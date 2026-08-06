@@ -8,6 +8,7 @@ import SaltWorks.HDL.Certs
 import SaltWorks.HDL.Banyan
 import SaltWorks.HDL.EmitV
 import SaltWorks.HDL.Seq
+import SaltWorks.HDL.Dense
 import SaltWorks.HDL.EmitN
 import SaltWorks.Silicon.Cells.Sky130
 import SaltWorks.Silicon.Imported.Comparator
