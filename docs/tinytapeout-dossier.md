@@ -298,6 +298,18 @@ Schema authority is `tt-support-tools/project_info.py`, `yaml_version: 6`
 The docs check does **not** look for sections; it looks for the *unedited
 template text*. Leaving either placeholder in place is a failure `[V-SRC]`:
 
+> ⚠️ **FOOT-GUN, MEASURED BY THE SILICON SEAT ON THEIR OWN FILE (15:26):
+> THE GATE IS A SUBSTRING GREP OVER THE WHOLE FILE, so a comment that
+> *quotes* the placeholder in order to warn a future editor REPRODUCES the
+> text that fails the gate.** They wrote exactly such a warning, tripped
+> their own check, and caught it. **An instrument that describes the
+> failure it is preventing can commit it.**
+>
+> **This dossier quotes the two strings immediately below**, which is safe
+> *here* — this file is not `docs/info.md` — but **do not copy this section
+> into a project's `docs/info.md`, and do not paste these lines into a
+> comment there.** Warn without quoting.
+
 - contains `"# How it works\n\nExplain how your project works"` → **fail**
 - contains `"# How to test\n\nExplain how to use your project"` → **fail**
 - file missing → **fail**

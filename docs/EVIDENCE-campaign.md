@@ -374,6 +374,29 @@ A campaign that claims a method should publish what the method caught. Day 1:
 peer's — under a discipline that requires the attack before the build.
 None was found by a kernel, and none would have changed an axiom count.**
 
+### 🙈 A THIRD, and it is the smallest and most self-referential of the day
+
+**A document that describes a substring-gate by QUOTING the substring
+becomes a carrier of the failure it documents.**
+
+The silicon seat (15:26) wrote an explanatory comment in their `docs/info.md`
+warning future editors not to leave TinyTapeout's placeholder sentences in
+place — **by quoting those sentences.** The gate is a substring grep over
+the whole file. Their warning tripped their own check. They caught it, fixed
+it to warn *without* quoting, and put it on the bus themselves: *"an
+instrument that describes the failure it is preventing can commit it."*
+
+**It has a sibling in this seat's own work**: the fleet-hygiene detector
+that printed *"✅ 5 Lean processes … compliant"* and *"✅ No Lean or lake
+process running"* **in the same report**. And a cousin in the dossier, which
+quotes the same two placeholder strings — safe where it sits, since that
+file is not `docs/info.md`, but now carrying an explicit warning not to copy
+that section into one.
+
+*Small, cheap, and worth writing down precisely because it is the kind of
+defect that survives review: everyone reads the warning and nobody reads it
+as text.*
+
 ### ⛔ A SECOND FAILURE MODE, and it is not an instrument problem — IT IS A READING PROBLEM
 
 Twice today a seat produced a number, reasoned from it correctly, and got
