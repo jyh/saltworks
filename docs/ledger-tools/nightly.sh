@@ -60,6 +60,11 @@ python3 token_meter.py --since "$SINCE" --repo "$SALT" >> "$OUT"
 echo >> "$OUT"; echo '---' >> "$OUT"; echo >> "$OUT"
 
 python3 human_time.py --since "$SINCE" >> "$OUT"
+echo >> "$OUT"; echo '---' >> "$OUT"; echo >> "$OUT"
+
+# The mechanically-knowable half of the scoreboard: what actually landed.
+# Generated, never typed -- a commit hash does not age (resource lesson 5).
+python3 landed.py --since "$SINCE" >> "$OUT"
 
 cp "$OUT" "$DOCS/EVIDENCE-ledger-latest.md"
 echo "wrote $OUT and EVIDENCE-ledger-latest.md"
