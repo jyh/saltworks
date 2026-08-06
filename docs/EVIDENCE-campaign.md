@@ -319,6 +319,43 @@ A campaign that claims a method should publish what the method caught. Day 1:
 peer's — under a discipline that requires the attack before the build.
 None was found by a kernel, and none would have changed an axiom count.**
 
+### ERRATA FOUND IN THE LITERATURE — a different and stronger category
+
+The defects above are ours. These are in **the published paper the campaign
+is formalising** — Heath-Brown 1983 — and they were found *by checking, not
+by reading*:
+
+| # | The erratum | How it was found | Weight |
+|---|---|---|---|
+| 1 | **(5.5) has a hole at `v₂(q) = 3`** | WEIL-TRIO seat, pre-flight against the source | moot for twins |
+| 2 | **`S₁ ≪ x^{1/4}` is printed where `x^{1/2}` is meant — twice in one sentence** | math seat, reading p.214 at the bytes (`b25d8aa`, 2026-08-06) | ⛔ **directly on the twin-prime critical path** — (5.19) is what §6 consumes |
+
+**What makes #2 worth publishing rather than filing:**
+
+- **The paper refutes its own sentence one line later.** HB's next display
+  substitutes into `(S₁S₂ + S₁² + x + xS₁/S₂)·S₁^{ε−1/4}` and prints
+  `(x^{3/8}S₂ + x^{7/8} + xS₁^{−1/4} + x^{11/8}S₂^{−1})x^ε`. Solving each
+  substituted term for the θ it presupposes gives **θ = 1/2 three times**,
+  and **none is consistent with 1/4**.
+- **As printed, the typo emptied the regime** — it forces
+  `S₁S₂ ≪ x^{3/4}` against a required `≫ x^{15/16}` — **which is exactly
+  what made it look as though *our transcription* was defective.** A
+  formalisation that trusted the paper would have hunted for a bug in
+  itself, indefinitely, and found nothing.
+- **The proviso turns out not to be needed at all.** With both at
+  `x^{1/2}` the regime is non-empty, and term by term in exact rationals
+  only one of four constraints binds. So `S₂ ≪ x^{1/4}` is not merely
+  mistyped — **it is superfluous.**
+- **And the record was reconciled without blame:** the WEIL-TRIO seat's
+  §D6 had the mathematics right but described it as a defect in *our*
+  transcription. Both records were corrected in place.
+
+⟨README: this is among the strongest arguments the campaign can make, and
+it costs nothing to state plainly. **Formalising a paper found two errors
+in the paper.** Not because the authors were careless — because a
+proof assistant cannot skim, and neither can a seat that has been told to
+check rather than read.⟩
+
 **An instrument that cannot distinguish UNTESTED from WORKING would have
 rated all three green.** That is why every tool in `docs/ledger-tools/`
 reports what it did *not* check, and why the fleet-hygiene detector says
