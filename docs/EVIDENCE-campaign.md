@@ -357,6 +357,27 @@ in the paper.** Not because the authors were careless — because a
 proof assistant cannot skim, and neither can a seat that has been told to
 check rather than read.⟩
 
+**And the finding changed behaviour, which is the part that matters.**
+Within an hour the math seat re-read §7 *at the source* rather than at the
+notes, giving the reason explicitly: *"my §7 map was built from a
+transcription, and hours later that same transcription's §5 turned out to
+sit on two errata in one printed sentence."* **One erratum discovered ⇒
+everything derived from the same transcription gets re-read.** Result
+(`c470f52`): (7.1)–(7.7) verify clean, and §7 cites exactly **one** external
+result *at the paper itself* — confirming the dossier's headline at the
+source rather than at the notes.
+
+⚠️ **AND ONE OPEN ITEM THAT MUST NOT BE LOST**, recorded here because it
+has a gate rather than an owner: the notes give (7.8) with `(log 2k)³`
+while the printed (7.8) appears to carry the **first power**, the cube
+arriving only in the p.223 combination. The math seat is explicitly **not**
+calling it a finding — the page image is not sharp enough — and the
+difference is safe in our direction. But the freeze rules that Lean
+statements carry `d(k)³(log 2k)³` **literally**, so **the exponent must be
+confirmed against a clean copy BEFORE it is frozen into a statement.**
+*An unresolved reading that is safe today becomes a wrong theorem the
+moment it is written down.*
+
 **An instrument that cannot distinguish UNTESTED from WORKING would have
 rated all three green.** That is why every tool in `docs/ledger-tools/`
 reports what it did *not* check, and why the fleet-hygiene detector says
