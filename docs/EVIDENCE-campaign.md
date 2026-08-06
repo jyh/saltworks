@@ -334,14 +334,21 @@ work would be exactly the distortion this file keeps catching elsewhere.
 corrected the paper twice and corrected us once, which is a better argument
 for reading sources than any of the three findings individually."*
 
-**Running tally, math seat, 11:44: the source has corrected HB TWICE and
-corrected US TWICE.**
+> ## ⚠️ RUNNING TALLY, 11:52: **the source has corrected HB TWICE and corrected US THREE TIMES.**
+>
+> **We are the less reliable party in this comparison, by a factor of 1.5.**
+> The math seat said so plainly and unprompted, and gave the reason the
+> ledger has to carry it: ***"the natural narrative — 'we found errata in a
+> published paper' — flatters us, and the ledger does not support it."***
+>
+> This reverses the headline I had written twice. It stays reversed.
 
-**The two that were OURS:**
+**The three that were OURS:**
 
 | The defect | Why it mattered |
 |---|---|
 | `fab7a8a` — our transcription printed (5.14)'s subscript as a **single** sum over `w₁`. HB prints the `i`-indexed form: a **double** sum over `w₁` *and* `w₂`, which is also what (5.19) sums over. | **The index we dropped is `w₂` — exactly Lemma 10's summation variable** (`n ↦ w₂`, `k = Dδ₁w₁`, `E = S₂`). Our notes hid the one index the entire §7 machine runs on. An executor working from them would have been confused by precisely the thing they most needed. |
+| `6ee9f07` — our notes over-stated (7.8)'s log power as `(log 2k)³`; **exactly one log survives** at that step. | The mildest of the three: stating (7.8) at `(log 2k)³` is **provable-but-blunt, not false**. Found by *re-deriving* rather than squinting at a page image — *"the more reliable instrument anyway"* — which also recovered a step missing from our notes entirely: the line that introduces `k₀`, carries `d(k)²`, and **spends Lemma 10's own `(C,k) = 1` hypothesis via `k₀ ∣ k`**. |
 | `409e227` — our notes had the `C_i` bounded *"≪ 1 uniformly in q, t, σ"*. **HB's p.220 continues: "but not necessarily in `α`."** | ⛔ **A Lean statement asserting uniformity in `α` would be FALSE** — an executor working from the notes alone could spend an entire wave proving something untrue. **Moot for twins** (`α₁ = α₂ = 4` is fixed) but it must be **stated, not silently relied on**: HB separates *"independent of `d`"*, which the argument uses, from *"not uniform in `α`"*, which it survives only because `α` is fixed. **This is the sp1-lean genre at its purest — a wrong specification, faithfully transcribed, that a proof assistant would have rejected only after the work was done.** |
 
 **The two that were the PAPER's** — found *by checking, not by reading*:
@@ -371,15 +378,20 @@ corrected US TWICE.**
   §D6 had the mathematics right but described it as a defect in *our*
   transcription. Both records were corrected in place.
 
-⟨README: this is among the strongest arguments the campaign can make, and
-it costs nothing to state plainly — **provided all three rows go in
-together.** *"Formalising a paper found two errors in the paper, and one in
-our own transcription of it."* The third clause is what makes the first two
-credible; without it the claim reads as scoring points off Heath-Brown,
-which is neither true nor the interesting result. Not because the authors
-were careless — because a proof assistant cannot skim, and neither can a
-seat told to check rather than read. **The method caught the paper and it
-caught us, by the same act.**⟩
+⟨**README — and this hook has now been rewritten three times as the tally
+moved, which is itself the point.** The claim is NOT "we found errata in a
+published paper." The ledger does not support that headline. The claim is:
+
+> *Reading the source at the bytes corrected the published paper twice and
+> corrected our own transcription three times. **We were the less reliable
+> party.** The method is worth having precisely because it is indifferent
+> to whose error it finds.*
+
+The flattering version was available all afternoon and the seat that would
+have been flattered by it is the one that killed it. That is the sentence
+to defend in a room, and it is stronger than the version that scores points
+off Heath-Brown — because a reader can check it, and because nobody
+volunteers this unless the discipline is real.⟩
 
 **Remaining owed from this block:** item 3 of the original three,
 `(log Kk)³ → (log 2k)³` (a bounded conversion worth ≤ 2.39), still owed by
@@ -395,16 +407,19 @@ everything derived from the same transcription gets re-read.** Result
 result *at the paper itself* — confirming the dossier's headline at the
 source rather than at the notes.
 
-⚠️ **AND ONE OPEN ITEM THAT MUST NOT BE LOST**, recorded here because it
-has a gate rather than an owner: the notes give (7.8) with `(log 2k)³`
-while the printed (7.8) appears to carry the **first power**, the cube
-arriving only in the p.223 combination. The math seat is explicitly **not**
-calling it a finding — the page image is not sharp enough — and the
-difference is safe in our direction. But the freeze rules that Lean
-statements carry `d(k)³(log 2k)³` **literally**, so **the exponent must be
-confirmed against a clean copy BEFORE it is frozen into a statement.**
-*An unresolved reading that is safe today becomes a wrong theorem the
-moment it is written down.*
+✅ **THE (7.8) OPEN ITEM IS CLOSED, AND THE GATE DID ITS JOB** (`6ee9f07`,
+11:52). Filed at 12:58 as an item that *must be confirmed before being
+frozen into a statement*; confirmed 54 minutes later — **by re-derivation
+rather than by squinting at a page image**, which the math seat rightly
+called the more reliable instrument. **Exactly one log survives at (7.8)**;
+the cube arrives only at p.223, where the (7.2)–(7.4) truncation
+contributes `log K` and the dyadic summation another.
+**Outcome: the freeze was RIGHT and needs no change** — `d(k)³(log 2k)³` is
+correct *for Lemma 10*, since `K = 2 + k^{1/4}` gives `log(Kk) ≍ log k`.
+Only the intermediate (7.8) was over-stated in our notes, and stating it at
+`(log 2k)³` would have been **provable-but-blunt, not false**.
+*An item filed with a gate and no owner was checked before it could become
+a theorem. That is the whole reason to file them.*
 
 **An instrument that cannot distinguish UNTESTED from WORKING would have
 rated all three green.** That is why every tool in `docs/ledger-tools/`
