@@ -389,7 +389,8 @@ corners; setup only on typical** (`TIMING_VIOLATION_CORNERS = ["*tt*"]`).
 
 **The netlist that gets fabricated is produced by TinyTapeout's CI, not by
 our LibreLane run.** The `gds` job runs `librelane==3.0.5` against a
-PDK pinned at `0536d02d875c8f67dd7cca3902ac457e62f20005`, and emits a
+PDK pinned at `0536d02d875c8f67dd7cca3902ac457e62f20005` (**precheck
+only** — the hardening revision is `8afc8346…`, see §6.4), and emits a
 `tt_submission` artifact containing:
 
 ```
@@ -424,14 +425,27 @@ project lands. `[V-SRC]`
    shuttle build are not running the same tools revision.** For a
    reproducible claim, pin `tools-ref` to a commit SHA in the workflow
    `with:` block and record the SHA beside the proof. `[V-SRC]`
-4. **Version skew is real, and there are THREE sky130A PDK pins in play**:
-   user precheck `0536d02d875c8f67dd7cca3902ac457e62f20005`; shuttle CI
-   `8afc8346a57fe1ab7934ba5a6056ea8b43078e71` (with `LIBRELANE_TAG
-   3.0.0.dev38`); and the shuttle's own `BUILDING.md` tells a human builder
-   to use `6d4d11780c40b20ee63cc98e645307a9bf2b2ab8` — **that one is
-   stale.** LibreLane likewise: CI `3.0.5`, devcontainer `2.4.2`. Our local
-   flow must pin **3.0.5 + `0536d02d…`** to have any hope of reproducing
-   the CI netlist. `[V-SRC]`
+4. **Version skew is real, and there are FOUR sky130A PDK revisions in
+   play.** ⚠️ **CORRECTED 2026-08-06 10:47 — I published the wrong one to
+   pin against, and the Silicon seat caught it** (refuter addendum
+   026f27f, refutation 4):
+   - `0536d02d875c8f67dd7cca3902ac457e62f20005` — **PRECHECK ONLY.** This
+     is what the precheck action installs. I originally told the fleet to
+     pin the local flow to it "to reproduce the CI netlist". **That is
+     wrong.** The precheck inspects a GDS; it does not build one.
+   - **`8afc8346a57fe1ab7934ba5a6056ea8b43078e71` — the one that matters.**
+     The netlist and GDS are hardened against this revision (with
+     `LIBRELANE_TAG 3.0.0.dev38`). **This is what a local flow must pin to
+     stand a chance of reproducing the artifact that ships.**
+   - `6d4d11780c40b20ee63cc98e645307a9bf2b2ab8` — the shuttle's own
+     `BUILDING.md` tells a human builder to use this. **Stale.**
+   - plus whatever the `ciel-action` resolves for a given run.
+
+   LibreLane likewise: CI `3.0.5`, devcontainer `2.4.2`. **The lesson
+   generalises: "pinned" is not one fact.** A flow can pin different
+   revisions at check time and at build time, and the one you must match is
+   whichever produced the bytes you intend to prove things about. `[V-SRC,
+   corrected]`
 5. **A gate-level cocotb testbench is mandatory work**, not a nice-to-have
    — and it is a *gift*: it is a second, independent check of the very
    netlist we are proving equivalent, in a different tool, by a different
@@ -453,7 +467,7 @@ project lands. `[V-SRC]`
 | P4 | `test/tb.v` (rename `tt_um_example`), `test/Makefile` `PROJECT_SOURCES`, `test/test.py` — a real cocotb bench that **passes at gate level** | Silicon |
 | P5 | `src/config.json` — `CLOCK_PERIOD` for our target; `PL_TARGET_DENSITY_PCT` only if placement fails | Silicon |
 | P6 | Apache-2.0 `LICENSE` retained, copyright header updated in every source file | Silicon |
-| P7 | Local dry run: LibreLane 3.0.5 + PDK `0536d02d…`, then `tt-support-tools` precheck locally per `guides/local-hardening/` | Silicon |
+| P7 | Local dry run: LibreLane 3.0.5 + PDK **`8afc8346…`** (the *hardening* revision — NOT the precheck-only `0536d02d…`; see §6.4), then `tt-support-tools` precheck locally per `guides/local-hardening/` | Silicon |
 | P8 | Pin `tools-ref` to a SHA in `.github/workflows/gds.yaml`; record it beside the equivalence proof | Silicon |
 
 ### 7.2 The human's clicks — JYH only, in order
@@ -575,7 +589,8 @@ campaign, not after it.
    *prepurchased* tiles, so the gallery understates how full it is.
 3. **Prove equivalence against `tt_submission/<top>.v` from TT's own CI**,
    which is a **powered** netlist (`VPWR`/`VGND` on every cell) built by
-   `librelane==3.0.5` against PDK `0536d02d…`. Pin the local flow to match,
+   `librelane==3.0.5` against PDK **`8afc8346…`** (the hardening revision;
+   `0536d02d…` is precheck-only — §6.4). Pin the local flow to match,
    and pin `tools-ref` to a SHA.
 4. **The pad's maximum output frequency is 33 MHz**, half its input
    ceiling — and a bit-serial fabric toggles its outputs every cycle.

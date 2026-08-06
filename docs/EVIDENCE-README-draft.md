@@ -20,8 +20,20 @@ verified compiler, hardened to real silicon geometry by tools we do not
 trust — and then checked, inside the kernel, against the netlist those
 tools actually produced.**
 
-Three axioms end to end: `propext`, `Classical.choice`, `Quot.sound`.
-Nothing else. The build fails if that changes.
+Every proof in this repo depends on exactly three axioms — `propext`,
+`Classical.choice`, `Quot.sound` — and the build fails if that changes.
+
+> ⚠️ **And that sentence is weaker than it sounds, so we say what it does
+> not cover.** An axiom audit is a statement about *proofs*. It is
+> **invariant under every failure mode that actually threatens this
+> chain**: import the wrong netlist file, mis-parse a port, mis-model a
+> cell, and the audit still prints three axioms. What rules those out is
+> not the axiom count — it is the importer's mutation tests, the
+> gate-level testbench eating byte-for-byte the same file, and the named
+> provenance of the artifact we checked. **"Three axioms end to end" is a
+> true statement about the proofs and a false one about the chain**, and
+> anyone quoting it without this paragraph is overclaiming on our behalf.
+> *(Silicon seat, refuter addendum 026f27f, honesty finding 1.)*
 
 > **The fences, stated before the claims** — they are in §6, and we would
 > rather you read them first than discover them later.
@@ -86,13 +98,21 @@ later:**
 shape is not an arbitrary scoping decision. It is the original silicon's
 own modularity.
 
-A second correspondence, and this one we did not plan. The landed proof
-uses a **descending stage index**: the router consumes destination bit *m*
-at the stage with *m* bits still unrouted, so the **first** stage reads the
-**most significant** bit. That is exactly the 1988 frame format — address
-at the front, MSB first, because the packet arrives as a bit stream.
-**The serial wire order and the proof's induction order agree by
-construction.** Neither was chosen to match the other.
+⟨A second correspondence, and this one we did not plan — **BUT IT IS NOT
+YET VERIFIED AGAINST THE LANDED PROOF AND MUST NOT SHIP UNTIL IT IS.** The
+claim: the proof uses a **descending stage index**, so the router consumes
+destination bit *m* at the stage with *m* bits still unrouted and the
+**first** stage reads the **most significant** bit — exactly the 1988 frame
+format, address at the front, MSB first, because the packet arrives as a
+bit stream. The serial wire order and the proof's induction order would
+then agree by construction, neither chosen to match the other.
+**Status (Silicon seat, addendum 026f27f, refutation 5): the confirmation
+that was reported was performed against `ProbeFacade.line` — a duplicate
+constant in a duplicate namespace — not against `SaltWorks.Banyan.line`.
+As a statement about the landed proof it does not yet typecheck.** The
+mathematics is untouched by this; the *claim about our artifact* is
+unproven. Delete this paragraph or verify it against the real constant
+before publication.⟩
 
 The pin economy is the same argument too. In 1988 the pinout was chosen so
 the fabric could stack; in 2026 the tile gives us 8 dedicated inputs and 8
@@ -205,6 +225,23 @@ Stated first everywhere we speak, and repeated here:
    fabricated. Promise the chain, never the silicon.⟩
 5. **The proof is of the routing, not of the whole switch.** The sorter is
    a hypothesis we discharge from mathlib, not a circuit we built.
+6. **THE CHIP CANNOT EXHIBIT ITS OWN THEOREM'S HYPOTHESIS.** The theorem
+   assumes destinations that are **sorted and concentrated**. The Batcher
+   sorter that would produce them is built **neither in Lean nor in
+   silicon**. So the taped-out part routes correctly **only if something
+   off-chip pre-sorts the inputs.** That is precisely the 1988 two-chip
+   partition and it was always the plan — but it needs saying in one plain
+   sentence, unprompted, because a reader will otherwise assume the chip
+   is self-contained.
+7. **What is proved is narrower than "a switch works".** Stated exactly:
+   an arithmetic function on ℕ is injective under stated hypotheses. **There
+   is no network, no switch, no packet and no time in the statement.** The
+   bridge from that theorem to a circuit is the `Circ` semantics and the
+   netlist equivalence — those are the interesting steps, and they are
+   separate claims that must each carry their own evidence.
+   *(Fences 6 and 7 are the Silicon seat's honesty finding 2, addendum
+   026f27f. They are in the README because a fence a reader has to
+   discover is not a fence.)*
 
 ---
 
