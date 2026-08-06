@@ -60,12 +60,14 @@ Rules for this file:
 | Deliverable | Status |
 |---|---|
 | Design freeze v1 + seat's own refuter pass | **LANDED** — `docs/hdl-design-v1.md` (+ 2 addenda) |
-| T1 `opt_sem` — the verified optimizer | ⟨IN FLIGHT⟩ |
-| T2 `emitN_sem` — the netlist normal form | ⟨NOT STARTED⟩ |
-| T3 the executable-certificate suite | ⟨NOT STARTED⟩ |
-| T4 `banyan_circ` — the fabric as a `Circ` | ⟨NOT STARTED⟩ |
-| T5 the fungibility exhibit (one spec, ≥3 implementations) | ⟨NOT STARTED⟩ |
-| Sequential extension for the bit-serial switch element | ⟨IN FLIGHT — seam with Silicon to be agreed first⟩ |
+| Syntax + Sem | **LANDED** — `ad313e3` |
+| T1 `opt_sem` — the optimizer | **LANDED** — `0aad951`, and as a **VALIDATED** optimizer: `opt` checks the property its liveness analysis needs and falls back to the identity when the check fails, so `opt_sem` holds for **every** circuit with no wf hypothesis and no assumption the analysis is right. **A bug in the analysis costs optimization, never correctness.** |
+| T3 the executable-certificate suite | **LANDED** — `2a27c12` |
+| T5 the fungibility exhibit | **LANDED** — `2a27c12`, and **checkable rather than asserted**: three XOR implementations at 1, 4 and 5 gates, with `fungible_distinct` proving the counts (so three renamings cannot pass as three implementations), `fungible_is_xor` pinning the result to the stated truth table rather than to mere agreement, and **`mutation_detected` proving that swapping the xor for an or BREAKS the certificate** |
+| T2 `emitN_sem` — the netlist normal form | ⛔ **BLOCKED** on the writer-slot ruling (see open ruling 5) |
+| T4 `banyan_circ` — the fabric as a `Circ` | ⟨NEXT — and the refuter pass found T4 **cannot be stated against the declared `sem`**; it gets an occupancy statement at stage *m* instead⟩ |
+| Sequential extension for the bit-serial switch element | ⟨IN FLIGHT — and now gated on Silicon's frame-format decision, see the defects list⟩ |
+| **The leg is MATHLIB-FREE** | **MEASURED** — a full `SaltWorks.HDL.*` build is **6 jobs, ~1.5 s**, against 8,581 jobs for a Mathlib-importing module. After three OOM kills that is a resource property, not a nicety: this seat's iteration no longer competes for the fleet lock. |
 
 ### Leg 3 — VLSI: the silicon chain (seat: silicon)
 
@@ -226,6 +228,19 @@ structural, not carelessness:
      module and does not forward stray args — it needs `moreLeanArgs` /
      `leanOptions` in the lakefile, which is a repo edit and therefore the
      maestro's or Captain's call.
+   - 🔑 **AND A BETTER ANSWER THAN THE GUARDRAIL** (compiler seat, 11:50):
+     the two certificate routes have **different shapes, not different
+     speeds.** Pointwise `decide +kernel` has **no memory bound at all** —
+     it materialises the reduction, which is how a 60-line probe reached
+     30 GB. **Bit-sliced is bounded by construction**: `Nat.pow` is
+     kernel-accelerated only to exponent `1 <<< 24`, so a sliced
+     certificate of width `W = 2ⁿ` needs the mask `2^W − 1` and **n = 24
+     input bits is a HARD KERNEL CEILING** — at which a single net is 2 MB,
+     so total memory is ~**2 MB × #nets** (200 nets ≈ 400 MB). *That is why
+     the measured "24 input bits, 60 gates, seconds" datum hit exactly 24
+     and not 25.* **A fleet that certifies bit-sliced never generates the
+     workload that needs the guardrail.** The `-M` question stays open;
+     this removes the need for the answer rather than supplying it.
    - ⚠️ **ENFORCEMENT IS UNVERIFIED.** Nobody has test-fired `-M` yet
      (math is under the no-Lean order until 20:00 and correctly declined
      to break it for an experiment). One run settles it: build a known-heavy
@@ -279,6 +294,33 @@ rated all three green.** That is why every tool in `docs/ledger-tools/`
 reports what it did *not* check, and why the fleet-hygiene detector says
 "not yet proof the cap binds — only proof this run has not tested it"
 rather than a green tick.
+
+### ⚠️ AND THE PRINCIPLE CUTS BOTH WAYS — a correction to this record
+
+The rule is **name the narrower question**, not **distrust the
+instrument**. A record that lists only what a tool *cannot* do is itself a
+narrower question presented as the whole one — which is the very failure
+this section exists to name. So, on the same day:
+
+**`#audit_axioms` earned its keep, measurably.** On leg 2's T1 commit a
+first attempt left an incomplete step, and the build-failing assertion
+**caught `sorryAx` in `run_filter` and `opt_sem`** rather than shipping a
+green-looking file *(compiler seat, 11:50)*. It is **necessary and not
+sufficient** — and it is **fully sufficient for the failure it targets**,
+which is precisely why it belongs in the stack rather than in the bin.
+
+The honest formulation, sharpened by the math seat (10:58) and the one to
+publish:
+
+> **Sufficient for its own failure mode, and structurally blind to the
+> adjacent one.**
+
+`#audit_axioms` caught `sorryAx` before a green-looking file shipped —
+**the instrument working perfectly at the thing it targets**, the
+incompleteness of a proof. That is *precisely why* it is silent on the
+adjacent class: W1's statement-level vacuity, two O(g²) evaluators
+published as linear, a routing bug at a port the hypothesis never
+constrained. The error is never the instrument. It is the substitution.
 
 ⟨README: this is the strongest thing the campaign produced on day 1 and it
 was not planned. It belongs in §4 beside the seam doctrine, because it is
@@ -351,7 +393,9 @@ dated.⟩
 |---|---|---|
 | 1 | The public repo's **name** and its Apache-2.0 / public status (contractually mandatory for TinyTapeout) | JYH |
 | 2 | The README verb in the price exhibit — "bought access to" until submitted *and* accepted | JYH |
-| 3 | ⛔ **ESCALATED — the `lean -M 12000` cap is ALREADY LIVE on the wrapper's `*.lean` audit branch and is STILL UNVERIFIED.** Math's 10:35 concern is specific and serious: `-M` is enforced *inside Lean*, which is why it survives Darwin's rlimit gap — but a `decide +kernel` runaway lives in **kernel `whnf`**, which may not sit on the allocation path Lean's counter checks. If so, the cap is a **second no-op adopted on top of the first**, and the fleet is protected only in belief. **The test is ~2 minutes and only the compiler seat can run it today**: re-run the probe that already OOM'd, under the lock, with a deliberately low cap. (a) dies with a Lean memory error → the cap is real and this ruling closes; (b) climbs past it → the audit-path cap is cosmetic for `decide`-shaped work. **Math's TS-1 wave fires at 20:00 through exactly that branch.** | compiler to test, maestro to rule |
+| 3 | ⛔ **ESCALATED — the `lean -M 12000` cap is ALREADY LIVE on the wrapper's `*.lean` audit branch and is STILL UNVERIFIED.** Math's 10:35 concern is specific and serious: `-M` is enforced *inside Lean*, which is why it survives Darwin's rlimit gap — but a `decide +kernel` runaway lives in **kernel `whnf`**, which may not sit on the allocation path Lean's counter checks. If so, the cap is a **second no-op adopted on top of the first**, and the fleet is protected only in belief. **THE TEST IS NOW SAFE — math redesigned it at 10:58 after the compiler seat rightly refused the first version.** *"You do not need a big probe. You need a small cap."* The binding question is a **yes/no about a mechanism** — does Lean's `-M` counter observe kernel `whnf` allocation? — and mechanisms do not care about scale. So: a **~300 MB `decide +kernel` probe against a `-M 100` cap**, seconds to run, killable instantly, **~1% of the risk of the original**. (a) dies with a Lean maximum-memory error → the cap is real, ruling closes; (b) sails past → `-M 12000` is **cosmetic for `decide`-shaped work**. A pass at 100 MB is evidence, not proof, that it binds at 12 GB — but **(b) would be conclusive in the direction we are exposed to.** Math runs it at 20:00 when their Lean pause lifts, ahead of TS-1, unless compiler takes it first. | math or compiler to test, maestro to rule |
+| 5 | ⛔ **The shared netlist type has NO writer slot** — `SEATS.md` gives HDL to compiler and Silicon to jason, so the type **both legs must import may be created by neither**, and both seats have been filling the vacuum privately. **This is now the single thing gating leg 2's EmitN.** Compiler's request: a third slot (`SaltWorks/NF/**`), owned by one seat with the other read-only, and they recommend it live with **Silicon** since that copy is already landed and proved and needs only the output-list repair — *"I would rather import theirs than compete with it."* | maestro |
+| 6 | **Hub imports owed** — `SaltWorks.lean` imports only `SaltWorks.Banyan.SelfRouting`, so **the entire landed Silicon leg (5 files, ~750 lines, the reflection theorem and every `#audit_axioms` block in it) is outside the default build.** The green build currently compiles one file. Owed: `Silicon.Equiv.BitSliced`, `Silicon.Equiv.Columns`, `Silicon.Cells.Sky130`, `Tactic.AuditAxioms`, `Banyan.Facade`. | maestro (hub is MAESTRO ONLY per `SEATS.md`) |
 | 3b | Whether the 09:22 no-Lean-until-20:00 order binds **only** the math seat or **all** heavy salt elaborations — salt has TWO live seats, and the second (CHAR-TRIO / WEIL-TRIO) is still elaborating `Salt/HB/*` files of the same weight class | maestro |
 | 4 | Install `docs/EVIDENCE-README-draft.md` at the repo root, once its `⟨slots⟩` are filled | maestro / JYH |
 

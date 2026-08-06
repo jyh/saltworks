@@ -157,8 +157,17 @@ changed, but because the price of a proof did.
 
 This repo exhibits the spectrum at three altitudes:
 
-1. **AMORTIZED** — the verified optimizer. Prove it once; every run of it
-   is covered. ⟨leg 2 T1⟩
+1. **AMORTIZED** — the optimizer. Prove it once; every run of it is
+   covered. **And it landed as a *validated* optimizer, not a
+   proved-correct one:** `opt` checks the property its liveness analysis
+   needs and falls back to the identity when the check fails, so
+   `opt_sem : sem (opt c) = sem c` holds for **every** circuit — no
+   well-formedness hypothesis, and no assumption that the analysis is
+   right. **A bug in the analysis costs optimization, never correctness.**
+   That is translation validation applied *inside* the compiler, one level
+   above where we apply it to the untrusted layout tools — **the doctrine
+   is not only for the untrusted tools at the bottom.** ⟨leg 2 T1,
+   `0aad951`⟩
 2. **PER-INSTANCE** — the netlist equivalence. LibreLane is never trusted;
    every run it does is checked. ⟨leg 3 D3⟩
 3. **THE FIVE-ARTIFACT LOOP** — spec, implementation, proof, certificates,
