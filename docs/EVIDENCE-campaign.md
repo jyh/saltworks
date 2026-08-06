@@ -143,13 +143,32 @@ sh docs/ledger-tools/nightly.sh     # → docs/EVIDENCE-ledger-<date>.md
 
 A snapshot, **stamped and superseded by the file above**, T0 → 11:35:
 
-| Quantity | 09:50 | 11:35 | note |
-|---|---:|---:|---|
-| API requests (deduplicated) | 2,752 | **4,435** | |
-| Output tokens | 869,114 | **1,601,367** | +84% in under two hours |
-| Cache created / read | 18.9M / 344.6M | **26.6M / 739.9M** | cache is its own column, never a headline |
-| JYH engaged time (floor) | 2 h 04 m | **5 h 03 m** | 3 DIRECTING, 1 WATCHING in-window |
-| Commits inside a ≥1 h silence window | 0 | **0** | the attended day stays attended |
+| Quantity | as published 09:50 | **artifact of record** | now (11:35) |
+|---|---:|---:|---:|
+| API requests (deduplicated) | ~~2,752~~ | **2,763** | 4,435 |
+| Output tokens | ~~869,114~~ | **880,785** | 1,601,367 |
+| Cache created | ~~18,941,186~~ | **18,962,346** | 26,599,778 |
+| Cache read | ~~344,638,099~~ | **347,054,453** | 739,897,878 |
+| JYH engaged time (floor) | ~~2 h 04 m~~ | **not reproducible at any window** | 5 h 03 m |
+| Commits inside a ≥1 h silence window | 0 | 0 | **0** |
+
+⛔ **The struck column is the finding.** Those four numbers **appear in no
+committed artifact.** `git log -S'869,114'` returns exactly one commit — the
+scoreboard itself. They were a real meter run at ~09:50, superseded a minute
+later, surviving only in a commit message; the artifact of record says
+2,763 / 880,785. And the engaged-time cell was worse: **2 h 04 m is not
+reproducible at any window boundary**, and its "5 DIRECTING, 1 WATCHING"
+counted the whole tags file including two blocks that precede T0.
+
+**The aggravating fact, which the audit put better than I would have:**
+this file's own rule — *"the claim table must be generated from the
+artifact, never hand-written"* — sits **~320 lines below** this
+hand-written table. I wrote the rule and then broke it in the same
+document.
+
+*(Mitigating, and recorded because the audit insisted on recording it: the
+drift was **self-deprecating** — I under-reported the fleet's own spend by
+~1.3%.)*
 
 **The zero is not a failure to report — it is the report.** Day 1 was
 Council I, five seat launches, a bit-serial ruling, a tile purchase and
