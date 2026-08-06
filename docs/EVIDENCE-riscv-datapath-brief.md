@@ -328,6 +328,7 @@ It takes a cross-seat lock (one heavy invocation at a time, stale-reaped)
 > |---|---|---|
 > | non-zero, with Lean errors | **a real build failure** | report it — this is the only one that means the proof is wrong |
 > | **`75`** | **LOCK TIMEOUT.** `MAXWAIT=5400`; the wrapper waited 90 min behind other seats' builds and gave up. **The build NEVER STARTED.** Prints a distinct *"lock wait exceeded; ABORT"* line. | **retry** |
+> | **`0` — A FALSE ZERO, AND IT IS THE DANGEROUS ONE** | **`saltbuild.sh … \| tail` reports `tail`'s exit status, not the build's**, so a CRASHED build reads as **EXIT 0**. This produced a phantom green and an unverified commit on 2026-08-06. | ⛔ **NEVER PIPE THE WRAPPER AT ALL.** Not "be careful with pipes" — *that is a rule you must remember; "do not pipe it" is one you can check by grep.* In backgrounded tasks the harness already captures full output, so the pipe buys nothing and hides the only verdict. |
 > | non-zero, `syntax error near unexpected token` | **the script was EDITED IN PLACE while this instance was running it.** Bash reads a script **incrementally, by byte offset** — an instance sitting in the lock-wait loop re-reads from its saved offset after each `sleep`, so an in-place rewrite that shifts byte positions makes it **resume mid-token**. *It is not a race on the file's contents; it is a race on the reader's cursor.* | **retry** — and tell whoever edited the wrapper |
 >
 > **The fix for the third, one line of shell hygiene:** never edit the
@@ -353,8 +354,8 @@ It takes a cross-seat lock (one heavy invocation at a time, stale-reaped)
 > something other than what the reader assumes.** Grep for the ABORT line,
 > or retry; do not report a failure.
 
-and caps `LEAN_NUM_THREADS=6`. **Judge its printed `saltbuild EXIT=N`, not
-a pipe.** Full builds only at wave exit. **Killed builds resume
+and caps `LEAN_NUM_THREADS=6`. **Judge its printed `saltbuild EXIT=N` — and
+⛔ NEVER PIPE IT** (see the false-zero row above). Full builds only at wave exit. **Killed builds resume
 incrementally**, so a lock wait costs nothing. **Put this rule in every
 executor and subagent brief you write.** (FLEET.md, maestro, 8/6 08:38 and
 the extension after the second OOM: five seats × default `-j18` exhausted
