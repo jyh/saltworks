@@ -184,11 +184,22 @@ def machine_state() -> dict:
 
     # --- the lock, and whether it is ORPHANED -----------------------------
     #
-    # THE DEADLOCK THIS CATCHES (live on 2026-08-06 13:18, third occurrence):
+    # THE DEADLOCK THIS CATCHES (live on 2026-08-06 13:18, 70 minutes):
     # saltbuild.sh takes the lock with `mkdir` and THEN writes `pid` — two
-    # operations. Anything that hard-kills the holder in between (a
-    # fleet-wide kill, a harness timeout, a SIGKILL) leaves a lock
-    # directory with NO pid file. The wrapper's reaper is
+    # operations. Anything that kills the holder in between leaves a lock
+    # directory with NO pid file.
+    #
+    # THE OBSERVED TRIGGER WAS NOT A HARD KILL — the silicon seat corrected
+    # their own first diagnosis at 13:31, and the real one is sharper:
+    # **saltbuild.sh was EDITED IN PLACE while instances were running.**
+    # bash reads a script incrementally by file offset, so an in-place edit
+    # shifts the offsets under every running instance; they die mid-token
+    # (`syntax error near unexpected token 'done'` is the signature), and a
+    # dying instance never reaches `echo $$ > "$LOCK/pid"`. One had already
+    # `mkdir`'d. So the `--cap` patch two seats had correctly asked for is
+    # what took the fleet down, through no fault of its content.
+    # Edit that file atomically (`cp` → edit → `bash -n` → `mv`) and this
+    # trigger disappears; the check below remains as defence in depth. The wrapper's reaper is
     #     if [ -f "$LOCK/pid" ] && ! kill -0 "$(cat "$LOCK/pid")"; then rm -rf
     # so it reaps only when a pid file EXISTS and names a dead process.
     # **A pid-less lock is never reaped, by construction, and deadlocks the

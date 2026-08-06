@@ -318,6 +318,24 @@ saltbuild.sh ScratchSILICON.lean        # replaces `lake env lean ScratchSILICON
 ```
 
 It takes a cross-seat lock (one heavy invocation at a time, stale-reaped)
+> ## ⛔ FOUR EXITS, AND **JUDGE THE ERROR TEXT, NOT THE NUMBER**
+>
+> **The taxonomy below is necessary and not sufficient — the exit code
+> alone cannot tell you which row you are in.** The math seat closed this
+> hole in their own probe spec at 13:24 after a run reported
+> `SANITY_EXIT=99` and was read as *"the memory cap is too low"* when it
+> was a **shell syntax error**. The corrected rule, and it governs every
+> row:
+>
+> * **A memory failure looks like Lean's own diagnostic** —
+>   `(deterministic) memory limit exceeded` / `maximum memory`.
+>   **Only that text counts as a cap hit.**
+> * **Anything else** — `syntax error near unexpected token`, `EXIT=75`, a
+>   missing file — means **the run did not test what you think it tested.**
+>   **Void it and retry. Do not adjust the cap.**
+>
+> *An exit code is a summary; the error text is the evidence.*
+
 > ## ⛔ THREE WAYS `saltbuild.sh` EXITS NON-ZERO. **ONLY ONE MEANS "THE PROOF IS WRONG."**
 >
 > We have trained every executor on this fleet to *"judge its printed
