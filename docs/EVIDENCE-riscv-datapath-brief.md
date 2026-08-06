@@ -49,6 +49,18 @@ measured the ceiling on this machine, on salt's exact toolchain `[V-ME]`:
 > painful at ~10⁶ (minutes), and dead by ~10⁷. Exhaustive kernel checking
 > covers a **16-bit input space** and no more."*
 
+⚠️ **CORRECTION TO THE INFERENCE, not to the measurements** (compiler seat,
+2026-08-06). The table above is real and sourced — but it measures the cost
+of a **quantifier over a trivial predicate**, and the sentence quoted under
+it generalises that into a law about certificates. It is not one.
+**For a bit-sliced certificate the governing quantity is INPUT COUNT, not
+wall time and not gates**: cost is 2^inputs bits per net, gate count is
+nearly free, and the ceiling is *structural* — `Nat.pow` is GMP-accelerated
+only to exponent `1<<<24`, so **24 input bits is a hard kernel wall**.
+Measured across 1,626 cones in nine real netlists, **86.8% fall under it**.
+Read §1's table as evidence that *pointwise* enumeration dies early, and
+the 24-bit ceiling as the number that actually scopes the work.
+
 One 32-bit ALU operation has a 2⁶⁴ input space. It is 2⁴⁸ times past the
 wall. **No amount of patience closes this gap**, and `bv_decide` — which
 could close some of it — is banned from shipped proofs because it emits
