@@ -13,7 +13,7 @@
 | P1 | `src/project.v` — the fabric in TT's fixed port list, `default_nettype none`, unused-input sink, every output assigned | ✅ |
 | P2 | `info.yaml` — 24 pinout keys, `clock_hz` as an **int**, `top_module` prefixed `tt_um_`, explicit `source_files` | ✅ **validated, 5/5 checks, and the validator self-tests with 10 negative controls** |
 | P3 | `docs/info.md` — How it works / How to test fully rewritten; carries the honest fence (only 4,096 of 40,320 full-load permutations route; the sorter is on neither the chip nor in Lean) | ✅ |
-| P4 | `test/` — a real cocotb bench | ✅ **RTL: 3/3, 255/255 scenarios.** ⚠️ **gate level not yet run** — needs a hardened netlist (see P7) |
+| P4 | `test/` — a real cocotb bench | ✅ **RTL: 3/3, 255/255.** ✅ **GATE LEVEL: 3/3, 255/255 against real sky130 cells** (`test/gl_local.sh`) — unpowered, pre-P&R; the powered post-layout form is still CI's (C.3) |
 | P5 | `src/config.json` — `CLOCK_PERIOD` 20 ns, `PL_TARGET_DENSITY_PCT` 60, and nothing that `user_config.json` would silently override | ✅ |
 | P6 | Apache-2.0 headers in every file we authored | ✅ (the `LICENSE` file itself comes from the template) |
 | P7 | **Local dry run: LibreLane 3.0.5 + precheck** | ⛔ **BLOCKED — LibreLane is not installed on the Mini.** yosys, iverilog and a sky130 PDK now are |
@@ -64,14 +64,25 @@ used to certify a netlist built by another. ⇒ Before D5 closes: verify the ~30
 `sky130_fd_sc_hd` cell models are revision-invariant, or re-pin `synth.sh` to
 `8afc8346…` and re-derive. **Not yet checked — stated, not assumed.**
 
-### C.3 Gate-level test is the one P-item with no local path
+### C.3 Gate level — now exercised locally, but not in the form that ships
 
 `gl_test` is a job inside the `gds` workflow, so a gate-level failure reddens
-`gds`, which is **blocking for submission**. Our bench is written for it
-(`GATES=yes`, `-DGL_TEST`, powered-netlist supply ports) but has only ever run at
-RTL. The first gate-level execution will be in TT's CI unless LibreLane is
-installed locally. ⇒ **Expect the first CI run to be the first real test of the
-gate-level path, and schedule it early enough that a surprise is cheap.**
+`gds`, which is **blocking for submission**.
+
+✅ **Run, and green: 3/3 tests, 255/255 scenarios against real `sky130_fd_sc_hd`
+standard cells** — `test/gl_local.sh`, with the shipped `tb.v` unmodified. That
+retires the risk that the bench simply does not work against gates (X-propagation
+from uninitialised flops, a reset that never takes, a cell model that disagrees
+with the RTL).
+
+⚠️ **What it is not**, stated so a green line here is not read as more than it is:
+the local netlist is **unpowered** (so `-DGL_TEST` is deliberately not passed) and
+**pre-place-and-route** — functional models at unit delay. It says nothing about
+setup and **nothing at all about hold**, which is the residual risk. The shuttle
+builds *powered* netlists and CI runs the powered, post-P&R form.
+
+⇒ The first CI run remains the first test of the **powered post-layout** path.
+Schedule it early enough that a surprise there is cheap.
 
 ### C.4 The public-repo ruling is the gate on everything in B
 

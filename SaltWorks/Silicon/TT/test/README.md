@@ -24,6 +24,17 @@ For the gate-level run outside CI, harden first and copy the netlist to
 `gate_level_netlist.v` in this directory; `PDK_ROOT` must point at the sky130A
 PDK so the cell models resolve.
 
+Without LibreLane you can still run the bench against a locally *synthesized*
+sky130 netlist, which is worth doing before spending a CI cycle:
+
+```sh
+./gl_local.sh /path/to/netlist.v   # real sky130 cells, tb.v unmodified
+```
+
+Measured: **3/3, 255/255 against real standard cells.** That netlist is
+**unpowered and pre-place-and-route**, so it says nothing about setup and nothing
+at all about hold — see `../docs/submission-checklist.md` §C.3.
+
 ## Local repro notes, because two of these cost real time
 
 - **cocotb 2.0.1 does not build on Python 3.14** — no wheels, and the sdist fails
