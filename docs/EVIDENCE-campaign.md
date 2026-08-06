@@ -1,14 +1,31 @@
 # CAMPAIGN SCOREBOARD
 ### The running status of the triple. Maintained by the EVIDENCE seat;
 ### refreshed at least daily and at every close-of-board.
-### **Last refreshed: 2026-08-06 09:53 PDT** (day 1).
+### **Last refreshed: 2026-08-06 10:12 PDT** (day 1). Seat-status lines age in
+### MINUTES, not days — see rule 2.
 
 **T0: 2026-08-05 22:02 PDT. Campaign window: ~Aug 19.
 Silicon deadline: 2026-09-07 13:00 PDT (32 days).**
 
-Rules for this file: a line moves to **LANDED** only when an artifact is
-committed and named here by path or commit. Anything else is IN FLIGHT or
-NOT STARTED. No line is upgraded on the strength of a plan.
+Rules for this file:
+
+1. A line moves to **LANDED** only when an artifact is committed and named
+   here **by path or commit**. Anything else is ⟨IN FLIGHT⟩ or ⟨NOT
+   STARTED⟩. No line is upgraded on the strength of a plan.
+2. ⚠️ **EVERY NON-LANDED LINE IS A SNAPSHOT, AND SNAPSHOTS AGE IN MINUTES.**
+   The math seat measured this on 2026-08-06: its N7-prep dossier marked two
+   WEIL-TRIO rows `[IN FLIGHT]` and they had **already landed** — *"my
+   snapshot aged in about twenty minutes… worth remembering before any seat
+   quotes another seat's status."* This scoreboard quotes other seats'
+   status **by construction**, so it inherits that failure mode and it must
+   not read as authoritative about work it does not own.
+   **Therefore: a ⟨…⟩ line is only ever "as reported by ⟨seat⟩ at ⟨time⟩",
+   and a stale one always errs against the seat whose work it describes.**
+   When in doubt, believe the seat, not this file.
+3. **LANDED rows are the trustworthy half** — they cite a commit, and a
+   commit does not go stale. ⟨TODO, evidence seat: generate the LANDED
+   table from `git log` rather than maintaining it by hand, so the
+   mechanically-knowable half stops depending on my attention.⟩
 
 ---
 
@@ -32,7 +49,10 @@ NOT STARTED. No line is upgraded on the strength of a plan.
 | 166 `#audit_axioms` assertions naming 6,302 distinct declarations | **MEASURED** | ibid. §3 |
 | 73 registry rows, lint-green | **MEASURED** | ibid. §2 |
 | Two papers: witness 20pp/172 citations, flagship 17pp/152 | **MEASURED** | ibid. §6 |
-| The fulcrum road kept running through the fortnight | **IN FLIGHT** | math seat; TAU-SHARP waves resume 20:00 tonight |
+| The fulcrum road kept running through the fortnight | ⟨IN FLIGHT — math, as of 10:09⟩ | Lean paused until 20:00 per the 09:22 order; read-only queue cleared |
+| N7-PREP dossier (three read-only scouts, zero Lean) | **LANDED** | salt `docs/exploration/n7-prep-dossier-0806.md` (1019c0e) |
+| The W3 refutation delivered to the WEIL-TRIO seat via `flags.md` | **LANDED** | salt `docs/blueprints/flags.md` (a7fa34e) |
+| CHAR-TRIO / WEIL-TRIO campaigns (second salt seat) | ⟨IN FLIGHT — third-hand, ages fast; **believe that seat, not this row**⟩ | WEIL-TRIO-W4Q reported landed at `flags.md:20887` |
 
 ### Leg 2 — CODE: the verified circuit compiler (seat: compiler)
 
