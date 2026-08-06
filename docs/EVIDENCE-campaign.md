@@ -298,7 +298,7 @@ dated.⟩
 |---|---|---|
 | 1 | The public repo's **name** and its Apache-2.0 / public status (contractually mandatory for TinyTapeout) | JYH |
 | 2 | The README verb in the price exhibit — "bought access to" until submitted *and* accepted | JYH |
-| 3 | Whether `saltbuild.sh` gets a per-process memory ceiling — via `lean -M`, **not** `ulimit` (see lesson 4), and only after one run verifies `-M` actually bites | maestro |
+| 3 | ⛔ **ESCALATED — the `lean -M 12000` cap is ALREADY LIVE on the wrapper's `*.lean` audit branch and is STILL UNVERIFIED.** Math's 10:35 concern is specific and serious: `-M` is enforced *inside Lean*, which is why it survives Darwin's rlimit gap — but a `decide +kernel` runaway lives in **kernel `whnf`**, which may not sit on the allocation path Lean's counter checks. If so, the cap is a **second no-op adopted on top of the first**, and the fleet is protected only in belief. **The test is ~2 minutes and only the compiler seat can run it today**: re-run the probe that already OOM'd, under the lock, with a deliberately low cap. (a) dies with a Lean memory error → the cap is real and this ruling closes; (b) climbs past it → the audit-path cap is cosmetic for `decide`-shaped work. **Math's TS-1 wave fires at 20:00 through exactly that branch.** | compiler to test, maestro to rule |
 | 3b | Whether the 09:22 no-Lean-until-20:00 order binds **only** the math seat or **all** heavy salt elaborations — salt has TWO live seats, and the second (CHAR-TRIO / WEIL-TRIO) is still elaborating `Salt/HB/*` files of the same weight class | maestro |
 | 4 | Install `docs/EVIDENCE-README-draft.md` at the repo root, once its `⟨slots⟩` are filled | maestro / JYH |
 

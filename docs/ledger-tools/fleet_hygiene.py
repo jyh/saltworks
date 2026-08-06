@@ -155,9 +155,25 @@ def machine_state() -> dict:
                 continue
             if "saltbuild.sh" in args:
                 continue
+            # Lean's own memory cap, if this invocation carries one.
+            # Whether -M actually binds a KERNEL reduction is an open
+            # question on this fleet (math, FLEET.md 10:35): the cap is
+            # enforced inside Lean, but a `decide +kernel` runaway lives
+            # in kernel whnf, which may not sit on the checked allocation
+            # path. If it does not bind, the wrapper's cap is cosmetic and
+            # we are protected only in belief. Recording cap-vs-RSS on
+            # every sample turns that question into a measurement: any
+            # process whose RSS exceeds its own -M is a live proof that
+            # -M does not bind THAT workload.
+            cap_mb = None
+            m = re.search(r"(?:-M|--memory=)\s*(\d+)", args)
+            if m:
+                cap_mb = int(m.group(1))
             state["procs"].append({
                 "pid": p["pid"], "rss_gb": p["rss_gb"], "etime": p["etime"],
                 "args": args[:120], "wrapped": under_wrapper(p["pid"]),
+                "cap_mb": cap_mb,
+                "over_cap": bool(cap_mb and p["rss_gb"] * 1024 > cap_mb * 1.05),
             })
     except Exception:
         pass
@@ -224,6 +240,34 @@ def machine_report(st: dict) -> list[str]:
     elif procs:
         out.append(f"✅ {len(procs)} Lean process(es), **every one of them descended "
                    f"from `saltbuild.sh`** — compliant.")
+        out.append("")
+
+    # --- is Lean's own -M cap actually binding? -------------------------
+    capped = [p for p in procs if p.get("cap_mb")]
+    breached = [p for p in procs if p.get("over_cap")]
+    if breached:
+        out.append("⛔ **`-M` IS NOT BINDING THIS WORKLOAD — MEASURED, NOT INFERRED.** "
+                   "A process is holding more RSS than its own Lean memory cap:")
+        out.append("")
+        out.append("| PID | `-M` cap | RSS | Verdict |")
+        out.append("|---:|---:|---:|---|")
+        for p in breached:
+            out.append(f"| {p['pid']} | {p['cap_mb']} MB | "
+                       f"**{p['rss_gb'] * 1024:.0f} MB** | cap exceeded |")
+        out.append("")
+        out.append("This is the outcome (b) the math seat asked about (FLEET.md "
+                   "10:35): the wrapper's cap is **cosmetic for this shape of "
+                   "work**, and the only real controls are the published "
+                   "self-caps plus an OS bound Darwin does not provide. "
+                   "**Post it to the bus.**")
+        out.append("")
+    elif capped:
+        out.append(f"ℹ️ {len(capped)} process(es) carry a Lean `-M` cap "
+                   f"({', '.join(str(p['cap_mb']) + ' MB' for p in capped)}) and "
+                   f"none has exceeded it so far. **That is not yet proof the cap "
+                   f"binds** — it is only proof this run has not tested it. The "
+                   f"binding question is settled by a deliberate over-cap probe, "
+                   f"not by observation of well-behaved runs.")
         out.append("")
     else:
         out.append("✅ No Lean or lake process running.")
