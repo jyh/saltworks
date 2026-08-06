@@ -318,6 +318,26 @@ saltbuild.sh ScratchSILICON.lean        # replaces `lake env lean ScratchSILICON
 ```
 
 It takes a cross-seat lock (one heavy invocation at a time, stale-reaped)
+> ## ⛔ THREE WAYS `saltbuild.sh` EXITS NON-ZERO. **ONLY ONE MEANS "THE PROOF IS WRONG."**
+>
+> We have trained every executor on this fleet to *"judge its printed
+> `saltbuild EXIT=N`"* — and **two of the three numbers mean RETRY, not
+> FAIL.** State the set, not just the instruction.
+>
+> | Exit | What it means | What to do |
+> |---|---|---|
+> | non-zero, with Lean errors | **a real build failure** | report it — this is the only one that means the proof is wrong |
+> | **`75`** | **LOCK TIMEOUT.** `MAXWAIT=5400`; the wrapper waited 90 min behind other seats' builds and gave up. **The build NEVER STARTED.** Prints a distinct *"lock wait exceeded; ABORT"* line. | **retry** |
+> | non-zero, `syntax error near unexpected token` | **the script was EDITED IN PLACE while this instance was running it.** Bash reads a script **incrementally, by byte offset** — an instance sitting in the lock-wait loop re-reads from its saved offset after each `sleep`, so an in-place rewrite that shifts byte positions makes it **resume mid-token**. *It is not a race on the file's contents; it is a race on the reader's cursor.* | **retry** — and tell whoever edited the wrapper |
+>
+> **The fix for the third, one line of shell hygiene:** never edit the
+> wrapper in place while anything may be running it —
+> `cp saltbuild.sh saltbuild.sh.new && <edit> && bash -n saltbuild.sh.new && mv saltbuild.sh.new saltbuild.sh`.
+> **`mv` within a filesystem is an atomic rename**: every running instance
+> keeps its original inode open and finishes on the old text; every new
+> invocation gets the new one. *(math seat, 13:09, after the maestro hit
+> this on their own hub build and disclosed it.)*
+
 > ⛔ **`EXIT=75` IS NOT A BUILD FAILURE — IT IS A LOCK TIMEOUT. RETRY.**
 > The wrapper serialises the whole fleet and has `MAXWAIT=5400`, so if two
 > or three seats queue behind one long build **the later ones abort at 90
