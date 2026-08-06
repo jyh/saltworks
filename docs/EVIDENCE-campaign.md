@@ -1,0 +1,181 @@
+# CAMPAIGN SCOREBOARD
+### The running status of the triple. Maintained by the EVIDENCE seat;
+### refreshed at least daily and at every close-of-board.
+### **Last refreshed: 2026-08-06 09:53 PDT** (day 1).
+
+**T0: 2026-08-05 22:02 PDT. Campaign window: ~Aug 19.
+Silicon deadline: 2026-09-07 13:00 PDT (32 days).**
+
+Rules for this file: a line moves to **LANDED** only when an artifact is
+committed and named here by path or commit. Anything else is IN FLIGHT or
+NOT STARTED. No line is upgraded on the strength of a plan.
+
+---
+
+## THE ONE CLAIM
+
+> The same method, the same fleet, the same referee discipline — three
+> domains, one fortnight, with the ledger showing when each artifact landed
+> and who was awake.
+
+---
+
+## THE THREE LEGS
+
+### Leg 1 — MATHEMATICS (harvest, do not rebuild)
+
+| Item | Status | Where |
+|---|---|---|
+| The evidence package | **LANDED** | salt `docs/exploration/leg1-evidence-0805.md` (740 ln) |
+| 652,312 Lean lines · 1,130 files · 19,564 declarations · 1,940 commits · 30 days | **MEASURED** | ibid. §1 |
+| Zero `sorry` / `native_decide` / home-rolled axioms, verified in tactic position | **MEASURED** | ibid. §3 |
+| 166 `#audit_axioms` assertions naming 6,302 distinct declarations | **MEASURED** | ibid. §3 |
+| 73 registry rows, lint-green | **MEASURED** | ibid. §2 |
+| Two papers: witness 20pp/172 citations, flagship 17pp/152 | **MEASURED** | ibid. §6 |
+| The fulcrum road kept running through the fortnight | **IN FLIGHT** | math seat; TAU-SHARP waves resume 20:00 tonight |
+
+### Leg 2 — CODE: the verified circuit compiler (seat: compiler)
+
+| Deliverable | Status |
+|---|---|
+| Design freeze v1 + seat's own refuter pass | **LANDED** — `docs/hdl-design-v1.md` (+ 2 addenda) |
+| T1 `opt_sem` — the verified optimizer | ⟨IN FLIGHT⟩ |
+| T2 `emitN_sem` — the netlist normal form | ⟨NOT STARTED⟩ |
+| T3 the executable-certificate suite | ⟨NOT STARTED⟩ |
+| T4 `banyan_circ` — the fabric as a `Circ` | ⟨NOT STARTED⟩ |
+| T5 the fungibility exhibit (one spec, ≥3 implementations) | ⟨NOT STARTED⟩ |
+| Sequential extension for the bit-serial switch element | ⟨IN FLIGHT — seam with Silicon to be agreed first⟩ |
+
+### Leg 3 — VLSI: the silicon chain (seat: silicon)
+
+| Deliverable | Status |
+|---|---|
+| `banyan_selfrouting`, parametric in *k*, 3 axioms | **LANDED** — `SaltWorks/Banyan/SelfRouting.lean` |
+| Design freeze v1 + ADDENDUM 1 (bit-serial, JYH-ruled) | **LANDED** — `docs/silicon-design-v1.md` |
+| The seat's own refuter pass, seven lanes | **LANDED** — `docs/silicon-refuter-0806.md` (3e41d10) |
+| D1 — real sky130 synthesis, reproducible, versions pinned | **LANDED** — 62b1b25 (Nix half stated as blocked) |
+| D2a — 13 sky130 cell models, kernel-cross-checked against the vendor Liberty | **LANDED** — 0baa9fd, `SaltWorks/Silicon/Cells/Sky130.lean` |
+| D2b — the netlist importer + mutation tests | ⟨IN FLIGHT⟩ |
+| D3 — comparator end-to-end equivalence, kernel-checked | ⟨NOT STARTED⟩ |
+| D3.5 — the bit-serial switch-element FSM refines `line` | ⟨NOT STARTED⟩ |
+| D4 — the fabric: per-module equivalence + GDSII | ⟨NOT STARTED⟩ |
+| D5 — TinyTapeout TTSKY26c submission | **TILES BOUGHT** (see below); nothing submitted |
+| D6 — the RISC-V datapath (stretch) | brief **LANDED** — `docs/EVIDENCE-riscv-datapath-brief.md` |
+
+---
+
+## THE PRICE EXHIBIT
+
+> **In 1988, fabricating this design cost roughly $150,000** (VLSI
+> Technology Inc; **the author's recollection**, order of magnitude).
+> **In 2026 it cost €280.** And this time it ships with a machine-checked
+> proof.
+
+- Nominal ratio ≈ **500×**; inflation-adjusted (~2.7× CPI 1988→2026, so
+  ~$400K real) ≈ **1,300×**.
+- The 2026 side is exact: **4 tiles (2×2) on TinyTapeout TTSKY26c, €280,
+  purchased 2026-08-06.** sky130A, foundry run CI-2609.
+- ⚠️ **Payment is not submission.** The "Submit a new revision" click is a
+  separate, later act. Until a design is submitted *and* accepted, the
+  honest verb is **"€280 bought access to a shuttle"**, not "fabricating
+  cost €280". See `docs/tinytapeout-dossier.md` §7.2.
+
+---
+
+## THE TAPEOUT CLOCK
+
+| Date | Event |
+|---|---|
+| **2026-09-07 13:00 PDT** | **HARD DEADLINE** (20:00 UTC) — no revisions after |
+| by 2026-08-31 | target: a real revision submitted, one week of slack |
+| 2027-03-27 | chips expected |
+| 2027-05-12 | estimated delivery |
+
+Shuttle capacity when last measured (2026-08-06): 222 of 512 tiles free —
+and both preceding sky130 shuttles closed at 512/512.
+
+---
+
+## THE LEDGER — who was awake
+
+Tooling: `docs/ledger-tools/` (committed, self-tested — 67 checks).
+Design frozen before the data existed:
+`docs/measurement-preregistration.md` + ADDENDUM 1.
+
+| Dated artifact | What it holds |
+|---|---|
+| `docs/EVIDENCE-ledger-2026-08-06.md` | day 1 — silence windows, per-day, longest run, the filter disclosure |
+| `docs/EVIDENCE-ledger-latest.md` | the most recent run, same content |
+| `docs/EVIDENCE-tokens-2026-08-06.md` | day 1 — tokens by project × tier × wave, cache separate |
+| `docs/EVIDENCE-human-time-tags.tsv` | the four-category tags (maestro-assigned, JYH spot-audited) |
+
+**Day 1, measured (T0 → 2026-08-06 09:50):**
+
+| Quantity | Value |
+|---|---:|
+| Commits, saltworks | 13 |
+| API requests (deduplicated) | 2,752 |
+| Output tokens | **869,114** |
+| Cache created / read | 18,941,186 / 344,638,099 |
+| JYH engaged time (pre-registered floor) | **2 h 04 m** — 5 DIRECTING, 1 WATCHING |
+| Commits inside a ≥1 h human-silence window | **0** |
+
+**The zero is not a failure to report — it is the report.** Day 1 was
+Council I, five seat launches, a bit-serial ruling, a tile purchase and
+three OOM kills: the most supervised day this campaign will ever have. The
+measurement was pre-registered before any data existed, and the attended
+days are published at the same resolution as the unattended ones. That is
+the only reason a long-silence exhibit will be worth anything when it
+arrives.
+
+---
+
+## FLEET RESOURCE LESSONS — day 1, evidence-grade
+
+Four incidents, all on one 64 GB machine, all cheap in work (lake resumes
+incrementally) and all worth publishing. They are the operational half of
+the unattended story, not blemishes on it.
+
+1. **OOM #1** — 5 seats × default parallelism; single elaborations
+   measured at 6–9 GB. *Fix:* `saltbuild.sh`, a fleet-wide lock + thread
+   cap.
+2. **OOM #2** — 49 bare `lean` processes, swap at 37 GB: the lock covered
+   `lake build` but not `lake env lean` audit runs, and in-flight
+   subagents carried pre-rule briefs. *Lesson:* **locks must cover every
+   door, not just the front one — and a rule change must reach the agents
+   dispatched before it existed.**
+3. **Kill #3** — enforcement escalation; one seat discovered it had been
+   an offender without knowing, because a rejected dispatch had already
+   launched. *Lesson:* **the working tree and the git index are cross-seat
+   resources with no lock** — commit explicit pathspecs only, never
+   `git add -A`.
+4. **The runaway (averted)** — a single *correctly wrapped* elaboration
+   reached **30.7 GB RSS** with the lock held and every rule obeyed.
+   *Lesson, and it is new:* **serialization is not a memory bound.** The
+   wrapper guarantees one heavy invocation at a time; it does not bound
+   what that one costs. The cap has to be on the process
+   (`ulimit -v`), not only on the queue.
+
+---
+
+## OPEN RULINGS OWED
+
+| # | Question | Owner |
+|---|---|---|
+| 1 | The public repo's **name** and its Apache-2.0 / public status (contractually mandatory for TinyTapeout) | JYH |
+| 2 | The README verb in the price exhibit — "bought access to" until submitted *and* accepted | JYH |
+| 3 | Whether `saltbuild.sh` gets a per-process memory ceiling | maestro |
+| 4 | Install `docs/EVIDENCE-README-draft.md` at the repo root, once its `⟨slots⟩` are filled | maestro / JYH |
+
+---
+
+## DO NOT QUOTE
+
+Inherited from the leg-1 harvest and binding on everything published here:
+never "13 waves" (it is 11, or 15 counting the morning); never the
+night-hours framing (the unit is the silence window); never "259/259"
+without its 2026-07-21 date and "content modules" scope; never a
+percentage of the corpus described as axiom-audited (quote the 6,302 named
+declarations and the 166 assertions); never the git author field as
+evidence of authorship. Full list: salt
+`docs/exploration/leg1-evidence-0805.md` §9.
