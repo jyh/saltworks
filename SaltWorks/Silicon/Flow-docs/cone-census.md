@@ -126,6 +126,53 @@ nets at `n = 16`) is ~1.9 MB of slice data and builds in about three seconds.
 The gap between those two numbers — 9 PB against kilobytes — is the entire
 argument for why the decomposition is not optional.
 
+## D4 — the fabric, and the finding that flattening is not fate
+
+The full 8×8 fabric now exists (`RTL/banyan_fabric.v`) and synthesizes:
+**259 cells, 2,108 µm², 21 distinct cell types**, 52 flops (12 elements × 4 plus
+a 4-bit frame counter). That is **11.8 % of one tile**, or 2.9 % of the four
+tiles bought.
+
+Two numbers there are worse than the element's, and both matter:
+
+* **21 cell types when flattened**, against 6 per element. Synthesis reaches for
+  a much wider cell set once it can optimize across element boundaries — so the
+  trusted model set grows with flattening, not with design size.
+* **the flattened fabric's cones reach 36 inputs.** At 36 bits a single sliced
+  net is 8.6 GB, far past the 24-bit ceiling. Those are exactly the 8 `dout`
+  cones: because the data path is combinational end to end, an output cone spans
+  all three stages. **Per-cone certification of the flattened fabric does not
+  close by itself.**
+
+### Flattening is a flow *setting*, not a law
+
+The obvious reading of "the flow flattens" is that hierarchy is lost and the
+proof must cope. That is not quite right, and the difference is cheap:
+
+Marking the stage boundaries `(* keep *)` makes them **survive synthesis** as
+real nets (`wire [7:0] w0; wire [7:0] w1;` appear in the netlist), at a measured
+cost of **1.7 % area** — 2,108 → 2,143 µm². With those as cut points, per-cone
+coverage rises from **86.9 % → 94.8 %**.
+
+So the honest statement is:
+
+> If you want the boundaries you reason about to survive to the fabricated
+> netlist, **ask the flow to keep them**. It costs about 2 % of area, and it is
+> the difference between a netlist whose structure matches the design's and one
+> that has been optimized into a single 36-input cone.
+
+A residue still exceeds the ceiling even with cut points, so **D4's fabric
+certificate is per-element plus structural composition** — twelve instances of
+the `switch_step_eq` certificate (9 inputs each, already landed in D3.5) wired
+together by the topology, not one enumeration over the fabric. That was always
+the plan; this measures why it is not optional, and the `keep` result is what
+makes the per-element route reachable on the *fabricated* artifact rather than
+only on a local hierarchical run.
+
+⚠️ Not yet established: whether `(* keep *)` survives **TinyTapeout's** CI flow,
+which runs its own LibreLane configuration. That is a D5 question and it is now
+on the list.
+
 ## Two incidental measurements worth keeping
 
 **Physical cells dominate.** `factory_test` is 90 logic cells against 4,425
