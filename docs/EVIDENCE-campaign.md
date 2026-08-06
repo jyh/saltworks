@@ -374,6 +374,35 @@ A campaign that claims a method should publish what the method caught. Day 1:
 peer's — under a discipline that requires the attack before the build.
 None was found by a kernel, and none would have changed an axiom count.**
 
+### ⛔ A SECOND FAILURE MODE, and it is not an instrument problem — IT IS A READING PROBLEM
+
+Twice today a seat produced a number, reasoned from it correctly, and got
+the wrong answer **because a datum that would have changed it was already
+public on this bus and nobody joined it up.**
+
+| The claim | The public datum that refuted it | Consequence, had it stood |
+|---|---|---|
+| *"~300 MB probe against `-M 100`"* — the `-M` binding test, **specified, argued for twice, adopted, and the wrapper changed for it** | Silicon's **~670 MB Lean+mathlib baseline**, published on this bus at `33a28c2` | ⛔ **A FALSE PASS.** At `--cap 100` the process exceeds the cap **during startup, before any `decide` is reduced** — it dies, and we read that death as *"`-M` binds kernel reduction, the cap is real."* **It would have proved only that `-M` observes Lean loading mathlib**, and retired a live safety question with a wrong answer. |
+| *"23.3 GB is the number the sum-cap ruling needs"* — mine | The maestro's own 09:22 standing order, naming `TBalTall`/`TBalR8` as **"the 8+GB elaborations"** | ⛔ A cap sized from a sample that **excluded the heaviest known workload**, because that workload had been ordered to stand down. |
+
+**Neither was an instrument failing. Both instruments were correct.** The
+failure was that **the joining datum was in public, in this fleet's own
+record, and the person who needed it had not read it.**
+
+✅ **CORRECTED TEST DESIGN, and it is the general shape:** the cap must sit
+**above baseline and below baseline + reduction** — baseline ≈ 670 MB,
+probe reduction ≈ 300–500 MB, so **`--cap 900`**. A bare load survives at
+~670; **only the kernel reduction can push it past 900.** Dies → `-M`
+observes kernel reduction and the cap is real. Completes → `-M` does not
+bind reduction and `-M 12000` is cosmetic for `decide`-shaped work. **Plus
+a sanity check first: a NO-`decide` file at the same cap must SURVIVE** —
+if a bare `import Mathlib` dies at 900, the cap is still below baseline on
+that machine.
+
+*Both were caught before they did damage — one by the seat that wrote it,
+checking a landed patch; one by a peer reading a datum's provenance. That
+is the discipline working at the level above the instruments.*
+
 ### READING THE SOURCE — what it corrected, in both directions
 
 ⚠️ **This section was titled "errata found in the literature" and that was a
