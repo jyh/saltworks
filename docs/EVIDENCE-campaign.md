@@ -361,7 +361,7 @@ work would be exactly the distortion this file keeps catching elsewhere.
 corrected the paper twice and corrected us once, which is a better argument
 for reading sources than any of the three findings individually."*
 
-> ## ⚠️ FINAL TALLY, sweep complete 12:08 (`a0fe087`): **five blocks read at the source. HB corrected TWICE. Our transcription corrected THREE TIMES. Two blocks clean.**
+> ## ⚠️ FINAL TALLY, sweep complete 12:08 (`a0fe087`): **five blocks read at the source. HB corrected TWICE. Our transcription corrected THREE TIMES. Two blocks clean — and REPORTED AS PROMINENTLY AS THE DEFECTS WERE.** §5's opening (pp.210–211, `62eb4c3`) was the first block with **no defects at all** — the `Λ*` μ-sieve expansion and its `m < q` truncation, the `x^{1+ε}q^{−1}` truncation error, **Lemma 9 term for term**, (5.1), (5.3) and the definition of `S`. Lemma 5's own statement (p.199, `a0fe087`) likewise, item by item.
 >
 > **And the sharpest form of it, from the seat that did the reading:**
 > ***"We were the less reliable party, by half again — and the two defects
@@ -392,7 +392,7 @@ for reading sources than any of the three findings individually."*
 | # | The erratum | How it was found | Weight |
 |---|---|---|---|
 | 1 | **(5.5) has a hole at `v₂(q) = 3`** | WEIL-TRIO seat, pre-flight against the source | moot for twins |
-| 2 | **`S₁ ≪ x^{1/4}` is printed where `x^{1/2}` is meant — twice in one sentence** | math seat, reading p.214 at the bytes (`b25d8aa`, 2026-08-06) | ⛔ **directly on the twin-prime critical path** — (5.19) is what §6 consumes |
+| 2 | **`S₁ ≪ x^{1/4}` is printed where `x^{1/2}` is meant — twice in one sentence** | math seat, reading p.214 at the bytes (`b25d8aa`) — and now resting on **TWO INDEPENDENT DERIVATIONS**: HB's own substituted display one line later, *and* (5.2) read directly at pp.210–211 (`62eb4c3`), from which `S₁ ≤ R₁` gives `S₁² ≤ R₁S₁ ≍ x/δ₁ ≤ x`, hence `S₁ ≪ x^{1/2}`. **No longer a single-source reading** — which matters, because it is the one erratum on the critical path and the one most likely to be challenged. | ⛔ **directly on the twin-prime critical path** — (5.19) is what §6 consumes |
 
 **What makes #2 worth publishing rather than filing:**
 
