@@ -111,6 +111,17 @@ theorem col_testBit : ∀ n i j, i < n → j < 2 ^ n → (col n i).testBit j = j
         simp only [if_neg hlo]
         rw [ih i (j - 2 ^ n) hi' hhi, hbit]
 
+/-- Above the input count there is no column: `reflect` quantifies over *all*
+input indices, so this is what covers the ones the design does not have. -/
+theorem col_of_le : ∀ n i, n ≤ i → col n i = 0 := by
+  intro n
+  induction n with
+  | zero => intro i _; rfl
+  | succ n ih =>
+    intro i hi
+    have hne : i ≠ n := by omega
+    simp [col, hne, ih i (by omega)]
+
 /-- The hypothesis `reflect` and `eq_of_sliced_eq` ask for, discharged. -/
 theorem col_agrees (n j : Nat) (hj : j < 2 ^ n) :
     ∀ i, i < n → (col n i).testBit j = j.testBit i :=
