@@ -44,6 +44,7 @@ from ledger_common import (
 
 FLEET_MD = Path.home() / "projects" / "claude" / "FLEET.md"
 QUIET_HOURS = 6.0
+BUILD_LOCK = Path("/tmp/salt-fleet-build.lock")
 
 # "[8/6 09:20, evidence] ..."  /  "[8/6 morning, maestro] ..."
 POST_RE = re.compile(r"^\[(\d{1,2})/(\d{1,2})\s+([^,\]]*?),\s*([A-Za-z][\w -]*)\]")
@@ -102,6 +103,139 @@ def scan_seats(dirs) -> dict[str, Seat]:
     return seats
 
 
+def machine_state() -> dict:
+    """Lean/lake processes, the fleet build lock, RAM and swap.
+
+    Written after the third OOM kill of 2026-08-06. The fleet was
+    discovering violations by crashing; this finds them in one second,
+    before the build starts. A Lean process running while the lock is
+    unheld is a bare invocation — the thing the standing order forbids.
+    """
+    import subprocess
+
+    state = {"procs": [], "lock_held": False, "lock_pid": None,
+             "ram_free_gb": None, "swap_used_gb": None, "swap_free_gb": None}
+
+    try:
+        out = subprocess.run(["ps", "-eo", "pid,ppid,rss,etime,args"],
+                             capture_output=True, text=True, timeout=20).stdout
+        procs: dict[int, dict] = {}
+        for line in out.splitlines()[1:]:
+            parts = line.split(None, 4)
+            if len(parts) < 5:
+                continue
+            pid, ppid, rss, etime, args = parts
+            procs[int(pid)] = {"pid": int(pid), "ppid": int(ppid),
+                               "rss_gb": int(rss) / 1048576, "etime": etime,
+                               "args": args}
+
+        def under_wrapper(pid: int) -> bool:
+            """Is any ancestor of this process a saltbuild.sh?
+
+            Checking only "is the lock held" is not enough, and the third
+            OOM of 2026-08-06 is why: 49 bare `lean` processes ran while a
+            legitimate wrapper build also held the lock. Compliance is a
+            property of each process's ancestry, not of the machine.
+            """
+            seen = set()
+            cur = pid
+            while cur > 1 and cur in procs and cur not in seen:
+                seen.add(cur)
+                if "saltbuild.sh" in procs[cur]["args"]:
+                    return True
+                cur = procs[cur]["ppid"]
+            return False
+
+        for p in procs.values():
+            args = p["args"]
+            base = args.split()[0].rsplit("/", 1)[-1] if args else ""
+            # match the executables, not any path that happens to contain
+            # the letters -- 'MobileSoftwareUpdate' is not a Lean build
+            if base not in ("lean", "lake", "leanc"):
+                continue
+            if "saltbuild.sh" in args:
+                continue
+            state["procs"].append({
+                "pid": p["pid"], "rss_gb": p["rss_gb"], "etime": p["etime"],
+                "args": args[:120], "wrapped": under_wrapper(p["pid"]),
+            })
+    except Exception:
+        pass
+
+    if BUILD_LOCK.is_dir():
+        state["lock_held"] = True
+        pid_file = BUILD_LOCK / "pid"
+        if pid_file.is_file():
+            try:
+                state["lock_pid"] = int(pid_file.read_text().strip())
+            except Exception:
+                pass
+
+    try:
+        import subprocess as sp
+        vm = sp.run(["vm_stat"], capture_output=True, text=True, timeout=10).stdout
+        page = 16384
+        for line in vm.splitlines():
+            if "page size of" in line:
+                page = int(line.split("page size of")[1].split()[0])
+            if line.startswith("Pages free:"):
+                state["ram_free_gb"] = int(line.split()[2].strip(".")) * page / 1073741824
+        sw = sp.run(["sysctl", "-n", "vm.swapusage"], capture_output=True,
+                    text=True, timeout=10).stdout
+        for tok, key in (("used =", "swap_used_gb"), ("free =", "swap_free_gb")):
+            if tok in sw:
+                val = sw.split(tok)[1].split()[0]
+                state[key] = float(val.rstrip("M")) / 1024 if val.endswith("M") else float(val.rstrip("G"))
+    except Exception:
+        pass
+    return state
+
+
+def machine_report(st: dict) -> list[str]:
+    out = []
+    procs = st["procs"]
+    bare = [p for p in procs if not p.get("wrapped")]
+    out.append("## Machine state — the build-etiquette detector")
+    out.append("")
+    out.append("| Check | Value |")
+    out.append("|---|---|")
+    out.append(f"| Lean/lake processes running | **{len(procs)}** "
+               f"({len(procs) - len(bare)} under `saltbuild.sh`, "
+               f"**{len(bare)} bare**) |")
+    out.append(f"| Fleet build lock (`{BUILD_LOCK}`) | "
+               f"{'HELD by pid ' + str(st['lock_pid']) if st['lock_held'] else 'not held'} |")
+    if st["ram_free_gb"] is not None:
+        out.append(f"| RAM free | {st['ram_free_gb']:.1f} GB |")
+    if st["swap_used_gb"] is not None:
+        out.append(f"| Swap used / free | {st['swap_used_gb']:.1f} GB / "
+                   f"{st['swap_free_gb']:.1f} GB |")
+    out.append("")
+    if bare:
+        out.append(f"⛔ **{len(bare)} BARE Lean/lake process(es) — no `saltbuild.sh` "
+                   f"anywhere in their ancestry. This violates the standing order "
+                   f"(FLEET.md, maestro, 8/6 09:22).**")
+        out.append("")
+        out.append("| PID | RSS | Elapsed | Command |")
+        out.append("|---:|---:|---|---|")
+        for p in sorted(bare, key=lambda p: -p["rss_gb"]):
+            out.append(f"| {p['pid']} | {p['rss_gb']:.1f} GB | {p['etime']} | "
+                       f"`{p['args']}` |")
+        out.append("")
+    elif procs:
+        out.append(f"✅ {len(procs)} Lean process(es), **every one of them descended "
+                   f"from `saltbuild.sh`** — compliant.")
+        out.append("")
+    else:
+        out.append("✅ No Lean or lake process running.")
+        out.append("")
+    if st["swap_free_gb"] is not None and st["swap_free_gb"] < 2.0:
+        out.append(f"⚠️ **Swap has only {st['swap_free_gb']:.1f} GB free** — RAM may "
+                   f"read healthy while the machine is still fragile. macOS does not "
+                   f"eagerly drain swap after a kill.")
+        out.append("")
+    return out
+
+
 def scan_fleet_md(path: Path, year: int) -> dict[str, datetime]:
     """Last FLEET.md post per seat name (lower-cased)."""
     posts: dict[str, datetime] = {}
@@ -152,8 +286,21 @@ def build(args) -> str:
     stalled = [r for r in rows if r[2] > QUIET_HOURS]
     silent = [r for r in rows if r[2] <= QUIET_HOURS and (r[4] is None or r[4] > QUIET_HOURS)]
 
+    st = machine_state() if not args.no_procs else None
+
     if args.brief:
         out = []
+        if st is not None:
+            n = len(st["procs"])
+            nbare = sum(1 for p in st["procs"] if not p.get("wrapped"))
+            if nbare:
+                out.append(f"VIOLATION {nbare} BARE lean/lake proc(s) of {n} "
+                           f"(no saltbuild.sh ancestor)")
+            else:
+                out.append(f"machine   {n} lean proc(s), all wrapped · lock "
+                           f"{'held' if st['lock_held'] else 'free'} · "
+                           f"RAM {st['ram_free_gb']:.0f}GB free · "
+                           f"swap {st['swap_free_gb']:.1f}GB free")
         for name, seat, idle_h, posted, post_h in rows:
             flag = "STALLED" if idle_h > QUIET_HOURS else (
                 "SILENT" if (post_h is None or post_h > QUIET_HOURS) else "ok")
@@ -197,6 +344,9 @@ def build(args) -> str:
     w("_Seat identity comes from each session's own `agent-name` record — "
       "the string the seat signs its posts with. Employer-lane projects are "
       "not scanned._")
+    if st is not None:
+        w("")
+        out.extend(machine_report(st))
     return "\n".join(out)
 
 
@@ -206,6 +356,8 @@ def main():
     ap.add_argument("--fleet", default=str(FLEET_MD))
     ap.add_argument("--project", action="append", default=None)
     ap.add_argument("--brief", action="store_true")
+    ap.add_argument("--no-procs", action="store_true",
+                    help="skip the machine-state / build-etiquette detector")
     ap.add_argument("--active-only", action="store_true", default=True,
                     help="only seats seen recently (default on)")
     ap.add_argument("--all", dest="active_only", action="store_false")
