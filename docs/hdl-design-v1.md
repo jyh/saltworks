@@ -49,3 +49,14 @@ R2 does T2's normal form match what leg 3's importer (Silicon design
 R3 is Vector-of-nets the right bus type for kernel-decide at 2^16?
 R4 sp1-lean failure modes: vacuous hypotheses, wrong-width semantics,
    missing theorems — audit MY statements above for all three.
+
+## ADDENDUM (Council I, 8/6) — ruled additions
+- T5 THE FUNGIBILITY EXHIBIT: one banyan-router spec, ≥3 deliberately
+  different implementations (iterative/unrolled/re-encoded), each
+  proved equivalent to the SAME spec by decide +kernel. The README
+  line: the certificate outlives every implementation.
+- FRAMING (the seam doctrine, salt triple-campaign §10): this leg is
+  spectrum-point 1 (amortized); leg 3 is point 2 (per-instance);
+  present them as ONE doctrine, not two demos.
+- Week-2 stretch (separate freeze to come): mini-language → RV32I
+  codegen w/ simulation proof — THE TOWER's keystone.
