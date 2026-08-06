@@ -118,6 +118,50 @@ def build(args) -> str:
     def block_id(b) -> str:
         return f"{b[0].when.strftime('%Y%m%dT%H%M')}"
 
+    # --- match tags to blocks by CONTAINMENT, not by exact id -------------
+    #
+    # A block id is its FIRST TOUCH's timestamp, which is not stable: change
+    # --since, or let one new message land inside a former gap, and two
+    # blocks merge, the id moves, and every tag on them silently detaches.
+    # Measured on 2026-08-06: the morning's six tags produced four blocks
+    # with three tags orphaned and NOTHING SAID ABOUT IT. A tagging
+    # instrument that silently drops its own tags reports a smaller claim
+    # than the truth and calls it data.
+    #
+    # So: a tag whose timestamp falls INSIDE a block tags that block; tags
+    # matching no block are reported as ORPHANED; and a block carrying two
+    # or more DIFFERENT categories is reported as CONFLICTED and folded
+    # into nothing, because a merged block genuinely has no single answer.
+    def tag_ts(tid: str) -> datetime | None:
+        try:
+            return datetime.strptime(tid, "%Y%m%dT%H%M").replace(tzinfo=lc.TZ)
+        except ValueError:
+            return None
+
+    block_tags: dict[int, list[tuple[str, str, str]]] = {}
+    matched: set[str] = set()
+    for i, b in enumerate(blocks):
+        # a block id is minute-truncated, so it is always <= the true first
+        # touch (07:57 vs 07:57:23). Truncate the bound to match, or every
+        # tag misses its own block by seconds.
+        lo = b[0].when.replace(second=0, microsecond=0)
+        hi = b[-1].when
+        for tid, (cat, note) in tags.items():
+            t = tag_ts(tid)
+            if t is not None and lo <= t <= hi:
+                block_tags.setdefault(i, []).append((tid, cat, note))
+                matched.add(tid)
+    orphaned = sorted(set(tags) - matched)
+
+    def category_of(i: int) -> tuple[str, str]:
+        got = block_tags.get(i, [])
+        cats = {c for _, c, _ in got}
+        if not cats:
+            return "UNTAGGED", ""
+        if len(cats) > 1:
+            return "CONFLICTED", "/".join(sorted(cats))
+        return next(iter(cats)), got[0][2]
+
     out: list[str] = []
     w = out.append
     w("# HUMAN-TIME LEDGER — the four categories")
@@ -148,8 +192,8 @@ def build(args) -> str:
 
     per_cat: dict[str, float] = defaultdict(float)
     per_cat_n: dict[str, int] = defaultdict(int)
-    for b in blocks:
-        cat = tags.get(block_id(b), ("UNTAGGED", ""))[0]
+    for i, b in enumerate(blocks):
+        cat, _ = category_of(i)
         per_cat[cat] += dur(b)
         per_cat_n[cat] += 1
 
@@ -160,7 +204,7 @@ def build(args) -> str:
     w("")
     w("| Category | Blocks | Time | Share |")
     w("|---|---:|---:|---:|")
-    for c in CATEGORIES + ("UNTAGGED",):
+    for c in CATEGORIES + ("UNTAGGED", "CONFLICTED"):
         if not per_cat_n.get(c):
             continue
         w(f"| {'**' + c + '**' if c in CLAIM_CATEGORIES else c} | "
@@ -179,6 +223,22 @@ def build(args) -> str:
           f"category.")
         w("")
 
+    if orphaned:
+        w(f"> ⛔ **{len(orphaned)} TAG(S) MATCH NO BLOCK IN THIS WINDOW** and are "
+          f"contributing nothing: `{'`, `'.join(orphaned)}`. A block id is its "
+          f"first touch's timestamp, so changing `--since`, or one new message "
+          f"landing inside a former gap, merges blocks and detaches their tags. "
+          f"**Tags are matched by containment rather than by exact id precisely "
+          f"so this is visible instead of silent** — but a tag outside the "
+          f"window still needs re-pointing. Re-run the worksheet and re-tag.")
+        w("")
+    if per_cat_n.get("CONFLICTED"):
+        w(f"> ⛔ **{per_cat_n['CONFLICTED']} block(s) carry TWO OR MORE different "
+          f"categories** — almost certainly because separately-tagged blocks "
+          f"merged when a message landed in the gap between them. They are "
+          f"folded into **nothing**, because a merged block genuinely has no "
+          f"single answer. Split them by re-tagging.")
+        w("")
     w("## 2. Per day")
     w("")
     days: dict[str, list] = defaultdict(list)
@@ -189,8 +249,9 @@ def build(args) -> str:
     for d in sorted(days):
         bs = days[d]
         eng = sum(dur(b) for b in bs)
+        idx = {id(b): i for i, b in enumerate(blocks)}
         cl = sum(dur(b) for b in bs
-                 if tags.get(block_id(b), ("", ""))[0] in CLAIM_CATEGORIES)
+                 if category_of(idx[id(b)])[0] in CLAIM_CATEGORIES)
         w(f"| {d} | {len(bs)} | {fmt_hours(eng)} | {fmt_hours(cl)} | "
           f"{sum(len(b) for b in bs)} |")
     w("")
@@ -202,9 +263,13 @@ def build(args) -> str:
     w("")
     w("| Block id | Seat | Start | End | Duration | Msgs | Category | Opens with |")
     w("|---|---|---|---|---:|---:|---|---|")
-    for b in blocks:
+    for i, b in enumerate(blocks):
         bid = block_id(b)
-        cat, note = tags.get(bid, ("**UNTAGGED**", ""))
+        cat, note = category_of(i)
+        if cat == "UNTAGGED":
+            cat = "**UNTAGGED**"
+        elif cat == "CONFLICTED":
+            cat = f"⛔ **CONFLICTED** ({note})" 
         seat = b[0].project.replace("-Users-jyh-projects-claude-", "")
         preview = ""
         for t in b:
