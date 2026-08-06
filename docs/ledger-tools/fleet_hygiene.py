@@ -117,7 +117,8 @@ def machine_state() -> dict:
 
     state = {"procs": [], "lock_held": False, "lock_pid": None,
              "lock_orphaned": None, "lock_age_s": None,
-             "ram_free_gb": None, "swap_used_gb": None, "swap_free_gb": None}
+             "ram_free_gb": None, "ram_inactive_gb": None,
+             "swap_used_gb": None, "swap_free_gb": None}
 
     try:
         out = subprocess.run(["ps", "-eo", "pid,ppid,rss,etime,args"],
@@ -245,6 +246,16 @@ def machine_state() -> dict:
                 page = int(line.split("page size of")[1].split()[0])
             if line.startswith("Pages free:"):
                 state["ram_free_gb"] = int(line.split()[2].strip(".")) * page / 1073741824
+            # macOS "free" EXCLUDES inactive pages, which the kernel reclaims
+            # on demand. Reporting free alone understates available memory —
+            # measured 2026-08-06 14:02: free 0.07 GB while inactive held
+            # 28.07 GB, i.e. the machine had ~28 GB available and my own
+            # monitor was calling it an emergency. Same defect as everything
+            # else in this directory: the instrument answered a narrower
+            # question (how much is FREE) than the one that matters (how much
+            # is AVAILABLE).
+            if line.startswith("Pages inactive:"):
+                state["ram_inactive_gb"] = int(line.split()[2].strip(".")) * page / 1073741824
         sw = sp.run(["sysctl", "-n", "vm.swapusage"], capture_output=True,
                     text=True, timeout=10).stdout
         for tok, key in (("used =", "swap_used_gb"), ("free =", "swap_free_gb")):
@@ -271,7 +282,11 @@ def machine_report(st: dict) -> list[str]:
         else ("HELD by pid " + str(st["lock_pid"]) if st["lock_held"] else "not held")
     out.append(f"| Fleet build lock (`{BUILD_LOCK}`) | {lock_cell} |")
     if st["ram_free_gb"] is not None:
+        inact = st.get("ram_inactive_gb") or 0.0
         out.append(f"| RAM free | {st['ram_free_gb']:.1f} GB |")
+        out.append(f"| RAM inactive (**reclaimable**) | {inact:.1f} GB |")
+        out.append(f"| **RAM available** (free + inactive — *the figure that "
+                   f"matters on macOS*) | **{st['ram_free_gb'] + inact:.1f} GB** |")
     if st["swap_used_gb"] is not None:
         out.append(f"| Swap used / free | {st['swap_used_gb']:.1f} GB / "
                    f"{st['swap_free_gb']:.1f} GB |")
