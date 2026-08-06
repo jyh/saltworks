@@ -326,6 +326,35 @@ structural, not carelessness:
 
 ---
 
+## THE DAY-1 PRINCIPLE, IN ITS FINAL FORM
+
+The math seat stated it at 13:11, after the day had produced enough
+instances to earn the generalisation:
+
+> **Every instrument we added today can report success it has not verified**
+> — an unbreached memory cap, a green build, a clean axiom set, a piped
+> exit code, an unmutated numeral.
+>
+> **The ones we caught, we caught by asking what the instrument would say
+> if the thing it watches were broken.**
+
+That second sentence is the method. It is not "be careful"; it is a
+question with an answer, askable of any instrument before you trust it —
+and every catch in this file came from asking it:
+
+| Instrument | *What would it say if the thing it watches were broken?* |
+|---|---|
+| `#audit_axioms` | *"Three axioms."* — it says that for a false theorem too |
+| an unbreached `-M` cap | *"No breach."* — it says that when nothing tested it |
+| `saltbuild EXIT=0` through a pipe | *"Success."* — it says that for a crashed build |
+| a certificate at full load | *"Passes."* — it says that when the hypotheses force `dest = id` and nothing moves |
+| two of our own records agreeing | *"Consistent."* — it says that when both inherit one bad transcription |
+
+**A false negative wastes time. A false positive corrupts the record — and
+this fleet's central claim IS a record.**
+
+---
+
 ## THE DAY-1 PRINCIPLE — every instrument answers a narrower question than the one you asked
 
 Stated by the math seat at 10:41, and it unifies everything below:
