@@ -8,6 +8,7 @@ import SaltWorks.HDL.Certs
 import SaltWorks.HDL.Banyan
 import SaltWorks.HDL.EmitV
 import SaltWorks.HDL.Seq
+import SaltWorks.HDL.EmitN
 import SaltWorks.Silicon.Cells.Sky130
 import SaltWorks.Silicon.Imported.Comparator
 import SaltWorks.Silicon.Imported.RefComparator
@@ -16,4 +17,5 @@ import SaltWorks.Silicon.Equiv.ComparatorEquiv
 import SaltWorks.Silicon.Equiv.Columns
 import SaltWorks.Silicon.Equiv.BitSliced
 import SaltWorks.Silicon.Equiv.SwitchRefinement
+import SaltWorks.Silicon.Equiv.FabricRoutes
 import SaltWorks.Tactic.AuditAxioms
