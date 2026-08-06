@@ -66,7 +66,6 @@ A single chain, closed at every seam:
     the check              per-COMBINATIONAL-CONE equivalence, by         ⟨leg 3 D3⟩
                            bit-sliced `decide +kernel`
                            ── the kernel re-does every step
-                           ── the kernel re-does every step
 ```
 
 **The contribution is the last two arrows.** Verified synthesis is a
