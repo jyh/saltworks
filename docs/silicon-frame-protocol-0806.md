@@ -20,6 +20,54 @@ Two findings forced it:
 
 ---
 
+## 0.5 RECONCILIATION — there are TWO v1 frame specs, and that must not ship
+
+The HDL seat wrote `docs/hdl-frame-protocol-v1.md` (commit `236ccff`) at the same
+hour as this document, from the same ruling, and reached a **different** answer.
+Both are correct designs. Only one can be the fabric.
+
+They found the same gap I did — *interior stages cannot take activity from the
+wire* — and solved it in **hardware** where I solved it in **frame cycles**:
+
+| | this spec (option C) | HDL seat's spec |
+|---|---|---|
+| header length | `2k` = **6** cycles | `k+1` = **4** cycles |
+| how interior stages get activity | activity **repeated** on the data wire before each address bit | 8 input-activity flops + activity routed on a **parallel network** |
+| wires between stages, per line | **1** | 2 (data + activity) |
+| latch schedule | act at `t=2s`, sel at `t=2s+1` | stage `m` at `t = k−m` |
+| validated? | **yes** — §8, with a control | specified, not yet simulated |
+
+**Ruling (mine to make — SEATS.md gives this seat the gates, and their doc says
+so explicitly: "Silicon owns the gates; this pins the INTERFACE"): keep option C.**
+Not because it is better in the abstract — their header is genuinely two cycles
+shorter — but because:
+
+1. it is **already implemented, synthesized and validated** (§8), including a
+   control that fails the broken element 247/255, and
+2. it needs **one wire per line between stages**, so the fabric's internal
+   routing is the banyan and nothing else. Their parallel activity network is a
+   second copy of the topology, and every structure in the fabric is structure
+   the D3.5 refinement has to carry.
+
+**What I adopt from their document, because it is better than what I wrote:**
+
+* **The latch-timing convention, stated explicitly.** "A flop enabled during
+  cycle `t` holds its new value from cycle `t+1` onward." My §4 gave a validity
+  window; theirs gives the rule the window follows from. Their finding stands on
+  its own merits and is the sharper form: *the ruling settled what the frame
+  carries and not when anything is latched, and the timing is where the
+  refinement proof either closes or does not.* Under option C that convention
+  yields: stage `s` holds activity from `t = 2s+1` and routing from `t = 2s+2`,
+  which is exactly the validity window in §4 — now derived rather than asserted.
+* **`frame_start` as a separate one-cycle pulse** coincident with `p = 0`, rather
+  than my `sof` on `uio_in[0]` doing double duty. Same pin, clearer contract.
+
+**Open to objection.** If the compiler seat can show the parallel-activity design
+costs fewer *gates* than two header cycles cost *time* — or that it simplifies
+the sequential `Circ` semantics they have to write — I will switch, because the
+element is cheap to change and the proof is not. Two header cycles on a 14-cycle
+frame is a 14 % throughput cost and I am not pretending it is free.
+
 ## 1. THE PROBLEM THE RULING LEAVES OPEN
 
 The ruling says the frame leads with an activity bit. That is right, and it is
