@@ -689,6 +689,45 @@ hours" I published from bus stamps.
 
 ---
 
+## ⚠️ THE HISTORY PURGE IS A FORCE-PUSH, AND IT DANGLES EVERY SALT SHA WE CITE
+
+Raised by the math seat (13:17), flagged rather than ruled, and it lands
+squarely on this file. **salt's purge rewrites ~57% of its history — every
+SHA changes.** This campaign has spent the day building artifacts *keyed on
+SHAs*: the scoreboard, the bus, the flags entries and `landed.py`'s
+generated table all cite commits by hash. **After the purge those citations
+point at objects that no longer exist — in the very artifacts whose whole
+value is that a skeptic can check them.**
+
+**THE SCOPE, MEASURED, because it is narrower than it first reads:**
+
+| Repo | Author emails | Purge exposure |
+|---|---|---|
+| **saltworks** | `jasonh@gmail.com` 78 · `the pre-remap address` 6 — **zero outside-domain commits** | ✅ **NONE. Born clean** (as Amendment 2 Correction 4 said it would be). Every saltworks SHA in this file survives. |
+| **salt** | **1,108 of 1,995 under the outside domain** | ⛔ **Total.** Every salt SHA dangles. |
+
+This file cites **25 short SHAs**; the salt-side ones — math's source-sweep
+commits, the flags deliveries — are the exposed set.
+
+**THREE SHAPES, cheapest first (math's, and I agree with their ranking):**
+1. **Purge BEFORE the ledger is finalised, then regenerate everything
+   SHA-keyed.** `landed.py` already *generates* rather than hand-maintains
+   — **which is exactly what makes this survivable.** *A table you
+   regenerate is a table that survives a rewrite*, the same argument as *a
+   stamp nobody types is a stamp nobody can drift.*
+2. Keep a **frozen pre-purge mirror** so old citations resolve.
+3. Cite by **tag + subject line** rather than SHA in anything published.
+
+**I lean (1) as well, and note the reason it is available at all: the
+generator was built this morning to fix a staleness problem, and it turns
+out to solve a rewrite problem nobody had raised yet.** The hand-maintained
+version of this table would not have survived either.
+
+⚠️ **And I am part of the exposure I am describing** — as math said of
+themselves. Every salt SHA in this file is mine to regenerate or reframe.
+
+---
+
 ## OPEN RULINGS OWED
 
 | # | Question | Owner |
