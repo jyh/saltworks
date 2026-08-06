@@ -253,6 +253,26 @@ from different directions:
 | `#audit_axioms` | do these **proofs** rest on only three axioms? | is this **chain** correct? *(wrong file imported, port mis-parsed, cell mis-modelled — all still print three axioms)* |
 | an unbreached memory cap | did **this run** exceed the cap? | does the cap **bind**? *(three controls were adopted today that looked like protection: `ulimit` — measured no-op; `-M` — deployed, unverified; the lock — real, but bounds the **queue**, not the **process**)* |
 | a per-instance certificate | is **this artifact** correct? | is the **tool** correct? *(this one is the seam doctrine itself, and it is the only one of the three we designed on purpose)* |
+| **`banyan_selfrouting`** | are the **active** destinations conflict-free? *(`no_conflict` is `Set.InjOn` over `Set.Iio n` — it constrains active lines only)* | **does the circuit behave correctly at every port?** ⛔ **It does not, and this gap produced a real bug — see below.** |
+
+---
+
+## DEFECTS FOUND BY THE DISCIPLINE — the running list
+
+A campaign that claims a method should publish what the method caught. Day 1:
+
+| Found | What | By whom, how |
+|---|---|---|
+| **A live routing bug in committed RTL** | `SaltWorks/Silicon/RTL/bitserial_switch.v:25-26`. Both-active cases route correctly — but at an **idle port**, `sel0 = 0` makes `out0` take `in0` unconditionally, so **an active packet on `in1` bound for `out0` is silently DROPPED**. One-sided (out0 prefers in0, out1 prefers in1). | compiler seat, 10:52, **by enumerating the element rather than reading it** |
+| — why the proof did not catch it | **`banyan_selfrouting`'s `no_conflict` hypothesis constrains only the ACTIVE lines.** Idle ports are outside what the theorem says anything about — and "sources concentrated" is exactly what *makes* idle ports possible at interior stages. The theorem is true; the artifact is wrong; nothing was violated. | the day-1 principle, in its sharpest form |
+| — the fix is a **frame-format decision, not a logic patch** | The element cannot distinguish "idle" from "destination bit 0" because **nothing in the frame says so**. The classical answer, implied by the 1988 framing, is a **leading activity bit** with routing gated on it. It must be decided **before D3.5's refinement statement is written.** | Silicon's ruling to make |
+| — and the proof consequence either way | **The no-conflict hypothesis must be visible in the refinement statement even though the conflict *logic* is unnecessary.** An FSM certificate that never exercises the conflict path while claiming to refine `line` **is the `sp1-lean` failure mode precisely.** | compiler seat |
+| A statement-level vacuity in a landed exit | W1's gcd exit is vacuous on the entire top gcd class; N7 sums over exactly those `s` | math seat's statement audit (`c4303b8`) |
+| Two O(g²) evaluators published as linear | `runP`/`runS` extend the environment with `env ++ [..]`; measured curve is g², not g. At D4's scale the linear law predicts ~6.6 s against a real ~40 s | compiler seat, **refuting its own earlier 100× claim as a probe artifact** |
+
+**Every one of these was found by a seat attacking work — its own or a
+peer's — under a discipline that requires the attack before the build.
+None was found by a kernel, and none would have changed an axiom count.**
 
 **An instrument that cannot distinguish UNTESTED from WORKING would have
 rated all three green.** That is why every tool in `docs/ledger-tools/`
