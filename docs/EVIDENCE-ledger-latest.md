@@ -10,7 +10,7 @@ touch is disclosed inside each section, per
 
 # SILENCE-WINDOW LEDGER — `saltworks`
 
-Generated 2026-08-06 08:48 America/Los_Angeles by `docs/ledger-tools/silence_windows.py` (saltworks, EVIDENCE seat).
+Generated 2026-08-06 09:34 America/Los_Angeles by `docs/ledger-tools/silence_windows.py` (saltworks, EVIDENCE seat).
 Window: `2026-08-05 22:00` → `now` · repo `/Users/jyh/projects/claude/saltworks` · tracked extension `.lean`.
 
 > **What a silence window is.** The stretch between the last moment a human touched any personal-lane seat and the next such moment. A commit landing inside a stretch of length ≥ T is counted at threshold T. **This is not a claim about sleep** — see §5.
@@ -19,19 +19,19 @@ Window: `2026-08-05 22:00` → `now` · repo `/Users/jyh/projects/claude/saltwor
 
 | Quantity | Value |
 |---|---:|
-| Commits | **5** |
+| Commits | **13** |
 | `.lean` lines inserted | **263** |
-| All lines inserted | 566 |
+| All lines inserted | 6,481 |
 | First commit | 2026-08-05 22:05 `4fa92be` |
-| Last commit | 2026-08-06 07:58 `cb5ccb3` |
-| Human touches read, personal-lane fleet (whole transcript record) | **1,933** |
-| — of which into this seat (`-Users-jyh-projects-claude-saltworks`) | 12 |
+| Last commit | 2026-08-06 09:33 `62b1b25` |
+| Human touches read, personal-lane fleet (whole transcript record) | **1,962** |
+| — of which into this seat (`-Users-jyh-projects-claude-saltworks`) | 27 |
 | Seats read for presence | 6 |
 | Transcripts observe from | 2026-07-07 07:18 |
 
 Seats contributing presence: this repo's own seat (`-Users-jyh-projects-claude-saltworks`) and 5 other personal-lane seats (names withheld — pass `--name-seats` to list them).
 
-Inside the commit window itself, the fleet received **25** human touches: **0** into this seat and **25** into every other personal-lane seat combined.
+Inside the commit window itself, the fleet received **74** human touches: **26** into this seat and **48** into every other personal-lane seat combined.
 
 ## 2. Landings inside a silence window — THE MEASURE THAT CARRIES THE CLAIM
 
@@ -42,7 +42,18 @@ Inside the commit window itself, the fleet received **25** human touches: **0** 
 | ≥ 4 h | 0 | 0.0% | 0 | 0 |
 | ≥ 8 h | 0 | 0.0% | 0 | 0 |
 | ≥ 12 h | 0 | 0.0% | 0 | 0 |
-| (all observed commits) | 5 | 100% | 263 | 566 |
+| (all observed commits) | 13 | 100% | 263 | 6,481 |
+
+The same table against **this seat's transcript alone** — the leg-1 harvest's unit, kept for comparison. It is the larger number and the weaker claim, because the human may have been directing another seat at the time:
+
+| Silence containing the landing | Commits | Share | `.lean` lines |
+|---|---:|---:|---:|
+| ≥ 1 h | 0 | 0.0% | 0 |
+| ≥ 2 h | 0 | 0.0% | 0 |
+| ≥ 4 h | 0 | 0.0% | 0 |
+| ≥ 8 h | 0 | 0.0% | 0 |
+| ≥ 12 h | 0 | 0.0% | 0 |
+| (observed by this seat) | 8 | 100% | 0 |
 
 ## 3. Per-commit gap since the last human word
 
@@ -50,7 +61,7 @@ _This view understates: a commit landing at hour 19 of a silence sits in the sam
 
 | Gap since last human touch | Commits | Share |
 |---|---:|---:|
-| < 30 min | 5 | 100.0% |
+| < 30 min | 13 | 100.0% |
 | 30–60 min | 0 | 0.0% |
 | 1–2 h | 0 | 0.0% |
 | 2–4 h | 0 | 0.0% |
@@ -61,9 +72,15 @@ _This view understates: a commit landing at hour 19 of a silence sits in the sam
 
 | Silence | From (last human touch) | To (next human touch) | Commits | `.lean` lines |
 |---:|---|---|---:|---:|
+| **0.3 h** | 2026-08-06 08:36 | 2026-08-06 08:54 | 1 | 0 |
 | **0.2 h** | 2026-08-06 07:57 | 2026-08-06 08:09 | 1 | 0 |
 | **0.2 h** | 2026-08-05 22:01 | 2026-08-05 22:11 | 1 | 262 |
+| **0.1 h** | 2026-08-06 09:04 | 2026-08-06 09:12 | 1 | 0 |
+| **0.1 h** | 2026-08-06 09:12 | 2026-08-06 09:17 | 1 | 0 |
+| **0.1 h** | 2026-08-06 08:55 | 2026-08-06 09:00 | 1 | 0 |
 | **0.1 h** | 2026-08-06 06:31 | 2026-08-06 06:35 | 2 | 1 |
+| **0.0 h** | 2026-08-06 09:30 | 2026-08-06 09:33 | 1 | 0 |
+| **0.0 h** | 2026-08-06 09:28 | 2026-08-06 09:30 | 1 | 0 |
 | **0.0 h** | 2026-08-06 07:07 | 2026-08-06 07:09 | 1 | 0 |
 
 **Best exhibit by commits landed:** 0h 03m of silence (2026-08-06 06:31 → 2026-08-06 06:35) carrying **2 commits** and **1 `.lean` lines**.
@@ -82,11 +99,11 @@ _This view understates: a commit landing at hour 19 of a silence sits in the sam
 | Date | Dow | Commits | `.lean` lines | In ≥1h silence | Human touches (fleet) | First | Last |
 |---|---|---:|---:|---:|---:|---|---|
 | 2026-08-05 | Wed | 1 | 262 | 0 | 45 | 07:06 | 22:19 |
-| 2026-08-06 | Thu | 4 | 1 | 0 | 43 | 00:55 | 08:36 |
+| 2026-08-06 | Thu | 12 | 1 | 0 | 72 | 00:55 | 09:33 |
 
 ## 7. The night column — reported so it is never quoted
 
-Commits in 21:00–04:59 local: **1 of 5 (20.0%)**.
+Commits in 21:00–04:59 local: **1 of 13 (7.7%)**.
 
 > **SPEAK SILENCE WINDOWS, NEVER NIGHT HOURS** (salt triple-campaign Amendment 2, Correction 1). The night share is thin and a skeptic running `git log` will find it in thirty seconds. The claim that is true, larger, and checkable is §2.
 
@@ -98,12 +115,12 @@ This tool classifies by the record's own provenance fields — `origin.kind`, `p
 
 | Record class | Verdict | Count |
 |---|---|---:|
-| `typed` | **counted as human** | 1,753 |
+| `typed` | **counted as human** | 1,773 |
 | `slash-command` | **counted as human** | 130 |
-| `legacy-fallback` | **counted as human** | 35 |
-| `interrupt` | **counted as human** | 15 |
-| `tool-result` | rejected | 9,886 |
-| `task-notification` | rejected | 1,466 |
+| `legacy-fallback` | **counted as human** | 41 |
+| `interrupt` | **counted as human** | 18 |
+| `tool-result` | rejected | 10,102 |
+| `task-notification` | rejected | 1,470 |
 | `slash-command-echo` | rejected | 260 |
 | `harness-injection` | rejected | 140 |
 | `compaction-summary` | rejected | 27 |
@@ -120,9 +137,9 @@ Notes on specific classes:
 - `interrupt` — `[Request interrupted by user]`, an ESC press. Also counted as human, for the same reason.
 - `legacy-fallback` — a record with no provenance fields that matched no injection pattern. Counted as human. If this number is large relative to `typed`, the fallback is doing real work and the figure deserves a manual sample.
 
-**Queue correction.** 812 messages were typed while the model was busy; the transcript writes them at dequeue time. Their `queue-operation: enqueue` timestamps were used instead. Largest correction applied: 464 s.
+**Queue correction.** 814 messages were typed while the model was busy; the transcript writes them at dequeue time. Their `queue-operation: enqueue` timestamps were used instead. Largest correction applied: 464 s.
 
-**Parse totals.** 81,779 records over 12 session files; 13,715 carried `type: user`; 0 lines failed to parse.
+**Parse totals.** 83,138 records over 12 session files; 13,964 carried `type: user`; 0 lines failed to parse.
 
 **Git.** `--since`/`--until` always carry an explicit time under `TZ=America/Los_Angeles` with `--date=format-local`. A bare date is parsed as UTC and silently drops commits — measured in the leg-1 harvest at 654 vs 712 over the same nominal window. Merges are excluded. Insertion counts come from `--numstat`.
 
@@ -138,7 +155,7 @@ Notes on specific classes:
 
 # SILENCE-WINDOW LEDGER — `salt`
 
-Generated 2026-08-06 08:48 America/Los_Angeles by `docs/ledger-tools/silence_windows.py` (saltworks, EVIDENCE seat).
+Generated 2026-08-06 09:34 America/Los_Angeles by `docs/ledger-tools/silence_windows.py` (saltworks, EVIDENCE seat).
 Window: `2026-08-05 22:00` → `now` · repo `/Users/jyh/projects/claude/salt` · tracked extension `.lean`.
 
 > **What a silence window is.** The stretch between the last moment a human touched any personal-lane seat and the next such moment. A commit landing inside a stretch of length ≥ T is counted at threshold T. **This is not a claim about sleep** — see §5.
@@ -147,19 +164,19 @@ Window: `2026-08-05 22:00` → `now` · repo `/Users/jyh/projects/claude/salt` �
 
 | Quantity | Value |
 |---|---:|
-| Commits | **6** |
-| `.lean` lines inserted | **4** |
-| All lines inserted | 996 |
+| Commits | **13** |
+| `.lean` lines inserted | **286** |
+| All lines inserted | 2,251 |
 | First commit | 2026-08-05 22:06 `db277c4` |
-| Last commit | 2026-08-06 08:21 `ce1187d` |
-| Human touches read, personal-lane fleet (whole transcript record) | **1,933** |
-| — of which into this seat (`-Users-jyh-projects-claude-salt`) | 1,878 |
+| Last commit | 2026-08-06 09:31 `cdc960b` |
+| Human touches read, personal-lane fleet (whole transcript record) | **1,962** |
+| — of which into this seat (`-Users-jyh-projects-claude-salt`) | 1,892 |
 | Seats read for presence | 6 |
 | Transcripts observe from | 2026-07-07 07:18 |
 
 Seats contributing presence: this repo's own seat (`-Users-jyh-projects-claude-salt`) and 5 other personal-lane seats (names withheld — pass `--name-seats` to list them).
 
-Inside the commit window itself, the fleet received **45** human touches: **33** into this seat and **12** into every other personal-lane seat combined.
+Inside the commit window itself, the fleet received **74** human touches: **48** into this seat and **26** into every other personal-lane seat combined.
 
 ## 2. Landings inside a silence window — THE MEASURE THAT CARRIES THE CLAIM
 
@@ -170,7 +187,7 @@ Inside the commit window itself, the fleet received **45** human touches: **33**
 | ≥ 4 h | 0 | 0.0% | 0 | 0 |
 | ≥ 8 h | 0 | 0.0% | 0 | 0 |
 | ≥ 12 h | 0 | 0.0% | 0 | 0 |
-| (all observed commits) | 6 | 100% | 4 | 996 |
+| (all observed commits) | 13 | 100% | 286 | 2,251 |
 
 The same table against **this seat's transcript alone** — the leg-1 harvest's unit, kept for comparison. It is the larger number and the weaker claim, because the human may have been directing another seat at the time:
 
@@ -181,7 +198,7 @@ The same table against **this seat's transcript alone** — the leg-1 harvest's 
 | ≥ 4 h | 0 | 0.0% | 0 |
 | ≥ 8 h | 0 | 0.0% | 0 |
 | ≥ 12 h | 0 | 0.0% | 0 |
-| (observed by this seat) | 6 | 100% | 4 |
+| (observed by this seat) | 13 | 100% | 286 |
 
 ## 3. Per-commit gap since the last human word
 
@@ -189,7 +206,7 @@ _This view understates: a commit landing at hour 19 of a silence sits in the sam
 
 | Gap since last human touch | Commits | Share |
 |---|---:|---:|
-| < 30 min | 6 | 100.0% |
+| < 30 min | 13 | 100.0% |
 | 30–60 min | 0 | 0.0% |
 | 1–2 h | 0 | 0.0% |
 | 2–4 h | 0 | 0.0% |
@@ -202,31 +219,37 @@ _This view understates: a commit landing at hour 19 of a silence sits in the sam
 |---:|---|---|---:|---:|
 | **0.3 h** | 2026-08-06 08:21 | 2026-08-06 08:36 | 2 | 4 |
 | **0.2 h** | 2026-08-05 22:01 | 2026-08-05 22:11 | 1 | 0 |
+| **0.1 h** | 2026-08-06 09:04 | 2026-08-06 09:12 | 1 | 0 |
+| **0.1 h** | 2026-08-06 08:55 | 2026-08-06 09:00 | 3 | 282 |
 | **0.1 h** | 2026-08-06 08:17 | 2026-08-06 08:21 | 1 | 0 |
+| **0.0 h** | 2026-08-06 09:30 | 2026-08-06 09:33 | 1 | 0 |
+| **0.0 h** | 2026-08-06 09:28 | 2026-08-06 09:30 | 1 | 0 |
 | **0.0 h** | 2026-08-06 07:07 | 2026-08-06 07:09 | 1 | 0 |
+| **0.0 h** | 2026-08-06 08:54 | 2026-08-06 08:55 | 1 | 0 |
 | **0.0 h** | 2026-08-05 22:18 | 2026-08-05 22:19 | 1 | 0 |
 
-**Best exhibit by commits landed:** 0h 15m of silence (2026-08-06 08:21 → 2026-08-06 08:36) carrying **2 commits** and **4 `.lean` lines**.
+**Best exhibit by commits landed:** 0h 04m of silence (2026-08-06 08:55 → 2026-08-06 09:00) carrying **3 commits** and **282 `.lean` lines**.
 
 ## 5. The longest unbroken run
 
-**2 consecutive commits**, 2026-08-06 08:21 → 2026-08-06 08:21, span **0h 00m**, with zero human touches to any personal-lane seat between the first and the last.
+**3 consecutive commits**, 2026-08-06 08:56 → 2026-08-06 08:57, span **0h 00m**, with zero human touches to any personal-lane seat between the first and the last.
 
 | Time | Commit | Subject |
 |---|---|---|
-| 08-06 08:21 | `7a1a6a1` | play M: WEIL-TRIO W4-e — the QuadCharSum citation corrected (HB 1983 p.217, not the fou… |
-| 08-06 08:21 | `ce1187d` | play M: WEIL-TRIO W4-e closed in the dossier (both doc defects fixed at 7a1a6a1) [skip ci] |
+| 08-06 08:56 | `8779d40` | play M: CHAR-TRIO — hchi01 + hchi0 DISCHARGED and hL1's product half landed (Salt/HB/Ch… |
+| 08-06 08:56 | `743cab5` | play M: CHAR-TRIO — the flags entry: hL1's residue PRICED at the s=1 boundary (mathlib'… |
+| 08-06 08:57 | `c9c2dc4` | play M: WEIL-TRIO v2 post-refutation (theta<=1/50 — my 1/6 was 8x over, Salie stays cla… |
 
 ## 6. Per day
 
 | Date | Dow | Commits | `.lean` lines | In ≥1h silence | Human touches (fleet) | First | Last |
 |---|---|---:|---:|---:|---:|---|---|
 | 2026-08-05 | Wed | 2 | 0 | 0 | 45 | 07:06 | 22:19 |
-| 2026-08-06 | Thu | 4 | 4 | 0 | 43 | 00:55 | 08:36 |
+| 2026-08-06 | Thu | 11 | 286 | 0 | 72 | 00:55 | 09:33 |
 
 ## 7. The night column — reported so it is never quoted
 
-Commits in 21:00–04:59 local: **2 of 6 (33.3%)**.
+Commits in 21:00–04:59 local: **2 of 13 (15.4%)**.
 
 > **SPEAK SILENCE WINDOWS, NEVER NIGHT HOURS** (salt triple-campaign Amendment 2, Correction 1). The night share is thin and a skeptic running `git log` will find it in thirty seconds. The claim that is true, larger, and checkable is §2.
 
@@ -238,12 +261,12 @@ This tool classifies by the record's own provenance fields — `origin.kind`, `p
 
 | Record class | Verdict | Count |
 |---|---|---:|
-| `typed` | **counted as human** | 1,753 |
+| `typed` | **counted as human** | 1,773 |
 | `slash-command` | **counted as human** | 130 |
-| `legacy-fallback` | **counted as human** | 35 |
-| `interrupt` | **counted as human** | 15 |
-| `tool-result` | rejected | 9,886 |
-| `task-notification` | rejected | 1,466 |
+| `legacy-fallback` | **counted as human** | 41 |
+| `interrupt` | **counted as human** | 18 |
+| `tool-result` | rejected | 10,102 |
+| `task-notification` | rejected | 1,470 |
 | `slash-command-echo` | rejected | 260 |
 | `harness-injection` | rejected | 140 |
 | `compaction-summary` | rejected | 27 |
@@ -260,9 +283,9 @@ Notes on specific classes:
 - `interrupt` — `[Request interrupted by user]`, an ESC press. Also counted as human, for the same reason.
 - `legacy-fallback` — a record with no provenance fields that matched no injection pattern. Counted as human. If this number is large relative to `typed`, the fallback is doing real work and the figure deserves a manual sample.
 
-**Queue correction.** 812 messages were typed while the model was busy; the transcript writes them at dequeue time. Their `queue-operation: enqueue` timestamps were used instead. Largest correction applied: 464 s.
+**Queue correction.** 814 messages were typed while the model was busy; the transcript writes them at dequeue time. Their `queue-operation: enqueue` timestamps were used instead. Largest correction applied: 464 s.
 
-**Parse totals.** 81,780 records over 12 session files; 13,715 carried `type: user`; 0 lines failed to parse.
+**Parse totals.** 83,138 records over 12 session files; 13,964 carried `type: user`; 0 lines failed to parse.
 
 **Git.** `--since`/`--until` always carry an explicit time under `TZ=America/Los_Angeles` with `--date=format-local`. A bare date is parsed as UTC and silently drops commits — measured in the leg-1 harvest at 654 vs 712 over the same nominal window. Merges are excluded. Insertion counts come from `--numstat`.
 
@@ -278,7 +301,7 @@ Notes on specific classes:
 
 # SILENCE-WINDOW LEDGER — `salt`
 
-Generated 2026-08-06 08:49 America/Los_Angeles by `docs/ledger-tools/silence_windows.py` (saltworks, EVIDENCE seat).
+Generated 2026-08-06 09:34 America/Los_Angeles by `docs/ledger-tools/silence_windows.py` (saltworks, EVIDENCE seat).
 Window: `2026-07-23 00:00` → `2026-08-06 00:00` · repo `/Users/jyh/projects/claude/salt` · tracked extension `.lean`.
 
 > **What a silence window is.** The stretch between the last moment a human touched any personal-lane seat and the next such moment. A commit landing inside a stretch of length ≥ T is counted at threshold T. **This is not a claim about sleep** — see §5.
@@ -292,8 +315,8 @@ Window: `2026-07-23 00:00` → `2026-08-06 00:00` · repo `/Users/jyh/projects/c
 | All lines inserted | 379,060 |
 | First commit | 2026-07-23 00:14 `3592f5c` |
 | Last commit | 2026-08-05 22:19 `df72d8a` |
-| Human touches read, personal-lane fleet (whole transcript record) | **1,933** |
-| — of which into this seat (`-Users-jyh-projects-claude-salt`) | 1,878 |
+| Human touches read, personal-lane fleet (whole transcript record) | **1,962** |
+| — of which into this seat (`-Users-jyh-projects-claude-salt`) | 1,892 |
 | Seats read for presence | 6 |
 | Transcripts observe from | 2026-07-07 07:18 |
 
@@ -390,12 +413,12 @@ This tool classifies by the record's own provenance fields — `origin.kind`, `p
 
 | Record class | Verdict | Count |
 |---|---|---:|
-| `typed` | **counted as human** | 1,753 |
+| `typed` | **counted as human** | 1,773 |
 | `slash-command` | **counted as human** | 130 |
-| `legacy-fallback` | **counted as human** | 35 |
-| `interrupt` | **counted as human** | 15 |
-| `tool-result` | rejected | 9,886 |
-| `task-notification` | rejected | 1,466 |
+| `legacy-fallback` | **counted as human** | 41 |
+| `interrupt` | **counted as human** | 18 |
+| `tool-result` | rejected | 10,104 |
+| `task-notification` | rejected | 1,470 |
 | `slash-command-echo` | rejected | 260 |
 | `harness-injection` | rejected | 140 |
 | `compaction-summary` | rejected | 27 |
@@ -412,9 +435,9 @@ Notes on specific classes:
 - `interrupt` — `[Request interrupted by user]`, an ESC press. Also counted as human, for the same reason.
 - `legacy-fallback` — a record with no provenance fields that matched no injection pattern. Counted as human. If this number is large relative to `typed`, the fallback is doing real work and the figure deserves a manual sample.
 
-**Queue correction.** 812 messages were typed while the model was busy; the transcript writes them at dequeue time. Their `queue-operation: enqueue` timestamps were used instead. Largest correction applied: 464 s.
+**Queue correction.** 814 messages were typed while the model was busy; the transcript writes them at dequeue time. Their `queue-operation: enqueue` timestamps were used instead. Largest correction applied: 464 s.
 
-**Parse totals.** 81,780 records over 12 session files; 13,715 carried `type: user`; 0 lines failed to parse.
+**Parse totals.** 83,153 records over 12 session files; 13,966 carried `type: user`; 0 lines failed to parse.
 
 **Git.** `--since`/`--until` always carry an explicit time under `TZ=America/Los_Angeles` with `--date=format-local`. A bare date is parsed as UTC and silently drops commits — measured in the leg-1 harvest at 654 vs 712 over the same nominal window. Merges are excluded. Insertion counts come from `--numstat`.
 
@@ -430,7 +453,7 @@ Notes on specific classes:
 
 # TOKEN METER — the campaign ledger
 
-Generated 2026-08-06 08:49 America/Los_Angeles by `docs/ledger-tools/token_meter.py` (saltworks, EVIDENCE seat), per `docs/measurement-preregistration.md` §1.
+Generated 2026-08-06 09:34 America/Los_Angeles by `docs/ledger-tools/token_meter.py` (saltworks, EVIDENCE seat), per `docs/measurement-preregistration.md` §1.
 Window: `2026-08-05 22:00` → `now` · 6 personal-lane projects · subagent transcripts INCLUDED.
 
 > **Unit is TOKENS.** These records carry no prices and no account identifier, so no dollar figure and no per-account split is derivable from them. On a subscription, dollars are a flat envelope; the two framings are reported separately or not at all, never blended.
@@ -440,47 +463,47 @@ Window: `2026-08-05 22:00` → `now` · 6 personal-lane projects · subagent tra
 
 | Quantity | Tokens |
 |---|---:|
-| API requests (deduplicated) | 1,223 |
-| Input | 38,385 |
-| **Output** | **410,959** |
-| Cache created | 11,107,868 |
-| Cache read | 125,515,884 |
+| API requests (deduplicated) | 2,278 |
+| Input | 50,498 |
+| **Output** | **777,903** |
+| Cache created | 16,699,176 |
+| Cache read | 265,471,841 |
 | First request | 2026-08-05 22:02 |
-| Last request | 2026-08-06 08:49 |
+| Last request | 2026-08-06 09:34 |
 
 ## 2. By project
 
 | Project | Requests | Input | Output | Cache created | Cache read |
 |---|---:|---:|---:|---:|---:|
-| `-Users-jyh-projects-claude-saltworks` | 914 | 20,533 | **278,562** | 3,884,113 | 62,774,826 |
-| `-Users-jyh-projects-claude-salt` | 309 | 17,852 | **132,397** | 7,223,755 | 62,741,058 |
-| **TOTAL** | **1,223** | **38,385** | **410,959** | **11,107,868** | **125,515,884** |
+| `-Users-jyh-projects-claude-saltworks` | 1,788 | 32,292 | **528,519** | 8,054,502 | 163,570,474 |
+| `-Users-jyh-projects-claude-salt` | 490 | 18,206 | **249,384** | 8,644,674 | 101,901,367 |
+| **TOTAL** | **2,278** | **50,498** | **777,903** | **16,699,176** | **265,471,841** |
 
 ## 3. By model tier
 
 | Tier | Requests | Input | Output | Cache created | Cache read |
 |---|---:|---:|---:|---:|---:|
-| Opus 5 | 1,169 | 26,967 | **351,090** | 8,297,821 | 93,210,438 |
-| Fable 5 | 46 | 87 | **58,227** | 1,494,821 | 32,100,115 |
+| Opus 5 | 2,198 | 39,031 | **678,801** | 13,819,556 | 214,208,256 |
+| Fable 5 | 72 | 136 | **97,460** | 1,564,394 | 51,058,254 |
 | Opus 4.8 | 2 | 4 | **1,632** | 1,248,389 | 26,022 |
 | Haiku 4.5 | 6 | 11,327 | **10** | 66,837 | 179,309 |
-| **TOTAL** | **1,223** | **38,385** | **410,959** | **11,107,868** | **125,515,884** |
+| **TOTAL** | **2,278** | **50,498** | **777,903** | **16,699,176** | **265,471,841** |
 
 ## 4. By day
 
 | Date | Requests | Input | Output | Cache created | Cache read |
 |---|---:|---:|---:|---:|---:|
 | 2026-08-05 | 24 | 11,361 | **22,571** | 228,132 | 10,006,395 |
-| 2026-08-06 | 1,199 | 27,024 | **388,388** | 10,879,736 | 115,509,489 |
-| **TOTAL** | **1,223** | **38,385** | **410,959** | **11,107,868** | **125,515,884** |
+| 2026-08-06 | 2,254 | 39,137 | **755,332** | 16,471,044 | 255,465,446 |
+| **TOTAL** | **2,278** | **50,498** | **777,903** | **16,699,176** | **265,471,841** |
 
 ## 5. Main loop vs subagents
 
 | Where | Requests | Input | Output | Cache created | Cache read |
 |---|---:|---:|---:|---:|---:|
-| main loop | 245 | 1,399 | **312,792** | 5,389,582 | 64,258,416 |
-| subagents / workflow agents | 978 | 36,986 | **98,167** | 5,718,286 | 61,257,468 |
-| **TOTAL** | **1,223** | **38,385** | **410,959** | **11,107,868** | **125,515,884** |
+| main loop | 458 | 1,809 | **603,055** | 5,944,315 | 128,736,627 |
+| subagents / workflow agents | 1,820 | 48,689 | **174,848** | 10,754,861 | 136,735,214 |
+| **TOTAL** | **2,278** | **50,498** | **777,903** | **16,699,176** | **265,471,841** |
 
 _The fleet's work is done by the agents, and the table shows it. A meter that reads only the session file misses most of the spend._
 
@@ -488,12 +511,16 @@ _The fleet's work is done by the agents, and the table shows it. A meter that re
 
 | Wave (leading tag of the landing commit's subject) | Requests | Input | Output | Cache created | Cache read |
 |---|---:|---:|---:|---:|---:|
-| `WEIL-TRIO` | 86 | 167 | **48,538** | 2,505,618 | 19,600,412 |
+| `TAU-SHARP` | 225 | 6,376 | **70,494** | 2,642,683 | 32,017,227 |
+| `WEIL-TRIO` | 87 | 169 | **48,543** | 2,506,578 | 19,725,123 |
+| `SILICON` | 78 | 152 | **34,430** | 783,630 | 18,722,293 |
 | `COUNCIL` | 12 | 23 | **29,343** | 811,092 | 8,739,995 |
+| `campaign` | 48 | 95 | **22,504** | 313,792 | 8,369,363 |
 | `THE TRIPLE` | 22 | 11,357 | **22,407** | 226,318 | 8,703,407 |
-| **TOTAL** | **120** | **11,547** | **100,288** | **3,543,028** | **37,043,814** |
+| `CHAR-TRIO` | 5 | 9 | **16,632** | 23,559 | 1,257,668 |
+| **TOTAL** | **477** | **18,181** | **244,353** | **7,307,652** | **97,535,076** |
 
-Attribution rule: each request is charged to the **next commit in `salt` at or after its timestamp**, if that commit lands within 4.0 h; otherwise it is unattributed. Unattributed in this window: 189 requests / 32,109 output tokens. Only requests from this repo's own seat (`-Users-jyh-projects-claude-salt`) are joined.
+Attribution rule: each request is charged to the **next commit in `salt` at or after its timestamp**, if that commit lands within 4.0 h; otherwise it is unattributed. Unattributed in this window: 13 requests / 5,031 output tokens. Only requests from this repo's own seat (`-Users-jyh-projects-claude-salt`) are joined.
 
 > **This join is a heuristic, and the table is labelled as one.** A request that produced no commit (a scout, a refuter, a council) is charged to whatever landed next. Read it as *tokens spent in the run-up to a landing*, never as *tokens the landing cost*.
 
@@ -501,13 +528,13 @@ Attribution rule: each request is charged to the **next commit in `salt` at or a
 
 | Fact | Value |
 |---|---:|
-| Transcript files read | 2,208 |
-| JSONL records scanned | 352,202 |
-| Duplicate assistant records dropped (same `requestId`) | 112,584 |
-| `<synthetic>` records dropped (API errors, zero usage) | 106 |
+| Transcript files read | 2,229 |
+| JSONL records scanned | 356,575 |
+| Duplicate assistant records dropped (same `requestId`) | 113,829 |
+| `<synthetic>` records dropped (API errors, zero usage) | 107 |
 | Unparseable lines | 0 |
 
-**The dedup rule.** Claude Code writes one assistant record per content block of a response, and **every one of those records repeats the whole `usage` block of the single API call**. Measured here: 112,584 records were duplicates of a request already counted. Summing records instead of requests would inflate every number in this file by roughly a factor of three. Usage was verified byte-identical within each `requestId` group before the rule was adopted.
+**The dedup rule.** Claude Code writes one assistant record per content block of a response, and **every one of those records repeats the whole `usage` block of the single API call**. Measured here: 113,829 records were duplicates of a request already counted. Summing records instead of requests would inflate every number in this file by roughly a factor of three. Usage was verified byte-identical within each `requestId` group before the rule was adopted.
 
 **Subagents.** Workflow and Task agents write their own transcripts under `<session>/subagents/**/agent-*.jsonl`. They are included by default (`--no-subagents` to exclude). They are the majority of the spend, and a meter that reads only the session file is wrong by an order of magnitude.
 
@@ -520,7 +547,7 @@ Attribution rule: each request is charged to the **next commit in `salt` at or a
 
 # HUMAN-TIME LEDGER — the four categories
 
-Generated 2026-08-06 08:49 America/Los_Angeles by `docs/ledger-tools/human_time.py`, per `docs/measurement-preregistration.md` §2.
+Generated 2026-08-06 09:34 America/Los_Angeles by `docs/ledger-tools/human_time.py`, per `docs/measurement-preregistration.md` §2.
 Window: `2026-08-05 22:00` → `now` · block gap 20 min · tags from `EVIDENCE-human-time-tags.tsv`.
 
 **The rubric, published beside the number** — DIRECTING: rulings, councils, requirement-setting. REVIEWING: reading that *gates* an artifact. UNBLOCKING: logins, purchases, physical acts. WATCHING: curiosity — reading along, questions that redirect nothing. **The dependency claim = DIRECTING + REVIEWING + UNBLOCKING only**, by the counterfactual test *would the artifact exist without this touch?* WATCHING is reported as its own line, proudly: the joy is evidence, not overhead.
@@ -529,18 +556,17 @@ Window: `2026-08-05 22:00` → `now` · block gap 20 min · tags from `EVIDENCE-
 
 | Category | Blocks | Time | Share |
 |---|---:|---:|---:|
-| UNTAGGED | 4 | 2h 04m | 100.0% |
-| **THE CLAIM** (D+R+U) | 0 | **0h 00m** | 0.0% |
-| (all engaged time) | 4 | 2h 04m | 100% |
-
-> **4 block(s), 2h 04m, are UNTAGGED.** They are counted in neither the claim nor WATCHING. Tag them in `EVIDENCE-human-time-tags.tsv` — one line per block id — and re-run. An untagged block is never silently folded into a category.
+| **DIRECTING** | 3 | 3h 00m | 99.2% |
+| WATCHING | 1 | 0h 01m | 0.8% |
+| **THE CLAIM** (D+R+U) | 3 | **3h 00m** | 99.2% |
+| (all engaged time) | 4 | 3h 01m | 100% |
 
 ## 2. Per day
 
 | Date | Blocks | Engaged time | Claim time (D+R+U) | Messages |
 |---|---:|---:|---:|---:|
-| 2026-08-05 | 1 | 0h 17m | 0h 00m | 4 |
-| 2026-08-06 | 3 | 1h 47m | 0h 00m | 43 |
+| 2026-08-05 | 1 | 0h 17m | 0h 17m | 4 |
+| 2026-08-06 | 3 | 2h 44m | 2h 42m | 72 |
 
 ## 3. The blocks — the tagging worksheet
 
@@ -548,10 +574,10 @@ Copy a block id into the tag file with its category. The opening message is show
 
 | Block id | Seat | Start | End | Duration | Msgs | Category | Opens with |
 |---|---|---|---|---:|---:|---|---|
-| `20260805T2201` | salt | 08-05 22:01 | 22:19 | 0h 17m | 4 | **UNTAGGED** | typed (858 chars) |
-| `20260806T0055` | salt | 08-06 00:55 | 00:56 | 0h 01m | 2 | **UNTAGGED** | typed (10 chars) |
-| `20260806T0629` | salt | 08-06 06:29 | 07:36 | 1h 06m | 19 | **UNTAGGED** | slash-command,typed (162 chars) |
-| `20260806T0757` | salt | 08-06 07:57 | 08:36 | 0h 38m | 22 | **UNTAGGED** | legacy-fallback,slash-command,typed (230 chars) |
+| `20260805T2201` | salt | 08-05 22:01 | 22:19 | 0h 17m | 4 | DIRECTING | typed (858 chars) |
+| `20260806T0055` | salt | 08-06 00:55 | 00:56 | 0h 01m | 2 | WATCHING | typed (10 chars) |
+| `20260806T0629` | salt | 08-06 06:29 | 07:36 | 1h 06m | 19 | DIRECTING | slash-command,typed (162 chars) |
+| `20260806T0757` | salt | 08-06 07:57 | 09:33 | 1h 35m | 51 | DIRECTING | interrupt,legacy-fallback,slash-command,typed (230 chars) |
 
 ## 4. Method notes
 
@@ -559,5 +585,5 @@ Copy a block id into the tag file with its category. The opening message is show
 - **This under-counts, deliberately.** Reading and thinking before the first message of a block leave no trace in the transcript, so the figure is a *floor* on engaged time. It is published as a floor and never adjusted upward by estimate.
 - **No manual time-tracking**, per the frozen design. Every timestamp comes from the transcript; the only human input is the category tag, and the rubric that assigns it is printed above the number.
 - The touch filter is the one in `ledger_common.classify_user_record` — see `README.md`. Injected records (task notifications, loop ticks, cron pings, peer messages) are not human time.
-- Touches read: 47 in window. Rejected as non-human across the whole record: 11,782.
+- Touches read: 76 in window. Rejected as non-human across the whole record: 12,004.
 
