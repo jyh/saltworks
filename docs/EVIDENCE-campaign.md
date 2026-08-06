@@ -333,11 +333,15 @@ work would be exactly the distortion this file keeps catching elsewhere.
 corrected the paper twice and corrected us once, which is a better argument
 for reading sources than any of the three findings individually."*
 
-**The one that was OURS** (`fab7a8a`, and it was the worst of the three):
+**Running tally, math seat, 11:44: the source has corrected HB TWICE and
+corrected US TWICE.**
 
-| The defect | Why it was the worst |
+**The two that were OURS:**
+
+| The defect | Why it mattered |
 |---|---|
-| Our transcription printed (5.14)'s subscript as a **single** sum over `w₁`. HB prints the `i`-indexed form — a **double** sum over `w₁` *and* `w₂`, which is also what (5.19) sums over. | **The index we dropped is `w₂` — exactly Lemma 10's summation variable** (`n ↦ w₂`, `k = Dδ₁w₁`, `E = S₂`). Our notes hid the one index the entire §7 machine runs on. An N7 executor working from them would have been confused by precisely the thing they most needed. |
+| `fab7a8a` — our transcription printed (5.14)'s subscript as a **single** sum over `w₁`. HB prints the `i`-indexed form: a **double** sum over `w₁` *and* `w₂`, which is also what (5.19) sums over. | **The index we dropped is `w₂` — exactly Lemma 10's summation variable** (`n ↦ w₂`, `k = Dδ₁w₁`, `E = S₂`). Our notes hid the one index the entire §7 machine runs on. An executor working from them would have been confused by precisely the thing they most needed. |
+| `409e227` — our notes had the `C_i` bounded *"≪ 1 uniformly in q, t, σ"*. **HB's p.220 continues: "but not necessarily in `α`."** | ⛔ **A Lean statement asserting uniformity in `α` would be FALSE** — an executor working from the notes alone could spend an entire wave proving something untrue. **Moot for twins** (`α₁ = α₂ = 4` is fixed) but it must be **stated, not silently relied on**: HB separates *"independent of `d`"*, which the argument uses, from *"not uniform in `α`"*, which it survives only because `α` is fixed. **This is the sp1-lean genre at its purest — a wrong specification, faithfully transcribed, that a proof assistant would have rejected only after the work was done.** |
 
 **The two that were the PAPER's** — found *by checking, not by reading*:
 
