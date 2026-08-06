@@ -49,7 +49,26 @@ QUIET_HOURS = 6.0
 BUILD_LOCK = Path("/tmp/salt-fleet-build.lock")
 
 # "[8/6 09:20, evidence] ..."  /  "[8/6 morning, maestro] ..."
-POST_RE = re.compile(r"^\[(\d{1,2})/(\d{1,2})\s+([^,\]]*?),\s*([A-Za-z][\w -]*)\]")
+#
+# ⛔ THE SEAT NAME NO LONGER HAS TO BE FOLLOWED IMMEDIATELY BY `]`, and that
+# one character was a 3.5-hour lie. The original pattern required the closing
+# bracket right after the name, so every post of the form
+#
+#     [8/6 13:58, math — `date`-verified] ...
+#
+# was INVISIBLE to this scanner. That annotation is the fleet's OWN
+# timestamp-hygiene convention, adopted after the clock-drift finding — so
+# **the seat that followed the rule most rigorously is the seat this detector
+# reported as most stale.** Measured on 2026-08-06 by backtesting the day:
+# math's last post read **12:22** when it was really **15:52** (understated by
+# 210 min, 58% of the 6 h threshold); evidence by 79 min; compiler by 56 min.
+# 22 of 144 bracket posts were dropped.
+#
+# DASH_RE is the maestro's separate convention ("- 08-06 13:52 MAESTRO: ..."),
+# which the bracket pattern never matched at all — 22 more posts. Between the
+# two, the scanner was blind to **26% of the bus** and reported a clean day.
+POST_RE = re.compile(r"^\[(\d{1,2})/(\d{1,2})\s+([^,\]]*?),\s*([A-Za-z][\w-]*)")
+DASH_RE = re.compile(r"^- (\d{1,2})-(\d{1,2}) (\d{1,2}):(\d{2}) ([A-Za-z][\w-]*)")
 
 
 @dataclass
@@ -406,32 +425,78 @@ def machine_report(st: dict) -> list[str]:
     return out
 
 
-def scan_fleet_md(path: Path, year: int) -> dict[str, datetime]:
-    """Last FLEET.md post per seat name (lower-cased)."""
-    posts: dict[str, datetime] = {}
+def scan_fleet_md_all(path: Path, year: int) -> dict[str, list[datetime]]:
+    """EVERY FLEET.md post per seat, in time order — both bus conventions.
+
+    The full list rather than only the last one, because the gap DISTRIBUTION
+    is what says whether ``QUIET_HOURS`` sits in a live regime; see
+    :func:`post_gap_calibration`.
+    """
+    posts: dict[str, list[datetime]] = {}
     if not path.is_file():
         return posts
     for line in path.read_text().splitlines():
-        m = POST_RE.match(line.strip())
-        if not m:
-            continue
-        month, day, timestr, seat = m.groups()
-        hh, mm = 12, 0
-        tm = re.match(r"^(\d{1,2}):(\d{2})", timestr.strip())
-        if tm:
-            hh, mm = int(tm.group(1)), int(tm.group(2))
-        elif "morning" in timestr:
-            hh = 8
-        elif "night" in timestr or "evening" in timestr:
-            hh = 21
+        line = line.strip()
+        m = POST_RE.match(line)
+        if m:
+            month, day, timestr, seat = m.groups()
+            hh, mm = 12, 0
+            tm = re.match(r"^(\d{1,2}):(\d{2})", timestr.strip())
+            if tm:
+                hh, mm = int(tm.group(1)), int(tm.group(2))
+            elif "morning" in timestr:
+                hh = 8
+            elif "night" in timestr or "evening" in timestr:
+                hh = 21
+        else:
+            m = DASH_RE.match(line)
+            if not m:
+                continue
+            month, day, hh, mm, seat = m.groups()
+            hh, mm = int(hh), int(mm)
         try:
             when = datetime(year, int(month), int(day), hh, mm, tzinfo=TZ)
         except ValueError:
             continue
-        key = seat.strip().lower()
-        if key not in posts or when > posts[key]:
-            posts[key] = when
+        posts.setdefault(seat.strip().lower(), []).append(when)
+    for k in posts:
+        posts[k].sort()
     return posts
+
+
+def scan_fleet_md(path: Path, year: int) -> dict[str, datetime]:
+    """Last FLEET.md post per seat name (lower-cased)."""
+    return {k: v[-1] for k, v in scan_fleet_md_all(path, year).items() if v}
+
+
+def post_gap_calibration(posts: dict[str, list[datetime]], day: datetime | None = None):
+    """Does ``QUIET_HOURS`` sit anywhere near the behaviour it watches?
+
+    An alarm that has never fired is not an alarm that works — the day-1
+    principle applied to this file. Backtested on 2026-08-06 the threshold was
+    **6 h against a largest-real-gap of 111 min**, i.e. **3.2x** the biggest
+    event that had ever occurred: the detector could not have fired that day
+    whatever happened, so its clean report carried no information. Rather than
+    guess a new number, every run now PRINTS the ratio.
+    """
+    day = day or now_local()
+    gaps: list[float] = []
+    per_seat = {}
+    for seat, ws in posts.items():
+        same = [w for w in ws if w.date() == day.date()]
+        g = [(b - a).total_seconds() / 3600 for a, b in zip(same, same[1:])]
+        if g:
+            per_seat[seat] = (len(same), max(g), sorted(g)[len(g) // 2])
+            gaps.extend(g)
+    gaps.sort()
+    return {
+        "per_seat": per_seat,
+        "n": len(gaps),
+        "median": gaps[len(gaps) // 2] if gaps else None,
+        "p95": gaps[int(0.95 * (len(gaps) - 1))] if gaps else None,
+        "max": gaps[-1] if gaps else None,
+        "headroom": (QUIET_HOURS / gaps[-1]) if gaps and gaps[-1] > 0 else None,
+    }
 
 
 def build(args) -> str:
@@ -516,6 +581,33 @@ def build(args) -> str:
     if not stalled and not silent:
         w("✅ Every seat is both alive and reporting.")
         w("")
+
+    # ⚠️ AND THE GREEN TICK ABOVE IS WORTH EXACTLY WHAT THE CALIBRATION SAYS.
+    cal = post_gap_calibration(scan_fleet_md_all(FLEET_MD, now_local().year))
+    if cal["max"] is not None:
+        w("**Is this threshold anywhere near the behaviour it watches?** "
+          "*(An alarm that has never fired is not an alarm that works — the "
+          "same reasoning the fleet applied to the unbreached `-M` cap, turned "
+          "on this file.)*")
+        w("")
+        w("| Bus posting, today | Value |")
+        w("|---|---:|")
+        w(f"| Posts read | {cal['n'] + len(cal['per_seat'])} |")
+        w(f"| Median gap between posts | {cal['median']*60:.0f} min |")
+        w(f"| p95 | {cal['p95']*60:.0f} min |")
+        w(f"| **Largest real gap** | **{cal['max']*60:.0f} min** |")
+        w(f"| Threshold | {QUIET_HOURS*60:.0f} min |")
+        w(f"| **Headroom** | **{cal['headroom']:.1f}×** |")
+        w("")
+        if cal["headroom"] and cal["headroom"] > 2:
+            w(f"⚠️ **The threshold is {cal['headroom']:.1f}× the largest gap that "
+              f"has actually occurred today, so it could not have fired whatever "
+              f"happened.** A clean verdict above therefore carries **no "
+              f"information about seat health** — it says only that nothing "
+              f"exceeded a bound nothing was near. The number is printed rather "
+              f"than quietly lowered: a threshold chosen to make an alarm fire "
+              f"is not a measurement either.")
+            w("")
     w("_Seat identity comes from each session's own `agent-name` record — "
       "the string the seat signs its posts with. Employer-lane projects are "
       "not scanned._")

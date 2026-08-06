@@ -298,6 +298,41 @@ with tempfile.TemporaryDirectory() as tmp:
     check(sep["best_above"] > sep["worst_below"],
           "COVERAGE: separation reports an inverted gap")
 
+    # ---- the bus parser, which had NO coverage and was wrong -------------
+    # Backtesting 2026-08-06 found it blind to 26% of FLEET.md: it required
+    # `]` immediately after the seat name, so every `date`-verified post was
+    # invisible, and it never knew the maestro's dash convention at all.
+    # math's last post read 12:22 when it was 15:52. These pin both.
+    import fleet_hygiene as fhy
+
+    def seat_of(line):
+        m = fhy.POST_RE.match(line)
+        if m:
+            return m.group(4)
+        m = fhy.DASH_RE.match(line)
+        return m.group(5) if m else None
+
+    check(seat_of("[8/6 14:30, evidence] x") == "evidence", "BUS: plain post missed")
+    check(seat_of("[8/6 13:58, math — `date`-verified] x") == "math",
+          "BUS: an ANNOTATED seat name is still invisible — the 3.5 h defect")
+    check(seat_of("[8/6 15:49, evidence — `date`-verified] x") == "evidence",
+          "BUS: annotated evidence post missed")
+    check(seat_of("- 08-06 13:52 MAESTRO: x") == "MAESTRO",
+          "BUS: the maestro's dash convention is not parsed")
+    check(seat_of("random prose about [8/6 whatever]") is None,
+          "BUS: parser matched a non-post line")
+
+    # the calibration must REFUSE to bless a threshold nothing came near
+    day = datetime(2026, 8, 6, 12, tzinfo=TZ)
+    tight = {"a": [day + timedelta(minutes=10 * i) for i in range(6)]}
+    cal = fhy.post_gap_calibration(tight, day)
+    check(cal["headroom"] is not None and cal["headroom"] > 2,
+          f"CALIBRATION: a 10-min-gap day should show large headroom, got {cal}")
+    wide = {"a": [day, day + timedelta(hours=7)]}
+    cal2 = fhy.post_gap_calibration(wide, day)
+    check(cal2["headroom"] < 1,
+          f"CALIBRATION: a gap PAST the threshold should show headroom < 1, got {cal2}")
+
     # fmt_dur_h must never round a sub-threshold window UP across a bucket
     check(lc.fmt_dur_h(59.14 * 60) == "59 min",
           f"FORMAT: 59.14 min printed as {lc.fmt_dur_h(59.14*60)!r} — the 1.0 h defect")

@@ -13,7 +13,7 @@ repos, and they emit markdown.
 | `ledger_common.py` | the shared transcript + git parser. The single place that decides "a human typed this" vs "the harness injected this". |
 | `silence_windows.py` | the silence-window ledger — what landed while no human was directing. |
 | `token_meter.py` | tokens by day × project × model tier × wave, cache always its own column. |
-| `selftest.py` | ~78 checks (72 fixed + one per discovered project, so the count is **machine-dependent**). ⚠️ It covers `ledger_common` and `silence_windows` **only** — `token_meter`, `human_time`, `fleet_hygiene` and `landed` have **no test coverage**. |
+| `selftest.py` | ~85 checks (79 fixed + one per discovered project, so the count is **machine-dependent**). ⚠️ It covers `ledger_common`, `silence_windows` and **`fleet_hygiene`'s bus parser + threshold calibration** — `token_meter`, `human_time`, `landed` and the rest of `fleet_hygiene` (process detection, lock state, memory readout) still have **no test coverage**, and both defects found on 2026-08-06 were in that uncovered region. |
 | `nightly.sh` | runs all of it, writes `docs/EVIDENCE-ledger-<date>.md`. |
 
 ## Run it
