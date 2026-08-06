@@ -1,3 +1,6 @@
 .lake/
 Scratch*.lean
 *.olean
+
+__pycache__/
+*.pyc

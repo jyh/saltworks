@@ -1,0 +1,13 @@
+# HUMAN-TIME CATEGORY TAGS — one line per engagement block.
+# Format:  <block-id>\t<CATEGORY>\t<optional note>
+# Categories (docs/measurement-preregistration.md §2):
+#   DIRECTING   rulings, councils, requirement-setting
+#   REVIEWING   reading that GATES an artifact (freeze ratification, paper review)
+#   UNBLOCKING  logins, purchases, physical acts
+#   WATCHING    curiosity — reading along, questions redirecting nothing
+# THE CLAIM = DIRECTING + REVIEWING + UNBLOCKING. WATCHING is its own proud line.
+# Counterfactual test for the first three: would the artifact exist without this touch?
+#
+# Block ids come from `python3 docs/ledger-tools/human_time.py --since '<T0>'`.
+# Tagging is the maestro's at councils, spot-audited by JYH. An untagged block
+# is reported as UNTAGGED and folded into nothing.
