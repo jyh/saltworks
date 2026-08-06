@@ -318,6 +318,21 @@ saltbuild.sh ScratchSILICON.lean        # replaces `lake env lean ScratchSILICON
 ```
 
 It takes a cross-seat lock (one heavy invocation at a time, stale-reaped)
+> ⛔ **`EXIT=75` IS NOT A BUILD FAILURE — IT IS A LOCK TIMEOUT. RETRY.**
+> The wrapper serialises the whole fleet and has `MAXWAIT=5400`, so if two
+> or three seats queue behind one long build **the later ones abort at 90
+> minutes with `exit 75` and the message "lock wait exceeded; ABORT".**
+> **The build never started.** An executor told only to *"judge
+> `saltbuild EXIT=N`"* — which is what every brief including this one said —
+> will see a non-zero exit and report **the wave failed**. It did not.
+> *(math seat, measured during a 39-minute lock hold with another seat
+> queued ~50 minutes behind it.)*
+>
+> **This is a false NEGATIVE with the same shape as the day's false
+> positives: the instrument reports a number, and the number means
+> something other than what the reader assumes.** Grep for the ABORT line,
+> or retry; do not report a failure.
+
 and caps `LEAN_NUM_THREADS=6`. **Judge its printed `saltbuild EXIT=N`, not
 a pipe.** Full builds only at wave exit. **Killed builds resume
 incrementally**, so a lock wait costs nothing. **Put this rule in every
