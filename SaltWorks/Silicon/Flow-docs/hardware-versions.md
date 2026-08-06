@@ -80,14 +80,24 @@ Sources in `SaltWorks/Silicon/RTL/`, outputs (netlist + cell histogram) in
 | design | cells | distinct types | area |
 |---|---|---|---|
 | `comparator` — 8-bit unsigned min/max, 16 input bits | 36 | 12 | 272.76 µm² |
-| `bitserial_switch` — the 2×2 bit-serial element | 8 | 4 | 95.09 µm² |
+| `bitserial_switch` — the 2×2 bit-serial element | 18 | 6 | 172.67 µm² |
+
+(The switch element grew from 8 cells / 95.09 µm² when the **activity bit** was
+added to fix the routing bug — see `RTL/bitserial_switch.v`. Two flops and the
+activity-gating logic; `nand3_1` joins the cell set. Worth the doubling: without
+it the element cannot distinguish an idle port from destination-bit-0.)
 
 Extrapolated to the tapeout target: an 8×8 bit-serial banyan is 3 stages × 4
-elements = **12 elements ≈ 96 cells ≈ 1,141 µm²**, against a 1×1 TT tile of
-161.00 × 111.52 µm ≈ 17,955 µm² — **about 6 % of one tile.** The freeze's
-"1299 gates vs 1000/tile, 2 tiles" reasoning was measuring the *word-parallel*
-fabric and does not apply. Area is not a constraint here; the pin count and the
-**33 MHz output-pad ceiling** are.
+elements = **12 elements ≈ 216 cells ≈ 2,072 µm²**, against a 1×1 TT tile of
+161.00 × 111.52 µm ≈ 17,955 µm² — **about 12 % of one tile**, and 4 tiles (2×2)
+are bought. The freeze's "1299 gates vs 1000/tile, 2 tiles" reasoning was
+measuring the *word-parallel* fabric and does not apply.
+
+⚠️ But note what real submissions measure: **4,220 / 4,645 / 5,344 cell
+instances each**, because TT pads every tile — so the *file* the importer must
+eat is ~4–5 k instances and ~18 k lines regardless of how small our logic is.
+Area is not a design constraint here; the pin count, the **33 MHz output-pad
+ceiling**, and **hold** (not setup) are.
 
 The cell set is the union of both designs — **13 distinct cells out of the 428
 in `sky130_fd_sc_hd`** (measured: `extract_liberty.py --all | grep -c 'in=('`),
