@@ -56,22 +56,33 @@ A single chain, closed at every seam:
         │                  sorted, route without conflict
         ▼
     the circuit            the fabric as a term of a deep-embedded
-        │                  circuit DSL, with a semantics              ⟨leg 2 T4⟩
-        │                  ── proved to realise the theorem's routing
+        │                  circuit DSL, with a semantics            [LANDED 26353d2]
+        │                  ── stated at the STAGE BOUNDARIES, because a
+        │                     `sem`-only theorem cannot see internal
+        │                     link occupancy — which is the whole
+        │                     content of the no-conflict hypothesis
         ▼
-    the Verilog            emitted by a printer we DO NOT TRUST       ⟨leg 2⟩
+    the Verilog            emitted by a printer we DO NOT TRUST     [LANDED 74035a9]
+        │                  ── no `emitV_sem`, deliberately: the round trip
+        │                     compares through a PORT CORRESPONDENCE, so a
+        │                     misconception SHARED by printer and importer
+        │                     would pass. The top-level contract is pinned
+        │                     to TT's validator — an authority outside this
+        │                     repo — precisely to break that circularity.
         │
         ▼
-    the layout             LibreLane + sky130 → GDSII                 ⟨leg 3 D4⟩
-        │                  synthesis and place-and-route are OUTSIDE
-        │                  the trusted base, by construction
+    the layout             LibreLane + sky130 → GDSII          ⟨D4: RTL landed
+        │                  synthesis and place-and-route are         002abc1 — 259
+        │                  OUTSIDE the trusted base, by              cells, 2,108 µm²;
+        │                  construction                              GDSII pending⟩
         ▼
     the netlist            imported back into Lean, ≤300 lines of
         │                  trusted importer + the cell models         ⟨leg 3 D2⟩
         │                  (15/13/68 distinct types across three real
         │                   submissions — budget the TAIL, not the median)
         ▼
-    the check              per-COMBINATIONAL-CONE equivalence, by         ⟨leg 3 D3⟩
+    the check              per-COMBINATIONAL-CONE equivalence, by   [LANDED 2e24205]
+                           bit-sliced `decide +kernel`              [+ D3.5 0f4c6d7]
                            bit-sliced `decide +kernel`
                            ── the kernel re-does every step
 ```
@@ -178,7 +189,18 @@ This repo exhibits the spectrum at three altitudes:
    is not only for the untrusted tools at the bottom.** ⟨leg 2 T1,
    `0aad951`⟩
 2. **PER-INSTANCE** — the netlist equivalence. LibreLane is never trusted;
-   every run it does is checked. ⟨leg 3 D3⟩
+   every run it does is checked. **This is no longer a promise:** the
+   comparator's real post-synthesis netlist — 36 sky130 cells over 12
+   types, 127 primitives, *including two `lpflow` power-isolation cells
+   abc pressed into service as ordinary logic* — was proved equivalent to
+   a deliberately differently-structured 109-gate reference **on all
+   65,536 input configurations, in the kernel** (`2e24205`). And the
+   sequential element followed: **every state and every input, lifted to
+   arbitrary run length by induction** (`0f4c6d7`).
+
+   **Both carry a mutation control** — change one gate and the certificate
+   *fails* — because a certificate without one can be vacuous and still
+   audit clean.
 3. **THE FIVE-ARTIFACT LOOP** — spec, implementation, proof, certificates,
    and the emitted artifact. The implementation language is fungible; **the
    spec is the only artifact whose language matters, because it is the one
