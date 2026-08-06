@@ -53,3 +53,34 @@ R4 the tile constraint: 1299 gates vs 1000/tile — 2 tiles OK, but
    check TT's 8-in/8-out pinout against an 8x8 fabric's port count;
    if it doesn't fit, WHAT scaled fabric fits the pins? (4x4?) This
    determines the taped-out N. Answer BEFORE D4.
+
+## ADDENDUM 1 (Council I discussion, 8/6) — BIT-SERIAL RULED (JYH)
+
+**The tapeout target is the BIT-SERIAL fabric, per the 1988 design:
+packets are bit streams, address at the front, MSB first.** Not
+nostalgia — FORCED: TT's 8in/8out cannot carry a word-parallel 8×8
+fabric (64+ pins); bit-serial fits the tile exactly (8 serial in,
+8 serial out, clk from TT). This ANSWERS kill-check R4.
+
+**The two-layer proof architecture:**
+- Layer 1 (LANDED): `banyan_selfrouting` — routing/topology level,
+  representation-independent.
+- Layer 2 (NEW deliverable, insert as D3.5): the bit-serial 2×2
+  switch element as a small FSM (routing latch set by the address
+  bit + conflict logic + transparent streaming), PROVED to refine
+  the word-level `line` semantics: per-cycle obligation by
+  decide +kernel, lifted by induction over cycles (the measured
+  sequential pattern from the vlsi-flow dossier §A). FSM state is a
+  few bits — comfortably inside the 16-bit module law.
+
+**The resonance (README material):** the landed proof's DESCENDING
+stage index consumes destination bit m at the stage with m bits
+unrouted — the FIRST stage reads the MSB. That is exactly the serial
+wire order: the 1988 frame format and the 2026 proof index agree by
+construction. Also the 3D-stacking pinout rationale of US4910730A is
+the same pin-economy argument TT forces today.
+
+**Consequence for the HDL leg:** combinational-first stands; ADD a
+minimal sequential extension (registers + a cycle semantics) scoped
+to what the switch-element FSM needs — agree the shape with the
+Silicon seat on the bus BEFORE building (the seam rule applies).

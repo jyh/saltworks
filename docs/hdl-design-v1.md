@@ -60,3 +60,8 @@ R4 sp1-lean failure modes: vacuous hypotheses, wrong-width semantics,
   present them as ONE doctrine, not two demos.
 - Week-2 stretch (separate freeze to come): mini-language → RV32I
   codegen w/ simulation proof — THE TOWER's keystone.
+
+## ADDENDUM 2 (8/6, bit-serial ruling): v1 gains a MINIMAL sequential
+extension — registers + cycle semantics — scoped to the bit-serial
+switch element (see silicon-design-v1 Addendum 1). Seam rule: agree
+the sequential interface with the Silicon seat on the bus first.
