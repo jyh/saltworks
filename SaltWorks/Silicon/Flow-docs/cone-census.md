@@ -74,6 +74,58 @@ That split is not a weakness discovered late; it is the same architecture at one
 level down. But it must be **stated**, because "per module by `decide +kernel`"
 implied a uniform method and there is none.
 
+## THE MEMORY LAW — the correction I owed my own repair
+
+When I reported bit-slicing I published a **time** result and no memory result.
+That was an omission, and the refuter pass caught it: slicing does not remove the
+wall, it **moves it from time to memory**. Here is the law, measured.
+
+Each net carries `2^n` bits, so
+
+> **slice footprint ≈ (number of nets) × 2^n / 8 bytes**
+
+on top of a fixed ~670 MB Lean+mathlib baseline. Measured peak RSS through
+`saltbuild.sh`, ripple-carry adder, 5 gates per bit:
+
+| input bits `n` | configurations | nets | predicted slice | **measured peak RSS** |
+|---:|---:|---:|---:|---:|
+| 8 | 256 | 20 | 640 B | 669 MB |
+| 16 | 65,536 | 40 | 320 KB | 670 MB |
+| 20 | 1,048,576 | 50 | 6.3 MB | 670 MB |
+| 24 | 16,777,216 | 60 | **120 MB** | **869 MB** |
+
+The first three are lost in the baseline; at `n = 24` the slice data is visible
+and lands where the law predicts (the ~80 MB excess is intermediates).
+
+**And there is a hard ceiling at `n = 24`, which is not mine** — the compiler
+seat established it: `Nat.pow` is kernel-accelerated only to exponent `1 <<< 24`,
+so a `2^n − 1` mask above 24 bits leaves the fast path. That is why my earlier
+"24 input bits, 60 gates, seconds" hit exactly 24 and not 25; I had the number
+and not the mechanism.
+
+So the two routes differ in **shape**, not merely speed:
+
+* pointwise `decide +kernel` has **no memory bound at all** — it materialises the
+  reduction, which is how a probe elsewhere in the fleet reached 30 GB;
+* bit-sliced is **bounded by construction** at ≤ 2 MB × #nets and *cannot* reach
+  the fleet's memory cap.
+
+### What this rules out, and what it leaves standing
+
+**Monolithic fabric certification is impossible, and by a wide margin.** The 8×8
+serial fabric has 8 primary inputs plus 12 elements × 4 state bits = **56 bits**,
+so one net would be `2^56` bits ≈ 9 PB. Not 2 TB as I first estimated (I was
+using 3 state bits per element before the activity bit was added) — worse. There
+is no version of this that fits.
+
+**Per-cone certification is comfortable, and by a wide margin.** Every cone in
+the switch element has ≤ 6 inputs → 64 bits per net. The whole fabric's
+certificate suite is kilobytes. The measured comparator equivalence (D3, 236
+nets at `n = 16`) is ~1.9 MB of slice data and builds in about three seconds.
+
+The gap between those two numbers — 9 PB against kilobytes — is the entire
+argument for why the decomposition is not optional.
+
 ## Two incidental measurements worth keeping
 
 **Physical cells dominate.** `factory_test` is 90 logic cells against 4,425
