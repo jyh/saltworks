@@ -34,6 +34,16 @@ Every proof in this repo depends on exactly three axioms — `propext`,
 > **invariant under every failure mode that actually threatens this
 > chain**: import the wrong netlist file, mis-parse a port, mis-model a
 > cell, and the audit still prints three axioms. What rules those out is
+> ⛔ **And it is weaker still in a way we only found by being caught: it
+> cannot see a theorem that DOES NOT EXIST.** On 2026-08-06 the audit
+> printed a cheerful `✓ [0 axioms]` for two theorems that had **never
+> elaborated** — a heartbeat timeout — and only the build's own non-zero
+> exit caught it. ***A green tick from `#audit_axioms` is not evidence
+> the theorem exists.*** That is a simpler and more total failure than
+> the three below, and it is why the axiom line is never quoted here
+> without the build result beside it.
+> 
+> What rules the others out is
 > not the axiom count — it is the importer's mutation tests, the
 > gate-level testbench eating byte-for-byte the same file, and the named
 > provenance of the artifact we checked. **"Three axioms end to end" is a

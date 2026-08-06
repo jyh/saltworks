@@ -444,9 +444,12 @@ def build(args) -> str:
                 out.append(f"VIOLATION {nbare} BARE lean/lake proc(s) of {n} "
                            f"(no saltbuild.sh ancestor)")
             else:
+                avail = (st["ram_free_gb"] or 0) + (st.get("ram_inactive_gb") or 0)
+                lockstr = ("⛔ORPHANED" if st.get("lock_orphaned")
+                           else ("held" if st["lock_held"] else "free"))
                 out.append(f"machine   {n} lean proc(s), all wrapped · lock "
-                           f"{'held' if st['lock_held'] else 'free'} · "
-                           f"RAM {st['ram_free_gb']:.0f}GB free · "
+                           f"{lockstr} · RAM {avail:.0f}GB available "
+                           f"(free {st['ram_free_gb']:.1f}) · "
                            f"swap {st['swap_free_gb']:.1f}GB free")
         for name, seat, idle_h, posted, post_h in rows:
             flag = "STALLED" if idle_h > QUIET_HOURS else (
