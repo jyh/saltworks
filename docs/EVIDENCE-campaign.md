@@ -297,6 +297,7 @@ from different directions:
 | an unbreached memory cap | did **this run** exceed the cap? | does the cap **bind**? *(three controls were adopted today that looked like protection: `ulimit` — measured no-op; `-M` — deployed, unverified; the lock — real, but bounds the **queue**, not the **process**)* |
 | a per-instance certificate | is **this artifact** correct? | is the **tool** correct? *(this one is the seam doctrine itself, and it is the only one of the three we designed on purpose)* |
 | **`banyan_selfrouting`** | are the **active** destinations conflict-free? *(`no_conflict` is `Set.InjOn` over `Set.Iio n` — it constrains active lines only)* | **does the circuit behave correctly at every port?** ⛔ **It does not, and this gap produced a real bug — see below.** |
+| **the circuit DSL's declared `sem`** | what appears at the **primary outputs**? | **does the fabric route?** ⛔ The freeze asked for *"`banyan_circ` + proof its `sem` realizes line-routing"* and **that is unstateable**: `sem` exposes only stage boundary m = 0, where `line 0 s d = d` holds for every source and destination **with no hypotheses at all**. A `sem`-only theorem cannot see internal link occupancy — **which is the entire content of `no_conflict`.** *(compiler seat, 13:10)* |
 
 ---
 
