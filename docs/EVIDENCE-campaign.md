@@ -320,11 +320,26 @@ A campaign that claims a method should publish what the method caught. Day 1:
 peer's — under a discipline that requires the attack before the build.
 None was found by a kernel, and none would have changed an axiom count.**
 
-### ERRATA FOUND IN THE LITERATURE — a different and stronger category
+### READING THE SOURCE — what it corrected, in both directions
 
-The defects above are ours. These are in **the published paper the campaign
-is formalising** — Heath-Brown 1983 — and they were found *by checking, not
-by reading*:
+⚠️ **This section was titled "errata found in the literature" and that was a
+flattering half-truth.** Reading Heath-Brown 1983 at the bytes has now
+**corrected the paper twice and corrected US once** — and the math seat
+said so unprompted at 11:33, which is the only reason the third row is
+here. A section that recorded only the errors we found in someone else's
+work would be exactly the distortion this file keeps catching elsewhere.
+
+**Their framing, and it is the right one:** *"reading the source has now
+corrected the paper twice and corrected us once, which is a better argument
+for reading sources than any of the three findings individually."*
+
+**The one that was OURS** (`fab7a8a`, and it was the worst of the three):
+
+| The defect | Why it was the worst |
+|---|---|
+| Our transcription printed (5.14)'s subscript as a **single** sum over `w₁`. HB prints the `i`-indexed form — a **double** sum over `w₁` *and* `w₂`, which is also what (5.19) sums over. | **The index we dropped is `w₂` — exactly Lemma 10's summation variable** (`n ↦ w₂`, `k = Dδ₁w₁`, `E = S₂`). Our notes hid the one index the entire §7 machine runs on. An N7 executor working from them would have been confused by precisely the thing they most needed. |
+
+**The two that were the PAPER's** — found *by checking, not by reading*:
 
 | # | The erratum | How it was found | Weight |
 |---|---|---|---|
@@ -352,10 +367,18 @@ by reading*:
   transcription. Both records were corrected in place.
 
 ⟨README: this is among the strongest arguments the campaign can make, and
-it costs nothing to state plainly. **Formalising a paper found two errors
-in the paper.** Not because the authors were careless — because a
-proof assistant cannot skim, and neither can a seat that has been told to
-check rather than read.⟩
+it costs nothing to state plainly — **provided all three rows go in
+together.** *"Formalising a paper found two errors in the paper, and one in
+our own transcription of it."* The third clause is what makes the first two
+credible; without it the claim reads as scoring points off Heath-Brown,
+which is neither true nor the interesting result. Not because the authors
+were careless — because a proof assistant cannot skim, and neither can a
+seat told to check rather than read. **The method caught the paper and it
+caught us, by the same act.**⟩
+
+**Remaining owed from this block:** item 3 of the original three,
+`(log Kk)³ → (log 2k)³` (a bounded conversion worth ≤ 2.39), still owed by
+N7; and ADDENDUM A's open check on (7.8)'s log exponent (above).
 
 **And the finding changed behaviour, which is the part that matters.**
 Within an hour the math seat re-read §7 *at the source* rather than at the
