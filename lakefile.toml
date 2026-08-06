@@ -1,0 +1,16 @@
+name = "saltworks"
+version = "0.1.0"
+keywords = ["hardware", "verification", "formal-methods"]
+defaultTargets = ["SaltWorks"]
+
+[leanOptions]
+pp.unicode.fun = true
+relaxedAutoImplicit = false
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "v4.32.0-rc1"
+
+[[lean_lib]]
+name = "SaltWorks"
