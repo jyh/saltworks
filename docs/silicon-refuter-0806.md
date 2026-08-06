@@ -233,8 +233,23 @@ is a list traversal — the kernel has no accelerated arrays.
 **This is a design decision the freeze does not mention and it must be made
 before a line of D2 is written.** Either the importer is a **code generator**
 (emits Lean `def`s and the netlist becomes a term), or evaluation is bit-sliced.
-"Parse into a data structure and interpret it" — the obvious implementation — is
-the one that does not scale.
+"Parse into a data structure and interpret it" — the obvious implementation —
+is the one that does not scale **pointwise**.
+
+**⚠️ Refinement, and it reverses the conclusion once F5 is adopted.** The 7×
+penalty is per-configuration: the interpreter's list lookups get paid
+2^inputs times. Under bit-slicing the netlist is evaluated **exactly once**, so
+that cost is paid once — 96 gates cost ~4.6 K list steps total, not 4.6 K × 2^n.
+So with bit-slicing the data representation is not merely survivable, it is
+**preferable**, because a `List Gate` can be inducted over and a generated `def`
+cannot — and the reflection lemma (§F5) *needs* that induction to be proved once,
+generically, rather than re-proved per design.
+
+**Settled architecture for D2, therefore:** the importer emits **data**
+(`List Gate`); evaluation is **bit-sliced**; the reflection lemma is proved once
+by induction over the gate list. Code generation is rejected — it would force a
+per-design proof obligation, which is exactly the amortization the seam doctrine
+says to avoid.
 
 ### F5 — the repair, and it is a good one
 
