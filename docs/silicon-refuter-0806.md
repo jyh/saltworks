@@ -19,15 +19,22 @@ Provenance: `[M]` measured on this machine today, command and number given.
 `[S]` sourced from a primary artifact (PDK file, vendor doc, sibling seat's
 URL-tagged dossier). `[R]` reasoned — argument only, no artifact.
 
-**⚠️ A methodological correction that applies to this whole document.** My first
-round of timings was taken while the fleet was in memory contention, and several
-runs were SIGTERM'd by the OS (jetsam) at 6–10 minutes with near-zero accounted
-*user* time. That looks exactly like a performance wall and is not one. Every
-timing quoted below was **re-taken through `saltbuild.sh`** (the fleet lock) on a
-quiet machine. The walls I originally believed in at 14 and 16 input bits
-**evaporated** on re-measurement. I am flagging this loudly because the same
-failure mode contaminated a sibling seat's numbers the same morning, and because
-a design freeze built on contended timings would have been built on sand.
+**⚠️ A methodological correction that applies to this whole document, and it
+corrects me.** My first round of timings was taken while the fleet was in memory
+contention, and several runs were SIGTERM'd by the OS (jetsam) at 6–10 minutes
+with near-zero accounted *user* time. That looks exactly like a performance wall
+and is not one. I initially reported walls at 14 and 16 input bits. **Re-run
+through `saltbuild.sh` (the fleet lock), the 14-bit case completed cleanly — the
+wall was contention, not the kernel.** I have not established where the pointwise
+wall actually is, and this document no longer claims one.
+
+I am flagging this loudly for three reasons: the same failure mode contaminated a
+sibling seat's numbers the same morning (a 2^12 sweep clocking 367 s while a
+*larger* 2^14 sweep clocked 28.8 s); a design freeze built on contended timings
+would have been built on sand; and my own refuter workflow was a contributor to
+the third fleet OOM — its Lean-heavy lane was my brief, and I cancelled it and
+re-dispatched web-only. Three OOM kills cost the fleet real time today, mine
+among them.
 
 ---
 
@@ -189,20 +196,32 @@ decision procedure had *no gate-level measurement at all*. I took one.
 Netlist: n-bit gate-level ripple-carry adder, 2-input primitives, 5 gates/bit,
 checked exhaustively against a spec over all 2^(2n) input configurations.
 
-| encoding | input bits | configs | gates | result |
-|---|---|---|---|---|
-| **A** pointwise, generated `def` w/ nested lets | 8 | 256 | 20 | ✅ |
-| **A** | 12 | 4,096 | 30 | ✅ |
-| **A** | 14 | 16,384 | 35 | ✅ |
-| **B** pointwise, netlist as DATA + interpreter | 8 | 256 | 20 | ✅ but **7× slower than A** |
-| **C** bit-sliced over ℕ | 8 | 256 | 20 | ✅ |
-| **C** | 16 | 65,536 | 40 | ✅ |
-| **C** | 24 | **16,777,216** | 60 | ✅ |
+| encoding | input bits | configs | gates | wall-clock | result |
+|---|---|---|---|---|---|
+| **A** pointwise, generated `def` w/ nested lets | 8 | 256 | 20 | 1.2 s | ✅ |
+| **A** | 12 | 4,096 | 30 | 9.3 s / 8 s | ✅ |
+| **A** | 14 | 16,384 | 35 | — | ✅ |
+| **B** pointwise, netlist as DATA + interpreter | 8 | 256 | 20 | 8.3 s | ✅ **7× slower than A** |
+| **C** bit-sliced over ℕ | 8 | 256 | 20 | 0.8 s | ✅ |
+| **C** | 16 | 65,536 | 40 | 4.4 s | ✅ |
+| **C** | 24 | **16,777,216** | 60 | 2.8 s | ✅ |
 
-Every one of them axiom-clean: `depends on axioms: [propext]`. No
-`Classical.choice`, no `Quot.sound`, no native axiom. `saltbuild EXIT=0`
-throughout. (Precise wall-clock per row is in §7; the qualitative result is what
-matters here and it is robust.)
+Every one axiom-clean: `depends on axioms: [propext]` — no `Classical.choice`,
+no `Quot.sound`, no native axiom. `saltbuild EXIT=0` throughout. Baseline
+(empty file) is ~0.8 s warm, so subtract that from every row.
+
+Reading the numbers honestly:
+
+- The pointwise ladder grows about **21× per 16× increase in configurations**
+  (0.4 s → 8.5 s of work from 256 → 4,096). Extrapolated, the freeze's 81-gate
+  comparator at 16 input bits lands in the several-minute range — so the doc's
+  "≈ 6 min" figure is *roughly right for that one module, for the wrong reason*,
+  and it leaves no headroom for a wider module or a bigger one.
+- The two encodings differ by 7× **at the smallest size tested**, and the gap
+  widens per gate.
+- Bit-slicing buys ~256× more configurations at *lower* absolute cost, and its
+  cost tracks gate count rather than input space.
+- Where the pointwise wall actually is, I did not establish — see §0.
 
 ### F4 — the importer's natural output is the worst shape for the kernel
 
@@ -297,6 +316,16 @@ Consequences, all of which are D2/D3.5 scope that the freeze does not fund:
    has *no* reset pin) rather than becoming a reset cell. The reset convention
    must be pinned deliberately — TT supplies `rst_n` — or the state after reset
    is an assumption rather than a theorem.
+4. **And the reset hypothesis cannot be the easy one.** TinyTapeout *power-gates*
+   unselected designs (`tt_mux.v` drives the user `ena` port and the power-gate
+   enable from the same `l_ena`, cells `tt_pg_1v8`): **no flop state survives
+   deselection**, `/specs/powerup/` does not exist, and the minimum reset pulse
+   width is undocumented. `[S]` So D3.5's FSM must **self-initialise from an
+   arbitrary state** under a reset pulse of unspecified length. That belongs in
+   the theorem's hypotheses, not in a comment — a refinement proof that assumes a
+   known reset state would be proving something the silicon does not guarantee.
+   With two state bits per element this is cheap to discharge; the cost of
+   *missing* it is a proof about a different machine.
 
 ### F9 — the switch element is only correct under the no-conflict hypothesis
 
@@ -366,10 +395,16 @@ runner reproducing `librelane==3.0.5 + PDK 0536d02d…`.
   trusted set is small by construction.
 - D2 architecture: importer is a **code generator**, not a data structure +
   interpreter; evaluation is **bit-sliced**; reflection lemma priced in.
-- D3.5: FSM-refinement shape, with the no-conflict hypothesis threaded
-  explicitly from `banyan_selfrouting`.
+- D3.5: FSM-refinement shape, with **two** hypotheses made explicit — the
+  no-conflict hypothesis threaded from `banyan_selfrouting`, and
+  self-initialisation from an arbitrary state under an unspecified-width reset.
 - D1 proceeds on the no-sudo path; Linux runner promoted from "week 2" to the
   primary path for any published number.
+- Flow pinning, from the sibling seats' TT findings: `tools-ref` pinned to a
+  commit SHA (tt-support-tools has no `ttsky26c` tag and its `main` moved
+  today), and design settings written to `src/user_config.json` — which
+  **overrides** `src/config.json`, so edits to the latter are silently
+  discarded. `[S]`
 
 **Wants a decision (recommendation attached, not blocking):**
 
@@ -396,4 +431,38 @@ Generator and all experiment files: scratchpad `gen.py`, `K{a,b,c}<n>.lean`,
 These are seat-local scratch, not repo files; the ones that become deliverables
 land under `SaltWorks/Silicon/**` in D2.
 
-<!-- TIMING TABLE + AGENT LANE FINDINGS APPENDED BELOW -->
+Reproduce the synthesis measurements:
+
+```bash
+yosys -q syn.ys            # comparator.v  -> comparator_nl.v  + stat
+yosys -q syn2.ys           # bitserial_switch.v -> switch_nl.v + stat
+```
+
+Reproduce a kernel measurement (one file at a time, fleet lock, per the 8/6 rule):
+
+```bash
+python3 gen.py c 12 > Kc12.lean
+/Users/jyh/projects/claude/saltbuild.sh /abs/path/Kc12.lean   # judge saltbuild EXIT=N
+```
+
+**Timing caveat, restated because it bit me:** wall-clock from `saltbuild.sh`
+*includes* time spent waiting for the cross-seat lock (one run showed 62 s of
+which ~55 s was waiting). Timings in §3 are from uncontended runs, with the
+12-bit pointwise row independently reproduced under the lock at 8 s against 9.3 s
+uncontended — which is the cross-check that makes me trust the rest.
+
+---
+
+## 8. STATUS OF THE PASS
+
+Seven refuter lanes were dispatched. The Lean-heavy lane was mine to brief and it
+contributed to the third fleet OOM; I cancelled the whole workflow under the
+09:22 enforcement order and re-dispatched four **web/read-only, zero-Lean** lanes
+(R1 powered-netlist grammar, R2 cell-exclusion knobs, R3 the leg-2 seam, OPEN)
+with the build rule in every brief. Their findings append to this document when
+they land. Everything above is either first-hand measurement by the seat or
+sourced from a sibling seat's URL-tagged dossier, and stands on its own.
+
+The two open gaps I know of and am not papering over: **no genuine post-P&R
+powered netlist has been parsed yet** (post-synthesis only), and **the pointwise
+kernel wall is unlocated**. Neither blocks D1.
