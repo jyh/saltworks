@@ -1,2 +1,19 @@
 -- The hub file. MAESTRO-OWNED: seats never edit; leave "import owed" in commit messages.
 import SaltWorks.Banyan.SelfRouting
+import SaltWorks.Banyan.Facade
+import SaltWorks.HDL.Syntax
+import SaltWorks.HDL.Sem
+import SaltWorks.HDL.Opt
+import SaltWorks.HDL.Certs
+import SaltWorks.HDL.Banyan
+import SaltWorks.HDL.EmitV
+import SaltWorks.HDL.Seq
+import SaltWorks.Silicon.Cells.Sky130
+import SaltWorks.Silicon.Imported.Comparator
+import SaltWorks.Silicon.Imported.RefComparator
+import SaltWorks.Silicon.Imported.Switch
+import SaltWorks.Silicon.Equiv.ComparatorEquiv
+import SaltWorks.Silicon.Equiv.Columns
+import SaltWorks.Silicon.Equiv.BitSliced
+import SaltWorks.Silicon.Equiv.SwitchRefinement
+import SaltWorks.Tactic.AuditAxioms
