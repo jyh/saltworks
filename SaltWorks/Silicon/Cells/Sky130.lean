@@ -45,8 +45,26 @@ be re-derived against TinyTapeout's CI configuration with an explicit don't-use
 list so the trusted set is small by construction rather than by luck.
 
 Power pins (`VPWR`, `VGND`, `VPB`, `VNB`) carry no logical content and do not
-appear here; every cell in the library declares exactly those four, and the
-importer discards exactly four per instance.
+appear here. The importer discards a connection **by pin name**, and asserts
+nothing about how many appear.
+
+⚠️ **A correction, recorded because the wrong rule was briefly committed.** An
+earlier version of this file claimed every cell declares exactly those four, so
+the importer could discard exactly four per instance. That is **false against
+real netlists**: `sky130_fd_sc_hd__tapvpwrvgnd_1` carries exactly two
+(`.VGND`, `.VPWR`) and appears 225–456 times in every real TinyTapeout netlist,
+and 23 of the library's 428 cells break the four-pin rule. It is also **not in
+the Liberty file at all** — which is why the Liberty survey that produced the
+claim could not have falsified it. See `docs/silicon-refuter-0806-addendum.md` §0.
+
+⚠️ **This cell set is largely the wrong one, and is kept only as the D1 record.**
+Measured against 118 real TTSKY26c netlists: eight of the nine cells named below
+are excluded by LibreLane's sky130A defaults (`no_synth.cells`, 185 entries) and
+appear in none of them — `clkinv_1` among them. Conversely the shipped netlist
+contains cells bare synthesis never emits (`clkbuf_*` from CTS, `clkdlybuf4s25_1`
+and `dlygate4sd3_1` from hold repair, `diode_2` for antennas, `conb_1` tie cells)
+and **the flop is `dfrtp_2` — asynchronous, active-low reset — not `dfxtp_1`.**
+The shippable model set is re-derived against TT's own configuration in D2.
 -/
 
 namespace SaltWorks.Silicon.Cells

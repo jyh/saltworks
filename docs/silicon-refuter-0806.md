@@ -7,6 +7,18 @@
 
 ---
 
+> **⚠️ READ THE ADDENDUM WITH THIS DOCUMENT.**
+> `docs/silicon-refuter-0806-addendum.md` carries 58 further findings from four
+> re-dispatched lanes — and **five of them refute claims made below**: the
+> "exactly four power pins per instance" rule (false), the post-synthesis grammar
+> carrying over (false — `assign` and escaped identifiers are both present, and
+> the latter is a *soundness* hazard), the 13-cell set (largely the wrong cells;
+> the flop is `dfrtp_2`, not `dfxtp_1`), the PDK pin (`8afc8346…`, not
+> `0536d02d…`), and the "CONFIRMED" resonance claim (confirmed about a duplicate
+> constant, not the landed one). Where the two documents disagree, **the addendum
+> is correct** — it was measured against nine real fabricated netlists, this one
+> against a local synthesis run.
+
 ## 0. HOW TO READ THIS
 
 Severities: **FATAL** = the leg as specified cannot deliver; needs a ruling, not

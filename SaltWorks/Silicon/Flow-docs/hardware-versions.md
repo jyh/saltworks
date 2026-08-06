@@ -42,20 +42,25 @@ cross-checked here against the PDK:
 | what | pin | note |
 |---|---|---|
 | LibreLane (TT CI `gds` job) | **`3.0.5`** | our local flow must match to have any hope of reproducing |
-| PDK (TT user precheck) | **`0536d02d875c8f67dd7cca3902ac457e62f20005`** | ⚠️ **not** the SHA we have locally |
-| PDK (TT shuttle CI) | `8afc8346a57fe1ab7934ba5a6056ea8b43078e71` | third value in play |
-| PDK (shuttle `BUILDING.md`) | `6d4d11780c40b20ee63cc98e645307a9bf2b2ab8` | **stale**, per the dossier |
+| **PDK the netlist is HARDENED against** | **`8afc8346a57fe1ab7934ba5a6056ea8b43078e71`** | ✅ **this is the one that matters** |
+| PDK (TT user *precheck* only) | `0536d02d875c8f67dd7cca3902ac457e62f20005` | GDS/DRC checks in a Nix shell — **not** the hardening PDK |
+| PDK (shuttle `BUILDING.md`) | `6d4d11780c40b20ee63cc98e645307a9bf2b2ab8` | **stale** |
+| PDK we fetched locally | `c6d73a35f524070e85faff4a6a9eef49553ebc2b` | volare's newest; a fourth value |
 | `tt-support-tools` | **unpinned — defaults to a moving `main`** | no `ttsky26c` tag exists; `main` moved on 8/6 while the shuttle pins its submodule at 7-29 |
+
+⚠️ **CORRECTION (recorded, because the wrong pin was published first).** An
+earlier version of this table — and a fleet-bus post — named `0536d02d…` as the
+PDK to re-pin to. That is the **precheck-only** revision. The netlist and GDS are
+hardened against **`8afc8346…`**. Four sky130A revisions are in play; getting
+this wrong would have pinned the local flow to a PDK that never touches the
+fabricated artifact. See `docs/silicon-refuter-0806-addendum.md` §0.
 
 **Two actions this table forces, and they are D1 exit criteria, not D5 items:**
 
-- **Re-pin the local PDK to `0536d02d…`** before any number is published. The
-  SHA we fetched today (`c6d73a35…`) was simply volare's newest; it is fine for
-  the grammar and cell-function work already done (cell *functions* do not move
-  between open_pdks builds), but it is **not** the pin the fabricated netlist is
-  built against. Treat every measurement below as PDK-version-independent — they
-  are about Liberty functions and cell counts — and re-run anything
-  timing/area-sensitive after re-pinning.
+- **Re-pin the local PDK to `8afc8346…`** before any number is published, and
+  fix `Flow/synth.sh`'s hard-coded default. The measurements already taken are
+  about Liberty functions and cell counts, which do not move between open_pdks
+  builds, so they stand; anything timing- or area-sensitive must be re-run.
 - **Pin `tools-ref` to a commit SHA** in the TT workflow `with:` block, and
   record that SHA next to the proof. A moving `main` under a reproducibility
   claim is not a reproducibility claim.
@@ -116,11 +121,19 @@ anyway (#522), and the artifact under proof is TT CI's `tt_submission/<top>.v`.
 The higher-value path is a pinned Linux runner reproducing `librelane==3.0.5` +
 PDK `0536d02d…`. A local macOS LibreLane buys only iteration speed.
 
-**Consequence for D2, stated plainly:** the importer's parser **cannot be frozen**
-until a real powered post-P&R netlist has been parsed. What we have characterised
-so far is post-*synthesis* grammar — flat, no `assign`, no `1'b` constants, no
-escaped identifiers, named ports and bit-selects only. The powered form adds
-exactly four pins per instance (every `sky130_fd_sc_hd` cell declares `pg_pin`
-VPWR, VGND, VPB, VNB — verified against the PDK), and post-route will add
-buffers, tie cells, and possibly `assign`. Obtaining a genuine sample is the
-open D1 item.
+**Consequence for D2 — and this exit criterion is now DISCHARGED.** Nine genuine
+powered post-P&R netlists were obtained from the public TT shuttle repos, three
+of them built by `librelane 3.0.5` for TTSKY26c itself. The provenance is pinned
+to a line of code: `tt-support-tools/project.py:575-611` copies
+`runs/wokwi/final/pnl/<top>.pnl.v` → `tt_submission/<top>.v`. So the freeze's
+`final/nl/<design>.logical_nl.v` is wrong in **both** directory and suffix —
+`nl` is the *unpowered* netlist.
+
+⚠️ **And the post-synthesis grammar did NOT carry over.** Measured across 14 real
+files: `assign` statements in **every** one (18–22 each); escaped identifiers in
+13 of 14, up to **1,573** each, embedding `.`/`[`/`]`; constants delivered by
+`conb_1` **tie cells**; instances **omit** unconnected pins rather than writing
+`.PIN()`. The escaped-identifier case is a **soundness** hazard, not a parse
+failure: `\cnt[0] ` terminates on whitespace and is an *atomic scalar net*, so a
+parser that strips the backslash and reads `[0]` as a bit-select aliases distinct
+nets onto one. Full corrections in `docs/silicon-refuter-0806-addendum.md`.
