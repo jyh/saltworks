@@ -15,10 +15,16 @@
 
 # ⟨REPO NAME — Captain's ruling owed⟩
 
-**A packet-switch fabric, proved in Lean 4, compiled to Verilog by a
-verified compiler, hardened to real silicon geometry by tools we do not
-trust — and then checked, inside the kernel, against the netlist those
-tools actually produced.**
+⟨**HEADLINE — DO NOT SHIP AS WRITTEN. One of these four clauses is true
+today.** The intended claim is: *"A packet-switch fabric, proved in Lean 4,
+compiled to Verilog by a verified compiler, hardened to real silicon
+geometry by tools we do not trust — and then checked, inside the kernel,
+against the netlist those tools actually produced."* **Status: the theorem
+is landed; the verified compiler is partly landed (`opt_sem`, the
+certificate suite, the fungibility exhibit); there is NO Verilog emitter
+yet — `emitV` occurs once in the tree, in a comment; and nothing has been
+hardened or checked end to end.** Rewrite it clause by clause against
+landed artifacts at publication time, or ship a smaller true sentence.⟩
 
 Every proof in this repo depends on exactly three axioms — `propext`,
 `Classical.choice`, `Quot.sound` — and the build fails if that changes.
@@ -61,7 +67,9 @@ A single chain, closed at every seam:
         │                  the trusted base, by construction
         ▼
     the netlist            imported back into Lean, ≤300 lines of
-        │                  trusted importer + ~30 cell models         ⟨leg 3 D2⟩
+        │                  trusted importer + the cell models         ⟨leg 3 D2⟩
+        │                  (15/13/68 distinct types across three real
+        │                   submissions — budget the TAIL, not the median)
         ▼
     the check              per-COMBINATIONAL-CONE equivalence, by         ⟨leg 3 D3⟩
                            bit-sliced `decide +kernel`

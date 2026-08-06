@@ -52,7 +52,7 @@ tinytapeout.com/specs/analog/: "each tile is 70€"]`:
   bundle: 70 + 100 + 15. `[INF, arithmetic on the above]`
 - **⚠️ TTSKY26c reports 80 of 80 subsidized PCBs sold.** So the realistic
   budget is **70 + 300 + 15 = €385** for one tile + devkit + shipping, and
-  **€455** for the two tiles our fabric needs. `[INF — the calculator's
+  **€455** for two tiles — ⚠️ SUPERSEDED: 4 tiles (2×2, €280) were bought on 2026-08-06 and the fabric needs ~12% of ONE (§3). `[INF — the calculator's
   "Individual" toggle is client-side and I could not confirm from outside
   an authenticated session whether checkout still honours it. Someone with
   a browser should open `app.tinytapeout.com/calculator` and settle it.]`
@@ -74,8 +74,7 @@ tinytapeout.com/specs/analog/: "each tile is 70€"]`:
 > tiles are bought while only 178 tiles' worth of projects are actually
 > placed `[INF, from the live index: 128 projects, tile-weighted sum 178]`.
 > Reading the design gallery and concluding "the shuttle is half empty"
-> is a mistake. **Buy the tiles this week, independently of whether the
-> design is ready.**
+> is a mistake. ✅ **DONE: 4 tiles (2×2, €280) bought 2026-08-06.**
 
 ---
 
@@ -458,8 +457,9 @@ project lands. `[V-SRC]`
    Measured on those same three real submissions: **exactly 1 `module` and
    1 `endmodule` each.** Post-place-and-route, there is no hierarchy left.
    So *"equivalence per module by `decide +kernel`"* — the phrase in
-   `silicon-design-v1.md`, in this dossier's §1 chain diagram, and in my
-   own README draft — **has no modules left to be "per"**. The
+   `silicon-design-v1.md` and in my own README draft (NOT in this dossier —
+   an earlier version of this note cited a §1 chain diagram that has never
+   existed here; §1 is the shuttle table) — **has no modules left to be "per"**. The
    decomposition into checkable pieces has to be stated some other way,
    and **it is stated nowhere in either freeze.** This is not a detail: the
    whole equivalence strategy rests on decomposing a design that the tools
@@ -522,7 +522,7 @@ project lands. `[V-SRC]`
 
 | # | Action | Where | Blocking? |
 |---|---|---|---|
-| H1 | **Buy the tiles now** (prepurchase) — 222 of 512 left | `app.tinytapeout.com/prepurchase` | **Do this first** |
+| H1 | ~~Buy the tiles~~ ✅ **DONE 2026-08-06 — 4 tiles (2×2), €280.** | `app.tinytapeout.com/prepurchase` | closed |
 | H2 | Create the repo from the template: **"Use this template" → "Create a new repository"** | `github.com/TinyTapeout/ttsky-verilog-template` | yes |
 | H3 | **Enable Actions**: Actions tab → "enable actions" | the new repo | yes |
 | H4 | **Enable Pages**: Settings → Pages → Source: *Deploy from a branch* → **GitHub Actions** | the new repo | yes (else `viewer` fails) |
