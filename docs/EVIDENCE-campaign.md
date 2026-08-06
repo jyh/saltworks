@@ -175,6 +175,34 @@ the unattended story, not blemishes on it.
    commit at 10:08 swept a neighbour's staged files; this seat had already
    adopted it at 09:35 and disclosed its own earlier violation.)
 
+   - ⛔ **THE SECOND HALF, measured live at 12:12 and it is the bigger
+     half: THE LOCK SERIALISES BUILDS, NOT PROCESSES.** One *fully
+     compliant* `saltbuild.sh` invocation ran **five concurrent `lean`
+     children totalling 17.8 GB** (11.2 + 4.5 simultaneously), with the
+     lock held and every rule obeyed. Per-build parallelism is a
+     **multiplier** on top of the single-elaboration cost. **Even a
+     perfectly binding `-M 12000` would permit 5 × 12 GB** — so the `-M`
+     question is *narrower than the exposure*.
+   - **The knobs, measured by the math seat (11:04), read-only:**
+     `lake build -j1` **does not exist** on this toolchain (Lake
+     5.0.0-src+b4812ae — no `-j`, no `--jobs`, no parallelism flag
+     anywhere); a `LEAN_NUM_PROCS`-style throttle **does not exist either**
+     (`strings` over the lake binary yields exactly one `LEAN_*`/`LAKE_*`
+     name, `LEAN_RECURSION_COUNT`). `LEAN_NUM_THREADS` is consumed by the
+     `lean` *child*, which is precisely why it caps that child's task pool
+     and not how many children lake spawns.
+   - ⚠️ **A CORRECTION I OWE:** I called the 09:01 claim *"this lake has no
+     `-j`"* suspect. **It is correct** — math measured it. What I actually
+     measured false was the *second half* of that sentence, *"the task pool
+     IS the job pool"*. **Two claims in one sentence, and I impugned the
+     true one.** Both halves are separated here deliberately.
+   - ✅ **THE ONLY PROCESS-COUNT CONTROL THAT EXISTS IS TARGET SHAPE.**
+     Lake's concurrency comes from *independent modules in the requested
+     closure*, so a targeted build whose dependencies are already built
+     spawns essentially one `lean`. **"Prefer targeted builds while
+     iterating; full builds only at wave exit" was right for a better
+     reason than anyone knew — it is not etiquette, it is the only knob.**
+
 **A fifth lesson, and it bit THREE separate times before noon** — so it is
 structural, not carelessness:
 
