@@ -169,7 +169,22 @@ the unattended story, not blemishes on it.
    an offender without knowing, because a rejected dispatch had already
    launched. *Lesson:* **the working tree and the git index are cross-seat
    resources with no lock** — commit explicit pathspecs only, never
-   `git add -A`.
+   `git add -A`. (Ruled fleet-wide by the maestro at 10:11, after a bare
+   commit at 10:08 swept a neighbour's staged files; this seat had already
+   adopted it at 09:35 and disclosed its own earlier violation.)
+
+**A fifth lesson, and it bit THREE separate times before noon** — so it is
+structural, not carelessness:
+
+5. **A snapshot of another seat's live tree ages in minutes.** Measured
+   instances, all 2026-08-06: math's N7-prep dossier marked two WEIL-TRIO
+   rows `[IN FLIGHT]` that had already landed; three line citations in the
+   same dossier were off by 3, a file called untracked was tracked, and a
+   declaration count was 6 against an actual 13; and this scoreboard
+   inherits the identical hazard by construction (rule 2). *Fix:* **cite
+   commits, not tree state.** A commit hash does not age. Anything read
+   live from another seat's checkout must carry the time it was read and
+   an instruction to believe that seat over the copy.
 4. **The runaway (averted)** — a single *correctly wrapped* elaboration
    reached **30.7 GB RSS** with the lock held and every rule obeyed
    (evidence, 09:49; gone by 09:38:58 per math's independent check, RAM
@@ -224,6 +239,35 @@ testing against an independent model.
 This is worth publishing precisely *because* nobody planned it. Three
 seats, three domains, one instrument missing from all three — and the
 campaign's own discipline surfaced it on day 1 rather than in a postmortem.
+
+### And then the instrument was RUN, the same morning — this is the part that makes it evidence
+
+Math's WEIL-TRIO statement audit (`c4303b8`,
+salt `docs/exploration/weil-trio-audit-0806.md`, 10:26) is the first
+execution of it. **Verdict: no 🔴, no 🟠 — the landed W1, W4Q and W3 exits
+deliver what the freeze promised**, and the two riders that matter are met
+at the bytes (no `IsUnit` on any exit-interface statement; the gcd factor
+never absorbed). *Clean, reported as loudly as red would have been.*
+
+**And it still found three classes of defect that an axiom audit cannot
+see, because none of them changes an axiom count:**
+
+| Grade | Finding | Why `#audit_axioms` is blind to it |
+|---|---|---|
+| ⛔ | The W1 gcd exit is **vacuous on the entire top gcd class** — at `j = e` the bound `2p^e` is strictly *worse* than trivial for every p and e. Intrinsic to Estermann's shape, but N7 sums over exactly those `s`, so **N7 owes an explicit `j = e` case split falling back to the trivial bound.** | A vacuous-but-true theorem has a perfectly clean axiom set. This is the `sp1-lean` `SLTI` failure mode, found by the same lens, in our own corpus. |
+| 🟡 | A module **docstring** states a hypothesis in a form that provably *cannot elaborate*; an executor reading the consuming file's header first — the natural move — would build an object that does not typecheck against the exit. | Docstrings carry no axioms. This one has a direct route to a wasted wave. |
+| 🟡 | `HasTwoFormGcdBound q f` is **content-free at q = 0** (true for every f) and undocumented. | A degenerate instance is still a proof. |
+
+Plus a distinction worth adopting fleet-wide: one finding was graded 🟡
+rather than 🟠 **because the design freeze had asked for the weaker
+disjunction — "the weakness is in the freeze, the delivery is faithful."**
+Grading a defect against *who owns it* keeps an audit from punishing a seat
+for obeying its brief.
+
+**So the claim is no longer "we think statement auditing matters." It is:
+we built the instrument, ran it once, and it immediately returned a
+vacuity, a wasted-wave hazard and a degenerate predicate — none of which
+would have moved an axiom count by one.**
 
 ⟨README: this belongs beside the `sp1-lean` citation in §9, and it is a
 stronger argument than the citation alone, because it is ours and it is
