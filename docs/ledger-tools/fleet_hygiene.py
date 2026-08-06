@@ -118,7 +118,8 @@ def machine_state() -> dict:
     state = {"procs": [], "lock_held": False, "lock_pid": None,
              "lock_orphaned": None, "lock_age_s": None,
              "ram_free_gb": None, "ram_inactive_gb": None,
-             "swap_used_gb": None, "swap_free_gb": None}
+             "swap_used_gb": None, "swap_free_gb": None,
+             "swap_total_gb": None}
 
     try:
         out = subprocess.run(["ps", "-eo", "pid,ppid,rss,etime,args"],
@@ -258,7 +259,19 @@ def machine_state() -> dict:
                 state["ram_inactive_gb"] = int(line.split()[2].strip(".")) * page / 1073741824
         sw = sp.run(["sysctl", "-n", "vm.swapusage"], capture_output=True,
                     text=True, timeout=10).stdout
-        for tok, key in (("used =", "swap_used_gb"), ("free =", "swap_free_gb")):
+        # `total` is READ BECAUSE OF THE MAC MINI, 2026-08-06 15:44. macOS
+        # grows its swap FILE on demand: a machine that has never paged out
+        # reports `total = 0.00M  used = 0.00M  free = 0.00M`. The alarm below
+        # keyed on FREE alone, so on the Mini's first hours it read
+        # "swap 0.0 GB free" — the loudest possible warning for the healthiest
+        # possible state. On the laptop the file had already grown (37 GB in
+        # use at OOM #2), so `free` was non-zero and the defect never fired.
+        # Same family as the RAM `free`-vs-`available` defect twenty lines up:
+        # the instrument answers a narrower question (space left in a file that
+        # is grown on demand) than the one that matters (is the machine
+        # paging?). THE SIGNAL IS `used`, NOT `free`.
+        for tok, key in (("used =", "swap_used_gb"), ("free =", "swap_free_gb"),
+                         ("total =", "swap_total_gb")):
             if tok in sw:
                 val = sw.split(tok)[1].split()[0]
                 state[key] = float(val.rstrip("M")) / 1024 if val.endswith("M") else float(val.rstrip("G"))
@@ -288,8 +301,14 @@ def machine_report(st: dict) -> list[str]:
         out.append(f"| **RAM available** (free + inactive — *the figure that "
                    f"matters on macOS*) | **{st['ram_free_gb'] + inact:.1f} GB** |")
     if st["swap_used_gb"] is not None:
-        out.append(f"| Swap used / free | {st['swap_used_gb']:.1f} GB / "
-                   f"{st['swap_free_gb']:.1f} GB |")
+        if (st.get("swap_total_gb") or 0.0) == 0.0:
+            out.append("| Swap | **none allocated** — macOS has not needed to "
+                       "page out. *Not a shortage: `free = 0` because "
+                       "`total = 0`.* |")
+        else:
+            out.append(f"| Swap used / free / total | {st['swap_used_gb']:.1f} GB / "
+                       f"{st['swap_free_gb']:.1f} GB / "
+                       f"{st['swap_total_gb']:.1f} GB |")
     out.append("")
     if st.get("lock_orphaned"):
         out.append(f"⛔⛔ **THE FLEET BUILD LOCK IS ORPHANED — EVERY QUEUED BUILD IS "
@@ -375,10 +394,14 @@ def machine_report(st: dict) -> list[str]:
                        "spawns. A single wrapped build is therefore not bounded "
                        "by one elaboration's cost.")
             out.append("")
-    if st["swap_free_gb"] is not None and st["swap_free_gb"] < 2.0:
-        out.append(f"⚠️ **Swap has only {st['swap_free_gb']:.1f} GB free** — RAM may "
-                   f"read healthy while the machine is still fragile. macOS does not "
-                   f"eagerly drain swap after a kill.")
+    # The trigger is USED, not FREE. A zero-total swap file is the absence of
+    # paging, not the exhaustion of it (see the note in machine_state).
+    if (st.get("swap_total_gb") or 0.0) > 0.0 and (st["swap_used_gb"] or 0.0) > 1.0:
+        out.append(f"⚠️ **The machine is PAGING — {st['swap_used_gb']:.1f} GB of swap "
+                   f"in use** ({st['swap_free_gb']:.1f} GB free of a "
+                   f"{st['swap_total_gb']:.1f} GB file). RAM may read healthy while "
+                   f"the machine is still fragile: macOS does not eagerly drain swap "
+                   f"after a kill, so this stays elevated after the pressure passes.")
         out.append("")
     return out
 
@@ -450,7 +473,9 @@ def build(args) -> str:
                 out.append(f"machine   {n} lean proc(s), all wrapped · lock "
                            f"{lockstr} · RAM {avail:.0f}GB available "
                            f"(free {st['ram_free_gb']:.1f}) · "
-                           f"swap {st['swap_free_gb']:.1f}GB free")
+                           + ("swap none" if (st.get("swap_total_gb") or 0.0) == 0.0
+                              else f"swap {st['swap_used_gb']:.1f}GB USED "
+                                   f"({st['swap_free_gb']:.1f} free)"))
         for name, seat, idle_h, posted, post_h in rows:
             flag = "STALLED" if idle_h > QUIET_HOURS else (
                 "SILENT" if (post_h is None or post_h > QUIET_HOURS) else "ok")
