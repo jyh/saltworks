@@ -170,7 +170,8 @@ def machine_state() -> dict:
             if m:
                 cap_mb = int(m.group(1))
             state["procs"].append({
-                "pid": p["pid"], "rss_gb": p["rss_gb"], "etime": p["etime"],
+                "pid": p["pid"], "ppid_lake": p["ppid"], "rss_gb": p["rss_gb"],
+                "etime": p["etime"],
                 "args": args[:120], "wrapped": under_wrapper(p["pid"]),
                 "cap_mb": cap_mb,
                 "over_cap": bool(cap_mb and p["rss_gb"] * 1024 > cap_mb * 1.05),
@@ -269,9 +270,27 @@ def machine_report(st: dict) -> list[str]:
                    f"binding question is settled by a deliberate over-cap probe, "
                    f"not by observation of well-behaved runs.")
         out.append("")
-    else:
-        out.append("✅ No Lean or lake process running.")
+
+    # --- per-build parallelism: the lock serialises BUILDS, not PROCESSES --
+    if procs:
+        by_parent: dict[int, list] = {}
+        for p in procs:
+            by_parent.setdefault(p.get("ppid_lake") or 0, []).append(p)
+        heavy = sorted(procs, key=lambda p: -p["rss_gb"])[:4]
+        total = sum(p["rss_gb"] for p in procs)
+        out.append(f"**Concurrent Lean processes: {len(procs)}, "
+                   f"{total:.1f} GB combined.** Largest: "
+                   + ", ".join(f"{p['rss_gb']:.1f} GB" for p in heavy) + ".")
         out.append("")
+        if len(procs) > 2 and total > 12:
+            out.append("⚠️ **THE LOCK SERIALISES BUILDS, NOT PROCESSES.** One "
+                       "compliant `saltbuild.sh` invocation can run several "
+                       "`lean` children at once, and their memory ADDS. "
+                       "`LEAN_NUM_THREADS` caps Lean's internal task pool — it "
+                       "is not observed to cap how many `lean` processes lake "
+                       "spawns. A single wrapped build is therefore not bounded "
+                       "by one elaboration's cost.")
+            out.append("")
     if st["swap_free_gb"] is not None and st["swap_free_gb"] < 2.0:
         out.append(f"⚠️ **Swap has only {st['swap_free_gb']:.1f} GB free** — RAM may "
                    f"read healthy while the machine is still fragile. macOS does not "
