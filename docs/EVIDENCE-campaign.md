@@ -359,7 +359,7 @@ A campaign that claims a method should publish what the method caught. Day 1:
 | — the fix is a **frame-format decision, not a logic patch** | The element cannot distinguish "idle" from "destination bit 0" because **nothing in the frame says so**. The classical answer, implied by the 1988 framing, is a **leading activity bit** with routing gated on it. It had to be decided **before D3.5's refinement statement is written.** | Silicon's to make |
 | — ✅ **RULED, 11:13** | **The serial frame leads with an ACTIVITY BIT, routing gated on it** — the 1988 practice, and the only way the element distinguishes idle from destination-bit-0. **And the refinement statement carries the no-conflict hypothesis VISIBLY.** JYH may override; until then it governs. | maestro |
 | — ✅ **FIXED AND VERIFIED, 12:31** | `19df872`. Verified **the way it was found** — by enumeration over every legal configuration under the no-conflict hypothesis: **FIXED = 0 mismatches, OLD = 28**, and the originally reported case reproduces exactly. The frame now leads with the activity bit, so an idle input claims nothing and an unclaimed output drives 0 — **idleness propagates downstream as a zero activity bit, which is what makes the fix compositional rather than local.** Cost: 8 cells/95.09 µm² → 18 cells/172.67 µm². | silicon |
-| — **the loop, closed end to end in 100 minutes** | enumeration finds a live bug (compiler, 10:52) → recorded with the reason the proof could not catch it (evidence, 11:38) → ruled as a frame-format change with the hypothesis made visible (maestro, 11:13) → **fixed, and re-verified by the same enumeration that found it** (silicon, 12:31). **No human outside the fleet, and the outcome is a design decision rather than a patch over a symptom.** | — |
+| — **the loop, closed end to end in 39 min 51 s** — *by commit clock, the only non-drifting one* | enumeration finds a live bug (compiler, 10:52) → recorded with the reason the proof could not catch it (evidence, 11:38) → ruled as a frame-format change with the hypothesis made visible (maestro, 11:13) → **fixed, and re-verified by the same enumeration that found it** (silicon, 12:31). **No human outside the fleet, and the outcome is a design decision rather than a patch over a symptom.** | — |
 | — and the proof consequence either way | **The no-conflict hypothesis must be visible in the refinement statement even though the conflict *logic* is unnecessary.** An FSM certificate that never exercises the conflict path while claiming to refine `line` **is the `sp1-lean` failure mode precisely.** | compiler seat |
 | A statement-level vacuity in a landed exit | W1's gcd exit is vacuous on the entire top gcd class; N7 sums over exactly those `s` | math seat's statement audit (`c4303b8`) |
 | Two O(g²) evaluators published as linear | `runP`/`runS` extend the environment with `env ++ [..]`; measured curve is g², not g. At D4's scale the linear law predicts ~6.6 s against a real ~40 s | compiler seat, **refuting its own earlier 100× claim as a probe artifact** |
@@ -572,6 +572,33 @@ would have moved an axiom count by one.**
 ⟨README: this belongs beside the `sp1-lean` citation in §9, and it is a
 stronger argument than the citation alone, because it is ours and it is
 dated.⟩
+
+---
+
+## DOES THE CLOCK DRIFT CORRUPT THE DELIVERABLE? — MEASURED, AND NO
+
+Four seats stamped bus posts up to 2 h into the future today. Leg 1's
+deliverable *is* "a timestamped ledger", so the question is not academic
+and nobody had answered it. The math seat measured it (11:58) rather than
+speculating, and the boundary is exact:
+
+**References to `FLEET.md` across `docs/ledger-tools/`:**
+`fleet_hygiene.py` **12** · `human_time.py` 0 · `landed.py` 0 ·
+`ledger_common.py` 0 · `silence_windows.py` 0 · `token_meter.py` 0 ·
+`selftest.py` 0.
+
+| Surface | Verdict |
+|---|---|
+| **The deliverable** — token report, silence windows, human-time blocks, the LANDED table | ✅ **CLEAN.** Times come from **session-transcript records** (`rec["timestamp"]`) and **git**. Neither is typed by a seat, so neither can inherit our drift. |
+| **The watchdog** — `fleet_hygiene.py` | ⚠️ **NOT clean by design** — it *parses* bus stamps (`scan_fleet_md`), which is exactly why it rendered negative ages. **A defect in the instrument that reads us, not in the record of what we did.** |
+| **Human-facing prose** — narrative "at 13:52 we…" in publishable docs | ⛔ **NOT clean.** Wrong by up to two hours, in documents intended for publication. **This is the live exposure and it is mine.** |
+
+**The rule that retires it, and it is `landed.py`'s rule generalised:
+a stamp nobody types is a stamp nobody can drift.** Every narrative time in
+a published document should cite a commit, not a bus post. The flagged
+causal chain in the defects table above has been re-derived that way — it
+reads **39 min 51 s** by commit clock, not the "100 minutes" and then "two
+hours" I published from bus stamps.
 
 ---
 
