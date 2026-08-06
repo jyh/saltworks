@@ -39,6 +39,15 @@ def Op.eval (env : Env) : Op → Bool
   | .or  a b => env a || env b
   | .xor a b => env a ^^ env b
 
+/-- An operation depends only on the nets it reads. -/
+theorem Op.eval_congr {env₁ env₂ : Env} :
+    (o : Op) → (∀ n ∈ o.fanin, env₁ n = env₂ n) → o.eval env₁ = o.eval env₂
+  | .const _, _ => rfl
+  | .not a,   h => by simp [Op.eval, h a (by simp [Op.fanin])]
+  | .and a b, h => by simp [Op.eval, h a (by simp [Op.fanin]), h b (by simp [Op.fanin])]
+  | .or  a b, h => by simp [Op.eval, h a (by simp [Op.fanin]), h b (by simp [Op.fanin])]
+  | .xor a b, h => by simp [Op.eval, h a (by simp [Op.fanin]), h b (by simp [Op.fanin])]
+
 /-- Point update. -/
 def upd (env : Env) (n : Net) (v : Bool) : Env := fun j => if j = n then v else env j
 
