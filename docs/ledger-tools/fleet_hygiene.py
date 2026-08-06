@@ -24,7 +24,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
+import time
 from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
@@ -114,6 +116,7 @@ def machine_state() -> dict:
     import subprocess
 
     state = {"procs": [], "lock_held": False, "lock_pid": None,
+             "lock_orphaned": None, "lock_age_s": None,
              "ram_free_gb": None, "swap_used_gb": None, "swap_free_gb": None}
 
     try:
@@ -179,6 +182,23 @@ def machine_state() -> dict:
     except Exception:
         pass
 
+    # --- the lock, and whether it is ORPHANED -----------------------------
+    #
+    # THE DEADLOCK THIS CATCHES (live on 2026-08-06 13:18, third occurrence):
+    # saltbuild.sh takes the lock with `mkdir` and THEN writes `pid` — two
+    # operations. Anything that hard-kills the holder in between (a
+    # fleet-wide kill, a harness timeout, a SIGKILL) leaves a lock
+    # directory with NO pid file. The wrapper's reaper is
+    #     if [ -f "$LOCK/pid" ] && ! kill -0 "$(cat "$LOCK/pid")"; then rm -rf
+    # so it reaps only when a pid file EXISTS and names a dead process.
+    # **A pid-less lock is never reaped, by construction, and deadlocks the
+    # entire fleet permanently.** Three fleet-wide kills today made it
+    # certain.
+    #
+    # The legitimate pid-less window is MICROSECONDS. Anything longer is
+    # the orphan state. Reporting "lock held" for it — which this detector
+    # did until now — is indistinguishable from healthy, which is exactly
+    # the failure mode this directory exists to catch.
     if BUILD_LOCK.is_dir():
         state["lock_held"] = True
         pid_file = BUILD_LOCK / "pid"
@@ -187,6 +207,23 @@ def machine_state() -> dict:
                 state["lock_pid"] = int(pid_file.read_text().strip())
             except Exception:
                 pass
+            if state["lock_pid"]:
+                try:
+                    os.kill(state["lock_pid"], 0)
+                except ProcessLookupError:
+                    state["lock_orphaned"] = "pid %d is dead" % state["lock_pid"]
+                except PermissionError:
+                    pass
+        else:
+            try:
+                age = time.time() - BUILD_LOCK.stat().st_mtime
+            except Exception:
+                age = 0.0
+            state["lock_age_s"] = age
+            if age > 5:
+                state["lock_orphaned"] = (
+                    "NO pid file, %.0f s old — the wrapper's reaper cannot "
+                    "reap this, by construction" % age)
 
     try:
         import subprocess as sp
@@ -219,14 +256,25 @@ def machine_report(st: dict) -> list[str]:
     out.append(f"| Lean/lake processes running | **{len(procs)}** "
                f"({len(procs) - len(bare)} under `saltbuild.sh`, "
                f"**{len(bare)} bare**) |")
-    out.append(f"| Fleet build lock (`{BUILD_LOCK}`) | "
-               f"{'HELD by pid ' + str(st['lock_pid']) if st['lock_held'] else 'not held'} |")
+    lock_cell = ("**⛔ ORPHANED — " + st["lock_orphaned"] + "**") if st.get("lock_orphaned") \
+        else ("HELD by pid " + str(st["lock_pid"]) if st["lock_held"] else "not held")
+    out.append(f"| Fleet build lock (`{BUILD_LOCK}`) | {lock_cell} |")
     if st["ram_free_gb"] is not None:
         out.append(f"| RAM free | {st['ram_free_gb']:.1f} GB |")
     if st["swap_used_gb"] is not None:
         out.append(f"| Swap used / free | {st['swap_used_gb']:.1f} GB / "
                    f"{st['swap_free_gb']:.1f} GB |")
     out.append("")
+    if st.get("lock_orphaned"):
+        out.append(f"⛔⛔ **THE FLEET BUILD LOCK IS ORPHANED — EVERY QUEUED BUILD IS "
+                   f"DEADLOCKED AND THE MACHINE MAY BE COMPLETELY IDLE.** "
+                   f"{st['lock_orphaned']}. **The wrapper's reaper only reaps a lock "
+                   f"whose `pid` file names a DEAD process — a lock with NO pid file "
+                   f"is never reaped, by construction.** Verify no `lean`/`lake` is "
+                   f"running, then `rmdir {BUILD_LOCK}`. *Clearing a stale runtime "
+                   f"artifact is not editing the wrapper.*")
+        out.append("")
+
     if bare:
         out.append(f"⛔ **{len(bare)} BARE Lean/lake process(es) — no `saltbuild.sh` "
                    f"anywhere in their ancestry. This violates the standing order "
