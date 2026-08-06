@@ -1,0 +1,31 @@
+
+7. Printing statistics.
+
+=== comparator ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+       24        - wires
+       52        - wire bits
+        4        - public wires
+       32        - public wire bits
+        4        - ports
+       32        - port bits
+       36  272.762 cells
+        1    10.01   sky130_fd_sc_hd__a222oi_1
+        1    7.507   sky130_fd_sc_hd__a22oi_1
+        1    6.256   sky130_fd_sc_hd__a31oi_1
+        1    6.256   sky130_fd_sc_hd__and2_0
+        9   33.782   sky130_fd_sc_hd__clkinv_1
+        1    6.256   sky130_fd_sc_hd__lpflow_inputiso1p_1
+        1    6.256   sky130_fd_sc_hd__lpflow_isobufsrc_1
+       12   135.13   sky130_fd_sc_hd__mux2_1
+        2   20.019   sky130_fd_sc_hd__mux2i_1
+        2    7.507   sky130_fd_sc_hd__nand2_1
+        4   25.024   sky130_fd_sc_hd__o22ai_1
+        1    8.758   sky130_fd_sc_hd__o2bb2ai_1
+
+   Chip area for module '\comparator': 272.761600
+     of which used for sequential elements: 0.000000 (0.00%)
+
