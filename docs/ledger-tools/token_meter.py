@@ -197,8 +197,25 @@ def build(args) -> str:
             add(rows["subagents / workflow agents" if e.subagent else "main loop"], e)
         out.extend(table(rows, "Where"))
         w("")
-        w("_The fleet's work is done by the agents, and the table shows it. "
-          "A meter that reads only the session file misses most of the spend._")
+        # Say what THIS window shows, never a remembered headline. An
+        # editorial caption that contradicts the table above it is exactly
+        # the failure this whole directory exists to prevent.
+        sub = rows.get("subagents / workflow agents", zero())
+        main = rows.get("main loop", zero())
+        tot_req = sub["requests"] + main["requests"]
+        tot_out = sub["output"] + main["output"]
+        if tot_req:
+            w(f"_In this window the subagents made "
+              f"**{100*sub['requests']/tot_req:.0f}% of the requests** and "
+              f"**{100*sub['output']/tot_out:.0f}% of the output tokens** "
+              f"(main loop: {100*main['requests']/tot_req:.0f}% / "
+              f"{100*main['output']/tot_out:.0f}%). "
+              + ("Design and orchestration sat in the main loops; the agents "
+                 "were many but individually cheap."
+                 if sub["output"] < main["output"] else
+                 "The work is done by the agents, and a meter that reads only "
+                 "the session files misses most of the spend.")
+              + "_")
         w("")
 
     # --- by wave -----------------------------------------------------------
