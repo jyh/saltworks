@@ -220,15 +220,29 @@ ceiling that is not the price. `[V-SRC]`
 > experimented with for free — you only need to have *bought* the tiles to
 > submit. `[V-SRC, FAQ]`
 
-> **✅ AND NOW THERE IS REAL DATA, WHICH VINDICATES THE 2×2 PURCHASE.**
-> The compiler seat measured **three genuine TTSKY26c submissions** on this
-> machine (`/private/tmp/ttsub/*/tt_submission/*.v`, FLEET.md 10:35):
-> **4,220 / 4,645 / 5,344 cell instances** each. Against the FAQ's
-> ~1,000 gates per tile, a real submission is a **4–5 tile design** — so
-> the 4 tiles (2×2, €280) already purchased are correctly sized for
-> something of that class, and `1x2` would very likely not have been.
-> **The €280 was not over-buying.** `[measured, compiler seat, on real
-> artifacts rather than estimates]`
+> **⚠️ REAL DATA ARRIVED IN TWO PARTS AND THE SECOND PART REVERSES MY
+> FIRST READING. Both are recorded.**
+>
+> **Part 1 (compiler seat, 10:35)** — three genuine TTSKY26c submissions on
+> this machine carry **4,220 / 4,645 / 5,344 cell instances** each. Against
+> the FAQ's ~1,000 gates per tile, *a typical real submission is a 4–5 tile
+> design*. **I concluded from this that the 2×2 purchase was correctly
+> sized and that €280 was not over-buying.**
+>
+> **Part 2 (silicon seat, 12:31) — and it makes that conclusion wrong for
+> OUR design.** The fixed bit-serial switch element costs 18 cells /
+> 172.67 µm² (up from 8 / 95.09 after the activity-bit fix), and **the whole
+> fabric measures ~216 cells / ~2,072 µm² — about 12% of ONE tile, against
+> the four bought.**
+>
+> **The honest statement, replacing mine:** other people's submissions are
+> 4–5 tiles; *ours is a twelfth of one*. The 2×2 purchase is therefore
+> **generous rather than necessary** — it buys headroom for the RISC-V
+> datapath stretch, a larger fabric, or a second exhibit on the same tile
+> budget. It was not wrong to buy, and it was **not** justified by the
+> reasoning I gave at 11:30. A number measured on other people's artifacts
+> did not transfer to ours, and I published the transfer before anyone
+> measured ours.
 
 **Area failure is the most common failure mode**, and its symptoms are
 named: *"placement failures; routing congestion; high utilization
