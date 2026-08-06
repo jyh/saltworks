@@ -12,6 +12,11 @@
 #    info.yaml. Nothing in TinyTapeout's flow checks that they agree.
 #    `../validate.py` does — run it after touching either.
 
+# DELIBERATE DIVERGENCE FROM THE TEMPLATE, so it does not read as an oversight:
+# the template declares `FST ?= -fst` and then never references it, while its
+# tb.v writes `tb.fst` — and without the runtime flag iverilog puts VCD-format
+# bytes in a file named .fst. We dump `tb.vcd` and drop the dead variable, which
+# is self-consistent. Nothing in TT's CI consumes the waveform.
 SIM ?= icarus
 TOPLEVEL_LANG ?= verilog
 SRC_DIR = $(PWD)/../src

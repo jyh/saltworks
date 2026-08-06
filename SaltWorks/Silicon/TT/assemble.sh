@@ -33,6 +33,10 @@ cp "$HERE/test/Makefile"            "$TARGET/test/Makefile"
 cp "$HERE/test/tb.v"                "$TARGET/test/tb.v"
 cp "$HERE/test/test.py"             "$TARGET/test/test.py"
 cp "$HERE/test/requirements.txt"    "$TARGET/test/requirements.txt"
+cp "$HERE/test/README.md"           "$TARGET/test/README.md"
+cp "$HERE/README.md"                "$TARGET/README.md"
+cp "$HERE/docs/submission-checklist.md" "$TARGET/docs/submission-checklist.md"
+cp "$HERE/docs/hardening-choices.md"    "$TARGET/docs/hardening-choices.md"
 
 # Derived: the single source of truth is RTL/, which is what synth.sh reads and
 # what the imported netlist under proof was built from.
