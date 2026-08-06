@@ -60,9 +60,31 @@ netlist we prove things about is produced by whatever `main` said that morning.
 the local dev loop that is harmless — the netlist is untrusted by construction and
 a bad one fails the equivalence check rather than producing a false theorem. It
 stops being harmless the moment a **cell model** written against one revision is
-used to certify a netlist built by another. ⇒ Before D5 closes: verify the ~30
-`sky130_fd_sc_hd` cell models are revision-invariant, or re-pin `synth.sh` to
-`8afc8346…` and re-derive. **Not yet checked — stated, not assumed.**
+used to certify a netlist built by another.
+
+✅ **CHECKED, AND IT CLOSES — both revisions installed and compared file by file.**
+
+| | |
+|---|---|
+| files differing across the whole PDK | **4,868** — the revisions are genuinely distinct |
+| of those, inside `sky130_fd_sc_hd` | **893** |
+| …in `mag/`, `maglef/`, `gds/`, `spice/` | **893 — all of them** |
+| …in `lib/` or `verilog/` | **0** |
+
+The liberty corner we synthesize against (`sky130_fd_sc_hd__tt_025C_1v80.lib`)
+and the behavioural models the gate-level sim executes (`sky130_fd_sc_hd.v`,
+`primitives.v`) are **byte-identical between the two revisions**, and every
+`function` / `next_state` for our **13 modelled cells** matches.
+
+⇒ **The precheck-vs-hardening distinction does not reach our cell models.** It is
+real, and it lives entirely in layout and extraction views — which matter for DRC,
+LVS and GDS, and not for the logical chain. `synth.sh` may stay pinned where it
+is. *Established between these two revisions only; a third would need the same
+check, which is now one command.*
+
+**Also corrected here:** the freeze's estimate of "~30 cell models" is **13** —
+`clkinv_1 nand2_1 and2_0 a22oi_1 a31oi_1 a222oi_1 o22ai_1 o2bb2ai_1 mux2_1
+mux2i_1 lpflow_inputiso1p_1 lpflow_isobufsrc_1 dfxtp_1`.
 
 ### C.3 Gate level — now exercised locally, but not in the form that ships
 
