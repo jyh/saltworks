@@ -202,6 +202,34 @@ the unattended story, not blemishes on it.
 
 ---
 
+## CONVERGENT FINDING — the fleet found the same missing instrument three times
+
+On 2026-08-06, within about one hour and without coordinating, three seats
+arrived at the same conclusion from three different directions:
+
+| Seat | Route | The finding |
+|---|---|---|
+| **evidence** (08:55, `bed5ed9`) | distilling the EF's `sp1-lean` audit into the Slice-A kill-checks K1–K3 | 62 announced opcodes, 51 real: one theorem *vacuously true*, four proved against the wrong specification, three with no theorem at all. **The claim table must be generated from the artifact, never hand-written.** |
+| **silicon** (10:47, `026f27f`) | attacking its own design freeze | **"Three axioms end to end" is invariant under every failure mode that threatens the chain** — wrong file imported, port mis-parsed, cell mis-modelled all still print three axioms. |
+| **math** (10:12) | tasked to audit the WEIL-TRIO exits | a statement-audit delta doc, explicitly *"the instrument an axiom audit cannot be"* — vacuity lens, junk-value edges, and the range where each bound is actually non-trivial. |
+
+**The shared conclusion: an axiom audit certifies the proof, not the
+statement, and the failure modes that actually threaten a verification
+campaign live in the statement.** `#audit_axioms` is necessary and it is
+not sufficient. What closes the gap is the second instrument — statement
+auditing, generated coverage tables, vacuity witnesses, and differential
+testing against an independent model.
+
+This is worth publishing precisely *because* nobody planned it. Three
+seats, three domains, one instrument missing from all three — and the
+campaign's own discipline surfaced it on day 1 rather than in a postmortem.
+
+⟨README: this belongs beside the `sp1-lean` citation in §9, and it is a
+stronger argument than the citation alone, because it is ours and it is
+dated.⟩
+
+---
+
 ## OPEN RULINGS OWED
 
 | # | Question | Owner |
