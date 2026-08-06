@@ -241,6 +241,71 @@ with tempfile.TemporaryDirectory() as tmp:
                              datetime(2026, 8, 2, tzinfo=TZ), stats.corpus_start)
     check(not early.observed, "SILENCE: pre-transcript commit was not marked unobserved")
 
+    # ---- record coverage: a HOLE IN THE MIDDLE, the migration failure -----
+    # §E of the charter modelled "unobserved ≠ silent" only for commits
+    # PREDATING the record. The 2026-08-06 laptop→Mini migration produced the
+    # other direction, and these checks pin the detector that closes it.
+    trace = lc.activity_trace([pdir])
+    check(len(trace) > len(filtered),
+          "COVERAGE: activity_trace should see every record, not only human ones")
+    check(trace == sorted(trace), "COVERAGE: activity_trace is not sorted")
+
+    class FakeCommit:
+        def __init__(self, when, sha):
+            self.when = when
+            self.sha = sha
+            self.subject = sha
+            self.insertions = 0
+            self.ext_insertions = 0
+
+    inside = FakeCommit(trace[len(trace) // 2], "inside")
+    # a hole one full day past the fixture's last record
+    hole = FakeCommit(trace[-1] + timedelta(days=1), "hole")
+
+    holes = lc.unrecorded_commits([inside, hole], trace)
+    check([c.sha for c, _ in holes] == ["hole"],
+          f"COVERAGE: expected only the hole to flag, got {[c.sha for c, _ in holes]}")
+
+    # the boundary is a real boundary, checked on BOTH sides of it
+    near = FakeCommit(trace[-1] + timedelta(seconds=lc.RECORD_TOL_S - 30), "near")
+    far = FakeCommit(trace[-1] + timedelta(seconds=lc.RECORD_TOL_S + 30), "far")
+    check([c.sha for c, _ in lc.unrecorded_commits([near, far], trace)] == ["far"],
+          "COVERAGE: the tolerance boundary does not bind on both sides")
+
+    # AND THE GUARD ON THE SCANNER ITSELF: if the record format ever changes,
+    # the scan must RAISE, not return an empty trace that reads as "clean".
+    # (The first version of activity_trace did exactly that on these fixtures.)
+    blind = Path(tmp) / "-Users-jyh-projects-claude-blindtest"
+    blind.mkdir()
+    (blind / "x.jsonl").write_text('{"type":"user","stamp":"2026-08-01T00:00:00Z"}\n')
+    try:
+        lc.activity_trace([blind])
+        check(False, "COVERAGE: a scanner that extracted ZERO stamps did not raise")
+    except ValueError:
+        check(True, "")
+
+    # AN EMPTY TRACE MUST FLAG EVERYTHING. A detector that reports "no holes"
+    # when it has no record at all is the day-1 failure mode exactly: an
+    # instrument reporting success it has not verified.
+    check(len(lc.unrecorded_commits([inside, hole], [])) == 2,
+          "COVERAGE: an EMPTY trace reported no holes — the green-tick failure")
+
+    # the live calibration must SEE the two populations separate, and must
+    # refuse to bless a tolerance that no longer separates them
+    sep = lc.separation([d for _, d in lc.record_distances([inside, hole], trace)])
+    check(sep["n_below"] == 1 and sep["n_above"] == 1,
+          f"COVERAGE: separation miscounted, got {sep}")
+    check(sep["best_above"] > sep["worst_below"],
+          "COVERAGE: separation reports an inverted gap")
+
+    # fmt_dur_h must never round a sub-threshold window UP across a bucket
+    check(lc.fmt_dur_h(59.14 * 60) == "59 min",
+          f"FORMAT: 59.14 min printed as {lc.fmt_dur_h(59.14*60)!r} — the 1.0 h defect")
+    check(lc.fmt_dur_h(3599) == "59 min",
+          f"FORMAT: 3599 s printed as {lc.fmt_dur_h(3599)!r}, must not read as an hour")
+    check(lc.fmt_dur_h(20.9 * 3600).startswith("20h"),
+          f"FORMAT: the 20.9 h exhibit now prints as {lc.fmt_dur_h(20.9*3600)!r}")
+
     # dedup + subagent inclusion
     events, ustats = usage_events([pdir])
     check(len(events) == 2, f"USAGE: expected 2 requests, got {len(events)}")

@@ -562,7 +562,154 @@ def fmt_hours(seconds: float) -> str:
 
 
 def fmt_dur_h(seconds: float) -> str:
-    return f"{seconds / 3600:.1f} h"
+    """A duration that CANNOT round across a bucket boundary.
+
+    §2 of the silence ledger buckets at 1 / 2 / 4 / 8 / 12 h. The old form
+    here was ``f"{seconds/3600:.1f} h"``, which printed a **59.14-minute**
+    window as **"1.0 h"** in §4 beside a ``≥ 1 h → 0 commits`` row computed
+    from the same run. Two correct tables that read as contradicting each
+    other — measured 2026-08-06, when the campaign's longest window to date
+    came in at 0.9856 h and **missed the headline bucket by 51 seconds**.
+
+    Below an hour the unit is minutes; at or above it, hours and minutes are
+    printed exactly. Both branches TRUNCATE, so a duration is never rounded
+    UP into a threshold it did not reach.
+    """
+    if seconds < 3600:
+        return f"{int(seconds // 60)} min"
+    return fmt_hours(seconds)
+
+
+# --- record coverage: is a silence MEASURED, or merely UNRECORDED? ---------
+#
+# Charter §E is "unobserved ≠ silent", and until 2026-08-06 this code modelled
+# it in one direction only: a commit PREDATING the earliest readable
+# transcript is excluded from every share. The laptop→Mac-Mini migration that
+# afternoon produced the other direction — a hole in the MIDDLE. The runbook
+# re-synced the repos and the kit before cutover but not `~/.claude/`, so the
+# transcript record stopped at 14:07:56 while git carried work to 14:30:08.
+# The ledger read the difference as the campaign's longest silence window.
+#
+# THE RULE THAT SEPARATES THEM NEEDS NO NEW DATA: a commit is made BY a
+# session, and a session writes records. So a commit sitting in a stretch
+# where NO personal-lane session wrote anything at all is proof of a hole in
+# the record — not evidence that nobody was directing.
+#
+# CALIBRATED BEFORE IT WAS SHIPPED, over 862 commits spanning the whole leg-1
+# harvest window and the campaign to date:
+#
+#     median  0.4 s      p90  2.2 s      p99  5.1 s
+#     largest normal commit   3.08 min
+#     the migration hole     22.19 min
+#
+# The default 5-minute tolerance therefore sits in a MEASURED VOID — above
+# every one of the 861 normal commits and 7× below the one real hole. It
+# flagged exactly 1 of 862, and that one was identified independently first.
+
+RECORD_TOL_S = 300
+
+# Compact (`"timestamp":"…"`) is what the harness writes; the spaced form is
+# what `json.dump` writes, which is what the SELF-TEST fixtures are made of.
+# The first version of this scanner matched the compact form with `str.find`
+# and returned an EMPTY trace on the fixtures — i.e. "no holes found",
+# cheerfully, from a parser that had matched nothing at all. That is the day-1
+# failure mode in the very instrument written to catch it, so the guard below
+# is not decoration: a scan that reads lines and extracts no stamp RAISES.
+_TS_RE = re.compile(r'"timestamp"\s*:\s*"([^"]{19,32})"')
+
+
+def activity_trace(project_dirs) -> list[datetime]:
+    """Every moment ANY personal-lane session wrote a record, of any type.
+
+    Human or harness, session or subagent — this is liveness, not presence.
+    Timestamps are lifted with ``str.find`` rather than ``json.loads``: it is
+    a full scan of ~2 GB, the field is a fixed prefix, and — the part that
+    matters — **nothing here interprets the record, so nothing here can
+    misclassify one.** The classification questions all live in
+    :func:`classify_user_record`; this function deliberately asks none of
+    them.
+    """
+    raw: list[str] = []
+    lines_read = 0
+    for d in project_dirs:
+        if is_employer_lane(Path(d).name):  # the firewall, restated locally
+            continue
+        for f in list(session_files(Path(d))) + list(subagent_files(Path(d))):
+            with open(f, "r", errors="replace") as fh:
+                for line in fh:
+                    lines_read += 1
+                    m = _TS_RE.search(line)
+                    if m:
+                        raw.append(m.group(1))
+    if lines_read and not raw:
+        raise ValueError(
+            "activity_trace read %d transcript lines and extracted ZERO "
+            "timestamps — the record format has changed and this detector is "
+            "silently blind. It must fail loudly rather than report 'no holes'."
+            % lines_read)
+    raw.sort()
+    out: list[datetime] = []
+    for s in raw:
+        try:
+            out.append(parse_ts(s))
+        except Exception:
+            continue  # a malformed stamp is one fewer witness, never a false one
+    out.sort()
+    return out
+
+
+def record_distances(commits, trace: list[datetime]) -> list[tuple]:
+    """``[(commit, seconds_to_nearest_record)]`` for EVERY commit, in order.
+
+    An empty trace puts every commit at infinity: with no record at all,
+    nothing is observed, and the honest report is "all of it", not "none".
+    """
+    import bisect
+
+    out = []
+    for c in commits:
+        if not trace:
+            out.append((c, float("inf")))
+            continue
+        i = bisect.bisect_left(trace, c.when)
+        before = (c.when - trace[i - 1]).total_seconds() if i > 0 else float("inf")
+        after = (trace[i] - c.when).total_seconds() if i < len(trace) else float("inf")
+        out.append((c, min(before, after)))
+    return out
+
+
+def unrecorded_commits(commits, trace: list[datetime], tol_s: float = RECORD_TOL_S):
+    """``[(commit, seconds)]`` for the commits whose nearest record is a hole."""
+    return [(c, d) for c, d in record_distances(commits, trace) if d > tol_s]
+
+
+def separation(distances: list[float], tol_s: float = RECORD_TOL_S) -> dict:
+    """The live calibration: does the tolerance still sit in an empty region?
+
+    A threshold is only honest while the data it separates stays separated.
+    This recomputes, on every run, the gap between the worst commit BELOW the
+    tolerance and the best one above it — so the number in the report is
+    measured by the run that prints it and can never go stale. The frozen
+    2026-08-06 baseline is kept in the module docstring above for comparison;
+    this is what the current corpus says.
+    """
+    below = sorted(d for d in distances if d <= tol_s)
+    above = sorted(d for d in distances if d > tol_s)
+
+    def pct(p):
+        if not below:
+            return None
+        return below[min(len(below) - 1, int(p * (len(below) - 1)))]
+
+    return {
+        "n": len(distances),
+        "n_below": len(below),
+        "n_above": len(above),
+        "median": pct(0.5),
+        "p99": pct(0.99),
+        "worst_below": below[-1] if below else None,
+        "best_above": above[0] if above else None,
+    }
 
 
 def rejection_table(stats: ParseStats) -> str:

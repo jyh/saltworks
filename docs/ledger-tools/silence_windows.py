@@ -43,6 +43,10 @@ from ledger_common import (
     Touch,
     day_local,
     discover_personal_projects,
+    RECORD_TOL_S,
+    activity_trace,
+    record_distances,
+    separation,
     fmt_dur_h,
     fmt_hours,
     fmt_int,
@@ -52,6 +56,7 @@ from ledger_common import (
     now_local,
     project_dir_for_repo,
     rejection_table,
+    unrecorded_commits,
 )
 
 THRESHOLDS_H = (1, 2, 4, 8, 12)
@@ -199,6 +204,74 @@ def build(args) -> str:
       "human touched any personal-lane seat and the next such moment. A "
       "commit landing inside a stretch of length ≥ T is counted at threshold "
       "T. **This is not a claim about sleep** — see §5.")
+    w("")
+
+    # ---- 0. record coverage ----------------------------------------------
+    # Before any silence figure, the question that qualifies all of them: is
+    # the silence MEASURED, or is the record simply absent?  A caveat that
+    # qualifies a headline belongs above it, not in a footnote below it.
+    trace = activity_trace(presence_dirs)
+    dists = record_distances(commits, trace)
+    holes = [(c, d) for c, d in dists if d > RECORD_TOL_S]
+    sep = separation([d for _, d in dists], RECORD_TOL_S)
+    w("## 0. Record coverage — is the silence MEASURED, or merely UNRECORDED?")
+    w("")
+    w(f"A commit is made **by** a session, and a session writes records. So a "
+      f"commit landing where no personal-lane session wrote anything at all is "
+      f"**proof of a hole in the transcript record**, not evidence that nobody "
+      f"was directing. Checked against {fmt_int(len(trace))} liveness records at "
+      f"a **{int(RECORD_TOL_S/60)}-minute** tolerance.")
+    w("")
+    w("**The tolerance, calibrated by this run rather than quoted from an "
+      "earlier one** — a threshold is only honest while the data it separates "
+      "stays separated:")
+    w("")
+    w("| Calibration | Value |")
+    w("|---|---:|")
+    if sep["median"] is not None:
+        w(f"| Median commit → nearest record | **{sep['median']:.1f} s** |")
+        w(f"| p99 | {sep['p99']:.1f} s |")
+        w(f"| Worst commit still INSIDE the tolerance | "
+          f"**{sep['worst_below']/60:.2f} min** |")
+    w(f"| Best commit OUTSIDE it (the nearest hole) | "
+      + (f"**{sep['best_above']/60:.2f} min** |" if sep["best_above"] is not None
+         else "_none — nothing is flagged_ |"))
+    if sep["worst_below"] is not None and sep["best_above"] is not None:
+        ratio = sep["best_above"] / max(sep["worst_below"], 1e-9)
+        verdict = ("**the threshold sits in an empty region**" if ratio >= 2
+                   else "⚠️ **THE TWO POPULATIONS NOW TOUCH — recalibrate before "
+                        "quoting this section**")
+        w(f"| Separation | **{ratio:.1f}×** — {verdict} |")
+    w("")
+    if holes:
+        w(f"⛔ **{fmt_int(len(holes))} of {fmt_int(len(commits))} commits landed "
+          f"in a stretch with NO transcript record.** Every silence figure below "
+          f"that contains one of these is a **lower bound on presence**: the "
+          f"human may have been directing and the evidence is missing, not "
+          f"absent. Do not publish a window containing these commits as "
+          f"unattended.")
+        w("")
+        w("| Commit | Landed | Nearest transcript record | Subject |")
+        w("|---|---|---:|---|")
+        for c, d in holes:
+            gap = "∞ (no record at all)" if d == float("inf") else f"{d/60:.1f} min away"
+            w(f"| `{c.sha[:7]}` | {iso_local(c.when)} | {gap} | {c.subject[:56]} |")
+        w("")
+    else:
+        w(f"✅ **Every one of the {fmt_int(len(commits))} commits in this window "
+          f"has a transcript record beside it.** The silences below are measured.")
+        w("")
+    w("⚠️ **The narrower question this check actually answers:** *did work land "
+      "inside a hole?* — not *is the record whole?* A hole in a stretch where "
+      "nothing was committed leaves no trace here and is invisible to it. That "
+      "is tolerable only because no published figure depends on such a stretch: "
+      "the measure that carries the claim (§2) counts commits. It is stated "
+      "rather than left to be discovered. **Known false-positive mode:** a "
+      "commit made by hand from a terminal rather than by a seat would flag "
+      "identically — measured at **0 occurrences in 862 commits on 2026-08-06** "
+      "(a frozen figure, unlike the calibration table above, which this run "
+      "computes), but the record cannot rule it out for a commit it has never "
+      "seen.")
     w("")
 
     # ---- 1. scale ---------------------------------------------------------

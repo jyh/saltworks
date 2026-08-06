@@ -13,7 +13,7 @@ repos, and they emit markdown.
 | `ledger_common.py` | the shared transcript + git parser. The single place that decides "a human typed this" vs "the harness injected this". |
 | `silence_windows.py` | the silence-window ledger — what landed while no human was directing. |
 | `token_meter.py` | tokens by day × project × model tier × wave, cache always its own column. |
-| `selftest.py` | ~67 checks (61 fixed + one per discovered project, so the count is **machine-dependent**). ⚠️ It covers `ledger_common` and `silence_windows` **only** — `token_meter`, `human_time`, `fleet_hygiene` and `landed` have **no test coverage**. |
+| `selftest.py` | ~78 checks (72 fixed + one per discovered project, so the count is **machine-dependent**). ⚠️ It covers `ledger_common` and `silence_windows` **only** — `token_meter`, `human_time`, `fleet_hygiene` and `landed` have **no test coverage**. |
 | `nightly.sh` | runs all of it, writes `docs/EVIDENCE-ledger-<date>.md`. |
 
 ## Run it
@@ -82,6 +82,24 @@ personal-lane fleet*, never *the human was asleep*.
 **Unobserved ≠ silent.** A commit that predates the earliest readable
 transcript is excluded from every share rather than counted as silent. An
 open-ended window is reported as a lower bound and marked.
+
+**And a hole in the MIDDLE of the record is caught too, as of 2026-08-06** —
+§0 of every silence report. The laptop→Mac-Mini migration re-synced the repos
+and the kit before cutover but not `~/.claude/`, so the transcript record
+stopped at 14:07:56 while git carried work to 14:30:08, and the ledger read
+the difference as the campaign's longest silence window. **The rule that
+separates the two needs no new data: a commit is made *by* a session, and a
+session writes records, so a commit landing where no personal-lane session
+wrote anything is proof of a hole rather than evidence of absence.** The
+5-minute tolerance is not a guess — the median commit sits **0.4 s** from the
+nearest record and the worst normal one ever measured is **3.08 min**, against
+**22.19 min** for the hole; every run recomputes that separation and says so.
+
+⭐ **The detector is non-vacuous, and the same run proves it:** it flags 1
+commit in saltworks *and clears all 715 in the leg-1 harvest window*. A
+coverage check that never fires certifies nothing — this one fires and clears
+in one pass, so the 20.9 h exhibit is now certified **measured**, not merely
+unrecorded.
 
 **Queued messages are dated by when they were typed.** A message typed while
 the model is working is written to the transcript at dequeue time; the
