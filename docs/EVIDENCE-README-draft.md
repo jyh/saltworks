@@ -63,7 +63,9 @@ A single chain, closed at every seam:
     the netlist            imported back into Lean, ≤300 lines of
         │                  trusted importer + ~30 cell models         ⟨leg 3 D2⟩
         ▼
-    the check              per-module equivalence by `decide +kernel`  ⟨leg 3 D3⟩
+    the check              per-COMBINATIONAL-CONE equivalence, by         ⟨leg 3 D3⟩
+                           bit-sliced `decide +kernel`
+                           ── the kernel re-does every step
                            ── the kernel re-does every step
 ```
 
@@ -236,11 +238,25 @@ only way a stack of narrow instruments adds up to a claim you can trust.
   axiom appears; we write those as `bv_normalize`, so the distinction is
   visible in the source.
 
-**The cost of that discipline, stated plainly:** exhaustive kernel checking
-reaches a **16-bit input space** (2¹⁶ in ~12 s; 2²⁰ in ~8 minutes; 2²⁴ is
-dead). So equivalence is per-module, and anything wider is proved
-structurally instead of enumerated. ⟨fill from the landed certificate
-suite⟩
+**The cost of that discipline, stated plainly — and the unit is INPUTS, not
+gates.** A bit-sliced certificate costs 2^inputs bits per net, so gate count
+is nearly free and **input count is the wall**: `Nat.pow` is
+kernel-accelerated only to exponent `1<<<24`, which puts a hard ceiling at
+**24 input bits**.
+
+**So the decomposition is not per-module — it is per COMBINATIONAL CONE.**
+Post-place-and-route there are no modules left: a real submission is one
+flat block (measured on three). A flat sequential netlist instead
+decomposes at the **flop boundary** — every flop D-pin and every primary
+output roots a cone bounded by flop Q-pins, primary inputs and tie cells —
+and that decomposition survives whether or not hierarchy does.
+
+**Measured, over 1,626 cones in nine real submissions: 86.8% fall under the
+24-input ceiling.** For this design it is not close — every cone in the
+bit-serial switch element has **at most six inputs**, and the fabric is
+twelve copies of it. The ~13% tail is real, and we state it rather than
+discover it later: the worst cone we found was 226 inputs, in someone
+else's register-file ECC.
 
 ---
 
