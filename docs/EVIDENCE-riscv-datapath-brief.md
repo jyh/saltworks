@@ -295,15 +295,23 @@ masking. Record hits and misses in `docs/LEDGER.md` either way.
 
 ### ⛔ BUILD ETIQUETTE — MANDATORY, AND IT BITES HARDEST HERE
 
-**Never run bare `lake build`. Use `/Users/jyh/projects/claude/saltbuild.sh
-[target]`** — it takes a cross-seat lock (one heavy build at a time,
-stale-reaped) and caps `LEAN_NUM_THREADS=6`. **Judge its printed
-`saltbuild EXIT=N`, not a pipe.** Prefer targeted builds
-(`saltbuild.sh SaltWorks.Silicon.YourModule`) while iterating; full builds
-only at wave exit. **Put this rule in every executor and subagent brief.**
-(FLEET.md, maestro, 8/6 08:38: five seats × default `-j18` exhausted 64 GB
-+ 8 GB swap this morning; single elaborations on salt's heavy files reach
-6–9 GB.)
+**EVERY Lean invocation goes through
+`/Users/jyh/projects/claude/saltbuild.sh`** — builds *and* audit runs.
+Never bare `lake`, never bare `lean`.
+
+```
+saltbuild.sh                            # full build, this repo
+saltbuild.sh SaltWorks.Silicon.YourMod  # targeted build — prefer this while iterating
+saltbuild.sh ScratchSILICON.lean        # replaces `lake env lean ScratchSILICON.lean`
+```
+
+It takes a cross-seat lock (one heavy invocation at a time, stale-reaped)
+and caps `LEAN_NUM_THREADS=6`. **Judge its printed `saltbuild EXIT=N`, not
+a pipe.** Full builds only at wave exit. **Killed builds resume
+incrementally**, so a lock wait costs nothing. **Put this rule in every
+executor and subagent brief you write.** (FLEET.md, maestro, 8/6 08:38 and
+the extension after the second OOM: five seats × default `-j18` exhausted
+64 GB + 8 GB swap; single elaborations on salt's heavy files reach 6–9 GB.)
 
 This applies with particular force to W2.2: a 2¹⁶ exhaustive
 `decide +kernel` certificate is a **12-second single-threaded kernel
@@ -311,6 +319,11 @@ reduction that holds memory the whole time**, and W2.5's netlist
 equivalence is another. Both belong in a **slow target that is not built by
 default**, and both must go through the wrapper. A certificate suite that
 OOMs the fleet is not a credibility exhibit.
+
+It applies to the **`#audit_axioms` and `#audit_coverage` runs of K1/K3
+too** — those are Lean elaborations like any other, and running them
+outside the wrapper is exactly the "just one quick check" that took the
+fleet down twice today.
 
 **The 3-attempt budget and A/B/C classification apply as everywhere else.**
 If W2.2's structural ALU proof exceeds three attempts, the honest fallback is

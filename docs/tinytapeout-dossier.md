@@ -59,11 +59,23 @@ tinytapeout.com/specs/analog/: "each tile is 70€"]`:
 - Eligibility, verbatim: *"Early bird prices are limited per shuttle, and
   are only available to individuals."* And *"the early bird price is only
   available once per person."* `[V-SRC, FAQ]`
+- The subsidized rate applies to **at most ONE PCB per order** — the
+  discount flag in the invoice code is a 0/1, never a count — and it
+  requires buying tile space. Two devkits as an Individual cost
+  100 + 300 + 30 = €430, not €230. `[V-SRC, invoice bundle]`
 - **Tiles can be prepurchased before submitting**, at
   `app.tinytapeout.com/prepurchase`, and the FAQ warns *"There are often
-  no tiles available near the submission deadline."* **222 of 512 left,
-  32 days to go — buy the tiles early, independently of whether the design
-  is ready.** `[V-SRC]`
+  no tiles available near the submission deadline."* `[V-SRC]`
+
+> **⚠️ BOTH PRECEDING SKY130 SHUTTLES SOLD OUT COMPLETELY** — TTSKY26a and
+> TTSKY26b each finished at **512 of 512 tiles used**. `[V-SRC, shuttle
+> REST index]` And the 222-free figure is *more* urgent than it looks:
+> **`tiles_used` counts PREPURCHASED tiles, not placed designs** — 290
+> tiles are bought while only 178 tiles' worth of projects are actually
+> placed `[INF, from the live index: 128 projects, tile-weighted sum 178]`.
+> Reading the design gallery and concluding "the shuttle is half empty"
+> is a mistake. **Buy the tiles this week, independently of whether the
+> design is ready.**
 
 ---
 
@@ -92,7 +104,7 @@ module tt_um_example (
 | Signal | Rule |
 |---|---|
 | `uio_oe` | **driven by us**, per bit, at runtime. **Active high: 1 = OUTPUT, 0 = input.** |
-| `ena` | *"always 1 when the design is powered, so you can ignore it"* — do **not** gate logic on it. Unselected designs are held in reset by the mux (`rst_n` tied 0). |
+| `ena` | *"always 1 when the design is powered, so you can ignore it"* — do **not** gate logic on it. See §2.2: it is also the power-gate enable. |
 | `rst_n` | **active LOW**. |
 | all outputs | **must be assigned.** Unused: `assign uio_out = 0; assign uio_oe = 0;` |
 | top module | must start with `tt_um_`, must not be `top`; convention `tt_um_<github_username>_<project>` |
@@ -130,6 +142,34 @@ consumed only by the datasheet renderer (`DocsHelper.pretty_clock`). It
 must nonetheless be an **integer** (`clock_hz: 33000000`); a YAML float
 like `33e6` fails validation. `[V-SRC]`
 
+### 2.2 ⚠️ UNSELECTED DESIGNS ARE POWER-GATED OFF — no state survives
+
+In `tt-multiplexer/rtl/tt_mux.v` the same internal `l_ena` drives **both**
+the user module's `ena` port **and** its power-gate enable (`um_ena[i]` and
+`um_pg_ena[i]` are two buffers off the same signal); the sky130 config
+names the gate cells `tt_pg_1v8`. `[V-SRC]`
+
+> **Consequence for a sequential design, and it is load-bearing for the
+> bit-serial fabric:** a deselected design is *powered down*, not merely
+> held in reset. **No flop state survives deselection.** The design must
+> come up correctly from an arbitrary power-on state once selected, and
+> there is no "keep running in the background" behaviour to rely on.
+> Combined with the fact that **`/specs/powerup/` does not exist** and the
+> minimum reset assertion width is undocumented (§9), the rule for us is:
+> **the switch-element FSM must self-initialise from any state, on a reset
+> pulse of unspecified length.** That belongs in the D3.5 refinement
+> proof's hypotheses, not in a comment.
+
+**Also undocumented, and relevant to a serial design:** no TinyTapeout page
+states a rule about **gated clocks, clock dividers or internally derived
+clocks**. `/hdl/important/` covers naming and Yosys optimisation;
+`/specs/clock/` covers source and frequency; the only clock-structure rule
+found anywhere is that a second GPIO clock must run at the same frequency.
+`tt-support-tools` injects no clock-structure checker beyond
+`CLOCK_PORT: "clk"`. **A ripple counter or an internally divided clock is
+neither blessed nor forbidden** — if the fabric needs one, it is
+unreviewed territory and should be avoided in favour of a clock enable.
+
 ---
 
 ## 3. AREA — how many tiles, and what fits
@@ -150,7 +190,18 @@ not the template comment (which says "about 167x108 uM") and not the FAQ
 
 Also valid but omitted from the template comment: `3x4`, `4x4`, `5x4`,
 `6x4`, `8x4` (max footprint 8x4 = 32 tiles = €2,240). The validator accepts
-any key of `tile_sizes.yaml`. `[V-SRC]`
+any key of `tile_sizes.yaml`. `[V-SRC]` The grammar's real source is the
+placer, which hard-validates **height ∈ {1, 2, 4}** and **width ∈ 1…8**
+(`grid.x // 2`). The 512-tile figure is likewise derivable: `grid x:16,
+y:32` over a die of **3.167 × 4.767 mm**. `[V-SRC, tt-multiplexer
+cfg/sky130.yaml + py/tt/placer.py]`
+
+**4-tile-high designs are a scarce, pre-allocated resource** — TTSKY26c's
+`mux_overrides.yaml` reserves exactly two mux units for them
+(`huge_modules: mux_id: [3, 19]`) and the placer will only place a
+height > 2 module facing a masked mux. Nothing on tinytapeout.com says
+this. Irrelevant to us at 1x2, but it means "just buy more tiles" has a
+ceiling that is not the price. `[V-SRC]`
 
 **Capacity per 1x1 tile** `[V-SRC]`:
 - *"about 1000 digital logic gates, depending on their size"* (FAQ)
@@ -320,6 +371,17 @@ corners; setup only on typical** (`TIMING_VIOLATION_CORNERS = ["*tt*"]`).
   `CLOCK_PERIOD` (20 ns), and the two hold-slack margins. **Everything
   below the "DO NOT CHANGE ANYTHING BELOW THIS POINT" banner is fixed.**
   `[V-SRC]`
+- **⚠️ `src/user_config.json` OVERRIDES `src/config.json`.**
+  `create_merged_config` does `config = read_config("src/config");
+  config.update(user_config)` — user_config is applied **last**. So
+  `DESIGN_NAME`, `VERILOG_FILES`, `DIE_AREA`, `FP_DEF_TEMPLATE`,
+  `VDD_PIN`, `GND_PIN` and `RT_MAX_LAYER` **cannot be overridden from
+  `config.json`; edits there are silently discarded.** If a flow
+  experiment appears to have no effect, this is why. `[V-SRC]`
+- Other sky130A constants a submitter may need: `def_suffix = "pg"` (so
+  the template DEF is `tt_block_<tiles>_pg.def`), signoff corner
+  `nom_tt_025C_1v80`, `netlist_type = "pnl"`, prBoundary layer (235,4).
+  `[V-SRC, tt-support-tools/tech.py]`
 
 ---
 
@@ -354,16 +416,22 @@ project lands. `[V-SRC]`
    must be written against the powered form. This is a concrete, testable
    requirement on D2 and it is discoverable *today*, not after the first
    run fails.
-3. **`tools-ref` defaults to `main`** — `tt-support-tools` has no
-   `ttsky26c` tag and no tags at all. The precheck rules and config
-   injection **can change under us between reruns**. For a reproducible
-   claim, pin `tools-ref` to a commit SHA in the workflow `with:` block,
-   and record the SHA beside the proof. `[V-SRC]`
-4. **Version skew is real**: CI `librelane==3.0.5`, devcontainer
-   `librelane==2.4.2`, shuttle top-level integration `LIBRELANE_TAG
-   3.0.0.dev38` with a *different* PDK pin
-   (`8afc8346a57fe1ab7934ba5a6056ea8b43078e71`). Our local flow must pin
-   **3.0.5 + `0536d02d…`** to have any hope of reproducing the CI netlist.
+3. **`tools-ref` defaults to `main`, and `main` is moving under us.**
+   `tt-support-tools` has no `ttsky26c` tag and no tags at all; its `main`
+   HEAD moved **today** (`8bca34a`, 2026-08-06 17:09 +02:00, *"fix(tt_tool):
+   allow hardening in git repos without a remote"*), while the shuttle repo
+   pins its `tt` submodule at `ff75e34` (2026-07-29). **Our CI and the
+   shuttle build are not running the same tools revision.** For a
+   reproducible claim, pin `tools-ref` to a commit SHA in the workflow
+   `with:` block and record the SHA beside the proof. `[V-SRC]`
+4. **Version skew is real, and there are THREE sky130A PDK pins in play**:
+   user precheck `0536d02d875c8f67dd7cca3902ac457e62f20005`; shuttle CI
+   `8afc8346a57fe1ab7934ba5a6056ea8b43078e71` (with `LIBRELANE_TAG
+   3.0.0.dev38`); and the shuttle's own `BUILDING.md` tells a human builder
+   to use `6d4d11780c40b20ee63cc98e645307a9bf2b2ab8` — **that one is
+   stale.** LibreLane likewise: CI `3.0.5`, devcontainer `2.4.2`. Our local
+   flow must pin **3.0.5 + `0536d02d…`** to have any hope of reproducing
+   the CI netlist. `[V-SRC]`
 5. **A gate-level cocotb testbench is mandatory work**, not a nice-to-have
    — and it is a *gift*: it is a second, independent check of the very
    netlist we are proving equivalent, in a different tool, by a different
@@ -460,27 +528,37 @@ campaign, not after it.
 
 ## 9. WHAT I COULD NOT ESTABLISH — stated, not papered over
 
-1. **Whether the €185 individual price is still obtainable.** The 80
-   subsidized PCBs are sold; the calculator's "Individual" toggle is
-   client-side with no visible inventory gate. Needs a browser and an
-   authenticated session. **Budget €385 and be pleased if it is less.**
+1. **Whether the €185 individual price is still obtainable.** The €185 and
+   €385 figures are now *arithmetically confirmed* against the invoice
+   code — but the discount is computed from a **client-side boolean with no
+   inventory check anywhere in the pricing path**, and the 80 subsidized
+   PCBs are sold. Any gate lives in an authenticated server route.
+   **Budget €385 and be pleased if it is less.**
 2. **The power-up / reset-sequencing spec.** `tinytapeout.com/specs/powerup/`
-   **404s** — the page does not exist. The only confirmed facts are that
-   `rst_n` is active-low, that flops power up random, and that the mux ties
-   `rst_n = 0` for unselected designs. **Minimum reset assertion width is
-   undocumented.** Our design must self-initialise from any state after a
-   reset of unspecified length.
+   **404s** — the page does not exist. What is now confirmed is *stronger*
+   than "held in reset": unselected designs are **power-gated off** (§2.2),
+   so no state survives. Still unknown: the pad-level power-up state of the
+   `uio` pins and the **minimum reset assertion width**. Our design must
+   self-initialise from any state on a reset pulse of unspecified length.
 3. **Whether the submission app enforces per-job or per-workflow status.**
    The prose rules and the workflow topology agree that `gl_test` and
    `precheck` failures block, but the app is a SPA and the enforcement
    mechanism is unverified. Treat "gate-level tests gate" as `[INF]`.
-4. **The exact tile grid / mux topology of TTSKY26c** (512 tiles is from
-   the API; the geometry lives in the `tt-multiplexer` submodule).
-5. **VAT treatment** of the invoice.
-6. **`maxAnalogPins: 0` for the chipfoundry shuttle** while `analogPin: 100`
-   and `discountedAnalogPins: 2` coexist in the same record — do not quote
-   an analog-pin count for TTSKY26c. Irrelevant to us (fully digital), noted
-   for completeness.
+4. **How many 4-tile-high and analog slots remain.** The reservations are
+   known (`huge_modules: mux_id [3, 19]`; analog `mux_id [11, 12]`, one
+   fewer analog row than TTSKY26b had) but the placer's site-suitability
+   rule is geometric and was not simulated. Irrelevant to us at 1x2.
+5. **VAT treatment** of the invoice — *definitively absent* from the
+   pricing code rather than merely unfound: the invoice bundle is 1,982
+   bytes and contains no `vat`, `tax` or `reverse charge`. Whether €385 is
+   VAT-inclusive is not answerable from TinyTapeout's own surfaces.
+6. **The price citation is inherently fragile.** `invoice-*.js` and
+   `calculator-*.js` are content-hashed build assets; the filenames change
+   on the next deploy. **Every price here is verified-as-of-2026-08-06
+   only.** (Closed since the first draft: `maxAnalogPins: 0` is **dead
+   code** — analog *is* available on sky130, and six analog projects are
+   already placed on TTSKY26c. Irrelevant to us; corrected so the earlier
+   caution is not carried forward.)
 7. **Stale documentation hazard:** the FAQ still refers to `config.tcl` and
    OpenLane in several places. The current SKY template ships
    `src/config.json` and runs LibreLane. **Do not follow `config.tcl`
@@ -492,8 +570,9 @@ campaign, not after it.
 ## 10. THE FIVE SENTENCES THE SILICON SEAT SHOULD ACT ON TODAY
 
 1. **The deadline is 13:00 PDT on 7 September, not midnight.** 32 days.
-2. **Buy the tiles before the design is ready** — 222 of 512 remain and the
-   FAQ warns they run out near the deadline.
+2. **Buy the tiles before the design is ready** — 222 of 512 remain, both
+   preceding sky130 shuttles finished at 512/512, and `tiles_used` counts
+   *prepurchased* tiles, so the gallery understates how full it is.
 3. **Prove equivalence against `tt_submission/<top>.v` from TT's own CI**,
    which is a **powered** netlist (`VPWR`/`VGND` on every cell) built by
    `librelane==3.0.5` against PDK `0536d02d…`. Pin the local flow to match,
