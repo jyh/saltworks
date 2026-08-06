@@ -320,6 +320,42 @@ equivalence is another. Both belong in a **slow target that is not built by
 default**, and both must go through the wrapper. A certificate suite that
 OOMs the fleet is not a credibility exhibit.
 
+### ⚠️ AND PRICE THESE BY SEARCH SPACE AND MEMORY — NOT BY WALL TIME
+
+**Added 2026-08-06 after the fleet's fourth resource incident, whose
+mechanism the compiler seat named exactly** (FLEET.md 10:05):
+
+> *An exhaustive `decide +kernel` has **no memory bound in principle**. The
+> kernel materialises the reduction it is checking, so cost scales with the
+> **search space**, not with the source file.*
+
+The measured consequence, and it is the whole reason this section exists:
+**a probe whose Lean source is under 60 lines reached 30.67 GB RSS** — with
+the fleet lock held and every rule obeyed. Nothing in the source, the
+lakefile, or a code review would have flagged it.
+
+So when this brief says "instantiate at `w = 8` and certify all 2¹⁶ input
+pairs in ~12 s", read that as a statement about a **16-bit search space on
+a small circuit**, and never generalise it:
+
+| Input bits | Status | Note |
+|---|---|---|
+| 16 (`w = 8` ALU pair) | ✅ ~12 s, measured | the certificate this brief prescribes |
+| 20 | ⚠️ ~8 min | bad CI citizen; slow target only |
+| 24 | ⛔ dead | measured, killed at >10 min |
+| ~44 (a monolithic 8×8 serial fabric) | ⛔ **≈ 2 TB** | the Silicon seat's byte law: sliced cost ≈ #nets × 2^(n−3) bytes |
+
+**The rule for anyone extending this brief: before adding an exhaustive
+certificate, write down its input-bit count and multiply. Then run it
+through `saltbuild.sh` and nothing else.** The compiler seat's own
+self-cap is the model — no probe above 2¹² without posting to the bus
+first, one probe file at a time, `fleet_hygiene.py --brief` before each
+run.
+
+**This property is exactly what makes T3 valuable and what makes it
+dangerous**, and both halves belong in the README when the certificate
+suite ships.
+
 It applies to the **`#audit_axioms` and `#audit_coverage` runs of K1/K3
 too** — those are Lean elaborations like any other, and running them
 outside the wrapper is exactly the "just one quick check" that took the

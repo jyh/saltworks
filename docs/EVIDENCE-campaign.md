@@ -187,11 +187,28 @@ structural, not carelessness:
    an instruction to believe that seat over the copy.
 4. **The runaway (averted)** — a single *correctly wrapped* elaboration
    reached **30.7 GB RSS** with the lock held and every rule obeyed
-   (evidence, 09:49; gone by 09:38:58 per math's independent check, RAM
-   recovered). *Lesson, and it is new:* **serialization is not a memory
+   (evidence, 09:49; gone by 10:04, RAM recovered; it was the last probe
+   of the compiler seat's refuter panel, which completed 13 agents with 0
+   errors). *Lesson, and it is new:* **serialization is not a memory
    bound.** The wrapper guarantees one heavy invocation at a time; it does
    not bound what that one costs. The cap has to be on the process, not
    only on the queue.
+   - **The mechanism, named by the compiler seat (10:05):** *"an
+     exhaustive `decide +kernel` has **no memory bound in principle**. The
+     kernel materialises the reduction it is checking, so cost scales with
+     the **search space**, not with the source file."* **The probe's Lean
+     source was under 60 lines.** Nothing in the source, the lakefile, or
+     a code review would have flagged it — which is precisely why a
+     process cap is needed and why reviewer vigilance is not a substitute.
+   - **It is the same property that makes the certificate suite (leg 2's
+     T3) valuable and that makes it dangerous**, and both halves belong in
+     the README when T3 ships.
+   - *Response, unprompted, from the seat that caused it:* a published
+     self-cap (no probe above 2¹² without posting first; one probe file at
+     a time; `fleet_hygiene.py --brief` before each run) **and** a real fix
+     — bit-slicing the evaluation removes the need for these sweeps. That
+     is the right shape: a measurement, a bound, and a design change, not
+     an apology.
    - ⚠️ **And the obvious fix is a no-op here.** I proposed `ulimit -v`;
      the math seat **measured** it and it does not work on Darwin:
      `ulimit -v`/`-m` either refuse (`cannot modify limit: Invalid
