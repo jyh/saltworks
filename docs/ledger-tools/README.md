@@ -13,7 +13,7 @@ repos, and they emit markdown.
 | `ledger_common.py` | the shared transcript + git parser. The single place that decides "a human typed this" vs "the harness injected this". |
 | `silence_windows.py` | the silence-window ledger — what landed while no human was directing. |
 | `token_meter.py` | tokens by day × project × model tier × wave, cache always its own column. |
-| `selftest.py` | 67 checks. Run it before believing anything the other three print. |
+| `selftest.py` | ~67 checks (61 fixed + one per discovered project, so the count is **machine-dependent**). ⚠️ It covers `ledger_common` and `silence_windows` **only** — `token_meter`, `human_time`, `fleet_hygiene` and `landed` have **no test coverage**. |
 | `nightly.sh` | runs all of it, writes `docs/EVIDENCE-ledger-<date>.md`. |
 
 ## Run it
@@ -32,7 +32,7 @@ python3 docs/ledger-tools/token_meter.py \
 sh docs/ledger-tools/nightly.sh                            # the whole thing
 ```
 
-No dependencies beyond the Python 3.9+ standard library. Runtime: about 13 s
+No dependencies beyond the Python **3.11+** standard library. (3.11 is a hard floor: `datetime.fromisoformat` cannot parse git's basic-format UTC offset `-0700` before it.) Runtime: about 13 s
 over salt's 2 GB of transcripts, 2 s over saltworks.
 
 ## The one thing to understand before quoting a number
@@ -86,16 +86,18 @@ open-ended window is reported as a lower bound and marked.
 **Queued messages are dated by when they were typed.** A message typed while
 the model is working is written to the transcript at dequeue time; the
 `queue-operation: enqueue` record carries the real moment and is preferred.
-Measured effect: median 0 s, maximum 318 s — it moves nothing at hour scale,
+Measured effect: median 0 s, maximum **464 s** (was 318 s when written; the tool prints the current figure on every run) — it moves nothing at hour scale,
 and is applied anyway.
 
 **One API response = several records.** Claude Code writes one assistant
 record per content block, each repeating the whole `usage` block. Token
 events are deduplicated by `requestId` (usage verified byte-identical within
-a group). Summing records would inflate every token figure by ~3×.
+a group). Summing records would inflate every token figure by **~2.3×** (measured; earlier text said ~3×).
 
-**Subagents are where the tokens are.** In salt: 71,115 subagent requests
-against 11,350 in the session files. A meter that reads only the session file
+**Subagents are where the REQUESTS are** — in salt, 71,115 subagent requests
+against 11,350 in the session files. ⚠️ **For OUTPUT TOKENS this reverses**,
+and the earlier wording overstated it: measured on day 1, subagents made 81%
+of requests and 24% of output tokens. A meter that reads only the session file
 is wrong by an order of magnitude.
 
 **Per-account attribution is not derivable.** The transcripts carry no

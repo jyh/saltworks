@@ -280,11 +280,16 @@ def build(args) -> str:
       "verified byte-identical within each `requestId` group before the rule "
       "was adopted.")
     w("")
-    w("**Subagents.** Workflow and Task agents write their own transcripts "
-      "under `<session>/subagents/**/agent-*.jsonl`. They are included by "
-      "default (`--no-subagents` to exclude). They are the majority of the "
-      "spend, and a meter that reads only the session file is wrong by an "
-      "order of magnitude.")
+    sub_r = sum(1 for e in events if e.subagent)
+    sub_o = sum(e.output_tokens for e in events if e.subagent)
+    tot_o = sum(e.output_tokens for e in events) or 1
+    w(f"**Subagents.** Workflow and Task agents write their own transcripts "
+      f"under `<session>/subagents/**/agent-*.jsonl`. They are included by "
+      f"default (`--no-subagents` to exclude). In THIS window they are "
+      f"{100*sub_r/max(len(events),1):.0f}% of requests and "
+      f"{100*sub_o/tot_o:.0f}% of output tokens. **Request share and token "
+      f"share differ sharply and can point opposite ways** — quote whichever "
+      f"you mean, and never the word 'majority' unattached to a unit.")
     w("")
     w("**Per-account attribution: UNAVAILABLE.** The transcripts carry no "
       "account, organisation or subscription identifier — checked field by "
