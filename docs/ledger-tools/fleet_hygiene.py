@@ -344,6 +344,13 @@ def build(args) -> str:
     w("_Seat identity comes from each session's own `agent-name` record — "
       "the string the seat signs its posts with. Employer-lane projects are "
       "not scanned._")
+    w("")
+    w("**Known blind spot:** this reads only `~/.claude/projects/` **for the "
+      "user running it**. A seat driven from another account, another "
+      "machine, or the web app is invisible here — it will never appear, "
+      "stalled or otherwise. Absence from this table is not evidence a seat "
+      "is down. (The maestro runs on a separate account and is expected to "
+      "be absent.)")
     if st is not None:
         w("")
         out.extend(machine_report(st))

@@ -150,11 +150,35 @@ the unattended story, not blemishes on it.
    resources with no lock** — commit explicit pathspecs only, never
    `git add -A`.
 4. **The runaway (averted)** — a single *correctly wrapped* elaboration
-   reached **30.7 GB RSS** with the lock held and every rule obeyed.
-   *Lesson, and it is new:* **serialization is not a memory bound.** The
-   wrapper guarantees one heavy invocation at a time; it does not bound
-   what that one costs. The cap has to be on the process
-   (`ulimit -v`), not only on the queue.
+   reached **30.7 GB RSS** with the lock held and every rule obeyed
+   (evidence, 09:49; gone by 09:38:58 per math's independent check, RAM
+   recovered). *Lesson, and it is new:* **serialization is not a memory
+   bound.** The wrapper guarantees one heavy invocation at a time; it does
+   not bound what that one costs. The cap has to be on the process, not
+   only on the queue.
+   - ⚠️ **And the obvious fix is a no-op here.** I proposed `ulimit -v`;
+     the math seat **measured** it and it does not work on Darwin:
+     `ulimit -v`/`-m` either refuse (`cannot modify limit: Invalid
+     argument`) or are silently unenforced — a child allocated 800 MB
+     under a nominal 500 MB cap. `RLIMIT_AS` is not enforced and
+     `RLIMIT_RSS` has been a no-op on macOS for years. **It would have
+     passed review and changed nothing, and we would have taken kill #5
+     believing we were protected.**
+   - ✅ **What should work is Lean's own cap**, enforced inside Lean where
+     Darwin's rlimit gap is irrelevant: `lean -M <MB>` (and `-T` for
+     allocations per task), documented in this toolchain's own `--help`.
+     Two separate edits: the **audit** path is a one-word change in the
+     wrapper (`lake env lean -M 12000 "$@"`); the **build** path is not
+     reachable from the wrapper at all, because lake spawns `lean` per
+     module and does not forward stray args — it needs `moreLeanArgs` /
+     `leanOptions` in the lakefile, which is a repo edit and therefore the
+     maestro's or Captain's call.
+   - ⚠️ **ENFORCEMENT IS UNVERIFIED.** Nobody has test-fired `-M` yet
+     (math is under the no-Lean order until 20:00 and correctly declined
+     to break it for an experiment). One run settles it: build a known-heavy
+     file through the wrapper with `-M 4000` and confirm it dies with a
+     Lean memory error instead of climbing. **Do not write the cap into
+     the wrapper as "fixed" until that run exists.**
 
 ---
 
@@ -164,7 +188,8 @@ the unattended story, not blemishes on it.
 |---|---|---|
 | 1 | The public repo's **name** and its Apache-2.0 / public status (contractually mandatory for TinyTapeout) | JYH |
 | 2 | The README verb in the price exhibit — "bought access to" until submitted *and* accepted | JYH |
-| 3 | Whether `saltbuild.sh` gets a per-process memory ceiling | maestro |
+| 3 | Whether `saltbuild.sh` gets a per-process memory ceiling — via `lean -M`, **not** `ulimit` (see lesson 4), and only after one run verifies `-M` actually bites | maestro |
+| 3b | Whether the 09:22 no-Lean-until-20:00 order binds **only** the math seat or **all** heavy salt elaborations — salt has TWO live seats, and the second (CHAR-TRIO / WEIL-TRIO) is still elaborating `Salt/HB/*` files of the same weight class | maestro |
 | 4 | Install `docs/EVIDENCE-README-draft.md` at the repo root, once its `⟨slots⟩` are filled | maestro / JYH |
 
 ---
