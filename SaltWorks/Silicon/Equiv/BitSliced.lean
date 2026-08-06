@@ -3,7 +3,6 @@ Copyright (c) 2026 Jason Hickey. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Jason Hickey, Claude
 -/
-import Mathlib
 import SaltWorks.Tactic.AuditAxioms
 
 /-!
@@ -122,24 +121,33 @@ theorem agree_nil (j : Nat) : Agree j [] [] := by
   refine ⟨rfl, fun k => ?_⟩
   simp [List.getD]
 
+/-- Reading past a one-element extension: at the new index you get the new
+element, everywhere else the original list answers — including out of range,
+where both sides give the default. One lemma instead of a three-way case split,
+and core-only, which is what keeps this module free of Mathlib. -/
+private theorem getD_snoc {α : Type _} (l : List α) (x d : α) :
+    ∀ k, (l ++ [x]).getD k d = if k = l.length then x else l.getD k d := by
+  induction l with
+  | nil => intro k; cases k <;> simp
+  | cons a t ih =>
+    intro k
+    cases k with
+    | zero => simp
+    | succ m => simpa using ih m
+
 /-- Appending one agreeing net preserves agreement. -/
 theorem agree_snoc {j : Nat} {envS envP} (h : Agree j envS envP)
     {x : Nat} {b : Bool} (hx : x.testBit j = b) :
     Agree j (envS ++ [x]) (envP ++ [b]) := by
   obtain ⟨hlen, hget⟩ := h
   refine ⟨by simp [hlen], fun k => ?_⟩
-  rcases lt_trichotomy k envS.length with hk | hk | hk
-  · rw [List.getD_append _ _ _ _ hk, List.getD_append _ _ _ _ (hlen ▸ hk)]
+  rw [getD_snoc, getD_snoc]
+  by_cases hk : k = envS.length
+  · have hk' : k = envP.length := by omega
+    rw [if_pos hk, if_pos hk', hx]
+  · have hk' : ¬ k = envP.length := by omega
+    rw [if_neg hk, if_neg hk']
     exact hget k
-  · subst hk
-    rw [List.getD_append_right _ _ _ _ (le_refl _),
-        List.getD_append_right _ _ _ _ (by omega)]
-    simp [hlen, hx]
-  · -- past the end of both: each side is its default, and `testBit 0 j = false`
-    have e1 : (envS ++ [x]).length ≤ k := by simp; omega
-    have e2 : (envP ++ [b]).length ≤ k := by simp [← hlen]; omega
-    rw [List.getD_eq_default _ _ e1, List.getD_eq_default _ _ e2]
-    simp
 
 /-! ## The bit lemmas
 
