@@ -354,7 +354,7 @@ a small circuit**, and never generalise it:
 |---|---|---|
 | 16 (`w = 8` ALU pair) | ✅ tractable | the certificate this brief prescribes |
 | 24 | ⛔ **HARD KERNEL CEILING** | `Nat.pow` is GMP-accelerated only to exponent `1<<<24`; a bit-sliced certificate of width 2ⁿ needs the mask `2^W − 1` |
-| ~44 (a monolithic 8×8 serial fabric) | ⛔ **≈ 2 TB** | the Silicon seat's byte law: sliced cost ≈ #nets × 2^(n−3) bytes |
+| **56** (a monolithic 8×8 serial fabric) | ⛔ **≈ 9 PB** | ⚠️ **CORRECTED 2026-08-06 by the Silicon seat, who corrected their own earlier figure.** The law is now MEASURED, not estimated: slice footprint ≈ **#nets × 2ⁿ / 8 bytes** atop a ~670 MB Lean+mathlib baseline (measured peak RSS: n=16/40 nets → 670 MB, lost in the baseline; n=24/60 nets → 869 MB, where the predicted 120 MB becomes visible). The earlier **2 TB** figure assumed 44 bits — 3 state bits per element. **Fixing the routing bug added the activity bit, taking it to 4**, so 8 inputs + 12 elements × 4 = **56 bits**, one net of 2⁵⁶ bits. **The correctness fix made the monolithic route ~4,500× worse.** |
 
 **The rule for anyone extending this brief: before adding an exhaustive
 certificate, write down its input-bit count and multiply. Then run it

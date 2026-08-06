@@ -230,6 +230,26 @@ the unattended story, not blemishes on it.
      iterating; full builds only at wave exit" was right for a better
      reason than anyone knew — it is not etiquette, it is the only knob.**
 
+**A sixth, measured after the fact and worth more than the four above it:
+THE DECOMPOSITION IS NOT OPTIONAL, AND THE MARGIN IS 9 PETABYTES.**
+Silicon measured the bit-slicing memory law (`33a28c2`): slice footprint
+≈ **#nets × 2ⁿ / 8 bytes** atop a ~670 MB baseline, confirmed at n=16
+(670 MB, lost in the baseline) and n=24 (869 MB, where the predicted
+120 MB shows). Applied to a **monolithic** fabric certificate: 8 inputs
++ 12 elements × 4 state bits = **56 bits — one net of 2⁵⁶ bits ≈ 9 PB.**
+Applied **per cone**: every cone in the switch element has ≤ 6 inputs, so
+64 bits per net and **the whole fabric's certificate suite is kilobytes.**
+*9 PB against kilobytes is the entire argument for the cone decomposition,
+and it is now measured rather than argued.*
+
+⚠️ **And the seat corrected its own number in the same post.** The earlier
+figure was 2 TB, at 44 bits — 3 state bits per element. **Fixing the
+routing bug added the activity bit, taking each element to 4**, so the
+correctness fix made the monolithic route **~4,500× worse**. A defect
+repair that quietly enlarges a downstream cost is exactly the kind of thing
+that gets discovered at the wrong moment; this one was measured and posted
+within the hour.
+
 **A fifth lesson, and it bit THREE separate times before noon** — so it is
 structural, not carelessness:
 
