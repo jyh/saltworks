@@ -24,9 +24,43 @@ LIB="$PDK_ROOT/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_025C_1v8
 
 [ -f "$LIB" ] || { echo "synth: liberty not found at $LIB"; echo "  fetch with: volare enable --pdk sky130 $PDK_VER"; exit 1; }
 
+# ⚠️ THIS SCRIPT USED TO READ `$RTL/$TOP.v` ALONE, AND COULD NOT SYNTHESIZE
+# `banyan_fabric` AT ALL: it instantiates `bitserial_switch`, so yosys quits with
+#   ERROR: Module `\bitserial_switch' referenced in module `\banyan_fabric' in
+#   cell `\e23' is not part of the design.
+# The script documented as "reproducible" could not reproduce the netlist the
+# equivalence proof is taken against. Fixed by reading the DEPENDENCY CLOSURE.
+#
+# Not `$RTL/*.v`: reading an unrelated module (comparator.v) advances yosys's
+# anonymous-net counter and shifts every `_NNN_` name in the output, so the
+# artifact stops being byte-stable. The closure keeps it byte-stable.
+# Assumes file name == module name, which holds and is checked below.
+SRCS="$TOP.v"
+changed=1
+while [ "$changed" = 1 ]; do
+  changed=0
+  for f in "$RTL"/*.v; do
+    b="$(basename "$f")"; m="${b%.v}"
+    case " $SRCS " in *" $b "*) continue ;; esac
+    for s in $SRCS; do
+      if grep -qE "^[[:space:]]*$m[[:space:]]+[A-Za-z_]" "$RTL/$s"; then
+        SRCS="$SRCS $b"; changed=1; break
+      fi
+    done
+  done
+done
+READ=""; for s in $SRCS; do READ="$READ $RTL/$s"; done
+echo "synth: reading$READ"
+
+# ⚠️ AND `-flatten` IS NOT A PREFERENCE. LibreLane flattens, so an unflattened
+# local netlist keeps boundaries for a reason that has nothing to do with design
+# intent, and is VOID as a proxy for any question flattening decides. Measured
+# 8/6: without `-flatten` the `(* keep *)` A/B arms come out BYTE-IDENTICAL --
+# the local flow could not see the attribute's effect at all. With both fixes
+# this reproduces the committed banyan_fabric_nl.v BYTE-FOR-BYTE.
 yosys -q -p "
-  read_verilog $RTL/$TOP.v
-  synth -top $TOP
+  read_verilog $READ
+  synth -top $TOP -flatten
   dfflibmap -liberty $LIB
   abc -liberty $LIB
   opt_clean -purge

@@ -11,9 +11,23 @@ because a bit-sliced certificate costs 2^inputs bits per net. Compiler measured 
 hard kernel ceiling at 24 input bits (Nat.pow is GMP-accelerated only to exponent
 1<<<24). So: what fraction of real cones have <= 24 inputs?
 
-Usage:  cones.py <netlist.v> [...]
+⚠️ THE DEFAULT CUT SET IS NOT THE ONLY ONE, AND THAT MATTERS (measured 8/6 16:2x).
+Rooting cones only at flop D-pins and primary outputs answers "how big are the
+cones this netlist happens to have". It does NOT answer "how big are the cones we
+could certify", because a proof may cut anywhere it likes -- at any net that
+still EXISTS. Marking the fabric's stage boundaries `(* keep *)` is exactly what
+makes them still exist after the flow flattens, and cutting there takes the TT
+top module from max 36 inputs / 86.9% to **max 16 inputs / 100%**.
+
+Run WITHOUT --cut and the census is blind to that: it reports 86.9% whether or
+not the boundaries survived. So a keep-vs-no-keep comparison run on the default
+cut set is treatment-insensitive and must not be read as evidence about `keep`.
+
+Usage:  cones.py [--cut REGEX] <netlist.v> [...]
+        --cut REGEX   also treat every net whose name matches REGEX as a cone
+                      boundary (both a root and a leaf) -- i.e. certify there.
 """
-import sys, collections
+import sys, collections, re
 sys.path.insert(0, __import__("os").path.dirname(__file__))
 from refparse import tokenize
 
@@ -148,15 +162,23 @@ def analyse(path):
         if "[" in nt and nt.split("[")[0] in moutputs:
             roots.append((f"out:{nt}", nt))
 
+    # Extra cut points: nets the proof chooses to certify at. They root their own
+    # cone and terminate anyone else's, exactly like a flop Q.
+    cutnets = {n for n in driver if CUT and CUT.search(n)}
+    for n in sorted(cutnets):
+        roots.append((f"cut:{n}", n))
+
     def cone(net):
-        """-> (gates, inputs) walking back to flops / primary inputs / consts"""
+        """-> (gates, inputs) walking back to flops / primary inputs / consts /
+        requested cut points"""
         seen, leaves, stack, gates = set(), set(), [net], 0
         while stack:
             x = stack.pop()
             if x in seen:
                 continue
             seen.add(x)
-            if x in seq_out or x in minputs or x.startswith("1'b") \
+            if (x != net and x in cutnets) or x in seq_out or x in minputs \
+               or x.startswith("1'b") \
                or x.split("[")[0] in minputs or x not in driver:
                 leaves.add(x)
                 continue
@@ -177,11 +199,18 @@ def analyse(path):
     return logic, physical, len(insts), sizes
 
 
+args = sys.argv[1:]
+CUT = None
+if args and args[0] == "--cut":
+    CUT = re.compile(args[1])
+    args = args[2:]
+
 print(f"{'design':34s} {'logic':>6s} {'phys':>6s} {'cones':>6s} "
-      f"{'in:med':>7s} {'in:max':>7s} {'<=24':>7s} {'gates:max':>9s}")
+      f"{'in:med':>7s} {'in:max':>7s} {'<=24':>7s} {'gates:max':>9s}"
+      + ("   [cut: " + CUT.pattern + "]" if CUT else ""))
 print("-" * 92)
 tot_ok = tot_all = 0
-for path in sys.argv[1:]:
+for path in args:
     try:
         logic, physical, allinst, sizes = analyse(path)
     except Exception as e:
