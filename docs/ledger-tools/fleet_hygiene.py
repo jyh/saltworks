@@ -274,6 +274,16 @@ def machine_report(st: dict) -> list[str]:
                    f"running, then `rmdir {BUILD_LOCK}`. *Clearing a stale runtime "
                    f"artifact is not editing the wrapper.*")
         out.append("")
+        out.append("⚠️ **RE-CHECK IMMEDIATELY BEFORE YOU DELETE — NOT WHEN YOU "
+                   "DECIDE TO.** The math seat came within three seconds of "
+                   "reaping a lock that had just been legitimately re-acquired "
+                   "(2026-08-06 13:21): their evidence was sound, their decision "
+                   "was sound, and **the world moved between the decision and "
+                   "the action**. This report is a snapshot; by the time you act "
+                   "on it a real build may hold the lock. Re-run this check as "
+                   "the last thing before `rmdir`, and abort if a pid file has "
+                   "appeared or any `lean`/`lake` is running.")
+        out.append("")
 
     if bare:
         out.append(f"⛔ **{len(bare)} BARE Lean/lake process(es) — no `saltbuild.sh` "
