@@ -216,10 +216,19 @@ ceiling that is not the price. `[V-SRC]`
 > elements (three stages of four), each a small FSM with a routing latch,
 > plus framing. It should be *smaller* in combinational logic and *larger*
 > in flops. **Silicon seat: re-measure after the first synthesis run and
-> size the tile purchase from that, not from 1299.** `1x2` (€140) is the
-> planning assumption; `2x2` (€280) is the safety margin. Tile size may be
+> size the tile purchase from that, not from 1299.** Tile size may be
 > experimented with for free — you only need to have *bought* the tiles to
 > submit. `[V-SRC, FAQ]`
+
+> **✅ AND NOW THERE IS REAL DATA, WHICH VINDICATES THE 2×2 PURCHASE.**
+> The compiler seat measured **three genuine TTSKY26c submissions** on this
+> machine (`/private/tmp/ttsub/*/tt_submission/*.v`, FLEET.md 10:35):
+> **4,220 / 4,645 / 5,344 cell instances** each. Against the FAQ's
+> ~1,000 gates per tile, a real submission is a **4–5 tile design** — so
+> the 4 tiles (2×2, €280) already purchased are correctly sized for
+> something of that class, and `1x2` would very likely not have been.
+> **The €280 was not over-buying.** `[measured, compiler seat, on real
+> artifacts rather than estimates]`
 
 **Area failure is the most common failure mode**, and its symptoms are
 named: *"placement failures; routing congestion; high utilization
@@ -412,11 +421,36 @@ project lands. `[V-SRC]`
    artifact.** Proving the local netlist and shipping the CI netlist would
    be a *seam we left open*, and the seam doctrine is the entire campaign.
 2. **The netlist is POWERED** (`powered_netlists: true`, `pnl` not `nl`).
-   Every cell instance carries `VPWR`/`VGND` (and `VPB`/`VNB`) ports. **The
-   importer must accept and discard them**, and its ~30 sky130 cell models
-   must be written against the powered form. This is a concrete, testable
-   requirement on D2 and it is discoverable *today*, not after the first
-   run fails.
+   Every cell instance carries power ports. **The importer must accept and
+   discard them** — and **by pin name, asserting nothing about arity**:
+   the Silicon seat's addendum found `sky130_fd_sc_hd__tapvpwrvgnd_1`
+   carries exactly **two** (`.VGND`, `.VPWR`), appears 225–456 times in
+   every real TT netlist, and **is not in Liberty at all**, so
+   "absent from Liberty ⇒ error" is also wrong. 23 of 428 cells break the
+   4-pin rule.
+   - **⚠️ "~30 cell models" is a MEDIAN, not a bound.** Measured across
+     three real TTSKY26c submissions: **15 / 13 / 68 distinct cell types**.
+     One real submission needs **68**. Plan for the tail. `[compiler seat,
+     10:35, on real artifacts]`
+   - **⚠️ AND POST-P&R CONTAINS CELLS SYNTHESIS NEVER EMITS:** `clkbuf_*`
+     from CTS, `clkdlybuf4s25_1` / `dlygate4sd3_1` from hold repair,
+     `diode_2` for antennas. A cell list derived from synthesis output —
+     or from Liberty — will miss them.
+   - **⚠️ Both flop types appear**: `dfrtp` 36/0/164 and `dfxtp` 0/3/156
+     across the same three submissions. **Model both**; it is
+     design-dependent.
+
+2b. **⚠️ THE FLOW FLATTENS — AND THIS BREAKS THE STATED PROOF PLAN.**
+   Measured on those same three real submissions: **exactly 1 `module` and
+   1 `endmodule` each.** Post-place-and-route, there is no hierarchy left.
+   So *"equivalence per module by `decide +kernel`"* — the phrase in
+   `silicon-design-v1.md`, in this dossier's §1 chain diagram, and in my
+   own README draft — **has no modules left to be "per"**. The
+   decomposition into checkable pieces has to be stated some other way,
+   and **it is stated nowhere in either freeze.** This is not a detail: the
+   whole equivalence strategy rests on decomposing a design that the tools
+   hand back as one flat block. `[compiler seat, 10:35, measured; flagged
+   here because this dossier repeated the claim]`
 3. **`tools-ref` defaults to `main`, and `main` is moving under us.**
    `tt-support-tools` has no `ttsky26c` tag and no tags at all; its `main`
    HEAD moved **today** (`8bca34a`, 2026-08-06 17:09 +02:00, *"fix(tt_tool):

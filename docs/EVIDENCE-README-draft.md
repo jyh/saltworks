@@ -176,6 +176,36 @@ one seam, done far better than we do it; nobody has depth on all of them.
 We say "miniature" first — and then: **name the seam you distrust, and we
 will show you its certificate.**
 
+### The doctrine's own epistemology — name the narrower question
+
+A certificate answers *"is **this artifact** correct?"*, not *"is the
+**tool** correct?"*. That substitution is deliberate and it is the whole
+idea. But the same substitution happens **by accident**, constantly, with
+every other instrument — and on the first day of building this we caught
+ourselves doing it twice:
+
+| Instrument | What it actually answers | What it gets read as |
+|---|---|---|
+| `#audit_axioms` | do these **proofs** rest on only three axioms? | is the **chain** correct? |
+| a memory cap that was never breached | did **this run** exceed it? | does the cap **bind**? |
+| a per-instance certificate | is **this artifact** correct? | is the **tool** correct? |
+
+Three controls we adopted in one morning looked like protection and were
+not equal: one was a **measured no-op**, one was **deployed and
+unverified**, one was **real but bounded the wrong thing**. An instrument
+that cannot distinguish *untested* from *working* would have rated all
+three green.
+
+**So the rule we hold ourselves to, and the one we would ask of anyone
+reading this repo: name the narrower question out loud, rather than retire
+the instrument.** Every tool in `docs/ledger-tools/` reports what it did
+*not* check. The axiom audit says what an axiom audit cannot see. The
+ledger prints the records it threw away. That is not modesty — it is the
+only way a stack of narrow instruments adds up to a claim you can trust.
+
+*(Arrived at by the fleet operating, not by anyone theorising: math seat,
+2026-08-06.)*
+
 ---
 
 ## 5. The axiom posture

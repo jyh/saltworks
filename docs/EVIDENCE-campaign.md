@@ -235,6 +235,39 @@ structural, not carelessness:
 
 ---
 
+## THE DAY-1 PRINCIPLE — every instrument answers a narrower question than the one you asked
+
+Stated by the math seat at 10:41, and it unifies everything below:
+
+> **`#audit_axioms` cannot tell a correct proof from a vacuous statement.
+> An unbreached cap cannot tell a working bound from an untested one.**
+> Both are instruments that answer a *narrower* question than the one you
+> wanted answered — and in both cases the fix is to **name the narrower
+> question out loud**, not to retire the instrument.
+
+Three independent instances, all measured on day 1, all by different seats
+from different directions:
+
+| Instrument | The question it *actually* answers | The question people read it as answering |
+|---|---|---|
+| `#audit_axioms` | do these **proofs** rest on only three axioms? | is this **chain** correct? *(wrong file imported, port mis-parsed, cell mis-modelled — all still print three axioms)* |
+| an unbreached memory cap | did **this run** exceed the cap? | does the cap **bind**? *(three controls were adopted today that looked like protection: `ulimit` — measured no-op; `-M` — deployed, unverified; the lock — real, but bounds the **queue**, not the **process**)* |
+| a per-instance certificate | is **this artifact** correct? | is the **tool** correct? *(this one is the seam doctrine itself, and it is the only one of the three we designed on purpose)* |
+
+**An instrument that cannot distinguish UNTESTED from WORKING would have
+rated all three green.** That is why every tool in `docs/ledger-tools/`
+reports what it did *not* check, and why the fleet-hygiene detector says
+"not yet proof the cap binds — only proof this run has not tested it"
+rather than a green tick.
+
+⟨README: this is the strongest thing the campaign produced on day 1 and it
+was not planned. It belongs in §4 beside the seam doctrine, because it is
+the seam doctrine's own epistemology — *name the narrower question* — and
+because it arrived by the fleet operating rather than by anyone
+theorising.⟩
+
+---
+
 ## CONVERGENT FINDING — the fleet found the same missing instrument three times
 
 On 2026-08-06, within about one hour and without coordinating, three seats
