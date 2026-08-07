@@ -104,13 +104,35 @@ def parse(path):
                                 break
                         elif toks[i][0] in ("ID", "ESCID"):
                             base = nm(toks[i])
+                            # ⛔ SOUNDNESS FIX (8/6, found by R3's regfile). The
+                            # bit-select used to be composed for `ID` ONLY. An
+                            # ESCAPED vector net — `\regs[20] [26]`, which is how
+                            # yosys writes a register-file bit — fell through
+                            # with `base = "regs[20]"`, and then the `[`, `26`,
+                            # `]` tokens were re-scanned by the loop: `26` hit
+                            # the NUM branch below and OVERWROTE the net with the
+                            # phantom constant `1'b26`.
+                            #
+                            # Effect: all 992 regfile bits became 32 fake
+                            # constants, constants are leaves, and the census
+                            # reported max 6 inputs for cones that genuinely have
+                            # 36. It did not warn — it produced a CONFIDENT WRONG
+                            # NUMBER, on the exact shape the CPU road is made of.
+                            #
+                            # Latent for the banyan, whose escaped nets carry the
+                            # index INSIDE the escape (`\fabric.w0[0]`), so no
+                            # `[` follows and nothing was corrupted — which is
+                            # why every banyan figure cross-checked clean.
                             if (i + 1 < n and toks[i + 1] == ("P", "[")
-                                    and toks[i][0] == "ID"):
-                                idx = nm(toks[i + 2])
-                                base = f"{base}[{idx}]"
+                                    and i + 2 < n and toks[i + 2][0] == "NUM"
+                                    and i + 3 < n and toks[i + 3] == ("P", "]")):
+                                base = f"{base}[{nm(toks[i + 2])}]"
                                 i += 3
                             net = base
                         elif toks[i][0] == "NUM":
+                            # A bare NUM here is a literal (`1'b0`). A bit-select
+                            # index can no longer reach this branch: it is
+                            # consumed above, with its brackets.
                             net = "1'b" + toks[i][1]
                         i += 1
                     depth -= 1
@@ -152,7 +174,15 @@ def analyse(path):
                 seq_out.add(nt)
         if is_seq:
             for p, nt in conns.items():
-                if p in ("D", "SCD", "SCE", "SET_B", "RESET_B") and p != "CLK":
+                # ⛔ `DE` ADDED 8/6 (found by R3). `edfxtp` is the ENABLE flop,
+                # and yosys reaches for it whenever a register has a conditional
+                # write — which is every register file and every CPU state
+                # element. Its enable pin carries the ENTIRE write-decode cone
+                # (address compare + we); its `D` is often wired straight to a
+                # data input and roots a 1-input cone. Omitting `DE` therefore
+                # hid the only interesting write cone in the design while
+                # reporting the trivial one, and the census looked healthy.
+                if p in ("D", "DE", "SCD", "SCE", "SET_B", "RESET_B") and p != "CLK":
                     roots.append((f"{iname}.{p}", nt))
     for o in moutputs:
         roots.append((f"out:{o}", o))

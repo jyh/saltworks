@@ -225,9 +225,35 @@ def base_of(cell):
 # flops, and when it does, this comment is the question that has to be answered
 # rather than a line that has to be typed.
 # ---------------------------------------------------------------------------
+# An entry is either
+#   "d"    : the next state IS this pin's net — the root is that net, unchanged;
+#   "next" : the next state is a straight-line expression over the flop's pins
+#            (including its OWN `Q`, which resolves to the state leaf), and the
+#            root is the gate that expression emits.
+# "pins" lists every non-power pin the model accounts for; anything else
+# connected is a hard error.
 SEQ_MODELS = {
-    # base name : (clock pin, data pin -> ROOT, state pin -> LEAF)
-    "dfxtp": {"clk": "CLK", "d": "D", "q": "Q"},
+    "dfxtp":  {"clk": "CLK", "q": "Q", "pins": {"CLK", "D", "Q"}, "d": "D"},
+
+    # THE ENABLE FLOP. yosys reaches for this whenever a register has a
+    # CONDITIONAL write — i.e. for every register file and every CPU state
+    # element — so a chain that cannot import it cannot import a CPU. Found by
+    # R3: a 32x32 regfile synthesised to 992 `edfxtp_1` and the importer
+    # refused, correctly, rather than dropping 992 state bits.
+    #
+    # ✅ AND UNLIKE `dfrtp`, THIS ONE IS HONESTLY MODELLABLE, which is the whole
+    # distinction the refusal exists to protect. `DE` is a SYNCHRONOUS enable: it
+    # is sampled at the same edge as `D`, so the next state genuinely IS a
+    # function of the flop's inputs and its own current state —
+    #     next = DE ? D : Q
+    # — with no assumption about anything happening between edges. `dfrtp`'s
+    # `RESET_B` is asynchronous and admits no such function; that is why one is
+    # here and the other is still refused.
+    "edfxtp": {"clk": "CLK", "q": "Q", "pins": {"CLK", "D", "DE", "Q"},
+               "next": [("n", "not", "DE", None),
+                        ("a", "and", "DE", "D"),
+                        ("b", "and", "n", "Q"),
+                        ("t", "or", "a", "b")]},
 }
 
 
@@ -245,19 +271,21 @@ def find_flops(insts):
         if m is None:
             unmodelled[cell] += 1
             continue
-        pins = {m["clk"], m["d"], m["q"]}
-        missing = [p for p in (m["clk"], m["d"], m["q"]) if p not in conns]
+        pins = m["pins"]
+        missing = [p for p in sorted(pins) if p not in conns]
         if missing:
             raise SystemExit(f"importer: flop {iname} ({cell}) has no connection on "
-                             f"{', '.join(missing)} — the model requires all three")
+                             f"{', '.join(missing)} — the model requires all of "
+                             f"{', '.join(sorted(pins))}")
         extra = sorted(set(conns) - PG - pins)
         if extra:
             raise SystemExit(
                 f"importer: flop {iname} ({cell}) has connected pin(s) {', '.join(extra)} "
                 f"that SEQ_MODELS['{base_of(cell)}'] does not model. Dropping them would "
                 f"silently change the machine; extend the model deliberately instead.")
-        flops.append({"cell": cell, "iname": iname,
-                      "q": conns[m["q"]], "d": conns[m["d"]], "clk": conns[m["clk"]]})
+        flops.append({"cell": cell, "iname": iname, "model": m,
+                      "q": conns[m["q"]], "clk": conns[m["clk"]], "conns": conns,
+                      "d": conns[m["d"]] if "d" in m else None})
     if unmodelled:
         listing = ", ".join(f"{c} x{n}" for c, n in sorted(unmodelled.items()))
         raise SystemExit(
@@ -398,6 +426,29 @@ def parse(path):
                                 break
                         elif toks[i][0] == "ESCID":
                             net = toks[i][1]           # ATOMIC — never split
+                            # …but an escaped name may still be FOLLOWED by a
+                            # genuine bit-select, and that is a different thing
+                            # from splitting the name itself.
+                            #
+                            # ⛔ SOUNDNESS FIX (8/6, found by R3's regfile).
+                            # `\regs[20] [26]` is the escaped vector `\regs[20]`
+                            # indexed at bit 26 — which is how yosys writes a
+                            # register-file bit. Taking the ESCID alone ALIASED
+                            # all 32 bits of a register onto ONE net: 2549
+                            # distinct nets collapsed to 1588, 961 of them
+                            # merged. That is the same class of defect this
+                            # file's own docstring warns about for the opposite
+                            # case, and it was live in the other direction.
+                            #
+                            # The banyan never reached it: its escaped names
+                            # carry the index INSIDE the escape (`\fabric.w0[0]`)
+                            # with no following bracket, so nothing aliased and
+                            # every figure cross-checked clean.
+                            if (i + 3 < n and toks[i + 1] == ("P", "[")
+                                    and toks[i + 2][0] == "NUM"
+                                    and toks[i + 3] == ("P", "]")):
+                                net = f"{net}[{toks[i+2][1]}]"
+                                i += 3
                         elif toks[i][0] == "ID":
                             base = toks[i][1]
                             if i + 1 < n and toks[i + 1] == ("P", "["):
@@ -517,7 +568,7 @@ def build(insts, decls, assigns, inputs_order):
                              f"logic to certify at that boundary")
         return expand_driver(nm)
 
-    return gates, net, root_value
+    return gates, net, root_value, emit
 
 
 def to_lean(gates, ns, name, outs, ninputs, src, state=(), ndesign_in=None,
@@ -562,7 +613,8 @@ def to_lean(gates, ns, name, outs, ninputs, src, state=(), ndesign_in=None,
         L.append(f"through {clockinfo[2]} distinct CLK net(s) of the synthesised clock tree.")
         L.append("")
         for i, f in enumerate(state):
-            L.append(f"* `{i:3d}`  Q `{f['q']}`  ←D— `{f['d']}`   ({f['iname']}, {f['cell']})")
+            src = f"`{f['d']}`" if f["d"] is not None else "*(next = DE ? D : Q)*"
+            L.append(f"* `{i:3d}`  Q `{f['q']}`  ←— {src}   ({f['iname']}, {f['cell']})")
         L.append("-/")
         L.append("")
         L.append(f"/-- Number of DESIGN primary inputs; inputs from here on are state bits. -/")
@@ -638,7 +690,18 @@ if flops:
     # was imported that way before this treatment existed, and re-running its
     # original command must still produce the committed bytes.
     ins_set, outs_set = set(ins), set(outs_named)
-    partial = [f for f in flops if (f["q"] in ins_set) != (f["d"] in outs_set)]
+    # A flop whose next state is an EXPRESSION has no single net to list, so it
+    # cannot be cut by hand — only by the treatment.
+    handcut_impossible = [f for f in flops if f["d"] is None and f["q"] in ins_set]
+    if handcut_impossible:
+        f = handcut_impossible[0]
+        raise SystemExit(
+            f"importer: flop {f['iname']} ({f['cell']}) has its Q '{f['q']}' listed in "
+            f"--inputs, but its next state is an EXPRESSION over its pins, not a net, so "
+            f"there is nothing to list in --outputs. Let the treatment cut it: remove it "
+            f"from --inputs.")
+    partial = [f for f in flops
+               if f["d"] is not None and (f["q"] in ins_set) != (f["d"] in outs_set)]
     if partial:
         detail = "; ".join(f"{f['iname']}: Q '{f['q']}' {'listed' if f['q'] in ins_set else 'absent'}, "
                            f"D '{f['d']}' {'listed' if f['d'] in outs_set else 'absent'}"
@@ -687,12 +750,36 @@ if a.cut:
 ins_all = ins_all + cuts
 outs_all = outs_all + cuts
 
-gates, net, root_value = build(insts, decls, assigns, ins_all)
-# Cut roots resolve through root_value (the driving LOGIC); everything else
-# through net (which returns the leaf for a cut net, as its consumers require).
-ncut = len(cuts)
-out_idx = ([net(o) for o in outs_all[:len(outs_all) - ncut]]
-           + [root_value(o) for o in cuts])
+gates, net, root_value, emit = build(insts, decls, assigns, ins_all)
+
+
+def state_root(f):
+    """The next-state value of a cut flop, as a gate index.
+
+    For a plain D flop this is just its D net. For an ENABLE flop the next state
+    is `DE ? D : Q` — an expression, whose `Q` resolves to the flop's own state
+    LEAF, which is exactly the feedback that makes "hold" mean hold."""
+    m = f["model"]
+    if f["d"] is not None:
+        return net(f["d"])
+    conns, local = f["conns"], {}
+    for (t, op, a, b) in m["next"]:
+        ai = local[a] if a in local else net(conns[a])
+        if op == "not":
+            local[t] = emit("not", ai)
+        elif op == "buf":
+            local[t] = ai
+        else:
+            bi = local[b] if b in local else net(conns[b])
+            local[t] = emit(op, ai, bi)
+    return local[m["next"][-1][0]]
+
+
+# Design outputs read through `net`; state roots through `state_root`; cut roots
+# through `root_value` (the driving LOGIC, not the leaf its consumers see).
+out_idx = ([net(o) for o in outs_named]
+           + [state_root(f) for f in auto]
+           + [root_value(c) for c in cuts])
 
 logic = [i for i in insts
          if not i[0].startswith(PHYSICAL_PREFIX) and not i[0].startswith(SEQ_PREFIX)]
