@@ -21,6 +21,7 @@ import SaltWorks.Silicon.Imported.FabricCut
 import SaltWorks.Silicon.Equiv.ComparatorEquiv
 import SaltWorks.Silicon.Equiv.Columns
 import SaltWorks.Silicon.Equiv.BitSliced
+import SaltWorks.Silicon.Equiv.AdderSlice
 import SaltWorks.Silicon.Equiv.SwitchRefinement
 import SaltWorks.Silicon.Equiv.FabricRoutes
 import SaltWorks.Tactic.AuditAxioms
