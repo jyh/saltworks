@@ -12,6 +12,13 @@ import SaltWorks.HDL.Dense
 import SaltWorks.HDL.EmitN
 import SaltWorks.HDL.ISA
 import SaltWorks.HDL.Renumber
+import SaltWorks.HDL.Adder
+import SaltWorks.HDL.Shifter
+import SaltWorks.HDL.PriorityEnc
+import SaltWorks.HDL.ReadTree
+import SaltWorks.HDL.AluSelect
+import SaltWorks.HDL.EmitS
+import SaltWorks.HDL.CodegenSpec
 import SaltWorks.Silicon.Cells.Sky130
 import SaltWorks.Silicon.Imported.Comparator
 import SaltWorks.Silicon.Imported.RefComparator
