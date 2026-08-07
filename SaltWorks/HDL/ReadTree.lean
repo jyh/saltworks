@@ -162,6 +162,15 @@ def readTree : Circ :=
   let (gs, outs) := rtBits rtWidth (rtIn + 1 + rtAddrBits)
   { nIn := rtIn, gates := zero :: invs ++ gs, outs := outs }
 
+
+/-- The read tree's cut set: **the output of every mux at every level**. The
+silicon seat's treated figure of 11 comes from a COARSER grouping; taking every
+level gives the finest decomposition and a cone of 3, and a coarser census is
+obtained by keeping only every k-th level of this list. -/
+def readTreeCuts : List Net :=
+  (readTree.gates.filterMap fun g =>
+    match g.op with | .or _ _ => some g.out | _ => none)
+
 /-! ## The oracle check — MEASUREMENTS, deliberately not theorems
 
 These compare the emitter against the silicon seat's two committed numbers. They
@@ -218,5 +227,6 @@ false.)*
 #audit_axioms rtBit
 #audit_axioms rtBits
 #audit_axioms readTree
+#audit_axioms readTreeCuts
 
 end SaltWorks.HDL

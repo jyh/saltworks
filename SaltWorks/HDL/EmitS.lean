@@ -331,6 +331,24 @@ def manifest (drive : String) (c : Circ) : String :=
   slines (c.gates.map fun g =>
     instName g.out ++ " " ++ cellOf drive g.op ++ " " ++ sNet c.nIn g.out)
 
+/-- **The SEMANTIC cut manifest** — only the nets a design NAMES as boundaries.
+
+⚠️ **`manifest` above lists EVERY gate, and the silicon seat measured why that is
+useless as a cone test: with 159 cuts for 160 cells every cone is one gate deep,
+so "max 2, 100%" is true BY CONSTRUCTION and tests nothing.** *That is a valid
+decomposition — it reduces equivalence to gate-by-gate matching against the
+cell-model theorems — but it is a DIFFERENT strategy from per-cone equivalence
+and does not exercise the 24-bit ceiling at all.*
+
+⇒ **This takes the design's own exported cut set** (`adder32Carries`,
+`shifter32Cuts`, `aluSelectCuts`, `zeroTreeCuts`, `priorityEncCuts`, …) **and
+emits only those**, so the cone census measures the decomposition the generator
+actually intended. -/
+def manifestCuts (drive : String) (c : Circ) (cuts : List Net) : String :=
+  slines (cuts.filterMap fun n =>
+    (c.gates.find? (fun g => g.out == n)).map fun g =>
+      instName g.out ++ " " ++ cellOf drive g.op ++ " " ++ sNet c.nIn g.out)
+
 /-! ## Axiom audit — every definition, per the iron rules -/
 
 #audit_axioms cellOf
@@ -346,5 +364,6 @@ def manifest (drive : String) (c : Circ) : String :=
 #audit_axioms emitSMux
 #audit_axioms muxCount
 #audit_axioms manifest
+#audit_axioms manifestCuts
 
 end SaltWorks.HDL
