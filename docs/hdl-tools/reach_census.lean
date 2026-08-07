@@ -1,4 +1,12 @@
 /-
+⚠️ NON-LIBRARY METAPROGRAM — NOT part of `SaltWorks`, NOT reachable from the hub,
+and it never should be.  It is a TOOL that imports the library in order to walk
+its environment; counting it as a module the hub "fails to reach" is a category
+error.  `docs/ledger-tools/import-closure.py` excludes non-`SaltWorks/` paths for
+exactly this reason (and PRINTS the exclusion) -- but a file that relies on an
+external filter to classify it correctly should say what it is, so: this is a
+tool, and its home is `docs/`.
+
 REACH CENSUS — "what is this theorem ABOUT?", answered by Lean rather than grep.
 
 Run:  ../saltbuild.sh docs/hdl-tools/reach_census.lean
