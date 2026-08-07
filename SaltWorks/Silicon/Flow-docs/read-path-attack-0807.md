@@ -158,6 +158,48 @@ writeback, PC) **and not where a synthesiser has already chosen a different
 form.** *Quoting a single yield figure for "a CPU" would be an extrapolation, and
 I have not made one.*
 
+## THE WRITEBACK PATH — measured on the Captain's order, and it needs NOTHING
+
+Predictions were written to disk **before** synthesis (`W1`–`W4`), and all four held.
+
+**RV32I writeback: 4:1 result select (ALU / MEM / PC+4 / CSR) + write-port decode
++ 31×32 flops**, every register exposed so none is pruned, read path deliberately
+absent:
+
+```
+1984 cones · median 6 · MAX 6 · 100% <= 24        — in PLAIN RTL
+  D roots : 32 distinct, all cone 6   (the 4:1 result mux: 2 select + 4 sources)
+  DE roots: 31 distinct, all cone 6   (waddr 5 + we)
+  flops 992 = 29,789 um^2 (97%)   ·   WB LOGIC 183 cells = 922 um^2 (3.0%)
+```
+
+⇒ **No tree. No structural emission. No cut. No `keep`.** The writeback path is
+natively inside the kernel ceiling as ordinary RTL.
+
+### 🎯 The read/write asymmetry is STRUCTURAL, not incidental
+
+| | logic cells | logic µm² | max cone | what it needs |
+|---|---|---|---|---|
+| **read** path | 1508 | 15,222 | **36** | a two-level tree **and** structural emission |
+| **write** path | **183** | **922** | **6** | **nothing** |
+| | **8.2×** | **16.5×** | | |
+
+**A read SELECTS one of 31 registers — its cone grows with the file. A write
+ENABLES one of 31 — its cone does not.** The data is *broadcast* to every
+register and only the enable is decoded, so the D cone is the width of the result
+mux (6) and the DE cone is the width of the address plus `we` (6), and **neither
+scales with the register count at all.**
+
+⇒ **The whole difficulty of the register file — verification *and* area — lives
+on the read side.** The writeback path was never the problem, and now that is
+measured rather than assumed.
+
+⇒ **Option (A) is required only for the READ path.** That is a narrowing worth
+having before C3 freezes: the emitter's structural obligations do not extend to
+the writeback, and the peephole ordered for the read tree buys nothing here
+(183 cells, of which the flow already chose compound forms — `a221oi`, `a21oi`,
+`nor2` — that are not mux-shaped).
+
 ## What I would tell the council
 
 1. **The read path is solvable at full RV32I.** Two-level tree, emitted

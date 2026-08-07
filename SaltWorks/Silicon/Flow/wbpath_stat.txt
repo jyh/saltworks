@@ -1,0 +1,33 @@
+
+7. Printing statistics.
+
+=== wbpath ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+      161        - wires
+     1312        - wire bits
+       10        - public wires
+     1161        - public wire bits
+        9        - ports
+     1129        - port bits
+     1175 3.07E+04 cells
+       32  160.154   sky130_fd_sc_hd__a21oi_1
+       29  253.994   sky130_fd_sc_hd__a221oi_1
+        3   22.522   sky130_fd_sc_hd__a22oi_1
+        2    7.507   sky130_fd_sc_hd__clkinv_1
+      992 2.98E+04   sky130_fd_sc_hd__edfxtp_1
+        2   12.512   sky130_fd_sc_hd__lpflow_inputiso1p_1
+        4   25.024   sky130_fd_sc_hd__lpflow_isobufsrc_1
+       35  131.376   sky130_fd_sc_hd__nand2_1
+        4   25.024   sky130_fd_sc_hd__nand2b_1
+        4   20.019   sky130_fd_sc_hd__nand3_1
+        1    6.256   sky130_fd_sc_hd__nand4_1
+       65  243.984   sky130_fd_sc_hd__nor2_1
+        1    5.005   sky130_fd_sc_hd__o21ai_0
+        1    8.758   sky130_fd_sc_hd__xnor2_1
+
+   Chip area for module '\wbpath': 30710.704000
+     of which used for sequential elements: 29788.569600 (97.00%)
+
