@@ -1,4 +1,14 @@
-# THE VERIFIED CPU — RV32I campaign freeze v0.1
+# THE VERIFIED CPU — RV32I campaign freeze v1 (C3 FINALIZED)
+### C3 RATIFIED 8/7 ~09:45 by the maestro under probe-validated→take-it:
+### **OPTION (A) — STRUCTURAL GATE-LEVEL EMISSION — IS THE ROUTE.**
+### The complete evidence, all measured through the pinned flow:
+### RTL route DEAD at scale (5,054-cell core: 60.1% verifiable even
+### with every named boundary cut — boundaries MERGED AND RENAMED,
+### partial 8-of-32 merges); structural route: probe P1–P4 green,
+### the ~5k-cell structural monolith 100% of LIVE boundaries survive
+### (768ce11). Emitters landed: emitS (drive 1/2) + emitSMux (peephole,
+### 5,270→2,006 cells). Fallback (B) retired unused. Known cost,
+### priced not fatal: TT's test job needs cell models under (A).
 ### AMENDED 8/6 ~21:55 by the maestro on silicon's C0 census (d618178,
 ### F1–F3) + compiler's tree-confirmation: v0's C4 headline DID NOT
 ### TYPECHECK as written — killed before the council sat, as the process
