@@ -140,12 +140,40 @@ if [ "${ARCHIVE:-0}" = "1" ]; then
   # Verified on this grep that `\b` actually binds — an unsupported `\b` would
   # match nothing and fail SILENTLY OPEN, which is the direction that matters.
   hits=$(grep -c -i -E '\bloca\b|\bholl\b|\bgdm\b|google|deepmind|confidential|proprietary' "$BUS" || true)
-  if [ "${hits:-0}" -ne 0 ]; then
-    echo "bus_snapshot: ⛔ ARCHIVE BLOCKED — the lane scan found $hits employer-lane" >&2
-    echo "              marker(s) in the bus. NOT pushed. Read them, and if they are" >&2
-    echo "              benign, archive with LANE_OK=1. The local snapshot is taken." >&2
-    [ "${LANE_OK:-0}" = "1" ] || exit 1
-    echo "bus_snapshot: ⚠️  LANE_OK=1 given — proceeding under an explicit human call."
+  # A BASELINE, NOT AN OVERRIDE. Every hit line is hashed; lines whose hash is
+  # already in the baseline have been adjudicated and do not re-flag. NEW
+  # marker text still blocks, because its hash is new. This is what keeps a
+  # blunt gate usable: the alternative — a global LANE_OK typed on every run —
+  # is the reflex compiler named at 18:12, and it would wave through a real
+  # leak sitting one line below an old false positive.
+  #
+  # The baseline is keyed on the LINE's content, so editing an adjudicated
+  # line re-flags it. That is deliberate: an edit is new text.
+  BASELINE=${BASELINE:-"$SEAT/fleet/BUS-lane-baseline.txt"}
+  hitlines=$(grep -n -i -E '\bloca\b|\bholl\b|\bgdm\b|google|deepmind|confidential|proprietary' "$BUS" || true)
+  novel=""
+  if [ -n "$hitlines" ]; then
+    touch "$BASELINE"
+    novel=$(printf '%s\n' "$hitlines" | while IFS= read -r l; do
+      h=$(printf '%s' "${l#*:}" | shasum | cut -c1-16)
+      grep -q "^$h " "$BASELINE" 2>/dev/null || printf '%s  %s\n' "$h" "$(printf '%s' "$l" | cut -c1-90)"
+    done)
+  fi
+
+  if [ -n "$novel" ]; then
+    echo "bus_snapshot: ⛔ ARCHIVE BLOCKED — NEW un-adjudicated lane-marker text:" >&2
+    printf '%s\n' "$novel" | sed 's/^/              /' >&2
+    echo "              NOT pushed; the local snapshot is taken. If these are benign" >&2
+    echo "              (e.g. prose ABOUT the gate), a human adjudicates them once:" >&2
+    echo "                LANE_ACK=1 ARCHIVE=1 sh docs/ledger-tools/bus_snapshot.sh" >&2
+    echo "              which records THESE lines only. Genuinely new hits still block." >&2
+    if [ "${LANE_ACK:-0}" != "1" ]; then
+      exit 1
+    fi
+    printf '%s\n' "$novel" | awk '{print $1"  adjudicated "d}' d="$(TZ=America/Los_Angeles date +%Y-%m-%dT%H:%M)" >> "$BASELINE"
+    echo "bus_snapshot: ⚠️  LANE_ACK=1 — $(printf '%s\n' "$novel" | wc -l | tr -d ' ') line(s) adjudicated and baselined."
+  elif [ "${hits:-0}" -ne 0 ]; then
+    echo "bus_snapshot: lane scan — $hits hit(s), all previously adjudicated in the baseline"
   fi
 
   # gh is the authority on visibility; the CLAUDE.md note is not. A public
