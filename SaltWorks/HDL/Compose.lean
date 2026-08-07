@@ -1,0 +1,151 @@
+/-
+Copyright (c) 2026 Jason Hickey. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Jason Hickey, Claude
+-/
+import SaltWorks.HDL.Renumber
+
+/-!
+# C4 · `core` — INSTANTIATION: putting one `Circ` inside another
+
+**This module exists because the tree does not contain it.** Every landed block
+— `adder32`, `readTree`, `aluSelect`, `decoder`, `regWrite`, `regNext` — is a
+standalone `Circ` with **hand-allocated net numbering**, and `Renumber` offers
+`renum`/`normalize`, which renumber *one* circuit rather than embedding one in
+another. *A `grep` for `compose`/`inst`/`embed`/`relabel` over `SaltWorks/HDL`
+returns nothing that composes circuits.*
+
+⇒ ***So `core`'s assembly is blocked on a combinator that has to be built, and
+that is worth saying at block 5 of 6 rather than at block 6.*** **It is the same
+shape as this morning's O(n²) discovery: a structural prerequisite that the plan
+listed as a step.**
+
+## What instantiation is
+
+Embedding `c` into a host at net offset `off`, with `c`'s inputs supplied by
+host nets through `σ`:
+
+```
+net n of c  ↦  σ n                  when n < c.nIn     (an input, wired by σ)
+            ↦  off + (n - c.nIn)    otherwise          (an internal, shifted)
+```
+
+**The side condition is the whole risk**: the shifted region `off …` must not
+collide with anything the host has already defined, and `σ`'s image must be
+nets the host has *already computed*. Stated as `instOK` below rather than left
+to the caller's care.
+
+## ⚠️ GRADE OF THIS FILE, STATED PLAINLY
+
+**Definitions: landed. A concrete instantiation: KERNEL-CHECKED. The general
+semantics theorem: `#check`ed and NOT PROVED.**
+
+*That is the honest grade and not a resting place — `inst_sem` is what makes
+assembly verified rather than glue, and it is the next proof obligation on this
+seat's board. A composite whose semantics theorem is missing is exactly the
+"unproved link" C4's own sentence forbids.*
+-/
+
+namespace SaltWorks.HDL
+
+/-! ### The combinator -/
+
+/-- Remap a net of `c` into the host. -/
+def instMap (c : Circ) (σ : Net → Net) (off : Nat) (n : Net) : Net :=
+  if n < c.nIn then σ n else off + (n - c.nIn)
+
+/-- `c`'s gates, embedded. -/
+def instGates (c : Circ) (σ : Net → Net) (off : Nat) : List Gate :=
+  c.gates.map fun g => ⟨instMap c σ off g.out, g.op.rename (instMap c σ off)⟩
+
+/-- Where `c`'s outputs land in the host. -/
+def instOuts (c : Circ) (σ : Net → Net) (off : Nat) : List Net :=
+  c.outs.map (instMap c σ off)
+
+/-- The next free net after an instantiation — `c`'s internal count, shifted. -/
+def instNext (c : Circ) (off : Nat) : Nat := off + c.gates.length
+
+/-- **The side condition, stated rather than left to care.** Every input wire
+`σ i` must be strictly below `off` (already computed by the host), and `c` must
+be well-formed. -/
+def instOK (c : Circ) (σ : Net → Net) (off : Nat) : Prop :=
+  c.wf = true ∧ ∀ i, i < c.nIn → σ i < off
+
+/-! ### A concrete instantiation, kernel-checked
+
+*Two half-adders: the second's inputs are the first's outputs. If the combinator
+mis-shifted a net or mis-wired an input, this composite would compute something
+else — and it is small enough that the kernel can say so.* -/
+
+/-- `sum = a ^^^ b`, `carry = a &&& b` — two inputs, two outputs, two gates. -/
+def ha : Circ := { nIn := 2, gates := [⟨2, .xor 0 1⟩, ⟨3, .and 0 1⟩], outs := [2, 3] }
+
+theorem ha_wf : ha.wf = true := by decide +kernel
+
+/-- Host: two primary inputs `0,1`; one `ha` instantiated on them at offset 2;
+a second `ha` instantiated on the FIRST one's two outputs, at offset 4. -/
+def haChain : Circ :=
+  let g1 := instGates ha (fun i => i) 2
+  let o1 := instOuts ha (fun i => i) 2
+  let g2 := instGates ha (fun i => o1.getD i 0) 4
+  let o2 := instOuts ha (fun i => o1.getD i 0) 4
+  { nIn := 2, gates := g1 ++ g2, outs := o1 ++ o2 }
+
+theorem haChain_wf : haChain.wf = true := by decide +kernel
+
+/-- **The composite computes what hand-composition says it should**, on all four
+input pairs. `ha`'s outputs are `(a^^^b, a&&&b)`; feeding those to a second `ha`
+gives `((a^^^b) ^^^ (a&&&b), (a^^^b) &&& (a&&&b))` — and the second is always
+`false`, which is a real fact about this composite and a good witness that the
+wiring is not accidental. -/
+def haChainOK : Bool :=
+  [false, true].all fun a => [false, true].all fun b =>
+    sem haChain (fun i => if i == 0 then a else b)
+      == [a ^^ b, a && b, (a ^^ b) ^^ (a && b), (a ^^ b) && (a && b)]
+
+theorem haChain_correct : haChainOK = true := by decide +kernel
+
+/-- **NON-VACUITY — the instantiated copy is genuinely a SECOND copy**, not the
+first one read twice: the composite has four gates, not two. -/
+theorem haChain_has_four_gates : haChain.gates.length = 4 := by decide +kernel
+
+/-- And the two instances occupy disjoint net ranges. -/
+theorem haChain_nets_disjoint :
+    (instGates ha (fun i => i) 2).map Gate.out
+      = [2, 3] ∧
+    (instGates ha (fun i => [2,3].getD i 0) 4).map Gate.out = [4, 5] := by
+  decide +kernel
+
+/-! ### THE OBLIGATION THIS FILE DOES NOT DISCHARGE
+
+The general theorem: under `instOK`, the embedded copy computes exactly what `c`
+computes on the wired-in inputs. **`#check`ed, not proved** — assembly is glue
+until this exists. -/
+
+section
+variable (c : Circ) (σ : Net → Net) (off : Nat) (env : Env)
+
+#check (instOK c σ off →
+        (∀ n, n < c.nIn + c.gates.length →
+          run env (instGates c σ off) (instMap c σ off n)
+            = run (fun i => env (σ i)) c.gates n) : Prop)
+
+-- And its corollary, which is the form assembly actually consumes.
+#check (instOK c σ off →
+        (instOuts c σ off).map (run env (instGates c σ off))
+          = sem c (fun i => env (σ i)) : Prop)
+end
+
+#audit_axioms instMap
+#audit_axioms instGates
+#audit_axioms instOuts
+#audit_axioms instNext
+#audit_axioms ha
+#audit_axioms ha_wf
+#audit_axioms haChain
+#audit_axioms haChain_wf
+#audit_axioms haChain_correct
+#audit_axioms haChain_has_four_gates
+#audit_axioms haChain_nets_disjoint
+
+end SaltWorks.HDL
