@@ -84,13 +84,34 @@ deletion. Fixed, with a mutation that deletes `FP_SIZING` alone: **11/11**.
 `#audit_axioms` is **sound**: six deliberately-broken theorems produced six hard
 errors and the control ticked. My 14:04 claim was false and evidence pulled it.
 
+**AND THE COLUMN PICTURE IS NOT REACHABLE AT ALL — CLOSED TONIGHT, NOT DEFERRED.**
+`SYNTH_HIERARCHY_MODE: "keep"` (run `31140850077`) dies at **step 7 of 70+**,
+before floorplanning:
+
+```
+06-yosys-synthesis   netlist retains:  bitserial_switch e00 ( … e01, e02, e03
+07-checker-yosysunmappedcells   "1 Unmapped Yosys instances found."   -> gds FAILS
+```
+
+⇒ **The property that would enable the picture is the property the checker
+rejects.** Columns need grouping → grouping needs instance names → names need
+retained hierarchy → **retained hierarchy IS an unmapped instance** →
+`YosysUnmappedCells` is a hard-fail default. **The two requirements are
+contradictory in this flow**, and all four levers are now closed on measurement:
+DEF fences (TT owns `FP_DEF_TEMPLATE`), `MANUAL_GLOBAL_PLACEMENTS` (dead names),
+`FP_OBSTRUCTIONS` (measured: does not group), `SYNTH_HIERARCHY_MODE` (measured:
+hard-fails).
+
+**The 1990 die is legible because it was full-custom — the designer placed those
+columns. TinyTapeout's proposition is that you do not, and the same automation
+that makes a €280 tile possible is what forbids the image.** What exists instead:
+`stage_map.py` renders the *real* placement coloured by stage from the shipped
+netlist and DEF. It shows two stripes, not three, because that is what is there.
+
 ## 3. IN FLIGHT AT MUSTER
 
-- `SYNTH_HIERARCHY_MODE: "keep"` on branch `layout-hierarchy` (run `31140850077`)
-  — the enabling question for the column picture: do instance names survive?
-  **`main` is untouched.** If yes, the picture is reachable at the price of
-  re-deriving the cone numbers on a hierarchical netlist. If no, the answer is
-  finished rather than open.
+**Nothing of mine is in flight.** `main` is green on HEAD, every branch
+experiment is concluded and recorded, and no run is pending.
 
 ## 4. COST
 
