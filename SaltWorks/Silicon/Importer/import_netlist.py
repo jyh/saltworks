@@ -172,8 +172,31 @@ EXPAND = {
     "o21a":               ([('a', 'or', 'A1', 'A2'), ('t', 'and', 'a', 'B1')], ('X', 't')),
     "o211a":              ([('a', 'or', 'A1', 'A2'), ('b', 'and', 'a', 'B1'), ('t', 'and', 'b', 'C1')], ('X', 't')),
     "clkbuf":             ([('t', 'buf', 'A', None)], ('X', 't')),
+    # a2bb2oi: hand-derived as !((!A1_N & !A2_N) | (B1 & B2)), which distributes
+    # to the vendor's four-term form (A1_N|A2_N) & (!B1|!B2). Derived BEFORE
+    # reading Liberty, per the non-circularity rule; Liberty adjudicated it.
+    "a2bb2oi":            ([('a', 'or', 'A1_N', 'A2_N'), ('b', 'not', 'B1', None),
+                            ('c', 'not', 'B2', None), ('d', 'or', 'b', 'c'),
+                            ('t', 'and', 'a', 'd')], ('Y', 't')),
     "dlygate4sd3":        ([('t', 'buf', 'A', None)], ('X', 't')),
     "clkdlybuf4s25":      ([('t', 'buf', 'A', None)], ('X', 't')),
+    # --- added for BB-1 B2 (the 24-element bitonic network). Each derived BY
+    # HAND from the naming convention, then adjudicated against the vendor
+    # Liberty: 9 of 9 agreed. Models + theorems in Cells/Sky130.lean.
+    "a221o":   ([('a','and','A1','A2'),('b','and','B1','B2'),('c','or','a','b'),
+                 ('t','or','c','C1')], ('X','t')),
+    "a22o":    ([('a','and','A1','A2'),('b','and','B1','B2'),('t','or','a','b')], ('X','t')),
+    "nor2b":   ([('n','not','A',None),('t','and','n','B_N')], ('Y','t')),
+    "o21bai":  ([('a','or','A1','A2'),('n','not','a',None),('t','or','n','B1_N')], ('Y','t')),
+    "o31a":    ([('a','or','A1','A2'),('b','or','a','A3'),('t','and','b','B1')], ('X','t')),
+    "o31ai":   ([('a','or','A1','A2'),('b','or','a','A3'),('c','and','b','B1'),
+                 ('t','not','c',None)], ('Y','t')),
+    "o41ai":   ([('a','or','A1','A2'),('b','or','a','A3'),('c','or','b','A4'),
+                 ('d','and','c','B1'),('t','not','d',None)], ('Y','t')),
+    "or3":     ([('a','or','A','B'),('t','or','a','C')], ('X','t')),
+    "or4b":    ([('a','or','A','B'),('b','or','a','C'),('n','not','D_N',None),
+                 ('t','or','b','n')], ('X','t')),
+
 }
 
 # ⚠️ DRIVE STRENGTH IS NOT PART OF THE FUNCTION, AND THIS IS MEASURED, NOT ASSUMED.

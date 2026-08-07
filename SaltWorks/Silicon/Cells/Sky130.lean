@@ -420,4 +420,58 @@ theorem conb_LO_liberty : conb_LO = false := by decide +kernel
 #audit_axioms a211oi_liberty a221oi_liberty o21a_liberty o21ai_liberty
 #audit_axioms o211a_liberty
 
+/-- `a2bb2oi` — AND-OR-INVERT with BOTH inputs of the first AND bubbled.
+Hand-derived from the naming convention before the Liberty was read: `2bb` is a
+2-input AND with both inputs bubbled, `2` a plain 2-input AND, `oi` OR-then-invert. -/
+def a2bb2oi (A1_N A2_N B1 B2 : Bool) : Bool := !((!A1_N && !A2_N) || (B1 && B2))
+
+/-- The vendor states it in the distributed four-term form; the two agree. -/
+theorem a2bb2oi_liberty (A1_N A2_N B1 B2 : Bool) :
+    a2bb2oi A1_N A2_N B1 B2
+      = ((A1_N && !B1) || (A1_N && !B2) || (A2_N && !B1) || (A2_N && !B2)) := by
+  decide +kernel +revert
+
+#audit_axioms a2bb2oi_liberty
+
+/-! ### BB-1 B2 cells — the 24-element bitonic network's remainder.
+Each model was written from the naming convention BEFORE the Liberty was read;
+all nine agreed with the vendor. -/
+
+def a221o (A1 A2 B1 B2 C1 : Bool) : Bool := (A1 && A2) || (B1 && B2) || C1
+theorem a221o_liberty (A1 A2 B1 B2 C1 : Bool) :
+    a221o A1 A2 B1 B2 C1 = ((B1 && B2) || (A1 && A2) || C1) := by decide +kernel +revert
+
+def a22o (A1 A2 B1 B2 : Bool) : Bool := (A1 && A2) || (B1 && B2)
+theorem a22o_liberty (A1 A2 B1 B2 : Bool) :
+    a22o A1 A2 B1 B2 = ((B1 && B2) || (A1 && A2)) := by decide +kernel +revert
+
+def nor2b (A B_N : Bool) : Bool := !A && B_N
+theorem nor2b_liberty (A B_N : Bool) : nor2b A B_N = (!A && B_N) := by decide +kernel +revert
+
+def o21bai (A1 A2 B1_N : Bool) : Bool := !((A1 || A2) && !B1_N)
+theorem o21bai_liberty (A1 A2 B1_N : Bool) :
+    o21bai A1 A2 B1_N = ((!A1 && !A2) || B1_N) := by decide +kernel +revert
+
+def o31a (A1 A2 A3 B1 : Bool) : Bool := (A1 || A2 || A3) && B1
+theorem o31a_liberty (A1 A2 A3 B1 : Bool) :
+    o31a A1 A2 A3 B1 = ((A1 && B1) || (A2 && B1) || (A3 && B1)) := by decide +kernel +revert
+
+def o31ai (A1 A2 A3 B1 : Bool) : Bool := !((A1 || A2 || A3) && B1)
+theorem o31ai_liberty (A1 A2 A3 B1 : Bool) :
+    o31ai A1 A2 A3 B1 = ((!A1 && !A2 && !A3) || !B1) := by decide +kernel +revert
+
+def o41ai (A1 A2 A3 A4 B1 : Bool) : Bool := !((A1 || A2 || A3 || A4) && B1)
+theorem o41ai_liberty (A1 A2 A3 A4 B1 : Bool) :
+    o41ai A1 A2 A3 A4 B1 = ((!A1 && !A2 && !A3 && !A4) || !B1) := by decide +kernel +revert
+
+def or3 (A B C : Bool) : Bool := A || B || C
+theorem or3_liberty (A B C : Bool) : or3 A B C = (A || B || C) := by decide +kernel +revert
+
+def or4b (A B C D_N : Bool) : Bool := A || B || C || !D_N
+theorem or4b_liberty (A B C D_N : Bool) :
+    or4b A B C D_N = (A || B || C || !D_N) := by decide +kernel +revert
+
+#audit_axioms a221o_liberty a22o_liberty nor2b_liberty o21bai_liberty
+#audit_axioms o31a_liberty o31ai_liberty o41ai_liberty or3_liberty or4b_liberty
+
 end SaltWorks.Silicon.Cells
