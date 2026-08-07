@@ -34,11 +34,24 @@ diff[k] = rs1[k] ⊕ rs2[k]        eq = ¬(⋁ diff)        take = isBEQ ∧ eq
 addend  = take ? offset : 4
 ```
 
-⚠️ **The `4` is built from `const` gates and a uniform 3-gate mux per bit**,
-rather than hand-specialising the 31 bits where the constant is zero. *That is
-deliberate: `opt` is the landed, **verified** constant folder (`opt_sem`, T1),
-and hand-specialising here would trade a proof for a saving the optimizer makes
-anyway.* **Write it uniformly, let the verified pass collapse it.**
+⛔ **A CORRECTION TO THIS FILE'S ORIGINAL RATIONALE, AND IT WAS MINE.** The
+first version built the `4` from `const` gates and a **uniform 3-gate mux per
+bit**, on the stated ground that *"`opt` is the landed verified constant folder,
+so hand-specialising would trade a proof for a saving the optimizer makes
+anyway."*
+
+***`opt` IS NOT A CONSTANT FOLDER.*** Measured: `opt pcNext` returned **164
+gates from 164** — unchanged. `Opt.lean:119-121` says it plainly: *"The
+optimizer. Currently dead-net elimination; constant folding **composes** here"*
+— i.e. folding is **planned, not implemented**. `opt` removes dead gates (a
+control confirms `2 → 1` on a circuit with a dead `or`); the constant branches
+here are **live** gates feeding a live `or`, so nothing removes them.
+
+⇒ **63 gates would have been emitted dead-by-construction, and the only thing
+that would have removed them is yosys — the UNTRUSTED half.** *I built a design
+decision on a capability I had not checked, in a file whose whole subject is
+checking things.* **Now specialised by hand: `and(take, offset[k])` for the 31
+bits where the constant is zero, two gates at bit 2. **164 → 99.**
 -/
 
 namespace SaltWorks.HDL
@@ -68,19 +81,22 @@ def pcAfterNe : Nat := pcNeGates.2.2
 def pcEq : Net := pcAfterNe
 def pcTake : Net := pcAfterNe + 1
 def pcNotTake : Net := pcAfterNe + 2
-def pcFalse : Net := pcAfterNe + 3
-def pcTrue : Net := pcAfterNe + 4
-def pcMuxBase : Nat := pcAfterNe + 5
+def pcMuxBase : Nat := pcAfterNe + 3
 
-/-- The constant `4`: bit 2 set, every other bit clear. -/
-def pcConst4 (k : Nat) : Net := if k == 2 then pcTrue else pcFalse
+/-- Addend bit `k`'s output net. **Bit 2 is the only one that costs two gates**
+— it is the single set bit of the constant `4`. -/
+def pcAddendOut (k : Nat) : Net :=
+  if k < 2 then pcMuxBase + k
+  else if k == 2 then pcMuxBase + 3
+  else pcMuxBase + k + 1
 
-/-- Three gates per addend bit; the output is the third. -/
-def pcAddendOut (k : Nat) : Net := pcMuxBase + 3 * k + 2
+/-- `addend[k] = take ∧ offset[k]` where `4`'s bit is clear; at bit 2, where it
+is set, `addend[2] = ¬take ∨ (take ∧ offset[2])`. -/
 def pcAddendGates (k : Nat) : List Gate :=
-  [ ⟨pcMuxBase + 3 * k,     .and pcNotTake (pcConst4 k)⟩
-  , ⟨pcMuxBase + 3 * k + 1, .and pcTake (pcOff k)⟩
-  , ⟨pcAddendOut k,         .or (pcMuxBase + 3 * k) (pcMuxBase + 3 * k + 1)⟩ ]
+  if k == 2 then
+    [ ⟨pcMuxBase + 2, .and pcTake (pcOff 2)⟩
+    , ⟨pcMuxBase + 3, .or pcNotTake (pcMuxBase + 2)⟩ ]
+  else [ ⟨pcAddendOut k, .and pcTake (pcOff k)⟩ ]
 
 /-- **The pc addend select.** Outputs: `addend[0…31]`, then `take`. -/
 def pcNext : Circ :=
@@ -88,13 +104,16 @@ def pcNext : Circ :=
     gates := pcDiffGates ++ pcNeGates.1
                ++ [ ⟨pcEq, .not pcNe⟩
                   , ⟨pcTake, .and pcIsBEQ pcEq⟩
-                  , ⟨pcNotTake, .not pcTake⟩
-                  , ⟨pcFalse, .const false⟩
-                  , ⟨pcTrue, .const true⟩ ]
+                  , ⟨pcNotTake, .not pcTake⟩ ]
                ++ (List.range 32).flatMap pcAddendGates
     outs := (List.range 32).map pcAddendOut ++ [pcTake] }
 
 theorem pcNext_wf : pcNext.wf = true := by decide +kernel
+
+/-- **99 gates**, down from 164. *Measured, then pinned — I predicted 101 from
+the same arithmetic that produced the block and was wrong by two, which is why
+the number in a docstring should come from the build and not from the author.* -/
+theorem pcNext_gate_count : pcNext.gates.length = 99 := by decide +kernel
 
 /-- Dense SSA — the precondition for instantiating this block into `core`. -/
 theorem pcNext_ssa : pcNext.ssa = true := by decide +kernel
@@ -168,6 +187,7 @@ theorem pcNext_compares_the_low_bit :
 #audit_axioms pcAddendGates
 #audit_axioms pcNext
 #audit_axioms pcNext_wf
+#audit_axioms pcNext_gate_count
 #audit_axioms pcNext_ssa
 #audit_axioms pcRun
 #audit_axioms pcSpec
