@@ -128,6 +128,16 @@ theorem halfAdder_correct :
         [(j.testBit 0) ^^ (j.testBit 1), (j.testBit 0) && (j.testBit 1)]) = true := by
   decide +kernel
 
+-- `#audit_axioms` takes a LIST OF NAMES, so it is a whitelist: it bounds what is
+-- checked from above and **nothing enforces that the list is complete.** A
+-- theorem nobody lists is a theorem nobody audits, and the build stays green.
+-- `Op.eval_congr` was unlisted from the day this file landed; it was covered only
+-- because `Opt.run_filter` uses it and IS listed, so its axioms appeared in that
+-- closure — coverage by luck, not by design. (Silicon's 18:24: a whitelist cannot
+-- distinguish a correct set from an empty one.) Checked across all of leg 2:
+-- this was the only unaudited theorem; the completeness check is one `comm` over
+-- declared-vs-listed names and belongs in CI rather than in anyone's memory.
+#audit_axioms Op.eval_congr
 #audit_axioms upd_self upd_of_ne run_append
 #audit_axioms run_of_unwritten run_congr sem_congr
 #audit_axioms halfAdder_correct
