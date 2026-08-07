@@ -171,8 +171,57 @@ def allScenarios : List (List Nat) :=
   ((List.range 256).map (fun m =>
     (List.range 8).filter (fun i => Nat.testBit m i))).filter (fun l => l ≠ [])
 
+/-! ### Why this is proved in four chunks
+
+Measured 2026-08-06: as ONE `decide +kernel` over all 255 scenarios this peaked
+at **18.2 GiB / 78 s** — the largest single elaboration in the campaign, and it
+FAILS at `--cap 12000` and at `--cap 16000` (`excessive memory consumption
+detected at 'interpreter'`), which is the wrapper's own default.
+
+The cost is **≈ 5.05 GiB fixed + 0.052 GiB per scenario**, i.e. linear in the
+scenario count, while WALL TIME is superlinear. So splitting is not a concession
+to the memory cap — it is strictly better on both axes: **8.8 GiB / 45 s**, a 52 %
+cut in peak memory and 43 % in wall clock, and it passes at `--cap 12000`.
+
+Both decomposition lemmas are **core, not Mathlib** (`List.all_append`,
+`List.take_append_drop`), so the seam leg 2 imports stays Mathlib-free.
+
+The statement of `fabric_routes` below is **unchanged**; only its proof is. -/
+
+/-- The per-scenario predicate — verbatim the lambda in `fabric_routes`. -/
+def routesOK (ds : List Nat) : Bool :=
+  let trace := runFrame initFabric (scenario ds)
+  (List.range 8).all (fun d =>
+    ((List.range 8).map (fun t => (trace.getD (6 + t) []).getD d false))
+      == expected ds d)
+
+abbrev cA : List (List Nat) := allScenarios.take 64
+abbrev cR : List (List Nat) := allScenarios.drop 64
+abbrev cB : List (List Nat) := cR.take 64
+abbrev cR2 : List (List Nat) := cR.drop 64
+abbrev cC : List (List Nat) := cR2.take 64
+abbrev cD : List (List Nat) := cR2.drop 64
+
+/-- Reassembly. No fabric evaluation happens here — this is list arithmetic. -/
+theorem split : cA ++ (cB ++ (cC ++ cD)) = allScenarios := by
+  rw [List.take_append_drop, List.take_append_drop, List.take_append_drop]
+
 set_option maxHeartbeats 4000000 in
 set_option maxRecDepth 100000 in
+theorem cA_ok : cA.all routesOK = true := by decide +kernel
+
+set_option maxHeartbeats 4000000 in
+set_option maxRecDepth 100000 in
+theorem cB_ok : cB.all routesOK = true := by decide +kernel
+
+set_option maxHeartbeats 4000000 in
+set_option maxRecDepth 100000 in
+theorem cC_ok : cC.all routesOK = true := by decide +kernel
+
+set_option maxHeartbeats 4000000 in
+set_option maxRecDepth 100000 in
+theorem cD_ok : cD.all routesOK = true := by decide +kernel
+
 /-- **D4.** For every one of the 255 sorted, concentrated destination sets, every
 packet's payload arrives on the line its address names, and every unaddressed
 line stays idle — checked inside the kernel.
@@ -185,7 +234,9 @@ theorem fabric_routes :
       (List.range 8).all (fun d =>
         ((List.range 8).map (fun t => (trace.getD (6 + t) []).getD d false))
           == expected ds d)) = true := by
-  decide +kernel
+  show allScenarios.all routesOK = true
+  rw [← split]
+  simp only [List.all_append, cA_ok, cB_ok, cC_ok, cD_ok, Bool.and_self]
 
 #audit_axioms elem_matches_spec fabric_routes
 
