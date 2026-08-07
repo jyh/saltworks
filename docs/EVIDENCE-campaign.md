@@ -141,11 +141,16 @@ Rules for this file:
 |---|---|
 | **2026-09-07 13:00 PDT** | **HARD DEADLINE** (20:00 UTC) — no revisions after |
 | by 2026-08-31 | target: a real revision submitted, one week of slack |
-| 2027-03-27 | chips expected |
-| 2027-05-12 | estimated delivery |
+| ⛔ ~~2027-03-27~~ | ~~chips expected~~ — **UNSOURCED.** Read at source 2026-08-07 11:52: the runs table **has** a `Chips expected` column and **TTSKY26c's cell is EMPTY**; the API carries no fab date either. **This figure has no source on the public page today.** Marked rather than deleted, so whoever entered it can say where it came from |
+| **2027-05-12** | estimated delivery — ✅ **CONFIRMED at source**, `tinytapeout.com/runs/`, verbatim |
 
-Shuttle capacity when last measured (2026-08-06): 222 of 512 tiles free —
-and both preceding sky130 shuttles closed at 512/512.
+**Shuttle capacity, read at source 2026-08-07 11:52: `"total":512,"available":202` —
+down from 222 on 2026-08-06, of which OUR submission is 4.** PCBs are at
+`"available":0` of 80, a different scarcity nobody has been tracking.
+⚠️ **At ~20 tiles/day the 202 remaining last about ten days against a close
+31 days out** — and both preceding sky130 shuttles closed at 512/512. **BB-1's
+revision plan assumes a September slot exists; on this slope the shuttle may
+fill first.** *A schedule risk with a measured rate rather than a worry.*
 
 ---
 
