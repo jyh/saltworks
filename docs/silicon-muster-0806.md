@@ -153,8 +153,13 @@ putting every cone at ≤ 21 inputs.**
 
 ### …AND THEN EXECUTED, WITH TWO RESULTS THE PRICING DID NOT PREDICT (`cad38dc`)
 
-**`Cells/Sky130.lean`: 13 → 42 liberty theorems, all `decide +kernel`, all
-audited. `import_netlist.py`: +21 expansions, each simulated over its full truth
+**`Cells/Sky130.lean`: 13 → 44 liberty theorems covering 43 cells, all
+`decide +kernel`, all audited.** ⚠️ *This line said **42** until 21:2x and 42 is
+not a count of anything here — the file has **44** theorems over **43** cells,
+because the tie cell `conb` owes **two** (one per output, `HI` and `LO`).
+Self-caught while answering the maestro's status check by re-deriving the number
+instead of quoting my own commit message. Same two-output cell that broke
+`outputs_of` this afternoon; it has now broken a count as well.* `import_netlist.py`: +21 expansions, each simulated over its full truth
 table against the vendor Liberty before landing, plus multi-output support and
 `conb_1`.** Full build **8602 jobs, `EXIT=0`, 0 warnings**.
 
