@@ -88,6 +88,66 @@ its window is the same defect as a countdown without its date.
 
 ---
 
+## 3b. THE [R]/[C] SPLIT — folded into the frozen definitions, 2026-08-07 09:25
+
+Tasked by the maestro: the stack story's **REQUIRED [R] vs CHOSEN [C]**
+split *"is now a consumer of your meta-time instrument… fold into the
+frozen-definition column before data accumulates."* Landed here **before**
+any data, per §4's own rule.
+
+**⛔ IT IS AN ORTHOGONAL AXIS, NOT A RENAMING OF THE FOUR CATEGORIES.** The
+tempting reading is `[R] = DIRECTING+REVIEWING+UNBLOCKING` and
+`[C] = WATCHING`. **That is wrong**, and adopting it would quietly make the
+split free — which would be the tell that it measures nothing new. A
+DIRECTING touch can be either:
+
+* **DIRECTING + [R]** — a seat was **blocked** and asked; the ruling released it.
+* **DIRECTING + [C]** — the human volunteered a direction **nobody was waiting on**.
+
+Both are load-bearing under §2's counterfactual test. Only the first was
+*necessary at that moment*.
+
+**THE MECHANICAL DEFINITION, so it is generated rather than judged:**
+
+> **[R] — a human touch that answers an ASK OUTSTANDING ON THE BUS at the
+> moment it arrives.** The ask is a prior post naming the blocker and its
+> owner; the touch resolves it. Both endpoints are in `FLEET.md`, timestamped.
+>
+> **[C] — a human touch with no outstanding ask.** Volunteered.
+
+*The blocked-ness is the evidence, and it exists in the record before the
+touch does — which is what keeps this from being a post-hoc judgement about
+how necessary something felt.*
+
+**⛔ AND [R] NOW DEPENDS ON PROVENANCE, which is this morning's other
+instrument.** A "required ruling" that was **ghost text answered nothing —
+nobody decided it.** So the filter composes:
+
+```
+  [R]  requires:  an outstanding ask  AND  a verified-origin touch
+                  (bare = human hand · CAPTAIN-RELAY: = his words in-channel)
+  ⛔   excludes:  MAESTRO:-tagged instructions (a seat directing a seat)
+  ⛔   excludes:  anything nudge_detect flags, and anything in the
+                  2026-08-06 ghost window until confirmed
+```
+
+**⚠️ THE DEFECT IN MY OWN DESIGN, NAMED BEFORE ANYONE USES IT: [R] IS
+GAMEABLE IN BOTH DIRECTIONS, BY US.** Defining [R] as *"answers a posted
+ask"* means **a fleet that posts more asks grows [R]**, and a fleet that
+posts fewer shrinks it. Both are available and neither requires dishonesty —
+only a drift in bus habits. ⇒ **The count of asks POSTED must be published
+beside [R] every time**, so a rising [R] can be checked against a rising ask
+rate rather than read as rising human necessity. *A measure whose numerator
+we control needs its denominator in the same table.*
+
+**And the maestro's own guard is adopted verbatim:** *that [C] exceeds [R]
+is a **finding**, never a **borrow**.* [C] is never moved into the claim to
+enlarge it. **If the human chose to spend far more than the artifact
+required, that is the most interesting number in the ledger and it belongs
+in its own line, unshrunk.**
+
+---
+
 ## 4. Pre-registered readout — fixed before the data accumulates
 
 Per the campaign's own discipline (`measurement-preregistration.md`), and
