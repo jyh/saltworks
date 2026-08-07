@@ -149,7 +149,35 @@ stated rather than assumed.
 
 ⇒ **Price of closing the seam: ~30 cell models + liberty theorems, then the
 import, then per-cone equivalence — which ruling 4a made possible tonight by
-putting every cone at ≤ 21 inputs.** Not started; costed.
+putting every cone at ≤ 21 inputs.**
+
+### …AND THEN EXECUTED, WITH TWO RESULTS THE PRICING DID NOT PREDICT (`cad38dc`)
+
+**`Cells/Sky130.lean`: 13 → 42 liberty theorems, all `decide +kernel`, all
+audited. `import_netlist.py`: +21 expansions, each simulated over its full truth
+table against the vendor Liberty before landing, plus multi-output support and
+`conb_1`.** Full build **8602 jobs, `EXIT=0`, 0 warnings**.
+
+**1. THE NON-CIRCULAR RULE PAID, MEASURABLY — 2 of 27 hand-derivations were
+WRONG.** Derived from the naming convention by contexts forbidden to read the
+Liberty, then adjudicated against it: `nor3b` and `or3b` bubble their **LAST**
+input (`C_N`) while `and*b`/`nand*b` bubble the **FIRST** (`A_N`). Five one way,
+two the other; nothing in the name says which. **Liberty-generated models would
+have agreed 27/27, every theorem green, and taught nothing.**
+
+**2. A GAP IN THE EXISTING CHAIN, now closed.** The importer expanded **22**
+cells; only **13** had a Lean model. Nine expansions were asserted by a Python
+dict and checked by nothing — **four load-bearing, 94 instances across the
+netlists D3/D3.5/D4 are proved against.** All four simulated against the Liberty
+tonight: **all correct — a GAP, not a DEFECT** — and now proved, so the
+importer's own docstring is true for the first time.
+
+**3. THE REMAINING BLOCKER IS NOT CELLS.** With every cell expanding, the importer
+stops at `net 'fabric.e20.sel0' has no driver and is not an input` — a **flop
+output**. It is **combinational-only**: the comparator it was built for has 0
+flops, the fabricated netlist has **52**. The fix is the flop treatment the cone
+census already describes (Q-pins as cone leaves, D-pins as roots — D3.5's and
+D4's own decomposition, one level up). **Design work, not another table row.**
 
 ## 4. COST
 
