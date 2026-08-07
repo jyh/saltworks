@@ -8,6 +8,7 @@ import SaltWorks.Stack.Perm
 import SaltWorks.Stack.ZeroOne
 import SaltWorks.HDL.StateCodec
 import SaltWorks.HDL.C4
+import SaltWorks.HDL.Bitwise
 
 /-!
 # STACK-S2 — THE PROGRAM: an agent-written bitonic sort in Slice A
@@ -2574,6 +2575,340 @@ theorem length_conjunct_is_necessary (c : SaltWorks.HDL.Circ) (m : SaltWorks.HDL
     rw [extendOut_outs_length, hlen] at hh
     omega
 
+/-! ## ⭐⭐ C4FIELDS — THE CERTIFIED BLOCKS, AGAINST THE FIELD OBLIGATIONS
+
+`c4Spec_iff_fieldwise` turned C4 into **33 obligations stated in the ISA's own
+operations**, and some of the datapath blocks that will discharge them are landed
+and certified in `HDL/Bitwise.lean`. This section is the link between the two.
+The first thing it has to do is say **how strong those certificates actually
+are**, because their names promise more than their statements deliver.
+
+## ⭐ WHAT `bwOK` AND `sltOK` QUANTIFY OVER: 100 PAIRS, NOT 2^64
+
+```
+bwOK c f  =  bwWords.all fun a => bwWords.all fun b => sem c (bwEnv a b) == …
+sltOK     =  bwWords.all fun a => bwWords.all fun b => sltDrive a b == cmpWord …
+```
+
+**`bwWords` is a TEN-WORD list** — `bwWords_sample_size` pins that in the kernel
+rather than by reading it. So each of `bitXor32_correct`, `sltCirc_correct`,
+`sltuCirc_correct` and `sub_via_adder_correct` is a check on **100 ordered
+operand pairs out of 2^64 ≈ 1.8 × 10^19**, a 5 × 10^-18 slice of the input space.
+*Compiler said so in that file's own docstring — "sampled rather than exhaustive"
+— so this is not a discovery. It is the fact that decides what the bridges below
+may claim, and it belongs where the bridges are rather than only where the
+certificates are.*
+
+⇒ ***`bitXor32_correct` does NOT establish that `bitXor32` computes `^^^`.***
+
+## ⇒ SO THE XOR BRIDGE IS PROVED, NOT SAMPLED
+
+**`bitXor32` is a POINTWISE block — 32 independent gates over disjoint bit pairs
+— so its meaning is provable STRUCTURALLY, for all 2^64 operand pairs, with no
+`decide` anywhere.** `sem_bitXor32` is that proof, and it *supersedes* the
+sampled certificate rather than leaning on it: the certificate is 100 points of a
+theorem that now holds everywhere. `sem_bitXor32_off_the_sample` exhibits a pair
+outside `bwWords` where the general statement applies and the certificate says
+nothing.
+
+## ⚠️ THE SLT BRIDGE IS SAMPLED, AND THE SAMPLE IS IN ITS TYPE
+
+**The gap is not in the comparator.** `sltCirc` takes **three input bits**, so its
+own semantics is exhaustively decidable — `sem_sltCirc` covers all 8 valuations
+by `decide +kernel` — and it computes exactly `s31 ⊕ ((a31 ⊕ b31) ∧ (a31 ⊕ s31))`.
+
+**The sampling enters one layer down.** `sltDrive` feeds that block the *real*
+`adder32`'s 31st output, and the only statement connecting that output to `a - b`
+is `sub_via_adder_correct`, at the same 100 pairs — because **`adder32` has no
+semantic theorem at all**, only `ssa` and `wf`. ⇒ *`sltField_is_sltCirc` carries
+`s.get x ∈ bwWords` and `s.get y ∈ bwWords` as hypotheses.* **Those membership
+premises ARE the sample.** *They put the weakness in the type, where a caller
+must discharge it, instead of in a comment; and they are exactly what a real
+adder theorem would delete.*
+
+## ⛔ OUT OF SCOPE HERE, FOR THE SAME REASON
+
+**`ADD`, `ADDI` and `PcField` are untouched.** All three run through `adder32`, so
+there is nothing to bridge them to yet. That gap is the compiler seat's lane and
+is not claimed here.
+
+## What the bridges say, in `RegField`'s idiom
+
+`RegField c r` asks that `outReg c ins r` — 32 output bits of the core, read back
+as a word — equal `(stepT (decQ ins) (seenWord ins)).regs[r]`. **There is no
+`core`, so these theorems state the OTHER side of that equation**: for an `XOR`
+(resp. `SLT`) instruction word, the destination register's field of the stepped
+state is *what the certified block computes on the source registers*, read back
+through `wordOf` in exactly the shape `outReg` uses. **The assembly into a
+`RegField` is then whatever `core` has to supply, and nothing about the ISA side
+is left to negotiate later.**
+-/
+
+/-! ### Word helpers -/
+
+theorem wordOf_getLsbD_self (w : Word) :
+    SaltWorks.HDL.wordOf (fun k => w.getLsbD k) = w := by
+  apply BitVec.eq_of_getLsbD_eq
+  intro k hk
+  rw [SaltWorks.HDL.wordOf_getLsbD _ _ hk]
+
+theorem wordOf_getD_map_range (f : Nat → Bool) :
+    SaltWorks.HDL.wordOf (fun k => ((List.range 32).map f).getD k false)
+      = SaltWorks.HDL.wordOf f := by
+  apply wordOf_congr
+  intro k hk
+  have hl : k < ((List.range 32).map f).length := by
+    rw [List.length_map, List.length_range]; exact hk
+  rw [List.getD_eq_getElem _ _ hl, List.getElem_map, List.getElem_range]
+
+/-- **The size of the certificates' input sample, in the kernel.** Ten words, so
+`bwOK`/`sltOK`/`sltuOK`/`subOK` each check 100 ordered pairs. -/
+theorem bwWords_sample_size :
+    SaltWorks.HDL.bwWords.length = 10
+      ∧ SaltWorks.HDL.bwWords.length * SaltWorks.HDL.bwWords.length = 100 := by
+  decide +kernel
+
+/-! ### ⭐ THE XOR BLOCK, FOR EVERY OPERAND PAIR
+
+*Structural, by induction over the gate list, using `Sem.lean`'s frame lemma: the
+`k`-th gate writes net `64 + k`, which no earlier gate reads, so the operand nets
+`0 … 63` survive the whole run untouched.* -/
+
+/-- Running the pointwise `xor` gate list: output net `64 + k` is the `xor` of
+the two operand nets, for every `k` below the prefix length. -/
+theorem run_xorGates (env : SaltWorks.HDL.Env) :
+    ∀ n, n ≤ 32 → ∀ k, k < n →
+      SaltWorks.HDL.run env
+          ((List.range n).map (fun i => (⟨64 + i, .xor i (32 + i)⟩ : SaltWorks.HDL.Gate)))
+          (64 + k)
+        = (env k ^^ env (32 + k)) := by
+  intro n
+  induction n with
+  | zero => intro _ k hk; exact absurd hk (Nat.not_lt_zero k)
+  | succ n ih =>
+    intro hn k hk
+    have hn' : n ≤ 32 := by omega
+    have hn32 : n < 32 := by omega
+    have hfr : ∀ m, m < 64 →
+        SaltWorks.HDL.run env
+          ((List.range n).map (fun i => (⟨64 + i, .xor i (32 + i)⟩ : SaltWorks.HDL.Gate))) m
+          = env m := by
+      intro m hm
+      refine SaltWorks.HDL.run_of_unwritten env _ m ?_
+      intro g hg
+      rw [List.mem_map] at hg
+      obtain ⟨i, _, hgi⟩ := hg
+      subst hgi
+      show 64 + i ≠ m
+      exact Nat.ne_of_gt (Nat.lt_of_lt_of_le hm (Nat.le_add_right 64 i))
+    have hstep : SaltWorks.HDL.run env
+        ((List.range (n + 1)).map (fun i => (⟨64 + i, .xor i (32 + i)⟩ : SaltWorks.HDL.Gate)))
+        = SaltWorks.HDL.upd
+            (SaltWorks.HDL.run env
+              ((List.range n).map (fun i => (⟨64 + i, .xor i (32 + i)⟩ : SaltWorks.HDL.Gate))))
+            (64 + n)
+            ((SaltWorks.HDL.Op.xor n (32 + n)).eval
+              (SaltWorks.HDL.run env
+                ((List.range n).map
+                  (fun i => (⟨64 + i, .xor i (32 + i)⟩ : SaltWorks.HDL.Gate))))) := by
+      rw [List.range_succ, List.map_append, SaltWorks.HDL.run_append]
+      rfl
+    rw [hstep]
+    rcases Nat.lt_or_ge k n with hkn | hkn
+    · rw [SaltWorks.HDL.upd_of_ne (n := 64 + n) (m := 64 + k) _
+        (show 64 + k ≠ 64 + n by omega)]
+      exact ih hn' k hkn
+    · have hkeq : k = n := by omega
+      subst hkeq
+      have h1 : k < 64 := by omega
+      have h2 : 32 + k < 64 := by omega
+      rw [SaltWorks.HDL.upd_self]
+      simp only [SaltWorks.HDL.Op.eval]
+      rw [hfr k h1, hfr (32 + k) h2]
+
+/-- ⭐⭐ **THE XOR BLOCK COMPUTES `^^^`, ON ALL 2^64 OPERAND PAIRS.** *Not
+`decide`d: 2^64 pairs is not a kernel computation. Proved from the gate list's
+shape, which is what a pointwise block makes possible and what the sampled
+`bitXor32_correct` could not reach.* -/
+theorem sem_bitXor32 (a b : Word) :
+    SaltWorks.HDL.sem SaltWorks.HDL.bitXor32 (SaltWorks.HDL.bwEnv a b)
+      = (List.range 32).map (fun k => (a ^^^ b).getLsbD k) := by
+  have h : SaltWorks.HDL.sem SaltWorks.HDL.bitXor32 (SaltWorks.HDL.bwEnv a b)
+      = (List.range 32).map (fun k =>
+          SaltWorks.HDL.run (SaltWorks.HDL.bwEnv a b) SaltWorks.HDL.bitXor32.gates (64 + k)) := by
+    show ((List.range 32).map (fun k => 64 + k)).map
+        (SaltWorks.HDL.run (SaltWorks.HDL.bwEnv a b) SaltWorks.HDL.bitXor32.gates) = _
+    rw [List.map_map]
+    rfl
+  rw [h]
+  apply List.map_congr_left
+  intro k hk
+  have hk32 : k < 32 := List.mem_range.mp hk
+  have hgates : SaltWorks.HDL.bitXor32.gates
+      = (List.range 32).map (fun i => (⟨64 + i, .xor i (32 + i)⟩ : SaltWorks.HDL.Gate)) := rfl
+  rw [hgates, run_xorGates _ 32 le_rfl k hk32, BitVec.getLsbD_xor]
+  have ha : SaltWorks.HDL.bwEnv a b k = a.getLsbD k := by
+    show (if k < 32 then a.getLsbD k else b.getLsbD (k - 32)) = _
+    rw [if_pos hk32]
+  have hb : SaltWorks.HDL.bwEnv a b (32 + k) = b.getLsbD k := by
+    have h1 : ¬(32 + k < 32) := Nat.not_lt.mpr (Nat.le_add_right 32 k)
+    have h2 : 32 + k - 32 = k := Nat.add_sub_cancel_left 32 k
+    show (if 32 + k < 32 then a.getLsbD (32 + k) else b.getLsbD (32 + k - 32)) = _
+    rw [if_neg h1, h2]
+  rw [ha, hb]
+
+/-- ⭐ **THE GENERAL THEOREM REACHES WHERE THE CERTIFICATE DOES NOT** — an operand
+pair with neither word in the sample. *Without this, "for all 2^64" and "for the
+100 checked" are indistinguishable from the outside.* -/
+theorem sem_bitXor32_off_the_sample :
+    (0x0F0F0F0F : Word) ∉ SaltWorks.HDL.bwWords
+      ∧ (0x33333333 : Word) ∉ SaltWorks.HDL.bwWords
+      ∧ SaltWorks.HDL.sem SaltWorks.HDL.bitXor32
+            (SaltWorks.HDL.bwEnv 0x0F0F0F0F 0x33333333)
+          = (List.range 32).map
+              (fun k => ((0x0F0F0F0F : Word) ^^^ 0x33333333).getLsbD k) :=
+  ⟨by decide +kernel, by decide +kernel, sem_bitXor32 _ _⟩
+
+/-! ### ⭐ THE ISA SIDE — the `XOR` destination field -/
+
+/-- ⭐⭐ **THE XOR FIELD BRIDGE.** For an `XOR rd, x, y` instruction word, the
+destination register's field of the stepped state **is what `bitXor32` computes on
+the source registers**, read back in `outReg`'s own shape. *No `core` is needed:
+this is the equation's right-hand side meeting the block, with only the assembly
+left to C4. Unconditional in the operands — it inherits `sem_bitXor32`.* -/
+theorem xorField_is_bitXor32 (s : St) (rd x y : Fin 32) (hrd : rd ≠ 0) :
+    (stepT (SaltWorks.HDL.decQ (envWith s (encode (Instr.XOR rd x y))))
+           (seenWord (envWith s (encode (Instr.XOR rd x y))))).regs[rd.val]
+      = SaltWorks.HDL.wordOf (fun k =>
+          (SaltWorks.HDL.sem SaltWorks.HDL.bitXor32
+            (SaltWorks.HDL.bwEnv (s.get x) (s.get y))).getD k false) := by
+  rw [decQ_envWith, seenWord_envWith, stepT_encode, sem_bitXor32,
+    wordOf_getD_map_range, wordOf_getLsbD_self]
+  show ((s.set rd (s.get x ^^^ s.get y)).next).regs[rd.val] = _
+  show (s.set rd (s.get x ^^^ s.get y)).regs[rd.val] = _
+  simp only [St.set, if_neg hrd]
+  exact Vector.getElem_set_self rd.isLt
+
+/-! ### ⭐ THE COMPARATOR, EXHAUSTIVELY OVER ITS THREE INPUTS
+
+*Three input bits is 8 valuations, so unlike the 32-bit blocks this one CAN be
+decided outright. Doing so separates the two questions the sampled
+`sltCirc_correct` runs together: what the comparator computes from its inputs
+(settled here, for every input) and whether the sign bit it is fed is the
+subtraction's (open, and blocked on the adder).* -/
+
+/-- ⭐ **THE COMPARATOR BLOCK, FOR ALL EIGHT INPUT VALUATIONS.** -/
+theorem sem_sltCirc (a31 b31 s31 : Bool) :
+    SaltWorks.HDL.sem SaltWorks.HDL.sltCirc
+        (fun i => if i == 0 then a31 else if i == 1 then b31 else s31)
+      = SaltWorks.HDL.cmpWord (s31 ^^ ((a31 ^^ b31) && (a31 ^^ s31))) := by
+  revert a31 b31 s31
+  decide +kernel
+
+/-- ⭐ **AND THEREFORE `sltDrive` IS THE SIGN FORMULA, FOR ALL 2^64 PAIRS** — with
+the adder's 31st output left as an opaque term. *This is the exact shape of what
+remains: the comparator is discharged unconditionally, and the ONLY thing between
+this and `BitVec.slt` is that `(subOut a b).getD 31 false` be the sign bit of
+`a - b`, which today is `sub_via_adder_correct` at 100 pairs.* -/
+theorem sltDrive_eq_sign_formula (a b : Word) :
+    SaltWorks.HDL.sltDrive a b
+      = SaltWorks.HDL.cmpWord
+          (((SaltWorks.HDL.subOut a b).getD 31 false) ^^
+            ((a.getLsbD 31 ^^ b.getLsbD 31)
+              && (a.getLsbD 31 ^^ ((SaltWorks.HDL.subOut a b).getD 31 false)))) :=
+  sem_sltCirc _ _ _
+
+/-! ### ⚠️ THE ISA SIDE — the `SLT` destination field, at the sample's strength -/
+
+/-- **The sampled certificate, unpacked.** `sltCirc_correct` gives the comparison
+only for operands drawn from `bwWords`; this is that `List.all` read back as the
+statement it is. -/
+theorem sltDrive_eq_of_mem {a b : Word}
+    (ha : a ∈ SaltWorks.HDL.bwWords) (hb : b ∈ SaltWorks.HDL.bwWords) :
+    SaltWorks.HDL.sltDrive a b = SaltWorks.HDL.cmpWord (BitVec.slt a b) := by
+  have h := SaltWorks.HDL.sltCirc_correct
+  unfold SaltWorks.HDL.sltOK at h
+  have h1 := (List.all_eq_true.mp h) a ha
+  have h2 := (List.all_eq_true.mp h1) b hb
+  exact eq_of_beq h2
+
+/-- **The widening the ISA needs and the block does not do.** `sltCirc` answers in
+one bit; `SLT` writes a 32-bit `0`/`1` word. `cmpWord` is the padding and this is
+the word it denotes. -/
+theorem wordOf_cmpWord (r : Bool) :
+    SaltWorks.HDL.wordOf (fun k => (SaltWorks.HDL.cmpWord r).getD k false)
+      = (if r then 1 else 0 : Word) := by
+  cases r <;> decide +kernel
+
+/-- ⭐⭐ **THE SLT FIELD BRIDGE — WITH THE SAMPLE AS A HYPOTHESIS.** For an
+`SLT rd, x, y` word whose *source registers hold sampled words*, the destination
+field is what the `sltCirc` datapath computes, widened to 32 bits.
+
+⚠️ **The two membership premises are not decoration: they are precisely the
+strength of `sltCirc_correct`, which checks 100 operand pairs.** *Deleting them
+needs a semantic theorem for `adder32`, which does not exist. Stating them makes
+the bridge true today and makes the debt visible to every caller.* -/
+theorem sltField_is_sltCirc (s : St) (rd x y : Fin 32) (hrd : rd ≠ 0)
+    (hx : s.get x ∈ SaltWorks.HDL.bwWords) (hy : s.get y ∈ SaltWorks.HDL.bwWords) :
+    (stepT (SaltWorks.HDL.decQ (envWith s (encode (Instr.SLT rd x y))))
+           (seenWord (envWith s (encode (Instr.SLT rd x y))))).regs[rd.val]
+      = SaltWorks.HDL.wordOf (fun k =>
+          (SaltWorks.HDL.sltDrive (s.get x) (s.get y)).getD k false) := by
+  rw [decQ_envWith, seenWord_envWith, stepT_encode, sltDrive_eq_of_mem hx hy, wordOf_cmpWord]
+  show ((s.set rd (if (s.get x).slt (s.get y) then 1 else 0)).next).regs[rd.val] = _
+  show (s.set rd (if (s.get x).slt (s.get y) then 1 else 0)).regs[rd.val] = _
+  simp only [St.set, if_neg hrd]
+  exact Vector.getElem_set_self rd.isLt
+
+/-! ### ⛔ NON-VACUITY — the WRONG block fails each bridge
+
+*Both bridges are equations between a field of `stepT` and a block's output. If
+any block satisfied them they would say nothing about which block belongs in the
+datapath, so each gets the neighbour it is most likely to be confused with.* -/
+
+/-- ⛔ **THE AND BLOCK DOES NOT MEET THE XOR FIELD.** *Same constructor, same
+layout, one `Op` apart — the copy-paste `bwCirc` exists to make unlikely, refuted
+at the field rather than only at the circuit.* -/
+theorem bitAnd32_fails_the_xorField (s : St) (rd x y : Fin 32) (hrd : rd ≠ 0)
+    (hx : s.get x = 0xAAAAAAAA) (hy : s.get y = 0x55555555) :
+    (stepT (SaltWorks.HDL.decQ (envWith s (encode (Instr.XOR rd x y))))
+           (seenWord (envWith s (encode (Instr.XOR rd x y))))).regs[rd.val]
+      ≠ SaltWorks.HDL.wordOf (fun k =>
+          (SaltWorks.HDL.sem SaltWorks.HDL.bitAnd32
+            (SaltWorks.HDL.bwEnv (s.get x) (s.get y))).getD k false) := by
+  rw [xorField_is_bitXor32 s rd x y hrd, hx, hy]
+  decide +kernel
+
+/-- ⛔⭐ **THE SIGNED/UNSIGNED TRAP, AT THE FIELD.** RISC-V `SLT` is the **signed**
+comparison, and `sltuCirc` — the unsigned comparator, landed and certified beside
+it — **fails the `SLT` field on `(0x80000000, 1)`**: as signed, `0x80000000` is the
+most negative word and the ISA writes `1`; as unsigned it is the largest and the
+block answers `0`.
+
+*This is the sharpest control the tree affords, because the wrong block here is
+not a typo — it is a real, correct, certified circuit that differs from the right
+one only in signedness, and every test whose spread omits a sign-straddling pair
+accepts it.* -/
+theorem sltuCirc_fails_the_sltField (s : St) (rd x y : Fin 32) (hrd : rd ≠ 0)
+    (hx : s.get x = 0x80000000) (hy : s.get y = 1) :
+    (stepT (SaltWorks.HDL.decQ (envWith s (encode (Instr.SLT rd x y))))
+           (seenWord (envWith s (encode (Instr.SLT rd x y))))).regs[rd.val]
+      ≠ SaltWorks.HDL.wordOf (fun k =>
+          (SaltWorks.HDL.sltuDrive (s.get x) (s.get y)).getD k false) := by
+  have hxm : s.get x ∈ SaltWorks.HDL.bwWords := by rw [hx]; decide
+  have hym : s.get y ∈ SaltWorks.HDL.bwWords := by rw [hy]; decide
+  rw [sltField_is_sltCirc s rd x y hrd hxm hym, hx, hy]
+  decide +kernel
+
+/-- **The controls' operand hypotheses are satisfiable** — a state meeting each
+pair exists, so neither refutation is vacuous. -/
+theorem control_states_exist :
+    ((St.init.set 1 0xAAAAAAAA).set 2 0x55555555).get 1 = 0xAAAAAAAA
+      ∧ ((St.init.set 1 0xAAAAAAAA).set 2 0x55555555).get 2 = 0x55555555
+      ∧ ((St.init.set 1 0x80000000).set 2 1).get 1 = 0x80000000
+      ∧ ((St.init.set 1 0x80000000).set 2 1).get 2 = 1 := by
+  decide +kernel
+
 /-! ## Axiom audit -/
 
 open Salt.Tactic
@@ -2648,5 +2983,12 @@ open Salt.Tactic
 #audit_axioms not_pcField_coreShapedT neither_coreShape_C4Spec
 #audit_axioms extendOut sem_extendOut extendOut_outs_length outBit_extendOut
 #audit_axioms length_conjunct_is_necessary
+#audit_axioms wordOf_getLsbD_self wordOf_getD_map_range bwWords_sample_size
+#audit_axioms run_xorGates sem_bitXor32 sem_bitXor32_off_the_sample
+#audit_axioms xorField_is_bitXor32
+#audit_axioms sem_sltCirc sltDrive_eq_sign_formula
+#audit_axioms sltDrive_eq_of_mem wordOf_cmpWord sltField_is_sltCirc
+#audit_axioms bitAnd32_fails_the_xorField sltuCirc_fails_the_sltField
+#audit_axioms control_states_exist
 
 end SaltWorks.Stack.Program

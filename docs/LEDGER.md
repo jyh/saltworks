@@ -2177,3 +2177,188 @@ committed) — every one inside `[propext, Classical.choice, Quot.sound]`.
    wants its own statement carrying the product order explicitly"* remains
    unowned. mathlib's `Prod.Lex` would supply the bundle cheaply; it was outside
    this brief and is **not** claimed as done.
+
+---
+
+## C4FIELDS — the certified blocks linked to the field obligations, and what the certificates actually say
+**2026-08-07 · Opus executor · `SaltWorks/Stack/Program.lean` +342 (162 lines of Lean, 139 of prose, 41 blank); 15 declarations, no new module**
+
+No file outside `SaltWorks/Stack/**` and `docs/` was touched. `SaltWorks.lean`
+was not touched: the section extends `Stack/Program.lean`, which is already in
+the default target, and the one structural change is a new
+`import SaltWorks.HDL.Bitwise` at its head.
+
+### ⭐ THE HEADLINE — `bwOK` and `sltOK` are SAMPLED, at 100 pairs of 2^64
+
+The brief's first instruction was to read the predicates before assuming their
+strength. Read:
+
+```
+bwOK c f  =  bwWords.all fun a => bwWords.all fun b => sem c (bwEnv a b) == …
+sltOK     =  bwWords.all fun a => bwWords.all fun b => sltDrive a b == cmpWord …
+sltuOK    =  (same shape)
+subOK     =  (same shape)
+```
+
+**`bwWords` is a ten-word list** — `[0, 0xFFFFFFFF, 0xAAAAAAAA, 0x55555555,
+0x0000FFFF, 0xFFFF0000, 0x12345678, 0xDEADBEEF, 1, 0x80000000]`. So each of
+`bitXor32_correct`, `bitAnd32_correct`, `bitOr32_correct`, `sltCirc_correct`,
+`sltuCirc_correct` and `sub_via_adder_correct` is a check on **100 ordered
+operand pairs out of 2^64 ≈ 1.8 × 10^19 — a 5 × 10^-18 slice.**
+`bwWords_sample_size` pins the count in the kernel rather than by reading the
+literal.
+
+⇒ ***`bitXor32_correct` does NOT establish that `bitXor32` computes `^^^`.***
+
+**This is not a defect found, and it is not news to the seat that wrote it** —
+`HDL/Bitwise.lean`'s own docstring says *"Sampled rather than exhaustive — 2^64
+input pairs is not a proof obligation, it is a category error."* The finding is
+that **the names do not carry the caveat and the consumers are one import away**:
+`bitXor32_correct : bwOK bitXor32 (· ^^^ ·) = true` reads, at a call site, exactly
+like a correctness theorem. So the caveat is now restated where the bridges are,
+and — where it could be — removed rather than restated.
+
+### ⭐⭐ WHERE IT COULD BE REMOVED: the XOR block, proved for all 2^64 pairs
+
+**`bitXor32` is pointwise — 32 independent gates over disjoint bit pairs — so its
+semantics is provable STRUCTURALLY, with no `decide` anywhere.**
+
+* `run_xorGates` — induction over the gate list. The `k`-th gate writes net
+  `64 + k`, which nothing reads, so `Sem.lean`'s `run_of_unwritten` keeps the
+  operand nets `0 … 63` intact across the whole run.
+* ⭐ `sem_bitXor32 (a b : Word) : sem bitXor32 (bwEnv a b) = (List.range
+  32).map (fun k => (a ^^^ b).getLsbD k)` — **unconditional, all 2^64 pairs.**
+  This *supersedes* the sampled certificate rather than consuming it.
+* `sem_bitXor32_off_the_sample` — a pair (`0x0F0F0F0F`, `0x33333333`) with
+  neither word in `bwWords`, so "for all 2^64" and "for the 100 checked" are
+  distinguishable from outside.
+
+`decide +kernel` over `BitVec 32` pairs was never attempted: 2^64 is not a kernel
+computation, which is exactly why the structural route was the route.
+
+### ⚠️ WHERE IT COULD NOT: the SLT bridge carries the sample in its type
+
+**The gap is not in the comparator.** `sltCirc` has **three input bits**, so its
+own semantics is exhaustively decidable:
+
+* `sem_sltCirc (a31 b31 s31 : Bool)` — all 8 valuations by `decide +kernel`; the
+  block computes exactly `s31 ⊕ ((a31 ⊕ b31) ∧ (a31 ⊕ s31))`.
+* `sltDrive_eq_sign_formula (a b : Word)` — **unconditional, all 2^64 pairs**,
+  with the adder's 31st output left opaque. *This isolates the residual to one
+  sentence: everything between it and `BitVec.slt` is the claim that
+  `(subOut a b).getD 31 false` is the sign bit of `a - b`.*
+
+That claim is `sub_via_adder_correct`, at the same 100 pairs, **because `adder32`
+has no semantic theorem at all — `ssa` and `wf` and nothing else.** So:
+
+* `sltDrive_eq_of_mem {a b} (ha : a ∈ bwWords) (hb : b ∈ bwWords)` — the sampled
+  certificate unpacked from its `List.all` into the statement it is.
+* ⭐ `sltField_is_sltCirc … (hx : s.get x ∈ bwWords) (hy : s.get y ∈ bwWords)`.
+  **The two membership premises ARE the sample.** They put the weakness in the
+  type where a caller must discharge it, and they are exactly what an `adder32`
+  theorem would delete.
+
+### The two field bridges, stated
+
+`RegField c r` asks that `outReg c ins r` equal
+`(stepT (decQ ins) (seenWord ins)).regs[r]`. There is no `core`, so these state
+**the other side of that equation** — the ISA target, met by the block:
+
+```lean
+theorem xorField_is_bitXor32 (s : St) (rd x y : Fin 32) (hrd : rd ≠ 0) :
+    (stepT (decQ (envWith s (encode (Instr.XOR rd x y))))
+           (seenWord (envWith s (encode (Instr.XOR rd x y))))).regs[rd.val]
+      = wordOf (fun k => (sem bitXor32 (bwEnv (s.get x) (s.get y))).getD k false)
+
+theorem sltField_is_sltCirc (s : St) (rd x y : Fin 32) (hrd : rd ≠ 0)
+    (hx : s.get x ∈ bwWords) (hy : s.get y ∈ bwWords) :
+    (stepT (decQ (envWith s (encode (Instr.SLT rd x y))))
+           (seenWord (envWith s (encode (Instr.SLT rd x y))))).regs[rd.val]
+      = wordOf (fun k => (sltDrive (s.get x) (s.get y)).getD k false)
+```
+
+The `wordOf ∘ getD` on the right is `outReg`'s own shape, so the assembly into a
+`RegField` is whatever `core` supplies and nothing on the ISA side is left to
+negotiate later. **The 1-bit → 32-bit widening is not glossed:** `wordOf_cmpWord`
+is the theorem that `cmpWord r` denotes the word `if r then 1 else 0`, which is
+what `SLT` writes.
+
+### ⛔ Non-vacuity — the wrong block fails each bridge
+
+* `bitAnd32_fails_the_xorField` — same constructor, same layout, one `Op` apart;
+  refuted **at the field**, not only at the circuit.
+* ⭐ `sltuCirc_fails_the_sltField` — **the signed/unsigned trap, arrived in the
+  hardware lane.** On `(0x80000000, 1)` the ISA's signed `SLT` writes `1`;
+  `sltuCirc`, a *landed and certified* circuit, answers `0`. The wrong block here
+  is not a typo — it is a correct circuit differing only in signedness, and every
+  test whose spread omits a sign-straddling pair accepts it.
+* `control_states_exist` — both controls' operand hypotheses are satisfiable, so
+  neither refutation is vacuous.
+
+### ⛔ What remains blocked on the adder
+
+**`ADD`, `ADDI` and `PcField` were not attempted and are not claimed.** All three
+run through `adder32`, which has no semantic theorem, so there is nothing to
+bridge them to. Not this seat's lane; already on the bus. **The SLT bridge's
+membership premises are the same debt, visible in a type:** an `adder32` semantics
+theorem deletes them and promotes `sltField_is_sltCirc` to the unconditional form
+`xorField_is_bitXor32` already has.
+
+### Attempt counts, against the split budget
+
+* **Statements 4 groups (budget 3–4, met): the XOR block bridge, the XOR field
+  bridge, the comparator/SLT field bridge, the controls.** 15 declarations.
+* **Proofs: 5 scratch build cycles, over the budget of 2. Recorded rather than
+  massaged.** The reason I did not stop at 2: **the mathematical content compiled
+  unchanged from cycle 1 to cycle 5** — every failure was elaboration mechanics on
+  the same proof, not a proof that was not going through, and each was diagnosed
+  (`trace_state`) rather than guessed at. The four causes, in order:
+  1. `omega` could not close `64 ≤ (⟨64 + i, …⟩ : Gate).out` — the structure
+     projection does not reduce for it. Replaced by a `show` plus a term proof.
+  2. **`a ^^ b = c` parses as `a ^^ (b = c)`** — `^^` is precedence 33, `=` is 50.
+     A `show` written without parentheses is a different proposition.
+  3. `by omega` **inside a `rw` argument** runs before unification fixes the
+     rewrite's implicit arguments, so it sees a goal full of metavariables. Moved
+     to standalone `have`s and named `rw [upd_of_ne (n := …) (m := …)]`.
+  4. ⭐ **`omega` DOES NOT SEE THROUGH `HDL.Net`.** `Net` is `abbrev Net := Nat`,
+     and a variable elaborated at `Net` (as `k` is, coming out of
+     `List.map_congr_left` against a gate-net index) makes `omega` report *"No
+     usable constraints found"* on a goal as trivial as `¬ 32 + k < 32` **and
+     silently ignore every `Net`-typed hypothesis in context.** *This is worth the
+     fleet's attention: the failure looks like a broken goal, not like a type
+     issue, and the message names neither.* Worked around with `Nat.not_lt.mpr`
+     and `Nat.add_sub_cancel_left`.
+* `Stack/Program.lean` itself built **clean on the first try** once the scratch
+  was green; the full tree likewise.
+* No `sorry`. No `native_decide`. No new axioms. `decide +kernel` for every
+  control and for the one exhaustive block check.
+
+### Build + audit
+
+`saltbuild.sh SaltWorks.Stack.Program` → **EXIT=0**. Full tree `saltbuild.sh` →
+**EXIT=0, 8635 jobs** (one more than the previous entry's 8634 — the added
+`SaltWorks.HDL.Bitwise` edge into `Stack.Program`), zero `error:`, zero
+`warning:`. All 15 new declarations tick `#audit_axioms` (max 3 axioms) and all 15
+were re-checked independently with `#print axioms` in `ScratchMATHC4F.lean`
+(EXIT=0; deleted, not committed) — every one inside
+`[propext, Classical.choice, Quot.sound]`, with `sem_sltCirc` and
+`bwWords_sample_size` depending on none.
+
+### Left undetermined
+
+* **Whether the sign formula equals `BitVec.slt` in general.** `sem_sltCirc` and
+  `sltDrive_eq_sign_formula` are unconditional; the step from
+  `s31 ⊕ ((a31 ⊕ b31) ∧ (a31 ⊕ s31))` to `BitVec.slt a b` needs *both* an
+  `adder32` semantics theorem *and* a `BitVec` lemma relating the overflow-
+  corrected sign of `a - b` to signed comparison. Neither exists here; neither was
+  attempted.
+* **`bitAnd32` and `bitOr32` got no general bridge.** `run_xorGates` is written
+  for `.xor` specifically. It generalises to any `mk : Net → Net → Op` whose
+  fanin is `[k, 32 + k]`, which is all three — one parameterisation, not a new
+  proof — but the ISA has no `AND`/`OR` instruction in Slice A, so there is no
+  field for them to bridge to and nothing asked for it.
+* **`bitNot32` is untouched.** It is not an ALU result (it is the subtractor's
+  operand path), so it has no field either.
+* **Nothing here says a `core` exists.** These are statements about a landed block
+  and the ISA. The assembly into `RegField` remains exactly what
+  `c4Spec_of_fieldwise` will consume, unchanged.
