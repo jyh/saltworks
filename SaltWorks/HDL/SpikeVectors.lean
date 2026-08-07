@@ -554,7 +554,27 @@ def sliceAExcluded : List (BitVec 32) :=
  ]
 
 /-- **THE EXCLUSION LIST, AS A THEOREM.** `decode` rejects every one — and
-Spike executes every one. *The disagreement is the specification working.* -/
+Spike executes every one. *The disagreement is the specification working.*
+
+⏰ **THIS THEOREM HAS AN EXPIRY DATE, AND THAT IS DELIBERATE — but it was the
+MATH seat who noticed, not me** (S0/R2 census, 8/7, verified at the bytes).
+**Four of the 22 words are loads and stores:**
+
+```
+0x00012083  lw ra, 0(sp)      0x00410183  lb gp, 4(sp)
+0x00112023  sw ra, 0(sp)      0x00310223  sb gp, 4(sp)
+```
+
+⇒ ***The day loads land in Slice A, `decode` starts accepting them and this
+theorem goes FALSE, breaking the build.*** **That is the correct behaviour and
+the reason to keep them in the list rather than a reason to remove them:** an
+exclusion list that silently survives its own exclusions being lifted is a stale
+claim shipping under a green build. *Here the build refuses.*
+
+📌 **It is math's own 10:53 principle applied to my file — a caveat with an
+expiry date, enforced by the build rather than by memory.** *The difference
+between a tripwire and a landmine is only that someone wrote down where it is;
+until this docstring, this was a landmine.* -/
 theorem slice_a_excluded_rejected :
     sliceAExcluded.all (fun w => (decode w).isNone) = true := by decide +kernel
 
