@@ -714,6 +714,73 @@ theorising.⟩
 
 ---
 
+## ⭐ PRE-REGISTRATION PAID OFF TWICE IN ONE EVENING — once on a measurement, once on a DECISION
+
+The campaign pre-registered its measurement design before any data existed
+(`docs/measurement-preregistration.md`). On the evening of day 1 the same
+discipline was applied to two very different things, hours apart, by
+different seats, and **both paid off within the same evening**:
+
+| # | What was fixed in advance | What it bought |
+|---|---|---|
+| **1. A MEASUREMENT** — ruling 4a's readout | *the primary measure is the cone census, not the net name*, written down hours before either CI arm ran | **It stopped a confident wrong answer.** The name grep reads ABSENT in both arms; with the default census at 87.5% in both, the table lands on row (b) *"CI strips it"* — the expensive outcome. **The truth is row (a).** |
+| **2. A DECISION** — the maestro's K3 ruling (19:10) | *"(C) now, with the decision rule PRE-REGISTERED so no second ruling is needed"* — the trace was ordered **together with the rule for interpreting whatever it found** | **It eliminated a round-trip on the critical path.** Math ran the trace, hit verdict (B), and **applied the rule without returning to the maestro** (19:24, `a593646`). |
+
+**The second is the interesting one, because nobody planned it as a
+methodological act.** The maestro was avoiding a second round-trip on a
+busy evening; what they actually did was **apply the campaign's central
+epistemic rule — fix the readout before you can see the answer — to
+governance rather than to instrumentation.** A ruling that names its
+decision rule in advance cannot be bent by the result that arrives.
+
+⇒ ***A decision rule chosen after the data is a decision rule chosen by the
+data*** — the exact sentence already in the README about measures, and it
+turns out to be true of rulings too.
+
+---
+
+## LEG 1's EVENING — the knee of the curve, and a deferral that is a result
+
+**TS-1 + TS-2 collected 82% of the entire `log(1/c)` prize — 631.58 → 86.23
+— for roughly 140 lines of new mathematics.** The residual (86 → 52) that
+TS-3 would have bought for **600–900 class-C lines** is worth **0.05% of
+the consuming threshold**. TS-3 is **deferred**; TS-3-PREP is banked as the
+only artifact.
+
+**The demand-side trace is what made that visible**, and its finding is
+sharper than the deferral: there *is* a committed consumer and the
+repulsion ceiling *is* non-substitutable for it — **but the demand is
+quantitative in `b`, not in `log(1/c)`.** Driving `log(1/c)` to **zero**
+moves the consumer's threshold by **0.27%**; `b : 680 → 210` moves it by
+**10.5×**. So the wave that would matter is a **`(b, k)` wave**, and
+TS-3-PREP — dispatched three hours earlier *because it was valid under
+every outcome* — turns out to be its precise prerequisite.
+
+⭐ **AND THE DEFERRAL CORRECTED THE DOCUMENT THAT ORDERED IT, in the
+direction that makes the landed work matter MORE.** TS-0's K3 analysed the
+Range-A EF ledger, which the trace confirms is **dead** — five exits all
+terminating in roll-calls. But the **live** obligation is HB's Lemma-3
+machinery, and there the artillery **is** load-bearing: without it
+`hbCoreRate` returns `≍ L/c₀` and Lemma 3 is **vacuous**. So *"the
+repulsion contract is not load-bearing"* was **true of the ledger K3 looked
+at and false of the road as a whole** — the fourth correction to a binding
+document in one day, and the only one that *increases* the value of work
+already landed.
+
+⚠️ **NOT CERTIFIED, and the seat said so unprompted rather than letting it
+drift:** no Lean anywhere composes `one_sub_ceiling_le_dist_one` with
+`hσ'r`, so **the 0.27% / 10.5× arithmetic is a hand derivation from two
+landed statements, not a kernel-checked composition.** *Strong enough to
+defer a wave on; not strong enough to quote as a theorem.* **A number that
+gates a decision and a number that can be published are different objects,
+and this file must never blur them.**
+
+> **The honest summary, in the seat's own words:** *"We stopped at the knee
+> of the curve, and we only know that because we spent an hour measuring
+> the demand side before spending the day on the supply side."*
+
+---
+
 ## CONVERGENT FINDING #2 — two seats fell into the same selector trap ninety minutes apart
 
 **"The latest run" is not a well-defined object**, and both seats watching
