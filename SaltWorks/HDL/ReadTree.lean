@@ -256,6 +256,74 @@ theorem readTree_wf : readTree.wf = true := Circ.wf_of_ssa readTree_ssa
 #audit_axioms rtAddrBits
 #audit_axioms rtRegs
 #audit_axioms rtStored
+/-! ## ⭐ DOES IT READ? — the behavioural certificate this file did not have
+
+⚠️ **THIS FILE'S `#eval` ARGUMENT ABOVE IS CORRECT AND IT IS ABOUT SOMETHING
+ELSE.** *It argues — rightly — that `decide +kernel` on `muxCount`/`readCount` is
+infeasible (O(n²), ~1.8 × 10⁷ traversals) **and pointless** (they are about an
+untrusted string emitter that sits outside `emitN_sem`).* ⛔ **Every word of that
+stands. It simply says nothing about whether the read path READS THE RIGHT
+REGISTER — and until today, nothing else did either.**
+
+📌 **THAT IS THE SHAPE, AND IT IS WORTH NAMING BECAUSE IT IS NOT A WRONG CLAIM:
+a well-argued "we deliberately did not prove X" sitting next to an unstated "we
+also never proved Y" READS AS COVERAGE.** *A reader comes away believing
+`decide +kernel` was considered and rejected for this circuit. True for the
+emitter oracle; never asked for correctness.*
+
+### The formulation is the cost — for the second time today
+
+⛔ **My first attempt drove all 32 outputs from an environment computing `/` and
+`%` per net lookup: `EXIT=134`, OOM, 76 s.** ✅ **The one-cold driver below reads
+ONE output bit from an environment that does one comparison per net: ALL 32
+ADDRESSES in 7 s.** ⇒ ***Same lesson as `BatcherNetC`'s sorting certificate, hit
+twice in one afternoon: the certificate was never too expensive, the way I wrote
+it was.*** *`sem` rebuilds a ~3,000-deep environment chain and then walks it once
+per output, so output count multiplies the dominant cost.*
+
+### The driver, and why one cold register is a discriminating test
+
+*Every stored register holds all-ones except register `m`, which holds zeros. Then
+bit 0 of the port is `false` **exactly when** the port selected `m` — or selected
+`x0`, which is the constant-zero leaf and never consults storage.* **One bit
+distinguishes all 32 addresses, which is what makes this cheap AND total over the
+address space.** -/
+
+/-- Address `a` on nets `0…4`; every stored register all-ones except `m`. -/
+def rtOneCold (m a : Nat) : Env := fun n =>
+  if n < rtAddrBits then a.testBit n
+  else decide (¬ (rtAddrBits + (m - 1) * rtWidth ≤ n
+                  ∧ n < rtAddrBits + (m - 1) * rtWidth + rtWidth))
+
+/-- Bit 0 of the read port. -/
+def rtBit0 (m a : Nat) : Bool := (sem readTree (rtOneCold m a)).getD 0 false
+
+/-- Every address selects the register it names. -/
+def rtSelectsOK (m : Nat) : Bool :=
+  (List.range 32).all fun a => rtBit0 m a == decide (a ≠ m ∧ a ≠ 0)
+
+/-- ⭐ **THE READ PATH READS — all 32 addresses, kernel-checked.** *Including
+`x0`, which must read zero without consulting storage: the address that is not a
+register.* -/
+theorem readTree_selects_correctly : rtSelectsOK 7 = true := by decide +kernel
+
+/-- …and again with a different cold register, so the first is not an accident of
+where `7` sits in the mux tree. -/
+theorem readTree_selects_correctly' : rtSelectsOK 19 = true := by decide +kernel
+
+/-- ⭐ **`x0` READS ZERO WITHOUT CONSULTING STORAGE** — stated on its own because
+it is the one address whose answer does not come from the register file, and the
+`rtStored = 31` / `rtRegs = 32` distinction exists entirely for it. -/
+theorem readTree_x0_is_zero : rtBit0 7 0 = false ∧ rtBit0 19 0 = false := by
+  decide +kernel
+
+/-- ⛔ **NON-VACUITY — the check DISCRIMINATES.** *Scored against the wrong
+expectation (off by one address) it is `false`, so `rtSelectsOK` is not a
+predicate that passes for everything.* -/
+theorem readTree_check_discriminates :
+    ((List.range 32).all fun a => rtBit0 7 a == decide (a ≠ 8 ∧ a ≠ 0)) = false := by
+  decide +kernel
+
 #audit_axioms rtZero
 #audit_axioms rtWidth
 #audit_axioms rtIn
@@ -267,6 +335,11 @@ theorem readTree_wf : readTree.wf = true := Circ.wf_of_ssa readTree_ssa
 #audit_axioms rtBit
 #audit_axioms rtBits
 #audit_axioms readTree
+#audit_axioms rtOneCold rtBit0 rtSelectsOK
+#audit_axioms readTree_selects_correctly
+#audit_axioms readTree_selects_correctly'
+#audit_axioms readTree_x0_is_zero
+#audit_axioms readTree_check_discriminates
 #audit_axioms readTree_ssa
 #audit_axioms readTree_wf
 #audit_axioms readTreeCuts
