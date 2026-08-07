@@ -5,7 +5,16 @@
 
 ---
 
-## 1. WHAT LANDED — 13 commits
+## 1. WHAT LANDED — 13 commits **IN THIS SESSION** (post-relight, 15:41→)
+
+⚠️ **THE WINDOW IS PART OF THE NUMBER.** Evidence's ledger attributes ~23
+saltworks commits to this seat *across the whole day*; measured just now, **25
+commits touched this slot today** (`SaltWorks/HDL`, `docs/hdl-*`, `lakefile`),
+of which **13 are this session** and **12 are this seat's pre-migration session**
+(T1, T3+T5, T4, EmitV, Seq, Dense, the refuter verdicts, the frame protocol).
+**Both numbers are right and neither is wrong; they answer different questions.**
+Stated because the Captain will read this file and that ledger together, and a
+count without its window is the same defect as a countdown without its date.
 
 | SHA | repo | what |
 |---|---|---|
