@@ -390,6 +390,7 @@ from different directions:
 | **a silence window in the ledger** | was any human **typing** in this stretch? | **was the human away?** ⛔ Not if the RECORD is missing. The laptop→Mini migration re-synced the repos and the kit before cutover but **not `~/.claude/`**, so the transcript record stopped at **14:07:56** while git carried work to **14:30:08** — and the ledger read the difference as **the campaign's longest silence window (0.9856 h), 82% of which is unrecorded rather than measured.** Charter §E modelled *unobserved ≠ silent* only for commits **predating** the record; a hole in the MIDDLE had no detector. **Closed by a rule needing no new data: a commit is made BY a session, and a session writes records.** *(evidence, `52b963e` — calibrated over 862 commits, and it fires once while clearing all 715 leg-1 commits in the same pass.)* |
 | **`swap free`, on a machine that has never paged** | how much room is left in the swap FILE? | **is the machine under memory pressure?** ⛔ macOS grows that file on demand, so a healthy Mini reports `total = 0.00M  used = 0.00M  free = 0.00M` — and my `< 2 GB free` alarm raised **its loudest warning for the healthiest state it can observe.** The laptop had long since grown a swap file (37 GB in use at OOM #2), so `free` was non-zero and the defect **could not fire there**. ⭐ **THE HARDWARE CHANGE IS ITSELF AN INSTRUMENT TEST: a new machine is a new point in the input space, and it falsified a threshold that had been green all day for the wrong reason.** *(evidence, `aa2b75d`; the trigger is now `used`.)* |
 | ⭐ **TWO DEFECTS THAT EACH MADE THE OTHER INVISIBLE** — and this is the one to publish | — | The seat-liveness detector's parser required `]` immediately after the seat name, so every `[8/6 13:58, math — \`date\`-verified]` post was **invisible** — **the seat that follows the fleet's own timestamp-hygiene convention most rigorously is the one it reported as most stale** (math read **3.4 h** when it was **0.2 h**; 26% of the bus unread). Its threshold, meanwhile, sits at **3.2× the largest inter-post gap that has ever occurred**, so it **could not fire whatever happened**. ⇒ **The loose threshold SUPPRESSED the alarm that would have exposed the parser.** A tighter one would have raised a false STALL on math at breakfast and the parser bug would have been found then. **Two defects, one file, both reporting green, neither discoverable from the output — only from a backtest.** *(evidence, `6a2b695`, `docs/EVIDENCE-liveness-backtest-0806.md`.)* |
+| ⭐ **A GREEN DEFAULT BUILD** | are the modules **in this closure** kernel-checked? | **is the LEG checked?** ⛔ Only if the hub imports it. Found **twice in one day, from opposite sides, both self-reported**: silicon caught `FabricRoutes` sitting outside compiler's green 8,590-job build in the afternoon; compiler caught `Renumber` sitting outside the default build that evening — the default audits **89** HDL declarations against **120** for a targeted build, so **31 declarations were kernel-checked and simultaneously outside the default closure.** ⇒ ***A green default build is evidence about its own closure and about nothing outside it*** — and **the closure changes every time a seat lands a module the hub has not imported**, which is the normal case in an active repo. Compiler's phrasing is the one to keep: *"they ARE kernel-checked" and "the default build covers leg 2" are two different sentences and only one is true tonight.* |
 | ⭐ **A NET-NAME GREP OVER A SYNTHESISED NETLIST** | does this **identifier** survive the flow? | **did the STRUCTURE survive?** ⛔ On the real TT artifact `wire [7:0] w0` is absent from **both** arms — `splitnets` deletes the parent vector and the survivors are `\fabric.w0[0]`…`\fabric.w1[7]` — while the cone census shows the boundaries are **fully intact and take the shipped netlist to 100% certifiable.** The name readout returns **the exact opposite of the truth, confidently**, and it is the readout a seat reaches for first. *(silicon, 18:36 — and the reason it did not land that way is that the experiment's readout had been **pre-registered as the census** hours before either arm ran. This is the campaign's cleanest argument that pre-registration is not bureaucracy.)* |
 | ⭐ **A LANE GATE'S OWN DOCUMENTATION** | does this text contain the forbidden markers? | **is this a LEAK?** ⛔ A methodology post *about* the gate contains the markers by necessity and is not a leak. Fired four times in one hour — three on this seat's own prose, once on a peer's audit table — and the naive repairs are both wrong: loosening it creates false negatives, and a global override *"converts an explicit human call into a reflex"* (compiler, 18:12) which is a false-negative design in false-positive clothes. **Resolved structurally by a BASELINE rather than an override:** each adjudicated line is hashed, so judged text stops re-flagging while genuinely new marker text still blocks. |
 | ⭐ **THE DIFFERENCE OF TWO INSTRUMENTS** | what do these two readings **differ by**? | **is that difference a PROPERTY OF THE WORLD?** ⛔ No — it is a property of the two instruments. Compiler's *"a cap of N permits N + 309 MiB"* came from subtracting `ru_maxrss` from the cap a run died at, and **inherits the error of both readings while being checkable against neither.** Silicon **bracketed the threshold directly, by moving the cap until it flipped** — `C* ∈ (8400, 8410]` against RSS 8407, a 10 MiB kill on an 8.4 GiB run — *a method that needs no theory of what the counter counts.* **`E ≈ 0`.** Compiler accepted it without qualification and named the methodological half themselves: ***"my 309 was never a measurement at all."*** *(17:03–17:04 — and it is the day's cleanest refutation because the refuted party supplied the criterion that killed it.)* |
@@ -714,6 +715,40 @@ theorising.⟩
 
 ---
 
+## ⭐ THE DAY'S PRINCIPLE, IN THE FORM THAT SURVIVED: *a true reading of an ADJACENT object*
+
+Stated by the silicon seat in their muster line, after a day in which every
+seat had been calling this "the instrument answers a narrower question":
+
+> **Every one was a TRUE READING OF AN ADJACENT OBJECT, and the fix was
+> never more care — it was NAMING THE OBJECT: which commit, which module,
+> which corner, which cut, which machine.**
+
+**"Narrower" was the wrong word and this is the right one.** None of the
+day's instruments was vague, imprecise or badly built. Each returned a
+perfectly accurate reading — **of the thing next to the thing.** The
+correction is never *be more careful*; it is *say which object you mean*:
+
+| The reading | The adjacent object it was true of | The object meant |
+|---|---|---|
+| `swap free = 0` | space left in a swap **file** | is the machine **paging** |
+| `RAM free` | pages **free** | pages **available** (free + inactive) |
+| "the latest gds run" | newest by **creation**, on another **branch** | the run on **`main`** that postdates the flip |
+| "this run predates the fix" | the **run's** creation time | the **job's** start time |
+| a bus post's staleness | one posting **convention** | **all** conventions on the bus |
+| `git rev-parse HEAD` | whatever landed **last** | **my** commit |
+| "13 days" / "23 commits" | a figure true at **one instant** | the figure **now** |
+| `1,455` vs `1,466` | **additions on one path** | **net on two paths** |
+| a green default build | the **closure** that was built | the **leg** |
+| a lane-marker hit | text **containing** the marker | a **leak** |
+
+⇒ **Three seats independently arrived at the same fix, and it is not
+vigilance:** pin the run **id**, name the **branch**, state the **window**,
+cite the **path**, say which **machine**. *An instrument cannot be told to
+mean the right object; the caller has to name it.*
+
+---
+
 ## ⭐ PRE-REGISTRATION PAID OFF TWICE IN ONE EVENING — once on a measurement, once on a DECISION
 
 The campaign pre-registered its measurement design before any data existed
@@ -778,6 +813,32 @@ and this file must never blur them.**
 > **The honest summary, in the seat's own words:** *"We stopped at the knee
 > of the curve, and we only know that because we spent an hour measuring
 > the demand side before spending the day on the supply side."*
+
+---
+
+## A DERIVED FIGURE WRITTEN DOWN AS A FACT — three instances in one evening
+
+All three were caught by someone **re-deriving** rather than re-reading,
+and all three are the same defect wearing different clothes.
+
+| The figure | What it needed | How it failed |
+|---|---|---|
+| **"13 days"** to the tapeout deadline | its **date** | True at no moment at all — a transposition of **31**. It travelled silicon → maestro → **the Captain's standing charge** in four minutes. My own scoreboard header carried the same defect honestly computed: *"(32 days)"*, true at T0 and wrong every day after. **Deleted rather than corrected — correcting a countdown just restarts its decay.** |
+| **"23 commits"** in a muster ledger | its **window** | Not wrong: **25** touched compiler's slot that **day**, **13** in the post-relight **session**. Two documents, two windows, neither stating which. *Compiler: **a count without its window is the same defect as a countdown without its date**.* |
+| **a GENERATED lane table** | its **regeneration command** | `landed.py` exists *because* hand-maintained tables age — and **its output aged too**: compiler moved **23 → 25 in six minutes** between generation and re-run. ⇒ ***A generated table stops being generated the moment it is pasted into a document.*** The tool built to fix the aging problem inherits it at the copy boundary. |
+
+⇒ **The rule, and it costs one clause:** publish the **date** with a
+countdown, the **window** with a count, and the **command** with a
+generated table. *Everything else is a snapshot presented as a property.*
+
+⭐ **AND THE EVENING'S BEST EVIDENCE THAT THE DISCIPLINE IS REAL RATHER
+THAN STATED:** the muster ledger's figures were **independently recomputed
+by the two seats they describe, before they reached the Captain, including
+the flattering ones.** Silicon's own words: ***"I do not get to accept a
+flattering number just because someone else generated it."*** One came back
+exact (2,503 = 2,503); the other exposed a units mismatch that both sides
+had been prepared to call noise. **A ledger nobody checked is a ledger
+nobody has reason to believe.**
 
 ---
 
