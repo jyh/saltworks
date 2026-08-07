@@ -634,6 +634,108 @@ theorem batcher4_strictMonoOn :
     StrictMonoOn (extendIio 0 (runNet batcher4 ![3, 1, 2, 0])) (Set.Iio 4) :=
   strictMonoOn_extendIio_runNet batcher4_sorts_bool (by decide) 0
 
+/-! ## A strictly-increasing list is determined by its members
+
+Requested by leg 3 (`Silicon/Equiv/ScenarioComplete.lean`): `fabric_routes` is
+enumerated over the 255 concrete lists of `allScenarios`, so feeding a sorter's
+output into it needs *any* strictly-increasing, bounded, non-empty destination
+list to **be** one of those 255. The last step of that argument is pure list
+mathematics with no silicon in it — hence this lane, not theirs.
+
+### What Mathlib actually has at this pin (v4.32.0-rc1), because two seats guessed wrong
+
+* **`List.Sorted` is gone.** It was replaced (deprecations dated 2025-11-27) by
+  four order-specific predicates in `Mathlib/Data/List/Sort.lean:376-404` —
+  `SortedLE`/`SortedGE`/`SortedLT`/`SortedGT`, *defined* as `Monotone l.get` /
+  `StrictMono l.get` rather than as `Pairwise`. `sortedLT_iff_pairwise`
+  (`:421`) is the bridge back.
+* **`List.eq_of_perm_of_sorted` is gone too**, and is not a rename of one thing:
+  `Perm.eq_of_sortedLE` (`:667`) is the order-flavoured heir,
+  `Perm.eq_of_pairwise'` (`:307`) the relation-flavoured one.
+* **`(· < ·)` IS antisymmetric here, vacuously, and it is registered.**
+  `Mathlib/Order/RelClasses.lean:687` — `instance instAntisymmLt [Preorder α] :
+  @Std.Antisymm α (· < ·)`. This is the fact that unblocks everything: the
+  antisymm-flavoured lemmas *do* apply to a strict order, so no `≤`-detour is
+  needed. (The `IsAntisymm`/`IsIrrefl` spellings are deprecated aliases of
+  `Std.Antisymm`/`Std.Irrefl`.)
+
+So both theorems below are one-liners against `Perm.eq_of_pairwise'` and
+`Pairwise.eq_of_mem_iff` (`Sort.lean:321`, `[Std.Antisymm r] [Std.Irrefl r]`).
+They are stated anyway, in the `Pairwise (· < ·)` vocabulary consumers actually
+hold, because the name-hunt above is the expensive part and it should be paid
+once. `Preorder` — not `LinearOrder` — is all either needs. -/
+
+/-- **Two strictly-increasing lists that are permutations of each other are
+equal.** Directly `List.Perm.eq_of_pairwise'` at `r := (· < ·)`, which typechecks
+because of `instAntisymmLt`. -/
+theorem eq_of_perm_of_pairwise_lt [Preorder α] {l₁ l₂ : List α}
+    (hp : List.Perm l₁ l₂) (h₁ : l₁.Pairwise (· < ·)) (h₂ : l₂.Pairwise (· < ·)) :
+    l₁ = l₂ :=
+  hp.eq_of_pairwise' h₁ h₂
+
+/-- ⭐ **Two strictly-increasing lists with the same members are equal** — the
+form leg 3 asked for. Strictly weaker hypotheses than the `Perm` version above
+(same members, not same multiset), and it is what an enumeration argument
+actually produces. `List.Pairwise.eq_of_mem_iff` supplies the `Nodup` step from
+`Std.Irrefl (· < ·)`. -/
+theorem eq_of_mem_iff_of_pairwise_lt [Preorder α] {l₁ l₂ : List α}
+    (h₁ : l₁.Pairwise (· < ·)) (h₂ : l₂.Pairwise (· < ·))
+    (h : ∀ a : α, a ∈ l₁ ↔ a ∈ l₂) : l₁ = l₂ :=
+  h₁.eq_of_mem_iff h₂ h
+
+/-- The enumeration side of that argument: `(range n).filter p` is strictly
+increasing, whatever `p` is. -/
+theorem pairwise_lt_filter_range (p : ℕ → Bool) (n : ℕ) :
+    ((List.range n).filter p).Pairwise (· < ·) :=
+  (List.pairwise_lt_range (n := n)).filter p
+
+/-- ⭐ **The composite, in the shape `mem_allScenarios` consumes it:** a strictly
+increasing list of naturals *is* the filtered range its own membership predicate
+picks out. `allScenarios` is `(range 256).map (fun m => (range 8).filter
+(m.testBit ·))` filtered non-empty, so with `p := ((maskOf ds).testBit ·)` and
+`n := 8` this closes the identification of `ds` with its mask's scenario, and
+what remains on leg 3's side is `maskOf ds ∈ range 256` plus non-emptiness. -/
+theorem eq_filter_range_of_pairwise_lt {l : List ℕ} {n : ℕ} {p : ℕ → Bool}
+    (hl : l.Pairwise (· < ·)) (hmem : ∀ i, i ∈ l ↔ (i < n ∧ p i = true)) :
+    l = (List.range n).filter p :=
+  eq_of_mem_iff_of_pairwise_lt hl (pairwise_lt_filter_range p n) <| by
+    intro a; simp [List.mem_filter, hmem a]
+
+/-! ### Non-vacuity controls for the sortedness hypotheses
+
+The repo's law: the mutated hypothesis must make the goal **FALSE**, not merely
+unreachable. Each pair below is a counterexample to the theorem with one
+`Pairwise (· < ·)` hypothesis deleted — the remaining hypotheses hold and the
+conclusion `l₁ = l₂` is refuted. -/
+
+/-- **CONTROL, half one — the permutation hypothesis is satisfied.** `[0, 1]` and
+`[1, 0]` really are permutations, so what fails next is not `hp`. -/
+theorem perm_zeroOne_oneZero : List.Perm ([0, 1] : List ℕ) [1, 0] := by decide
+
+/-- **CONTROL, half two — and `[1, 0]` provably is not strictly increasing.** -/
+theorem not_pairwise_lt_oneZero : ¬ ([1, 0] : List ℕ).Pairwise (· < ·) := by decide
+
+/-- ⭐ **CONTROL, the refutation: with `h₂` dropped, `eq_of_perm_of_pairwise_lt`
+is FALSE.** `[0, 1] ~ [1, 0]`, the first list is strictly increasing, and the two
+are unequal — so `h₂` is load-bearing, not decoration. -/
+theorem ne_zeroOne_oneZero : ([0, 1] : List ℕ) ≠ [1, 0] := by decide
+
+/-- **CONTROL for the mem-iff form, half one: the membership hypothesis holds.**
+`[0, 0]` and `[0]` have exactly the same members. -/
+theorem mem_iff_dup_zero : ∀ a : ℕ, a ∈ ([0, 0] : List ℕ) ↔ a ∈ [0] := by
+  intro a; simp
+
+/-- **CONTROL, half two: `[0, 0]` is not strictly increasing** — irreflexivity of
+`<` is exactly what it fails, which is the `Nodup` half `Std.Irrefl` supplies. -/
+theorem not_pairwise_lt_dup_zero : ¬ ([0, 0] : List ℕ).Pairwise (· < ·) := by decide
+
+/-- ⭐ **CONTROL, the refutation: with `h₁` dropped,
+`eq_of_mem_iff_of_pairwise_lt` is FALSE.** Same members, second list strictly
+increasing, lists unequal. Note this control kills a *weakening* too: replacing
+`Pairwise (· < ·)` by `Pairwise (· ≤ ·)` leaves `[0, 0]` admissible, so the
+`≤`-detour route would not have proved this theorem. -/
+theorem ne_dup_zero : ([0, 0] : List ℕ) ≠ [0] := by decide
+
 /-! ## Axiom audit -/
 
 section Audit
@@ -658,6 +760,10 @@ open Salt.Tactic
 #audit_axioms dup_isSorted dup_not_strictMonoOn swap_injective swap_not_strictMonoOn
 #audit_axioms batcher4_dup_run batcher4_dup_not_strictMonoOn
 #audit_axioms batcher4_run batcher4_strictMonoOn
+#audit_axioms eq_of_perm_of_pairwise_lt eq_of_mem_iff_of_pairwise_lt
+#audit_axioms pairwise_lt_filter_range eq_filter_range_of_pairwise_lt
+#audit_axioms perm_zeroOne_oneZero not_pairwise_lt_oneZero ne_zeroOne_oneZero
+#audit_axioms mem_iff_dup_zero not_pairwise_lt_dup_zero ne_dup_zero
 
 end Audit
 

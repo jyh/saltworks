@@ -879,3 +879,128 @@ projection argument at `Decoder.lean:40–56` already covers opcode + funct3, so
 silicon cost of loads/stores is *cheap* and the expensive part is somewhere else
 entirely (the flops). **Both errors would have pointed the next seat at the wrong
 file.**
+
+---
+
+## STACK-EQSORT — two strictly-increasing lists with the same members are equal
+
+**Seat:** math-acct (math), Opus executor. **Node:** the last step of leg 3's
+`mem_allScenarios` (`Silicon/Equiv/ScenarioComplete.lean`), which stopped rather
+than guess Mathlib names at this pin. **Landed in:** `SaltWorks/Stack/Perm.lean`
+(+106 lines, `git diff --stat`: 4 theorems, 6 controls, one doc block, 4 audit
+lines — the doc block is the larger half, and deliberately so).
+
+### What Mathlib ACTUALLY has at v4.32.0-rc1 — the half of this node with the value in it
+
+Two seats have now been surprised by this API, so it is written down rather than
+re-derived. All line numbers are `.lake/packages/mathlib/Mathlib/Data/List/Sort.lean`
+unless stated.
+
+- **`List.Sorted` genuinely does not exist.** It was replaced — deprecations dated
+  2025-11-27 are still in the file — by **four order-specific predicates**,
+  `SortedLE` / `SortedGE` / `SortedLT` / `SortedGT` (`:376–397`), and they are *not*
+  `Pairwise` abbreviations: they are **defined** as `Monotone l.get` and
+  `StrictMono l.get`. `sortedLT_iff_pairwise` (`:421`) is the bridge back to
+  `Pairwise (· < ·)`, and it is a `@[grind =]` simp-normal-form lemma.
+- **`List.eq_of_perm_of_sorted` does not exist either**, and it is not a single
+  rename. It split: `Perm.eq_of_sortedLE` (`:667`, `[PartialOrder α]`) is the
+  order-flavoured heir; `Perm.eq_of_pairwise'` (`:307`, `[Std.Antisymm r]`) is the
+  relation-flavoured one; core's `List.eq_of_pairwise` is underneath both.
+- **⭐ THE BLOCKER'S ACTUAL RESOLUTION, and it contradicts the brief's own
+  hypothesis.** The brief warned that `(· < ·)` is not antisymmetric, so the
+  antisymm-flavoured lemmas could not apply and a `≤`-detour would be needed.
+  **That is false at this pin.** `Mathlib/Order/RelClasses.lean:687` registers
+  `instance instAntisymmLt [Preorder α] : @Std.Antisymm α (· < ·)` — vacuously
+  true, and *instance-available*. So the antisymm lemmas apply directly to a strict
+  order and **no detour is needed.** (`IsAntisymm`/`IsIrrefl` are now deprecated
+  aliases of `Std.Antisymm`/`Std.Irrefl`; searching for the old spellings is part
+  of why the name-hunt failed.)
+- **The exact statement leg 3 wanted is already in Mathlib, twice**, which is why
+  no real mathematics was done here:
+  - `List.Pairwise.eq_of_mem_iff` (`:321`, `[Std.Antisymm r] [Std.Irrefl r]`) —
+    the general-relation form;
+  - `List.SortedLT.eq_of_mem_iff` (`:680`, `[PartialOrder α]`) — the order form.
+
+### Route taken: (b), not (a)
+
+The brief offered (a) weaken to `≤` + `Nodup` + perm, or (b) find the strict-order
+lemma under another name. **(b), and it is a one-liner** — `instAntisymmLt` makes
+`Perm.eq_of_pairwise'` and `Pairwise.eq_of_mem_iff` fire at `r := (· < ·)`
+directly. Route (a) was never entered.
+
+And route (a) would have been *worse than slower*: the control `ne_dup_zero` kills
+it outright. `[0, 0]` and `[0]` have the same members and are unequal, and `[0, 0]`
+**is** `Pairwise (· ≤ ·)` — so the `≤`-only hypothesis does not prove the theorem,
+and (a) must carry `Nodup` as a genuinely separate hypothesis. `Std.Irrefl (· < ·)`
+supplies exactly that for free on route (b).
+
+### Where it went, and why not a new module
+
+`SaltWorks/Stack/Perm.lean`, appended before the audit block. Two reasons over a
+fresh `Stack/SortedEq.lean`:
+
+1. `SEATS.md:5` names this lane `sortedness/permutation`, and `Perm.lean` already
+   owns the `List.Perm`/`Nodup` material — the new theorems sit beside
+   `runNet_ofFn_nodup`, not in a new silo.
+2. **A new module would be invisible to the full build.** `lakefile.toml` has
+   `defaultTargets = ["SaltWorks"]` over a single-root `lean_lib`, so `lake build`
+   checks only `SaltWorks.lean`'s import closure. A fresh module would be an orphan
+   until the maestro swept it in — verified by targeted build only, and *nobody
+   else's build would catch a later break in it*. `Perm.lean` is already in the
+   closure, so **no `import owed:` line and no `SaltWorks.lean` edit.**
+
+Cost to leg 3: one `import SaltWorks.Stack.Perm`, whose closure is
+Mathlib + `HDL.ISA` + `Tactic.AuditAxioms` — no cycle (Stack reaches no Silicon
+module), and negligible next to `ScenarioComplete.lean`'s existing `import Mathlib`.
+
+### What landed
+
+| name | shape |
+|---|---|
+| `eq_of_perm_of_pairwise_lt` | `[Preorder α]`, `Perm l₁ l₂` + both `Pairwise (· < ·)` ⇒ `l₁ = l₂` |
+| ⭐ `eq_of_mem_iff_of_pairwise_lt` | `[Preorder α]`, `∀ a, a ∈ l₁ ↔ a ∈ l₂` + both `Pairwise (· < ·)` ⇒ `l₁ = l₂` — **the one leg 3 asked for** |
+| `pairwise_lt_filter_range` | `((List.range n).filter p).Pairwise (· < ·)` |
+| ⭐ `eq_filter_range_of_pairwise_lt` | ℕ composite: `Pairwise (· < ·) l` + `∀ i, i ∈ l ↔ (i < n ∧ p i)` ⇒ `l = (List.range n).filter p` — **the shape `allScenarios` consumes** |
+
+`Preorder`, not the `LinearOrder` the brief proposed — `instAntisymmLt` is stated
+at `Preorder` and nothing else is used, so the generality was free.
+
+### Non-vacuity controls (6)
+
+Both refutations make the conclusion **false**, not unreachable.
+
+- `perm_zeroOne_oneZero` + `not_pairwise_lt_oneZero` + `ne_zeroOne_oneZero` —
+  `[0,1] ~ [1,0]`, `[0,1]` is strictly increasing, `[1,0]` is not, and the two are
+  unequal. **`h₂` is load-bearing in `eq_of_perm_of_pairwise_lt`.**
+- `mem_iff_dup_zero` + `not_pairwise_lt_dup_zero` + `ne_dup_zero` — `[0,0]` and
+  `[0]` have the same members, `[0]` is strictly increasing, `[0,0]` is not, and
+  the two are unequal. **`h₁` is load-bearing in `eq_of_mem_iff_of_pairwise_lt`** —
+  and, as noted above, this is simultaneously the refutation of the `≤`-weakening.
+
+### Attempts, build, audit
+
+**Two attempts, both on syntax rather than mathematics.** Attempt 1 failed on two
+things and neither was a proof: `~` is *scoped* notation (`List.Perm` written out
+avoids the `open`), and `List.pairwise_lt_range` takes `n` **implicitly** — the
+`(n := n)` named argument is required. Attempt 2 was green on every declaration.
+The proofs themselves are each a single term application; the expensive step was
+the name-hunt recorded above.
+
+- targeted `saltbuild.sh SaltWorks.Stack.Perm` → **EXIT=0**, no errors, no warnings;
+- full `saltbuild.sh` → **EXIT=0**, 8627 jobs, no errors, no warnings;
+- `#audit_axioms` on all 10 new declarations, in-file and build-failing:
+  all `[propext, Classical.choice, Quot.sound]` or a subset (4 of the 6 controls
+  are at **0 axioms**).
+
+### The handoff, verified rather than asserted
+
+`mem_allScenarios` was **proved end-to-end in a scratch probe** (`ScratchMATHEQ.lean`,
+audited at 3 whitelisted axioms, **deleted, not committed, and leg 3's file was not
+touched**) — so the unblock is measured, not predicted. It closes in 8 lines from
+`eq_filter_range_of_pairwise_lt` plus the `testBit_maskOf` / `maskOf_lt` already in
+`ScenarioComplete.lean`; the proof text went to leg 3 in the handoff report.
+
+One incidental finding for the maestro, not acted on: **`SaltWorks/Silicon/Equiv/
+ScenarioComplete.lean` is not imported from `SaltWorks.lean`** — an import is owed,
+and until it is swept the module is outside the full build (the scratch probe hit
+this as a missing `.olean` and had to build the target explicitly).
