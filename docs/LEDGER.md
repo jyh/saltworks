@@ -746,3 +746,14 @@ edit and therefore did **not** compile `Bridge.lean` — the targeted build did.
   output through `runNet_forall`. If a future caller has the bound only on the
   output, the same lemma runs the other way through `runNet_perm`, but that
   direction was not stated.
+
+### Addendum, same session — the import is no longer owed, and the full build now covers it
+
+Written minutes after the entry above and correcting it, because the shared tree
+moved: another seat committed the hub line as **`ae70384`** ("hub +4"), so
+`import SaltWorks.Stack.Bridge` is in `SaltWorks.lean` on `master` and the "owed"
+note is settled. The full build was therefore re-run **with `Bridge.lean` inside
+the hub closure**: `saltbuild EXIT=0`, **8624 jobs**, `Bridge.lean` present in the
+log with its four `#audit_axioms` lines, and the same single pre-existing warning
+(`HDL/CompareExchange.lean:337`) and no other. So every declaration of this node —
+both modules, all 23 — is now checked by the plain full build.
