@@ -108,10 +108,48 @@ that makes a €280 tile possible is what forbids the image.** What exists inste
 `stage_map.py` renders the *real* placement coloured by stage from the shipped
 netlist and DEF. It shows two stripes, not three, because that is what is there.
 
-## 3. IN FLIGHT AT MUSTER
+## 3. IN FLIGHT AT MUSTER — NOTHING. AND THE NEXT WORK IS PRICED.
 
 **Nothing of mine is in flight.** `main` is green on HEAD, every branch
-experiment is concluded and recorded, and no run is pending.
+experiment is concluded and recorded, no run is pending.
+
+**THE LEG'S REAL REMAINING WORK, measured tonight rather than estimated.** The
+seam doctrine says the equivalence proof must target **TT's CI netlist**, not our
+local one — and until tonight that netlist did not exist. It does now. Pointing
+the importer at it:
+
+```
+importer: no expansion for cell 'inv_2' (instance _170_)
+```
+
+Census of the fabricated artifact: **36 distinct cell types (32 logic, 4
+physical) against our 13 trusted models — overlap ZERO.** Split by *function*
+rather than by name, that zero is misleading and the real shape is:
+
+| | count | instances |
+|---|---|---|
+| same function, different **drive strength** (`and2_2`, `dfxtp_2`, `nand2_2`) | 3 | 67 / 327 |
+| **genuinely new functions** | 27 | 260 / 327 |
+
+Our models are the `_1` family; the CI flow chose `_2` drives almost throughout.
+⇒ **the trusted set must grow 13 → ~40**: 3 aliases, 27 new one-line functions,
+each owing a `decide +kernel` liberty-agreement theorem like the existing
+thirteen.
+
+**This quantifies the evidence seat's 12:44 finding on our own artifact: the
+trusted model set grows with FLATTENING, not with design size.** The design did
+not grow — 327 logic cells — but the flow at TT's constraints reached for three
+times as many distinct cell types as our local run.
+
+⚠️ Two of the new cells deserve care rather than a one-liner: **`dlygate4sd3`**
+(24) and **`clkdlybuf4s25`** (18) are hold-fixing delay cells whose *logic* is
+identity but whose *presence* is a timing artifact; **`conb_1`** (12) is a tie
+cell. A trivial model for a delay buffer is trivially right, and that should be
+stated rather than assumed.
+
+⇒ **Price of closing the seam: ~30 cell models + liberty theorems, then the
+import, then per-cone equivalence — which ruling 4a made possible tonight by
+putting every cone at ≤ 21 inputs.** Not started; costed.
 
 ## 4. COST
 
