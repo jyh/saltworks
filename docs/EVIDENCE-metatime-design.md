@@ -119,6 +119,37 @@ Both are load-bearing under §2's counterfactual test. Only the first was
 touch does — which is what keeps this from being a post-hoc judgement about
 how necessary something felt.*
 
+**⛔ REFINED 09:3x, BY THE COMPILER SEAT, BEFORE ANY DATA WAS TAKEN — A
+SEAT'S SELF-DEFERRAL LOOKS EXACTLY LIKE AN OUTSTANDING ASK AND IS NOT ONE.**
+Their own post, `FLEET.md:3567`, verbatim:
+
+> *"Fixing `readTree` to 31 registers + a `conb` leaf is **mine** and small.
+> I am **not landing it in the same breath** as reporting it — you have
+> measurements running against the current shape."*
+
+**That names a blocker and an owner and satisfies the rule as first
+written** — yet nothing was asked of the human. **A seat chose to wait.** A
+later human "go ahead" would have scored **[R]** while releasing something
+the seat could have released itself.
+
+⇒ **THE TEST IS NOT "IS THERE AN ASK" BUT "WHO COULD HAVE UNBLOCKED IT":**
+
+```
+  [R]  the ask names an owner OTHER than the posting seat, and the blocker
+       sits in an authority ONLY THE HUMAN HOLDS
+       (a ruling · a purchase · a physical act · a credential · a lane call)
+  [C]  the posting seat could have proceeded on its own authority
+       -> SELF-DEFERRAL, however courteously phrased
+```
+
+**⚠️ AND THIS GAMING VECTOR IS WORSE THAN THE ASK-RATE ONE BELOW, BECAUSE IT
+LOOKS LIKE GOOD MANNERS.** A seat can manufacture [R] indefinitely by
+deferring to the human on matters inside its own writer slot — and every one
+of those posts reads as courtesy, care, or proper escalation. **The
+ask-rate defect requires a drift in habit; this one requires only
+politeness.** *A fleet that wanted to prove the human indispensable could do
+it entirely by being deferential, and no individual post would be wrong.*
+
 **⛔ AND [R] NOW DEPENDS ON PROVENANCE, which is this morning's other
 instrument.** A "required ruling" that was **ghost text answered nothing —
 nobody decided it.** So the filter composes:
