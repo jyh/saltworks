@@ -136,7 +136,7 @@ inherited rather than chosen:
 
 | if `step` models the offset as… | consequence |
 |---|---|
-| a **bounded 13-bit encoding** (real RISC-V B-type: 12 encoded bits + implicit zero LSB ⇒ −4096..+4094 bytes ⇒ ±1023 instructions) | **P4 is real and was unlisted**; `compile` must return `none` on long branches and C3's hypothesis needs the extra conjunct |
+| a **bounded encoding** — the ISA manual's own words, fetched by the silicon seat from `riscv/riscv-isa-manual`, `src/unpriv/rv32.adoc`: *"The 12-bit B-immediate encodes signed offsets in multiples-of-two bytes"*, *"The conditional branch range is ±4 KiB"* ⇒ **±1024 four-byte instructions** | **P4 is real and was unlisted**; `compile` must return `none` on long branches and C3's hypothesis needs the extra conjunct |
 | an **unbounded index** (`Int`, instruction-counted) | **there is no P4 — and C3 then proves a theorem about a machine that is not RISC-V.** The five-instruction claim silently becomes *"five instructions, one of which has an encoding we do not model"* |
 
 **Nothing in P1–P3 bounds it:** P1 bounds expression *depth*, P2 bounds *live
@@ -241,7 +241,13 @@ no mutation control is not evidence.**
 - **Not CompCert.** The source language has three statement forms.
 - **No loops, no functions, no memory, no I/O.** P1–P3 are stated exclusions.
 - **`emitV` remains UNTRUSTED**, as in leg 2. The trusted path is `emitN`.
-- **The generated code is not claimed to be efficient, small, or idiomatic.**
+- **The generated code is not claimed to be efficient, small, or idiomatic** — and
+  one specific non-idiom must be said out loud rather than discovered by a
+  referee who knows RV32I: **Slice A excludes `JAL`, so `ite` is compiled with an
+  always-true `BEQ`, which the ISA manual tells you not to do.** The manual's two
+  reasons — offset range and branch-prediction pollution — are a *performance*
+  objection; **neither affects the theorem, and both are consequences of the
+  datapath's stated exclusions rather than of the generator's design.**
 
 **If this is described as anything but "a terminating three-form imperative
 language compiled to five RV32I instructions, with a machine-checked simulation
