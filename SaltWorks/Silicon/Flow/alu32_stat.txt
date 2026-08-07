@@ -1,0 +1,72 @@
+
+7. Printing statistics.
+
+=== alu32 ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+      953        - wires
+     1359        - wire bits
+       15        - public wires
+      421        - public wire bits
+        5        - ports
+      101        - port bits
+     1225 6.72E+03 cells
+        1    8.758   sky130_fd_sc_hd__a2111oi_0
+        7   61.309   sky130_fd_sc_hd__a211o_1
+       26  195.187   sky130_fd_sc_hd__a211oi_1
+        1    7.507   sky130_fd_sc_hd__a21boi_0
+       22  165.158   sky130_fd_sc_hd__a21o_1
+      192  960.922   sky130_fd_sc_hd__a21oi_1
+        2   20.019   sky130_fd_sc_hd__a221o_1
+        8   70.067   sky130_fd_sc_hd__a221oi_1
+        1    8.758   sky130_fd_sc_hd__a22o_1
+        8   60.058   sky130_fd_sc_hd__a22oi_1
+        2   17.517   sky130_fd_sc_hd__a2bb2oi_1
+        1    10.01   sky130_fd_sc_hd__a311o_1
+        2   17.517   sky130_fd_sc_hd__a311oi_1
+        5   43.792   sky130_fd_sc_hd__a31o_1
+       10    62.56   sky130_fd_sc_hd__a31oi_1
+        1    10.01   sky130_fd_sc_hd__a32o_1
+        2   17.517   sky130_fd_sc_hd__a32oi_1
+        1    10.01   sky130_fd_sc_hd__a41o_1
+       37  231.472   sky130_fd_sc_hd__and2_0
+        3   18.768   sky130_fd_sc_hd__and3_1
+       81  304.042   sky130_fd_sc_hd__clkinv_1
+       32  200.192   sky130_fd_sc_hd__lpflow_inputiso1p_1
+       24  150.144   sky130_fd_sc_hd__lpflow_isobufsrc_1
+       20  200.192   sky130_fd_sc_hd__maj3_1
+        3   33.782   sky130_fd_sc_hd__mux2_1
+       23  230.221   sky130_fd_sc_hd__mux2i_1
+      213  799.517   sky130_fd_sc_hd__nand2_1
+       31  193.936   sky130_fd_sc_hd__nand2b_1
+        7   35.034   sky130_fd_sc_hd__nand3_1
+        1    6.256   sky130_fd_sc_hd__nand4_1
+      149  559.286   sky130_fd_sc_hd__nor2_1
+        3   18.768   sky130_fd_sc_hd__nor2b_1
+       16   80.077   sky130_fd_sc_hd__nor3_1
+        8   50.048   sky130_fd_sc_hd__nor4_1
+        1    10.01   sky130_fd_sc_hd__o211a_1
+       14  105.101   sky130_fd_sc_hd__o211ai_1
+       11   82.579   sky130_fd_sc_hd__o21a_1
+      144  720.691   sky130_fd_sc_hd__o21ai_0
+        3   22.522   sky130_fd_sc_hd__o21bai_1
+        3   33.782   sky130_fd_sc_hd__o221a_1
+        5   43.792   sky130_fd_sc_hd__o221ai_1
+        1    8.758   sky130_fd_sc_hd__o22a_1
+        7   43.792   sky130_fd_sc_hd__o22ai_1
+        2   17.517   sky130_fd_sc_hd__o2bb2ai_1
+        1    10.01   sky130_fd_sc_hd__o311a_1
+        4   35.034   sky130_fd_sc_hd__o311ai_0
+       11   82.579   sky130_fd_sc_hd__o31ai_1
+        2   20.019   sky130_fd_sc_hd__o32a_1
+        2   17.517   sky130_fd_sc_hd__o32ai_1
+        3   18.768   sky130_fd_sc_hd__or3_1
+        5   37.536   sky130_fd_sc_hd__or4_1
+       41  359.094   sky130_fd_sc_hd__xnor2_1
+       22  192.685   sky130_fd_sc_hd__xor2_1
+
+   Chip area for module '\alu32': 6720.195200
+     of which used for sequential elements: 0.000000 (0.00%)
+
