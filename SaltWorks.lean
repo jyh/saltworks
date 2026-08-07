@@ -19,6 +19,7 @@ import SaltWorks.HDL.ReadTree
 import SaltWorks.HDL.AluSelect
 import SaltWorks.HDL.EmitS
 import SaltWorks.HDL.CodegenSpec
+import SaltWorks.HDL.CompareExchange
 import SaltWorks.HDL.Vectors
 import SaltWorks.HDL.SpikeVectors
 import SaltWorks.Stack.Spec
