@@ -430,6 +430,29 @@ with tempfile.TemporaryDirectory() as tmp:
               f"LANDED: lane_of({p!r}) returned no lane — a path that vanishes "
               f"is a commit missing from every per-lane total")
 
+    # ---- META-TIME: the classification is FROZEN, so pin it ---------------
+    # docs/EVIDENCE-metatime-design.md §4 forbids publishing a fraction below
+    # 5 days of data. These checks exist so the DEFINITION cannot drift while
+    # those days accumulate — a measure that changes under you is a measure
+    # chosen by the data.
+    for p, expect in (("SaltWorks/HDL/ISA.lean", "DESIGN"),
+                      ("Salt/HB/X.lean", "DESIGN"),
+                      ("papers/x.tex", "DESIGN"),
+                      ("docs/ledger-tools/landed.py", "META"),
+                      ("docs/EVIDENCE-campaign.md", "META"),
+                      ("docs/measurement-preregistration.md", "META"),
+                      ("docs/silicon-design-v1.md", "AMBIGUOUS"),
+                      ("docs/hdl-codegen-freeze-v1.md", "AMBIGUOUS")):
+        check(ld.metatime_of(p) == expect,
+              f"METATIME: {p!r} classified {ld.metatime_of(p)!r}, frozen value is "
+              f"{expect!r} — the definition must not drift while data accumulates")
+
+    # AMBIGUOUS must never be silently folded into either of the other two
+    check(ld.metatime_of("docs/silicon-design-v1.md") != "DESIGN"
+          and ld.metatime_of("docs/silicon-design-v1.md") != "META",
+          "METATIME: a gating design doc was folded into DESIGN or META — the "
+          "design says it is reported as its own column, never split")
+
     # fmt_dur_h must never round a sub-threshold window UP across a bucket
     check(lc.fmt_dur_h(59.14 * 60) == "59 min",
           f"FORMAT: 59.14 min printed as {lc.fmt_dur_h(59.14*60)!r} — the 1.0 h defect")

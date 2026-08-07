@@ -88,6 +88,43 @@ def lane_of(path: str) -> str:
     return "other"
 
 
+# --- META-TIME: the frozen classification (docs/EVIDENCE-metatime-design.md) --
+#
+# DESIGN = work that advances a DELIVERABLE (theorems, RTL, netlist, papers).
+# META   = work on the APPARATUS (instruments, ledgers, protocols, provenance).
+# AMBIG  = design docs that GATE a build (freezes, design-v1s) — reported as
+#          its own column and NEVER silently split into one of the other two.
+#
+# ⚠️ THE TAG IS "WORK ON THE APPARATUS", NOT "NON-PRODUCTIVE". For leg 1 the
+# apparatus IS the deliverable — the campaign's claim is "a ledger showing
+# when each artifact landed and who was awake" — so a framing that lets a
+# reader hear "overhead" is wrong, and the column header says so.
+#
+# ⛔ AND THE EVIDENCE SEAT IS ~100% META BY CONSTRUCTION (93 commits, 11,727
+# lines, ZERO .lean on day 1). A fleet-wide fraction that includes it measures
+# how busy this seat was, NOT method maturity — so the report prints per-lane
+# and marks the evidence row as EXCLUDED from any aggregate.
+#
+# Frozen 2026-08-07, before any data was taken. Publishing a fraction needs
+# >= 5 campaign days (design §4); this column exists so those days accumulate
+# against a definition nobody chose after seeing the answer.
+
+META_PREFIXES = (
+    "docs/ledger-tools/", "docs/EVIDENCE-", "docs/measurement-preregistration",
+    "docs/SEATS.md", "docs/reports/", "docs/RESULTS.md",
+)
+AMBIG_MARKERS = ("-design-v", "-freeze", "freeze-", "-protocol", "dossier")
+
+
+def metatime_of(path: str) -> str:
+    """DESIGN | META | AMBIGUOUS — frozen; see the note above."""
+    if any(m in path for m in AMBIG_MARKERS):
+        return "AMBIGUOUS"
+    if path.startswith(META_PREFIXES):
+        return "META"
+    return "DESIGN"
+
+
 def run(args, cwd) -> str:
     return subprocess.run(args, capture_output=True, text=True, cwd=cwd,
                           check=True).stdout
