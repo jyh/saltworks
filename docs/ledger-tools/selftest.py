@@ -372,6 +372,64 @@ with tempfile.TemporaryDirectory() as tmp:
     check("outside the default build: 2" in out,
           f"CLOSURE: miscounted audit sites (expected 2 from B), got:\n{out}")
 
+    # ---- the three tools the README lists as UNCOVERED ---------------------
+    # Both of 2026-08-06's worst defects (the swap threshold, nudge_detect's
+    # empty matcher) lived in the untested region. These are the properties
+    # each tool's own docstring says it depends on.
+
+    # token_meter: DEDUP BY requestId. ADDENDUM 1 §D — one API response is
+    # written as several assistant records, each repeating the whole usage
+    # block; summing records inflates every published figure ~2.3x.
+    ev, ustats = usage_events([pdir])
+    check(ustats.dedup_dropped > 0,
+          "TOKENS: the fixture has duplicate requestIds and none was dropped — "
+          "the dedup rule is the difference between a true figure and a ~2.3x one")
+    seen_ids = [getattr(e, "request_id", None) for e in ev]
+    seen_ids = [i for i in seen_ids if i]
+    check(len(seen_ids) == len(set(seen_ids)),
+          "TOKENS: a requestId appears twice in the deduplicated events")
+
+    # cache must never be folded into output — the charter forbids it in a
+    # headline, and the only structural guarantee is that they are separate
+    # fields that never sum into one another
+    tot_out = sum(e.output_tokens for e in ev)
+    tot_cr = sum(e.cache_read for e in ev)
+    check(tot_out != tot_cr or tot_out == 0,
+          "TOKENS: output and cache_read are indistinguishable in the fixture — "
+          "the separation cannot be checked")
+
+    # human_time: an ORPHANED tag must be REPORTED, never silently dropped.
+    # Measured 2026-08-06: the morning's six tags produced four blocks with
+    # three orphaned and nothing said about it.
+    import human_time as ht
+    tagf = Path(tmp) / "orphan-tags.tsv"
+    tagf.write_text("20990101T0000\tDIRECTING\ta tag that can match nothing\n")
+    loaded = ht.load_tags(tagf)
+    check("20990101T0000" in loaded,
+          "HUMAN_TIME: a well-formed tag line did not load")
+    check(loaded["20990101T0000"][0] == "DIRECTING",
+          "HUMAN_TIME: tag category was not read")
+
+    # an unknown category must ABORT, not be silently coerced
+    bad = Path(tmp) / "bad-cat.tsv"
+    bad.write_text("20990101T0000\tPRODUCTIVE\tnot a charter category\n")
+    try:
+        ht.load_tags(bad)
+        check(False, "HUMAN_TIME: an unknown category was accepted silently")
+    except SystemExit:
+        check(True, "")
+
+    # landed: lane attribution is a PATH HEURISTIC and must be total —
+    # every path lands somewhere, and an unknown path must not vanish
+    import landed as ld
+    for p, expect_known in (("SaltWorks/HDL/ISA.lean", True),
+                            ("docs/ledger-tools/x.py", True),
+                            ("some/unmapped/path.txt", False)):
+        lane = ld.lane_of(p)
+        check(isinstance(lane, str) and lane != "",
+              f"LANDED: lane_of({p!r}) returned no lane — a path that vanishes "
+              f"is a commit missing from every per-lane total")
+
     # fmt_dur_h must never round a sub-threshold window UP across a bucket
     check(lc.fmt_dur_h(59.14 * 60) == "59 min",
           f"FORMAT: 59.14 min printed as {lc.fmt_dur_h(59.14*60)!r} — the 1.0 h defect")
