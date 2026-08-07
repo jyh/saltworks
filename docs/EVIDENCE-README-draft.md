@@ -259,6 +259,41 @@ ourselves doing it twice:
 | `#audit_axioms` | do these **proofs** rest on only three axioms? | is the **chain** correct? |
 | a memory cap that was never breached | did **this run** exceed it? | does the cap **bind**? |
 | a per-instance certificate | is **this artifact** correct? | is the **tool** correct? |
+| **a net-name grep over the synthesised netlist** | did this **identifier** survive the flow? | did the **structure** survive? |
+
+**The last row is not hypothetical, and it nearly cost us a wrong ruling on
+the chip we are taping out.** We mark the design's stage boundaries so that
+synthesis keeps them as real nets — that is what makes the fabricated
+netlist certifiable cone by cone rather than as one 36-input blob. To check
+whether the foundry flow honours it, the obvious test is to grep the
+returned netlist for the boundary net's name.
+
+**On the real artifact that name is absent — from the treated *and* the
+untreated build.** The flow splits vectors into per-bit nets, so the parent
+declaration disappears in both. The grep therefore reports *"the attribute
+was stripped"* with complete confidence, and it is **wrong**: measured by
+what actually matters — the number of inputs feeding each combinational
+cone — the boundaries are entirely intact, and they take the shipped
+netlist from **87.5% to 100%** of cones inside the size ceiling our proofs
+require.
+
+Two readouts, both reasonable, pointing in opposite directions; the
+misleading one is the one you reach for first. **What saved it was writing
+the readout down before the data existed** — the experiment was
+pre-registered with the cone census, not the name, as its primary measure,
+hours before either build ran. We do the same thing with the ledger in §7,
+for the same reason.
+
+⇒ **Two rules we hold ourselves to, beyond naming the narrower question:**
+
+1. **Fix the readout before you can see the answer.** A measure chosen
+   after the data is a measure chosen by the data.
+2. **When an instrument cannot be quoted, publish its location.** One of
+   our own checks scans text for forbidden strings, so any document
+   describing it by *quoting* those strings trips it — which means the
+   check can never be explained in prose, and an unexplainable check is an
+   unauditable one. A file-and-line pointer is not a string, and costs
+   nothing.
 
 Three controls we adopted in one morning looked like protection and were
 not equal: one was a **measured no-op**, one was **deployed and
