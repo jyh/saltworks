@@ -91,7 +91,24 @@ theorem bw_gate_counts :
       ∧ bitXor32.gates.length = 32 ∧ bitNot32.gates.length = 32 := by
   decide +kernel
 
-/-! ### Correctness, against `BitVec`'s own operations
+/-! ### Correctness, against `BitVec`'s own operations — SAMPLED, AND THE NAMES SAY SO
+
+⚠️ **MATH'S 16:22 FINDING, AND IT IS RIGHT ABOUT THE PART THAT MATTERS.**
+`bwWords` is TEN words, so every certificate below checks **100 ordered pairs out
+of 2^64 ≈ 1.8 × 10^19 — a 5 × 10^-18 slice.** *This file said "sampled rather
+than exhaustive" at the definition site from the day it landed, so the honesty
+was there.* ⛔ **THE DEFECT IS THAT THE CAVEAT DID NOT TRAVEL WITH THE NAME:
+`bitXor32_correct` reads at a call site exactly like a correctness theorem, and a
+consumer is one `import` away from the docstring that qualifies it.**
+
+✅ **FIXED THE ONLY WAY THAT TRAVELS: every sampled certificate is now
+`…_on_sample`.** *A reader who never opens this file still cannot mistake it.*
+📌 **AND WHERE THE SAMPLE COULD BE REMOVED, MATH REMOVED IT** — `sem_bitXor32`
+(`Stack/Program.lean`, `d4fe922`) proves the XOR block for **all 2^64 pairs,
+structurally, with no `decide` at all**, and SUPERSEDES the sampled version
+rather than consuming it. *The remaining samples are where the gap is real, and
+it enters one layer down: `adder32` has no structural semantics, so anything
+driven through it inherits the sample.*
 
 *Sampled rather than exhaustive — 2^64 input pairs is not a proof obligation, it
 is a category error. The words below are the campaign's standard spread: zero,
@@ -113,16 +130,16 @@ def bwOK (c : Circ) (f : BitVec 32 → BitVec 32 → BitVec 32) : Bool :=
   bwWords.all fun a => bwWords.all fun b =>
     sem c (bwEnv a b) == (List.range 32).map (fun k => (f a b).getLsbD k)
 
-theorem bitAnd32_correct : bwOK bitAnd32 (· &&& ·) = true := by decide +kernel
-theorem bitOr32_correct  : bwOK bitOr32  (· ||| ·) = true := by decide +kernel
-theorem bitXor32_correct : bwOK bitXor32 (· ^^^ ·) = true := by decide +kernel
+theorem bitAnd32_correct_on_sample : bwOK bitAnd32 (· &&& ·) = true := by decide +kernel
+theorem bitOr32_correct_on_sample  : bwOK bitOr32  (· ||| ·) = true := by decide +kernel
+theorem bitXor32_correct_on_sample : bwOK bitXor32 (· ^^^ ·) = true := by decide +kernel
 
 /-- `bitNot32` reads only its one operand, so it gets its own driver. -/
 def bwNotOK : Bool :=
   bwWords.all fun a =>
     sem bitNot32 (fun i => a.getLsbD i) == (List.range 32).map (fun k => (~~~a).getLsbD k)
 
-theorem bitNot32_correct : bwNotOK = true := by decide +kernel
+theorem bitNot32_correct_on_sample : bwNotOK = true := by decide +kernel
 
 /-! ### NON-VACUITY — the three blocks are genuinely different circuits
 
@@ -220,7 +237,7 @@ def subOK : Bool :=
   bwWords.all fun a => bwWords.all fun b =>
     (subOut a b).take 32 == (List.range 32).map (fun k => (a - b).getLsbD k)
 
-theorem sub_via_adder_correct : subOK = true := by decide +kernel
+theorem sub_via_adder_correct_on_sample : subOK = true := by decide +kernel
 
 def sltOK  : Bool := bwWords.all fun a => bwWords.all fun b =>
   sltDrive a b == cmpWord (BitVec.slt a b)
@@ -228,9 +245,9 @@ def sltuOK : Bool := bwWords.all fun a => bwWords.all fun b =>
   sltuDrive a b == cmpWord (BitVec.ult a b)
 
 /-- ⭐ **Signed comparison, against `BitVec.slt`**, driven through the real adder. -/
-theorem sltCirc_correct : sltOK = true := by decide +kernel
+theorem sltCirc_correct_on_sample : sltOK = true := by decide +kernel
 /-- ⭐ **Unsigned comparison, against `BitVec.ult`.** -/
-theorem sltuCirc_correct : sltuOK = true := by decide +kernel
+theorem sltuCirc_correct_on_sample : sltuOK = true := by decide +kernel
 
 /-! ### NON-VACUITY — signed and unsigned must DISAGREE
 
@@ -260,18 +277,34 @@ theorem cmp_upper_bits_are_zero :
 #audit_axioms sltCirc sltuCirc
 #audit_axioms sltCirc_ssa sltuCirc_ssa sltCirc_wf sltuCirc_wf
 #audit_axioms subOut sltDrive sltuDrive cmpWord
-#audit_axioms subOK sub_via_adder_correct
-#audit_axioms sltOK sltuOK sltCirc_correct sltuCirc_correct
+#audit_axioms subOK sub_via_adder_correct_on_sample
+#audit_axioms sltOK sltuOK sltCirc_correct_on_sample sltuCirc_correct_on_sample
 #audit_axioms slt_differs_from_sltu
 #audit_axioms cmp_blocks_are_distinct
 #audit_axioms cmp_upper_bits_are_zero
+
+
+/-! ### Compatibility aliases — the OLD names, kept so no other seat's file breaks
+
+*Math's `Stack/Program.lean` imports four of these under their previous names.
+Renaming without an alias would have broken another seat's build in a shared
+worktree, which is the hazard the writer-slot law exists to prevent.*
+
+⚠️ **These are the MISLEADING names and they are deliberately not the primary
+ones.** *Drop them once `Program.lean` migrates; that is math's call and their
+file.* -/
+
+alias bitXor32_correct := bitXor32_correct_on_sample
+alias sub_via_adder_correct := sub_via_adder_correct_on_sample
+alias sltCirc_correct := sltCirc_correct_on_sample
+alias sltuCirc_correct := sltuCirc_correct_on_sample
 
 #audit_axioms bwCirc bitAnd32 bitOr32 bitXor32 bitNot32
 #audit_axioms bitAnd32_ssa bitOr32_ssa bitXor32_ssa bitNot32_ssa
 #audit_axioms bitAnd32_wf bitOr32_wf bitXor32_wf bitNot32_wf
 #audit_axioms bw_gate_counts
 #audit_axioms bwEnv bwWords bwOK bwNotOK
-#audit_axioms bitAnd32_correct bitOr32_correct bitXor32_correct bitNot32_correct
+#audit_axioms bitAnd32_correct_on_sample bitOr32_correct_on_sample bitXor32_correct_on_sample bitNot32_correct_on_sample
 #audit_axioms bw_blocks_are_distinct
 #audit_axioms bw_disagree_concretely
 #audit_axioms bitNot32_is_not_identity

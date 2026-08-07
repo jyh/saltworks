@@ -250,9 +250,9 @@ def incOut (w : BitVec 32) : List Bool := sem inc32 (fun i => w.getLsbD i)
 def incAddsFourOK : Bool :=
   addWords.all fun w => incOut w == (List.range 32).map (fun k => (w + 4).getLsbD k)
 
-theorem adder32_adds : adderAddsOK = true := by decide +kernel
-theorem adder32_carry_out : adderCarryOK = true := by decide +kernel
-theorem inc32_adds_four : incAddsFourOK = true := by decide +kernel
+theorem adder32_adds_on_sample : adderAddsOK = true := by decide +kernel
+theorem adder32_carry_out_on_sample : adderCarryOK = true := by decide +kernel
+theorem inc32_adds_four_on_sample : incAddsFourOK = true := by decide +kernel
 
 /-! ## Instantiability — the precondition for C4's assembly
 
@@ -283,9 +283,9 @@ theorem adder32_wf : adder32.wf = true := Circ.wf_of_ssa adder32_ssa
 #audit_axioms adder32_wf
 #audit_axioms addWords addOut adderAddsOK adderCarryOK
 #audit_axioms incOut incAddsFourOK
-#audit_axioms adder32_adds
-#audit_axioms adder32_carry_out
-#audit_axioms inc32_adds_four
+#audit_axioms adder32_adds_on_sample
+#audit_axioms adder32_carry_out_on_sample
+#audit_axioms inc32_adds_four_on_sample
 #audit_axioms adder32Carries
 #audit_axioms incIn
 #audit_axioms incBase
