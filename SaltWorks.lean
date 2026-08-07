@@ -10,6 +10,8 @@ import SaltWorks.HDL.EmitV
 import SaltWorks.HDL.Seq
 import SaltWorks.HDL.Dense
 import SaltWorks.HDL.EmitN
+import SaltWorks.HDL.ISA
+import SaltWorks.HDL.Renumber
 import SaltWorks.Silicon.Cells.Sky130
 import SaltWorks.Silicon.Imported.Comparator
 import SaltWorks.Silicon.Imported.RefComparator
