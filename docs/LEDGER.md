@@ -2151,3 +2151,29 @@ committed) — every one inside `[propext, Classical.choice, Quot.sound]`.
 * **Task 1 has no consumer yet.** `runNetD`/`destKeyOrder` are exported and
   proved; whether silicon's link ②(b) actually lands on `Dest 3` or stays at `ℕ`
   is their call, and `runNetD_toNat` is written so that either works.
+
+### Addendum, same session — two corrections to the entry above
+
+1. **The declaration count is 61, not 60.** Recounted off the `#audit_axioms`
+   lists: 23 in `Perm.lean`, 38 in `Program.lean`. Plus two anonymous
+   `Decidable (dle _ _)` / `Decidable (dlt _ _)` instances, which `#audit_axioms`
+   cannot list by name — the same gap `Spec.lean`'s `Decidable wle` instances
+   already have, and not a new one.
+2. **Silicon landed a key object of their own in the same window
+   (`d855e9b`, `HDL/CompareExchangeC.lean`), and it is NOT a duplicate of Task 1
+   — checked rather than assumed.** Their `cKey (active) (dest) : Bool × Nat` and
+   `cKeyLE : Bool × Nat → Bool × Nat → Bool` are the **partial-load PRODUCT key**
+   (active-before-idle, then destination) as a decidable `Bool` comparison over
+   the 3-bit range. Mine is the **full-load key as a `LinearOrder` bundle**, which
+   is what `runNet`/`batcher8_sorts` are instantiated at and what a `Bool`-valued
+   comparison cannot be. **The two meet at their own
+   `cKey_degenerates_at_full_load`: at full load the product collapses to plain
+   destination order, which is exactly `destKeyOrder`.** So they are
+   complementary, and neither seat duplicated the other.
+
+   ⚠️ **The residual this exposes: nobody has a `LinearOrder` on the PRODUCT.**
+   `cKeyLE` is a `Bool` function, so the partial-load statement still cannot
+   instantiate `runNet` at the product key — `BatcherNetC.lean`'s *"partial load
+   wants its own statement carrying the product order explicitly"* remains
+   unowned. mathlib's `Prod.Lex` would supply the bundle cheaply; it was outside
+   this brief and is **not** claimed as done.
