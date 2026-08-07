@@ -1620,3 +1620,194 @@ outside the new block is the added import `SaltWorks.HDL.StateCodec` — no cycl
 * **Whether `EntryLoaded` and `DeliversProgram` compose to an S5 statement.**
   They are the two entry-side obligations the trace found; nothing here claims
   they are the *only* ones. C4's §4 lists three more that are C3's.
+
+---
+
+## C5IND — the cycle induction, over an abstract per-cycle step
+**2026-08-07 · Opus executor · `SaltWorks/Stack/Program.lean` (+474 lines: **218
+code**, 191 comment/docstring, 65 blank — counted, not estimated; 36 new
+declarations)**
+
+### Why the shape
+
+C4 is *"one cycle of the emitted netlist equals one `ISA.stepT`"*. **It cannot be
+stated against a real core today** — `grep -rnE "^(def|theorem|abbrev)
+(core|compile)\b"` over `SaltWorks/` returns nothing, so `compile` and `core` do
+not exist. This node built the layer *above* C4 that does not depend on it: given
+one-cycle equivalence as a hypothesis, `n`-cycle equivalence, and then the whole
+program. The netlist half of C4 (`Circ.wf_of_ssa` + `emitPipeline'_sem`) was NOT
+rebuilt — it is already generic in `c` and is untouched here.
+
+**Module choice: extended `Stack/Program.lean` rather than opening a new module**,
+because a new file is invisible to the full build until the maestro sweeps it into
+`SaltWorks.lean`, and `Program.lean` already carries `EntryLoaded` and
+`DeliversProgram` — the two obligations this node's third one sits beside.
+`SaltWorks.lean` was not touched; nothing outside `SaltWorks/Stack/**` and
+`docs/` was written.
+
+### ⛔ THE ANSWER TO THE ASSIGNED QUESTION: `stepT`-ITERATION AND `runFor` ARE **NOT** THE SAME OBJECT
+
+They agree on a region and part company at its boundary, and the boundary is one
+thing:
+
+```
+runFor  : fetch code s.pc = none  ⇒  HALT.  Halting is a FIXED POINT (runFor_of_fetch_none).
+runWords: every cycle steps.  stepT is TOTAL.  There is NO halting word.
+```
+
+`runFor` takes the program as an argument and reads it by `pc`; `stepT` takes a
+word handed to it on `instrNet` and, by the v1 ruling (`ISA.lean:636-676`), has a
+defined NOP-advance on everything it cannot decode. So the netlist has no halt
+state at all. Precisely:
+
+* **Where they agree** — `runWords_eq_runFor`, and its hypothesis is the exact
+  price: for **all** `k < n`, the fetch must succeed *and* the stream must carry
+  that instruction's encoding. There is no version without the `k < n` binder.
+* **Where they diverge** — `runFor_halts_where_runWords_runs_on`, kernel-checked
+  at `offEndState`: `runFor n batcherSort offEndState = offEndState` for **every**
+  `n`, while ten cycles of the wires move the pc from 480 to 520.
+
+⚠️ **The boundary is the common case, not a corner case.** `step_count_data_dependent`
+(landed earlier) pins that this program finishes in **48 to 90** steps depending
+on the data while `run` spends 120. On a fixed-length silicon run the machine is
+past the end of its own program for 30–72 cycles of *every* execution.
+
+⇒ **THIS IS THE SAME `DeliversProgram` GAP, ONE LAYER DOWN, AND IT HAS A SECOND
+HALF NOBODY HAD WRITTEN DOWN.** `DeliversProgram` is stated only where
+`fetchWord` returns `some`. It is **silent** past the end of the program. A tile
+that satisfies `EntryLoaded` and `DeliversProgram` and then presents live
+instructions on the instruction nets computes garbage, and nothing stated before
+today notices. `FeedsProgram`'s second conjunct is that obligation, named.
+
+**And the obligation is cheap — that is a theorem, not a hope.**
+`runWords_get_of_undecodable`: a word the decoder rejects touches no register at
+all. `decode_zero`: the all-zero word is one. ⇒ **a ROM reading zero outside
+`[0, 480)` discharges it.** `noisy_tail_overwrites` is the control: a tile that
+instead re-presents a live instruction has the answer overwritten a little more
+every cycle (`1` after one cycle, `4` after four).
+
+### What landed
+
+**The two n-step objects** (both left folds, so they compose index-by-index):
+
+- `runWords (ws : Nat → Word) : Nat → St → St` — `n` `stepT`s driven by a word
+  stream. With `runWords_succ`, `runWords_add` (the stream splits *with a shift*).
+- `cycles (cyc : SaltWorks.HDL.Env → SaltWorks.HDL.Env) : Nat → Env → Env`. With
+  `cycles_succ`, `cycles_add`.
+- 📌 Note the contrast with `runFor_add`: `cycles_add`/`runWords_add` are
+  unconditional **trivially** (nothing halts); `runFor_add` is unconditional for
+  a *substantive* reason (halting is a fixed point). Same shape, opposite content
+  — the divergence again, seen from the algebra.
+
+**The hypothesis and the induction:**
+
+- `seenWord ins := wordOf (fun k => ins (instrNet k))` — the word the core sees.
+  **Not `wordOf ins`**, which typechecks and reads register `x0`.
+- `CycleRealisesStep cyc wordAt : Prop := ∀ ins, decQ (cyc ins) = stepT (decQ ins) (wordAt ins)`
+  — parameterised in **both** the cycle map and the word source, so it commits to
+  no core, no netlist and no fetch path.
+- ⭐ `cycles_realise_steps` — **the deliverable**:
+  `decQ (cycles cyc n ins) = runWords (fun k => wordAt (cycles cyc k ins)) n (decQ ins)`.
+  The ISA side's stream is read off the cycle sequence itself, which is what lets
+  the statement need no fetch model.
+
+**The stream contract and the register agreement:**
+
+- `FeedsProgram code ws s K` — two halves: the fetched instruction while `k < K`,
+  a word the decoder **rejects** for `K ≤ k`.
+- ⭐ `runWords_get_eq_runFor` — given the contract, the wires and the software
+  model agree **at the registers** at **any** `N ≥ K`. Stated about `St.get` only,
+  deliberately: the pc does *not* agree, it has run away, and saying so is the
+  content.
+
+**The bridge to the landed obligation:**
+
+- `fetchWord_eq_encode` — every word this program's fetch produces is an `encode`,
+  since `batcherSortWords = batcherSort.map encode`.
+- ⭐ `feedsFst_of_deliversProgram` — **`DeliversProgram` IS `FeedsProgram`'s first
+  half**, for a tile whose input map is a function of the machine state and whose
+  pc stays in the program for `K` cycles. So this node adds exactly one obligation
+  to the demand list, not two.
+
+**The payoff:**
+
+- `exists_halting_count` — **the cycle count, exposed.** `refinesNetwork_of_pc_zero`
+  discards the `k` that `emit_runs` produces because `run`'s `code.length` bound is
+  a software convenience; silicon has no such bound, so the `k` is the load-bearing
+  quantity. ≤ 120, halted, registers holding the network's output.
+- ⭐⭐ `cycles_sort` — **the C5 sentence, over C4 as a hypothesis**: given
+  `CycleRealisesStep`, `EntryLoaded`, and `FeedsProgram`, the eight data registers
+  read off the wires through `decQ` at **any** `N ≥ K` are a signed-sorted
+  permutation of the input. Everything right of the turnstile is already in the
+  kernel (`emit_runs`, `batcher8_sortsTo_word`).
+
+### Non-vacuity — required, and delivered on both hypotheses
+
+Precedent followed: `entryLoaded_encD_stOfFn` + `not_entryLoaded_offEndEnv`.
+
+- **`CycleRealisesStep` is satisfiable** — `cycleRealisesStep_cycOf`. `cycOf` is a
+  genuine one-cycle machine (decode the Q-leaves, read the instruction nets, step,
+  write the state back and present the next word), built on `envWith` /
+  `decQ_envWith` / `seenWord_envWith`, and generic in the next-word policy so it
+  smuggles in no fetch model. *It is the trivial witness and is offered as one:
+  it is `encD ∘ stepT ∘ decQ` and proves nothing about any netlist.*
+- **CONTROL 1 — the stalled cycle FAILS** (`not_cycleRealisesStep_id`). A netlist
+  whose flops do not change satisfies nothing.
+- 🔴 **CONTROL 2 — the wrong 32 wires FAIL** (`not_cycleRealisesStep_wordOf`). The
+  *same* machine `cycOf`, paired with `wordOf ins` instead of `seenWord ins`,
+  is refuted: `wordOf ins` reads nets `0…31`, which are register `x0`, which is
+  zero, which the decoder rejects — so the machine appears to NOP while the ISA
+  executes. This is `StateCodec.word_at_zero_is_register_x0`'s trap converted from
+  a warning into a refutation.
+- **`FeedsProgram` is satisfiable** — `feedsProgram_addi`, both halves, on a real
+  one-instruction program with a zero-filled tail; and `feedsProgram_addi_runs`
+  runs the whole machinery end to end: for **any** `N ≥ 1` the register holds the
+  answer, which is the shape a fixed-length silicon run has.
+- **CONTROL 3 — the quiet half is doing work** (`noisy_tail_overwrites`).
+
+### Attempt counts, against the split budget
+
+* **Statements: 1 attempt each** (budget 3–4). The one design decision that took
+  weighing was `FeedsProgram`'s shape: the alternative was to write the induction
+  against `run`'s 120-step bound and let the tail be vacuous, which would have
+  hidden the finding instead of stating it. The `∃ K ≤ 120` form was chosen
+  because the real count is data-dependent (48–90) and hardware runs cycles, not
+  `code.length`.
+* **Proofs: 1 attempt, 3 line-level repairs** (budget 2 before flagging; not
+  reached). All three were tactic mechanics, none a proof-design change:
+  `congr 1` on `BitVec.getLsbD` blew `maxRecDepth` (replaced by a `have` + `rw`);
+  a `show` did not see through a `def`-shaped stream (`unfold` instead);
+  `Option.noConfusion` mis-elaborated at `some x = none` (`absurd … (by simp)`).
+* No `sorry` at any point. No `native_decide`. `decide +kernel` is used for the
+  divergence, the two `CycleRealisesStep` controls, and the small concrete runs.
+* ⛔ **No landed statement was weakened, restated or repaired.** `EntryLoaded`,
+  `DeliversProgram`, `RefinesNetwork`, `SortsAllInputs`, `refinesNetwork_of_pc_zero`
+  are untouched; every result here is a new named declaration alongside them.
+
+### Build + audit
+
+`saltbuild.sh SaltWorks.Stack.Program` → **EXIT=0**. Full-tree `saltbuild.sh` →
+**EXIT=0**, 8632 jobs, **zero** `error:` and zero `warning:` lines. All 36 new
+declarations tick `#audit_axioms`, and were re-checked independently with
+`#print axioms` in `ScratchMATHC5.lean` (EXIT=0; deleted, not committed) —
+every one inside `[propext, Classical.choice, Quot.sound]`.
+
+### Left undetermined
+
+* **Whether `CycleRealisesStep` is true of any real netlist.** That is C4, and C4
+  cannot be stated until `compile`/`core` exist. The hypothesis is shown
+  satisfiable and discriminating; it is not discharged, and reading
+  `cycleRealisesStep_cycOf` as "C4 is done" would be exactly the entry-point
+  mistake S3(b) was caught making.
+* **The coherence fact linking the two halves of `feedsFst_of_deliversProgram`:**
+  that a tile's input map at cycle `k` really is the `k`-th iterate,
+  `env (runFor k code s) = cycles cyc k ins`. That is a statement about a netlist,
+  so it belongs with C4 and the tile assembly. It is named in the docstring and
+  is **not** proved here.
+* **Which tile-level mechanism meets `FeedsProgram`.** A zero-filled ROM
+  discharges both halves on paper (`decode_zero` + `runWords_get_of_undecodable`),
+  but no ROM exists in the tree and the tile-level decision (ROM vs hard-wired
+  words) is still nobody's, exactly as the `DeliversProgram` note already said.
+* **Whether three obligations is all of them.** `EntryLoaded`, `DeliversProgram`
+  and now `FeedsProgram`'s tail are what the traces found. Nothing here claims the
+  list is complete; C4's §4 lists three more that are C3's.

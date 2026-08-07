@@ -1311,6 +1311,468 @@ def DeliversProgram (env : St → SaltWorks.HDL.Env) : Prop :=
   ∀ (s : St) (w : Word), fetchWord s.pc = some w →
       SaltWorks.HDL.wordOf (fun k => env s (SaltWorks.HDL.instrNet k)) = w
 
+/-! ## ⭐ C5IND — THE CYCLE INDUCTION, over an abstract per-cycle hypothesis
+
+C4 is *"one cycle of the emitted netlist equals one `ISA.stepT`"*. **It cannot be
+stated against a real core today: `compile` and `core` do not exist**
+(`grep -rnE "^(def|theorem|abbrev) (core|compile)\b"` over `SaltWorks/` returns
+nothing). This section is the layer *above* C4 that does not depend on it: given
+one-cycle equivalence **as a hypothesis**, `n`-cycle equivalence, and then the
+whole program. When C4 lands it discharges `CycleRealisesStep` and the two halves
+meet with nothing left over.
+
+### ⛔ THE FINDING: `stepT`-ITERATION AND `runFor` ARE **NOT** THE SAME OBJECT
+
+This node's assignment asked whether the two lanes' notions of *"n steps"* line
+up. They do not, and the divergence is exactly one thing:
+
+```
+runFor  : fetch code s.pc = none  ⇒  HALT, and halting is a FIXED POINT
+runWords: every cycle steps.  stepT is TOTAL.  There is no halting word.
+```
+
+`runFor` gets its `pc` from a `List Instr` it is *handed*; `stepT` gets a word
+*presented on the instruction nets* and has, by the v1 ruling
+(`ISA.lean:636-676`), a defined NOP-advance on everything it cannot decode. So
+the netlist has **no halt state at all** — it steps forever. `runWords_eq_runFor`
+below is the agreement, and it is conditional: it holds for exactly as many
+cycles as the pc keeps naming a program word. `runFor_halts_where_runWords_runs_on`
+is the divergence, kernel-checked at `offEndState`, where `runFor` is the identity
+at *every* bound and ten cycles have moved the pc forty bytes further on.
+
+⚠️ **AND THE BOUNDARY IS NOT A CORNER CASE — IT IS THE COMMON CASE.**
+`step_count_data_dependent` already pins that this program finishes in **48 to 90**
+steps depending on the data, while `run` spends 120. So on a fixed-length silicon
+run the machine is *past the end of its own program* for between 30 and 72 cycles
+of every execution. `runFor`'s fixed point covers that silently; the tile does not.
+
+⇒ **A THIRD ENTRY-SIDE OBLIGATION, alongside `EntryLoaded` and
+`DeliversProgram`: what the tile presents on the instruction nets AFTER the
+program ends.** `DeliversProgram` is stated only where `fetchWord` returns
+`some`, so it is *silent* there — and a tile that presents live instructions past
+the end computes garbage while satisfying every obligation stated before today.
+`FeedsProgram`'s second conjunct is that obligation, named.
+
+**The good news, and it is a theorem rather than a hope:** the obligation is
+cheap. `runWords_get_of_undecodable` says an undecodable word touches no
+register at all, so *any* word the decoder rejects is a safe filler — and
+`decode_zero` says the all-zero word is one. ⇒ **a ROM that reads zero outside
+`[0, 480)` discharges it**, and `noisy_tail_overwrites` is the control showing a
+tile that instead re-presents a live instruction destroys the answer.
+
+### What "n cycles" is, on each side
+
+`cycles` (netlist) and `runWords` (ISA) are both left folds, so they compose
+index-by-index. Note the contrast their `_add` lemmas make with `runFor_add`
+above: `cycles_add` and `runWords_add` are unconditional **trivially**, because
+nothing halts; `runFor_add` is unconditional for a *substantive* reason, that
+halting is a fixed point. Same shape, different content — which is the divergence
+again, seen from the algebra. -/
+
+/-! ### The two `n`-step objects -/
+
+/-- **`n` ISA steps driven by a word stream**: at cycle `k` the core is handed
+`ws k`. This is the ISA-side meaning of *"n cycles"*, and it is **not** `runFor`
+— see the section note. Left fold, to match `cycles` below. -/
+def runWords (ws : Nat → Word) : Nat → St → St
+  | 0,     s => s
+  | n + 1, s => stepT (runWords ws n s) (ws n)
+
+theorem runWords_succ (ws : Nat → Word) (n : Nat) (s : St) :
+    runWords ws (n + 1) s = stepT (runWords ws n s) (ws n) := rfl
+
+/-- The stream splits with a shift, since the second leg's cycle `k` is the
+whole run's cycle `m + k`. Unconditional — but for the trivial reason that
+`stepT` never stops, not for `runFor_add`'s reason. -/
+theorem runWords_add (ws : Nat → Word) (m n : Nat) (s : St) :
+    runWords ws (m + n) s = runWords (fun k => ws (m + k)) n (runWords ws m s) := by
+  induction n with
+  | zero => rfl
+  | succ d ih =>
+      show stepT (runWords ws (m + d) s) (ws (m + d))
+          = runWords (fun k => ws (m + k)) (d + 1) (runWords ws m s)
+      rw [runWords_succ, ih]
+
+/-- **`n` netlist cycles** — the primary inputs after `n` applications of the
+one-cycle map. ⚠️ `SaltWorks.HDL.Env`, fully qualified: `SaltWorks.Codegen.Env`
+is `Nat → BitVec 32`, i.e. WORDS, and both are reducible `abbrev`s, so a
+wrong-but-well-typed composition would elaborate silently. -/
+def cycles (cyc : SaltWorks.HDL.Env → SaltWorks.HDL.Env) :
+    Nat → SaltWorks.HDL.Env → SaltWorks.HDL.Env
+  | 0,     ins => ins
+  | n + 1, ins => cyc (cycles cyc n ins)
+
+theorem cycles_succ (cyc : SaltWorks.HDL.Env → SaltWorks.HDL.Env) (n : Nat)
+    (ins : SaltWorks.HDL.Env) : cycles cyc (n + 1) ins = cyc (cycles cyc n ins) := rfl
+
+theorem cycles_add (cyc : SaltWorks.HDL.Env → SaltWorks.HDL.Env) (m n : Nat)
+    (ins : SaltWorks.HDL.Env) :
+    cycles cyc (m + n) ins = cycles cyc n (cycles cyc m ins) := by
+  induction n with
+  | zero => rfl
+  | succ d ih =>
+      show cyc (cycles cyc (m + d) ins) = cycles cyc (d + 1) (cycles cyc m ins)
+      rw [cycles_succ, ih]
+
+/-! ### The abstract per-cycle hypothesis -/
+
+/-- **The word the core sees this cycle**, read off the instruction nets.
+
+🔴 **Written `wordOf (fun k => ins (instrNet k))` and NOT `wordOf ins`.** The
+latter typechecks — `Env`, `Net` and `Nat` are all reducible — and reads bits
+`0 … 31`, **which is register `x0`**
+(`SaltWorks.HDL.word_at_zero_is_register_x0`). `not_cycleRealisesStep_wordOf`
+below is that trap as a refutation rather than a warning. -/
+def seenWord (ins : SaltWorks.HDL.Env) : Word :=
+  SaltWorks.HDL.wordOf (fun k => ins (SaltWorks.HDL.instrNet k))
+
+/-- ⭐ **THE ABSTRACT PER-CYCLE HYPOTHESIS — C4, as a `Prop` the layer above can
+consume today.** *One netlist cycle, read through the codec, is one `stepT` on
+the word the core saw.*
+
+Parameterised in **both** the cycle map and the word source, so it commits to no
+core, no netlist and no fetch path. C4 will instantiate `cyc` at the emitted
+netlist's one-cycle observation and `wordAt` at `seenWord`. -/
+def CycleRealisesStep (cyc : SaltWorks.HDL.Env → SaltWorks.HDL.Env)
+    (wordAt : SaltWorks.HDL.Env → Word) : Prop :=
+  ∀ ins, SaltWorks.HDL.decQ (cyc ins) = stepT (SaltWorks.HDL.decQ ins) (wordAt ins)
+
+/-- ⭐⭐ **THE DELIVERABLE — `n` CYCLES REALISE `n` STEPS.** One cycle of induction
+over the hypothesis; the stream the ISA side is driven by is read off the cycle
+sequence itself, which is what makes the statement need no fetch model. -/
+theorem cycles_realise_steps {cyc : SaltWorks.HDL.Env → SaltWorks.HDL.Env}
+    {wordAt : SaltWorks.HDL.Env → Word} (h : CycleRealisesStep cyc wordAt)
+    (n : Nat) (ins : SaltWorks.HDL.Env) :
+    SaltWorks.HDL.decQ (cycles cyc n ins)
+      = runWords (fun k => wordAt (cycles cyc k ins)) n (SaltWorks.HDL.decQ ins) := by
+  induction n with
+  | zero => rfl
+  | succ m ih => rw [cycles_succ, h (cycles cyc m ins), ih, runWords_succ]
+
+/-! ### ⭐ NON-VACUITY — the hypothesis is satisfiable, and the neighbours break
+
+Per this file's standing practice: a green `∀` over a hypothesis nothing can meet
+is not evidence. Below: a concrete cycle map that **meets** `CycleRealisesStep`,
+and two adjacent maps that **provably fail** it. -/
+
+/-- The wire configuration presenting state `s` on the Q-leaves and word `w` on
+the instruction nets — the shape a tile's input map has. -/
+def envWith (s : St) (w : Word) : SaltWorks.HDL.Env := fun j =>
+  if j < SaltWorks.HDL.stWidth then (SaltWorks.HDL.encD s).getD j false
+  else w.getLsbD (j - SaltWorks.HDL.instrBase)
+
+/-- `wordOf` reads 32 bits, so it only cares about 32 bits. -/
+theorem wordOf_congr {f g : Nat → Bool} (h : ∀ k, k < 32 → f k = g k) :
+    SaltWorks.HDL.wordOf f = SaltWorks.HDL.wordOf g := by
+  apply BitVec.eq_of_getLsbD_eq
+  intro k hk
+  rw [SaltWorks.HDL.wordOf_getLsbD _ _ hk, SaltWorks.HDL.wordOf_getLsbD _ _ hk, h k hk]
+
+/-- **`decQ` reads only the state nets** — `0 … 1055`, per `StateCodec`'s layout.
+This is the fact that makes the instruction nets free to carry anything at all
+without disturbing the decoded state, and it is why `instrBase = stWidth` was the
+right pin. -/
+theorem decQ_congr {a b : SaltWorks.HDL.Env}
+    (hab : ∀ j, j < SaltWorks.HDL.stWidth → a j = b j) :
+    SaltWorks.HDL.decQ a = SaltWorks.HDL.decQ b := by
+  simp only [SaltWorks.HDL.decQ, St.mk.injEq]
+  refine ⟨?_, wordOf_congr (fun k hk => hab (1024 + k) (by show 1024 + k < 1056; omega))⟩
+  apply Vector.ext
+  intro i hi
+  rw [Vector.getElem_ofFn, Vector.getElem_ofFn]
+  exact wordOf_congr (fun k hk => hab (32 * i + k) (by show 32 * i + k < 1056; omega))
+
+theorem decQ_envWith (s : St) (w : Word) : SaltWorks.HDL.decQ (envWith s w) = s := by
+  rw [decQ_congr (b := fun j => (SaltWorks.HDL.encD s).getD j false)
+        (fun j hj => by simp only [envWith, if_pos hj])]
+  exact SaltWorks.HDL.decQ_encD s
+
+theorem seenWord_envWith (s : St) (w : Word) : seenWord (envWith s w) = w := by
+  apply BitVec.eq_of_getLsbD_eq
+  intro k hk
+  rw [seenWord, SaltWorks.HDL.wordOf_getLsbD _ _ hk]
+  show (if SaltWorks.HDL.instrNet k < SaltWorks.HDL.stWidth
+        then (SaltWorks.HDL.encD s).getD (SaltWorks.HDL.instrNet k) false
+        else w.getLsbD (SaltWorks.HDL.instrNet k - SaltWorks.HDL.instrBase))
+      = w.getLsbD k
+  have hsub : SaltWorks.HDL.instrNet k - SaltWorks.HDL.instrBase = k := by
+    show 1056 + k - 1056 = k
+    omega
+  rw [if_neg (by show ¬ (1056 + k < 1056); omega), hsub]
+
+/-- **A one-cycle machine**: decode the Q-leaves, read the instruction nets,
+step, and present the new state together with whatever word comes next.
+
+*This is the trivial witness and it is offered as one* — it is `encD ∘ stepT ∘
+decQ` and it proves nothing about any netlist. Its job is to show
+`CycleRealisesStep` is a satisfiable constraint rather than a shape, and it is
+generic in the next-word policy so it does not smuggle a fetch model in. -/
+def cycOf (nextW : St → Word) (ins : SaltWorks.HDL.Env) : SaltWorks.HDL.Env :=
+  envWith (stepT (SaltWorks.HDL.decQ ins) (seenWord ins)) (nextW (SaltWorks.HDL.decQ ins))
+
+theorem decQ_cycOf (nextW : St → Word) (ins : SaltWorks.HDL.Env) :
+    SaltWorks.HDL.decQ (cycOf nextW ins)
+      = stepT (SaltWorks.HDL.decQ ins) (seenWord ins) := decQ_envWith _ _
+
+/-- ⭐ **SATISFIABLE**, for every next-word policy. -/
+theorem cycleRealisesStep_cycOf (nextW : St → Word) :
+    CycleRealisesStep (cycOf nextW) seenWord := fun ins => decQ_cycOf nextW ins
+
+/-- ⛔ **CONTROL 1 — A STALLED CYCLE FAILS.** A netlist whose flops do not change
+satisfies nothing: at a wire configuration holding `St.init` with `addi x1, x0, 1`
+on the instruction nets, the ISA writes `x1 = 1` and the stall does not. ⇒ the
+hypothesis has content, and `cycles_realise_steps` is not true of every `cyc`. -/
+theorem not_cycleRealisesStep_id : ¬ CycleRealisesStep id seenWord := by
+  intro h
+  have hh := h (envWith St.init (encode (Instr.ADDI 1 0 1)))
+  rw [id_eq, decQ_envWith, seenWord_envWith, stepT_encode] at hh
+  revert hh
+  decide +kernel
+
+/-- 🔴 **CONTROL 2 — THE WRONG 32 WIRES, AS A REFUTATION.** The *same* machine
+`cycOf`, paired with `wordOf ins` instead of `seenWord ins`, fails — because
+`wordOf ins` reads nets `0 … 31`, which are register `x0`, which is zero, which
+the decoder rejects, so the machine appears to NOP while the ISA executes.
+
+*`wordOf ins` typechecks and Lean says nothing.* This theorem is what says
+something. -/
+theorem not_cycleRealisesStep_wordOf (nextW : St → Word) :
+    ¬ CycleRealisesStep (cycOf nextW) (fun ins => SaltWorks.HDL.wordOf ins) := by
+  intro h
+  have hh := h (envWith St.init (encode (Instr.ADDI 1 0 1)))
+  rw [decQ_cycOf, decQ_envWith, seenWord_envWith, stepT_encode] at hh
+  revert hh
+  decide +kernel
+
+/-! ### ⛔ AGREEMENT WITH `runFor`, AND THE DIVERGENCE -/
+
+/-- One tick, at a known fetch. -/
+theorem runFor_one_of_fetch {code : List Instr} {t : St} {i : Instr}
+    (h : fetch code t.pc = some i) : runFor 1 code t = step t i :=
+  runFor_step 0 h
+
+/-- The `n`-th tick of a run, at a known fetch — `runFor_step` seen from the
+other end, which is the end a left fold needs. -/
+theorem runFor_succ_of_fetch {code : List Instr} {s : St} {i : Instr} (n : Nat)
+    (h : fetch code (runFor n code s).pc = some i) :
+    runFor (n + 1) code s = step (runFor n code s) i := by
+  rw [runFor_add n 1, runFor_one_of_fetch h]
+
+/-- ⭐ **THE AGREEMENT, AND ITS EXACT PRICE.** `runWords` and `runFor` are the
+same for `n` cycles **iff the stream is the program's own fetch for all `n` of
+them** — every cycle must both find an instruction and be handed its encoding.
+There is no version of this without the `k < n` hypothesis: the moment the fetch
+returns `none`, `runFor` stops and `runWords` does not. -/
+theorem runWords_eq_runFor {code : List Instr} {ws : Nat → Word} {s : St} (n : Nat) :
+    (∀ k, k < n → ∃ i, fetch code (runFor k code s).pc = some i ∧ ws k = encode i) →
+    runWords ws n s = runFor n code s := by
+  induction n with
+  | zero => intro _; rfl
+  | succ m ih =>
+      intro h
+      obtain ⟨i, hf, hw⟩ := h m (by omega)
+      rw [runWords_succ, ih (fun k hk => h k (by omega)), hw, stepT_encode,
+        runFor_succ_of_fetch m hf]
+
+/-- ⭐ **AND THE OVERRUN IS HARMLESS, IF THE WORDS ARE UNDECODABLE.** `stepT` on a
+word the decoder rejects advances the pc and touches no register, so a tile that
+keeps cycling past the end of its program still holds the answer — *in the
+registers*, which is where the observation is taken. This is the theorem that
+makes the third obligation cheap rather than a redesign. -/
+theorem runWords_get_of_undecodable {ws : Nat → Word} {s : St} (n : Nat) (r : Fin 32) :
+    (∀ k, k < n → decode (ws k) = none) → (runWords ws n s).get r = s.get r := by
+  induction n with
+  | zero => intro _; rfl
+  | succ m ih =>
+      intro h
+      rw [runWords_succ, stepT_undecodable _ _ (h m (by omega)), next_get_eq]
+      exact ih (fun k hk => h k (by omega))
+
+/-- ⭐ **THE INSTRUCTION-STREAM CONTRACT, IN TWO HALVES — and the second half is
+the one nobody had written down.**
+
+1. *while the program runs* (`k < K`): the nets carry the fetched instruction —
+   this is `DeliversProgram`, indexed by cycle rather than by state;
+2. *afterwards* (`K ≤ k`): the nets carry something the decoder **rejects**.
+
+⚠️ **Half 2 is not bookkeeping.** `run` is total and `runFor` halts, so the
+software model never had to say what happens after the last instruction. The tile
+has no halt, so it must be told. `noisy_tail_overwrites` below is what half 2
+buys. -/
+def FeedsProgram (code : List Instr) (ws : Nat → Word) (s : St) (K : Nat) : Prop :=
+  (∀ k, k < K → ∃ i, fetch code (runFor k code s).pc = some i ∧ ws k = encode i)
+    ∧ ∀ k, K ≤ k → decode (ws k) = none
+
+/-- ⭐ **THE TWO NOTIONS AGREE AT THE REGISTERS, AT ANY SUFFICIENT CYCLE COUNT.**
+Given the stream contract, running the wires for **any** `N ≥ K` reads the same
+registers as running the software model for `K`. The pc does *not* agree — it has
+run away — and the statement says so by being about `St.get` only. -/
+theorem runWords_get_eq_runFor {code : List Instr} {ws : Nat → Word} {s : St}
+    {K : Nat} (hfeed : FeedsProgram code ws s K) {N : Nat} (hN : K ≤ N) (r : Fin 32) :
+    (runWords ws N s).get r = (runFor K code s).get r := by
+  obtain ⟨d, rfl⟩ := Nat.exists_eq_add_of_le hN
+  rw [runWords_add, runWords_eq_runFor K hfeed.1]
+  exact runWords_get_of_undecodable d r (fun k _ => hfeed.2 (K + k) (by omega))
+
+/-- **The all-zero word is undecodable** — so a ROM reading zero off the end of
+the program discharges `FeedsProgram`'s second half. The cheapest possible
+answer to the obligation the section note names. -/
+theorem decode_zero : decode 0 = none := by decide +kernel
+
+/-- ⛔ **THE DIVERGENCE, KERNEL-CHECKED.** At `offEndState` — the pc off the end
+of the program, which is where *every* completed run of this program sits —
+`runFor` is the identity at **every** bound, and ten cycles of the wires have
+moved the pc from 480 to 520. *These are not two views of one object; they are
+two different functions that agree on a region.* -/
+theorem runFor_halts_where_runWords_runs_on :
+    (∀ n, runFor n batcherSort offEndState = offEndState)
+      ∧ (runWords (fun _ => 0) 10 offEndState).pc = 520 := by
+  refine ⟨fun n => runFor_of_fetch_none (by decide +kernel) n, by decide +kernel⟩
+
+/-! ### The bridge to `DeliversProgram` -/
+
+/-- Every word this program's fetch produces is an `encode` — because
+`batcherSortWords` is `batcherSort.map encode` and nothing else. The step that
+turns `DeliversProgram`'s conclusion into the shape `runWords_eq_runFor` wants. -/
+theorem fetchWord_eq_encode {pc : BitVec 32} {w : Word} (h : fetchWord pc = some w) :
+    ∃ i, fetch batcherSort pc = some i ∧ w = encode i := by
+  unfold fetchWord at h
+  by_cases ha : pc.toNat % 4 = 0
+  · rw [if_pos ha, batcherSortWords, List.getElem?_map] at h
+    cases hb : batcherSort[pc.toNat / 4]? with
+    | none => rw [hb] at h; exact absurd h (by simp)
+    | some i =>
+        rw [hb] at h
+        exact ⟨i, by unfold fetch; rw [if_pos ha, hb], by simpa using h.symm⟩
+  · rw [if_neg ha] at h; exact absurd h (by simp)
+
+/-- ⭐ **`DeliversProgram` IS `FeedsProgram`'s FIRST HALF** — for a tile whose
+input map is a function of the machine state and whose pc stays inside the
+program for `K` cycles. So the obligation already stated is exactly the one the
+induction consumes, and the only thing this node adds to the demand list is the
+second half.
+
+⚠️ **What is still owed and is NOT here:** the coherence fact that the tile's
+input map at cycle `k` really is the `k`-th iterate — `env (runFor k code s) =
+cycles cyc k ins`. That is a statement about a netlist, so it belongs with C4 and
+the tile assembly, not here. -/
+theorem feedsFst_of_deliversProgram {env : St → SaltWorks.HDL.Env}
+    (hdel : DeliversProgram env) (s : St) (K : Nat)
+    (hin : ∀ k, k < K → (fetchWord (runFor k batcherSort s).pc).isSome) :
+    ∀ k, k < K → ∃ i, fetch batcherSort (runFor k batcherSort s).pc = some i
+      ∧ seenWord (env (runFor k batcherSort s)) = encode i := by
+  intro k hk
+  obtain ⟨w, hw⟩ := Option.isSome_iff_exists.mp (hin k hk)
+  obtain ⟨i, hfetch, hwe⟩ := fetchWord_eq_encode hw
+  exact ⟨i, hfetch, (hdel _ w hw).trans hwe⟩
+
+/-! ### ⭐ NON-VACUITY OF `FeedsProgram` — and the control on its second half -/
+
+/-- A one-instruction program, so the stream contract can be met concretely
+rather than argued about. -/
+def addiOnly : List Instr := [Instr.ADDI 1 0 1]
+
+/-- Its stream: the instruction on cycle 0, zeros thereafter — the zero-filled
+ROM, written out. -/
+def addiStream : Nat → Word := fun k => if k = 0 then encode (Instr.ADDI 1 0 1) else 0
+
+/-- ⭐ **`FeedsProgram` IS SATISFIABLE**, both halves, on a real program. -/
+theorem feedsProgram_addi : FeedsProgram addiOnly addiStream St.init 1 := by
+  refine ⟨fun k hk => ?_, fun k hk => ?_⟩
+  · have hk0 : k = 0 := by omega
+    subst hk0
+    exact ⟨Instr.ADDI 1 0 1, by decide +kernel, rfl⟩
+  · unfold addiStream
+    rw [if_neg (by omega)]
+    exact decode_zero
+
+/-- ⭐ **AND THE WHOLE MACHINERY RUNS ON IT: the answer is stable at every
+sufficient cycle count.** For *any* `N ≥ 1` the register holds `1` — one cycle of
+real work and `N - 1` cycles of harmless overrun. This is the shape a fixed-length
+silicon run has, exercised end to end through `runWords_get_eq_runFor`. -/
+theorem feedsProgram_addi_runs (N : Nat) (hN : 1 ≤ N) :
+    (runWords addiStream N St.init).get 1 = 1 := by
+  rw [runWords_get_eq_runFor feedsProgram_addi hN 1]
+  decide +kernel
+
+/-- ⛔ **AND THE SECOND HALF IS DOING WORK.** Replace the quiet tail with a live
+instruction and the answer is overwritten a little more on every cycle: `1` after
+one cycle, `4` after four. So *"run it a bit longer, it can't hurt"* is false on
+this machine, and `FeedsProgram`'s second conjunct is what rules it out. -/
+theorem noisy_tail_overwrites :
+    ¬ (∀ k, 1 ≤ k → decode ((fun _ : Nat => encode (Instr.ADDI 1 1 1)) k) = none)
+      ∧ (runWords (fun _ => encode (Instr.ADDI 1 1 1)) 1 St.init).get 1 = 1
+      ∧ (runWords (fun _ => encode (Instr.ADDI 1 1 1)) 4 St.init).get 1 = 4 := by
+  refine ⟨fun h => ?_, by decide +kernel, by decide +kernel⟩
+  have := h 1 (by omega)
+  rw [decode_encode] at this
+  exact absurd this (by simp)
+
+/-! ### ⭐⭐ THE PAYOFF — given C4, the tile sorts -/
+
+/-- **The cycle count, exposed.** `refinesNetwork_of_pc_zero` discards the `k`
+that `emit_runs` produces, because `run`'s `code.length` bound is a software
+convenience. Silicon has no such bound — it runs for a number of cycles — so the
+`k` is the load-bearing quantity here and this states it: **at most 120 cycles,
+after which the machine has halted and the registers hold the network's output.**
+(`step_count_data_dependent`: the real number is between 48 and 90, and depends
+on the data.) -/
+theorem exists_halting_count (s : St) (hpc : s.pc = 0) :
+    ∃ K, K ≤ 120 ∧ fetch batcherSort (runFor K batcherSort s).pc = none ∧
+      ∀ i : Fin 8, (runFor K batcherSort s).get (dataReg i)
+        = runNetW batcher8 (fun j => s.get (dataReg j)) i := by
+  have hpc0 : s.pc.toNat = 4 * 0 := by rw [hpc]; rfl
+  have hbnd : 4 * 0 + 20 * batcher8.length < 2 ^ 32 := by rw [batcher8_length]; omega
+  obtain ⟨k, hk, hkpc, hkreg⟩ :=
+    emit_runs batcherSort batcher8 0 s batcherSort_embeds hpc0 hbnd
+  rw [batcher8_length] at hk hkpc
+  refine ⟨k, by omega, ?_, hkreg⟩
+  unfold fetch
+  rw [hkpc, if_pos (by omega), show (4 * 0 + 20 * 24) / 4 = 120 by omega]
+  exact List.getElem?_eq_none (by rw [batcherSort_length])
+
+/-- ⭐⭐ **THE C5 SENTENCE, over C4 as a hypothesis.** *Given one-cycle
+equivalence, a netlist reset into the entry state and fed the program for `K`
+cycles and quiet words after, the eight data registers — read off the wires
+through `decQ` at ANY cycle count `N ≥ K` — are a signed-sorted permutation of
+the input.*
+
+Everything on the right of the turnstile is already in the kernel: `emit_runs`
+supplies `K`, `batcher8_sortsTo_word` supplies the sort. What is hypothesised is
+exactly three things, and each is owned by a named lane:
+
+* `CycleRealisesStep` — **C4**, the compiler lane. Satisfiable
+  (`cycleRealisesStep_cycOf`), discriminating (`not_cycleRealisesStep_id`,
+  `not_cycleRealisesStep_wordOf`).
+* `EntryLoaded` — the reset, the silicon lane. Satisfiable
+  (`entryLoaded_encD_stOfFn`), discriminating (`not_entryLoaded_offEndEnv`).
+* `FeedsProgram` — the instruction path, the tile lane. Satisfiable
+  (`feedsProgram_addi`), discriminating (`noisy_tail_overwrites`); its first half
+  is `DeliversProgram` (`feedsFst_of_deliversProgram`) and its second half is new
+  today.
+
+Nothing else is assumed, and no statement above this one was weakened to get
+here. -/
+theorem cycles_sort {cyc : SaltWorks.HDL.Env → SaltWorks.HDL.Env}
+    {wordAt : SaltWorks.HDL.Env → Word} (h : CycleRealisesStep cyc wordAt)
+    {ins : SaltWorks.HDL.Env} {v : Fin 8 → Word} (hentry : EntryLoaded ins v) :
+    ∃ K, K ≤ 120 ∧ ∀ N, K ≤ N →
+      FeedsProgram batcherSort (fun k => wordAt (cycles cyc k ins))
+        (SaltWorks.HDL.decQ ins) K →
+      SortsTo (List.ofFn v)
+        (dataRegs.map (SaltWorks.HDL.decQ (cycles cyc N ins)).get) := by
+  obtain ⟨hpc, hreg⟩ := hentry
+  obtain ⟨K, hK, _, hregs⟩ := exists_halting_count (SaltWorks.HDL.decQ ins) hpc
+  refine ⟨K, hK, fun N hN hfeed => ?_⟩
+  have hv : (fun j => (SaltWorks.HDL.decQ ins).get (dataReg j)) = v := funext hreg
+  have key : (fun i : Fin 8 => (SaltWorks.HDL.decQ (cycles cyc N ins)).get (dataReg i))
+      = runNetW batcher8 v := by
+    funext i
+    rw [cycles_realise_steps h N ins, runWords_get_eq_runFor hfeed hN (dataReg i),
+      hregs i, hv]
+  rw [dataRegs_map_get, key]
+  exact batcher8_sortsTo_word v
+
 /-! ## Axiom audit -/
 
 open Salt.Tactic
@@ -1349,5 +1811,17 @@ open Salt.Tactic
 #audit_axioms EntryLoaded sorts_of_entryLoaded entryLoaded_encD_stOfFn
 #audit_axioms offEndEnv not_entryLoaded_offEndEnv offEndEnv_does_not_sort
 #audit_axioms fetchWord fetchWord_decodes DeliversProgram
+#audit_axioms runWords runWords_succ runWords_add
+#audit_axioms cycles cycles_succ cycles_add
+#audit_axioms seenWord CycleRealisesStep cycles_realise_steps
+#audit_axioms envWith wordOf_congr decQ_congr decQ_envWith seenWord_envWith
+#audit_axioms cycOf decQ_cycOf cycleRealisesStep_cycOf
+#audit_axioms not_cycleRealisesStep_id not_cycleRealisesStep_wordOf
+#audit_axioms runFor_one_of_fetch runFor_succ_of_fetch runWords_eq_runFor
+#audit_axioms runWords_get_of_undecodable FeedsProgram runWords_get_eq_runFor
+#audit_axioms decode_zero runFor_halts_where_runWords_runs_on
+#audit_axioms fetchWord_eq_encode feedsFst_of_deliversProgram
+#audit_axioms addiOnly addiStream feedsProgram_addi feedsProgram_addi_runs
+#audit_axioms noisy_tail_overwrites exists_halting_count cycles_sort
 
 end SaltWorks.Stack.Program
