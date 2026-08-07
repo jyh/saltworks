@@ -418,6 +418,37 @@ from different directions:
 
 ---
 
+## DAY 2 (2026-08-07) — four campaign-level facts, each with its verification status
+
+**Recorded by the EVIDENCE seat as the day ran.** The status column is the
+point: this seat verified some of these with its own instruments and could
+not verify others, and the difference is preserved rather than flattened.
+
+| Fact | Status |
+|---|---|
+| **THE BANYAN IS SUBMITTED** — `tt_um_saltworks_banyan` in the TTSKY26c queue, DRC zero at two engines, precheck 15/15, tile 2×2 | ⚠️ **ATTESTED, not measured.** No seat can reach the TT app; this is the Captain's act relayed by the maestro. **This seat verified the gates** — GDS green all four jobs, replicated at two shas, three reds beneath as control — **and cannot verify the click.** ⏳ **Submitted ≠ accepted**; the verb stays *"submitted to a shuttle"* until the 2026-09-07 close |
+| **C3 FINALIZED — structural gate-level emission ratified, fallback (B) retired unused** | ✅ **Decision sound.** ⚠️ **Headline citation corrected on this seat's catch:** `100%` is *boundary survival*, `60.1%` is *cone coverage* — different quantities. Like-for-like the boundary comparison is **100% vs 66.7%**, which is what the ruling actually rests on. **The structural arm's cone-width census is still owed** and is the number C4 needs |
+| **C2 WITNESSED — `step` agrees with Spike AND Sail on 120 kernel-checked vectors** | ✅ **VERIFIED AT THE BYTES by this seat.** Spike 1.1.1-dev at a pinned commit, built from source; Sail 0.20.2 + sail-riscv at a second pinned commit; `120 agree · 0 disagree · 0 skipped`. ⭐ **R2 checked independently: `SaltWorks.ISA.encode` appears in the generator four times, all four in the comment saying it is unused** — *the common ancestor was removed from the path rather than argued about* |
+| **THE IMPORT CLOSURE REACHED ZERO** — 38 tracked, 38 in closure, 0 audit sites outside the default build | ✅ **VERIFIED by this seat's own instrument.** First clean run since `import-closure.py` was written; it had flagged `Renumber`, `ISA`, `CodegenSpec` and `Vectors` as each appeared. *"The default build covers all three legs" became safe to write at 10:24 and was not safe to write at any earlier point today* |
+
+⭐ **AND THE DAY'S BEST HOUR WAS A COLLISION.** At **10:41** the compiler
+seat landed an element ordering *active before idle unconditionally*; at
+**10:42**, not having seen it, this seat refuted BB-1's headline by reading
+`SelfRouting.lean:103` and finding that `StrictMonoOn dest (Set.Iio n)` is
+**two conjuncts wearing one name** — sorted **and** concentrated — so a
+sorter discharges one. **One minute apart, opposite ends, same law.** And
+silicon derived the identical *"idle sorts last"* convention from the fabric
+side without coordinating.
+
+**The certificate is what makes it more than agreement:**
+`ce_rejects_idle_sorts_low = false` is a **kernel refutation of the ordering
+that sorts correctly and destroys concentration.** *Both orderings sort.
+Only one concentrates. The difference is now a theorem rather than a
+convention* — the D4 mutation-control discipline applied to a design choice
+before the design existed.
+
+---
+
 ## TWO FLEET LAWS RATIFIED ON DAY 1 EVENING, both from the same root
 
 **1. THE INSTRUMENT LAW** *(maestro, 16:52, banked in permanent memory)*:
