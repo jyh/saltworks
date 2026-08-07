@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Jason Hickey, Claude
 -/
 import SaltWorks.HDL.RegWrite
+import SaltWorks.HDL.Compose
 
 /-!
 # C4 · `core` — THE REGISTER-FILE NEXT-STATE ARRAY
@@ -173,12 +174,53 @@ nothing should cite them as if they were.* -/
 -- 32 we + 32 result + 1024 current.  MEASURED: 1088.
 #eval regNext.nIn
 
+
+/-! ## ⭐ WELL-FORMEDNESS — AND THE O(n²) WALL, MEASURED ON BOTH SIDES
+
+**This circuit is the one the campaign recorded as the wall.** `Circ.wf`'s
+`nodupB` is O(n²), and this seat's 8/7 note reads *"a core-sized `Circ` CANNOT be
+certified as one circuit — `EXIT=134` at 3,104 gates."* ⇒ ***That was a citation.
+Here is the differential, run today on this machine at the module build's own
+budget:***
+
+```
+route                                    budget      result
+decide +kernel  on  wf   (direct)        -M 20000    EXIT=134, memory_exception
+                                                     "excessive memory
+                                                     consumption at 'interpreter'"
+                                                     after 76 s
+Circ.wf_of_ssa  on  ssa  (structural)    -M 20000    PROVED, ~5 s
+```
+
+**Same circuit, same claim, same machine, same cap. One route dies and the other
+closes.** *The first run was at `-M 6000` and also died; it was re-run at 20000
+because a wall measured at MY OWN cap would be the adjacent object rather than the
+wall.*
+
+🔑 **WHY THE STRUCTURAL ROUTE IS CHEAP: `ssa` is a LINEAR scan** — gate `i`'s
+output must be exactly `base + i` and its fanin below it — **whereas `wf` asks
+`nodupB`, which compares every output against every other.** *The density that
+`ssa` demands is precisely what makes the distinctness `wf` demands free, so the
+quadratic never has to be walked.*
+
+📌 **Note the failure site: `at 'interpreter'`, not `(kernel)`.** *The
+`hdl-cap-rule-M2` note records the two diagnostic texts; this is the elaboration
+site rather than the kernel one, and the rule's own advice applies — classify by
+the DIFFERENTIAL, not by the string.* -/
+
+theorem regNext_ssa : regNext.ssa = true := by decide +kernel
+
+/-- **`wf` for a circuit `decide` cannot reach.** -/
+theorem regNext_wf : regNext.wf = true := Circ.wf_of_ssa regNext_ssa
+
 #audit_axioms rnWe
 #audit_axioms rnCur
 #audit_axioms rnIn
 #audit_axioms rnMux
 #audit_axioms regNextN
 #audit_axioms regNext
+#audit_axioms regNext_ssa
+#audit_axioms regNext_wf
 #audit_axioms rnRun
 #audit_axioms rnSpec
 #audit_axioms regNext4_correct_on_all_enables
