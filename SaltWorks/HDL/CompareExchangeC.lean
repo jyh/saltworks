@@ -259,9 +259,83 @@ theorem ceCIdleLow_is_one_gate_from_ceC :
       ∧ (ceCcoreIdleLow.gates.zip ceCcore.gates).countP (fun p => p.1 != p.2) = 1 := by
   decide +kernel
 
+/-! ## 🔗 OBLIGATION (a) — THE KEY THE ELEMENT ORDERS BY
+
+**Silicon has now built the abstract side of TWO seams without writing either
+seam** (`composed_switch_of_seam` 15:04, `cSorted_concentrates` 15:41) and said
+why: *"the fact that the hardware implements the order is a MEASUREMENT, and it
+is not mine to assert."* ⇒ **This is that half's vocabulary, and it is mine.**
+
+📐 **AND IT EXPLAINS THE 14:43 CONFUSION THAT COST TWO RETRACTIONS:**
+
+```
+FULL LOAD     every active bit is 1, the first component is CONSTANT, and the key
+              DEGENERATES to plain ℕ on destinations.  That is why silicon's
+              `v hw : Fin 8 → ℕ` seam needs no product order.
+PARTIAL LOAD  the first component varies and the key does NOT degenerate --
+              cKey_partial_load_differs_from_dest is a witness where key order
+              and destination order DISAGREE.
+```
+
+⚠️ **SCOPE, STATED SO THIS IS NOT READ AS THE SEAM: what follows defines the key
+and certifies ITS OWN order properties. It does NOT prove that `ceC` REALISES
+it** — that is obligation (b), the per-element latch theorem decomposed in
+`BatcherNetC.lean`, and it remains OPEN. *`ceC_frame_active_beats_idle` and
+`ceC_rejects_idle_sorts_low` are behavioural evidence that the element orders
+this way; they are four fixtures, not a theorem.*
+-/
+
+/-- The key a convention-C line carries: **active before idle, then destination
+ascending.** First component is `!active`, so plain lexicographic order on the
+pair IS the sorter's order — `false < true` puts ACTIVE first with no special
+case. -/
+def cKey (active : Bool) (dest : Nat) : Bool × Nat := (!active, dest)
+
+/-- Lexicographic `≤` on the key, as a decidable `Bool`. -/
+def cKeyLE (x y : Bool × Nat) : Bool :=
+  (!x.1 && y.1) || (x.1 == y.1 && decide (x.2 ≤ y.2))
+
+/-- ⭐ **ACTIVE SORTS BEFORE IDLE, unconditionally and before any address bit** —
+over every destination pair the 3-bit fabric can carry. -/
+theorem cKey_active_beats_idle :
+    ((List.range 8).all fun d => (List.range 8).all fun e =>
+      cKeyLE (cKey true d) (cKey false e)) = true := by decide +kernel
+
+/-- …and idle never beats active, whatever the addresses. -/
+theorem cKey_idle_never_beats_active :
+    ((List.range 8).all fun d => (List.range 8).all fun e =>
+      cKeyLE (cKey false d) (cKey true e) == false) = true := by decide +kernel
+
+/-- Between two ACTIVE lines the key is destination order. -/
+theorem cKey_actives_compare_by_dest :
+    ((List.range 8).all fun d => (List.range 8).all fun e =>
+      cKeyLE (cKey true d) (cKey true e) == decide (d ≤ e)) = true := by decide +kernel
+
+/-- ⭐ **AT FULL LOAD THE FIRST COMPONENT IS CONSTANT, so the key DEGENERATES to
+plain `ℕ` on destinations** — which is why silicon's `v : Fin 8 → ℕ` seam needs no
+product order. -/
+theorem cKey_degenerates_at_full_load :
+    ((List.range 8).all fun d => (List.range 8).all fun e =>
+      cKeyLE (cKey true d) (cKey true e) == decide (d ≤ e)) = true
+      ∧ (cKey true 3).1 = (cKey true 5).1 := by decide +kernel
+
+/-- ⛔ **AND IT DOES NOT DEGENERATE AT PARTIAL LOAD** — a witness where the key
+order and plain destination order DISAGREE: an idle line bound for 0 against an
+active line bound for 7. *This is why the product order had to go back after I
+withdrew it at 14:43.* -/
+theorem cKey_partial_load_differs_from_dest :
+    cKeyLE (cKey false 0) (cKey true 7) = false ∧ decide ((0:Nat) ≤ 7) = true := by
+  decide +kernel
+
 #audit_axioms cFrame
 #audit_axioms cFrame_matches_adjudicated_bytes
 #audit_axioms cFrame_idle_is_silent
+#audit_axioms cKey cKeyLE
+#audit_axioms cKey_active_beats_idle
+#audit_axioms cKey_idle_never_beats_active
+#audit_axioms cKey_actives_compare_by_dest
+#audit_axioms cKey_degenerates_at_full_load
+#audit_axioms cKey_partial_load_differs_from_dest
 #audit_axioms ceCSpecStep
 #audit_axioms ceC_step_eq
 #audit_axioms ceC_frame_swaps_when_out_of_order
