@@ -1066,3 +1066,170 @@ stWidth` survives assembly — `Compose.lean`'s `inst_sem` is `#check`ed and
 **not proved**, so the input map is posited on top of an unproved combinator.
 And whether the memory interface (C1 names one; `stWidth` covers regfile+PC
 only) later changes `encD` and hence this statement.
+
+## STACK-S2 — THE PROGRAM: an agent-written bitonic sort in Slice A
+**2026-08-07 · Opus executor · `SaltWorks/Stack/Program.lean` (new module)**
+**`import owed: SaltWorks.Stack.Program`**
+
+### ⭐ AUTHORSHIP RECORD
+
+The campaign's claim is *"unverified agent → verified code → verified compiler →
+verified silicon"*. The first link is a claim about **provenance**, so the
+provenance is a deliverable. Recorded here and, at greater length, in the
+module's own docstring — where it will stay attached to the code.
+
+**Every line of `SaltWorks/Stack/Program.lean` was written by an AI agent**
+(Claude, Opus tier, one session, 2026-08-07) working from a written brief. The
+split between hand-written and derived:
+
+- **BY HAND:** `cmpEx`, the five-instruction compare-exchange — the 3-XOR swap,
+  the register allocation (`x1`–`x8` data, `x9` scratch, `x0` only ever the
+  `BEQ` comparand), and the branch immediate. Also the module's prose.
+- **DERIVED, NOT TRANSCRIBED:** the 24-comparator order. `batcherSort` is
+  `batcher8.flatMap cmpEx` — emitted from *the same `SaltWorks.Stack.batcher8`
+  literal* `batcher8_sorts_bool` proves sorts. **No comparator was typed by
+  hand**, so the abstract-network ↔ program correspondence is structural, not a
+  coincidence S3(b) must re-establish. `emit` is generic in the network.
+- **NEITHER:** every numeric claim is kernel-checked, not agent-asserted.
+
+### ⭐ WHAT THE AGENT GOT WRONG
+
+**1. The branch immediate — the brief's number, and the agent's first draft.**
+The brief specified `BEQ t, x0, +3`, *"skipping 3 instructions (12 bytes) needs
+`imm = 6`"*. **Wrong.** `step`'s `BEQ` adds `bOffset imm = 2 * imm` to the pc
+**of the branch itself**, so skipping the three `XOR`s needs `2 * imm = 16`,
+i.e. **`imm = 8`**. `imm = 6` lands *on the third `XOR`*, which executes alone
+and corrupts the pair. Caught by computing it from `step` rather than accepting
+it — which the brief explicitly asked for (*"do not trust my arithmetic"*).
+
+Both halves are committed as certificates rather than deleted:
+`skip_immediate_is_eight`, `skip_immediate_six_is_wrong`, and
+`offset_six_does_not_sort` — the `imm = 6` program **builds clean, runs to
+completion, returns an ordinary state, and does not sort.** `run` is total, so
+nothing but a certificate would ever have reported it.
+
+**2. A near-miss of the agent's own making — the forwardness check was almost
+vacuous.** The first draft of `branchIsForward` tested `0 < imm.toNat`. A
+backward immediate has a large *positive* `toNat` (`-2` is `4094`), so that
+check would have **passed every backward branch**. This is S1's signed/unsigned
+trap recurring one layer up, in the file whose job is to prevent it. Pinned as
+`forwardness_must_be_signed`; the shipped check reads `imm.toInt`.
+
+**3. Two tooling misreadings**, no consequence: `fin_cases` is not in scope in
+this import set (a redundant per-index lemma was dropped in favour of the
+list-level one), and `decide` cannot close a `List.ofFn` goal containing a free
+variable (`List.ofFn_succ` can).
+
+### What landed
+
+**120 instructions = 5 × 24**, and `emit_length` proves the 5 while
+`batcher8_length` supplies the 24 — the count is a *fact about the network*, not
+a number anyone counted. Assembled by `encode` to `batcherSortWords : List
+(BitVec 32)`, 120 words; `decode_batcherSortWords` inverts the whole list
+structurally from `decode_encode` (no 120-way enumeration).
+
+**⭐ THE ONE THEOREM THAT DOES REAL WORK — the S3(b) reduction.**
+`sortsAllInputs_of_refinesNetwork : RefinesNetwork → SortsAllInputs`, **proved**,
+by composing with math's landed `batcher8_sortsTo_word`. Consequence: **S3(b)
+never has to argue about `SortedW` or `PermW` at all.** It inherits both and is
+left with a pure refinement question — *do 120 instructions under `step` compute
+what `runNetW batcher8` computes?* The two lanes meet at the same network literal
+precisely because the program was emitted from it. `SortsAllInputs` and
+`RefinesNetwork` are committed as `Prop`s (sorry-free, axiom-clean) so S3(b) has
+a named target rather than a statement to reinvent.
+
+### The two constraints, settled
+
+**Branchless is NOT EXPRESSIBLE, not merely less clean.** Verified by reading
+`ISA.lean`'s constructor list, not assumed: Slice A is exactly five constructors
+(`:82–93`) — no `AND`, no `OR`, no `SUB`, no shift. The only `<<<` in the file is
+inside `bOffset`, the immediate's own scaling, which no program can execute. A
+branchless compare-exchange builds a mask and *ands* it against a difference;
+without `AND` the mask cannot be applied and without `SUB` there is no difference.
+**So the compare-exchange branches by necessity.**
+
+**Every branch is forward, proved structurally for EVERY network.**
+`emit_branches_forward : ∀ i ∈ emit net, branchIsForward i = true` — for any
+`net`, not just `batcher8`; `batcherSort_branches_forward` is the corollary. Plus
+`beq_skipImm_advances`: taken `+16`, not taken `+4`, both forward, neither
+data-dependent. This discharges, for this family of programs, the hypothesis
+`run`'s `code.length` bound rests on — `ISA.lean:149` states it as **prose with
+no predicate behind it** (S0/R2 confirmed; `beq_offset_can_be_negative` shows the
+machine can violate it).
+
+**Plus a semantic receipt.** Every concrete run asserts `pc = 480 = 4 × 120` —
+the pc *off the end of the program*. That is the direct evidence the run was not
+truncated, which is the failure a backward branch causes and which is otherwise
+invisible (a truncated `run` and a completed `run` are the same kind of value).
+`run_already_sorted` is the sharpest of these: nothing swaps, so **all 24
+branches are taken**, and a single backward one would not reach 480.
+
+### The concrete runs (checks, not the theorem)
+
+Seven, all `decide +kernel`, all cheap — the whole file elaborates in **3.4 s**,
+so the anticipated kernel-reduction cost of a 120-instruction `run` **did not
+materialise** and is not a finding against the approach.
+
+| certificate | input | why this one |
+|---|---|---|
+| `run_mixed` | `[3,-1,7,0,-5,2,9,-2]` | S1's own witness; mixed signs |
+| `run_mixed_not_unsigned_sorted` | same | ⭐ output is **not** unsigned-sorted — the program demonstrably computes the signed order |
+| `run_already_sorted` | `[-5,-2,-1,0,2,3,7,9]` | identity; **all 24 branches taken** |
+| `run_reverse_sorted` | `[9,7,3,2,0,-1,-2,-5]` | the opposite branch pattern |
+| `run_all_equal` | `[4×8]` | `¬(a <ₛ a)`; the 3-XOR path never runs |
+| `run_duplicates` | `[2,1,2,1,2,1,2,1]` | where a value-dropping element would show |
+| `run_extremes` | `INT_MIN`/`INT_MAX` with repeats | unsigned, `INT_MIN` sorts *above* `INT_MAX` |
+
+Three of them are stated in the **stronger** form
+`… = List.ofFn (runNetW batcher8 v)` (`run_*_matches_network`): not merely
+"sorted" but *equal to the abstract network's output, element for element*.
+That is `RefinesNetwork` at a point.
+
+**Non-vacuity, committed as positive theorems:** `offset_six_does_not_sort` and
+`flipped_comparand_does_not_sort` — two mutants, each one token from the real
+thing, each building clean and running to the end, each **provably failing**
+`SortsRegs`. So the positive certificates are not trivially true.
+(Three further negative controls were run in scratch and all fired: a wrong
+output literal, the `imm = 6` program, and the flipped-`SLT` program.)
+
+### `SortsRegs`' in-place assumption — CONFIRMED, no mismatch
+
+`SortsRegs` reads the same `rs` before and after. A register-resident network
+sorts in place by construction: the 3-XOR swap writes back to the pair it read.
+`dataRegs = [x1..x8]` before and after. `x9` is scratch and is clobbered — it is
+deliberately outside `dataRegs`, and the spec says nothing about it, which is the
+honest content. `x0` is never a data register and never a temporary.
+
+### Build + audit
+
+`saltbuild.sh SaltWorks.Stack.Program` → **EXIT=0**, no errors, no warnings in
+the file. **41 declarations, all `#audit_axioms`-clean** at
+`[propext, Classical.choice, Quot.sound]`; independently re-checked by
+`#print axioms` in `ScratchMATHS2.lean` (audit run, EXIT=0, deleted, not
+committed). No `native_decide`, no `sorry` in committed code.
+
+The S3(b) statement **elaborates** — probed three ways in the scratch
+(`SortsRegs` spelled out, via `SortsAllInputs`, and the reduction applied to a
+`sorry`d `RefinesNetwork`); all three typecheck. The bodies were `sorry` and the
+file is deleted.
+
+⚠️ **Judged by TARGETED build only.** `lakefile.toml`'s `defaultTargets` is a
+single-root lib, so a new module is invisible to the full build until the maestro
+sweeps `import owed: SaltWorks.Stack.Program` into `SaltWorks.lean`.
+
+⚠️ **Lane note:** `SaltWorks/Stack/**` is math's writer slot per `docs/SEATS.md:5`.
+`Program.lean` was placed there on the maestro's explicit instruction because the
+program is the campaign's artifact and must sit beside the network it is emitted
+from. No existing file in the tree was modified.
+
+### Left undetermined
+
+Whether the program **sorts** — that is S3(b), and nothing here attempts it.
+Whether `RefinesNetwork` is the *easiest* route to it (it is the one that reuses
+the most landed work, which is not the same claim). Whether a `decide`-based
+attack on `RefinesNetwork` is feasible at all — the input space is `2^256` and
+the 0-1 principle does **not** transfer across the refinement boundary, since
+`step` is not a comparator network. And the loader: `stOfFn` builds a state
+directly rather than compiling to `ADDI`s, so nothing here says how the eight
+words *arrive* in the registers — a real gap the moment S5 wants a whole-tile
+story.
