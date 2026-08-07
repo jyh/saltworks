@@ -4,8 +4,10 @@
 ### DRAFT-UNTIL-REFUTED. Never displaces the CPU campaign — rides beside.
 
 ## Objective
-Add an 8×8 Batcher odd-even merge network (19 compare-exchange elements,
-6 stages) upstream of the landed banyan on the SAME tile, and upgrade
+Add an 8×8 Batcher BITONIC network (24 compare-exchange elements in
+6 layers — THE LANDED ARTIFACT: ZeroOne.lean's batcher8, batcher8_length
+= 24 := rfl, kernel-pinned; the draft's odd-even-19 guess corrected to
+the proven network 8/7 ~12:10) upstream of the landed banyan on the SAME tile, and upgrade
 the tile's theorem from conditional to ENTIRE:
 
 > **the composed-switch theorem**: for arbitrary inputs with distinct
@@ -37,7 +39,7 @@ the tile's theorem from conditional to ENTIRE:
   (FSM refines word semantics; per-cycle decide; cycle induction).
 - Comparator core: ComparatorEquiv (D1/D3) already kernel-checked
   through the flow.
-- Composition: the D4 pattern verbatim at 19 elements instead of 12.
+- Composition: the D4 pattern verbatim at 24 elements instead of 12.
 - Spec layer: math's S3a (`Stack/ZeroOne.lean` + Batcher merge, IN
   FLIGHT for the software application) doubles as the hardware spec —
   one proof, two lanes.
@@ -56,12 +58,12 @@ the tile's theorem from conditional to ENTIRE:
   (d) the test-mode question (bypass worth its pins?).
 - **B1** — the element: Circ FSM + refinement proof (compiler builds,
   silicon proves — the SwitchRefinement pattern).
-- **B2** — the network: 19 elements assembled in Circ; batcher_sorts
+- **B2** — the network: 24 elements assembled in Circ; batcher_sorts
   at the network level (math's abstract merge theorem instantiated).
 - **B3** — the composed tile: Batcher→banyan in Circ; emit through the
   landed chain; TT CI green on the revision branch.
 - **B4** — the composed-switch theorem end-to-end on the re-imported
-  netlist (the D4 ceremony at 31 elements total).
+  netlist (the D4 ceremony at 36 elements total).
 - **B5** — THE REVISION: resubmitted to TTSKY26c before Sept 7 close.
   The banyan-only submission (the Captain's checkout, TODAY) stays the
   floor — if BB-1 slips, the proven banyan flies alone. The revision
