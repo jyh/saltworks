@@ -14,6 +14,43 @@
 | **register read** (2 × 32:1) | 36 | 93.9 % | **YES** | **11** |
 | **ALU** (10 ops + flags) | 68 | **0 %** | **YES** | **20** *(14 encoded)* |
 | **PC adders** (`pc+imm`, `pc+4`) | 64 / 30 | — | **YES** | **3** |
+| **fetch** (PC reg + next-PC select + JALR) | 100 | 21.2 % | **YES** *(its adders)* | **6** |
+
+## THE FETCH PATH — no new mechanism, but the worst `keep` bypass measured
+
+Predictions `F1`–`F4` on disk first. The **corrected rule held**: it predicts the
+adders over (carry) and the next-PC mux fine (3 sources + 3 selects = 6), and
+both are what the netlist shows. **`F4` was refuted** — not by a new mechanism,
+but because **RTL + `keep` could not deliver the decomposition at all.**
+
+```
+cut at pc_plus_4 | pc_plus_imm | jalr_target          max 74, 58.7%
+cut at those THREE *plus* pc_next                     max 73, 66.5%
+```
+
+**Four `keep`-marked 32-bit vectors, all surviving as nets, and the flop `D` pins
+read `_018_`, `_017_`, `_016_` — machine-named nets that recompute the value and
+bypass every one of them.** *(`pc_plus_4` survives 30 of 32 bits, correctly: bits
+0–1 are unchanged by +4 and were folded.)*
+
+⇒ **Fourth block, fourth bypass, and the severity is still rising**: carry chain
+wholly re-derived → read path one bit → ALU eight bits → **fetch, four entire
+vectors.** The treated figure of **6** is what structural emission gives, by the
+same mechanism proven on `readtree`, `adder8s` and `alutail`.
+
+### ⚠️ And an error in MY OWN diagnostic, caught before it was reported
+
+My first pass showed `imem_addr` cones at **74** and I nearly published it. It is
+an artifact: synthesis merged `pc_q` and `imem_addr` into one net, so the flop's
+`.Q()` **is** `imem_addr[5]` — and rooting a cone **at a flop output** made my
+traversal walk *through* the flop into its `D` logic. **The cone of a register
+output is the register, not the logic feeding it.**
+
+📌 `Sim/cones.py` shares this behaviour: when a primary output is directly a flop
+`Q`, it roots a cone there and traverses into `D`, **double-counting that cone.**
+It inflates a census and can only ever report a cone *larger* than it is — so it
+produces **false failures, never false passes.** Recorded rather than fixed
+mid-probe; the fetch figures above are quoted from the untouched instrument.
 
 ## ⛔ THE RULE I PUBLISHED AT 07:08 WAS IMPRECISE, AND THE MEMORY INTERFACE REFUTED IT AT 07:1x
 
