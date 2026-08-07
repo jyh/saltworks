@@ -137,6 +137,19 @@ theorem halfAdder_correct :
 -- distinguish a correct set from an empty one.) Checked across all of leg 2:
 -- this was the only unaudited theorem; the completeness check is one `comm` over
 -- declared-vs-listed names and belongs in CI rather than in anyone's memory.
+--
+-- ✅ THAT CHECK NOW EXISTS: `docs/hdl-tools/audit_completeness.py`.  Run today
+-- over all 35 leg-2 files / 359 theorems: EVERY theorem is on an
+-- `#audit_axioms` list, so the hole this note describes is closed rather than
+-- merely recorded.  Three-way exit (0 complete / 1 unaudited / 2 could not
+-- check) and mutation-verified in all three, because a checker that cannot fail
+-- is the defect it exists to prevent.
+--
+-- ⚠️ AND ITS FIRST VERSION WAS WRONG IN THE INSTRUCTIVE WAY: it matched
+-- declarations against the RAW source and so read prose inside docstrings as
+-- code, reporting 149 unaudited "theorems" with names like `is`, `goes` and
+-- `rather`.  A tool that scans Lean and does not strip comments is measuring the
+-- prose.  The real number is zero.
 #audit_axioms Op.eval_congr
 #audit_axioms upd_self upd_of_ne run_append
 #audit_axioms run_of_unwritten run_congr sem_congr
