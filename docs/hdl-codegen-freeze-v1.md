@@ -13,6 +13,15 @@ refuter pass (`hdl-refuter-0806.md`) killed three of its rulings in an afternoon
 — the `Vector` bus type, the "2^16 ≈ 12 s" cost law, and T4, **which was not
 merely mis-scoped but UNSTATEABLE against the declared semantics.**
 
+⛔ **REAL STATUS AFTER THE FIRST PASS (silicon, 20:05-20:07): THREE OF FIVE
+KILL-CHECKS ARE BLOCKED ON ONE MISSING ARTIFACT.** `step`, `Instr` and `St` do
+not exist in Lean — `grep` returns 0 hits for `inductive Instr`, `structure St`
+and `def decode` across the repo, and the four `def step*` that do exist are
+Banyan routing and gate evaluation. **R1 is UNRUNNABLE; R2 and R4 are runnable
+only in the halves that do not mention `step`; the P4 fork above is unresolvable
+until it lands.** *This freeze is not wrong — it is EARLY, and it is a document
+about a seam whose far side has not been built.*
+
 Two consequences, both binding:
 
 1. **A refuter pass runs before a line is written.** Kill-checks are in §7. The
@@ -115,6 +124,30 @@ inherited rather than chosen:
 | P1 | **Expression depth** — temporaries live only in registers | nesting beyond the temp budget cannot be compiled |
 | P2 | **Variable count** — one register per live variable | more variables than registers cannot be compiled |
 | P3 | **Immediate range** — `ADDI` takes a 12-bit SIGNED immediate | constants outside `[-2048, 2047]` need `LUI`, which Slice A excludes |
+
+### P4 and P5 — FOUND BY THE REFUTER PASS (silicon, R3, 20:07). NOT MINE.
+
+| # | Source | The bound |
+|---|---|---|
+| **P4** | **BEQ branch-offset RANGE** — `§4.1`'s offsets grow with the compiled body | a `then` branch longer than ~1023 instructions cannot be **encoded** |
+| **P5** | **`x0` as an assignment DESTINATION** | if `reg x = x0`, `[ADD (reg x) x0 t0]` is `ADD x0 x0 t0` — **a silent NO-OP** |
+
+⛔ **P4 IS A FORK, AND BOTH PRONGS COST SOMETHING — it is not a missing table row.**
+
+| if `step` models the offset as… | consequence |
+|---|---|
+| a **bounded 13-bit encoding** (real RISC-V B-type: 12 encoded bits + implicit zero LSB ⇒ −4096..+4094 bytes ⇒ ±1023 instructions) | **P4 is real and was unlisted**; `compile` must return `none` on long branches and C3's hypothesis needs the extra conjunct |
+| an **unbounded index** (`Int`, instruction-counted) | **there is no P4 — and C3 then proves a theorem about a machine that is not RISC-V.** The five-instruction claim silently becomes *"five instructions, one of which has an encoding we do not model"* |
+
+**Nothing in P1–P3 bounds it:** P1 bounds expression *depth*, P2 bounds *live
+variables*, P3 bounds *`ADDI` immediates*. **A `seq` of a few thousand small
+statements violates none of them and still cannot be encoded.**
+
+⚠️ **AND P5 IS THE `x0` TRAP ON THE SIDE §7's R3 DID NOT NAME.** I predicted *"a
+generator that ever allocates `x0` as a TEMPORARY"*. The real one is `x0` as a
+**destination**: the program compiles, runs, and the variable never changes.
+**Right register, wrong direction** — and a certificate catches it only if some
+program in the suite actually assigns to that variable.
 
 ⇒ **`compile : Stmt → Option (List Instr)`, and the simulation theorem is
 conditioned on `compile p = some code`.**
@@ -251,10 +284,13 @@ in full, against the landed `step`, before trusting this document.** If it needs
 a hypothesis that cannot be inhabited, C3 is vacuous — and the sp1-lean audit's
 first finding was exactly a vacuously-true theorem about `SLT`.
 
-**R3 — ARE P1–P3 THE ONLY PARTIALITY?** Find a fourth. I expect one around
-`x0`: the register that must always read zero is both the constant source and a
-trap, and a generator that ever allocates `x0` as a temporary is silently wrong
-in a way no type catches.
+**R3 — ARE P1–P3 THE ONLY PARTIALITY? ✅ RUN 2026-08-06 20:07 BY THE SILICON
+SEAT — RETURNED TWO, AND MY PREDICTION WAS WRONG IN DIRECTION.** I predicted a
+trap at `x0`-as-a-TEMPORARY. The found ones are **P4 (branch-offset range)** —
+which I had not considered at all and which no P1–P3 bound touches — and **P5,
+`x0` as a DESTINATION**, which is the same register and the opposite direction.
+Both are now in §3. **A refuter that returns the defect you predicted has told
+you less than one that returns the defect beside it.**
 
 **R4 — IS THE FORWARD-BRANCH CLAIM TRUE?** §2 asserts every emitted branch is
 forward, and the whole no-fuel execution model rests on it. **The scheme is now
