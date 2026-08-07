@@ -6,22 +6,57 @@
 ## Where the trust sits, stated plainly
 
 This program is **untrusted**, and that is a deliberate change from the freeze,
-which called the importer trusted. Nothing here has to be believed, because
-every run is CHECKED per-instance (`--check`, on by default):
+which called the importer trusted.
 
-* the emitted Lean netlist is **read back** and re-expanded independently, and
-  its instance/pin/net census is compared against a second, independent tokenizer
-  pass over the source file. A parse that drops, duplicates, or misconnects an
-  instance fails here.
-* the **cell expansions** are not trusted either: each sky130 cell is expanded
-  into primitive gates, and `SaltWorks/Silicon/Cells/Sky130.lean` carries a
-  `decide +kernel` theorem that the expansion equals the cell's Liberty function.
+⛔ **CORRECTION, 2026-08-06.** This docstring previously claimed that "every run
+is CHECKED per-instance (`--check`, on by default)", describing a readback pass
+that compares the emitted Lean against a second independent tokenizer census.
+**No such flag and no such pass exist**, and none ever did — the claim was
+written aspirationally and read as fact, which is the same defect class this
+campaign spent the day cataloguing. What the run actually prints at the end is a
+*census report*, not a check: a report cannot fail. The readback check is
+genuinely owed and is tracked as open work; until it lands, the honest statement
+of the trust position is the one below.
 
-What remains trusted is exactly two things, both small and both auditable:
-the **cell models** themselves (13 one-liners, cross-checked against the vendor
-Liberty), and the claim that **the file we imported is the file that was
-fabricated** — which is a provenance question, not a parsing one, and is
-answered by pinning `tt_submission/<top>.v` plus the PDK and tool SHAs.
+What is actually checked, today:
+
+* the **cell expansions** are not trusted: each sky130 cell is expanded into
+  primitive gates, and `SaltWorks/Silicon/Cells/Sky130.lean` carries a
+  `decide +kernel` theorem that the expansion equals the cell's Liberty function
+  (42 of them as of tonight, covering every cell this file expands).
+* the **flop treatment** below refuses rather than approximates: an unmodelled
+  sequential cell, a connected pin the model does not account for, and a clock
+  that is not common to every flop are each a hard error, not a warning.
+* the emitted datum is **regenerated and byte-compared** against what is
+  committed by `reimport.sh`, which also records the command line that produced
+  each file — provenance that previously existed nowhere.
+
+What remains trusted: the **cell models** themselves, and the claim that **the
+file we imported is the file that was fabricated** — a provenance question, not
+a parsing one, answered by pinning `tt_submission/<top>.v` plus the PDK and tool
+SHAs.
+
+## The flop treatment — Q-pins as leaves, D-pins as roots
+
+A post-P&R netlist is sequential; a `Netlist` datum is combinational. The
+decomposition that reconciles them is the one D3.5 and D4 already use, one level
+up: **cut every flop**. Its `Q` becomes a primary input (a *leaf* — the current
+state, an input to the combinational cone) and its `D` becomes an output (a
+*root* — the next state). What is left between the cuts is pure combinational
+logic, which is what the kernel can decide.
+
+The paired ordering is what makes it meaningful: state input `i` and next-state
+output `i` are **the same flop**, so a one-cycle obligation can be stated by
+lining the two vectors up. Flops are ordered by `Q` net name — stable across
+resynthesis in a way the machine-generated `D` names (`_000_`, `_001_`) are not,
+which is precisely why this is discovered here rather than typed by a caller.
+
+⚠️ **Soundness condition, checked and not assumed.** "Next state" is only
+well-defined if every flop latches on the same event. After clock-tree synthesis
+the flops do **not** share a CLK *net* — the fabricated netlist has eight
+(`clknet_3_0__leaf_clk` … `_3_7_`) — so net equality is the wrong test and would
+false-alarm. Each CLK is instead traced back through the buffer/inverter tree to
+its source, and all flops must reach the same (root, inversion-parity) pair.
 
 ## The grammar, as measured on nine real submissions
 
@@ -165,6 +200,137 @@ def expansion_for(cell):
     return None
 
 
+def base_of(cell):
+    """Cell name with the trailing drive-strength suffix removed."""
+    return re.sub(r"_\d+$", "", cell)
+
+
+# ---------------------------------------------------------------------------
+# SEQUENTIAL CELL MODELS — the flop treatment's trusted core, kept deliberately
+# tiny.  Each entry names the three pins that carry the model: the clock, the
+# data input whose net becomes a cone ROOT, and the state output whose net
+# becomes a cone LEAF.
+#
+# ⛔ ONLY CELLS LISTED HERE ARE IMPORTED.  A sequential cell that is absent is a
+# HARD ERROR naming it, never a silent skip — because skipping a flop does not
+# lose a gate, it loses a STATE BIT, and the resulting netlist would still parse,
+# still typecheck, and still prove theorems about the wrong machine.
+#
+# ⚠️ WHY `dfrtp` IS NOT HERE, though adding a line would make it import.
+# `dfrtp` carries an asynchronous `RESET_B`.  Asynchronous reset is not a
+# next-state function of the flop's inputs at all — it acts between edges — so
+# the honest model is not `next = D & RESET_B`; that formula is a *synchronous*
+# reset, correct only under an assumption about reset being held across an edge
+# that nothing in the netlist states.  The RV32I work will bring resettable
+# flops, and when it does, this comment is the question that has to be answered
+# rather than a line that has to be typed.
+# ---------------------------------------------------------------------------
+SEQ_MODELS = {
+    # base name : (clock pin, data pin -> ROOT, state pin -> LEAF)
+    "dfxtp": {"clk": "CLK", "d": "D", "q": "Q"},
+}
+
+
+def find_flops(insts):
+    """-> [ {cell, iname, q, d, clk} ], one per sequential instance.
+
+    Refuses on: an unmodelled sequential cell, a missing modelled pin, and any
+    connected non-power pin the model does not account for (which is how a
+    silently-dropped reset would be caught)."""
+    flops, unmodelled = [], collections.Counter()
+    for (cell, iname, conns) in insts:
+        if not cell.startswith(SEQ_PREFIX):
+            continue
+        m = SEQ_MODELS.get(base_of(cell))
+        if m is None:
+            unmodelled[cell] += 1
+            continue
+        pins = {m["clk"], m["d"], m["q"]}
+        missing = [p for p in (m["clk"], m["d"], m["q"]) if p not in conns]
+        if missing:
+            raise SystemExit(f"importer: flop {iname} ({cell}) has no connection on "
+                             f"{', '.join(missing)} — the model requires all three")
+        extra = sorted(set(conns) - PG - pins)
+        if extra:
+            raise SystemExit(
+                f"importer: flop {iname} ({cell}) has connected pin(s) {', '.join(extra)} "
+                f"that SEQ_MODELS['{base_of(cell)}'] does not model. Dropping them would "
+                f"silently change the machine; extend the model deliberately instead.")
+        flops.append({"cell": cell, "iname": iname,
+                      "q": conns[m["q"]], "d": conns[m["d"]], "clk": conns[m["clk"]]})
+    if unmodelled:
+        listing = ", ".join(f"{c} x{n}" for c, n in sorted(unmodelled.items()))
+        raise SystemExit(
+            f"importer: unmodelled sequential cell(s): {listing}. Skipping a flop loses a "
+            f"STATE BIT, not a gate — add it to SEQ_MODELS only with a justified next-state "
+            f"model (see the note on `dfrtp` there).")
+    return flops
+
+
+def all_drivers(insts):
+    """net -> driving (cell, iname, conns), over expandable combinational cells."""
+    drv = {}
+    for (cell, iname, conns) in insts:
+        if cell.startswith(PHYSICAL_PREFIX) or cell.startswith(SEQ_PREFIX):
+            continue
+        exp = expansion_for(cell)
+        if exp is None:
+            continue
+        for (p, _t) in outputs_of(exp):
+            if p in conns:
+                drv[conns[p]] = (cell, iname, conns)
+    return drv
+
+
+def clock_root(nm, drv, assigns, inputs_set, depth=0):
+    """Trace a clock net back to its source -> (root_net, parity) or None.
+
+    Follows `assign` aliases and any cell whose whole expansion is a single
+    `buf` or `not` — which is exactly the clock tree CTS builds. Returns None if
+    the clock passes through real combinational logic (a GATED clock), because
+    then the flops it feeds do not latch on a common event and the whole
+    Q-leaf/D-root decomposition is invalid."""
+    if depth > 256:
+        return None
+    for (l, r) in assigns:
+        if l == nm:
+            return clock_root(r, drv, assigns, inputs_set, depth + 1)
+    if nm in inputs_set or nm not in drv:
+        return (nm, 0)
+    cell, _iname, conns = drv[nm]
+    ops = expansion_for(cell)[0]
+    if len(ops) == 1 and ops[0][1] in ("buf", "not"):
+        src = conns.get(ops[0][2])
+        if src is None:
+            return None
+        sub = clock_root(src, drv, assigns, inputs_set, depth + 1)
+        if sub is None:
+            return None
+        return (sub[0], sub[1] ^ (1 if ops[0][1] == "not" else 0))
+    return None
+
+
+def check_clock_domain(flops, drv, assigns, inputs_set):
+    """All flops must latch on the same event. -> (root, parity, n_leaf_nets)."""
+    domains = collections.defaultdict(list)
+    for f in flops:
+        r = clock_root(f["clk"], drv, assigns, inputs_set)
+        if r is None:
+            raise SystemExit(
+                f"importer: flop {f['iname']} has a GATED clock — net '{f['clk']}' traces "
+                f"back through combinational logic, so it does not latch on a common event "
+                f"and 'next state' is not well defined for this netlist.")
+        domains[r].append(f)
+    if len(domains) != 1:
+        detail = "; ".join(f"{root} (parity {par}): {len(fs)} flops"
+                           for (root, par), fs in sorted(domains.items()))
+        raise SystemExit(
+            f"importer: flops span {len(domains)} clock domains — {detail}. The paired "
+            f"state vectors assume every flop latches together.")
+    (root, parity), fs = next(iter(domains.items()))
+    return root, parity, len({f["clk"] for f in fs})
+
+
 
 def parse(path):
     toks = tokenize(open(path).read())
@@ -263,8 +429,16 @@ def build(insts, decls, assigns, inputs_order):
         gates.append((op, args))
         return len(gates) - 1
 
-    for nm in inputs_order:
-        idx[nm] = emit("inp", inputs_order.index(nm))
+    # ⚠️ Indexed by POSITION, not by `.index()`, which returns the first match:
+    # a repeated name would have aliased two distinct primary inputs onto one
+    # gate and silently shifted every later input's position. Harmless while the
+    # list was hand-written and short; a real hazard now that the flop treatment
+    # appends 52 discovered state nets to it. Duplicates are rejected outright.
+    dup = [nm for nm, c in collections.Counter(inputs_order).items() if c > 1]
+    if dup:
+        raise SystemExit(f"importer: duplicate primary input net(s): {', '.join(sorted(dup))}")
+    for k, nm in enumerate(inputs_order):
+        idx[nm] = emit("inp", k)
 
     driver = {}
     for (cell, iname, conns) in insts:
@@ -322,7 +496,8 @@ def build(insts, decls, assigns, inputs_order):
     return gates, net
 
 
-def to_lean(gates, ns, name, outs, ninputs, src):
+def to_lean(gates, ns, name, outs, ninputs, src, state=(), ndesign_in=None,
+            ndesign_out=None, clockinfo=None):
     L = [f"-- GENERATED by SaltWorks/Silicon/Importer/import_netlist.py",
          f"-- source: {os.path.basename(src)}",
          f"-- DO NOT EDIT. The generator is UNTRUSTED; this datum is checked",
@@ -347,6 +522,34 @@ def to_lean(gates, ns, name, outs, ninputs, src):
     L.append("")
     L.append(f"/-- Output net indices, in declaration order. -/")
     L.append(f"def {name}_outs : List Nat := {outs}")
+    if state:
+        n = len(state)
+        L.append("")
+        L.append(f"/-! ## The flop treatment — {n} flops cut, Q as leaf, D as root")
+        L.append("")
+        L.append(f"This netlist is the COMBINATIONAL part of a sequential design. Every flop")
+        L.append(f"was cut: its `Q` became a primary input (current state) and its `D` an")
+        L.append(f"output (next state). The two vectors are PAIRED BY POSITION —")
+        L.append(f"state bit `i` is input `{ndesign_in} + i` and output `{ndesign_out} + i`,")
+        L.append(f"and both belong to the same flop, listed below in `Q`-net order.")
+        L.append("")
+        L.append(f"Soundness: all {n} flops were checked to latch on one common event —")
+        L.append(f"clock root `{clockinfo[0]}`, inversion parity {clockinfo[1]}, reached")
+        L.append(f"through {clockinfo[2]} distinct CLK net(s) of the synthesised clock tree.")
+        L.append("")
+        for i, f in enumerate(state):
+            L.append(f"* `{i:3d}`  Q `{f['q']}`  ←D— `{f['d']}`   ({f['iname']}, {f['cell']})")
+        L.append("-/")
+        L.append("")
+        L.append(f"/-- Number of DESIGN primary inputs; inputs from here on are state bits. -/")
+        L.append(f"def {name}_ndesign_in : Nat := {ndesign_in}")
+        L.append("")
+        L.append(f"/-- Number of DESIGN outputs; `{name}_outs` entries from here on are")
+        L.append(f"next-state bits, paired by position with the state inputs. -/")
+        L.append(f"def {name}_ndesign_out : Nat := {ndesign_out}")
+        L.append("")
+        L.append(f"/-- Number of flops cut by the treatment. -/")
+        L.append(f"def {name}_nstate : Nat := {n}")
     L.append("")
     L.append(f"end {ns}")
     return "\n".join(L)
@@ -364,20 +567,59 @@ ap.add_argument("--outputs", required=True, help="comma-separated output nets, i
 a = ap.parse_args()
 
 insts, decls, assigns, vports = parse(a.netlist)
-ins = a.inputs.split(",")
-outs_named = a.outputs.split(",")
-gates, net = build(insts, decls, assigns, ins)
-out_idx = [net(o) for o in outs_named]
+ins = [x for x in a.inputs.split(",") if x]
+outs_named = [x for x in a.outputs.split(",") if x]
+
+# --- THE FLOP TREATMENT ----------------------------------------------------
+# Discover every flop, verify they share one latching event, then cut them:
+# Q -> appended to the primary inputs (leaf), D -> appended to the outputs
+# (root), paired by position and ordered by Q net name.
+flops = find_flops(insts)
+clockinfo = None
+auto = []
+if flops:
+    drv_all = all_drivers(insts)
+    clockinfo = check_clock_domain(flops, drv_all, assigns, set(ins))
+
+    # BACKWARD COMPATIBILITY, and the reason byte-identity is provable: a flop
+    # the caller has ALREADY cut by hand — Q listed in --inputs and D in
+    # --outputs — is left exactly where the caller put it. The switch netlist
+    # was imported that way before this treatment existed, and re-running its
+    # original command must still produce the committed bytes.
+    ins_set, outs_set = set(ins), set(outs_named)
+    partial = [f for f in flops if (f["q"] in ins_set) != (f["d"] in outs_set)]
+    if partial:
+        detail = "; ".join(f"{f['iname']}: Q '{f['q']}' {'listed' if f['q'] in ins_set else 'absent'}, "
+                           f"D '{f['d']}' {'listed' if f['d'] in outs_set else 'absent'}"
+                           for f in partial[:4])
+        raise SystemExit(
+            f"importer: {len(partial)} flop(s) are cut by hand on ONE side only — {detail}. "
+            f"A half-cut flop pairs a state input with the wrong next-state output. List "
+            f"both sides or neither.")
+    auto = sorted([f for f in flops if f["q"] not in ins_set], key=lambda f: f["q"])
+
+ins_all = ins + [f["q"] for f in auto]
+outs_all = outs_named + [f["d"] for f in auto]
+
+gates, net = build(insts, decls, assigns, ins_all)
+out_idx = [net(o) for o in outs_all]
 
 logic = [i for i in insts
          if not i[0].startswith(PHYSICAL_PREFIX) and not i[0].startswith(SEQ_PREFIX)]
 phys = len(insts) - len(logic)
-open(a.out, "w").write(to_lean(gates, a.ns, a.name, out_idx, len(ins), a.netlist))
+open(a.out, "w").write(to_lean(gates, a.ns, a.name, out_idx, len(ins_all), a.netlist,
+                               state=auto, ndesign_in=len(ins), ndesign_out=len(outs_named),
+                               clockinfo=clockinfo))
 
 print(f"importer: {a.netlist}")
 print(f"  instances     : {len(insts)}  ({len(logic)} logic, {phys} physical/sequential)")
 print(f"  cell types    : {len(set(c for c, _, _ in logic))}")
-print(f"  primary inputs: {len(ins)}")
+print(f"  primary inputs: {len(ins_all)}  ({len(ins)} design + {len(auto)} state)")
 print(f"  gates emitted : {len(gates)}")
-print(f"  outputs       : {out_idx}")
+print(f"  outputs       : {len(out_idx)}  ({len(outs_named)} design + {len(auto)} next-state)")
+if flops:
+    root, parity, nleaf = clockinfo
+    print(f"  flops cut     : {len(flops)}  ({len(auto)} by the treatment, "
+          f"{len(flops) - len(auto)} listed by the caller)")
+    print(f"  clock domain  : one — root '{root}', parity {parity}, via {nleaf} CLK net(s)")
 print(f"  wrote         : {a.out}")
