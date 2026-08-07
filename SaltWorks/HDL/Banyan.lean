@@ -58,22 +58,37 @@ def pick (s₀ s₁ a b base : Net) : List Gate :=
   , ⟨base + 1, .and s₁ b⟩
   , ⟨base + 2, .or base (base + 1)⟩ ]
 
-/-- **The multiplexer computes a claim-gated select**, proved generically for any
-nets strictly below `base`. Under the no-conflict hypothesis at most one claim is
-true, so this is a selection; with neither claim it is `false`, i.e. idle. -/
+/-- **The multiplexer computes a claim-gated select.** Under the no-conflict
+hypothesis at most one claim is true, so this is a selection; with neither claim
+it is `false`, i.e. idle.
+
+**Only the SECOND port's nets need constraining, and the asymmetry is real rather
+than an artefact of the proof.** `pick` is straight-line: gate `base` reads `s₀`
+and `a` *before anything has been written*, so those two operands cannot have
+been clobbered no matter where they live — `s₀` may even BE `base`. Gate `base+1`
+runs after `base` has been written and therefore does need `s₁ ≠ base` and
+`b ≠ base`; gate `base+2` reads only nets it just wrote.
+
+The original statement carried `s₀ < base` and `a < base` "for symmetry". They
+were never used, the unused-simp-argument linter had been saying so in every
+build log this leg produced, and dropping them makes the theorem strictly
+stronger. Found by chasing three warnings I had read past all day. -/
 theorem pick_spec (env : Env) (s₀ s₁ a b base : Net)
-    (h₀ : s₀ < base) (h₁ : s₁ < base) (ha : a < base) (hb : b < base) :
+    (h₁ : s₁ < base) (hb : b < base) :
     run env (pick s₀ s₁ a b base) (base + 2)
       = ((env s₀ && env a) || (env s₁ && env b)) := by
   -- NB: `omega` reports "no usable constraints" on these — it does not pick up
   -- `<` facts whose operands are typed `Net` rather than `Nat`, even though
   -- `Net` is an `abbrev`. Explicit terms instead.
-  have e₀ : s₀ ≠ base := Nat.ne_of_lt h₀
+  -- Only two of the five disequalities are actually needed. The other three were
+  -- carried "for symmetry" and the linter has been saying so in every build log
+  -- this leg has produced; I read past them all day until the Silicon seat's 18:39
+  -- note — *an artifact answers the question you ask it* — sent me back to my own.
+  -- Left warning-free deliberately: a log with standing warnings trains its
+  -- readers to skim, which is precisely how these survived.
   have e₁ : s₁ ≠ base := Nat.ne_of_lt h₁
-  have ea : a ≠ base := Nat.ne_of_lt ha
   have eb : b ≠ base := Nat.ne_of_lt hb
-  have eb1 : b ≠ base + 1 := Nat.ne_of_lt (Nat.lt_succ_of_lt hb)
-  simp [pick, run, upd, Op.eval, e₀, e₁, ea, eb, eb1]
+  simp [pick, run, upd, Op.eval, e₁, eb]
 
 /-- A 2×2 element: two claim-gated outputs. Six gates from `base`; the low-line
 output is `base+2` and the high-line output is `base+5`. -/
