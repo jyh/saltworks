@@ -1,0 +1,13 @@
+# The provenance manifest — every bundle, and the artifact it claims to bind.
+#
+# bundle <TAB> target (absolute path AS THE EXECUTOR SAW IT) <TAB> git rev:path <TAB> source (optional)
+#
+# Checked by:  python3 docs/ledger-tools/provenance_replay.py --manifest docs/provenance/MANIFEST.tsv
+#
+# ⚠️ `--against HEAD:...` is deliberate, not a pin. A pinned rev would go on
+# passing forever while the live artifact drifted away from its birth record;
+# HEAD is what makes drift a RED. The birth commit is recorded in the comment
+# beside each row, which is where a pin belongs.
+#
+# S2 — the bitonic sort. Program landed bf2de34; bundle landed a5d2ef7 (next commit).
+docs/provenance/s2/s2-executor-transcript.jsonl	/Users/jyh/projects/claude/saltworks/SaltWorks/Stack/Program.lean	HEAD:SaltWorks/Stack/Program.lean	/Users/jyh/.claude/projects/-Users-jyh-projects-claude-salt/9a758ca5-4cb1-42a9-a375-6125180a6db8/subagents/agent-ac01cfad3d5259a4b.jsonl

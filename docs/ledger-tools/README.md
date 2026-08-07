@@ -4,9 +4,16 @@ Owner: the **EVIDENCE seat**. Charter: `docs/measurement-preregistration.md`
 (frozen 2026-08-06 at Council I) and its dated addenda. Amendments to the
 measurement design go in that file, never here.
 
-These four files produce every number the campaign publishes about **who was
+These files produce every number the campaign publishes about **who was
 present** and **what it cost**. They are committed, they run on any of our git
 repos, and they emit markdown.
+
+> 📌 *"These **four** files" stood here until 8/7, when `ls docs/ledger-tools/*.py
+> *.sh` returned **14**. A count written in prose is a count that stopped being
+> regenerated — this directory's entire thesis, failing on its own front door.
+> **And the seat that caught it typed "eleven" into the correction before
+> counting, one line and thirty seconds later.** The reflex is not weaker in the
+> person who just named it; only the `ls` is.*
 
 | File | What it is |
 |---|---|
@@ -14,7 +21,8 @@ repos, and they emit markdown.
 | `silence_windows.py` | the silence-window ledger — what landed while no human was directing. |
 | `token_meter.py` | tokens by day × project × model tier × wave, cache always its own column. |
 | `import-closure.py` | which git-tracked modules sit **outside** the hub's transitive import closure, and how many `#audit_axioms` sites therefore **never fire in the default build**. Compiler seat's tool, this seat's directory. **Three-way exit: 0 covered · 1 something outside (the gate) · 2 could not read.** Exit 2 exists because the first version returned **exit 0 with `OUTSIDE: 0` when `git ls-files` failed** — a clean green from a tool that had read nothing, in a tool whose job is gating a commit. ✅ **Covered by `selftest.py`** (guards + a fixture with a known answer), and the checks are **mutation-verified**: disable all three guards and exactly two of them fail. |
-| `selftest.py` | ~100 checks (79 fixed + one per discovered project, so the count is **machine-dependent**). ⚠️ It covers `ledger_common`, `silence_windows` and **`fleet_hygiene`'s bus parser + threshold calibration** — `token_meter`, `human_time` and `landed` gained coverage on 2026-08-07 for the properties their own docstrings depend on — **requestId dedup** (the ~2.3x inflation), **the unknown-category abort**, **orphaned-tag loading**, and **lane totality** — all four **mutation-verified**: break them and exactly 6 checks fail. ⚠️ Still uncovered: the rest of `fleet_hygiene` (process detection, lock state, memory readout) and `nudge_detect`'s correlation window. **Both defects found on 2026-08-06 were in the uncovered region**, which is why the region is named rather than left implicit. |
+| `selftest.py` | ~120 checks (91 fixed + one per discovered project, so the count is **machine-dependent**); **121 on this machine, 8/7**. ⚠️ It covers `ledger_common`, `silence_windows` and **`fleet_hygiene`'s bus parser + threshold calibration** — `token_meter`, `human_time` and `landed` gained coverage on 2026-08-07 for the properties their own docstrings depend on — **requestId dedup** (the ~2.3x inflation), **the unknown-category abort**, **orphaned-tag loading**, and **lane totality** — all four **mutation-verified**: break them and exactly 6 checks fail. ⚠️ Still uncovered: the rest of `fleet_hygiene` (process detection, lock state, memory readout) and `nudge_detect`'s correlation window. **Both defects found on 2026-08-06 were in the uncovered region**, which is why the region is named rather than left implicit. ➕ **8/7: `provenance_replay` covered** — 12 checks, every one written as the red it prevents, plus a live `MANIFEST.tsv` integration row whose failure is a FINDING (the artifact drifted from its birth record) rather than a broken test. |
+| `provenance_replay.py` | **does a provenance bundle actually BIND the artifact it ships with?** Replays the executor transcript's `Write`/`Edit` calls and hashes the result against the committed blob. Driven by `docs/provenance/MANIFEST.tsv`; `--against HEAD:…` on purpose, because a pinned rev passes forever while the artifact drifts. **Three-way exit: 0 bound · 1 MISMATCH · 2 could not check** — the same lesson as `import-closure.py`. ✅ **Covered by `selftest.py`, mutation-verified** (each of three guards, disabled, fails exactly one check). ⚠️ It answers content-**BOUND**, never content-**VETTED**. |
 | `nightly.sh` | runs all of it, writes `docs/EVIDENCE-ledger-<date>.md`. |
 
 ## Run it

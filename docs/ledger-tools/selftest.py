@@ -500,6 +500,120 @@ for d in lc.discover_personal_projects():
     check(not lc.is_employer_lane(d.name), f"FIREWALL: discovery returned {d.name}")
 
 # --------------------------------------------------------------------------
+# 4. provenance_replay — the bundle-binding check
+#
+# Written as the failures it prevents. The one that would have been a real
+# bug is WRONG-TARGET: it yields zero matching ops, and the obvious
+# implementation then replays nothing and compares an empty string — which
+# in the variant where "unchanged" means "fine" is a PASS from a tool that
+# located nothing. It must REFUSE. Every case below is the red, not the green.
+# --------------------------------------------------------------------------
+
+import provenance_replay as pr  # noqa: E402
+
+_T = "/x/Program.lean"
+
+
+def _line(name, inp):
+    return json.dumps({"type": "assistant", "message": {"role": "assistant", "content": [
+        {"type": "tool_use", "name": name, "input": inp}]}})
+
+
+def _bundle(lines, tmp, fname="b.jsonl"):
+    p = os.path.join(tmp, fname)
+    with open(p, "w", encoding="utf-8") as fh:
+        fh.write("\n".join(lines) + "\n")
+    return p
+
+
+with tempfile.TemporaryDirectory() as _tmp:
+    _w = _line("Write", {"file_path": _T, "content": "alpha\nbeta\n"})
+    _e = _line("Edit", {"file_path": _T, "old_string": "beta", "new_string": "gamma"})
+
+    # the happy path: Write then Edit replays to the expected text
+    text, _ = pr.replay(pr.read_ops(_bundle([_w, _e], _tmp), _T))
+    check(text == "alpha\ngamma\n", f"REPLAY: expected alpha/gamma, got {text!r}")
+
+    # ops aimed at ANOTHER file must not leak into this file's replay
+    _other = _line("Write", {"file_path": "/x/Other.lean", "content": "NOPE"})
+    text, _ = pr.replay(pr.read_ops(_bundle([_w, _other, _e], _tmp), _T))
+    check(text == "alpha\ngamma\n", "REPLAY: an op for a different file leaked in")
+
+    # ⛔ wrong target => REFUSE, never a silent empty replay
+    try:
+        pr.replay(pr.read_ops(_bundle([_w, _e], _tmp), "/x/Nowhere.lean"))
+        check(False, "REPLAY: wrong target did not refuse (this is the false green)")
+    except pr.Unreadable:
+        check(True, "")
+
+    # ⛔ an Edit whose old_string is absent => the file moved outside the bundle
+    _bad = _line("Edit", {"file_path": _T, "old_string": "absent", "new_string": "x"})
+    try:
+        pr.replay(pr.read_ops(_bundle([_w, _bad], _tmp), _T))
+        check(False, "REPLAY: absent old_string did not refuse")
+    except pr.Unreadable:
+        check(True, "")
+
+    # ⛔ an ambiguous Edit (2 matches, no replace_all) => refuse, do not guess
+    _dup = _line("Write", {"file_path": _T, "content": "aa\naa\n"})
+    _amb = _line("Edit", {"file_path": _T, "old_string": "aa", "new_string": "bb"})
+    try:
+        pr.replay(pr.read_ops(_bundle([_dup, _amb], _tmp), _T))
+        check(False, "REPLAY: ambiguous old_string did not refuse")
+    except pr.Unreadable:
+        check(True, "")
+    # ...and with replace_all it is unambiguous, so it must SUCCEED
+    _all = _line("Edit", {"file_path": _T, "old_string": "aa",
+                          "new_string": "bb", "replace_all": True})
+    text, _ = pr.replay(pr.read_ops(_bundle([_dup, _all], _tmp), _T))
+    check(text == "bb\nbb\n", f"REPLAY: replace_all did not apply, got {text!r}")
+
+    # ⛔ an Edit with no preceding Write => the bundle lacks the file's creation
+    try:
+        pr.replay(pr.read_ops(_bundle([_e], _tmp), _T))
+        check(False, "REPLAY: Edit-before-Write did not refuse")
+    except pr.Unreadable:
+        check(True, "")
+
+    # ⛔ one unparseable line => holes in the op sequence, refuse the whole bundle
+    try:
+        pr.read_ops(_bundle([_w, "{ not json", _e], _tmp), _T)
+        check(False, "REPLAY: unparseable line did not refuse")
+    except pr.Unreadable:
+        check(True, "")
+
+    # ⛔ empty bundle => refuse (exit 2), never "nothing to compare, so fine"
+    _empty = os.path.join(_tmp, "empty.jsonl")
+    open(_empty, "w").close()
+    for _arg, _why in ((_empty, "empty bundle"), (_tmp + "/nope.jsonl", "missing bundle")):
+        try:
+            pr.read_ops(_arg, _T)
+            check(False, f"REPLAY: {_why} did not refuse")
+        except pr.Unreadable:
+            check(True, "")
+
+# integration: the real S2 manifest must still bind. A red here is a FINDING
+# (the artifact drifted from its birth record), not a broken test.
+_man = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                    "..", "provenance", "MANIFEST.tsv")
+if os.path.exists(_man):
+    _rows = [l.split("\t") for l in open(_man, encoding="utf-8").read().splitlines()
+             if l.strip() and not l.lstrip().startswith("#")]
+    check(len(_rows) >= 1, "MANIFEST: no rows — a manifest nobody adds to is not a gate")
+    for _r in _rows:
+        _b = os.path.join(pr.REPO, _r[0])
+        if not os.path.exists(_b):
+            check(False, f"MANIFEST: bundle missing: {_r[0]}")
+            continue
+        try:
+            _rc = pr.check_one(_b, _r[1], _r[2], None, quiet=True)
+        except pr.Unreadable as _ex:
+            _rc = 2
+            check(False, f"MANIFEST: {_r[0]} could not be checked: {_ex}")
+        check(_rc == 0, f"MANIFEST: {_r[0]} does NOT bind {_r[2]} (exit {_rc}) "
+                        "— the artifact has drifted from its birth record")
+
+# --------------------------------------------------------------------------
 
 if FAILURES:
     print(f"selftest: {len(FAILURES)} FAILURE(S) out of {CHECKS} checks\n")
