@@ -1,7 +1,7 @@
-# THE C3 DATAPATH SURVEY — four blocks measured, and a rule that says where option (A) is required
+# THE C3 DATAPATH SURVEY — five blocks measured, and a rule that was TESTED and CORRECTED
 
 ### 2026-08-07, SILICON, on the Captain's orders (read path → writeback → ALU →
-### control). Every block synthesised through the pinned flow and censused;
+### control → memory interface). Every block synthesised through the pinned flow and censused;
 ### predictions written to disk before each synthesis. Kernel ceiling = 24 bits.
 
 ## The survey
@@ -71,9 +71,11 @@ the record shows a rule that was tested rather than a rule that was asserted.**
 | **decodes** | control signals (≤ 8), immediates (≤ 10), branch (13) | bounded by the **instruction field**, ~17 bits, and does not grow |
 | **enables** | regfile write port (6) | **constant** — data is broadcast, only the enable is decoded |
 
-⇒ **Two of the four blocks need nothing at all.** That is a real narrowing of
-option (A)'s obligations, and it was not obvious in advance — I predicted the
-writeback and control results and would not have bet heavily on either.
+*(That table is the superseded rule's evidence, kept with it.)*
+
+⇒ **THREE of the five blocks need nothing at all** — writeback, control, and the
+memory interface. A real narrowing of option (A)'s obligations, and **the third
+one arrived by refuting my own prediction.**
 
 ## ⚠️ EVEN A `+4` INCREMENT NEEDS THE TREATMENT
 
@@ -100,8 +102,9 @@ Cutting at the two named PC terms isolates them exactly: **`pc_next` becomes 15
 ## What this means for C3
 
 1. **Option (A) is required for three things**: the register read path, the ALU,
-   and every adder/incrementer. **Not** for decode, immediates, branch logic, or
-   the register write port.
+   and every adder/incrementer. **Not** for decode, immediates, branch logic, the
+   register write port, or **the whole memory interface** — load extract, store
+   alignment and byte enables are all natively inside the ceiling.
 2. **The emitter's structural obligations are bounded and enumerable** — that is
    the useful form of this result. The five obligations now measured:
    * name the **carry chain**, per slice (adders, incrementers)
