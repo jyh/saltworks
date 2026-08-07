@@ -38,6 +38,7 @@ Post-P&R powered netlists (`docs/silicon-refuter-0806-addendum.md` §0):
   appear (the tap cell has two, not four, and is absent from Liberty entirely).
 * constants arrive only via `conb_1` tie cells, never as literals.
 """
+import re
 import sys, os, re, argparse, collections
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)),
@@ -96,6 +97,31 @@ EXPAND = {
     "lpflow_inputiso1p_1": ([("t", "or", "A", "SLEEP")], ("X", "t")),
     "lpflow_isobufsrc_1":  ([("n", "not", "SLEEP", None), ("t", "and", "A", "n")], ("X", "t")),
 }
+
+# ⚠️ DRIVE STRENGTH IS NOT PART OF THE FUNCTION, AND THIS IS MEASURED, NOT ASSUMED.
+# `EXPAND` keys on exact cell names, so `or2_1` being present did nothing for
+# `or2_2` — and the flow's choice of drive strength is not ours to control. The
+# first CI netlist used `_2` drives almost throughout and the importer stopped on
+# its first cell.
+#
+# Checked across the WHOLE vendor library (sky130_fd_sc_hd, tt_025C_1v80, PDK
+# revision 8afc8346…): 428 cells, 127 base names carrying more than one drive
+# strength, and **ZERO whose `function`/`next_state` differs between them**. So a
+# trailing `_<digits>` may be stripped for the purpose of finding an expansion.
+#
+# The ORIGINAL name is what gets reported and accounted for; only the LOOKUP is
+# normalised. A future flow that picks `_4` or `_8` will now import rather than
+# stop, and it will still be a named cell in the trusted set.
+def expansion_for(cell):
+    """-> (ops, (outpin, outtmp)) or None. Exact match first, then drive-stripped."""
+    if cell in EXPAND:
+        return EXPAND[cell]
+    base = re.sub(r"_\d+$", "", cell)
+    for k, v in EXPAND.items():
+        if re.sub(r"_\d+$", "", k) == base:
+            return v
+    return None
+
 
 
 def parse(path):
@@ -202,10 +228,11 @@ def build(insts, decls, assigns, inputs_order):
     for (cell, iname, conns) in insts:
         if cell.startswith(PHYSICAL_PREFIX) or cell.startswith(SEQ_PREFIX):
             continue
-        if cell not in EXPAND:
+        exp = expansion_for(cell)
+        if exp is None:
             raise SystemExit(f"importer: no expansion for cell '{cell}' "
                              f"(instance {iname}) — add it to EXPAND and to Sky130.lean")
-        _, (outpin, _) = EXPAND[cell]
+        _, (outpin, _) = exp
         if outpin in conns:
             driver[conns[outpin]] = (cell, iname, conns)
 
@@ -226,7 +253,7 @@ def build(insts, decls, assigns, inputs_order):
             raise SystemExit(f"importer: combinational cycle at '{nm}'")
         resolving.add(nm)
         cell, iname, conns = driver[nm]
-        ops, (outpin, outtmp) = EXPAND[cell]
+        ops, (outpin, outtmp) = expansion_for(cell)
         local = {}
         for (t, op, a, b) in ops:
             ai = local[a] if a in local else net(conns[a])
