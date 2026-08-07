@@ -361,6 +361,35 @@ theorem cKey_partial_load_differs_from_dest :
     cKeyLE (cKey false 0) (cKey true 7) = false ∧ decide ((0:Nat) ≤ 7) = true := by
   decide +kernel
 
+/-! ### WHICH DOOR LINK ② GOES THROUGH — a measurement, not a preference
+
+**Silicon landed two entry points and declined to choose** (`c1b2681`):
+`composed_switch_of_seam_k3` (destinations already `ℕ`) and
+`composed_switch_of_seam_dest3` (destinations as `Dest 3`, where the address
+bound **vanishes into the type**). *Their reason for not choosing is exactly
+right — "only you know what the decoder hands you", and that is a measurement
+about this artifact.*
+
+⭐ **MEASURED: `cFrame` READS EXACTLY THREE BITS.** It is `Nat.testBit dest (2-s)`
+for `s ∈ {0,1,2}`, so bits ≥ 3 are not merely unused — **they are unrepresentable
+in the frame**, and all eight low values give distinct frames. ⇒ ***`Dest 3` is
+the door. The address bound is not discharged, it ceases to exist*** — which is
+what silicon's `dest3_toNat_lt_eight` (`[0 axioms]`, one projection) already says
+from the other side. -/
+
+/-- **The frame cannot express a destination above 7** — `d` and `d % 8` produce
+byte-identical frames across the whole range a `Nat` could offer. -/
+theorem cFrame_reads_exactly_three_bits :
+    ((List.range 32).all fun d =>
+      cFrame true d [true, false] == cFrame true (d % 8) [true, false]) = true := by
+  decide +kernel
+
+/-- …and it does distinguish all eight, so three bits is exact rather than an
+upper bound. -/
+theorem cFrame_distinguishes_all_eight :
+    ((List.range 8).map fun d => cFrame true d []).eraseDups.length = 8 := by
+  decide +kernel
+
 /-! ## ⭐ OBLIGATION (b) — THE ELEMENT REALISES THE KEY, AND THE SPEC WAS WRONG
 
 **This is the seam silicon has been naming all afternoon** — *"the fact that the
@@ -434,6 +463,8 @@ theorem ceC_idle_dest_is_unobservable :
 #audit_axioms ceC_realises_cKey_when_active
 #audit_axioms ceC_does_not_realise_cKey_naively
 #audit_axioms ceC_idle_dest_is_unobservable
+#audit_axioms cFrame_reads_exactly_three_bits
+#audit_axioms cFrame_distinguishes_all_eight
 #audit_axioms cKey_active_beats_idle
 #audit_axioms cKey_idle_never_beats_active
 #audit_axioms cKey_actives_compare_by_dest
