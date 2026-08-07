@@ -132,6 +132,55 @@ and `test/Makefile:PROJECT_SOURCES` **agree**. Both files warn that nothing
 checks their agreement; on this branch they are in sync. *I went looking and
 there is nothing there.*
 
+---
+
+## 4c. ADDENDUM ~16:4x — THE CI GATE IS CLOSED, AND A TIMING SURPRISE THAT IS
+## REAL BUT NOT A FAILURE TO MEET SPEC
+
+```
+revision-bb1-composed   test ✅  docs ✅  gds ✅  precheck ✅  gl_test ✅  viewer ✅
+main (the floor)        UNTOUCHED at f14a4fa
+```
+⇒ **B5's first gate is CLOSED. The second — "B4 is in the kernel" — is
+compiler's seam, and it is the only thing left before the Captain's H8 click.**
+
+**P8 landed** (`55fe7f5`): all four `tt-gds-action` refs pinned to
+`651ea05e…`, taken *after* the full workflow went green so a red would have one
+cause. `ciel-action@v1` deliberately **not** pinned — it installs the PDK for the
+test runner, the PDK *version* is already pinned, and it never touches the
+submitted artifact.
+
+### ⏱️ THE TIMING FINDING — and the correction inside it
+
+| | floor (`main`) | revision |
+|---|---|---|
+| `timing__setup_vio__count` | **0** | **24** (all at `ss` corners) |
+| `timing__setup__wns` | 0.0 ns | **−3.455 ns** |
+| `timing__setup__tns` | 0.0 ns | **−27.34 ns** |
+| `design__instance__utilization` | 6.56 % | 15.28 % |
+| `design__instance__count__setup_buffer` | — | **111** |
+
+**BB-1 introduced them; the floor is clean at every corner — and `gds` and
+`precheck` PASSED anyway, so TT's blocking checks do not gate multi-corner setup
+timing.**
+
+⚠️ **BUT THE DESIGN MEETS ITS DECLARED SPEC, and I had the opposite drafted.**
+`CLOCK_PERIOD` (hardening constraint, `config_merged.json`) = **20 ns / 50 MHz**;
+`clock_hz` (published spec, `info.yaml`) = **25 MHz / 40 ns**. They are
+independent. Slow-corner path = `20 + 3.455` = **23.46 ns ≈ 42.6 MHz**, so at the
+declared 25 MHz there is **~16.5 ns of margin**. ⇒ *A true reading against the
+wrong reference* — the violations are against a frequency we never claim.
+
+📌 **P5 RECOMMENDATION (mine), REVISED: `CLOCK_PERIOD` 20 → 30, not 40.** *40 ns
+is exactly the declared period — zero design margin.* **30 ns clears all 24
+violations, closes with ~6.5 ns slack at `ss`, keeps ≥10 ns against the published
+25 MHz, and stops the flow spending 111 buffers chasing 50 MHz.** Hold is not at
+risk either way: hold WS is +0.11…+0.90 ns with **0 violations at every corner**,
+and relaxing a *setup* constraint does not tighten hold.
+🔴 **It re-hardens the submitted artifact, so it is a RULING, not a tweak — and
+it is not blocking: the current state meets spec and passes precheck.** *The Lean
+proof is unaffected either way: it is about `batcher_struct.v`, the SOURCE.*
+
 ## 5. What this does NOT say
 
 * It does **not** say the revision is ready. Two gates are open, and the `test`
