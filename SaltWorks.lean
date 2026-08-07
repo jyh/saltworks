@@ -20,6 +20,10 @@ import SaltWorks.HDL.AluSelect
 import SaltWorks.HDL.EmitS
 import SaltWorks.HDL.CodegenSpec
 import SaltWorks.HDL.CompareExchange
+import SaltWorks.HDL.CompareExchangeC
+import SaltWorks.HDL.BatcherNet
+import SaltWorks.HDL.BatcherNetCheck
+import SaltWorks.HDL.PcNext
 import SaltWorks.HDL.Decoder
 import SaltWorks.HDL.RegWrite
 import SaltWorks.HDL.StateCodec
