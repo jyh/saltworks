@@ -43,14 +43,24 @@ count (`card_filter_perm`). **`bnC_concentrates_actives` — three actives on li
 2, 5, 7 landing on wires 0, 1, 2 — is one of the 256 activity patterns this
 covers.**
 
-⛔ **Not proved:** `P2` — `StrictMonoOn` on that prefix, which needs distinctness
-of the **actives'** destinations (`KB3` restricted to the lines that carry
-packets). With `P2`, `banyan_selfrouting` applies at `n := cCount act` and the
-partial-load theorem closes.
+⭐ **`P2` — `StrictMonoOn` on that prefix — IS PROVED** (`cSorted_strictMonoOn`),
+from distinctness of the **actives'** destinations alone: `KB3` restricted to the
+lines that carry packets, and **strictly weaker than the full-load `KB3`**, which
+demanded it of all eight including the idles.
 
-⚠️ **And the seam to the fabricated element — that convention C's order actually
-IS `(¬active, dest)` — is compiler's, exactly as `hseam` is.** Nothing here
-claims it.
+⭐⭐ **AND SO THE THEOREM CLOSES: `partial_load_selfrouting`.** Any activity
+pattern; hypotheses on the **active lines only**; the banyan routes every active
+packet without a single internal conflict. ***Both of the banyan's traffic
+hypotheses are discharged by the sorter's ORDER*** — sortedness by
+`zeroOne_principle`, concentration by `cSorted_concentrates`. **The idle lines
+are constrained by nothing at all**, which is exactly what
+`composed_switch_of_seam` could not offer and what `bnCSparse`'s five
+byte-identical idle frames need.
+
+⚠️ **What is NOT claimed: the seam to the fabricated element — that convention
+C's order actually IS `(¬active, dest)` — is compiler's, exactly as `hseam` is.**
+This module is about `cSorted`, the abstract product-order sort. **Nothing here
+asserts that the silicon implements it.**
 -/
 
 namespace SaltWorks.Silicon
@@ -188,6 +198,127 @@ theorem cSorted_concentrates (act : Fin 8 → Bool) (dst : Fin 8 → ℕ) (i : F
     (ofLex (cSorted act dst i)).1 = false ↔ (i : ℕ) < cCount act := by
   rw [cSorted_actives_are_a_prefix act dst i, cSorted_active_count act dst]
 
+/-! ## P2 — strict monotonicity on the active prefix -/
+
+/-- The destination carried on wire `i` after sorting. -/
+def cDst (act : Fin 8 → Bool) (dst : Fin 8 → ℕ) (i : Fin 8) : ℕ :=
+  (ofLex (cSorted act dst i)).2
+
+/-- **`KB3`, restricted to the lines that carry packets.** *Strictly weaker than
+the full-load form*, which demanded distinctness of all eight destinations
+including the idles' — the demand `bnCSparse` cannot meet. -/
+def ActivesDistinct (act : Fin 8 → Bool) (dst : Fin 8 → ℕ) : Prop :=
+  ∀ i j : Fin 8, act i = true → act j = true → dst i = dst j → i = j
+
+theorem cCount_le (act : Fin 8 → Bool) : cCount act ≤ 8 := by
+  unfold cCount
+  calc (Finset.univ.filter fun i => act i = true).card
+      ≤ (Finset.univ : Finset (Fin 8)).card := Finset.card_filter_le _ _
+    _ = 8 := by simp
+
+/-- With equal activity bits, the sorted order is the destination order. -/
+theorem cSorted_snd_le (act : Fin 8 → Bool) (dst : Fin 8 → ℕ) (i j : Fin 8)
+    (hij : i ≤ j) (hfst : (ofLex (cSorted act dst i)).1 = (ofLex (cSorted act dst j)).1) :
+    cDst act dst i ≤ cDst act dst j := by
+  have h := cSorted_isSorted act dst i j hij
+  rcases Prod.Lex.le_iff.mp h with h1 | ⟨_, h2⟩
+  · rw [hfst] at h1; exact absurd h1 (lt_irrefl _)
+  · exact h2
+
+/-- ⭐⭐ **P2 — STRICT MONOTONICITY ON THE ACTIVE PREFIX.** Given only that the
+**active** lines carry distinct destinations, the sorted destinations are
+strictly increasing across `Iio (cCount act)` — which is exactly
+`banyan_selfrouting`'s `hdest`, at the partial-load `n`. -/
+theorem cSorted_strictMonoOn (act : Fin 8 → Bool) (dst : Fin 8 → ℕ)
+    (hd : ActivesDistinct act dst) :
+    StrictMonoOn (extendIio 0 (cDst act dst)) (Set.Iio (cCount act)) := by
+  obtain ⟨σ, hσ⟩ := runNet_perm batcher8 (cKey act dst)
+  have hfst : ∀ k : Fin 8, (ofLex (cSorted act dst k)).1 = (!act (σ k)) := by
+    intro k; show (ofLex (runNet batcher8 (cKey act dst) k)).1 = _; rw [hσ]; rfl
+  have hsnd : ∀ k : Fin 8, cDst act dst k = dst (σ k) := by
+    intro k; show (ofLex (runNet batcher8 (cKey act dst) k)).2 = _; rw [hσ]; rfl
+  intro a ha b hb hab
+  simp only [Set.mem_Iio] at ha hb
+  have ha8 : a < 8 := lt_of_lt_of_le ha (cCount_le act)
+  have hb8 : b < 8 := lt_of_lt_of_le hb (cCount_le act)
+  rw [extendIio_apply _ _ ha8, extendIio_apply _ _ hb8]
+  set i : Fin 8 := ⟨a, ha8⟩ with hi
+  set j : Fin 8 := ⟨b, hb8⟩ with hj
+  -- both wires are ACTIVE, by concentration
+  have hai : (ofLex (cSorted act dst i)).1 = false :=
+    (cSorted_concentrates act dst i).mpr ha
+  have hbj : (ofLex (cSorted act dst j)).1 = false :=
+    (cSorted_concentrates act dst j).mpr hb
+  have hacti : act (σ i) = true := by
+    have := hfst i; rw [hai] at this; simpa using this.symm
+  have hactj : act (σ j) = true := by
+    have := hfst j; rw [hbj] at this; simpa using this.symm
+  -- ≤ from the sort, ≠ from distinctness of the actives
+  have hle : cDst act dst i ≤ cDst act dst j :=
+    cSorted_snd_le act dst i j (by simpa [hi, hj] using hab.le) (by rw [hai, hbj])
+  have hne : cDst act dst i ≠ cDst act dst j := by
+    rw [hsnd i, hsnd j]
+    intro heq
+    have := hd (σ i) (σ j) hacti hactj heq
+    have hij : i = j := σ.injective this
+    rw [hi, hj] at hij
+    exact absurd (Fin.mk.inj_iff.mp hij) (Nat.ne_of_lt hab)
+  exact lt_of_le_of_ne hle hne
+
+/-! ## The partial-load theorem -/
+
+/-- Every wire below the boundary carries a genuine active line's destination —
+**the sorter cannot manufacture traffic.** -/
+theorem cDst_of_active (act : Fin 8 → Bool) (dst : Fin 8 → ℕ) (i : Fin 8)
+    (hi : (i : ℕ) < cCount act) : ∃ j, act j = true ∧ cDst act dst i = dst j := by
+  obtain ⟨σ, hσ⟩ := runNet_perm batcher8 (cKey act dst)
+  have hfst : (ofLex (cSorted act dst i)).1 = (!act (σ i)) := by
+    show (ofLex (runNet batcher8 (cKey act dst) i)).1 = _; rw [hσ]; rfl
+  have hsnd : cDst act dst i = dst (σ i) := by
+    show (ofLex (runNet batcher8 (cKey act dst) i)).2 = _; rw [hσ]; rfl
+  have hai : (ofLex (cSorted act dst i)).1 = false :=
+    (cSorted_concentrates act dst i).mpr hi
+  refine ⟨σ i, ?_, hsnd⟩
+  rw [hai] at hfst
+  simpa using hfst.symm
+
+/-- The address bound, on the **active** lines only. -/
+def ActivesBounded (act : Fin 8 → Bool) (dst : Fin 8 → ℕ) (k : ℕ) : Prop :=
+  ∀ i, act i = true → dst i < 2 ^ k
+
+/-- ⭐⭐⭐ **PARTIAL LOAD — THE SWITCH ROUTES ITS ACTUAL OPERATING RANGE.**
+
+With **any** activity pattern, and hypotheses on the **active lines only** —
+distinct destinations, each below the address bound — the banyan routes every
+active packet without a single internal conflict, each reaching the line its
+address names.
+
+⇒ ***Both of the banyan's traffic hypotheses are discharged by the sorter's
+ORDER: sortedness by `zeroOne_principle`, and concentration on `Set.Iio n` by
+`cSorted_concentrates`.*** **The idle lines are constrained by nothing** — no
+sentinel, no encoding, no distinctness — which is precisely what
+`composed_switch_of_seam` could not offer and what `bnCSparse`'s five
+byte-identical idle frames require.
+
+⚠️ **This is about `cSorted`, the abstract product-order sort. Tying it to the
+fabricated element — that convention C's order actually IS `(¬active, dest)` —
+is the seam, and it is compiler's, exactly as `hseam` is.** -/
+theorem partial_load_selfrouting {k : ℕ} (act : Fin 8 → Bool) (dst : Fin 8 → ℕ)
+    (hn : cCount act ≤ 2 ^ k) (hd : ActivesDistinct act dst)
+    (hb : ActivesBounded act dst k) :
+    (∀ m ≤ k, Set.InjOn (fun s => Banyan.line m s (extendIio 0 (cDst act dst) s))
+        (Set.Iio (cCount act))) ∧
+      (∀ s < cCount act, Banyan.line k s (extendIio 0 (cDst act dst) s) = s) ∧
+      (∀ s, Banyan.line 0 s (extendIio 0 (cDst act dst) s)
+        = extendIio 0 (cDst act dst) s) := by
+  refine Banyan.banyan_selfrouting hn (cSorted_strictMonoOn act dst hd) ?_
+  intro s hs
+  have hs8 : s < 8 := lt_of_lt_of_le hs (cCount_le act)
+  rw [extendIio_apply _ _ hs8]
+  obtain ⟨j, hj, hdj⟩ := cDst_of_active act dst ⟨s, hs8⟩ hs
+  rw [hdj]
+  exact hb j hj
+
 end SaltWorks.Silicon
 
 section Audit
@@ -199,4 +330,9 @@ open Salt.Tactic
 #audit_axioms SaltWorks.Silicon.cSorted_actives_are_a_prefix
   SaltWorks.Silicon.cSorted_active_count
 #audit_axioms SaltWorks.Silicon.cSorted_concentrates
+  SaltWorks.Silicon.cCount_le
+#audit_axioms SaltWorks.Silicon.cSorted_snd_le
+  SaltWorks.Silicon.cSorted_strictMonoOn
+#audit_axioms SaltWorks.Silicon.cDst_of_active
+  SaltWorks.Silicon.partial_load_selfrouting
 end Audit
