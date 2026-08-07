@@ -1233,3 +1233,206 @@ the 0-1 principle does **not** transfer across the refinement boundary, since
 directly rather than compiling to `ADDI`s, so nothing here says how the eight
 words *arrive* in the registers — a real gap the moment S5 wants a whole-tile
 story.
+
+---
+
+## STACK-S3(b) — the refinement: the obligation as committed is FALSE, and the repair is PROVED
+
+*Opus executor, 2026-08-07. One file touched: `SaltWorks/Stack/Program.lean`,
+**+599 / −3 lines** (564 of new material, plus the audit block and two docstring
+corrections). Full hub build **EXIT=0**; **41 new declarations, every one
+`#audit_axioms`-clean** at `[propext, Classical.choice, Quot.sound]`.*
+
+### ⭐ THE HEADLINE — `RefinesNetwork` and `SortsAllInputs` are FALSE
+
+Not hard, not open. **False**, and the refutation is now a committed kernel
+certificate: `refinesNetwork_is_false`, `sortsAllInputs_is_false`.
+
+Both are stated `∀ s : St`, and `St` carries a `pc`. **Nothing constrains it.**
+At `s.pc = 480` — the pc *off the end of the program*, which is exactly where
+every concrete certificate in the file proudly ends — `fetch` returns `none` on
+the first tick, `runFor` returns `s` unchanged, and the obligation degenerates to
+*"the eight data registers are already sorted"*. The witness is `offEndState`:
+reverse-sorted data with `pc := 480`.
+
+⚠️ **This is the file's own named failure mode, one layer up.** The authorship
+record says *"`run` is total, so a wrong branch is silent."* The same totality
+makes a **wrong starting pc** silent: `run` outside the code is not an error, it
+is the identity, and the identity satisfies nothing. The statement inherited an
+entry-point assumption from the concrete runs — every one of which starts from
+`stOfFn v`, whose `pc` is `0` (`stOfFn_pc`) — and the assumption was never
+written down because in the concrete runs it was never a variable.
+
+**Both `def`s are left EXACTLY as committed**, per the iron rule. Repairing them
+is a statement change and belongs to the seat that owns them. What is added is
+(1) the refutation, so the falsity is a theorem rather than a note, and (2) the
+content S3(b) was actually after, proved:
+
+| landed | statement |
+|---|---|
+| ⭐ `refinesNetwork_of_pc_zero` | `s.pc = 0 → dataRegs.map (run batcherSort s).get = List.ofFn (runNetW batcher8 (fun i => s.get (dataReg i)))` |
+| ⭐ `sortsRegs_of_pc_zero` | `s.pc = 0 → SortsRegs dataRegs s (run batcherSort s)` |
+
+Read with `refinesNetwork_is_false`, the pair says precisely how much the entry
+point was carrying: **everything**. `s.pc = 0` is the whole gap, it is
+load-bearing rather than defensive, and both halves of that are theorems.
+
+**Recommended repair (NOT applied — the maestro's call):** add `(hpc : s.pc = 0)`
+to both `RefinesNetwork` and `SortsAllInputs`. `sortsAllInputs_of_refinesNetwork`
+survives the change unedited, and `refinesNetwork_of_pc_zero` discharges the
+repaired `RefinesNetwork` immediately.
+
+### ⛔ THE CRUX, and it was not the per-comparator step
+
+**There is no `run`/`runFor` decomposition lemma for the ISA anywhere in the
+tower.** (`run_append` in `HDL/Sem.lean` is the *gate-level* `run` — a different
+function with the same name.) Writing that algebra was the node.
+
+⚠️ **THE STEP COUNT IS DATA-DEPENDENT.** Each comparator is five instructions,
+but the `BEQ` skips the three `XOR`s: **ordered ⇒ 2 ticks, swap ⇒ 5**. Measured
+over the file's own inputs:
+
+| input | ticks to `pc = 480` |
+|---|---|
+| all equal `[4×8]` | **48** — the true minimum, all 24 branches taken |
+| duplicates `[2,1,…]` | 66 |
+| already sorted | **78** |
+| mixed signs | 87 |
+| reverse sorted | **90** |
+| — | `run` always spends **120** |
+
+So `runFor 120` does **not** align comparator-by-comparator, and no induction
+assuming a fixed per-comparator budget can close. `step_count_data_dependent`
+pins 48-suffices / 48-does-not / 90-suffices as one kernel certificate — the
+control that the fuel algebra is load-bearing rather than decorative.
+
+**What saves it is that the paths reconverge.** Taken lands at `base + 20` via
+`bOffset skipImm = 16`; not-taken walks the three `XOR`s to the same `base + 20`.
+A comparator is a **20-byte block with a single exit**.
+
+### ⭐ THE TWO LEMMAS
+
+**The fuel algebra** — five declarations, generic in `code`, nothing about
+comparators:
+
+```lean
+theorem runFor_add (m n : Nat) (code : List Instr) (s : St) :
+    runFor (m + n) code s = runFor n code (runFor m code s)
+```
+
+**Unconditional — no "enough fuel" side condition.** That surprised me and it is
+the reason the decomposition came cheap: *halting is a fixed point*. Once `fetch`
+returns `none` the state stops changing (`runFor_of_fetch_none`), so a run that
+halts inside the first `m` ticks spends the remaining `n` on a state that
+fetches `none`, which is the identity. `runFor_eq_of_halted` is the slack form
+that transports a `k`-step result to `run`'s own `code.length` bound.
+
+**The block lemma:**
+
+```lean
+theorem cmpEx_block (code : List Instr) (c : Comparator 8) (s : St)
+    (h0 : fetch code s.pc        = some (.SLT tmpReg (dataReg c.2) (dataReg c.1)))
+    (h1 : fetch code (s.pc + 4)  = some (.BEQ tmpReg 0 skipImm))
+    (h2 : fetch code (s.pc + 8)  = some (.XOR (dataReg c.1) (dataReg c.1) (dataReg c.2)))
+    (h3 : fetch code (s.pc + 12) = some (.XOR (dataReg c.2) (dataReg c.1) (dataReg c.2)))
+    (h4 : fetch code (s.pc + 16) = some (.XOR (dataReg c.1) (dataReg c.1) (dataReg c.2))) :
+    ∃ k, k ≤ 5 ∧ (runFor k code s).pc = s.pc + 20 ∧
+      ∀ i : Fin 8, (runFor k code s).get (dataReg i)
+        = @applyComp 8 Word wordSignedOrder c (fun j => s.get (dataReg j)) i
+```
+
+The `∃ k` is the data-dependence, quarantined into one existential. **Three
+hypotheses it turned out not to need**, each worth recording:
+
+* **no `c.1 ≠ c.2`.** A self-comparator makes `SLT` compute `¬ (x <ₛ x)`, so the
+  branch is always taken and the 3-XOR — which would *zero* the register — is
+  unreachable. Abstract `applyComp` is the identity there too. They agree for
+  free, so the emitter is safe on networks nobody has checked for
+  self-comparators.
+* **no distinctness of the two registers.** In the swapping branch `SLT` has
+  already certified `v c.2 <ₛ v c.1`, hence `v c.1 ≠ v c.2`, hence
+  `dataReg c.1 ≠ dataReg c.2`. **The 3-XOR's side condition is derived from the
+  branch being taken, not assumed.**
+* **nothing about `x9`.** `dataReg_ne_tmp` keeps scratch out of the data.
+
+### The induction — an OFFSET, not a prefix
+
+⚠️ **A prefix does not run in isolation**: `fetch code pc` indexes the *whole*
+list by absolute `pc`. So the induction holds `code` fixed and moves an offset:
+
+```lean
+def EmbedsAt (code : List Instr) (net : Network 8) (off : Nat) : Prop :=
+  ∀ j, j < 5 * net.length → code[off + j]? = (emit net)[j]?
+
+theorem emit_runs (code : List Instr) : ∀ (net : Network 8) (off : Nat) (s : St),
+    EmbedsAt code net off → s.pc.toNat = 4 * off →
+    4 * off + 20 * net.length < 2 ^ 32 →
+    ∃ k, k ≤ 5 * net.length ∧
+      (runFor k code s).pc.toNat = 4 * off + 20 * net.length ∧
+      ∀ i : Fin 8, (runFor k code s).get (dataReg i)
+        = runNetW net (fun j => s.get (dataReg j)) i
+```
+
+**Generic in the network and in the enclosing program**, exactly as `emit` is —
+a different network compiled by the same emitter inherits this unchanged, and a
+program that embeds `emit net` inside more code inherits it too. The
+non-wrapping hypothesis is real: `pc` is a `BitVec 32` and its addition wraps
+(`toNat_add_of` carries the bound; `480 < 2^32` discharges it for `batcherSort`).
+
+### Non-vacuity
+
+* ⭐ **`refinesNetwork_is_false` + `refinesNetwork_of_pc_zero`** — the sharpest
+  control available: the same statement is false without `s.pc = 0` and true
+  with it, both kernel-checked. A green `∀` here is evidence, not a shape.
+* `step_count_data_dependent` — 48 ticks finish one input and provably do not
+  finish another.
+* `cmpEx6_does_not_refine`, `cmpExFlip_does_not_refine` — both mutants enter at
+  `pc = 0` like everything else, run to completion, and **fail the repaired
+  statement**. So `refinesNetwork_of_pc_zero` is a claim a wrong program breaks.
+
+### ⚠️ A FALSE DOCSTRING, CORRECTED
+
+`run_already_sorted` claimed *"no comparator swaps, so **all 24 branches are
+taken**"*. **That is false and is now refuted by a certificate in the same file**
+(`already_sorted_input_still_swaps`): `batcher8` contains descending comparators
+(`(3,2)`, `(7,6)`, `(5,4)`, …), for which an ascending input is out of order, so
+**ten of the 24 comparators swap** and the run costs 78 ticks, not 48. The
+all-taken input is `run_all_equal`. The table entry above in this ledger
+("*identity; all 24 branches taken*") carries the same error and is superseded
+here. Comment-only correction; no proof content touched.
+
+### Attempt counts, against the split budget
+
+* **Statement shape: 1 attempt.** The refutation was found by reading
+  `RefinesNetwork`'s binder against `fetch`'s absolute indexing, and confirmed
+  first try in scratch. Budget was 3–4.
+* **Proofs: 1 attempt each, 3 mechanical repairs.** Fuel algebra clean first
+  build. Register bookkeeping: one repair (`simp` recursion-depth on
+  `dataReg_ne_zero` → `revert; decide +kernel`). Block lemma: one repair
+  (`norm_num` is not in this import set → `omega`). Induction: two repairs (a
+  stray `rw … at *`, and `(c :: cs).length` un-normalised in the goal). Budget
+  was 2 attempts before flagging; none was reached.
+* No `sorry` at any point in committed code. No `native_decide`. `bv_omega` is
+  used for the pc arithmetic — omega-backed, audit-clean.
+
+### Build + audit
+
+`saltbuild.sh SaltWorks.Stack.Program` → **EXIT=0**. Full-tree `saltbuild.sh` →
+**EXIT=0** (8632 jobs) — `Stack.Program` is now in the hub, so this is no longer
+a targeted-only judgement. All 41 new declarations tick `#audit_axioms`;
+independently re-checked with `#print axioms` in `ScratchMATHS3B.lean` (audit
+run EXIT=0, deleted, not committed).
+
+### Left undetermined
+
+The **loader** is still the open seam: `stOfFn` builds a state directly rather
+than compiling to `ADDI`s, so `s.pc = 0` is now discharged wherever `stOfFn` is
+the entry (`stOfFn_pc`), but nothing says how the eight words *arrive* in the
+registers on real silicon. S5's whole-tile story needs that.
+
+Whether the two `def`s should be repaired in place or deprecated in favour of the
+`_of_pc_zero` theorems — a statement call, deliberately not made here.
+
+`emit_runs` is stated for `Network 8` only, because `cmpEx`/`dataReg` are. Nothing
+in the proof uses `8`; generalising to `Network n` with `n + 1 < 32` is
+mechanical and was not done.
