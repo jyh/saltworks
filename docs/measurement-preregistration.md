@@ -134,3 +134,71 @@ evidence of the human WORKING, not of the human being away**, and the
 report must not be quoted as though the two were the same. The
 counterfactual test in §2 is unaffected and, if anything, sharper: nothing
 in that hour would have happened without the human.
+
+## ADDENDUM 3 — 2026-08-06 19:3x, EVIDENCE seat. A NEW INJECTION CLASS that
+## no provenance field can catch, and a UNIT defect in §2's own instrument.
+## Both found by adversarially attacking this seat's own tag proposals.
+
+**J. `tmux send-keys` IS A HUMAN KEYSTROKE AS FAR AS THE RECORD IS
+CONCERNED — AND ADDENDUM 1 §A's METHOD CANNOT SEE IT.** §A established
+that injections are classified *by the record's own provenance fields* —
+`origin.kind`, `promptSource`, `isMeta` — with string patterns only as a
+legacy fallback. **That method fails outright on a class created at 17:07
+on 2026-08-06**, when the maestro adopted pane-level nudging: composing a
+message and injecting it into another seat's input box with
+`tmux send-keys`.
+
+Checked field by field on this seat's own transcript, the two nudges it
+received carry:
+
+    promptSource: "typed"   userType: "external"   origin.kind: "human"
+
+**Identical to a human typing, because at the terminal layer it IS a
+keystroke.** The harness has no way to know a machine produced it. No
+provenance field distinguishes them and none ever will.
+
+**MEASURED, 2026-08-06:** of **128** records classified human across the
+personal lane that day, **4 are machine-authored** (12:59:54, 17:07:27,
+17:07:45, 18:43:04) — **3.1%**. Three are pure `send-keys` with no hand on
+any keyboard; the fourth is machine-authored text that JYH *pasted*, which
+is a hand but not a decision.
+
+**THE TWO BIASES RUN IN OPPOSITE DIRECTIONS AND BOTH MUST BE STATED.**
+Counting a machine nudge as human **inflates human-time** (the dishonest
+direction, since it pads THE CLAIM) and **shortens silence windows** (the
+self-deprecating direction, since it makes the fleet look more attended
+than it was).
+
+**The only honest detector is cross-seat, not per-record:** a nudge exists
+in the *sending* seat's transcript as a `tmux send-keys` tool call at the
+same instant it appears as a "human" message in the *receiving* seat's.
+**Provenance cannot see it; correlation can.** Not implemented; specified
+here so the gap is on the record rather than in the numbers.
+
+**K. THE BLOCK IS THE WRONG UNIT FOR §2's COUNTERFACTUAL TEST, AND IT
+INFLATES THE CLAIM.** §2 tests each **touch** — *"would the artifact exist
+without this touch?"* — but `human_time.py` assigns one category per
+**block**, where a block is any run of touches with no >20 min gap. On
+2026-08-06 that put THE CLAIM at **11h 13m of 11h 16m — 99.6%**.
+
+**That number must not be published as "99.6% of the human time was
+load-bearing."** No tag is wrong; the unit is. The adversarial pass showed
+block `20260806T1243` is *mostly* watching-shaped — 11 of its 20 typed
+messages redirect nothing, and its longest contiguous stretch, 10 of 60
+typed minutes, is iTerm2 window-management — while **one irreducible order
+inside it (create the private repo) drags the whole 1h 13m into THE
+CLAIM.** The 3h 55m evening block has the same shape.
+
+⇒ **Until tagging is per-touch or blocks are split at category changes,
+THE CLAIM is a COARSE UPPER BOUND and must be quoted as one.** The floor —
+WATCHING at 0h 02m — is equally obviously not the truth. *A measure whose
+unit is coarser than its own decision rule reports the decision rule's
+answer for the whole unit.*
+
+**L. AND THE SEAT LABEL ON A BLOCK CAN BE SIMPLY WRONG.** Block
+`20260806T1243` is labelled **saltworks**; **19 of its 20 typed messages
+are in the salt seat.** The label comes from the block's first touch, not
+from where its mass sits. Cosmetic for the totals, misleading in the
+worksheet a human tags from — and it is the third instance today of an
+instrument naming an adjacent object correctly and the intended one not at
+all.
