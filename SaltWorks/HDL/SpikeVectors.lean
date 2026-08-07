@@ -446,4 +446,140 @@ theorem spike_suite_size : spikeSuite.length = 120 := by decide +kernel
 #audit_axioms spike_checker_rejects_a_corrupted_witness
 #audit_axioms spike_suite_size
 
+/-! ## THE REJECTION ARM — the words the `Vec` format CANNOT represent
+
+`Vec.actual` is `Option St` and `checkFull` compares against `some`, so a word
+that **both** sides reject — real agreement, and the case where a third-party
+word is most informative — **has no `Vec`.** That gap was named in
+`docs/hdl-c2-generator-design-0807.md` §6.4 as *"not the generator's to make"*.
+It is the consumer's, the consumer is this file, so it is made here.
+
+⛔ **TWO CLASSES, AND MERGING THEM WOULD BE THE WHOLE MISTAKE.**
+
+```
+A  Spike TRAPS and SAIL TRAPS and `decode` = none   -> GENUINE AGREEMENT
+B  Spike EXECUTES and `decode` = none               -> DISAGREEMENT, OURS RIGHT
+```
+
+⭐ **CLASS B IS WHAT "WITNESS, NOT ORACLE" MEANS IN PRACTICE, AND IT IS THE ONLY
+PLACE IN C2 WHERE THE DISTINCTION HAS TEETH.** These are *legal RV32I
+instructions* — `LUI`, `JAL`, loads, stores, shifts, `SUB`, `BNE` — that Spike
+executes happily and Slice A deliberately excludes. **A seat treating the witness
+as an oracle would read 22 disagreements as 22 bugs and "fix" `decode` to accept
+them, silently destroying the stated scope.** *The five-instruction claim would
+become "five instructions, plus whatever the simulator happened to accept."*
+⇒ ***Every one of these disagreements is a PASS, and the exclusion list stops
+being prose and becomes a kernel-checked property of `decode`.***
+-/
+
+/-- **CLASS A** — 40 random words on which Spike raises
+`trap_illegal_instruction` AND the Sail model traps. *Sampled 40 of 241 random
+words; the other 201 were legal encodings.* **SAIL and Spike disagreed on
+ZERO of them.** -/
+def spikeIllegal : List (BitVec 32) :=
+ [
+  0x9A0C3B77#32,
+  0x0BC71C57#32,
+  0x324BBCEB#32,
+  0xA9BE4227#32,
+  0x73DD1DBF#32,
+  0x6E558DD3#32,
+  0x25ED84D3#32,
+  0x0C147877#32,
+  0xBFFD073B#32,
+  0xCDC22A33#32,
+  0x66FF4047#32,
+  0x0B576343#32,
+  0x93F08743#32,
+  0x30454D4B#32,
+  0x506E0E57#32,
+  0x703010C3#32,
+  0x2A152D6B#32,
+  0x7A15DEF7#32,
+  0x213D8243#32,
+  0x6E84573F#32,
+  0x0DAD78A7#32,
+  0xAC0D982F#32,
+  0xFD49C74F#32,
+  0xCC65D87B#32,
+  0x6D7EF4D7#32,
+  0x003A6557#32,
+  0xF625B6C3#32,
+  0xA21C3A77#32,
+  0x50B92BFB#32,
+  0x50741AFB#32,
+  0xF0898DBF#32,
+  0x772210E7#32,
+  0x25D9E4CB#32,
+  0xA8B8A063#32,
+  0xF582DD3B#32,
+  0x03DF6703#32,
+  0x707A4A73#32,
+  0xBC3E5EDB#32,
+  0x275BBD77#32,
+  0xA66CBF4B#32
+ ]
+
+/-- **Both witnesses reject, and so do we.** The agreement the `Vec` format had
+no room to state. -/
+theorem spike_illegal_rejected :
+    spikeIllegal.all (fun w => (decode w).isNone) = true := by decide +kernel
+
+/-- **CLASS B** — legal RV32I that Slice A excludes, as real encodings produced
+by the assembler and confirmed executable by Spike. -/
+def sliceAExcluded : List (BitVec 32) :=
+ [
+  0x000010B7#32,   -- lui     ra, 0x1
+  0x00001117#32,   -- auipc   sp, 0x1
+  0x008000EF#32,   -- jal     pc + 0x8
+  0x000100E7#32,   -- jalr    sp
+  0x00012083#32,   -- lw      ra, 0(sp)
+  0x00112023#32,   -- sw      ra, 0(sp)
+  0x00410183#32,   -- lb      gp, 4(sp)
+  0x00310223#32,   -- sb      gp, 4(sp)
+  0x002091B3#32,   -- sll     gp, ra, sp
+  0x0020D1B3#32,   -- srl     gp, ra, sp
+  0x4020D1B3#32,   -- sra     gp, ra, sp
+  0x0020E1B3#32,   -- or      gp, ra, sp
+  0x0020F1B3#32,   -- and     gp, ra, sp
+  0x402081B3#32,   -- sub     gp, ra, sp
+  0x0020B1B3#32,   -- sltu    gp, ra, sp
+  0x0050C193#32,   -- xori    gp, ra, 5
+  0x0050E193#32,   -- ori     gp, ra, 5
+  0x0050F193#32,   -- andi    gp, ra, 5
+  0x0050A193#32,   -- slti    gp, ra, 5
+  0x00209463#32,   -- bne     ra, sp, pc + 8
+  0x0020C463#32,   -- blt     ra, sp, pc + 8
+  0x0020D463#32,   -- bge     ra, sp, pc + 8
+ ]
+
+/-- **THE EXCLUSION LIST, AS A THEOREM.** `decode` rejects every one — and
+Spike executes every one. *The disagreement is the specification working.* -/
+theorem slice_a_excluded_rejected :
+    sliceAExcluded.all (fun w => (decode w).isNone) = true := by decide +kernel
+
+/-! ### Non-vacuity — a rejector that rejects everything would prove nothing -/
+
+/-- The 120 witnessed words all DECODE, so `decode` is not simply constant
+`none`. *Without this, both theorems above are satisfied by a broken decoder.* -/
+theorem suite_words_decode :
+    spikeSuite.all (fun v => (decode v.word).isSome) = true := by decide +kernel
+
+/-- And the rejected words are disjoint from the accepted suite. -/
+theorem rejected_disjoint_from_suite :
+    (spikeIllegal ++ sliceAExcluded).all
+      (fun w => spikeSuite.all (fun v => v.word != w)) = true := by decide +kernel
+
+theorem spike_illegal_size : spikeIllegal.length = 40 := by decide +kernel
+theorem slice_a_excluded_size : sliceAExcluded.length = 22 := by decide +kernel
+
+#audit_axioms spikeIllegal
+#audit_axioms spike_illegal_rejected
+#audit_axioms sliceAExcluded
+#audit_axioms slice_a_excluded_rejected
+#audit_axioms suite_words_decode
+#audit_axioms rejected_disjoint_from_suite
+#audit_axioms spike_illegal_size
+#audit_axioms slice_a_excluded_size
+
 end SaltWorks.ISA

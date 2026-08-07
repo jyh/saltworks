@@ -194,12 +194,24 @@ draw. **The number is the maestro's to raise; the ceiling is no longer unknown.*
    it cannot exclude an error the specification itself carries.
 3. **120 vectors is a spot check**, not coverage: 2^32 words against a 2^992
    state space. Its value is in its corners, not its count.
-4. **Mutually-agreed-ILLEGAL words are not representable.** `Vec.actual` is
-   `Option St` and `checkFull` compares against `some`, so *"our `decode`
-   rejects this word AND Spike traps on it"* — real agreement, and the case
-   where a third-party word is most informative — has no `Vec`. The generator
-   emits only words both sides accept. **Closing this needs a consumer-side
-   change and is not the generator's to make.**
+4. ✅ **Mutually-agreed-ILLEGAL words — GAP NOW CLOSED, as two lists rather
+   than as `Vec`s.** The format still cannot express it (`Vec.actual` is
+   `Option St`), so the rejection arm is stated separately in
+   `SpikeVectors.lean` — **and it splits into two classes that must never be
+   merged**:
+   ```
+   A  Spike TRAPS · SAIL TRAPS · decode = none    40 words   GENUINE AGREEMENT
+   B  Spike EXECUTES · decode = none              22 words   DISAGREEMENT,
+                                                             AND OURS IS RIGHT
+   ```
+   ⭐ **Class B is where "witness, not oracle" stops being a slogan.** They are
+   legal RV32I — `LUI`, `JAL`, loads, stores, shifts, `SUB`, `BNE` — that Spike
+   executes and Slice A excludes. *A seat treating the witness as an oracle
+   reads 22 disagreements as 22 bugs and "fixes" `decode` to accept them,
+   turning the five-instruction claim into "five instructions plus whatever the
+   simulator accepted."* **Every one of those disagreements is a PASS, and the
+   exclusion list is now a kernel-checked property of `decode` instead of
+   prose.**
 5. **No backward branches**, per the consumer's stated promise.
 
 ---
