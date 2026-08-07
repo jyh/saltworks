@@ -741,6 +741,30 @@ correction is never *be more careful*; it is *say which object you mean*:
 | `1,455` vs `1,466` | **additions on one path** | **net on two paths** |
 | a green default build | the **closure** that was built | the **leg** |
 | a lane-marker hit | text **containing** the marker | a **leak** |
+| `ping` 100% loss | **ICMP** reachability (macOS stealth mode drops it) | is the host **up**? — port 22 answered in the same second |
+| `ssh` *"Permission denied"* ×3 | **one** of three unrelated layers | **which** layer — see below |
+
+⭐ **THE SHARPEST INSTANCE THE DAY PRODUCED IS THE LAST ONE, because the
+string was IDENTICAL all three times.** Recovering the migration
+transcripts required three fixes, and every failure printed the same nine
+words:
+
+```
+  1. hostname unknown     jaoquin.local — the typo is IN the hostname, so every
+                          probe (joaquin/macbook/jyh-laptop/mDNS) came back empty
+  2. key not authorized   fixed by the human; `ssh -v` then reports
+                          "Server accepts key: ...SHA256:NIb/WCce..."
+  3. key is ENCRYPTED     Proc-Type: 4,ENCRYPTED — signing needs a passphrase a
+                          non-tty invocation cannot supply.  STILL OPEN.
+```
+
+**`Permission denied (publickey,password,keyboard-interactive)` was a true
+statement at every layer and never once said which one.** Only `ssh -v`
+distinguished them — `identity file id_dsa type -1` (unloadable) and
+`Will attempt key: id_dsa explicit` revealed that this machine's
+`~/.ssh/config` sets `IdentityFile` **globally, outside any Host block**,
+so **the one key that cannot load is the only key ever offered.** *A
+diagnosis that stops at the error text stops at layer 1 of 3.*
 
 ⇒ **Three seats independently arrived at the same fix, and it is not
 vigilance:** pin the run **id**, name the **branch**, state the **window**,
