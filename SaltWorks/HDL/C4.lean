@@ -98,6 +98,24 @@ theorem C4_lengths_agree {c : Circ} (h : CoreConforms c) (ins : Env) :
 -- arriving in a fifth costume. File-level `set_option` sidesteps it entirely.
 set_option maxRecDepth 8000
 
+/-! ### ⚠️ ONE CONJUNCT OF `CoreConforms` IS IMPLIED, NOT REQUIRED (math, 15:04)
+
+*I wrote `outs.length = stWidth` in as a hypothesis on math's 14:17 flag, and
+math then corrected their own brief: it is a CONSEQUENCE.* **`C4Spec` is an
+equality of LISTS, and `encD`'s length is `stWidth` unconditionally — so one
+`congrArg List.length` recovers it.**
+
+⇒ ***So the conjunct is belt-and-braces rather than necessity.*** **It stays,
+deliberately: `CoreConforms` is meant to be checkable on a CANDIDATE `core`
+BEFORE anyone has proved `C4Spec` about it, and at that moment the implication
+below is unavailable.** *A hypothesis that is redundant given the conclusion is
+still load-bearing before the conclusion exists.* -/
+
+/-- **The length obligation falls out of the specification itself.** -/
+theorem outs_length_of_C4Spec {c : Circ} (h : C4Spec c) : c.outs.length = stWidth := by
+  have := congrArg List.length (h (fun _ => false))
+  rwa [sem, List.length_map, encD, List.length_map, List.length_range] at this
+
 /-! ### CONTROLS — every obligation must be able to FAIL
 
 *`CoreConforms` is a predicate I wrote about a circuit that does not exist yet.
@@ -148,6 +166,7 @@ theorem conformance_does_not_determine_semantics :
 
 #audit_axioms CoreConforms seenWord C4Spec
 #audit_axioms C4_lengths_agree
+#audit_axioms outs_length_of_C4Spec
 #audit_axioms coreShort coreNarrow coreShaped
 #audit_axioms coreShort_is_rejected
 #audit_axioms coreNarrow_is_rejected
