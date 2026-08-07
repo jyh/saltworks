@@ -81,9 +81,21 @@ the chain is new; only the design on top of it is.
   per cycle, at the flop boundary (Q-leaves/D-roots),
   `(Silicon.runP ins [] (emitN (compile core)))` projected at the
   D-roots `=` the state encoding of `SaltWorks.ISA.step` applied at the
-  Q-leaves' decoding — composed with `emitN_sem` (landed, `8c4f8d7`) so
-  the new obligation is `sem (compile core) = encoded step`, at the
-  `Circ` level, where `sem` belongs. The EXACT statement is C1+C3's
+  Q-leaves' decoding — composed with `emitPipeline'_sem` (landed) —
+  NOT `emitN_sem`: ROUTE B per compiler's 07f6040, ADOPTED. The theorem
+  observes `emitN (normalize (opt (compile core)))` — the netlist that
+  ACTUALLY tapes out; its hypothesis `(compile core).wf = true` holds
+  by construction (SSA discharged internally, not C4's to carry);
+  `encD` indexes the NORMALIZED port list.
+  **PARTIALITY (maestro DRAFT ruling 8/7 per compiler's a1d8c1e
+  pricing; Captain ratification pending): OPTION 1 — total `stepT` on
+  words + the COMPATIBILITY OBLIGATION as a named theorem
+  (`stepW s w = some s' → stepT s w = s'`); undecodable words =
+  defined NOP-advance (PC+4), an explicit v1 semantics sentence,
+  superseded when trap machinery lifts R5's exclusion. Grounds: the
+  guard would silence C4 on a MEASURED 99.80% of the word space; the
+  validity bit costs gates on every instruction; option 1 alone keeps
+  the netlist total and pins disagreement to a written theorem.** The EXACT statement is C1+C3's
   first joint artifact and must be COMPOSITION-CHECKED (a `Scratch`
   elaboration of the statement's type, no proof) before either freezes.
   All identifiers fully qualified: `SaltWorks.ISA.step`, never bare
