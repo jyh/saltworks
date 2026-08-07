@@ -195,6 +195,41 @@ theorem aluSelect_ssa : aluSelect.ssa = true := by decide +kernel
 /-- **`wf` by the structural route** (1,445 gates). -/
 theorem aluSelect_wf : aluSelect.wf = true := Circ.wf_of_ssa aluSelect_ssa
 
+
+/-! ## ⭐ DOES IT SELECT? — the behavioural certificate this file did not have
+
+**Before today this file carried NO theorems.** *It is a 1,445-gate mux tree that
+`core` depends on totally, and nothing said it picks the operand the select bits
+name.* ⇒ **Found by census after the same gap turned up in three other files
+(`docs/hdl-c4-core-assembly-plan-0807.md`).**
+
+*Driver: operand result `m` alone holds all-ones, so bit 0 of the output is
+`true` exactly when the tree selected `m`. One bit distinguishes all sixteen
+select values — which is what makes this total over the select space AND cheap.
+No division: one comparison per net, per the `ReadTree` lesson that output count
+multiplies `sem`'s dominant cost.* -/
+
+/-- Operand result `m` alone holds all-ones; the four select bits carry `sel`. -/
+def asOneHot (m sel : Nat) : Env := fun n =>
+  if n < asOps * asW then decide (m * asW ≤ n ∧ n < m * asW + asW)
+  else decide (sel.testBit (n - asOps * asW))
+
+def asBit0 (m sel : Nat) : Bool := (sem aluSelect (asOneHot m sel)).getD 0 false
+
+/-- Every select value picks the operand it names — and the six PADDING slots
+(10…15) read the shared constant and yield zero, which is the one behaviour the
+`asPad = 16` design decision is responsible for. -/
+def asSelectsOK (m : Nat) : Bool :=
+  (List.range 16).all fun sel => asBit0 m sel == decide (sel = m)
+
+/-- ⭐ **THE ALU SELECT SELECTS** — all sixteen select values, kernel-checked. -/
+theorem aluSelect_selects : asSelectsOK 3 = true := by decide +kernel
+
+/-- …and again at the LAST real operand (`sra`, index 9), so the first is not an
+accident of where `3` sits in the tree, and the 9/10 padding boundary is
+exercised. -/
+theorem aluSelect_selects_last : asSelectsOK 9 = true := by decide +kernel
+
 #audit_axioms asW
 #audit_axioms asOps
 #audit_axioms asPad
@@ -213,6 +248,9 @@ theorem aluSelect_wf : aluSelect.wf = true := Circ.wf_of_ssa aluSelect_ssa
 #audit_axioms aluSelect
 #audit_axioms aluSelect_ssa
 #audit_axioms aluSelect_wf
+#audit_axioms asOneHot asBit0 asSelectsOK
+#audit_axioms aluSelect_selects
+#audit_axioms aluSelect_selects_last
 #audit_axioms aluSelectCuts
 #audit_axioms zrIn
 #audit_axioms zrLevels

@@ -213,6 +213,40 @@ theorem regNext_ssa : regNext.ssa = true := by decide +kernel
 /-- **`wf` for a circuit `decide` cannot reach.** -/
 theorem regNext_wf : regNext.wf = true := Circ.wf_of_ssa regNext_ssa
 
+
+/-! ## ⭐ THE 32×32 INSTANCE — certified at the size that actually ships
+
+⛔ **`regNext4_correct_on_all_enables` and `regNext8_correct` are about
+`regNextN 4 4` and `regNextN 8 8`. `regNext` — the 3,104-gate `regNextN 32 32`
+that goes into `core` — HAD NO BEHAVIOURAL CERTIFICATE.** *Small instances of the
+same generator are good evidence the GENERATOR is right; they are not a statement
+about the instance that ships, and the distinction is invisible in a green
+build.*
+
+*Reading all 1,024 outputs is the OOM zone (`sem` walks a ~3,000-deep chain once
+per output). Reading ONE output bit is seconds — the `ReadTree` lesson again.* -/
+
+/-- Write-enable one-hot at `wr`; the result word and the current-register words
+each held at a single value. -/
+def rnEnv (wr : Nat) (resBit curBit : Bool) : Env := fun n =>
+  if n < 32 then decide (n = wr)
+  else if n < 64 then resBit
+  else curBit
+
+/-- Register 0, bit 0 of the next state. -/
+def rnBit (wr : Nat) (resBit curBit : Bool) : Bool :=
+  (sem regNext (rnEnv wr resBit curBit)).getD 0 false
+
+/-- ⭐ **AT 32×32: an ENABLED register takes the result.** -/
+theorem regNext32_writes_when_enabled : rnBit 0 true false = true := by decide +kernel
+
+/-- ⭐ **…a DISABLED register does not** — same result bit, enable moved. -/
+theorem regNext32_holds_when_not_enabled : rnBit 1 true false = false := by decide +kernel
+
+/-- ⭐ **…and a disabled register HOLDS ITS CURRENT VALUE**, which is the half a
+"writes nothing" check cannot see. -/
+theorem regNext32_holds_current : rnBit 1 false true = true := by decide +kernel
+
 #audit_axioms rnWe
 #audit_axioms rnCur
 #audit_axioms rnIn
@@ -221,6 +255,10 @@ theorem regNext_wf : regNext.wf = true := Circ.wf_of_ssa regNext_ssa
 #audit_axioms regNext
 #audit_axioms regNext_ssa
 #audit_axioms regNext_wf
+#audit_axioms rnEnv rnBit
+#audit_axioms regNext32_writes_when_enabled
+#audit_axioms regNext32_holds_when_not_enabled
+#audit_axioms regNext32_holds_current
 #audit_axioms rnRun
 #audit_axioms rnSpec
 #audit_axioms regNext4_correct_on_all_enables

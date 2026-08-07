@@ -154,6 +154,33 @@ theorem shifter32_ssa : shifter32.ssa = true := by decide +kernel
 /-- **`wf` by the structural route** (486 gates). -/
 theorem shifter32_wf : shifter32.wf = true := Circ.wf_of_ssa shifter32_ssa
 
+
+/-! ## ⭐ DOES IT SHIFT? — the behavioural certificate this file did not have
+
+**Before today this file carried NO theorems.** *A 486-gate log shifter whose
+docstring gives one equation, and nothing checked that the gates implement it.*
+
+⚠️ **AND THE CERTIFICATE PINS THE FACT THAT MATTERS FOR `core`: THIS IS ONE
+DIRECTION, LOGICAL.** `nIn = 37 = 32 data + 5 shamt` — **no mode bit.** *So
+`aluSelect`'s `srl` slot is fed by this; its `sll` and `sra` slots have no
+producer, which is the open decision in the C4 assembly plan.* -/
+
+/-- Data on nets `0…31`, shift amount on `32…36`. -/
+def bsEnv (w : BitVec 32) (s : Nat) : Env := fun n =>
+  if n < bsW then w.getLsbD n else s.testBit (n - bsW)
+
+/-- The shifter agrees with `BitVec`'s own `>>>` at every shift amount. -/
+def bsOK (w : BitVec 32) : Bool :=
+  (List.range 32).all fun s =>
+    sem shifter32 (bsEnv w s) == (List.range 32).map (fun k => (w >>> s).getLsbD k)
+
+/-- ⭐ **IT IS A LOGICAL RIGHT SHIFT — all 32 shift amounts, against `BitVec`'s
+own operator.** -/
+theorem shifter32_is_a_right_shift : bsOK 0xDEADBEEF = true := by decide +kernel
+
+/-- A second word, so the first is not passing on a pattern's symmetry. -/
+theorem shifter32_second_word : bsOK 0x0F0F1234 = true := by decide +kernel
+
 #audit_axioms bsW
 #audit_axioms bsStages
 #audit_axioms bsIn
@@ -167,6 +194,9 @@ theorem shifter32_wf : shifter32.wf = true := Circ.wf_of_ssa shifter32_ssa
 #audit_axioms shifter32
 #audit_axioms shifter32_ssa
 #audit_axioms shifter32_wf
+#audit_axioms bsEnv bsOK
+#audit_axioms shifter32_is_a_right_shift
+#audit_axioms shifter32_second_word
 #audit_axioms shifter32Cuts
 
 end SaltWorks.HDL
