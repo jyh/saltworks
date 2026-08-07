@@ -18,6 +18,8 @@ so prose inside docstrings that happened to begin a line with those words was
 read as a declaration -- it "found" theorems named `is`, `goes`, `rather`,
 `above` and `mentioning`.  Comments are stripped first for exactly that reason.
 A tool that scans Lean source and does not strip comments is measuring the prose.
+That applies to BOTH sides of the comparison: an `#audit_axioms` line quoted
+inside a docstring is prose about auditing, not an audit.
 """
 import re, sys, glob, os
 
@@ -47,8 +49,13 @@ def main() -> int:
         raw = open(p).read()
         body = strip_comments(raw)
         thms = set(re.findall(r'^theorem\s+([A-Za-z_][A-Za-z0-9_\'\.!?]*)', body, re.M))
+        # BOTH sides read from the comment-stripped body.  An `#audit_axioms`
+        # line QUOTED in a docstring is not an audit -- and there is a real one
+        # in SaltWorks/Tactic/AuditAxioms.lean, where the tactic documents itself
+        # by quoting its own syntax.  Reading the raw source would credit a
+        # theorem as audited on the strength of prose about auditing.
         listed = set()
-        for m in re.findall(r'^#audit_axioms\s+(.*)$', raw, re.M):
+        for m in re.findall(r'^#audit_axioms\s+(.*)$', body, re.M):
             listed.update(m.split())
         total_thm += len(thms)
         missing = sorted(thms - listed)
