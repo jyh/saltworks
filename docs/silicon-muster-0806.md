@@ -184,6 +184,48 @@ flops, the fabricated netlist has **52**. The fix is the flop treatment the cone
 census already describes (Q-pins as cone leaves, D-pins as roots — D3.5's and
 D4's own decomposition, one level up). **Design work, not another table row.**
 
+### …AND THEN THE NIGHT SHIFT, 20:30–22:00 — SIX LANDINGS, AND THREE OF THEM ARE KILL-CHECKS
+
+**THE CAPTAIN'S FLOP TREATMENT** (`cc401c9`). Q-pins as leaves, D-pins as roots,
+paired by position. **The fabricated netlist imports for the first time**: 52
+flops cut, 70 inputs (18 design + 52 state), 76 outputs, 524 gates.
+`Fabric.lean` is **in the hub's import closure**, not merely on disk.
+⚠️ **Soundness checked, not assumed**: the obvious test — do all flops share a
+CLK net? — is **wrong** here (after CTS they sit on **eight**), so each clock is
+traced through the buffer tree to a common **(root, parity)**.
+
+**THE KEEP-ARM FOLLOW-THROUGH** (`f5b6e83`). `--cut` at the surviving
+`(* keep *)` boundaries ⇒ **every cone in the netlist TT will fabricate is now
+≤ 21 bits, 100 % inside the kernel ceiling**, as a Lean datum that builds.
+`uo_out` falls 36 → 21, next-state 22 → 7. Agrees exactly with `cones.py --cut`.
+
+**C0 SEAM CENSUS, SILICON HALF** (`d618178`) — **two findings on C4, the
+council's headline.** `compile` has **zero declarations in the tree**; and
+`sem (emitN (compile core)) = step` **does not typecheck** (`sem` takes a `Circ`,
+`emitN` returns a `Silicon.Netlist`) — **run with a control, not argued.** The
+landed `emitN_sem` supplies the correct shape, which proves something *stronger*.
+✅ Adopted by the maestro into freeze **v0.1**.
+
+**R3 — THE REGFILE: DOES NOT PASS** (`7e9f6a3`). 1056 cones, **max 36, 93.9 %**,
+the failure **entirely in the read ports** and uniform (all 64 at exactly 36).
+Cycle induction **does** elaborate at 992-bit state — and is *free*, because
+`iterate_congr` inducts on the input list, not the state.
+⛔ **And finding this exposed a SOUNDNESS BUG in `cones.py` that had already told
+me R3 PASSED** (`max 6, 100 %`): escaped vector nets became phantom constants.
+**I caught it only because it contradicted a prediction written to disk first.**
+
+**R2 — THE ALU CONE: HALF RIGHT** (`28db1e5`). The slice obligation is **landed
+and proved** (`slice_ok`, 3 inputs, 8 cases). But the **synthesised** netlist has
+no slices: cutting at all 33 kept carry nets moved the max only **65 → 62**,
+because abc re-derived every carry as lookahead. 🎯 **`(* keep *)` preserves the
+NET, not the DEPENDENCY** — and this does **not** retract ruling 4a, re-measured.
+
+**THE READBACK CHECK** (`7090b9f`) — the one the docstring claimed for weeks.
+Now real, and **not a mirror**: it takes cell functions, output pins, flop
+identification and next-state from the **vendor Liberty**, so corrupting `EXPAND`
+or `SEQ_MODELS` makes it fail (measured). ⭐ The vendor **independently confirmed**
+the hand-derived `edfxtp` model: `next_state = (D&DE) | (IQ&!DE)`.
+
 ## 4. COST
 
 Roughly **20 CI runs** across five branches (~4 min each, zero shuttle cost);
@@ -191,3 +233,15 @@ Roughly **20 CI runs** across five branches (~4 min each, zero shuttle cost);
 answered the STA question the pull was started for. **Twelve defects of my own
 found today; seven were caught by another seat's instrument or by a tool refusing
 me, five by me.** That ratio is the honest headline of my day.
+
+**Night shift adds four more of mine**, and the pattern held: a false `--check`
+claim in a docstring, `.index()` aliasing primary inputs, **"42 liberty theorems"
+that is not a count of anything (44 over 43 cells)**, and the `cones.py` phantom
+constant. **Three of the four were caught by an instrument or a prediction rather
+than by care** — and the fourth, the count, only because I re-derived a number
+instead of quoting my own commit message.
+
+⚠️ **THE ONE TO CARRY INTO THE COUNCIL:** `cones.py` reported a **clean pass** on
+the regfile. It did not warn, it did not degrade — **it printed a confident wrong
+number on the exact shape the CPU road is made of.** Without a pre-registered
+prediction on disk, *"max 6, 100 %"* would have gone on the bus as R3 passing.
