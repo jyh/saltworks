@@ -124,6 +124,12 @@ def incSlice (i : Nat) : List Gate :=
   else if i == 2 then
     -- carry-in to bit 2 is the constant 1, so sum = !a and carry = a
     [⟨incS i, .not i⟩, ⟨incBase i + 1, .and i i⟩]
+  else if i + 1 == adW then
+    -- TOP BIT: emit the sum only. The carry OUT of bit 31 is consumed by nothing
+    -- (`inc32.outs` is bits 0..31), so emitting it produced a DEAD gate — which
+    -- the silicon seat's 09:34 monolith run found as one of four dropped cells
+    -- and generously attributed to its own wiring. It was mine.
+    [⟨incS i, .xor i (incC i)⟩]
   else
     [⟨incS i, .xor i (incC i)⟩, ⟨incBase i + 1, .and i (incC i)⟩]
 
