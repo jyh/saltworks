@@ -345,3 +345,183 @@ proof of that claim, not a promise about it: `native_decide` would have put
   an oversight — `sorts_of_sorts_bool h α` reads better with the carrier named,
   and `zeroOne_principle h v` infers it from `v`. If S3(b) finds this irritating
   it is a free change.
+
+---
+
+## STACK-S3(a)-2 — comparator networks PERMUTE (one proof, two lanes)
+**2026-08-07 · Opus executor · `SaltWorks/Stack/Perm.lean` (new module)**
+
+### What landed
+
+The half of `SortsTo` that `ZeroOne.lean` did not prove. Twenty-nine
+declarations, all sorry-free, all audited.
+
+- **The core.** `runNet_perm : ∃ σ : Equiv.Perm (Fin n), runNet net v = v ∘ σ` —
+  at arbitrary `n`, arbitrary `net`, arbitrary `α : Type u` in an arbitrary
+  universe with `[LinearOrder α]`, matching `zeroOne_principle`'s generality
+  exactly. Built on `applyComp_perm`, whose witness is `Equiv.refl` when the pair
+  is already ordered and `Equiv.swap c.1 c.2` when it is not.
+- **The consumers' forms.** `runNet_ofFn_perm` /`ofFn_perm_runNet`
+  (`List.Perm`, both orientations), `runNet_ofFn_multiset` (multiset equality),
+  `runNet_ofFn_nodup` and `runNet_injective` (KB3).
+- **The carrier bridge.** `isSorted_iff_pairwise_ofFn` — `IsSorted` on
+  `Fin n → α` is `List.Pairwise (· ≤ ·)` on `List.ofFn`.
+- **The combined general statement.** `sortsTo_ofFn_of_sorts_bool`, and
+  `batcher8_sorts_perm` / `batcher4_sorts_perm`.
+- **⭐ The deliverable at S1's order.** `batcher8_sortsTo_word`,
+  `batcher4_sortsTo_word`, `batcher8_sortsToV_word` — literally
+  `SortsTo (List.ofFn v) (List.ofFn (runNetW batcher8 v))` and its `Vector` form.
+
+### Why the `Equiv.Perm` form, and not the multiset or `List.Perm` form
+
+The brief said to pick the form that COMPOSES. Only one of the three does.
+`runNet` is a `foldl`, so the induction must apply the tail's conclusion to a
+*different* input — the already-comparator'd `applyComp c v`. On the `Equiv` form
+that step is `(v ∘ σ) ∘ τ = v ∘ (τ.trans σ)`, closed by `rfl`. On a multiset or
+`List.Perm` form the induction hypothesis hands back a *relation*, not a
+rearrangement, so there is nothing to compose with and the cons step stalls. The
+weaker forms are each one line downstream of the strong one, so nothing was lost
+by taking it first — and `σ` is exactly the data BB-1's routing story wants.
+
+One order trap inside the core proof, found by the elaborator rather than by
+thought: it is `τ.trans σ` and not `σ.trans τ`. `Equiv.trans` applies its FIRST
+argument first, and the head comparator's `σ` acts on the result of the tail's
+`τ`. Noted in the docstring so the next reader does not re-derive it.
+
+### ⭐ THE ORDER-INTERFACE FINDING — and it is worse than the brief guessed
+
+The brief asked whether the combined statement can be instantiated at S1's signed
+order. Three facts, all measured:
+
+1. **`Sorts batcher8 Word` does not elaborate.** There is no `LinearOrder Word`
+   instance, by S1's deliberate design. Confirmed: mathlib's `Mathlib/Data/
+   BitVec.lean` registers only `CommSemiring`/`CommRing`; `grep -F LinearOrder`
+   over it returns nothing. So the two modules genuinely do not compose on
+   their own.
+2. **⚠️ The obvious fix is a SILENT WRONG ANSWER.** The natural move is
+   `letI := wordSignedOrder` and then plain `≤`. That does not do what it looks
+   like. Probed with `set_option pp.explicit`:
+   `fun (a b : Word) => letI := wordSignedOrder; a ≤ b` elaborates to
+   `@LE.le Word (@instLEBitVec 32) a b` — **core's UNSIGNED order**. Typeclass
+   search answers the `LE Word` goal from `BitVec`'s own direct instance and
+   never walks down `LinearOrder → PartialOrder → Preorder → LE` from the local
+   bundle. The first attempt at `wordSignedOrder_le` was written this way and
+   failed `Iff.rfl`; that failure is what exposed it. It is now pinned as a
+   kernel certificate, `letI_le_is_still_unsigned`: signed, `-1 ≤ 1` holds, and
+   the `≤` a `letI` block actually elaborates rejects that pair. If a toolchain
+   ever changes the resolution order, that theorem fails the build and the
+   warning gets retired deliberately instead of rotting.
+3. **The composition works when the bundle is handed over by hand.**
+   `wordSignedOrder : LinearOrder Word := LinearOrder.lift' BitVec.toInt _` is an
+   `abbrev` (Lean requires class-typed definitions to be reducible) and is
+   **never an `instance`, not even a `local` one**. `runNetW net v` is
+   `@runNet _ Word wordSignedOrder net v`. No `≤` notation appears anywhere in
+   the `Word` section. The one place the bundle's `≤` must be recognised as
+   `wle` is `wordSignedOrder_le`, spelled through the full projection chain, and
+   it is `Iff.rfl` — `LinearOrder.lift'` sets `le := fun a b ↦ f a ≤ f b` and
+   `wle a b` is by definition `a.toInt ≤ b.toInt`.
+
+**VERDICT: `SortsTo` for `batcher8` at S1's signed order is REACHABLE and
+REACHED** — `batcher8_sortsTo_word`. Nothing was weakened to get there: no global
+instance, no `local instance`, no second order behind `≤`. What remains
+unreachable, and should, is `SortsTo` from an *inferred* instance.
+
+A bonus for S3(b): the bundle's `min`/`max` unfold to
+`if a.toInt ≤ b.toInt then a else b` and its mirror — a select on the negation of
+`SLT`, i.e. the only comparison Slice A can build. Pinned as `wordSignedOrder_min`
+/ `wordSignedOrder_max` (both `rfl`) rather than left to be rediscovered when a
+refinement proof matches against an unexamined `LinearOrder.lift'` field.
+
+### Non-vacuity — the control IS the argument for the node
+
+`applyDup` is `applyComp` with the `max` changed to `min`: one character. Then
+
+- `applyDup_sorts` — the mutation **still sorts** (its output is constant), so
+  `ZeroOne.lean`'s conclusion survives it intact;
+- `applyDup_not_perm` — the mutation **provably does not permute**: it drops
+  `true` and duplicates `false`.
+
+Together: sortedness does not imply the permutation half, so everything in this
+module is new content and not a repackaging of `batcher8_sorts`. Three more
+controls: `batcher8_perm_not_refl` (Batcher really moves values, so
+`runNet_perm`'s witness is not trivially `Equiv.refl`), `batcher8_word_run` (a
+concrete signed 8-word run pinned against its literal output, `decide +kernel`),
+and `batcher8_word_run_not_unsigned` (that output is NOT unsigned-sorted, because
+`-5` is `0xFFFFFFFB` — so `runNetW` demonstrably computes with the signed
+comparator).
+
+### What mathlib supplied — and what it did not
+
+FOUND, not proved:
+
+- `Equiv.Perm.ofFn_comp_perm` (`Mathlib/Data/List/FinRange.lean:73`) —
+  `ofFn (f ∘ σ) ~ ofFn f`. The entire `Equiv`→`List.Perm` bridge, one line.
+- `List.pairwise_ofFn` (`Mathlib/Data/List/OfFn.lean:119`) — the `IsSorted` /
+  `List.Pairwise` carrier bridge.
+- `LinearOrder.lift'` (`Mathlib/Order/Basic.lean:792`), `List.nodup_ofFn`,
+  `List.Perm.nodup` (core `Init/Data/List/Perm.lean:527`), `Multiset.coe_eq_coe`,
+  `Vector.toList_ofFn` / `Vector.ofFn_getElem` (core), `Equiv.swap` with
+  `swap_apply_left` / `swap_apply_right` / `swap_apply_of_ne_of_ne`.
+
+NOT supplied: mathlib still has nothing on sorting networks, so `applyComp_perm`
+and `runNet_perm` are new here, as `zeroOne_principle` was.
+
+### Where it went, and the import owed
+
+**New module `SaltWorks/Stack/Perm.lean`, not an extension of `ZeroOne.lean`.**
+The reason is the dependency direction, not taste: the `Word` half needs
+`Stack.Spec`, which imports `HDL.ISA`. Putting that import into `ZeroOne.lean`
+would drag the ISA into the 0-1 principle — the one module in this campaign that
+is pure, reusable mathematics with no machine in it. `Perm.lean` takes the
+dependency instead and `ZeroOne.lean` is untouched.
+
+**`SaltWorks.Stack.Perm` is NOT in `SaltWorks.lean`** — import owed to the
+maestro (in the commit message). Consequence, stated plainly: the `EXIT=0` full
+build below **did not compile this module**; the targeted build did.
+
+### Attempts, build, audit
+
+- **`runNet_perm` and `applyComp_perm`: first attempt, both.** So were all seven
+  corollaries, the carrier bridge, and every combined statement.
+- **Three declarations needed a second pass, all three in the `Word` section and
+  all three the same root cause** — the instance-resolution finding above:
+  `wordSignedOrder` (missing `@[reducible]`, i.e. wanted to be an `abbrev`),
+  `wordSignedOrder_le` (`letI` picked the unsigned instance), and
+  `batcher8_sortsToV_word` (`simpa` could not see `v.toList` as
+  `List.ofFn (v[·])`; fixed with `Vector.ofFn_getElem`). No third attempt
+  anywhere; nothing flagged.
+- **Build:** `saltbuild.sh SaltWorks.Stack.Perm` → `saltbuild EXIT=0`, 679 jobs,
+  **0 warnings** (fresh rebuild with the `.olean` deleted, grepped). Full
+  `saltbuild.sh` from `saltworks` → `saltbuild EXIT=0`, 8619 jobs; its one
+  warning is pre-existing in `HDL/CompareExchange.lean:337`, a file this node
+  did not touch.
+- **Axioms:** all 29 declarations audited two ways — `#audit_axioms` in-file
+  (build-failing) and an out-of-band `#print axioms` sweep in `ScratchMATHPERM.lean`
+  (gitignored, not committed). They agree. Every declaration is a subset of
+  `[propext, Classical.choice, Quot.sound]`; the `Word`-side results use only
+  `[propext, Quot.sound]`, and `letI_le_is_still_unsigned` depends on **no axioms
+  at all**. No `sorry`, no `native_decide`, no new axioms.
+- **Honest line count:** 454 lines total — **149 lines of definitions and
+  proofs**, 11 lines of `#audit_axioms`, 294 lines of docstrings / module header
+  / blanks. The header is long for one reason: the instance-resolution finding is
+  a trap that costs a wrong theorem if missed, and it belongs where the next
+  reader of this module will hit it.
+
+### Left undetermined
+
+- **`SortsRegs` was not touched.** This node closes S1↔S3(a) at the `List`/
+  `Vector` level. The register-level spec (`SortsRegs rs s s'`) is about `step`
+  and belongs to S3(b)'s refinement, which is where `runNetW`'s `min`/`max` meet
+  `SLT`.
+- **`runNet_perm` gives `∃ σ`, never a *named* `σ`.** Nothing here computes the
+  permutation Batcher's network induces on a given input, and nothing needs to.
+  If BB-1 later wants the routing map as data rather than as an existential, the
+  honest route is a `def` returning the `Equiv` by the same `foldl`, with
+  `runNet_perm` re-derived from it — a rewrite of ~20 lines, not a new idea.
+- **The general combined statement is a bare `∧`, not a `def`.** It could be
+  packaged as a carrier-generic `SortsToFn`, but `Spec.lean` already owns the
+  name `SortsTo` at `List Word` and a second spec-shaped definition in a second
+  module is how two specs drift apart. Left as an `∧` deliberately.
+- **`applyDup`'s controls are at `n = 2` over `Bool`.** That is enough to break
+  the implication (one counterexample suffices), but it is not a claim about how
+  a *whole* mutated network behaves. No such claim is made.
