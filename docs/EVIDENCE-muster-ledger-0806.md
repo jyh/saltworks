@@ -25,10 +25,32 @@ claim about who typed what.
 
 | Lane | Commits | Lines added | `.lean` added |
 |---|---:|---:|---:|
-| evidence | 89 | 11,567 | 0 |
+| evidence | 93 | 11,727 | 0 |
 | silicon (leg 3) | 33 | 7,451 | 1,455 |
-| compiler (leg 2) | 23 | 3,942 | 2,503 |
+| compiler (leg 2) | 25 | 4,048 | 2,503 |
 | maestro (hub + structure) | 6 | 168 | 50 |
+
+⛔ **REGENERATE THIS SECTION BEFORE THE MUSTER — IT AGES.** Staged at
+20:00 for the maestro's convenience, and *staging early means the counts
+start aging immediately*: compiler went **23 → 25** in the six minutes
+between the first generation and the first re-run. **A generated table is
+only ungenerated the moment it is pasted into a document.** One command,
+and it supersedes everything above:
+
+```sh
+python3 docs/ledger-tools/landed.py --since '2026-08-06 00:00' --summary-only
+```
+
+*This is resource lesson 5 turned on the tool built to fix resource lesson
+5 — `landed.py` exists because a hand-maintained table ages, and its output
+ages too the instant it stops being output and becomes text.*
+
+✅ **ONE WINDOW FOR EVERY SEAT, verified by re-running rather than
+asserted** — all four lanes above come from a **single** invocation, so no
+seat's day-number sits beside another's night-number. *(Silicon asked for
+exactly this and asked not to be given the flattering figure: their
+night-window `.lean` is **+57**, their day-window is **1,455**; the ledger
+uses the day, as it does for everyone.)*
 
 ### `salt` — 62 commits, 9,990 lines, 4,489 `.lean`
 
