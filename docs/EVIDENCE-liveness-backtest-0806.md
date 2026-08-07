@@ -166,3 +166,84 @@ believed.** The rate is not falling, which suggests it is a property of
 building instruments rather than a run of bad luck; what has changed is that
 the interval between shipping and catching is now measured in hours rather
 than left to a postmortem.
+
+---
+
+# ADDENDUM — scored against TONIGHT's traffic (maestro's 19:16 order)
+
+The afternoon backtest scored this detector against a régime whose largest
+inter-post gap was **111 min against a 360-min threshold** — 3.2× headroom,
+so it could not fire whatever happened. The order was to score it against
+tonight instead: a genuinely different régime, five seats, **109 bus posts
+between 17:00 and 20:00**. What that found is not what I expected.
+
+## 1. ⛔ I MISREMEMBERED MY OWN TIMELINE, AND THE LEDGER CORRECTED ME
+
+I set out to use my own 18:0x jam as the detector's **first ground-truth
+positive** — a seat that demonstrably needed intervention, since the maestro
+had to nudge me. I recalled the gap as **82 minutes** (17:23 → 18:45).
+
+**It was not.** Measured from the bus: `17:23 → 18:08` = **45 min**, then
+`18:12 → 18:45` = **33 min**. I had forgotten two posts I made at 18:08 and
+18:12. **My largest real gap tonight was 45 minutes** — inside the evening's
+normal range.
+
+*The seat that owns the ledger misremembered its own timeline by 82%, in the
+direction that made its story better, about events three hours old.* Caught
+only because the claim was checked before it was published. **That is the
+argument for the ledger, made against its author.**
+
+## 2. THE TWO SIGNALS DIFFER BY ~300×, AND SHARE ONE THRESHOLD
+
+`fleet_hygiene` pairs two independent signals and applies **the same
+`QUIET_HOURS = 6.0`** to both:
+
+| Signal | Verdict it drives | median | p90 | **max, whole day** | headroom to 360 min |
+|---|---|---:|---:|---:|---:|
+| **bus-post gap** (per seat) | **SILENT** | 6.0 min | 28 min | **111 min** | **3.2×** |
+| **transcript idle** (per session) | **STALLED** | **0.02 min** (1.2 s) | 0.3 min | **67.4 min** | **5.3×** |
+
+Evening only, bus posts: median **3.0 min**, p90 16 min, max **45 min**.
+
+⛔ **One constant governs two quantities whose medians are 300× apart.** A
+threshold merely loose for human-paced bus posts is absurd for machine-paced
+transcript activity, where the normal gap is **just over a second**. Neither
+can fire — for different reasons, at different scales — and the shared
+constant hides that.
+
+## 3. THE HUMAN'S THRESHOLD IS ~45 MIN. THE INSTRUMENT'S IS 360.
+
+The only intervention that actually happened tonight was the **maestro
+nudging this seat**, triggered by reading tmux panes, at a bus gap of about
+**45 minutes**.
+
+⇒ **The fleet operates to a ~45-minute standard and its instrument is
+calibrated to 360** — **8× looser than the standard the humans in the loop
+actually apply**, which is why every intervention today came from a person
+and none from the tool.
+
+## 4. THE HONEST NEGATIVE: NO BUS-GAP THRESHOLD WORKS ALONE
+
+The tempting fix is to lower `QUIET_HOURS`. Measured, it does not survive:
+at **80 min** (two missed posts under the visibility law's ~40-min cadence)
+it fires **three times today** — math 111 min, maestro 104, silicon 104.
+**None was stalled; all three were deep in work.** *A seat mid-build and a
+seat that has stopped look identical on the bus.*
+
+**That is precisely why the detector has two signals** — and why the one I
+never scored, transcript idle, is the load-bearing half. It is the only one
+that can tell them apart, its normal value is **1.2 seconds**, and a
+67-minute transcript silence is genuinely abnormal rather than a busy
+afternoon.
+
+⇒ **RECOMMENDATION, derived rather than guessed: split the constant.**
+`STALLED` from the transcript distribution (max observed 67 min ⇒ ~3 h is
+meaningful and rarely false); `SILENT` from the visibility law's own
+published cadence (~40 min ⇒ two missed posts ≈ 80 min, **reported as a
+notice, not an alarm**, since it is a bus-hygiene fact rather than a health
+fact). **Neither number is invented: one comes from measured behaviour, the
+other from a rule the fleet already adopted.**
+
+⚠️ **Not implemented tonight.** Changing an alarm threshold on the evening
+the fleet goes unattended is the wrong moment to discover I was wrong about
+it. Filed with its measurements, for a ruling at muster.
