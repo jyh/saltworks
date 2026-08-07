@@ -83,3 +83,54 @@ with no >20 min gap; duration is last−first (60 s floor). Reading
 before the first message leaves no trace, so the figure under-counts
 and is published as a floor, never adjusted upward by estimate.
 Untagged blocks are reported as UNTAGGED and folded into nothing.
+
+## ADDENDUM 2 — 2026-08-06 evening, EVIDENCE seat. Two places the frozen
+## design and ADDENDUM 1 were both silent, found by moving the fleet from
+## the laptop to the Mac Mini. The design above is unchanged; these record
+## what the move exposed and what was built in response.
+
+**H. A HOLE IN THE MIDDLE OF THE RECORD.** §E ("unobserved ≠ silent")
+models one direction only — a commit PREDATING the earliest readable
+transcript is excluded from every share. The migration produced the other
+direction. The runbook re-synced the repos and the seat kit before
+cutover but **not `~/.claude/`**, so the transcript record stops at
+**14:07:56** while git carries fleet work to **14:30:08**. Read naively,
+that becomes the campaign's longest silence window (0.9856 h, 5 commits),
+**82% of which is missing record rather than measured absence.**
+
+The separating rule needs no new data: **a commit is made BY a session,
+and a session writes records**, so a commit landing where no personal-lane
+session wrote anything is proof of a hole. Implemented as §0 of every
+silence report (`ledger_common.activity_trace` / `record_distances` /
+`unrecorded_commits`). **Calibrated before it was shipped**, over 862
+commits spanning the leg-1 harvest and the campaign: median **0.4 s** from
+a commit to the nearest record, p99 **5.1 s**, largest normal **3.08 min**,
+the hole **22.19 min** — so the 5-minute tolerance sits in a measured void,
+and every run recomputes that separation rather than quoting this one.
+It flags 1 commit while clearing all 715 leg-1 commits **in the same
+pass**, which is what makes it non-vacuous.
+
+Reported, per the house rule, with the narrower question it answers:
+**it detects holes that SWALLOWED WORK, not holes as such.** A hole in a
+stretch where nothing was committed is invisible to it. That is tolerable
+only because the measure carrying the claim counts commits.
+
+**I. UNBLOCKING IS THE CATEGORY THE INSTRUMENT IS BLINDEST TO, AND §2
+NAMED IT WITHOUT NOTICING.** THE CLAIM = DIRECTING + REVIEWING +
+UNBLOCKING, where UNBLOCKING is *"logins, purchases, physical acts."*
+**A physical act leaves no transcript trace by definition.** The migration
+is the clean instance: from **14:07:56 to 15:25:53** the human was moving
+a five-seat fleet between machines — running rsyncs, enabling Remote
+Login, completing five separate account logins — and the record shows
+**one 0.9856 h silence window and one 29.4-minute gap, with no human time
+at all.** The engaged-time figure is a floor (§G) for the reason §G
+gives; **this is a second and larger reason, and it bites hardest on
+exactly the category that most obviously would not have happened without
+the human.**
+
+No estimate is applied — the floor stays a floor. What changes is the
+disclosure: **a silence window that coincides with an UNBLOCKING act is
+evidence of the human WORKING, not of the human being away**, and the
+report must not be quoted as though the two were the same. The
+counterfactual test in §2 is unaffected and, if anything, sharper: nothing
+in that hour would have happened without the human.
