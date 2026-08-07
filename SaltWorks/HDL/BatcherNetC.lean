@@ -297,25 +297,40 @@ element implement one `applyComp`, and does the fold carry".**
 ### The three obligations, in the order they should be attempted
 
 ```
-(a) THE KEY.  Define  key i = (¬active i, dest i)  ordered
-    active-before-idle then dest ascending.  This is the LinearOrder that
-    `runNet` is instantiated at, and `ce_rejects_idle_sorts_low` /
-    `ceC_frame_active_beats_idle` are already the proofs that the ELEMENT
-    orders by it.  NOTHING in the tree names this order yet -- it exists only
-    as behaviour.  ⇒ This is obligation zero and it is a DEFINITION.
-
-(b) PER-ELEMENT.  One element on a frame PAIR computes `applyComp` on the two
-    keys, in the payload window.  `ceC_step_eq` gives the cycle; the four frame
-    certificates in `CompareExchangeC` give whole frames; what is MISSING is the
-    bridge from "frames in, frames out" to "keys in, keys out".
-
-(c) THE FOLD.  `runNet` is `net.foldl (applyComp)`; `bnCBuild` is a fold over
-    the same list placing instances at `bnCOff e`.  `inst_compose_frame` /
-    `inst_compose_first` / `inst_compose_sem` (`Compose.lean`, `5868b9f`) are
-    exactly the induction step -- each instance computes what it computes and
-    does not disturb its predecessor.  The offsets chain by
-    `bnC_instances_are_disjoint`.
+(a) THE KEY      ✅ CLOSED.  cKey / cKeyLE (CompareExchangeC, d855e9b) with
+cKeyLE_eq_lex (1916c44) bridging to Mathlib's Prod.Lex --
+the order `runNet` actually sorts by.  Silicon caught that
+the bridge was load-bearing: without it (b) would not have
+connected to partial_load_selfrouting at all.
+(b) PER-ELEMENT  ✅ CLOSED AT THE ELEMENT (ca6c368).
+ceC_realises_cKey_when_active -- all 192 frame pairs where
+either line is active, exhaustive, kernel-checked.
+⛔ AND THE NAIVE FORM IS FALSE: 28 both-idle pairs fail,
+because cFrame ERASES an idle line's destination.  The
+element realises the key wherever either line is active,
+and the idle-idle case is a question the frame language
+cannot ask.
+(c) THE FOLD     ⛔ OPEN.  THIS IS ALL THAT REMAINS, and it is the whole of
+seam ①.  inst_compose_frame/_first/_sem (5868b9f) are the
+induction step; offsets chain by bnC_instances_are_disjoint;
+bnComps_eq_batcher8 identifies the comparator list with
+math's batcher8.
 ```
+
+🔑 **THE INDUCTION'S SHAPE, CORRECTED BY WHAT (b) TURNED OUT TO BE.** *I wrote at
+14:5x that (b) "is not a statement about one cycle — the decision LATCHES across
+the header, so the induction must carry the LATCH STATE."* ⇒ ***That is true of
+(b) and it is NOT true of (c), which is the useful part: (b) is stated
+frame-in/frame-out, so the latch is INTERNAL to it and discharged.*** **The fold
+induction is over LAYERS, not over cycles** — each element consumes two frames
+and emits two frames, so the invariant is "after k comparators the frame vector
+is `runNet (bnComps.take k)` of the input keys", and the latch never appears in
+it.
+
+⚠️ **AND EXHAUSTION IS NOT AVAILABLE AT THE NETWORK, measured rather than
+assumed: full load with `v : Fin 8 → Dest 3` injective is a BIJECTION, so 8! =
+40,320 permutations at ~18 s per network run.** *The four sampled certificates
+above are a sample and say so. (c) is structural or it does not exist.*
 
 🔑 **AND THE NON-OBVIOUS PART, WHICH IS WHERE A FIRST ATTEMPT WOULD GO WRONG:
 (b) IS NOT A STATEMENT ABOUT ONE CYCLE. The element's decision is LATCHED across
