@@ -183,10 +183,15 @@ draw. **The number is the maestro's to raise; the ceiling is no longer unknown.*
 
 1. **NOT "`step` is the ISA."** The licensed sentence is exactly *"`step` agrees
    with Spike on 120 vectors, kernel-checked."*
-2. **A correlated error is not excluded by agreement.** Both this spec and Spike
-   could be wrong the same way. That is why ruling 3 also orders the one-time
-   SAIL cross-check — **which has not run, so the claim may not carry SAIL's
-   name.**
+2. **A correlated error is not excluded by agreement.** ✅ **Ruling 3's one-time
+   SAIL cross-check HAS NOW RUN — `sailcheck.py`, 120 agree / 0 disagree / 0
+   skipped against the LANDED suite**, mutation-controlled four ways. **But the
+   two halves have different strengths and the distinction must survive
+   quotation:** *the kernel vouches for `step` against the vectors; it does not
+   vouch for SAIL* — the cross-check is an offline untrusted script.
+   ⚠️ **And Spike and SAIL are independent of each OTHER, not of the RISC-V
+   manual.** Three-way agreement excludes an error in any **one** of the three;
+   it cannot exclude an error the specification itself carries.
 3. **120 vectors is a spot check**, not coverage: 2^32 words against a 2^992
    state space. Its value is in its corners, not its count.
 4. **Mutually-agreed-ILLEGAL words are not representable.** `Vec.actual` is

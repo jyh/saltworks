@@ -47,5 +47,16 @@ with the value distribution being sampled*. Measured: 44% -> 0%.
   `Vec`. The generator therefore only emits words both sides accept, and
   `decode`'s rejection behaviour is left to `decode_rejects_lui`.
 * **Backward branches are not emitted**, per the consumer's stated promise.
-* **No SAIL cross-check yet** — ruling 3 orders one, and until it runs the claim
-  may not carry SAIL's name.
+* **The SAIL cross-check HAS run** — `sailcheck.py`, **120 agree · 0 disagree ·
+  0 skipped** against the *landed* suite (not against a fresh Spike run: the
+  point is to tie SAIL to the artifact the kernel checks). Mutation-controlled:
+  a one-bit `post` corruption, an emptied `post`, a shifted `pc'`, and a
+  `funct3` flip each produce DISAGREE.
+  ⚠️ **Method asymmetry, stated because it is a real weakness:** Spike's debug
+  mode dumps the whole register file, so nothing is reconstructed there. SAIL
+  offers no register dump — only a write trace — so the state IS rebuilt by
+  replaying the `reg <- value` events SAIL itself emits. That is bookkeeping
+  over the witness's own statements rather than a second model of the machine,
+  but it is a weaker instrument than Spike's.
+  ⚠️ **And three-way agreement does not exclude a correlated error**: Spike and
+  SAIL are independent of each other, not of the RISC-V manual.

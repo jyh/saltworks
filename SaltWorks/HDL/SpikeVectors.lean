@@ -38,6 +38,16 @@ Spike RISC-V ISA Simulator 1.1.1-dev
 GNU assembler (GNU Binutils) 2.47.20260726
 riscv64-elf-gcc (GCC) 16.1.0                 -- assembler/linker only
 generator: docs/hdl-c2-tools/genvec.py       seed 20260807, n = 120
+
+SAIL (ruling 3's SECOND reference) — the one-time cross-check, RUN:
+Sail 0.20.2 (sail2 @ 41694abd58b27b687af5db275810dfeb8a88cfc0)
+  built with `dune build @install` + `dune install --prefix` — opam's solver
+  cannot place libsail's dev dependency on ocaml 5.4.1/arm64, and the prefix
+  install is REQUIRED or the C++ backend plugin is undiscoverable
+sail-riscv model commit 61266bd4dede6c7dd6e903e52dc80bcbf644b1b8 (2026-08-03)
+  sail_riscv_sim --rv32 --trace-instr --trace-gpr --stop-at-pc <after>
+z3 (sail dies `SMT solver returned unexpected status 127` without a solver)
+cross-check: docs/hdl-c2-tools/sailcheck.py  ->  120 agree · 0 disagree · 0 skipped
 ```
 
 ## THE THREE RULES THE GENERATOR OBEYS, AND WHY EACH IS LOAD-BEARING
@@ -85,11 +95,26 @@ headline would have described a skewed sample.* Fixed with `.align 3`;
 ## ⛔ What this file does NOT claim
 
 **It does not claim `step` is the RISC-V ISA.** It claims exactly what ruling 3
-licenses: *`step` agrees with Spike on these 120 vectors, kernel-checked.* A
-correlated error — both this spec and Spike wrong the same way — is not excluded
-by agreement, which is why the ruling also orders a one-time SAIL cross-check on
-the same vector set. **That cross-check is NOT in this file and the claim above
-is not entitled to SAIL's name until it is.**
+licenses, and the two halves have DIFFERENT strengths, which is the distinction
+most likely to be flattened when this is quoted:
+
+```
+step agrees with these 120 vectors          KERNEL-CHECKED  (decide +kernel,
+                                                             spike_agrees below)
+the 120 vectors are reproduced by SAIL      OFFLINE, UNTRUSTED script
+                                            (docs/hdl-c2-tools/sailcheck.py:
+                                             120 agree, 0 disagree, 0 skipped)
+```
+
+⇒ ***The kernel vouches for `step` against the vectors. It does not vouch for
+SAIL.*** *The cross-check is a script; its own non-vacuity was established by
+mutation — corrupting a landed `post` value by one bit, emptying a `post`,
+advancing `pc'`, or flipping a `funct3` bit each produce DISAGREE.*
+
+⚠️ **AND THREE-WAY AGREEMENT DOES NOT EXCLUDE A CORRELATED ERROR.** Spike and
+SAIL are independent implementations, but they are **not independent of the
+RISC-V manual**. Agreement excludes an error in any **one** of the three; it
+cannot exclude an error the specification itself carries.
 
 **Nor is the sample a proof of coverage.** 120 vectors out of a 2^32-word × 2^992
 state space is a spot check whose value is in its corners, not its count.
