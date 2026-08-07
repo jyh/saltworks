@@ -58,10 +58,20 @@ PLACEHOLDERS = [
     "# How to test\n\n" + "Explain how to use your project",
 ]
 
-SANCTIONED_CONFIG_KEYS = {
-    "CLOCK_PERIOD", "PL_TARGET_DENSITY_PCT",
-    "FP_PDN_MULTILAYER", "HOLD_SLACK_MARGIN", "MAX_TRANSITION_CONSTRAINT",
-    "SYNTH_MAX_FANOUT", "RUN_LINTER",
+# ⚠️ THE KEYS BELOW TinyTapeout's "DO NOT CHANGE ANYTHING BELOW THIS POINT" BANNER.
+# Shipping a config.json without them is what broke the first CI run: dropping
+# `FP_SIZING: absolute` makes the floorplanner size the die by UTILISATION while
+# the pins still come from the 2x2 DEF template, so `ena` lands at 146 um on an
+# 85 um die and global routing dies with
+#   [GRT-0209] Pin ena is completely outside the die area and cannot be routed.
+# Nothing in TT's flow tells you the key is missing -- it tells you a pin is
+# misplaced, forty minutes later, in a different tool.
+REQUIRED_CONFIG_KEYS = {
+    "RUN_KLAYOUT_XOR", "RUN_KLAYOUT_DRC", "DESIGN_REPAIR_BUFFER_OUTPUT_PORTS",
+    "TOP_MARGIN_MULT", "BOTTOM_MARGIN_MULT", "LEFT_MARGIN_MULT",
+    "RIGHT_MARGIN_MULT", "FP_SIZING", "GRT_ALLOW_CONGESTION", "FP_IO_HLENGTH",
+    "FP_IO_VLENGTH", "FP_PDN_VPITCH", "RUN_CTS", "FP_PDN_MULTILAYER",
+    "MAGIC_DEF_LABELS", "MAGIC_WRITE_LEF_PINONLY",
 }
 # Keys tt_tool.py writes into user_config.json, which is merged LAST and wins.
 # Setting any of these in config.json looks like a setting and is a no-op.
@@ -204,9 +214,22 @@ def check_config(tree):
     except json.JSONDecodeError as e:
         return [f"src/config.json is not valid JSON: {e}"]
 
+    # ⚠️ THE CHECK THAT WAS MISSING, AND ITS ABSENCE COST A CI CYCLE. The old
+    # version only asked "is any key here one that should not be?" — a whitelist,
+    # which catches ADDITIONS and is structurally blind to DELETIONS. Shipping a
+    # two-key config.json passed it cleanly while having removed sixteen required
+    # settings. A validator that only bounds a set from above cannot see an
+    # empty set.
+    missing = sorted(REQUIRED_CONFIG_KEYS - set(cfg))
+    if missing:
+        bad.append(f"src/config.json is missing {len(missing)} key(s) from below "
+                   f"TT's DO-NOT-CHANGE banner: {', '.join(missing[:6])}"
+                   + (" …" if len(missing) > 6 else ""))
+
     # Duplicate keys are not reliably legal and json.loads silently keeps the
-    # last; catch the "// comment" idiom before a strict parser does.
-    keys = re.findall(r'"([^"]+)"\s*:', raw)
+    # last. `"//"` repeated is TinyTapeout's OWN comment convention in this file,
+    # so it is exempt — but a repeated REAL key is a silent override.
+    keys = [k for k in re.findall(r'"([^"]+)"\s*:', raw) if k != "//"]
     dupes = {k for k in keys if keys.count(k) > 1}
     if dupes:
         bad.append(f"src/config.json has duplicate key(s): {', '.join(sorted(dupes))}")
@@ -215,8 +238,6 @@ def check_config(tree):
         if k in OVERRIDDEN_KEYS:
             bad.append(f"src/config.json sets {k}, which user_config.json overrides "
                        "— it would read as a setting and be a no-op")
-        elif k not in SANCTIONED_CONFIG_KEYS:
-            bad.append(f"src/config.json sets {k}, which is not a TT-sanctioned knob")
     return bad
 
 
@@ -279,8 +300,14 @@ MUTATIONS = [
                     "tt_um_example user_project")),
     ("config", "a config key user_config.json overrides",
      lambda t: _sub(t, "src/config.json", '{', '{\n  "DIE_AREA": "0 0 100 100",')),
-    ("config", "the JSON-comment idiom",
-     lambda t: _sub(t, "src/config.json", '{', '{\n  "//": "a",\n  "//": "b",')),
+    ("config", "a duplicated REAL key (not the // comment convention)",
+     lambda t: _sub(t, "src/config.json", '"CLOCK_PORT": "clk",',
+                    '"CLOCK_PORT": "clk",\n  "CLOCK_PORT": "gpio",')),
+    # THE ONE THAT WOULD HAVE CAUGHT THE FIRST CI FAILURE. Deleting FP_SIZING
+    # alone is enough: the die stops being taken from DIE_AREA, the pins keep
+    # coming from the 2x2 template, and global routing fails on a misplaced pin.
+    ("config", "FP_SIZING deleted from below the DO-NOT-CHANGE banner",
+     lambda t: _sub(t, "src/config.json", '  "FP_SIZING": "absolute",\n', "")),
 ]
 
 
