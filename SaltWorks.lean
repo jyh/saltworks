@@ -49,4 +49,5 @@ import SaltWorks.Silicon.Equiv.BitSliced
 import SaltWorks.Silicon.Equiv.AdderSlice
 import SaltWorks.Silicon.Equiv.SwitchRefinement
 import SaltWorks.Silicon.Equiv.FabricRoutes
+import SaltWorks.Silicon.Equiv.ComposedSwitch
 import SaltWorks.Tactic.AuditAxioms
