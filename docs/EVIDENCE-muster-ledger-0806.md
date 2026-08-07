@@ -46,7 +46,8 @@ and both deltas are published rather than reconciled away.**
 
 | Figure | This ledger | The seat's own recount | Δ | Cause |
 |---|---:|---:|---:|---|
-| silicon `.lean` lines | **1,455** | 1,466 | 11 | `Tactic/AuditAxioms.lean` is a **shared** file silicon edited tonight (`643bb07`); whether its 29 lines land on silicon or on nobody is a judgement call. *Silicon: "either figure is honest; I would not change yours."* |
+| compiler `.lean` lines | **2,503** | 2,503 | **0** | **Exact — the same integer**, same path set, same unit. |
+| silicon `.lean` lines | **1,455** | 1,466 | ~~11~~ **0** | ⛔ **NOT "within noise" — and silicon's own generous reading of it was the wrong one.** Resolved at the bytes: `SaltWorks/Silicon` alone is **+1455 / −18**; `Silicon + Tactic` is **+1484 / −18**; `Tactic` alone is **+29**. So this ledger reports **additions on one path (1,455)** and silicon recounted **net on two paths (1,466)**. **The "11" is the residual of two exact differences that partially cancel: +29 (Tactic included) − 18 (deletions subtracted) = 11.** On like-for-like both are **exact**: additions/one path = 1,455 = 1,455; additions/two paths = 1,484 = 1,484. *Neither figure was noisy; the comparison was.* |
 | compiler commits | **23** | 13 *(their muster file)* / 25 *(their recount)* | — | ⛔ **NOT a discrepancy — a MISSING WINDOW.** 25 commits touched compiler's slot **today**; **13** of those are in the **post-relight session**, 12 in the **pre-migration session**. This ledger counts the day; their file counted the session. **Neither was wrong; neither said which question it was answering.** |
 
 ⇒ **`A count without its window is the same defect as a countdown without
