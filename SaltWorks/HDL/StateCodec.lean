@@ -59,6 +59,49 @@ open SaltWorks.ISA
 /-- Number of state bits: 32 registers × 32 bits, plus the pc. -/
 def stWidth : Nat := 32 * 32 + 32
 
+/-! ### The instruction word's input nets — pinned here on math's C4STMT finding
+
+**This layout was silent about the fetched word, and that silence was not
+harmless.** Math's `C4STMT` (8/7) had to *posit* an `instrBase` to state C4 at
+all: `stepT : St → BitVec 32 → St` needs 32 wires the state layout never
+named, and `grep -F 1056` over `SaltWorks/` returned only `stWidth`'s own
+definition. **The one invented thing in the composed statement was a gap in this
+file.**
+
+🔴 **AND THE TRAP THEY FOUND IS THE REASON THIS IS PINNED RATHER THAN LEFT TO
+THE CALLER.** `wordOf ins` **typechecks** — `Env`, `Net` and `Nat` are all
+reducible, so nothing objects — and reads bits `0…31`, **which is register
+`x0`**. *A C4 written that way is a well-typed theorem about the wrong 32
+wires, and the reducibility that made the seam free is the same reducibility
+that hides it.* **A named constant is the cheapest thing that makes the wrong
+version look wrong.** -/
+
+/-- **The fetched instruction word occupies nets `stWidth … stWidth + 31`** —
+immediately above the state, so `decQ`'s domain and the word's domain do not
+overlap. -/
+def instrBase : Nat := stWidth
+
+/-- The word's bit `k`. -/
+def instrNet (k : Nat) : Net := instrBase + k
+
+/-- Total input width of a core that takes the state and one instruction. -/
+def coreInWidth : Nat := stWidth + 32
+
+theorem instrBase_is_above_the_state : instrBase = 1056 := by decide +kernel
+theorem coreInWidth_value : coreInWidth = 1088 := by decide +kernel
+
+/-- **The instruction nets are disjoint from every state net** — the property
+that makes `wordOf (fun k => ins (instrNet k))` the right reading and
+`wordOf ins` the wrong one. -/
+theorem instr_nets_disjoint_from_state :
+    ((List.range 32).all fun k => instrNet k ≥ stWidth) = true := by decide +kernel
+
+/-- ⚠️ **The trap, as a theorem: reading the word at net 0 reads `x0`, not the
+instruction.** *`wordOf ins` and `wordOf (fun k => ins (instrNet k))` are
+different functions, and only the type system's silence makes them look alike.* -/
+theorem word_at_zero_is_register_x0 :
+    instrNet 0 ≠ 0 ∧ instrNet 0 = stWidth := by decide +kernel
+
 /-- A 32-bit word from a bit function. Built through `BitVec.ofBoolListLE`
 because that is the constructor with a `getLsbD` lemma; the cast is discharged
 by `List.length_map`/`length_range`. -/
@@ -150,6 +193,13 @@ theorem correct_layout_recovers :
   decide +kernel
 
 #audit_axioms stWidth
+#audit_axioms instrBase
+#audit_axioms instrNet
+#audit_axioms coreInWidth
+#audit_axioms instrBase_is_above_the_state
+#audit_axioms coreInWidth_value
+#audit_axioms instr_nets_disjoint_from_state
+#audit_axioms word_at_zero_is_register_x0
 #audit_axioms wordOf
 #audit_axioms wordOf_getLsbD
 #audit_axioms stBit
