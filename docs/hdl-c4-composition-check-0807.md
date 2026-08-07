@@ -252,3 +252,55 @@ option 3 is correct but pays for it in gates on every instruction.
 
 ⛔ **But this is a recommendation, not a ruling — it changes what the ISA
 *means* on 99.8 % of its input space, and that is the council's to decide.**
+
+---
+
+# ADDENDUM 2 — §5 RESOLVED: C4 SHOULD COMPOSE WITH `emitPipeline'_sem`, NOT `emitN_sem`
+
+§5 left an open item: *"C4 composes with `emitN_sem` by name and must say which
+of `emitN` / `emitPipeline'` it composes."* **It is determinate, and the freeze
+names the wrong one.** Both routes elaborate; the difference is what C4 must
+then carry and what it is talking about.
+
+```
+ROUTE A   emitN_sem          hypothesis:  (compile core).ssa = true
+                             observes:    emitN (compile core)          <- UNOPTIMISED
+ROUTE B   emitPipeline'_sem  hypothesis:  (compile core).wf  = true
+                             observes:    emitPipeline' (compile core)  <- opt + normalize
+```
+
+**THREE REASONS ROUTE B, and the second is the one that actually matters:**
+
+1. **The hypothesis is strictly weaker.** `wf` is well-formedness, which any
+   compiler output has by construction; `ssa` is dense-SSA form, a real
+   obligation on `compile`'s output shape. **And nobody owes `ssa` on route B:
+   it is discharged internally — `emitPipeline'_sem`'s proof goes through
+   `normalize_ssa (opt_wf c h)`.** *So the hypothesis C4 was inheriting simply
+   evaporates.*
+
+2. ⭐ **ROUTE A TALKS ABOUT AN ARTIFACT THAT IS NOT FABRICATED.**
+   `emitN (compile core)` is the **unoptimised** emission. The thing that goes
+   through the flow is `emitPipeline' = emitN ∘ normalize ∘ opt`. ***A C4 proved
+   on route A would be a true theorem about a netlist nobody tapes out*** — the
+   same genre of error as measuring the wrong object, one level up.
+
+3. `opt_sem` and `normalize_sem` are already landed and already inside
+   `emitPipeline'_sem`'s proof, so route B costs nothing to adopt.
+
+## What route B costs — stated, because it is not free
+
+**The observation is at the NORMALISED port list**, `(normalize (opt (compile
+core))).outs`, not `(compile core).outs`. So **`encD` must be indexed against
+the normalised outs.** *The pipeline law's own docstring already rules the
+positional form — "the two agree positionally, output `k` for output `k`, which
+is the form the refuter pass ruled the seam must use" — so this is a stated
+convention to honour, not a new problem.*
+
+## ⇒ The freeze edit, in one line
+
+> *…composed with `emitPipeline'_sem` (landed), whose hypothesis is
+> `(compile core).wf = true`; the SSA condition is discharged internally and is
+> **not** C4's to carry. The observation is at `(normalize (opt (compile
+> core))).outs`.*
+
+**§5 closes. Item 5 of §6's list is struck.**
