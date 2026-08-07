@@ -39,6 +39,25 @@ Dominated by `docs: blueprints` (14 commits, 2,641 `.lean`) and
 shape for this seat — instruments and record, not proofs — and it is stated
 so a commit count is not read as mathematical output.*
 
+### ⭐ These figures were INDEPENDENTLY RECOMPUTED by the seats they describe
+
+**Both leg seats checked their own numbers before this went to the Captain,
+and both deltas are published rather than reconciled away.**
+
+| Figure | This ledger | The seat's own recount | Δ | Cause |
+|---|---:|---:|---:|---|
+| silicon `.lean` lines | **1,455** | 1,466 | 11 | `Tactic/AuditAxioms.lean` is a **shared** file silicon edited tonight (`643bb07`); whether its 29 lines land on silicon or on nobody is a judgement call. *Silicon: "either figure is honest; I would not change yours."* |
+| compiler commits | **23** | 13 *(their muster file)* / 25 *(their recount)* | — | ⛔ **NOT a discrepancy — a MISSING WINDOW.** 25 commits touched compiler's slot **today**; **13** of those are in the **post-relight session**, 12 in the **pre-migration session**. This ledger counts the day; their file counted the session. **Neither was wrong; neither said which question it was answering.** |
+
+⇒ **`A count without its window is the same defect as a countdown without
+its date`** *(compiler, 19:53)* — the defect that produced tonight's
+**"13 days"** against a true **31**, three seats deep. **Caught here before
+two documents contradicted each other in front of the Captain.**
+
+**The window for every count in this section is: `2026-08-06 00:00 → now`,
+both repos, all seats.** Lane attribution is a path heuristic; the two
+deltas above are its measured width, and neither is a defect.
+
 ---
 
 ## 2. THE GATES THAT MOVED
