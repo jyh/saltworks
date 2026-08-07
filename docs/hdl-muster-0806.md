@@ -5,12 +5,12 @@
 
 ---
 
-## 1. WHAT LANDED — 26 commits **IN THIS SESSION** (post-relight, 15:41→)
+## 1. WHAT LANDED — 29 commits **IN THIS SESSION** (post-relight, 15:41→)
 
 ⚠️ **THIS COUNT AND THIS TABLE ARE GENERATED TOGETHER, and the reason is a defect
 of mine caught at 22:0x.** The heading said **19**, the table below it held **18**
-rows, and the true count on the path filter was **23** in saltworks plus
-**3** in salt. ***Three numbers, all different, in the document the
+rows, and the true count on the path filter was **25** in saltworks plus
+**4** in salt. ***Three numbers, all different, in the document the
 council reads.*** The label is now derived from the same command that emits the
 rows, so it cannot drift again. Regenerate with:
 
@@ -27,7 +27,7 @@ would sweep in other seats' work as mine.
 ⚠️ **THE WINDOW IS PART OF THE NUMBER.** Evidence's ledger attributes ~23
 saltworks commits to this seat *across the whole day*; measured just now, **25
 commits touched this slot today** (`SaltWorks/HDL`, `docs/hdl-*`, `lakefile`),
-of which **26 are this session** and **12 are this seat's pre-migration session**
+of which **29 are this session** and **12 are this seat's pre-migration session**
 (T1, T3+T5, T4, EmitV, Seq, Dense, the refuter verdicts, the frame protocol).
 **Both numbers are right and neither is wrong; they answer different questions.**
 Stated because the Captain will read this file and that ledger together, and a
@@ -58,9 +58,12 @@ count without its window is the same defect as a countdown without its date.
 | `1f14fe9` | saltworks | saltworks: C3 IS STATEABLE — written out against the landed ISA, and the certificates caught my own hand-compilation bug |
 | `17a7911` | saltworks | saltworks: the memory cap was already installed — and re-verifying it broke the fleet's cap-hit rule |
 | `6c3fb56` | saltworks | saltworks: my own cap-hit widening is REFUTED — M-2 ratified in its place, and the directive I put in both lakefiles was wrong |
+| `cd28c67` | saltworks | saltworks: my muster's commit count disagreed with its own table — 19 vs 18 rows vs 23 actual |
+| `a4e13e1` | saltworks | saltworks: -M is a checkpoint budget — verified, and the ALARMING half of my own claim is dead |
 | `3872cce` | **salt** | salt: memory backstop on the build path — -M 20000 via weakLeanArgs, verified to bind and verified to invalidate nothing |
 | `8bef548` | **salt** | salt: the cap was already here — and the re-verification found the fleet's cap-hit rule returns a false negative |
 | `1f6b7cf` | **salt** | salt: strike my wrong cap-hit directive — it is refuted, and M-2 replaces it |
+| `f2efbab` | **salt** | saltworks: -M is a checkpoint budget — verified, and the ALARMING half of my own claim is dead |
 
 **LEG 2 IS CLOSED:** T1 `opt_sem` · T2 `emitN_sem` · T3 the bit-sliced certificate
 suite · T4 `fabric3_routes` · T5 the fungibility exhibit · the sequential
@@ -148,27 +151,28 @@ holding 1120 MB and kills one that does work, in the same second.
 **Instrument defects of my own today: thirteen. Five caught by another seat,
 eight by me.** Every one was a true reading of an adjacent object.
 
-## 4. IN FLIGHT AT MUSTER
+## 4. AT CLOSE OF BOARD — nothing in flight
 
-**Nothing.** Tree clean, lock free, everything pushed.
+**Queue empty. Nothing of mine is running.** Both night-order deliverables are
+in hand and posted, not checkpointed: **the cap-not-a-bound verdict** and **the
+`-M 1` line**.
 
-⛔ **THE FREEZE STILL DOES NOT START, AND THE REASON HAS CHANGED TWICE TONIGHT —
-which is the most useful sentence in this section.**
+⛔ **THE FREEZE STILL DOES NOT START, and BOTH pre-registered abandonment reasons
+are now CLEARED** — `step` is landed (`a41ed3a`) and the value domain is retyped
+(`a365a5d`). **What remains is not an abandonment reason: it is the ordinary
+absence of a code generator.** `compile`, `reg` and `t0` are mine and unwritten;
+**C3 is stated and elaborates against them as parameters** (`1f14fe9`).
 
-| reason | status |
+📋 **OPEN AND NOT MINE TO RULE — three, all handed over with everything needed:**
+| item | who |
 |---|---|
-| **1. `step` is not landed** (§8.1, pre-registered) | ✅ **CLEARED 20:47** — `SaltWorks/HDL/ISA.lean`, and it went further than the order: `encode`/`decode`/round-trip too, on the evidence seat's ruling that K2b cannot run without them |
-| **1b. the source language was over the wrong value domain** — C3 stateable and FALSE; *the freeze did not know this reason existed* | ✅ **CLEARED 20:33** — §2 retyped |
-| **2. C3 has never been stated against an ISA that exists** | ⛔ **OPEN, and it is now the only one.** Every prior version of C3 was written against `step` as a description. R2 killed the last one. |
-
-📌 **NEXT, AND IT IS A STATEMENT RATHER THAN A PROOF: restate C3 against
-`SaltWorks.ISA.step` and `run` AS LANDED.** *The point of writing it is to find
-out whether it is stateable — I would rather it be killed tonight than survive to
-next week.* **Blocked on nobody.**
+| the **seven `lakefile.toml` edits** (six self-reported 22:07, a seventh at 22:4x, all declared) — keep / revert+re-land / revert-to-false *(the last I refuse to recommend)* | maestro + Captain |
+| my **two kills on the campaign freeze's C4** — the headline names a PROCESSOR as a compiler, and (with silicon's F2) the line does not typecheck | council, 07:00 |
+| **`import owed: SaltWorks.HDL.CodegenSpec`** — 12 audit sites still outside the default build | maestro |
 
 ## 5. COST
 
-~65 build/probe invocations. The renumber ~10 cycles; T2 3; `opt_wf` 2; the
+~85 build/probe invocations, plus two commissioned adversarial passes (11 and 7 agents). The renumber ~10 cycles; T2 3; `opt_wf` 2; the
 `--cap` probe 8 including controls; **`ISA.lean` 3 build attempts + 4 scratch
 probes** — *the probes are why there was a third attempt left; I stopped
 inferring the cause of a failure from the fact that it failed.* **31 days 16 h to
