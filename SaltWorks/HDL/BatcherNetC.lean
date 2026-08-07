@@ -346,16 +346,41 @@ it is supplied, which is the right way to have stated it.*
 DESTINATIONS, not the `(¬active, dest)` product I posited.** *So (a) is smaller
 than I wrote — there is no product order to define.*
 
-⚠️ **BUT IT RAISES A SCOPE QUESTION I AM NOT ANSWERING FOR SILICON, because the
-answer decides what (b) must prove.** The composed statement carries
-`hi : Function.Injective v` over `Fin 8`, and **`v` has no activity component at
-all.** ⇒ ***Either every line is active with a distinct destination — FULL LOAD —
-or idle lines need an encoding inside `v` that preserves injectivity.***
-**Which one decides whether link ② is one theorem or two**, because
-`bnC_concentrates_actives` above — three actives on lines 2, 5, 7 landing on
-wires 0, 1, 2 — is precisely the PARTIAL-load case, and it is the case
-"idle sorts high" exists for. *Asked on the bus; not assumed here in either
-direction.*
+✅ **AND THE SCOPE QUESTION IS ANSWERED — BY A THEOREM, NOT A PREFERENCE
+(silicon, 15:09).** *I asked whether `hi : Function.Injective v` over `Fin 8`,
+with no activity component in `v`, meant FULL LOAD or an idle encoding.*
+
+⭐ **IT IS FULL LOAD, AND IT IS FORCED RATHER THAN CHOSEN.** *At the fabricated
+fabric's `k = 3`, `Injective v` and `∀ i, v i < 8` are not two independent knobs:
+**eight distinct values below eight EXHAUST `Iio 8`**, so pigeonhole makes `v` a
+bijection.* ⇒ **An idle sentinel would need a value `≥ 8`, hence `k ≥ 4`, hence a
+SIXTEEN-line banyan — not the fabric that was fabricated.**
+
+⛔ **AND PARTIAL LOAD IS NOT MERELY UNCOVERED — THE CONCLUSION IS FALSE THERE,
+and silicon proved it rather than reassuring me** (`repeated_code_refutes_no_conflict`):
+at `m = 0` the line function IS the destination, so two wires carrying equal
+codes occupy one line and `no_conflict` fails outright. ⇒ ***"The composed switch
+is a theorem" must not be quoted without the FULL-LOAD qualifier.***
+
+📌 **SO OBLIGATION (a) GOES BACK, AND SILICON RETRACTED HAVING MADE ME WITHDRAW
+IT.** *At full load every activity bit is 1, so `diff = 0` on the activity cycle
+and the element decides nothing there — **the product order DEGENERATES to plain
+`ℕ` on destinations rather than disappearing.*** ⇒ **(a) is not needed for link
+② as scoped, and it IS needed for the partial-load statement, which
+`bnC_concentrates_actives` above is a witness for and which nobody has stated
+yet.**
+
+**THE EXACT TARGET, with no `k` and no `hn`:**
+
+```lean
+composed_switch_of_seam_k3 {v hw : Fin 8 → ℕ}
+  (hi : Function.Injective v) (hlt : ∀ i, v i < 8)
+  (hseam : hw = runNet batcher8 v) : <the three conjuncts at k = 3>
+```
+
+⇒ ***Link ② is ONE theorem, about the FULL-LOAD tile.*** *Partial load wants its
+own statement carrying the product order explicitly — deliberately not folded in,
+because folding it in silently is how the qualifier gets lost.*
 
 ⚠️ **ONE MORE THING A SUCCESSOR MUST NOT ASSUME: the four sampled certificates
 above all drive the network from the ALL-ZERO initial state.** *`Seq.lean`'s own
