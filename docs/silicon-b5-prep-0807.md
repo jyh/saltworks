@@ -84,6 +84,54 @@ config tweak, and **B5 cannot fire today regardless: B4 is still conditional on
 compiler's seam.** ⇒ **There is no urgency that justifies acting unilaterally on
 the Captain's submission repo. Maestro sequences it; I build it on the word.**
 
+---
+
+## 4b. ADDENDUM ~16:1x — THE FIX IS LANDED, AND THE PROVENANCE PINS ARE RECORDED
+
+**Maestro's word given; route ① landed on `revision-bb1-composed` (`0b03051`).
+`main` untouched at `f14a4fa`.** `test` ✅ 33 s (run `31226212805`), `docs` ✅.
+
+**Verified LOCALLY before the public push** (iverilog 13.0, cocotb 2.0.1 on a
+Python 3.13 venv — 3.14 is on this box and cocotb will not run there):
+
+```
+without models :  505 error(s) during elaboration   ← byte-identical to CI's
+with models    :  EXIT=0, sim.vvp built
+full testbench :  TESTS=3 PASS=3 FAIL=0  — 255/255 sorted+concentrated
+                  destination sets route correctly
+```
+
+### 📌 THE TWO PINS — this is P8's "record it beside the equivalence proof"
+
+| what | value | how it was obtained |
+|---|---|---|
+| **PDK** | `sky130A` @ **`8afc8346a57fe1ab7934ba5a6056ea8b43078e71`** | read from `pdk.json` **inside the `tt_submission` artifact** of green run `31214859139` — *not remembered*. `FLOW_NAME LibreLane`, `FLOW_VERSION 3.0.5`, `PDK_SOURCE open_pdks`. This is the **hardening** revision, distinct from the precheck-only `0536d02d…` the dossier §6.4 separates. |
+| **Flow** | `TinyTapeout/tt-gds-action` @ **`651ea05e19e86a9c26d00307e8081ceb53d328d3`** | `gh api repos/TinyTapeout/tt-gds-action/commits/ttsky26c` → 2026-07-30. **`ttsky26c` is a TAG** (`branches/ttsky26c` 404; `git/ref/tags/ttsky26c` hits), and a tag can be re-pointed. |
+
+⚠️ **AND THE OBLIGATION THAT MAKES PINNING SAFE RATHER THAN MERELY TIDY —
+RE-CHECK BOTH BEFORE SUBMITTING.** *Pinning freezes the flow; freezing is only
+correct if someone looks again.* **If TinyTapeout moves `ttsky26c` to fix
+something the shuttle requires, a pinned repo silently keeps the old flow and can
+fail the shuttle's own re-run of `precheck.py` on the submitted `.oas`.** ⇒
+**Compare, then re-pin deliberately. Do not drift, and do not freeze blindly.**
+The same warning is in `.github/workflows/gds.yaml` itself, where the next
+person to touch it will see it.
+
+### ⛔ STILL OPEN, and NOT mine
+
+**The revision's public identity still describes the FLOOR.** `info.yaml`'s title
+(*"Verified 8x8 bit-serial banyan switch"*) and description (*"Recreates the
+banyan **half**…"*), and `docs/info.md:17` (*"the banyan is the theorem. **This
+chip is the proved half.**"*). **The revision is BOTH halves** — `batcher_struct.v`
+and `banyan_fabric.v` are both in `src/` and both in `source_files`. That
+sentence goes false the moment the revision replaces the floor, and it is what a
+gallery reader sees. **P2/P3 — evidence drafts, this seat confirms.**
+
+✅ **One clean check worth recording as a non-finding:** `info.yaml:source_files`
+and `test/Makefile:PROJECT_SOURCES` **agree**. Both files warn that nothing
+checks their agreement; on this branch they are in sync. *I went looking and
+there is nothing there.*
+
 ## 5. What this does NOT say
 
 * It does **not** say the revision is ready. Two gates are open, and the `test`
