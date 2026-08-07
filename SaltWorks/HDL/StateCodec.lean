@@ -1,0 +1,165 @@
+/-
+Copyright (c) 2026 Jason Hickey. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Jason Hickey, Claude
+-/
+import SaltWorks.HDL.ISA
+import SaltWorks.HDL.Sem
+
+/-!
+# C4 · the STATE CODEC — `decQ` and `encD`, the two coercions C4's sentence turns on
+
+Campaign freeze v1.1 opened C4's construction gate on `compile`/`core`, `decQ`,
+`encD`. The composition check
+(`docs/hdl-c4-composition-check-0807.md` §1) found that **both coercions are
+named in C4's prose and have no referent anywhere in the tree** — `grep` for
+`toBits`/`ofBits`/`encodeSt`/`decodeSt` over `SaltWorks/` returned zero — and,
+unlike `compile`, **they were on no manifest as owed.** This file is them.
+
+## ⚠️ THIS FIXES AN INTERFACE, AND THAT IS THE POINT RATHER THAN A SIDE EFFECT
+
+`decQ : Env → St` reads the **Q-leaves** (flop outputs, which enter the
+combinational core as inputs) and `encD : St → List Bool` names the **D-roots**
+in the core's output order. **Both are therefore indexed by the core's net
+layout — a layout that does not exist yet.**
+
+There are two ways round that, and only one of them is the seam doctrine this
+leg was given: *"agree the interface BEFORE building"* (`hdl-design-v1.md` R2,
+which is why leg 2 and leg 3 have a shared netlist type at all). ⇒ **The layout
+is FIXED HERE, and `compile`/`core` is required to conform to it.** *The
+alternative — build the core, then read its layout off and write the codec to
+match — makes the codec a description of whatever was built, which cannot then
+catch a layout mistake.*
+
+📌 **SILICON: this is the flop layout your Q-leaf/D-root treatment will see.
+It is a proposal until you say otherwise, and it is cheap to change NOW and
+expensive to change after `core` exists.**
+
+## The layout
+
+```
+index          contents
+0 … 1023       register r, bit k, at  32 * r + k       (r,k < 32)
+1024 … 1055    pc, bit k, at  1024 + k
+               1056 bits total = 32 regs × 32 + 32
+```
+
+**`x0` occupies indices 0…31 and is part of the layout even though it is not
+stored.** *That is deliberate: `St.regs` has 32 entries and `St.set 0` is a
+no-op, so the codec mirrors `St` exactly and the "31 stored registers" fact
+(`ReadTree.lean`) stays a property of the READ PATH rather than leaking into the
+state encoding. Two different questions; the earlier one was already answered
+wrongly once by conflating them.*
+-/
+
+namespace SaltWorks.HDL
+
+open SaltWorks.ISA
+
+/-- Number of state bits: 32 registers × 32 bits, plus the pc. -/
+def stWidth : Nat := 32 * 32 + 32
+
+/-- A 32-bit word from a bit function. Built through `BitVec.ofBoolListLE`
+because that is the constructor with a `getLsbD` lemma; the cast is discharged
+by `List.length_map`/`length_range`. -/
+def wordOf (f : Nat → Bool) : BitVec 32 :=
+  (BitVec.ofBoolListLE ((List.range 32).map f)).cast (by simp)
+
+/-- **The word codec's defining property.** -/
+theorem wordOf_getLsbD (f : Nat → Bool) (k : Nat) (h : k < 32) :
+    (wordOf f).getLsbD k = f k := by
+  rw [wordOf, BitVec.getLsbD_cast, BitVec.getLsbD_ofBoolListLE]
+  rw [List.getD_eq_getElem?_getD]
+  simp [h]
+
+/-- Bit `j` of the state, under the layout above. -/
+def stBit (s : St) (j : Nat) : Bool :=
+  if j < 1024 then (s.regs[j / 32]!).getLsbD (j % 32)
+  else s.pc.getLsbD (j - 1024)
+
+/-- **`encD` — the state encoding**, the D-root order C4 compares against. -/
+def encD (s : St) : List Bool := (List.range stWidth).map (stBit s)
+
+/-- **`decQ` — the Q-leaves' decoding**, reading the same layout back. -/
+def decQ (ins : Env) : St :=
+  { regs := Vector.ofFn (fun r : Fin 32 => wordOf (fun k => ins (32 * r.val + k)))
+    pc   := wordOf (fun k => ins (1024 + k)) }
+
+/-- Reading `encD`'s list back at an index in range is `stBit`. -/
+theorem encD_getD (s : St) (j : Nat) (h : j < stWidth) :
+    (encD s).getD j false = stBit s j := by
+  rw [encD, List.getD_eq_getElem?_getD]
+  simp [stWidth] at h ⊢
+  simp [h]
+
+/-- **THE ROUND TRIP — `decQ ∘ encD = id`.** *The property that makes the pair a
+codec rather than two unrelated functions, and the one a layout mistake breaks.* -/
+theorem decQ_encD (s : St) : decQ (fun j => (encD s).getD j false) = s := by
+  obtain ⟨regs, pc⟩ := s
+  have hpc : wordOf (fun k => (encD ⟨regs, pc⟩).getD (1024 + k) false) = pc := by
+    apply BitVec.eq_of_getLsbD_eq
+    intro k hk
+    rw [wordOf_getLsbD _ _ hk, encD_getD _ _ (by simp [stWidth]; omega), stBit,
+        if_neg (by omega)]
+    have h1024 : 1024 + k - 1024 = k := by omega
+    rw [h1024]
+  have hreg : ∀ (i : Nat) (hi : i < 32),
+      wordOf (fun k => (encD ⟨regs, pc⟩).getD (32 * i + k) false) = regs[i] := by
+    intro i hi
+    apply BitVec.eq_of_getLsbD_eq
+    intro k hk
+    rw [wordOf_getLsbD _ _ hk, encD_getD _ _ (by simp [stWidth]; omega), stBit,
+        if_pos (by omega)]
+    have hdiv : (32 * i + k) / 32 = i := by omega
+    have hmod : (32 * i + k) % 32 = k := by omega
+    rw [hdiv, hmod, getElem!_pos regs i hi]
+  simp only [decQ, St.mk.injEq]
+  refine ⟨?_, hpc⟩
+  apply Vector.ext
+  intro i hi
+  rw [Vector.getElem_ofFn]
+  exact hreg i hi
+
+
+/-! ### NON-VACUITY — a WRONG layout must break the round trip
+
+*`decQ_encD` is an equality between two functions I wrote; if the layout were
+transposed in BOTH it would still hold. So the control is a decoder that reads
+the SAME bits under a different indexing, and it must fail.* -/
+
+/-- The transposed layout — register `r` bit `k` at `r + 32*k` instead of
+`32*r + k`. **A plausible mistake: it is the same 1024 bits, read column-wise.** -/
+def decQtransposed (ins : Env) : St :=
+  { regs := Vector.ofFn (fun r : Fin 32 => wordOf (fun k => ins (r.val + 32 * k)))
+    pc   := wordOf (fun k => ins (1024 + k)) }
+
+/-- A state that distinguishes the two layouts: `x1 = 3`. -/
+def sTest : St := St.init.set 1 3
+
+/-- **THE CONTROL: the transposed decoder does NOT recover `x1`.** *Kernel-checked
+on the register the layouts disagree about, rather than on the whole 1056-bit
+state, because the witness is what matters and it is cheaper.* -/
+theorem transposed_layout_breaks :
+    (decQtransposed (fun j => (encD sTest).getD j false)).get 1 ≠ sTest.get 1 := by
+  decide +kernel
+
+/-- And the correct decoder DOES recover it — the same computation, one index
+apart, so the control is not passing for an unrelated reason. -/
+theorem correct_layout_recovers :
+    (decQ (fun j => (encD sTest).getD j false)).get 1 = sTest.get 1 := by
+  decide +kernel
+
+#audit_axioms stWidth
+#audit_axioms wordOf
+#audit_axioms wordOf_getLsbD
+#audit_axioms stBit
+#audit_axioms encD
+#audit_axioms decQ
+#audit_axioms encD_getD
+#audit_axioms decQ_encD
+#audit_axioms decQtransposed
+#audit_axioms sTest
+#audit_axioms transposed_layout_breaks
+#audit_axioms correct_layout_recovers
+
+end SaltWorks.HDL
