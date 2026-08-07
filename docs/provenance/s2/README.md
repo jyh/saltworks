@@ -80,3 +80,39 @@ I asserted a count I had not verified.** The `(120, 120)` header pair in the emi
 was genuine, and *that is what made the truncated list look right* — a true adjacent number
 standing in for the one that mattered. The line-count and the SHA-256 in the table above were exact
 throughout; the two figures that were wrong were the two nobody would have checked.
+
+## The binding is now a MECHANISM, not a claim
+
+`docs/provenance/MANIFEST.tsv` + `docs/provenance/verify.sh`. Run it from anywhere:
+
+```
+bash docs/provenance/verify.sh     # exit 0 = BOUND, exit 1 = DRIFTED
+```
+
+It asserts three things, and **fails loudly on each**:
+
+1. **the program blob** — `git hash-object SaltWorks/Stack/Program.lean` matches what the bundle
+   was written about. *If the program changes, the bundle is declared drifted.* This is what the
+   "same commit" sentence falsely promised; now it is checked rather than asserted.
+2. **every bundle file's SHA-256** — the record itself is byte-pinned.
+3. ⭐ **the word count, DERIVED not hardcoded** — it reads `cmpEx_length` from `Program.lean` and
+   `batcher8_length` from `ZeroOne.lean`, multiplies (5 × 24 = 120), and compares against the words
+   actually present in the file. **It refuses to fall back to a literal if it cannot read the
+   theorems.** So the count in the prose can never again outrun the count in the data: the source of
+   truth is the module's own theorems, and the check re-derives it every run.
+
+**Verified to fail, not merely to pass** — a checker that cannot fail is the defect it exists to
+prevent:
+
+| control | result |
+|---|---|
+| append one comment line to `Program.lean` | **FAIL** on `blob` |
+| truncate the word list to 46 entries | **FAIL** on both `sha256` and `words` (*"file has 46, theorems give 5 × 24 = 120"*) — the 2026-08-07 defect, caught |
+| restore both | **BOUND**, exit 0 |
+
+📌 **And the check caught something on its first run — its own documentation.** A whole-file grep
+for the `⋯` truncation marker flagged the *prose above*, which describes the defect and therefore
+contains the character. The marker check is now scoped to the fenced data block. **That is the
+fourth self-match this fleet has hit in two days, and it fired inside the tool built to close that
+class** — which is the most honest possible argument for running the control rather than trusting
+the design.
