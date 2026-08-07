@@ -48,10 +48,31 @@ defaultTargets = ["SaltWorks"]
 # means it was the cap, byte-identical means it was not.
 #
 # /!\ AND READ M-2.8 BEFORE TRUSTING A GREEN BUILD. `-M` is NOT a process
-# limit; it is a budget consulted at checkSystem checkpoints. MEASURED: `-M 1`
-# passed a compile peaking at 1.86 GiB (~1900x its cap) and `-M 100` passed one
-# at 7.82 GiB, because one `@[extern]` C allocation crosses no checkpoint.
-# A green build under -M 20000 is NOT evidence that the build stayed under 20 GB.
+# limit; it is a budget tested where the C++ runtime calls `lean::check_memory`
+# -- e.g. the interpreter and the kernel -- against Lean's OWN ALLOCATION
+# COUNTER, never process RSS.
+#
+# NOT `checkSystem`: that wording was here from 21:58 to 22:4x and it is WRONG.
+# Lean/CoreM.lean:496-499 is `checkInterrupted` + `checkMaxHeartbeats` and a
+# TODO -- it does not look at memory at all. Corrected because the first seat to
+# grep CoreM.lean would have disbelieved the whole note.
+#
+# MEASURED: `-M 1` passed a compile peaking at 1.86 GiB (~1900x its cap),
+# replicated by 3 agents over 4 runs to within 0.5%; and `#eval 1+1` is green
+# under `-M 1` while holding 374 MiB resident -- ~375 MB of baseline (mmapped
+# oleans, the binary) is invisible to the counter.
+#
+# BUT DO NOT READ THAT AS "the backstop is worthless" -- MEASURED THE OTHER WAY
+# TOO: every real module in this repo IS checkpointed. ISA.lean at --cap 1 dies
+# with 96 occurrences of the ratified string; 19 of 19 real modules fail at
+# --cap 1; and on the heaviest (FabricRoutes, 14.83 GB) the cap binds to within
+# 1.1 MB. For ONE module, green at 20000 really is evidence of staying under.
+#
+# /!\ THE REAL EXPOSURE IS CONCURRENCY, and it is not what the note used to say:
+# saltbuild.sh sets LEAN_NUM_THREADS=4 and `lake build` runs up to FOUR lean
+# processes at once, EACH with its own 20 GB budget. 4 x 20 = 80 GB of licence
+# on a 64 GB machine. The per-module guarantee is real; the per-MACHINE one does
+# not exist.
 weakLeanArgs = ["-M", "20000"]
 
 [leanOptions]
