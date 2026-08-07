@@ -361,11 +361,79 @@ theorem cKey_partial_load_differs_from_dest :
     cKeyLE (cKey false 0) (cKey true 7) = false ∧ decide ((0:Nat) ≤ 7) = true := by
   decide +kernel
 
+/-! ## ⭐ OBLIGATION (b) — THE ELEMENT REALISES THE KEY, AND THE SPEC WAS WRONG
+
+**This is the seam silicon has been naming all afternoon** — *"the fact that the
+hardware implements the order is a MEASUREMENT, and it is not mine to assert."*
+⇒ **Measured here, exhaustively over every frame pair the 3-bit fabric can
+produce (2 activities × 8 destinations, twice: 256 pairs).**
+
+⛔ **AND THE NAIVE STATEMENT IS FALSE. `ceKeyOK false = false`, 28 failures —
+and the 28 are the finding, not a defect in the element:**
+
+```
+failures involving an ACTIVE line   0
+failures with BOTH LINES IDLE      28   = the 28 ordered pairs d0 > d1
+```
+
+🔑 **`cFrame_idle_is_silent`: an idle frame is ALL ZEROS whatever its nominal
+destination.** ⇒ ***So an idle line's destination is PHYSICALLY UNOBSERVABLE, and
+`cKey` gives it a destination-DEPENDENT key. No element can implement that — the
+defect is in the SPEC, not in the hardware.*** *`ceC_idle_dest_is_unobservable`
+is the witness: two idle frames that are byte-identical, whose keys demand a
+swap.*
+
+✅ **RESTRICTED TO PAIRS WHERE EITHER LINE IS ACTIVE, IT HOLDS EXACTLY** —
+`ceC_realises_cKey_when_active`, all 192 such pairs, kernel-checked. **That is
+obligation (b) at the element, and it is the honest form.**
+
+📌 **AND IT MATTERS ONE LANE OVER: `SaltWorks.Silicon.cKey act dst i =
+toLex (!act i, dst i)` reads `dst i` even when `act i = false`, so it has the same
+property.** *Their `partial_load_selfrouting` is unaffected — its conclusion
+quantifies over `Iio (cCount act)`, the ACTIVE prefix, so the relative order of
+idle lines among themselves is never consumed.* ⚠️ **But the SEAM to it cannot be
+stated as "the element realises `cKey`" full stop. It is "realises it wherever
+either line is active", and the idle-idle case is not a gap in the hardware — it
+is a question the frame language cannot ask.**
+
+⚠️ **SCOPE: this is the ELEMENT, exhaustively. It is NOT the network** — lifting
+it across the 24-instance fold is still the `inst_compose_*` induction named in
+`BatcherNetC.lean`, and the latch state is still what that induction must carry. -/
+
+def cePairOut (k : Nat) (a0 : Bool) (d0 : Nat) (a1 : Bool) (d1 : Nat) : List Bool :=
+  let f0 := cFrame a0 d0 [true, false]
+  let f1 := cFrame a1 d1 [false, true]
+  (runTrace ceC [false, false, false, false]
+    ((List.range 8).map fun t =>
+      [t == 0, f0.getD t false, f1.getD t false])).1.map (fun o => o.getD k false)
+
+def ceKeyOK (skipBothIdle : Bool) : Bool :=
+  bools.all fun a0 => (List.range 8).all fun d0 =>
+  bools.all fun a1 => (List.range 8).all fun d1 =>
+    if skipBothIdle && !a0 && !a1 then true else
+    let f0 := cFrame a0 d0 [true, false]
+    let f1 := cFrame a1 d1 [false, true]
+    let sw := cKeyLE (cKey a0 d0) (cKey a1 d1)
+    (cePairOut 0 a0 d0 a1 d1).drop 6 == (if sw then f0 else f1).drop 6
+      && (cePairOut 1 a0 d0 a1 d1).drop 6 == (if sw then f1 else f0).drop 6
+
+theorem ceC_realises_cKey_when_active : ceKeyOK true = true := by decide +kernel
+theorem ceC_does_not_realise_cKey_naively : ceKeyOK false = false := by decide +kernel
+
+theorem ceC_idle_dest_is_unobservable :
+    cFrame false 1 [true, false] = cFrame false 0 [true, false]
+      ∧ cKeyLE (cKey false 1) (cKey false 0) = false := by decide +kernel
+
+
 #audit_axioms cFrame
 #audit_axioms cFrame_matches_adjudicated_bytes
 #audit_axioms cFrame_idle_is_silent
 #audit_axioms cKey cKeyLE
 #audit_axioms cKeyLE_eq_lex
+#audit_axioms cePairOut ceKeyOK
+#audit_axioms ceC_realises_cKey_when_active
+#audit_axioms ceC_does_not_realise_cKey_naively
+#audit_axioms ceC_idle_dest_is_unobservable
 #audit_axioms cKey_active_beats_idle
 #audit_axioms cKey_idle_never_beats_active
 #audit_axioms cKey_actives_compare_by_dest
