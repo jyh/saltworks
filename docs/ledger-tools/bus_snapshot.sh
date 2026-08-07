@@ -89,6 +89,18 @@ esac
 # a firewall scan performed once at adoption is the unbreached-cap failure in
 # a new costume: it certifies the file that WAS, and the file that IS keeps
 # changing. A hit blocks the push rather than warning about it.
+#
+# 🙈 AND THE GATE IS BLUNT BY DESIGN, WITH ONE CONSEQUENCE EVERY SEAT MUST
+# KNOW: **writing ABOUT this check, by spelling out the strings it looks for,
+# TRIPS IT.** That is not hypothetical — the bus post announcing this script
+# listed the markers to show the scan came back clean, and the scan then
+# blocked the archive of that post. It is the third instance of the fleet's
+# self-referential defect (*a document that describes a substring-gate by
+# quoting the substring becomes a carrier of the failure it documents*) and
+# the first to fire in production. **Describe the markers; do not reproduce
+# them.** The gate stays blunt on purpose: a firewall check should err toward
+# blocking, and the override is LANE_OK=1 — an explicit human call, never a
+# default.
 if [ "${ARCHIVE:-0}" = "1" ]; then
   SEAT=${SEAT:-"${SEAT_DIR}"}
   REL=${REL:-"fleet/BUS-triple-campaign.md"}

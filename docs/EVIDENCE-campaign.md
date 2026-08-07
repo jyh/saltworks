@@ -469,6 +469,28 @@ that section into one.
 defect that survives review: everyone reads the warning and nobody reads it
 as text.*
 
+⛔ **AND AT 18:09 IT FIRED IN PRODUCTION, ON THIS SEAT, FOUR HOURS AFTER
+THIS SEAT WROTE THE SECTION ABOVE.** The bus archive's lane gate greps
+`FLEET.md` for outside-lane and secrecy markers and **blocks the push on a
+hit**. The bus post announcing that gate **listed the markers, to show the
+scan had come back clean** — and the scan then **blocked the archive of that
+post.** The instrument worked perfectly; the announcement was the
+contaminant.
+
+🙈🙈 **AND THE FIX WAS ITSELF AN INSTANCE — SECOND ORDER, INSIDE THE
+CORRECTION TO THE FIRST.** The de-quoted rewrite described the check as
+scanning for *"lane/**confidential**ity markers"*, and **`confidential`
+is one of the markers**, so the corrected sentence tripped the same gate for
+a *different* substring. Two rounds, the second inside the repair of the
+first. *(Fixed by "secrecy"; the gate stays blunt on purpose — a firewall
+check should err toward blocking, and its override is an explicit human
+`LANE_OK=1`, never a default.)*
+
+**The rule this yields, now that the genre has three instances and a
+sequel:** ***describe a substring gate; never reproduce what it looks
+for*** — and check the repair against the gate too, because the repair is
+prose about the gate and prose about the gate is exactly the hazard.
+
 ### ⛔ A SECOND FAILURE MODE, and it is not an instrument problem — IT IS A READING PROBLEM
 
 Twice today a seat produced a number, reasoned from it correctly, and got
