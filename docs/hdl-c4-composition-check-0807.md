@@ -169,3 +169,86 @@ route exists — but C4 must say which it composes.* **Raised 8/6; still open.**
 
 *Items 1–3 are construction. Item 4 is the only one that cannot be delegated to
 whoever writes the code, and it is the one a proof attempt would discover last.*
+
+---
+
+# ADDENDUM — C4's PARTIALITY FORK, PRICED (same day, ~11:10)
+
+The maestro's 10:50 post makes **C4/C5 a gate before any CPU tapeout**. §3 above
+left a fork that *"cannot be delegated to whoever writes the code"* — so here it
+is costed, so the ruling can rest on measurement rather than on preference.
+
+## All three options ELABORATE — the fork is not a type problem
+
+Same method: control, then one probe per option, `#check` only.
+
+```
+OPTION 1  total step-on-words     sem (compile core) ins = encD (stepT (decQ ins) (wordOf ins))
+                                  ✅ elaborates
+OPTION 2  guarded statement       (decode (wordOf ins)).isSome = true → ∃ s', …
+                                  ✅ elaborates
+OPTION 3  decoder inside          sem (compile core) ins = encO (stepW (decQ ins) (wordOf ins))
+                                  ✅ elaborates   (encO : Option St → List Bool)
+```
+
+⇒ ***Lean will accept any of the three. Nothing here decides itself, which is
+precisely why it needs a ruling and not an implementation.***
+
+## What each one OWES — the part that is not free
+
+**OPTION 1 owes a COMPATIBILITY obligation**, and without it `stepT` is a
+different ISA wearing the same name:
+
+```lean
+∀ s w s', SaltWorks.ISA.stepW s w = some s' → stepT s w = s'      -- ✅ elaborates
+```
+
+*A total `stepT` that quietly disagreed with `stepW` on a decodable word would
+make C4 true and the ISA claim false.* **This obligation is cheap to state and
+must not be skipped.**
+
+**OPTION 2 owes the discharge of its guard — and the guard is far stronger than
+it looks.** How much of the word space does `decode` actually accept?
+
+```
+KERNEL-CHECKED   the funct3 = 0 plane (128 funct7 × 128 opcodes = 16384 words):
+                 planeCount = 257  =  1 (ADD, funct7 must be 0)
+                                   + 128 (ADDI, funct7 bits are immediate)
+                                   + 128 (BEQ,  likewise)
+                 `plane_is_257 : planeCount = 257 := by decide +kernel`, EXIT=0
+```
+
+That confirms the acceptance-set model, from which the whole-space figure
+follows by arithmetic (**arithmetic, not kernel-checked — labelled as such**):
+
+```
+ADD + XOR + SLT   3 × 2^15  =     98,304     (rd, rs1, rs2 free; funct7 pinned)
+ADDI + BEQ        2 × 2^22  =  8,388,608     (12 immediate bits free)
+                  total     =  8,486,912  of  2^32  =  0.1976 %
+```
+
+⇒ **`(decode w).isSome` excludes 99.80 % of the word space.** *That is not a
+side condition; it is nearly the whole input domain.* **Whoever drives the fetch
+path owes that discharge, and the freeze must name them.**
+
+⚠️ **AND A SAMPLING ERROR I MADE AND CAUGHT, because it would have overstated
+the case by 2.5×.** My first measurement counted decodable words among the
+**first 2^16** — `320 / 65536 = 0.488 %`. **That slice is not representative:
+its words have bits 31:16 = 0, which pins `funct7 = 0` and so over-selects the
+R-type forms.** *The honest figure is 0.1976 %, and the biased one was the
+convenient direction — it made the guard look four times weaker than it is.*
+
+**OPTION 3 owes a validity bit in the netlist** — `encO : Option St → List Bool`
+means the hardware must *emit* "this word did not decode". Honest, and the only
+one of the three where the netlist's totality and `stepW`'s partiality are
+reconciled **in the artifact** rather than in the statement.
+
+## The recommendation this seat would make if asked
+
+**Option 1 with the compatibility obligation**, on one ground: it is the only
+choice that keeps the netlist total *and* pins the disagreement to a written
+theorem. Option 2 relocates the problem to a hypothesis 99.8 % of words fail;
+option 3 is correct but pays for it in gates on every instruction.
+
+⛔ **But this is a recommendation, not a ruling — it changes what the ISA
+*means* on 99.8 % of its input space, and that is the council's to decide.**
