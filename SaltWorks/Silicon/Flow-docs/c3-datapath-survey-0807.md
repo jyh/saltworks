@@ -205,7 +205,42 @@ point (`csr_rdata`). No new mechanism.** Under option (A) the read mux is
 an expensive exclusion to reverse — that is the number, whatever the council
 decides with it.**
 
-## What this means for C3
+## THE TRAP PATH — priced for R5, mostly free, and a SIXTH bypass
+
+⚠️ **`R5` lists traps alongside CSRs as a candidate v1 exclusion; this prices it.**
+Predictions `T1`–`T6` on disk first. **All six held.**
+
+```
+INDIVIDUAL detectors        AGGREGATE outputs      with the flags cut
+  e_illegal    7  OK          trap     57            trap     40  OVER
+  e_ecall/brk 19  OK          cause[3] 58            cause[1] 31  OVER
+  e_mis_f      2  OK          cause[0] 46            cause[0] 23  OK
+  e_mis_l/s   11  OK          cause[4] 33            cause[4] 18  OK
+  irq_id[*]   30  OVER  <- T5
+```
+
+**T1–T4: every exception detector is individually inside the ceiling** — they are
+decode-shaped, exactly as predicted. **T5: the interrupt priority encoder is the
+one that fails**, at 30 (predicted 32) — a priority chain, the comparator's
+family. **T6: no tenth mechanism appeared.**
+
+**The aggregates fail only because they aggregate**: `trap` and `cause` OR
+together every exception source *including* the 33-input interrupt term. Cutting
+at the six exception flags fixes most of it.
+
+⚠️ **What it does NOT fix is `trap` at 40, and the reason is the sixth bypass.**
+`irq` is `(* keep *)`-marked and exists as a declared name, but **it is not in
+`trap`'s cone** — `trap` reaches **`mip` (16 bits) and `mie` (16 bits) directly**,
+32 of its 57 leaves. The optimiser dissolved the flag and re-derived it inline.
+
+⇒ **Sixth block, sixth bypass.** carry chain → read path (1 bit) → ALU (8 bits) →
+fetch (4 vectors) → CSR (an 8-bit compare) → traps (an interrupt flag).
+
+⇒ **Pricing for R5: traps cost ONE priority-encoder tree plus the exception flags
+as cut points. No new mechanism.** Under option (A) `irq` survives, `trap`
+collapses to the 7 flags, and `irq_id` trees like any other reduction.
+**Traps, like CSRs, are cheap to include — the expensive thing was never the
+feature, it was the RTL route.**
 
 1. **Option (A) is required for three things**: the register read path, the ALU,
    and every adder/incrementer. **Not** for decode, immediates, branch logic, the
