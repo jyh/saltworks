@@ -19,9 +19,15 @@ the CPU makes it PROGRAMMABLE; the application makes it legible.
   support today? Nothing freezes until every composite elaborates.
 - **S1 — the spec**: sortedness + permutation over the machine words
   (mathlib's `List.Sorted`/`List.Perm` — small, standard). Math's lane.
-- **S2 — the program**: agent-written Batcher (bitonic) sort in RV32I,
-  assembled via `encode` (a tiny Lean-side assembler: `List Instr` →
-  memory image). THE AGENT'S AUTHORSHIP IS LOGGED as part of the
+- **S2 — the program**: agent-written Batcher (bitonic) sort in RV32I —
+  **REGISTER-RESIDENT (memory ruling 8/7, census 2fc95d8 §3.5 adopted:
+  option (0) now; (A) data-memory-only when a consumer states an N
+  registers cannot hold; NOT (B) this campaign — it kills
+  run_halts_off_the_end, reintroduces fuel, and ends single-cycle).**
+  There is NO memory image — the census found S2's original text named
+  a missing TYPE: the assembler is `encode` over `List Instr` (what the
+  differential harness already does), data lives in registers, n = 8
+  (banyan-matched, S3(a)-proved) up to ~24. THE AGENT'S AUTHORSHIP IS LOGGED as part of the
   artifact — "unverified agent" is a claim about provenance, so the
   provenance is part of the deliverable.
 - **S3 — the correctness proof**: two-layer refinement (math's lane):
