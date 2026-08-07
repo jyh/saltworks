@@ -58,7 +58,26 @@ echo "synth: reading$READ"
 # 8/6: without `-flatten` the `(* keep *)` A/B arms come out BYTE-IDENTICAL --
 # the local flow could not see the attribute's effect at all. With both fixes
 # this reproduces the committed banyan_fabric_nl.v BYTE-FOR-BYTE.
+# ⚠️ STRUCTURAL INPUT NEEDS THE LIBRARY READ FIRST, AND THE DEFAULT PATH MUST NOT
+# CHANGE. Measured 8/7 during the C3 probe: a source that INSTANTIATES sky130
+# cells cannot be read at all by the default sequence —
+#   ERROR: Module `\sky130_fd_sc_hd__or2_1' referenced in module `\adder8s' in
+#          cell `\cy7' is not part of the design.
+# because nothing has told yosys those modules exist. `read_liberty -lib` before
+# `read_verilog` declares them as BLACKBOXES, and that single line is what makes
+# synthesis-as-passthrough possible: abc cannot restructure through a blackbox,
+# so an already-mapped design comes out as it went in.
+#
+# OPT-IN, never default: `SYNTH_STRUCTURAL=1 ./synth.sh <top>`. The committed
+# netlists were produced by the default path and must stay byte-reproducible by
+# it — `Importer/reimport.sh` checks exactly that.
+PRELUDE=""
+if [ "${SYNTH_STRUCTURAL:-0}" = "1" ]; then
+  PRELUDE="read_liberty -lib $LIB"
+  echo "synth: STRUCTURAL mode — cells declared as blackboxes before read_verilog"
+fi
 yosys -q -p "
+  $PRELUDE
   read_verilog $READ
   synth -top $TOP -flatten
   dfflibmap -liberty $LIB

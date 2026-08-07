@@ -1,0 +1,21 @@
+
+7. Printing statistics.
+
+=== adder8r ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+       20        - wires
+       41        - wire bits
+        5        - public wires
+       26        - public wire bits
+        5        - ports
+       26        - port bits
+       24  220.211 cells
+        8   80.077   sky130_fd_sc_hd__maj3_1
+       16  140.134   sky130_fd_sc_hd__xnor2_1
+
+   Chip area for module '\adder8r': 220.211200
+     of which used for sequential elements: 0.000000 (0.00%)
+

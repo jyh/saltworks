@@ -195,6 +195,22 @@ def analyse(path):
     # Extra cut points: nets the proof chooses to certify at. They root their own
     # cone and terminate anyone else's, exactly like a flop Q.
     cutnets = {n for n in driver if CUT and CUT.search(n)}
+    # ⛔ A --cut that matches NOTHING must not print the untreated numbers as
+    # though they were treated. Added 8/7, after this exact blind spot occurred
+    # inside the C3 probe: the RTL control arm has ZERO `carry` nets (synthesis
+    # dissolved them), so `--cut 'carry\['` was a silent no-op and the run
+    # printed the default census — numerically identical to an honest "cutting
+    # here does not help", but a completely different fact.
+    #
+    # The importer got this guard last night; cones.py did not, and the docstring
+    # above has warned since 16:2x that this instrument is treatment-INSENSITIVE
+    # when the boundaries are absent. A warning in prose did not stop it being
+    # relied on. Now it cannot be.
+    if CUT and not cutnets:
+        raise SystemExit(
+            f"cones.py: --cut matched no DRIVEN net in {path}. The boundaries you asked "
+            f"to certify at do not exist in this netlist — most likely the flow dissolved "
+            f"them. Refusing to print the untreated census as a treated one.")
     for n in sorted(cutnets):
         roots.append((f"cut:{n}", n))
 
