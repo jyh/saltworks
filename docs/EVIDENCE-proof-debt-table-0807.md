@@ -32,7 +32,18 @@ do not.**
 |---|---|---:|---|
 | **`bnComps`** | `HDL/BatcherNet.lean` | **0** | **4**, in `HDL/BatcherNetC.lean`: `bnC_rotation_routes`, `bnC_concentrates_actives`, `bnC_identity_is_fixed`, `bnC_sorts_reversed_input` |
 
-⭐ **`adder32` LEFT THIS CLASS AT 16:07.** It now carries `adder32_adds` and
+⛔ **RETRACTED 16:34 — READ THE NEXT PARAGRAPH BEFORE THIS ONE.** The maestro's 16:33 ruling is that
+**sampled certificates are tripwires, never correctness**, and `adderAddsOK` runs over
+`addWords` — **seven literal words, 49 pairs** (`Adder.lean:219`). ⇒ ***`adder32`'s new
+certificate is a tripwire; its unconditional theorem (the ripple-carry induction, now
+assigned to math) does not exist yet.*** **This table's behavioural axis cannot see that
+distinction — a sampled check touches `sem` exactly as an exhaustive one does — so the row
+below overstates the baseline by one organ, and the class is NOT one import from empty: it
+is one import and one induction.** *The theorems have since been renamed `_on_sample`,
+which protects a reader and does nothing for this instrument, which is name-blind.*
+
+⭐ **`adder32` LEFT THIS CLASS AT 16:07** *(by the census's own definition, which the ruling
+above supersedes)*. It now carries `adder32_adds` and
 `adder32_carry_out` in `Adder.lean` — in the closure — alongside `adder32_ssa`/`_wf`.
 **`inc32` left `MERELY-BUILT` in the same commit** (`inc32_adds_four`).
 
