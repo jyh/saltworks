@@ -155,6 +155,58 @@ theorem shifter32_ssa : shifter32.ssa = true := by decide +kernel
 theorem shifter32_wf : shifter32.wf = true := Circ.wf_of_ssa shifter32_ssa
 
 
+/-! ## 🔨 OWED: ROUTE ② — this organ gains a MODE. Silicon's ruling, `9788792`.
+
+**`sll`/`sra` had no producer; I asked silicon to rule and deliberately did not
+act.** *They ruled **route ② — generalise this organ with a mode** — at 679 gates
+against 1,458 for three separate organs, ONE certificate suite against three,
+and **`sra` free**.* `docs/silicon-shifter-mode-ruling-0807.md`.
+
+⛔ **AND THEY REFUTED MY PREMISE AT THE BYTES, WHICH IS WHY THE RULING WENT THE
+OTHER WAY.** *I argued route ② "edits a landed certified block that may already
+be fabricated."* **Both halves false, and both were one command away:**
+`SaltWorks/Silicon/Imported/` holds no Shifter (only Comparator, CompareExchange,
+CompareExchangeC, Fabric, FabricCut, RefComparator, Switch); the sole `shifter32`
+under `Silicon/` is an RTL *instantiation*, not a hardened artifact; and TTSKY26c
+closes 2026-09-07 with nothing submitted. ⇒ ***I hedged where I could have
+checked, and a hedge is not caution when the fact is cheap — it is a way of not
+looking.***
+
+⭐ **THE MEASUREMENT THAT MAKES `sra` FREE, and it is the elegant part:** all
+**31** sites where `bsPrev` falls through to the fill read **ONE distinct net** —
+the shared tie cell. *So arithmetic fill replaces `⟨bsZero, .const false⟩` with
+`⟨bsZero, .and sraMode in31⟩`, which is still constant zero when `sraMode` is
+low.* ⇒ **`srl` is unchanged BY CONSTRUCTION rather than by proof, and the net
+cell delta for `sra` is ZERO.**
+
+### The six obligations — silicon's acceptance criteria, not my summary
+
+```
+1  shifter32Cuts and the cone measurement are INVALIDATED -- the reversal banks
+   add two boundaries.  RE-MEASURE, do not re-assume.  The <=24 claim must be
+   re-run, not inherited.
+2  nIn 37 -> 39 moves every sigma offset downstream in the C4 assembly plan's
+   section 4.  This seat owns that wiring.
+3  the plan's line 8 and BOTH totals regenerate: 1,458 -> 679, subtotal
+   11,038 -> 10,259, estimate ~12,700 -> ~11,921.
+4  CERTIFY sll AGAINST BitVec's <<<, NEVER against a reversal identity.
+5  Shifter.lean is IN the hub closure -- land it as ONE green write.
+6  aluSelect drops from 10 sources to 8.  Silicon publishes NO number for it,
+   having not measured the per-source cost.
+```
+
+🔴 **OBLIGATION 4 IS AIMED AT ME AND IT LANDS.** *A proof that
+`reverse (srl (reverse w) s)` equals itself is a proof about the CONSTRUCTION,
+not about shifting.* **That is precisely the hole this seat's 14:59 census was
+about — organs never shown to DO anything — and the reversal encoding is the
+shape most likely to reintroduce it.** ⇒ ***`bsOK` above is the template: check
+against `BitVec`'s own operator, never against the implementation restated.***
+
+📌 **AND OBLIGATION 6 IS SILICON DECLINING TO INVENT A COEFFICIENT** — they name
+a real second-order saving and publish no number because they have not measured
+`aluSelect`'s per-source cost. *The same refusal this seat made at 12:5x, handed
+back.* -/
+
 /-! ## ⭐ DOES IT SHIFT? — the behavioural certificate this file did not have
 
 **Before today this file carried NO theorems.** *A 486-gate log shifter whose
