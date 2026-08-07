@@ -214,6 +214,6 @@ theorem eq_of_sliced_eq {W : Nat} {cols : Nat → Nat}
 
 #audit_axioms agree_nil agree_snoc
 #audit_axioms testBit_mask testBit_mask_xor stepS_testBit
-#audit_axioms reflect eq_of_sliced_eq
+#audit_axioms reflect eq_of_sliced_eq getD_snoc
 
 end SaltWorks.Silicon

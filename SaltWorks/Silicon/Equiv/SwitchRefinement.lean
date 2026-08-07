@@ -173,6 +173,6 @@ theorem iterate_congr {σ ι ω : Type} (f g : σ → ι → σ × ω)
   | nil => rfl
   | cons i is ih => simp [iterate, h s i, ih]
 
-#audit_axioms switch_step_sliced switch_step_eq iterate_congr
+#audit_axioms switch_step_sliced switch_step_eq iterate_congr scols_agree
 
 end SaltWorks.Silicon.Imported

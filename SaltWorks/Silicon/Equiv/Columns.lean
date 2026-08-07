@@ -128,5 +128,6 @@ theorem col_agrees (n j : Nat) (hj : j < 2 ^ n) :
   fun i hi => col_testBit n i j hi hj
 
 #audit_axioms two_pow_width_succ col_lt col_testBit col_agrees
+#audit_axioms ones_add col_of_le
 
 end SaltWorks.Silicon

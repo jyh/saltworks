@@ -239,5 +239,6 @@ theorem fabric_routes :
   simp only [List.all_append, cA_ok, cB_ok, cC_ok, cD_ok, Bool.and_self]
 
 #audit_axioms elem_matches_spec fabric_routes
+#audit_axioms split cA_ok cB_ok cC_ok cD_ok
 
 end SaltWorks.Silicon.Imported

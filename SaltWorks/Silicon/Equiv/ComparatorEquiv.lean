@@ -111,6 +111,6 @@ theorem comparator_equiv (j : Nat) (hj : j < W) :
     intro r idx; simp [outsOf, List.map_map, Function.comp]
   rw [this, this, comparator_sliced_eq]
 
-#audit_axioms comparator_sliced_eq comparator_equiv
+#audit_axioms comparator_sliced_eq comparator_equiv cols_agree
 
 end SaltWorks.Silicon.Imported
