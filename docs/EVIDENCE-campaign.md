@@ -705,6 +705,72 @@ theorising.⟩
 
 ---
 
+## CONVERGENT FINDING #2 — two seats fell into the same selector trap ninety minutes apart
+
+**"The latest run" is not a well-defined object**, and both seats watching
+TinyTapeout's CI discovered it independently by being handed the wrong
+answer.
+
+| Seat | The selector | What it would have reported |
+|---|---|---|
+| **silicon**, ~18:1x | monitor keyed on **branch** | two `gds` runs existed on `main` — their `(* keep *)` arm A and the template's initial commit — so the terminal condition **could have reported the template's failure as their arm's result** |
+| **evidence**, 19:07 | watcher keyed on **recency** (`--limit 1`) | fetched the newest run *by creation time*, which was **silicon's `layout-obstructions` column experiment on another branch, created 13 minutes before the event being measured** — and printed it as a four-job verdict |
+
+**Both selectors were reasonable. Both returned a neighbouring
+experiment and called it the answer** — and in both cases the output looks
+exactly like a result: a run id, four job names, four conclusions.
+
+⛔ **The evidence instance is the sharper one, because the claim being
+checked was ABOUT staleness.** That seat had written, three minutes
+earlier, *"a run that finished before the fix is not evidence about the
+fix"* — and then built an instrument that served it precisely that.
+
+✅ **The fix both seats converged on: pin the RUN ID, name the branch, and
+check the timestamp against the event.** Silicon caught theirs, stopped the
+monitor and re-armed on explicit ids; evidence retracted before the number
+spread.
+
+⭐ **AND THE CLOCK CORRECTION THAT CAME OUT OF IT — run-creation time is
+the wrong boundary.** `viewer` runs **last**, under `needs: gds`. So what
+decides whether the GitHub Pages blocker is cleared is **when the JOB
+executed, not when the RUN was created**: a run begun while the repo was
+still private can have its Pages step fire after the flip and succeed.
+*The coarse framing — "this run predates the fix, ignore it" — was wrong in
+a way that would have discarded a valid answer.*
+
+---
+
+## ONE-WAY ACTS — the class with no protocol, named 2026-08-06 19:07
+
+**The fleet announces before taking the build lock, which protects a
+REVERSIBLE resource, and announces nothing before acts that cannot be
+undone at all** — flipping a repo's visibility, pushing to a public remote,
+submitting to a shuttle, sending mail.
+
+Found the way these things are found: the Captain's order to make the
+tapeout repo public reached two seats, and **both executed it, within the
+same minute.** No harm — setting a public repo public is idempotent — **but
+nothing in the order or the conventions made it so.**
+
+**The sharpest form is silicon's, about themselves:**
+
+> ***An announcement that follows an irreversible act is a record, not a
+> coordination mechanism.***
+
+They announced at 19:04, *after* executing; evidence audited the repo's
+entire history for secrets, outside-domain authorship and lane markers
+*before* flipping — **and still failed to check whether anyone else was
+already doing it.** *One seat coordinated on content and not on actors; the
+other announced too late to coordinate at all.* **Had the audit found a
+leak mid-flip, the "executed" post would have arrived after it mattered.**
+
+⇒ **PROPOSED (maestro to rule): the take/release discipline the build lock
+already has, extended to one-way acts — `TAKING: <act>` on the bus before,
+result after.** One line, and it is the same discipline that stopped two
+seats colliding on the shared git index this morning.
+
+---
+
 ## CONVERGENT FINDING — the fleet found the same missing instrument three times
 
 On 2026-08-06, within about one hour and without coordinating, three seats
