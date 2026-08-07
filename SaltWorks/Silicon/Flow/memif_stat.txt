@@ -1,0 +1,38 @@
+
+7. Printing statistics.
+
+=== memif ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+      108        - wires
+      260        - wire bits
+       10        - public wires
+      162        - public wire bits
+        8        - ports
+      138        - port bits
+      182  1073.53 cells
+        2   15.014   sky130_fd_sc_hd__a211oi_1
+        3   15.014   sky130_fd_sc_hd__a21oi_1
+        1    10.01   sky130_fd_sc_hd__a222oi_1
+       13   97.594   sky130_fd_sc_hd__a22oi_1
+        2   12.512   sky130_fd_sc_hd__a31oi_1
+        3   26.275   sky130_fd_sc_hd__a32oi_1
+        3   11.261   sky130_fd_sc_hd__clkinv_1
+        2   12.512   sky130_fd_sc_hd__lpflow_inputiso1p_1
+        1    6.256   sky130_fd_sc_hd__lpflow_isobufsrc_1
+       16  180.173   sky130_fd_sc_hd__mux2_1
+        8  180.173   sky130_fd_sc_hd__mux4_2
+       97  364.099   sky130_fd_sc_hd__nand2_1
+        1    6.256   sky130_fd_sc_hd__nand2b_1
+       19   71.318   sky130_fd_sc_hd__nor2_1
+        1    5.005   sky130_fd_sc_hd__nor3_1
+        1    7.507   sky130_fd_sc_hd__nor3b_1
+        3   15.014   sky130_fd_sc_hd__o21ai_0
+        5    31.28   sky130_fd_sc_hd__o22ai_1
+        1    6.256   sky130_fd_sc_hd__or3_1
+
+   Chip area for module '\memif': 1073.529600
+     of which used for sequential elements: 0.000000 (0.00%)
+

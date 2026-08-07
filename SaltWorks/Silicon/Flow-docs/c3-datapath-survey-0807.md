@@ -10,14 +10,59 @@
 |---|---|---|---|---|
 | **writeback** (result mux + write decode) | **6** | **100 %** | **NO** | 6 |
 | **control** (decode + immgen + branch) | **13** | **100 %** | **NO** | 13 |
+| **memory interface** (load/store/BE) | **11** | **100 %** | **NO** | 11 |
 | **register read** (2 × 32:1) | 36 | 93.9 % | **YES** | **11** |
 | **ALU** (10 ops + flags) | 68 | **0 %** | **YES** | **20** *(14 encoded)* |
 | **PC adders** (`pc+imm`, `pc+4`) | 64 / 30 | — | **YES** | **3** |
 
-## 🎯 THE RULE THE FOUR BLOCKS AGREE ON
+## ⛔ THE RULE I PUBLISHED AT 07:08 WAS IMPRECISE, AND THE MEMORY INTERFACE REFUTED IT AT 07:1x
 
-> **A block needs structural emission if it SELECTS across a wide operand set, or
-> ADDS across a wide word. A block that DECODES or ENABLES does not.**
+I derived a rule from four blocks and then tested it on a fifth that was **not in
+the derivation sample** — the memory interface — with the predictions written
+down first. **It predicted the wrong way, twice.**
+
+| | predicted | measured |
+|---|---|---|
+| load extract + extend | **OVER**, ~37 | **11 — fine** |
+| store alignment | **OVER**, ~29 | **6 — fine** |
+| byte enables | fine, ~6 | 6 — fine |
+
+**Why.** `load_out[0]`'s leaves are exactly
+`rdata_raw[0], [8], [16], [24], addr[0], addr[1], funct3[0], funct3[1]`. **A
+byte-lane extract is BIT-SLICED**: output bit *k* depends on input bits
+*k, k+8, k+16, k+24* — **four sources per bit, not thirty-two.** I had counted
+the *word* as the operand set when what matters is the count **per output bit**.
+
+⇒ **"Wide operand set" was the wrong phrase.** A 32-bit word selected **four
+ways** is cheap; a 5-bit address selecting among **thirty-two words** is not.
+*The width of the data is irrelevant; the number of sources per output bit is
+everything.* **Corrected rule below.**
+
+## 🎯 THE RULE, CORRECTED AND QUANTITATIVE
+
+> **A cone exceeds the ceiling iff (sources per OUTPUT BIT) + (select/control
+> bits) > 24.** Two mechanisms produce many sources per bit — **selecting among
+> many operands**, and **carry/serial dependency**. Nothing else in this datapath
+> does.
+
+| block | sources per output bit | + control | total | verdict |
+|---|---|---|---|---|
+| register read | **31** registers | 5 | **36** | ✗ |
+| barrel shift | **32** possible source positions | 5 | **37** | ✗ |
+| ALU op mux | 10 op results | 10 one-hot | 20 | ✓ *(tight)* |
+| **byte-lane extract** | **4** lanes | 4 | **8** | ✓ |
+| writeback mux | 4 results | 2 | 6 | ✓ |
+| adder / incrementer | *carry: all lower bits* | — | 30–65 | ✗ |
+| decode / immgen | instruction field | — | ≤ 13 | ✓ |
+| write enable | *broadcast — none* | 6 | 6 | ✓ |
+
+**The superseded formulation is left above deliberately, with its refutation, so
+the record shows a rule that was tested rather than a rule that was asserted.**
+
+### The superseded version, for the record
+
+> ~~A block needs structural emission if it SELECTS across a wide operand set, or
+> ADDS across a wide word. A block that DECODES or ENABLES does not.~~
 
 | what the block does | examples measured | cone behaviour |
 |---|---|---|
