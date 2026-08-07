@@ -595,7 +595,7 @@ with tempfile.TemporaryDirectory() as _tmp:
 # integration: the real S2 manifest must still bind. A red here is a FINDING
 # (the artifact drifted from its birth record), not a broken test.
 _man = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                    "..", "provenance", "MANIFEST.tsv")
+                    "..", "provenance", "REPLAY-MANIFEST.tsv")
 if os.path.exists(_man):
     _rows = [l.split("\t") for l in open(_man, encoding="utf-8").read().splitlines()
              if l.strip() and not l.lstrip().startswith("#")]

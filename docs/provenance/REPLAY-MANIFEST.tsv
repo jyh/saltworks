@@ -1,0 +1,32 @@
+# docs/provenance/REPLAY-MANIFEST.tsv — for `docs/ledger-tools/provenance_replay.py`.
+#
+# ⚠️ THIS IS NOT `MANIFEST.tsv`, AND THE TWO ANSWER DIFFERENT QUESTIONS.
+#   MANIFEST.tsv  + verify.sh   (math)  — "are the bundle's files unaltered, and
+#                                         does the program still match the blob
+#                                         we pinned?"   Pins the CURRENT artifact.
+#   REPLAY-MANIFEST.tsv         (this)  — "do the executor's logged tool calls
+#                                         still REPRODUCE the artifact as born?"
+#                                         Pins the BIRTH commit, forever.
+# Both are wanted. Neither subsumes the other: a file can be byte-identical to a
+# pin that was itself re-pinned after an edit, which is exactly the state S2
+# reached at 14:06 on 2026-08-07.
+#
+# bundle <TAB> target (absolute path AS THE EXECUTOR SAW IT) <TAB> git rev:path <TAB> source (optional)
+#
+#   python3 docs/ledger-tools/provenance_replay.py --manifest docs/provenance/REPLAY-MANIFEST.tsv
+#
+# ⛔ THE REV IS PINNED TO THE BIRTH COMMIT, AND MY FIRST VERSION OF THIS FILE HAD
+# IT WRONG. At 13:2x I wrote "`--against HEAD:…` is deliberate, not a pin — a
+# pinned rev would pass forever while the artifact drifted." That reasoning is
+# right for a FROZEN artifact and wrong for a LIVE MODULE. At 14:0x math added
+# 841 lines of S3(b) to `Program.lean`; the drift was legitimate development, and
+# HEAD-anchoring turned a birth record into a permanent RED. A gate that goes red
+# for expected behaviour is a gate someone switches off.
+#
+# A birth record binds a BIRTH. Pinning `bf2de34` makes the replay claim -- "the
+# executor's tool calls reproduce this file exactly" -- true and checkable
+# forever. Drift of HEAD away from birth is normal and is verify.sh's question,
+# not this one.
+#
+# S2 — the bitonic sort. Born bf2de34; bundle a5d2ef7 (the next commit).
+docs/provenance/s2/s2-executor-transcript.jsonl	/Users/jyh/projects/claude/saltworks/SaltWorks/Stack/Program.lean	bf2de34:SaltWorks/Stack/Program.lean	/Users/jyh/.claude/projects/-Users-jyh-projects-claude-salt/9a758ca5-4cb1-42a9-a375-6125180a6db8/subagents/agent-ac01cfad3d5259a4b.jsonl

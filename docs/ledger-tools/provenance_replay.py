@@ -37,12 +37,28 @@ mechanism used. A LATER commit can edit `Program.lean` and the bundle will
 sit there unchanged, still described as bound. This tool is what makes that
 detectable, and it is why the check belongs in CI rather than in a README.
 
+⛔ AND THE DRIFT ARRIVED IN NINETY MINUTES, WHICH CORRECTED THIS TOOL'S OWN
+ANCHORING. At 14:0x the same day, math added 841 lines of S3(b) to
+`Program.lean`. Legitimate development -- and it made the first version of this
+check, anchored at `HEAD:...`, go permanently red. The reasoning behind that
+anchor ("a pinned rev passes forever while the artifact drifts") is right for a
+FROZEN artifact and WRONG for a LIVE MODULE.
+
+  => A birth record binds a BIRTH. Pin the birth commit, and the replay claim --
+     "the executor's logged tool calls reproduce this file exactly" -- stays true
+     and checkable forever. Whether HEAD has since moved on is a different and
+     equally real question; it belongs to `docs/provenance/verify.sh`, which
+     answers it by pinning the CURRENT blob.
+
+A gate that reds on expected behaviour is a gate someone switches off, and that
+failure mode loses BOTH checks.
+
     python3 docs/ledger-tools/provenance_replay.py \
         --bundle docs/provenance/s2/s2-executor-transcript.jsonl \
         --target /Users/jyh/projects/claude/saltworks/SaltWorks/Stack/Program.lean \
-        --against HEAD:SaltWorks/Stack/Program.lean
+        --against bf2de34:SaltWorks/Stack/Program.lean
 
-    python3 docs/ledger-tools/provenance_replay.py --manifest docs/provenance/s2/MANIFEST.tsv
+    python3 docs/ledger-tools/provenance_replay.py --manifest docs/provenance/REPLAY-MANIFEST.tsv
 
 EXIT: 0 replay reproduces the blob · 1 MISMATCH (drift, or never bound) ·
 2 could not read/replay -- following `import-closure.py`'s three-way exit
