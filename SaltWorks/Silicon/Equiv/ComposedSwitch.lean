@@ -150,6 +150,29 @@ theorem composed_switch_of_seam_k3 {v hw : Fin 8 → ℕ}
       (∀ s, Banyan.line 0 s (extendIio 0 hw s) = extendIio 0 hw s) :=
   composed_switch_of_seam (by norm_num) hi (by simpa using hlt) hseam
 
+/-- ⭐⭐ **THE FABRICATED WIDTH, IN THE CARRIER THE FRAME ACTUALLY DECODES TO —
+and the address bound VANISHES.**
+
+With destinations as a 3-bit field rather than an `ℕ`, math's
+`dest3_toNat_lt_eight` discharges `hlt` **from the type**: a 3-bit field cannot
+name a line outside an 8-line fabric. `toNat_injective_of_injective` carries
+distinctness across the carrier change.
+
+⇒ ***The caller is left owing injectivity of the field vector and the seam, and
+nothing else.*** *Both lemmas are math's (`Stack/Perm.lean:900, :909`), written
+against this theorem by name — this is the taking, not a restatement.*
+
+**`composed_switch_of_seam_k3` still stands** for a caller whose destinations are
+already `ℕ`; this is the cheaper door, not a replacement. -/
+theorem composed_switch_of_seam_dest3 {d : Fin 8 → Dest 3} {hw : Fin 8 → ℕ}
+    (hi : Function.Injective d)
+    (hseam : hw = runNet batcher8 (fun i => (d i).toNat)) :
+    (∀ m ≤ 3, Set.InjOn (fun s => Banyan.line m s (extendIio 0 hw s)) (Set.Iio 8)) ∧
+      (∀ s < 8, Banyan.line 3 s (extendIio 0 hw s) = s) ∧
+      (∀ s, Banyan.line 0 s (extendIio 0 hw s) = extendIio 0 hw s) :=
+  composed_switch_of_seam_k3 (toNat_injective_of_injective hi)
+    (dest3_toNat_lt_eight d) hseam
+
 end SaltWorks.Silicon
 
 section Audit
@@ -158,6 +181,7 @@ open Salt.Tactic
   SaltWorks.Silicon.composed_switch_of_seam_nodup
 #audit_axioms SaltWorks.Silicon.seam_hyps_force_full_load
   SaltWorks.Silicon.composed_switch_of_seam_k3
+#audit_axioms SaltWorks.Silicon.composed_switch_of_seam_dest3
 #audit_axioms SaltWorks.Silicon.repeated_code_refutes_no_conflict
   SaltWorks.Silicon.repeated_input_code_refutes_no_conflict
 end Audit
