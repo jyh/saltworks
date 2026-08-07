@@ -187,6 +187,61 @@ theorem instMap_internal (c : Circ) (σ : Net → Net) (off n : Nat) (h : ¬ (n 
     instMap c σ off n = off + (n - c.nIn) := by
   rw [instMap]; exact if_neg h
 
+/-! ### `ssa → wf` — THE DECOMPOSITION, and the invariant that is the whole trick
+
+**Flagged as owed at 13:00 and still unstarted. What follows is not an attempt;
+it is the part of a proof that is actually expensive** — the decomposition and
+the invariant. *The tactics are the cheap half, and handing over a decomposition
+without them is worth more than handing over three failed tactic scripts.*
+
+⭐ **WHY IT SHOULD HOLD, informally but completely.** Under `ssaFrom nIn gs`,
+gate `i`'s output is exactly `nIn + i` and its fanin is `< nIn + i`. So:
+
+```
+nodupB (gs.map .out)      outs are nIn, nIn+1, … — distinct by construction
+gs.all (nIn ≤ ·.out)      immediate, same reason
+wfGates inputs gs         fanin < nIn+i, and everything < nIn+i is ALREADY defined
+c.outs.all defined        Circ.ssa's SECOND conjunct is outs < nIn + gs.length,
+                          and defined = {0 … nIn+len-1} exactly
+```
+
+🔑 **AND THE ONE NON-OBVIOUS STEP, which is where a first attempt would go
+wrong: `wfGates` threads `defined` as a PREPEND-LIST, so it is not a `range` and
+cannot be rewritten into one.** *`Syntax.lean:112` even says so — "the
+append-extension trap the refuter pass measured applies to well-formedness
+checking exactly as it applies to evaluation."* ⇒ **The induction must carry a
+SET characterisation, not a list equality:**
+
+```lean
+(∀ a, D.contains a = true ↔ a < base)
+```
+
+**preserved by the cons step because `g.out = base`, so `D' = base :: D`
+characterises `a < base + 1`.** *That invariant is the trick; with it each of the
+four conjuncts is a short induction, and without it the first one does not
+close.*
+
+**The four statements, elaborated so the shapes are pinned:** -/
+
+section SsaWf
+variable (gs : List Gate) (base : Nat) (D : List Net) (c : Circ)
+
+#check (ssaFrom base gs = true → (∀ a, D.contains a = true ↔ a < base) →
+        wfGates D gs = true : Prop)
+
+#check (ssaFrom base gs = true → nodupB (gs.map Gate.out) = true : Prop)
+
+#check (ssaFrom base gs = true → gs.all (fun g => base ≤ g.out) = true : Prop)
+
+#check (ssaFrom base gs = true →
+        ∀ a, a < base + gs.length → (gs.foldl (fun acc g => g.out :: acc) D).contains a = true
+          ∨ D.contains a = true : Prop)
+
+-- And the target they compose to.
+#check (c.ssa = true → c.wf = true : Prop)
+
+end SsaWf
+
 section
 variable (c : Circ) (σ : Net → Net) (off : Nat)
 
