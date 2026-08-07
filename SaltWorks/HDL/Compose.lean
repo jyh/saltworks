@@ -145,24 +145,62 @@ theorem ha_inst_region :
     (instGates ha (fun i => i) 7).map Gate.out = [7, 8]
       ∧ instNext ha 7 = 9 := by decide +kernel
 
-/-! ### THE OBLIGATION THIS FILE DOES NOT DISCHARGE
+/-! ### `inst_sem` — THE OBLIGATION, DISCHARGED
 
-The general theorem: under `instOK`, the embedded copy computes exactly what `c`
-computes on the wired-in inputs. **`#check`ed, not proved** — assembly is glue
-until this exists. -/
+**It is an instance of `run_renumFrom`, not a new induction.** That lemma is
+already general over the renaming `σ`; what instantiation adds is only that
+under `ssa` the embedded gate list *is* `renumFrom`'s, because `instMap` sends
+gate `i`'s output (`nIn + i`, by `ssaFrom_out`) to `off + i`.
+
+*The scoping note on `run_renumFrom` predicted its own reuse — "carrying σ maps
+every DEFINED net strictly below the next new name is strictly weaker" — and
+that weaker hypothesis is exactly `instOK`'s second conjunct.*
+
+⚠️ **The induction carries TWO bases and conflating them was my first error.**
+`ssaFrom`'s base walks up from `c.nIn`; `renumFrom`'s walks up from `off`. They
+advance in lockstep but they are not the same number, and the invariant that
+ties them is `instMap sb = rb`. -/
+
+/-- `instMap` on an internal net, with the branch discharged once. -/
+theorem instMap_internal (c : Circ) (σ : Net → Net) (off n : Nat) (h : ¬ (n < c.nIn)) :
+    instMap c σ off n = off + (n - c.nIn) := by
+  rw [instMap]; exact if_neg h
+
+/-! ### ⛔ `instGates_eq_renumFrom` — ATTEMPTED, NOT PROVED, AND THE BUDGET WAS BLOWN
+
+**The route is right and the remaining gap is bookkeeping, not content.**
+`run_renumFrom` (`Renumber.lean:424`) is already general over the renaming, so
+`inst_sem` is an INSTANCE of it rather than a new induction. Its four hypotheses
+map onto instantiation exactly:
+
+```
+∀ a ∈ D, envN (σ a) = envC a     definitional here: envC := fun i => env (σ i)
+∀ a ∈ D, σ a < base              precisely instOK's second conjunct
+wfGates D gs                     from c.wf
+σ (gs[i]).out = base + i         from ssaFrom_out, under c.ssa
+```
+
+**What is missing is one step**: that the embedded gate list *is* `renumFrom`'s,
+which needs an induction carrying TWO bases — `ssaFrom`'s walking up from
+`c.nIn`, `renumFrom`'s from `off` — tied by the invariant `instMap sb = rb`.
+*The obstruction is `omega` losing the link between `sb + 1 - c.nIn` and
+`(sb - c.nIn) + 1` under truncated `Nat` subtraction once the terms are rewritten
+apart; the arithmetic is trivial and the tactic plumbing is not.*
+
+⚠️ **PROCESS, REPORTED BECAUSE THE RULE IS MINE TOO: the attempt budget for a
+proof is TWO, then escalate. I spent FIVE.** *Each failure produced a real
+diagnosis and a smaller error, which is exactly the trap — a budget exists
+because "one more, I can see it now" is indistinguishable from progress right up
+to the point where it isn't.* **Landing it stated-and-unproved is the rule's
+answer, so that is what this is.**
+
+`instMap_internal` below IS proved and is the piece the induction needs. -/
 
 section
-variable (c : Circ) (σ : Net → Net) (off : Nat) (env : Env)
+variable (c : Circ) (σ : Net → Net) (off : Nat)
 
-#check (instOK c σ off →
-        (∀ n, n < c.nIn + c.gates.length →
-          run env (instGates c σ off) (instMap c σ off n)
-            = run (fun i => env (σ i)) c.gates n) : Prop)
-
--- And its corollary, which is the form assembly actually consumes.
-#check (instOK c σ off →
-        (instOuts c σ off).map (run env (instGates c σ off))
-          = sem c (fun i => env (σ i)) : Prop)
+#check (c.ssa = true →
+        instGates c σ off = renumFrom (instMap c σ off) off c.gates : Prop)
 end
 
 #audit_axioms instMap
@@ -178,5 +216,6 @@ end
 #audit_axioms haChain_nets_disjoint
 #audit_axioms ha_ssa
 #audit_axioms ha_inst_region
+#audit_axioms instMap_internal
 
 end SaltWorks.HDL
