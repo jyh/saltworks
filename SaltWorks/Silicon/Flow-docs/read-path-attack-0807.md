@@ -91,6 +91,73 @@ swapping the target to make the proof easier is exactly the move this campaign
 should be suspicious of. **Recorded as a measured option for the Captain, not a
 recommendation I am entitled to make.**
 
+## THE EMITTER CHANGE, PRICED (Captain's order, 2026-08-07; RV32I confirmed as the target)
+
+### Cost: zero in trust, zero in proof, ~30 lines in a file that is already untrusted
+
+| what it might have cost | actual |
+|---|---|
+| new cell model + liberty theorem | **ZERO** — `mux2_1_liberty` is proved at `Cells/Sky130.lean:142` and `mux2_1` is already in the importer's `EXPAND` |
+| a `mux` constructor on `Gate` | **ZERO** — not needed; see below |
+| re-proving the equivalence | **ZERO** — the theorem compares **values**, not structure |
+| trusted-base growth | **ZERO** |
+
+**Why `Gate` needs no `mux` constructor.** The importer expands a `mux2_1` cell
+into exactly `not S · and A0 ¬S · and A1 S · or` — **the same four primitives a
+`Circ` mux produces**. So the emitted Verilog carries one *cell*, both Lean
+netlists carry the same four *gates*, and they meet. The cell is emitted, the
+proof uses the expansion, and the liberty theorem is the bridge.
+
+**Why no proof changes.** `comparator_equiv` already relates two **structurally
+different** netlists — synthesis output against a hand-written ripple reference —
+by comparing `outs.map (runP …)` at output indices. **Structure is not what the
+theorem constrains.** A peephole that changes gate shape cannot disturb it.
+
+**Where it lands, and why that makes it safe.** In `emitV` (`EmitV.lean:76`),
+which produces Verilog text and sits **outside** `emitN_sem`. The trusted chain
+is `Circ --emitN--> Netlist` versus `fabricated --importer--> Netlist`. ⇒ **A
+wrong peephole cannot produce a false theorem — it produces a FAILING proof.**
+
+### Benefit: measured, one read port, identical tree and boundaries
+
+| emission | cells | area µm² | boundaries | max cone |
+|---|---|---|---|---|
+| `Circ` primitive basis (`and`/`or`/`not`) | 2981 | 18,637 | 128/128 | 11 |
+| **`mux2_1` cells** | **992** | **11,171** | **128/128** | **11** |
+
+**3.0× fewer cells, 40 % less area, and the verifiability is unchanged.**
+Passthrough exact both ways (992 in → 992 out).
+
+⭐ **Cross-check: I computed 22,341 µm² for two ports BEFORE building the variant;
+the measurement is 2 × 11,170.7 = 22,341.4 — agreement to 0.002 %.**
+
+| regfile, 2 read ports + 992 flops | µm² | tiles |
+|---|---|---|
+| structural tree, primitive basis | 67,062 | 1.48 |
+| **structural tree, `mux2_1`** | **52,130** | **1.15** |
+| RTL baseline — **unverifiable**, max cone 36 | 45,011 | 0.99 |
+
+⇒ **Full per-cone verifiability of the RV32I read path costs +16 % area over a
+baseline that cannot be verified at all.**
+
+### ⚠️ Yield is design-dependent, and I measured that rather than assuming it
+
+Counting the 4-gate mux idiom in the netlists we already have:
+
+| netlist | logic gates | mux idioms | gates collapsing |
+|---|---|---|---|
+| `Fabric.lean` (banyan, synthesis-derived) | 454 | **0** | 0 % |
+| `Comparator.lean` | 111 | 14 | **50.5 %** |
+| `Switch.lean` | 44 | 4 | 36.4 % |
+| the read tree (by construction) | — | all | **100 %** |
+
+**Zero on the banyan** — synthesis reached for compound cells (`a21oi`, `o21ai`)
+whose expansions are not mux-shaped. ⇒ **The peephole pays where muxes are built
+deliberately, which is exactly the CPU datapath** (operand select, ALU select,
+writeback, PC) **and not where a synthesiser has already chosen a different
+form.** *Quoting a single yield figure for "a CPU" would be an extrapolation, and
+I have not made one.*
+
 ## What I would tell the council
 
 1. **The read path is solvable at full RV32I.** Two-level tree, emitted
