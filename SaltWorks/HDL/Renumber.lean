@@ -548,6 +548,73 @@ theorem normalize_fabric3_ssa : (normalize (fabric 3)).ssa = true :=
 #audit_axioms run_renumFrom normalize_sem
 #audit_axioms opt_withMidDead_wf' normalize_opt_withMidDead_ssa normalize_fabric3_ssa
 
+/-! ## Toward discharging `emitPipeline'_sem`'s hypothesis
+
+`emitPipeline'_sem` takes `(opt c).wf` rather than `c.wf`. That is a decidable
+`Bool`, so every concrete circuit discharges it by `decide +kernel` — but the
+general fact that **`opt` preserves well-formedness** is missing from `Opt.lean`
+and would remove the hypothesis outright.
+
+Its load-bearing half is below and is proved. **The remaining three steps are
+mechanical and are NOT done:** `nodupB` under filter-then-map (a sublist of a
+duplicate-free list is duplicate-free), the converse of `defined_mem` (an input
+or a surviving gate's output really is in the filtered circuit's `defined`), and
+`nIn ≤ out` under filter (immediate, filter members are members). Recorded here
+rather than attempted at the end of a long session: the hypothesis costs a
+`decide` today, and three half-finished lemmas would cost more than that.
+-/
+
+
+
+/-- **Filtering preserves `wfGates`.** Two defined-lists are threaded, not one:
+`D` is what the ORIGINAL list has defined, `Dk` what the FILTERED list has. `Dk`
+is a subset, and the hypothesis says it retains everything kept. The narrowing
+is sound for one reason, and it is the whole content of the lemma: a KEPT gate
+cannot read a DROPPED gate's output, because `KeepClosed` puts every operand of
+a kept gate in `keep` and a dropped gate's output is not. -/
+theorem wfGates_filter {keep : Net → Bool} :
+    ∀ (gs : List Gate) (D Dk : List Net),
+      wfGates D gs = true →
+      KeepClosed keep gs →
+      (∀ a, keep a = true → D.contains a = true → Dk.contains a = true) →
+      wfGates Dk (gs.filter (fun g => keep g.out)) = true := by
+  intro gs
+  induction gs with
+  | nil => intro D Dk _ _ _; rfl
+  | cons g gs ih =>
+    intro D Dk hwf hc hsub
+    rw [wfGates, Bool.and_eq_true] at hwf
+    obtain ⟨hfan, hrest⟩ := hwf
+    have hc' : KeepClosed keep gs := fun g' hg' => hc g' (by simp [hg'])
+    by_cases hk : keep g.out = true
+    · have hfil : (g :: gs).filter (fun g => keep g.out)
+          = g :: gs.filter (fun g => keep g.out) := by simp [hk]
+      rw [hfil, wfGates, Bool.and_eq_true]
+      refine ⟨?_, ?_⟩
+      · rw [List.all_eq_true]
+        intro a ha
+        have haD : D.contains a = true := List.all_eq_true.mp hfan a ha
+        have hak : keep a = true := hc g (by simp) hk a ha
+        exact hsub a hak haD
+      · refine ih (g.out :: D) (g.out :: Dk) hrest hc' ?_
+        intro a hak haD
+        have hmem : a ∈ g.out :: D := by simpa using haD
+        rcases List.mem_cons.mp hmem with h1 | h2
+        · exact (by simp [h1])
+        · have := hsub a hak (by simpa using h2)
+          have : a ∈ Dk := by simpa using this
+          simpa using List.mem_cons_of_mem g.out this
+    · have hk' : keep g.out = false := by simpa using hk
+      have hfil : (g :: gs).filter (fun g => keep g.out)
+          = gs.filter (fun g => keep g.out) := by simp [hk']
+      rw [hfil]
+      refine ih (g.out :: D) Dk hrest hc' ?_
+      intro a hak haD
+      have hmem : a ∈ g.out :: D := by simpa using haD
+      rcases List.mem_cons.mp hmem with h1 | h2
+      · rw [h1, hk'] at hak; exact absurd hak (by simp)
+      · exact hsub a hak (by simpa using h2)
+
 /-! ## OBLIGATION 5 — the pipeline that could not be written this afternoon
 
 `EmitN.emitPipeline` optimizes, checks `ssa`, and falls back to the UNOPTIMIZED
@@ -568,5 +635,6 @@ theorem emitPipeline'_sem (c : Circ) (h : (opt c).wf = true) (ins : Env) :
   rw [emitPipeline', emitN_sem _ (normalize_ssa _ h) ins, normalize_sem _ h ins, opt_sem]
 
 #audit_axioms emitPipeline' emitPipeline'_sem
+#audit_axioms wfGates_filter
 
 end SaltWorks.HDL
