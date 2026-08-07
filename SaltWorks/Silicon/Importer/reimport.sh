@@ -67,12 +67,14 @@ run switchNL Switch.lean SaltWorks/Silicon/Flow/bitserial_switch_nl.v bitserial_
 # netlist is a real check rather than a tautology. Adding it here would be a
 # category error.
 #
-# NOTE: Fabric.lean is NOT listed either, and that is a provenance decision, not
-# an oversight. Its source is `tt_submission/tt_um_saltworks_banyan.v` — a CI
-# BUILD ARTIFACT from run 31140274735, not a file in this repository. A check
-# that silently regenerated it from whatever copy happened to be on disk would
-# assert reproducibility it cannot establish. See Flow-docs/flop-treatment-0806.md
-# for the pinned artifact identity and the exact command.
+# NOTE: Fabric.lean and FabricCut.lean are NOT listed either, and that is a
+# provenance decision, not an oversight. Their source is
+# `tt_submission/tt_um_saltworks_banyan.v` — a CI BUILD ARTIFACT from run
+# 31140274735, not a file in this repository. A check that silently regenerated
+# them from whatever copy happened to be on disk would assert reproducibility it
+# cannot establish; three copies were present tonight with three different
+# checksums. See Flow-docs/flop-treatment-0806.md for the pinned artifact
+# identity and both exact commands (they differ only by `--cut`).
 
 echo "reimport: $n datum(s), $( [ $fail -eq 0 ] && echo "ALL REPRODUCE" || echo "FAILURES ABOVE" )"
 exit $fail

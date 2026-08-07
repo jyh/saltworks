@@ -120,6 +120,50 @@ those are precisely what ruling 4a's `(* keep *)` cut addresses — max 21, 100 
 The 87.5 % headline is not a uniform difficulty spread across the design; it is
 **52 easy cones, 16 trivial ones, and 8 hard ones that already have a treatment.**
 
+## The same move at a CHOSEN boundary — `--cut`, and the whole chip lands inside the ceiling
+
+A flop is cut because the netlist forces it. A `(* keep *)` boundary is cut
+because we **choose** to certify there — and that choice only exists if the net
+still exists after the flow flattens, which is exactly what ruling 4a bought.
+
+⚠️ **First, a false alarm I nearly raised.** The census above reported max 36 /
+87.5 % on the artifact — the *control* arm's figures — which reads as "the chip
+being fabricated does not carry the treatment". It does. `cones.py`'s own
+docstring says the default cut set is **treatment-insensitive**: it reports the
+same number whether or not the boundaries survived. Checking the thing itself
+instead of its proxy: **all 16 boundary nets (`\fabric.w0[0..7]`,
+`\fabric.w1[0..7]`) are present in the pinned artifact, driven by real cells.**
+The fabricated chip *is* the keep arm.
+
+`--cut REGEX` gives the importer `cones.py`'s semantics: a matched net becomes
+**both a leaf and a root** — bound to an input for every consumer downstream,
+while its own root names the logic that drives it. That needed one structural
+change: `expand_driver` deliberately does not consult the net's leaf binding, so
+a cut net can be two things at once. A regex matching **no driven net is a hard
+error**, because a census that silently found nothing would report the untreated
+numbers as though they were treated — the precise failure mode the docstring
+warns about, made impossible rather than documented.
+
+```
+primary inputs: 86  (18 design + 52 state + 16 cut)
+outputs       : 92  (24 design + 52 next-state + 16 cut)
+```
+
+| | roots with logic | median | **max** | ≤ 24 |
+|---|---|---|---|---|
+| `Fabric.lean` (forced cuts only) | 64 | 12 | **36** | 87.5 % |
+| `FabricCut.lean` (+ kept boundaries) | **80** | 7 | **21** | **100 %** |
+
+Agreeing exactly with `cones.py --cut` (80 cones, median 7, max 21, 100 %) — the
+independent implementation again, on the treated arm this time. Per kind, the
+`uo_out` cones fall **36 → 21** and the next-state cones **22 → 7**.
+
+⇒ **Every cone in the netlist TinyTapeout will fabricate is now inside the
+24-bit kernel ceiling, as a Lean datum that builds** (`FabricCut.lean`, 8606
+jobs, `EXIT=0`). Both data are kept: `Fabric.lean` is the design as the netlist
+forces it, `FabricCut.lean` is the decomposition we can certify. They answer
+different questions and the first is what keeps the second honest.
+
 ## Two defects found while doing this
 
 **1. The importer's docstring claimed a check that never existed.** It said
@@ -169,5 +213,6 @@ was caught by the duplicate-input guard.
 
 * the **readback census check** the docstring used to claim (defect 1 above);
 * `dfrtp` / async reset, before the RV32I netlist needs it;
-* per-cone equivalence against the RTL — the next step, and the reason the
-  ≤ 22-input next-state result above matters.
+* **per-cone equivalence against the RTL — now unblocked on every cone**, which
+  is the point of all of the above: `FabricCut.lean` puts all 80 at ≤ 21 bits,
+  and the 24-bit ceiling was the only thing standing in the way.

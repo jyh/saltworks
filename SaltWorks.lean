@@ -17,6 +17,7 @@ import SaltWorks.Silicon.Imported.Comparator
 import SaltWorks.Silicon.Imported.RefComparator
 import SaltWorks.Silicon.Imported.Switch
 import SaltWorks.Silicon.Imported.Fabric
+import SaltWorks.Silicon.Imported.FabricCut
 import SaltWorks.Silicon.Equiv.ComparatorEquiv
 import SaltWorks.Silicon.Equiv.Columns
 import SaltWorks.Silicon.Equiv.BitSliced
