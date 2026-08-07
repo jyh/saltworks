@@ -187,6 +187,65 @@ partial def coneAt (c : Circ) (cut : List Net) (n : Net) : List Net :=
 #eval (adder32.gates.length, inc32.gates.length)
 
 
+/-! ## ⭐ WHAT THIS FILE SAID IT DID NOT CLAIM — now claimed, and the deferral has an address
+
+**`Adder.lean:52` says, verbatim: *"No theorem says these circuits add."*** *The
+author deferred deliberately and gave a reason:* **"Correctness of the datapath
+against `SaltWorks.ISA` belongs to the code generator's argument, not to a
+construction file."** ⇒ ***That was defensible and it is not what I am
+contradicting.***
+
+⛔ **WHAT CHANGED IS THAT THE DEFERRAL NOW HAS AN ADDRESS AND DID NOT BEFORE.**
+*`C4Spec` exists (`C4.lean`, 8/7), so "the code generator's argument" is a named
+object rather than a future one — and `adder32` and `inc32` sit under it.*
+📌 **AND THE FILE NAMES THE HAZARD ITS OWN CHECKS CANNOT CATCH: *"a generator
+producing the right cone shape and the wrong sum would pass every check here."***
+⇒ ***A sampled behavioural certificate is exactly the check for that, it costs
+seconds, and it was never the thing being deferred.***
+
+🙏 **Found by EVIDENCE's census, not by me reading the file — and I had read it
+twice today.** *Their line: a machine census found in twenty minutes what a
+sentence in the file had been saying the whole time.*
+
+⚠️ **AND ONE FACT FOR C4's ASSEMBLY, STATED HERE BECAUSE THIS IS WHERE IT LIVES:
+`inc32.ssa = false`.** *It is the only non-dense `Circ` in the tree, so it CANNOT
+be embedded by `instGates` without `normalize` first — `instNext` would silently
+under-report the region it occupies (`Compose.instNext_under_reports_without_ssa`).*
+-/
+
+/-- Seven words: zero, one, all-ones (the wrap), the two carry boundaries, and
+two asymmetric patterns.  49 pairs -- 169 OOMs at -M 12000, per the standing
+"re-read the quantifier" law. -/
+def addWords : List (BitVec 32) :=
+  [0, 1, 0xFFFFFFFF, 0x7FFFFFFF, 0x80000000, 0xAAAAAAAA, 0x12345678]
+
+/-- `adder32`: a on 0..31, b on 32..63, carry-in at 64.  Outputs: 32 sum bits
+then the carry-out. -/
+def addOut (a b : BitVec 32) (cin : Bool) : List Bool :=
+  sem adder32 (fun i => if i < 32 then a.getLsbD i
+                        else if i < 64 then b.getLsbD (i - 32) else cin)
+
+def adderAddsOK : Bool :=
+  addWords.all fun a => addWords.all fun b =>
+    (addOut a b false).take 32 == (List.range 32).map (fun k => (a + b).getLsbD k)
+
+/-- Carry-out, computed independently as bit 32 of a 33-bit sum. -/
+def adderCarryOK : Bool :=
+  addWords.all fun a => addWords.all fun b =>
+    (addOut a b false).getD 32 false
+      == ((a.zeroExtend 33 + b.zeroExtend 33).getLsbD 32)
+
+/-- `inc32`: 32 input bits; outputs 0,1 pass through and the increment starts at
+bit 2, so it computes `w + 4` -- the pc step. -/
+def incOut (w : BitVec 32) : List Bool := sem inc32 (fun i => w.getLsbD i)
+
+def incAddsFourOK : Bool :=
+  addWords.all fun w => incOut w == (List.range 32).map (fun k => (w + 4).getLsbD k)
+
+theorem adder32_adds : adderAddsOK = true := by decide +kernel
+theorem adder32_carry_out : adderCarryOK = true := by decide +kernel
+theorem inc32_adds_four : incAddsFourOK = true := by decide +kernel
+
 /-! ## Instantiability — the precondition for C4's assembly
 
 *`instOK` requires `ssa`, not merely `wf`: under `wf` alone a circuit may have
@@ -214,6 +273,11 @@ theorem adder32_wf : adder32.wf = true := Circ.wf_of_ssa adder32_ssa
 #audit_axioms adder32
 #audit_axioms adder32_ssa
 #audit_axioms adder32_wf
+#audit_axioms addWords addOut adderAddsOK adderCarryOK
+#audit_axioms incOut incAddsFourOK
+#audit_axioms adder32_adds
+#audit_axioms adder32_carry_out
+#audit_axioms inc32_adds_four
 #audit_axioms adder32Carries
 #audit_axioms incIn
 #audit_axioms incBase
