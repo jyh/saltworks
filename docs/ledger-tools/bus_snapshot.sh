@@ -35,7 +35,18 @@ src_lines=$(wc -l < "$BUS" | tr -d ' ')
 
 # A bus that has SHRUNK since the last snapshot is the exact accident this
 # script exists for, so it is reported loudly rather than snapshotted over.
-last=$(ls -1 "$DEST"/FLEET-*.md 2>/dev/null | tail -1 || true)
+#
+# ⛔ ORDERED BY MTIME, NOT BY NAME — and that correction is owed to the
+# SILICON seat, who adopted this script within 45 minutes and named their
+# copies `FLEET-silicon-preappend-<time>.md`. The first version took the
+# baseline with `ls -1 | tail -1`, i.e. the last filename ALPHABETICALLY,
+# which silently assumed one naming convention. `FLEET-2026…` sorts before
+# `FLEET-silicon-…` for every possible timestamp, so the moment a second seat
+# joined, "the most recent snapshot" became "whichever seat's prefix sorts
+# last" — and the prune below would have deleted the NEWEST dated snapshots
+# while keeping older ones. It read correctly today by accident, which is not
+# the same as correctly.
+last=$(ls -1t "$DEST"/FLEET-*.md 2>/dev/null | head -1 || true)
 if [ -n "$last" ]; then
   last_bytes=$(wc -c < "$last" | tr -d ' ')
   if [ "$src_bytes" -lt "$last_bytes" ]; then
@@ -62,9 +73,67 @@ fi
 
 case "$stamp" in
   *.SHRUNK) ;;
-  *) ls -1 "$DEST"/FLEET-*.md 2>/dev/null | grep -v SHRUNK | sed -e :a -e "\$d;N;2,${KEEP}ba" -e 'P;D' \
+  *) # newest first by MTIME, drop everything past KEEP — naming-agnostic, so
+     # any seat may use any prefix (see the note above)
+     ls -1t "$DEST"/FLEET-*.md 2>/dev/null | grep -v SHRUNK | tail -n +$((KEEP + 1)) \
        | while read -r old; do rm -f "$old"; done ;;
 esac
+
+# --- ARCHIVE: refresh the version-controlled copy in the private seat repo --
+# Captain-directed 2026-08-06. Opt-in (ARCHIVE=1) rather than automatic,
+# because it commits and pushes into ANOTHER SEAT'S repo and nobody should
+# discover that as a side effect of taking a local snapshot.
+#
+# ⛔ THE LANE CHECK RUNS ON EVERY ARCHIVE, NOT ONCE. The bus is append-only
+# and growing — it added 67 KB in the 35 minutes after the first archive — so
+# a firewall scan performed once at adoption is the unbreached-cap failure in
+# a new costume: it certifies the file that WAS, and the file that IS keeps
+# changing. A hit blocks the push rather than warning about it.
+if [ "${ARCHIVE:-0}" = "1" ]; then
+  SEAT=${SEAT:-"${SEAT_DIR}"}
+  REL=${REL:-"fleet/BUS-triple-campaign.md"}
+
+  if [ ! -d "$SEAT/.git" ]; then
+    echo "bus_snapshot: ⛔ ARCHIVE FAILED — no git repo at $SEAT" >&2
+    exit 1
+  fi
+
+  hits=$(grep -c -i -E '\bloca\b|\bholl\b|google|gdm|deepmind|confidential|proprietary' "$BUS" || true)
+  if [ "${hits:-0}" -ne 0 ]; then
+    echo "bus_snapshot: ⛔ ARCHIVE BLOCKED — the lane scan found $hits employer-lane" >&2
+    echo "              marker(s) in the bus. NOT pushed. Read them, and if they are" >&2
+    echo "              benign, archive with LANE_OK=1. The local snapshot is taken." >&2
+    [ "${LANE_OK:-0}" = "1" ] || exit 1
+    echo "bus_snapshot: ⚠️  LANE_OK=1 given — proceeding under an explicit human call."
+  fi
+
+  # gh is the authority on visibility; the CLAUDE.md note is not. A public
+  # repo here would publish five seats' unreviewed notes in one push.
+  vis=$(cd "$SEAT" && gh repo view --json visibility -q .visibility 2>/dev/null || echo UNKNOWN)
+  if [ "$vis" != "PRIVATE" ]; then
+    echo "bus_snapshot: ⛔ ARCHIVE BLOCKED — $SEAT reports visibility '$vis', not PRIVATE." >&2
+    echo "              The bus carries unreviewed seat notes. NOT pushed." >&2
+    exit 1
+  fi
+
+  cp -p "$BUS" "$SEAT/$REL"
+  if ! cmp -s "$BUS" "$SEAT/$REL"; then
+    echo "bus_snapshot: ⛔ ARCHIVE FAILED — copy is not byte-identical to the bus" >&2
+    exit 1
+  fi
+
+  if (cd "$SEAT" && git diff --quiet -- "$REL" && git diff --cached --quiet -- "$REL"); then
+    echo "bus_snapshot: archive already current at $REL — nothing to commit"
+  else
+    (cd "$SEAT" \
+      && git add "$REL" \
+      && git commit --only "$REL" -q \
+           -m "fleet: bus archive refresh — $src_lines lines, $src_bytes bytes" \
+      && git push -q origin master) \
+      && echo "bus_snapshot: archive pushed — $REL ($vis)" \
+      || { echo "bus_snapshot: ⛔ ARCHIVE COMMIT/PUSH FAILED — the local snapshot stands" >&2; exit 1; }
+  fi
+fi
 
 n=$(ls -1 "$DEST"/FLEET-*.md 2>/dev/null | wc -l | tr -d ' ')
 # ⛔ NOT "OK" ON THE SHRINK PATH. The first version of this script printed the
