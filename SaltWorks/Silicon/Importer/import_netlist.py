@@ -8,22 +8,35 @@
 This program is **untrusted**, and that is a deliberate change from the freeze,
 which called the importer trusted.
 
-⛔ **CORRECTION, 2026-08-06.** This docstring previously claimed that "every run
-is CHECKED per-instance (`--check`, on by default)", describing a readback pass
-that compares the emitted Lean against a second independent tokenizer census.
-**No such flag and no such pass exist**, and none ever did — the claim was
-written aspirationally and read as fact, which is the same defect class this
-campaign spent the day cataloguing. What the run actually prints at the end is a
-*census report*, not a check: a report cannot fail. The readback check is
-genuinely owed and is tracked as open work; until it lands, the honest statement
-of the trust position is the one below.
+⛔ **CORRECTION, 2026-08-06 — and then the correction was DISCHARGED the same
+night; both halves are recorded because the first half alone is now false.**
 
-What is actually checked, today:
+This docstring long claimed that "every run is CHECKED per-instance (`--check`,
+on by default)", describing a readback pass. **For as long as it said so, no such
+flag and no such pass existed** — the claim was written aspirationally and read
+as fact, which is the defect class this campaign spent the day cataloguing. What
+the run printed was a *census report*, and a report cannot fail.
+
+✅ **`--check` now exists** (`Importer/readback.py`) and the sentence is true for
+the first time. It does more than the original claim promised: rather than
+comparing this program against a second parse of itself, it simulates the emitted
+datum against **vendor Liberty semantics**, taking cell functions, output-pin
+directions, flop identification and next-state from the `.lib` rather than from
+any table in this file. Its own negative controls are recorded in that file.
+
+⚠️ **Do not read the fix as retiring the lesson.** The claim was false for weeks
+and nothing detected it, because a docstring is not executed. *The check is worth
+having; the reason it was owed is worth remembering.*
+
+What is checked, today:
 
 * the **cell expansions** are not trusted: each sky130 cell is expanded into
   primitive gates, and `SaltWorks/Silicon/Cells/Sky130.lean` carries a
   `decide +kernel` theorem that the expansion equals the cell's Liberty function
-  (42 of them as of tonight, covering every cell this file expands).
+  (44 theorems over 43 cells, covering every cell this file expands).
+* the **emitted datum is simulated against the vendor Liberty** by `--check`,
+  which is independent of `EXPAND`, `OUTPINS`, `SEQ_PREFIX` and `SEQ_MODELS` —
+  corrupting any of them makes it fail, and that was measured, not assumed.
 * the **flop treatment** below refuses rather than approximates: an unmodelled
   sequential cell, a connected pin the model does not account for, and a clock
   that is not common to every flop are each a hard error, not a warning.
@@ -662,6 +675,13 @@ ap.add_argument("--name", default="netlist")
 ap.add_argument("--inputs", required=True,
                 help="comma-separated primary input nets, in order (bit-selects allowed)")
 ap.add_argument("--outputs", required=True, help="comma-separated output nets, in order")
+ap.add_argument("--check", default="auto", choices=["auto", "require", "off"],
+                help="readback: simulate the emitted datum against VENDOR LIBERTY "
+                     "semantics (Importer/readback.py). 'auto' runs it when the PDK "
+                     "is present and says loudly when it is not; 'require' makes an "
+                     "unavailable check a hard error; 'off' must be asked for and is "
+                     "printed. There is no silent skip — that is what this flag's "
+                     "predecessor pretended to be.")
 ap.add_argument("--cut", default=None, metavar="REGEX",
                 help="also cut at every net matching REGEX: each becomes BOTH a root "
                      "(the logic driving it) and a leaf (an input for its consumers). "
@@ -804,3 +824,16 @@ if flops:
           f"{len(flops) - len(auto)} listed by the caller)")
     print(f"  clock domain  : one — root '{root}', parity {parity}, via {nleaf} CLK net(s)")
 print(f"  wrote         : {a.out}")
+
+# --- THE READBACK CHECK ----------------------------------------------------
+if a.check == "off":
+    print("  readback      : OFF by explicit request — this datum is UNCHECKED")
+else:
+    import readback
+    ok, msg = readback.check(tokenize(open(a.netlist).read()), assigns, a.out,
+                             a.name, ins_all, outs_named, auto, cuts)
+    print(f"  {msg}")
+    if ok is False:
+        raise SystemExit(1)
+    if ok is None and a.check == "require":
+        raise SystemExit("importer: --check=require but the check could not run")
