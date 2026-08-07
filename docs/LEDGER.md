@@ -757,3 +757,125 @@ the hub closure**: `saltbuild EXIT=0`, **8624 jobs**, `Bridge.lean` present in t
 log with its four `#audit_axioms` lines, and the same single pre-existing warning
 (`HDL/CompareExchange.lean:337`) and no other. So every declaration of this node —
 both modules, all 23 — is now checked by the plain full build.
+
+---
+
+## S0/R2 — THE MEMORY-MODEL CENSUS (read-only; the fork priced)
+**2026-08-07 · Opus executor · `docs/s0-r2-memory-census-0807.md` (new doc)**
+
+Read-only node by construction: **no `.lean` written, no build run, no existing
+file changed.** Deliverable is one document plus this entry. Format was
+pre-registered on the fleet bus before any answer existed — six sections, fixed
+order — so the census could not be shaped to its conclusions.
+
+### What I checked, and how
+
+- **`grep -F` throughout**, and **every absence claim ran in a batch carrying a
+  positive control in the same invocation**, with the control's non-zero count
+  reported beside it. The negatives that matter: `def wS` → 0 files, `def
+  compile` → 0, `def core` → 0, `Mem` → 0, `.LW`/`.SW` → 0; controls in the same
+  batch `def step` → 4, `structure St` → 1, `BitVec 32` → 9. Two apparent hits
+  were run down and are prose: `mem :` is 19 × `have hmem :` in `Renumber.lean`;
+  `LOAD`/`STORE` are the phrases "LOAD-BEARING", "PARTIAL LOAD", "`x0` IS NOT
+  STORED".
+- **Every cited line re-located by name**, not carried from an earlier read —
+  five seats commit here concurrently.
+- **USE vs PROSE tagged on every §1 claim.** The distinction did real work twice:
+  `run`'s bound (PROSE, and only PROSE) and the layout freeze in `StateCodec`.
+
+### What was RE-VERIFIED (already on the bus, not rediscovered)
+
+`SaltWorks.ISA.St` at `ISA.lean:72` is `regs : Vector (BitVec 32) 32` + `pc :
+BitVec 32`, no memory field. `SaltWorks.ISA.Instr` at `:80` is exactly `ADD`,
+`ADDI`, `XOR`, `SLT`, `BEQ`. Both confirmed at the bytes, both exactly as the
+evidence seat reported (`docs/EVIDENCE-stack-refuter-0807.md` §1).
+
+### What was FOUND (the census's own work)
+
+1. **The machine is neither Harvard nor von Neumann — it has zero memories.**
+   Data is 32 registers; **code is a Lean `List Instr` passed as an argument to
+   `fetch` (`ISA.lean:131`) — a host-language value the machine's state cannot
+   name.** So S2's "memory image" names a thing with no *type* anywhere in the
+   tower, not a missing feature.
+2. ⭐ **The register-resident path is not a fallback — it is already half-built.**
+   `SaltWorks.Stack.SortsRegs` (`Stack/Spec.lean:329`) is landed, its file header
+   (`:57–63`) already states "no memory ⇒ fully-unrolled fixed-`n`", and
+   `batcher8_sortsToV_word` (`Stack/Perm.lean:396`) is S3(a) at `n = 8` over
+   `Word`. ⇒ **S2 is unblocked today with zero changes to any landed theorem.**
+3. ⛔ **A landed kernel theorem goes FALSE the day loads/stores are added:**
+   `slice_a_excluded_rejected` (`SpikeVectors.lean:558`) asserts `decode` rejects
+   all 22 words of `sliceAExcluded`, and four of them are `lw`/`sw`/`lb`/`sb`
+   (`:536–539`). Fixing it means moving those rows into the witnessed suite with
+   Spike-confirmed post-state **including memory** — which the `Vec` format
+   (`Vectors.lean:43`) has no columns for. **The C2 differential harness, not the
+   ISA, is on the critical path of any memory work.** Nobody was looking there.
+4. **No single `St.mem` form serves both consumers.** `BitVec 32 → BitVec 8` is
+   the ISA lane's best shape and is **unstateable for the core** — `encD :
+   St → List Bool` (`StateCodec.lean:81`) is a finite bit list and a
+   function-typed field has no finite encoding, so `decQ_encD` (`:97`) cannot even
+   be stated. A port-shaped memory is the core's best shape and **dissolves every
+   landed `Stack/**` spec**, all of which are stated over `St`.
+5. **The forward-branch precondition is an ASSUMPTION, and the failure mode is
+   silent.** Prose at `ISA.lean:149–152` and nowhere else; the machine can violate
+   it (`beq_offset_can_be_negative`, `:281`); what discharges it today is the
+   *source language* having no loop form (`CodegenSpec.lean:83,86`). For
+   agent-written assembly nothing discharges it, and **a truncated `run` and a
+   completed `run` are the same value** — `runFor` just returns the state it is
+   in.
+6. **Word-space arithmetic moves and four documents carry the old number.**
+   *(ARITHMETIC, NOT KERNEL-CHECKED.)* Adding 5 loads + 3 stores adds 8 × 2^22
+   decodable words: 8,486,912 → 42,041,344, so the ratified fence reads **99.02 %,
+   not 99.80 %** (`ISA.lean:651,664–665`; `RegWrite.lean:35–36`;
+   `hdl-c4-composition-check-0807.md`; `riscv-core-campaign-v0.md` §C4).
+7. **`wI` is not reusable for loads as written** — it hardcodes opcode `0010011`
+   **and** funct3 `0#3` (`ISA.lean:372`), and its field lemmas state the constants
+   (`:487`, `:503`). "I-type is already covered" is false.
+
+### The rulings the census recommends (recommendations, not rulings)
+
+- **§3 fork: (0) no memory now; (A) data-memory-only when a consumer states an
+  `N` registers cannot hold; NOT (B) unified.** (B) kills
+  `run_halts_off_the_end` (`ISA.lean:301`), reintroduces the fuel parameter the
+  refuter pass deliberately removed (`:137–138`), puts the 99.8 %-of-word-space
+  NOP semantics inside the execution loop, and makes the core multi-cycle against
+  the campaign's stated "single-cycle v1".
+- **§4 form: F0 — no `St.mem` for v1.** If memory must land: `BitVec 32 →
+  BitVec 8` for the ISA lane, a port for the core, and the bridging obligation
+  written down **before** either is built.
+
+### What I could NOT determine — honest, and §6 of the doc is longer than this
+
+- **The core's memory-port requirements, because the core has no memory port and
+  there is no `core`.** `compile`/`core` are zero declarations. §4's second
+  consumer was judged against *constraints* — `encD`'s finiteness, `Seq`'s
+  `nIn`/`nOut`, and TT's measured *"about 320 DFFs (40 bytes)"* per tile
+  (`tinytapeout-dossier.md:207`) against a register file already at 992 flops —
+  **not against a port. The hardware side is simply not there to census yet, and
+  the constraint that will decide it is flops-per-tile, not proof shape.**
+- **Whether `deriving DecidableEq` (`ISA.lean:75`) survives a `mem` field.**
+  PREDICTED to break for a function type (no mathlib in `ISA.lean`'s imports;
+  2^32 cases even with it) and to be fine for a `Vector`. **Both predictions,
+  unverified — this node ran no build.** A three-line Scratch probe settles it.
+- **Whether `decide +kernel` stays feasible on a memory-carrying state.**
+  Unmeasured; the `[V-ME]` measurement is at 32 registers, and this tree has two
+  measured O(n²) walls at core scale (`RegNext.lean:36–48`).
+- **Whether my RV32I alignment/endianness statements are right** — I did not have
+  `src/unpriv/rv32.adoc` open, and said so in the document rather than letting the
+  claims pass as source-grounded. (The opcode/funct3 values I quote *are*
+  in-tree-grounded, read off `SpikeVectors.lean:536–539`.)
+- **The `N` for S2. No document contains one**, and the entire urgency of the fork
+  rests on it.
+- **The no-backward-branch predicate and `n ≥ code.length → runFor n = run`** —
+  named as the missing object, not attempted; in particular I do not know whether
+  the `pc`-increases argument survives `BitVec 32` wraparound.
+
+### Process note
+
+Two things nearly went in as findings and were caught by checking rather than by
+review. First, "I-type encoding already exists" — true of the *name* `wI`, false
+of the *definition*, which bakes in both discriminating fields. Second, "the
+decoder's cone census would blow up with 8 more instructions" — false: the
+projection argument at `Decoder.lean:40–56` already covers opcode + funct3, so the
+silicon cost of loads/stores is *cheap* and the expensive part is somewhere else
+entirely (the flops). **Both errors would have pointed the next seat at the wrong
+file.**
