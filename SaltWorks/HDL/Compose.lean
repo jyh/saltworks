@@ -37,16 +37,22 @@ to the caller's care.
 
 ## ⚠️ GRADE OF THIS FILE, STATED PLAINLY
 
-**Definitions: landed. A concrete instantiation: KERNEL-CHECKED. `ssa → wf`:
-PROVED. `instGates_eq_renumFrom`: PROVED. ⭐ `inst_sem` — the SEMANTIC theorem,
-and the "unproved link" this block flagged from the day this file landed:
-PROVED. Non-vacuity controls for all three: KERNEL-CHECKED.**
+**Definitions: landed. A concrete instantiation: KERNEL-CHECKED. `ssa → wf`,
+`instGates_eq_renumFrom`, ⭐ `inst_sem` (the semantic theorem — the "unproved
+link" this block flagged from the day the file landed), and ⭐ the `++`
+composition lemmas: ALL PROVED. Non-vacuity controls for every one of them:
+KERNEL-CHECKED.**
 
-⛔ **WHAT IS STILL OPEN, and it is ONE instantiation short of the assembly:
-`inst_sem` covers embedding ONE block. `core` is a `++` of several, and `run`
-over an APPENDED gate list is covered by nothing in this file.** *That lemma —
-and not `inst_sem` — is now the last thing between here and a verified `core`.
-`haChain` is its concrete witness and is already kernel-checked.*
+✅ **THE ASSEMBLY IS NO LONGER GATED ON THIS FILE.** *`inst_sem` embeds one block;
+`inst_compose_first`/`inst_compose_sem` say that two blocks placed at `off` and
+`instNext` each still compute what they compute — the first undisturbed by the
+second, the second reading the first's outputs. `core` is an iteration of exactly
+that step.*
+
+⛔ **WHAT REMAINS IS NOT A LEMMA, IT IS A CONSTRUCTION:** `core` itself — the
+wiring `σ` for each of the six organs, and the `outs` list. *No new theory is
+owed; the obligations above are what an assembly discharges, not what it waits
+on.*
 -/
 
 namespace SaltWorks.HDL
@@ -431,12 +437,140 @@ theorem inst_sem_needs_input_agreement :
       ≠ run (fun i => i == 0) ha.gates 2 := by
   decide +kernel
 
-/-! ### WHAT IS STILL OWED FOR THE ASSEMBLY, NAMED SO IT IS NOT REDISCOVERED
+/-! ### ⭐ THE `++` LEMMA — TWO INSTANCES COMPOSE. This was the last gate.
 
-*`inst_sem` covers ONE instantiation. `core` is a `++` of several, and `run` over
-an appended gate list is not covered by anything above.* ⇒ **The next obligation
-is a two-instance composition lemma** — `run env (g1 ++ g2) n` splits according
-to which instance defines `n` — and `haChain` is its concrete witness. -/
+*`inst_sem` embeds ONE block. `core` is a `++` of several, and `run` over an
+appended gate list was covered by nothing — which is what the previous version of
+this file named as the remaining obligation.*
+
+**It turns out to need no new machinery at all: `run_append` and
+`run_of_unwritten` were both already landed in `Sem.lean`.** ⇒ ***The whole
+content is a RANGE fact — an instantiation writes exactly `off … instNext-1` —
+and that comes straight out of `instGates_eq_renumFrom`.*** *So the composition
+lemma is a frame argument, and the reason it looked expensive from the outside is
+that the range fact it needs was hiding inside the structural theorem.*
+
+📌 **AND THE OFFSET IS THE WHOLE CONTENT: `instNext` is not a convenience, it is
+the hypothesis.** *`compose_frame_fails_below_instNext` places the second
+instance ONE net too low and the first instance's output is overwritten.*
+-/
+
+-- Where renumFrom puts its outputs.
+theorem renumFrom_out_range (m : Net → Net) : ∀ (gs : List Gate) (b : Nat),
+    ∀ g ∈ renumFrom m b gs, b ≤ g.out ∧ g.out < b + gs.length := by
+  intro gs
+  induction gs with
+  | nil => intro b g hg; simp [renumFrom] at hg
+  | cons g gs ih =>
+    intro b x hx
+    rw [renumFrom, List.mem_cons] at hx
+    rcases hx with h | h
+    · subst h
+      refine ⟨Nat.le_refl _, ?_⟩
+      have : b < b + (gs.length + 1) := by omega
+      exact this
+    · obtain ⟨hlo, hhi⟩ := ih (b + 1) x h
+      refine ⟨Nat.le_of_succ_le hlo, ?_⟩
+      have harith : b + 1 + gs.length = b + (gs.length + 1) := by omega
+      rw [harith] at hhi
+      exact hhi
+
+-- …hence where an instantiation puts its outputs.
+theorem instGates_out_range (c : Circ) (σ : Net → Net) (off : Nat) (h : c.ssa = true) :
+    ∀ g ∈ instGates c σ off, off ≤ g.out ∧ g.out < instNext c off := by
+  intro g hg
+  rw [instGates_eq_renumFrom c σ off h] at hg
+  have := renumFrom_out_range (instMap c σ off) c.gates off g hg
+  exact ⟨this.1, this.2⟩
+
+-- The frame: an instantiation leaves every net below its offset alone.
+theorem inst_frame_below (c : Circ) (σ : Net → Net) (off : Nat) (h : c.ssa = true)
+    (env : Env) (n : Net) (hn : n < off) :
+    run env (instGates c σ off) n = env n := by
+  refine run_of_unwritten env _ n (fun g hg hEq => ?_)
+  have hlo := (instGates_out_range c σ off h g hg).1
+  rw [hEq] at hlo
+  -- `hn : n < off` is Net-typed, so omega never sees it; use Nat directly.
+  exact absurd hlo (Nat.not_le.mpr hn)
+
+/-- **TWO INSTANCES COMPOSE — the second's gates do not disturb the first.** -/
+theorem inst_compose_frame (c1 c2 : Circ) (σ1 σ2 : Net → Net) (off : Nat)
+    (h2 : c2.ssa = true) (env : Env) (n : Net) (hn : n < instNext c1 off) :
+    run env (instGates c1 σ1 off ++ instGates c2 σ2 (instNext c1 off)) n
+      = run env (instGates c1 σ1 off) n := by
+  rw [run_append]
+  exact inst_frame_below c2 σ2 (instNext c1 off) h2 _ n hn
+
+/-- **…and the second instance still computes what `c2` computes.** -/
+theorem inst_compose_sem (c1 c2 : Circ) (σ1 σ2 : Net → Net) (off : Nat)
+    (h2 : instOK c2 σ2 (instNext c1 off)) (env envC2 : Env)
+    (hin2 : ∀ a, a < c2.nIn →
+      run env (instGates c1 σ1 off) (σ2 a) = envC2 a) :
+    ∀ a, (a < c2.nIn ∨ (c2.gates.map Gate.out).contains a = true) →
+      run env (instGates c1 σ1 off ++ instGates c2 σ2 (instNext c1 off))
+              (instMap c2 σ2 (instNext c1 off) a)
+        = run envC2 c2.gates a := by
+  intro a ha
+  rw [run_append]
+  exact inst_sem c2 σ2 (instNext c1 off) _ envC2 h2 hin2 a ha
+
+/-- **The first instance's own nets read the same in the composite as alone.** -/
+theorem inst_compose_first (c1 c2 : Circ) (σ1 σ2 : Net → Net) (off : Nat)
+    (h1 : instOK c1 σ1 off) (h2 : c2.ssa = true) (env envC1 : Env)
+    (hin1 : ∀ a, a < c1.nIn → env (σ1 a) = envC1 a) :
+    ∀ a, (a < c1.nIn ∨ (c1.gates.map Gate.out).contains a = true) →
+      run env (instGates c1 σ1 off ++ instGates c2 σ2 (instNext c1 off))
+              (instMap c1 σ1 off a)
+        = run envC1 c1.gates a := by
+  intro a ha
+  have hbelow : instMap c1 σ1 off a < instNext c1 off := by
+    rcases ha with h | h
+    · rw [instMap, if_pos h]
+      have hlt := h1.2.2 a h
+      have hoff : off ≤ instNext c1 off := Nat.le_add_right _ _
+      exact Nat.lt_of_lt_of_le hlt hoff
+    · have hmem : ∃ g ∈ instGates c1 σ1 off, g.out = instMap c1 σ1 off a := by
+        obtain ⟨g, hg, hge⟩ := List.mem_map.mp (by simpa using List.mem_of_elem_eq_true h)
+        exact ⟨⟨instMap c1 σ1 off g.out, g.op.rename (instMap c1 σ1 off)⟩,
+               List.mem_map.mpr ⟨g, hg, rfl⟩, by rw [hge]⟩
+      obtain ⟨g, hg, hge⟩ := hmem
+      have := (instGates_out_range c1 σ1 off h1.1 g hg).2
+      rw [hge] at this
+      exact this
+  rw [inst_compose_frame c1 c2 σ1 σ2 off h2 env _ hbelow]
+  exact inst_sem c1 σ1 off env envC1 h1 hin1 a ha
+
+#audit_axioms renumFrom_out_range
+#audit_axioms instGates_out_range
+#audit_axioms inst_frame_below
+#audit_axioms inst_compose_frame
+#audit_axioms inst_compose_sem
+#audit_axioms inst_compose_first
+
+
+
+/-! ### CONTROLS for the composition — the offset must be load-bearing -/
+
+/-- Correct placement: the second instance at `instNext` leaves the first's net 3
+alone — the frame lemma's conclusion, on a concrete pair. -/
+theorem compose_frame_holds_at_instNext :
+    run (fun i => i == 0)
+        (instGates ha (fun i => i) 2 ++ instGates ha (fun i => [2,3].getD i 0) 4) 3
+      = run (fun i => i == 0) (instGates ha (fun i => i) 2) 3 := by
+  decide +kernel
+
+/-- ⛔ **PLACED ONE NET TOO LOW, THE SECOND INSTANCE OVERWRITES THE FIRST'S
+OUTPUT.** *So `instNext` in `inst_compose_frame` is the hypothesis, not a
+convenience — and this is the same silent collision `instOK`'s docstring argues
+for, arriving from the other direction.* -/
+theorem compose_frame_fails_below_instNext :
+    run (fun i => i == 0)
+        (instGates ha (fun i => i) 2 ++ instGates ha (fun i => [2,3].getD i 0) 3) 3
+      ≠ run (fun i => i == 0) (instGates ha (fun i => i) 2) 3 := by
+  decide +kernel
+
+/-- …and 4 really is `instNext` here, so the two controls are one net apart. -/
+theorem instNext_ha_is_four : instNext ha 2 = 4 := by decide +kernel
 
 /-! ### NON-VACUITY — the `ssa` hypothesis is load-bearing, and `wf` is not enough
 
@@ -501,5 +635,14 @@ theorem instNext_under_reports_without_ssa :
 #audit_axioms instNext_under_reports_without_ssa
 #audit_axioms inst_sem
 #audit_axioms inst_sem_needs_input_agreement
+#audit_axioms renumFrom_out_range
+#audit_axioms instGates_out_range
+#audit_axioms inst_frame_below
+#audit_axioms inst_compose_frame
+#audit_axioms inst_compose_sem
+#audit_axioms inst_compose_first
+#audit_axioms compose_frame_holds_at_instNext
+#audit_axioms compose_frame_fails_below_instNext
+#audit_axioms instNext_ha_is_four
 
 end SaltWorks.HDL
