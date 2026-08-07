@@ -32,26 +32,30 @@ input order*, and the ordering must come from off-chip — as it did in 1988.
 | `src/config.json` | the two hardening knobs; rationale in [`docs/hardening-choices.md`](docs/hardening-choices.md) |
 | `docs/info.md` | the datasheet body spliced into the shuttle datasheet |
 | `docs/submission-checklist.md` | prepared / owed / the human's clicks |
+| `src/banyan_fabric.v` | the 8×8 fabric: twelve switch elements in three stages |
+| `src/bitserial_switch.v` | the 2×2 element — the thing the Lean proof is about |
 | `test/` | the cocotb bench — [`test/README.md`](test/README.md) |
-| `assemble.sh` | builds the submission tree; **the RTL is not duplicated here** |
-| `validate.py` | offline pre-flight for every gate that needs no EDA toolchain |
 
-**`src/banyan_fabric.v` and `src/bitserial_switch.v` are not checked in.** They
-live once, in `SaltWorks/Silicon/RTL/`, because that is what the equivalence
-proof and the synthesis script read; `assemble.sh` copies them in. A copy a human
-maintains drifts; a copy a script makes does not.
+`banyan_fabric.v` and `bitserial_switch.v` are **generated into this repo**, not
+authored here: they live once upstream, because the same bytes are what the
+equivalence proof and the synthesis script read, and a second hand-maintained
+copy would drift. What you see in `src/` is that copy, made by a script.
 
-## Assembling and checking it
+## Checking it
 
 ```sh
-./assemble.sh /path/to/tt-repo-clone   # drop our files into a template checkout
-./validate.py                          # schema, docs gate, cross-file sync, RTL rules
-cd /path/to/tt-repo-clone/test && make # the 255-scenario bench at RTL
+cd test && make            # the 255-scenario bench at RTL
+GATES=yes make             # the same bench against the post-layout netlist
+./gl_local.sh <netlist.v>  # ...or against a locally synthesized sky130 netlist
 ```
 
-`.github/workflows/`, `.devcontainer/`, `.vscode/`, `LICENSE` and `tb.gtkw` come
-from **TinyTapeout's template repo verbatim** and must not be hand-written —
-create the repo *from* the template, then run `assemble.sh` over it.
+The GitHub Actions in this repo run the same bench, plus the hardening flow, the
+TinyTapeout precheck, and a gate-level test against the **powered** post-layout
+netlist.
+
+`.github/workflows/`, `.devcontainer/`, `.vscode/`, `LICENSE` and `tb.gtkw` are
+**TinyTapeout's template repo verbatim** — this repository was created *from*
+that template, and those files are deliberately unmodified.
 
 ## Licence
 
