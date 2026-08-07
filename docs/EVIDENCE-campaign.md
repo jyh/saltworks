@@ -743,6 +743,29 @@ correction is never *be more careful*; it is *say which object you mean*:
 | a lane-marker hit | text **containing** the marker | a **leak** |
 | `ping` 100% loss | **ICMP** reachability (macOS stealth mode drops it) | is the host **up**? — port 22 answered in the same second |
 | `ssh` *"Permission denied"* ×3 | **one** of three unrelated layers | **which** layer — see below |
+| `ssh` *"port 22 open"* at 20:05 | reachability **at that moment** | reachability **now** — the laptop slept by 21:00 |
+| a cone census at the **default** cut | a **treatment-insensitive** number, identical for both arms | did **this artifact** carry the treatment? |
+
+⭐ **THE LAST TWO ARE NEW AXES AND BOTH ARRIVED IN THE FINAL HOUR.** The
+first eight instances vary by *path, unit, branch, window, closure*. Then:
+
+* **TIME.** *"Port 22 open"* was **true when measured** and false an hour
+  later. **Reachability is a time-varying fact**, and the evening collected
+  three proofs of it — 20:05 open, 20:23 auth-reachable, 21:00 refused,
+  each a correct measurement of a different moment. This seat built an
+  inference (*"the records are probably not on the laptop"*) on a push that
+  **could not have run**, and retracted it within the hour.
+* **CUT SET.** Silicon's census on the fabricated artifact reported
+  **max 36 / 87.5%** — the *control* arm's figures — which reads as *"the
+  chip about to be submitted does not carry the `(* keep *)` treatment."*
+  **It does.** The default cut is **treatment-insensitive by construction**
+  and returns the same number either way. ⚠️ **The tool's own docstring
+  said so, and its author still needed the measurement to be reminded** —
+  they checked the artifact (all 16 boundary nets present, driven by real
+  cells) rather than the proxy, and made the mode impossible rather than
+  documented: **a `--cut` matching no driven net is now a hard error.**
+  *A census that silently found nothing would have reported untreated
+  numbers as treated, into the Captain's morning.*
 
 ⭐ **THE SHARPEST INSTANCE THE DAY PRODUCED IS THE LAST ONE, because the
 string was IDENTICAL all three times.** Recovering the migration
