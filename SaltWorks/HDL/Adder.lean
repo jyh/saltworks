@@ -236,7 +236,15 @@ def adderCarryOK : Bool :=
       == ((a.zeroExtend 33 + b.zeroExtend 33).getLsbD 32)
 
 /-- `inc32`: 32 input bits; outputs 0,1 pass through and the increment starts at
-bit 2, so it computes `w + 4` -- the pc step. -/
+bit 2, so it computes `w + 4`.
+
+⚠️ **IT IS UNREFERENCED. `grep` for `inc32` over `SaltWorks/` finds this file and
+nothing else** — `pcNext` implements the pc increment itself
+(`pcNext_not_beq_adds_four`), so the pc path does not go through here. *It was
+described on the bus as "on every instruction's path"; that is FALSE, and this
+seat repeated it before checking.* **The theorem below is still worth having —
+an unreferenced circuit that a successor reaches for should say what it computes
+— but it closes a gap in a DEAD definition, not on the critical path.** -/
 def incOut (w : BitVec 32) : List Bool := sem inc32 (fun i => w.getLsbD i)
 
 def incAddsFourOK : Bool :=
