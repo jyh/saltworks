@@ -1,0 +1,16 @@
+Local LibreLane 3.0.5 config for hardening `banyan_fabric` standalone.
+
+STATUS: this path was SUPERSEDED and never completed. It was created to obtain a
+post-P&R STA f_max locally, on the reasoning that the number was blocked on
+installing LibreLane. It was not: the CI run fired for the (* keep *) arms had
+already produced the signoff STA, in an artifact already downloaded for a
+different question — `runs/wokwi/55-openroad-stapostpnr/summary.rpt`.
+
+The local image pull was still unfinished when the answer arrived from CI, and
+CI's number is the better one anyway: it is the real flow, on the real tile, at
+the version TinyTapeout actually runs.
+
+Kept because the config is correct and a local harden is still the right tool for
+iterating without spending CI cycles. Run it with:
+
+  librelane --dockerized --pdk-root <volare sky130 dir> --run-tag <tag> config.json

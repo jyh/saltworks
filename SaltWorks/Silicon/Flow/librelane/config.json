@@ -1,0 +1,13 @@
+{
+  "DESIGN_NAME": "banyan_fabric",
+  "VERILOG_FILES": ["dir::../../RTL/banyan_fabric.v", "dir::../../RTL/bitserial_switch.v"],
+  "CLOCK_PORT": "clk",
+  "CLOCK_PERIOD": 10,
+  "FP_CORE_UTIL": 40,
+  "PL_TARGET_DENSITY_PCT": 60,
+  "RUN_KLAYOUT_XOR": false,
+  "RUN_MAGIC_DRC": true,
+  "pdk::sky130A": {
+    "MAX_FANOUT_CONSTRAINT": 10
+  }
+}
