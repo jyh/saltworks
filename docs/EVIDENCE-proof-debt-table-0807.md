@@ -52,6 +52,37 @@ above supersedes)*. It now carries `adder32_adds` and
 the same position: `incAddsFourOK` runs over the SAME seven `addWords`, so it too is a
 tripwire and tier ④ is NOT closed.**
 
+## §2ᵇ TIER ①ᵇ — THE DATAPATH IS CERTIFIED ON SAMPLES, AND MY CONTROLS WERE IN IT
+
+⛔ **Measured 16:4x, after compiler's `34927c7` renamed 30 certificates: 20 `_on_sample`
+theorems, and between them they cover ESSENTIALLY THE WHOLE DATAPATH.**
+
+`adder32` · `inc32` · `aluSelect` · `readTree` · `regNext32` (×3) · `shifter32` (×2) ·
+`pcNext` · `bitAnd32` · `bitOr32` · `bitXor32` · `bitNot32` · `sltCirc` · `sltuCirc` ·
+`sub_via_adder`
+
+📐 **AND SEVERAL ARE SINGLE POINTS, not samples in any statistical sense:**
+
+| certificate | what it actually checks |
+|---|---|
+| `shifter32_is_a_right_shift_on_sample : bsOK 0xDEADBEEF = true` | **one word** |
+| `regNext32_writes_when_enabled_on_sample : rnBit 0 true false = true` | **one bit, one enable** |
+| `readTree_selects_correctly_on_sample : rtSelectsOK 7 = true` | **one register index** (+ one more at 19) |
+| `aluSelect_selects_on_sample : asSelectsOK 3 = true` | **one op** (+ one at 9) |
+| `adder32_adds_on_sample` | 7 literal words → **49 pairs** |
+
+⛔⛔ **AND THE PART THAT IS MINE: `readTree`, `aluSelect`, `shifter32`, `regNext` WERE THE
+FOUR POSITIVE CONTROLS OF THIS CENSUS'S VALIDATION.** *I chose them because they were
+believed behaviourally certified, asserted they should come out `B-PROVEN`, and reported
+✅ when they did.* ⇒ ***The controls passed and the control SET was invalid: they proved
+the instrument can detect that A CERTIFICATE EXISTS, which is its own question, while I
+presented them as evidence about CORRECTNESS.*** **A validation is only as good as the
+belief that picked its controls, and mine came from the same place the defect did.**
+
+⇒ **C4's honesty baseline, stated plainly: the datapath's organs carry single-point
+tripwires. Not one of them has an unconditional theorem today.** *That is a far larger
+statement than "two organs are sampled", and it is the number the muster needs.*
+
 ## §3 THE PROOF-DEBT QUEUE — 106 definitions no theorem anywhere mentions
 
 Ranked, which is the order to work it:
