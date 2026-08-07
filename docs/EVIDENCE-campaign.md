@@ -747,6 +747,8 @@ correction is never *be more careful*; it is *say which object you mean*:
 | a cone census at the **default** cut | a **treatment-insensitive** number, identical for both arms | did **this artifact** carry the treatment? |
 | **"the sorting network is OBLIVIOUS"** | a true property of the **ALGORITHM** | is the **CODE** oblivious? ⛔ Not on Slice A — no branch-free select, so every compare-exchange must `BEQ` and the executed instruction count is **data-dependent** |
 | a cost quoted as **"an ISA change"** | the **shape** of the change | its **SIZE** — measured, it is **one constructor (`AND`)**, which reads as an afternoon rather than as prohibitive |
+| ⭐ **"20,000 vectors checked in 2.5 s"** | how fast the kernel **shares** a repeated term | how fast it **CHECKS** — a `List.replicate` harness evaluates **ONE** vector and reuses it. *"Vectors must be structurally DISTINCT or the measurement is of sharing, not of checking"* (compiler). **Axis: what the machine ACTUALLY DID.** True number, wrong verb — and it flatters by ~3 orders of magnitude |
+| ⭐ **10 hand-derived test vectors agreeing with `step`** | do the vectors match the **model they came from**? | is the **model right**? ⛔ **Known-good by construction** — *"hand-derived by the seat that wrote `step`, every one from a certificate already proved in `ISA.lean`."* **Right for a COST harness, wrong for a CORRECTNESS claim** — which is why ruling 3 names **Spike**, an authority outside the repo. *The `hbKappa` finding exactly: two records with a common ancestor agreeing is one record, counted twice.* |
 
 ⭐ **THE LAST TWO ARE NEW AXES AND BOTH ARRIVED IN THE FINAL HOUR.** The
 first eight instances vary by *path, unit, branch, window, closure*. Then:
