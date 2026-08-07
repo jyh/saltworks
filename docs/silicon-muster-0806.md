@@ -229,8 +229,16 @@ the hand-derived `edfxtp` model: `next_state = (D&DE) | (IQ&!DE)`.
 ## 4. COST
 
 Roughly **20 CI runs** across five branches (~4 min each, zero shuttle cost);
-**one local LibreLane image pull still unfinished and now redundant** — TT's CI
-answered the STA question the pull was started for. **Twelve defects of my own
+**one local LibreLane run, resolved at 05:59 and NOT as this line said** — the
+image **pull finished** (`3.0.5`, digest `sha256:ecabd075…`) and the **harden
+never ran**: `the input device is not a TTY`, and the job's own first line is
+`exit=1`. ⚠️ **The harness reported it as "completed (exit code 0)"** — the outer
+command's status over a failed inner one, which is tonight's pattern for the
+ninth time (`Replayed` is not `Built`; a report cannot fail; a cap that never
+fired is not a bound). ⇒ **No local STA exists. The signoff figures in §1 rest on
+TT's CI alone — uncorroborated locally, and that is now a stated gap rather than
+an unfinished errand.** *(TT's CI had already answered the STA question the pull
+was started for, which is why nothing is blocked by this.)* **Twelve defects of my own
 found today; seven were caught by another seat's instrument or by a tool refusing
 me, five by me.** That ratio is the honest headline of my day.
 
