@@ -124,4 +124,33 @@ error: #audit_axioms: 'Lean.ofReduceBool' depends on non-whitelisted axiom(s): L
 #guard_msgs in
 #audit_axioms Salt.Tactic.thisDeclDoesNotExist
 
+/-! ### Failure path C: A BROKEN PROOF, which is the one that matters in practice
+
+Measured 2026-08-06 (silicon seat, E1). A proof that fails leaves the environment
+in exactly one of two states, and the two paths above cover them BOTH — but only
+by accident of what they were written for, so the second one is pinned here
+explicitly:
+
+* **elaboration ABORTS** (heartbeat, recursion depth, kernel rejection) — the
+  declaration is never added, the name does not resolve, and path B fires.
+* **elaboration RECOVERS** (`sorry`, a failing tactic, a type mismatch) — the
+  declaration IS added, carrying `sorryAx`, which is not whitelisted. **That is
+  this test**, and nothing above exercised `sorryAx` specifically: path A uses
+  `Lean.ofReduceBool`, an axiom nobody reaches by writing a bad proof.
+
+There is no third state, which is why the claim *"a green tick from
+`#audit_axioms` is not evidence the theorem exists"* was **false** and was
+withdrawn from the campaign README. The tick cannot be printed for a broken
+proof, and this file now fails the build if that ever stops being true. -/
+
+/-- warning: declaration uses `sorry` -/
+#guard_msgs in
+theorem brokenProof : (2 : Nat) + 2 = 4 := by sorry
+
+/--
+error: #audit_axioms: 'brokenProof' depends on non-whitelisted axiom(s): sorryAx. Allowed: propext, Classical.choice, Quot.sound. Extend `Salt.Tactic.auditWhitelist` deliberately if this is intended.
+-/
+#guard_msgs in
+#audit_axioms brokenProof
+
 end Tests
