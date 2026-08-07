@@ -2091,6 +2091,489 @@ theorem not_both_coreShaped_C4Spec :
   exact SaltWorks.HDL.conformance_does_not_determine_semantics
     ((h1 (fun _ => false)).trans (h2 (fun _ => false)).symm)
 
+/-! ## ⭐⭐ C4, FIELDWISE — 33 OBLIGATIONS IN PLACE OF ONE 1056-BIT EQUATION
+
+`C4Spec c` is **one equation between two `List Bool`s of length 1056, about a
+circuit of ~3,000 gates.** Compiler's measured lesson is that a core-sized object
+cannot be certified as one thing: the monolithic well-formedness route hit
+`EXIT=134`, *"excessive memory consumption"*, on an O(n²) `wf` check, and was
+broken instead by proving `Circ.wf_of_ssa` **structurally**. **C4 needs the same
+treatment and this section is it** — not an attempt at C4, which is impossible
+today (`grep -rE "^(def|theorem|abbrev|noncomputable def) (core|compile)\b"` over
+`SaltWorks/` still returns nothing), but the *decomposition* that turns C4 from a
+fresh proof into an assembly the day its subject exists.
+
+## The split, and why it is the layout's split rather than an arbitrary one
+
+`stWidth = 1056 = 32 registers × 32 bits + 32 pc bits`, and `encD` writes exactly
+that layout (`StateCodec.lean`). So the 1056 output bits fall into **33 fields**,
+each 32 bits wide, each with an independent meaning:
+
+```
+RegField c r   (r : Fin 32)   output bits 32r … 32r+31  =  (stepT …).regs[r]
+PcField  c                    output bits 1024 … 1055   =  (stepT …).pc
+```
+
+`c4Spec_iff_fieldwise` is the equivalence. **Both directions are proved, and they
+do different jobs:**
+
+* **`→` isolates.** A failing core fails *some field*, and the field names the
+  datapath slice at fault. `coreShaped_isolation` below is that made real: one
+  circuit that meets field 0, fails field 1, and fails the pc.
+* **`←` assembles.** *This is the theorem compiler applies once `core` exists*:
+  33 per-field lemmas, each about 32 bits and each checkable on its own, compose
+  into `C4Spec` with no further work — and `sorts_of_fieldwise` carries them all
+  the way to "the machine sorts".
+
+## ⚠️ THE LENGTH IS NOT SYMMETRIC BETWEEN THE DIRECTIONS
+
+**`c.outs.length = stWidth` is a conjunct of the fieldwise side, and it must
+be.** Both sides of C4 are `List Bool` at *any* length (C4.lean's 14:17 hazard).
+
+* Forward, it is **free**: `outs_length_of_C4Spec` derives it from `C4Spec`
+  itself, since `C4Spec` is an equality of lists and `encD`'s length is `stWidth`
+  unconditionally. The `→` direction therefore *produces* the length.
+* Reverse, it must be **assumed**: the 33 field obligations are statements about
+  `getD`, which is total, and a 1055-output core can satisfy every one of them by
+  reading the default `false` at the last index. **Without the length conjunct the
+  `←` direction is FALSE**, and `outs_length_is_not_implied_by_the_fields` below
+  refutes the version without it rather than warning about it.
+
+⇒ *The `iff` is stated with the length on the fieldwise side, which is the only
+placement that makes both directions true.*
+-/
+
+-- The 1056-element `outs` lists below exceed the default elaboration depth —
+-- C4.lean carries the same `set_option` for the same reason, and it does not
+-- cross the module boundary.
+set_option maxRecDepth 8000
+
+/-- **Output bit `j` of `c`**, read positionally off `sem`. Total: an index past
+the end reads `false`, which is exactly the hazard the length conjunct exists to
+exclude. -/
+def outBit (c : SaltWorks.HDL.Circ) (ins : SaltWorks.HDL.Env) (j : Nat) : Bool :=
+  (SaltWorks.HDL.sem c ins).getD j false
+
+/-- **The register-`r` output field** — the 32 output bits `StateCodec` assigns to
+register `r`, read back as a word. -/
+def outReg (c : SaltWorks.HDL.Circ) (ins : SaltWorks.HDL.Env) (r : Fin 32) : Word :=
+  SaltWorks.HDL.wordOf (fun k => outBit c ins (32 * r.val + k))
+
+/-- **The pc output field** — output bits `1024 … 1055`. -/
+def outPc (c : SaltWorks.HDL.Circ) (ins : SaltWorks.HDL.Env) : Word :=
+  SaltWorks.HDL.wordOf (fun k => outBit c ins (1024 + k))
+
+/-- ⭐ **ONE OF THE 32 REGISTER OBLIGATIONS.** A statement about `c` alone, about
+32 output bits, provable and checkable without reference to the other 32. -/
+def RegField (c : SaltWorks.HDL.Circ) (r : Fin 32) : Prop :=
+  ∀ ins, outReg c ins r = (stepT (SaltWorks.HDL.decQ ins) (seenWord ins)).regs[r.val]
+
+/-- ⭐ **THE 33RD OBLIGATION** — the program counter. -/
+def PcField (c : SaltWorks.HDL.Circ) : Prop :=
+  ∀ ins, outPc c ins = (stepT (SaltWorks.HDL.decQ ins) (seenWord ins)).pc
+
+/-! ### The layout arithmetic, once
+
+`stBit` is `StateCodec`'s bit-level reader; these two lemmas are the only places
+the index arithmetic `32 * r + k` / `1024 + k` is done. -/
+
+/-- Register `r`'s bit `k` of the encoded state. -/
+theorem stBit_reg (s : St) (r : Fin 32) (k : Nat) (hk : k < 32) :
+    SaltWorks.HDL.stBit s (32 * r.val + k) = (s.regs[r.val]).getLsbD k := by
+  have hr := r.isLt
+  have hdiv : (32 * r.val + k) / 32 = r.val := by omega
+  have hmod : (32 * r.val + k) % 32 = k := by omega
+  rw [SaltWorks.HDL.stBit, if_pos (by omega), hdiv, hmod, getElem!_pos s.regs r.val hr]
+
+/-- The pc's bit `k` of the encoded state. -/
+theorem stBit_pc (s : St) (k : Nat) (hk : k < 32) :
+    SaltWorks.HDL.stBit s (1024 + k) = s.pc.getLsbD k := by
+  have hsub : 1024 + k - 1024 = k := by omega
+  rw [SaltWorks.HDL.stBit, if_neg (by omega), hsub]
+
+/-- **A register field IS 32 independent bit obligations** — the sentence that
+makes "each field is checkable on its own" concrete rather than rhetorical. -/
+theorem regField_iff_bits (c : SaltWorks.HDL.Circ) (r : Fin 32) :
+    RegField c r ↔ ∀ ins, ∀ k < 32,
+      outBit c ins (32 * r.val + k)
+        = ((stepT (SaltWorks.HDL.decQ ins) (seenWord ins)).regs[r.val]).getLsbD k := by
+  constructor
+  · intro h ins k hk
+    have hh : (outReg c ins r).getLsbD k
+        = ((stepT (SaltWorks.HDL.decQ ins) (seenWord ins)).regs[r.val]).getLsbD k := by
+      rw [h ins]
+    rwa [outReg, SaltWorks.HDL.wordOf_getLsbD _ _ hk] at hh
+  · intro h ins
+    apply BitVec.eq_of_getLsbD_eq
+    intro k hk
+    rw [outReg, SaltWorks.HDL.wordOf_getLsbD _ _ hk]
+    exact h ins k hk
+
+/-- The pc field, likewise. -/
+theorem pcField_iff_bits (c : SaltWorks.HDL.Circ) :
+    PcField c ↔ ∀ ins, ∀ k < 32,
+      outBit c ins (1024 + k)
+        = ((stepT (SaltWorks.HDL.decQ ins) (seenWord ins)).pc).getLsbD k := by
+  constructor
+  · intro h ins k hk
+    have hh : (outPc c ins).getLsbD k
+        = ((stepT (SaltWorks.HDL.decQ ins) (seenWord ins)).pc).getLsbD k := by
+      rw [h ins]
+    rwa [outPc, SaltWorks.HDL.wordOf_getLsbD _ _ hk] at hh
+  · intro h ins
+    apply BitVec.eq_of_getLsbD_eq
+    intro k hk
+    rw [outPc, SaltWorks.HDL.wordOf_getLsbD _ _ hk]
+    exact h ins k hk
+
+/-- ⭐ **THE POSITIONAL FORM — `C4Spec` is a length plus 1056 bit equations.**
+Stated separately from the fieldwise form because it is where the *list* reasoning
+lives (`List.ext_getElem`, `encD_getD`); the fieldwise theorem is then pure index
+arithmetic on top of it.
+
+⚠️ **The length conjunct is on the right-hand side.** Forward it is free
+(`outs_length_of_C4Spec`); reverse it is indispensable, since `getD` is total. -/
+theorem c4Spec_iff_bitwise (c : SaltWorks.HDL.Circ) :
+    SaltWorks.HDL.C4Spec c ↔
+      c.outs.length = SaltWorks.HDL.stWidth ∧
+        ∀ ins, ∀ j < SaltWorks.HDL.stWidth,
+          outBit c ins j
+            = SaltWorks.HDL.stBit (stepT (SaltWorks.HDL.decQ ins) (seenWord ins)) j := by
+  constructor
+  · intro h
+    refine ⟨outs_length_of_C4Spec h, ?_⟩
+    intro ins j hj
+    rw [outBit, seenWord_eq_hdl, h ins, SaltWorks.HDL.encD_getD _ _ hj]
+  · rintro ⟨hlen, hbits⟩ ins
+    apply List.ext_getElem
+    · rw [SaltWorks.HDL.sem, List.length_map, hlen, encD_length]
+    · intro i h1 h2
+      have hi : i < SaltWorks.HDL.stWidth := by rwa [encD_length] at h2
+      have hL : (SaltWorks.HDL.sem c ins)[i]'h1 = outBit c ins i := by
+        rw [outBit, List.getD_eq_getElem _ _ h1]
+      have hR : (SaltWorks.HDL.encD
+            (stepT (SaltWorks.HDL.decQ ins) (SaltWorks.HDL.seenWord ins)))[i]'h2
+          = SaltWorks.HDL.stBit
+            (stepT (SaltWorks.HDL.decQ ins) (SaltWorks.HDL.seenWord ins)) i := by
+        rw [← List.getD_eq_getElem _ false h2, SaltWorks.HDL.encD_getD _ _ hi]
+      rw [hL, hR]
+      exact hbits ins i hi
+
+/-- ⭐⭐ **THE DECOMPOSITION — `C4Spec` IS A FIELDWISE CONJUNCTION.** One 1056-bit
+equation about a ~3,000-gate circuit becomes **33 obligations of 32 bits each**,
+plus the output count. *This is what makes a core-sized C4 tractable at all: each
+conjunct is provable, checkable and re-checkable on its own, and a failure names
+the field it came from.* -/
+theorem c4Spec_iff_fieldwise (c : SaltWorks.HDL.Circ) :
+    SaltWorks.HDL.C4Spec c ↔
+      c.outs.length = SaltWorks.HDL.stWidth
+        ∧ (∀ r : Fin 32, RegField c r)
+        ∧ PcField c := by
+  rw [c4Spec_iff_bitwise]
+  constructor
+  · rintro ⟨hlen, hbits⟩
+    refine ⟨hlen, ?_, ?_⟩
+    · intro r
+      rw [regField_iff_bits]
+      intro ins k hk
+      have hr := r.isLt
+      rw [hbits ins (32 * r.val + k) (by show 32 * r.val + k < 1056; omega),
+        stBit_reg _ r k hk]
+    · rw [pcField_iff_bits]
+      intro ins k hk
+      rw [hbits ins (1024 + k) (by show 1024 + k < 1056; omega), stBit_pc _ k hk]
+  · rintro ⟨hlen, hregs, hpc⟩
+    refine ⟨hlen, ?_⟩
+    intro ins j hj
+    have hj56 : j < 1056 := hj
+    by_cases h1 : j < 1024
+    · have hlt : j / 32 < 32 := by omega
+      have hk : j % 32 < 32 := by omega
+      have hd : 32 * (⟨j / 32, hlt⟩ : Fin 32).val + j % 32 = j := by
+        show 32 * (j / 32) + j % 32 = j
+        omega
+      have hs := stBit_reg (stepT (SaltWorks.HDL.decQ ins) (seenWord ins))
+        ⟨j / 32, hlt⟩ (j % 32) hk
+      have hb := (regField_iff_bits c ⟨j / 32, hlt⟩).mp (hregs _) ins (j % 32) hk
+      rw [hd] at hs hb
+      exact hb.trans hs.symm
+    · have hk : j - 1024 < 32 := by omega
+      have hd : 1024 + (j - 1024) = j := by omega
+      have hs := stBit_pc (stepT (SaltWorks.HDL.decQ ins) (seenWord ins)) (j - 1024) hk
+      have hb := (pcField_iff_bits c).mp hpc ins (j - 1024) hk
+      rw [hd] at hs hb
+      exact hb.trans hs.symm
+
+/-! ### ⭐ THE ASSEMBLY DIRECTION — what compiler applies once `core` exists -/
+
+/-- ⭐⭐ **33 FIELD LEMMAS AND AN OUTPUT COUNT GIVE C4.** *The theorem this whole
+section exists for: no further proof work between "every field is right" and
+`C4Spec`.* -/
+theorem c4Spec_of_fieldwise {c : SaltWorks.HDL.Circ}
+    (hlen : c.outs.length = SaltWorks.HDL.stWidth)
+    (hregs : ∀ r : Fin 32, RegField c r) (hpc : PcField c) : SaltWorks.HDL.C4Spec c :=
+  (c4Spec_iff_fieldwise c).mpr ⟨hlen, hregs, hpc⟩
+
+/-- ⭐⭐ **AND STRAIGHT THROUGH THE BRIDGE.** Fields ⇒ `C4Spec` ⇒
+`CycleRealisesStep`, for every next-word policy and every pad. -/
+theorem cycleRealisesStep_of_fieldwise {c : SaltWorks.HDL.Circ}
+    (hlen : c.outs.length = SaltWorks.HDL.stWidth)
+    (hregs : ∀ r : Fin 32, RegField c r) (hpc : PcField c)
+    (nextW : SaltWorks.HDL.Env → Word) (pad : SaltWorks.HDL.Env) :
+    CycleRealisesStep (cycOfCirc c nextW pad) seenWord :=
+  cycleRealisesStep_of_C4Spec (c4Spec_of_fieldwise hlen hregs hpc) nextW pad
+
+/-- ⭐⭐⭐ **THE END-TO-END THEOREM, FROM THE FIELDS.** `sorts_of_C4` with its
+`C4Spec` premise replaced by the 33 field obligations — so the surviving
+hypotheses are `CoreConforms` (whose own `outs.length` conjunct supplies the
+count), the 33 fields, the reset and the instruction path. *Nothing about the
+statement was weakened: this is `sorts_of_C4` composed with
+`c4Spec_of_fieldwise`.* -/
+theorem sorts_of_fieldwise {c : SaltWorks.HDL.Circ} (hconf : SaltWorks.HDL.CoreConforms c)
+    (hregs : ∀ r : Fin 32, RegField c r) (hpc : PcField c)
+    (nextW : SaltWorks.HDL.Env → Word) (pad : SaltWorks.HDL.Env)
+    {ins : SaltWorks.HDL.Env} {v : Fin 8 → Word} (hentry : EntryLoaded ins v) :
+    ∃ K, K ≤ 120 ∧ ∀ N, K ≤ N →
+      FeedsProgram batcherSort
+        (fun k => seenWord (cycles (cycOfCirc c nextW pad) k ins))
+        (SaltWorks.HDL.decQ ins) K →
+      SortsTo (List.ofFn v)
+        (dataRegs.map (SaltWorks.HDL.decQ (cycles (cycOfCirc c nextW pad) N ins)).get) :=
+  sorts_of_C4 ⟨hconf, c4Spec_of_fieldwise hconf.2.2 hregs hpc⟩ nextW pad hentry
+
+/-! ### ⭐ THE ISOLATION DIRECTION — a failing core fails a NAMED field -/
+
+/-- A failing register field refutes C4 on its own. -/
+theorem not_C4Spec_of_not_regField {c : SaltWorks.HDL.Circ} {r : Fin 32}
+    (h : ¬ RegField c r) : ¬ SaltWorks.HDL.C4Spec c :=
+  fun hc => h (((c4Spec_iff_fieldwise c).mp hc).2.1 r)
+
+/-- A failing pc field refutes C4 on its own. -/
+theorem not_C4Spec_of_not_pcField {c : SaltWorks.HDL.Circ}
+    (h : ¬ PcField c) : ¬ SaltWorks.HDL.C4Spec c :=
+  fun hc => h (((c4Spec_iff_fieldwise c).mp hc).2.2)
+
+/-! ## ⛔ NON-VACUITY — a circuit that meets SOME fields and not others
+
+*The isolation property is worth nothing unless the fields can come apart. They
+can, and compiler's own conforming shapes are the witnesses: `coreShaped` is the
+1056-output pass-through, which **gets register `x0` exactly right** (a write to
+`x0` is discarded, so `x0` never changes and passing it through is correct
+behaviour) and **gets `x1` and the pc wrong** (both move under `ADDI x1, x0, 1`).*
+
+⇒ ***Three fields of the same circuit, decided three different ways** — which is
+the whole content of the claim that 33 obligations are independent.* -/
+
+/-- `coreShaped` is the pass-through: no gates, output `j` reads net `j`. -/
+theorem sem_coreShaped (ins : SaltWorks.HDL.Env) :
+    SaltWorks.HDL.sem SaltWorks.HDL.coreShaped ins
+      = (List.range SaltWorks.HDL.stWidth).map ins := rfl
+
+theorem outBit_coreShaped (ins : SaltWorks.HDL.Env) (j : Nat)
+    (hj : j < SaltWorks.HDL.stWidth) :
+    outBit SaltWorks.HDL.coreShaped ins j = ins j := by
+  have hl : j < ((List.range SaltWorks.HDL.stWidth).map ins).length := by
+    rw [List.length_map, List.length_range]; exact hj
+  rw [outBit, sem_coreShaped, List.getD_eq_getElem _ _ hl, List.getElem_map,
+    List.getElem_range]
+
+theorem outReg_coreShaped (ins : SaltWorks.HDL.Env) (r : Fin 32) :
+    outReg SaltWorks.HDL.coreShaped ins r = (SaltWorks.HDL.decQ ins).regs[r.val] := by
+  have hr := r.isLt
+  have h1 : outReg SaltWorks.HDL.coreShaped ins r
+      = SaltWorks.HDL.wordOf (fun k => ins (32 * r.val + k)) :=
+    wordOf_congr (fun k hk =>
+      outBit_coreShaped ins _ (by show 32 * r.val + k < 1056; omega))
+  have h2 : (SaltWorks.HDL.decQ ins).regs[r.val]
+      = SaltWorks.HDL.wordOf (fun k => ins (32 * r.val + k)) := by
+    show (Vector.ofFn (fun r : Fin 32 =>
+      SaltWorks.HDL.wordOf (fun k => ins (32 * r.val + k))))[r.val] = _
+    rw [Vector.getElem_ofFn]
+  rw [h1, h2]
+
+theorem outPc_coreShaped (ins : SaltWorks.HDL.Env) :
+    outPc SaltWorks.HDL.coreShaped ins = (SaltWorks.HDL.decQ ins).pc :=
+  wordOf_congr (fun k hk => outBit_coreShaped ins _ (by show 1024 + k < 1056; omega))
+
+/-! #### `x0` never changes — the fact that makes field 0 satisfiable today -/
+
+theorem set_regs_zero (s : St) (r : Fin 32) (v : BitVec 32) :
+    (s.set r v).regs[0] = s.regs[0] := by
+  by_cases h : r = 0
+  · rw [h, St.set_zero]
+  · have hne : r.val ≠ 0 := fun hh => h (Fin.ext hh)
+    simp only [St.set, if_neg h]
+    exact Vector.getElem_set_ne r.isLt (by omega) hne
+
+theorem step_regs_zero (s : St) (i : Instr) : (step s i).regs[0] = s.regs[0] := by
+  cases i with
+  | ADD rd a b => exact set_regs_zero s rd _
+  | ADDI rd a imm => exact set_regs_zero s rd _
+  | XOR rd a b => exact set_regs_zero s rd _
+  | SLT rd a b => exact set_regs_zero s rd _
+  | BEQ a b imm => simp only [step]; split <;> rfl
+
+/-- ⭐ **`x0` IS INVARIANT UNDER THE WHOLE TOTAL STEP** — decodable or not. This
+is `St.set_zero` (P5) propagated to `stepT`, and it is why the pass-through
+circuit satisfies register field 0 exactly. -/
+theorem stepT_regs_zero (s : St) (w : BitVec 32) : (stepT s w).regs[0] = s.regs[0] := by
+  cases h : decode w with
+  | none => rw [stepT_undecodable s w h]; rfl
+  | some i =>
+    rw [stepT_compat s w (step s i) (by simp [stepW, h])]
+    exact step_regs_zero s i
+
+/-- ✅ **FIELD 0 HOLDS.** The pass-through core computes register `x0` correctly —
+because `x0` never changes and passing it through is exactly right. -/
+theorem regField_zero_coreShaped : RegField SaltWorks.HDL.coreShaped 0 := by
+  intro ins
+  rw [outReg_coreShaped]
+  simp only [Fin.val_zero]
+  exact (stepT_regs_zero _ _).symm
+
+/-- ⛔ **FIELD 1 FAILS.** `ADDI x1, x0, 1` from the entry state writes `1` into
+`x1`; the pass-through re-presents `0`. -/
+theorem not_regField_one_coreShaped : ¬ RegField SaltWorks.HDL.coreShaped 1 := by
+  intro h
+  have hh := h (envWith St.init (encode (Instr.ADDI 1 0 1)))
+  rw [outReg_coreShaped, decQ_envWith, seenWord_envWith, stepT_encode] at hh
+  revert hh
+  decide +kernel
+
+/-- ⛔ **THE PC FIELD FAILS.** The pc advances by 4 and the pass-through does
+not move it. -/
+theorem not_pcField_coreShaped : ¬ PcField SaltWorks.HDL.coreShaped := by
+  intro h
+  have hh := h (envWith St.init (encode (Instr.ADDI 1 0 1)))
+  rw [outPc_coreShaped, decQ_envWith, seenWord_envWith, stepT_encode] at hh
+  revert hh
+  decide +kernel
+
+/-- ⭐⭐ **THE ISOLATION PROPERTY, MADE REAL.** One conforming circuit; three of
+its 33 obligations decided three different ways. *So the decomposition is not a
+restatement — the conjuncts genuinely come apart, and a `C4Spec` failure has a
+named location rather than being a 1056-bit disagreement somewhere.* -/
+theorem coreShaped_isolation :
+    RegField SaltWorks.HDL.coreShaped 0
+      ∧ ¬ RegField SaltWorks.HDL.coreShaped 1
+      ∧ ¬ PcField SaltWorks.HDL.coreShaped :=
+  ⟨regField_zero_coreShaped, not_regField_one_coreShaped, not_pcField_coreShaped⟩
+
+/-- ⛔ **AND THEREFORE `coreShaped` IS NOT BRIDGEABLE** — refuted outright, via a
+named field, rather than only in the pair. -/
+theorem not_C4Spec_coreShaped : ¬ SaltWorks.HDL.C4Spec SaltWorks.HDL.coreShaped :=
+  not_C4Spec_of_not_pcField not_pcField_coreShaped
+
+/-! #### The second conforming shape falls the same way -/
+
+theorem sem_coreShapedT (ins : SaltWorks.HDL.Env) :
+    SaltWorks.HDL.sem SaltWorks.HDL.coreShapedT ins
+      = List.replicate SaltWorks.HDL.stWidth true := by
+  show (List.replicate SaltWorks.HDL.stWidth SaltWorks.HDL.coreInWidth).map
+    (SaltWorks.HDL.run ins [⟨SaltWorks.HDL.coreInWidth, .const true⟩]) = _
+  rw [List.map_replicate]
+  rfl
+
+theorem outBit_coreShapedT (ins : SaltWorks.HDL.Env) (j : Nat)
+    (hj : j < SaltWorks.HDL.stWidth) :
+    outBit SaltWorks.HDL.coreShapedT ins j = true := by
+  have hl : j < (List.replicate SaltWorks.HDL.stWidth true).length := by
+    rw [List.length_replicate]; exact hj
+  rw [outBit, sem_coreShapedT, List.getD_eq_getElem _ _ hl, List.getElem_replicate]
+
+theorem outPc_coreShapedT (ins : SaltWorks.HDL.Env) :
+    outPc SaltWorks.HDL.coreShapedT ins = SaltWorks.HDL.wordOf (fun _ => true) :=
+  wordOf_congr (fun k hk => outBit_coreShapedT ins _ (by show 1024 + k < 1056; omega))
+
+theorem not_pcField_coreShapedT : ¬ PcField SaltWorks.HDL.coreShapedT := by
+  intro h
+  have hh := h (envWith St.init (encode (Instr.ADDI 1 0 1)))
+  rw [outPc_coreShapedT, decQ_envWith, seenWord_envWith, stepT_encode] at hh
+  revert hh
+  decide +kernel
+
+/-- ⭐ **NEITHER conforming shape is bridgeable.** `not_both_coreShaped_C4Spec`
+above says *at most one* of the two can satisfy `C4Spec` — the strongest thing
+sayable without the decomposition. **With the decomposition, both are refuted
+individually, each by a named field.** *That is the isolation property paying for
+itself immediately: the pair argument could never have said which one, or
+why.* -/
+theorem neither_coreShape_C4Spec :
+    ¬ SaltWorks.HDL.C4Spec SaltWorks.HDL.coreShaped
+      ∧ ¬ SaltWorks.HDL.C4Spec SaltWorks.HDL.coreShapedT :=
+  ⟨not_C4Spec_coreShaped, not_C4Spec_of_not_pcField not_pcField_coreShapedT⟩
+
+/-! ### ⛔ THE LENGTH CONJUNCT IS LOAD-BEARING, and here is the refutation
+
+*The `←` direction cannot drop `c.outs.length = stWidth`, and the reason is not
+that the 33 obligations are hard to satisfy — it is that **they say nothing
+whatever about output ports past index 1055.** Appending one more port to a
+circuit leaves every one of the 33 obligations untouched (they read `getD` at
+indices below 1056) and destroys `C4Spec` outright (it is an equality of lists,
+and `encD` has exactly 1056 elements).*
+
+⇒ ***The refutation is UNCONDITIONAL and needs no correct core.*** *It says that
+for **any** `c` of the right output count, the fieldwise conjunction cannot tell
+`c` from `extendOut c m`, while `C4Spec` tells them apart always — so the fields
+alone cannot imply `C4Spec`, and the length conjunct is exactly the difference.
+Stating it this way is what lets it be proved today: a witness satisfying all 33
+fields would have to BE a correct core.* -/
+
+/-- One more output port, reading net `m`. Nothing else changes. -/
+def extendOut (c : SaltWorks.HDL.Circ) (m : SaltWorks.HDL.Net) : SaltWorks.HDL.Circ :=
+  { c with outs := c.outs ++ [m] }
+
+theorem sem_extendOut (c : SaltWorks.HDL.Circ) (m : SaltWorks.HDL.Net)
+    (ins : SaltWorks.HDL.Env) :
+    SaltWorks.HDL.sem (extendOut c m) ins
+      = SaltWorks.HDL.sem c ins ++ [SaltWorks.HDL.run ins c.gates m] := by
+  show (c.outs ++ [m]).map (SaltWorks.HDL.run ins c.gates)
+    = c.outs.map (SaltWorks.HDL.run ins c.gates) ++ [SaltWorks.HDL.run ins c.gates m]
+  simp
+
+theorem extendOut_outs_length (c : SaltWorks.HDL.Circ) (m : SaltWorks.HDL.Net) :
+    (extendOut c m).outs.length = c.outs.length + 1 := by
+  show (c.outs ++ [m]).length = c.outs.length + 1
+  simp
+
+/-- **The fields cannot see the extra port.** -/
+theorem outBit_extendOut (c : SaltWorks.HDL.Circ) (m : SaltWorks.HDL.Net)
+    (ins : SaltWorks.HDL.Env) (j : Nat) (hj : j < c.outs.length) :
+    outBit (extendOut c m) ins j = outBit c ins j := by
+  have hl : j < (SaltWorks.HDL.sem c ins).length := by
+    rw [SaltWorks.HDL.sem, List.length_map]; exact hj
+  simp only [outBit]
+  rw [sem_extendOut, List.getD_append _ _ _ _ hl]
+
+/-- ⛔ **THE REFUTATION — every field survives the extension, and `C4Spec` does
+not.** So **the fieldwise conjunction ALONE does not imply `C4Spec`**, and the
+length conjunct of `c4Spec_iff_fieldwise` is precisely what closes the gap.
+*Stated for an arbitrary `c` with the right output count, so it does not wait on
+a correct core to exist.* -/
+theorem length_conjunct_is_necessary (c : SaltWorks.HDL.Circ) (m : SaltWorks.HDL.Net)
+    (hlen : c.outs.length = SaltWorks.HDL.stWidth) :
+    (∀ r : Fin 32, RegField c r → RegField (extendOut c m) r)
+      ∧ (PcField c → PcField (extendOut c m))
+      ∧ ¬ SaltWorks.HDL.C4Spec (extendOut c m) := by
+  refine ⟨?_, ?_, ?_⟩
+  · intro r h ins
+    have hr := r.isLt
+    have he : outReg (extendOut c m) ins r = outReg c ins r :=
+      wordOf_congr (fun k hk => outBit_extendOut c m ins (32 * r.val + k)
+        (by rw [hlen]; show 32 * r.val + k < 1056; omega))
+    rw [he]
+    exact h ins
+  · intro h ins
+    have he : outPc (extendOut c m) ins = outPc c ins :=
+      wordOf_congr (fun k hk => outBit_extendOut c m ins (1024 + k)
+        (by rw [hlen]; show 1024 + k < 1056; omega))
+    rw [he]
+    exact h ins
+  · intro hc
+    have hh := outs_length_of_C4Spec hc
+    rw [extendOut_outs_length, hlen] at hh
+    omega
+
 /-! ## Axiom audit -/
 
 open Salt.Tactic
@@ -2152,5 +2635,18 @@ open Salt.Tactic
 #audit_axioms cycOfBits_shortBits_pad_dependent
 #audit_axioms cycOfBits_pad_irrelevant cycOfCirc_pad_irrelevant
 #audit_axioms not_both_coreShaped_C4Spec
+#audit_axioms outBit outReg outPc RegField PcField
+#audit_axioms stBit_reg stBit_pc regField_iff_bits pcField_iff_bits
+#audit_axioms c4Spec_iff_bitwise c4Spec_iff_fieldwise
+#audit_axioms c4Spec_of_fieldwise cycleRealisesStep_of_fieldwise sorts_of_fieldwise
+#audit_axioms not_C4Spec_of_not_regField not_C4Spec_of_not_pcField
+#audit_axioms sem_coreShaped outBit_coreShaped outReg_coreShaped outPc_coreShaped
+#audit_axioms set_regs_zero step_regs_zero stepT_regs_zero
+#audit_axioms regField_zero_coreShaped not_regField_one_coreShaped
+#audit_axioms not_pcField_coreShaped coreShaped_isolation not_C4Spec_coreShaped
+#audit_axioms sem_coreShapedT outBit_coreShapedT outPc_coreShapedT
+#audit_axioms not_pcField_coreShapedT neither_coreShape_C4Spec
+#audit_axioms extendOut sem_extendOut extendOut_outs_length outBit_extendOut
+#audit_axioms length_conjunct_is_necessary
 
 end SaltWorks.Stack.Program

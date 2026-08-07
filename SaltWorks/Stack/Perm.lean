@@ -736,6 +736,212 @@ increasing, lists unequal. Note this control kills a *weakening* too: replacing
 `≤`-detour route would not have proved this theorem. -/
 theorem ne_dup_zero : ([0, 0] : List ℕ) ≠ [0] := by decide
 
+/-! ## ⭐ THE KEY ORDER — the order a hardware Batcher sorts DESTINATION FIELDS by
+
+**Owned here on silicon's request (8/7):** *"the key order is the `LinearOrder`
+your `runNet` is instantiated at. If you would rather own the definition than
+have me write it in HDL, say so — it is one `def` and I would rather it live
+where the network theory lives than be duplicated."* `batcher8_sorts` is already
+stated at `∀ {α} [LinearOrder α]` in an arbitrary universe, so the *network* is
+generic; what was missing is the **instantiation for addresses**, and duplicating
+it in `SaltWorks/HDL/**` would put two definitions of one order in two lanes.
+
+### ⚠️ IT IS THE **UNSIGNED** ORDER — the opposite of this file's other one
+
+A destination field is an **address**. Addresses carry no sign bit, so the key
+order is `BitVec.toNat`-based, whereas `Spec.lean`'s `wle` — the order `SLT`
+computes, bundled above as `wordSignedOrder` — is `BitVec.toInt`-based. **At
+`w = 32` both bundles live on literally the same type** (`Word = BitVec 32`), so
+*nothing in a type signature separates them*: `destKeyOrder 32` and
+`wordSignedOrder` are two `LinearOrder Word`s and a consumer that grabs the wrong
+one gets a well-typed wrong answer. `dest_order_is_not_the_word_order` (one
+concrete pair) and `batcher8_dest_run_ne_word_run` (a whole network run) are that
+separation as kernel-checked facts.
+
+### ⚠️ AND THE `letI` HAZARD HAS THE OPPOSITE SIGN HERE
+
+`letI_le_is_still_unsigned` above is this file's certificate that
+`letI := wordSignedOrder; a ≤ b` silently elaborates to `BitVec`'s own **unsigned**
+`≤`. Read the other way round, that theorem says *which* order `≤` on `BitVec`
+means: **the destination one.** `destKeyOrder_le_is_the_ambient_le` states it
+positively, by `Iff.rfl`. ⇒ **A `letI := destKeyOrder w` block would be harmless
+exactly where a `letI := wordSignedOrder` block is wrong.** *Neither is used:
+every statement below carries its instance explicitly, exactly as the `Word`
+section does, because "harmless today" is not a property a successor reads off
+the source — and the two bundles sit on one type.*
+
+### There is no ambient instance to collide with
+
+`#synth LinearOrder (BitVec 3)` **fails** — measured on this pin (v4.32.0-rc1);
+mathlib registers no order class on `BitVec` at all. So `Sorts batcher8 (Dest w)`
+does not elaborate on its own and the bundle *must* be handed over by hand, which
+is the discipline this file already runs at `Word`.
+
+📌 **SILICON: `import SaltWorks.Stack.Perm` and use `destKeyOrder` / `runNetD`;
+do not write a second key order in `SaltWorks/HDL/**`.** *`runNetD_toNat` is the
+bridge to the `Fin 8 → ℕ` carrier `composed_switch_of_seam_k3` already takes, and
+`dest3_toNat_lt_eight` discharges that theorem's `hlt` for free at the fabricated
+`k = 3` width — so the ℕ-side statements you have landed compose with this
+without any restatement.* -/
+
+/-- **A destination field of width `w`** — the address a packet carries, in the
+representation the frame carries it. A type *abbreviation* rather than a wrapper:
+it must be the same type the frame's bits decode to, or the order below is an
+order on something else. -/
+abbrev Dest (w : ℕ) := BitVec w
+
+/-- ⭐ **THE KEY ORDER, as a relation** — UNSIGNED, through `BitVec.toNat`.
+Deliberately **not** `wle`; see the section header. -/
+def dle {w : ℕ} (a b : Dest w) : Prop := a.toNat ≤ b.toNat
+
+/-- The strict companion — the relation `banyan_selfrouting`'s `StrictMonoOn`
+hypothesis is about once the carrier is a field rather than an `ℕ`. -/
+def dlt {w : ℕ} (a b : Dest w) : Prop := a.toNat < b.toNat
+
+instance {w : ℕ} (a b : Dest w) : Decidable (dle a b) := inferInstanceAs (Decidable (_ ≤ _))
+instance {w : ℕ} (a b : Dest w) : Decidable (dlt a b) := inferInstanceAs (Decidable (_ < _))
+
+/-- ⭐ **THE KEY ORDER AS A `LinearOrder` BUNDLE**, ready to hand to `runNet`. An
+`abbrev` (Lean requires class-typed definitions to be reducible) and — following
+`wordSignedOrder` — deliberately **not** an `instance`, not even a `local` one.
+Reducible is not registered: typeclass search never returns this. -/
+abbrev destKeyOrder (w : ℕ) : LinearOrder (Dest w) :=
+  LinearOrder.lift' BitVec.toNat fun _ _ h => BitVec.toNat_inj.mp h
+
+/-- **The bundle's `≤` IS `dle`**, by `Iff.rfl`, spelled through the projection
+chain rather than left to notation — the same discipline as
+`wordSignedOrder_le`. -/
+theorem destKeyOrder_le {w : ℕ} (a b : Dest w) :
+    @LE.le (Dest w) (@Preorder.toLE (Dest w) (@PartialOrder.toPreorder (Dest w)
+      (@LinearOrder.toPartialOrder (Dest w) (destKeyOrder w)))) a b ↔ dle a b := Iff.rfl
+
+/-- ⭐ **AND IT IS ALSO `BitVec`'s OWN `≤`** — the fact that makes this order the
+*natural* one on a field and `wle` the imported one. `BitVec.le_def` is `Iff.rfl`
+in core, so this whole statement is. **Contrast `letI_le_is_still_unsigned`: the
+elaborator's silent answer is wrong for `wordSignedOrder` and right here, and the
+only thing distinguishing the two cases is which order was meant.** -/
+theorem destKeyOrder_le_is_the_ambient_le {w : ℕ} (a b : Dest w) :
+    @LE.le (Dest w) (@Preorder.toLE (Dest w) (@PartialOrder.toPreorder (Dest w)
+      (@LinearOrder.toPartialOrder (Dest w) (destKeyOrder w)))) a b ↔ a ≤ b := Iff.rfl
+
+/-- `dle` is `BitVec`'s `≤`, spelled out for consumers who hold one and want the
+other. -/
+theorem dle_iff_le {w : ℕ} (a b : Dest w) : dle a b ↔ a ≤ b := Iff.rfl
+
+/-- The bundle's `min` is a select on the negation of unsigned less-than — the
+comparison a hardware compare-exchange element actually builds. Pinned rather
+than assumed, for the same reason `wordSignedOrder_min` is. -/
+theorem destKeyOrder_min {w : ℕ} (a b : Dest w) :
+    @min (Dest w) (@LinearOrder.toMin (Dest w) (destKeyOrder w)) a b =
+      if a.toNat ≤ b.toNat then a else b := rfl
+
+/-- The `max` companion. -/
+theorem destKeyOrder_max {w : ℕ} (a b : Dest w) :
+    @max (Dest w) (@LinearOrder.toMax (Dest w) (destKeyOrder w)) a b =
+      if a.toNat ≤ b.toNat then b else a := rfl
+
+/-- **A network run on destination fields under the KEY (unsigned) comparator.**
+The instance is applied by hand, so the order in force is visible in the term —
+`runNetW`'s shape, at the other order. -/
+def runNetD {w : ℕ} (net : Network n) (v : Fin n → Dest w) : Fin n → Dest w :=
+  @runNet n (Dest w) (destKeyOrder w) net v
+
+/-- Any network passing `ZeroOne.lean`'s Boolean check sorts destination fields
+of any width. -/
+theorem sortsD (w : ℕ) {net : Network n} (hb : Sorts net Bool) :
+    @Sorts n net (Dest w) (destKeyOrder w) :=
+  @sorts_of_sorts_bool n net hb (Dest w) (destKeyOrder w)
+
+/-- The sortedness half, landing on the relation `dle` and never writing `≤` at a
+`BitVec`. -/
+theorem sortedD_ofFn_runNetD {net : Network n} (hb : Sorts net Bool) {w : ℕ}
+    (v : Fin n → Dest w) : (List.ofFn (runNetD net v)).Pairwise dle :=
+  @pairwise_ofFn_runNet n net hb (Dest w) (destKeyOrder w) dle (fun h => h) v
+
+/-- The permutation half — "every payload arrives", at the field carrier. -/
+theorem permD_ofFn_runNetD {w : ℕ} (net : Network n) (v : Fin n → Dest w) :
+    (List.ofFn v).Perm (List.ofFn (runNetD net v)) :=
+  @ofFn_perm_runNet n (Dest w) (destKeyOrder w) net v
+
+/-- Distinct destinations in, distinct destinations out — the `KB3` half at the
+field carrier. -/
+theorem injective_runNetD {w : ℕ} (net : Network n) {v : Fin n → Dest w}
+    (hv : Function.Injective v) : Function.Injective (runNetD net v) :=
+  @runNet_injective n (Dest w) (destKeyOrder w) net v hv
+
+/-- ⭐ **THE INSTANTIATION LEMMA — BATCHER'S 8-WIRE NETWORK SORTS DESTINATION
+FIELDS**, at every field width, at the key order. *This is the theorem silicon
+instantiates instead of restating.* -/
+theorem batcher8_sortsD (w : ℕ) : @Sorts 8 batcher8 (Dest w) (destKeyOrder w) :=
+  sortsD w batcher8_sorts_bool
+
+/-- The same, in the `List` vocabulary, with both halves — sorted by the key
+order **and** a permutation of the input. -/
+theorem batcher8_sortsD_ofFn (w : ℕ) (v : Fin 8 → Dest w) :
+    (List.ofFn (runNetD batcher8 v)).Pairwise dle ∧
+      (List.ofFn v).Perm (List.ofFn (runNetD batcher8 v)) :=
+  ⟨sortedD_ofFn_runNetD batcher8_sorts_bool v, permD_ofFn_runNetD batcher8 v⟩
+
+/-! ### The bridge to the `ℕ` carrier silicon's landed statements already use
+
+`composed_switch_of_seam_k3` takes `v hw : Fin 8 → ℕ`. That is the *same* order —
+`toNat` is a monotone bijection onto `Iio (2 ^ w)` — so nothing needs restating;
+`runNet_comp_monotone` carries the network across the carrier change in one
+line. -/
+
+/-- ⭐ **RUNNING ON FIELDS AND RUNNING ON THEIR VALUES ARE THE SAME RUN.** -/
+theorem runNetD_toNat {w : ℕ} (net : Network n) (v : Fin n → Dest w) (i : Fin n) :
+    (runNetD net v i).toNat = runNet net (fun j => (v j).toNat) i :=
+  (congrFun (@runNet_comp_monotone n (Dest w) ℕ (destKeyOrder w) inferInstance
+    BitVec.toNat (fun _ _ h => h) net v) i).symm
+
+/-- Distinctness survives the carrier change, so `composed_switch_of_seam_k3`'s
+`hi` is exactly injectivity of the field vector. -/
+theorem toNat_injective_of_injective {w : ℕ} {v : Fin n → Dest w}
+    (hv : Function.Injective v) : Function.Injective (fun i => (v i).toNat) :=
+  fun _ _ h => hv (BitVec.toNat_inj.mp h)
+
+/-- ⭐ **AND THE ADDRESS BOUND IS FREE AT THE FABRICATED WIDTH.** A 3-bit
+destination field cannot name a line outside an 8-line fabric — so
+`composed_switch_of_seam_k3`'s `hlt : ∀ i, v i < 8` is discharged by the *type*
+once the carrier is `Dest 3` rather than `ℕ`. *That is the whole argument for
+owning the order at the field type instead of at `ℕ`.* -/
+theorem dest3_toNat_lt_eight (v : Fin 8 → Dest 3) (i : Fin 8) : (v i).toNat < 8 :=
+  (v i).isLt
+
+/-! ### ⛔ CONTROLS — the two orders must be visibly different
+
+*A key order nobody can distinguish from `wle` is a key order that will be
+confused with it. Both controls are `decide +kernel`.* -/
+
+/-- ⛔ **THE TWO ORDERS DISAGREE, on the pair `Spec.lean` already uses.** `-1` is
+`0xFFFFFFFF`: the *smallest* word signed and the *largest* unsigned. So
+`destKeyOrder 32` and `wordSignedOrder` are genuinely different bundles on
+genuinely the same type. -/
+theorem dest_order_is_not_the_word_order :
+    wle (-1 : Word) 1 ∧ ¬ dle (-1 : Dest 32) 1 := by decide +kernel
+
+/-- **A concrete run at the key order**, pinned against its literal output —
+ascending *unsigned*, so the negatives land at the top. -/
+theorem batcher8_dest_run :
+    List.ofFn (runNetD batcher8 (![3, -1, 7, 0, -5, 2, 9, -2] : Fin 8 → Dest 32))
+      = [(0 : Dest 32), 2, 3, 7, 9, -5, -2, -1] := by decide +kernel
+
+/-- ⛔ **AND THE TWO NETWORKS COMPUTE DIFFERENT THINGS ON THE SAME INPUT.** Same
+24 comparators, same vector, different order, different answer
+(`batcher8_word_run` is the other one). **So instantiating `runNet` at the wrong
+bundle is not a stylistic slip — it changes the output.** -/
+theorem batcher8_dest_run_ne_word_run :
+    List.ofFn (runNetD batcher8 (![3, -1, 7, 0, -5, 2, 9, -2] : Fin 8 → Dest 32))
+      ≠ List.ofFn (runNetW batcher8 ![3, -1, 7, 0, -5, 2, 9, -2]) := by decide +kernel
+
+/-- ⛔ And the key order's output is **not** signed-sorted — the mirror of
+`batcher8_word_run_not_unsigned`, so neither order is a special case of the
+other. -/
+theorem batcher8_dest_run_not_signed :
+    ¬ SortedW (List.ofFn (runNetD batcher8
+        (![3, -1, 7, 0, -5, 2, 9, -2] : Fin 8 → Dest 32))) := by decide +kernel
+
 /-! ## Axiom audit -/
 
 section Audit
@@ -764,6 +970,15 @@ open Salt.Tactic
 #audit_axioms pairwise_lt_filter_range eq_filter_range_of_pairwise_lt
 #audit_axioms perm_zeroOne_oneZero not_pairwise_lt_oneZero ne_zeroOne_oneZero
 #audit_axioms mem_iff_dup_zero not_pairwise_lt_dup_zero ne_dup_zero
+#audit_axioms Dest dle dlt destKeyOrder
+#audit_axioms destKeyOrder_le destKeyOrder_le_is_the_ambient_le dle_iff_le
+#audit_axioms destKeyOrder_min destKeyOrder_max
+#audit_axioms runNetD sortsD sortedD_ofFn_runNetD permD_ofFn_runNetD injective_runNetD
+#audit_axioms batcher8_sortsD batcher8_sortsD_ofFn
+#audit_axioms runNetD_toNat toNat_injective_of_injective dest3_toNat_lt_eight
+#audit_axioms dest_order_is_not_the_word_order
+#audit_axioms batcher8_dest_run batcher8_dest_run_ne_word_run
+#audit_axioms batcher8_dest_run_not_signed
 
 end Audit
 

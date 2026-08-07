@@ -1986,3 +1986,168 @@ import. ⛔ No file under `HDL/` was edited; `SaltWorks.lean` was not touched.
   a real tile will have a definite reset/hold behaviour, and when that is pinned
   the `pad` can be instantiated rather than quantified. Nothing here depends on
   which way that goes.
+
+---
+
+## C4DECOMP — the key order owned in math's lane, and `C4Spec` decomposed fieldwise
+**2026-08-07 · Opus executor · `SaltWorks/Stack/Perm.lean` +215, `SaltWorks/Stack/Program.lean` +496 (711 lines, no new module)**
+
+Two independent tasks. **No file outside `SaltWorks/Stack/**` and `docs/` was
+touched; `SaltWorks.lean` was not touched and no `import owed:` is needed** —
+both landed by extending modules already in the default target.
+
+⚠️ **One brief deviation, deliberate.** The brief said to extend
+`Stack/Program.lean` "unless a new module is clearly cleaner". Task 1 went into
+`Stack/Perm.lean` instead — not a new module, but the one where `runNetW` /
+`wordSignedOrder` already live, which is literally what silicon asked for
+(*"where the network theory lives"*). Perm.lean is hub-visible (Program.lean
+imports it), so the "invisible to the full build" hazard does not apply. Task 2
+is in `Program.lean` as directed.
+
+### TASK 1 — THE KEY ORDER (`Stack/Perm.lean`)
+
+Silicon asked math to own the `LinearOrder` their hardware Batcher sorts
+destination fields by, rather than duplicating it in HDL. Owned.
+
+- `Dest w := BitVec w` — a destination field at its real width.
+- `dle a b := a.toNat ≤ b.toNat` / `dlt` — **the UNSIGNED order**, with
+  `Decidable` instances.
+- `destKeyOrder (w) : LinearOrder (Dest w)` — `LinearOrder.lift' BitVec.toNat`,
+  an `abbrev`, **never an `instance`**, exactly mirroring `wordSignedOrder`.
+- `destKeyOrder_le` (it is `dle`) and `destKeyOrder_le_is_the_ambient_le` (it is
+  also `BitVec`'s own `≤`) — both `Iff.rfl`; `destKeyOrder_min` / `_max` pin the
+  comparator a hardware element builds.
+- `runNetD` = `@runNet _ (Dest w) (destKeyOrder w)`, instance applied by hand.
+- **The instantiation lemma: `batcher8_sortsD (w) : @Sorts 8 batcher8 (Dest w)
+  (destKeyOrder w)`**, plus `batcher8_sortsD_ofFn` (sorted-by-`dle` **and** a
+  permutation), `sortedD_ofFn_runNetD`, `permD_ofFn_runNetD`,
+  `injective_runNetD`.
+- **The ℕ bridge** (this is the piece that makes it drop-in for silicon):
+  `runNetD_toNat` — running on fields and running on their `toNat` values is the
+  same run, via `runNet_comp_monotone`; `toNat_injective_of_injective`; and
+  `dest3_toNat_lt_eight`, which discharges `composed_switch_of_seam_k3`'s
+  `hlt : ∀ i, v i < 8` **from the type** once the carrier is `Dest 3`.
+
+⭐ **THE FINDING WORTH RECORDING.** `Word = BitVec 32`, so at `w = 32`
+`destKeyOrder 32` and `wordSignedOrder` are **two `LinearOrder`s on literally the
+same type** and nothing in a signature separates them. And S1's
+`letI_le_is_still_unsigned` — the certificate that `letI := wordSignedOrder`
+silently gives `BitVec`'s unsigned `≤` — **reads the other way round as a
+statement about which order `≤` on `BitVec` IS: the destination one.** So the
+`letI` hazard has the *opposite sign* for the two bundles: harmless for
+`destKeyOrder`, wrong for `wordSignedOrder`. Both are still written with explicit
+instances, because "harmless today" is not a property a successor reads off the
+source.
+
+**Measured, not assumed:** `#synth LinearOrder (BitVec 3)` **fails** on this pin
+(v4.32.0-rc1) — mathlib registers no order class on `BitVec` at all. So the
+bundle must be handed over by hand; there is no ambient instance to collide with.
+
+**Controls (all `decide +kernel`):** `dest_order_is_not_the_word_order`
+(`wle (-1) 1` holds, `dle (-1) 1` does not); `batcher8_dest_run` (the literal
+unsigned-ascending output); `batcher8_dest_run_ne_word_run` — **the same 24
+comparators on the same vector give different answers at the two orders**, so
+picking the wrong bundle is not a stylistic slip; `batcher8_dest_run_not_signed`,
+the mirror of `batcher8_word_run_not_unsigned`.
+
+📌 **ON THE RECORD FOR SILICON: `import SaltWorks.Stack.Perm` and instantiate
+`destKeyOrder` / `runNetD`; do not write a second key order in
+`SaltWorks/HDL/**`.**
+
+### TASK 2 — THE C4 PROOF SKELETON (`Stack/Program.lean`)
+
+⛔ **C4 itself was not attempted and remains unprovable** —
+`grep -rE "^(def|theorem|abbrev|noncomputable def) (core|compile)\b"` over
+`SaltWorks/` still returns nothing. What landed is the decomposition that turns
+C4 into an assembly.
+
+- `outBit` / `outReg` / `outPc` — positional readers of `sem`.
+- **`RegField c (r : Fin 32)`** and **`PcField c`** — the 33 obligations, each a
+  `Prop` about `c` alone, each about 32 bits.
+- `regField_iff_bits` / `pcField_iff_bits` — each field IS 32 independent bit
+  equations, so "checkable on its own" is a theorem rather than a claim.
+- `c4Spec_iff_bitwise` — the intermediate positional form (length + 1056 bit
+  equations), where the `List.ext_getElem` reasoning lives.
+- ⭐⭐ **`c4Spec_iff_fieldwise` — BOTH DIRECTIONS CLOSED:**
+  `C4Spec c ↔ c.outs.length = stWidth ∧ (∀ r, RegField c r) ∧ PcField c`.
+- **The assembly direction, which is the payoff:** `c4Spec_of_fieldwise`,
+  `cycleRealisesStep_of_fieldwise`, and `sorts_of_fieldwise` — the end-to-end
+  theorem with `C4Spec` replaced by the 33 field obligations (`CoreConforms`'s
+  own `outs.length` conjunct supplies the count).
+- **The isolation direction:** `not_C4Spec_of_not_regField` /
+  `not_C4Spec_of_not_pcField`.
+
+⚠️ **THE LENGTH IS ASYMMETRIC, and the brief was right to flag it.** Forward it
+is **free** (`outs_length_of_C4Spec`, landed); reverse it must be **assumed**.
+The refutation is `length_conjunct_is_necessary` and it is **unconditional**: for
+any `c` of the right output count, `extendOut c m` (one extra output port)
+satisfies **every one of the 33 fields** — they read `getD` below index 1056 and
+cannot see the extra port — and **provably fails `C4Spec`**, whose list equality
+forces length 1056. *So the fields alone do not imply `C4Spec`, and the length
+conjunct is exactly the difference.*
+
+⚠️ **A CONTROL I WROTE WRONG AND REPLACED.** My first version of that refutation
+used a zero-output `coreEmpty` and claimed the fieldwise conjunction "cannot
+exclude it". **That was over-claimed**: `coreEmpty`'s pc field fails, so it is
+not a witness that all fields hold while the length does not. The honest version
+is the `extendOut` one above, and it is stronger — it needs no witness core at
+all, which is why it is provable today. The wrong version was deleted, not
+weakened around.
+
+**⭐ NON-VACUITY — the fields genuinely come apart.** `coreShaped_isolation`:
+compiler's 1056-output pass-through **satisfies `RegField coreShaped 0`** (a
+write to `x0` is discarded, so `x0` never changes — `stepT_regs_zero`, new here,
+propagates `St.set_zero`/P5 through the *total* step, decodable word or not),
+**fails `RegField coreShaped 1`** and **fails `PcField coreShaped`** under
+`ADDI x1, x0, 1` from the entry state. *Three of the same circuit's 33
+obligations, decided three different ways.*
+
+⭐ **AND IT UPGRADES A LANDED RESULT.** `not_both_coreShaped_C4Spec` said *at
+most one* of compiler's two conforming shapes can satisfy `C4Spec` — the
+strongest thing sayable without the decomposition. `neither_coreShape_C4Spec`
+now refutes **both, individually, each by a named field**. The landed statement
+was not touched.
+
+### Attempt counts, against the split budget
+
+* **Task 1 — statements 1, proofs 1.** Built clean on the first `saltbuild`. One
+  design decision weighed rather than defaulted: the carrier. `BitVec w` (the
+  field) rather than `ℕ` (silicon's current landed carrier), *because* the width
+  is what discharges the address bound — `dest3_toNat_lt_eight` — and
+  `runNetD_toNat` makes the ℕ statements compose anyway. Nothing is lost and the
+  bound becomes free.
+* **Task 2 — statements 1, proofs 2 (budget 2, not exceeded).** Attempt 1 failed
+  with four real errors: two missing `[i]'h` getElem proof terms in
+  `c4Spec_iff_bitwise`, a `maxRecDepth` overflow on the 1056-element `outs` list
+  (C4.lean carries the same `set_option` and it does not cross the module
+  boundary), and two `rw`-auto-`rfl`s that did not fire. Attempt 2 clean. The
+  `extendOut` control replacing `coreEmpty` built first time and is counted
+  separately as a correction, not a proof attempt.
+* No `sorry`. No `native_decide`. `decide +kernel` for every control.
+
+### Build + audit
+
+`saltbuild.sh SaltWorks.Stack.Perm` → EXIT=0. `saltbuild.sh
+SaltWorks.Stack.Program` → EXIT=0. Full tree `saltbuild.sh` → **EXIT=0, 8634
+jobs, zero `error:` and zero `warning:`** (same job count as before — no new
+module). All 60 new declarations tick `#audit_axioms`; fifteen were re-checked
+independently with `#print axioms` in `ScratchMATHC4D.lean` (EXIT=0; deleted, not
+committed) — every one inside `[propext, Classical.choice, Quot.sound]`.
+
+### Left undetermined
+
+* **Whether any `Circ` satisfies a single `RegField`/`PcField` non-trivially.**
+  Field 0 is satisfied by the pass-through, but that is because `x0` never
+  changes. Every other field needs datapath, i.e. needs `core`. **The
+  decomposition makes C4 an assembly; it does not make any one field easier.**
+* **The 33 fields are not equally sized in gates.** `PcField` is the adder and
+  the branch; the 32 `RegField`s share one write port and a decoder. The
+  decomposition is by *layout*, which is the right split for checking, and it may
+  not be the right split for *proving* — a successor may want a further split of
+  `PcField` by instruction class. Nothing here forecloses that.
+* **`CoreConforms`'s `ssa` and `nIn` conjuncts still have no consumer here** —
+  `sorts_of_fieldwise` takes the whole structure and uses only `.2.2`. Unchanged
+  from `C4BRIDGE`.
+* **Task 1 has no consumer yet.** `runNetD`/`destKeyOrder` are exported and
+  proved; whether silicon's link ②(b) actually lands on `Dest 3` or stays at `ℕ`
+  is their call, and `runNetD_toNat` is written so that either works.
