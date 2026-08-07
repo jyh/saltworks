@@ -44,9 +44,29 @@ out of the refuter pass:
 
 ## The ceiling, and why it is a *safety* property
 
-`Nat.pow` is kernel-accelerated only up to exponent `1 <<< 24`. A slice of width
-`W = 2^n` needs the mask `2^W - 1`, so **`n = 24` input bits is the hard kernel
-ceiling** — and at `n = 24` a single net is 2 MB, so a sliced certificate's
+`Nat.pow` is kernel-accelerated only up to exponent `1 <<< 24` — **measured
+2026-08-06, not assumed.** This line asserted a property of Lean's kernel that
+the campaign then cited in two other documents, and it was the one
+externally-checkable number in this file that nobody had checked. `2 ^ e % 3`
+by `decide +kernel`, wrapper timings, zero lock-wait in every row:
+
+| exponent `e` | | result |
+|---|---|---|
+| `1000000` | | 0.61 s, `EXIT=0` |
+| `16777215` | `= (1 <<< 24) - 1` | 0.59 s, `EXIT=0` |
+| `16777216` | `= 1 <<< 24` | **0.59 s, `EXIT=0` — accelerated** |
+| `16777218` | `= (1 <<< 24) + 2` | **57.07 s, `EXIT=1`, `maximum recursion depth`** |
+| `33554432` | `= 1 <<< 25` | 56.95 s, `EXIT=1`, same |
+
+So the bound is **inclusive** at `1 <<< 24`, the cost below it is flat rather
+than scaling with the exponent (one accelerated operation), and past it the
+kernel falls back to unfolding `Nat.pow`, which cannot finish. Note the failure
+text is `maximum recursion depth`, **not** a memory diagnostic — under the
+fleet's cap-hit guard that is not a cap hit, and a reader must not price this
+ceiling as a memory limit.
+
+A slice of width `W = 2^n` needs the mask `2^W - 1`, so **`n = 24` input bits is
+the hard kernel ceiling** — and at `n = 24` a single net is 2 MB, so a sliced certificate's
 memory is bounded by roughly `2 MB × nets`. Pointwise `decide +kernel` has no
 such bound: it materialises the reduction, and this seat drove a probe of under
 60 lines to 30 GB that way. Bit-slicing is therefore not only ~10^3 times
