@@ -57,6 +57,13 @@ are constrained by nothing at all**, which is exactly what
 `composed_switch_of_seam` could not offer and what `bnCSparse`'s five
 byte-identical idle frames need.
 
+✅ **And it BITES, checked rather than asserted:** `sparse_partial_load` routes
+`bnCSparse`'s own pattern — three actives, **five idle lines sharing the code
+0** — so the hypotheses are satisfiable *at the configuration the full-load
+statement cannot express*; `dup_not_actives_distinct` shows the distinctness
+hypothesis can fail, so it is not a predicate that holds of everything; and
+`full_load_cCount` places full load at the top of the same range.
+
 ⚠️ **What is NOT claimed: the seam to the fabricated element — that convention
 C's order actually IS `(¬active, dest)` — is compiler's, exactly as `hseam` is.**
 This module is about `cSorted`, the abstract product-order sort. **Nothing here
@@ -210,6 +217,13 @@ including the idles' — the demand `bnCSparse` cannot meet. -/
 def ActivesDistinct (act : Fin 8 → Bool) (dst : Fin 8 → ℕ) : Prop :=
   ∀ i j : Fin 8, act i = true → act j = true → dst i = dst j → i = j
 
+/-- `ActivesDistinct` is a `def` returning `Prop`, so instance search will not see
+through it on its own — the same hazard `ZeroOne.lean` records for `IsSorted`.
+A definitional unfolding, not a new decision procedure. -/
+instance (act : Fin 8 → Bool) (dst : Fin 8 → ℕ) : Decidable (ActivesDistinct act dst) :=
+  inferInstanceAs
+    (Decidable (∀ i j : Fin 8, act i = true → act j = true → dst i = dst j → i = j))
+
 theorem cCount_le (act : Fin 8 → Bool) : cCount act ≤ 8 := by
   unfold cCount
   calc (Finset.univ.filter fun i => act i = true).card
@@ -286,6 +300,10 @@ theorem cDst_of_active (act : Fin 8 → Bool) (dst : Fin 8 → ℕ) (i : Fin 8)
 def ActivesBounded (act : Fin 8 → Bool) (dst : Fin 8 → ℕ) (k : ℕ) : Prop :=
   ∀ i, act i = true → dst i < 2 ^ k
 
+instance (act : Fin 8 → Bool) (dst : Fin 8 → ℕ) (k : ℕ) :
+    Decidable (ActivesBounded act dst k) :=
+  inferInstanceAs (Decidable (∀ i, act i = true → dst i < 2 ^ k))
+
 /-- ⭐⭐⭐ **PARTIAL LOAD — THE SWITCH ROUTES ITS ACTUAL OPERATING RANGE.**
 
 With **any** activity pattern, and hypotheses on the **active lines only** —
@@ -319,6 +337,56 @@ theorem partial_load_selfrouting {k : ℕ} (act : Fin 8 → Bool) (dst : Fin 8 �
   rw [hdj]
   exact hb j hj
 
+/-! ### Controls — does the theorem BITE?
+
+A theorem whose hypotheses are unsatisfiable is true and useless, and one whose
+hypotheses cannot fail is not saying anything. Both are checked here, and the
+satisfiable witness is deliberately **the tile's own fixture pattern** rather
+than a convenient one. -/
+
+/-- `bnCSparse`'s activity pattern (`HDL/BatcherNetC.lean:216`): lines 2, 5, 7
+active, bound for 0, 1, 2 — **three actives and five idles.** -/
+def sparseAct : Fin 8 → Bool := fun i => i == 2 || i == 5 || i == 7
+
+/-- Its destinations. **The five idle lines all carry 0** — byte-identical, as
+the real frame does, which is exactly what the full-load statement cannot take. -/
+def sparseDst : Fin 8 → ℕ := fun i => if i == 2 then 0 else if i == 5 then 1
+  else if i == 7 then 2 else 0
+
+theorem sparse_cCount : cCount sparseAct = 3 := by decide
+
+/-- ✅ **SATISFIABLE — and note WHICH hypothesis holds:** the actives are
+distinct **even though five idle lines share the code 0.** -/
+theorem sparse_actives_distinct : ActivesDistinct sparseAct sparseDst := by decide
+
+theorem sparse_actives_bounded : ActivesBounded sparseAct sparseDst 3 := by decide
+
+/-- ⭐ **THE FIXTURE'S PATTERN, ROUTED BY THE THEOREM RATHER THAN BY A `decide`.**
+`bnC_concentrates_actives` verifies this one configuration on the netlist at the
+cost of a kernel evaluation; this derives it — and every other pattern — from the
+sorter's order. -/
+theorem sparse_partial_load :
+    (∀ m ≤ 3, Set.InjOn
+        (fun s => Banyan.line m s (extendIio 0 (cDst sparseAct sparseDst) s))
+        (Set.Iio (cCount sparseAct))) ∧
+      (∀ s < cCount sparseAct,
+        Banyan.line 3 s (extendIio 0 (cDst sparseAct sparseDst) s) = s) ∧
+      (∀ s, Banyan.line 0 s (extendIio 0 (cDst sparseAct sparseDst) s)
+        = extendIio 0 (cDst sparseAct sparseDst) s) :=
+  partial_load_selfrouting sparseAct sparseDst
+    (by rw [sparse_cCount]; norm_num) sparse_actives_distinct sparse_actives_bounded
+
+/-- Two actives bound for one destination. -/
+def dupAct : Fin 8 → Bool := fun i => i == 0 || i == 1
+def dupDst : Fin 8 → ℕ := fun _ => 5
+
+/-- ⛔ **DISCRIMINATING — the distinctness hypothesis CAN fail**, so it is not a
+predicate that holds of everything and the theorem is not vacuously general. -/
+theorem dup_not_actives_distinct : ¬ ActivesDistinct dupAct dupDst := by decide
+
+/-- **Full load is the top of the range, not a different theorem.** -/
+theorem full_load_cCount : cCount (fun _ => true) = 8 := by decide
+
 end SaltWorks.Silicon
 
 section Audit
@@ -335,4 +403,8 @@ open Salt.Tactic
   SaltWorks.Silicon.cSorted_strictMonoOn
 #audit_axioms SaltWorks.Silicon.cDst_of_active
   SaltWorks.Silicon.partial_load_selfrouting
+#audit_axioms SaltWorks.Silicon.sparse_cCount
+  SaltWorks.Silicon.sparse_actives_distinct SaltWorks.Silicon.sparse_actives_bounded
+#audit_axioms SaltWorks.Silicon.sparse_partial_load
+  SaltWorks.Silicon.dup_not_actives_distinct SaltWorks.Silicon.full_load_cCount
 end Audit
