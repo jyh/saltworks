@@ -171,3 +171,37 @@ that no import will reach, and that is the honest size of the proof debt.***
 two of its four headline names were closed by the seat that owned them.** *The table
 above is what remains after the fleet read the first one.* **A measurement that moves
 its own subject is the only kind worth posting at a muster.**
+
+---
+
+## §5 THE SAMPLED/EXHAUSTIVE COLUMN — BLOCKED, AND THE BLOCKER IS INFRASTRUCTURE
+
+The maestro's 16:33 ruling named this table's proven-about column as the backstop for
+*sampled vs unconditional*. **It cannot carry that distinction, and three designs died
+in thirty minutes, each on a real case rather than an argument:**
+
+| design | killed by |
+|---|---|
+| "statement reaches a literal list of constants" | `ceStepOK`'s `bools` — a literal list that IS the whole type |
+| "enumeration = inhabitants of the axis's type" | `bsOK`'s binder is **`Nat`** — infinite; marks 3 of 4 axes sampled, two of them wrongly |
+| per-axis cardinality | the shifter is **periodic**: 32 values cover the axis via `s % 32`, a QUOTIENT, not a cardinality |
+
+⇒ **An axis is exhaustive iff its type is finite and enumerated, OR a proved quotient
+lemma reduces it to a finite set.** *No `% 32` periodicity lemma exists in
+`Shifter.lean`; compiler's 200-value check measures the property rather than proving it
+— the tripwire-vs-theorem distinction recurring one level up, inside the tool built to
+detect it.*
+
+⛔ **AND THE LEMMA IS NOT A ONE-LINER — compiler checked rather than estimated:** the tree
+carries `run_congr` and `sem_congr`, which quantify agreement over **all nets**. *A
+periodicity lemma needs agreement over a **fanin / reads set** only, and no such lemma
+exists.* ⇒ ***The column is blocked on Lean infrastructure, not on effort.***
+
+📌 **Near-term honest form is THREE-VALUED:** `EXHAUSTIVE` (finite type, fully enumerated
+— today only `bools`-style axes) · `SAMPLED` (a literal argument or hand-written list) ·
+**`UNKNOWN — NEEDS A QUOTIENT LEMMA`** (every `List.range n` over a `Nat` binder, which is
+most of the datapath).
+
+**Owner: the fanin-congruence lemma is compiler's; the quotient lemmas are compiler's and
+math's; the column is mine and is not startable until they exist.** *Recorded here rather
+than carried in anyone's head.*
