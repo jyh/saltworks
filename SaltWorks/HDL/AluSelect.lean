@@ -223,12 +223,12 @@ def asSelectsOK (m : Nat) : Bool :=
   (List.range 16).all fun sel => asBit0 m sel == decide (sel = m)
 
 /-- ⭐ **THE ALU SELECT SELECTS** — all sixteen select values, kernel-checked. -/
-theorem aluSelect_selects : asSelectsOK 3 = true := by decide +kernel
+theorem aluSelect_selects_on_sample : asSelectsOK 3 = true := by decide +kernel
 
 /-- …and again at the LAST real operand (`sra`, index 9), so the first is not an
 accident of where `3` sits in the tree, and the 9/10 padding boundary is
 exercised. -/
-theorem aluSelect_selects_last : asSelectsOK 9 = true := by decide +kernel
+theorem aluSelect_selects_on_sample_last : asSelectsOK 9 = true := by decide +kernel
 
 #audit_axioms asW
 #audit_axioms asOps
@@ -249,8 +249,8 @@ theorem aluSelect_selects_last : asSelectsOK 9 = true := by decide +kernel
 #audit_axioms aluSelect_ssa
 #audit_axioms aluSelect_wf
 #audit_axioms asOneHot asBit0 asSelectsOK
-#audit_axioms aluSelect_selects
-#audit_axioms aluSelect_selects_last
+#audit_axioms aluSelect_selects_on_sample
+#audit_axioms aluSelect_selects_on_sample_last
 #audit_axioms aluSelectCuts
 #audit_axioms zrIn
 #audit_axioms zrLevels

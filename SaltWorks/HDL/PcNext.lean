@@ -151,7 +151,7 @@ def pcOK : Bool :=
     pcRun p.1 p.2 o b == pcSpec p.1 p.2 o b
 
 /-- **The addend select agrees with `stepT`'s pc rule** on 100 driven cases. -/
-theorem pcNext_correct : pcOK = true := by decide +kernel
+theorem pcNext_correct_on_sample : pcOK = true := by decide +kernel
 
 /-- **A NON-`BEQ` INSTRUCTION ALWAYS ADDS 4** — including the NOP-advance path,
 which is the ratified behaviour on 99.80% of words. -/
@@ -191,7 +191,7 @@ theorem pcNext_compares_the_low_bit :
 #audit_axioms pcNext_ssa
 #audit_axioms pcRun
 #audit_axioms pcSpec
-#audit_axioms pcNext_correct
+#audit_axioms pcNext_correct_on_sample
 #audit_axioms pcNext_not_beq_adds_four
 #audit_axioms pcNext_taken_adds_offset
 #audit_axioms pcNext_compares_all_32_bits

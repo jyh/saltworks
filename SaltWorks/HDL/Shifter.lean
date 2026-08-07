@@ -228,10 +228,10 @@ def bsOK (w : BitVec 32) : Bool :=
 
 /-- ⭐ **IT IS A LOGICAL RIGHT SHIFT — all 32 shift amounts, against `BitVec`'s
 own operator.** -/
-theorem shifter32_is_a_right_shift : bsOK 0xDEADBEEF = true := by decide +kernel
+theorem shifter32_is_a_right_shift_on_sample : bsOK 0xDEADBEEF = true := by decide +kernel
 
 /-- A second word, so the first is not passing on a pattern's symmetry. -/
-theorem shifter32_second_word : bsOK 0x0F0F1234 = true := by decide +kernel
+theorem shifter32_second_word_on_sample : bsOK 0x0F0F1234 = true := by decide +kernel
 
 #audit_axioms bsW
 #audit_axioms bsStages
@@ -247,8 +247,8 @@ theorem shifter32_second_word : bsOK 0x0F0F1234 = true := by decide +kernel
 #audit_axioms shifter32_ssa
 #audit_axioms shifter32_wf
 #audit_axioms bsEnv bsOK
-#audit_axioms shifter32_is_a_right_shift
-#audit_axioms shifter32_second_word
+#audit_axioms shifter32_is_a_right_shift_on_sample
+#audit_axioms shifter32_second_word_on_sample
 #audit_axioms shifter32Cuts
 
 end SaltWorks.HDL

@@ -305,11 +305,11 @@ def rtSelectsOK (m : Nat) : Bool :=
 /-- ⭐ **THE READ PATH READS — all 32 addresses, kernel-checked.** *Including
 `x0`, which must read zero without consulting storage: the address that is not a
 register.* -/
-theorem readTree_selects_correctly : rtSelectsOK 7 = true := by decide +kernel
+theorem readTree_selects_correctly_on_sample : rtSelectsOK 7 = true := by decide +kernel
 
 /-- …and again with a different cold register, so the first is not an accident of
 where `7` sits in the mux tree. -/
-theorem readTree_selects_correctly' : rtSelectsOK 19 = true := by decide +kernel
+theorem readTree_selects_correctly_on_sample' : rtSelectsOK 19 = true := by decide +kernel
 
 /-- ⭐ **`x0` READS ZERO WITHOUT CONSULTING STORAGE** — stated on its own because
 it is the one address whose answer does not come from the register file, and the
@@ -336,8 +336,8 @@ theorem readTree_check_discriminates :
 #audit_axioms rtBits
 #audit_axioms readTree
 #audit_axioms rtOneCold rtBit0 rtSelectsOK
-#audit_axioms readTree_selects_correctly
-#audit_axioms readTree_selects_correctly'
+#audit_axioms readTree_selects_correctly_on_sample
+#audit_axioms readTree_selects_correctly_on_sample'
 #audit_axioms readTree_x0_is_zero
 #audit_axioms readTree_check_discriminates
 #audit_axioms readTree_ssa

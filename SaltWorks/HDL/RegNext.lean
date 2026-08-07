@@ -238,14 +238,14 @@ def rnBit (wr : Nat) (resBit curBit : Bool) : Bool :=
   (sem regNext (rnEnv wr resBit curBit)).getD 0 false
 
 /-- ⭐ **AT 32×32: an ENABLED register takes the result.** -/
-theorem regNext32_writes_when_enabled : rnBit 0 true false = true := by decide +kernel
+theorem regNext32_writes_when_enabled_on_sample : rnBit 0 true false = true := by decide +kernel
 
 /-- ⭐ **…a DISABLED register does not** — same result bit, enable moved. -/
-theorem regNext32_holds_when_not_enabled : rnBit 1 true false = false := by decide +kernel
+theorem regNext32_holds_when_not_enabled_on_sample : rnBit 1 true false = false := by decide +kernel
 
 /-- ⭐ **…and a disabled register HOLDS ITS CURRENT VALUE**, which is the half a
 "writes nothing" check cannot see. -/
-theorem regNext32_holds_current : rnBit 1 false true = true := by decide +kernel
+theorem regNext32_holds_current_on_sample : rnBit 1 false true = true := by decide +kernel
 
 #audit_axioms rnWe
 #audit_axioms rnCur
@@ -256,9 +256,9 @@ theorem regNext32_holds_current : rnBit 1 false true = true := by decide +kernel
 #audit_axioms regNext_ssa
 #audit_axioms regNext_wf
 #audit_axioms rnEnv rnBit
-#audit_axioms regNext32_writes_when_enabled
-#audit_axioms regNext32_holds_when_not_enabled
-#audit_axioms regNext32_holds_current
+#audit_axioms regNext32_writes_when_enabled_on_sample
+#audit_axioms regNext32_holds_when_not_enabled_on_sample
+#audit_axioms regNext32_holds_current_on_sample
 #audit_axioms rnRun
 #audit_axioms rnSpec
 #audit_axioms regNext4_correct_on_all_enables
