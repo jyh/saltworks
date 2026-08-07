@@ -1,0 +1,24 @@
+
+8. Printing statistics.
+
+=== batcher_c ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+      681        - wires
+      681        - wire bits
+      681        - public wires
+      681        - public wire bits
+      209        - ports
+      209        - port bits
+      576 3.84E+03 cells
+      264 1.65E+03   sky130_fd_sc_hd__and2_1
+      120  450.432   sky130_fd_sc_hd__inv_1
+       96 1.08E+03   sky130_fd_sc_hd__mux2_1
+       72  450.432   sky130_fd_sc_hd__or2_1
+       24  210.202   sky130_fd_sc_hd__xor2_1
+
+   Chip area for module '\batcher_c': 3843.686400
+     of which used for sequential elements: 0.000000 (0.00%)
+
