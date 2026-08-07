@@ -16,6 +16,28 @@ defaultTargets = ["SaltWorks"]
 # the build survives. So it is semantically weak by nature, and putting it in
 # `moreLeanArgs` would invalidate every trace in both repos on every adjustment —
 # 9,718 jobs in salt, mid-wave, for a guard that changes no result.
+#
+# RE-VERIFIED 2026-08-06 ~21:20 ON THE MAESTRO'S CAP CHASE, and one result
+# overturns a rule this fleet ratified. Read from Lake's OWN trace, not inferred:
+#   bin/lean -M 20000 .../SaltWorks/HDL/ISA.lean     ->  Built (813ms)
+#   bin/lean -M 20000 .../Salt.lean                  ->  Built (25s)
+# so the key binds on both repos, observed on modules that were BUILT and not
+# Replayed -- a replayed module issues no lean invocation and proves nothing.
+#
+# AND THE WEAK PROPERTY IS MEASURED RATHER THAN ARGUED: changing the cap with
+# no artifact deleted did NOT trigger a rebuild (exit 0, nothing recompiled).
+# That is the whole reason this is not `moreLeanArgs`, which would invalidate
+# 9,718 traces in salt and 8,606 here on every adjustment to a guard that
+# changes no result.
+#
+# /!\ THE CAP DOES NOT ALWAYS ANNOUNCE ITSELF. In a standalone probe package
+# at -M <= 4800 (green at >= 9600, same file), `lake build` dies with
+#     Stack overflow detected. Aborting.   /   Lean exited with code 134 (SIGABRT)
+# and NEITHER ratified diagnostic string appears. The fleet rule "a cap hit
+# counts ONLY on the two `excessive memory consumption` texts" therefore returns
+# a FALSE NEGATIVE on a real kill: it reads as "the run did not test the cap"
+# when the correct response is to raise the cap. Judge a cap hit by exit 134 and
+# that text as well.
 weakLeanArgs = ["-M", "20000"]
 
 [leanOptions]
