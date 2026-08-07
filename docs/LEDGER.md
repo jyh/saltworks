@@ -1004,3 +1004,65 @@ One incidental finding for the maestro, not acted on: **`SaltWorks/Silicon/Equiv
 ScenarioComplete.lean` is not imported from `SaltWorks.lean`** — an import is owed,
 and until it is swept the module is outside the full build (the scratch probe hit
 this as a missing `.olean` and had to build the target explicitly).
+
+---
+
+## C4STMT — the C4 statement, composition-checked (C1+C3's joint artifact)
+**2026-08-07 · Opus executor · `docs/c4-statement-composition-check-0807.md` (new doc)**
+
+### What landed
+
+A document, not a module. **No `.lean` file in the tree was modified.** The work
+was done in `ScratchC4STMT.lean`, which was **deleted and never committed**.
+
+### What was FOUND vs what was PROVED
+
+**FOUND (the verdict): the composed C4 statement ELABORATES.** Route B
+(`SaltWorks.HDL.emitPipeline'_sem`, hypothesis `wf`, observation at the
+normalized port list) × option 1 (`SaltWorks.ISA.stepT`, total on words), both
+as ratified in `docs/riscv-core-campaign-v0.md:81–94`. `saltbuild EXIT=0`; the
+only diagnostics were the two expected `declaration uses 'sorry'` warnings.
+⇒ **The freeze's own precondition is met; C1 and C3 may freeze.**
+
+**FOUND: the coercion the brief anticipated does not exist.** `encD : St →
+List Bool` never has to become an `Env` on the ratified shape — both sides of
+the equation are `List Bool`. And `Env`/`Net` are *reducible* abbrevs of
+`Nat → Bool` / `Nat`, so `SaltWorks.HDL.decQ` and `SaltWorks.Silicon.runP`
+share one type with no conversion at all.
+
+**FOUND (the one real gap, and it is a layout decision, not a defect): the
+instruction word has no input net.** `StateCodec`'s layout fixes `0 … 1055` for
+the state and is silent about the fetched word, but option 1 makes `stepT` take
+a `BitVec 32`. The statement therefore carries a posited `instrBase`.
+Recommendation in the doc: pin `instrBase = stWidth` in `StateCodec`.
+🔴 **With a live trap:** `SaltWorks.HDL.wordOf ins` **typechecks** (by
+reducibility) and reads register `x0`. Lean cannot catch that one.
+
+**PROVED (one line, kernel-checked, incidental):**
+`(normalize (opt c)).outs.length = c.outs.length`, by
+`simp [normalize, opt_outs]`. ⇒ Route B's normalized port list is the *same
+list positionally*, renumbered — so *"`encD` indexes the NORMALIZED port list"*
+costs `compile` nothing extra. **Route B's stated cost is smaller than the
+ruling priced it.**
+
+**NEGATIVE CONTROLS, both fired** (pass 1, `EXIT=1`): `sem` applied to a
+`Netlist` (v0's own defect) and `encD (stepW …)` (`Option St` vs `St`). The
+second is the ratification's receipt — swapping `stepW` for `stepT` is the
+*only* edit between the failing probe and the elaborating theorem.
+
+### Attempts
+
+Three scratch passes, no dead ends: pass 1 (controls + negatives, `EXIT=1` by
+design), pass 2 clean (`EXIT=0`), pass 3 (+ the length lemma and the `wordOf`
+trap, `EXIT=0`). Two cosmetic parse errors in pass 1 — a `/-- -/` docstring
+cannot precede a `variable` command.
+
+### Left undetermined (§5 of the doc, in full there)
+
+Whether the statement is **true** — no proof was attempted. Whether
+`compile core` can be *given* 1056 outputs at core scale, given `RegNext.lean`'s
+own `EXIT=134` finding that `Circ.wf` is quadratic. Whether `instrBase =
+stWidth` survives assembly — `Compose.lean`'s `inst_sem` is `#check`ed and
+**not proved**, so the input map is posited on top of an unproved combinator.
+And whether the memory interface (C1 names one; `stWidth` covers regfile+PC
+only) later changes `encD` and hence this statement.
