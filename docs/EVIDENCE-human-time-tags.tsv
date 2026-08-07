@@ -43,3 +43,29 @@
 # INFLATING direction, which is the dishonest one. Until tagging is per-touch
 # or blocks are split, quote the claim as a COARSE UPPER BOUND, and quote
 # WATCHING (0h02m) as the floor it obviously is not.
+#
+# ============ RATIFIED — JYH, 2026-08-06 20:01 PDT ============
+# The three tags above are RATIFIED by JYH, who is the spot-auditor named in
+# the charter (measurement-preregistration.md §2). Recorded by the evidence
+# seat at JYH direction; a ratification whose authority and moment are not
+# written down cannot be audited later.
+#
+# WHAT WAS RATIFIED: the three CATEGORY ASSIGNMENTS. Verified to still BIND
+# at ratification time (blocks merge as touches land, and a ratified tag that
+# had silently detached would be an approval of nothing). State at 20:01:
+#   20260806T1243  DIRECTING   12:43-13:57  1h13m  34 msgs   CLOSED
+#   20260806T1456  WATCHING    14:56-14:56  0h01m   3 msgs   CLOSED
+#   20260806T1525  UNBLOCKING  15:25-20:00  4h35m  78 msgs   *** STILL OPEN ***
+#   totals: DIRECTING 7h00m . UNBLOCKING 4h35m . WATCHING 0h02m
+#
+# WHAT WAS *NOT* RATIFIED, because ratifying a tag cannot fix a unit:
+#   (1) THE CLAIM = 99.6% of engaged time. Still DO-NOT-PUBLISH. The charter
+#       tests each TOUCH; this tool tags each BLOCK. Unchanged by ratification.
+#   (2) Block 20260806T1525 was STILL ACCUMULATING when ratified -- it grew
+#       3h55m -> 4h35m between tagging (19:41) and ratification (20:01), and
+#       will keep growing. Its UNBLOCKING label was earned by the Mini relight
+#       at its head; every hour it absorbs afterwards makes that label less
+#       representative of its mass. RE-TAG IT AFTER IT CLOSES.
+#   (3) The two pre-T0 tags (20260805T1759, 20260805T2039) remain correctly
+#       OUTSIDE the campaign window. The tool warns about them every run; the
+#       right response is to leave them, not to move them in.
