@@ -745,6 +745,8 @@ correction is never *be more careful*; it is *say which object you mean*:
 | `ssh` *"Permission denied"* ×3 | **one** of three unrelated layers | **which** layer — see below |
 | `ssh` *"port 22 open"* at 20:05 | reachability **at that moment** | reachability **now** — the laptop slept by 21:00 |
 | a cone census at the **default** cut | a **treatment-insensitive** number, identical for both arms | did **this artifact** carry the treatment? |
+| **"the sorting network is OBLIVIOUS"** | a true property of the **ALGORITHM** | is the **CODE** oblivious? ⛔ Not on Slice A — no branch-free select, so every compare-exchange must `BEQ` and the executed instruction count is **data-dependent** |
+| a cost quoted as **"an ISA change"** | the **shape** of the change | its **SIZE** — measured, it is **one constructor (`AND`)**, which reads as an afternoon rather than as prohibitive |
 
 ⭐ **THE LAST TWO ARE NEW AXES AND BOTH ARRIVED IN THE FINAL HOUR.** The
 first eight instances vary by *path, unit, branch, window, closure*. Then:

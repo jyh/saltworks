@@ -155,10 +155,32 @@ though the network's *comparator schedule* is not. **R1's fixed-bound
 termination argument is therefore unavailable at the code level**, which is
 the level S3(b) proves.
 
-**Constructive:** either the bound is stated over *comparator stages* with a
-per-stage worst case (still fixed, and honest), or Slice A gains one
-selecting instruction. *The first costs a sentence; the second costs an ISA
-change and a re-proof.*
+**Constructive, and the price is now MEASURED rather than guessed —
+the compiler seat corrected it DOWNWARD and my own chain was one step too
+long.** I stopped at `mask = ADDI c, -1` and inferred that a *selecting
+instruction* was needed. The mask was never the obstacle: it is
+constructible two ways from what Slice A already has, verified here —
+
+```
+  c    = SLT  a b            0 or 1                       HAVE
+  neg1 = ADDI x0, -1         0xFFFFFFFF                   HAVE
+  mask = (c XOR neg1) + 1  = −c   → c=1: 0xFFFFFFFF ; c=0: 0x00000000   HAVE
+```
+
+⇒ **The missing primitive is exactly ONE: `AND`.** Not six constructors, not
+"an ISA change" in the vague sense I implied. So the two options are:
+
+1. state the bound over **comparator stages** with a per-stage worst case —
+   **costs a sentence**, changes no code;
+2. add **`AND`** to Slice A — **one constructor, one `sem` case, one
+   `encode`/`decode` case, one round-trip case** — and the code becomes
+   genuinely branch-free, which *restores R1's obliviousness at the code
+   level* rather than working around its loss.
+
+**Option 2 is now the interesting one**, and it was not while the price was
+unmeasured. *A cost quoted as "an ISA change and a re-proof" reads as
+prohibitive; the same cost quoted as "one constructor" reads as an
+afternoon.*
 
 📌 **And the process point: I wrote "R1 survives" as the closing line of a
 refutation whose whole subject is claims that outrun their evidence.** I
