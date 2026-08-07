@@ -162,3 +162,186 @@ typeclass); mathlib's `Perm.eq_of_pairwise'` is the `[Std.Antisymm r]` variant.
   not (`docs/SEATS.md` names it; no file was present at 2026-08-07 09:42), so
   this entry created it with a header. If another seat's entry was meant to be
   first, this file needs merging rather than trusting.
+
+---
+
+## STACK-S3(a) — the 0-1 principle, and Batcher's network sorts
+**2026-08-07 · Opus executor · `SaltWorks/Stack/ZeroOne.lean` (new module)**
+
+### What landed
+
+Both halves of the deliverable, at the sizes asked for. No fallback was taken.
+
+**(i) The 0-1 principle, general `n`, general `LinearOrder`, arbitrary universe.**
+
+```lean
+theorem zeroOne_principle {n : ℕ} {net : Network n}
+    (h : ∀ w : Fin n → Bool, IsSorted (runNet net w))
+    {α : Type u} [LinearOrder α] (v : Fin n → α) :
+    IsSorted (runNet net v)
+```
+
+with `IsSorted v := ∀ i j : Fin n, i ≤ j → v i ≤ v j`, `Sorts net α := ∀ v, IsSorted (runNet net v)`,
+and `Iff` form `sorts_iff_sorts_bool : (∀ (α : Type) [LinearOrder α], Sorts net α) ↔ Sorts net Bool`.
+
+**One specialisation, and it is only in the `Iff` and only in the universe.**
+`zeroOne_principle` and `sorts_of_sorts_bool` quantify `α : Type u` for arbitrary
+`u`, exactly as briefed. `sorts_iff_sorts_bool` is stated at `Type` (universe 0)
+because `Bool : Type 0` has to appear on *both* sides of the equivalence, and
+`∀ α : Type u` does not admit `Bool` for general `u`. The alternative was
+`ULift Bool` on the right, which buys nothing and costs a reader. The
+general-universe content is not in the `Iff`; the `Iff` is packaging.
+
+**(ii) Batcher's bitonic network at `n = 8` — LANDED AT 8, not 4.**
+`batcher8 : Network 8`, an explicit 24-comparator literal (6 layers × 4;
+`k(k+1)/2 · 2^(k-1)` at `k = 3`), `batcher8_length : batcher8.length = 24 := rfl`.
+`batcher8_sorts (α : Type u) [LinearOrder α] : Sorts batcher8 α`. `batcher4` (6
+comparators) is also landed — as the natural first code-generation target, NOT as
+a fallback.
+
+**Non-vacuity controls, in the module rather than in scratch.** A `∀` over 256
+cases is worth what its predicate is worth, so three mutilated networks are
+proved *not* to sort: `batcher8_eraseIdx_20_not_sorts`,
+`batcher8_eraseIdx_12_not_sorts`, `empty_not_sorts`. If `IsSorted`/`runNet`/`Sorts`
+were accidentally trivial these would fail. They cost ~0 s on top of the positive
+check. Out-of-band `#eval` sanity at a `Nat` carrier (not committed):
+`[5,3,8,1,9,2,7,4] ↦ [1,2,3,4,5,7,8,9]`, `[9,2,7,4] ↦ [2,4,7,9]`.
+
+### The carrier: `Fin n → α`, and the risk that had to be measured
+
+Chosen over `Vector α n` for two reasons pulling the same way. **Mathematically**,
+the principle is about post-composition with a monotone `f : α → β`; on `Fin n → α`
+that is literally `f ∘ v`, so the central lemma `runNet_comp_monotone` is a
+function equation by `funext` with no length bookkeeping — `Vector` would have put
+a `size` proof under every rewrite for zero mathematical content.
+**Operationally**, `∀ v : Fin 8 → Bool` is served by `Pi.fintype` and the kernel
+does reduce it.
+
+The real risk was NOT the case count, and it was checked rather than assumed:
+`runNet` builds a **24-deep tower of closures**, and evaluating the result at one
+index calls the previous layer *twice* (`min (w a) (w b)`), which is `2^24`
+**without sharing**. The kernel's `whnf` cache is keyed structurally, so the
+distinct subterms are the ~`24 × 8` (layer, index) pairs and the tower collapses.
+That it collapses is the measured fact below. Had it not, the fix was a
+`Vector`/`List` carrier — strict data at every layer — not a drop to `n = 4`.
+
+### How the finite check went — MEASURED, both ways
+
+| what | result |
+|---|---|
+| baseline (scratch importing the module, nothing else) | 1.46 s |
+| plain `decide`, default `maxRecDepth` (512) | **FAILS: `maximum recursion depth has been reached`** |
+| plain `decide`, `set_option maxRecDepth 100000` | 8.26 s → **~6.8 s** of check |
+| `decide +kernel` | 4.95 s → **~3.5 s** of check |
+| whole module, fresh (both networks + 3 controls + 8 audit lines) | **4.7 s** |
+
+**`decide +kernel` is committed.** It needs no `maxRecDepth` override and is ~2×
+faster. Read the failure correctly: the default-`decide` failure is an
+**elaborator `whnf` depth** limit (walking the 24-deep closure tower), *not* a
+memory event and *not* a kernel refusal. **Nothing here came near the `-M 20000`
+backstop**; no `excessive memory consumption` diagnostic appeared at any point,
+so the lakefile's M-2 differential test was never triggered and never needed.
+
+`decide +kernel` is **not** `native_decide` and the distinction is not a
+technicality: `+kernel` hands the `Decidable` instance to the *trusted kernel* to
+reduce (`Lean/Elab/Tactic/Decide.lean:83,96-97` — "we let the kernel recompute it
+during type checking"), picking up no reflection axiom. The audit below is the
+proof of that claim, not a promise about it: `native_decide` would have put
+`Lean.ofReduceBool` in the list and failed the build.
+
+### What mathlib supplied — and what it did not
+
+- **`Monotone.map_min` / `Monotone.map_max`** (`Mathlib/Order/MinMax.lean:150`,
+  and the `to_dual`-generated `map_min`). This is the entire content of
+  `applyComp_comp_monotone`, i.e. the first half of the principle. Worth
+  ~15 lines of `rcases le_total` bookkeeping that did not have to be written.
+- **`Bool.linearOrder`** (`Mathlib/Data/Bool/Basic.lean:142`) and
+  **`Bool.le_iff_imp`** — the `false < true` order the threshold indicator has to
+  be monotone into.
+- **`Pi.fintype`** — the `Fintype (Fin 8 → Bool)` the finite check enumerates over.
+- **`Decidable (p → q)`** is Lean core (`Init/Core.lean:1159`), not mathlib;
+  checked before relying on the `i ≤ j → v i ≤ v j` shape of `IsSorted`.
+- **Mathlib has NO sorting-network material whatsoever.** `grep -rniF` over
+  `Mathlib/` for "sorting network", "0-1 principle", "batcher", "bitonic" returns
+  **zero hits, all four**. `Comparator`, `Network`, `applyComp`, `runNet`,
+  `IsSorted`, `Sorts`, `thresh`, and both theorems are new here. (Mathlib has
+  `List.Sorted`/`List.Perm` and merge sort, but nothing about oblivious networks;
+  S1's `Spec.lean` is where the `List.Sorted` vocabulary lives, and S3(a)
+  deliberately does not import it — the principle is about arbitrary
+  `LinearOrder`s and needs nothing from the `BitVec` spec.)
+
+### Attempts, build, audit
+
+- **Attempts: 3 build cycles, no proof attempted more than twice, no statement
+  reshaped to make a proof go through.**
+  - Cycle 1 — two mechanical failures. (a) `Bool.eq_false_or_eq_true` returns
+    `b = true ∨ b = false`, i.e. the disjuncts in the *opposite* order to the one
+    assumed; replaced by `cases hcase : thresh t (…)` with named `| false`/`| true`
+    branches, which cannot be got backwards. (b) `failed to synthesize
+    Decidable (Sorts batcher8 Bool)` — `Sorts` and `IsSorted` are `def`s, so
+    instance search does not see through them. Fixed with two explicit instances
+    (`decidableIsSorted`, `decidableSorts`), both `inferInstanceAs`, deliberately
+    **not** `by unfold …; infer_instance`: `inferInstanceAs` is a definitional
+    unfolding, so the kernel's reduction goes straight to
+    `Fin.decidableForallFin` / `Fintype.decidableForallFintype` with no `Eq.mpr`
+    in the path.
+  - Cycle 2 — the `maxRecDepth` hit at `n = 8` above; resolved by `+kernel` after
+    measuring both routes rather than guessing.
+  - Cycle 3 — green.
+  - The three commutation lemmas (`applyComp_comp_monotone`,
+    `runNet_comp_monotone`, `monotone_thresh`) went through **first attempt**.
+- **Network correctness was checked outside Lean before being encoded** — a
+  20-line Python exhaustive pass over all 2^8 Boolean inputs plus 20 000 random
+  `Nat` vectors, for both `batcher8` and `batcher4`, all clean. This is why cycle
+  1 contained no "the network is wrong" failure: the literal was known-good
+  before the kernel saw it. (The Python is a scratch artifact, not committed; the
+  Lean theorems are the claim.)
+- **Build:** `saltbuild.sh SaltWorks.Stack.ZeroOne` → `saltbuild EXIT=0`,
+  675 jobs, **0 warnings** (fresh rebuild with the `.olean` deleted, grepped).
+  Full `saltbuild.sh` from `saltworks` → `saltbuild EXIT=0`, 8614 jobs.
+- **Axioms:** all 28 declarations audited two ways — `#audit_axioms` in-file (the
+  build-failing assertion, repo convention per `HDL/Opt.lean`, `HDL/ISA.lean`),
+  and an out-of-band `#print axioms` sweep in `ScratchMATHS3A.lean` (gitignored,
+  not committed). They agree. Every declaration is a subset of
+  `[propext, Classical.choice, Quot.sound]`; the definitions and the three
+  commutation lemmas use strictly fewer (`zeroOne_principle` itself is
+  `[propext, Quot.sound]` — it never touches choice). Only the `decide`-backed
+  finite checks reach all three. No `sorry`, no `native_decide`, no new axioms.
+- **Honest line count:** 352 lines total — **106 lines of definitions and
+  proofs**, 7 lines of `#audit_axioms`, 239 lines of docstrings / module header /
+  blanks. The header is long on purpose: it carries the carrier decision, the
+  `2^24` sharing argument, and the `+kernel` ≠ `native_decide` distinction, all of
+  which a reader will otherwise re-litigate.
+
+### Left undetermined
+
+- **`SaltWorks.Stack.ZeroOne` is NOT in `SaltWorks.lean`** — import owed to the
+  maestro (in the commit message). Until swept, the module is not covered by the
+  default full build and must be built targeted. Note the consequence: the
+  `EXIT=0` full build above **did not compile this module**; the targeted build
+  did.
+- **The `2^24` collapse is measured, not proved.** The claim "the kernel's `whnf`
+  cache is structural, so the tower collapses" is inference from Lean's C++ type
+  checker plus a 3.5 s wall clock. If a future toolchain changes that cache, this
+  file's `decide` will not fail *wrongly* — it will just stop terminating in
+  reasonable time. The remedy is on record above (strict `Vector`/`List` carrier),
+  not discovered under pressure.
+- **`n = 16` was not attempted.** The cost curve here is one data point at
+  `n = 8` (3.5 s, 256 cases, 24 comparators); `n = 16` is 65 536 cases and 80
+  comparators, so a naive extrapolation is ~10^3× and almost certainly a genuine
+  memory event. If a 16-wire sorter is ever wanted, the honest route is a
+  *proof* of Batcher's construction by induction on `k`, not a bigger `decide` —
+  and the 0-1 principle landed here is exactly the lemma that proof would consume.
+- **No connection to `Spec.lean` (S1) was made**, deliberately and per brief. The
+  bridge — `Sorts batcher8 Word` versus S1's `SortsTo`/`SortedW` — is real work
+  and belongs to whoever composes S1 with S3(a). Two gaps to expect there: this
+  module proves *sortedness of the output at each index*, and says nothing about
+  **permutation** (a comparator network is obviously a permutation, but that is an
+  unproved theorem in this file); and S1's `wle` is the **signed** `BitVec.toInt`
+  order, so the `LinearOrder Word` instance handed to `batcher8_sorts` must be the
+  signed one, not `BitVec`'s default unsigned `≤`. **That mismatch is the most
+  likely way to compose these two modules incorrectly.**
+- **`Sorts` takes `α` explicitly, `zeroOne_principle` takes it implicitly.** Not
+  an oversight — `sorts_of_sorts_bool h α` reads better with the carrier named,
+  and `zeroOne_principle h v` infers it from `v`. If S3(b) finds this irritating
+  it is a free change.
