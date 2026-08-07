@@ -20,11 +20,29 @@ quantity you named. Hence: count the sites directly, in the file, and never
 infer this from a delta again.
 
 Usage:  python3 docs/ledger-tools/import-closure.py
-Exit 1 if any tracked module is outside the closure, so it can gate a commit.
+        CLOSURE_ROOT=/some/repo python3 docs/ledger-tools/import-closure.py
+
+EXIT CODES ARE THREE-WAY ON PURPOSE (evidence seat, 21:0x, adopting the
+16:52 instrument law -- "no matching data" is a DISTINCT output from 0):
+
+    0   every tracked module is inside the closure
+    1   something is OUTSIDE  -- the gate this tool exists to be
+    2   COULD NOT READ the repo -- neither of the above is known
+
+Why 2 exists: this tool gates a commit, and the first version returned
+**exit 0 with "OUTSIDE: 0" when `git ls-files` failed**. An empty `tracked`
+list has nothing that can be outside it, so a tool that had read NOTHING
+printed the same clean green as a fully-covered repo. *A gate that passes
+when it cannot read the repo is a gate that opens when the lock is broken.*
+Measured on a fixture pointed at a non-repo, not reasoned about.
+
+Same family as `ledger_common.activity_trace`, which raises if it reads
+transcript lines and extracts zero timestamps. The logic below is the
+compiler seat's and is untouched; these are guards around it.
 """
 import re, subprocess, sys, os
 
-ROOT = "/Users/jyh/projects/claude/saltworks"
+ROOT = os.environ.get("CLOSURE_ROOT", "/Users/jyh/projects/claude/saltworks")
 HUB  = "SaltWorks.lean"
 
 def mod_of(path):                       # SaltWorks/HDL/ISA.lean -> SaltWorks.HDL.ISA
@@ -33,9 +51,28 @@ def mod_of(path):                       # SaltWorks/HDL/ISA.lean -> SaltWorks.HD
 def path_of(mod):
     return mod.replace(".", "/") + ".lean"
 
-tracked = subprocess.run(["git","-C",ROOT,"ls-files","*.lean"],
-                         capture_output=True, text=True).stdout.split()
+_git = subprocess.run(["git","-C",ROOT,"ls-files","*.lean"],
+                      capture_output=True, text=True)
+if _git.returncode != 0:
+    print(f"import-closure: ⛔ CANNOT READ REPO — `git ls-files` failed in {ROOT!r}\n"
+          f"  {(_git.stderr or '').strip()[:200]}\n"
+          f"  Reporting NOTHING rather than 'OUTSIDE: 0'. This is exit 2, not a pass.",
+          file=sys.stderr)
+    sys.exit(2)
+
+tracked = _git.stdout.split()
 tracked = [p for p in tracked if not p.startswith(".lake")]
+
+if not tracked:
+    print(f"import-closure: ⛔ ZERO tracked .lean files under {ROOT!r} — an empty set "
+          f"has nothing outside it, so 'OUTSIDE: 0' here would mean 'I read nothing', "
+          f"not 'everything is covered'. Exit 2.", file=sys.stderr)
+    sys.exit(2)
+
+if not os.path.exists(os.path.join(ROOT, HUB)):
+    print(f"import-closure: ⛔ HUB {HUB!r} NOT FOUND under {ROOT!r} — the closure would "
+          f"be empty and every module would be reported outside. Exit 2.", file=sys.stderr)
+    sys.exit(2)
 bypath  = {p: mod_of(p) for p in tracked}
 known   = set(bypath.values())
 

@@ -20,6 +20,7 @@ Run it before believing any table this directory prints.
 from __future__ import annotations
 
 import json
+import os
 import sys
 import tempfile
 from datetime import datetime, timedelta
@@ -332,6 +333,44 @@ with tempfile.TemporaryDirectory() as tmp:
     cal2 = fhy.post_gap_calibration(wide, day)
     check(cal2["headroom"] < 1,
           f"CALIBRATION: a gap PAST the threshold should show headroom < 1, got {cal2}")
+
+    # ---- import-closure: the GATE must not open when it cannot read -------
+    # Landed by the compiler seat 20:50; its first version returned exit 0
+    # with "OUTSIDE: 0" when `git ls-files` failed, i.e. a clean green from a
+    # tool that had read nothing — and its docstring says it gates a commit.
+    import subprocess as _sp
+    _ic = str(Path(__file__).parent / "import-closure.py")
+
+    def closure(root):
+        env = dict(os.environ, CLOSURE_ROOT=str(root))
+        r = _sp.run([sys.executable, _ic], capture_output=True, text=True, env=env)
+        return r.returncode, r.stdout + r.stderr
+
+    rc, _ = closure(Path(tmp) / "does-not-exist-at-all")
+    check(rc == 2, f"CLOSURE: unreadable repo returned {rc}, must be 2 (not 0, not 1)")
+
+    empty = Path(tmp) / "empty-repo"
+    (empty / "SaltWorks").mkdir(parents=True)
+    _sp.run(["git", "init", "-q", str(empty)], capture_output=True)
+    rc, out = closure(empty)
+    check(rc == 2, f"CLOSURE: repo with ZERO tracked .lean returned {rc}, must be 2 — "
+                   f"'nothing outside an empty set' is not 'everything covered'")
+
+    # a fixture where the answer is known: hub imports A, B is orphaned
+    fix = Path(tmp) / "fixture-repo"
+    (fix / "SaltWorks").mkdir(parents=True)
+    (fix / "SaltWorks.lean").write_text("import SaltWorks.A\n")
+    (fix / "SaltWorks" / "A.lean").write_text("#audit_axioms foo\n")
+    (fix / "SaltWorks" / "B.lean").write_text("#audit_axioms bar\n#audit_axioms baz\n")
+    _sp.run(["git", "init", "-q", str(fix)], capture_output=True)
+    _sp.run(["git", "-C", str(fix), "add", "-A"], capture_output=True)
+    rc, out = closure(fix)
+    check(rc == 1, f"CLOSURE: an orphaned module must exit 1 (the gate), got {rc}")
+    check("SaltWorks.B" in out, "CLOSURE: did not name the orphaned module")
+    check("SaltWorks.A" not in out.split("OUTSIDE")[-1],
+          "CLOSURE: reported an IMPORTED module as outside")
+    check("outside the default build: 2" in out,
+          f"CLOSURE: miscounted audit sites (expected 2 from B), got:\n{out}")
 
     # fmt_dur_h must never round a sub-threshold window UP across a bucket
     check(lc.fmt_dur_h(59.14 * 60) == "59 min",
