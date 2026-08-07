@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Jason Hickey, Claude
 -/
 import SaltWorks.HDL.CompareExchange
+import Mathlib.Data.Prod.Lex
 
 /-!
 # PROBE — the compare-exchange element under OPTION C
@@ -295,6 +296,39 @@ def cKey (active : Bool) (dest : Nat) : Bool × Nat := (!active, dest)
 def cKeyLE (x y : Bool × Nat) : Bool :=
   (!x.1 && y.1) || (x.1 == y.1 && decide (x.2 ≤ y.2))
 
+/-! ### ⛔ THE BRIDGE — because `runNet` sorts by `[LinearOrder α]`, NOT by `cKeyLE`
+
+**Silicon and I built the same object forty minutes apart in two lanes**
+(`SaltWorks.Silicon.cKey : … → Bool ×ₗ ℕ` via Mathlib's `Prod.Lex` **instance**;
+`SaltWorks.HDL.cKey` here, with a hand-rolled decidable `cKeyLE`). *Math's
+`Perm.lean:780` had meanwhile written* ***"do not write a second key order in
+`SaltWorks/HDL/**`"*** *— and this file did, two minutes earlier.*
+
+🔴 **AND THE COLLISION IS LOAD-BEARING RATHER THAN COSMETIC: `runNet` sorts by
+the `LinearOrder` INSTANCE. A proof that `ceC` realises `cKeyLE` would NOT, by
+itself, connect to `partial_load_selfrouting`.** ***Two correct halves that do
+not meet.***
+
+✅ **SO THE DECIDABLE FORM SURVIVES ONLY BECAUSE THE JOIN IS PROVED.** *Silicon
+measured the agreement over every value the 3-bit fabric can produce and named
+the missing one-liner; it has to live in HDL because it mentions `cKeyLE`, and
+no `Silicon` module may import `HDL` (`HDL/EmitN.lean:7` goes the other way).*
+
+📌 **WHY KEEP A SECOND FORM AT ALL: `cKeyLE` is `Bool`-valued and reduces in the
+kernel, which is what the element-level fixtures need; Mathlib's `Lex` order does
+not `decide` the same way.** ⇒ ***A decidable SHADOW with a proved bridge is a
+different thing from a second order — drift is impossible by construction.***
+*Without `cKeyLE_eq_lex` below, this file would be the `decode_zero` hazard I
+raised with math at 15:0x, committed by the seat that raised it.* -/
+
+/-- ⭐ **THE BRIDGE: the decidable comparison IS Mathlib's lexicographic order.**
+*This is what makes `cKeyLE` a shadow rather than a rival.* -/
+theorem cKeyLE_eq_lex (x y : Bool × Nat) :
+    cKeyLE x y = decide (toLex x ≤ toLex y) := by
+  obtain ⟨a, d⟩ := x
+  obtain ⟨b, e⟩ := y
+  cases a <;> cases b <;> simp [cKeyLE, Prod.Lex.le_iff]
+
 /-- ⭐ **ACTIVE SORTS BEFORE IDLE, unconditionally and before any address bit** —
 over every destination pair the 3-bit fabric can carry. -/
 theorem cKey_active_beats_idle :
@@ -331,6 +365,7 @@ theorem cKey_partial_load_differs_from_dest :
 #audit_axioms cFrame_matches_adjudicated_bytes
 #audit_axioms cFrame_idle_is_silent
 #audit_axioms cKey cKeyLE
+#audit_axioms cKeyLE_eq_lex
 #audit_axioms cKey_active_beats_idle
 #audit_axioms cKey_idle_never_beats_active
 #audit_axioms cKey_actives_compare_by_dest
