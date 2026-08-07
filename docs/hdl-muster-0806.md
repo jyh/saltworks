@@ -170,6 +170,30 @@ absence of a code generator.** `compile`, `reg` and `t0` are mine and unwritten;
 | my **two kills on the campaign freeze's C4** — the headline names a PROCESSOR as a compiler, and (with silicon's F2) the line does not typecheck | council, 07:00 |
 | **`import owed: SaltWorks.HDL.CodegenSpec`** — 12 audit sites still outside the default build | maestro |
 
+▶️ **FIRST ITEM OF THE NEXT SESSION — ordered by JYH at close of board:
+*"measure the concurrency hazard tomorrow."***
+
+`saltbuild.sh` sets `LEAN_NUM_THREADS=4` and `lake build` runs up to **four
+`lean` processes at once, each with its own `-M 20000` budget** — **4 × 20 GB of
+licence on a 64 GiB machine** (`hw.memsize` = 68,719,476,736 B). ⚠️ **Every
+memory number this repo holds is PER-PROCESS**, and `/usr/bin/time -l` around the
+wrapper reports `RUSAGE_CHILDREN` — *the aggregate as reaped at `wait()`, which
+cannot see four processes overlapping.* ⇒ **The peak has never been measured.**
+
+**Method, pre-registered here so the answer cannot be shaped after the fact:**
+sample all live `lean` pids every ~250 ms and report **peak SUM and peak
+CONCURRENCY** (not a max of one); `rm -rf .lake/build` first or it replays;
+correlate the peak with *which modules were co-scheduled*; and vary
+`LEAN_NUM_THREADS` ∈ {1, 2, 4} as the control — **if peak-sum scales with thread
+count the hazard is real.** *Read pressure with `vm_stat`/`memory_pressure`, not
+"free" — free is not available on macOS, an error that already cost this seat a
+published 28 GB understatement.*
+
+📌 **Any outcome is acceptable — cap the threads, lower per-process `-M` to
+RAM/threads, or accept the overcommit and SAY SO.** ***What is not acceptable is
+the present state, where the number is unknown and the backstop is described as
+though it bounded the machine.***
+
 ## 5. COST
 
 ~85 build/probe invocations, plus two commissioned adversarial passes (11 and 7 agents). The renumber ~10 cycles; T2 3; `opt_wf` 2; the
