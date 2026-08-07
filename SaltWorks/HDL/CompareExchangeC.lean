@@ -31,8 +31,17 @@ odd cycle = address bit. So the element must
   gated on it and the activity arrived on the *previous* cycle —
   **a `bothAct` state bit**.
 
-⇒ **4 state bits, against 2 for the parallel-activity element.** *That is the
-cost, and it is a cost in FLOPS, which is the scarcest thing on a TT tile.*
+⇒ **4 state bits, against 2 for the parallel-activity element.**
+
+⛔ **BOTH HALVES OF THAT SENTENCE WERE LATER FALSIFIED, AND THE FILE KEEPS THEM
+VISIBLE RATHER THAN QUIETLY EDITING THEM.** *(i) It continued "…and it is a cost
+in FLOPS, which is the scarcest thing on a TT tile" — **withdrawn** once silicon
+measured the composed tile at **21.3% of a 2×2**, ~5× headroom, where 48 flops is
+noise rather than scarcity. (ii) The count itself is wrong: `bothAct` is never
+read under the protocol — **`ceC_fourth_state_bit_is_dead` below, 256 frame pairs
+— so the real price is 3 bits against 2, which is exactly what silicon's B4
+states.*** ⇒ **This file priced the losing side of an argument twice, in the same
+sentence, and both errors ran in the direction of its own conclusion.**
 
 **Everything about the ORDER carries over unchanged** — active-before-idle,
 decide-at-first-difference, stability for two idle lines. *The idle-sorts-high
@@ -96,7 +105,9 @@ theorem ceC_gate_count : ceCcore.gates.length = 34 := by decide +kernel
 /-- The landed parallel-activity element, for comparison. -/
 theorem ce_gate_count' : ceCore.gates.length = 31 := by decide +kernel
 
-/-- **The state cost, which is the one that matters: 4 bits against 2.** -/
+/-- The DECLARED state width. ⚠️ **This is not the price** — one of the four bits
+is never read under the protocol (`ceC_fourth_state_bit_is_dead`), so the cost
+against `ce` is **3 against 2**, not 4 against 2. -/
 theorem ceC_state_bits : ceC.nState = 4 := by decide +kernel
 theorem ce_state_bits : ce.nState = 2 := by decide +kernel
 
@@ -109,6 +120,223 @@ theorem ceC_phase_is_load_bearing :
     (stepSeq ceC [false, false, false, true] [false, false, true]).1
       ≠ (stepSeq ceC [false, false, true, true] [false, false, true]).1 := by
   decide +kernel
+
+/-! ## ⭐ B4 RATIFIED CONVENTION C — and this file was a PRICE, not a certificate
+
+**Silicon's B4 (`7012d3d`, 13:32) picks C and assigns the sorter's rebuild to this
+seat.** *The ruling is accepted without reservation: `fabric_routes` is proved on
+C against the netlist being fabricated, and moving the banyan instead would
+invalidate a theorem about the shipping artifact to save 128 rows of a truth
+table. That asymmetry is not close.*
+
+⛔ **WHAT THIS FILE LACKED, AND IT IS THE WHOLE DIFFERENCE BETWEEN A PRICE AND AN
+ELEMENT: `ceC` had `wf`, a gate count, a state count and one load-bearing
+witness — and NO ONE-CYCLE OBLIGATION, NO FRAME CERTIFICATE, AND NO ORDERING
+CONTROL.** *Everything below `ceC_wf` was an argument about COST. `ce` (the
+convention-P element) carries `ce_step_eq` over all 128 configurations, whole-frame
+certificates and four mutation controls; `ceC` carried none of them.* ⇒ **A
+convention was ratified onto an element that had never been certified.**
+
+## The frame, pinned to the bytes the ruling was decided on
+
+`FabricRoutes.lean:147-149` defines `mkFrame active dest payload` as
+`(List.range 3).flatMap (fun s => [active, active && Nat.testBit dest (2-s)]) ++ payload`
+— **six header cycles, activity on EVEN, address MSB-first on ODD.** It is
+restated here rather than imported, and then **checked against the exact byte
+string silicon's adjudication quotes** (`mkFrame true 5 p = 1 1 1 0 1 1 | p`), so
+the seam is pinned to the ruling's own evidence rather than to a citation of it.
+-/
+
+/-- Convention C's frame, restated from `FabricRoutes.lean:147-149`. -/
+def cFrame (active : Bool) (dest : Nat) (payload : List Bool) : List Bool :=
+  (List.range 3).flatMap (fun s => [active, active && Nat.testBit dest (2 - s)]) ++ payload
+
+/-- ⭐ **THE SEAM, PINNED TO THE ADJUDICATED BYTES.** *Silicon's B4 states
+convention C as `mkFrame true 5 p = 1 1 1 0 1 1 | payload`. This is that string,
+kernel-checked against the definition this file builds on.* -/
+theorem cFrame_matches_adjudicated_bytes :
+    cFrame true 5 [true, false] = [true, true, true, false, true, true, true, false] := by
+  decide +kernel
+
+/-- An idle line is silent for the whole header. -/
+theorem cFrame_idle_is_silent :
+    cFrame false 5 [false, false] = List.replicate 8 false := by decide +kernel
+
+/-! ### The one-cycle obligation — the thing this file did not have -/
+
+/-- The word-level spec of one cycle, written from the protocol rather than from
+the gates. `p` is the effective phase (`false` = an activity cycle). -/
+def ceCSpecStep (dec sw ph ba rst i0 i1 : Bool) : List Bool × List Bool :=
+  let d      := dec && !rst
+  let p      := ph && !rst
+  let b      := ba && !rst
+  let diff   := i0 ^^ i1
+  let swAct  := !i0 && i1
+  let swAddr := i0 && !i1
+  let evenD  := !p && diff
+  let oddD   := p && b && diff
+  let newSw  := (evenD && swAct) || (oddD && swAddr)
+  let s      := (d && sw) || (!d && newSw)
+  ([ (!s && i0) || (s && i1), (!s && i1) || (s && i0) ],
+   [ d || evenD || oddD, s, !p, (!p && (i0 && i1)) || (p && b) ])
+
+/-- All 128 configurations: 4 state bits x 3 primary inputs. **No reachability
+assumption** — the quantifier runs over every state including unreachable ones. -/
+def ceCStepOK : Bool :=
+  bools.all fun dec => bools.all fun sw => bools.all fun ph => bools.all fun ba =>
+  bools.all fun rst => bools.all fun i0 => bools.all fun i1 =>
+    stepSeq ceC [dec, sw, ph, ba] [rst, i0, i1] == ceCSpecStep dec sw ph ba rst i0 i1
+
+/-- ⭐ **ONE CYCLE, EVERY STATE, EVERY INPUT — the obligation `ce` has carried
+since it landed and `ceC` never did.** -/
+theorem ceC_step_eq : ceCStepOK = true := by decide +kernel
+
+/-! ### Whole-frame certificates against REAL convention-C frames -/
+
+/-- Drive the element with two convention-C lines: `rst` high on cycle 0 only. -/
+def ceCRun (f0 f1 : List Bool) : List (List Bool) :=
+  (runTrace ceC [false, false, false, false]
+    ((List.range (max f0.length f1.length)).map fun t =>
+      [t == 0, f0.getD t false, f1.getD t false])).1
+
+/-- The two output streams, de-interleaved. -/
+def ceCOut (k : Nat) (f0 f1 : List Bool) : List Bool :=
+  (ceCRun f0 f1).map (fun o => o.getD k false)
+
+/-- **BOTH ACTIVE, `in0` bound for 5 and `in1` for 2 ⇒ SMALLER FIRST ⇒ SWAP.**
+The line-2 frame comes out on `out0`. -/
+theorem ceC_frame_swaps_when_out_of_order :
+    ceCOut 0 (cFrame true 5 [true, false]) (cFrame true 2 [false, true])
+      = cFrame true 2 [false, true] := by decide +kernel
+
+/-- …and the larger address leaves on `out1`. -/
+theorem ceC_frame_swap_other_port :
+    ceCOut 1 (cFrame true 5 [true, false]) (cFrame true 2 [false, true])
+      = cFrame true 5 [true, false] := by decide +kernel
+
+/-- **ALREADY IN ORDER ⇒ NO SWAP.** Same two frames, exchanged. -/
+theorem ceC_frame_stable_when_in_order :
+    ceCOut 0 (cFrame true 2 [false, true]) (cFrame true 5 [true, false])
+      = cFrame true 2 [false, true] := by decide +kernel
+
+/-- ⭐ **IDLE SORTS HIGH, AT THE ELEMENT.** `in0` idle and `in1` active ⇒ the
+ACTIVE frame is pulled down to `out0`. *This is the property that discharges the
+banyan's `Set.Iio n` conjunct — concentration, decided at the element.* -/
+theorem ceC_frame_active_beats_idle :
+    ceCOut 0 (cFrame false 0 [false, false]) (cFrame true 5 [true, false])
+      = cFrame true 5 [true, false] := by decide +kernel
+
+/-- **TWO IDLE LINES ARE STABLE** — nothing swaps, so an all-idle region of the
+network cannot manufacture activity. -/
+theorem ceC_frame_two_idle_stable :
+    ceCRun (cFrame false 0 [false, false]) (cFrame false 0 [false, false])
+      = List.replicate 8 [false, false] := by decide +kernel
+
+/-! ### MUTATION CONTROLS — the certificates above must be able to FAIL -/
+
+/-- The idle-sorts-LOW element: `swAct` inverted, everything else identical. -/
+def ceCcoreIdleLow : Circ :=
+  { ceCcore with gates := ceCcore.gates.map fun g =>
+      if g.out == 16 then ⟨16, .and 1 15⟩ else g }
+
+def ceCIdleLow : Seq := { ceC with core := ceCcoreIdleLow }
+
+/-- ⛔ **THE IDLE-SORTS-LOW READING IS KERNEL-REFUTED** — with `swAct` inverted
+the active frame is pushed to `out1` instead of pulled to `out0`, so the actives
+land on `8-n … 7` and the banyan's `Set.Iio n` hypothesis FAILS. *`ce` carries
+this control; now C does too, and it is the same content on the other wiring.* -/
+theorem ceC_rejects_idle_sorts_low :
+    (runTrace ceCIdleLow [false, false, false, false]
+      ((List.range 8).map fun t =>
+        [t == 0, (cFrame false 0 [false,false]).getD t false,
+                 (cFrame true 5 [true,false]).getD t false])).1.map (fun o => o.getD 0 false)
+      ≠ cFrame true 5 [true, false] := by
+  decide +kernel
+
+/-- And the mutant is a genuine one-gate edit, not a different circuit. -/
+theorem ceCIdleLow_is_one_gate_from_ceC :
+    ceCcoreIdleLow.gates.length = ceCcore.gates.length
+      ∧ (ceCcoreIdleLow.gates.zip ceCcore.gates).countP (fun p => p.1 != p.2) = 1 := by
+  decide +kernel
+
+#audit_axioms cFrame
+#audit_axioms cFrame_matches_adjudicated_bytes
+#audit_axioms cFrame_idle_is_silent
+#audit_axioms ceCSpecStep
+#audit_axioms ceC_step_eq
+#audit_axioms ceC_frame_swaps_when_out_of_order
+#audit_axioms ceC_frame_swap_other_port
+#audit_axioms ceC_frame_stable_when_in_order
+#audit_axioms ceC_frame_active_beats_idle
+#audit_axioms ceC_frame_two_idle_stable
+#audit_axioms ceC_rejects_idle_sorts_low
+#audit_axioms ceCIdleLow_is_one_gate_from_ceC
+
+/-! ## 📐 IS THE FOURTH STATE BIT REAL? — measured, because this file's own price
+depended on it
+
+**This file priced option C at "4 state bits against 2" and used that number to
+argue against the convention that has now been ratified.** *Silicon's B4 states
+the cost as **"2 state bits → 3"**. The two numbers disagree, and the landed
+element is the one carrying the extra bit — so the disagreement is mine to
+settle, not silicon's.*
+
+⭐ **THE ARGUMENT THAT `bothAct` IS DEAD: it gates the ODD-phase decision, and the
+only way to REACH an odd cycle undecided is that the activity bits AGREED.** *If
+both lines were active, `ba` is set and the gate passes. If both were idle, the
+whole frame is zeros (`cFrame_idle_is_silent`), so `diff` is false on every odd
+cycle and the gate has nothing to block. **In both cases the gate's output is the
+same as if it were not there.*** ⇒ **An argument is not a measurement. The
+differential below is.** -/
+
+/-- `ceC` with the odd-phase decision UNGATED — `bothAct` is still computed and
+still stored, but nothing reads it. **A one-gate edit.** -/
+def ceCcoreUngated : Circ :=
+  { ceCcore with gates := ceCcore.gates.map fun g =>
+      if g.out == 21 then ⟨21, .and 10 13⟩ else g }
+
+def ceCUngated : Seq := { ceC with core := ceCcoreUngated }
+
+theorem ceCUngated_is_one_gate_from_ceC :
+    (ceCcoreUngated.gates.zip ceCcore.gates).countP (fun p => p.1 != p.2) = 1 := by
+  decide +kernel
+
+/-- Both elements, driven by the same convention-C frame pair. -/
+def ceCPairAgrees (a0 : Bool) (d0 : Nat) (a1 : Bool) (d1 : Nat) : Bool :=
+  let f0 := cFrame a0 d0 [true, false]
+  let f1 := cFrame a1 d1 [false, true]
+  let tr := (List.range 8).map fun t => [t == 0, f0.getD t false, f1.getD t false]
+  (runTrace ceC        [false, false, false, false] tr).1
+    == (runTrace ceCUngated [false, false, false, false] tr).1
+
+/-- **Every convention-C frame pair: both activities x all 8 destinations each.** -/
+def ceCUngatedOK : Bool :=
+  bools.all fun a0 => (List.range 8).all fun d0 =>
+  bools.all fun a1 => (List.range 8).all fun d1 => ceCPairAgrees a0 d0 a1 d1
+
+/-- ⛔ **THE FOURTH STATE BIT IS DEAD IN THE FRAME LANGUAGE — 256 frame pairs,
+every one identical.** *So this file's "4 state bits against 2" overstated option
+C's cost by a bit, on the very number it used to argue against the convention
+that was then ratified anyway.* **SILICON'S "2 → 3" IS THE CORRECT PRICE.** -/
+theorem ceC_fourth_state_bit_is_dead : ceCUngatedOK = true := by decide +kernel
+
+/-- ⚠️ **AND IT IS NOT DEAD IN GENERAL — the differential is scoped to FRAMES,
+and that scope is load-bearing.** *Off the frame language — an "idle" line
+carrying a non-zero stream, which `cFrame` cannot produce — the two elements
+disagree.* **So the honest claim is "unreachable under the protocol", NOT
+"redundant logic", and a successor must not delete the bit on the strength of the
+theorem above without re-checking what drives the element.** -/
+theorem ceC_fourth_bit_differs_off_protocol :
+    (runTrace ceC        [false, false, false, false]
+       [[true, false, false], [false, true, false]]).1
+      ≠ (runTrace ceCUngated [false, false, false, false]
+       [[true, false, false], [false, true, false]]).1 := by
+  decide +kernel
+
+#audit_axioms ceCcoreUngated
+#audit_axioms ceCUngated_is_one_gate_from_ceC
+#audit_axioms ceC_fourth_state_bit_is_dead
+#audit_axioms ceC_fourth_bit_differs_off_protocol
 
 #audit_axioms ceCcore
 #audit_axioms ceC
