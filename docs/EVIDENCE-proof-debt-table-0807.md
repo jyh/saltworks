@@ -47,8 +47,10 @@ above supersedes)*. It now carries `adder32_adds` and
 `adder32_carry_out` in `Adder.lean` — in the closure — alongside `adder32_ssa`/`_wf`.
 **`inc32` left `MERELY-BUILT` in the same commit** (`inc32_adds_four`).
 
-⇒ ***The class is one import from empty. `BatcherNetC` is the whole remaining
-membership, and the four theorems saying the sorter sorts are the cost.***
+⇒ ***The class is ONE IMPORT AND ONE INDUCTION from empty*** — `BatcherNetC`'s import for
+`bnComps`, and the adder's unconditional ripple-carry proof for `adder32`. **`inc32` is in
+the same position: `incAddsFourOK` runs over the SAME seven `addWords`, so it too is a
+tripwire and tier ④ is NOT closed.**
 
 ## §3 THE PROOF-DEBT QUEUE — 106 definitions no theorem anywhere mentions
 
@@ -107,9 +109,17 @@ not open with obsolete work.*
 | tier | population | cure |
 |---|---|---|
 | ① behavioural cert exists, out of build | **`bnComps`** | **an import** |
-| ② certified structurally only | ~34 real (+15 in `BatcherNet`) | a proof |
+| ①ᵇ **certified only ON A SAMPLE** (ruling 16:33) | **`adder32`, `inc32`** — 49 pairs / 7 words | **an unconditional proof** (math, C4 arc) |
+| ② certified structurally only | ~34 real (+15 in `BatcherNet`, possibly retired) | a proof |
 | ③ no theorem at all | **106** | a proof |
-| ④ on every instruction's path | *(was `inc32` — CLOSED 16:07)* | — |
+
+⚠️ **Tier ①ᵇ IS NEW AND THIS INSTRUMENT CANNOT SEE IT.** A sampled check touches `sem`
+exactly as an exhaustive one does, so both members read `B-PROVEN` above. **Its population
+is therefore UNKNOWN, not two** — 19 theorems in the tree have the shape `<X>OK = true`,
+six now carry `_on_sample`, and the remainder mix genuinely exhaustive certificates
+(`ce_step_eq`, all 128 configurations) with unclassified ones. *The proposed value-shape
+detector — does the unfolded statement reach a def whose value is a literal list of
+hand-written constants — would settle it; it does not exist yet.*
 
 ⇒ ***The import sweep closes tier ① and nothing else. Tiers ②③ are ~140 definitions
 that no import will reach, and that is the honest size of the proof debt.***
