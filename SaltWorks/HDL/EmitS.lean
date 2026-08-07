@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Jason Hickey, Claude
 -/
 import SaltWorks.HDL.Syntax
+import SaltWorks.Tactic.AuditAxioms
 
 /-!
 # `emitS` — STRUCTURAL emission: one sky130 cell per gate
@@ -299,5 +300,21 @@ restructure through a blackbox. -/
 def manifest (c : Circ) : String :=
   slines (c.gates.map fun g =>
     instName g.out ++ " " ++ cellOf g.op ++ " " ++ sNet c.nIn g.out)
+
+/-! ## Axiom audit — every definition, per the iron rules -/
+
+#audit_axioms cellOf
+#audit_axioms sNet
+#audit_axioms instName
+#audit_axioms emitCell
+#audit_axioms dummyDecl
+#audit_axioms emitS
+#audit_axioms opAt
+#audit_axioms readCount
+#audit_axioms MuxSite
+#audit_axioms muxAt
+#audit_axioms emitSMux
+#audit_axioms muxCount
+#audit_axioms manifest
 
 end SaltWorks.HDL
