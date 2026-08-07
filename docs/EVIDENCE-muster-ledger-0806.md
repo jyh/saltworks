@@ -51,10 +51,21 @@ so a commit count is not read as mathematical output.*
 | **Leg 1 — TAU-SHARP** | ✅ **631.58 → 86.23** | TS-1+TS-2, **82% of the entire `log(1/c)` prize for ~140 lines**. TS-3 **deferred** on demand-side evidence per a pre-registered rule. *(math)* |
 | **Ruling 3 — does `-M` bind kernel reduction?** | ✅ **CLOSED: the cap is real** | Three-run design; the decisive third run is the same file at `--cap 12000` producing **no memory diagnostic at all**. *(compiler)* |
 | **Ruling 3a — cap sizing** | ✅ **`E ≈ 0`; the threshold is peak RSS** | `C* ∈ (8400, 8410]` against RSS 8407 — a 10 MiB bracket on an 8.4 GiB run. *(silicon, refuting compiler's constant on compiler's own criterion)* |
-| **Ruling 6 — hub imports** | ✅ **PAID** | All three legs checked by a default build, 8,602 jobs green. *(maestro)* |
+| **Ruling 6 — hub imports** | ⚠️ **PAID, THEN RE-OPENED THE SAME EVENING — do not read "the default build covers all three legs" tonight** | The hub sweep landed and the default build is green at 8,602 jobs *(maestro)*. **But `SaltWorks.HDL.Renumber` is not in `SaltWorks.lean`:** the default build audits **89** HDL declarations, a targeted build of `Renumber` audits **120**, so **31 declarations — all five renumber obligations, the frame lemma, `opt_wf` — sit OUTSIDE the default build's closure.** ✅ They **are** kernel-checked (targeted build, this machine, `Built` not `Replayed`). ⛔ *"They are kernel-checked" and "the default build covers leg 2" are two different sentences and only the first is true tonight.* **`import owed: SaltWorks.HDL.Renumber`.** *(compiler, self-reported at 19:52 — and this is the SECOND time today the same gap was found from opposite sides: silicon caught `FabricRoutes` sitting outside compiler's green 8,590-job build this afternoon.)* |
 | **The record itself** | ✅ **VERSIONED** | The bus had **no repo, no remote, one copy, 1,171 lines**. Now `${SEAT_DIR}/fleet/BUS-triple-campaign.md` on a **verified-private** remote, refreshed by one command with the lane check re-run every push. *(evidence)* |
 
-**Silicon's own muster line is a file — `docs/silicon-muster-0806.md` (`6b7a0d7`)** — written to this same format with every SHA resolved and its subject read back. Take it verbatim; nothing of silicon's needs digging out of the bus.
+**Two seats wrote their own muster lines as files, to this same format, with
+every SHA resolved in its own repo and its subject read back:**
+
+* **`docs/silicon-muster-0806.md`** (`6b7a0d7`) — leg 3
+* **`docs/hdl-muster-0806.md`** (`4e40547`) — leg 2
+
+**Take them verbatim; nothing of either seat's needs digging out of 770 KB
+of bus.** *This is the visibility law arriving at its useful form: a muster
+line that is a committed file cannot be mis-transcribed by the seat
+assembling the ledger — which is exactly what I would otherwise have done
+to compiler's coverage fact below, since I had already written the
+opposite.*
 
 ---
 
