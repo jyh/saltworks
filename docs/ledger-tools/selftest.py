@@ -614,6 +614,77 @@ if os.path.exists(_man):
                         "— the artifact has drifted from its birth record")
 
 # --------------------------------------------------------------------------
+# 5. model_integrity — which model actually served each message
+#
+# Written as the failures it prevents. The date filter is here because the
+# first version filtered on the FILE's mtime, and a session file spans days:
+# it printed a run reading "11:22 -> 09:06", start after end, which is what a
+# lost date looks like when two days are averaged into one.
+# --------------------------------------------------------------------------
+
+import model_integrity as mi  # noqa: E402
+
+
+def _mrec(hour, model, day=7, typ="assistant", minute=0):
+    local = datetime(2026, 8, day, hour, minute, tzinfo=TZ)
+    return json.dumps({
+        "type": typ,
+        "timestamp": local.astimezone(lc.ZoneInfo("UTC")).strftime("%Y-%m-%dT%H:%M:%S.000Z"),
+        "message": {"model": model},
+    })
+
+
+with tempfile.TemporaryDirectory() as _tmp:
+    def _mk(recs, name="s.jsonl"):
+        p = os.path.join(_tmp, name)
+        with open(p, "w", encoding="utf-8") as fh:
+            fh.write("\n".join(recs) + "\n")
+        return p
+
+    # contiguous same-model records collapse to ONE run
+    r = mi.runs_for(_mk([_mrec(9, "claude-opus-5"), _mrec(10, "claude-opus-5")]), "2026-08-07")
+    check(len(r) == 1 and r[0][3] == 2, f"MODEL: same model did not collapse ({r})")
+
+    # a change splits into runs, in order, and is what the tool reports
+    r = mi.runs_for(_mk([_mrec(9, "claude-opus-5"), _mrec(13, "claude-opus-4-8"),
+                         _mrec(15, "claude-opus-5")]), "2026-08-07")
+    check(len(r) == 3, f"MODEL: a mid-session change was not split ({len(r)} runs)")
+    check([x[2] for x in r] == ["claude-opus-5", "claude-opus-4-8", "claude-opus-5"],
+          "MODEL: runs are not in timestamp order")
+
+    # ⛔ the date filter is on the MESSAGE, not the file: yesterday must not leak in
+    r = mi.runs_for(_mk([_mrec(9, "claude-opus-5", day=6), _mrec(10, "claude-opus-5", day=7)]),
+                    "2026-08-07")
+    check(len(r) == 1 and r[0][3] == 1,
+          f"MODEL: a record from another day leaked into the day's runs ({r})")
+    # ...and every run must have start <= end, the shape that exposed the bug
+    for _s, _e, _m, _n in r:
+        check(_s <= _e, f"MODEL: run start after end ({_s} > {_e}) — a lost date")
+
+    # synthetic and non-assistant records are not evidence of a model
+    r = mi.runs_for(_mk([_mrec(9, "<synthetic>"), _mrec(10, "claude-opus-5", typ="user"),
+                         _mrec(11, "claude-opus-5")]), "2026-08-07")
+    check(len(r) == 1 and r[0][3] == 1, f"MODEL: synthetic/user records were counted ({r})")
+
+    # an unparseable line is skipped, not fatal — a transcript is append-only and
+    # its last line can be a partial write while a session is live
+    r = mi.runs_for(_mk(["{ not json", _mrec(9, "claude-opus-5")]), "2026-08-07")
+    check(len(r) == 1, "MODEL: a partial final line broke the read")
+
+    # ⛔ THE FIREWALL RAISES, and does not silently skip
+    for _lane in ("-Users-jyh-projects-claude-loca", "-Users-jyh-projects-claude-holl"):
+        try:
+            mi._guard(_lane)
+            check(False, f"MODEL FIREWALL: {_lane} was not refused")
+        except mi.Unreadable:
+            check(True, "")
+    try:
+        mi._guard("-Users-jyh-projects-claude-saltworks")
+        check(True, "")
+    except mi.Unreadable:
+        check(False, "MODEL FIREWALL: a personal-lane path was refused")
+
+# --------------------------------------------------------------------------
 
 if FAILURES:
     print(f"selftest: {len(FAILURES)} FAILURE(S) out of {CHECKS} checks\n")
