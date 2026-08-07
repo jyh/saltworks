@@ -234,6 +234,109 @@ five silent wires say the network cannot manufacture activity.* -/
 theorem bnC_concentrates_actives :
     (bnCRun bnCSparse).drop 6 = bnCSparseExpected := by decide +kernel
 
+/-! ### More of the routing space — and why this is SAMPLED and not universal
+
+📐 **THE INPUT SPACE IS `16^8 ≈ 4.3 × 10^9` CONFIGURATIONS** (8 lines, each idle
+or active × 8 destinations), **and one config costs ~18 s in the kernel.**
+*Exhaustive is not "expensive", it is `10^12` seconds.* ⇒ **So the network's
+routing is certified on a CHOSEN set, and the choice is the argument.**
+
+**Two more cases beyond the reversed input and the sparse concentration:**
+already-sorted (nothing may swap — the failure mode that a network of
+unconditional swaps would exhibit) and a rotation (every line moves, but not to
+the mirror position, so it fails differently from the reversal). -/
+
+/-- Already in order: line `i` bound for `i`. **Nothing may move.** -/
+def bnCIdent : List (List Bool) :=
+  (List.range 8).map fun i => cFrame true i ((List.range 3).map (Nat.testBit i))
+
+/-- ⭐ **AN ALREADY-SORTED INPUT IS A FIXED POINT.** *A network built from
+unconditional swaps would sort correctly and fail this; it is the control that
+the comparators are genuinely conditional.* -/
+theorem bnC_identity_is_fixed :
+    (bnCRun bnCIdent).drop 6
+      = (List.range 3).map (fun b => (List.range 8).map fun j => Nat.testBit j b) := by
+  decide +kernel
+
+/-- A rotation: line `i` bound for `(i+3) % 8`. Every line moves. -/
+def bnCRot : List (List Bool) :=
+  (List.range 8).map fun i => cFrame true ((i + 3) % 8) ((List.range 3).map (Nat.testBit i))
+
+/-- ⭐ **A ROTATION ROUTES CORRECTLY** — wire `j` receives the line whose
+destination is `j`, i.e. line `(j + 5) % 8`. *Distinct from the reversal: it is
+not its own inverse, so a network that mirrored rather than sorted would pass the
+reversed test and fail this one.* -/
+theorem bnC_rotation_routes :
+    (bnCRun bnCRot).drop 6
+      = (List.range 3).map (fun b => (List.range 8).map fun j => Nat.testBit ((j + 5) % 8) b) := by
+  decide +kernel
+
+/-! ## 🔗 LINK ② — THE DECOMPOSITION, and it is the expensive part
+
+**Silicon's 14:31 named three links for the composed theorem: ① the fabricated
+element vs the emission (CLOSED, `SeamC.lean`, `17b20ff`), ② the 24-instance
+network vs `runNet batcher8` — THIS, and mine — and ③ injectivity + bound, math's
+form.** *What follows is the decomposition and the anchor, not an attempt. The
+tactics are the cheap half.*
+
+### Why this is not "run the network and compare"
+
+📐 **THE ROUTING SPACE IS `16^8 ≈ 4.3 × 10^9` CONFIGURATIONS, AND ONE COSTS ~18 s
+IN THE KERNEL.** *Exhaustive is not expensive, it is `~10^12` seconds.* ⇒ **The
+four certificates above are a SAMPLE and are labelled as one. ② has to be
+structural or it does not exist.**
+
+### The anchor already exists, and it is the reason this is tractable
+
+⭐ **`BatcherNetCheck.bnComps_eq_batcher8` ALREADY PROVES `bnComps` IS
+`Stack.batcher8`** — the same comparator list, in the same order, `decide
++kernel`. *So the bit-serial network and the abstract network are folds over
+LITERALLY THE SAME LIST.* ⇒ **② is not "do these two agree", it is "does one
+element implement one `applyComp`, and does the fold carry".**
+
+### The three obligations, in the order they should be attempted
+
+```
+(a) THE KEY.  Define  key i = (¬active i, dest i)  ordered
+    active-before-idle then dest ascending.  This is the LinearOrder that
+    `runNet` is instantiated at, and `ce_rejects_idle_sorts_low` /
+    `ceC_frame_active_beats_idle` are already the proofs that the ELEMENT
+    orders by it.  NOTHING in the tree names this order yet -- it exists only
+    as behaviour.  ⇒ This is obligation zero and it is a DEFINITION.
+
+(b) PER-ELEMENT.  One element on a frame PAIR computes `applyComp` on the two
+    keys, in the payload window.  `ceC_step_eq` gives the cycle; the four frame
+    certificates in `CompareExchangeC` give whole frames; what is MISSING is the
+    bridge from "frames in, frames out" to "keys in, keys out".
+
+(c) THE FOLD.  `runNet` is `net.foldl (applyComp)`; `bnCBuild` is a fold over
+    the same list placing instances at `bnCOff e`.  `inst_compose_frame` /
+    `inst_compose_first` / `inst_compose_sem` (`Compose.lean`, `5868b9f`) are
+    exactly the induction step -- each instance computes what it computes and
+    does not disturb its predecessor.  The offsets chain by
+    `bnC_instances_are_disjoint`.
+```
+
+🔑 **AND THE NON-OBVIOUS PART, WHICH IS WHERE A FIRST ATTEMPT WOULD GO WRONG:
+(b) IS NOT A STATEMENT ABOUT ONE CYCLE. The element's decision is LATCHED across
+the header and only settled at cycle 6** — so the per-element obligation is a
+statement about a whole frame under `runTrace`, and its induction hypothesis has
+to carry the LATCH STATE, not just the data. *`ce_step_eq`-style per-cycle
+quantification does not compose across the header for exactly the reason the
+delivery window exists.*
+
+⇒ ***The honest shape: (a) is a definition, (c) is landed machinery, and (b) is
+the real theorem — and (b)'s difficulty is the latch, not the arithmetic.***
+
+⚠️ **ONE MORE THING A SUCCESSOR MUST NOT ASSUME: the four sampled certificates
+above all drive the network from the ALL-ZERO initial state.** *`Seq.lean`'s own
+doctrine says a refinement must be `∀ st₀` because a deselected TinyTapeout
+design is powered off, not reset.* **These four are `st₀ = 0` only, and ② must
+quantify over the initial state or inherit `rst`'s self-initialisation as an
+explicit lemma.** *`xorPrev_self_initialises` is the shape; nothing yet proves it
+for this element.*
+-/
+
 #audit_axioms bnCWires bnCElems bnCRst bnCDatIn bnCIn bnCState bnCCoreIn bnCOff
 #audit_axioms bnCSigma bnCBuild bnCResult bnCCore batcherNetC
 #audit_axioms bnC_comps_count
@@ -252,5 +355,7 @@ theorem bnC_concentrates_actives :
 #audit_axioms bnC_sorts_reversed_input
 #audit_axioms bnCSparse bnCSparseExpected
 #audit_axioms bnC_concentrates_actives
+#audit_axioms bnCIdent bnC_identity_is_fixed
+#audit_axioms bnCRot bnC_rotation_routes
 
 end SaltWorks.HDL
