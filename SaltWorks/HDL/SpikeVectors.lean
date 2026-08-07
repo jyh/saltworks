@@ -385,10 +385,16 @@ MUT-B   SLT  slt  ->  sle     ISA.lean BUILDS   suite FAILS   EXIT=1
 restore                       ISA.lean BUILDS   suite GREEN   EXIT=0
 ```
 
-⭐ **`MUT-A` is possible because `XOR` HAS NO THEOREM ANYWHERE IN `ISA.lean`** —
-of the five instructions it is the only one with no certificate pinning it, and
-until this file, nothing in the repository would have noticed if it computed
-`or`. **`MUT-B` is the sharper one: `sle` satisfies `slt_is_signed` (`-1 ≤ 1`
+⭐ **`MUT-A` was possible because, WHEN IT WAS RUN, `XOR` had no theorem anywhere
+in `ISA.lean`** — of the five instructions it was the only one with no
+certificate pinning it, and nothing in the repository would have noticed if it
+computed `or`. *The witness found a hole in the hand-written certificates, which
+is the first thing it was asked to do.* **That gap is now CLOSED** —
+`xor_is_exclusive` and `xor_self_is_zero` landed in `ISA.lean` in response, so a
+re-run of MUT-A today would be caught upstream as well. **The result above is
+recorded as it was actually run, not as it would run now.**
+
+**`MUT-B` is the sharper one and is unaffected: `sle` satisfies `slt_is_signed` (`-1 ≤ 1`
 gives 1) AND `slt_is_signed'` (`1 ≤ -1` gives 0), so it passes both hand-written
 SLT certificates** and is caught only by a witnessed vector where the two
 operands are equal. *That is the corner-biased sampling earning its keep, and it

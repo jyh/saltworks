@@ -223,6 +223,26 @@ theorem slt_is_signed' :
     (step s₂ (.SLT 3 2 1)).get 3 = 0 := by
   decide +kernel
 
+/-- **TRAP 2c — `XOR` IS EXCLUSIVE, AND UNTIL NOW NOTHING IN THIS REPOSITORY
+SAID SO.** *Found by the C2 witness suite, not by review: `XOR` was the only one
+of Slice A's five instructions with no certificate anywhere, so mutating it to
+`|||` built clean and was caught solely by Spike* (`SaltWorks/HDL/SpikeVectors.lean`,
+MUT-A). **`3 ^^^ 1 = 2`, where `or` gives 3 and `and` gives 1** — one certificate
+separating XOR from both neighbours it is plausibly confused with. -/
+theorem xor_is_exclusive :
+    let s₁ := step St.init (.ADDI 1 0 3)
+    let s₂ := step s₁ (.ADDI 2 0 1)
+    (step s₂ (.XOR 3 1 2)).get 3 = 2 := by
+  decide +kernel
+
+/-- **And `XOR` is self-annihilating**, which `or` and `and` both fail — they
+return `x`. *Without this, `xor_is_exclusive` alone is still satisfied by a
+handful of wrong functions.* -/
+theorem xor_self_is_zero :
+    let s₁ := step St.init (.ADDI 1 0 7)
+    (step s₁ (.XOR 3 1 1)).get 3 = 0 := by
+  decide +kernel
+
 /-- **TRAP 3 — `BEQ x0 x0` IS TAKEN.** The freeze's §4.1 compiles `ite` with an
 always-true `BEQ` because Slice A excludes `JAL`, and kill-check R4 asked for
 exactly this confirmation against `step` *as landed* — the half of R4 that was
@@ -638,6 +658,8 @@ theorem stepW_encode (s : St) (i : Instr) : stepW s (encode i) = some (step s i)
 #audit_axioms addi_sign_extends
 #audit_axioms slt_is_signed
 #audit_axioms slt_is_signed'
+#audit_axioms xor_is_exclusive
+#audit_axioms xor_self_is_zero
 #audit_axioms beq_x0_x0_taken
 #audit_axioms beq_not_taken
 #audit_axioms x0_write_is_a_silent_noop
