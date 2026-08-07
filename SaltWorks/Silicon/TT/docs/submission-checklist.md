@@ -16,8 +16,8 @@
 | P4 | `test/` — a real cocotb bench | ✅ **RTL: 3/3, 255/255.** ✅ **GATE LEVEL: 3/3, 255/255 against real sky130 cells** (`test/gl_local.sh`) — unpowered, pre-P&R; the powered post-layout form is still CI's (C.3) |
 | P5 | `src/config.json` — `CLOCK_PERIOD` 20 ns, `PL_TARGET_DENSITY_PCT` 60, and nothing that `user_config.json` would silently override | ✅ |
 | P6 | Apache-2.0 headers in every file we authored | ✅ (the `LICENSE` file itself comes from the template) |
-| P7 | **Local dry run: LibreLane 3.0.5 + precheck** | ⛔ **BLOCKED — LibreLane is not installed on the Mini.** yosys, iverilog and a sky130 PDK now are |
-| P8 | **Pin `tools-ref` to a SHA** in `.github/workflows/gds.yaml` | ⛔ **OWED, and newly urgent — see C.1** |
+| P7 | **Dry run: LibreLane 3.0.5 + precheck** | ✅ **DONE IN TT's OWN CI, which is better than local:** the design hardens, **Precheck PASSES**, and **GL test PASSES against the powered post-layout netlist** |
+| P8 | **Pin `tools-ref` to a SHA** in `.github/workflows/gds.yaml` | ⛔ **OWED — see C.1.** Two runs four minutes apart came out identical (`pdk.json` byte-identical, `resolved.json` zero differing keys), which is luck, not pinning |
 
 ## B. The human's clicks — JYH only, in order
 
@@ -106,12 +106,28 @@ builds *powered* netlists and CI runs the powered, post-P&R form.
 ⇒ The first CI run remains the first test of the **powered post-layout** path.
 Schedule it early enough that a surprise there is cheap.
 
-### C.4 The public-repo ruling is the gate on everything in B
+### C.4 ⚠️ THE REPO MUST GO PUBLIC FOR THE GDS ACTION TO GO GREEN
 
-Apache-2.0 and publication are contractually **mandatory**; the maestro
-recommended YES at 09:13 and the Captain's ruling is owed. Until then H2 cannot
-happen — and neither can the two `(* keep *)` CI arms, which need nothing but a
-repo and ten minutes of Actions.
+Ruled GO by the Captain (8/6): create now, **private until CI green, then flip
+public**. Repo: **`jyh/tt-verified-banyan-switch`**, H2 done.
+
+**That sequencing turns out to be circular, and it is the one live blocker.** The
+`gds` workflow's fourth job is `viewer`, which deploys to **GitHub Pages** —
+and `POST /repos/…/pages` returns:
+
+```
+422  Your current plan does not support GitHub Pages for this repository.
+```
+
+because the repository is **private**. `viewer` lives inside `gds.yaml`, so its
+failure reddens the whole GDS action, and TT's rule is *"a project can't be
+submitted to a shuttle if its GDS action is failing."*
+
+⇒ **CI cannot go fully green while the repo is private, so "private until green"
+cannot be satisfied.** Every substantive gate — harden, precheck, gl_test, docs,
+RTL test — has already passed. **The resolution is one bit: make the repo public
+(Pages works on public repos at any plan), or upgrade the plan.** It is the
+Captain's, not this seat's.
 
 ## D. What a green submission will and will not mean
 

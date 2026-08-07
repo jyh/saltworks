@@ -141,6 +141,59 @@ pass.
   `attrmap -remove keep`. `write_verilog -noattr` strips the *attribute*, not the
   *wire*.
 
+---
+
+# ✅ THE CI ARMS RAN. RULING 4a CLOSES **YES**, ON THE FABRICATED ARTIFACT.
+
+### 2026-08-06 18:3x. Repo `jyh/tt-verified-banyan-switch`, arms `f9a8ca0` (keep)
+### and `0861169` (control), pushed four minutes apart, differing by ONE line.
+
+**① Tooling equality, checked before anything else as the design requires:**
+`pdk.json` **byte-identical** · `resolved.json` **zero differing keys** ·
+`commit_id.json` differs only in `commit` and `workflow_url`, i.e. in *which arm
+it is*. Confound 5.2 is clear — the arms differ by the attribute and nothing else.
+
+**③ PRIMARY READOUT — cone census over `tt_submission/tt_um_saltworks_banyan.v`:**
+
+| arm | cut set | cones | median in | max in | ≤ 24 |
+|---|---|---|---|---|---|
+| A `(* keep *)` | default | 64 | 12 | 36 | 87.5 % |
+| B control | default | 64 | 12 | 36 | 87.5 % |
+| **A `(* keep *)`** | **at the boundaries** | 80 | 7 | **21** | **100.0 %** |
+| B control | requested; the nets do not exist | 64 | 12 | 36 | 87.5 % |
+
+**② MECHANISM:** arm A carries **16 boundary bit-nets, all 16 driven by a real
+cell output**; arm B carries **0**.
+
+⇒ **Pre-registered row (a).** Max cone input **36 → 21** — three bits inside the
+measured 24-bit kernel ceiling — **on the netlist TinyTapeout will fabricate**,
+not on a local proxy.
+
+### The local proxy predicted the CI result
+
+Local (yosys 0.68, TT top, flattened+split): 86.9 % → **100 %**, max 36 → 16.
+CI (librelane 3.0.5): 87.5 % → **100 %**, max 36 → 21. Same verdict, same
+direction, same shape; the local method was sound and its absolute numbers were
+not the CI's — which is exactly what it was labelled as.
+
+### And correction 2 was load-bearing
+
+`wire [7:0] w0` appears in **NEITHER** CI arm — vector-decls 0 and 0. Readout ②
+as originally pre-registered would have reported the **treatment** arm ABSENT,
+and with the default census reading 87.5 % in both arms, the table lands on **row
+(b), "CI strips it — the expensive outcome"**, when the truth is row (a). Two
+individually reasonable instruments agreeing on the exact opposite of the truth,
+and the correction was made before either arm was fired.
+
+### Gates, for the record
+
+**Precheck PASS · GL test PASS** (the 255-scenario bench against the **powered**
+post-layout netlist) **· docs PASS · RTL test PASS.** The only red is `viewer`,
+which deploys to GitHub Pages and cannot run while the repo is private on this
+plan — a plan limit, not a design fault.
+
+---
+
 ## What is NOT established
 
 - ⚠️ **This is not the CI artifact.** Local yosys **0.68+post**; CI runs
