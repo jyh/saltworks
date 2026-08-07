@@ -157,7 +157,22 @@ account, org or subscription identifier. Reported as a gap, never estimated.
 
 ## 6. WHAT THE HUMAN-TIME NUMBER IS, AND WHAT IT IS NOT
 
-Tagged tonight at JYH's direction, adversarially challenged before
+⛔ **PROVENANCE RE-TAG, 2026-08-07** (maestro's 07:43 ghost-text correction +
+07:46 source-tag law). This section previously read *"tagged at JYH's
+direction."* **Measured against 82 captured `tmux send-keys` injections: the
+order was BARE and maestro-sent** — `19:21:45 → fleet:4 "do the human-time
+tags"` — so it is re-tagged **maestro-relayed, provenance unverified**, an
+unknown subset of that class being the client's own autocomplete ghost text.
+**The ratification is the opposite case and is kept separate:** no matching
+injection into this pane exists among the 82 (the only *"ratify the tags"*
+captured went to **fleet:2** at 20:00:54, another seat's pane), so on the
+available evidence it was **not** maestro-injected — stated as *no injection
+found*, never as *certainly human*, because the detector is a floor.
+⇒ **The tags themselves are unchanged**; they rest on transcript evidence and
+an adversarial pass, not on who asked. *Only the attribution moves, and it
+moves in the direction that reduces this seat's claim to have been directed.*
+
+Tagged on that order, adversarially challenged before
 assignment — **one of this seat's own proposals was refuted and retagged
 WATCHING**, which shrank the claim.
 

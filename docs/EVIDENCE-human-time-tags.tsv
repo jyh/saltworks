@@ -69,3 +69,38 @@
 #   (3) The two pre-T0 tags (20260805T1759, 20260805T2039) remain correctly
 #       OUTSIDE the campaign window. The tool warns about them every run; the
 #       right response is to leave them, not to move them in.
+#
+# ============ PROVENANCE RE-TAG — 2026-08-07, per the maestro's 07:43
+# ============ ghost-text correction and 07:46 source-tag law
+#
+# ⛔ THE TAGGING ORDER WAS NOT VERIFIED-JYH. Measured with this seat's own
+# nudge_detect against 82 captured `tmux send-keys` injections:
+#
+#   19:21:45 -> fleet:4  BARE  "do the human-time tags"       <- the order
+#   19:27:58 -> fleet:4  BARE  "post the tags when the workflow lands"
+#
+# Both were sent by the MAESTRO seat, not typed by a hand at this terminal.
+# Under the 07:43 finding an unknown subset of such bare inputs were the
+# client's own autocomplete GHOST TEXT -- dim SGR-2 suggestions captured
+# style-blind and delivered as keystrokes. So the header line reading
+# "JYH-DIRECTED" is RE-TAGGED:
+#
+#   was:  tagging performed at JYH direction
+#   now:  tagging performed on a MAESTRO-RELAYED order, PROVENANCE UNVERIFIED
+#
+# AND THE RATIFICATION IS THE OPPOSITE CASE, WHICH IS WHY IT IS SEPARATED
+# RATHER THAN SWEPT INTO THE SAME DOUBT. "ratify the tags" does NOT appear
+# among the 82 injections into this pane at all -- the only such payload
+# captured went to fleet:2 at 20:00:54, a different pane and a different
+# seat's business. On the evidence available the ratification was NOT
+# maestro-injected. Absence from the detector is a FLOOR, not proof: it
+# matches the first 60 chars verbatim and cannot see a paraphrase or a
+# channel it does not scan. Stated as "no injection found", never as
+# "certainly human".
+#
+# NET EFFECT ON THE TAGS THEMSELVES: NONE. The three category assignments
+# rest on transcript evidence and an adversarial pass, not on who asked for
+# them -- and work triggered by an unverified order stands on its own merits,
+# exactly as the 07:43 correction says. What changes is ONE LINE OF
+# ATTRIBUTION, and it changes in the direction that REDUCES this seat's claim
+# to have been directed by the human.
