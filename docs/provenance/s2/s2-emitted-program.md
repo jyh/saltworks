@@ -1,0 +1,13 @@
+# S2 — the emitted program, as data
+
+Produced by `#eval` against the committed `SaltWorks.Stack.Program` (`bf2de34`), saltbuild EXIT=0.
+`batcherSort.length = 120`, `batcherSortWords.length = 120` — 5 instructions x 24 comparators,
+both factors theorems in the module (`emit_length`, `batcher8_length`), not counted by hand.
+
+```
+(120, 120)
+[1123507, 297059, 2146483, 2146611, 2146483, 4302003, 297059, 3293747, 3293619, 3293747, 5448883, 297059, 6472371,
+  6472499, 6472371, 8627379, 297059, 7619635, 7619507, 7619635, 1156275, 297059, 3195059, 3195315, 3195059, 2237619,
+  297059, 4276531, 4276787, 4276531, 7513267, 297059, 5489587, 5489331, 5489587, 8594611, 297059, 6571059, 6570803,
+  6571059, 1123507, 297059, 2146483, 2146611, 2146483, 3286195, 297059, 4309427, 4309555, 4309427, 6464691, ⋯]
+```
