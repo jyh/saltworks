@@ -136,6 +136,36 @@ Cutting at the two named PC terms isolates them exactly: **`pc_next` becomes 15
 (the select mux), and the two adders stand alone at 64 and 30.** ⇒ **The control
 *logic* is not the problem and never was; the adders it contains are.**
 
+## THE BRANCH PATH — no new mechanism, and a reduction that is TWICE as wide
+
+Predictions `B1`–`B5` on disk first. The comparator is the piece `ctrl32` took as
+a given input, so it had never been measured.
+
+```
+eq  = (rs1 == rs2)   cone 64   OVER      taken   cone 68   OVER
+lt  = signed  <      cone 64   OVER      tgt[*]  cone 64   OVER  (known adder)
+ltu = unsigned <     cone 64   OVER
+```
+
+**B1 and B2 exactly.** ⚠️ Cutting *at* `eq`/`lt`/`ltu` does **not** help them —
+a cut makes a net a root, and a root's own cone is unchanged. **It helps only
+their consumers.** The comparator must be treed **internally**.
+
+**Treated** (`cmptree`, structural: per-bit XNOR row + a named AND-reduction
+tree, cut at 4 group boundaries): **5 cones, MAX 16, 100 %** — from 64.
+
+⚠️ **I predicted 8–11 and measured 16.** The XNOR row is *not* cut, so each group
+cone reaches through it to **both** operands: 8 bit-positions × 2 operands = 16
+leaves. **A two-operand reduction is twice as wide as a one-operand one** — the
+ALU's `zero` flag reduced one 32-bit result (treated 8); the branch comparator
+reduces *two* 32-bit operands (treated 16). ⇒ **Halve the group size for
+two-operand reductions, or accept 16 — which is inside the ceiling either way.**
+
+⇒ **No new mechanism.** The branch path is reduction (the ALU's `zero` shape),
+carry (the adder's shape) and select (the mux shape) — all three already
+enumerated. **What is new is only that the reduction is the block's PRIMARY
+function here rather than a side flag.**
+
 ## What this means for C3
 
 1. **Option (A) is required for three things**: the register read path, the ALU,
