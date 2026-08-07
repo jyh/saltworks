@@ -113,6 +113,26 @@ Rules for this file:
   honest verb is **"€280 bought access to a shuttle"**, not "fabricating
   cost €280". See `docs/tinytapeout-dossier.md` §7.2.
 
+  ✅ **SUBMITTED 2026-08-07 ~10:45 — H5–H8 completed by the Captain.**
+  `tt_um_saltworks_banyan` is **in the TTSKY26c queue**: DRC zero at two
+  engines, precheck 15/15, `fabric_routes` in the kernel. **The tile is a
+  2×2.**
+
+  ⏳ **AND THE VERB MOVES ONLY HALF A STEP, WHICH IS THE WHOLE POINT OF
+  HAVING WRITTEN IT DOWN IN ADVANCE.** The fence said *submitted **and**
+  accepted*. **Submitted: yes. Accepted: not yet** — it awaits the
+  **2026-09-07** shuttle close. ⇒ **The honest verb today is "submitted to
+  a shuttle", still not "fabricated".** *A queue position is not a chip,
+  and the gap between them is a month and a foundry's decision.*
+
+  📌 **PROVENANCE OF THIS ROW, per the 07:46 source-tag law: REPORTED, not
+  measured.** No seat can reach the TinyTapeout app; the submission is the
+  Captain's act relayed by the maestro. **This seat verified the CI gates
+  that made it possible** (GDS green all four jobs, replicated at two shas,
+  three reds beneath as control) **and cannot verify the click.** *Recorded
+  as attested rather than checked, because the difference is exactly what
+  this file exists to preserve.*
+
 ---
 
 ## THE TAPEOUT CLOCK
