@@ -5,12 +5,12 @@
 
 ---
 
-## 1. WHAT LANDED — 13 commits **IN THIS SESSION** (post-relight, 15:41→)
+## 1. WHAT LANDED — 19 commits **IN THIS SESSION** (post-relight, 15:41→)
 
 ⚠️ **THE WINDOW IS PART OF THE NUMBER.** Evidence's ledger attributes ~23
 saltworks commits to this seat *across the whole day*; measured just now, **25
 commits touched this slot today** (`SaltWorks/HDL`, `docs/hdl-*`, `lakefile`),
-of which **13 are this session** and **12 are this seat's pre-migration session**
+of which **19 are this session** and **12 are this seat's pre-migration session**
 (T1, T3+T5, T4, EmitV, Seq, Dense, the refuter verdicts, the frame protocol).
 **Both numbers are right and neither is wrong; they answer different questions.**
 Stated because the Captain will read this file and that ledger together, and a
@@ -31,6 +31,11 @@ count without its window is the same defect as a countdown without its date.
 | `159f8f4` | saltworks | `opt_wf` — `emitPipeline'_sem` now takes `c.wf` |
 | `bddcadb` | saltworks | **the week-2 codegen freeze** (NOT started) |
 | `38fc8e6` | saltworks | the freeze's own kill-check R4 had no referent; §4.1 now states the scheme |
+| `fb3374f` | saltworks | **P4 + P5** — silicon's R3 found a partiality I had not imagined and the `x0` trap on the side I did not name |
+| `380224d` | saltworks | the ISA manual advises against the exact trick §4.1 is built on — logged as an **idiom** objection, explicitly not a correctness one |
+| `a365a5d` | saltworks | ⛔ **the second refuter pass: C3 was STATEABLE AND FALSE.** §2 retyped `Int` → `BitVec 32`; C3's matching relation written out in full; the branch convention pinned; C6 restated |
+| `a41ed3a` | saltworks | ✅ **the seam's far side EXISTS** — `Instr`, `St`, `step`, `encode`, `decode`, `decode (encode i) = some i`, 60 audit ticks |
+| `83bf20b` | saltworks | my "31 declarations" was **subtracted from two instruments**; the number is 12, and it is now a tool |
 
 **LEG 2 IS CLOSED:** T1 `opt_sem` · T2 `emitN_sem` · T3 the bit-sliced certificate
 suite · T4 `fabric3_routes` · T5 the fungibility exhibit · the sequential
@@ -120,14 +125,26 @@ eight by me.** Every one was a true reading of an adjacent object.
 
 ## 4. IN FLIGHT AT MUSTER
 
-**Nothing.** Queue empty, tree clean, lock free, everything pushed.
+**Nothing.** Tree clean, lock free, everything pushed.
 
-**Available and blocked-on-others:** the codegen freeze cannot start until
-`step` (evidence's brief, W2.1) is **landed and frozen** — not sketched — and its
-adversarial pass must be run by a seat that is not me.
+⛔ **THE FREEZE STILL DOES NOT START, AND THE REASON HAS CHANGED TWICE TONIGHT —
+which is the most useful sentence in this section.**
+
+| reason | status |
+|---|---|
+| **1. `step` is not landed** (§8.1, pre-registered) | ✅ **CLEARED 20:47** — `SaltWorks/HDL/ISA.lean`, and it went further than the order: `encode`/`decode`/round-trip too, on the evidence seat's ruling that K2b cannot run without them |
+| **1b. the source language was over the wrong value domain** — C3 stateable and FALSE; *the freeze did not know this reason existed* | ✅ **CLEARED 20:33** — §2 retyped |
+| **2. C3 has never been stated against an ISA that exists** | ⛔ **OPEN, and it is now the only one.** Every prior version of C3 was written against `step` as a description. R2 killed the last one. |
+
+📌 **NEXT, AND IT IS A STATEMENT RATHER THAN A PROOF: restate C3 against
+`SaltWorks.ISA.step` and `run` AS LANDED.** *The point of writing it is to find
+out whether it is stateable — I would rather it be killed tonight than survive to
+next week.* **Blocked on nobody.**
 
 ## 5. COST
 
-~57 build/probe invocations. The renumber ~10 cycles; T2 3; `opt_wf` 2; the
-`--cap` probe 8 including controls. **31 days 17 h to the hard deadline,
-computed 19:50 — a date does not age, a countdown does.**
+~65 build/probe invocations. The renumber ~10 cycles; T2 3; `opt_wf` 2; the
+`--cap` probe 8 including controls; **`ISA.lean` 3 build attempts + 4 scratch
+probes** — *the probes are why there was a third attempt left; I stopped
+inferring the cause of a failure from the fact that it failed.* **31 days 16 h to
+the hard deadline, computed 20:5x — a date does not age, a countdown does.**
