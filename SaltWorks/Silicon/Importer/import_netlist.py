@@ -96,6 +96,36 @@ EXPAND = {
                              ("o", "and", "a", "b"), ("t", "not", "o", None)], ("Y", "t")),
     "lpflow_inputiso1p_1": ([("t", "or", "A", "SLEEP")], ("X", "t")),
     "lpflow_isobufsrc_1":  ([("n", "not", "SLEEP", None), ("t", "and", "A", "n")], ("X", "t")),
+    # --- added 2026-08-06 for the FABRICATED netlist (Cells/CI-cell-census.md).
+    # Keyed by BASE name: expansion_for() strips the drive suffix, and that is
+    # justified library-wide (428 cells, 127 multi-drive base names, 0 differing).
+    # Each expansion was simulated over its full truth table against the vendor
+    # Liberty before landing, and each has a proved model in Cells/Sky130.lean.
+    # The tie cell: no inputs, TWO constant outputs. The only cell here that is
+    # not a function of its inputs, and the reason `outputs_of` exists.
+    "conb":   ([("hi", "const", True, None), ("lo", "const", False, None)],
+               [("HI", "hi"), ("LO", "lo")]),
+    "and3":               ([('a', 'and', 'A', 'B'), ('t', 'and', 'a', 'C')], ('X', 't')),
+    "nor3b":              ([('a', 'not', 'C_N', None), ('b', 'or', 'A', 'B'), ('c', 'or', 'b', 'a'), ('t', 'not', 'c', None)], ('Y', 't')),
+    "or3b":               ([('a', 'not', 'C_N', None), ('b', 'or', 'A', 'B'), ('t', 'or', 'b', 'a')], ('X', 't')),
+    "and2b":              ([('a', 'not', 'A_N', None), ('t', 'and', 'a', 'B')], ('X', 't')),
+    "and3b":              ([('a', 'not', 'A_N', None), ('b', 'and', 'a', 'B'), ('t', 'and', 'b', 'C')], ('X', 't')),
+    "and4bb":             ([('a', 'not', 'A_N', None), ('b', 'not', 'B_N', None), ('c', 'and', 'a', 'b'), ('d', 'and', 'c', 'C'), ('t', 'and', 'd', 'D')], ('X', 't')),
+    "nand2b":             ([('a', 'not', 'A_N', None), ('b', 'and', 'a', 'B'), ('t', 'not', 'b', None)], ('Y', 't')),
+    "nand3b":             ([('a', 'not', 'A_N', None), ('b', 'and', 'a', 'B'), ('c', 'and', 'b', 'C'), ('t', 'not', 'c', None)], ('Y', 't')),
+    "a21o":               ([('a', 'and', 'A1', 'A2'), ('t', 'or', 'a', 'B1')], ('X', 't')),
+    "a21oi":              ([('a', 'and', 'A1', 'A2'), ('b', 'or', 'a', 'B1'), ('t', 'not', 'b', None)], ('Y', 't')),
+    "a21boi":             ([('a', 'and', 'A1', 'A2'), ('b', 'not', 'B1_N', None), ('c', 'or', 'a', 'b'), ('t', 'not', 'c', None)], ('Y', 't')),
+    "a31o":               ([('a', 'and', 'A1', 'A2'), ('b', 'and', 'a', 'A3'), ('t', 'or', 'b', 'B1')], ('X', 't')),
+    "a32o":               ([('a', 'and', 'A1', 'A2'), ('b', 'and', 'a', 'A3'), ('c', 'and', 'B1', 'B2'), ('t', 'or', 'b', 'c')], ('X', 't')),
+    "a211o":              ([('a', 'and', 'A1', 'A2'), ('b', 'or', 'a', 'B1'), ('t', 'or', 'b', 'C1')], ('X', 't')),
+    "a211oi":             ([('a', 'and', 'A1', 'A2'), ('b', 'or', 'a', 'B1'), ('c', 'or', 'b', 'C1'), ('t', 'not', 'c', None)], ('Y', 't')),
+    "a221oi":             ([('a', 'and', 'A1', 'A2'), ('b', 'and', 'B1', 'B2'), ('c', 'or', 'a', 'b'), ('d', 'or', 'c', 'C1'), ('t', 'not', 'd', None)], ('Y', 't')),
+    "o21a":               ([('a', 'or', 'A1', 'A2'), ('t', 'and', 'a', 'B1')], ('X', 't')),
+    "o211a":              ([('a', 'or', 'A1', 'A2'), ('b', 'and', 'a', 'B1'), ('t', 'and', 'b', 'C1')], ('X', 't')),
+    "clkbuf":             ([('t', 'buf', 'A', None)], ('X', 't')),
+    "dlygate4sd3":        ([('t', 'buf', 'A', None)], ('X', 't')),
+    "clkdlybuf4s25":      ([('t', 'buf', 'A', None)], ('X', 't')),
 }
 
 # ⚠️ DRIVE STRENGTH IS NOT PART OF THE FUNCTION, AND THIS IS MEASURED, NOT ASSUMED.
@@ -112,8 +142,20 @@ EXPAND = {
 # The ORIGINAL name is what gets reported and accounted for; only the LOOKUP is
 # normalised. A future flow that picks `_4` or `_8` will now import rather than
 # stop, and it will still be a named cell in the trusted set.
+def outputs_of(exp):
+    """Expansion outputs as a LIST of (pin, tmp).
+
+    ⚠️ Most cells drive ONE pin and their entry is a bare `(pin, tmp)` tuple.
+    `conb_1` — the tie cell — drives TWO (`HI` and `LO`), and the single-output
+    shape simply could not express it: the importer's own docstring said
+    "constants arrive only via conb_1 tie cells" while EXPAND had no conb entry
+    at all. A list normalises both without touching the 43 single-output rows."""
+    outs = exp[1]
+    return outs if isinstance(outs, list) else [outs]
+
+
 def expansion_for(cell):
-    """-> (ops, (outpin, outtmp)) or None. Exact match first, then drive-stripped."""
+    """-> (ops, outs) or None. Exact match first, then drive-stripped."""
     if cell in EXPAND:
         return EXPAND[cell]
     base = re.sub(r"_\d+$", "", cell)
@@ -232,9 +274,9 @@ def build(insts, decls, assigns, inputs_order):
         if exp is None:
             raise SystemExit(f"importer: no expansion for cell '{cell}' "
                              f"(instance {iname}) — add it to EXPAND and to Sky130.lean")
-        _, (outpin, _) = exp
-        if outpin in conns:
-            driver[conns[outpin]] = (cell, iname, conns)
+        for (outpin, _t) in outputs_of(exp):
+            if outpin in conns:
+                driver[conns[outpin]] = (cell, iname, conns)
 
     resolving = set()
 
@@ -253,9 +295,18 @@ def build(insts, decls, assigns, inputs_order):
             raise SystemExit(f"importer: combinational cycle at '{nm}'")
         resolving.add(nm)
         cell, iname, conns = driver[nm]
-        ops, (outpin, outtmp) = expansion_for(cell)
+        exp = expansion_for(cell)
+        ops = exp[0]
+        cands = [(p, t) for (p, t) in outputs_of(exp) if conns.get(p) == nm]
+        if not cands:
+            raise SystemExit(f"importer: cell '{cell}' ({iname}) drives no output "
+                             f"pin onto net '{nm}'")
+        outtmp = cands[0][1]
         local = {}
         for (t, op, a, b) in ops:
+            if op == "const":
+                local[t] = emit("const", a)
+                continue
             ai = local[a] if a in local else net(conns[a])
             if op == "not":
                 local[t] = emit("not", ai)

@@ -199,11 +199,225 @@ Every model above is asserted to depend on nothing outside
 if a proof ever acquires `sorryAx`, or a native axiom from `bv_decide`, the build
 breaks here rather than at review time. -/
 
+/-! ## THE FABRICATED NETLIST'S CELLS
+
+Added 2026-08-06 after the first TinyTapeout CI run: the artifact that will be
+fabricated uses **32 logic cell types** against the 13 modelled here, and the
+importer stopped on its first one. See `Cells/CI-cell-census.md`.
+
+⛔ **Every function below was derived BY HAND from the sky130 naming convention,
+by contexts forbidden to read the Liberty, and only then checked against it.**
+Generating these from the Liberty would make each `_liberty` theorem compare a
+value with itself. **The method was not free and it was not decorative: two of
+the 27 derivations came back WRONG** — `nor3b` and `or3b` — because the `b`
+suffix marks a pre-inverted input but **which** input is not uniform:
+`and*b`/`nand*b` bubble the FIRST pin (`A_N`), while `nor3b`/`or3b` bubble the
+**LAST** (`C_N`). Nothing in the name says so. Both are written below with the
+Liberty's pin positions.
+
+Drive strength is omitted from these names deliberately: checked across the whole
+vendor library — 428 cells, 127 base names carrying more than one drive strength
+— **zero** have a differing `function`/`next_state`, so the model is a statement
+about the function and the importer normalises the suffix when it looks one up. -/
+
+/-- `inv` -/
+def inv (A : Bool) : Bool := !A
+
+theorem inv_liberty (A : Bool) :
+    inv A = ((!A)) := by decide +kernel +revert
+
+/-- `buf` -/
+def buf (A : Bool) : Bool := A
+
+theorem buf_liberty (A : Bool) :
+    buf A = ((A)) := by decide +kernel +revert
+
+/-- `clkbuf` -/
+def clkbuf (A : Bool) : Bool := A
+
+theorem clkbuf_liberty (A : Bool) :
+    clkbuf A = ((A)) := by decide +kernel +revert
+
+/-- `dlygate4sd3` -/
+def dlygate4sd3 (A : Bool) : Bool := A
+
+theorem dlygate4sd3_liberty (A : Bool) :
+    dlygate4sd3 A = ((A)) := by decide +kernel +revert
+
+/-- `clkdlybuf4s25` -/
+def clkdlybuf4s25 (A : Bool) : Bool := A
+
+theorem clkdlybuf4s25_liberty (A : Bool) :
+    clkdlybuf4s25 A = ((A)) := by decide +kernel +revert
+
+/-- `or2` -/
+def or2 (A B : Bool) : Bool := A || B
+
+theorem or2_liberty (A B : Bool) :
+    or2 A B = ((A) || (B)) := by decide +kernel +revert
+
+/-- `nor2` -/
+def nor2 (A B : Bool) : Bool := !(A || B)
+
+theorem nor2_liberty (A B : Bool) :
+    nor2 A B = ((!A && !B)) := by decide +kernel +revert
+
+/-- `and3` -/
+def and3 (A B C : Bool) : Bool := A && B && C
+
+theorem and3_liberty (A B C : Bool) :
+    and3 A B C = ((A && B && C)) := by decide +kernel +revert
+
+/-- `nand3` -/
+def nand3 (A B C : Bool) : Bool := !(A && B && C)
+
+theorem nand3_liberty (A B C : Bool) :
+    nand3 A B C = ((!A) || (!B) || (!C)) := by decide +kernel +revert
+
+/-- `nor3` -/
+def nor3 (A B C : Bool) : Bool := !(A || B || C)
+
+theorem nor3_liberty (A B C : Bool) :
+    nor3 A B C = ((!A && !B && !C)) := by decide +kernel +revert
+
+/-- `xor2` -/
+def xor2 (A B : Bool) : Bool := A != B
+
+theorem xor2_liberty (A B : Bool) :
+    xor2 A B = ((A && !B) || (!A && B)) := by decide +kernel +revert
+
+/-- `and2b` -/
+def and2b (A_N B : Bool) : Bool := (!A_N) && B
+
+theorem and2b_liberty (A_N B : Bool) :
+    and2b A_N B = ((!A_N && B)) := by decide +kernel +revert
+
+/-- `and3b` -/
+def and3b (A_N B C : Bool) : Bool := (!A_N) && B && C
+
+theorem and3b_liberty (A_N B C : Bool) :
+    and3b A_N B C = ((!A_N && B && C)) := by decide +kernel +revert
+
+/-- `and4bb` -/
+def and4bb (A_N B_N C D : Bool) : Bool := (!A_N) && (!B_N) && C && D
+
+theorem and4bb_liberty (A_N B_N C D : Bool) :
+    and4bb A_N B_N C D = ((!A_N && !B_N && C && D)) := by decide +kernel +revert
+
+/-- `nand2b` -/
+def nand2b (A_N B : Bool) : Bool := !((!A_N) && B)
+
+theorem nand2b_liberty (A_N B : Bool) :
+    nand2b A_N B = ((A_N) || (!B)) := by decide +kernel +revert
+
+/-- `nand3b` -/
+def nand3b (A_N B C : Bool) : Bool := !((!A_N) && B && C)
+
+theorem nand3b_liberty (A_N B C : Bool) :
+    nand3b A_N B C = ((A_N) || (!B) || (!C)) := by decide +kernel +revert
+
+/-- `nor3b` -/
+def nor3b (A B C_N : Bool) : Bool := !(A || B || (!C_N))
+
+theorem nor3b_liberty (A B C_N : Bool) :
+    nor3b A B C_N = ((!A && !B && C_N)) := by decide +kernel +revert
+
+/-- `or3b` -/
+def or3b (A B C_N : Bool) : Bool := A || B || (!C_N)
+
+theorem or3b_liberty (A B C_N : Bool) :
+    or3b A B C_N = ((A) || (B) || (!C_N)) := by decide +kernel +revert
+
+/-- `a21o` -/
+def a21o (A1 A2 B1 : Bool) : Bool := (A1 && A2) || B1
+
+theorem a21o_liberty (A1 A2 B1 : Bool) :
+    a21o A1 A2 B1 = ((A1 && A2) || (B1)) := by decide +kernel +revert
+
+/-- `a21oi` -/
+def a21oi (A1 A2 B1 : Bool) : Bool := !((A1 && A2) || B1)
+
+theorem a21oi_liberty (A1 A2 B1 : Bool) :
+    a21oi A1 A2 B1 = ((!A1 && !B1) || (!A2 && !B1)) := by decide +kernel +revert
+
+/-- `a21boi` -/
+def a21boi (A1 A2 B1_N : Bool) : Bool := !((A1 && A2) || (!B1_N))
+
+theorem a21boi_liberty (A1 A2 B1_N : Bool) :
+    a21boi A1 A2 B1_N = ((!A1 && B1_N) || (!A2 && B1_N)) := by decide +kernel +revert
+
+/-- `a31o` -/
+def a31o (A1 A2 A3 B1 : Bool) : Bool := (A1 && A2 && A3) || B1
+
+theorem a31o_liberty (A1 A2 A3 B1 : Bool) :
+    a31o A1 A2 A3 B1 = ((A1 && A2 && A3) || (B1)) := by decide +kernel +revert
+
+/-- `a32o` -/
+def a32o (A1 A2 A3 B1 B2 : Bool) : Bool := (A1 && A2 && A3) || (B1 && B2)
+
+theorem a32o_liberty (A1 A2 A3 B1 B2 : Bool) :
+    a32o A1 A2 A3 B1 B2 = ((A1 && A2 && A3) || (B1 && B2)) := by decide +kernel +revert
+
+/-- `a211o` -/
+def a211o (A1 A2 B1 C1 : Bool) : Bool := (A1 && A2) || B1 || C1
+
+theorem a211o_liberty (A1 A2 B1 C1 : Bool) :
+    a211o A1 A2 B1 C1 = ((A1 && A2) || (B1) || (C1)) := by decide +kernel +revert
+
+/-- `a211oi` -/
+def a211oi (A1 A2 B1 C1 : Bool) : Bool := !((A1 && A2) || B1 || C1)
+
+theorem a211oi_liberty (A1 A2 B1 C1 : Bool) :
+    a211oi A1 A2 B1 C1 = ((!A1 && !B1 && !C1) || (!A2 && !B1 && !C1)) := by decide +kernel +revert
+
+/-- `a221oi` -/
+def a221oi (A1 A2 B1 B2 C1 : Bool) : Bool := !((A1 && A2) || (B1 && B2) || C1)
+
+theorem a221oi_liberty (A1 A2 B1 B2 C1 : Bool) :
+    a221oi A1 A2 B1 B2 C1 = ((!A1 && !B1 && !C1) || (!A1 && !B2 && !C1) || (!A2 && !B1 && !C1) || (!A2 && !B2 && !C1)) := by decide +kernel +revert
+
+/-- `o21a` -/
+def o21a (A1 A2 B1 : Bool) : Bool := (A1 || A2) && B1
+
+theorem o21a_liberty (A1 A2 B1 : Bool) :
+    o21a A1 A2 B1 = ((A1 && B1) || (A2 && B1)) := by decide +kernel +revert
+
+/-- `o21ai` -/
+def o21ai (A1 A2 B1 : Bool) : Bool := !((A1 || A2) && B1)
+
+theorem o21ai_liberty (A1 A2 B1 : Bool) :
+    o21ai A1 A2 B1 = ((!A1 && !A2) || (!B1)) := by decide +kernel +revert
+
+/-- `o211a` -/
+def o211a (A1 A2 B1 C1 : Bool) : Bool := (A1 || A2) && B1 && C1
+
+theorem o211a_liberty (A1 A2 B1 C1 : Bool) :
+    o211a A1 A2 B1 C1 = ((A1 && B1 && C1) || (A2 && B1 && C1)) := by decide +kernel +revert
+
+/-- `conb` — the tie cell. It is the ONE cell here that is not a function of its
+inputs: it has none, and it drives two constant outputs. The existing model shape
+`def f (args) : Bool` does not fit it, so it is two nullary definitions. -/
+def conb_HI : Bool := true
+
+/-- `conb`'s low output. -/
+def conb_LO : Bool := false
+
+theorem conb_HI_liberty : conb_HI = true := by decide +kernel
+theorem conb_LO_liberty : conb_LO = false := by decide +kernel
+
 #audit_axioms clkinv_1_liberty nand2_1_liberty and2_0_liberty
 #audit_axioms a22oi_1_liberty a31oi_1_liberty a222oi_1_liberty
 #audit_axioms o22ai_1_liberty o2bb2ai_1_liberty
 #audit_axioms mux2_1_liberty mux2i_1_liberty
 #audit_axioms lpflow_inputiso1p_1_liberty lpflow_isobufsrc_1_liberty
 #audit_axioms dfxtp_1_next_liberty
+#audit_axioms inv_liberty buf_liberty clkbuf_liberty dlygate4sd3_liberty
+#audit_axioms clkdlybuf4s25_liberty or2_liberty nor2_liberty and3_liberty
+#audit_axioms nand3_liberty nor3_liberty xor2_liberty and2b_liberty
+#audit_axioms and3b_liberty and4bb_liberty nand2b_liberty nand3b_liberty
+#audit_axioms nor3b_liberty or3b_liberty a21o_liberty a21oi_liberty
+#audit_axioms a21boi_liberty a31o_liberty a32o_liberty a211o_liberty
+#audit_axioms a211oi_liberty a221oi_liberty o21a_liberty o21ai_liberty
+#audit_axioms o211a_liberty
 
 end SaltWorks.Silicon.Cells
