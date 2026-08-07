@@ -63,13 +63,25 @@ theorems, and between them they cover ESSENTIALLY THE WHOLE DATAPATH.**
 
 📐 **AND SEVERAL ARE SINGLE POINTS, not samples in any statistical sense:**
 
-| certificate | what it actually checks |
-|---|---|
-| `shifter32_is_a_right_shift_on_sample : bsOK 0xDEADBEEF = true` | **one word** |
-| `regNext32_writes_when_enabled_on_sample : rnBit 0 true false = true` | **one bit, one enable** |
-| `readTree_selects_correctly_on_sample : rtSelectsOK 7 = true` | **one register index** (+ one more at 19) |
-| `aluSelect_selects_on_sample : asSelectsOK 3 = true` | **one op** (+ one at 9) |
-| `adder32_adds_on_sample` | 7 literal words → **49 pairs** |
+⚠️ **CORRECTED 16:4x — my first version of this table overstated two of four rows, and
+compiler corrected them in the direction that made its own work look BETTER. Read the
+right-hand column, which I have now verified at each definition:**
+
+| certificate | exhaustive over | fixed at one value of |
+|---|---|---|
+| `readTree_selects_correctly_on_sample : rtSelectsOK 7` | **all 32 addresses** | the stored-register pattern (`m = 7`, and `19`) |
+| `aluSelect_selects_on_sample : asSelectsOK 3` | **all 16 selects** | the one-hot (`m = 3`, and `9`) |
+| `shifter32_is_a_right_shift_on_sample : bsOK 0xDEADBEEF` | **all 32 shift amounts** | the word — **one of 2³²** |
+| `regNext32_writes_when_enabled_on_sample : rnBit 0 true false` | *(nothing — no quantifier)* | **a single point: one bit, one enable, one current value** |
+| `adder32_adds_on_sample` | *(nothing)* | 7 literal words → **49 pairs of 2⁶⁴** |
+
+📌 **I wrote "one register index" and "one op". Both were WRONG: those two are quantified
+over their full index range and fixed only in the data pattern.** *`regNext`'s single point
+and the shifter's one-word-of-2³² stand as written.* ⇒ ***Overstating in the alarming
+direction is the same defect as understating in the flattering one, and it is worse coming
+from the seat whose job is the number.*** **The finding survives the correction — one
+pattern of 2³², one word of 2³², 49 pairs of 2⁶⁴ are samples on any reading — but the
+characterisation had to be exact and was not.**
 
 ⛔⛔ **AND THE PART THAT IS MINE: `readTree`, `aluSelect`, `shifter32`, `regNext` WERE THE
 FOUR POSITIVE CONTROLS OF THIS CENSUS'S VALIDATION.** *I chose them because they were
