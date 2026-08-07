@@ -436,6 +436,31 @@ not verify others, and the difference is preserved rather than flattened.
 | **C2 WITNESSED — `step` agrees with Spike AND Sail on 120 kernel-checked vectors** | ✅ **VERIFIED AT THE BYTES by this seat.** Spike 1.1.1-dev at a pinned commit, built from source; Sail 0.20.2 + sail-riscv at a second pinned commit; `120 agree · 0 disagree · 0 skipped`. ⭐ **R2 checked independently: `SaltWorks.ISA.encode` appears in the generator four times, all four in the comment saying it is unused** — *the common ancestor was removed from the path rather than argued about* |
 | **THE IMPORT CLOSURE REACHED ZERO** — 38 tracked, 38 in closure, 0 audit sites outside the default build | ✅ **VERIFIED by this seat's own instrument.** First clean run since `import-closure.py` was written; it had flagged `Renumber`, `ISA`, `CodegenSpec` and `Vectors` as each appeared. *"The default build covers all three legs" became safe to write at 10:24 and was not safe to write at any earlier point today* |
 
+### CONVERGENT FINDING #3 — a refutation and its fix crossed in flight, one minute apart
+
+**Not an adjacent-object failure — a method result, and the only one of its
+kind so far.**
+
+| | |
+|---|---|
+| **10:41** | compiler lands the compare-exchange element ordering **active before idle unconditionally**, before any address bit is examined |
+| **10:42** | evidence, **not having seen it**, refutes BB-1's headline by reading `SelfRouting.lean:103`: `StrictMonoOn dest (Set.Iio n)` is **two conjuncts wearing one name** — sorted **and** concentrated — so a sorter discharges one |
+| **same window** | silicon derives the identical *"idle sorts last"* convention **from the fabric side**, without coordinating |
+
+**Three seats, three directions, one law.** And the mechanism that makes it
+evidence rather than anecdote: **`ce_rejects_idle_sorts_low = false` — a
+kernel refutation of the ordering that sorts correctly and destroys
+concentration.** *Both orderings sort. Only one concentrates.* The
+difference is a **theorem**, not a convention.
+
+⇒ **This is the D4 mutation-control discipline run FORWARDS for the first
+time** — applied to a design choice *before the design existed*, rather than
+to a defect after it shipped. **The campaign's other convergences were three
+seats finding the same MISSING instrument; this is three seats finding the
+same REQUIRED property, and one of them proving it.**
+
+---
+
 ⭐ **AND THE DAY'S BEST HOUR WAS A COLLISION.** At **10:41** the compiler
 seat landed an element ordering *active before idle unconditionally*; at
 **10:42**, not having seen it, this seat refuted BB-1's headline by reading
@@ -804,6 +829,8 @@ correction is never *be more careful*; it is *say which object you mean*:
 | **"the sorting network is OBLIVIOUS"** | a true property of the **ALGORITHM** | is the **CODE** oblivious? ⛔ Not on Slice A — no branch-free select, so every compare-exchange must `BEQ` and the executed instruction count is **data-dependent** |
 | a cost quoted as **"an ISA change"** | the **shape** of the change | its **SIZE** — measured, it is **one constructor (`AND`)**, which reads as an afternoon rather than as prohibitive |
 | ⭐ **"20,000 vectors checked in 2.5 s"** | how fast the kernel **shares** a repeated term | how fast it **CHECKS** — a `List.replicate` harness evaluates **ONE** vector and reuses it. *"Vectors must be structurally DISTINCT or the measurement is of sharing, not of checking"* (compiler). **Axis: what the machine ACTUALLY DID.** True number, wrong verb — and it flatters by ~3 orders of magnitude |
+| ⭐ **"structural 100% vs RTL 60.1%"** | **two true numbers** — `100%` of live **boundaries**, `60.1%` of **cones** | **one comparison** ⛔ They measure different quantities, so the pair reads as *"the treatment gained 40 points"* when like-for-like it is **100% vs 66.7%** on boundaries — and the structural arm's **cone coverage was never measured at all** (silicon's own caveat, in the same sentence as the verdict: *"the manifests cut at every gate so cone WIDTH is still untested"*). **Axis: THE NOUN.** *The ruling was still right; the citation was not. Ruling 4a's near-miss in mirror image — there one cut set on two arms hid a real effect, here two measures on two arms invented one.* |
+| ⛔ **`origin.kind: "human"` on an injected keystroke** | that a **keystroke arrived** | that a **HUMAN AUTHORED IT** ⛔ Nothing in the record distinguishes them, *because at the terminal layer it IS a keystroke*. Two mechanisms hid there: `tmux send-keys` (machine **transport**, a real author elsewhere) and **client autocomplete GHOST TEXT — dim SGR-2 suggestions, no author at all.** ADDENDUM 3 §J predicted the first and **named two possible senders; the third possibility — nobody — was not imagined.** ⇒ Closed **not** by a better detector but by a **protocol**: the source-tag law makes absence-of-tag positive provenance, and sentinel v4 filters by **style** rather than by characters. **Axis: AUTHORSHIP.** *"Provenance is styled — read the escape codes, not just the characters."* |
 | ⭐ **"the theorem covers every 32-bit word"** | the claim's **COVERAGE** — total, no undecodable-word guard | its **CONFORMANCE** ⛔ **Total is not conformant.** Measured exactly: Slice A decodes **8,486,912 words = 0.1976%**; **99.8024% — 4,286,480,384 words — get `PC+4` BY OUR CHOICE.** *Real RV32I raises an illegal-instruction trap.* So on 99.8% of inputs the theorem certifies agreement with **our** `stepT`, not with the ISA. **The theorem stays true; what it is a theorem ABOUT changes.** **Axis: DOMAIN OF THE CLAIM.** *(Fence landed verbatim in `ISA.lean:651`.)* |
 | ⭐ **10 hand-derived test vectors agreeing with `step`** | do the vectors match the **model they came from**? | is the **model right**? ⛔ **Known-good by construction** — *"hand-derived by the seat that wrote `step`, every one from a certificate already proved in `ISA.lean`."* **Right for a COST harness, wrong for a CORRECTNESS claim** — which is why ruling 3 names **Spike**, an authority outside the repo. *The `hbKappa` finding exactly: two records with a common ancestor agreeing is one record, counted twice.* |
 
