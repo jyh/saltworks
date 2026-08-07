@@ -5,6 +5,8 @@ Authors: Jason Hickey, Claude
 -/
 import SaltWorks.HDL.Decoder
 
+import SaltWorks.HDL.EmitN
+
 /-!
 # C4 · `core` — IMMEDIATE EXTRACTION
 
@@ -148,6 +150,13 @@ theorem immI_is_not_constant :
     sem immICirc (fun i => (wordI 1).getLsbD i)
       ≠ sem immICirc (fun i => (wordI 2).getLsbD i) := by decide +kernel
 
+/-- **Dense SSA — the precondition for instantiating this block into `core`.**
+`Compose.instOK` needs `ssa`, not merely `wf`: under `wf` alone the gate outputs
+may be sparse and `instNext` would under-report the region occupied. *Checked
+here rather than assumed at the assembly site.* -/
+theorem immBCirc_ssa : immBCirc.ssa = true := by decide +kernel
+
+#audit_axioms immBCirc_ssa
 #audit_axioms immI
 #audit_axioms immICirc
 #audit_axioms immICirc_wf

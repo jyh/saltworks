@@ -5,6 +5,8 @@ Authors: Jason Hickey, Claude
 -/
 import SaltWorks.HDL.Decoder
 
+import SaltWorks.HDL.EmitN
+
 /-!
 # C4 · `core` — THE WRITE-ENABLE DECODER
 
@@ -127,6 +129,13 @@ instruction with `rd = 3` enables exactly register 3. -/
 theorem regWrite_enables_exactly_one :
     weOf 3 true false = (List.range 32).map (· == 3) := by decide +kernel
 
+/-- **Dense SSA — the precondition for instantiating this block into `core`.**
+`Compose.instOK` needs `ssa`, not merely `wf`: under `wf` alone the gate outputs
+may be sparse and `instNext` would under-report the region occupied. *Checked
+here rather than assumed at the assembly site.* -/
+theorem regWrite_ssa : regWrite.ssa = true := by decide +kernel
+
+#audit_axioms regWrite_ssa
 #audit_axioms rwIn
 #audit_axioms rwPrefix
 #audit_axioms rwMatch

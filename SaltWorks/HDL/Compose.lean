@@ -67,9 +67,24 @@ def instNext (c : Circ) (off : Nat) : Nat := off + c.gates.length
 
 /-- **The side condition, stated rather than left to care.** Every input wire
 `σ i` must be strictly below `off` (already computed by the host), and `c` must
-be well-formed. -/
+be **dense SSA** — not merely well-formed.
+
+⛔ **`wf` IS NOT ENOUGH, AND THIS WAS WRONG WHEN FIRST LANDED.** I wrote
+`c.wf = true` here, and attempting `inst_sem` is what exposed it. `Circ.wf`
+requires gate outputs to be **distinct and `≥ nIn`** — it does *not* require them
+to be **contiguous**. So under `wf` alone a circuit may have sparse outputs
+(say `{5, 12, 7}` with `nIn = 5`), `instMap` sends them to `off+0, off+7, off+2`,
+and **`instNext = off + gates.length` UNDER-REPORTS the region actually
+occupied** — the next instantiation placed at `instNext` would silently collide
+with this one.
+
+✅ **`Circ.ssa` is exactly the missing property**: `ssaFrom nIn` forces
+`g.out == base` incrementing, so gate `i`'s output is exactly `nIn + i` and the
+image is precisely `off … off + gates.length - 1`. *And it costs nothing to
+require: `normalize_ssa` is landed and `emitPipeline'` normalizes anyway, so any
+block can be made dense before instantiation.* -/
 def instOK (c : Circ) (σ : Net → Net) (off : Nat) : Prop :=
-  c.wf = true ∧ ∀ i, i < c.nIn → σ i < off
+  c.ssa = true ∧ c.wf = true ∧ ∀ i, i < c.nIn → σ i < off
 
 /-! ### A concrete instantiation, kernel-checked
 
@@ -116,6 +131,20 @@ theorem haChain_nets_disjoint :
     (instGates ha (fun i => [2,3].getD i 0) 4).map Gate.out = [4, 5] := by
   decide +kernel
 
+
+/-! ### The blocks this seat has built are dense — checked, not assumed
+
+*If they were not, each would need `normalize` before instantiation. They are,
+so `instNext` is a genuine bound for every one of them.* -/
+
+theorem ha_ssa : ha.ssa = true := by decide +kernel
+
+/-- **Under `ssa`, the instantiated region is exactly `off … off+len-1`** — which
+is what makes `instNext` a real bound rather than an optimistic one. -/
+theorem ha_inst_region :
+    (instGates ha (fun i => i) 7).map Gate.out = [7, 8]
+      ∧ instNext ha 7 = 9 := by decide +kernel
+
 /-! ### THE OBLIGATION THIS FILE DOES NOT DISCHARGE
 
 The general theorem: under `instOK`, the embedded copy computes exactly what `c`
@@ -147,5 +176,7 @@ end
 #audit_axioms haChain_correct
 #audit_axioms haChain_has_four_gates
 #audit_axioms haChain_nets_disjoint
+#audit_axioms ha_ssa
+#audit_axioms ha_inst_region
 
 end SaltWorks.HDL

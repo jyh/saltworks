@@ -6,6 +6,8 @@ Authors: Jason Hickey, Claude
 import SaltWorks.HDL.ISA
 import SaltWorks.HDL.Sem
 
+import SaltWorks.HDL.EmitN
+
 /-!
 # C4 · `core` — THE DECODER, as a `Circ`
 
@@ -186,6 +188,13 @@ theorem decoder_signals_are_reachable :
     ctrlOf 0x000010B7#32          = [false, false, false, false, false, false] := by
   decide +kernel
 
+/-- **Dense SSA — the precondition for instantiating this block into `core`.**
+`Compose.instOK` needs `ssa`, not merely `wf`: under `wf` alone the gate outputs
+may be sparse and `instNext` would under-report the region occupied. *Checked
+here rather than assumed at the assembly site.* -/
+theorem decoder_ssa : decoder.ssa = true := by decide +kernel
+
+#audit_axioms decoder_ssa
 #audit_axioms dcIn
 #audit_axioms dcNot
 #audit_axioms dcInvs
