@@ -40,10 +40,9 @@ per bit   16 + 8 + 4 + 2 + 1  =  31 muxes
 gates     992 × 3 + 5 shared inverters = 2981        <- the oracle's primitive count
 ```
 
-**Those two numbers are `readtreem.v` (992) and `readtree.v` (2981) exactly**,
-which is why this file is a check on the emitter rather than a new design: if
-`emitSMux` does not turn this `Circ` into 992 mux cells, one of us is wrong and
-the disagreement is visible immediately.
+**The mux count is `readtreem.v`'s 992 exactly.** The primitive count is
+**2982**, not the oracle's 2981, and the extra gate is the shared `const` tie
+that replaces `x0` — see the note below on why 32 register leaves was wrong.
 
 ⚠️ **The five inverters are SHARED — one per address bit, not one per mux.** That
 is the silicon seat's measured sharp edge and the reason the peephole must never
@@ -62,22 +61,58 @@ discovering it.*
 
 namespace SaltWorks.HDL
 
-/-- Address width: 5 bits select one of 32 registers. -/
+/-! ### `x0` IS NOT STORED, AND THAT IS THE WHOLE OF THIS FILE'S CORRECTION
+
+The first version of this file built **32 register leaves**. That was wrong, and
+the cell counts could not catch it — a 32:1 tree needs 31 muxes whether leaf 0 is
+a register or a constant, so it matched the oracle's 992 and 2981 while
+describing the wrong object. ***A number matching exactly is not evidence the
+object is right.***
+
+Two independent facts say 31:
+
+* **This campaign's own ISA.** `SaltWorks/HDL/ISA.lean` enforces read-as-zero **on
+  the read port, unconditionally** — `St.get s r = if r = 0 then 0 else
+  s.regs[r.val]` — deliberately a fact about the port rather than an invariant on
+  `regs[0]`, which is what lets `get_zero` need no hypothesis. **A read of `x0`
+  therefore never consults storage.**
+* **The silicon seat's measurement:** a real regfile stores **992 flops, not
+  1024**. *"`x0` is hardwired, so storing it is 32 flops that can only ever hold
+  zero. 1024 counts ISA REGISTERS, not hardware STATE."*
+
+⇒ **31 registers are stored; leaf 0 of every tree is a CONSTANT ZERO.** That is
+the same substitution the flow already made on its own when `carry[0]` was tied
+low and correctly became a `conb` tie cell.
+
+**Consequence, stated because it moves a published number:** the primitive count
+goes **2981 → 2982** — one shared `const` gate appears — while the **mux count
+stays 992**. *The mux count was never able to distinguish the two designs, which
+is exactly why it agreed before the correction.* -/
+
+/-- Address width: 5 bits select one of 32 ISA registers. -/
 def rtAddrBits : Nat := 5
-/-- 32 registers of 32 bits, flattened. -/
+/-- ISA registers addressed. `x0` is among them and is NOT stored. -/
 def rtRegs : Nat := 32
+/-- Registers actually held in flops: `x1 … x31`. -/
+def rtStored : Nat := rtRegs - 1
 def rtWidth : Nat := 32
 
-/-- Input layout: `raddr` occupies nets `0 … 4`; register `i` bit `k` is at
-`rtAddrBits + i * rtWidth + k`. -/
-def rtIn : Nat := rtAddrBits + rtRegs * rtWidth
+/-- Input layout: `raddr` occupies nets `0 … 4`; **stored** register `i`
+(`1 ≤ i ≤ 31`) bit `k` is at `rtAddrBits + (i-1) * rtWidth + k`. -/
+def rtIn : Nat := rtAddrBits + rtStored * rtWidth
 
-/-- The net carrying register `i`'s bit `k`. -/
-def rtReg (i k : Nat) : Net := rtAddrBits + i * rtWidth + k
+/-- The shared constant-zero leaf that stands in for `x0`. One gate for the whole
+file — `x0` is one value, not thirty-two. -/
+def rtZero : Net := rtIn
 
 /-- The inverter for address bit `j` — **one per address bit, shared by every
-mux at that level**. Allocated immediately above the inputs. -/
-def rtNotSel (j : Nat) : Net := rtIn + j
+mux at that level**. Allocated above the tie cell. -/
+def rtNotSel (j : Nat) : Net := rtIn + 1 + j
+
+/-- The net carrying ISA register `i`'s bit `k`. **`i = 0` is the constant-zero
+leaf, not an input** — the read port never consults storage for `x0`. -/
+def rtReg (i k : Nat) : Net :=
+  if i == 0 then rtZero else rtAddrBits + (i - 1) * rtWidth + k
 
 /-- Three gates forming one 2:1 mux at base net `b`: `b` and `b+1` are the two
 `and`s and `b+2` is the `or`. The output is `b+2`.
@@ -122,9 +157,10 @@ def rtBits : Nat → Nat → List Gate × List Net
 
 /-- **The read path.** Five shared inverters, then 32 independent 32:1 trees. -/
 def readTree : Circ :=
+  let zero := (⟨rtZero, .const false⟩ : Gate)
   let invs := (List.range rtAddrBits).map fun j => (⟨rtNotSel j, .not j⟩ : Gate)
-  let (gs, outs) := rtBits rtWidth (rtIn + rtAddrBits)
-  { nIn := rtIn, gates := invs ++ gs, outs := outs }
+  let (gs, outs) := rtBits rtWidth (rtIn + 1 + rtAddrBits)
+  { nIn := rtIn, gates := zero :: invs ++ gs, outs := outs }
 
 /-! ## The oracle check — MEASUREMENTS, deliberately not theorems
 
@@ -155,7 +191,8 @@ false.)*
 **Expected, from `RTL/readtree.v` and `RTL/readtreem.v`:**
 `gates = 2981` (992 muxes × 3 + 5 shared inverters) and `muxCount = 992`. -/
 
--- Gate count against `readtree.v`'s 2981.  MEASURED: 2981.
+-- Gate count. 992 muxes x 3 + 5 inverters + 1 tie = 2982.  MEASURED: 2982.
+-- (readtree.v is 2981; the difference is the x0 tie cell, and it is the FIX.)
 #eval readTree.gates.length
 
 -- Mux sites against `readtreem.v`'s 992.  MEASURED: 992.
@@ -169,6 +206,8 @@ false.)*
 
 #audit_axioms rtAddrBits
 #audit_axioms rtRegs
+#audit_axioms rtStored
+#audit_axioms rtZero
 #audit_axioms rtWidth
 #audit_axioms rtIn
 #audit_axioms rtReg
