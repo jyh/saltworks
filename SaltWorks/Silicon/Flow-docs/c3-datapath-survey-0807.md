@@ -166,6 +166,45 @@ carry (the adder's shape) and select (the mux shape) — all three already
 enumerated. **What is new is only that the reduction is the block's PRIMARY
 function here rather than a side flag.**
 
+## THE CSR PATH (Zicsr) — priced for R5, and CHEAPER than an exclusion would suggest
+
+⚠️ **Campaign `R5` lists CSRs as a candidate v1 exclusion. This prices that
+decision; it does not presume it.** Measured on a 16-CSR machine-mode file with
+CSRRW/CSRRS/CSRRC. Predictions `CS1`–`CS5` on disk first.
+
+```
+untreated                    1088 cones, median 31, MAX 31, 47.1%
+  csr_rdata (read mux)  28   OVER    <- CS1 predicted 28, exactly
+  FLOP.D    (write)     31   OVER    <- CS2 predicted 4-6. WRONG.
+  FLOP.DE   (enable)    13   OK
+cut at csr_rdata:  write path -> 4   OK
+```
+
+**CS2 was wrong for a structural reason worth keeping.** Unlike the register
+file — whose write is a pure broadcast, cone **1** — **CSRRS/CSRRC are
+READ-MODIFY-WRITE, so the CSR write data contains the entire read cone**
+(28 + `rs1` + op = 31). ⇒ **`csr_rdata` must be a cut point, and then the write
+path collapses to 4.** *A block whose write reads first inherits its own read
+problem; nothing else in this datapath does that.*
+
+### ⭐ CS5 confirmed: the 12-bit address is the distinctive cost
+
+`csr_rdata`'s 28 leaves are **16 CSR operands + 12 address bits**. **Everywhere
+else in this datapath the control term was 2–5; here it is 12** — 43 % of the
+cone spent before a single operand is counted. ⇒ **With a 12-bit address, a CSR
+file larger than ~12 registers is over the ceiling on that ground alone**, where
+a 12-way *register* read would be trivial.
+
+⚠️ **And naming the address compare does NOT fix it under RTL.** `addr_match`
+survives as a net and **`csr_rdata`'s cone contains all 12 raw `csr_addr` bits
+and not `addr_match`** — recomputed inline. **Fifth block, fifth bypass.**
+
+⇒ **Pricing for R5: including CSRs costs ONE more read-mux tree and ONE more cut
+point (`csr_rdata`). No new mechanism.** Under option (A) the read mux is
+16 + 4 + 1 = **21**, inside the ceiling without even treeing it. **CSRs are not
+an expensive exclusion to reverse — that is the number, whatever the council
+decides with it.**
+
 ## What this means for C3
 
 1. **Option (A) is required for three things**: the register read path, the ALU,
