@@ -157,6 +157,38 @@ meaning, carried to the gate netlist, with no unproved link. **This is the
 keystone claim and it is the only sentence in this freeze worth saying in
 public.**
 
+### 4.1 The intended compilation scheme — stated so R4 can actually be run
+
+*Added after writing §7: **R4 asks the refuter to check that every emitted branch
+is forward, and the document did not say what the generator emits.** A
+kill-check whose referent is missing cannot be run — which is the defect this
+fleet spent 2026-08-06 finding in four separate instruments, including a guard
+specified against an error string that does not exist in Lean. So:*
+
+```
+compileExp (const n) d = [ADDI d x0 n]                    -- P3 bounds n
+compileExp (var x)   d = [ADD  d x0 (reg x)]
+compileExp (add a b) d = compileExp a d ++ compileExp b (d+1) ++ [ADD d d (d+1)]
+   (xor, slt identically, with XOR / SLT)
+
+compile (assign x e) = compileExp e t0 ++ [ADD (reg x) x0 t0]
+compile (seq s t)    = compile s ++ compile t
+compile (ite c s t)  = compileExp c t0
+                    ++ [BEQ t0 x0 (|S| + 1)]      -- c = 0  -> skip S, land on T
+                    ++ S                           -- S = compile s
+                    ++ [BEQ x0 x0 |T|]             -- unconditional: skip T
+                    ++ T                           -- T = compile t
+```
+
+**Both branches are forward**, which is what §2's no-fuel execution model rests
+on. ⭐ **And the unconditional jump is `BEQ x0 x0` — `x0` equals itself always,
+so the branch is taken unconditionally and NO SIXTH INSTRUCTION IS NEEDED.**
+Slice A excludes `JAL`/`JALR`; without this trick `ite` would not compile and the
+five-instruction claim would be false. *The refuter should confirm that `step`
+as landed actually evaluates `BEQ x0 x0` as taken rather than special-casing
+`x0` reads in a way that breaks it — that is R3's `x0` trap arriving from the
+other side.*
+
 **C5 — CERTIFICATES.** Concrete programs run end to end by `decide +kernel`.
 Cost is EVALUATION, not quantification — no input space is enumerated — so this
 is cheap and should be exercised on a program a reader can follow by hand.
@@ -225,8 +257,11 @@ trap, and a generator that ever allocates `x0` as a temporary is silently wrong
 in a way no type catches.
 
 **R4 — IS THE FORWARD-BRANCH CLAIM TRUE?** §2 asserts every emitted branch is
-forward, and the whole no-fuel execution model rests on it. **Check the `ite`
-case specifically.** If it is false, the execution model is wrong and C3's
+forward, and the whole no-fuel execution model rests on it. **The scheme is now
+written out in §4.1 so this check has a referent** — attack the `ite` case, and
+in particular the `BEQ x0 x0` unconditional jump, which is load-bearing: without
+it `ite` needs `JAL`, which Slice A excludes, and the five-instruction claim is
+false. If either branch can be backward, the execution model is wrong and C3's
 statement changes shape.
 
 **R5 — IS THE MUTATION CONTROL DISCRIMINATING?** Per tonight's rule: a mutant
