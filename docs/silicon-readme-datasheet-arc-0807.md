@@ -177,7 +177,48 @@ because the die was FULL. Ours is a sparse wedge in a tile with room to spare.**
 *(Read off the rendered image plus the utilization metric — not from placement
 coordinates, which I did not measure.)*
 
-🎯 **SO THE PAIR SHIPS WITH ITS CAPTION, and the caption is the point:**
+### ⛔⛔ HALT ON THE IMAGE — I WENT TO BUILD THE COMPOSITE AND FOUND A FIREWALL
+### PROBLEM AT THE FOOTER OF THE PAGE
+
+I rendered ISSCC'90 p.3 at 300 dpi to place it beside our render. **Every page
+of all four PDFs carries this line:**
+
+```
+Authorized licensed use limited to: GOOGLE.  Downloaded on August 07,2026
+at 01:25:02 UTC from IEEE Xplore.  Restrictions apply.
+```
+*(verified on all four: `isscc90…`, `iss90…`, `cicc92…`, `sunshine91…`)*
+
+⇒ **TWO distinct problems, and only one of them is copyright:**
+
+1. 🔴 **THE LANE.** These files were obtained under a **GOOGLE institutional
+   licence** — outside-lane access — and item ③ would put an image from them
+   into a **PUBLIC personal-lane repo.** The portfolio firewall
+   (JYH-ratified 2026-07-21) is explicit that outside-lane material does not cross
+   into personal repos. ***This is the firewall's case exactly, and it is the
+   one I would not want discovered after publication.***
+2. ⚖️ **THE COPYRIGHT.** Figure 6 is IEEE's to license; *"Restrictions apply"*
+   is their own notice. Republishing it needs a right we have not established.
+
+✅ **AND THE MITIGATION IS STRONG, BUT IT IS THE CAPTAIN'S TO INVOKE, NOT
+MINE: JYH IS AN AUTHOR OF THIS PAPER.** IEEE's policy permits authors to reuse
+their own figures with citation. ⇒ ***The right plausibly exists — through
+AUTHORSHIP, not through the Google licence*** — and if it is invoked, the image
+should be re-obtained by a personal-lane route (his own copy / IEEE author
+reuse), **not** cropped from the file on this disk.
+
+📌 **UNAFFECTED: §2, the numbers and citations.** *Bibliographic facts — DOI,
+page numbers, "measured 170 Mb/s" — are not copyrightable, and citing them is
+ordinary scholarship.* **The heritage paragraph ships as written.** *Reading
+these PDFs to VERIFY numbers was always a legitimate internal use; the boundary
+is only at publishing an IMAGE.*
+
+🎯 **RECOMMENDED NOW: ship our own render ALONE, with Figure 6 cited in words** —
+the description in this section is precise enough that a reader can look it up,
+and it costs us nothing. **Ship the pair only if the Captain invokes author
+reuse and supplies the figure from a personal-lane source.**
+
+🎯 **THE CAPTION EITHER WAY, and it is the point:**
 > *Left, 1990: hand-placed full-custom silicon whose architecture you can read
 > off the die. Right, 2026: an auto-placed standard-cell tile whose architecture
 > you cannot. The 1990 picture is legible because a person placed every column;
