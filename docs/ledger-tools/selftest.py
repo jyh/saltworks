@@ -372,6 +372,23 @@ with tempfile.TemporaryDirectory() as tmp:
     check("outside the default build: 2" in out,
           f"CLOSURE: miscounted audit sites (expected 2 from B), got:\n{out}")
 
+    # ⚠️ A standalone .lean TOOL is not a library module and must not inflate the
+    # OUTSIDE count. On 8/7 `docs/hdl-tools/reach_census.lean` landed and the count
+    # read 8 -> 10 modules; the audit-SITE total was unaffected (a tool carries no
+    # sites), which is why the wrong number survived being quoted on the bus.
+    (fix / "docs").mkdir(exist_ok=True)
+    (fix / "docs" / "some_tool.lean").write_text("-- a metaprogram, not a module\n")
+    _sp.run(["git", "-C", str(fix), "add", "-A"], capture_output=True)
+    rc, out = closure(fix)
+    check("SaltWorks.B" in out, "CLOSURE: lost the real orphan after adding a tool file")
+    check("some_tool" not in out.split("OUTSIDE")[-1],
+          "CLOSURE: a non-library .lean tool was counted as an OUTSIDE module")
+    check("outside the default build: 2" in out,
+          f"CLOSURE: a tool file changed the audit-site total, got:\n{out}")
+    check("excluded as NON-LIBRARY" in out,
+          "CLOSURE: the exclusion must be PRINTED, not silent — a filter nobody "
+          "can see is how the population becomes wrong without anyone noticing")
+
     # ---- the three tools the README lists as UNCOVERED ---------------------
     # Both of 2026-08-06's worst defects (the swap threshold, nudge_detect's
     # empty matcher) lived in the untested region. These are the properties

@@ -63,6 +63,20 @@ if _git.returncode != 0:
 tracked = _git.stdout.split()
 tracked = [p for p in tracked if not p.startswith(".lake")]
 
+# ⚠️ THE LIBRARY, NOT EVERY TRACKED .lean. The closure question is "which LIBRARY
+# modules does the hub fail to reach"; a standalone .lean TOOL is outside the hub
+# by design and always will be. On 2026-08-07 `docs/hdl-tools/reach_census.lean`
+# landed -- a Lean metaprogram, not a module -- and this tool reported OUTSIDE 8 -> 10
+# while the audit-site total (the number that matters) stayed at 53, because the
+# tool carries no audit sites. The evidence seat quoted the inflated module count on
+# the bus one paragraph before catching it. The SITE total was never wrong; the
+# MODULE count was, and only because the population was wrong.
+_nonlib = [p for p in tracked if p != HUB and not p.startswith("SaltWorks/")]
+tracked = [p for p in tracked if p == HUB or p.startswith("SaltWorks/")]
+if _nonlib:
+    print(f"import-closure: {len(_nonlib)} tracked .lean file(s) excluded as NON-LIBRARY "
+          f"(outside SaltWorks/): {', '.join(sorted(_nonlib))}")
+
 if not tracked:
     print(f"import-closure: ⛔ ZERO tracked .lean files under {ROOT!r} — an empty set "
           f"has nothing outside it, so 'OUTSIDE: 0' here would mean 'I read nothing', "
