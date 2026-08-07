@@ -125,8 +125,25 @@ Rules for this file:
   a shuttle", still not "fabricated".** *A queue position is not a chip,
   and the gap between them is a month and a foundry's decision.*
 
-  📌 **PROVENANCE OF THIS ROW, per the 07:46 source-tag law: REPORTED, not
-  measured.** No seat can reach the TinyTapeout app; the submission is the
+  ✅ **UPGRADED 2026-08-07 12:35 — THE SUBMISSION IS NOW MACHINE-VERIFIED,
+  NOT MERELY ATTESTED.** The shuttle API returns, unprompted, in the same
+  payload as the tile counts:
+
+  ```
+  "mostRecentSubmission":{"name":"Verified 8x8 bit-serial banyan switch",
+                          "repo":"https://github.com/jyh/tt-verified-banyan-switch"}
+  ```
+
+  **Our design, named, with our repo URL, reported by TinyTapeout's own
+  service.** ⇒ *The click I said I could not verify is verified — by a
+  source outside this fleet, found while instrumenting something else.*
+  **The row below is kept as written**, because what it says about the limits
+  of attestation was true when written and is the reason the upgrade is
+  worth recording. ⏳ **Submitted ≠ accepted is UNCHANGED** — this confirms
+  the submission, not the shuttle's acceptance.
+
+  📌 **PROVENANCE OF THIS ROW AS FIRST WRITTEN, per the 07:46 source-tag law:
+  REPORTED, not measured.** No seat can reach the TinyTapeout app; the submission is the
   Captain's act relayed by the maestro. **This seat verified the CI gates
   that made it possible** (GDS green all four jobs, replicated at two shas,
   three reds beneath as control) **and cannot verify the click.** *Recorded

@@ -66,5 +66,14 @@ echo >> "$OUT"; echo '---' >> "$OUT"; echo >> "$OUT"
 # Generated, never typed -- a commit hash does not age (resource lesson 5).
 python3 landed.py --since "$SINCE" >> "$OUT"
 
+echo >> "$OUT"; echo '---' >> "$OUT"; echo >> "$OUT"
+
+# The shuttle drain series -- appended, then cited. A projection needs a
+# measured slope; this keeps the readings accumulating so the slope exists.
+python3 tile_drain.py >> "$OUT" 2>&1 || \
+  echo "_(tile_drain: reading could not be taken; series unchanged — a gap is honest.)_" >> "$OUT"
+
+
+
 cp "$OUT" "$DOCS/EVIDENCE-ledger-latest.md"
 echo "wrote $OUT and EVIDENCE-ledger-latest.md"
