@@ -12,8 +12,7 @@ finding that by reading is much cheaper than finding it at assembly time.*
 the counts below are REGENERATED and not original.** *A census that keeps its
 first number after the number has moved is the exact defect this campaign has
 found four times today — and it would be especially cheap to commit in the
-document whose whole subject is missing pieces.* **Live count: 6 found, 4
-closed, 2 open + 1 decision.**
+document whose whole subject is missing pieces.* **Live count: 8 found, 6 closed; 0 open builds, 1 silicon decision (`sll`/`sra`).**
 
 ---
 
@@ -93,8 +92,8 @@ pure mux tree. It computes none of its inputs.**
 | 2 | and | `bitAnd32` | ✅ **LANDED** |
 | 3 | or | `bitOr32` | ✅ **LANDED** |
 | 4 | xor | `bitXor32` | ✅ **LANDED** |
-| 5 | slt | sub's sign bit, corrected for overflow | ⛔ **MISSING** |
-| 6 | sltu | sub's carry-out | ⛔ **MISSING** |
+| 5 | slt | `sltCirc` | ✅ **LANDED** |
+| 6 | sltu | `sltuCirc` | ✅ **LANDED** |
 | 7 | sll | — | ⛔ **MISSING** — see below |
 | 8 | srl | `shifter32` | ✅ exists |
 | 9 | sra | — | ⛔ **MISSING** — see below |
@@ -145,7 +144,7 @@ off_0 = 1088                    (= coreInWidth; state and instruction below it)
  4  bitwise     and / or / xor over rs1,rs2                       96   ✅ LANDED
  5  bitNot32    invert b, for sub                                 32   ✅ LANDED
  6  adder32×2   add, and sub via (a, ~b, cin=1)                  320
- 7  slt/sltu    from sub's sign and carry                        ~8   ⛔ MISSING
+ 7  sltCirc/sltuCirc  from sub's sign and carry                    7   ✅ LANDED
  8  shifters×3  sll / srl / sra                                1,458  ⛔ 2 MISSING
  9  aluSelect   muxes the ten                                  1,445
 10  regWrite    reads instr rd field + decoder                    163
@@ -166,10 +165,11 @@ the kind of off-by-one that a positional `outs` list cannot catch by type.*
 
 ## 5. WHAT THIS DOES **NOT** SAY
 
-* It does not say `core` is nearly done. **Two blocks are still missing**
-  (`slt`/`sltu`) and the two shift modes may be a modification to a landed organ.
-  *(Four were missing when this was written and closed the same day; this line is
-  regenerated, not original — see §3.)*
+* It does not say `core` is nearly done. **Every missing BUILD is now landed;
+  what remains is one DECISION** — `sll`/`sra` need a shifter mode `shifter32`
+  does not have, which is a change to a landed certified block and therefore
+  silicon's call, not mine. *(Six were missing when this was written and closed
+  the same day; this line is regenerated, not original — see §3.)*
 * It does not certify any wiring. **No `σ` in §4 has been written or checked.**
 * It does not settle C4's own statement, which still owes math's
   **`DeliversProgram`** hypothesis (`run` takes the program as an argument;
@@ -177,8 +177,8 @@ the kind of off-by-one that a positional `outs` list cannot catch by type.*
   comes from) and **`EntryLoaded`**.
 
 ⇒ ***The honest summary: C4's assembly is no longer blocked on THEORY, and is
-now blocked on TWO SMALL DERIVED BLOCKS, ONE SHIFTER DECISION, and three
-statement hypotheses — all named, none open research.***
+now blocked on ONE SHIFTER DECISION and four statement hypotheses — all named,
+none open research, and no unbuilt block on the critical path.***
 
 ---
 

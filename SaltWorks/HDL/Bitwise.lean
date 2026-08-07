@@ -3,25 +3,32 @@ Copyright (c) 2026 Jason Hickey. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Jason Hickey, Claude
 -/
+import SaltWorks.HDL.Adder
 import SaltWorks.HDL.Compose
 import SaltWorks.HDL.ISA
 
 /-!
-# C4 · THE BITWISE BLOCK — four of `aluSelect`'s six missing producers
+# C4 · THE OPERAND BLOCKS — six of `aluSelect`'s eight missing producers
 
 **`aluSelect` takes TEN precomputed 32-bit operand results and computes none of
 them** (`AluSelect.lean:56`; census in `docs/hdl-c4-core-assembly-plan-0807.md`).
-Of the eight with no producer in the tree, **four are pointwise and land here**:
+Eight had no producer in the tree. **Six of them land here:**
 
 ```
-and   or   xor        aluSelect results 2, 3, 4
-not                   NOT an ALU result -- it is what makes `sub` из `adder32`,
-                      which needs (a, ~b, carry-in 1)
+and   or   xor        aluSelect results 2, 3, 4        pointwise
+slt   sltu            aluSelect results 5, 6           derived from the adder
+not                   NOT an ALU result -- it is what makes `sub` out of
+                      `adder32`, which needs (a, ~b, carry-in 1)
 ```
 
-*The remaining four — `slt`, `sltu`, `sll`, `sra` — are not pointwise and are not
-in this file: two are derived from the adder's sign and carry, and two need a
-shifter mode `shifter32` does not have.*
+⚠️ **THIS FILE'S TITLE SAID "BITWISE" AND "FOUR" WHEN IT WAS COMMITTED AN HOUR
+AGO, AND BOTH WENT STALE THE MOMENT `slt`/`sltu` LANDED IN IT.** *Regenerated
+rather than left — the same reflex this campaign has now caught five times in two
+days, and a file that names the reflex is the worst place to commit it.*
+
+*The remaining two — `sll` and `sra` — are NOT here and are not a build: they
+need a shifter mode `shifter32` does not have, which is a change to a landed,
+certified block and therefore silicon's decision.*
 
 ## Why one constructor and not three files
 
@@ -142,6 +149,122 @@ theorem bitNot32_is_not_identity :
     sem bitNot32 (fun i => (0xDEADBEEF : BitVec 32).getLsbD i)
       ≠ (List.range 32).map (fun k => (0xDEADBEEF : BitVec 32).getLsbD k) := by
   decide +kernel
+
+/-! ## `slt` and `sltu` — the two DERIVED results
+
+*`aluSelect` results 5 and 6. They are not pointwise and they are not new
+arithmetic: both fall out of the subtraction `adder32` already computes as
+`a + ~b + 1` (which is what `bitNot32` above is for).*
+
+```
+sltu a b  =  ¬cout                       unsigned: the borrow IS the comparison
+ovf       =  (a31 ⊕ b31) ∧ (a31 ⊕ s31)   subtraction overflows when the operands
+                                         differ in sign and the result takes b's
+slt  a b  =  s31 ⊕ ovf                   signed: the sign, corrected for overflow
+```
+
+⚠️ **RISC-V `SLT`/`SLTU` write a full word — `1` or `0` — so bits 1…31 are a
+shared constant, not a copy of anything.** *One `const` gate for the whole block,
+the same trick `readTree` uses for `x0`.*
+
+📌 **AND THE CERTIFICATES BELOW DRIVE THESE THROUGH `adder32` ITSELF rather than
+through a hand-derived carry.** *Deriving the carry by hand in the test would be
+assuming exactly the relationship under test; running the real adder and taking
+its 33rd output is an independent computation of the same quantity.* -/
+
+/-- Inputs: `a31`, `b31`, `s31` (the subtraction's sign bit). -/
+def sltCirc : Circ :=
+  { nIn   := 3
+    gates :=
+      [ ⟨3, .xor 0 1⟩        -- a31 ⊕ b31
+      , ⟨4, .xor 0 2⟩        -- a31 ⊕ s31
+      , ⟨5, .and 3 4⟩        -- overflow
+      , ⟨6, .xor 2 5⟩        -- slt = s31 ⊕ ovf
+      , ⟨7, .const false⟩ ]
+    outs  := 6 :: List.replicate 31 7 }
+
+/-- Input: the subtraction's carry-out. -/
+def sltuCirc : Circ :=
+  { nIn   := 1
+    gates := [⟨1, .not 0⟩, ⟨2, .const false⟩]
+    outs  := 1 :: List.replicate 31 2 }
+
+theorem sltCirc_ssa  : sltCirc.ssa  = true := by decide +kernel
+theorem sltuCirc_ssa : sltuCirc.ssa = true := by decide +kernel
+theorem sltCirc_wf   : sltCirc.wf   = true := Circ.wf_of_ssa sltCirc_ssa
+theorem sltuCirc_wf  : sltuCirc.wf  = true := Circ.wf_of_ssa sltuCirc_ssa
+
+/-- `a - b` through the REAL adder: `a + ~b + 1`. Outputs `0…31` are the
+difference; output `32` is the carry-out. -/
+def subOut (a b : BitVec 32) : List Bool :=
+  sem adder32 (fun i =>
+    if i < 32 then a.getLsbD i
+    else if i < 64 then !(b.getLsbD (i - 32))
+    else true)
+
+def sltDrive (a b : BitVec 32) : List Bool :=
+  sem sltCirc (fun i =>
+    if i == 0 then a.getLsbD 31
+    else if i == 1 then b.getLsbD 31
+    else (subOut a b).getD 31 false)
+
+def sltuDrive (a b : BitVec 32) : List Bool :=
+  sem sltuCirc (fun _ => (subOut a b).getD 32 false)
+
+/-- The word: bit 0 carries the answer, bits 1…31 are zero. -/
+def cmpWord (r : Bool) : List Bool := r :: List.replicate 31 false
+
+/-- ⭐ **The subtraction path really is a subtraction** — checked before the
+comparators are, so a failure downstream cannot be blamed on it. -/
+def subOK : Bool :=
+  bwWords.all fun a => bwWords.all fun b =>
+    (subOut a b).take 32 == (List.range 32).map (fun k => (a - b).getLsbD k)
+
+theorem sub_via_adder_correct : subOK = true := by decide +kernel
+
+def sltOK  : Bool := bwWords.all fun a => bwWords.all fun b =>
+  sltDrive a b == cmpWord (BitVec.slt a b)
+def sltuOK : Bool := bwWords.all fun a => bwWords.all fun b =>
+  sltuDrive a b == cmpWord (BitVec.ult a b)
+
+/-- ⭐ **Signed comparison, against `BitVec.slt`**, driven through the real adder. -/
+theorem sltCirc_correct : sltOK = true := by decide +kernel
+/-- ⭐ **Unsigned comparison, against `BitVec.ult`.** -/
+theorem sltuCirc_correct : sltuOK = true := by decide +kernel
+
+/-! ### NON-VACUITY — signed and unsigned must DISAGREE
+
+*The spread contains `0x80000000` and `1`, which is exactly the pair that
+separates them: as signed, `0x80000000` is the most negative word; as unsigned it
+is the largest. A `slt` that silently computed `sltu` would pass every test that
+did not include such a pair.* -/
+
+/-- ⛔ **`slt` and `sltu` disagree on `(0x80000000, 1)`** — so the overflow
+correction is doing real work and is not decoration. -/
+theorem slt_differs_from_sltu :
+    sltDrive 0x80000000 1 ≠ sltuDrive 0x80000000 1 := by decide +kernel
+
+/-- ⛔ **…and neither block satisfies the other's specification.** -/
+theorem cmp_blocks_are_distinct :
+    (bwWords.all fun a => bwWords.all fun b => sltDrive a b == cmpWord (BitVec.ult a b)) = false
+      ∧ (bwWords.all fun a => bwWords.all fun b =>
+           sltuDrive a b == cmpWord (BitVec.slt a b)) = false := by
+  decide +kernel
+
+/-- The upper 31 bits really are constant zero — `SLT` writes a word, not a bit. -/
+theorem cmp_upper_bits_are_zero :
+    (sltDrive 0x80000000 1).drop 1 = List.replicate 31 false
+      ∧ (sltuDrive 1 0x80000000).drop 1 = List.replicate 31 false := by
+  decide +kernel
+
+#audit_axioms sltCirc sltuCirc
+#audit_axioms sltCirc_ssa sltuCirc_ssa sltCirc_wf sltuCirc_wf
+#audit_axioms subOut sltDrive sltuDrive cmpWord
+#audit_axioms subOK sub_via_adder_correct
+#audit_axioms sltOK sltuOK sltCirc_correct sltuCirc_correct
+#audit_axioms slt_differs_from_sltu
+#audit_axioms cmp_blocks_are_distinct
+#audit_axioms cmp_upper_bits_are_zero
 
 #audit_axioms bwCirc bitAnd32 bitOr32 bitXor32 bitNot32
 #audit_axioms bitAnd32_ssa bitOr32_ssa bitXor32_ssa bitNot32_ssa
