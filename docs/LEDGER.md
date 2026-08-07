@@ -525,3 +525,224 @@ build below **did not compile this module**; the targeted build did.
 - **`applyDup`'s controls are at `n = 2` over `Bool`.** That is enough to break
   the implication (one counterexample suffices), but it is not a claim about how
   a *whole* mutated network behaves. No such claim is made.
+
+---
+
+## STACK-B2M — the `StrictMonoOn` bridge (sorted ∧ distinct ⇒ the banyan's hypothesis)
+**2026-08-07 · Opus executor · `SaltWorks/Stack/Perm.lean` (new Step 5) + `SaltWorks/Stack/Bridge.lean` (new module)**
+
+### THE VERDICT FIRST — `banyan_selfrouting` APPLIES, END TO END
+
+No blocker. `SaltWorks/Stack/Bridge.lean` calls
+`SaltWorks.Banyan.banyan_selfrouting` on a Batcher-sorted destination vector and
+lands its full conclusion:
+
+```lean
+theorem batcher8_banyan_selfrouting {k : ℕ} (hn : 8 ≤ 2 ^ k) {v : Fin 8 → ℕ}
+    (hi : Function.Injective v) (hlt : ∀ i, v i < 2 ^ k) :
+    (∀ m ≤ k,
+        Set.InjOn (fun s => Banyan.line m s (extendIio 0 (runNet batcher8 v) s)) (Set.Iio 8)) ∧
+      (∀ s < 8, Banyan.line k s (extendIio 0 (runNet batcher8 v) s) = s) ∧
+      (∀ s, Banyan.line 0 s (extendIio 0 (runNet batcher8 v) s)
+        = extendIio 0 (runNet batcher8 v) s)
+```
+
+Read the surviving hypotheses, because that is the node: **`hdest` is gone.**
+What the caller still owes is distinctness of the destinations, the address
+bound, and `8 ≤ 2 ^ k`. Sortedness — the hypothesis nothing in the campaign
+could previously discharge — is now discharged by the network itself.
+
+### What landed, and where
+
+**In `Stack/Perm.lean`, as Step 5 — the reusable part (19 declarations).**
+
+- `extendIio (d : α) (v : Fin n → α) : ℕ → α` — the carrier bridge as data:
+  `v` below `n`, the junk value `d` at and above it, with `extendIio_apply` /
+  `extendIio_of_le` pinning both branches.
+- `strictMono_of_isSorted_of_injective` — ⭐ the mathematical content, and it is
+  one mathlib lemma wide (see below).
+- `strictMonoOn_extendIio` — the carrier half: `StrictMono v` on `Fin n` ⇒
+  `StrictMonoOn (extendIio d v) (Set.Iio n)`. Not on all of `ℕ`; the junk breaks
+  that, and `Set.Iio n` is exactly the region the router quantifies over.
+- `strictMonoOn_extendIio_of_isSorted` — the two composed, still generic.
+- `runNet_forall` — a network preserves any pointwise property of its wires
+  (`runNet_perm` used as a transport lemma). The router consumes it at
+  `p := (· < 2 ^ k)`, i.e. the address-width side condition.
+- `strictMonoOn_extendIio_runNet` — ⭐ **the bridge at the network**: a network
+  passing `ZeroOne.lean`'s Boolean check, on a distinct input, produces the
+  router's hypothesis. Both landed halves are consumed and neither is optional:
+  `zeroOne_principle` for the `≤`, `runNet_injective` for the `≠`.
+  `strictMonoOn_extendIio_runNet_of_nodup` is the same with the hypothesis in
+  KB3's `Nodup` shape (`List.nodup_ofFn` is an `Iff`, so nothing is lost).
+- `banyanHyps_of_sorts_bool` / `batcher8_banyanHyps` — ⭐ **everything
+  `banyan_selfrouting` needs except `hn`**, as a bare `∧`, with the bound left
+  general at `B` rather than fixed at `2 ^ k` (the bound plays no arithmetic role
+  on this side of the seam).
+
+**In `Stack/Bridge.lean`, the application (4 declarations):**
+`banyan_selfrouting_of_sorts_bool`, `batcher8_banyan_selfrouting`,
+`batcher8_banyan_selfrouting_of_nodup`, and one control.
+
+### THE CARRIER DECISION — generic, and it was not contorted
+
+**Route (a): stated generically, instantiated at `ℕ` only where the router
+forces it.** Everything through `strictMonoOn_extendIio_runNet` is at general
+`n` and general `α : Type u`: `extendIio` is carrier-polymorphic,
+`strictMono_of_isSorted_of_injective` asks for `PartialOrder α`,
+`strictMonoOn_extendIio` for `Preorder α`. `ℕ` enters exactly twice — at
+`banyanHyps_of_sorts_bool`, because `banyan_selfrouting`'s `dest` is `ℕ → ℕ`,
+and at the applications.
+
+The reason it is not contorted: `StrictMonoOn f s` constrains only the *domain*
+order (`ℕ`, fixed by the router) and the *codomain* order (free). So the
+generality costs nothing — there was no point where `α := ℕ` would have made a
+proof shorter.
+
+**The junk value is explicit (`d`), not an `Inhabited α`.** A consumer should be
+able to see which value it is handing over; the routing lane passes `0`.
+`extendIio_of_le` is kept so nobody reads this function as secretly total.
+
+### The two conjuncts, and which module owns which
+
+The brief's framing held up exactly. `IsSorted` is **non-strict** by design —
+a comparator network sorts *multisets*, and a repeated value stays repeated — so
+`ZeroOne.lean` cannot reach `StrictMonoOn` on its own at any `n`. The `<` comes
+from injectivity, which is a **permutation** fact and lives in `Perm.lean`. The
+bridge is the first place in the campaign where both landed theorems are needed
+and neither suffices.
+
+### Non-vacuity — four controls, all of them `¬`
+
+Each is a proof that the goal is **FALSE**, not unreachable.
+
+- `dup_isSorted` + `dup_not_strictMonoOn` — ⭐ the pair that carries the
+  argument. `![1, 1] : Fin 2 → ℕ` **is** `IsSorted`, and its extension
+  **provably fails** `StrictMonoOn` at `(0, 1)`. So the `Function.Injective`
+  hypothesis is load-bearing and `ZeroOne.lean` alone cannot reach the router.
+- `swap_injective` + `swap_not_strictMonoOn` — the mirror: `![1, 0]` is
+  injective and fails for want of sortedness. Neither half can be dropped.
+- `batcher4_dup_run` + `batcher4_dup_not_strictMonoOn` — ⭐ the sharpest one,
+  and the one that is about the *network* rather than about an abstract vector:
+  `![0, 0, 1, 2]` is already sorted, so Batcher's 4-wire network returns it
+  unchanged (pinned against the literal by `decide`), and the extended output
+  fails `StrictMonoOn`. **Running the network does not repair a duplicate**, so
+  `hi` cannot be dropped from `strictMonoOn_extendIio_runNet` itself.
+- `batcher4_run` + `batcher4_strictMonoOn` — the positive side: a genuinely
+  scrambled distinct input (`![3, 1, 2, 0]` ↦ `[0, 1, 2, 3]`, pinned), on which
+  the bridge fires. The network had to move the values.
+- `banyan_conflict_of_const` (in `Bridge.lean`) — the conclusion is not free
+  either: `no_conflict`'s `Set.InjOn` fails outright for a constant destination
+  map at stage `m = 0`, where `line 0 s d = d`.
+
+### The software lane is untouched
+
+`Spec.lean`'s `SortsTo := SortedW ∧ PermW` was not weakened, restated, or
+re-derived, and `batcher8_sortsTo_word` is byte-identical. **No common parent
+was introduced, and one should not be.** The two forms are not two views of one
+statement: `SortsTo` is a relation between an input list and an output list and
+is *permutation*-based; `StrictMonoOn` is a property of a single function on an
+initial segment and is *injectivity*-based, which `SortsTo` deliberately does
+not require (the software lane must sort inputs with repeats — that is the
+normal case for a sorter). A parent would have to carry injectivity as an
+optional field, which is a `∧` wearing a hat. Left as two statements.
+
+### What mathlib supplied — and what it did not
+
+FOUND, not proved:
+
+- `Monotone.strictMono_of_injective` (`Mathlib/Order/Monotone/Defs.lean:232`) —
+  **the entire mathematical content of the bridge.** `IsSorted v` is `Monotone v`
+  *definitionally* on `Fin n` (both are `∀ i j, i ≤ j → v i ≤ v j`), so
+  `strictMono_of_isSorted_of_injective` is one term with nothing to prove.
+  `MonotoneOn.strictMonoOn_of_injOn` (`Order/Monotone/Basic.lean:237`) was found
+  first and is the `On`-flavoured alternative; it was **not** used, because
+  doing the strictness on `Fin n` and the carrier change afterwards keeps the
+  two concerns in separate lemmas.
+- `List.nodup_ofFn` (`Mathlib/Data/List/FinRange.lean:52`) — the `Nodup` ↔
+  `Injective` translation, an `Iff`.
+- `Fin.mk_lt_mk`, `Set.mem_Iio`, `dif_pos` / `dif_neg`, `Nat.not_lt`.
+
+NOT supplied: nothing about sorting networks, as before. And nothing connects a
+sorted-and-distinct vector to a routing hypothesis — that composition is this
+node.
+
+**Two narrow imports added to `Perm.lean`**: `Mathlib.Order.Monotone.Defs` and
+`Mathlib.Order.Interval.Set.Defs`. Deliberately `Defs` and not `Basic` — the
+`Basic` files were read and nothing in them is needed.
+
+### Where it went, and why the node is split across two files
+
+**`Stack/Bridge.lean` is a separate module and holds only the four application
+theorems.** The reason is an import, not taste: `Banyan/SelfRouting.lean` opens
+with `import Mathlib` — the whole library. `Stack/Perm.lean` is the module whose
+subject *is* instance hygiene (its header is a warning about `letI` silently
+electing the unsigned order on `BitVec`), and pulling a universe of instances
+into it to reach one theorem is exactly the risk that header exists to name.
+
+So the split is: **all the reusable content in `Perm.lean`**, which the hub
+builds and the full build therefore checks; **the full-Mathlib dependency
+confined to `Bridge.lean`**, which is four one-term theorems and a control.
+
+**The import is owed** — but it was already anticipated. Another seat added
+`import SaltWorks.Stack.Bridge` to `SaltWorks.lean` in the shared working tree
+at 11:53 today (uncommitted, along with three `HDL` modules); this seat did not
+touch the hub. Stated plainly: the full build recorded below ran **before** that
+edit and therefore did **not** compile `Bridge.lean` — the targeted build did.
+
+### Attempts, build, audit
+
+- **19 of 23 declarations: first attempt.** The whole Step 5 chain and every
+  control went through on the first serious pass.
+- **One correction, one cause.** `banyanHyps_of_sorts_bool`'s second conjunct
+  failed with an application type mismatch: `runNet_forall`'s predicate `p` is a
+  higher-order metavariable and unification could not invent
+  `fun x => x < B` from the goal. Fixed by naming it —
+  `runNet_forall (p := fun x => x < B)`. Second attempt, green. Nothing else was
+  retried and nothing was flagged.
+- **The statement shape was not iterated at all** — one pass. The brief's
+  decomposition (strictness on `Fin n`, carrier afterwards) was taken as written
+  and did not need revising.
+- **Build:** `saltbuild.sh SaltWorks.Stack.Bridge` → `saltbuild EXIT=0`, 8586
+  jobs (this compiles `Perm.lean` too). Full `saltbuild.sh` from `saltworks` →
+  `saltbuild EXIT=0`, 8620 jobs; **one** warning in the whole log, the
+  pre-existing `HDL/CompareExchange.lean:337` (`st₀` not explicitly referenced),
+  a file this node did not touch. Zero warnings in `Stack/Perm.lean` and
+  `Stack/Bridge.lean`.
+- **Axioms:** all 23 declarations audited two ways — `#audit_axioms` in-file
+  (build-failing) and an out-of-band `#print axioms` sweep in `ScratchMATHB2M.lean`
+  (gitignored, not committed). They agree. Every declaration is a subset of
+  `[propext, Classical.choice, Quot.sound]`; `extendIio`, `extendIio_apply` and
+  `extendIio_of_le` depend on **no axioms at all**, and the four `decide`-shaped
+  controls come in at `[propext, Quot.sound]`. No `sorry`, no `native_decide`, no
+  new axioms. The sweep also re-checked the three consumed results
+  (`zeroOne_principle`, `runNet_injective`, `Banyan.banyan_selfrouting`).
+- **Honest line count.** `Perm.lean` **+210 lines**: the Step 5 region is 177
+  lines of which **73 are Lean** (statements and proofs, 19 declarations) and 75
+  are docstrings; plus 2 imports, 8 `#audit_axioms` lines, and ~25 lines of
+  module-header prose explaining why the two conjuncts live in two modules.
+  `Bridge.lean` **123 lines**: **38 lines of Lean** (4 declarations), 60 lines of
+  header and docstrings, 2 audit lines, 24 blank. So the node is **111 lines of
+  Lean** in total, and the docstrings outweigh them — which is the right ratio
+  for a seam whose whole difficulty is knowing which hypothesis comes from where.
+
+### Left undetermined
+
+- **No payload travels with the destinations.** `banyan_selfrouting`'s conclusion
+  is about `line` — which link each source occupies at each stage — and that is
+  all that is claimed. Nothing here says a *packet* arrives; that is the
+  composed-switch statement in `docs/bb1-composed-switch-addendum.md`, and it
+  needs the payload to be carried alongside the address by the same permutation.
+  `runNet_perm`'s `σ` is the handle for that and it is still an existential.
+- **The concentrated-input assumption is inherited, not discharged.** The router
+  requires the active sources to be exactly `{0, …, n-1}`; the network is fed a
+  total `v : Fin n → ℕ`, so this is satisfied by construction here, but a real
+  switch with idle inputs needs a *concentrator* in front and this node does not
+  build one.
+- **`extendIio` is not the only carrier bridge one could want.** A consumer
+  holding a `Vector` rather than a `Fin n → α` pays one `Vector.ofFn_getElem`
+  hop, as `batcher8_sortsToV_word` already does. No `Vector` form was added
+  because nothing asked for it.
+- **The address bound is `∀ i, v i < B` on the *input*.** It transports to the
+  output through `runNet_forall`. If a future caller has the bound only on the
+  output, the same lemma runs the other way through `runNet_perm`, but that
+  direction was not stated.

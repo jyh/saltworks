@@ -8,6 +8,8 @@ import Mathlib.Data.List.FinRange
 import Mathlib.Data.List.OfFn
 import Mathlib.Data.Multiset.Basic
 import Mathlib.Data.Fin.VecNotation
+import Mathlib.Order.Monotone.Defs
+import Mathlib.Order.Interval.Set.Defs
 import SaltWorks.Stack.ZeroOne
 import SaltWorks.Stack.Spec
 
@@ -109,6 +111,29 @@ reached** — `batcher8_sortsTo_word`. What is *not* reachable, and should not b
 is `SortsTo` from `batcher8_sorts Word` with an inferred instance: there is no
 instance to infer, and installing one would put the signed and unsigned orders
 behind the same notation.
+
+## ⭐ THE `StrictMonoOn` BRIDGE — why the two halves are one hypothesis
+
+`Banyan/SelfRouting.lean`'s routing theorem takes exactly one hypothesis about
+the traffic: `StrictMonoOn dest (Set.Iio n)`. That name hides **two** conjuncts,
+and this campaign proves them in two different modules:
+
+* **monotone** — `ZeroOne.lean`'s `IsSorted`, which is *non-strict*
+  (`∀ i j, i ≤ j → v i ≤ v j`);
+* **strict** — which cannot come from sortedness at all. It comes from
+  `runNet_injective` above, i.e. from the permutation half.
+
+So the bridge is not bookkeeping: it is the place where this module's theorem and
+`ZeroOne.lean`'s theorem are *both* needed and neither suffices.
+`dup_not_strictMonoOn` below is the proof that the second half is load-bearing —
+a sorted vector with a repeat provably fails `StrictMonoOn`.
+
+The second half of the bridge is a **carrier** change. `runNet` produces
+`Fin n → α`; the routing theorem wants `ℕ → ℕ`. `extendIio d v` crosses that gap
+by agreeing with `v` below `n` and returning the junk value `d` above it, and
+`Set.Iio n` is precisely the region where the junk is not consulted. Both halves
+are stated at general `n` and general `α`; nothing here is special to `ℕ`, which
+enters only at the routing theorem's own carrier.
 
 ## Non-vacuity
 
@@ -432,6 +457,183 @@ theorem batcher8_word_run_not_unsigned :
         (List.ofFn (runNetW batcher8 ![3, -1, 7, 0, -5, 2, 9, -2])) := by
   decide +kernel
 
+/-! ## Step 5 — the `StrictMonoOn` bridge
+
+Sorted (`ZeroOne.lean`) **and** distinct (Step 2 above) ⇒ strictly monotone; then
+across the carrier boundary `Fin n → α` ↝ `ℕ → α`, on `Set.Iio n`. That composite
+is the single hypothesis `Banyan/SelfRouting.lean`'s routing theorem takes.
+
+The module header explains why this is not bookkeeping. The short version: the
+`≤` in `IsSorted` is non-strict by design — a comparator network sorts
+multisets, and a repeated value stays repeated — so the `<` the router needs can
+only come from injectivity, which is a *permutation* fact. -/
+
+/-- **The carrier bridge, as data.** `extendIio d v` is the wire-indexed vector
+`v` seen as a function on all of `ℕ`: it agrees with `v` below `n` and returns
+the junk value `d` at and above `n`.
+
+The junk is never consulted by anything downstream, because every statement about
+this function is relativised to `Set.Iio n`. Stated with an explicit `d` rather
+than an `Inhabited α` so that the caller can see which value it is handing over —
+the routing lane passes `0`. -/
+def extendIio (d : α) (v : Fin n → α) : ℕ → α :=
+  fun s => if h : s < n then v ⟨s, h⟩ else d
+
+/-- Below `n`, `extendIio` is `v`. -/
+theorem extendIio_apply (d : α) (v : Fin n → α) {s : ℕ} (h : s < n) :
+    extendIio d v s = v ⟨s, h⟩ := dif_pos h
+
+/-- At and above `n`, `extendIio` is the junk value. Kept so that a consumer can
+see the junk is reachable — this function is *not* secretly total. -/
+theorem extendIio_of_le (d : α) (v : Fin n → α) {s : ℕ} (h : n ≤ s) :
+    extendIio d v s = d := dif_neg (Nat.not_lt.mpr h)
+
+/-- ⭐ **SORTED **AND** DISTINCT ⇒ STRICTLY MONOTONE**, on the network's own
+carrier. This is the whole content of the bridge, and it is one mathlib lemma
+wide: `IsSorted v` *is* `Monotone v` definitionally on `Fin n`, so
+`Monotone.strictMono_of_injective` applies with nothing to prove.
+
+`PartialOrder` and not `Preorder`, because `≤` plus `≠` gives `<` only when the
+order is antisymmetric. -/
+theorem strictMono_of_isSorted_of_injective [PartialOrder α] {v : Fin n → α}
+    (hs : IsSorted v) (hi : Function.Injective v) : StrictMono v :=
+  Monotone.strictMono_of_injective (fun _ _ h => hs _ _ h) hi
+
+/-- The carrier half: a strictly monotone vector extends to a function on `ℕ`
+that is strictly monotone **on the initial segment** `Set.Iio n`. Not on all of
+`ℕ` — the junk value above `n` breaks that, and `Set.Iio n` is exactly the region
+the routing theorem quantifies over. -/
+theorem strictMonoOn_extendIio [Preorder α] {v : Fin n → α} (h : StrictMono v) (d : α) :
+    StrictMonoOn (extendIio d v) (Set.Iio n) := by
+  intro a ha b hb hab
+  rw [extendIio_apply d v (Set.mem_Iio.mp ha), extendIio_apply d v (Set.mem_Iio.mp hb)]
+  exact h (Fin.mk_lt_mk.mpr hab)
+
+/-- The two halves composed: sorted + injective ⇒ `StrictMonoOn` on `Set.Iio n`.
+Still at general `n` and general `α`. -/
+theorem strictMonoOn_extendIio_of_isSorted [PartialOrder α] {v : Fin n → α}
+    (hs : IsSorted v) (hi : Function.Injective v) (d : α) :
+    StrictMonoOn (extendIio d v) (Set.Iio n) :=
+  strictMonoOn_extendIio (strictMono_of_isSorted_of_injective hs hi) d
+
+/-- **A network preserves every pointwise property of its wires.** The values on
+the output wires are the values on the input wires, rearranged, so any `p` that
+held of all of them still does. This is `runNet_perm` used as a transport lemma
+rather than as a permutation statement; the routing lane consumes it at
+`p := (· < 2 ^ k)`, which is the address-width side condition. -/
+theorem runNet_forall [LinearOrder α] {p : α → Prop} (net : Network n) {v : Fin n → α}
+    (h : ∀ i, p (v i)) (i : Fin n) : p (runNet net v i) := by
+  obtain ⟨σ, hσ⟩ := runNet_perm net v
+  rw [hσ]
+  exact h (σ i)
+
+/-- ⭐ **THE BRIDGE AT THE NETWORK.** Feed any network that passes `ZeroOne.lean`'s
+Boolean check an input with **distinct** entries, and the extended output is
+`StrictMonoOn` on `Set.Iio n` — the routing theorem's hypothesis, produced.
+
+Both landed halves are consumed here and neither is optional: `zeroOne_principle`
+for sortedness, `runNet_injective` for strictness. -/
+theorem strictMonoOn_extendIio_runNet {net : Network n} (hb : Sorts net Bool)
+    [LinearOrder α] {v : Fin n → α} (hi : Function.Injective v) (d : α) :
+    StrictMonoOn (extendIio d (runNet net v)) (Set.Iio n) :=
+  strictMonoOn_extendIio_of_isSorted (zeroOne_principle hb v) (runNet_injective net hi) d
+
+/-- The same with the hypothesis in `Nodup` form, which is the shape
+`runNet_ofFn_nodup` and the BB-1 addendum's KB3 speak. `List.nodup_ofFn` is the
+translation and it is an `Iff`, so nothing is lost either way. -/
+theorem strictMonoOn_extendIio_runNet_of_nodup {net : Network n} (hb : Sorts net Bool)
+    [LinearOrder α] {v : Fin n → α} (hi : (List.ofFn v).Nodup) (d : α) :
+    StrictMonoOn (extendIio d (runNet net v)) (Set.Iio n) :=
+  strictMonoOn_extendIio_runNet hb (List.nodup_ofFn.mp hi) d
+
+/-- ⭐ **EVERYTHING THE ROUTING THEOREM NEEDS EXCEPT `n ≤ 2 ^ k`.** Distinct
+destinations, all below the address bound `B`, sorted by the network: the output
+is strictly monotone on the initial segment and still below `B` there.
+
+`B` is left general rather than fixed at `2 ^ k` — the bound plays no arithmetic
+role on this side of the seam, and the router instantiates it. The junk value is
+`0`, and `extendIio_of_le` says where it lives; the second conjunct is guarded by
+`s < n` and never sees it. -/
+theorem banyanHyps_of_sorts_bool {net : Network n} (hb : Sorts net Bool) {B : ℕ}
+    {v : Fin n → ℕ} (hi : Function.Injective v) (hlt : ∀ i, v i < B) :
+    StrictMonoOn (extendIio 0 (runNet net v)) (Set.Iio n) ∧
+      ∀ s < n, extendIio 0 (runNet net v) s < B :=
+  ⟨strictMonoOn_extendIio_runNet hb hi 0, fun s hs => by
+    rw [extendIio_apply (0 : ℕ) _ hs]
+    exact runNet_forall (p := fun x => x < B) net hlt _⟩
+
+/-- Batcher's 8-wire network, the campaign's `n`: distinct destinations below `B`
+in, the routing theorem's traffic hypothesis out. -/
+theorem batcher8_banyanHyps {B : ℕ} {v : Fin 8 → ℕ} (hi : Function.Injective v)
+    (hlt : ∀ i, v i < B) :
+    StrictMonoOn (extendIio 0 (runNet batcher8 v)) (Set.Iio 8) ∧
+      ∀ s < 8, extendIio 0 (runNet batcher8 v) s < B :=
+  banyanHyps_of_sorts_bool batcher8_sorts_bool hi hlt
+
+/-! ### Non-vacuity controls for the bridge
+
+The repo's law, applied to a hypothesis rather than to a network: the mutated
+input must make the goal **false**, not merely unreachable. Both controls below
+are proofs of `¬ StrictMonoOn …`, so each names a pair that breaks it. -/
+
+/-- **CONTROL, half one: the input really is sorted.** `![1, 1]` satisfies
+`IsSorted` — so what fails next is not sortedness. -/
+theorem dup_isSorted : IsSorted (![1, 1] : Fin 2 → ℕ) := by decide
+
+/-- ⭐ **CONTROL, half two: and it provably FAILS `StrictMonoOn`.** Together with
+`dup_isSorted` this is the argument that `Function.Injective` is load-bearing in
+`strictMonoOn_extendIio_runNet` and not decoration: sortedness alone does not
+give the router its hypothesis, so `ZeroOne.lean` on its own cannot reach it. -/
+theorem dup_not_strictMonoOn :
+    ¬ StrictMonoOn (extendIio 0 (![1, 1] : Fin 2 → ℕ)) (Set.Iio 2) := by
+  intro h
+  have h01 := h (Set.mem_Iio.2 (by omega : (0 : ℕ) < 2))
+    (Set.mem_Iio.2 (by omega : (1 : ℕ) < 2)) (by omega)
+  revert h01
+  decide
+
+/-- **CONTROL: the other hypothesis is load-bearing too.** `![1, 0]` is injective
+and fails `StrictMonoOn` for want of sortedness — so neither half of the bridge
+can be dropped. -/
+theorem swap_injective : Function.Injective (![1, 0] : Fin 2 → ℕ) := by decide
+
+theorem swap_not_strictMonoOn :
+    ¬ StrictMonoOn (extendIio 0 (![1, 0] : Fin 2 → ℕ)) (Set.Iio 2) := by
+  intro h
+  have h01 := h (Set.mem_Iio.2 (by omega : (0 : ℕ) < 2))
+    (Set.mem_Iio.2 (by omega : (1 : ℕ) < 2)) (by omega)
+  revert h01
+  decide
+
+/-- ⭐ **CONTROL, and the sharpest one: running the network does not repair a
+duplicate.** The input `![0, 0, 1, 2]` is already sorted, so Batcher's 4-wire
+network returns it unchanged (pinned here against the literal), and the extended
+output therefore fails `StrictMonoOn` at the pair `(0, 1)`.
+
+This is the statement that `hi` cannot be dropped from
+`strictMonoOn_extendIio_runNet` *at the network level* — not merely that some
+abstract sorted vector can repeat. -/
+theorem batcher4_dup_run : List.ofFn (runNet batcher4 ![0, 0, 1, 2]) = [0, 0, 1, 2] := by
+  decide
+
+theorem batcher4_dup_not_strictMonoOn :
+    ¬ StrictMonoOn (extendIio 0 (runNet batcher4 ![0, 0, 1, 2])) (Set.Iio 4) := by
+  intro h
+  have h01 := h (Set.mem_Iio.2 (by omega : (0 : ℕ) < 4))
+    (Set.mem_Iio.2 (by omega : (1 : ℕ) < 4)) (by omega)
+  revert h01
+  decide
+
+/-- **CONTROL, the positive side: on a genuinely scrambled distinct input the
+bridge fires.** The run is pinned against its literal output so that the
+`StrictMonoOn` below is visibly about a vector the network had to move. -/
+theorem batcher4_run : List.ofFn (runNet batcher4 ![3, 1, 2, 0]) = [0, 1, 2, 3] := by
+  decide
+
+theorem batcher4_strictMonoOn :
+    StrictMonoOn (extendIio 0 (runNet batcher4 ![3, 1, 2, 0])) (Set.Iio 4) :=
+  strictMonoOn_extendIio_runNet batcher4_sorts_bool (by decide) 0
+
 /-! ## Axiom audit -/
 
 section Audit
@@ -448,6 +650,14 @@ open Salt.Tactic
 #audit_axioms batcher8_sortsTo_word batcher4_sortsTo_word batcher8_sortsToV_word
 #audit_axioms applyDup applyDup_sorts applyDup_not_perm batcher8_perm_not_refl
 #audit_axioms batcher8_word_run batcher8_word_run_not_unsigned
+#audit_axioms extendIio extendIio_apply extendIio_of_le
+#audit_axioms strictMono_of_isSorted_of_injective strictMonoOn_extendIio
+#audit_axioms strictMonoOn_extendIio_of_isSorted runNet_forall
+#audit_axioms strictMonoOn_extendIio_runNet strictMonoOn_extendIio_runNet_of_nodup
+#audit_axioms banyanHyps_of_sorts_bool batcher8_banyanHyps
+#audit_axioms dup_isSorted dup_not_strictMonoOn swap_injective swap_not_strictMonoOn
+#audit_axioms batcher4_dup_run batcher4_dup_not_strictMonoOn
+#audit_axioms batcher4_run batcher4_strictMonoOn
 
 end Audit
 
