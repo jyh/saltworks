@@ -633,6 +633,90 @@ derived definition: decode the word, then step. `Option` because Slice A's
 exclusions are real — a word this subset does not define has no transition. -/
 def stepW (s : St) (w : BitVec 32) : Option St := (decode w).map (step s)
 
+/-! ## `stepT` — THE TOTAL STEP-ON-WORDS (campaign freeze v1.1, option 1)
+
+Ruled 8/7 11:21 (**DRAFT — Captain ratification pending**, since it defines what
+the chip MEANS on garbage words). C4 needs a step the hardware can implement:
+**a netlist observation is `List Bool` and TOTAL, while `stepW` is `Option St`
+and PARTIAL**, and no encoding reconciles them — there is no `List Bool` that
+means *"this word did not decode"*.
+
+**v1 SEMANTICS, stated as a sentence because it is a specification choice and
+not a proof detail: an undecodable word is a DEFINED NOP-ADVANCE — the register
+file is unchanged and `pc` advances by 4.**
+
+🔴 **THE FENCE, at the evidence seat's strength (11:26) and placed HERE because a
+reader meets the code before they meet the freeze:**
+
+> **On the 99.80% of 32-bit words outside the five-instruction subset, this chip
+> advances `PC+4`. That is a deliberate v1 semantics, NOT RV32I behaviour —
+> RV32I raises an illegal-instruction trap. An equivalence theorem covering the
+> whole word space certifies, on those words, agreement with OUR CHOSEN
+> SEMANTICS — not conformance to the ISA.**
+
+⚠️ ***TOTAL IS NOT CONFORMANT.*** *"The theorem covers every 32-bit word" is a
+true statement about COVERAGE and reads as one about CONFORMANCE.* The datapath
+brief's existing fence — *"never say core, say RV32I subset"* — bounds **which
+instructions are implemented**; this one bounds **what happens when you feed it
+anything else**, and the first does not imply the second.
+
+```
+decodable    8,486,912 words  =  0.1976 %   (ADD/XOR/SLT 2^15 each; ADDI/BEQ 2^22)
+undecodable  4,286,480,384    = 99.8024 %   <- PC+4 by OUR choice, not by RV32I
+```
+
+*Superseded when trap machinery arrives; until then this is what the silicon
+does and the claim must say so.*
+
+⚠️ **Why not the alternatives, per the pricing in
+`docs/hdl-c4-composition-check-0807.md`:** a hypothesis restricting inputs to
+decodable words would silence C4 on a **measured 99.80%** of the word space
+(`decode` accepts `3·2^15 + 2·2^22 = 8,486,912` of `2^32`); putting the decoder
+inside the boundary needs a validity bit and pays gates on **every** instruction.
+-/
+
+/-- **The total step.** Decodable words behave exactly as `step`; everything else
+advances the `pc` and touches nothing.
+
+📌 **Defined AS `stepW` with a default, deliberately.** Writing it as an
+independent `match` would make the compatibility obligation a theorem that could
+be *wrong*; written this way the agreement is **definitional**, and
+`stepT_compat` below is the one-line consequence rather than the load-bearing
+proof. *The obligation is no less real — it is discharged by construction, which
+is the strongest way to discharge it.* -/
+def stepT (s : St) (w : BitVec 32) : St := (stepW s w).getD s.next
+
+/-- **THE COMPATIBILITY OBLIGATION, as the named theorem the ruling requires.**
+Wherever `stepW` is defined, `stepT` agrees with it. *Without this, a total
+`stepT` could disagree with `stepW` on a **decodable** word — which would make
+C4 true and the ISA claim false. It is the whole price of option 1 and it is one
+line.* -/
+theorem stepT_compat (s : St) (w : BitVec 32) (s' : St) (h : stepW s w = some s') :
+    stepT s w = s' := by
+  simp [stepT, h]
+
+/-- **The v1 semantics, executable.** An undecodable word is a NOP-advance. -/
+theorem stepT_undecodable (s : St) (w : BitVec 32) (h : decode w = none) :
+    stepT s w = s.next := by
+  simp [stepT, stepW, h]
+
+/-- **And `stepT` still runs the ISA on everything the encoder produces**, so
+option 1 did not quietly widen or narrow Slice A. -/
+theorem stepT_encode (s : St) (i : Instr) : stepT s (encode i) = step s i := by
+  simp [stepT, stepW, decode_encode]
+
+/-- **NON-VACUITY — the NOP branch is REACHABLE, on a word this file already
+proves is rejected.** `LUI` is legal RV32I that Slice A excludes, so this is
+also the exact case where `stepT` and a RISC-V simulator part company, by
+design. -/
+theorem stepT_nop_is_reachable (s : St) :
+    stepT s 0x000010B7#32 = s.next := stepT_undecodable s _ decode_rejects_lui
+
+/-- And the two are genuinely different functions — `stepW` has no value here. -/
+theorem stepW_none_where_stepT_advances (s : St) :
+    stepW s 0x000010B7#32 = none := by
+  simp [stepW, decode_rejects_lui]
+
 /-- **The two `step`s agree**, which is the whole content of having both: the
 code generator may reason over `Instr` while the differential test runs over
 encoded words, and this theorem is the bridge. -/
@@ -703,5 +787,11 @@ theorem stepW_encode (s : St) (i : Instr) : stepW s (encode i) = some (step s i)
 #audit_axioms decode_rejects_lui
 #audit_axioms stepW
 #audit_axioms stepW_encode
+#audit_axioms stepT
+#audit_axioms stepT_compat
+#audit_axioms stepT_undecodable
+#audit_axioms stepT_encode
+#audit_axioms stepT_nop_is_reachable
+#audit_axioms stepW_none_where_stepT_advances
 
 end SaltWorks.ISA
