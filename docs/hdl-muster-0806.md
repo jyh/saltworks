@@ -40,15 +40,37 @@ extension · the complete densifying renumber · `opt_wf`.
 EXIT=0` · **0 declarations above 3 axioms · 0 warnings · 0 `sorry` / 0
 `native_decide` / 0 `ofReduceBool`.**
 
-⚠️ **ONE COVERAGE FACT THE LEDGER SHOULD CARRY RATHER THAN ROUND OFF.** The
-default build audits **89** HDL declarations; a targeted build of
-`SaltWorks.HDL.Renumber` audits **120**. The difference is real: **`Renumber` is
-NOT in `SaltWorks.lean`, so the renumber's 31 declarations are outside the
-default build's closure** until the maestro's import sweep lands
-(`import owed: SaltWorks.HDL.Renumber`). They are kernel-checked — by a targeted
-build, on this machine, `Built` not `Replayed` — but *"the default build covers
-leg 2"* is **false tonight** and I am not letting it into a brief. Silicon spent
-the afternoon on exactly this for `FabricRoutes`.
+⚠️ **ONE COVERAGE FACT THE LEDGER SHOULD CARRY RATHER THAN ROUND OFF — AND MY
+FIRST NUMBER FOR IT WAS WRONG. CORRECTED 20:5x, MEASURED DIRECTLY.**
+
+🔴 **STRUCK: *"the renumber's 31 declarations are outside the default build's
+closure."*** I got 31 by subtracting a **targeted** run's tick count from a
+**full build's**. A targeted run of `Renumber.lean` re-audits its **imports**
+too — **33 ticks, of which only 12 are Renumber's**; the other 21 belong to
+modules that are inside the closure and were never missing. ⇒ ***That is the 309
+MiB constant again, in a different domain: a number derived by SUBTRACTING TWO
+INSTRUMENTS, where the difference is not the quantity I named.*** **Second time
+today, and this one I published in the muster EVIDENCE was told to take
+verbatim.**
+
+✅ **THE MEASURED FACT, counted directly in the files rather than inferred from a
+delta** — `docs/ledger-tools/import-closure.py`, which now exists so this is
+never hand-derived again:
+
+```
+hub SaltWorks.lean   tracked .lean 24   in closure 22   OUTSIDE 2
+  ⛔ SaltWorks.HDL.ISA         60 audit sites   never fire in the default build
+  ⛔ SaltWorks.HDL.Renumber    12 audit sites   never fire in the default build
+  TOTAL outside the default build: 72
+```
+
+**Both are kernel-checked by targeted builds on this machine — `Built`, not
+`Replayed` — but *"the default build covers leg 2"* is FALSE tonight**, and now
+by a number I can defend. `import owed: SaltWorks.HDL.Renumber`,
+`SaltWorks.HDL.ISA` — maestro-owned. *Silicon spent the afternoon on exactly
+this for `FabricRoutes`; evidence found it on `ISA` four minutes after that file
+landed. **Three seats have now hit one defect, which is why it is an instrument
+and not a third report.***
 
 ## 2. THE TWO RESULTS WORTH READING
 
@@ -87,8 +109,14 @@ holding 1120 MB and kills one that does work, in the same second.
 - **My freeze's kill-check R4 had no referent** — it asked a refuter to check a
   compilation scheme the document never stated.
 
-**Instrument defects of my own today: twelve. Four caught by another seat, eight
-by me.** Every one was a true reading of an adjacent object.
+- **I published "31 declarations outside the default build" — DERIVED BY
+  SUBTRACTING TWO INSTRUMENTS, and the real number is 12** (§1). *The same
+  mechanism as the 309 MiB constant, eight hours later, in the document I asked
+  another seat to take verbatim.* ⇒ It is now `docs/ledger-tools/import-closure.py`,
+  which counts the sites in the files instead of inferring them from a delta.
+
+**Instrument defects of my own today: thirteen. Five caught by another seat,
+eight by me.** Every one was a true reading of an adjacent object.
 
 ## 4. IN FLIGHT AT MUSTER
 
