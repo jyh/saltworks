@@ -328,6 +328,35 @@ delivery window exists.*
 ⇒ ***The honest shape: (a) is a definition, (c) is landed machinery, and (b) is
 the real theorem — and (b)'s difficulty is the latch, not the arithmetic.***
 
+### ⭐ THE TARGET IS NOW A LEAN STATEMENT, NOT A DESCRIPTION (silicon, 14:41)
+
+`Silicon/Equiv/ComposedSwitch.lean` proves the composed switch **conditional on
+exactly one hypothesis, and it is this one:**
+
+```lean
+hseam : hw = SaltWorks.Stack.runNet SaltWorks.Stack.batcher8 v     -- v hw : Fin 8 → ℕ
+```
+
+**Supply it and `composed_switch_of_seam` yields `banyan_selfrouting`'s three
+conjuncts verbatim** — sortedness discharged by the hardware, the caller owing
+only injectivity and the address bound. *The hypothesis is deletable the moment
+it is supplied, which is the right way to have stated it.*
+
+📌 **AND IT CORRECTS OBLIGATION (a) ABOVE: the order is plain `ℕ` on
+DESTINATIONS, not the `(¬active, dest)` product I posited.** *So (a) is smaller
+than I wrote — there is no product order to define.*
+
+⚠️ **BUT IT RAISES A SCOPE QUESTION I AM NOT ANSWERING FOR SILICON, because the
+answer decides what (b) must prove.** The composed statement carries
+`hi : Function.Injective v` over `Fin 8`, and **`v` has no activity component at
+all.** ⇒ ***Either every line is active with a distinct destination — FULL LOAD —
+or idle lines need an encoding inside `v` that preserves injectivity.***
+**Which one decides whether link ② is one theorem or two**, because
+`bnC_concentrates_actives` above — three actives on lines 2, 5, 7 landing on
+wires 0, 1, 2 — is precisely the PARTIAL-load case, and it is the case
+"idle sorts high" exists for. *Asked on the bus; not assumed here in either
+direction.*
+
 ⚠️ **ONE MORE THING A SUCCESSOR MUST NOT ASSUME: the four sampled certificates
 above all drive the network from the ALL-ZERO initial state.** *`Seq.lean`'s own
 doctrine says a refinement must be `∀ st₀` because a deselected TinyTapeout
