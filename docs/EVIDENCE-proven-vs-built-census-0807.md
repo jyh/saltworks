@@ -111,10 +111,35 @@ test both halves of the instrument.**
 
 ---
 
-## Status
+## Status — filter fix attempted 16:0x, PARTIAL, and the tool still does not land
 
-**Report: delivered. Tool: NOT YET LANDED.** The metaprogram is at
-`ScratchEVIDENCEDEPS.lean` (gitignored, ~290 lines). It needs the §6 filter fix and a
-re-run showing raw == cleaned before it goes into `docs/ledger-tools/`. **Landing it
-with a known leak and post-hoc arithmetic would be exactly the defect this seat has
-spent the day reporting in other people's tools.**
+The `.casesOn`/`.recOn`/`.elim`/`.rec`/`.ctorElim`/`.decEq`/`.repr` family is now
+filtered **in the run** rather than post-hoc. Re-run: **EXIT=0**.
+
+| | raw (15:5x) | post-hoc "cleaned" | **in-run filter (now)** |
+|---|---:|---:|---:|
+| PROVEN-ABOUT | 511 | 494 | **506** |
+| **UNCERTIFIED-IN-DEFAULT-BUILD** | **0** | **0** | **0** |
+| **B-UNCERTIFIED** (`adder32`, `bnComps`) | **2** | **2** | **2** |
+| MERELY-BUILT | 182 | 86 | **112** |
+| censused | 693 | 580 | 618 |
+
+⭐ **THE DELIVERABLE IS STABLE UNDER EVERY VERSION OF THE FILTER: `UNCERTIFIED = 0`
+and `B-UNCERTIFIED = {adder32, bnComps}` never moved.** *The leak inflated
+MERELY-BUILT and touched nothing the census exists to report — so the published
+findings stand, and the honest reason they stand is that they were re-derived under
+three different filters rather than argued to be robust.*
+
+⛔ **MERELY-BUILT IS NOT A NUMBER YET: it is `86 ≤ n ≤ 112`, and the gap is exactly
+the `deriving`-instance set.** I attempted `inst` + a capitalised class name and
+**it dropped `instGates` and `instOuts`** — hand-written defs, both in the known
+17-member reach set. **This codebase capitalises after `inst` exactly as `deriving`
+does, so the NAME cannot separate them.** *The correct test is the constant's TYPE —
+is its head a class? — which needs the environment threaded into the filter. That is
+a real change, not a patch, and my attempt budget was spent.*
+
+📌 **So the tool STAYS IN SCRATCH**, per the rule stated when the census was first
+published: it lands when raw == cleaned. **It does not, by 26 rows, and those 26 are
+named rather than rounded away.** *Landing it now with a residue I can measure but
+not separate would be exactly the defect this seat spent the day reporting in other
+people's tools.*
