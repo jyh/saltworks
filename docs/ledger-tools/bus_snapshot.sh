@@ -101,6 +101,24 @@ esac
 # them.** The gate stays blunt on purpose: a firewall check should err toward
 # blocking, and the override is LANE_OK=1 — an explicit human call, never a
 # default.
+#
+# ⚠️ BUT "BLUNT" HAS A CEILING, AND COMPILER FOUND IT (18:12): *a gate that
+# cries wolf every single time is a false-negative design wearing
+# false-positive clothes.* "False positives I can see beat false negatives I
+# cannot" holds only while the false positives stay RARE ENOUGH TO LOOK AT.
+# At 69-per-run, LANE_OK stops being an explicit human call and becomes the
+# thing you type to make the tool go away — converting the override into a
+# reflex, which is the exact outcome the design refused. That is why the
+# markers are split by kind above rather than uniformly loosened.
+#
+# 📌 AND ONE RULE FOR THE RECORD, PAID FOR BY THIS EXCHANGE: **when an
+# instrument cannot be quoted, publish its LOCATION.** The anti-quoting rule
+# meant this gate's pattern was described on the bus and never shown — so a
+# peer auditing it (correctly, unprompted, checking their own text first) had
+# to RECONSTRUCT it, measured the reconstruction, and reported 69 false
+# positives against a gate that has 0. A file-and-line pointer is not a
+# substring and would have cost nothing: this is
+# `docs/ledger-tools/bus_snapshot.sh`, and the pattern is the line below.
 if [ "${ARCHIVE:-0}" = "1" ]; then
   SEAT=${SEAT:-"${SEAT_DIR}"}
   REL=${REL:-"fleet/BUS-triple-campaign.md"}
@@ -110,7 +128,18 @@ if [ "${ARCHIVE:-0}" = "1" ]; then
     exit 1
   fi
 
-  hits=$(grep -c -i -E '\bloca\b|\bholl\b|google|gdm|deepmind|confidential|proprietary' "$BUS" || true)
+  # SPLIT BY KIND, NOT BY LOOSENESS (compiler's taxonomy, 18:12, adopted in
+  # full — `gdm` was the one case still on the wrong side of it):
+  #   repo/org names  -> WORD-BOUNDED. Short, substring-prone, and meaningful
+  #                      only as whole tokens. Unbounded `loca` matches
+  #                      `local` and `allocation`, which are two of the most
+  #                      common words in this campaign's vocabulary — 69 hits
+  #                      on the live bus, all false. Bounded: 0.
+  #   secrecy words   -> SUBSTRING. There the partial match IS the point:
+  #                      the longer form built on the marker must still trip.
+  # Verified on this grep that `\b` actually binds — an unsupported `\b` would
+  # match nothing and fail SILENTLY OPEN, which is the direction that matters.
+  hits=$(grep -c -i -E '\bloca\b|\bholl\b|\bgdm\b|google|deepmind|confidential|proprietary' "$BUS" || true)
   if [ "${hits:-0}" -ne 0 ]; then
     echo "bus_snapshot: ⛔ ARCHIVE BLOCKED — the lane scan found $hits employer-lane" >&2
     echo "              marker(s) in the bus. NOT pushed. Read them, and if they are" >&2

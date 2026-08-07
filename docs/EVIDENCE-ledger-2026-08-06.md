@@ -10,14 +10,14 @@ touch is disclosed inside each section, per
 
 # SILENCE-WINDOW LEDGER — `saltworks`
 
-Generated 2026-08-06 17:13 America/Los_Angeles by `docs/ledger-tools/silence_windows.py` (saltworks, EVIDENCE seat).
+Generated 2026-08-06 18:44 America/Los_Angeles by `docs/ledger-tools/silence_windows.py` (saltworks, EVIDENCE seat).
 Window: `2026-08-05 22:00` → `now` · repo `/Users/jyh/projects/claude/saltworks` · tracked extension `.lean`.
 
 > **What a silence window is.** The stretch between the last moment a human touched any personal-lane seat and the next such moment. A commit landing inside a stretch of length ≥ T is counted at threshold T. **This is not a claim about sleep** — see §5.
 
 ## 0. Record coverage — is the silence MEASURED, or merely UNRECORDED?
 
-A commit is made **by** a session, and a session writes records. So a commit landing where no personal-lane session wrote anything at all is **proof of a hole in the transcript record**, not evidence that nobody was directing. Checked against 344,605 liveness records at a **5-minute** tolerance.
+A commit is made **by** a session, and a session writes records. So a commit landing where no personal-lane session wrote anything at all is **proof of a hole in the transcript record**, not evidence that nobody was directing. Checked against 348,018 liveness records at a **5-minute** tolerance.
 
 **The tolerance, calibrated by this run rather than quoted from an earlier one** — a threshold is only honest while the data it separates stays separated:
 
@@ -29,7 +29,7 @@ A commit is made **by** a session, and a session writes records. So a commit lan
 | Best commit OUTSIDE it (the nearest hole) | **22.19 min** |
 | Separation | **787.0×** — **the threshold sits in an empty region** |
 
-⛔ **1 of 109 commits landed in a stretch with NO transcript record.** Every silence figure below that contains one of these is a **lower bound on presence**: the human may have been directing and the evidence is missing, not absent. Do not publish a window containing these commits as unattended.
+⛔ **1 of 124 commits landed in a stretch with NO transcript record.** Every silence figure below that contains one of these is a **lower bound on presence**: the human may have been directing and the evidence is missing, not absent. Do not publish a window containing these commits as unattended.
 
 | Commit | Landed | Nearest transcript record | Subject |
 |---|---|---:|---|
@@ -41,19 +41,19 @@ A commit is made **by** a session, and a session writes records. So a commit lan
 
 | Quantity | Value |
 |---|---:|
-| Commits | **109** |
-| `.lean` lines inserted | **3,407** |
-| All lines inserted | 20,169 |
+| Commits | **124** |
+| `.lean` lines inserted | **3,468** |
+| All lines inserted | 21,074 |
 | First commit | 2026-08-05 22:05 `4fa92be` |
-| Last commit | 2026-08-06 17:13 `128956e` |
-| Human touches read, personal-lane fleet (whole transcript record) | **2,109** |
-| — of which into this seat (`-Users-jyh-projects-claude-saltworks`) | 78 |
+| Last commit | 2026-08-06 18:43 `248f725` |
+| Human touches read, personal-lane fleet (whole transcript record) | **2,125** |
+| — of which into this seat (`-Users-jyh-projects-claude-saltworks`) | 81 |
 | Seats read for presence | 6 |
 | Transcripts observe from | 2026-07-07 07:18 |
 
 Seats contributing presence: this repo's own seat (`-Users-jyh-projects-claude-saltworks`) and 5 other personal-lane seats (names withheld — pass `--name-seats` to list them).
 
-Inside the commit window itself, the fleet received **222** human touches: **78** into this seat and **144** into every other personal-lane seat combined.
+Inside the commit window itself, the fleet received **238** human touches: **81** into this seat and **157** into every other personal-lane seat combined.
 
 ## 2. Landings inside a silence window — THE MEASURE THAT CARRIES THE CLAIM
 
@@ -64,18 +64,18 @@ Inside the commit window itself, the fleet received **222** human touches: **78*
 | ≥ 4 h | 0 | 0.0% | 0 | 0 |
 | ≥ 8 h | 0 | 0.0% | 0 | 0 |
 | ≥ 12 h | 0 | 0.0% | 0 | 0 |
-| (all observed commits) | 109 | 100% | 3,407 | 20,169 |
+| (all observed commits) | 124 | 100% | 3,468 | 21,074 |
 
 The same table against **this seat's transcript alone** — the leg-1 harvest's unit, kept for comparison. It is the larger number and the weaker claim, because the human may have been directing another seat at the time:
 
 | Silence containing the landing | Commits | Share | `.lean` lines |
 |---|---:|---:|---:|
-| ≥ 1 h | 37 | 35.6% | 1,637 |
+| ≥ 1 h | 37 | 31.1% | 1,637 |
 | ≥ 2 h | 0 | 0.0% | 0 |
 | ≥ 4 h | 0 | 0.0% | 0 |
 | ≥ 8 h | 0 | 0.0% | 0 |
 | ≥ 12 h | 0 | 0.0% | 0 |
-| (observed by this seat) | 104 | 100% | 3,144 |
+| (observed by this seat) | 119 | 100% | 3,205 |
 
 ## 3. Per-commit gap since the last human word
 
@@ -83,8 +83,8 @@ _This view understates: a commit landing at hour 19 of a silence sits in the sam
 
 | Gap since last human touch | Commits | Share |
 |---|---:|---:|
-| < 30 min | 108 | 99.1% |
-| 30–60 min | 1 | 0.9% |
+| < 30 min | 123 | 99.2% |
+| 30–60 min | 1 | 0.8% |
 | 1–2 h | 0 | 0.0% |
 | 2–4 h | 0 | 0.0% |
 | 4–8 h | 0 | 0.0% |
@@ -99,11 +99,11 @@ _This view understates: a commit landing at hour 19 of a silence sits in the sam
 | **18 min** | 2026-08-06 16:15 | 2026-08-06 16:34 | 3 | 0 |
 | **18 min** | 2026-08-06 08:36 | 2026-08-06 08:54 | 1 | 0 |
 | **14 min** | 2026-08-06 16:36 | 2026-08-06 16:51 | 3 | 434 |
+| **13 min** | 2026-08-06 17:28 | 2026-08-06 17:42 | 1 | 0 |
 | **12 min** | 2026-08-06 07:57 | 2026-08-06 08:09 | 1 | 0 |
+| **11 min** | 2026-08-06 17:09 | 2026-08-06 17:20 | 4 | 52 |
 | **10 min** | 2026-08-06 13:04 | 2026-08-06 13:14 | 4 | 17 |
 | **9 min** | 2026-08-06 10:06 | 2026-08-06 10:15 | 3 | 0 |
-| **9 min** | 2026-08-05 22:01 | 2026-08-05 22:11 | 1 | 262 |
-| **8 min** | 2026-08-06 10:27 | 2026-08-06 10:36 | 3 | 0 |
 
 **Best exhibit by commits landed:** 0h 06m of silence (2026-08-06 11:57 → 2026-08-06 12:04) carrying **7 commits** and **590 `.lean` lines**.
 
@@ -126,11 +126,11 @@ _This view understates: a commit landing at hour 19 of a silence sits in the sam
 | Date | Dow | Commits | `.lean` lines | In ≥1h silence | Human touches (fleet) | First | Last |
 |---|---|---:|---:|---:|---:|---|---|
 | 2026-08-05 | Wed | 1 | 262 | 0 | 45 | 07:06 | 22:19 |
-| 2026-08-06 | Thu | 108 | 3,145 | 0 | 219 | 00:55 | 17:09 |
+| 2026-08-06 | Thu | 123 | 3,206 | 0 | 235 | 00:55 | 18:43 |
 
 ## 7. The night column — reported so it is never quoted
 
-Commits in 21:00–04:59 local: **1 of 109 (0.9%)**.
+Commits in 21:00–04:59 local: **1 of 124 (0.8%)**.
 
 > **SPEAK SILENCE WINDOWS, NEVER NIGHT HOURS** (salt triple-campaign Amendment 2, Correction 1). The night share is thin and a skeptic running `git log` will find it in thirty seconds. The claim that is true, larger, and checkable is §2.
 
@@ -142,14 +142,14 @@ This tool classifies by the record's own provenance fields — `origin.kind`, `p
 
 | Record class | Verdict | Count |
 |---|---|---:|
-| `typed` | **counted as human** | 1,864 |
+| `typed` | **counted as human** | 1,879 |
 | `slash-command` | **counted as human** | 151 |
-| `legacy-fallback` | **counted as human** | 72 |
+| `legacy-fallback` | **counted as human** | 73 |
 | `interrupt` | **counted as human** | 22 |
-| `tool-result` | rejected | 11,888 |
-| `task-notification` | rejected | 1,630 |
+| `tool-result` | rejected | 12,291 |
+| `task-notification` | rejected | 1,700 |
 | `slash-command-echo` | rejected | 302 |
-| `harness-injection` | rejected | 149 |
+| `harness-injection` | rejected | 152 |
 | `compaction-summary` | rejected | 28 |
 | `system-reminder` | rejected | 2 |
 | `peer` | rejected | 1 |
@@ -164,9 +164,9 @@ Notes on specific classes:
 - `interrupt` — `[Request interrupted by user]`, an ESC press. Also counted as human, for the same reason.
 - `legacy-fallback` — a record with no provenance fields that matched no injection pattern. Counted as human. If this number is large relative to `typed`, the fallback is doing real work and the figure deserves a manual sample.
 
-**Queue correction.** 827 messages were typed while the model was busy; the transcript writes them at dequeue time. Their `queue-operation: enqueue` timestamps were used instead. Largest correction applied: 464 s.
+**Queue correction.** 832 messages were typed while the model was busy; the transcript writes them at dequeue time. Their `queue-operation: enqueue` timestamps were used instead. Largest correction applied: 464 s.
 
-**Parse totals.** 94,348 records over 19 session files; 16,109 carried `type: user`; 0 lines failed to parse.
+**Parse totals.** 97,039 records over 19 session files; 16,601 carried `type: user`; 0 lines failed to parse.
 
 **Git.** `--since`/`--until` always carry an explicit time under `TZ=America/Los_Angeles` with `--date=format-local`. A bare date is parsed as UTC and silently drops commits — measured in the leg-1 harvest at 654 vs 712 over the same nominal window. Merges are excluded. Insertion counts come from `--numstat`.
 
@@ -182,14 +182,14 @@ Notes on specific classes:
 
 # SILENCE-WINDOW LEDGER — `salt`
 
-Generated 2026-08-06 17:13 America/Los_Angeles by `docs/ledger-tools/silence_windows.py` (saltworks, EVIDENCE seat).
+Generated 2026-08-06 18:44 America/Los_Angeles by `docs/ledger-tools/silence_windows.py` (saltworks, EVIDENCE seat).
 Window: `2026-08-05 22:00` → `now` · repo `/Users/jyh/projects/claude/salt` · tracked extension `.lean`.
 
 > **What a silence window is.** The stretch between the last moment a human touched any personal-lane seat and the next such moment. A commit landing inside a stretch of length ≥ T is counted at threshold T. **This is not a claim about sleep** — see §5.
 
 ## 0. Record coverage — is the silence MEASURED, or merely UNRECORDED?
 
-A commit is made **by** a session, and a session writes records. So a commit landing where no personal-lane session wrote anything at all is **proof of a hole in the transcript record**, not evidence that nobody was directing. Checked against 344,605 liveness records at a **5-minute** tolerance.
+A commit is made **by** a session, and a session writes records. So a commit landing where no personal-lane session wrote anything at all is **proof of a hole in the transcript record**, not evidence that nobody was directing. Checked against 348,018 liveness records at a **5-minute** tolerance.
 
 **The tolerance, calibrated by this run rather than quoted from an earlier one** — a threshold is only honest while the data it separates stays separated:
 
@@ -200,7 +200,7 @@ A commit is made **by** a session, and a session writes records. So a commit lan
 | Worst commit still INSIDE the tolerance | **0.02 min** |
 | Best commit OUTSIDE it (the nearest hole) | _none — nothing is flagged_ |
 
-✅ **Every one of the 58 commits in this window has a transcript record beside it.** The silences below are measured.
+✅ **Every one of the 61 commits in this window has a transcript record beside it.** The silences below are measured.
 
 ⚠️ **The narrower question this check actually answers:** *did work land inside a hole?* — not *is the record whole?* A hole in a stretch where nothing was committed leaves no trace here and is invisible to it. That is tolerable only because no published figure depends on such a stretch: the measure that carries the claim (§2) counts commits. It is stated rather than left to be discovered. **Known false-positive mode:** a commit made by hand from a terminal rather than by a seat would flag identically — measured at **0 occurrences in 862 commits on 2026-08-06** (a frozen figure, unlike the calibration table above, which this run computes), but the record cannot rule it out for a commit it has never seen.
 
@@ -208,19 +208,19 @@ A commit is made **by** a session, and a session writes records. So a commit lan
 
 | Quantity | Value |
 |---|---:|
-| Commits | **58** |
-| `.lean` lines inserted | **4,118** |
-| All lines inserted | 9,613 |
+| Commits | **61** |
+| `.lean` lines inserted | **4,449** |
+| All lines inserted | 10,427 |
 | First commit | 2026-08-05 22:06 `db277c4` |
-| Last commit | 2026-08-06 16:11 `b8da427` |
-| Human touches read, personal-lane fleet (whole transcript record) | **2,109** |
-| — of which into this seat (`-Users-jyh-projects-claude-salt`) | 1,988 |
+| Last commit | 2026-08-06 17:57 `158f266` |
+| Human touches read, personal-lane fleet (whole transcript record) | **2,125** |
+| — of which into this seat (`-Users-jyh-projects-claude-salt`) | 2,001 |
 | Seats read for presence | 6 |
 | Transcripts observe from | 2026-07-07 07:18 |
 
 Seats contributing presence: this repo's own seat (`-Users-jyh-projects-claude-salt`) and 5 other personal-lane seats (names withheld — pass `--name-seats` to list them).
 
-Inside the commit window itself, the fleet received **211** human touches: **134** into this seat and **77** into every other personal-lane seat combined.
+Inside the commit window itself, the fleet received **225** human touches: **147** into this seat and **78** into every other personal-lane seat combined.
 
 ## 2. Landings inside a silence window — THE MEASURE THAT CARRIES THE CLAIM
 
@@ -231,7 +231,7 @@ Inside the commit window itself, the fleet received **211** human touches: **134
 | ≥ 4 h | 0 | 0.0% | 0 | 0 |
 | ≥ 8 h | 0 | 0.0% | 0 | 0 |
 | ≥ 12 h | 0 | 0.0% | 0 | 0 |
-| (all observed commits) | 58 | 100% | 4,118 | 9,613 |
+| (all observed commits) | 61 | 100% | 4,449 | 10,427 |
 
 The same table against **this seat's transcript alone** — the leg-1 harvest's unit, kept for comparison. It is the larger number and the weaker claim, because the human may have been directing another seat at the time:
 
@@ -242,7 +242,7 @@ The same table against **this seat's transcript alone** — the leg-1 harvest's 
 | ≥ 4 h | 0 | 0.0% | 0 |
 | ≥ 8 h | 0 | 0.0% | 0 |
 | ≥ 12 h | 0 | 0.0% | 0 |
-| (observed by this seat) | 58 | 100% | 4,118 |
+| (observed by this seat) | 61 | 100% | 4,449 |
 
 ## 3. Per-commit gap since the last human word
 
@@ -250,7 +250,7 @@ _This view understates: a commit landing at hour 19 of a silence sits in the sam
 
 | Gap since last human touch | Commits | Share |
 |---|---:|---:|
-| < 30 min | 58 | 100.0% |
+| < 30 min | 61 | 100.0% |
 | 30–60 min | 0 | 0.0% |
 | 1–2 h | 0 | 0.0% |
 | 2–4 h | 0 | 0.0% |
@@ -262,15 +262,15 @@ _This view understates: a commit landing at hour 19 of a silence sits in the sam
 | Silence | From (last human touch) | To (next human touch) | Commits | `.lean` lines |
 |---:|---|---|---:|---:|
 | **59 min** | 2026-08-06 13:57 | 2026-08-06 14:56 | 1 | 0 |
+| **15 min** | 2026-08-06 17:42 | 2026-08-06 17:57 | 1 | 130 |
 | **15 min** | 2026-08-06 08:21 | 2026-08-06 08:36 | 2 | 4 |
+| **13 min** | 2026-08-06 17:28 | 2026-08-06 17:42 | 1 | 0 |
 | **9 min** | 2026-08-06 10:06 | 2026-08-06 10:15 | 5 | 849 |
 | **9 min** | 2026-08-05 22:01 | 2026-08-05 22:11 | 1 | 0 |
 | **8 min** | 2026-08-06 10:27 | 2026-08-06 10:36 | 2 | 216 |
 | **8 min** | 2026-08-06 11:48 | 2026-08-06 11:57 | 4 | 218 |
 | **8 min** | 2026-08-06 09:04 | 2026-08-06 09:12 | 1 | 0 |
-| **8 min** | 2026-08-06 09:54 | 2026-08-06 10:02 | 6 | 580 |
-| **7 min** | 2026-08-06 10:40 | 2026-08-06 10:48 | 1 | 662 |
-| **7 min** | 2026-08-06 15:54 | 2026-08-06 16:01 | 1 | 0 |
+| **8 min** | 2026-08-06 17:20 | 2026-08-06 17:28 | 1 | 201 |
 
 **Best exhibit by commits landed:** 0h 08m of silence (2026-08-06 09:54 → 2026-08-06 10:02) carrying **6 commits** and **580 `.lean` lines**.
 
@@ -292,11 +292,11 @@ _This view understates: a commit landing at hour 19 of a silence sits in the sam
 | Date | Dow | Commits | `.lean` lines | In ≥1h silence | Human touches (fleet) | First | Last |
 |---|---|---:|---:|---:|---:|---|---|
 | 2026-08-05 | Wed | 2 | 0 | 0 | 45 | 07:06 | 22:19 |
-| 2026-08-06 | Thu | 56 | 4,118 | 0 | 219 | 00:55 | 17:09 |
+| 2026-08-06 | Thu | 59 | 4,449 | 0 | 235 | 00:55 | 18:43 |
 
 ## 7. The night column — reported so it is never quoted
 
-Commits in 21:00–04:59 local: **2 of 58 (3.4%)**.
+Commits in 21:00–04:59 local: **2 of 61 (3.3%)**.
 
 > **SPEAK SILENCE WINDOWS, NEVER NIGHT HOURS** (salt triple-campaign Amendment 2, Correction 1). The night share is thin and a skeptic running `git log` will find it in thirty seconds. The claim that is true, larger, and checkable is §2.
 
@@ -308,14 +308,14 @@ This tool classifies by the record's own provenance fields — `origin.kind`, `p
 
 | Record class | Verdict | Count |
 |---|---|---:|
-| `typed` | **counted as human** | 1,864 |
+| `typed` | **counted as human** | 1,879 |
 | `slash-command` | **counted as human** | 151 |
-| `legacy-fallback` | **counted as human** | 72 |
+| `legacy-fallback` | **counted as human** | 73 |
 | `interrupt` | **counted as human** | 22 |
-| `tool-result` | rejected | 11,888 |
-| `task-notification` | rejected | 1,631 |
+| `tool-result` | rejected | 12,292 |
+| `task-notification` | rejected | 1,700 |
 | `slash-command-echo` | rejected | 302 |
-| `harness-injection` | rejected | 149 |
+| `harness-injection` | rejected | 152 |
 | `compaction-summary` | rejected | 28 |
 | `system-reminder` | rejected | 2 |
 | `peer` | rejected | 1 |
@@ -330,9 +330,9 @@ Notes on specific classes:
 - `interrupt` — `[Request interrupted by user]`, an ESC press. Also counted as human, for the same reason.
 - `legacy-fallback` — a record with no provenance fields that matched no injection pattern. Counted as human. If this number is large relative to `typed`, the fallback is doing real work and the figure deserves a manual sample.
 
-**Queue correction.** 827 messages were typed while the model was busy; the transcript writes them at dequeue time. Their `queue-operation: enqueue` timestamps were used instead. Largest correction applied: 464 s.
+**Queue correction.** 832 messages were typed while the model was busy; the transcript writes them at dequeue time. Their `queue-operation: enqueue` timestamps were used instead. Largest correction applied: 464 s.
 
-**Parse totals.** 94,354 records over 19 session files; 16,110 carried `type: user`; 0 lines failed to parse.
+**Parse totals.** 97,051 records over 19 session files; 16,602 carried `type: user`; 0 lines failed to parse.
 
 **Git.** `--since`/`--until` always carry an explicit time under `TZ=America/Los_Angeles` with `--date=format-local`. A bare date is parsed as UTC and silently drops commits — measured in the leg-1 harvest at 654 vs 712 over the same nominal window. Merges are excluded. Insertion counts come from `--numstat`.
 
@@ -348,14 +348,14 @@ Notes on specific classes:
 
 # SILENCE-WINDOW LEDGER — `salt`
 
-Generated 2026-08-06 17:14 America/Los_Angeles by `docs/ledger-tools/silence_windows.py` (saltworks, EVIDENCE seat).
+Generated 2026-08-06 18:44 America/Los_Angeles by `docs/ledger-tools/silence_windows.py` (saltworks, EVIDENCE seat).
 Window: `2026-07-23 00:00` → `2026-08-06 00:00` · repo `/Users/jyh/projects/claude/salt` · tracked extension `.lean`.
 
 > **What a silence window is.** The stretch between the last moment a human touched any personal-lane seat and the next such moment. A commit landing inside a stretch of length ≥ T is counted at threshold T. **This is not a claim about sleep** — see §5.
 
 ## 0. Record coverage — is the silence MEASURED, or merely UNRECORDED?
 
-A commit is made **by** a session, and a session writes records. So a commit landing where no personal-lane session wrote anything at all is **proof of a hole in the transcript record**, not evidence that nobody was directing. Checked against 344,605 liveness records at a **5-minute** tolerance.
+A commit is made **by** a session, and a session writes records. So a commit landing where no personal-lane session wrote anything at all is **proof of a hole in the transcript record**, not evidence that nobody was directing. Checked against 348,025 liveness records at a **5-minute** tolerance.
 
 **The tolerance, calibrated by this run rather than quoted from an earlier one** — a threshold is only honest while the data it separates stays separated:
 
@@ -379,8 +379,8 @@ A commit is made **by** a session, and a session writes records. So a commit lan
 | All lines inserted | 379,060 |
 | First commit | 2026-07-23 00:14 `3592f5c` |
 | Last commit | 2026-08-05 22:19 `df72d8a` |
-| Human touches read, personal-lane fleet (whole transcript record) | **2,109** |
-| — of which into this seat (`-Users-jyh-projects-claude-salt`) | 1,988 |
+| Human touches read, personal-lane fleet (whole transcript record) | **2,125** |
+| — of which into this seat (`-Users-jyh-projects-claude-salt`) | 2,001 |
 | Seats read for presence | 6 |
 | Transcripts observe from | 2026-07-07 07:18 |
 
@@ -477,14 +477,14 @@ This tool classifies by the record's own provenance fields — `origin.kind`, `p
 
 | Record class | Verdict | Count |
 |---|---|---:|
-| `typed` | **counted as human** | 1,864 |
+| `typed` | **counted as human** | 1,879 |
 | `slash-command` | **counted as human** | 151 |
-| `legacy-fallback` | **counted as human** | 72 |
+| `legacy-fallback` | **counted as human** | 73 |
 | `interrupt` | **counted as human** | 22 |
-| `tool-result` | rejected | 11,888 |
-| `task-notification` | rejected | 1,631 |
+| `tool-result` | rejected | 12,292 |
+| `task-notification` | rejected | 1,700 |
 | `slash-command-echo` | rejected | 302 |
-| `harness-injection` | rejected | 149 |
+| `harness-injection` | rejected | 152 |
 | `compaction-summary` | rejected | 28 |
 | `system-reminder` | rejected | 2 |
 | `peer` | rejected | 1 |
@@ -499,9 +499,9 @@ Notes on specific classes:
 - `interrupt` — `[Request interrupted by user]`, an ESC press. Also counted as human, for the same reason.
 - `legacy-fallback` — a record with no provenance fields that matched no injection pattern. Counted as human. If this number is large relative to `typed`, the fallback is doing real work and the figure deserves a manual sample.
 
-**Queue correction.** 827 messages were typed while the model was busy; the transcript writes them at dequeue time. Their `queue-operation: enqueue` timestamps were used instead. Largest correction applied: 464 s.
+**Queue correction.** 832 messages were typed while the model was busy; the transcript writes them at dequeue time. Their `queue-operation: enqueue` timestamps were used instead. Largest correction applied: 464 s.
 
-**Parse totals.** 94,354 records over 19 session files; 16,110 carried `type: user`; 0 lines failed to parse.
+**Parse totals.** 97,051 records over 19 session files; 16,602 carried `type: user`; 0 lines failed to parse.
 
 **Git.** `--since`/`--until` always carry an explicit time under `TZ=America/Los_Angeles` with `--date=format-local`. A bare date is parsed as UTC and silently drops commits — measured in the leg-1 harvest at 654 vs 712 over the same nominal window. Merges are excluded. Insertion counts come from `--numstat`.
 
@@ -517,7 +517,7 @@ Notes on specific classes:
 
 # TOKEN METER — the campaign ledger
 
-Generated 2026-08-06 17:14 America/Los_Angeles by `docs/ledger-tools/token_meter.py` (saltworks, EVIDENCE seat), per `docs/measurement-preregistration.md` §1.
+Generated 2026-08-06 18:44 America/Los_Angeles by `docs/ledger-tools/token_meter.py` (saltworks, EVIDENCE seat), per `docs/measurement-preregistration.md` §1.
 Window: `2026-08-05 22:00` → `now` · 6 personal-lane projects · subagent transcripts INCLUDED.
 
 > **Unit is TOKENS.** These records carry no prices and no account identifier, so no dollar figure and no per-account split is derivable from them. On a subscription, dollars are a flat envelope; the two framings are reported separately or not at all, never blended.
@@ -527,55 +527,55 @@ Window: `2026-08-05 22:00` → `now` · 6 personal-lane projects · subagent tra
 
 | Quantity | Tokens |
 |---|---:|
-| API requests (deduplicated) | 6,408 |
-| Input | 80,625 |
-| **Output** | **3,119,160** |
-| Cache created | 32,481,595 |
-| Cache read | 1,277,095,232 |
+| API requests (deduplicated) | 7,224 |
+| Input | 83,613 |
+| **Output** | **3,641,893** |
+| Cache created | 34,079,208 |
+| Cache read | 1,523,101,212 |
 | First request | 2026-08-05 22:02 |
-| Last request | 2026-08-06 17:14 |
+| Last request | 2026-08-06 18:44 |
 
 ## 2. By project
 
 | Project | Requests | Input | Output | Cache created | Cache read |
 |---|---:|---:|---:|---:|---:|
-| `-Users-jyh-projects-claude-saltworks` | 4,462 | 40,745 | **1,961,062** | 16,623,732 | 722,275,521 |
-| `-Users-jyh-projects-claude-salt` | 1,946 | 39,880 | **1,158,098** | 15,857,863 | 554,819,711 |
-| **TOTAL** | **6,408** | **80,625** | **3,119,160** | **32,481,595** | **1,277,095,232** |
+| `-Users-jyh-projects-claude-saltworks` | 5,090 | 43,369 | **2,343,533** | 17,814,273 | 933,002,078 |
+| `-Users-jyh-projects-claude-salt` | 2,134 | 40,244 | **1,298,360** | 16,264,935 | 590,099,134 |
+| **TOTAL** | **7,224** | **83,613** | **3,641,893** | **34,079,208** | **1,523,101,212** |
 
 ## 3. By model tier
 
 | Tier | Requests | Input | Output | Cache created | Cache read |
 |---|---:|---:|---:|---:|---:|
-| Opus 5 | 5,979 | 67,847 | **2,655,610** | 28,951,830 | 1,083,295,957 |
-| Fable 5 | 421 | 1,447 | **461,908** | 2,214,539 | 193,593,944 |
+| Opus 5 | 6,736 | 70,724 | **3,106,213** | 30,447,611 | 1,314,785,687 |
+| Fable 5 | 480 | 1,558 | **534,038** | 2,316,371 | 208,110,194 |
 | Opus 4.8 | 2 | 4 | **1,632** | 1,248,389 | 26,022 |
 | Haiku 4.5 | 6 | 11,327 | **10** | 66,837 | 179,309 |
-| **TOTAL** | **6,408** | **80,625** | **3,119,160** | **32,481,595** | **1,277,095,232** |
+| **TOTAL** | **7,224** | **83,613** | **3,641,893** | **34,079,208** | **1,523,101,212** |
 
 ## 4. By day
 
 | Date | Requests | Input | Output | Cache created | Cache read |
 |---|---:|---:|---:|---:|---:|
 | 2026-08-05 | 24 | 11,361 | **22,571** | 228,132 | 10,006,395 |
-| 2026-08-06 | 6,384 | 69,264 | **3,096,589** | 32,253,463 | 1,267,088,837 |
-| **TOTAL** | **6,408** | **80,625** | **3,119,160** | **32,481,595** | **1,277,095,232** |
+| 2026-08-06 | 7,200 | 72,252 | **3,619,322** | 33,851,076 | 1,513,094,817 |
+| **TOTAL** | **7,224** | **83,613** | **3,641,893** | **34,079,208** | **1,523,101,212** |
 
 ## 5. Main loop vs subagents
 
 | Where | Requests | Input | Output | Cache created | Cache read |
 |---|---:|---:|---:|---:|---:|
-| main loop | 2,327 | 8,339 | **2,788,101** | 10,225,022 | 947,832,974 |
-| subagents / workflow agents | 4,081 | 72,286 | **331,059** | 22,256,573 | 329,262,258 |
-| **TOTAL** | **6,408** | **80,625** | **3,119,160** | **32,481,595** | **1,277,095,232** |
+| main loop | 2,795 | 9,209 | **3,282,042** | 10,945,831 | 1,167,643,189 |
+| subagents / workflow agents | 4,429 | 74,404 | **359,851** | 23,133,377 | 355,458,023 |
+| **TOTAL** | **7,224** | **83,613** | **3,641,893** | **34,079,208** | **1,523,101,212** |
 
-_In this window the subagents made **64% of the requests** and **11% of the output tokens** (main loop: 36% / 89%). Design and orchestration sat in the main loops; the agents were many but individually cheap._
+_In this window the subagents made **61% of the requests** and **10% of the output tokens** (main loop: 39% / 90%). Design and orchestration sat in the main loops; the agents were many but individually cheap._
 
 ## 6. By wave — timestamp-join against git
 
 | Wave (leading tag of the landing commit's subject) | Requests | Input | Output | Cache created | Cache read |
 |---|---:|---:|---:|---:|---:|
-| `TAU-SHARP` | 314 | 7,192 | **183,270** | 2,932,466 | 48,355,777 |
+| `TAU-SHARP` | 517 | 7,586 | **310,873** | 3,428,167 | 76,765,946 |
 | `MIGRATION-PROOF` | 186 | 354 | **146,414** | 1,194,960 | 77,830,330 |
 | `N7-prep` | 153 | 294 | **113,016** | 1,105,430 | 68,140,310 |
 | `WEIL-TRIO` | 159 | 309 | **85,167** | 2,672,942 | 42,134,402 |
@@ -583,6 +583,7 @@ _In this window the subagents made **64% of the requests** and **11% of the outp
 | `WEIL-TRIO-W1` | 166 | 1,899 | **60,635** | 753,450 | 36,487,132 |
 | `WEIL-TRIO-W4A` | 159 | 4,753 | **46,901** | 669,615 | 38,594,703 |
 | `TS-1` | 32 | 61 | **44,359** | 77,855 | 17,045,305 |
+| `TS-2` | 38 | 71 | **36,053** | 194,116 | 8,699,561 |
 | `SILICON` | 78 | 152 | **34,430** | 783,630 | 18,722,293 |
 | `(unlabelled)` | 31 | 59 | **29,928** | 167,958 | 12,482,271 |
 | `COUNCIL` | 12 | 23 | **29,343** | 811,092 | 8,739,995 |
@@ -593,7 +594,6 @@ _In this window the subagents made **64% of the requests** and **11% of the outp
 | `THE TRIPLE` | 22 | 11,357 | **22,407** | 226,318 | 8,703,407 |
 | `hb1983-notes` | 36 | 70 | **18,513** | 238,858 | 10,088,198 |
 | `CHAR-TRIO` | 5 | 9 | **16,632** | 23,559 | 1,257,668 |
-| `TS-2` | 20 | 38 | **10,960** | 156,840 | 4,424,436 |
 | `copyright` | 8 | 16 | **8,121** | 18,090 | 2,711,463 |
 | `flags` | 13 | 24 | **8,007** | 44,231 | 3,476,615 |
 | `WEIL-TRIO-W3` | 13 | 12,225 | **6,903** | 67,374 | 1,626,611 |
@@ -601,9 +601,9 @@ _In this window the subagents made **64% of the requests** and **11% of the outp
 | `GUARD` | 4 | 6 | **3,753** | 8,236 | 578,863 |
 | `WEIL-TRIO-W4Q` | 5 | 9 | **3,010** | 17,873 | 1,051,418 |
 | `WEIL-CONS` | 4 | 8 | **2,585** | 7,261 | 1,004,095 |
-| **TOTAL** | **1,842** | **39,683** | **1,066,938** | **14,316,960** | **538,098,655** |
+| **TOTAL** | **2,063** | **40,110** | **1,219,634** | **14,849,937** | **570,783,949** |
 
-Attribution rule: each request is charged to the **next commit in `salt` at or after its timestamp**, if that commit lands within 4.0 h; otherwise it is unattributed. Unattributed in this window: 104 requests / 91,160 output tokens. Only requests from this repo's own seat (`-Users-jyh-projects-claude-salt`) are joined.
+Attribution rule: each request is charged to the **next commit in `salt` at or after its timestamp**, if that commit lands within 4.0 h; otherwise it is unattributed. Unattributed in this window: 71 requests / 78,726 output tokens. Only requests from this repo's own seat (`-Users-jyh-projects-claude-salt`) are joined.
 
 > **This join is a heuristic, and the table is labelled as one.** A request that produced no commit (a scout, a refuter, a council) is charged to whatever landed next. Read it as *tokens spent in the run-up to a landing*, never as *tokens the landing cost*.
 
@@ -611,15 +611,15 @@ Attribution rule: each request is charged to the **next commit in `salt` at or a
 
 | Fact | Value |
 |---|---:|
-| Transcript files read | 2,342 |
-| JSONL records scanned | 376,700 |
-| Duplicate assistant records dropped (same `requestId`) | 118,978 |
+| Transcript files read | 2,351 |
+| JSONL records scanned | 380,855 |
+| Duplicate assistant records dropped (same `requestId`) | 120,069 |
 | `<synthetic>` records dropped (API errors, zero usage) | 107 |
 | Unparseable lines | 0 |
 
-**The dedup rule.** Claude Code writes one assistant record per content block of a response, and **every one of those records repeats the whole `usage` block of the single API call**. Measured here: 118,978 records were duplicates of a request already counted. Summing records instead of requests would inflate every number in this file by roughly a factor of three. Usage was verified byte-identical within each `requestId` group before the rule was adopted.
+**The dedup rule.** Claude Code writes one assistant record per content block of a response, and **every one of those records repeats the whole `usage` block of the single API call**. Measured here: 120,069 records were duplicates of a request already counted. Summing records instead of requests would inflate every number in this file by roughly a factor of three. Usage was verified byte-identical within each `requestId` group before the rule was adopted.
 
-**Subagents.** Workflow and Task agents write their own transcripts under `<session>/subagents/**/agent-*.jsonl`. They are included by default (`--no-subagents` to exclude). In THIS window they are 64% of requests and 11% of output tokens. **Request share and token share differ sharply and can point opposite ways** — quote whichever you mean, and never the word 'majority' unattached to a unit.
+**Subagents.** Workflow and Task agents write their own transcripts under `<session>/subagents/**/agent-*.jsonl`. They are included by default (`--no-subagents` to exclude). In THIS window they are 61% of requests and 10% of output tokens. **Request share and token share differ sharply and can point opposite ways** — quote whichever you mean, and never the word 'majority' unattached to a unit.
 
 **Per-account attribution: UNAVAILABLE.** The transcripts carry no account, organisation or subscription identifier — checked field by field across every record type. The campaign runs five accounts; these files cannot say which one paid for a given request. Reported here as a gap rather than estimated.
 
@@ -630,7 +630,7 @@ Attribution rule: each request is charged to the **next commit in `salt` at or a
 
 # HUMAN-TIME LEDGER — the four categories
 
-Generated 2026-08-06 17:14 America/Los_Angeles by `docs/ledger-tools/human_time.py`, per `docs/measurement-preregistration.md` §2.
+Generated 2026-08-06 18:44 America/Los_Angeles by `docs/ledger-tools/human_time.py`, per `docs/measurement-preregistration.md` §2.
 Window: `2026-08-05 22:00` → `now` · block gap 20 min · tags from `EVIDENCE-human-time-tags.tsv`.
 
 **The rubric, published beside the number** — DIRECTING: rulings, councils, requirement-setting. REVIEWING: reading that *gates* an artifact. UNBLOCKING: logins, purchases, physical acts. WATCHING: curiosity — reading along, questions that redirect nothing. **The dependency claim = DIRECTING + REVIEWING + UNBLOCKING only**, by the counterfactual test *would the artifact exist without this touch?* WATCHING is reported as its own line, proudly: the joy is evidence, not overhead.
@@ -639,13 +639,13 @@ Window: `2026-08-05 22:00` → `now` · block gap 20 min · tags from `EVIDENCE-
 
 | Category | Blocks | Time | Share |
 |---|---:|---:|---:|
-| **DIRECTING** | 3 | 5h 46m | 65.9% |
-| WATCHING | 1 | 0h 01m | 0.3% |
-| UNTAGGED | 3 | 2h 58m | 33.9% |
-| **THE CLAIM** (D+R+U) | 3 | **5h 46m** | 65.9% |
-| (all engaged time) | 7 | 8h 46m | 100% |
+| **DIRECTING** | 3 | 5h 46m | 55.9% |
+| WATCHING | 1 | 0h 01m | 0.2% |
+| UNTAGGED | 3 | 4h 32m | 43.8% |
+| **THE CLAIM** (D+R+U) | 3 | **5h 46m** | 55.9% |
+| (all engaged time) | 7 | 10h 20m | 100% |
 
-> **3 block(s), 2h 58m, are UNTAGGED.** They are counted in neither the claim nor WATCHING. Tag them in `EVIDENCE-human-time-tags.tsv` — one line per block id — and re-run. An untagged block is never silently folded into a category.
+> **3 block(s), 4h 32m, are UNTAGGED.** They are counted in neither the claim nor WATCHING. Tag them in `EVIDENCE-human-time-tags.tsv` — one line per block id — and re-run. An untagged block is never silently folded into a category.
 
 > ⛔ **2 TAG(S) MATCH NO BLOCK IN THIS WINDOW** and are contributing nothing: `20260805T1759`, `20260805T2039`. A block id is its first touch's timestamp, so changing `--since`, or one new message landing inside a former gap, merges blocks and detaches their tags. **Tags are matched by containment rather than by exact id precisely so this is visible instead of silent** — but a tag outside the window still needs re-pointing. Re-run the worksheet and re-tag.
 
@@ -654,7 +654,7 @@ Window: `2026-08-05 22:00` → `now` · block gap 20 min · tags from `EVIDENCE-
 | Date | Blocks | Engaged time | Claim time (D+R+U) | Messages |
 |---|---:|---:|---:|---:|
 | 2026-08-05 | 1 | 0h 17m | 0h 17m | 4 |
-| 2026-08-06 | 6 | 8h 29m | 5h 29m | 219 |
+| 2026-08-06 | 6 | 10h 02m | 5h 29m | 235 |
 
 ## 3. The blocks — the tagging worksheet
 
@@ -668,7 +668,7 @@ Copy a block id into the tag file with its category. The opening message is show
 | `20260806T0757` | salt | 08-06 07:57 | 12:20 | 4h 22m | 119 | DIRECTING | interrupt,legacy-fallback,slash-command,typed (230 chars) |
 | `20260806T1243` | saltworks | 08-06 12:43 | 13:57 | 1h 13m | 34 | **UNTAGGED** | legacy-fallback,typed (229 chars) |
 | `20260806T1456` | salt | 08-06 14:56 | 14:56 | 0h 01m | 3 | **UNTAGGED** | slash-command  |
-| `20260806T1525` | saltworks | 08-06 15:25 | 17:09 | 1h 43m | 42 | **UNTAGGED** | slash-command,typed (65 chars) |
+| `20260806T1525` | saltworks | 08-06 15:25 | 18:43 | 3h 17m | 58 | **UNTAGGED** | legacy-fallback,slash-command,typed (65 chars) |
 
 ## 4. Method notes
 
@@ -676,28 +676,28 @@ Copy a block id into the tag file with its category. The opening message is show
 - **This under-counts, deliberately.** Reading and thinking before the first message of a block leave no trace in the transcript, so the figure is a *floor* on engaged time. It is published as a floor and never adjusted upward by estimate.
 - **No manual time-tracking**, per the frozen design. Every timestamp comes from the transcript; the only human input is the category tag, and the rubric that assigns it is printed above the number.
 - The touch filter is the one in `ledger_common.classify_user_record` — see `README.md`. Injected records (task notifications, loop ticks, cron pings, peer messages) are not human time.
-- Touches read: 223 in window. Rejected as non-human across the whole record: 14,001.
+- Touches read: 239 in window. Rejected as non-human across the whole record: 14,482.
 
 
 ---
 
 ## LANDED — generated from `git log`, never typed
 
-Generated 2026-08-06 17:14 America/Los_Angeles by `docs/ledger-tools/landed.py`. Window: `2026-08-05 22:00` → `now`.
+Generated 2026-08-06 18:44 America/Los_Angeles by `docs/ledger-tools/landed.py`. Window: `2026-08-05 22:00` → `now`.
 
 > **This table is mechanical.** It reports what was committed — hash, time, lane, size. It knows nothing about whether a thing *works*, whether a proof is *meaningful*, or what anyone intends next; those stay hand-written and stay stamped with the time they were written. **A commit hash does not age, which is the entire reason this is generated** (resource lesson 5: a snapshot of another seat's live tree ages in minutes).
 > Seat attribution is a **heuristic over file paths**, from the writer-slot law in `docs/SEATS.md`. It is not a claim about who typed what.
 
-### `saltworks` — 109 commits
+### `saltworks` — 124 commits
 
 | Lane | Commits | Lines added | `.lean` added |
 |---|---:|---:|---:|
-| evidence | 70 | 10,253 | 0 |
-| silicon (leg 3) | 21 | 6,787 | 1,450 |
-| compiler (leg 2) | 13 | 2,723 | 1,674 |
+| evidence | 76 | 10,777 | 0 |
+| silicon (leg 3) | 26 | 7,023 | 1,455 |
+| compiler (leg 2) | 17 | 2,868 | 1,730 |
 | maestro (hub) | 3 | 20 | 20 |
 | maestro | 2 | 386 | 263 |
-| **total** | **109** | **20,169** | **3,407** |
+| **total** | **124** | **21,074** | **3,468** |
 
 | When | Commit | Lane | +lines | Subject |
 |---|---|---|---:|---|
@@ -810,20 +810,35 @@ Generated 2026-08-06 17:14 America/Los_Angeles by `docs/ledger-tools/landed.py`.
 | 08-06 16:52 | `b5bc1dd` | maestro (hub) | 1 | saltworks: hub — Dense made explicit (was transitive via EmitN; explicit per compiler's owed l… |
 | 08-06 17:11 | `27d8867` | silicon (leg 3) | 52 | saltworks: D4 is chunked — 18.2 -> 13.9 GiB and the cap threshold drops a rung, but NOT to 12 … |
 | 08-06 17:13 | `128956e` | evidence | 36 | saltworks: I pull the README's leading axiom-posture sentence — silicon refuted their own find… |
+| 08-06 17:14 | `bfaa67c` | evidence | 242 | saltworks: ledger refresh — 109 commits, 3,407 .lean lines; the migration hole is still open a… |
+| 08-06 17:17 | `1e08eeb` | evidence | 45 | saltworks: scoreboard sweep — LEG 2 IS COMPLETE (T2 lands), the hub debt is paid, the -M cap i… |
+| 08-06 17:21 | `41a2dcd` | evidence | 81 | saltworks: the bus is in NO git repo, has NO remote and had ONE copy — 474,676 bytes of the ca… |
+| 08-06 17:23 | `362e95e` | evidence | 51 | saltworks: pre-registration ADDENDUM 2 — a hole in the middle of the record, and UNBLOCKING is… |
+| 08-06 17:32 | `c91faf3` | silicon (leg 3) | 34 | saltworks: the TT validator's mutation suite tested fewer things than it claimed — two mutants… |
+| 08-06 18:00 | `c34c180` | compiler (leg 2) | 23 | saltworks: the 24-bit kernel ceiling is now MEASURED, not asserted — and it is inclusive at 1<… |
+| 08-06 18:08 | `5c3a55f` | evidence | 71 | saltworks: bus archive into the private seat repo, with the lane check re-run every push — and… |
+| 08-06 18:10 | `48e2e75` | evidence | 34 | saltworks: my lane gate blocked the post announcing my lane gate — and the fix tripped it agai… |
+| 08-06 18:17 | `1b8f8de` | compiler (leg 2) | 89 | saltworks: the densifying renumber is scoped — and the reason it is unwritten is that the bit-… |
+| 08-06 18:23 | `e1a1a3b` | silicon (leg 3) | 108 | saltworks: the first TT CI run failed on a pin 60 um outside the die, and the cause was sixtee… |
+| 08-06 18:25 | `15b6c9e` | compiler (leg 2) | 10 | saltworks: #audit_axioms is a WHITELIST — one leg-2 theorem was never listed, and it was cover… |
+| 08-06 18:30 | `2f302c0` | silicon (leg 3) | 5 | saltworks: every theorem in the Silicon leg is now named in an audit line — 31/41 before, 41/4… |
+| 08-06 18:38 | `de689b8` | silicon (leg 3) | 76 | saltworks: ruling 4a closes YES on the fabricated artifact — (* keep *) survives TT's CI and t… |
+| 08-06 18:43 | `2d5f747` | compiler (leg 2) | 23 | saltworks: three warnings I read past all day were pointing at two unnecessary hypotheses — pi… |
+| 08-06 18:43 | `248f725` | silicon (leg 3) | 13 | saltworks: the datasheet carries the three rates, with hold slack as the one that matters |
 
-### `salt` — 58 commits
+### `salt` — 61 commits
 
 | Lane | Commits | Lines added | `.lean` added |
 |---|---:|---:|---:|
-| docs: exploration | 34 | 4,154 | 4 |
-| docs: blueprints | 11 | 3,073 | 2,270 |
+| docs: exploration | 35 | 4,193 | 4 |
+| docs: blueprints | 13 | 3,848 | 2,601 |
 | salt: HB (Heath-Brown) | 6 | 1,441 | 1,441 |
 | docs (shared) | 2 | 63 | 0 |
 | salt: Entropy/Chowla | 2 | 520 | 42 |
 | salt: Weil | 1 | 361 | 361 |
 | other | 1 | 0 | 0 |
 | salt: papers | 1 | 1 | 0 |
-| **total** | **58** | **9,613** | **4,118** |
+| **total** | **61** | **10,427** | **4,449** |
 
 | When | Commit | Lane | +lines | Subject |
 |---|---|---|---:|---|
@@ -885,6 +900,9 @@ Generated 2026-08-06 17:14 America/Los_Angeles by `docs/ledger-tools/landed.py`.
 | 08-06 16:09 | `67a2b97` | docs: exploration | 30 | play M: TAU-SHARP pre-gate — Amendment 6: the arm table recomputed; two "after" cells are pre-… |
 | 08-06 16:11 | `d5ddc4e` | docs: exploration | 26 | play M: TAU-SHARP pre-gate — Amendment 7: S5(b) is NOT attempted tonight (it couples the two w… |
 | 08-06 16:11 | `b8da427` | docs: exploration | 10 | play M: GUARD RESTATED in both TS dispatch prompts — cap-hit text corrected to the binary-veri… |
+| 08-06 17:26 | `e8d975c` | docs: blueprints | 441 | play M: TAU-SHARP TS-1 — S1 + S5(a) + S6 land in BOTH towers (log(1/c) 631.58 -> 563.92) |
+| 08-06 17:31 | `2d8a123` | docs: exploration | 39 | play M: TS-2 prompt re-coordinated to POST-TS-1 bytes (S5(a) shifted R8 by +51) |
+| 08-06 17:57 | `158f266` | docs: blueprints | 334 | play M: TAU-SHARP TS-2 — the γ-honest arms land in BOTH towers (all FOUR sites; log(1/c) 563.9… |
 
-**167 commits across 2 repo(s) in the window.**
+**185 commits across 2 repo(s) in the window.**
 
