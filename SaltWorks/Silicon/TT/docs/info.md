@@ -77,6 +77,19 @@ produced. Sample only while `valid` is high.
 the fabric's hypothesis, not a suggestion. Unsorted input collides internally
 and the affected packets are lost.
 
+## Speed — three different numbers, and they are not interchangeable
+
+| | rate | what it is |
+|---|---|---|
+| **the logic** | **89 Mbit/s per link** (102 typical) | post-place-and-route signoff STA, slow corner `ss_100C_1v60`. The fabric is bit-serial, so MHz *is* Mbit/s per link |
+| **this chip** | **25 Mbit/s per link** | what `info.yaml` requests. **A pad limit, not a core limit** — the TinyTapeout pad's maximum *output* rate is 33 MHz, half its input ceiling, and a bit-serial fabric toggles every output every cycle |
+| the harness | shared | the demo rate is set by the pinout and the board, not by the fabric |
+
+Signoff, all nine corners: **zero setup violations, zero hold violations**, worst
+hold slack **+0.11 ns**. Hold is the number worth quoting, because lowering a
+clock fixes setup and does nothing for hold — a design can be "run slower" out of
+a setup problem and never out of a hold one.
+
 ## External hardware
 
 None required. Any source of 8 synchronised bit streams will do — a
