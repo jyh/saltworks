@@ -331,12 +331,23 @@ it. -/
 
 /-! **STATEMENT 3 — the property B2 actually needs from the element**, stated
 here so the network proof has a named target: the element is a *permutation* of
-its two inputs. Math's 10:35 note is that permutation is the missing piece both
-lanes need; at the element it is two lines. -/
+its two inputs — its output pair is the input pair, in one order or the other,
+carrying the activity bits with it.
 
-#check (∀ (st₀ : List Bool) (act0 act1 : Bool) (a b : List Bool),
-          ceWordOut act0 act1 a b = ceWordOut act0 act1 a b
-            ∧ (keyLE act0 a act1 b = true ∨ keyLE act1 b act0 a = true)
+⛔ **THIS STATEMENT WAS WRONG WHEN FIRST WRITTEN AND THE LINTER FOUND IT.** It
+read `ceWordOut … = ceWordOut …`, a **tautological conjunct**, beside an unused
+`st₀` binder. The unused-variable warning was the only thing that pointed at it;
+*a tautology names nothing, so the "named target" I claimed to be giving B2 was
+an empty one.* **Corrected to the real disjunction below.** *A statement that
+elaborates is not thereby a statement that says something — which is the
+probe-grade instrument's one failure mode, and it found me on my third use of
+it.* -/
+
+#check (∀ (act0 act1 : Bool) (a b : List Bool),
+          ceWordOut act0 act1 a b
+              = (a.zip b).map (fun q => [q.1, q.2, act0, act1])
+            ∨ ceWordOut act0 act1 a b
+              = (b.zip a).map (fun q => [q.1, q.2, act1, act0])
         : Prop)
 
 #audit_axioms ceCore
