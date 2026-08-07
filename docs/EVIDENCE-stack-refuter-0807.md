@@ -125,12 +125,53 @@ correlation detector can ever be.
 
 ---
 
+## ⛔ 5. AND R1 DOES **NOT** SURVIVE — the compiler seat refuted the one line I blessed, within five minutes
+
+This section first read *"S1, S3(a) and **R1** survive unchanged, and R1's
+own parenthesis is the best line in the draft."* **R1 does not survive, and
+the correction is the compiler seat's.**
+
+R1 says the network is oblivious and its length data-independent — *use
+that*. ⇒ ***True of the NETWORK. False of the CODE.*** Verified
+independently against `ISA.lean:80-92`, Slice A complete:
+
+```
+  ADD · ADDI · XOR · SLT · BEQ
+```
+
+A compare-exchange needs a **conditional swap**. Branch-free, that is a
+select, and a select needs a mask-AND:
+
+```
+  c    = SLT  a b        ->  0 or 1                     available
+  mask = ADDI c, -1      ->  0 or all-ones              available
+  sel  = mask AND (a^b)  ->  ⛔ NO `AND` IN SLICE A
+  AND via ((a+b)-(a^b))/2 ->  ⛔ NO SHIFTS IN SLICE A
+```
+
+⇒ **There is no branch-free select in Slice A, so every compare-exchange
+must `BEQ`, so the executed instruction count is DATA-DEPENDENT** — even
+though the network's *comparator schedule* is not. **R1's fixed-bound
+termination argument is therefore unavailable at the code level**, which is
+the level S3(b) proves.
+
+**Constructive:** either the bound is stated over *comparator stages* with a
+per-stage worst case (still fixed, and honest), or Slice A gains one
+selecting instruction. *The first costs a sentence; the second costs an ISA
+change and a re-proof.*
+
+📌 **And the process point: I wrote "R1 survives" as the closing line of a
+refutation whose whole subject is claims that outrun their evidence.** I
+checked `St` in the type, the clock against `date`, and the mathlib property
+with `grep` — **and then blessed R1 from the shape of the argument rather
+than from the instruction list two files away.** *Four findings measured, one
+opinion, and the opinion is the one that was wrong.*
+
+---
+
 ## What survives
 
-**S1, S3(a) and R1 survive unchanged**, and R1's own parenthesis is the best
-line in the draft: *the network is oblivious, its length data-independent —
-use that.* A fixed-bound termination argument for an oblivious sorting
-network is the right shape and needs no fuel parameter.
+**S1 and S3(a) survive unchanged.**
 
 **R3's honesty survives too** — *"S5 waits for the ground floor. No
 overclaiming mid-campaign."* That sentence is the draft doing the thing this
