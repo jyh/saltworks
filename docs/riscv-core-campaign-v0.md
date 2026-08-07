@@ -1,4 +1,11 @@
-# THE VERIFIED CPU — RV32I campaign freeze v0
+# THE VERIFIED CPU — RV32I campaign freeze v0.1
+### AMENDED 8/6 ~21:55 by the maestro on silicon's C0 census (d618178,
+### F1–F3) + compiler's tree-confirmation: v0's C4 headline DID NOT
+### TYPECHECK as written — killed before the council sat, as the process
+### intends. Changes: C4 restated in the runP form (below), C0 upgraded
+### to require COMPOSITION CHECKS (a name census is necessary, not
+### sufficient — F2 was invisible to grep), all chain identifiers must
+### appear FULLY QUALIFIED in freezes (F3: step/run/runS are ambiguous).
 ### Maestro, night of 8/6→8/7. STATUS: DRAFT — refuter passes at the 07:00
 ### council; all five seats invited to kill it. The Captain's order, verbatim:
 ### "go for the gold, an entire cpu, verified" / "do the cpu, verified."
@@ -33,7 +40,12 @@ the chain is new; only the design on top of it is.
 
 - **C0 — THE SEAM CENSUS, BEFORE ANYTHING ELSE FREEZES.** Every interface
   in the chain named with BOTH sides' actual Lean identifiers,
-  grep-verified at the tree. Tonight's law, paid twice today: the far
+  grep-verified at the tree — **AND composition-checked: every composite
+  the campaign will state must ELABORATE at the type level (Scratch
+  probe, no proof) at census time. An existence census is necessary and
+  not sufficient — v0's own headline passed the name test and failed
+  the type test (F2).** Silicon's half LANDED (`d618178`, ten seams,
+  F1–F3); the compiler half (ISA-side seams) completes it. Tonight's law, paid twice today: the far
   side must EXIST before a freeze about it means anything (silicon's R1
   on the codegen freeze found `step`/`Instr`/`St` absent — that census
   cost one grep; discovered post-build it costs a week).
@@ -47,8 +59,21 @@ the chain is new; only the design on top of it is.
   flop array. The flop treatment applies from the first line: the
   per-cone census (widths, counts) is C3's FIRST artifact, before any
   proof is attempted.
-- **C4 — compile correctness**: `sem (emitN (compile core)) = step` —
-  **"the compiler, verified," the council's headline.**
+- **C4 — compile correctness** — **"the compiler, verified," the
+  council's headline** — stated in the TYPE-CORRECT shape (v0.1; v0's
+  `sem (emitN (compile core)) = step` did not typecheck — `sem` consumes
+  a `Circ`, never a `Netlist`; the netlist is run by `Silicon.runP`,
+  and `sem` sits on the far side, per `emitN_sem` verbatim):
+  per cycle, at the flop boundary (Q-leaves/D-roots),
+  `(Silicon.runP ins [] (emitN (compile core)))` projected at the
+  D-roots `=` the state encoding of `SaltWorks.ISA.step` applied at the
+  Q-leaves' decoding — composed with `emitN_sem` (landed, `8c4f8d7`) so
+  the new obligation is `sem (compile core) = encoded step`, at the
+  `Circ` level, where `sem` belongs. The EXACT statement is C1+C3's
+  first joint artifact and must be COMPOSITION-CHECKED (a `Scratch`
+  elaboration of the statement's type, no proof) before either freezes.
+  All identifiers fully qualified: `SaltWorks.ISA.step`, never bare
+  `step` (three ambiguous names in the chain: step, run, runS — F3).
 - **C5 — flow + re-import**: the netlist through the flow; per-cone
   equivalence at flop boundaries; MUTATION CONTROLS that make the goal
   FALSE (inject a decode bug; the checker must catch it — math's banked
