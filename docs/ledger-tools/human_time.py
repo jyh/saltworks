@@ -82,7 +82,22 @@ def load_tags(path: Path) -> dict[str, tuple[str, str]]:
             continue
         parts = line.split("\t")
         if len(parts) < 2:
-            continue
+            # ⛔ A MALFORMED TAG LINE IS NOT A NON-EVENT. This branch used to
+            # `continue` in silence, so a line separated with SPACES instead of
+            # TABs — the obvious mistake, and invisible in every editor —
+            # vanished without a word, and the block it was meant to tag was
+            # then reported as UNTAGGED. That is the exact failure this file's
+            # containment matching was written to end (see below), surviving in
+            # the loader underneath it: an instrument silently discarding its
+            # own input and reporting a smaller claim than the record supports.
+            # Fails loud now, per the 2026-08-06 instrument law: an instrument
+            # must PRINT WHAT IT READ, and "no matching data" is a DISTINCT
+            # output from zero.
+            raise SystemExit(
+                f"{path}: line is not TAB-separated and would have been "
+                f"silently ignored:\n    {line!r}\n"
+                f"  Tag lines are: <block-id>\\t<CATEGORY>\\t<optional note>. "
+                f"Spaces do not work.")
         block_id, cat = parts[0].strip(), parts[1].strip().upper()
         note = parts[2].strip() if len(parts) > 2 else ""
         if cat not in CATEGORIES:
