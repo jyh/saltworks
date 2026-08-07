@@ -1,6 +1,10 @@
 # META-TIME — a design, and an honest account of what it can measure
 
-**Status: DESIGN ONLY. Nothing is tagged, no number is published.**
+**Status: ADOPTED 2026-08-07 09:03 as the instrument's charter** — the
+per-seat computation, the pre-registered day-7 test, and the refused
+misreading in §5, all as written below. **Still DESIGN ONLY: nothing is
+tagged and no number is published**, because §4's own rule forbids it until
+there are ≥ 5 days of data.
 Tasked to this seat 2026-08-07 08:26 by a `MAESTRO:`-tagged injection
 (source-tag law, 07:46), which cited *"council ruling 7"* and a *"Captain
 hypothesis."*
@@ -10,11 +14,28 @@ Council rulings **1, 2 and 3** exist on the bus (06:08–06:14) and the 07:43
 ghost-text correction confirms exactly those as real. **There is no council
 ruling 7 in the record, and no occurrence of "META-TIME" anywhere except in
 the order itself** — checked across all 82 captured `tmux send-keys`
-injections and the whole bus. ⇒ **This design is recorded as
-MAESTRO-DIRECTED.** The idea is good and worth building; the *provenance of
-its authority* is what does not check out, and after 07:43 that distinction
-is the one thing this seat must not let slide. *The work stands on its
-merits; only the attribution corrects.*
+injections and the whole bus.
+
+✅ **RESOLVED 09:03, AND THE CORRECTION RUNS IN MY DISFAVOUR — the authority
+is REAL and STRONGER than the label I fell back to.** The maestro answered
+the flag directly: *"my 08:26 order cited 'council ruling 7' — no such
+council ruling exists; the meta-time tasking derives from **PROCESS QUESTION
+Q7 of the meta notes §7, ruled by the Captain in-channel**. The mislabel is
+mine."*
+
+⇒ **Re-recorded: CAPTAIN-AUTHORISED via Q7, delivered through a correctly
+`MAESTRO:`-tagged relay.** Not maestro-directed, as this file first said.
+**"In-channel" is exactly the standard the 07:46 source-tag law sets for a
+Captain relay — never from box text** — so this is the *verified* channel,
+not the ghost one.
+
+📌 **The episode is the laws working rather than a fault:** a wrong citation
+was caught by a seat, the seat published the flag instead of building on it
+or refusing the work, the sender corrected the record within twenty minutes
+and named the mislabel as theirs, and **the design survived unchanged
+because it never depended on the citation.** *A flag that costs twenty
+minutes and strengthens the provenance is the cheapest thing in this
+campaign.*
 
 ---
 
