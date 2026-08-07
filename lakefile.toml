@@ -30,14 +30,28 @@ defaultTargets = ["SaltWorks"]
 # 9,718 traces in salt and 8,606 here on every adjustment to a guard that
 # changes no result.
 #
-# /!\ THE CAP DOES NOT ALWAYS ANNOUNCE ITSELF. In a standalone probe package
-# at -M <= 4800 (green at >= 9600, same file), `lake build` dies with
-#     Stack overflow detected. Aborting.   /   Lean exited with code 134 (SIGABRT)
-# and NEITHER ratified diagnostic string appears. The fleet rule "a cap hit
-# counts ONLY on the two `excessive memory consumption` texts" therefore returns
-# a FALSE NEGATIVE on a real kill: it reads as "the run did not test the cap"
-# when the correct response is to raise the cap. Judge a cap hit by exit 134 and
-# that text as well.
+# /!\ AND THE PARAGRAPH THAT USED TO SIT HERE WAS WRONG. It told every seat to
+# "judge a cap hit by exit 134 and `Stack overflow detected. Aborting.`". An
+# 11-agent adversarial pass, commissioned against that very proposal, KILLED it:
+#   - not sufficient: the identical bytes appear with NO -M at all, and at
+#     -M 100000, on a 300k-deep paren tower peaking at 3.23 GiB;
+#   - not necessary: the canonical workload does NOT produce them -- the abort
+#     needs a `set_option maxRecDepth` the workload never had;
+#   - wrong exit code: on the BUILD path saltbuild returns EXIT=1, never 134;
+#   - wrong channel: both lines are on lake's STDOUT. Process stderr carries
+#     only `error: build failed`.
+# The ratified diagnostic was never missing -- the `decide` tactic's own lazy
+# renderer exhausts the C stack WHILE PRINTING IT.
+#
+# THE RULE IS NOW M-2: docs/hdl-cap-rule-M2-0806.md. Its core is a DIFFERENTIAL
+# TEST, not a text match -- `rm -rf .lake/build`, double the cap, rebuild: green
+# means it was the cap, byte-identical means it was not.
+#
+# /!\ AND READ M-2.8 BEFORE TRUSTING A GREEN BUILD. `-M` is NOT a process
+# limit; it is a budget consulted at checkSystem checkpoints. MEASURED: `-M 1`
+# passed a compile peaking at 1.86 GiB (~1900x its cap) and `-M 100` passed one
+# at 7.82 GiB, because one `@[extern]` C allocation crosses no checkpoint.
+# A green build under -M 20000 is NOT evidence that the build stayed under 20 GB.
 weakLeanArgs = ["-M", "20000"]
 
 [leanOptions]
