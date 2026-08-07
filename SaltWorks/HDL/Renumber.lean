@@ -6,7 +6,7 @@ Authors: Jason Hickey, Claude
 import SaltWorks.HDL.EmitN
 
 /-!
-# The densifying renumber — obligations 1 and 4
+# The densifying renumber — ALL FIVE OBLIGATIONS
 
 `Dense.lean` found that `opt` does not preserve density: dead-net elimination
 filters gates out, so survivors keep their old NAMES while their POSITIONS
@@ -18,23 +18,35 @@ netlist is the UNOPTIMIZED one exactly when optimization would have helped.
 defines it, so the result is dense SSA by construction and `emitN` applies to
 the OPTIMIZED circuit.
 
-## Status — this file is HALF of the scoped work, and says so
+## Status — complete
 
-`docs/hdl-renumber-design-0806.md` lists five obligations. Landed here:
+`docs/hdl-renumber-design-0806.md` scoped five obligations. All five land here:
 
-* **(1) the renaming map is injective on defined nets** — `renum_out`, via
-  `posOf_getD` and the `nodup` conjunct of `Circ.wf`.
+* **(1) injective on defined nets** — `renum_out`, via `posOf_getD` and the
+  `nodup` conjunct of `Circ.wf`.
+* **(2) the frame lemma** — `run_renumFrom`. ⭐ The scoping note predicted this
+  would need `σ` INJECTIVE, carried and re-applied at every gate, and called it
+  "the expensive one". **It does not.** Carrying *"σ maps every DEFINED net
+  strictly below the next new name"* is strictly weaker, is exactly what the
+  circuit's own topological order already gives, and yields the disjointness for
+  free: the net about to be written is `base`, and everything already defined
+  renames below it. The predicted difficulty was an artefact of the predicted
+  formulation.
+* **(3) meaning preserved** — `normalize_sem`. The port list is renamed too, so
+  the two `sem`s agree POSITIONALLY, output `k` for output `k`, which is the form
+  the refuter pass ruled the seam must use.
 * **(4) `normalize` establishes `ssa`** — `normalize_ssa`. The scoping note
   flagged this as *the step most likely to be false as written*. It is true, and
   the reason is `renum_fanin_lt`: the renaming is monotone on defined nets
   BECAUSE it maps each net to the position of the gate that defined it, and `wf`
   orders those positions.
+* **(5) the pipeline law** — `emitPipeline'_sem`. Optimize, renumber, emit; no
+  check, no fallback, no unoptimized branch.
 
-**NOT landed: (2) the frame lemma and (3) `sem (normalize c) = sem c`.** Those
-are the expensive pair, and nothing here claims them. Until they land,
-`normalize` is a construction with a proved SHAPE and an unproved MEANING, and
-must not be wired into `emitPipeline` — a densifying renumber whose semantics
-are unproved is exactly the renaming the seam doctrine says to be afraid of.
+**`EmitN.emitPipeline` is deliberately left in place.** It is sound, it needs no
+`wf` hypothesis, and a validated fallback that never fires costs nothing. This
+file adds the route that does not have to fall back; it does not delete the one
+that cannot fail.
 
 ## What the two landed bridges buy the remaining work
 
@@ -351,6 +363,165 @@ theorem normalize_ssa (c : Circ) (h : c.wf = true) : (normalize c).ssa = true :=
     rw [hlen]
     exact hlt
 
+
+
+/-- Renumbering keyed on the ABSOLUTE next name rather than an index. The frame
+lemma inducts on this: `base` is exactly "the name the next gate will take", which
+is the quantity the disjointness argument needs. -/
+def renumFrom (σ : Net → Net) : Nat → List Gate → List Gate
+  | _, []      => []
+  | b, g :: gs => ⟨b, g.op.rename σ⟩ :: renumFrom σ (b + 1) gs
+
+theorem renumGates_eq_renumFrom (nIn : Nat) (σ : Net → Net) :
+    ∀ (i : Nat) (gs : List Gate), renumGates nIn σ i gs = renumFrom σ (nIn + i) gs := by
+  intro i gs
+  induction gs generalizing i with
+  | nil => rfl
+  | cons g gs ih =>
+    show (⟨nIn + i, _⟩ : Gate) :: renumGates nIn σ (i + 1) gs
+       = (⟨nIn + i, _⟩ : Gate) :: renumFrom σ (nIn + i + 1) gs
+    rw [ih (i + 1)]
+    have : nIn + (i + 1) = nIn + i + 1 := by omega
+    rw [this]
+
+/-- One renamed operation, on environments that agree via `σ` on everything the
+operation reads. -/
+theorem eval_rename {σ : Net → Net} {envN envC : Env} {D : List Net}
+    (hag : ∀ a, D.contains a = true → envN (σ a) = envC a) :
+    ∀ (o : Op), o.fanin.all D.contains = true →
+      (o.rename σ).eval envN = o.eval envC := by
+  intro o
+  cases o with
+  | const b => intro _; rfl
+  | not a =>
+    intro hf
+    have ha : D.contains a = true := by simpa [Op.fanin] using hf
+    show (!(envN (σ a))) = (!(envC a))
+    rw [hag a ha]
+  | and a b =>
+    intro hf
+    simp only [Op.fanin, List.all_cons, List.all_nil, Bool.and_true, Bool.and_eq_true] at hf
+    show (envN (σ a) && envN (σ b)) = (envC a && envC b)
+    rw [hag a hf.1, hag b hf.2]
+  | or a b =>
+    intro hf
+    simp only [Op.fanin, List.all_cons, List.all_nil, Bool.and_true, Bool.and_eq_true] at hf
+    show (envN (σ a) || envN (σ b)) = (envC a || envC b)
+    rw [hag a hf.1, hag b hf.2]
+  | xor a b =>
+    intro hf
+    simp only [Op.fanin, List.all_cons, List.all_nil, Bool.and_true, Bool.and_eq_true] at hf
+    show (envN (σ a) ^^ envN (σ b)) = (envC a ^^ envC b)
+    rw [hag a hf.1, hag b hf.2]
+
+/-! ## THE FRAME LEMMA (obligation 2)
+
+The scoping note predicted this would need `σ` injective, carried and re-applied
+at every gate. It does not. Carrying **"σ maps every DEFINED net strictly below
+the next new name"** is strictly weaker, is what the circuit's own topological
+order already gives, and yields the disjointness for free: the net about to be
+written is `base`, and everything already defined renames below it. -/
+theorem run_renumFrom (σ : Net → Net) :
+    ∀ (gs : List Gate) (base : Nat) (D : List Net) (envN envC : Env),
+      (∀ a, D.contains a = true → envN (σ a) = envC a) →
+      (∀ a, D.contains a = true → σ a < base) →
+      wfGates D gs = true →
+      (∀ i, i < gs.length → σ (gs.getD i default).out = base + i) →
+      ∀ a, (D.contains a = true ∨ (gs.map Gate.out).contains a = true) →
+        run envN (renumFrom σ base gs) (σ a) = run envC gs a := by
+  intro gs
+  induction gs with
+  | nil =>
+    intro base D envN envC hag _ _ _ a ha
+    rcases ha with h | h
+    · exact hag a h
+    · simp at h
+  | cons g gs ih =>
+    intro base D envN envC hag hlt hwf hout a ha
+    rw [wfGates, Bool.and_eq_true] at hwf
+    obtain ⟨hfan, hrest⟩ := hwf
+    have hg0 : σ g.out = base := by
+      have := hout 0 (by simp)
+      simpa [List.getD] using this
+    have hstep : (g.op.rename σ).eval envN = g.op.eval envC := eval_rename hag g.op hfan
+    -- the two updated environments still agree via σ, on the enlarged defined set
+    have hag' : ∀ b, (g.out :: D).contains b = true →
+        upd envN base ((g.op.rename σ).eval envN) (σ b)
+          = upd envC g.out (g.op.eval envC) b := by
+      intro b hb
+      have hmem : b ∈ g.out :: D := by simpa using hb
+      rcases List.mem_cons.mp hmem with h1 | h2
+      · subst h1
+        rw [hg0, upd_self, upd_self, hstep]
+      · have hbD : D.contains b = true := by simpa using h2
+        have hne : σ b ≠ base := Nat.ne_of_lt (hlt b hbD)
+        have hne2 : b ≠ g.out := by
+          intro hc; rw [hc, hg0] at hne; exact hne rfl
+        rw [upd_of_ne _ hne, upd_of_ne _ hne2]
+        exact hag b hbD
+    have hlt' : ∀ b, (g.out :: D).contains b = true → σ b < base + 1 := by
+      intro b hb
+      have hmem : b ∈ g.out :: D := by simpa using hb
+      rcases List.mem_cons.mp hmem with h1 | h2
+      -- omega again refuses these: `σ : Net → Net`, so both goals are Net-typed.
+      -- Fifth and sixth occurrences in this leg. Explicit terms instead.
+      · subst h1; rw [hg0]; exact Nat.lt_succ_self base
+      · exact Nat.lt_succ_of_lt (hlt b (by simpa using h2))
+    have hout' : ∀ i, i < gs.length → σ (gs.getD i default).out = base + 1 + i := by
+      intro i hi
+      have hcons : (g :: gs).getD (i + 1) default = gs.getD i default := by simp [List.getD]
+      have hh := hout (i + 1) (by simp only [List.length_cons]; omega)
+      rw [hcons] at hh
+      have harith : base + 1 + i = base + (i + 1) := by omega
+      rw [harith, hh]
+    have hnew : (g.out :: D).contains a = true ∨ (gs.map Gate.out).contains a = true := by
+      rcases ha with hD | hO
+      · exact Or.inl (by
+          have : a ∈ g.out :: D := List.mem_cons_of_mem _ (by simpa using hD)
+          simpa using this)
+      · -- keep the LIST shape: `simpa` alone destructures the membership into a
+        -- disjunction with an existential, after which `List.mem_cons` no longer
+        -- applies. `map_cons` first, then the cons lemma.
+        have h0 : a ∈ (g :: gs).map Gate.out := by simpa using hO
+        rw [List.map_cons] at h0
+        rcases List.mem_cons.mp h0 with h1 | h2
+        · exact Or.inl (by simp [h1])
+        · exact Or.inr (by simpa using h2)
+    exact ih (base + 1) (g.out :: D) _ _ hag' hlt' hrest hout' a hnew
+
+/-! ## OBLIGATION 3 — the renumber preserves meaning -/
+
+/-- **`normalize` preserves meaning.** The port list is renamed too, so the two
+`sem`s agree POSITIONALLY — output `k` of the normalized circuit is output `k` of
+the original — which is the form the refuter pass ruled the seam must use. -/
+theorem normalize_sem (c : Circ) (h : c.wf = true) (ins : Env) :
+    sem (normalize c) ins = sem c ins := by
+  have h' := h
+  rw [Circ.wf, Bool.and_eq_true, Bool.and_eq_true, Bool.and_eq_true] at h'
+  obtain ⟨⟨⟨hwfg, houts⟩, _⟩, _⟩ := h'
+  have hin : ∀ a, c.inputs.contains a = true → renum c a = a := by
+    intro a ha
+    have hmem : a ∈ c.inputs := by simpa using ha
+    have hlt : a < c.nIn := by rw [Circ.inputs] at hmem; exact List.mem_range.mp hmem
+    rw [renum, if_pos hlt]
+  have hinlt : ∀ a, c.inputs.contains a = true → renum c a < c.nIn := by
+    intro a ha
+    have hmem : a ∈ c.inputs := by simpa using ha
+    have hlt : a < c.nIn := by rw [Circ.inputs] at hmem; exact List.mem_range.mp hmem
+    rw [renum, if_pos hlt]; exact hlt
+  have key : ∀ n, c.defined.contains n = true →
+      run ins (renumFrom (renum c) c.nIn c.gates) (renum c n) = run ins c.gates n := by
+    intro n hn
+    refine run_renumFrom (renum c) c.gates c.nIn c.inputs ins ins
+      (fun a ha => by rw [hin a ha]) hinlt hwfg (fun i hi => renum_out c h i hi) n ?_
+    rw [Circ.defined] at hn
+    exact defined_mem c.gates c.inputs n hn
+  show ((c.outs.map (renum c)).map (run ins (renumGates c.nIn (renum c) 0 c.gates)))
+      = c.outs.map (run ins c.gates)
+  rw [renumGates_eq_renumFrom, show c.nIn + 0 = c.nIn from rfl, List.map_map]
+  refine List.map_congr_left (fun n hn => ?_)
+  exact key n (List.all_eq_true.mp houts n hn)
+
 /-! ## The motivating case, kernel-checked
 
 `withMidDead` is the circuit `Dense.lean` built to exhibit the trap: `opt` fires,
@@ -373,6 +544,29 @@ theorem normalize_fabric3_ssa : (normalize (fabric 3)).ssa = true :=
 #audit_axioms Op.rename_fanin defined_mem wfGates_fanin_mem
 #audit_axioms renum_fanin_lt ssaFrom_of_pos
 #audit_axioms normalize_ssa
+#audit_axioms renumFrom renumGates_eq_renumFrom eval_rename
+#audit_axioms run_renumFrom normalize_sem
 #audit_axioms opt_withMidDead_wf' normalize_opt_withMidDead_ssa normalize_fabric3_ssa
+
+/-! ## OBLIGATION 5 — the pipeline that could not be written this afternoon
+
+`EmitN.emitPipeline` optimizes, checks `ssa`, and falls back to the UNOPTIMIZED
+circuit when `opt` has broken density — sound, but it emits the larger netlist
+exactly when optimization would have helped. With `normalize` proved, the
+fallback is no longer the only option: optimize, RENUMBER, emit. -/
+
+/-- **Optimize, normalize, emit.** No check, no fallback, no unoptimized branch. -/
+def emitPipeline' (c : Circ) : Silicon.Netlist := emitN (normalize (opt c))
+
+/-- **The pipeline law.** The emitted netlist means what the ORIGINAL circuit
+means, with `opt` actually applied. Note the port list is the normalized one —
+the two agree positionally, output `k` for output `k`, which is the form the
+refuter pass ruled the seam must use. -/
+theorem emitPipeline'_sem (c : Circ) (h : (opt c).wf = true) (ins : Env) :
+    (normalize (opt c)).outs.map
+        (fun n => (Silicon.runP ins [] (emitPipeline' c)).getD n false) = sem c ins := by
+  rw [emitPipeline', emitN_sem _ (normalize_ssa _ h) ins, normalize_sem _ h ins, opt_sem]
+
+#audit_axioms emitPipeline' emitPipeline'_sem
 
 end SaltWorks.HDL
