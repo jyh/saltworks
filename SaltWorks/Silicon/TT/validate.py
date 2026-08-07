@@ -247,10 +247,25 @@ MUTATIONS = [
      lambda t: _sub(t, "info.yaml", "clock_hz:    25000000", "clock_hz:    25e6")),
     ("manifest", "a missing pinout key",
      lambda t: _sub(t, "info.yaml", '  uio[7]: ""\n', "")),
+    # SURGICAL: the Makefile is mutated in step with the manifest, so `source_files`
+    # and PROJECT_SOURCES still AGREE and only the wildcard rule can fire. The
+    # naive version (manifest only) also tripped `sources-in-sync`, which leaves
+    # that guard un-exercised by its own mutant.
     ("manifest", "a wildcard in source_files",
-     lambda t: _sub(t, "info.yaml", '    - "banyan_fabric.v"', '    - "*.v"')),
+     lambda t: (_sub(t, "info.yaml", '    - "project.v"\n    - "banyan_fabric.v"\n'
+                                     '    - "bitserial_switch.v"', '    - "*.v"'),
+                _sub(t, "test/Makefile",
+                     "PROJECT_SOURCES = project.v banyan_fabric.v bitserial_switch.v",
+                     "PROJECT_SOURCES = *.v"))),
+    # SURGICAL: rename the module EVERYWHERE, so it is still defined in src/ and
+    # still instantiated in tb.v — only the `tt_um_` prefix rule can fire. The
+    # naive version renamed it in the manifest alone and also tripped `rtl`.
     ("manifest", "top_module without the tt_um_ prefix",
-     lambda t: _sub(t, "info.yaml", "tt_um_saltworks_banyan", "saltworks_banyan")),
+     lambda t: (_sub(t, "info.yaml", "tt_um_saltworks_banyan", "xx_um_saltworks_banyan"),
+                _sub(t, "src/project.v", "module tt_um_saltworks_banyan",
+                     "module xx_um_saltworks_banyan"),
+                _sub(t, "test/tb.v", "tt_um_saltworks_banyan user_project",
+                     "xx_um_saltworks_banyan user_project"))),
     ("docs", "the unedited template placeholder",
      lambda t: _sub(t, "docs/info.md", "## How it works",
                     "# How it works\n\n" + "Explain how your project works")),
@@ -278,20 +293,31 @@ def run_checks(tree):
 
 
 def self_test(build_tree):
-    """Every mutation must be caught, and caught BY THE CHECK THAT OWNS IT."""
-    print("\nself-test — each mutation must be caught:")
+    """Every mutation must be caught by its OWN check and by NO OTHER.
+
+    The second half is not fussiness (compiler seat's rule, 8/6): if a mutant
+    trips two guards, a green suite does not prove the second guard works — it
+    may be reacting to the first one's mutation and have a defect of its own that
+    nothing here exercises. **One mutant per guard, and each mutant invisible to
+    every other guard**, or the suite tests fewer things than it appears to."""
+    print("\nself-test — each mutation caught by its own check, and ONLY its own:")
     escaped = []
     for owner, label, mutate in MUTATIONS:
         with tempfile.TemporaryDirectory() as d:
             t = os.path.join(d, "tree")
             build_tree(t)
             mutate(t)
-            caught = [n for n, _ in run_checks(t)]
-            if owner in caught:
+            caught = sorted({n for n, _ in run_checks(t)})
+            others = [c for c in caught if c != owner]
+            if caught == [owner]:
                 print(f"  caught  [{owner:16}] {label}")
+            elif owner in caught:
+                print(f"  LEAKY   [{owner:16}] {label} — also tripped {others}")
+                escaped.append((label, f"also tripped {others}; those guards are "
+                                       "not independently exercised"))
             elif caught:
-                print(f"  MISFILED[{owner:16}] {label} — caught by {set(caught)}")
-                escaped.append((label, f"caught by the wrong check: {set(caught)}"))
+                print(f"  MISFILED[{owner:16}] {label} — caught by {caught}")
+                escaped.append((label, f"caught by the wrong check: {caught}"))
             else:
                 print(f"  ESCAPED [{owner:16}] {label}")
                 escaped.append((label, "not caught at all"))
