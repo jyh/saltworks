@@ -2,11 +2,15 @@
 ### C3 RATIFIED 8/7 ~09:45 by the maestro under probe-validated→take-it:
 ### **OPTION (A) — STRUCTURAL GATE-LEVEL EMISSION — IS THE ROUTE.**
 ### The complete evidence, all measured through the pinned flow:
-### RTL route DEAD at scale (5,054-cell core: 60.1% verifiable even
-### with every named boundary cut — boundaries MERGED AND RENAMED,
-### partial 8-of-32 merges); structural route: probe P1–P4 green,
-### the ~5k-cell structural monolith 100% of LIVE boundaries survive
-### (768ce11). Emitters landed: emitS (drive 1/2) + emitSMux (peephole,
+### LIKE-FOR-LIKE (citation corrected per evidence's 10:04 catch —
+### the quantities are BOUNDARY SURVIVAL vs CONE COVERAGE, never mix):
+###   boundary survival: structural 100% (5,266-cell monolith,
+###     deterministic, 768ce11) vs RTL 8/12 = 66.7% (merged/renamed,
+###     partial 8-of-32 merges) — the route question, decided.
+###   cone coverage: RTL 60.1%; structural NOT YET MEASURED — the
+###   cone-width census on the structural monolith is the named open
+###   measurement C4 NEEDS (dispatched to silicon 8/7 ~10:15).
+### Emitters landed: emitS (drive 1/2) + emitSMux (peephole,
 ### 5,270→2,006 cells). Fallback (B) retired unused. Known cost,
 ### priced not fatal: TT's test job needs cell models under (A).
 ### AMENDED 8/6 ~21:55 by the maestro on silicon's C0 census (d618178,
