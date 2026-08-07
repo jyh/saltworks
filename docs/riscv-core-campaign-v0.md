@@ -87,12 +87,16 @@ the chain is new; only the design on top of it is.
   ACTUALLY tapes out; its hypothesis `(compile core).wf = true` holds
   by construction (SSA discharged internally, not C4's to carry);
   `encD` indexes the NORMALIZED port list.
-  **PARTIALITY (maestro DRAFT ruling 8/7 per compiler's a1d8c1e
-  pricing; Captain ratification pending): OPTION 1 — total `stepT` on
+  **PARTIALITY (RATIFIED BY THE CAPTAIN 8/7 ~11:45 — "ratified,
+  option 1" — on compiler's a1d8c1e pricing, evidence's exact-to-four-
+  figures recomputation, and both seats' endorsement): OPTION 1 — total `stepT` on
   words + the COMPATIBILITY OBLIGATION as a named theorem
   (`stepW s w = some s' → stepT s w = s'`); undecodable words =
-  defined NOP-advance (PC+4), an explicit v1 semantics sentence,
-  superseded when trap machinery lifts R5's exclusion. Grounds: the
+  defined NOP-advance (PC+4). THE FENCE, at evidence's strength: this
+  is a CHOSEN v1 semantics on 99.80% of the word space and it is NOT
+  RV32I's (real RV32I raises an illegal-instruction trap — excluded by
+  R5); every claim sentence about this core states the choice
+  explicitly; superseded when trap machinery lifts the exclusion. Grounds: the
   guard would silence C4 on a MEASURED 99.80% of the word space; the
   validity bit costs gates on every instruction; option 1 alone keeps
   the netlist total and pins disagreement to a written theorem.** The EXACT statement is C1+C3's
