@@ -7,6 +7,7 @@ import SaltWorks.Stack.Spec
 import SaltWorks.Stack.Perm
 import SaltWorks.Stack.ZeroOne
 import SaltWorks.HDL.StateCodec
+import SaltWorks.HDL.C4
 
 /-!
 # STACK-S2 — THE PROGRAM: an agent-written bitonic sort in Slice A
@@ -1773,6 +1774,323 @@ theorem cycles_sort {cyc : SaltWorks.HDL.Env → SaltWorks.HDL.Env}
   rw [dataRegs_map_get, key]
   exact batcher8_sortsTo_word v
 
+/-! ## ⭐⭐ C4BRIDGE — THE MISSING LINK BETWEEN `C4Spec` AND `CycleRealisesStep`
+
+**The two lanes wrote two halves of one sentence and nothing joined them.**
+
+* Compiler's `HDL.C4Spec c` is about **`sem c ins`** — a `List Bool`, the
+  circuit's output ports in port order.
+* Math's `CycleRealisesStep cyc wordAt` is about a **cycle function**
+  `cyc : Env → Env` on wires.
+
+⇒ *Even with C4 in hand, `cycles_sort` could not consume it*, because no
+definition said which wires `sem c ins` lands on. This section is that
+definition and the two theorems that ride on it, so that **the day C4 is proved
+the end-to-end theorem fires with no further work.**
+
+### The content is the codec round trip, and one obligation the type system cannot see
+
+`cycOfCirc` puts output port `j` on state net `j` — the D→Q flop transfer, in
+`StateCodec`'s own layout — and `nextW ins` on the instruction nets. `C4Spec`
+says the port list *is* `encD (stepT …)`, and `decQ_encD` turns that back into
+the state. **That step is legal only because the two lists have the same length**
+(C4.lean's 14:17 hazard: 1055 against 1056, well-typed either way), and this
+section does not assume the length — it *carries the failure mode in the model*.
+`envOfBits` takes a `pad : Env` for the state nets **the output list does not
+reach**, because a core with too few outputs leaves those flops undriven and
+`false` would be a fiction. Every theorem below is universally quantified in
+`pad`; `cycOfBits_pad_irrelevant` says the pad is invisible when the length is
+right, and `cycOfBits_shortBits_pad_dependent` says it is visible when it is not.
+
+### ⚠️ THE FINDING — the bridge needs `C4Spec` and **not** `CoreConforms`
+
+The brief expected `CoreConforms`'s `outs.length = stWidth` to be what makes the
+round trip legal. It *is* the fact that makes it legal — but it is **implied by
+`C4Spec` itself**, because `C4Spec` is an equality of *lists* and `encD`'s length
+is `stWidth` unconditionally. `outs_length_of_C4Spec` below is that derivation.
+⇒ **Nothing was weakened and nothing was restated**: the bridge is stated from
+the `spec` field alone, which is the stronger theorem, and
+`cycleRealisesStep_of_C4` is the `C4`-structure interface compiler's own
+docstring asks callers to use. `CoreConforms` is still owed — its `ssa` conjunct
+feeds `Circ.wf_of_ssa` and the emission layer, and its `nIn = coreInWidth`
+conjunct is the input-map obligation — but **neither of those is a debt of the
+codec round trip**, and saying otherwise would have been a fake dependency.
+
+### ⛔ Non-vacuity, and what cannot be witnessed today
+
+`cycleRealisesStep_of_C4Spec`'s premise is C4, so **no `Circ` can witness it**
+until `core` exists. What the bridge's proof actually consumes is the *bits*
+hypothesis, and that is witnessed (`cycleRealisesStep_idealBits`) and
+discriminating (`not_cycleRealisesStep_stalledBits`,
+`cycOfBits_shortBits_pad_dependent`) — three controls through the same code path.
+At the `Circ` level, `not_both_coreShaped_C4Spec` is the strongest thing that can
+be said and it is said: compiler's two conforming circuits compute different
+things, so **at most one of them can ever be bridged.** -/
+
+/-- The two seats wrote the same 32 wires. `HDL.seenWord` (C4.lean:66) and this
+file's `seenWord` are the same function, so `C4Spec`'s word and
+`CycleRealisesStep`'s word need no translation. *Stated rather than assumed: the
+one thing a bridge between two lanes must not get wrong is which wires it is
+about, and `not_cycleRealisesStep_wordOf` is what the wrong answer looks like.* -/
+theorem seenWord_eq_hdl : seenWord = SaltWorks.HDL.seenWord := rfl
+
+/-- `encD` is `stWidth` bits, unconditionally — the fact the padding argument
+turns on. -/
+theorem encD_length (s : St) : (SaltWorks.HDL.encD s).length = SaltWorks.HDL.stWidth := by
+  rw [SaltWorks.HDL.encD, List.length_map, List.length_range]
+
+/-- **The wire configuration a bit list induces.** State net `j` carries element
+`j` of `bs`; ⚠️ **a state net the list does not reach carries `pad j`**, because a
+core with too few outputs leaves that flop undriven and there is no honest
+default; instruction nets carry `w`. *Compare `envWith`, which is this at
+`bs = encD s` — see `envOfBits_encD`.* -/
+def envOfBits (bs : List Bool) (pad : SaltWorks.HDL.Env) (w : Word) : SaltWorks.HDL.Env :=
+  fun j =>
+    if j < SaltWorks.HDL.stWidth then bs.getD j (pad j)
+    else w.getLsbD (j - SaltWorks.HDL.instrBase)
+
+/-- ⭐ **THE LENGTH OBLIGATION, DISCHARGING THE PADDING.** A list long enough to
+cover the state nets makes the undriven-wire model invisible. -/
+theorem envOfBits_of_length {bs : List Bool} (hlen : SaltWorks.HDL.stWidth ≤ bs.length)
+    (pad pad' : SaltWorks.HDL.Env) (w : Word) : envOfBits bs pad w = envOfBits bs pad' w := by
+  funext j
+  show (if j < SaltWorks.HDL.stWidth then bs.getD j (pad j) else _)
+      = (if j < SaltWorks.HDL.stWidth then bs.getD j (pad' j) else _)
+  by_cases hj : j < SaltWorks.HDL.stWidth
+  · have h1 : j < bs.length := Nat.lt_of_lt_of_le hj hlen
+    rw [if_pos hj, if_pos hj, List.getD_eq_getElem?_getD, List.getD_eq_getElem?_getD,
+      List.getElem?_eq_getElem h1]
+    rfl
+  · rw [if_neg hj, if_neg hj]
+
+/-- At a full state encoding this **is** `envWith`, for every pad — so the whole
+existing witness apparatus (`decQ_envWith`, `seenWord_envWith`) applies. -/
+theorem envOfBits_encD (s : St) (pad : SaltWorks.HDL.Env) (w : Word) :
+    envOfBits (SaltWorks.HDL.encD s) pad w = envWith s w := by
+  rw [envOfBits_of_length (le_of_eq (encD_length s).symm) pad (fun _ => false) w]
+  rfl
+
+/-- The instruction half is faithful: whatever `w` was put on the instruction
+nets is what `seenWord` reads back. *`seenWord_envWith`'s argument, at an
+arbitrary bit list.* -/
+theorem seenWord_envOfBits (bs : List Bool) (pad : SaltWorks.HDL.Env) (w : Word) :
+    seenWord (envOfBits bs pad w) = w := by
+  apply BitVec.eq_of_getLsbD_eq
+  intro k hk
+  rw [seenWord, SaltWorks.HDL.wordOf_getLsbD _ _ hk]
+  show (if SaltWorks.HDL.instrNet k < SaltWorks.HDL.stWidth
+        then bs.getD (SaltWorks.HDL.instrNet k) (pad (SaltWorks.HDL.instrNet k))
+        else w.getLsbD (SaltWorks.HDL.instrNet k - SaltWorks.HDL.instrBase))
+      = w.getLsbD k
+  have hsub : SaltWorks.HDL.instrNet k - SaltWorks.HDL.instrBase = k := by
+    show 1056 + k - 1056 = k
+    omega
+  rw [if_neg (by show ¬ (1056 + k < 1056); omega), hsub]
+
+/-- **The cycle map an output-bit function induces**, with the instruction-net
+policy left as an arbitrary `nextW : Env → Word`. *Arbitrary on purpose: a ROM
+indexed by the old pc and a ROM indexed by the new one are both functions of the
+current wire state, so this commits to neither, and `FeedsProgram` is where the
+policy is constrained.* -/
+def cycOfBits (f : SaltWorks.HDL.Env → List Bool) (nextW : SaltWorks.HDL.Env → Word)
+    (pad : SaltWorks.HDL.Env) (ins : SaltWorks.HDL.Env) : SaltWorks.HDL.Env :=
+  envOfBits (f ins) pad (nextW ins)
+
+/-- ⭐ **THE BRIDGE, at the level its proof actually works at.** A bit function
+that agrees with `encD ∘ stepT ∘ decQ` induces a cycle map realising the step —
+for every next-word policy and every pad. -/
+theorem cycleRealisesStep_of_bits {f : SaltWorks.HDL.Env → List Bool}
+    (h : ∀ ins, f ins
+      = SaltWorks.HDL.encD (stepT (SaltWorks.HDL.decQ ins) (seenWord ins)))
+    (nextW : SaltWorks.HDL.Env → Word) (pad : SaltWorks.HDL.Env) :
+    CycleRealisesStep (cycOfBits f nextW pad) seenWord := by
+  intro ins
+  rw [cycOfBits, h ins, envOfBits_encD]
+  exact decQ_envWith _ _
+
+/-- ⭐ **THE CYCLE MAP A CIRCUIT INDUCES** — output port `j` becomes state net
+`j`, which is the D→Q transfer in `StateCodec`'s layout and is the definition
+that was missing. -/
+def cycOfCirc (c : SaltWorks.HDL.Circ) (nextW : SaltWorks.HDL.Env → Word)
+    (pad : SaltWorks.HDL.Env) : SaltWorks.HDL.Env → SaltWorks.HDL.Env :=
+  cycOfBits (SaltWorks.HDL.sem c) nextW pad
+
+/-- What the core sees next cycle is exactly `nextW` of this cycle's wires. The
+reading that makes `sorts_of_C4`'s `FeedsProgram` hypothesis legible. -/
+theorem seenWord_cycOfCirc (c : SaltWorks.HDL.Circ) (nextW : SaltWorks.HDL.Env → Word)
+    (pad ins : SaltWorks.HDL.Env) : seenWord (cycOfCirc c nextW pad ins) = nextW ins :=
+  seenWord_envOfBits _ _ _
+
+/-- ⭐⭐ **THE BRIDGE — `C4Spec` DISCHARGES `CycleRealisesStep`.** The theorem
+whose absence meant a proved C4 would still not reach `cycles_sort`. -/
+theorem cycleRealisesStep_of_C4Spec {c : SaltWorks.HDL.Circ} (h : SaltWorks.HDL.C4Spec c)
+    (nextW : SaltWorks.HDL.Env → Word) (pad : SaltWorks.HDL.Env) :
+    CycleRealisesStep (cycOfCirc c nextW pad) seenWord :=
+  cycleRealisesStep_of_bits (f := SaltWorks.HDL.sem c) h nextW pad
+
+/-- The same, through the `C4` structure — *"C4 as it should be USED"*, in
+compiler's words. -/
+theorem cycleRealisesStep_of_C4 {c : SaltWorks.HDL.Circ} (hC4 : SaltWorks.HDL.C4 c)
+    (nextW : SaltWorks.HDL.Env → Word) (pad : SaltWorks.HDL.Env) :
+    CycleRealisesStep (cycOfCirc c nextW pad) seenWord :=
+  cycleRealisesStep_of_C4Spec hC4.spec nextW pad
+
+/-- ⚠️ **`CoreConforms`'S THIRD CONJUNCT IS IMPLIED BY `C4Spec`.** The output
+count the type system cannot see is pinned by the specification itself, because
+`C4Spec` is an equality of *lists*. *So the bridge above owes nothing to
+`CoreConforms`, and the honest statement is the one that does not ask for it.
+`CoreConforms` remains owed for `ssa` (the emission layer) and for the input
+width — different obligations, different consumers.* -/
+theorem outs_length_of_C4Spec {c : SaltWorks.HDL.Circ} (h : SaltWorks.HDL.C4Spec c) :
+    c.outs.length = SaltWorks.HDL.stWidth := by
+  have hh := congrArg List.length (h (fun _ => false))
+  rwa [SaltWorks.HDL.sem, List.length_map, encD_length] at hh
+
+/-- ⭐⭐⭐ **THE END-TO-END THEOREM — GIVEN C4, THE COMPILED CIRCUIT SORTS.**
+
+*A circuit satisfying C4, wired so its output ports drive the state flops, reset
+into the entry state and fed the program: the eight data registers, read off the
+wires through `decQ` at any cycle count `N ≥ K`, are a signed-sorted permutation
+of the input.*
+
+⭐ **THE SURVIVING HYPOTHESES ARE EXACTLY THREE, AND EACH IS A NAMED LANE'S:**
+
+1. `SaltWorks.HDL.C4 c` — the **compiler**. Unwitnessable today (`core` does not
+   exist); `outs_length_of_C4Spec` shows the bridge uses only its `spec` field.
+2. `EntryLoaded ins v` — the **reset**, the silicon lane. Satisfiable
+   (`entryLoaded_encD_stOfFn`), discriminating (`not_entryLoaded_offEndEnv`).
+3. `FeedsProgram batcherSort (fun k => seenWord (cycles … k ins)) … K` — the
+   **instruction path**, the tile lane. Satisfiable (`feedsProgram_addi`),
+   discriminating (`noisy_tail_overwrites`); by `seenWord_cycOfCirc` the stream
+   it constrains is literally `nextW` along the cycle sequence, so it is a
+   demand on the tile's ROM and on nothing else.
+
+**Nothing else is assumed.** `nextW` and `pad` are universally quantified — the
+theorem holds for *every* instruction-net policy and *every* behaviour of
+undriven state flops — so neither is a hypothesis, and no statement above this
+one was weakened to get here. -/
+theorem sorts_of_C4 {c : SaltWorks.HDL.Circ} (hC4 : SaltWorks.HDL.C4 c)
+    (nextW : SaltWorks.HDL.Env → Word) (pad : SaltWorks.HDL.Env)
+    {ins : SaltWorks.HDL.Env} {v : Fin 8 → Word} (hentry : EntryLoaded ins v) :
+    ∃ K, K ≤ 120 ∧ ∀ N, K ≤ N →
+      FeedsProgram batcherSort
+        (fun k => seenWord (cycles (cycOfCirc c nextW pad) k ins))
+        (SaltWorks.HDL.decQ ins) K →
+      SortsTo (List.ofFn v)
+        (dataRegs.map (SaltWorks.HDL.decQ (cycles (cycOfCirc c nextW pad) N ins)).get) :=
+  cycles_sort (cycleRealisesStep_of_C4 hC4 nextW pad) hentry
+
+/-! ### ⭐ NON-VACUITY AND THE CONTROLS
+
+Per this file's standing practice. The `Circ`-level premise is C4 itself and
+cannot be witnessed until `core` exists — that is a fact about the campaign, not
+a gap in this section — so the witnesses are placed where the bridge's proof
+actually consumes its hypothesis: at `cycleRealisesStep_of_bits`. Same code path,
+same conclusion. -/
+
+/-- The ideal core's output list — `encD ∘ stepT ∘ decQ`, offered as the trivial
+witness it is. -/
+def idealBits (ins : SaltWorks.HDL.Env) : List Bool :=
+  SaltWorks.HDL.encD (stepT (SaltWorks.HDL.decQ ins) (seenWord ins))
+
+/-- ✅ **THE BRIDGE IS NOT VACUOUS** — its hypothesis is met, for every next-word
+policy and every pad, and the conclusion comes out through
+`cycleRealisesStep_of_bits`. -/
+theorem cycleRealisesStep_idealBits (nextW : SaltWorks.HDL.Env → Word)
+    (pad : SaltWorks.HDL.Env) :
+    CycleRealisesStep (cycOfBits idealBits nextW pad) seenWord :=
+  cycleRealisesStep_of_bits (fun _ => rfl) nextW pad
+
+/-- A core whose outputs re-present the state it was given: the stall. -/
+def stalledBits (ins : SaltWorks.HDL.Env) : List Bool :=
+  SaltWorks.HDL.encD (SaltWorks.HDL.decQ ins)
+
+theorem decQ_cycOfBits_stalled (nextW : SaltWorks.HDL.Env → Word) (pad : SaltWorks.HDL.Env)
+    (ins : SaltWorks.HDL.Env) :
+    SaltWorks.HDL.decQ (cycOfBits stalledBits nextW pad ins) = SaltWorks.HDL.decQ ins := by
+  rw [cycOfBits, stalledBits, envOfBits_encD]
+  exact decQ_envWith _ _
+
+/-- ⛔ **CONTROL 1 — THE STALLED CORE FAILS THROUGH THE BRIDGE.** `cycOfBits` is
+not a construction that makes anything realise a step: at `St.init` with
+`addi x1, x0, 1` on the instruction nets the ISA writes `x1 = 1` and the stall
+does not. *`not_cycleRealisesStep_id`'s witness, now aimed at the circuit-level
+cycle map instead of the abstract one.* -/
+theorem not_cycleRealisesStep_stalledBits (nextW : SaltWorks.HDL.Env → Word)
+    (pad : SaltWorks.HDL.Env) :
+    ¬ CycleRealisesStep (cycOfBits stalledBits nextW pad) seenWord := by
+  intro h
+  have hh := h (envWith St.init (encode (Instr.ADDI 1 0 1)))
+  rw [decQ_cycOfBits_stalled, decQ_envWith, seenWord_envWith, stepT_encode] at hh
+  revert hh
+  decide +kernel
+
+/-- 🔴 **The 1055-output core of `C4.lean`'s hazard, at the bit level** — the
+ideal core with its last output port removed. -/
+def shortBits (ins : SaltWorks.HDL.Env) : List Bool :=
+  (idealBits ins).take (SaltWorks.HDL.stWidth - 1)
+
+theorem shortBits_length (ins : SaltWorks.HDL.Env) :
+    (shortBits ins).length = SaltWorks.HDL.stWidth - 1 := by
+  rw [shortBits, List.length_take, idealBits, encD_length]
+  omega
+
+theorem shortBits_reads_the_pad (ins pad : SaltWorks.HDL.Env) (w : Word) :
+    envOfBits (shortBits ins) pad w (SaltWorks.HDL.stWidth - 1)
+      = pad (SaltWorks.HDL.stWidth - 1) := by
+  have hlen := shortBits_length ins
+  show (if SaltWorks.HDL.stWidth - 1 < SaltWorks.HDL.stWidth then _ else _) = _
+  rw [if_pos (by decide +kernel), List.getD_eq_getElem?_getD,
+    List.getElem?_eq_none (by omega)]
+  rfl
+
+/-- ⛔ **CONTROL 2 — ONE OUTPUT SHORT AND THE UNDRIVEN FLOP IS WHAT THE MACHINE
+RUNS ON.** The two cycle maps differ at net 1055 — the pc's top bit — purely in
+the pad, so *what the tile computes is decided by a wire the circuit does not
+drive.* **This is C4.lean's 1055-against-1056 hazard, propagated through the
+bridge and refuted rather than warned about**, and it is why `envOfBits` carries
+a pad instead of quietly defaulting to `false`. -/
+theorem cycOfBits_shortBits_pad_dependent (nextW : SaltWorks.HDL.Env → Word)
+    (ins : SaltWorks.HDL.Env) :
+    cycOfBits shortBits nextW (fun _ => false) ins
+      ≠ cycOfBits shortBits nextW (fun _ => true) ins := by
+  intro h
+  have hh := congrFun h (SaltWorks.HDL.stWidth - 1)
+  rw [cycOfBits, cycOfBits, shortBits_reads_the_pad, shortBits_reads_the_pad] at hh
+  exact absurd hh (by simp)
+
+/-- ✅ **AND THE OTHER SIDE OF CONTROL 2 — with the length right, the pad is
+invisible.** So the padding is not a modelling assumption smuggled into the
+bridge: it is a failure mode the bridge's own hypothesis excludes. -/
+theorem cycOfBits_pad_irrelevant {f : SaltWorks.HDL.Env → List Bool}
+    (hlen : ∀ ins, SaltWorks.HDL.stWidth ≤ (f ins).length)
+    (nextW : SaltWorks.HDL.Env → Word) (pad pad' : SaltWorks.HDL.Env) :
+    cycOfBits f nextW pad = cycOfBits f nextW pad' := by
+  funext ins
+  exact envOfBits_of_length (hlen ins) pad pad' _
+
+/-- ⭐ **AND `C4Spec` SUPPLIES THE LENGTH** — a bridged circuit's cycle map does
+not depend on the pad at all. -/
+theorem cycOfCirc_pad_irrelevant {c : SaltWorks.HDL.Circ} (h : SaltWorks.HDL.C4Spec c)
+    (nextW : SaltWorks.HDL.Env → Word) (pad pad' : SaltWorks.HDL.Env) :
+    cycOfCirc c nextW pad = cycOfCirc c nextW pad' :=
+  cycOfBits_pad_irrelevant
+    (fun ins => le_of_eq ((congrArg List.length (h ins)).trans (encD_length _)).symm)
+    nextW pad pad'
+
+/-- ⛔ **CONTROL 3 — CONFORMING IS NOT BEING BRIDGEABLE.** Compiler's two
+structurally-conforming circuits compute different things
+(`conformance_does_not_determine_semantics`), so **at most one of them can ever
+satisfy `C4Spec`** and be carried into `sorts_of_C4`. *The `Circ`-level statement
+that the premise of the bridge is a real constraint and not a shape — which is
+the strongest thing sayable while `core` does not exist.* -/
+theorem not_both_coreShaped_C4Spec :
+    ¬ (SaltWorks.HDL.C4Spec SaltWorks.HDL.coreShaped
+        ∧ SaltWorks.HDL.C4Spec SaltWorks.HDL.coreShapedT) := by
+  rintro ⟨h1, h2⟩
+  exact SaltWorks.HDL.conformance_does_not_determine_semantics
+    ((h1 (fun _ => false)).trans (h2 (fun _ => false)).symm)
+
 /-! ## Axiom audit -/
 
 open Salt.Tactic
@@ -1823,5 +2141,16 @@ open Salt.Tactic
 #audit_axioms fetchWord_eq_encode feedsFst_of_deliversProgram
 #audit_axioms addiOnly addiStream feedsProgram_addi feedsProgram_addi_runs
 #audit_axioms noisy_tail_overwrites exists_halting_count cycles_sort
+#audit_axioms seenWord_eq_hdl encD_length envOfBits envOfBits_of_length envOfBits_encD
+#audit_axioms seenWord_envOfBits cycOfBits cycleRealisesStep_of_bits
+#audit_axioms cycOfCirc seenWord_cycOfCirc
+#audit_axioms cycleRealisesStep_of_C4Spec cycleRealisesStep_of_C4
+#audit_axioms outs_length_of_C4Spec sorts_of_C4
+#audit_axioms idealBits cycleRealisesStep_idealBits
+#audit_axioms stalledBits decQ_cycOfBits_stalled not_cycleRealisesStep_stalledBits
+#audit_axioms shortBits shortBits_length shortBits_reads_the_pad
+#audit_axioms cycOfBits_shortBits_pad_dependent
+#audit_axioms cycOfBits_pad_irrelevant cycOfCirc_pad_irrelevant
+#audit_axioms not_both_coreShaped_C4Spec
 
 end SaltWorks.Stack.Program

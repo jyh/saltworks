@@ -1811,3 +1811,178 @@ every one inside `[propext, Classical.choice, Quot.sound]`.
 * **Whether three obligations is all of them.** `EntryLoaded`, `DeliversProgram`
   and now `FeedsProgram`'s tail are what the traces found. Nothing here claims the
   list is complete; C4's §4 lists three more that are C3's.
+
+## C4BRIDGE — the missing link between `C4Spec` and `CycleRealisesStep`
+**2026-08-07 · Opus executor · `SaltWorks/Stack/Program.lean` (+329 lines: **147
+code**, 154 comment/docstring, 28 blank — counted, not estimated; 26 new
+declarations, 1 new import)**
+
+### The gap this closed
+
+The two lanes had written two halves of one sentence and **nothing joined them.**
+
+* compiler's `HDL.C4Spec c` is about **`sem c ins` — a `List Bool`**, the
+  circuit's output ports in port order;
+* math's `CycleRealisesStep cyc wordAt` is about a **cycle function
+  `cyc : Env → Env` on wires**.
+
+⇒ *even with C4 proved, `cycles_sort` could not have consumed it*, because no
+definition said which wires `sem c ins` lands on. `cycOfCirc` is that definition
+— output port `j` drives state net `j`, the D→Q transfer in `StateCodec`'s own
+layout — and `cycleRealisesStep_of_C4Spec` is the theorem that was missing.
+
+### ⭐⭐ THE SURVIVING HYPOTHESES — the campaign's remaining debt, in one list
+
+`sorts_of_C4` is unconditional in everything except **three** things, and each is
+a named lane's:
+
+1. **`SaltWorks.HDL.C4 c`** — the *compiler* lane. Unwitnessable today (`core`
+   does not exist). Its `spec` field is all the bridge uses; its `conforms` field
+   is owed elsewhere (below).
+2. **`EntryLoaded ins v`** — the *reset*, the silicon lane. Satisfiable
+   (`entryLoaded_encD_stOfFn`), discriminating (`not_entryLoaded_offEndEnv`).
+3. **`FeedsProgram batcherSort (fun k => seenWord (cycles (cycOfCirc c nextW pad) k ins))
+   (decQ ins) K`** — the *instruction path*, the tile lane. Satisfiable
+   (`feedsProgram_addi`), discriminating (`noisy_tail_overwrites`). By
+   `seenWord_cycOfCirc` the stream it constrains is literally `nextW` along the
+   cycle sequence, so it is a demand on the tile's ROM and on nothing else.
+
+**And nothing else.** `nextW` (the instruction-net policy) and `pad` (the
+behaviour of undriven state flops) are **universally quantified**, so neither is
+a hypothesis: the theorem holds for every policy and every undriven-wire
+behaviour. No statement above `sorts_of_C4` was weakened, restated or repaired to
+get there.
+
+### ⚠️ THE FINDING — the bridge needs `C4Spec` and **not** `CoreConforms`
+
+The brief expected `CoreConforms`'s `outs.length = stWidth` to be the fact that
+makes the codec round trip legal. **It is that fact — but `C4Spec` already
+implies it**, because `C4Spec` is an equality of *lists* and `encD`'s length is
+`stWidth` unconditionally. `outs_length_of_C4Spec` is the derivation:
+`C4Spec c → c.outs.length = stWidth`, one `congrArg List.length`.
+
+⇒ the bridge is stated from the **`spec` field alone**, which is the stronger
+theorem; `cycleRealisesStep_of_C4` supplies the `C4`-structure interface
+compiler's own docstring tells callers to use, and `sorts_of_C4` takes the whole
+structure. **Taking `CoreConforms` as a hypothesis of the bridge would have been
+a fake dependency** and was rejected on those grounds. `CoreConforms` is still
+owed — `ssa` feeds `Circ.wf_of_ssa` and the emission layer, `nIn = coreInWidth`
+is the input-map obligation — but **neither of those is a debt of the round
+trip.** ⛔ Nothing in `C4.lean` was touched, weakened or restated.
+
+### The undriven-wire model, and why `envOfBits` carries a `pad`
+
+A core with too few outputs leaves the remaining state flops **undriven**, and
+defaulting them to `false` would be a fiction that makes C4.lean's 1055-vs-1056
+hazard invisible on math's side. So `envOfBits bs pad w` takes an arbitrary
+`pad : Env` for the state nets the output list does not reach, and every theorem
+is quantified in it. That turns the length obligation into a pair of results
+rather than a comment:
+
+* ✅ `cycOfBits_pad_irrelevant` / `cycOfCirc_pad_irrelevant` — with the length
+  right (and `C4Spec` supplies it) the pad is **invisible**;
+* ⛔ `cycOfBits_shortBits_pad_dependent` — one output short and the two cycle maps
+  **differ at net 1055, the pc's top bit, purely in the pad**. *What the tile
+  computes would be decided by a wire the circuit does not drive.*
+
+### What landed (26 declarations)
+
+- **`envOfBits` / `envOfBits_of_length` / `envOfBits_encD` / `seenWord_envOfBits`** —
+  the wire configuration a bit list induces, its pad-independence under the
+  length obligation, its agreement with the existing `envWith` at a full state
+  encoding, and the fidelity of the instruction half.
+- **`cycOfBits` / `cycleRealisesStep_of_bits`** — the bridge at the level its
+  proof works at: a bit function agreeing with `encD ∘ stepT ∘ decQ` induces a
+  cycle map realising the step, for every `nextW` and every `pad`.
+- ⭐ **`cycOfCirc`** — the cycle map a **circuit** induces. The definition that
+  was missing.
+- ⭐⭐ **`cycleRealisesStep_of_C4Spec`**, and **`cycleRealisesStep_of_C4`** through
+  the structure. **THE BRIDGE.**
+- ⭐⭐⭐ **`sorts_of_C4`** — `C4 c` → `CycleRealisesStep` → `cycles_realise_steps`
+  → `cycles_sort`, chained. The end-to-end sentence, with the three hypotheses
+  above and no others.
+- **`seenWord_eq_hdl`** — `Stack.Program.seenWord = HDL.seenWord`, by `rfl`. The
+  two seats are about the same 32 wires; stated rather than assumed, because the
+  one thing a cross-lane bridge must not get wrong is which wires it is about
+  (`not_cycleRealisesStep_wordOf` is what the wrong answer looks like).
+- **`outs_length_of_C4Spec`**, **`seenWord_cycOfCirc`**, **`encD_length`** — the
+  finding, the legibility lemma for hypothesis 3, and the length fact.
+
+### Non-vacuity — required, and delivered where the proof consumes its hypothesis
+
+⚠️ **The `Circ`-level premise is C4 itself and CANNOT be witnessed today**, and
+this ledger says so rather than dressing something up as a witness. What the
+bridge's proof actually consumes is the *bits* hypothesis, so the witnesses are
+placed there — same code path, same conclusion:
+
+- ✅ **`cycleRealisesStep_idealBits`** — `idealBits = encD ∘ stepT ∘ decQ` meets
+  the hypothesis, for every `nextW` and every `pad`, and the conclusion comes out
+  through `cycleRealisesStep_of_bits`.
+- ⛔ **CONTROL 1 — `not_cycleRealisesStep_stalledBits`.** A core whose outputs
+  re-present the state it was given fails, at `St.init` with `addi x1, x0, 1` on
+  the instruction nets. `cycOfBits` is not a construction that makes anything
+  realise a step.
+- ⛔ **CONTROL 2 — `cycOfBits_shortBits_pad_dependent`**, with its positive half
+  `cycOfBits_pad_irrelevant`. **C4.lean's 1055-against-1056 hazard, propagated
+  through the bridge and refuted rather than warned about.**
+- ⛔ **CONTROL 3 — `not_both_coreShaped_C4Spec`.** Compiler's two conforming
+  circuits compute different things (`conformance_does_not_determine_semantics`),
+  so **at most one of them can ever be bridged.** The strongest `Circ`-level
+  statement available while `core` does not exist, and it is made.
+
+### Attempt counts, against the split budget
+
+* **Statements: 1 attempt each** (budget 3–4). Two design decisions were weighed
+  rather than defaulted: (a) whether the bridge takes `CoreConforms` — resolved
+  against, see the finding above, with `cycleRealisesStep_of_C4` added so callers
+  still have the structure-shaped interface; (b) whether the undriven state nets
+  default to `false` or carry an arbitrary `pad` — resolved for the pad, because
+  `false` would have hidden the exact hazard `C4.lean` exists to make visible.
+  A third, smaller: `nextW : Env → Word` rather than `St → Word` (the shape
+  `cycOf` uses), because a ROM indexed by the *new* pc is also a function of the
+  current wires and the more general type prejudges neither.
+* **Proofs: 1 attempt, 1 line-level repair** (budget 2 before flagging; not
+  reached). The repair: in `envOfBits_of_length`, `omega` did not pick up the
+  `by_cases` hypothesis `hj : j < stWidth` (its counterexample listed only
+  `bs.length` and `stWidth` as atoms) — replaced with the explicit
+  `Nat.lt_of_lt_of_le hj hlen`. No proof-design change anywhere.
+* No `sorry`. No `native_decide`. `decide +kernel` is used for CONTROL 1's
+  arithmetic and for `1055 < 1056`.
+
+### Build + audit, and one side effect worth flagging
+
+`saltbuild.sh SaltWorks.Stack.Program` → **EXIT=0** (10.6 s). Full-tree
+`saltbuild.sh` → **EXIT=0**, **8634 jobs**, zero `error:` and zero `warning:`
+lines. All 26 new declarations tick `#audit_axioms`, and eight were re-checked
+independently with `#print axioms` in `ScratchMATHC4B.lean` (EXIT=0; deleted, not
+committed) — every one inside `[propext, Classical.choice, Quot.sound]`.
+
+**The import worked and no new module was needed.** `Stack/Program.lean` now
+imports `SaltWorks.HDL.C4`; there is no cycle (nothing under `HDL/` imports
+`Stack/`) and no heavy closure — C4's transitive dependencies
+(`Compose → Renumber → EmitN → {Dense, Silicon.Equiv.BitSliced}`) were already in
+the hub's closure and pre-built, so the full tree went from 8632 to 8634 jobs.
+⚠️ **Side effect for the maestro and for compiler: `SaltWorks/HDL/C4.lean` was
+not reachable from `SaltWorks.lean` before today** — nothing imported it — so
+`lake build` was not checking it. It is in the default target now, via this
+import. ⛔ No file under `HDL/` was edited; `SaltWorks.lean` was not touched.
+
+### Left undetermined
+
+* **Whether any `Circ` satisfies `C4Spec`.** That is C4, and it is still
+  unprovable: `compile` and `core` do not exist. The bridge is what makes proving
+  it *sufficient*; it does not make it easier.
+* **The coherence fact** named in `feedsFst_of_deliversProgram`'s docstring —
+  that a tile's input map at cycle `k` is the `k`-th iterate. `cycOfCirc` now
+  fixes what the iterate *is*, which is half of what that statement needs; the
+  other half is a claim about the tile's assembly and is still nobody's.
+* **`CoreConforms`'s other two conjuncts have no consumer in this file.** `ssa`
+  belongs to the emission layer (`Circ.wf_of_ssa`, `emitPipeline'_sem`) and
+  `nIn = coreInWidth` to the input map. Neither is discharged and neither is
+  used here; they are listed so nobody reads `sorts_of_C4`'s use of the `C4`
+  structure as having consumed them.
+* **Whether `pad` should exist at all in the final tile model.** It is the honest
+  model of an undriven flop and it costs one universally-quantified argument, but
+  a real tile will have a definite reset/hold behaviour, and when that is pinned
+  the `pad` can be instantiated rather than quantified. Nothing here depends on
+  which way that goes.
