@@ -142,6 +142,27 @@ the seat could have released itself.
        -> SELF-DEFERRAL, however courteously phrased
 ```
 
+**⛔ THIRD EXCLUSION, 2026-08-07 — THE STALE-BOARD `[R]`, AND IT NEEDS NO
+BAD ACTOR AT ALL.** A human touch that orders work **already landed** scores
+`[R]` under the rule as written — there is an open ask on the board, and the
+touch answers it. **But it unblocked nothing, because nothing was blocked.**
+
+**Measured instance:** compiler landed the `readTree` `x0`-leaf fix at
+**07:19**; a later touch arrived saying *"fix the readTree x0 leaf."* **The
+board was stale across a maestro reboot** — the item was open on the board
+and closed in the repo.
+
+```
+  [R]  requires ALSO: the ask is still OPEN IN THE ARTIFACT at the moment
+       of the touch — not merely open on someone's board
+  [C]  the work had already landed -> the touch released nothing
+```
+
+*This one is the most dangerous of the three because it requires no drift in
+habit and no politeness — only a board that has fallen behind a repo, which
+is the normal state of any board.* **And it inflates `[R]` exactly when the
+fleet is moving fastest, since that is when boards go stale.**
+
 **⚠️ AND THIS GAMING VECTOR IS WORSE THAN THE ASK-RATE ONE BELOW, BECAUSE IT
 LOOKS LIKE GOOD MANNERS.** A seat can manufacture [R] indefinitely by
 deferring to the human on matters inside its own writer slot — and every one
