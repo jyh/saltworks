@@ -77,6 +77,16 @@ both are `#eval`-checked-only files.**
 algebra with no named evaluator. **Subtract them: the real structural-only count is
 ~34, and `HDL.BatcherNet`'s 15 are then the largest genuine block.**
 
+⛔ **AND THAT LARGEST BLOCK MAY BE DEAD WEIGHT — compiler's addition, 16:1x, and it
+changes the queue's ordering rather than its contents.** *`BatcherNet.lean`'s 15
+structural-only definitions are the **convention-P** network — **the one B4
+retired**.* ⇒ ***Certifying them would be proving things about a design the fleet has
+already replaced.*** **Nobody should work that block until someone rules whether
+`BatcherNet.lean` is retired or retained**, and it cannot simply be deleted:
+`bnComps` (tier ①'s sole member) and `BatcherNetCheck` still live there. ⚠️ *Unruled;
+compiler declined to rule it and so do I. It is named here so tomorrow's queue does
+not open with obsolete work.*
+
 ---
 
 ## What this says for C4
