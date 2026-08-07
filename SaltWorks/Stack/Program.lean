@@ -6,6 +6,7 @@ Authors: Jason Hickey, Claude
 import SaltWorks.Stack.Spec
 import SaltWorks.Stack.Perm
 import SaltWorks.Stack.ZeroOne
+import SaltWorks.HDL.StateCodec
 
 /-!
 # STACK-S2 — THE PROGRAM: an agent-written bitonic sort in Slice A
@@ -1071,6 +1072,245 @@ theorem cmpExFlip_does_not_refine :
   revert this
   decide +kernel
 
+/-! ## ⭐ STACK-LOADER — how `s.pc = 0` arrives, and what S5 needs at the entry
+
+S3(b) left `refinesNetwork_of_pc_zero` carrying an `hpc : s.pc = 0` and the
+ledger left *"how do the eight words arrive in the registers on real silicon"*
+as the open seam. This section is the demand trace that answers it, and the
+answer is not the one the seam's name suggests.
+
+### ⛔ THE FIRST FINDING: THERE CAN BE NO LOADER, BECAUSE SLICE A CANNOT LOAD
+
+The obvious repair is a *prelude* — a few instructions in front of `batcherSort`
+that put the input into `x1`–`x8` and leave the pc at the sort's first word.
+**Slice A cannot express one.** Read off the instruction set rather than
+argued:
+
+* `ADDI rd rs1 (imm : BitVec 12)` is the only instruction that introduces a
+  constant, and `step`'s `ADDI` case adds `imm.signExtend 32`. **The reachable
+  constants are `[-2048, 2047]`** — the 32-bit word `0x000010B7` is not among
+  them, and neither is most of any input.
+* There is **no `LW`, no `LB`, no `LUI`, no `AUIPC`** — `Instr` has exactly five
+  constructors (`ADD`, `ADDI`, `XOR`, `SLT`, `BEQ`) and `ISA.lean`'s own
+  docstring lists the exclusions. `decode_rejects_lui` is the same fact from the
+  decoder's side.
+* There is **no memory** at all, so there is nowhere for a load to load from.
+
+⇒ **A prelude could only install eight assembly-time constants inside ±2047.**
+That is not `∀ v : Fin 8 → Word`; it is one example. *The prelude option does
+not weaken the theorem — it destroys it*, and that is why the entry point is
+`stOfFn` and not a program.
+
+### ⭐ THE SECOND FINDING: `stOfFn` IS NOT A LOADER, IT IS A RESET
+
+`stOfFn` builds a state from `St.init`, whose `pc` is already `0`. Nothing
+*runs* to establish `pc = 0`; the state simply has it. So at the software level
+the hypothesis is discharged for free (`stOfFn_pc`, `rfl`), and everything below
+`stOfFn_sorts` is bookkeeping.
+
+⚠️ **But that means the obligation did not disappear — it changed lanes.** C4
+observes the machine state as `SaltWorks.HDL.decQ ins`, *decoded from the
+netlist's primary inputs* (`docs/c4-statement-composition-check-0807.md` §2:
+the Q-leaves, at the flop boundary). On silicon there is no `St.init` and no
+`stOfFn`: the state at cycle 0 is **whatever the flops hold out of reset**. ⇒
+*`pc = 0` and "the data is in the registers" are a **hardware initialisation**
+obligation, not a software one.* `EntryLoaded` below is that obligation, named.
+
+### And a second obligation the trace exposes, which was not on anyone's list
+
+Slice A's `run` takes the program as a `List Instr` *argument*. On silicon it
+does not: C4's `stepT` takes a **fetched word** on the instruction nets
+(`instrNet`, `StateCodec.lean`). So S5 needs the netlist to be *fed the program*
+as well as reset into the right state. `DeliversProgram` is that second
+obligation, and it is the larger of the two — see the note on it below. -/
+
+/-! ### The entry state, read at the data registers -/
+
+/-- The eight data registers of `stOfFn v`, as a function — the exact shape
+`refinesNetwork_of_pc_zero`'s right-hand side wants. Derived from
+`dataRegs_map_stOfFn` through `dataRegs_map_get` (which is `rfl`) rather than by
+unfolding eight `St.set`s. -/
+theorem stOfFn_dataReg_eq (v : Fin 8 → Word) :
+    (fun i : Fin 8 => (stOfFn v).get (dataReg i)) = v :=
+  List.ofFn_inj.mp (by rw [← dataRegs_map_get, dataRegs_map_stOfFn])
+
+/-- The same, pointwise. -/
+theorem stOfFn_get_dataReg (v : Fin 8 → Word) (i : Fin 8) :
+    (stOfFn v).get (dataReg i) = v i := congrFun (stOfFn_dataReg_eq v) i
+
+/-! ### ⭐ S2 + S3(b), CLOSED AT THE SOFTWARE LEVEL — no hypothesis survives -/
+
+/-- ⭐ **THE PROGRAM COMPUTES THE NETWORK, unconditionally in the input.** No
+`s`, no `pc`, no hypothesis: for **every** vector of eight words, loading it and
+running the 120 instructions leaves the data registers holding exactly
+`runNetW batcher8 v`.
+
+This is `RefinesNetwork` with the false generality removed rather than repaired
+— `refinesNetwork_of_pc_zero` instantiated at the entry state the program
+actually has, with `hpc` discharged by `rfl`. -/
+theorem stOfFn_refines_network (v : Fin 8 → Word) :
+    dataRegs.map (run batcherSort (stOfFn v)).get
+      = List.ofFn (runNetW batcher8 v) := by
+  rw [refinesNetwork_of_pc_zero _ (stOfFn_pc v), stOfFn_dataReg_eq]
+
+/-- ⭐⭐ **AND THEREFORE IT SORTS — the S2/S3(b) deliverable, unconditional.**
+*For every eight-word input, the agent-written program's output registers are a
+signed-sorted permutation of the input.* The input appears as `v` on both sides:
+nothing is read back out of a state, so there is no entry-point assumption left
+to hide in.
+
+This is the sentence the campaign's first link was after, and it is now free of
+side conditions at the software level. What remains is not a gap in this
+theorem; it is `EntryLoaded` below, which is a different lane's. -/
+theorem stOfFn_sorts (v : Fin 8 → Word) :
+    SortsTo (List.ofFn v) (dataRegs.map (run batcherSort (stOfFn v)).get) := by
+  rw [stOfFn_refines_network]
+  exact batcher8_sortsTo_word v
+
+/-- The same claim in `SortsRegs` form — the before/after register reading
+`Spec.lean` defines, for callers that want the spec's own vocabulary. -/
+theorem stOfFn_sortsRegs (v : Fin 8 → Word) :
+    SortsRegs dataRegs (stOfFn v) (run batcherSort (stOfFn v)) :=
+  sortsRegs_of_pc_zero _ (stOfFn_pc v)
+
+/-! ### ⭐ THE SEAM — the entry contract the silicon lane owes S5 -/
+
+/-- ⭐ **THE ENTRY CONTRACT.** *The netlist's primary inputs at cycle 0 decode to
+a machine state whose `pc` is `0` and whose eight data registers hold `v`.*
+
+Phrased against `SaltWorks.HDL.decQ` — C4's own reading of the Q-leaves — so the
+silicon lane can consume it without a translation step, and stated as a `def …
+: Prop` rather than a `sorry`-ed theorem for the same reason `RefinesNetwork`
+was: so it is committed, named and axiom-clean today.
+
+**Deliberately minimal.** It says nothing about `tmpReg`, nothing about the
+other 23 registers, and nothing about `St.init`. `refinesNetwork_of_pc_zero`
+needs the pc and the eight registers and nothing else, so asking hardware for
+anything more would be asking for what the proof does not use. In particular
+this is *weaker* than `decQ ins = stOfFn v`, which would also pin the scratch
+register — a reset that leaves `x9` dirty still satisfies this.
+
+**Who owes it: the silicon lane (reset / power-on state), not the compiler and
+not this file.** Nothing in the tower models a reset today, which is why this is
+stated and not proved. **What would discharge it:** a reset model that pins the
+flops' power-on values, plus the input-map obligation C4's composition check
+already lists (`docs/c4-statement-composition-check-0807.md` §4, row 3 —
+*"primary inputs 0 … 1055 are the Q-leaves in `StateCodec`'s layout"*). Given
+those, `EntryLoaded` follows the way `entryLoaded_encD_stOfFn` below does. -/
+def EntryLoaded (ins : SaltWorks.HDL.Env) (v : Fin 8 → Word) : Prop :=
+  (SaltWorks.HDL.decQ ins).pc = 0 ∧
+    ∀ i : Fin 8, (SaltWorks.HDL.decQ ins).get (dataReg i) = v i
+
+/-- ⭐ **THE SEAM IS SUFFICIENT** — this is what makes `EntryLoaded` the right
+statement rather than a plausible one. Given only the entry contract, the
+program sorts from the decoded state. So S5 may compose against `EntryLoaded`
+and never mention `stOfFn`, `St.init` or `pc` again. -/
+theorem sorts_of_entryLoaded {ins : SaltWorks.HDL.Env} {v : Fin 8 → Word}
+    (h : EntryLoaded ins v) :
+    SortsTo (List.ofFn v)
+      (dataRegs.map (run batcherSort (SaltWorks.HDL.decQ ins)).get) := by
+  obtain ⟨hpc, hreg⟩ := h
+  have hv : (fun i : Fin 8 => (SaltWorks.HDL.decQ ins).get (dataReg i)) = v :=
+    funext hreg
+  rw [refinesNetwork_of_pc_zero _ hpc, hv]
+  exact batcher8_sortsTo_word v
+
+/-- ⭐ **AND IT IS SATISFIABLE** — a `Prop` nothing can meet is not a contract.
+The wire configuration is `stOfFn v`'s own encoding, and the proof is the landed
+round trip `decQ_encD`. *This is the discharge, modulo the one thing missing:
+a theorem that says the flops actually come out of reset holding these bits.*
+Everything downstream of that is already here. -/
+theorem entryLoaded_encD_stOfFn (v : Fin 8 → Word) :
+    EntryLoaded (fun j => (SaltWorks.HDL.encD (stOfFn v)).getD j false) v := by
+  refine ⟨?_, ?_⟩ <;> rw [SaltWorks.HDL.decQ_encD]
+  · exact stOfFn_pc v
+  · exact fun i => stOfFn_get_dataReg v i
+
+/-! ### The controls — the seam discriminates
+
+Per this file's standing practice: a contract satisfied by everything is not a
+contract. `offEndState` — the witness that refuted `RefinesNetwork` — is a
+perfectly good machine state, so its encoding is a perfectly good wire
+configuration, and it **fails** `EntryLoaded` and **fails** the conclusion. The
+two theorems below are that pair. -/
+
+/-- The refutation witness, as an input environment. -/
+def offEndEnv : SaltWorks.HDL.Env :=
+  fun j => (SaltWorks.HDL.encD offEndState).getD j false
+
+/-- **The contract rejects it** — `pc = 480`, not `0`. -/
+theorem not_entryLoaded_offEndEnv :
+    ¬ EntryLoaded offEndEnv ![9, 7, 3, 2, 0, -1, -2, -5] := by
+  rintro ⟨hpc, -⟩
+  unfold offEndEnv at hpc
+  rw [SaltWorks.HDL.decQ_encD] at hpc
+  exact absurd hpc (by decide +kernel)
+
+/-- ⭐ **AND THE CONCLUSION REALLY IS FALSE THERE.** Not merely unproved: at
+`offEndEnv` the machine fetches nothing, the registers keep their reverse-sorted
+contents, and `SortsTo` fails. ⇒ *`sorts_of_entryLoaded`'s hypothesis is doing
+work, and a reset that got the pc wrong would be caught here rather than
+silently produce an unsorted chip.* -/
+theorem offEndEnv_does_not_sort :
+    ¬ SortsTo (List.ofFn ![9, 7, 3, 2, 0, -1, -2, -5])
+        (dataRegs.map (run batcherSort (SaltWorks.HDL.decQ offEndEnv)).get) := by
+  unfold offEndEnv
+  rw [SaltWorks.HDL.decQ_encD]
+  decide +kernel
+
+/-! ### ⛔ THE SECOND OBLIGATION — the program has to reach the silicon too
+
+**This one was not on the seam list and it is the bigger of the two.** `run`
+takes `batcherSort : List Instr` as an *argument*: in the software model the
+program is a parameter of the semantics. C4's `stepT : St → BitVec 32 → St`
+takes a **word**, delivered on `instrNet 0 … instrNet 31`. So a netlist that
+satisfies `EntryLoaded` and then reads garbage on the instruction nets computes
+garbage, and nothing stated so far notices.
+
+⚠️ **And there is no memory to fetch from** (`docs/s0-r2-memory-census-0807.md`;
+Slice A's own exclusion list). So `DeliversProgram` cannot be discharged by an
+instruction-memory model that does not exist — it will be met either by a ROM
+added to the tile or by hard-wiring the 120 words, and **that is a tile-level
+design decision nobody has made.** Stating it here is the point: it is the
+difference between S5 being a composition and S5 being a surprise. -/
+
+/-- The program word at a byte address, in `fetch`'s own convention — including
+its alignment rule, so the two cannot drift. -/
+def fetchWord (pc : BitVec 32) : Option Word :=
+  if pc.toNat % 4 = 0 then batcherSortWords[pc.toNat / 4]? else none
+
+/-- **`fetchWord` is `fetch`, one decode later.** The bridge that makes the
+obligation below a statement about *this* program rather than about a list of
+words that happens to be lying around. Structural, from `decode_encode`. -/
+theorem fetchWord_decodes (pc : BitVec 32) :
+    (fetchWord pc).bind decode = fetch batcherSort pc := by
+  unfold fetchWord fetch
+  by_cases h : pc.toNat % 4 = 0
+  · simp only [if_pos h, batcherSortWords, List.getElem?_map]
+    cases batcherSort[pc.toNat / 4]? with
+    | none => rfl
+    | some i => simp [decode_encode]
+  · simp [h]
+
+/-- ⭐ **THE INSTRUCTION-DELIVERY OBLIGATION.** *Whenever the machine's pc names
+a word of the program, the tile presents that word on the instruction nets.*
+
+`env` is the tile's input map as a function of the machine state, which is the
+shape C5's cycle induction will have anyway: each cycle it must say what the
+core sees. Written with `wordOf (fun k => env s (instrNet k))` and **not**
+`wordOf (env s)` — the latter typechecks and reads register `x0`, the trap
+`StateCodec.word_at_zero_is_register_x0` exists to make visible.
+
+**Who owes it: the tile's assembly (a ROM, or hard-wired words), together with
+whatever `Compose.lean`'s input map turns out to be.** Not the compiler: C4 is a
+statement about one cycle given a word, and is silent on where the word came
+from. **What would discharge it:** a tile-level netlist that includes the 120
+words of `batcherSortWords` as constants indexed by the pc, plus the proof that
+its output lands on `instrNet`. Nothing in the tree does this today. -/
+def DeliversProgram (env : St → SaltWorks.HDL.Env) : Prop :=
+  ∀ (s : St) (w : Word), fetchWord s.pc = some w →
+      SaltWorks.HDL.wordOf (fun k => env s (SaltWorks.HDL.instrNet k)) = w
+
 /-! ## Axiom audit -/
 
 open Salt.Tactic
@@ -1104,5 +1344,10 @@ open Salt.Tactic
 #audit_axioms embeds_head embeds_tail emit_runs
 #audit_axioms batcherSort_embeds refinesNetwork_of_pc_zero sortsRegs_of_pc_zero
 #audit_axioms stOfFn_pc cmpEx6_does_not_refine cmpExFlip_does_not_refine
+#audit_axioms stOfFn_dataReg_eq stOfFn_get_dataReg
+#audit_axioms stOfFn_refines_network stOfFn_sorts stOfFn_sortsRegs
+#audit_axioms EntryLoaded sorts_of_entryLoaded entryLoaded_encD_stOfFn
+#audit_axioms offEndEnv not_entryLoaded_offEndEnv offEndEnv_does_not_sort
+#audit_axioms fetchWord fetchWord_decodes DeliversProgram
 
 end SaltWorks.Stack.Program
