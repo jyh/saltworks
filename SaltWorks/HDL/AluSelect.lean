@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Jason Hickey, Claude
 -/
 import SaltWorks.HDL.EmitS
+import SaltWorks.HDL.Compose
 
 /-!
 # The ALU output select and the flag reduction — obligations ③ and ⑤
@@ -181,6 +182,19 @@ partial def asCone (c : Circ) (cut : List Net) (n : Net) : List Net :=
 -- Cells: the select is 32 bits x 15 muxes; the reduction is 31 nodes.
 #eval (aluSelect.gates.length, muxCount aluSelect, zeroTree.gates.length)
 
+
+/-! ## Instantiability — the precondition for C4's assembly
+
+*`instOK` requires `ssa`, not merely `wf`: under `wf` alone a circuit may have
+sparse gate outputs and `instNext` under-reports the region it occupies
+(`Compose.instNext_under_reports_without_ssa`). So `ssa` is what makes this organ
+safe to embed in `core`, and `wf` then follows for free.* -/
+
+theorem aluSelect_ssa : aluSelect.ssa = true := by decide +kernel
+
+/-- **`wf` by the structural route** (1,445 gates). -/
+theorem aluSelect_wf : aluSelect.wf = true := Circ.wf_of_ssa aluSelect_ssa
+
 #audit_axioms asW
 #audit_axioms asOps
 #audit_axioms asPad
@@ -197,6 +211,8 @@ partial def asCone (c : Circ) (cut : List Net) (n : Net) : List Net :=
 #audit_axioms asPrev
 #audit_axioms asMux
 #audit_axioms aluSelect
+#audit_axioms aluSelect_ssa
+#audit_axioms aluSelect_wf
 #audit_axioms aluSelectCuts
 #audit_axioms zrIn
 #audit_axioms zrLevels

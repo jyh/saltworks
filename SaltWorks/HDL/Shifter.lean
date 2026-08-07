@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Jason Hickey, Claude
 -/
 import SaltWorks.HDL.EmitS
+import SaltWorks.HDL.Compose
 
 /-!
 # A 32-bit barrel shifter — a LOG shifter with named stage boundaries
@@ -140,6 +141,19 @@ partial def bsCone (c : Circ) (cut : List Net) (n : Net) : List Net :=
 -- Cells, against the readTree shape's 992 muxes / 2982 gates for the same function.
 #eval (shifter32.gates.length, muxCount shifter32)
 
+
+/-! ## Instantiability — the precondition for C4's assembly
+
+*`instOK` requires `ssa`, not merely `wf`: under `wf` alone a circuit may have
+sparse gate outputs and `instNext` under-reports the region it occupies
+(`Compose.instNext_under_reports_without_ssa`). So `ssa` is what makes this organ
+safe to embed in `core`, and `wf` then follows for free.* -/
+
+theorem shifter32_ssa : shifter32.ssa = true := by decide +kernel
+
+/-- **`wf` by the structural route** (486 gates). -/
+theorem shifter32_wf : shifter32.wf = true := Circ.wf_of_ssa shifter32_ssa
+
 #audit_axioms bsW
 #audit_axioms bsStages
 #audit_axioms bsIn
@@ -151,6 +165,8 @@ partial def bsCone (c : Circ) (cut : List Net) (n : Net) : List Net :=
 #audit_axioms bsPrev
 #audit_axioms bsMux
 #audit_axioms shifter32
+#audit_axioms shifter32_ssa
+#audit_axioms shifter32_wf
 #audit_axioms shifter32Cuts
 
 end SaltWorks.HDL

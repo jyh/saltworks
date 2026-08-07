@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Jason Hickey, Claude
 -/
 import SaltWorks.HDL.EmitS
+import SaltWorks.HDL.Compose
 
 /-!
 # Adders and incrementers with NAMED per-slice carries
@@ -185,6 +186,19 @@ partial def coneAt (c : Circ) (cut : List Net) (n : Net) : List Net :=
 -- Gate counts: 5 per slice x 32 = 160; the incrementer 2 x 30 = 60.
 #eval (adder32.gates.length, inc32.gates.length)
 
+
+/-! ## Instantiability — the precondition for C4's assembly
+
+*`instOK` requires `ssa`, not merely `wf`: under `wf` alone a circuit may have
+sparse gate outputs and `instNext` under-reports the region it occupies
+(`Compose.instNext_under_reports_without_ssa`). So `ssa` is what makes this organ
+safe to embed in `core`, and `wf` then follows for free.* -/
+
+theorem adder32_ssa : adder32.ssa = true := by decide +kernel
+
+/-- **`wf` by the structural route** (160 gates). -/
+theorem adder32_wf : adder32.wf = true := Circ.wf_of_ssa adder32_ssa
+
 #audit_axioms adW
 #audit_axioms adIn
 #audit_axioms adA
@@ -198,6 +212,8 @@ partial def coneAt (c : Circ) (cut : List Net) (n : Net) : List Net :=
 #audit_axioms adC
 #audit_axioms adSlice
 #audit_axioms adder32
+#audit_axioms adder32_ssa
+#audit_axioms adder32_wf
 #audit_axioms adder32Carries
 #audit_axioms incIn
 #audit_axioms incBase
