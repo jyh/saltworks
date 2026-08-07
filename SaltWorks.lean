@@ -35,6 +35,7 @@ import SaltWorks.HDL.Vectors
 import SaltWorks.HDL.SpikeVectors
 import SaltWorks.Stack.Spec
 import SaltWorks.Stack.Perm
+import SaltWorks.Stack.Program
 import SaltWorks.Stack.ZeroOne
 import SaltWorks.Silicon.Cells.Sky130
 import SaltWorks.Silicon.Imported.Comparator
