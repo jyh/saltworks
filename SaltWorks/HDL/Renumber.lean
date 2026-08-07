@@ -548,23 +548,20 @@ theorem normalize_fabric3_ssa : (normalize (fabric 3)).ssa = true :=
 #audit_axioms run_renumFrom normalize_sem
 #audit_axioms opt_withMidDead_wf' normalize_opt_withMidDead_ssa normalize_fabric3_ssa
 
-/-! ## Toward discharging `emitPipeline'_sem`'s hypothesis
+/-! ## `opt` preserves well-formedness
 
-`emitPipeline'_sem` takes `(opt c).wf` rather than `c.wf`. That is a decidable
-`Bool`, so every concrete circuit discharges it by `decide +kernel` — but the
-general fact that **`opt` preserves well-formedness** is missing from `Opt.lean`
-and would remove the hypothesis outright.
+`emitPipeline'_sem` originally took `(opt c).wf`. `Opt.lean` never proved that
+`opt` preserves well-formedness, so the hypothesis could not be discharged from
+`c.wf` and every caller paid a separate `decide`.
 
-Its load-bearing half is below and is proved. **The remaining three steps are
-mechanical and are NOT done:** `nodupB` under filter-then-map (a sublist of a
-duplicate-free list is duplicate-free), the converse of `defined_mem` (an input
-or a surviving gate's output really is in the filtered circuit's `defined`), and
-`nIn ≤ out` under filter (immediate, filter members are members). Recorded here
-rather than attempted at the end of a long session: the hypothesis costs a
-`decide` today, and three half-finished lemmas would cost more than that.
+`opt_wf` closes it, and the hypothesis is now the natural one. The load-bearing
+step is `wfGates_filter`: the narrowing it performs is NOT monotonicity — my
+first attempt reached for a `wfGates_mono` that does not exist and would have
+been false in the direction needed. It is sound for exactly one reason, and that
+reason is the lemma's content: **a KEPT gate cannot read a DROPPED gate's
+output**, because `KeepClosed` puts every operand of a kept gate in `keep` and a
+dropped gate's output is not. Hence two threaded defined-lists rather than one.
 -/
-
-
 
 /-- **Filtering preserves `wfGates`.** Two defined-lists are threaded, not one:
 `D` is what the ORIGINAL list has defined, `Dk` what the FILTERED list has. `Dk`
@@ -615,6 +612,109 @@ theorem wfGates_filter {keep : Net → Bool} :
       · rw [h1, hk'] at hak; exact absurd hak (by simp)
       · exact hsub a hak (by simpa using h2)
 
+
+
+theorem contains_filter_out {p : Gate → Bool} : ∀ (gs : List Gate) (a : Net),
+    ((gs.filter p).map Gate.out).contains a = true → (gs.map Gate.out).contains a = true := by
+  intro gs
+  induction gs with
+  | nil => intro a h; simp at h
+  | cons g gs ih =>
+    intro a h
+    by_cases hp : p g = true
+    · rw [List.filter_cons_of_pos hp, List.map_cons] at h
+      have hmem : a ∈ g.out :: (gs.filter p).map Gate.out := by simpa using h
+      rcases List.mem_cons.mp hmem with h1 | h2
+      · simp [h1]
+      · have := ih a (by simpa using h2)
+        have hm : a ∈ gs.map Gate.out := by simpa using this
+        simpa using List.mem_cons_of_mem g.out hm
+    · have hp' : p g = false := by simpa using hp
+      rw [List.filter_cons_of_neg (by simp [hp'])] at h
+      have := ih a h
+      have hm : a ∈ gs.map Gate.out := by simpa using this
+      simpa using List.mem_cons_of_mem g.out hm
+
+theorem nodupB_filter_out {p : Gate → Bool} : ∀ (gs : List Gate),
+    nodupB (gs.map Gate.out) = true → nodupB ((gs.filter p).map Gate.out) = true := by
+  intro gs
+  induction gs with
+  | nil => intro h; exact h
+  | cons g gs ih =>
+    intro h
+    rw [List.map_cons, nodupB, Bool.and_eq_true] at h
+    obtain ⟨hne, hrest⟩ := h
+    by_cases hp : p g = true
+    · rw [List.filter_cons_of_pos hp, List.map_cons, nodupB, Bool.and_eq_true]
+      refine ⟨?_, ih hrest⟩
+      by_cases hc : ((gs.filter p).map Gate.out).contains g.out = true
+      · exact absurd (contains_filter_out gs g.out hc) (by simpa using hne)
+      · simpa using hc
+    · rw [List.filter_cons_of_neg (by simpa using hp)]
+      exact ih hrest
+
+theorem mem_defined : ∀ (gs : List Gate) (acc : List Net) (n : Net),
+    (acc.contains n = true ∨ (gs.map Gate.out).contains n = true) →
+    (gs.foldl (fun acc g => g.out :: acc) acc).contains n = true := by
+  intro gs
+  induction gs with
+  | nil =>
+    intro acc n h
+    rcases h with h | h
+    · exact h
+    · simp at h
+  | cons g gs ih =>
+    intro acc n h
+    show (gs.foldl (fun acc g => g.out :: acc) (g.out :: acc)).contains n = true
+    refine ih (g.out :: acc) n ?_
+    rcases h with hA | hO
+    · left
+      have hm : n ∈ acc := by simpa using hA
+      simpa using List.mem_cons_of_mem g.out hm
+    · rw [List.map_cons] at hO
+      have hmem : n ∈ g.out :: gs.map Gate.out := by simpa using hO
+      rcases List.mem_cons.mp hmem with h1 | h2
+      · left; simp [h1]
+      · right; simpa using h2
+
+/-- **`opt` preserves well-formedness.** Discharges the hypothesis
+`emitPipeline'_sem` was taking. -/
+theorem opt_wf (c : Circ) (h : c.wf = true) : (opt c).wf = true := by
+  rw [opt, dce]
+  split
+  · next hcond =>
+    rw [Bool.and_eq_true] at hcond
+    obtain ⟨hclosed, houtsk⟩ := hcond
+    rw [Circ.wf, Bool.and_eq_true, Bool.and_eq_true, Bool.and_eq_true] at h ⊢
+    obtain ⟨⟨⟨hwfg, houts⟩, hnd⟩, hge⟩ := h
+    refine ⟨⟨⟨?_, ?_⟩, ?_⟩, ?_⟩
+    · exact wfGates_filter _ _ _ hwfg (keepClosedB_sound hclosed) (fun a _ ha => ha)
+    · rw [List.all_eq_true]
+      intro n hn
+      have hkeep := List.all_eq_true.mp houtsk n hn
+      have hdef := List.all_eq_true.mp houts n hn
+      show (Circ.defined _).contains n = true
+      rw [Circ.defined]
+      refine mem_defined _ _ n ?_
+      rw [Circ.defined] at hdef
+      rcases defined_mem c.gates c.inputs n hdef with hin | hg
+      · exact Or.inl hin
+      · right
+        have hmem : n ∈ c.gates.map Gate.out := by simpa using hg
+        obtain ⟨g, hgm, hge2⟩ := List.mem_map.mp hmem
+        have : g ∈ c.gates.filter (fun g => (liveOf c.gates c.outs).contains g.out) := by
+          refine List.mem_filter.mpr ⟨hgm, ?_⟩
+          rw [hge2]; simpa using hkeep
+        have : n ∈ (c.gates.filter
+            (fun g => (liveOf c.gates c.outs).contains g.out)).map Gate.out := by
+          rw [← hge2]; exact List.mem_map_of_mem this
+        simpa using this
+    · exact nodupB_filter_out _ hnd
+    · rw [List.all_eq_true]
+      intro g hg
+      exact List.all_eq_true.mp hge g (List.mem_of_mem_filter hg)
+  · exact h
+
 /-! ## OBLIGATION 5 — the pipeline that could not be written this afternoon
 
 `EmitN.emitPipeline` optimizes, checks `ssa`, and falls back to the UNOPTIMIZED
@@ -629,12 +729,14 @@ def emitPipeline' (c : Circ) : Silicon.Netlist := emitN (normalize (opt c))
 means, with `opt` actually applied. Note the port list is the normalized one —
 the two agree positionally, output `k` for output `k`, which is the form the
 refuter pass ruled the seam must use. -/
-theorem emitPipeline'_sem (c : Circ) (h : (opt c).wf = true) (ins : Env) :
+theorem emitPipeline'_sem (c : Circ) (h : c.wf = true) (ins : Env) :
     (normalize (opt c)).outs.map
         (fun n => (Silicon.runP ins [] (emitPipeline' c)).getD n false) = sem c ins := by
-  rw [emitPipeline', emitN_sem _ (normalize_ssa _ h) ins, normalize_sem _ h ins, opt_sem]
+  have h' := opt_wf c h
+  rw [emitPipeline', emitN_sem _ (normalize_ssa _ h') ins, normalize_sem _ h' ins, opt_sem]
 
 #audit_axioms emitPipeline' emitPipeline'_sem
-#audit_axioms wfGates_filter
+#audit_axioms wfGates_filter contains_filter_out nodupB_filter_out
+#audit_axioms mem_defined opt_wf
 
 end SaltWorks.HDL
