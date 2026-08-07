@@ -10,8 +10,25 @@ the tile's theorem from conditional to ENTIRE:
 
 > **the composed-switch theorem**: for arbitrary inputs with distinct
 > destinations, every packet arrives on the wire its address names —
-> `batcher_sorts ∘ banyan_selfrouting`, the sortedness hypothesis
-> DISCHARGED BY HARDWARE. The full 1990 system claim, kernel-checked.
+> `batcher_sorts ∘ banyan_selfrouting`, the SORTED-AND-CONCENTRATED
+> hypothesis discharged by hardware. The full 1990 system claim,
+> kernel-checked.
+
+### KB1 ANSWERED BEFORE CONSTRUCTION (evidence's 10:42 refutation,
+### ADOPTED): the banyan hypothesis `StrictMonoOn dest (Set.Iio n)` is
+### TWO conjuncts — ① SORTED (the Batcher's job) and ② CONCENTRATED
+### (actives contiguous FROM LINE 0 — not sortedness at all). ② is
+### decided by the frame format — AND ALREADY DISCHARGED AT THE ELEMENT
+### (compiler's d762dbc, landed one minute BEFORE the refutation posted;
+### the two crossed in flight and AGREE): the element orders
+### ACTIVE-BEFORE-IDLE unconditionally (activity outranks every address
+### bit; two gates), and `ce_rejects_idle_sorts_low` is the KERNEL
+### CERTIFICATE that the idle-low reading fails — the wrong law refuted,
+### not merely avoided. DISCOVERED AT CONSTRUCTION, now spec: **the
+### stability law** — two idle lines NEVER swap (address comparison
+### guarded by both-active), else garbage reorders idle lines and the
+### sorter has no writable spec. B0(a) COMPLETE: 31 gates, 5 inputs,
+### 2 state bits — the element of US 5,130,976, certified both ways.
 
 ## Why it is cheap (everything is on the shelf)
 - Element: bit-serial compare-exchange judging destination fields
