@@ -80,13 +80,43 @@ to establish.
 
 namespace SaltWorks.HDL
 
-/-- The sky130 cell each `Op` maps to. -/
-def cellOf : Op → String
+/-! ### Drive strength is a PARAMETER, and that is a deliberate refusal to guess
+
+The C3 probe found a contradiction here that two agents and a CI run could not
+settle, and the verdict's instruction was explicit: **do not resolve it by
+argument.**
+
+* The pinned PDK's `libs.tech/openlane/sky130_fd_sc_hd/no_synth.cells` has **199
+  entries and contains `inv_1`, `and2_1`, `or2_1`, `xor2_1` — four of the five
+  cells below.** Against a liberty reduced by that list, `_1` emission
+  **hard-errors before synthesis**: `ERROR: Module '\sky130_fd_sc_hd__or2_1' …
+  is not part of the design`, rc=1. Re-emitted at `_2`: rc=0, `Extracted 0
+  gates`, 24,320/24,320 instance-exact. ⇒ *pin `_2`.*
+* But the silicon seat's **TT CI run `31182129057` ran green on all four jobs
+  with `_1` cells, preserved exactly, no resizing.** ⇒ *`_1` is the only drive
+  with a real-path green.*
+
+**Both are real measurements and they cannot both describe the same operation** —
+deleting cell blocks from a liberty is a stronger edit than an exclusion list
+that constrains what abc may *choose* rather than what a designer may
+*instantiate*. **The measurement that settles it is a LibreLane/TT-CI run of a
+structural design at `_2`, and LibreLane 3.0.5 is not installed on this machine.**
+
+⇒ **So `drive` is an argument.** Emitting either is one character; **choosing
+between them without the measurement would be exactly the guess this campaign
+keeps paying for.** `conb_1` is deliberately NOT parameterised — it is not on the
+exclusion list, and it is OpenLane's own `SYNTH_TIEHI_PORT`/`SYNTH_TIELO_PORT`.
+`mux2_1` is not on the list either, so the peephole cell is safe at any drive. -/
+
+/-- The sky130 cell each `Op` maps to, at drive strength `drive` (`"1"`, `"2"`,
+…). See the note above: the correct default is **unmeasured**, so the caller
+must say. -/
+def cellOf (drive : String) : Op → String
   | .const _ => "sky130_fd_sc_hd__conb_1"
-  | .not _   => "sky130_fd_sc_hd__inv_1"
-  | .and _ _ => "sky130_fd_sc_hd__and2_1"
-  | .or  _ _ => "sky130_fd_sc_hd__or2_1"
-  | .xor _ _ => "sky130_fd_sc_hd__xor2_1"
+  | .not _   => "sky130_fd_sc_hd__inv_" ++ drive
+  | .and _ _ => "sky130_fd_sc_hd__and2_" ++ drive
+  | .or  _ _ => "sky130_fd_sc_hd__or2_" ++ drive
+  | .xor _ _ => "sky130_fd_sc_hd__xor2_" ++ drive
 
 /-- Net names, shared with `emitV` so the two emitters' outputs can be diffed by
 a human against the same `Circ`. -/
@@ -100,7 +130,7 @@ check mechanical rather than a matching problem. -/
 def instName (n : Net) : String := "g" ++ toString n
 
 /-- One cell instance, port-mapped. -/
-def emitCell (nIn : Nat) (g : Gate) : String :=
+def emitCell (drive : String) (nIn : Nat) (g : Gate) : String :=
   let inst := instName g.out
   let o    := sNet nIn g.out
   match g.op with
@@ -110,17 +140,17 @@ def emitCell (nIn : Nat) (g : Gate) : String :=
       -- is left floating, which is a lint error in the flow.
       let dummy := "u_" ++ inst
       if b then
-        "  " ++ cellOf g.op ++ " " ++ inst ++ " (.HI(" ++ o ++ "), .LO(" ++ dummy ++ "));"
+        "  " ++ cellOf drive g.op ++ " " ++ inst ++ " (.HI(" ++ o ++ "), .LO(" ++ dummy ++ "));"
       else
-        "  " ++ cellOf g.op ++ " " ++ inst ++ " (.HI(" ++ dummy ++ "), .LO(" ++ o ++ "));"
+        "  " ++ cellOf drive g.op ++ " " ++ inst ++ " (.HI(" ++ dummy ++ "), .LO(" ++ o ++ "));"
   | .not a =>
-      "  " ++ cellOf g.op ++ " " ++ inst ++ " (.A(" ++ sNet nIn a ++ "), .Y(" ++ o ++ "));"
+      "  " ++ cellOf drive g.op ++ " " ++ inst ++ " (.A(" ++ sNet nIn a ++ "), .Y(" ++ o ++ "));"
   | .and a b =>
-      "  " ++ cellOf g.op ++ " " ++ inst ++ " (.A(" ++ sNet nIn a ++ "), .B(" ++ sNet nIn b ++ "), .X(" ++ o ++ "));"
+      "  " ++ cellOf drive g.op ++ " " ++ inst ++ " (.A(" ++ sNet nIn a ++ "), .B(" ++ sNet nIn b ++ "), .X(" ++ o ++ "));"
   | .or a b =>
-      "  " ++ cellOf g.op ++ " " ++ inst ++ " (.A(" ++ sNet nIn a ++ "), .B(" ++ sNet nIn b ++ "), .X(" ++ o ++ "));"
+      "  " ++ cellOf drive g.op ++ " " ++ inst ++ " (.A(" ++ sNet nIn a ++ "), .B(" ++ sNet nIn b ++ "), .X(" ++ o ++ "));"
   | .xor a b =>
-      "  " ++ cellOf g.op ++ " " ++ inst ++ " (.A(" ++ sNet nIn a ++ "), .B(" ++ sNet nIn b ++ "), .X(" ++ o ++ "));"
+      "  " ++ cellOf drive g.op ++ " " ++ inst ++ " (.A(" ++ sNet nIn a ++ "), .B(" ++ sNet nIn b ++ "), .X(" ++ o ++ "));"
 
 /-- The dummy wire a `const` gate parks its unused tie output on. -/
 def dummyDecl (g : Gate) : Option String :=
@@ -133,12 +163,12 @@ private def slines (ls : List String) : String := String.intercalate "\n" ls
 /-- **The structural module.** Flat, no hierarchy, every cell already mapped —
 so `Checker.YosysUnmappedCells`, which fails TinyTapeout's CI on *un*mapped
 instances, has nothing to fire on. -/
-def emitS (name : String) (c : Circ) : String :=
+def emitS (drive : String) (name : String) (c : Circ) : String :=
   let inPorts  := (List.range c.nIn).map fun i => "    input  wire " ++ sNet c.nIn i
   let outPorts := (List.range c.outs.length).map fun k => "    output wire o" ++ toString k
   let decls    := c.gates.map fun g => "  wire " ++ sNet c.nIn g.out ++ ";"
   let dummies  := c.gates.filterMap dummyDecl
-  let cells    := c.gates.map (emitCell c.nIn)
+  let cells    := c.gates.map (emitCell drive c.nIn)
   let drives   := (List.range c.outs.length).map fun k =>
     "  assign o" ++ toString k ++ " = " ++ sNet c.nIn (c.outs.getD k 0) ++ ";"
   "`default_nettype none\n\nmodule " ++ name ++ " (\n"
@@ -236,7 +266,7 @@ def muxAt (c : Circ) (g : Gate) : Option MuxSite :=
 /-- **The structural module with the peephole applied.** Non-mux gates emit one
 cell each exactly as `emitS`; a recognised site emits one `mux2_1` and its two
 `and` gates are dropped. -/
-def emitSMux (name : String) (c : Circ) : String :=
+def emitSMux (drive : String) (name : String) (c : Circ) : String :=
   let sites := c.gates.filterMap fun g => (muxAt c g).map fun m => (g.out, m)
   let cons  := sites.flatMap fun s => [s.2.arm0, s.2.arm1]
   let live  := c.gates.filter fun g => !(cons.contains g.out)
@@ -250,7 +280,7 @@ def emitSMux (name : String) (c : Circ) : String :=
         "  sky130_fd_sc_hd__mux2_1 " ++ instName g.out
           ++ " (.A0(" ++ sNet c.nIn m.a0 ++ "), .A1(" ++ sNet c.nIn m.a1
           ++ "), .S(" ++ sNet c.nIn m.sel ++ "), .X(" ++ sNet c.nIn g.out ++ "));"
-    | none => emitCell c.nIn g
+    | none => emitCell drive c.nIn g
   let drives := (List.range c.outs.length).map fun k =>
     "  assign o" ++ toString k ++ " = " ++ sNet c.nIn (c.outs.getD k 0) ++ ";"
   "`default_nettype none\n\nmodule " ++ name ++ " (\n"
@@ -297,9 +327,9 @@ why `sNet` and `instName` above are derived from the net number and nothing
 else. **`(* keep *)` is not needed and does not help**: there is nothing for the
 optimiser to re-derive, because the cells arrive already mapped and abc cannot
 restructure through a blackbox. -/
-def manifest (c : Circ) : String :=
+def manifest (drive : String) (c : Circ) : String :=
   slines (c.gates.map fun g =>
-    instName g.out ++ " " ++ cellOf g.op ++ " " ++ sNet c.nIn g.out)
+    instName g.out ++ " " ++ cellOf drive g.op ++ " " ++ sNet c.nIn g.out)
 
 /-! ## Axiom audit — every definition, per the iron rules -/
 
