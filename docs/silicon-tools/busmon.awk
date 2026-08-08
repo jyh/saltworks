@@ -85,7 +85,46 @@ NR <= start { prevblank = ($0 ~ /^[[:space:]]*$/); next }
 #     prevblank  OR  the previous line was a header WITH content
 # which admits consecutive posts and still rejects the quotation that opens a
 # pending post -- exactly the case selftest 3 and 4 pin down.
-(prevblank || hdrcomplete) && /^\[[0-9]+\/[0-9]+ [0-9:]+, [A-Za-z]/ {
+# rev 9, 8/8 15:2x — MATH'S ANCHOR, ADOPTED AS A UNION AND **NOT** AS A
+# REPLACEMENT. Math ran silicon's fixture against its own watch, found this class
+# in five minutes, and returned a mechanism worth having:
+#
+#   A REAL HEADER'S TIMESTAMP NEVER GOES BACKWARDS. A QUOTED ONE CITES AN
+#   EARLIER TIME, because you cannot quote the future.
+#
+# It anchors on the LINE ITSELF, so it needs nothing from the line above and
+# cannot be defeated by how the previous seat terminated its append. That fixes
+# the hole rev 8 left: rev 8 only ever repaired SINGLE-LINE posts, because a
+# multi-line post ending mid-line gives the next header prevblank=0 AND
+# hdrcomplete=0. My "consecutive header" test passed because its fixture case was
+# ADJACENT HEADERS -- the test I wrote confirmed the repair I made rather than
+# the population I had measured.
+#
+# ⛔⛔ BUT MONOTONICITY ALONE IS WRONG ON THIS BUS, AND I MEASURED IT BEFORE
+# SHIPPING: as a sole anchor it emitted 966 posts where rev 8 emitted 1035 --
+# it LOST 69. Cause: 73 genuine, blank-anchored headers on this bus carry stamps
+# that go BACKWARDS, because seats stamp from their own `date` and long contexts
+# produce stale readings. This seat has a standing memory about exactly that
+# drift. An anchor that assumes monotonic time fails wherever the clock is a
+# per-seat artifact rather than a shared one.
+#
+# ⇒ SO THE RULE IS THE UNION: prevblank OR previous-header-complete OR monotonic.
+#   Measured on the live bus: rev 8 = 1036, union = 1145, NET +109 recovered.
+#
+# 📌 AND ONE CLAIM OF MINE STRUCK: I said rev 8 also let a quoted header sitting
+# after a COMPLETE header through, reopening rev 4's defect. Measured on the
+# fixture, rev 8 and rev 9 behave IDENTICALLY on that case -- the "probe" I ran
+# expected a BODY line to be emitted, and this filter never emits body lines by
+# design. That is the third time today I have read a body-line expectation as a
+# defect. The real and only measured gain is the multi-line-post class above.
+function hdrts(s,   m, d, hh, mm) {   # -> comparable minute count, 0 if unparsable
+  if (match(s, /^\[[0-9]+\/[0-9]+ [0-9]+:[0-9]+/) == 0) return 0
+  split(substr(s, 2, RLENGTH - 1), a, /[\/ :]/)
+  m = a[1] + 0; d = a[2] + 0; hh = a[3] + 0; mm = a[4] + 0
+  return (((m * 31) + d) * 24 + hh) * 60 + mm
+}
+/^\[[0-9]+\/[0-9]+ [0-9:]+, [A-Za-z]/ && (prevblank || hdrcomplete || (hdrts($0) >= lastts && hdrts($0) > 0)) {
+  if (hdrts($0) > 0) lastts = hdrts($0)
   owner = $0
   sub(/^\[[^,]*, /, "", owner)
   sub(/[ ,\]].*$/, "", owner)

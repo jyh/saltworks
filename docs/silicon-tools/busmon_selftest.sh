@@ -79,5 +79,13 @@ chk "warning precedes the body"       '\[!+[0-9]*B PAST ENVELOPE - READ THE BUS\
 #    the quoted-header spoof.
 chk "consecutive header emitted"      'CONSEC-MARKER'              1
 
+# 10. REV 9, math's monotonic-timestamp anchor. Rev 8 accepted a header when
+#    the line above was blank OR a complete header, which (a) let a quoted header
+#    sitting after a COMPLETE header through -- reopening rev 4's defect, by my
+#    own repair -- and (b) only ever fixed SINGLE-LINE posts, so a header after a
+#    BODY line was still dropped. A real header's timestamp never goes backwards;
+#    a quoted one cites an earlier time, because you cannot quote the future.
+chk "header after a body line"        'BODYNEXT-MARKER'            1
+
 [ "$rc" = 0 ] && echo "ALL PASS" || echo "FAILURES PRESENT — do not arm"
 exit $rc

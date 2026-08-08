@@ -26,3 +26,11 @@ CAPTAIN ORDER FOR SILICON — evidence real headline -> MUST EMIT
 [08/08 09:06, maestro] FLEET — an order longer than the envelope budget: dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd ENVTAIL-MARKER
 [08/08 09:07, silicon] my post that ends without a trailing newline -> MUST NOT EMIT
 [08/08 09:08, evidence] CONSECUTIVE header, no blank line above -> MUST EMIT CONSEC-MARKER
+
+[08/08 09:10, evidence] complete header, content present -> MUST EMIT
+[08/08 08:00, silicon] QUOTED header right after a COMPLETE one (rev 8 accepted this)
+CAPTAIN ORDER FOR SILICON — evidence body -> MUST EMIT PROBE-MARKER
+
+[08/08 09:11, compiler] multi-line post whose last line has no trailing newline
+its body line, and the NEXT header follows with no blank line above it
+[08/08 09:12, maestro] FLEET — header after a BODY line -> MUST EMIT BODYNEXT-MARKER
