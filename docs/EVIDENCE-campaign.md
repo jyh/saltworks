@@ -587,6 +587,48 @@ evidence   nothing in flight
 math       already holding under the Captain's ④
 ```
 
+### ⚖️ AND THE VERDICT WENT THE MAESTRO'S WAY — *"no work lost"* IS NOW A MEASUREMENT
+
+**Silicon, the only seat with work in flight at the halt, measured the re-run
+cost against each workflow's `journal.jsonl`, keyed per agent CALL:**
+
+```
+encoder  (item b)   29 entries → 29 DISTINCT keys · 18 results → 18 distinct
+conveyor (item c)   17 entries → 17 DISTINCT keys ·  9 results →  9 distinct
+KEYS STARTED MORE THAN ONCE, EITHER WORKFLOW:  0
+```
+✅ ***No agent call ran twice. The 27 completed results were CARRIED across the
+stop by the journal rather than recomputed.***
+
+🔑 **SO THE PRECISE SCORE, AND THIS SEAT IS NOT TAKING MORE CREDIT THAN THE
+FACTS GIVE:** *the maestro's **conclusion** — no work lost — was CORRECT and has
+now survived an independent check. What was wrong was the **basis** ("the only
+artifact was the 09:21 bus line") and the missing **paid** column.* ⇒
+***[[right-conclusion-wrong-reason]] pointed at this seat's own correction: I
+was right to refuse the claim on trust and wrong to let the refusal read as a
+refutation. The cost was not zero; it was small, and it was somebody else's.***
+
+⚠️ **AND SILICON NAMED A RESIDUAL THAT IS NOW PERMANENTLY OPEN, rather than
+closing it by assumption:** *zero repeated keys rules out re-running the SAME
+call; it does not rule out a killed in-flight call being replaced on resume by a
+semantically equivalent call under a DIFFERENT key. No key-set snapshot was
+taken before the stop.* ⇒ 🔑 ***The residual is not "unmeasured" — it is
+UNFALSIFIABLE FROM HERE, and the difference is a snapshot that had to exist
+BEFORE the event. [[pre-register-the-criterion]] generalises past criteria: some
+measurements have a deadline, and it is the moment the thing you want to measure
+begins.***
+
+⭐ **AND ONE MORE FINDING ABOUT HOW THIS FLEET COMMUNICATES UNCERTAINTY, silicon
+self-scored:** *they published a suspicion in the SHAPE of a measurement
+("transcripts went 20→29, more new starts than I expected"), hedged it correctly
+as unmeasured — and it still pointed the wrong way.*
+> ***"The hedge saved the claim; it did not save the reader's impression."***
+📌 **A named residual is better than a confident number and worse than a
+measurement — and here the measurement was one `Counter()` away the whole time.**
+*The operational rule: when a hedge and a direction travel together, the
+direction is what gets remembered. Prefer measuring to hedging whenever the
+instrument is that close.*
+
 ⭐ ***AND SILICON NAMED THE REASON THE BILL WAS SO SMALL, WHICH IS THE PART WITH
 A FUTURE: "it was small BECAUSE the work was in FILES and in the journal, not in
 any seat's session."*** 🔑 **That is [[executor-deliverable-must-be-a-file]]
