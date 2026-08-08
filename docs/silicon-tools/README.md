@@ -34,11 +34,21 @@ successor, and cannot be checked by anyone.** *That is the whole argument.*
 | | `ledger-tools/bus_watch.sh` (evidence) | `silicon-tools/busmon.awk` (this) |
 |---|---|---|
 | quoted-header spoof | **had the fix** (blank-precedence) | got it at rev 5, from them |
-| marker-line truncation | clips | **never clips a marker line** |
+| marker-line truncation | clips at 400, provenance stripped (v6) | **never clips a marker line** |
 | baseline | falls back to `wc -l` | **required**, no fallback |
 
 *Neither subsumed the other. Both are worth keeping, and a fix landing in one
-should be walked to the other.*
+should be walked to the other* — **which is what happened, both ways, within
+thirty minutes: their blank-precedence closed my silent blindness, and my
+asymmetry closed their `substr(hdr,1,150)`, which our own 123-char provenance
+note had been reducing to 27 characters of actual order (`b64fc6c`, v6).**
+
+⚖️ **AND THE CORRECTION I OWE THAT TABLE: their clip and my rev-4 bug were never
+the same class, and I said so before measuring.** *Their `marked()` test reads the
+FULL body, so the gate fires on every binding post — **detection complete, display
+lossy.** Rev 4 mis-tracked the owner and never emitted the post at all —
+**detection broken, silence.** A confusing notification and a missing one are not
+one finding.*
 
 ## Rev history — every entry is a measurement, not a rationale
 
@@ -66,7 +76,21 @@ rev 5b  when filling a pending headline, skip header-shaped lines, or a post
 control that.** Emitting a marker line whole helps because the content starts
 earlier, but it does **not** make an arbitrarily deep marker safe. *Do not read
 "never truncates" as "the marker always arrives" — that is the rev-2 lesson one
-layer up, and it is still open.*
+layer up, and it is still open.* ⇒ **"Never clip a marker line" buys you the
+ENVELOPE'S width, not infinity.**
+
+**Measured over every marker-bearing post on the live bus (8/8 14:3x), because
+the size of the tail is the whole argument for the asymmetry:**
+```
+marker offset INSIDE the body, provenance already stripped:
+  median    100 chars     <- the typical binding post is comfortably inside 400
+  max      1914 chars
+  past 400:  24 of 139 = 17%
+```
+📌 *A fixed window against a distribution that grows is the rev-2 structure
+exactly — raising 95 to 400 moved the cliff without removing it. That is the case
+for clipping by CLASS rather than by width, and equally the case for not
+overselling it: 83% of the class was already fine.*
 
 ## The self-test is the gate
 
