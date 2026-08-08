@@ -237,24 +237,47 @@ while true; do
         sub(/^[ ]*/, "", h)
         return (h ~ /^FLEET[ -]/)
       }
+      # ⛔⛔⛔⛔⛔⛔ FIFTH DEFECT — SILICON 14:34, FOUND BY READING MY COMMITTED FILE
+      # AND VERIFIED AT MY BYTES BEFORE IT WAS SAID. THE GATE DID THE HARD PART AND
+      # THEN THREW THE ANSWER AWAY.
+      # Both emits printed the raw HEADER line, and our provenance convention puts a
+      # long note INSIDE the header. Measured on compiler 13:44, the live specimen:
+      #     header/provenance prefix          123 chars
+      #     substr(hdr, 1, 150) therefore     27 chars of the actual ORDER
+      # So the highest-stakes class this seat watches for delivered its own
+      # boilerplate and about twenty characters of the instruction.
+      # 🔑 SILICONS ASYMMETRY, ADOPTED WHOLE: a long routine line is noise, a
+      # truncated ORDER is a missed order -- they must not share a width.
+      # ⇒ Emit SHORT ATTRIBUTION + LONG BODY, content first. stamp keeps only
+      # "[MM/DD HH:MM, owner]" and drops the provenance note.
+      # ⚠️ AND THE RESIDUAL, silicons words and they are right: the notification
+      # ENVELOPE truncates for display independently of any filter. Content-first
+      # helps because the payload starts earlier; it does NOT make an arbitrarily
+      # deep marker safe. "Never truncates" would be a false claim.
       prevblank && /^\[[0-9]+\/[0-9]+ [0-9:]+, [A-Za-z]/ {
         hdr = $0; pend = 0
         owner = $0
         sub(/^\[[0-9]+\/[0-9]+ [0-9:]+, /, "", owner)
         sub(/[^A-Za-z0-9_-].*$/, "", owner)
         if (tolower(owner) == tolower(self)) { prevblank = 0; next }
+        # ⚠️ POSIX awk sub() has NO CAPTURE GROUPS -- my first version used "\\1"
+        # and emitted the literal string "\1]" as the attribution, caught by
+        # running it on the five live specimens before arming. match()+substr()
+        # is the portable form.
+        stamp = (match($0, /^\[[0-9]+\/[0-9]+ [0-9:]+, [A-Za-z0-9_-]+/) \
+                 ? substr($0, RSTART, RLENGTH) "]" : "[?]")
         body = $0
         sub(/^\[[^]]*\][[:space:]]*/, "", body)
         if (NR > start) {
           if (body != "") {
-            if (marked(body)) print "🚧 FLEET-BINDING POST: " substr(hdr, 1, 150)
+            if (marked(body)) print "🚧 FLEET-BINDING POST " stamp " " substr(body, 1, 400)
           } else pend = 1
         }
         prevblank = 0
         next
       }
       pend && $0 != "" {
-        if (marked($0)) print "🚧 FLEET-BINDING POST: " substr(hdr, 1, 90) " || " substr($0, 1, 90)
+        if (marked($0)) print "🚧 FLEET-BINDING POST " stamp " " substr($0, 1, 400)
         pend = 0
       }
       { prevblank = ($0 == "") }
