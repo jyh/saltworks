@@ -28,6 +28,32 @@ AluSelect.lean:76       asLevelWidth j = asPad / 2^(j+1)   ⇒  Σⱼ = asPad �
 ```
 ⇒ **`gates(n) = 32 × (pad − 1) × 3 + ⌈log₂ n⌉ + [n < pad]`**, `pad = 2^⌈log₂ n⌉`.
 
+## 🔧 CORRECTION (22:05, math measured it in the kernel — `2f86b92`)
+⛔ **THE `[n < pad]` TERM IS WRONG. THE PAD CONSTANT IS EMITTED UNCONDITIONALLY**
+— `AluSelect.lean:101`, `(⟨asZero, .const false⟩ : Gate) ::`, prepended with no
+guard — so at `n = 2^b` it is a **DEAD gate that is still counted.**
+**The term is `+1`, always.** *`[n < pad]` was my invention about what a shrunken
+generator ought to do, not a reading of the code.*
+```
+              published    correct     Δ vs 10
+n = 10          1,445       1,445         —      ✅ unchanged (already charged)
+n = 8             675         676      −769      ⛔ was −770
+n = 4             290         291    −1,154      ⛔
+n = 3             291         291    −1,154      ✅ unchanged — 3 is not a power of two
+n = 2              97          98    −1,347      ⛔ was −1,348
+```
+✅ **THE HEADLINE IS UNTOUCHED: 10 → 3 is −1,154.** *Only exact powers of two move,
+by one gate each; no conclusion in this document depends on them.*
+🔴 **AND §1's "VALIDATED AT TWO INDEPENDENT POINTS" WAS ONE POINT AND AN ECHO.**
+*`n=10` is not a power of two, so it could never expose this term. `n=2` agreed
+because the bank's `97` was **derived by the same arithmetic, by the same seat**.*
+⭐ ***A validation point is independent only if produced by a DIFFERENT METHOD —
+not merely at a different time, by a different seat, or in a different document.
+The kernel is a different method, which is why math found this and I could not.***
+📌 **§5's "exact to the gate" is STRUCK:** `genSelect 2 1` = 98 against a bespoke
+32-bit 2:1 mux at 97 — **the generator is one gate worse than a hand-built mux at
+`n = 2`, and only there.** *The block-identity claim stands; the exactness does not.*
+
 ✅ **VALIDATED AT TWO INDEPENDENT POINTS BEFORE BEING USED —** *the formula was
 not trusted on its own:*
 * `n = 10` → `32×15×3 + 4 + 1` = **1,445**, matching `hdl-c4-core-assembly-plan-0807.md:64`
