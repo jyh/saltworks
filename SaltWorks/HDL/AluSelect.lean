@@ -555,7 +555,31 @@ parametrically.
 statement:** after harvesting the only two numeric facts the construction needs,
 the four named constants are made LOCALLY IRREDUCIBLE.  From that point the
 elaborator cannot delta-unfold `asOps`/`asSelBits`/`asPad`/`asW` to numerals, so
-no `rfl` or `decide` can silently compute its way through the equality.
+no `rfl` and no plain `decide` can silently compute its way through the equality.
+
+⛔⛔ **AND THE EXCEPTION, WHICH IS NOT A DETAIL: `attribute [local irreducible]`
+is an ELABORATOR reducibility hint. THE KERNEL DOES NOT HONOUR IT.** So
+`decide +kernel` walks straight through the device. Replicated on this seat's own
+hand (`ScratchDeviceProbe.lean`) after math reported it, because it is a claim
+about a guarantee math authored and this seat certified:
+
+```
+under the live attribute:
+  asOps = 10 := rfl                  ⛔ Type mismatch     ← the device working
+  asSelBits = 4 := rfl               ⛔ Type mismatch     ← the device working
+  asOps = 10 := by decide +kernel    ✅ SUCCEEDS, [0 axioms]
+  asSelBits = 4 := by decide +kernel ✅ SUCCEEDS, [0 axioms]
+```
+
+⛔ **STANDING BAN, ratified: NO `decide +kernel` INSIDE `section ParametricHinge`.**
+Anything proved that way here would carry the device's certification, read as
+parametric, and SHATTER AT THE RE-CUT. The section is clean today (zero `decide`
+of any kind); this ban is a door being closed, not a crack being patched.
+
+⚠️ The general form, and it is the day's law in miniature: a verification device
+is itself an instrument, and *which layer it binds* is part of its design. This
+one binds the elaborator. The kernel is a different reader and answers a
+different question — which is normally the whole point of having it.
 Everything below goes through the two seeds alone.
 
 Math's negative control confirms the device BITES — both examples MUST fail and
