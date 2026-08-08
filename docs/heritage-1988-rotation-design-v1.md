@@ -65,9 +65,13 @@ granting the Batcher a spare the banyan was denied. Independent
 second kill: 16/20 are PER-CHIP traversals and the prose hedges
 chip-vs-network ("one or more Batcher chips"). WHAT SURVIVES: the
 MECHANISM and its direction — banyan slower than Batcher, the
-rotation's buffering price, confirmed by 20 > 16. The table carries
-d_cell SYMBOLIC (d_B, d_N with d_N > d_B) until a citable source
-fixes it. Control distribution: the strobes-by-flip-flop-chain
+rotation's buffering price, confirmed by 20 > 16. STRENGTHENED by
+silicon's own right-of-reply (13:54, confirming its refuter): the
+overhead CANCELS, so a mod-5 congruence refutes the common-overhead
+model for ANY o — the prose fixes d_B exactly and leaves d_N at
+three candidates, both previously-claimed values among them. The
+table carries d_B fixed, d_N SYMBOLIC (d_N > d_B) until a citable
+source decides among the candidates. Control distribution: the strobes-by-flip-flop-chain
 claim remains uncited recollection (silicon's ④ disclosure 3),
 barred from the flagship until sourced; the 1988-pipelined vs
 2026-frame-counter CONTRAST survives on the architecture (spec §6).**
