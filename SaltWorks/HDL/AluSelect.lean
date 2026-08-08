@@ -196,6 +196,178 @@ theorem aluSelect_ssa : aluSelect.ssa = true := by decide +kernel
 theorem aluSelect_wf : aluSelect.wf = true := Circ.wf_of_ssa aluSelect_ssa
 
 
+/-! ## ⭐⭐ THE SOURCE COUNT, PARAMETRISED — `genSelect n b`
+
+**`aluSelect` IS `genSelect 10 4`** (`genSelect_ten`, below).
+
+*The block above is written at one width, and the semantics theorem
+(`sem_aluSelect`, math's `Stack/Program.lean`) was written at that width too —
+`329 + 45*k + 42`, `pfr (320 + j)`, `< 324`, and level 3 baked into the lemma
+names (`asV3_eq`, `asB3`, `asOut k 3 0`). So every theorem proved against
+`asIn = 324` was another line in a future rewrite, and the sizing question became
+a **DEADLINE rather than a trade** (silicon, `79bb72a`).*
+
+⇒ **The deadline was a property of one proof having been written at a literal
+width, not of the decision.** `genSelect n b` is the same construction at `n`
+sources and `b` encoded select bits; `sem_genSelect` (math) proves it selects,
+unconditionally, at every `n`. ⚠️ **The landed `aluSelect` is NOT redefined** —
+it is *recovered*, so nothing that consumes it moves.
+
+## The shape
+
+A balanced mux tree over `2^b` leaves per output bit, with an **encoded** select
+(`b` bits, not `2^b` one-hot lines — the choice that cut the uncut cone from 20
+to 14), and the padding leaves above `n` sharing one `const false`. Cost is a
+step function on the doubling: a source costs nothing until it crosses a power
+of two.
+
+⚠️ **ONE GATE MORE THAN SILICON'S SIZING TABLE AT EXACT POWERS OF TWO.** That
+formula carries `+ [n < pad]` — the pad constant, charged only when there IS
+padding. `genSelect` emits it unconditionally, so at `n = 2^b` it is a **dead
+net**: `genSelect 2 1` is **98** gates where the table says 97, and `n = 8` would
+be 676 where it says 675. Measured in the kernel (`genSelect_two_gate_count`),
+not derived. The `n = 3` row (291) and the `n = 10` row (1,445) match exactly. -/
+
+/-- `n` sources of 32 bits each, then `b` encoded select bits. -/
+def gsIn (n b : Nat) : Nat := n * 32 + b
+/-- Source `r` bit `k`. -/
+def gsRes (r k : Nat) : Nat := r * 32 + k
+/-- Select bit `j`. (`b` is carried for uniformity with the rest of the family.) -/
+def gsSel (n _b j : Nat) : Nat := n * 32 + j
+/-- The shared constant that pads `n` sources up to `2^b` leaves. -/
+def gsZero (n b : Nat) : Nat := gsIn n b
+/-- One inverter per select bit, shared by every mux at that level. -/
+def gsNot (n b j : Nat) : Nat := gsIn n b + 1 + j
+def gsPad (b : Nat) : Nat := 2 ^ b
+/-- Positions feeding level `j`; level `0` is fed by the `2^b` padded leaves. -/
+def gsWidth (b j : Nat) : Nat := gsPad b / 2 ^ j
+/-- Muxes at level `j` — half its input width. -/
+def gsLevelWidth (b j : Nat) : Nat := gsWidth b (j + 1)
+/-- Muxes below level `j`, per bit. -/
+def gsBelow (b : Nat) : Nat → Nat
+  | 0 => 0
+  | j + 1 => gsBelow b j + gsLevelWidth b j
+def gsBase (n b k j i : Nat) : Nat :=
+  gsIn n b + 1 + b + (k * (gsPad b - 1) + gsBelow b j + i) * 3
+/-- **The named output of level `j`, position `i`, for bit `k`.** -/
+def gsOut (n b k j i : Nat) : Nat := gsBase n b k j i + 2
+/-- What level `j` reads: level 0 the padded sources, later levels the level below. -/
+def gsPrev (n b k : Nat) : Nat → Nat → Nat
+  | 0,     i => if n ≤ i then gsZero n b else gsRes i k
+  | j + 1, i => gsOut n b k j i
+/-- One mux: `sel[j] ? prev[2i+1] : prev[2i]`. -/
+def gsMux (n b k j i : Nat) : List Gate :=
+  [⟨gsBase n b k j i,     .and (gsPrev n b k j (2 * i))     (gsNot n b j)⟩,
+   ⟨gsBase n b k j i + 1, .and (gsPrev n b k j (2 * i + 1)) (gsSel n b j)⟩,
+   ⟨gsOut n b k j i,      .or (gsBase n b k j i) (gsBase n b k j i + 1)⟩]
+
+/-- **The output select at a general source count**: 32 bits, each a `b`-level
+tree over `2^b` padded leaves of which the first `n` are real sources. -/
+def genSelect (n b : Nat) : Circ :=
+  { nIn := gsIn n b
+    gates :=
+      (⟨gsZero n b, .const false⟩ : Gate)
+        :: (List.range b).map (fun j => (⟨gsNot n b j, .not (gsSel n b j)⟩ : Gate))
+        ++ (List.range 32).flatMap fun k =>
+             (List.range b).flatMap fun j =>
+               (List.range (gsLevelWidth b j)).flatMap (gsMux n b k j)
+    outs := (List.range 32).map fun k => gsOut n b k (b - 1) 0 }
+
+/-! ### The landed block, recovered
+
+⚠️ **Proved through the layout lemmas, never by `rfl` across the gate list.**
+`aluSelect` is 1,445 gates and `whnf` has timed out on this arc at 259; the
+equality is assembled from `gsMux_ten` (three gates) by `funext`, and the `Circ`
+equality itself goes through structure eta on the three fields. -/
+
+theorem gsLevelWidth_four (j : Nat) : gsLevelWidth 4 j = asLevelWidth j := rfl
+
+theorem gsBelow_four (j : Nat) : gsBelow 4 j = asBelow j := by
+  induction j with
+  | zero => rfl
+  | succ j ih =>
+    show gsBelow 4 j + gsLevelWidth 4 j = asBelow j + asLevelWidth j
+    rw [ih, gsLevelWidth_four]
+
+theorem gsPad_four : gsPad 4 = asPad := rfl
+theorem gsIn_ten : gsIn 10 4 = asIn := rfl
+
+theorem gsBase_ten (k j i : Nat) : gsBase 10 4 k j i = asBase k j i := by
+  show gsIn 10 4 + 1 + 4 + (k * (gsPad 4 - 1) + gsBelow 4 j + i) * 3
+      = asIn + 1 + asSelBits + (k * (asPad - 1) + asBelow j + i) * 3
+  rw [gsBelow_four, gsPad_four, gsIn_ten]
+  rfl
+
+theorem gsOut_ten (k j i : Nat) : gsOut 10 4 k j i = asOut k j i := by
+  show gsBase 10 4 k j i + 2 = asBase k j i + 2
+  rw [gsBase_ten]
+
+theorem gsPrev_ten (k j i : Nat) : gsPrev 10 4 k j i = asPrev k j i := by
+  cases j with
+  | zero => show (if 10 ≤ i then gsZero 10 4 else gsRes i k)
+                = (if i ≥ asOps then asZero else asRes i k)
+            rfl
+  | succ j => show gsOut 10 4 k j i = asOut k j i
+              rw [gsOut_ten]
+
+theorem gsMux_ten (k j : Nat) : gsMux 10 4 k j = asMux k j := by
+  funext i
+  show [(⟨gsBase 10 4 k j i, .and (gsPrev 10 4 k j (2 * i)) (gsNot 10 4 j)⟩ : Gate),
+        ⟨gsBase 10 4 k j i + 1, .and (gsPrev 10 4 k j (2 * i + 1)) (gsSel 10 4 j)⟩,
+        ⟨gsOut 10 4 k j i, .or (gsBase 10 4 k j i) (gsBase 10 4 k j i + 1)⟩] = _
+  rw [gsBase_ten, gsOut_ten, gsPrev_ten, gsPrev_ten]
+  rfl
+
+theorem genSelect_ten_gates : (genSelect 10 4).gates = aluSelect.gates := by
+  show (⟨gsZero 10 4, .const false⟩ : Gate)
+        :: (List.range 4).map (fun j => (⟨gsNot 10 4 j, .not (gsSel 10 4 j)⟩ : Gate))
+        ++ (List.range 32).flatMap (fun k =>
+             (List.range 4).flatMap fun j =>
+               (List.range (gsLevelWidth 4 j)).flatMap (gsMux 10 4 k j))
+      = (⟨asZero, .const false⟩ : Gate)
+        :: (List.range asSelBits).map (fun j => (⟨asNot j, .not (asSel j)⟩ : Gate))
+        ++ (List.range asW).flatMap (fun k =>
+             (List.range asSelBits).flatMap fun j =>
+               (List.range (asLevelWidth j)).flatMap (asMux k j))
+  have h : (fun k => (List.range 4).flatMap fun j =>
+              (List.range (gsLevelWidth 4 j)).flatMap (gsMux 10 4 k j))
+         = (fun k => (List.range asSelBits).flatMap fun j =>
+              (List.range (asLevelWidth j)).flatMap (asMux k j)) := by
+    funext k
+    have h2 : (fun j => (List.range (gsLevelWidth 4 j)).flatMap (gsMux 10 4 k j))
+            = (fun j => (List.range (asLevelWidth j)).flatMap (asMux k j)) := by
+      funext j; rw [gsLevelWidth_four, gsMux_ten]
+    rw [h2]
+    rfl
+  rw [h]
+  rfl
+
+theorem genSelect_ten_outs : (genSelect 10 4).outs = aluSelect.outs := by
+  show (List.range 32).map (fun k => gsOut 10 4 k 3 0)
+      = (List.range asW).map (fun k => asOut k (asSelBits - 1) 0)
+  have h : (fun k => gsOut 10 4 k 3 0) = (fun k => asOut k (asSelBits - 1) 0) := by
+    funext k; rw [gsOut_ten]; rfl
+  rw [h]
+  rfl
+
+/-- ⭐ **THE LANDED BLOCK IS THE PARAMETRIC ONE AT `n = 10`** — so `sem_genSelect`
+supersedes `sem_aluSelect` rather than competing with it, and shrinking the ALU
+to three sources is an INSTANTIATION rather than a re-proof. -/
+theorem genSelect_ten : genSelect 10 4 = aluSelect := by
+  have hn : (genSelect 10 4).nIn = aluSelect.nIn := rfl
+  calc genSelect 10 4
+      = ⟨(genSelect 10 4).nIn, (genSelect 10 4).gates, (genSelect 10 4).outs⟩ := rfl
+    _ = ⟨aluSelect.nIn, aluSelect.gates, aluSelect.outs⟩ := by
+          rw [hn, genSelect_ten_gates, genSelect_ten_outs]
+    _ = aluSelect := rfl
+
+#audit_axioms gsIn gsRes gsSel gsZero gsNot gsPad gsWidth gsLevelWidth
+#audit_axioms gsBelow gsBase gsOut gsPrev gsMux genSelect
+#audit_axioms gsLevelWidth_four gsBelow_four gsPad_four gsIn_ten
+#audit_axioms gsBase_ten gsOut_ten gsPrev_ten gsMux_ten
+#audit_axioms genSelect_ten_gates genSelect_ten_outs genSelect_ten
+
+
 /-! ## ⭐ DOES IT SELECT? — the behavioural certificate this file did not have
 
 **Before today this file carried NO theorems.** *It is a 1,445-gate mux tree that
