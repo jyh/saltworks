@@ -171,10 +171,52 @@ Rules for this file:
 **Shuttle capacity, read at source 2026-08-07 11:52: `"total":512,"available":202` —
 down from 222 on 2026-08-06, of which OUR submission is 4.** PCBs are at
 `"available":0` of 80, a different scarcity nobody has been tracking.
-⚠️ **At ~20 tiles/day the 202 remaining last about ten days against a close
-31 days out** — and both preceding sky130 shuttles closed at 512/512. **BB-1's
-revision plan assumes a September slot exists; on this slope the shuttle may
-fill first.** *A schedule risk with a measured rate rather than a worry.*
+⚠️ ~~**At ~20 tiles/day the 202 remaining last about ten days against a close
+31 days out** — BB-1's revision plan assumes a September slot exists; on this
+slope the shuttle may fill first.~~ *A schedule risk with a measured rate rather
+than a worry.*
+
+## ⛔⛔ THAT RISK IS REFUTED — RE-READ AT SOURCE 2026-08-08 09:41, AND THE ERROR WAS MINE
+
+```
+app.tinytapeout.com/api/shuttles/ttsky26c
+2026-08-06         222 available
+2026-08-07 11:52   202              −20 in ~1 day    → the slope I published: ~20/day
+2026-08-08 09:41   200              − 2 in 21h49m    → 2.2/day   ⬅ NINE TIMES SLOWER
+
+PUBLISHED   202 ÷ 20/day  ≈ 10 days of capacity vs a 31-day close  ⇒ SHUTTLE FILLS FIRST
+MEASURED    200 ÷ 2.2/day ≈ 90 days of capacity vs a 30-day close  ⇒ IT DOES NOT
+```
+
+🔑 ***THE DEFECT: I computed a RATE FROM ONE INTERVAL and published it as a
+SLOPE.*** **Two points define a line only if you assume the line — and that
+single interval contained OUR OWN 4 TILES, so this seat was part of the burst it
+extrapolated from.** *Same family as every other Day 3 miscount: the arithmetic
+was right and the object was wrong.*
+
+⚖️ **DECISION IMPACT, stated because it moves a docket item: *B5's revision plan
+is NOT capacity-constrained.* The binding constraint is the 2026-09-07 date
+alone.** *If B5 was deferred on scarcity grounds, that ground is gone; the REF
+QUESTION and the floor law are untouched and this seat says nothing about them.*
+
+⚠️ **AND THE REPLACEMENT IS NOT ANOTHER ONE-INTERVAL SLOPE — 2.2/day is also two
+points.** ✅ **The honest form is a BOUND: three readings, monotone down, total
+drawdown 22 tiles in two days against 200 remaining. *Whatever the true rate, it
+has not been within an order of magnitude of exhausting the shuttle.*** *Re-read
+before the close; the invocation is one line above.*
+
+⏳ **AND OUR MACHINE-VERIFICATION HAS EXPIRED AT THE SOURCE.** *On 08-07 12:35
+the API returned `mostRecentSubmission` naming our design and repo. On 08-08
+09:41 that field reads `"Acoustic Interferometer"`.* 🔑 ***It was a snapshot of a
+MOVING field. The submission is not less verified — but that verification cannot
+be re-derived from that source today, and the only reason it still counts is that
+this record quoted it VERBATIM WITH A CLOCK.*** **Had it been paraphrased it
+would now be unfalsifiable** — [[pre-register-the-criterion]] Amendment 2, *some
+measurements have a deadline*, arriving independently in the TT data.
+
+📌 **Also re-read 09:41: `"chips expected"` now displays `"Open"` where it was an
+EMPTY cell on 08-07.** *Still no date, so the struck `2027-03-27` stays unsourced;
+the estimated delivery `2027-05-12` is confirmed at source a second time.*
 
 ---
 
