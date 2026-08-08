@@ -5676,6 +5676,67 @@ theorem sem_genSelect (n b : Nat) (hb : 0 < b) (E : Env) :
   · rw [if_pos (by omega), if_neg hlt]
     exact pzero
 
+/-! ### ⭐ THE ADMISSIBILITY GUARD — `n ≤ 2 ^ b`
+
+`sem_genSelect` holds at EVERY `n` and `b`, and that generality hides a trap:
+`gsSelOf` is `b` bits wide, so it ranges over `[0, 2 ^ b)` and nothing more. At
+`n > 2 ^ b` the circuit is still well-formed and still correctly gate-counted —
+it simply has sources `2 ^ b … n - 1` that no valuation of the select nets can
+ever name, and the ALU operations sitting there are dropped in silence. No
+theorem above catches that, because none of them says a source is *reachable*.
+
+`genSelect_sources_reachable` is the missing statement, and it carries `n ≤ 2 ^ b`
+as a hypothesis so an inadmissible `(n, b)` fails to elaborate at the call site
+instead of losing operations quietly. -/
+
+/-- The select valuation that names `t`: `sel[j] := bit j of t`, matching
+`gsSelUpTo`'s `sel[0]`-is-LSB order. Its first `m` bits read as `t % 2 ^ m`. -/
+theorem gsSelUpTo_testBit (n b t : Nat) :
+    ∀ m, gsSelUpTo n b (fun x => Nat.testBit t (x - n * 32)) m = t % 2 ^ m := by
+  have hsel : ∀ m : Nat, Nat.testBit t (gsSel n b m - n * 32) = Nat.testBit t m := by
+    intro m
+    show Nat.testBit t (n * 32 + m - n * 32) = Nat.testBit t m
+    congr 1
+    omega
+  intro m
+  induction m with
+  | zero => show 0 = t % 1; omega
+  | succ m ih =>
+    show gsSelUpTo n b (fun x => Nat.testBit t (x - n * 32)) m
+        + (if Nat.testBit t (gsSel n b m - n * 32) then 2 ^ m else 0) = t % 2 ^ (m + 1)
+    rw [ih, hsel m, Nat.mod_pow_succ, ← Nat.toNat_testBit]
+    cases Nat.testBit t m <;> simp
+
+/-- ⭐⭐ **EVERY SOURCE IS REACHABLE, EXACTLY WHEN `n ≤ 2 ^ b`.** For an
+admissible pair, each source `j < n` is named by some valuation of the select
+nets — so no operation of `genSelect n b` is silently unreachable. The
+hypothesis is load-bearing: without it the statement is FALSE (take `n = 5`,
+`b = 2`, `j = 4`, where `gsSelOf 5 2 E < 4` for every `E` by
+`gsSelOf_lt_pad`). -/
+theorem genSelect_sources_reachable (n b : Nat) (hb : 0 < b) (hn : n ≤ 2 ^ b) :
+    ∀ j, j < n → ∃ E : Env, gsSelOf n b E = j := by
+  have _hb : 0 < b := hb
+  intro j hj
+  refine ⟨fun x => Nat.testBit j (x - n * 32), ?_⟩
+  show gsSelUpTo n b (fun x => Nat.testBit j (x - n * 32)) b = j
+  rw [gsSelUpTo_testBit n b j b]
+  exact Nat.mod_eq_of_lt (Nat.lt_of_lt_of_le hj hn)
+
+/-- The converse half of the guard: `b` select bits can never name `2 ^ b` or
+above, which is why `n > 2 ^ b` drops sources. -/
+theorem gsSelOf_lt_pad (n b : Nat) (F : Env) : gsSelOf n b F < 2 ^ b := by
+  show gsSelUpTo n b F b < 2 ^ b
+  have : ∀ m : Nat, gsSelUpTo n b F m < 2 ^ m := by
+    intro m
+    induction m with
+    | zero => show 0 < 1; omega
+    | succ m ih =>
+      show gsSelUpTo n b F m + (if F (gsSel n b m) then 2 ^ m else 0) < 2 ^ (m + 1)
+      have hp : (2 : Nat) ^ (m + 1) = 2 ^ m + 2 ^ m := by
+        rw [Nat.pow_succ]; omega
+      split_ifs <;> omega
+  exact this b
+
 #audit_axioms gsWidth_top gsWidth_of_le gsLevelWidth_two
 #audit_axioms gsBelow_zero gsBelow_succ gsBelow_of_le gsBelow_top
 #audit_axioms gsB gsBase_eq gsOut_eq gsB_step gsB_zero_le gsB_bit gsB_bit_mono gsB00
@@ -5686,6 +5747,7 @@ theorem sem_genSelect (n b : Nat) (hb : 0 < b) (E : Env) :
 #audit_axioms gsPre_eq genSelect_gates_eq gsL_eq
 #audit_axioms gsPrev_zero_val run_gsLevels run_gsBody run_gsPre
 #audit_axioms genSelect_outs_eq sem_genSelect
+#audit_axioms gsSelUpTo_testBit genSelect_sources_reachable gsSelOf_lt_pad
 
 /-! ## ⭐⭐ THE THEOREM -/
 
