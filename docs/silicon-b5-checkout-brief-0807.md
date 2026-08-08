@@ -80,6 +80,28 @@ branch/commit/run selector, take the branch. If it does not, the merge in §4 is
 mandatory.* ⇒ ***Do not infer this from the outcome of a click that cannot be
 un-pressed inside a deadline.***
 
+### ✅ HALF OF IT IS NOW MEASURED (silicon, 8/7 20:4x — re-verified 23:1x)
+**The "evidence leans toward" clause above is no longer a lean. It is a reading:**
+```
+gh api repos/jyh/tt-verified-banyan-switch --jq .default_branch   →  main
+gh api repos/jyh/tt-verified-banyan-switch/branches/main          →  f14a4fa
+                                                                     = THE FLOOR
+```
+⇒ ***`default_branch` IS `main`; `main` IS `f14a4fa`; `f14a4fa` IS the floor. So IF
+TT builds the default branch, pressing Submit today re-submits the floor — and the
+premise of that conditional is now MEASURED rather than inferred.***
+⚠️ **WHAT REMAINS UNRESOLVED IS ONLY THE OTHER HALF: does the revision dialog offer
+a branch/commit/run selector?** *No API answers that; it needs a human at the page.*
+📌 **AND NOTE THE INSTRUMENT, because `git` cannot answer either question here —
+the TT repo is NOT cloned on this machine, and `git` reports `f14a4fa` as
+`fatal: ambiguous argument`, which reads like a broken repo rather than a missing
+clone. Use `gh api`. Reading a ref never needs a checkout.**
+🟢 **B4 STATUS AT THE TIME OF WRITING: CLOSED and UNCONDITIONAL (`33a3c86` +
+sweep `924a44e`; the corpus's own build emits
+`✓ SaltWorks.HDL.composed_switch_of_bnC_driven [3 axioms]`).** *So the floor law no
+longer holds B5 — **this §3 dialog question is the only remaining gate**, and it is
+not one a seat can answer.*
+
 ---
 
 ## 4. WHAT REPLACES WHAT — the floor law, unchanged
