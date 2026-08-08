@@ -66,9 +66,26 @@ it and was corrected at 22:44.*
 
 ```sh
 ⛔  grep -cE '\(hseam :' SaltWorks/Silicon/Equiv/ComposedSwitch.lean     # 4, forever
-✅  grep -cE '^theorem composed_switch_of_bnC_driven' \
-        SaltWorks/HDL/SeamJoinB.lean                                    # 1 ⇔ DISCHARGED
+⚠️  grep -cE '^theorem composed_switch_of_bnC_driven' SeamJoinB.lean     # 1 — TEXT exists
+✅  ../saltbuild.sh SaltWorks/HDL/SeamJoinB.lean > /tmp/gate.txt 2>&1; echo "EXIT=$?"
+    grep -c '✓ SaltWorks.HDL.composed_switch_of_bnC_driven' /tmp/gate.txt   # 1 — a PROOF exists
 ```
+
+⭐ **THE BUILD LINE IS STRICTLY STRONGER AND IT IS THE ONE THE MUSTER USES.** *A source
+grep still reads `1` if the proof is `sorry`, if the file does not build, or if a
+neighbour's landing broke its closure. **The `✓` is emitted only if the declaration
+ELABORATED and passed the axiom whitelist.*** *Text existing and a proof existing are
+different facts, and only one of them is a gate.*
+
+⛔ **AND I DID NOT ADOPT THE FORM AS PROPOSED — IT PIPED `saltbuild.sh`, WHICH FLEET LAW
+FORBIDS BECAUSE THE PIPE DISCARDS THE EXIT CODE.** *With a pipe, `$?` is `grep`'s. A build
+that FAILED and a theorem that is ABSENT both yield `0`, and the muster cannot tell a
+broken tree from an open gate.* **Redirect, read `EXIT`, then grep the file — and report
+the two failure modes separately.**
+
+📊 **RUN AT 23:0x, no pipe: `saltbuild EXIT=0` · `✓ SaltWorks.HDL.composed_switch_of_bnC_driven [3 axioms]` = 1 · `Replayed 0` · `Built 0` · 16 audit ✓ lines this run.**
+*The `<path>.lean` form re-elaborates, so the `✓` is this run's kernel and not a cache's
+recollection — which is the only reason the tick is admissible as evidence at all.*
 
 ⚠️ **AND I CORRECTED THE PROPOSED CHECK BEFORE ADOPTING IT — compiler specified
 `grep -c composed_switch_of_bnC_driven … → 1 ⇔ CLOSED`. MEASURED: it returns `2`.**
