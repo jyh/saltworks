@@ -874,8 +874,28 @@ bits.***
 frame's cycles), then prove `bnCDatStep ↔ applyComp` AT THE FRAME LEVEL**, with
 `ceC_realises_cKey_when_active` supplying the per-element sort and
 `bnC_trace_factors` supplying the state agreement each element needs to BE that
-standalone `ceC`. **`bnCResult_dat` above is what makes the fold's endpoint
-nameable; the frame lifting is the work.**
+standalone `ceC`.
+
+📊 **UPDATED AFTER 2a–2c LANDED — read this section's position, not just its
+words: it was written BEFORE the three subsections above it, and a reader now
+meets three finished steps followed by text that sounds like nothing has begun.**
+```
+2a  bnC_data_bit        ✅ per-cycle, data side
+2b  bnC_out_factors     ✅ element e's whole OUTPUT FRAME = standalone ceC's
+2c  bnCDatAt_succ       ✅ the fold's step from the BACK
+    bnCDatStep_getD     ✅ the applyComp-SHAPED read, at the NET level
+────────────────────────────────────────────────────────────────────────
+2d  THE FRAME-LEVEL SORT   ⛔ THE REMAINING WORK
+```
+⇒ ***What is left is NOT the plumbing — that is done, both halves of it. What is
+left is the SORTING ARGUMENT: that an element's two output FRAMES are the `cKey`
+min and max of its two input frames, and that folding that across `bnComps`
+is `runNet`.*** **`bnCDatStep_getD` gives `applyComp`'s SHAPE; what it does not
+give is that the two written values are the min and the max.**
+
+⚠️ **And that step must carry the two hypotheses recorded in ① and ② above —
+they are hypotheses of the FRAME-level element certificate, and the frame is the
+level this argument works at.**
 
 📌 *This is also why the two hypotheses in ① and ② above are unavoidable rather
 than tidiable: they are hypotheses of the FRAME-level element certificate, and
