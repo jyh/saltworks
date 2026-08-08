@@ -74,6 +74,17 @@ is ~100% META by construction, so including it measures how busy I was.
   ⭐ **Why it belongs among the NEGATIVES rather than the wins: nothing was published and
   nothing was caught by review. A seat stopped itself.** *The fleet now protects the LANES
   as reflexively as it protects the kernel, and that reflex is the result.*
+- ⚖️ **MAESTRO'S RULING OWED — 49 THEOREMS NOBODY HAS EVER AUDITED, AND THE QUESTION IS
+  WHOSE CONVENTION BINDS.** `audit_completeness.py` defaults to `SaltWorks/HDL`, so its
+  *"every theorem is on an `#audit_axioms` list"* was **true of a DIRECTORY and read as
+  true of the REPO** — three ledger entries said it unscoped (now annotated in place,
+  `6c6e1ba`). Run at the repo root: **49 unaudited**, most in **other seats' slots** —
+  `Silicon/Equiv` (18 in `PartialLoad` alone), `Banyan`, `Stack`. ⛔ **Nobody is calling
+  them defective; nobody has ever looked.** *Whether the HDL seat's convention binds those
+  files is the maestro's ruling — compiler declined it, and so do I.*
+  📌 **And the shape is the day's: the ledger CAUGHT this before math did, and the catch
+  never travelled back to the three lines it invalidated.** *A correction that lands only
+  where it was found leaves every earlier statement standing.*
 - ⛔ **THE SAMPLED/EXHAUSTIVE COLUMN IS BLOCKED ON INFRASTRUCTURE** — see
   `EVIDENCE-proof-debt-table-0807.md` §5. Three designs died in thirty minutes; an axis is
   exhaustive only with a **proved quotient lemma**, and the fanin-restricted congruence
