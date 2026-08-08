@@ -3,7 +3,7 @@ Copyright (c) 2026 Jason Hickey. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Jason Hickey, Claude
 -/
-import SaltWorks.HDL.SeamElement
+import SaltWorks.HDL.SeamJoinA
 import SaltWorks.HDL.BatcherNetCheck
 import SaltWorks.Silicon.Equiv.ComposedSwitch
 
@@ -21,18 +21,6 @@ set_option maxRecDepth 8000
 
 /-! ## 1. The destination decoder — the `key : List Bool → ℕ` the seam is run at -/
 
-/-- The destination a convention-C frame names: bits 1, 3, 5 of the header are
-the address MSB-first (`cFrame`'s odd cycles). -/
-def cDestOf (f : List Bool) : Nat :=
-  (if f.getD 1 false then 4 else 0) + (if f.getD 3 false then 2 else 0)
-    + (if f.getD 5 false then 1 else 0)
-
-/-- ⭐ The address bound is FREE: a three-bit decode cannot exceed 7, so
-`composed_switch_of_seam_k3`'s `hlt` never reaches the caller. -/
-theorem cDestOf_lt_eight (f : List Bool) : cDestOf f < 8 := by
-  unfold cDestOf
-  split <;> split <;> split <;> decide
-
 /-- `cFrame` at full activity, unfolded to its six header cycles. -/
 theorem cFrame_true_expand (d : Nat) (p : List Bool) :
     cFrame true d p
@@ -43,12 +31,6 @@ theorem cDestOf_cFrame_bits (d : Nat) (p : List Bool) :
     cDestOf (cFrame true d p)
       = (if d.testBit 2 then 4 else 0) + (if d.testBit 1 then 2 else 0)
         + (if d.testBit 0 then 1 else 0) := rfl
-
-/-- ⭐ **THE DECODER INVERTS THE FRAME** below the fabricated width. -/
-theorem cDestOf_cFrame (d : Nat) (hd : d < 8) (p : List Bool) :
-    cDestOf (cFrame true d p) = d := by
-  rw [cDestOf_cFrame_bits]
-  interval_cases d <;> decide
 
 /-- ⭐ **THE ORDER THE TRANSPORT RUNS AT IS THE ELEMENT'S OWN ORDER** on
 full-load frames — this is what J1's `ElemSortsAt` obligation gets to consume. -/
@@ -182,13 +164,42 @@ theorem composed_switch_of_bnC_trace (st : List Bool) (tr : List (List Bool))
   composed_switch_of_bnC_frames st tr d hd hdi p
     (fun i => (bnCFrameAt_zero_col st tr i).trans (hin i)) h
 
-#audit_axioms cDestOf cDestOf_lt_eight cFrame_true_expand cDestOf_cFrame_bits
-#audit_axioms cDestOf_cFrame cDestOf_le_eq_cKeyLE
+#audit_axioms cFrame_true_expand cDestOf_cFrame_bits
+#audit_axioms cDestOf_le_eq_cKeyLE
 #audit_axioms cDestOf_adjudicated_bytes cDestOf_idle_is_zero
 #audit_axioms applyCompN_val runNetN_map_val
 #audit_axioms bnCOutKey bnCInKey bnC_seam_runNet
 #audit_axioms composed_switch_of_bnC_seam bnCInKey_of_frames
 #audit_axioms composed_switch_of_bnC_frames bnCFrameAt_zero_col
 #audit_axioms composed_switch_of_bnC_trace
+
+
+/-! ## ⭐⭐⭐ THE SEAM, CLOSED
+
+`elemSortsAt_all` (SeamJoinA) concludes EXACTLY the premise `composed_switch_of_bnC_trace`
+assumes — same predicate, same decoder, character for character — so the two
+compose with no glue. What remains are conditions on the DRIVEN TRACE and
+nothing about internal wires. -/
+
+/-- ⭐⭐⭐ **`hseam` DISCHARGED.** The composed switch's three-part conclusion,
+from the stimulus alone: the `rst` column is asserted once at cycle 0, stage 0's
+eight wires carry well-formed active frames with distinct destinations, and
+column `1+i` of the trace is the frame for destination `d i`. -/
+theorem composed_switch_of_bnC_driven
+    (st : List Bool) (tr : List (List Bool)) (n L : Nat)
+    (d : Fin 8 → Nat) (hd : ∀ i, d i < 8) (hdi : Function.Injective d)
+    (p : Fin 8 → List Bool)
+    (hrst : tr.map (fun i => i.getD 0 false) = true :: List.replicate n false)
+    (h0 : StageOK st tr L 0)
+    (hin : ∀ i : Fin 8,
+      tr.map (fun c => c.getD (1 + i.val) false) = cFrame true (d i) (p i)) :
+    (∀ m ≤ 3, Set.InjOn
+        (fun s => Banyan.line m s (extendIio 0 (bnCOutKey st tr) s)) (Set.Iio 8)) ∧
+      (∀ s < 8, Banyan.line 3 s (extendIio 0 (bnCOutKey st tr) s) = s) ∧
+      (∀ s, Banyan.line 0 s (extendIio 0 (bnCOutKey st tr) s)
+              = extendIio 0 (bnCOutKey st tr) s) :=
+  composed_switch_of_bnC_trace st tr d hd hdi p hin (elemSortsAt_all st tr n L hrst h0)
+
+#audit_axioms composed_switch_of_bnC_driven
 
 end SaltWorks.HDL
