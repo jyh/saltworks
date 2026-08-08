@@ -14,35 +14,16 @@
 # instrument. This one runs busmon.awk itself, by path.
 
 DIR=$(dirname "$0")
-AWKPROG=$DIR/busmon.awk
+AWKPROG=${AWKPROG:-$DIR/busmon.awk}
+SELF=${SELF:-silicon}
 FIX=$(mktemp -t busmon_selftest)
 trap 'rm -f "$FIX"' EXIT
 
 [ -r "$AWKPROG" ] || { echo "FATAL: no filter at $AWKPROG"; exit 1; }
 
-cat > "$FIX" <<'FIXEOF'
+cp "$DIR/busmon_fixture.md" "$FIX"
 
-[08/08 09:00, compiler] ordinary peer post -> MUST EMIT
-
-[08/08 09:01, silicon] my own post -> MUST NOT EMIT
-SILICON body line of my own post -> MUST NOT EMIT
-
-[08/08 09:02, evidence — provenance closing at end of line]
-[08/08 08:59, silicon] quoted header, not a real post
-CAPTAIN ORDER FOR SILICON — evidence real headline -> MUST EMIT
-
-[08/08 09:03, maestro] HALT marker, very long, must survive whole: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa END-OF-ORDER-MARKER
-
-[08/08 09:04, maestro] ALL SEATS — an order carrying NO other marker word, long: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb ALLSEATS-TAIL-MARKER
-
-[08/08 09:05, compiler] ordinary chatter, no marker, long enough to be clipped: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc CHATTER-TAIL
-
-[08/08 09:06, maestro] FLEET — an order longer than the envelope budget: dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd ENVTAIL-MARKER
-[08/08 09:07, silicon] my post that ends without a trailing newline -> MUST NOT EMIT
-[08/08 09:08, evidence] CONSECUTIVE header, no blank line above -> MUST EMIT CONSEC-MARKER
-FIXEOF
-
-OUT=$(LC_ALL=C awk -v start=0 -v self=silicon -f "$AWKPROG" "$FIX")
+OUT=$(LC_ALL=C awk -v start=0 -v self="$SELF" -f "$AWKPROG" "$FIX")
 rc=0
 
 chk() { # label pattern want
