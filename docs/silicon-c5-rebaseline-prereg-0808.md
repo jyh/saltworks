@@ -115,6 +115,39 @@ lesson): all three are `decide +kernel` on the COMMITTED post-contract ref, defa
 `maxRecDepth`, no knobs, built via `../saltbuild.sh`, judged by the
 `saltbuild EXIT=N` text and never through a pipe.
 
+### ⛔ AMENDED 15:3x, BEFORE THE GATE OPENED — the bar above was too weak
+
+**The fleet ratified math's trap at 15:29: *THE ERROR LIST IS A FLOOR, NOT A
+CENSUS — a `sorry` upstream launders false theorems into silence, and accidental
+truth hides falsity; the census is the PER-DECLARATION WALK.*** ⛔ **"Built via
+saltbuild, judged by the EXIT text" is an ERROR-LIST criterion, which that ruling
+just declared insufficient. My bar would have accepted a green build as evidence
+that M1–M3 were kernel-checked.**
+
+⇒ ✅ **AMENDED: each of M1–M3 is scored by its OWN declaration reporting, not by
+the build's silence** — build the `<path>.lean` form and grep the OUTPUT for
+`✓ <Namespace>.<name>`, which is emitted only if the declaration ELABORATED and
+passed the axiom whitelist. *A source grep proves TEXT EXISTS; a build line proves
+A PROOF EXISTS; a green build proves NEITHER about a named declaration.* **And use
+the path form, or the ✓ is a cache's recollection rather than the kernel's.**
+
+### ⚠️ AND THE ANCHORS ARE ABOUT TO BE RENAMED — cite them by STATEMENT
+
+**Maestro's 15:29 ruling has compiler restating these comparisons over explicit
+generator instances** (`gate_saving` becomes
+`(genSelect 10 4).gates.length − (genSelect 3 2).gates.length = 1154`).
+⇒ **`genSelect_three_gate_count` and its siblings may be restated or retired
+under new names, so a pre-registration that cites them BY NAME rots at the flip.**
+📌 **Each anchor is therefore pinned by its PROPOSITION, which survives renaming:**
+```
+M2 anchor   (genSelect 3 2).gates.length  = 291      <- whatever it ends up called
+M3 anchor   e1Cost (List.range 10) 4      = 11
+M1 anchor   e1Cost ruledCodes 2           = 0
+derived     (genSelect 10 4).gates.length = 291 + 1154 = 1445, from the ruling
+```
+*A name-anchored citation is blind to a proof transported to its subject — this
+seat's standing lesson, applied forward this time instead of after the fact.*
+
 **WHAT WOULD FALSIFY THE RE-BASELINE ITSELF** — *published so a clean run cannot
 be mistaken for a validated one:* any of M1–M3 disagreeing with its anchor;
 `as*` surviving the contract; or the ruled theorems turning out to be stated
