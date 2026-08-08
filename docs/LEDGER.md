@@ -2730,3 +2730,207 @@ committed). `docs/hdl-tools/audit_completeness.py` → **every theorem is on an
 * **The `sem_bitXor32` consolidation is available and not taken** (above).
 * **`bitOr32` / `bitNot32` are proved but unconsumed.** If they stay unreferenced
   they are candidates for deletion, not for further work.
+
+---
+
+## PCADD — the pc increment restored BY COMPOSITION, and the defect committed as a theorem
+**2026-08-07 · Opus executor · `SaltWorks/Stack/Program.lean` (extended)**
+
+### What landed
+
+**`sem_pcAdd` — the pc path computes `stepT`'s pc rule on all 2^129 inputs**, no
+`decide`, no sample, no `native_decide`:
+
+```lean
+theorem sem_pcAdd (pc rs1 rs2 off : Word) (isBEQ : Bool) :
+    sem pcAdd (pcAddEnv pc rs1 rs2 off isBEQ)
+      = (List.range 32).map
+          (fun k => (pc + (if isBEQ && (rs1 == rs2) then off else 4 : Word)).getLsbD k)
+```
+
+`pcAdd` is **260 gates**: one `⟨129, .const false⟩` (the adder's carry-in), the
+landed `pcNext` instantiated at 130 (99 gates), the landed `adder32` instantiated
+at `instNext pcNext 130 = 229` (160 gates). Host inputs `pc 0…31`,
+`rs1 32…63`, `rs2 64…95`, `off 96…127`, `isBEQ 128`. `ssa` structurally,
+`wf` via `Circ.wf_of_ssa` (the O(n²) `nodupB` is never walked).
+
+The two premises `PcNext.lean:23-28` gave for the addend-select —
+*"instantiation's semantics theorem is owed, not proved"* and the absence of an
+unconditional adder — are **both false as of today**, so the composition is the
+fix the design's own objection was blocking.
+
+⭐ **AND THIS IS THE THIRD `adder32` THE ASSEMBLY PLAN ASKS FOR**
+(`hdl-c4-core-assembly-plan-0807.md:168-171`), reached by instantiating the
+proved block rather than by standing up a new one. **`inc32` was not
+resurrected** — `Adder.lean:115` gives it 32 inputs and no addend port, so it
+cannot do the branch case, exactly as `docs/silicon-refute-pcpath-0807.md` §5
+concluded.
+
+⚠️ **THE REUSE IS AT THE DEFINITION LEVEL, NOT THE GATE LEVEL, AND THIS NODE
+MEASURES IT.** `instGates` maps every gate into the host, so the carry chain is
+duplicated in the netlist. **`pcAdd_gate_count = 260` = 1 + 99 + 160** — a
+kernel-checked confirmation of the `+160` that silicon's §6.1(b) derived from
+`instGates`/`instNext`, and of its `~12,081` corrected core total. *What is not
+duplicated is the SOURCE: one `adder32`, one `sem_adder32`, nothing that can
+drift — which is what `PcNext.lean:28` feared and is the whole saving.*
+
+📌 **And the shape silicon priced as "a bigger change than it looks" is reached
+without making it.** Its §3 put the alternative as *"`pcNext` needs the pc among
+its inputs … `pcIn` goes 97 → 129 and the block stops being 99 gates."*
+`pcAdd.nIn` **is** 129 — and `pcNext` is untouched, still 97 inputs, still 99
+gates. **The width moved to the composite; the block did not.**
+
+* **The three bridges**, the landed `pcField_is_pcNext_*` trio with the addition
+  now inside the circuit: `pcField_is_pcAdd_beq` / `_add` / `_undecodable`.
+  **Their right-hand sides no longer carry `s.pc + …`** — that is the whole
+  observable difference, and it is the difference the node exists for.
+* **The defect, as a theorem.** `addend_read_as_pc_is_four` — the addend on every
+  non-branch is `4` and *does not mention the pc*;
+  `addend_as_pc_is_wrong_unless_pc_zero` — so reading it as the next pc disagrees
+  with `stepT` at every pc but zero (⇒ **a smoke test from reset would not have
+  caught it**); `the_defect_and_the_fix` — 4 vs 0x1004 at one pc, side by side.
+  Same service `offset_six_does_not_sort` performs for the branch immediate.
+* **Two netlist witnesses** walked by the kernel rather than by the proof:
+  `pcAdd_netlist_advances_the_pc` (0x1000 → 0x1004),
+  `pcAdd_netlist_takes_the_branch` (0x1000 + 0x40).
+
+### ⭐ `inst_sem`'s actual hypothesis, and whether it was discharged — YES, twice
+
+The brief flagged this as the likely failure mode. Stated exactly:
+
+```
+instOK c σ off   :   c.ssa ∧ c.wf ∧ ∀ i < c.nIn, σ i < off
+hin              :   ∀ a < c.nIn, envN (σ a) = envC a
+```
+
+* **The third `instOK` clause is what makes the whole thing work**, and it is why
+  the host's inputs are laid out **pc first**: `σ₁ = (32 + ·)` is then a uniform
+  shift, every wire lands below `130`, and `pcAddEnv_shift` — the host read
+  through `σ₁` IS `pcEnvOf` — is four `if` branches. A layout interleaving the pc
+  with `pcNext`'s ports would have satisfied nothing.
+* **`hin` for `pcNext`**: `hin_pcNext`, three lines.
+* ⭐ **For the SECOND instance the hypothesis MOVES**, and this is the part worth
+  keeping. `inst_compose_sem` asks for agreement *after the first instance has
+  run*: `run env (instGates c₁ σ₁ off) (σ₂ a) = envC₂ a`. `hin_adder` splits it
+  three ways, one per port group, each paid by a different lemma — the `a` port
+  (the pc) by the **frame** (`inst_frame_below`: `pcNext`'s instance leaves nets
+  `0…31` alone), the `b` port by **`inst_sem` on `pcNext` itself**, the carry-in
+  by the frame again at net `129`, which is below `130` for exactly the `instOK`
+  reason. **No net-numbering collision and no width mismatch: the highest addend
+  wire is 228 and the adder sits at 229, one net above it.**
+
+### ⚠️ The `Net` trap, at its worst as predicted — and the fix was structural
+
+Instantiation renumbers nets, so every wire in `σ₂` is arithmetic in `pcOut`.
+**`addendNet : Nat → Nat` is the `Nat` mirror and `σ₂` is defined THROUGH it**;
+`instMap_pcOut` proves once that the mirror is the real wire, and every bound
+after that is plain `Nat`. *`pcOut` did this for `sem_pcNext`; this is the same
+lesson one level up.* It also bit in the small: `n ≠ pcAddZero` defeats `omega`
+because `pcAddZero` is an opaque `def` — omega parsed the hypothesis and not the
+goal, the exact tell `Compose.lean:206` records. Fixed with `Nat.ne_of_lt`, no
+`omega` at all.
+
+### ⛔ Control bar — TWO mutants the certificates accept
+
+The composite has two distinct defect surfaces, so there are two.
+
+* **Mutant A — one wire.** `adSigmaCut`: the adder's carry-in reads `pcNext`'s
+  TAKE flag (host net 194) instead of the constant-zero net 129. *The most
+  available error in this node: "which net is the zero?"* Still `ssa`, still 260
+  gates. **`pcAddCut_passes_the_certificate`: 36 driven points** — the
+  not-taken suite, i.e. `pcNext_not_beq_adds_four`'s coverage lifted to the
+  composite, the ratified behaviour on **99.80%** of the word space. The mutated
+  carry-in is `false` on every one of them. **`pcAddCut_fails_the_theorem`**
+  refutes it at one taken branch.
+* **Mutant B — the organ.** `pcAddCutB`: the same composite around the landed
+  `adder32Cut` (slice 16's carry-out `or` → `and`). ⭐ **This one survives BOTH
+  branch directions** — `pcAddCutB_passes_the_certificate` drives taken and
+  not-taken alike (18 points) and the mutation is visible only when a carry
+  crosses bit 16, which realistic pcs and short branch offsets never do.
+  Refuted at `0x0001FFFC + 4`.
+* **`pcAdd_passes_the_certificate`** — the same 36-point suite on the REAL
+  composite, so "the mutant passes" is distinguishable from "the suite is
+  malformed". **`sem_pcAdd_off_the_sample`** — the theorem reaches where neither
+  certificate does.
+
+### Attempt counts, against the split budget — content vs mechanics
+
+**Statements: 3 groups (budget 3–4, met)** — the composite plus its net-level
+lemma; the word bridge plus the three ISA bridges; the defect-as-a-theorem plus
+the two mutants. **Proofs: 2 scratch cycles (budget 2, met). Content changed in
+ZERO of them.** The decomposition — host layout pc-first, one constant-zero gate,
+`σ₁` a uniform shift, `σ₂` defined through a `Nat` mirror — was fixed before the
+first build and never revised. Both cycles were elaboration mechanics, each
+diagnosed from the error text:
+
+1. Three mechanical faults in one build. (a) `instMap_pcOut` needed a trailing
+   `rfl`. (b) The `Net`/opaque-`def` omega failure above. (c) ⭐ **the reusable
+   one: `(kernel) deterministic timeout` on the constant-gate peel.** Stating it
+   as a single `rfl` from `run E pcAdd.gates` to `run E₀ (G₁ ++ G₂)` puts a
+   **cons on the left and an append on the right**; the kernel's argument-wise
+   heuristic fails, it falls back to unfolding `run` on both sides, and it walks
+   the whole 259-gate list symbolically. **Rewriting the gate list first
+   (`pcAdd_gates_eq`, then `run_cons`) makes the two `run`s agree on their second
+   argument syntactically and the check is instant.** *Recorded because every
+   future `core` assembly step has this shape.*
+2. **`excessive memory consumption detected at 'interpreter'`, EXIT=134** — a
+   250-drive certificate (5 pcs × the 10 `pcCases` × the 5 `pcOffs`). Each drive
+   re-reduces `instGates` for both instances and then does 32 lookups down a
+   260-deep `upd` chain. Cut to 36 + 18 + 36 driven points; green in ~20 s.
+   **Measured budget for a composite this size: ~90 kernel-driven `sem` points
+   per file before the cap binds.**
+
+### Build + audit
+
+`saltbuild.sh SaltWorks.Stack.Program` → **EXIT=0, 8605 jobs**. **Job-count
+delta from PCNEXT's 8605: ZERO** — no module and no import was added; `C4.lean`
+already pulls `Compose.lean` into `Program.lean`'s closure, which is the reason
+this node needed no import at all.
+
+**65 new declarations, 576 lines.** All 65 are on `#audit_axioms` lists, and
+`#audit_axioms` **fails elaboration** on any axiom outside
+`[propext, Classical.choice, Quot.sound]` (and on any unknown name), so a green
+build is the assertion rather than a report. Independently re-checked with
+`#print axioms` in `ScratchMATHPCA.lean` — EXIT=0, exactly the three, on all 25
+headline results (deleted, not committed).
+`docs/hdl-tools/audit_completeness.py` → **every theorem is on an
+`#audit_axioms` list** (35 files, 404 theorems, up from 392).
+
+⚠️ **SHARED-TREE HAZARD, RECORDED BECAUSE IT NEARLY COST THIS NODE.** The first
+port of this block was written into `Stack/Program.lean` while the `aluSelect`
+executor's in-flight `AluSelectSemantics` section was also sitting uncommitted in
+the same working tree (that build read 8606 jobs). Both blocks were then wiped by
+a third party's checkout before either was committed. **The block survived only
+because it was kept in a scratch file outside the repo and the port was scripted
+rather than hand-edited** — the port is `git show HEAD:…` + one deterministic
+insertion, guarded by a `cmp` against `HEAD` so it refuses to run when a
+sibling's edits are present. *Recommended for every seat sharing this checkout.*
+
+### Left undetermined
+
+* ⛔ **`PcField` IS NOT CLOSED and this node does not claim it.** `PcField` is
+  about a whole `core`'s output bits `1024…1055`, and no `core` exists. What
+  landed is the block-level theorem plus the three bridges a `core` assembly
+  applies. **The debt is `core`, not the pc path** — and it is now the *only*
+  debt on the pc path.
+* **`pcNext` is unchanged.** Not one landed statement was weakened, restated or
+  repaired; `run_pcNext_addend` reads the addend back OUT of `sem_pcNext`
+  through `pcNext_outs_eq` rather than re-deriving anything.
+* **`pcAdd` is not wired into anything.** It is a `Circ` with a theorem; the
+  `core` that instantiates it is still owed, and `PcNext.lean`'s header still
+  says the addition is left to the assembly. *Correcting that prose is a
+  compiler-lane edit and was not mine to make.*
+* ⛔ **THE ASSEMBLY PLAN IS STILL STALE AND THIS NODE DOES NOT FIX IT.**
+  `docs/silicon-refute-pcpath-0807.md` §7 is unanswered: §4 of
+  `hdl-c4-core-assembly-plan-0807.md` still routes `pcNext`'s **addend** onto
+  the pc field (`:156`), still lists twelve organs with no pc adder, and `:183`
+  still instructs a builder to take `pcNext`'s low 32. **A builder following §4
+  builds the defect even though `pcAdd` now exists.** *That is HDL's edit; what
+  this node supplies is the block it should name and a kernel-checked gate count
+  for its totals.*
+* **`inc32` still has no semantics and is still unreferenced.** This node
+  confirms it should stay that way: the pc path goes through `adder32`.
+* **The carry-out is dropped.** `pcAdd.outs` is the 32 sum bits; `adC 32` is
+  live in the netlist and unread. Correct — the pc wraps — but it leaves **3
+  dead gates** in the top slice (`adG 31`, `adT 31`, and the carry-out `or`),
+  which `opt`'s dead-net elimination would remove and which nobody has run.

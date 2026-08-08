@@ -4135,6 +4135,565 @@ theorem pcField_is_pcNext_undecodable (s : St) (w : Word) (h : decode w = none) 
   rw [stepT_undecodable s w h, pcAddend_word, if_neg (by simp)]
   rfl
 
+/-! ## ⭐⭐ PCADD — THE PC INCREMENT, RESTORED BY COMPOSITION
+
+⛔ **THE DEFECT THIS SECTION EXISTS TO FIX, AND IT WAS REFUTED AT THE BYTES**
+(`cefd93e` / `625009b`). `pcNext` emits the **addend** and the take flag —
+`PcNext.lean:27` says so: *"Emitting the addend and leaving the addition to the
+assembly."* **The assembly is `core`, and `core` does not exist.** So on the plan
+as it stood nothing added, and reading `pcNext`'s output *as* the next pc sets
+`pc := 4` every cycle. **That is now a theorem, not a memo**
+(`addend_read_as_pc_is_four`, `addend_as_pc_is_wrong_unless_pc_zero`,
+`the_defect_and_the_fix`) — the same service `offset_six_does_not_sort` performs
+for the branch immediate. *A bug that is a theorem cannot be re-introduced
+quietly.*
+
+## ⭐ THE FIX IS COMPOSITION, AND THE DESIGN'S OWN OBJECTION HAS EXPIRED
+
+`PcNext.lean:23-28` gave the reason for the addend-select verbatim: *"The landed
+`adder32` would have to be instantiated to be reused here, and instantiation's
+semantics theorem is **owed, not proved**."* **Both premises are now false**:
+`inst_sem` is proved (`Compose.lean:397`) and `sem_adder32` holds
+unconditionally over all 2^64 operand pairs.
+
+⇒ ⭐ **THIS IS THE THIRD `adder32` THE ASSEMBLY PLAN ASKS FOR**
+(`hdl-c4-core-assembly-plan-0807.md:168-171`) — the same silicon, reached by
+instantiating the proved block instead of standing up a new one. **`inc32` is not
+it and was not resurrected**: `Adder.lean:115` gives it 32 inputs and no addend
+port, so it cannot do the branch case.
+
+⚠️ **AND THE REUSE IS AT THE DEFINITION LEVEL, NOT THE GATE LEVEL — measured,
+because the opposite reading moves a number.** `instGates` maps *every* gate into
+the host, so **the carry chain IS duplicated in the netlist**: `pcAdd` is 260
+gates and 160 of them are the adder instance. *`pcAdd_gate_count` is the kernel's
+confirmation of the `+160` that `docs/silicon-refute-pcpath-0807.md` §6.1(b)
+derived from `instGates`/`instNext`.* **What is not duplicated is the SOURCE:
+one `adder32`, one `sem_adder32`, no second copy that can drift — which is
+exactly what `PcNext.lean:28` feared, and it is the whole saving.**
+
+📌 **AND THE SHAPE SILICON PRICED AS "a bigger change than it looks" IS REACHED
+WITHOUT MAKING IT.** §3 of that refutation put the alternative as *"`pcNext`
+needs the pc among its inputs … `pcIn` goes 97 → 129 and the block stops being
+99 gates."* `pcAdd.nIn` **is** 129 — and `pcNext` is untouched, still 97 inputs,
+still 99 gates. *The width moved to the composite; the block did not.*
+
+```
+host inputs   pc 0…31   rs1 32…63   rs2 64…95   off 96…127   isBEQ 128
+net 129       ⟨const false⟩                    <- the adder's carry-in
+nets 130…228  instGates pcNext  σ₁ = (32 + ·)  <- 99 gates, the addend + take
+nets 229…388  instGates adder32 σ₂             <- 160 gates, a := pc, b := addend
+outs          the 32 sum nets, 230 + 5k
+```
+
+**260 gates. `ssa` structurally, `wf` through `Circ.wf_of_ssa`** — the quadratic
+`nodupB` is never walked.
+
+## ⭐ WHAT `inst_sem` ACTUALLY ASKS FOR, AND WHERE EACH CLAUSE WAS PAID
+
+*The brief flagged this as the likely failure mode, and it is the load-bearing
+part of the node. Both hypotheses were satisfiable; neither was free.*
+
+* **`instOK c σ off`** — `c.ssa`, `c.wf`, and ⭐ **`∀ i < c.nIn, σ i < off`**.
+  The third clause is what makes the frame argument available at all, and it is
+  why the host's inputs are laid out **pc first**: `σ₁ = (32 + ·)` is then a
+  uniform shift and every wire lands below `130`. *A layout that interleaved the
+  pc with `pcNext`'s ports would have satisfied nothing.*
+* **`hin : ∀ a < c.nIn, envN (σ a) = envC a`** — the host environment, read
+  through `σ`, agrees with what the block would see standalone. `hin_pcNext`
+  discharges it for `pcNext` (one shift, four `if` branches).
+* ⭐ **For the SECOND instance the hypothesis moves**: `inst_compose_sem` asks
+  for agreement **after the first instance has run** —
+  `run env (instGates c₁ σ₁ off) (σ₂ a) = envC₂ a`. `hin_adder` is that proof and
+  it splits three ways, one per port group: the `a` port (the pc) needs the
+  **frame** lemma — the `pcNext` instance must not have disturbed nets `0…31`;
+  the `b` port needs **`inst_sem` on `pcNext` itself** — the addend nets read what
+  `pcNext` computes; and the carry-in needs the frame again, at net `129`, which
+  is below `130` for exactly the `instOK` reason.
+
+⚠️ **THE `Net` TRAP WAS AT ITS WORST HERE, AS THE BRIEF PREDICTED, AND THE FIX
+WAS STRUCTURAL RATHER THAN TACTICAL.** Instantiation renumbers nets, so every
+wire in `σ₂` is an arithmetic expression in `pcOut`. **`addendNet : Nat → Nat`
+is the `Nat` mirror** — `σ₂` is defined *through it*, and `instMap_pcOut` proves
+once that the mirror is the real wire. Every bound below is then plain `Nat`
+arithmetic. *`pcOut` did the same job for `sem_pcNext`; this is that lesson
+applied one level up.*
+
+## ⛔ `PcField` IS NOT CLOSED BY THIS
+
+`PcField` is a statement about a whole `core`'s output bits `1024…1055`, and no
+`core` exists. What lands here is **the block-level theorem plus the three
+bridges a `core` assembly applies** — `pcField_is_pcAdd_beq` / `_add` /
+`_undecodable`, the landed `pcField_is_pcNext_*` trio with the addition now
+included, so the `s.pc + …` on their right-hand sides is gone. *The debt is
+`core`, not the pc path.*
+-/
+
+/-! ### The layout -/
+
+/-- Host inputs: `pc` on `0…31`, `rs1` on `32…63`, `rs2` on `64…95`,
+`off` on `96…127`, `isBEQ` at `128`. -/
+def pcAddIn : Nat := 129
+
+/-- The constant-zero net — the adder's carry-in. **The one gate this composite
+adds of its own**, and it is not decoration: `adder32.nIn = 65` and net `64` is a
+real carry-in port, so something below the instance has to hold `false`. -/
+def pcAddZero : Nat := 129
+
+/-- `pcNext`'s 97 inputs are the host's, shifted past the pc. *A uniform shift
+because the pc was put FIRST; see the section header.* -/
+def pcSigma (i : Nat) : Nat := 32 + i
+
+/-- Where the `pcNext` instance starts — one past the constant-zero gate. -/
+def pcAddOff : Nat := 130
+
+/-- ⭐ **The `Nat` mirror of the addend wire.** `pcAddendOut` is not contiguous
+(bit 2 costs two gates), so this is `pcOut` shifted by the instantiation — and
+`σ₂` is defined THROUGH it so that every bound below is `Nat` arithmetic. -/
+def addendNet (k : Nat) : Nat := 130 + (pcOut k - 97)
+
+/-- `adder32`'s wiring: `a` := the pc, `b` := `pcNext`'s addend, carry-in := 0. -/
+def adSigma (i : Nat) : Nat :=
+  if i < 32 then i else if i < 64 then addendNet (i - 32) else pcAddZero
+
+/-- ⭐⭐ **THE COMPOSITE.** `pcNext`'s addend, added to the pc by an instantiated
+`adder32`. -/
+def pcAdd : Circ :=
+  { nIn := pcAddIn
+    gates := ⟨pcAddZero, .const false⟩
+               :: (instGates pcNext pcSigma pcAddOff
+                     ++ instGates adder32 adSigma (instNext pcNext pcAddOff))
+    outs := (List.range 32).map
+              (fun k => instMap adder32 adSigma (instNext pcNext pcAddOff) (adS k)) }
+
+theorem pcAdd_ssa : pcAdd.ssa = true := by decide +kernel
+
+/-- Through `Circ.wf_of_ssa`, not through `decide` — `wf`'s `nodupB` is O(n²). -/
+theorem pcAdd_wf : pcAdd.wf = true := Circ.wf_of_ssa pcAdd_ssa
+
+/-- **260 gates: 1 + 99 + 160.** Measured, then pinned. -/
+theorem pcAdd_gate_count : pcAdd.gates.length = 260 := by decide +kernel
+
+theorem pcAdd_adder_off : instNext pcNext pcAddOff = 229 := by decide +kernel
+
+/-! ### The wiring facts -/
+
+/-- **The mirror IS the wire.** Every addend net is internal to `pcNext`
+(`pcOut k ≥ 163 > 97`), so `instMap` takes the shifted branch. -/
+theorem instMap_pcOut (k : Nat) : instMap pcNext pcSigma pcAddOff (pcOut k) = addendNet k := by
+  have h : ¬ (pcOut k < pcNext.nIn) := by
+    show ¬ (pcOut k < 97)
+    unfold pcOut
+    split_ifs <;> omega
+  rw [instMap_internal pcNext pcSigma pcAddOff (pcOut k) h]
+  rfl
+
+theorem addendNet_lt (k : Nat) (hk : k < 32) : addendNet k < 229 := by
+  unfold addendNet pcOut
+  split_ifs <;> omega
+
+theorem adSigma_lt (i : Nat) (hi : i < 65) : adSigma i < 229 := by
+  unfold adSigma pcAddZero
+  split_ifs with h1 h2
+  · omega
+  · exact addendNet_lt (i - 32) (by omega)
+  · omega
+
+theorem instOK_pcNext : instOK pcNext pcSigma pcAddOff := by
+  refine ⟨pcNext_ssa, pcNext_wf, ?_⟩
+  intro i hi
+  have hi' : i < 97 := hi
+  show (32 + i : Nat) < 130
+  omega
+
+/-- ⭐ **The offset is the hypothesis, not a convenience** — the highest addend
+wire is `228` and the adder sits at `229`, one net above it. -/
+theorem instOK_adder : instOK adder32 adSigma (instNext pcNext pcAddOff) := by
+  refine ⟨adder32_ssa, adder32_wf, ?_⟩
+  intro i hi
+  have hi' : i < 65 := hi
+  show adSigma i < instNext pcNext pcAddOff
+  rw [pcAdd_adder_off]
+  exact adSigma_lt i hi'
+
+theorem pcOut_mem_gates :
+    ((List.range 32).all fun k => (pcNext.gates.map Gate.out).contains (pcOut k)) = true := by
+  decide +kernel
+
+theorem adS_mem_gates :
+    ((List.range 32).all fun k => (adder32.gates.map Gate.out).contains (adS k)) = true := by
+  decide +kernel
+
+theorem pcOut_mem (k : Nat) (hk : k < 32) :
+    (pcNext.gates.map Gate.out).contains (pcOut k) = true :=
+  (List.all_eq_true.mp pcOut_mem_gates) k (List.mem_range.mpr hk)
+
+theorem adS_mem (k : Nat) (hk : k < 32) :
+    (adder32.gates.map Gate.out).contains (adS k) = true :=
+  (List.all_eq_true.mp adS_mem_gates) k (List.mem_range.mpr hk)
+
+/-! ### The environments -/
+
+/-- The host valuation. `pcAddEnv … 129` is `isBEQ`, which is exactly why the
+constant-zero gate exists rather than a convention. -/
+def pcAddEnv (pc rs1 rs2 off : Word) (isBEQ : Bool) : Env :=
+  fun i => if i < 32 then pc.getLsbD i
+           else if i < 64 then rs1.getLsbD (i - 32)
+           else if i < 96 then rs2.getLsbD (i - 64)
+           else if i < 128 then off.getLsbD (i - 96)
+           else isBEQ
+
+/-- …after the constant-zero gate has run. -/
+def pcAddEnv0 (pc rs1 rs2 off : Word) (isBEQ : Bool) : Env :=
+  upd (pcAddEnv pc rs1 rs2 off isBEQ) pcAddZero false
+
+theorem pcAddEnv_pc (pc rs1 rs2 off : Word) (isBEQ : Bool) (k : Nat) (h : k < 32) :
+    pcAddEnv pc rs1 rs2 off isBEQ k = pc.getLsbD k := by
+  show (if k < 32 then pc.getLsbD k else _) = _
+  rw [if_pos h]
+
+/-- ⭐ **The layout's whole payoff, in one lemma**: the host, shifted by 32, IS
+`pcNext`'s own driver. -/
+theorem pcAddEnv_shift (pc rs1 rs2 off : Word) (isBEQ : Bool) (a : Nat) (ha : a < 97) :
+    pcAddEnv pc rs1 rs2 off isBEQ (32 + a) = pcEnvOf rs1 rs2 off isBEQ a := by
+  show (if 32 + a < 32 then pc.getLsbD (32 + a)
+        else if 32 + a < 64 then rs1.getLsbD (32 + a - 32)
+        else if 32 + a < 96 then rs2.getLsbD (32 + a - 64)
+        else if 32 + a < 128 then off.getLsbD (32 + a - 96) else isBEQ)
+      = (if a < 32 then rs1.getLsbD a
+         else if a < 64 then rs2.getLsbD (a - 32)
+         else if a < 96 then off.getLsbD (a - 64) else isBEQ)
+  rw [if_neg (by omega)]
+  by_cases h1 : a < 32
+  · rw [if_pos (by omega), if_pos h1]; congr 1; omega
+  · rw [if_neg (by omega), if_neg h1]
+    by_cases h2 : a < 64
+    · rw [if_pos (by omega), if_pos h2]; congr 1; omega
+    · rw [if_neg (by omega), if_neg h2]
+      by_cases h3 : a < 96
+      · rw [if_pos (by omega), if_pos h3]; congr 1; omega
+      · rw [if_neg (by omega), if_neg h3]
+
+theorem pcAddEnv0_low (pc rs1 rs2 off : Word) (isBEQ : Bool) (n : Nat) (h : n < 129) :
+    pcAddEnv0 pc rs1 rs2 off isBEQ n = pcAddEnv pc rs1 rs2 off isBEQ n :=
+  upd_of_ne _ (Nat.ne_of_lt h)
+
+theorem pcAddEnv0_zero (pc rs1 rs2 off : Word) (isBEQ : Bool) :
+    pcAddEnv0 pc rs1 rs2 off isBEQ pcAddZero = false := upd_self _ _ _
+
+theorem adEnv_a (a b : Word) (cin : Bool) (k : Nat) (h : k < 32) :
+    adEnv a b cin k = a.getLsbD k := by
+  show (if k < 32 then a.getLsbD k else _) = _
+  rw [if_pos h]
+
+theorem adEnv_b (a b : Word) (cin : Bool) (k : Nat) (h1 : 32 ≤ k) (h2 : k < 64) :
+    adEnv a b cin k = b.getLsbD (k - 32) := by
+  show (if k < 32 then a.getLsbD k else if k < 64 then b.getLsbD (k - 32) else cin) = _
+  rw [if_neg (by omega), if_pos h2]
+
+theorem adEnv_cin (a b : Word) (cin : Bool) (k : Nat) (h : 64 ≤ k) :
+    adEnv a b cin k = cin := by
+  show (if k < 32 then a.getLsbD k else if k < 64 then b.getLsbD (k - 32) else cin) = _
+  rw [if_neg (by omega), if_neg (by omega)]
+
+/-! ### The addend, as a net-level fact
+
+*`sem_pcNext` is a statement about `sem` — the output LIST. The composition needs
+it one level lower, at the net the adder's `b` port is wired to. This reads it
+back out of the landed theorem rather than re-deriving it: nothing about
+`pcNext`'s internals is touched.* -/
+
+def pcAddend (rs1 rs2 off : Word) (isBEQ : Bool) : Word :=
+  if isBEQ && (rs1 == rs2) then off else 4
+
+theorem run_pcNext_addend (rs1 rs2 off : Word) (isBEQ : Bool) (k : Nat) (hk : k < 32) :
+    run (pcEnvOf rs1 rs2 off isBEQ) pcNext.gates (pcOut k)
+      = (pcAddend rs1 rs2 off isBEQ).getLsbD k := by
+  have h : (sem pcNext (pcEnvOf rs1 rs2 off isBEQ)).getD k false
+      = run (pcEnvOf rs1 rs2 off isBEQ) pcNext.gates (pcOut k) := by
+    show (pcNext.outs.map (run (pcEnvOf rs1 rs2 off isBEQ) pcNext.gates)).getD k false = _
+    rw [pcNext_outs_eq, List.map_append, List.map_map]
+    simp only [Function.comp_def, pcAddendOut_eq]
+    exact getD_of_range_append _ _ k hk
+  rw [← h, ← pcRun_eq, sem_pcNext, pcSpec_eq, getD_of_range_append _ _ k hk]
+  unfold pcAddend
+  by_cases hb : (isBEQ && (rs1 == rs2)) = true
+  · rw [if_pos hb, if_pos hb]
+  · rw [if_neg hb, if_neg hb]
+
+/-! ### ⭐ THE WIRING HYPOTHESES — what `inst_sem` charged, and the payment -/
+
+theorem hin_pcNext (pc rs1 rs2 off : Word) (isBEQ : Bool) :
+    ∀ a, a < pcNext.nIn →
+      pcAddEnv0 pc rs1 rs2 off isBEQ (pcSigma a) = pcEnvOf rs1 rs2 off isBEQ a := by
+  intro a ha
+  have ha' : a < 97 := ha
+  show pcAddEnv0 pc rs1 rs2 off isBEQ (32 + a) = _
+  rw [pcAddEnv0_low _ _ _ _ _ _ (by omega), pcAddEnv_shift _ _ _ _ _ a ha']
+
+/-- ⭐⭐ **THE JOIN.** The adder's three port groups, each paid by a different
+lemma: the `a` port by the FRAME (`pcNext`'s instance leaves nets `0…31` alone),
+the `b` port by `inst_sem` **on `pcNext`** (the addend nets read what `pcNext`
+computes), the carry-in by the frame again at net `129`. -/
+theorem hin_adder (pc rs1 rs2 off : Word) (isBEQ : Bool) :
+    ∀ a, a < adder32.nIn →
+      run (pcAddEnv0 pc rs1 rs2 off isBEQ) (instGates pcNext pcSigma pcAddOff) (adSigma a)
+        = adEnv pc (pcAddend rs1 rs2 off isBEQ) false a := by
+  intro a ha
+  have ha' : a < 65 := ha
+  by_cases h1 : a < 32
+  · have hs : adSigma a = a := by unfold adSigma; rw [if_pos h1]
+    rw [hs, inst_frame_below pcNext pcSigma pcAddOff pcNext_ssa _ a (by show (a : Nat) < 130; omega),
+      pcAddEnv0_low _ _ _ _ _ _ (by omega), pcAddEnv_pc _ _ _ _ _ _ h1, adEnv_a _ _ _ _ h1]
+  · by_cases h2 : a < 64
+    · have hs : adSigma a = instMap pcNext pcSigma pcAddOff (pcOut (a - 32)) := by
+        rw [instMap_pcOut]; unfold adSigma; rw [if_neg h1, if_pos h2]
+      rw [hs, inst_sem pcNext pcSigma pcAddOff _ (pcEnvOf rs1 rs2 off isBEQ) instOK_pcNext
+            (hin_pcNext pc rs1 rs2 off isBEQ) (pcOut (a - 32))
+            (Or.inr (pcOut_mem (a - 32) (by omega))),
+        run_pcNext_addend _ _ _ _ (a - 32) (by omega), adEnv_b _ _ _ _ (by omega) h2]
+    · have hs : adSigma a = pcAddZero := by unfold adSigma; rw [if_neg h1, if_neg h2]
+      rw [hs, inst_frame_below pcNext pcSigma pcAddOff pcNext_ssa _ pcAddZero
+            (by show (129 : Nat) < 130; omega),
+        pcAddEnv0_zero, adEnv_cin _ _ _ _ (by omega)]
+
+/-! ### The adder, per net
+
+*`sem_adder32` is about the output LIST; the composite needs the sum net. Both
+come from the same landed `run_adGates` invariant.* -/
+
+theorem run_adder32_adS (a b : Word) (k : Nat) (hk : k < 32) :
+    run (adEnv a b false) adder32.gates (adS k) = (a + b).getLsbD k := by
+  have hg : adder32.gates = adGates 32 := rfl
+  rw [hg, (run_adGates a b false 32 le_rfl).2.2 k hk, ← BitVec.getLsbD_add_add_bool hk a b false]
+  simp
+
+/-! ### ⭐⭐ THE COMPOSITE THEOREM -/
+
+theorem pcAdd_gates_eq : pcAdd.gates
+    = (⟨pcAddZero, .const false⟩ : Gate)
+        :: (instGates pcNext pcSigma pcAddOff
+              ++ instGates adder32 adSigma (instNext pcNext pcAddOff)) := rfl
+
+/-- Peeling the constant-zero gate.
+
+⚠️ **AND THE `rfl` HAS TO GO THROUGH `pcAdd_gates_eq` FIRST — MEASURED, NOT
+STYLE.** Stating this as one `rfl` from `run E pcAdd.gates` to
+`run E₀ (G₁ ++ G₂)` puts a cons on the left and an append on the right, the
+argument-wise heuristic fails, and both sides get unfolded: **`(kernel)
+deterministic timeout`**. Rewriting the gate list first makes the two `run`s
+agree on their second argument syntactically, and the check is instant. -/
+theorem run_pcAdd_peel (E : Env) :
+    run E pcAdd.gates
+      = run (upd E pcAddZero false)
+          (instGates pcNext pcSigma pcAddOff
+             ++ instGates adder32 adSigma (instNext pcNext pcAddOff)) := by
+  rw [pcAdd_gates_eq, run_cons]
+  rfl
+
+theorem run_pcAdd_out (pc rs1 rs2 off : Word) (isBEQ : Bool) (k : Nat) (hk : k < 32) :
+    run (pcAddEnv pc rs1 rs2 off isBEQ) pcAdd.gates
+        (instMap adder32 adSigma (instNext pcNext pcAddOff) (adS k))
+      = (pc + pcAddend rs1 rs2 off isBEQ).getLsbD k := by
+  rw [run_pcAdd_peel, show upd (pcAddEnv pc rs1 rs2 off isBEQ) pcAddZero false
+        = pcAddEnv0 pc rs1 rs2 off isBEQ from rfl,
+    inst_compose_sem pcNext adder32 pcSigma adSigma pcAddOff instOK_adder
+      (pcAddEnv0 pc rs1 rs2 off isBEQ) (adEnv pc (pcAddend rs1 rs2 off isBEQ) false)
+      (hin_adder pc rs1 rs2 off isBEQ) (adS k) (Or.inr (adS_mem k hk))]
+  exact run_adder32_adS pc (pcAddend rs1 rs2 off isBEQ) k hk
+
+/-- ⭐⭐ **THE PC PATH COMPUTES `stepT`'s PC RULE, ON ALL 2^129 INPUTS.** BEQ with
+`rs1 = rs2` gives `pc + bOffset imm`; everything else — including the
+NOP-advance on an undecodable word — gives `pc + 4`. *No `decide`, no
+`native_decide`, no sample.* -/
+theorem sem_pcAdd (pc rs1 rs2 off : Word) (isBEQ : Bool) :
+    sem pcAdd (pcAddEnv pc rs1 rs2 off isBEQ)
+      = (List.range 32).map
+          (fun k => (pc + (if isBEQ && (rs1 == rs2) then off else 4 : Word)).getLsbD k) := by
+  show (pcAdd.outs.map (run (pcAddEnv pc rs1 rs2 off isBEQ) pcAdd.gates)) = _
+  show (((List.range 32).map
+      (fun k => instMap adder32 adSigma (instNext pcNext pcAddOff) (adS k))).map
+        (run (pcAddEnv pc rs1 rs2 off isBEQ) pcAdd.gates)) = _
+  rw [List.map_map]
+  refine List.map_congr_left ?_
+  intro k hk
+  exact run_pcAdd_out pc rs1 rs2 off isBEQ k (List.mem_range.mp hk)
+
+/-! ### ⭐ THE ISA SIDE — the pc field, through the composite
+
+*The landed `pcField_is_pcNext_*` trio reads `s.pc + wordOf …` because the block
+emitted an addend. **These three have no `s.pc +` on the right**: the addition is
+inside the circuit now, which is the whole point of the node.* -/
+
+theorem pcAdd_word (pc rs1 rs2 off : Word) (isBEQ : Bool) :
+    wordOf (fun k => (sem pcAdd (pcAddEnv pc rs1 rs2 off isBEQ)).getD k false)
+      = pc + (if isBEQ && (rs1 == rs2) then off else 4) := by
+  rw [sem_pcAdd, wordOf_getD_map_range, wordOf_getLsbD_self]
+
+/-- ⭐⭐ **THE TAKEN/NOT-TAKEN BRANCH, THROUGH THE COMPOSITE.** -/
+theorem pcField_is_pcAdd_beq (s : St) (x y : Fin 32) (imm : BitVec 12) :
+    (stepT (SaltWorks.HDL.decQ (envWith s (encode (Instr.BEQ x y imm))))
+           (seenWord (envWith s (encode (Instr.BEQ x y imm))))).pc
+      = wordOf (fun k =>
+          (sem pcAdd (pcAddEnv s.pc (s.get x) (s.get y) (bOffset imm) true)).getD k false) := by
+  rw [decQ_envWith, seenWord_envWith, stepT_encode, pcAdd_word]
+  show (if s.get x = s.get y then { s with pc := s.pc + bOffset imm } else s.next).pc = _
+  by_cases h : s.get x = s.get y
+  · rw [if_pos h, if_pos (by simp [h])]
+  · rw [if_neg h, if_neg (by simp [h])]
+    rfl
+
+/-- ⭐ **AND EVERY NON-BRANCH ADVANCES BY FOUR** — the composite driven with
+`isBEQ = false`. -/
+theorem pcField_is_pcAdd_add (s : St) (rd x y : Fin 32) :
+    (stepT (SaltWorks.HDL.decQ (envWith s (encode (Instr.ADD rd x y))))
+           (seenWord (envWith s (encode (Instr.ADD rd x y))))).pc
+      = wordOf (fun k =>
+          (sem pcAdd (pcAddEnv s.pc (s.get x) (s.get y) 0 false)).getD k false) := by
+  rw [decQ_envWith, seenWord_envWith, stepT_encode, pcAdd_word, if_neg (by simp)]
+  show ((s.set rd (s.get x + s.get y)).next).pc = _
+  show (s.set rd (s.get x + s.get y)).pc + 4 = _
+  rw [set_pc]
+
+/-- ⭐ **INCLUDING THE UNDECODABLE WORDS** — `stepT`'s NOP-advance path, the
+measured 99.80%. -/
+theorem pcField_is_pcAdd_undecodable (s : St) (w : Word) (h : decode w = none) :
+    (stepT s w).pc
+      = wordOf (fun k => (sem pcAdd (pcAddEnv s.pc 0 0 0 false)).getD k false) := by
+  rw [stepT_undecodable s w h, pcAdd_word, if_neg (by simp)]
+  rfl
+
+/-! ### ⛔⛔ THE DEFECT, AS A THEOREM
+
+*The artifact that stops this being re-introduced. `offset_six_does_not_sort`
+did it for the branch immediate; this does it for the pc path.* -/
+
+/-- ⛔ **THE ADDEND IS `4` ON EVERY NON-BRANCH — AND IT DOES NOT MENTION THE
+PC.** So a `core` that took `pcNext`'s output *as* its next pc would set
+`pc := 4`, forever, whatever the pc was. -/
+theorem addend_read_as_pc_is_four (rs1 rs2 off : Word) :
+    wordOf (fun k => (SaltWorks.HDL.pcRun rs1 rs2 off false).getD k false) = 4 := by
+  rw [pcAddend_word, if_neg (by simp)]
+
+/-- ⛔⛔ **AND THAT IS WRONG AT EVERY PC BUT ZERO.** *The plan as it stood agreed
+with `stepT` only on the first cycle out of reset — which is exactly why a
+smoke-test from `pc = 0` would not have caught it.* -/
+theorem addend_as_pc_is_wrong_unless_pc_zero (s : St) (rd x y : Fin 32) (h : s.pc ≠ 0) :
+    wordOf (fun k => (SaltWorks.HDL.pcRun (s.get x) (s.get y) 0 false).getD k false)
+      ≠ (stepT (SaltWorks.HDL.decQ (envWith s (encode (Instr.ADD rd x y))))
+                (seenWord (envWith s (encode (Instr.ADD rd x y))))).pc := by
+  rw [addend_read_as_pc_is_four, pcField_is_pcAdd_add, pcAdd_word, if_neg (by simp)]
+  intro he
+  refine h (add_right_cancel (b := (4 : Word)) ?_)
+  rw [zero_add]
+  exact he.symm
+
+/-- ⛔ **THE DEFECT AND THE FIX, SIDE BY SIDE, AT ONE PC.** -/
+theorem the_defect_and_the_fix :
+    wordOf (fun k => (SaltWorks.HDL.pcRun 0 0 0 false).getD k false) = 4
+      ∧ wordOf (fun k => (sem pcAdd (pcAddEnv 0x1000 0 0 0 false)).getD k false) = 0x1004
+      ∧ (0x1004 : Word) ≠ 4 :=
+  ⟨addend_read_as_pc_is_four 0 0 0, by rw [pcAdd_word]; decide, by decide⟩
+
+/-- The 260-gate netlist, walked by the kernel — an independent check of
+`sem_pcAdd`, since it goes through the circuit rather than through the proof. -/
+theorem pcAdd_netlist_advances_the_pc :
+    sem pcAdd (pcAddEnv 0x1000 0 0 0 false)
+      = (List.range 32).map (fun k => (0x1004 : Word).getLsbD k) := by decide +kernel
+
+theorem pcAdd_netlist_takes_the_branch :
+    sem pcAdd (pcAddEnv 0x1000 7 7 0x40 true)
+      = (List.range 32).map (fun k => (0x1040 : Word).getLsbD k) := by decide +kernel
+
+/-! ### ⛔ CONTROL BAR — two mutants the certificates ACCEPT
+
+*The campaign standard set by `pcNextCut_passes_the_certificate` /
+`pcNextCut_fails_the_theorem`: a mutant a sampled suite cannot tell from the real
+thing, and the unconditional theorem can. Two here, because the composite has two
+distinct defect surfaces — **its own wiring**, and **the organ it embeds**.* -/
+
+/-- ⛔ **MUTANT A — ONE WIRE.** The adder's carry-in reads `pcNext`'s TAKE flag
+(host net `194`) instead of the constant-zero net `129`. *The most available
+error in this node: "which net is the zero?"* -/
+def adSigmaCut (i : Nat) : Nat := if i < 64 then adSigma i else 194
+
+def pcAddCut : Circ :=
+  { pcAdd with
+    gates := ⟨pcAddZero, .const false⟩
+               :: (instGates pcNext pcSigma pcAddOff
+                     ++ instGates adder32 adSigmaCut (instNext pcNext pcAddOff)) }
+
+theorem pcAddCut_ssa : pcAddCut.ssa = true := by decide +kernel
+theorem pcAddCut_gate_count : pcAddCut.gates.length = 260 := by decide +kernel
+
+def pcAddPcs : List Word := [0, 4, 0x1000]
+def pcAddPairs : List (Word × Word) := [(0, 0), (1, 1), (0, 1), (0x80000000, 0)]
+def pcAddOffs : List Word := [0, 8, 0x40]
+
+/-- The NOT-TAKEN suite — `pcNext_not_beq_adds_four`'s coverage, lifted to the
+composite: the ratified behaviour on **99.80%** of the word space. -/
+def pcAddOKCut : Bool :=
+  pcAddPcs.all fun p => pcAddPairs.all fun q => pcAddOffs.all fun o =>
+    sem pcAddCut (pcAddEnv p q.1 q.2 o false)
+      == (List.range 32).map (fun k => (p + 4).getLsbD k)
+
+/-- ⛔ **36 DRIVEN POINTS, AND THE MUTANT PASSES ALL OF THEM** — the carry-in it
+reads is `false` on every non-branch, so the wire is invisible on the path the
+core spends 99.80% of its life on. -/
+theorem pcAddCut_passes_the_certificate : pcAddOKCut = true := by decide +kernel
+
+/-- ⭐ **AND `sem_pcAdd` REFUSES IT** at one taken branch: `0x1000 + 0x40` comes
+back `0x1041`. -/
+theorem pcAddCut_fails_the_theorem :
+    sem pcAddCut (pcAddEnv 0x1000 7 7 0x40 true)
+      ≠ (List.range 32).map (fun k => ((0x1000 : Word) + 0x40).getLsbD k) := by decide +kernel
+
+/-- ⛔ **MUTANT B — THE ORGAN.** The same composite around the landed
+`adder32Cut` (slice 16's carry-out `or` → `and`). *This one survives BOTH branch
+directions: the certificate below drives taken and not-taken alike, and the
+mutation is only visible when a carry crosses bit 16 — which realistic pcs and
+short branch offsets never do.* -/
+def pcAddCutB : Circ :=
+  { pcAdd with
+    gates := ⟨pcAddZero, .const false⟩
+               :: (instGates pcNext pcSigma pcAddOff
+                     ++ instGates adder32Cut adSigma (instNext pcNext pcAddOff)) }
+
+theorem pcAddCutB_ssa : pcAddCutB.ssa = true := by decide +kernel
+
+def pcAddOKCutB : Bool :=
+  pcAddPcs.all fun p => pcAddOffs.all fun o => [false, true].all fun b =>
+    sem pcAddCutB (pcAddEnv p 7 7 o b)
+      == (List.range 32).map (fun k => (p + (if b then o else 4)).getLsbD k)
+
+/-- ⛔ **18 DRIVEN POINTS, BOTH BRANCH DIRECTIONS, AND THE MUTANT PASSES.** -/
+theorem pcAddCutB_passes_the_certificate : pcAddOKCutB = true := by decide +kernel
+
+/-- ⭐ **AND `sem_pcAdd` REFUSES IT** at a pc where the carry crosses bit 16:
+`0x0001FFFC + 4` should be `0x00020000` and the mutant loses the carry. -/
+theorem pcAddCutB_fails_the_theorem :
+    sem pcAddCutB (pcAddEnv 0x0001FFFC 0 0 0 false)
+      ≠ (List.range 32).map (fun k => ((0x0001FFFC : Word) + 4).getLsbD k) := by decide +kernel
+
+/-- ⭐ **THE CERTIFICATE IS NOT BROKEN — THE MUTANT IS INDISTINGUISHABLE FROM THE
+REAL COMPOSITE ON IT.** *Without this, "the mutant passes" and "the suite is
+malformed" look the same from outside.* -/
+def pcAddOK : Bool :=
+  pcAddPcs.all fun p => pcAddPairs.all fun q => pcAddOffs.all fun o =>
+    sem pcAdd (pcAddEnv p q.1 q.2 o false)
+      == (List.range 32).map (fun k => (p + 4).getLsbD k)
+
+theorem pcAdd_passes_the_certificate : pcAddOK = true := by decide +kernel
+
+/-- ⭐ **THE THEOREM REACHES WHERE NEITHER CERTIFICATE DOES.** -/
+theorem sem_pcAdd_off_the_sample :
+    (0x0001FFFC : Word) ∉ pcAddPcs
+      ∧ sem pcAdd (pcAddEnv 0x0001FFFC 0 0 0 false)
+          = (List.range 32).map (fun k => ((0x0001FFFC : Word) + 4).getLsbD k)
+      ∧ sem pcAdd (pcAddEnv 0x1000 7 7 0x40 true)
+          = (List.range 32).map (fun k => ((0x1000 : Word) + 0x40).getLsbD k) :=
+  ⟨by decide +kernel, by rw [sem_pcAdd]; norm_num, by rw [sem_pcAdd]; norm_num⟩
+
+
 end OrganSemantics
 
 /-! ## Axiom audit -/
@@ -4255,5 +4814,22 @@ open Salt.Tactic
 #audit_axioms sem_bitAnd32_off_the_sample
 #audit_axioms pcSpec_eq pcAddend_word
 #audit_axioms pcField_is_pcNext_beq pcField_is_pcNext_add pcField_is_pcNext_undecodable
+#audit_axioms pcAddIn pcAddZero pcSigma pcAddOff addendNet adSigma pcAdd
+#audit_axioms pcAdd_ssa pcAdd_wf pcAdd_gate_count pcAdd_adder_off
+#audit_axioms instMap_pcOut addendNet_lt adSigma_lt instOK_pcNext instOK_adder
+#audit_axioms pcOut_mem_gates adS_mem_gates pcOut_mem adS_mem
+#audit_axioms pcAddEnv pcAddEnv0 pcAddEnv_pc pcAddEnv_shift pcAddEnv0_low pcAddEnv0_zero
+#audit_axioms adEnv_a adEnv_b adEnv_cin pcAddend run_pcNext_addend
+#audit_axioms hin_pcNext hin_adder run_adder32_adS
+#audit_axioms pcAdd_gates_eq run_pcAdd_peel run_pcAdd_out sem_pcAdd
+#audit_axioms pcAdd_word pcField_is_pcAdd_beq pcField_is_pcAdd_add pcField_is_pcAdd_undecodable
+#audit_axioms addend_read_as_pc_is_four addend_as_pc_is_wrong_unless_pc_zero
+#audit_axioms the_defect_and_the_fix pcAdd_netlist_advances_the_pc pcAdd_netlist_takes_the_branch
+#audit_axioms adSigmaCut pcAddCut pcAddCut_ssa pcAddCut_gate_count
+#audit_axioms pcAddPcs pcAddPairs pcAddOffs pcAddOKCut
+#audit_axioms pcAddCut_passes_the_certificate pcAddCut_fails_the_theorem
+#audit_axioms pcAddCutB pcAddCutB_ssa pcAddOKCutB
+#audit_axioms pcAddCutB_passes_the_certificate pcAddCutB_fails_the_theorem
+#audit_axioms pcAddOK pcAdd_passes_the_certificate sem_pcAdd_off_the_sample
 
 end SaltWorks.Stack.Program
