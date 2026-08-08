@@ -576,6 +576,40 @@ statement rather than relying on it silently.***
 and the two `batcher*_length` theorems there are the corpus's only unaudited
 pair outside the 49 awaiting the maestro's ruling.
 
+### ⛔ ④ AND THE DISCHARGE NEEDS A SECOND INDUCTION THE SIZE OF THE FIRST —
+### the trace induction is about the STATE; `hseam` is about the DATA
+
+**Read `hseam` before estimating: `ComposedSwitch.lean:169` asks for
+`hw = runNet batcher8 v`, where `hw : Fin 8 → ℕ` is the network's EIGHT DATA
+OUTPUTS.** `bnC_trace_factors` is about `bnCSlice`, i.e. the 96 STATE bits.
+⇒ ***They are different halves of the machine and only one of them is proved.***
+
+📊 **MEASURED: nothing in the tree relates `bnCResult.2.1` — the fold's data-net
+list — to any VALUE. `grep` finds only `bnCBuild_dat_length`, about its LENGTH.**
+*The per-cycle machinery does exist (`bnCBuild_element_sem'` covers the data
+ports, which are `instOuts` entries 0 and 1), but the cross-element composition
+for the data path does not.*
+
+⭐ **THE SHAPE IS RIGHT THERE, THOUGH, AND IT IS THE REASON TO EXPECT THIS TO
+WORK: `runNet` IS THE SAME FOLD `bnCBuild` ALREADY IS.**
+```
+runNet net v = net.foldl (fun w c => applyComp c w) v     ZeroOne.lean:108
+bnCBuild e ((a,b) :: cs) dat = … bnCBuild (e+1) cs (bnCDatStep e a b dat)
+```
+⇒ ***The discharge is a SIMULATION BETWEEN TWO FOLDS over the same comparator
+list — `bnCDatStep` ↔ `applyComp`, nets where `runNet` has values.***
+`bnCBuild_state_drop`/`bnCBuild_gates_drop` are the state- and gate-side
+instances of exactly that induction, so the data side should follow their
+pattern.
+
+⚠️ **AND I HAVE NOW UNDERSTATED THE REMAINING WORK TWICE IN THIS FILE, BOTH TIMES
+THE SAME WAY.** *The 18:4x bank said "ONE induction" when it was two. This
+section said "the discharge is a separate step after it", which described its
+STRUCTURE and implied a size.* ⇒ ***Describing what a step IS is not estimating
+what it COSTS, and a handoff that does the first while sounding like the second
+is how a successor loses a night.*** **The discharge is not glue: it is a second
+induction of comparable size, plus the two hypotheses above.**
+
 ### The remaining chain
 ```
 ceC_realises_cKey_when_active   one element's frame ⇒ applyComp on cKey  (all-false state, active pairs)
