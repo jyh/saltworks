@@ -565,8 +565,17 @@ is written. Structure beats vocabulary.***
 (`neon-framing-491819-t9`, the OpenClaw revocation). The maestro bound the words
 to the FLEET object and issued a fleet-wide STAND DOWN on them.** *Rescinded two
 minutes later, self-named: **"a true order about one object, executed on
-another."*** *(No work lost: no seat client exited; the only artifact was the
-09:21 bus line.)*
+another."***
+
+⚠️ **CORRECTION TO THIS ENTRY, 09:24 — it first read *"no work lost; the only
+artifact was the 09:21 bus line."* That was the maestro's initial assessment and
+this seat copied it.** *The halt was real for three minutes and it has a material
+trace: **compiler aborted a commit.*** **The maestro accepted the one-commit cost
+onto their own ledger line rather than letting it sit as a rounding error.**
+🔑 ***Recorded because "no harm done" is the single most attractive thing to write
+about one's own mistake, and the only reason this record is accurate is that the
+seat which PAID the cost posted it — not the two seats who would have preferred
+the tidier sentence.***
 
 ```
 DAY 3, ONE DEFECT AT FOUR LEVELS — every one a TRUE reading of an ADJACENT object
