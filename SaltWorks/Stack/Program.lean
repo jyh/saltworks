@@ -5964,13 +5964,55 @@ theorem aluField_is_aluSelect_add (s : St) (rd x y : Fin 32) (hrd : rd ≠ 0)
 
 /-- ⛔ **ONE GATE MUTATED**, and it is mutated where `m = 3` and `m = 9` cannot
 look: bit 0's level-0 mux at position 2 reads leaf **4** on both of its inputs,
-so `sel = 5` returns operand 4. Still `ssa`, still 1,445 gates. -/
+so `sel = 5` returns operand 4. Still `ssa`, still 1,445 gates.
+
+⚠️ **The site is a POSITION, and the two guards below are what keep it one.** -/
 def asMuxCut (k j i : Nat) : List Gate :=
   if k == 0 && j == 0 && i == 2 then
     [⟨asBase k j i,     .and (asPrev k j (2 * i)) (asNot j)⟩,
      ⟨asBase k j i + 1, .and (asPrev k j (2 * i)) (asSel j)⟩,
      ⟨asOut k j i,      .or (asBase k j i) (asBase k j i + 1)⟩]
   else asMux k j i
+
+/-! ### ⭐ The site, guarded — the same tripwire discipline as `asPair_admissible`
+
+*The `if` above fires on the literal `i == 2` whether or not level 0 actually
+holds a third mux, and `aluSelectCut` only ever calls `asMuxCut` at
+`i < asLevelWidth j`. Those two facts are independent, and nothing in the
+definitions relates them. MEASURED: build the same circuit with the site moved
+to a position outside level 0's range and `aluSelectCut.gates == aluSelect.gates`
+comes back `true` — the "mutant" is the original, gate for gate.* -/
+
+/-- ⭐ **THE SITE IS INSIDE THE LEVEL, AND IT IS A MUTATION.** Read the
+positions level 0 actually has (`asLevelWidth 0 = asPad / 2`) and count the ones
+where `asMuxCut` differs from `asMux`: **exactly one**. This binds all three
+things that can drift apart — the `if`'s literal, the level's real width, and
+the mutation being a mutation — instead of restating any of them.
+
+⛔ **At the ruled pair (`rsSelBits = 2`, `rsPad = 4`) level 0 holds TWO muxes,
+the site is GONE, and this count is 0.** The `decide` reads the live constants
+through their definitions, so such a re-cut makes this FALSE and BREAKS THE
+BUILD. *Verified to bite: the identical statement with `asPad` swapped for
+`rsPad` is rejected — "Tactic `decide` proved that the proposition … is false".
+Do not repair a failure here by widening the range or dropping the count.* -/
+theorem asMuxCut_site_exists :
+    ((List.range (asLevelWidth 0)).filter (fun i => asMuxCut 0 0 i != asMux 0 0 i)).length = 1 := by
+  decide +kernel
+
+/-- ⭐ **AND THE REFUTING WITNESS EXISTS** — the half that says re-siting cannot
+rescue this control, so no one wastes an afternoon trying.
+
+*A level-0 site `i` rewires the `sel = 2i+1` leaf to the `sel = 2i` leaf, so it
+is visible at exactly `m ∈ {2i, 2i+1}`. MEASURED at `i = 0`: detected at
+`m ∈ {0, 1}` and nowhere else. So `aluSelectCut_fails_the_theorem`'s witness
+`m = 5` forces `i = 2` and no other position — `i = 0` was measured to give
+`asSelectsOKCut 5 = true`, which flips that theorem.* Which means the control
+needs operand 5 to be REAL and select value 5 to be REACHABLE:
+
+⛔ **both die at the ruled pair (`rsOps = 3`, `rsPad = 4`), so NO level-0 site
+inside a 2-bit select preserves this control.** Re-siting it is a re-witnessing
+— a statement change — and not a repair. -/
+theorem asMuxCut_witness_exists : 5 < asOps ∧ 5 < asPad := by decide +kernel
 
 def aluSelectCut : Circ :=
   { aluSelect with
@@ -8808,6 +8850,7 @@ open Salt.Tactic
 #audit_axioms asDrive asDrive_eq asDrive_sel asDrive_res
 #audit_axioms sem_aluSelect_drive aluSelect_word aluField_is_aluSelect_add
 #audit_axioms asMuxCut aluSelectCut asBit0Cut asSelectsOKCut
+#audit_axioms asMuxCut_site_exists asMuxCut_witness_exists
 #audit_axioms aluSelectCut_ssa aluSelectCut_gate_count aluSelectCut_is_one_gate
 #audit_axioms aluSelectCut_passes_the_certificate aluSelectCut_fails_the_theorem
 #audit_axioms asOffEnv asOffEnv_eq sem_aluSelect_off_the_sample
