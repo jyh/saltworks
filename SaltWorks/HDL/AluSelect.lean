@@ -222,12 +222,41 @@ def asBit0 (m sel : Nat) : Bool := (sem aluSelect (asOneHot m sel)).getD 0 false
 def asSelectsOK (m : Nat) : Bool :=
   (List.range 16).all fun sel => asBit0 m sel == decide (sel = m)
 
-/-- ⭐ **THE ALU SELECT SELECTS** — all sixteen select values, kernel-checked. -/
+/-- ⛔ **DO NOT GENERALISE THIS — `asSelectsOK m` IS FALSE FOR `10 ≤ m < 16`.**
+
+*Math found it (`ec21bb5`, 8/7 18:44) and it is checkable at `asPrev` above:
+level 0 reads `asZero` — the shared tie constant — for every `i ≥ asOps`. Slots
+10…15 are PADDING, so `asOneHot 10` paints a region the tree NEVER READS while
+the predicate still expects `sel = 10` to select it.* **The predicate holds
+exactly on `m < 10 ∨ 16 ≤ m`, and both points proved below sit inside the first
+range.**
+
+🔑 **SO THIS IS NOT THE USUAL "PROVES LESS THAN ITS NAME" — IT IS A PREDICATE
+THAT IS FALSE SOMEWHERE.** *The theorems below are TRUE. A seat generalising
+them to "the selector selects" would be asserting something FALSE, not merely
+something unproven.*
+
+✅ **SUPERSEDED — use `sem_aluSelect` (math, `SaltWorks/Stack/Program.lean`):
+unconditional over all 2^324 valuations and all 32 outputs, with
+`asSelectsOK_of_lt` recovering this predicate for the ten REAL operands as a
+corollary.** *What follows is a tripwire. That is the theorem.*
+
+⚠️ **AND THIS DOCSTRING USED TO READ "all sixteen select values,
+kernel-checked" — TRUE about `sel` and SILENT about the other three axes:** `m`
+(two points, not sixteen), the operand bits (one pattern out of 2^320), and the
+output (**BIT 0 ONLY** — `asBit0` is `getD 0`). *The exhaustive half was
+genuine, which is exactly what made the whole sentence persuasive.* -/
 theorem aluSelect_selects_on_sample : asSelectsOK 3 = true := by decide +kernel
 
 /-- …and again at the LAST real operand (`sra`, index 9), so the first is not an
-accident of where `3` sits in the tree, and the 9/10 padding boundary is
-exercised. -/
+accident of where `3` sits in the tree.
+
+⛔ **CORRECTED: this docstring used to claim "the 9/10 padding boundary is
+exercised". IT IS NOT.** *Index 9 is the last point at which the predicate is
+TRUE; the boundary is approached and never crossed, and crossing it is precisely
+where `asSelectsOK` becomes FALSE (`asSelectsOK 10 = false`).* **A sample that
+stops at the last good value is evidence about the good range, never about the
+edge — see the correction above.** -/
 theorem aluSelect_selects_on_sample_last : asSelectsOK 9 = true := by decide +kernel
 
 #audit_axioms asW
