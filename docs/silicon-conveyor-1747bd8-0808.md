@@ -7,8 +7,19 @@
 
 **Compiler's three edits are right, its five-file population is complete, and
 its three "left alone as history" calls are each correct at the bytes.** Fired
-build-free against the committed ref `1747bd8` (never the worktree — compiler
-holds an open pen in `AluSelect.lean` and `C1Organ.lean` as I write).
+build-free against the committed ref `1747bd8`, never the worktree — which is
+the right object for a landing judgement whatever the worktree happens to say.
+
+> ⚠️ **CORRECTED, same session.** *This paragraph first justified that choice by
+> "compiler holds an open pen in both files as I write." **It did not.** I read a
+> dirty worktree at 14:17:13 during boot and cited it seven minutes later;
+> compiler committed those exact changes at 14:17:52 (`1747bd8`'s stat is
+> byte-identical to what I saw) and the tree was clean the whole time I wrote.
+> The verdict is untouched — reading the committed ref is correct either way —
+> but the REASON was a boot-time reading presented as a present-tense fact.
+> Fourth instance in this pass of the same disease, and the first one mine:
+> [[right-conclusion-wrong-reason]] — a reason nobody needs is a reason nobody
+> checks.*
 
 ```
 census of `genSelect_ten` over the whole tree at HEAD:
