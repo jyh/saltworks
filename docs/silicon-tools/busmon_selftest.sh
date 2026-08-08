@@ -36,6 +36,8 @@ CAPTAIN ORDER FOR SILICON — evidence real headline -> MUST EMIT
 [08/08 09:04, maestro] ALL SEATS — an order carrying NO other marker word, long: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb ALLSEATS-TAIL-MARKER
 
 [08/08 09:05, compiler] ordinary chatter, no marker, long enough to be clipped: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc CHATTER-TAIL
+
+[08/08 09:06, maestro] FLEET — an order longer than the envelope budget: dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd ENVTAIL-MARKER
 FIXEOF
 
 OUT=$(LC_ALL=C awk -v start=0 -v self=silicon -f "$AWKPROG" "$FIX")
@@ -77,6 +79,13 @@ chk "ALL SEATS order emitted WHOLE"  'ALLSEATS-TAIL-MARKER'       1
 #    incomplete. A clipped line must never look like a complete one.
 chk "chatter clip is VISIBLE"        '\[+[0-9]* chars clipped\]'  1
 chk "chatter tail actually dropped"  'CHATTER-TAIL'               0
+
+# 8. REV 7. The envelope cuts at ~512 BYTES of delivered text, so an order past
+#    ~487 bytes of body is truncated DOWNSTREAM and this filter cannot see it.
+#    The notice is FRONT-loaded on purpose: a warning about a cut at byte 512
+#    cannot live after byte 512, or the envelope eats the notice too.
+chk "over-long order warns UP FRONT"  'PAST ENVELOPE'              1
+chk "warning precedes the body"       '\[!+[0-9]*B PAST ENVELOPE - READ THE BUS\] FLEET' 1
 
 [ "$rc" = 0 ] && echo "ALL PASS" || echo "FAILURES PRESENT — do not arm"
 exit $rc

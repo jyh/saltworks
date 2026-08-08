@@ -25,11 +25,30 @@
 #       ends with "[+N chars clipped]" -- a truncated order can no longer be
 #       mistaken for a complete routine line. Silence that means two things
 #       means nothing; this makes the two states distinguishable at a glance.
+# rev 7, 8/8 14:5x — THE ENVELOPE IS A SECOND CAP IN SERIES AND I MEASURED IT.
+# The notification envelope cuts at ~512 BYTES of delivered text (two specimens:
+# maestro 14:43 at 512, 14:16 at 516, spread = multi-byte em-dashes). Stamp is
+# ~25, so an order-bearing line has ~487 bytes of usable body.
+#
+#   ⇒ "a marker line is NEVER clipped" is TRUE OF THIS FILTER and FALSE OF THE
+#     DELIVERY. Past ~487 bytes I emit whole, believe I delivered whole, and did
+#     not. The filter cannot observe its own downstream loss.
+#
+# THE FIX MUST BE FRONT-LOADED, and that is the whole lesson of this rev: rev 6
+# appends "[+N chars clipped]" at the END, which works only because MY cap is
+# mine to place. A warning about a cut that happens at byte 512 cannot live after
+# byte 512 -- the envelope would eat the notice that the envelope ate something.
+# So an over-long ORDER is announced BEFORE its text, where no downstream cap can
+# reach it.
 function emit(st, body,   marked, n) {
   marked = (body ~ /FLEET|CAPTAIN|HALT|STAND DOWN|STAND-DOWN|ALL SEATS|ALL HANDS|SILICON|silicon/)
   # Asymmetric by design: a long routine line is noise, a truncated order is a
-  # missed order. Marker-bearing lines are NEVER clipped.
-  if (marked) print st "... " body
+  # missed order. Marker-bearing lines are NEVER clipped BY US.
+  if (marked) {
+    n = length(body) - 487
+    if (n > 0) print st " [!+" n "B PAST ENVELOPE - READ THE BUS] " body
+    else       print st "... " body
+  }
   else {
     n = length(body) - 200
     if (n > 0) print st "... " substr(body, 1, 200) " [+" n " chars clipped]"
