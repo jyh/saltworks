@@ -34,10 +34,30 @@ meaning what it has always meant.
 def Circ.portsNodup (c : Circ) : Prop := c.outs.Nodup
 ```
 - ACCEPTANCE BAR: new clause ①⁵ — every NEW block certifies
-  `portsNodup` (literal port lists: `by decide`; generated lists:
-  nodup lemmas — e.g. one general `genSelect_portsNodup (n b)` via
-  `genSelect_outs_eq` + `(List.range 32).map` with an injective map,
-  covering every pair at once).
+  `portsNodup`, route DIFFERENTIATED (math's ⑦(2) pass 13:42,
+  kernel-backed):
+  · generated lists: nodup lemmas — `genSelect_portsNodup (n b)
+    (hb : 0 < b)` via `List.nodup_range` (core, `n` IMPLICIT) +
+    `List.Nodup.map_on`. THE hb IS LOAD-BEARING: at b = 0 the port
+    map's factor `gsPad b − 1` is zero, the map goes CONSTANT, and
+    `¬ (genSelect 10 0).outs.Nodup` is kernel-proved — the drafted
+    hypothesis-free form was FALSE (four boundary controls pass:
+    b=0 is a boundary defect, not a broken definition). The (3,2)
+    re-cut inherits free — no `as*` constant enters the injectivity.
+  · literal port lists: `by decide` WITH THE PAIR NAMED. For the
+    concatenated-list majority (PcNext, PriorityEnc, BatcherNet,
+    BatcherNetC, Decoder, ReadTree) decide IS the right tool — the
+    two-lemma route measurably fails on PcNext (Nodup.append +
+    Disjoint + piecewise-if injectivity omega cannot do). A blanket
+    never-decide clause is BARRED.
+  · THE SILENT-REVERIFY TRAP (the clause's real reason): a
+    `decide +kernel` nodup cert under the irreducibility device with
+    NO numeral visible still elaborates — the kernel unfolds 10/4 —
+    so it READS parametric, is not, and can NEVER break at a re-cut
+    (nodup is true at every pair; no build signal ever). Any cert
+    advertising parametricity uses the lemma route; precedent:
+    `aluSelect_outs_eq` (`show` + `rw` through a named seed, zero
+    decide).
 - RETROFIT: opportunistic, organ-by-organ, cheapest-first (literal
   lists are one `decide` each); NOT a blocking wave. The corpus gap
   closes monotonically; the bar stops it growing.
