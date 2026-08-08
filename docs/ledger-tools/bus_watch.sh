@@ -218,7 +218,19 @@ while true; do
     # or on the first non-blank line beneath a header that carries no body text.
     # The DESCRIBES-vs-BINDS discriminator is unchanged and still rejects the
     # ruling that created the marker (maestro 13:49), measured after the fix.
-    LC_ALL=C awk -v start="$last" '
+    # ⛔⛔⛔⛔⛔ FOURTH DEFECT, AND IT IS THIS FILES FOUNDING BUG, RECOMMITTED BY ME
+    # WHILE READING THE COMMENT THAT DESCRIBES IT. The header of this file opens:
+    #   "attempt 1: no self-filter at all -> notified on my own posts"
+    # I added the FLEET pass reading "$BUS" DIRECTLY instead of the owner-filtered
+    # peer view, so it fired on my own 14:02 post within seconds of arming.
+    # 🔑 THE THREE EARLIER PASSES ARE OWNER-GATED BECAUSE THEY WERE BUILT THROUGH
+    # THAT PAIN; the new pass was built from the RULING, which says nothing about
+    # ownership, so it inherited none of the file s history. A new pass in an old
+    # file does not inherit the old passes lessons -- the lessons live in their
+    # code, not in the file s air.
+    # ⇒ Owner extracted here the same way the peer pass does it, and self-owned
+    # posts are skipped before any marker test.
+    LC_ALL=C awk -v start="$last" -v self="$SELF" '
       function marked(s,   h) {
         h = substr(s, 1, 40)
         gsub(/[^A-Za-z -]/, "", h)
@@ -227,6 +239,10 @@ while true; do
       }
       prevblank && /^\[[0-9]+\/[0-9]+ [0-9:]+, [A-Za-z]/ {
         hdr = $0; pend = 0
+        owner = $0
+        sub(/^\[[0-9]+\/[0-9]+ [0-9:]+, /, "", owner)
+        sub(/[^A-Za-z0-9_-].*$/, "", owner)
+        if (tolower(owner) == tolower(self)) { prevblank = 0; next }
         body = $0
         sub(/^\[[^]]*\][[:space:]]*/, "", body)
         if (NR > start) {
