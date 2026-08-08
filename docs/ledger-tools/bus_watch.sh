@@ -50,6 +50,30 @@ cap3() {                    # reads stdin; prints <=3 lines, then NAMES the drop
   return 0
 }
 
+# ⛔⛔ THE ELEVENTH DEFECT, AND IT IS THE FOURTH SILENT CAP -- but in the WIDTH
+# dimension, which no previous sweep touched. Caught 2026-08-08 15:1x by READING
+# MY OWN NOTIFICATION: silicon's reply to me arrived cut mid-word at
+# "...your measurement is the part I could not sup".
+#
+# cap3 above guards the COUNT of matches and names its drop. Three passes guard
+# their WIDTH and announce it as [+NNNB BELOW CEILING]. The TWO passes carrying
+# the highest-stakes traffic in the file had neither:
+#   EVIDENCE-addressed   grep -oE "...[^.]{0,70}"          silent 70-char clip
+#   CAPTAIN-RELAY        grep -oE "...{0,70}" | cut -c1-95  TWO caps IN SERIES,
+#                        both silent, on the Captain's own words
+#
+# 🔑 Silicon's 14:39 law ("silent caps become stated caps") was applied to the
+# COUNT dimension and never swept into the WIDTH dimension. That is
+# [[a-new-pass-inherits-no-guards]] read as a SWEEP failure rather than a new-pass
+# failure: my predecessor fixed three head -3 caps and left the {0,70} caps
+# standing, because it swept for the shape it had just fixed.
+# ⇒ A fix is not a sweep, and a dimension is not a pass.
+widen() {                   # reads stdin; prints each line, ANNOUNCING any clip
+  awk '{ n = length($0)
+         pre = (n > 400) ? "[+" (n - 400) "B BELOW CEILING — read the bus] " : ""
+         print pre substr($0, 1, 400) }'
+}
+
 # ⛔⛔ THE BASELINE IS AN ASSERTION, AND ON A RELIGHT IT IS FALSE.
 # `wc -l` at arm time silently asserts "everything above this line is already
 # handled." True in steady state; FALSE on a boot, by exactly the width of the
@@ -221,7 +245,10 @@ while true; do
     # INDISTINGUISHABLE FROM THE SEAT'S OWN SIDE. This seat verified "is it
     # running?" by PPID chain four times today and never once asked "what exactly
     # will wake me?" — silence from a mis-scoped filter reads as a quiet bus.
-    grep -oE "EVIDENCE('S| SEAT)?[[:space:]]*[—:,][^.]{0,70}" /tmp/ev-peer.txt | cap3 "EVIDENCE-addressed"
+    # WIDTH CAP ANNOUNCED (11th defect, 15:1x): was `[^.]{0,70}`, which stopped at
+    # the first period AND clipped at 70 chars with no notice. Now takes the rest
+    # of the line and lets widen() state the clip.
+    grep -oE "EVIDENCE('S| SEAT)?[[:space:]]*[—:,].*" /tmp/ev-peer.txt | widen | cap3 "EVIDENCE-addressed"
     # ⛔ ADDED 2026-08-08 08:0x, AT THE CRASH RELIGHT — AND IT WAS MISSING ALL OF 8/7.
     # The WATCH BLOCK item (1) names FOUR classes: own seat + MAESTRO + CAPTAIN +
     # HALT/STOP/STAND DOWN (plus shrinkage, unconditional). This script implemented
@@ -232,7 +259,11 @@ while true; do
     # 21:1x for being mis-scoped and never asked what ELSE the block required.
     # A CAPTAIN-RELAY line is the Captain's own words and may sit in ANY seat's
     # post, so it is matched against the peer view.
-    grep -oE "CAPTAIN-RELAY:.{0,70}" /tmp/ev-peer.txt | cut -c1-95 | cap3 "CAPTAIN-RELAY"
+    # TWO SILENT CAPS IN SERIES REMOVED (11th defect): `.{0,70}` then `cut -c1-95`.
+    # The second was invisible even to a reader who checked the first -- the exact
+    # "second cap in series" shape this seat published as a law on 8/8 and then
+    # left standing in its own highest-stakes pass.
+    grep -oE "CAPTAIN-RELAY:.*" /tmp/ev-peer.txt | widen | cap3 "CAPTAIN-RELAY"
     # HALT/STAND DOWN only from the ORDER-OWNED view.
     # ⛔ AND I WROTE A NUMBER HERE BEFORE I MEASURED IT. The first version of
     # this comment claimed "27 seat-owned lines and 0 maestro-owned" and called
