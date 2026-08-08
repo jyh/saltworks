@@ -50,10 +50,17 @@ git grep -h -E "^theorem [A-Za-z_0-9']+ ?:.*:=" "$REF" -- "$GLOB" \
 | grep -vE '^$' | sort | uniq -c | sort -rn | awk '$1>1 {$1=""; sub(/^ /,""); print}' \
 | while IFS= read -r prop; do
     [ -z "$prop" ] && continue
-    printf '\n=== %s\n' "$prop"
-    git grep -n -F "$prop" "$REF" -- "$GLOB" \
-    | sed "s|^$REF:||" | grep -E ':[0-9]+:theorem' \
-    | while IFS= read -r hit; do
+    hits=$(git grep -n -F "$prop" "$REF" -- "$GLOB" | sed "s|^$REF:||" | grep -E ':[0-9]+:theorem')
+    # ⭐ ONLY REPORT A PROPOSITION WITH >=2 INDEPENDENT PROOFS. A proposition that
+    # has been CURED -- one proof plus aliases -- must drop off the list, or the
+    # headline count never falls and a reader concludes the fix did nothing.
+    # MEASURED 8/8: after compiler aliased five of six pairs, the old output still
+    # listed all six. The classification column was right and the LIST was
+    # misleading, which is this file's own count-vs-classify law aimed at itself.
+    indep=$(printf '%s\n' "$hits" | grep -c ':= by' || true)
+    [ "${indep:-0}" -lt 2 ] && continue
+    printf '\n=== %s   [%s independent proofs]\n' "$prop" "$indep"
+    printf '%s\n' "$hits" | while IFS= read -r hit; do
         case "$hit" in
           *':= by'*)  kind='INDEPENDENT PROOF' ;;
           *':='*)     kind='alias / instantiation  <- the CURE, do not sweep' ;;
