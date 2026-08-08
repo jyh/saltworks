@@ -7,17 +7,29 @@
 ### FIREWALL: the source is Marcus & Hickey, ISSCC 1990, WPM 2.4
 ### (pp. 32-33, Fig. 6 p. 258) — WORDS-ONLY citations, never the
 ### figures (Google-licensed PDFs; standing 8/7 ruling).
+### Refutation state (8/8 12:4x): SILICON ④ pass COMPLETE — cell
+### timing REFUTED from prose and repaired (banyan cell = 4-clock);
+### 3 disclosures folded into §0. Method law from the pass: grep the
+### PROSE for a quantity before sending any pass to artwork — here
+### the prose had both delays, and the figures were never needed.
+### COMPILER + MATH ④ passes OPEN (fire at their seams).
 
 ## 0. THE DESIGN, AS THE PAPER STATES IT
 
 The 1990 chipset (1.2μm CMOS, 32 bit-serial channels at 170 Mb/s,
 113/114 transistors per cell) runs the packet layout
-`[validity][address MSB-first][payload]` through arrays of identical
-2×2 cells, **pipelined one bit per cell per clock** (16-bit delay
-across the Batcher chip, 20 across the banyan — Captain-confirmed
-8/8: per-stage skew is how a single leading validity bit stays fresh
-at every interior stage; contrast convention C, which buys the same
-freshness by repeating ACT in the frame).
+`[validity][address MSB-first][payload]` — the three-field frame is
+this doc's SYNTHESIS, marked derived at silicon's ④ pass: the paper's
+words are "most significant bit first" and "packet address-validity
+bit" — through arrays of identical 2×2 cells. The paper's pipelining
+sentence is a GATE-DEPTH constraint ("the cell logic is pipelined to
+allow no more than four logic gates between flip-flops"), not a
+per-cell-per-clock rate — the rate was this doc's inference and its
+banyan half is corrected below. Chip traversal, the paper's prose: a
+16-bit time delay across the Batcher chip, 20 across the banyan
+(Captain-confirmed 8/8: per-stage skew is how a single leading
+validity bit stays fresh at every interior stage; contrast convention
+C, which buys the same freshness by repeating ACT in the frame).
 
 **The banyan cell's trick**: after its state decision, it "moves the
 route bit for the subsequent Banyan cell directly after the packet
@@ -25,17 +37,24 @@ address-validity bit" — each stage consumes its route bit and CYCLES
 the address, so every cell reads the same position. iSOP is
 duration-specific: the pulse width tells cells how much to rotate.
 
-**Cell timing + control distribution (Captain-recalled 8/8, IIRC-
-flagged — refutation pass verifies against Fig 2/3 timing diagrams):
-the Batcher cell is a 1-clock delay, the banyan cell a 2-clock delay —
-and the asymmetry is the rotation's price: rewriting the header means
-buffering the consumed route bit for reinsertion behind the validity
-bit, one extra flop stage. The strobes are carried along by
-flip-flop chains, pipelined WITH the data so each stage's control
-arrives aligned with its skewed packet — 1988 distributes control by
-PIPELINE where convention C distributes it by DECODE from a global
-frame counter (spec §6). Chip-level check: 16-bit delay across the
-Batcher chip ≈ 1 cycle/column over ~15 bitonic columns.**
+**Cell timing — REFUTED-AND-REPAIRED at silicon's ④ pass (8/8
+12:43), from the paper's PROSE alone: the IIRC-flagged "1-clock
+Batcher / 2-clock banyan" does not survive the paper's own numbers.
+The chip-level check, now run on BOTH chips: Batcher ~15 bitonic
+columns × 1-clock cell = 15 ≈ the paper's 16 (one spare, plausibly
+I/O); banyan 5 stages × 2-clock = 10 vs the paper's 20 — off by 2×;
+5 × 4 = 20 EXACT. THE BANYAN CELL IS A 4-CLOCK DELAY. The MECHANISM
+survives while its magnitude dies: the asymmetry is still the
+rotation's price — buffering the consumed route bit for reinsertion
+behind the validity bit — and the paper's 20 > 16 confirms the
+direction; what died is "one extra flop stage": the numbers put the
+gap at three clocks, not one. Control distribution: the
+strobes-by-flip-flop-chain claim is Captain-recalled hardware memory
+with NO words support in the cited digest (silicon's ④ disclosure 3)
+— it stays as recollection, is NOT citable, and needs its own source
+before the flagship may state it; the 1988-pipelined vs
+2026-frame-counter CONTRAST survives on the architecture (spec §6),
+not on that sentence.**
 
 **The Captain's observation, which is the theorem**: the per-stage
 mutation composes to the IDENTITY. After k stages the address has made
@@ -55,8 +74,10 @@ distinct set of addresses" — B4's hypothesis, stated in 1990):
        abstract self-routing, reused, not re-proved]
   (ii) HEALING: the exit stream of packet i, de-skewed by the
        network's pipeline depth D (a per-design constant: 1 cycle per
-       Batcher column, 2 per banyan stage — the rotation's buffering
-       price), equals its entry stream — verbatim. The header healed:
+       Batcher column, 4 per banyan stage — fixed by the paper's own
+       prose delays, 16 and 20 bit-times chip-wide, at silicon's ④
+       pass; the rotation's buffering price), equals its entry stream
+       — verbatim. The header healed:
        rotate^k = id.
 
 ## 2. THE FIVE PIECES, WITH CLASSES
@@ -93,8 +114,8 @@ the rejected parallel-activity spec: WIRES (a second topology copy);
 convention C: HEADER LENGTH (2k cycles, the admitted 14%). Spec
 §2.1's resonance (stage s consumes bit k−1−s, forced by the delta
 topology) is the bridge fact — 1988's frame order and 2026's proof
-index agree because they must. Facade duplicate-constant caveat
-applies before citing (same prerequisite repair as ③ §4).
+index agree because they must. Facade caveat CLEARED 8/8
+(64f9311, same repair as ③ §4) — §2.1's resonance is citable directly.
 
 ## 4. WHAT THIS IS FOR
 
