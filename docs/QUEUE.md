@@ -146,6 +146,9 @@ OPEN ITEMS:
   richer; the 1990 paper states the full-circle theorem verbatim.
 - Endorsement + witness approval #2 (T1): his lanes, he monitors
   personally (his 8/7 disposition; no maestro re-surfacing).
+- Salt (7.3) (T1-flagged by the corpus per math 15:34): unblocked by
+  W5(S2)#1's landing, unclaimed, carries the CAPTAIN'S WORD — waits
+  for him; surface with the ③+④ session or his return.
 - The ③+④ deep design session: open at his pleasure — a
   collaboration, not an authorization; the blocks are five
   refutation rounds richer than when he last held them.
