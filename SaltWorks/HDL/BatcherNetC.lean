@@ -574,6 +574,53 @@ theorem bnCBuild_state_slice (cs : List (Nat × Nat)) (e a b : Nat) (dat : List 
   rw [bnCBuild_state_cons]
   interval_cases j <;> rfl
 
+/-! ### Step ③'s vocabulary, and the TARGET stated before it is attempted
+
+*Everything above is per-CYCLE. The trace induction lifts it across a frame's
+nine cycles, and its difficulty is not the arithmetic — it is that **element
+`e`'s input trace is not given a priori.** It is determined by the network's own
+evaluation, because element `e`'s inputs at cycle `t` are the previous layer's
+OUTPUTS at cycle `t`.*
+
+🔑 **SO THE HONEST TARGET IS A SIMULTANEOUS STATEMENT OVER ALL 24, not 24
+separate ones:**
+
+```
+runTrace batcherNetC st tr  =  the parallel composition of 24 `runTrace ceC`s,
+                               wired by bnComps, each on its own state slice
+```
+
+**What makes it TRUE is that the slices are disjoint and contiguous; what makes
+it WORK is that the per-cycle factorisation already handles the within-cycle
+DAG.** ⇒ ***The induction carries no new content about the element — only the
+bookkeeping that state threads per-slice.***
+
+⚠️ **THE DISCHARGE IS A SEPARATE STEP AFTER IT:** `ceC_realises_cKey_when_active`
+gives one element's whole-frame behaviour as `applyComp` on keys; folding that
+across `bnComps` and rewriting by `bnComps_eq_batcher8` gives `runNet batcher8`.
+*Both landed; neither written.* -/
+
+/-- Element `e`'s state slice, read out of the network's 96-bit state. -/
+def bnCSlice (st : List Bool) (e : Nat) : List Bool :=
+  [st.getD (4*e) false, st.getD (4*e+1) false,
+   st.getD (4*e+2) false, st.getD (4*e+3) false]
+
+theorem bnCSlice_length (st : List Bool) (e : Nat) : (bnCSlice st e).length = 4 := rfl
+
+/-- Distinct elements read disjoint positions — the fact that makes the trace
+induction per-element rather than global. -/
+theorem bnCSlice_disjoint (e f : Nat) (h : e ≠ f) :
+    ∀ i < 4, ∀ j < 4, 4*e + i ≠ 4*f + j := by
+  intro i hi j hj hEq
+  exact h (by omega)
+
+/-- Element `e`'s inputs at one cycle, as `ceC` would see them. -/
+def bnCElemIn (env : Env) (a b : Nat) (dat : List Net) : List Bool :=
+  [env bnCRst, env (dat.getD a 0), env (dat.getD b 0)]
+
+theorem bnCElemIn_length (env : Env) (a b : Nat) (dat : List Net) :
+    (bnCElemIn env a b dat).length = 3 := rfl
+
 /-! ## 🔗 LINK ② — THE DECOMPOSITION, and it is the expensive part
 
 **Silicon's 14:31 named three links for the composed theorem: ① the fabricated
@@ -729,6 +776,8 @@ for this element.*
 #audit_axioms bnCCore_outs_split
 #audit_axioms bnCBuild_state_cons
 #audit_axioms bnCBuild_state_slice
+#audit_axioms bnCSlice bnCSlice_length bnCSlice_disjoint
+#audit_axioms bnCElemIn bnCElemIn_length
 #audit_axioms bnCWires bnCElems bnCRst bnCDatIn bnCIn bnCState bnCCoreIn bnCOff
 #audit_axioms bnCSigma bnCBuild bnCResult bnCCore batcherNetC
 #audit_axioms bnC_comps_count
