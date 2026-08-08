@@ -74,4 +74,5 @@ import SaltWorks.Silicon.Equiv.ScenarioComplete
 import SaltWorks.HDL.PayloadL0
 import SaltWorks.HDL.PayloadL1
 import SaltWorks.HDL.PayloadL2
+import SaltWorks.HDL.PayloadL4
 import SaltWorks.Tactic.AuditAxioms
