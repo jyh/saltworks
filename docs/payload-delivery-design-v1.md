@@ -4,11 +4,11 @@
 ### from docs/silicon-frame-protocol-0806.md and confirmed in session.
 ### Refutation assignments at the end. Sequenced AFTER the c1/(3,2)
 ### dispatches — this block costs no seat time until those land.
-### Refutation state (8/8 12:2x): SILICON pass CLEAN (11 facts
-### line-verified; 2 disclosures + 1 cross-check folded into §1).
-### COMPILER clause 3 REFUTED → repaired (§4 port-axis trap; §5 ∀-P
-### rider); A/B executor out. MATH pass OPEN (fires at its phase-2
-### seam).
+### Refutation state (8/8 12:5x): SILICON pass CLEAN (folded into
+### §1). COMPILER clause 3 repaired (§4/§5); A/B executor out. MATH
+### pass COMPLETE — σ STRUCK from §2 (findings 1+2), L0 seed lemma
+### added to §3 (finding 3), act_stb probe OPEN in §5 (the flagged
+### suspicion, silicon's domain).
 
 ## 0. WHAT B4 DID AND DID NOT CERTIFY
 
@@ -46,15 +46,26 @@ the bracket is ours, not the spec's, and is no longer attributed to
 
 For the k=3 fabric under:
 - H1 (B4's regime, FORCED at k=3 by `seam_hyps_force_full_load`):
-  every line active, destinations distinct — hence a bijection σ,
-  the permutation B4's chain certifies;
+  every line active, destinations distinct — B4's own binders
+  (`hd : ∀ i, d i < 8`, `hdi : Function.Injective d`); no bijection
+  OBJECT is taken (σ STRUCK — first rider below);
 - H2 (init, spec §5's honest form): the frame begins at or after the
   second act_stb following power-up, from ANY initial register state;
 
 CLAIM: for every line i and every t ∈ [2k, 2k+P):
-  `output (σ (dest i)) t = input i t`.
+  `output (dest i) t = input i t`.
 
 Riders:
+- **σ STRUCK (math's ③ findings 1+2, resolved by the block's owner)**:
+  B4's conclusion certifies PROPERTIES — per-stage injectivity, a
+  stage-3 IDENTITY, a stage-0 value — not a permutation object; there
+  is no σ to read off, and constructing one was work the block never
+  priced. And none is needed: the stage-3 identity plus §0's own
+  "same output" make the named output the actual output, so the claim
+  speaks in `dest` directly. A σ parameter would be either dead
+  (= id — one binder stronger than needed, for no gain) or false
+  (≠ id contradicts §0). Any bijection object a successor campaign
+  needs (partial load) is constructed and priced there.
 - **Header window excluded by design**: output cycles [0, 2k) are
   don't-care (§4); the certificate says NOTHING about them. A clause
   claiming them would be false and the spec forbids reading them.
@@ -68,8 +79,16 @@ Riders:
   needed per-stage skew accounting; convention C does not — record the
   contrast in the heritage block, not here.
 
-## 3. THE DECOMPOSITION — three lemmas, two of one shape
+## 3. THE DECOMPOSITION — four lemmas (L0 added at math's ③ pass)
 
+- **L0 (init-independence — the induction's SEED; math's ③ finding
+  3)**: within a well-phased frame, every control latch value from its
+  strobe cycle onward is a function of the frame's own header bits,
+  from ANY initial register state. The datapath is combinational and
+  carries no state (§4), so the control latches are the ONLY init
+  surface — and every one is strobed inside [0, 2k). B-class,
+  element-level, L2's genre. This grounds H2's "any initial state"
+  half — previously assumed, now named and priced.
 - **L1 (Batcher element, ceC/bnC)**: after its decide (first differing
   bit inside the header — guaranteed under H1 since distinct
   destinations differ inside [0, 2k)), the compare-exchange is a
@@ -81,8 +100,10 @@ Riders:
   a static 2-permutation for the rest of the frame. "A locked element
   is a wire."
 - **L3 (composition)**: by cycle 2k every element is static, so the
-  fabric from 2k on IS the fixed permutation σ of B4's conclusion;
-  the claim follows by composing L1/L2 transparency along σ's paths.
+  fabric from 2k on realizes the routing i ↦ dest i that B4's chain
+  certifies (stage-3 identity: the named output IS the actual output);
+  the claim follows by composing L1/L2 transparency along those
+  static paths.
   No offsets (combinational). The trace-induction style is B4's own
   (the hseam discharge); the hypotheses are B4's driven-trace
   conditions extended over the full 14-cycle frame.
@@ -127,6 +148,15 @@ Riders:
   applying — the generalized statement must carry port coverage
   explicitly or it inherits the index-wise blindness the repaired §4
   trap names.
+
+- **OPEN PROBE (math's ③ flagged suspicion; cheap; fires before L0
+  is priced)**: does act_stb reset/align the frame counter? If YES,
+  first-act_stb frames are already well-phased and H2 STRENGTHENS to
+  "at or after the FIRST act_stb" — a strictly stronger theorem; if
+  the counter free-runs, the second-act_stb clause is load-bearing
+  and stays. Spec/RTL question — silicon's domain, queued behind its
+  ④ pass. H2 stays spec-quoted (:180-183) either way until answered;
+  the clause is never weakened, only possibly strengthened.
 
 ## 6. REFUTATION ASSIGNMENTS (draft-until-refuted)
 
