@@ -320,16 +320,44 @@ flattening that would be the exact over-claim this bar exists to prevent.**
 ```
 (a) AWAY declaration    ✅ STRONG — the Captain's OWN WORDS, quoted with clock:
                            "you have the helm", 12:14, relayed by the maestro
-(b) RETURN declaration  ⚠️ WEAKER — ATTESTED, not quoted: the maestro reports
-                           "the Captain is back at the terminal", 13:25.
-                           NOT his own words. The window's end is therefore
-                           attested-to-the-minute, not quoted-to-the-minute.
-(c) landings not the      ✅ STRONG — 12 commits in the window, of which
-    seat measuring itself     8 ARE OTHER SEATS'. This seat's 4 are EXCLUDED
-                           by construction (docs/EVIDENCE-*, ledger-tools,
-                           measurement-*): a charter cannot count itself as
-                           evidence for the claim it measures.
+(b) RETURN declaration  ✅ STRONG — UPGRADED 13:27 from attested to QUOTED:
+                           "good afternoon Sancho, let's discuss the scheduling.
+                            I'm wondering about the causes of seats becoming idle"
+                           — his own words at the terminal, ~13:24
+(c) landings not the      ✅ STRONG — 8 OTHER-SEAT commits inside. This seat's
+    seat measuring itself     own are EXCLUDED by construction (docs/EVIDENCE-*,
+                           ledger-tools, measurement-*): a charter cannot count
+                           itself as evidence for the claim it measures.
 ```
+
+## ⛔ AND THE SAME POST THAT UPGRADED (b) SHORTENED THE WINDOW BY 13 MINUTES
+
+**The maestro disclosed a Captain intervention *inside* the window — his own
+hand, ~13:12: *"compiler did not get the /clear"*, acted on at 13:13–13:14.**
+*It was offered as the window's "strongest possible specimen — the fleet worked
+away-mode, and the one defect that needed human eyes got them anyway."*
+
+⛔ ***THAT IS THE GENEROUS READING AND I AM NOT TAKING IT. A category-4 window is
+defined by the human being AWAY. A human who catches a defect at 13:12 was not
+away at 13:12.*** **The window is therefore SHORTER than recorded, not stronger:**
+
+```
+AS FIRST RECORDED   12:14 → 13:25    1 h 11 m
+CORRECTED           12:14 → 13:12       58 m   ⬅ ends at the intervention
+                    13:12 → 13:25 is HUMAN-PRESENT and leaves the window
+```
+
+⭐ **AND THE EVIDENCE SURVIVES THE CUT INTACT — measured, not hoped:** *all
+**8** other-seat landings fall before 13:12* (`eebad07` 12:18 · `625b18d` 12:27 ·
+`8fe9c08` 12:31 · `b5943f0` 12:45 · `6b8dc71` 12:57 · `d71a59f` 13:00 ·
+`cdb67a0` 13:06 · `bdb75f2` 13:07). ⇒ ***The window loses thirteen minutes and
+ZERO evidence.***
+
+🔑 ***THE METHOD NOTE, because this is the case the bar was built for: the
+upgrade and the shortening arrived in ONE post, from the party the window
+flatters, with the shortening framed as a strengthening. Taking the upgrade and
+declining the frame is the whole discipline — and the arithmetic came out better
+for having declined it, which is not why one declines.***
 
 **THE EIGHT, named so the count is checkable rather than believable:** *clause-3
 refutation fold · silicon's clean ③ · the honesty-device `decide +kernel`
