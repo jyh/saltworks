@@ -5736,6 +5736,25 @@ theorem gsSelOf_lt_pad (n b : Nat) (F : Env) : gsSelOf n b F < 2 ^ b := by
       split_ifs <;> omega
   exact this b
 
+/-! ### ⭐ The guard, applied to the live pair
+
+`genSelect_sources_reachable` is a lemma *about* admissibility; the two theorems
+below make it admissibility *enforced*. Both are stated against the named
+constants of `SaltWorks.HDL.AluSelect`, so a re-cut that breaks either one breaks
+the BUILD rather than passing silently. -/
+
+/-- ⭐ **ADMISSIBILITY, ENFORCED.** The live pair is `(asOps, asSelBits)`; if it is ever
+re-cut to an inadmissible pair (n > 2^b) the `by decide` fails and the BUILD BREAKS.
+That failure is the entire point of this theorem. -/
+theorem asPair_admissible :
+    ∀ j, j < asOps → ∃ E : Env, gsSelOf asOps asSelBits E = j :=
+  genSelect_sources_reachable asOps asSelBits (by decide)
+
+/-- ⭐ **THE PAD TRACKS THE WIDTH.** `asPad` and `asSelBits` are separate definitions;
+nothing currently forces them to agree, so a re-cut that changes one and not the other
+is silent. This makes it loud. -/
+theorem asPad_eq_two_pow : asPad = 2 ^ asSelBits := by decide
+
 #audit_axioms gsWidth_top gsWidth_of_le gsLevelWidth_two
 #audit_axioms gsBelow_zero gsBelow_succ gsBelow_of_le gsBelow_top
 #audit_axioms gsB gsBase_eq gsOut_eq gsB_step gsB_zero_le gsB_bit gsB_bit_mono gsB00
@@ -5747,6 +5766,7 @@ theorem gsSelOf_lt_pad (n b : Nat) (F : Env) : gsSelOf n b F < 2 ^ b := by
 #audit_axioms gsPrev_zero_val run_gsLevels run_gsBody run_gsPre
 #audit_axioms genSelect_outs_eq sem_genSelect
 #audit_axioms gsSelUpTo_testBit genSelect_sources_reachable gsSelOf_lt_pad
+#audit_axioms asPair_admissible asPad_eq_two_pow
 
 /-! ## ⭐⭐ THE THEOREM -/
 
