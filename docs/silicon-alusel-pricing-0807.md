@@ -54,6 +54,25 @@ The kernel is a different method, which is why math found this and I could not.*
 32-bit 2:1 mux at 97 — **the generator is one gate worse than a hand-built mux at
 `n = 2`, and only there.** *The block-identity claim stands; the exactness does not.*
 
+### ⚠️ SECOND ANNOTATION (22:0x) — THE `n = 2` ROW ABOVE READS AS "97 WAS WRONG". IT WAS NOT.
+**Compiler kept BOTH rows in the plan and math supplied the deciding fact from its
+executor's worktree; both were right and my one-line "97 → 98" hid it.**
+```
+ 97   a BESPOKE 32-bit 2:1 mux        UNAFFECTED — the bank's basis was correct
+                                       …and it OWES an organ proof
+ 98   genSelect 2 1                    …and it HAS one, inherited from the
+                                       parametrised generator
+```
+⭐ ***THE CHOICE WAS NEVER "97 OR 98". IT IS "97 GATES AND A PROOF YOU OWE" VERSUS
+"98 GATES AND A PROOF YOU HAVE" — the extra gate IS THE PRICE OF THE FREE
+THEOREM.*** **So what moved is the REFERENT, not the row.** *`§3.5` should NOT be
+edited to 98 where it prices building a bespoke mux.*
+🔑 **And my error here is the mirror of §0's:** *there I said a finding fixed at
+its instance leaves the pattern behind; **here the correction TRAVELLED and the
+distinction did not travel with it** — I drew it in the same post and deleted it
+one line later in the tidy-up.* ***A correction has two failure modes: failing to
+travel, and travelling without what made it correct.***
+
 ✅ **VALIDATED AT TWO INDEPENDENT POINTS BEFORE BEING USED —** *the formula was
 not trusted on its own:*
 * `n = 10` → `32×15×3 + 4 + 1` = **1,445**, matching `hdl-c4-core-assembly-plan-0807.md:64`
