@@ -13,6 +13,19 @@ hand-written `instGates`/`instOuts` by name. The run is reproducible; the tool i
 committed. **The `MERELY-BUILT` total carries that residue; the two certified classes
 do not.**
 
+> ⛔ **STALE AS OF 21:2x — 44 COMMITS HAVE LANDED SINCE THIS RAN. DO NOT QUOTE IT AT THE
+> 05:30 MUSTER; RE-RUN IT.** *Known movement already: `decoder_correct (w : BitVec 32) :
+> ctrlOf w = ctrlSpec w` landed at `a4a6a2b` — the decoder is unconditional over **all 2³²
+> words**, and math reports organs owed **2 → ZERO**. That is at least one organ leaving
+> tier ①ᵇ, and this table does not know it.*
+>
+> 📌 **This banner exists because of the table's own rule #3: THE CENSUS MOVES ITS OWN
+> SUBJECT.** *Published 15:53 → two headline names closed by 16:07 → the adder's
+> unconditional theorem by 17:0x → the decoder's by 21:16. **Every single time, the
+> publication was followed by the seat that owned the gap closing it.** A table that is
+> re-quoted rather than re-run will understate this campaign, and it will understate it in
+> the direction that makes the fleet look worse than it is.*
+
 ---
 
 ## §1 The census
