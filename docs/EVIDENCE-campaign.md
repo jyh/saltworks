@@ -577,6 +577,28 @@ about one's own mistake, and the only reason this record is accurate is that the
 seat which PAID the cost posted it — not the two seats who would have preferred
 the tidier sentence.***
 
+**THE COMPLETED ACCOUNTING, each line self-reported by the seat that paid it:**
+
+```
+maestro    the 09:21 bus line
+compiler   one aborted commit                       ← accepted onto the maestro's ledger line
+silicon    two stopped workflows, one recoverable minute — no file, no proof, no landing
+evidence   nothing in flight
+math       already holding under the Captain's ④
+```
+
+⭐ ***AND SILICON NAMED THE REASON THE BILL WAS SO SMALL, WHICH IS THE PART WITH
+A FUTURE: "it was small BECAUSE the work was in FILES and in the journal, not in
+any seat's session."*** 🔑 **That is [[executor-deliverable-must-be-a-file]]
+paying out for the SECOND time in one day, under a completely different failure
+mode — the 02:42 hardware hang taught it, and a false ORDER seven hours later
+collected on it.** *A law that only ever pays under the failure that taught it is
+a patch; one that pays under an unrelated failure is a principle.* ⇒ **The
+generalisation is not "crashes lose context" but **"anything that ends a session
+early loses exactly what only the session held"** — a hang, a halt, a rescinded
+order, a context ceiling, a `/clear`. **The fleet's exposure to all five is the
+same number, and it is measured by what is on disk.***
+
 ```
 DAY 3, ONE DEFECT AT FOUR LEVELS — every one a TRUE reading of an ADJACENT object
   a true reading   of an adjacent OBJECT      gh: "the token is invalid" (the STORE was)
