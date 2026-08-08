@@ -5713,9 +5713,8 @@ nets — so no operation of `genSelect n b` is silently unreachable. The
 hypothesis is load-bearing: without it the statement is FALSE (take `n = 5`,
 `b = 2`, `j = 4`, where `gsSelOf 5 2 E < 4` for every `E` by
 `gsSelOf_lt_pad`). -/
-theorem genSelect_sources_reachable (n b : Nat) (hb : 0 < b) (hn : n ≤ 2 ^ b) :
+theorem genSelect_sources_reachable (n b : Nat) (hn : n ≤ 2 ^ b) :
     ∀ j, j < n → ∃ E : Env, gsSelOf n b E = j := by
-  have _hb : 0 < b := hb
   intro j hj
   refine ⟨fun x => Nat.testBit j (x - n * 32), ?_⟩
   show gsSelUpTo n b (fun x => Nat.testBit j (x - n * 32)) b = j
