@@ -21,6 +21,36 @@ active frames with pairwise-distinct destinations, and column `1+i` of the
 stimulus being the frame for destination `d i`. Nothing about internal wires,
 nothing about element state.
 
+⚠️⚠️ **AND THE SCOPE SENTENCE THAT MUST TRAVEL WITH IT — verified at the source
+2026-08-08 00:1x, three readings:**
+```
+SeamJoinA:45  cDestOf s := (if s.getD 1 …) + (if s.getD 3 …) + (if s.getD 5 …)
+                              ↑ THREE BITS, nothing else
+SeamJoinB:86  bnCOutKey st tr := fun w => cDestOf (output stream on wire w)
+B4's CONCLUSION quantifies over `bnCOutKey` ONLY.
+The payload `p : Fin 8 → List Bool` occurs in the HYPOTHESIS `hin` and NOWHERE
+in the conclusion.
+```
+🔑 ***B4 PROVES the eight DESTINATION HEADERS leaving the sorter self-route
+through the Banyan. It does NOT prove that each payload arrives with its own
+destination.*** **The theorem is true, unconditional and correctly stated — this
+is a fact about WHAT IT SAYS, not a defect.**
+
+⛔ **Why this is not pedantry, from my own landed control:**
+`ceC_pair_tie_splices_the_payload` (`16efae8`) proves a destination tie SPLICES
+the payload **and the result is still a well-formed frame** ⇒ *payload corruption
+is INVISIBLE to any header-level invariant, and B4 is a header-level invariant.*
+✅ *The door is shut in B4 by the injectivity hypothesis (no ties under full
+load) — **shut BY HYPOTHESIS, not by any proof that payloads travel with their
+headers.*** 📌 **Muster wording, four extra words: *"B4 closed and unconditional:
+THE DESTINATION HEADERS self-route"* — never *"the composed switch works"*.**
+
+🙏 **And the provenance, because it is the lesson:** my own dispatched verifier
+wrote *"the compiler seat must not gloss this"* at ~21:xx. I banked *"I read only
+part of the 188 KB recon output"* as a residual, closed B4, posted the landing,
+and let the residual sit for three hours while the number travelled. ⇒ ***A
+residual you bank and do not clear is a finding you have chosen to publish late.***
+
 **Verified in the strong form (`lake env lean`, `Replayed/Built = 0`), and
 INDEPENDENTLY by the math seat at 23:00 with an instrument I did not use — the
 axiom NAMES rather than the count**: `[propext, Classical.choice, Quot.sound]`,
