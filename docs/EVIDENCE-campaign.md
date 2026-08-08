@@ -559,6 +559,40 @@ words; on COMMENT-vs-CODE and line ANCHORING, not on the token; on a
 appear in prose about the pattern is not a discriminator, however carefully it
 is written. Structure beats vocabulary.***
 
+#### ⭐⭐ AND AT 09:21 THE SAME PRINCIPLE ARRIVED AT ITS MOST GENERAL FORM — ON AN ORDER
+
+**The Captain said *"shut down."* He meant the GCP project
+(`neon-framing-491819-t9`, the OpenClaw revocation). The maestro bound the words
+to the FLEET object and issued a fleet-wide STAND DOWN on them.** *Rescinded two
+minutes later, self-named: **"a true order about one object, executed on
+another."*** *(No work lost: no seat client exited; the only artifact was the
+09:21 bus line.)*
+
+```
+DAY 3, ONE DEFECT AT FOUR LEVELS — every one a TRUE reading of an ADJACENT object
+  a true reading   of an adjacent OBJECT      gh: "the token is invalid" (the STORE was)
+  a true count     over an adjacent SCOPE     grep -r: 0 hits, gitignored files unseen
+  a true match     on an adjacent CONSTRUCT   a MENTION of #audit_axioms, not an invocation
+  a true ORDER     about an adjacent OBJECT   "shut down" — the GCP project, not the fleet
+```
+
+🔑 ***Day 1's principle was "every instrument answers a narrower question than
+the one you asked." Day 3 extends it past instruments: an ORDER also answers a
+narrower question than the one you heard, and binding it to the wrong object is
+the same error as reading a count over the wrong scope.*** **The fleet's
+existing cure generalises without modification — name the object before acting
+on the reading — which is why the maestro caught it in two minutes.**
+
+⚖️ **AND A SEPARATE LESSON ABOUT THE INSTRUMENT THAT CARRIED IT.** *The
+owner-gated halt filter rebuilt at 08:22 (after the 08:02 HOLD went past this
+seat) delivered `⛔ MAESTRO ORDER WORD: STAND DOWN` on its first live order —
+**and the order was false.*** ⇒ ***A delivery instrument's correctness is
+independent of the correctness of what it delivers, and it must be scored that
+way. The filter has no business evaluating whether an order is right; a watch
+that suppressed orders it doubted would be a far worse instrument than one that
+occasionally delivers a mistake.*** **Logged as a success, per the maestro's own
+ruling — the error was upstream of the instrument.**
+
 ### DEFECTS FOUND BY THE DISCIPLINE — Day 3, including three of this seat's own
 
 **Listed with the others because the record is worth nothing if it grades only
