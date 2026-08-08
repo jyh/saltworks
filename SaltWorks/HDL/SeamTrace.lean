@@ -17,6 +17,8 @@ hazard with a bigger blast radius.)*
 
 namespace SaltWorks.HDL
 
+set_option maxRecDepth 8000
+
 /-- The data-net list after element `e` has written its two outputs. Names the
 thing the fold computes inline, so the indexing induction can talk about it. -/
 def bnCDatStep (e a b : Nat) (dat : List Net) : List Net :=
@@ -246,5 +248,142 @@ theorem run_agree_of_inputs_circ (c : Circ) (h : c.ssa = true) (env₁ env₂ : 
   have hgs : ssaFrom c.nIn c.gates = true := by
     rw [Circ.ssa, Bool.and_eq_true] at h; exact h.1
   exact run_agree_of_inputs c.gates c.nIn env₁ env₂ hgs hin n hn
+
+/-! ### Element `e`'s state nets, named -/
+
+theorem getD_drop_nat (l : List Net) (m j : Nat) :
+    (l.drop m).getD j 0 = l.getD (m + j) 0 := by
+  simp [List.getD_eq_getElem?_getD, List.getElem?_drop]
+
+theorem getD_map_nat (l : List Net) (f : Net → Net) (j : Nat) (hj : j < l.length) :
+    (l.map f).getD j 0 = f (l.getD j 0) := by
+  rw [List.getD_eq_getElem _ _ (by simpa using hj), List.getD_eq_getElem _ _ hj,
+      List.getElem_map]
+
+theorem ceCcore_outs_length : ceCcore.outs.length = 6 := by decide +kernel
+
+/-- ⭐ **ELEMENT `e`'s `j`-th NEXT-STATE NET, out of the fold that starts at 0.**
+This is `bnCBuild_state_slice` (which is about the fold whose head is element
+`e`) transported by `bnCBuild_state_drop` (which skips the first `e`). -/
+theorem bnC_state_net (e j : Nat) (he : e < 24) (hj : j < 4) :
+    bnCResult.2.2.getD (4 * e + j) 0
+      = instMap ceCcore (bnCSigma e (bnCCompAt e).1 (bnCCompAt e).2 (bnCDatAt e))
+          (bnCOff e) (ceCcore.outs.getD (j + 2) 0) := by
+  have hdrop : bnCResult.2.2.drop (4 * e)
+      = (bnCBuild e (bnComps.drop e) (bnCDatAt e)).2.2 := by
+    have := bnCBuild_state_drop e bnComps 0 bnCDat0
+    simpa [bnCResult, bnCDatAt, bnCDat0] using this
+  rw [← getD_drop_nat, hdrop, bnComps_drop_cons e he]
+  rw [show (bnCCompAt e) = ((bnCCompAt e).1, (bnCCompAt e).2) from rfl]
+  rw [bnCBuild_state_slice _ e (bnCCompAt e).1 (bnCCompAt e).2 _ j hj]
+  rw [instOuts, getD_map_nat _ _ _ (by rw [ceCcore_outs_length]; omega)]
+
+/-! ### The two environments meet -/
+
+/-- Element `e`'s three input bits at one cycle, as the NETWORK presents them.
+
+⚠️ **This is `elemTrace`'s per-cycle half, and it is why `elemTrace` cannot be a
+hypothesis:** entries 1 and 2 are `run … bnCCore.gates …`, i.e. the values the
+*previous layer computed this same cycle*. The element's input trace is a
+function of the network's own evaluation, not data given alongside it. -/
+def bnCElemInAt (st inp : List Bool) (e : Nat) : List Bool :=
+  let E := batcherNetC.env inp st
+  [run E bnCCore.gates bnCRst,
+   run E bnCCore.gates ((bnCDatAt e).getD (bnCCompAt e).1 0),
+   run E bnCCore.gates ((bnCDatAt e).getD (bnCCompAt e).2 0)]
+
+theorem ceC_nIn_eq : ceC.nIn = 3 := rfl
+
+theorem ceC_env_in (v sl : List Bool) (i : Nat) (hi : i < 3) :
+    ceC.env v sl i = v.getD i false := by
+  show (if i < ceC.nIn then _ else _) = _
+  rw [if_pos (by rw [ceC_nIn_eq]; exact hi)]
+
+theorem ceC_env_st (v sl : List Bool) (i : Nat) (hi : ¬ i < 3) :
+    ceC.env v sl i = sl.getD (i - 3) false := by
+  show (if i < ceC.nIn then _ else _) = _
+  rw [if_neg (by rw [ceC_nIn_eq]; exact hi), ceC_nIn_eq]
+
+/-- No gate writes a primary input or a state net, so the prefix leaves them. -/
+theorem bnC_run_pre_low (E : Env) (e : Nat) (pre : List Gate)
+    (hpre : bnCCore.gates = pre ++ (bnCBuild e (bnComps.drop e) (bnCDatAt e)).1)
+    (n : Net) (hn : n < bnCOff 0) : run E pre n = E n := by
+  refine run_of_unwritten _ _ _ (fun g hg => Nat.ne_of_gt (Nat.lt_of_lt_of_le hn ?_))
+  -- NB: stated with the fold's literal initial list, so the elaborator unifies it
+  -- with `bnCCore.gates` lazily. Routing through a `rfl` lemma instead made the
+  -- KERNEL evaluate all 816 gates and time out.
+  have hmem : g ∈ bnCCore.gates := by rw [hpre]; exact List.mem_append_left _ hg
+  exact bnCBuild_writes_above bnComps 0 ((List.range bnCWires).map bnCDatIn) g hmem
+
+/-- ⭐ **THE AGREEMENT: the network's wiring, seen through the prefix, IS `ceC`'s
+own input environment.** Inputs 0–2 are the rst line and the two data wires the
+previous layer just drove; inputs 3–6 are element `e`'s own state slice. -/
+theorem bnC_env_agree (st inp : List Bool) (hst : st.length = 96) (e : Nat) (he : e < 24)
+    (pre : List Gate)
+    (hpre : bnCCore.gates = pre ++ (bnCBuild e (bnComps.drop e) (bnCDatAt e)).1) :
+    ∀ i, i < ceCcore.nIn →
+      run (batcherNetC.env inp st) pre
+          (bnCSigma e (bnCCompAt e).1 (bnCCompAt e).2 (bnCDatAt e) i)
+        = ceC.env (bnCElemInAt st inp e) (bnCSlice st e) i := by
+  have hnIn : ceCcore.nIn = 7 := by decide +kernel
+  have he24 : (e : Nat) < 24 := he
+  have hlow : ∀ n : Net, n < bnCOff e →
+      run (batcherNetC.env inp st) pre n
+        = run (batcherNetC.env inp st) bnCCore.gates n := fun n hn =>
+    (bnC_run_split_low _ e pre hpre n hn).symm
+  have hd : ∀ c : Nat, (bnCDatAt e).getD c 0 < bnCOff e := by
+    intro c
+    rcases Nat.lt_or_ge c (bnCDatAt e).length with hc | hc
+    · exact bnCDatAt_below e _ (List.getD_eq_getElem _ _ hc ▸ List.getElem_mem hc)
+    · rw [List.getD_eq_default _ _ hc]; exact bnCRst_lt_off e
+  have hstate : ∀ k : Nat, k < 4 →
+      run (batcherNetC.env inp st) pre (bnCState e + k)
+        = (bnCSlice st e).getD k false := by
+    intro k hk
+    have hk4 : (k : Nat) < 4 := hk
+    have hs : (bnCState e : Nat) + k = 9 + 4 * e + k := by rw [bnCState_eq]
+    have h1 : e ≤ 23 := Nat.lt_succ_iff.mp he24
+    have h2 : k ≤ 3 := Nat.lt_succ_iff.mp hk4
+    have h4e : 4 * e ≤ 92 := Nat.mul_le_mul_left 4 h1
+    have hnum : (9 : Nat) + 4 * e + k < 105 := by omega
+    have hk0 : (bnCState e + k : Nat) < bnCOff 0 :=
+      lt_of_lt_of_eq (lt_of_eq_of_lt hs hnum) (bnCOff_eq 0).symm
+    rw [bnC_run_pre_low _ e pre hpre _ hk0]
+    have hnI : batcherNetC.nIn = 9 := by decide +kernel
+    -- omega refuses this even after `rw [hs]` (the relation is Net-typed);
+    -- an explicit `Nat.le` chain is the idiom this file already uses.
+    have hge : ¬ ((bnCState e + k : Nat) < 9) := by
+      rw [hs]
+      exact Nat.not_lt.mpr (Nat.le_trans (Nat.le_add_right 9 (4 * e))
+        (Nat.le_add_right (9 + 4 * e) k))
+    show (if (bnCState e + k : Nat) < batcherNetC.nIn then _ else _) = _
+    have harith : (9 : Nat) + 4 * e + k - 9 = 4 * e + k := by
+      rw [Nat.add_assoc, Nat.add_sub_cancel_left]
+    rw [hnI, if_neg hge, hs, harith]
+    interval_cases k <;> simp [bnCSlice]
+  intro i hi
+  rw [hnIn] at hi
+  interval_cases i
+  · rw [ceC_env_in _ _ 0 (by omega)]
+    show run (batcherNetC.env inp st) pre bnCRst = _
+    rw [hlow _ (bnCRst_lt_off e)]; simp [bnCElemInAt]
+  · rw [ceC_env_in _ _ 1 (by omega)]
+    show run (batcherNetC.env inp st) pre ((bnCDatAt e).getD (bnCCompAt e).1 0) = _
+    rw [hlow _ (hd _)]; simp [bnCElemInAt]
+  · rw [ceC_env_in _ _ 2 (by omega)]
+    show run (batcherNetC.env inp st) pre ((bnCDatAt e).getD (bnCCompAt e).2 0) = _
+    rw [hlow _ (hd _)]; simp [bnCElemInAt]
+  · rw [ceC_env_st _ _ 3 (by omega)]
+    show run (batcherNetC.env inp st) pre (bnCState e) = _
+    simpa using hstate 0 (by omega)
+  · rw [ceC_env_st _ _ 4 (by omega)]
+    show run (batcherNetC.env inp st) pre (bnCState e + 1) = _
+    simpa using hstate 1 (by omega)
+  · rw [ceC_env_st _ _ 5 (by omega)]
+    show run (batcherNetC.env inp st) pre (bnCState e + 2) = _
+    simpa using hstate 2 (by omega)
+  · rw [ceC_env_st _ _ 6 (by omega)]
+    show run (batcherNetC.env inp st) pre (bnCState e + 3) = _
+    simpa using hstate 3 (by omega)
 
 end SaltWorks.HDL
