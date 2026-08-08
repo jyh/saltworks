@@ -271,6 +271,51 @@ theorem bnC_rotation_routes :
       = (List.range 3).map (fun b => (List.range 8).map fun j => Nat.testBit ((j + 5) % 8) b) := by
   decide +kernel
 
+/-! ## 🔧 THE FOLD'S MACHINERY — obligation (c)'s engine, and it is cheap
+
+**Maestro's 17:0x order: take `sem_congr_on_reads`, then close the seam. This is
+the seam's induction machinery, landed ahead of the induction itself.**
+
+⭐ **`bnCBuild_cons` IS THE ENGINE AND THE REASON IT WORKS IS WHY THE OBVIOUS
+ROUTE FAILS.** *The obvious move — split `bnCCore.gates` into "element 0's gates
+++ the rest" by `rfl` — **times out at `isDefEq` after 200,000 heartbeats**,
+because it forces unification of the whole 816-gate list.* ⇒ ***Unfolding ONE
+recursion step GENERICALLY, with `cs` and `dat` abstract, is `rfl` in
+milliseconds.*** **Peel one element at a time and never build the network.**
+
+📊 **AND THE FACTORISATION THE INDUCTION IS FOR IS MEASURED TRUE, not assumed:**
+over 400 sample environments, element 0's output net INSIDE the network carries
+exactly what `ceCcore` computes standalone through its own `σ`. *A measurement,
+not a proof — but it says the target is true before anyone spends an induction
+on it.* -/
+
+/-- **A suffix that writes only above `n` cannot change `n`.** The list form of
+`inst_frame_below`, which is what a 24-instance fold needs. -/
+theorem run_append_frame (env : Env) (g1 gs : List Gate) (n : Net)
+    (h : ∀ g ∈ gs, n < g.out) : run env (g1 ++ gs) n = run env g1 n := by
+  rw [run_append]
+  refine run_of_unwritten _ gs n (fun g hg hEq => ?_)
+  have := h g hg
+  rw [hEq] at this
+  exact absurd this (Nat.lt_irrefl n)
+
+/-- Later elements sit strictly higher, which is what feeds the frame step. -/
+theorem bnCOff_mono (e f : Nat) (h : e < f) : bnCOff e < bnCOff f := by
+  unfold bnCOff
+  have h34 : ceCcore.gates.length = 34 := by decide +kernel
+  rw [h34]
+  omega
+
+/-- ⭐ **ONE STEP OF THE FOLD, GENERIC IN THE REMAINING COMPARATORS.** -/
+theorem bnCBuild_cons (e a b : Nat) (cs : List (Nat × Nat)) (dat : List Net) :
+    (bnCBuild e ((a, b) :: cs) dat).1
+      = instGates ceCcore (bnCSigma e a b dat) (bnCOff e)
+        ++ (bnCBuild (e + 1) cs
+              ((dat.set a ((instOuts ceCcore (bnCSigma e a b dat) (bnCOff e)).getD 0 0)).set b
+                ((instOuts ceCcore (bnCSigma e a b dat) (bnCOff e)).getD 1 0))).1 := rfl
+
+theorem bnCBuild_nil (e : Nat) (dat : List Net) : (bnCBuild e [] dat).1 = [] := rfl
+
 /-! ## 🔗 LINK ② — THE DECOMPOSITION, and it is the expensive part
 
 **Silicon's 14:31 named three links for the composed theorem: ① the fabricated
@@ -406,6 +451,10 @@ explicit lemma.** *`xorPrev_self_initialises` is the shape; nothing yet proves i
 for this element.*
 -/
 
+#audit_axioms run_append_frame
+#audit_axioms bnCOff_mono
+#audit_axioms bnCBuild_cons
+#audit_axioms bnCBuild_nil
 #audit_axioms bnCWires bnCElems bnCRst bnCDatIn bnCIn bnCState bnCCoreIn bnCOff
 #audit_axioms bnCSigma bnCBuild bnCResult bnCCore batcherNetC
 #audit_axioms bnC_comps_count
