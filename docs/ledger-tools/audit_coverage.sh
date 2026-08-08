@@ -206,13 +206,23 @@ for f in "$@"; do
   echo "⏱  SOURCE MTIME  $base.lean  $smt"
   # ⭐ A FILE-MODE AUDIT LEAVES NO TRACE (silicon, 09:51) — so the only way to
   # answer "was this verified?" is for someone to have WRITTEN the verdict down.
-  # audit_record.sh does that, pinned to a source hash. Read it if it exists.
-  arec="$(git rev-parse --show-toplevel 2>/dev/null)/docs/audit-records/$base.audit"
-  if [ -f "$arec" ]; then
-    rsha=$(command grep -m1 '^sha256' "$arec" | awk '{print $3}')
-    rver=$(command grep -m1 '^VERDICT' "$arec" | awk '{print $3}')
-    rfin=$(command grep -m1 '^run finished' "$arec" | cut -d: -f2- | sed 's/^ *//')
-    csha=$(shasum -a 256 "$f" | cut -d' ' -f1)
+  #
+  # ✅ 2026-08-08 10:38 — `saltbuild.sh` IS NOW SELF-RECORDING (silicon's
+  # proposal, maestro-landed): every run appends one line to the CANONICAL log
+  # below. My `audit_record.sh` was an explicit stopgap and I said on the bus I
+  # would retire it the moment the wrapper recorded itself — it has, so it is
+  # retired, and this reads the canonical artifact instead.
+  # 🔑 KEYED ON THE SHA, NEVER ON THE FILENAME. Measured in the log's own first
+  # five lines: TWO filenames each appear with TWO DIFFERENT shas, 16s and 34s
+  # apart. A name is not a revision.
+  AUDITLOG=/Users/jyh/projects/claude/.saltbuild-audit.log
+  csha=$(shasum -a 256 "$f" | cut -c1-12)
+  if [ -f "$AUDITLOG" ] && command grep -q "sha256=$csha" "$AUDITLOG"; then
+    hit=$(command grep "sha256=$csha" "$AUDITLOG" | tail -1)
+    rver=$(echo "$hit" | command grep -oE 'EXIT=[0-9]+')
+    rfin=$(echo "$hit" | cut -d'|' -f1 | sed 's/ *$//')
+    [ "$rver" = "EXIT=0" ] && rver=GREEN || rver="RED ($rver)"
+    rsha="$csha"
     if [ "$rsha" = "$csha" ]; then
       # ⛔ THE MARKER KEYS ON *GREEN*, NOT ON "a record exists". A RED or
       # UNPINNED verdict pinned to the right revision is still not a pass, and
@@ -222,18 +232,23 @@ for f in "$@"; do
         GREEN) mark="✅" ;;
         *)     mark="⚠️ " ;;
       esac
-      echo "   $mark AUDIT RECORD: $rver, pinned to THIS revision ($rfin)"
-      echo "      sha $(echo "$csha" | cut -c1-16)… — record and source agree."
+      echo "   $mark saltbuild-audit.log: $rver on THESE EXACT BYTES ($rfin)"
+      echo "      sha256=$csha — the log records a run on this revision."
       [ "$rver" = "GREEN" ] || echo "      ⇒ a record is not a pass. This verdict is NOT green."
-    else
-      echo "   ⛔ AUDIT RECORD IS FOR A DIFFERENT REVISION — it describes sha"
-      echo "      $(echo "$rsha" | cut -c1-16)…, the file on disk is $(echo "$csha" | cut -c1-16)…"
-      echo "      ⇒ that verdict ($rver) DOES NOT APPLY to these bytes. Re-record."
+      # ⚠️ THE LOG'S sha IS TAKEN *AFTER* THE BUILD (saltbuild.sh:37 runs after
+      # the case block at :32-34). If the source changed DURING the run, the log
+      # pins the verdict to bytes the build never elaborated — which is worse
+      # than a pre-run hash, because it looks authoritative. Reported to the
+      # maestro 2026-08-08; until a before-hash lands, treat a match as
+      # "a run finished with the file in this state", not "these bytes built".
+      echo "      ⚠️ the log's sha is captured POST-build — a match means the file"
+      echo "         ENDED in this state, not that these bytes were elaborated."
     fi
   else
-    echo "   FILE-MODE AUDIT: your 'saltbuild EXIT=N' is current only if THAT RUN"
-    echo "   COMPLETED AFTER $smt. No audit record exists, so this tool cannot"
-    echo "   answer it — a file-mode audit writes nothing. Use audit_record.sh."
+    echo "   FILE-MODE AUDIT: no run on these bytes in the canonical log"
+    echo "   (~/projects/claude/.saltbuild-audit.log). Either it was never"
+    echo "   audited, or it was audited before the wrapper self-recorded (10:38)."
+    echo "   Run: ../saltbuild.sh $f   — it records itself now."
   fi
   ol=$(command find .lake -name "$base.olean" 2>/dev/null | head -1)
   if [ -z "$ol" ] || [ ! -f "$ol" ]; then
