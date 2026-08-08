@@ -18,9 +18,25 @@ source the select block reads, as a function of the instruction word alone.
 ⭐ **EVERY STATEMENT HERE IS AGAINST A NAMED CONSTANT, NOT A NUMERAL.** The pair
 enters as `rsOps` / `rsSelBits`, the select block as `sliceASelect`, the encoder
 as `ruledEnc`, and the encoder's input nets as `lineXOR` / `lineSLT`. That is
-deliberate: `genSelect_ten : genSelect 10 4 = aluSelect` is numeral-bound and is
-exactly what makes the as-built block expensive to migrate. Nothing below would
+deliberate: the numeral-bound bridge `genSelect_ten : genSelect 10 4 = aluSelect`
+was exactly what made the as-built block expensive to migrate. Nothing below would
 need restating if the pair or the blocks were renamed.
+
+📌 **AND THE POLICY WAS VINDICATED AT PHASE 3, `52c51e5`:** *`genSelect_ten` turned
+out to be the top of an **eleven**-theorem numeral-bound ladder, every rung an
+equation between the generator at the literal `(10,4)` and the `as*` block — so the
+re-cut FALSIFIES all eleven rather than merely unproving them, and they retired
+wholesale against math's parametric hinge.*
+
+⚠️ **AND THIS FILE'S OWN VERDICT AT THE RULED PAIR IS A PREDICTION, NOT A
+MEASUREMENT — SAID PLAINLY BECAUSE THE TEMPTING SENTENCE IS FALSE.** *I first wrote
+"this file needed no edit at the re-cut" here and struck it two minutes later. This
+module imports `SelectCut32`, which imports `Stack.Program`, which does NOT yet
+compile at the ruled pair — so in the flip census this file was **UNREACHED**, never
+elaborated, and an absence of errors from a module that never ran is byte-identical
+to a pass.* ⇒ ***The prediction is flip-inert, and the grounds are the policy in the
+paragraph above (no numerals to falsify). The CONFIRMATION is owed by the joint
+landing, and `docs/compiler-census.py` is what will report it.***
 
 ## The three pieces
 

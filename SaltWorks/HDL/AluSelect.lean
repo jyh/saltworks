@@ -71,7 +71,10 @@ OLD ones and are deliberately untouched until phase 3.  Transitional prefix `rs`
 ⚠️ **State phase-2 work against THESE NAMES, never against bare `3`/`2`.**  The
 whole point of the migration is to escape numeral-bound theorems — a new theorem
 written as `gsSelOf 3 2` is one more of exactly the thing being escaped, and it
-is how `genSelect_ten : genSelect 10 4 = aluSelect` became expensive. -/
+is how the numeral-bound bridge `genSelect_ten : genSelect 10 4 = aluSelect` became
+expensive.  *(RETIRED at phase 3, `52c51e5` — it was the top of an ELEVEN-theorem
+ladder, all of which the re-cut falsifies.  Named here as history, not as something
+to look up.)* -/
 
 /-- Ruled source count. -/
 def rsOps : Nat := 3
@@ -520,8 +523,11 @@ control `ScratchHINGECTL.lean`); landed here by the compiler seat under the
 maestro's 10:58 PATCH-TO-OWNER ruling — no cross-slot grant, because a patch
 handed to the slot-owner needs none.
 
-The landed `genSelect_ten : genSelect 10 4 = aluSelect` is NUMERAL-BOUND: a calc
-of `rfl` steps at 10 and 4.  So the `ALUSEL-PARAM` parametrization bought gate
+The **since-retired** `genSelect_ten : genSelect 10 4 = aluSelect` was NUMERAL-BOUND:
+a calc of `rfl` steps at 10 and 4.  *(Deleted at phase 3, `52c51e5`, with the ten
+other rungs of its ladder — do not go looking for it; this paragraph is the record of
+why it existed and why it could not survive the re-cut.)*  So the `ALUSEL-PARAM`
+parametrization bought gate
 counts and `ssa`/`wf` free at every `(n,b)` and did NOT buy the IDENTIFICATION of
 the generator with the bespoke block — which is the fact that made the `(3,2)`
 migration look like a fortnight.  This is that identification, once,
