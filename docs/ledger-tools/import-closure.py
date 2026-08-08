@@ -43,7 +43,57 @@ compiler seat's and is untouched; these are guards around it.
 import re, subprocess, sys, os
 
 ROOT = os.environ.get("CLOSURE_ROOT", "/Users/jyh/projects/claude/saltworks")
-HUB  = "SaltWorks.lean"
+
+# ⛔⛔ THE CORPUS IS MULTI-ROOTED SINCE 2026-08-08 10:5x, AND THIS TOOL KNEW ONE ROOT.
+# The maestro added a SECOND lean_lib — `SaltWorksAudit`, rooted at
+# SaltWorks.HDL.PortLengths — for modules that IMPORT the hub in order to audit the
+# corpus. Such a module CANNOT be imported back by the hub: that is a build cycle,
+# and the maestro hit exactly that (~2 min of broken shared tree at 10:50).
+# ⇒ PortLengths is not unswept. It is deliberately ABOVE the hub, and it IS built.
+# With HUB hardcoded, this guard reported it OUTSIDE **forever**.
+# 🔑 A GUARD THAT CRIES WOLF PERMANENTLY IS A GUARD PEOPLE STOP READING — and this
+# one caught three real omissions on 8/8 alone (5 modules 08:49 · GenSelectCount
+# 09:2x · 4 modules 10:48). Silicon caught the false positive within minutes.
+# THE FIX: read the roots from lakefile.toml. The tool's model of "the build" must
+# come FROM the build's own declaration, never from a constant in the instrument.
+def _discover_roots():
+    """Every lean_lib's root MODULE names, from lakefile.toml. Returns (roots, how)."""
+    env = os.environ.get("CLOSURE_ROOTS")          # override, for differential tests
+    if env:
+        return [r.strip() for r in env.split(",") if r.strip()], "CLOSURE_ROOTS env"
+    lf = os.path.join(ROOT, "lakefile.toml")
+    if not os.path.exists(lf):
+        return [], "lakefile.toml NOT FOUND"
+    txt = open(lf, encoding="utf-8", errors="replace").read()
+    roots, how = [], "lakefile.toml"
+    try:
+        import tomllib                              # 3.11+: real parsing
+        data = tomllib.loads(txt)
+        for lib in data.get("lean_lib", []):
+            r = lib.get("roots")
+            if r:   roots.extend(r)
+            elif lib.get("name"): roots.append(lib["name"])
+        how = "lakefile.toml (tomllib)"
+    except Exception:                               # regex fallback, stated not hidden
+        for blk in re.split(r'^\[\[lean_lib\]\]', txt, flags=re.M)[1:]:
+            blk = re.split(r'^\[', blk, flags=re.M)[0]
+            r = re.search(r'^\s*roots\s*=\s*\[([^\]]*)\]', blk, re.M)
+            if r:
+                roots.extend(re.findall(r'"([^"]+)"', r.group(1)))
+            else:
+                n = re.search(r'^\s*name\s*=\s*"([^"]+)"', blk, re.M)
+                if n: roots.append(n.group(1))
+        how = "lakefile.toml (regex fallback — tomllib unavailable)"
+    return roots, how
+
+ROOT_MODS, ROOTS_HOW = _discover_roots()
+if not ROOT_MODS:
+    print(f"import-closure: ⛔ NO BUILD ROOTS DISCOVERED ({ROOTS_HOW}). Every module "
+          f"would report OUTSIDE, which would be a true statement about an empty "
+          f"closure and a false one about the corpus. Exit 2.", file=sys.stderr)
+    sys.exit(2)
+ROOT_PATHS = {m.replace(".", "/") + ".lean" for m in ROOT_MODS}
+HUB = sorted(ROOT_PATHS)[0]   # retained only for messages that name a single file
 
 def mod_of(path):                       # SaltWorks/HDL/ISA.lean -> SaltWorks.HDL.ISA
     return path[:-5].replace("/", ".")
@@ -71,8 +121,8 @@ tracked = [p for p in tracked if not p.startswith(".lake")]
 # tool carries no audit sites. The evidence seat quoted the inflated module count on
 # the bus one paragraph before catching it. The SITE total was never wrong; the
 # MODULE count was, and only because the population was wrong.
-_nonlib = [p for p in tracked if p != HUB and not p.startswith("SaltWorks/")]
-tracked = [p for p in tracked if p == HUB or p.startswith("SaltWorks/")]
+_nonlib = [p for p in tracked if p not in ROOT_PATHS and not p.startswith("SaltWorks/")]
+tracked = [p for p in tracked if p in ROOT_PATHS or p.startswith("SaltWorks/")]
 if _nonlib:
     print(f"import-closure: {len(_nonlib)} tracked .lean file(s) excluded as NON-LIBRARY "
           f"(outside SaltWorks/): {', '.join(sorted(_nonlib))}")
@@ -83,9 +133,10 @@ if not tracked:
           f"not 'everything is covered'. Exit 2.", file=sys.stderr)
     sys.exit(2)
 
-if not os.path.exists(os.path.join(ROOT, HUB)):
-    print(f"import-closure: ⛔ HUB {HUB!r} NOT FOUND under {ROOT!r} — the closure would "
-          f"be empty and every module would be reported outside. Exit 2.", file=sys.stderr)
+missing = [p for p in sorted(ROOT_PATHS) if not os.path.exists(os.path.join(ROOT, p))]
+if missing:
+    print(f"import-closure: ⛔ DECLARED ROOT(S) NOT FOUND under {ROOT!r}: {missing} — the "
+          f"closure would be short and modules would be falsely reported outside. Exit 2.", file=sys.stderr)
     sys.exit(2)
 bypath  = {p: mod_of(p) for p in tracked}
 known   = set(bypath.values())
@@ -97,7 +148,7 @@ def imports(p):
     return IMPORT.findall(open(fp, encoding='utf-8', errors='replace').read())
 
 # transitive closure from the hub
-seen, stack = set(), [mod_of(HUB)]
+seen, stack = set(), [m for m in ROOT_MODS]
 while stack:
     m = stack.pop()
     if m in seen: continue
@@ -109,12 +160,13 @@ while stack:
 AUDIT = re.compile(r'^\s*#audit_axioms\b', re.M)
 outside = []
 for p, m in sorted(bypath.items()):
-    if p == HUB or m in seen: continue
+    if p in ROOT_PATHS or m in seen: continue
     n = len(AUDIT.findall(open(os.path.join(ROOT,p), encoding='utf-8', errors='replace').read()))
     outside.append((m, n))
 
 tot = sum(n for _, n in outside)
-print(f"hub: {HUB}   tracked .lean: {len(tracked)}   in closure: {len(seen)}   OUTSIDE: {len(outside)}")
+print(f"roots ({ROOTS_HOW}): {', '.join(sorted(ROOT_MODS))}")
+print(f"tracked .lean: {len(tracked)}   in closure: {len(seen)}   OUTSIDE: {len(outside)}")
 for m, n in outside:
     print(f"  ⛔ {m:<34} {n:>3} audit site(s) never fire in the default build")
 print(f"TOTAL audit sites outside the default build: {tot}")
