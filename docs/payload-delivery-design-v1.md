@@ -82,13 +82,17 @@ Riders:
 ## 3. THE DECOMPOSITION — four lemmas (L0 added at math's ③ pass)
 
 - **L0 (init-independence — the induction's SEED; math's ③ finding
-  3)**: within a well-phased frame, every control latch value from its
-  strobe cycle onward is a function of the frame's own header bits,
-  from ANY initial register state. The datapath is combinational and
-  carries no state (§4), so the control latches are the ONLY init
-  surface — and every one is strobed inside [0, 2k). B-class,
-  element-level, L2's genre. This grounds H2's "any initial state"
-  half — previously assumed, now named and priced.
+  3, tightened at silicon's 12:59 flag)**: within a WELL-PHASED frame,
+  every per-stage control latch value from its strobe cycle onward is
+  a function of the frame's own header bits, from ANY initial register
+  state. The datapath is combinational and carries no state (§4); the
+  init surface is the per-stage latches (all strobed inside [0, 2k))
+  PLUS the frame counter — and the counter is exactly what
+  "well-phased" quantifies away: L0 is stated FOR well-phased frames,
+  and H2's second-act_stb clause is what SUPPLIES well-phasedness
+  (the spec's own one-complete-frame argument, §5:174). L0 + H2
+  compose; neither claims the other's ground. B-class, element-level,
+  L2's genre.
 - **L1 (Batcher element, ceC/bnC)**: after its decide (first differing
   bit inside the header — guaranteed under H1 since distinct
   destinations differ inside [0, 2k)), the compare-exchange is a
@@ -149,14 +153,17 @@ Riders:
   explicitly or it inherits the index-wise blindness the repaired §4
   trap names.
 
-- **OPEN PROBE (math's ③ flagged suspicion; cheap; fires before L0
-  is priced)**: does act_stb reset/align the frame counter? If YES,
-  first-act_stb frames are already well-phased and H2 STRENGTHENS to
-  "at or after the FIRST act_stb" — a strictly stronger theorem; if
-  the counter free-runs, the second-act_stb clause is load-bearing
-  and stays. Spec/RTL question — silicon's domain, queued behind its
-  ④ pass. H2 stays spec-quoted (:180-183) either way until answered;
-  the clause is never weakened, only possibly strengthened.
+- **OPEN PROBE (math's ③ suspicion, RE-SCOPED at silicon's 12:59
+  flag)**: the factual question stands — does act_stb reset/align the
+  frame counter, or does it free-run? — but its H2 consequence now
+  routes THROUGH THE SPEC: §5's "second" is the conclusion of the
+  spec's own one-complete-frame argument (:174), so a first-act_stb
+  H2 would out-claim the spec, and under citation discipline the
+  block cannot source it from §5. If the probe finds counter-reset
+  at the RTL, the path is: spec AMENDMENT first (silicon's file, on
+  silicon's evidence, its own bar), block cites the amended spec
+  second. DEFAULT UNCHANGED either way: H2 stays spec-quoted at
+  second-act_stb. Silicon's domain, queued behind its ④ pass.
 
 ## 6. REFUTATION ASSIGNMENTS (draft-until-refuted)
 
