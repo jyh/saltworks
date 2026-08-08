@@ -624,7 +624,7 @@ ceC_realises_cKey_when_active   one element's frame ⇒ applyComp on cKey  (all-
 cKeyLE_eq_lex                   cKeyLE = the lex order on (¬active, dest)
 bnComps_eq_batcher8             bnComps IS batcher8's comparator list
   ⇒ fold across the 24 elements ⇒ runNet batcher8
-  ⇒ hseam's 8 sites in Silicon/Equiv/ComposedSwitch.lean, via composed_switch_of_seam_dest3
+  ⇒ hseam's 4 BINDER sites (`grep -c hseam` returns 8: four binders plus four uses in proof terms — the count was mis-read as sites, by me, and the fleet adopted it) in Silicon/Equiv/ComposedSwitch.lean, via composed_switch_of_seam_dest3
 ```
 -/
 
