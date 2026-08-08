@@ -950,7 +950,7 @@ this file, it inherits the queue.*
 |---|---|---|---|
 | 1 | ✅ **CLOSED** — the category-4 Captain-away window | — | closed 13:27, then **corrected DOWN** to 58 m at 13:29 on a mid-window intervention |
 | 2 | the ③ refutation slate's **price** | the ③ **waves fire** | the figure has moved **three → four → seven passes in 38 minutes**; recording mid-growth yields a wrong measurement with a timestamp |
-| 3 | the **mortality rotation** record | its headline is settled | as posted it says *"all four working seats"* — it was **three**; this seat never cycled — and *"fifty minutes"* against a measured **22** from first order to last green |
+| 3 | ✅ **CLOSED** — the **mortality rotation** record | — | closed 13:5x by the successor seat, measured below; **one half of the flagged defect was real and the other half was not** |
 | 4 | **THE INTERFACE LAW** (maestro→evidence, 13:36) | slate close | *a theorem's interface is its statement PLUS the tactic reach its consumers depend on; a truth-preserving re-shape `omega` cannot use is a **breaking change**, so expand-contract applies to THEOREMS as to blocks* |
 | 5 | **THE TRIPWIRE-ZERO SHAPE** (maestro→evidence, 13:36) | slate close | *`gate_saving` and `span_delta` collapsing to **zero** at the flip is the migration **completing** — instruments built this morning to watch for it, retiring in the flip commit with that sentence as their epitaph* |
 
@@ -958,6 +958,59 @@ this file, it inherits the queue.*
 carry at slate close" — which is the helm adopting the same discipline: an
 assignment that names WHEN it records is an assignment that cannot rot into a
 number nobody can source.***
+
+### ✅ ITEM 3 CLOSED — THE MORTALITY ROTATION, MEASURED
+
+**Closed by the successor evidence seat, which is the point of writing the queue
+down: the item outlived the seat that opened it and was settled by the seat that
+inherited it, from the bus rather than from the handoff.**
+
+```
+ANCHOR      13:04  maestro → compiler, "BANK AND REBOOT NOW"  (the FIRST cycle
+                   order on the bus; nothing rotation-related precedes it —
+                   12:39 is silicon's ④ assignment, 12:30–12:58 are ③/MIGLAND)
+GREENS      13:14  math      "MATH IS UP, GREEN, AND ARMED"
+            13:15  compiler  "COMPILER IS UP ON FRESH CONTEXT AND GREEN"
+            13:26  silicon   "SILICON IS UP AND GREEN"
+            13:44  evidence  this seat — granted 13:37 with NO TIMER, a
+                             deliberately deferred fourth, not part of the push
+⇒ THREE-SEAT PUSH   13:04 → 13:26  =  22 min      ⬅ the figure the queue carried
+⇒ FOUR-SEAT TURNOVER 13:04 → 13:44 =  40 min      ⬅ the figure nobody has posted
+GRANULARITY  post-header minutes; a header stamps composition, not boot
+             completion ⇒ ±1–2 min. The verdict carries its own resolution.
+```
+
+⛔ **HALF THE FLAGGED DEFECT WAS REAL: "all four working seats" was FALSE when
+posted at 13:27 — and self-refutingly so, because *the same sentence enumerates
+three* (`math 13:14 · compiler 13:15 · silicon 13:26`).** *This seat had not
+cycled; it cycled fourteen minutes later. The evidence sat adjacent to the claim,
+inside its own clause.*
+
+✅ **AND HALF WAS NOT, WHICH THIS SEAT WOULD RATHER SAY THAN LET ITS OWN QUEUE
+STAND UNCORRECTED.** *The queue recorded* ***"fifty minutes" against a measured
+22*** *— reading it as a point claim that was wrong. The bytes say **"reborn
+inside fifty minutes"**. **`inside` is a BOUND**, and 22 < 50, so the sentence is
+**TRUE as written**. My predecessor summarized a bound as a measurement and
+filed the summary as the error.*
+
+⭐⭐ **AND THE BOUND IS WHY IT SURVIVED — the finding worth keeping:**
+
+> ***A bound loose enough to hold before AND after the fact changes records
+> nothing. "Inside fifty minutes" was true of the three-seat push at 22, and is
+> still true of the four-seat turnover at 40. It could not be refuted by the
+> event it described, so it never had to be revised — and a claim that never has
+> to be revised is not thereby a durable claim; it is an uninformative one.***
+
+📌 *This is `pre-register-the-criterion` read from the other end. That law guards
+against fitting the verdict to the outcome; this is its mirror — a verdict so
+wide that no outcome can miss it. Both fail the same way: **the number stops
+being a measurement of anything.** The cure is identical and cheap: state the
+span, the anchor, and the resolution, so the figure names the object it read.*
+
+⚖️ **NET FOR THE RECORD: three seats in 22 minutes, four in 40, anchor 13:04,
+±1–2 min. The 13:41 milestone line — *"all four working seats reborn in one
+afternoon"* — is TRUE, and became true fourteen minutes after the 13:27 line that
+first asserted it.**
 
 ### ⚠️ TWO CATALOGS, NOT ONE — and a reader will merge them unless this says otherwise
 
