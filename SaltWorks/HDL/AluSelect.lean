@@ -233,7 +233,13 @@ theorem aluSelect_wf : aluSelect.wf = true := Circ.wf_of_ssa aluSelect_ssa
 
 /-! ## ⭐⭐ THE SOURCE COUNT, PARAMETRISED — `genSelect n b`
 
-**`aluSelect` IS `genSelect 10 4`** (`genSelect_ten`, below).
+**`aluSelect` IS `genSelect asOps asSelBits`** (`genSelect_eq_aluSelect`, math's
+parametric hinge, below).
+
+⚠️ *This line read "`aluSelect` IS `genSelect 10 4` (`genSelect_ten`, below)" until
+phase 3 retired the ladder. Left alone it would have named a deleted theorem AND
+asserted a literal pair the constants no longer hold — a docstring that survives a
+re-cut while its content does not.*
 
 *The block above is written at one width, and the semantics theorem
 (`sem_aluSelect`, math's `Stack/Program.lean`) was written at that width too —
@@ -319,93 +325,32 @@ def genSelect (n b : Nat) : Circ :=
                (List.range (gsLevelWidth b j)).flatMap (gsMux n b k j)
     outs := (List.range 32).map fun k => gsOut n b k (b - 1) 0 }
 
-/-! ### The landed block, recovered
+/-! ### The landed block, recovered — ⛔ **THE ELEVEN-THEOREM LADDER RETIRED AT PHASE 3**
 
-⚠️ **Proved through the layout lemmas, never by `rfl` across the gate list.**
-`aluSelect` is 1,445 gates and `whnf` has timed out on this arc at 259; the
-equality is assembled from `gsMux_ten` (three gates) by `funext`, and the `Circ`
-equality itself goes through structure eta on the three fields. -/
+**What stood here, and what left together:** `gsLevelWidth_four`, `gsBelow_four`,
+`gsPad_four`, `gsIn_ten`, `gsBase_ten`, `gsOut_ten`, `gsPrev_ten`, `gsMux_ten`,
+`genSelect_ten_gates`, `genSelect_ten_outs`, `genSelect_ten` — **eleven**
+declarations, every one an equation between the generator AT THE LITERAL PAIR
+`(10, 4)` and the `as*` block, plus the three `#audit_axioms` lines that named
+them.
 
-theorem gsLevelWidth_four (j : Nat) : gsLevelWidth 4 j = asLevelWidth j := rfl
+⚠️ **THEY WERE NOT MERELY SUPERSEDED — THE RE-CUT FALSIFIES EVERY ONE OF THEM.**
+*`gsPad_four` becomes `16 = 4`; `gsIn_ten` becomes `324 = 98`;
+`gsLevelWidth_four` fails at `j = 0` with `8 = 2`. All exhibited in the KERNEL
+before the deletion, with a positive control proving the deletion set is not too
+wide (`ScratchP3PRICE.lean`, 7/7).*
 
-theorem gsBelow_four (j : Nat) : gsBelow 4 j = asBelow j := by
-  induction j with
-  | zero => rfl
-  | succ j ih =>
-    show gsBelow 4 j + gsLevelWidth 4 j = asBelow j + asLevelWidth j
-    rw [ih, gsLevelWidth_four]
+✅ **THEIR WHOLE PURPOSE WAS TO BUILD `genSelect_ten`, AND MATH'S PARAMETRIC HINGE
+`genSelect_eq_aluSelect` (below, `efa5fe4`) REPLACES THE LOT FROM TWO SEED FACTS.**
+So the ladder retires wholesale instead of being re-proved at the ruled pair —
+eleven dead declarations rather than eleven migrations. *That is the hinge earning
+its keep in the only currency that counts.*
 
-theorem gsPad_four : gsPad 4 = asPad := rfl
-theorem gsIn_ten : gsIn 10 4 = asIn := rfl
-
-theorem gsBase_ten (k j i : Nat) : gsBase 10 4 k j i = asBase k j i := by
-  show gsIn 10 4 + 1 + 4 + (k * (gsPad 4 - 1) + gsBelow 4 j + i) * 3
-      = asIn + 1 + asSelBits + (k * (asPad - 1) + asBelow j + i) * 3
-  rw [gsBelow_four, gsPad_four, gsIn_ten]
-  rfl
-
-theorem gsOut_ten (k j i : Nat) : gsOut 10 4 k j i = asOut k j i := by
-  show gsBase 10 4 k j i + 2 = asBase k j i + 2
-  rw [gsBase_ten]
-
-theorem gsPrev_ten (k j i : Nat) : gsPrev 10 4 k j i = asPrev k j i := by
-  cases j with
-  | zero => show (if 10 ≤ i then gsZero 10 4 else gsRes i k)
-                = (if i ≥ asOps then asZero else asRes i k)
-            rfl
-  | succ j => show gsOut 10 4 k j i = asOut k j i
-              rw [gsOut_ten]
-
-theorem gsMux_ten (k j : Nat) : gsMux 10 4 k j = asMux k j := by
-  funext i
-  show [(⟨gsBase 10 4 k j i, .and (gsPrev 10 4 k j (2 * i)) (gsNot 10 4 j)⟩ : Gate),
-        ⟨gsBase 10 4 k j i + 1, .and (gsPrev 10 4 k j (2 * i + 1)) (gsSel 10 4 j)⟩,
-        ⟨gsOut 10 4 k j i, .or (gsBase 10 4 k j i) (gsBase 10 4 k j i + 1)⟩] = _
-  rw [gsBase_ten, gsOut_ten, gsPrev_ten, gsPrev_ten]
-  rfl
-
-theorem genSelect_ten_gates : (genSelect 10 4).gates = aluSelect.gates := by
-  show (⟨gsZero 10 4, .const false⟩ : Gate)
-        :: (List.range 4).map (fun j => (⟨gsNot 10 4 j, .not (gsSel 10 4 j)⟩ : Gate))
-        ++ (List.range 32).flatMap (fun k =>
-             (List.range 4).flatMap fun j =>
-               (List.range (gsLevelWidth 4 j)).flatMap (gsMux 10 4 k j))
-      = (⟨asZero, .const false⟩ : Gate)
-        :: (List.range asSelBits).map (fun j => (⟨asNot j, .not (asSel j)⟩ : Gate))
-        ++ (List.range asW).flatMap (fun k =>
-             (List.range asSelBits).flatMap fun j =>
-               (List.range (asLevelWidth j)).flatMap (asMux k j))
-  have h : (fun k => (List.range 4).flatMap fun j =>
-              (List.range (gsLevelWidth 4 j)).flatMap (gsMux 10 4 k j))
-         = (fun k => (List.range asSelBits).flatMap fun j =>
-              (List.range (asLevelWidth j)).flatMap (asMux k j)) := by
-    funext k
-    have h2 : (fun j => (List.range (gsLevelWidth 4 j)).flatMap (gsMux 10 4 k j))
-            = (fun j => (List.range (asLevelWidth j)).flatMap (asMux k j)) := by
-      funext j; rw [gsLevelWidth_four, gsMux_ten]
-    rw [h2]
-    rfl
-  rw [h]
-  rfl
-
-theorem genSelect_ten_outs : (genSelect 10 4).outs = aluSelect.outs := by
-  show (List.range 32).map (fun k => gsOut 10 4 k 3 0)
-      = (List.range asW).map (fun k => asOut k (asSelBits - 1) 0)
-  have h : (fun k => gsOut 10 4 k 3 0) = (fun k => asOut k (asSelBits - 1) 0) := by
-    funext k; rw [gsOut_ten]; rfl
-  rw [h]
-  rfl
-
-/-- ⭐ **THE LANDED BLOCK IS THE PARAMETRIC ONE AT `n = 10`** — so `sem_genSelect`
-supersedes `sem_aluSelect` rather than competing with it, and shrinking the ALU
-to three sources is an INSTANTIATION rather than a re-proof. -/
-theorem genSelect_ten : genSelect 10 4 = aluSelect := by
-  have hn : (genSelect 10 4).nIn = aluSelect.nIn := rfl
-  calc genSelect 10 4
-      = ⟨(genSelect 10 4).nIn, (genSelect 10 4).gates, (genSelect 10 4).outs⟩ := rfl
-    _ = ⟨aluSelect.nIn, aluSelect.gates, aluSelect.outs⟩ := by
-          rw [hn, genSelect_ten_gates, genSelect_ten_outs]
-    _ = aluSelect := rfl
+📌 **The banked phase-3 estimate said "3 deletions". It was eleven.** *The
+difference was found by asking who RIDES a bridge rather than what the bridge
+proves — and the one consumer from outside this file
+(`GSCount.gate_count_aluSelect`) was repointed at the hinge in `1d9e7d6`, the
+commit before this one, so that this deletion could go in green.* -/
 
 /-! ### The two shrunk instances, measured
 
@@ -436,9 +381,6 @@ theorem genSelect_three_wf : (genSelect 3 2).wf = true := Circ.wf_of_ssa genSele
 
 #audit_axioms gsIn gsRes gsSel gsZero gsNot gsPad gsWidth gsLevelWidth
 #audit_axioms gsBelow gsBase gsOut gsPrev gsMux genSelect
-#audit_axioms gsLevelWidth_four gsBelow_four gsPad_four gsIn_ten
-#audit_axioms gsBase_ten gsOut_ten gsPrev_ten gsMux_ten
-#audit_axioms genSelect_ten_gates genSelect_ten_outs genSelect_ten
 #audit_axioms genSelect_two_gate_count genSelect_three_gate_count
 #audit_axioms genSelect_two_ssa genSelect_two_wf genSelect_three_ssa genSelect_three_wf
 
@@ -617,10 +559,25 @@ different question — which is normally the whole point of having it.
 Everything below goes through the two seeds alone.
 
 Math's negative control confirms the device BITES — both examples MUST fail and
-do: `gsPad asSelBits = asPad` by `rfl` (would be computing `16 = 2^4`), and
-`genSelect asOps asSelBits = aluSelect := genSelect_ten` (the numeral-bound
-hinge offered for the named-constant statement).  **A device that cannot fail
-would prove nothing, and this one was tested against itself.**
+do, `ScratchHINGECTL.lean`, re-verified after the phase-3 deletion (13:39, both
+failing with **Type mismatch**):
+```
+CONTROL 1  gsPad asSelBits = asPad        := rfl   -- would be computing 16 = 2^4
+CONTROL 2  gsIn asOps asSelBits = asIn    := rfl   -- would be computing 98 = 3*32+2
+```
+**A device that cannot fail would prove nothing, and this one was tested against
+itself.**
+
+⛔ **CONTROL 2 WAS REPLACED AT PHASE 3, AND THE REASON IS A TRAP WORTH THE LINES.**
+*It used to be `genSelect asOps asSelBits = aluSelect := genSelect_ten` — the
+numeral-bound bridge offered for the named-constant statement. Phase 3 DELETED
+`genSelect_ten`, so that example would have gone on "failing" — with `unknown
+identifier`.* ⇒ ***It would have failed BY ABSENCE while the device it exists to
+test went untested, and the standing instruction "both examples MUST fail" would
+have read GREEN.*** **A control whose subject no longer exists is not a control.**
+📌 *Both controls are transcribed here because `Scratch*.lean` is gitignored: the
+control file is durable on disk but carries no history, so the repo's only record
+of what the device was tested against is this docstring.*
 
 ⚠️ Contained in its own `section` so `local irreducible` cannot leak into the
 `decide +kernel` theorems above, which need to compute.
