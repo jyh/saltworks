@@ -1,0 +1,115 @@
+# 🏦 SILICON BANK — 2026-08-07 NIGHT CYCLE (the seat after the first Phoenix)
+
+### Written at a CLEAN SEAM, not at a ceiling: organ duty 2/2 complete, nothing
+### in flight, tree clean, 0/0. **Everything below is verified state, not
+### recollection.** Successor: this is in the REPO and not only on the bus,
+### because tonight's own lesson was that bus-resident things do not survive a
+### clear ([[bus-resident-fixes-die-at-reboot]]).
+
+## ① REFUTATION SCOREBOARD — organ duty, 2 of 2
+
+```
+IMM-UNCOND      baa7e0f   🟡 NOT CLEAN — 4 findings, ALL reporting-level,
+                             ZERO defects in the Lean.  All four taken by math.
+                             verdict: 190176e
+DECODER-UNCOND  a4a6a2b   ✅ CLEAN against checks published BEFORE it landed
+                             (3b3551b, 20:56).  4 findings, all documentation.
+                             verdict: 9edb087
+```
+**IMM's four:** ① "no `decide` anywhere" true of the two proofs, false of their
+closure by ONE leaf — `toReg_ofReg` (`ISA.lean:349`, `decide +kernel +revert`)
+via `decode_encode`. *Settled by reading to ONE named residual: the trailing bare
+`simp` could in principle close it otherwise; the `getUsedConstants` receipt is
+still owed for exactly that.* ② "26 declarations" is 29 *(understated —
+conservative)*. ③ "15 `#audit_axioms`" is whole-commit; the organ's is 12/29/~323.
+④ the I-side mutant is `wf = false`, so a cheap pre-existing check already kills it.
+
+**DECODER's four, all documentation:** ① C-D4 credited to the wrong seat
+(`f287785` is silicon's) and its reason flattened. ② `decoderCut_passes_the_whole_dcWord_family`
+carries `(hop : op < 512)` and the name drops it — *and the rejecting witness is
+itself a `dcWord` point:* `encode (.ADD 4 1 2) = 2130483 = dcWord 563 520 0`.
+③ `dc_both_none_paths` — both arms, one route (0.78 %), zero consumers.
+④ a stale cite (`Decoder.lean:173` → `:214`).
+
+## ② WHAT I CLOSED THAT WAS BANKED AS OPEN
+
+```
+bank blind spot (a)  aluSelect pricing   ✅ 79bb72a — a STEP FUNCTION on the doubling,
+                                            not a per-source slope. n=10→1,445 · n=8→675
+                                            · n=3→291 · n=2→97.  n=2 IS the operand-B mux,
+                                            exact to the gate ⇒ two board items are ONE block.
+                                            Adopted: compiler 04c9db6, math's ALUSEL-PARAM brief.
+bank blind spot (c)  tt-gds-action tag   ✅ unmoved: ttsky26c = 651ea05e…, 2026-07-30
+σ catch-all (board)  ✅ 81d34ba — the fix went to the INSTANCE not the PATTERN. bnCSigma
+                        fixed; adSigma + adSigmaCut still catch-all (LIVE, pc path);
+                        bnSigma catch-all real but QUARANTINED (3 mentions, own file only).
+                        FREE FIX: point the tail at a net ≥ off and instOK becomes the guard.
+package custody      ✅ 26 files, GDS 3,802,450 B, valid GDSII head+ENDLIB, provenance
+                        JSONs match. HASHED so the next check is a comparison:
+                        GDS d2a52c01…2887 · PNG 6f958d89…1936 · tree 07772266…06d8
+floor                ✅ main = f14a4fa, UNMOVED.  ⚠️ read it with `gh api`, NOT git —
+                        the TT repo is not cloned here; git says "ambiguous argument".
+                        Same call proves default_branch IS main ⇒ the B5 §3 danger is
+                        MEASURED, not "leans yes".
+```
+
+## ③ WHAT IS OPEN, AND WHOSE
+```
+B4 / hseam        ⛔ compiler — frame-level sort + cone lemma, taken, running to done
+B5 (all of it)    ⛔ HELD BY THE FLOOR LAW while hseam is open. CLOCK_PERIOD 20→30 and
+                     the die-plot decision are B5-adjacent and stay UNTOUCHED, not
+                     "nearly ready". Die-plot has one new fact: Pages serves main, and
+                     main IS the floor, so committing our render to master is not served.
+4-import sweep    ⚖️ MAESTRO — SaltWorks.lean. Two seats recommend it. Converts
+                     "proved once, silently" into "proved every build". 31 of the 49
+                     unaudited live there.
+C5-9…C5-11        ⛔ genuinely blocked on `core`, which does not exist (C4.lean header)
+watch-block rot   ⚖️ MAESTRO — items 1, 4, 6, 11 rotted; 37ddd8b is the 13-item sweep
+receipt (IMM F1)  ⛔ the getUsedConstants receipt, still owed, purpose narrowed to one route
+```
+
+## ④ THREE THINGS I GOT WRONG, IN PUBLIC, AND THE SHAPE THEY SHARE
+1. **C-D4 published as 15 dead inverters; it is 17.** *I counted the UNREAD bits
+   and stopped. `dcNot 0`/`dcNot 1` are dead too — every RISC-V 32-bit opcode has
+   `opcode[1:0] = 11`, so their negation is never asked for.* Corrected in 90 s.
+2. **I took `decoderCut_passes_the_whole_dcWord_family` at its NAME** — in the
+   same hour I wrote *"NAMES LIE"* into my own agents' brief as law (4).
+3. **My item-(11) repair carried the defect it repaired.** *"Record at boot,
+   alert on change" fails when baseline and check come from different
+   instruments — this seat knows itself as `claude-opus-5[1m]`, the transcript
+   says `claude-opus-5`. Math caught it.*
+
+⭐ **THE SHAPE:** *each was a rule I was holding at the time.* **Three times in
+thirty minutes, three seats, and nobody caught themselves once — every catch came
+from another seat within minutes.** *That is the only argument for five seats I
+found tonight that is not about throughput.*
+
+## ⑤ 🔑 WHAT I THINK THIS BANK MISSES — my own blind-spot guess, per item 13
+* **(a)** I never priced the **producer cascade** the aluSelect shrink implies —
+  `bitwise` is 96 = 3×32 with only `xor` live, and I flagged it without reading
+  `Bitwise.lean`. *The core-size number is therefore still incomplete in the
+  favourable direction.*
+* **(b)** I verified `partial_load_selfrouting` is current **by mtime**, not by
+  rebuilding it. *A staleness sweep proves nothing was touched; it does not prove
+  the proof still elaborates.* **The four-import sweep is what would.**
+* **(c)** I asserted `adSigma`'s sentinel fix "costs nothing" **without building
+  it.** *`instOK_adder`'s proof may or may not go through unchanged; I named the
+  receipt and did not take it.*
+* **(d)** My conveyor briefs forbid builds absolutely. *That was right tonight
+  (the lock was math's) but it means **every verdict I posted is a reading, never
+  an execution** — and I said so each time, but a successor should know it is a
+  standing property of my method, not a one-off caveat.*
+
+## ⑥ LAWS THAT PAID, AND ONE THAT ONLY HALF-PAID
+✅ **`git show <ref>:<path>`** — my predecessor wrote it to stop `reset --hard`
+eating a neighbour's work. *It ALSO made every conveyor line-number frame-correct
+when `Program.lean` grew 607 lines mid-verdict.* **One law, two hazards, only one
+known when it was written.**
+✅ **`Built`, not `Replayed`** — caught a false receipt for math, who then
+discharged it by a stronger route (`lake env lean`, re-elaborates from source).
+⚠️ **"Watch armed" is a claim about the PAST.** *My fallback died at ~21:5x and I
+only learned because the harness reported the kill.* **Report a watch as
+VERIFIED-NOW (`ps` + PPID) or not at all.**
+
+🟢 **Tree clean · 0/0 with origin · `main` untouched at `f14a4fa` · evidence's
+three files never touched · no build run by this seat all night.** 🧂⚓
