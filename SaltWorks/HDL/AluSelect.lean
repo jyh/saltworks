@@ -54,12 +54,14 @@ namespace SaltWorks.HDL
 /-! ## ③ The op-result select -/
 
 def asW : Nat := 32
-/-- Ten op results: add, sub, and, or, xor, slt, sltu, sll, srl, sra. -/
-def asOps : Nat := 10
-/-- Padded to a power of two so the tree is clean. -/
-def asPad : Nat := 16
-/-- Encoded select, four bits — the seat's measured saving over a one-hot ten. -/
-def asSelBits : Nat := 4
+/-- **THE RULED SOURCE COUNT — three: `add`, `xor`, `slt`.** *Muster ruling ① sized
+the select at `(n = 3, b = 2)`; phase 3 is where these three constants moved. It
+read `10` (add, sub, and, or, xor, slt, sltu, sll, srl, sra) until then.* -/
+def asOps : Nat := 3
+/-- Padded to a power of two so the tree is clean. Tracks `asSelBits`; was `16`. -/
+def asPad : Nat := 4
+/-- Encoded select, two bits — the seat's measured saving over a one-hot three. -/
+def asSelBits : Nat := 2
 
 /-! ## THE RULED PAIR — phase 1 of the expand-contract, landed BESIDE the old
 

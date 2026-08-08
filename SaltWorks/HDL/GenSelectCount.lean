@@ -561,8 +561,12 @@ arithmetic. Both proofs failed, and `#audit_axioms` caught the `sorryAx` their
 failed `omega` installed.* ⇒ 🔑 ***A truth-preserving change of a statement's
 SHAPE is still a breaking change. Expand-contract has to preserve what consumers
 can USE, not merely what is true — and a tactic's reach is part of the interface.***
--/
-theorem gate_count_aluSelect : aluSelect.gates.length = 1445 := by
+
+📌 **THE NUMERAL MOVED `1445 → 291` AT THE FLIP, WHICH IS THE ONE EDIT THIS
+THEOREM WAS SUPPOSED TO COST.** *`decide` reported it precisely — "proved that the
+proposition is false" — so the literal is doing its job as a tripwire while
+`gate_count_aluSelect_param` below carries the pair-independent form.* -/
+theorem gate_count_aluSelect : aluSelect.gates.length = 291 := by
   rw [← genSelect_eq_aluSelect, genSelect_gates_length]
   decide
 

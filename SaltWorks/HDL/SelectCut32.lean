@@ -353,27 +353,19 @@ The corpus swap will trip on these. They are stated in the kernel rather than in
 prose because each one is a number a reader would otherwise carry by memory. -/
 
 theorem sliceASelect_nIn : sliceASelect.nIn = 98 := rfl
-theorem aluSelect_nIn : aluSelect.nIn = 324 := rfl
 
-/-- The saving the ruling bought, against the LANDED block rather than against
-`genSelect 10 4`. -/
-theorem gate_saving : aluSelect.gates.length - sliceASelect.gates.length = 1154 := by
-  have h1 := gate_count_aluSelect
-  have h2 := sliceASelect_gate_count
-  omega
+/-! ⛔ **`aluSelect_nIn`, `gate_saving` AND `span_delta` LEFT HERE AT PHASE 3.**
 
-/-- ⚠️ **EVERY DOWNSTREAM NET OFFSET MOVES BY 1,380.** `Compose.instNext` places
-the next organ at `nIn + gates.length`; that is `1769` today and `389` at the
-ruled pair. Nothing in the type system notices an organ placed at the old
-offset. -/
-theorem span_delta :
-    (aluSelect.nIn + aluSelect.gates.length)
-      - (sliceASelect.nIn + sliceASelect.gates.length) = 1380 := by
-  have h1 := gate_count_aluSelect
-  have h2 := sliceASelect_gate_count
-  have h3 : aluSelect.nIn = 324 := rfl
-  have h4 : sliceASelect.nIn = 98 := rfl
-  omega
+*All three compared the ruled block against `aluSelect`, and at the ruled pair
+`aluSelect` IS the ruled block — so `aluSelect_nIn` became `98 = 324`, and the two
+deltas collapsed to `0 = 1154` and `0 = 1380`. They were not merely unproved; the
+re-cut FALSIFIED them, and `gate_saving`'s `omega` reported it as "no usable
+constraints" rather than as a false arithmetic goal.*
+
+✅ **Their content survives above, restated over explicit generator instances
+(`gate_saving_of_instances`, `span_delta_of_instances`, `nIn_of_both_instances`) —
+which is silicon's ruling and the reason the Captain-ratified `−1,154` is still a
+kernel theorem instead of a deleted one.** -/
 
 /-- ⚠️⚠️ **NET 96 AND NET 97 CHANGE MEANING SILENTLY.** Under `(10,4)` net 96 is
 bit 0 of op result **3** and net 97 is bit 1 of it. Under `(3,2)` net 96 is
@@ -384,8 +376,8 @@ operand bits. **This is the sharpest edge in the whole swap.** -/
 theorem net96_97_change_meaning :
     gsRes 3 0 = gsSel 3 2 0 ∧ gsRes 3 1 = gsSel 3 2 1 := ⟨rfl, rfl⟩
 
-/-- The tie constant moves too: `324` (`asZero`) becomes `98` (`gsZero 3 2`). -/
-theorem pad_net_moves : gsZero 3 2 = 98 ∧ asZero = 324 := ⟨rfl, rfl⟩
+/-! *`pad_net_moves` left at phase 3 — its `asZero = 324` half became `98 = 324`.
+Restated above as `pad_net_of_both_instances`, over the generator.* -/
 
 /-- ⚠️ **THE ROOT IS AT LEVEL 1, NOT LEVEL 3.** Every theorem and lemma name in
 `Program.lean` pinned to the old depth — `asV3_eq`, `asB3`, `asOut k 3 0`,
@@ -393,8 +385,9 @@ theorem pad_net_moves : gsZero 3 2 = 98 ∧ asZero = 324 := ⟨rfl, rfl⟩
 theorem root_is_level_one :
     sliceASelect.outs = (List.range 32).map (fun k => gsOut 3 2 k 1 0) := rfl
 
-theorem aluSelect_root_is_level_three :
-    aluSelect.outs = (List.range 32).map (fun k => asOut k 3 0) := rfl
+/-! *`aluSelect_root_is_level_three` left at phase 3 — at two select bits the root
+is level 1, so `asOut k 3 0` names a level the block no longer has. Restated above
+as `root_level_of_both_instances`, which carries BOTH depths.* -/
 
 /-! ### ⭐ THE SAME COMPARISONS OVER EXPLICIT GENERATOR INSTANCES — the phase-3 form
 
@@ -513,13 +506,8 @@ reached. One name per call makes "not reported" impossible. -/
 #audit_axioms mutLeafCut_is_one_gate
 #audit_axioms mutLeafCut_fails_cert
 #audit_axioms sliceASelect_nIn
-#audit_axioms aluSelect_nIn
-#audit_axioms gate_saving
-#audit_axioms span_delta
 #audit_axioms net96_97_change_meaning
-#audit_axioms pad_net_moves
 #audit_axioms root_is_level_one
-#audit_axioms aluSelect_root_is_level_three
 #audit_axioms source_capacity
 #audit_axioms pad_slots
 #audit_axioms nIn_of_both_instances
