@@ -52,6 +52,38 @@ and is NOT edited here -- this file only mechanises it.
        (ii-b) FIRST LANDING  compiler's first COMMIT carrying an L0/L1/L2
                              lemma, verified at origin                NOT FIRED
 
+⛔⛔ THIRD AMENDMENT, 16:1x — MY ANCHORS WERE CITED BY AN UNRESOLVABLE NAME, AND
+   I FOUND IT BY APPLYING THE MAESTRO'S 16:11 RULING TO MYSELF.
+   That ruling: "KERNEL-EXHIBITED requires a RESOLVABLE name -- scratch evidence
+   quotes as scratch or gets landed." The phantom five were real kernel runs in a
+   lawfully deleted scratch; the defect was UNCITEABILITY, not fabrication.
+
+   The identical defect is in the lines just above. `bus L28318` is a POSITION IN
+   AN UNVERSIONED FILE: FLEET.md is in no git repo and has no remote
+   ([[fleet-bus-is-unversioned]]) -- which is why bus_snapshot.sh exists at all,
+   and why this seat's own watcher carries a BUS SHRANK detector. A line number
+   resolves today and may resolve to nothing tomorrow, and item 2's entire freeze
+   hangs on these two anchors.
+
+   ⇒ CONTENT-ADDRESSED IDENTITY, recorded so the anchors survive renumbering,
+     truncation, rotation or a clobbering '>':
+
+     (i)    L28318  "[08/08 15:51, maestro] ... THE (3) WAVES ARE DISPATCHED"
+            line sha256[0:24] = ff89fca3b2e7fa6604909910
+     (ii-a) L28432  "[08/08 15:54, compiler - printf header via %s ARGUMENT ..."
+            line sha256[0:24] = ce31acf364349097597b0c80
+
+     bus digest at pinning time  sha256[0:32] = 74c076bc7f5972996895d606be5dcfc5
+     bus length at pinning time  28712 lines
+
+   📌 The LINE NUMBER is now a convenience; the HASH is the identity. A grep for
+   the quoted header re-finds the anchor at any offset. Line numbers stay printed
+   because they are what a human reads -- they are simply no longer the citation.
+
+   🔑 THE GENERAL FORM, and it is broader than the bus: ***AN INDEX INTO A MUTABLE
+   UNVERSIONED OBJECT IS NOT A CITATION.*** It is a lookup that happens to work
+   right now. Cite content, and keep the index only as an aid.
+
    PRIMARY = (ii-b). The maestro (15:51) and compiler (15:54) read it that way
    independently, and it is the only one that is operationally meaningful: a
    wave in flight has neither cost anything nor bought anything yet.
