@@ -113,6 +113,63 @@ theorem sem_congr (c : Circ) {ins₁ ins₂ : Env} (h : ∀ n, ins₁ n = ins₂
   simp only [sem]
   exact List.map_congr_left (fun n _ => run_congr c.gates h n)
 
+/-! ## ⭐ A CIRCUIT DEPENDS ONLY ON WHAT IT READS
+
+**`run_congr` and `sem_congr` above ask for agreement on EVERY net**, which is
+more than the semantics needs and is why they cannot see the commonest fact
+about a circuit: *changing a wire it never looks at changes nothing.*
+
+📌 **THIS WAS PRICED BEFORE IT WAS BUILT AND THE PRICE WAS THE POINT.** *Evidence
+needed a sampled/exhaustive detector; the detector needs to know when an
+enumeration covers an axis; that needs a QUOTIENT lemma (e.g. `shifter32` reads
+five shamt nets, so `List.range 32` IS the whole shift axis); and every such
+lemma needs exactly this — because the two environments agree on what the circuit
+reads and DIFFER elsewhere.* ⇒ **Four separate findings on 8/7 turned on "what
+does this thing actually read": the `Dest 3` door, the idle-destination
+refutation, the shift axis, and the detector. This is that question, once.** -/
+
+/-- **A gate list depends only on what it READS** — agreement on every net any
+gate takes as fanin, plus the queried net, is enough. *The `upd` step preserves
+it: a later gate's fanin is either an earlier gate's output, where both sides
+hold the same computed value, or an original net covered by the hypothesis.* -/
+theorem run_congr_on (gs : List Gate) : ∀ {env₁ env₂ : Env},
+    (∀ g ∈ gs, ∀ a ∈ g.op.fanin, env₁ a = env₂ a) →
+    ∀ n, env₁ n = env₂ n → run env₁ gs n = run env₂ gs n := by
+  induction gs with
+  | nil => intro e₁ e₂ _ n hn; exact hn
+  | cons g gs ih =>
+    intro e₁ e₂ hf n hn
+    have hop : g.op.eval e₁ = g.op.eval e₂ :=
+      Op.eval_congr g.op (fun a ha => hf g (by simp) a ha)
+    rw [run_cons, run_cons, hop]
+    refine ih (fun g' hg' a ha => ?_) n ?_
+    · by_cases hEq : a = g.out
+      · subst hEq; simp [upd]
+      · rw [upd_of_ne _ hEq, upd_of_ne _ hEq]
+        exact hf g' (by simp [hg']) a ha
+    · by_cases hEq : n = g.out
+      · subst hEq; simp [upd]
+      · rw [upd_of_ne _ hEq, upd_of_ne _ hEq]; exact hn
+
+/-- ⭐ **A CIRCUIT DEPENDS ONLY ON WHAT IT READS.** Two input valuations agreeing
+on every net the gates consume, and on the primary outputs, give the same
+meaning — however wildly they differ on nets the circuit never looks at. -/
+theorem sem_congr_on (c : Circ) {ins₁ ins₂ : Env}
+    (hf : ∀ g ∈ c.gates, ∀ a ∈ g.op.fanin, ins₁ a = ins₂ a)
+    (ho : ∀ n ∈ c.outs, ins₁ n = ins₂ n) :
+    sem c ins₁ = sem c ins₂ := by
+  simp only [sem]
+  exact List.map_congr_left (fun n hn => run_congr_on c.gates hf n (ho n hn))
+
+/-- ⛔ **THE FANIN HYPOTHESIS IS LOAD-BEARING** — two valuations agreeing at the
+output net and differing on what a gate reads give different answers. -/
+theorem reads_hypothesis_is_load_bearing :
+    run (fun i => i == 0) [(⟨2, .and 0 1⟩ : Gate)] 2
+      ≠ run (fun i => i == 1) [(⟨2, .and 0 1⟩ : Gate)] 2 ∨
+    run (fun i => decide (i < 2)) [(⟨2, .and 0 1⟩ : Gate)] 2
+      ≠ run (fun _ => false) [(⟨2, .and 0 1⟩ : Gate)] 2 := by
+  decide +kernel
+
 /-! ## Worked meaning, kernel-checked
 
 `halfAdder` really is a half adder — proved by `decide +kernel` over its whole
@@ -153,6 +210,7 @@ theorem halfAdder_correct :
 #audit_axioms Op.eval_congr
 #audit_axioms upd_self upd_of_ne run_append
 #audit_axioms run_of_unwritten run_congr sem_congr
+#audit_axioms run_congr_on sem_congr_on reads_hypothesis_is_load_bearing
 #audit_axioms halfAdder_correct
 
 end SaltWorks.HDL
