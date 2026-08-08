@@ -212,6 +212,52 @@ as well, and a positional `outs` list cannot catch either by type.*
 
 ---
 
+## 3.5. ⛔ TWO BLOCKS ON THE CRITICAL PATH THAT DO NOT EXIST
+
+**Found by math 8/7 19:59 (§3), re-verified here at the bytes before acceptance.**
+*§3's table has TEN rows — one per operand **RESULT** — and no row for
+`aluSelect`'s four **CONTROL** inputs. The census counted the data side and
+omitted the control side, and that is how both of these hid.*
+
+### ① THE ALU-SELECT ENCODER — nothing drives `aluSelect`'s select bits
+
+```
+AluSelect.lean:67   asSel j = asOps * asW + j = 320 + j      ← INPUT nets (asIn = 324)
+                    consumed at :96 (asNot) and :105 (asMux)
+Decoder.lean:128    decoder.outs = [isADD, isXOR, isSLT, isADDI, isBEQ, valid]
+                    FIVE one-hot CLASS signals — NOT an encoded ALU op
+grep asSel outside AluSelect.lean → only Stack/Program.lean, which PROVES ABOUT
+                    aluSelect and drives nothing
+```
+⇒ ***A block converting five one-hot class signals into four select bits is not
+in the tree, and no §4 row allocates one.***
+
+📌 **It is CHEAP — slice A's demand set is three slots — but the encoding is
+where a wrong map would be well-formed and wrong.** ⚠️ ***The bit ORDER must be
+READ from `asPrev`/`asLeafOf`/`asLevelWidth`, never assumed***: the tree consumes
+`asSel 0` at width 8 and `asSel 3` at width 1, so which `j` is the LSB is a fact
+about the tree, not a convention. **No number is published here because none has
+been measured.**
+
+### ② THE OPERAND-B PATH FOR `ADDI` — nothing muxes rs2 against the immediate
+
+```
+ISA.lean:121   ADD  rd a b   => s.get a + s.get b
+ISA.lean:122   ADDI rd a imm => s.get a + imm.signExtend 32
+```
+⇒ ***`adder32`'s `b` port must carry `readTree`'s rs2 output OR `immICirc`'s 32
+wires, and NOTHING SELECTS BETWEEN THEM.*** §4 allocates exactly two `adder32`s
+and no mux. *Thirty-two 2:1 muxes; at `asMux`'s three-gates-per-bit shape that is
+**~96 gates — DERIVED from that shape, not measured**.*
+
+🔑 **BOTH ARE THE `C5-5` FAMILY AGAIN, AND BOTH ARE WORSE THAN THE FOUR ALREADY
+LOGGED:** *`instOK` forbids a dangling input, so the assembly MUST map these
+somewhere — and a wrong map stays well-formed, stays `ssa`, and passes every
+certificate that does not select the mis-fed slot.* ⛔ **The difference is that
+the earlier four were mis-WIRINGS of blocks that exist. These two blocks do not
+exist at all, so there is nothing to mis-wire yet — which is exactly why a census
+of landed organs could not see them.**
+
 ## 5. WHAT THIS DOES **NOT** SAY
 
 * It does not say `core` is nearly done. ⛔ **AND THE "ONE DECISION" THIS BULLET
@@ -256,15 +302,31 @@ as well, and a positional `outs` list cannot catch either by type.*
   `stepT` takes a fetched word on `instrNet`, and nothing yet says where that word
   comes from) and **`EntryLoaded`**.
 
-⇒ ***The honest summary, CORRECTED: C4's assembly is no longer blocked on THEORY,
-and is blocked on FOUR STATEMENT HYPOTHESES — all named, none open research, and
-no unbuilt block on the critical path.***
+⇒ ***The honest summary, CORRECTED TWICE: C4's assembly is no longer blocked on
+THEORY. It is blocked on FOUR STATEMENT HYPOTHESES **and on TWO BLOCKS THAT DO
+NOT EXIST** (§3.5).***
 
-⛔ **The words "ONE SHIFTER DECISION" stood here and were wrong: the shifter is
-not a blocker, because slice A never selects it.** *Left visible rather than
-silently deleted — the count in this sentence was quoted elsewhere, and a summary
-that repairs its own past without showing the repair is worth less than one that
-shows it.*
+⛔ **THIS SENTENCE HAS NOW BEEN WRONG IN TWO DIFFERENT WAYS AND THE SECOND IS THE
+INSTRUCTIVE ONE.**
+* *First it read "blocked on **ONE SHIFTER DECISION** and four statement
+  hypotheses". The shifter is not a blocker — slice A never selects it.*
+* 🔴 *Then it read "…four statement hypotheses — all named, none open research,
+  and **NO UNBUILT BLOCK ON THE CRITICAL PATH**." **That last clause was false,
+  and it was false BEFORE the first correction too.** A correction pass rewrote
+  this exact sentence and **carried the false clause through untouched.***
+
+🔑 ***AND REMOVING THE SHIFTER MADE THE SURVIVING CLAUSE STRICTLY MORE
+MISLEADING, not less.*** *Before: one false clause standing beside one real (if
+mis-scoped) blocker. After: one false clause **alone**, in a summary that reads
+as fully closed — so a reader staffing off it concludes `core` is a wiring
+exercise. It is not: two blocks have to be BUILT first.* (Math, 8/7 20:07, whose
+§3 I took only half of.)
+
+⚠️ ***REWRITING A SENTENCE IS NOT RE-CHECKING ITS CLAUSES.*** **When a correction
+touches a summary, every OTHER clause in that summary is now unverified too — and
+closing one gap can promote a surviving falsehood from "one of the problems" to
+"the whole picture."** *Both wordings are left visible above rather than deleted;
+the counts in this sentence were quoted elsewhere.*
 
 ---
 
