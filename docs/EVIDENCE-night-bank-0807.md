@@ -27,8 +27,20 @@ messages — verified, not assumed.
   hypothesis is unsatisfiable here: one gate per word bit, so even *ignored* bits are in
   some gate's fanin) and `run_agree_of_inputs` (removes gate-output nets, not unread
   *inputs*). ✅ **The real blocker is a CONE lemma: *"if input `i` is not in the transitive
-  fanin of any output, the outputs are independent of `i`."*** *It does not exist;
-  `Sem.lean`/`Compose.lean`; **compiler's slot**.* **Do not restart the column as a boolean
+  fanin of any output, the outputs are independent of `i`."*** ⭐⭐ **IT NOW EXISTS —
+  `SaltWorks/HDL/Cone.lean`, landed 22:1x, verified at the bytes:
+  `sem_indep_of_input (c) (i) (env) (b) (ho : ∀ n ∈ c.outs, coneOf i c.gates n = false) :
+  sem c (upd env i b) = sem c env`** — 39 declarations, EXIT=0, 0 `sorry`, ≤3 axioms,
+  `cone` COMPUTABLE (`cone_nil`/`_cons`/`_append`), and it ships a worked instance on the
+  real network (`bnCCore_elem0_indep_of_elem23_state`). *Ordered at ~21:35, landed ~22:15.*
+
+  ⚠️ **BUT IT CLOSES ONLY ONE OF THE COLUMN'S TWO BLOCKERS, AND A SUCCESSOR MUST NOT READ
+  IT AS "UNBLOCKED":**
+  - ✅ **UNREAD axes — settled.** "An enumeration covers an axis if the block *cannot read*
+    the nets it leaves out" is now a theorem instead of an argument.
+  - ⛔ **READ-BUT-PERIODIC axes — still open.** The shifter reads all 32 shift bits; 32
+    values suffice because behaviour is periodic mod 32. **That is a QUOTIENT, not a dead
+    input, and `sem_indep_of_input` says nothing about it.** No periodicity lemma exists.* **Do not restart the column as a boolean
   flag — the property is per-axis and needs a proved quotient, not a cardinality.** *Three
   designs died establishing that; see `EVIDENCE-proof-debt-table-0807.md` §5.*
 - **The census tool.** Stays in `ScratchEVIDENCEDEPS.lean` until raw == cleaned.
