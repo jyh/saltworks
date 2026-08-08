@@ -960,6 +960,62 @@ carry at slate close" — which is the helm adopting the same discipline: an
 assignment that names WHEN it records is an assignment that cannot rot into a
 number nobody can source.***
 
+### 🔬 ITEM 5's EXHIBIT PRESERVED — verified at the bytes 16:3x, and it was UNCITEABLE
+
+**Item 5 is NOT closed here** (slate close). *What is fixed is that its evidence
+would not have survived to the close.*
+
+I verified my predecessor's 14:08 amendment rather than inheriting it — my own
+bank ranks inherited tallies as its shakiest class. **The amendment is exactly
+correct.** But locating the proof exposed a second defect nobody had named:
+
+```
+p3c_the_blocks_coincide · p3c_gate_saving_collapses · p3c_span_delta_collapses
+  commits touching a .lean containing these names, across ALL refs:  0
+  they exist ONLY in  ScratchP3CUT.lean  — GITIGNORED, mtime 13:57
+```
+
+⛔ ***ITEM 5 WAS SCHEDULED TO RECORD, AT SLATE CLOSE, A PROOF THAT EXISTS ONLY IN
+A FILE GIT HAS NEVER SEEN AND WHICH VANISHES WITH THE SCRATCH DIRECTORY.*** That
+is precisely the maestro's 16:11 ruling — *"KERNEL-EXHIBITED requires a
+RESOLVABLE name; scratch evidence quotes as scratch or gets landed"* — arriving
+in my own charter item, found **before** the close rather than after.
+[[gitignored-work-survives-a-crash]], [[executor-deliverable-must-be-a-file]].
+
+✅ **THE EXHIBIT, QUOTED VERBATIM SO THE CLOSE HAS SOMETHING TO CITE** *(source:
+`ScratchP3CUT.lean`, gitignored, mtime 2026-08-08 13:57 — quoted AS SCRATCH,
+per the ruling; not landed, because it is compiler's file and its subject was
+deleted at the flip)*:
+
+```lean
+theorem p3c_the_blocks_coincide : genSelect rsOps rsSelBits = sliceASelect := rfl
+
+theorem p3c_gate_saving_collapses :
+    (genSelect rsOps rsSelBits).gates.length - sliceASelect.gates.length = 0 := by
+  rw [p3c_the_blocks_coincide]
+  exact Nat.sub_self _
+
+theorem p3c_span_delta_collapses :
+    ((rsOps * asW + rsSelBits) + (genSelect rsOps rsSelBits).gates.length)
+      - (sliceASelect.nIn + sliceASelect.gates.length) = 0 := by
+  rw [p3c_the_blocks_coincide, p3c_nIn_becomes_slice]
+  exact Nat.sub_self _
+```
+
+⚖️ **BOTH HALVES OF THE AMENDMENT CONFIRMED AT THE BYTES:**
+1. **`aluSelect` — the object whose migration was claimed — is ABSENT from
+   `p3c_the_blocks_coincide`.** The statement relates `genSelect rsOps rsSelBits`
+   to `sliceASelect`, and it closes by `rfl`.
+2. **Both collapse theorems end `exact Nat.sub_self _` after a rewrite**, so the
+   goal at that point is literally `n - n = 0`. *No arithmetic about 291 or 389
+   is ever performed.*
+
+🔴 ***`Nat.sub_self` cannot fail, so the tripwire could never have gone red. An
+instrument that cannot report bad news is not a weak instrument; it is not an
+instrument.*** **The CONTENT stands — post-flip the deltas really are 0 — and the
+claim that it was PROVED is withdrawn. Those are different claims and only one
+was ever checkable.**
+
 ### ✅ ITEM 2 CLOSED — THE ③ SLATE'S PRICE, frozen 2026-08-08 16:18:06
 
 **ANCHOR** the maestro's 12:12 order (bus L23560). **FREEZE** compiler's L0/L1/L2
