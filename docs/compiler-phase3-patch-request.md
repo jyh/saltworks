@@ -153,6 +153,38 @@ a pad CONSTANT against its select width, which is a different thing.
 
 Expand-contract, every commit green, patch-to-owner, and *"the census closes only
 when the THIRD file lands green."* So: math patches `Program.lean`, compiler
-reapplies the flip patch, and the joint landing is verified by a full build plus
-`docs/compiler-census.py` showing `FAIL 0 · UNREACHED 0` — which is the first run
-where `SelectCut32` and `C1Organ` get real verdicts rather than masked ones.
+reapplies the flip patch, and the joint landing is verified as below.
+
+**THE EXACT INVOCATIONS — published rather than described, because a named
+instrument with an unnamed invocation is how a check gets skipped or mis-run:**
+
+```bash
+cd ~/projects/claude/saltworks
+
+# 1. the flip patch must still apply — RE-CHECK, do not cite an earlier check.
+#    (It applied cleanly at 14:19; any later edit near AluSelect.lean:54-65
+#     invalidates that silently.)
+git apply --check ${LOCAL_SEAT}/PHASE3-FLIP-compiler-1349.patch
+git apply         ${LOCAL_SEAT}/PHASE3-FLIP-compiler-1349.patch
+
+# 2. the build. NEVER PIPE IT — $? after a pipe is the tail's status, and it
+#    fails in the reassuring direction. Redirect, then read the EXIT text.
+/Users/jyh/projects/claude/saltbuild.sh > /tmp/joint.txt 2>&1
+grep 'saltbuild EXIT' /tmp/joint.txt          # must read EXIT=0
+
+# 3. the trichotomy. Same rule: unpiped, and read the rc.
+python3 docs/compiler-census.py /tmp/joint.txt
+#    PASS bar: FAIL 0 · UNREACHED 0 · PASS = all tracked modules
+#    rc: 0 on a clean run, 2 on misuse (bare call / missing file)
+```
+
+⚠️ **`UNREACHED 0` is the load-bearing half, not `FAIL 0`.** A build can report no
+errors while modules behind a failure were never elaborated — that is how
+`SelectCut32` and `C1Organ` read as green in the 13:49 census when neither had run.
+**This is the first run in which those two get real verdicts rather than masked
+ones**, and the trichotomy is what proves it.
+
+📌 *Both "never pipe" notes above are there because this seat piped `saltbuild.sh`
+once and piped the census tool once, in the same session, having banked the law.
+The wrapper's own EXIT text caught the first; the second produced two bogus `rc=0`
+readings that briefly looked like a defect in the tool.*
