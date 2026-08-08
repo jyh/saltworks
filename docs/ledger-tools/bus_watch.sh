@@ -54,13 +54,25 @@ while true; do
     awk -v start="$last" -v self="$SELF" '
       NR <= start { next }
       # a post header sets the owner for every line until the next header
-      /^\[[0-9]+\/[0-9]+ [0-9:]+, [A-Za-z]/ {
+      # A HEADER MUST FOLLOW A BLANK LINE (2026-08-08 11:4x, the stricter case
+      # the maestro published). Pattern alone cannot tell a header you QUOTE from
+      # one that IS one: their 11:25 post quoted a header at column 0 and this arm
+      # matched it as REAL, spoofing owner-tracking -- which is what the 08:22
+      # owner-gate exists to prevent, one level up.
+      # MEASURED on the live window: blank-precedence rejects every quoted header
+      # and misses ZERO genuine posts, because each real post is appended with a
+      # newline-then-bracket header. The blank line is STRUCTURAL, not stylistic.
+      # NOTE: NO APOSTROPHES IN THIS COMMENT. It lives inside a single-quoted awk
+      # program, so one apostrophe terminates the program -- which is exactly the
+      # defect that broke this file twice while the fix was being written.
+      prevblank && /^\[[0-9]+\/[0-9]+ [0-9:]+, [A-Za-z]/ {
         owner = $0
         sub(/^\[[0-9]+\/[0-9]+ [0-9:]+, /, "", owner)
         sub(/[^A-Za-z0-9_-].*$/, "", owner)
       }
       /^- [0-9-]+ [0-9:]+ [A-Z]/ { owner = "maestro" }
       { if (tolower(owner) != tolower(self)) print }
+      { prevblank = ($0 == "") }
     ' "$BUS" > /tmp/ev-peer.txt
 
     # ⛔ SECOND PASS, ADDED 08:1x 8/8 AFTER THE WIDENING FIRED TWICE AND WAS
@@ -77,7 +89,18 @@ while true; do
     # be EMITTED. Without it this pass re-reports every historical maestro
     # halt on each fire -- I wrote that bug into the fix for a false-fire.
     awk -v start="$last" '
-      /^\[[0-9]+\/[0-9]+ [0-9:]+, [A-Za-z]/ {
+      # A HEADER MUST FOLLOW A BLANK LINE (2026-08-08 11:4x, the stricter case
+      # the maestro published). Pattern alone cannot tell a header you QUOTE from
+      # one that IS one: their 11:25 post quoted a header at column 0 and this arm
+      # matched it as REAL, spoofing owner-tracking -- which is what the 08:22
+      # owner-gate exists to prevent, one level up.
+      # MEASURED on the live window: blank-precedence rejects every quoted header
+      # and misses ZERO genuine posts, because each real post is appended with a
+      # newline-then-bracket header. The blank line is STRUCTURAL, not stylistic.
+      # NOTE: NO APOSTROPHES IN THIS COMMENT. It lives inside a single-quoted awk
+      # program, so one apostrophe terminates the program -- which is exactly the
+      # defect that broke this file twice while the fix was being written.
+      prevblank && /^\[[0-9]+\/[0-9]+ [0-9:]+, [A-Za-z]/ {
         owner = $0
         sub(/^\[[0-9]+\/[0-9]+ [0-9:]+, /, "", owner)
         sub(/[^A-Za-z0-9_-].*$/, "", owner)
@@ -85,6 +108,7 @@ while true; do
       /^- [0-9-]+ [0-9:]+ [A-Z]/ { owner = "maestro" }
       NR <= start { next }
       { if (tolower(owner) == "maestro") print }
+      { prevblank = ($0 == "") }
     ' "$BUS" > /tmp/ev-orders.txt
 
     grep -oE '^\[[0-9]+/[0-9]+ [0-9:]+, maestro[^]]*\]|^- [0-9-]+ [0-9:]+ MAESTRO' \
