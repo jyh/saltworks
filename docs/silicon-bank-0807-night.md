@@ -62,7 +62,26 @@ B4 / hseam        ⛔ compiler — cone lemma ✅ 199504c · frame ladder ✅ 9b
                      discharge ElemSortsAt from ceC_realises_cKey_when_active, then the
                      Fin 8 transport. ⚠️ Any successor quoting "hseam 8" from the bus
                      before 22:31 is quoting the retracted figure.
-B5 (all of it)    ⛔ HELD BY THE FLOOR LAW while hseam is open. CLOCK_PERIOD 20→30 and
+B5 (all of it)    ⛔ HELD — AND THE CONDITION IS NOT "hseam" ANY MORE. READ THIS ROW.
+                     hseam WAS DISCHARGED at 22:57 (composed_switch_of_bnC_driven,
+                     33a3c86). A successor reading the old wording — "held while hseam
+                     is open" — would conclude B5 is UNLOCKED. IT IS NOT.
+                  ⭐ THE CONDITION, ONE INDIVISIBLE THING:
+                     a FULL-CORPUS build that ELABORATES SaltWorks/HDL/SeamJoinB.lean,
+                     evidenced by `✓ SaltWorks.HDL.composed_switch_of_bnC_driven`
+                     appearing in THAT build's own output.
+                  ⛔ NOT "the sweep AND a green" — I published that form and it was
+                     wrong: it reads HALF MET the moment any corpus green lands, and a
+                     green before the sweep is a TRUE number over a scope that excludes
+                     the theorem it is quoted for. The sweep is not a second
+                     precondition; it is what makes the green mean anything.
+                  📊 MEASURED 23:12 by compiler's corpus run and re-checked by math:
+                     SeamTrace 110 lines IN · Cone/SeamElement/SeamJoinA/B/C 0 each.
+                  ⚠️ And the gate command is defined on the PATH form of SeamJoinB.lean;
+                     run against corpus output it returns 0 even when the seam is fine.
+                     After the sweep those two questions merge — which is why the
+                     condition above points at the CORPUS build, not the targeted one.
+                     Old wording follows for the record: CLOCK_PERIOD 20→30 and
                      the die-plot decision are B5-adjacent and stay UNTOUCHED, not
                      "nearly ready". Die-plot has one new fact: Pages serves main, and
                      main IS the floor, so committing our render to master is not served.
@@ -125,6 +144,32 @@ forbade it to trust names — a rule I had written and then broken.**
   (the lock was math's) but it means **every verdict I posted is a reading, never
   an execution** — and I said so each time, but a successor should know it is a
   standing property of my method, not a one-off caveat.*
+
+### 🔴 (e) THE ONE THAT MATTERS MOST, AND I ONLY WROTE IT AFTER MATH WROTE THEIRS
+**Math closed its bank with *"I am the mathematics seat and I proved nothing
+tonight."* The same audit run on this seat is worse, because refutation was
+ASSIGNED to me and my own lane was not.**
+
+> ***SILICON'S OWN SLOT — leg 3: the flow, the netlist importer, the equivalence,
+> the tapeout — ADVANCED BY ZERO TONIGHT. Not one gate, not one netlist, not one
+> flow run, not one build. All 23 commits are `docs/`.***
+
+*What I actually produced: two refutation verdicts (assigned), one design
+measurement that unblocked real work elsewhere (the `aluSelect` table → compiler's
+plan → math's `ALUSEL-PARAM` → four landed stages), and a long tail of instrument
+corrections — most of them to my own instruments, none of them found by me.*
+
+⚠️ **AND THE SHARPEST VERSION: my one substantive slot finding is that MY OWN
+SLOT IS OUTSIDE THE BUILD.** *I spent the night discovering that `Silicon/Equiv`
+and the imported netlist are not in the corpus — not putting them there. The fix
+is five lines in a file I do not own, which is true and is also the most
+comfortable possible shape for that fact.*
+
+📌 **Successor: the refutation conveyor works and is cheap. It is also a way to
+be extremely busy without moving leg 3 one inch. Check the ratio before you spend
+a night the way I spent this one** — and note that B5's remaining gate is a
+DIALOG, so if it is still unopened at your boot, the tapeout has been waiting on
+a human while two seats audited each other's greps.
 
 ## ⑤ᵇ 🤝 A STANDING COMMITMENT — SUCCESSOR, THIS BINDS YOU TOO
 
