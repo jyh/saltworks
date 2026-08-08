@@ -170,12 +170,27 @@ an unreferenced circuit that should still say what it computes, not a hole under
 | ③ no theorem at all | **106** | a proof |
 
 ⚠️ **Tier ①ᵇ IS NEW AND THIS INSTRUMENT CANNOT SEE IT.** A sampled check touches `sem`
-exactly as an exhaustive one does, so both members read `B-PROVEN` above. **Its population
-is therefore UNKNOWN, not two** — 19 theorems in the tree have the shape `<X>OK = true`,
-six now carry `_on_sample`, and the remainder mix genuinely exhaustive certificates
-(`ce_step_eq`, all 128 configurations) with unclassified ones. *The proposed value-shape
-detector — does the unfolded statement reach a def whose value is a literal list of
-hand-written constants — would settle it; it does not exist yet.*
+exactly as an exhaustive one does, so every member reads `B-PROVEN` above.
+
+✅ **POPULATION NOW KNOWN — classified BY HAND at 17:2x, not by the tool:** **20 theorems
+carry `_on_sample`**, and the four that were outstanding are settled *(each verified at its
+own definition by this seat before acceptance)*:
+
+| certificate | enumeration | verdict |
+|---|---|---|
+| `haChain_correct` | `[false,true].all` ×2 — **all 4** of a 2-input circuit | ✅ EXHAUSTIVE |
+| `immI_correct` | `(List.range 4096).all` — **all 2¹²** of a 12-bit field | ✅ EXHAUSTIVE |
+| `immB_correct` | same | ✅ EXHAUSTIVE |
+| **`regNext8_correct`** | `(List.range 8)` one-hots + all-false — **9 of 2⁸** | ⛔ **SAMPLED, and NOT renamed** |
+
+📌 **`regNext8_correct` is the finding: a sampled certificate carrying an unqualified
+name.** *Nine enable patterns of 256 — the register file is certified on one-hot writes and
+never on a multi-bit enable.*
+
+⛔ **AND MY OWN COUNT WAS STALE BY A PASS. I measured 20 `_on_sample` at 16:40, then wrote
+"6" in a commit message at 16:52 and again on the bus at 17:18** — carrying forward a figure
+**I had personally superseded**, twice, after compiler's second rename pass. *The defect I
+have been reporting all day, self-inflicted, with the newer measurement in my own hand.*
 
 ⇒ ***The import sweep closes tier ① and nothing else. Tiers ②③ are ~140 definitions
 that no import will reach, and that is the honest size of the proof debt.***
