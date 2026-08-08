@@ -22,10 +22,15 @@ messages — verified, not assumed.
 
 **Mine, and BLOCKED rather than idle:**
 
-- **The sampled/exhaustive column.** Needs a **fanin-restricted congruence lemma that
-  does not exist** (`run_congr`/`sem_congr` quantify over *all* nets). Three designs
-  died; see `EVIDENCE-proof-debt-table-0807.md` §5. **Do not restart it as a boolean
-  flag — the property is per-axis and needs a proved quotient, not a cardinality.**
+- **The sampled/exhaustive column.** ⚠️ **I first called the blocker "a fanin-restricted
+  congruence lemma". THAT NAME IS WRONG** — compiler ruled out `sem_congr_on` (its
+  hypothesis is unsatisfiable here: one gate per word bit, so even *ignored* bits are in
+  some gate's fanin) and `run_agree_of_inputs` (removes gate-output nets, not unread
+  *inputs*). ✅ **The real blocker is a CONE lemma: *"if input `i` is not in the transitive
+  fanin of any output, the outputs are independent of `i`."*** *It does not exist;
+  `Sem.lean`/`Compose.lean`; **compiler's slot**.* **Do not restart the column as a boolean
+  flag — the property is per-axis and needs a proved quotient, not a cardinality.** *Three
+  designs died establishing that; see `EVIDENCE-proof-debt-table-0807.md` §5.*
 - **The census tool.** Stays in `ScratchEVIDENCEDEPS.lean` until raw == cleaned.
   `MERELY-BUILT` is `86 ≤ n ≤ 112`; the residue is `deriving` instances, and **the NAME
   cannot separate them** — `instGates`/`instOuts` are hand-written defs that capitalise

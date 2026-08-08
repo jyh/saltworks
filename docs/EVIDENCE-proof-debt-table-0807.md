@@ -249,10 +249,25 @@ lemma reduces it to a finite set.** *No `% 32` periodicity lemma exists in
 — the tripwire-vs-theorem distinction recurring one level up, inside the tool built to
 detect it.*
 
-⛔ **AND THE LEMMA IS NOT A ONE-LINER — compiler checked rather than estimated:** the tree
-carries `run_congr` and `sem_congr`, which quantify agreement over **all nets**. *A
-periodicity lemma needs agreement over a **fanin / reads set** only, and no such lemma
-exists.* ⇒ ***The column is blocked on Lean infrastructure, not on effort.***
+⛔ **AND THE MISSING LEMMA IS NOW NAMED EXACTLY — compiler, 21:1x, and my earlier name for
+it was WRONG in a way that would have cost a successor a morning.**
+
+*I wrote "a fanin-restricted congruence lemma". **That is not it**, and compiler ruled out
+both of the obvious candidates at the statement level:*
+
+| candidate | why it cannot work |
+|---|---|
+| `sem_congr` / `run_congr` | quantify agreement over **all nets** |
+| `sem_congr_on` | hypothesis is `∀ g ∈ c.gates, ∀ a ∈ g.op.fanin` — the inverter bank has **one gate per word bit**, so all 32 bits are in *some* gate's fanin **including the 15 the decoder ignores**. ***Unsatisfiable for this purpose no matter how the circuit behaves.*** |
+| `run_agree_of_inputs` (new) | says only the `nIn` primary inputs matter — but **all 32 word bits ARE primary inputs** here. It removes gate-output nets from the obligation, **not unread inputs**. |
+
+🔑 **WHAT IS ACTUALLY NEEDED IS A *CONE* LEMMA: *"if input `i` is not in the transitive
+fanin of any output, the outputs are independent of `i`."*** **A different theorem. It does
+not exist. Computing the outputs is the only route today.**
+
+⇒ ***The column is blocked on Lean infrastructure, not on effort*** — and the infrastructure
+is a **cone** lemma in `Sem.lean`/`Compose.lean`, **compiler's slot**, awaiting the
+maestro's call because the seam is the fleet's critical path and this is not.
 
 📌 **Near-term honest form is THREE-VALUED:** `EXHAUSTIVE` (finite type, fully enumerated
 — today only `bools`-style axes) · `SAMPLED` (a literal argument or hand-written list) ·
