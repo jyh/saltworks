@@ -72,11 +72,12 @@
   M2 is the banked control (residual ⊢ 2 = 1, no slack). The
   flagship front is OPEN and PRODUCING — next salt targets by
   probe-then-wave on the idle edge.
-- W3 · WRITE · **L3 LANDED 16:15** (`5a3735d`,
-  `bnC_output_frames_of_stageOK`, 3 axioms — landed at the first
-  quiet window, minutes after its vacuous gate dissolved). NEXT: L4
-  (candidate-B: the runNetF_key + bnCFrameAt_succ_frames induction,
-  C-class fallback; the ∀-w clause is the named risk).
+- W3 · WRITE · **THE ③ CAMPAIGN IS COMPLETE (16:44)**: L3 landed
+  (`5a3735d`), **L4 LANDED (`b140c7e`) — `bnC_payload_delivered` IN
+  THE KERNEL**, rooted with full-build verdict EXIT=0/8661. The
+  candidate-B route held: NO σ object ever constructed; the flagged
+  ∀-w clause was the leg that made the induction trivial. Goal-level
+  controls with pre-written witnesses, both biting.
 - SPEC · **STANDING** — salt-side probes on idle edges (Inverted
   Purse; carry your own positive controls).
 
