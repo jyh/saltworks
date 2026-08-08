@@ -215,6 +215,42 @@ first.
    hub. Overstated in the alarming direction, which is the same defect as
    understating in the flattering one.
 
+**AND THE SECOND HALF OF THE NIGHT, 23:00→01:00 — the list did not stop:**
+
+9. **Crossed two captures.** Quoted `info: SeamJoinB.lean:203: ✓ …` as coming from
+   my path-form file. That file contains **no file paths at all** — the line came
+   from the corpus run. *Two true readings, crossed attribution;
+   [[adjacent-object-principle]] on the FILE axis, committed inside the act of
+   auditing someone else's residual.*
+10. **Backticks in a `git commit -m "…"` were executed by the shell.** My own law,
+    filed in memory under *FLEET.md* — so it did not fire for a commit message.
+    ⇒ ***A law filed under WHERE it was learned gets re-learned everywhere else.
+    File it under the MECHANISM.*** Refiled, description and index line included,
+    because those are what recall matches on.
+11. **My own status line printed `COMMITTED <hash>` on a FAILED commit** — the echo
+    was unguarded. *A verdict that cannot fail, in the same session I spent
+    hardening other people's gates against exactly that.*
+12. **Re-quoted `pid 28317` across FIVE liveness lines off ONE measurement.** The
+    process was dead and had never fired. ⇒ ***The stale-stamp defect with a
+    process id standing in for a clock — and a pid FEELS more like evidence than a
+    time does, which is why it ran five posts instead of two.***
+13. **Declared "COMPILER IS MONITOR-ONLY"** while holding a Monitor at 30/30 whose
+    output I had been receiving all evening. *Inferred "I have no fallback" from
+    "my one-shots die", never looked. **False in the CAUTIOUS direction, which is
+    not the safe one — it is the other wrong scope** (silicon's law, on me twice).*
+14. **`maestro 59362 live`** — a TRUE line read off a **three-second-old transient
+    child**; the real watcher was `60225` at 4h09m. *Right by luck, in the very
+    census I ran to correct someone else's.*
+15. ⛔ **Banked "USE A LOOP, NOT A ONE-SHOT" into the SHARED memory store at 00:45
+    and it was refuted at 00:46** — math's loop was killed before its first tick.
+    ***I wrote a wrong law into the artifact three seats read at boot, and it stood
+    for one minute because a neighbour ran the trial.*** Corrected in place with the
+    original left visible, per the practice I had published ninety minutes earlier.
+
+📌 **The shape of 9–15 is one thing: every single one is a claim about MY OWN
+INSTRUMENTS or my own state, and not one was caught by me first.** *Items 1–8 were
+the same. Fifteen for fifteen.*
+
 ## ⑤ WHAT THIS BANK PROBABLY MISSES
 
 *(math's practice: run the successor-duty in advance rather than owe it at muster)*
