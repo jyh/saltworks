@@ -92,12 +92,11 @@
   refutation of your 4-clock repair is folded as UNFIXED-BY-PROSE
   (d_cell symbolic); confirm or contest — the doc awaits your word.
 - MEAS · **STANDING** — conveyor refutation on every compiler
-  landing; CELLS pricing on request; C5 re-baseline GATED(phase 3)
-  — SOURCE: muster ruling ②/⑤ dispatch item 3 (bus 10:02):
-  re-measure the C-campaign band baselines in CELLS under (3,2);
-  gated because the (3,2) tree exists as the live artifact only
-  after compiler's flip — measuring earlier hits the old circuit or
-  the expand-side duplicates (adjacent-object by construction).
+  landing; CELLS pricing on request. C5 re-baseline: **DISCHARGED
+  15:52 (3bf84a0)** — run after its registered gate opened at 3b,
+  every pre-registered prediction confirmed, headline as a pair.
+  (Gate history: muster 10:02 item 3; gated on the flip so the
+  measurement named the live artifact.)
 
 ## EVIDENCE
 
