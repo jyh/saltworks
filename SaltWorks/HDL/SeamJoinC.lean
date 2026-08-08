@@ -1,4 +1,12 @@
 import SaltWorks.HDL.SeamElement
+-- `bnCFrameAt_length` comes from here.  This file used to declare its OWN copy —
+-- same namespace, identical statement AND proof — and the hub imported both.
+-- Lean accepts that silently (`EXIT=0`, no warning), and math measured 2026-08-08
+-- that the environment keeps the FIRST-imported copy, which made the LINE ORDER
+-- of `SaltWorks.lean` semantically load-bearing: an alphabetise would have
+-- swapped which proof downstream code sees.  Deleting the duplicate is what
+-- makes the order question stop existing.  Do not re-declare it here.
+import SaltWorks.HDL.SeamJoinA
 
 /-!
 # THE DRIVER BRIDGE — `zip3Trace` (network side) vs `ceFrameTrace` (element side)
@@ -16,15 +24,9 @@ uses it to DISCHARGE `ElemSortsAt` outright from a frame-shape hypothesis.
 
 namespace SaltWorks.HDL
 
-/-! ## 0. LENGTH BOOKKEEPING — every wire's frame is exactly as long as the trace -/
-
-/-- `bnCFrameAt` emits one bit per input cycle, on every wire, at every stage. -/
-theorem bnCFrameAt_length (st : List Bool) (tr : List (List Bool)) (k w : Nat) :
-    (bnCFrameAt st tr k w).length = tr.length := by
-  induction tr generalizing st with
-  | nil => rfl
-  | cons inp is ih =>
-    rw [bnCFrameAt_cons, List.length_cons, List.length_cons, ih]
+/-! ## 0. LENGTH BOOKKEEPING — `bnCFrameAt_length` is imported from `SeamJoinA`.
+This file's own copy was an EXACT duplicate (statement and proof) and was deleted
+2026-08-08; see the import header. -/
 
 /-! ## 1. THE BRIDGE -/
 
@@ -262,7 +264,7 @@ theorem minmax_lt_eight_ne (d0 d1 : Nat) (hd0 : d0 < 8) (hd1 : d1 < 8) (hne : d0
     min d0 d1 < 8 ∧ max d0 d1 < 8 ∧ min d0 d1 ≠ max d0 d1 := by
   omega
 
-#audit_axioms bnCFrameAt_length zip3Trace_eq_ceBody zip3Trace_eq_ceFrameTrace
+#audit_axioms zip3Trace_eq_ceBody zip3Trace_eq_ceFrameTrace
 #audit_axioms zip3Trace_bridge_fixture zip3Trace_needs_rst_low zip3Trace_needs_length
 #audit_axioms ceCPort_eq_frameTrace runTrace_ceC_frameTrace_any_state
 #audit_axioms cDestRd cDestRd_cFrame
