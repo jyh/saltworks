@@ -257,6 +257,53 @@ about offsets, and offsets are cheap.**
 count. *If it costs more, the decomposition is wrong and I want to know at the
 plan, not at the proof.*
 
+### 2.3 ⭐ THE WALL DATA FOLDED IN — and it corrects the core's SIZE, not just
+### its ceiling
+
+**The `~11,900` figure is CIRC gates. That is not what gets imported.** Structural
+emission is passthrough (1 Circ gate → 1 cell), but **the importer then EXPANDS
+each sky130 cell into the 6-primitive `Gate` type**, and that factor is now
+measured rather than guessed:
+
+```
+composed tile, measured (§2.1c):   910 logic cells → 1,389 entries
+                                   less 118 primary inputs → 1,271 logic gates
+                                   ⇒ EXPANSION ×1.40
+core, projected:  ~11,900 cells ×1.45  ≈ 17,300 logic gates
+                  + 1,056 state leaves + 18 design inputs
+                  ⇒ ≈ 18,400 Netlist entries
+```
+
+⇒ ***The core's imported netlist is ~18,400 entries, not ~11,900 — about 1.5×
+bigger than the number the assembly plan hands you, and nobody had applied the
+expansion factor because until tonight it had never been measured at scale.***
+
+**Elaboration cost at that size, interpolated from the two measured rungs**
+(12,000 → 7 s, 24,000 → 22 s; ⇒ ≈ n^1.65):
+`(18,400 / 12,000)^1.65 × 7 s ≈ **14 s**` — **comfortably inside, chunked, at
+default settings.**
+
+**`C5-9`** — the core's imported netlist is **15,000–21,000** `Netlist` entries.
+**`C5-10`** — it elaborates **chunked, at default `maxRecDepth`, in under 30 s**.
+**`C5-11`** — the **readback** check is the cost that bites, not elaboration. *The
+tile's readback ran 32 vectors × 116 outputs; the core is ~1,072 outputs over
+~18,400 gates — **~14× the work per vector, ~9× the outputs**. This is the first
+place I expect a wall I have not already broken.*
+
+### 2.4 ⇒ THE DECOMPOSITION CHOICE, RE-COST AT MEASURED NUMBERS
+
+| | one netlist | 12 organs |
+|---|---|---|
+| elaboration | ~14 s, **fits** | ~1–2 s each |
+| a failure tells you | *"the core is wrong"* | **which organ** |
+| readback | one 18,400-gate pass | 12 small passes, **parallelisable** |
+| the σ-wiring seam | none | **a real obligation** (`C5-5`) |
+
+⭐ **The elaborator no longer decides this — I do, and the reason is the middle
+row.** ***At 18,400 gates a red is uninformative; at 1,500 it names the organ.***
+**Per-organ stands, and now stands on a stated ground rather than a borrowed
+constraint.**
+
 ---
 
 ## 3. THE MUTATION CONTROLS
@@ -358,7 +405,7 @@ it is being made HERE rather than discovered later.*
 
 | # | step | gate |
 |---|---|---|
-| 1 | **elaboration-ceiling ladder** (§2.1) | none — **run it before `core` lands** |
+| 1 | ✅ **elaboration-ceiling ladder** (§2.1) — **DONE**, wall diagnosed and broken by restructure (§2.1b, §2.1c); harness chunks; readback repaired | — |
 | 2 | pre-flight sequential-cell scan (§4.2b) | `core` netlist exists |
 | 3 | per-organ import + round-trip census | ceiling known |
 | 4 | greedy cut + cone census at core scale | organs imported |
@@ -371,6 +418,35 @@ compiler deliverable, and no seam — only synthetic netlists — and it is the
 number the rest of this plan branches on.* **That is the one piece of C5 that can
 be paid for before the campaign starts, and paying for it early is the whole
 reason to pre-register a plan.**
+
+---
+
+---
+
+## 5b. THE PRE-REGISTRATION LEDGER — every prediction, and its state
+
+**Registered before any C5 work. Scored as results arrive, including against
+me.**
+
+| # | prediction | state |
+|---|---|---|
+| `C5-1` | greedy cut set lands in **100–200** | ⏳ open — needs `core` |
+| `C5-2` | max cone **≤ 24** holds at core scale without sub-cone splitting | ⏳ open |
+| `C5-3` | the four unmeasured blocks contribute **< 40** cuts | ⏳ open |
+| `C5-4` | the true elaboration ceiling is **above 1,300** | ⚠️ **SCORED — AMBIGUOUS, NO CREDIT.** Refuted at defaults (wall 1,000–2,000), confirmed with knobs, and the prediction never said which regime. *The defect is in my pre-registration, not the result.* |
+| `C5-5` | the wiring certificate costs **< 5 %** of obligations | ⏳ open |
+| `C5-6` | all six mutations produce a **FALSE** goal, not a timeout | ⏳ open |
+| `C5-7` | **M5 passes every per-organ check** and fails only the wiring | ⏳ open — *the one I would least bet on* |
+| `C5-8` | the core introduces **≤ 3** unmodelled cell families | ⏳ open — *cell coverage measured COMPLETE for the tile (53/32/0)* |
+| `C5-9` | the core's imported netlist is **15,000–21,000** entries | ⏳ open — *from the ×1.40 expansion measured tonight* |
+| `C5-10` | it elaborates **chunked, default settings, < 30 s** | ⏳ open |
+| `C5-11` | **readback**, not elaboration, is the next wall | ⏳ open — *~14× the per-vector work of the tile* |
+
+📌 **`C5-4` IS THE ONE TO LEARN FROM, AND THE LESSON IS ABOUT WRITING
+PREDICTIONS, NOT ABOUT LEAN.** *"Above 1,300" was true and false at once because
+it never named the regime it was measured in.* ⇒ **`C5-9`…`C5-11` each name their
+configuration explicitly — "chunked, default `maxRecDepth`" — so none of them can
+be scored both ways.**
 
 ---
 
