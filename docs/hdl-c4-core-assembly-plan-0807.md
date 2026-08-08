@@ -274,9 +274,30 @@ which is the load-bearing half — at a cost of one dead constant.**
 📌 *The `97` for the bespoke operand-B mux above is UNAFFECTED and stands. Two
 different objects, one gate apart, and the plan now names both.*
 ⚖️ **AND THE HEADLINE SIZING IS UNMOVED: `10 → 3` is still `−1,154`, because
-`3 < 4` means the constant IS charged at both ends.** ⚠️ **STATED AS A CONDITIONAL BECAUSE THE PARAMETRISATION IS NOT DONE —
-math is holding for the maestro's word. Until it lands, block ② is unbuilt and
-owes 97 gates and a proof.** *Recorded here because it changes what the sizing
+`3 < 4` means the constant IS charged at both ends.** ✅ **NO LONGER CONDITIONAL — `ALUSEL-PARAM` LANDED 8/7 22:18 AND I READ THE
+THEOREMS AT `HEAD`, NOT OFF THE ANNOUNCEMENT:**
+```
+Program.lean:5650   sem_genSelect (n b) (hb : 0 < b) (E)   every source count, every
+                                                            select width, every valuation
+Program.lean:5989   sem_operandBMux (E) :
+                      sem (genSelect 2 1) E
+                        = (List.range 32).map fun k =>
+                            if E (gsSel 2 1 0) then E (gsRes 1 k) else E (gsRes 0 k)
+Program.lean:6082   sem_sliceASelect (E)                   the n = 3 Slice A select
+```
+⇒ ***Block ② no longer "would inherit a proof shape" — THE THEOREM EXISTS, over all
+valuations and all 32 outputs, with its own mutation control at `n = 2`
+(`genSelectCut2`, a width the ten-source mutant has no opinion about).***
+
+⚖️ **SO THE TRADE IS NOW FULLY PRICED ON BOTH SIDES:**
+```
+BESPOKE mux     97 gates  +  an organ proof YOU OWE
+genSelect 2 1   98 gates  +  an organ proof that EXISTS, with a control
+                ⇒ THE EXTRA GATE IS THE PRICE OF THE FREE THEOREM
+```
+📌 *`sem_aluSelect` is unharmed and is now a corollary — `genSelect_ten` makes it
+an instance, stated verbatim, 2^324 preserved exactly. `aluSelectCut` survives
+untouched and certifies more.* *Recorded here because it changes what the sizing
 ruling is choosing between: not "1,154 gates against re-proving an organ", but
 "…against re-proving an organ that would ALSO discharge one of the two blocks on
 the critical path."*
