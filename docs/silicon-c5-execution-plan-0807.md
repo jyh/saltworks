@@ -274,6 +274,31 @@ of 2** — and it is why `instOK`'s `σ i < off` discipline in the assembly plan
 load-bearing rather than bookkeeping: **the wiring certificate is a statement
 about offsets, and offsets are cheap.**
 
+#### ⭐ AMENDED ~20:5x — `C5-5` HAS MEASURED CONTENT NOW, FROM THREE ORGANS
+
+I registered `C5-5` as a guess. Three organs landing in one evening have given
+the σ-wiring certificate its **seed set**, each with a known failure mode:
+
+| # | obligation | found by |
+|---|---|---|
+| 1 | `pcAdd`'s **carry-in** must be driven by a host **zero** (`adder32.nIn = 65`) | compiler, PCADD ledger |
+| 2 | `aluSelect`'s **three shift slots** have **one** producer after route ② | silicon |
+| 3 | `regNext`'s **`we` ports** must come from `regWrite` **alone** | math, REGNEXT |
+
+🔑 ***All three are one shape: an input port whose correctness is no organ's
+theorem, only `core`'s wiring.*** **And `instOK` forbids leaving a port dangling
+— so the assembly MUST map it somewhere, a wrong map stays well-formed and
+`ssa`, and it passes every certificate that does not select it.**
+
+*Math states the exposure exactly, for their own organ:* **"any assembly driving
+`we` from anything but `regWrite` breaks P5 silently, and no core exists to check
+it."**
+
+⇒ **`M5` (swap two organs' σ offsets) is aimed at precisely this class, and it
+now has three concrete targets rather than a hypothetical.** *`C5-5`'s < 5 %
+estimate stands unchanged — but it is now an estimate ABOUT something, and the
+three seeds are what the certificate must at minimum discharge.*
+
 **`C5-5`** — the wiring certificate costs **< 5 %** of the total obligation
 count. *If it costs more, the decomposition is wrong and I want to know at the
 plan, not at the proof.*
