@@ -251,6 +251,25 @@ and no mux. **97 gates** — `32 × 3 + 1`, silicon's arithmetic from the shifte
 reversal banks, *which supersedes my own "~96, derived from `asMux`'s shape": the
 `+1` is the shared inverter and their basis is measured where mine was inferred.*
 
+⏳ **AND BLOCK ② MAY STOP BEING A BLOCK AT ALL — CONDITIONAL, NOT YET TRUE.**
+*Math proposed at 21:18 parametrising `sem_aluSelect` over the source count `n`
+(it currently threads literals `329 + 45k + 42`, `pfr (320+j)`, `< 324`, with
+level 3 baked into the lemma NAMES). **If that lands, silicon's `n = 2` row IS
+this mux** — and I checked the identity rather than relaying it:*
+```
+asMux            = 3 gates: .and (prev even) (¬sel) · .and (prev odd) (sel) · .or
+gates(2)         = 32×(2−1)×3 + ⌈log₂2⌉ + [2<2] = 96 + 1 + 0 = 97
+operand-B mux    = 32 × 3 + 1 (shared inverter)                 = 97
+```
+⇒ ***Same generator, same 3-gate cell, same shared inverter, exact to the gate.
+It is not a new organ; it would INHERIT the proof shape rather than need its
+own.*** ⚠️ **STATED AS A CONDITIONAL BECAUSE THE PARAMETRISATION IS NOT DONE —
+math is holding for the maestro's word. Until it lands, block ② is unbuilt and
+owes 97 gates and a proof.** *Recorded here because it changes what the sizing
+ruling is choosing between: not "1,154 gates against re-proving an organ", but
+"…against re-proving an organ that would ALSO discharge one of the two blocks on
+the critical path."*
+
 📌 **And `immICirc` is BUILT AND WIRED TO NO ONE** — `grep` outside
 `Immediate.lean` returns nothing. *The block exists; the path does not.*
 
