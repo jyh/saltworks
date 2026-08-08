@@ -35,7 +35,7 @@ A tool that scans Lean source and does not strip comments is measuring the prose
 That applies to BOTH sides of the comparison: an `#audit_axioms` line quoted
 inside a docstring is prose about auditing, not an audit.
 """
-import re, sys, glob, os
+import re, sys, glob, os, subprocess
 
 def strip_comments(src: str) -> str:
     out, i, depth = [], 0, 0
@@ -50,6 +50,27 @@ def strip_comments(src: str) -> str:
             out.append(src[i])
         i += 1
     return ''.join(out), depth
+
+def _tree_state(files):
+    """HEAD sha and which of `files` are uncommitted, captured WITH the reading.
+
+    Returns ('?', []) if git is unavailable -- an unknown tree state is reported
+    as unknown, never as clean."""
+    try:
+        head = subprocess.run(['git', 'rev-parse', '--short', 'HEAD'],
+                              capture_output=True, text=True, timeout=10).stdout.strip() or '?'
+        out = subprocess.run(['git', 'status', '--porcelain', '--'] + list(files),
+                             capture_output=True, text=True, timeout=30).stdout
+        dirty = [ln[3:].strip() for ln in out.splitlines() if ln.strip()]
+        return head, dirty
+    except Exception as e:
+        # ⛔ NOT `return '?', []` — an empty dirty list READS AS CLEAN, and that is
+        # exactly how this shipped broken for one run: `subprocess` was unimported,
+        # the NameError was swallowed here, and every verdict printed HEAD=? with
+        # NO dirty files while another seat's file was ` M`.
+        # A broad `except` that degrades to the REASSURING value is a false green.
+        return f'UNREADABLE({type(e).__name__})', ['⚠️ TREE-STATE-UNKNOWN']
+
 
 def main() -> int:
     root = sys.argv[1] if len(sys.argv) > 1 else 'SaltWorks'
@@ -85,7 +106,13 @@ def main() -> int:
             # Two mitigations, and the second is the real one:
             #   * refuse on unbalanced nesting (below) -- turns silence into noise
             #   * run against a COMMITTED ref, not the working tree:
-            #       git show HEAD:<path>  /  git stash-free read of origin/master
+            #       git show HEAD:<path>
+            #
+            # ⭐ AND SILICON'S CLAUSE (8/7 21:13) IS SHARPER THAN "STAMP OR SKIP":
+            # `git show <ref>:<path>` is not merely the SAFE way to read a landing,
+            # it is the ONLY way to get LINE NUMBERS IN THE FRAME THE LANDING IS
+            # ABOUT. A verdict about commit X citing working-tree lines cites a
+            # frame no reader can reproduce. Tonight that offset was 607 lines.
             print(f"COULD NOT CHECK: unbalanced comment nesting in {p} "
                   f"(depth {depth} at EOF) -- this parser's block-comment model "
                   f"differs from Lean's here; its verdict on this file is void",
@@ -105,7 +132,17 @@ def main() -> int:
         if missing:
             bad.append((p, missing))
     dirs = sorted({os.path.dirname(f) for f in files})
+    # ⭐ ATTRIBUTION, adopted from math 8/7 21:12 after we hit the same hazard from
+    # opposite sides within three minutes. A reading of a ` M` file is not WRONG,
+    # it is UNATTRIBUTABLE -- the report cannot name which object it measured.
+    # So every verdict now carries HEAD and the dirty files it actually read.
+    # (This is the account-check lesson on the FILE axis: stamp the reading,
+    # do not assert the expectation.)
+    head, dirty = _tree_state(files)
     scope = f"ROOT={root}, {len(files)} files in {len(dirs)} dirs, {total_thm} theorems"
+    scope += f", HEAD={head}"
+    if dirty:
+        scope += f", ⚠️ {len(dirty)} DIRTY: {' '.join(dirty)}"
     print(f"READ: {scope}")
     for d in dirs:
         n = sum(1 for f in files if os.path.dirname(f) == d)
