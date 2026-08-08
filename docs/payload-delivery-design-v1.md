@@ -4,22 +4,19 @@
 ### from docs/silicon-frame-protocol-0806.md and confirmed in session.
 ### Refutation assignments at the end. Sequenced AFTER the c1/(3,2)
 ### dispatches — this block costs no seat time until those land.
-### Round-2 state (8/8 13:5x, v2.2): MATH's read IN and FOLDED (H4;
-### F3; residues). PROBE CLOSED (free-run, double-confirmed) AND its
-### successor measurement COMPLETE: H2 RESTATED on the amended spec
-### §5 D3.5 (9efc4f5) — well-phasedness is a sof-anchored input
-### event, strictly stronger than the retired second-act_stb form
-### (measured inert on phase, 200 seeds, treatment-asserted); L0's
-### seed now sourced. ∀-P's artifact-side ground REMOVED (counter
-### width fixed netlist-neutral). Citation law adopted:
-### section+sentence, never line. SILICON round-2 read IN (its 13:47
-### §6 assignment rode the same post); COMPILER round-2 read OPEN.
-### WAVES fire after compiler's read AND phase 3 closes.
-### (History: 6b8dc71/d71a59f/bdb75f2/1a70c99.)
+### v2.3 (8/8 15:5x) — ALL GATES DOWN, WAVES DISPATCHED: phase 3
+### closed (d85e13a) + 3b (bb82d5c); ALL round-2 reads IN and folded
+### (math 13:33 · silicon 13:47/12:59 · compiler 15:50). CLAIM
+### scoped to the tapeout instance P=8 (compiler's R1: `runFrame`
+### bakes the 14; ∀-P's true price = the driver, named in §5). Body
+### citations converted to symbol/sentence anchors per the citation
+### law. THE ③ WAVES ARE LIVE: L0/L1/L2 → compiler's HDL slot;
+### L3 → math (three lines); L4 → math (C-class, the summit).
+### (History: 6b8dc71/d71a59f/bdb75f2/1a70c99 + this fold.)
 
 ## 0. WHAT B4 DID AND DID NOT CERTIFY
 
-`composed_switch_of_bnC_driven` (SeamJoinB.lean:188, 33a3c86) certifies
+`composed_switch_of_bnC_driven` (SeamJoinB.lean, 33a3c86) certifies
 **destination-header delivery**: under the driven-trace hypotheses,
 every header reaches the output it names. Verified at the source 8/8
 00:16 (d567ca4 thread): headers, NOT payloads. This block scopes the
@@ -30,10 +27,12 @@ arrive **verbatim, in order, at the same output, in the same cycle**.
 
 k=3, P=8, frame = 2k+P = 14 cycles per line, MSB first:
 `[ACT, a₂, ACT, a₁, ACT, a₀, p₀ … p₇]`. P = 8 is the tapeout's
-PLACEHOLDER (spec :270), not a frozen constant — the statement is
+PLACEHOLDER (spec, the P-placeholder sentence — was :270, drifted to
+:361 per §5's drift table), not a frozen constant — the statement is
 parametric in P and the certificate must not hard-code 14 (silicon's
 ③ disclosure 1). Frame order cross-checked against consumption:
-stage s consumes destination bit k−1−s at cycle 2s+1 (spec :121), so
+stage s consumes destination bit k−1−s at cycle 2s+1 (spec, the
+stage-consumption sentence), so
 the MSB-first frame and the stage order AGREE — an LSB-first frame
 would satisfy every quoted spec sentence and route backwards
 (silicon's ③ pass, the cross-check this block had not stated).
@@ -70,7 +69,7 @@ For the k=3 fabric under:
   Well-phasedness is an INPUT EVENT and appears as its own
   hypothesis — never inherited from a frame count;
 - H3 (reset discipline — compiler's ③ A/B pass, the L1 refutation):
-  B4's own `hrst` binder (SeamJoinB.lean:192): the reset trace is
+  B4's own `hrst` binder (SeamJoinB, the binder itself): the reset trace is
   `true :: List.replicate n false` — one pulse at cycle 0, none
   after. Without it a mid-frame rst erases `decided` and the element
   re-decides on PAYLOAD bits: a correct-looking delivery with the
@@ -88,7 +87,12 @@ For the k=3 fabric under:
   `p : Fin 8 → List Bool` is arbitrary-length, so B4's sorter leg is
   ALREADY ∀-P;
 
-CLAIM: for every line i and every t ∈ [2k, 2k+P):
+CLAIM (stated at the tapeout instance P = 8, frame = 14 — compiler's
+R1, 15:50: the fabric's own driver `runFrame` bakes the 14 in as a
+literal, so ∀-P is artifact-supported on the SORTER leg only; the
+generalization stays deferred in §5, where its true price — the
+driver's length parameter — is now named): for every line i and
+every t ∈ [2k, 2k+P):
   `output (dest i) t = input i t`.
 
 Riders:
@@ -140,19 +144,17 @@ Riders:
 - **L1 (Batcher element, ceC — REVISED at compiler's ③ pass)**: under
   H3, after its decide the compare-exchange is a static 2-permutation
   for the rest of the frame. The persistence is LANDED
-  (`ceC_step_decided` :110, `ceC_body_mux` :157); H3 is what makes it
+  (`ceC_step_decided`, `ceC_body_mux`); H3 is what makes it
   usable. The undecided cases are THREE, not two: two idles =
-  straight-through (`ceC_frame_two_idle_stable` :232 — the
+  straight-through (`ceC_frame_two_idle_stable` — the
   previously-cited `…_rejects_idle_sorts_low` is a MUTATION CONTROL,
   not the statement); and two ACTIVE lines with EQUAL destinations —
-  the tie SPLICES the payload (`ceC_pair_tie_splices_the_payload`
-  :307), excluded by StageOK's distinctness clause — a B4 hypothesis
-  AT STAGE 0 (SeamJoinB:193), transported inward by `stageOK_succ`
-  (SeamJoinA:313), not a consequence of H1 (math's round-2 F2
+  the tie SPLICES the payload (`ceC_pair_tie_splices_the_payload`), excluded by StageOK's distinctness clause — a B4 hypothesis
+  AT STAGE 0 (its own binder), transported inward by `stageOK_succ`, not a consequence of H1 (math's round-2 F2
   residue: "interior" was loose). The statement carries it.
 - **L2 (banyan element — RESTATED at compiler's ③ pass; the draft's
   form was refuted TWICE)**: there is no sequential banyan in the
-  fleet — `fabric` (Banyan.lean:132) is a `Circ`: no state, no cycle
+  fleet — `fabric` (Banyan.lean, the definition) is a `Circ`: no state, no cycle
   index, no "after sel_stb"; its claim signals are PRIMARY INPUTS
   supplied by an oracle computed from `Banyan.line`/`srcAt`, never
   from header bits on the wire. And the locked element is a
@@ -172,12 +174,12 @@ Riders:
   (`cDestOf_is_payload_blind`) — payload-blind BY CONSTRUCTION, it
   survives every payload-mangling transformation and cannot carry a
   payload theorem. The machinery that CAN is landed elsewhere:
-  `bnC_output_frames_are_the_fold` (SeamTrace.lean:1242) —
+  `bnC_output_frames_are_the_fold` (SeamTrace.lean) —
   whole-frame, payload-CARRYING, consuming the same `ElemSortsAt`
   premise `elemSortsAt_all` discharges. The composition from those
   two landed theorems is THREE LINES (executor-proved in the pass).
 - **L4 (the σ-composition — the C-class work L3 was hiding; NAMED at
-  compiler's ③ pass)**: `frames_succ_perm` (SeamJoinA.lean:267)
+  compiler's ③ pass)**: `frames_succ_perm` (SeamJoinA.lean)
   holds the one-comparator permutation, but its σ is EXISTENTIAL AND
   DISCARDED — `stageOK_succ` uses it only to transport the invariant;
   nothing composes the 24 per-comparator σ's, and frame-σ's agreement
@@ -231,7 +233,11 @@ Riders:
   F3: the port-coverage companion is literal-k, NOT P-bound — it
   survives ∀-P and dies at ∀-k, so it was never a reason to defer P;
   and B4's sorter leg is ALREADY ∀-P (`p` arbitrary-length, per H4's
-  read). The deferral's remaining ground is the frame counter alone;
+  read). AND (compiler's R1, 15:50): the artifact ground reappears
+  one level up — `runFrame` hardcodes the 14, so generalizing the
+  DRIVER is the ∀-P wave's true price, named here so it is never
+  silently carried. The deferral's remaining ground is the frame
+  counter alone;
   the generalized statement still carries port coverage explicitly
   per §4. ARTIFACT-SIDE GROUND REMOVED (silicon 13:47): the
   counter-width literal is fixed ($clog2, netlist-neutral at P=8),
