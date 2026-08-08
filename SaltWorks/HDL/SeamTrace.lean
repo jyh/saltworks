@@ -901,6 +901,33 @@ level this argument works at.**
 than tidiable: they are hypotheses of the FRAME-level element certificate, and
 the frame is the level the discharge has to work at.* -/
 
+/-! ### Step 2d's first piece — the network's EIGHT OUTPUTS, named
+
+*The twin of `bnC_step_state`: that one said the next STATE is the fold's state
+nets evaluated; this says the OUTPUTS are the fold's data list evaluated. With
+`bnCResult_dat` (`= bnCDatAt 24`) it says the eight wires carry exactly what the
+24th element left behind.* -/
+
+theorem bnC_step_out_wires (st inp : List Bool) :
+    (stepSeq batcherNetC st inp).1
+      = (bnCDatAt 24).map (run (batcherNetC.env inp st) bnCCore.gates) := by
+  have hnOut : batcherNetC.nOut = 8 := by decide +kernel
+  have hlen : (bnCResult.2.1.map (run (batcherNetC.env inp st) bnCCore.gates)).length = 8 := by
+    rw [List.length_map]
+    have h := bnCBuild_dat_length bnComps 0 ((List.range bnCWires).map bnCDatIn)
+    have h8 : ((List.range bnCWires).map bnCDatIn).length = 8 := by decide +kernel
+    rw [h8] at h
+    exact h
+  show (sem bnCCore _).take batcherNetC.nOut = _
+  rw [sem, hnOut, bnCCore_outs_eq, List.map_append, ← hlen, List.take_left,
+      bnCResult_dat]
+
+/-- ⭐ **WIRE `w`'s VALUE THIS CYCLE, and it is what `hseam`'s `hw` reads.** -/
+theorem bnC_wire_val (st inp : List Bool) (w : Nat) (hw : w < 8) :
+    (stepSeq batcherNetC st inp).1.getD w false
+      = run (batcherNetC.env inp st) bnCCore.gates ((bnCDatAt 24).getD w 0) := by
+  rw [bnC_step_out_wires, getD_map_bool _ _ _ (by rw [bnCDatAt_length]; exact hw)]
+
 /-! ### Axiom audit -/
 
 #audit_axioms bnCDatStep bnCDatDrop bnCBuild_state_drop4 bnCBuild_state_drop
@@ -919,5 +946,6 @@ the frame is the level the discharge has to work at.* -/
 #audit_axioms ceCcore_data_port_gate ceCcore_data_port_lt bnC_data_bit
 #audit_axioms bnCElemOutAt ceC_nOut_eq bnC_step_out bnCElemOuts bnC_out_factors
 #audit_axioms bnCDatDrop_succ bnCDatAt_succ bnCDatStep_getD
+#audit_axioms bnC_step_out_wires bnC_wire_val
 
 end SaltWorks.HDL
