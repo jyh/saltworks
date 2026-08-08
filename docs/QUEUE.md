@@ -124,8 +124,17 @@ OPEN ITEMS:
   law remain his; fact sheet on his word. Adjacent MONEY item from
   the muster flags: PCBs 0/80 — the real TT scarcity; ordering is
   his word.
-- The pin cnt[3] → uio_out[5] (T2, exercised 13:49): rides into B5
-  unless struck; put to the Captain directly 8/8 14:1x.
+- The pin cnt[3] → uio_out[5]: **CAPTAIN-CONFIRMED 8/8 14:14** — no
+  longer a veto-window; settled. Silicon implements in RTL at its
+  next write seam; spec §6 records it.
+- PCBs 0/80 (T1, money): the Captain is UNDECIDED, will decide
+  later — resurface gently with the B5 fact sheet, not before.
+- **THE ③+④ DEEP SESSION — CAPTAIN-COMMITTED, do-not-forget duty
+  (his words 14:14: "please don't let us forget — tonight, or
+  tomorrow morning")**: the maestro re-surfaces it THIS EVENING
+  before ~19:00, and again TOMORROW MORNING ~07:30 if not held
+  tonight. Brief ready: the blocks are five refutation rounds
+  richer; the 1990 paper states the full-circle theorem verbatim.
 - Endorsement + witness approval #2 (T1): his lanes, he monitors
   personally (his 8/7 disposition; no maestro re-surfacing).
 - The ③+④ deep design session: open at his pleasure — a
