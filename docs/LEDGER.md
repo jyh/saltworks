@@ -2540,3 +2540,193 @@ headline result was independently re-checked with `#print axioms` in
 * **Nothing here says a `core` exists.** These are statements about a landed block
   and the ISA. The assembly into `RegField` / `PcField` remains exactly what
   `c4Spec_of_fieldwise` will consume, unchanged.
+
+## PCNEXT — the pc addend select unconditionally, and three bitwise organs from one lemma
+**2026-08-07 · Opus executor · `SaltWorks/Stack/Program.lean` +740 (577 lines of Lean, 88 of prose, 75 blank); 65 declarations, no new module, ONE new import**
+
+No file outside `SaltWorks/Stack/**` and `docs/` was touched. `SaltWorks/HDL/**`
+(compiler's slot), `SaltWorks/Silicon/**` (silicon's) and `SaltWorks.lean`
+(maestro's) are untouched. ⚠️ **`import SaltWorks.HDL.PcNext` was added to
+`Stack/Program.lean`** — it was not in the closure (`Bitwise` reaches
+`Adder`/`Compose`/`ISA`, none of which reach `PcNext` → `Immediate` →
+`Decoder`/`EmitN`). **Measured job-count change: full tree 8635 → 8637, +2.**
+
+### ⭐ THE FIRST DELIVERABLE — what the four standing `pcNext` theorems quantify over
+
+The dispatch asked this be read before anything was proved, and the answer is
+**all five existing statements are sampled; not one was reusable as a lemma.**
+
+| theorem | binder | points |
+|---|---|---|
+| `pcNext_correct_on_sample` | `pcCases × pcOffs × [false,true]` | 100 |
+| `pcNext_not_beq_adds_four` | `pcCases × pcOffs`, `isBEQ := false` | 50 |
+| `pcNext_taken_adds_offset` | none — `pcRun 7 7 0x7FFFFFFC true` | 1 |
+| `pcNext_compares_all_32_bits` | none — `pcRun 0x80000000 0 8 true` | 1 |
+| `pcNext_compares_the_low_bit` | none — `pcRun 0xA5A5A5A5 0xA5A5A5A4 8 true` | 1 |
+
+All five are `decide +kernel` over **fixed** operand lists (`pcCases` is ten
+pairs, `pcOffs` five offsets). ⇒ **The three whose names read like universal
+claims about the comparator's width are single points**, and
+`..._not_beq_adds_four` binds `p` and `o` only over the listed values. The input
+space is `2^97`. **None was competition and none was a step**; they are now
+points of `sem_pcNext`.
+
+### ⭐ THE HEADLINE — TASK 1
+
+```lean
+theorem sem_pcNext (rs1 rs2 off : Word) (isBEQ : Bool) :
+    pcRun rs1 rs2 off isBEQ = pcSpec rs1 rs2 off isBEQ
+```
+
+**All 2^97 input valuations**, stated against the block's own landed driver and
+its own landed specification, so it *supersedes* `pcNext_correct_on_sample`
+rather than restating it. No `decide` in the proof, no `native_decide`, no new
+axiom.
+
+### The three shapes, and why the adder's machinery did NOT transfer
+
+`pcNext` is **neither pointwise nor a ripple chain — it is three shapes in
+series**, one lemma each:
+
+1. **32 `xor` difference gates — POINTWISE.** `run_pointwise` (generic in the
+   base net and the gate constructor) does it, and is also what closes all three
+   bitwise organs below: **one lemma, four blocks.**
+2. **A 31-gate OR tree — a CHAIN.** `run_of_unwritten` does not apply across it,
+   so it gets its own induction, `run_orChain`. ⭐ **Proved over `Decoder.lean`'s
+   `orChain` GENERICALLY**, by strong induction on a fuel parameter (`orChain` is
+   well-founded on `ns.length`), not over the concrete 32-input instance — so any
+   later block built from that chain inherits it.
+3. **32 independent addend-mux blocks**, one of which (bit 2, the single set bit
+   of the constant `4`) is two gates rather than one. Its induction carries a
+   **disjointness** obligation the pointwise lemma does not have.
+
+⛔ **`sem_adder32`'s carry machinery did not transfer, and that is the block's own
+design decision rather than an accident.** `PcNext.lean:19` emits the *addend*
+and leaves the addition to the assembly, exactly so the block never instantiates
+`adder32`. **There is no carry chain in `pcNext`; `BitVec.carry` appears nowhere
+in this entry.** What transferred is the *method* — frame lemma plus an induction
+carrying an invariant — not a line of the adder's arithmetic. The dispatch's
+warning that `inc32` is unreferenced and `pcNext` "implements its own increment"
+was itself slightly off: **`pcNext` implements no increment at all.** It selects
+between `bOffset imm` and the constant `4` and hands the sum to whoever
+instantiates it.
+
+⚠️ **AND THE `Net` TRAP FIRED AGAIN, on the goal, exactly as the ADDER32 entry
+warned.** `omega` reported *"a possible counterexample may satisfy `0 ≤ k ≤ 1`"*
+on the goal `163 + k = 163 + k` — it drops a goal whose head sits at `Net` and
+then tries to refute the context. Fixed structurally rather than case by case:
+**`pcOut : Nat → Nat`, a `Nat`-valued mirror of `pcAddendOut`**, with
+`pcAddendOut_eq` the one bridge; every net-arithmetic obligation goes through it
+or through a `show` into `Nat`.
+
+### ⭐ THE ISA SIDE — the pc field, all three branches of `stepT`'s rule
+
+```lean
+pcField_is_pcNext_beq          (stepT … (BEQ x y imm)).pc = s.pc + wordOf (pcRun … true)
+pcField_is_pcNext_add          (stepT … (ADD rd x y)).pc  = s.pc + wordOf (pcRun … false)
+pcField_is_pcNext_undecodable  decode w = none → (stepT s w).pc = s.pc + wordOf (pcRun … false)
+```
+
+with `pcAddend_word : wordOf (pcRun rs1 rs2 off isBEQ) = if isBEQ && (rs1 == rs2)
+then off else 4` underneath. The **addend** shape is why these are `s.pc + …`
+rather than an equality with the block's output — the block does not compute the
+pc, by design.
+
+⛔ **`PcField` IS NOT CLOSED AND IS NOT CLAIMED TO BE.** It is a statement about
+a whole `core`'s output bits `1024 … 1055`, and no `core` exists (`grep` for
+`def core` over `SaltWorks/` still returns nothing). What lands is the
+block-level theorem plus the three bridges a `core` assembly would apply —
+exactly the service `addField_is_adder32` performs for `ADD`. **The debt is
+`core`, not `pcNext`.**
+
+### ⭐ TASK 2 — one generic lemma covered all three, so all three landed
+
+```lean
+sem_bwCirc mk f (fanin bound) (eval law) :  sem (bwCirc mk) (bwEnv a b) = map (f a[k] b[k])
+sem_bitAnd32 / sem_bitOr32   : instances at `.and` / `.or`, three lines each
+sem_bitNot32                 : the same `run_pointwise`, base 32, one operand
+```
+
+**The dispatching seat's scope correction is answered in the affirmative**: the
+generic lemma is `run_pointwise`, the *same* lemma the pc difference block uses,
+so `bitOr32` and `bitNot32` cost three lines apiece on top of work already done.
+⚠️ **AND THE CORRECTION'S MEASUREMENT STANDS AND IS RECORDED HERE: before this
+node, `bitOr32` and `bitNot32` were referenced by no file but their own
+(`HDL/Bitwise.lean`); `bitAnd32` had one consumer.** They are proved because
+they were free, not because anything consumes them — and the only file that now
+names them is this one, which is not consumption.
+
+📌 **`sem_bitXor32` (landed `d4fe922`) is now also an instance of `sem_bwCirc`,
+and it was left exactly as it stands.** Collapsing `run_xorGates` + `sem_bitXor32`
+(~60 lines) into two instantiations is a clean consolidation and it is **not**
+taken here: the iron rule against touching landed statements was read
+conservatively. *Flagged as available, not done.*
+
+### ⛔ NON-VACUITY — and one control is stronger than the genre's usual
+
+* **`pcNextCut`** — `pcNext` with **one gate** changed: difference bit 5 is tied
+  to `.const false`. Still `ssa`, still 99 gates, still the right cone shape.
+  ⭐ **`pcNextCut_passes_the_certificate : pcOKCut = true`** — the mutant satisfies
+  the landed 100-point sample, because no pair in `pcCases` differs *only* at bit
+  5 — **and `pcNextCut_fails_the_theorem` refutes it on `(0x20, 0)`.** *This is
+  the first control in this campaign that separates the certificate from the
+  theorem by exhibiting a circuit the certificate accepts.* (`adder32Cut` failed
+  both; that is a weaker demonstration.)
+* **`sem_pcNext_off_the_sample`** — `(0x20, 0)` and `(0x0F0F0F0F, 0x0F0F0F0F)`
+  are not in `pcCases`, `0x12345678` is not in `pcOffs`, and the theorem gives
+  both.
+* **`bitAnd32Cut`** — bit 7's gate is `.or`, still `ssa`; refuted on
+  `(0xFFFFFFFF, 0)`. **`sem_bitAnd32_off_the_sample`** — `0x0F0F0F0F` and
+  `0x33333333` are in neither `bwWords`, for all three new organs.
+
+### Attempt counts, against the split budget — content vs mechanics
+
+The fleet asked these be separated. **The mathematics settled in cycle 1 for both
+tasks; every later cycle was elaboration mechanics, each diagnosed from the error
+text.**
+
+* **Task 1 — statements: 3 groups (budget 3–4, met)** — the block theorem, the
+  addend-as-a-word lemma, the three ISA bridges. **Proofs: 4 scratch cycles
+  (budget 2 — over, recorded).** *Content changed in ZERO of them.* The decomposition
+  (pointwise / chain / mux + the stage envs) was fixed before the first build and
+  never revised. The four:
+  1. A probe cycle, deliberate and not a failure: it established that
+     `decide +kernel` **does** reduce `orChain` (so the layout numerals `pcNe =
+     159 … pcMuxBase = 163` are available) while `rfl` does **not** — `orChain` is
+     well-founded, so the elaborator will not unfold it but the kernel will.
+     Also fixed `conv_lhs => rw [orChain]` as the unfolding idiom.
+  2. `omega` on the `Net`-typed goal (above) → the `pcOut` mirror.
+  3. `!x = y` parses as `!(x = y)` — the exact analogue of the recorded
+     `a ^^ b = c` trap, and it cost a `show` in `sem_bitNot32`.
+     `BitVec.getLsbD_and`/`_or` take **implicit** arguments and are not applicable
+     as `lemma a b k`.
+  4. `rw [if_pos h]` cannot reach an `if` under a `fun k =>` binder (motive
+     failure, reported as "did not find an occurrence"); `simp only [if_pos h]`
+     can. Same cycle: `cases h : e` already generalises the goal, so the `simp
+     [h]` that follows is dead.
+* **Task 2 — statements: 1 group (budget 3–4, under).** Three organs, one lemma.
+  **Proofs: 0 dedicated cycles** — they rode task 1's `run_pointwise` and were
+  green the first time it was.
+* `Stack/Program.lean` built **clean on the first try** once the scratch was green.
+
+### Build + audit
+
+`saltbuild.sh SaltWorks.Stack.Program` → **EXIT=0**, 8605 jobs. Full tree
+`saltbuild.sh` → **EXIT=0, 8637 jobs**, zero `error:`, zero `warning:`. All 65
+new declarations tick `#audit_axioms` (max 3, i.e. inside
+`[propext, Classical.choice, Quot.sound]`), and every headline result was
+independently re-checked in `ScratchMATHPC.lean` (EXIT=0; deleted, not
+committed). `docs/hdl-tools/audit_completeness.py` → **every theorem is on an
+`#audit_axioms` list** (35 files, 392 theorems, up from 374).
+
+### Left undetermined
+
+* **`PcField` and `RegField` are untouched.** Nothing here claims a `core`.
+* **`inc32` still has no semantics** and is still unreferenced — and this node
+  removes the last reason to want one: the pc path does not go through it, and
+  `pcNext` does not increment.
+* **`aluSelect` and `zeroTree`** are still sampled-only; `sll`/`sra` still have
+  no producer at all.
+* **The `sem_bitXor32` consolidation is available and not taken** (above).
+* **`bitOr32` / `bitNot32` are proved but unconsumed.** If they stay unreferenced
+  they are candidates for deletion, not for further work.

@@ -9,6 +9,7 @@ import SaltWorks.Stack.ZeroOne
 import SaltWorks.HDL.StateCodec
 import SaltWorks.HDL.C4
 import SaltWorks.HDL.Bitwise
+import SaltWorks.HDL.PcNext
 
 /-!
 # STACK-S2 — THE PROGRAM: an agent-written bitonic sort in Slice A
@@ -3418,6 +3419,724 @@ theorem sem_adder32_off_the_sample :
 
 end AdderSemantics
 
+/-! ## ⭐⭐ THE ORGANS — `pcNext`, AND THE THREE POINTWISE BLOCKS
+
+**A sampled certificate is a tripwire; C4 rests on organ theorems.** `adder32`
+left the sampled tier at `752675c`; this section takes four more blocks with it.
+
+## ⚠️ WHAT THE FOUR STANDING `pcNext` THEOREMS ACTUALLY QUANTIFY OVER, MEASURED
+
+*Read before assuming any of them was already general — none of them is:*
+
+```
+pcNext_correct_on_sample     pcCases x pcOffs x [false,true]   =  100 driven points
+pcNext_not_beq_adds_four     pcCases x pcOffs, isBEQ := false  =   50 driven points
+pcNext_taken_adds_offset     pcRun 7 7 0x7FFFFFFC true         =    1 point
+pcNext_compares_all_32_bits  pcRun 0x80000000 0 8 true         =    1 point
+pcNext_compares_the_low_bit  pcRun 0xA5A5A5A5 0xA5A5A5A4 8 true=    1 point
+```
+
+⇒ **All five are `decide +kernel` over FIXED operand lists.** The last three read
+like universally quantified claims about the comparator's width and are single
+points; `..._not_beq_adds_four` binds `p` and `o` but only over the ten pairs and
+five offsets the file lists. The input space is `2^97`. **They are lemmas of
+`sem_pcNext` below, not competition for it, and none of them was reusable as a
+step in its proof.**
+
+## How, and what is genuinely different from the adder
+
+**`pcNext` is neither pointwise nor a ripple chain — it is three shapes in
+series**, and the proof has one lemma per shape:
+
+* the 32 `xor` difference gates are POINTWISE (`run_pointwise`, which is also
+  what closes the three bitwise organs below — one lemma, four blocks);
+* the 31-gate OR tree is a CHAIN, so `run_of_unwritten` does not apply across it
+  and it needs its own induction (`run_orChain`). ⭐ **It is proved over
+  `orChain` GENERICALLY** rather than over the concrete 32-input instance, so any
+  later block built from `Decoder.lean`'s chain inherits it;
+* the addend mux is 32 INDEPENDENT blocks, one of which (bit 2, the single set
+  bit of the constant `4`) is two gates instead of one — so its induction carries
+  a disjointness obligation the pointwise lemma does not have.
+
+⭐ **`sem_adder32`'s machinery did NOT transfer, and the reason is the block's
+own design decision.** `PcNext.lean:19` emits the *addend* and leaves the
+addition to the assembly, precisely so the block does not instantiate `adder32`.
+There is therefore no carry chain here and `BitVec.carry` appears nowhere; what
+transferred is the *method* — a frame lemma plus an induction carrying an
+invariant — not a line of the adder's arithmetic.
+
+⚠️ **`omega` CANNOT READ A GOAL AT `Net`.** `abbrev Net := Nat`, and `omega`
+still drops the goal and then tries to derive `False` from the context —
+observed here on `163 + k = 163 + k`, which it reported as a possible
+counterexample for `0 ≤ k ≤ 1`. Every net-arithmetic obligation below therefore
+goes through `pcOut : Nat → Nat`, a `Nat`-valued mirror of `pcAddendOut`, or a
+`show` into `Nat`. This is the trap that cost the adder node three cycles,
+restated because it is not a `Net`-vs-`Nat` *coercion* problem: it is that a
+`def`-headed bound is an opaque atom to `omega` whatever its type.
+
+⛔ **`PcField` IS NOT CLOSED BY THIS, and the shape of the remaining debt is
+exactly the adder's.** `PcField` is a statement about a whole `core`'s output
+bits `1024 … 1055`, and no `core` exists. What lands here is the block-level
+theorem plus the three bridge lemmas a `core` assembly would apply — the same
+service `addField_is_adder32` performs for `ADD`. *The debt is `core`, not
+`pcNext`.*
+-/
+
+section OrganSemantics
+
+open SaltWorks.HDL hiding seenWord
+
+/-! ## The generic pointwise block -/
+
+theorem run_pointwise (E : Env) (base : Nat) (mk : Nat → Op) :
+    ∀ n : Nat, (∀ i : Nat, i < n → ∀ a ∈ (mk i).fanin, a < base) →
+      (∀ m : Nat, m < base →
+          run E ((List.range n).map (fun i => (⟨base + i, mk i⟩ : Gate))) m = E m)
+      ∧ (∀ k : Nat, k < n →
+          run E ((List.range n).map (fun i => (⟨base + i, mk i⟩ : Gate))) (base + k)
+            = (mk k).eval E) := by
+  intro n
+  induction n with
+  | zero =>
+    intro _
+    exact ⟨fun m _ => rfl, fun k hk => absurd hk (Nat.not_lt_zero k)⟩
+  | succ n ih =>
+    intro hread
+    obtain ⟨hfr, hval⟩ := ih (fun i hi => hread i (Nat.lt_succ_of_lt hi))
+    have hsplit : (List.range (n + 1)).map (fun i => (⟨base + i, mk i⟩ : Gate))
+        = (List.range n).map (fun i => (⟨base + i, mk i⟩ : Gate)) ++ [⟨base + n, mk n⟩] := by
+      rw [List.range_succ, List.map_append]
+      rfl
+    have hstep : ∀ m : Nat,
+        run E ((List.range (n + 1)).map (fun i => (⟨base + i, mk i⟩ : Gate))) m
+          = upd (run E ((List.range n).map (fun i => (⟨base + i, mk i⟩ : Gate))))
+              (base + n)
+              ((mk n).eval (run E ((List.range n).map (fun i => (⟨base + i, mk i⟩ : Gate))))) m := by
+      intro m
+      rw [hsplit, run_append]
+      rfl
+    refine ⟨?_, ?_⟩
+    · intro m hm
+      rw [hstep m, upd_of_ne _ (Nat.ne_of_lt (Nat.lt_of_lt_of_le hm (Nat.le_add_right base n)))]
+      exact hfr m hm
+    · intro k hk
+      rw [hstep (base + k)]
+      rcases Nat.lt_or_ge k n with hkn | hkn
+      · rw [upd_of_ne _ (fun hEq => absurd (Nat.add_left_cancel hEq) (Nat.ne_of_lt hkn))]
+        exact hval k hkn
+      · have hkeq : k = n := Nat.le_antisymm (Nat.le_of_lt_succ hk) hkn
+        subst hkeq
+        rw [upd_self]
+        exact Op.eval_congr (mk k) (fun a ha => hfr a (hread k hk a ha))
+
+theorem any_congr_mem {α : Type} {l : List α} {p q : α → Bool} (h : ∀ x ∈ l, p x = q x) :
+    l.any p = l.any q := by
+  induction l with
+  | nil => rfl
+  | cons a as ih =>
+    rw [List.any_cons, List.any_cons, h a (by simp), ih (fun x hx => h x (by simp [hx]))]
+
+/-! ## TASK 2 — the three bitwise organs, from the one lemma -/
+
+theorem sem_bwCirc (mk : Net → Net → Op) (f : Bool → Bool → Bool)
+    (hfan : ∀ i : Nat, i < 32 → ∀ a ∈ (mk i (32 + i)).fanin, a < 64)
+    (hev : ∀ (E : Env) (i : Nat), (mk i (32 + i)).eval E = f (E i) (E (32 + i)))
+    (a b : Word) :
+    sem (bwCirc mk) (bwEnv a b)
+      = (List.range 32).map (fun k => f (a.getLsbD k) (b.getLsbD k)) := by
+  have hgates : (bwCirc mk).gates
+      = (List.range 32).map (fun i => (⟨64 + i, mk i (32 + i)⟩ : Gate)) := rfl
+  have hrun := (run_pointwise (bwEnv a b) 64 (fun i => mk i (32 + i)) 32 hfan).2
+  have h : sem (bwCirc mk) (bwEnv a b)
+      = (List.range 32).map (fun k => run (bwEnv a b) (bwCirc mk).gates (64 + k)) := by
+    show ((List.range 32).map (fun k => 64 + k)).map
+        (run (bwEnv a b) (bwCirc mk).gates) = _
+    rw [List.map_map]
+    rfl
+  rw [h]
+  refine List.map_congr_left ?_
+  intro k hk
+  have hk32 : k < 32 := List.mem_range.mp hk
+  rw [hgates, hrun k hk32, hev]
+  have ha : bwEnv a b k = a.getLsbD k := by
+    show (if k < 32 then a.getLsbD k else b.getLsbD (k - 32)) = _
+    rw [if_pos hk32]
+  have hb : bwEnv a b (32 + k) = b.getLsbD k := by
+    show (if 32 + k < 32 then a.getLsbD (32 + k) else b.getLsbD (32 + k - 32)) = _
+    rw [if_neg (Nat.not_lt.mpr (Nat.le_add_right 32 k)), Nat.add_sub_cancel_left]
+  rw [ha, hb]
+
+theorem sem_bitAnd32 (a b : Word) :
+    sem bitAnd32 (bwEnv a b) = (List.range 32).map (fun k => (a &&& b).getLsbD k) := by
+  rw [show bitAnd32 = bwCirc .and from rfl,
+    sem_bwCirc .and (· && ·)
+      (fun i hi c hc => by
+        simp only [Op.fanin, List.mem_cons, List.not_mem_nil, or_false] at hc
+        rcases hc with rfl | rfl
+        · exact Nat.lt_of_lt_of_le hi (by norm_num)
+        · exact Nat.lt_of_lt_of_le (Nat.add_lt_add_left hi 32) (by norm_num))
+      (fun _ _ => rfl)]
+  exact List.map_congr_left (fun k _ => by simp)
+
+theorem sem_bitOr32 (a b : Word) :
+    sem bitOr32 (bwEnv a b) = (List.range 32).map (fun k => (a ||| b).getLsbD k) := by
+  rw [show bitOr32 = bwCirc .or from rfl,
+    sem_bwCirc .or (· || ·)
+      (fun i hi c hc => by
+        simp only [Op.fanin, List.mem_cons, List.not_mem_nil, or_false] at hc
+        rcases hc with rfl | rfl
+        · exact Nat.lt_of_lt_of_le hi (by norm_num)
+        · exact Nat.lt_of_lt_of_le (Nat.add_lt_add_left hi 32) (by norm_num))
+      (fun _ _ => rfl)]
+  exact List.map_congr_left (fun k _ => by simp)
+
+theorem sem_bitNot32 (a : Word) :
+    sem bitNot32 (fun i => a.getLsbD i) = (List.range 32).map (fun k => (~~~a).getLsbD k) := by
+  have hgates : bitNot32.gates
+      = (List.range 32).map (fun i => (⟨32 + i, Op.not i⟩ : Gate)) := rfl
+  have hrun := (run_pointwise (fun i => a.getLsbD i) 32 (fun i => Op.not i) 32
+      (fun i hi c hc => by
+        simp only [Op.fanin, List.mem_cons, List.not_mem_nil, or_false] at hc
+        exact hc ▸ hi)).2
+  have h : sem bitNot32 (fun i => a.getLsbD i)
+      = (List.range 32).map (fun k => run (fun i => a.getLsbD i) bitNot32.gates (32 + k)) := by
+    show ((List.range 32).map (fun k => 32 + k)).map
+        (run (fun i => a.getLsbD i) bitNot32.gates) = _
+    rw [List.map_map]
+    rfl
+  rw [h]
+  refine List.map_congr_left ?_
+  intro k hk
+  have hk32 : k < 32 := List.mem_range.mp hk
+  rw [hgates, hrun k hk32]
+  show (!(a.getLsbD k)) = _
+  rw [BitVec.getLsbD_not]
+  simp [hk32]
+
+/-! ## TASK 1 — `sem_pcNext` -/
+
+theorem pcNe_eq : pcNe = 159 := by decide +kernel
+theorem pcEq_eq : pcEq = 160 := by decide +kernel
+theorem pcTake_eq : pcTake = 161 := by decide +kernel
+theorem pcNotTake_eq : pcNotTake = 162 := by decide +kernel
+theorem pcMuxBase_eq : pcMuxBase = 163 := by decide +kernel
+
+/-- The addend output nets, as a `Nat`-valued function `omega` can read. -/
+def pcOut (k : Nat) : Nat := if k < 2 then 163 + k else if k = 2 then 166 else 164 + k
+
+theorem pcAddendOut_eq (k : Nat) : pcAddendOut k = pcOut k := by
+  simp only [pcAddendOut, pcMuxBase_eq, pcOut, beq_iff_eq]
+  split_ifs
+  · rfl
+  · rfl
+  · show (163 : Nat) + k + 1 = 164 + k
+    omega
+
+/-! ### The OR chain -/
+
+theorem orChain_nil (b : Nat) : orChain b ([] : List Net) = ([], 0, b) := by
+  conv_lhs => rw [orChain]
+
+theorem orChain_one (b : Nat) (x : Net) : orChain b [x] = ([], x, b) := by
+  conv_lhs => rw [orChain]
+
+theorem orChain_cons2 (b : Nat) (x y : Net) (r : List Net) :
+    orChain b (x :: y :: r)
+      = (⟨b, .or x y⟩ :: (orChain (b + 1) (b :: r)).1,
+         (orChain (b + 1) (b :: r)).2.1, (orChain (b + 1) (b :: r)).2.2) := by
+  conv_lhs => rw [orChain]
+
+theorem orChain_out_ge : ∀ (fuel : Nat) (ns : List Net) (b : Nat), ns.length ≤ fuel →
+    ∀ g ∈ (orChain b ns).1, b ≤ g.out := by
+  intro fuel
+  induction fuel with
+  | zero =>
+    intro ns b h g hg
+    rw [List.eq_nil_of_length_eq_zero (Nat.le_zero.mp h), orChain_nil] at hg
+    exact absurd hg (List.not_mem_nil)
+  | succ f ih =>
+    intro ns b h g hg
+    match ns with
+    | [] => rw [orChain_nil] at hg; exact absurd hg (List.not_mem_nil)
+    | [x] => rw [orChain_one] at hg; exact absurd hg (List.not_mem_nil)
+    | x :: y :: r =>
+      rw [orChain_cons2] at hg
+      simp only [List.mem_cons] at hg
+      rcases hg with rfl | hg
+      · exact Nat.le_refl b
+      · have hlen : (b :: r).length ≤ f := by
+          simp only [List.length_cons] at h ⊢
+          omega
+        exact Nat.le_of_succ_le (ih (b :: r) (b + 1) hlen g hg)
+
+theorem run_orChain_frame (fuel : Nat) (E : Env) (ns : List Net) (b : Nat)
+    (h : ns.length ≤ fuel) (m : Nat) (hm : m < b) : run E (orChain b ns).1 m = E m :=
+  run_of_unwritten E _ m (fun g hg =>
+    Nat.ne_of_gt (Nat.lt_of_lt_of_le hm (orChain_out_ge fuel ns b h g hg)))
+
+theorem run_orChain : ∀ (fuel : Nat) (E : Env) (ns : List Net) (b : Nat),
+    ns.length ≤ fuel → ns ≠ [] → (∀ m ∈ ns, m < b) →
+    run E (orChain b ns).1 ((orChain b ns).2.1) = ns.any E := by
+  intro fuel
+  induction fuel with
+  | zero =>
+    intro E ns b h hne _
+    exact absurd (List.eq_nil_of_length_eq_zero (Nat.le_zero.mp h)) hne
+  | succ f ih =>
+    intro E ns b h hne hlt
+    match ns with
+    | [] => exact absurd rfl hne
+    | [x] =>
+      rw [orChain_one]
+      simp
+    | x :: y :: r =>
+      rw [orChain_cons2]
+      show run (upd E b ((Op.or x y).eval E)) (orChain (b + 1) (b :: r)).1
+          ((orChain (b + 1) (b :: r)).2.1) = _
+      have hlen : (b :: r).length ≤ f := by
+        simp only [List.length_cons] at h ⊢
+        omega
+      have hlt' : ∀ m ∈ (b :: r), m < b + 1 := by
+        intro m hm
+        rcases List.mem_cons.mp hm with rfl | hm
+        · exact Nat.lt_succ_self m
+        · exact Nat.lt_succ_of_lt (hlt m (by simp [hm]))
+      rw [ih (upd E b ((Op.or x y).eval E)) (b :: r) (b + 1) hlen (by simp) hlt']
+      rw [List.any_cons, List.any_cons, List.any_cons, upd_self,
+        any_congr_mem (l := r) (p := upd E b ((Op.or x y).eval E)) (q := E)
+          (fun m hm => upd_of_ne _ (Nat.ne_of_lt (hlt m (by simp [hm]))))]
+      show ((E x || E y) || r.any E) = (E x || (E y || r.any E))
+      exact Bool.or_assoc (E x) (E y) (r.any E)
+
+/-! ### The three stages -/
+
+theorem run_pcDiffGates (E : Env) :
+    (∀ m : Nat, m < 97 → run E pcDiffGates m = E m)
+    ∧ (∀ k : Nat, k < 32 → run E pcDiffGates (97 + k) = (E k ^^ E (32 + k))) := by
+  have hgates : pcDiffGates
+      = (List.range 32).map (fun i => (⟨97 + i, Op.xor i (32 + i)⟩ : Gate)) := rfl
+  obtain ⟨hfr, hval⟩ := run_pointwise E 97 (fun i => Op.xor i (32 + i)) 32
+    (fun i hi c hc => by
+      simp only [Op.fanin, List.mem_cons, List.not_mem_nil, or_false] at hc
+      rcases hc with rfl | rfl
+      · exact Nat.lt_of_lt_of_le hi (by norm_num)
+      · exact Nat.lt_of_lt_of_le (Nat.add_lt_add_left hi 32) (by norm_num))
+  exact ⟨fun m hm => by rw [hgates]; exact hfr m hm,
+         fun k hk => by rw [hgates]; exact hval k hk⟩
+
+theorem run_pcNeGates (E : Env) :
+    (∀ m : Nat, m < 129 → run E pcNeGates.1 m = E m)
+    ∧ run E pcNeGates.1 159 = (List.range 32).any (fun k => E (97 + k)) := by
+  have hgs : pcNeGates.1 = (orChain 129 ((List.range 32).map (fun k => (97 + k : Net)))).1 := rfl
+  have hout : (orChain 129 ((List.range 32).map (fun k => (97 + k : Net)))).2.1 = 159 := by
+    decide +kernel
+  have hlen : ((List.range 32).map (fun k => (97 + k : Net))).length ≤ 32 := by simp
+  have hne : ((List.range 32).map (fun k => (97 + k : Net))) ≠ [] := by
+    intro hc
+    have hl := congrArg List.length hc
+    simp at hl
+  have hlt : ∀ m ∈ ((List.range 32).map (fun k => (97 + k : Net))), m < 129 := by
+    intro m hm
+    simp only [List.mem_map, List.mem_range] at hm
+    obtain ⟨k, hk, hkm⟩ := hm
+    exact hkm ▸ Nat.lt_of_lt_of_le (Nat.add_lt_add_left hk 97) (by norm_num)
+  refine ⟨fun m hm => by rw [hgs]; exact run_orChain_frame 32 E _ 129 hlen m hm, ?_⟩
+  rw [hgs, ← hout, run_orChain 32 E _ 129 hlen hne hlt]
+  simp [List.any_map, Function.comp_def]
+
+abbrev pcCtrlGates : List Gate :=
+  [(⟨160, .not 159⟩ : Gate), ⟨161, .and 96 160⟩, ⟨162, .not 161⟩]
+
+theorem run_pcCtrl_161 (E : Env) : run E pcCtrlGates 161 = (E 96 && !(E 159)) := by
+  simp [run_cons, run_nil, Op.eval, upd]
+
+theorem run_pcCtrl_162 (E : Env) : run E pcCtrlGates 162 = !(E 96 && !(E 159)) := by
+  simp [run_cons, run_nil, Op.eval, upd]
+
+theorem run_pcCtrl_frame (E : Env) (m : Nat) (h : m < 160) : run E pcCtrlGates m = E m :=
+  run_of_unwritten E pcCtrlGates m (by
+    intro g hg
+    have hge : (160 : Nat) ≤ g.out := by
+      simp only [pcCtrlGates, List.mem_cons, List.not_mem_nil, or_false] at hg
+      rcases hg with rfl | rfl | rfl <;> norm_num
+    exact Nat.ne_of_gt (Nat.lt_of_lt_of_le h hge))
+
+/-! ### The addend block -/
+
+def pcAddGates (n : Nat) : List Gate := (List.range n).flatMap pcAddendGates
+
+theorem pcAddGates_succ (n : Nat) : pcAddGates (n + 1) = pcAddGates n ++ pcAddendGates n := by
+  simp [pcAddGates, List.range_succ]
+
+theorem pcAddendGates_two :
+    pcAddendGates 2 = [(⟨165, .and 161 66⟩ : Gate), ⟨166, .or 162 165⟩] := by decide +kernel
+
+theorem pcAddendGates_ne {k : Nat} (h : k ≠ 2) :
+    pcAddendGates k = [(⟨pcOut k, .and 161 (64 + k)⟩ : Gate)] := by
+  unfold pcAddendGates
+  rw [if_neg (by simpa using h), pcTake_eq, pcAddendOut_eq]
+  rfl
+
+theorem pcAddendGates_out_ge (n : Nat) : ∀ g ∈ pcAddendGates n, 163 ≤ g.out := by
+  intro g hg
+  by_cases h2 : n = 2
+  · subst h2
+    rw [pcAddendGates_two] at hg
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hg
+    rcases hg with rfl | rfl <;> norm_num
+  · rw [pcAddendGates_ne h2] at hg
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hg
+    subst hg
+    show (163 : Nat) ≤ pcOut n
+    unfold pcOut
+    split_ifs <;> omega
+
+theorem pcAddendGates_out_ne {k n : Nat} (h : k < n) :
+    ∀ g ∈ pcAddendGates n, g.out ≠ pcOut k := by
+  intro g hg
+  by_cases h2 : n = 2
+  · subst h2
+    rw [pcAddendGates_two] at hg
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hg
+    have hp : pcOut k = 163 + k := by unfold pcOut; rw [if_pos h]
+    rcases hg with rfl | rfl
+    · show (165 : Nat) ≠ pcOut k
+      rw [hp]; omega
+    · show (166 : Nat) ≠ pcOut k
+      rw [hp]; omega
+  · rw [pcAddendGates_ne h2] at hg
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hg
+    subst hg
+    show pcOut n ≠ pcOut k
+    unfold pcOut
+    split_ifs <;> omega
+
+theorem run_pcAddGates (E : Env) : ∀ n : Nat, n ≤ 32 →
+    (∀ m : Nat, m < 163 → run E (pcAddGates n) m = E m)
+    ∧ (∀ k : Nat, k < n → run E (pcAddGates n) (pcOut k)
+        = if k = 2 then (E 162 || (E 161 && E 66)) else (E 161 && E (64 + k))) := by
+  intro n
+  induction n with
+  | zero =>
+    intro _
+    exact ⟨fun m _ => rfl, fun k hk => absurd hk (Nat.not_lt_zero k)⟩
+  | succ n ih =>
+    intro hn
+    obtain ⟨hfr, hval⟩ := ih (Nat.le_of_succ_le hn)
+    have hn32 : n < 32 := Nat.lt_of_lt_of_le (Nat.lt_succ_self n) hn
+    refine ⟨?_, ?_⟩
+    · intro m hm
+      rw [pcAddGates_succ, run_append,
+        run_of_unwritten _ _ m (fun g hg =>
+          Nat.ne_of_gt (Nat.lt_of_lt_of_le hm (pcAddendGates_out_ge n g hg)))]
+      exact hfr m hm
+    · intro k hk
+      rw [pcAddGates_succ, run_append]
+      rcases Nat.lt_or_ge k n with hkn | hkn
+      · rw [run_of_unwritten _ _ (pcOut k) (pcAddendGates_out_ne hkn)]
+        exact hval k hkn
+      · have hkeq : k = n := Nat.le_antisymm (Nat.le_of_lt_succ hk) hkn
+        subst hkeq
+        by_cases h2 : k = 2
+        · subst h2
+          rw [pcAddendGates_two, if_pos rfl, show pcOut 2 = 166 from rfl,
+            show run (run E (pcAddGates 2))
+                [(⟨165, .and 161 66⟩ : Gate), ⟨166, .or 162 165⟩] 166
+              = ((run E (pcAddGates 2)) 162
+                  || ((run E (pcAddGates 2)) 161 && (run E (pcAddGates 2)) 66)) by
+              simp [run_cons, run_nil, Op.eval, upd],
+            hfr 162 (by norm_num), hfr 161 (by norm_num), hfr 66 (by norm_num)]
+        · rw [pcAddendGates_ne h2, if_neg h2,
+            show run (run E (pcAddGates k)) [(⟨pcOut k, .and 161 (64 + k)⟩ : Gate)] (pcOut k)
+              = ((run E (pcAddGates k)) 161 && (run E (pcAddGates k)) (64 + k)) by
+              simp [run_cons, run_nil, Op.eval, upd],
+            hfr 161 (by norm_num),
+            hfr (64 + k) (Nat.lt_of_lt_of_le (Nat.add_lt_add_left hn32 64) (by norm_num))]
+
+/-! ### The whole block, over an arbitrary valuation -/
+
+/-- The `take` signal, as a function of the input valuation. -/
+def takeOf (E : Env) : Bool := E 96 && !((List.range 32).any (fun k => E k ^^ E (32 + k)))
+
+theorem pcNext_gates_eq : pcNext.gates
+    = pcDiffGates ++ (pcNeGates.1 ++ (pcCtrlGates ++ pcAddGates 32)) := by decide +kernel
+
+theorem pcNext_outs_eq : pcNext.outs = (List.range 32).map pcAddendOut ++ [161] := by
+  decide +kernel
+
+theorem run_pcNext (E : Env) :
+    (∀ k : Nat, k < 32 → run E pcNext.gates (pcOut k)
+        = if k = 2 then (!(takeOf E) || (takeOf E && E 66)) else (takeOf E && E (64 + k)))
+      ∧ run E pcNext.gates 161 = takeOf E := by
+  obtain ⟨hf1, hv1⟩ := run_pcDiffGates E
+  obtain ⟨hf2, hv2⟩ := run_pcNeGates (run E pcDiffGates)
+  obtain ⟨hf4, hv4⟩ :=
+    run_pcAddGates (run (run (run E pcDiffGates) pcNeGates.1) pcCtrlGates) 32 le_rfl
+  have hE96 : run (run E pcDiffGates) pcNeGates.1 96 = E 96 := by
+    rw [hf2 96 (by norm_num), hf1 96 (by norm_num)]
+  have hE159 : run (run E pcDiffGates) pcNeGates.1 159
+      = (List.range 32).any (fun k => E k ^^ E (32 + k)) := by
+    rw [hv2]
+    exact any_congr_mem (fun k hk => hv1 k (List.mem_range.mp hk))
+  have hC161 : run (run (run E pcDiffGates) pcNeGates.1) pcCtrlGates 161 = takeOf E := by
+    rw [run_pcCtrl_161, hE96, hE159]
+    rfl
+  have hC162 : run (run (run E pcDiffGates) pcNeGates.1) pcCtrlGates 162 = !(takeOf E) := by
+    rw [run_pcCtrl_162, hE96, hE159]
+    rfl
+  have hClow : ∀ m : Nat, m < 96 →
+      run (run (run E pcDiffGates) pcNeGates.1) pcCtrlGates m = E m := by
+    intro m hm
+    rw [run_pcCtrl_frame _ m (by omega), hf2 m (by omega), hf1 m (by omega)]
+  have hgates : ∀ m : Nat, run E pcNext.gates m
+      = run (run (run (run E pcDiffGates) pcNeGates.1) pcCtrlGates) (pcAddGates 32) m := by
+    intro m
+    rw [pcNext_gates_eq, run_append, run_append, run_append]
+  refine ⟨?_, ?_⟩
+  · intro k hk
+    rw [hgates, hv4 k hk, hC161, hC162, hClow 66 (by norm_num),
+      hClow (64 + k) (Nat.add_lt_add_left hk 64)]
+  · rw [hgates, hf4 161 (by norm_num), hC161]
+
+/-! ### The driver, and the theorem -/
+
+def pcEnvOf (rs1 rs2 off : Word) (isBEQ : Bool) : Env :=
+  fun i => if i < 32 then rs1.getLsbD i
+           else if i < 64 then rs2.getLsbD (i - 32)
+           else if i < 96 then off.getLsbD (i - 64) else isBEQ
+
+theorem pcRun_eq (rs1 rs2 off : Word) (isBEQ : Bool) :
+    pcRun rs1 rs2 off isBEQ = sem pcNext (pcEnvOf rs1 rs2 off isBEQ) := rfl
+
+theorem pcEnvOf_rs1 (rs1 rs2 off : Word) (isBEQ : Bool) (k : Nat) (h : k < 32) :
+    pcEnvOf rs1 rs2 off isBEQ k = rs1.getLsbD k := by
+  show (if k < 32 then rs1.getLsbD k else _) = _
+  rw [if_pos h]
+
+theorem pcEnvOf_rs2 (rs1 rs2 off : Word) (isBEQ : Bool) (k : Nat) (h : k < 32) :
+    pcEnvOf rs1 rs2 off isBEQ (32 + k) = rs2.getLsbD k := by
+  show (if 32 + k < 32 then rs1.getLsbD (32 + k)
+        else if 32 + k < 64 then rs2.getLsbD (32 + k - 32)
+        else if 32 + k < 96 then off.getLsbD (32 + k - 64) else isBEQ) = _
+  rw [if_neg (Nat.not_lt.mpr (Nat.le_add_right 32 k)),
+    if_pos (Nat.add_lt_add_left h 32), Nat.add_sub_cancel_left]
+
+theorem pcEnvOf_off (rs1 rs2 off : Word) (isBEQ : Bool) (k : Nat) (h : k < 32) :
+    pcEnvOf rs1 rs2 off isBEQ (64 + k) = off.getLsbD k := by
+  show (if 64 + k < 32 then rs1.getLsbD (64 + k)
+        else if 64 + k < 64 then rs2.getLsbD (64 + k - 32)
+        else if 64 + k < 96 then off.getLsbD (64 + k - 64) else isBEQ) = _
+  rw [if_neg (by omega), if_neg (by omega), if_pos (by omega)]
+  congr 1
+  omega
+
+theorem pcEnvOf_66 (rs1 rs2 off : Word) (isBEQ : Bool) :
+    pcEnvOf rs1 rs2 off isBEQ 66 = off.getLsbD 2 :=
+  pcEnvOf_off rs1 rs2 off isBEQ 2 (by norm_num)
+
+theorem pcEnvOf_96 (rs1 rs2 off : Word) (isBEQ : Bool) :
+    pcEnvOf rs1 rs2 off isBEQ 96 = isBEQ := by
+  show (if (96 : Nat) < 32 then rs1.getLsbD 96
+        else if (96 : Nat) < 64 then rs2.getLsbD (96 - 32)
+        else if (96 : Nat) < 96 then off.getLsbD (96 - 64) else isBEQ) = _
+  norm_num
+
+theorem any_range_xor (a b : Word) :
+    (List.range 32).any (fun k => a.getLsbD k ^^ b.getLsbD k) = !(a == b) := by
+  rcases eq_or_ne a b with rfl | hne
+  · simp
+  · have hex : ∃ k, k < 32 ∧ a.getLsbD k ≠ b.getLsbD k := by
+      by_contra hc
+      refine hne (BitVec.eq_of_getLsbD_eq (fun k hk => ?_))
+      by_contra hd
+      exact hc ⟨k, hk, hd⟩
+    obtain ⟨k, hk, hne2⟩ := hex
+    have hany : (List.range 32).any (fun k => a.getLsbD k ^^ b.getLsbD k) = true := by
+      rw [List.any_eq_true]
+      refine ⟨k, List.mem_range.mpr hk, ?_⟩
+      cases h1 : a.getLsbD k <;> cases h2 : b.getLsbD k <;> simp_all
+    rw [hany]
+    simp [hne]
+
+theorem takeOf_pcEnvOf (rs1 rs2 off : Word) (isBEQ : Bool) :
+    takeOf (pcEnvOf rs1 rs2 off isBEQ) = (isBEQ && (rs1 == rs2)) := by
+  unfold takeOf
+  rw [pcEnvOf_96,
+    any_congr_mem (l := List.range 32)
+      (p := fun k => pcEnvOf rs1 rs2 off isBEQ k ^^ pcEnvOf rs1 rs2 off isBEQ (32 + k))
+      (q := fun k => rs1.getLsbD k ^^ rs2.getLsbD k)
+      (fun k hk => by
+        rw [pcEnvOf_rs1 _ _ _ _ k (List.mem_range.mp hk),
+          pcEnvOf_rs2 _ _ _ _ k (List.mem_range.mp hk)]),
+    any_range_xor, Bool.not_not]
+
+theorem four_getLsbD (k : Nat) : (4 : Word).getLsbD k = decide (k = 2) := by
+  match k with
+  | 0 => decide
+  | 1 => decide
+  | 2 => decide
+  | (n + 3) =>
+      have h4 : (4 : Nat) < 2 ^ (n + 3) := by
+        calc (4 : Nat) < 2 ^ 3 := by norm_num
+        _ ≤ 2 ^ (n + 3) := Nat.pow_le_pow_right (by norm_num) (by omega)
+      have ht : (4 : Word).toNat = 4 := by decide
+      show Nat.testBit (4 : Word).toNat (n + 3) = _
+      rw [ht, Nat.testBit_lt_two_pow h4]
+      simp
+
+/-- ⭐⭐ **THE PC ADDEND SELECT AGREES WITH `stepT`'s PC RULE, ON ALL 2^97
+INPUTS.** -/
+theorem sem_pcNext (rs1 rs2 off : Word) (isBEQ : Bool) :
+    pcRun rs1 rs2 off isBEQ = pcSpec rs1 rs2 off isBEQ := by
+  obtain ⟨hout, htake⟩ := run_pcNext (pcEnvOf rs1 rs2 off isBEQ)
+  have hsem : sem pcNext (pcEnvOf rs1 rs2 off isBEQ)
+      = (List.range 32).map
+            (fun k => run (pcEnvOf rs1 rs2 off isBEQ) pcNext.gates (pcOut k))
+          ++ [run (pcEnvOf rs1 rs2 off isBEQ) pcNext.gates 161] := by
+    show (pcNext.outs).map (run (pcEnvOf rs1 rs2 off isBEQ) pcNext.gates) = _
+    rw [pcNext_outs_eq, List.map_append, List.map_map]
+    simp only [Function.comp_def, pcAddendOut_eq]
+    rfl
+  rw [pcRun_eq, hsem, htake, takeOf_pcEnvOf]
+  show _ = (List.range 32).map
+      (fun k => if (isBEQ && (rs1 == rs2)) then off.getLsbD k else (4 : Word).getLsbD k)
+      ++ [isBEQ && (rs1 == rs2)]
+  congr 1
+  refine List.map_congr_left ?_
+  intro k hk
+  have hk32 : k < 32 := List.mem_range.mp hk
+  rw [hout k hk32, takeOf_pcEnvOf, four_getLsbD, pcEnvOf_66,
+    pcEnvOf_off _ _ _ _ k hk32]
+  by_cases h2 : k = 2
+  · subst h2
+    cases hb : (isBEQ && (rs1 == rs2))
+    · simp
+    · simp
+  · cases hb : (isBEQ && (rs1 == rs2))
+    · simp [h2]
+    · simp [h2]
+
+/-! ### NON-VACUITY — task 1 -/
+
+/-- ⛔ ONE GATE MUTATED: difference bit 5 is tied to `false`. -/
+def pcDiffGatesCut : List Gate :=
+  (List.range 32).map fun k =>
+    ⟨pcDiff k, if k == 5 then .const false else .xor (pcRs1 k) (pcRs2 k)⟩
+
+def pcNextCut : Circ :=
+  { pcNext with
+    gates := pcDiffGatesCut ++ pcNeGates.1
+               ++ [ ⟨pcEq, .not pcNe⟩
+                  , ⟨pcTake, .and pcIsBEQ pcEq⟩
+                  , ⟨pcNotTake, .not pcTake⟩ ]
+               ++ (List.range 32).flatMap pcAddendGates }
+
+theorem pcNextCut_ssa : pcNextCut.ssa = true := by decide +kernel
+theorem pcNextCut_gate_count : pcNextCut.gates.length = 99 := by decide +kernel
+
+def pcOKCut : Bool :=
+  pcCases.all fun p => pcOffs.all fun o => [false, true].all fun b =>
+    sem pcNextCut (pcEnvOf p.1 p.2 o b) == pcSpec p.1 p.2 o b
+
+theorem pcNextCut_passes_the_certificate : pcOKCut = true := by decide +kernel
+
+theorem pcNextCut_fails_the_theorem :
+    sem pcNextCut (pcEnvOf 0x20 0 8 true) ≠ pcSpec 0x20 0 8 true := by decide +kernel
+
+theorem sem_pcNext_off_the_sample :
+    ((0x20 : Word), (0 : Word)) ∉ pcCases
+      ∧ ((0x0F0F0F0F : Word), (0x0F0F0F0F : Word)) ∉ pcCases
+      ∧ (0x12345678 : Word) ∉ pcOffs
+      ∧ pcRun 0x20 0 8 true = pcSpec 0x20 0 8 true
+      ∧ pcRun 0x0F0F0F0F 0x0F0F0F0F 0x12345678 true
+          = pcSpec 0x0F0F0F0F 0x0F0F0F0F 0x12345678 true :=
+  ⟨by decide +kernel, by decide +kernel, by decide +kernel,
+   sem_pcNext _ _ _ _, sem_pcNext _ _ _ _⟩
+
+/-! ### NON-VACUITY — task 2 -/
+
+def bitAnd32Cut : Circ :=
+  { nIn := 64
+    gates := (List.range 32).map fun k =>
+      ⟨64 + k, if k == 7 then .or k (32 + k) else .and k (32 + k)⟩
+    outs := (List.range 32).map (fun k => 64 + k) }
+
+theorem bitAnd32Cut_ssa : bitAnd32Cut.ssa = true := by decide +kernel
+
+theorem bitAnd32Cut_fails_the_theorem :
+    sem bitAnd32Cut (bwEnv 0xFFFFFFFF 0x00000000)
+      ≠ (List.range 32).map (fun k => ((0xFFFFFFFF : Word) &&& 0x00000000).getLsbD k) := by
+  decide +kernel
+
+theorem sem_bitAnd32_off_the_sample :
+    (0x0F0F0F0F : Word) ∉ bwWords ∧ (0x33333333 : Word) ∉ bwWords
+      ∧ sem bitAnd32 (bwEnv 0x0F0F0F0F 0x33333333)
+          = (List.range 32).map (fun k => ((0x0F0F0F0F : Word) &&& 0x33333333).getLsbD k)
+      ∧ sem bitOr32 (bwEnv 0x0F0F0F0F 0x33333333)
+          = (List.range 32).map (fun k => ((0x0F0F0F0F : Word) ||| 0x33333333).getLsbD k)
+      ∧ sem bitNot32 (fun i => (0x0F0F0F0F : Word).getLsbD i)
+          = (List.range 32).map (fun k => (~~~(0x0F0F0F0F : Word)).getLsbD k) :=
+  ⟨by decide +kernel, by decide +kernel, sem_bitAnd32 _ _, sem_bitOr32 _ _, sem_bitNot32 _⟩
+
+/-! ### ⭐ THE ISA SIDE — the pc field, through the block
+
+*The block emits the ADDEND, so the bridge is `s.pc + <what the block computes>`
+rather than an equality with the block's output. All three branches of `stepT`'s
+pc rule are covered: the taken branch, a representative non-branch, and the
+NOP-advance on an undecodable word.*
+-/
+
+theorem pcSpec_eq (rs1 rs2 off : Word) (isBEQ : Bool) :
+    SaltWorks.HDL.pcSpec rs1 rs2 off isBEQ
+      = (List.range 32).map (fun k =>
+          if (isBEQ && (rs1 == rs2)) = true then off.getLsbD k else (4 : Word).getLsbD k)
+        ++ [isBEQ && (rs1 == rs2)] := rfl
+
+/-- ⭐ **THE ADDEND, AS A WORD.** -/
+theorem pcAddend_word (rs1 rs2 off : Word) (isBEQ : Bool) :
+    SaltWorks.HDL.wordOf (fun k => (SaltWorks.HDL.pcRun rs1 rs2 off isBEQ).getD k false)
+      = if (isBEQ && (rs1 == rs2)) = true then off else 4 := by
+  rw [sem_pcNext, pcSpec_eq, wordOf_getD_range_append]
+  by_cases hb : (isBEQ && (rs1 == rs2)) = true
+  · simp only [if_pos hb]
+    exact wordOf_getLsbD_self off
+  · simp only [if_neg hb]
+    exact wordOf_getLsbD_self 4
+
+/-- ⭐⭐ **THE TAKEN/NOT-TAKEN BRANCH, THROUGH THE BLOCK.** -/
+theorem pcField_is_pcNext_beq (s : St) (x y : Fin 32) (imm : BitVec 12) :
+    (stepT (SaltWorks.HDL.decQ (envWith s (encode (Instr.BEQ x y imm))))
+           (seenWord (envWith s (encode (Instr.BEQ x y imm))))).pc
+      = s.pc + SaltWorks.HDL.wordOf (fun k =>
+          (SaltWorks.HDL.pcRun (s.get x) (s.get y) (bOffset imm) true).getD k false) := by
+  rw [decQ_envWith, seenWord_envWith, stepT_encode, pcAddend_word]
+  show (if s.get x = s.get y then { s with pc := s.pc + bOffset imm } else s.next).pc = _
+  by_cases h : s.get x = s.get y
+  · rw [if_pos h, if_pos (by simp [h])]
+  · rw [if_neg h, if_neg (by simp [h])]
+    rfl
+
+/-- ⭐ **AND EVERY NON-BRANCH ADDS 4** — the block driven with `isBEQ = false`. -/
+theorem pcField_is_pcNext_add (s : St) (rd x y : Fin 32) :
+    (stepT (SaltWorks.HDL.decQ (envWith s (encode (Instr.ADD rd x y))))
+           (seenWord (envWith s (encode (Instr.ADD rd x y))))).pc
+      = s.pc + SaltWorks.HDL.wordOf (fun k =>
+          (SaltWorks.HDL.pcRun (s.get x) (s.get y) 0 false).getD k false) := by
+  rw [decQ_envWith, seenWord_envWith, stepT_encode, pcAddend_word, if_neg (by simp)]
+  show ((s.set rd (s.get x + s.get y)).next).pc = _
+  show (s.set rd (s.get x + s.get y)).pc + 4 = _
+  rw [set_pc]
+
+/-- ⭐ **INCLUDING THE UNDECODABLE WORDS** — `stepT`'s NOP-advance path. -/
+theorem pcField_is_pcNext_undecodable (s : St) (w : Word) (h : decode w = none) :
+    (stepT s w).pc
+      = s.pc + SaltWorks.HDL.wordOf (fun k =>
+          (SaltWorks.HDL.pcRun 0 0 0 false).getD k false) := by
+  rw [stepT_undecodable s w h, pcAddend_word, if_neg (by simp)]
+  rfl
+
+end OrganSemantics
+
 /-! ## Axiom audit -/
 
 open Salt.Tactic
@@ -3515,5 +4234,26 @@ open Salt.Tactic
 #audit_axioms addField_is_adder32 addiField_is_adder32 sltField_is_sltCirc_unconditional
 #audit_axioms adSliceCut adder32Cut adder32Cut_is_ssa adder32Cut_fails_the_adder
 #audit_axioms bitXor32_fails_the_adder sem_adder32_off_the_sample
+
+#audit_axioms run_pointwise any_congr_mem sem_bwCirc
+#audit_axioms sem_bitAnd32 sem_bitOr32 sem_bitNot32
+#audit_axioms pcNe_eq pcEq_eq pcTake_eq pcNotTake_eq pcMuxBase_eq
+#audit_axioms pcOut pcAddendOut_eq
+#audit_axioms orChain_nil orChain_one orChain_cons2 orChain_out_ge
+#audit_axioms run_orChain_frame run_orChain
+#audit_axioms run_pcDiffGates run_pcNeGates pcCtrlGates
+#audit_axioms run_pcCtrl_161 run_pcCtrl_162 run_pcCtrl_frame
+#audit_axioms pcAddGates pcAddGates_succ pcAddendGates_two pcAddendGates_ne
+#audit_axioms pcAddendGates_out_ge pcAddendGates_out_ne run_pcAddGates
+#audit_axioms takeOf pcNext_gates_eq pcNext_outs_eq run_pcNext
+#audit_axioms pcEnvOf pcRun_eq pcEnvOf_rs1 pcEnvOf_rs2 pcEnvOf_off pcEnvOf_66 pcEnvOf_96
+#audit_axioms any_range_xor takeOf_pcEnvOf four_getLsbD sem_pcNext
+#audit_axioms pcDiffGatesCut pcNextCut pcNextCut_ssa pcNextCut_gate_count
+#audit_axioms pcOKCut pcNextCut_passes_the_certificate pcNextCut_fails_the_theorem
+#audit_axioms sem_pcNext_off_the_sample
+#audit_axioms bitAnd32Cut bitAnd32Cut_ssa bitAnd32Cut_fails_the_theorem
+#audit_axioms sem_bitAnd32_off_the_sample
+#audit_axioms pcSpec_eq pcAddend_word
+#audit_axioms pcField_is_pcNext_beq pcField_is_pcNext_add pcField_is_pcNext_undecodable
 
 end SaltWorks.Stack.Program
