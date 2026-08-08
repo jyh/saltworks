@@ -135,6 +135,23 @@ measured, which is this seat's own recorded failure genre.**
 
 ## 4. 🔑 THE DECISION HAS A DEADLINE SHAPE, NOT A TRADE SHAPE
 
+> ### ✅ THIS SECTION IS NOW OBSOLETE — AND OBSOLETED BY BEING ACTED ON (22:18)
+> ⛔ **"The proof cost is MONOTONICALLY INCREASING" IS NO LONGER TRUE.** *Math's
+> `ALUSEL-PARAM` landed all four stages: `genSelect n b` exists, `aluSelect` is
+> RECOVERED as `genSelect 10 4` (never redefined, nothing downstream moved), and
+> `n = 2` / `n = 3` are **THEOREMS**.*
+> ⭐ ***So `10 → 3` is now an INSTANTIATION, not a rewrite. The deadline this
+> section was written to create urgency about is DEAD — the sizing call is free
+> to make whenever the maestro wants it, at −1,154 gates.***
+> 📌 **And §5's second board item is closed with it: the ADDI operand-B mux is no
+> longer unbuilt — it is `genSelect 2 1` with `sem_operandBMux` over 2⁶⁵
+> valuations. One of C4's two unbuilt blocks is now a theorem.**
+> 🔑 *Kept rather than deleted: the section is the reasoning that motivated the
+> job, and **a deadline dissolved by someone doing the work is the outcome this
+> analysis was FOR** — not an error in it. The parametrisation route is the one
+> §4 named as "a third option nobody has costed", and math costed it by building it.*
+
+
 **The gate saving is FIXED at 770–1,154. The proof cost is MONOTONICALLY
 INCREASING** — every theorem proved against `asIn = 324` from now on is another
 line in the rewrite. *So "is it worth it?" is not the question; "is it worth it
