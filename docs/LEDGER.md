@@ -2526,7 +2526,7 @@ depend on none, `adder32Cut_fails_the_adder` on `propext` alone) and every
 headline result was independently re-checked with `#print axioms` in
 `ScratchMATHADD.lean` (EXIT=0; deleted, not committed).
 `docs/hdl-tools/audit_completeness.py` → **every theorem is on an
-`#audit_axioms` list** (35 files, 374 theorems).
+`#audit_axioms` list** (35 files, 374 theorems). ⚠️ **SCOPE ADDED 8/7 19:0x: the 35 files are `SaltWorks/HDL` ONLY — the tool defaults to that root and had never read `SaltWorks/Stack/`. This sentence was true of a DIRECTORY and was read as true of the REPO. See the `audit_completeness` entry below.**
 
 ### Left undetermined
 
@@ -2717,7 +2717,7 @@ new declarations tick `#audit_axioms` (max 3, i.e. inside
 `[propext, Classical.choice, Quot.sound]`), and every headline result was
 independently re-checked in `ScratchMATHPC.lean` (EXIT=0; deleted, not
 committed). `docs/hdl-tools/audit_completeness.py` → **every theorem is on an
-`#audit_axioms` list** (35 files, 392 theorems, up from 374).
+`#audit_axioms` list** (35 files, 392 theorems, up from 374). ⚠️ **SCOPE ADDED 8/7 19:0x — `SaltWorks/HDL` ONLY; see below.**
 
 ### Left undetermined
 
@@ -2894,7 +2894,7 @@ build is the assertion rather than a report. Independently re-checked with
 `#print axioms` in `ScratchMATHPCA.lean` — EXIT=0, exactly the three, on all 25
 headline results (deleted, not committed).
 `docs/hdl-tools/audit_completeness.py` → **every theorem is on an
-`#audit_axioms` list** (35 files, 404 theorems, up from 392).
+`#audit_axioms` list** (35 files, 404 theorems, up from 392). ⚠️ **SCOPE ADDED 8/7 19:0x — `SaltWorks/HDL` ONLY; see below.**
 
 ⚠️ **SHARED-TREE HAZARD, RECORDED BECAUSE IT NEARLY COST THIS NODE.** The first
 port of this block was written into `Stack/Program.lean` while the `aluSelect`
