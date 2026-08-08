@@ -301,6 +301,12 @@ if [ "$nud" -gt 0 ]; then
   echo "ℹ️  defs not audited — $nud (NORMAL: a def carries no proof obligation,"
   echo "    so this is not a gap. Listed only so the numbers reconcile.)"
   sed 's/^/     /' "$TMP/uncovered.def" | head -12
+  # CAP ANNOUNCED 2026-08-08 15:2x — found by running the 11th-defect grep across
+  # the WHOLE KIT (silicon's method) instead of only the file under discussion.
+  # Milder than bus_watch.sh's caps because $nud above already prints the true
+  # count, and the GAP list (uncovered THEOREMs) is uncapped -- but a reader
+  # seeing 12 lines should be told 12 is a display limit, not the total.
+  [ "$nud" -gt 12 ] && echo "     ⚠️ $((nud - 12)) MORE not shown (12-line DISPLAY cap, not a gap) — full list: $TMP/uncovered.def"
 fi
 
 if [ "$ns" -gt 0 ]; then

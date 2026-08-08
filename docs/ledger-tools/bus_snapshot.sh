@@ -156,7 +156,15 @@ if [ "${ARCHIVE:-0}" = "1" ]; then
     touch "$BASELINE"
     novel=$(printf '%s\n' "$hitlines" | while IFS= read -r l; do
       h=$(printf '%s' "${l#*:}" | shasum | cut -c1-16)
-      grep -q "^$h " "$BASELINE" 2>/dev/null || printf '%s  %s\n' "$h" "$(printf '%s' "$l" | cut -c1-90)"
+      # CAP ANNOUNCED 2026-08-08 15:2x (the 11th-defect class, kit-wide sweep).
+      # This is the LANE FIREWALL, so the truncation mattered more than its size
+      # suggests: the BLOCK still fires and the bus line number is printed, but a
+      # human ADJUDICATING a marker hit reads this text to decide, and 90 chars
+      # can cut the very context that separates a false positive from a leak.
+      _n=$(printf '%s' "$l" | wc -c | tr -d ' ')
+      _clip=""
+      [ "$_n" -gt 90 ] && _clip=" [+$((_n - 90))B CLIPPED — read the full line at its bus line number above]"
+      grep -q "^$h " "$BASELINE" 2>/dev/null || printf '%s  %s%s\n' "$h" "$(printf '%s' "$l" | cut -c1-90)" "$_clip"
     done)
   fi
 
