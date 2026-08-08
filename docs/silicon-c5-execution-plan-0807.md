@@ -76,6 +76,27 @@ blocks, not similar ones.** Everything else is declared unmeasured.
 ⭐ **PROJECTED: ~130 cone cuts + 1,056 flop boundaries, over an unmeasured tail of
 499 gates.**
 
+#### ⚠️ AMENDED ~19:4x — THE PC ADDER, applied to my own numbers
+
+The pc-path refutation (`cefd93e`) adds a **third `adder32` instance** to the
+core — **160 gates**, whether it is described as "a third adder32" (compiler) or
+as "`adder32` instantiated through `inst_sem`" (math). *`Compose.lean:67`
+relocates every gate and `:75` advances the host counter by the full
+`gates.length`, so the instantiation route does not avoid the gates.*
+
+```
+core            ~11,900  →  ~12,060 gates
+adder32 density    3.2 % (MEASURED, same block)  →  +5 cuts
+cone budget        130   →  ~135 measured cuts
+imported entries   ~18,400 → ~18,600
+```
+✅ **AND IT SLIGHTLY IMPROVES THE BUDGET'S CONFIDENCE, which is not the direction
+I expected: the new block is `adder32`, whose density is MEASURED — so 160 gates
+move INTO the measured column rather than into the unmeasured tail.**
+📌 *I am applying this to my own projections in the same hour I told two other
+seats their total moves by 160. `C5-9`'s band (15,000–21,000) is unchanged and
+still contains the new figure.*
+
 📌 **AND THE CORE IS *CHEAPER PER GATE* THAN THE MONOLITH, WHICH IS THE CENSUS'S
 W4 LESSON PAYING OUT.** *A uniform 2.9 % on ~11,900 gates would predict ~345 cuts.
 The weighted figure is **1.55 %** — because the core is dominated by `readTree`
