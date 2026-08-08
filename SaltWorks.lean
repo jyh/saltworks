@@ -71,4 +71,7 @@ import SaltWorks.Silicon.Equiv.CERefinement
 import SaltWorks.Silicon.Equiv.CERefinementC
 import SaltWorks.Silicon.Equiv.PartialLoad
 import SaltWorks.Silicon.Equiv.ScenarioComplete
+import SaltWorks.HDL.PayloadL0
+import SaltWorks.HDL.PayloadL1
+import SaltWorks.HDL.PayloadL2
 import SaltWorks.Tactic.AuditAxioms
