@@ -302,18 +302,65 @@ def rtBit0 (m a : Nat) : Bool := (sem readTree (rtOneCold m a)).getD 0 false
 def rtSelectsOK (m : Nat) : Bool :=
   (List.range 32).all fun a => rtBit0 m a == decide (a ≠ m ∧ a ≠ 0)
 
-/-- ⭐ **THE READ PATH READS — all 32 addresses, kernel-checked.** *Including
+/-- ⭐ **THE READ PATH READS — all 32 ADDRESSES, kernel-checked** *(including
 `x0`, which must read zero without consulting storage: the address that is not a
-register.* -/
+register)*.
+
+⚠️ **AND THE ADDRESS IS THE ONLY AXIS THIS IS EXHAUSTIVE IN. Corrected 8/7 19:1x
+after math measured all three:**
+```
+a   the ADDRESS         ALL 32   genuinely exhaustive — five address bits IS 32
+m   the FILE CONTENTS   ONE      m = 7, one-cold, of the 2^992 the 31 registers hold
+the PORT                ⛔ BIT 0 ONLY — `rtBit0`; 31 of the 32 mux trees are
+                         outside this certificate entirely
+```
+**`readTree.nIn = 997`.** *This certificate and its sibling drive 64 of 2^997
+valuations and read 1 of 32 outputs.* ⇒ ***"all 32, kernel-checked" is TRUE and
+names the one axis where it is true.***
+
+✅ **SUPERSEDED — use math's `sem_readTree_St` / `sem_readTree_uncond`
+(`SaltWorks/Stack/Program.lean`): the block tied to `St.get` at EVERY state,
+register and bit, with no driver at all.** *`rtOneCold_eq` proves this
+certificate's own one-cold driver IS `rtEnvOf` at one file, so the sampled
+predicate now holds for all 31 stored registers rather than two — supersession,
+not restatement.* **What follows is a tripwire. That is the theorem.**
+
+🔑 **AND THE MUTANT THAT PROVES THE PORT AXIS IS REAL: `readTreeCutB` ties the
+root of OUTPUT BIT 1's tree to `.const false` — one gate, still `ssa` — and this
+certificate accepts it EVERYWHERE.** *Not a gap in the sample: an entire axis the
+certificate does not have.* -/
 theorem readTree_selects_correctly_on_sample : rtSelectsOK 7 = true := by decide +kernel
 
 /-- …and again with a different cold register, so the first is not an accident of
 where `7` sits in the mux tree. -/
 theorem readTree_selects_correctly_on_sample' : rtSelectsOK 19 = true := by decide +kernel
 
-/-- ⭐ **`x0` READS ZERO WITHOUT CONSULTING STORAGE** — stated on its own because
-it is the one address whose answer does not come from the register file, and the
-`rtStored = 31` / `rtRegs = 32` distinction exists entirely for it. -/
+/-- ⛔⛔ **TWO POINTS WEARING A TOTAL LAW'S NAME — AND IT IS THE ONLY THEOREM IN
+THIS CORPUS THAT SKIPPED THE `_on_sample` SUFFIX.** *(Math asked for this one to
+be flagged loudly, 8/7 19:02. They were right.)*
+
+**The ISA's version, `St.get_zero` (`ISA.lean:165`), is
+`@[simp] theorem St.get_zero (s : St) : s.get 0 = 0` — TOTAL, no hypothesis.
+The circuit's version below is `rtBit0 7 0 = false ∧ rtBit0 19 0 = false`: two
+file contents, address 0, BIT 0.** ⇒ ***A name that matches an unconditional ISA
+law, on a statement that is two points of 2^997 × 32.***
+
+🔑 **THE NAMING CONVENTION IS THE FINDING, NOT THE THEOREM.** *Twenty certificates
+in `SaltWorks/HDL/**` carry `_on_sample`, and every one of them warns a reader in
+its own name. **This is the single theorem that skipped it, and it is the single
+one that misled.*** ⇒ ***That is evidence FOR the convention, so: `_on_sample` is
+not decoration — a certificate whose name does not say `sample` will be read as a
+law, by me, within the day.***
+
+✅ **SUPERSEDED by math's `readTree_reads_x0_zero`: `x0` reads zero at EVERY file
+contents and ALL 32 bits, no driver.** *Kept here, unrenamed, because other seats'
+prose cites this name — annotated rather than rewritten, per evidence's ruling
+that a record which silently repairs its past is worth less than one that shows
+where it was wrong.*
+
+*(The underlying claim is still the right one to state separately: `x0` is the
+one address whose answer does not come from the register file, and the
+`rtStored = 31` / `rtRegs = 32` distinction exists entirely for it.)* -/
 theorem readTree_x0_is_zero : rtBit0 7 0 = false ∧ rtBit0 19 0 = false := by
   decide +kernel
 
