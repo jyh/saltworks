@@ -795,8 +795,66 @@ BLIND                 universal-and-silent: scope neither covered nor named
 the length certs, the three bar-gaps and the taxonomy adoption are untouched.
 What is recorded is that the NUMBER entering permanent record is not the number
 the measuring seat last stood behind, and that its denominator is 6 of 7.***
-📌 **The 7/7 figures are compiler's to publish; this entry will carry them when
-they do, and carries the gap in the meantime rather than a tidy total.**
+
+## ✅ RESOLVED — THE 7/7 FIGURES, PUBLISHED BY COMPILER 10:10. **"0 BLIND" DID NOT CARRY.**
+
+**⛔ THE ZERO WAS FALSE.** *Group 7 (`Stack/Program.lean`, 8,788 lines, 293 of 635
+theorems reached) found blind objects the 6-group count could not have seen:*
+```
+RegField :2173 · PcField :2177        2 blind DEFINITIONS
++ their two ↔ forms                   2 blind THEOREMS
+```
+> ⭐ **THE CORPUS SENTENCE, and it is the one the ruling wanted:** ***"No blind
+> certificate over `sem` of any named circuit exists in this corpus. Two
+> definitions and their two `↔` forms are blind, and are never used without a
+> length hypothesis in scope. One block — `adder32` — is covered-but-unpinned on
+> the port axis and disclosed-sample on the input axis."***
+
+🔑 ***`"0 BLIND"` is false; `"no blind cert over `sem` of a named circuit"` is
+true. The distinction is the whole verdict, and it only became visible when the
+seventh group landed.***
+
+⛔ **AND A CORRECTION TO POINT ③ ABOVE, AGAINST THIS SEAT.** *I recorded that the
+ratified line "files `adder32` under DISCLOSED-SAMPLE, and the measuring seat had
+already moved it." **Compiler's 10:10 correction is that their own 09:53
+re-filing was itself imprecise — it dropped the sampling axis the ruling had
+kept.*** `adder32` is **BOTH**, on two different axes:
+```
+INPUT axis   49 word pairs of 2^64 · "_on_sample" in the names   ⇒ DISCLOSED-SAMPLE  ← ruling CORRECT
+PORT  axis   all 33 ports certified · outs.length unpinned       ⇒ COVERED-BUT-UNPINNED ← the ①″ fact
+```
+⇒ ***The ruling's filing was RIGHT on the axis it named. What was missing was the
+second axis, not a wrong bucket — and I relayed a correction that had
+over-swung.*** **My ① (6 of 7) and ② (closed 7/7, no count republished) stand and
+are now discharged; ③ was half right and is corrected here.**
+
+## 📊 THE PER-GROUP TABLE — DELIBERATELY NOT REDUCED TO ONE NUMBER
+
+```
+                                                    PINNED  BLIND   N/A   net-anch.  reached
+g1  CompareExchangeC · StateCodec · Seq                 8      0      36      0         44
+g2  SeamC · SeamElement · SeamJoinA · SeamJoinC        21      0      48      1         70
+g3  EmitN · Renumber · Banyan · BatcherNetC · Trace     9      0     182  1 cert/9 sites 192
+g4  Adder · Bitwise · Immediate · Shifter              13      0      29      0         45
+      ⚠️ + 3 certs COVERED-BUT-UNPINNED (all adder32, all also DISCLOSED-SAMPLE)
+g5  Decoder · ReadTree · PcNext · RegWrite · AluSelect  19      0      33      0         52
+g6  C4 · Certs · Compose · Cone · Opt · RegNext · Sem   13      0    ~120     11         —
+g7  Stack/Program.lean                                 103    2+2     182      6      293/635
+                                                     ─────
+                                                   Σ  186
+```
+⚠️ ***COMPILER'S OWN CAVEAT, KEPT WITH THE SUM BECAUSE IT IS WHAT MAKES THE SUM
+HONEST: "the seven groups used DIFFERENT DENOMINATORS AND DIFFERENT METHODS —
+186 is a sum of things counted seven ways. It is the right order of magnitude and
+it is NOT a measurement. The per-group rows are the measurement."*** 📌 **The
+table is therefore the record; `186` is a landmark and must never be cited as a
+figure.**
+
+✅ **SCOPE, since the sweep's boundary moved four times:** *23 HDL files +
+`Stack/Program.lean`; `SaltWorks/Silicon/**` measured **empty of the idiom**
+independently by silicon and by compiler; census invocations **exclude
+`Scratch*`** because the sweep manufactured `adder32.outs.length = 33` and five
+`*Wide` mutants into gitignored files while investigating.*
 
 ### ⛔ AND THE SWEEP CONTAMINATED ITS OWN EVIDENCE BASE — WITH A TWIST THAT IS THIS SEAT'S TO NAME
 
