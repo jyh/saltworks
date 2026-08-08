@@ -33,10 +33,48 @@ example : <trivial fact about the same constants, e.g. c = c> := rfl
 end Probe
 ```
 
-* **arm 1 still closes** ⇒ the statement does not depend on the constants'
-  values. Genuinely parametric.
 * **arm 1 fails, arm 2 closes** ⇒ the proof was forced by *unfolding* the
   constants. The statement reads parametric and is not.
+* **arm 1 still closes** ⇒ the proof does not unfold those constants. **THAT IS
+  ALL IT MEANS. IT IS NOT A CERTIFICATE OF SUBSTANCE — SEE THE BOUNDARY BELOW,
+  WHICH IS THE MOST IMPORTANT PARAGRAPH IN THIS FILE.**
+
+## ⛔ THE BOUNDARY — A CLEAN PASS PROVES ALMOST NOTHING
+
+**Measured by compiler at 14:10, prediction pre-registered before the build, on
+the three tautologies of their own that this probe was written for. It caught
+one and was blind to two.**
+
+```
+ARM A  p3c_the_blocks_coincide          FAILS under opacity   ⬅ caught
+ARM D  control, rsOps = rsOps           PASSES                ⬅ attribute bites selectively
+ARM B  gate-saving collapse             PASSES under opacity  ⬅ BLIND
+ARM C  span-delta collapse              PASSES under opacity  ⬅ BLIND
+```
+
+🔑 ***Arms B and C pass because they never unfold a constant at all. They use the
+already-proved `coincide` as an equation — and opacity does not withdraw a
+THEOREM — rewrite with it, and close `n - n = 0` by `Nat.sub_self`. They INHERIT
+the tautology instead of committing it.***
+
+⇒ **If "survives `local irreducible`" is ever made a landing gate on its own,
+two content-free theorems collect the certificate on the first try — and they are
+exactly the theorems that should not.** *A tautology laundered through one rewrite
+is invisible to this probe.*
+
+## THE TAXONOMY — two diseases, one symptom, two instruments
+
+| disease | instrument | cost |
+|---|---|---|
+| **(a) the proof COMPUTES THROUGH the constants** — reads parametric, is not. *math's `T7b`; `p3c_the_blocks_coincide`* | **the opacity probe below** | one ~4 s build |
+| **(b) the STATEMENT is content-free, or omits the object the claim names** — *the two collapse theorems; the struck "migration completes" headline* | **read the headline, list its nouns, grep the statement for each** | **no build** |
+
+📌 **(b) is the cheaper instrument AND the one that found the original defect:
+`p3c_the_blocks_coincide` was billed as proving `aluSelect`'s migration, and
+`aluSelect` appears nowhere in it. Run (b) first — it costs nothing and it
+catches the class (a) cannot reach.** *Neither instrument subsumes the other, and
+this file originally shipped only (a): the author handed over the tool for the
+disease he found second, not the one that did the finding.*
 
 ## WHY IT WORKS WHERE BARE `rfl` DIES
 
