@@ -46,51 +46,105 @@ STRUCTURE PROJECTIONS survive (`Circ.outs`, `Circ.nIn`, `Seq.nIn`) and so do
 EQUATION LEMMAS (`Seq.wf.eq_1`).  One layer better than drowning in types, and
 the same shape.
 
-## Scope
+## Scope -- DERIVED, not declared (fixed 2026-08-07 23:4x, compiler)
 
-`outsideMods` is hardcoded to the four HDL modules outside the hub as of
-2026-08-07.  Regenerate it rather than trusting it -- that list is exactly the
-kind of value that stops being true without announcing it.
+`outsideMods` USED TO BE hardcoded to four HDL modules "outside the hub as of
+2026-08-07", with a note saying to regenerate it rather than trust it.  By that
+evening **all four had been swept into the hub and the list was 100 % rotted** --
+and because `reach` also used it to decide what counts as IN-closure, the rot
+corrupted the classification, not merely the header.  *The warning was written,
+read, and did not fire; a value that encodes a fact about the world needs a
+derivation, not a caveat.*
+
+It is now COMPUTED from the environment's recorded import graph: the closure of
+`SaltWorks`, subtracted from the loaded `SaltWorks.*` modules.  `scopeReport`
+prints it, and every verdict carries it -- a scope you cannot quote without.
+
+Cross-checked 2026-08-07 23:4x against an independent instrument (a Python regex
+over `^import` lines): both say FIVE, and name the same five.  Note the Lean
+figure counts modules LOADED here; `Scratch*.lean` are gitignored working files
+and are outside the hub by construction -- a filesystem walk that counts them
+reports 13 and disagrees with every tracked-file census.
 -/
 import SaltWorks
-import SaltWorks.HDL.Bitwise
-import SaltWorks.HDL.BatcherNetC
-import SaltWorks.HDL.SeamC
-import SaltWorks.HDL.C4
+import SaltWorks.Silicon.Equiv.CERefinement
+import SaltWorks.Silicon.Equiv.CERefinementC
+import SaltWorks.Silicon.Equiv.PartialLoad
+import SaltWorks.Silicon.Equiv.ScenarioComplete
+import SaltWorks.Silicon.Imported.CompareExchange
 
 open Lean
 
 namespace SaltWorks.Reach
 
-/-- The HDL modules that are NOT in the hub closure. -/
-def outsideMods : List Name :=
-  [`SaltWorks.HDL.Bitwise, `SaltWorks.HDL.BatcherNetC,
-   `SaltWorks.HDL.SeamC, `SaltWorks.HDL.C4]
+/-- Modules reachable from `root` by following recorded imports. -/
+def closureOf (env : Environment) (root : Name) : NameSet := Id.run do
+  let names := env.header.moduleNames
+  let data  := env.header.moduleData
+  let mut idx : Std.HashMap Name Nat := {}
+  for i in [0:names.size] do
+    idx := idx.insert names[i]! i
+  let mut seen : NameSet := {}
+  let mut todo : List Name := [root]
+  while !todo.isEmpty do
+    match todo with
+    | [] => pure ()
+    | m :: rest =>
+      todo := rest
+      if !seen.contains m then
+        seen := seen.insert m
+        if let some i := idx[m]? then
+          if let some d := data[i]? then
+            for imp in d.imports do
+              todo := imp.module :: todo
+  return seen
+
+/-- The `SaltWorks.*` modules loaded here that are NOT in the hub's closure.
+DERIVED — see the Scope note.  Never hardcode this. -/
+def outsideModsOf (env : Environment) : Array Name :=
+  let cl := closureOf env `SaltWorks
+  (env.header.moduleNames.filter
+    (fun m => (`SaltWorks).isPrefixOf m || m == `SaltWorks)).filter (fun m => !cl.contains m)
+
+/-- Scope line, printed BEFORE the expensive walk so a killed run still
+answers the cheap question. -/
+def scopeReport : CoreM Unit := do
+  let env ← getEnv
+  let outside := outsideModsOf env
+  let all := env.header.moduleNames.filter
+    (fun m => (`SaltWorks).isPrefixOf m || m == `SaltWorks)
+  IO.println s!"SCOPE  loaded {all.size} SaltWorks modules · in closure {all.size - outside.size} · OUTSIDE {outside.size}"
+  for m in outside do IO.println s!"  outside: {m}"
+
+#eval scopeReport
 
 def modOf (env : Environment) (n : Name) : Option Name := do
   let idx ← env.getModuleIdxFor? n
   env.header.moduleNames[idx.toNat]?
 
-/-- Transitive statement-constants, unfolding only defs declared in `home`. -/
-partial def reach (env : Environment) (home : Name) (seen : NameSet) (todo : List Name)
-    (acc : NameSet) : NameSet :=
+/-- Transitive statement-constants, unfolding only defs declared in `home`.
+`outside` is the DERIVED outside-module set (see `outsideModsOf`); it decides
+what counts as in-closure, which is why hardcoding it corrupted classification
+and not merely the header. -/
+partial def reach (env : Environment) (outside : NameSet) (home : Name) (seen : NameSet)
+    (todo : List Name) (acc : NameSet) : NameSet :=
   match todo with
   | [] => acc
   | n :: rest =>
-    if seen.contains n then reach env home seen rest acc else
+    if seen.contains n then reach env outside home seen rest acc else
     let seen := seen.insert n
     match env.find? n with
-    | none => reach env home seen rest acc
+    | none => reach env outside home seen rest acc
     | some ci =>
       let m := modOf env n
       if m == some home then
         -- local helper: unfold its TYPE and its VALUE
         let next := ci.type.getUsedConstants.toList
                       ++ (ci.value?.map (·.getUsedConstants.toList) |>.getD [])
-        reach env home seen (next ++ rest) acc
+        reach env outside home seen (next ++ rest) acc
       else
-        let acc := if m.isSome && !(outsideMods.contains m.get!) then acc.insert n else acc
-        reach env home seen rest acc
+        let acc := if m.isSome && !(outside.contains m.get!) then acc.insert n else acc
+        reach env outside home seen rest acc
 
 /-- Substring test. -/
 def has (s pat : String) : Bool := (s.splitOn pat).length > 1
@@ -107,19 +161,30 @@ def isNoise (env : Environment) (n : Name) : Bool :=
 
 def report : CoreM Unit := do
   let env ← getEnv
+  let outsideArr := outsideModsOf env
+  let outside : NameSet := outsideArr.foldl (fun s m => s.insert m) {}
   -- INVERT the map: in-closure definition -> the outside theorems about it.
   let mut inv : Std.HashMap Name (Array Name) := {}
-  for home in outsideMods do
+  for home in outsideArr do
     for (n, ci) in env.constants.toList do
       if modOf env n == some home then
         if ci matches .thmInfo _ then
           if !(has n.toString "_proof") then
-            let hits := reach env home {} ci.type.getUsedConstants.toList {}
+            let hits := reach env outside home {} ci.type.getUsedConstants.toList {}
             for h in hits.toList do
               if (`SaltWorks).isPrefixOf h && !(isNoise env h) then
                 inv := inv.insert h ((inv.getD h #[]).push n)
   let ks := inv.toList.toArray.qsort (fun a b => b.2.size < a.2.size)
-  IO.println s!"IN-CLOSURE DEFINITIONS whose only certificates live OUTSIDE the hub: {ks.size}"
+  -- ⛔ HEADLINE FIXED 2026-08-07 (compiler).  This line USED to read "whose only
+  -- certificates live OUTSIDE the hub" -- the stronger claim this tool's own
+  -- header says it does NOT compute, and which manufactures ~15 false positives.
+  -- The docstring corrected it; the PRINTED line asserted it, and the printed
+  -- line is the one that gets quoted.  A correct body does not repair a
+  -- quotable headline.
+  IO.println s!"IN-CLOSURE DEFINITIONS REACHED BY outside theorems: {ks.size}"
+  IO.println s!"  [scope: {outsideArr.size} outside modules — {outsideArr.toList}]"
+  IO.println "  [NOT 'definitions whose ONLY certificates are outside' — that needs"
+  IO.println "   the in-closure subjects subtracted, and THE SUBTRACTION IS STILL OWED.]"
   for (d, thms) in ks do
     IO.println s!"  {d}   <- {thms.size} outside theorem(s): {thms.toList.take 3}"
 
