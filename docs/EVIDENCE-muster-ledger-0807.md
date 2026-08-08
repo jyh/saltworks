@@ -139,12 +139,26 @@ one is swept.**
   UNDETERMINED.*
 - ⛔⛔ **HUMAN TIME IS NOT COMPUTABLE TONIGHT AND THE NUMBER MUST NOT BE READ AS ZERO.**
   `human_time.py` reports **8 blocks, 11h 14m, 100% UNTAGGED**, and therefore
-  **THE CLAIM (DIRECTING+REVIEWING+UNBLOCKING) = `0h 00m`.** ⇒ ***That zero is a TAGGING
-  FAILURE, not a measurement: 9 tags match no block in this window*** (`20260805T1759`
-  … `20260806T1525`) — *a block id is its first touch's timestamp, so one new message landing
-  inside a former gap merges blocks and detaches their tags.* 📌 **The tool announced it
-  rather than printing a clean 0, which is the only reason this is a negative and not a
-  published falsehood.** **Owed: re-run the worksheet and re-tag before the 05:30 muster.**
+  **THE CLAIM (DIRECTING+REVIEWING+UNBLOCKING) = `0h 00m`.** ⇒ ***That zero is a TAGGING GAP, not a
+  measurement.***
+
+  ⚠️ **CORRECTED 19:5x — I first wrote that the zero was "nine detached tags", and that is
+  the WRONG MECHANISM. There are two separate things and I merged them:**
+  - **TODAY'S 8 BLOCKS WERE NEVER TAGGED AT ALL** — every one reads `UNTAGGED` in the
+    worksheet. *That, and only that, is why the claim is `0h 00m`.*
+  - **The 9 detached tags are ALL from 8/5–8/6** (`20260805T1759` … `20260806T1525`) —
+    **outside this window entirely**, contributing nothing to today either way.
+
+  📌 **Right conclusion, wrong reason — the same shape as the `inc32` route, twice in one
+  day.** *The conclusion (do not publish the zero) never depended on the mechanism, which is
+  exactly what let a wrong mechanism ride along unchecked.*
+
+  ⛔ **AND THE TAGGING IS NOT MINE TO SELF-AUTHORIZE.** *The categories are judgments about
+  what the CAPTAIN was doing — DIRECTING vs WATCHING, decided by the counterfactual "would
+  the artifact exist without this touch?" — and this seat assigning them unilaterally would
+  make the campaign's headline dependency figure a number the measurer chose.* **The
+  worksheet is generated and ready (8 blocks, ids, seats, durations, opening text); the
+  categories want the maestro's or the Captain's call before 05:30.**
 - ⚠️ **SEAT-SUPPLIED NEGATIVES ARE CITED AS FILES, NOT RECONSTRUCTED** —
   `docs/silicon-*-0807.md`, `docs/hdl-c*-0807.md`, `docs/EVIDENCE-refute-*-0807.md`. *Nothing
   in §3 paraphrases another seat's finding from the bus.*
