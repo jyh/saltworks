@@ -25,6 +25,11 @@ import SaltWorks.HDL.Bitwise
 import SaltWorks.HDL.C4
 import SaltWorks.HDL.SeamC
 import SaltWorks.HDL.SeamTrace
+import SaltWorks.HDL.Cone
+import SaltWorks.HDL.SeamElement
+import SaltWorks.HDL.SeamJoinA
+import SaltWorks.HDL.SeamJoinB
+import SaltWorks.HDL.SeamJoinC
 import SaltWorks.HDL.BatcherNetC
 import SaltWorks.HDL.BatcherNet
 import SaltWorks.HDL.BatcherNetCheck
