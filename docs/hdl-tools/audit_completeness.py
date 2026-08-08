@@ -9,8 +9,22 @@ nobody lists is a theorem nobody audits, and the build stays green.
 
 Exit 0 = complete · 1 = unaudited theorems found · 2 = could not check.
 The three-way exit is deliberate: a green from a tool that read nothing is worse
-than a red.  This prints WHAT IT READ (file and theorem counts), not only what
-it concluded.
+than a red.
+
+⛔ AND THIS SCRIPT COMMITTED THAT EXACT SIN FOR A DAY (found by math 2026-08-07
+19:02, confirmed and widened here).  The default root was `SaltWorks/HDL` and the
+glob was NON-RECURSIVE, so it read 35 files of the repo's 48 and 404 theorems of
+its ~967.  SIX OF THE SEVEN directories holding .lean files were never audited --
+including SaltWorks/Stack, which holds MORE theorems (563) than the scope that
+was read, and 2 unaudited ones.  Naming the parent (`SaltWorks`) read ZERO files
+and exited 2.
+
+🔑 The defence this docstring used to offer -- "it prints WHAT IT READ (file and
+theorem counts)" -- WAS THE BUG WEARING THE FIX'S CLOTHES.  A COUNT IS NOT A
+SCOPE: "READ: 35 files" cannot distinguish `all of them` from `35 of 48`, and the
+RESULT line (the one that gets quoted) carried neither the root nor the count.
+⇒ EVERY LINE THIS TOOL PRINTS NOW NAMES ITS ROOT.  A verdict that cannot be
+quoted without its scope is the only kind worth printing.
 
 ⚠️ THE FIRST VERSION OF THIS SCRIPT REPORTED 149 UNAUDITED DECLARATIONS AND WAS
 WRONG.  It regex-matched `^(theorem|def|abbrev)\\s+NAME` against the RAW source,
@@ -38,8 +52,10 @@ def strip_comments(src: str) -> str:
     return ''.join(out)
 
 def main() -> int:
-    root = sys.argv[1] if len(sys.argv) > 1 else 'SaltWorks/HDL'
-    files = sorted(glob.glob(os.path.join(root, '*.lean')))
+    root = sys.argv[1] if len(sys.argv) > 1 else 'SaltWorks'
+    # RECURSIVE.  The old flat glob made every subdirectory invisible, so the
+    # honest-looking `audit_completeness.py SaltWorks` read nothing at all.
+    files = sorted(glob.glob(os.path.join(root, '**', '*.lean'), recursive=True))
     if not files:
         print(f"COULD NOT CHECK: no .lean files under {root}", file=sys.stderr)
         return 2
@@ -61,13 +77,18 @@ def main() -> int:
         missing = sorted(thms - listed)
         if missing:
             bad.append((p, missing))
-    print(f"READ: {len(files)} files, {total_thm} theorems")
+    dirs = sorted({os.path.dirname(f) for f in files})
+    scope = f"ROOT={root}, {len(files)} files in {len(dirs)} dirs, {total_thm} theorems"
+    print(f"READ: {scope}")
+    for d in dirs:
+        n = sum(1 for f in files if os.path.dirname(f) == d)
+        print(f"  scanned  {d}  ({n} files)")
     if bad:
         for p, miss in bad:
             print(f"UNAUDITED  {p}: {', '.join(miss)}")
-        print(f"RESULT: {sum(len(m) for _, m in bad)} unaudited theorem(s)")
+        print(f"RESULT: {sum(len(m) for _, m in bad)} unaudited theorem(s)  [{scope}]")
         return 1
-    print("RESULT: every theorem is on an #audit_axioms list")
+    print(f"RESULT: every theorem is on an #audit_axioms list  [{scope}]")
     return 0
 
 if __name__ == '__main__':
