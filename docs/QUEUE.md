@@ -53,11 +53,10 @@
   PASS 75 / FAIL 0 / UNREACHED 0; constants at the ruled pair;
   SelectCut32 restated over generator instances (the kernel-checked
   −1154 preserved); ruling-to-close in one day.
-- W2 · WRITE · **GATED(W1 + both round-2 reads in)** — ③ waves
-  L1 + L2 (HDL-slot element lemmas, v2.1 statements: H3/hrst carried;
-  claim-gated OR under act0∧act1∧sel0≠sel1; the three undecided
-  cases incl. tie-splice). L0 rides with them (element-level, L2's
-  genre).
+- W2 · WRITE · **FIRED 15:51 (all gates down)** — ③ waves L0/L1/L2
+  in the HDL slot, statements per v2.3 (P=8 scope; H1–H4 in full;
+  three undecided cases; claim-gated-OR transparency; ∀-P off
+  runFrame traces); precondition preambles mandatory.
 - R1 · READ · **PRE-AUTH** — ③ v2.1 round-2 read (bdb75f2/1a70c99).
 - R2 · READ · **PRE-AUTH** — ④ refutation pass (the FSM model's fit
   in sequential Circ; piece-4 trace shapes; piece-5 well-formedness
