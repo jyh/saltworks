@@ -155,6 +155,49 @@ against literals rather than the ruled constants — *in which case the migratio
 did not escape numeral-binding and the whole exercise is measuring the thing it
 was meant to retire.*
 
+## 4b · ✅ RESULT — RUN 15:5x AT `bb82d5c`, EVERY PREDICTION CONFIRMED
+
+```
+$ ../saltbuild.sh ScratchC5REBASE-silicon.lean
+✓ SaltWorks.HDL.c5_m1_ruled_price          [1 axioms]   e1Cost ruledCodes 2 = 0
+✓ SaltWorks.HDL.c5_m3_retired_price        [1 axioms]   e1Cost (range 10) 4 = 11
+✓ SaltWorks.HDL.c5_m2_ruled_gates          [1 axioms]   (genSelect 3 2).gates.length = 291
+✓ SaltWorks.HDL.c5_retired_gates           [1 axioms]   (genSelect 10 4).gates.length = 1445
+✓ SaltWorks.HDL.c5_ruled_pair_is_three_two [0 axioms]   rsOps=3 ∧ rsSelBits=2 ∧ rsPad=4
+saltbuild EXIT=0
+```
+
+### ⭐ THE RE-BASELINE, and it is reported as PAIRS because a price with no comparator is a cached number
+```
+                      RETIRED (10,4)      RULED (3,2)      delta
+E1 encoder price            11                 0           −11   (free)
+select gate count         1445               291         −1154
+```
+📌 **`1445` was DERIVED in §4 as `291 + 1154` from the maestro's ruling and is now
+CHECKED rather than asserted — the arithmetic held.** *Had it not, the pre-reg
+said so in advance: "if this is not 1445, my arithmetic in the pre-reg was wrong."*
+
+**WHY THESE TICKS AND NOT A GREEN BUILD:** `#audit_axioms` reports each
+declaration's transitive axiom dependencies, throwing if any falls outside
+`{propext, Classical.choice, Quot.sound}`. **`[1 axioms]` is one WHITELISTED
+axiom, not one unproved assumption** — a `sorry` or an `ofReduceBool` would have
+failed the run by name. *This is the per-declaration walk the 15:29 ruling
+requires, and it is why the amended bar exists.*
+
+⚠️ **THE THREE PROPOSITIONS WERE RE-PROVED UNDER THIS SEAT'S OWN HAND, not cited
+from compiler's file.** *Citing `ruled_cost_zero` would have measured my ability
+to read a theorem name; `by decide +kernel` on the proposition measures the fact.
+Anchors were located BY PROPOSITION, which mattered — phase 3b re-homed
+`(genSelect 3 2).gates.length = 291` and a name-anchored citation would have
+rotted.*
+
+⛔ **WHAT I DID *NOT* VERIFY, stated so the green is not over-read:** this is the
+AUDIT form, which elaborates and discards. It establishes that the modules under
+measurement and their transitive imports elaborate, and that my five declarations
+are axiom-clean. **It is NOT a full-tree build and writes no olean.** *The
+pre-registered clause "AND the tree builds green" is discharged only to the scope
+of the imports above.*
+
 ## 5 · WHAT THIS DOES NOT COVER
 
 **`C5-9`/`C5-10`/`C5-11` are NOT released by this.** *They are gated on `core`
