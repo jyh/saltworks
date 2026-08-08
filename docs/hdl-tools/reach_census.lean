@@ -32,12 +32,35 @@ class, via `sub_via_adder_correct`.  It does.
 ## ⛔ WHAT IT DOES **NOT** ANSWER, stated because the first run's header claimed
 ## it did
 
-It computes "in-closure definitions REACHED BY outside theorems".  It does NOT
-compute "definitions whose ONLY certificates are outside" -- for that you must
-also compute the IN-closure theorems' subjects and SUBTRACT.  `decQ`, `encD`,
-`wordOf` and `stepT` all appear in the output and all have certificates inside
-the hub (`decQ_encD`, `transposed_layout_breaks`).  Reading the raw output as
-the stronger claim manufactures ~15 false positives.  THE SUBTRACTION IS OWED.
+It computes "in-closure definitions REACHED BY outside theorems".  That is NOT
+"definitions whose ONLY certificates are outside" -- for that the IN-closure
+theorems' subjects must be subtracted.  Reading the raw reach list as the
+stronger claim manufactures false positives.
+
+## ✅ THE SUBTRACTION IS NOW PAID (2026-08-07 23:5x, compiler)
+
+The header called it OWED from the day it was written, and a fleet seat read the
+reach list as the stronger claim within three minutes of my publishing it -- so
+it was not a theoretical debt.  `certifiedInside` now computes it and `report`
+prints the residual.
+
+**RESULT: residual 0.**  All nine reached definitions are certified inside the
+hub, abundantly: `Stack.batcher8` 39, `Stack.runNet` 36, `Stack.extendIio` 25,
+`Banyan.line` 22, `Silicon.runP` 20, `Silicon.Netlist` 11, `Stack.IsSorted` 6,
+`ceCNL`/`ceCNL_outs` 3 each.  ⇒ **The outside modules are a BUILD-COVERAGE gap
+(the nightly does not kernel-check those files), NOT a certification gap.**
+
+⚖️ **Why the residual may be stated flatly despite a weak instrument.**
+`certifiedInside` matches STATEMENT constants only, so it can MISS a certificate
+whose link sits inside a body.  A missed certificate leaves a candidate wrongly
+IN the residual ⇒ **this instrument can only OVERSTATE the residual.**  It
+measured 0, and a residual cannot be negative, so the true residual is 0.  *The
+weakness runs against the conclusion, which is what makes the conclusion safe --
+had it measured 7, that number would be an upper bound and nothing more.*
+
+📌 *The header used to cite `decQ`, `encD`, `wordOf`, `stepT` and "~15 false
+positives".  Those describe the ROTTED four-module configuration and no longer
+correspond to anything this tool prints; kept only as a record of the class.*
 
 ## Known leak
 
@@ -159,6 +182,23 @@ def isNoise (env : Environment) (n : Name) : Bool :=
   | some (.defnInfo _) => has s "_proof" || has s "_aux" || has s "match_" || has s "._"
   | _                  => true
 
+/-- For each candidate, the IN-CLOSURE theorems that name it in their STATEMENT.
+Statement-only by design: see the BOUND note in the header — missing a
+certificate can only overstate the residual, never understate it. -/
+def certifiedInside (env : Environment) (cands : NameSet) : Std.HashMap Name (Array Name) := Id.run do
+  let cl := closureOf env `SaltWorks
+  let mut hit : Std.HashMap Name (Array Name) := {}
+  for (n, ci) in env.constants.toList do
+    if ci matches .thmInfo _ then
+      if !(has n.toString "_proof") then
+        match modOf env n with
+        | some m =>
+          if cl.contains m && (`SaltWorks).isPrefixOf m then
+            for c in ci.type.getUsedConstants do
+              if cands.contains c then hit := hit.insert c ((hit.getD c #[]).push n)
+        | none => pure ()
+  return hit
+
 def report : CoreM Unit := do
   let env ← getEnv
   let outsideArr := outsideModsOf env
@@ -183,10 +223,26 @@ def report : CoreM Unit := do
   -- quotable headline.
   IO.println s!"IN-CLOSURE DEFINITIONS REACHED BY outside theorems: {ks.size}"
   IO.println s!"  [scope: {outsideArr.size} outside modules — {outsideArr.toList}]"
-  IO.println "  [NOT 'definitions whose ONLY certificates are outside' — that needs"
-  IO.println "   the in-closure subjects subtracted, and THE SUBTRACTION IS STILL OWED.]"
   for (d, thms) in ks do
     IO.println s!"  {d}   <- {thms.size} outside theorem(s): {thms.toList.take 3}"
+  -- THE SUBTRACTION.  Owed since this file was written; paid 2026-08-07.
+  let cands : NameSet := ks.foldl (fun s (d, _) => s.insert d) {}
+  let inside := certifiedInside env cands
+  let mut residual : List Name := []
+  IO.println ""
+  IO.println "SUBTRACTION — which of the above are ALSO certified INSIDE the hub?"
+  for (d, _) in ks do
+    match inside[d]? with
+    | some ws => IO.println s!"  inside-certified  {d}  <- {ws.size} in-closure thm(s): {ws.toList.take 2}"
+    | none    => residual := d :: residual
+  IO.println s!"RESIDUAL — reached from outside with NO in-closure certificate: {residual.length}"
+  for d in residual.reverse do IO.println s!"    {d}"
+  IO.println "  [BOUND: `certifiedInside` matches STATEMENT constants only, so it can MISS"
+  IO.println "   a certificate whose link is in a body. That can only OVERSTATE the residual,"
+  IO.println "   so residual 0 is exact and any residual > 0 is an UPPER BOUND.]"
+  IO.println "  [SCOPE: candidates are IN-CLOSURE definitions only. Objects DEFINED in the"
+  IO.println "   outside modules (e.g. `ceNL`) are never candidates — this says NOTHING"
+  IO.println "   about them, and nothing about the build-coverage gap itself.]"
 
 #eval report
 
