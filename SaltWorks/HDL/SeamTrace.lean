@@ -752,6 +752,76 @@ theorem bnC_out_factors : ∀ (tr : List (List Bool)) (st : List Bool), st.lengt
     rw [bnC_step_out st inp hst e he, ← bnC_step_slice st inp hst e he,
         ih _ (bnC_step_state_length st inp) e he]
 
+/-! ### Step 2c — the fold, from the BACK
+
+*`bnCDatDrop` recurses from the FRONT (apply element `e`, then the rest). The
+value-level correspondence needs the other end: element `k`'s step applied to the
+list the first `k` elements produced — which is the shape `runNet`'s `foldl` has.* -/
+
+theorem bnCDatDrop_succ :
+    ∀ (k : Nat) (cs : List (Nat × Nat)) (e : Nat) (dat : List Net), k < cs.length →
+      bnCDatDrop e (k+1) cs dat
+        = bnCDatStep (e + k) (cs.getD k (0,0)).1 (cs.getD k (0,0)).2
+            (bnCDatDrop e k cs dat) := by
+  intro k
+  induction k with
+  | zero =>
+    intro cs e dat hk
+    match cs with
+    | [] => simp at hk
+    | (a, b) :: cs => rfl
+  | succ k ih =>
+    intro cs e dat hk
+    match cs with
+    | [] => simp at hk
+    | (a, b) :: cs =>
+      have hk' : k < cs.length := by simpa using hk
+      have he : e + (k+1) = (e+1) + k := by omega
+      show bnCDatDrop (e+1) (k+1) cs (bnCDatStep e a b dat) = _
+      rw [ih cs (e+1) (bnCDatStep e a b dat) hk', he]
+      rfl
+
+/-- ⭐ **THE FOLD'S STEP: element `k` applied to what the first `k` produced.**
+*This is `runNet`'s `foldl` shape, one level down — nets where it has values.* -/
+theorem bnCDatAt_succ (k : Nat) (hk : k < 24) :
+    bnCDatAt (k+1)
+      = bnCDatStep k (bnCCompAt k).1 (bnCCompAt k).2 (bnCDatAt k) := by
+  have hlen : k < bnComps.length := by rw [bnC_comps_count]; exact hk
+  have h := bnCDatDrop_succ k bnComps 0 ((List.range bnCWires).map bnCDatIn) hlen
+  simpa [bnCDatAt, bnCDat0, bnCCompAt] using h
+
+/-! #### ⛔ NEXT: `bnCDatStep_getD`, and it beat me three times — the obstacle is
+#### recorded so the next hand does not re-pay it
+
+**The statement wanted, and it is `applyComp`'s shape exactly:**
+```lean
+(bnCDatStep e a b dat).getD i 0
+  = if i = a then (instOuts ceCcore (bnCSigma e a b dat) (bnCOff e)).getD 0 0
+    else if i = b then (instOuts … ).getD 1 0
+    else dat.getD i 0                        -- given a ≠ b, a < len, b < len
+```
+*Compare `applyComp c v i = if i = c.1 then min … else if i = c.2 then max … else v i`.*
+**The `i = a` case is proved; cases `i = b` and `i ∉ {a,b}` are not.**
+
+📌 **THREE ATTEMPTS, THREE DIFFERENT FAILURES, ALL RECORDED BECAUSE NONE IS
+OBVIOUS:**
+1. ⛔ `List.getD_set_ne` / `List.getD_set_self_of_lt` **do not exist** in this
+   toolchain. What batteries has is `List.getElem?_set_eq_of_lt` and
+   `List.getElem?_set_of_lt` — so the route is through `getElem?`, not `getD`.
+2. ⛔ `subst hia` on `hia : i = a` **eliminates `a`, not `i`**, and every later
+   mention fails with *"Unknown identifier `a`"*. (Math hit the same shape at
+   19:18 through a δ-alias.) **Use `by_cases` + explicit `Ne.symm` forms.**
+3. ⛔ `simp` **blows `maxRecDepth` (8000) on the `i = b` and neither cases, even
+   after `generalize`-ing both instOuts terms away.** The `i = a` case with the
+   same lemma set succeeds, so it is not the big term alone. *Unresolved — and
+   the `set` lemmas orient their conditions `a = i`, not `i = a`, which is worth
+   checking first.*
+
+⚠️ **AND THE AUDIT IS WHAT CAUGHT THE DANGER: an unsolved goal became `sorryAx`,
+and `#audit_axioms` FAILED THE BUILD on it.** *A red build is why nothing here
+was committed. **The whitelist is not paperwork — it is the thing standing
+between a tactic failure and a committed hole.*** -/
+
 /-! ### ⚠️ STEP 2 IS NOT THE SAME SHAPE AS STEP 1 — the data path is PER-FRAME
 
 **Having built the skeleton, the next step is where the state and data halves
@@ -797,5 +867,6 @@ the frame is the level the discharge has to work at.* -/
 #audit_axioms bnCBuild_dat_drop bnCResult_dat
 #audit_axioms ceCcore_data_port_gate ceCcore_data_port_lt bnC_data_bit
 #audit_axioms bnCElemOutAt ceC_nOut_eq bnC_step_out bnCElemOuts bnC_out_factors
+#audit_axioms bnCDatDrop_succ bnCDatAt_succ
 
 end SaltWorks.HDL
