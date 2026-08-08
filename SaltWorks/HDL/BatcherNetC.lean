@@ -912,5 +912,6 @@ for this element.*
 #audit_axioms bnC_concentrates_actives
 #audit_axioms bnCIdent bnC_identity_is_fixed
 #audit_axioms bnCRot bnC_rotation_routes
+#audit_axioms bnCSigma_state bnCSigma_state_injective
 
 end SaltWorks.HDL
