@@ -72,10 +72,12 @@
   M2 is the banked control (residual ⊢ 2 = 1, no slack). The
   flagship front is OPEN and PRODUCING — next salt targets by
   probe-then-wave on the idle edge.
-- W3 · WRITE · **GATED(L1+L2 landed)** — ③ L3 (three lines from
-  bnC_output_frames_are_the_fold + elemSortsAt_all), then L4 (the
-  σ-composition, C-class, absorbs the sel-distinctness transport).
-  L4 SCOPING may start any time as a read.
+- W3 · WRITE · **L3 PROBE GREEN, GATE VACUOUS (math 16:13: L3 needs
+  NOTHING from L0/L1/L2 — it rides two other landed theorems);
+  PARKED operationally pending tree-quiet with compiler's running
+  executors.** Then L4 (RE-PRICED candidate-B per the 16:09 scope:
+  the runNetF_key + bnCFrameAt_succ_frames induction, C-class
+  fallback). L4 scoping DONE.
 - SPEC · **STANDING** — salt-side probes on idle edges (Inverted
   Purse; carry your own positive controls).
 
