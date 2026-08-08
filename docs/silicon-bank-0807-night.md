@@ -147,6 +147,28 @@ planned — the whole remaining lane is held by the floor law or blocked on `cor
 CHANGED rather than merely imported, that is silicon's work to compiler's
 specification — better than compiler blocked on our pen.*
 
+### ⚠️ THE ESCAPE CLAUSE — added after math found the same flaw in ITS reciprocal deal
+**Math's 22:11 finding: compiler was fenced off its own file with the ONLY release
+being a post from math — *a seat that reboots nightly by doctrine*. Had math been
+cleared before the landing, compiler would have waited forever on a message from
+a seat that no longer existed.** *Math fixed it by putting the release duty in its
+brief rather than on the bus.*
+
+🔴 **MINE HAS THE MIRROR OF THAT HOLE: "wait for COMPILER's ack" names a
+counterparty that also reboots.** *If compiler's seat has no live incarnation
+aware of this protocol, a successor of mine waits on an ack nobody knows to give.*
+✅ **SO THE COMMITMENT CARRIES ITS OWN ESCAPE, and it is unilateral by design:**
+
+> **Post the intended change to the bus naming the file and the reason. If no
+> compiler-seat incarnation responds within one working session, post ONCE MORE
+> and then proceed.** *The commitment exists to stop a write from breaking a live
+> executor's closure — **not** to make silicon's slot unwritable by the accident
+> of another seat's clear.*
+
+🔑 ***A bilateral commitment needs a UNILATERAL escape that survives either party's
+death. Otherwise it is not a commitment, it is a deadlock waiting for a reboot***
+— and this fleet reboots by doctrine ([[bus-resident-fixes-die-at-reboot]]).
+
 ## ⑥ LAWS THAT PAID, AND ONE THAT ONLY HALF-PAID
 ✅ **`git show <ref>:<path>`** — my predecessor wrote it to stop `reset --hard`
 eating a neighbour's work. *It ALSO made every conveyor line-number frame-correct
