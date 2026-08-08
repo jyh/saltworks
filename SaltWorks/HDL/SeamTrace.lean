@@ -205,4 +205,46 @@ theorem bnComps_drop_cons (e : Nat) (he : e < 24) :
   congr 1
   rw [bnCCompAt, List.getD_eq_getElem _ _ h]
 
+/-! ### ⭐ For a dense-SSA gate list, ONLY THE INPUT NETS MATTER
+
+*`run_congr_on` asks for agreement on every net any gate READS — including the
+nets earlier gates WRITE. That is unusable here: the network-side environment is
+`env ∘ σ` and the element-side is `ceC.env v sl`, and above `ceCcore.nIn` they
+genuinely differ. Under `ssaFrom` they need not agree there, because every such
+net is written before it is read.*
+
+**This is the content `inst_sem` reaches through `run_renumFrom`, stated on its
+own so it can be used without an instantiation.** -/
+theorem run_agree_of_inputs :
+    ∀ (gs : List Gate) (base : Nat) (env₁ env₂ : Env),
+      ssaFrom base gs = true →
+      (∀ a, a < base → env₁ a = env₂ a) →
+      ∀ n, n < base + gs.length → run env₁ gs n = run env₂ gs n := by
+  intro gs
+  induction gs with
+  | nil => intro base env₁ env₂ _ hin n hn; simpa using hin n (by simpa using hn)
+  | cons g gs ih =>
+    intro base env₁ env₂ hssa hin n hn
+    rw [ssaFrom, Bool.and_eq_true, Bool.and_eq_true] at hssa
+    obtain ⟨⟨hout, hfan⟩, hrest⟩ := hssa
+    have hout' : g.out = base := by simpa using hout
+    have hop : g.op.eval env₁ = g.op.eval env₂ :=
+      Op.eval_congr g.op (fun a ha => hin a (of_decide_eq_true (List.all_eq_true.mp hfan a ha)))
+    rw [run_cons, run_cons, hop]
+    refine ih (base+1) _ _ hrest (fun a ha => ?_) n (by simp at hn ⊢; omega)
+    by_cases hEq : a = g.out
+    · subst hEq; simp [upd]
+    · rw [upd_of_ne _ hEq, upd_of_ne _ hEq]
+      rw [hout'] at hEq
+      exact hin a (by omega)
+
+/-- The same, specialised to a `Circ` that is `ssa`. -/
+theorem run_agree_of_inputs_circ (c : Circ) (h : c.ssa = true) (env₁ env₂ : Env)
+    (hin : ∀ a, a < c.nIn → env₁ a = env₂ a)
+    (n : Net) (hn : n < c.nIn + c.gates.length) :
+    run env₁ c.gates n = run env₂ c.gates n := by
+  have hgs : ssaFrom c.nIn c.gates = true := by
+    rw [Circ.ssa, Bool.and_eq_true] at h; exact h.1
+  exact run_agree_of_inputs c.gates c.nIn env₁ env₂ hgs hin n hn
+
 end SaltWorks.HDL
