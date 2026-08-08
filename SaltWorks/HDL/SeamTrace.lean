@@ -948,4 +948,473 @@ theorem bnC_wire_val (st inp : List Bool) (w : Nat) (hw : w < 8) :
 #audit_axioms bnCDatDrop_succ bnCDatAt_succ bnCDatStep_getD
 #audit_axioms bnC_step_out_wires bnC_wire_val
 
+
+/-! ## ⭐ THE FRAME LADDER — built by a dispatched executor (maestro item 10),
+verified here in the strong form before landing.
+
+*The seam's remaining structural half: the network's eight output STREAMS as a
+fold over `bnComps`, and the transposition of that fold to `ℕ` keys.* -/
+
+/-! ### 0. The comparator's two endpoints are distinct -/
+
+theorem bnComps_ne : ∀ p ∈ bnComps, p.1 ≠ p.2 := by decide +kernel
+
+theorem bnCCompAt_ne (e : Nat) (he : e < 24) : (bnCCompAt e).1 ≠ (bnCCompAt e).2 :=
+  bnComps_ne _ (bnCCompAt_mem e he)
+
+/-! ### 1. Nets below the whole gate block keep their environment value -/
+
+theorem bnC_run_low (E : Env) (n : Net) (hn : n < bnCOff 0) :
+    run E bnCCore.gates n = E n := by
+  refine run_of_unwritten _ _ _ (fun g hg => Nat.ne_of_gt (Nat.lt_of_lt_of_le hn ?_))
+  exact bnCBuild_writes_above bnComps 0 ((List.range bnCWires).map bnCDatIn) g hg
+
+theorem bnC_rst_val (st inp : List Bool) :
+    run (batcherNetC.env inp st) bnCCore.gates bnCRst = inp.getD 0 false := by
+  rw [bnC_run_low _ _ (bnCRst_lt_off 0)]
+  rfl
+
+/-! ### 2. The value on wire `w` after stage `k`, at ONE cycle -/
+
+def bnCWireAt (st inp : List Bool) (k w : Nat) : Bool :=
+  run (batcherNetC.env inp st) bnCCore.gates ((bnCDatAt k).getD w 0)
+
+theorem bnCDatAt_zero_getD (w : Nat) (hw : w < 8) : (bnCDatAt 0).getD w 0 = 1 + w := by
+  interval_cases w <;> rfl
+
+theorem bnCWireAt_zero (st inp : List Bool) (w : Nat) (hw : w < 8) :
+    bnCWireAt st inp 0 w = inp.getD (1 + w) false := by
+  have h105 : bnCOff 0 = 105 := by rw [bnCOff_eq]
+  have hlt : (1 + w : Nat) < bnCOff 0 := by rw [h105]; omega
+  rw [bnCWireAt, bnCDatAt_zero_getD w hw, bnC_run_low _ _ hlt]
+  have hnI : batcherNetC.nIn = 9 := by decide +kernel
+  have hcond : (1 + w : Nat) < batcherNetC.nIn := by rw [hnI]; omega
+  show (if (1 + w : Nat) < batcherNetC.nIn then inp.getD (1 + w) false
+        else st.getD ((1 + w) - batcherNetC.nIn) false) = _
+  rw [if_pos hcond]
+
+theorem bnCElemOutAt_getD0 (st inp : List Bool) (e : Nat) :
+    (bnCElemOutAt st inp e).getD 0 false
+      = run (batcherNetC.env inp st) bnCCore.gates
+          ((instOuts ceCcore (bnCSigma e (bnCCompAt e).1 (bnCCompAt e).2 (bnCDatAt e))
+              (bnCOff e)).getD 0 0) := rfl
+
+theorem bnCElemOutAt_getD1 (st inp : List Bool) (e : Nat) :
+    (bnCElemOutAt st inp e).getD 1 false
+      = run (batcherNetC.env inp st) bnCCore.gates
+          ((instOuts ceCcore (bnCSigma e (bnCCompAt e).1 (bnCCompAt e).2 (bnCDatAt e))
+              (bnCOff e)).getD 1 0) := rfl
+
+/-- **`applyComp`'s shape, at the VALUE level, one cycle.** -/
+theorem bnCWireAt_succ (st inp : List Bool) (k w : Nat) (hk : k < 24) :
+    bnCWireAt st inp (k + 1) w
+      = if w = (bnCCompAt k).1 then (bnCElemOutAt st inp k).getD 0 false
+        else if w = (bnCCompAt k).2 then (bnCElemOutAt st inp k).getD 1 false
+        else bnCWireAt st inp k w := by
+  have hab := bnCCompAt_ne k hk
+  obtain ⟨ha, hb⟩ := bnCCompAt_lt k hk
+  rw [bnCWireAt, bnCDatAt_succ k hk,
+      bnCDatStep_getD k (bnCCompAt k).1 (bnCCompAt k).2 (bnCDatAt k) w hab ha hb,
+      bnCElemOutAt_getD0, bnCElemOutAt_getD1, bnCWireAt]
+  by_cases h1 : w = (bnCCompAt k).1
+  · simp only [if_pos h1]
+  · simp only [if_neg h1]
+    by_cases h2 : w = (bnCCompAt k).2
+    · simp only [if_pos h2]
+    · simp only [if_neg h2]
+
+/-! ### 3. THE FRAME: wire `w`'s values across a whole trace -/
+
+def bnCFrameAt : List Bool → List (List Bool) → Nat → Nat → List Bool
+  | _,  [],        _, _ => []
+  | st, inp :: is, k, w =>
+      bnCWireAt st inp k w :: bnCFrameAt (stepSeq batcherNetC st inp).2 is k w
+
+theorem bnCFrameAt_nil (st : List Bool) (k w : Nat) : bnCFrameAt st [] k w = [] := rfl
+
+theorem bnCFrameAt_cons (st inp : List Bool) (is : List (List Bool)) (k w : Nat) :
+    bnCFrameAt st (inp :: is) k w
+      = bnCWireAt st inp k w :: bnCFrameAt (stepSeq batcherNetC st inp).2 is k w := rfl
+
+/-- Element `e`'s output frame on its port `j`. -/
+def bnCElemOutFrame (st : List Bool) (tr : List (List Bool)) (e j : Nat) : List Bool :=
+  (bnCElemOuts st tr e).map (fun o => o.getD j false)
+
+theorem bnCElemOutFrame_nil (st : List Bool) (e j : Nat) :
+    bnCElemOutFrame st [] e j = [] := rfl
+
+theorem bnCElemOutFrame_cons (st inp : List Bool) (is : List (List Bool)) (e j : Nat) :
+    bnCElemOutFrame st (inp :: is) e j
+      = (bnCElemOutAt st inp e).getD j false
+        :: bnCElemOutFrame (stepSeq batcherNetC st inp).2 is e j := rfl
+
+/-- ⭐ **`applyComp`'s shape at the FRAME level.** -/
+theorem bnCFrameAt_succ (st : List Bool) (tr : List (List Bool)) (k w : Nat) (hk : k < 24) :
+    bnCFrameAt st tr (k + 1) w
+      = if w = (bnCCompAt k).1 then bnCElemOutFrame st tr k 0
+        else if w = (bnCCompAt k).2 then bnCElemOutFrame st tr k 1
+        else bnCFrameAt st tr k w := by
+  induction tr generalizing st with
+  | nil => simp only [bnCFrameAt_nil, bnCElemOutFrame_nil, ite_self]
+  | cons inp is ih =>
+    rw [bnCFrameAt_cons, bnCWireAt_succ st inp k w hk, ih]
+    by_cases h1 : w = (bnCCompAt k).1
+    · simp only [if_pos h1, bnCElemOutFrame_cons]
+    · simp only [if_neg h1]
+      by_cases h2 : w = (bnCCompAt k).2
+      · simp only [if_pos h2, bnCElemOutFrame_cons]
+      · simp only [if_neg h2, bnCFrameAt_cons]
+
+/-! ### 4. The two ends of the ladder -/
+
+theorem bnCFrameAt_zero (st : List Bool) (tr : List (List Bool)) (w : Nat) (hw : w < 8) :
+    bnCFrameAt st tr 0 w = tr.map (fun i => i.getD (1 + w) false) := by
+  induction tr generalizing st with
+  | nil => rfl
+  | cons inp is ih =>
+    rw [bnCFrameAt_cons, bnCWireAt_zero st inp w hw, ih, List.map_cons]
+
+theorem bnCFrameAt_24 (st : List Bool) (tr : List (List Bool)) (w : Nat) (hw : w < 8) :
+    bnCFrameAt st tr 24 w = (runTrace batcherNetC st tr).1.map (fun o => o.getD w false) := by
+  induction tr generalizing st with
+  | nil => rfl
+  | cons inp is ih =>
+    have h : bnCWireAt st inp 24 w = (stepSeq batcherNetC st inp).1.getD w false :=
+      (bnC_wire_val st inp w hw).symm
+    rw [bnCFrameAt_cons, ih, h]
+    rfl
+
+/-! ### 5. The element's INPUT trace, re-assembled from the frames -/
+
+def zip3Trace : List Bool → List Bool → List Bool → List (List Bool)
+  | r :: rs, x :: xs, y :: ys => [r, x, y] :: zip3Trace rs xs ys
+  | _,      _,       _       => []
+
+/-- ⚠️ The equation compiler's `cons/cons/cons` equation for `zip3Trace` is **not
+`rfl`** (three overlapping patterns), so `rw`'s trailing `rfl` does not close it.
+It must be named and rewritten with explicitly. -/
+theorem zip3Trace_cons (r x y : Bool) (rs xs ys : List Bool) :
+    zip3Trace (r :: rs) (x :: xs) (y :: ys) = [r, x, y] :: zip3Trace rs xs ys := by
+  simp only [zip3Trace]
+
+theorem bnCElemInAt_eq (st inp : List Bool) (e : Nat) :
+    bnCElemInAt st inp e
+      = [inp.getD 0 false, bnCWireAt st inp e (bnCCompAt e).1,
+         bnCWireAt st inp e (bnCCompAt e).2] := by
+  have h : bnCElemInAt st inp e
+      = [run (batcherNetC.env inp st) bnCCore.gates bnCRst,
+         bnCWireAt st inp e (bnCCompAt e).1,
+         bnCWireAt st inp e (bnCCompAt e).2] := rfl
+  rw [h, bnC_rst_val]
+
+theorem bnCElemTrace_eq_zip3 (st : List Bool) (tr : List (List Bool)) (e : Nat) :
+    bnCElemTrace st tr e
+      = zip3Trace (tr.map (fun i => i.getD 0 false))
+          (bnCFrameAt st tr e (bnCCompAt e).1) (bnCFrameAt st tr e (bnCCompAt e).2) := by
+  induction tr generalizing st with
+  | nil => rfl
+  | cons inp is ih =>
+    show bnCElemInAt st inp e :: bnCElemTrace (stepSeq batcherNetC st inp).2 is e = _
+    rw [ih, List.map_cons, bnCFrameAt_cons, bnCFrameAt_cons, bnCElemInAt_eq,
+        zip3Trace_cons]
+
+/-! ### 6. THE SINGLE-ELEMENT STEP — a standalone `ceC` on the two input frames -/
+
+/-- `ceC`'s port-`j` output stream, driven by an `rst` column and two frames. -/
+def ceCPort (s r x y : List Bool) (j : Nat) : List Bool :=
+  (runTrace ceC s (zip3Trace r x y)).1.map (fun o => o.getD j false)
+
+theorem bnCElemOutFrame_eq_ceCPort (st : List Bool) (tr : List (List Bool)) (e : Nat)
+    (he : e < 24) (j : Nat) :
+    bnCElemOutFrame st tr e j
+      = ceCPort (bnCSlice st e) (tr.map (fun i => i.getD 0 false))
+          (bnCFrameAt st tr e (bnCCompAt e).1) (bnCFrameAt st tr e (bnCCompAt e).2) j := by
+  rw [bnCElemOutFrame, bnC_out_factors tr st e he, ceCPort, bnCElemTrace_eq_zip3]
+
+/-- ⭐⭐ **ROUTE A's SINGLE-ELEMENT STEP.** -/
+theorem bnCFrameAt_succ_ceC (st : List Bool) (tr : List (List Bool)) (k w : Nat)
+    (hk : k < 24) :
+    bnCFrameAt st tr (k + 1) w
+      = if w = (bnCCompAt k).1 then
+          ceCPort (bnCSlice st k) (tr.map (fun i => i.getD 0 false))
+            (bnCFrameAt st tr k (bnCCompAt k).1) (bnCFrameAt st tr k (bnCCompAt k).2) 0
+        else if w = (bnCCompAt k).2 then
+          ceCPort (bnCSlice st k) (tr.map (fun i => i.getD 0 false))
+            (bnCFrameAt st tr k (bnCCompAt k).1) (bnCFrameAt st tr k (bnCCompAt k).2) 1
+        else bnCFrameAt st tr k w := by
+  rw [bnCFrameAt_succ st tr k w hk, bnCElemOutFrame_eq_ceCPort st tr k hk 0,
+      bnCElemOutFrame_eq_ceCPort st tr k hk 1]
+
+/-! ### 7. THE SORT, with the element certificate carried as a hypothesis
+
+`ElemSortsAt st tr k le` is **exactly** the obligation a frame-level element
+certificate must discharge, written in the vocabulary the network side produces:
+a standalone `ceC`, from element `k`'s own state slice, driven by the `rst`
+column and the two frames the previous stages left on `k`'s two wires, emits the
+`le`-smaller frame on port 0 and the `le`-larger on port 1. -/
+def ElemSortsAt (st : List Bool) (tr : List (List Bool)) (k : Nat)
+    (le : List Bool → List Bool → Bool) : Prop :=
+  ceCPort (bnCSlice st k) (tr.map (fun i => i.getD 0 false))
+        (bnCFrameAt st tr k (bnCCompAt k).1) (bnCFrameAt st tr k (bnCCompAt k).2) 0
+      = (if le (bnCFrameAt st tr k (bnCCompAt k).1) (bnCFrameAt st tr k (bnCCompAt k).2)
+         then bnCFrameAt st tr k (bnCCompAt k).1 else bnCFrameAt st tr k (bnCCompAt k).2)
+    ∧ ceCPort (bnCSlice st k) (tr.map (fun i => i.getD 0 false))
+        (bnCFrameAt st tr k (bnCCompAt k).1) (bnCFrameAt st tr k (bnCCompAt k).2) 1
+      = (if le (bnCFrameAt st tr k (bnCCompAt k).1) (bnCFrameAt st tr k (bnCCompAt k).2)
+         then bnCFrameAt st tr k (bnCCompAt k).2 else bnCFrameAt st tr k (bnCCompAt k).1)
+
+/-- `applyComp`'s literal shape, on frames, with `min`/`max` taken by `le`.
+Compare `SaltWorks.Stack.applyComp c v i = if i = c.1 then min (v c.1) (v c.2)
+else if i = c.2 then max (v c.1) (v c.2) else v i`. -/
+def applyCompF (le : List Bool → List Bool → Bool) (c : Nat × Nat)
+    (v : Nat → List Bool) : Nat → List Bool := fun i =>
+  if i = c.1 then (if le (v c.1) (v c.2) then v c.1 else v c.2)
+  else if i = c.2 then (if le (v c.1) (v c.2) then v c.2 else v c.1)
+  else v i
+
+/-- `runNet`'s literal shape, on frames. Compare
+`SaltWorks.Stack.runNet net v = net.foldl (fun w c => applyComp c w) v`. -/
+def runNetF (le : List Bool → List Bool → Bool) (net : List (Nat × Nat))
+    (v : Nat → List Bool) : Nat → List Bool :=
+  net.foldl (fun w c => applyCompF le c w) v
+
+/-- ⭐⭐⭐ **THE SINGLE-ELEMENT STEP, SORTED.** One comparator: the frame vector
+after stage `k+1` is the frame vector after stage `k` with `applyComp` applied at
+comparator `k`. -/
+theorem bnCFrameAt_succ_sorted (st : List Bool) (tr : List (List Bool)) (k : Nat)
+    (le : List Bool → List Bool → Bool) (hk : k < 24) (h : ElemSortsAt st tr k le)
+    (w : Nat) :
+    bnCFrameAt st tr (k + 1) w
+      = applyCompF le (bnCCompAt k) (fun i => bnCFrameAt st tr k i) w := by
+  obtain ⟨h0, h1⟩ := h
+  rw [bnCFrameAt_succ_ceC st tr k w hk, applyCompF]
+  by_cases hw1 : w = (bnCCompAt k).1
+  · simp only [if_pos hw1, h0]
+  · simp only [if_neg hw1]
+    by_cases hw2 : w = (bnCCompAt k).2
+    · simp only [if_pos hw2, h1]
+    · simp only [if_neg hw2]
+
+/-! ### 8. THE FOLD -/
+
+theorem bnComps_getElem?_eq (k : Nat) (hk : k < 24) :
+    bnComps[k]? = some (bnCCompAt k) := by
+  have hlen : k < bnComps.length := by rw [bnC_comps_count]; exact hk
+  rw [List.getElem?_eq_getElem hlen, bnCCompAt, List.getD_eq_getElem _ _ hlen]
+
+theorem bnComps_take_succ (k : Nat) (hk : k < 24) :
+    bnComps.take (k + 1) = bnComps.take k ++ [bnCCompAt k] := by
+  rw [List.take_add_one, bnComps_getElem?_eq k hk]
+  rfl
+
+theorem runNetF_append (le : List Bool → List Bool → Bool) (n m : List (Nat × Nat))
+    (v : Nat → List Bool) :
+    runNetF le (n ++ m) v = runNetF le m (runNetF le n v) := by
+  simp only [runNetF, List.foldl_append]
+
+/-- ⭐ **THE FOLD.** Under the per-element certificate, the frame vector after
+`k` stages IS `runNet`'s `foldl` over the first `k` comparators. -/
+theorem bnCFrames_fold (st : List Bool) (tr : List (List Bool))
+    (le : List Bool → List Bool → Bool)
+    (h : ∀ k, k < 24 → ElemSortsAt st tr k le) :
+    ∀ k, k ≤ 24 →
+      (fun w => bnCFrameAt st tr k w)
+        = runNetF le (bnComps.take k) (fun w => bnCFrameAt st tr 0 w) := by
+  intro k
+  induction k with
+  | zero => intro _; rfl
+  | succ k ih =>
+    intro hk
+    have hk24 : k < 24 := by omega
+    have hfold := ih (by omega)
+    rw [bnComps_take_succ k hk24, runNetF_append, ← hfold]
+    funext w
+    exact bnCFrameAt_succ_sorted st tr k le hk24 (h k hk24) w
+
+theorem bnComps_take_24 : bnComps.take 24 = bnComps := by decide +kernel
+
+/-- ⭐⭐⭐ **ROUTE A's TARGET, hypothesis-carrying: the network's EIGHT OUTPUT
+FRAMES are `runNet`-over-`bnComps` applied to its eight INPUT FRAMES.**
+
+`bnComps = batcher8.map (fun c => (c.1.val, c.2.val))` (`bnComps_eq_batcher8`),
+and `bnCFrameAt st tr 0 i = tr.map (fun j => j.getD (1 + i) false)` for `i < 8`
+(`bnCFrameAt_zero`), so both ends are the objects `hseam` names. -/
+theorem bnC_output_frames_are_the_fold (st : List Bool) (tr : List (List Bool))
+    (le : List Bool → List Bool → Bool)
+    (h : ∀ k, k < 24 → ElemSortsAt st tr k le) (w : Nat) (hw : w < 8) :
+    (runTrace batcherNetC st tr).1.map (fun o => o.getD w false)
+      = runNetF le bnComps (fun i => bnCFrameAt st tr 0 i) w := by
+  have hfold := bnCFrames_fold st tr le h 24 (Nat.le_refl 24)
+  rw [bnComps_take_24] at hfold
+  rw [← bnCFrameAt_24 st tr w hw]
+  exact congrFun hfold w
+
+/-! ### 9. ⭐ HYPOTHESIS ① IS REMOVABLE — the element FORGETS its state on `rst`
+
+`ceKeyOK` / `cePairOut` pin the element at the ALL-FALSE initial state, while
+`bnC_trace_factors` hands the fold an ARBITRARY slice `bnCSlice st k`. That gap
+was recorded as an unavoidable hypothesis. It is not: with `rst` high on cycle 0
+the next state is a function of the inputs alone, so one cycle erases the slice. -/
+
+theorem sem_ceCcore_congr (env₁ env₂ : Env) (h : ∀ a, a < ceCcore.nIn → env₁ a = env₂ a) :
+    sem ceCcore env₁ = sem ceCcore env₂ := by
+  have hout : ∀ n ∈ ceCcore.outs, n < ceCcore.nIn + ceCcore.gates.length := by
+    decide +kernel
+  rw [sem, sem]
+  exact List.map_congr_left (fun n hn =>
+    run_agree_of_inputs_circ ceCcore ceCcore_ssa' env₁ env₂ h n (hout n hn))
+
+/-- `ceC` reads exactly four state bits, so any state list acts as its first four
+entries. -/
+theorem stepSeq_ceC_slice (s inp : List Bool) :
+    stepSeq ceC s inp
+      = stepSeq ceC [s.getD 0 false, s.getD 1 false, s.getD 2 false, s.getD 3 false] inp := by
+  -- ⚠️ `h` must be stated at `ceC.core`, NOT at `ceCcore`: they are defeq but the
+  -- goal `simp only [stepSeq]` leaves says `ceC.core`, and `rw` is syntactic.
+  have h : sem ceC.core (ceC.env inp s)
+      = sem ceC.core
+          (ceC.env inp [s.getD 0 false, s.getD 1 false, s.getD 2 false, s.getD 3 false]) := by
+    show sem ceCcore _ = sem ceCcore _
+    refine sem_ceCcore_congr _ _ ?_
+    intro a ha
+    have hn7 : ceCcore.nIn = 7 := by decide +kernel
+    rw [hn7] at ha
+    interval_cases a <;> rfl
+  simp only [stepSeq]
+  rw [h]
+
+/-- Every one of the 64 `(state, in0, in1)` configurations with `rst` high. -/
+theorem ceC_reset_forgets_bits (d w p b i0 i1 : Bool) :
+    stepSeq ceC [d, w, p, b] [true, i0, i1]
+      = stepSeq ceC [false, false, false, false] [true, i0, i1] := by
+  cases d <;> cases w <;> cases p <;> cases b <;> cases i0 <;> cases i1 <;> decide +kernel
+
+theorem ceC_reset_forgets (s : List Bool) (i0 i1 : Bool) :
+    stepSeq ceC s [true, i0, i1]
+      = stepSeq ceC [false, false, false, false] [true, i0, i1] := by
+  rw [stepSeq_ceC_slice s]
+  exact ceC_reset_forgets_bits _ _ _ _ i0 i1
+
+theorem runTrace_cons (m : Seq) (st i : List Bool) (is : List (List Bool)) :
+    runTrace m st (i :: is)
+      = ((stepSeq m st i).1 :: (runTrace m (stepSeq m st i).2 is).1,
+         (runTrace m (stepSeq m st i).2 is).2) := rfl
+
+/-- One `rst` cycle erases the initial state, for the WHOLE remaining stream. -/
+theorem ceCPort_reset (s : List Bool) (rr xx yy : List Bool) (i0 i1 : Bool) (j : Nat) :
+    ceCPort s (true :: rr) (i0 :: xx) (i1 :: yy) j
+      = ceCPort [false, false, false, false] (true :: rr) (i0 :: xx) (i1 :: yy) j := by
+  rw [ceCPort, ceCPort, zip3Trace_cons, runTrace_cons, runTrace_cons,
+      ceC_reset_forgets s i0 i1]
+
+/-- ⭐⭐ **THE TRANSFER.** Whenever the frame asserts `rst` on cycle 0, element
+`k`'s standalone `ceC` — started from the arbitrary slice `bnCSlice st k` the
+network hands it — produces the same output stream as one started from
+`[false,false,false,false]`, which is the state `cePairOut`/`ceKeyOK` pin. -/
+theorem ceCPort_at_slice_eq_reset (st : List Bool) (inp : List Bool)
+    (is : List (List Bool)) (k j : Nat) (hrst : inp.getD 0 false = true) :
+    ceCPort (bnCSlice st k) ((inp :: is).map (fun i => i.getD 0 false))
+        (bnCFrameAt st (inp :: is) k (bnCCompAt k).1)
+        (bnCFrameAt st (inp :: is) k (bnCCompAt k).2) j
+      = ceCPort [false, false, false, false] ((inp :: is).map (fun i => i.getD 0 false))
+        (bnCFrameAt st (inp :: is) k (bnCCompAt k).1)
+        (bnCFrameAt st (inp :: is) k (bnCCompAt k).2) j := by
+  rw [List.map_cons, hrst, bnCFrameAt_cons, bnCFrameAt_cons]
+  exact ceCPort_reset _ _ _ _ _ _ j
+
+/-- ⭐⭐⭐ `ElemSortsAt` — the fold's per-element obligation — **reduces to the
+all-false initial state.** This is hypothesis ① discharged. -/
+theorem ElemSortsAt_of_reset (st inp : List Bool) (is : List (List Bool)) (k : Nat)
+    (le : List Bool → List Bool → Bool) (hrst : inp.getD 0 false = true)
+    (h0 : ceCPort [false, false, false, false] ((inp :: is).map (fun i => i.getD 0 false))
+            (bnCFrameAt st (inp :: is) k (bnCCompAt k).1)
+            (bnCFrameAt st (inp :: is) k (bnCCompAt k).2) 0
+          = (if le (bnCFrameAt st (inp :: is) k (bnCCompAt k).1)
+                   (bnCFrameAt st (inp :: is) k (bnCCompAt k).2)
+             then bnCFrameAt st (inp :: is) k (bnCCompAt k).1
+             else bnCFrameAt st (inp :: is) k (bnCCompAt k).2))
+    (h1 : ceCPort [false, false, false, false] ((inp :: is).map (fun i => i.getD 0 false))
+            (bnCFrameAt st (inp :: is) k (bnCCompAt k).1)
+            (bnCFrameAt st (inp :: is) k (bnCCompAt k).2) 1
+          = (if le (bnCFrameAt st (inp :: is) k (bnCCompAt k).1)
+                   (bnCFrameAt st (inp :: is) k (bnCCompAt k).2)
+             then bnCFrameAt st (inp :: is) k (bnCCompAt k).2
+             else bnCFrameAt st (inp :: is) k (bnCCompAt k).1)) :
+    ElemSortsAt st (inp :: is) k le :=
+  ⟨(ceCPort_at_slice_eq_reset st inp is k 0 hrst).trans h0,
+   (ceCPort_at_slice_eq_reset st inp is k 1 hrst).trans h1⟩
+
+/-! ### 10. FROM FRAMES TO KEYS — `runNet`'s literal shape at `ℕ`
+
+`runNetF` folds FRAMES; silicon's `hseam` wants `runNet batcher8 v` at `v : Fin 8
+→ ℕ`. A decoding `key : List Bool → ℕ` transports one to the other, because for a
+linear order `key (min-by-key x y) = min (key x) (key y)`. -/
+
+/-- `SaltWorks.Stack.applyComp`'s literal shape, at `ℕ`, `Nat`-indexed. -/
+def applyCompN (c : Nat × Nat) (v : Nat → Nat) : Nat → Nat := fun i =>
+  if i = c.1 then min (v c.1) (v c.2)
+  else if i = c.2 then max (v c.1) (v c.2)
+  else v i
+
+/-- `SaltWorks.Stack.runNet`'s literal shape, at `ℕ`, `Nat`-indexed. -/
+def runNetN (net : List (Nat × Nat)) (v : Nat → Nat) : Nat → Nat :=
+  net.foldl (fun w c => applyCompN c w) v
+
+theorem applyCompF_key (key : List Bool → Nat) (c : Nat × Nat) (v : Nat → List Bool)
+    (i : Nat) :
+    key (applyCompF (fun x y => decide (key x ≤ key y)) c v i)
+      = applyCompN c (fun j => key (v j)) i := by
+  -- `apply_ite key` pushes the decoding through BOTH conditionals, after which
+  -- the two sides are syntactically equal — no case split is needed at all.
+  simp only [applyCompF, applyCompN, min_def, max_def, decide_eq_true_eq, apply_ite key]
+
+theorem runNetF_key (key : List Bool → Nat) (net : List (Nat × Nat)) :
+    ∀ v : Nat → List Bool,
+      (fun i => key (runNetF (fun x y => decide (key x ≤ key y)) net v i))
+        = runNetN net (fun j => key (v j)) := by
+  induction net with
+  | nil => intro v; rfl
+  | cons c cs ih =>
+    intro v
+    have h1 : runNetF (fun x y => decide (key x ≤ key y)) (c :: cs) v
+        = runNetF (fun x y => decide (key x ≤ key y)) cs
+            (applyCompF (fun x y => decide (key x ≤ key y)) c v) := rfl
+    have h2 : runNetN (c :: cs) (fun j => key (v j))
+        = runNetN cs (applyCompN c (fun j => key (v j))) := rfl
+    rw [h1, h2, ih]
+    congr 1
+    funext j
+    exact applyCompF_key key c v j
+
+/-- ⭐⭐⭐ **THE SEAM, AT `ℕ`.** The `key` of the frame the network emits on wire
+`w` is `runNet`-over-`bnComps` applied to the `key`s of its eight input frames.
+`bnComps_eq_batcher8` turns `bnComps` into `batcher8`, so the only step left to
+`composed_switch_of_seam_k3`'s `hseam : hw = runNet batcher8 v` is the
+`Nat`-index → `Fin 8`-index transport, which lives on the Stack side. -/
+theorem bnC_output_keys_are_runNetN (st : List Bool) (tr : List (List Bool))
+    (key : List Bool → Nat)
+    (h : ∀ k, k < 24 → ElemSortsAt st tr k (fun x y => decide (key x ≤ key y)))
+    (w : Nat) (hw : w < 8) :
+    key ((runTrace batcherNetC st tr).1.map (fun o => o.getD w false))
+      = runNetN bnComps (fun i => key (bnCFrameAt st tr 0 i)) w := by
+  rw [bnC_output_frames_are_the_fold st tr _ h w hw]
+  exact congrFun (runNetF_key key bnComps (fun i => bnCFrameAt st tr 0 i)) w
+
+#audit_axioms bnComps_ne bnCCompAt_ne bnC_run_low bnC_rst_val
+#audit_axioms bnCWireAt bnCDatAt_zero_getD bnCWireAt_zero
+#audit_axioms bnCElemOutAt_getD0 bnCElemOutAt_getD1 bnCWireAt_succ
+#audit_axioms bnCFrameAt bnCFrameAt_nil bnCFrameAt_cons
+#audit_axioms bnCElemOutFrame bnCElemOutFrame_nil bnCElemOutFrame_cons
+#audit_axioms bnCFrameAt_succ bnCFrameAt_zero bnCFrameAt_24
+#audit_axioms zip3Trace zip3Trace_cons bnCElemInAt_eq bnCElemTrace_eq_zip3
+#audit_axioms ceCPort bnCElemOutFrame_eq_ceCPort bnCFrameAt_succ_ceC
+#audit_axioms ElemSortsAt applyCompF runNetF bnCFrameAt_succ_sorted
+#audit_axioms bnComps_getElem?_eq bnComps_take_succ runNetF_append
+#audit_axioms bnCFrames_fold bnComps_take_24 bnC_output_frames_are_the_fold
+#audit_axioms sem_ceCcore_congr stepSeq_ceC_slice ceC_reset_forgets_bits
+#audit_axioms ceC_reset_forgets runTrace_cons ceCPort_reset
+#audit_axioms ceCPort_at_slice_eq_reset ElemSortsAt_of_reset
+#audit_axioms applyCompN runNetN applyCompF_key runNetF_key
+#audit_axioms bnC_output_keys_are_runNetN
+
 end SaltWorks.HDL
