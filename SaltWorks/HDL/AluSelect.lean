@@ -361,11 +361,39 @@ theorem genSelect_ten : genSelect 10 4 = aluSelect := by
           rw [hn, genSelect_ten_gates, genSelect_ten_outs]
     _ = aluSelect := rfl
 
+/-! ### The two shrunk instances, measured
+
+*The rows the sizing table cares about, in the kernel rather than in a formula.
+The behavioural theorems for both are `sem_operandBMux` and `sem_sliceASelect`
+(math, `Stack/Program.lean`), and the mutation control that makes the `n = 2`
+number mean something is `genSelectCut2` beside them — the same place
+`aluSelectCut` sits for the ten-source block.* -/
+
+-- (gates, gates, muxes, muxes) for `n = 2` and `n = 3`. ⚠️ The 98 is the
+-- table's 97 PLUS the unconditional pad constant, dead at `n = 2^b`.
+#eval ((genSelect 2 1).gates.length, (genSelect 3 2).gates.length,
+       muxCount (genSelect 2 1), muxCount (genSelect 3 2))
+
+/-- ⭐ **THE ADDI OPERAND-B MUX, TO THE GATE** — and it is **98**, not the
+table's 97. -/
+theorem genSelect_two_gate_count : (genSelect 2 1).gates.length = 98 := by decide +kernel
+
+/-- ⭐ **SLICE A'S ALU SELECT `{add, xor, slt}`** — 291, matching the table
+exactly, because `3 < 4` charges the pad constant on both sides. -/
+theorem genSelect_three_gate_count : (genSelect 3 2).gates.length = 291 := by decide +kernel
+
+theorem genSelect_two_ssa : (genSelect 2 1).ssa = true := by decide +kernel
+theorem genSelect_two_wf : (genSelect 2 1).wf = true := Circ.wf_of_ssa genSelect_two_ssa
+theorem genSelect_three_ssa : (genSelect 3 2).ssa = true := by decide +kernel
+theorem genSelect_three_wf : (genSelect 3 2).wf = true := Circ.wf_of_ssa genSelect_three_ssa
+
 #audit_axioms gsIn gsRes gsSel gsZero gsNot gsPad gsWidth gsLevelWidth
 #audit_axioms gsBelow gsBase gsOut gsPrev gsMux genSelect
 #audit_axioms gsLevelWidth_four gsBelow_four gsPad_four gsIn_ten
 #audit_axioms gsBase_ten gsOut_ten gsPrev_ten gsMux_ten
 #audit_axioms genSelect_ten_gates genSelect_ten_outs genSelect_ten
+#audit_axioms genSelect_two_gate_count genSelect_three_gate_count
+#audit_axioms genSelect_two_ssa genSelect_two_wf genSelect_three_ssa genSelect_three_wf
 
 
 /-! ## ⭐ DOES IT SELECT? — the behavioural certificate this file did not have
