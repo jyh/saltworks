@@ -521,13 +521,13 @@ theorem genSelect_zero_b_not_ssa : (genSelect 5 0).ssa = false := by decide +ker
 
 /-! ## The three kernel anchors, recovered FROM the closed form -/
 
-theorem gate_count_two : (genSelect 2 1).gates.length = 98 := by
-  rw [genSelect_gates_length]
-  rfl
+/-- 98 at the operand-B pair. *(ALIAS since 16:3x — silicon's six-pair divergence sweep. Two independent proofs of one proposition can DIVERGE at a re-cut: one gets updated, the other stays kernel-checked, audited, ticked, and false. The alias forecloses it.)* -/
+theorem gate_count_two : (genSelect 2 1).gates.length = 98 :=
+  genSelect_two_gate_count
 
-theorem gate_count_three : (genSelect 3 2).gates.length = 291 := by
-  rw [genSelect_gates_length]
-  rfl
+/-- 291 at the ruled pair. *(ALIAS since 16:3x — silicon's six-pair divergence sweep. Two independent proofs of one proposition can DIVERGE at a re-cut: one gets updated, the other stays kernel-checked, audited, ticked, and false. The alias forecloses it.)* -/
+theorem gate_count_three : (genSelect 3 2).gates.length = 291 :=
+  genSelect_three_gate_count
 
 theorem gate_count_ten : (genSelect 10 4).gates.length = 1445 := by
   rw [genSelect_gates_length]

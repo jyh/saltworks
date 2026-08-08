@@ -102,7 +102,8 @@ def batcherNetC : Seq :=
 
 /-! ### The interface, pinned -/
 
-theorem bnC_comps_count : bnComps.length = 24 := by decide +kernel
+/-- ⚠️ The `bnC_` prefix names this FILE's convention, not a second object — `bnComps` is defined ONCE, in `SaltWorks.HDL`. *(ALIAS since 16:3x — silicon's six-pair divergence sweep: two independent proofs of one proposition can DIVERGE at a re-cut, one updated and the other left kernel-checked, audited, and false.)* -/
+theorem bnC_comps_count : bnComps.length = 24 := bn_comps_count
 theorem bnC_core_inputs : bnCCore.nIn = 105 := by decide +kernel
 theorem bnC_core_outputs : bnCCore.outs.length = 104 := by decide +kernel
 theorem bnC_state_bits : batcherNetC.nState = 96 := by decide +kernel

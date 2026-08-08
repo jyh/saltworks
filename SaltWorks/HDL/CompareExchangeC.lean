@@ -103,8 +103,12 @@ theorem ceC_wf : ceC.wf = true := by decide +kernel
 
 /-- Option C's element. -/
 theorem ceC_gate_count : ceCcore.gates.length = 34 := by decide +kernel
-/-- The landed parallel-activity element, for comparison. -/
-theorem ce_gate_count' : ceCore.gates.length = 31 := by decide +kernel
+/-- The landed parallel-activity element, for comparison.
+
+*ALIAS of `CompareExchange.ce_gate_count` since silicon's six-pair divergence sweep: two
+independent proofs of one proposition can DIVERGE at a re-cut — one gets updated, the
+other stays kernel-checked, audited, ticked, and FALSE.* -/
+theorem ce_gate_count' : ceCore.gates.length = 31 := ce_gate_count
 
 /-- The DECLARED state width. ⚠️ **This is not the price** — one of the four bits
 is never read under the protocol (`ceC_fourth_state_bit_is_dead`), so the cost

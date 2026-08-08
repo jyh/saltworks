@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Jason Hickey, Claude
 -/
 import SaltWorks.HDL.GenSelectCount
+import SaltWorks.HDL.RuledSizing32
 import SaltWorks.Stack.Program
 
 /-!
@@ -412,12 +413,18 @@ permanently rather than for as long as `aluSelect` happens to be the wide block.
 theorem nIn_of_both_instances :
     (genSelect 10 4).nIn = 324 ∧ (genSelect 3 2).nIn = 98 := ⟨rfl, rfl⟩
 
-/-- ⭐ **THE RULING'S −1,154, AS A PERMANENT KERNEL THEOREM.** -/
+/-- ⭐ **THE RULING'S −1,154, AS A PERMANENT KERNEL THEOREM.**
+
+⛔ **AND AN ALIAS, BECAUSE I DUPLICATED A LANDED THEOREM WRITING IT.** *`RuledSizing32.ruled_saving`
+already stated this exact proposition — same two instances, same 1154 — with a cleaner
+proof (`rw [gate_count_ten, gate_count_three]`, no `omega`). I wrote this an hour earlier
+without grepping the STATEMENT first, and silicon's six-pair divergence sweep caught my own
+fresh contribution to the class it was reporting.* ⇒ ***Two independent proofs of one
+proposition can DIVERGE at a re-cut: one gets updated, the other stays kernel-checked,
+audited, ticked, and FALSE. The alias forecloses it and costs nothing.*** -/
 theorem gate_saving_of_instances :
-    (genSelect 10 4).gates.length - (genSelect 3 2).gates.length = 1154 := by
-  have h1 := GSCount.gate_count_ten
-  have h2 := genSelect_three_gate_count
-  omega
+    (genSelect 10 4).gates.length - (genSelect 3 2).gates.length = 1154 :=
+  RuledSizing32.ruled_saving
 
 /-- Every downstream net offset moves by this much: `Compose.instNext` places the
 next organ at `nIn + gates.length`, which is `1769` at `(10,4)` and `389` at the
