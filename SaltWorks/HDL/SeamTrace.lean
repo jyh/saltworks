@@ -1417,4 +1417,64 @@ theorem bnC_output_keys_are_runNetN (st : List Bool) (tr : List (List Bool))
 #audit_axioms applyCompN runNetN applyCompF_key runNetF_key
 #audit_axioms bnC_output_keys_are_runNetN
 
+/-! ## 🏦 THE JOIN — both halves are LANDED and this is the only step left
+
+**Read this before attempting anything: the two halves were built by different
+executors in different vocabularies, and the remaining work is JOINING them, not
+proving anything new about the hardware.**
+
+### What exists, verified in the strong form
+
+```
+THIS FILE            bnC_output_keys_are_runNetN
+                       key(network output on wire w)
+                         = runNetN bnComps (key ∘ input frames) w
+                     ⚠️ hypothesis  h : ∀ k < 24, ElemSortsAt st tr k le
+                        — and ElemSortsAt IS the sorting fact, ASSUMED
+
+SeamElement.lean     ceC_pair_full_load_out0 / _out1
+                       port 0 = the cKeyLE-min of the two input frames
+                       port 1 = the cKeyLE-max                    ⭐ PROVED
+                     ceC_pair_full_load_any_state — ANY initial state
+                     cKeyLE_full_load : cKeyLE (cKey true d0) (cKey true d1)
+                                          = decide (d0 ≤ d1)
+```
+
+### The gap is exactly two hypotheses, and neither is about the circuit
+
+1. **THE RST COLUMN.** `ElemSortsAt` drives the element with `tr.map (·.getD 0)`
+   — the network's actual rst stream. `ceC_pair_full_load_*` drives it with
+   `ceFrameTrace`, whose first cycle is `[true, x₀, y₀]`. ⇒ *Needs: the trace's
+   rst column is asserted at cycle 0.* **A condition on the caller's trace, not a
+   fact to discover.**
+
+2. ⭐ **THE FRAME INVARIANT — and Route C already made it INDUCTIVE.** `ElemSortsAt`
+   is stated on `bnCFrameAt` (arbitrary `List Bool`); the element theorem wants
+   `cFrame true d p`. ⇒ *Needs: every wire carries a well-formed frame at every
+   stage.* 🔑 ***And `ceC_pair_full_load_any_state` gives the induction step for
+   free: its conclusion is that the two outputs ARE the two inputs, reordered.
+   Well-formedness is therefore PRESERVED rather than re-established — base case
+   `bnCFrameAt_zero` (the input columns), step by that theorem.***
+
+### Then the transport, which is Stack-side and small
+
+`cKeyLE_full_load` turns the key into `decide (d0 ≤ d1)`; `bnComps_eq_batcher8`
+turns `bnComps` into `batcher8`; what remains is `runNetN` (`Nat`-indexed) →
+`runNet` (`Fin 8`-indexed). **`Perm.lean:893 runNetD_toNat` is the lemma shaped
+for that step.**
+
+⚠️ **AND ONE HYPOTHESIS I BANKED AT `4538e9e` AS UNAVOIDABLE IS NOW RETIRED:**
+*"`ceKeyOK` is pinned at the all-false initial state"* — `ceC_pair_full_load_any_state`
+proves it from **any** state, because the reset at cycle 0 does the work.
+**The both-idle exclusion stands**: `hne : d0 ≠ d1` is load-bearing, with a
+control (`ceC_pair_tie_splices_the_payload`), and full load supplies it via
+`seam_hyps_force_full_load`.
+
+📌 **`hseam` is FOUR binder sites, not eight** — `grep -c` returns 8 because four
+are uses in proof terms. One theorem discharges all four; three delegate to the
+first. **And the discharge needs NO edit to `Silicon/Equiv/`: `HDL` already
+imports `Silicon` (`EmitN.lean:7`), so a module here can `import
+SaltWorks.Silicon.Equiv.ComposedSwitch` and apply `composed_switch_of_seam_k3`.**
+-/
+
 end SaltWorks.HDL
