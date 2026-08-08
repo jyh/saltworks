@@ -21,6 +21,9 @@ import SaltWorks.HDL.EmitS
 import SaltWorks.HDL.CodegenSpec
 import SaltWorks.HDL.CompareExchange
 import SaltWorks.HDL.CompareExchangeC
+import SaltWorks.HDL.Bitwise
+import SaltWorks.HDL.C4
+import SaltWorks.HDL.SeamC
 import SaltWorks.HDL.BatcherNet
 import SaltWorks.HDL.BatcherNetCheck
 import SaltWorks.HDL.PcNext
