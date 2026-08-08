@@ -960,6 +960,51 @@ carry at slate close" — which is the helm adopting the same discipline: an
 assignment that names WHEN it records is an assignment that cannot rot into a
 number nobody can source.***
 
+### 🔬 EVIDENCE BANKED FOR ITEM 4 (the INTERFACE LAW) — its FIRST PRODUCTION TEST, measured 2026-08-08 16:0x
+
+**Item 4 is NOT closed here** — its condition is slate close and that has not
+come. *What is banked is the law's first empirical test, gathered while it is
+cheap, so the close records a law WITH a measurement instead of a law alone.*
+
+Phase 3 ran expand-contract over THEOREMS on exactly the law's terms —
+*statement unchanged + parametric companion beside it, omega consumers get
+literals.* Measured across the whole span, **from committed refs only**
+(`1d9e7d6~1` = before EXPAND → `d85e13a` = phase-3 CLOSE), never the working
+tree, because a peer was mid-edit ([[read-tools-inherit-the-shared-tree]]):
+
+```
+theorems present in BOTH refs        863
+  statement UNCHANGED                860        99.65%
+  statement CHANGED                    3
+deleted (the numeral-bound ladder)    16
+added BESIDE                           6
+```
+
+⭐ **AND ALL THREE CHANGES ARE THE ONES THAT MUST CHANGE** — they are statements
+*about* the constants being re-baselined, not consumers broken by a re-shape:
+
+| theorem | before | after |
+|---|---|---|
+| `aluSelect_selects_on_sample` | `asSelectsOK 3 = true` | `asSelectsOK 0 = true` |
+| `aluSelect_selects_on_sample_last` | `asSelectsOK 9 = true` | `asSelectsOK (asOps - 1) = true` |
+| `gate_count_aluSelect` | `.gates.length = 1445` | `.gates.length = 291` |
+
+✅ *The third independently cross-checks silicon's C5 re-baseline figure
+("the select drops 1445 → 291"), measured by a different seat with a different
+instrument.*
+
+⚠️ **TWO LIMITS, stated because the figure is mine and flattering to a law I was
+assigned to carry:**
+1. **This is TOKEN-identity after whitespace normalisation, NOT literal byte
+   identity.** A pure reformat would pass here and fail a byte check. That is
+   the right comparison for an *interface* claim and it is a weaker claim than
+   "byte-unchanged" — so it is stated as what it is.
+2. **The extractor is a regex** (`theorem|lemma NAME … :=`) and would mis-slice a
+   signature containing `:=` before its statement ends. It is a source parse, not
+   a kernel fact; the census (`PASS 75 / FAIL 0 / UNREACHED 0`) is the kernel-side
+   claim and I did **not** re-run it — it needs a built tree and math holds the
+   build lock. **I verified the law's MECHANISM, not the build's greenness.**
+
 ### ✅ ITEM 3 CLOSED — THE MORTALITY ROTATION, MEASURED
 
 **Closed by the successor evidence seat, which is the point of writing the queue
