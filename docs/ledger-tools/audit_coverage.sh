@@ -172,6 +172,32 @@ nu=$(wc -l < "$TMP/uncovered"     | tr -d ' ')
 nud=$(wc -l < "$TMP/uncovered.def" | tr -d ' ')
 ns=$(wc -l < "$TMP/stale"          | tr -d ' ')
 
+# ⛔⛔ BUILD SKEW — added 2026-08-08 09:4x after silicon caught a landed module
+# whose .olean was 22 minutes OLDER than its source, so every EXIT=0 being quoted
+# for it was a build of an EARLIER FILE. That is [[replayed-is-not-checked]] one
+# notch further: not a cached green, but a green measured against bytes that have
+# since moved.
+# 🔑 THIS TOOL READS SOURCE. A kernel verdict reads the BUILD. Pairing them is
+# only valid if they refer to THE SAME BYTES — and nothing else in the pipeline
+# says whether they do. So the coverage report states it, every run.
+for f in "$@"; do
+  base=$(basename "$f" .lean)
+  ol=$(command find .lake -name "$base.olean" 2>/dev/null | head -1)
+  if [ -z "$ol" ] || [ ! -f "$ol" ]; then
+    echo "⛔ BUILD SKEW  $base: NO .olean FOUND — never built. A coverage ✅ here"
+    echo "               says nothing about the kernel, because the kernel has not run."
+  else
+    st=$(stat -f %m "$f"); ot=$(stat -f %m "$ol")
+    if [ "$st" -gt "$ot" ]; then
+      d=$(( (st - ot) / 60 ))
+      echo "⛔ BUILD SKEW  $base: SOURCE IS ${d}m NEWER THAN ITS .olean."
+      echo "               source $(stat -f %Sm -t '%H:%M:%S' "$f")  ·  olean $(stat -f %Sm -t '%H:%M:%S' "$ol")"
+      echo "               ⇒ ANY 'EXIT=0' QUOTED FOR THIS FILE BUILT AN EARLIER VERSION."
+      echo "                 Re-run ../saltbuild.sh before pairing this report with a verdict."
+    fi
+  fi
+done
+
 echo "files              : $*"
 echo "theorems/lemmas    : $nt    ^(theorem|lemma), line-anchored  ← the audited duty"
 echo "defs               : $nf    ^def                             ← informational only"
