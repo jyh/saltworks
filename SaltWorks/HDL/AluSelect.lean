@@ -221,12 +221,23 @@ to 14), and the padding leaves above `n` sharing one `const false`. Cost is a
 step function on the doubling: a source costs nothing until it crosses a power
 of two.
 
-⚠️ **ONE GATE MORE THAN SILICON'S SIZING TABLE AT EXACT POWERS OF TWO.** That
-formula carries `+ [n < pad]` — the pad constant, charged only when there IS
-padding. `genSelect` emits it unconditionally, so at `n = 2^b` it is a **dead
-net**: `genSelect 2 1` is **98** gates where the table says 97, and `n = 8` would
-be 676 where it says 675. Measured in the kernel (`genSelect_two_gate_count`),
-not derived. The `n = 3` row (291) and the `n = 10` row (1,445) match exactly. -/
+⚠️ **ONE GATE MORE THAN THE SIZING TABLE AT EXACT POWERS OF TWO — AND THE 97 IS
+NOT AN ERROR.** That formula carries `+ [n < pad]`: the pad constant, charged
+only when there IS padding. `genSelect` emits it unconditionally, so at `n = 2^b`
+it is a **dead net** — `genSelect 2 1` is **98** gates, and `n = 8` would be 676.
+Measured in the kernel (`genSelect_two_gate_count`), not derived. `n = 3` (291)
+and `n = 10` (1,445) match the table exactly.
+
+🔑 **What moved is the REFERENT, not the row** (silicon, `74fd26b`):
+
+```
+97   a BESPOKE 32-bit 2:1 mux    correct — and OWES an organ proof
+98   genSelect 2 1               — and HAS one, inherited from the generator
+```
+
+*The choice was never "97 or 98". It is "97 gates and a proof you owe" versus
+"98 gates and a proof you have", and the extra gate IS the price of the free
+theorem.* ⛔ **So do not edit a plan's bespoke-mux row to 98.** -/
 
 /-- `n` sources of 32 bits each, then `b` encoded select bits. -/
 def gsIn (n b : Nat) : Nat := n * 32 + b
@@ -374,8 +385,9 @@ number mean something is `genSelectCut2` beside them — the same place
 #eval ((genSelect 2 1).gates.length, (genSelect 3 2).gates.length,
        muxCount (genSelect 2 1), muxCount (genSelect 3 2))
 
-/-- ⭐ **THE ADDI OPERAND-B MUX, TO THE GATE** — and it is **98**, not the
-table's 97. -/
+/-- ⭐ **THE ADDI OPERAND-B MUX, TO THE GATE** — **98**. ⚠️ *Not a correction of
+the table's 97: that row prices a bespoke 2:1 mux and is right about it. This
+row prices the one that arrives with `sem_operandBMux` already proved.* -/
 theorem genSelect_two_gate_count : (genSelect 2 1).gates.length = 98 := by decide +kernel
 
 /-- ⭐ **SLICE A'S ALU SELECT `{add, xor, slt}`** — 291, matching the table
