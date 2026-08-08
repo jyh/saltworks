@@ -48,6 +48,30 @@ while true; do
       { if (tolower(owner) != tolower(self)) print }
     ' "$BUS" > /tmp/ev-peer.txt
 
+    # ⛔ SECOND PASS, ADDED 08:1x 8/8 AFTER THE WIDENING FIRED TWICE AND WAS
+    # WRONG BOTH TIMES. An order-owned view: only the maestro's own posts.
+    # A HALT is an ORDER, and on this bus orders come from the maestro or from
+    # a CAPTAIN-RELAY line. Every seat post that merely CONTAINS "HALT" is a
+    # seat DESCRIBING ITS OWN FILTER -- which is this file's founding defect
+    # (a document naming a pattern becomes a carrier of it) reappearing one
+    # variable further out. Owner-gating is the same fix the self-filter
+    # already uses; I applied it to "whose post is this" and not to "whose
+    # post may issue an order."
+    # NOTE the `start` guard: owner must be tracked from line 1 (a body line
+    # inherits a header that may predate the new tail), but only NEW lines may
+    # be EMITTED. Without it this pass re-reports every historical maestro
+    # halt on each fire -- I wrote that bug into the fix for a false-fire.
+    awk -v start="$last" '
+      /^\[[0-9]+\/[0-9]+ [0-9:]+, [A-Za-z]/ {
+        owner = $0
+        sub(/^\[[0-9]+\/[0-9]+ [0-9:]+, /, "", owner)
+        sub(/[^A-Za-z0-9_-].*$/, "", owner)
+      }
+      /^- [0-9-]+ [0-9:]+ [A-Z]/ { owner = "maestro" }
+      NR <= start { next }
+      { if (tolower(owner) == "maestro") print }
+    ' "$BUS" > /tmp/ev-orders.txt
+
     grep -oE '^\[[0-9]+/[0-9]+ [0-9:]+, maestro[^]]*\]|^- [0-9-]+ [0-9:]+ MAESTRO' \
       /tmp/ev-peer.txt | cut -c1-95
     # ⛔ WIDENED 2026-08-07 21:1x, AND THE OLD PATTERN WAS WRONG IN BOTH DIRECTIONS.
@@ -76,8 +100,22 @@ while true; do
     # That is the 8/7 lesson (watch-filter-watches-orders-not-triggers) committed
     # a second time by the seat that WROTE it: I widened the EVIDENCE pattern at
     # 21:1x for being mis-scoped and never asked what ELSE the block required.
-    grep -oE "^\[[0-9]+/[0-9]+ [0-9:]+, (captain|CAPTAIN|jyh|JYH)[^]]*\]|CAPTAIN-RELAY:|\
-HALT|STAND DOWN|STAND-DOWN|ALL SEATS STOP|FLEET STOP" /tmp/ev-peer.txt | cut -c1-95 | head -5
+    # A CAPTAIN-RELAY line is the Captain's own words and may sit in ANY seat's
+    # post, so it is matched against the peer view.
+    grep -oE "CAPTAIN-RELAY:.{0,70}" /tmp/ev-peer.txt | cut -c1-95 | head -3
+    # HALT/STAND DOWN only from the ORDER-OWNED view.
+    # ⛔ AND I WROTE A NUMBER HERE BEFORE I MEASURED IT. The first version of
+    # this comment claimed "27 seat-owned lines and 0 maestro-owned" and called
+    # itself "measured before arming". Then I measured:
+    #   math 11 · silicon 10 · compiler 5 · evidence 2 · MAESTRO 1  = 29
+    # The maestro line is real and is exactly the class worth waking for --
+    # 8/7 17:00, ratifying silicon's FIREWALL halt (fdb4474, the Bellcore
+    # figure). So the gate is NOT vacuous: it keeps 1 of 29 and drops 28 seat
+    # posts that merely LIST their filter classes. Had I shipped the asserted
+    # version, the comment would have argued the gate discards nothing while
+    # the gate's whole value is the one line it keeps.
+    grep -oE "HALT|STAND DOWN|STAND-DOWN|ALL SEATS STOP|FLEET STOP" /tmp/ev-orders.txt \
+      | head -3 | sed 's/^/⛔ MAESTRO ORDER WORD: /'
     last=$n
   fi
   sleep "$POLL"
