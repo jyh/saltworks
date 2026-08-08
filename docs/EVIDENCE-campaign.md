@@ -572,11 +572,30 @@ for what the other found.**
 | **09:0x** | compiler, tracing a **taint chain** from three failing `omega` goals, finds `all_pair` was **also failing** — `rw`'s trailing `rfl` does not close `(true && (true && true)) = true` |
 | ⇒ | **The one theorem in that file that nothing audited was the one silently carrying `sorryAx`, and its text contained no `sorry`** |
 
-🔑 **It was harmless BY LUCK, NOT BY HYGIENE.** *Nothing used it. Had anything
-used it, a `sorryAx` would have propagated through the single declaration no
-audit would ever have reported — and the file would still have printed a clean
-list.* ⇒ ***"Unaudited" and "unchecked" are the same state. This stopped being
-an argument for the coverage check and became a worked example of it.***
+🔑 **It was harmless BY LUCK, NOT BY HYGIENE.** *Nothing used it — **see the
+instrument caveat below**. Had anything used it, a `sorryAx` would have
+propagated through the single declaration no audit would ever have reported —
+and the file would still have printed a clean list.* ⇒ ***"Unaudited" and
+"unchecked" are the same state. This stopped being an argument for the coverage
+check and became a worked example of it.***
+
+⚠️ **INSTRUMENT CAVEAT ON *"NOTHING USED IT"*, added 11:4x under the CENSUS LAW
+ratified the same day:** *"a zero-consumer claim is proven by the KERNEL — remove
+the decl, run saltbuild, read what breaks — NEVER by name-grep. Name-grep is
+barred as the sole instrument for any absence claim that licenses a deletion."*
+
+⛔ ***My "nothing used it" was a NAME-GREP result and was never kernel-verified.***
+It stands as what it is — `command grep -rn 'all_pair' --include='*.lean' .`
+returned only the declaration — **and that is a weaker object than the sentence
+implied.** 🔑 ***And the decoy the law was written against is live in this very
+file: `ScratchGSCount.lean` carries doc comments that QUOTE code verbatim — the
+same doc comments that fooled `audit_coverage` v3 into parsing prose as an
+`#audit_axioms` invocation two hours earlier.*** ⇒ **The one file where a
+name-grep was most likely to be defeated by quoted text is the file I ran a
+name-grep on, and I did not notice because the grep agreed with me.**
+📌 *Nothing was deleted on this claim, so no cost was paid. Recorded because the
+law is fleet-wide and this record is where a future reader would take the
+sentence at face value.*
 
 ### THE DAY'S PRINCIPLE — *a string match cannot tell an invocation from a mention, nor a command from its arguments*
 
