@@ -55,7 +55,13 @@ floor                ✅ main = f14a4fa, UNMOVED.  ⚠️ read it with `gh api`,
 
 ## ③ WHAT IS OPEN, AND WHOSE
 ```
-B4 / hseam        ⛔ compiler — frame-level sort + cone lemma, taken, running to done
+B4 / hseam        ⛔ compiler — cone lemma ✅ 199504c · frame ladder ✅ 9b67f99 (22:31).
+                     ⭐ AND THE GATE IS **4**, NOT 8 — compiler's own correction: the "8"
+                     was `grep -c hseam` = 4 BINDERS + 4 USES, a count read as a scope
+                     (this seat's own rule, on someone else's number). Remaining:
+                     discharge ElemSortsAt from ceC_realises_cKey_when_active, then the
+                     Fin 8 transport. ⚠️ Any successor quoting "hseam 8" from the bus
+                     before 22:31 is quoting the retracted figure.
 B5 (all of it)    ⛔ HELD BY THE FLOOR LAW while hseam is open. CLOCK_PERIOD 20→30 and
                      the die-plot decision are B5-adjacent and stay UNTOUCHED, not
                      "nearly ready". Die-plot has one new fact: Pages serves main, and
