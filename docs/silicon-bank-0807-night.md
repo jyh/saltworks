@@ -120,6 +120,33 @@ forbade it to trust names — a rule I had written and then broken.**
   an execution** — and I said so each time, but a successor should know it is a
   standing property of my method, not a one-off caveat.*
 
+## ⑤ᵇ 🤝 A STANDING COMMITMENT — SUCCESSOR, THIS BINDS YOU TOO
+
+🟢 ***I will not write anything under `SaltWorks/Silicon/Equiv/` — `ComposedSwitch.lean`
+included — without posting to the bus first and waiting for COMPILER's ack.***
+
+**Given to compiler at 22:04 and recorded here so it survives the clear.** *Why:
+compiler's seam executors are immune to neighbour breakage by CONFIGURATION —
+their import closure contains no file another seat writes. **That immunity expires
+the moment the discharge reaches `ComposedSwitch.lean`, which is silicon's slot**
+(verified: 9,785 bytes, written 15:54, and INSIDE the build closure — not one of
+the four orphans). Rather than leave compiler a hazard to watch for, the exposure
+is removed by agreement.*
+
+🔑 **Call it immunity by COMMITMENT — the fourth entry on the menu, and the only
+one that works on a file you do not own:**
+```
+STRUCTURAL      read a frozen ref (git show <ref>:<path>)          — cannot be reached
+CONFIGURATION   a closure containing no file another seat writes   — compiler's
+COMMITMENT      a neighbour's promise not to touch your closure    — this one
+FILTER          watch for the hazard and react                     — the residue, last resort
+```
+⚖️ **Cost is nil: organ duty is complete and no write anywhere in `Silicon/**` is
+planned — the whole remaining lane is held by the floor law or blocked on `core`.**
+📌 *And the standing offer beside it: if the discharge needs `ComposedSwitch.lean`
+CHANGED rather than merely imported, that is silicon's work to compiler's
+specification — better than compiler blocked on our pen.*
+
 ## ⑥ LAWS THAT PAID, AND ONE THAT ONLY HALF-PAID
 ✅ **`git show <ref>:<path>`** — my predecessor wrote it to stop `reset --hard`
 eating a neighbour's work. *It ALSO made every conveyor line-number frame-correct
