@@ -4,11 +4,16 @@
 ### from docs/silicon-frame-protocol-0806.md and confirmed in session.
 ### Refutation assignments at the end. Sequenced AFTER the c1/(3,2)
 ### dispatches — this block costs no seat time until those land.
-### Refutation state (8/8 12:5x): SILICON pass CLEAN (folded into
-### §1). COMPILER clause 3 repaired (§4/§5); A/B executor out. MATH
-### pass COMPLETE — σ STRUCK from §2 (findings 1+2), L0 seed lemma
-### added to §3 (finding 3), act_stb probe OPEN in §5 (the flagged
-### suspicion, silicon's domain).
+### Refutation state (8/8 13:0x): ALL ③ READS COMPLETE AND FOLDED.
+### SILICON clean (§1, + the 12:59 hazard → probe re-scoped).
+### COMPILER clause-3 (§4/§5) AND the A/B pass (12:28): H3 added to
+### §2; L1 hypotheses fixed; L2 restated for the real artifact (Circ
+### fabric, claim-gated OR, act/sel hypothesis); L3 re-routed via
+### bnC_output_frames_are_the_fold; L4 NAMED = the σ-composition,
+### C-class, the summit. MATH: σ struck, L0 added, act_stb probe
+### open (silicon's, dispatched 13:06). This is v2 of the
+### decomposition — WAVES DISPATCH ONLY AFTER the seats read v2
+### (draft-until-refuted, round 2).
 
 ## 0. WHAT B4 DID AND DID NOT CERTIFY
 
@@ -51,6 +56,14 @@ For the k=3 fabric under:
   OBJECT is taken (σ STRUCK — first rider below);
 - H2 (init, spec §5's honest form): the frame begins at or after the
   second act_stb following power-up, from ANY initial register state;
+- H3 (reset discipline — compiler's ③ A/B pass, the L1 refutation):
+  B4's own `hrst` binder (SeamJoinB.lean:192): the reset trace is
+  `true :: List.replicate n false` — one pulse at cycle 0, none
+  after. Without it a mid-frame rst erases `decided` and the element
+  re-decides on PAYLOAD bits: a correct-looking delivery with the
+  WRONG payload tail (kernel-exhibited, `l1_fails_when_rst_returns` /
+  `l1_failure_is_a_mid_frame_flip`) — exactly the failure class this
+  block exists to certify against;
 
 CLAIM: for every line i and every t ∈ [2k, 2k+P):
   `output (dest i) t = input i t`.
@@ -79,7 +92,8 @@ Riders:
   needed per-stage skew accounting; convention C does not — record the
   contrast in the heritage block, not here.
 
-## 3. THE DECOMPOSITION — four lemmas (L0 added at math's ③ pass)
+## 3. THE DECOMPOSITION — five nodes (L0 added at math's ③ pass;
+## L1/L2/L3 revised and L4 named at compiler's A/B pass, 12:28)
 
 - **L0 (init-independence — the induction's SEED; math's ③ finding
   3, tightened at silicon's 12:59 flag)**: within a WELL-PHASED frame,
@@ -93,21 +107,52 @@ Riders:
   (the spec's own one-complete-frame argument, §5:174). L0 + H2
   compose; neither claims the other's ground. B-class, element-level,
   L2's genre.
-- **L1 (Batcher element, ceC/bnC)**: after its decide (first differing
-  bit inside the header — guaranteed under H1 since distinct
-  destinations differ inside [0, 2k)), the compare-exchange is a
-  static 2-permutation of its two lines for every later cycle of the
-  frame. Never-decided (two idles) = straight-through — exists as
-  element-order results (`ce_rejects_idle_sorts_low` family); becomes
-  load-bearing only at partial load.
-- **L2 (banyan element)**: after sel_stb (cycle 2s+1), the element is
-  a static 2-permutation for the rest of the frame. "A locked element
-  is a wire."
-- **L3 (composition)**: by cycle 2k every element is static, so the
-  fabric from 2k on realizes the routing i ↦ dest i that B4's chain
-  certifies (stage-3 identity: the named output IS the actual output);
-  the claim follows by composing L1/L2 transparency along those
-  static paths.
+- **L1 (Batcher element, ceC — REVISED at compiler's ③ pass)**: under
+  H3, after its decide the compare-exchange is a static 2-permutation
+  for the rest of the frame. The persistence is LANDED
+  (`ceC_step_decided` :110, `ceC_body_mux` :157); H3 is what makes it
+  usable. The undecided cases are THREE, not two: two idles =
+  straight-through (`ceC_frame_two_idle_stable` :232 — the
+  previously-cited `…_rejects_idle_sorts_low` is a MUTATION CONTROL,
+  not the statement); and two ACTIVE lines with EQUAL destinations —
+  the tie SPLICES the payload (`ceC_pair_tie_splices_the_payload`
+  :307), excluded at interior comparators only by StageOK's
+  distinctness clause, which is a B4 HYPOTHESIS, not a consequence of
+  H1. The statement carries it.
+- **L2 (banyan element — RESTATED at compiler's ③ pass; the draft's
+  form was refuted TWICE)**: there is no sequential banyan in the
+  fleet — `fabric` (Banyan.lean:132) is a `Circ`: no state, no cycle
+  index, no "after sel_stb"; its claim signals are PRIMARY INPUTS
+  supplied by an oracle computed from `Banyan.line`/`srcAt`, never
+  from header bits on the wire. And the locked element is a
+  CLAIM-GATED OR, not a mux — a 2-permutation in 2 of 16 latched
+  states (`l2_locked_is_a_wire_in_two_states`); full-load
+  conflict-merge is non-injective (`l2_full_load_conflict_merges`)
+  and §2's idle rider does NOT cover it. L2's true form:
+  transparency UNDER HYPOTHESIS `act0 ∧ act1 ∧ (sel0 ≠ sel1)` at
+  each element; transporting H1's distinct destinations down to
+  per-element sel-distinctness is L4's work. (The old heading "two
+  of one shape" dies here: ceC is 8/8 states, the banyan element
+  2/16.)
+- **L3 (composition — PROOF ROUTE RE-LAID at compiler's ③ pass)**:
+  the old route ("ride B4's hseam discharge") is refuted at the
+  bytes: B4 concludes about `cDestOf ∘ output column`, and `cDestOf`
+  reads header indices 1/3/5 and nothing else
+  (`cDestOf_is_payload_blind`) — payload-blind BY CONSTRUCTION, it
+  survives every payload-mangling transformation and cannot carry a
+  payload theorem. The machinery that CAN is landed elsewhere:
+  `bnC_output_frames_are_the_fold` (SeamTrace.lean:1242) —
+  whole-frame, payload-CARRYING, consuming the same `ElemSortsAt`
+  premise `elemSortsAt_all` discharges. The composition from those
+  two landed theorems is THREE LINES (executor-proved in the pass).
+- **L4 (the σ-composition — the C-class work L3 was hiding; NAMED at
+  compiler's ③ pass)**: `frames_succ_perm` (SeamJoinA.lean:267)
+  holds the one-comparator permutation, but its σ is EXISTENTIAL AND
+  DISCARDED — `stageOK_succ` uses it only to transport the invariant;
+  nothing composes the 24 per-comparator σ's, and frame-σ's agreement
+  with key-σ is unproved. That composition + agreement is the block's
+  real C-class node, and it absorbs L2's H1→per-element
+  sel-distinctness transport. One wave, the block's summit.
   No offsets (combinational). The trace-induction style is B4's own
   (the hseam discharge); the hypotheses are B4's driven-trace
   conditions extended over the full 14-cycle frame.
@@ -116,8 +161,9 @@ Riders:
 
 - The per-element "locked ⇒ transparent" lemmas live where the element
   semantics live (HDL slot); the composition is Equiv-side beside
-  ComposedSwitch. Difficulty: L1/L2 = B-class each (same genre as the
-  landed element certs); L3 = C-class, one wave, riding B4's machinery.
+  ComposedSwitch. Difficulty RE-PRICED at the ③ folds: L0/L1/L2 =
+  B-class; L3 = three lines from two landed theorems; L4 = the
+  C-class wave, the summit.
 - TRAP (from the morning's sweep): state the conclusion WHOLE-LIST /
   whole-window — `∀ t ∈ [2k, 2k+P)` with the window's BOUNDS in the
   statement, not a per-sample form. A `take`-shaped claim pins no
