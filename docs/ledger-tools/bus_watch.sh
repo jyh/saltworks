@@ -126,7 +126,25 @@ while true; do
       # NOTE: NO APOSTROPHES IN THIS COMMENT. It lives inside a single-quoted awk
       # program, so one apostrophe terminates the program -- which is exactly the
       # defect that broke this file twice while the fix was being written.
-      prevblank && /^\[[0-9]+\/[0-9]+ [0-9:]+, [A-Za-z]/ {
+      # ⛔ 12th DEFECT / UNION ANCHOR, 2026-08-08 15:3x. Blank-precedence alone
+      # drops 160 of 1551 real headers on this bus (10.32%), and the comment two
+      # screens up claiming it "misses ZERO genuine posts" was measured on a
+      # WINDOW, not the full object -- [[verify-over-the-full-object]], in this
+      # file, about this rule.
+      # ⚠️ BUT MONOTONIC-ALONE (math v12) IS WORSE: 179 dropped, because seats post
+      # with drifting clocks so BACKWARD stamps are common among GENUINE posts.
+      # So: accept a header if it is blank-anchored OR monotonic. Strictly
+      # dominates blank alone; never drops anything blank alone would have kept.
+      # MEASURED: 8/7 loss 6.7% -> 2.0%; 8/6 24.6% -> 11.8%; forward-era 0 -> 0.
+      # Applied at ALL FOUR sites, because fixing one would recommit
+      # [[a-new-pass-inherits-no-guards]] an hour after I posted the law.
+      /^\[[0-9]+\/[0-9]+ [0-9:]+, [A-Za-z]/ {
+        _t = $0; sub(/^\[/, "", _t); split(_t, _a, /[\/ :,]+/)
+        _k = ((_a[1] * 100 + _a[2]) * 100 + _a[3]) * 100 + _a[4]
+        hdrok = (prevblank || _k >= lastkey)
+        if (_k > lastkey) lastkey = _k
+      }
+      hdrok && /^\[[0-9]+\/[0-9]+ [0-9:]+, [A-Za-z]/ {
         owner = $0
         sub(/^\[[0-9]+\/[0-9]+ [0-9:]+, /, "", owner)
         sub(/[^A-Za-z0-9_-].*$/, "", owner)
@@ -161,7 +179,25 @@ while true; do
       # NOTE: NO APOSTROPHES IN THIS COMMENT. It lives inside a single-quoted awk
       # program, so one apostrophe terminates the program -- which is exactly the
       # defect that broke this file twice while the fix was being written.
-      prevblank && /^\[[0-9]+\/[0-9]+ [0-9:]+, [A-Za-z]/ {
+      # ⛔ 12th DEFECT / UNION ANCHOR, 2026-08-08 15:3x. Blank-precedence alone
+      # drops 160 of 1551 real headers on this bus (10.32%), and the comment two
+      # screens up claiming it "misses ZERO genuine posts" was measured on a
+      # WINDOW, not the full object -- [[verify-over-the-full-object]], in this
+      # file, about this rule.
+      # ⚠️ BUT MONOTONIC-ALONE (math v12) IS WORSE: 179 dropped, because seats post
+      # with drifting clocks so BACKWARD stamps are common among GENUINE posts.
+      # So: accept a header if it is blank-anchored OR monotonic. Strictly
+      # dominates blank alone; never drops anything blank alone would have kept.
+      # MEASURED: 8/7 loss 6.7% -> 2.0%; 8/6 24.6% -> 11.8%; forward-era 0 -> 0.
+      # Applied at ALL FOUR sites, because fixing one would recommit
+      # [[a-new-pass-inherits-no-guards]] an hour after I posted the law.
+      /^\[[0-9]+\/[0-9]+ [0-9:]+, [A-Za-z]/ {
+        _t = $0; sub(/^\[/, "", _t); split(_t, _a, /[\/ :,]+/)
+        _k = ((_a[1] * 100 + _a[2]) * 100 + _a[3]) * 100 + _a[4]
+        hdrok = (prevblank || _k >= lastkey)
+        if (_k > lastkey) lastkey = _k
+      }
+      hdrok && /^\[[0-9]+\/[0-9]+ [0-9:]+, [A-Za-z]/ {
         owner = $0
         sub(/^\[[0-9]+\/[0-9]+ [0-9:]+, /, "", owner)
         sub(/[^A-Za-z0-9_-].*$/, "", owner)
@@ -211,7 +247,25 @@ while true; do
         out = substr(b, 1, 430)
         print "⚖️ MAESTRO " s " " pre out
       }
-      prevblank && /^\[[0-9]+\/[0-9]+ [0-9:]+, [A-Za-z]/ {
+      # ⛔ 12th DEFECT / UNION ANCHOR, 2026-08-08 15:3x. Blank-precedence alone
+      # drops 160 of 1551 real headers on this bus (10.32%), and the comment two
+      # screens up claiming it "misses ZERO genuine posts" was measured on a
+      # WINDOW, not the full object -- [[verify-over-the-full-object]], in this
+      # file, about this rule.
+      # ⚠️ BUT MONOTONIC-ALONE (math v12) IS WORSE: 179 dropped, because seats post
+      # with drifting clocks so BACKWARD stamps are common among GENUINE posts.
+      # So: accept a header if it is blank-anchored OR monotonic. Strictly
+      # dominates blank alone; never drops anything blank alone would have kept.
+      # MEASURED: 8/7 loss 6.7% -> 2.0%; 8/6 24.6% -> 11.8%; forward-era 0 -> 0.
+      # Applied at ALL FOUR sites, because fixing one would recommit
+      # [[a-new-pass-inherits-no-guards]] an hour after I posted the law.
+      /^\[[0-9]+\/[0-9]+ [0-9:]+, [A-Za-z]/ {
+        _t = $0; sub(/^\[/, "", _t); split(_t, _a, /[\/ :,]+/)
+        _k = ((_a[1] * 100 + _a[2]) * 100 + _a[3]) * 100 + _a[4]
+        hdrok = (prevblank || _k >= lastkey)
+        if (_k > lastkey) lastkey = _k
+      }
+      hdrok && /^\[[0-9]+\/[0-9]+ [0-9:]+, [A-Za-z]/ {
         owner = $0
         sub(/^\[[0-9]+\/[0-9]+ [0-9:]+, /, "", owner)
         sub(/[^A-Za-z0-9_-].*$/, "", owner)
@@ -376,7 +430,25 @@ while true; do
       # ENVELOPE truncates for display independently of any filter. Content-first
       # helps because the payload starts earlier; it does NOT make an arbitrarily
       # deep marker safe. "Never truncates" would be a false claim.
-      prevblank && /^\[[0-9]+\/[0-9]+ [0-9:]+, [A-Za-z]/ {
+      # ⛔ 12th DEFECT / UNION ANCHOR, 2026-08-08 15:3x. Blank-precedence alone
+      # drops 160 of 1551 real headers on this bus (10.32%), and the comment two
+      # screens up claiming it "misses ZERO genuine posts" was measured on a
+      # WINDOW, not the full object -- [[verify-over-the-full-object]], in this
+      # file, about this rule.
+      # ⚠️ BUT MONOTONIC-ALONE (math v12) IS WORSE: 179 dropped, because seats post
+      # with drifting clocks so BACKWARD stamps are common among GENUINE posts.
+      # So: accept a header if it is blank-anchored OR monotonic. Strictly
+      # dominates blank alone; never drops anything blank alone would have kept.
+      # MEASURED: 8/7 loss 6.7% -> 2.0%; 8/6 24.6% -> 11.8%; forward-era 0 -> 0.
+      # Applied at ALL FOUR sites, because fixing one would recommit
+      # [[a-new-pass-inherits-no-guards]] an hour after I posted the law.
+      /^\[[0-9]+\/[0-9]+ [0-9:]+, [A-Za-z]/ {
+        _t = $0; sub(/^\[/, "", _t); split(_t, _a, /[\/ :,]+/)
+        _k = ((_a[1] * 100 + _a[2]) * 100 + _a[3]) * 100 + _a[4]
+        hdrok = (prevblank || _k >= lastkey)
+        if (_k > lastkey) lastkey = _k
+      }
+      hdrok && /^\[[0-9]+\/[0-9]+ [0-9:]+, [A-Za-z]/ {
         hdr = $0; pend = 0
         owner = $0
         sub(/^\[[0-9]+\/[0-9]+ [0-9:]+, /, "", owner)
