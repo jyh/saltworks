@@ -204,6 +204,27 @@ nothing, when the gate's entire value is the single line it keeps.**
 
 ---
 
+## 4b. DISPOSITIONS — all three §4 items closed between 08:48 and 10:05
+
+**§4 was written at 08:15 and every bullet in it has since been overtaken. The
+original text is kept above and marked here rather than edited, per this
+record's standing rule — a reader who acted on §4 needs to find the correction,
+not a gap. ⚠️ Two of the three closed in a direction OPPOSITE to what §4
+predicted.**
+
+| §4 item | disposition |
+|---|---|
+| **PUSH IS BLOCKED — "needs one unlock in a GUI Terminal, by the Captain"** | ⛔ **THE DIAGNOSIS WAS RIGHT AND THE PRESCRIPTION WAS WRONG.** Push was restored **08:48:24** by **SSH remotes on a fresh on-disk ed25519 key** — *no keychain in the path, and the keychain was **never unlocked***. Verified from this seat, same process: `managername` still `Background`, `security` still refusing, `gh` still failing, `git ls-remote` returning refs. **All four evidence commits (six by then) reached origin.** ⚠️ **`gh` REMAINS DOWN** — HTTPS + keychain — so any duty routed through `gh api` is unavailable |
+| **A LIVE DISK-WRITE CONDITION** (five `node` diagnostics, `ai.openclaw.gateway` 03:50) | ✅ **CLOSED AT THE CAUSE, and it was a security matter rather than a capacity one.** OpenClaw **eradicated**; revocations **DONE** (Captain, 09:3x — client and every token dead at the source); the `silicon-acct` **unix user deleted** (09:29). **Separately, the WindowServer error storm has a named author — iStat Menus** (bootout dropped the invalid-window rate 4.8/s → 0.7/s, held through a verified-dead window). ⚠️ **Cause-vs-symptom of the WEDGE itself stays honestly open**; the discriminating measurement — the invalid-window rate series *before* 02:42:16 — has not been taken |
+| **Five surviving `Scratch*.lean`, "zero `sorry` by grep, not by build"** | ⭐ **THE CAVEAT WAS CASHED BY THE KERNEL, EXACTLY AS WRITTEN.** Builds: `ScratchMuxCAudit` EXIT=0 (29/29 clean) · `ScratchMuxC` EXIT=0 · `ScratchMuxA` EXIT=1 (57 errors) · `ScratchMuxB` EXIT=134 · `ScratchGSCount` EXIT=1 (41 ✓, 4 TAINTED). 🔑 ***`grep -c sorry` = 0 AND the file depends on `sorryAx` — a failed tactic fills the hole. "0 `sorry`" is a property of the TEXT and never a hygiene result;*** `#audit_axioms` + `saltbuild EXIT=0` is |
+
+🔑 **THE ONE SENTENCE THIS TABLE IS FOR:** ***every item §4 flagged as needing
+the Captain's hand was closed without it, and the item §4 hedged most carefully
+is the one the kernel proved.*** *A close-of-ledger snapshot is a prediction, and
+these three were scored the same day — which is the only reason anyone can tell.*
+
+---
+
 ## 5. COST — one line, unit named
 
 **GENERATED 08:13 by `token_meter.py`, window `2026-08-08 00:00 → 08:13`,
