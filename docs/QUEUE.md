@@ -124,9 +124,11 @@ OPEN ITEMS:
   law remain his; fact sheet on his word. Adjacent MONEY item from
   the muster flags: PCBs 0/80 — the real TT scarcity; ordering is
   his word.
-- The pin cnt[3] → uio_out[5]: **CAPTAIN-CONFIRMED 8/8 14:14** — no
-  longer a veto-window; settled. Silicon implements in RTL at its
-  next write seam; spec §6 records it.
+- The pin cnt[3] → uio_out[5]: **CAPTAIN-CONFIRMED 14:14 ·
+  IMPLEMENTED 14:25** (silicon life-4: 05f423f/f76ee81/a2fa973;
+  the counter was ALREADY 4-bit from the 13:47 $clog2 fix — the
+  earlier "implements in RTL" wording was half-stale and silicon
+  read past it correctly). CLOSED.
 - PCBs 0/80 (T1, money): the Captain is UNDECIDED, will decide
   later — resurface gently with the B5 fact sheet, not before.
 - **THE ③+④ DEEP SESSION — CAPTAIN-COMMITTED, do-not-forget duty
