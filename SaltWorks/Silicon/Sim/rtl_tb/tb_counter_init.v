@@ -56,7 +56,7 @@ module tb_counter_init;
   integer    srcof [0:7];
   reg  [FRAME-1:0] stream [0:7];
   reg  [7:0] cap [0:FRAME-1];
-  integer fail_a, fail_b, fail_c, fail_d, bad, harness_fail, distinct;
+  integer fail_a, fail_b, fail_c, fail_d, fail_e, bad, harness_fail, distinct;
   reg [3:0]  cnt_at_start;
   reg [47:0] sig, sigs [0:SEEDS-1];
 
@@ -98,9 +98,16 @@ module tb_counter_init;
   // A random 8-bit mask's set bits, read ascending, ARE a sorted destination
   // set; assigning them to sources 0..n-1 concentrates the sources. That is
   // banyan_selfrouting's hypothesis, built by construction, not filtered for.
-  task build_load;
+  task build_load;                    // a random load
     begin
-      mask = $random;
+      build_load_mask($random);
+    end
+  endtask
+
+  task build_load_mask;               // a NAMED load, for the exhaustive arm
+    input [7:0] m;
+    begin
+      mask = m;
       if (mask == 8'd0) mask = 8'd1;
       n = 0;
       for (i = 0; i < N; i = i + 1) srcof[i] = -1;
@@ -159,7 +166,7 @@ module tb_counter_init;
   endtask
 
   initial begin
-    fail_a = 0; fail_b = 0; fail_c = 0; fail_d = 0; harness_fail = 0;
+    fail_a = 0; fail_b = 0; fail_c = 0; fail_d = 0; fail_e = 0; harness_fail = 0;
     $display("tb_counter_init rev2 — BOTH init surfaces randomised (48 routing bits AND cnt)");
     $display("rst_n is NEVER asserted; self-initialisation is the property under test.");
     $display("");
@@ -258,9 +265,33 @@ module tb_counter_init;
     $display("ARM D      sof-aligned, TWO frames abutting, judge the SECOND : %0d/%0d FAIL",
              fail_d, SEEDS);
 
+    // ===== ARM E: EXHAUSTIVE over the theorem's hypothesis at k=3.
+    // Every non-empty subset of the 8 outputs, read ascending, IS a sorted
+    // destination set; sources 0..n-1 concentrate it. So masks 1..255 enumerate
+    // ALL sorted+concentrated loads — the same population as §8 row 2, but
+    // against the REAL VERILOG rather than frame_sim.py's transcription of it,
+    // and with a random register power-up per case rather than a zero one.
+    // Strictly stronger than either row it supplements.
+    for (seed = 1; seed <= 255; seed = seed + 1) begin
+      @(negedge clk); randomize_state;
+      build_load_mask(seed[7:0]);
+      align;
+      drive_frame;
+      if (cnt_at_start !== 4'd0) harness_fail = harness_fail + 1;
+      check_frame;
+      if (bad != 0) begin
+        fail_e = fail_e + 1;
+        if (fail_e <= 5)
+          $display("  E FAIL mask %b n=%0d state=%h badbits=%0d", seed[7:0], n, sig, bad);
+      end
+    end
+    $display("ARM E      EXHAUSTIVE: all 255 sorted+concentrated loads,");
+    $display("           aligned, random power-up per case                   : %0d/255 FAIL",
+             fail_e);
+
     $display("");
-    $display("VERDICT harness=%0d armA=%0d armB=%0d armC=%0d armD=%0d",
-             harness_fail, fail_a, fail_b, fail_c, fail_d);
+    $display("VERDICT harness=%0d armA=%0d armB=%0d armC=%0d armD=%0d armE=%0d",
+             harness_fail, fail_a, fail_b, fail_c, fail_d, fail_e);
     $finish;
   end
 

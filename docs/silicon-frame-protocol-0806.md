@@ -317,6 +317,21 @@ power-up states.
 | 7 | mis-phased, **TWO** frames, judging the **SECOND** | **192 / 200 fail** |
 | 8 | `sof`-aligned, two frames **abutting**, judging the second | **0 / 200 fail** |
 | 9 | control: rows 5–8 against the **mutant** (old, buggy) element | **194 / 200 fail (row 5 arm)** |
+| 10 | **EXHAUSTIVE** — all 255 sorted + concentrated loads, aligned, **random power-up per case** | **0 / 255 fail** |
+| 11 | control: row 10 against the **mutant** element | **247 / 255 fail** |
+
+⭐ **ROW 11 IS ALSO A TRANSCRIPTION CHECK, and it is the strongest one in this
+document.** Row 4 reports **247 / 255** for the *Python* mutant; row 11 reports
+**247 / 255** for the *Verilog* mutant — same population, same count, two
+independent implementations of both the fixed and the broken element. `frame_sim.py`
+says of itself "validates the PROTOCOL, not the Verilog", so until now nothing
+connected its verdicts to the artifact that tapes out. These two numbers do.
+
+📌 And the agreement is not luck: rows 4 and 11 differ in power-up state (zero vs
+random), and **row 5's finding is exactly why that cannot matter** — an aligned
+header erases the initial state before the validity window opens, so any
+aligned-frame failure count is init-independent. The three results explain each
+other.
 
 **Reading these.** Row 5 is the amended §5 hypothesis: the first well-phased
 frame is already correct from any register state. Row 7 against row 6 is the
