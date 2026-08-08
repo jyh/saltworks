@@ -115,6 +115,53 @@ elaboration struggles with; a deep net-reference graph is.*
 remembered figure from a different context, and the largest thing actually
 imported, 540, never tested it).
 
+### 2.1b ⭐ THE LADDER HAS BEEN RUN — RESULT, ~18:0x — AND IT CORRECTS A FLEET LAW
+
+**Fired immediately, as §5 said it should be, because it needed nobody.**
+Synthetic `Netlist` defs, realistic net-reference graph (a 64-net sliding window,
+so the graph is deep rather than flat), each on its own `Scratch` file.
+
+| config | gates | verdict | time | failure |
+|---|---:|:---:|---:|---|
+| default | 540 | ✅ | 16 s | |
+| default | 1,000 | ✅ | 2 s | |
+| **default** | **2,000** | ❌ | 1 s | **`maximum recursion depth`** |
+| `maxRecDepth 1e6` | 2,000 | ✅ | 2 s | |
+| `maxRecDepth 1e6` | 4,000 | ✅ | 3 s | |
+| **`maxRecDepth 1e6`** | **12,000** | ✅ | **6 s** | ⭐ **the core's size** |
+| `maxRecDepth 1e6` | 24,000 | ❌ | 11 s | `«LCNF compiler»` heartbeats |
+| **`+ noncomputable`** | **24,000** | ✅ | **23 s** | |
+| `+ noncomputable` | 48,000 | ❌ | 13 s | `isDefEq` heartbeats |
+
+⇒ ***THE "~1,300 ELABORATION LAW" IS A STATEMENT ABOUT A DEFAULT, NOT ABOUT A
+CAPACITY.*** **It is exactly right at defaults — the wall is between 1,000 and
+2,000 — and wrong as a claim about what Lean can hold. The core's ~11,900 gates
+elaborate in SIX SECONDS behind one `set_option`.**
+
+🔑 **AND THE CEILING IS A STAIRCASE OF THREE DIFFERENT DEFAULTS, each its own
+knob:** ① `maxRecDepth` (512) → ~1,300 · ② the **code generator**'s heartbeats →
+~24,000 · ③ `isDefEq` heartbeats → 24,000–48,000.
+⭐ **② IS FREE TO SKIP, AND THAT IS THE TECHNIQUE WORTH KEEPING: mark the netlist
+`noncomputable`.** *A netlist is a proof datum, not a program — `decide +kernel`
+reduces in the KERNEL and never touches compiled code — so the code generator is
+pure waste on it, and skipping it doubles the ceiling.*
+⚠️ *I first tried to skip it by dropping `#eval`. **That was wrong** — Lean
+compiles every plain `def` whether or not anything evaluates it. The knob is
+`noncomputable`, not the absence of a consumer.*
+
+📊 **SCORING `C5-4` HONESTLY: I predicted "the true ceiling is above 1,300."
+REFUTED at defaults, CONFIRMED with the knobs — and the prediction did not say
+which regime it meant.** *That ambiguity is a defect in my pre-registration, not
+a subtlety in the result. A prediction that can be scored either way scored
+nothing.*
+
+⇒ 🎯 **§2's DECISION RULE RESOLVES TO THE FIRST BRANCH, AND FURTHER: chunking is
+now a CHOICE, not a NECESSITY.** *The core could be imported as ONE netlist.*
+**§2.2 stands anyway, and the reasons are now positive rather than forced —**
+locality of failure, organs that can be certified in parallel, and a σ-wiring
+certificate that stays small. ***But the plan must not claim the elaborator
+forces it, because it does not.***
+
 ### 2.2 The import unit is the ORGAN, and the seam is the WIRING
 
 The core is a composition of 12 organs whose boundaries are already named by the
