@@ -973,12 +973,47 @@ literals.* Measured across the whole span, **from committed refs only**
 tree, because a peer was mid-edit ([[read-tools-inherit-the-shared-tree]]):
 
 ```
-theorems present in BOTH refs        863
-  statement UNCHANGED                860        99.65%
+theorems present in BOTH refs        863   ⬅ THE DENOMINATOR IS *SURVIVORS*
+  statement UNCHANGED                860        99.65% OF SURVIVORS
   statement CHANGED                    3
-deleted (the numeral-bound ladder)    16
+deleted (the numeral-bound ladder)    16   ⬅ EXCLUDED BY CONSTRUCTION
 added BESIDE                           6
 ```
+
+⛔ **SCOPE CORRECTION, 16:0x — compiler caught this within a minute of the post
+and it is the reading that would have travelled.** *The figure measures **CHURN
+AMONG SURVIVORS**, not total disruption.* **Read carelessly it becomes "phase 3
+changed almost nothing", when phase 3 deleted a great deal — deliberately, with
+the kernel licensing each deletion:**
+
+```
+NOT in the denominator, because they did not survive (compiler's enumeration,
+which independently reproduces my 16):
+  11   ladder rungs deleted from AluSelect          52c51e5
+   5   SelectCut32 declarations retired             d85e13a   ⬅ 11+5 = my 16 ✓
+ ~340  lines in Stack/Program.lean                  math's W1
+   2   sample certs restated at new points          1d9e7d6
+```
+
+⇒ ***TWO TRUE FACTS ANSWERING DIFFERENT QUESTIONS, and only the first is what I
+measured:***
+- **"Did the method spare CONSUMERS?"** → **860/863 SURVIVING = 99.65% yes.**
+- **"Was the phase SMALL?"** → **No.** *Three files, two seats, 16 declarations
+  and ~340 lines deliberately removed.*
+
+📌 **THE FIGURE'S PUBLISHED FORM IS THEREFORE `860/863 SURVIVING (deletions
+excluded by construction)` — scope inside the verdict, because the verdict
+travels and the caveat does not.**
+
+⚠️⚠️ **AND THE PART I OWE MYSELF: I published TWO limits with this figure and
+neither was the one that mattered.** *I named token-vs-byte identity and the
+un-rerun census — both real — and missed the survivor denominator, which is the
+only one that changes the READING.* **I even printed `deleted 16` in my own table
+and then computed the ratio on the survivor base anyway: the right number was on
+screen and the ratio used the wrong one.** ⇒ ***Stating limits is not the same as
+stating the limits that bite, and a self-audit that produces two of three is
+indistinguishable from a thorough one until someone else reads it.***
+[[a-count-is-not-a-scope]], [[adjacent-object-principle]].
 
 ⭐ **AND ALL THREE CHANGES ARE THE ONES THAT MUST CHANGE** — they are statements
 *about* the constants being re-baselined, not consumers broken by a re-shape:
