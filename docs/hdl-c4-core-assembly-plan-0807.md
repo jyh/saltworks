@@ -247,8 +247,43 @@ ISA.lean:122   ADDI rd a imm => s.get a + imm.signExtend 32
 ```
 ⇒ ***`adder32`'s `b` port must carry `readTree`'s rs2 output OR `immICirc`'s 32
 wires, and NOTHING SELECTS BETWEEN THEM.*** §4 allocates exactly two `adder32`s
-and no mux. *Thirty-two 2:1 muxes; at `asMux`'s three-gates-per-bit shape that is
-**~96 gates — DERIVED from that shape, not measured**.*
+and no mux. **97 gates** — `32 × 3 + 1`, silicon's arithmetic from the shifter's
+reversal banks, *which supersedes my own "~96, derived from `asMux`'s shape": the
+`+1` is the shared inverter and their basis is measured where mine was inferred.*
+
+📌 **And `immICirc` is BUILT AND WIRED TO NO ONE** — `grep` outside
+`Immediate.lean` returns nothing. *The block exists; the path does not.*
+
+### ⭐ WHY BOTH OF THESE EXIST — a property of the METHOD, not of any seat
+
+**Silicon, 8/7 20:12, from `AluSelect.lean:18-24` — which is a CONE-WIDTH table,
+and the cone budget is theirs:**
+```
+| ALU op select, one-hot  | 20 |   10 op results + 10 select lines
+| ALU op select, encoded  | 14 |   10 op results +  4 select bits
+:61  asSelBits = 4 — "the seat's measured saving over a one-hot ten."   ← MY note
+```
+🔴 ***The encoding was chosen to cut `aluSelect`'s cone width from 20 to 14 — the
+≤ 24 ceiling the whole C4/C5 decomposition rests on — and its cost is an ENCODER
+OUTSIDE THE ORGAN, which no cone budget counts.*** **The saving is real inside
+the organ and the bill is posted where the instrument cannot read it.**
+
+⇒ **THIS IS THE *CAUSE* OF THE `C5-5` FAMILY RATHER THAN ANOTHER MEMBER:**
+```
+aluSelect  encoded select    saves cone width 20→14   needs an ENCODER       unbuilt
+pcNext     addend-select     saves one adder          needed an ADDER        was unallocated
+ADDI       operand B         —                        needs a 2:1 MUX BANK   unbuilt
+```
+***A per-organ budget creates pressure to push complexity across the organ
+boundary, and the budget is structurally blind to exactly what crosses.***
+
+📉 **AND IT INVERTS THE GATE DIRECTION POSTED AT 19:5x.** Slice A removes 679;
+these two add it back:
+```
+~11,403  +  97 (operand-B mux, measured basis)  +  encoder (UNPRICED)  ⇒  ~11,500+
+```
+*The encoder stays unpriced: it is small, nobody has a measured basis, and
+inventing a coefficient is the error three seats have now refused today.*
 
 🔑 **BOTH ARE THE `C5-5` FAMILY AGAIN, AND BOTH ARE WORSE THAN THE FOUR ALREADY
 LOGGED:** *`instOK` forbids a dangling input, so the assembly MUST map these
