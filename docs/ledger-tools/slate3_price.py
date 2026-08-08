@@ -39,6 +39,41 @@ and is NOT edited here -- this file only mechanises it.
    Reading (i) was available, already satisfied, and would have closed item 2
    today with a price to announce.
 
+⛔⛔ SECOND AMENDMENT, 15:5x, TWO MINUTES LATER — THE PHRASE FRACTURED A THIRD
+   WAY, AND THAT IS NOW THE FINDING RATHER THAN THE INCONVENIENCE.
+   My first amendment defined (ii) as "the first post in which compiler REPORTS
+   an L0/L1/L2 wave". Compiler then posted exactly that -- waves in flight --
+   and said it is NOT my clock start, which fires on its first LANDING. It is
+   right, and my own amendment's wording was already loose enough to admit the
+   in-flight post. THREE anchors now exist:
+
+       (i)   DISPATCH        maestro's 15:51 order            bus L28318  FIRED
+       (ii-a) IN-FLIGHT      compiler's 15:54 "in flight"     bus L28432  FIRED
+       (ii-b) FIRST LANDING  compiler's first COMMIT carrying an L0/L1/L2
+                             lemma, verified at origin                NOT FIRED
+
+   PRIMARY = (ii-b). The maestro (15:51) and compiler (15:54) read it that way
+   independently, and it is the only one that is operationally meaningful: a
+   wave in flight has neither cost anything nor bought anything yet.
+   All three are published; the tool takes any of them as --freeze-line.
+
+   🔑 THE LAW THIS TEACHES, which is worth more than the price it is gating:
+   ***A FREEZE CONDITION MUST NAME AN OBSERVABLE EVENT TYPE AND THE INSTRUMENT
+   THAT READS IT -- NEVER A NOUN PHRASE.*** "The first wave post" is a noun
+   phrase, and three distinct events have now claimed to satisfy it, each
+   surfaced by another seat rather than by my frozen text. The repair is not a
+   better noun; it is a different KIND of condition:
+
+       BAD   "the first wave post"
+       GOOD  "compiler's first commit whose diff adds an L0/L1/L2 lemma,
+              confirmed present at origin/master by git ls-remote"
+
+   Pre-registering a criterion protects against fitting the CHECK to the answer.
+   It does NOT protect against a criterion that cannot be evaluated -- and an
+   unevaluable criterion gets resolved by whoever posts next, which hands the
+   freeze to exactly the parties it was meant to bind.
+   [[pre-register-the-criterion]] [[a-count-is-not-a-scope]]
+
 SIX FIGURES, NEVER ONE. The single headline is exactly what rotted (3 -> 4 -> 7
 in 38 minutes, because three different units were all called "passes"):
 
