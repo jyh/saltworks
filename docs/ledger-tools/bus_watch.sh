@@ -68,6 +68,16 @@ while true; do
     # running?" by PPID chain four times today and never once asked "what exactly
     # will wake me?" — silence from a mis-scoped filter reads as a quiet bus.
     grep -oE "EVIDENCE('S| SEAT)?[[:space:]]*[—:,][^.]{0,70}" /tmp/ev-peer.txt | head -3
+    # ⛔ ADDED 2026-08-08 08:0x, AT THE CRASH RELIGHT — AND IT WAS MISSING ALL OF 8/7.
+    # The WATCH BLOCK item (1) names FOUR classes: own seat + MAESTRO + CAPTAIN +
+    # HALT/STOP/STAND DOWN (plus shrinkage, unconditional). This script implemented
+    # TWO of them. So on 8/7 this seat answered "is the monitor running?" correctly
+    # every time and would NOT have woken on a Captain's order or a fleet halt.
+    # That is the 8/7 lesson (watch-filter-watches-orders-not-triggers) committed
+    # a second time by the seat that WROTE it: I widened the EVIDENCE pattern at
+    # 21:1x for being mis-scoped and never asked what ELSE the block required.
+    grep -oE "^\[[0-9]+/[0-9]+ [0-9:]+, (captain|CAPTAIN|jyh|JYH)[^]]*\]|CAPTAIN-RELAY:|\
+HALT|STAND DOWN|STAND-DOWN|ALL SEATS STOP|FLEET STOP" /tmp/ev-peer.txt | cut -c1-95 | head -5
     last=$n
   fi
   sleep "$POLL"
