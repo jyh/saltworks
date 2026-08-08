@@ -4,6 +4,9 @@
 ### from docs/silicon-frame-protocol-0806.md and confirmed in session.
 ### Refutation assignments at the end. Sequenced AFTER the c1/(3,2)
 ### dispatches — this block costs no seat time until those land.
+### Refutation state (8/8 12:1x): compiler clause 3 REFUTED → repaired
+### in place (§4 port-axis trap; §5 ∀-P rider). Silicon pass, compiler
+### A/B executor, and math pass OPEN.
 
 ## 0. WHAT B4 DID AND DID NOT CERTIFY
 
@@ -81,14 +84,22 @@ Riders:
   whole-window — `∀ t ∈ [2k, 2k+P)` with the window's BOUNDS in the
   statement, not a per-sample form. A `take`-shaped claim pins no
   upper bound (compiler's ①⁗ finding).
+- TRAP — REFUTED-AND-REPAIRED (compiler's ③ pass, 8/8 12:15): the
+  clause above guarded only the TIME axis. The conclusion must be
+  whole over the PORT axis too (①‴, from the same bar revision) —
+  whole over ports, or the statement carries `outs.length` explicitly.
+  At k=3 the port coverage is PINNED-BY-COMPANION (`fabric3_shape`'s
+  literal 8 + `hdi` injectivity ⇒ σ∘dest onto), so the k=3 wave is
+  safe — but the companion stops applying at the ∀-P generalization
+  while the claim's shape does not change. The Lean statement for
+  L3/CLAIM carries the port-coverage clause EXPLICITLY, never by
+  companion.
 - TRAP: the certificate must quantify over the INPUT streams as free
   trace variables (B4's driven-trace form), never over a sampled
   environment; `_on_sample` names are for disclosed-scope certs only.
-- Facade caveat (spec §2.1's own note): `Facade`'s bit-consumption
-  lemmas are stated over the duplicate `ProbeFacade.line`; the bridge
-  must be restated over `SaltWorks.Banyan.line` before §2.1's
-  resonance is cited inside any proof here. That restatement is a
-  PREREQUISITE REPAIR, small, unclaimed — flag before the wave.
+- Facade caveat — CLEARED 8/8 (maestro, 64f9311): `Facade` restated
+  over `SaltWorks.Banyan.line`, `ProbeFacade` deleted. §2.1's
+  resonance may be cited directly; the prerequisite repair is done.
 
 ## 5. WHAT THIS BLOCK DEFERS, BY NAME
 
@@ -98,7 +109,11 @@ Riders:
   statement. Separate campaign; the idle riders here are its hooks.
 - **P as a parameter**: state over the tapeout's P=8 first; the
   ∀-P generalization is free-looking but touches the frame counter —
-  do not bundle it into the first wave.
+  do not bundle it into the first wave. AND (clause-3 refutation): at
+  ∀-P the port-coverage companion (`fabric3_shape`'s literal 8) stops
+  applying — the generalized statement must carry port coverage
+  explicitly or it inherits the index-wise blindness the repaired §4
+  trap names.
 
 ## 6. REFUTATION ASSIGNMENTS (draft-until-refuted)
 
