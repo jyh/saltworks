@@ -222,10 +222,47 @@ than from any account of the night:
 | Last commit | 2026-08-08 00:57 `f4825d7` | `git log` |
 | Last bus post | 02:31 | `FLEET.md` |
 | **Last file written** | **02:42:16** | `find -newermt` / `stat` |
+| WindowServer error storm opens | 02:49 | maestro, 09:33 (see below) |
 | Diagnostic cascade opens | 02:50 | `/Library/Logs/DiagnosticReports` |
 | apfsd CPU resource event | 03:08–03:10 | same |
 | Shutdown stalls | 07:44:29, 07:47:50 | same |
 | Boot | **07:48:22** | `sysctl kern.boottime` |
+
+**ADDED 09:3x — THE STORM HAS AN AUTHOR, AND THE ORDERING IS A CONSTRAINT ON
+WHAT IT CAN BE.** *The maestro identified iStat Menus (bjango launch agents):
+booting out both agents dropped the WindowServer invalid-window rate **4.8/s →
+0.7/s**, held through a verified-dead window, and it had been running under both
+users all night. **The maestro states cause-vs-symptom of the wedge itself stays
+open, and this row does not close it** — it records one ordering:*
+
+```
+02:42:16   last observable work        ← the machine stops writing
+02:49      error storm becomes visible ← ~7 minutes LATER
+02:50      diagnostic cascade opens
+```
+
+⚠️ **THE CONSTRAINT IS WEAKER THAN IT LOOKS AND MUST NOT BE OVERSOLD.** *A
+simple "the storm wedged the machine" story predicts the storm FIRST; observed,
+work stops first. **But both terms are soft:** absence of file writes is not
+absence of work (an executor can compute for minutes without writing), and
+`02:49` is when a RATE crossed visibility, not when the condition began.* ⇒
+***The ordering is consistent with symptom and does not exclude cause. It is a
+constraint, not a verdict, and it is recorded as one.***
+
+✅ **THE MEASUREMENT THAT WOULD ACTUALLY DISCRIMINATE, since the instrument
+already exists:** *iStat ran all night, so `02:49` is a CHANGE in rate rather
+than an onset of presence.* **Recover the invalid-window rate series for the
+hours BEFORE 02:42:16.** *Elevated beforehand ⇒ the storm predates the stall and
+cause stays live; flat until 02:49 ⇒ something else moved first and the storm
+joins the symptom column.* **Neither this seat nor the record should pick between
+them until that series is read.**
+
+📌 **AND ONE INSTRUMENT NOTE FROM THE HUNT ITSELF, because it is this day's
+recurring class:** *the maestro's FIRST kill ladder had a **launchd-respawn
+hole** — it measured a process being ABSENT, not a process being DEAD, and
+launchd put it back. The rerun added hold-dead verification and only then was
+the 4.8 → 0.7 drop meaningful.* ⇒ ***A kill you did not verify held is an
+absence, not an experiment.***
 
 **The outage is 02:42:16 → 07:48:22 = 5 h 06 m, and ZERO commits landed
 inside it.** Therefore §0 flags nothing (no commit, so no hole to detect) and
