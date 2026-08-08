@@ -147,13 +147,17 @@ off_0 = 1088                    (= coreInWidth; state and instruction below it)
                  ⛔ NOTE: these are the ALU's.  NO adder is allocated to the
                  PC PATH below, and that is the defect silicon refuted.
  7  sltCirc/sltuCirc  from sub's sign and carry                    7   ✅ LANDED
- 8  shifters×3  sll / srl / sra                                1,458  ⛔ 2 MISSING
+ 8  shifterM    ONE mode-generalised organ: sll / srl / sra       679  (route ②)
  9  aluSelect   muxes the ten                                  1,445
 10  regWrite    reads instr rd field + decoder                    163
 11  pcNext      reads rs1, rs2, immB, decoder isBEQ                99
 12  regNext     we <- regWrite, res <- aluSelect, cur <- state  3,104
+13  adder32     THE PC ADDER.  operands: pc (state nets 1024..1055)
+                and pcNext's ADDEND.  Instantiated via inst_sem,
+                one definition, third instance.                    160
 
-core.outs = regNext's 1,024 ++ pcNext's low 32          = 1,056 = stWidth
+core.outs = regNext's 1,024 ++ THE PC ADDER's low 32    = 1,056 = stWidth
+            ^^^^^^^^^^^^^^^^^^ NOT pcNext's: pcNext emits the ADDEND
 ```
 
 🔴 **THIS LINE IS REFUTED (silicon, `cefd93e`) AND THE PLAN IS WRONG AS WRITTEN.**
@@ -177,12 +181,24 @@ select-then-add path needs one VARIABLE adder and has no role for a constant `+4
 OUTPUT EQUALS 4.* ⇒ ***A theorem's NAME read as its STATEMENT — corrected in
 `Adder.lean`.***
 
-**Measured subtotal of what EXISTS: 11,038 gates. Estimated total with §3
-filled: ~12,700.**
+**TOTAL, re-derived on both accepted decisions rather than carried:**
 
-⚠️ **`pcNext.outs.length = 33`, not 32.** *`core.outs` must take the low 32 and
-the successor must check which end the extra bit is on before wiring it — this is
-the kind of off-by-one that a positional `outs` list cannot catch by type.*
+```
+plan of record (before either)                    ~12,700
+route ② — shifter mode, accepted 15:50 fcea207       −779   (1,458 → 679)
+the pc adder — accepted ~18:0x                       +160
+                                                  ────────
+                                                  ~12,081
+```
+*Silicon's C5 amendment said ~12,060 from a rounded chain; the exact derivation
+is `12,700 − 779 + 160 = 12,081`, and theirs was ~20 light. Corrected here rather
+than left as the tidier figure.*
+
+⚠️ **`pcNext.outs.length = 33`, not 32** — 32 addend bits plus the take flag.
+*Both go to the PC ADDER (the addend as one operand, the flag nowhere yet), and
+it is the ADDER's low 32 that reach `core.outs`.* **`adder32.outs.length = 33`
+too — 32 sum bits plus carry-out — so the same off-by-one lives at the new organ
+as well, and a positional `outs` list cannot catch either by type.*
 
 ---
 
