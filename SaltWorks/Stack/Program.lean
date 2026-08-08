@@ -11,6 +11,7 @@ import SaltWorks.HDL.C4
 import SaltWorks.HDL.Bitwise
 import SaltWorks.HDL.PcNext
 import SaltWorks.HDL.AluSelect
+import SaltWorks.HDL.ReadTree
 
 /-!
 # STACK-S2 — THE PROGRAM: an agent-written bitonic sort in Slice A
@@ -5416,6 +5417,736 @@ theorem aluSelectCut_is_one_gate :
 
 end AluSelectSemantics
 
+/-! ## ⭐⭐ READTREE — THE REGISTER READ PORT, UNCONDITIONALLY
+
+**A sampled certificate is a tripwire; C4 rests on organ theorems.** `readTree`
+is the register-file READ PATH — the block `ReadTree.lean:30` calls the place
+where *"the whole difficulty of the register file — verification and area —
+lives"*, and the second-most-consumed unproved block in the tower.
+
+## ⚠️ WHAT `rtSelectsOK` AND `readTree_x0_is_zero` QUANTIFY OVER, MEASURED
+
+*Read before assuming either was already general. Neither is, and the shape is
+`asSelectsOK`'s exactly: EXHAUSTIVE IN ONE ARGUMENT AND SILENT ABOUT THE REST.*
+
+```
+readTree.nIn = 997                    ⇒ 2^997 input valuations
+readTree.outs.length = 32             ⇒ 32 output bits, one 32:1 tree each
+
+rtSelectsOK m = (List.range 32).all fun a => rtBit0 m a == decide (a ≠ m ∧ a ≠ 0)
+  a    THE ADDRESS   EXHAUSTIVE — all 32, and five address bits IS 32, so total
+  m    THE CONTENTS  TWO POINTS (7, 19), each a ONE-COLD file: all-ones but x_m
+  bit  THE PORT      rtBit0 = (sem …).getD 0 — OUTPUT BIT 0 AND NOTHING ELSE
+
+readTree_x0_is_zero = rtBit0 7 0 = false ∧ rtBit0 19 0 = false
+  ⇒ literally TWO POINTS: address 0 fixed, two file contents, one output bit.
+```
+
+⛔ **`readTree_x0_is_zero` READS AS A TOTAL ISA CLAIM AND IS TWO POINTS.**
+`St.get_zero` is unconditional in the state and holds at every bit; the circuit's
+version was pinned at two one-cold files and bit 0. **Between them the four
+standing certificates drive 64 of `2^997` valuations, and 1 of the 32 outputs.**
+
+📌 **AND THAT IS NOT A HYPOTHETICAL GAP — the two one-gate mutants at the foot of
+this section exploit it, and the certificate accepts both.** `readTreeCutB` ties
+the ROOT of output bit **1**'s tree low: every check in `ReadTree.lean` passes
+unchanged, because none of them ever reads output 1. `readTreeCutA` makes address
+3 read `x2`, and the certificates pass because at `m = 7` and `m = 19` registers
+2 and 3 hold the same word.
+
+## ⭐ WHAT LANDS
+
+* `sem_readTree_uncond` — **the organ theorem, with no driver at all**: for EVERY
+  valuation of the 997 input nets, `sem readTree E` is the 32 bits of the
+  register the five address nets name, and `false` at every bit when they name
+  `x0`. The address is read off the valuation by `rtSel`, so nothing is pinned.
+* `sem_readTree` / `sem_readTree_St` — the same statement through a driver, then
+  through the ISA: **the port IS `St.get`**, every state, every register, every
+  bit.
+* `readTree_reads_x0_zero` — ⭐ `readTree_x0_is_zero` **at every file contents and
+  on all 32 output bits**, as a corollary of `St.get_zero` rather than a sample.
+* `rtSelectsOK_uncond` — ⭐ **the sampled certificate is now a COROLLARY, at all
+  31 stored registers rather than two**, via `rtOneCold_eq`: the one-cold driver
+  is `rtEnvOf` at one particular file, so the organ theorem SUPERSEDES the
+  certificate instead of restating it.
+* `rtWord_is_get` — the consumer bridge in the shape a `core` assembly applies.
+
+⛔ **NO `C4Spec` FIELD IS CLOSED BY THIS, and the shape of the debt is the
+adder's.** A register-field claim is about a whole `core`'s output bits, and no
+`core` exists. *The debt is `core`, not `readTree`.*
+
+## What transferred from the landed organs, and what did not
+
+⭐ **`run_pointwise` transferred EXACTLY ONCE, and there it was an exact fit**:
+the five SHARED inverters are `(List.range 5).map fun j => ⟨998 + j, .not j⟩`,
+which is the pointwise shape on the nose (`rtInvGates`).
+
+⛔ **`sem_pcNext`'s OR-chain did NOT transfer, and neither did its mux array.**
+Measured against `ReadTree.lean`'s gates rather than assumed:
+
+* **There is no OR chain.** `readTree`'s 992 `or` gates are each the THIRD gate
+  of a mux, never a fold — `orChain` appears nowhere in `ReadTree.lean`, so
+  `run_orChain` has nothing to apply to.
+* **`run_pcAddGates` is the wrong shape for a tree.** `pcNext`'s mux array is 32
+  INDEPENDENT one-gate selects off one shared control net, so its induction needs
+  only a frame over a flat list. `readTree` is a 5-deep TREE: level `n+1`'s
+  outputs ARE level `n`'s inputs, so the induction must carry the input-NAMING
+  function forward (`run_rtLevels` quantifies over `f : Nat → Nat`) and prove the
+  new names lie below the new base. That obligation does not exist in `pcNext`.
+* **No adder, so no carry** — as with `pcNext`, and for the same reason.
+
+⇒ ***What transferred is the METHOD — a frame lemma plus an induction carrying an
+invariant — together with `run_of_unwritten`, `run_append` and `sem_congr`
+themselves.*** **What is new and reusable is
+`run_rtMux`/`run_rtLevel`/`run_rtLevels`: a MUX-TREE induction, generic in the
+leaf-naming function and in the base net**, which a crossbar or a barrel shifter
+built the same way would inherit.
+
+⚠️ **`decide` IS NOT AVAILABLE HERE AND THAT IS THE DESIGN CONSTRAINT.**
+`readTree` reads a 32×32 file: `2^1024` file contents. Every step below is
+structural, and the only `decide +kernel` in this section is on the two mutants,
+where the circuits are closed terms.
+
+⛔ **THE `Net` TRAP FIRED THREE MORE TIMES**, each on a goal whose head was
+`rtZero`, `rtNotSel jj`, or an element of a `List Net`: `omega` DROPPED THE GOAL
+and reported a counterexample derived from the hypotheses alone. Every fix is the
+same — `show` the goal at `Nat` with the constants spelled out (`rtReg_lt`,
+`run_rtLevels`'s `hnsb`, `run_rtBits`'s head-of-list step).
+-/
+
+section ReadTreeSemantics
+
+open SaltWorks.HDL hiding seenWord
+
+/-! ## Net-arithmetic mirrors (the `Net` trap: everything below is `Nat`-bound) -/
+
+theorem rtIn_eq : rtIn = 997 := by decide +kernel
+
+theorem rtZero_eq : rtZero = 997 := by decide +kernel
+
+theorem rtNotSel_eq (j : Nat) : rtNotSel j = 998 + j := by
+  show rtIn + 1 + j = 998 + j
+  rw [rtIn_eq]
+
+theorem rtReg_lt (i k : Nat) (hi : i < 32) (hk : k < 32) : rtReg i k < 998 := by
+  unfold rtReg
+  split
+  · rw [rtZero_eq]; decide
+  · show (5 : Nat) + (i - 1) * 32 + k < 998
+    omega
+
+theorem rtReg_ne (i k : Nat) (hi : 1 ≤ i) : rtReg i k = 5 + (i - 1) * 32 + k := by
+  show (if i == 0 then rtZero else rtAddrBits + (i - 1) * rtWidth + k) = _
+  rw [if_neg (by simp; omega)]
+  rfl
+
+theorem rtReg_lt_stored (i k : Nat) (hi : 1 ≤ i) (hi2 : i < 32) (hk : k < 32) :
+    rtReg i k < 997 := by
+  rw [rtReg_ne i k hi]
+  show (5 : Nat) + (i - 1) * 32 + k < 997
+  omega
+
+/-! ## The address value a valuation carries on nets `lo … lo+n-1`, LSB first -/
+
+def rtSel (E : Env) (lo : Nat) : Nat → Nat
+  | 0     => 0
+  | n + 1 => (if E lo then 1 else 0) + 2 * rtSel E (lo + 1) n
+
+theorem rtSel_succ (E : Env) (lo n : Nat) :
+    rtSel E lo (n + 1) = (if E lo then 1 else 0) + 2 * rtSel E (lo + 1) n := rfl
+
+theorem rtSel_lt (E : Env) : ∀ (n lo : Nat), rtSel E lo n < 2 ^ n := by
+  intro n
+  induction n with
+  | zero => intro lo; show 0 < 1; norm_num
+  | succ n ih =>
+    intro lo
+    have h := ih (lo + 1)
+    have hp : (2 : Nat) ^ (n + 1) = 2 * 2 ^ n := by rw [Nat.pow_succ]; omega
+    rw [rtSel_succ, hp]
+    split <;> omega
+
+theorem rtSel_congr {E E' : Env} (h : ∀ m : Nat, m < 5 → E' m = E m) :
+    ∀ (n lo : Nat), lo + n ≤ 5 → rtSel E' lo n = rtSel E lo n := by
+  intro n
+  induction n with
+  | zero => intro lo _; rfl
+  | succ n ih =>
+    intro lo hlo
+    rw [rtSel_succ, rtSel_succ, h lo (by omega), ih (lo + 1) (by omega)]
+
+theorem rtSel_testBit (a : Nat) : ∀ (n lo : Nat),
+    rtSel (fun i => a.testBit i) lo n = a / 2 ^ lo % 2 ^ n := by
+  intro n
+  induction n with
+  | zero => intro lo; show 0 = _; rw [Nat.pow_zero, Nat.mod_one]
+  | succ n ih =>
+    intro lo
+    have hd : a / 2 ^ (lo + 1) = a / 2 ^ lo / 2 := by
+      rw [Nat.div_div_eq_div_mul, ← Nat.pow_succ]
+    have hb : (if (fun i => a.testBit i) lo then (1 : Nat) else 0) = a / 2 ^ lo % 2 := by
+      show (if a.testBit lo then (1 : Nat) else 0) = _
+      rw [Nat.testBit_eq_decide_div_mod_eq]
+      have h2 : a / 2 ^ lo % 2 < 2 := Nat.mod_lt _ (by norm_num)
+      by_cases hh : a / 2 ^ lo % 2 = 1
+      · simp [hh]
+      · simp [hh]; omega
+    rw [rtSel_succ, ih (lo + 1), hd, hb]
+    generalize hx : a / 2 ^ lo = x
+    have hM : 0 < (2 : Nat) ^ n := Nat.one_le_two_pow
+    have hp : (2 : Nat) ^ (n + 1) = 2 * 2 ^ n := by rw [Nat.pow_succ]; omega
+    rw [hp]
+    have h1 : x = 2 * 2 ^ n * (x / 2 / 2 ^ n) + (2 * (x / 2 % 2 ^ n) + x % 2) := by
+      conv_lhs => rw [← Nat.div_add_mod x 2, ← Nat.div_add_mod (x / 2) (2 ^ n)]
+      ring
+    have h2 : 2 * (x / 2 % 2 ^ n) + x % 2 < 2 * 2 ^ n := by
+      have ha := Nat.mod_lt (x / 2) hM
+      have hb2 := Nat.mod_lt x (show 0 < 2 by norm_num)
+      omega
+    have hkey : x % (2 * 2 ^ n) = 2 * (x / 2 % 2 ^ n) + x % 2 := by
+      conv_lhs => rw [h1]
+      rw [Nat.mul_add_mod]
+      exact Nat.mod_eq_of_lt h2
+    rw [hkey]
+    omega
+
+theorem sel_bit (c : Bool) (F : Nat → Bool) (S : Nat) :
+    (if c then F (2 * S + 1) else F (2 * S)) = F ((if c then 1 else 0) + 2 * S) := by
+  cases c
+  · show F (2 * S) = F (0 + 2 * S)
+    exact congrArg F (by omega)
+  · show F (2 * S + 1) = F (1 + 2 * S)
+    exact congrArg F (by omega)
+
+/-! ## `rtLevel` — one level of the mux tree -/
+
+theorem rtLevel_nil (s ns b : Nat) : rtLevel s ns b [] = ([], [], b) := rfl
+
+theorem rtLevel_cons2 (s ns b x y : Nat) (rest : List Net) :
+    rtLevel s ns b (x :: y :: rest)
+      = (rtMux b x y s ns ++ (rtLevel s ns (b + 3) rest).1,
+         (b + 2) :: (rtLevel s ns (b + 3) rest).2.1,
+         (rtLevel s ns (b + 3) rest).2.2) := rfl
+
+/-- One 2:1 mux. **`x` and `ns` need no bound**: the first gate reads them from
+the incoming valuation, before anything has been written. -/
+theorem run_rtMux (E : Env) (b x y s ns : Nat) (hy : y < b) (hs : s < b) :
+    (∀ m : Nat, m < b → run E (rtMux b x y s ns) m = E m)
+    ∧ run E (rtMux b x y s ns) (b + 2) = ((E x && E ns) || (E y && E s)) := by
+  refine ⟨fun m hm => run_of_unwritten E _ m (fun g hg => ?_), ?_⟩
+  · simp only [rtMux, List.mem_cons, List.not_mem_nil, or_false] at hg
+    rcases hg with rfl | rfl | rfl
+    · show b ≠ m; omega
+    · show b + 1 ≠ m; omega
+    · show b + 2 ≠ m; omega
+  · have h3 : y ≠ b := by omega
+    have h4 : s ≠ b := by omega
+    simp [rtMux, Op.eval, upd, h3, h4]
+
+theorem range_map_two (n : Nat) (f : Nat → Nat) :
+    (List.range (n + 2)).map f = f 0 :: f 1 :: (List.range n).map (fun i => f (i + 2)) := by
+  rw [show n + 2 = (n + 1) + 1 from rfl, List.range_succ_eq_map, List.map_cons,
+    List.map_map, List.range_succ_eq_map, List.map_cons, List.map_map]
+  rfl
+
+/-- **One level of the tree, over `2 * m` inputs named by `f`.** -/
+theorem run_rtLevel (s ns : Nat) :
+    ∀ (m b : Nat) (f : Nat → Nat) (E : Env),
+      (∀ i : Nat, i < 2 * m → f i < b) → s < b → ns < b → E ns = !(E s) →
+      ((rtLevel s ns b ((List.range (2 * m)).map f)).2.1
+          = (List.range m).map (fun p => b + 3 * p + 2))
+      ∧ ((rtLevel s ns b ((List.range (2 * m)).map f)).2.2 = b + 3 * m)
+      ∧ (∀ n : Nat, n < b →
+          run E (rtLevel s ns b ((List.range (2 * m)).map f)).1 n = E n)
+      ∧ (∀ p : Nat, p < m →
+          run E (rtLevel s ns b ((List.range (2 * m)).map f)).1 (b + 3 * p + 2)
+            = (if E s then E (f (2 * p + 1)) else E (f (2 * p)))) := by
+  intro m
+  induction m with
+  | zero =>
+    intro b f E _ _ _ _
+    refine ⟨?_, ?_, ?_, ?_⟩
+    · simp [rtLevel_nil]
+    · simp [rtLevel_nil]
+    · intro n _; simp [rtLevel_nil]
+    · intro p hp; exact absurd hp (Nat.not_lt_zero p)
+  | succ m ih =>
+    intro b f E hf hs hns hE
+    have hx : f 0 < b := hf 0 (by omega)
+    have hy : f 1 < b := hf 1 (by omega)
+    obtain ⟨hmfr, hmval⟩ := run_rtMux E b (f 0) (f 1) s ns hy hs
+    have h2m : 2 * (m + 1) = 2 * m + 2 := by omega
+    have hf' : ∀ i : Nat, i < 2 * m → (fun i => f (i + 2)) i < b + 3 := by
+      intro i hi
+      have := hf (i + 2) (by omega)
+      show f (i + 2) < b + 3
+      omega
+    have hE' : run E (rtMux b (f 0) (f 1) s ns) ns
+        = !(run E (rtMux b (f 0) (f 1) s ns) s) := by
+      rw [hmfr ns hns, hmfr s hs]; exact hE
+    obtain ⟨ho, hb', hfr, hval⟩ :=
+      ih (b + 3) (fun i => f (i + 2)) (run E (rtMux b (f 0) (f 1) s ns))
+        hf' (by omega) (by omega) hE'
+    rw [h2m, range_map_two, rtLevel_cons2]
+    refine ⟨?_, ?_, ?_, ?_⟩
+    · rw [ho, List.range_succ_eq_map, List.map_cons, List.map_map]
+      refine congrArg₂ List.cons (by omega) (List.map_congr_left (fun p _ => by
+        show b + 3 + 3 * p + 2 = b + 3 * (p + 1) + 2
+        omega))
+    · rw [hb']; omega
+    · intro n hn
+      rw [run_append, hfr n (by omega), hmfr n hn]
+    · intro p hp
+      rw [run_append]
+      match p with
+      | 0 =>
+        rw [show b + 3 * 0 + 2 = b + 2 from by omega, hfr (b + 2) (by omega), hmval, hE]
+        show _ = if E s then E (f 1) else E (f 0)
+        cases hEs : E s <;> simp
+      | q + 1 =>
+        have hq : q < m := by omega
+        rw [show b + 3 * (q + 1) + 2 = b + 3 + 3 * q + 2 from by omega, hval q hq,
+          hmfr s hs, hmfr (f (2 * q + 1 + 2)) (hf _ (by omega)),
+          hmfr (f (2 * q + 2)) (hf _ (by omega))]
+        show (if E s then E (f (2 * q + 1 + 2)) else E (f (2 * q + 2))) = _
+        rw [show 2 * q + 1 + 2 = 2 * (q + 1) + 1 from by omega,
+          show 2 * q + 2 = 2 * (q + 1) from by omega]
+
+/-! ## `rtLevels` — the folded tree -/
+
+theorem rtLevels_zero (b : Nat) (ins : List Net) : rtLevels 0 b ins = ([], ins, b) := rfl
+
+/-- The level `rtLevels (n+1)` runs first: it selects on address bit `5 - (n+1)`. -/
+def rtLevAt (n b : Nat) (ins : List Net) : List Gate × List Net × Nat :=
+  rtLevel (5 - (n + 1)) (rtNotSel (5 - (n + 1))) b ins
+
+theorem rtLevels_succ (n b : Nat) (ins : List Net) :
+    rtLevels (n + 1) b ins
+      = ((rtLevAt n b ins).1 ++ (rtLevels n (rtLevAt n b ins).2.2 (rtLevAt n b ins).2.1).1,
+         (rtLevels n (rtLevAt n b ins).2.2 (rtLevAt n b ins).2.1).2.1,
+         (rtLevels n (rtLevAt n b ins).2.2 (rtLevAt n b ins).2.1).2.2) := rfl
+
+/-- **The whole `n`-level tree over `2^n` inputs named by `f`.** -/
+theorem run_rtLevels : ∀ (n : Nat), n ≤ 5 → ∀ (b : Nat) (f : Nat → Nat) (E : Env),
+    1003 ≤ b → (∀ i : Nat, i < 2 ^ n → f i < b) →
+    (∀ j : Nat, j < 5 → E (998 + j) = !(E j)) →
+    ((rtLevels n b ((List.range (2 ^ n)).map f)).2.1
+        = [if n = 0 then f 0 else b + (3 * 2 ^ n - 4)])
+    ∧ ((rtLevels n b ((List.range (2 ^ n)).map f)).2.2 = b + 3 * (2 ^ n - 1))
+    ∧ (∀ m : Nat, m < b → run E (rtLevels n b ((List.range (2 ^ n)).map f)).1 m = E m)
+    ∧ (run E (rtLevels n b ((List.range (2 ^ n)).map f)).1
+          ((rtLevels n b ((List.range (2 ^ n)).map f)).2.1.headD 0)
+        = E (f (rtSel E (5 - n) n))) := by
+  intro n
+  induction n with
+  | zero =>
+    intro _ b f E _ hf _
+    refine ⟨?_, ?_, ?_, ?_⟩
+    · simp [rtLevels_zero]
+    · simp [rtLevels_zero]
+    · intro m _; simp [rtLevels_zero]
+    · simp [rtLevels_zero]
+      rfl
+  | succ n ih =>
+    intro hn5 b f E hb hf hinv
+    have hn : n ≤ 5 := by omega
+    have hK : (1 : Nat) ≤ 2 ^ n := Nat.one_le_two_pow
+    have hp : (2 : Nat) ^ (n + 1) = 2 * 2 ^ n := by rw [Nat.pow_succ]; omega
+    have hjlt : 5 - (n + 1) < 5 := by omega
+    have hjb : 5 - (n + 1) < b := by omega
+    have hnsb : rtNotSel (5 - (n + 1)) < b := by
+      rw [rtNotSel_eq]
+      show (998 : Nat) + (5 - (n + 1)) < b
+      omega
+    have hjE : E (rtNotSel (5 - (n + 1))) = !(E (5 - (n + 1))) := by
+      rw [rtNotSel_eq]; exact hinv _ hjlt
+    obtain ⟨hLo, hLb, hLfr, hLval⟩ :=
+      run_rtLevel (5 - (n + 1)) (rtNotSel (5 - (n + 1))) (2 ^ n) b f E
+        (fun i hi => hf i (by omega)) hjb hnsb hjE
+    have hAt : rtLevAt n b ((List.range (2 * 2 ^ n)).map f)
+        = rtLevel (5 - (n + 1)) (rtNotSel (5 - (n + 1))) b ((List.range (2 * 2 ^ n)).map f) := rfl
+    rw [← hAt] at hLo hLb hLfr hLval
+    obtain ⟨hRo, hRb, hRfr, hRval⟩ :=
+      ih hn (b + 3 * 2 ^ n) (fun p => b + 3 * p + 2)
+        (run E (rtLevAt n b ((List.range (2 * 2 ^ n)).map f)).1)
+        (by omega)
+        (fun i hi => by show b + 3 * i + 2 < b + 3 * 2 ^ n; omega)
+        (fun jj hjj => by
+          rw [hLfr (998 + jj) (by omega), hLfr jj (by omega)]; exact hinv jj hjj)
+    have hins : (List.range (2 ^ (n + 1))).map f = (List.range (2 * 2 ^ n)).map f := by rw [hp]
+    rw [hins, rtLevels_succ, hLo, hLb]
+    refine ⟨?_, ?_, ?_, ?_⟩
+    · rw [hRo, if_neg (show ¬(n + 1 = 0) by omega)]
+      by_cases h0 : n = 0
+      · subst h0
+        norm_num
+      · rw [if_neg h0]
+        have h2K : (2 : Nat) ≤ 2 ^ n := by
+          calc (2 : Nat) = 2 ^ 1 := by norm_num
+          _ ≤ 2 ^ n := Nat.pow_le_pow_right (by norm_num) (by omega)
+        congr 1
+        rw [hp]
+        omega
+    · rw [hRb, hp]; omega
+    · intro m hm
+      rw [run_append, hRfr m (by omega), hLfr m hm]
+    · rw [run_append, hRval]
+      have hsel : rtSel (run E (rtLevAt n b ((List.range (2 * 2 ^ n)).map f)).1) (5 - n) n
+          = rtSel E (5 - n) n :=
+        rtSel_congr (fun m hm => hLfr m (by omega)) n (5 - n) (by omega)
+      show run E (rtLevAt n b ((List.range (2 * 2 ^ n)).map f)).1
+          (b + 3 * rtSel (run E (rtLevAt n b ((List.range (2 * 2 ^ n)).map f)).1) (5 - n) n + 2)
+        = E (f (rtSel E (5 - (n + 1)) (n + 1)))
+      rw [hsel, hLval _ (rtSel_lt E n (5 - n)), rtSel_succ,
+        show 5 - (n + 1) + 1 = 5 - n from by omega]
+      exact sel_bit _ (fun z => E (f z)) _
+
+/-! ## `rtBit` — one output bit's 32:1 tree -/
+
+theorem rtBit_gates (k b : Nat) :
+    (rtBit k b).1 = (rtLevels 5 b ((List.range (2 ^ 5)).map (fun i => rtReg i k))).1 := rfl
+
+theorem rtBit_out (k b : Nat) :
+    (rtBit k b).2.1
+      = (rtLevels 5 b ((List.range (2 ^ 5)).map (fun i => rtReg i k))).2.1.headD 0 := rfl
+
+theorem rtBit_next (k b : Nat) :
+    (rtBit k b).2.2 = (rtLevels 5 b ((List.range (2 ^ 5)).map (fun i => rtReg i k))).2.2 := rfl
+
+theorem run_rtBit (k b : Nat) (E : Env) (hk : k < 32) (hb : 1003 ≤ b)
+    (hinv : ∀ j : Nat, j < 5 → E (998 + j) = !(E j)) :
+    ((rtBit k b).2.1 = b + 92)
+    ∧ ((rtBit k b).2.2 = b + 93)
+    ∧ (∀ m : Nat, m < b → run E (rtBit k b).1 m = E m)
+    ∧ (run E (rtBit k b).1 (b + 92) = E (rtReg (rtSel E 0 5) k)) := by
+  obtain ⟨ho, hb', hfr, hval⟩ :=
+    run_rtLevels 5 (le_refl 5) b (fun i => rtReg i k) E hb
+      (fun i hi => Nat.lt_of_lt_of_le (rtReg_lt i k (by norm_num at hi; omega) hk)
+        (by omega)) hinv
+  have ho' : (rtLevels 5 b ((List.range (2 ^ 5)).map (fun i => rtReg i k))).2.1 = [b + 92] := by
+    rw [ho]; norm_num
+  have h92 : (rtLevels 5 b ((List.range (2 ^ 5)).map (fun i => rtReg i k))).2.1.headD 0
+      = b + 92 := by rw [ho']; rfl
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · rw [rtBit_out, h92]
+  · rw [rtBit_next, hb']; norm_num
+  · intro m hm; rw [rtBit_gates]; exact hfr m hm
+  · rw [rtBit_gates, ← h92]; exact hval
+
+/-! ## `rtBits` — the 32 independent trees -/
+
+theorem rtBits_zero (b : Nat) : rtBits 0 b = ([], []) := rfl
+
+theorem rtBits_succ (n b : Nat) :
+    rtBits (n + 1) b
+      = ((rtBit (32 - (n + 1)) b).1 ++ (rtBits n (rtBit (32 - (n + 1)) b).2.2).1,
+         (rtBit (32 - (n + 1)) b).2.1 :: (rtBits n (rtBit (32 - (n + 1)) b).2.2).2) := rfl
+
+theorem run_rtBits : ∀ (n b : Nat) (E : Env), n ≤ 32 → 1003 ≤ b →
+    (∀ j : Nat, j < 5 → E (998 + j) = !(E j)) →
+    ((rtBits n b).2 = (List.range n).map (fun t => b + 93 * t + 92))
+    ∧ (∀ m : Nat, m < b → run E (rtBits n b).1 m = E m)
+    ∧ (∀ t : Nat, t < n → run E (rtBits n b).1 (b + 93 * t + 92)
+        = E (rtReg (rtSel E 0 5) (32 - n + t))) := by
+  intro n
+  induction n with
+  | zero =>
+    intro b E _ _ _
+    exact ⟨by simp [rtBits_zero], fun m _ => rfl, fun t ht => absurd ht (Nat.not_lt_zero t)⟩
+  | succ n ih =>
+    intro b E hn hb hinv
+    obtain ⟨hBo, hBb, hBfr, hBval⟩ :=
+      run_rtBit (32 - (n + 1)) b E (by omega) hb hinv
+    obtain ⟨hSo, hSfr, hSval⟩ :=
+      ih (b + 93) (run E (rtBit (32 - (n + 1)) b).1) (by omega) (by omega)
+        (fun jj hjj => by
+          rw [hBfr (998 + jj) (by omega), hBfr jj (by omega)]; exact hinv jj hjj)
+    have hsel : rtSel (run E (rtBit (32 - (n + 1)) b).1) 0 5 = rtSel E 0 5 :=
+      rtSel_congr (fun m hm => hBfr m (by omega)) 5 0 (by omega)
+    have hS : rtSel E 0 5 < 32 := by have := rtSel_lt E 5 0; norm_num at this; omega
+    rw [hsel] at hSval
+    rw [rtBits_succ, hBb, hBo]
+    refine ⟨?_, ?_, ?_⟩
+    · rw [hSo, List.range_succ_eq_map, List.map_cons, List.map_map]
+      refine congrArg₂ List.cons ?_ ?_
+      · norm_num
+      · exact List.map_congr_left (fun p _ => by
+          show b + 93 + 93 * p + 92 = b + 93 * (p + 1) + 92
+          omega)
+    · intro m hm
+      rw [run_append, hSfr m (by omega), hBfr m hm]
+    · intro t ht
+      rw [run_append]
+      match t with
+      | 0 =>
+        rw [show b + 93 * 0 + 92 = b + 92 from by omega, hSfr (b + 92) (by omega), hBval]
+        exact congrArg (fun z => E (rtReg (rtSel E 0 5) z)) (by omega)
+      | q + 1 =>
+        have hq : q < n := by omega
+        rw [show b + 93 * (q + 1) + 92 = b + 93 + 93 * q + 92 from by omega, hSval q hq,
+          hBfr (rtReg (rtSel E 0 5) (32 - n + q))
+            (Nat.lt_of_lt_of_le (rtReg_lt (rtSel E 0 5) (32 - n + q) hS (by omega))
+              (by omega))]
+        exact congrArg (fun z => E (rtReg (rtSel E 0 5) z)) (by omega)
+
+/-! ## `readTree` — the whole read path -/
+
+theorem readTree_gates_eq : readTree.gates
+    = (⟨997, Op.const false⟩ : Gate)
+      :: ((List.range 5).map (fun j => (⟨998 + j, Op.not j⟩ : Gate)) ++ (rtBits 32 1003).1) :=
+  rfl
+
+theorem readTree_outs_eq : readTree.outs = (rtBits 32 1003).2 := rfl
+
+/-- The valuation the 32 trees actually see: the input valuation with the shared
+`x0` tie driven low and the five shared inverters evaluated. -/
+def rtPre (E : Env) : Env :=
+  run (upd E 997 false) ((List.range 5).map (fun j => (⟨998 + j, Op.not j⟩ : Gate)))
+
+/-- ⭐ **`run_pointwise` TRANSFERRED HERE, AND ONLY HERE** — the five SHARED
+inverters are a pointwise block on the nose. -/
+theorem rtInvGates (E : Env) :
+    (∀ m : Nat, m < 998 →
+        run E ((List.range 5).map (fun j => (⟨998 + j, Op.not j⟩ : Gate))) m = E m)
+    ∧ (∀ k : Nat, k < 5 →
+        run E ((List.range 5).map (fun j => (⟨998 + j, Op.not j⟩ : Gate))) (998 + k)
+          = (Op.not k).eval E) :=
+  run_pointwise E 998 (fun i => Op.not i) 5
+    (fun i hi c hc => by
+      simp only [Op.fanin, List.mem_cons, List.not_mem_nil, or_false] at hc
+      subst hc
+      exact Nat.lt_of_lt_of_le hi (by norm_num))
+
+theorem rtPre_lt (E : Env) (m : Nat) (hm : m < 997) : rtPre E m = E m := by
+  rw [rtPre, (rtInvGates (upd E 997 false)).1 m (Nat.lt_trans hm (by norm_num))]
+  exact upd_of_ne (n := 997) (m := m) false (Nat.ne_of_lt hm)
+
+theorem rtPre_zero (E : Env) : rtPre E 997 = false := by
+  rw [rtPre, (rtInvGates (upd E 997 false)).1 997 (by norm_num)]
+  exact upd_self _ _ _
+
+theorem rtPre_inv (E : Env) (j : Nat) (hj : j < 5) : rtPre E (998 + j) = !(rtPre E j) := by
+  rw [rtPre_lt E j (Nat.lt_trans hj (by norm_num)), rtPre,
+    (rtInvGates (upd E 997 false)).2 j hj]
+  show (!(upd E 997 false j)) = _
+  rw [upd_of_ne (n := 997) (m := j) false (Nat.ne_of_lt (Nat.lt_trans hj (by norm_num)))]
+
+theorem run_readTree_gates (E : Env) (m : Nat) :
+    run E readTree.gates m = run (rtPre E) (rtBits 32 1003).1 m := by
+  rw [readTree_gates_eq, run_cons, run_append]
+  rfl
+
+/-- ⭐⭐ **THE READ PATH READS THE REGISTER ITS ADDRESS NAMES** — for every one of
+the `2^997` input valuations, at every one of the 32 output bits. *No driver, no
+sample: the address is read off the valuation by `rtSel`.* -/
+theorem sem_readTree_uncond (E : Env) :
+    sem readTree E = (List.range 32).map (fun t =>
+      if rtSel E 0 5 = 0 then false else E (rtReg (rtSel E 0 5) t)) := by
+  obtain ⟨hBo, hBfr, hBval⟩ :=
+    run_rtBits 32 1003 (rtPre E) (le_refl 32) (by norm_num) (rtPre_inv E)
+  have hsel : rtSel (rtPre E) 0 5 = rtSel E 0 5 :=
+    rtSel_congr (fun m hm => rtPre_lt E m (by omega)) 5 0 (by omega)
+  rw [hsel] at hBval
+  have hS : rtSel E 0 5 < 32 := by have := rtSel_lt E 5 0; norm_num at this; omega
+  have key : ∀ t : Nat, t < 32 → run E readTree.gates (1003 + 93 * t + 92)
+      = (if rtSel E 0 5 = 0 then false else E (rtReg (rtSel E 0 5) t)) := by
+    intro t ht
+    rw [run_readTree_gates, hBval t ht, show (32 : Nat) - 32 + t = t from by omega]
+    by_cases h0 : rtSel E 0 5 = 0
+    · rw [if_pos h0, h0]
+      show rtPre E rtZero = false
+      rw [rtZero_eq]
+      exact rtPre_zero E
+    · rw [if_neg h0]
+      exact rtPre_lt E _ (rtReg_lt_stored _ _ (by omega) hS ht)
+  show readTree.outs.map (run E readTree.gates) = _
+  rw [readTree_outs_eq, hBo, List.map_map]
+  simp only [Function.comp_def]
+  exact List.map_congr_left (fun t ht => key t (List.mem_range.mp ht))
+
+/-! ## The driver, and the ISA bridge -/
+
+/-- The read port's input valuation: address `a` on nets `0…4`, and STORED
+register `i`'s bit `k` on net `5 + (i-1)*32 + k`. -/
+def rtEnvOf (regs : Nat → Word) (a : Nat) : Env :=
+  fun n => if n < rtAddrBits then a.testBit n
+           else (regs ((n - rtAddrBits) / rtWidth + 1)).getLsbD ((n - rtAddrBits) % rtWidth)
+
+theorem rtEnvOf_addr (regs : Nat → Word) (a j : Nat) (hj : j < 5) :
+    rtEnvOf regs a j = a.testBit j := by
+  show (if j < rtAddrBits then a.testBit j else _) = _
+  rw [if_pos (show j < rtAddrBits from hj)]
+
+theorem rtEnvOf_else (regs : Nat → Word) (a n : Nat) (hn : 5 ≤ n) :
+    rtEnvOf regs a n = (regs ((n - 5) / 32 + 1)).getLsbD ((n - 5) % 32) := by
+  show (if n < rtAddrBits then a.testBit n
+        else (regs ((n - 5) / 32 + 1)).getLsbD ((n - 5) % 32)) = _
+  rw [if_neg (Nat.not_lt.mpr (show rtAddrBits ≤ n from hn))]
+
+theorem rtEnvOf_reg (regs : Nat → Word) (a i k : Nat) (hi : 1 ≤ i) (hk : k < 32) :
+    rtEnvOf regs a (rtReg i k) = (regs i).getLsbD k := by
+  rw [rtReg_ne i k hi, rtEnvOf_else regs a _ (by omega),
+    show (5 : Nat) + (i - 1) * 32 + k - 5 = 32 * (i - 1) + k by omega,
+    Nat.mul_add_div (by norm_num), Nat.mul_add_mod, Nat.div_eq_of_lt hk,
+    Nat.mod_eq_of_lt hk, show i - 1 + 0 + 1 = i by omega]
+
+theorem rtSel_rtEnvOf (regs : Nat → Word) (a : Nat) (ha : a < 32) :
+    rtSel (rtEnvOf regs a) 0 5 = a := by
+  rw [rtSel_congr (E := fun i => a.testBit i) (fun m hm => rtEnvOf_addr regs a m hm) 5 0
+      (by norm_num), rtSel_testBit]
+  norm_num
+  omega
+
+/-- ⭐ **THE READ PORT, DRIVEN** — every address `a < 32`, every register file. -/
+theorem sem_readTree (regs : Nat → Word) (a : Nat) (ha : a < 32) :
+    sem readTree (rtEnvOf regs a)
+      = (List.range 32).map (fun t => (if a = 0 then (0 : Word) else regs a).getLsbD t) := by
+  rw [sem_readTree_uncond, rtSel_rtEnvOf regs a ha]
+  refine List.map_congr_left (fun t ht => ?_)
+  have ht32 : t < 32 := List.mem_range.mp ht
+  by_cases h0 : a = 0
+  · rw [if_pos h0, if_pos h0]
+    simp
+  · rw [if_neg h0, if_neg h0]
+    exact rtEnvOf_reg regs a a t (by omega) ht32
+
+/-- The port driven by an ISA machine state, addressed by `a`. -/
+def rtEnvOfSt (s : St) (a : Fin 32) : Env :=
+  rtEnvOf (fun i => s.get ⟨i % 32, Nat.mod_lt i (by norm_num)⟩) a.val
+
+/-- ⭐⭐ **THE PORT IS `St.get`** — every state, every ISA register, every bit. -/
+theorem sem_readTree_St (s : St) (a : Fin 32) :
+    sem readTree (rtEnvOfSt s a) = (List.range 32).map (fun t => (s.get a).getLsbD t) := by
+  rw [rtEnvOfSt, sem_readTree _ _ a.isLt]
+  refine List.map_congr_left (fun t _ => ?_)
+  by_cases h : (a : Nat) = 0
+  · rw [if_pos h, show a = 0 from Fin.ext h, St.get_zero]
+  · rw [if_neg h]
+    exact congrArg (fun w : Word => w.getLsbD t)
+      (congrArg s.get (Fin.ext (Nat.mod_eq_of_lt a.isLt)))
+
+/-- ⭐ **`x0` READS ZERO AT EVERY FILE CONTENTS AND ON EVERY OUTPUT BIT** — the
+`St.get_zero` law, on the circuit. *`readTree_x0_is_zero` is this at two file
+contents and one bit.* -/
+theorem readTree_reads_x0_zero (s : St) :
+    sem readTree (rtEnvOfSt s 0) = List.replicate 32 false := by
+  rw [sem_readTree_St, St.get_zero]
+  decide +kernel
+
+/-- **The consumer bridge, in the shape a `core` assembly applies.** -/
+theorem rtWord_is_get (s : St) (a : Fin 32) :
+    SaltWorks.HDL.wordOf (fun k => (sem readTree (rtEnvOfSt s a)).getD k false) = s.get a := by
+  rw [sem_readTree_St]
+  have h := wordOf_getD_map_range (fun t => (s.get a).getLsbD t)
+  rw [h, wordOf_getLsbD_self]
+
+/-! ## ⭐ THE SAMPLED CERTIFICATE, SUPERSEDED -/
+
+theorem getD_map_range (f : Nat → Bool) (k : Nat) (hk : k < 32) :
+    ((List.range 32).map f).getD k false = f k := by
+  have h := getD_of_range_append f [] k hk
+  rwa [List.append_nil] at h
+
+theorem rtOneCold_else (m a n : Nat) (hn : 5 ≤ n) :
+    rtOneCold m a n
+      = decide (¬ ((5 : Nat) + (m - 1) * 32 ≤ n ∧ n < (5 : Nat) + (m - 1) * 32 + 32)) := by
+  show (if n < rtAddrBits then a.testBit n
+        else decide (¬ ((5 : Nat) + (m - 1) * 32 ≤ n
+                        ∧ n < (5 : Nat) + (m - 1) * 32 + 32))) = _
+  rw [if_neg (Nat.not_lt.mpr (show rtAddrBits ≤ n from hn))]
+
+/-- ⭐ **THE ONE-COLD DRIVER IS `rtEnvOf` AT ONE FILE** — which is what lets the
+organ theorem SUPERSEDE the certificate instead of restating it. -/
+theorem rtOneCold_eq (m : Nat) (hm : 1 ≤ m) (a n : Nat) :
+    rtOneCold m a n = rtEnvOf (fun i => if i = m then (0 : Word) else BitVec.allOnes 32) a n := by
+  by_cases hn : n < 5
+  · show (if n < rtAddrBits then a.testBit n else _) = _
+    rw [if_pos (show n < rtAddrBits from hn)]
+    exact (rtEnvOf_addr _ a n hn).symm
+  · have h5 : 5 ≤ n := by omega
+    have hqr : 32 * ((n - 5) / 32) + (n - 5) % 32 = n - 5 := Nat.div_add_mod _ _
+    have hr32 : (n - 5) % 32 < 32 := Nat.mod_lt _ (by norm_num)
+    rw [rtOneCold_else m a n h5, rtEnvOf_else _ a n h5]
+    by_cases hmq : (n - 5) / 32 + 1 = m
+    · have hin : ((5 : Nat) + (m - 1) * 32 ≤ n ∧ n < (5 : Nat) + (m - 1) * 32 + 32) := by omega
+      simp [hin, hmq]
+    · have hout : ¬ ((5 : Nat) + (m - 1) * 32 ≤ n ∧ n < (5 : Nat) + (m - 1) * 32 + 32) := by omega
+      rw [if_neg hmq, BitVec.getLsbD_allOnes, decide_eq_true hr32, decide_eq_true hout]
+
+theorem rtBit0_uncond (m : Nat) (hm : 1 ≤ m) (a : Nat) (ha : a < 32) :
+    rtBit0 m a = decide (a ≠ m ∧ a ≠ 0) := by
+  have hsem : sem readTree (rtOneCold m a)
+      = sem readTree (rtEnvOf (fun i => if i = m then (0 : Word) else BitVec.allOnes 32) a) :=
+    sem_congr readTree (fun n => rtOneCold_eq m hm a n)
+  show (sem readTree (rtOneCold m a)).getD 0 false = _
+  rw [hsem, sem_readTree _ a ha, getD_map_range _ 0 (by norm_num)]
+  by_cases h0 : a = 0
+  · simp [h0]
+  · by_cases hM : a = m
+    · simp [hM]
+    · simp [h0, hM]
+
+/-- ⭐⭐ **`rtSelectsOK` HOLDS AT EVERY STORED REGISTER, NOT TWO** — the sampled
+certificate is now a COROLLARY of the organ theorem. -/
+theorem rtSelectsOK_uncond (m : Nat) (hm : 1 ≤ m) : rtSelectsOK m = true := by
+  show ((List.range 32).all fun a => rtBit0 m a == decide (a ≠ m ∧ a ≠ 0)) = true
+  refine List.all_eq_true.mpr (fun a ha => ?_)
+  rw [rtBit0_uncond m hm a (List.mem_range.mp ha)]
+  simp
+
+/-- Off the `{7, 19}` sample, and with no `decide` anywhere in the proof. -/
+theorem sem_readTree_off_the_sample :
+    rtSelectsOK 2 = true ∧ rtSelectsOK 31 = true :=
+  ⟨rtSelectsOK_uncond 2 (by norm_num), rtSelectsOK_uncond 31 (by norm_num)⟩
+
+/-! ### ⛔ NON-VACUITY — two ONE-GATE mutants the CERTIFICATE ACCEPTS -/
+
+/-- ⛔ ONE GATE MUTATED. Net 1007 is the `and` leg carrying `x3`'s bit 0 into the
+level-0 mux of output bit **0**'s tree; it now reads `x2`'s bit 0 (net 37), so
+**address 3 reads `x2`**. Still `ssa`. -/
+def readTreeCutA : Circ :=
+  { readTree with
+    gates := readTree.gates.map fun g => if g.out == 1007 then ⟨g.out, .and 37 0⟩ else g }
+
+/-- ⛔ ONE GATE MUTATED. Net 1188 is the ROOT of output bit **1**'s tree, tied
+low, so **the port's bit 1 is always zero**. Still `ssa`. -/
+def readTreeCutB : Circ :=
+  { readTree with
+    gates := readTree.gates.map fun g => if g.out == 1188 then ⟨g.out, .const false⟩ else g }
+
+/-- `rtSelectsOK`'s check, run against an arbitrary circuit. -/
+def rtSelectsCut (c : Circ) (m : Nat) : Bool :=
+  (List.range 32).all fun a => (sem c (rtOneCold m a)).getD 0 false == decide (a ≠ m ∧ a ≠ 0)
+
+theorem readTreeCutA_ssa : readTreeCutA.ssa = true := by decide +kernel
+
+theorem readTreeCutB_ssa : readTreeCutB.ssa = true := by decide +kernel
+
+/-- ⛔ **THE CERTIFICATE ACCEPTS THE MUTANT AT BOTH ITS SAMPLE POINTS.** At
+`m = 7` and `m = 19` registers 2 and 3 hold the same word, so reading the wrong
+one is invisible. -/
+theorem readTreeCutA_passes_the_certificate :
+    rtSelectsCut readTreeCutA 7 = true ∧ rtSelectsCut readTreeCutA 19 = true := by
+  decide +kernel
+
+/-- ⛔ **AND ACCEPTS THE BIT-1 MUTANT AT EVERY SAMPLE POINT THERE IS** — `rtBit0`
+reads output 0, so 31 of the 32 trees are outside the certificate entirely. -/
+theorem readTreeCutB_passes_the_certificate :
+    rtSelectsCut readTreeCutB 7 = true ∧ rtSelectsCut readTreeCutB 19 = true := by
+  decide +kernel
+
+/-- ✅ **AND THE ORGAN THEOREM REFUTES IT**, one register off the sample. -/
+theorem readTreeCutA_fails_the_theorem :
+    (sem readTreeCutA (rtOneCold 2 3)).getD 0 false = false
+      ∧ (sem readTree (rtOneCold 2 3)).getD 0 false = true := by decide +kernel
+
+/-- ✅ **AND REFUTES THE BIT-1 MUTANT**, one output bit off the sample. -/
+theorem readTreeCutB_fails_the_theorem :
+    (sem readTreeCutB (rtOneCold 7 3)).getD 1 false = false
+      ∧ (sem readTree (rtOneCold 7 3)).getD 1 false = true := by decide +kernel
+
+end ReadTreeSemantics
+
 /-! ## Axiom audit -/
 
 open Salt.Tactic
@@ -5574,5 +6305,21 @@ open Salt.Tactic
 #audit_axioms pcAddCutB pcAddCutB_ssa pcAddOKCutB
 #audit_axioms pcAddCutB_passes_the_certificate pcAddCutB_fails_the_theorem
 #audit_axioms pcAddOK pcAdd_passes_the_certificate sem_pcAdd_off_the_sample
+
+#audit_axioms rtIn_eq rtZero_eq rtNotSel_eq rtReg_lt rtReg_ne rtReg_lt_stored
+#audit_axioms rtSel rtSel_succ rtSel_lt rtSel_congr rtSel_testBit sel_bit
+#audit_axioms rtLevel_nil rtLevel_cons2 run_rtMux range_map_two run_rtLevel
+#audit_axioms rtLevels_zero rtLevAt rtLevels_succ run_rtLevels
+#audit_axioms rtBit_gates rtBit_out rtBit_next run_rtBit
+#audit_axioms rtBits_zero rtBits_succ run_rtBits
+#audit_axioms readTree_gates_eq readTree_outs_eq rtPre rtInvGates
+#audit_axioms rtPre_lt rtPre_zero rtPre_inv run_readTree_gates sem_readTree_uncond
+#audit_axioms rtEnvOf rtEnvOf_addr rtEnvOf_else rtEnvOf_reg rtSel_rtEnvOf sem_readTree
+#audit_axioms rtEnvOfSt sem_readTree_St readTree_reads_x0_zero rtWord_is_get
+#audit_axioms getD_map_range rtOneCold_else rtOneCold_eq rtBit0_uncond
+#audit_axioms rtSelectsOK_uncond sem_readTree_off_the_sample
+#audit_axioms readTreeCutA readTreeCutB rtSelectsCut readTreeCutA_ssa readTreeCutB_ssa
+#audit_axioms readTreeCutA_passes_the_certificate readTreeCutB_passes_the_certificate
+#audit_axioms readTreeCutA_fails_the_theorem readTreeCutB_fails_the_theorem
 
 end SaltWorks.Stack.Program

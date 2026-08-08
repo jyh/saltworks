@@ -3133,3 +3133,193 @@ committed).
 * **`asSelectsOK` is now redundant** as a claim (superseded at all ten real `m`)
   but is retained: it is the tripwire, and `aluSelectCut` shows exactly how far a
   tripwire can be walked past.
+
+---
+
+## READTREE — the register read port leaves the sampled tier (Opus executor, 2026-08-07)
+
+**`sem_readTree_uncond`: `readTree` reads the register its address names, over
+all `2^997` input valuations and at all 32 output bits.** The block whose own
+file says *"the whole difficulty of the register file — verification and area —
+lives on the read side"* now has a behavioural theorem with no driver in it.
+
+### ⚠️ What `rtSelectsOK` and `readTree_x0_is_zero` ACTUALLY quantify over
+
+*Measured off the definitions in `ReadTree.lean:293–325`, not assumed.* The shape
+is `asSelectsOK`'s exactly — **exhaustive in one argument and silent about the
+rest** — and there is a third axis neither of the earlier two nodes had:
+
+```
+readTree.nIn = 997                ⇒ 2^997 input valuations
+readTree.outs.length = 32         ⇒ 32 output bits, one 32:1 tree each
+
+rtSelectsOK m = (List.range 32).all fun a => rtBit0 m a == decide (a ≠ m ∧ a ≠ 0)
+  a    THE ADDRESS    EXHAUSTIVE — all 32, and five address bits IS 32: total.
+  m    THE CONTENTS   TWO POINTS (7, 19), each a ONE-COLD file (all-ones but x_m)
+                      out of the 2^992 the 31 stored registers can hold.
+  bit  THE PORT       rtBit0 = (sem …).getD 0.  OUTPUT BIT 0 AND NOTHING ELSE —
+                      31 of the 32 trees are outside the certificate entirely.
+
+readTree_x0_is_zero = rtBit0 7 0 = false ∧ rtBit0 19 0 = false
+```
+
+⛔ **YES — `readTree_x0_is_zero` IS TWO POINTS, and it is the one to say loudly.**
+Address 0 fixed, two file contents, output bit 0. `St.get_zero` is a *total* ISA
+law (`ISA.lean:165`, no hypothesis, every state, every bit); the circuit's
+version was a two-point sample wearing its name. **The four standing certificates
+between them drive 64 of `2^997` valuations and 1 of the 32 outputs.**
+
+📌 **And the gap is not hypothetical: BOTH one-gate mutants below are ACCEPTED by
+the certificate at both its sample points.**
+
+### What landed
+
+| theorem | quantifies over |
+|---|---|
+| `sem_readTree_uncond` | every `E : Env` — all 997 input nets, all 32 outputs |
+| `sem_readTree` | every register file `regs`, every address `a < 32` |
+| `sem_readTree_St` | **every `St`, every `Fin 32` — the port IS `St.get`** |
+| `readTree_reads_x0_zero` | every state, all 32 bits (was: 2 files, 1 bit) |
+| `rtWord_is_get` | the `wordOf` consumer bridge a `core` assembly applies |
+| `rtSelectsOK_uncond` | **every `m ≥ 1`, not two** — the certificate as corollary |
+| `sem_readTree_off_the_sample` | `rtSelectsOK 2` and `31`, proved with no `decide` |
+
+⭐ **The supersession is real rather than a restatement.** `rtOneCold_eq` proves
+the certificate's own one-cold driver IS `rtEnvOf` at the file
+`fun i => if i = m then 0 else allOnes`, so `rtSelectsOK m = true` falls out of
+the organ theorem for **all 31 stored registers**, not the two that were decided.
+
+⛔ **No `C4Spec` field is closed.** A register-field claim is about a whole
+`core`'s output bits and `core` does not exist. *The debt is `core`.*
+
+### Machinery: what transferred, measured rather than guessed
+
+⭐ **`run_pointwise` transferred EXACTLY ONCE and it was an exact fit** — the five
+SHARED inverters are `(List.range 5).map fun j => ⟨998 + j, .not j⟩`, the
+pointwise shape on the nose (`rtInvGates`).
+
+⛔ **The brief's two candidates from `sem_pcNext` BOTH failed, and the reasons are
+structural:**
+
+* **No OR chain exists.** `readTree`'s 992 `or` gates are each the third gate of
+  a mux, never a fold; `orChain` appears nowhere in `ReadTree.lean`, so
+  `run_orChain` has nothing to apply to.
+* **`run_pcAddGates` is the wrong shape for a tree.** `pcNext`'s mux array is 32
+  INDEPENDENT one-gate selects off one shared control net — a frame over a flat
+  list. `readTree` is a 5-deep TREE: level `n+1`'s outputs ARE level `n`'s
+  inputs, so the induction must carry the input-NAMING FUNCTION forward
+  (`run_rtLevels` is quantified over `f : Nat → Nat`) and re-establish that the
+  new names lie below the new base. **That obligation does not exist in
+  `pcNext`.**
+* No adder, so no carry — as at `pcNext`, for the same reason.
+
+⇒ ***What transferred is the METHOD plus `run_of_unwritten`, `run_append`,
+`sem_congr` and `Op.eval_congr`. What is NEW and reusable is
+`run_rtMux` / `run_rtLevel` / `run_rtLevels` — a MUX-TREE induction generic in
+the leaf-naming function and the base net*** — which a crossbar or a barrel
+shifter built the same way inherits. *Three briefs in a row have now guessed the
+transfer wrong; reading the gates first cost ten minutes and saved a rewrite.*
+
+⚠️ **`decide` was never an option and that is the design constraint**, not a
+preference: `readTree` reads a 32×32 file, `2^1024` contents. The only
+`decide +kernel` in the section is on the two mutants, where the circuits are
+closed terms.
+
+### ⛔ THE CONTROLS — one-gate mutants the certificate ACCEPTS
+
+Both are `readTree.gates.map` with a single `out` rewritten, both still `ssa`:
+
+| mutant | the one gate | certificate at 7 / 19 | the organ theorem |
+|---|---|---|---|
+| `readTreeCutA` | net 1007: `.and 69 0` → `.and 37 0`, so **address 3 reads `x2`** | **ACCEPTS both** | REFUTES at `m = 2, a = 3` |
+| `readTreeCutB` | net 1188: the **root of output bit 1's tree**, tied `.const false` | **ACCEPTS both** | REFUTES at bit 1 |
+
+*Cut A survives because at `m = 7` and `m = 19` registers 2 and 3 hold the same
+word — a mutation on a path only some other index distinguishes, exactly the bar
+`pcNextCut` set.* **Cut B survives because `rtBit0` reads output 0 and the
+certificate never looks anywhere else.** ⇒ ***The second is the more damning of
+the two: it is not a lucky alignment, it is a whole axis the certificate does not
+have.***
+
+### Cycles — SPLIT content vs mechanics
+
+**The decomposition (mux → level → `2^n`-leaf tree → per-bit → 32 bits → the
+`x0`-tie/inverter pre-block) was fixed before the first build and NEVER CHANGED.**
+
+* **Statements: 4 groups (budget 3–4, met)** — the organ theorem; the
+  driver/ISA/`wordOf` bridges; the certificate supersession (`rtOneCold_eq` →
+  `rtSelectsOK_uncond`); the controls.
+* **Proofs: 7 error cycles + 2 warning cycles (budget 2 — OVER, recorded).
+  CONTENT CHANGED IN ZERO OF THEM.** All nine, as mechanics:
+  1. ⛔ **The `Net` trap, three times.** `omega` DROPPED THE GOAL and reported a
+     counterexample from the hypotheses alone — on `997 < 998` (head `rtZero`),
+     on `rtNotSel jj < b`, and on a `List Net` element. Fix each time: `show` the
+     goal at `Nat` with the constants spelled out.
+  2. ⛔ **`omega` under a metavariable-headed expected type.** `congrArg₂ List.cons
+     (by omega) …` and `upd_of_ne _ (by omega)` elaborate the tactic block BEFORE
+     unification fixes the goal, so `omega` sees a metavariable and drops it. Fix:
+     `refine … ?_ ?_` with bullets, and named implicits (`upd_of_ne (n := 997)`).
+  3. ⛔ **`!x = y` parses as `!(x = y)`** — the recorded trap, hit verbatim in a
+     `show`. Outer parens.
+  4. ⛔ **`rfl` across the gate list blows the budget twice**: `rtBit_eq` as one
+     tuple equation is a `whnf` timeout, and `Function.comp` in the final
+     `List.map_congr_left` makes `isDefEq` try to `whnf` `run E readTree.gates`
+     (2,982 gates) — `maxRecDepth`, then heartbeats. Fix: **three separate
+     projection lemmas** (`rtBit_gates`/`_out`/`_next`) and
+     `simp only [Function.comp_def]` BEFORE the congruence, so no defeq check
+     ever straddles the gate list. *`aluSelect` recorded the same shape at 1,445
+     gates; it is now twice-observed and belongs in any tree-block brief.*
+  5. `conv_lhs => rw [rtLevel]` leaves the match-completeness side goal — `rfl`
+     discharges the equation directly.
+  6. `let`-bound RHS in an equation lemma is unusable by `rw`: the occurrence sits
+     under a binder, so the pattern never matches. Fix: name the sub-term as a
+     `def` (`rtLevAt`) and restate projection-wise.
+  7. `set … with h` rewrote the goal but left the hypotheses displaying the
+     unfolded body, so `rw [h]` failed. Dropped `set` entirely.
+  8–9. Two warning cycles: unused `simp` arguments, and `run_rtMux`'s `x < b` /
+     `ns < b` hypotheses turned out to be **unnecessary** (the first gate reads
+     them before anything is written) — so they were deleted, which strengthens
+     the lemma.
+
+⚠️ **AND ONE INCIDENT THAT IS NEITHER**, recorded because it is a fleet hazard
+rather than a proof fact: **a sibling executor's checkout of the shared
+`Stack/Program.lean` deleted this section from the working tree after it had
+built green** (source mtime one minute newer than the `.olean` that still
+contained the declarations). It was reconstructed verbatim from the session
+record and rebuilt clean — **no proof content changed** — but the shared-tree
+rule needs the corollary that lands here: *an executor holding uncommitted work
+in `Stack/Program.lean` should commit as soon as it is green, not at the end.*
+
+### Build + audit
+
+`saltbuild.sh SaltWorks.Stack.Program` → **EXIT=0**, zero `error:`, zero
+`warning:`. All 62 new declarations tick `#audit_axioms` at ≤ 3 axioms
+(`[propext, Classical.choice, Quot.sound]`; the four mutant theorems at
+`[propext]` alone). No `native_decide`, no `sorry`. Independently re-checked with
+`#print axioms` in `ScratchMATHRT.lean` (EXIT=0; not committed).
+
+**Job-count delta: +1**, `8606 → 8607` on the targeted build. `Stack/Program.lean`
+gained `import SaltWorks.HDL.ReadTree`; `ReadTree`'s own imports (`EmitS`,
+`Compose`) were already in the closure. *A +2 was measured earlier in the same
+session, `8605 → 8607`, before `ALUSEL` landed and put `EmitS` in the closure —
+the load-bearing number is the +1 against the current baseline.* **747 lines
+added** (101 prose, 626 proof, 15 audit; 62 declarations).
+
+### Left undetermined
+
+* **`readTree` has no `wf`/emission consequence stated here.** `readTree_ssa` and
+  `readTree_wf` are landed in `ReadTree.lean`; nothing in this section touches the
+  emission layer, which `emitPipeline'_sem` covers generically.
+* **The write path is still unproved and is the cheap half** — `RegWrite.lean` is
+  183 cells against the read path's 1,508, and the read side is now the proved
+  one. The asymmetry has inverted.
+* **`C4Spec` is untouched.** No `core`.
+* ⚠️ **`docs/hdl-tools/audit_completeness.py` DEFAULTS TO `SaltWorks/HDL` AND HAS
+  THEREFORE NEVER READ `SaltWorks/Stack/`.** Run with the explicit root it reports
+  `563 theorems` and **two unaudited: `batcher4_length`, `batcher8_length` in
+  `Stack/ZeroOne.lean`.** *Not repaired here — it is another file and this commit
+  is kept surgical — but the tool's own thesis ("a whitelist cannot distinguish a
+  correct set from an empty one") applies to its own default root.*
+* **`rtSelectsOK` and `readTree_x0_is_zero` are retained** in `ReadTree.lean`,
+  untouched. They are the tripwires, and the two mutants above are the measured
+  statement of how far a tripwire can be walked past.
