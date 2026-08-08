@@ -49,7 +49,7 @@ def strip_comments(src: str) -> str:
         if depth == 0:
             out.append(src[i])
         i += 1
-    return ''.join(out)
+    return ''.join(out), depth
 
 def main() -> int:
     root = sys.argv[1] if len(sys.argv) > 1 else 'SaltWorks'
@@ -63,7 +63,34 @@ def main() -> int:
     bad = []
     for p in files:
         raw = open(p).read()
-        body = strip_comments(raw)
+        body, depth = strip_comments(raw)
+        if depth != 0:
+            # ⛔ REFUSE rather than report -- and the reason is NOT a parser bug.
+            #
+            # 2026-08-07 ~21:0x: this tool read Stack/Program.lean at depth 2 and
+            # swallowed everything after line 6983, INCLUDING ALL 224
+            # #audit_axioms lines, and reported 544 audited theorems as
+            # "unaudited". Minutes later the SAME file parsed at depth 0 with all
+            # 224 lines seen.
+            #
+            # The file was ` M` throughout: ANOTHER SEAT'S EXECUTOR WAS WRITING IT.
+            # The reading was TRUE of the bytes on disk at that instant and FALSE
+            # of the seat's work -- the adjacent-object error on the TIME axis.
+            #
+            # ⇒ FIVE SEATS SHARE THIS WORKING TREE, so any tool that PARSES source
+            # here can catch a half-written file and emit a confident, false
+            # verdict about someone else's proofs. The shared-tree hazard is not
+            # only about write commands; read-only tools inherit it too.
+            #
+            # Two mitigations, and the second is the real one:
+            #   * refuse on unbalanced nesting (below) -- turns silence into noise
+            #   * run against a COMMITTED ref, not the working tree:
+            #       git show HEAD:<path>  /  git stash-free read of origin/master
+            print(f"COULD NOT CHECK: unbalanced comment nesting in {p} "
+                  f"(depth {depth} at EOF) -- this parser's block-comment model "
+                  f"differs from Lean's here; its verdict on this file is void",
+                  file=sys.stderr)
+            return 2
         thms = set(re.findall(r'^theorem\s+([A-Za-z_][A-Za-z0-9_\'\.!?]*)', body, re.M))
         # BOTH sides read from the comment-stripped body.  An `#audit_axioms`
         # line QUOTED in a docstring is not an audit -- and there is a real one
