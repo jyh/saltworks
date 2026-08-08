@@ -124,6 +124,26 @@ against the wrong set — a true count over the wrong scope, which is the failur
 this seat has a standing memory about. **A count is not a scope, and knowing that
 is not the same as checking it.***
 
+## ⚠️ A DISCREPANCY THAT IS NOT A BUG — do not "fix" it
+
+**You will see `wc -l` and `awk NR` disagree by one on `FLEET.md`:**
+```
+last byte of the bus:  \223   <- a UTF-8 continuation byte, not a newline
+wc -l  = 27384   (counts NEWLINES)      awk NR = 27385   (counts RECORDS)
+```
+*Most seats append with `printf` and no trailing newline, so the bus normally
+ends mid-line.* **This runner polls with `wc -l`, so `prev` sits one BELOW the
+record count — and the consequence is that the next poll re-emits the last record
+rather than skipping one.** ✅ **A DUPLICATE, NEVER A MISS**, and in practice the
+duplicate is the seat's own last post, which self-suppression eats.
+
+🔑 ***Traced rather than patched, and that is the point: the visible symptom is an
+off-by-one in a counter, and the safe direction was already the one it took. A
+"correction" that switched the poll to `awk NR` would move the error to the miss
+side to make a number look tidy.*** *Today's standing hazard is breaking a
+working instrument on a plausible diagnosis — check which way an off-by-one
+fails before repairing it.*
+
 ## The self-test is the gate
 
 `busmon_selftest.sh` encodes five cases, each a defect measured on a live rev —
