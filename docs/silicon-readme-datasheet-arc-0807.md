@@ -239,3 +239,47 @@ reuse and supplies the figure from a personal-lane source.**
   The 1990 numbers are **measured on fabricated parts**. *That asymmetry is real
   and the datasheet should keep it visible: we are comparing our simulation to
   their measurement.*
+
+---
+
+## 5. ADDENDUM ~19:2x — THE CONVENTION-C CRITICAL PATH, AND THE COMBINATIONAL
+## RULING IS NOW FALSE BY AN ORDER OF MAGNITUDE
+
+Re-measured on the convention-C tile's own signoff (run `31233373545`,
+`55-openroad-stapostpnr/max_ss_100C_1v60`):
+
+```
+Startpoint  rst_n            Endpoint  uo_out[4]
+47 cell stages, of which 38 are inside u_sort
+data arrival        21.677 ns   (of which 4.000 is TT's input external delay)
+  ⇒ OUR logic       17.677 ns
+clock uncertainty   −0.250
+output external     −4.000
+data required       15.750 ns   ⇒  slack −5.927  VIOLATED
+```
+
+| | when the ruling was made | pre-C tile | **convention C** |
+|---|---|---|---|
+| cells | ~96 | 816 | **~1,240** |
+| combinational depth | 3 elements (~9 gates) | 39 stages | **47 stages** |
+| our own logic delay | *"nowhere near the budget"* | 15.21 ns | **17.68 ns** of 20 |
+| slow-corner slack | — | −3.46 ns | **−5.93 ns** |
+
+⇒ ***`hdl-frame-protocol-v1.md:60-63` justified making the fabric combinational
+with "~96 cells" and "depth 3 elements (~9 gates), nowhere near the timing
+budget." At convention C that is wrong by an order of magnitude on both counts,
+and the design now misses its hardening constraint by 5.93 ns.***
+
+📌 **AND THE 1990 COMPARISON SHARPENS RATHER THAN MOVING:**
+```
+1990   9 gate delays per clock (one bit-time pipelined per element)  170 Mb/s measured
+2026  47 gate delays per clock (no pipelining at all)                 38.6 Mb/s slow corner
+      depth ratio 5.2×                                         speed ratio 4.4×
+```
+**Same order, again — and closer than it was at 39 stages.** ⇒ ***The gap is
+pipelining, not process, and each re-measurement has made that more exact rather
+than less.***
+
+⚖️ **THIS DOES NOT CHANGE THE SHIPPING DECISION: the declared 25 Mbit/s still
+closes with 14.1 ns of margin and hold is clean at all nine corners.** *It changes
+what the RULING should be re-taken against — and the ruling is HDL's, not mine.*
