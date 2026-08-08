@@ -16,8 +16,13 @@ morning at exactly the ruled pair, so the ruling has a single kernel receipt
 rather than a reader's inference across three files.
 
 ⛔ SCOPE — what this file deliberately does NOT contain:
-* the general reachability guard `genSelect_sources_reachable (n b) (hb) (hn : n ≤ 2^b)`
-  is **math's**, dispatched under rider (3). Not duplicated here.
+* the general reachability guard `genSelect_sources_reachable (n b) (hn : n ≤ 2^b)`
+  is **math's** (`Stack/Program.lean:5716`), dispatched under rider (3). Not
+  duplicated here — and it CANNOT be applied here either: `Stack/Program.lean`
+  imports `SaltWorks.HDL.AluSelect`, so an HDL module importing `Program` is a
+  cycle. Math's requested call site has to live in `Program.lean` itself or
+  downstream of it. Recorded so the absence reads as a layering fact, not an
+  oversight.
 * the re-cut of `aluSelect` itself is barred pending ruling ② (rider 5).
 -/
 namespace SaltWorks.HDL
@@ -52,6 +57,7 @@ statement of this is math's guard theorem; here is the ruled instance, which is
 the only one the ruling depends on. -/
 
 theorem ruled_sources_fit : 3 ≤ 2 ^ 2 := by decide
+
 
 /-- The ISA demands three slots; the ruled pair supplies four. -/
 theorem ruled_spare_slot : 2 ^ 2 - 3 = 1 := by decide
