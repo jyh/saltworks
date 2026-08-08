@@ -5800,7 +5800,52 @@ theorem asPad_eq_two_pow : asPad = 2 ^ asSelBits := by decide
 
 /-! ## ⭐⭐ THE THEOREM -/
 
-theorem aluSelect_outs_eq : aluSelect.outs = (List.range 32).map (fun k => asOut k 3 0) := rfl
+/-! ### ⭐ THE PARAMETRIC SEEDS AND THE HONESTY DEVICE
+
+The `aluSelect_*` family below is restated and reproved with **no numeral standing
+for the pair `(asOps, asSelBits) = (10, 4)`**. What keeps that claim honest is the
+device the parametric hinge uses: inside each `section AluSelectParametric*`,
+`asW`/`asOps`/`asPad`/`asSelBits` are made **locally irreducible**, so no `rfl`,
+`norm_num` or `decide` can compute its way through them. The only numeric input is
+the named seed facts, harvested *before* the attribute fires.
+
+⛔ **The device is an ELABORATOR hint, and the KERNEL ignores it.** Measured:
+`asOps = 10 := by decide +kernel` SUCCEEDS under the device while `:= rfl` FAILS.
+So the device certifies elaborated proofs only; a `decide +kernel` certificate is
+numeral-bound whether or not it sits inside one of these sections. The sections
+exist so a later edit cannot silently re-numeralize an elaborated proof — and they
+are kept tight so the attribute never reaches the literal-width cross-checks
+(`sem_aluSelect_direct`, `gsSelOf_ten`) or the sampled certificate layer, all of
+which are numeral-bound BY DESIGN and would not elaborate under it.
+
+*`asW`'s 32 may remain throughout: the hinge is not parametric in datapath width.* -/
+
+section AluSelectParametric
+
+/-- Seed 3: at least one select bit — `sem_genSelect`'s side condition.
+*(Seeds 1 and 2 are already landed above: `asW_eq` and `asPad_eq_two_pow`.)* -/
+theorem asSelBits_pos : 0 < asSelBits := by decide
+
+/-- Seed 4 — ADMISSIBILITY: every source is addressable. `rsPair_admissible` is the
+ruled pair's copy of this; this is the live pair's. -/
+theorem asOps_le_pad : asOps ≤ asPad := by decide
+
+/-- Seed 5: there is at least one operand slot. -/
+theorem asOps_pos : 0 < asOps := by decide
+
+#audit_axioms asSelBits_pos asOps_le_pad asOps_pos
+
+attribute [local irreducible] asW asOps asPad asSelBits
+
+/-- ⭐ **THE OUTPUT PORT LIST, PARAMETRICALLY.** The level index is `asSelBits - 1`,
+not the literal `3`. *`List.range 32` here is the OUTPUT COUNT — `asW`, the datapath
+width — and stays: the hinge is not parametric in width.* -/
+theorem aluSelect_outs_eq :
+    aluSelect.outs = (List.range 32).map (fun k => asOut k (asSelBits - 1) 0) := by
+  show (List.range asW).map (fun k => asOut k (asSelBits - 1) 0) = _
+  rw [asW_eq]
+
+end AluSelectParametric
 
 /-- ⛔ **THE LITERAL-WIDTH PROOF, RETAINED AS A CROSS-CHECK ONLY.** *This is the
 original `sem_aluSelect`, unchanged, and every line of it is pinned at ten
@@ -5823,6 +5868,7 @@ theorem sem_aluSelect_direct (E : Env) :
     show aluSelect.outs.map (run E aluSelect.gates) = _
     rw [aluSelect_outs_eq, List.map_map]
     simp only [Function.comp_def]
+    rfl
   rw [hsem]
   refine List.map_congr_left ?_
   intro k hk
@@ -5843,26 +5889,74 @@ term up to delta. *This used to be a `show` against a hand-written four-term sum
 — a second literal-width site that had to be re-typed at every re-size.* -/
 theorem gsSelOf_ten (E : Env) : gsSelOf 10 4 E = asSelOf E := rfl
 
+section AluSelectParametricSem
+
+attribute [local irreducible] asW asOps asPad asSelBits
+
 /-- ⭐⭐ **THE THEOREM — NOW A COROLLARY, STATED VERBATIM.** Unconditional over
 all `2^324` valuations and all 32 outputs, exactly as before; what changed is
-that it is no longer *where the work is*. It is `sem_genSelect` at `n = 10`,
-`b = 4`, transported by `genSelect_ten`. ⇒ **Nothing downstream moves, and the
-sizing question below is now an instantiation.**
+that it is no longer *where the work is*. It is `sem_genSelect` at `n = asOps`,
+`b = asSelBits`, transported by `genSelect_eq_aluSelect` — **and the proof runs
+under the honesty device, so not one step of it reads a `10` or a `4`.**
+⇒ **Nothing downstream moves, and the sizing question below is now an
+instantiation.**
 
-*(The literal-width proof survives as `sem_aluSelect_direct`, an independent
-second route to the same statement.)* -/
+*(The literal-width proof survives as `sem_aluSelect_direct` above, an independent
+second route to the same statement — that one IS pinned at ten, by design.)* -/
 theorem sem_aluSelect (E : Env) :
     sem aluSelect E
       = (List.range 32).map (fun k =>
           if asSelOf E < asOps then E (asRes (asSelOf E) k) else false) := by
-  have h : (fun k => if gsSelOf 10 4 E < 10 then E (gsRes (gsSelOf 10 4 E) k) else false)
+  have h : (fun k => if gsSelOf asOps asSelBits E < asOps
+                     then E (gsRes (gsSelOf asOps asSelBits E) k) else false)
          = (fun k => if asSelOf E < asOps then E (asRes (asSelOf E) k) else false) := by
     funext k
-    rw [gsSelOf_ten]
+    rw [gsRes_eq]
     rfl
-  rw [← genSelect_ten, sem_genSelect 10 4 (by norm_num) E, h]
+  rw [← genSelect_eq_aluSelect, sem_genSelect asOps asSelBits asSelBits_pos E, h]
+
+/-! ### ⭐ THE SELECT-VALUE READER, PARAMETRICALLY
+
+The sampled layer's `asSelOf_of_testBit` below is pinned three ways — `sel < 16`,
+`j < 4`, and `asSelOf_expand`'s four-term sum finished by `interval_cases`. This
+pair replaces all three with one general fact about `gsSelOf`, assembled from the
+landed parametric `gsSelUpTo_congr` and `gsSelUpTo_testBit`. *Both survive: the
+pinned one still serves the sampled certificate, whose statements are fixed.* -/
+
+/-- `gsSelOf` reads back exactly the number whose bits drive the select nets —
+for **every** `(n, b)`, with no numeral anywhere. -/
+theorem gsSelOf_of_testBit (n b : Nat) (F : Env) (sel : Nat) (hs : sel < 2 ^ b)
+    (hb : ∀ j : Nat, j < b → F (gsSel n b j) = sel.testBit j) :
+    gsSelOf n b F = sel := by
+  have hG : ∀ j : Nat, j < b →
+      F (gsSel n b j) = (fun x => Nat.testBit sel (x - n * 32)) (gsSel n b j) := by
+    intro j hj
+    show F (gsSel n b j) = Nat.testBit sel (gsSel n b j - n * 32)
+    rw [hb j hj]
+    show sel.testBit j = Nat.testBit sel (n * 32 + j - n * 32)
+    congr 1
+    omega
+  show gsSelUpTo n b F b = sel
+  rw [gsSelUpTo_congr n b F (fun x => Nat.testBit sel (x - n * 32)) hG b (Nat.le_refl b),
+    gsSelUpTo_testBit n b sel b]
+  exact Nat.mod_eq_of_lt hs
+
+/-- ⭐ The live pair's corollary. ⚠️ *Hypothesis shape differs from the pinned
+`asSelOf_of_testBit`: `sel < asPad` (not `sel < 16`) and `j < asSelBits` (not
+`j < 4`).* -/
+theorem asSelOf_of_testBit' (E : Env) (sel : Nat) (hs : sel < asPad)
+    (hb : ∀ j : Nat, j < asSelBits → E (asSel j) = sel.testBit j) : asSelOf E = sel := by
+  rw [asPad_eq_two_pow] at hs
+  show gsSelOf asOps asSelBits E = sel
+  refine gsSelOf_of_testBit asOps asSelBits E sel hs ?_
+  intro j hj
+  rw [gsSel_eq]
+  exact hb j hj
+
+end AluSelectParametricSem
 
 #audit_axioms sem_aluSelect_direct gsSelOf_ten sem_aluSelect
+#audit_axioms gsSelOf_of_testBit asSelOf_of_testBit'
 
 /-! ## ⭐ WHAT THE SAMPLED CERTIFICATE ACTUALLY QUANTIFIES OVER -/
 
@@ -5939,32 +6033,47 @@ def asDrive (res : Nat → Word) (sel : Nat) : Env := fun n =>
   if n < asOps * asW then (res (n / asW)).getLsbD (n % asW)
   else decide (sel.testBit (n - asOps * asW))
 
+section AluSelectParametricDrive
+
+attribute [local irreducible] asW asOps asPad asSelBits
+
+/-- The driver, unfolded with the block's own names — **no `320`, no `32`.** -/
 theorem asDrive_eq (res : Nat → Word) (sel n : Nat) :
     asDrive res sel n
-      = if n < 320 then (res (n / 32)).getLsbD (n % 32)
-        else decide (sel.testBit (n - 320)) := rfl
+      = if n < asOps * asW then (res (n / asW)).getLsbD (n % asW)
+        else decide (sel.testBit (n - asOps * asW)) := rfl
 
-theorem asDrive_sel (res : Nat → Word) (sel j : Nat) (hj : j < 4) :
+/-- ⚠️ *The old `j < 4` hypothesis is GONE — it was never needed: the select nets
+sit above the operand block by construction, for every `j`.* -/
+theorem asDrive_sel (res : Nat → Word) (sel j : Nat) :
     asDrive res sel (asSel j) = sel.testBit j := by
-  rw [asDrive_eq, asSel_eq, if_neg (by omega), show 320 + j - 320 = j by omega]
+  have hs : asSel j = asOps * asW + j := rfl
+  rw [asDrive_eq res sel (asSel j), hs,
+    if_neg (Nat.not_lt.mpr (Nat.le_add_right (asOps * asW) j)), Nat.add_sub_cancel_left]
   simp
 
-theorem asDrive_res (res : Nat → Word) (sel r k : Nat) (hr : r < 10) (hk : k < 32) :
+/-- ⚠️ *Hypothesis shape changed: `r < asOps` and `k < asW`, not `r < 10` and
+`k < 32`.* -/
+theorem asDrive_res (res : Nat → Word) (sel r k : Nat) (hr : r < asOps) (hk : k < asW) :
     asDrive res sel (asRes r k) = (res r).getLsbD k := by
-  rw [asDrive_eq, asRes_eq, if_pos (by omega), show (r * 32 + k) / 32 = r by omega,
-    show (r * 32 + k) % 32 = k by omega]
+  have hk32 : k < 32 := by rw [asW_eq] at hk; exact hk
+  have hres : asRes r k = r * 32 + k := by show r * asW + k = _; rw [asW_eq]
+  rw [asDrive_eq res sel (asRes r k), hres, asW_eq,
+    if_pos (show r * 32 + k < asOps * 32 by omega),
+    show (r * 32 + k) / 32 = r by omega, show (r * 32 + k) % 32 = k by omega]
 
-/-- ⭐ **THE BLOCK IS A TEN-WAY SELECT ON ARBITRARY OPERANDS** — the certificate's
-one-hot family is one line of this. -/
+/-- ⭐ **THE BLOCK IS AN `asOps`-WAY SELECT ON ARBITRARY OPERANDS** — the
+certificate's one-hot family is one line of this. -/
 theorem sem_aluSelect_drive (res : Nat → Word) (sel : Nat) (h : sel < asOps) :
     sem aluSelect (asDrive res sel) = (List.range 32).map (fun k => (res sel).getLsbD k) := by
-  rw [asOps_eq] at h
-  rw [sem_aluSelect,
-    asSelOf_of_testBit _ sel (by omega) (fun j hj => asDrive_sel res sel j hj)]
+  have hsel : asSelOf (asDrive res sel) = sel :=
+    asSelOf_of_testBit' (asDrive res sel) sel (Nat.lt_of_lt_of_le h asOps_le_pad)
+      (fun j _ => asDrive_sel res sel j)
+  rw [sem_aluSelect, hsel]
   refine List.map_congr_left ?_
   intro k hk
-  rw [if_pos (by rw [asOps_eq]; omega)]
-  exact asDrive_res res sel sel k h (List.mem_range.mp hk)
+  rw [if_pos h]
+  exact asDrive_res res sel sel k h (by rw [asW_eq]; exact List.mem_range.mp hk)
 
 /-- ⭐ **THE SELECTED OPERAND, AS A WORD** — the form a `core` assembly applies. -/
 theorem aluSelect_word (res : Nat → Word) (sel : Nat) (h : sel < asOps) :
@@ -5982,12 +6091,14 @@ theorem aluField_is_aluSelect_add (s : St) (rd x y : Fin 32) (hrd : rd ≠ 0)
            (seenWord (envWith s (encode (Instr.ADD rd x y))))).regs[rd.val]
       = SaltWorks.HDL.wordOf (fun k =>
           (sem aluSelect (asDrive res 0)).getD k false) := by
-  rw [aluSelect_word res 0 (by rw [asOps_eq]; omega), h0,
+  rw [aluSelect_word res 0 asOps_pos, h0,
     decQ_envWith, seenWord_envWith, stepT_encode]
   show ((s.set rd (s.get x + s.get y)).next).regs[rd.val] = _
   show (s.set rd (s.get x + s.get y)).regs[rd.val] = _
   simp only [St.set, if_neg hrd]
   exact Vector.getElem_set_self rd.isLt
+
+end AluSelectParametricDrive
 
 /-! ## ⭐ THE CONTROLS -/
 
