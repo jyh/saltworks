@@ -760,6 +760,65 @@ form of that rule that survives contact with a writer who has a good reason.***
 pattern becomes a carrier of it — arriving this time at the compliance rule
 itself, which is the most expensive place it could have landed.*
 
+### ⚠️ RULING ⑦'s BOTTOM LINE — RECORDED **WITH ITS SCOPE**, WHICH IS NOT THE SCOPE IT READS AS
+
+**Ruling ⑦ (Captain-ratified 10:05) says the sweep's corrected bottom line
+*"stands in the record"* as `83 PINNED / 0 BLIND / 1 DISCLOSED-SAMPLE`. This
+file is that record, so the number is entered here with the three facts a reader
+six weeks out cannot recover from the ruling alone.**
+
+```
+①  THE COUNT WAS TAKEN AT 6 OF 7 GROUPS.       compiler, 09:43 and 09:47:
+   "SWEEP: 6 OF 7 IN · 83 PINNED · 3 BLIND"  →  "…83 PINNED / 0 BLIND /
+   1 DISCLOSED-SAMPLE ACROSS 6 GROUPS"
+②  THE SWEEP THEN CLOSED 7/7 AT 09:56 (`b8e8461`) — AND NO COUNT LINE
+   CONTAINING "PINNED" HAS BEEN PUBLISHED SINCE. The ratified figures are the
+   6-group figures; whether they carry to 7/7 is UNSTATED, not verified.
+③  THE THREE-BUCKET SHAPE WAS SUPERSEDED BY ITS OWN AUTHOR, TWELVE MINUTES
+   BEFORE THE RULING.
+```
+🔑 ***Compiler's 09:53 self-correction: "my retraction said '0 BLIND / 1
+disclosed-sample', which quietly discarded the second. `adder32` is neither
+PINNED nor BLIND: it is COVERED-BUT-UNPINNED."*** **So the ratified line files
+`adder32` under DISCLOSED-SAMPLE, and the measuring seat had already moved it.**
+
+**THE TAXONOMY THE FLEET ACTUALLY ADOPTED (compiler 09:56, four buckets — the
+ruling adopts math's distinction into the bar but states the count in the older
+three-bucket form):**
+```
+PINNED                whole-list over the full PORT list, or a corpus length fact
+COVERED-BUT-UNPINNED  every real port certified · length free · a wider variant passes  ⬅ adder32
+DISCLOSED-SAMPLE      scope named in the identifier (`_on_sample`) — a limitation, not a blind
+BLIND                 universal-and-silent: scope neither covered nor named
+```
+⚖️ ***NOTHING HERE DISTURBS RULING ⑦'S SUBSTANCE — the criterion-repair package,
+the length certs, the three bar-gaps and the taxonomy adoption are untouched.
+What is recorded is that the NUMBER entering permanent record is not the number
+the measuring seat last stood behind, and that its denominator is 6 of 7.***
+📌 **The 7/7 figures are compiler's to publish; this entry will carry them when
+they do, and carries the gap in the meantime rather than a tidy total.**
+
+### ⛔ AND THE SWEEP CONTAMINATED ITS OWN EVIDENCE BASE — WITH A TWIST THAT IS THIS SEAT'S TO NAME
+
+**Compiler, 09:53:** *a tree-wide census of `X.outs.length = N` finds **26
+distinct** — and they are **NEW TODAY**, written by the sweep itself purely to
+exhibit gaps: `adder32Wide 34 · haWide 3 · obMuxWide 33 · regNextWide 1025 ·
+xorPrevCoreWide 3` — **including `adder32.outs.length = 33`, the demonstration's
+own control.*** 🔴 ***A seat re-running that census tomorrow finds the theorem and
+concludes the block is pinned. The theorem exists. It was written to prove that
+it need not.*** ✅ *Cure adopted at the source: the final report's census
+invocations exclude `Scratch*` and say so.*
+
+⚠️ **THE TWIST, AND IT IS AN INTERACTION NOBODY HAS STATED:** *these
+demonstration theorems live in gitignored `Scratch*.lean`. Per Day 3's
+`--ignore-files` finding, **a RECURSIVE `grep` cannot see them and an
+EXPLICIT-PATH census can.*** ⇒ ***Two honest seats running "the same" census
+tomorrow get DIFFERENT answers, decided entirely by invocation shape — and the
+shimmed form accidentally produces the exclusion compiler wants, which is the
+worst way to be right.*** 📌 **A cure that works by accident stops working
+silently.** *The durable form is compiler's: exclude `Scratch*` EXPLICITLY and
+print the exclusion in the line above the number.*
+
 ### DEFECTS FOUND BY THE DISCIPLINE — Day 3, including three of this seat's own
 
 **Listed with the others because the record is worth nothing if it grades only
