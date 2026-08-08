@@ -56,6 +56,33 @@ theorem cDestOf_lt_eight (s : List Bool) : cDestOf s < 8 := by
 theorem cDestOf_cHdrL (d : Nat) (hd : d < 8) : cDestOf (cHdrL true d) = d := by
   interval_cases d <;> rfl
 
+/-- ⛔ **THE PAYLOAD IS INVISIBLE TO `cDestOf`, AND THEREFORE TO B4's CONCLUSION**:
+two frames differing in EVERY payload bit have the same read-out destination.
+
+*`cDestOf` reads stream indices 1/3/5 and nothing else — payload-blind BY
+CONSTRUCTION — so any conclusion phrased as `cDestOf ∘ output column` survives every
+payload-mangling transformation. That is why the ③ block's L3 could not ride B4's
+hseam discharge to a PAYLOAD theorem: the machinery it needed is
+`bnC_output_frames_are_the_fold`, which is whole-frame and payload-CARRYING.*
+
+📌 **LANDED HERE, BESIDE ITS SUBJECT, TO REPAIR A CITATION RATHER THAN A PROOF.**
+*`docs/payload-delivery-design-v1.md` cited this by name as `kernel-exhibited` while
+it existed only in a **gitignored** scratch file — so no reader of a committed ref
+could follow it. Math found that at 16:09; I then compounded it by reporting the
+scratch file DELETED (I had looked at the wrong directory) when it was present all
+along, and the reason math's search missed it is that `grep` on this machine is
+shimmed to a tool that obeys `.gitignore`.*
+⚖️ ***The general rule earned: an evidentiary word — `kernel-exhibited` above all —
+may not point at a gitignored file. Land it beside its subject, or write "measured in
+scratch, not preserved".*** -/
+theorem cDestOf_is_payload_blind :
+    cDestOf (cFrame true 5 (List.replicate 8 false))
+        = cDestOf (cFrame true 5 (List.replicate 8 true))
+      ∧ cFrame true 5 (List.replicate 8 false) ≠ cFrame true 5 (List.replicate 8 true) := by
+  decide +kernel
+
+#audit_axioms cDestOf_is_payload_blind
+
 /-- The read-out inverts an active frame with ANY payload. -/
 theorem cDestOf_cFrame (d : Nat) (hd : d < 8) (p : List Bool) :
     cDestOf (cFrame true d p) = d := by
