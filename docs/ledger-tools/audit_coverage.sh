@@ -172,28 +172,52 @@ nu=$(wc -l < "$TMP/uncovered"     | tr -d ' ')
 nud=$(wc -l < "$TMP/uncovered.def" | tr -d ' ')
 ns=$(wc -l < "$TMP/stale"          | tr -d ' ')
 
-# ⛔⛔ BUILD SKEW — added 2026-08-08 09:4x after silicon caught a landed module
-# whose .olean was 22 minutes OLDER than its source, so every EXIT=0 being quoted
-# for it was a build of an EARLIER FILE. That is [[replayed-is-not-checked]] one
-# notch further: not a cached green, but a green measured against bytes that have
-# since moved.
-# 🔑 THIS TOOL READS SOURCE. A kernel verdict reads the BUILD. Pairing them is
-# only valid if they refer to THE SAME BYTES — and nothing else in the pipeline
-# says whether they do. So the coverage report states it, every run.
+# ⛔⛔ v6 — THE SKEW BLOCK, CORRECTED. v5 PAIRED THE WRONG TWO OBJECTS.
+#
+# v5 compared SOURCE mtime against the module's .olean and concluded "any EXIT=0
+# quoted for this file built an earlier version." Compiler and silicon refuted it
+# within three minutes, from saltbuild.sh itself:
+#
+#   saltbuild.sh:26   *.lean)  lake env lean -M "$CAP" "$@"   ← ELABORATES, writes NO olean
+#   saltbuild.sh:27   *)       lake build "$@"                ← the ONLY path that writes one
+#
+# 🔑 A FILE-MODE AUDIT NEVER WRITES OR READS AN OLEAN. So a stale-or-absent olean
+# is the NORMAL state for an audited file and says nothing whatever about whether
+# the audit read current bytes. MEASURED: v5's "never built" branch fired on
+# 34 of 41 Scratch*.lean — the exact corpus this tool exists to audit — and the
+# message was not merely noisy, it was FALSE: those files HAVE been built, in
+# file mode, EXIT=0. (My own GenSelectCount passed v5 only because it is a hub
+# module that happened to be swept after my edit — luck of sequencing, not a
+# property of the check.)
+#
+# ⭐ THE FIX IS TO PUT THE READING BACK UNDER THE PROPERTY IT ACTUALLY MEASURES.
+# The olean's age is not HYGIENE (②). It is REACH (③) — is this module current in
+# the corpus build graph. Two different verdicts need two different pairs:
+#
+#   FILE-MODE AUDIT  (saltbuild.sh X.lean)  →  pair RUN CLOCK  vs SOURCE MTIME
+#   MODULE / HUB GREEN (lake build)         →  pair OLEAN MTIME vs SOURCE MTIME
+#
+# This tool cannot know which verdict a reader will pair it with, and it cannot
+# see anyone's run clock. So it PRINTS THE SOURCE MTIME and names both pairs,
+# and it asserts nothing about a verdict it did not observe.
 for f in "$@"; do
   base=$(basename "$f" .lean)
+  smt=$(stat -f %Sm -t '%H:%M:%S' "$f")
+  echo "⏱  SOURCE MTIME  $base.lean  $smt"
+  echo "   FILE-MODE AUDIT: your 'saltbuild EXIT=N' is current only if THAT RUN"
+  echo "   COMPLETED AFTER $smt. This tool cannot see your run clock — check it."
   ol=$(command find .lake -name "$base.olean" 2>/dev/null | head -1)
   if [ -z "$ol" ] || [ ! -f "$ol" ]; then
-    echo "⛔ BUILD SKEW  $base: NO .olean FOUND — never built. A coverage ✅ here"
-    echo "               says nothing about the kernel, because the kernel has not run."
+    echo "   REACH: no .olean — NOT IN THE CORPUS BUILD GRAPH. Normal for a scratch"
+    echo "   file (file-mode audits write none). It means no HUB green covers this."
   else
-    st=$(stat -f %m "$f"); ot=$(stat -f %m "$ol")
+    ot=$(stat -f %m "$ol"); st=$(stat -f %m "$f")
     if [ "$st" -gt "$ot" ]; then
-      d=$(( (st - ot) / 60 ))
-      echo "⛔ BUILD SKEW  $base: SOURCE IS ${d}m NEWER THAN ITS .olean."
-      echo "               source $(stat -f %Sm -t '%H:%M:%S' "$f")  ·  olean $(stat -f %Sm -t '%H:%M:%S' "$ol")"
-      echo "               ⇒ ANY 'EXIT=0' QUOTED FOR THIS FILE BUILT AN EARLIER VERSION."
-      echo "                 Re-run ../saltbuild.sh before pairing this report with a verdict."
+      echo "   ⛔ REACH: olean $(stat -f %Sm -t '%H:%M:%S' "$ol") is OLDER than source (${st_d:-$(( (st-ot)/60 ))}m)."
+      echo "   ⇒ THE HUB GREEN FOR THIS MODULE IS STALE. Says nothing about a file-mode"
+      echo "     audit, which never consults it. The next lake build will rebuild it."
+    else
+      echo "   REACH: olean $(stat -f %Sm -t '%H:%M:%S' "$ol") — current w.r.t. source."
     fi
   fi
 done
