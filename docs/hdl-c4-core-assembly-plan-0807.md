@@ -214,20 +214,57 @@ as well, and a positional `outs` list cannot catch either by type.*
 
 ## 5. WHAT THIS DOES **NOT** SAY
 
-* It does not say `core` is nearly done. **Every missing BUILD is now landed;
-  what remains is one DECISION** — `sll`/`sra` need a shifter mode `shifter32`
-  does not have, which is a change to a landed certified block and therefore
-  silicon's call, not mine. *(Six were missing when this was written and closed
-  the same day; this line is regenerated, not original — see §3.)*
+* It does not say `core` is nearly done. ⛔ **AND THE "ONE DECISION" THIS BULLET
+  USED TO NAME — the shifter mode — IS NOT ON SLICE A'S PATH AT ALL.**
+
+  > 🔴 **CORRECTED 8/7 ~20:0x. Math measured the DEMAND side from `Instr`, not
+  > from the mux; silicon re-scoped their ruling (`744a120`); I am correcting the
+  > plan that carried the claim.** `Instr` has **five** constructors and its own
+  > docstring says *"no shifts"*; `decode` rejects `funct7 = 0100000` and sends
+  > `SLL`/`SRL`/`SRA` to `none`.
+  > ```
+  > ADD  -> slot 0 add     ADDI -> slot 0 add     XOR -> slot 4 xor
+  > SLT  -> slot 5 slt     BEQ  -> writes no register (we = 0)
+  > garbage (99.8 % of words) -> we = 0
+  > ⇒ SLICE A'S DEMAND SET IS {0, 4, 5}
+  > ```
+  > **Slots 1 `sub` · 2 `and` · 3 `or` · 6 `sltu` · 7 `sll` · 8 `srl` · 9 `sra`
+  > are UNREACHABLE — including `srl`, so `shifter32` is off the path ENTIRELY,
+  > not merely its two missing modes.**
+  >
+  > 🔑 **And the don't-cares are a THEOREM, not a hand-wave:** `sem_aluSelect` is
+  > unconditional over 2^324 and its RHS is
+  > `if asSelOf E < asOps then E (asRes (asSelOf E) k) else false` — ***the
+  > unselected slots' 96 wires do not occur in it***, so the output is provably
+  > independent of whatever they carry.
+  >
+  > ⚖️ **I AM NOT RULING ON THE SIZING, and math's second column is why the gate
+  > count alone would mislead:** keeping ten slots costs ~1,000 provably-inert
+  > gates and **ZERO proof**; shrinking to four saves them and **re-proves the
+  > organ** — a 2-bit tree is a different `Circ`, so neither `sem_aluSelect` nor
+  > `aluSelectCut` transfers. ***The gates say shrink; the proofs say keep; the
+  > proof side is the one already banked.*** Silicon's block, my plan, maestro's
+  > call.
+  >
+  > 📉 **Gate consequence if `core` is built to slice A: `~12,082 − 679 = ~11,403`.**
+
+  *(Six blocks were missing when this was written and closed the same day; that
+  line is regenerated, not original — see §3.)*
 * It does not certify any wiring. **No `σ` in §4 has been written or checked.**
 * It does not settle C4's own statement, which still owes math's
   **`DeliversProgram`** hypothesis (`run` takes the program as an argument;
   `stepT` takes a fetched word on `instrNet`, and nothing yet says where that word
   comes from) and **`EntryLoaded`**.
 
-⇒ ***The honest summary: C4's assembly is no longer blocked on THEORY, and is
-now blocked on ONE SHIFTER DECISION and four statement hypotheses — all named,
-none open research, and no unbuilt block on the critical path.***
+⇒ ***The honest summary, CORRECTED: C4's assembly is no longer blocked on THEORY,
+and is blocked on FOUR STATEMENT HYPOTHESES — all named, none open research, and
+no unbuilt block on the critical path.***
+
+⛔ **The words "ONE SHIFTER DECISION" stood here and were wrong: the shifter is
+not a blocker, because slice A never selects it.** *Left visible rather than
+silently deleted — the count in this sentence was quoted elsewhere, and a summary
+that repairs its own past without showing the repair is worth less than one that
+shows it.*
 
 ---
 
