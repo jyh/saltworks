@@ -63,12 +63,39 @@ def asPad : Nat := 4
 /-- Encoded select, two bits — the seat's measured saving over a one-hot three. -/
 def asSelBits : Nat := 2
 
-/-! ## THE RULED PAIR — phase 1 of the expand-contract, landed BESIDE the old
+/-! ## THE RULED PAIR — phase 1's transitional names, now DEFINITIONAL ALIASES
 
-Muster ruling ① sizes the select at `(n = 3, b = 2)`.  These are the NEW
-constants the migration states against; `asOps`/`asSelBits`/`asPad` above are the
-OLD ones and are deliberately untouched until phase 3.  Transitional prefix `rs`
-("ruled select"), recorded on the bus.
+Muster ruling ① sizes the select at `(n = 3, b = 2)`.  These `rs*` names were
+landed at phase 1 BESIDE the then-`(10,4)` `as*` constants, so phase-2 work could
+be stated against the ruled pair before the re-cut existed.  **Phase 3 has since
+moved the `as*` constants to that same pair (`d85e13a`), so the two sets now hold
+identical values and the `rs*` prefix is transitional history rather than a
+separate configuration.**
+
+⛔ **THIS PARAGRAPH USED TO SAY `asOps`/`asSelBits`/`asPad` ARE "the OLD ones,
+deliberately untouched until phase 3" — TRUE WHEN WRITTEN, FALSE FROM `d85e13a`
+ONWARD, AND IT SURVIVED THE RE-CUT BY TEN LINES.** *Silicon reported it at 15:04;
+I described the repair, then dropped it when math's W1 opened the landing gate, and
+the bus recorded the sweep as done.  An announced repair that did not run is the
+most expensive kind, because the next reader trusts the record and does not look.*
+
+⛔⛔ **AND SIX LITERAL DEFINITIONS OF THREE VALUES WAS ITSELF THE HAZARD — resolved
+at phase 3b by DEFINITIONAL ALIASING, per the maestro's alias-or-delete ruling.**
+*Silicon's C5 gate refused on exactly this and refused correctly: two
+identically-valued sets with **no equation between them** can desynchronise on the
+next re-cut with nothing to catch it — and a census that scores declarations which
+EXIST is structurally silent about a duplicate that should not.*
+
+✅ **`rsOps`/`rsSelBits`/`rsPad` are now `:= asOps`/`asSelBits`/`asPad` — aliases by
+DEFINITION, not by theorem.** *There is exactly ONE literal per ruled constant in
+this file. A theorem could be forgotten or weakened; an alias cannot desynchronise
+at all, because there is no second value to drift from.* 📌 *And the phase-1 guards
+below now bite on the LIVE constants for free: `rsPad_eq_two_pow` unfolds to
+`asPad = 2 ^ asSelBits`, and `rsPair_admissible` to `asOps ≤ 2 ^ asSelBits` — checks
+the `as*` set never carried in its own right.*
+🔑 ***The maestro's naming is the part to keep: two independent literals for one
+ruled constant is the numeral-bound disease of this whole campaign, wearing its last
+mask.***
 
 ⚠️ **State phase-2 work against THESE NAMES, never against bare `3`/`2`.**  The
 whole point of the migration is to escape numeral-bound theorems — a new theorem
@@ -78,12 +105,13 @@ expensive.  *(RETIRED at phase 3, `52c51e5` — it was the top of an ELEVEN-theo
 ladder, all of which the re-cut falsifies.  Named here as history, not as something
 to look up.)* -/
 
-/-- Ruled source count. -/
-def rsOps : Nat := 3
-/-- Ruled select width. -/
-def rsSelBits : Nat := 2
-/-- Ruled pad — MUST track the width; the guard below is what forces it. -/
-def rsPad : Nat := 4
+/-- Ruled source count — an ALIAS of `asOps` since phase 3b, not a second literal. -/
+def rsOps : Nat := asOps
+/-- Ruled select width — an ALIAS of `asSelBits` since phase 3b. -/
+def rsSelBits : Nat := asSelBits
+/-- Ruled pad — an ALIAS of `asPad` since phase 3b; the guard below now forces the
+LIVE constant to track the live width. -/
+def rsPad : Nat := asPad
 
 /-- The pad tracks the width.  Separate definitions with nothing forcing them to
 agree is how a re-cut silently desynchronises geometry from select width. -/

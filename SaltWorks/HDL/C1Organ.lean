@@ -150,7 +150,7 @@ theorem gsSelOf_eq_selVal_of_wired (E env : Env)
            ∧ E (gsSel rsOps rsSelBits 1) = env lineSLT) :
     gsSelOf rsOps rsSelBits E = selVal (sem ruledEnc env) := by
   obtain ⟨h0, h1⟩ := hwire
-  simp only [rsOps, rsSelBits] at h0 h1 ⊢
+  simp only [rsOps, rsSelBits, asOps, asSelBits] at h0 h1 ⊢
   rw [sliceASelOf, ruledEnc_cert, h0, h1]
   cases hx : env lineXOR <;> cases hs : env lineSLT <;> decide
 
@@ -162,7 +162,7 @@ theorem gsSelOf_of_decoder_driven (w : BitVec 32) (E : Env)
             ∧ E (gsSel rsOps rsSelBits 1) = dcSLTm w) :
     gsSelOf rsOps rsSelBits E = opIndex w := by
   obtain ⟨h0, h1⟩ := hdrive
-  simp only [rsOps, rsSelBits] at h0 h1 ⊢
+  simp only [rsOps, rsSelBits, asOps, asSelBits] at h0 h1 ⊢
   rw [sliceASelOf, h0, h1]
   simp only [opIndex]
   cases hx : dcXORm w <;> cases hs : dcSLTm w
