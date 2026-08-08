@@ -694,6 +694,64 @@ theorem bnC_data_bit (st inp : List Bool) (hst : st.length = 96) (e : Nat) (he :
   exact run_agree_of_inputs_circ ceCcore ceCcore_ssa' _ _
     (bnC_env_agree st inp hst e he pre hpre) _ (ceCcore_data_port_lt j hj)
 
+/-! ### Step 2b — element `e`'s OUTPUT FRAME is the standalone element's -/
+
+/-- The two bits element `e` drives onto its wires this cycle. -/
+def bnCElemOutAt (st inp : List Bool) (e : Nat) : List Bool :=
+  let E := batcherNetC.env inp st
+  let σ := bnCSigma e (bnCCompAt e).1 (bnCCompAt e).2 (bnCDatAt e)
+  [run E bnCCore.gates ((instOuts ceCcore σ (bnCOff e)).getD 0 0),
+   run E bnCCore.gates ((instOuts ceCcore σ (bnCOff e)).getD 1 0)]
+
+theorem ceC_nOut_eq : ceC.nOut = 2 := rfl
+
+/-- One cycle, data side, as lists. -/
+theorem bnC_step_out (st inp : List Bool) (hst : st.length = 96) (e : Nat) (he : e < 24) :
+    bnCElemOutAt st inp e = (stepSeq ceC (bnCSlice st e) (bnCElemInAt st inp e)).1 := by
+  obtain ⟨pre, hpre0⟩ := bnCBuild_gates_drop e bnComps 0 ((List.range bnCWires).map bnCDatIn)
+  have hpre : bnCCore.gates = pre ++ (bnCBuild e (bnComps.drop e) (bnCDatAt e)).1 := by
+    have h := hpre0
+    simp only [Nat.zero_add] at h
+    exact h
+  have h0 := bnC_data_bit st inp hst e he 0 (by omega) pre hpre
+  have h1 := bnC_data_bit st inp hst e he 1 (by omega) pre hpre
+  have hRHS : (stepSeq ceC (bnCSlice st e) (bnCElemInAt st inp e)).1
+      = [run (ceC.env (bnCElemInAt st inp e) (bnCSlice st e)) ceCcore.gates
+           (ceCcore.outs.getD 0 0),
+         run (ceC.env (bnCElemInAt st inp e) (bnCSlice st e)) ceCcore.gates
+           (ceCcore.outs.getD 1 0)] := by
+    show (sem ceCcore _).take ceC.nOut = _
+    rw [sem, ceC_nOut_eq]
+    rfl
+  rw [hRHS]
+  show [_, _] = _
+  rw [h0, h1]
+
+/-- Element `e`'s output trace, read out of the network. -/
+def bnCElemOuts : List Bool → List (List Bool) → Nat → List (List Bool)
+  | _,  [],        _ => []
+  | st, inp :: is, e =>
+      bnCElemOutAt st inp e :: bnCElemOuts (stepSeq batcherNetC st inp).2 is e
+
+/-- ⭐⭐ **ELEMENT `e`'s WHOLE OUTPUT FRAME, in the network, IS the standalone
+`ceC`'s output frame on the inputs the network presented it.** *The data-side
+twin of `bnC_trace_factors`, and it consumes it: the state agreement each cycle
+is what lets the next cycle's data lemma fire.* -/
+theorem bnC_out_factors : ∀ (tr : List (List Bool)) (st : List Bool), st.length = 96 →
+    ∀ (e : Nat), e < 24 →
+      bnCElemOuts st tr e = (runTrace ceC (bnCSlice st e) (bnCElemTrace st tr e)).1 := by
+  intro tr
+  induction tr with
+  | nil => intro st _ e _; rfl
+  | cons inp is ih =>
+    intro st hst e he
+    show bnCElemOutAt st inp e :: bnCElemOuts (stepSeq batcherNetC st inp).2 is e
+      = (stepSeq ceC (bnCSlice st e) (bnCElemInAt st inp e)).1
+        :: (runTrace ceC (stepSeq ceC (bnCSlice st e) (bnCElemInAt st inp e)).2
+              (bnCElemTrace (stepSeq batcherNetC st inp).2 is e)).1
+    rw [bnC_step_out st inp hst e he, ← bnC_step_slice st inp hst e he,
+        ih _ (bnC_step_state_length st inp) e he]
+
 /-! ### ⚠️ STEP 2 IS NOT THE SAME SHAPE AS STEP 1 — the data path is PER-FRAME
 
 **Having built the skeleton, the next step is where the state and data halves
@@ -738,5 +796,6 @@ the frame is the level the discharge has to work at.* -/
 #audit_axioms bnC_step_slice bnC_step_state_length bnCElemTrace bnC_trace_factors
 #audit_axioms bnCBuild_dat_drop bnCResult_dat
 #audit_axioms ceCcore_data_port_gate ceCcore_data_port_lt bnC_data_bit
+#audit_axioms bnCElemOutAt ceC_nOut_eq bnC_step_out bnCElemOuts bnC_out_factors
 
 end SaltWorks.HDL
