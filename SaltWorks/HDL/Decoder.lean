@@ -95,6 +95,36 @@ def orChain (b : Nat) : List Net → List Gate × Net × Nat
       (⟨b, .or x y⟩ :: gs, o, b')
   termination_by ns => ns.length
 
+/-! ### ⛔ THE EMPTY-LIST HAZARD, COMMITTED AS A THEOREM RATHER THAN A COMMENT
+
+*Silicon's `C-D3`, pre-registered against `DECODER-UNCOND` 8/7 20:56 and verified
+here at the bytes.* **`andChain b [] = ([], 0, b)` and `orChain b [] = ([], 0, b)`
+both return NET 0 — and net 0 is WORD BIT 0**, the opcode's LSB, because `dcIn`
+lays the 32 word bits at nets `0…31`. ⇒ ***A match built from an EMPTY literal
+list would silently take `w[0]` as its match signal: well-formed, `ssa`-valid,
+and wrong.***
+
+⚖️ **THE HAZARD IS NOT CLOSED BY CHANGING `andChain`** — allocating a real
+constant-true in the nil case shifts every gate number downstream and
+invalidates the whole certificate suite for a case that never occurs. **It is
+closed by the TABLE, and the table is what gets edited.** *So the fact is stated
+as a theorem and the invariant is stated beside `dcMatches` below, in the same
+spirit as math's `regNext_writes_x0_when_enabled`: commit the hazard, then close
+it.*
+
+📌 **Same genre as `bnCSigma`'s catch-all `else` (silicon, 19:52): a total
+function whose default is silently WRONG for an input its author did not expect.
+There it was fixed at the source because that was free; here it is not, so it is
+fenced instead.** -/
+
+/-- ⛔ **THE HAZARD: an empty literal list yields word bit 0 as the match net.** -/
+theorem andChain_nil_is_word_bit_zero (b : Nat) : (andChain b []).2.1 = 0 := by
+  simp [andChain]
+
+/-- …and `orChain` likewise. -/
+theorem orChain_nil_is_word_bit_zero (b : Nat) : (orChain b []).2.1 = 0 := by
+  simp [orChain]
+
 /-- The literal for "word bit `i` equals `v`": the bit itself, or its inverter. -/
 def dcLit (i : Nat) (v : Bool) : Net := if v then i else dcNot i
 
@@ -116,6 +146,17 @@ def dcMatches : List (List Net) :=
   , dcOpcode 0b0110011 ++ dcFunct7Zero ++ dcFunct3 0b010    -- SLT
   , dcOpcode 0b0010011 ++ dcFunct3 0b000                    -- ADDI
   , dcOpcode 0b1100011 ++ dcFunct3 0b000 ]                  -- BEQ
+
+/-- ✅ **THE INVARIANT THAT CLOSES `andChain_nil_is_word_bit_zero` — every match
+in the table has literals.** *This is a property of `dcMatches`, NOT of
+`andChain`, and it must be re-checked whenever the table is edited. That is
+exactly why it is a theorem and not a comment.* -/
+theorem dcMatches_all_nonempty : dcMatches.all (fun m => !m.isEmpty) = true := by
+  decide +kernel
+
+/-- The margin the invariant is standing on, measured rather than asserted. -/
+theorem dcMatches_literal_counts :
+    dcMatches.map List.length = [17, 17, 17, 10, 10] := by decide +kernel
 
 /-- Lay the matches out one after another, collecting their output nets. -/
 def dcLayout : Nat → List (List Net) → List Gate × List Net × Nat
@@ -212,5 +253,7 @@ theorem decoder_ssa : decoder.ssa = true := by decide +kernel
 #audit_axioms decoder_plane_f7_one
 #audit_axioms decoder_funct7_exhaustive
 #audit_axioms decoder_signals_are_reachable
+#audit_axioms andChain_nil_is_word_bit_zero orChain_nil_is_word_bit_zero
+#audit_axioms dcMatches_all_nonempty dcMatches_literal_counts
 
 end SaltWorks.HDL
