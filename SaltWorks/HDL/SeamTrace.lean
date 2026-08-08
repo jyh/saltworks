@@ -620,6 +620,71 @@ bnComps_eq_batcher8             bnComps IS batcher8's comparator list
 ```
 -/
 
+/-! ## THE DISCHARGE, STEP 1 — the data path's skeleton
+
+*The state side needed `bnCBuild_state_drop` (dropping `4k` state nets is
+skipping `k` elements). The data side needs the same shape, and it is simpler:
+the fold's FINAL data list does not depend on where you split it, because every
+element only rewrites two entries and passes the list on.* -/
+
+/-- The fold's final data list is unchanged by splitting at any element. -/
+theorem bnCBuild_dat_drop :
+    ∀ (k : Nat) (cs : List (Nat × Nat)) (e : Nat) (dat : List Net),
+      (bnCBuild e cs dat).2.1
+        = (bnCBuild (e + k) (cs.drop k) (bnCDatDrop e k cs dat)).2.1 := by
+  intro k
+  induction k with
+  | zero => intro cs e dat; simp [bnCDatDrop]
+  | succ k ih =>
+    intro cs e dat
+    match cs with
+    | [] => simp [bnCBuild, bnCDatDrop]
+    | (a, b) :: cs =>
+      have he : e + (k+1) = (e+1) + k := by omega
+      rw [he, List.drop_succ_cons]
+      show (bnCBuild (e+1) cs (bnCDatStep e a b dat)).2.1 = _
+      exact ih cs (e+1) (bnCDatStep e a b dat)
+
+/-- ⭐ **THE NETWORK'S EIGHT DATA NETS ARE THE FOLD'S DATA LIST AFTER ALL 24
+ELEMENTS.** *This is what `hseam`'s `hw` reads, and it is now named.* -/
+theorem bnCResult_dat : bnCResult.2.1 = bnCDatAt 24 := by
+  have hlen : bnComps.length = 24 := bnC_comps_count
+  have hdrop : bnComps.drop 24 = [] := by
+    rw [List.drop_eq_nil_iff]; omega
+  have h := bnCBuild_dat_drop 24 bnComps 0 ((List.range bnCWires).map bnCDatIn)
+  rw [hdrop] at h
+  -- `exact`, not `simpa`: the elaborator unifies bnCResult with the fold lazily,
+  -- where simp normalises it into a form that no longer matches.
+  exact h
+
+/-! ### ⚠️ STEP 2 IS NOT THE SAME SHAPE AS STEP 1 — the data path is PER-FRAME
+
+**Having built the skeleton, the next step is where the state and data halves
+stop being analogous, and it is worth saying before anyone assumes symmetry.**
+
+*The STATE induction worked per-CYCLE and lifted: `bnC_step_slice` is one cycle,
+`bnC_trace_factors` lifts it across a trace, and each cycle's statement is
+meaningful on its own.*
+
+⛔ **THE DATA PATH HAS NO MEANINGFUL PER-CYCLE STATEMENT.** An element's job is
+to emit the SMALLER key on one wire and the LARGER on the other — and "smaller"
+is not a property of one cycle's bit. `ceC_realises_cKey_when_active` says so in
+its own shape: it compares `(cePairOut …).drop 6` against whole frames, over the
+six header cycles plus payload. ⇒ ***The element's correctness is a statement
+about a FRAME, and the composition must thread FRAMES through the fold, not
+bits.***
+
+🔑 **SO STEP 2 IS: define the frame carried on a net (that net's value across the
+frame's cycles), then prove `bnCDatStep ↔ applyComp` AT THE FRAME LEVEL**, with
+`ceC_realises_cKey_when_active` supplying the per-element sort and
+`bnC_trace_factors` supplying the state agreement each element needs to BE that
+standalone `ceC`. **`bnCResult_dat` above is what makes the fold's endpoint
+nameable; the frame lifting is the work.**
+
+📌 *This is also why the two hypotheses in ① and ② above are unavoidable rather
+than tidiable: they are hypotheses of the FRAME-level element certificate, and
+the frame is the level the discharge has to work at.* -/
+
 /-! ### Axiom audit -/
 
 #audit_axioms bnCDatStep bnCDatDrop bnCBuild_state_drop4 bnCBuild_state_drop
@@ -634,5 +699,6 @@ bnComps_eq_batcher8             bnComps IS batcher8's comparator list
 #audit_axioms ceCcore_state_port_gate ceCcore_state_port_lt bnC_state_bit
 #audit_axioms bnCCore_outs_eq ceCcore_outs_drop2 bnC_step_state bnCResult_state_length
 #audit_axioms bnC_step_slice bnC_step_state_length bnCElemTrace bnC_trace_factors
+#audit_axioms bnCBuild_dat_drop bnCResult_dat
 
 end SaltWorks.HDL
