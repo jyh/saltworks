@@ -523,6 +523,57 @@ theorem bnCBuild_state_sem (e a b : Nat) (cs : List (Nat × Nat)) (dat : List Ne
       = run (fun i => env (bnCSigma e a b dat i)) ceCcore.gates n :=
   bnCBuild_element_sem' e a b cs dat env hdat ha hb n (Or.inr hn)
 
+/-! ### Step ③'s bookkeeping — the state slices are contiguous and in order
+
+*The trace induction is per-element only if each element's state lives in its own
+contiguous slice. The fold lays them out four-at-a-time in element order, and
+these are the lemmas that say so.* -/
+
+/-- The fold emits exactly four state nets per element, in element order. -/
+theorem bnCBuild_state_length : ∀ (cs : List (Nat × Nat)) (e : Nat) (dat : List Net),
+    (bnCBuild e cs dat).2.2.length = 4 * cs.length := by
+  intro cs
+  induction cs with
+  | nil => intro e dat; rfl
+  | cons c cs ih =>
+    intro e dat
+    obtain ⟨a, b⟩ := c
+    show (_ :: _ :: _ :: _ :: (bnCBuild (e+1) cs _).2.2).length = _
+    simp [ih (e+1)]
+    omega
+
+/-- So `bnCCore.outs` is 8 data nets then 96 state nets, four per element. -/
+theorem bnCCore_outs_split :
+    bnCCore.outs.length = 8 + 4 * 24 ∧ bnCResult.2.2.length = 96 := by
+  constructor
+  · decide +kernel
+  · have := bnCBuild_state_length bnComps 0 ((List.range bnCWires).map bnCDatIn)
+    have hc : bnComps.length = 24 := by decide +kernel
+    rw [hc] at this
+    exact this
+
+/-- ⭐ **The state list's cons step, generic** — element `e`'s four next-state
+nets are the head of the fold's state output, in `ceCcore.outs` order 2…5. -/
+theorem bnCBuild_state_cons (e a b : Nat) (cs : List (Nat × Nat)) (dat : List Net) :
+    (bnCBuild e ((a, b) :: cs) dat).2.2
+      = (instOuts ceCcore (bnCSigma e a b dat) (bnCOff e)).getD 2 0
+        :: (instOuts ceCcore (bnCSigma e a b dat) (bnCOff e)).getD 3 0
+        :: (instOuts ceCcore (bnCSigma e a b dat) (bnCOff e)).getD 4 0
+        :: (instOuts ceCcore (bnCSigma e a b dat) (bnCOff e)).getD 5 0
+        :: (bnCBuild (e + 1) cs
+              ((dat.set a ((instOuts ceCcore (bnCSigma e a b dat) (bnCOff e)).getD 0 0)).set b
+                ((instOuts ceCcore (bnCSigma e a b dat) (bnCOff e)).getD 1 0))).2.2 := rfl
+
+/-- ⭐ **ELEMENT `e`'s STATE SLICE IS AT POSITION `4k`** — the fold lays the 24
+elements' state out contiguously and in order, which is what makes the slices
+disjoint and the trace induction per-element. -/
+theorem bnCBuild_state_slice (cs : List (Nat × Nat)) (e a b : Nat) (dat : List Net) (j : Nat)
+    (hj : j < 4) :
+    (bnCBuild e ((a, b) :: cs) dat).2.2.getD j 0
+      = (instOuts ceCcore (bnCSigma e a b dat) (bnCOff e)).getD (j + 2) 0 := by
+  rw [bnCBuild_state_cons]
+  interval_cases j <;> rfl
+
 /-! ## 🔗 LINK ② — THE DECOMPOSITION, and it is the expensive part
 
 **Silicon's 14:31 named three links for the composed theorem: ① the fabricated
@@ -674,6 +725,10 @@ for this element.*
 #audit_axioms bnCBuild_element_sem'
 #audit_axioms ceCcore_state_outs_are_gates
 #audit_axioms bnCBuild_state_sem
+#audit_axioms bnCBuild_state_length
+#audit_axioms bnCCore_outs_split
+#audit_axioms bnCBuild_state_cons
+#audit_axioms bnCBuild_state_slice
 #audit_axioms bnCWires bnCElems bnCRst bnCDatIn bnCIn bnCState bnCCoreIn bnCOff
 #audit_axioms bnCSigma bnCBuild bnCResult bnCCore batcherNetC
 #audit_axioms bnC_comps_count
