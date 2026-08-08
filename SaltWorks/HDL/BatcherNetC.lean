@@ -621,6 +621,86 @@ def bnCElemIn (env : Env) (a b : Nat) (dat : List Net) : List Bool :=
 theorem bnCElemIn_length (env : Env) (a b : Nat) (dat : List Net) :
     (bnCElemIn env a b dat).length = 3 := rfl
 
+/-! ## 🏦 BANKED 8/7 ~18:4x — THE TRACE INDUCTION IS THE SINGLE REMAINING ACT
+
+**Successor: this is your one inherited task.** *Steps ①, ②, and ③'s per-cycle
+half, bookkeeping and vocabulary are landed and kernel-checked below. What is
+left before the discharge is ONE induction, and everything it composes already
+exists.*
+
+### The exact statement to aim at
+
+```lean
+theorem bnC_trace_factors
+    (st : List Bool) (hst : st.length = 96)
+    (tr : List (List Bool)) (e : Nat) (he : e < 24) :
+    -- element e's state, threaded by the NETWORK across the whole trace,
+    -- equals its state threaded by ceC ALONE on the inputs the network fed it
+    bnCSlice (runTrace batcherNetC st tr).2 e
+      = (runTrace ceC (bnCSlice st e) (elemTrace tr e)).2
+```
+
+⚠️ **`elemTrace tr e` IS NOT A HYPOTHESIS — IT IS A DEFINITION YOU MUST WRITE,
+AND IT IS THE WHOLE DIFFICULTY.** *Element `e`'s inputs at cycle `t` are the
+PREVIOUS LAYER'S OUTPUTS at cycle `t`, so `elemTrace` is defined BY the network's
+own evaluation. That is why the honest statement is SIMULTANEOUS over all 24 and
+not 24 separate ones: you cannot name element 5's input trace without having
+evaluated elements 0–4 at the same cycle.*
+
+🔑 **THE INDUCTION IS ON THE TRACE (9 cycles), NOT ON THE ELEMENTS.** *At each
+cycle the within-cycle DAG is ALREADY handled — that is what step ① bought. The
+induction carries only: "the state after `t` cycles, sliced, equals each
+element's own threaded state".*
+
+### What it composes — all landed, all kernel-checked
+
+```
+bnCBuild_element_sem'   element e's DATA outputs in the network = ceCcore's,
+                        with hσ discharged and hin instantiated (envC := env ∘ σ)
+bnCBuild_state_sem      element e's NEXT-STATE bits likewise (nets 35/26/40/39
+                        are ceCcore gate outputs, so this is the same lemma)
+bnCSigma_below          hσ: every input wire is already computed
+bnCSigma_dat_step       the dat invariant: one step keeps wires below the NEXT
+                        element's region — this is what lets hσ re-apply
+bnCBuild_state_slice    element e's four state nets are ceCcore.outs entries 2…5
+bnCBuild_state_length   4 per element, so slice e is at position 4e
+bnCSlice_disjoint       distinct elements read disjoint positions
+bnC_instances_are_disjoint   the offsets chain: bnCOff (e+1) = bnCOff e + 34
+run_append_frame        a suffix writing only above n cannot change n
+bnCBuild_cons / _nil    peel ONE element without evaluating the network
+```
+
+### Then the discharge, which is a SEPARATE act
+
+```
+ceC_realises_cKey_when_active   one element, whole frame, = applyComp on cKey
+                                (all 192 active-involving pairs, exhaustive)
+cKeyLE_eq_lex                   cKeyLE IS Mathlib's Prod.Lex — the order runNet
+                                actually sorts by
+bnComps_eq_batcher8             the comparator list IS Stack.batcher8
+                                ⇒ fold the per-element result across bnComps and
+                                  rewrite: hw = runNet batcher8 v
+```
+
+⇒ **`hseam` is then deletable in `Silicon/Equiv/ComposedSwitch.lean`, and
+`composed_switch_of_seam_dest3` is the door** — `Dest 3`, because
+`cFrame_reads_exactly_three_bits` shows the frame cannot express a destination
+above 7, so the address bound does not get discharged, it ceases to exist.
+
+### Two traps this seat paid for
+
+⛔ **DO NOT split `bnCCore.gates` concretely.** `rfl` on "element 0's gates ++ the
+rest" **times out at `isDefEq`, 200,000 heartbeats** — it forces unification of
+all 816 gates. `bnCBuild_cons` peels one step generically in milliseconds.
+
+⛔ **`omega` DOES NOT WORK ON `Net`-TYPED ARITHMETIC, in three distinct tiers.**
+Equations → restate at `Nat`. Subtraction → explicit `Nat` lemmas. **Definitions
+that RETURN `Net`** (`bnCOff`, `bnCState`, `bnCRst`) → prove the `Nat` fact
+separately and transport it with `lt_of_eq_of_lt`/`lt_of_lt_of_eq`. *A proof TERM
+typechecks against a `Net`-typed goal by reducibility; the TACTIC never parses
+it.* **Seven instances in one day; the third tier cost five attempts.**
+-/
+
 /-! ## 🔗 LINK ② — THE DECOMPOSITION, and it is the expensive part
 
 **Silicon's 14:31 named three links for the composed theorem: ① the fabricated

@@ -150,11 +150,11 @@ off_0 = 1088                    (= coreInWidth; state and instruction below it)
  8  shifterM    ONE mode-generalised organ: sll / srl / sra       679  (route ②)
  9  aluSelect   muxes the ten                                  1,445
 10  regWrite    reads instr rd field + decoder                    163
-11  pcNext      reads rs1, rs2, immB, decoder isBEQ                99
+11  pcAdd       THE PC PATH, COMPOSED AND LANDED (math, 0fb2d39):
+                pcNext + an INSTANTIATED adder32 at offset 229.
+                sem_pcAdd is unconditional over all 2^129 inputs.
+                Replaces the bare pcNext; do NOT wire pcNext direct.  260
 12  regNext     we <- regWrite, res <- aluSelect, cur <- state  3,104
-13  adder32     THE PC ADDER.  operands: pc (state nets 1024..1055)
-                and pcNext's ADDEND.  Instantiated via inst_sem,
-                one definition, third instance.                    160
 
 core.outs = regNext's 1,024 ++ THE PC ADDER's low 32    = 1,056 = stWidth
             ^^^^^^^^^^^^^^^^^^ NOT pcNext's: pcNext emits the ADDEND
@@ -186,13 +186,23 @@ OUTPUT EQUALS 4.* ⇒ ***A theorem's NAME read as its STATEMENT — corrected in
 ```
 plan of record (before either)                    ~12,700
 route ② — shifter mode, accepted 15:50 fcea207       −779   (1,458 → 679)
-the pc adder — accepted ~18:0x                       +160
+pcNext (99) → pcAdd (260), MEASURED by math          +161
                                                   ────────
-                                                  ~12,081
+                                                  ~12,082
 ```
-*Silicon's C5 amendment said ~12,060 from a rounded chain; the exact derivation
-is `12,700 − 779 + 160 = 12,081`, and theirs was ~20 light. Corrected here rather
-than left as the tidier figure.*
+⚠️ **The pc delta is `+161`, not the `+160` I derived from `adder32.gates.length`
+— `pcAdd` measures **260** and `pcNext` is **99**, so the composition costs one
+gate of glue. *Taken from math's measurement rather than from my arithmetic on
+the parts, because the parts are not the artifact.*
+*Silicon's C5 amendment said ~12,060 from a rounded chain. My own first
+derivation said 12,081 from `adder32`'s gate count. **Both were computed from
+parts; 12,082 is computed from the landed block.***
+
+🔴 **AND MATH'S `addend_as_pc_is_wrong_unless_pc_zero` EXPLAINS WHY THIS DEFECT
+SURVIVED A DESIGN, A PLAN AND TWO SEATS' READING: the broken wiring agrees with
+`stepT` EXACTLY AT `pc = 0`.** ⇒ ***A smoke test from reset would have PASSED.
+The defect was invisible to precisely the test anyone runs first, and correct on
+precisely the first cycle.***
 
 ⚠️ **`pcNext.outs.length = 33`, not 32** — 32 addend bits plus the take flag.
 *Both go to the PC ADDER (the addend as one operand, the flag nowhere yet), and
