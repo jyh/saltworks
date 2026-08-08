@@ -204,8 +204,37 @@ for f in "$@"; do
   base=$(basename "$f" .lean)
   smt=$(stat -f %Sm -t '%H:%M:%S' "$f")
   echo "⏱  SOURCE MTIME  $base.lean  $smt"
-  echo "   FILE-MODE AUDIT: your 'saltbuild EXIT=N' is current only if THAT RUN"
-  echo "   COMPLETED AFTER $smt. This tool cannot see your run clock — check it."
+  # ⭐ A FILE-MODE AUDIT LEAVES NO TRACE (silicon, 09:51) — so the only way to
+  # answer "was this verified?" is for someone to have WRITTEN the verdict down.
+  # audit_record.sh does that, pinned to a source hash. Read it if it exists.
+  arec="$(git rev-parse --show-toplevel 2>/dev/null)/docs/audit-records/$base.audit"
+  if [ -f "$arec" ]; then
+    rsha=$(command grep -m1 '^sha256' "$arec" | awk '{print $3}')
+    rver=$(command grep -m1 '^VERDICT' "$arec" | awk '{print $3}')
+    rfin=$(command grep -m1 '^run finished' "$arec" | cut -d: -f2- | sed 's/^ *//')
+    csha=$(shasum -a 256 "$f" | cut -d' ' -f1)
+    if [ "$rsha" = "$csha" ]; then
+      # ⛔ THE MARKER KEYS ON *GREEN*, NOT ON "a record exists". A RED or
+      # UNPINNED verdict pinned to the right revision is still not a pass, and
+      # a ✅ beside it would manufacture exactly the reassurance this tool spent
+      # the morning removing from its own output.
+      case "$rver" in
+        GREEN) mark="✅" ;;
+        *)     mark="⚠️ " ;;
+      esac
+      echo "   $mark AUDIT RECORD: $rver, pinned to THIS revision ($rfin)"
+      echo "      sha $(echo "$csha" | cut -c1-16)… — record and source agree."
+      [ "$rver" = "GREEN" ] || echo "      ⇒ a record is not a pass. This verdict is NOT green."
+    else
+      echo "   ⛔ AUDIT RECORD IS FOR A DIFFERENT REVISION — it describes sha"
+      echo "      $(echo "$rsha" | cut -c1-16)…, the file on disk is $(echo "$csha" | cut -c1-16)…"
+      echo "      ⇒ that verdict ($rver) DOES NOT APPLY to these bytes. Re-record."
+    fi
+  else
+    echo "   FILE-MODE AUDIT: your 'saltbuild EXIT=N' is current only if THAT RUN"
+    echo "   COMPLETED AFTER $smt. No audit record exists, so this tool cannot"
+    echo "   answer it — a file-mode audit writes nothing. Use audit_record.sh."
+  fi
   ol=$(command find .lake -name "$base.olean" 2>/dev/null | head -1)
   if [ -z "$ol" ] || [ ! -f "$ol" ]; then
     echo "   REACH: no .olean — NOT IN THE CORPUS BUILD GRAPH. Normal for a scratch"
