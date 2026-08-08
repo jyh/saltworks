@@ -161,11 +161,27 @@ of the declaring file finds nothing; `Stack.Program` is in the hub closure, so t
 them.* ⇒ **The induction I said the class needed is done. One import remains.**
 
 ⛔ **AND `inc32` WAS NEVER ON THE INSTRUCTION PATH — MY CLAIM, AND IT IS FALSE.** I named it
-separately *"because it is on every instruction's path"*. **It is UNREFERENCED**: `pcNext`
-implements the pc increment itself (`pcNext_not_beq_adds_four`), and `grep` for `inc32` over
-`SaltWorks/` finds its own file and one docstring. **`Adder.lean` now records the error in its
-own docstring.** *Its sampled certificate is therefore a much smaller matter than I made it —
-an unreferenced circuit that should still say what it computes, not a hole under the datapath.*
+separately *"because it is on every instruction's path"*. **It is UNREFERENCED**, and `grep`
+for `inc32` over `SaltWorks/` finds its own file and one docstring.
+
+⚠️ **ROUTE CORRECTED 18:0x — the CONCLUSION here was right and my stated REASON was not, and
+the difference matters because a later pass reversed the conclusion on the strength of the
+bad reason.** *I wrote that `pcNext` "implements the pc increment itself"
+(`pcNext_not_beq_adds_four`). That reasoning propagated into three artifacts and then a
+correction to it flipped `inc32` INTO the critical tier — which would have promoted a sampled
+certificate on a false premise.*
+
+✅ **THE SETTLING FACT IS STRUCTURAL, not functional (`Adder.lean:115`): `incIn := adW` —
+**32 inputs, the word and nothing else. THERE IS NO ADDEND PORT.*** ⇒ ***`inc32` can compute
+`w + 4` and nothing else, while the branch case needs `pc + offset`.*** **Because `pcNext`
+SELECTS the addend and hands it downstream, the pc path needs ONE VARIABLE ADDER, and a
+constant-only `+4` has no role in a select-then-add architecture.** *It would have had one in
+an increment-or-add architecture; that is not the architecture that was built.*
+
+📌 **So `inc32` is dead for an ARCHITECTURAL reason and will STILL be unreferenced after the
+pc path is assembled — not merely "unwired for now".** ***The tier was right; only my route to
+it was wrong.*** *Its sampled certificate stays a small matter: an unreferenced circuit that
+should say what it computes, not a hole under the datapath.*
 | ② certified structurally only | ~34 real (+15 in `BatcherNet`, possibly retired) | a proof |
 | ③ no theorem at all | **106** | a proof |
 
