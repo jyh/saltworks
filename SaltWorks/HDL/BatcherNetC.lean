@@ -316,6 +316,84 @@ theorem bnCBuild_cons (e a b : Nat) (cs : List (Nat × Nat)) (dat : List Net) :
 
 theorem bnCBuild_nil (e : Nat) (dat : List Net) : (bnCBuild e [] dat).1 = [] := rfl
 
+/-! ## ⭐ OBLIGATION (c), STEP ① — THE PER-ELEMENT FACTORISATION IS PROVED
+
+**Inside the 24-instance fold, element `e` computes exactly what `ceCcore`
+computes standalone on its own wired inputs.** *That is the crux of the seam: it
+says the network is genuinely 24 copies of the certified element and not merely
+24 copies of its gates.*
+
+🔑 **IT RESTS ON THIS MORNING'S MACHINERY DOING THE JOB IT WAS BUILT FOR:**
+`inst_sem` (`f49b5a4`) supplies "an instantiated block computes what the block
+computes"; `run_append_frame` + `bnCBuild_writes_above` supply "and the other 23
+cannot disturb it". *The offsets chain by `bnCOff_mono`, and the element's own
+region ends exactly where the next begins — `instNext ceCcore (bnCOff e) =
+bnCOff (e+1)`, which is where the 34-gate count becomes load-bearing.*
+
+📌 **AND THE HYPOTHESES ARE THE HONEST ONES: `hσ` (every input wire already
+computed, i.e. `instOK`'s third clause at this offset) and `hin` (the host
+environment agrees with the element's through `σ`).** *Both are discharged by the
+caller — which is what step ② does when it threads the fold.* -/
+
+theorem ceCcore_ssa' : ceCcore.ssa = true := by decide +kernel
+
+/-- **Every gate the fold emits from element `e` onward writes at `bnCOff e` or
+above.** The induction the frame step consumes. -/
+theorem bnCBuild_writes_above : ∀ (cs : List (Nat × Nat)) (e : Nat) (dat : List Net),
+    ∀ g ∈ (bnCBuild e cs dat).1, bnCOff e ≤ g.out := by
+  intro cs
+  induction cs with
+  | nil => intro e dat g hg; rw [bnCBuild_nil] at hg; simp at hg
+  | cons c cs ih =>
+    intro e dat g hg
+    obtain ⟨a, b⟩ := c
+    rw [bnCBuild_cons] at hg
+    rcases List.mem_append.mp hg with h | h
+    · exact (instGates_out_range ceCcore _ _ ceCcore_ssa' g h).1
+    · exact Nat.le_trans (Nat.le_of_lt (bnCOff_mono e (e+1) (Nat.lt_succ_self e)))
+        (ih (e + 1) _ g h)
+
+/-- …strictly above, once you are past element `e`'s own region. -/
+theorem bnCBuild_writes_strictly_above (cs : List (Nat × Nat)) (e : Nat) (dat : List Net)
+    (n : Net) (hn : n < bnCOff e) : ∀ g ∈ (bnCBuild e cs dat).1, n < g.out := by
+  intro g hg
+  exact Nat.lt_of_lt_of_le hn (bnCBuild_writes_above cs e dat g hg)
+
+/-- ⭐ **THE PER-ELEMENT FACTORISATION: inside the fold, element `e` computes
+exactly what `ceCcore` computes on its own wired inputs.** -/
+theorem bnCBuild_element_sem (e a b : Nat) (cs : List (Nat × Nat)) (dat : List Net)
+    (env envC : Env)
+    (hσ : ∀ i, i < ceCcore.nIn → bnCSigma e a b dat i < bnCOff e)
+    (hin : ∀ i, i < ceCcore.nIn → env (bnCSigma e a b dat i) = envC i)
+    (n : Net) (hn : n < ceCcore.nIn ∨ (ceCcore.gates.map Gate.out).contains n = true) :
+    run env (bnCBuild e ((a, b) :: cs) dat).1
+        (instMap ceCcore (bnCSigma e a b dat) (bnCOff e) n)
+      = run envC ceCcore.gates n := by
+  rw [bnCBuild_cons]
+  set σ := bnCSigma e a b dat with hs
+  -- the element's own net sits strictly below where the REST starts writing
+  have hlow : instMap ceCcore σ (bnCOff e) n < bnCOff (e + 1) := by
+    rcases hn with h | h
+    · rw [instMap, if_pos h]
+      exact Nat.lt_trans (hσ n h) (bnCOff_mono e (e+1) (Nat.lt_succ_self e))
+    · have hmem : (⟨instMap ceCcore σ (bnCOff e) n, Op.rename (instMap ceCcore σ (bnCOff e)) default⟩ : Gate)
+          ∈ instGates ceCcore σ (bnCOff e) ∨ True := Or.inr trivial
+      have hb := instGates_out_range ceCcore σ (bnCOff e) ceCcore_ssa'
+      -- every emitted gate output is < instNext = bnCOff e + 34 = bnCOff (e+1)
+      obtain ⟨g, hg, hge⟩ := List.mem_map.mp (List.mem_of_elem_eq_true h)
+      have := (hb ⟨instMap ceCcore σ (bnCOff e) g.out,
+                   Op.rename (instMap ceCcore σ (bnCOff e)) g.op⟩
+                 (List.mem_map.mpr ⟨g, hg, rfl⟩)).2
+      rw [hge] at this
+      have h34 : instNext ceCcore (bnCOff e) = bnCOff (e + 1) := by
+        unfold instNext bnCOff
+        have : ceCcore.gates.length = 34 := by decide +kernel
+        rw [this]; omega
+      rwa [h34] at this
+  rw [run_append_frame env _ _ _
+        (fun g hg => Nat.lt_of_lt_of_le hlow (bnCBuild_writes_above cs (e+1) _ g hg))]
+  exact inst_sem ceCcore σ (bnCOff e) env envC ⟨ceCcore_ssa', by decide +kernel, hσ⟩ hin n hn
+
 /-! ## 🔗 LINK ② — THE DECOMPOSITION, and it is the expensive part
 
 **Silicon's 14:31 named three links for the composed theorem: ① the fabricated
@@ -455,6 +533,10 @@ for this element.*
 #audit_axioms bnCOff_mono
 #audit_axioms bnCBuild_cons
 #audit_axioms bnCBuild_nil
+#audit_axioms ceCcore_ssa'
+#audit_axioms bnCBuild_writes_above
+#audit_axioms bnCBuild_writes_strictly_above
+#audit_axioms bnCBuild_element_sem
 #audit_axioms bnCWires bnCElems bnCRst bnCDatIn bnCIn bnCState bnCCoreIn bnCOff
 #audit_axioms bnCSigma bnCBuild bnCResult bnCCore batcherNetC
 #audit_axioms bnC_comps_count
