@@ -341,20 +341,59 @@ with tempfile.TemporaryDirectory() as tmp:
     import subprocess as _sp
     _ic = str(Path(__file__).parent / "import-closure.py")
 
-    def closure(root):
+    # ⛔⛔ REPAIRED 2026-08-08 14:3x BY THE EVIDENCE SEAT, AND THE BREAKAGE WAS
+    # ONLY VISIBLE BECAUSE THE NIGHTLY WAS DRY-RUN SIX HOURS EARLY.
+    # `import-closure.py` gained MULTI-ROOT discovery (roots read from
+    # lakefile.toml, so the tool's model of the build comes from the build's own
+    # declaration). It fails CLOSED — no lakefile.toml => exit 2 — which is
+    # correct. But these fixtures predate that upgrade and none of them has a
+    # lakefile.toml, so every fixture hit the new guard: 6 of 134 checks failed,
+    # and `nightly.sh` runs this file FIRST under `set -e`, so TONIGHT'S LEDGER
+    # WOULD NOT HAVE RUN AT ALL.
+    #
+    # ⭐ AND FIXING IT EXPOSED A SECOND, OLDER DEFECT: the two exit-2 checks below
+    # asserted ONLY the exit code, never the REASON. Measured, both states:
+    #     empty repo, NO lakefile  -> exit 2 "NO BUILD ROOTS DISCOVERED"
+    #     empty repo, WITH lakefile-> exit 2 "ZERO tracked .lean files"   <- intended
+    # Both are 2, so the check passed while testing a guard it never reached. It
+    # would still pass with the zero-tracked-.lean guard DELETED. A check that
+    # cannot fail for the reason it exists is not a check.
+    # ⇒ Fixtures now declare a lakefile; every exit-2 assertion names its REASON;
+    # and the no-lakefile path gets its own explicit check instead of being the
+    # accidental cause of everyone else's green.
+    LAKE = '[[lean_lib]]\nname = "SaltWorks"\n'
+
+    def closure(root, roots=None):
         env = dict(os.environ, CLOSURE_ROOT=str(root))
+        if roots:                      # documented override, for the git-read guard
+            env["CLOSURE_ROOTS"] = roots
+        else:
+            env.pop("CLOSURE_ROOTS", None)
         r = _sp.run([sys.executable, _ic], capture_output=True, text=True, env=env)
         return r.returncode, r.stdout + r.stderr
 
-    rc, _ = closure(Path(tmp) / "does-not-exist-at-all")
+    # roots supplied, so discovery SUCCEEDS and the git-read guard is the one tested
+    rc, out = closure(Path(tmp) / "does-not-exist-at-all", roots="SaltWorks")
     check(rc == 2, f"CLOSURE: unreadable repo returned {rc}, must be 2 (not 0, not 1)")
+    # the expected string is QUOTED FROM THE TOOL, not guessed — my first version
+    # of this assertion listed three plausible phrasings and the real one
+    # ("CANNOT READ REPO") was none of them, which is the same
+    # belief-for-a-measurement error the corpus records elsewhere.
+    check("CANNOT READ REPO" in out,
+          f"CLOSURE: unreadable repo exited 2 for an UNSTATED reason — the check must "
+          f"reach the git-read guard, not the root-discovery guard:\n{out}")
 
     empty = Path(tmp) / "empty-repo"
     (empty / "SaltWorks").mkdir(parents=True)
+    (empty / "lakefile.toml").write_text(LAKE)
     _sp.run(["git", "init", "-q", str(empty)], capture_output=True)
+    _sp.run(["git", "-C", str(empty), "add", "-A"], capture_output=True)
     rc, out = closure(empty)
     check(rc == 2, f"CLOSURE: repo with ZERO tracked .lean returned {rc}, must be 2 — "
                    f"'nothing outside an empty set' is not 'everything covered'")
+    check("ZERO tracked" in out,
+          f"CLOSURE: exited 2 without reaching the zero-tracked-.lean guard — this "
+          f"check passed for the WRONG REASON before 8/8:\n{out}")
 
     # a fixture where the answer is known: hub imports A, B is orphaned
     fix = Path(tmp) / "fixture-repo"
@@ -364,7 +403,23 @@ with tempfile.TemporaryDirectory() as tmp:
     (fix / "SaltWorks" / "B.lean").write_text("#audit_axioms bar\n#audit_axioms baz\n")
     _sp.run(["git", "init", "-q", str(fix)], capture_output=True)
     _sp.run(["git", "-C", str(fix), "add", "-A"], capture_output=True)
+
+    # NEW 8/8: the no-lakefile path, pinned explicitly. Tracked .lean files exist,
+    # so ONLY the missing build declaration can produce this exit — the exact
+    # state that silently broke every fixture above.
     rc, out = closure(fix)
+    check(rc == 2, f"CLOSURE: tracked .lean but NO lakefile.toml returned {rc}, must "
+                   f"be 2 — roots must come from the build's own declaration")
+    check("NO BUILD ROOTS" in out,
+          f"CLOSURE: missing lakefile.toml must SAY so — a tool that guesses the "
+          f"build when it cannot read it is the defect this guard exists for:\n{out}")
+
+    (fix / "lakefile.toml").write_text(LAKE)
+    _sp.run(["git", "-C", str(fix), "add", "-A"], capture_output=True)
+    rc, out = closure(fix)
+    check("lakefile.toml" in out,
+          f"CLOSURE: must report WHERE its roots came from, so a reader can tell a "
+          f"declared build from a guessed one:\n{out}")
     check(rc == 1, f"CLOSURE: an orphaned module must exit 1 (the gate), got {rc}")
     check("SaltWorks.B" in out, "CLOSURE: did not name the orphaned module")
     check("SaltWorks.A" not in out.split("OUTSIDE")[-1],
