@@ -31,8 +31,22 @@ python3 docs/ledger-tools/nudge_detect.py                              # provena
 
 ## 1. WHAT LANDED — generated, never typed
 
-⟨REGEN: `landed.py` per-lane table — commits · lines · `.lean` · **and the
-new META/DESIGN/AMBIGUOUS column**, frozen 8/7 and pinned by 9 self-tests⟩
+**GENERATED 19:15 by `landed.py`, window `2026-08-07 00:00 → now`. 236 commits across 2 repos.**
+
+| Lane | Commits | Lines added | `.lean` added |
+|---|---:|---:|---:|
+| compiler (leg 2) | 88 | 11,329 | 7,929 |
+| silicon (leg 3) | 54 | 156,545 | 1,036 |
+| evidence | 44 | 3,875 | **0** |
+| docs (shared) | 35 | 12,734 | 7,435 |
+| maestro (hub) | 11 | 39 | 30 |
+| other | 1 | 743 | 743 |
+| **saltworks total** | **233** | **185,265** | **17,173** |
+| `salt` (3 commits) | 3 | 446 | 272 |
+
+⚠️ **The evidence row is `.lean` = 0 BY CONSTRUCTION** — this seat writes instruments and
+documents, never library modules. *It is excluded from any META aggregate for the same
+reason: including it measures how busy the measurer was.*
 
 **Window: `2026-08-07 00:00 → close`, both repos, all seats** — stated on the
 section, because *a count without its window is the same defect as a
@@ -44,16 +58,45 @@ is ~100% META by construction, so including it measures how busy I was.
 
 ---
 
+## 1b. LANDINGS INSIDE A SILENCE WINDOW — the measure that carries the claim
+
+**GENERATED 19:14 by `silence_windows.py` (saltworks, fleet-wide presence):**
+
+| Silence containing the landing | Commits | Share | `.lean` lines | All lines |
+|---|---:|---:|---:|---:|
+| **≥ 1 h** | **0** | **0.0%** | 0 | 0 |
+| ≥ 2 h · ≥ 4 h · ≥ 8 h · ≥ 12 h | 0 | 0.0% | 0 | 0 |
+| (all observed commits) | 430 | 100% | 24,098 | 235,132 |
+
+⚠️ **The single-seat measure — the leg-1 harvest's unit — is printed beside it and is the
+LARGER number and the WEAKER claim: `≥ 1 h → 37 commits, 8.7%, 1,637 .lean lines`.** *The
+human may have been directing another seat at the time; the fleet-wide measure is the one
+that carries the claim, and today it is zero.*
+
+📌 **AND THE CAVEAT IS DISCHARGED FOR THIS WINDOW, which is rare enough to say: the fleet
+received 716 human touches inside the commit window — 716 into this seat and 0 into every
+other personal-lane seat combined. The two measures coincide.** ⛔ *Subject to §3's coverage
+hole: 1 of 430 commits landed where no transcript record exists.*
+
+---
+
 ## 2. THE GATES THAT MOVED
 
 | Gate | State | Verification status |
 |---|---|---|
-| **BB-1 / B2M — the composed switch's mathematics** | `batcher8_banyan_selfrouting`; `StrictMonoOn` discharged **by the network**; four goal-FALSE controls | ⟨REGEN: verify at the bytes — theorem present, controls present, `#audit_axioms` clean⟩ |
-| **C4 construction** | ungated under the ratified partiality spec | ⟨REGEN⟩ |
+| **BB-1 / B2M — the composed switch's mathematics** | `batcher8_banyan_selfrouting`; `StrictMonoOn` discharged **by the network**; four goal-FALSE controls | **VERIFIED AT THE BYTES 15:04 — theorem present · controls present · census clean** (`docs/EVIDENCE-refute-B2M-0807.md`). `#print axioms` run rather than `#audit_axioms` trusted: `[propext, Classical.choice, Quot.sound]`, **no `sorryAx`, no `native_decide`**. Four controls are TWO PAIRS, each exhibiting an input satisfying the *other* hypothesis. ⛔ **AND ONE FINDING: of the three conjuncts, the THIRD IS FREE** — `Banyan.line_zero` instantiated, elaborated for an arbitrary function with axioms `[propext]`. **The routing content is conjunct 1 alone; the same shape recurs verbatim in `partial_load_selfrouting`.** *Upstream statement shape, not a defect either lane introduced — but the muster line must say ONE result and TWO boundary identities.* |
+| **C4 construction** | ungated under the ratified partiality spec | **assembly theory ✅; `core` construction open at close** |
 | **C2 witnessed** | Spike **and** Sail, 120/120 | ✅ **VERIFIED at the bytes 8/7** — both pinned, `encode` absent from the generator path |
 | **C3 finalized → v1.1** | structural emission; Route B ruled in | ✅ decision sound · ⚠️ **citation corrected**: `100%` boundary vs `60.1%` cone are different quantities |
 | **The banyan is SUBMITTED** | in the TTSKY26c queue, tile 2×2 | ⚠️ **ATTESTED, not measured** — gates verified, the click cannot be |
-| **Import closure** | ⟨REGEN: `import-closure.py`⟩ | the exit code **is** the finding: 0 covered · 1 outside · 2 could not read |
+| **Import closure** | **EXIT 1 — 63 tracked · 58 in closure · OUTSIDE 5 · 10 audit sites** | the exit code **is** the finding: 0 covered · 1 outside · 2 could not read |
+
+⭐ **THE SWEEP LANDED TODAY AND IT IS THE GATE THAT MOVED FURTHEST: 9 modules / 55 audit
+sites outside at 17:4x → 5 modules / 10 sites at 19:15.** *`Bitwise`, `BatcherNetC`,
+`SeamC` and `PartialLoad` are in; the adder's only behavioural certificate and the four
+theorems saying the sorter sorts are now read by the default build.* ⛔ **Still 5 outside
+and the gate is still RED — `import-closure` exits 1 by design and will until the last
+one is swept.**
 
 ---
 
@@ -89,14 +132,30 @@ is ~100% META by construction, so including it measures how busy I was.
   `EVIDENCE-proof-debt-table-0807.md` §5. Three designs died in thirty minutes; an axis is
   exhaustive only with a **proved quotient lemma**, and the fanin-restricted congruence
   those need does not exist in the tree. **Blocked, with owners named, not merely open.**
-- ⟨REGEN: any §0 coverage hole; the 8/6 `e3ea8f1` gap remains OPEN, cause UNDETERMINED⟩
-- ⟨REGEN: seat-supplied negatives — silicon's, compiler's, math's own muster lines, **cited as files, not reconstructed**⟩
+- ⛔ **COVERAGE, §0 of tonight's run: 1 of 430 commits landed in a stretch with NO transcript
+  record.** *Checked against 374,089 liveness records at 5-minute tolerance; nearest clean
+  commit sits 22.19 min from a hole.* **Any window containing that commit is a LOWER BOUND on
+  presence and must not be published as unattended.** *The 8/6 gap remains OPEN, cause
+  UNDETERMINED.*
+- ⛔⛔ **HUMAN TIME IS NOT COMPUTABLE TONIGHT AND THE NUMBER MUST NOT BE READ AS ZERO.**
+  `human_time.py` reports **8 blocks, 11h 14m, 100% UNTAGGED**, and therefore
+  **THE CLAIM (DIRECTING+REVIEWING+UNBLOCKING) = `0h 00m`.** ⇒ ***That zero is a TAGGING
+  FAILURE, not a measurement: 9 tags match no block in this window*** (`20260805T1759`
+  … `20260806T1525`) — *a block id is its first touch's timestamp, so one new message landing
+  inside a former gap merges blocks and detaches their tags.* 📌 **The tool announced it
+  rather than printing a clean 0, which is the only reason this is a negative and not a
+  published falsehood.** **Owed: re-run the worksheet and re-tag before the 05:30 muster.**
+- ⚠️ **SEAT-SUPPLIED NEGATIVES ARE CITED AS FILES, NOT RECONSTRUCTED** —
+  `docs/silicon-*-0807.md`, `docs/hdl-c*-0807.md`, `docs/EVIDENCE-refute-*-0807.md`. *Nothing
+  in §3 paraphrases another seat's finding from the bus.*
 
 ---
 
 ## 4. IN FLIGHT AT CLOSE
 
-⟨REGEN⟩ — and the standing ones: **B0(c) Captain-awaited** · the cone-width
+**AT CLOSE, mine:** the **sampled/exhaustive column** ⛔ BLOCKED on a fanin-restricted congruence lemma that does not exist (`EVIDENCE-proof-debt-table-0807.md` §5) · the **census tool** ⛔ in scratch until raw == cleaned (`MERELY-BUILT` is `86 ≤ n ≤ 112`, the residue is `deriving` instances that cannot be separated by name) · **`regNext8_correct`** ⛔ a SAMPLED certificate carrying an unqualified name, 9 enable patterns of 2⁸ · **human-time re-tagging** ⛔ owed before 05:30 · **5 modules** ⛔ still outside the closure · the **49 unaudited theorems** ⚖️ awaiting the maestro's ruling on whose convention binds.
+
+⇒ **and the standing ones: **B0(c) Captain-awaited** · the cone-width
 census · **R2 the memory model** (S2 is unimplementable at interesting N
 until it lands) · the `step`↔`stepT` compatibility obligation.
 
@@ -109,7 +168,16 @@ revision assumes a September slot exists.
 
 ## 5. COST — one line, unit named
 
-⟨REGEN: `token_meter.py` — requests · **OUTPUT tokens** · cache in its own
+**GENERATED 19:15 by `token_meter.py`, window `2026-08-07 00:00 → now`:**
+
+| Project | Requests | Input | **Output** | Cache created | Cache read |
+|---|---:|---:|---:|---:|---:|
+| `saltworks` | 2,912 | 5,441 | **3,010,831** | 11,469,954 | 1,303,961,258 |
+| `salt` | 1,768 | 8,576 | **985,985** | 10,020,417 | 653,762,335 |
+| **TOTAL** | **4,680** | **14,017** | **3,996,816** | **21,490,371** | **1,957,723,593** |
+
+⚠️ **THE UNIT IS OUTPUT TOKENS — 3,996,816.** *Cache read (1.96 bn) is reported in its own
+column and is not the cost figure; conflating them inflates the number ~490×.*
 column, never in a headline⟩
 
 ⚠️ **Subagent tokens are a DIFFERENT UNIT from output tokens** — yesterday a
@@ -121,14 +189,19 @@ workflow reported "507,808 subagent tokens" whose *output* share was
 
 ## 6. HUMAN TIME — and what the number is not
 
-⟨REGEN: `human_time.py` totals + the tagging worksheet⟩
+**GENERATED 19:15 — and it reports a DEFECT rather than a figure: 224 touches read in
+window, 8 blocks, 11h 14m engaged, `100.0% UNTAGGED`, THE CLAIM `0h 00m`.** ⛔ **See §3:
+the zero is nine detached tags, not an absence of human direction.** *No human-time figure
+is published tonight.*
 
 ⛔ **THE CLAIM MUST NOT BE PUBLISHED AS A PERCENTAGE.** The charter tests each
 **touch**; the tool tags each **block**; a block containing one irreducible
 order drags its whole duration in. **Quote it as a coarse upper bound or not
 at all.**
 
-⛔ **AND PROVENANCE NOW GATES IT.** ⟨REGEN: `nudge_detect.py`⟩ — machine-
+⛔ **AND PROVENANCE NOW GATES IT. GENERATED 19:15 by `nudge_detect.py`: 2,406 touches
+classified HUMAN across the record, correlation window 300 s, and the `tmux send-keys`
+channel is detected — 8/6 17:07 into `salt:5bc2f991` from `fleet:math`.** — machine-
 transported touches are **not** the human typing into that seat. Day-1
 measure: **32 of 2,171 (1.5%)**. `[R]` additionally excludes `MAESTRO:`-tagged
 instructions, self-deferrals, and **orders for work already landed**.
