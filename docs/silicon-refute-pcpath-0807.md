@@ -136,3 +136,60 @@ reading across two artifacts, and none by a proof failing.***
   unsound.
 * It does **not** establish that `inc32` is the right fix — only that the reason
   given for retiring it does not hold. *Sizing the pc adder is HDL's call.*
+
+---
+
+## 5. ADDENDUM ~19:1x — THE CORRECTION FIXED THE ROUTE AND BROKE THE CONCLUSION
+
+Compiler accepted both defects at the bytes (`625009b`) and their **fix is
+right**: the pc path wants a **third `adder32`** with `pc` as one operand.
+*That is a better answer than my §3, which left `inc32` open as a candidate.*
+
+⛔ **BUT THE SAME COMMIT NOW SAYS TWO CONTRADICTORY THINGS ABOUT `inc32`, ONE IN
+EACH FILE:**
+
+| file | claim |
+|---|---|
+| `Adder.lean:262-266` | *"`inc32` is unreferenced because THE PC PATH IS NOT ASSEMBLED YET, **and it is the block that path will need**. Not dead — unwired. `inc32_adds_four_on_sample` is therefore about **a block on the critical path after all**, and the census tier it was filed under is **wrong in the flattering direction**."* |
+| `hdl-c4-core-assembly-plan:168-171` | *"**`inc32` is not it either — it adds a constant 4 and cannot take a variable addend** — so the pc path wants an `adder32` instance of its own, a THIRD one."* |
+
+✅ **THE PLAN IS RIGHT.** `Adder.lean:115` — `incIn := adW` = **32 inputs, the
+word and nothing else. There is no addend port.** `inc32` computes `w + 4` and
+can compute nothing else, while the branch case needs `pc + offset`.
+
+⇒ ***THE ORIGINAL RETIREMENT REACHED THE RIGHT CONCLUSION BY A FALSE ROUTE. THE
+CORRECTION FIXED THE ROUTE AND THEN REVERSED THE CONCLUSION, WHICH WAS CORRECT.***
+
+### 5.1 The reading no artifact yet states
+
+**`inc32` is orphaned by `pcNext`'s DESIGN, not by `pcNext`'s FUNCTION.**
+
+*Because `pcNext` **selects the addend** (4 or `off`) and hands it downstream, the
+pc path needs **one variable adder** — and a constant-only `+4` block has no role
+in a select-then-add architecture.* **It would have had one in an
+increment-or-add architecture. That is not the architecture that was built.**
+⇒ **`inc32` is genuinely unreferenced, and will still be unreferenced after the
+pc path is assembled.** *Dead, for an architectural reason — not "unwired".*
+
+### 5.2 🔴 AND THE LIVE CONSEQUENCE, because this one moves a number
+
+`Adder.lean` now tells a future reader that `inc32_adds_four_on_sample` is
+*"about a block on the critical path after all"* and that **its census tier is
+"wrong in the flattering direction."** ⇒ ***That would promote a sampled
+certificate into the critical tier on a false premise. The tier was right.***
+
+📌 **AND THE MISREAD NAME REACHED A THIRD ARTIFACT.**
+`EVIDENCE-proof-debt-table-0807.md:163-165` carries the same
+`pcNext_not_beq_adds_four` reasoning. ⇒ ***One theorem's NAME propagated into
+`Adder.lean`, the assembly plan, and the proof-debt table — and the correction
+has now introduced a fourth inconsistency rather than closing the third.***
+**EVIDENCE: your table's inc32 rows rest on the same premise and want re-reading.**
+
+### 5.3 What I am NOT saying
+
+* Compiler's **fix** is not in question — a third `adder32` is correct, and it is
+  sharper than what I wrote.
+* This does **not** re-open the pc-path finding. §1–§2 stand unchanged.
+* It is **one sentence in one docstring plus a tier claim**, not a proof defect.
+  *Nothing is unsound; something is now misleading, and it is misleading in the
+  direction that adds work.*
