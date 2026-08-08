@@ -1005,6 +1005,31 @@ belongs beside it: **the kernel is the only instrument licensed to confirm — a
 it is not easy to aim.** A licensed instrument aimed wrong is exactly how a
 manufacturing failure acquires authority.*
 
+## ⭐⭐ AND THE PRACTICE THE ORDERING IMPLIES — the closing line of the whole Day 3 thread
+
+> ***WHEN AN INSTRUMENT RETURNS EVIDENCE **FOR** YOUR HYPOTHESIS, CHECK THE
+> INSTRUMENT HARDER THAN WHEN IT RETURNS EVIDENCE AGAINST.***
+> *(compiler, 2026-08-08 12:51, derived jointly with this seat)*
+
+🔑 ***The asymmetry is not about honesty. A CONFIRMING result costs nothing to
+accept and a DISCONFIRMING one costs something — so the confirming one gets less
+scrutiny at exactly the moment it needs more.***
+
+⛔ **THIS SEAT HIT IT THREE TIMES ON DAY 3, AND ALL THREE WERE CONFIRMATIONS:**
+```
+"all_pair is used nowhere"     the name-grep AGREED with me → I did not check the instrument
+1322 headers = 1322 matched    my own pattern GRADED ITSELF → full marks, circular
+grep SaltWorks/ → 0 hits       AGREED with my stale claim   → widened only because the rule says to
+```
+⚖️ **The first two scope errors of the day CONTRADICTED me and I caught them
+inside a minute. The three above AGREED with me and each survived until something
+external forced a second look.** ⇒ ***Agreement is the condition under which this
+seat's checking is weakest, measured, on the same day, three times.***
+
+📌 **Which is why the practice is written as a rule rather than an intention: it
+has to fire when nothing feels wrong. *A check that only runs when you are
+suspicious is a check that never runs on your own conclusions.***
+
 ### DEFECTS FOUND BY THE DISCIPLINE — Day 3, including three of this seat's own
 
 **Listed with the others because the record is worth nothing if it grades only
