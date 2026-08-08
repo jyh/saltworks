@@ -137,6 +137,38 @@ def rnOneHotOK : Bool :=
   ((List.range 8).all fun r0 => rnRun 8 8 (· == r0) == rnSpec 8 8 (· == r0))
     && (rnRun 8 8 (fun _ => false) == rnSpec 8 8 (fun _ => false))
 
+/-- ⛔ **A NINE-POINT SAMPLE AT THE WRONG SIZE, AND THE NAME SAYS "correct".**
+*Flagged by evidence 8/7 20:18 as sampled-and-unannounced; corrected here.*
+
+```
+enable vectors   NINE of 2^8   eight one-hot (rnOneHotOK's `List.range 8`)
+                               plus the all-zero vector
+the array size   R = W = 8     ⛔ NOT the 32×32 instance that ships
+the data         PINNED        one current-file pattern, one result pattern
+```
+⇒ ***It is universal in WHICH register is enabled and pinned in everything
+else*** — and `_correct` is the one suffix in this file that promises otherwise.
+
+🔑 **THIS FILE'S OWN CONVENTION IS `_on_sample`, and the three theorems below
+carry it.** *`regNext32_writes_when_enabled_on_sample` and its siblings warn a
+reader in their own names; this one does not, and it is the one that misled.*
+**Same finding as `readTree_x0_is_zero` (`ReadTree.lean`), and the second
+instance of it in my slot today: a certificate whose name does not say "sample"
+gets read as a law.**
+
+✅ **SUPERSEDED — use math's `sem_regNextN` (`SaltWorks/Stack/Program.lean`):
+unconditional over every enable vector (not just one-hot), every result word,
+every incoming file, and universal in the ARRAY SIZE itself — 2^1088 at the
+shipping size — with `regNext_is_St_set` tying the port to `St.set`.**
+
+⚠️ **AND THE MUTANT THAT MAKES THIS CONCRETE: math's `rnMuxCut` changes ONE
+fanin and passes EVERY certificate this block carries — both sweeps, the frame
+certificate, the hold certificate, and all three 32×32 samples.** *Invisible at
+8×8 because `rnResPat 5 = rnCurPat 5 5` there — a coincidence they MEASURED
+before writing the mutant.* ***Kept as a tripwire; it is not the theorem.***
+
+⚖️ **NOT RENAMED:** other seats cite this name, and a record that silently
+repairs its past is worth less than one that shows where it was wrong. -/
 theorem regNext8_correct : rnOneHotOK = true := by decide +kernel
 
 theorem regNext8_wf : (regNextN 8 8).wf = true := by decide +kernel
