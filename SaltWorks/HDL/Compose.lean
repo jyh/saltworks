@@ -572,6 +572,34 @@ theorem compose_frame_fails_below_instNext :
 /-- …and 4 really is `instNext` here, so the two controls are one net apart. -/
 theorem instNext_ha_is_four : instNext ha 2 = 4 := by decide +kernel
 
+/-! ### Where the OUTPUT nets land — the `dat`-invariant's missing piece
+
+*`instGates_out_range` bounds the GATES. The seam's fold also needs to know where
+the instance's PORTS land, because those are the nets the next comparator is
+wired to.* -/
+
+/-- **Where an instantiation's OUTPUT nets land**: each is either an input wire
+routed through `σ`, or inside the instance's own region. -/
+theorem instOuts_range (c : Circ) (σ : Net → Net) (off : Nat) (h : c.ssa = true) :
+    ∀ m ∈ instOuts c σ off,
+      (∃ i, i < c.nIn ∧ m = σ i) ∨ (off ≤ m ∧ m < instNext c off) := by
+  intro m hm
+  obtain ⟨n, hn, hnm⟩ := List.mem_map.mp hm
+  rw [Circ.ssa, Bool.and_eq_true] at h
+  have hlt : n < c.nIn + c.gates.length := by
+    simpa using (List.all_eq_true.mp h.2) n hn
+  by_cases hin : n < c.nIn
+  · exact Or.inl ⟨n, hin, by rw [← hnm, instMap, if_pos hin]⟩
+  · refine Or.inr ?_
+    rw [← hnm, instMap, if_neg hin]
+    unfold instNext
+    -- No omega: `n : Net`, so `n - c.nIn` is a Net-typed subtraction and omega
+    -- treats it as an opaque atom (its counterexample names `↑(n - c.nIn)`).
+    have hge : c.nIn ≤ n := Nat.not_lt.mp hin
+    have hsub : n - c.nIn < c.gates.length := Nat.sub_lt_left_of_lt_add hge hlt
+    exact ⟨Nat.le_add_right _ _, Nat.add_lt_add_left hsub off⟩
+
+
 /-! ### NON-VACUITY — the `ssa` hypothesis is load-bearing, and `wf` is not enough
 
 *Both theorems above are implications I stated with a hypothesis I chose. The
@@ -635,6 +663,7 @@ theorem instNext_under_reports_without_ssa :
 #audit_axioms instNext_under_reports_without_ssa
 #audit_axioms inst_sem
 #audit_axioms inst_sem_needs_input_agreement
+#audit_axioms instOuts_range
 #audit_axioms renumFrom_out_range
 #audit_axioms instGates_out_range
 #audit_axioms inst_frame_below
