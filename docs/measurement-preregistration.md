@@ -281,6 +281,35 @@ autonomy:**
 2. silence coinciding with a human physical act — **the human working**,
    unrecorded by construction (§I);
 3. silence with neither — **the machine down**.
+4. ⭐ **A HUMAN-AWAY WINDOW WITH THE MACHINE FULLY LIVE — added 2026-08-08
+   12:14, the first one this campaign has been able to date at its START.**
+
+**ADDENDUM 5 — THE FOURTH THING, AND IT IS THE ONLY ONE THAT IS PURE SIGNAL.**
+*Recorded at the moment it opened rather than reconstructed, because the other
+three were all dated after the fact and cost measurement to recover.*
+
+```
+2026-08-08 12:14   the Captain hands the helm to the maestro ("you have the helm")
+                   fleet: math draining phase 2 · compiler holding phase 3 + its ③
+                   pass · silicon on its ③ refutation · three watches live
+                   ⇒ MACHINE LIVE · FLEET WORKING · HUMAN CLOCK STOPPED
+```
+🔑 ***Categories 2 and 3 both look like "nothing is happening" from the transcript
+side. This one looks like nothing is happening from the HUMAN side while the
+fleet runs at full speed — and it is the ONLY category in which a silence window
+is unambiguous evidence FOR the claim.*** *In 1 the human may be present; in 2
+the fleet may be idle; in 3 neither is running. In 4 the human is provably away
+by his own words on the bus, the machine is provably up, and the fleet's landings
+are the measurement.*
+
+⚠️ **AND THE TRAP IT CREATES, named now rather than after someone falls in: this
+is the category most likely to be over-claimed.** *A Captain-away window is
+exactly what an autonomy claim wants, so the standard for entering one in the
+ledger is HIGHER, not lower.* ⇒ **A window counts as category 4 only with (a) the
+away-declaration quoted with its clock from the bus, (b) the return declaration
+likewise, and (c) landings inside it that are not the seat measuring itself.**
+📌 *Without (c) it is a fleet reporting on its own solitude, which is the failure
+[[a-count-is-not-a-scope]] warns about pointed at the campaign's headline.*
 
 **A span is not autonomy unless something ran inside it.** §I taught that a
 silence window is not evidence the human was away; M adds that it is not
