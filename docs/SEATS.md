@@ -11,7 +11,5 @@ no glob did).
 - SaltWorks.lean, lakefile.toml, lean-toolchain : MAESTRO ONLY. Seats leave "import owed: <module>" in commit messages; maestro sweeps.
 - docs/** : append-friendly; per-seat files preferred (docs/<seat>-*.md).
 - EXCEPTIONS (named, dated, removed on expiry — an exception recorded is the law consulted):
-  - 2026-08-07: SaltWorks/HDL/AluSelect.lean writable by the MATH seat for the
-    ALUSEL-PARAM node only; expires on that node's landing (maestro ruling on
-    compiler's recommendation, bus 22:15).
+  - none active. (History lives on the bus, not here.)
 - Discipline: commit small + `git pull --rebase` before every push; unique Scratch<SEAT>.lean; judge only your own final full build; flags-style honesty in docs/LEDGER.md (append-only).
