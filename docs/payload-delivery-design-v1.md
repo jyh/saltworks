@@ -4,9 +4,11 @@
 ### from docs/silicon-frame-protocol-0806.md and confirmed in session.
 ### Refutation assignments at the end. Sequenced AFTER the c1/(3,2)
 ### dispatches — this block costs no seat time until those land.
-### Refutation state (8/8 12:1x): compiler clause 3 REFUTED → repaired
-### in place (§4 port-axis trap; §5 ∀-P rider). Silicon pass, compiler
-### A/B executor, and math pass OPEN.
+### Refutation state (8/8 12:2x): SILICON pass CLEAN (11 facts
+### line-verified; 2 disclosures + 1 cross-check folded into §1).
+### COMPILER clause 3 REFUTED → repaired (§4 port-axis trap; §5 ∀-P
+### rider); A/B executor out. MATH pass OPEN (fires at its phase-2
+### seam).
 
 ## 0. WHAT B4 DID AND DID NOT CERTIFY
 
@@ -20,14 +22,25 @@ arrive **verbatim, in order, at the same output, in the same cycle**.
 ## 1. THE FRAME (spec §2, restated for the certificate's eyes)
 
 k=3, P=8, frame = 2k+P = 14 cycles per line, MSB first:
-`[ACT, a₂, ACT, a₁, ACT, a₀, p₀ … p₇]`. Payload streams RAW from cycle
+`[ACT, a₂, ACT, a₁, ACT, a₀, p₀ … p₇]`. P = 8 is the tapeout's
+PLACEHOLDER (spec :270), not a frozen constant — the statement is
+parametric in P and the certificate must not hard-code 14 (silicon's
+③ disclosure 1). Frame order cross-checked against consumption:
+stage s consumes destination bit k−1−s at cycle 2s+1 (spec :121), so
+the MSB-first frame and the stage order AGREE — an LSB-first frame
+would satisfy every quoted spec sentence and route backwards
+(silicon's ③ pass, the cross-check this block had not stated).
+Payload streams RAW from cycle
 2k (no interleave continuation — the phase discipline question is
 ANSWERED BY SPEC, not open). The data path is **combinational end to
 end** (§4): a payload bit presented at input cycle t leaves at output
 cycle t. Stage s latches activity at 2s, select at 2s+1, outputs
 defined from 2s+2; fabric outputs defined from 2k. **The payload
-window [2k, 2k+P) equals the validity window** — §4's own sentence:
-that is why the header is 2k.
+window [2k, 2k+P) equals the validity window** — the open end (2k…)
+is §4's own sentence; the CLOSED upper bound 2k+P is this block's
+tightening, coinciding within a frame (silicon's ③ disclosure 2 —
+the bracket is ours, not the spec's, and is no longer attributed to
+§4): that is why the header is 2k.
 
 ## 2. THE STATEMENT (shape, not yet Lean)
 
