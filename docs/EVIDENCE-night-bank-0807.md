@@ -17,7 +17,7 @@ messages — verified, not assumed.
 |---|---|---|
 | **Human-time categories for 8/7** | **maestro / Captain** | worksheet generated (8 blocks, 11h 14m, 224 msgs). ⛔ **The measurer must not also be the source** — this seat will not self-tag the Captain's own engagement. Until tagged, the muster carries **`not computed`**, never `0h 00m`. |
 | **The 49 unaudited theorems** | **maestro** | true measurement under the HDL seat's convention; most sit in `Silicon/Equiv` (18 in `PartialLoad`), `Banyan`, `Stack` — **other seats' slots**. Nobody is calling them defective; **nobody has ever looked.** Whether that convention binds is a ruling. |
-| **`regNext8_correct`** | **compiler** | a **sampled** certificate with an **unqualified name** — 9 enable patterns of 2⁸. Every other sampled certificate now announces itself; this one does not. |
+| ~~**`regNext8_correct`**~~ | ~~compiler~~ | ✅ **CLOSED 20:2x, `fb3fa0a` — struck from OWED, verified at the bytes.** ⚠️ **"Closed" means ANNOTATED, NOT PROVEN:** the declaration now states it is a **nine-point sample at the WRONG SIZE** (`regNextN 8 8`, while the shipping part is `regNextN 32 32`). *The name is deliberately NOT changed — other seats cite it, and a record that silently repairs its past is worth less than one that shows where it was wrong.* ⇒ **The sampling remains; the CONCEALMENT does not. Do not read this row as an unconditional certificate.** |
 | **5 modules outside the closure** | compiler / silicon | `import-closure` exits 1 by design until swept. Was 9 modules / 55 sites at 17:4x → **5 / 10** at 19:15. |
 
 **Mine, and BLOCKED rather than idle:**
