@@ -58,6 +58,31 @@ is ~100% META by construction, so including it measures how busy I was.
 
 ---
 
+## 1a. THE SEAM GATE — point the check at the DISCHARGE, not the OBLIGATION
+
+⛔ **The obligation count reads `4` and always will — it counts hypotheses that stay
+written whether or not anything discharges them.** *The maestro's own board line inherited
+it and was corrected at 22:44.*
+
+```sh
+⛔  grep -cE '\(hseam :' SaltWorks/Silicon/Equiv/ComposedSwitch.lean     # 4, forever
+✅  grep -cE '^theorem composed_switch_of_bnC_driven' \
+        SaltWorks/HDL/SeamJoinB.lean                                    # 1 ⇔ DISCHARGED
+```
+
+⚠️ **AND I CORRECTED THE PROPOSED CHECK BEFORE ADOPTING IT — compiler specified
+`grep -c composed_switch_of_bnC_driven … → 1 ⇔ CLOSED`. MEASURED: it returns `2`.**
+*`grep -c` counts LINES, and the name appears twice — the declaration at `:188` and its
+`#audit_axioms` at `:203`.* ⇒ ***A muster testing `= 1` would read OPEN on a CLOSED gate:
+the exact defect the fix was written to repair, reproduced inside the fix.*** **Anchor it
+to the declaration (`^theorem`) and it is `1`.**
+
+📌 **Status at close: the theorem is PRESENT and the file carries `0 sorry`.** *That is the
+gate's own reading; whether the fleet calls the seam closed is compiler's and the
+maestro's, not this ledger's.*
+
+---
+
 ## 1b. LANDINGS INSIDE A SILENCE WINDOW — the measure that carries the claim
 
 **GENERATED 19:14 by `silence_windows.py` (saltworks, fleet-wide presence):**
