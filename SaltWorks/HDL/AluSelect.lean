@@ -537,4 +537,170 @@ theorem aluSelect_selects_on_sample_last : asSelectsOK 9 = true := by decide +ke
 #audit_axioms zeroTree
 #audit_axioms zeroTreeCuts
 
+/-! # THE PARAMETRIC HINGE — `genSelect asOps asSelBits = aluSelect`
+
+**Authored by the MATH seat** (probe `ScratchHINGE.lean`, with a negative
+control `ScratchHINGECTL.lean`); landed here by the compiler seat under the
+maestro's 10:58 PATCH-TO-OWNER ruling — no cross-slot grant, because a patch
+handed to the slot-owner needs none.
+
+The landed `genSelect_ten : genSelect 10 4 = aluSelect` is NUMERAL-BOUND: a calc
+of `rfl` steps at 10 and 4.  So the `ALUSEL-PARAM` parametrization bought gate
+counts and `ssa`/`wf` free at every `(n,b)` and did NOT buy the IDENTIFICATION of
+the generator with the bespoke block — which is the fact that made the `(3,2)`
+migration look like a fortnight.  This is that identification, once,
+parametrically.
+
+⭐ **THE HONESTY DEVICE, and it is why this proof is worth more than its
+statement:** after harvesting the only two numeric facts the construction needs,
+the four named constants are made LOCALLY IRREDUCIBLE.  From that point the
+elaborator cannot delta-unfold `asOps`/`asSelBits`/`asPad`/`asW` to numerals, so
+no `rfl` or `decide` can silently compute its way through the equality.
+Everything below goes through the two seeds alone.
+
+Math's negative control confirms the device BITES — both examples MUST fail and
+do: `gsPad asSelBits = asPad` by `rfl` (would be computing `16 = 2^4`), and
+`genSelect asOps asSelBits = aluSelect := genSelect_ten` (the numeral-bound
+hinge offered for the named-constant statement).  **A device that cannot fail
+would prove nothing, and this one was tested against itself.**
+
+⚠️ Contained in its own `section` so `local irreducible` cannot leak into the
+`decide +kernel` theorems above, which need to compute.
+
+📌 The downstream migration test — `sem_aluSelect` restated through this hinge
+with no numeral in sight — is math's `ScratchHINGE2.lean` and belongs in
+`Stack/Program.lean`, not here: it needs `sem_genSelect` and `gsSelOf`, and this
+module is imported BY `Program`. -/
+
+section ParametricHinge
+
+/-! ## The two seed facts — the ONLY numeric input -/
+
+/-- Seed 1: the datapath width the generator hard-codes. -/
+theorem asW_eq_32 : asW = 32 := rfl
+
+/-- Seed 2: the pad alignment (`asPad_eq_two_pow` of `Stack/Program.lean`,
+re-proved here to show it does NOT force downstream siting). -/
+theorem asPad_two_pow : asPad = 2 ^ asSelBits := rfl
+
+attribute [local irreducible] asW asOps asPad asSelBits
+
+/-! ## The layout lemmas, parametrically -/
+
+theorem gsPad_eq : gsPad asSelBits = asPad := asPad_two_pow.symm
+
+theorem gsIn_eq : gsIn asOps asSelBits = asIn := by
+  show asOps * 32 + asSelBits = asOps * asW + asSelBits
+  rw [asW_eq_32]
+
+theorem gsRes_eq (r k : Nat) : gsRes r k = asRes r k := by
+  show r * 32 + k = r * asW + k
+  rw [asW_eq_32]
+
+theorem gsSel_eq (j : Nat) : gsSel asOps asSelBits j = asSel j := by
+  show asOps * 32 + j = asOps * asW + j
+  rw [asW_eq_32]
+
+theorem gsZero_eq : gsZero asOps asSelBits = asZero := gsIn_eq
+
+theorem gsNot_eq (j : Nat) : gsNot asOps asSelBits j = asNot j := by
+  show gsIn asOps asSelBits + 1 + j = asIn + 1 + j
+  rw [gsIn_eq]
+
+theorem gsLevelWidth_eq (j : Nat) : gsLevelWidth asSelBits j = asLevelWidth j := by
+  show gsPad asSelBits / 2 ^ (j + 1) = asPad / 2 ^ (j + 1)
+  rw [gsPad_eq]
+
+theorem gsBelow_eq (j : Nat) : gsBelow asSelBits j = asBelow j := by
+  induction j with
+  | zero => rfl
+  | succ j ih =>
+    show gsBelow asSelBits j + gsLevelWidth asSelBits j = asBelow j + asLevelWidth j
+    rw [ih, gsLevelWidth_eq]
+
+theorem gsBase_eq' (k j i : Nat) : gsBase asOps asSelBits k j i = asBase k j i := by
+  show gsIn asOps asSelBits + 1 + asSelBits
+        + (k * (gsPad asSelBits - 1) + gsBelow asSelBits j + i) * 3
+      = asIn + 1 + asSelBits + (k * (asPad - 1) + asBelow j + i) * 3
+  rw [gsIn_eq, gsPad_eq, gsBelow_eq]
+
+theorem gsOut_eq' (k j i : Nat) : gsOut asOps asSelBits k j i = asOut k j i := by
+  show gsBase asOps asSelBits k j i + 2 = asBase k j i + 2
+  rw [gsBase_eq']
+
+theorem gsPrev_eq (k j i : Nat) : gsPrev asOps asSelBits k j i = asPrev k j i := by
+  cases j with
+  | zero =>
+    show (if asOps ≤ i then gsZero asOps asSelBits else gsRes i k)
+        = (if asOps ≤ i then asZero else asRes i k)
+    rw [gsZero_eq, gsRes_eq]
+  | succ j =>
+    show gsOut asOps asSelBits k j i = asOut k j i
+    rw [gsOut_eq']
+
+theorem gsMux_eq (k j : Nat) : gsMux asOps asSelBits k j = asMux k j := by
+  funext i
+  show [(⟨gsBase asOps asSelBits k j i,
+          .and (gsPrev asOps asSelBits k j (2 * i)) (gsNot asOps asSelBits j)⟩ : Gate),
+        ⟨gsBase asOps asSelBits k j i + 1,
+          .and (gsPrev asOps asSelBits k j (2 * i + 1)) (gsSel asOps asSelBits j)⟩,
+        ⟨gsOut asOps asSelBits k j i,
+          .or (gsBase asOps asSelBits k j i) (gsBase asOps asSelBits k j i + 1)⟩] = _
+  rw [gsBase_eq', gsOut_eq', gsPrev_eq, gsPrev_eq, gsNot_eq, gsSel_eq]
+  rfl
+
+/-! ## The three fields -/
+
+theorem genSelect_gates_eq' : (genSelect asOps asSelBits).gates = aluSelect.gates := by
+  have hnot : (fun j => (⟨gsNot asOps asSelBits j, .not (gsSel asOps asSelBits j)⟩ : Gate))
+            = (fun j => (⟨asNot j, .not (asSel j)⟩ : Gate)) := by
+    funext j; rw [gsNot_eq, gsSel_eq]
+  have hbody : (fun k => (List.range asSelBits).flatMap fun j =>
+                  (List.range (gsLevelWidth asSelBits j)).flatMap (gsMux asOps asSelBits k j))
+             = (fun k => (List.range asSelBits).flatMap fun j =>
+                  (List.range (asLevelWidth j)).flatMap (asMux k j)) := by
+    funext k
+    have h2 : (fun j => (List.range (gsLevelWidth asSelBits j)).flatMap
+                          (gsMux asOps asSelBits k j))
+            = (fun j => (List.range (asLevelWidth j)).flatMap (asMux k j)) := by
+      funext j; rw [gsLevelWidth_eq, gsMux_eq]
+    rw [h2]
+  show (⟨gsZero asOps asSelBits, .const false⟩ : Gate)
+        :: (List.range asSelBits).map
+             (fun j => (⟨gsNot asOps asSelBits j, .not (gsSel asOps asSelBits j)⟩ : Gate))
+        ++ (List.range 32).flatMap (fun k =>
+             (List.range asSelBits).flatMap fun j =>
+               (List.range (gsLevelWidth asSelBits j)).flatMap (gsMux asOps asSelBits k j))
+      = (⟨asZero, .const false⟩ : Gate)
+        :: (List.range asSelBits).map (fun j => (⟨asNot j, .not (asSel j)⟩ : Gate))
+        ++ (List.range asW).flatMap (fun k =>
+             (List.range asSelBits).flatMap fun j =>
+               (List.range (asLevelWidth j)).flatMap (asMux k j))
+  rw [hnot, hbody, gsZero_eq, asW_eq_32]
+
+theorem genSelect_outs_eq' : (genSelect asOps asSelBits).outs = aluSelect.outs := by
+  have h : (fun k => gsOut asOps asSelBits k (asSelBits - 1) 0)
+         = (fun k => asOut k (asSelBits - 1) 0) := by
+    funext k; rw [gsOut_eq']
+  show (List.range 32).map (fun k => gsOut asOps asSelBits k (asSelBits - 1) 0)
+      = (List.range asW).map (fun k => asOut k (asSelBits - 1) 0)
+  rw [h, asW_eq_32]
+
+/-! ## ⭐ THE HINGE -/
+
+theorem genSelect_eq_aluSelect : genSelect asOps asSelBits = aluSelect := by
+  have hn : (genSelect asOps asSelBits).nIn = aluSelect.nIn := gsIn_eq
+  calc genSelect asOps asSelBits
+      = ⟨(genSelect asOps asSelBits).nIn, (genSelect asOps asSelBits).gates,
+         (genSelect asOps asSelBits).outs⟩ := rfl
+    _ = ⟨aluSelect.nIn, aluSelect.gates, aluSelect.outs⟩ := by
+          rw [hn, genSelect_gates_eq', genSelect_outs_eq']
+    _ = aluSelect := rfl
+
+#audit_axioms genSelect_eq_aluSelect
+#audit_axioms genSelect_gates_eq'
+#audit_axioms genSelect_outs_eq'
+
+end ParametricHinge
+
 end SaltWorks.HDL
