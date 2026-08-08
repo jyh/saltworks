@@ -6980,9 +6980,616 @@ theorem run_andChain : ∀ (fuel : Nat) (E : Env) (ns : List Net) (b : Nat),
       show ((E x && E y) && r.all E) = (E x && (E y && r.all E))
       exact Bool.and_assoc (E x) (E y) (r.all E)
 
+/-! ### ⭐ THE CIRCUIT'S SIX OUTPUTS, SYMBOLICALLY, FOR A **SYMBOLIC** WORD
+
+The landed certificates evaluate the netlist at 3,056 concrete points. Nothing
+below evaluates it anywhere: `decoder`'s **gate list is a closed term**, so the
+kernel can be asked for the layout constants once (`decide +kernel` on net
+numbers), while everything under `∀ w` goes through `run_andChain` /
+`run_orChain` / `run_pointwise`. That is the only route available — `andChain`
+and `orChain` are well-founded recursive and will not reduce under a binder.
+
+⛔ **C-D2 — DO THE THREE CERTIFIED SLICES TILE THE CUBE? THEY DO NOT, AND THIS
+ROUTE DOES NOT NEED THEM TO.** `decoder_funct7_exhaustive` sweeps 128 `funct7`
+values **at one opcode** (`Decoder.lean:173` — `dcWord 0b0110011 f3 f7`), so the
+"funct7 is read only through is-it-zero" factorisation that would license
+`funct7 = 1` standing for every non-zero `funct7` is certified on a single
+opcode plane, not on the product. The theorem below is proved over `∀ w :
+BitVec 32` directly, so it never asks whether the slices tile. -/
+
+/-! ### The layout as concrete constants -/
+
+def dcL1 : List Net := dcOpcode 0b0110011 ++ dcFunct7Zero ++ dcFunct3 0b000
+def dcL2 : List Net := dcOpcode 0b0110011 ++ dcFunct7Zero ++ dcFunct3 0b100
+def dcL3 : List Net := dcOpcode 0b0110011 ++ dcFunct7Zero ++ dcFunct3 0b010
+def dcL4 : List Net := dcOpcode 0b0010011 ++ dcFunct3 0b000
+def dcL5 : List Net := dcOpcode 0b1100011 ++ dcFunct3 0b000
+
+def dcG1 : List Gate := (andChain 64 dcL1).1
+def dcG2 : List Gate := (andChain 80 dcL2).1
+def dcG3 : List Gate := (andChain 96 dcL3).1
+def dcG4 : List Gate := (andChain 112 dcL4).1
+def dcG5 : List Gate := (andChain 121 dcL5).1
+def dcGM : List Gate := dcG1 ++ (dcG2 ++ (dcG3 ++ (dcG4 ++ dcG5)))
+def dcGO : List Gate := (orChain 130 [79, 95, 111, 120, 129]).1
+
+theorem decoder_gates_eq : decoder.gates = dcInvs ++ (dcGM ++ dcGO) := by decide +kernel
+
+theorem decoder_outs_eq : decoder.outs = [79, 95, 111, 120, 129, 133] := by decide +kernel
+
+theorem dcOut1 : (andChain 64 dcL1).2.1 = 79 := by decide +kernel
+theorem dcOut2 : (andChain 80 dcL2).2.1 = 95 := by decide +kernel
+theorem dcOut3 : (andChain 96 dcL3).2.1 = 111 := by decide +kernel
+theorem dcOut4 : (andChain 112 dcL4).2.1 = 120 := by decide +kernel
+theorem dcOut5 : (andChain 121 dcL5).2.1 = 129 := by decide +kernel
+theorem dcOutO : (orChain 130 [79, 95, 111, 120, 129]).2.1 = 133 := by decide +kernel
+
+theorem dcL1_lt : ∀ m ∈ dcL1, m < 64 := by decide
+theorem dcL2_lt : ∀ m ∈ dcL2, m < 64 := by decide
+theorem dcL3_lt : ∀ m ∈ dcL3, m < 64 := by decide
+theorem dcL4_lt : ∀ m ∈ dcL4, m < 64 := by decide
+theorem dcL5_lt : ∀ m ∈ dcL5, m < 64 := by decide
+
+theorem dcL1_ne : dcL1 ≠ [] := by decide
+theorem dcL2_ne : dcL2 ≠ [] := by decide
+theorem dcL3_ne : dcL3 ≠ [] := by decide
+theorem dcL4_ne : dcL4 ≠ [] := by decide
+theorem dcL5_ne : dcL5 ≠ [] := by decide
+
+/-! ### Frames and values, one per chain -/
+
+theorem dcG1_frame (E : Env) (m : Nat) (h : m < 64) : run E dcG1 m = E m :=
+  run_andChain_frame 17 E dcL1 64 (by decide) m h
+theorem dcG2_frame (E : Env) (m : Nat) (h : m < 80) : run E dcG2 m = E m :=
+  run_andChain_frame 17 E dcL2 80 (by decide) m h
+theorem dcG3_frame (E : Env) (m : Nat) (h : m < 96) : run E dcG3 m = E m :=
+  run_andChain_frame 17 E dcL3 96 (by decide) m h
+theorem dcG4_frame (E : Env) (m : Nat) (h : m < 112) : run E dcG4 m = E m :=
+  run_andChain_frame 10 E dcL4 112 (by decide) m h
+theorem dcG5_frame (E : Env) (m : Nat) (h : m < 121) : run E dcG5 m = E m :=
+  run_andChain_frame 10 E dcL5 121 (by decide) m h
+theorem dcGO_frame (E : Env) (m : Nat) (h : m < 130) : run E dcGO m = E m :=
+  run_orChain_frame 5 E [79, 95, 111, 120, 129] 130 (by decide) m h
+
+theorem dcG1_val (E : Env) : run E dcG1 79 = dcL1.all E := by
+  have := run_andChain 17 E dcL1 64 (by decide) dcL1_ne (fun m hm => dcL1_lt m hm)
+  rw [dcOut1] at this
+  exact this
+theorem dcG2_val (E : Env) : run E dcG2 95 = dcL2.all E := by
+  have := run_andChain 17 E dcL2 80 (by decide) dcL2_ne
+    (fun m hm => Nat.lt_trans (dcL2_lt m hm) (by norm_num))
+  rw [dcOut2] at this
+  exact this
+theorem dcG3_val (E : Env) : run E dcG3 111 = dcL3.all E := by
+  have := run_andChain 17 E dcL3 96 (by decide) dcL3_ne
+    (fun m hm => Nat.lt_trans (dcL3_lt m hm) (by norm_num))
+  rw [dcOut3] at this
+  exact this
+theorem dcG4_val (E : Env) : run E dcG4 120 = dcL4.all E := by
+  have := run_andChain 10 E dcL4 112 (by decide) dcL4_ne
+    (fun m hm => Nat.lt_trans (dcL4_lt m hm) (by norm_num))
+  rw [dcOut4] at this
+  exact this
+theorem dcG5_val (E : Env) : run E dcG5 129 = dcL5.all E := by
+  have := run_andChain 10 E dcL5 121 (by decide) dcL5_ne
+    (fun m hm => Nat.lt_trans (dcL5_lt m hm) (by norm_num))
+  rw [dcOut5] at this
+  exact this
+theorem dcGO_val (E : Env) : run E dcGO 133 = [79, 95, 111, 120, 129].any E := by
+  have := run_orChain 5 E [79, 95, 111, 120, 129] 130 (by decide) (by decide) (by decide)
+  rw [dcOutO] at this
+  exact this
+
+/-! ### The match block, composed -/
+
+theorem run_dcGM (E : Env) :
+    run E dcGM 79 = dcL1.all E ∧ run E dcGM 95 = dcL2.all E
+    ∧ run E dcGM 111 = dcL3.all E ∧ run E dcGM 120 = dcL4.all E
+    ∧ run E dcGM 129 = dcL5.all E := by
+  have hM : dcGM = dcG1 ++ (dcG2 ++ (dcG3 ++ (dcG4 ++ dcG5))) := rfl
+  rw [hM, run_append, run_append, run_append, run_append]
+  set A1 := run E dcG1 with hA1
+  set A2 := run A1 dcG2 with hA2
+  set A3 := run A2 dcG3 with hA3
+  set A4 := run A3 dcG4 with hA4
+  refine ⟨?_, ?_, ?_, ?_, ?_⟩
+  · rw [dcG5_frame A4 79 (by norm_num), hA4, dcG4_frame A3 79 (by norm_num),
+      hA3, dcG3_frame A2 79 (by norm_num), hA2, dcG2_frame A1 79 (by norm_num),
+      hA1, dcG1_val E]
+  · rw [dcG5_frame A4 95 (by norm_num), hA4, dcG4_frame A3 95 (by norm_num),
+      hA3, dcG3_frame A2 95 (by norm_num), hA2, dcG2_val A1, hA1]
+    exact all_congr_mem (fun m hm => dcG1_frame E m (dcL2_lt m hm))
+  · rw [dcG5_frame A4 111 (by norm_num), hA4, dcG4_frame A3 111 (by norm_num),
+      hA3, dcG3_val A2, hA2, hA1]
+    refine all_congr_mem (fun m hm => ?_)
+    rw [dcG2_frame (run E dcG1) m (Nat.lt_trans (dcL3_lt m hm) (by norm_num)),
+      dcG1_frame E m (dcL3_lt m hm)]
+  · rw [dcG5_frame A4 120 (by norm_num), hA4, dcG4_val A3, hA3, hA2, hA1]
+    refine all_congr_mem (fun m hm => ?_)
+    rw [dcG3_frame (run (run E dcG1) dcG2) m (Nat.lt_trans (dcL4_lt m hm) (by norm_num)),
+      dcG2_frame (run E dcG1) m (Nat.lt_trans (dcL4_lt m hm) (by norm_num)),
+      dcG1_frame E m (dcL4_lt m hm)]
+  · rw [dcG5_val A4, hA4, hA3, hA2, hA1]
+    refine all_congr_mem (fun m hm => ?_)
+    rw [dcG4_frame (run (run (run E dcG1) dcG2) dcG3) m
+        (Nat.lt_trans (dcL5_lt m hm) (by norm_num)),
+      dcG3_frame (run (run E dcG1) dcG2) m (Nat.lt_trans (dcL5_lt m hm) (by norm_num)),
+      dcG2_frame (run E dcG1) m (Nat.lt_trans (dcL5_lt m hm) (by norm_num)),
+      dcG1_frame E m (dcL5_lt m hm)]
+
+theorem dcGM_frame (E : Env) (m : Nat) (h : m < 64) : run E dcGM m = E m := by
+  have hM : dcGM = dcG1 ++ (dcG2 ++ (dcG3 ++ (dcG4 ++ dcG5))) := rfl
+  rw [hM, run_append, run_append, run_append, run_append,
+    dcG5_frame _ m (by omega), dcG4_frame _ m (by omega), dcG3_frame _ m (by omega),
+    dcG2_frame _ m (by omega), dcG1_frame E m h]
+
+/-! ### The inverter bank and the literal fields -/
+
+theorem run_dcInvs (E : Env) :
+    (∀ m : Nat, m < 32 → run E dcInvs m = E m)
+    ∧ (∀ k : Nat, k < 32 → run E dcInvs (32 + k) = !(E k)) := by
+  have hgates : dcInvs = (List.range 32).map (fun i => (⟨32 + i, Op.not i⟩ : Gate)) := rfl
+  obtain ⟨hfr, hval⟩ := run_pointwise E 32 (fun i => Op.not i) 32
+    (fun i hi c hc => by
+      simp only [Op.fanin, List.mem_cons, List.not_mem_nil, or_false] at hc
+      exact hc ▸ hi)
+  exact ⟨fun m hm => by rw [hgates]; exact hfr m hm,
+         fun k hk => by rw [hgates]; exact hval k hk⟩
+
+theorem run_dcInvs_lit (E : Env) (i : Nat) (hi : i < 32) (v : Bool) :
+    run E dcInvs (dcLit i v) = (E i == v) := by
+  cases v with
+  | true =>
+    show run E dcInvs i = (E i == true)
+    rw [(run_dcInvs E).1 i hi]
+    simp
+  | false =>
+    show run E dcInvs (32 + i) = (E i == false)
+    rw [(run_dcInvs E).2 i hi]
+    simp
+
+theorem run_dcInvs_field (E : Env) (lo n val : Nat) (h : lo + n ≤ 32) :
+    (dcField lo n val).all (run E dcInvs)
+      = (List.range n).all (fun j => E (lo + j) == val.testBit j) := by
+  show ((List.range n).map (fun j => dcLit (lo + j) (val.testBit j))).all (run E dcInvs) = _
+  rw [List.all_map]
+  refine all_congr_mem (fun j hj => ?_)
+  have hj' : lo + j < 32 := by
+    have := List.mem_range.mp hj
+    omega
+  exact run_dcInvs_lit E (lo + j) hj' (val.testBit j)
+
+theorem field_all_eq_extract (w : BitVec 32) (lo n val : Nat) :
+    ((List.range n).all (fun j => (w.getLsbD (lo + j)) == val.testBit j))
+      = decide (w.extractLsb' lo n = BitVec.ofNat n val) := by
+  rw [Bool.eq_iff_iff]
+  simp only [List.all_eq_true, List.mem_range, beq_iff_eq, decide_eq_true_eq]
+  rw [BitVec.eq_of_getLsbD_eq_iff]
+  constructor
+  · intro hh j hj
+    simp only [BitVec.getLsbD_extractLsb', BitVec.getLsbD_ofNat, hj, decide_true, Bool.true_and]
+    exact hh j hj
+  · intro hh j hj
+    have hx := hh j hj
+    simp only [BitVec.getLsbD_extractLsb', BitVec.getLsbD_ofNat, hj, decide_true,
+      Bool.true_and] at hx
+    exact hx
+
+def dcOpIs (w : BitVec 32) (val : Nat) : Bool := decide (w.extractLsb' 0 7 = BitVec.ofNat 7 val)
+def dcF3Is (w : BitVec 32) (val : Nat) : Bool := decide (w.extractLsb' 12 3 = BitVec.ofNat 3 val)
+def dcF7Z  (w : BitVec 32) : Bool := decide (w.extractLsb' 25 7 = BitVec.ofNat 7 0)
+
+theorem dcOpcode_all (w : BitVec 32) (val : Nat) :
+    (dcOpcode val).all (run (fun i => w.getLsbD i) dcInvs) = dcOpIs w val := by
+  show (dcField 0 7 val).all (run (fun i => w.getLsbD i) dcInvs) = _
+  rw [run_dcInvs_field _ 0 7 val (by norm_num)]
+  exact field_all_eq_extract w 0 7 val
+
+theorem dcFunct3_all (w : BitVec 32) (val : Nat) :
+    (dcFunct3 val).all (run (fun i => w.getLsbD i) dcInvs) = dcF3Is w val := by
+  show (dcField 12 3 val).all (run (fun i => w.getLsbD i) dcInvs) = _
+  rw [run_dcInvs_field _ 12 3 val (by norm_num)]
+  exact field_all_eq_extract w 12 3 val
+
+theorem dcFunct7Zero_all (w : BitVec 32) :
+    dcFunct7Zero.all (run (fun i => w.getLsbD i) dcInvs) = dcF7Z w := by
+  show (dcField 25 7 0).all (run (fun i => w.getLsbD i) dcInvs) = _
+  rw [run_dcInvs_field _ 25 7 0 (by norm_num)]
+  exact field_all_eq_extract w 25 7 0
+
+/-! ### The six outputs, symbolically -/
+
+def dcADDm  (w : BitVec 32) : Bool := dcOpIs w 0b0110011 && dcF7Z w && dcF3Is w 0b000
+def dcXORm  (w : BitVec 32) : Bool := dcOpIs w 0b0110011 && dcF7Z w && dcF3Is w 0b100
+def dcSLTm  (w : BitVec 32) : Bool := dcOpIs w 0b0110011 && dcF7Z w && dcF3Is w 0b010
+def dcADDIm (w : BitVec 32) : Bool := dcOpIs w 0b0010011 && dcF3Is w 0b000
+def dcBEQm  (w : BitVec 32) : Bool := dcOpIs w 0b1100011 && dcF3Is w 0b000
+def dcValidm (w : BitVec 32) : Bool :=
+  dcADDm w || dcXORm w || dcSLTm w || dcADDIm w || dcBEQm w
+
+theorem dcL1_all (w : BitVec 32) : dcL1.all (run (fun i => w.getLsbD i) dcInvs) = dcADDm w := by
+  show ((dcOpcode 0b0110011 ++ dcFunct7Zero) ++ dcFunct3 0b000).all _ = _
+  rw [List.all_append, List.all_append, dcOpcode_all, dcFunct7Zero_all, dcFunct3_all]
+  rfl
+
+theorem dcL2_all (w : BitVec 32) : dcL2.all (run (fun i => w.getLsbD i) dcInvs) = dcXORm w := by
+  show ((dcOpcode 0b0110011 ++ dcFunct7Zero) ++ dcFunct3 0b100).all _ = _
+  rw [List.all_append, List.all_append, dcOpcode_all, dcFunct7Zero_all, dcFunct3_all]
+  rfl
+
+theorem dcL3_all (w : BitVec 32) : dcL3.all (run (fun i => w.getLsbD i) dcInvs) = dcSLTm w := by
+  show ((dcOpcode 0b0110011 ++ dcFunct7Zero) ++ dcFunct3 0b010).all _ = _
+  rw [List.all_append, List.all_append, dcOpcode_all, dcFunct7Zero_all, dcFunct3_all]
+  rfl
+
+theorem dcL4_all (w : BitVec 32) : dcL4.all (run (fun i => w.getLsbD i) dcInvs) = dcADDIm w := by
+  show (dcOpcode 0b0010011 ++ dcFunct3 0b000).all _ = _
+  rw [List.all_append, dcOpcode_all, dcFunct3_all]
+  rfl
+
+theorem dcL5_all (w : BitVec 32) : dcL5.all (run (fun i => w.getLsbD i) dcInvs) = dcBEQm w := by
+  show (dcOpcode 0b1100011 ++ dcFunct3 0b000).all _ = _
+  rw [List.all_append, dcOpcode_all, dcFunct3_all]
+  rfl
+
+theorem run_decoder_out (w : BitVec 32) :
+    run (fun i => w.getLsbD i) decoder.gates 79 = dcADDm w
+    ∧ run (fun i => w.getLsbD i) decoder.gates 95 = dcXORm w
+    ∧ run (fun i => w.getLsbD i) decoder.gates 111 = dcSLTm w
+    ∧ run (fun i => w.getLsbD i) decoder.gates 120 = dcADDIm w
+    ∧ run (fun i => w.getLsbD i) decoder.gates 129 = dcBEQm w
+    ∧ run (fun i => w.getLsbD i) decoder.gates 133 = dcValidm w
+    ∧ run (fun i => w.getLsbD i) decoder.gates 41 = !(w.getLsbD 9) := by
+  have hg : ∀ n : Nat, run (fun i => w.getLsbD i) decoder.gates n
+      = run (run (run (fun i => w.getLsbD i) dcInvs) dcGM) dcGO n := by
+    intro n
+    rw [decoder_gates_eq, run_append, run_append]
+  obtain ⟨v1, v2, v3, v4, v5⟩ := run_dcGM (run (fun i => w.getLsbD i) dcInvs)
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+  · rw [hg, dcGO_frame _ 79 (by norm_num), v1, dcL1_all]
+  · rw [hg, dcGO_frame _ 95 (by norm_num), v2, dcL2_all]
+  · rw [hg, dcGO_frame _ 111 (by norm_num), v3, dcL3_all]
+  · rw [hg, dcGO_frame _ 120 (by norm_num), v4, dcL4_all]
+  · rw [hg, dcGO_frame _ 129 (by norm_num), v5, dcL5_all]
+  · rw [hg, dcGO_val]
+    simp only [List.any_cons, List.any_nil, Bool.or_false]
+    rw [v1, v2, v3, v4, v5, dcL1_all, dcL2_all, dcL3_all, dcL4_all, dcL5_all]
+    simp [dcValidm, Bool.or_assoc]
+  · rw [hg, dcGO_frame _ 41 (by norm_num), dcGM_frame _ 41 (by norm_num)]
+    exact (run_dcInvs (fun i => w.getLsbD i)).2 9 (by norm_num)
+
+theorem sem_decoder (w : BitVec 32) :
+    sem decoder (fun i => w.getLsbD i)
+      = [dcADDm w, dcXORm w, dcSLTm w, dcADDIm w, dcBEQm w, dcValidm w] := by
+  obtain ⟨a1, a2, a3, a4, a5, a6, _⟩ := run_decoder_out w
+  show decoder.outs.map (run (fun i => w.getLsbD i) decoder.gates) = _
+  rw [decoder_outs_eq]
+  simp only [List.map_cons, List.map_nil, a1, a2, a3, a4, a5, a6]
+
+/-! ### The spec side, read off `ISA.decode`'s nested `if`-chain
+
+⭐ **Hazard (E) — the PARALLEL/SEQUENTIAL mismatch — is discharged HERE, by case
+analysis, not by an appeal to opcode-disjointness.** The circuit computes five
+matches in parallel and ORs them; `decode` is a nested `if`-chain with an
+interior `else none` (`ISA.lean:572`) *and* a fallthrough `none`
+(`ISA.lean:582`). `split_ifs` produces one goal per path — including both `none`
+paths — and each is closed by substituting the branch condition and evaluating
+the resulting concrete `BitVec` disequalities. Opcode-disjointness is what makes
+those disequalities discharge, and it is named separately below. -/
+
+theorem ctrlSpec_eq (w : BitVec 32) :
+    ctrlSpec w = [dcADDm w, dcXORm w, dcSLTm w, dcADDIm w, dcBEQm w, dcValidm w] := by
+  simp only [ctrlSpec, SaltWorks.ISA.decode, dcADDm, dcXORm, dcSLTm, dcADDIm, dcBEQm,
+    dcValidm, dcOpIs, dcF3Is, dcF7Z]
+  split_ifs with h1 h2 h3 h4 h5 h6 <;> simp_all
+
+/-! ### ⭐ THE UNCONDITIONAL THEOREM -/
+
+theorem decoder_correct (w : BitVec 32) : ctrlOf w = ctrlSpec w := by
+  rw [ctrlOf, sem_decoder, ctrlSpec_eq]
+
+theorem sem_decoder_eq_ctrlSpec (w : BitVec 32) :
+    sem decoder (fun i => w.getLsbD i) = ctrlSpec w := by
+  rw [sem_decoder, ctrlSpec_eq]
+
+/-! ### ⭐ C-D1 / hazard (A) — THE PROJECTION, STATED, ON BOTH SIDES
+
+*"Stating the projection is the whole argument"* (`Decoder.lean:56`) — and it was
+never stated. Here it is, twice. Two words that agree on the **17 bits the
+decoder is allowed to read** (opcode `0…6`, funct3 `12…14`, funct7 `25…31`) give
+the same six control bits — from the CIRCUIT (`decoder_ignores_rd_rs1_rs2`) and
+from the SPEC (`ctrlSpec_ignores_rd_rs1_rs2`). The 15 bits carrying `rd` (`7…11`),
+`rs1` (`15…19`) and `rs2` (`20…24`) may differ arbitrarily.
+
+⚠️ **`sem_congr_on` (`Sem.lean:157`) CANNOT PROVE THIS, and it is worth knowing
+why**: the inverter bank has one gate per word bit, *including the 15 data bits*,
+so "agreement on every net any gate reads" already forces agreement on all 32
+bits. The unread inverters are dead nets, and only computing the outputs shows
+it. -/
+
+theorem ctrl_projection (w w' : BitVec 32)
+    (hop : ∀ i, i < 7 → w.getLsbD i = w'.getLsbD i)
+    (hf3 : ∀ i, 12 ≤ i → i < 15 → w.getLsbD i = w'.getLsbD i)
+    (hf7 : ∀ i, 25 ≤ i → i < 32 → w.getLsbD i = w'.getLsbD i) :
+    sem decoder (fun i => w.getLsbD i) = sem decoder (fun i => w'.getLsbD i)
+      ∧ ctrlSpec w = ctrlSpec w' := by
+  have e0 : w.extractLsb' 0 7 = w'.extractLsb' 0 7 := by
+    rw [BitVec.eq_of_getLsbD_eq_iff]
+    intro j hj
+    simp only [BitVec.getLsbD_extractLsb', hj, decide_true, Bool.true_and, Nat.zero_add]
+    exact hop j hj
+  have e12 : w.extractLsb' 12 3 = w'.extractLsb' 12 3 := by
+    rw [BitVec.eq_of_getLsbD_eq_iff]
+    intro j hj
+    simp only [BitVec.getLsbD_extractLsb', hj, decide_true, Bool.true_and]
+    exact hf3 (12 + j) (by omega) (by omega)
+  have e25 : w.extractLsb' 25 7 = w'.extractLsb' 25 7 := by
+    rw [BitVec.eq_of_getLsbD_eq_iff]
+    intro j hj
+    simp only [BitVec.getLsbD_extractLsb', hj, decide_true, Bool.true_and]
+    exact hf7 (25 + j) (by omega) (by omega)
+  have hADD : dcADDm w = dcADDm w' := by simp [dcADDm, dcOpIs, dcF3Is, dcF7Z, e0, e12, e25]
+  have hXOR : dcXORm w = dcXORm w' := by simp [dcXORm, dcOpIs, dcF3Is, dcF7Z, e0, e12, e25]
+  have hSLT : dcSLTm w = dcSLTm w' := by simp [dcSLTm, dcOpIs, dcF3Is, dcF7Z, e0, e12, e25]
+  have hADI : dcADDIm w = dcADDIm w' := by simp [dcADDIm, dcOpIs, dcF3Is, e0, e12]
+  have hBEQ : dcBEQm w = dcBEQm w' := by simp [dcBEQm, dcOpIs, dcF3Is, e0, e12]
+  have hVal : dcValidm w = dcValidm w' := by
+    simp only [dcValidm, hADD, hXOR, hSLT, hADI, hBEQ]
+  exact ⟨by rw [sem_decoder, sem_decoder, hADD, hXOR, hSLT, hADI, hBEQ, hVal],
+         by rw [ctrlSpec_eq, ctrlSpec_eq, hADD, hXOR, hSLT, hADI, hBEQ, hVal]⟩
+
+theorem ctrl_ignores_the_data_bits (w w' : BitVec 32)
+    (h : ∀ i, i < 32 → (i < 7 ∨ (12 ≤ i ∧ i < 15) ∨ 25 ≤ i) → w.getLsbD i = w'.getLsbD i) :
+    sem decoder (fun i => w.getLsbD i) = sem decoder (fun i => w'.getLsbD i)
+      ∧ ctrlSpec w = ctrlSpec w' :=
+  ctrl_projection w w'
+    (fun i hi => h i (by omega) (Or.inl hi))
+    (fun i h1 h2 => h i (by omega) (Or.inr (Or.inl ⟨h1, h2⟩)))
+    (fun i h1 h2 => h i h2 (Or.inr (Or.inr h1)))
+
+/-! ### Hazard (E) — disjointness, and BOTH paths to `none` -/
+
+theorem dc_opcodes_disjoint :
+    (0b0110011#7 ≠ 0b0010011#7) ∧ (0b0110011#7 ≠ 0b1100011#7)
+      ∧ (0b0010011#7 ≠ (0b1100011#7 : BitVec 7)) := by decide
+
+theorem dc_both_none_paths (w : BitVec 32) :
+    (w.extractLsb' 0 7 = 0b0110011#7 → w.extractLsb' 25 7 = 0#7 →
+      w.extractLsb' 12 3 ≠ 0#3 → w.extractLsb' 12 3 ≠ 4#3 → w.extractLsb' 12 3 ≠ 2#3 →
+      ctrlOf w = [false, false, false, false, false, false])
+    ∧ (w.extractLsb' 0 7 = 0b0110011#7 → w.extractLsb' 25 7 ≠ 0#7 →
+      ctrlOf w = [false, false, false, false, false, false]) := by
+  constructor
+  · intro hop hz h0 h4 h2
+    rw [ctrlOf, sem_decoder]
+    simp [dcADDm, dcXORm, dcSLTm, dcADDIm, dcBEQm, dcValidm, dcOpIs, dcF3Is, dcF7Z,
+      hop, hz, h0, h4, h2]
+  · intro hop hz
+    rw [ctrlOf, sem_decoder]
+    simp [dcADDm, dcXORm, dcSLTm, dcADDIm, dcBEQm, dcValidm, dcOpIs, dcF3Is, dcF7Z,
+      hop, hz]
+
+/-! ### Control 1 — the theorem IMPLIES the landed certificates, and more
+
+`decoder_plane_f7_zero` and `decoder_plane_f7_one` are `dcPlaneOK` at two values
+of `funct7`. What follows is `dcPlaneOK` at **every** `funct7`. -/
+
+theorem decoder_correct_implies_the_certificates :
+    (∀ f7 : Nat, dcPlaneOK f7 = true) ∧ dcFunct7OK = true := by
+  constructor
+  · intro f7
+    simp only [dcPlaneOK, List.all_eq_true]
+    intro op _ f3 _
+    simp [decoder_correct]
+  · simp only [dcFunct7OK, List.all_eq_true]
+    intro f7 _ f3 _
+    simp [decoder_correct]
+
+theorem plane_f7_zero_is_now_a_corollary : dcPlaneOK 0 = true :=
+  decoder_correct_implies_the_certificates.1 0
+theorem plane_f7_one_is_now_a_corollary : dcPlaneOK 1 = true :=
+  decoder_correct_implies_the_certificates.1 1
+theorem funct7_exhaustive_is_now_a_corollary : dcFunct7OK = true :=
+  decoder_correct_implies_the_certificates.2
+
+/-! ### ⭐ Control 2 — A MUTANT THE WHOLE SAMPLE ACCEPTS AND THE THEOREM REJECTS
+
+`decoderCut` is `decoder` with **one gate appended**: `isADD` additionally
+requires word bit 9 to be low. Bit 9 is `rd`'s bit 2 — one of the 15 bits hazard
+(A) is about.
+
+⛔ **The mutant is INVISIBLE TO THE ENTIRE SAMPLE, and this is proved rather than
+sampled**: `decoderCut_passes_the_whole_dcWord_family` says it agrees with
+`ctrlSpec` at **every** `dcWord op f3 f7` with `op < 512` — not merely at the
+3,056 certified points but at every point the certificates' *shape* can reach.
+It also passes all six reachability witnesses (`rd = 3` and `rd = 1` both have
+bit 9 low). And `decoderCut_fails_the_theorem` exhibits `ADD x4, x1, x2`, where
+it is wrong.
+
+*This control is symbolic on purpose.* The brute-force version — re-certifying
+the mutant over the 3,056 points by `decide +kernel` — was built first and
+**hit the memory cap** on the `funct7` sweep. So did the REAL `dcFunct7OK`, run
+as a control from an importing module: see the note at the end of this section. -/
+
+def decoderCut : Circ :=
+  { nIn := dcIn
+  , gates := decoder.gates ++ [(⟨134, .and 79 (dcNot 9)⟩ : Gate)]
+  , outs := [134, 95, 111, 120, 129, 133] }
+
+def ctrlOfCut (w : BitVec 32) : List Bool := sem decoderCut (fun i => w.getLsbD i)
+
+theorem sem_decoderCut (w : BitVec 32) :
+    ctrlOfCut w = [dcADDm w && !(w.getLsbD 9), dcXORm w, dcSLTm w, dcADDIm w,
+                   dcBEQm w, dcValidm w] := by
+  obtain ⟨a1, a2, a3, a4, a5, a6, a7⟩ := run_decoder_out w
+  have hg : ∀ n : Nat, run (fun i => w.getLsbD i) decoderCut.gates n
+      = upd (run (fun i => w.getLsbD i) decoder.gates) 134
+          ((Op.and 79 (dcNot 9)).eval (run (fun i => w.getLsbD i) decoder.gates)) n := by
+    intro n
+    show run (fun i => w.getLsbD i) (decoder.gates ++ _) n = _
+    rw [run_append]
+    rfl
+  show ([134, 95, 111, 120, 129, 133] : List Net).map
+      (run (fun i => w.getLsbD i) decoderCut.gates) = _
+  simp only [List.map_cons, List.map_nil, hg, upd_self,
+    upd_of_ne _ (by norm_num : (95 : Nat) ≠ 134),
+    upd_of_ne _ (by norm_num : (111 : Nat) ≠ 134),
+    upd_of_ne _ (by norm_num : (120 : Nat) ≠ 134),
+    upd_of_ne _ (by norm_num : (129 : Nat) ≠ 134),
+    upd_of_ne _ (by norm_num : (133 : Nat) ≠ 134)]
+  show [(run (fun i => w.getLsbD i) decoder.gates 79
+          && run (fun i => w.getLsbD i) decoder.gates 41), _, _, _, _, _] = _
+  rw [a1, a2, a3, a4, a5, a6, a7]
+
+theorem decoderCut_agrees_where_bit9_is_low (w : BitVec 32) (h : w.getLsbD 9 = false) :
+    ctrlOfCut w = ctrlOf w := by
+  rw [sem_decoderCut, ctrlOf, sem_decoder, h]
+  simp
+
+theorem dcWord_bit9 (op f3 f7 : Nat) (hop : op < 512) :
+    (dcWord op f3 f7).getLsbD 9 = false := by
+  simp only [dcWord, BitVec.getLsbD_ofNat, Nat.testBit_or, Nat.testBit_shiftLeft,
+    Nat.testBit_lt_two_pow (show op < 2 ^ 9 by norm_num; omega)]
+  norm_num
+
+theorem decoderCut_passes_the_whole_dcWord_family (op f3 f7 : Nat) (hop : op < 512) :
+    ctrlOfCut (dcWord op f3 f7) = ctrlSpec (dcWord op f3 f7) := by
+  rw [decoderCut_agrees_where_bit9_is_low _ (dcWord_bit9 op f3 f7 hop), decoder_correct]
+
+theorem decoderCut_passes_the_reachability_witnesses :
+    ctrlOfCut (SaltWorks.ISA.encode (.ADD 3 1 2))  = [true, false, false, false, false, true] ∧
+    ctrlOfCut (SaltWorks.ISA.encode (.XOR 3 1 2))  = [false, true, false, false, false, true] ∧
+    ctrlOfCut (SaltWorks.ISA.encode (.SLT 3 1 2))  = [false, false, true, false, false, true] ∧
+    ctrlOfCut (SaltWorks.ISA.encode (.ADDI 1 0 5)) = [false, false, false, true, false, true] ∧
+    ctrlOfCut (SaltWorks.ISA.encode (.BEQ 1 2 4))  = [false, false, false, false, true, true] ∧
+    ctrlOfCut 0x000010B7#32 = [false, false, false, false, false, false] := by
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩ <;>
+    (rw [decoderCut_agrees_where_bit9_is_low _ (by decide +kernel)]; decide +kernel)
+
+theorem decoderCut_fails_the_theorem :
+    ctrlOfCut (SaltWorks.ISA.encode (.ADD 4 1 2))
+      ≠ ctrlSpec (SaltWorks.ISA.encode (.ADD 4 1 2)) := by
+  decide +kernel
+
+theorem decoderCut_is_rejected : ¬ (∀ w : BitVec 32, ctrlOfCut w = ctrlSpec w) :=
+  fun h => decoderCut_fails_the_theorem (h _)
+
+theorem decoder_correct_implies_reachability :
+    ctrlOf (SaltWorks.ISA.encode (.ADD 3 1 2))  = [true, false, false, false, false, true] ∧
+    ctrlOf (SaltWorks.ISA.encode (.XOR 3 1 2))  = [false, true, false, false, false, true] ∧
+    ctrlOf (SaltWorks.ISA.encode (.SLT 3 1 2))  = [false, false, true, false, false, true] ∧
+    ctrlOf (SaltWorks.ISA.encode (.ADDI 1 0 5)) = [false, false, false, true, false, true] ∧
+    ctrlOf (SaltWorks.ISA.encode (.BEQ 1 2 4))  = [false, false, false, false, true, true] ∧
+    ctrlOf 0x000010B7#32 = [false, false, false, false, false, false] := by
+  simp only [decoder_correct]
+  decide +kernel
+
+/-! ### Pre-registered checks C-D3, C-D6, C-D7
+
+**C-D3 is NAMED, not fixed.** `andChain`'s empty arm returns net **0**, and net 0
+is word bit 0 — the opcode's LSB, not a fresh constant. A match built from an
+empty literal list would silently take `w[0]` as its match signal. Today that is
+unreachable because every `dcMatches` entry has at least ten literals — **a fact
+about the current table, not a property of `andChain`** — so the fact is stated
+and the table invariant is stated beside it. (The compiler seat states the
+net-number half in `Decoder.lean` itself; the half below is about the
+SEMANTICS: running the empty gate list leaves net 0 holding the input bit.)
+
+**C-D4 (dead inverters) is the compiler seat's, corrected at `f287785` to 17 —
+and 17 is what an independent count here gives too**: bits 0 and 1 are set in all
+three opcodes, so their inverters are dead for the same reason as bits 7-11 and
+15-24. Nothing further is spent on it. -/
+
+theorem andChain_empty_arm_is_word_bit_zero (b : Nat) (E : Env) :
+    (andChain b ([] : List Net)).2.1 = 0
+      ∧ run E (andChain b ([] : List Net)).1 0 = E 0 := by
+  rw [andChain_nil]
+  exact ⟨rfl, rfl⟩
+
+theorem dcMatches_are_all_long : dcMatches.all (fun m => 10 ≤ m.length) = true := by decide
+
+theorem decoder_out_length (w : BitVec 32) :
+    (sem decoder (fun i => w.getLsbD i)).length = 6 := by
+  rw [sem_decoder]
+  rfl
+
+theorem valid_is_false_on_every_undecodable_word (w : BitVec 32)
+    (h : SaltWorks.ISA.decode w = none) :
+    ctrlOf w = [false, false, false, false, false, false] := by
+  rw [decoder_correct, ctrlSpec, h]
+
+/-! ### C-D1, split so each side is its own named theorem -/
+
+theorem decoder_ignores_rd_rs1_rs2 (w w' : BitVec 32)
+    (hop : ∀ i, i < 7 → w.getLsbD i = w'.getLsbD i)
+    (hf3 : ∀ i, 12 ≤ i → i < 15 → w.getLsbD i = w'.getLsbD i)
+    (hf7 : ∀ i, 25 ≤ i → i < 32 → w.getLsbD i = w'.getLsbD i) :
+    sem decoder (fun i => w.getLsbD i) = sem decoder (fun i => w'.getLsbD i) :=
+  (ctrl_projection w w' hop hf3 hf7).1
+
+theorem ctrlSpec_ignores_rd_rs1_rs2 (w w' : BitVec 32)
+    (hop : ∀ i, i < 7 → w.getLsbD i = w'.getLsbD i)
+    (hf3 : ∀ i, 12 ≤ i → i < 15 → w.getLsbD i = w'.getLsbD i)
+    (hf7 : ∀ i, 25 ≤ i → i < 32 → w.getLsbD i = w'.getLsbD i) :
+    ctrlSpec w = ctrlSpec w' :=
+  (ctrl_projection w w' hop hf3 hf7).2
+
+
+/-! ### ⚠️ A MEASURED LIMIT OF THE CERTIFICATE SUITE, found while building Control 2
+
+The first version of the mutant control re-certified `decoderCut` over the 3,056
+sampled points by `decide +kernel`, mirroring `Decoder.lean`'s three theorems.
+Two of the three go through from here; the third does not:
+
+* `dcPlaneOKCut 0` and `dcPlaneOKCut 1` — 1,024 points each — **pass**.
+* the `funct7` sweep (128 `funct7` × 8 `funct3` at one opcode) **hits the memory
+  cap**: `excessive memory consumption detected at 'interpreter'`.
+
+⛔ **AND THE CONTROL SAYS IT IS NOT THE MUTANT'S FAULT.** Re-proving the REAL,
+LANDED `dcFunct7OK = true` — verbatim, by `decide +kernel` — from a module that
+merely *imports* `Decoder.lean` hits the same cap. So **`decoder_funct7_exhaustive`
+is module-local: it reduces inside `Decoder.lean` and is out of reach of any
+importing module.** The plausible mechanism is `dcWord`'s `|||` over 128 distinct
+`funct7 <<< 25` values — `Nat.lor` is not a kernel-accelerated operation and
+nothing is shared across the sweep, whereas the two plane certificates hold
+`funct7` fixed and share one shifted value.
+
+⇒ The control above is therefore **symbolic**, which is strictly stronger anyway:
+it covers the whole `dcWord` family rather than 3,056 of its points, and it costs
+no memory. *Recorded because a downstream node that plans to re-use a landed
+`decide +kernel` certificate by re-deriving it should expect this.*
+-/
+
 #audit_axioms all_congr_mem
 #audit_axioms andChain_nil andChain_one andChain_cons2 andChain_out_ge
 #audit_axioms run_andChain_frame run_andChain
+#audit_axioms dcL1 dcL2 dcL3 dcL4 dcL5 dcG1 dcG2 dcG3 dcG4 dcG5 dcGM dcGO
+#audit_axioms decoder_gates_eq decoder_outs_eq
+#audit_axioms dcOut1 dcOut2 dcOut3 dcOut4 dcOut5 dcOutO
+#audit_axioms dcL1_lt dcL2_lt dcL3_lt dcL4_lt dcL5_lt
+#audit_axioms dcL1_ne dcL2_ne dcL3_ne dcL4_ne dcL5_ne
+#audit_axioms dcG1_frame dcG2_frame dcG3_frame dcG4_frame dcG5_frame dcGO_frame
+#audit_axioms dcG1_val dcG2_val dcG3_val dcG4_val dcG5_val dcGO_val
+#audit_axioms run_dcGM dcGM_frame
+#audit_axioms run_dcInvs run_dcInvs_lit run_dcInvs_field field_all_eq_extract
+#audit_axioms dcOpIs dcF3Is dcF7Z dcOpcode_all dcFunct3_all dcFunct7Zero_all
+#audit_axioms dcADDm dcXORm dcSLTm dcADDIm dcBEQm dcValidm
+#audit_axioms dcL1_all dcL2_all dcL3_all dcL4_all dcL5_all
+#audit_axioms run_decoder_out sem_decoder ctrlSpec_eq
+#audit_axioms decoder_correct sem_decoder_eq_ctrlSpec
+#audit_axioms ctrl_projection ctrl_ignores_the_data_bits
+#audit_axioms decoder_ignores_rd_rs1_rs2 ctrlSpec_ignores_rd_rs1_rs2
+#audit_axioms dc_opcodes_disjoint dc_both_none_paths
+#audit_axioms decoder_correct_implies_the_certificates
+#audit_axioms plane_f7_zero_is_now_a_corollary plane_f7_one_is_now_a_corollary
+#audit_axioms funct7_exhaustive_is_now_a_corollary
+#audit_axioms decoderCut ctrlOfCut sem_decoderCut decoderCut_agrees_where_bit9_is_low
+#audit_axioms dcWord_bit9 decoderCut_passes_the_whole_dcWord_family
+#audit_axioms decoderCut_passes_the_reachability_witnesses
+#audit_axioms decoderCut_fails_the_theorem decoderCut_is_rejected
+#audit_axioms decoder_correct_implies_reachability
+#audit_axioms andChain_empty_arm_is_word_bit_zero dcMatches_are_all_long
+#audit_axioms decoder_out_length valid_is_false_on_every_undecodable_word
 
 end DecoderSemantics
 
