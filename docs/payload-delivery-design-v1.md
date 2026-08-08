@@ -4,16 +4,15 @@
 ### from docs/silicon-frame-protocol-0806.md and confirmed in session.
 ### Refutation assignments at the end. Sequenced AFTER the c1/(3,2)
 ### dispatches — this block costs no seat time until those land.
-### Refutation state (8/8 13:0x): ALL ③ READS COMPLETE AND FOLDED.
-### SILICON clean (§1, + the 12:59 hazard → probe re-scoped).
-### COMPILER clause-3 (§4/§5) AND the A/B pass (12:28): H3 added to
-### §2; L1 hypotheses fixed; L2 restated for the real artifact (Circ
-### fabric, claim-gated OR, act/sel hypothesis); L3 re-routed via
-### bnC_output_frames_are_the_fold; L4 NAMED = the σ-composition,
-### C-class, the summit. MATH: σ struck, L0 added, act_stb probe
-### open (silicon's, dispatched 13:06). This is v2 of the
-### decomposition — WAVES DISPATCH ONLY AFTER the seats read v2
-### (draft-until-refuted, round 2).
+### Round-2 state (8/8 13:3x): MATH's read IN and FOLDED — the
+### wave-blocker (hin/h0) is H4; F3 stands (the companion is
+### literal-k; the ∀-P alarm was false); F1/F2/F4 residues folded.
+### PROBE CLOSED: free-run, double-confirmed (silicon 13:31 + math
+### 13:33, independently, same bytes). SILICON + COMPILER round-2
+### reads OPEN at their seams; silicon's §8 half-surface measurement
+### runs. WAVES fire after those reads AND phase 3 closes; L1/L2
+### land in the HDL slot post-surgery, L3/L4 Equiv-side after.
+### (v1 history: round-1 folds at 6b8dc71/d71a59f/bdb75f2.)
 
 ## 0. WHAT B4 DID AND DID NOT CERTIFY
 
@@ -64,6 +63,16 @@ For the k=3 fabric under:
   WRONG payload tail (kernel-exhibited, `l1_fails_when_rst_returns` /
   `l1_failure_is_a_mid_frame_flip`) — exactly the failure class this
   block exists to certify against;
+- H4 (the wire-tie — math's round-2 WAVE-BLOCKER, 13:33): B4's `hin`
+  binder — `∀ i : Fin 8, tr.map (fun c => c.getD (1 + i.val) false)
+  = cFrame true (d i) (p i)` — is the ONLY thing tying the abstract
+  `d i`/`p i` to the fabric's wires; without it the CLAIM has no
+  referent and cannot be transcribed into Lean. B4's `h0 : StageOK
+  st tr L 0` (the stage-0 invariant, transported inward by
+  `stageOK_succ`) rides with it. §2's hypothesis set is B4's binder
+  list IN FULL — nothing summarized away. Bonus from the same read:
+  `p : Fin 8 → List Bool` is arbitrary-length, so B4's sorter leg is
+  ALREADY ∀-P;
 
 CLAIM: for every line i and every t ∈ [2k, 2k+P):
   `output (dest i) t = input i t`.
@@ -78,7 +87,11 @@ Riders:
   speaks in `dest` directly. A σ parameter would be either dead
   (= id — one binder stronger than needed, for no gain) or false
   (≠ id contradicts §0). Any bijection object a successor campaign
-  needs (partial load) is constructed and priced there.
+  needs (partial load) is constructed and priced there. (The
+  per-comparator σ's that DO get priced are L4's — anonymous,
+  sorter-only, never mentioning `dest`: different objects from the
+  struck statement-level σ, and their pricing lives in L4, not here —
+  math's round-2 F1 residue.)
 - **Header window excluded by design**: output cycles [0, 2k) are
   don't-care (§4); the certificate says NOTHING about them. A clause
   claiming them would be false and the spec forbids reading them.
@@ -116,9 +129,10 @@ Riders:
   previously-cited `…_rejects_idle_sorts_low` is a MUTATION CONTROL,
   not the statement); and two ACTIVE lines with EQUAL destinations —
   the tie SPLICES the payload (`ceC_pair_tie_splices_the_payload`
-  :307), excluded at interior comparators only by StageOK's
-  distinctness clause, which is a B4 HYPOTHESIS, not a consequence of
-  H1. The statement carries it.
+  :307), excluded by StageOK's distinctness clause — a B4 hypothesis
+  AT STAGE 0 (SeamJoinB:193), transported inward by `stageOK_succ`
+  (SeamJoinA:313), not a consequence of H1 (math's round-2 F2
+  residue: "interior" was loose). The statement carries it.
 - **L2 (banyan element — RESTATED at compiler's ③ pass; the draft's
   form was refuted TWICE)**: there is no sequential banyan in the
   fleet — `fabric` (Banyan.lean:132) is a `Circ`: no state, no cycle
@@ -174,10 +188,13 @@ Riders:
   whole over ports, or the statement carries `outs.length` explicitly.
   At k=3 the port coverage is PINNED-BY-COMPANION (`fabric3_shape`'s
   literal 8 + `hdi` injectivity ⇒ σ∘dest onto), so the k=3 wave is
-  safe — but the companion stops applying at the ∀-P generalization
-  while the claim's shape does not change. The Lean statement for
-  L3/CLAIM carries the port-coverage clause EXPLICITLY, never by
-  companion.
+  safe — but the companion is a LITERAL-k fact (`fabric3_shape`
+  contains no P anywhere — math's round-2 F3, the finding that
+  survived): it stops applying when k generalizes, and blaming ∀-P
+  for it was a false alarm. The Lean statement for L3/CLAIM carries
+  the port-coverage clause EXPLICITLY, never by companion — concrete
+  shape (F4 residue): `∀ o, o < batcherNetC.nOut → ∃ i : Fin 8,
+  d i = o`, closed by `seam_hyps_force_full_load`.
 - TRAP: the certificate must quantify over the INPUT streams as free
   trace variables (B4's driven-trace form), never over a sampled
   environment; `_on_sample` names are for disclosed-scope certs only.
@@ -193,23 +210,29 @@ Riders:
   statement. Separate campaign; the idle riders here are its hooks.
 - **P as a parameter**: state over the tapeout's P=8 first; the
   ∀-P generalization is free-looking but touches the frame counter —
-  do not bundle it into the first wave. AND (clause-3 refutation): at
-  ∀-P the port-coverage companion (`fabric3_shape`'s literal 8) stops
-  applying — the generalized statement must carry port coverage
-  explicitly or it inherits the index-wise blindness the repaired §4
-  trap names.
+  do not bundle it into the first wave. CORRECTED at math's round-2
+  F3: the port-coverage companion is literal-k, NOT P-bound — it
+  survives ∀-P and dies at ∀-k, so it was never a reason to defer P;
+  and B4's sorter leg is ALREADY ∀-P (`p` arbitrary-length, per H4's
+  read). The deferral's remaining ground is the frame counter alone;
+  the generalized statement still carries port coverage explicitly
+  per §4.
 
-- **OPEN PROBE (math's ③ suspicion, RE-SCOPED at silicon's 12:59
-  flag)**: the factual question stands — does act_stb reset/align the
-  frame counter, or does it free-run? — but its H2 consequence now
-  routes THROUGH THE SPEC: §5's "second" is the conclusion of the
-  spec's own one-complete-frame argument (:174), so a first-act_stb
-  H2 would out-claim the spec, and under citation discipline the
-  block cannot source it from §5. If the probe finds counter-reset
-  at the RTL, the path is: spec AMENDMENT first (silicon's file, on
-  silicon's evidence, its own bar), block cites the amended spec
-  second. DEFAULT UNCHANGED either way: H2 stays spec-quoted at
-  second-act_stb. Silicon's domain, queued behind its ④ pass.
+- **PROBE CLOSED (8/8 13:3x — answered INDEPENDENTLY by silicon
+  13:31 and math 13:33, same bytes, same verdict)**: the counter
+  FREE-RUNS. banyan_fabric.v:44-47 — the only zeroing paths are
+  rst_n, sof, and the natural wrap; act_stb is a pure DECODE of cnt
+  (:57), so the reset direction is structurally impossible (an
+  output cannot reset its own source; spec :191/:202 states the
+  free-run in prose). NO spec amendment triggered; H2's
+  second-act_stb clause is LOAD-BEARING and stays, spec-quoted, as
+  drafted. OPEN SUCCESSOR (silicon's own artifact, pre-registered
+  13:31): spec §8's validation models only HALF the init surface —
+  frame_sim.py has no counter at all — and silicon is measuring the
+  missing half against the real RTL; if that confirms
+  conservative-on-registers + inert-on-phase, the consequence lands
+  on the SPEC's §5 wording first (a sof-phase premise), the block
+  cites the amended spec second.
 
 ## 6. REFUTATION ASSIGNMENTS (draft-until-refuted)
 
