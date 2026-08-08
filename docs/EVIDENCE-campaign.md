@@ -1585,6 +1585,44 @@ value is that a skeptic can check them.**
 | Repo | Author emails | Purge exposure |
 |---|---|---|
 | **saltworks** | `jasonh@gmail.com` 78 · `the pre-remap address` 6 — **zero outside-domain commits** | ✅ **NONE. Born clean** (as Amendment 2 Correction 4 said it would be). Every saltworks SHA in this file survives. |
+
+⛔⛔ **THAT VERDICT IS TRUE ON THE AXIS IT MEASURED AND FALSE AS A SENTENCE —
+CORRECTED 2026-08-08 10:2x, and the axis it missed covers nearly half the repo.**
+
+*The table above measures ONE axis — author email — and declares saltworks purge
+exposure `NONE`. **It never measured session trailers.***
+
+```
+AXIS 1  AUTHOR EMAIL      re-measured 2026-08-08:  jasonh 558 · silicon-acct 6 · outside-domain 0
+                          ✅ the NONE verdict STANDS on this axis
+                          ⚠️ (the table's "78" is stale by ~7×; total is now 564)
+AXIS 2  SESSION TRAILERS  264 of 564 commits carry `Claude-Session`
+                          ⛔ NEVER MEASURED — and it is ~47% of the repo's history
+```
+🔑 ***A purge planner reading "saltworks: exposure NONE" concludes there is no
+saltworks purge work. There is: 264 commits carry a trailer, sixteen of them
+landed on 2026-08-08 alone, and six of those sixteen are this seat's own.***
+
+⚖️ **THE CONVENTION AND THE BACKLOG ARE DIFFERENT OBJECTS** *(maestro, ratified
+10:23 after this seat refuted the original justification — "a right ruling on a
+wrong reason is half a ruling; it now has the right reason")*:
+```
+CONVENTION  future commits carry no trailers   ✅ settled 10:21, costs nothing,
+                                                  and it stands on its MERITS —
+                                                  new trailers only grow purge scope
+BACKLOG     the 264 already in history         ⛔ PURGE-SCOPE. Not fixed by a
+                                                  convention. Recorded here because
+                                                  this file is what a purge planner reads
+```
+📌 **ACTION, one line in the purge brief: *strip session trailers* joins the
+purge's scope alongside the author-domain rewrite.** *And the count grows every
+day the convention is mistaken for something retroactive.*
+
+⭐ ***AND THE SHAPE IS DAY 3'S OWN PRINCIPLE, IN THIS FILE, IN THIS SEAT'S
+HANDWRITING: a `NONE` that is a TRUE reading of an adjacent object — the author
+axis — standing where a reader will take it for the whole question.*** *It sat
+here unchallenged because nobody, including its author, asked "exposure to
+WHAT?"*
 | **salt** | **1,108 of 1,995 under the outside domain** | ⛔ **Total.** Every salt SHA dangles. |
 
 This file cites **25 short SHAs**; the salt-side ones — math's source-sweep
