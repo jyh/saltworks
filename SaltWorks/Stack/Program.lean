@@ -10,6 +10,7 @@ import SaltWorks.HDL.StateCodec
 import SaltWorks.HDL.C4
 import SaltWorks.HDL.Bitwise
 import SaltWorks.HDL.PcNext
+import SaltWorks.HDL.AluSelect
 
 /-!
 # STACK-S2 — THE PROGRAM: an agent-written bitonic sort in Slice A
@@ -4696,6 +4697,725 @@ theorem sem_pcAdd_off_the_sample :
 
 end OrganSemantics
 
+/-! ## ⭐⭐ THE ALU OUTPUT SELECT — AND WHAT ITS CERTIFICATE QUANTIFIES OVER
+
+⚠️ **READ THIS BEFORE ASSUMING `aluSelect` WAS ALREADY GENERAL.**
+`AluSelect.lean:222` carries a driver, a predicate and two theorems:
+
+```
+def asOneHot (m sel : Nat) : Env := ...      -- result m all-ones, the other nine all-zero
+def asBit0 (m sel : Nat) : Bool := (sem aluSelect (asOneHot m sel)).getD 0 false
+def asSelectsOK (m : Nat) : Bool := (List.range 16).all fun sel => asBit0 m sel == decide (sel = m)
+theorem aluSelect_selects_on_sample      : asSelectsOK 3 = true := by decide +kernel
+theorem aluSelect_selects_on_sample_last : asSelectsOK 9 = true := by decide +kernel
+```
+
+and a docstring reading *"all sixteen select values, kernel-checked"*. **That
+sentence is true about `sel` and silent about everything else.** Measured:
+
+| axis | size of the axis | what the two theorems cover |
+|---|---:|---|
+| `sel`, the select value | 16 | ⭐ **ALL 16 — genuinely exhaustive** |
+| `m`, which operand is live | unbounded | ⛔ **TWO POINTS: `m = 3` and `m = 9`** |
+| the 320 operand-result bits | `2^320` | ⛔ **one pattern per `m`** — all-ones in slot `m`, all-zero elsewhere; the driver cannot paint any other picture |
+| the 4 select-input bits | 16 | ✅ covered, and this is the `sel` axis |
+| the output | 32 bits | ⛔ **BIT 0 ONLY** — `asBit0` is `getD 0` |
+
+⇒ **`aluSelect` has `2^324` input valuations and 32 outputs. The certificate
+drives 32 of them and reads one output bit.** *`sel` is the universal argument;
+`m` is the sampled one; the operand bits are not an axis of the certificate at
+all.*
+
+⛔ **AND `asSelectsOK` IS NOT A UNIVERSALLY TRUE STATEMENT ABOUT `m`.**
+`asSelectsOK_fails_at_ten` below proves `asSelectsOK 10 = false`: at the first
+PAD slot the tree correctly returns `false` while `decide (10 = 10)` is `true`.
+The predicate holds exactly on `m < 10 ∨ 16 ≤ m`, and both proved points sit
+inside the first range. *So "the certificate passes" is not even a property the
+block has for all `m` — it is a property of the ten real operand slots, which is
+what `asSelectsOK_of_lt` proves outright.*
+
+## What lands here
+
+`sem_aluSelect` is universal in **every one of the 324 inputs** — arbitrary
+operand bits, arbitrary select bits, arbitrary garbage on the internal nets —
+and pins **all 32 outputs**:
+
+```
+sem aluSelect E = (List.range 32).map fun k =>
+  if asSelOf E < asOps then E (asRes (asSelOf E) k) else false
+```
+
+read in the block's own vocabulary (`asSelOf` is the four select nets as a
+number, LSB first; `asRes r k` is bit `k` of result `r`; `asOps = 10`). It says
+the block is a 16:1 mux whose top six sources are tied low — which is exactly
+the design claim `asPad = 16` makes and which nothing checked. `asSelectsOK_of_lt`
+then recovers the sampled predicate for **all ten** real operands as a corollary,
+so this supersedes the certificate rather than restating it.
+
+## ⭐ WHICH LANDED MACHINERY TRANSFERRED, AND WHICH DID NOT
+
+*Measured before proving, per the two briefs that were wrong about this:*
+
+* `run_pointwise` — **did NOT transfer.** `aluSelect` has no pointwise block.
+  Apart from one `const` and four inverters, every gate is part of a mux triple
+  whose fanin is another gate's output, so there is no row of gates that all read
+  only primary inputs.
+* `run_orChain` — **did NOT transfer.** `aluSelect` contains no `orChain`; its
+  reduction is a **tree**, not a chain, and a tree's levels are independent
+  blocks in series rather than a fold.
+* `sem_adder32`'s carry induction — **no.** No carry, no arithmetic.
+* What DID transfer is the **method**: a frame lemma plus an induction carrying
+  an invariant, and `Sem.lean`'s `run_of_unwritten` / `run_append`.
+
+⭐ **THE NEW GENERIC PIECE IS `run_muxRow`** — a row of `n` two-to-one muxes,
+three gates each, proved generically over the base net, both source functions,
+both select nets and `n`. It is to selectors what `run_pointwise` is to bitwise
+blocks: `aluSelect`'s 1,440 mux gates are **four instances of it** (widths
+8/4/2/1), and any later block emitting `and/and/or` mux triples inherits it.
+
+## The three shapes, in series
+
+```
+1 gate     const false                        the shared pad source
+4 gates    not sel[j]                         one inverter per select bit, shared by every mux
+1440 gates 32 independent 4-level mux trees   45 gates per output bit, 15 muxes of 3 gates
+```
+
+Bit `k`'s tree occupies nets `329 + 45k … 329 + 45k + 44` and reads only primary
+inputs, the pad and the four inverters — so the 32 trees are proved once,
+generically in `k`, and composed by an induction whose frame is `m < 329`.
+
+⛔ **`C4Spec` IS NOT CLOSED BY THIS, AND NOTHING HERE CLAIMS IT IS.** `core` does
+not exist. `aluField_is_aluSelect_add` is the service a `core` assembly would
+apply, in the shape `addField_is_adder32` performs for the adder.
+
+⚠️ **THE `Net` TRAP COST THIS NODE ITS ONLY REWORK.** `abbrev Net := Nat`, and
+`omega` drops a `Net`-typed goal on the floor — it reported "no usable
+constraints" for `320 + j < 320`. Every net-arithmetic obligation below therefore
+goes through a `Nat` mirror (`asB`) or a `Nat`-binder restatement
+(`asOneHot_eq`, `asDrive_eq`, `asOffEnv_eq`), whose whole content is to move a
+definition's own binder from `Net` to `Nat`.
+-/
+
+section AluSelectSemantics
+
+open SaltWorks.HDL hiding seenWord
+
+/-! ## The generic mux row -/
+
+def muxRow (base : Nat) (p q : Nat → Net) (s t : Net) (n : Nat) : List Gate :=
+  (List.range n).flatMap fun i =>
+    [(⟨base + 3 * i,     .and (p i) s⟩ : Gate),
+     ⟨base + 3 * i + 1, .and (q i) t⟩,
+     ⟨base + 3 * i + 2, .or (base + 3 * i) (base + 3 * i + 1)⟩]
+
+theorem muxRow_succ (base : Nat) (p q : Nat → Net) (s t : Net) (n : Nat) :
+    muxRow base p q s t (n + 1)
+      = muxRow base p q s t n
+          ++ [(⟨base + 3 * n,     .and (p n) s⟩ : Gate),
+              ⟨base + 3 * n + 1, .and (q n) t⟩,
+              ⟨base + 3 * n + 2, .or (base + 3 * n) (base + 3 * n + 1)⟩] := by
+  simp [muxRow, List.range_succ]
+
+theorem run_three (F : Env) (b : Nat) (a1 a2 s t : Net) (h2 : a2 < b) (ht : t < b) :
+    run F [(⟨b, .and a1 s⟩ : Gate), ⟨b + 1, .and a2 t⟩, ⟨b + 2, .or b (b + 1)⟩] (b + 2)
+      = ((F a1 && F s) || (F a2 && F t)) := by
+  have e4 : ¬ (a2 = b) := Nat.ne_of_lt h2
+  have e5 : ¬ (t = b) := Nat.ne_of_lt ht
+  simp [Op.eval, upd, e4, e5]
+
+theorem run_three_frame (F : Env) (b m : Nat) (a1 a2 s t : Net)
+    (hm : ¬ (b ≤ m ∧ m ≤ b + 2)) :
+    run F [(⟨b, .and a1 s⟩ : Gate), ⟨b + 1, .and a2 t⟩, ⟨b + 2, .or b (b + 1)⟩] m = F m := by
+  have e0 : ¬ (m = b) := by omega
+  have e1 : ¬ (m = b + 1) := by omega
+  have e2 : ¬ (m = b + 2) := by omega
+  simp [Op.eval, upd, e0, e1, e2]
+
+theorem run_muxRow (E : Env) (base : Nat) (p q : Nat → Net) (s t : Net)
+    (hs : s < base) (ht : t < base) :
+    ∀ n : Nat, (∀ i : Nat, i < n → p i < base ∧ q i < base) →
+      (∀ m : Nat, m < base → run E (muxRow base p q s t n) m = E m)
+      ∧ (∀ i : Nat, i < n → run E (muxRow base p q s t n) (base + 3 * i + 2)
+           = ((E (p i) && E s) || (E (q i) && E t))) := by
+  intro n
+  induction n with
+  | zero => intro _; exact ⟨fun m _ => rfl, fun i hi => absurd hi (Nat.not_lt_zero i)⟩
+  | succ n ih =>
+    intro hb
+    obtain ⟨hfr, hval⟩ := ih (fun i hi => hb i (Nat.lt_succ_of_lt hi))
+    obtain ⟨hpn, hqn⟩ := hb n (Nat.lt_succ_self n)
+    refine ⟨?_, ?_⟩
+    · intro m hm
+      rw [muxRow_succ, run_append, run_three_frame _ _ _ _ _ _ _ (by omega)]
+      exact hfr m hm
+    · intro i hi
+      rw [muxRow_succ, run_append]
+      rcases Nat.lt_or_ge i n with hin | hin
+      · rw [run_three_frame _ _ _ _ _ _ _ (by omega)]
+        exact hval i hin
+      · have hEq : i = n := Nat.le_antisymm (Nat.le_of_lt_succ hi) hin
+        subst hEq
+        rw [run_three _ (base + 3 * i) (p i) (q i) s t
+            (Nat.lt_of_lt_of_le hqn (Nat.le_add_right base (3 * i)))
+            (Nat.lt_of_lt_of_le ht (Nat.le_add_right base (3 * i))),
+          hfr (p i) hpn, hfr s hs, hfr (q i) hqn, hfr t ht]
+
+theorem mux_pick (a b c : Bool) : ((a && !c) || (b && c)) = (if c then b else a) := by
+  cases c <;> simp
+
+/-! ## The block's arithmetic, in `Nat` -/
+
+theorem asOps_eq : asOps = 10 := rfl
+theorem asW_eq : asW = 32 := rfl
+theorem asRes_eq (r k : Nat) : asRes r k = r * 32 + k := rfl
+theorem asSel_eq (j : Nat) : asSel j = 320 + j := rfl
+theorem asNot_eq (j : Nat) : asNot j = 325 + j := rfl
+theorem asZero_eq : asZero = 324 := rfl
+
+/-- Base of level `j` of bit `k`'s tree, as a `Nat` `omega` can read. -/
+def asB (k j : Nat) : Nat := 329 + 45 * k + 3 * asBelow j
+
+theorem asBase_eq (k j i : Nat) : asBase k j i = asB k j + 3 * i := by
+  show 324 + 1 + 4 + (k * 15 + asBelow j + i) * 3 = 329 + 45 * k + 3 * asBelow j + 3 * i
+  omega
+
+theorem asB0 (k : Nat) : asB k 0 = 329 + 45 * k := by show 329 + 45 * k + 3 * 0 = _; omega
+theorem asB1 (k : Nat) : asB k 1 = 329 + 45 * k + 24 := by show 329 + 45 * k + 3 * 8 = _; omega
+theorem asB2 (k : Nat) : asB k 2 = 329 + 45 * k + 36 := by show 329 + 45 * k + 3 * 12 = _; omega
+theorem asB3 (k : Nat) : asB k 3 = 329 + 45 * k + 42 := by show 329 + 45 * k + 3 * 14 = _; omega
+
+theorem asOut_eq (k j i : Nat) : asOut k j i = asB k j + 3 * i + 2 := by
+  show asBase k j i + 2 = _
+  rw [asBase_eq]
+
+theorem asB_mono01 (k : Nat) : asB k 0 < asB k 1 := by rw [asB0, asB1]; omega
+theorem asB_mono12 (k : Nat) : asB k 1 < asB k 2 := by rw [asB1, asB2]; omega
+theorem asB_mono23 (k : Nat) : asB k 2 < asB k 3 := by rw [asB2, asB3]; omega
+
+theorem asPrev_0 (k l : Nat) : asPrev k 0 l = if 10 ≤ l then 324 else l * 32 + k := by
+  show (if l ≥ asOps then asZero else asRes l k) = _
+  rfl
+
+theorem asPrev_1' (k l : Nat) : asPrev k 1 l = asOut k 0 l := rfl
+theorem asPrev_2' (k l : Nat) : asPrev k 2 l = asOut k 1 l := rfl
+theorem asPrev_3' (k l : Nat) : asPrev k 3 l = asOut k 2 l := rfl
+
+/-! ## The gate list, cut into a prefix and 32 independent bit trees -/
+
+def asL (k j : Nat) : List Gate := (List.range (asLevelWidth j)).flatMap (asMux k j)
+def asBitGates (k : Nat) : List Gate := asL k 0 ++ (asL k 1 ++ (asL k 2 ++ asL k 3))
+def asBodyGates (n : Nat) : List Gate := (List.range n).flatMap asBitGates
+def asPreGates : List Gate :=
+  (⟨asZero, .const false⟩ : Gate)
+    :: (List.range asSelBits).map (fun j => (⟨asNot j, .not (asSel j)⟩ : Gate))
+
+theorem asBitGates_eq (k : Nat) :
+    (List.range asSelBits).flatMap
+        (fun j => (List.range (asLevelWidth j)).flatMap (asMux k j)) = asBitGates k := by
+  show asL k 0 ++ (asL k 1 ++ (asL k 2 ++ (asL k 3 ++ []))) = _
+  rw [List.append_nil]
+  rfl
+
+theorem aluSelect_gates_eq : aluSelect.gates = asPreGates ++ asBodyGates 32 := by
+  have hf : (fun k => (List.range asSelBits).flatMap
+        (fun j => (List.range (asLevelWidth j)).flatMap (asMux k j))) = asBitGates :=
+    funext asBitGates_eq
+  show asPreGates ++ (List.range asW).flatMap
+      (fun k => (List.range asSelBits).flatMap
+        (fun j => (List.range (asLevelWidth j)).flatMap (asMux k j))) = _
+  rw [hf]
+  rfl
+
+theorem asL_eq (k j : Nat) :
+    asL k j = muxRow (asB k j) (fun i => asPrev k j (2 * i)) (fun i => asPrev k j (2 * i + 1))
+        (asNot j) (asSel j) (asLevelWidth j) := by
+  have h : asMux k j = fun i =>
+      [(⟨asB k j + 3 * i, .and (asPrev k j (2 * i)) (asNot j)⟩ : Gate),
+       ⟨asB k j + 3 * i + 1, .and (asPrev k j (2 * i + 1)) (asSel j)⟩,
+       ⟨asB k j + 3 * i + 2, .or (asB k j + 3 * i) (asB k j + 3 * i + 1)⟩] := by
+    funext i
+    show [(⟨asBase k j i, .and (asPrev k j (2 * i)) (asNot j)⟩ : Gate),
+          ⟨asBase k j i + 1, .and (asPrev k j (2 * i + 1)) (asSel j)⟩,
+          ⟨asOut k j i, .or (asBase k j i) (asBase k j i + 1)⟩] = _
+    rw [asOut_eq, asBase_eq]
+  rw [asL, h, muxRow]
+
+theorem asL0_eq (k : Nat) : asL k 0
+    = muxRow (asB k 0) (fun i => asPrev k 0 (2 * i)) (fun i => asPrev k 0 (2 * i + 1))
+        (asNot 0) (asSel 0) 8 := asL_eq k 0
+theorem asL1_eq (k : Nat) : asL k 1
+    = muxRow (asB k 1) (fun i => asPrev k 1 (2 * i)) (fun i => asPrev k 1 (2 * i + 1))
+        (asNot 1) (asSel 1) 4 := asL_eq k 1
+theorem asL2_eq (k : Nat) : asL k 2
+    = muxRow (asB k 2) (fun i => asPrev k 2 (2 * i)) (fun i => asPrev k 2 (2 * i + 1))
+        (asNot 2) (asSel 2) 2 := asL_eq k 2
+theorem asL3_eq (k : Nat) : asL k 3
+    = muxRow (asB k 3) (fun i => asPrev k 3 (2 * i)) (fun i => asPrev k 3 (2 * i + 1))
+        (asNot 3) (asSel 3) 1 := asL_eq k 3
+
+/-! ## The tree's value, level by level -/
+
+/-- Leaf `l` of bit `k`'s tree: an op result below `asOps`, the shared pad above. -/
+def asLeafOf (F : Env) (k l : Nat) : Bool := if asOps ≤ l then F asZero else F (asRes l k)
+
+def asV0 (F : Env) (k i : Nat) : Bool :=
+  if F (asSel 0) then asLeafOf F k (2 * i + 1) else asLeafOf F k (2 * i)
+def asV1 (F : Env) (k i : Nat) : Bool :=
+  if F (asSel 1) then asV0 F k (2 * i + 1) else asV0 F k (2 * i)
+def asV2 (F : Env) (k i : Nat) : Bool :=
+  if F (asSel 2) then asV1 F k (2 * i + 1) else asV1 F k (2 * i)
+def asV3 (F : Env) (k : Nat) : Bool :=
+  if F (asSel 3) then asV2 F k 1 else asV2 F k 0
+
+theorem asPrev_0_val (F : Env) (k l : Nat) : F (asPrev k 0 l) = asLeafOf F k l := by
+  rw [asPrev_0, asLeafOf, asRes_eq, asOps_eq, asZero_eq]
+  split_ifs <;> rfl
+
+theorem asNot_lt (k j : Nat) (hj : j < 4) : asNot j < asB k 0 := by
+  have h : (325 : Nat) + j < 329 + 45 * k := by omega
+  rw [asNot_eq, asB0]; exact h
+
+theorem asSel_lt (k j : Nat) (hj : j < 4) : asSel j < asB k 0 := by
+  have h : (320 : Nat) + j < 329 + 45 * k := by omega
+  rw [asSel_eq, asB0]; exact h
+
+theorem asPrev0_lt (k l : Nat) (hk : k < 32) : asPrev k 0 l < asB k 0 := by
+  have h : (if 10 ≤ l then 324 else l * 32 + k) < 329 + 45 * k := by split_ifs <;> omega
+  rw [asPrev_0, asB0]; exact h
+
+theorem asPrev1_lt (k l : Nat) (hl : l < 8) : asPrev k 1 l < asB k 1 := by
+  have h : 329 + 45 * k + 3 * l + 2 < 329 + 45 * k + 24 := by omega
+  rw [asPrev_1', asOut_eq, asB0, asB1]; exact h
+
+theorem asPrev2_lt (k l : Nat) (hl : l < 4) : asPrev k 2 l < asB k 2 := by
+  have h : 329 + 45 * k + 24 + 3 * l + 2 < 329 + 45 * k + 36 := by omega
+  rw [asPrev_2', asOut_eq, asB1, asB2]; exact h
+
+theorem asPrev3_lt (k l : Nat) (hl : l < 2) : asPrev k 3 l < asB k 3 := by
+  have h : 329 + 45 * k + 36 + 3 * l + 2 < 329 + 45 * k + 42 := by omega
+  rw [asPrev_3', asOut_eq, asB2, asB3]; exact h
+
+theorem run_asBit (G : Env) (k : Nat) (hk : k < 32)
+    (hnot : ∀ j : Nat, j < 4 → G (asNot j) = !(G (asSel j))) :
+    (∀ m : Nat, m < asB k 0 → run G (asBitGates k) m = G m)
+    ∧ run G (asBitGates k) (asOut k 3 0) = asV3 G k := by
+  have hrun : ∀ m : Nat, run G (asBitGates k) m
+      = run (run (run (run G (asL k 0)) (asL k 1)) (asL k 2)) (asL k 3) m := by
+    intro m; rw [asBitGates, run_append, run_append, run_append]
+  have h01 := asB_mono01 k
+  have h12 := asB_mono12 k
+  have h23 := asB_mono23 k
+  -- LEVEL 0
+  have L0 := run_muxRow G (asB k 0)
+      (fun i => asPrev k 0 (2 * i)) (fun i => asPrev k 0 (2 * i + 1)) (asNot 0) (asSel 0)
+      (asNot_lt k 0 (by norm_num)) (asSel_lt k 0 (by norm_num)) 8
+      (fun i _ => ⟨asPrev0_lt k (2 * i) hk, asPrev0_lt k (2 * i + 1) hk⟩)
+  rw [← asL0_eq k] at L0
+  -- LEVEL 1
+  have L1 := run_muxRow (run G (asL k 0)) (asB k 1)
+      (fun i => asPrev k 1 (2 * i)) (fun i => asPrev k 1 (2 * i + 1)) (asNot 1) (asSel 1)
+      (Nat.lt_trans (asNot_lt k 1 (by norm_num)) h01)
+      (Nat.lt_trans (asSel_lt k 1 (by norm_num)) h01) 4
+      (fun i hi => ⟨asPrev1_lt k (2 * i) (by omega), asPrev1_lt k (2 * i + 1) (by omega)⟩)
+  rw [← asL1_eq k] at L1
+  -- LEVEL 2
+  have L2 := run_muxRow (run (run G (asL k 0)) (asL k 1)) (asB k 2)
+      (fun i => asPrev k 2 (2 * i)) (fun i => asPrev k 2 (2 * i + 1)) (asNot 2) (asSel 2)
+      (Nat.lt_trans (Nat.lt_trans (asNot_lt k 2 (by norm_num)) h01) h12)
+      (Nat.lt_trans (Nat.lt_trans (asSel_lt k 2 (by norm_num)) h01) h12) 2
+      (fun i hi => ⟨asPrev2_lt k (2 * i) (by omega), asPrev2_lt k (2 * i + 1) (by omega)⟩)
+  rw [← asL2_eq k] at L2
+  -- LEVEL 3
+  have L3 := run_muxRow (run (run (run G (asL k 0)) (asL k 1)) (asL k 2)) (asB k 3)
+      (fun i => asPrev k 3 (2 * i)) (fun i => asPrev k 3 (2 * i + 1)) (asNot 3) (asSel 3)
+      (Nat.lt_trans (Nat.lt_trans (Nat.lt_trans (asNot_lt k 3 (by norm_num)) h01) h12) h23)
+      (Nat.lt_trans (Nat.lt_trans (Nat.lt_trans (asSel_lt k 3 (by norm_num)) h01) h12) h23) 1
+      (fun i hi => ⟨asPrev3_lt k (2 * i) (by omega), asPrev3_lt k (2 * i + 1) (by omega)⟩)
+  rw [← asL3_eq k] at L3
+  -- the frames, stacked
+  have F1 : ∀ m : Nat, m < asB k 0 → run G (asL k 0) m = G m := L0.1
+  have F2 : ∀ m : Nat, m < asB k 0 → run (run G (asL k 0)) (asL k 1) m = G m := fun m hm => by
+    rw [L1.1 m (Nat.lt_trans hm h01), F1 m hm]
+  have F3 : ∀ m : Nat, m < asB k 0 →
+      run (run (run G (asL k 0)) (asL k 1)) (asL k 2) m = G m := fun m hm => by
+    rw [L2.1 m (Nat.lt_trans (Nat.lt_trans hm h01) h12), F2 m hm]
+  have F4 : ∀ m : Nat, m < asB k 0 →
+      run (run (run (run G (asL k 0)) (asL k 1)) (asL k 2)) (asL k 3) m = G m := fun m hm => by
+    rw [L3.1 m (Nat.lt_trans (Nat.lt_trans (Nat.lt_trans hm h01) h12) h23), F3 m hm]
+  -- the values, level by level
+  have V0 : ∀ i : Nat, i < 8 → run G (asL k 0) (asOut k 0 i) = asV0 G k i := by
+    intro i hi
+    rw [asOut_eq, L0.2 i hi]
+    show ((G (asPrev k 0 (2 * i)) && G (asNot 0)) || (G (asPrev k 0 (2 * i + 1)) && G (asSel 0)))
+        = _
+    rw [hnot 0 (by norm_num), mux_pick, asPrev_0_val G k (2 * i + 1), asPrev_0_val G k (2 * i)]
+    rfl
+  have V1 : ∀ i : Nat, i < 4 →
+      run (run G (asL k 0)) (asL k 1) (asOut k 1 i) = asV1 G k i := by
+    intro i hi
+    rw [asOut_eq, L1.2 i hi]
+    show ((run G (asL k 0) (asPrev k 1 (2 * i)) && run G (asL k 0) (asNot 1))
+        || (run G (asL k 0) (asPrev k 1 (2 * i + 1)) && run G (asL k 0) (asSel 1))) = _
+    rw [asPrev_1', asPrev_1', V0 (2 * i) (by omega), V0 (2 * i + 1) (by omega),
+      F1 (asNot 1) (asNot_lt k 1 (by norm_num)), F1 (asSel 1) (asSel_lt k 1 (by norm_num)),
+      hnot 1 (by norm_num), mux_pick]
+    rfl
+  have V2 : ∀ i : Nat, i < 2 →
+      run (run (run G (asL k 0)) (asL k 1)) (asL k 2) (asOut k 2 i) = asV2 G k i := by
+    intro i hi
+    rw [asOut_eq, L2.2 i hi]
+    show ((run (run G (asL k 0)) (asL k 1) (asPrev k 2 (2 * i))
+          && run (run G (asL k 0)) (asL k 1) (asNot 2))
+        || (run (run G (asL k 0)) (asL k 1) (asPrev k 2 (2 * i + 1))
+          && run (run G (asL k 0)) (asL k 1) (asSel 2))) = _
+    rw [asPrev_2', asPrev_2', V1 (2 * i) (by omega), V1 (2 * i + 1) (by omega),
+      F2 (asNot 2) (asNot_lt k 2 (by norm_num)), F2 (asSel 2) (asSel_lt k 2 (by norm_num)),
+      hnot 2 (by norm_num), mux_pick]
+    rfl
+  refine ⟨fun m hm => by rw [hrun m]; exact F4 m hm, ?_⟩
+  rw [hrun, asOut_eq, L3.2 0 (by norm_num)]
+  show ((run (run (run G (asL k 0)) (asL k 1)) (asL k 2) (asPrev k 3 (2 * 0))
+        && run (run (run G (asL k 0)) (asL k 1)) (asL k 2) (asNot 3))
+      || (run (run (run G (asL k 0)) (asL k 1)) (asL k 2) (asPrev k 3 (2 * 0 + 1))
+        && run (run (run G (asL k 0)) (asL k 1)) (asL k 2) (asSel 3))) = _
+  rw [asPrev_3', asPrev_3', V2 (2 * 0) (by norm_num), V2 (2 * 0 + 1) (by norm_num),
+    F3 (asNot 3) (asNot_lt k 3 (by norm_num)), F3 (asSel 3) (asSel_lt k 3 (by norm_num)),
+    hnot 3 (by norm_num), mux_pick]
+  rfl
+
+/-! ## The select value, and the closed form of a bit tree -/
+
+/-- The four select nets read as a number — `sel[0]` is the LSB. -/
+def asSelOf (E : Env) : Nat :=
+  (if E (asSel 0) then 1 else 0) + (if E (asSel 1) then 2 else 0)
+    + (if E (asSel 2) then 4 else 0) + (if E (asSel 3) then 8 else 0)
+
+theorem asV3_eq (F : Env) (k : Nat) :
+    asV3 F k = if asSelOf F < asOps then F (asRes (asSelOf F) k) else F asZero := by
+  simp only [asV3, asV2, asV1, asV0, asLeafOf, asSelOf, asOps_eq, asRes_eq]
+  cases h0 : F (asSel 0) <;> cases h1 : F (asSel 1) <;> cases h2 : F (asSel 2) <;>
+    cases h3 : F (asSel 3) <;> norm_num
+
+theorem asSelOf_congr (F G : Env) (h : ∀ m : Nat, m < 324 → F m = G m) :
+    asSelOf F = asSelOf G := by
+  have hsel : ∀ j : Nat, j < 4 → F (asSel j) = G (asSel j) := by
+    intro j hj
+    refine h (asSel j) ?_
+    have hb : (320 : Nat) + j < 324 := by omega
+    rw [asSel_eq]; exact hb
+  unfold asSelOf
+  rw [hsel 0 (by norm_num), hsel 1 (by norm_num), hsel 2 (by norm_num), hsel 3 (by norm_num)]
+
+theorem asV3_congr (F G : Env) (k : Nat) (hk : k < 32) (h : ∀ m : Nat, m < 329 → F m = G m) :
+    asV3 F k = asV3 G k := by
+  have hs : asSelOf F = asSelOf G := asSelOf_congr F G (fun m hm => h m (by omega))
+  rw [asV3_eq, asV3_eq, hs]
+  split_ifs with hlt
+  · rw [asOps_eq] at hlt
+    refine h (asRes (asSelOf G) k) ?_
+    have hb : asSelOf G * 32 + k < 329 := by omega
+    rw [asRes_eq]; exact hb
+  · refine h asZero ?_
+    have hb : (324 : Nat) < 329 := by omega
+    rw [asZero_eq]; exact hb
+
+/-! ## The constant and the four inverters -/
+
+theorem asPreGates_eq :
+    asPreGates = [(⟨324, .const false⟩ : Gate), ⟨325, .not 320⟩, ⟨326, .not 321⟩,
+                  ⟨327, .not 322⟩, ⟨328, .not 323⟩] := by decide +kernel
+
+theorem run_asPre (E : Env) :
+    (∀ m : Nat, m < 324 → run E asPreGates m = E m)
+    ∧ run E asPreGates 324 = false
+    ∧ (∀ j : Nat, j < 4 → run E asPreGates (325 + j) = !(E (320 + j))) := by
+  rw [asPreGates_eq]
+  refine ⟨?_, ?_, ?_⟩
+  · intro m hm
+    have e0 : ¬ (m = 324) := by omega
+    have e1 : ¬ (m = 325) := by omega
+    have e2 : ¬ (m = 326) := by omega
+    have e3 : ¬ (m = 327) := by omega
+    have e4 : ¬ (m = 328) := by omega
+    simp [Op.eval, upd, e0, e1, e2, e3, e4]
+  · simp [Op.eval, upd]
+  · intro j hj
+    interval_cases j <;> simp [Op.eval, upd]
+
+/-! ## The 32 bit trees, in series -/
+
+theorem run_asBody (F : Env) (hnot : ∀ j : Nat, j < 4 → F (asNot j) = !(F (asSel j))) :
+    ∀ n : Nat, n ≤ 32 →
+      (∀ m : Nat, m < 329 → run F (asBodyGates n) m = F m)
+      ∧ (∀ k : Nat, k < n → run F (asBodyGates n) (asOut k 3 0) = asV3 F k) := by
+  intro n
+  induction n with
+  | zero => intro _; exact ⟨fun m _ => rfl, fun k hk => absurd hk (Nat.not_lt_zero k)⟩
+  | succ n ih =>
+    intro hn
+    obtain ⟨hfr, hval⟩ := ih (Nat.le_of_succ_le hn)
+    have hn32 : n < 32 := Nat.lt_of_lt_of_le (Nat.lt_succ_self n) hn
+    have hsucc : asBodyGates (n + 1) = asBodyGates n ++ asBitGates n := by
+      simp [asBodyGates, List.range_succ]
+    have hnot' : ∀ j : Nat, j < 4 → run F (asBodyGates n) (asNot j)
+        = !(run F (asBodyGates n) (asSel j)) := by
+      intro j hj
+      rw [hfr (asNot j) (by have hb : (325 : Nat) + j < 329 := by omega
+                            rw [asNot_eq]; exact hb),
+        hfr (asSel j) (by have hb : (320 : Nat) + j < 329 := by omega
+                          rw [asSel_eq]; exact hb)]
+      exact hnot j hj
+    obtain ⟨bfr, bval⟩ := run_asBit (run F (asBodyGates n)) n hn32 hnot'
+    have hB0 : (329 : Nat) ≤ asB n 0 := by rw [asB0]; omega
+    refine ⟨?_, ?_⟩
+    · intro m hm
+      rw [hsucc, run_append, bfr m (Nat.lt_of_lt_of_le hm hB0)]
+      exact hfr m hm
+    · intro k hk
+      rw [hsucc, run_append]
+      rcases Nat.lt_or_ge k n with hkn | hkn
+      · rw [bfr (asOut k 3 0) (by
+          have hb : 329 + 45 * k + 42 + 3 * 0 + 2 < 329 + 45 * n := by omega
+          rw [asOut_eq, asB3, asB0]; exact hb)]
+        exact hval k hkn
+      · have hEq : k = n := Nat.le_antisymm (Nat.le_of_lt_succ hk) hkn
+        subst hEq
+        rw [bval]
+        exact asV3_congr _ _ k hn32 hfr
+
+/-! ## ⭐⭐ THE THEOREM -/
+
+theorem aluSelect_outs_eq : aluSelect.outs = (List.range 32).map (fun k => asOut k 3 0) := rfl
+
+theorem sem_aluSelect (E : Env) :
+    sem aluSelect E
+      = (List.range 32).map (fun k =>
+          if asSelOf E < asOps then E (asRes (asSelOf E) k) else false) := by
+  obtain ⟨pfr, pzero, pnot⟩ := run_asPre E
+  have hnotF : ∀ j : Nat, j < 4 → run E asPreGates (asNot j)
+      = !(run E asPreGates (asSel j)) := by
+    intro j hj
+    rw [asNot_eq, pnot j hj, asSel_eq, pfr (320 + j) (by omega)]
+  obtain ⟨bfr, bval⟩ := run_asBody (run E asPreGates) hnotF 32 le_rfl
+  have hsem : sem aluSelect E
+      = (List.range 32).map (fun k => run E aluSelect.gates (asOut k 3 0)) := by
+    show aluSelect.outs.map (run E aluSelect.gates) = _
+    rw [aluSelect_outs_eq, List.map_map]
+    simp only [Function.comp_def]
+  rw [hsem]
+  refine List.map_congr_left ?_
+  intro k hk
+  have hk32 : k < 32 := List.mem_range.mp hk
+  rw [aluSelect_gates_eq, run_append, bval k hk32, asV3_eq,
+    asSelOf_congr (run E asPreGates) E pfr]
+  split_ifs with hlt
+  · rw [asOps_eq] at hlt
+    refine pfr (asRes (asSelOf E) k) ?_
+    have hb : asSelOf E * 32 + k < 324 := by omega
+    rw [asRes_eq]; exact hb
+  · rw [asZero_eq]; exact pzero
+
+/-! ## ⭐ WHAT THE SAMPLED CERTIFICATE ACTUALLY QUANTIFIES OVER -/
+
+theorem getD_map_range_zero (f : Nat → Bool) : ((List.range 32).map f).getD 0 false = f 0 := by
+  rw [List.getD_eq_getElem _ _ (by simp)]
+  simp
+
+theorem asSelOf_of_testBit (E : Env) (sel : Nat) (h : sel < 16)
+    (hb : ∀ j : Nat, j < 4 → E (asSel j) = sel.testBit j) : asSelOf E = sel := by
+  unfold asSelOf
+  rw [hb 0 (by norm_num), hb 1 (by norm_num), hb 2 (by norm_num), hb 3 (by norm_num)]
+  interval_cases sel <;> decide
+
+/-- ⚠️ `asOneHot`'s own binder is at `Net`, and `omega` cannot read a `Net`-typed
+goal; this restatement binds `n : Nat` and is what every proof below rewrites by. -/
+theorem asOneHot_eq (m sel n : Nat) :
+    asOneHot m sel n
+      = if n < 320 then decide (m * 32 ≤ n ∧ n < m * 32 + 32)
+        else decide (sel.testBit (n - 320)) := rfl
+
+theorem asOneHot_sel (m sel j : Nat) (hj : j < 4) :
+    asOneHot m sel (asSel j) = sel.testBit j := by
+  rw [asOneHot_eq, asSel_eq, if_neg (by omega), show 320 + j - 320 = j by omega]
+  simp
+
+theorem asOneHot_res (m sel k : Nat) (hs : sel < 10) (hk : k < 32) :
+    asOneHot m sel (asRes sel k) = decide (sel = m) := by
+  rw [asOneHot_eq, asRes_eq, if_pos (by omega), decide_eq_decide]
+  omega
+
+theorem asBit0_eq (m sel : Nat) (hm : m < 10) (h : sel < 16) :
+    asBit0 m sel = decide (sel = m) := by
+  show (sem aluSelect (asOneHot m sel)).getD 0 false = _
+  rw [sem_aluSelect,
+    asSelOf_of_testBit _ sel h (fun j hj => asOneHot_sel m sel j hj), getD_map_range_zero]
+  rcases Nat.lt_or_ge sel 10 with hs | hs
+  · rw [if_pos (by rw [asOps_eq]; omega)]
+    exact asOneHot_res m sel 0 hs (by norm_num)
+  · rw [if_neg (by rw [asOps_eq]; omega)]
+    exact (decide_eq_false (by omega)).symm
+
+/-- ⭐ **THE CERTIFICATE, FOR EVERY REAL OPERAND** — `asSelectsOK` was proved at
+`m = 3` and `m = 9`; it holds at all ten, as a corollary of `sem_aluSelect`. -/
+theorem asSelectsOK_of_lt (m : Nat) (hm : m < asOps) : asSelectsOK m = true := by
+  rw [asOps_eq] at hm
+  show ((List.range 16).all fun sel => asBit0 m sel == decide (sel = m)) = true
+  rw [List.all_eq_true]
+  intro sel hsel
+  rw [beq_iff_eq]
+  exact asBit0_eq m sel hm (List.mem_range.mp hsel)
+
+/-- ⛔ **AND IT IS NOT A UNIVERSALLY TRUE STATEMENT ABOUT `m`** — at `m = 10`,
+the first pad slot, `asSelectsOK` is FALSE. The two proved points sit inside the
+range where it happens to hold. -/
+theorem asSelectsOK_fails_at_ten : asSelectsOK 10 = false := by
+  have h : asBit0 10 10 = false := by
+    show (sem aluSelect (asOneHot 10 10)).getD 0 false = false
+    rw [sem_aluSelect,
+      asSelOf_of_testBit _ 10 (by norm_num) (fun j hj => asOneHot_sel 10 10 j hj),
+      getD_map_range_zero, if_neg (by rw [asOps_eq]; omega)]
+  rw [Bool.eq_false_iff]
+  intro hc
+  rw [show asSelectsOK 10 = ((List.range 16).all fun sel => asBit0 10 sel == decide (sel = 10))
+      from rfl, List.all_eq_true] at hc
+  have h10 := hc 10 (List.mem_range.mpr (by norm_num))
+  rw [beq_iff_eq, h] at h10
+  simp at h10
+
+/-! ## ⭐ THE GENERAL DRIVER AND THE WORD BRIDGE -/
+
+/-- **The general driver**: ten arbitrary operand results and a select value.
+`asOneHot` is the sub-family in which exactly one result is live. -/
+def asDrive (res : Nat → Word) (sel : Nat) : Env := fun n =>
+  if n < asOps * asW then (res (n / asW)).getLsbD (n % asW)
+  else decide (sel.testBit (n - asOps * asW))
+
+theorem asDrive_eq (res : Nat → Word) (sel n : Nat) :
+    asDrive res sel n
+      = if n < 320 then (res (n / 32)).getLsbD (n % 32)
+        else decide (sel.testBit (n - 320)) := rfl
+
+theorem asDrive_sel (res : Nat → Word) (sel j : Nat) (hj : j < 4) :
+    asDrive res sel (asSel j) = sel.testBit j := by
+  rw [asDrive_eq, asSel_eq, if_neg (by omega), show 320 + j - 320 = j by omega]
+  simp
+
+theorem asDrive_res (res : Nat → Word) (sel r k : Nat) (hr : r < 10) (hk : k < 32) :
+    asDrive res sel (asRes r k) = (res r).getLsbD k := by
+  rw [asDrive_eq, asRes_eq, if_pos (by omega), show (r * 32 + k) / 32 = r by omega,
+    show (r * 32 + k) % 32 = k by omega]
+
+/-- ⭐ **THE BLOCK IS A TEN-WAY SELECT ON ARBITRARY OPERANDS** — the certificate's
+one-hot family is one line of this. -/
+theorem sem_aluSelect_drive (res : Nat → Word) (sel : Nat) (h : sel < asOps) :
+    sem aluSelect (asDrive res sel) = (List.range 32).map (fun k => (res sel).getLsbD k) := by
+  rw [asOps_eq] at h
+  rw [sem_aluSelect,
+    asSelOf_of_testBit _ sel (by omega) (fun j hj => asDrive_sel res sel j hj)]
+  refine List.map_congr_left ?_
+  intro k hk
+  rw [if_pos (by rw [asOps_eq]; omega)]
+  exact asDrive_res res sel sel k h (List.mem_range.mp hk)
+
+/-- ⭐ **THE SELECTED OPERAND, AS A WORD** — the form a `core` assembly applies. -/
+theorem aluSelect_word (res : Nat → Word) (sel : Nat) (h : sel < asOps) :
+    SaltWorks.HDL.wordOf (fun k => (sem aluSelect (asDrive res sel)).getD k false) = res sel := by
+  rw [sem_aluSelect_drive res sel h, wordOf_getD_map_range, wordOf_getLsbD_self]
+
+/-- ⭐⭐ **THE `rd` FIELD, THROUGH THE SELECT.** An `ADD` presents its result in
+operand slot `0` (`add` is the first of the ten) and drives `sel = 0`; the block
+then delivers exactly the word `stepT` writes. ⛔ *This does NOT close any
+`C4Spec` field: `core` does not exist, and this is the service the assembly would
+apply, in the shape `addField_is_adder32` performs for the adder.* -/
+theorem aluField_is_aluSelect_add (s : St) (rd x y : Fin 32) (hrd : rd ≠ 0)
+    (res : Nat → Word) (h0 : res 0 = s.get x + s.get y) :
+    (stepT (SaltWorks.HDL.decQ (envWith s (encode (Instr.ADD rd x y))))
+           (seenWord (envWith s (encode (Instr.ADD rd x y))))).regs[rd.val]
+      = SaltWorks.HDL.wordOf (fun k =>
+          (sem aluSelect (asDrive res 0)).getD k false) := by
+  rw [aluSelect_word res 0 (by rw [asOps_eq]; omega), h0,
+    decQ_envWith, seenWord_envWith, stepT_encode]
+  show ((s.set rd (s.get x + s.get y)).next).regs[rd.val] = _
+  show (s.set rd (s.get x + s.get y)).regs[rd.val] = _
+  simp only [St.set, if_neg hrd]
+  exact Vector.getElem_set_self rd.isLt
+
+/-! ## ⭐ THE CONTROLS -/
+
+/-- ⛔ **ONE GATE MUTATED**, and it is mutated where `m = 3` and `m = 9` cannot
+look: bit 0's level-0 mux at position 2 reads leaf **4** on both of its inputs,
+so `sel = 5` returns operand 4. Still `ssa`, still 1,445 gates. -/
+def asMuxCut (k j i : Nat) : List Gate :=
+  if k == 0 && j == 0 && i == 2 then
+    [⟨asBase k j i,     .and (asPrev k j (2 * i)) (asNot j)⟩,
+     ⟨asBase k j i + 1, .and (asPrev k j (2 * i)) (asSel j)⟩,
+     ⟨asOut k j i,      .or (asBase k j i) (asBase k j i + 1)⟩]
+  else asMux k j i
+
+def aluSelectCut : Circ :=
+  { aluSelect with
+    gates :=
+      (⟨asZero, .const false⟩ : Gate)
+        :: (List.range asSelBits).map (fun j => (⟨asNot j, .not (asSel j)⟩ : Gate))
+        ++ (List.range asW).flatMap fun k =>
+             (List.range asSelBits).flatMap fun j =>
+               (List.range (asLevelWidth j)).flatMap (asMuxCut k j) }
+
+def asBit0Cut (m sel : Nat) : Bool := (sem aluSelectCut (asOneHot m sel)).getD 0 false
+
+def asSelectsOKCut (m : Nat) : Bool :=
+  (List.range 16).all fun sel => asBit0Cut m sel == decide (sel = m)
+
+theorem aluSelectCut_ssa : aluSelectCut.ssa = true := by decide +kernel
+
+theorem aluSelectCut_gate_count : aluSelectCut.gates.length = 1445 := by decide +kernel
+
+/-- ⛔ **THE MUTANT PASSES BOTH PROVED CERTIFICATES.** -/
+theorem aluSelectCut_passes_the_certificate :
+    asSelectsOKCut 3 = true ∧ asSelectsOKCut 9 = true := by
+  constructor <;> decide +kernel
+
+/-- ⭐ **AND THE THEOREM REFUTES IT** — at `m = 5`, where `asSelectsOK 5 = true`
+is a corollary of `sem_aluSelect` and the mutant answers `false`. -/
+theorem aluSelectCut_fails_the_theorem :
+    asSelectsOKCut 5 = false ∧ asSelectsOK 5 = true :=
+  ⟨by decide +kernel, asSelectsOK_of_lt 5 (by rw [asOps_eq]; omega)⟩
+
+/-- An operand picture NO `asOneHot` driver can produce: **two operand results
+live at once**. -/
+def asOffEnv : Env := fun n =>
+  if n < asOps * asW then decide (n % 2 = 0) else decide (n = asSel 1)
+
+theorem asOffEnv_eq (n : Nat) :
+    asOffEnv n = if n < 320 then decide (n % 2 = 0) else decide (n = 321) := rfl
+
+/-- ⭐ **THE THEOREM REACHES WHERE THE CERTIFICATE'S DRIVER CANNOT GO.** -/
+theorem sem_aluSelect_off_the_sample :
+    asOffEnv (asRes 0 0) = true ∧ asOffEnv (asRes 2 0) = true
+      ∧ (∀ m sel : Nat,
+          ¬(asOneHot m sel (asRes 0 0) = true ∧ asOneHot m sel (asRes 2 0) = true))
+      ∧ sem aluSelect asOffEnv = (List.range 32).map (fun k => decide (k % 2 = 0)) := by
+  refine ⟨by decide, by decide, ?_, ?_⟩
+  · rintro m sel ⟨h1, h2⟩
+    rw [asOneHot_eq, asRes_eq, if_pos (by omega), decide_eq_true_eq] at h1
+    rw [asOneHot_eq, asRes_eq, if_pos (by omega), decide_eq_true_eq] at h2
+    omega
+  · rw [sem_aluSelect, show asSelOf asOffEnv = 2 from by decide]
+    refine List.map_congr_left ?_
+    intro k hk
+    have hk32 : k < 32 := List.mem_range.mp hk
+    rw [if_pos (by rw [asOps_eq]; omega), asOffEnv_eq, asRes_eq, if_pos (by omega),
+      decide_eq_decide]
+    omega
+
+/-- ⭐ **EXACTLY ONE GATE DIFFERS.** -/
+theorem aluSelectCut_is_one_gate :
+    (List.zip aluSelectCut.gates aluSelect.gates).countP (fun p => p.1 != p.2) = 1 := by
+  decide +kernel
+
+end AluSelectSemantics
+
 /-! ## Axiom audit -/
 
 open Salt.Tactic
@@ -4823,6 +5543,29 @@ open Salt.Tactic
 #audit_axioms hin_pcNext hin_adder run_adder32_adS
 #audit_axioms pcAdd_gates_eq run_pcAdd_peel run_pcAdd_out sem_pcAdd
 #audit_axioms pcAdd_word pcField_is_pcAdd_beq pcField_is_pcAdd_add pcField_is_pcAdd_undecodable
+
+#audit_axioms muxRow muxRow_succ run_three run_three_frame run_muxRow mux_pick
+#audit_axioms asOps_eq asW_eq asRes_eq asSel_eq asNot_eq asZero_eq
+#audit_axioms asB asBase_eq asB0 asB1 asB2 asB3 asOut_eq
+#audit_axioms asB_mono01 asB_mono12 asB_mono23
+#audit_axioms asPrev_0 asPrev_1' asPrev_2' asPrev_3'
+#audit_axioms asL asBitGates asBodyGates asPreGates asBitGates_eq aluSelect_gates_eq
+#audit_axioms asL_eq asL0_eq asL1_eq asL2_eq asL3_eq
+#audit_axioms asLeafOf asV0 asV1 asV2 asV3 asPrev_0_val
+#audit_axioms asNot_lt asSel_lt asPrev0_lt asPrev1_lt asPrev2_lt asPrev3_lt
+#audit_axioms run_asBit
+#audit_axioms asSelOf asV3_eq asSelOf_congr asV3_congr
+#audit_axioms asPreGates_eq run_asPre run_asBody
+#audit_axioms aluSelect_outs_eq sem_aluSelect
+#audit_axioms getD_map_range_zero asSelOf_of_testBit
+#audit_axioms asOneHot_eq asOneHot_sel asOneHot_res asBit0_eq
+#audit_axioms asSelectsOK_of_lt asSelectsOK_fails_at_ten
+#audit_axioms asDrive asDrive_eq asDrive_sel asDrive_res
+#audit_axioms sem_aluSelect_drive aluSelect_word aluField_is_aluSelect_add
+#audit_axioms asMuxCut aluSelectCut asBit0Cut asSelectsOKCut
+#audit_axioms aluSelectCut_ssa aluSelectCut_gate_count aluSelectCut_is_one_gate
+#audit_axioms aluSelectCut_passes_the_certificate aluSelectCut_fails_the_theorem
+#audit_axioms asOffEnv asOffEnv_eq sem_aluSelect_off_the_sample
 #audit_axioms addend_read_as_pc_is_four addend_as_pc_is_wrong_unless_pc_zero
 #audit_axioms the_defect_and_the_fix pcAdd_netlist_advances_the_pc pcAdd_netlist_takes_the_branch
 #audit_axioms adSigmaCut pcAddCut pcAddCut_ssa pcAddCut_gate_count
