@@ -41,6 +41,48 @@ any of them surfaced — a passing build cannot report a hole in the bar.*
   — **but it closes it because its author chose a list-level cert, not because
   the bar demanded it.** A criterion satisfied by luck is still a broken
   criterion.
+* **①‴ THE WHOLE-LIST MUST BE OVER THE *PORT* AXIS** — a cert can have two list
+  axes and only one of them is the port list. A trace cert
+  (`trace == [[true],[false],…]`) is a single top-level whole-list equality that
+  pins **how many CYCLES** were observed, while each cycle still reads one fixed
+  port index — so the port axis stays length-free and ①″ is satisfied
+  vacuously. *Ask what the ELEMENTS of the compared list are:* ports ⇒ pinned;
+  cycles ⇒ not pinned by shape, go find a length fact.
+  *Why it exists:* proved on a sequential sibling — `xorPrev_trace`'s exact
+  statement survives appending a port to the core, and what catches the wide
+  machine is `Seq.wf`, not the certificate.
+
+* **①⁗ AND THE WHOLE-LIST MUST BE THE *WHOLE* LIST** — `take N` is a top-level
+  list equation whose LHS is a **prefix**, so it pins `outs.length ≥ N` and
+  gives no upper bound at all. `drop 1`, by contrast, has length
+  `outs.length - 1` and pins exactly. **Same combinator family, opposite
+  verdicts — so "is there a `==` between lists?" cannot be read off the syntax.**
+  *Why it exists:* `adder32`'s three certificates read `take 32` twice and
+  `getD 32` once, nothing states `adder32.outs.length = 33`, and a 34-port
+  `adder32Wide` with byte-identical gates satisfies all three. Eleven lines from
+  one of them, `cmp_upper_bits_are_zero` uses `drop 1` and pins exactly.
+
+  ⚠️ **AND THE STRUCTURAL FACTS EVERY COMBINATIONAL BLOCK AUTHOR NEEDS:**
+  `Circ.wf` (`Syntax.lean:110-114`) does **NOT** constrain `outs.length`, and it
+  is weaker still than that: its `nodupB` is applied to `c.gates.map Gate.out`
+  — **the gates, not the port list** — so `wf` does not even require the ports
+  to be distinct. A circuit naming one net twice in `outs` passes `wf` *and*
+  `ssa` (both kernel-checked). `Circ.ssa` bounds each port's net *number*, never
+  the port *count*. `Seq.wf` (`Seq.lean:60-61`) *does* carry the width
+  (`core.outs.length == nOut + nState`), which is why sequential machines are
+  pinned for free and combinational ones are not.
+
+  ⇒ **A `wf`/`ssa` theorem earns you nothing on ①″. Prove the length, or state
+  the cert as a whole-list equality over the full port list and let
+  `sem c ins = c.outs.map …` pin it definitionally.** The one block in this
+  corpus that does it structurally is `C4`, whose `CoreConforms` carries
+  `outs.length = stWidth` as a decidable precondition — the pattern the rest
+  lack, and it already exists here.
+
+  📌 *General lemma, if you need to check a candidate:*
+  `sem { c with outs := c.outs ++ [n] } ins = sem c ins ++ [run ins c.gates n]`
+  — appending a port is invisible to both `take k` (`k ≤ length`) and `getD k`
+  (`k < length`) for **every** circuit and **every** environment. Not a sample.
 * **② GATE COUNT** proved by `decide +kernel`, never asserted in a comment.
 * **③ MUTATIONS ≥ 3**, each proving **the cert fails** for the mutant — not
   merely that two circuits differ at some net. Must include the a/b **bus swap**
