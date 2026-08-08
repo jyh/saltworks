@@ -2362,3 +2362,181 @@ were re-checked independently with `#print axioms` in `ScratchMATHC4F.lean`
 * **Nothing here says a `core` exists.** These are statements about a landed block
   and the ISA. The assembly into `RegField` remains exactly what
   `c4Spec_of_fieldwise` will consume, unchanged.
+
+
+## ADDER32 — the unconditional semantics of `adder32`, and the sample premises deleted
+**2026-08-07 · Opus executor · `SaltWorks/Stack/Program.lean` +525 (313 lines of Lean, 126 of prose, 86 blank); 50 declarations, no new module**
+
+No file outside `SaltWorks/Stack/**` and `docs/` was touched. `SaltWorks/HDL/**`
+(compiler's slot), `SaltWorks/Silicon/**` (silicon's) and `SaltWorks.lean`
+(maestro's) are untouched — the section extends `Stack/Program.lean`, which
+already imports `HDL.C4` and `HDL.Bitwise`, so there is **no new import**.
+
+### ⭐ THE HEADLINE
+
+```lean
+theorem sem_adder32 (a b : Word) :
+    sem adder32 (bwEnv a b)
+      = (List.range 32).map (fun k => (a + b).getLsbD k) ++ [BitVec.carry 32 a b false]
+```
+
+**All 2^64 operand pairs. No `decide`, no `native_decide`, no new axiom.** The
+general form `sem_adder32_gen a b cin` carries the carry-in as a parameter and
+targets `a + b + setWidth 32 (ofBool cin)`, because the same circuit is driven
+with carry-in `1` by `subOut`.
+
+Before this, `adder32` had `adder32_ssa` and `adder32_wf` and **no behavioural
+theorem at all** — only `adder32_adds_on_sample` / `adder32_carry_out_on_sample`
+(49 ordered pairs of `addWords`) and `sub_via_adder_correct` (100 pairs of
+`bwWords`). `Adder.lean`'s own docstring names what those cannot catch: *"a
+generator producing the right cone shape and the wrong sum would pass every
+check here."*
+
+### ⭐ THE INVARIANT — the actual node
+
+`sem_bitXor32`'s method does **not** transfer. `bitXor32` is pointwise, so
+`run_of_unwritten` frames every operand net across the whole gate list. **The
+adder is a ripple chain: slice `i` READS `adC i`, which slice `i-1` WROTE**, so
+there is no frame across slices and the induction needs a real invariant. It is
+`run_adGates`, and it is three-part — for every `n ≤ 32`, after running the
+first `n` slices:
+
+1. **frame** — `∀ m < 65, run E (adGates n) m = E m` (the 65 primary-input nets
+   survive; every gate writes at `adBase i = 65 + 5i` or above);
+2. **the carry** — `run E (adGates n) (adC n) = BitVec.carry n a b cin`
+   (⭐ *the circuit's NAMED carry net identified with core's carry function* —
+   this is the whole node);
+3. **the sums** — `∀ k < n, run E (adGates n) (adS k)
+   = a.getLsbD k ^^ (b.getLsbD k ^^ BitVec.carry k a b cin)`.
+
+The step runs one slice over the prefix environment: `run_adSlice_frame`
+preserves (1) and the already-written sum bits, `run_adSlice_cout` plus
+`BitVec.carry_succ` advances (2), `run_adSlice_sum` extends (3). The `n ≤ 32`
+premise is load-bearing — it is what lets `E (adA n)` and `E (adB n)` be read as
+`a.getLsbD n` and `b.getLsbD n`.
+
+### What core supplied vs what was built here
+
+**Core carried the ripple model, and it carried it completely.**
+`Init.Data.BitVec.Bitblast` gave `carry`, `carry_zero`, `carry_succ`,
+`getLsbD_add_add_bool`, `carry_width`, `ult_eq_not_carry` and `slt_eq_not_carry`;
+`Bool.atLeastTwo` is core's majority function. **No carry recurrence was
+hand-rolled and no arithmetic fact about `+`, `-`, `<ᵤ` or `<ₛ` was proved here.**
+
+Built here: (a) `run_five`, the five-gate slice reduction, stated over four raw
+`Nat` net names with only "the three read nets sit below the five written ones"
+as hypotheses — one `simp` discharges all five `upd`s; (b) the identification of
+`adC i` with `BitVec.carry i`; (c) three Bool identities of eight valuations each
+(`atLeastTwo_eq`, `xor3`, `slt_bool`).
+
+### ⛔ `slice_ok` was NOT importable, and the reason is structural
+
+The brief pointed at `SaltWorks/Silicon/Equiv/AdderSlice.lean:70`. It is a real
+theorem and it is the right mathematics, but it is stated over
+`SaltWorks.Silicon.Netlist` / `runP` / `sliceNL_outs` — **a different carrier and
+a different evaluator from `HDL.Circ` / `sem` / `run`.** Importing it would have
+bought a carrier-bridging obligation rather than a lemma. Its content is the
+majority function, which is `Bool.atLeastTwo`, and it is re-derived locally in
+one `decide` over 8 valuations. *No Silicon import was added.*
+
+### What this unblocks — and one place it does not
+
+* ⭐ **`ADD`** — `addField_is_adder32`, unconditional in the operands.
+* ⭐ **`ADDI`** — `addiField_is_adder32`, unconditional (the immediate is
+  sign-extended by `stepT`; the block sees the extended word).
+* ⭐ **the `∈ bwWords` premises** — `sltField_is_sltCirc_unconditional` is
+  `sltField_is_sltCirc` with **both membership hypotheses gone**. The chain is
+  `subOut_bits` (the subtraction path, all 2^64) → `subOut_sign_formula` →
+  `slt_sign_formula` (core's `slt_eq_not_carry` + the 8-case identity) →
+  `sltDrive_uncond`. ⚠️ **The landed `sltField_is_sltCirc` and
+  `sltDrive_eq_of_mem` are left EXACTLY as they stand** — nothing was weakened,
+  restated or repaired; the stronger theorem is additive and retiring the weaker
+  one is another seat's call.
+* ⭐ **`SLTU`** — `sltuDrive_uncond`, which is core's `ult_eq_not_carry` read off
+  the adder's 33rd output. This was not asked for and fell out.
+* ⭐ The previous entry (C4FIELDS) listed *"whether the sign formula equals
+  `BitVec.slt` in general"* under **Left undetermined**, needing "both an
+  `adder32` semantics theorem and a `BitVec` lemma relating the overflow-
+  corrected sign of `a - b` to signed comparison." **Both now exist** — the first
+  here, the second in core.
+* ⛔ **`PcField` is NOT closed, and the brief's claim that it would be is wrong.**
+  `PcField c` is a statement about a whole `core`'s output bits `1024…1055`, and
+  **the pc path does not run through `adder32`**: `pcNext` implements the
+  increment itself (`pcNext_not_beq_adds_four`), and `Adder.lean:241` records
+  that `inc32` is *unreferenced* — `grep` finds it in its own file and nowhere
+  else. `sem_adder32` gives `PcField` nothing. The debt there is `core`.
+
+### ⛔ Non-vacuity
+
+* `adder32Cut` — `adder32` with **one gate changed**: slice 16's carry-out is
+  `and` rather than `or`, which makes that carry identically `false` (`a&&b` and
+  `a^^b` are disjoint). It is still `ssa` (`adder32Cut_is_ssa`), still 160 gates,
+  still the right cone shape. `adder32Cut_fails_the_adder` refutes it on
+  `(0x00010000, 0x00010000)`, which generates a carry at exactly that slice.
+* `bitXor32_fails_the_adder` — the carry-free "adder", refuted by `1 + 1`.
+* `sem_adder32_off_the_sample` — `0xF0F0F0F0`, in **neither** `bwWords` nor
+  `addWords`, with the carry-out `true`. *Without it, "for all 2^64" and "for the
+  pairs someone listed" are indistinguishable from outside.*
+* ⚠️ **Honest limit of the controls.** I looked for a mutation that **passes** the
+  sampled certificates and **fails** the theorem — the sharpest possible control.
+  There is no cheap one: `addWords` and `bwWords` both contain `0xFFFFFFFF` and
+  `1`, and `0xFFFFFFFF + 1` ripples a carry through every slice, so **any**
+  single-gate mutation of the carry chain or of a sum gate is caught by that one
+  pair. ⇒ *The sample is a decent tripwire against single-gate damage. What it
+  cannot be is a theorem, and that is the whole distinction this entry is about.*
+
+### Attempt counts, against the split budget
+
+* **Statements: 4 groups (budget 3–4, met)** — the adder itself
+  (`sem_adder32_gen` / `sem_adder32`), the subtraction path, the two comparators,
+  the ISA bridges + controls. 50 declarations.
+* **Proofs: 5 scratch build cycles (budget 2).** Recorded, not massaged. As in the
+  previous entry, **the mathematical content did not change after cycle 1** — the
+  invariant, the induction and the core lemmas used were fixed from the first
+  draft, and every cycle after that was elaboration mechanics, each diagnosed
+  from the error text rather than guessed:
+  1. ⭐ **`omega` does not see through `HDL.Net`** — again, and worse than the
+     last entry recorded. It is not only `Net`-typed *hypotheses* that vanish: a
+     **goal** whose `<` sits at `Net` (e.g. `adA n < adBase n`, since `adA`
+     returns `Net` while `adBase` returns `Nat`) makes `omega` report *"No usable
+     constraints found"* and try to derive `False` from context instead. Fixed by
+     `show`ing every such goal into `Nat` first (`adA_lt`, `adB_lt`, `adC_lt`) and
+     by binding `∀ m : Nat` rather than letting `m` be inferred at `Net` from
+     `run E gs m`. **`adBase`/`adIn`/`adW` return `Nat` and are safe; `adA`,
+     `adB`, `adC`, `adS`, `adP`, `adG`, `adT`, `adCin` return `Net` and are not.**
+  2. `omega` also treats `adBase n` as an **atom**, so every bound needs
+     `have : adBase n = 65 + 5 * n := adBase_eq n` in scope first.
+  3. `set … with hR` then `rw [hR]` **un-abstracts** the very term the hypotheses
+     are stated over. Dropped `set` entirely.
+  4. `congr 1` on a `List` append blew `maxRecDepth`; replaced by two `have`s and
+     one `rw`. **No `set_option maxRecDepth` was needed in the end** — the bump
+     was a symptom of `congr`, not of the file.
+  5. `atLeastTwo` is `Bool.atLeastTwo`, not `BitVec.atLeastTwo`; and `by decide`
+     on a goal with free `Bool` variables needs them reverted (`∀ x y c : Bool`).
+* `Stack/Program.lean` built **clean on the first try** once the scratch was
+  green — no errors, no warnings.
+
+### Build + audit
+
+`saltbuild.sh SaltWorks.Stack.Program` → **EXIT=0**. Full tree `saltbuild.sh` →
+**EXIT=0, 8635 jobs**, zero `error:`, zero `warning:`. All 50 new declarations
+tick `#audit_axioms` (max 3 axioms, i.e. inside
+`[propext, Classical.choice, Quot.sound]`; `adder32Cut` and `adder32Cut_is_ssa`
+depend on none, `adder32Cut_fails_the_adder` on `propext` alone) and every
+headline result was independently re-checked with `#print axioms` in
+`ScratchMATHADD.lean` (EXIT=0; deleted, not committed).
+`docs/hdl-tools/audit_completeness.py` → **every theorem is on an
+`#audit_axioms` list** (35 files, 374 theorems).
+
+### Left undetermined
+
+* **`inc32` still has no semantics.** It is the one non-`ssa` `Circ` in the tree
+  and it is unreferenced; `inc32_adds_four_on_sample` remains its only statement.
+  The method here transfers to it directly (it is a degenerate adder), but it
+  closes a gap in a dead definition and nothing asked for it.
+* **`bitAnd32` / `bitOr32` / `bitNot32`** still have only sampled certificates —
+  unchanged from the previous entry, and still with no ISA field to bridge to.
+* **`BEQ` is untouched.** It is a branch, not an ALU result; its field is the pc.
+* **Nothing here says a `core` exists.** These are statements about a landed block
+  and the ISA. The assembly into `RegField` / `PcField` remains exactly what
+  `c4Spec_of_fieldwise` will consume, unchanged.

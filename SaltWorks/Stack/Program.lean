@@ -2909,6 +2909,515 @@ theorem control_states_exist :
       ∧ ((St.init.set 1 0x80000000).set 2 1).get 2 = 1 := by
   decide +kernel
 
+/-! ### ⭐⭐ THE ADDER, UNCONDITIONALLY — and the sample premises come off
+
+## What was missing, in one line
+
+**`adder32` carried `adder32_ssa` and `adder32_wf` and nothing else: structure,
+no semantics.** Its behavioural statements were `adder32_adds_on_sample` and
+`adder32_carry_out_on_sample`, at 49 ordered pairs of `addWords`; the SLT path's
+was `sub_via_adder_correct`, at 100 pairs of `bwWords`. *Both are tripwires and
+neither is a theorem — 100 pairs is 5 × 10⁻¹⁸ of 2^64, and `Adder.lean`'s own
+docstring names the hazard they cannot catch: **"a generator producing the right
+cone shape and the wrong sum would pass every check here."***
+
+⇒ ***That is why `sltField_is_sltCirc` carries `s.get x ∈ bwWords` and
+`s.get y ∈ bwWords`: the premises ARE the sample.*** And it is why `ADD` and
+`ADDI` had no bridge at all.
+
+## What this section adds
+
+`sem_adder32` — **the 32 sum bits of `a + b`, then the carry-out, for every one
+of the 2^64 operand pairs, with no `decide` and no `native_decide`.** Everything
+under it follows: the subtraction path (`subOut_bits`), both comparators
+(`sltDrive_uncond`, `sltuDrive_uncond`), and three ISA field bridges
+(`addField_is_adder32`, `addiField_is_adder32`,
+`sltField_is_sltCirc_unconditional` — *the last is `sltField_is_sltCirc` with
+both membership premises deleted; the landed premise-carrying version is left
+exactly as it stands*).
+
+## How, and what came from core
+
+**The circuit is a ripple chain, so `run_of_unwritten` — the frame lemma
+`sem_bitXor32` runs on — does not apply across slices**: slice `i` reads the net
+slice `i-1` wrote. The proof is an induction over slices carrying a genuine
+invariant (stated at `run_adGates`), and ⭐ **the carry recurrence is Lean core's,
+not this file's**: `BitVec.carry`, `carry_zero`, `carry_succ`,
+`getLsbD_add_add_bool`, `carry_width`, `ult_eq_not_carry` and `slt_eq_not_carry`
+supply every arithmetic fact about addition, subtraction and comparison. What is
+built here is exactly the identification of the CIRCUIT's named carry net `adC i`
+with `BitVec.carry i a b cin`, plus three Bool identities of eight valuations
+each.
+
+📌 **`Silicon/Equiv/AdderSlice.lean`'s `slice_ok` was NOT reusable and the reason
+is structural**: it is stated over `SaltWorks.Silicon.Netlist`/`runP`, a
+different carrier and a different evaluator from `HDL.Circ`/`sem`, so importing
+it would have bought a bridge obligation rather than a lemma. *Its content — the
+majority function — is `Bool.atLeastTwo`, and it is re-derived here in one
+`decide` over 8 valuations (`atLeastTwo_eq`).*
+-/
+
+section AdderSemantics
+
+-- `SaltWorks.ISA.run` and `SaltWorks.Stack.Program.seenWord` are already in
+-- scope, so those two HDL names stay qualified; everything else opens.
+open SaltWorks.HDL hiding run seenWord
+
+/-! #### The two Bool identities the slice needs — 8 valuations each -/
+
+theorem atLeastTwo_eq : ∀ x y c : Bool,
+    Bool.atLeastTwo x y c = ((x && y) || ((x ^^ y) && c)) := by decide
+
+theorem xor3 : ∀ x y c : Bool, ((x ^^ y) ^^ c) = (x ^^ (y ^^ c)) := by decide
+
+/-! #### The input valuation, with the carry-in as a parameter
+
+*`bwEnv` pins the carry-in to `false` (net 64 reads `b.getLsbD 32`, which is
+`false` at width 32). `subOut` drives the SAME circuit with carry-in `true` and
+`~~~b` on the `b` port. One theorem has to cover both, so the carry-in is a
+parameter here and `bwEnv` is recovered as the `false` instance.* -/
+
+/-- `a` on nets `0…31`, `b` on `32…63`, and `cin` on every net from `64` up. -/
+def adEnv (a b : Word) (cin : Bool) : Env :=
+  fun i => if i < 32 then a.getLsbD i else if i < 64 then b.getLsbD (i - 32) else cin
+
+/-! #### The generic five-gate slice
+
+*Stated over four raw `Nat` net names rather than over `adSlice n`, because the
+only facts the reduction needs are that the three READ nets sit strictly below
+the five WRITTEN ones. `simp` then discharges all five `upd`s at once.*
+
+⚠️ **`omega` cannot read a goal whose `<` sits at `HDL.Net`** (`abbrev Net :=
+Nat`; it reports *"No usable constraints found"* and silently drops every
+`Net`-typed hypothesis). Every bound below is therefore either stated at `Nat`
+or `show`n into `Nat` first — that is what the `show` lines in `adA_lt`,
+`adB_lt` and `adC_lt` are for, and they are not decoration. -/
+
+theorem run_five (E : Env) (na nb nc P : Nat)
+    (hA : na < P) (hB : nb < P) (hC : nc < P) (m : Nat) :
+    SaltWorks.HDL.run E
+        [(⟨P, .xor na nb⟩ : Gate), ⟨P + 1, .xor P nc⟩, ⟨P + 2, .and na nb⟩,
+         ⟨P + 3, .and P nc⟩, ⟨P + 4, .or (P + 2) (P + 3)⟩] m
+      = if m = P + 4 then ((E na && E nb) || ((E na ^^ E nb) && E nc))
+        else if m = P + 3 then ((E na ^^ E nb) && E nc)
+        else if m = P + 2 then (E na && E nb)
+        else if m = P + 1 then ((E na ^^ E nb) ^^ E nc)
+        else if m = P then (E na ^^ E nb)
+        else E m := by
+  have h1 : ¬ (na = P) := by omega
+  have h2 : ¬ (nb = P) := by omega
+  have h3 : ¬ (nc = P) := by omega
+  have h4 : ¬ (na = P + 1) := by omega
+  have h5 : ¬ (nb = P + 1) := by omega
+  have h6 : ¬ (nc = P + 1) := by omega
+  have h7 : ¬ (nc = P + 2) := by omega
+  simp [run_cons, run_nil, Op.eval, upd, h1, h2, h3, h4, h5, h6, h7]
+
+/-! #### Slice arithmetic -/
+
+theorem adBase_eq (i : Nat) : adBase i = 65 + 5 * i := by
+  unfold adBase adIn adW; omega
+
+theorem adA_lt (n : Nat) : adA n < adBase n := by
+  show n < 65 + 5 * n
+  omega
+
+theorem adB_lt (n : Nat) : adB n < adBase n := by
+  show 32 + n < 65 + 5 * n
+  omega
+
+theorem adC_lt (n : Nat) : adC n < adBase n := by
+  cases n with
+  | zero => show (64 : Nat) < 65 + 5 * 0; omega
+  | succ m => show 65 + 5 * m + 4 < 65 + 5 * (m + 1); omega
+
+theorem adC_succ (n : Nat) : adC (n + 1) = adBase n + 4 := rfl
+
+theorem adS_eq (n : Nat) : adS n = adBase n + 1 := rfl
+
+/-! #### The gate prefix — the first `n` slices -/
+
+def adGates (n : Nat) : List Gate := (List.range n).flatMap adSlice
+
+theorem adGates_succ (n : Nat) : adGates (n + 1) = adGates n ++ adSlice n := by
+  simp [adGates, List.range_succ]
+
+/-- One slice, SaltWorks.HDL.run over the prefix environment. -/
+theorem run_adSlice (E : Env) (n : Nat) (m : Nat) :
+    SaltWorks.HDL.run E (adSlice n) m
+      = if m = adBase n + 4 then
+            ((E (adA n) && E (adB n)) || ((E (adA n) ^^ E (adB n)) && E (adC n)))
+        else if m = adBase n + 3 then ((E (adA n) ^^ E (adB n)) && E (adC n))
+        else if m = adBase n + 2 then (E (adA n) && E (adB n))
+        else if m = adBase n + 1 then ((E (adA n) ^^ E (adB n)) ^^ E (adC n))
+        else if m = adBase n then (E (adA n) ^^ E (adB n))
+        else E m :=
+  run_five E (adA n) (adB n) (adC n) (adBase n) (adA_lt n) (adB_lt n) (adC_lt n) m
+
+theorem run_adSlice_cout (E : Env) (n : Nat) :
+    SaltWorks.HDL.run E (adSlice n) (adBase n + 4)
+      = ((E (adA n) && E (adB n)) || ((E (adA n) ^^ E (adB n)) && E (adC n))) := by
+  rw [run_adSlice, if_pos rfl]
+
+theorem run_adSlice_sum (E : Env) (n : Nat) :
+    SaltWorks.HDL.run E (adSlice n) (adBase n + 1)
+      = ((E (adA n) ^^ E (adB n)) ^^ E (adC n)) := by
+  rw [run_adSlice, if_neg (by omega), if_neg (by omega), if_neg (by omega), if_pos rfl]
+
+theorem run_adSlice_frame (E : Env) (n : Nat) (m : Nat) (h : m < adBase n) :
+    SaltWorks.HDL.run E (adSlice n) m = E m := by
+  rw [run_adSlice, if_neg (by omega), if_neg (by omega), if_neg (by omega),
+    if_neg (by omega), if_neg (by omega)]
+
+/-! #### ⭐ THE CARRY INVARIANT — the node
+
+**`bitXor32` is POINTWISE and `adder32` IS NOT.** *Slice `i` READS `adC i`, which
+slice `i-1` WROTE, so `run_of_unwritten` — the frame lemma the `xor` proof runs
+on — does not apply across slices and there is nothing to induct on but the
+chain itself.* ⇒ **The induction carries a three-part invariant: after the first
+`n` slices, (1) every primary input net still holds its input, (2) the named
+carry net `adC n` holds `BitVec.carry n a b cin`, and (3) sum nets `adS 0 …
+adS (n-1)` hold the low sum bits.**
+
+⭐ **The carry recurrence is NOT hand-rolled.** *Lean core already defines the
+ripple model (`Init.Data.BitVec.Bitblast`: `carry`, `carry_zero`, `carry_succ`,
+`getLsbD_add_add_bool`, `carry_width`, `ult_eq_not_carry`, `slt_eq_not_carry`),
+so the whole proof is the identification of the CIRCUIT's carry net with core's
+`BitVec.carry i a b cin` — and every arithmetic fact about addition comes from
+core rather than from this file.* -/
+
+/-- **The invariant, by induction on the number of slices run.** -/
+theorem run_adGates (a b : Word) (cin : Bool) :
+    ∀ n, n ≤ 32 →
+      (∀ m : Nat, m < 65 → SaltWorks.HDL.run (adEnv a b cin) (adGates n) m = adEnv a b cin m)
+      ∧ SaltWorks.HDL.run (adEnv a b cin) (adGates n) (adC n) = BitVec.carry n a b cin
+      ∧ (∀ k : Nat, k < n → SaltWorks.HDL.run (adEnv a b cin) (adGates n) (adS k)
+            = (a.getLsbD k ^^ (b.getLsbD k ^^ BitVec.carry k a b cin))) := by
+  intro n
+  induction n with
+  | zero =>
+    intro _
+    refine ⟨fun m _ => rfl, ?_, fun k hk => absurd hk (Nat.not_lt_zero k)⟩
+    show adEnv a b cin 64 = BitVec.carry 0 a b cin
+    rw [BitVec.carry_zero]
+    simp [adEnv]
+  | succ n ih =>
+    intro hn
+    have hn32 : n < 32 := by omega
+    obtain ⟨hfr, hc, hs⟩ := ih (by omega)
+    have hbn : adBase n = 65 + 5 * n := adBase_eq n
+    have hAv : SaltWorks.HDL.run (adEnv a b cin) (adGates n) (adA n) = a.getLsbD n := by
+      have h65 : adA n < 65 := by show n < 65; omega
+      rw [hfr _ h65]
+      show (if n < 32 then a.getLsbD n
+              else if n < 64 then b.getLsbD (n - 32) else cin) = a.getLsbD n
+      rw [if_pos hn32]
+    have hBv : SaltWorks.HDL.run (adEnv a b cin) (adGates n) (adB n) = b.getLsbD n := by
+      have h65 : adB n < 65 := by show 32 + n < 65; omega
+      rw [hfr _ h65]
+      show (if 32 + n < 32 then a.getLsbD (32 + n)
+              else if 32 + n < 64 then b.getLsbD (32 + n - 32) else cin) = b.getLsbD n
+      rw [if_neg (by omega), if_pos (by omega), show 32 + n - 32 = n by omega]
+    refine ⟨?_, ?_, ?_⟩
+    · intro m hm
+      rw [adGates_succ, run_append, run_adSlice_frame _ _ _ (by omega)]
+      exact hfr m hm
+    · rw [adGates_succ, run_append, adC_succ, run_adSlice_cout, hAv, hBv, hc,
+        BitVec.carry_succ, atLeastTwo_eq]
+    · intro k hk
+      rw [adGates_succ, run_append, adS_eq]
+      rcases Nat.lt_or_ge k n with hkn | hkn
+      · have hbk : adBase k = 65 + 5 * k := adBase_eq k
+        rw [run_adSlice_frame _ _ _ (by omega)]
+        rw [← adS_eq]
+        exact hs k hkn
+      · have hkeq : k = n := by omega
+        subst hkeq
+        rw [run_adSlice_sum, hAv, hBv, hc, xor3]
+
+/-! #### ⭐⭐ THE THEOREM -/
+
+/-- ⭐⭐ **`adder32` ADDS — every operand pair, every carry-in.** The 32 sum bits
+of `a + b + cin` in port order, then the carry-out. *Not `decide`d: 2^64 pairs is
+not a kernel computation.* -/
+theorem sem_adder32_gen (a b : Word) (cin : Bool) :
+    sem adder32 (adEnv a b cin)
+      = (List.range 32).map
+            (fun k => (a + b + BitVec.setWidth 32 (BitVec.ofBool cin)).getLsbD k)
+          ++ [BitVec.carry 32 a b cin] := by
+  obtain ⟨-, hc, hs⟩ := run_adGates a b cin 32 le_rfl
+  have houts : adder32.outs = (List.range 32).map adS ++ [adC 32] := rfl
+  have hgates : adder32.gates = adGates 32 := rfl
+  have h1 : ((List.range 32).map adS).map (SaltWorks.HDL.run (adEnv a b cin) (adGates 32))
+      = (List.range 32).map
+          (fun k => (a + b + BitVec.setWidth 32 (BitVec.ofBool cin)).getLsbD k) := by
+    rw [List.map_map]
+    refine List.map_congr_left ?_
+    intro k hk
+    have hk32 : k < 32 := List.mem_range.mp hk
+    show SaltWorks.HDL.run (adEnv a b cin) (adGates 32) (adS k) = _
+    rw [hs k hk32]
+    exact (BitVec.getLsbD_add_add_bool hk32 a b cin).symm
+  have h2 : [adC 32].map (SaltWorks.HDL.run (adEnv a b cin) (adGates 32))
+      = [BitVec.carry 32 a b cin] := by
+    show [SaltWorks.HDL.run (adEnv a b cin) (adGates 32) (adC 32)] = _
+    rw [hc]
+  unfold sem
+  rw [houts, hgates, List.map_append, h1, h2]
+
+theorem bwEnv_eq_adEnv (a b : Word) (n : Nat) : bwEnv a b n = adEnv a b false n := by
+  show (if n < 32 then a.getLsbD n else b.getLsbD (n - 32))
+      = (if n < 32 then a.getLsbD n else if n < 64 then b.getLsbD (n - 32) else false)
+  by_cases h1 : n < 32
+  · rw [if_pos h1, if_pos h1]
+  · rw [if_neg h1, if_neg h1]
+    by_cases h2 : n < 64
+    · rw [if_pos h2]
+    · rw [if_neg h2]
+      apply BitVec.getLsbD_of_ge
+      omega
+
+/-- ⭐⭐ **THE 32-BIT RIPPLE ADDER ADDS, ON ALL 2^64 OPERAND PAIRS** — the
+carry-in `bwEnv` supplies is `false`, so this is `a + b` outright. *This
+supersedes `adder32_adds_on_sample` and `adder32_carry_out_on_sample` (49 pairs
+of `addWords`) the way `sem_bitXor32` superseded `bitXor32_correct`: the
+certificates are points of a theorem that now holds everywhere.* -/
+theorem sem_adder32 (a b : Word) :
+    sem adder32 (bwEnv a b)
+      = (List.range 32).map (fun k => (a + b).getLsbD k) ++ [BitVec.carry 32 a b false] := by
+  rw [sem_congr adder32 (bwEnv_eq_adEnv a b), sem_adder32_gen]
+  simp
+
+/-! #### Reading the 33-element output list
+
+⚠️ **`adder32.outs` is 32 sum bits THEN the carry-out, so `sem` returns 33
+values, not 32.** *Every reader below is indexed against that length.* -/
+
+theorem getD_of_range_append (f : Nat → Bool) (t : List Bool) (k : Nat) (hk : k < 32) :
+    (((List.range 32).map f) ++ t).getD k false = f k := by
+  have hl1 : ((List.range 32).map f).length = 32 := by simp
+  have hlt : k < (((List.range 32).map f) ++ t).length := by
+    rw [List.length_append, hl1]; omega
+  rw [List.getD_eq_getElem _ _ hlt, List.getElem_append_left (by rw [hl1]; exact hk)]
+  simp
+
+theorem getD_32_of_range_append (f : Nat → Bool) (x : Bool) :
+    (((List.range 32).map f) ++ [x]).getD 32 false = x := by
+  have hl1 : ((List.range 32).map f).length = 32 := by simp
+  have hlt : 32 < (((List.range 32).map f) ++ [x]).length := by
+    rw [List.length_append, hl1]; simp
+  rw [List.getD_eq_getElem _ _ hlt, List.getElem_append_right (by rw [hl1])]
+  simp [hl1]
+
+theorem sem_adder32_getD (a b : Word) (k : Nat) (hk : k < 32) :
+    (sem adder32 (bwEnv a b)).getD k false = (a + b).getLsbD k := by
+  rw [sem_adder32]; exact getD_of_range_append _ _ k hk
+
+theorem sem_adder32_cout (a b : Word) :
+    (sem adder32 (bwEnv a b)).getD 32 false = decide (a.toNat + b.toNat ≥ 2 ^ 32) := by
+  rw [sem_adder32, getD_32_of_range_append, BitVec.carry_width]
+  simp
+
+/-! #### ⭐ THE SUBTRACTION PATH, UNCONDITIONALLY
+
+*`subOut` is the SAME `adder32`, driven with `~~~b` and carry-in `1`. Its only
+previous statement was `sub_via_adder_correct` at 100 pairs — and that sample is
+exactly what put `∈ bwWords` into `sltField_is_sltCirc`'s type.* -/
+
+theorem subEnv_eq (a b : Word) (n : Nat) :
+    (if n < 32 then a.getLsbD n else if n < 64 then !(b.getLsbD (n - 32)) else true)
+      = adEnv a (~~~b) true n := by
+  show _ = (if n < 32 then a.getLsbD n
+              else if n < 64 then (~~~b).getLsbD (n - 32) else true)
+  by_cases h1 : n < 32
+  · rw [if_pos h1, if_pos h1]
+  · rw [if_neg h1, if_neg h1]
+    by_cases h2 : n < 64
+    · have h3 : n - 32 < 32 := by omega
+      rw [if_pos h2, if_pos h2]
+      simp [h3]
+    · rw [if_neg h2, if_neg h2]
+
+theorem subOut_eq_sem (a b : Word) : subOut a b = sem adder32 (adEnv a (~~~b) true) :=
+  sem_congr adder32 (fun n => subEnv_eq a b n)
+
+theorem setWidth_ofBool_true : BitVec.setWidth 32 (BitVec.ofBool true) = (1 : Word) := by decide
+
+theorem add_not_one (a b : Word) :
+    a + ~~~b + BitVec.setWidth 32 (BitVec.ofBool true) = a - b := by
+  rw [setWidth_ofBool_true, BitVec.sub_eq_add_neg, BitVec.neg_eq_not_add, BitVec.add_assoc]
+  rfl
+
+/-- ⭐ **`a - b` THROUGH THE REAL ADDER, FOR ALL 2^64 PAIRS.** -/
+theorem subOut_bits (a b : Word) :
+    subOut a b = (List.range 32).map (fun k => (a - b).getLsbD k)
+        ++ [BitVec.carry 32 a (~~~b) true] := by
+  rw [subOut_eq_sem, sem_adder32_gen, add_not_one]
+
+theorem sub_via_adder_unconditional (a b : Word) :
+    (subOut a b).take 32 = (List.range 32).map (fun k => (a - b).getLsbD k) := by
+  rw [subOut_bits]; exact List.take_left' (by simp)
+
+theorem subOut_sign (a b : Word) : (subOut a b).getD 31 false = (a - b).getLsbD 31 := by
+  rw [subOut_bits]; exact getD_of_range_append _ _ 31 (by omega)
+
+theorem subOut_cout (a b : Word) :
+    (subOut a b).getD 32 false = BitVec.carry 32 a (~~~b) true := by
+  rw [subOut_bits]; exact getD_32_of_range_append _ _
+
+/-! #### ⭐ THE COMPARATORS, WITH THE SAMPLE PREMISES GONE
+
+*`sem_sltCirc` already settled what the comparator computes FROM its inputs, for
+all 8 valuations; what was open was whether the sign bit it is fed is the
+subtraction's. That is now closed, so both comparators are unconditional.*
+**`sltu` is core's `ult_eq_not_carry` read off the 33rd output; `slt` is core's
+`slt_eq_not_carry` plus one 8-case Bool identity relating the circuit's
+overflow correction to the `msb`/carry form.** -/
+
+theorem sem_sltuCirc : ∀ x : Bool, sem sltuCirc (fun _ => x) = cmpWord (!x) := by decide
+
+theorem sltuDrive_uncond (a b : Word) : sltuDrive a b = cmpWord (BitVec.ult a b) := by
+  unfold sltuDrive
+  rw [subOut_cout, sem_sltuCirc, ← BitVec.ult_eq_not_carry]
+
+theorem msb31 (a : Word) : a.msb = a.getLsbD 31 := BitVec.msb_eq_getLsbD_last a
+
+theorem carry32_expand (a b : Word) :
+    BitVec.carry 32 a (~~~b) true
+      = Bool.atLeastTwo (a.getLsbD 31) (!(b.getLsbD 31)) (BitVec.carry 31 a (~~~b) true) := by
+  have h : BitVec.carry 32 a (~~~b) true
+      = Bool.atLeastTwo (a.getLsbD 31) ((~~~b).getLsbD 31) (BitVec.carry 31 a (~~~b) true) :=
+    BitVec.carry_succ 31 a (~~~b) true
+  rw [h]; simp
+
+theorem subOut_sign_formula (a b : Word) :
+    (subOut a b).getD 31 false
+      = (a.getLsbD 31 ^^ ((!(b.getLsbD 31)) ^^ BitVec.carry 31 a (~~~b) true)) := by
+  rw [subOut_sign, ← add_not_one, BitVec.getLsbD_add_add_bool (show 31 < 32 by omega)]
+  simp
+
+theorem slt_bool : ∀ x y c : Bool,
+    ((x ^^ ((!y) ^^ c)) ^^ ((x ^^ y) && (x ^^ (x ^^ ((!y) ^^ c)))))
+      = ((x == y) ^^ Bool.atLeastTwo x (!y) c) := by decide
+
+theorem slt_sign_formula (a b : Word) :
+    ((a.getLsbD 31 ^^ ((!(b.getLsbD 31)) ^^ BitVec.carry 31 a (~~~b) true))
+        ^^ ((a.getLsbD 31 ^^ b.getLsbD 31)
+            && (a.getLsbD 31
+                ^^ (a.getLsbD 31 ^^ ((!(b.getLsbD 31)) ^^ BitVec.carry 31 a (~~~b) true)))))
+      = BitVec.slt a b := by
+  rw [slt_bool, BitVec.slt_eq_not_carry, msb31, msb31, carry32_expand]
+
+theorem sltDrive_uncond (a b : Word) : sltDrive a b = cmpWord (BitVec.slt a b) := by
+  rw [sltDrive_eq_sign_formula, subOut_sign_formula, slt_sign_formula]
+
+/-! #### ⭐ THE ISA BRIDGES — `ADD`, `ADDI`, and `SLT` without the sample
+
+*Same shape as `xorField_is_bitXor32`: for an instruction word, the destination
+register's field of the stepped state is what the certified block computes on the
+source registers, read back through `wordOf` in `outReg`'s own shape. All three
+are unconditional in the operands.*
+
+⛔ **`PcField` is NOT closed by this and the reason is worth recording**: it is a
+statement about a whole `core`'s output bits `1024…1055`, and the pc path does
+not run through `adder32` at all — `pcNext` implements the increment itself
+(`pcNext_not_beq_adds_four`), and `inc32` is unreferenced. *`sem_adder32` gives
+`PcField` nothing; the debt there is `core`, not the adder.* -/
+
+theorem wordOf_getD_range_append (f : Nat → Bool) (t : List Bool) :
+    wordOf (fun k => (((List.range 32).map f) ++ t).getD k false)
+      = wordOf f :=
+  wordOf_congr (fun k hk => getD_of_range_append f t k hk)
+
+theorem addField_is_adder32 (s : St) (rd x y : Fin 32) (hrd : rd ≠ 0) :
+    (stepT (decQ (envWith s (encode (Instr.ADD rd x y))))
+           (seenWord (envWith s (encode (Instr.ADD rd x y))))).regs[rd.val]
+      = wordOf (fun k =>
+          (sem adder32 (bwEnv (s.get x) (s.get y))).getD k false) := by
+  rw [decQ_envWith, seenWord_envWith, stepT_encode, sem_adder32,
+    wordOf_getD_range_append, wordOf_getLsbD_self]
+  show ((s.set rd (s.get x + s.get y)).next).regs[rd.val] = _
+  show (s.set rd (s.get x + s.get y)).regs[rd.val] = _
+  simp only [St.set, if_neg hrd]
+  exact Vector.getElem_set_self rd.isLt
+
+theorem addiField_is_adder32 (s : St) (rd x : Fin 32) (imm : BitVec 12) (hrd : rd ≠ 0) :
+    (stepT (decQ (envWith s (encode (Instr.ADDI rd x imm))))
+           (seenWord (envWith s (encode (Instr.ADDI rd x imm))))).regs[rd.val]
+      = wordOf (fun k =>
+          (sem adder32 (bwEnv (s.get x) (imm.signExtend 32))).getD k false) := by
+  rw [decQ_envWith, seenWord_envWith, stepT_encode, sem_adder32,
+    wordOf_getD_range_append, wordOf_getLsbD_self]
+  show ((s.set rd (s.get x + imm.signExtend 32)).next).regs[rd.val] = _
+  show (s.set rd (s.get x + imm.signExtend 32)).regs[rd.val] = _
+  simp only [St.set, if_neg hrd]
+  exact Vector.getElem_set_self rd.isLt
+
+theorem sltField_is_sltCirc_unconditional (s : St) (rd x y : Fin 32) (hrd : rd ≠ 0) :
+    (stepT (decQ (envWith s (encode (Instr.SLT rd x y))))
+           (seenWord (envWith s (encode (Instr.SLT rd x y))))).regs[rd.val]
+      = wordOf (fun k => (sltDrive (s.get x) (s.get y)).getD k false) := by
+  rw [decQ_envWith, seenWord_envWith, stepT_encode, sltDrive_uncond, wordOf_cmpWord]
+  show ((s.set rd (if (s.get x).slt (s.get y) then 1 else 0)).next).regs[rd.val] = _
+  show (s.set rd (if (s.get x).slt (s.get y) then 1 else 0)).regs[rd.val] = _
+  simp only [St.set, if_neg hrd]
+  exact Vector.getElem_set_self rd.isLt
+
+/-! #### ⛔ NON-VACUITY
+
+*An adder theorem that any circuit satisfied would say nothing about which
+circuit belongs in the datapath, and a theorem that only reached the checked
+pairs would be the certificate under another name.* -/
+
+/-- ⛔ ONE SLICE MUTATED: slice 16's carry-out gate is `and`, not `or`. -/
+def adSliceCut (i : Nat) : List Gate :=
+  if i == 16 then
+    [⟨adP i, .xor (adA i) (adB i)⟩,
+     ⟨adS i, .xor (adP i) (adC i)⟩,
+     ⟨adG i, .and (adA i) (adB i)⟩,
+     ⟨adT i, .and (adP i) (adC i)⟩,
+     ⟨adBase i + 4, .and (adG i) (adT i)⟩]
+  else adSlice i
+
+def adder32Cut : Circ :=
+  { nIn := adIn
+    gates := (List.range adW).flatMap adSliceCut
+    outs := (List.range adW).map adS ++ [adC adW] }
+
+theorem adder32Cut_is_ssa : adder32Cut.ssa = true := by decide +kernel
+
+/-- ⛔ **ONE GATE WRONG AND THE THEOREM REFUSES IT.** *`adder32Cut` is `adder32`
+with slice 16's carry-out gate changed from `or` to `and` — which makes that
+carry identically `false`, since `a&&b` and `a^^b` are disjoint. It is still
+`ssa`, still `wf`, still 160 gates, still the right cone shape. The pair
+`(0x00010000, 0x00010000)` generates a carry at exactly that slice.* -/
+theorem adder32Cut_fails_the_adder :
+    sem adder32Cut (bwEnv 0x00010000 0x00010000)
+      ≠ (List.range 32).map (fun k => ((0x00010000 : Word) + 0x00010000).getLsbD k)
+          ++ [BitVec.carry 32 (0x00010000 : Word) 0x00010000 false] := by decide +kernel
+
+/-- ⛔ **AND THE CARRY-FREE "ADDER" FAILS IT TOO.** *`bitXor32` is addition
+without carries — it agrees with `adder32` on every operand pair that generates
+none, which is why `1 + 1` is the whole refutation.* -/
+theorem bitXor32_fails_the_adder :
+    sem bitXor32 (bwEnv 1 1)
+      ≠ (List.range 32).map (fun k => ((1 : Word) + 1).getLsbD k)
+          ++ [BitVec.carry 32 (1 : Word) 1 false] := by decide +kernel
+
+/-- ⭐ **THE THEOREM REACHES WHERE NEITHER CERTIFICATE DOES** — an operand pair
+in neither `bwWords` (the 100-pair spread) nor `addWords` (the 49-pair spread),
+with a carry-out that is genuinely `true`. *Without this, "for all 2^64" and
+"for the pairs someone listed" are indistinguishable from the outside.* -/
+theorem sem_adder32_off_the_sample :
+    (0xF0F0F0F0 : Word) ∉ bwWords ∧ (0xF0F0F0F0 : Word) ∉ addWords
+      ∧ sem adder32 (bwEnv 0xF0F0F0F0 0xF0F0F0F0)
+          = (List.range 32).map (fun k => ((0xF0F0F0F0 : Word) + 0xF0F0F0F0).getLsbD k)
+              ++ [BitVec.carry 32 (0xF0F0F0F0 : Word) 0xF0F0F0F0 false]
+      ∧ BitVec.carry 32 (0xF0F0F0F0 : Word) 0xF0F0F0F0 false = true :=
+  ⟨by decide +kernel, by decide +kernel, sem_adder32 _ _, by decide +kernel⟩
+
+end AdderSemantics
+
 /-! ## Axiom audit -/
 
 open Salt.Tactic
@@ -2990,5 +3499,21 @@ open Salt.Tactic
 #audit_axioms sltDrive_eq_of_mem wordOf_cmpWord sltField_is_sltCirc
 #audit_axioms bitAnd32_fails_the_xorField sltuCirc_fails_the_sltField
 #audit_axioms control_states_exist
+
+#audit_axioms atLeastTwo_eq xor3 adEnv run_five
+#audit_axioms adBase_eq adA_lt adB_lt adC_lt adC_succ adS_eq
+#audit_axioms adGates adGates_succ run_adSlice run_adSlice_cout run_adSlice_sum
+#audit_axioms run_adSlice_frame run_adGates
+#audit_axioms sem_adder32_gen bwEnv_eq_adEnv sem_adder32
+#audit_axioms getD_of_range_append getD_32_of_range_append
+#audit_axioms sem_adder32_getD sem_adder32_cout
+#audit_axioms subEnv_eq subOut_eq_sem setWidth_ofBool_true add_not_one subOut_bits
+#audit_axioms sub_via_adder_unconditional subOut_sign subOut_cout
+#audit_axioms sem_sltuCirc sltuDrive_uncond msb31 carry32_expand
+#audit_axioms subOut_sign_formula slt_bool slt_sign_formula sltDrive_uncond
+#audit_axioms wordOf_getD_range_append
+#audit_axioms addField_is_adder32 addiField_is_adder32 sltField_is_sltCirc_unconditional
+#audit_axioms adSliceCut adder32Cut adder32Cut_is_ssa adder32Cut_fails_the_adder
+#audit_axioms bitXor32_fails_the_adder sem_adder32_off_the_sample
 
 end SaltWorks.Stack.Program
