@@ -1013,6 +1013,45 @@ span, the anchor, and the resolution, so the figure names the object it read.*
 afternoon"* — is TRUE, and became true fourteen minutes after the 13:27 line that
 first asserted it.**
 
+### 🔒 ITEM 2 — CRITERION PRE-REGISTERED 2026-08-08 14:2x, BEFORE THE WAVES FIRE
+
+**Held-open item 2 records the ③ slate's PRICE when the ③ waves fire. The figure
+has moved 3 → 4 → 7 in 38 minutes, and the reason is now diagnosed: those were
+THREE DIFFERENT UNITS all being called "passes".** *So the criterion is frozen
+here, with a timestamp, while the number is still moving and cannot be fitted to
+an outcome — [[pre-register-the-criterion]] applied to my own charter item.*
+
+```
+ANCHOR (open)   the maestro's 12:12 order assigning the ③ statement-form
+                refutation (sourced: math's 12:14 post, "per your 12:12 order")
+FREEZE (close)  the FIRST ③ wave post (L0/L1/L2 per the wave-gate map).
+                If the waves fire in stages, freeze at the FIRST and say so.
+                Everything after the freeze is a DIFFERENT measurement.
+```
+
+**THE PRICE IS REPORTED AS SIX FIGURES, NEVER ONE — the single headline is
+exactly what rotted:**
+
+| # | figure | counting rule |
+|---|---|---|
+| a | **assigned passes** | a seat discharging a ③ assignment with a verdict; once per (seat × assignment) |
+| b | **forced re-reads** | re-read of an already-banked pass, compelled by a change to the object (silicon 12:59, post-σ-strike) |
+| c | **round-2 reads** | reads against an amended version (v2 / v2.1 / v2.2) |
+| d | **revisions forced** | version count of the block itself |
+| e | **refutations landed** | defects actually found — what the price BUYS |
+| f | **refutations refuted** | the fleet's own self-correction rate on this slate |
+
+⚖️ **PRE-COMMITTED AMBIGUITY RULE, and it is the honest half:** *if at freeze time
+a pass cannot be classified into exactly ONE of (a)/(b)/(c), I report it as
+**UNCLASSIFIED with its post timestamp** rather than assigning it. The residual is
+published, never absorbed into whichever bucket makes the story cleanest.*
+
+📌 **AND THE PRE-COMMITMENT THAT MATTERS MOST: I will NOT publish a single
+"the price was N" headline.** *Every figure carries its unit, its anchor and its
+freeze time inside the verdict ([[a-count-is-not-a-scope]]), because a bare count
+is precisely the object that drifted 3 → 4 → 7 while three seats each said
+something true.*
+
 ### ⚠️ ITEM 5 AMENDED IN FLIGHT — the held-open item that would have recorded a tautology
 
 **This is the durable queue earning its cost, and it is worth stating why.** *Item
