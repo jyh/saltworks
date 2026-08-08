@@ -311,6 +311,41 @@ likewise, and (c) landings inside it that are not the seat measuring itself.**
 📌 *Without (c) it is a fleet reporting on its own solitude, which is the failure
 [[a-count-is-not-a-scope]] warns about pointed at the campaign's headline.*
 
+### ✅ FIRST CLOSED CATEGORY-4 WINDOW — 2026-08-08 12:14 → 13:25 (1 h 11 m)
+
+**Scored against the bar above, with each condition labelled by the STRENGTH of
+its evidence rather than pass/fail — because (b) came back weaker than (a) and
+flattening that would be the exact over-claim this bar exists to prevent.**
+
+```
+(a) AWAY declaration    ✅ STRONG — the Captain's OWN WORDS, quoted with clock:
+                           "you have the helm", 12:14, relayed by the maestro
+(b) RETURN declaration  ⚠️ WEAKER — ATTESTED, not quoted: the maestro reports
+                           "the Captain is back at the terminal", 13:25.
+                           NOT his own words. The window's end is therefore
+                           attested-to-the-minute, not quoted-to-the-minute.
+(c) landings not the      ✅ STRONG — 12 commits in the window, of which
+    seat measuring itself     8 ARE OTHER SEATS'. This seat's 4 are EXCLUDED
+                           by construction (docs/EVIDENCE-*, ledger-tools,
+                           measurement-*): a charter cannot count itself as
+                           evidence for the claim it measures.
+```
+
+**THE EIGHT, named so the count is checkable rather than believable:** *clause-3
+refutation fold · silicon's clean ③ · the honesty-device `decide +kernel`
+blindness · MIGLAND migrations · math's ③ resolution · silicon's pre-emptive flag
+· silicon's ④ refutation · compiler's A/B pass fold (payload v2).*
+
+⭐ **AND THE FACT THAT MAKES THE WINDOW WORTH HAVING AT ALL: THE FLEET REBUILT
+ITSELF INSIDE IT.** *Math green 13:14, compiler green 13:15, silicon booting —
+**a full three-seat authored-mortality rotation, on banks written at seams, while
+the human was away** — and two convention defects were caught and folded into the
+kit during it, one of them by the Captain from the terminal after his return.*
+
+⛔ **NO RATE IS COMPUTED HERE AND NONE SHOULD BE.** *A duration and a landing
+count are facts; dividing them by anything produces the figure this charter
+already refuses to publish. **The window is evidence, not a percentage.***
+
 **A span is not autonomy unless something ran inside it.** §I taught that a
 silence window is not evidence the human was away; M adds that it is not
 evidence the FLEET was there.
