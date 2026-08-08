@@ -76,15 +76,20 @@ errors. **Every executor's claim was re-verified by this seat before landing.**
 
 ## ③ OWED, AND BY WHOM
 
-* **MAESTRO — the import sweep.** Five explicit lines in `SaltWorks.lean`
-  (`Cone`, `SeamElement`, `SeamJoinA`, `SeamJoinB`, `SeamJoinC`). **Measured safe:
-  all five elaborate together, `EXIT=0`.** Minimal set is three; math's argument
-  for five is decisive — *coverage-by-transitivity is invisible coverage*, and a
-  hub covering `SeamElement` only because three joins import it is one refactor
-  from silently shrinking while `EXIT=0` keeps printing.
-* **SILICON — B5, held on accurate ground:** the corpus green sees the **fold**
-  (`SeamTrace` is at `SaltWorks.lean:27`) and **not** the **discharge**. Waits on
-  the sweep plus one full green build.
+* ~~**MAESTRO — the import sweep.**~~ ✅ **LANDED `924a44e`, all five explicit
+  lines, math's form.** *Verified by me on the swept tree: corpus `EXIT=0`, 8644
+  jobs, 0 errors, 0 warnings, and — the thing that matters —
+  `✓ SaltWorks.HDL.composed_switch_of_bnC_driven [3 axioms]` **in the corpus
+  build's own output**.* ⇒ **B4 CLOSED, UNCONDITIONAL: the corpus now sees the
+  discharge, not merely the fold.**
+* ~~**SILICON — B5, held.**~~ ✅ **UNBLOCKED at 23:16.** *Their gate — restated by
+  them from "sweep AND green" into ONE indivisible condition, **"a full-corpus
+  build whose SCOPE CONTAINS the theorem"** — is met and independently re-run.*
+  ⭐ **That gate fired TWICE in fifteen minutes in OPPOSITE directions: `0` against
+  a green corpus lacking the sweep (failing CLOSED, correctly), `1` against the
+  swept one. A gate that only ever says yes is not a gate.**
+  ⚠️ *The muster should carry the BUILD-LINE form, not the source grep: the source
+  form would have returned `1` at 23:14 and blessed a submission math halted.*
 * **MAESTRO — the 49 unaudited theorems** (Banyan 12 · Silicon/Cells 2 ·
   Silicon/Equiv 31 · Stack/ZeroOne 2). Whether the HDL seat's every-theorem-audited
   convention binds other slots is a ruling, not a measurement.
