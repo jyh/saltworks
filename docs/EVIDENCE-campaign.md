@@ -708,6 +708,45 @@ that suppressed orders it doubted would be a far worse instrument than one that
 occasionally delivers a mistake.*** **Logged as a success, per the maestro's own
 ruling — the error was upstream of the instrument.**
 
+### ⚖️ THE COST-MODEL RULING — PERMANENT, CAPTAIN-RATIFIED 2026-08-08 10:02 (muster ②/⑤)
+
+> ***THE TILE IS SCORED IN CELLS.*** **Emitted cells are the tile metric for every
+> optimization argument henceforth; `gates.length` remains the PROOF-SIDE count.**
+> ***Any future pricing claim that does not name its model is out of order.***
+
+⛔ **TWO METRICS NOW EXIST AND THEY ARE NOT INTERCHANGEABLE.** *This entry exists
+because the record already contains numbers in both, ratified minutes apart:*
+
+```
+RULING ①  10:02−3m   "(3,2) — 291 gates, −1,154 vs as-built"   ⬅ PROOF-SIDE (gates.length)
+RULING ②  10:02      the tile is scored in CELLS                ⬅ TILE-SIDE, for optimization
+```
+🔑 ***Ruling ①'s figures were ratified BEFORE the cost-model ruling and are
+proof-side counts. They are not cells figures and must never be read as one.***
+**E4's sign inversion is settled by this permanently** — a sign that flips
+between models is not a disagreement about a circuit, it is two answers to two
+questions.
+
+✅ **AUDIT OF THIS SEAT'S OWN ARTIFACTS, run at the ruling rather than asserted:**
+*no unnamed-model pricing claim exists in `EVIDENCE-campaign.md`,
+`EVIDENCE-muster-ledger-0808.md` or `measurement-preregistration.md`. The single
+gate-count datum in this file (§ the `-M` ceiling: "24 input bits, 60 gates,
+seconds") is a **memory-ceiling measurement**, not an optimization argument, and
+is not in scope for the ruling.* **Reported clean as loudly as a finding, per
+this record's own standing rule.**
+
+⭐ **AND THE STANDING HAZARD IS A NAMING PROBLEM, WHICH DAY 3 ALREADY SOLVED
+ELSEWHERE.** *A reader six weeks out sees `291`, `−1,154` and a cells figure in
+one document and merges them; the ruling's "name your model" is the guard, and it
+works only if the model rides WITH the number.*
+```
+MODEL IN A NEARBY SENTENCE   "…scored in cells" three paragraphs up   ⬅ survives until quoted
+MODEL IN THE FIGURE ITSELF   "291 gates (proof-side)" · "N cells"     ⬅ cannot be separated
+```
+🔑 ***Which is `adder32_adds_on_sample` applied to cost figures: put the scope in
+the thing a citation is forced to carry.*** **A bare `291` is exactly as
+quotable as a bare `99.6%`, and this record already knows what that costs.**
+
 ### DEFECTS FOUND BY THE DISCIPLINE — Day 3, including three of this seat's own
 
 **Listed with the others because the record is worth nothing if it grades only
