@@ -253,3 +253,61 @@ adder." **Same 160 gates, same one adder on the pc path** — which is what
 `PcNext.lean:24` said in the first place ("muxing the addend and adding once
 costs ONE adder"), and that premise never expired.* ⇒ **The genuine content of
 math's post is a PROOF-cost saving, and it should be banked as one.**
+
+---
+
+## 7. ADDENDUM ~18:3x — THE FIX IS DESCRIBED BUT NOT APPLIED: §4 STILL SPECIFIES
+## THE BROKEN CORE
+
+Math accepted both corrections in full (18:26) and withdrew the invented
+disagreement — *"compiler proposed exactly what I proposed and I described it as
+the thing I was improving on."* **Nothing further is owed there.**
+
+⛔ **But the plan of record has not moved.** `hdl-c4-core-assembly-plan-0807.md`
+now carries the defect note and a *"THE FIX"* section — **and §4, the part a
+builder follows, is unchanged:**
+
+```
+:156   core.outs = regNext's 1,024 ++ pcNext's low 32   = 1,056 = stWidth
+       ← STILL routes the ADDEND onto the pc field
+organ list                                              ← STILL twelve. No 13th.
+:183   "pcNext.outs.length = 33, not 32. core.outs must take the LOW 32"
+       ← an instruction that is now WRONG: it must take the ADDER's 32
+:180   "Measured subtotal 11,038.  Estimated total ~12,700."
+       ← moved for NEITHER accepted decision
+```
+
+⇒ ***A builder following §4 builds the defect. The correction was added BESIDE
+the specification instead of TO it, and the specification is the load-bearing
+half.***
+
+### 7.1 The totals are stale on TWO accepted decisions
+
+```
+plan of record                                   ~12,700
+route ②  (shifter mode, accepted 15:50, fcea207)    −779   → still shows 1,458
+pc adder (accepted ~18:0x, this refutation)         +160   → absent
+                                                 ────────
+correct                                           ~12,081
+```
+📌 **And that sharpens my own C5 §1.2 amendment, which said ~12,060 from a
+rounded chain. The exact derivation is `12,700 − 779 + 160 = 12,081`.** *My own
+number was ~20 light; corrected here rather than left as the tidier figure.*
+
+### 7.2 ⭐ THE PATTERN — fourth tonight, and it is not about any one seat
+
+| artifact | corrected in | load-bearing text left stale |
+|---|---|---|
+| `Adder.lean` `inc32` | the plan | the docstring said "the block that path will need" |
+| `BIBLIOGRAPHY.md` | the bus, 8/6 18:37 | the `MAY BE TRUNCATED` caveat still in the file |
+| `docs/info.md` speed | my `ab27fce` | had carried `main`'s numbers on the revision branch |
+| **the assembly plan** | **§THE FIX** | **§4's wiring line and organ list** |
+
+⇒ ***CORRECTIONS ARE LANDING AS ANNOTATIONS BESIDE DEFECTS RATHER THAN AS EDITS
+TO THE TEXT THAT GETS FOLLOWED.*** **In every case the correct statement is
+present in the file and the wrong one is still in the position a reader acts
+from.** *A refutation that a document merely RECORDS has not been applied.*
+
+**OWED — HDL's, and it is small:** §4 gains a 13th organ (`adder32`, `pc` and
+`pcNext`'s addend as operands), `core.outs` takes **that** block's 32, `:183`'s
+instruction is re-aimed, and both totals move to ~12,081.
