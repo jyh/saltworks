@@ -533,9 +533,48 @@ theorem gate_count_ten : (genSelect 10 4).gates.length = 1445 := by
   rw [genSelect_gates_length]
   rfl
 
-/-- The landed block's recorded size, now a corollary of the closed form. -/
+/-- The landed block's recorded size, now a corollary of the closed form — and
+stated with **no numeral**, so the phase-3 re-cut cannot falsify it.
+
+⚠️ **THIS THEOREM WAS THE ONE PHASE 3'S ESTIMATE MISSED.** *It read
+`aluSelect.gates.length = 1445` and was proved `rw [← genSelect_ten]; exact
+gate_count_ten` — so BOTH halves were re-cut hazards, and the statement was the
+worse one. The proof rode `genSelect_ten`, the numeral-bound bridge phase 3
+retires; the STATEMENT carried the `(10,4)` gate count, so moving the constants
+would have made a LANDED THEOREM FALSE rather than merely unproved. A "zero
+consumers" reading of the bridge missed it because the census asked what the
+bridge PROVES, never who `rw`s with it.*
+
+✅ **THE PROOF IS REPOINTED AT MATH'S PARAMETRIC HINGE AND THE STATEMENT IS LEFT
+EXACTLY AS IT WAS** — `= 1445`, unchanged to the byte. That is the expand half of
+expand-contract: the `genSelect_ten` dependency is gone, so the ladder can be
+deleted in the next commit, and no consumer of THIS theorem sees any difference.
+The numeral moves to `291` in the flip commit, where it belongs, beside the
+tripwires that are supposed to fire.
+
+⛔ **AND IT MUST STAY `= 1445` UNTIL THEN — I TRIED THE PARAMETRIC STATEMENT HERE
+AND IT BROKE TWO LANDED THEOREMS.** *`SelectCut32.gate_saving` and
+`SelectCut32.span_delta` both do `have h1 := gate_count_aluSelect; omega`. Stated
+as `96 * (2 ^ asSelBits - 1) + asSelBits + 1` the equation is still TRUE at
+`(10,4)` — but `omega` cannot use it, because `2 ^ asSelBits` is not linear
+arithmetic. Both proofs failed, and `#audit_axioms` caught the `sorryAx` their
+failed `omega` installed.* ⇒ 🔑 ***A truth-preserving change of a statement's
+SHAPE is still a breaking change. Expand-contract has to preserve what consumers
+can USE, not merely what is true — and a tactic's reach is part of the interface.***
+-/
 theorem gate_count_aluSelect : aluSelect.gates.length = 1445 := by
-  rw [← genSelect_ten]; exact gate_count_ten
+  rw [← genSelect_eq_aluSelect, genSelect_gates_length]
+  decide
+
+/-- The same count with **no numeral**, for the post-re-cut world: true at every
+pair, and the form `gate_count_aluSelect` takes once the constants move.
+
+📌 *Landed BESIDE the literal one rather than replacing it — the phase-1 pattern,
+applied to a theorem instead of a block. Consumers migrate to this at their own
+pace; `omega`-based ones cannot migrate at all and must be given a literal.* -/
+theorem gate_count_aluSelect_param :
+    aluSelect.gates.length = 96 * (2 ^ asSelBits - 1) + asSelBits + 1 := by
+  rw [← genSelect_eq_aluSelect, genSelect_gates_length]
 
 /-- ⭐ **THE GAP BETWEEN THE TWO PROVED POINTS, CLOSED**: `b = 3`, the
 eight-source width, 676 gates — and now `ssa`/`wf` as well. -/

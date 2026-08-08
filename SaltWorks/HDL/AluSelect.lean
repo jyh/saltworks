@@ -463,20 +463,41 @@ def asOneHot (m sel : Nat) : Env := fun n =>
 
 def asBit0 (m sel : Nat) : Bool := (sem aluSelect (asOneHot m sel)).getD 0 false
 
-/-- Every select value picks the operand it names — and the six PADDING slots
-(10…15) read the shared constant and yield zero, which is the one behaviour the
-`asPad = 16` design decision is responsible for. -/
-def asSelectsOK (m : Nat) : Bool :=
-  (List.range 16).all fun sel => asBit0 m sel == decide (sel = m)
+/-- Every select value picks the operand it names — and the PADDING slots
+(`asOps ≤ sel < asPad`) read the shared constant and yield zero, which is the one
+behaviour the pad design decision is responsible for.
 
-/-- ⛔ **DO NOT GENERALISE THIS — `asSelectsOK m` IS FALSE FOR `10 ≤ m < 16`.**
+⛔ **THE SELECT SPACE IS `asPad`, NOT A LITERAL `16` — corrected at phase 3's
+aiming sweep, and this was the most dangerous line in the file.** *It read
+`List.range 16`: correct-by-coincidence at `asPad = 16` and a re-cut hazard
+everywhere else. At the ruled `asSelBits = 2` the literal iterates SIXTEEN values
+over a FOUR-value select space, so `sel = 4…15` alias onto `0…3` — `asOneHot`
+feeds `sel.testBit j` to nets that are gate outputs rather than inputs, so `sem`
+ignores them — while the predicate still demands `sel = m`.* ⇒ ***That makes
+`asSelectsOK` FALSE AT EVERY `m`, and it would have taken BOTH certificates below
+down with it.***
+
+🔑 *No pad guard could have caught it. `rsPad_eq_two_pow` and `asPad_two_pow`
+guard a pad CONSTANT against its select width — exactly the desynchronisation
+they were built for. Nothing guards a pad numeral **hardcoded inside a
+predicate**, because nothing knows it is a pad.* -/
+def asSelectsOK (m : Nat) : Bool :=
+  (List.range asPad).all fun sel => asBit0 m sel == decide (sel = m)
+
+/-- ⛔ **DO NOT GENERALISE THIS — `asSelectsOK m` IS FALSE FOR `asOps ≤ m < asPad`.**
 
 *Math found it (`ec21bb5`, 8/7 18:44) and it is checkable at `asPrev` above:
 level 0 reads `asZero` — the shared tie constant — for every `i ≥ asOps`. Slots
-10…15 are PADDING, so `asOneHot 10` paints a region the tree NEVER READS while
-the predicate still expects `sel = 10` to select it.* **The predicate holds
-exactly on `m < 10 ∨ 16 ≤ m`, and both points proved below sit inside the first
-range.**
+the slots at and above `asOps` are PADDING, so `asOneHot asOps` paints a region
+the tree NEVER READS while the predicate still expects `sel = asOps` to select
+it.* **The predicate holds exactly on `m < asOps ∨ asPad ≤ m`, and both points
+proved below sit inside the first range.**
+
+⚠️ **STATED AGAINST THE CONSTANTS SINCE PHASE 3, AND THAT IS NOT COSMETIC.** *In
+literal form ("FALSE for `10 ≤ m < 16`") this docstring was a TRUE sentence that
+the re-cut turns into a FALSE one, sitting directly above two certificates whose
+sample points it licenses. The prose and the theorems have to move together or
+the file starts lying about itself while still compiling.*
 
 🔑 **SO THIS IS NOT THE USUAL "PROVES LESS THAN ITS NAME" — IT IS A PREDICATE
 THAT IS FALSE SOMEWHERE.** *The theorems below are TRUE. A seat generalising
@@ -492,19 +513,32 @@ corollary.** *What follows is a tripwire. That is the theorem.*
 kernel-checked" — TRUE about `sel` and SILENT about the other three axes:** `m`
 (two points, not sixteen), the operand bits (one pattern out of 2^320), and the
 output (**BIT 0 ONLY** — `asBit0` is `getD 0`). *The exhaustive half was
-genuine, which is exactly what made the whole sentence persuasive.* -/
-theorem aluSelect_selects_on_sample : asSelectsOK 3 = true := by decide +kernel
+genuine, which is exactly what made the whole sentence persuasive.*
 
-/-- …and again at the LAST real operand (`sra`, index 9), so the first is not an
-accident of where `3` sits in the tree.
+📌 **SAMPLE POINT MOVED `3 → 0` AT PHASE 3.** *`3` is a real operand at ten
+sources and is the FIRST PADDING SLOT at three — so the old statement does not
+merely lose its proof at the re-cut, it becomes FALSE. `0` is a real operand at
+every admissible pair, which is what a sample point has to be if it is written
+once and read after a re-cut.* -/
+theorem aluSelect_selects_on_sample : asSelectsOK 0 = true := by decide +kernel
+
+/-- …and again at the LAST real operand (`asOps - 1`; `sra`, index 9, at ten
+sources), so the first is not an accident of where one index sits in the tree.
 
 ⛔ **CORRECTED: this docstring used to claim "the 9/10 padding boundary is
-exercised". IT IS NOT.** *Index 9 is the last point at which the predicate is
+exercised". IT IS NOT.** *`asOps - 1` is the last point at which the predicate is
 TRUE; the boundary is approached and never crossed, and crossing it is precisely
-where `asSelectsOK` becomes FALSE (`asSelectsOK 10 = false`).* **A sample that
+where `asSelectsOK` becomes FALSE (`asSelectsOK asOps = false`).* **A sample that
 stops at the last good value is evidence about the good range, never about the
-edge — see the correction above.** -/
-theorem aluSelect_selects_on_sample_last : asSelectsOK 9 = true := by decide +kernel
+edge — see the correction above.**
+
+📌 **WRITTEN AS `asOps - 1` SINCE PHASE 3, WHICH IS THE SAME POINT IT ALWAYS
+NAMED.** *At ten sources it still elaborates to `9`, so this certificate's
+content is unchanged and its kernel check is the same computation — but "the last
+real operand" now tracks the constant instead of asserting a numeral about it,
+and the sentence above is what it means at every pair.* -/
+theorem aluSelect_selects_on_sample_last :
+    asSelectsOK (asOps - 1) = true := by decide +kernel
 
 #audit_axioms asW
 #audit_axioms asOps
