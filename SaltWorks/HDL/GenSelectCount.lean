@@ -66,16 +66,31 @@ whnf, the `Nat` match fails, and the goal facts are discarded wholesale. omega
 is then asked to derive `False` from hypotheses alone — hence a counterexample
 with every goal variable absent.
 
-Three probes, each changing one thing:
+Five probes, each changing exactly one thing (`ScratchOmegaProbe.lean`). A rival
+diagnosis was live — *"the `simp only` leaves a Bool equation `(… && …) = true`
+and omega cannot act on that"* — and it predicts the same fix, so only a probe
+can separate them:
 
-| goal                                      | omega  |
-| ----------------------------------------- | ------ |
-| `x < base ∧ y < base` (both at `Nat`)      | ✓      |
-| `@LT.lt Net .. x base` (single, no `∧`)    | ✓      |
-| `@LT.lt Net .. ∧ @LT.lt Net ..`            | ✗ FAIL |
+| # | goal                                             | omega  |
+| - | ------------------------------------------------ | ------ |
+| 1 | `x < base ∧ y < base`  (both at `Nat`)            | ✓      |
+| 2 | `@LT.lt Net .. x base` (single, no `∧`)           | ✓      |
+| 3 | `@LT.lt Net .. ∧ @LT.lt Net ..`                   | ✗ FAIL |
+| 4 | `(decide (x<base) && decide (y<base)) = true`     | ✗ FAIL |
+| 5 | the real site: the goal + `simp only` from below  | ✗ FAIL |
 
-So it is neither the connective alone nor the abbrev alone: it is an
-`abbrev`-typed comparison *underneath* a logical connective.
+Probe 1 kills *"omega cannot do conjunctions"*; probe 2 kills *"omega cannot do
+`Net`"*. It takes **both** — an `abbrev`-typed comparison *underneath* a logical
+connective. Probe 4 shows the Bool-equation obstruction is real but is NOT what
+happens here, because `Bool.and_eq_true` and `decide_eq_true_eq` are in the simp
+set and remove it: `trace_state` at probe 5 prints `⊢ x < base ∧ y < base`, a
+Prop conjunction.
+
+**⚠️ And that is the trap.** Probe 5's printed goal is *character-for-character
+identical* to probe 1's, and probe 1 succeeds where probe 5 fails. `Net` is
+reducible, so **the pretty-printer erases the one difference that decides the
+outcome** — `trace_state` shows a goal omega can obviously do, and omega cannot
+do it. Use `set_option pp.all true` before believing a goal display here.
 
 **The refined rule:** *"the counterexample omits a goal variable"* does not mean
 omega folded an atom — it means omega **dropped the goal**. Atom-folding is one
