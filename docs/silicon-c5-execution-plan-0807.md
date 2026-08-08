@@ -1,0 +1,267 @@
+# C5 — THE EXECUTION PLAN, pre-registered
+
+### 2026-08-07 ~17:4x, SILICON, on the maestro's dispatch. **Draft until refuted.**
+### C5 per the freeze: *"flow + re-import: the netlist through the flow; per-cone
+### equivalence at flop boundaries; MUTATION CONTROLS that make the goal FALSE
+### (inject a decode bug; the checker must catch it)."*
+### **Every number below is measured or is declared unmeasured. Predictions
+### `C5-1`…`C5-8` are registered HERE, before the run.**
+
+---
+
+## 0. THE ONE FACT THAT SHAPES EVERYTHING ELSE
+
+```
+largest netlist EVER imported by this seat   540 gates   (FabricCut.lean)
+the freeze's elaboration law                ~1,300 gates  ("monolithic
+                                                          elaboration dies
+                                                          ~1300 — per-module
+                                                          always")
+the core, projected                        ~11,900 gates  (assembly plan's
+                                                          ~12,700 estimate
+                                                          − 779 from route ②)
+```
+
+⇒ ***The core is ~22× the largest thing this harness has ever imported and ~9×
+the elaboration law's ceiling.*** **C5 is not the switch ceremony at a bigger
+size. The switch fit in one `def`; the core cannot, and no amount of proof
+cleverness changes that — it is an elaborator limit, upstream of any theorem.**
+
+🔴 **AND I AM INHERITING THE ~1,300, WHICH IS THE WEAKEST LOAD-BEARING NUMBER IN
+THIS PLAN.** *It appears in the freeze's "laws honored" as a bare figure; I have
+not measured it and neither has anyone this leg.* ⇒ **C5's FIRST action is to
+measure it (§2.1), because the entire chunking plan is a different plan on either
+side of it.**
+
+---
+
+## 1. THE PER-CONE BUDGET AT CORE SCALE
+
+### 1.1 What the census actually licenses
+
+The cone census ran on the **5,266-cell structural monolith**: **151 cuts (2.9 %),
+max cone 24, median 3** — greedy, so an **upper bound**. Its transferable finding
+was `W4`, which I got exactly backwards and which is the reason this section is
+per-block and not a percentage:
+
+> **Cone width accumulates with DEPTH along a serial chain, not with the FAN-IN
+> of a select.** A mux tree is shallow and wide — one wide cone at its output,
+> cut once. A carry chain is deep and serial — cones grow at every position, cut
+> constantly. **57× spread, measured.**
+
+```
+inc32     62.7%  ·  zerotree 35.5%  ·  prioenc 15.9%  ·  adder32 3.2%
+shifter32  2.7%  ·  aluselect 2.5%  ·  readtree 1.1%
+```
+
+### 1.2 The core's budget, block by block
+
+**Densities are transferred only to blocks that were IN the census — the same
+blocks, not similar ones.** Everything else is declared unmeasured.
+
+| block | gates | cut density | cuts | basis |
+|---|---:|---:|---:|---|
+| `readTree` ×2 | 5,964 | **1.1 %** | **66** | ✅ measured, same block |
+| `aluSelect` | 1,445 | **2.5 %** | **36** | ✅ measured, same block |
+| `shifter` (route ②) | 679 | **2.7 %** | **18** | ✅ measured; ⚠️ route ② adds two reversal-bank boundaries — **re-measure** |
+| `adder32` ×2 | 320 | **3.2 %** | **10** | ✅ measured, same block |
+| **measured subtotal** | **8,408** | **1.55 %** | **130** | |
+| `regNext` | 3,104 | — | **0 extra** | **flop-bounded**: all 1,056 flops are already cut points |
+| `decoder` | 102 | ⛔ | ? | never measured |
+| `regWrite` | 163 | ⛔ | ? | never measured |
+| `pcNext` | 99 | ⛔ | ? | never measured |
+| `bitwise` / `bitNot32` / `slt`,`sltu` | 135 | ⛔ | ? | pointwise — expect ≈0, **not measured** |
+| `immBCirc` | 1 | — | 0 | |
+
+⭐ **PROJECTED: ~130 cone cuts + 1,056 flop boundaries, over an unmeasured tail of
+499 gates.**
+
+📌 **AND THE CORE IS *CHEAPER PER GATE* THAN THE MONOLITH, WHICH IS THE CENSUS'S
+W4 LESSON PAYING OUT.** *A uniform 2.9 % on ~11,900 gates would predict ~345 cuts.
+The weighted figure is **1.55 %** — because the core is dominated by `readTree`
+(5,964 gates at the census's **sparsest** density) while the monolith carried
+`inc32` and `zerotree`, its two **densest** blocks, which the core does not have
+at all.* ⇒ ***Scaling the monolith's percentage would have overstated the core's
+obligation count by ~2.7×.***
+
+**`C5-1`** — the core's greedy cut set lands in **100–200**, not 300+.
+**`C5-2`** — max cone ≤ 24 holds at core scale **without** sub-cone splitting.
+**`C5-3`** — the four unmeasured blocks contribute **< 40** cuts between them.
+
+---
+
+## 2. THE CHUNKING PLAN
+
+### 2.1 FIRST ACTION — measure the elaboration ceiling (it decides the rest)
+
+**A ladder of synthetic `Netlist` `def`s: 540 → 1,000 → 2,000 → 3,000 → 4,000 →
+6,000 → 12,000 gate entries**, each elaborated by `saltbuild.sh` on a unique
+`Scratch` file, nothing landed. Record **wall time, peak RSS, and the verb**.
+
+⚠️ **The ladder must use REALISTIC gates** — random `and/or/xor/not` over
+previously-defined nets, not 12,000 `.inp`s. *A list of constructors is not what
+elaboration struggles with; a deep net-reference graph is.*
+
+⇒ **THE DECISION RULE, pre-registered so no second ruling is needed:**
+* **ceiling ≥ 3,000** → **per-organ import**, 12 netlists, largest `readTree` at
+  2,982. Clean, matches the assembly plan's own boundaries.
+* **ceiling ~1,300** → `readTree` (2,982) and `regNext` (3,104) each need
+  **sub-chunking**, and the plan becomes ~30 pieces with internal cut points that
+  are *not* organ boundaries — **a materially harder ceremony**, because those
+  seams have no design meaning and must be certified as arbitrary.
+* **ceiling < 1,000** → the per-organ route is dead; escalate before building.
+
+**`C5-4`** — the true ceiling is **above 1,300** (the freeze's number is a
+remembered figure from a different context, and the largest thing actually
+imported, 540, never tested it).
+
+### 2.2 The import unit is the ORGAN, and the seam is the WIRING
+
+The core is a composition of 12 organs whose boundaries are already named by the
+assembly plan's §4 order. **Import each organ separately; certify the wiring
+separately.**
+
+```
+per-organ:   import  →  round-trip census  →  per-cone equivalence vs its Circ
+the wiring:  σ-maps only — "organ k's input j is organ i's output m"
+```
+📌 **This is the same split that made the switch tractable, at 12 organs instead
+of 2** — and it is why `instOK`'s `σ i < off` discipline in the assembly plan is
+load-bearing rather than bookkeeping: **the wiring certificate is a statement
+about offsets, and offsets are cheap.**
+
+**`C5-5`** — the wiring certificate costs **< 5 %** of the total obligation
+count. *If it costs more, the decomposition is wrong and I want to know at the
+plan, not at the proof.*
+
+---
+
+## 3. THE MUTATION CONTROLS
+
+The freeze requires *"MUTATION CONTROLS that make the goal FALSE (inject a decode
+bug; the checker must catch it)"* under **math's banked validity law: the control
+must make the goal FALSE, not merely UNREACHABLE.**
+
+⚠️ **That distinction is the whole difficulty and it is where this kind of
+control usually fails.** *A mutation that makes a `decide` time out, or that
+makes a hypothesis unsatisfiable, proves nothing — the checker "caught" an
+absence. **A valid control produces a well-typed FALSE goal that the checker
+refutes.***
+
+| # | injection | site | must go FALSE | catches |
+|---|---|---|---|---|
+| **M1** | swap two `funct3` arms in the decoder | `decoder` | `C4Spec` | the decode bug the freeze names |
+| **M2** | invert one bit of the `rd` write-enable | `regWrite` | `C4Spec` | write-port addressing |
+| **M3** | drop the carry into bit 17 of `adder32` | `adder32` | per-cone equivalence, **that cone only** | ⭐ **cone LOCALITY** — if a mid-adder mutation reddens cones it is not in, the decomposition leaks |
+| **M4** | shift `pcNext` by +8 instead of +4 | `pcNext` | `C4Spec` | the sequencing path, which no ALU test reaches |
+| **M5** | swap two organs' `σ` offsets | the **wiring**, not an organ | the wiring certificate — **every organ still passes** | ⭐ **that the wiring certificate is load-bearing at all** |
+| **M6** | retype one cell `and2_1`→`or2_1` in the imported netlist | post-import datum | the round-trip census | the importer, not the design |
+
+⭐ **M3 AND M5 ARE THE TWO THAT EARN THEIR PLACE.** *M1/M2/M4 test that the
+checker notices a wrong core — necessary, and the easy half.* **M3 tests that a
+local bug stays local, and M5 tests the seam that per-organ decomposition
+CREATES.** ⇒ ***A decomposition's characteristic failure is not missing a bug;
+it is passing every piece while the assembly is wrong. M5 is the only control
+here that could fail while all twelve organs are green.***
+
+**`C5-6`** — all six mutations produce a **FALSE** goal, not an unreachable or a
+timeout. **Any that yields a timeout is REPLACED, not counted.**
+**`C5-7`** — **M5 passes every per-organ check** and fails only the wiring
+certificate. *If M5 also reddens an organ, my decomposition is not what I think it
+is.*
+
+---
+
+## 4. THE IMPORT-HARNESS DELTAS — what the core needs beyond the fabrics
+
+### 4.1 ✅ THE FEARED COST IS NOT THERE — cell coverage is COMPLETE
+
+Measured, `Cells/Sky130.lean` against the composed tile's fabricated netlist:
+
+```
+cell families MODELLED (Liberty-checked)   53
+families USED by the fabricated tile       32
+MISSING                                     0        ← full coverage
+modelled but unused (headroom)             21
+```
+⇒ **The AOI/OAI families the core's arithmetic will pull in — `a211o`, `a31o`,
+`a32o`, `o211a`, `nand3b`, `and4bb` — are ALREADY modelled and already
+Liberty-checked.** *I expected this to be C5's long pole. It is not there at all.*
+
+**`C5-8`** — the core's netlist introduces **≤ 3** unmodelled cell families, and
+plausibly zero.
+
+### 4.2 ⛔ THE REAL DELTAS, in the order they will bite
+
+**(a) SCALE OF THE FLOP TREATMENT — 52 → 1,056, a 20× jump.**
+The Q-leaf/D-root treatment is established at **52 flops** (`cc401c9`, 70 inputs
+= 18 design + 52 state, 76 outputs, 524 gates). The core has **1,056 state bits**
+(`regNext`'s 1,024 ++ `pcNext`'s low 32 = `stWidth`). ⇒ *Every flop becomes a
+primary input AND a root, so the core's imported netlist has **1,056 extra
+leaves** before a single design input.* **Nothing about the method changes; the
+sizes in every intermediate structure do.**
+
+**(b) 🔴 THE SEQUENTIAL-CELL TRIPWIRE — a HARD ERROR, by design.**
+The importer *"refuses rather than approximates: an unmodelled sequential cell …
+is a hard error, not a warning."* **Exactly one flop is modelled —
+`dfxtp_1_next`, with `dfxtp_1_next_liberty`.** And `Cells/Sky130.lean:66` records
+that a design in this very repo maps to **`dfrtp_2` — asynchronous, active-low
+reset — *not* `dfxtp_1`**.
+✅ *The composed tile as fabricated uses `dfxtp` only, so today's designs are
+covered.* ⛔ ***But which flop the core gets is decided by synthesis, from RTL
+this seat does not write.*** ⇒ **PRE-FLIGHT CHECK, before any import attempt:
+scan the core's netlist for sequential families and confirm every one is
+modelled.** *Cheap, one grep, and it is the difference between a five-minute fix
+and a mid-ceremony stop.*
+
+**(c) THE COMMON-CLOCK OBLIGATION AT 1,056 FLOPS.** The treatment is only
+well-defined if every flop latches on the same event, and after CTS the flops do
+**not** share a CLK *net* — the fabric needed **8 CLK nets proved into one
+domain** rather than assumed from net equality. **A core-scale clock tree will
+have many more.** ⇒ *This scales with the tree, not with the design, and it is
+the one harness cost I expect to grow super-linearly.*
+
+**(d) 🟡 THE MONOLITH'S UNFINISHED BUSINESS, INHERITED HONESTLY.** *`M5` was only
+**partially** established: my evaluator does not traverse module hierarchy, so
+the monolith's end-to-end functional equivalence was never checked.* **A 12-organ
+core is exactly a module hierarchy.** ⇒ **Either the evaluator learns hierarchy,
+or every organ is evaluated flat and the wiring is carried by the σ-certificate
+alone.** *The second is the plan of §2.2 and I prefer it — but it is a choice, and
+it is being made HERE rather than discovered later.*
+
+---
+
+## 5. FIRING ORDER
+
+| # | step | gate |
+|---|---|---|
+| 1 | **elaboration-ceiling ladder** (§2.1) | none — **run it before `core` lands** |
+| 2 | pre-flight sequential-cell scan (§4.2b) | `core` netlist exists |
+| 3 | per-organ import + round-trip census | ceiling known |
+| 4 | greedy cut + cone census at core scale | organs imported |
+| 5 | per-cone equivalence, organ by organ | §4 |
+| 6 | the σ-wiring certificate | §5 |
+| 7 | **mutation controls M1–M6** | §6 — *and they run LAST, against a green checker, because a control against a red checker proves nothing* |
+
+⭐ **STEP 1 IS NOT GATED ON `core` AND SHOULD FIRE NOW.** *It needs no RTL, no
+compiler deliverable, and no seam — only synthetic netlists — and it is the
+number the rest of this plan branches on.* **That is the one piece of C5 that can
+be paid for before the campaign starts, and paying for it early is the whole
+reason to pre-register a plan.**
+
+---
+
+## 6. WHAT THIS PLAN DOES NOT SAY
+
+* It does **not** claim the core will pass. **Every prediction above is
+  falsifiable and three of them (`C5-1`, `C5-4`, `C5-7`) I would not bet heavily
+  on.**
+* It does **not** cost the proof effort, only the **structure**. Per-cone
+  equivalence at ~130 cones is a different question from whether each closes.
+* The `~1,300` elaboration law and the `~11,900` gate projection are both
+  **inherited**, from the freeze and from the assembly plan. *Neither is mine and
+  neither has been re-measured; §2.1 fixes the first and `core`'s existence will
+  fix the second.*
+* It assumes the assembly plan's **12-organ decomposition survives contact**. If
+  compiler's `core` composes differently, §1.2's per-block transfer is void — the
+  densities are per-BLOCK, and they move with the blocks.
