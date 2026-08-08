@@ -74,6 +74,25 @@ widen() {                   # reads stdin; prints each line, ANNOUNCING any clip
          print pre substr($0, 1, 400) }'
 }
 
+# 📌 ACCEPTANCE BAR, PINNED TO A VERSION — 2026-08-08 15:3x.
+# This watcher's anchor rule (see the UNION ANCHOR blocks below) is gated on
+# silicon's shared known-answer fixture. That fixture is a SHARED DEPENDENCY and
+# it ALREADY MOVED ONCE MID-FLIGHT: silicon appended the header-after-a-body-line
+# specimen at 15:2x, AFTER math had run its v12 against it.
+#
+#     bar     docs/silicon-tools/busmon_fixture.md @ a0258a7
+#     sha256  6852a23aa816c80afb435e8d325c53d74f876bcdd4a6c105e9cc733ce6009c63
+#     size    14 specimen headers        (it carried 10 at fa4103c)
+#     score   14/14 with the anchor rule ISOLATED; working tree verified clean
+#             against HEAD, so this tested the COMMITTED bytes, not a local variant
+#
+# ⚠️ A score against an unversioned bar is not reproducible, and two seats quoting
+# "n/n" from different revisions are not comparing anything -- math's v12 run and
+# this 14/14 were scored against DIFFERENT corpora (10 vs 14 specimens), so the
+# two numbers must not be set side by side. Re-run and RE-PIN when the fixture
+# moves; never carry the number forward across a change to the bar.
+# [[a-count-is-not-a-scope]] applied to an acceptance test rather than a census.
+
 # ⛔⛔ THE BASELINE IS AN ASSERTION, AND ON A RELIGHT IT IS FALSE.
 # `wc -l` at arm time silently asserts "everything above this line is already
 # handled." True in steady state; FALSE on a boot, by exactly the width of the
