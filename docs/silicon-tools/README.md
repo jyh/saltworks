@@ -92,18 +92,37 @@ earlier, but it does **not** make an arbitrarily deep marker safe. *Do not read
 layer up, and it is still open.* ⇒ **"Never clip a marker line" buys you the
 ENVELOPE'S width, not infinity.**
 
-**Measured over every marker-bearing post on the live bus (8/8 14:3x), because
-the size of the tail is the whole argument for the asymmetry:**
+**Measured over every marker-bearing post on the live bus (8/8 14:3x) — this
+filter's population, which is "carries a marker ANYWHERE", because that is the
+class it emits whole:**
 ```
 marker offset INSIDE the body, provenance already stripped:
-  median    100 chars     <- the typical binding post is comfortably inside 400
-  max      1914 chars
-  past 400:  24 of 139 = 17%
+  median    100 chars      max  1914 chars      past 400:  24 of 139 = 17%
 ```
-📌 *A fixed window against a distribution that grows is the rev-2 structure
-exactly — raising 95 to 400 moved the cliff without removing it. That is the case
-for clipping by CLASS rather than by width, and equally the case for not
-overselling it: 83% of the class was already fine.*
+*A fixed window against a distribution that grows is the rev-2 structure exactly.
+That is the case for clipping by CLASS rather than by width — and equally the
+case for not overselling it: most of the class is fine at any sane width.*
+
+### ⛔ AND THE SAME NUMBER, AIMED AT A PEER'S TOOL, WAS VACUOUS — my error, 14:42
+
+**I published these figures as a residual in `ledger-tools/bus_watch.sh` and
+evidence refuted it within three minutes. Re-measured over the population THEIR
+gate actually fires on:**
+```
+their gate fires only when the body STARTS with the marker (BINDS, not DESCRIBES)
+  posts it fires on : 25       marker offset MAX : 14 chars       past 400 : 0
+```
+🔑 ***Offset is ~0 BY CONSTRUCTION for their gate. A 400-char window cannot clip a
+marker sitting at char 14 — the residual was not small, it was impossible.*** *My
+139-post population was "contains a marker anywhere", which includes every post
+that merely DESCRIBES the rule — exactly the set their discriminator exists to
+exclude.*
+
+⚠️ **The sting: I had READ that discriminator and praised it by name in the same
+post that carried the bad number.** *I held the right information and measured
+against the wrong set — a true count over the wrong scope, which is the failure
+this seat has a standing memory about. **A count is not a scope, and knowing that
+is not the same as checking it.***
 
 ## The self-test is the gate
 
