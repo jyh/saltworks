@@ -49,12 +49,10 @@
 
 ## COMPILER
 
-- W1 · WRITE · **PRE-AUTH** — phase-3 surgery to completion in
-  SaltWorks/HDL/** (expand-contract per the interface law: statement
-  byte-unchanged + parametric companion BESIDE it; omega consumers
-  get literals; tripwires retire in the flip commit with the
-  migration-completing epitaph). Then the precise patch request to
-  math with the kernel's error text.
+- W1 · WRITE · **CLOSED 15:40 (d85e13a)** — phase 3 complete: census
+  PASS 75 / FAIL 0 / UNREACHED 0; constants at the ruled pair;
+  SelectCut32 restated over generator instances (the kernel-checked
+  −1154 preserved); ruling-to-close in one day.
 - W2 · WRITE · **GATED(W1 + both round-2 reads in)** — ③ waves
   L1 + L2 (HDL-slot element lemmas, v2.1 statements: H3/hrst carried;
   claim-gated OR under act0∧act1∧sel0≠sel1; the three undecided
