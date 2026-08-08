@@ -130,9 +130,14 @@ Riders:
 ## L1/L2/L3 revised and L4 named at compiler's A/B pass, 12:28)
 
 - **L0 (init-independence — the induction's SEED; math's ③ finding
-  3, tightened at silicon's 12:59 flag)**: within a WELL-PHASED frame,
-  every per-stage control latch value from its strobe cycle onward is
-  a function of the frame's own header bits, from ANY initial register
+  3, tightened at silicon's 12:59 flag; SENTENCE REPAIRED at the
+  wave landing — compiler's finding (a): "a function of the header
+  bits" was one word too strong, since `bothAct` samples the DATA
+  wires on every even cycle, payload cycles included; bit 3 is
+  proved DEAD under the protocol in PayloadL0, so the ROUTING
+  conclusion stands unchanged)**: within a WELL-PHASED frame,
+  every per-stage control latch value from its strobe cycle onward
+  is PROTOCOL-DETERMINED, from ANY initial register
   state. The datapath is combinational and carries no state (§4); the
   init surface is the per-stage latches (all strobed inside [0, 2k))
   PLUS the frame counter — and the counter is exactly what
@@ -151,10 +156,20 @@ Riders:
   usable. The undecided cases are THREE, not two: two idles =
   straight-through (`ceC_frame_two_idle_stable` — the
   previously-cited `…_rejects_idle_sorts_low` is a MUTATION CONTROL,
-  not the statement); and two ACTIVE lines with EQUAL destinations —
-  the tie SPLICES the payload (`ceC_pair_tie_splices_the_payload`), excluded by StageOK's distinctness clause — a B4 hypothesis
-  AT STAGE 0 (its own binder), transported inward by `stageOK_succ`, not a consequence of H1 (math's round-2 F2
-  residue: "interior" was loose). The statement carries it.
+  not the statement; and the REASON is repaired at the wave landing,
+  compiler's finding (b): it holds because an on-protocol idle line
+  is SILENT all frame, NOT because idleness stops the decide — idle
+  headers with differing payloads decide on payload bit 0 and SWAP,
+  and the partial-load successor inherits exactly that reason, where
+  idle silence is no longer guaranteed); and two ACTIVE lines with
+  EQUAL destinations — the tie SPLICES the payload
+  (`ceC_pair_tie_splices_the_payload`), excluded by StageOK's
+  distinctness clause — a B4 hypothesis AT STAGE 0 (its own binder),
+  transported inward by `stageOK_succ`, not a consequence of H1
+  (math's round-2 F2 residue: "interior" was loose). COMPLETENESS,
+  proved at the wave (finding (c)): undecided ⟺ headers
+  bit-identical ⟺ two idles ∨ an active tie, over all 256 header
+  pairs — there is no fourth case. The statement carries it.
 - **L2 (banyan element — RESTATED at compiler's ③ pass; the draft's
   form was refuted TWICE)**: there is no sequential banyan in the
   fleet — `fabric` (Banyan.lean, the definition) is a `Circ`: no state, no cycle
