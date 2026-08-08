@@ -235,14 +235,26 @@ for f in "$@"; do
       echo "   $mark saltbuild-audit.log: $rver on THESE EXACT BYTES ($rfin)"
       echo "      sha256=$csha — the log records a run on this revision."
       [ "$rver" = "GREEN" ] || echo "      ⇒ a record is not a pass. This verdict is NOT green."
-      # ⚠️ THE LOG'S sha IS TAKEN *AFTER* THE BUILD (saltbuild.sh:37 runs after
-      # the case block at :32-34). If the source changed DURING the run, the log
-      # pins the verdict to bytes the build never elaborated — which is worse
-      # than a pre-run hash, because it looks authoritative. Reported to the
-      # maestro 2026-08-08; until a before-hash lands, treat a match as
-      # "a run finished with the file in this state", not "these bytes built".
-      echo "      ⚠️ the log's sha is captured POST-build — a match means the file"
-      echo "         ENDED in this state, not that these bytes were elaborated."
+      # ✅ FIXED AT MECHANISM by the maestro 2026-08-08 10:42, on this seat's
+      # report: saltbuild.sh now hashes PRE-build (:34, before the lake env lean
+      # at :35), re-reads POST-build (:41), and logs `sha256=PRE->POST UNPINNED`
+      # when they differ. A mid-run edit can no longer borrow a green's authority.
+      # ⚠️ TWO RESIDUAL CASES THE TOOL MUST STILL SAY OUT LOUD:
+      #   UNPINNED marker present → the source moved mid-run; the verdict pins nothing.
+      #   line logged BEFORE 10:42 → post-build-only hash; the old caveat applies.
+      if echo "$hit" | command grep -q 'UNPINNED'; then
+        echo "      ⛔ UNPINNED — the source CHANGED DURING that run. The verdict"
+        echo "         names no revision; these bytes were not what was elaborated."
+      else
+        lt=$(echo "$hit" | cut -d'|' -f1 | sed 's/ *$//')
+        if [ "$lt" \< "2026-08-08 10:42:00" ]; then
+          echo "      ⚠️ logged $lt — BEFORE the pre-hash fix (10:42). That line's sha"
+          echo "         is post-build only: the file ENDED in this state, which is not"
+          echo "         the same as these bytes having been elaborated."
+        else
+          echo "      ✅ pinned pre- and post-build — these bytes ARE what was elaborated."
+        fi
+      fi
     fi
   else
     echo "   FILE-MODE AUDIT: no run on these bytes in the canonical log"
