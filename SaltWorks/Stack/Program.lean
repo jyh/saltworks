@@ -5186,11 +5186,518 @@ theorem run_asBody (F : Env) (hnot : ∀ j : Nat, j < 4 → F (asNot j) = !(F (a
         rw [bval]
         exact asV3_congr _ _ k hn32 hfr
 
+/-! ## ⭐⭐⭐ THE SAME BLOCK AT EVERY SOURCE COUNT — `sem_genSelect`
+
+*Everything above this point is written at ONE WIDTH.* `329 + 45*k + 42`,
+`pfr (320 + j)`, `< 324`, `∀ j, j < 4`, and **level 3 in the lemma names**
+(`asV3_eq`, `asB3`, `asOut k 3 0`). That is why the ALU sizing question was a
+**deadline rather than a trade** (silicon, `79bb72a`): the gate saving is fixed
+at 770–1,154 and the proof cost is monotonically increasing, because every
+theorem proved against `asIn = 324` is another line in the eventual rewrite.
+
+⇒ **The deadline is not a property of the decision. It is a property of one
+proof having been written at a literal width.** What follows re-proves the block
+at `genSelect n b` (`HDL/AluSelect.lean`) — `n` sources, `b` encoded select bits,
+`2^b` padded leaves — and `sem_aluSelect` becomes the `n = 10, b = 4` corollary.
+Shrinking the ALU to three sources is now an INSTANTIATION.
+
+## The induction the shape actually wants, and the one it does not
+
+⛔ **The four levels above are NOT four instances of one lemma that could be
+`induction`-ed directly.** Level `j`'s inputs are level `j-1`'s *outputs*, so an
+induction whose invariant is "level `j` is correct" cannot state its own
+hypothesis: at `j = 0` the inputs are leaf nets and at `j > 0` they are gate
+nets, two different naming functions.
+
+⭐ **What closes it is indexing on the INPUTS rather than the outputs.**
+`run_gsLevels` carries
+
+    ∀ l < gsWidth b j,  run G (gsPre n b k j) (gsPrev n b k j l) = gsV n b G k j l
+
+— *what feeds level `j`* — and `gsPrev` is exactly the function that is leaf
+naming at `0` and `gsOut` above it, so the base case and the step case are the
+same sentence. The muxRow lemma then supplies the step and the frame together.
+
+The closed form falls out of that by a second induction: `gsV n b F k j i` is the
+leaf at `i * 2^j + (the low j select bits)`, so the root at `j = b` is the leaf
+at `gsSelOf`, and the padding above `n` reads the tie constant. -/
+
+theorem gsWidth_top (b : Nat) : gsWidth b b = 1 := by
+  show 2 ^ b / 2 ^ b = 1
+  rw [Nat.pow_div le_rfl (by norm_num)]
+  simp
+
+theorem gsWidth_of_le (b j : Nat) (h : j ≤ b) : gsWidth b j = 2 ^ (b - j) := by
+  show 2 ^ b / 2 ^ j = _
+  rw [Nat.pow_div h (by norm_num)]
+
+theorem gsLevelWidth_two (b j : Nat) (h : j < b) : gsLevelWidth b j * 2 = gsWidth b j := by
+  rw [show gsLevelWidth b j = gsWidth b (j + 1) from rfl,
+    gsWidth_of_le b (j + 1) h, gsWidth_of_le b j (Nat.le_of_lt h), ← Nat.pow_succ]
+  congr 1
+  omega
+
+theorem gsBelow_zero (b : Nat) : gsBelow b 0 = 0 := rfl
+
+theorem gsBelow_succ (b j : Nat) : gsBelow b (j + 1) = gsBelow b j + gsLevelWidth b j := rfl
+
+theorem gsBelow_of_le (b : Nat) : ∀ j, j ≤ b → gsBelow b j = 2 ^ b - 2 ^ (b - j) := by
+  intro j
+  induction j with
+  | zero => intro _; show (0 : Nat) = 2 ^ b - 2 ^ (b - 0); simp
+  | succ j ih =>
+    intro hj
+    have hjb : j < b := hj
+    rw [gsBelow_succ, ih (Nat.le_of_lt hjb),
+      show gsLevelWidth b j = gsWidth b (j + 1) from rfl, gsWidth_of_le b (j + 1) hj]
+    have hp : 2 ^ (b - j) = 2 ^ (b - (j + 1)) * 2 := by
+      rw [← Nat.pow_succ]; congr 1; omega
+    have hle : 2 ^ (b - j) ≤ 2 ^ b := Nat.pow_le_pow_right (by norm_num) (by omega)
+    omega
+
+/-- **A whole bit tree is `2^b - 1` muxes** — the geometric sum, so the bits tile
+the net space without a gap. -/
+theorem gsBelow_top (b : Nat) : gsBelow b b = gsPad b - 1 := by
+  rw [gsBelow_of_le b b le_rfl]
+  show 2 ^ b - 2 ^ (b - b) = 2 ^ b - 1
+  simp
+
+/-- Base of level `j` of bit `k`'s tree, as a plain `Nat` — `abbrev Net := Nat`
+defeats `omega`, so every arithmetic obligation below is stated at `Nat`. -/
+def gsB (n b k j : Nat) : Nat := gsIn n b + 1 + b + (k * (gsPad b - 1) + gsBelow b j) * 3
+
+theorem gsBase_eq (n b k j i : Nat) : gsBase n b k j i = gsB n b k j + 3 * i := by
+  show gsIn n b + 1 + b + (k * (gsPad b - 1) + gsBelow b j + i) * 3
+      = gsIn n b + 1 + b + (k * (gsPad b - 1) + gsBelow b j) * 3 + 3 * i
+  omega
+
+theorem gsOut_eq (n b k j i : Nat) : gsOut n b k j i = gsB n b k j + 3 * i + 2 := by
+  show gsBase n b k j i + 2 = _
+  rw [gsBase_eq]
+
+theorem gsB_step (n b k j : Nat) : gsB n b k (j + 1) = gsB n b k j + 3 * gsLevelWidth b j := by
+  show gsIn n b + 1 + b + (k * (gsPad b - 1) + gsBelow b (j + 1)) * 3
+      = gsIn n b + 1 + b + (k * (gsPad b - 1) + gsBelow b j) * 3 + 3 * gsLevelWidth b j
+  rw [gsBelow_succ]
+  omega
+
+theorem gsB_zero_le (n b k j : Nat) : gsB n b k 0 ≤ gsB n b k j := by
+  show gsIn n b + 1 + b + (k * (gsPad b - 1) + gsBelow b 0) * 3
+      ≤ gsIn n b + 1 + b + (k * (gsPad b - 1) + gsBelow b j) * 3
+  rw [gsBelow_zero]
+  omega
+
+/-- **Bit `k`'s tree ends exactly where bit `k+1`'s begins.** -/
+theorem gsB_bit (n b k : Nat) : gsB n b k b = gsB n b (k + 1) 0 := by
+  have h2 : (k + 1) * (gsPad b - 1) = k * (gsPad b - 1) + (gsPad b - 1) := Nat.succ_mul _ _
+  show gsIn n b + 1 + b + (k * (gsPad b - 1) + gsBelow b b) * 3
+      = gsIn n b + 1 + b + ((k + 1) * (gsPad b - 1) + gsBelow b 0) * 3
+  rw [gsBelow_top, gsBelow_zero, h2]
+  omega
+
+theorem gsB_bit_mono (n b k k' : Nat) (h : k ≤ k') : gsB n b k 0 ≤ gsB n b k' 0 := by
+  have : k * (gsPad b - 1) ≤ k' * (gsPad b - 1) := Nat.mul_le_mul_right _ h
+  show gsIn n b + 1 + b + (k * (gsPad b - 1) + gsBelow b 0) * 3
+      ≤ gsIn n b + 1 + b + (k' * (gsPad b - 1) + gsBelow b 0) * 3
+  rw [gsBelow_zero]
+  omega
+
+theorem gsB00 (n b : Nat) : gsB n b 0 0 = gsIn n b + 1 + b := by
+  show gsIn n b + 1 + b + (0 * (gsPad b - 1) + gsBelow b 0) * 3 = _
+  rw [gsBelow_zero]
+  omega
+
+theorem gsSel_lt_in (n b j : Nat) (hj : j < b) : gsSel n b j < gsIn n b := by
+  show n * 32 + j < n * 32 + b
+  omega
+
+theorem gsRes_lt_in (n b r k : Nat) (hr : r < n) (hk : k < 32) : gsRes r k < gsIn n b := by
+  show r * 32 + k < n * 32 + b
+  have : r * 32 + 32 ≤ n * 32 := by
+    have := Nat.mul_le_mul_right 32 hr
+    omega
+  omega
+
+theorem gsNot_lt (n b k j : Nat) (hj : j < b) : gsNot n b j < gsB n b k 0 := by
+  show gsIn n b + 1 + j < gsIn n b + 1 + b + (k * (gsPad b - 1) + gsBelow b 0) * 3
+  rw [gsBelow_zero]
+  omega
+
+theorem gsSel_lt (n b k j : Nat) (hj : j < b) : gsSel n b j < gsB n b k 0 := by
+  have h := gsSel_lt_in n b j hj
+  show gsSel n b j < gsIn n b + 1 + b + (k * (gsPad b - 1) + gsBelow b 0) * 3
+  rw [gsBelow_zero]
+  omega
+
+theorem gsZero_lt (n b k : Nat) : gsZero n b < gsB n b k 0 := by
+  show gsIn n b < gsIn n b + 1 + b + (k * (gsPad b - 1) + gsBelow b 0) * 3
+  rw [gsBelow_zero]
+  omega
+
+/-- ⭐ **Every net level `j` reads lies below level `j`'s base** — the ONE
+obligation that is genuinely different at `j = 0` and above, and the reason the
+induction is indexed on inputs. -/
+theorem gsPrev_lt (n b k j l : Nat) (hk : k < 32) (hl : l < gsWidth b j) :
+    gsPrev n b k j l < gsB n b k j := by
+  cases j with
+  | zero =>
+    show (if n ≤ l then gsZero n b else gsRes l k) < gsB n b k 0
+    split_ifs with h
+    · exact gsZero_lt n b k
+    · exact Nat.lt_of_lt_of_le (gsRes_lt_in n b l k (by omega) hk)
+        (Nat.le_of_lt (gsZero_lt n b k))
+  | succ j =>
+    show gsOut n b k j l < gsB n b k (j + 1)
+    rw [gsOut_eq, gsB_step]
+    have : l < gsLevelWidth b j := hl
+    omega
+
+/-! ### The tree's value -/
+
+/-- Leaf `l` of bit `k`'s tree: a real source below `n`, the shared pad above. -/
+def gsLeafOf (n b : Nat) (F : Env) (k l : Nat) : Bool :=
+  if n ≤ l then F (gsZero n b) else F (gsRes l k)
+
+/-- `gsV … j i` is what feeds position `i` of level `j`: at `j = 0` a leaf, above
+it the value level `j-1` computed. -/
+def gsV (n b : Nat) (F : Env) (k : Nat) : Nat → Nat → Bool
+  | 0,     i => gsLeafOf n b F k i
+  | j + 1, i => if F (gsSel n b j) then gsV n b F k j (2 * i + 1) else gsV n b F k j (2 * i)
+
+/-- The low `j` select nets read as a number, `sel[0]` the LSB. -/
+def gsSelUpTo (n b : Nat) (F : Env) : Nat → Nat
+  | 0     => 0
+  | j + 1 => gsSelUpTo n b F j + (if F (gsSel n b j) then 2 ^ j else 0)
+
+def gsSelOf (n b : Nat) (F : Env) : Nat := gsSelUpTo n b F b
+
+/-- ⭐ **THE CLOSED FORM** — position `i` of level `j` holds leaf
+`i * 2^j + (the low j select bits)`. -/
+theorem gsV_eq (n b : Nat) (F : Env) (k : Nat) :
+    ∀ j i : Nat, gsV n b F k j i = gsLeafOf n b F k (i * 2 ^ j + gsSelUpTo n b F j) := by
+  intro j
+  induction j with
+  | zero => intro i; show gsLeafOf n b F k i = gsLeafOf n b F k (i * 1 + 0); congr 1; omega
+  | succ j ih =>
+    intro i
+    show (if F (gsSel n b j) then gsV n b F k j (2 * i + 1) else gsV n b F k j (2 * i)) = _
+    rw [ih (2 * i + 1), ih (2 * i)]
+    show _ = gsLeafOf n b F k (i * 2 ^ (j + 1)
+        + (gsSelUpTo n b F j + (if F (gsSel n b j) then 2 ^ j else 0)))
+    have hp : (2 : Nat) ^ (j + 1) = 2 ^ j * 2 := Nat.pow_succ 2 j
+    split_ifs with hs <;> · congr 1; rw [hp]; ring
+
+theorem gsV_top (n b : Nat) (F : Env) (k : Nat) :
+    gsV n b F k b 0 = gsLeafOf n b F k (gsSelOf n b F) := by
+  rw [gsV_eq]
+  congr 1
+  show 0 * 2 ^ b + gsSelUpTo n b F b = gsSelUpTo n b F b
+  omega
+
+theorem gsSelUpTo_congr (n b : Nat) (F G : Env)
+    (h : ∀ j : Nat, j < b → F (gsSel n b j) = G (gsSel n b j)) :
+    ∀ j, j ≤ b → gsSelUpTo n b F j = gsSelUpTo n b G j := by
+  intro j
+  induction j with
+  | zero => intro _; rfl
+  | succ j ih =>
+    intro hj
+    show gsSelUpTo n b F j + (if F (gsSel n b j) then 2 ^ j else 0)
+        = gsSelUpTo n b G j + (if G (gsSel n b j) then 2 ^ j else 0)
+    rw [ih (Nat.le_of_lt hj), h j hj]
+
+theorem gsSelOf_congr (n b : Nat) (F G : Env) (h : ∀ m : Nat, m < gsIn n b → F m = G m) :
+    gsSelOf n b F = gsSelOf n b G :=
+  gsSelUpTo_congr n b F G (fun j hj => h _ (gsSel_lt_in n b j hj)) b le_rfl
+
+theorem gsV_top_congr (n b : Nat) (F G : Env) (k : Nat) (hk : k < 32)
+    (h : ∀ m : Nat, m < gsB n b 0 0 → F m = G m) :
+    gsV n b F k b 0 = gsV n b G k b 0 := by
+  have hin : ∀ m : Nat, m < gsIn n b → F m = G m := by
+    intro m hm
+    refine h m ?_
+    rw [gsB00]
+    omega
+  rw [gsV_top, gsV_top, gsSelOf_congr n b F G hin]
+  show (if n ≤ gsSelOf n b G then F (gsZero n b) else F (gsRes (gsSelOf n b G) k))
+      = (if n ≤ gsSelOf n b G then G (gsZero n b) else G (gsRes (gsSelOf n b G) k))
+  split_ifs with hlt
+  · refine h (gsZero n b) ?_
+    rw [gsB00]
+    show gsIn n b < gsIn n b + 1 + b
+    omega
+  · exact hin _ (gsRes_lt_in n b _ k (by omega) hk)
+
+/-! ### The gate list, cut into a prefix and 32 independent bit trees -/
+
+def gsL (n b k j : Nat) : List Gate := (List.range (gsLevelWidth b j)).flatMap (gsMux n b k j)
+
+/-- Levels `0 … j-1` of bit `k`, in emission order. -/
+def gsPre (n b k : Nat) : Nat → List Gate
+  | 0     => []
+  | j + 1 => gsPre n b k j ++ gsL n b k j
+
+def gsBitGates (n b k : Nat) : List Gate := gsPre n b k b
+
+def gsBodyGates (n b c : Nat) : List Gate := (List.range c).flatMap (gsBitGates n b)
+
+def gsPreGates (n b : Nat) : List Gate :=
+  (⟨gsZero n b, .const false⟩ : Gate)
+    :: (List.range b).map (fun j => (⟨gsNot n b j, .not (gsSel n b j)⟩ : Gate))
+
+theorem gsPre_eq (n b k : Nat) : ∀ j, (List.range j).flatMap (gsL n b k) = gsPre n b k j := by
+  intro j
+  induction j with
+  | zero => rfl
+  | succ j ih =>
+    rw [List.range_succ, List.flatMap_append, ih]
+    show gsPre n b k j ++ (gsL n b k j ++ []) = gsPre n b k j ++ gsL n b k j
+    rw [List.append_nil]
+
+theorem genSelect_gates_eq (n b : Nat) :
+    (genSelect n b).gates = gsPreGates n b ++ gsBodyGates n b 32 := by
+  have h : (fun k => (List.range b).flatMap fun j =>
+              (List.range (gsLevelWidth b j)).flatMap (gsMux n b k j))
+         = gsBitGates n b := by
+    funext k
+    show (List.range b).flatMap (gsL n b k) = gsPre n b k b
+    exact gsPre_eq n b k b
+  show gsPreGates n b ++ (List.range 32).flatMap
+      (fun k => (List.range b).flatMap fun j =>
+        (List.range (gsLevelWidth b j)).flatMap (gsMux n b k j)) = _
+  rw [h]
+  rfl
+
+theorem gsL_eq (n b k j : Nat) :
+    gsL n b k j = muxRow (gsB n b k j) (fun i => gsPrev n b k j (2 * i))
+        (fun i => gsPrev n b k j (2 * i + 1)) (gsNot n b j) (gsSel n b j) (gsLevelWidth b j) := by
+  have h : gsMux n b k j = fun i =>
+      [(⟨gsB n b k j + 3 * i, .and (gsPrev n b k j (2 * i)) (gsNot n b j)⟩ : Gate),
+       ⟨gsB n b k j + 3 * i + 1, .and (gsPrev n b k j (2 * i + 1)) (gsSel n b j)⟩,
+       ⟨gsB n b k j + 3 * i + 2, .or (gsB n b k j + 3 * i) (gsB n b k j + 3 * i + 1)⟩] := by
+    funext i
+    show [(⟨gsBase n b k j i, .and (gsPrev n b k j (2 * i)) (gsNot n b j)⟩ : Gate),
+          ⟨gsBase n b k j i + 1, .and (gsPrev n b k j (2 * i + 1)) (gsSel n b j)⟩,
+          ⟨gsOut n b k j i, .or (gsBase n b k j i) (gsBase n b k j i + 1)⟩] = _
+    rw [gsOut_eq, gsBase_eq]
+  rw [gsL, h, muxRow]
+
+/-! ### ⭐ THE LEVEL INDUCTION — the heart of the parametrisation -/
+
+theorem gsPrev_zero_val (n b : Nat) (F : Env) (k l : Nat) :
+    F (gsPrev n b k 0 l) = gsLeafOf n b F k l := by
+  show F (if n ≤ l then gsZero n b else gsRes l k) = _
+  rw [gsLeafOf]
+  split_ifs <;> rfl
+
+/-- ⭐⭐ **ONE BIT'S TREE, AT EVERY DEPTH.** Indexed on level `j`'s INPUTS, so
+the base case (leaf nets) and the step case (the level below's outputs) are the
+same sentence — `gsPrev` is the function that changes shape, not the invariant. -/
+theorem run_gsLevels (n b : Nat) (G : Env) (k : Nat) (hk : k < 32)
+    (hnot : ∀ j : Nat, j < b → G (gsNot n b j) = !(G (gsSel n b j))) :
+    ∀ j : Nat, j ≤ b →
+      (∀ m : Nat, m < gsB n b k 0 → run G (gsPre n b k j) m = G m)
+      ∧ (∀ l : Nat, l < gsWidth b j →
+           run G (gsPre n b k j) (gsPrev n b k j l) = gsV n b G k j l) := by
+  intro j
+  induction j with
+  | zero =>
+    intro _
+    refine ⟨fun m _ => rfl, fun l _ => ?_⟩
+    exact gsPrev_zero_val n b G k l
+  | succ j ih =>
+    intro hj
+    have hjb : j < b := hj
+    obtain ⟨hfr, hval⟩ := ih (Nat.le_of_lt hjb)
+    have hbase : gsB n b k 0 ≤ gsB n b k j := gsB_zero_le n b k j
+    have L := run_muxRow (run G (gsPre n b k j)) (gsB n b k j)
+        (fun i => gsPrev n b k j (2 * i)) (fun i => gsPrev n b k j (2 * i + 1))
+        (gsNot n b j) (gsSel n b j)
+        (Nat.lt_of_lt_of_le (gsNot_lt n b k j hjb) hbase)
+        (Nat.lt_of_lt_of_le (gsSel_lt n b k j hjb) hbase)
+        (gsLevelWidth b j)
+        (fun i hi => ⟨gsPrev_lt n b k j (2 * i) hk (by
+            have := gsLevelWidth_two b j hjb; omega),
+          gsPrev_lt n b k j (2 * i + 1) hk (by
+            have := gsLevelWidth_two b j hjb; omega)⟩)
+    rw [← gsL_eq n b k j] at L
+    have hsucc : gsPre n b k (j + 1) = gsPre n b k j ++ gsL n b k j := rfl
+    refine ⟨?_, ?_⟩
+    · intro m hm
+      rw [hsucc, run_append, L.1 m (Nat.lt_of_lt_of_le hm hbase)]
+      exact hfr m hm
+    · intro l hl
+      have hlw : l < gsLevelWidth b j := hl
+      rw [hsucc, run_append]
+      show run (run G (gsPre n b k j)) (gsL n b k j) (gsOut n b k j l) = _
+      rw [gsOut_eq, L.2 l hlw,
+        hfr (gsNot n b j) (gsNot_lt n b k j hjb), hfr (gsSel n b j) (gsSel_lt n b k j hjb),
+        hnot j hjb, mux_pick, hval (2 * l) (by have := gsLevelWidth_two b j hjb; omega),
+        hval (2 * l + 1) (by have := gsLevelWidth_two b j hjb; omega)]
+      rfl
+
+/-! ### The 32 bit trees, in series -/
+
+theorem run_gsBody (n b : Nat) (hb : 0 < b) (F : Env)
+    (hnot : ∀ j : Nat, j < b → F (gsNot n b j) = !(F (gsSel n b j))) :
+    ∀ c : Nat, c ≤ 32 →
+      (∀ m : Nat, m < gsB n b 0 0 → run F (gsBodyGates n b c) m = F m)
+      ∧ (∀ k : Nat, k < c →
+           run F (gsBodyGates n b c) (gsOut n b k (b - 1) 0) = gsV n b F k b 0) := by
+  have hlw1 : gsLevelWidth b (b - 1) = 1 := by
+    show gsWidth b (b - 1 + 1) = 1
+    rw [show b - 1 + 1 = b from by omega]
+    exact gsWidth_top b
+  have hb1 : (b - 1) + 1 = b := by omega
+  have hroot : ∀ k : Nat, gsOut n b k (b - 1) 0 + 1 = gsB n b (k + 1) 0 := by
+    intro k
+    have e1 := gsB_step n b k (b - 1)
+    rw [hb1] at e1
+    rw [gsOut_eq, ← gsB_bit n b k, e1, hlw1]
+  intro c
+  induction c with
+  | zero => intro _; exact ⟨fun m _ => rfl, fun k hk => absurd hk (Nat.not_lt_zero k)⟩
+  | succ c ih =>
+    intro hc
+    obtain ⟨hfr, hval⟩ := ih (Nat.le_of_succ_le hc)
+    have hc32 : c < 32 := Nat.lt_of_lt_of_le (Nat.lt_succ_self c) hc
+    have hsucc : gsBodyGates n b (c + 1) = gsBodyGates n b c ++ gsBitGates n b c := by
+      simp [gsBodyGates, List.range_succ]
+    have hzero_le : gsB n b 0 0 ≤ gsB n b c 0 := gsB_bit_mono n b 0 c (Nat.zero_le c)
+    have hnot' : ∀ j : Nat, j < b → run F (gsBodyGates n b c) (gsNot n b j)
+        = !(run F (gsBodyGates n b c) (gsSel n b j)) := by
+      intro j hj
+      rw [hfr (gsNot n b j) (gsNot_lt n b 0 j hj), hfr (gsSel n b j) (gsSel_lt n b 0 j hj)]
+      exact hnot j hj
+    obtain ⟨bfr, bval⟩ :=
+      run_gsLevels n b (run F (gsBodyGates n b c)) c hc32 hnot' b le_rfl
+    refine ⟨?_, ?_⟩
+    · intro m hm
+      rw [hsucc, run_append]
+      show run (run F (gsBodyGates n b c)) (gsPre n b c b) m = F m
+      rw [bfr m (Nat.lt_of_lt_of_le hm hzero_le)]
+      exact hfr m hm
+    · intro k hk
+      rw [hsucc, run_append]
+      show run (run F (gsBodyGates n b c)) (gsPre n b c b) (gsOut n b k (b - 1) 0) = _
+      rcases Nat.lt_or_ge k c with hkc | hkc
+      · rw [bfr (gsOut n b k (b - 1) 0) ?_]
+        · exact hval k hkc
+        · have h1 := hroot k
+          have h2 : gsB n b (k + 1) 0 ≤ gsB n b c 0 := gsB_bit_mono n b (k + 1) c hkc
+          omega
+      · have hEq : k = c := Nat.le_antisymm (Nat.le_of_lt_succ hk) hkc
+        subst hEq
+        have hb0 := bval 0 (by rw [gsWidth_top]; omega)
+        show run (run F (gsBodyGates n b k)) (gsPre n b k b) (gsOut n b k (b - 1) 0) = _
+        rw [show gsOut n b k (b - 1) 0 = gsPrev n b k b 0 from by
+              rw [show b = (b - 1) + 1 from by omega]
+              rfl]
+        rw [hb0]
+        exact gsV_top_congr n b _ _ k hc32 hfr
+
+/-! ### The constant and the `b` shared inverters
+
+⭐ **`run_pointwise` transfers exactly** — the inverters are
+`(List.range b).map fun j => ⟨gsIn n b + 1 + j, .not (gsSel n b j)⟩`, the
+pointwise shape on the nose, and the tie constant is peeled off as one `upd`. -/
+
+theorem run_gsPre (n b : Nat) (E : Env) :
+    (∀ m : Nat, m < gsIn n b → run E (gsPreGates n b) m = E m)
+    ∧ run E (gsPreGates n b) (gsZero n b) = false
+    ∧ (∀ j : Nat, j < b → run E (gsPreGates n b) (gsNot n b j) = !(E (gsSel n b j))) := by
+  have hstep : run E (gsPreGates n b)
+      = run (upd E (gsIn n b) false)
+          ((List.range b).map (fun j => (⟨gsIn n b + 1 + j, Op.not (gsSel n b j)⟩ : Gate))) := by
+    show run (upd E (gsZero n b) ((Op.const false).eval E)) _ = _
+    rfl
+  have P := run_pointwise (upd E (gsIn n b) false) (gsIn n b + 1) (fun j => Op.not (gsSel n b j)) b
+      (by
+        intro i hi a ha
+        show a < gsIn n b + 1
+        have : a = gsSel n b i := by
+          revert ha
+          show a ∈ [gsSel n b i] → _
+          intro ha
+          simpa using ha
+        rw [this]
+        exact Nat.lt_of_lt_of_le (gsSel_lt_in n b i hi) (Nat.le_succ _))
+  obtain ⟨pfr, pval⟩ := P
+  refine ⟨?_, ?_, ?_⟩
+  · intro m hm
+    have hne : ¬ (m = gsIn n b) := by omega
+    rw [hstep, pfr m (by omega)]
+    exact upd_of_ne false hne
+  · rw [hstep, show gsZero n b = gsIn n b from rfl, pfr (gsIn n b) (by omega)]
+    simp [upd]
+  · intro j hj
+    have hne : ¬ (gsSel n b j = gsIn n b) := by
+      have := gsSel_lt_in n b j hj; omega
+    rw [hstep, show gsNot n b j = gsIn n b + 1 + j from rfl, pval j hj]
+    show (!(upd E (gsIn n b) false (gsSel n b j))) = (!(E (gsSel n b j)))
+    rw [upd_of_ne false hne]
+
+/-! ### ⭐⭐ THE PARAMETRIC THEOREM -/
+
+theorem genSelect_outs_eq (n b : Nat) :
+    (genSelect n b).outs = (List.range 32).map (fun k => gsOut n b k (b - 1) 0) := rfl
+
+/-- ⭐⭐⭐ **THE BLOCK SELECTS, AT EVERY SOURCE COUNT.** No driver, no sample:
+for every `n`, every `b ≥ 1`, and EVERY valuation of the `n * 32 + b` input nets,
+`genSelect n b` delivers all 32 bits of the source the select nets name, and
+`false` at every bit when they name a padding slot. `sem_aluSelect` is the
+`n = 10, b = 4` line of this. -/
+theorem sem_genSelect (n b : Nat) (hb : 0 < b) (E : Env) :
+    sem (genSelect n b) E
+      = (List.range 32).map (fun k =>
+          if gsSelOf n b E < n then E (gsRes (gsSelOf n b E) k) else false) := by
+  obtain ⟨pfr, pzero, pnot⟩ := run_gsPre n b E
+  have hnotF : ∀ j : Nat, j < b → run E (gsPreGates n b) (gsNot n b j)
+      = !(run E (gsPreGates n b) (gsSel n b j)) := by
+    intro j hj
+    rw [pnot j hj, pfr (gsSel n b j) (gsSel_lt_in n b j hj)]
+  obtain ⟨bfr, bval⟩ := run_gsBody n b hb (run E (gsPreGates n b)) hnotF 32 le_rfl
+  have hsem : sem (genSelect n b) E
+      = (List.range 32).map (fun k => run E (genSelect n b).gates (gsOut n b k (b - 1) 0)) := by
+    show (genSelect n b).outs.map (run E (genSelect n b).gates) = _
+    rw [genSelect_outs_eq, List.map_map]
+    simp only [Function.comp_def]
+  rw [hsem]
+  refine List.map_congr_left ?_
+  intro k hk
+  have hk32 : k < 32 := List.mem_range.mp hk
+  rw [genSelect_gates_eq, run_append, bval k hk32, gsV_top,
+    gsSelOf_congr n b (run E (gsPreGates n b)) E pfr]
+  show (if n ≤ gsSelOf n b E then run E (gsPreGates n b) (gsZero n b)
+        else run E (gsPreGates n b) (gsRes (gsSelOf n b E) k)) = _
+  by_cases hlt : gsSelOf n b E < n
+  · rw [if_neg (by omega), if_pos hlt]
+    exact pfr _ (gsRes_lt_in n b _ k hlt hk32)
+  · rw [if_pos (by omega), if_neg hlt]
+    exact pzero
+
+#audit_axioms gsWidth_top gsWidth_of_le gsLevelWidth_two
+#audit_axioms gsBelow_zero gsBelow_succ gsBelow_of_le gsBelow_top
+#audit_axioms gsB gsBase_eq gsOut_eq gsB_step gsB_zero_le gsB_bit gsB_bit_mono gsB00
+#audit_axioms gsSel_lt_in gsRes_lt_in gsNot_lt gsSel_lt gsZero_lt gsPrev_lt
+#audit_axioms gsLeafOf gsV gsSelUpTo gsSelOf
+#audit_axioms gsV_eq gsV_top gsSelUpTo_congr gsSelOf_congr gsV_top_congr
+#audit_axioms gsL gsPre gsBitGates gsBodyGates gsPreGates
+#audit_axioms gsPre_eq genSelect_gates_eq gsL_eq
+#audit_axioms gsPrev_zero_val run_gsLevels run_gsBody run_gsPre
+#audit_axioms genSelect_outs_eq sem_genSelect
+
 /-! ## ⭐⭐ THE THEOREM -/
 
 theorem aluSelect_outs_eq : aluSelect.outs = (List.range 32).map (fun k => asOut k 3 0) := rfl
 
-theorem sem_aluSelect (E : Env) :
+/-- ⛔ **THE LITERAL-WIDTH PROOF, RETAINED AS A CROSS-CHECK ONLY.** *This is the
+original `sem_aluSelect`, unchanged, and every line of it is pinned at ten
+sources — `329 + 45*k + 42`, `pfr (320 + j)`, `< 324`, level 3 in the lemma
+names.* **It is no longer what `sem_aluSelect` rests on** (see below); it is kept
+because it re-derives the same statement by a route that shares nothing with the
+parametric one, which is a stronger check than either alone. -/
+theorem sem_aluSelect_direct (E : Env) :
     sem aluSelect E
       = (List.range 32).map (fun k =>
           if asSelOf E < asOps then E (asRes (asSelOf E) k) else false) := by
@@ -5217,6 +5724,35 @@ theorem sem_aluSelect (E : Env) :
     have hb : asSelOf E * 32 + k < 324 := by omega
     rw [asRes_eq]; exact hb
   · rw [asZero_eq]; exact pzero
+
+/-- `asSelOf` — the four select nets read as a number — is `gsSelOf` at `b = 4`. -/
+theorem gsSelOf_ten (E : Env) : gsSelOf 10 4 E = asSelOf E := by
+  show 0 + (if E (asSel 0) then 2 ^ 0 else 0) + (if E (asSel 1) then 2 ^ 1 else 0)
+      + (if E (asSel 2) then 2 ^ 2 else 0) + (if E (asSel 3) then 2 ^ 3 else 0)
+    = (if E (asSel 0) then 1 else 0) + (if E (asSel 1) then 2 else 0)
+      + (if E (asSel 2) then 4 else 0) + (if E (asSel 3) then 8 else 0)
+  norm_num
+
+/-- ⭐⭐ **THE THEOREM — NOW A COROLLARY, STATED VERBATIM.** Unconditional over
+all `2^324` valuations and all 32 outputs, exactly as before; what changed is
+that it is no longer *where the work is*. It is `sem_genSelect` at `n = 10`,
+`b = 4`, transported by `genSelect_ten`. ⇒ **Nothing downstream moves, and the
+sizing question below is now an instantiation.**
+
+*(The literal-width proof survives as `sem_aluSelect_direct`, an independent
+second route to the same statement.)* -/
+theorem sem_aluSelect (E : Env) :
+    sem aluSelect E
+      = (List.range 32).map (fun k =>
+          if asSelOf E < asOps then E (asRes (asSelOf E) k) else false) := by
+  have h : (fun k => if gsSelOf 10 4 E < 10 then E (gsRes (gsSelOf 10 4 E) k) else false)
+         = (fun k => if asSelOf E < asOps then E (asRes (asSelOf E) k) else false) := by
+    funext k
+    rw [gsSelOf_ten]
+    rfl
+  rw [← genSelect_ten, sem_genSelect 10 4 (by norm_num) E, h]
+
+#audit_axioms sem_aluSelect_direct gsSelOf_ten sem_aluSelect
 
 /-! ## ⭐ WHAT THE SAMPLED CERTIFICATE ACTUALLY QUANTIFIES OVER -/
 
@@ -5415,6 +5951,149 @@ theorem sem_aluSelect_off_the_sample :
 theorem aluSelectCut_is_one_gate :
     (List.zip aluSelectCut.gates aluSelect.gates).countP (fun p => p.1 != p.2) = 1 := by
   decide +kernel
+
+/-! ## ⭐⭐⭐ THE TWO SHRUNK INSTANCES — WHAT THE PARAMETRISATION BUYS
+
+*Both are `sem_genSelect` with `n` and `b` filled in. Neither needed a line of
+new proof, which is the whole claim of the exercise.*
+
+### Does `aluSelectCut` survive the generalisation?
+
+⭐ **YES, UNTOUCHED, AND IT NOW CERTIFIES MORE THAN IT DID.** `aluSelectCut` is a
+mutant of `aluSelect`; `genSelect_ten` makes `aluSelect` an *instance* rather
+than a separate object, so `aluSelectCut_fails_the_theorem` — which refutes the
+mutant against `asSelectsOK 5`, a corollary of `sem_aluSelect` — is now refuting
+it against a corollary of the PARAMETRIC theorem. Not one character of it
+changes and its reach grows.
+
+⛔ **BUT IT IS A CONTROL FOR ONE VALUE OF `n`, AND A PARAMETRIC THEOREM CAN BE
+VACUOUS AT WIDTHS THE TEN-SOURCE MUTANT CANNOT REACH.** `genSelectCut2` below is
+the same mutation carried to `n = 2` — a width `aluSelectCut` has no opinion
+about — so the new instance is refuted at its own size rather than by
+inheritance. -/
+
+/-! ### `n = 2` — THE ADDI OPERAND-B MUX -/
+
+theorem gsSelOf_two (E : Env) : gsSelOf 2 1 E = if E (gsSel 2 1 0) then 1 else 0 := by
+  show 0 + (if E (gsSel 2 1 0) then 2 ^ 0 else 0) = _
+  norm_num
+
+/-- ⭐⭐ **THE OPERAND-B MUX ORGAN THEOREM.** The one select net picks between the
+two 32-bit sources, at every one of the `2^65` valuations and on all 32 outputs.
+*Silicon established and the compiler seat checked (`f61f023`) that the `n = 2`
+row IS this mux — same generator, same three-gate cell, same shared inverter — so
+it inherits the proof rather than needing one, and one of the two unbuilt blocks
+on C4's critical path stops being unbuilt.* ⚠️ **`n = 2 = 2^1` means there are no
+padding leaves: the `else false` arm of `sem_genSelect` is unreachable here, and
+the tie constant is a dead net.** -/
+theorem sem_operandBMux (E : Env) :
+    sem (genSelect 2 1) E
+      = (List.range 32).map (fun k =>
+          if E (gsSel 2 1 0) then E (gsRes 1 k) else E (gsRes 0 k)) := by
+  rw [sem_genSelect 2 1 (by norm_num) E]
+  refine List.map_congr_left ?_
+  intro k _
+  rw [gsSelOf_two]
+  cases h : E (gsSel 2 1 0) <;> norm_num
+
+/-- Two words on the two source buses, the select on net `64`. -/
+def gsDrive2 (x y : Word) (s : Bool) : Env := fun m =>
+  if m < 32 then x.getLsbD m else if m < 64 then y.getLsbD (m - 32) else s
+
+/-- ⭐ **THE SELECTED OPERAND, AS A WORD** — the form a `core` assembly applies,
+the shape `aluSelect_word` performs for the ten-source block. -/
+theorem operandBMux_word (x y : Word) (s : Bool) :
+    SaltWorks.HDL.wordOf (fun k => (sem (genSelect 2 1) (gsDrive2 x y s)).getD k false)
+      = if s then y else x := by
+  rw [sem_operandBMux, wordOf_getD_map_range]
+  have hsel : gsDrive2 x y s (gsSel 2 1 0) = s := rfl
+  rw [hsel]
+  cases s
+  · show SaltWorks.HDL.wordOf (fun k => gsDrive2 x y false (gsRes 0 k)) = x
+    have h : ∀ k : Nat, k < 32 → gsDrive2 x y false (gsRes 0 k) = x.getLsbD k := by
+      intro k hk
+      show (if 0 * 32 + k < 32 then x.getLsbD (0 * 32 + k)
+            else if 0 * 32 + k < 64 then y.getLsbD (0 * 32 + k - 32) else false) = x.getLsbD k
+      rw [if_pos (by omega), show 0 * 32 + k = k from by omega]
+    rw [wordOf_congr h]
+    exact wordOf_getLsbD_self x
+  · show SaltWorks.HDL.wordOf (fun k => gsDrive2 x y true (gsRes 1 k)) = y
+    have h : ∀ k : Nat, k < 32 → gsDrive2 x y true (gsRes 1 k) = y.getLsbD k := by
+      intro k hk
+      show (if 1 * 32 + k < 32 then x.getLsbD (1 * 32 + k)
+            else if 1 * 32 + k < 64 then y.getLsbD (1 * 32 + k - 32) else true) = y.getLsbD k
+      rw [if_neg (by omega), if_pos (by omega), show 1 * 32 + k - 32 = k from by omega]
+    rw [wordOf_congr h]
+    exact wordOf_getLsbD_self y
+
+/-! ### The mutation control at the NEW width -/
+
+/-- ⛔ **ONE GATE MUTATED** in the `n = 2` instance: bit 0's only mux reads leaf
+`0` on both of its inputs, so source 1 is unreachable at bit 0. Still `ssa`,
+still 98 gates. -/
+def gsMuxCut2 (k j i : Nat) : List Gate :=
+  if k == 0 && j == 0 && i == 0 then
+    [⟨gsBase 2 1 k j i,     .and (gsPrev 2 1 k j (2 * i)) (gsNot 2 1 j)⟩,
+     ⟨gsBase 2 1 k j i + 1, .and (gsPrev 2 1 k j (2 * i)) (gsSel 2 1 j)⟩,
+     ⟨gsOut 2 1 k j i,      .or (gsBase 2 1 k j i) (gsBase 2 1 k j i + 1)⟩]
+  else gsMux 2 1 k j i
+
+def genSelectCut2 : Circ :=
+  { genSelect 2 1 with
+    gates :=
+      (⟨gsZero 2 1, .const false⟩ : Gate)
+        :: (List.range 1).map (fun j => (⟨gsNot 2 1 j, .not (gsSel 2 1 j)⟩ : Gate))
+        ++ (List.range 32).flatMap fun k =>
+             (List.range 1).flatMap fun j =>
+               (List.range (gsLevelWidth 1 j)).flatMap (gsMuxCut2 k j) }
+
+theorem genSelectCut2_ssa : genSelectCut2.ssa = true := by decide +kernel
+theorem genSelectCut2_gate_count : genSelectCut2.gates.length = 98 := by decide +kernel
+
+/-- ⭐ **EXACTLY ONE GATE DIFFERS.** -/
+theorem genSelectCut2_is_one_gate :
+    (List.zip genSelectCut2.gates (genSelect 2 1).gates).countP (fun p => p.1 != p.2) = 1 := by
+  decide +kernel
+
+/-- Source 1 alone live at bit 0, select high. -/
+def gsOffEnv2 : Env := fun m => decide (m = 32 ∨ m = 64)
+
+/-- ⭐ **AND THE ORGAN THEOREM REFUTES IT AT ITS OWN WIDTH** — the mutant answers
+`false` where `sem_operandBMux` forces `true`. -/
+theorem genSelectCut2_fails_the_theorem :
+    (sem genSelectCut2 gsOffEnv2).getD 0 false = false
+      ∧ (sem (genSelect 2 1) gsOffEnv2).getD 0 false = true := by
+  refine ⟨by decide +kernel, ?_⟩
+  rw [sem_operandBMux, getD_map_range_zero, if_pos (by decide)]
+  decide
+
+/-! ### `n = 3` — SLICE A'S ALU SELECT `{add, xor, slt}` -/
+
+theorem gsSelOf_three (E : Env) :
+    gsSelOf 3 2 E = (if E (gsSel 3 2 0) then 1 else 0) + (if E (gsSel 3 2 1) then 2 else 0) := by
+  show 0 + (if E (gsSel 3 2 0) then 2 ^ 0 else 0) + (if E (gsSel 3 2 1) then 2 ^ 1 else 0) = _
+  norm_num
+
+/-- ⭐⭐ **SLICE A'S ALU SELECT, SPELLED OUT.** Three real sources and one padding
+slot: select `3` reads the tie constant and every output bit is `false`. That
+last arm is the behaviour the padding design decision is responsible for, and it
+is proved here rather than sampled. **−1,154 gates against the ten-source block,
+and the shrink cost no proof.** -/
+theorem sem_sliceASelect (E : Env) :
+    sem (genSelect 3 2) E
+      = (List.range 32).map (fun k =>
+          if E (gsSel 3 2 1) then (if E (gsSel 3 2 0) then false else E (gsRes 2 k))
+          else (if E (gsSel 3 2 0) then E (gsRes 1 k) else E (gsRes 0 k))) := by
+  rw [sem_genSelect 3 2 (by norm_num) E]
+  refine List.map_congr_left ?_
+  intro k _
+  rw [gsSelOf_three]
+  cases h0 : E (gsSel 3 2 0) <;> cases h1 : E (gsSel 3 2 1) <;> norm_num
+
+#audit_axioms gsSelOf_two sem_operandBMux gsDrive2 operandBMux_word
+#audit_axioms gsMuxCut2 genSelectCut2 genSelectCut2_ssa genSelectCut2_gate_count
+#audit_axioms genSelectCut2_is_one_gate gsOffEnv2 genSelectCut2_fails_the_theorem
+#audit_axioms gsSelOf_three sem_sliceASelect
 
 end AluSelectSemantics
 
