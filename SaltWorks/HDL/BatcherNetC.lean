@@ -394,6 +394,62 @@ theorem bnCBuild_element_sem (e a b : Nat) (cs : List (Nat × Nat)) (dat : List 
         (fun g hg => Nat.lt_of_lt_of_le hlow (bnCBuild_writes_above cs (e+1) _ g hg))]
   exact inst_sem ceCcore σ (bnCOff e) env envC ⟨ceCcore_ssa', by decide +kernel, hσ⟩ hin n hn
 
+/-! ## OBLIGATION (c), STEP ② — `hσ` DISCHARGED
+
+*`bnCBuild_element_sem` takes two hypotheses from its caller: `hσ` (every input
+wire already computed) and `hin` (the environments agree through `σ`). This is
+`hσ`, and it is the half that is pure layout arithmetic.*
+
+⚠️ **AND IT COST FIVE ATTEMPTS — OVER THE LADDER, FLAGGED RATHER THAN QUIETLY
+ABSORBED.** *All five failures were the SAME defect and none was a design error:
+`bnCOff`, `bnCState` and `bnCRst` all return `Net`, so every inequality between
+them is `Net`-typed and `omega` atomises it.* 🔑 **The banked fix — "restate at
+`Nat` with a `have`" — DOES NOT WORK HERE, because ascribing `(bnCState e + k :
+Nat)` is a no-op when the function returns `Net`.** ⇒ ***What works is an
+explicit `Nat` fact plus `lt_of_eq_of_lt`/`lt_of_lt_of_eq` to transport it — a
+proof TERM, never a tactic, because the term typechecks against a `Net`-typed
+goal by reducibility while the tactic never parses it.***
+
+📌 **THE LAW IS NOW THREE-TIERED, and the third tier is this one:** `Net`-typed
+EQUATIONS → restate at `Nat` (`EmitN.lean:280`) · `Net`-typed SUBTRACTION →
+explicit lemmas (`instOuts_range`) · **`Net`-returning DEFINITIONS in an
+inequality → prove the `Nat` fact separately and transport it.** -/
+
+-- Net-typed defs: force the inequalities to Nat so omega parses them.
+theorem bnCOff_eq (e : Nat) : (bnCOff e : Nat) = 105 + 34 * e := by
+  unfold bnCOff bnCCoreIn bnCIn bnCWires bnCElems
+  have h34 : ceCcore.gates.length = 34 := by decide +kernel
+  rw [h34]
+
+theorem bnCState_eq (e : Nat) : (bnCState e : Nat) = 9 + 4 * e := rfl
+
+theorem bnCState_lt_off (e k : Nat) (hk : k < 4) : bnCState e + k < bnCOff e := by
+  -- the relation is Net-typed, so omega cannot see it; supply an explicit Nat term
+  have h : (9 : Nat) + 4 * e + k < 105 + 34 * e := by omega
+  have hs : bnCState e + k = 9 + 4 * e + k := by rw [bnCState_eq]
+  exact lt_of_lt_of_eq (lt_of_eq_of_lt hs h) (bnCOff_eq e).symm
+
+theorem bnCRst_eq : (bnCRst : Nat) = 0 := rfl
+
+theorem bnCRst_lt_off (e : Nat) : bnCRst < bnCOff e := by
+  have h : (0 : Nat) < 105 + 34 * e := by omega
+  exact lt_of_lt_of_eq (lt_of_eq_of_lt bnCRst_eq h) (bnCOff_eq e).symm
+
+/-- ⭐ `instOK`'s third clause for element `e`, given the wire nets are below. -/
+theorem bnCSigma_below (e a b : Nat) (dat : List Net)
+    (hdat : ∀ n ∈ dat, n < bnCOff e) (ha : a < dat.length) (hb : b < dat.length) :
+    ∀ i, i < ceCcore.nIn → bnCSigma e a b dat i < bnCOff e := by
+  intro i _
+  unfold bnCSigma
+  split_ifs
+  · exact bnCRst_lt_off e
+  · exact hdat _ (by rw [List.getD_eq_getElem _ _ ha]; exact List.getElem_mem ha)
+  · exact hdat _ (by rw [List.getD_eq_getElem _ _ hb]; exact List.getElem_mem hb)
+  · exact bnCState_lt_off e 0 (by omega)
+  · exact bnCState_lt_off e 1 (by omega)
+  · exact bnCState_lt_off e 2 (by omega)
+  · exact bnCState_lt_off e 3 (by omega)
+
 /-! ## 🔗 LINK ② — THE DECOMPOSITION, and it is the expensive part
 
 **Silicon's 14:31 named three links for the composed theorem: ① the fabricated
@@ -537,6 +593,9 @@ for this element.*
 #audit_axioms bnCBuild_writes_above
 #audit_axioms bnCBuild_writes_strictly_above
 #audit_axioms bnCBuild_element_sem
+#audit_axioms bnCOff_eq bnCState_eq bnCRst_eq
+#audit_axioms bnCState_lt_off bnCRst_lt_off
+#audit_axioms bnCSigma_below
 #audit_axioms bnCWires bnCElems bnCRst bnCDatIn bnCIn bnCState bnCCoreIn bnCOff
 #audit_axioms bnCSigma bnCBuild bnCResult bnCCore batcherNetC
 #audit_axioms bnC_comps_count
