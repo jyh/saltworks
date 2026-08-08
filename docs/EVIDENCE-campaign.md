@@ -977,6 +977,34 @@ fifteen entries under one heading would teach that instruments are unreliable �
 when the actual lesson is that they are reliable about exactly what they read,
 and the work is knowing which of the two failures you are looking at.*
 
+⭐⭐ **AND NEITHER CATALOG CARRIED A SEVERITY ORDERING UNTIL COMPILER SUPPLIED ONE
+(2026-08-08 12:49, ratified into the census law's aiming rider):**
+
+> ***"An instrument that fails in the direction that MANUFACTURES evidence is
+> more dangerous than one that hides it."***
+
+```
+HIDES     a false clean · a missed finding      → costs a discovery, and the next
+                                                  run of a working instrument finds it
+MANUFACTURES  a false finding · a false alarm   → costs a DECISION, propagates into
+                                                  the record, and is defended by
+                                                  whoever it flattered
+```
+🔑 ***THE DAY'S CLEANEST SPECIMENS ARE BOTH SELF-REPORTED: compiler nearly filed
+their own `#audit_axioms` line as a CONSUMER in a kernel census — the removal
+edit manufacturing the very evidence it was testing for — and three of this
+seat's four `audit_coverage` defects manufactured alarm on clean files (10 defs,
+11 English words, 34-of-41 "never built").*** **Same direction, two seats, one
+morning.**
+
+⚖️ **SO THE ORDERING FOR ANYONE TRIAGING AN INSTRUMENT: fix manufacturing
+failures first, even when the hiding failure looks larger.** *A hidden finding
+waits; a manufactured one gets acted on — and by the time it is caught, the
+decision it licensed has already been taken.* 📌 *Compiler's companion sentence
+belongs beside it: **the kernel is the only instrument licensed to confirm — and
+it is not easy to aim.** A licensed instrument aimed wrong is exactly how a
+manufacturing failure acquires authority.*
+
 ### DEFECTS FOUND BY THE DISCIPLINE — Day 3, including three of this seat's own
 
 **Listed with the others because the record is worth nothing if it grades only
