@@ -450,6 +450,46 @@ theorem bnCSigma_below (e a b : Nat) (dat : List Net)
   · exact bnCState_lt_off e 2 (by omega)
   · exact bnCState_lt_off e 3 (by omega)
 
+/-! ### The `dat` invariant — step ②'s other half
+
+*One fold step keeps every wire net below the NEXT element's region, which is
+what lets `bnCSigma_below` apply at the next comparator. With this, `hσ` threads
+through all 24 by induction and only `hin` remains.* -/
+
+theorem instNext_ceCcore (e : Nat) : instNext ceCcore (bnCOff e) = bnCOff (e + 1) := by
+  unfold instNext bnCOff
+  have h34 : ceCcore.gates.length = 34 := by decide +kernel
+  rw [h34]
+  have : (105 : Nat) + 34 * e + 34 = 105 + 34 * (e + 1) := by omega
+  omega
+
+/-- ⭐ **THE `dat` INVARIANT: one fold step keeps every wire net below the NEXT
+element's region.** -/
+theorem bnCSigma_dat_step (e a b : Nat) (dat : List Net)
+    (hdat : ∀ n ∈ dat, n < bnCOff e) (ha : a < dat.length) (hb : b < dat.length) :
+    ∀ n ∈ (dat.set a ((instOuts ceCcore (bnCSigma e a b dat) (bnCOff e)).getD 0 0)).set b
+             ((instOuts ceCcore (bnCSigma e a b dat) (bnCOff e)).getD 1 0),
+      n < bnCOff (e + 1) := by
+  have hnext : bnCOff e < bnCOff (e + 1) := bnCOff_mono e (e + 1) (Nat.lt_succ_self e)
+  have hport : ∀ j, (instOuts ceCcore (bnCSigma e a b dat) (bnCOff e)).getD j 0
+      < bnCOff (e + 1) := by
+    intro j
+    by_cases hj : j < (instOuts ceCcore (bnCSigma e a b dat) (bnCOff e)).length
+    · rw [List.getD_eq_getElem _ _ hj]
+      rcases instOuts_range ceCcore _ (bnCOff e) ceCcore_ssa' _ (List.getElem_mem hj) with
+        ⟨i, hi, hie⟩ | ⟨_, hup⟩
+      · rw [hie]
+        exact Nat.lt_trans (bnCSigma_below e a b dat hdat ha hb i hi) hnext
+      · rwa [instNext_ceCcore] at hup
+    · rw [List.getD_eq_default _ _ (Nat.not_lt.mp hj)]
+      exact Nat.lt_of_le_of_lt (Nat.zero_le _) (Nat.lt_of_lt_of_le hnext (Nat.le_refl _))
+  intro n hn
+  rcases List.mem_or_eq_of_mem_set hn with h | h
+  · rcases List.mem_or_eq_of_mem_set h with h' | h'
+    · exact Nat.lt_trans (hdat n h') hnext
+    · exact h' ▸ hport 0
+  · exact h ▸ hport 1
+
 /-! ## 🔗 LINK ② — THE DECOMPOSITION, and it is the expensive part
 
 **Silicon's 14:31 named three links for the composed theorem: ① the fabricated
@@ -596,6 +636,8 @@ for this element.*
 #audit_axioms bnCOff_eq bnCState_eq bnCRst_eq
 #audit_axioms bnCState_lt_off bnCRst_lt_off
 #audit_axioms bnCSigma_below
+#audit_axioms instNext_ceCcore
+#audit_axioms bnCSigma_dat_step
 #audit_axioms bnCWires bnCElems bnCRst bnCDatIn bnCIn bnCState bnCCoreIn bnCOff
 #audit_axioms bnCSigma bnCBuild bnCResult bnCCore batcherNetC
 #audit_axioms bnC_comps_count
