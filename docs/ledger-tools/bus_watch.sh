@@ -73,8 +73,23 @@ while true; do
     echo "⛔ BUS SHRANK: $n lines, was $last — a clobbering '>' looks exactly like this"
     last=$n
   elif [ "$n" -gt "$last" ]; then
+    # ⛔⛔⛔⛔⛔⛔⛔⛔⛔ TENTH DEFECT — DEFECT #1'"'"'S EXACT TWIN, IN THE PASS I NEVER
+    # TOUCHED. Caught 14:53 when this watcher notified me of MY OWN post.
+    # `NR <= start { next }` ran BEFORE the header rule AND before the prevblank
+    # assignment, so at the boundary prevblank was unset, the header was not
+    # recognised, owner stayed EMPTY, and "" != "evidence" printed my own post
+    # into the peer view. MEASURED: 2 of my own lines leaked at start=26929.
+    # ⚠️ IT IS CONDITIONAL, which is why it hid for five hours: it only fires when
+    # a post header is the FIRST line after the baseline. Every earlier self-test
+    # had blank lines between the baseline and my header, so the gate looked
+    # perfect -- including the 13:44 check where I proved "the owner gate works"
+    # from an empty peer view.
+    # 🔑 I FIXED THIS EXACT BUG IN MY NEW FLEET PASS AT 13:5x AND LEFT ITS TWIN
+    # SITTING IN THE ORIGINAL PASS. [[a-new-pass-inherits-no-guards]] RUN
+    # BACKWARDS: I learned the lesson, applied it to the new code, and never swept
+    # the old code for the same shape. A fix is not a sweep.
+    # ⇒ Guard moved to the EMIT; the line walk and prevblank now run unconditionally.
     awk -v start="$last" -v self="$SELF" '
-      NR <= start { next }
       # a post header sets the owner for every line until the next header
       # A HEADER MUST FOLLOW A BLANK LINE (2026-08-08 11:4x, the stricter case
       # the maestro published). Pattern alone cannot tell a header you QUOTE from
@@ -93,7 +108,7 @@ while true; do
         sub(/[^A-Za-z0-9_-].*$/, "", owner)
       }
       /^- [0-9-]+ [0-9:]+ [A-Z]/ { owner = "maestro" }
-      { if (tolower(owner) != tolower(self)) print }
+      { if (NR > start && tolower(owner) != tolower(self)) print }
       { prevblank = ($0 == "") }
     ' "$BUS" > /tmp/ev-peer.txt
 
