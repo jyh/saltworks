@@ -282,6 +282,41 @@ these two add it back:
 ```
 ~11,403  +  97 (operand-B mux, measured basis)  +  encoder (UNPRICED)  ⇒  ~11,500+
 ```
+📐 **AND THE `aluSelect` SIZING IS NO LONGER UNPRICED — silicon measured it
+(`79bb72a`, 8/7 20:53), and the reason it sat unmeasured for six hours is that
+the quantity everyone was reaching for DOES NOT EXIST:**
+```
+gates(n) = 32×(pad−1)×3 + ⌈log₂ n⌉ + [n < pad],  pad = 2^⌈log₂ n⌉
+
+n    pad  gates    Δ vs 10
+10    16  1,445       —     as built
+ 9    16  1,445       0     ⚠️ a source can cost NOTHING
+ 8     8    675    −770
+ 3     4    291  −1,154     ⭐ SLICE A'S ACTUAL DEMAND {add, xor, slt}
+ 2     2     97  −1,348     = the ADDI operand-B mux, EXACTLY
+```
+🔑 ***There is no per-source cost. It is a STEP FUNCTION on the doubling — a
+source costs 0 gates seven times in ten and 770 once*** — which is precisely the
+shape that defeats an eyeball estimate, and why two attempts to make one produced
+nothing. ✅ **Cross-checked at two independent points before use: `n = 10`
+reproduces the 1,445 recorded at `:64`/`:151`, and `n = 2` reproduces the 97
+above — a number derived hours earlier by a completely different route.**
+
+⚖️ **BOTH COLUMNS ARE NOW PRICED, AND I AM STILL NOT RULING:**
+```
+SHRINK 10 → 3   −1,154 gates    COSTS: sem_aluSelect is NOT parametric — literals
+                                 (329 + 45k + 42, pfr (320+j), < 324) and level 3
+                                 baked into lemma NAMES. It does not transfer, and
+                                 neither does aluSelectCut.
+KEEP 10         ~1,154 dead      COSTS: nothing. The organ is proved unconditional
+                gates            over 2^324 and its dead slots are provably INERT.
+```
+⚠️ **AND SILICON'S OWN COMPARISON IS THE ONE THAT SHOULD REACH WHOEVER RULES:
+route ② was ACCEPTED at 15:50 for saving 779 gates; dropping `aluSelect` 10 → 8
+saves 770 — within nine gates — and was dismissed in one clause as unmeasured.**
+*That asymmetry was not judgement; it was an artefact of one number existing and
+the other not.* **Silicon's block, my plan, the maestro's call.
+```
 *The encoder stays unpriced: it is small, nobody has a measured basis, and
 inventing a coefficient is the error three seats have now refused today.*
 
