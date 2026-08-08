@@ -22,6 +22,7 @@ import SaltWorks.HDL.OperandBMux
 import SaltWorks.HDL.SelectCut32
 import SaltWorks.HDL.EncoderE1
 import SaltWorks.HDL.RuledSizing32
+import SaltWorks.HDL.C1Organ
 import SaltWorks.HDL.EmitS
 import SaltWorks.HDL.CodegenSpec
 import SaltWorks.HDL.CompareExchange
