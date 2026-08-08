@@ -490,6 +490,19 @@ theorem bnCSigma_dat_step (e a b : Nat) (dat : List Net)
     · exact h' ▸ hport 0
   · exact h ▸ hport 1
 
+/-- ⭐ **STEP ② CLOSED: `hin` is not an obligation, it is a CHOICE of `envC`.**
+With `envC := env ∘ σ` the agreement hypothesis is `rfl`, so the factorisation
+holds with `hσ` as its ONLY remaining hypothesis — and `hσ` is `bnCSigma_below`. -/
+theorem bnCBuild_element_sem' (e a b : Nat) (cs : List (Nat × Nat)) (dat : List Net)
+    (env : Env) (hdat : ∀ n ∈ dat, n < bnCOff e)
+    (ha : a < dat.length) (hb : b < dat.length)
+    (n : Net) (hn : n < ceCcore.nIn ∨ (ceCcore.gates.map Gate.out).contains n = true) :
+    run env (bnCBuild e ((a, b) :: cs) dat).1
+        (instMap ceCcore (bnCSigma e a b dat) (bnCOff e) n)
+      = run (fun i => env (bnCSigma e a b dat i)) ceCcore.gates n :=
+  bnCBuild_element_sem e a b cs dat env _
+    (bnCSigma_below e a b dat hdat ha hb) (fun _ _ => rfl) n hn
+
 /-! ## 🔗 LINK ② — THE DECOMPOSITION, and it is the expensive part
 
 **Silicon's 14:31 named three links for the composed theorem: ① the fabricated
@@ -638,6 +651,7 @@ for this element.*
 #audit_axioms bnCSigma_below
 #audit_axioms instNext_ceCcore
 #audit_axioms bnCSigma_dat_step
+#audit_axioms bnCBuild_element_sem'
 #audit_axioms bnCWires bnCElems bnCRst bnCDatIn bnCIn bnCState bnCCoreIn bnCOff
 #audit_axioms bnCSigma bnCBuild bnCResult bnCCore batcherNetC
 #audit_axioms bnC_comps_count
