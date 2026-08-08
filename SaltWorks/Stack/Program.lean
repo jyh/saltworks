@@ -12,6 +12,7 @@ import SaltWorks.HDL.Bitwise
 import SaltWorks.HDL.PcNext
 import SaltWorks.HDL.AluSelect
 import SaltWorks.HDL.ReadTree
+import SaltWorks.HDL.RegNext
 
 /-!
 # STACK-S2 — THE PROGRAM: an agent-written bitonic sort in Slice A
@@ -6147,6 +6148,694 @@ theorem readTreeCutB_fails_the_theorem :
 
 end ReadTreeSemantics
 
+/-! # REGNEXT — THE REGISTER WRITE PATH, UNCONDITIONAL
+
+`RegNext.lean`'s `regNext` is the fourth block of `core` and **the bulk of it by
+gate count**: 32 inverters and 3 × 1,024 mux gates, 3,104 in all. It is what
+`St.set rd v` *is* in silicon.
+
+⛔ **IT HAS ONE REFERENCING FILE AND THAT IS NOT A REASON TO SKIP IT.** The
+fleet nearly shipped a core pinning `pc := 4` forever because `inc32` was
+retired for having no consumers. The corrected metric is **"unproved AND
+(consumed OR REQUIRED-BY-SPEC)"**, and a machine whose ISA says `s.set rd v`
+requires a write port whatever the reference count says.
+
+## ⭐ WHAT THE BLOCK'S CERTIFICATES ACTUALLY QUANTIFY OVER
+
+Read before proving; the reading is a deliverable in its own right.
+
+| certificate | universal in | PINNED | covers |
+|---|---|---|---|
+| `regNext4_correct_on_all_enables` | **all 16 `we` vectors** | datum `rnResPat`, file `rnCurPat`, size 4×4 | 16 of 2^24 |
+| `regNext8_correct` | 8 one-hot `we`, plus all-zero | the same two patterns, size 8×8 | **9 of 2^80** |
+| `regNext8_writes_only_the_enabled` | all 64 output bits | ONE `we` vector (`r = 5`), both patterns | 1 of 2^80 |
+| `regNext8_no_enable_holds_state` | all 64 output bits | `we ≡ false`, both patterns | 1 of 2^80 |
+| `regNext32_*_on_sample` (three) | nothing | **output 0 only**, uniform `res`/`cur` | **3 of 2^1088** |
+
+⇒ **`regNext8_correct` — the one Evidence flagged UNCLASSIFIED — is exactly the
+`asSelectsOK m` shape**: universal in one axis (*which single register is
+enabled*) and pinned in three (the datum, the incoming file, the array size).
+Nine points of a 2^80 space, and **not one of them is about `regNext` itself**,
+which is `regNextN 32 32`.
+
+⭐ **AND THE THREE 32×32 CERTIFICATES ARE HONESTLY NAMED, WHICH THE `pcNext`
+TRIO WAS NOT.** `regNext32_writes_when_enabled_on_sample` says `on_sample` in
+its own name and `RegNext.lean:217-227` says why: reading all 1,024 outputs is
+the OOM zone, so `rnBit` reads output 0 — register 0, bit 0 — and nothing else.
+*A block that documents its own sampling is a different object from one whose
+names overclaim.*
+
+## ⛔ THE `x0` FINDING — THE DISCARD IS NOT IN THIS BLOCK
+
+`St.set_zero` (P5) is a landed **universal** ISA law: a write to `x0` is
+discarded. **`regNext` does not implement it.** `rnMux` is uniform in `r`,
+`r = 0` included, so `next[0][k] = we[0] ? result[k] : cur[0][k]` — raise
+`we[0]` and `x0` latches, at every one of its 32 bits
+(`regNext_writes_x0_when_enabled`, and `regNext_x0_is_not_self_enforcing` gives
+a valuation where it is observable).
+
+⭐ **THAT IS NOT A DEFECT, AND THE DIFFERENCE FROM THE `pc` CASE IS THE POINT.**
+The suppression exists — one block upstream, as `regWrite`'s output 0 wired to
+`.const false` (`RegWrite.lean:83`), certified by `regWrite_x0_never_enabled`
+over all 128 control inputs. The write path enforces P5 **on the ENABLE side and
+nowhere else**. So:
+
+* `regNext_x0_holds` — ⭐ with `regWrite`'s enables, `x0` holds its incoming
+  contents at **every** bit, every destination, every datum. P5 at all 32 bits
+  rather than at sampled ones, and *stronger than the ISA law*, since
+  `St.get_zero` makes `regs[0]` unobservable while the array must still leave it
+  alone.
+* ⛔ **and the standing exposure is real**: any assembly that drives `regNext`'s
+  `we` ports from anything but `regWrite` breaks P5 silently, because this block
+  cannot refuse. **`core` does not exist, so nothing yet checks that wiring.**
+  That is the `pc` defect's shape with the sign flipped — there a spec law had no
+  implementation; here it has exactly one, in a different block, unbridged.
+
+## What transferred, and what did not
+
+* ⭐ **`run_pointwise` transferred exactly once and exactly**: the 32 write-enable
+  inverters are `(List.range R).map fun r => ⟨rnIn + r, .not r⟩`.
+* ⛔ **`run_muxRow` did NOT transfer, and the reason was visible before any proof
+  attempt.** `muxRow`'s cells are `.and (p i) s` — *selector second*. `rnMux`'s
+  are `.and (notWe r) (cur r k)` — *selector FIRST*. Same circuit, transposed
+  operands, and no instantiation of `p q s t` produces it. What lands instead is
+  `run_cellRow`, generic over two arbitrary `Op`s ORed into a third net, which
+  **subsumes `run_muxRow`'s shape as well as this one**.
+* ⛔ **`sem_pcAdd`'s composition template did not apply**: `regNext` instantiates
+  nothing — it is a flat generator — so there is no `instOK` to discharge.
+* ⛔ **`decide` over the array is not available and never was.** 32×32 is 2^1088
+  states; `RegNext.lean`'s header records the `EXIT=134` that established it.
+  **This proof is structural throughout** and the only `decide +kernel` below is
+  on the 8×8 mutant controls.
+
+## ⛔ THE DEBT THIS DOES NOT PAY
+
+**No `C4Spec` field is closed.** A register-field claim is about a whole `core`'s
+output bits and no `core` exists. What lands is the block theorem, the ISA
+bridge, and the shape a `core` assembly applies. *The debt is `core`.*
+-/
+
+section RegNextSemantics
+
+open SaltWorks.HDL hiding seenWord
+
+/-! ## The generic OR-cell array -/
+
+def cellRow (base : Nat) (p q : Nat → Op) (n : Nat) : List Gate :=
+  (List.range n).flatMap fun i =>
+    [(⟨base + 3 * i, p i⟩ : Gate),
+     ⟨base + 3 * i + 1, q i⟩,
+     ⟨base + 3 * i + 2, .or (base + 3 * i) (base + 3 * i + 1)⟩]
+
+theorem cellRow_succ (base : Nat) (p q : Nat → Op) (n : Nat) :
+    cellRow base p q (n + 1)
+      = cellRow base p q n
+          ++ [(⟨base + 3 * n, p n⟩ : Gate),
+              ⟨base + 3 * n + 1, q n⟩,
+              ⟨base + 3 * n + 2, .or (base + 3 * n) (base + 3 * n + 1)⟩] := by
+  simp [cellRow, List.range_succ]
+
+theorem run_cell (F : Env) (b : Nat) (o1 o2 : Op) (h2 : ∀ a ∈ o2.fanin, a < b) :
+    run F [(⟨b, o1⟩ : Gate), ⟨b + 1, o2⟩, ⟨b + 2, .or b (b + 1)⟩] (b + 2)
+      = (o1.eval F || o2.eval F) := by
+  have he : o2.eval (upd F b (o1.eval F)) = o2.eval F :=
+    Op.eval_congr o2 (fun a ha => upd_of_ne _ (Nat.ne_of_lt (h2 a ha)))
+  have hne : b ≠ b + 1 := Nat.ne_of_lt (Nat.lt_succ_self b)
+  simp only [run_cons, run_nil, upd_self]
+  show (upd (upd F b (o1.eval F)) (b + 1) (o2.eval (upd F b (o1.eval F))) b
+        || upd (upd F b (o1.eval F)) (b + 1) (o2.eval (upd F b (o1.eval F))) (b + 1)) = _
+  rw [upd_of_ne _ hne, upd_self, upd_self, he]
+
+theorem run_cell_frame (F : Env) (b m : Nat) (o1 o2 : Op) (hm : ¬ (b ≤ m ∧ m ≤ b + 2)) :
+    run F [(⟨b, o1⟩ : Gate), ⟨b + 1, o2⟩, ⟨b + 2, .or b (b + 1)⟩] m = F m := by
+  have e0 : ¬ (m = b) := by omega
+  have e1 : ¬ (m = b + 1) := by omega
+  have e2 : ¬ (m = b + 2) := by omega
+  simp [upd, e0, e1, e2]
+
+theorem run_cellRow (E : Env) (base : Nat) (p q : Nat → Op) :
+    ∀ n : Nat, (∀ i : Nat, i < n →
+        (∀ a ∈ (p i).fanin, a < base) ∧ (∀ a ∈ (q i).fanin, a < base)) →
+      (∀ m : Nat, m < base → run E (cellRow base p q n) m = E m)
+      ∧ (∀ i : Nat, i < n → run E (cellRow base p q n) (base + 3 * i + 2)
+           = ((p i).eval E || (q i).eval E)) := by
+  intro n
+  induction n with
+  | zero => intro _; exact ⟨fun m _ => rfl, fun i hi => absurd hi (Nat.not_lt_zero i)⟩
+  | succ n ih =>
+    intro hb
+    obtain ⟨hfr, hval⟩ := ih (fun i hi => hb i (Nat.lt_succ_of_lt hi))
+    obtain ⟨hpn, hqn⟩ := hb n (Nat.lt_succ_self n)
+    refine ⟨?_, ?_⟩
+    · intro m hm
+      rw [cellRow_succ, run_append, run_cell_frame _ _ _ _ _ (by omega)]
+      exact hfr m hm
+    · intro i hi
+      rw [cellRow_succ, run_append]
+      rcases Nat.lt_or_ge i n with hin | hin
+      · rw [run_cell_frame _ _ _ _ _ (by omega)]
+        exact hval i hin
+      · have hEq : i = n := Nat.le_antisymm (Nat.le_of_lt_succ hi) hin
+        subst hEq
+        rw [run_cell _ (base + 3 * i) (p i) (q i)
+              (fun a ha => Nat.lt_of_lt_of_le (hqn a ha) (Nat.le_add_right base (3 * i))),
+          Op.eval_congr (p i) (fun a ha => hfr a (hpn a ha)),
+          Op.eval_congr (q i) (fun a ha => hfr a (hqn a ha))]
+
+/-! ## `regNextN`'s arithmetic, in `Nat` -/
+
+def rnInN (R W : Nat) : Nat := R + W + R * W
+def rnBaseN (R W : Nat) : Nat := R + W + R * W + R
+def rnOutN (R W r k : Nat) : Nat := R + W + R * W + R + 3 * (W * r) + 3 * k + 2
+
+theorem rnInN_eq (R W : Nat) : rnIn R W = rnInN R W := rfl
+theorem rnBaseN_eq (R W : Nat) : rnBase R W = rnBaseN R W := rfl
+theorem rnNotWe_eq (R W r : Nat) : rnNotWe R W r = rnInN R W + r := rfl
+theorem rnWe_eq (r : Nat) : rnWe r = r := rfl
+theorem rnRes_eq (R k : Nat) : rnRes R k = R + k := rfl
+theorem rnCur_eq (R W r k : Nat) : rnCur R W r k = R + W + W * r + k := rfl
+
+theorem rnOut_eq (R W r k : Nat) : rnOut R W r k = rnOutN R W r k := by
+  show (rnBase R W + 3 * (W * r + k) + 2 : Nat) = rnOutN R W r k
+  simp only [rnBase, rnIn, rnOutN]
+  omega
+
+/-! ## The mux array -/
+
+def rnPOp (R W r k : Nat) : Op := .and (rnNotWe R W r) (rnCur R W r k)
+def rnQOp (R _W r k : Nat) : Op := .and (rnWe r) (rnRes R k)
+
+def rnArr (R W n : Nat) : List Gate :=
+  (List.range n).flatMap (fun r => (List.range W).flatMap (rnMux R W r))
+
+theorem rnArr_succ (R W n : Nat) :
+    rnArr R W (n + 1) = rnArr R W n ++ (List.range W).flatMap (rnMux R W n) := by
+  simp [rnArr, List.range_succ]
+
+theorem rnRow_eq (R W r : Nat) :
+    (List.range W).flatMap (rnMux R W r)
+      = cellRow (rnBaseN R W + 3 * (W * r)) (rnPOp R W r) (rnQOp R W r) W := by
+  unfold cellRow
+  refine List.flatMap_congr ?_
+  intro k _
+  have h1 : rnMuxBase R W r k = rnBaseN R W + 3 * (W * r) + 3 * k := by
+    show (rnBase R W + 3 * (W * r + k) : Nat) = _
+    simp only [rnBase, rnIn, rnBaseN]
+    omega
+  show [(⟨rnMuxBase R W r k, Op.and (rnNotWe R W r) (rnCur R W r k)⟩ : Gate),
+        ⟨rnMuxBase R W r k + 1, Op.and (rnWe r) (rnRes R k)⟩,
+        ⟨rnMuxBase R W r k + 2, Op.or (rnMuxBase R W r k) (rnMuxBase R W r k + 1)⟩] = _
+  rw [h1]
+  rfl
+
+theorem run_rnArr (R W : Nat) (E : Env) : ∀ n : Nat, n ≤ R →
+    (∀ m : Nat, m < rnBaseN R W → run E (rnArr R W n) m = E m)
+    ∧ (∀ r k : Nat, r < n → k < W →
+        run E (rnArr R W n) (rnOutN R W r k)
+          = ((E (rnNotWe R W r) && E (rnCur R W r k)) || (E (rnWe r) && E (rnRes R k)))) := by
+  intro n
+  induction n with
+  | zero => intro _; exact ⟨fun m _ => rfl, fun r k hr _ => absurd hr (Nat.not_lt_zero r)⟩
+  | succ n ih =>
+    intro hn
+    obtain ⟨hfr, hval⟩ := ih (Nat.le_of_succ_le hn)
+    have hnR : n < R := hn
+    have hRpos : 0 < R := Nat.lt_of_le_of_lt (Nat.zero_le n) hnR
+    have hW : W ≤ R * W := Nat.le_mul_of_pos_left W hRpos
+    have hWn : W * n + W ≤ R * W := by
+      calc W * n + W = W * (n + 1) := by ring
+        _ ≤ W * R := Nat.mul_le_mul (Nat.le_refl W) hn
+        _ = R * W := Nat.mul_comm W R
+    have hfan : ∀ i : Nat, i < W →
+        (∀ a ∈ (rnPOp R W n i).fanin, a < rnBaseN R W + 3 * (W * n))
+        ∧ (∀ a ∈ (rnQOp R W n i).fanin, a < rnBaseN R W + 3 * (W * n)) := by
+      intro i hi
+      refine ⟨?_, ?_⟩
+      · intro a ha
+        simp only [rnPOp, Op.fanin, List.mem_cons, List.not_mem_nil, or_false] at ha
+        rcases ha with rfl | rfl
+        · show (rnInN R W + n : Nat) < _
+          simp only [rnInN, rnBaseN]; omega
+        · show (R + W + W * n + i : Nat) < _
+          simp only [rnBaseN]; omega
+      · intro a ha
+        simp only [rnQOp, Op.fanin, List.mem_cons, List.not_mem_nil, or_false] at ha
+        rcases ha with ha | ha
+        · rw [ha]
+          show (n : Nat) < _
+          simp only [rnBaseN]; omega
+        · rw [ha]
+          show (R + i : Nat) < _
+          simp only [rnBaseN]; omega
+    refine ⟨?_, ?_⟩
+    · intro m hm
+      rw [rnArr_succ, run_append, rnRow_eq,
+        (run_cellRow (run E (rnArr R W n)) (rnBaseN R W + 3 * (W * n))
+          (rnPOp R W n) (rnQOp R W n) W hfan).1 m (by omega)]
+      exact hfr m hm
+    · intro r k hr hk
+      rw [rnArr_succ, run_append, rnRow_eq]
+      rcases Nat.lt_or_ge r n with hrn | hrn
+      · have hkey : W * r + W ≤ W * n := by
+          calc W * r + W = W * (r + 1) := by ring
+            _ ≤ W * n := Nat.mul_le_mul (Nat.le_refl W) hrn
+        rw [(run_cellRow (run E (rnArr R W n)) (rnBaseN R W + 3 * (W * n))
+              (rnPOp R W n) (rnQOp R W n) W hfan).1 (rnOutN R W r k)
+              (by simp only [rnOutN, rnBaseN]; omega)]
+        exact hval r k hrn hk
+      · have hEq : r = n := Nat.le_antisymm (Nat.le_of_lt_succ hr) hrn
+        subst hEq
+        rw [show rnOutN R W r k = rnBaseN R W + 3 * (W * r) + 3 * k + 2 from rfl,
+          (run_cellRow (run E (rnArr R W r)) (rnBaseN R W + 3 * (W * r))
+            (rnPOp R W r) (rnQOp R W r) W hfan).2 k hk]
+        have h1 : (rnNotWe R W r : Nat) < rnBaseN R W := by
+          show (rnInN R W + r : Nat) < _
+          simp only [rnInN, rnBaseN]; omega
+        have h2 : (rnCur R W r k : Nat) < rnBaseN R W := by
+          show (R + W + W * r + k : Nat) < _
+          simp only [rnBaseN]; omega
+        have h3 : (rnWe r : Nat) < rnBaseN R W := by
+          show (r : Nat) < _
+          simp only [rnBaseN]; omega
+        have h4 : (rnRes R k : Nat) < rnBaseN R W := by
+          show (R + k : Nat) < _
+          simp only [rnBaseN]; omega
+        simp only [rnPOp, rnQOp, Op.eval]
+        rw [hfr _ h1, hfr _ h2, hfr _ h3, hfr _ h4]
+
+/-! ## ⭐ THE ORGAN THEOREM -/
+
+theorem regNextN_gates_eq (R W : Nat) :
+    (regNextN R W).gates
+      = (List.range R).map (fun i => (⟨rnInN R W + i, Op.not i⟩ : Gate)) ++ rnArr R W R := rfl
+
+theorem run_regNextN (R W : Nat) (E : Env) (r k : Nat) (hr : r < R) (hk : k < W) :
+    run E (regNextN R W).gates (rnOut R W r k)
+      = (if E (rnWe r) then E (rnRes R k) else E (rnCur R W r k)) := by
+  have hkey : W * r + W ≤ R * W := by
+    calc W * r + W = W * (r + 1) := by ring
+      _ ≤ W * R := Nat.mul_le_mul (Nat.le_refl W) hr
+      _ = R * W := Nat.mul_comm W R
+  obtain ⟨hifr, hival⟩ := run_pointwise E (rnInN R W) (fun i => Op.not i) R
+    (fun i hi a ha => by
+      simp only [Op.fanin, List.mem_cons, List.not_mem_nil, or_false] at ha
+      subst ha
+      exact Nat.lt_of_lt_of_le hi (by show (R : Nat) ≤ rnInN R W; simp only [rnInN]; omega))
+  rw [regNextN_gates_eq, run_append, rnOut_eq,
+    (run_rnArr R W (run E ((List.range R).map (fun i => (⟨rnInN R W + i, Op.not i⟩ : Gate))))
+      R (Nat.le_refl R)).2 r k hr hk]
+  have e1 : run E ((List.range R).map (fun i => (⟨rnInN R W + i, Op.not i⟩ : Gate)))
+      (rnNotWe R W r) = !(E r) := by
+    rw [rnNotWe_eq]
+    exact hival r hr
+  have e2 : run E ((List.range R).map (fun i => (⟨rnInN R W + i, Op.not i⟩ : Gate)))
+      (rnCur R W r k) = E (rnCur R W r k) :=
+    hifr _ (by show (R + W + W * r + k : Nat) < _; simp only [rnInN]; omega)
+  have e3 : run E ((List.range R).map (fun i => (⟨rnInN R W + i, Op.not i⟩ : Gate)))
+      (rnWe r) = E (rnWe r) :=
+    hifr _ (by show (r : Nat) < _; simp only [rnInN]; omega)
+  have e4 : run E ((List.range R).map (fun i => (⟨rnInN R W + i, Op.not i⟩ : Gate)))
+      (rnRes R k) = E (rnRes R k) :=
+    hifr _ (by show (R + k : Nat) < _; simp only [rnInN]; omega)
+  rw [e1, e2, e3, e4]
+  show ((!(E (rnWe r)) && E (rnCur R W r k)) || (E (rnWe r) && E (rnRes R k))) = _
+  cases E (rnWe r) <;> simp
+
+/-- ⭐⭐ **THE REGISTER WRITE PATH, UNCONDITIONAL.** For EVERY array size and
+EVERY valuation of its `R + W + R·W` input nets — every write-enable vector (not
+just the one-hot ones), every result word, every incoming file — the next-state
+file is `we r ? result : current`, register by register and bit by bit. -/
+theorem sem_regNextN (R W : Nat) (E : Env) :
+    sem (regNextN R W) E
+      = (List.range R).flatMap (fun r =>
+          (List.range W).map (fun k =>
+            if E (rnWe r) then E (rnRes R k) else E (rnCur R W r k))) := by
+  show ((List.range R).flatMap (fun r => (List.range W).map (rnOut R W r))).map
+      (run E (regNextN R W).gates) = _
+  rw [List.map_flatMap]
+  refine List.flatMap_congr ?_
+  intro r hr
+  rw [List.map_map]
+  refine List.map_congr_left ?_
+  intro k hk
+  exact run_regNextN R W E r k (List.mem_range.mp hr) (List.mem_range.mp hk)
+
+/-- The shipping instance, with the nets spelled out: `we` on `0…31`, `result`
+on `32…63`, register `r`'s current bit `k` on `64 + 32r + k`. -/
+theorem sem_regNext (E : Env) :
+    sem regNext E
+      = (List.range 32).flatMap (fun r =>
+          (List.range 32).map (fun k =>
+            if E r then E (32 + k) else E (64 + 32 * r + k))) := by
+  rw [show regNext = regNextN 32 32 from rfl, sem_regNextN]
+  refine List.flatMap_congr ?_
+  intro r _
+  refine List.map_congr_left ?_
+  intro k _
+  show (if E (rnWe r) then E (rnRes 32 k) else E (rnCur 32 32 r k)) = _
+  simp only [rnWe, rnRes, rnCur]
+
+/-! ## Indexing -/
+
+theorem getD_map_range_gen (W : Nat) (g : Nat → Bool) (k : Nat) (hk : k < W) :
+    ((List.range W).map g).getD k false = g k := by
+  have hl : k < ((List.range W).map g).length := by simp [hk]
+  rw [List.getD_eq_getElem _ _ hl, List.getElem_map, List.getElem_range]
+
+theorem length_flatMap_range_map (W : Nat) (f : Nat → Nat → Bool) : ∀ n : Nat,
+    ((List.range n).flatMap (fun r => (List.range W).map (f r))).length = n * W := by
+  intro n
+  induction n with
+  | zero => simp
+  | succ n ih => simp [List.range_succ, ih, Nat.succ_mul]
+
+theorem getD_flatMap_range_map (W : Nat) (f : Nat → Nat → Bool) :
+    ∀ n r k : Nat, r < n → k < W →
+      ((List.range n).flatMap (fun r => (List.range W).map (f r))).getD (W * r + k) false
+        = f r k := by
+  intro n
+  induction n with
+  | zero => intro r k hr _; exact absurd hr (Nat.not_lt_zero r)
+  | succ n ih =>
+    intro r k hr hk
+    have hsplit : (List.range (n + 1)).flatMap (fun r => (List.range W).map (f r))
+        = (List.range n).flatMap (fun r => (List.range W).map (f r))
+            ++ (List.range W).map (f n) := by
+      simp [List.range_succ]
+    have hlen := length_flatMap_range_map W f n
+    have hcomm : W * n = n * W := Nat.mul_comm W n
+    rw [hsplit]
+    rcases Nat.lt_or_ge r n with hrn | hrn
+    · have hkey : W * r + W ≤ W * n := by
+        calc W * r + W = W * (r + 1) := by ring
+          _ ≤ W * n := Nat.mul_le_mul (Nat.le_refl W) hrn
+      have hlt : W * r + k
+          < ((List.range n).flatMap (fun r => (List.range W).map (f r))).length := by
+        rw [hlen]; omega
+      rw [List.getD_append _ _ _ _ hlt]
+      exact ih r k hrn hk
+    · have hEq : r = n := Nat.le_antisymm (Nat.le_of_lt_succ hr) hrn
+      subst hEq
+      have hge : ((List.range r).flatMap (fun r => (List.range W).map (f r))).length
+          ≤ W * r + k := by rw [hlen]; omega
+      rw [List.getD_append_right _ _ _ _ hge, hlen, show W * r + k - r * W = k from by omega]
+      exact getD_map_range_gen W (f r) k hk
+
+/-- **Bit `k` of register `r` of the next-state file** — the form a consumer
+indexes. -/
+theorem regNext_getD (E : Env) (r k : Nat) (hr : r < 32) (hk : k < 32) :
+    (sem regNext E).getD (32 * r + k) false
+      = if E (rnWe r) then E (rnRes 32 k) else E (rnCur 32 32 r k) := by
+  rw [show regNext = regNextN 32 32 from rfl, sem_regNextN]
+  exact getD_flatMap_range_map 32 _ 32 r k hr hk
+
+/-! ## ⛔ THE `x0` FINDING -/
+
+/-- ⛔ **`regNext` DOES NOT IMPLEMENT P5.** Raise `we[0]` and register `x0`
+latches the result, at every one of its 32 bits. The discard lives one block
+upstream, in `regWrite`'s constant-`false` output 0. -/
+theorem regNext_writes_x0_when_enabled (E : Env) (h : E (rnWe 0) = true)
+    (k : Nat) (hk : k < 32) :
+    (sem regNext E).getD k false = E (rnRes 32 k) := by
+  have h1 := regNext_getD E 0 k (by norm_num) hk
+  rw [show (32 : Nat) * 0 + k = k from by omega, h, if_pos rfl] at h1
+  exact h1
+
+/-- ⛔ **AND THAT IS OBSERVABLE**: a valuation whose `x0` output disagrees with
+`x0`'s incoming contents. -/
+theorem regNext_x0_is_not_self_enforcing :
+    ∃ E : Env, E (rnWe 0) = true ∧ (sem regNext E).getD 0 false ≠ E (rnCur 32 32 0 0) := by
+  refine ⟨fun n => decide (n < 64), rfl, ?_⟩
+  rw [regNext_writes_x0_when_enabled _ rfl 0 (by norm_num)]
+  decide
+
+/-! ## The driver, and the ISA bridge -/
+
+/-- The array driven with an arbitrary enable vector, result word and file. -/
+def rnEnvOf (regs : Nat → Word) (we : Nat → Bool) (v : Word) : Env := fun n =>
+  if n < 32 then we n
+  else if n < 64 then v.getLsbD (n - 32)
+  else (regs ((n - 64) / 32)).getLsbD ((n - 64) % 32)
+
+theorem rnEnvOf_we (regs : Nat → Word) (we : Nat → Bool) (v : Word) (r : Nat) (hr : r < 32) :
+    rnEnvOf regs we v (rnWe r) = we r := by
+  show (if r < 32 then we r else _) = _
+  rw [if_pos hr]
+
+theorem rnEnvOf_res (regs : Nat → Word) (we : Nat → Bool) (v : Word) (k : Nat) (hk : k < 32) :
+    rnEnvOf regs we v (rnRes 32 k) = v.getLsbD k := by
+  show (if (32 + k : Nat) < 32 then we (32 + k)
+        else if (32 + k : Nat) < 64 then v.getLsbD (32 + k - 32)
+        else (regs ((32 + k - 64) / 32)).getLsbD ((32 + k - 64) % 32)) = _
+  rw [if_neg (by omega), if_pos (by omega), show 32 + k - 32 = k from by omega]
+
+theorem rnEnvOf_cur (regs : Nat → Word) (we : Nat → Bool) (v : Word) (r k : Nat) (hk : k < 32) :
+    rnEnvOf regs we v (rnCur 32 32 r k) = (regs r).getLsbD k := by
+  show (if (32 + 32 + 32 * r + k : Nat) < 32 then we (32 + 32 + 32 * r + k)
+        else if (32 + 32 + 32 * r + k : Nat) < 64 then v.getLsbD (32 + 32 + 32 * r + k - 32)
+        else (regs ((32 + 32 + 32 * r + k - 64) / 32)).getLsbD
+               ((32 + 32 + 32 * r + k - 64) % 32)) = _
+  rw [if_neg (by omega), if_neg (by omega),
+    show (32 + 32 + 32 * r + k - 64 : Nat) = 32 * r + k from by omega,
+    Nat.mul_add_div (by norm_num), Nat.mul_add_mod, Nat.div_eq_of_lt hk, Nat.mod_eq_of_lt hk,
+    Nat.add_zero]
+
+/-- ⭐ **THE WRITE PORT, DRIVEN** — every enable vector, every datum, every file,
+every register, every bit. -/
+theorem sem_regNext_drive (regs : Nat → Word) (we : Nat → Bool) (v : Word) (r k : Nat)
+    (hr : r < 32) (hk : k < 32) :
+    (sem regNext (rnEnvOf regs we v)).getD (32 * r + k) false
+      = if we r then v.getLsbD k else (regs r).getLsbD k := by
+  rw [regNext_getD _ r k hr hk, rnEnvOf_we regs we v r hr, rnEnvOf_res regs we v k hk,
+    rnEnvOf_cur regs we v r k hk]
+
+/-- `regWrite`'s enables for a valid, non-`BEQ` instruction with destination
+`rd`: **`x0` is excluded here, and nowhere else in the write path.** -/
+def rnWeOf (rd : Nat) : Nat → Bool := fun r => decide (rd = r) && !decide (r = 0)
+
+/-- **These ARE `regWrite`'s outputs** — the spec `regWrite_correct` certifies
+exhaustively, read at the array's enable ports. -/
+theorem rnWeOf_is_weSpec (rd r : Nat) (hr : r < 32) :
+    (weSpec rd true false).getD r false = rnWeOf rd r := by
+  show ((List.range 32).map (fun r => true && !false && (rd == r) && !(r == 0))).getD r false = _
+  rw [getD_map_range_gen 32 _ r hr]
+  by_cases h : rd = r <;> by_cases h2 : r = 0 <;> simp [rnWeOf, h, h2]
+
+/-- ⭐⭐ **THE WRITE PORT IS `St.set`** — every state, every destination, every
+datum, at all 31 writable registers and all 32 bits. -/
+theorem regNext_is_St_set (s : St) (rd : Fin 32) (v : Word) (r k : Nat)
+    (hr0 : 0 < r) (hr : r < 32) (hk : k < 32) :
+    (sem regNext (rnEnvOf (fun i => s.regs[i]!) (rnWeOf rd.val) v)).getD (32 * r + k) false
+      = ((s.set rd v).get ⟨r, hr⟩).getLsbD k := by
+  rw [sem_regNext_drive _ _ _ r k hr hk]
+  have hrne : (⟨r, hr⟩ : Fin 32) ≠ 0 := by
+    intro hc
+    have hv : r = 0 := congrArg Fin.val hc
+    omega
+  by_cases h0 : rd = 0
+  · have h0' : (rd : Nat) = 0 := by rw [h0]; rfl
+    have hwe : rnWeOf rd.val r = false := by
+      simp [rnWeOf, h0', show ¬ ((0 : Nat) = r) from by omega]
+    rw [hwe, if_neg (by simp), show s.set rd v = s from by rw [h0]; exact St.set_zero s v]
+    show (s.regs[r]!).getLsbD k = _
+    rw [getElem!_pos s.regs r hr]
+    show _ = (if (⟨r, hr⟩ : Fin 32) = 0 then (0 : Word) else s.regs[r]).getLsbD k
+    rw [if_neg hrne]
+  · by_cases hrd : r = rd.val
+    · have hwe : rnWeOf rd.val r = true := by
+        simp [rnWeOf, hrd.symm, show ¬ (r = 0) from by omega]
+      rw [hwe, if_pos rfl, show (⟨r, hr⟩ : Fin 32) = rd from Fin.ext hrd,
+        St.get_set_self s rd v h0]
+    · have hne : ¬ ((rd : Nat) = r) := fun hc => hrd hc.symm
+      have hwe : rnWeOf rd.val r = false := by simp [rnWeOf, hne]
+      rw [hwe, if_neg (by simp),
+        St.get_set_ne s rd ⟨r, hr⟩ v (fun hc => hrd (congrArg Fin.val hc)),
+        show s.get ⟨r, hr⟩ = s.regs[r] from by
+          show (if (⟨r, hr⟩ : Fin 32) = 0 then (0 : Word) else s.regs[r]) = _
+          rw [if_neg hrne]]
+      show (s.regs[r]!).getLsbD k = _
+      rw [getElem!_pos s.regs r hr]
+
+/-- ⭐ **P5 AT EVERY BIT OF `x0`, AS A COROLLARY** — with `regWrite`'s enables,
+register `x0` HOLDS, whatever the destination and whatever the datum. This is
+`St.set_zero` on the silicon, and it is stronger than the ISA law, because
+`St.get_zero` makes `regs[0]` unobservable while the array must still not
+disturb it. -/
+theorem regNext_x0_holds (regs : Nat → Word) (rd : Nat) (v : Word) (k : Nat) (hk : k < 32) :
+    (sem regNext (rnEnvOf regs (rnWeOf rd) v)).getD k false = (regs 0).getLsbD k := by
+  have h := sem_regNext_drive regs (rnWeOf rd) v 0 k (by norm_num) hk
+  rw [show (32 : Nat) * 0 + k = k from by omega] at h
+  rw [h, show rnWeOf rd 0 = false from by simp [rnWeOf], if_neg (by simp)]
+
+/-! ## ⭐ THE SAMPLED CERTIFICATES, SUPERSEDED -/
+
+def rnDrive (R W : Nat) (we : Nat → Bool) : Env := fun i =>
+  if i < R then we i
+  else if i < R + W then rnResPat (i - R)
+  else rnCurPat ((i - R - W) / W) ((i - R - W) % W)
+
+theorem rnRun_eq_drive (R W : Nat) (we : Nat → Bool) :
+    rnRun R W we = sem (regNextN R W) (rnDrive R W we) := rfl
+
+theorem rnDrive_we (R W : Nat) (we : Nat → Bool) (r : Nat) (hr : r < R) :
+    rnDrive R W we (rnWe r) = we r := by
+  show (if r < R then we r else _) = _
+  rw [if_pos hr]
+
+theorem rnDrive_res (R W : Nat) (we : Nat → Bool) (k : Nat) (hk : k < W) :
+    rnDrive R W we (rnRes R k) = rnResPat k := by
+  show (if (R + k : Nat) < R then we (R + k)
+        else if (R + k : Nat) < R + W then rnResPat (R + k - R)
+        else rnCurPat ((R + k - R - W) / W) ((R + k - R - W) % W)) = _
+  rw [if_neg (by omega), if_pos (by omega), show R + k - R = k from by omega]
+
+theorem rnDrive_cur (R W : Nat) (hW : 0 < W) (we : Nat → Bool) (r k : Nat) (hk : k < W) :
+    rnDrive R W we (rnCur R W r k) = rnCurPat r k := by
+  show (if (R + W + W * r + k : Nat) < R then we (R + W + W * r + k)
+        else if (R + W + W * r + k : Nat) < R + W then rnResPat (R + W + W * r + k - R)
+        else rnCurPat ((R + W + W * r + k - R - W) / W)
+               ((R + W + W * r + k - R - W) % W)) = _
+  rw [if_neg (by omega), if_neg (by omega),
+    show (R + W + W * r + k - R - W : Nat) = W * r + k from by omega,
+    Nat.mul_add_div hW, Nat.mul_add_mod, Nat.div_eq_of_lt hk, Nat.mod_eq_of_lt hk,
+    Nat.add_zero]
+
+/-- ⭐ **THE DRIVEN ARRAY MEETS ITS SPEC AT EVERY SIZE AND EVERY ENABLE VECTOR** —
+the statement the two kernel certificates sample. -/
+theorem rnRun_eq_rnSpec (R W : Nat) (hW : 0 < W) (we : Nat → Bool) :
+    rnRun R W we = rnSpec R W we := by
+  rw [rnRun_eq_drive, sem_regNextN]
+  unfold rnSpec
+  refine List.flatMap_congr ?_
+  intro r hr
+  refine List.map_congr_left ?_
+  intro k hk
+  rw [rnDrive_we R W we r (List.mem_range.mp hr),
+    rnDrive_res R W we k (List.mem_range.mp hk),
+    rnDrive_cur R W hW we r k (List.mem_range.mp hk)]
+
+/-- ⭐ `regNext4_correct_on_all_enables`, now a corollary. -/
+theorem rnAllWeOK_uncond : rnAllWeOK = true := by
+  unfold rnAllWeOK
+  refine List.all_eq_true.mpr (fun m _ => ?_)
+  rw [rnRun_eq_rnSpec 4 4 (by norm_num)]
+  exact beq_self_eq_true _
+
+/-- ⭐ `regNext8_correct`, now a corollary — and no longer only at the nine
+sampled enable vectors. -/
+theorem rnOneHotOK_uncond : rnOneHotOK = true := by
+  unfold rnOneHotOK
+  refine (Bool.and_eq_true _ _).mpr ⟨?_, ?_⟩
+  · refine List.all_eq_true.mpr (fun r0 _ => ?_)
+    rw [rnRun_eq_rnSpec 8 8 (by norm_num)]
+    exact beq_self_eq_true _
+  · rw [rnRun_eq_rnSpec 8 8 (by norm_num)]
+    exact beq_self_eq_true _
+
+/-- ⭐ The three 32×32 point certificates, at EVERY write-enable index and both
+data polarities. -/
+theorem rnBit_uncond (wr : Nat) (resBit curBit : Bool) :
+    rnBit wr resBit curBit = if wr = 0 then resBit else curBit := by
+  have h := regNext_getD (rnEnv wr resBit curBit) 0 0 (by norm_num) (by norm_num)
+  rw [show (32 : Nat) * 0 + 0 = 0 from rfl] at h
+  rw [show rnBit wr resBit curBit
+        = (sem regNext (rnEnv wr resBit curBit)).getD 0 false from rfl, h,
+    show rnEnv wr resBit curBit (rnWe 0) = decide (0 = wr) from rfl,
+    show rnEnv wr resBit curBit (rnRes 32 0) = resBit from rfl,
+    show rnEnv wr resBit curBit (rnCur 32 32 0 0) = curBit from rfl]
+  by_cases hw : wr = 0
+  · simp [hw]
+  · have hw' : ¬ ((0 : Nat) = wr) := fun hc => hw hc.symm
+    simp [hw, hw']
+
+/-! ## ⛔ THE CONTROL — a mutant the certificates accept -/
+
+/-- ⛔ **ONE FANIN MUTATED**: cell `(5,5)`'s result leg reads the CURRENT bit, so
+that cell holds instead of writing. `regNextN 4 4` has no such cell; at
+`regNextN 8 8` the sampled patterns agree there (`rnResPat 5 = rnCurPat 5 5`);
+and the three 32×32 certificates read output 0 only. -/
+def rnMuxCut (R W r k : Nat) : List Gate :=
+  [ ⟨rnMuxBase R W r k,     .and (rnNotWe R W r) (rnCur R W r k)⟩
+  , ⟨rnMuxBase R W r k + 1,
+      .and (rnWe r) (if r == 5 && k == 5 then rnCur R W r k else rnRes R k)⟩
+  , ⟨rnOut R W r k,         .or (rnMuxBase R W r k) (rnMuxBase R W r k + 1)⟩ ]
+
+def regNextNCut (R W : Nat) : Circ :=
+  { regNextN R W with
+    gates := (List.range R).map (fun r => (⟨rnNotWe R W r, .not (rnWe r)⟩ : Gate))
+               ++ (List.range R).flatMap (fun r => (List.range W).flatMap (rnMuxCut R W r)) }
+
+def rnRunCut (R W : Nat) (we : Nat → Bool) : List Bool :=
+  sem (regNextNCut R W) (rnDrive R W we)
+
+def rnAllWeOKCut : Bool :=
+  (List.range 16).all fun m =>
+    rnRunCut 4 4 (fun r => Nat.testBit m r) == rnSpec 4 4 (fun r => Nat.testBit m r)
+
+def rnOneHotOKCut : Bool :=
+  ((List.range 8).all fun r0 => rnRunCut 8 8 (· == r0) == rnSpec 8 8 (· == r0))
+    && (rnRunCut 8 8 (fun _ => false) == rnSpec 8 8 (fun _ => false))
+
+def rnBitCut (wr : Nat) (resBit curBit : Bool) : Bool :=
+  (sem (regNextNCut 32 32) (rnEnv wr resBit curBit)).getD 0 false
+
+theorem regNextCut_ssa : (regNextNCut 8 8).ssa = true := by decide +kernel
+
+theorem regNextCut_gate_count : (regNextNCut 32 32).gates.length = 3104 := by decide +kernel
+
+/-- ⛔ **THE MUTANT PASSES EVERY BEHAVIOURAL CERTIFICATE THE BLOCK CARRIES** —
+both `rnRun`/`rnSpec` sweeps, the frame certificate, the no-enable certificate,
+and all three 32×32 samples. -/
+theorem regNextCut_passes_the_certificate :
+    rnAllWeOKCut = true ∧ rnOneHotOKCut = true := ⟨by decide +kernel, by decide +kernel⟩
+
+theorem regNextCut_passes_the_frame_certificate :
+    ((List.range 8).all fun r => (List.range 8).all fun k =>
+      (rnRunCut 8 8 (· == 5)).getD (8 * r + k) false
+        == (if r == 5 then rnResPat k else rnCurPat r k)) = true := by decide +kernel
+
+theorem regNextCut_passes_the_hold_certificate :
+    rnRunCut 8 8 (fun _ => false)
+      = (List.range 8).flatMap (fun r => (List.range 8).map (rnCurPat r)) := by decide +kernel
+
+theorem regNextCut_passes_the_32_samples :
+    rnBitCut 0 true false = true ∧ rnBitCut 1 true false = false
+      ∧ rnBitCut 1 false true = true :=
+  ⟨by decide +kernel, by decide +kernel, by decide +kernel⟩
+
+def rnCutWitness : Env := fun n => decide (n < 16)
+
+/-- ⭐ **AND THE UNCONDITIONAL THEOREM REFUTES IT** — at an enable vector no
+sample contains (all eight raised at once), cell `(5,5)` holds where the
+specification writes. -/
+theorem regNextCut_fails_the_theorem :
+    sem (regNextNCut 8 8) rnCutWitness
+      ≠ (List.range 8).flatMap (fun r =>
+          (List.range 8).map (fun k =>
+            if rnCutWitness (rnWe r) then rnCutWitness (rnRes 8 k)
+            else rnCutWitness (rnCur 8 8 r k))) := by
+  decide +kernel
+
+/-! ## Off every sample -/
+
+def rnOffEnv : Env := fun n =>
+  if n < 32 then (n == 17 || n == 3)
+  else if n < 64 then Nat.testBit 0xF0F0F0F0 (n - 32)
+  else Nat.testBit 0x0F0F0F0F ((n - 64) % 32)
+
+/-- ⭐ **TWO ENABLES AT ONCE, READ AT A BIT NO CERTIFICATE TOUCHES.** The 32×32
+certificates read output 0; the 8×8 sweep is one-hot-or-empty; this is neither. -/
+theorem sem_regNext_off_the_sample :
+    (rnOffEnv (rnWe 17) = true ∧ rnOffEnv (rnWe 3) = true)
+      ∧ (32 * 17 + 5 ≠ 0 ∧ 32 * 2 + 5 ≠ 0)
+      ∧ (sem regNext rnOffEnv).getD (32 * 17 + 5) false = true
+      ∧ (sem regNext rnOffEnv).getD (32 * 2 + 5) false = false := by
+  refine ⟨⟨rfl, rfl⟩, ⟨by norm_num, by norm_num⟩, ?_, ?_⟩
+  · rw [regNext_getD rnOffEnv 17 5 (by norm_num) (by norm_num)]; decide
+  · rw [regNext_getD rnOffEnv 2 5 (by norm_num) (by norm_num)]; decide
+
+end RegNextSemantics
+
 /-! ## Axiom audit -/
 
 open Salt.Tactic
@@ -6321,5 +7010,22 @@ open Salt.Tactic
 #audit_axioms readTreeCutA readTreeCutB rtSelectsCut readTreeCutA_ssa readTreeCutB_ssa
 #audit_axioms readTreeCutA_passes_the_certificate readTreeCutB_passes_the_certificate
 #audit_axioms readTreeCutA_fails_the_theorem readTreeCutB_fails_the_theorem
+
+#audit_axioms cellRow cellRow_succ run_cell run_cell_frame run_cellRow
+#audit_axioms rnInN rnBaseN rnOutN rnInN_eq rnBaseN_eq rnNotWe_eq
+#audit_axioms rnWe_eq rnRes_eq rnCur_eq rnOut_eq
+#audit_axioms rnPOp rnQOp rnArr rnArr_succ rnRow_eq run_rnArr
+#audit_axioms regNextN_gates_eq run_regNextN sem_regNextN sem_regNext
+#audit_axioms getD_map_range_gen length_flatMap_range_map getD_flatMap_range_map
+#audit_axioms regNext_getD regNext_writes_x0_when_enabled regNext_x0_is_not_self_enforcing
+#audit_axioms rnEnvOf rnEnvOf_we rnEnvOf_res rnEnvOf_cur sem_regNext_drive
+#audit_axioms rnWeOf rnWeOf_is_weSpec regNext_is_St_set regNext_x0_holds
+#audit_axioms rnDrive rnRun_eq_drive rnDrive_we rnDrive_res rnDrive_cur rnRun_eq_rnSpec
+#audit_axioms rnAllWeOK_uncond rnOneHotOK_uncond rnBit_uncond
+#audit_axioms rnMuxCut regNextNCut rnRunCut rnAllWeOKCut rnOneHotOKCut rnBitCut
+#audit_axioms regNextCut_ssa regNextCut_gate_count regNextCut_passes_the_certificate
+#audit_axioms regNextCut_passes_the_frame_certificate regNextCut_passes_the_hold_certificate
+#audit_axioms regNextCut_passes_the_32_samples rnCutWitness regNextCut_fails_the_theorem
+#audit_axioms rnOffEnv sem_regNext_off_the_sample
 
 end SaltWorks.Stack.Program

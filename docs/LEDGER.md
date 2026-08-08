@@ -3323,3 +3323,182 @@ added** (101 prose, 626 proof, 15 audit; 62 declarations).
 * **`rtSelectsOK` and `readTree_x0_is_zero` are retained** in `ReadTree.lean`,
   untouched. They are the tripwires, and the two mutants above are the measured
   statement of how far a tripwire can be walked past.
+
+---
+
+## REGNEXT — the register write path unconditional, and P5 found one block upstream
+**2026-08-07 · Opus executor · `SaltWorks/Stack/Program.lean` (§ REGNEXT)**
+
+### ⭐ FIRST DELIVERABLE — what `RegNext.lean`'s certificates quantify over
+
+Read before any proof was attempted. `regNext = regNextN 32 32`: 3,104 gates,
+1,088 input nets, 1,024 outputs.
+
+| certificate | universal in | PINNED | covers |
+|---|---|---|---|
+| `regNext4_correct_on_all_enables` | **all 16 `we` vectors** | datum `rnResPat`, file `rnCurPat`, size 4×4 | 16 of 2^24 |
+| `regNext8_correct` | 8 one-hot `we` + all-zero | the same two patterns, size 8×8 | **9 of 2^80** |
+| `regNext8_writes_only_the_enabled` | all 64 output bits | ONE `we` vector (`r=5`), both patterns | 1 of 2^80 |
+| `regNext8_no_enable_holds_state` | all 64 output bits | `we ≡ false`, both patterns | 1 of 2^80 |
+| `regNext32_*_on_sample` (three) | nothing | **output 0 only**, uniform `res`/`cur` | **3 of 2^1088** |
+
+⇒ **`regNext8_correct` — Evidence's UNCLASSIFIED row — is the `asSelectsOK m`
+shape exactly**: universal in one axis (*which single register is enabled*),
+pinned in three (the datum, the incoming file, the array size). ⛔ **And not one
+of the five 4×4/8×8 certificates is a statement about the instance that ships.**
+
+⭐ **BUT THE THREE 32×32 CERTIFICATES ARE HONESTLY NAMED**, and that is a real
+difference from the `pcNext` trio, whose names read as universal claims and were
+single points. `regNext32_writes_when_enabled_on_sample` carries `on_sample` in
+its own name, and `RegNext.lean:217-227` states why (reading all 1,024 outputs is
+the OOM zone, so `rnBit` reads output 0 and nothing else). *A block that
+documents its own sampling is a different object from one whose names overclaim,
+and the census should record the difference rather than flatten it.*
+
+### ⛔ SECOND DELIVERABLE — the `x0` law is NOT in this block
+
+`St.set_zero` (P5) is a landed **universal** ISA law. **`regNext` does not
+implement it, at any generality.** `rnMux` is uniform in `r`, `r = 0` included:
+
+* `regNext_writes_x0_when_enabled` — raise `we[0]` and register `x0` latches the
+  result **at every one of its 32 bits**. Committed as a theorem, not a comment.
+* `regNext_x0_is_not_self_enforcing` — a valuation where that is observable.
+
+⭐ **AND THAT IS NOT A DEFECT — the difference from the `pc` case is the whole
+finding.** The suppression exists one block upstream: `regWrite`'s output 0 is
+wired to `.const false` (`RegWrite.lean:83`), certified over all 128 control
+inputs by `regWrite_x0_never_enabled`. **The write path enforces P5 on the ENABLE
+side and nowhere else.** So what lands is:
+
+* `rnWeOf_is_weSpec` — the array's enable ports read exactly `regWrite`'s spec
+  outputs (`weSpec rd true false`), at every `rd` and every index;
+* ⭐ `regNext_x0_holds` — with those enables, `x0` **holds its incoming contents
+  at every bit, every destination, every datum**. P5 at all 32 bits rather than
+  at sampled ones — and *stronger than the ISA law*, since `St.get_zero` makes
+  `regs[0]` unobservable while the array must still leave it alone.
+
+⛔ **THE STANDING EXPOSURE, stated so it cannot be lost:** any assembly that
+drives `regNext`'s `we` ports from anything other than `regWrite` breaks P5
+silently, because this block cannot refuse. **`core` does not exist, so nothing
+yet checks that wiring.** That is the `pc` defect with the sign flipped — there a
+spec law had no implementation; here it has exactly one, in a different block,
+unbridged.
+
+### What landed
+
+* ⭐⭐ `sem_regNextN` — **the organ theorem, universal in `R`, `W` and the whole
+  environment.** For every array size and every valuation of the `R + W + R·W`
+  input nets — *every* write-enable vector (not just one-hot), every result word,
+  every incoming file — the next-state file is `we r ? result k : cur r k`,
+  register by register and bit by bit. At the shipping size that is 2^1088.
+* `sem_regNext` — the 32×32 instance with the nets spelled out; `regNext_getD` —
+  the bit-indexed form a consumer applies; `sem_regNext_drive` — through a driver.
+* ⭐⭐ `regNext_is_St_set` — **the write port IS `St.set`**: every state, every
+  destination, every datum, all 31 writable registers, all 32 bits, via the
+  landed `St.get_set_self` / `St.get_set_ne` rather than by enumeration.
+* ⭐ **THE SAMPLED CERTIFICATES ARE NOW COROLLARIES**, and at more than their own
+  sample: `rnRun_eq_rnSpec` proves driver-meets-spec at **every** `R`, every
+  `W > 0` and **every** `we`, from which `rnAllWeOK_uncond` and
+  `rnOneHotOK_uncond` follow; `rnBit_uncond` supersedes the three 32×32 points at
+  every enable index and both data polarities.
+* `run_cellRow` — **new commons**: `n` independent three-gate cells, two
+  arbitrary `Op`s ORed into a third net. Generic over the ops, so it subsumes
+  `run_muxRow`'s shape as well as this block's.
+
+### The control — a mutant the certificates accept
+
+`rnMuxCut` changes **one fanin**: cell `(5,5)`'s result leg reads the CURRENT bit,
+so that one cell holds instead of writing. It passes **every behavioural
+certificate the block carries** —
+`regNextCut_passes_the_certificate` (both sweeps),
+`regNextCut_passes_the_frame_certificate`,
+`regNextCut_passes_the_hold_certificate`,
+`regNextCut_passes_the_32_samples` — and `regNextCut_fails_the_theorem` refutes
+it. Same gate count (3,104) and `ssa`.
+
+⚠️ **WHY IT IS INVISIBLE, MEASURED RATHER THAN ARGUED:** `regNextN 4 4` has no
+cell `(5,5)`; the 32×32 certificates read output 0; and at 8×8 the two pinned
+patterns **coincide there** — `rnResPat 5 = rnCurPat 5 5 = true` (`#eval`, before
+the mutant was written). *That is `RegNext.lean`'s own warning — "a constant `cur`
+would let a mux that reads the wrong register pass undetected" — reappearing as a
+one-cell coincidence in a `cur` that is not constant. Pseudo-random per register
+is not the same as pseudo-random per bit.*
+
+`sem_regNext_off_the_sample` — two enables raised at once (outside the one-hot
+sweep by construction), read at register 17 bit 5 and register 2 bit 5, neither
+of which is output 0.
+
+### Cycles — SPLIT
+
+* **CONTENT: 0.** No landed statement was wrong, no statement needed changing,
+  and no proof strategy had to be redesigned mid-flight. The one decision that
+  could have cost a cycle was resolved **by reading the gates before proving**:
+  see the transfer note below.
+* **MECHANICS: 3 build iterations, 9 fixes** — `rfl`→`simp` on a `0 * W` length
+  base case, `beq`/`decide` bridging in `rnWeOf_is_weSpec`, `Fin ≠ 0` via
+  `congrArg Fin.val`, three `¬(0 = r)` orientation goals simp left behind, a
+  `norm_num` after simp had already closed the goal, and the two below.
+* **TRAPS: 1 known + 1 NEW.**
+  * ⚠️ The `Net` trap, third sighting: `omega` **silently dropped the goal**
+    `a < rnInN R W` where `a : Net` came from `Op.fanin`, then reported a
+    counterexample built only from the surrounding hypotheses. Fixed by
+    `Nat.lt_of_lt_of_le` with the arithmetic pushed into a `show … : Nat`.
+  * ⛔ **NEW — `subst` through a δ-alias eliminates the WRONG variable.**
+    `rcases ha with rfl` on `ha : a = rnWe n` does not substitute `a`; `rnWe n`
+    unfolds to the bound variable `n`, so `n` is eliminated and every later
+    reference to `n` fails with *"Unknown identifier `n`"*. **Fix: `rcases ha with
+    ha | ha` then `rw [ha]`.** The sibling case (`a = rnNotWe R W n`, not an
+    alias) substituted correctly, so the failure is per-branch and looks
+    arbitrary.
+* ⛔ **`simp only [Op.eval]` on an ABSTRACT `Op` is a trap of its own**: it
+  unfolds the match into a five-way case split on a variable, after which no
+  hypothesis about `Op.eval` matches syntactically. Keep `Op.eval` out of the simp
+  set and let a `show` unfold it at the concrete constructor.
+
+### What transferred, and what did not
+
+* ⭐ **`run_pointwise` transferred exactly once and exactly**: the 32 write-enable
+  inverters are `(List.range R).map fun r => ⟨rnIn + r, .not r⟩`.
+* ⛔ **`run_muxRow` did NOT transfer, and the reason was visible before any proof
+  attempt.** `muxRow`'s cells are `.and (p i) s` — *selector second*; `rnMux`'s
+  are `.and (notWe r) (cur r k)` — *selector FIRST*. Same circuit, transposed
+  operands, and no instantiation of `p q s t` yields it. `run_cellRow` was written
+  generic over two `Op`s instead, which covers both.
+* ⛔ **`sem_pcAdd`'s composition template did not apply**: `regNext` instantiates
+  nothing — it is a flat generator — so there is no `instOK` to discharge.
+* ⛔ **`decide` over the array was never available.** 32×32 is 2^1088 states and
+  `RegNext.lean`'s header records the `EXIT=134` that established it. The proof is
+  structural throughout; the only `decide +kernel` below the organ theorem is on
+  the 8×8 mutant controls and the two 32×32 structural checks.
+
+### Build + audit
+
+`saltbuild.sh SaltWorks.Stack.Program` → **EXIT=0**; full tree `saltbuild.sh` →
+**EXIT=0**, **8638 jobs**, zero `error:`, zero `warning:`. All **65 new
+declarations** tick `#audit_axioms` at ≤ 3 axioms
+(`[propext, Classical.choice, Quot.sound]`). No `native_decide`, no `sorry`.
+Independently re-audited in `ScratchMATHRN.lean` (EXIT=0; **not committed**).
+
+**Job-count delta: +2**, `8607 → 8609` on the targeted build.
+`Stack/Program.lean` gained `import SaltWorks.HDL.RegNext`, which pulls
+`RegNext` and `RegWrite`; `Compose`, `Decoder` and `EmitN` were already in the
+closure. **706 lines added** — 86 prose, 604 proof, 16 audit; 65 declarations.
+
+### Left undetermined
+
+* ⛔ **`C4Spec` is untouched. No `core`.** Nothing here closes a field
+  obligation, and the `we`-port wiring that P5 depends on has no theorem because
+  there is no assembly to state it about.
+* **The write path's own `wf` is not restated.** `regNext_ssa` / `regNext_wf` are
+  landed in `RegNext.lean`; this section adds `regNextNCut_ssa`-style checks for
+  the mutant only.
+* **`regNext4_correct_on_all_enables`, `regNext8_correct` and the three
+  `..._on_sample` theorems are RETAINED** in `RegNext.lean`, untouched. They are
+  the tripwires; `rnMuxCut` is the measured statement of how far a tripwire can
+  be walked past.
+* ✅ **Corrects the READTREE entry's "the write path is still unproved and is the
+  cheap half".** Both halves of the register file are now unconditional; what is
+  unproved is the *wiring between them*, which is `core`.
+* **`rnCurPat`'s per-register (not per-bit) pseudo-randomness is a live sampling
+  weakness**, quantified above at exactly one cell. Any future certificate that
+  pins `cur` should vary it per bit as well as per register.
