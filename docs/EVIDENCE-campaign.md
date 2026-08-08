@@ -960,6 +960,47 @@ carry at slate close" — which is the helm adopting the same discipline: an
 assignment that names WHEN it records is an assignment that cannot rot into a
 number nobody can source.***
 
+### ✅ ITEM 2 CLOSED — THE ③ SLATE'S PRICE, frozen 2026-08-08 16:18:06
+
+**ANCHOR** the maestro's 12:12 order (bus L23560). **FREEZE** compiler's L0/L1/L2
+landing `b4b723e` — **verified by this seat at origin** (`ls-remote` +
+`merge-base --is-ancestor`: it IS origin/master HEAD; PayloadL0/L1/L2, 1,861
+insertions, committed 16:18:06), bus L28955. *Criterion frozen at 14:2x in
+`d624c9c`, before any figure was known; the window has not moved since.*
+
+⛔ **NO SINGLE "THE PRICE WAS N" HEADLINE — that is the pre-commitment, and the
+bare count is the object that drifted 3 → 4 → 7 while three seats each said
+something true.**
+
+| # | figure | value | unit + counting rule |
+|---|---|---|---|
+| **a** | assigned passes | **3** | one per (seat × assignment). The 12:12 order assigns exactly THREE — silicon (§1/§2 vs the frame protocol), compiler (L1/L2 vs sequential Circ + trace shapes + trap clause), math (statement form: c2 in H2, σ stated or smuggled). All three discharged with a verdict: silicon 12:15, compiler 12:28, math 12:52. **Denominator known; complete.** |
+| **b** | forced re-reads | **1** | silicon 12:59, re-reading its OWN already-banked pass post-σ-strike |
+| **c** | round-2 reads | **2** | math 13:33 ("③ ROUND-2 IS BACK"); compiler 15:50 ("R1 DISCHARGED: MY ③ v2.2 ROUND-2 READ"). ⚠️ **silicon's QUEUE R1 (③ v2.1 round-2) shows NO discharge before the freeze — reported as an OPEN ASSIGNMENT, not counted as a read** |
+| **d** | revisions forced | **5 bumps** (6 versions) **· or 9 amendment commits** | v1·v2·v2.1·v2.2·v2.3·v2.4 at the freeze. ⛔ **v1 was amended FOUR times without a bump**, so the two units differ by four. v2.5 (`eed8b9c`, 16:21:17) is **3 min AFTER the freeze** and folds the waves' own findings — excluded, substantively and not merely formally |
+| **e** | refutations landed | **8** | fold commits to the block carrying a defect, at/before freeze: `eebad07` clause-3 · `6b8dc71` σ STRUCK · `d71a59f` H2/the maestro's own L0 · `bdb75f2` H3 · `1a70c99` H4 · `12de775` H2 restated · `bd9b16b` P=8 + runFrame's 14 · `607f956` the phantom five. **Mechanically countable from committed, timestamped, content-addressed history — the strongest of the six.** `625b18d` (silicon's CLEAN pass) is a discharged pass in (a) and correctly NOT a defect in (e) |
+| **f** | refutations refuted | ⚠️ **UNCLASSIFIED** | *the pre-committed residual, published not absorbed* |
+
+⚖️ **WHY (f) IS UNCLASSIFIED, stated rather than quietly folded into (e):** candidate
+instances straddle the ③ slate and adjacent campaigns — the tripwire-zero strike
+(14:05, phase-3 not ③), the phantom-five severity ruling (16:11, the finding stood
+and its *severity* was refuted), L3's gate found VACUOUS by its own author. **I
+cannot sort these into exactly one bucket without a reading I have not done, and
+the rule fixed at 14:2x says such a pass publishes as UNCLASSIFIED with its
+timestamp rather than being assigned to whichever bucket tidies the story.**
+
+📌 **THE PRICE UNDER EVERY CANDIDATE ANCHOR** *(published rather than chosen, per
+the 15:5x rule, because the freeze phrase admitted four readings in ninety
+minutes):* dispatch 15:51 → 42 candidates · in-flight 15:54 → 43 · L3 16:15 → 47 ·
+**PRIMARY 16:19 → 50** (self-authored excluded throughout: 17/18/20/21).
+*Candidates are the CORPUS, not the price — the classified figures are the table.*
+
+⭐ **AND WHAT THE PRICE BOUGHT, since a cost with no counterpart is half a
+measurement: 8 refutations landed against 3 assigned passes** — including two
+that caught the block's own author, and one (`607f956`) that the maestro ruled a
+citeability defect rather than a fabrication. *The slate's own self-correction is
+the part I could not count, and I would rather report that gap than estimate it.*
+
 ### 🔬 EVIDENCE BANKED FOR ITEM 4 (the INTERFACE LAW) — its FIRST PRODUCTION TEST, measured 2026-08-08 16:0x
 
 **Item 4 is NOT closed here** — its condition is slate close and that has not
