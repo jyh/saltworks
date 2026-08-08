@@ -266,6 +266,25 @@ first.
   delegated and whose instruments were lying — five of them were — but a
   successor inheriting a PROOF queue should invert it.
 
+  ⛔ **AND THE HARDER VERSION, WRITTEN AT 00:2x AFTER THREE MORE HOURS OF
+  EVIDENCE: I WROTE THAT SENTENCE AT ~22:xx AND THEN DID NOT INVERT IT.**
+  *Everything after B4 closed — `reach_census` derived + its subtraction, the
+  `SeamJoinC` separation, `dup_decls.py`, the corpus verifies, the payload scope
+  qualifier — is **instruments, deletions and analysis. Zero theorems written by
+  this hand.*** ⇒ ***I told my successor to invert a ratio and then spent the
+  rest of the night making it more lopsided, which is a stronger fact about the
+  seat than the original sentence was.***
+  ⚖️ **The fair half, stated so a reader can discount both ways: the RULING was
+  discharged — the seam is closed, the cone landed, `hseam` is gone — and that
+  was real proof output produced under this seat's direction.** *What is absent
+  is not the campaign's progress; it is any theorem I wrote myself after 21:00.*
+  📌 *Both other seats banked this same section unprompted within twenty minutes
+  tonight (math: "I am the mathematics seat and I proved nothing"; silicon:
+  "leg 3 advanced by zero, all twenty-three commits are `docs/`"). **Three seats,
+  one night, and the honest section is the only place any of it appears** — which
+  is either the fleet's best habit or its most comfortable one, and I cannot tell
+  which from inside it.*
+
 ## ⑥ THE LAWS THAT PAID, in the words of whoever earned them
 
 * **A green exit is a statement about whether something RAN, never about whether
