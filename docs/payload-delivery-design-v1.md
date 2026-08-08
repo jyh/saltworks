@@ -4,15 +4,18 @@
 ### from docs/silicon-frame-protocol-0806.md and confirmed in session.
 ### Refutation assignments at the end. Sequenced AFTER the c1/(3,2)
 ### dispatches — this block costs no seat time until those land.
-### Round-2 state (8/8 13:3x): MATH's read IN and FOLDED — the
-### wave-blocker (hin/h0) is H4; F3 stands (the companion is
-### literal-k; the ∀-P alarm was false); F1/F2/F4 residues folded.
-### PROBE CLOSED: free-run, double-confirmed (silicon 13:31 + math
-### 13:33, independently, same bytes). SILICON + COMPILER round-2
-### reads OPEN at their seams; silicon's §8 half-surface measurement
-### runs. WAVES fire after those reads AND phase 3 closes; L1/L2
-### land in the HDL slot post-surgery, L3/L4 Equiv-side after.
-### (v1 history: round-1 folds at 6b8dc71/d71a59f/bdb75f2.)
+### Round-2 state (8/8 13:5x, v2.2): MATH's read IN and FOLDED (H4;
+### F3; residues). PROBE CLOSED (free-run, double-confirmed) AND its
+### successor measurement COMPLETE: H2 RESTATED on the amended spec
+### §5 D3.5 (9efc4f5) — well-phasedness is a sof-anchored input
+### event, strictly stronger than the retired second-act_stb form
+### (measured inert on phase, 200 seeds, treatment-asserted); L0's
+### seed now sourced. ∀-P's artifact-side ground REMOVED (counter
+### width fixed netlist-neutral). Citation law adopted:
+### section+sentence, never line. SILICON round-2 read IN (its 13:47
+### §6 assignment rode the same post); COMPILER round-2 read OPEN.
+### WAVES fire after compiler's read AND phase 3 closes.
+### (History: 6b8dc71/d71a59f/bdb75f2/1a70c99.)
 
 ## 0. WHAT B4 DID AND DID NOT CERTIFY
 
@@ -53,8 +56,19 @@ For the k=3 fabric under:
   every line active, destinations distinct — B4's own binders
   (`hd : ∀ i, d i < 8`, `hdi : Function.Injective d`); no bijection
   OBJECT is taken (σ STRUCK — first rider below);
-- H2 (init, spec §5's honest form): the frame begins at or after the
-  second act_stb following power-up, from ANY initial register state;
+- H2 (init — RESTATED at silicon's 13:47 measurement, citing the
+  AMENDED spec §5 D3.5, 9efc4f5): the frame is WELL-PHASED — cycle 0
+  coincident with cnt==0, established by `sof` or `rst_n` — from ANY
+  initial register state. STRICTLY STRONGER than the retired
+  second-act_stb form, which was measured INERT on the phase axis
+  (the counter's period equals the frame length, so waiting repairs
+  nothing: 188/200 and 192/200 mis-phased failures on frames 1 and 2
+  alike) and conservative-only on registers (the first well-phased
+  frame is already correct: 0/200 failures across arbitrary
+  register+counter states, mutant control biting at 194/200, with a
+  TREATMENT ASSERTION guarding that the alignment actually applied).
+  Well-phasedness is an INPUT EVENT and appears as its own
+  hypothesis — never inherited from a frame count;
 - H3 (reset discipline — compiler's ③ A/B pass, the L1 refutation):
   B4's own `hrst` binder (SeamJoinB.lean:192): the reset trace is
   `true :: List.replicate n false` — one pulse at cycle 0, none
@@ -116,10 +130,13 @@ Riders:
   init surface is the per-stage latches (all strobed inside [0, 2k))
   PLUS the frame counter — and the counter is exactly what
   "well-phased" quantifies away: L0 is stated FOR well-phased frames,
-  and H2's second-act_stb clause is what SUPPLIES well-phasedness
-  (the spec's own one-complete-frame argument, §5:174). L0 + H2
-  compose; neither claims the other's ground. B-class, element-level,
-  L2's genre.
+  and H2 supplies well-phasedness DIRECTLY as the sof-anchored
+  premise (amended spec §5 D3.5, 9efc4f5). The earlier attribution —
+  "H2's second-act_stb clause supplies it" — was REFUTED by
+  silicon's 13:47 measurement: that clause is inert on phase, and
+  the composition was citing an unsourced seed (math's 12:52 shape,
+  one level out). L0 + H2 compose; neither claims the other's
+  ground. B-class, element-level, L2's genre.
 - **L1 (Batcher element, ceC — REVISED at compiler's ③ pass)**: under
   H3, after its decide the compare-exchange is a static 2-permutation
   for the rest of the frame. The persistence is LANDED
@@ -216,7 +233,15 @@ Riders:
   and B4's sorter leg is ALREADY ∀-P (`p` arbitrary-length, per H4's
   read). The deferral's remaining ground is the frame counter alone;
   the generalized statement still carries port coverage explicitly
-  per §4.
+  per §4. ARTIFACT-SIDE GROUND REMOVED (silicon 13:47): the
+  counter-width literal is fixed ($clog2, netlist-neutral at P=8),
+  so "touches the frame counter" no longer names an artifact defect
+  — any remaining reason to defer ∀-P is PROOF-side only.
+- CITATION LAW (silicon's cross-document rule, adopted for this
+  block): spec citations are SECTION + QUOTED SENTENCE, never bare
+  line numbers — three of this block's line-cites rotted inside one
+  spec amendment (:270→:361, :191→:221, :202→:232, :174→:175;
+  recorded so no reader chases stale lines).
 
 - **PROBE CLOSED (8/8 13:3x — answered INDEPENDENTLY by silicon
   13:31 and math 13:33, same bytes, same verdict)**: the counter
@@ -232,7 +257,11 @@ Riders:
   missing half against the real RTL; if that confirms
   conservative-on-registers + inert-on-phase, the consequence lands
   on the SPEC's §5 wording first (a sof-phase premise), the block
-  cites the amended spec second.
+  cites the amended spec second. SUCCESSOR MEASUREMENT COMPLETE
+  (13:47): conservative+inert CONFIRMED — 200-seed arms with
+  treatment assertions; spec §5 AMENDED (9efc4f5); H2 restated
+  above on the amended form; the block now cites the spec it was
+  waiting for.
 
 ## 6. REFUTATION ASSIGNMENTS (draft-until-refuted)
 
