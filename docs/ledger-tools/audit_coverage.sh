@@ -72,29 +72,61 @@ trap 'rm -rf "$TMP"' EXIT INT TERM
 # containing none of the punctuation that any other Lean syntax would carry.
 # A negative test survives unicode identifiers (σ, ₀, «…»); an identifier
 # character-class does not, and this corpus is full of them.
+# ⛔⛔ v4 — THE THIRD DEFECT, AND THE PUREST INSTANCE OF THE DAY'S RECURRING CLASS.
+# v3 matched `#audit_axioms` ANYWHERE on a line. GenSelectCount.lean:577 is PROSE
+# INSIDE A `/-! ... -/` DOC COMMENT:
+#     `#audit_axioms` aborts the rest of its own argument list at the first failure,
+# — compiler's ④′ RATIONALE. v3 parsed that sentence as an invocation and
+# reported eleven English words as audited names: the · of · at · its · own ·
+# rest · list · first · failure, · argument · aborts. EXIT=1 on a clean file.
+# 🔑 A DOCUMENT EXPLAINING A COMMAND BECAME AN INVOCATION OF IT — the same shape
+# as bus_watch.sh's founding defect, which I wrote in that file's own header:
+# "a document describing a pattern-matcher by quoting the pattern becomes a
+# carrier of it." Fifth instance on 2026-08-08, across five different instrument
+# kinds. TWO INDEPENDENT GUARDS, because one of these keeps not being enough:
+#   (1) STRIP COMMENTS FIRST — audit arguments are code, never comment text.
+#       Lean block comments NEST, so the depth counter is required.
+#   (2) ANCHOR THE COMMAND — a real invocation starts its line.
 cat > "$TMP/parse.awk" <<'AWK'
 function emit(s,   n, a, i) {
   n = split(s, a, /[ \t]+/)
   for (i = 1; i <= n; i++) if (a[i] != "") print a[i]
 }
-/#audit_axioms/ {
-  line = $0
-  sub(/^.*#audit_axioms[ \t]*/, "", line)
-  emit(line)
-  inAudit = 1
-  next
-}
-inAudit == 1 {
-  # must be indented and have content
-  if ($0 !~ /^[ \t]+[^ \t]/) { inAudit = 0; next }
-  # any of these means it is NOT a bare name list
-  if ($0 ~ /[:(){}\[\],=#⟨⟩→←∀∃λ|]/)   { inAudit = 0; next }
-  if ($0 ~ /--|\/-|-\//)                { inAudit = 0; next }
-  if ($1 ~ /^(theorem|lemma|def|end|section|namespace|open|import|instance|example|abbrev|structure|inductive|variable|attribute|macro|elab|notation|set_option|deriving|where|by)$/) {
-    inAudit = 0; next
+# Guard (1): remove --line comments and NESTED /- block -/ comments.
+# `depth` is global on purpose: block comments span lines.
+function strip(line,   out, i, n, two) {
+  out = ""; n = length(line); i = 1
+  while (i <= n) {
+    two = substr(line, i, 2)
+    if (depth == 0 && two == "--") break          # line comment: drop the rest
+    if (two == "/-") { depth++; i += 2; continue }
+    if (two == "-/") { if (depth > 0) depth--; i += 2; continue }
+    if (depth == 0) out = out substr(line, i, 1)
+    i++
   }
-  emit($0)
-  next
+  return out
+}
+{
+  s = strip($0)
+  # Guard (2): the command must START the line (after indentation).
+  if (s ~ /^[ \t]*#audit_axioms([ \t]|$)/) {
+    line = s
+    sub(/^[ \t]*#audit_axioms[ \t]*/, "", line)
+    emit(line)
+    inAudit = 1
+    next
+  }
+  if (inAudit == 1) {
+    # must be indented and have content
+    if (s !~ /^[ \t]+[^ \t]/)               { inAudit = 0; next }
+    # any of these means it is NOT a bare name list
+    if (s ~ /[:(){}\[\],=#⟨⟩→←∀∃λ|]/)       { inAudit = 0; next }
+    if (s ~ /^[ \t]*(theorem|lemma|def|end|section|namespace|open|import|instance|example|abbrev|structure|inductive|variable|attribute|macro|elab|notation|set_option|deriving|where|by)([ \t]|$)/) {
+      inAudit = 0; next
+    }
+    emit(s)
+    next
+  }
 }
 AWK
 
@@ -129,7 +161,9 @@ awk -f "$TMP/parse.awk" "$@" | command grep '[A-Za-z]' | sed 's/.*\.//' | sort -
 nt=$(wc -l < "$TMP/declared.thm" | tr -d ' ')
 nf=$(wc -l < "$TMP/declared.def" | tr -d ' ')
 na=$(wc -l < "$TMP/audited.base" | tr -d ' ')
-ncmd=$(command grep -hc '#audit_axioms' "$@" | awk '{s+=$1} END{print s+0}')
+# anchored for the same reason the parser is: an unanchored count also counts
+# the doc comment that EXPLAINS the command (GenSelectCount.lean:577).
+ncmd=$(command grep -hc '^[[:space:]]*#audit_axioms' "$@" | awk '{s+=$1} END{print s+0}')
 comm -23 "$TMP/declared.thm" "$TMP/audited.base" > "$TMP/uncovered"
 comm -23 "$TMP/declared.def" "$TMP/audited.base" > "$TMP/uncovered.def"
 cat "$TMP/declared.thm" "$TMP/declared.def" | sort -u > "$TMP/declared.all"
