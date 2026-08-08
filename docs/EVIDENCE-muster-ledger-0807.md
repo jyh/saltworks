@@ -62,6 +62,22 @@ is ~100% META by construction, so including it measures how busy I was.
 - **The stale-board mode** — a fix landed 07:19, a touch ordered it later; open on the board, closed in the repo, **stale across a reboot**. *Maestro-side, recorded because the syllabus records modes wherever they live.*
 - **The ghost-text injection class** — client autocomplete delivered as keystrokes, **no author at all**; closed by **protocol** (source tags + style filtering), not by a better detector.
 - **`2027-03-27 chips expected` is UNSOURCED** — read at source 8/7: the runs table's `Chips expected` cell for TTSKY26c is **empty**.
+- 🛡️ **THE FIREWALL HELD, AND IT WAS A SEAT THAT STOPPED IT — not a rule, not a reviewer.**
+  Silicon halted its own heritage block (`fdb4474`, maestro-ratified 17:00): the Bellcore
+  PDFs are **Google-licensed library copies**, so republishing Figure 6's IMAGE in a public
+  repo would cross the outside-lane firewall — *the one category no purse inversion ever
+  touched.* Remedy shipped: **our render alone, Figure 6 cited IN WORDS** (Marcus & Hickey,
+  ISSCC 1990 Digest p.258). *Our polygons are ours; their reproduction is not.*
+  📌 **CAPTAIN'S NOTE, per the maestro:** a side-by-side in print is available if you want
+  it — an IEEE republication permission **for your own figure** is yours to request. *Your
+  paper, your rights, your call, and never the fleet's to make for you.*
+  ⭐ **Why it belongs among the NEGATIVES rather than the wins: nothing was published and
+  nothing was caught by review. A seat stopped itself.** *The fleet now protects the LANES
+  as reflexively as it protects the kernel, and that reflex is the result.*
+- ⛔ **THE SAMPLED/EXHAUSTIVE COLUMN IS BLOCKED ON INFRASTRUCTURE** — see
+  `EVIDENCE-proof-debt-table-0807.md` §5. Three designs died in thirty minutes; an axis is
+  exhaustive only with a **proved quotient lemma**, and the fanin-restricted congruence
+  those need does not exist in the tree. **Blocked, with owners named, not merely open.**
 - ⟨REGEN: any §0 coverage hole; the 8/6 `e3ea8f1` gap remains OPEN, cause UNDETERMINED⟩
 - ⟨REGEN: seat-supplied negatives — silicon's, compiler's, math's own muster lines, **cited as files, not reconstructed**⟩
 
