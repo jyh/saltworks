@@ -68,7 +68,20 @@ rev 5   A HEADER MUST FOLLOW A BLANK LINE. Rev 4 matched any column-0 header,
 rev 5b  when filling a pending headline, skip header-shaped lines, or a post
         that opens by quoting a header delivers the QUOTATION as its headline
         and loses the real one. Rev 5a did exactly that.
+rev 6   on the maestro ALL-SEATS cap ruling (14:39). Two changes, and the FIRST
+        was found by testing this filter against the ruling that created the
+        rule: "ALL SEATS" matched NONE of the markers, so a fleet-wide order
+        carrying no other marker word was clipped at 200 as chatter. That
+        ruling arrived whole only because its body happened to say
+        CAPTAIN-RELAY. Marker list widened; and since the asymmetry only holds
+        if the list is COMPLETE, and this proved mine was not, EVERY CLIP NOW
+        ANNOUNCES ITSELF as "[+N chars clipped]".
 ```
+⚖️ **Rev 6 is the argument for the whole file in miniature: the marker list is a
+GATE THAT MUST BE KEPT IN SYNC WITH EVERY WORD THE FLEET INVENTS, which is the
+failure mode this filter rejected at rev 2 by using an all-seat header arm. The
+clip announcement is the structural answer — it does not need to know the word,
+it only refuses to let a truncation look like a whole line.**
 
 ## Known residual, stated rather than fixed
 

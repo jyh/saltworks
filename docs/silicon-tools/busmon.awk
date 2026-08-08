@@ -11,12 +11,30 @@
 #
 # Variables: start = last line already READ. self = this seat.
 
-function emit(st, body,   marked) {
-  marked = (body ~ /FLEET|CAPTAIN|HALT|STAND DOWN|SILICON|silicon/)
+# rev 6, on the maestro ALL-SEATS ruling 8/8 14:39: a cap on an order-bearing
+# pass either GOES or announces itself. Two changes, and the FIRST was found by
+# testing this filter against the ruling that created the rule:
+#
+#   (a) THE MARKER LIST WAS INCOMPLETE. That ruling opens "ALL SEATS —" and
+#       matched NONE of FLEET|CAPTAIN|HALT|STAND DOWN|SILICON. It reached me
+#       whole only because its body happened to mention CAPTAIN-RELAY. An order
+#       addressed to every seat, carrying no other marker, would have been
+#       clipped at 200 as chatter.
+#   (b) EVERY CLIP NOW ANNOUNCES ITSELF. The asymmetry only holds if the marker
+#       list is complete, and (a) proves mine was not. So a clipped line now
+#       ends with "[+N chars clipped]" -- a truncated order can no longer be
+#       mistaken for a complete routine line. Silence that means two things
+#       means nothing; this makes the two states distinguishable at a glance.
+function emit(st, body,   marked, n) {
+  marked = (body ~ /FLEET|CAPTAIN|HALT|STAND DOWN|STAND-DOWN|ALL SEATS|ALL HANDS|SILICON|silicon/)
   # Asymmetric by design: a long routine line is noise, a truncated order is a
   # missed order. Marker-bearing lines are NEVER clipped.
   if (marked) print st "... " body
-  else        print st "... " substr(body, 1, 200)
+  else {
+    n = length(body) - 200
+    if (n > 0) print st "... " substr(body, 1, 200) " [+" n " chars clipped]"
+    else       print st "... " body
+  }
   fflush()
 }
 

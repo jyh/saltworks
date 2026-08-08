@@ -32,6 +32,10 @@ SILICON body line of my own post -> MUST NOT EMIT
 CAPTAIN ORDER FOR SILICON — evidence real headline -> MUST EMIT
 
 [08/08 09:03, maestro] HALT marker, very long, must survive whole: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa END-OF-ORDER-MARKER
+
+[08/08 09:04, maestro] ALL SEATS — an order carrying NO other marker word, long: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb ALLSEATS-TAIL-MARKER
+
+[08/08 09:05, compiler] ordinary chatter, no marker, long enough to be clipped: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc CHATTER-TAIL
 FIXEOF
 
 OUT=$(LC_ALL=C awk -v start=0 -v self=silicon -f "$AWKPROG" "$FIX")
@@ -62,6 +66,17 @@ chk "quoted header not leaked"       'quoted header, not a real'  0
 #    this filter cannot control. Emitting whole helps because content starts
 #    earlier; it does not make an arbitrarily deep marker safe.
 chk "marker line emitted WHOLE"      'END-OF-ORDER-MARKER'        1
+# 6. REV 6, and it was found by testing this filter against the very ruling that
+#    created the rule: "ALL SEATS" matched NO marker in rev 5b, so a fleet-wide
+#    order carrying no other marker word was clipped at 200 as chatter. The
+#    maestro ruling arrived whole only because its body mentioned CAPTAIN-RELAY.
+chk "ALL SEATS order emitted WHOLE"  'ALLSEATS-TAIL-MARKER'       1
+# 7. REV 6, the maestro cap rule: a cap on an order-bearing pass either GOES or
+#    ANNOUNCES ITSELF. Marker lines are never clipped, so the announcement is
+#    for chatter -- and it exists because check 6 proved the marker list can be
+#    incomplete. A clipped line must never look like a complete one.
+chk "chatter clip is VISIBLE"        '\[+[0-9]* chars clipped\]'  1
+chk "chatter tail actually dropped"  'CHATTER-TAIL'               0
 
 [ "$rc" = 0 ] && echo "ALL PASS" || echo "FAILURES PRESENT — do not arm"
 exit $rc
