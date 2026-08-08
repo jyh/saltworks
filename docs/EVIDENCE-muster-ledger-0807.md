@@ -83,6 +83,12 @@ that FAILED and a theorem that is ABSENT both yield `0`, and the muster cannot t
 broken tree from an open gate.* **Redirect, read `EXIT`, then grep the file — and report
 the two failure modes separately.**
 
+✅ **AND THE FAIL-CLOSED PROPERTY IS TESTED, NOT ASSERTED — math ran this form against a
+corpus that LACKED the seam and got `0`: it REFUSED to certify.** *The source grep would
+have returned `1` and blessed it.* ⇒ ***A gate that fails OPEN is worse than no gate,
+because it manufactures confidence exactly when the tree is broken.*** **That negative
+control is the reason this form is in the ledger and the source form is not.**
+
 📊 **RUN AT 23:0x, no pipe: `saltbuild EXIT=0` · `✓ SaltWorks.HDL.composed_switch_of_bnC_driven [3 axioms]` = 1 · `Replayed 0` · `Built 0` · 16 audit ✓ lines this run.**
 *The `<path>.lean` form re-elaborates, so the `✓` is this run's kernel and not a cache's
 recollection — which is the only reason the tick is admissible as evidence at all.*
