@@ -170,4 +170,13 @@ print(f"tracked .lean: {len(tracked)}   in closure: {len(seen)}   OUTSIDE: {len(
 for m, n in outside:
     print(f"  ⛔ {m:<34} {n:>3} audit site(s) never fire in the default build")
 print(f"TOTAL audit sites outside the default build: {tot}")
+# ⚠️ PROOF-OF-LIFE LIMIT (silicon, 2026-08-08 11:04 — "a STATE reading cannot tell
+# you whether the state was ALWAYS so"). This seat cited a moving population
+# (75 -> 76) as evidence the tool had genuinely re-read. True — but checkable ONLY
+# by a reader holding BOTH runs, so the proof travelled with the author instead of
+# with the artifact. That is the same defect as a scope named in a nearby sentence
+# rather than in the identifier. The tool now carries its own caveat.
+print("⚠️  PROOF-OF-LIFE: a green with an UNCHANGED `tracked` count cannot distinguish")
+print("    a fresh read from a stale one. A population that MOVED since your last run")
+print("    is evidence this instrument re-read; an unchanged one is not evidence either way.")
 sys.exit(1 if outside else 0)
