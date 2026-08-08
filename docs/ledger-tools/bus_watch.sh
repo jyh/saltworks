@@ -133,8 +133,48 @@ while true; do
       { prevblank = ($0 == "") }
     ' "$BUS" > /tmp/ev-orders.txt
 
-    grep -oE '^\[[0-9]+/[0-9]+ [0-9:]+, maestro[^]]*\]|^- [0-9-]+ [0-9:]+ MAESTRO' \
-      /tmp/ev-peer.txt | cut -c1-95
+    # ⛔⛔⛔⛔⛔⛔⛔ EIGHTH DEFECT, AND THE MOST EMBARRASSING OF THE DAY: THIS PASS
+    # DELIVERED NO CONTENT AT ALL. It grepped the HEADER and clipped it at 95, so
+    # every maestro ruling this session arrived as the bare string
+    #     [08/08 14:43, maestro]
+    # and nothing else. The most important order class this seat has, reduced to a
+    # timestamp. It never cost me because my WORKFLOW compensated -- I opened
+    # FLEET.md and read the post by hand after every notification -- which is
+    # compliance by luck, and a successor who trusted the notification would be
+    # acting on a clock reading.
+    # 🔑 FOUND because COMPILER audited their own filter (14:47) after silicon
+    # audited mine, and reported the maestro 14:39 ruling reaching them cut at 200
+    # chars unannounced -- they read a truncated sentence as a whole one. I went
+    # looking for the same class in my file and found something worse than a clip.
+    # ⇒ Now: short attribution + the BODY, content-first, with the clip ANNOUNCED.
+    # (Counts are BYTES: LC_ALL=C makes awk byte-oriented, which is deliberate --
+    # see the towc abort at bus line 127 -- so a multibyte glyph counts as its
+    # bytes. Stated rather than rounded, because an unstated unit is how a figure
+    # stops being checkable.)
+    LC_ALL=C awk -v start="$last" '
+      function emit(s, b,   n, out) {
+        n = length(b)
+        out = substr(b, 1, 600)
+        if (n > 600) out = out " [+" (n - 600) " bytes CLIPPED — read the bus]"
+        print "⚖️ MAESTRO " s " " out
+      }
+      prevblank && /^\[[0-9]+\/[0-9]+ [0-9:]+, [A-Za-z]/ {
+        owner = $0
+        sub(/^\[[0-9]+\/[0-9]+ [0-9:]+, /, "", owner)
+        sub(/[^A-Za-z0-9_-].*$/, "", owner)
+        ism = (tolower(owner) == "maestro")
+        stamp = (match($0, /^\[[0-9]+\/[0-9]+ [0-9:]+, [A-Za-z0-9_-]+/) \
+                 ? substr($0, RSTART, RLENGTH) "]" : "[?]")
+        body = $0
+        sub(/^\[[^]]*\][[:space:]]*/, "", body)
+        pend = 0
+        if (NR > start && ism) { if (body != "") emit(stamp, body); else pend = 1 }
+        prevblank = 0
+        next
+      }
+      pend && $0 != "" { emit(stamp, $0); pend = 0 }
+      { prevblank = ($0 == "") }
+    ' "$BUS"
     # ⛔ WIDENED 2026-08-07 21:1x, AND THE OLD PATTERN WAS WRONG IN BOTH DIRECTIONS.
     # It was `-i 'EVIDENCE (—|:)'`, which:
     #   TOO NARROW — the fleet addresses this seat with a COMMA and with "EVIDENCE
