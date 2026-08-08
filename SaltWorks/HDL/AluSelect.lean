@@ -61,6 +61,41 @@ def asPad : Nat := 16
 /-- Encoded select, four bits — the seat's measured saving over a one-hot ten. -/
 def asSelBits : Nat := 4
 
+/-! ## THE RULED PAIR — phase 1 of the expand-contract, landed BESIDE the old
+
+Muster ruling ① sizes the select at `(n = 3, b = 2)`.  These are the NEW
+constants the migration states against; `asOps`/`asSelBits`/`asPad` above are the
+OLD ones and are deliberately untouched until phase 3.  Transitional prefix `rs`
+("ruled select"), recorded on the bus.
+
+⚠️ **State phase-2 work against THESE NAMES, never against bare `3`/`2`.**  The
+whole point of the migration is to escape numeral-bound theorems — a new theorem
+written as `gsSelOf 3 2` is one more of exactly the thing being escaped, and it
+is how `genSelect_ten : genSelect 10 4 = aluSelect` became expensive. -/
+
+/-- Ruled source count. -/
+def rsOps : Nat := 3
+/-- Ruled select width. -/
+def rsSelBits : Nat := 2
+/-- Ruled pad — MUST track the width; the guard below is what forces it. -/
+def rsPad : Nat := 4
+
+/-- The pad tracks the width.  Separate definitions with nothing forcing them to
+agree is how a re-cut silently desynchronises geometry from select width. -/
+theorem rsPad_eq_two_pow : rsPad = 2 ^ rsSelBits := by decide +kernel
+
+/-- Every ruled source is addressable: `n ≤ 2^b`.  An inadmissible re-pairing
+fails `decide` here and BREAKS THE BUILD, which is the mechanism rider 3 asked
+for.  Do not "fix" a failure of this by weakening the guard. -/
+theorem rsPair_admissible : rsOps ≤ 2 ^ rsSelBits := by decide +kernel
+
+/-- …and the ruled pair is the one the muster ruled. -/
+theorem rsPair_is_the_ruled_pair : rsOps = 3 ∧ rsSelBits = 2 := by decide +kernel
+
+#audit_axioms rsPad_eq_two_pow
+#audit_axioms rsPair_admissible
+#audit_axioms rsPair_is_the_ruled_pair
+
 /-- Op result `r` bit `k` occupies net `r * 32 + k`; the four select bits follow. -/
 def asIn : Nat := asOps * asW + asSelBits
 def asRes (r k : Nat) : Net := r * asW + k
