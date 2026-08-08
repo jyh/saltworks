@@ -28,6 +28,28 @@ BUS=${BUS:-"$HOME/projects/claude/FLEET.md"}
 SELF=${SELF:-evidence}
 POLL=${POLL:-20}
 
+# ⛔⛔ SILENT CAPS BECOME STATED CAPS — silicon, 2026-08-08 14:39, reading this
+# committed file. Three passes ended in `head -3`, so a FOURTH match in one poll
+# window was dropped WITH NO TRACE. On the CAPTAIN-RELAY pass that means the
+# Captain's own words, silently. The cap itself is defensible -- a notification
+# storm is its own failure -- but an UNSTATED cap is not: from the seat's side a
+# suppressed order and a quiet bus are the same observation, which is this file's
+# founding ambiguity arriving on the OUTPUT side after four fixes on the input
+# side.
+# 🔑 This seat published "no silent caps: log what was dropped" as a rule and
+# then shipped three of them in its own watcher. A rule you wrote is not a rule
+# you applied.
+cap3() {                    # reads stdin; prints <=3 lines, then NAMES the drop
+  _t=$(cat)
+  [ -z "$_t" ] && return 0
+  _n=$(printf '%s\n' "$_t" | wc -l | tr -d ' ')
+  printf '%s\n' "$_t" | head -3
+  if [ "$_n" -gt 3 ]; then
+    echo "⚠️ $((_n - 3)) MORE ${1:-match(es)} SUPPRESSED by the 3-line cap — read /tmp/ev-peer.txt for the rest"
+  fi
+  return 0
+}
+
 # ⛔⛔ THE BASELINE IS AN ASSERTION, AND ON A RELIGHT IT IS FALSE.
 # `wc -l` at arm time silently asserts "everything above this line is already
 # handled." True in steady state; FALSE on a boot, by exactly the width of the
@@ -130,7 +152,7 @@ while true; do
     # INDISTINGUISHABLE FROM THE SEAT'S OWN SIDE. This seat verified "is it
     # running?" by PPID chain four times today and never once asked "what exactly
     # will wake me?" — silence from a mis-scoped filter reads as a quiet bus.
-    grep -oE "EVIDENCE('S| SEAT)?[[:space:]]*[—:,][^.]{0,70}" /tmp/ev-peer.txt | head -3
+    grep -oE "EVIDENCE('S| SEAT)?[[:space:]]*[—:,][^.]{0,70}" /tmp/ev-peer.txt | cap3 "EVIDENCE-addressed"
     # ⛔ ADDED 2026-08-08 08:0x, AT THE CRASH RELIGHT — AND IT WAS MISSING ALL OF 8/7.
     # The WATCH BLOCK item (1) names FOUR classes: own seat + MAESTRO + CAPTAIN +
     # HALT/STOP/STAND DOWN (plus shrinkage, unconditional). This script implemented
@@ -141,7 +163,7 @@ while true; do
     # 21:1x for being mis-scoped and never asked what ELSE the block required.
     # A CAPTAIN-RELAY line is the Captain's own words and may sit in ANY seat's
     # post, so it is matched against the peer view.
-    grep -oE "CAPTAIN-RELAY:.{0,70}" /tmp/ev-peer.txt | cut -c1-95 | head -3
+    grep -oE "CAPTAIN-RELAY:.{0,70}" /tmp/ev-peer.txt | cut -c1-95 | cap3 "CAPTAIN-RELAY"
     # HALT/STAND DOWN only from the ORDER-OWNED view.
     # ⛔ AND I WROTE A NUMBER HERE BEFORE I MEASURED IT. The first version of
     # this comment claimed "27 seat-owned lines and 0 maestro-owned" and called
@@ -154,7 +176,7 @@ while true; do
     # version, the comment would have argued the gate discards nothing while
     # the gate's whole value is the one line it keeps.
     grep -oE "HALT|STAND DOWN|STAND-DOWN|ALL SEATS STOP|FLEET STOP" /tmp/ev-orders.txt \
-      | head -3 | sed 's/^/⛔ MAESTRO ORDER WORD: /'
+      | sed 's/^/⛔ MAESTRO ORDER WORD: /' | cap3 "MAESTRO ORDER WORD"
     # ⛔ THE FLEET GATE -- ADDED 2026-08-08 13:5x ON THE MAESTRO RULING THAT CLOSED
     # A GAP THIS SEAT NAMED AGAINST ITSELF AT 13:44. The order-owned view above is
     # gated on the MAESTRO, and a PEER SEAT CAN BIND THE WHOLE FLEET WITHOUT BEING
