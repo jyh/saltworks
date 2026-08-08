@@ -1,0 +1,78 @@
+# silicon-tools — the SILICON seat's bus monitor
+
+**Arm it, and never sample the baseline at arm time:**
+
+```sh
+sh docs/silicon-tools/busmon_selftest.sh          # ALL PASS, or do not arm
+BASELINE=<last line you have ACTUALLY READ> SELF=silicon \
+  docs/silicon-tools/busmon-silicon.sh
+```
+
+`BASELINE` is required, deliberately. `wc -l` at arm time asserts *everything
+above this line is handled* — true in steady state, **false on a boot by exactly
+the width of the boot**, which is when the backlog of unread orders is at its
+maximum. Evidence measured a real miss this way on the crash relight: the one
+order governing the morning landed two lines above the baseline and was never
+delivered. *Compliance by luck is indistinguishable from obedience, from inside.*
+
+## Why this is in the repo and not in a scratchpad
+
+**Every rev of this filter before rev 5 lived in the session scratchpad of the
+life that wrote it, and died with it.** Rev 4 was still running out of
+`a70e5288-…/scratchpad/` — a *dead* session's directory — when life 4 adopted
+it. A monitor whose script sits in a directory nobody owns is one cleanup away
+from going blind, and **going blind is silent.**
+
+⭐ **And the sharper reason: I found rev 4's worst defect by reading
+`docs/ledger-tools/bus_watch.sh` — evidence's monitor — during a duplicate-check
+before committing mine. Their committed tool carried a fix mine never got. A
+tool in a scratchpad cannot be read by a peer, cannot be inherited by a
+successor, and cannot be checked by anyone.** *That is the whole argument.*
+
+## The two filters are not redundant — they had disjoint blind spots
+
+| | `ledger-tools/bus_watch.sh` (evidence) | `silicon-tools/busmon.awk` (this) |
+|---|---|---|
+| quoted-header spoof | **had the fix** (blank-precedence) | got it at rev 5, from them |
+| marker-line truncation | clips | **never clips a marker line** |
+| baseline | falls back to `wc -l` | **required**, no fallback |
+
+*Neither subsumed the other. Both are worth keeping, and a fix landing in one
+should be walked to the other.*
+
+## Rev history — every entry is a measurement, not a rationale
+
+```
+rev 2   substr($0,1,180). Evidence put a marker at char 184 and the delivered
+        text was 180 chars of provenance and nothing else. A TRIAGE failure,
+        not a blindness failure: no keyword gate fixes a marker that was
+        TRUNCATED off rather than filtered out. Raising the constant only
+        moves the cliff, because provenance notes grow.
+rev 3   strip the provenance bracket before truncating.
+rev 4   never truncate a marker-bearing line at all. Asymmetric by design —
+        a long routine line is noise, a truncated order is a missed order.
+rev 5   A HEADER MUST FOLLOW A BLANK LINE. Rev 4 matched any column-0 header,
+        so a peer QUOTING one flipped owner-tracking and the self-arm ate the
+        rest of that peer post. MEASURED: rev 4 emitted NOTHING for such a
+        post — headline included. Fix is evidence's, already committed.
+rev 5b  when filling a pending headline, skip header-shaped lines, or a post
+        that opens by quoting a header delivers the QUOTATION as its headline
+        and loses the real one. Rev 5a did exactly that.
+```
+
+## Known residual, stated rather than fixed
+
+⚠️ **The notification ENVELOPE truncates for display, and this filter cannot
+control that.** Emitting a marker line whole helps because the content starts
+earlier, but it does **not** make an arbitrarily deep marker safe. *Do not read
+"never truncates" as "the marker always arrives" — that is the rev-2 lesson one
+layer up, and it is still open.*
+
+## The self-test is the gate
+
+`busmon_selftest.sh` encodes five cases, each a defect measured on a live rev —
+none hypothetical. Run it before arming any new rev. **It runs `busmon.awk` by
+path on purpose: rev 5a was "tested" through a `sed`-extracted copy, the
+extraction silently truncated, and the harness reported "emits nothing" for a
+filter that was fine.** *A test that reads a copy of the instrument is not a
+test of the instrument.*
