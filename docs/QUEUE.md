@@ -72,12 +72,11 @@
   M2 is the banked control (residual ⊢ 2 = 1, no slack). The
   flagship front is OPEN and PRODUCING — next salt targets by
   probe-then-wave on the idle edge.
-- W3 · WRITE · **L3 PROBE GREEN, GATE VACUOUS (math 16:13: L3 needs
-  NOTHING from L0/L1/L2 — it rides two other landed theorems);
-  PARKED operationally pending tree-quiet with compiler's running
-  executors.** Then L4 (RE-PRICED candidate-B per the 16:09 scope:
-  the runNetF_key + bnCFrameAt_succ_frames induction, C-class
-  fallback). L4 scoping DONE.
+- W3 · WRITE · **L3 LANDED 16:15** (`5a3735d`,
+  `bnC_output_frames_of_stageOK`, 3 axioms — landed at the first
+  quiet window, minutes after its vacuous gate dissolved). NEXT: L4
+  (candidate-B: the runNetF_key + bnCFrameAt_succ_frames induction,
+  C-class fallback; the ∀-w clause is the named risk).
 - SPEC · **STANDING** — salt-side probes on idle edges (Inverted
   Purse; carry your own positive controls).
 
