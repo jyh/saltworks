@@ -73,9 +73,12 @@ For the k=3 fabric under:
   `true :: List.replicate n false` — one pulse at cycle 0, none
   after. Without it a mid-frame rst erases `decided` and the element
   re-decides on PAYLOAD bits: a correct-looking delivery with the
-  WRONG payload tail (kernel-exhibited, `l1_fails_when_rst_returns` /
-  `l1_failure_is_a_mid_frame_flip`) — exactly the failure class this
-  block exists to certify against;
+  WRONG payload tail (kernel-exhibited IN SCRATCH 8/8 12:28 —
+  EXIT=0 32/32 on compiler's hand; the scratch is deleted by law so
+  `l1_fails_when_rst_returns`/`l1_failure_is_a_mid_frame_flip` DO
+  NOT RESOLVE — math's 16:09 find; permanent `example`s are QUEUED
+  to compiler's next seam) — exactly the failure class this block
+  exists to certify against;
 - H4 (the wire-tie — math's round-2 WAVE-BLOCKER, 13:33): B4's `hin`
   binder — `∀ i : Fin 8, tr.map (fun c => c.getD (1 + i.val) false)
   = cFrame true (d i) (p i)` — is the ONLY thing tying the abstract
@@ -159,9 +162,10 @@ Riders:
   supplied by an oracle computed from `Banyan.line`/`srcAt`, never
   from header bits on the wire. And the locked element is a
   CLAIM-GATED OR, not a mux — a 2-permutation in 2 of 16 latched
-  states (`l2_locked_is_a_wire_in_two_states`); full-load
-  conflict-merge is non-injective (`l2_full_load_conflict_merges`)
-  and §2's idle rider does NOT cover it. L2's true form:
+  states, and full-load conflict-merge is non-injective; §2's idle
+  rider does NOT cover it. (Both facts scratch-measured 12:28, not
+  preserved — the exhibit names do not resolve; permanent examples
+  queued per the 16:09 ruling.) L2's true form:
   transparency UNDER HYPOTHESIS `act0 ∧ act1 ∧ (sel0 ≠ sel1)` at
   each element; transporting H1's distinct destinations down to
   per-element sel-distinctness is L4's work. (The old heading "two
@@ -170,22 +174,30 @@ Riders:
 - **L3 (composition — PROOF ROUTE RE-LAID at compiler's ③ pass)**:
   the old route ("ride B4's hseam discharge") is refuted at the
   bytes: B4 concludes about `cDestOf ∘ output column`, and `cDestOf`
-  reads header indices 1/3/5 and nothing else
-  (`cDestOf_is_payload_blind`) — payload-blind BY CONSTRUCTION, it
+  reads header indices 1/3/5 and nothing else (scratch-measured
+  12:28, exhibit name unresolved, permanent example queued) —
+  payload-blind BY CONSTRUCTION, it
   survives every payload-mangling transformation and cannot carry a
   payload theorem. The machinery that CAN is landed elsewhere:
   `bnC_output_frames_are_the_fold` (SeamTrace.lean) —
   whole-frame, payload-CARRYING, consuming the same `ElemSortsAt`
   premise `elemSortsAt_all` discharges. The composition from those
   two landed theorems is THREE LINES (executor-proved in the pass).
-- **L4 (the σ-composition — the C-class work L3 was hiding; NAMED at
-  compiler's ③ pass)**: `frames_succ_perm` (SeamJoinA.lean)
-  holds the one-comparator permutation, but its σ is EXISTENTIAL AND
-  DISCARDED — `stageOK_succ` uses it only to transport the invariant;
-  nothing composes the 24 per-comparator σ's, and frame-σ's agreement
-  with key-σ is unproved. That composition + agreement is the block's
-  real C-class node, and it absorbs L2's H1→per-element
-  sel-distinctness transport. One wave, the block's summit.
+- **L4 (RE-PRICED at math's 16:09 L4 scope — candidate B-class,
+  C-class fallback)**: the old pricing rested on `frames_succ_perm`'s
+  existential-and-discarded σ. But TWO stronger lemmas are already
+  in the kernel: `runNetF_key` (SeamTrace — key of the frame-fold =
+  the key-fold, ANY key, ANY comparator list: the σ-agreement is NOT
+  unproved) and `bnCFrameAt_succ_frames` (SeamJoinC — the per-stage
+  step explicit and PAYLOAD-CARRYING, every other wire unchanged).
+  The candidate route: induction over the 24 stages composing those
+  two — NO σ object ever constructed. RISK, named: the ∀-w
+  "unchanged" clause is where it would break; if it does, the
+  C-class σ-composition is the fallback. L4 still absorbs L2's
+  H1→per-element sel-distinctness transport. Genuinely absent
+  (searched -F): any frames_perm over 24 stages, any payload-delivery
+  theorem — nothing of L4 is landed; `runNet_perm` does not import
+  (typeclass mismatch).
   No offsets (combinational). The trace-induction style is B4's own
   (the hseam discharge); the hypotheses are B4's driven-trace
   conditions extended over the full 14-cycle frame.
@@ -236,7 +248,11 @@ Riders:
   read). AND (compiler's R1, 15:50): the artifact ground reappears
   one level up — `runFrame` hardcodes the 14, so generalizing the
   DRIVER is the ∀-P wave's true price, named here so it is never
-  silently carried. The deferral's remaining ground is the frame
+  silently carried. AND (math's 16:09 residue): `StageOK` carries
+  `p.length = L` — a UNIFORM payload length across all eight lines,
+  so the sorter leg's ∀-P is arbitrary-but-EQUAL, not arbitrary —
+  invisible at P=8, another named piece of the ∀-P price. The
+  deferral's remaining ground is the frame
   counter alone;
   the generalized statement still carries port coverage explicitly
   per §4. ARTIFACT-SIDE GROUND REMOVED (silicon 13:47): the
