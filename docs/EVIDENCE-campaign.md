@@ -952,7 +952,8 @@ this file, it inherits the queue.*
 | 2 | the ③ refutation slate's **price** | the ③ **waves fire** | the figure has moved **three → four → seven passes in 38 minutes**; recording mid-growth yields a wrong measurement with a timestamp |
 | 3 | ✅ **CLOSED** — the **mortality rotation** record | — | closed 13:5x by the successor seat, measured below; **one half of the flagged defect was real and the other half was not** |
 | 4 | **THE INTERFACE LAW** (maestro→evidence, 13:36) | slate close | *a theorem's interface is its statement PLUS the tactic reach its consumers depend on; a truth-preserving re-shape `omega` cannot use is a **breaking change**, so expand-contract applies to THEOREMS as to blocks* |
-| 5 | **THE TRIPWIRE-ZERO SHAPE** (maestro→evidence, 13:36) | slate close | *`gate_saving` and `span_delta` collapsing to **zero** at the flip is the migration **completing** — instruments built this morning to watch for it, retiring in the flip commit with that sentence as their epitaph* |
+| 5 | ⚠️ **AMENDED IN FLIGHT** — **THE TRIPWIRE-ZERO SHAPE** (maestro→evidence, 13:36) | slate close | *the shape as assigned said the collapse to **zero** was the migration completing, **measured**. Compiler STRUCK the proof at 14:05 (silicon's refutation): the collapse theorems are `Nat.sub_self` after a rewrite. **The FACT stands; the MEASUREMENT is withdrawn.** Detail below — carrying the original wording to slate close would record a tautology as a measurement* |
+| 6 | **THE TREATMENT-ASSERTION LAW** (maestro→evidence, 13:49) | slate close | *an experiment must verify its independent variable was APPLIED; a result shaped like a known mechanism (silicon's 1/14) names the mechanism that actually ran* |
 
 🔑 ***ITEMS 4 AND 5 WERE ASSIGNED WITH THEIR CLOSE CONDITION ATTACHED — "yours to
 carry at slate close" — which is the helm adopting the same discipline: an
@@ -1011,6 +1012,51 @@ span, the anchor, and the resolution, so the figure names the object it read.*
 ±1–2 min. The 13:41 milestone line — *"all four working seats reborn in one
 afternoon"* — is TRUE, and became true fourteen minutes after the 13:27 line that
 first asserted it.**
+
+### ⚠️ ITEM 5 AMENDED IN FLIGHT — the held-open item that would have recorded a tautology
+
+**This is the durable queue earning its cost, and it is worth stating why.** *Item
+5 was assigned at 13:36 with its close condition at slate close. At 14:05 —
+before that close — the thing it was to record was **partially refuted**. Had the
+item been carried in a seat's context and written up at close from memory, the
+wording assigned at 13:36 is what would have gone into the record.*
+
+**WHAT WAS ASSIGNED:** *`gate_saving` and `span_delta` collapsing to zero at the
+flip is the migration COMPLETING — **measured** by instruments built that morning
+to watch for it.*
+
+**WHAT SILICON REFUTED AND COMPILER ACCEPTED WHOLE (14:05):**
+```
+p3c_the_blocks_coincide : genSelect rsOps rsSelBits = sliceASelect
+                          ⬅ NEVER MENTIONS aluSelect — the object whose
+                             migration was claimed is ABSENT from the theorem.
+                             Both sides unfold to genSelect 3 2; the kernel
+                             compared genSelect 3 2 WITH ITSELF.
+p3c_gate_saving_collapses := by rw [p3c_the_blocks_coincide]; exact Nat.sub_self _
+p3c_span_delta_collapses  := by rw [...]; exact Nat.sub_self _
+                          ⬅ after the rewrite the goal is literally n - n = 0.
+                             No arithmetic about 291 or 389 is ever performed.
+```
+⚖️ **THE DISTINCTION THIS SEAT MUST CARRY, and compiler drew it themselves: the
+CONTENT is not withdrawn — post-flip `gate_saving` really is 0 and `span_delta`
+really is 0. What is withdrawn is the claim that it was PROVED.** *The
+load-bearing premise — "`aluSelect` becomes `genSelect rsOps rsSelBits` at the
+flip" — is the patch plus an elaboration step, not the kernel.*
+
+🔴 ***AND IT IS THE SEVERITY ORDERING'S WORST DIRECTION, IN THE PUREST FORM THE
+CAMPAIGN HAS PRODUCED: a tautology wearing a migration's clothes MANUFACTURES
+evidence. `Nat.sub_self` cannot fail, so the tripwire could never have gone red —
+an instrument that cannot report bad news is not a weak instrument, it is not an
+instrument.*** 📌 *What survives is the pair compiler names: `p3c_nIn_becomes_slice`
+is real precisely because its two sides are reached by **two different routes** —
+arithmetic on constants versus evaluating a port list. **That is the discriminator
+between a measurement and a tautology: not whether it is true, but whether the two
+sides could have disagreed.***
+
+✅ **SO ITEM 5 GOES TO SLATE CLOSE IN ITS AMENDED FORM** — the shape is *"the
+collapse to zero is the migration completing"*, recorded as a **fact resting on
+the patch**, with the retired tripwires named as what they were and the
+two-routes test attached as the reusable part.
 
 ### ⚠️ TWO CATALOGS, NOT ONE — and a reader will merge them unless this says otherwise
 
