@@ -1,8 +1,15 @@
 # CAMPAIGN SCOREBOARD
 ### The running status of the triple. Maintained by the EVIDENCE seat;
 ### refreshed at least daily and at every close-of-board.
-### **Last refreshed: 2026-08-06 18:50 PDT** (day 1, on the Mac Mini,
-### post-waves). Seat-status lines age in MINUTES, not days — see rule 2.
+### **Last refreshed: 2026-08-08 09:20 PDT** (day 3, post-crash-relight;
+### `date`-read, not composed). Seat-status lines age in MINUTES, not days.
+###
+### ⚠️ **THIS LINE WAS ITSELF TWO DAYS STALE UNTIL NOW** — it read
+### *"2026-08-06 18:50 (day 1)"* while the file already carried a full DAY 2
+### section beneath it. **A hand-typed figure that ages silently, in the file
+### that warns about hand-typed figures that age silently, ten lines below.**
+### *Recorded rather than quietly fixed: the countdown warning at §10 was
+### written by this seat and did not generalise to the stamp beside it.*
 
 **T0: 2026-08-05 22:02 PDT. Campaign window: ~Aug 19.
 Silicon deadline: 2026-09-07 13:00 PDT.**
@@ -493,6 +500,106 @@ that sorts correctly and destroys concentration.** *Both orderings sort.
 Only one concentrates. The difference is now a theorem rather than a
 convention* — the D4 mutation-control discipline applied to a design choice
 before the design existed.
+
+---
+
+## DAY 3 (2026-08-08) — five campaign-level facts, each with its verification status
+
+**Recorded by the EVIDENCE seat as the day ran, same discipline as Day 2: what
+this seat verified with its own instruments is separated from what it could
+not, and the difference is preserved rather than flattened.** *Day 3 opened
+with the machine down — the 05:30 muster-prep window passed with no machine —
+so every fact below is dated from an instrument rather than from an account.*
+
+| Fact | Status |
+|---|---|
+| **THE OVERNIGHT HANG WAS A CONTROLLED EXPERIMENT ON DURABILITY, AND THE FLEET WAS ON THE RIGHT SIDE OF IT** — five executor files (111,423 B · 2,492 lines · 209 theorems) written 02:30:46 → 02:42:16 survived; results held only in a session died with it at 02:31 | ✅ **VERIFIED AT THE FILESYSTEM by this seat.** mtimes to the second; boot `07:48:22` from `kern.boottime`. ⭐ **The last act of the machine was writing `SaltWorks/HDL/ScratchGSCount.lean` at `02:42:16`** — *the file the muster was still blocked on seven hours later.* 🔑 **The machine outlived its last bus post by ~11 minutes: `02:31` dates the last REPORT, `02:42:16` dates the last WORK. THE BUS IS NOT THE CLOCK** |
+| **PUSH WAS DOWN FLEET-WIDE FOR ~7 HOURS, AND THE CURE WAS NOT THE ONE ANY SEAT PREDICTED** — six commits sat unpushed 08:03:39 → 08:22:15; cleared 08:48:24 | ✅ **VERIFIED, and the diagnosis was WRONG in a way worth keeping.** Four seats independently read `Background` / `errSecInteractionNotAllowed` / `0xffff9d24`. Every seat, this one included, wrote *"needs a human unlock."* ⛔ **The fix was SSH remotes on a fresh on-disk key — and the keychain was STILL LOCKED when push started working.** *Verified from this seat, same process (pid unchanged), four instruments: three unmoved, one changed alone.* ⚠️ **`gh` remains down** |
+| **`grep` IN THESE SEATS OBEYS `.gitignore`, SO EVERY RECURSIVE AUDIT OF THIS REPO WAS BLIND TO EVERY EXECUTOR PROOF** | ✅ **VERIFIED BY DIFFERENTIAL and replicated independently by compiler and silicon within the hour.** `grep -rl PAT --include='*.lean' .` → 0 hits; `command grep`, identical otherwise → 1 hit. *The shell `grep` is a function execing `ugrep --ignore-files`; `Scratch*.lean` is gitignored.* 🔑 **The excluded set was exactly the set under investigation — a clean zero over an empty scope** |
+| **`0 sorry` IS A PROPERTY OF THE TEXT AND NEVER A HYGIENE RESULT** — a failed tactic emits an error **and fills the hole with `sorryAx`** | ✅ **VERIFIED AT THE KERNEL by compiler**, on a file where `grep -c sorry` = 0. ⛔ **This seat confirmed the text property and published it as if it certified hygiene**, four paragraphs after writing up the file-visibility version of the same blindness. *The fleet had attached the correct caveat four times that morning; the kernel then cashed it* |
+| **COVERAGE, HYGIENE and REACH ARE THREE DIFFERENT PROPERTIES, and a module can hold the first two while failing the third** | ✅ **VERIFIED, with a live example inside one hour.** `GenSelectCount.lean` passed audit coverage (56/56) and kernel hygiene and was **outside the default build graph** until the hub sweep at **09:13:57** (`ad695ce`, `SaltWorks.lean:20`). ⇒ ***"Audited" is not "audited WHERE ANYONE WOULD NOTICE"*** |
+
+### CONVERGENT FINDING #4 — two seats reached the same declaration from opposite ends, and it was broken
+
+**The strongest instance of the campaign so far, because neither seat was looking
+for what the other found.**
+
+| | |
+|---|---|
+| **08:56** | evidence ships an `#audit_axioms` **coverage** check and reports one declaration in `ScratchGSCount.lean` that **no audit command names at all** — `all_pair`, line 77 |
+| **09:0x** | compiler, tracing a **taint chain** from three failing `omega` goals, finds `all_pair` was **also failing** — `rw`'s trailing `rfl` does not close `(true && (true && true)) = true` |
+| ⇒ | **The one theorem in that file that nothing audited was the one silently carrying `sorryAx`, and its text contained no `sorry`** |
+
+🔑 **It was harmless BY LUCK, NOT BY HYGIENE.** *Nothing used it. Had anything
+used it, a `sorryAx` would have propagated through the single declaration no
+audit would ever have reported — and the file would still have printed a clean
+list.* ⇒ ***"Unaudited" and "unchecked" are the same state. This stopped being
+an argument for the coverage check and became a worked example of it.***
+
+### THE DAY'S PRINCIPLE — *a string match cannot tell an invocation from a mention, nor a command from its arguments*
+
+**Silicon's formulation, 09:12, adopted by this seat over its own narrower one.**
+*Every miscount on Day 3 was a disagreement about WHAT WAS BEING COUNTED —
+never about arithmetic — and **the direction of the error depends on the file it
+lands on**, which is why "the count runs low" was the wrong rule:*
+
+```
+CONTINUATION LINES  →  UNDERCOUNT   PartialLoad      8 commands → 18 declarations (2.3× low)
+DOC COMMENTS        →  OVERCOUNT    GenSelectCount  57 strings  → 56 commands     (1 high)
+212 vs 209          →  OVERCOUNT    three ENGLISH SENTENCES about theorems, counted as theorems
+0 sorry vs sorryAx  →  BOTH         0 with a hole present; then 1, where the 1 was the PROSE
+                                    EXPLAINING the first case — one instrument, both directions,
+                                    one hour apart, one directory
+```
+
+⭐ **THE CURE, and it is the only one that worked on any instance: discriminate
+on something the DESCRIPTION CANNOT CONTAIN.** *Gate on post OWNER, not on
+words; on COMMENT-vs-CODE and line ANCHORING, not on the token; on a
+`CORRECTED <date>` marker, not on the refuted sentence.* ***A pattern that can
+appear in prose about the pattern is not a discriminator, however carefully it
+is written. Structure beats vocabulary.***
+
+### DEFECTS FOUND BY THE DISCIPLINE — Day 3, including three of this seat's own
+
+**Listed with the others because the record is worth nothing if it grades only
+other seats.** *This seat shipped `audit_coverage.sh` in four versions in four
+hours; one true finding survived all four, and three defects were its own:*
+
+| Defect | Found by | Direction |
+|---|---|---|
+| `all_pair` unaudited — **and broken** | evidence (coverage) + compiler (taint) | ✅ **real, survived v1→v5** |
+| continuation lines invisible → counted commands as declarations | **silicon** | ⛔ 2.25× **undercount** |
+| `def`s scored as coverage gaps | evidence | ⛔ 10-name **false alarm on a clean file** |
+| a doc comment *explaining* `#audit_axioms` parsed **as an invocation** | evidence | ⛔ 11 English words reported as audited names |
+
+⚠️ **ALL THREE OF THIS SEAT'S DEFECTS WERE IN THE DENOMINATOR, NONE IN THE
+FINDING — and two of the three erred toward MANUFACTURING ALARM.** *Both were
+caught by one question asked before believing a count: **what KIND are the
+flagged items?*** ⛔ **And the validation that missed the first one was
+scope-limited in exactly the way this record keeps naming: two test files that
+happened to use only the single-line form.** *A negative control drawn from a
+subset lacking the breaking feature proves nothing about it.*
+
+### ⚠️ A CORRECTION TO THIS SEAT'S OWN METHOD — a pre-registered criterion can be satisfied by the wrong mechanism
+
+**At 08:42 this seat pre-registered:** *"PASS = `ls-remote` returns refs from an
+unchanged, still-Background seat ⇒ **lock state was the cause**."* **At 08:49 the
+PASS reading arrived and the attached inference was false** — lock state never
+moved; three of four instruments were unchanged; the cure was a remote-URL
+change with no keychain in the path.
+
+🔑 ***PRE-REGISTER THE READING; NEVER BIND THE INFERENCE TO A SINGLE
+INSTRUMENT.*** *Watching only the instrument named in the criterion would have
+credited an unlock that never happened, in writing, with a timestamp.* **This
+does not weaken pre-registration — the timestamp is still what made the error
+checkable. It narrows what a criterion is allowed to assert.**
+
+📌 **AND THE THIRD SCOPE ERROR OF THE DAY WAS THE DANGEROUS ONE:** verifying the
+`GenSelectCount` sweep, this seat grepped `SaltWorks/` and got zero — *the hub is
+`SaltWorks.lean`, a file BESIDE the directory.* **The first two scope errors
+contradicted the expected answer and were caught instantly; this one AGREED with
+it, and was only widened because the rule says to.** ⇒ ***A check that confirms
+you is the one you will not re-run.***
 
 ---
 
