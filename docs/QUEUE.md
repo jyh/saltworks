@@ -69,10 +69,12 @@
 
 - W1 · WRITE · **PRE-AUTH** — the phase-3 Program.lean patch, on
   arrival of compiler's request (land it yourself; your file).
-- W2 · WRITE · **FIRED 13:59 (the word given on the green trace)** —
-  the salt flagship: W5(S2)#1, K/(π²m²) arm, statement + route +
-  supply per the 13:58 pre-flight; mutation control = the refuted
-  K/(2π²m²) re-cut must FAIL. The flagship front is OPEN.
+- W2 · WRITE · **LANDED 15:31 — the flagship's first theorem in five
+  math lives**: norm_majorantCoeff_le_sq in the kernel (8b4c94c,
+  clean axioms, audit by math's own hand); pre-flight held whole;
+  M2 is the banked control (residual ⊢ 2 = 1, no slack). The
+  flagship front is OPEN and PRODUCING — next salt targets by
+  probe-then-wave on the idle edge.
 - W3 · WRITE · **GATED(L1+L2 landed)** — ③ L3 (three lines from
   bnC_output_frames_are_the_fold + elemSortsAt_all), then L4 (the
   σ-composition, C-class, absorbs the sel-distinctness transport).
