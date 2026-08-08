@@ -4702,9 +4702,16 @@ end OrganSemantics
 /-! ## ⭐⭐ THE ALU OUTPUT SELECT — AND WHAT ITS CERTIFICATE QUANTIFIES OVER
 
 ⚠️ **READ THIS BEFORE ASSUMING `aluSelect` WAS ALREADY GENERAL.**
-`AluSelect.lean:222` carries a driver, a predicate and two theorems:
+`SaltWorks/HDL/AluSelect.lean:460-507` carries a driver, a predicate and two
+theorems:
 
 ```
+-- ⛔⛔ VERBATIM QUOTE OF `SaltWorks/HDL/AluSelect.lean:460-507`. NOT A
+-- DEFINITION SITE. These five declarations are ALIVE and are defined in that
+-- file; this fence is prose about them. A name-grep that lands here is reading
+-- a quotation, and a census that treats this as their definition site will
+-- conclude they have no consumers — which on 2026-08-08 nearly licensed a
+-- wrong deletion of the whole sample layer. To change them, edit AluSelect.lean.
 def asOneHot (m sel : Nat) : Env := ...      -- result m all-ones, the other nine all-zero
 def asBit0 (m sel : Nat) : Bool := (sem aluSelect (asOneHot m sel)).getD 0 false
 def asSelectsOK (m : Nat) : Bool := (List.range 16).all fun sel => asBit0 m sel == decide (sel = m)
@@ -5086,16 +5093,43 @@ theorem run_asBit (G : Env) (k : Nat) (hk : k < 32)
     hnot 3 (by norm_num), mux_pick]
   rfl
 
-/-! ## The select value, and the closed form of a bit tree -/
+/-! ## The select value, and the closed form of a bit tree
 
-/-- The four select nets read as a number — `sel[0]` is the LSB. -/
-def asSelOf (E : Env) : Nat :=
-  (if E (asSel 0) then 1 else 0) + (if E (asSel 1) then 2 else 0)
-    + (if E (asSel 2) then 4 else 0) + (if E (asSel 3) then 8 else 0)
+⚠️ **`gsSelUpTo`/`gsSelOf` are defined HERE, ahead of the generic section below,
+because `asSelOf` is literally `gsSelOf` at the live pair** — the general
+definition has to precede the special one. Nothing else about them is local to
+the literal width; the rest of the `gs*` family stays with `sem_genSelect`. -/
+
+/-- The low `j` select nets read as a number, `sel[0]` the LSB. -/
+def gsSelUpTo (n b : Nat) (F : Env) : Nat → Nat
+  | 0     => 0
+  | j + 1 => gsSelUpTo n b F j + (if F (gsSel n b j) then 2 ^ j else 0)
+
+def gsSelOf (n b : Nat) (F : Env) : Nat := gsSelUpTo n b F b
+
+/-- The four select nets read as a number — `sel[0]` is the LSB.
+
+⇒ **This is `gsSelOf` at the live pair, not a second definition of the same
+thing.** `asOps` and `asSelBits` are plain `def`s (10 and 4), so `asSelOf E` and
+`gsSelOf 10 4 E` are the same term up to delta — `gsSelOf_ten` below is `rfl`,
+and re-sizing the block moves this line by changing `asOps`, not by rewriting a
+four-term sum. The literal four-term reading survives as `asSelOf_expand`, which
+is what the proofs in this section rewrite by. -/
+def asSelOf (E : Env) : Nat := gsSelOf asOps asSelBits E
+
+/-- `asSelOf` unfolded at the live pair: the four select nets, weighted 1/2/4/8.
+*This is the only place the literal width is spelled out, and it is a lemma
+rather than the definition, so nothing downstream unfolds `asSelOf` structurally.* -/
+theorem asSelOf_expand (E : Env) :
+    asSelOf E = (if E (asSel 0) then 1 else 0) + (if E (asSel 1) then 2 else 0)
+      + (if E (asSel 2) then 4 else 0) + (if E (asSel 3) then 8 else 0) := by
+  show 0 + (if E (asSel 0) then 2 ^ 0 else 0) + (if E (asSel 1) then 2 ^ 1 else 0)
+      + (if E (asSel 2) then 2 ^ 2 else 0) + (if E (asSel 3) then 2 ^ 3 else 0) = _
+  norm_num
 
 theorem asV3_eq (F : Env) (k : Nat) :
     asV3 F k = if asSelOf F < asOps then F (asRes (asSelOf F) k) else F asZero := by
-  simp only [asV3, asV2, asV1, asV0, asLeafOf, asSelOf, asOps_eq, asRes_eq]
+  simp only [asV3, asV2, asV1, asV0, asLeafOf, asSelOf_expand, asOps_eq, asRes_eq]
   cases h0 : F (asSel 0) <;> cases h1 : F (asSel 1) <;> cases h2 : F (asSel 2) <;>
     cases h3 : F (asSel 3) <;> norm_num
 
@@ -5106,7 +5140,7 @@ theorem asSelOf_congr (F G : Env) (h : ∀ m : Nat, m < 324 → F m = G m) :
     refine h (asSel j) ?_
     have hb : (320 : Nat) + j < 324 := by omega
     rw [asSel_eq]; exact hb
-  unfold asSelOf
+  rw [asSelOf_expand, asSelOf_expand]
   rw [hsel 0 (by norm_num), hsel 1 (by norm_num), hsel 2 (by norm_num), hsel 3 (by norm_num)]
 
 theorem asV3_congr (F G : Env) (k : Nat) (hk : k < 32) (h : ∀ m : Nat, m < 329 → F m = G m) :
@@ -5352,7 +5386,10 @@ theorem gsPrev_lt (n b k j l : Nat) (hk : k < 32) (hl : l < gsWidth b j) :
     have : l < gsLevelWidth b j := hl
     omega
 
-/-! ### The tree's value -/
+/-! ### The tree's value
+
+*(`gsSelUpTo` and `gsSelOf` are not missing — they are defined ABOVE `asSelOf`,
+which is their instance at `(asOps, asSelBits)`; see the note there.)* -/
 
 /-- Leaf `l` of bit `k`'s tree: a real source below `n`, the shared pad above. -/
 def gsLeafOf (n b : Nat) (F : Env) (k l : Nat) : Bool :=
@@ -5363,13 +5400,6 @@ it the value level `j-1` computed. -/
 def gsV (n b : Nat) (F : Env) (k : Nat) : Nat → Nat → Bool
   | 0,     i => gsLeafOf n b F k i
   | j + 1, i => if F (gsSel n b j) then gsV n b F k j (2 * i + 1) else gsV n b F k j (2 * i)
-
-/-- The low `j` select nets read as a number, `sel[0]` the LSB. -/
-def gsSelUpTo (n b : Nat) (F : Env) : Nat → Nat
-  | 0     => 0
-  | j + 1 => gsSelUpTo n b F j + (if F (gsSel n b j) then 2 ^ j else 0)
-
-def gsSelOf (n b : Nat) (F : Env) : Nat := gsSelUpTo n b F b
 
 /-- ⭐ **THE CLOSED FORM** — position `i` of level `j` holds leaf
 `i * 2^j + (the low j select bits)`. -/
@@ -5806,13 +5836,12 @@ theorem sem_aluSelect_direct (E : Env) :
     rw [asRes_eq]; exact hb
   · rw [asZero_eq]; exact pzero
 
-/-- `asSelOf` — the four select nets read as a number — is `gsSelOf` at `b = 4`. -/
-theorem gsSelOf_ten (E : Env) : gsSelOf 10 4 E = asSelOf E := by
-  show 0 + (if E (asSel 0) then 2 ^ 0 else 0) + (if E (asSel 1) then 2 ^ 1 else 0)
-      + (if E (asSel 2) then 2 ^ 2 else 0) + (if E (asSel 3) then 2 ^ 3 else 0)
-    = (if E (asSel 0) then 1 else 0) + (if E (asSel 1) then 2 else 0)
-      + (if E (asSel 2) then 4 else 0) + (if E (asSel 3) then 8 else 0)
-  norm_num
+/-- `asSelOf` — the four select nets read as a number — is `gsSelOf` at `b = 4`.
+⭐ **`rfl` since `SELOFPARAM`**: `asSelOf` IS `gsSelOf asOps asSelBits`, and
+`asOps`/`asSelBits` are plain `def`s, so the numerals and the names are the same
+term up to delta. *This used to be a `show` against a hand-written four-term sum
+— a second literal-width site that had to be re-typed at every re-size.* -/
+theorem gsSelOf_ten (E : Env) : gsSelOf 10 4 E = asSelOf E := rfl
 
 /-- ⭐⭐ **THE THEOREM — NOW A COROLLARY, STATED VERBATIM.** Unconditional over
 all `2^324` valuations and all 32 outputs, exactly as before; what changed is
@@ -5843,7 +5872,7 @@ theorem getD_map_range_zero (f : Nat → Bool) : ((List.range 32).map f).getD 0 
 
 theorem asSelOf_of_testBit (E : Env) (sel : Nat) (h : sel < 16)
     (hb : ∀ j : Nat, j < 4 → E (asSel j) = sel.testBit j) : asSelOf E = sel := by
-  unfold asSelOf
+  rw [asSelOf_expand]
   rw [hb 0 (by norm_num), hb 1 (by norm_num), hb 2 (by norm_num), hb 3 (by norm_num)]
   interval_cases sel <;> decide
 
@@ -8841,7 +8870,7 @@ open Salt.Tactic
 #audit_axioms asLeafOf asV0 asV1 asV2 asV3 asPrev_0_val
 #audit_axioms asNot_lt asSel_lt asPrev0_lt asPrev1_lt asPrev2_lt asPrev3_lt
 #audit_axioms run_asBit
-#audit_axioms asSelOf asV3_eq asSelOf_congr asV3_congr
+#audit_axioms asSelOf asSelOf_expand asV3_eq asSelOf_congr asV3_congr
 #audit_axioms asPreGates_eq run_asPre run_asBody
 #audit_axioms aluSelect_outs_eq sem_aluSelect
 #audit_axioms getD_map_range_zero asSelOf_of_testBit
