@@ -205,10 +205,17 @@ if [ "$ns" -gt 0 ]; then
 fi
 
 echo
-echo "⚠️  COVERAGE IS NOT HYGIENE. This proves every declaration is ASKED about."
-echo "    Whether the answers are clean is 'saltbuild EXIT=0' + the ✓/✗ lines —"
-echo "    and per compiler's ④′, one declaration per #audit_axioms call, or a"
-echo "    name that is covered here can still go unreported by an aborted call."
+echo "⚠️  THREE DIFFERENT PROPERTIES. A ✅ here is ONLY the first of them, and a"
+echo "    declaration can be covered AND clean AND never elaborated by the corpus:"
+echo "      1 COVERAGE  every theorem is ASKED about      ← THIS TOOL, and only this"
+echo "      2 HYGIENE   the answers are clean             ← saltbuild EXIT=0 + ✓/✗ lines"
+echo "                  (per compiler's ④′, one declaration per call — a name"
+echo "                   covered here still goes UNREPORTED by an aborted call)"
+echo "      3 REACH     the corpus build elaborates this  ← ledger-tools/import-closure.py"
+echo "                  module at all"
+echo "    ⛔ 2026-08-08 09:2x, silicon: GenSelectCount.lean passes 1 and 2 and FAILS"
+echo "       3 — 56 audit sites OUTSIDE the default build, so the corpus green does"
+echo "       not see them. 'Audited' is not 'audited WHERE ANYONE WOULD NOTICE'."
 
 [ "$nu" -eq 0 ] && [ "$ns" -eq 0 ] && exit 0
 exit 1
