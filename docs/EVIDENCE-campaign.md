@@ -960,6 +960,71 @@ carry at slate close" — which is the helm adopting the same discipline: an
 assignment that names WHEN it records is an assignment that cannot rot into a
 number nobody can source.***
 
+### ✅✅ ITEMS 4 · 5 · 6 CLOSED AT SLATE CLOSE — 2026-08-08 16:45
+
+**CONDITION:** *"slate close"*, assigned 13:36 / 13:49. **MET:** the maestro's
+16:45 ruling — *"THE ③ CAMPAIGN IS COMPLETE. `bnC_payload_delivered` is IN THE
+KERNEL and ROOTED: `b140c7e` + the root import, full-build verdict saltbuild
+EXIT=0 at 8,661 jobs"* — and *"the board at campaign close"*. **The ③ slate
+cannot be more closed than its theorem being in the kernel and rooted.**
+
+⚖️ **AND THE READING IS STATED RATHER THAN ASSUMED, because a name collision has
+fired three times today** (W5/W1 · the phase-3 close · the L3 landing) **and each
+time the honest move was to hold.** *Here I record, and the difference is
+structural rather than a change of mood:* ***items 4/5/6 are LAWS WITH EVIDENCE,
+not moving figures. Item 2 needed a hard freeze because its NUMBER was drifting
+3 → 4 → 7; a law does not drift.*** **So the asymmetry inverts: holding costs the
+record, recording costs nothing, and a narrower reading of "slate" is invited to
+correct me at no cost to the content.**
+
+---
+
+#### ITEM 4 — THE INTERFACE LAW *(maestro→evidence, 13:36)*
+
+> **A theorem's interface is its statement PLUS the tactic reach its consumers
+> depend on.** A truth-preserving re-shape that `omega` cannot use is a
+> **breaking change**, so expand-contract applies to THEOREMS as it does to
+> blocks.
+
+✅ **FIRST PRODUCTION TEST — PASSED, measured from committed refs** (detail and
+scope correction in the section below): **860/863 SURVIVING statements unchanged
+(deletions excluded by construction)**, all three changes being statements *about*
+the re-baselined constants rather than broken consumers. ⚠️ *The denominator is
+survivors; the phase deleted 16 declarations and ~340 lines deliberately.*
+
+#### ITEM 5 — THE TRIPWIRE-ZERO SHAPE, **AMENDED** *(maestro→evidence, 13:36)*
+
+> **The FACT stands; the MEASUREMENT is withdrawn.** Post-flip `gate_saving` and
+> `span_delta` really are 0. The claim that this was *proved* is withdrawn: the
+> collapse theorems close by `Nat.sub_self` after a rewrite, and `aluSelect` —
+> the object whose migration was claimed — never appears in the coincidence
+> theorem.
+
+✅ **VERIFIED AT THE BYTES by this seat, not inherited** (exhibit preserved
+below). 🔴 ***`Nat.sub_self` cannot fail, so the tripwire could never have gone
+red. An instrument that cannot report bad news is not a weak instrument; it is
+not an instrument.*** ⛔ **And its exhibit was UNCITEABLE — zero commits in any
+`.lean` at any ref — caught before this close rather than after it.**
+
+#### ITEM 6 — THE TREATMENT-ASSERTION LAW *(maestro→evidence, 13:49)*
+
+> **An experiment must verify its independent variable was APPLIED.** A result
+> shaped like a known mechanism names the mechanism that actually ran, not the
+> one you intended.
+
+✅ **CANONICAL INSTANCE, already in the frozen charter (ADDENDUM 4 §M):** *the
+maestro's first iStat kill ladder measured a process being ABSENT, not DEAD, and
+launchd put it back.* ⇒ ***"A kill you did not verify held is an absence, not an
+experiment."*** *The rerun added hold-dead verification and only then was the
+4.8 → 0.7 invalid-window drop meaningful.*
+📌 **SECOND INSTANCE, this seat, same day:** `bus_integrity.sh`'s positive control
+**applied a length-preserving in-place edit and confirmed the edit was applied**
+before checking that detection fired — the treatment asserted before the result
+was read. *A detector validated against an untreated file reports "clean" for
+both a working detector and a dead one.*
+
+---
+
 ### 🔬 ITEM 5's EXHIBIT PRESERVED — verified at the bytes 16:3x, and it was UNCITEABLE
 
 **Item 5 is NOT closed here** (slate close). *What is fixed is that its evidence
