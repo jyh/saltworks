@@ -3107,7 +3107,11 @@ each diagnosed from the error text.
 ### Build + audit
 
 `saltbuild.sh SaltWorks.Stack.Program` → **EXIT=0**, and the full tree
-`saltbuild.sh` → **EXIT=0, 8637 jobs**, zero `error:`, zero `warning:`.
+`saltbuild.sh` → **EXIT=0**, zero `error:`, zero `warning:` — **8637 jobs when
+first measured (pre-`PCADD`), 8638 re-measured after this section was committed
+on top of it.** *Both numbers stated because the first is what the proof was
+checked against and the second is what HEAD reports; the load-bearing figure is
+the targeted delta below.*
 All 63 new declarations tick `#audit_axioms` at ≤ 3 axioms, i.e. inside
 `[propext, Classical.choice, Quot.sound]`. No `native_decide`, no `sorry`.
 
