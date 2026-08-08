@@ -2920,17 +2920,212 @@ sibling's edits are present. *Recommended for every seat sharing this checkout.*
   `core` that instantiates it is still owed, and `PcNext.lean`'s header still
   says the addition is left to the assembly. *Correcting that prose is a
   compiler-lane edit and was not mine to make.*
-* ⛔ **THE ASSEMBLY PLAN IS STILL STALE AND THIS NODE DOES NOT FIX IT.**
-  `docs/silicon-refute-pcpath-0807.md` §7 is unanswered: §4 of
-  `hdl-c4-core-assembly-plan-0807.md` still routes `pcNext`'s **addend** onto
-  the pc field (`:156`), still lists twelve organs with no pc adder, and `:183`
-  still instructs a builder to take `pcNext`'s low 32. **A builder following §4
-  builds the defect even though `pcAdd` now exists.** *That is HDL's edit; what
-  this node supplies is the block it should name and a kernel-checked gate count
-  for its totals.*
+* ✅ **THE ASSEMBLY PLAN WAS FIXED WHILE THIS NODE WAS IN FLIGHT** (`749792d`,
+  answering `docs/silicon-refute-pcpath-0807.md` §7): §4 now carries a **13th
+  organ — "THE PC ADDER", `adder32`, 160 gates, instantiated via `inst_sem`** —
+  `core.outs` takes **that** block's low 32, and the total is re-derived to
+  `~12,081`. **`pcAdd` is that organ, built and proved.** *An earlier draft of
+  this entry said the plan was stale; it was, for about an hour, and it is not
+  now — corrected rather than left standing.*
+* ⚠️ **TWO THINGS THE PLAN'S ORGAN 13 STILL DOES NOT ACCOUNT FOR, and this node
+  measured both because it had to build them.**
+  1. ⛔ **THE CARRY-IN HAS NO SOURCE.** `adder32.nIn = 65` and **net 64 is a real
+     carry-in port** — an instantiated `adder32` needs a host net already holding
+     `false`, and §4 allocates 160 gates and no zero. `pcAdd` spends **one
+     `⟨129, .const false⟩` gate** on it. ⇒ **The core total is `~12,082`, not
+     `~12,081`, unless the assembly finds a zero net elsewhere** (it cannot reuse
+     an input: `encD`'s state nets are all live). *One gate on 12,000 is
+     nothing; naming it is not, because the plan's discipline is that totals are
+     derived and not carried.*
+  2. **`pcNext`'s 33rd output — the take flag — is confirmed to go nowhere.** The
+     plan says *"the flag nowhere yet"*; in `pcAdd` it is host net `194`,
+     computed and unread. ⭐ *It is also live and `ssa`-valid, which is exactly
+     what makes mutant A — carry-in wired to the take flag instead of the zero —
+     a well-formed circuit rather than a rejected one. **The unallocated flag
+     sitting one wire from the carry-in port is the hazard, and the mutant is
+     that hazard as a theorem.***
 * **`inc32` still has no semantics and is still unreferenced.** This node
   confirms it should stay that way: the pc path goes through `adder32`.
 * **The carry-out is dropped.** `pcAdd.outs` is the 32 sum bits; `adC 32` is
   live in the netlist and unread. Correct — the pc wraps — but it leaves **3
   dead gates** in the top slice (`adG 31`, `adT 31`, and the carry-out `or`),
   which `opt`'s dead-net elimination would remove and which nobody has run.
+
+## ALUSEL — `aluSelect` unconditional, and what its certificate was actually saying
+
+### ⭐ FIRST DELIVERABLE — the certificate reading, measured
+
+`AluSelect.lean:222-231`:
+
+```
+def asOneHot (m sel : Nat) : Env  -- result m all-ones, the other nine all-zero
+def asBit0 (m sel : Nat) : Bool := (sem aluSelect (asOneHot m sel)).getD 0 false
+def asSelectsOK (m : Nat) : Bool := (List.range 16).all fun sel => asBit0 m sel == decide (sel = m)
+theorem aluSelect_selects_on_sample      : asSelectsOK 3 = true := by decide +kernel
+theorem aluSelect_selects_on_sample_last : asSelectsOK 9 = true := by decide +kernel
+```
+
+The docstring says *"all sixteen select values, kernel-checked"*. **True about
+`sel`; silent about everything else.** The axes, separated:
+
+| axis | size | covered by the two theorems |
+|---|---:|---|
+| `sel`, the select value | 16 | ⭐ **UNIVERSAL — all 16, genuinely exhaustive** |
+| `m`, which operand is live | unbounded | ⛔ **SAMPLED — two points, `m = 3` and `m = 9`** |
+| the 320 operand-result bits | `2^320` | ⛔ **one pattern per `m`**; `asOneHot` cannot paint any other picture |
+| the output | 32 bits | ⛔ **bit 0 only** (`asBit0` is `getD 0`) |
+
+⇒ **The block has `2^324` input valuations and 32 output bits. The certificate
+drives 32 of the valuations and reads one output bit.** *`sel` is the universal
+argument, `m` is the sampled one, and the operand bits are not an axis of the
+certificate at all — the one-hot driver collapses them to a single degree of
+freedom.*
+
+⛔ **AND `asSelectsOK` IS NOT A UNIVERSALLY TRUE STATEMENT ABOUT `m`** —
+`asSelectsOK_fails_at_ten : asSelectsOK 10 = false`, derived (no kernel
+evaluation) from the theorem: at the first PAD slot the tree correctly answers
+`false` while `decide (10 = 10)` is `true`. The predicate holds exactly on
+`m < 10 ∨ 16 ≤ m`; both proved points sit inside the first range. *So "the
+certificate passes" is not a property `aluSelect` has for all `m`. It is a
+property of the ten real operand slots — which is what `asSelectsOK_of_lt` now
+proves outright.* The docstring's claim about "the six PADDING slots (10…15)" is
+exercised as `sel` values and never as `m` values.
+
+### What landed — one theorem, universal in every input
+
+```
+theorem sem_aluSelect (E : Env) :
+    sem aluSelect E
+      = (List.range 32).map fun k =>
+          if asSelOf E < asOps then E (asRes (asSelOf E) k) else false
+```
+
+Arbitrary operand bits, arbitrary select bits, arbitrary garbage on the 1,445
+internal nets; **all 32 outputs pinned.** Stated in the block's own vocabulary
+(`asSelOf` = the four select nets as a number, LSB first; `asRes r k` = bit `k`
+of result `r`; `asOps = 10`), so it says the thing the file's design decision
+claims and nothing checked: **`aluSelect` is a 16:1 mux whose top six sources are
+tied low.**
+
+* **`asSelectsOK_of_lt (m) (hm : m < asOps) : asSelectsOK m = true`** — the
+  sampled predicate, for **all ten** real operands, as a corollary. This
+  supersedes `aluSelect_selects_on_sample`/`_last` rather than restating them.
+* **`sem_aluSelect_drive`** — the block on the **general** driver `asDrive`
+  (ten arbitrary 32-bit results + a select value). `asOneHot` is one line of it.
+* **`aluSelect_word`** — the selected operand as a `Word`; the `pcAddend_word`
+  analogue.
+* **`aluField_is_aluSelect_add`** — the `rd` field through the select, for
+  `ADD` in slot 0. ⛔ **NO `C4Spec` FIELD IS CLAIMED CLOSED. `core` does not
+  exist**; this is the service the assembly would apply, in the shape
+  `addField_is_adder32` performs for the adder.
+
+### ⭐ WHICH LANDED MACHINERY TRANSFERRED — measured before proving
+
+*Two briefs in a row were wrong about this, so it was checked first.*
+
+* **`run_pointwise` — did NOT transfer.** `aluSelect` has no pointwise block.
+  Apart from one `const` and four inverters, every gate belongs to a mux triple
+  whose fanin is another gate's output.
+* **`run_orChain` — did NOT transfer.** There is no `orChain` here. The
+  reduction is a **tree**, not a chain; a tree's levels are blocks in series,
+  not a fold, so the chain induction has nothing to bite on.
+* **`sem_adder32`'s carry induction — no.** No carry, no arithmetic.
+* **What transferred is the METHOD** — frame lemma plus an induction carrying an
+  invariant — and `Sem.lean`'s `run_of_unwritten` / `run_append`.
+
+⭐ **THE NEW GENERIC PIECE: `run_muxRow`** — a row of `n` two-to-one muxes, three
+gates each (`and`/`and`/`or`), proved generically over the base net, both source
+functions, both select nets and `n`. It is to selectors what `run_pointwise` is
+to bitwise blocks. `aluSelect`'s 1,440 mux gates are **four instances of it**
+(widths 8/4/2/1), and any later block emitting mux triples inherits it.
+
+### The decomposition
+
+```
+1 gate     const false                          the shared pad source
+4 gates    not sel[j]                           one inverter per select bit, shared
+1440 gates 32 independent 4-level mux trees     45 gates per output bit, 15 muxes x 3
+```
+
+Bit `k`'s tree occupies nets `329 + 45k … 329 + 45k + 44` and reads only primary
+inputs, the pad, and the four inverters — so the 32 trees are proved **once**,
+generically in `k` (`run_asBit`), and composed by an induction whose frame is
+`m < 329` (`run_asBody`).
+
+### ⛔ NON-VACUITY — the control bar was raised, and it is met
+
+* **`aluSelectCut`** — `aluSelect` with **exactly one gate** changed
+  (`aluSelectCut_is_one_gate` proves the zip differs in one position): bit 0's
+  level-0 mux at position 2 reads leaf **4** on both inputs, so `sel = 5` returns
+  operand 4. Still `ssa`, still 1,445 gates.
+  * ⭐ **`aluSelectCut_passes_the_certificate : asSelectsOKCut 3 = true ∧
+    asSelectsOKCut 9 = true`** — the mutant satisfies **both** landed theorems,
+    because with only operand 3 (or 9) live, the mutated mux sees `false` on both
+    of its inputs and cannot tell them apart.
+  * ⭐ **`aluSelectCut_fails_the_theorem : asSelectsOKCut 5 = false ∧
+    asSelectsOK 5 = true`** — at `m = 5` the mutant answers wrong and the
+    unconditional theorem proves the real block answers right. **A mutation
+    invisible to the two proved `m` values does exist, and this is it.**
+* **`sem_aluSelect_off_the_sample`** — `asOffEnv` has **two operand results live
+  at once**, which no `asOneHot m sel` can produce (proved: nets `0` and `64`
+  both `true` forces `m = 0` and `m = 2`), and the theorem gives its full
+  32-bit answer.
+
+### Attempt counts — content vs mechanics
+
+**The mathematics settled in cycle 1 and never changed.** The decomposition
+(`muxRow` row lemma → four levels in series → 32 trees in series → the pre-block)
+was fixed before the first build and every later cycle was elaboration mechanics,
+each diagnosed from the error text.
+
+* **Statements: 4 groups (budget 3–4, met)** — the block theorem; the
+  certificate-supersession pair (`asSelectsOK_of_lt` + `asSelectsOK_fails_at_ten`);
+  the driver/word/ISA bridge; the controls.
+* **Proofs: 5 scratch cycles (budget 2 — over, recorded). CONTENT CHANGED IN
+  ZERO OF THEM.** The five, all mechanics:
+  1. ⛔ **The `Net` trap, three times, and it is the whole story of this node.**
+     `omega` reported "no usable constraints" for `320 + j < 320` because the
+     goal was `Net`-typed. Fix: a `Nat` mirror (`asB`) for the net layout, and
+     `Nat`-binder restatements (`asOneHot_eq`, `asDrive_eq`, `asOffEnv_eq`)
+     whose entire content is moving a definition's own binder from `Net` to
+     `Nat`. **The trap also eats `Net`-typed HYPOTHESES silently**, so
+     `q i < base` had to be discharged by `Nat.lt_of_lt_of_le`, not `omega`.
+  2. `refine ⟨?_, ?_⟩ <;> · <multi-line block>` does not parse; and
+     `run_of_unwritten`'s `g.out ≠ n` obligations were replaced outright by a
+     3-gate frame lemma (`run_three_frame`), which removed the `Gate.out`
+     projection goals the trap was hiding behind.
+  3. `rw` cannot use `asPrev_0_val : F (asPrev k 0 l) = asLeafOf F k l` — the
+     pattern is metavariable-headed (`?F (asPrev ?k 0 ?l)`). Explicit
+     instantiation, not `simp only`.
+  4. ⛔ **`rfl` on `sem aluSelect …` blows `maxRecDepth`** — it forces
+     `aluSelect.gates` (1,445 gates). Fix: never let a defeq check straddle the
+     gate list; pull the `outs` equality out as its own `rfl` lemma
+     (`aluSelect_outs_eq`) and close the rest with `Function.comp_def`.
+  5. `List.append_nil` is not `rfl`, so `flatMap` over `List.range 4` needs one
+     rewrite before the four levels line up.
+
+### Build + audit
+
+`saltbuild.sh SaltWorks.Stack.Program` → **EXIT=0**, and the full tree
+`saltbuild.sh` → **EXIT=0, 8637 jobs**, zero `error:`, zero `warning:`.
+All 63 new declarations tick `#audit_axioms` at ≤ 3 axioms, i.e. inside
+`[propext, Classical.choice, Quot.sound]`. No `native_decide`, no `sorry`.
+
+**Job-count delta: +1.** `Stack/Program.lean` gained `import
+SaltWorks.HDL.AluSelect`; targeted build went **8605 → 8606 jobs** (`AluSelect`'s
+own two imports, `EmitS` and `Compose`, were already in the closure).
+Independently re-checked in `ScratchMATHALU.lean` (EXIT=0; deleted, not
+committed).
+
+### Left undetermined
+
+* **`zeroTree` is still sampled-only** — it has no behavioural theorem at all,
+  and it is the other half of `AluSelect.lean`. It is an OR-tree, so
+  `run_muxRow` does not apply, but the same level-in-series skeleton does.
+* **`aluSelect`'s ten sources still do not all exist.** `sll` and `sra` have no
+  producer; this theorem says what the block does with whatever is presented to
+  it, which makes the missing producers *more* visible, not less.
+* **`C4Spec` is untouched.** No `core`.
+* **`asSelectsOK` is now redundant** as a claim (superseded at all ten real `m`)
+  but is retained: it is the tripwire, and `aluSelectCut` shows exactly how far a
+  tripwire can be walked past.
