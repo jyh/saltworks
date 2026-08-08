@@ -386,4 +386,177 @@ theorem bnC_env_agree (st inp : List Bool) (hst : st.length = 96) (e : Nat) (he 
     show run (batcherNetC.env inp st) pre (bnCState e + 3) = _
     simpa using hstate 3 (by omega)
 
+/-! ### The per-bit join -/
+
+theorem getD_map_bool (l : List Net) (f : Net → Bool) (j : Nat) (hj : j < l.length) :
+    (l.map f).getD j false = f (l.getD j 0) := by
+  rw [List.getD_eq_getElem _ _ (by simpa using hj), List.getD_eq_getElem _ _ hj,
+      List.getElem_map]
+
+theorem bnCCompAt_mem (e : Nat) (he : e < 24) : bnCCompAt e ∈ bnComps := by
+  have hlen : bnComps.length = 24 := bnC_comps_count
+  have h : e < bnComps.length := by rw [hlen]; exact he
+  rw [bnCCompAt, List.getD_eq_getElem _ _ h]
+  exact List.getElem_mem h
+
+theorem bnCCompAt_lt (e : Nat) (he : e < 24) :
+    (bnCCompAt e).1 < (bnCDatAt e).length ∧ (bnCCompAt e).2 < (bnCDatAt e).length := by
+  have h := bnComps_lt_eight _ (bnCCompAt_mem e he)
+  rw [bnCDatAt_length]
+  exact h
+
+/-- The four next-state ports are gate outputs, and they live below net 41. -/
+theorem ceCcore_state_port_gate (j : Nat) (hj : j < 4) :
+    (ceCcore.gates.map Gate.out).contains (ceCcore.outs.getD (j + 2) 0) = true := by
+  interval_cases j <;> decide +kernel
+
+theorem ceCcore_state_port_lt (j : Nat) (hj : j < 4) :
+    ceCcore.outs.getD (j + 2) 0 < ceCcore.nIn + ceCcore.gates.length := by
+  interval_cases j <;> decide +kernel
+
+/-- ⭐ **THE PER-BIT JOIN — element `e`'s `j`-th next-state bit in the NETWORK is
+the bit `ceC` computes standalone.** Everything above meets here:
+`bnC_state_net` names the net, `bnCBuild_state_sem` factors the element out of
+the fold, and `run_agree_of_inputs_circ` + `bnC_env_agree` replace the network's
+environment by `ceC`'s own. -/
+theorem bnC_state_bit (st inp : List Bool) (hst : st.length = 96) (e : Nat) (he : e < 24)
+    (j : Nat) (hj : j < 4) (pre : List Gate)
+    (hpre : bnCCore.gates = pre ++ (bnCBuild e (bnComps.drop e) (bnCDatAt e)).1) :
+    run (batcherNetC.env inp st) bnCCore.gates (bnCResult.2.2.getD (4 * e + j) 0)
+      = run (ceC.env (bnCElemInAt st inp e) (bnCSlice st e)) ceCcore.gates
+          (ceCcore.outs.getD (j + 2) 0) := by
+  have hab := bnCCompAt_lt e he
+  rw [bnC_state_net e j he hj, hpre, run_append, bnComps_drop_cons e he]
+  rw [show (bnCCompAt e) = ((bnCCompAt e).1, (bnCCompAt e).2) from rfl]
+  rw [bnCBuild_state_sem e (bnCCompAt e).1 (bnCCompAt e).2 (bnComps.drop (e+1))
+        (bnCDatAt e) _ (bnCDatAt_below e) hab.1 hab.2 _ (ceCcore_state_port_gate j hj)]
+  exact run_agree_of_inputs_circ ceCcore ceCcore_ssa' _ _
+    (bnC_env_agree st inp hst e he pre hpre) _ (ceCcore_state_port_lt j hj)
+
+/-! ### ⭐⭐ THE ONE-CYCLE SLICE LEMMA -/
+
+theorem bnCCore_outs_eq : bnCCore.outs = bnCResult.2.1 ++ bnCResult.2.2 := rfl
+
+theorem ceCcore_outs_drop2 :
+    ceCcore.outs.drop 2 = [ceCcore.outs.getD 2 0, ceCcore.outs.getD 3 0,
+                           ceCcore.outs.getD 4 0, ceCcore.outs.getD 5 0] := by
+  decide +kernel
+
+/-- The network's next state is the fold's state nets, evaluated. -/
+theorem bnC_step_state (st inp : List Bool) :
+    (stepSeq batcherNetC st inp).2
+      = bnCResult.2.2.map (run (batcherNetC.env inp st) bnCCore.gates) := by
+  have hnOut : batcherNetC.nOut = 8 := by decide +kernel
+  have hlen : (bnCResult.2.1.map (run (batcherNetC.env inp st) bnCCore.gates)).length = 8 := by
+    rw [List.length_map]
+    have h := bnCBuild_dat_length bnComps 0 ((List.range bnCWires).map bnCDatIn)
+    have h8 : ((List.range bnCWires).map bnCDatIn).length = 8 := by decide +kernel
+    rw [h8] at h
+    exact h
+  show (sem bnCCore _).drop batcherNetC.nOut = _
+  rw [sem, hnOut, bnCCore_outs_eq, List.map_append, ← hlen, List.drop_left]
+
+theorem bnCResult_state_length : bnCResult.2.2.length = 96 := (bnCCore_outs_split).2
+
+/-- ⭐⭐ **ONE CYCLE: element `e`'s state slice steps exactly as `ceC` does.**
+This is step ③ discharged at the network level — the fact the trace induction
+lifts across a frame. -/
+theorem bnC_step_slice (st inp : List Bool) (hst : st.length = 96) (e : Nat) (he : e < 24) :
+    bnCSlice (stepSeq batcherNetC st inp).2 e
+      = (stepSeq ceC (bnCSlice st e) (bnCElemInAt st inp e)).2 := by
+  obtain ⟨pre, hpre0⟩ := bnCBuild_gates_drop e bnComps 0 ((List.range bnCWires).map bnCDatIn)
+  have hpre : bnCCore.gates = pre ++ (bnCBuild e (bnComps.drop e) (bnCDatAt e)).1 := by
+    have h := hpre0
+    simp only [Nat.zero_add] at h
+    exact h
+  have hbit : ∀ j, j < 4 →
+      (bnCResult.2.2.map (run (batcherNetC.env inp st) bnCCore.gates)).getD (4 * e + j) false
+        = run (ceC.env (bnCElemInAt st inp e) (bnCSlice st e)) ceCcore.gates
+            (ceCcore.outs.getD (j + 2) 0) := by
+    intro j hj
+    rw [getD_map_bool _ _ _ (by rw [bnCResult_state_length]; omega)]
+    exact bnC_state_bit st inp hst e he j hj pre hpre
+  have hnOut2 : ceC.nOut = 2 := by decide +kernel
+  have hRHS : (stepSeq ceC (bnCSlice st e) (bnCElemInAt st inp e)).2
+      = [run (ceC.env (bnCElemInAt st inp e) (bnCSlice st e)) ceCcore.gates
+           (ceCcore.outs.getD 2 0),
+         run (ceC.env (bnCElemInAt st inp e) (bnCSlice st e)) ceCcore.gates
+           (ceCcore.outs.getD 3 0),
+         run (ceC.env (bnCElemInAt st inp e) (bnCSlice st e)) ceCcore.gates
+           (ceCcore.outs.getD 4 0),
+         run (ceC.env (bnCElemInAt st inp e) (bnCSlice st e)) ceCcore.gates
+           (ceCcore.outs.getD 5 0)] := by
+    show (sem ceCcore _).drop ceC.nOut = _
+    rw [sem, hnOut2]
+    rfl
+  -- literal indices: `4*e + 0 ≡ 4*e` and `0 + 2 ≡ 2` are DEFEQ, so `exact` takes
+  -- them. (`norm_num` would also rewrite the left sides into `getElem?` form and
+  -- stop them matching the goal.)
+  have h0 : (bnCResult.2.2.map (run (batcherNetC.env inp st) bnCCore.gates)).getD (4 * e) false
+      = run (ceC.env (bnCElemInAt st inp e) (bnCSlice st e)) ceCcore.gates
+          (ceCcore.outs.getD 2 0) := hbit 0 (by omega)
+  have h1 : (bnCResult.2.2.map (run (batcherNetC.env inp st) bnCCore.gates)).getD (4 * e + 1) false
+      = run (ceC.env (bnCElemInAt st inp e) (bnCSlice st e)) ceCcore.gates
+          (ceCcore.outs.getD 3 0) := hbit 1 (by omega)
+  have h2 : (bnCResult.2.2.map (run (batcherNetC.env inp st) bnCCore.gates)).getD (4 * e + 2) false
+      = run (ceC.env (bnCElemInAt st inp e) (bnCSlice st e)) ceCcore.gates
+          (ceCcore.outs.getD 4 0) := hbit 2 (by omega)
+  have h3 : (bnCResult.2.2.map (run (batcherNetC.env inp st) bnCCore.gates)).getD (4 * e + 3) false
+      = run (ceC.env (bnCElemInAt st inp e) (bnCSlice st e)) ceCcore.gates
+          (ceCcore.outs.getD 5 0) := hbit 3 (by omega)
+  rw [bnC_step_state, hRHS]
+  show [_, _, _, _] = _
+  rw [h0, h1, h2, h3]
+
+/-! ## ⭐⭐⭐ THE TRACE INDUCTION -/
+
+theorem bnC_step_state_length (st inp : List Bool) :
+    (stepSeq batcherNetC st inp).2.length = 96 := by
+  rw [bnC_step_state, List.length_map, bnCResult_state_length]
+
+/-- ⭐ **`elemTrace`, AND IT IS A DEFINITION RATHER THAN A HYPOTHESIS.**
+Element `e`'s input at cycle `t` is what the previous layer drove at cycle `t`,
+so the trace can only be defined by a recursion that carries the NETWORK's own
+state forward. That is the whole difficulty the bank named, and this is it. -/
+def bnCElemTrace : List Bool → List (List Bool) → Nat → List (List Bool)
+  | _,  [],        _ => []
+  | st, inp :: is, e =>
+      bnCElemInAt st inp e :: bnCElemTrace (stepSeq batcherNetC st inp).2 is e
+
+/-- ⭐⭐⭐ **THE TRACE INDUCTION — the network's 96-bit state, restricted to
+element `e`'s slice, evolves over ANY trace exactly as a standalone `ceC` does on
+the inputs the network presented it.**
+
+*The induction carries no new content about the element: `bnC_step_slice` is the
+whole cycle, and this lifts it. Any initial state, any trace length — no reset
+assumption, which is what a power-gated TinyTapeout tile requires.* -/
+theorem bnC_trace_factors : ∀ (tr : List (List Bool)) (st : List Bool), st.length = 96 →
+    ∀ (e : Nat), e < 24 →
+      bnCSlice (runTrace batcherNetC st tr).2 e
+        = (runTrace ceC (bnCSlice st e) (bnCElemTrace st tr e)).2 := by
+  intro tr
+  induction tr with
+  | nil => intro st _ e _; rfl
+  | cons inp is ih =>
+    intro st hst e he
+    show bnCSlice (runTrace batcherNetC (stepSeq batcherNetC st inp).2 is).2 e
+      = (runTrace ceC (stepSeq ceC (bnCSlice st e) (bnCElemInAt st inp e)).2
+          (bnCElemTrace (stepSeq batcherNetC st inp).2 is e)).2
+    rw [ih _ (bnC_step_state_length st inp) e he, bnC_step_slice st inp hst e he]
+
+/-! ### Axiom audit -/
+
+#audit_axioms bnCDatStep bnCDatDrop bnCBuild_state_drop4 bnCBuild_state_drop
+#audit_axioms bnCBuild_gates_drop bnCDatStep_length bnCDatDrop_length bnCDatDrop_below
+#audit_axioms bnCDat0 bnCDat0_length bnCDatAt bnCCompAt bnCDatAt_length
+#audit_axioms bnComps_lt_eight bnCDat0_below bnCDatAt_below bnC_run_split_low
+#audit_axioms bnCBuild_dat_length bnComps_drop_cons
+#audit_axioms run_agree_of_inputs run_agree_of_inputs_circ
+#audit_axioms getD_drop_nat getD_map_nat ceCcore_outs_length bnC_state_net
+#audit_axioms bnCElemInAt ceC_nIn_eq ceC_env_in ceC_env_st bnC_run_pre_low bnC_env_agree
+#audit_axioms getD_map_bool bnCCompAt_mem bnCCompAt_lt
+#audit_axioms ceCcore_state_port_gate ceCcore_state_port_lt bnC_state_bit
+#audit_axioms bnCCore_outs_eq ceCcore_outs_drop2 bnC_step_state bnCResult_state_length
+#audit_axioms bnC_step_slice bnC_step_state_length bnCElemTrace bnC_trace_factors
+
 end SaltWorks.HDL
