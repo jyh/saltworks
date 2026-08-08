@@ -63,6 +63,45 @@ Rationale: the fabric measures ~96 cells against a ~17,955 µm² tile, so area d
 not force pipelining; combinational depth is 3 elements (~9 gates), nowhere near
 the timing budget; and an unpipelined chain keeps `t = p` at every stage, which
 is what makes the schedule below one line instead of an arithmetic puzzle.
+
+> ⛔ **BOTH FIGURES IN THAT RATIONALE ARE NOW MEASURED FALSE — silicon, 8/7 19:10,
+> on the convention-C signoff (`31233373545`). The paragraph above is left exactly
+> as written; this note sits beside it.**
+>
+> ```
+>                        as ruled        convention C (measured)
+> cells                  ~96             ~1,240            13×
+> combinational depth    3 elem (~9)     47 cell stages     5.2×  (38 in u_sort)
+> our logic delay        "nowhere near"  17.677 ns of 20    slack −5.927 VIOLATED
+> ```
+>
+> ⭐ **BUT THE TWO LEGS DO NOT FAIL TOGETHER, AND SAYING "BOTH WRONG" FLATTENS A
+> REAL DIFFERENCE:**
+> * **The CELLS leg: the number is wrong by 13×, THE INFERENCE SURVIVES.** It
+>   claimed only that *area does not force pipelining*, and utilization went
+>   15.28 % → **18.85 %**. Still true, for the same reason, at thirteen times the
+>   size.
+> * 🔴 **The DEPTH leg: the number is wrong by 5.2× AND THE INFERENCE IS
+>   DESTROYED.** *"Nowhere near the timing budget"* became a **violated
+>   constraint**. This is not a stale figure — it is a claim that reversed.
+> * **The THIRD leg — that an unpipelined chain keeps `t = p`, making the schedule
+>   one line — is untouched.** It was always a claim about the SCHEDULE'S FORM,
+>   never about feasibility, and nothing measured bears on it.
+>
+> ⚠️ **AND THE VIOLATION HAS A SCOPE, WHICH THE WORD "VIOLATED" HIDES:** the
+> −5.927 ns is against a **20 ns period (50 MHz)**. **The tile declares 25 Mbit/s
+> — a 40 ns period — where the slow corner closes at 25.93 ns with 14.1 ns of
+> margin.** ⇒ ***The depth leg is refuted AT 50 MHz and the design closes AT THE
+> RATE IT DECLARES. Both are true and they are different scopes*** — the same
+> trap as a certificate whose name outruns its quantifier, one level up.
+>
+> ⛔ **I AM NOT RE-TAKING THE RULING, AND THIS NOTE IS NOT A RE-TAKING.** *Silicon
+> has SHIPPED on it: six-of-six green, `gl_test` passing on the post-layout
+> netlist, hold clean at all nine corners.* **Whether to pipeline the fabric is a
+> silicon + maestro decision with a fabrication deadline attached (TTSKY26c closes
+> 2026-09-07), not a documentation fix.** *What I owe and have paid here is the
+> FACTS the ruling was justified on. The ruling's author does not get to quietly
+> restate its premises and call the ruling unchanged.*
 (A pipelined variant staggers stage `j`'s address bit to `t = 1 + 2j`. That is a
 real design, but it is not this one, and mixing the two silently is how the
 delivery window gets stated wrong.)
