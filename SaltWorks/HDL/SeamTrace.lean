@@ -790,37 +790,60 @@ theorem bnCDatAt_succ (k : Nat) (hk : k < 24) :
   have h := bnCDatDrop_succ k bnComps 0 ((List.range bnCWires).map bnCDatIn) hlen
   simpa [bnCDatAt, bnCDat0, bnCCompAt] using h
 
-/-! #### ⛔ NEXT: `bnCDatStep_getD`, and it beat me three times — the obstacle is
-#### recorded so the next hand does not re-pay it
+/-- ⭐ **Reading a wire after element `k` has written — and this IS `applyComp`'s
+shape:** `if i = c.1 … else if i = c.2 … else v i`. -/
+theorem bnCDatStep_getD (e a b : Nat) (dat : List Net) (i : Nat)
+    (hab : a ≠ b) (ha : a < dat.length) (hb : b < dat.length) :
+    (bnCDatStep e a b dat).getD i 0
+      = if i = a then (instOuts ceCcore (bnCSigma e a b dat) (bnCOff e)).getD 0 0
+        else if i = b then (instOuts ceCcore (bnCSigma e a b dat) (bnCOff e)).getD 1 0
+        else dat.getD i 0 := by
+  -- FOURTH attempt, and the technique came from math's 20:32 finding: `rw` fires
+  -- where `simp` no-ops or diverges. `List.getElem?_set_of_lt'` is the right
+  -- lemma — it needs only the SET index in range and yields the whole conditional.
+  simp only [bnCDatStep]
+  generalize (instOuts ceCcore (bnCSigma e a b dat) (bnCOff e)).getD 0 0 = v0
+  generalize (instOuts ceCcore (bnCSigma e a b dat) (bnCOff e)).getD 1 0 = v1
+  rw [List.getD_eq_getElem?_getD, List.getD_eq_getElem?_getD,
+      List.getElem?_set_of_lt' v1 _ (by simpa using hb),
+      List.getElem?_set_of_lt' v0 _ ha]
+  by_cases hia : i = a
+  · have hbi : b ≠ i := fun h => hab (hia.symm.trans h.symm)
+    rw [if_neg hbi, if_pos hia.symm, if_pos hia, Option.getD_some]
+  · by_cases hib : i = b
+    · rw [if_pos hib.symm, if_neg hia, if_pos hib, Option.getD_some]
+    · have hai : a ≠ i := fun h => hia h.symm
+      have hbi : b ≠ i := fun h => hib h.symm
+      rw [if_neg hbi, if_neg hai, if_neg hia, if_neg hib]
 
-**The statement wanted, and it is `applyComp`'s shape exactly:**
-```lean
-(bnCDatStep e a b dat).getD i 0
-  = if i = a then (instOuts ceCcore (bnCSigma e a b dat) (bnCOff e)).getD 0 0
-    else if i = b then (instOuts … ).getD 1 0
-    else dat.getD i 0                        -- given a ≠ b, a < len, b < len
-```
-*Compare `applyComp c v i = if i = c.1 then min … else if i = c.2 then max … else v i`.*
-**The `i = a` case is proved; cases `i = b` and `i ∉ {a,b}` are not.**
+/-! #### ✅ `bnCDatStep_getD` — SOLVED ON THE FOURTH ATTEMPT, BY A TECHNIQUE THAT
+#### CAME OFF THE BUS. The three failures are kept: they are the expensive part.
 
-📌 **THREE ATTEMPTS, THREE DIFFERENT FAILURES, ALL RECORDED BECAUSE NONE IS
-OBVIOUS:**
+⭐ **WHAT SOLVED IT WAS MATH'S 20:32 TACTIC FINDING, NOT MORE FORCE:** *"`simp`
+will not fire … it reports the lemma unused and NO-OPS SILENTLY. `rw` fires on
+the IDENTICAL goal."* **Nine minutes later that was the answer here.** ⇒ ***The
+three failures below were all `simp`-shaped; the fix was to stop using `simp`.***
+Plus the right lemma: **`List.getElem?_set_of_lt'`**, which needs only the SET
+index in range and yields the whole conditional in one step.
+
+**THE THREE FAILURES, KEPT — because each cost a build and none is obvious:**
 1. ⛔ `List.getD_set_ne` / `List.getD_set_self_of_lt` **do not exist** in this
-   toolchain. What batteries has is `List.getElem?_set_eq_of_lt` and
-   `List.getElem?_set_of_lt` — so the route is through `getElem?`, not `getD`.
-2. ⛔ `subst hia` on `hia : i = a` **eliminates `a`, not `i`**, and every later
-   mention fails with *"Unknown identifier `a`"*. (Math hit the same shape at
-   19:18 through a δ-alias.) **Use `by_cases` + explicit `Ne.symm` forms.**
-3. ⛔ `simp` **blows `maxRecDepth` (8000) on the `i = b` and neither cases, even
-   after `generalize`-ing both instOuts terms away.** The `i = a` case with the
-   same lemma set succeeds, so it is not the big term alone. *Unresolved — and
-   the `set` lemmas orient their conditions `a = i`, not `i = a`, which is worth
-   checking first.*
+   toolchain. Batteries has `getElem?_set_eq_of_lt` / `getElem?_set_of_lt(')`, so
+   the route is through `getElem?`, never `getD`.
+2. ⛔ `subst hia` on `hia : i = a` **eliminates `a`, not `i`** — every later
+   mention then fails *"Unknown identifier `a`"*. (Math hit the same shape at
+   19:18 through a δ-alias.) **Use `by_cases` + explicit `Ne.symm` forms**, and
+   note the `set` lemmas orient their conditions `a = i`, not `i = a`.
+3. ⛔ `simp` **blew `maxRecDepth` (8000)** on two of the three cases *even after
+   `generalize`-ing both `instOuts` terms away*, while the third succeeded with
+   the same lemma set. **That asymmetry was the tell that the tactic, not the
+   term, was the problem** — and I read it as "the term is too big" for three
+   attempts.
 
-⚠️ **AND THE AUDIT IS WHAT CAUGHT THE DANGER: an unsolved goal became `sorryAx`,
-and `#audit_axioms` FAILED THE BUILD on it.** *A red build is why nothing here
-was committed. **The whitelist is not paperwork — it is the thing standing
-between a tactic failure and a committed hole.*** -/
+⚠️ **AND THE AUDIT IS WHAT KEPT THE FAILURES HONEST: an unsolved goal became
+`sorryAx`, and `#audit_axioms` FAILED THE BUILD on it.** ***A red build is why
+none of the three broken attempts was ever committed. The whitelist is not
+paperwork — it is what stands between a tactic failure and a committed hole.*** -/
 
 /-! ### ⚠️ STEP 2 IS NOT THE SAME SHAPE AS STEP 1 — the data path is PER-FRAME
 
@@ -867,6 +890,6 @@ the frame is the level the discharge has to work at.* -/
 #audit_axioms bnCBuild_dat_drop bnCResult_dat
 #audit_axioms ceCcore_data_port_gate ceCcore_data_port_lt bnC_data_bit
 #audit_axioms bnCElemOutAt ceC_nOut_eq bnC_step_out bnCElemOuts bnC_out_factors
-#audit_axioms bnCDatDrop_succ bnCDatAt_succ
+#audit_axioms bnCDatDrop_succ bnCDatAt_succ bnCDatStep_getD
 
 end SaltWorks.HDL
