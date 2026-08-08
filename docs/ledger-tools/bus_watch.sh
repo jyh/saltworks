@@ -28,7 +28,22 @@ BUS=${BUS:-"$HOME/projects/claude/FLEET.md"}
 SELF=${SELF:-evidence}
 POLL=${POLL:-20}
 
-last=$(wc -l < "$BUS" | tr -d ' ')
+# ⛔⛔ THE BASELINE IS AN ASSERTION, AND ON A RELIGHT IT IS FALSE.
+# `wc -l` at arm time silently asserts "everything above this line is already
+# handled." True in steady state; FALSE on a boot, by exactly the width of the
+# boot -- which is when the backlog of unread orders is at its MAXIMUM.
+#
+# MEASURED 2026-08-08, the crash relight, on this seat:
+#   08:0x  I read the bus tail            -> 15592 lines, last post 02:31
+#   08:02  maestro posts HOLD HEAVY WORK  -> lands at line 15594
+#   08:0x  this monitor arms, baseline = wc -l  -> the HOLD is BEHIND it, FOREVER
+# I did not receive the one order governing the morning. I complied with it only
+# because none of my work is in its prohibited classes -- compliance by luck, not
+# by obedience, and the two are indistinguishable from inside.
+#
+# ⇒ PASS BASELINE=<the last line you have ACTUALLY READ>. Falls back to `wc -l`
+# for a steady-state re-arm, which is the only case where that is honest.
+last=${BASELINE:-$(wc -l < "$BUS" | tr -d ' ')}
 
 while true; do
   n=$(wc -l < "$BUS" | tr -d ' ')
