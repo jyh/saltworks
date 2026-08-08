@@ -318,7 +318,7 @@ theorem bnC_run_pre_low (E : Env) (e : Nat) (pre : List Gate)
 /-- ⭐ **THE AGREEMENT: the network's wiring, seen through the prefix, IS `ceC`'s
 own input environment.** Inputs 0–2 are the rst line and the two data wires the
 previous layer just drove; inputs 3–6 are element `e`'s own state slice. -/
-theorem bnC_env_agree (st inp : List Bool) (hst : st.length = 96) (e : Nat) (he : e < 24)
+theorem bnC_env_agree (st inp : List Bool) (e : Nat) (he : e < 24)
     (pre : List Gate)
     (hpre : bnCCore.gates = pre ++ (bnCBuild e (bnComps.drop e) (bnCDatAt e)).1) :
     ∀ i, i < ceCcore.nIn →
@@ -419,7 +419,7 @@ the bit `ceC` computes standalone.** Everything above meets here:
 `bnC_state_net` names the net, `bnCBuild_state_sem` factors the element out of
 the fold, and `run_agree_of_inputs_circ` + `bnC_env_agree` replace the network's
 environment by `ceC`'s own. -/
-theorem bnC_state_bit (st inp : List Bool) (hst : st.length = 96) (e : Nat) (he : e < 24)
+theorem bnC_state_bit (st inp : List Bool) (e : Nat) (he : e < 24)
     (j : Nat) (hj : j < 4) (pre : List Gate)
     (hpre : bnCCore.gates = pre ++ (bnCBuild e (bnComps.drop e) (bnCDatAt e)).1) :
     run (batcherNetC.env inp st) bnCCore.gates (bnCResult.2.2.getD (4 * e + j) 0)
@@ -431,7 +431,7 @@ theorem bnC_state_bit (st inp : List Bool) (hst : st.length = 96) (e : Nat) (he 
   rw [bnCBuild_state_sem e (bnCCompAt e).1 (bnCCompAt e).2 (bnComps.drop (e+1))
         (bnCDatAt e) _ (bnCDatAt_below e) hab.1 hab.2 _ (ceCcore_state_port_gate j hj)]
   exact run_agree_of_inputs_circ ceCcore ceCcore_ssa' _ _
-    (bnC_env_agree st inp hst e he pre hpre) _ (ceCcore_state_port_lt j hj)
+    (bnC_env_agree st inp e he pre hpre) _ (ceCcore_state_port_lt j hj)
 
 /-! ### ⭐⭐ THE ONE-CYCLE SLICE LEMMA -/
 
@@ -461,7 +461,7 @@ theorem bnCResult_state_length : bnCResult.2.2.length = 96 := (bnCCore_outs_spli
 /-- ⭐⭐ **ONE CYCLE: element `e`'s state slice steps exactly as `ceC` does.**
 This is step ③ discharged at the network level — the fact the trace induction
 lifts across a frame. -/
-theorem bnC_step_slice (st inp : List Bool) (hst : st.length = 96) (e : Nat) (he : e < 24) :
+theorem bnC_step_slice (st inp : List Bool) (e : Nat) (he : e < 24) :
     bnCSlice (stepSeq batcherNetC st inp).2 e
       = (stepSeq ceC (bnCSlice st e) (bnCElemInAt st inp e)).2 := by
   obtain ⟨pre, hpre0⟩ := bnCBuild_gates_drop e bnComps 0 ((List.range bnCWires).map bnCDatIn)
@@ -475,7 +475,7 @@ theorem bnC_step_slice (st inp : List Bool) (hst : st.length = 96) (e : Nat) (he
             (ceCcore.outs.getD (j + 2) 0) := by
     intro j hj
     rw [getD_map_bool _ _ _ (by rw [bnCResult_state_length]; omega)]
-    exact bnC_state_bit st inp hst e he j hj pre hpre
+    exact bnC_state_bit st inp e he j hj pre hpre
   have hnOut2 : ceC.nOut = 2 := by decide +kernel
   have hRHS : (stepSeq ceC (bnCSlice st e) (bnCElemInAt st inp e)).2
       = [run (ceC.env (bnCElemInAt st inp e) (bnCSlice st e)) ceCcore.gates
@@ -529,20 +529,28 @@ the inputs the network presented it.**
 
 *The induction carries no new content about the element: `bnC_step_slice` is the
 whole cycle, and this lifts it. Any initial state, any trace length — no reset
-assumption, which is what a power-gated TinyTapeout tile requires.* -/
-theorem bnC_trace_factors : ∀ (tr : List (List Bool)) (st : List Bool), st.length = 96 →
+assumption, which is what a power-gated TinyTapeout tile requires.*
+
+⭐ **AND IT NEEDS NO LENGTH HYPOTHESIS AT ALL — discovered from a LINTER WARNING
+(`hst` unused in `bnC_env_agree`), then removed from the whole chain and
+rebuilt.** *`bnCSlice` is `getD`-based, so a short state list degrades both sides
+identically rather than making the statement false.* ⇒ ***This is the evening's
+theme running BACKWARDS for once: every other finding tonight was a statement
+claiming MORE than it proved. This one claimed LESS, and the fix was to delete a
+hypothesis rather than qualify a claim.*** -/
+theorem bnC_trace_factors : ∀ (tr : List (List Bool)) (st : List Bool),
     ∀ (e : Nat), e < 24 →
       bnCSlice (runTrace batcherNetC st tr).2 e
         = (runTrace ceC (bnCSlice st e) (bnCElemTrace st tr e)).2 := by
   intro tr
   induction tr with
-  | nil => intro st _ e _; rfl
+  | nil => intro st e _; rfl
   | cons inp is ih =>
-    intro st hst e he
+    intro st e he
     show bnCSlice (runTrace batcherNetC (stepSeq batcherNetC st inp).2 is).2 e
       = (runTrace ceC (stepSeq ceC (bnCSlice st e) (bnCElemInAt st inp e)).2
           (bnCElemTrace (stepSeq batcherNetC st inp).2 is e)).2
-    rw [ih _ (bnC_step_state_length st inp) e he, bnC_step_slice st inp hst e he]
+    rw [ih _ e he, bnC_step_slice st inp e he]
 
 /-! ## 🏦 THE DISCHARGE — scoped at the bytes before it is attempted
 
@@ -677,7 +685,7 @@ theorem ceCcore_data_port_lt (j : Nat) (hj : j < 2) :
 carries exactly what `ceC` computes standalone.** *These are the nets
 `bnCDatStep` writes — `dat.set a (os.getD 0 0)` and `.set b (os.getD 1 0)` — so
 this is the value that flows to the next element in the same cycle.* -/
-theorem bnC_data_bit (st inp : List Bool) (hst : st.length = 96) (e : Nat) (he : e < 24)
+theorem bnC_data_bit (st inp : List Bool) (e : Nat) (he : e < 24)
     (j : Nat) (hj : j < 2) (pre : List Gate)
     (hpre : bnCCore.gates = pre ++ (bnCBuild e (bnComps.drop e) (bnCDatAt e)).1) :
     run (batcherNetC.env inp st) bnCCore.gates
@@ -692,7 +700,7 @@ theorem bnC_data_bit (st inp : List Bool) (hst : st.length = 96) (e : Nat) (he :
   rw [bnCBuild_state_sem e (bnCCompAt e).1 (bnCCompAt e).2 (bnComps.drop (e+1))
         (bnCDatAt e) _ (bnCDatAt_below e) hab.1 hab.2 _ (ceCcore_data_port_gate j hj)]
   exact run_agree_of_inputs_circ ceCcore ceCcore_ssa' _ _
-    (bnC_env_agree st inp hst e he pre hpre) _ (ceCcore_data_port_lt j hj)
+    (bnC_env_agree st inp e he pre hpre) _ (ceCcore_data_port_lt j hj)
 
 /-! ### Step 2b — element `e`'s OUTPUT FRAME is the standalone element's -/
 
@@ -706,15 +714,15 @@ def bnCElemOutAt (st inp : List Bool) (e : Nat) : List Bool :=
 theorem ceC_nOut_eq : ceC.nOut = 2 := rfl
 
 /-- One cycle, data side, as lists. -/
-theorem bnC_step_out (st inp : List Bool) (hst : st.length = 96) (e : Nat) (he : e < 24) :
+theorem bnC_step_out (st inp : List Bool) (e : Nat) (he : e < 24) :
     bnCElemOutAt st inp e = (stepSeq ceC (bnCSlice st e) (bnCElemInAt st inp e)).1 := by
   obtain ⟨pre, hpre0⟩ := bnCBuild_gates_drop e bnComps 0 ((List.range bnCWires).map bnCDatIn)
   have hpre : bnCCore.gates = pre ++ (bnCBuild e (bnComps.drop e) (bnCDatAt e)).1 := by
     have h := hpre0
     simp only [Nat.zero_add] at h
     exact h
-  have h0 := bnC_data_bit st inp hst e he 0 (by omega) pre hpre
-  have h1 := bnC_data_bit st inp hst e he 1 (by omega) pre hpre
+  have h0 := bnC_data_bit st inp e he 0 (by omega) pre hpre
+  have h1 := bnC_data_bit st inp e he 1 (by omega) pre hpre
   have hRHS : (stepSeq ceC (bnCSlice st e) (bnCElemInAt st inp e)).1
       = [run (ceC.env (bnCElemInAt st inp e) (bnCSlice st e)) ceCcore.gates
            (ceCcore.outs.getD 0 0),
@@ -737,20 +745,20 @@ def bnCElemOuts : List Bool → List (List Bool) → Nat → List (List Bool)
 `ceC`'s output frame on the inputs the network presented it.** *The data-side
 twin of `bnC_trace_factors`, and it consumes it: the state agreement each cycle
 is what lets the next cycle's data lemma fire.* -/
-theorem bnC_out_factors : ∀ (tr : List (List Bool)) (st : List Bool), st.length = 96 →
+theorem bnC_out_factors : ∀ (tr : List (List Bool)) (st : List Bool),
     ∀ (e : Nat), e < 24 →
       bnCElemOuts st tr e = (runTrace ceC (bnCSlice st e) (bnCElemTrace st tr e)).1 := by
   intro tr
   induction tr with
-  | nil => intro st _ e _; rfl
+  | nil => intro st e _; rfl
   | cons inp is ih =>
-    intro st hst e he
+    intro st e he
     show bnCElemOutAt st inp e :: bnCElemOuts (stepSeq batcherNetC st inp).2 is e
       = (stepSeq ceC (bnCSlice st e) (bnCElemInAt st inp e)).1
         :: (runTrace ceC (stepSeq ceC (bnCSlice st e) (bnCElemInAt st inp e)).2
               (bnCElemTrace (stepSeq batcherNetC st inp).2 is e)).1
-    rw [bnC_step_out st inp hst e he, ← bnC_step_slice st inp hst e he,
-        ih _ (bnC_step_state_length st inp) e he]
+    rw [bnC_step_out st inp e he, ← bnC_step_slice st inp e he,
+        ih _ e he]
 
 /-! ### Step 2c — the fold, from the BACK
 
