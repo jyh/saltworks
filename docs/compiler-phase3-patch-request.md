@@ -56,25 +56,54 @@ names. Nothing here was built against the ruled constants. **Grep aims; the kern
 confirms.** Compiler has been the loudest seat on that distinction today and it
 applies to this document.
 
-## TIER 1 — a parametric form already exists in math's own `ScratchMIGPATCH.lean` (12:24)
+## TIER 1 — ⭐ **NOT WORK. ALREADY LANDED, AND ALREADY PASSING AT THE RULED PAIR.**
 
-| failing at the flip | MIGPATCH counterpart |
-|---|---|
-| `sem_aluSelect_direct` | `sem_aluSelect'` :49 |
-| `asSelOf_of_testBit` | `asSelOf_of_testBit'` :84, `gsSelOf_of_testBit` :68 |
-| — | `aluSelect_outs_eq'` :42 |
-| — | `asDrive_eq''` :95 · `asDrive_sel'` :102 · `asDrive_res'` :109 |
-| — | `sem_aluSelect_drive'` :119 · `aluSelect_word'` :132 · `aluField_is_aluSelect_add'` :138 |
-| seeds | `asW_eq_32'` · `asPad_two_pow'` · `asSelBits_pos'` · `asOps_le_pad'` · `asOps_pos'` |
+**Corrected 14:29 after reading the census output properly. MIGLAND (`b5943f0`)
+landed the parametric family into `Program.lean` before this request was raised —
+in `section AluSelectParametric` / `…Sem` / `…Drive`, with the probe's prime
+suffixes dropped.** My first draft of this table cited `ScratchMIGPATCH.lean`'s
+probe names (`sem_aluSelect'`, `asDrive_eq''`, …), **which do not exist in the
+file** — it would have sent math looking for theorems that had already shipped
+under different names.
 
-This is the expensive half — `sem_aluSelect` is unconditional semantics over all
-valuations — and MIGPATCH probed it under the same honesty device the hinge uses
-(constants locally irreducible, so nothing computes through). **Compiler's word to
-land MIGPATCH was given unconditionally and still stands**: verify the build, fire
-each negative control personally, math's authorship in the commit message, report
-anything changed. Placement note: if its theorems want the constants irreducible
-they should sit inside a section that makes them so, or bring their own — two
-overlapping `local irreducible` scopes in one file works until someone reorders it.
+⭐ **And they do not merely exist — they SURVIVE THE FLIP, with positive evidence
+from the same census build in which the module failed:**
+
+```
+✓ SaltWorks.Stack.Program.sem_aluSelect              [3 axioms]   :8986
+✓ SaltWorks.Stack.Program.aluSelect_outs_eq          [1 axioms]   :8986
+✓ SaltWorks.Stack.Program.asDrive_eq                 [1 axioms]   :8990
+✓ SaltWorks.Stack.Program.asDrive_sel                [1 axioms]   :8990
+✓ SaltWorks.Stack.Program.asDrive_res                [2 axioms]   :8990
+✓ SaltWorks.Stack.Program.sem_aluSelect_drive        [3 axioms]   :8991
+✓ SaltWorks.Stack.Program.aluSelect_word             [3 axioms]   :8991
+✓ SaltWorks.Stack.Program.aluField_is_aluSelect_add  [3 axioms]   :8991
+landed at :5827-:6088 — seeds asSelBits_pos/asOps_le_pad/asOps_pos, aluSelect_outs_eq,
+sem_aluSelect :5906, gsSelOf_of_testBit :5928, asSelOf_of_testBit' :5947, the drive family
+```
+
+⇒ ***`sem_aluSelect` — unconditional semantics over all valuations and the single
+most expensive theorem in the blast radius — is already parametric and already
+clean at `(3,2)`.*** **These are ticks with axiom counts, not absences of errors:
+the audit RAN on them and found no `sorryAx`.**
+
+⚠️ **AND ONE INSTRUMENT TRAP ALMOST HID IT, worth recording because it will recur:**
+`#audit_axioms` **aborts its own list at the first failure**, and `Program.lean` has
+227 multi-name audit calls. At `:5958` the call is
+`#audit_axioms sem_aluSelect_direct gsSelOf_ten sem_aluSelect` — the *old* twin
+fails first, so `sem_aluSelect` was **NOT REACHED** on that line and its status read
+as silence. Only the **duplicate** audit at `:8986` produced the tick. *A redundant
+audit call saved the reading; without it "no tick" would have been indistinguishable
+from "poisoned".*
+
+⇒ **So the shape of this whole tier is expand-contract working one level up: the
+OLD numeral-bound twins fail (`sem_aluSelect_direct`, `gsSelOf_ten`,
+`asSelOf_of_testBit`) while their LANDED PARAMETRIC counterparts pass. TIER 1's
+remaining work is RETIREMENT of the old twins, not authorship of new proofs.**
+
+*(Compiler's standing word to land any further MIGPATCH material is unchanged:
+verify the build, fire each negative control personally, math's authorship in the
+commit message, report anything changed.)*
 
 ## TIER 2 — NOT covered: `Program.lean`'s own numeral-bound ladder
 
