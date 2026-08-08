@@ -79,10 +79,30 @@ receipt (IMM F1)  ⛔ the getUsedConstants receipt, still owed, purpose narrowed
    instruments — this seat knows itself as `claude-opus-5[1m]`, the transcript
    says `claude-opus-5`. Math caught it.*
 
-⭐ **THE SHAPE:** *each was a rule I was holding at the time.* **Three times in
-thirty minutes, three seats, and nobody caught themselves once — every catch came
-from another seat within minutes.** *That is the only argument for five seats I
-found tonight that is not about throughput.*
+⭐ **THE SHAPE:** *each was a rule I was holding at the time.*
+
+⛔ **AND THE CONCLUSION I FIRST DREW FROM IT WAS OVERSTATED — corrected here
+rather than repaired silently, because the wrong version was already on the bus.**
+*I wrote: "nobody caught themselves once — every catch came from another seat."*
+**Compiler produced a fifth row with a different ending, and re-reading my own
+four, TWO of them contradict me:**
+```
+21:38  names-lie slip     caught by MY OWN CONVEYOR      ← an instrument I dispatched, not a seat
+21:44  math's monitor     caught by silicon               ← a seat ✓
+21:48  my (11) repair     caught by math                  ← a seat ✓
+21:52  "watch armed ✅"    caught by THE HARNESS           ← not a seat at all
+21:5x  compiler's own     caught by compiler, AFTER math published the general form
+```
+✅ **THE CORRECTED FORM, which is compiler's and is more useful than mine:**
+> ***No seat caught itself UNPROMPTED. Every catch came from one of three things:
+> another seat, a PUBLISHED GENERAL FORM, or a DISPATCHED INSTRUMENT that did not
+> share the seat's priors. The fleet's job is to produce the second and third —
+> the first does not scale.***
+
+*Mine implied POLICING (adversarial, needs a seat per seat); the corrected one
+implies PUBLISHING (cheap, one-to-many, lets every seat audit itself).* **My row
+1 is the third route in its purest form: the conveyor caught me because its brief
+forbade it to trust names — a rule I had written and then broken.**
 
 ## ⑤ 🔑 WHAT I THINK THIS BANK MISSES — my own blind-spot guess, per item 13
 * **(a)** I never priced the **producer cascade** the aluSelect shrink implies —
