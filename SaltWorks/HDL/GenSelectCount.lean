@@ -6,34 +6,84 @@ Authors: Jason Hickey, Claude
 import SaltWorks.HDL.AluSelect
 
 /-!
-# `genSelect n b` — the closed-form gate count
+# `genSelect n b` — the closed-form gate count, and dense SSA at every `(n, b)`
 
-**`genSelect_gates_length` : `(genSelect n b).gates.length = 96 * (2^b - 1) + b + 1`
-— NO hypotheses at all.** `n` is genuinely absent, so a source is free and a
-SELECT BIT is what costs. Every kernel anchor below is `rw`-recovered FROM this
-identity rather than re-derived by an independent `decide`: three `decide`s that
-agree is not evidence a formula holds; six anchors that fall out of it is.
+Two general theorems about the parametric output select, plus the exact
+hypotheses each one needs and a kernel refutation for the one that is necessary.
 
-Also here, because each is needed to read the identity correctly:
-* `genSelect_zero_b_not_ssa` — `(genSelect 5 0).ssa = false`. `0 < b` is not
-  decoration; the count is arithmetically fine at `b = 0` and the object is not
-  a circuit.
-* `gsPrev_zero_of_ge` + the read-set witnesses — `n ≤ 2^b` is needed for neither
-  the count nor the SSA scaffolding, only for the sources to be READ.
-* The `ssaFrom` scaffolding and net-ordering bounds, which the general
-  well-formedness proof is built on.
+* `genSelect_gates_length` : `(genSelect n b).gates.length = 96 * (2^b - 1) + b + 1`
+  — **NO hypotheses at all.** `n` is genuinely absent: a source is free, a
+  SELECT BIT is what costs. Every anchor below is `rw`-recovered FROM this
+  identity rather than re-derived by an independent `decide` — three `decide`s
+  that agree is not evidence a formula holds; six anchors that fall out of it is.
+* `genSelect_ssa` / `genSelect_wf` : dense SSA and well-formedness for **every**
+  `n` and **every** `b > 0`. `0 < b` is not decoration: `genSelect_zero_b_not_ssa`
+  refutes `b = 0` in the kernel.
 
-## ⛔ SCOPE — what this module does NOT contain
+All statements stay general in `(n b)`; `b = 3` and `b = 4` are corollaries by
+instantiation, not separate proofs. Before this module, `wf`/`ssa` existed at
+exactly three POINTS — `(2,1)`, `(3,2)`, `(10,4)` — and `b = 3` was proved at
+none, which is the width an `aluSelect` sizing call was most likely to choose.
 
-**`genSelect_ssa` / `genSelect_wf` for general `(n, b)` are NOT here.** They were
-written, and three `omega` goals inside `gsMux_ssaFrom` did not close; the
-failed tactics filled their holes with `sorryAx`, so the whole chain was
-withheld. **`b = 3` is therefore still proved well-formed at NO point** — the
-open hole under the `aluSelect` sizing call, unchanged.
+## The three hypotheses, separated — they are not interchangeable
 
-*Stated here rather than in a commit message because a module that carries the
-count and the SSA scaffolding is exactly the one a reader would assume carries
-the SSA theorem.*
+| condition  | needed for the COUNT | needed for `ssa`/`wf` | needed for the SEMANTICS |
+| ---------- | -------------------- | --------------------- | ------------------------ |
+| `0 < b`    | no                   | **YES** (and refuted below without it) | yes |
+| `n ≤ 2^b`  | no                   | no                    | **YES** — to read every source |
+
+`genSelect 20 4` is a well-formed, dense-SSA, 1,445-gate circuit that reads
+sixteen of its twenty sources. Well-formedness and correctness-of-capacity are
+different claims and this module closes only the first.
+
+## ⚠️ A number this module corrects, with witnesses
+
+Three seats stated on 8/8 that `genSelect 20 4` *"silently reads only ten of its
+twenty sources."* **The conclusion it was offered for is right and the number is
+wrong.** Level-0 leaves are indexed `i < 2^b = 16` and pad only when `n ≤ i`, so
+at `n = 20` NO leaf pads: sixteen sources are read and `16..19` are named by no
+leaf. The `ten` belongs to `genSelect 10 4` — `aluSelect` — where six of the
+sixteen leaves DO pad. See `twenty_no_leaf_pads`, `twenty_ignores_high`,
+`ten_pads_six`.
+
+## Why `gsMux_ssaFrom` was hard, and the fleet rule it refines
+
+Its three `omega` goals failed with counterexamples built purely from hypothesis
+atoms, **no goal variable present** — the classic signature of omega folding a
+compound term into an atom. That diagnosis is wrong here.
+
+`simp only [...]` correctly reduces the fanin obligation to a conjunction which
+`pp.all` reveals as
+
+    And (@LT.lt SaltWorks.HDL.Net instLTNat x base)
+        (@LT.lt SaltWorks.HDL.Net instLTNat y base)
+
+— the `<` sits at the **abbrev `Net`**, not `Nat`, because the fanin list is
+`List Net`. `omega` matches comparisons by the *literal* type argument. At a
+goal's top level it applies reducible whnf first, which sees through the abbrev;
+but when the goal is `And p q` it recurses into the conjuncts **without** that
+whnf, the `Nat` match fails, and the goal facts are discarded wholesale. omega
+is then asked to derive `False` from hypotheses alone — hence a counterexample
+with every goal variable absent.
+
+Three probes, each changing one thing:
+
+| goal                                      | omega  |
+| ----------------------------------------- | ------ |
+| `x < base ∧ y < base` (both at `Nat`)      | ✓      |
+| `@LT.lt Net .. x base` (single, no `∧`)    | ✓      |
+| `@LT.lt Net .. ∧ @LT.lt Net ..`            | ✗ FAIL |
+
+So it is neither the connective alone nor the abbrev alone: it is an
+`abbrev`-typed comparison *underneath* a logical connective.
+
+**The refined rule:** *"the counterexample omits a goal variable"* does not mean
+omega folded an atom — it means omega **dropped the goal**. Atom-folding is one
+cause; a type synonym under `∧`/`∨` is another, and for that one rebinding to
+`: Nat` genuinely does not help. The fix is to stop handing omega the
+connective: `all_pair` ends in `exact ⟨hx, hy⟩`. No bridging fact was missing —
+the layout lemmas were already sufficient, and only the SHAPE of the final goal
+was the obstruction.
 -/
 
 namespace SaltWorks.HDL
@@ -91,7 +141,18 @@ theorem ssaFrom_singleton (g : Gate) (base : Nat) (h1 : g.out = base)
   rw [e, h1, h2, e2]
   simp
 
-/-- Every net a two-input gate reads is below its own net. -/
+/-- **THE REPAIR.** Every net a two-input gate reads is below its own net.
+
+`simp only` reduces the `List.all` to a conjunction of two `Net`-typed `<`.
+The original closed it with `omega`, which silently discards a goal whose
+comparisons sit at an abbrev underneath `∧` (see the module docstring).
+`exact ⟨hx, hy⟩` is the right closer: it discharges the connective directly and
+needs no arithmetic at all. -/
+theorem all_pair {x y base : Nat} (hx : x < base) (hy : y < base) :
+    ([x, y] : List Net).all (fun a => a < base) = true := by
+  simp only [List.all_cons, List.all_nil, Bool.and_true, decide_eq_true_eq, Bool.and_eq_true]
+  exact ⟨hx, hy⟩
+
 theorem ssaFrom_triple (g1 g2 g3 : Gate) (base : Nat)
     (o1 : g1.out = base) (o2 : g2.out = base + 1) (o3 : g3.out = base + 1 + 1)
     (f1 : g1.op.fanin.all (fun a => a < base) = true)
@@ -295,7 +356,78 @@ theorem gsPrev_lt {n b k j i i' : Nat} (hk : k < 32) (hj : j < b)
     show gsOut n b k j' i' < gsBase n b k (j' + 1) i
     exact gsOut_lt_gsBase_succ (by omega)
 
-/-- **One mux is dense SSA at its own base.** -/
+/-- ⭐ **One mux is dense SSA at its own base.** — THE REPAIRED THEOREM.
+
+The three fanin obligations are discharged by `all_pair`, not by `omega`. Each
+one is a two-element `List.all` over `List Net`, which `simp only` turns into a
+conjunction of two `Net`-typed comparisons — a shape `omega` discards wholesale,
+leaving it to hunt for `False` in the hypotheses alone. Nothing arithmetic was
+missing: the five layout lemmas above already give every inequality needed, and
+`all_pair` simply pairs them. -/
+theorem gsMux_ssaFrom (n b k j i : Nat) (hk : k < 32) (hj : j < b)
+    (hi : i < gsLevelWidth b j) :
+    ssaFrom (gsBase n b k j i) (gsMux n b k j i) = true := by
+  have h1 : gsPrev n b k j (2 * i) < gsBase n b k j i := gsPrev_lt hk hj (by omega)
+  have h2 : gsPrev n b k j (2 * i + 1) < gsBase n b k j i := gsPrev_lt hk hj (by omega)
+  have h3 : gsNot n b j < gsBase n b k j i := gsNot_lt_base hj
+  have h4 : gsSel n b j < gsBase n b k j i := gsSel_lt_base hj
+  -- The three fanin lists, each already lifted to the base its own gate reads at.
+  have h2' : gsPrev n b k j (2 * i + 1) < gsBase n b k j i + 1 := by omega
+  have h4' : gsSel n b j < gsBase n b k j i + 1 := by omega
+  have h5 : gsBase n b k j i < gsBase n b k j i + 1 + 1 := by omega
+  have h6 : gsBase n b k j i + 1 < gsBase n b k j i + 1 + 1 := by omega
+  show ssaFrom (gsBase n b k j i)
+      [(⟨gsBase n b k j i, .and (gsPrev n b k j (2 * i)) (gsNot n b j)⟩ : Gate),
+       ⟨gsBase n b k j i + 1, .and (gsPrev n b k j (2 * i + 1)) (gsSel n b j)⟩,
+       ⟨gsBase n b k j i + 2, .or (gsBase n b k j i) (gsBase n b k j i + 1)⟩] = true
+  refine ssaFrom_triple _ _ _ _ rfl rfl ?_ ?_ ?_ ?_
+  · show gsBase n b k j i + 2 = gsBase n b k j i + 1 + 1
+    omega
+  · show ([gsPrev n b k j (2 * i), gsNot n b j] : List Net).all
+        (fun a => a < gsBase n b k j i) = true
+    exact all_pair h1 h3
+  · show ([gsPrev n b k j (2 * i + 1), gsSel n b j] : List Net).all
+        (fun a => a < gsBase n b k j i + 1) = true
+    exact all_pair h2' h4'
+  · show ([gsBase n b k j i, gsBase n b k j i + 1] : List Net).all
+        (fun a => a < gsBase n b k j i + 1 + 1) = true
+    exact all_pair h5 h6
+
+theorem gsMuxLevel_ssaFrom (n b k j : Nat) (hk : k < 32) (hj : j < b) :
+    ssaFrom (gsIn n b + 1 + b + (k * (gsPad b - 1) + gsBelow b j) * 3)
+      (gsMuxLevel n b k j) = true := by
+  show ssaFrom _ ((List.range (gsLevelWidth b j)).flatMap (gsMux n b k j)) = true
+  refine ssaFrom_flatMap_range _ _ _ ?_
+  intro t ht
+  rw [psum_const _ 3 (gsMux_length n b k j) t]
+  have heq : gsIn n b + 1 + b + (k * (gsPad b - 1) + gsBelow b j) * 3 + t * 3
+      = gsBase n b k j t := by
+    show _ = gsIn n b + 1 + b + (k * (gsPad b - 1) + gsBelow b j + t) * 3
+    omega
+  rw [heq]
+  exact gsMux_ssaFrom n b k j t hk hj ht
+
+theorem gsMuxBit_ssaFrom (n b k : Nat) (hk : k < 32) :
+    ssaFrom (gsIn n b + 1 + b + k * ((gsPad b - 1) * 3)) (gsMuxBit n b k) = true := by
+  have hassoc : k * ((gsPad b - 1) * 3) = k * (gsPad b - 1) * 3 := (Nat.mul_assoc _ _ _).symm
+  rw [hassoc]
+  show ssaFrom _ ((List.range b).flatMap (gsMuxLevel n b k)) = true
+  refine ssaFrom_flatMap_range _ _ _ ?_
+  intro t ht
+  rw [psum_gsMuxLevel n b k t]
+  have heq : gsIn n b + 1 + b + k * (gsPad b - 1) * 3 + gsBelow b t * 3
+      = gsIn n b + 1 + b + (k * (gsPad b - 1) + gsBelow b t) * 3 := by omega
+  rw [heq]
+  exact gsMuxLevel_ssaFrom n b k t hk ht
+
+theorem gsMuxGates_ssaFrom (n b : Nat) :
+    ssaFrom (gsIn n b + 1 + b) (gsMuxGates n b) = true := by
+  show ssaFrom _ ((List.range 32).flatMap (gsMuxBit n b)) = true
+  refine ssaFrom_flatMap_range _ _ _ ?_
+  intro t ht
+  rw [psum_const _ ((gsPad b - 1) * 3) (gsMuxBit_length n b) t]
+  exact gsMuxBit_ssaFrom n b t ht
+
 theorem gsConstGate_ssaFrom (n b : Nat) : ssaFrom (gsIn n b) [gsConstGate n b] = true :=
   ssaFrom_singleton _ _ rfl rfl
 
@@ -312,6 +444,60 @@ theorem gsNotGates_ssaFrom (n b : Nat) : ssaFrom (gsIn n b + 1) (gsNotGates n b)
     omega
   simp only [List.all_cons, List.all_nil, Bool.and_true, decide_eq_true_eq]
   exact hlt
+
+/-- ⭐ **THE GATE LIST IS DENSE SSA FROM `nIn`, AT EVERY `n` AND EVERY `b`.**
+No hypothesis — not even `0 < b`, and not `n ≤ 2^b`. -/
+theorem genSelect_ssaFrom (n b : Nat) : ssaFrom (gsIn n b) (genSelect n b).gates = true := by
+  rw [genSelect_gates_eq]
+  refine ssaFrom_append _ _ _ ?_ ?_
+  · have h : (gsConstGate n b :: gsNotGates n b) = [gsConstGate n b] ++ gsNotGates n b := rfl
+    rw [h]
+    refine ssaFrom_append _ _ _ (gsConstGate_ssaFrom n b) ?_
+    show ssaFrom (gsIn n b + 1) (gsNotGates n b) = true
+    exact gsNotGates_ssaFrom n b
+  · have hlen : (gsConstGate n b :: gsNotGates n b).length = b + 1 := by
+      show (gsNotGates n b).length + 1 = b + 1
+      show ((List.range b).map _).length + 1 = b + 1
+      simp
+    rw [hlen]
+    have he : gsIn n b + (b + 1) = gsIn n b + 1 + b := by omega
+    rw [he]
+    exact gsMuxGates_ssaFrom n b
+
+/-- ⭐ **`Circ.ssa` — dense SSA *and* every primary output inside the netlist.**
+`0 < b` IS required here (and only here): at `b = 0` the recorded output net
+`gsOut n 0 k 0 0` lies three past the only gate. Refuted below. -/
+theorem genSelect_ssa (n b : Nat) (hb : 0 < b) : (genSelect n b).ssa = true := by
+  have hnIn : (genSelect n b).nIn = gsIn n b := rfl
+  show (ssaFrom (genSelect n b).nIn (genSelect n b).gates
+      && (genSelect n b).outs.all
+          (fun m => m < (genSelect n b).nIn + (genSelect n b).gates.length)) = true
+  rw [Bool.and_eq_true, hnIn, genSelect_gates_length]
+  refine ⟨genSelect_ssaFrom n b, ?_⟩
+  show ((List.range 32).map (fun k => gsOut n b k (b - 1) 0)).all
+      (fun m => m < gsIn n b + (96 * (2 ^ b - 1) + b + 1)) = true
+  rw [List.all_eq_true]
+  intro x hx
+  simp only [List.mem_map, List.mem_range] at hx
+  obtain ⟨k, hk, rfl⟩ := hx
+  simp only [decide_eq_true_eq]
+  have hbel : gsBelow b (b - 1) = 2 ^ b - 2 ^ (b - (b - 1)) := gsBelow_eq b (b - 1) (by omega)
+  have he : b - (b - 1) = 1 := by omega
+  rw [he] at hbel
+  have hP : 1 < 2 ^ b := Nat.one_lt_two_pow (by omega)
+  have hkP : k * (2 ^ b - 1) ≤ 31 * (2 ^ b - 1) :=
+    Nat.mul_le_mul (by omega) (Nat.le_refl _)
+  have hpad : gsPad b = 2 ^ b := rfl
+  show gsIn n b + 1 + b + (k * (gsPad b - 1) + gsBelow b (b - 1) + 0) * 3 + 2
+      < gsIn n b + (96 * (2 ^ b - 1) + b + 1)
+  rw [hpad, hbel]
+  omega
+
+/-- ⭐ **AND THEREFORE WELL-FORMED, AT EVERY `n` AND EVERY `b > 0`.** -/
+theorem genSelect_wf (n b : Nat) (hb : 0 < b) : (genSelect n b).wf = true :=
+  Circ.wf_of_ssa (genSelect_ssa n b hb)
+
+/-! ## `0 < b` is necessary — the refutation, in the kernel -/
 
 /-- At `b = 0` the tree has no levels, so `gsOut n 0 k (0-1) 0` names a net three
 past the single gate. `Circ.ssa` is FALSE, and `genSelect n 0` is not a circuit
@@ -336,12 +522,17 @@ theorem gate_count_ten : (genSelect 10 4).gates.length = 1445 := by
 theorem gate_count_aluSelect : aluSelect.gates.length = 1445 := by
   rw [← genSelect_ten]; exact gate_count_ten
 
-
-/-- `b = 3` — the eight-source width, 676 gates. Recovered from the closed form,
-not re-derived by an independent `decide`. -/
+/-- ⭐ **THE GAP BETWEEN THE TWO PROVED POINTS, CLOSED**: `b = 3`, the
+eight-source width, 676 gates — and now `ssa`/`wf` as well. -/
 theorem gate_count_eight : (genSelect 8 3).gates.length = 676 := by
   rw [genSelect_gates_length]
   rfl
+
+/-- ⭐ **THE MUSTER'S CONFIGURATION.** `b = 3` is an instance of the general
+theorem, not a separate `decide` point. -/
+theorem genSelect_eight_ssa : (genSelect 8 3).ssa = true := genSelect_ssa 8 3 (by decide)
+theorem genSelect_eight_wf : (genSelect 8 3).wf = true := genSelect_wf 8 3 (by decide)
+
 /-! ## `n ≤ 2^b` is NOT needed for the count, and NOT needed for well-formedness
 
 It is needed for the circuit to READ every source. Leaf indices run `0 ..< 2^b`
@@ -358,16 +549,10 @@ theorem gate_count_twenty : (genSelect 20 4).gates.length = 1445 := by
   rw [genSelect_gates_length]
   rfl
 
-/-! ### Which sources a leaf actually reads — the kernel witnesses
+theorem genSelect_twenty_ssa : (genSelect 20 4).ssa = true := genSelect_ssa 20 4 (by decide)
+theorem genSelect_twenty_wf : (genSelect 20 4).wf = true := genSelect_wf 20 4 (by decide)
 
-⛔ A number repeated across three seats on 8/8 said `genSelect 20 4` *"silently
-reads only ten of its twenty sources."* **That is wrong, and the conclusion it
-was offered for is right.** Level-0 leaves are indexed `i < 2^b = 16`, and
-`gsPrev … 0 i` pads only when `n ≤ i`. At `n = 20` no leaf pads: all sixteen
-read real sources, and sources `16..19` are named by no leaf.
-
-The `ten` belongs to `genSelect 10 4` — `aluSelect` — where six of the sixteen
-leaves DO pad. The two configurations were conflated. -/
+/-! ### Which sources a leaf actually reads — the kernel witnesses -/
 
 /-- At `n = 20, b = 4`: **no leaf is the pad.** All sixteen read real sources. -/
 theorem twenty_no_leaf_pads (k i : Nat) (hi : i < 16) :
@@ -375,7 +560,7 @@ theorem twenty_no_leaf_pads (k i : Nat) (hi : i < 16) :
   show (if 20 ≤ i then gsZero 20 4 else gsRes i k) = gsRes i k
   rw [if_neg (by omega)]
 
-/-- …and a source at or above `2^b` is read by NO leaf. Sources 16..19 are lost. -/
+/-- …and a source at or above `2^b` is read by NO leaf: `16..19` are lost. -/
 theorem twenty_ignores_high (k r i : Nat) (hr : 16 ≤ r) (hi : i < 16) :
     gsPrev 20 4 k 0 i ≠ gsRes r k := by
   rw [twenty_no_leaf_pads k i hi]
@@ -387,18 +572,19 @@ sixteen leaves pad. Same `b`, different `n`, different read-set. -/
 theorem ten_pads_six (k i : Nat) (h1 : 10 ≤ i) (h2 : i < 16) :
     gsPrev 10 4 k 0 i = gsZero 10 4 :=
   gsPrev_zero_of_ge h1
+/-! ## Axiom audit — ONE declaration per call.
 
-/-! ## Audit — ONE DECLARATION PER CALL.
+`#audit_axioms` aborts the rest of its own argument list at the first failure,
+so a multi-name call silently hides the status of every name after a failure.
+One name per call makes "not reported" impossible. -/
 
-`#audit_axioms A B C` abandons the REST OF ITS OWN LIST at the first failure,
-so a name absent from the error list reads as clean when it was never reached.
-Eight declarations were unreported that way in this file's scratch ancestor. -/
-
+#audit_axioms psum
 #audit_axioms psum_succ
 #audit_axioms length_flatMap_range
 #audit_axioms psum_const
 #audit_axioms ssaFrom_append
 #audit_axioms ssaFrom_singleton
+#audit_axioms all_pair
 #audit_axioms ssaFrom_triple
 #audit_axioms ssaFrom_flatMap_range
 #audit_axioms ssaFrom_map_range
@@ -408,6 +594,11 @@ Eight declarations were unreported that way in this file's scratch ancestor. -/
 #audit_axioms gsBelow_eq
 #audit_axioms gsBelow_top
 #audit_axioms gsBelow_top_pad
+#audit_axioms gsConstGate
+#audit_axioms gsNotGates
+#audit_axioms gsMuxLevel
+#audit_axioms gsMuxBit
+#audit_axioms gsMuxGates
 #audit_axioms genSelect_gates_eq
 #audit_axioms gsMux_length
 #audit_axioms gsMuxLevel_length
@@ -419,16 +610,27 @@ Eight declarations were unreported that way in this file's scratch ancestor. -/
 #audit_axioms gsSel_lt_base
 #audit_axioms gsOut_lt_gsBase_succ
 #audit_axioms gsPrev_lt
+#audit_axioms gsMux_ssaFrom
+#audit_axioms gsMuxLevel_ssaFrom
+#audit_axioms gsMuxBit_ssaFrom
+#audit_axioms gsMuxGates_ssaFrom
 #audit_axioms gsConstGate_ssaFrom
 #audit_axioms gsNotGates_ssaFrom
+#audit_axioms genSelect_ssaFrom
+#audit_axioms genSelect_ssa
+#audit_axioms genSelect_wf
 #audit_axioms genSelect_zero_b_not_ssa
 #audit_axioms gate_count_two
 #audit_axioms gate_count_three
 #audit_axioms gate_count_ten
 #audit_axioms gate_count_aluSelect
 #audit_axioms gate_count_eight
+#audit_axioms genSelect_eight_ssa
+#audit_axioms genSelect_eight_wf
 #audit_axioms gsPrev_zero_of_ge
 #audit_axioms gate_count_twenty
+#audit_axioms genSelect_twenty_ssa
+#audit_axioms genSelect_twenty_wf
 #audit_axioms twenty_no_leaf_pads
 #audit_axioms twenty_ignores_high
 #audit_axioms ten_pads_six
