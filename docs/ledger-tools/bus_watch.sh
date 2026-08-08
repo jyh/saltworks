@@ -155,6 +155,65 @@ while true; do
     # the gate's whole value is the one line it keeps.
     grep -oE "HALT|STAND DOWN|STAND-DOWN|ALL SEATS STOP|FLEET STOP" /tmp/ev-orders.txt \
       | head -3 | sed 's/^/⛔ MAESTRO ORDER WORD: /'
+    # ⛔ THE FLEET GATE -- ADDED 2026-08-08 13:5x ON THE MAESTRO RULING THAT CLOSED
+    # A GAP THIS SEAT NAMED AGAINST ITSELF AT 13:44. The order-owned view above is
+    # gated on the MAESTRO, and a PEER SEAT CAN BIND THE WHOLE FLEET WITHOUT BEING
+    # THE HELM: compiler 13:44 opened a red window on the shared tree with
+    # do-not-debug instructions, and this watch would have slept through it.
+    # I read it by hand and it cost nothing -- compliance by luck, which is the
+    # same failure this file already records at the BASELINE comment.
+    #
+    # ⚠️ AND THE OBVIOUS IMPLEMENTATION IS A CARRIER. The ruling that CREATED this
+    # rule necessarily quotes the marker (maestro 13:49: "opens its header body
+    # with FLEET -- in caps"), so a bare grep for the marker fires on the
+    # announcement of the marker. That is this file's founding defect for the
+    # fourth time, and a wider regex cannot fix it.
+    #
+    # 🔑 THE STRUCTURAL DISCRIMINATOR, MEASURED ON BOTH LIVE SPECIMENS: a post that
+    # BINDS opens its body with the marker -- it is the FIRST text after the
+    # header bracket. A post that DESCRIBES the rule reaches the marker mid
+    # sentence, after other prose. So the gate reads only the first characters
+    # after the "]", stripped of emoji and markup, and asks whether the body
+    # STARTS there.
+    #   compiler 13:44 (binds)     "]  U+1F6A7 **FLEET -- DELIBERATE RED WINDOW"   MATCH
+    #   maestro  13:49 (describes) "]  **ALL SEATS -- one-line convention, ..."    no match
+    # NOTE: NO APOSTROPHES IN THIS COMMENT -- it sits above a single-quoted awk
+    # program, the hazard already recorded twice in this file.
+    # ⛔⛔ AND THE FIRST VERSION OF THIS PASS WAS BROKEN, CAUGHT BY TESTING IT
+    # AGAINST BOTH LIVE SPECIMENS BEFORE ARMING IT. I opened with
+    #   NR <= start { next }
+    # which skips the boundary line BEFORE prevblank is assigned, so the header
+    # at start+1 never learns that start was blank and the gate matched NOTHING --
+    # including the very post it exists to catch. The orders pass twenty lines
+    # above carries a comment warning of exactly this, in exactly these words
+    # ("owner must be tracked from line 1 ... but only NEW lines may be EMITTED"),
+    # and I reproduced it one pass over while reading it. The guard belongs on
+    # the EMIT, never on the line walk.
+    # ⛔⛔⛔ AND THE SECOND DEFECT, CAUGHT ONLY BY SWEEPING THE WHOLE FILE RATHER
+    # THAN THE WINDOW I CARED ABOUT: this pass ABORTS without LC_ALL=C.
+    #   awk: towc: multibyte conversion failure ... input record number 127
+    # The gsub below forces wide-char conversion of emoji-bearing lines, and one
+    # malformed sequence at line 127 kills the whole program -- every fire,
+    # forever, BEFORE reaching any post. The peer and orders passes never hit it
+    # because neither gsubs over multibyte text.
+    # 🔑 AN ARMED GATE THAT ABORTS AT LINE 127 IS INDISTINGUISHABLE FROM A QUIET
+    # BUS, which is this file's standing lesson about mis-scoped monitors, now in
+    # its most literal form: not the wrong filter, a DEAD one. LC_ALL=C makes awk
+    # byte-oriented, which is also exactly the semantics this gate wants -- it
+    # strips emoji bytes as non-letters, which is the intent.
+    LC_ALL=C awk -v start="$last" '
+      prevblank && /^\[[0-9]+\/[0-9]+ [0-9:]+, [A-Za-z]/ {
+        if (NR > start) {
+          body = $0
+          sub(/^\[[^]]*\][[:space:]]*/, "", body)
+          head = substr(body, 1, 40)
+          gsub(/[^A-Za-z -]/, "", head)
+          sub(/^[[:space:]]*/, "", head)
+          if (head ~ /^FLEET[[:space:]-]/) print "🚧 FLEET-BINDING POST: " substr($0, 1, 150)
+        }
+      }
+      { prevblank = ($0 == "") }
+    ' "$BUS"
     last=$n
   fi
   sleep "$POLL"
