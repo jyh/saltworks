@@ -258,12 +258,23 @@ level 3 baked into the lemma NAMES). **If that lands, silicon's `n = 2` row IS
 this mux** — and I checked the identity rather than relaying it:*
 ```
 asMux            = 3 gates: .and (prev even) (¬sel) · .and (prev odd) (sel) · .or
-gates(2)         = 32×(2−1)×3 + ⌈log₂2⌉ + [2<2] = 96 + 1 + 0 = 97
-operand-B mux    = 32 × 3 + 1 (shared inverter)                 = 97
+genSelect 2 1    = 96 (muxes) + 1 (inverter) + 1 (pad constant)  = 98   ⬅ CORRECTED
+operand-B mux    = 32 × 3 + 1 (shared inverter), bespoke          = 97
 ```
-⇒ ***Same generator, same 3-gate cell, same shared inverter, exact to the gate.
-It is not a new organ; it would INHERIT the proof shape rather than need its
-own.*** ⚠️ **STATED AS A CONDITIONAL BECAUSE THE PARAMETRISATION IS NOT DONE —
+🔴 **CORRECTED 8/7 22:0x — the row above read `97` and the generator is `98`.**
+*Math found it, silicon confirmed at `AluSelect.lean:101-108`: the pad constant
+`⟨asZero, .const false⟩` is **prepended UNCONDITIONALLY**, so silicon's `[n < pad]`
+term described what a shrunken generator WOULD do, not what the code does. At
+`n = 2^b` the constant is still emitted — it is simply DEAD.*
+
+⇒ ***The BLOCK-IDENTITY claim stands and "exact to the gate" is STRUCK: the
+generator is ONE GATE WORSE than a hand-built 2:1 mux, and only at exact powers
+of two.*** **It would still INHERIT the proof shape rather than need its own —
+which is the load-bearing half — at a cost of one dead constant.**
+📌 *The `97` for the bespoke operand-B mux above is UNAFFECTED and stands. Two
+different objects, one gate apart, and the plan now names both.*
+⚖️ **AND THE HEADLINE SIZING IS UNMOVED: `10 → 3` is still `−1,154`, because
+`3 < 4` means the constant IS charged at both ends.** ⚠️ **STATED AS A CONDITIONAL BECAUSE THE PARAMETRISATION IS NOT DONE —
 math is holding for the maestro's word. Until it lands, block ② is unbuilt and
 owes 97 gates and a proof.** *Recorded here because it changes what the sizing
 ruling is choosing between: not "1,154 gates against re-proving an organ", but
