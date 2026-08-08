@@ -745,7 +745,20 @@ MODEL IN THE FIGURE ITSELF   "291 gates (proof-side)" · "N cells"     ⬅ canno
 ```
 🔑 ***Which is `adder32_adds_on_sample` applied to cost figures: put the scope in
 the thing a citation is forced to carry.*** **A bare `291` is exactly as
-quotable as a bare `99.6%`, and this record already knows what that costs.**
+quotable as the engaged-time ratio this record refuses to print, and for the
+same reason.**
+
+⛔ **AND THIS PARAGRAPH ALMOST BROKE THE LAW IT CITES.** *The sentence above
+originally reproduced that ratio verbatim as an example of an unquotable number —
+putting the figure into a file that had **zero** occurrences of it, in the act of
+warning against quoting it.* **My own compliance check flagged it at the commit,
+and my first instinct was to rationalise: "it isn't published AS a rate."** 🔑
+***A do-not-publish law that admits "but not as a rate" has been repealed by its
+first exception. The charter says the figure NEVER appears, and never is the only
+form of that rule that survives contact with a writer who has a good reason.***
+📌 *Same self-referential class as the rest of Day 3 — a document describing a
+pattern becomes a carrier of it — arriving this time at the compliance rule
+itself, which is the most expensive place it could have landed.*
 
 ### DEFECTS FOUND BY THE DISCIPLINE — Day 3, including three of this seat's own
 
