@@ -12,6 +12,33 @@ and is NOT edited here -- this file only mechanises it.
     FREEZE (close)  the FIRST ③ wave post (L0/L1/L2 per the wave-gate map).
                     If the waves fire in stages, freeze at the FIRST and say so.
 
+⚠️ AMENDMENT, 2026-08-08 15:5x — THE FREEZE PHRASE WAS AMBIGUOUS AND I AM
+   RESOLVING IT BEFORE THE DATA EXISTS, NOT AFTER.
+   The waves were DISPATCHED at 15:51 (bus L28318). "The FIRST ③ wave post"
+   admits two readings and I did not notice when I froze it:
+       (i)  DISPATCH  the maestro's order firing L0/L1/L2   -> bus L28318, KNOWN
+       (ii) EXECUTOR  the first post in which compiler REPORTS an L0/L1/L2
+                      wave                                   -> not yet fired
+   The maestro read it as (ii) -- "this is the dispatch, not the wave; the clock
+   starts on compiler's first landing" -- which matches my own parenthetical,
+   since L0/L1/L2 name compiler's wave ITEMS and not the order to fire them.
+   (ii) is therefore PRIMARY.
+
+   📌 BUT THE HONEST HANDLING IS NOT TO PICK ONE. This tool is already
+   parameterised on --freeze-line, so BOTH prices cost one extra run:
+   I will publish the figures under BOTH anchors and label them. A reader can
+   then recompute under either reading instead of trusting my choice of phrase.
+
+   🔑 THE TIMING IS THE WHOLE POINT: both anchors are fixed NOW, while neither
+   number is known to me and neither reading can be preferred for the answer it
+   gives. An ambiguity found mid-flight gets the same treatment as the original
+   criterion -- resolved in public, before the data, with the residual published.
+   [[pre-register-the-criterion]]
+
+   ⚖️ Noted for the record: the maestro resolved this AGAINST its own interest.
+   Reading (i) was available, already satisfied, and would have closed item 2
+   today with a price to announce.
+
 SIX FIGURES, NEVER ONE. The single headline is exactly what rotted (3 -> 4 -> 7
 in 38 minutes, because three different units were all called "passes"):
 
