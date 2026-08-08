@@ -939,6 +939,44 @@ error**.* ✅ **Silicon's cross-check rides in the same law: when a capture
 suggests a seat was TOLD something, ASK THE SEAT — the seat's inbound record
 outranks any capture, being downstream of submit rather than upstream of it.**
 
+### ⚠️ TWO CATALOGS, NOT ONE — and a reader will merge them unless this says otherwise
+
+**The fleet now maintains two running lists of instrument failures. They are
+adjacent, they grew on the same day, and they are DIFFERENT KINDS.**
+
+```
+THE INSTRUMENT SERIES (10, closed with law 5b, above)
+  an instrument reported CONFIDENTLY about the WRONG OBJECT
+  the instrument WORKED; the object was not the one the question was about
+  e.g. an .olean age answering a file-mode verdict · a name-grep answering
+       coverage · ownership answering liveness · a state read answering history
+
+THE BLINDNESS CATALOG (5, compiler/maestro's, banked 2026-08-08 12:30)
+  an instrument STRUCTURALLY CANNOT SEE a thing, and says nothing about it
+  the instrument is RIGHT and INCOMPLETE, forever, by construction
+  e.g. #audit_axioms blind to `decide` · `simp` silent no-op · lake's cached
+       replay · BSD `find` · `attribute local irreducible` is an ELABORATOR
+       hint the KERNEL DOES NOT HONOR
+```
+
+🔑 ***THE TEST THAT SEPARATES THEM: could a better-aimed question have got the
+right answer from this instrument?*** **Series — YES, ask it about the right
+object. Blindness — NO, the answer is not in there at any aim, and only a
+DIFFERENT instrument reaches it.**
+
+⚖️ **The cures differ accordingly, which is why merging them is expensive:** *the
+series is cured by naming the object (put the scope in the identifier, the model
+in the figure, the roots in the build's own declaration); the blindness catalog
+is cured only by **barring the blind path** — the maestro's ruling that day was
+not "measure more carefully" but **"place a standing ban on `decide +kernel`
+inside the section"**.* ⇒ ***A guarantee one tactic can walk through is not a
+guarantee until the walk is barred.***
+
+📌 *Recorded here because this file is where a reader six weeks out goes, and
+fifteen entries under one heading would teach that instruments are unreliable —
+when the actual lesson is that they are reliable about exactly what they read,
+and the work is knowing which of the two failures you are looking at.*
+
 ### DEFECTS FOUND BY THE DISCIPLINE — Day 3, including three of this seat's own
 
 **Listed with the others because the record is worth nothing if it grades only
