@@ -36,7 +36,7 @@ module tt_um_saltworks_banyan (
     input  wire       rst_n     // active low
 );
 
-    wire [2:0] cnt_o;
+    wire [3:0] cnt_o;
     wire       valid;
 
     banyan_fabric #(.PAYLOAD(8)) fabric (
@@ -49,10 +49,16 @@ module tt_um_saltworks_banyan (
         .valid (valid)
     );
 
-    // uio[0] is an input (sof); uio[4:1] report frame state for bring-up;
-    // uio[7:5] are reserved and driven low.
-    assign uio_out = {3'b000, valid, cnt_o, 1'b0};
-    assign uio_oe  = 8'b0001_1110;
+    // uio[0] is an input (sof); uio[5:1] report frame state for bring-up;
+    // uio[7:6] are reserved and driven low.
+    //
+    // uio[5] = cnt[3], added 8/8 on the maestro's ruling. Three counter bits
+    // cannot identify the phase of a 14-cycle frame — cycles 8..13 alias onto
+    // 0..5 — and the amended spec §5 makes well-phasedness the whole
+    // correctness premise, so the pin that reports phase must not alias.
+    // Observability only: one assign, no logic, nothing in the datapath.
+    assign uio_out = {2'b00, cnt_o[3], valid, cnt_o[2:0], 1'b0};
+    assign uio_oe  = 8'b0011_1110;
 
     // `ena` is not used: TT holds it high whenever we are selected, and the
     // design has no power-down behaviour of its own. Tie it off explicitly so

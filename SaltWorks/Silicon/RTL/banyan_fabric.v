@@ -31,7 +31,11 @@ module banyan_fabric #(
     input  wire       sof,        // start of frame: re-aligns the counter to 0
     input  wire [7:0] din,        // 8 serial inputs
     output wire [7:0] dout,       // 8 serial outputs
-    output wire [2:0] cnt_o,      // frame counter, exposed for bring-up
+    output wire [3:0] cnt_o,      // frame counter, exposed for bring-up. FOUR
+                                  // bits as of 8/8: three cannot identify the
+                                  // phase of a 14-cycle frame (8..13 aliased
+                                  // onto 0..5), and phase is now the whole
+                                  // correctness premise (spec §5, amended).
     output wire       valid       // high during the payload window
 );
     localparam K     = 3;
@@ -55,7 +59,11 @@ module banyan_fabric #(
         else if (cnt == FRAME - 1) cnt <= {CW{1'b0}};
         else             cnt <= cnt + 1'b1;
     end
-    assign cnt_o = cnt[2:0];
+    // Width-safe in both directions: zero-extends when CW < 4 (small PAYLOAD),
+    // truncates when CW > 4 (large PAYLOAD, where 4 pins cannot report the
+    // phase anyway). At the tapeout's P=8, CW=4 and this is exact.
+    wire [3:0] cnt_pad = cnt;
+    assign cnt_o = cnt_pad;
     assign valid = (cnt >= HDR);
 
     // ---- per-stage strobes -------------------------------------------------

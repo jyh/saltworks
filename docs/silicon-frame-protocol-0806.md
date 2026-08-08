@@ -230,9 +230,10 @@ TinyTapeout pin assignment (`ui_in[8]` + `uo_out[8]` + `uio[8]` + clk + rst_n):
 | `uo_out[7:0]` | 8 | the 8 serial **outputs** |
 | `clk`, `rst_n` | 1+1 | as supplied |
 | `uio_in[0]` | 1 | **`sof`** — start-of-frame, re-aligns the counter to 0 |
-| `uio_out[3:1]` | 3 | the frame counter, exposed for bring-up |
+| `uio_out[3:1]` | 3 | the frame counter, bits 2:0 |
 | `uio_out[4]` | 1 | `valid` — high during the payload window (cycle ≥ 2k) |
-| `uio[7:5]` | 3 | reserved |
+| `uio_out[5]` | 1 | the frame counter, **bit 3** (maestro-ruled 8/8; see below) |
+| `uio[7:6]` | 2 | reserved |
 
 `sof` matters: without it the host cannot align to the fabric's frame after a
 power-gate cycle, and §5 says no state survives one. **As of the 8/8 amendment
@@ -240,13 +241,16 @@ power-gate cycle, and §5 says no state survives one. **As of the 8/8 amendment
 establishes the well-phasedness the D3.5 hypothesis now names, and a mis-phased
 frame fails ~94 % of random loads (§8 row 6).**
 
-⚠️ **`cnt` needs `⌈log₂(2k+P)⌉` bits and only 3 are pinned out.** At the tapeout
-`cnt` is 4 bits (0…13) while `cnt_o = cnt[2:0]` exposes 3, so cycles 8…13 alias
-onto 0…5 and **the exposed counter cannot identify the frame phase uniquely**.
-Since phase is now the whole correctness premise, that is a bring-up hazard, not
-a cosmetic one. **Bring-up must align with `sof` and treat `cnt_o` as a coarse
-indicator only** — or `uio_out[5]` (currently reserved) should carry `cnt[3]`.
-Decision owed before bring-up; the pin map above is unchanged until it is made.
+✅ **`cnt` needs `⌈log₂(2k+P)⌉` bits and all 4 are now pinned out** (RULED by the
+maestro 8/8 13:49 under the Inverted Purse, raised by silicon; rides into B5
+unless the Captain objects). Until that ruling `cnt_o` was `cnt[2:0]` — 3 bits of
+a 4-bit counter — so cycles 8…13 aliased onto 0…5 and **the exposed counter could
+not identify the frame phase uniquely.** With the amended D3.5 hypothesis making
+well-phasedness the entire correctness premise, the pin that reports phase must
+not alias: a bring-up engineer reading `cnt_o == 2` could not tell whether the
+next `act_stb` was one cycle away or eight. `cnt[3]` now rides `uio_out[5]`
+(previously reserved). **Observability only — one `assign`, no logic, nothing in
+the datapath, and `uio_oe` widens from `8'b0001_1110` to `8'b0011_1110`.**
 
 📌 **The counter's width is DERIVED, not literal** (fixed 8/8 13:4x): it was
 `reg [3:0]`, so the wrap test `cnt == FRAME-1` could never match once

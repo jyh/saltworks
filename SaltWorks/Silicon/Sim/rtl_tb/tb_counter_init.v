@@ -40,7 +40,7 @@ module tb_counter_init;
   reg        sof   = 1'b0;
   reg  [7:0] din   = 8'd0;
   wire [7:0] dout;
-  wire [2:0] cnt_o;
+  wire [3:0] cnt_o;
   wire       valid;
 
   banyan_fabric #(.PAYLOAD(P)) dut (

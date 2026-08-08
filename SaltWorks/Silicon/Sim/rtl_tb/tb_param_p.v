@@ -14,7 +14,7 @@
 module period_probe #(parameter PAYLOAD = 8);
   reg clk = 1'b0, rst_n = 1'b1, sof = 1'b0;
   reg [7:0] din = 8'd0;
-  wire [7:0] dout; wire [2:0] cnt_o; wire valid;
+  wire [7:0] dout; wire [3:0] cnt_o; wire valid;
   integer c;
   integer period;
 
