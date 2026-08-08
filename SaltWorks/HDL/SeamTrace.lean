@@ -544,6 +544,48 @@ theorem bnC_trace_factors : ∀ (tr : List (List Bool)) (st : List Bool), st.len
           (bnCElemTrace (stepSeq batcherNetC st inp).2 is e)).2
     rw [ih _ (bnC_step_state_length st inp) e he, bnC_step_slice st inp hst e he]
 
+/-! ## 🏦 THE DISCHARGE — scoped at the bytes before it is attempted
+
+**The trace induction above is done. The discharge is NOT, and reading its
+ingredients turns up two scope facts that shape what it can claim.**
+
+⛔ **① `ceKeyOK` IS PINNED AT ONE INITIAL STATE, AND `bnC_trace_factors` IS NOT.**
+`CompareExchangeC.lean:435` drives `runTrace ceC [false, false, false, false] …`
+— the **all-false** state. But `bnC_trace_factors` is quantified over EVERY
+initial state, deliberately, because `Seq.lean` requires it (a deselected tile is
+powered off, not reset).
+⇒ ***The discharge therefore closes only for frames whose element state is
+all-false at frame start.*** That is what the composed switch assumes (`rst` at
+`t = 0`) and it is a REAL HYPOTHESIS, not a formality — **whoever writes the
+discharge must either carry it or prove the element returns to that state
+between frames.** *Do not let the induction's generality make the composed
+statement look more general than its element certificate.*
+
+⛔ **② THE CERTIFICATE SKIPS THE BOTH-IDLE PAIRS, BY CONSTRUCTION.**
+`ceC_realises_cKey_when_active` is `ceKeyOK true = true`, and the `true` is
+`skipBothIdle`: `if skipBothIdle && !a0 && !a1 then true`. The landed
+`ceC_does_not_realise_cKey_naively` proves `ceKeyOK false = false` — **28
+both-idle failures, a spec defect (`cFrame` erases an idle line's destination),
+not a hardware one.**
+⇒ **The discharge inherits that exclusion.** ✅ *It happens to fit: silicon's
+composed theorem is **full-load**, where no input is idle. **Say so in the
+statement rather than relying on it silently.***
+
+📌 **③ SLOT NOTE: `runNet` and `applyComp` live in `SaltWorks/Stack/ZeroOne.lean`
+— math's slot, not mine.** The discharge must import rather than restate them,
+and the two `batcher*_length` theorems there are the corpus's only unaudited
+pair outside the 49 awaiting the maestro's ruling.
+
+### The remaining chain
+```
+ceC_realises_cKey_when_active   one element's frame ⇒ applyComp on cKey  (all-false state, active pairs)
+cKeyLE_eq_lex                   cKeyLE = the lex order on (¬active, dest)
+bnComps_eq_batcher8             bnComps IS batcher8's comparator list
+  ⇒ fold across the 24 elements ⇒ runNet batcher8
+  ⇒ hseam's 8 sites in Silicon/Equiv/ComposedSwitch.lean, via composed_switch_of_seam_dest3
+```
+-/
+
 /-! ### Axiom audit -/
 
 #audit_axioms bnCDatStep bnCDatDrop bnCBuild_state_drop4 bnCBuild_state_drop
