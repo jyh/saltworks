@@ -274,8 +274,46 @@ def check(toks, assigns, lean_path, name, ins_all, outs_named, flops, cuts,
                 seqQ[nt] = (cell, iname, conns)
 
     # --- the emitted Lean datum, read back FROM DISK -----------------------
+    #
+    # ⚠️ THIS MUST FOLLOW THE `++` CHAIN, NOT JUST TAKE THE FIRST BLOCK.
+    # Large netlists are emitted in chunks (see import_netlist.py's note on the
+    # list-literal depth wall):
+    #
+    #   def NAME__c0 : Netlist := [ … ]      def NAME : Netlist := NAME__c0 ++ NAME__c1 ++ …
+    #
+    # The previous reader was `src.split("Netlist := [", 1)[1]` — the FIRST
+    # block only. On a chunked datum that silently checks the first chunk and
+    # calls the whole file verified. It happened to crash with an IndexError
+    # here (outputs indexed past chunk 0), but a netlist whose outputs all fell
+    # inside chunk 0 would have PASSED a check that read a third of the gates.
+    # ⇒ *A partial check that reports success is worse than a crash.*
+    #
+    # The chunk ORDER is read from the `++` chain rather than from file order,
+    # because this file's own doctrine is that the generator is UNTRUSTED — and
+    # "the chunks appear in join order" is a generator promise, not a fact.
     src = open(lean_path).read()
-    body = src.split("Netlist := [", 1)[1].split("\n]", 1)[0]
+
+    def _literal(block_src):
+        return block_src.split("\n]", 1)[0]
+
+    m_join = re.search(r"^def\s+" + re.escape(name) +
+                       r"\s*:\s*SaltWorks\.Silicon\.Netlist\s*:=\s*(.+)$",
+                       src, re.M)
+    if m_join and "++" in m_join.group(1):
+        parts = [p.strip() for p in m_join.group(1).split("++")]
+        bodies = []
+        for p in parts:
+            mp = re.search(r"^def\s+" + re.escape(p) +
+                           r"\s*:\s*SaltWorks\.Silicon\.Netlist\s*:=\s*\[\n",
+                           src, re.M)
+            if not mp:
+                return False, (f"readback: chunk '{p}' named in {name}'s `++` chain "
+                               f"has no definition in {lean_path}")
+            bodies.append(_literal(src[mp.end():]))
+        body = ",\n".join(bodies)
+    else:
+        body = _literal(src.split("Netlist := [", 1)[1])
+
     gates = []
     for line in body.strip().split(",\n"):
         t = line.strip().split()

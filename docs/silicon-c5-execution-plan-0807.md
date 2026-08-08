@@ -162,6 +162,82 @@ locality of failure, organs that can be certified in parallel, and a σ-wiring
 certificate that stays small. ***But the plan must not claim the elaborator
 forces it, because it does not.***
 
+### 2.1c ⭐ THE WALL IS BROKEN BY RESTRUCTURE, NOT BY THE KNOB — AND THE HARNESS
+### NOW DOES IT
+
+**On the maestro's order: diagnose the recursion, then fix it — iterative
+restructure preferred, `maxRecDepth` only as a measured fallback.**
+
+**DIAGNOSIS.** A plain `List Nat` literal of 2,000 elements fails at default
+depth **identically**. ⇒ ***It is generic list-literal elaboration — Lean
+recursing once per element over a right-nested `List.cons` chain. Not `Gate`, not
+`Netlist`, not the importer's parser, not the `runP` fold.*** *The failure site
+was the `def` line itself, which said so all along.*
+
+**THE FIX, and the iterative one wins outright.** Emit in chunks joined by `++`:
+each literal stays shallow and the top-level chain is only `⌈n/CHUNK⌉` deep.
+Measured **at DEFAULT `maxRecDepth`, chunk 500**, each rung carrying a
+`decide +kernel` length proof so the datum is shown *reducible*, not merely
+elaborable:
+
+| gates | flat, default | flat + `maxRecDepth` | **chunked, DEFAULT** |
+|---:|:---:|:---:|:---:|
+| 2,000 | ❌ | ✅ 2 s | ✅ 2 s |
+| 4,000 | — | ✅ 3 s | ✅ 2 s |
+| **12,000** | — | ✅ 6 s | **✅ 7 s** |
+| 24,000 | — | ❌ codegen | **✅ 22 s** |
+
+⇒ **Core scale and 2× core scale clear with NO `set_option` at all.** *The knob
+is recorded as the fallback and its numbers are in §2.1b — it is not adopted,
+because it pushes the cost onto every consumer of the file and hides a
+structural problem behind a default.*
+
+**LANDED IN THE HARNESS**: `import_netlist.py` now chunks above **1,000** gates
+(`CHUNK=500`, `THRESHOLD=1000`, both below the measured wall with margin).
+✅ **Every file generated to date is byte-identical** — `reimport.sh` reproduces
+both committed data.
+
+### ⛔ AND IT EXPOSED A REGRESSION I INTRODUCED, WHICH IS THE PART WORTH READING
+
+`readback.py` read the emitted datum as `src.split("Netlist := [", 1)[1]` — **the
+FIRST block only.** On a chunked file that reads chunk 0 and calls the whole
+datum verified.
+
+🔴 ***It crashed here with an `IndexError` only because the outputs happened to
+index past chunk 0. A netlist whose outputs all fell inside chunk 0 would have
+PASSED a check that read a third of the gates.*** **A partial check that reports
+success is worse than the crash that revealed it** — and `readback` is this
+harness's entire trust anchor, the reason the file header can say *"the generator
+is UNTRUSTED."*
+
+✅ **Fixed: readback now follows the `++` chain — and takes the chunk ORDER from
+the chain rather than from file order**, because "the chunks appear in join
+order" is a *generator promise*, and the generator is exactly what this file
+refuses to trust.
+
+📌 **AND `reimport.sh` COULD NOT HAVE CAUGHT IT.** *Both committed data are below
+the threshold, so they take the unchanged path.* ⇒ **A regression test built from
+the existing corpus cannot see a bug that only fires above the corpus's size.**
+*That is not a criticism of `reimport.sh`; it is the reason the end-to-end import
+below had to be run.*
+
+### ✅ END-TO-END, THROUGH THE REAL HARNESS
+
+```
+tt_um_saltworks_banyan.v  (post-layout, run 31226766476)   19,183 instances
+  → 910 logic / 18,273 physical+sequential · 51 cell types
+  → 1,389 gates emitted, 3 chunks of ≤500
+  → 100 flops cut, ONE clock domain — root 'clk', parity 0, via 16 CLK nets
+  → readback: 32 random vectors × 116 outputs, AGREES WITH VENDOR LIBERTY
+  → elaborates at DEFAULT maxRecDepth, and `decide +kernel` reduces it
+```
+
+⚠️ **THE HONEST LIMIT ON "STEP 1 IS DONE": the SIZE is cleared — 12,000 and
+24,000 synthetic, at default settings, reducible.** *But the largest **real**
+artifact available is 1,389 gates, because `core` does not exist yet.* ⇒ **Step 1
+is done for the size and must be re-run on the actual core when it lands.** *I
+would rather say that than let a synthetic ladder stand in for the thing.*
+
 ### 2.2 The import unit is the ORGAN, and the seam is the WIRING
 
 The core is a composition of 12 organs whose boundaries are already named by the

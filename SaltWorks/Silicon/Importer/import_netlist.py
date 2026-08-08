@@ -615,9 +615,7 @@ def to_lean(gates, ns, name, outs, ninputs, src, state=(), ndesign_in=None,
          f"-- per-instance by the importer's round-trip census, and its cell",
          f"-- expansions are proved against Liberty in SaltWorks.Silicon.Cells.Sky130.",
          "import SaltWorks.Silicon.Equiv.BitSliced", "",
-         f"namespace {ns}", "",
-         f"/-- {name}: {len(gates)} gates, {ninputs} primary inputs. -/",
-         f"def {name} : SaltWorks.Silicon.Netlist := ["]
+         f"namespace {ns}", ""]
     body = []
     for (op, args) in gates:
         if op == "inp":
@@ -628,8 +626,56 @@ def to_lean(gates, ns, name, outs, ninputs, src, state=(), ndesign_in=None,
             body.append(f"  .not {args[0]}")
         else:
             body.append(f"  .{op} {args[0]} {args[1]}")
-    L.append(",\n".join(body))
-    L.append("]")
+
+    # ---- THE LIST-LITERAL DEPTH WALL, and why this is chunked -------------
+    #
+    # A Lean list literal desugars to a right-nested `List.cons` chain, and the
+    # ELABORATOR recurses once per element. MEASURED on this toolchain
+    # (2026-08-07, ladder in docs/silicon-c5-execution-plan-0807.md §2.1b):
+    #
+    #   flat literal, default maxRecDepth :  1,000 OK  ·  2,000 FAILS
+    #     -> "maximum recursion depth has been reached"
+    #
+    # It is NOT specific to Gate or Netlist -- a plain `List Nat` of 2,000
+    # elements fails identically. It is generic list-literal elaboration.
+    #
+    # Two fixes exist and the iterative one is strictly better:
+    #   (a) `set_option maxRecDepth` -- works, but pushes the cost onto every
+    #       consumer of the file and hides a structural problem behind a knob;
+    #   (b) EMIT IN CHUNKS joined by `++` -- each chunk's literal is shallow,
+    #       and the top-level `++` chain is only ceil(n/CHUNK) deep.
+    #
+    # (b) is what this does. MEASURED at DEFAULT maxRecDepth, chunk 500:
+    #   4,000 gates OK 2s  ·  12,000 OK 7s  ·  24,000 OK 22s
+    # and `decide +kernel` still reduces through the `++` chain (checked with a
+    # length theorem at every rung). The core is projected at ~11,900 gates.
+    #
+    # Netlists at or below THRESHOLD are emitted EXACTLY as before, so every
+    # file generated to date is byte-identical under this change.
+    CHUNK, THRESHOLD = 500, 1000
+    if len(body) <= THRESHOLD:
+        L.append(f"/-- {name}: {len(gates)} gates, {ninputs} primary inputs. -/")
+        L.append(f"def {name} : SaltWorks.Silicon.Netlist := [")
+        L.append(",\n".join(body))
+        L.append("]")
+    else:
+        parts = [body[i:i + CHUNK] for i in range(0, len(body), CHUNK)]
+        L.append(f"/-! ### {name} is emitted in {len(parts)} chunks of ≤ {CHUNK}")
+        L.append("")
+        L.append(f"A flat literal of {len(body)} elements exceeds Lean's default")
+        L.append(f"`maxRecDepth` during elaboration (measured wall: 1,000 OK, 2,000 not).")
+        L.append(f"Chunking keeps every literal shallow and the `++` chain only")
+        L.append(f"{len(parts)} deep, so this file needs NO `set_option` to elaborate.")
+        L.append("-/")
+        L.append("")
+        for ci, part in enumerate(parts):
+            L.append(f"def {name}__c{ci} : SaltWorks.Silicon.Netlist := [")
+            L.append(",\n".join(part))
+            L.append("]")
+            L.append("")
+        joined = " ++ ".join(f"{name}__c{ci}" for ci in range(len(parts)))
+        L.append(f"/-- {name}: {len(gates)} gates, {ninputs} primary inputs. -/")
+        L.append(f"def {name} : SaltWorks.Silicon.Netlist := {joined}")
     L.append("")
     L.append(f"/-- Output net indices, in declaration order. -/")
     L.append(f"def {name}_outs : List Nat := {outs}")
