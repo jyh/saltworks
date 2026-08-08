@@ -74,7 +74,28 @@ if [ "$cur_hash" != "$prev_hash" ]; then
   exit 2
 fi
 
-echo "✅ bus_integrity: prefix intact across $prev_lines lines (bus now $now_lines, +$((now_lines - prev_lines)))."
+grown=$((now_lines - prev_lines))
+echo "✅ bus_integrity: VERIFIED unchanged across $prev_lines lines."
+
+# ⛔ THE GREEN MUST STATE ITS OWN SCOPE -- silicon, 16:18, adversarially testing
+# this file within two minutes of it landing. The blind window is not merely
+# "missed": on the NEXT run the growth region is hashed into the new baseline and
+# ADOPTED AS TRUSTED, and every run after that certifies the tampered bytes.
+# My header already said "detects a rewrite ONLY on the next run" -- TRUE, and I
+# wrote it, and I did not extract this consequence from it either.
+# 🔑 NAMING THE CONSEQUENCE IS WORTH MORE THAN NAMING THE MECHANISM.
+if [ "$grown" -gt 0 ]; then
+  if [ "$MODE" != "--check" ]; then
+    echo "⚠️  +$grown line(s) written since the last run are ADOPTED UNCHECKED into"
+    echo "    the new baseline. This run CANNOT speak for them, and no later run"
+    echo "    will either — they become part of what is certified."
+    echo "    ⇒ Shrink this window by running the check in the SAME command as"
+    echo "      every bus append; then it is one post wide."
+  else
+    echo "ℹ️  +$grown line(s) are outside the verified prefix and were NOT adopted"
+    echo "    (--check does not move the baseline)."
+  fi
+fi
 
 if [ "$MODE" != "--check" ]; then
   d=$(head -n "$now_lines" "$BUS" | shasum -a 256 | cut -d' ' -f1)
