@@ -130,10 +130,13 @@ first.
 
 *(math's practice: run the successor-duty in advance rather than owe it at muster)*
 
-* **I never ran the full corpus build after the last four landings.** Everything
-  above is a TARGETED build. The five modules are outside the hub, so a corpus
-  run would not have covered them anyway — but I did not check that the landed
-  `SeamTrace` edits left the corpus green, and I should have.
+* ~~**I never ran the full corpus build after the last four landings.**~~
+  ✅ **CLOSED at 23:06, before banking rather than after: `EXIT=0`, 8639 jobs,
+  0 errors, 0 warnings, 0 `sorryAx`.** *The corpus emits 110 lines for
+  `SeamTrace` — the fold IS covered — and ZERO for each of `Cone`, `SeamElement`,
+  `SeamJoinA/B/C`, which is the import-owed gap stated as a measurement instead
+  of an expectation.* **A gap named in a bank is worth less than a gap closed
+  while writing it, when closing costs one command.**
 * **`SeamJoinC` is landed and unused.** Math showed it re-proves A's payoff under
   different names (`cDestRd`, `bnCFrameAt_succ_frames`). Its driver bridge and its
   **two negative controls** are the non-redundant part; nobody has separated them.
