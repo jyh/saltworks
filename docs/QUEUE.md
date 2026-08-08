@@ -105,6 +105,33 @@
   duty-filter design carries no landing-triggered duties; keep it
   light by design).
 
+## THE CAPTAIN'S REGISTER (Captain-ratified 8/8 ~14:10, his words)
+
+> "It is better to ask for correction than for permission." — and the
+> Purse: "do it, unless it is obviously wrong."
+
+- **TIER 1 — SOLELY THE CAPTAIN'S, never defaulted**: anything
+  PUBLIC · MONEY · ENDORSEMENTS · frozen-statement re-cuts · the
+  summit word · named clicks (B5). The maestro's duty is the fact
+  sheet BEFORE ripeness, so each costs one read and one word.
+- **TIER 2/3 — PREAUTHORIZED TO THE MAESTRO**: everything else;
+  the Captain's later veto always available. Decisions touching
+  Tier-1-adjacent artifacts are FLAGGED with their veto point named
+  (the pin pattern, 13:49).
+
+OPEN ITEMS:
+- B5 (T1): the click; Sept-7 13:00 PDT close; REF QUESTION + floor
+  law remain his; fact sheet on his word. Adjacent MONEY item from
+  the muster flags: PCBs 0/80 — the real TT scarcity; ordering is
+  his word.
+- The pin cnt[3] → uio_out[5] (T2, exercised 13:49): rides into B5
+  unless struck; put to the Captain directly 8/8 14:1x.
+- Endorsement + witness approval #2 (T1): his lanes, he monitors
+  personally (his 8/7 disposition; no maestro re-surfacing).
+- The ③+④ deep design session: open at his pleasure — a
+  collaboration, not an authorization; the blocks are five
+  refutation rounds richer than when he last held them.
+
 ## WAVE-GATES (the coarse dependency map, one glance)
 
 ```
