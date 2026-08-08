@@ -657,6 +657,43 @@ theorem bnCResult_dat : bnCResult.2.1 = bnCDatAt 24 := by
   -- where simp normalises it into a form that no longer matches.
   exact h
 
+/-! ### Step 2a — the PER-CYCLE data lemma (which does exist, and is cheap)
+
+*`bnCBuild_state_sem`'s name is narrower than its statement: its hypothesis is
+`(ceCcore.gates.map Gate.out).contains n`, i.e. ANY gate output — so it serves
+the DATA ports (`instOuts` entries 0 and 1) exactly as it serves the state ports
+(entries 2…5). The per-cycle half of the data path is therefore the same chain as
+`bnC_state_bit`, with no new machinery.* -/
+
+theorem ceCcore_data_port_gate (j : Nat) (hj : j < 2) :
+    (ceCcore.gates.map Gate.out).contains (ceCcore.outs.getD j 0) = true := by
+  interval_cases j <;> decide +kernel
+
+theorem ceCcore_data_port_lt (j : Nat) (hj : j < 2) :
+    ceCcore.outs.getD j 0 < ceCcore.nIn + ceCcore.gates.length := by
+  interval_cases j <;> decide +kernel
+
+/-- ⭐ **PER-CYCLE, DATA SIDE: the net element `e` drives onto its output wire
+carries exactly what `ceC` computes standalone.** *These are the nets
+`bnCDatStep` writes — `dat.set a (os.getD 0 0)` and `.set b (os.getD 1 0)` — so
+this is the value that flows to the next element in the same cycle.* -/
+theorem bnC_data_bit (st inp : List Bool) (hst : st.length = 96) (e : Nat) (he : e < 24)
+    (j : Nat) (hj : j < 2) (pre : List Gate)
+    (hpre : bnCCore.gates = pre ++ (bnCBuild e (bnComps.drop e) (bnCDatAt e)).1) :
+    run (batcherNetC.env inp st) bnCCore.gates
+        ((instOuts ceCcore (bnCSigma e (bnCCompAt e).1 (bnCCompAt e).2 (bnCDatAt e))
+            (bnCOff e)).getD j 0)
+      = run (ceC.env (bnCElemInAt st inp e) (bnCSlice st e)) ceCcore.gates
+          (ceCcore.outs.getD j 0) := by
+  have hab := bnCCompAt_lt e he
+  rw [instOuts, getD_map_nat _ _ _ (by rw [ceCcore_outs_length]; omega)]
+  rw [hpre, run_append, bnComps_drop_cons e he]
+  rw [show (bnCCompAt e) = ((bnCCompAt e).1, (bnCCompAt e).2) from rfl]
+  rw [bnCBuild_state_sem e (bnCCompAt e).1 (bnCCompAt e).2 (bnComps.drop (e+1))
+        (bnCDatAt e) _ (bnCDatAt_below e) hab.1 hab.2 _ (ceCcore_data_port_gate j hj)]
+  exact run_agree_of_inputs_circ ceCcore ceCcore_ssa' _ _
+    (bnC_env_agree st inp hst e he pre hpre) _ (ceCcore_data_port_lt j hj)
+
 /-! ### ⚠️ STEP 2 IS NOT THE SAME SHAPE AS STEP 1 — the data path is PER-FRAME
 
 **Having built the skeleton, the next step is where the state and data halves
@@ -700,5 +737,6 @@ the frame is the level the discharge has to work at.* -/
 #audit_axioms bnCCore_outs_eq ceCcore_outs_drop2 bnC_step_state bnCResult_state_length
 #audit_axioms bnC_step_slice bnC_step_state_length bnCElemTrace bnC_trace_factors
 #audit_axioms bnCBuild_dat_drop bnCResult_dat
+#audit_axioms ceCcore_data_port_gate ceCcore_data_port_lt bnC_data_bit
 
 end SaltWorks.HDL
