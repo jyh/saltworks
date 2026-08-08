@@ -5839,13 +5839,25 @@ does not rescue it and the reason is structural, not a failure of effort:
 ruled pair** — sampling two of three operands leaves almost nothing to hide in.
 Re-siting would be a re-witnessing, i.e. a statement change, not a repair.
 
-⭐ **WHAT SURVIVES, AND IT IS NOT NOTHING.** The same control lives on where it is
-flip-inert: `genSelectCut2_fails_the_theorem` below carries the identical
-mutation at `n = 2, b = 1` — stated entirely against literals, so the re-cut
-cannot touch it — and `pcAddCut_fails_the_theorem` / `pcAddCutB_fails_the_theorem`
-do the same job for the PC adder. What is lost is a mutation control *at the ALU
-select's own width*, and it is lost because that width is now too small to hide a
-mutation from a two-point sample. -/
+⭐ **WHAT SURVIVES, AND THE RULED WIDTH IS COVERED.** Three controls carry the
+job, all of them flip-inert because all of them are stated against literals
+rather than against `asOps`/`asSelBits`/`asPad`:
+
+* ⭐ `SelectCut32.mutLeafCut_fails_cert` — **the mutation control AT THE RULED
+  SELECT'S OWN WIDTH.** `mutLeafCut` is the one-gate mutant of
+  `sliceASelect = genSelect 3 2`, refuted against the whole-list spec `Cert`. It
+  was written for the ruled block and it does not care what `asOps` becomes.
+  *MEASURED: it elaborates and ticks with the flip applied.*
+* `genSelectCut2_fails_the_theorem` below — the identical mutation at `n = 2,
+  b = 1`, the ADDI operand-B mux.
+* `pcAddCut_fails_the_theorem` / `pcAddCutB_fails_the_theorem` — the PC adder.
+
+⇒ **What is lost is this particular mutant, not mutation coverage of the select.**
+`aluSelectCut` was the control for a TEN-source block, and at three sources over
+a two-bit select there is nothing left to hide from a two-point sample — the
+coverage moved to `SelectCut32`, where it was written against the ruled pair from
+the start. -/
+
 /-- An operand picture NO `asOneHot` driver can produce: **two operand results
 live at once**. -/
 def asOffEnv : Env := fun n =>
