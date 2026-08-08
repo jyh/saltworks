@@ -38,6 +38,8 @@ CAPTAIN ORDER FOR SILICON — evidence real headline -> MUST EMIT
 [08/08 09:05, compiler] ordinary chatter, no marker, long enough to be clipped: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc CHATTER-TAIL
 
 [08/08 09:06, maestro] FLEET — an order longer than the envelope budget: dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd ENVTAIL-MARKER
+[08/08 09:07, silicon] my post that ends without a trailing newline -> MUST NOT EMIT
+[08/08 09:08, evidence] CONSECUTIVE header, no blank line above -> MUST EMIT CONSEC-MARKER
 FIXEOF
 
 OUT=$(LC_ALL=C awk -v start=0 -v self=silicon -f "$AWKPROG" "$FIX")
@@ -86,6 +88,15 @@ chk "chatter tail actually dropped"  'CHATTER-TAIL'               0
 #    cannot live after byte 512, or the envelope eats the notice too.
 chk "over-long order warns UP FRONT"  'PAST ENVELOPE'              1
 chk "warning precedes the body"       '\[!+[0-9]*B PAST ENVELOPE - READ THE BUS\] FLEET' 1
+
+# 9. REV 8, MEASURED LIVE. 155 headers on the bus are not preceded by a blank
+#    line (19 today) because a poster whose append lacks a trailing newline
+#    leaves the file mid-line. Rev 7 dropped every one -- evidence 14:52 was
+#    confirmed never emitted. Same class cost math 54 minutes on two consecutive
+#    maestro posts. A header is real if prevblank OR the previous line was a
+#    header WITH content; checks 3 and 4 above guard that this did not re-open
+#    the quoted-header spoof.
+chk "consecutive header emitted"      'CONSEC-MARKER'              1
 
 [ "$rc" = 0 ] && echo "ALL PASS" || echo "FAILURES PRESENT — do not arm"
 exit $rc

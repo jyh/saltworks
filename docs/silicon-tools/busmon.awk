@@ -65,24 +65,45 @@ NR <= start { prevblank = ($0 ~ /^[[:space:]]*$/); next }
 # Without it, a quoted silicon header spoofs owner-tracking and the self-arm
 # swallows the rest of a peer post -- measured: rev 4 emitted NOTHING for an
 # evidence post that quoted one, headline included.
-prevblank && /^\[[0-9]+\/[0-9]+ [0-9:]+, [A-Za-z]/ {
+# rev 8, 8/8 14:5x — BLANK-PRECEDENCE ALONE DROPS REAL POSTS, MEASURED LIVE.
+# 155 headers on this bus are NOT preceded by a blank line (19 of them today),
+# and rev 7 silently dropped every one. Confirmed at the bytes: evidence's 14:52
+# post was never emitted to me.
+#
+# THE CAUSE WAS MINE. A poster whose append ends WITHOUT a trailing newline
+# leaves the file mid-line, so the next seat's leading "\n" merely terminates it
+# and their header lands with no blank line above. My own 14:51 post did exactly
+# that and blinded my own filter to the seat that posted next. The same class
+# cost math 54 minutes at 13:59/14:07 — two consecutive maestro posts, both
+# dropped, W5 sat unfired while the pane read "waiting on the helm".
+#
+# THE FIX, and it must not re-open the quoted-header spoof rev 5 closed. A real
+# header follows a blank line OR another COMPLETE header; a quoted header follows
+# BODY PROSE. The discriminator is whether the previous header carried content
+# after its "] ": a complete post line did, a provenance-only line (the pending
+# path, where the headline sits on the NEXT line) did not. So a header is real if
+#     prevblank  OR  the previous line was a header WITH content
+# which admits consecutive posts and still rejects the quotation that opens a
+# pending post -- exactly the case selftest 3 and 4 pin down.
+(prevblank || hdrcomplete) && /^\[[0-9]+\/[0-9]+ [0-9:]+, [A-Za-z]/ {
   owner = $0
   sub(/^\[[^,]*, /, "", owner)
   sub(/[ ,\]].*$/, "", owner)
   pending = ""
+  p = index($0, "] ")
   if (owner != self) {
     match($0, /^\[[0-9]+\/[0-9]+ [0-9:]+, [a-z]+/)
     stamp = substr($0, RSTART, RLENGTH)
-    p = index($0, "] ")
     if (p > 0) { emit(stamp, substr($0, p + 2)) }
     else       { pending = stamp }
   }
+  hdrcomplete = (p > 0)
   prevblank = 0
   next
 }
 
 # Self-suppression is POST-SCOPED: a body line inherits its header owner.
-owner == self { prevblank = ($0 ~ /^[[:space:]]*$/); next }
+owner == self { prevblank = ($0 ~ /^[[:space:]]*$/); hdrcomplete = 0; next }
 
 # Some seats close the provenance bracket at end-of-line and put the headline on
 # the NEXT line. Fill pending from the first real body line -- but SKIP
@@ -91,6 +112,7 @@ owner == self { prevblank = ($0 ~ /^[[:space:]]*$/); next }
 pending != "" && NF > 0 && !/^\[[0-9]+\/[0-9]+ [0-9:]+, [A-Za-z]/ {
   emit(pending, $0)
   pending = ""
+  hdrcomplete = 0
 }
 
-{ prevblank = ($0 ~ /^[[:space:]]*$/) }
+{ prevblank = ($0 ~ /^[[:space:]]*$/); hdrcomplete = 0 }
