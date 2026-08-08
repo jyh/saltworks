@@ -17,6 +17,7 @@ import SaltWorks.HDL.Shifter
 import SaltWorks.HDL.PriorityEnc
 import SaltWorks.HDL.ReadTree
 import SaltWorks.HDL.AluSelect
+import SaltWorks.HDL.GenSelectCount
 import SaltWorks.HDL.EmitS
 import SaltWorks.HDL.CodegenSpec
 import SaltWorks.HDL.CompareExchange
