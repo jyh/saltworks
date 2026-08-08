@@ -6836,6 +6836,464 @@ theorem sem_regNext_off_the_sample :
 
 end RegNextSemantics
 
+section DecoderSemantics
+
+open SaltWorks.HDL hiding seenWord
+open Salt.Tactic
+
+/-!
+## DECODER-UNCOND — the decoder, off the sample and over the whole word space
+
+`HDL/Decoder.lean`'s certificates are `decide +kernel` over **3,056 words**, every
+one of them built by `dcWord op f3 f7`, which leaves bits 7-11, 15-19 and 20-24 at
+zero. The file's docstring (`Decoder.lean:38-58`) argues that this is enough
+because *"the control signals depend on the word ONLY through `opcode`, `funct3`
+and the single predicate `funct7 = 0`"* — and then concedes, in the same
+paragraph, ***"Stating the projection is the whole argument."***
+
+⛔ **IT WAS NEVER STATED.** Not for the circuit, not for `ctrlSpec`. Until it is,
+3,056 points say nothing about the other 4,294,964,240 words, and
+`RegField`/`PcField` quantify over **every** environment. This section states it,
+on both sides, and then does not need it: the route below computes the circuit's
+six outputs symbolically, so the projection falls out as a corollary of a
+*stronger* fact rather than being assumed as a lemma.
+
+### What is actually here, in dependency order
+
+1. **The `andChain` lemma set** (`andChain_nil` … `run_andChain`), mirroring the
+   five `orChain` lemmas at `:3640`. ⭐ *This asymmetry was backwards from where
+   the gates are*: `orChain` contributes 4 of the decoder's 102 gates and had a
+   complete lemma set; `andChain` contributes **66** and had none — `grep -F
+   andChain` returned its own definition, its own recursive call, one use site and
+   two audit lines. The proofs transfer from `orChain` line for line with
+   `any → all` and `Bool.or_assoc → Bool.and_assoc`.
+2. **`sem_decoder`** — the six outputs as an explicit `Bool` formula in
+   `w`'s opcode / funct3 / funct7-zero predicates, for a **symbolic** `w`.
+3. **`ctrlSpec_eq`** — the same six, read off `ISA.decode`'s nested `if`-chain.
+   This is where opcode-disjointness and the **two distinct paths to `none`** are
+   discharged (`ISA.lean:572`'s interior `else none` for a bad `funct3` at
+   `funct7 = 0`, and `ISA.lean:582`'s fallthrough for `funct7 ≠ 0`).
+4. **`decoder_correct`** — `∀ w, ctrlOf w = ctrlSpec w`, unconditional.
+5. Controls: the theorem **implies** all three landed sampled certificates, and
+   **rejects** a mutant decoder that passes none of them.
+
+### The reduction facts, and why they are `decide +kernel`
+
+`andChain` and `orChain` are well-founded recursive (`Decoder.lean:87`, `:96`),
+and `Sem.lean:20-22` states the consequence: WF recursion does not reduce during
+elaboration. The gate list is nevertheless a **closed** term, so the kernel can
+be asked for its value directly; what it cannot do is reduce it under a binder.
+Hence the shape below — `decide +kernel` for the layout constants (net numbers,
+gate lists), `run_andChain`/`run_orChain` for everything under `∀ w`.
+-/
+
+/-! ### The `andChain` lemma set -/
+
+/-- `List.all` respects pointwise agreement on membership — the `List.any`
+counterpart is `any_congr_mem` (`:3535`). -/
+theorem all_congr_mem {α : Type} {l : List α} {p q : α → Bool} (h : ∀ x ∈ l, p x = q x) :
+    l.all p = l.all q := by
+  induction l with
+  | nil => rfl
+  | cons a as ih =>
+    rw [List.all_cons, List.all_cons, h a (by simp), ih (fun x hx => h x (by simp [hx]))]
+
+theorem andChain_nil (b : Nat) : andChain b ([] : List Net) = ([], 0, b) := by
+  conv_lhs => rw [andChain]
+
+theorem andChain_one (b : Nat) (x : Net) : andChain b [x] = ([], x, b) := by
+  conv_lhs => rw [andChain]
+
+theorem andChain_cons2 (b : Nat) (x y : Net) (r : List Net) :
+    andChain b (x :: y :: r)
+      = (⟨b, .and x y⟩ :: (andChain (b + 1) (b :: r)).1,
+         (andChain (b + 1) (b :: r)).2.1, (andChain (b + 1) (b :: r)).2.2) := by
+  conv_lhs => rw [andChain]
+
+/-- Every gate an `andChain` emits lands at or above its base. The `fuel`
+argument is the induction measure: `andChain`'s recursive argument `b :: r` is
+not a subterm of `x :: y :: r`, so the recursion is on **length**, not structure.
+-/
+theorem andChain_out_ge : ∀ (fuel : Nat) (ns : List Net) (b : Nat), ns.length ≤ fuel →
+    ∀ g ∈ (andChain b ns).1, b ≤ g.out := by
+  intro fuel
+  induction fuel with
+  | zero =>
+    intro ns b h g hg
+    rw [List.eq_nil_of_length_eq_zero (Nat.le_zero.mp h), andChain_nil] at hg
+    exact absurd hg (List.not_mem_nil)
+  | succ f ih =>
+    intro ns b h g hg
+    match ns with
+    | [] => rw [andChain_nil] at hg; exact absurd hg (List.not_mem_nil)
+    | [x] => rw [andChain_one] at hg; exact absurd hg (List.not_mem_nil)
+    | x :: y :: r =>
+      rw [andChain_cons2] at hg
+      simp only [List.mem_cons] at hg
+      rcases hg with rfl | hg
+      · exact Nat.le_refl b
+      · have hlen : (b :: r).length ≤ f := by
+          simp only [List.length_cons] at h ⊢
+          omega
+        exact Nat.le_of_succ_le (ih (b :: r) (b + 1) hlen g hg)
+
+/-- Nothing below the base moves. -/
+theorem run_andChain_frame (fuel : Nat) (E : Env) (ns : List Net) (b : Nat)
+    (h : ns.length ≤ fuel) (m : Nat) (hm : m < b) : run E (andChain b ns).1 m = E m :=
+  run_of_unwritten E _ m (fun g hg =>
+    Nat.ne_of_gt (Nat.lt_of_lt_of_le hm (andChain_out_ge fuel ns b h g hg)))
+
+/-- ⭐ **The chain computes the conjunction.** Stated over `andChain`
+generically, exactly as `run_orChain` is stated over `orChain`, so it is not
+specialised to the decoder's five instances. -/
+theorem run_andChain : ∀ (fuel : Nat) (E : Env) (ns : List Net) (b : Nat),
+    ns.length ≤ fuel → ns ≠ [] → (∀ m ∈ ns, m < b) →
+    run E (andChain b ns).1 ((andChain b ns).2.1) = ns.all E := by
+  intro fuel
+  induction fuel with
+  | zero =>
+    intro E ns b h hne _
+    exact absurd (List.eq_nil_of_length_eq_zero (Nat.le_zero.mp h)) hne
+  | succ f ih =>
+    intro E ns b h hne hlt
+    match ns with
+    | [] => exact absurd rfl hne
+    | [x] =>
+      rw [andChain_one]
+      simp
+    | x :: y :: r =>
+      rw [andChain_cons2]
+      show run (upd E b ((Op.and x y).eval E)) (andChain (b + 1) (b :: r)).1
+          ((andChain (b + 1) (b :: r)).2.1) = _
+      have hlen : (b :: r).length ≤ f := by
+        simp only [List.length_cons] at h ⊢
+        omega
+      have hlt' : ∀ m ∈ (b :: r), m < b + 1 := by
+        intro m hm
+        rcases List.mem_cons.mp hm with rfl | hm
+        · exact Nat.lt_succ_self m
+        · exact Nat.lt_succ_of_lt (hlt m (by simp [hm]))
+      rw [ih (upd E b ((Op.and x y).eval E)) (b :: r) (b + 1) hlen (by simp) hlt']
+      rw [List.all_cons, List.all_cons, List.all_cons, upd_self,
+        all_congr_mem (l := r) (p := upd E b ((Op.and x y).eval E)) (q := E)
+          (fun m hm => upd_of_ne _ (Nat.ne_of_lt (hlt m (by simp [hm]))))]
+      show ((E x && E y) && r.all E) = (E x && (E y && r.all E))
+      exact Bool.and_assoc (E x) (E y) (r.all E)
+
+#audit_axioms all_congr_mem
+#audit_axioms andChain_nil andChain_one andChain_cons2 andChain_out_ge
+#audit_axioms run_andChain_frame run_andChain
+
+end DecoderSemantics
+
+section ImmediateSemantics
+
+open SaltWorks.HDL hiding seenWord
+open Salt.Tactic
+
+/-!
+## IMM-UNCOND — the immediate extractors, for every 32-bit word
+
+`HDL/Immediate.lean`'s two certificates are `decide +kernel` over **4096 words
+each**, and every one of those words is `encode (.ADDI 1 0 v)` or
+`encode (.BEQ 1 2 v)` — i.e. the `rd`/`rs1`/`rs2` fields are **PINNED**. That is
+a 4096-member family inside 2^32.
+
+⛔ **`RegField`/`PcField` quantify over `∀ ins`** — an arbitrary environment, so
+an arbitrary instruction word. A certificate over a pinned family cannot feed
+that obligation, however exhaustive it is *within* the family.
+
+### The route, and why it is short
+
+`immICirc` has **zero gates**, so `run ins [] = ins` and `sem` is nothing but a
+re-indexing of the input valuation through `immI`. `immBCirc` has **one** gate,
+`⟨32, .const false⟩`, and every net its outputs read other than 32 is `< 32`
+(`immBField_lt_32`) — so the single `upd` hits output 0 and frames past all the
+others. Both facts are stated below *before* any bit-level reasoning, which is
+what keeps the arithmetic to twelve `interval_cases`.
+
+📌 **The environment's value at net 32 is IRRELEVANT, and that is a theorem here
+rather than an assumption** — `sem_immBCirc` writes `false` at output 0
+outright, and `sem_immBCirc_ignores_net32` says two valuations agreeing only
+below 32 give the same meaning.
+-/
+
+/-! ### The wiring, at the level of `sem` -/
+
+/-- Every net `immBField` names is a **primary input** — below the one gate's
+output net. *This is what makes the `B` block's single `upd` frame past all
+outputs but the zero.* ⚠️ `abbrev Net := Nat` and `omega` does not see through
+it: every branch is mirrored into `Nat` by `show` first. -/
+theorem immBField_lt_32 (j : Nat) : immBField j < 32 := by
+  unfold immBField
+  split
+  · show 8 + j < 32; omega
+  · split
+    · show 25 + (j - 4) < 32; omega
+    · split
+      · show (7 : Nat) < 32; omega
+      · show (31 : Nat) < 32; omega
+
+/-- And so is every net `immB` names, except output 0's. -/
+theorem immB_lt_32_of_ne_zero {k : Nat} (hk : k ≠ 0) : immB k < 32 := by
+  unfold immB
+  rw [if_neg hk]
+  split
+  · exact immBField_lt_32 _
+  · exact immBField_lt_32 _
+
+/-- ⭐ **THE `I` BLOCK IS A RE-INDEXING AND NOTHING ELSE, FOR EVERY VALUATION.**
+Zero gates means `run ins [] = ins`, so `sem` is `outs.map ins`. -/
+theorem sem_immICirc (E : Env) :
+    sem immICirc E = (List.range 32).map (fun k => E (immI k)) := by
+  simp [sem, immICirc, List.map_map, Function.comp_def]
+
+/-- ⭐ **THE `B` BLOCK, FOR EVERY VALUATION**: output 0 is `false` — written by
+the block's only gate, whatever `E` says at net 32 — and every other output is
+the input net `immB` names. -/
+theorem sem_immBCirc (E : Env) :
+    sem immBCirc E = (List.range 32).map (fun k => if k = 0 then false else E (immB k)) := by
+  show ((List.range 32).map immB).map (run E [⟨immBZero, .const false⟩]) = _
+  rw [List.map_map]
+  apply List.map_congr_left
+  intro k _
+  show run E [⟨immBZero, .const false⟩] (immB k) = _
+  rw [run_cons, run_nil]
+  by_cases hk : k = 0
+  · subst hk
+    show upd E immBZero false immBZero = _
+    simp
+  · rw [if_neg hk]
+    exact upd_of_ne _ (Nat.ne_of_lt (immB_lt_32_of_ne_zero hk))
+
+/-- ⭐ **NET 32 IS NOT AN INPUT**, said precisely: valuations that agree only on
+the 32 primary inputs already agree on the block's meaning. *Stated rather than
+assumed, because the gate writes net 32 and a reader cannot tell from the `Circ`
+alone whether the pre-existing value leaks.* -/
+theorem sem_immBCirc_ignores_net32 {E₁ E₂ : Env} (h : ∀ n : Nat, n < 32 → E₁ n = E₂ n) :
+    sem immBCirc E₁ = sem immBCirc E₂ := by
+  rw [sem_immBCirc, sem_immBCirc]
+  apply List.map_congr_left
+  intro k _
+  by_cases hk : k = 0
+  · rw [if_pos hk, if_pos hk]
+  · rw [if_neg hk, if_neg hk]
+    exact h _ (immB_lt_32_of_ne_zero hk)
+
+/-! ### The bits — the wiring against `sext` and against the scramble -/
+
+/-- Output `k` of the `I` block is bit `k` of `sext(w[31:20])`, for a **symbolic**
+`w`. -/
+theorem immI_bit (w : BitVec 32) {k : Nat} (hk : k < 32) :
+    w.getLsbD (immI k) = ((w.extractLsb' 20 12).signExtend 32).getLsbD k := by
+  rw [BitVec.getLsbD_signExtend]
+  by_cases h : k < 12
+  · rw [BitVec.getLsbD_extractLsb']
+    simp [immI, h, hk]
+  · rw [BitVec.msb_eq_getLsbD_last, BitVec.getLsbD_extractLsb']
+    simp [immI, h, hk]
+
+/-- **`w`'s `B`-type immediate field, reassembled** — character for character the
+expression `ISA.decode` uses at `ISA.lean:580`, so a reader can check the
+transcription by eye against the decoder rather than against the prose table. -/
+def bImmOf (w : BitVec 32) : BitVec 12 :=
+  w.extractLsb' 31 1 ++ (w.extractLsb' 7 1 ++ (w.extractLsb' 25 6 ++ w.extractLsb' 8 4))
+
+/-- ⚠️ **A WIDTH-INDEX BRIDGE, AND IT IS LOAD-BEARING.** `bImmOf w` is declared at
+`BitVec 12` while its body is at `BitVec (1 + (1 + (6 + 4)))`; the two are
+definitionally equal, but `simp` will **not** fire `BitVec.getLsbD_append`
+through the literal `12`. Re-stating the projection at the sum-shaped width is
+what makes the append lemmas apply at all. -/
+theorem bImmOf_getLsbD (w : BitVec 32) (j : Nat) :
+    (bImmOf w).getLsbD j
+      = (w.extractLsb' 31 1 ++
+          (w.extractLsb' 7 1 ++ (w.extractLsb' 25 6 ++ w.extractLsb' 8 4))).getLsbD j := rfl
+
+/-- ⭐ **THE SCRAMBLE, BIT BY BIT, AGAINST THE DECODER'S OWN REASSEMBLY.** Twelve
+cases because the field is twelve bits and its pieces are not contiguous. -/
+theorem bImmOf_bit (w : BitVec 32) {j : Nat} (hj : j < 12) :
+    (bImmOf w).getLsbD j = w.getLsbD (immBField j) := by
+  rw [bImmOf_getLsbD]
+  interval_cases j <;>
+    (repeat rw [BitVec.getLsbD_append]) <;>
+    norm_num [immBField, BitVec.getLsbD_extractLsb']
+
+/-- Output `k > 0` of the `B` block is bit `k` of `bOffset` — **the scramble AND
+the doubling**, for a symbolic `w`. -/
+theorem immB_bit (w : BitVec 32) {k : Nat} (hk : k < 32) (hk0 : k ≠ 0) :
+    w.getLsbD (immB k) = (bOffset (bImmOf w)).getLsbD k := by
+  have h1 : ¬ (k < 1) := by omega
+  have h2 : k - 1 < 32 := by omega
+  rw [bOffset, BitVec.getLsbD_shiftLeft, BitVec.getLsbD_signExtend,
+    BitVec.msb_eq_getLsbD_last, decide_eq_true hk, decide_eq_false h1, decide_eq_true h2]
+  simp only [Bool.not_false, Bool.true_and, Bool.and_true, Nat.reduceSub]
+  unfold immB
+  rw [if_neg hk0]
+  by_cases h13 : k < 13
+  · rw [if_pos h13, if_pos (show k - 1 < 12 by omega),
+      bImmOf_bit w (show k - 1 < 12 by omega)]
+  · rw [if_neg h13, if_neg (show ¬ (k - 1 < 12) by omega),
+      bImmOf_bit w (show (11 : Nat) < 12 by omega)]
+
+/-! ### ⭐⭐ THE UNCONDITIONAL THEOREMS -/
+
+/-- ⭐⭐ **THE `I` IMMEDIATE IS `sext(w[31:20])`, ON ALL 2^32 WORDS.** *Not
+`decide`d — 2^32 words is not a kernel computation, and the existing certificate
+reaches 4096 of them with `rd`/`rs1` pinned.* -/
+theorem sem_immICirc_word (w : BitVec 32) :
+    sem immICirc (fun i => w.getLsbD i)
+      = (List.range 32).map ((w.extractLsb' 20 12).signExtend 32).getLsbD := by
+  rw [sem_immICirc]
+  exact List.map_congr_left (fun k hk => immI_bit w (List.mem_range.mp hk))
+
+/-- ⭐⭐ **THE `B` DISPLACEMENT IS `bOffset` OF THE REASSEMBLED FIELD, ON ALL 2^32
+WORDS** — including the structural low zero, which the statement carries as
+`bOffset`'s own `<<< 1` rather than as a side remark. -/
+theorem sem_immBCirc_word (w : BitVec 32) :
+    sem immBCirc (fun i => w.getLsbD i)
+      = (List.range 32).map (bOffset (bImmOf w)).getLsbD := by
+  rw [sem_immBCirc]
+  refine List.map_congr_left (fun k hk => ?_)
+  have hk32 : k < 32 := List.mem_range.mp hk
+  by_cases hk0 : k = 0
+  · subst hk0
+    rw [if_pos rfl, bOffset, BitVec.getLsbD_shiftLeft]
+    simp
+  · rw [if_neg hk0]
+    exact immB_bit w hk32 hk0
+
+/-! ### The specification-facing forms — against `ISA.decode`'s own immediate -/
+
+/-- Whatever immediate `decode` reports for an `ADDI` word is `w[31:20]`. -/
+theorem iImm_of_decode {w : BitVec 32} {rd rs1 : Fin 32} {imm : BitVec 12}
+    (h : decode w = some (.ADDI rd rs1 imm)) : w.extractLsb' 20 12 = imm := by
+  simp only [decode] at h
+  split_ifs at h <;>
+    simp only [Option.some.injEq, Instr.ADDI.injEq, reduceCtorEq] at h
+  exact h.2.2
+
+/-- Whatever immediate `decode` reports for a `BEQ` word is `bImmOf w`. -/
+theorem bImm_of_decode {w : BitVec 32} {a b : Fin 32} {imm : BitVec 12}
+    (h : decode w = some (.BEQ a b imm)) : bImmOf w = imm := by
+  simp only [decode] at h
+  split_ifs at h <;>
+    simp only [Option.some.injEq, Instr.BEQ.injEq, reduceCtorEq] at h
+  exact h.2.2
+
+/-- ⭐ **THE FORM A FIELD OBLIGATION CONSUMES**: for **any** word the decoder
+reads as `ADDI`, with **any** `rd`/`rs1`, the block's meaning is `sext` of *that
+instruction's* immediate. -/
+theorem sem_immICirc_of_decode {w : BitVec 32} {rd rs1 : Fin 32} {imm : BitVec 12}
+    (h : decode w = some (.ADDI rd rs1 imm)) :
+    sem immICirc (fun i => w.getLsbD i) = (List.range 32).map (imm.signExtend 32).getLsbD := by
+  rw [sem_immICirc_word, iImm_of_decode h]
+
+/-- ⭐ **AND FOR `BEQ`** — the byte displacement `ISA.step` actually adds to `pc`. -/
+theorem sem_immBCirc_of_decode {w : BitVec 32} {a b : Fin 32} {imm : BitVec 12}
+    (h : decode w = some (.BEQ a b imm)) :
+    sem immBCirc (fun i => w.getLsbD i) = (List.range 32).map (bOffset imm).getLsbD := by
+  rw [sem_immBCirc_word, bImm_of_decode h]
+
+/-! ### ⭐ NON-VACUITY 1 — the unconditional theorems IMPLY the certificates
+
+*The direction that matters: a "more general" theorem that did not recover the
+checked points would be a different claim wearing the same name. These re-prove
+`immI_OK`/`immB_OK` with **no** `decide` — only the word theorems and
+`decode_encode`.* -/
+
+/-- ⭐ **`Immediate.lean:112`'s 4096 points, derived rather than computed.** -/
+theorem immI_correct_of_uncond : immI_OK = true := by
+  simp only [immI_OK, List.all_eq_true]
+  intro v _
+  rw [beq_iff_eq]
+  exact sem_immICirc_of_decode (by unfold wordI; exact decode_encode _)
+
+/-- ⭐ **`Immediate.lean:121`'s 4096 points, likewise.** -/
+theorem immB_correct_of_uncond : immB_OK = true := by
+  simp only [immB_OK, List.all_eq_true]
+  intro v _
+  rw [beq_iff_eq]
+  exact sem_immBCirc_of_decode (by unfold wordB; exact decode_encode _)
+
+/-! ### ⭐ NON-VACUITY 2 — words the certificates cannot reach
+
+*`wordI v` pins `rd = 1, rs1 = 0`; `wordB v` pins `rs1 = 1, rs2 = 2`. These words
+are well-formed instructions of the same two kinds with **different register
+fields**, so they lie outside both 4096-member families — by `encode_injective`,
+not by inspection.* -/
+
+def immIWordOff : BitVec 32 := encode (.ADDI 31 30 0x5A5#12)
+def immBWordOff : BitVec 32 := encode (.BEQ 31 30 0x5A5#12)
+
+theorem immIWordOff_off_the_family (v : Nat) : immIWordOff ≠ wordI v := by
+  intro h
+  unfold immIWordOff wordI at h
+  have h2 := encode_injective h
+  injection h2 with e1 _ _
+  exact absurd e1 (by decide)
+
+theorem immBWordOff_off_the_family (v : Nat) : immBWordOff ≠ wordB v := by
+  intro h
+  unfold immBWordOff wordB at h
+  have h2 := encode_injective h
+  injection h2 with e1 _ _
+  exact absurd e1 (by decide)
+
+/-- ⭐ **OFF THE SAMPLE, `I` SIDE** — `addi x31, x30, 0x5A5` is in no `immI_OK`
+point, and the wiring still delivers `sext(0x5A5)`. -/
+theorem sem_immICirc_off_the_sample :
+    (∀ v : Nat, immIWordOff ≠ wordI v)
+      ∧ sem immICirc (fun i => immIWordOff.getLsbD i)
+          = (List.range 32).map ((0x5A5#12 : BitVec 12).signExtend 32).getLsbD :=
+  ⟨immIWordOff_off_the_family,
+   sem_immICirc_of_decode (by unfold immIWordOff; exact decode_encode _)⟩
+
+/-- ⭐ **OFF THE SAMPLE, `B` SIDE.** -/
+theorem sem_immBCirc_off_the_sample :
+    (∀ v : Nat, immBWordOff ≠ wordB v)
+      ∧ sem immBCirc (fun i => immBWordOff.getLsbD i)
+          = (List.range 32).map (bOffset (0x5A5#12 : BitVec 12)).getLsbD :=
+  ⟨immBWordOff_off_the_family,
+   sem_immBCirc_of_decode (by unfold immBWordOff; exact decode_encode _)⟩
+
+/-! ### ⭐ NON-VACUITY 3 — the mutants the unconditional theorems reject -/
+
+/-- **The `I`-side mutant: the field read one bit high.** The commonest wiring
+slip in a block with no gates to get wrong. -/
+def immIoff (k : Nat) : Net := if k < 12 then 21 + k else 31
+
+def immIoffCirc : Circ :=
+  { nIn := 32, gates := [], outs := (List.range 32).map immIoff }
+
+/-- ⭐ **AND `sem_immICirc_word` REFUTES IT**, at `addi x1, x0, 1`. -/
+theorem immIoffCirc_fails_the_theorem :
+    ¬ (∀ w : BitVec 32, sem immIoffCirc (fun i => w.getLsbD i)
+        = (List.range 32).map ((w.extractLsb' 20 12).signExtend 32).getLsbD) := by
+  intro h
+  have hw := h (encode (.ADDI 1 0 1))
+  revert hw
+  decide +kernel
+
+/-- ⭐ **AND `sem_immBCirc_word` REFUTES THE OFF-BY-ONE MUTANT** the freeze
+actually shipped — `Immediate.lean:138`'s undoubled wiring, here rejected by the
+theorem rather than by a 4096-point sweep. -/
+theorem immBshiftedCirc_fails_the_theorem :
+    ¬ (∀ w : BitVec 32, sem immBshiftedCirc (fun i => w.getLsbD i)
+        = (List.range 32).map (bOffset (bImmOf w)).getLsbD) := by
+  intro h
+  have hw := h (encode (.BEQ 1 2 4))
+  revert hw
+  decide +kernel
+
+/-- And the two blocks are genuinely different circuits, on a word the manual
+pins (`ISA.lean:615`): `beq x1, x2, +8`. -/
+theorem immBCirc_ne_immBshiftedCirc :
+    sem immBCirc (fun i => (encode (Instr.BEQ 1 2 4)).getLsbD i)
+      ≠ sem immBshiftedCirc (fun i => (encode (Instr.BEQ 1 2 4)).getLsbD i) := by
+  decide +kernel
+
+end ImmediateSemantics
+
 /-! ## Axiom audit -/
 
 open Salt.Tactic
@@ -7027,5 +7485,18 @@ open Salt.Tactic
 #audit_axioms regNextCut_passes_the_frame_certificate regNextCut_passes_the_hold_certificate
 #audit_axioms regNextCut_passes_the_32_samples rnCutWitness regNextCut_fails_the_theorem
 #audit_axioms rnOffEnv sem_regNext_off_the_sample
+
+#audit_axioms immBField_lt_32 immB_lt_32_of_ne_zero
+#audit_axioms sem_immICirc sem_immBCirc sem_immBCirc_ignores_net32
+#audit_axioms immI_bit bImmOf bImmOf_getLsbD bImmOf_bit immB_bit
+#audit_axioms sem_immICirc_word sem_immBCirc_word
+#audit_axioms iImm_of_decode bImm_of_decode
+#audit_axioms sem_immICirc_of_decode sem_immBCirc_of_decode
+#audit_axioms immI_correct_of_uncond immB_correct_of_uncond
+#audit_axioms immIWordOff immBWordOff
+#audit_axioms immIWordOff_off_the_family immBWordOff_off_the_family
+#audit_axioms sem_immICirc_off_the_sample sem_immBCirc_off_the_sample
+#audit_axioms immIoff immIoffCirc immIoffCirc_fails_the_theorem
+#audit_axioms immBshiftedCirc_fails_the_theorem immBCirc_ne_immBshiftedCirc
 
 end SaltWorks.Stack.Program
