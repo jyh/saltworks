@@ -70,16 +70,28 @@ any of them surfaced — a passing build cannot report a hole in the bar.*
   `drop 1` pins exactly" — keyed on the combinator. `(subOut a b).take 32 = …`
   has no `take` on the right, no `getD` anywhere, and reads a bounded prefix
   regardless; the `Bool = Bool` family mentions no list operation at all. **Every
-  syntactic rule this bar shipped before this one misses them.** `adder32` is the
-  live instance: all 33 ports certified, `outs.length` unpinned in the corpus, so
-  a 34-port `adder32Wide` with byte-identical gates satisfies all three certs —
-  *covered but unpinned*, which is neither PINNED nor BLIND.
+  syntactic rule this bar shipped before this one misses them.** `adder32`'s
+  three certs are the live instance *of the shape*: read in isolation they pin
+  `outs.length ≥ 32` and no more, so a 34-port `adder32Wide` with byte-identical
+  gates satisfies all three.
 
-  📌 **And the taxonomy needs four buckets, not two:** PINNED · COVERED-BUT-UNPINNED
-  (every real port certified, length free) · DISCLOSED-SAMPLE (scope named in the
-  identifier, e.g. `_on_sample` — a stated limitation, not a blind) · BLIND
-  (universal-and-silent). A verdict with nowhere right to go lands in the worst
-  bucket available; add the bucket first.
+  ⚠️ **BUT `adder32` ITSELF IS PINNED, and an earlier form of this paragraph said
+  otherwise.** `sem_adder32_gen` (`Stack/Program.lean:3147`) is a whole-list
+  equality whose RHS is `(List.range 32).map … ++ [carry]` — determined length 33
+  — and `sem c ins = c.outs.map …` definitionally, so **a whole-list equality at
+  even ONE environment pins `outs.length`.** The claim that nothing in the corpus
+  pinned it came from a census that searched for the *string* `outs.length`, which
+  cannot see implicit pinning — **the exact failure this clause's own first table
+  row describes.** A rule and a census that contradict each other, in one file.
+
+  📌 **Taxonomy — four buckets, and one is currently unoccupied:** PINNED
+  (including *pinned by a companion cert elsewhere*, which is where `adder32`
+  actually sits) · COVERED-BUT-UNPINNED (every real port certified, length free —
+  **no confirmed occupant in this corpus**) · DISCLOSED-SAMPLE (scope named in
+  the identifier, e.g. `_on_sample`; `adder32`'s 49-of-2⁶⁴ input sampling *is*
+  this, on a different axis) · BLIND (universal-and-silent). A verdict with
+  nowhere right to go lands in the worst bucket available; add the bucket first —
+  and then check the bucket is not empty before reporting an occupant.
 
   ⚠️ **AND THE STRUCTURAL FACTS EVERY COMBINATIONAL BLOCK AUTHOR NEEDS:**
   `Circ.wf` (`Syntax.lean:110-114`) does **NOT** constrain `outs.length`, and it
@@ -114,6 +126,13 @@ any of them surfaced — a passing build cannot report a hole in the bar.*
   `sem { c with outs := c.outs ++ [n] } ins = sem c ins ++ [run ins c.gates n]`
   — appending a port is invisible to both `take k` (`k ≤ length`) and `getD k`
   (`k < length`) for **every** circuit and **every** environment. Not a sample.
+* **⑦ PIN THE DECLARED ARITY SEPARATELY** — `c.nIn` does **not occur in `sem`**
+  (`Sem.lean:72-73`), so no certificate over `sem c`, at any strength, can reach
+  it. A block may advertise any `nIn ≥ 65` and satisfy every other clause here.
+  The downward case is already caught — `nIn = 64` drops net 64 (`sel`, which the
+  cert names) and `wf` refuses it — so the hole is one-directional and the repair
+  cannot be a strengthening of the cert. Prove `c.nIn = N` by `decide +kernel`.
+  Worked example: `nIn_obMux`.
 * **② GATE COUNT** proved by `decide +kernel`, never asserted in a comment.
 * **③ MUTATIONS ≥ 3**, each proving **the cert fails** for the mutant — not
   merely that two circuits differ at some net. Must include the a/b **bus swap**
@@ -136,6 +155,44 @@ any of them surfaced — a passing build cannot report a hole in the bar.*
   piped (`$?` after a pipe is the tail's status, and it fails in the reassuring
   direction). `EXIT=N` judged by its literal text; `75` is a lock-wait abort,
   not a failure. Every number quoted comes from that run.
+
+## ⛔ WHAT THIS BAR DOES **NOT** CHECK — named limits, not clauses
+
+*Muster ruling ⑦ asked for three further clauses. Two of the three proposed
+repairs were shown vacuous by their own author's kill pass, and shipping a
+clause that cannot fail is worse than shipping nothing: it teaches the next
+block author that the ground is covered. They are recorded here as limits.
+"This bar does not check X" is information; a decorative clause is not.*
+
+* **THE SPEC HAS NO EXTERNAL ANCHOR.** The bar requires the cert to equal a
+  *spec*; it never requires the spec to be anchored to anything outside the
+  file. In this module the anchor chain reaches `gsDrive2`/`wordOf` and stops.
+  **A five-line counterfeit — a spec that agrees with a wrong circuit — passes
+  the whole bar, and ② is already proved for it.** The proposed repair ("the RHS
+  must mention an external identifier") is satisfied by the counterfeit too, so
+  it is not shipped. *"The bar had the anchor in its hand and used it as a style
+  guide."*
+* **THE BAR IS INVARIANT UNDER A JOINT RELABELLING OF BLOCK AND SPEC.** Every
+  clause above constrains the LEFT side of the certificate; the right side is a
+  definition the artifact writes itself. **The standing counterexample is in this
+  file**: `sem_obMuxm1 : sem obMuxm1 ins = swapSpec ins` satisfies ①, ①′, ①″ and
+  ② for a circuit that takes `rs2` when the immediate was requested. *Only the
+  name separates it from the right answer.* No shape-checking clause can close
+  this — it is a limit on the method, and the mutation suite is its witness.
+* **A ZERO-GATE BLOCK IS INVISIBLE TO EVERY STRUCTURAL INSTRUMENT.**
+  `gates.length` counts 0; `ssa`/`wf` pass *vacuously*; the cell price is 0 —
+  and cells are the ruled tile metric. **A mis-wired zero-gate block — the right
+  signal on the wrong port — is green on all of them.** This is `n ≤ 2^b` one
+  block over: well-formed ≠ adequate, and here adequacy has no gates to hang a
+  check on. The only instrument that can fail is a composition lemma against an
+  explicitly written correspondence, which is why such a block must state its
+  wiring as a definition rather than leave it implicit in index arithmetic.
+* **NOT RECORDED: operand orientation.** ① is a schema with four free symbols
+  (`out_k`, `sel`, `a_k`, `b_k`) and the bar never pins which operand is A. It
+  is a real observation, but its author explicitly declined to rule on whether
+  it survives against the bar as it stands — *"treat orientation as contested"* —
+  and settling a peer's open question by writing it into a criterion for every
+  future block is not this file's call. It goes in when they pick.
 
 ## The block
 
@@ -277,6 +334,16 @@ def obMux : Circ :=
 
 /-! ## 2 · WELL-FORMEDNESS, AND THE GATE COUNT -/
 
+/-- ⑦'s worked example — **and it was already here before ⑦ existed.**
+`c.nIn` does not occur in `sem` (`Sem.lean:72-73`), so no certificate over
+`sem c`, at any strength, can reach the declared arity: a block may advertise
+any `nIn ≥ 65` and satisfy every other clause of the bar. The downward case is
+already caught (`nIn = 64` drops net 64, which is `sel`, a net the cert names,
+and `wf` refuses it), so the hole is one-directional and no strengthening of the
+cert reaches it — the repair has to name the field, which is what this does.
+
+*Third time today the artifact turned out to satisfy a clause the bar had not
+yet demanded — the same way ①″ was already closed by `obMux_certList`.* -/
 theorem nIn_obMux : obMux.nIn = 65 := rfl
 
 /-- Dense SSA: gate `i` writes net `65 + i`, reading only nets `< 65 + i`. -/
@@ -872,12 +939,12 @@ the only form whose green is readable. -/
 #audit_axioms sel_ne_65
 #audit_axioms obCell
 #audit_axioms obMux
-#audit_axioms nIn_obMux
 #audit_axioms ssa_obMux
 #audit_axioms wf_obMux
 #audit_axioms nodup_obMux
 #audit_axioms dense_obMux
 #audit_axioms gateCount_obMux
+#audit_axioms nIn_obMux
 #audit_axioms census_obMux
 #audit_axioms exhibit_obMux
 #audit_axioms muxCell
