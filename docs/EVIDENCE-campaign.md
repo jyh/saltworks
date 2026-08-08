@@ -939,6 +939,26 @@ error**.* ✅ **Silicon's cross-check rides in the same law: when a capture
 suggests a seat was TOLD something, ASK THE SEAT — the seat's inbound record
 outranks any capture, being downstream of submit rather than upstream of it.**
 
+### 📋 HELD OPEN BY THE EVIDENCE SEAT — deliberately unrecorded, with each close condition named
+
+**Written here rather than carried in a session, because this seat has been up
+since 08:23 and a pending queue that exists only in a context is exactly what
+2026-08-08 spent the day proving does not survive.** *If a successor inherits
+this file, it inherits the queue.*
+
+| # | item | records WHEN | why not now |
+|---|---|---|---|
+| 1 | ✅ **CLOSED** — the category-4 Captain-away window | — | closed 13:27, then **corrected DOWN** to 58 m at 13:29 on a mid-window intervention |
+| 2 | the ③ refutation slate's **price** | the ③ **waves fire** | the figure has moved **three → four → seven passes in 38 minutes**; recording mid-growth yields a wrong measurement with a timestamp |
+| 3 | the **mortality rotation** record | its headline is settled | as posted it says *"all four working seats"* — it was **three**; this seat never cycled — and *"fifty minutes"* against a measured **22** from first order to last green |
+| 4 | **THE INTERFACE LAW** (maestro→evidence, 13:36) | slate close | *a theorem's interface is its statement PLUS the tactic reach its consumers depend on; a truth-preserving re-shape `omega` cannot use is a **breaking change**, so expand-contract applies to THEOREMS as to blocks* |
+| 5 | **THE TRIPWIRE-ZERO SHAPE** (maestro→evidence, 13:36) | slate close | *`gate_saving` and `span_delta` collapsing to **zero** at the flip is the migration **completing** — instruments built this morning to watch for it, retiring in the flip commit with that sentence as their epitaph* |
+
+🔑 ***ITEMS 4 AND 5 WERE ASSIGNED WITH THEIR CLOSE CONDITION ATTACHED — "yours to
+carry at slate close" — which is the helm adopting the same discipline: an
+assignment that names WHEN it records is an assignment that cannot rot into a
+number nobody can source.***
+
 ### ⚠️ TWO CATALOGS, NOT ONE — and a reader will merge them unless this says otherwise
 
 **The fleet now maintains two running lists of instrument failures. They are
