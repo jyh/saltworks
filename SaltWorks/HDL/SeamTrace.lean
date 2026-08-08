@@ -59,4 +59,93 @@ theorem bnCBuild_state_drop :
       rw [h4, ← List.drop_drop, bnCBuild_state_drop4, he, List.drop_succ_cons]
       exact ih cs (e+1) (bnCDatStep e a b dat)
 
+/-! ### The gate prefix, and the data-net bound
+
+*`run_append` turns `run E (gs₀ ++ gsₑ) n` into `run (run E gs₀) gsₑ n`, and
+`bnCBuild_element_sem'` takes an ARBITRARY `env` — so instantiating it at
+`run E gs₀` is what carries the per-element factorisation into the full network.
+These two lemmas supply its hypotheses.* -/
+
+/-- The fold's gates split at any element boundary. -/
+theorem bnCBuild_gates_drop :
+    ∀ (k : Nat) (cs : List (Nat × Nat)) (e : Nat) (dat : List Net),
+      ∃ pre, (bnCBuild e cs dat).1
+        = pre ++ (bnCBuild (e + k) (cs.drop k) (bnCDatDrop e k cs dat)).1 := by
+  intro k
+  induction k with
+  | zero => intro cs e dat; exact ⟨[], by simp [bnCDatDrop]⟩
+  | succ k ih =>
+    intro cs e dat
+    match cs with
+    | [] => exact ⟨[], by simp [bnCBuild, bnCDatDrop]⟩
+    | (a, b) :: cs =>
+      obtain ⟨pre, hpre⟩ := ih cs (e+1) (bnCDatStep e a b dat)
+      refine ⟨instGates ceCcore (bnCSigma e a b dat) (bnCOff e) ++ pre, ?_⟩
+      have he : e + (k+1) = (e+1) + k := by omega
+      rw [he, List.drop_succ_cons]
+      show instGates ceCcore (bnCSigma e a b dat) (bnCOff e)
+             ++ (bnCBuild (e+1) cs (bnCDatStep e a b dat)).1 = _
+      rw [hpre, List.append_assoc]
+      rfl
+
+/-! ### What already existed — recorded because I re-derived it
+
+⚠️ **`bnCOff_eq`, `bnCState_eq`, `bnCState_lt_off`, `bnCRst_lt_off`, `bnCOff_mono`
+and `bnCSigma_below` were ALL already landed in `BatcherNetC.lean`, and I spent
+two build cycles re-proving them.** *The bank named eleven lemmas; I read the
+bank and not the file.* ⇒ ***Inventory before proving: `grep "^theorem" ` the
+module you are extending, not the note you wrote about it.***
+
+*(`bnCSigma_below` is the general form of the wiring bound; `bnCSigma_dat_step`
+is the one-step data invariant. Both are used below rather than rebuilt.)* -/
+
+/-- `set` preserves length, so the fold's data list keeps its width. -/
+theorem bnCDatStep_length (e a b : Nat) (dat : List Net) :
+    (bnCDatStep e a b dat).length = dat.length := by
+  simp [bnCDatStep]
+
+theorem bnCDatDrop_length :
+    ∀ (k : Nat) (cs : List (Nat × Nat)) (e : Nat) (dat : List Net),
+      (bnCDatDrop e k cs dat).length = dat.length := by
+  intro k
+  induction k with
+  | zero => intro cs e dat; simp [bnCDatDrop]
+  | succ k ih =>
+    intro cs e dat
+    match cs with
+    | [] => simp [bnCDatDrop]
+    | (a, b) :: cs =>
+      show (bnCDatDrop (e+1) k cs (bnCDatStep e a b dat)).length = dat.length
+      rw [ih, bnCDatStep_length]
+
+/-- ⭐ **THE `dat` INVARIANT, LIFTED ACROSS `k` ELEMENTS** — `bnCSigma_dat_step`
+is the one-step version; this threads it, and it is what lets
+`bnCBuild_element_sem'` fire at element `e` of the fold that starts at 0. -/
+theorem bnCDatDrop_below :
+    ∀ (k : Nat) (cs : List (Nat × Nat)) (e : Nat) (dat : List Net),
+      (∀ n ∈ dat, n < bnCOff e) →
+      (∀ p ∈ cs, p.1 < dat.length ∧ p.2 < dat.length) →
+      ∀ n ∈ bnCDatDrop e k cs dat, n < bnCOff (e + k) := by
+  intro k
+  induction k with
+  | zero => intro cs e dat hdat _ n hn; simpa [bnCDatDrop] using hdat n hn
+  | succ k ih =>
+    intro cs e dat hdat hab n hn
+    match cs with
+    | [] =>
+      have h : bnCOff e < bnCOff (e + (k+1)) := bnCOff_mono _ _ (by omega)
+      exact Nat.lt_trans (hdat n (by simpa [bnCDatDrop] using hn)) h
+    | (a, b) :: cs =>
+      have hpa := hab (a, b) List.mem_cons_self
+      have hstep : ∀ m ∈ bnCDatStep e a b dat, m < bnCOff (e+1) :=
+        bnCSigma_dat_step e a b dat hdat hpa.1 hpa.2
+      have hab' : ∀ p ∈ cs, p.1 < (bnCDatStep e a b dat).length
+          ∧ p.2 < (bnCDatStep e a b dat).length := by
+        intro p hp
+        rw [bnCDatStep_length]
+        exact hab p (List.mem_cons_of_mem _ hp)
+      have he : e + (k+1) = (e+1) + k := by omega
+      rw [he]
+      exact ih cs (e+1) (bnCDatStep e a b dat) hstep hab' n hn
+
 end SaltWorks.HDL
