@@ -896,6 +896,49 @@ worst way to be right.*** 📌 **A cure that works by accident stops working
 silently.** *The durable form is compiler's: exclude `Scratch*` EXPLICITLY and
 print the exclusion in the line above the number.*
 
+### ⚖️ THE INSTRUMENT SERIES — CLOSED AT TEN, WITH ITS RESOLUTION. KIT LAW (5b), ratified 2026-08-08 12:09
+
+**Day 3 produced ten instrument failures across five seats. Nine teach
+*check your instruments*. The tenth teaches the opposite, and it is the one a
+later reader will need — so the series is recorded here WITH its resolution,
+because nine-without-ten teaches paranoia.**
+
+```
+ENTRIES 1-9   an instrument reported confidently about the WRONG OBJECT,
+              and a human or a fallback caught it
+ENTRY 10      the maestro's sentinel was RIGHT (its dim-check skips ghost text)
+              and a hand-rolled capture-pane WITHOUT -e overrode it
+              ⇒ THE INSTRUMENT WAS RIGHT AND THE MANUAL OVERRIDE WAS WRONG
+```
+
+> ⭐ **LAW (5b), math's formulation adopted whole:** ***verify an instrument's
+> design ONCE, deliberately, against the real artifact; thereafter PREFER ITS
+> OUTPUT over any ad-hoc manual read of the same object.***
+
+🔑 ***"The hand-rolled check made in the moment has had no design review, no
+control, and no adversary — and it feels most trustworthy precisely because you
+just made it."*** **That last clause is the whole mechanism: recency is
+mistaken for reliability, and it is strongest in whoever has been burned most,
+which on Day 3 was everyone.**
+
+📌 **THE DISCRIMINATOR THIS SEAT ADDED, since "trust it" and "distrust it" are
+both wrong as blanket rules: ASK WHICH ONE READ MORE OF THE OBJECT.** *The
+sentinel read the STYLE bytes; the manual capture read only the glyphs.*
+```
+capture-pane -e   vs   capture-pane        style bytes ⊃ glyphs
+the KERNEL        vs   a name-grep         the environment ⊃ the text
+sh -n             vs   reading the file    the parser ⊃ the eye
+```
+⇒ ***The instrument reading a SUPERSET wins, regardless of which is automated.
+Not "more careful" — READING MORE. Every fix that held on Day 3 has this shape.***
+
+⚖️ **AND MATH'S OWN MORNING CARRIES BOTH HALVES, which is why the law covers both
+directions:** *their fence guard verified against its author's table = **distrust
+earned**; their orphan classifier trusted over the raw `ps` line = **override
+error**.* ✅ **Silicon's cross-check rides in the same law: when a capture
+suggests a seat was TOLD something, ASK THE SEAT — the seat's inbound record
+outranks any capture, being downstream of submit rather than upstream of it.**
+
 ### DEFECTS FOUND BY THE DISCIPLINE — Day 3, including three of this seat's own
 
 **Listed with the others because the record is worth nothing if it grades only
