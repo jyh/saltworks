@@ -396,6 +396,58 @@ theorem root_is_level_one :
 theorem aluSelect_root_is_level_three :
     aluSelect.outs = (List.range 32).map (fun k => asOut k 3 0) := rfl
 
+/-! ### ⭐ THE SAME COMPARISONS OVER EXPLICIT GENERATOR INSTANCES — the phase-3 form
+
+**Silicon's design ruling (15:29), and it is better than the retirement I proposed.**
+
+Every theorem above this block is the *"before"* side of a before/after comparison
+against the ten-source block, stated through `aluSelect`.  **At the ruled pair
+`aluSelect` IS the shrunk block, so each one either dies or collapses:**
+`aluSelect_nIn` `324 → 98`, `gate_saving` `1154 → 0`, `span_delta` `1380 → 0`.
+
+⛔ **I recommended retiring them, on the grounds that a zero saving carries no
+information.  That was wrong in a way worth recording: it would have DESTROYED a
+Captain-ratified number the flagship cites.**  The saving is a real fact — it is
+just not a fact about `aluSelect`.  It is a fact about two *generator instances*.
+
+✅ **So the comparison is restated over `genSelect 10 4` and `genSelect 3 2`
+directly.  These mention no `as*` constant, so they are FLIP-INVARIANT: they are
+true before the re-cut and after it, and `−1,154` stays a kernel theorem
+permanently rather than for as long as `aluSelect` happens to be the wide block.**
+*Landed BESIDE the originals; the originals leave in the flip commit.* -/
+
+theorem nIn_of_both_instances :
+    (genSelect 10 4).nIn = 324 ∧ (genSelect 3 2).nIn = 98 := ⟨rfl, rfl⟩
+
+/-- ⭐ **THE RULING'S −1,154, AS A PERMANENT KERNEL THEOREM.** -/
+theorem gate_saving_of_instances :
+    (genSelect 10 4).gates.length - (genSelect 3 2).gates.length = 1154 := by
+  have h1 := GSCount.gate_count_ten
+  have h2 := genSelect_three_gate_count
+  omega
+
+/-- Every downstream net offset moves by this much: `Compose.instNext` places the
+next organ at `nIn + gates.length`, which is `1769` at `(10,4)` and `389` at the
+ruled pair. -/
+theorem span_delta_of_instances :
+    ((genSelect 10 4).nIn + (genSelect 10 4).gates.length)
+      - ((genSelect 3 2).nIn + (genSelect 3 2).gates.length) = 1380 := by
+  have h1 := GSCount.gate_count_ten
+  have h2 := genSelect_three_gate_count
+  have h3 : (genSelect 10 4).nIn = 324 := rfl
+  have h4 : (genSelect 3 2).nIn = 98 := rfl
+  omega
+
+/-- The tie constant moves: `324` at `(10,4)`, `98` at the ruled pair. -/
+theorem pad_net_of_both_instances :
+    gsZero 3 2 = 98 ∧ gsZero 10 4 = 324 := ⟨rfl, rfl⟩
+
+/-- The root sits at level `b - 1`: level 3 at four select bits, level 1 at two. -/
+theorem root_level_of_both_instances :
+    (genSelect 10 4).outs = (List.range 32).map (fun k => gsOut 10 4 k 3 0)
+    ∧ (genSelect 3 2).outs = (List.range 32).map (fun k => gsOut 3 2 k 1 0) :=
+  ⟨rfl, rfl⟩
+
 /-- ⚠️ **THREE SOURCE PORTS, NOT TEN.** The ruled block has slots for
 `{add, xor, slt}` only. The seven other op results `aluSelect` names — `sub`,
 `and`, `or`, `sltu`, `sll`, `srl`, `sra` — have NO port here. This is a scope
@@ -470,6 +522,11 @@ reached. One name per call makes "not reported" impossible. -/
 #audit_axioms aluSelect_root_is_level_three
 #audit_axioms source_capacity
 #audit_axioms pad_slots
+#audit_axioms nIn_of_both_instances
+#audit_axioms gate_saving_of_instances
+#audit_axioms span_delta_of_instances
+#audit_axioms pad_net_of_both_instances
+#audit_axioms root_level_of_both_instances
 
 end SelectCut32
 end SaltWorks.HDL
