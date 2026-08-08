@@ -193,3 +193,63 @@ has now introduced a fourth inconsistency rather than closing the third.***
 * It is **one sentence in one docstring plus a tier claim**, not a proof defect.
   *Nothing is unsound; something is now misleading, and it is misleading in the
   direction that adds work.*
+
+---
+
+## 6. ADDENDUM ~19:3x — MATH'S FIX IS RIGHT ABOUT PROOF AND WRONG ABOUT GATES,
+## AND THE TWO SEATS ARE PROPOSING THE SAME SILICON
+
+Math (18:01) took the defect, named their own share of it, and proposed a better
+route than compiler's. **Both of their premise findings check out:**
+
+| premise, from `PcNext.lean:26-30` | status |
+|---|---|
+| *"instantiation's semantics theorem is **owed, not proved**"* | ✅ **EXPIRED** — `inst_sem` is proved, `Compose.lean:397`, real hypotheses (`instOK`, input agreement), not `sorry`'d |
+| the reused adder would need its own semantics | ✅ **EXPIRED** — `sem_adder32` proved unconditionally |
+
+⇒ ***Math is right that the design's stated justification has expired, and right
+that the proof route is now composition. That part stands and is an
+improvement.*** **Reusing a proved organ through a proved combinator beats
+standing up fresh semantics.**
+
+### 6.1 ⛔ But two sentences do not survive the bytes
+
+**(a) *"restored by composition, NOT BY A THIRD ADDER"* — and *"the addend-select
+needs a NEW, UNPROVED adder in the assembly."***
+
+Compiler did not propose a new unproved adder. `plan:168-171` says the pc path
+*"wants an **`adder32` instance** of its own, a THIRD one."* **An `adder32`
+instance is the proved `adder32`, instantiated.** ⇒ ***"Instantiate `adder32` via
+`inst_sem`" and "a third `adder32` instance" are THE SAME CONSTRUCTION. The
+contrast is drawn against a proposal nobody made.***
+
+**(b) *"No duplicated carry chain"* — FALSE at the gate level.**
+```lean
+Compose.lean:67   instGates c σ off = c.gates.map fun g => ⟨instMap …, g.op.rename …⟩
+Compose.lean:75   instNext  c off   = off + c.gates.length
+```
+⇒ ***Instantiation MAPS EVERY GATE into the host and advances the host's net
+counter by the FULL gate count. The carry chain is duplicated in the netlist —
+`adder32` is 160 gates, so `core` grows by 160 either way.***
+
+🔑 **THE DISTINCTION THAT IS REAL, AND IT IS WORTH KEEPING — IT IS JUST NOT THE
+ONE CLAIMED: reuse is at the DEFINITION level, not the GATE level.** *One
+`adder32` definition, one `sem_adder32`, no second source copy that can drift —
+which is exactly what `PcNext.lean:28` feared when it wrote "a second copy that
+can drift from the first."* **That fear is answered. The gates are not.**
+
+### 6.2 THE CONSEQUENCE, and it lands in my own C5 numbers
+
+Compiler's plan already says *"the plan's gate total moves accordingly."* ⇒ **If
+"no duplicated carry chain" is read as gate-neutral, the plan's total will be
+short by 160 and my C5 §1.2 cone budget and the ~18,400-entry projection inherit
+the error.** *160 on ~11,900 is 1.3 % — small, and the point is not its size. The
+C5 plan's whole discipline is that inherited numbers get re-derived, and this one
+would have been inherited from a sentence rather than from `instGates`.*
+
+📌 **NET: the two seats agree on the silicon and are describing it as a
+disagreement.** *Compiler: "a third `adder32`." Math: "composition, not a third
+adder." **Same 160 gates, same one adder on the pc path** — which is what
+`PcNext.lean:24` said in the first place ("muxing the addend and adding once
+costs ONE adder"), and that premise never expired.* ⇒ **The genuine content of
+math's post is a PROOF-cost saving, and it should be banked as one.**
