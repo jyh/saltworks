@@ -152,11 +152,25 @@ while true; do
     # bytes. Stated rather than rounded, because an unstated unit is how a figure
     # stops being checkable.)
     LC_ALL=C awk -v start="$last" '
-      function emit(s, b,   n, out) {
+      # ⛔⛔⛔⛔⛔⛔⛔⛔ NINTH DEFECT, AND MY FIX FOR THE EIGHTH CONTAINED IT:
+      # I put the clip announcement at the END of a 600-byte emit, and silicon
+      # measured the NOTIFICATION ENVELOPE at ~487 chars of body (+25 stamp = 512,
+      # two independent specimens). So the announcement sat BEYOND the ceiling and
+      # was never delivered -- A SILENT CAP ON THE NOTICE THAT EXISTS TO ANNOUNCE
+      # A CAP. My own v8 notification arrived marked "(truncated)" and proved it.
+      # 🔑 A CAP YOU OWN AND A CAP YOU INHERIT ARE INDISTINGUISHABLE FROM THE
+      # DELIVERED TEXT ALONE (silicon 14:50): they nearly published two ceilings
+      # before noticing 227 was their OWN window plus a stamp. Mine was the
+      # opposite error -- I sized a window with no idea a second cap sat outside it.
+      # ⇒ The announcement moves to the FRONT, where the envelope cannot reach it,
+      # and the window drops under the measured ceiling so both survive.
+      # ⚠️ 487 is MEASURED, not documented; treat it as an observation that can
+      # move, which is why the window leaves headroom rather than sitting on it.
+      function emit(s, b,   n, out, pre) {
         n = length(b)
-        out = substr(b, 1, 600)
-        if (n > 600) out = out " [+" (n - 600) " bytes CLIPPED — read the bus]"
-        print "⚖️ MAESTRO " s " " out
+        pre = (n > 430) ? "[+" (n - 430) "B BELOW CEILING — read the bus] " : ""
+        out = substr(b, 1, 430)
+        print "⚖️ MAESTRO " s " " pre out
       }
       prevblank && /^\[[0-9]+\/[0-9]+ [0-9:]+, [A-Za-z]/ {
         owner = $0
@@ -332,14 +346,18 @@ while true; do
         sub(/^\[[^]]*\][[:space:]]*/, "", body)
         if (NR > start) {
           if (body != "") {
-            if (marked(body)) print "🚧 FLEET-BINDING POST " stamp " " substr(body, 1, 400)
+            if (marked(body)) print "🚧 FLEET-BINDING POST " stamp " " \
+                              ((length(body) > 400) ? "[+" (length(body)-400) "B BELOW CEILING] " : "") \
+                              substr(body, 1, 400)
           } else pend = 1
         }
         prevblank = 0
         next
       }
       pend && $0 != "" {
-        if (marked($0)) print "🚧 FLEET-BINDING POST " stamp " " substr($0, 1, 400)
+        if (marked($0)) print "🚧 FLEET-BINDING POST " stamp " " \
+                        ((length($0) > 400) ? "[+" (length($0)-400) "B BELOW CEILING] " : "") \
+                        substr($0, 1, 400)
         pend = 0
       }
       { prevblank = ($0 == "") }
