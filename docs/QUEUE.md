@@ -27,6 +27,21 @@
   phase-3 residue compiler→math). Labor moves; the owner runs the
   controls and lands. Read-work floats freely — any seat may refute
   any block.
+- **PRECONDITIONS (optimistic concurrency — the Captain's frame,
+  US9229774's discipline adapted 8/8)**: every WAVE BRIEF opens with
+  its assumed world — the constants it relies on, the spec sentences
+  QUOTED (never line numbers), the statement bytes, the files it
+  expects unmoved — and the executor VALIDATES them against the
+  live tree BEFORE starting, aborting-with-a-report on drift
+  instead of proving against a ghost. Floating (stealable) work is
+  claimed by one bus line naming the item + "unclaimed as of <last
+  line read>": the append-only bus serializes claims and a later
+  claimant self-rejects. The policy split, named: validate-BEFORE
+  for expensive transactions (waves, deletions, tapeout decisions);
+  validate-AFTER (draft-until-refuted) for cheap ones (docs, where
+  amendment is measured-cheap). Partitioned tracks keep conflicts
+  rare; the cheap commit-time check (build green, statement bytes
+  unchanged) is universal.
 - Laws that ride every item: saltbuild-only builds; pathspec-only
   commits; trailer-free; unique Scratch<NODE>-<agent>.lean
   (per-AGENT); explicit-brief law for executors; the kernel-census
