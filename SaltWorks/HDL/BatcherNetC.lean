@@ -503,6 +503,26 @@ theorem bnCBuild_element_sem' (e a b : Nat) (cs : List (Nat × Nat)) (dat : List
   bnCBuild_element_sem e a b cs dat env _
     (bnCSigma_below e a b dat hdat ha hb) (fun _ _ => rfl) n hn
 
+/-- The four nets `ceCcore` emits its next state on are gate outputs, so the
+factorisation's `hn` is satisfied for every one of them. -/
+theorem ceCcore_state_outs_are_gates :
+    ((ceCcore.gates.map Gate.out).contains 35 && (ceCcore.gates.map Gate.out).contains 26
+      && (ceCcore.gates.map Gate.out).contains 40
+      && (ceCcore.gates.map Gate.out).contains 39) = true := by decide +kernel
+
+/-- ⭐ **STEP ③, PER-CYCLE HALF: element `e`'s NEXT-STATE bits in the network are
+what `ceCcore` computes standalone.** The fold emits them as `instOuts` entries
+2…5, which are `ceCcore` gate outputs — so this is `bnCBuild_element_sem'` at
+those four nets and needs no new induction. -/
+theorem bnCBuild_state_sem (e a b : Nat) (cs : List (Nat × Nat)) (dat : List Net)
+    (env : Env) (hdat : ∀ n ∈ dat, n < bnCOff e)
+    (ha : a < dat.length) (hb : b < dat.length)
+    (n : Net) (hn : (ceCcore.gates.map Gate.out).contains n = true) :
+    run env (bnCBuild e ((a, b) :: cs) dat).1
+        (instMap ceCcore (bnCSigma e a b dat) (bnCOff e) n)
+      = run (fun i => env (bnCSigma e a b dat i)) ceCcore.gates n :=
+  bnCBuild_element_sem' e a b cs dat env hdat ha hb n (Or.inr hn)
+
 /-! ## 🔗 LINK ② — THE DECOMPOSITION, and it is the expensive part
 
 **Silicon's 14:31 named three links for the composed theorem: ① the fabricated
@@ -652,6 +672,8 @@ for this element.*
 #audit_axioms instNext_ceCcore
 #audit_axioms bnCSigma_dat_step
 #audit_axioms bnCBuild_element_sem'
+#audit_axioms ceCcore_state_outs_are_gates
+#audit_axioms bnCBuild_state_sem
 #audit_axioms bnCWires bnCElems bnCRst bnCDatIn bnCIn bnCState bnCCoreIn bnCOff
 #audit_axioms bnCSigma bnCBuild bnCResult bnCCore batcherNetC
 #audit_axioms bnC_comps_count

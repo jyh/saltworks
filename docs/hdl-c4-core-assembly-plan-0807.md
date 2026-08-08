@@ -166,9 +166,11 @@ instruction 1, then instruction 1, forever.*
 
 ✅ **THE FIX: the pc path needs an ADDER between `pcNext` and the pc field**, with
 `pc` as one operand and `pcNext`'s output as the other. **`inc32` is not it
-either — it adds a constant 4 and cannot take a variable addend — so the pc path
-wants an `adder32` instance of its own, a THIRD one, and the plan's gate total
-moves accordingly.**
+either — `incIn = adW = 32`, the word and nothing else, so there is NO ADDEND
+PORT — and the pc path wants an `adder32` instance of its own, a THIRD one, with
+the plan's gate total moving accordingly.** *`inc32` stays unreferenced after
+assembly, for an architectural reason: `pcNext` SELECTS the addend, so a
+select-then-add path needs one VARIABLE adder and has no role for a constant `+4`.*
 
 📌 **AND THE JUSTIFICATION THAT RETIRED `inc32` WAS MINE AND WAS FALSE:** I cited
 `pcNext_not_beq_adds_four` as evidence that `pcNext` increments. *It proves the

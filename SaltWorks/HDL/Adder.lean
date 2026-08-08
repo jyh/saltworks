@@ -259,11 +259,28 @@ a theorem's NAME as its STATEMENT, and retired the one block that could perform
 the pc increment on the strength of it*** — in a correction whose own subject was
 having taken a description for an object.
 
-✅ **SO THE CORRECT READING IS THE OPPOSITE: `inc32` is unreferenced because THE
-PC PATH IS NOT ASSEMBLED YET, and it is the block that path will need.** *Not
-dead — unwired.* **`inc32_adds_four_on_sample` below is therefore about a block
-on the critical path after all, and the census tier it was filed under is wrong
-in the flattering direction.** -/
+⚠️ **AND THEN MY CORRECTION OVERSHOT — silicon caught that too (`f4a7078`), in
+the same hour.** *Having fixed the ROUTE, I reversed the CONCLUSION and wrote
+that `inc32` is "not dead — unwired … a block on the critical path after all".*
+⛔ **THAT IS ALSO FALSE, and `Adder.lean:115` settles it: `incIn := adW` — THIRTY-
+TWO INPUTS, the word and nothing else. THERE IS NO ADDEND PORT.** *`inc32`
+computes `w + 4` and can compute nothing else; the branch case needs
+`pc + offset`.*
+
+✅ **THE READING THAT ENDS IT IS ARCHITECTURAL, NOT FUNCTIONAL: `inc32` is
+orphaned by `pcNext`'s DESIGN.** *Because `pcNext` **selects the addend** and
+hands it downstream, the pc path needs ONE VARIABLE adder — and a constant-only
+`+4` has no role in a **select-then-add** architecture. It would have had one in
+an increment-or-add architecture; that is not what was built.* ⇒ **`inc32` will
+STILL be unreferenced after the pc path is assembled. It is dead, and the census
+tier it was filed under was RIGHT.**
+
+📌 **THE SHAPE, BECAUSE IT IS NOT THE USUAL ONE: the original conclusion was
+RIGHT and its REASON was WRONG.** *A functional route ("`pcNext` increments") for
+a fact that is structural.* ⇒ ***A right answer with a wrong reason is more
+dangerous than a wrong answer, because the reason is what the next reader uses***
+— here it propagated into three artifacts, and then correcting the route flipped
+the conclusion and nearly promoted a sampled certificate into the critical tier. -/
 def incOut (w : BitVec 32) : List Bool := sem inc32 (fun i => w.getLsbD i)
 
 def incAddsFourOK : Bool :=
