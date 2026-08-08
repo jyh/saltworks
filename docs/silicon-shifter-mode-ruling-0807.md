@@ -113,3 +113,57 @@ SAVING: 779 gates, 53.4%.**
 * It does **not** certify the moded construction. Nothing here is a proof; it is
   a price. **Compiler builds it, and the obligations in §4 are the acceptance
   test.**
+
+---
+
+## ⛔ RE-SCOPED 2026-08-07 ~20:0x — THIS RULING NEVER ASKED WHETHER THE ISA HAS A
+## SHIFT, AND IT DOES NOT
+
+**Math, 19:59, verified by me at the bytes before accepting:**
+
+```
+ISA.lean:80-94   Instr has FIVE constructors: ADD · ADDI · XOR · SLT · BEQ
+ISA.lean:568     decode requires funct7 = 0#7 and funct3 ∈ {0,4,2}
+                 → SUB rejected; SLL/SRL/SRA decode to `none`
+grep over THIS FILE:  "Slice A" 0 · "slice A" 0 · "RV32I" 0 · "ISA" 0 · "decode" 0
+```
+
+⇒ ***Slice A's aluSelect demand set is `{0 add, 4 xor, 5 slt}`. `srl` is not in
+it. `shifter32` is off the path ENTIRELY — not merely its two missing modes.***
+
+🔴 **SO THIS RULING PRICED *HOW* TO BUILD A BLOCK NOTHING SELECTS, AND NEVER
+ASKED *WHETHER*.** *115 lines of gate arithmetic — `sra` measured free at the
+shared tie cell, `sll` at 193 rather than 480, 679 against 1,458 — **all of it
+correct as arithmetic, and all of it about an organ slice A cannot reach**.*
+**Route ① builds three organs nothing selects; route ② builds one. For slice A
+the answer is neither.**
+
+📌 **AND THE DEMAND QUESTION WAS ON MY DESK.** *The assembly plan's §3 is titled
+"THE GAP — `aluSelect` NEEDS TEN OPERAND RESULTS; SIX HAD NO PRODUCER". I read
+that file the same afternoon, to price the gates. **I read the SUPPLY side and
+never turned to the DEMAND side of the same document.*** ⇒ *A true measurement of
+the wrong object — the genre I spent the evening finding in other seats' work,
+in mine, at the top of the file.*
+
+## WHAT SURVIVES, PRECISELY
+
+* **The arithmetic stands.** `sra` free (31 fall-through sites reading ONE net),
+  `sll` 193 via reversal banks, 679 vs 1,458, the six obligations. *Nothing
+  measured here is wrong.*
+* **The B4-precedent analysis stands** — no hardened shifter netlist, nothing
+  fabricated. *That refutation of the "already fabricated" premise was correct.*
+* ⇒ **RE-SCOPE, don't retract: "WHEN shifts enter the ISA, route ②." Not "the
+  core needs this now."** *The ruling answers a question that has not been asked
+  yet, and it answers it correctly.*
+
+## CONSEQUENCE I OWE ON MY OWN NUMBERS
+
+**If `core` is built to slice A as `Instr` defines it, the shifter is not in it:**
+```
+core (C5 §1.2, after pc adder)      ~12,082 gates
+less shifterM, off the path          −679
+                                    ─────────
+slice-A core                        ~11,403
+```
+*and `aluSelect`'s ten slots serve a demand set of three, which is a separate
+sizing question I am NOT ruling on here — I have made that mistake once tonight.*
