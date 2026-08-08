@@ -152,7 +152,20 @@ not open with obsolete work.*
 | tier | population | cure |
 |---|---|---|
 | ① behavioural cert exists, out of build | **`bnComps`** | **an import** |
-| ①ᵇ **certified only ON A SAMPLE** (ruling 16:33) | **`adder32`, `inc32`** — 49 pairs / 7 words | **an unconditional proof** (math, C4 arc) |
+| ①ᵇ **certified only ON A SAMPLE** (ruling 16:33) | *population UNKNOWN — see below* | **an unconditional proof** |
+
+⭐ **`adder32` LEFT TIER ①ᵇ AT 17:0x — `752675c`, and I verified it before dissolving the row.**
+`sem_adder32` / `sem_adder32_getD` / `sem_adder32_cout` quantify over `(a b : Word)` — **all
+2⁶⁴ pairs**, not 49. *They live in `Stack/Program.lean`, not `Adder.lean`, which is why a grep
+of the declaring file finds nothing; `Stack.Program` is in the hub closure, so the census sees
+them.* ⇒ **The induction I said the class needed is done. One import remains.**
+
+⛔ **AND `inc32` WAS NEVER ON THE INSTRUCTION PATH — MY CLAIM, AND IT IS FALSE.** I named it
+separately *"because it is on every instruction's path"*. **It is UNREFERENCED**: `pcNext`
+implements the pc increment itself (`pcNext_not_beq_adds_four`), and `grep` for `inc32` over
+`SaltWorks/` finds its own file and one docstring. **`Adder.lean` now records the error in its
+own docstring.** *Its sampled certificate is therefore a much smaller matter than I made it —
+an unreferenced circuit that should still say what it computes, not a hole under the datapath.*
 | ② certified structurally only | ~34 real (+15 in `BatcherNet`, possibly retired) | a proof |
 | ③ no theorem at all | **106** | a proof |
 
