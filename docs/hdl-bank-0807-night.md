@@ -196,9 +196,34 @@ first.
   `SeamJoinA/B/C`, which is the import-owed gap stated as a measurement instead
   of an expectation.* **A gap named in a bank is worth less than a gap closed
   while writing it, when closing costs one command.**
-* **`SeamJoinC` is landed and unused.** Math showed it re-proves A's payoff under
-  different names (`cDestRd`, `bnCFrameAt_succ_frames`). Its driver bridge and its
-  **two negative controls** are the non-redundant part; nobody has separated them.
+* ~~**`SeamJoinC` is landed and unused; nobody has separated it.**~~ ✅ **SEPARATED,
+  and "unused" is now MEASURED rather than suspected: all 14 declarations have ZERO
+  uses anywhere else, and `SaltWorks.lean` is its only importer.**
+  ✅ *Caveat closed first, because it would have made the number a lie: a `@[simp]`
+  lemma fires WITHOUT being named, so "0 textual references" proves nothing on a
+  file that has them. `SeamJoinC` has no `@[simp]`, no instances, no attributes —
+  so here, never-named does mean unused.*
+  ```
+  UNIQUE, keep (7)  zip3Trace_eq_ceFrameTrace ⭐ driver bridge · ceCPort_eq_frameTrace
+                    zip3Trace_eq_ceBody · _bridge_fixture · minmax_lt_eight_ne
+                    zip3Trace_needs_rst_low  ⛔ NEGATIVE CONTROL
+                    zip3Trace_needs_length   ⛔ NEGATIVE CONTROL
+  REDUNDANT (7)     bnCFrameAt_length (EXACT dup of A's) · runTrace_ceC_frameTrace_any_state
+                    cDestRd + cDestRd_cFrame (= A's cDestOf pair) · ElemSortsAt_of_cFrames
+                    bnC_output_keys_of_frames · bnCFrameAt_succ_frames
+  ```
+  ⭐ ***The two negative controls have their value PRECISELY AS UNUSED THEOREMS:
+  they prove `hrt` and the length side-condition are LOAD-BEARING. A census that
+  reads "0 uses" as "delete it" would remove the only proof that two hypotheses
+  are not decoration.*** **"Unused" and "worthless" are different measurements.**
+* ⛔ **AND A DUPLICATE DECLARATION IS SILENTLY ACCEPTED — the corpus green is not
+  evidence against one.** `SeamJoinA:74` and `SeamJoinC:22` both declare
+  `SaltWorks.HDL.bnCFrameAt_length`, same namespace, **identical statement AND
+  proof**, neither importing the other, and the hub imports both. *I expected a
+  clash and TESTED instead of assuming: `#check` after importing both resolves
+  cleanly, `EXIT=0`, no warning.* ⚠️ **Which copy the environment holds I did not
+  measure and am not guessing — the hazard stands either way: edit one and the
+  effect downstream is undetermined from the source.**
 * **I did not read the recon agents' full output** — 188 KB, of which I read the
   hseam findings and the inventory. There may be findings in it nobody has seen.
 * **The frame invariant `StageOK` assumes distinct destinations at stage 0.** Full
