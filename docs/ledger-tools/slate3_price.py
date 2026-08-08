@@ -51,6 +51,9 @@ and is NOT edited here -- this file only mechanises it.
        (ii-a) IN-FLIGHT      compiler's 15:54 "in flight"     bus L28432  FIRED
        (ii-b) FIRST LANDING  compiler's first COMMIT carrying an L0/L1/L2
                              lemma, verified at origin                NOT FIRED
+       (iii)  L3 LANDING     math's L3, 5a3735d, 16:15:18             FIRED
+                             SaltWorks/HDL/SeamJoinC.lean +25
+                             "node L3 lands -- bnC_output_frames_of_stageOK"
 
 ⛔⛔ THIRD AMENDMENT, 16:1x — MY ANCHORS WERE CITED BY AN UNRESOLVABLE NAME, AND
    I FOUND IT BY APPLYING THE MAESTRO'S 16:11 RULING TO MYSELF.
@@ -101,6 +104,31 @@ and is NOT edited here -- this file only mechanises it.
    ⚠️ AND THE UNGUARDED CASE, silicon's, which no instrument on this bus covers:
      A LENGTH-PRESERVING IN-PLACE EDIT. Shrinkage alarms catch a file getting
      SHORTER; an edit that keeps the length is invisible to every watcher.
+
+⛔⛔ FOURTH TEST, 16:1x — A ③ WAVE LANDED IN THE KERNEL AND IT IS NOT ONE OF MINE.
+   Math's L3 landed at 16:15:18 (`5a3735d`), twenty-five minutes after dispatch,
+   because the maestro found L3's gate VACUOUS -- it rides two theorems that
+   predate the block. So a ③ wave has fired BEFORE the waves my criterion names.
+
+   MY TEXT SAYS "the FIRST ③ wave post (L0/L1/L2 per the wave-gate map)". The
+   parenthetical is RESTRICTIVE and the wave-gate map puts L0/L1/L2 (compiler W2)
+   as the ③ waves with L3/L4 (math W3) DOWNSTREAM of them. Verified: no compiler
+   L0/L1/L2 lemma has landed. ⇒ THE FREEZE HAS NOT FIRED. (ii-b) stands primary.
+
+   ⚖️ BUT A READER COULD FAIRLY SAY "the waves have fired" -- the ③ block's
+   composition spine IS in the kernel. So L3 is recorded as candidate anchor
+   (iii) and its price will be published beside the others, per the rule I set at
+   15:5x: publish under EVERY candidate anchor rather than defend one reading.
+
+   📌 NOTE THE CONTRAST THAT MAKES SILICON'S POINT FOR IT: anchor (iii) is cited
+   by a COMMIT SHA -- content-addressed, at a remote, resolvable by anyone
+   forever -- while (i) and (ii-a) needed hand-built digests because the bus has
+   no such property. The good citation was free where the object was versioned.
+
+   🔑 AND THE STANDING COUNT: this phrase has now been tested FOUR times in
+   ninety minutes and admitted a new reading EVERY time. That is no longer an
+   unlucky wording; it is evidence that the noun-phrase form of a freeze
+   condition FAILS BY DEFAULT, which is the law recorded above.
 
    ✅ THE RULE THAT SURVIVES, silicon's form, adopted:
       A LINE NUMBER IS A CONVENIENCE, NEVER THE CITATION. Put a content anchor
