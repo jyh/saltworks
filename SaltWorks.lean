@@ -50,6 +50,7 @@ import SaltWorks.Stack.ZeroOne
 import SaltWorks.Silicon.Cells.Sky130
 import SaltWorks.Silicon.Imported.Comparator
 import SaltWorks.Silicon.Imported.RefComparator
+import SaltWorks.Silicon.Imported.CompareExchange
 import SaltWorks.Silicon.Imported.Switch
 import SaltWorks.Silicon.Imported.Fabric
 import SaltWorks.Silicon.Imported.FabricCut
@@ -60,4 +61,8 @@ import SaltWorks.Silicon.Equiv.AdderSlice
 import SaltWorks.Silicon.Equiv.SwitchRefinement
 import SaltWorks.Silicon.Equiv.FabricRoutes
 import SaltWorks.Silicon.Equiv.ComposedSwitch
+import SaltWorks.Silicon.Equiv.CERefinement
+import SaltWorks.Silicon.Equiv.CERefinementC
+import SaltWorks.Silicon.Equiv.PartialLoad
+import SaltWorks.Silicon.Equiv.ScenarioComplete
 import SaltWorks.Tactic.AuditAxioms
