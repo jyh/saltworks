@@ -25,6 +25,18 @@ address-validity bit" — each stage consumes its route bit and CYCLES
 the address, so every cell reads the same position. iSOP is
 duration-specific: the pulse width tells cells how much to rotate.
 
+**Cell timing + control distribution (Captain-recalled 8/8, IIRC-
+flagged — refutation pass verifies against Fig 2/3 timing diagrams):
+the Batcher cell is a 1-clock delay, the banyan cell a 2-clock delay —
+and the asymmetry is the rotation's price: rewriting the header means
+buffering the consumed route bit for reinsertion behind the validity
+bit, one extra flop stage. The strobes are carried along by
+flip-flop chains, pipelined WITH the data so each stage's control
+arrives aligned with its skewed packet — 1988 distributes control by
+PIPELINE where convention C distributes it by DECODE from a global
+frame counter (spec §6). Chip-level check: 16-bit delay across the
+Batcher chip ≈ 1 cycle/column over ~15 bitonic columns.**
+
 **The Captain's observation, which is the theorem**: the per-stage
 mutation composes to the IDENTITY. After k stages the address has made
 one full revolution; the packet exits byte-identical to how it
@@ -41,8 +53,10 @@ distinct set of addresses" — B4's hypothesis, stated in 1990):
 
   (i)  ROUTING: packet i exits at output (address i)         [= B2M's
        abstract self-routing, reused, not re-proved]
-  (ii) HEALING: the exit stream of packet i, de-skewed by k cycles,
-       equals its entry stream — verbatim. The header healed:
+  (ii) HEALING: the exit stream of packet i, de-skewed by the
+       network's pipeline depth D (a per-design constant: 1 cycle per
+       Batcher column, 2 per banyan stage — the rotation's buffering
+       price), equals its entry stream — verbatim. The header healed:
        rotate^k = id.
 
 ## 2. THE FIVE PIECES, WITH CLASSES
