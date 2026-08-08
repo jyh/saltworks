@@ -232,7 +232,7 @@ TinyTapeout pin assignment (`ui_in[8]` + `uo_out[8]` + `uio[8]` + clk + rst_n):
 | `uio_in[0]` | 1 | **`sof`** — start-of-frame, re-aligns the counter to 0 |
 | `uio_out[3:1]` | 3 | the frame counter, bits 2:0 |
 | `uio_out[4]` | 1 | `valid` — high during the payload window (cycle ≥ 2k) |
-| `uio_out[5]` | 1 | the frame counter, **bit 3** (maestro-ruled 8/8; see below) |
+| `uio_out[5]` | 1 | the frame counter, **bit 3** (CAPTAIN-CONFIRMED 8/8; below) |
 | `uio[7:6]` | 2 | reserved |
 
 `sof` matters: without it the host cannot align to the fabric's frame after a
@@ -241,9 +241,9 @@ power-gate cycle, and §5 says no state survives one. **As of the 8/8 amendment
 establishes the well-phasedness the D3.5 hypothesis now names, and a mis-phased
 frame fails ~94 % of random loads (§8 row 6).**
 
-✅ **`cnt` needs `⌈log₂(2k+P)⌉` bits and all 4 are now pinned out** (RULED by the
-maestro 8/8 13:49 under the Inverted Purse, raised by silicon; rides into B5
-unless the Captain objects). Until that ruling `cnt_o` was `cnt[2:0]` — 3 bits of
+✅ **`cnt` needs `⌈log₂(2k+P)⌉` bits and all 4 are now pinned out** — raised by
+silicon, maestro-ruled 8/8 13:49 (Inverted Purse), **CAPTAIN-CONFIRMED 14:14:
+settled, rides into B5**. Before it `cnt_o` was `cnt[2:0]` — 3 bits of
 a 4-bit counter — so cycles 8…13 aliased onto 0…5 and **the exposed counter could
 not identify the frame phase uniquely.** With the amended D3.5 hypothesis making
 well-phasedness the entire correctness premise, the pin that reports phase must
