@@ -1,7 +1,7 @@
 name = "saltworks"
 version = "0.1.0"
 keywords = ["hardware", "verification", "formal-methods"]
-defaultTargets = ["SaltWorks"]
+defaultTargets = ["SaltWorks", "SaltWorksAudit"]
 
 # MEMORY BACKSTOP for the build path (Captain-approved 19:02).
 # `saltbuild.sh` caps only its `*.lean` audit branch; `lake build` passed no `-M`
@@ -86,3 +86,14 @@ rev = "v4.32.0-rc1"
 
 [[lean_lib]]
 name = "SaltWorks"
+
+# ABOVE-HUB AUDIT ROOT (maestro, 8/8): modules that IMPORT the hub to
+# audit the whole corpus (PortLengths-class) can never be imported BY
+# the hub — that is a build cycle, witnessed 10:50 when the maestro's
+# sweep tried it. This second root puts them in `lake build`'s graph
+# WITHOUT a hub import, killing the current-by-coincidence class for
+# above-hub files structurally. Add corpus-audit modules to `roots`
+# here, never to SaltWorks.lean.
+[[lean_lib]]
+name = "SaltWorksAudit"
+roots = ["SaltWorks.HDL.PortLengths"]

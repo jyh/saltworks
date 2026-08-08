@@ -19,6 +19,9 @@ import SaltWorks.HDL.ReadTree
 import SaltWorks.HDL.AluSelect
 import SaltWorks.HDL.GenSelectCount
 import SaltWorks.HDL.OperandBMux
+import SaltWorks.HDL.SelectCut32
+import SaltWorks.HDL.EncoderE1
+import SaltWorks.HDL.RuledSizing32
 import SaltWorks.HDL.EmitS
 import SaltWorks.HDL.CodegenSpec
 import SaltWorks.HDL.CompareExchange
