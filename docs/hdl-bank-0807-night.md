@@ -52,6 +52,34 @@ an identical-looking tick and proves nothing.**
 *Measured (math, three runs): the glyph is U+2713 + one space; namespacing is
 `SaltWorks.HDL.` in full; both the audit lines and `saltbuild EXIT=` are on
 STDOUT — `stderr` carries neither.*
+
+⚠️ **AND THE TWO FORMS DO NOT PRINT THE SAME LINE — measured 23:2x, both captures
+side by side:**
+```
+path form    ✓ SaltWorks.HDL.composed_switch_of_bnC_driven [3 axioms]
+             ← NO file path in the line at all
+corpus form  info: SaltWorks/HDL/SeamJoinB.lean:203:0: ✓ SaltWorks.HDL.…driven [3 axioms]
+             ← file:line:col prefix
+```
+✅ **The adopted gate string — `grep -cF '✓ SaltWorks.HDL.composed_switch_of_bnC_driven'`
+— matches BOTH, which is why it survives.** ⛔ ***Do not "improve" it by adding the
+filename: that returns `0` on the PATH form, i.e. a false negative from the
+STRONGER instrument.*** *`grep -c SeamJoinB` on a path-form capture is `0`, and
+that zero is correct.*
+
+📊 **STATUS OF B4's EVIDENCE, stated as two objects rather than one (silicon asked;
+this is the measurement, not the argument):**
+```
+corpus run   8644 jobs · EXIT=0 · gate line PRESENT
+             Built 0 · Replayed 54 · SeamJoinB explicitly REPLAYED
+path form    EXIT=0 · gate line present · RE-ELABORATED (this is the kernel run)
+```
+⇒ ***The corpus's ✓ is CACHED TEXT and may NOT be quoted as "elaborated tonight"
+(math's narrowing, correct). The elaboration exists — it is the path-form run, mine
+and math's independently. Both are true; they are different sentences.*** **What
+the corpus green does carry, per math at the source: a `Replayed` line means Lake
+matched a trace over that exact source and those exact deps, so the olean came from
+a build that passed `AuditAxioms`' `throwError` — for every AUDITED declaration.**
 ⛔ **NOT** `grep -cE '\(hseam :' Silicon/Equiv/ComposedSwitch.lean` — that reads **4
 forever**, correctly: *a hypothesis is discharged by SUPPLYING it, not by deleting
 it*, and those binders are the theorems' **generality**, not residue. ⛔ **NOT** a
