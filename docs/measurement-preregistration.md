@@ -202,3 +202,67 @@ from where its mass sits. Cosmetic for the totals, misleading in the
 worksheet a human tags from — and it is the third instance today of an
 instrument naming an adjacent object correctly and the intended one not at
 all.
+
+## ADDENDUM 4 — 2026-08-08 morning, EVIDENCE seat. THE OVERNIGHT OUTAGE.
+## The design above is unchanged. This records a THIRD thing that a silence
+## window can be, and a place where the bus is not the clock. Both were found
+## by measuring a machine hang instead of narrating it.
+
+**M. AN OUTAGE IS A THIRD THING, AND §0's DETECTOR IS BLIND TO IT BY
+CONSTRUCTION — WHICH ADDENDUM 2 SAID IN ADVANCE.** §H shipped with its own
+limit printed: *it detects holes that SWALLOWED WORK, not holes as such. A
+hole in a stretch where nothing was committed is invisible to it.* The
+2026-08-08 hang is that sentence's first instance at scale, and a clean one.
+
+The sequence, every reading taken from the machine or the filesystem rather
+than from any account of the night:
+
+| Reading | Value | Instrument |
+|---|---|---|
+| Last commit | 2026-08-08 00:57 `f4825d7` | `git log` |
+| Last bus post | 02:31 | `FLEET.md` |
+| **Last file written** | **02:42:16** | `find -newermt` / `stat` |
+| Diagnostic cascade opens | 02:50 | `/Library/Logs/DiagnosticReports` |
+| apfsd CPU resource event | 03:08–03:10 | same |
+| Shutdown stalls | 07:44:29, 07:47:50 | same |
+| Boot | **07:48:22** | `sysctl kern.boottime` |
+
+**The outage is 02:42:16 → 07:48:22 = 5 h 06 m, and ZERO commits landed
+inside it.** Therefore §0 flags nothing (no commit, so no hole to detect) and
+§2 — THE MEASURE THAT CARRIES THE CLAIM — is untouched in both numerator and
+denominator. Confirmed in the 08-08 run: the `≥ 4 h` row reads 0 commits,
+0.0%. **The outage is invisible to the claim, and that is correct.**
+
+It must still be written down, because the failure mode runs the other way.
+A reader who computes "hours the fleet ran unattended" from the SPAN of a
+silence window would score 5 h 06 m of a dead machine as autonomous running.
+
+⇒ **THREE DISTINCT THINGS NOW SHARE ONE MEASUREMENT, and only the first is
+autonomy:**
+
+1. silence with fleet work in it — **the claim**;
+2. silence coinciding with a human physical act — **the human working**,
+   unrecorded by construction (§I);
+3. silence with neither — **the machine down**.
+
+**A span is not autonomy unless something ran inside it.** §I taught that a
+silence window is not evidence the human was away; M adds that it is not
+evidence the FLEET was there.
+
+**N. THE BUS IS NOT THE CLOCK, AND IT UNDER-REPORTS THE TAIL OF ANY
+INTERRUPTED STRETCH.** The night's last bus post is 02:31, and that is the
+timestamp an account of the crash naturally reaches for. The filesystem
+disagrees: **five `Scratch*.lean` files, 111 KB, written 02:30:46 → 02:42:16**
+— eleven minutes of real executor work after the last thing the bus knows,
+and 1 h 45 m after the last commit. The hang onset therefore sits between
+**02:42 and 02:50**, not "after 02:31."
+
+A record whose granularity is *what got posted* cannot see work that was
+still being written when the recorder stopped. The instrument that saw it was
+`find -newermt` against the crash window — not the ledger, and not the bus.
+
+**AND THOSE FILES ARE INVISIBLE TO `git status`** (`Scratch*.lean` is
+gitignored, which is where executor proofs live). So **"nothing committed was
+lost" is true, and it is not the same claim as "nothing was lost."** The
+survey that separates them is mtime, and it must be run BEFORE any seat
+re-dispatches an executor for work that is already sitting on disk.
