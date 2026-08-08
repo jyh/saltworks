@@ -271,4 +271,29 @@ theorem minmax_lt_eight_ne (d0 d1 : Nat) (hd0 : d0 < 8) (hd1 : d1 < 8) (hne : d0
 #audit_axioms ElemSortsAt_of_cFrames bnC_output_keys_of_frames
 #audit_axioms bnCFrameAt_succ_frames minmax_lt_eight_ne
 
+/-! ### ③ node L3 — the composition (the fold leg of §2's CLAIM)
+
+The payload-delivery block routes L3 through two theorems that were **already landed before
+the block was written**: `bnC_output_frames_are_the_fold` (SeamTrace — whole-frame,
+payload-carrying, with a free comparison `le`) and `elemSortsAt_all` (SeamJoinA — which
+produces exactly that theorem's `ElemSortsAt` premise, with `le` fixed at
+`decide (cDestOf · ≤ cDestOf ·)`).  Composing them pins the free `le` and is the whole content.
+
+**It needs nothing from L0/L1/L2.**  The wave-gates map placed L3 behind the element lemmas;
+that dependency came from the decomposition's shape, not its substance.
+
+Scope, so the label is not overread: this is the **fold leg** — *output column `w` = the network
+fold of the stage-0 input frames*.  §2's CLAIM (`output (dest i) t = input i t`) needs two more
+steps: evaluating the fold at `dest i`, which is L4, and reading the payload out of the frame,
+which is `cFrame_true_expand` (a `rfl`; the payload sits at indices `6..`). -/
+theorem bnC_output_frames_of_stageOK (st : List Bool) (tr : List (List Bool)) (n L : Nat)
+    (hrst : tr.map (fun i => i.getD 0 false) = true :: List.replicate n false)
+    (h0 : StageOK st tr L 0) (w : Nat) (hw : w < 8) :
+    (runTrace batcherNetC st tr).1.map (fun o => o.getD w false)
+      = runNetF (fun x y => decide (cDestOf x ≤ cDestOf y)) bnComps
+          (fun i => bnCFrameAt st tr 0 i) w :=
+  bnC_output_frames_are_the_fold st tr _ (elemSortsAt_all st tr n L hrst h0) w hw
+
+#audit_axioms bnC_output_frames_of_stageOK
+
 end SaltWorks.HDL
