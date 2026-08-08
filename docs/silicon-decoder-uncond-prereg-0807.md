@@ -81,11 +81,30 @@ literals — a fact about the current table, not a property of `andChain`.
 match from a possibly-empty field list.** *Same genre as the σ catch-all.*
 
 ### C-D4 — DEAD GATES INSIDE THE COUNT *(minor, honesty not soundness)*
-`dcInvs` emits an inverter for **all 32** bits, but only 17 bits carry literals.
-⇒ **15 of the 102 gates (`dcNot` on bits 7–11, 15–24) are read by nothing** —
-14.7 % of the organ, ~0.13 % of the planned core, and a free 15-gate saving.
+`dcInvs` emits an inverter for **all 32** bits. An inverter is live only where
+some `dcLit (i, false)` asks for it — i.e. where a matched field bit is **0**.
+
+🔧 **I FIRST WROTE 15 HERE AND IT IS 17.** *Counting the UNREAD bits (7–11,
+15–24) gets 15; it misses two READ bits whose inverter is still never asked for.*
+
+```
+opcode 0b0110011  zero at j = 2,3,6        ⇒ dcNot 2,3,6
+opcode 0b0010011  zero at j = 2,3,5,6      ⇒ dcNot 2,3,5,6
+opcode 0b1100011  zero at j = 2,3,4        ⇒ dcNot 2,3,4
+funct3 000 / 100 / 010                     ⇒ dcNot 12,13,14
+funct7Zero (all seven bits zero)           ⇒ dcNot 25…31
+LIVE = {2,3,4,5,6} ∪ {12,13,14} ∪ {25…31} = 15      DEAD = 32 − 15 = 17
+```
+⭐ **`dcNot 0` and `dcNot 1` are dead FOR AN ISA REASON, not a table reason:
+every RISC-V 32-bit instruction has `opcode[1:0] = 11`, so bits 0 and 1 are
+matched as raw literals in all three opcodes and their negation can never be
+asked for.** *That one is structural — it survives any change to this decoder's
+instruction table that keeps the 32-bit encoding.*
+
+⇒ **17 of the 102 gates are read by nothing** — 16.7 % of the organ, a free
+17-gate saving, and the live organ is **85** gates.
 * ✅ **PASS** — accounted, or the landing notes them.
-* ⛔ **FAIL** — "102 gates, fully verified" with no note that 15 compute nothing.
+* ⛔ **FAIL** — "102 gates, fully verified" with no note that 17 compute nothing.
 
 ### ✅ C-D5 — SPEC CIRCULARITY: **REGISTERED AS EXPECTED-PASS**
 `ctrlSpec` (`:139-147`) is `match decode w with …` — **defined FROM `ISA.decode`**,
