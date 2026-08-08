@@ -39,12 +39,21 @@ module banyan_fabric #(
     localparam FRAME = HDR + PAYLOAD;       // 14
 
     // ---- frame counter -----------------------------------------------------
-    reg [3:0] cnt;
+    // WIDTH IS DERIVED, NOT LITERAL (silicon, 8/8 13:4x). It was `reg [3:0]`,
+    // which holds 0..15, so the wrap test `cnt == FRAME-1` could never match
+    // once FRAME-1 > 15: at PAYLOAD >= 11 the counter rolled over at 16 instead
+    // of at FRAME and the period silently stopped tracking the header. Measured
+    // before the fix — P=8/9/10 gave periods 14/15/16 (correct) and P=11/12/16
+    // ALL gave 16. The module advertised a parameter it honoured only to P=10.
+    // At the tapeout's PAYLOAD=8, $clog2(14)=4, so this is bit-identical to the
+    // literal it replaces: zero netlist change where it ships, correct elsewhere.
+    localparam CW = $clog2(FRAME);
+    reg [CW-1:0] cnt;
     always @(posedge clk) begin
-        if (!rst_n)      cnt <= 4'd0;
-        else if (sof)    cnt <= 4'd0;
-        else if (cnt == FRAME - 1) cnt <= 4'd0;
-        else             cnt <= cnt + 4'd1;
+        if (!rst_n)      cnt <= {CW{1'b0}};
+        else if (sof)    cnt <= {CW{1'b0}};
+        else if (cnt == FRAME - 1) cnt <= {CW{1'b0}};
+        else             cnt <= cnt + 1'b1;
     end
     assign cnt_o = cnt[2:0];
     assign valid = (cnt >= HDR);

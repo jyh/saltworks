@@ -177,10 +177,40 @@ So the fabric must **self-initialise from an arbitrary state**:
 * `rst_n` is belt-and-braces, and the frame counter is the only element that
   needs it (§6).
 
-**D3.5 hypothesis:** the refinement holds for frames beginning at or after the
-*second* `act_stb` following power-up, from **any** initial register state. This
-is stronger than "assume reset works" and it is the honest statement, because the
-silicon does not guarantee the weaker one.
+**D3.5 hypothesis — AMENDED 2026-08-08 13:4x (silicon), measured on the RTL;
+see §8 rows 5–8 and `SaltWorks/Silicon/Sim/rtl_tb/`:**
+
+> the refinement holds for any **well-phased** frame — one whose cycle 0
+> coincides with `cnt == 0`, which the host establishes with `sof` (or `rst_n`)
+> — from **any** initial register state.
+
+The superseded form read *"frames beginning at or after the **second** `act_stb`
+following power-up, from any initial register state."* That clause was inferred
+from the register bullets above, and measurement against `banyan_fabric.v` shows
+it is **conservative where it could bind and inert where it is needed**:
+
+* **CONSERVATIVE on the register axis.** The header strobes stage 0 at cycles
+  0/1, stage 1 at 2/3, stage 2 at 4/5, and every latch is *unconditionally*
+  reloaded — so all twelve elements are frame-determined **before** the validity
+  window opens at cycle `2k`. The FIRST well-phased frame is already correct.
+  Measured: 200/200 distinct arbitrary power-up states, one `sof`-aligned frame,
+  **zero failures**.
+* **INERT on the phase axis.** The counter is periodic with period `2k+P`, and a
+  frame is `2k+P` cycles — so a mis-phased host meets the *second* `act_stb` at
+  exactly the same offset as the first. Waiting repairs nothing. Measured:
+  mis-phased and judging the **second** frame, 192/200 fail — statistically the
+  same as judging the first (188/200).
+
+⇒ **Well-phasedness is supplied by an INPUT EVENT (`sof`/`rst_n`), never by a
+frame count.** It must appear as a hypothesis in its own right; it cannot be
+inherited from "wait one frame". The amended form is strictly *stronger* (it
+covers the first frame) and it names the premise the old one left implicit.
+
+⚠️ **Consumers: this correction matters to anything that cites the old clause as
+the SOURCE of well-phasedness.** A statement of the form "L is stated for
+well-phased frames, and the second-`act_stb` clause supplies well-phasedness"
+attributes the premise to a clause that cannot produce it, and leaves phase
+unsourced in both nodes.
 
 ## 6. THE STROBE GENERATOR AND TT PIN MAP
 
@@ -205,7 +235,27 @@ TinyTapeout pin assignment (`ui_in[8]` + `uo_out[8]` + `uio[8]` + clk + rst_n):
 | `uio[7:5]` | 3 | reserved |
 
 `sof` matters: without it the host cannot align to the fabric's frame after a
-power-gate cycle, and §5 says no state survives one.
+power-gate cycle, and §5 says no state survives one. **As of the 8/8 amendment
+`sof` is load-bearing rather than a convenience: it is the ONLY thing that
+establishes the well-phasedness the D3.5 hypothesis now names, and a mis-phased
+frame fails ~94 % of random loads (§8 row 6).**
+
+⚠️ **`cnt` needs `⌈log₂(2k+P)⌉` bits and only 3 are pinned out.** At the tapeout
+`cnt` is 4 bits (0…13) while `cnt_o = cnt[2:0]` exposes 3, so cycles 8…13 alias
+onto 0…5 and **the exposed counter cannot identify the frame phase uniquely**.
+Since phase is now the whole correctness premise, that is a bring-up hazard, not
+a cosmetic one. **Bring-up must align with `sof` and treat `cnt_o` as a coarse
+indicator only** — or `uio_out[5]` (currently reserved) should carry `cnt[3]`.
+Decision owed before bring-up; the pin map above is unchanged until it is made.
+
+📌 **The counter's width is DERIVED, not literal** (fixed 8/8 13:4x): it was
+`reg [3:0]`, so the wrap test `cnt == FRAME-1` could never match once
+`FRAME-1 > 15` and at `P ≥ 11` the counter rolled over at 16 instead of at
+`FRAME` — the module advertised a `PAYLOAD` parameter it honoured only to
+`P = 10`. Measured before the fix: `P` = 8/9/10 gave periods 14/15/16 (correct),
+`P` = 11/12/16 **all gave 16**. Now `localparam CW = $clog2(FRAME)`. At the
+tapeout's `P = 8` this is bit-identical to the literal it replaces — yosys
+reports the same 27 cells and the same 4 counter flops before and after.
 
 **⚠️ Clock.** The TT pad's maximum **output** rate is 33 MHz (half its input
 ceiling) and a serial fabric toggles its outputs every cycle. Target **≤ 25 MHz**
@@ -242,8 +292,49 @@ packet arrives on the line its destination names. Run it: no installs, seconds.
 |---|---|---|
 | 1 | **necessity census** — all 8! = 40,320 full-load permutations | **4,096 route correctly (10.159 %)** |
 | 2 | all 255 sorted + concentrated cases, **with idle ports** | **PASS** |
-| 3 | 200 arbitrary power-up states, one frame | **PASS** |
+| 3 | 200 arbitrary power-up states, one frame — ⚠️ **REGISTERS ONLY**, see below | **PASS** |
 | 4 | control: same suite against the **old, buggy** element | **247 / 255 fail** |
+
+⚠️ **ROW 3 REACHES ONLY HALF THE INIT SURFACE, and the half it misses is the one
+§5 singles out.** `frame_sim.py` decodes its strobes from the loop variable
+(`act_stb = (t == 2*s)`), so it contains **no frame counter at all** — no `cnt`,
+no `sof`, no phase. Every frame it simulates is perfectly phased *by
+construction*, and `init_random` varies the twelve elements' `act`/`sel`
+registers and nothing else. Row 3 is a true result over the register surface and
+says nothing whatever about the counter. It is not relabelled here; it is
+**supplemented** by rows 5–8, which drive the real `banyan_fabric.v`.
+
+Rows 5–8: `SaltWorks/Silicon/Sim/rtl_tb/` (iverilog, no PDK — `sh run.sh`).
+Both init surfaces randomised (48 routing bits **and** `cnt`, including the
+out-of-range 14/15 a 4-bit register can power up into); `rst_n` **never**
+asserted; loads are random sorted + concentrated; 200 seeds, 200 distinct
+power-up states.
+
+| # | check | result |
+|---|---|---|
+| 5 | `sof`-aligned, **ONE** frame, arbitrary registers + arbitrary `cnt` | **0 / 200 fail** |
+| 6 | control: `sof` **withheld**, arbitrary phase | **188 / 200 fail** |
+| 7 | mis-phased, **TWO** frames, judging the **SECOND** | **192 / 200 fail** |
+| 8 | `sof`-aligned, two frames **abutting**, judging the second | **0 / 200 fail** |
+| 9 | control: rows 5–8 against the **mutant** (old, buggy) element | **194 / 200 fail (row 5 arm)** |
+
+**Reading these.** Row 5 is the amended §5 hypothesis: the first well-phased
+frame is already correct from any register state. Row 7 against row 6 is the
+finding that the *"second `act_stb`"* clause was inert — waiting does not repair
+phase, because the counter's period and the frame length are the same number.
+Row 8 is the old hypothesis, which also holds, and is the first evidence on §9's
+back-to-back question. Row 9 is the control that makes row 5 mean anything: the
+same bench, the same checker, the pre-fix element — and it fails.
+
+📌 **The residual ~6 % pass rate in rows 6 and 7 is not noise to be explained
+away — it is 1/14, the chance that a free-running 14-cycle counter is at 0 when
+the frame happens to start.** That number is also what caught a defect in the
+bench itself: rev 1 reported a 14/200 pass rate in the *aligned* arm, which is
+the same 1/14, because a stimulus race meant the alignment never happened and
+both arms were secretly the same experiment. The bench now carries a **treatment
+assertion** — arm A verifies `cnt == 0` at frame start on every seed and reports
+a harness failure if not. *An experiment must check that its independent variable
+was actually applied; a suspiciously mechanism-shaped number is the tell.*
 
 Reading these:
 
@@ -269,10 +360,17 @@ independently named this morning.
 
 * **`P` (payload length).** 8 is a placeholder chosen to make a 14-cycle frame.
   Nothing in the proof depends on it. Decide when the testbench is written.
-* **Multi-frame back-to-back.** This spec describes one frame. Whether frames
-  may abut with no gap depends on the strobe generator only; the element is
-  memoryless across frames by construction (§5), so I expect yes — but it is
-  **unverified** and must not be claimed until the cocotb testbench shows it.
+  📌 **8/8: the RTL-side obstacle is GONE.** The counter's width is now derived
+  (`$clog2(FRAME)`) and its period tracks `P` at 8/9/10/11/12/16 — measured. The
+  previous hard-coded `reg [3:0]` silently capped correctness at `P ≤ 10`, which
+  is the concrete form of "∀-P touches the frame counter". Any remaining ground
+  for deferring ∀-P is now proof-side, not artifact-side.
+* **Multi-frame back-to-back.** ✅ **First evidence in (§8 row 8): 200/200
+  aligned, abutting frames route correctly with a fresh load in the second and
+  no gap between them.** The expectation was right and the reason is that the
+  counter's period IS the frame length. Still short of the cocotb testbench —
+  this is iverilog against the RTL, not the packaged flow — so treat it as
+  strong evidence, not the final word, and do not yet claim it of the netlist.
 * **`sof` polarity and pulse width** — pin down with the testbench.
 * The **cone-size distribution** of the padded 4–5 k-instance netlist, which
   decides whether per-cone certification is a plan or a hope (see the bus post
