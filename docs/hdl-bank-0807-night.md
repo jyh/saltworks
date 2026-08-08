@@ -125,9 +125,35 @@ errors. **Every executor's claim was re-verified by this seat before landing.**
   settles UNREAD axes. **READ-BUT-PERIODIC axes are still open** — the shifter
   reads all 32 shamt bits and 32 values suffice because behaviour is periodic mod
   32. That is a QUOTIENT lemma, and it does not exist.
-* **ME, if I return:** `docs/hdl-tools/reach_census.lean:67-68` hardcodes a
-  four-module "outside" list that is **100 % rotted** — all four are now inside.
-  Convert it to an argument and print it in the verdict.
+* ~~**ME — `reach_census.lean` rot.**~~ ✅ **DISCHARGED `27a1789` + `b55824d`.**
+  Two defects, both tonight's shape, both in my own tool:
+  1. **`outsideMods` hardcoded** to four modules, beside a note saying *"regenerate
+     it rather than trusting it — that list is exactly the kind of value that stops
+     being true without announcing it."* All four had been swept in: **100 % rotted.**
+     ⇒ ***The caveat was written, read by me twice, and did not fire. A value that
+     encodes a fact about the world needs a DERIVATION, not a warning label.*** And
+     it fed the classifier, so the rot corrupted **which constants counted as
+     in-closure**, not just the header. Now derived from the import graph.
+  2. **The printed headline asserted what the header denies** — *"definitions whose
+     ONLY certificates are outside"*, the ~15-false-positive reading. The docstring
+     corrected it; the `IO.println` claimed it. ***A tool's headline is its
+     `IO.println`, and that is the line that gets pasted into a ledger.***
+* ✅ **AND THE SUBTRACTION THE HEADER OWED SINCE IT WAS WRITTEN IS PAID.**
+  **RESIDUAL 0** — all 9 reached definitions are certified inside the hub
+  (`batcher8` 39, `runNet` 36, `extendIio` 25, `Banyan.line` 22, `runP` 20,
+  `Netlist` 11, `IsSorted` 6, `ceCNL`/`_outs` 3). ⇒ **The five outside modules are
+  a BUILD-COVERAGE gap, not a CERTIFICATION gap.**
+  ⚖️ *Stated flatly only because the bound runs the right way: statement-only
+  matching can MISS a certificate, which can only OVERSTATE the residual — so 0 is
+  exact, and any residual > 0 would be an upper bound and nothing more.*
+  ⛔ **SCOPE, printed by the tool because it is droppable when quoted: candidates
+  are IN-CLOSURE definitions only. `ceNL` is DEFINED outside, was never a
+  candidate, and this says NOTHING about it or about the coverage gap itself.**
+  📌 *A seat read my raw 9 as the stronger claim within three minutes of my posting
+  it. The debt was not theoretical, and I had shipped the disclaimer and the
+  invitation in the same post — **the invitation is what travelled.***
+* **ME, if I return:** `SeamJoinC`'s non-redundant half (driver bridge + two negative
+  controls) is still unseparated; and I read only part of the 188 KB recon output.
 
 ## ④ WHAT I GOT WRONG — the useful section
 
