@@ -16,6 +16,54 @@ kernel-proved gate count. **Wiring is deliberately NOT here** — which object t
 ALU selects is a design ruling, and this module exists so that ruling has two
 certified candidates instead of one.
 
+## THE ACCEPTANCE BAR FOR A CERTIFIED BLOCK
+
+*Recorded here because this module is its worked example, and because a bar that
+lives only in bus posts does not survive a seat reboot. Every clause below was
+pre-registered before the artifact it judges existed; the primed ones were added
+by someone attacking the criterion rather than the block, which is the only way
+any of them surfaced — a passing build cannot report a hole in the bar.*
+
+* **① BLOCK CERT** — `∀ E : Env, ∀ k < 32, out_k = if sel then b_k else a_k`,
+  proved for an **arbitrary** environment. A cert over a fixture, a sample, or a
+  `decide` at fixed inputs does not satisfy this.
+* **①′ STATED OVER `sem c`** — over the circuit's **output port list**, never
+  over `run … c.gates <hardcoded net>`. A net-anchored cert is blind to `outs`
+  *by construction*, and `outs` is where bit order lives.
+  *Why it exists:* ① as first written says `out_k = …`, and `out_k` is exactly
+  the ambiguity — a net-anchored cert satisfies that sentence read literally.
+  A sibling file proves the blindness is definitional, `Iff.rfl`, not accidental.
+* **①″ PIN `outs` LENGTH, not merely mention `outs`** — by a list-level equality
+  against a spec of known length, or an explicit kernel-proved `outs.length = N`.
+  *Why it exists:* ①′ makes the cert read the port list, but an index-wise cert
+  (`∀ k < 32`) is satisfied by a circuit whose `outs` has length 40. This module
+  closes it twice (`obMux_certList`, and `outs.length = 32` by `decide +kernel`)
+  — **but it closes it because its author chose a list-level cert, not because
+  the bar demanded it.** A criterion satisfied by luck is still a broken
+  criterion.
+* **② GATE COUNT** proved by `decide +kernel`, never asserted in a comment.
+* **③ MUTATIONS ≥ 3**, each proving **the cert fails** for the mutant — not
+  merely that two circuits differ at some net. Must include the a/b **bus swap**
+  and an **`outs` reversal**; both are known vacuity modes of this suite, and a
+  mux is the case that bites. Beware the converse too: a suite assuming *"any
+  single-op change must break"* ships false positives — `or → xor` here is a
+  genuine non-defect (one-hot merge), and two of the mutants are one defect
+  counted twice.
+* **④ AUDIT** — `#audit_axioms` clean on every declaration, ≤ 3 axioms each,
+  and **one declaration per call**. A multi-name call abandons the rest of its
+  own list at the first failure, so a name absent from the error list reads as
+  clean when it was never reached — and the hidden names are exactly those
+  downstream of the failure.
+* **⑤ HYGIENE** — 0 `sorry`, 0 `native_decide`, 0 `axiom`. ⚠️ **Not by grep.**
+  A failed tactic emits an error *and* fills the hole with `sorryAx`, so a file
+  with zero `sorry` tokens can still depend on it; and prose about `sorryAx`
+  makes a clean file's grep non-zero. The instrument is wrong in both
+  directions. Only `saltbuild EXIT=0` **plus** a clean audit is a verdict.
+* **⑥ BUILD** — `../saltbuild.sh SaltWorks/HDL/<file>.lean`, path form, never
+  piped (`$?` after a pipe is the tail's status, and it fails in the reassuring
+  direction). `EXIT=N` judged by its literal text; `75` is a lock-wait abort,
+  not a failure. Every number quoted comes from that run.
+
 ## The block
 
 ```
