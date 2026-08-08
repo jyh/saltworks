@@ -54,10 +54,10 @@
 
 - W1 · WRITE · **PRE-AUTH** — the phase-3 Program.lean patch, on
   arrival of compiler's request (land it yourself; your file).
-- W2 · WRITE · **GATED(probe GO + maestro word)** — the salt
-  flagship: W5(S2)#1, the K/m² arm. The demand-side answer (per-m
-  vs tail-sum) decides which theorem is bought. The Captain is
-  informed; the wave is the maestro's word on the pre-flighted GO.
+- W2 · WRITE · **FIRED 13:59 (the word given on the green trace)** —
+  the salt flagship: W5(S2)#1, K/(π²m²) arm, statement + route +
+  supply per the 13:58 pre-flight; mutation control = the refuted
+  K/(2π²m²) re-cut must FAIL. The flagship front is OPEN.
 - W3 · WRITE · **GATED(L1+L2 landed)** — ③ L3 (three lines from
   bnC_output_frames_are_the_fold + elemSortsAt_all), then L4 (the
   σ-composition, C-class, absorbs the sel-distinctness transport).
