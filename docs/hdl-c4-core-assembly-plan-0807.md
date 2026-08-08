@@ -144,6 +144,8 @@ off_0 = 1088                    (= coreInWidth; state and instruction below it)
  4  bitwise     and / or / xor over rs1,rs2                       96   ✅ LANDED
  5  bitNot32    invert b, for sub                                 32   ✅ LANDED
  6  adder32×2   add, and sub via (a, ~b, cin=1)                  320
+                 ⛔ NOTE: these are the ALU's.  NO adder is allocated to the
+                 PC PATH below, and that is the defect silicon refuted.
  7  sltCirc/sltuCirc  from sub's sign and carry                    7   ✅ LANDED
  8  shifters×3  sll / srl / sra                                1,458  ⛔ 2 MISSING
  9  aluSelect   muxes the ten                                  1,445
@@ -153,6 +155,25 @@ off_0 = 1088                    (= coreInWidth; state and instruction below it)
 
 core.outs = regNext's 1,024 ++ pcNext's low 32          = 1,056 = stWidth
 ```
+
+🔴 **THIS LINE IS REFUTED (silicon, `cefd93e`) AND THE PLAN IS WRONG AS WRITTEN.**
+`pcNext` has **no pc input** (`PcNext.lean:63-67`: rs1, rs2, off, isBEQ — 97
+nets, and the program counter is not among them) and `pcSpec` returns
+`if take then off else 4`: ***an ADDEND, not a sum.*** ⇒ **Wiring `pcNext`'s
+output straight onto `encD`'s pc field sets `pc' := 4` on every non-branch
+instruction and `pc' := offset` on a taken branch** — *a machine that executes
+instruction 1, then instruction 1, forever.*
+
+✅ **THE FIX: the pc path needs an ADDER between `pcNext` and the pc field**, with
+`pc` as one operand and `pcNext`'s output as the other. **`inc32` is not it
+either — it adds a constant 4 and cannot take a variable addend — so the pc path
+wants an `adder32` instance of its own, a THIRD one, and the plan's gate total
+moves accordingly.**
+
+📌 **AND THE JUSTIFICATION THAT RETIRED `inc32` WAS MINE AND WAS FALSE:** I cited
+`pcNext_not_beq_adds_four` as evidence that `pcNext` increments. *It proves the
+OUTPUT EQUALS 4.* ⇒ ***A theorem's NAME read as its STATEMENT — corrected in
+`Adder.lean`.***
 
 **Measured subtotal of what EXISTS: 11,038 gates. Estimated total with §3
 filled: ~12,700.**

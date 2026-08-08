@@ -238,13 +238,32 @@ def adderCarryOK : Bool :=
 /-- `inc32`: 32 input bits; outputs 0,1 pass through and the increment starts at
 bit 2, so it computes `w + 4`.
 
-⚠️ **IT IS UNREFERENCED. `grep` for `inc32` over `SaltWorks/` finds this file and
-nothing else** — `pcNext` implements the pc increment itself
-(`pcNext_not_beq_adds_four`), so the pc path does not go through here. *It was
-described on the bus as "on every instruction's path"; that is FALSE, and this
-seat repeated it before checking.* **The theorem below is still worth having —
-an unreferenced circuit that a successor reaches for should say what it computes
-— but it closes a gap in a DEAD definition, not on the critical path.** -/
+⚠️ **IT IS UNREFERENCED — `grep` for `inc32` over `SaltWorks/` finds this file
+and nothing else.** *That much is measured and stands.*
+
+⛔ **BUT THE CONCLUSION THIS DOCSTRING DREW FROM IT WAS FALSE, AND SILICON
+REFUTED IT AT THE BYTES (`cefd93e`).** *It said: "`pcNext` implements the pc
+increment itself (`pcNext_not_beq_adds_four`), so the pc path does not go through
+here … a DEAD definition, not on the critical path."*
+
+🔴 **`pcNext` HAS NO PC INPUT.** `PcNext.lean:63-67` — `pcRs1 0…31`, `pcRs2
+32…63`, `pcOff 64…95`, `pcIsBEQ 96`, `pcIn = 97`. ***Ninety-seven inputs and the
+program counter is not among them.*** *And `pcSpec` returns `if take then off
+else 4` — **an addend, not a sum** — which `PcNext.lean:100` says in words: "the
+pc addend select".*
+
+🔑 **AND THE THEOREM I CITED PROVES THE OPPOSITE OF WHAT ITS NAME SUGGESTS:
+`pcNext_not_beq_adds_four` proves the OUTPUT EQUALS 4. It does not prove anything
+was incremented by four — a block with no pc input could not have.** ⇒ ***I read
+a theorem's NAME as its STATEMENT, and retired the one block that could perform
+the pc increment on the strength of it*** — in a correction whose own subject was
+having taken a description for an object.
+
+✅ **SO THE CORRECT READING IS THE OPPOSITE: `inc32` is unreferenced because THE
+PC PATH IS NOT ASSEMBLED YET, and it is the block that path will need.** *Not
+dead — unwired.* **`inc32_adds_four_on_sample` below is therefore about a block
+on the critical path after all, and the census tier it was filed under is wrong
+in the flattering direction.** -/
 def incOut (w : BitVec 32) : List Bool := sem inc32 (fun i => w.getLsbD i)
 
 def incAddsFourOK : Bool :=
