@@ -52,15 +52,34 @@ any of them surfaced — a passing build cannot report a hole in the bar.*
   statement survives appending a port to the core, and what catches the wide
   machine is `Seq.wf`, not the certificate.
 
-* **①⁗ AND THE WHOLE-LIST MUST BE THE *WHOLE* LIST** — `take N` is a top-level
-  list equation whose LHS is a **prefix**, so it pins `outs.length ≥ N` and
-  gives no upper bound at all. `drop 1`, by contrast, has length
-  `outs.length - 1` and pins exactly. **Same combinator family, opposite
-  verdicts — so "is there a `==` between lists?" cannot be read off the syntax.**
-  *Why it exists:* `adder32`'s three certificates read `take 32` twice and
-  `getD 32` once, nothing states `adder32.outs.length = 33`, and a 34-port
-  `adder32Wide` with byte-identical gates satisfies all three. Eleven lines from
-  one of them, `cmp_upper_bits_are_zero` uses `drop 1` and pins exactly.
+* **①⁗ KEY THE TEST ON THE WIDEST INDEX THE STATEMENT CAN READ** — not on the
+  combinator, and not on whether a `==` between lists appears. If the widest
+  index the statement constrains is bounded by a literal, the length is free
+  above it, whatever the surrounding syntax looks like. Shapes that a
+  combinator-keyed rule scores wrong:
+
+  | statement | reads | verdict |
+  | --- | --- | --- |
+  | `sem c ins = (List.range 32).map f` | the whole list | PINNED |
+  | `(subOut a b).take 32 = …` | prefix 0…31 | **unpinned** — and it *is* a single equation between two lists |
+  | `(sem c e).drop 1 = …` | length `n-1` | PINNED — pins `n` exactly |
+  | `wordOf (fun k => (sem C E).getD k false) = w` | 0…31 | unpinned, `Word = Word` |
+  | `asBit0 …= b` | index 0 only | unpinned, `Bool = Bool`, no `getD` in sight |
+
+  *Why it exists:* an earlier form of this clause said "`take N` is a prefix,
+  `drop 1` pins exactly" — keyed on the combinator. `(subOut a b).take 32 = …`
+  has no `take` on the right, no `getD` anywhere, and reads a bounded prefix
+  regardless; the `Bool = Bool` family mentions no list operation at all. **Every
+  syntactic rule this bar shipped before this one misses them.** `adder32` is the
+  live instance: all 33 ports certified, `outs.length` unpinned in the corpus, so
+  a 34-port `adder32Wide` with byte-identical gates satisfies all three certs —
+  *covered but unpinned*, which is neither PINNED nor BLIND.
+
+  📌 **And the taxonomy needs four buckets, not two:** PINNED · COVERED-BUT-UNPINNED
+  (every real port certified, length free) · DISCLOSED-SAMPLE (scope named in the
+  identifier, e.g. `_on_sample` — a stated limitation, not a blind) · BLIND
+  (universal-and-silent). A verdict with nowhere right to go lands in the worst
+  bucket available; add the bucket first.
 
   ⚠️ **AND THE STRUCTURAL FACTS EVERY COMBINATIONAL BLOCK AUTHOR NEEDS:**
   `Circ.wf` (`Syntax.lean:110-114`) does **NOT** constrain `outs.length`, and it
@@ -79,7 +98,19 @@ any of them surfaced — a passing build cannot report a hole in the bar.*
   `outs.length = stWidth` as a decidable precondition — the pattern the rest
   lack, and it already exists here.
 
-  📌 *General lemma, if you need to check a candidate:*
+  📌 **⚠️ DO NOT RE-DERIVE THIS — the general theorem is already in the corpus
+  and predates the clause it justifies:**
+  `Stack/Program.lean:2528` `extendOut c m := { c with outs := c.outs ++ [m] }`,
+  `:2545` `outBit_extendOut` (index-wise reads are unchanged), and
+  `:2558` **`length_conjunct_is_necessary`** — *universally quantified in `c`*:
+  every field obligation survives an appended port while the whole-list spec
+  dies, stated for an arbitrary `c` "so it does not wait on a correct core to
+  exist."
+
+  Three seats independently rebuilt per-circuit witnesses of this on 8/8
+  (`obMuxWide`, `adder32Wide`, a bar-gap probe) before anyone read `:2558`.
+  **Cite the corpus, not the re-derivations.** If you need a per-circuit check
+  anyway, the specialised form is
   `sem { c with outs := c.outs ++ [n] } ins = sem c ins ++ [run ins c.gates n]`
   — appending a port is invisible to both `take k` (`k ≤ length`) and `getD k`
   (`k < length`) for **every** circuit and **every** environment. Not a sample.
