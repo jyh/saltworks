@@ -201,16 +201,45 @@ while true; do
     # its most literal form: not the wrong filter, a DEAD one. LC_ALL=C makes awk
     # byte-oriented, which is also exactly the semantics this gate wants -- it
     # strips emoji bytes as non-letters, which is the intent.
+    # ⛔⛔⛔⛔ THIRD DEFECT, AND THE ONLY ONE THAT WOULD HAVE SURVIVED REVIEW: the
+    # first working version read the marker ONLY on the header line, and was
+    # therefore BLIND TO THIS SEATS OWN POSTING FORMAT. Measured by running the
+    # gate against my own FLEET post seconds after publishing it -- it saw the
+    # header and reported "not FLEET-marked".
+    #   compiler / silicon / math  printf ends WITHOUT a newline
+    #                              -> "] <emoji> **FLEET -- ..."   marker ON the header
+    #   THIS SEAT                  printf ends WITH a newline
+    #                              -> marker on the FIRST BODY LINE BELOW it
+    # 🔑 I built the gate from the specimens I had, and every specimen I had was
+    # another seats format. An instrument tested only on other peoples objects is
+    # blind in exactly the place its author cannot see -- the same shape as
+    # verifying over a window instead of the full object, one axis over.
+    # ⇒ The gate now accepts the marker in EITHER position: on the header line,
+    # or on the first non-blank line beneath a header that carries no body text.
+    # The DESCRIBES-vs-BINDS discriminator is unchanged and still rejects the
+    # ruling that created the marker (maestro 13:49), measured after the fix.
     LC_ALL=C awk -v start="$last" '
+      function marked(s,   h) {
+        h = substr(s, 1, 40)
+        gsub(/[^A-Za-z -]/, "", h)
+        sub(/^[ ]*/, "", h)
+        return (h ~ /^FLEET[ -]/)
+      }
       prevblank && /^\[[0-9]+\/[0-9]+ [0-9:]+, [A-Za-z]/ {
+        hdr = $0; pend = 0
+        body = $0
+        sub(/^\[[^]]*\][[:space:]]*/, "", body)
         if (NR > start) {
-          body = $0
-          sub(/^\[[^]]*\][[:space:]]*/, "", body)
-          head = substr(body, 1, 40)
-          gsub(/[^A-Za-z -]/, "", head)
-          sub(/^[[:space:]]*/, "", head)
-          if (head ~ /^FLEET[[:space:]-]/) print "🚧 FLEET-BINDING POST: " substr($0, 1, 150)
+          if (body != "") {
+            if (marked(body)) print "🚧 FLEET-BINDING POST: " substr(hdr, 1, 150)
+          } else pend = 1
         }
+        prevblank = 0
+        next
+      }
+      pend && $0 != "" {
+        if (marked($0)) print "🚧 FLEET-BINDING POST: " substr(hdr, 1, 90) " || " substr($0, 1, 90)
+        pend = 0
       }
       { prevblank = ($0 == "") }
     ' "$BUS"
