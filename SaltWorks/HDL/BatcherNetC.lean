@@ -69,10 +69,7 @@ def bnCSigma (e a b : Nat) (dat : List Net) : Net → Net := fun i =>
   if i == 0 then bnCRst
   else if i == 1 then dat.getD a 0
   else if i == 2 then dat.getD b 0
-  else if i == 3 then bnCState e
-  else if i == 4 then bnCState e + 1
-  else if i == 5 then bnCState e + 2
-  else bnCState e + 3
+  else bnCState e + (i - 3)
 
 /-- Fold the comparators, threading the per-wire nets and the gate list.
 Returns gates, the final data nets, and the next-state nets in element order. -/
@@ -439,16 +436,53 @@ theorem bnCRst_lt_off (e : Nat) : bnCRst < bnCOff e := by
 theorem bnCSigma_below (e a b : Nat) (dat : List Net)
     (hdat : ∀ n ∈ dat, n < bnCOff e) (ha : a < dat.length) (hb : b < dat.length) :
     ∀ i, i < ceCcore.nIn → bnCSigma e a b dat i < bnCOff e := by
-  intro i _
+  intro i hi
+  -- the state branch is now ARITHMETIC (`bnCState e + (i - 3)`), so it needs the
+  -- input bound that the earlier four-way split could discard.
+  have h7 : (i : Nat) < 7 := by
+    have hnIn : ceCcore.nIn = 7 := by decide +kernel
+    rwa [hnIn] at hi
+  have hsub : (i : Nat) - 3 < 4 := by omega
   unfold bnCSigma
   split_ifs
   · exact bnCRst_lt_off e
   · exact hdat _ (by rw [List.getD_eq_getElem _ _ ha]; exact List.getElem_mem ha)
   · exact hdat _ (by rw [List.getD_eq_getElem _ _ hb]; exact List.getElem_mem hb)
-  · exact bnCState_lt_off e 0 (by omega)
-  · exact bnCState_lt_off e 1 (by omega)
-  · exact bnCState_lt_off e 2 (by omega)
-  · exact bnCState_lt_off e 3 (by omega)
+  · exact bnCState_lt_off e (i - 3) hsub
+
+/-- ⭐ **THE STATE INPUTS MAP ARITHMETICALLY, SO INJECTIVELY BY CONSTRUCTION
+RATHER THAN BY COINCIDENCE.** *Silicon's conveyor-7 finding (8/7 19:52): the old
+form ended `… else bnCState e + 3`, a CATCH-ALL. It was safe **exactly** because
+`ceCcore.nIn = 7`, so precisely one input (`bothAct`) reached it.* ⛔ **Had
+`ceCcore` ever gained an eighth input, `i = 6` and `i = 7` would BOTH have landed
+on `bnCState e + 3` — two distinct element inputs silently reading one net,
+well-formed, `ssa`-valid, `instOK`-satisfying and wrong, because `instOK` bounds
+`σ` without saying anything about injectivity.**
+
+⚖️ *And "require injectivity" would be the wrong fix — non-injective `σ` is
+sometimes exactly right (two operands deliberately tied to one host net). The
+hazard is not in the combinator; it is in writing `σ` with a catch-all, which
+makes accidental aliasing the default for any input its author did not think of.
+Arithmetic indexing removes it at the source and costs nothing.* -/
+theorem bnCSigma_state (e a b : Nat) (dat : List Net) (i : Nat) (hi : 3 ≤ i) :
+    bnCSigma e a b dat i = bnCState e + (i - 3) := by
+  have hiN : 3 ≤ (i : Nat) := hi
+  unfold bnCSigma
+  split_ifs with h1 h2 h3
+  · exact absurd (show (i : Nat) = 0 by simpa using h1) (by omega)
+  · exact absurd (show (i : Nat) = 1 by simpa using h2) (by omega)
+  · exact absurd (show (i : Nat) = 2 by simpa using h3) (by omega)
+  · rfl
+
+/-- …and therefore distinct state inputs never alias. -/
+theorem bnCSigma_state_injective (e a b : Nat) (dat : List Net) (i j : Nat)
+    (hi : 3 ≤ i) (hj : 3 ≤ j) (h : bnCSigma e a b dat i = bnCSigma e a b dat j) : i = j := by
+  rw [bnCSigma_state e a b dat i hi, bnCSigma_state e a b dat j hj] at h
+  -- omega cannot parse the Net-typed equation, so cancel the common term first
+  have hsub : (i : Nat) - 3 = (j : Nat) - 3 := Nat.add_left_cancel h
+  have hiN : 3 ≤ (i : Nat) := hi
+  have hjN : 3 ≤ (j : Nat) := hj
+  omega
 
 /-! ### The `dat` invariant — step ②'s other half
 
