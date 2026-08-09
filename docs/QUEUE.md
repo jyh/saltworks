@@ -70,6 +70,18 @@
   pieces 2 AND 5: Cell1988.lean, six-state FSM, the framework law
   zero_offset_rotation_is_impossible; piece 5 over testBit rode the
   same landing. Neither refuted.
+- W4 · WRITE · **LANDED 19:44 (86553a6) + ROOTED 19:53 (5446a98,
+  saltbuild EXIT=0, 8668 jobs)** — Executive.lean, the word-level
+  executive, self-pulled under the aggressive mandate into the gap
+  compiler itself published: all five pre-registered bar lines MET,
+  `runW_map` unconditional (the prize), six SortDemo certificates
+  lifted by rewrite with zero re-execution, the undecodable-word
+  boundary shown with witnesses. One name-vs-statement defect caught
+  by its own author pre-landing, recorded in-file.
+- W5 · WRITE · **GATED(the Captain's morning review)** — the `core`
+  construction: the seam between machine words and gates (compiler's
+  named next, inventory Q1). Registered, not fired: capacity may be
+  redirected to tiny-Rust/B-ISA waves at review.
 
 ## MATH
 
