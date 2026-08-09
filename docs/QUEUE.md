@@ -63,14 +63,22 @@
   arm); module form `-M 20000` PER PROCESS from `lakefile.toml`'s
   weakLeanArgs — the full build is NOT uncapped; cold
   reproducibility survives FOR THE RIGHT REASON (20,000 > 12,000;
-  Immediate cold-rebuilds EXIT=0, 79s, measured). Path-form audits
-  of `Immediate`, `Decoder`, `FabricRoutes` still exit 134 at
-  12000 — use `--cap 24000` for those three; EXIT=134 there is the
-  cap, not your edit. ⚠️ THE MACHINE-LEVEL GUARANTEE DOES NOT
-  EXIST: 4 seats × 20 GB = 80 GB of license on 64 GiB — the
-  Captain's own 8/6 measurement instruction covers exactly this
-  (see OPEN ITEMS).** ADD-BESIDE remains good practice on its own
-  merits. Caps do not move without a maestro ruling.
+  Immediate cold-rebuilds EXIT=0, 79s, measured). THE RULE BY CAUSE
+  (NOT a module list — compiler 08:12 fixing the symptom-list form
+  we refuted at 01:39): ANY module whose path-form audit demands
+  >12 GB exits 134 at the `-M 12000` default — use `--cap 24000`.
+  Known heavy as of 08-09: Immediate (14.85 GB measured), Decoder,
+  FabricRoutes — EXAMPLES, not the exhaustive set; a fourth heavy
+  module is the cause recurring, not a new bug, and EXIT=134 on ANY
+  module is the cap, not your edit. ✅ THE MACHINE-LEVEL QUESTION IS
+  MEASURED, NOT OPEN (was stated here as an unmeasured 80-GB hazard;
+  that rotted in the dangerous direction and is STRUCK): realised
+  fleet peak 43.08 GB of 64 GiB (compiler 01:0x, scratch clone);
+  the per-process 20-GB cap NEVER binds (~10.8 GB actual); the FLEET
+  LOCK is the machine-level guard — it fits, and nobody should "fix"
+  the cap on the strength of the old 80-GB arithmetic.** ADD-BESIDE
+  remains good practice on its own merits. Caps do not move without
+  a maestro ruling.
 
 ## COMPILER
 
@@ -192,6 +200,16 @@ preemption per the named small-step/fuel deferral, and beyond).
 Morning: he reviews the council pack + tiny-Rust v1.9 + the story.
 
 OPEN ITEMS:
+- **COMPILER'S UNREGISTERED GATED ITEMS (swept into the register
+  08:1x per the re-raise clause's own first job — an item never
+  registered cannot be protected; compiler's declared-interest
+  find): (a) raise the saltbuild DEFAULT cap 12000→24000 (still
+  CAP=12000 in the wrapper; compiler's 01:34 recommendation, its
+  own interest declared — registered ≠ endorsed, a maestro ruling
+  at council decides) · (b) import owed: SubFragment, SingleLevel
+  (line-57 records the CONVENTION, not these two specific debts) ·
+  (c) ImmediateScope retirement via the aiming rider (already noted
+  below, compiler's slot). Re-raise clock: council.**
 - **RE-RAISE CLOCKS ON GATED ITEMS (silicon 07:5x, `a standing order
   outlives its world`): every authorization-gated open item wants a
   RE-RAISE cadence, or it dies quietly the day the authorizing word
