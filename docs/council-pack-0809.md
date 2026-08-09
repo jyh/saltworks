@@ -73,7 +73,16 @@
 5. **THE THIRD FUEL COLUMN — name it in one word.** Your triples'
    third number is NOT "week-Opus" (math-acct reads 0 beside an
    Opus-all-day seat). Semantics attested-twice-verified-zero.
-6. **Small lines:** the audit-cap rider stands (--cap 24000 for
+6. **NEW, YOUR OWN 02:1x SPECULATION, WRITTEN UP FOR DISCUSSION:
+   the PACKET-IO CPU + the verified-firewall demo —
+   `docs/packet-io-demo-sketch.md`. Your 2-pin packet-port move
+   revives co-tenancy by dissolving the pin contention, rides
+   theory already landed (the frame, rot^k=id, the payload
+   theorem), and lands an application with teeth: the world's
+   smallest verified firewall, policy in tiny-Rust, updated
+   through its own dataplane. Sketch only — nothing dispatched or
+   priced; the opens are §4 of the sketch. We discuss.**
+7. **Small lines:** the audit-cap rider stands (--cap 24000 for
    Immediate/Decoder/FabricRoutes only; default unmoved) — AND YOUR
    8/6 CONCURRENCY ITEM IS DISCHARGED, measured overnight on a
    scratch clone: 43.08 GB peak at threads=4 on 64 GiB — it fits;
