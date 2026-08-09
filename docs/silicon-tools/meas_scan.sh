@@ -37,9 +37,21 @@ HERE="$(cd "$(dirname "$0")" && pwd)"
 SRC=$(git show "$REF:$MOD" 2>/dev/null) || { echo "⛔ meas_scan: cannot read $REF:$MOD"; exit 2; }
 [ -n "$SRC" ] || { echo "⛔ meas_scan: $REF:$MOD is EMPTY — refusing to report clean"; exit 2; }
 
+# ⛔⛔ SCAN THE CODE, NOT THE PROSE. This corpus is heavily commented in WRAPPED
+# prose, which puts ordinary words at COLUMN 0 — so every column-anchored pattern
+# below fires inside comments. Measured on ImmediateScope.lean @ 169eaf5: a
+# docstring line reading "theorem was true and awkward" made this script report
+# "⛔ UNAUDITED was" against a landing that is 4/4 clean. One more step and that
+# is a FALSE ACCUSATION against a peer — my second of the day from a pattern
+# defect. The stripper is a COMMITTED EXECUTABLE so it is fixed once, here and
+# for any other seat that calls it, rather than re-typed per tool.
+[ -f "$HERE/strip_lean_comments.awk" ] || { echo "⛔ meas_scan: strip_lean_comments.awk missing — refusing to scan prose as code"; exit 2; }
+CODE=$(printf '%s\n' "$SRC" | awk -f "$HERE/strip_lean_comments.awk") || { echo "⛔ meas_scan: comment stripping FAILED — refusing to report clean"; exit 2; }
+[ -n "$CODE" ] || { echo "⛔ meas_scan: stripped source is EMPTY — refusing to report clean"; exit 2; }
+
 # declarations: attribute prefixes and lemma/theorem both, keyword NOT anchored at col 0
-DECLS=$(printf '%s\n' "$SRC" | grep -oE "^[[:space:]]*(@\[[^]]*\][[:space:]]*)?(private |protected |noncomputable )*(theorem|lemma) [A-Za-z_0-9']+" | awk '{print $NF}' | sort -u)
-AUD=$(printf '%s\n' "$SRC" | grep "^#audit_axioms" | sed 's/^#audit_axioms //' | tr ' ' '\n' | grep -vE '^$' | sort -u)
+DECLS=$(printf '%s\n' "$CODE" | grep -oE "^[[:space:]]*(@\[[^]]*\][[:space:]]*)?(private |protected |noncomputable )*(theorem|lemma) [A-Za-z_0-9']+" | awk '{print $NF}' | sort -u)
+AUD=$(printf '%s\n' "$CODE" | grep "^#audit_axioms" | sed 's/^#audit_axioms //' | tr ' ' '\n' | grep -vE '^$' | sort -u)
 NDECL=$(printf '%s\n' "$DECLS" | grep -c .)
 NAUD=$(printf '%s\n' "$AUD" | grep -c .)
 # ⛔⛔ NO PROCESS SUBSTITUTION. The first version of this line used
@@ -63,7 +75,14 @@ fi
 # or `by` or sits alone. "admits" in prose must not fire, or the check gets
 # ignored by its own author inside a day — and an ignored sorry check is worse
 # than no check.
-SORRY=$(printf '%s\n' "$SRC" | grep -nE '(:=|by|<;>|;)[[:space:]]*sorry\b|^[[:space:]]*sorry\b|\badmit\b[[:space:]]*$' | head -20)
+# Scanned on $CODE: with comments gone, "the encoding admits a value" cannot fire
+# at all, so the anchoring below is now belt-and-braces rather than the only guard.
+SORRY=$(printf '%s\n' "$CODE" | grep -nE '(:=|by|<;>|;)[[:space:]]*sorry\b|^[[:space:]]*sorry\b|\badmit\b[[:space:]]*$')
+# ⛔ COUNT BEFORE CAPPING. `| head -20` used to be part of the line above, which
+# would have shown 20 of N and printed no N. On 8/8 I read `dup_props | head -3`
+# and published a wrong residue three times; a display cap must never be able to
+# hide the size of what it capped.
+NSORRY=$(printf '%s\n' "$SORRY" | grep -c .)
 
 printf 'MEAS SCAN  %s  @ %s\n' "$MOD" "$REF"
 printf '  declarations   %s\n' "$NDECL"
@@ -74,9 +93,11 @@ else
   printf '  ✅ UNAUDITED   none\n'
 fi
 if [ -n "$SORRY" ]; then
-  printf '  ⛔ SORRY/ADMIT (anchored):\n%s\n' "$SORRY"
+  printf '  ⛔ SORRY/ADMIT — %s found (comments stripped, so these are CODE):\n' "$NSORRY"
+  printf '%s\n' "$SORRY" | head -20
+  [ "$NSORRY" -gt 20 ] && printf '     … %s more NOT shown — this is a DISPLAY cap; the count above is complete\n' "$((NSORRY - 20))"
 else
-  printf '  ✅ sorry/admit none (anchored — prose "admits" does NOT fire)\n'
+  printf '  ✅ sorry/admit none — searched CODE ONLY (comments stripped first)\n'
 fi
 printf '  — duplicate propositions are a CORPUS check, not a module one:\n'
 printf '      sh %s/dup_props.sh %s "SaltWorks/HDL/*.lean"   # read it WHOLE\n' "$HERE" "$REF"

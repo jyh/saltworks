@@ -83,9 +83,18 @@ for target in "$@"; do
   attempt=0
   while : ; do
     attempt=$((attempt + 1))
+    # ⭐⭐ CUSTODY PIN — three seats edit this tree concurrently, so a verdict that
+    # does not name a REVISION names nothing. Measured 8/8 09:4x: a re-run
+    # returned EXIT=0 while the source mtime moved from 09:39:46 to 09:42:04 —
+    # the file moved UNDER the build and the green was worthless as evidence.
+    # ⚠️ This check was MISSING from v1 of this file, which I wrote 20 minutes
+    # after amending the memory that prescribes it, and the gap surfaced when
+    # compiler landed 169eaf5 into ImmediateScope.lean inside my verify window.
+    h1=$(shasum -a 256 "$target" | cut -c1-12)
     start=$(date +%s)
     "$SALTBUILD" "$target" > "$out" 2>&1
     end=$(date +%s)
+    h2=$(shasum -a 256 "$target" | cut -c1-12)
     line=$(grep -E '^saltbuild EXIT=[0-9]+$' "$out" | tail -1)
     # EXIT=75 is the fleet lock timeout, not a result. Retry, do not report.
     case "$line" in
@@ -111,8 +120,19 @@ for target in "$@"; do
   # taken from cache; the correct number is one I can actually measure.
   nimp=$(grep -cE '^import ' "$target")
 
+  # The custody pin is judged BEFORE the exit code, because an unattributable
+  # green is not a weaker green — it is not evidence at all, and reporting it
+  # as green with a footnote is how it gets quoted without the footnote.
+  if [ "$h1" != "$h2" ]; then
+    printf '⛔ %s — VERDICT NOT ATTRIBUTABLE. The file moved under the build\n' "$target"
+    printf '   (%s -> %s). EXIT=%s is real but names no revision — another seat\n' "$h1" "$h2" "$code"
+    printf '   landed mid-elaboration. Re-run when the tree is quiet.\n'
+    rc_all=1
+    continue
+  fi
+
   if [ "$code" = "0" ]; then
-    printf '✅ %s — KERNEL-CHECKED under this hand · %ss · EXIT=0\n' "$target" "$wall"
+    printf '✅ %s — KERNEL-CHECKED under this hand · %ss · EXIT=0 @ sha %s\n' "$target" "$wall" "$h1"
     printf '   scope: TARGET elaborated fresh by the kernel. Its %s direct imports and\n' "$nimp"
     printf '          their transitive closure came from cached oleans — NOT re-checked here.\n'
   else
