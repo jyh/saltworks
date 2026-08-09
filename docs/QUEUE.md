@@ -66,9 +66,10 @@
 - R2 · READ · **DISCHARGED 17:25** — the last ④ read (the +1-cycle
   price revived as a causality floor; piece 5 re-founded over
   testBit; folded into the heritage doc).
-- W3 · WRITE · **FIRED 17:26 — ④ wave: piece 2**, the 1988 rotating
-  cell as a Seq FSM, wrap-sized state, HDL slot; piece 5 lands here
-  later per the slot ruling.
+- W3 · WRITE · **LANDED 18:07 (499360d, rooted 8663-green)** — ④
+  pieces 2 AND 5: Cell1988.lean, six-state FSM, the framework law
+  zero_offset_rotation_is_impossible; piece 5 over testBit rode the
+  same landing. Neither refuted.
 
 ## MATH
 
@@ -80,10 +81,11 @@
   M2 is the banked control (residual ⊢ 2 = 1, no slack). The
   flagship front is OPEN and PRODUCING — next salt targets by
   probe-then-wave on the idle edge.
-- W4 · WRITE · **FIRED 17:26 — ④ wave: piece 1** (rotate_rotate +
-  rotate_length + the identification as a NAMED premise); piece 3
-  queues after compiler's piece 2 (A1, validity-antecedent,
-  barred-pair-fixed controls); pieces 4/5 after 2/3.
+- W4 · WRITE · piece 1 **LANDED 17:31 (2933a99)** — the full circle,
+  the SCOPED traveling form only. **PIECE 3 DISPATCHED 18:08** (gate
+  opened by Cell1988; the 18:07 scouting is the pre-flight; A1,
+  validity-antecedent, one-directional, barred-pair-fixed controls).
+  Piece 4 queues after 3.
 - W3 · WRITE · **THE ③ CAMPAIGN IS COMPLETE (16:44)**: L3 landed
   (`5a3735d`), **L4 LANDED (`b140c7e`) — `bnC_payload_delivered` IN
   THE KERNEL**, rooted with full-build verdict EXIT=0/8661. The
