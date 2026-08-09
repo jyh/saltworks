@@ -80,20 +80,77 @@ one-port slice, `ceCcore` a two-input compare-exchange; the composed
 2×2 of the 1988 cell is ten state bits, not five. Different objects,
 never one column.
 
-## 3. SILICON'S HALF — ⏳ SLOT OPEN (dispatched 19:19, PRE-AUTH)
+## 3. SILICON'S HALF (landed 20:11 as `silicon-bb-switch-cells-0808.md`,
+## folded same hour; full provenance rows and fences: the source file)
 
-Owed here, per the dispatch and compiler's own §5.4 boundary: standard-
-cell counts, µm², and sequential fraction for the SAME three objects,
-from synthesis — plus whatever honest co-tenancy/tile context silicon
-rules relevant after its 19:37 zero-cell refutation. Silicon lands its
-file; the maestro folds it and only then writes §4.
+⛔ **Read before the table (silicon's §0, folded verbatim in substance):
+the CELL column is NOT an independent measurement.** Two of the three
+objects enter synthesis as STRUCTURAL netlists emitted by `emitS` from
+the kernel `Circ`; in that regime abc cannot restructure through
+blackboxed cells, so **cell count equals gate count BY CONSTRUCTION —
+the 6/34/40 below is compiler's own column wearing different units,
+one witness printed twice, never corroboration.** The independent
+silicon contribution is the AREA column.
 
-## 4. THE JOINT READING — ⏳ BLOCKED ON §3
+```
+object              cells   area µm²   µm²/gate   state
+Banyan.element          6         38       6.3      0
+ceCcore                34        198       5.8      4*
+cell88core             40        235       5.9      5*
+     * state bits live in the sequential wrappers — NO flop area is
+       in any row; these are CORES ONLY, matching §1's scope
+all three: SYNTH_STRUCTURAL=1, sky130_fd_sc_hd, pinned PDK, one flow
+```
 
-Reserved: the three-ways-to-buy-a-decision thesis priced at BOTH
-levels (kernel gates/state vs synthesized cells/area), with the
-level-crossing stated as two measurements of two objects — never a
-ratio between unlike columns.
+⭐ **One optimisation datum, standing ALONE (no cross-row ratio — it
+comes from a different flow):** `Banyan.element` written behaviourally
+through the default flow is **2 cells / 18 µm²** — sky130 carries
+`a22o_1`, an AND-AND-OR compound that implements the claim-gated OR in
+one cell. **The library already contains the oracle's exact shape.**
+The comparable same-regime pair remains 6 vs 34.
+
+Provenance (silicon's §3): `cell88core.v` and `banyan_element_s.v`
+emitted by `emitS` — the verified path, not a hand; the 6-input core
+wrapping is silicon's and flagged; the behavioural element is
+hand-written, two `assign` lines, marked NOT the verified element.
+`ce_c.v` identified against compiler's `ceCcore` by exact
+port-and-count agreement (7 in / 6 out / 34). Not measured: flops,
+routing, placement, anything post-layout.
+
+## 4. THE JOINT READING — both halves in, the level-crossing stated
+
+1. **The thesis, now priced in two units.** The same routing decision
+   at three price points: ORACLE 6 gates / 0 state / 38 µm² · TIMING
+   34 / 4 / 198 · DATA MUTATION 40 / 5 / 235. The gate and state
+   columns are kernel measurements (compiler, `#eval` on the real
+   objects); the area column is silicon's pre-layout mapping. The
+   cells column is struck from the joint table on silicon's own
+   warning — it is the gate column restated, and quoting it as
+   agreement would read one witness as two.
+2. **µm²/gate is flat (5.8–6.3), and that is the finding:** at this
+   scale all three designs are built from the same kind of small
+   gate, so the cost differences are ARCHITECTURAL — gate count and
+   state discipline — not gate-type effects. The oracle is not cheap
+   per gate; it is cheap because it has six gates.
+3. **The state axis is UNPRICED in silicon.** The 0/4/5 state bits
+   live in sequential wrappers no row measures, so the most
+   interesting economic question — what TIMING vs DATA MUTATION cost
+   in flops and area — is open, named here rather than smoothed. If
+   the account is extended, that is the next measurement.
+4. **The library-shape datum reads with the heritage result:** the
+   claim-gated OR is not an exotic structure — a commodity 2026 PDK
+   implements it as one compound cell. The 1990 paper's KIND of cell
+   remains an ordinary citizen of a modern library. (Words-only; no
+   figure of the paper is compared.)
+5. **None of these numbers enters the tile argument** (silicon's §4
+   fence): the live co-tenancy limit is PINS, not area, and the tile
+   decision stays on the honest numbers already before the Captain.
+
+## 4b. WHAT §4 DELIBERATELY DOES NOT SAY
+
+No cells-vs-gates corroboration claim · no cross-flow ratio (the 2-cell
+datum stands alone) · no flop/sequential pricing · no tile inference ·
+no claim about the 1990 silicon.
 
 ## 5. WHAT THIS ACCOUNT DOES NOT CLAIM (inherited + assembly-level)
 
