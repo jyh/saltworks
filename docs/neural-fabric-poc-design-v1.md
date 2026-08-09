@@ -142,6 +142,41 @@ PMOD-bridged = two fabric stages — the fabric composes (banyan of
 banyans), and the demo photograph is two chips with a visible wire and
 certified traffic crossing it.
 
+### 2b. SCALING IN PRINCIPLE (the Captain's 10:5x question: "to, say, 64k chips?")
+
+- **Recursion:** each chip's 8×8 BB is a switching element; a butterfly
+  of butterflies is a butterfly. 8⁶ = 262k ports at six chip-stages —
+  64k chips is five-to-six hops. Self-routing composes: the address is
+  just LONGER (16 bits), each chip consumes its 3. Intra-chip and
+  inter-chip are the SAME network at two scales.
+- **Batcher at scale:** a global runtime sort does NOT scale (O(log²N)
+  synchronized stages — the classical wall). Resolution: **our traffic
+  is static per phase (the graph is known at compile time), so the
+  sort happens ONCE, in the compiler**, which emits system-wide
+  deterministic permutation-round schedules — the Groq
+  software-scheduled-network insight, with our twist: the schedule
+  ships with a theorem. Valiant load-balancing is the named fallback
+  for dynamic traffic (2× hops, zero coordination). On-chip Batcher
+  halves keep the compute job regardless.
+- **Physics:** 2-pin links = two wires chip-to-chip, clock embedded,
+  GALS, no global clock. Honest: 2-pin bisection is thin at 64k;
+  links widen into parallel lanes, architecture unchanged.
+- **Neural scaling:** ~half a million physical cells; sharding IS
+  graph partitioning (min edge-cut = min inter-chip traffic).
+  Precedent: SpiNNaker at 10⁶ cores proved the physics; our delta is
+  determinism + theorems.
+- **THE PUNCHLINE — verification amortizes over replication:** 64k
+  identical chips need ONE chip theorem + ONE composition induction
+  (the corpus already composes switches) + ONE schedule checker.
+  Verification cost grows with the STATEMENT, not the silicon count —
+  the exact opposite of testing. At scale the verified approach gets
+  RELATIVELY cheaper.
+- **The honest wound: faults.** 64k chips will have dead links;
+  deterministic schedules are brittle. Answer in our lane: telemetry
+  via each chip's control-plane CPU, then RECOMPILE the schedule
+  around the fault set — re-verifiable by the same checker. Fault
+  tolerance becomes recompilation, not redundant hardware.
+
 ## 3. THE ON-DIE CPU — yes, and it is the machine we are already building
 
 The core (slicea16, W5-asm assembly underway) rides along as the
