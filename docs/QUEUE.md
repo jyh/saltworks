@@ -268,6 +268,26 @@ OPEN ITEMS:
   GATE: §1 final row table awaits assembly rows 15-16; halves
   proceed now.**
 
+- **CROSS-SESSION MESSAGING — ADOPTION PLANNED AT NEXT RELIGHT
+  (the Captain flagged the new system 14:1x; assessed from the doc
+  + live probes): binary 2.1.226 HAS it; every RUNNING session
+  predates it (sockets unbound, zero local peers — only cloud/
+  Remote-Control rows). WHAT IT REPLACES: the tmux send-keys NUDGE
+  layer (addressed delivery between tool calls; kills the
+  keystroke-fragility class — Enter-separately, input-box
+  stranding, ghost text). WHAT IT DOES NOT REPLACE: the BUS —
+  durable append-only record, broadcast, watches; DOCTRINE:
+  messages carry POINTERS, the bus carries the RECORD. RELIGHT
+  CHECKLIST: (i) name seats via --name in fleet-up.sh (silicon/
+  compiler/math/evidence — dir-derived names would collide);
+  (ii) verify /list-agents shows all four locally post-relight
+  (per-seat CLAUDE_CONFIG_DIR may affect registry — TEST);
+  (iii) bypass<->bypass default-delivers, no settings needed;
+  (iv) LANE FIREWALL EXTENDS TO THIS CHANNEL: never message
+  outside-lane sessions (visible in listings); consider
+  isolatePeerMachines:true. NOT worth restarting a humming fleet
+  mid-campaign for a nudge upgrade — adopt at the natural cycle.**
+
 - **THE CELL WAVE — THE BRIDGE NODE, RULED at math's 13:36
   refusal-of-credit (its own wave's): maestro's "NDF critical path
   CLOSED" is STRUCK — the honest state is TWO hardware theorems
