@@ -1,6 +1,7 @@
 import SaltWorks.HDL.Compose
 import SaltWorks.HDL.StateCodec
 import SaltWorks.HDL.Decoder
+import SaltWorks.HDL.Immediate
 
 /-!
 # W5-asm, increment 2a — the FIRST organ placed at the real offset, `instOK` discharged
@@ -94,5 +95,65 @@ theorem decoder_reads_only_the_instruction (k : Nat) (hk : k < 32) :
     stWidth ≤ decoderSig k ∧ decoderSig k < off0 := by
   simp only [decoderSig, instrNet, instrBase, off0, coreInWidth, stWidth, Net]
   omega
+
+/-! ## 3. INCREMENT 2b — the chain step, and the second placement
+
+The chain lemma below is what makes placements #3–#15 mechanical: an organ whose inputs all sit
+below the FIRST free net is placeable at **every later** offset, so each placement needs only its
+own σ checked once against `off0`, never re-checked against its actual position. -/
+
+/-- ⭐ **`instOK` IS MONOTONE IN THE OFFSET.** If every input wire is below `off`, it is below any
+`off' ≥ off`. Trivial to prove and load-bearing to have: without it, each of the fifteen
+placements would need its σ re-verified against its own offset, and the σ that reads only core
+INPUTS (state and instruction) is the same σ at every position in the chain. -/
+theorem instOK_mono {c : Circ} {σ : Net → Net} {off off' : Nat}
+    (h : instOK c σ off) (hle : off ≤ off') : instOK c σ off' := by
+  obtain ⟨hssa, hwf, hin⟩ := h
+  exact ⟨hssa, hwf, fun i hi => Nat.lt_of_lt_of_le (hin i hi) hle⟩
+
+/-- The second placement's offset: the decoder's `instNext`. -/
+def off1 : Nat := instNext decoder off0
+
+theorem off1_value : off1 = 1190 := by
+  simp only [off1, instNext, off0, coreInWidth, stWidth]
+  decide +kernel
+
+/-- `immBCirc` reads the instruction word, so its σ is `instrNet` — the same named accessor as
+the decoder's. -/
+def immBSig : Net → Net := instrNet
+
+/-- ⭐ **THE SECOND PLACEMENT, DISCHARGED VIA THE CHAIN LEMMA rather than re-derived.** `immBCirc`
+reads only the instruction, so its inputs are below `off0`; `off0 ≤ off1` because a chain step
+adds gates. This is the pattern every remaining input-reading organ follows. -/
+theorem immB_instOK : instOK immBCirc immBSig off1 := by
+  refine instOK_mono (off := off0) ?_ ?_
+  · refine ⟨by decide +kernel, by decide +kernel, ?_⟩
+    intro i hi
+    have hnn : immBCirc.nIn = 32 := by decide +kernel
+    rw [hnn] at hi
+    simp only [immBSig, instrNet, instrBase, off0, coreInWidth, stWidth, Net]
+    omega
+  · simp only [off1, instNext, off0]
+    omega
+
+/-- **CONTROL: the chain step genuinely ADVANCED.** If `off1 = off0` the second placement would be
+a no-op dressed as progress — and a zero-gate organ would make exactly that happen (increment 1's
+`zero_gate_organ_does_not_advance`). The decoder has 102 gates, so this step is real. -/
+theorem chain_step_advanced : off0 < off1 ∧ off1 = off0 + 102 := by
+  refine ⟨?_, ?_⟩
+  · simp only [off1, instNext, off0, coreInWidth, stWidth]
+    decide +kernel
+  · simp only [off1, instNext, off0]
+    congr 1
+    decide +kernel
+
+/-- **CONTROL: the two placements do not collide.** The decoder's gates occupy `off0 … off1 - 1`,
+and `immBCirc`'s begin at `off1`. Stated additively, never with truncated subtraction. -/
+theorem placements_do_not_collide :
+    off0 + decoder.gates.length = off1 ∧ instNext immBCirc off1 = off1 + 1 := by
+  refine ⟨rfl, ?_⟩
+  simp only [instNext]
+  congr 1
+
 
 end SaltWorks.HDL.CorePlace
