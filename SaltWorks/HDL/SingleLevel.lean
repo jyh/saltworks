@@ -32,24 +32,25 @@ silently, so the only thing that catches one is looking.*
 The first unconditional semantics for any bitwise organ in this corpus, and exactly the
 premise `SubFragment`'s bar 4 was missing.
 
-## ⛔ WHAT IS **DEFERRED**, WITH THE SYMPTOM SO IT IS A NAMED PIECE AND NOT AN OMISSION
+## ✅ ALL FOUR BITWISE ORGANS NOW HAVE ∀-env SPECS — closed 21:5x
 
-`bwCirc mk` (`Bitwise.lean:58`) has the SAME single-level shape at `base = 64`, so
-`bitXor32`, `bitAnd32` and `bitOr32` should follow from one generalisation. **I wrote it and it
-did not land:**
+**When this file first landed, three of the four were still sampled-only and I published that as
+an open item for the fleet.** It is closed. `bitXor32_sem`, `bitAnd32_sem` and `bitOr32_sem` are
+here, each ∀ env with no side condition.
+
+⛔ **BUT NOT THE WAY I FIRST TRIED, AND THE DIFFERENCE IS THE REUSABLE PART.** The generic
 ```
 theorem bwCirc_sem (mk) (hfan : ∀ x y, (mk x y).fanin = [x, y]) (env) : …
-  → (deterministic) timeout at `whnf`, even at maxHeartbeats 1000000
 ```
-[INFERENCE] *The unfold of `sem` + `bwCirc` with a VARIABLE `mk` appears to diverge where the
-same shape with `bitNot32`'s concrete gates does not.* ⚠️ **And a second obstruction beside it:
-`omega` could not prove `32 + k < 64` from `k < 32` in the fanin side condition** — the
-counterexample carried `k`'s bound and never saw the goal, which is the documented tell for
-`omega` against `Net`-typed arithmetic here (`Net` is an `abbrev` for `Nat`,
-`Syntax.lean:46`).
-⇒ ***So `bitXor32`, `bitAnd32` and `bitOr32` REMAIN SAMPLED-ONLY. Three of the four bitwise
-organs are still where the probe found them, and the route is known: either specialise the
-lemma per-op (concrete `mk`, which is what works for `bitNot32`) or fix the elaboration.***
+**still does not elaborate** — deterministic `whnf` timeout at `maxHeartbeats 1000000`. [INFERENCE]
+*Unfolding `sem` + `bwCirc` with a VARIABLE `mk` appears to diverge where concrete gates do not.*
+⇒ ***So the three organs are covered by three CONCRETE INSTANCES of `run_level_map`, one per op —
+the route named when the generalisation was deferred. The general lemma over an arbitrary `mk`
+remains unproved and is not needed: `run_level_map` itself is the generalisation that matters, and
+it takes the gate shape rather than the op constructor.***
+
+📌 **The side condition is shared by all three (`bin_fanin_below`) and it needs BOTH omega cures:
+`simp only [Net]` for the ascription and nothing for the defs here, since `64` is a literal.**
 
 ## THE ROWS, BY NAME
 
@@ -58,13 +59,21 @@ lemma per-op (concrete `mk`, which is what works for `bitNot32`) or fix the elab
 | ⭐ `run_level_map` | a single-level gate list computes each `f j` in the ORIGINAL env |
 | `not_fanin_below` | `(Op.not k).fanin` lies below `32` — the side condition, discharged without `omega` |
 | ⭐ `bitNot32_sem` | `sem bitNot32 env = map (!env ·)`, **∀ env, no side condition** |
+| `bin_fanin_below` | the two-operand side condition, shared by the three below |
+| ⭐ `bitXor32_sem` | `sem bitXor32 env = map (env k ^^ env (32+k))`, **∀ env** |
+| ⭐ `bitAnd32_sem` | `sem bitAnd32 env = map (env k && env (32+k))`, **∀ env** |
+| ⭐ `bitOr32_sem` | `sem bitOr32 env = map (env k \|\| env (32+k))`, **∀ env** |
 
 ## ⚠️ AND WHAT THIS DOES **NOT** DO
 
-**It does not upgrade `SubFragment`'s bar 4.** That upgrade needs `bitNot32_sem` composed
-through `inst_sem` to relate the composite's nets to `!(env ·)`, and **that step is not taken
-here.** *Bar 4 is now REACHABLE and is still PARTIAL; saying otherwise would be the
-name-outruns-statement defect this seat has fixed four times tonight.*
+**This file does not itself assemble anything.** ✅ *`SubFragment`'s bar 4 WAS closed separately at
+21:4x (`frag_subtraction`, `7f21fa2`) using `bitNot32_sem` — and the connection turned out not to
+need `inst_sem` at all: the instantiated `bitNot32` is itself single-level, so `run_level_map`
+applies directly (`SubFragment.notInst_shape`).*
+⚠️ **And a `∀ env` spec is not a `∀ env` CORRECTNESS theorem.** These say what the organs COMPUTE,
+in terms of their input nets. Whether that computation is the RIGHT function of a 32-bit word —
+e.g. that `bitXor32` implements `BitVec.xor` — is a separate statement, and the corpus's
+`*_correct_on_sample` certificates are still the only evidence for it.
 -/
 
 namespace SaltWorks.HDL
@@ -118,8 +127,50 @@ theorem bitNot32_sem (env : Env) :
               (fun j hj => not_fanin_below j hj) k (List.mem_range.mp hk)
   simpa [Op.eval] using h
 
+theorem bin_fanin_below (k : Nat) (hk : k < 32) (op : Net → Net → Op)
+    (hfan : (op k (32 + k)).fanin = [k, 32 + k]) :
+    ∀ x ∈ (op k (32 + k)).fanin, x < 64 := by
+  intro x hx
+  rw [hfan] at hx
+  simp at hx
+  simp only [Net] at hk ⊢
+  rcases hx with rfl | rfl
+  · omega
+  · omega
+
+theorem bitXor32_sem (env : Env) :
+    sem bitXor32 env = (List.range 32).map (fun k => xor (env k) (env (32 + k))) := by
+  simp only [sem, bitXor32, bwCirc, List.map_map]
+  apply List.map_congr_left
+  intro k hk
+  have h := run_level_map 64 32 (fun j => Op.xor j (32 + j)) env
+              (fun j hj => bin_fanin_below j hj Op.xor rfl) k (List.mem_range.mp hk)
+  simpa [Op.eval] using h
+
+theorem bitAnd32_sem (env : Env) :
+    sem bitAnd32 env = (List.range 32).map (fun k => (env k) && (env (32 + k))) := by
+  simp only [sem, bitAnd32, bwCirc, List.map_map]
+  apply List.map_congr_left
+  intro k hk
+  have h := run_level_map 64 32 (fun j => Op.and j (32 + j)) env
+              (fun j hj => bin_fanin_below j hj Op.and rfl) k (List.mem_range.mp hk)
+  simpa [Op.eval] using h
+
+theorem bitOr32_sem (env : Env) :
+    sem bitOr32 env = (List.range 32).map (fun k => (env k) || (env (32 + k))) := by
+  simp only [sem, bitOr32, bwCirc, List.map_map]
+  apply List.map_congr_left
+  intro k hk
+  have h := run_level_map 64 32 (fun j => Op.or j (32 + j)) env
+              (fun j hj => bin_fanin_below j hj Op.or rfl) k (List.mem_range.mp hk)
+  simpa [Op.eval] using h
+
 #audit_axioms run_level_map
 #audit_axioms not_fanin_below
 #audit_axioms bitNot32_sem
+#audit_axioms bin_fanin_below
+#audit_axioms bitXor32_sem
+#audit_axioms bitAnd32_sem
+#audit_axioms bitOr32_sem
 
 end SaltWorks.HDL
