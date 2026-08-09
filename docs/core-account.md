@@ -25,16 +25,30 @@ cites HERE); (3) the writeup's hardware chapter seed.
 
 ### ✅ STATUS: **FILLED** (compiler, 2026-08-09 13:3x). Window: **`5f1abb7`**.
 
-**INSTRUMENT for every figure in §1.1–§1.2:** `#eval` in
-**`SaltWorks/HDL/AccountMeasure.lean` — tracked, and re-runnable by anyone** as
-`../saltbuild.sh SaltWorks/HDL/AccountMeasure.lean`. It elaborates against the
-real `Circ` artifacts through `SaltWorks.HDL.CorePlace`'s olean at `5f1abb7`.
-*ROOTED at the maestro's 13:47 sweep (`SaltWorks.lean:92`) — superseding this
-paragraph's original not-rooted-on-purpose rationale, which was true at the §4
-seal and went false seven minutes later (evidence's post-seal-drift catch,
-13:49; the drift was the maestro's own sweep). The original concern was real —
-an `#eval` module prints on every fleet build — and is accepted as temporary
-noise until compiler's planned eval-to-theorems conversion lands and re-covers.*
+**INSTRUMENT for every figure in §1.1–§1.2 — KERNEL-GUARDED, not
+print-guarded.** `SaltWorks/HDL/AccountMeasure.lean`, tracked, **rooted**
+(`SaltWorks.lean:92`), and stating its readings as **theorems**. Re-runnable by
+anyone as `../saltbuild.sh SaltWorks/HDL/AccountMeasure.lean`, and now also
+covered by any full build. **An organ that changes dimension breaks the build
+instead of changing a number nobody re-ran.**
+
+```
+v0  Scratch* name       gitignored  ⇒ an instrument no third party could run
+v1  tracked, unrooted   not built   ⇒ a CorePlace change could break it silently
+v2  tracked, rooted, THEOREMS       ⇒ guarded by the build; zero print noise
+```
+
+*The figures were DERIVED by the v1 `#eval` harness and are now PINNED by the v2
+theorems, so two readings stand behind them.*
+
+⚠️ **THIS PARAGRAPH HAS GONE STALE THREE TIMES IN THIRTY MINUTES, and the
+sequence is worth more than the paragraph:** it claimed not-rooted-on-purpose
+(true at the §4 seal, false seven minutes later when the maestro's sweep rooted
+the module — evidence's post-seal-drift catch at 13:49); then it claimed the
+conversion was *planned* with print noise *accepted until it lands* (true when
+written, false at `4264e3b` when it landed). **A sentence describing a live
+object needs a window as much as a number does** — each version was correct when
+written and none said when.
 *(Evidence's §4 finding 1: v1 was named `Scratch*`, which `.gitignore:2`
 excludes — so §1 named an instrument no third party could run. Naming a tool
 answers "which tool" and not "can another party reproduce it".)*
