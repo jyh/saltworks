@@ -96,7 +96,16 @@ embedding.
 ## 3. DECOMPOSITION
 
 - N0 the type system + PRESERVATION (B): the judgment, decidability,
-  and the bool-representation invariant — N1-N3 consume it.
+  and the bool-representation invariant — N1-N3 consume it. The
+  judgment carries function signatures (Δ) and DEMANDS the call
+  graph be a DAG (decidable; recursion rejected in v1 — a
+  pre-registered reject control alongside while-1).
+- N0.5 VERIFIED INLINING (B/C): multiple functions with tail-
+  expression returns, compiled by inlining (params → let-bindings);
+  the theorem "inlining preserves bigStep" is its own node. No JAL
+  needed; Slice B's JAL/JALR upgrade the STRATEGY, not the source.
+  Boundary named: no tuples and no &mut in v1 ⇒ multi-output
+  helpers (cex) stay frontend sugar until v2's references.
 - N1 expression compilation + correctness (B): registers-and-ops,
   the two proved lowerings folded in.
 - N2 statement compilation, straightline (B): seq/assign; the
@@ -136,6 +145,9 @@ embedding.
   face.
 - `u32` and typed signedness (F8): v2, with the source-level unsigned
   compare.
+- RECURSION: rejected by the v1 judgment (DAG check); arrives with
+  Slice B's JAL/JALR + stack — real frames replace inlining, source
+  unchanged.
 - Divergence-sensitive semantics (small-step + fuel): needed by
   B-EXEC's preemption story; v1's big-step terminating-runs form is
   the honest first cut. NAMED with it (math's slate): nothing in v1

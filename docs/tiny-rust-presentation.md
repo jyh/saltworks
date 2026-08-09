@@ -38,6 +38,22 @@ fn main() {
 }                       // post: sum = 55
 ```
 
+**A helper function** — tail-expression return, Rust-style, compiled
+by verified inlining:
+
+```rust
+fn max(a: i32, b: i32) -> i32 {
+    let mut m = a;
+    if m < b { m = b; }
+    m                       // tail expression = the return value
+}
+
+fn main() {
+    let mut hi = max(7, 3);
+    hi = max(hi, 12);       // hi = 12; two call sites, both inlined,
+}                           // one theorem covering the transformation
+```
+
 **The sort — the story's centerpiece.** v1 has registers, not arrays,
 so we sort four named values through Batcher's 4-input network — the
 SAME comparator specification the silicon sorter is proved against
@@ -82,6 +98,7 @@ road: the executive as the thing yields return to).
 
 e ::= x | n | true | false              (Expr)
     | e + e | e ^ e | e < e
+    | f(e₁, …, eₙ)                      — function call
 
 s ::= skip                              (Stmt)
     | let mut x : τ = e                 — binds x for the enclosing block;
@@ -90,8 +107,23 @@ s ::= skip                              (Stmt)
     | if e { s } else { s }
     | while e { s }
 
-p ::= fn main() { s }                   (Prog)
+d ::= fn f(x₁:τ₁, …, xₙ:τₙ) -> τ { s; e }   (Decl — the tail expression
+                                             is the return value, as Rust)
+p ::= d* fn main() { s }                (Prog)
 ```
+
+**Multiple functions, no JAL — the staged trick:** Slice A has no
+jump-and-link and no stack, so v1 functions are compiled by VERIFIED
+INLINING — parameters become let-bindings, the call site becomes the
+body, and the theorem "inlining preserves the big-step semantics" is
+its own kernel node. The judgment demands the call graph be a DAG
+(decidable — recursion is REJECTED in v1, and that rejection is a
+pre-registered control alongside the type ones). When Slice B lands
+JAL/JALR and memory, calls become real frames and recursion arrives
+— the SOURCE programs don't change, only the compiler's strategy
+does. One honest boundary: a two-output helper like `cex` cannot be
+a function yet (no tuples, no `&mut` until v2) — `cex!` stays sugar,
+and becomes a real `fn(&mut i32, &mut i32)` the day references land.
 The parser (Rust-familiar surface, `let mut`, sugar like `n - 1` and
 `cex!`) is a TRUSTED frontend; every theorem lives from this AST down
 to machine code — CompCert's own posture, stated plainly.
