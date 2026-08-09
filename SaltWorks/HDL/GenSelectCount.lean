@@ -682,6 +682,7 @@ One name per call makes "not reported" impossible. -/
 #audit_axioms gate_count_three
 #audit_axioms gate_count_ten
 #audit_axioms gate_count_aluSelect
+#audit_axioms gate_count_aluSelect_param
 #audit_axioms gate_count_eight
 #audit_axioms genSelect_eight_ssa
 #audit_axioms genSelect_eight_wf

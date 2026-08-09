@@ -125,6 +125,9 @@ theorem rsPair_admissible : rsOps ≤ 2 ^ rsSelBits := by decide +kernel
 /-- …and the ruled pair is the one the muster ruled. -/
 theorem rsPair_is_the_ruled_pair : rsOps = 3 ∧ rsSelBits = 2 := by decide +kernel
 
+#audit_axioms rsOps
+#audit_axioms rsSelBits
+#audit_axioms rsPad
 #audit_axioms rsPad_eq_two_pow
 #audit_axioms rsPair_admissible
 #audit_axioms rsPair_is_the_ruled_pair
@@ -749,6 +752,20 @@ theorem genSelect_eq_aluSelect : genSelect asOps asSelBits = aluSelect := by
     _ = aluSelect := rfl
 
 #audit_axioms genSelect_eq_aluSelect
+#audit_axioms asW_eq_32
+#audit_axioms asPad_two_pow
+#audit_axioms gsPad_eq
+#audit_axioms gsIn_eq
+#audit_axioms gsRes_eq
+#audit_axioms gsSel_eq
+#audit_axioms gsZero_eq
+#audit_axioms gsNot_eq
+#audit_axioms gsLevelWidth_eq
+#audit_axioms gsBelow_eq
+#audit_axioms gsBase_eq'
+#audit_axioms gsOut_eq'
+#audit_axioms gsPrev_eq
+#audit_axioms gsMux_eq
 #audit_axioms genSelect_gates_eq'
 #audit_axioms genSelect_outs_eq'
 
