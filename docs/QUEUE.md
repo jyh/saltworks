@@ -250,6 +250,12 @@ OPEN ITEMS:
   1,300–2,600 ln pricing CONFIRMED by math's shrink attempt — mathlib
   has the tools, not the theorem). The flagship front at solo tier is
   exhausted until one of these opens a gate.**
+- **NEXT-RUNG RE-RECON, MAESTRO-OWED (post-council; opened 21:37 on
+  math's entry-2 scan): docs/blueprints/next-rung-scoping.md (Fable
+  7/07) carries a dated staleness banner as of ea3fb1b — its S1
+  absence list rotted from success (SW, large sieve, Mertens,
+  Vaughan all corpus-landed since). The four-agent recon re-runs
+  against today's corpus before any next-rung planning consumes it.**
 - B5 (T1): the click; Sept-7 13:00 PDT close; REF QUESTION + floor
   law remain his; fact sheet on his word. Adjacent MONEY item from
   the muster flags: PCBs 0/80 — the real TT scarcity; ordering is
