@@ -115,6 +115,50 @@ council picks the exhibit; seats price it.]
   barred-phrasings list wants writing before the first measurement
   exists.
 
+## 6. DESIGN B — THE FABRIC AS THE NEURAL PROCESSOR (the Captain's
+## second-dream dual, ~03:xx: "the switch fabric as neural
+## processor, managed by the cpu. can we explore that design space
+## too?")
+
+The inversion of §1: compute IN the fabric, the CPU as MANAGER
+(the TPU split: fabric = dataplane, CPU = control plane holding
+weights, sequencing passes, computing loss and updates).
+
+- **The tropical gift [the corpus already owns half of this]:** the
+  compare-exchange element computes max/min — the tropical
+  semiring's operations — and ReLU networks ARE tropical-rational
+  functions (max/min + addition compose into exactly deep
+  learning's piecewise-linear family). A fabric of
+  compare-exchanges + adders is a neural layer WITH NO MULTIPLIERS,
+  and the certified Batcher sorter is a PROVED order-statistics
+  computer: `batcher8_sorts` is a neural-nonlinearity certificate
+  wearing a sorting costume. Exact in i32 — the fixed-point honesty
+  problem nearly vanishes in the tropical form.
+- **Gradient-is-routing:** d(max(a,b)) sends the gradient to the
+  winner — backprop through a compare-exchange network IS packet
+  routing along recorded winner paths. The fabric's own operation
+  is its backward pass. Differentiability structural again,
+  subgradients as switch decisions.
+- **The weighted alternative:** 2×2 weighted blocks make the
+  butterfly a factored linear layer (Monarch-family; products of
+  butterflies universal for linear maps) — more expressive, real
+  multiplier cost. Silicon prices element-cost both ways
+  (tropical: ~existing cell + adder; weighted: 2×2 MAC).
+- **Precedent in our own record:** the 8/6 council ruled a
+  "systolic stretch with clean naming" — this direction's ancestor,
+  named on day one, recovered tonight from the early-format posts.
+- **A and B compose:** B's fabric layers feeding A's smart neurons
+  is the full machine; one substrate (port, packets, the landed
+  theorems) carries both. Council explores the family, not a fork.
+
+Seat-question deltas for Design B: SILICON — element cost, tropical
+vs weighted, per-element and per-fabric · MATH — max-plus/
+subgradient statement forms, and whether the landed sorter
+certificates are consumable as nonlinearity lemmas · COMPILER —
+the configuration compiler (weights/routing as compiled artifacts;
+does Rows A/B extend to layer configs?) · EVIDENCE — the same
+claim fence covers both designs; one fence, one family.
+
 ## 5. WHY THIS ONE (the era answer)
 
 The firewall was this era's plumbing; the exchange was 1990's
