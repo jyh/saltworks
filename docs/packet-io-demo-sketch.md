@@ -99,6 +99,18 @@ aggregator (verified counting). The filter is the one with teeth.
 5. Every pin, cell, and rate number above dies until built — the
    night's iron law, pre-applied.
 
+SILICON'S STRUCTURAL NOTE (02:31, from measurements in hand):
+**opens 2 and 3 are the SAME question** — the packet-port reframe
+dissolves the pin wall ONLY in the program-load-by-packet fork
+(pure, slower); keeping the byte-wide feed means the port ADDS
+~2–3 pins to 18 rather than replacing them, and the 20:16 wall
+stands where measured. Not an argument for either fork — its
+actual cost, visible only when 2 and 3 are read together. (So the
+council's couplings are: 1+4, and 2+3.) And the zero-cell caution
+is correctly cited but does NOT forbid this shape: slicea16t
+collapsed for having NO observable output; a packet-IO core has
+serial-out, so the deletion does not apply.
+
 ## 4b. MATH'S AST CHECK (02:30 — the sketch's own open #4, answered
 ## against CodegenSpec.lean, not the intent)
 
