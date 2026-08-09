@@ -79,6 +79,13 @@ the failure `Compose.instNext_under_reports_without_ssa` witnesses.*
 
 ---
 
+> ⚠️ **SUPERSEDED 2026-08-09 (maestro, on compiler's report): this section
+> censuses `aluSelect`, which the Slice-A reprice RETIRED (−1,445;
+> `sliceASelect` +291 is the ruled select). The ruled ISA is the 5-op set
+> ADD · XOR · SLT · ADDI · BEQ — `sll`/`sra` are OUT, and the "1 silicon
+> decision" above is MOOT. The census below is kept as history of how the
+> six missing blocks were found; do not resume work from it.**
+
 ## 3. ⛔ THE GAP — `aluSelect` NEEDS TEN OPERAND RESULTS; SIX HAD NO PRODUCER, FOUR NOW DO
 
 `AluSelect.lean:56` is explicit: *"Ten op results: add, sub, and, or, xor, slt,
@@ -129,6 +136,17 @@ common cause is that our certificates are per-organ and nothing checks the
 JOIN.**
 
 ---
+
+> ⚠️ **GATE RE-POINTED 2026-08-09 (maestro): §3 is superseded, so this
+> section's "once §3 is filled" condition is DISCHARGED BY THE RULED PAIR,
+> not by the census — the source-port map is `C1Organ.opIndex`
+> (`C1Organ.lean:113`: port 0 ← adder32, port 1 ← bitXor32, port 2 ←
+> sltCirc; SUB is not a select source — it is how `slt` is computed), and
+> the connecting chain is landed: `ruledEnc_drives_opIndex`,
+> `sliceASelect_of_decoder_driven`, `opIndex_lt_rsOps`. The order below
+> still names retired organs (`shifterM`, `aluSelect` rows); the LIVE
+> assembly order is W5-asm's `CoreOffsets.lean` (measured, 13 organs) and
+> placement is underway in `CorePlace.lean`. Read those, not this table.**
 
 ## 4. THE ASSEMBLY ORDER, once §3 is filled
 
