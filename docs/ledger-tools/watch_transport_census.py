@@ -329,17 +329,43 @@ def main():
     print("    read from each RECEIVING seat's own transcript = ground truth.")
     print("    THIS IS THE MEASUREMENT THE DISPUTE NEEDED: a mute watch")
     print("    delivers zero no matter what its filter scores on capture.")
+    zero_seats, live_seats = [], []
     for seat in SEATS:
         if scanned.get(seat) is None:
             continue
         rows = today(arrivals.get(seat, []))
         mon = [r for r in rows if r[1] == "monitor"]
         if rows:
+            live_seats.append(seat)
             print(f"  {seat:9s} {len(rows):4d} arrival(s)  "
                   f"({len(mon):3d} monitor-event)  "
                   f"first {local(rows[0][0])}  last {local(rows[-1][0])}")
         else:
+            zero_seats.append(seat)
             print(f"  {seat:9s} {0:4d} arrival(s)  ⛔ NOTHING EVER REACHED THIS SEAT")
+
+    # ⛔⛔ AN EMPTY RESULT IS AN INSTRUMENT READING, NOT A FACT ABOUT THE WORLD.
+    # Adopted from silicon, 2026-08-08 17:09, after TWO seats searched the same
+    # post with two UNRELATED defects (mine: headers only; theirs: a lowercase
+    # regex against a CAPS heading) and reached one identical false "there is
+    # none". An empty result is the single output that looks the same whether or
+    # not you asked correctly -- the shape of an armed-dead monitor and a quiet
+    # bus, one layer up.
+    # ⇒ THE POSITIVE CONTROL ON THE QUERY ITSELF: this scan claims to detect
+    # arrivals. If it detects NONE ANYWHERE, the likeliest explanation is that the
+    # detector is broken, not that five seats simultaneously went deaf -- and a
+    # dramatic finding is exactly what a broken detector produces here.
+    if not live_seats:
+        print("\n  ⛔⛔ ZERO ARRIVALS ACROSS EVERY SEAT SCANNED.")
+        print("      DO NOT REPORT THIS AS A FLEET-WIDE OUTAGE. With no seat")
+        print("      showing a single arrival, the detector has not demonstrated")
+        print("      it can detect anything, so 'none' and 'unasked' are the same")
+        print("      reading. Verify the notification marker still matches the")
+        print("      transcript format BEFORE drawing any conclusion.")
+    elif zero_seats:
+        print(f"\n  ✅ DETECTOR DEMONSTRATED LIVE on {len(live_seats)} seat(s), so a"
+              f" zero for {', '.join(zero_seats)}")
+        print("     is a finding about that seat rather than about this scan.")
 
     print("\n" + "=" * 74)
 
