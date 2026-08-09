@@ -364,7 +364,7 @@ def regWriteSig (j : Net) : Net :=
 
 /-- ⭐ **PLACEMENT #5 — `regWrite` at `off1`, `instOK` DISCHARGED, and the first placement whose
 σ reaches into another organ's gates.** -/
-theorem regWrite_instOK : instOK regWrite regWriteSig off1 := by
+theorem regWrite_placeable_from_off1 : instOK regWrite regWriteSig off1 := by
   refine ⟨regWrite_ssa, regWrite_wf, ?_⟩
   intro j hj
   have hnn : regWrite.nIn = 7 := by decide +kernel
@@ -923,10 +923,37 @@ So the four producers are written down as a citable table — `pcAddPortMap` —
 table, and `pcAddSig_follows_the_port_map` proves the σ is exactly that table read back. A reviewer
 checks a five-row list against `Program.lean:4184` instead of re-deriving five `if` branches. -/
 
-/-- Row 14's offset. `ruledEnc` has **zero gates**, so this is `offEnc` unchanged — the one place
-in the chain where two organs share a starting net (`CoreOffsets.zero_gate_organ_does_not_advance`
-is the same fact, stated over the offset list). -/
-def offPc : Nat := instNext EncoderE1.ruledEnc offEnc
+/-- ⭐ **ROW 13 — `regWrite`'s REAL offset.** `ruledEnc` has zero gates, so this equals `offEnc`;
+the point is that the chain now STEPS OVER `regWrite`, which it previously did not.
+
+⛔ **THIS DEF IS THE REPAIR OF A LANDED DEFECT.** `regWrite` was placed at `off1` — the offset
+`immBCirc` already occupies — because §5's docstring concluded it was *"placeable from `off1`
+onward"* and the placement collapsed that half-open interval to its left endpoint. Measured before
+the repair: `immBCirc` out-nets `[1192]`, `regWrite` out-nets `[1192, 1193, …]`, **overlap `[1192]`**,
+and `regWrite`'s 163 gates appeared in no downstream offset. *A BOUND IS NOT A POSITION.* -/
+def offRw : Nat := instNext EncoderE1.ruledEnc offEnc
+
+/-- `off1 ≤ offRw` — structurally, so no offset is ever forced to a numeral. -/
+theorem off1_le_offRw : off1 ≤ offRw := by
+  simp only [offRw, offEnc, offSel, offSlt, offSub, offAdd, offOb, off5, off4, off3, off2, instNext]
+  omega
+
+/-- ⭐ **PLACEMENT #5, REPAIRED — `regWrite` at its ruled row 13, `instOK` DISCHARGED.** Lifted from
+the `off1` bound by `instOK_mono`: `regWrite`'s inputs are the `rd` field and two decoder outputs,
+all of them below `off1`, so the certificate rides up the chain unchanged. *The bound was always
+true; it was never the address.* -/
+theorem regWrite_instOK : instOK regWrite regWriteSig offRw :=
+  instOK_mono regWrite_placeable_from_off1 off1_le_offRw
+
+/-- ⛔⛔ **THE DEFECT, NOW A THEOREM THAT WOULD BREAK IF IT RETURNED: `immBCirc`'s gates end at or
+before `regWrite`'s first gate.** Two placements sharing a net is invisible to every `instOK` in
+this file, so it has to be said separately. -/
+theorem immB_and_regWrite_do_not_overlap : instNext immBCirc off1 ≤ offRw := by
+  simp only [offRw, offEnc, offSel, offSlt, offSub, offAdd, offOb, off5, off4, off3, off2, instNext]
+  omega
+
+/-- Row 14's offset — now after `regWrite`, per `CoreOffsets`' ruled order. -/
+def offPc : Nat := instNext regWrite offRw
 
 /-- **The pc lives in the core's INPUT space, not in any organ's gates.** `StateCodec:43` — pc bit
 `k` is net `1024 + k`. *A plausible and silent error is to look for the pc among the organs, since
@@ -984,9 +1011,17 @@ theorem pcAdd_instOK : instOK SaltWorks.Stack.Program.pcAdd pcAddSig offPc := by
 
 /-- **The zero-gate row: `pcAdd` starts where `ruledEnc` started.** Stated over the offsets rather
 than over a numeral, so the whole chain is never evaluated. -/
-theorem pc_row_does_not_shift : offPc = offEnc := by
+theorem rw_row_does_not_shift : offRw = offEnc := by
   have h : EncoderE1.ruledEnc.gates.length = 0 := by decide +kernel
-  simp only [offPc, instNext, h, Nat.add_zero]
+  simp only [offRw, instNext, h, Nat.add_zero]
+
+/-- ⛔ **AND ITS PREDECESSOR WAS A TRUE THEOREM ABOUT A BROKEN CHAIN.** `pc_row_does_not_shift`
+asserted `offPc = offEnc`, which held *only because `regWrite` was missing from the chain*. It is
+false now, and its falsity is the repair: the pc row is a full `regWrite` further on. *A theorem can
+be true, kernel-checked, axiom-clean — and true only of a defect.* -/
+theorem pc_row_is_a_regWrite_past_the_encoder :
+    offPc = offRw + regWrite.gates.length := by
+  simp only [offPc, instNext]
 
 /-- ⭐⭐ **THE MUTANT THE PORT MAP EXISTS TO EXCLUDE: `rs1`/`rs2` ARE VALUES, NOT INDICES.**
 Both halves asserted — the first says the wire is the register-file read, the second says that is a
@@ -1145,7 +1180,7 @@ file is transposed — register 1 built from bit 1 of every register. *Asserted 
 def offRegNext : Nat := instNext SaltWorks.Stack.Program.pcAdd offPc
 
 /-- `regWrite`'s output `k` at row 5: the write-enable for register `k`. -/
-def rwOut (k : Nat) : Net := (instOuts regWrite regWriteSig off1).getD k 0
+def rwOut (k : Nat) : Net := (instOuts regWrite regWriteSig offRw).getD k 0
 
 /-- The select's output `k` at row 10: bit `k` of the value to be written. -/
 def selOut (k : Nat) : Net := (instOuts SelectCut32.sliceASelect selSig offSel).getD k 0
@@ -1159,8 +1194,11 @@ whole chain is `offTie` plus a sum of lengths — provable WITHOUT evaluating a 
 *Forcing these offsets to numerals is what made an earlier row time out; this is the cheap form and
 it is also the stronger statement.* -/
 theorem offTie_le_offRegNext : offTie ≤ offRegNext := by
-  simp only [offRegNext, offPc, offEnc, offSel, offSlt, offSub, offAdd, offOb, off5, off4, off3,
-             off2, off1, off0, instNext]
+  -- ⚠️ `offRw` is a NEW LINK in the chain and this list had to learn it: without it the unfolding
+  -- stops at `offRw` as an opaque atom and omega cannot relate `offTie` to the far end. Inserting a
+  -- row means auditing every simp list that WALKS the chain, not just the offsets themselves.
+  simp only [offRegNext, offPc, offRw, offEnc, offSel, offSlt, offSub, offAdd, offOb, off5, off4,
+             off3, off2, off1, off0, instNext]
   omega
 
 /-- The `cur` bank's obligation, discharged by arithmetic over 1,024 inputs at once. -/
@@ -1235,15 +1273,44 @@ theorem we_and_res_banks_are_not_swapped :
 
 /-- **CONTROL: `regNext` is placed strictly after both of its organ producers.** Stated over the
 offsets so no numeral is ever forced. -/
-theorem regNext_follows_its_producers : off1 < offRegNext ∧ offSel < offRegNext := by
+theorem regNext_follows_its_producers : offRw < offRegNext ∧ offSel < offRegNext := by
   constructor <;>
-    simp only [offRegNext, offPc, offEnc, offSel, offSlt, offSub, offAdd, offOb, off5, off4, off3,
-               off2, off1, instNext] <;>
+    simp only [offRegNext, offPc, offRw, offEnc, offSel, offSlt, offSub, offAdd, offOb, off5, off4,
+               off3, off2, off1, instNext] <;>
     · have h : 0 < SaltWorks.Stack.Program.pcAdd.gates.length := by decide +kernel
       omega
 
 
-/-! ## 15. THE AXIOM AUDIT — closing a gap this file had carried since placement #1
+/-! ## 15. THE INVARIANT THE SIXTEEN `instOK`s COULD NOT EXPRESS
+
+⛔ **Sixteen `instOK` certificates were all TRUE over a netlist with two gates writing net 1192.**
+`instOK c σ off` constrains ONE instance against ITS OWN inputs; it cannot see another instance at
+all. So the chain needs a property no per-organ certificate can supply: **that it accounts for every
+placed organ's gates, exactly once.** -/
+
+/-- The gate budget of the sixteen rows, summed from the ARTIFACTS. -/
+def placedGateTotal : Nat :=
+  tieCells.gates.length + decoder.gates.length + immBCirc.gates.length
+    + readTree.gates.length + readTree.gates.length + bitXor32.gates.length
+    + bitNot32.gates.length + OperandB.obMux.gates.length + adder32.gates.length
+    + adder32.gates.length + sltCirc.gates.length + SelectCut32.sliceASelect.gates.length
+    + EncoderE1.ruledEnc.gates.length + regWrite.gates.length
+    + SaltWorks.Stack.Program.pcAdd.gates.length + regNext.gates.length
+
+/-- ⭐⭐ **THE COVERAGE INVARIANT — and it is FALSE of the chain as it stood one commit ago.** The
+chain's span from the first gate net to the last equals the sum of every placed organ's gates. An
+organ omitted from the chain (as `regWrite` was) makes the right side larger; an organ placed at an
+occupied net makes the left side smaller. Either way THIS BREAKS.
+
+*Proved structurally — both sides reduce to sums of the same `gates.length` atoms, so `omega`
+matches them without evaluating a single gate list.* -/
+theorem chain_accounts_for_every_placed_organ :
+    instNext regNext offRegNext = offTie + placedGateTotal := by
+  simp only [placedGateTotal, offRegNext, offPc, offRw, offEnc, offSel, offSlt, offSub, offAdd,
+             offOb, off5, off4, off3, off2, off1, off0, instNext]
+  omega
+
+/-! ## 16. THE AXIOM AUDIT — closing a gap this file had carried since placement #1
 
 ⛔ **`CorePlace.lean` reached FOURTEEN placements with `EXIT=0` and NOT ONE `#audit_axioms` call**,
 while every neighbouring organ file (`AluSelect`, `OperandBMux`, `Adder`, …) audits each declaration.
@@ -1276,7 +1343,12 @@ list at the first failure, so everything after a failing name silently reads as 
 #audit_axioms pcAdd_compares_values_not_indices
 #audit_axioms isBEQ_agrees_with_regWrite
 #audit_axioms pc_bits_are_core_inputs
-#audit_axioms pc_row_does_not_shift
+#audit_axioms rw_row_does_not_shift
+#audit_axioms pc_row_is_a_regWrite_past_the_encoder
+#audit_axioms regWrite_placeable_from_off1
+#audit_axioms off1_le_offRw
+#audit_axioms immB_and_regWrite_do_not_overlap
+#audit_axioms chain_accounts_for_every_placed_organ
 
 #audit_axioms wrong_wire_mutant_fails_at_addi
 #audit_axioms addSig_b_bank_is_obMux_not_rs2
