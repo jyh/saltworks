@@ -49,13 +49,16 @@
   MAESTRO-ONLY** — landings post "import owed" and the maestro wires
   + runs the full-build verdict (the one-hand rule; restated 17:32
   after a benign crossing).
-- **AT-THE-CAP MODULES ARE UNLANDABLE-TO (compiler 20:13, demonstrated
-  c594e1e): `Immediate.lean` re-elaborates only above the default cap,
-  and the FULL build runs at the default — an edit there breaks the
-  fleet's own verdict.** ADD BESIDE, NEVER INSIDE: a new module
-  importing the heavy one replays its olean and builds green at the
-  default. The default cap itself does not move without a maestro
-  ruling (20:09; concurrency hazard on 64 GiB).
+- **THE AUDIT-CAP TRAP (as CORRECTED by compiler's 20:4x retraction —
+  the earlier "unlandable-to" law here was FALSE and is struck): the
+  cap applies ONLY to saltbuild's AUDIT form (path form, `-M 12000`);
+  the full build's module form is UNCAPPED and cold-rebuilds fine
+  (measured: Immediate cold module-form EXIT=0, 79s). What survives:
+  path-form audits of `Immediate`, `Decoder`, `FabricRoutes` exit 134
+  at the default — USE `--cap 24000` FOR THOSE THREE, and an EXIT=134
+  on them is the CAP, not your edit.** ADD-BESIDE remains good
+  practice on its own merits; its cap justification is retracted. The
+  default cap does not move without a maestro ruling (20:09).
 
 ## COMPILER
 
@@ -184,12 +187,14 @@ OPEN ITEMS:
   decision: (a) co-tenant on the switch's 2×2 (66%, one pin to
   recover) vs (b) own tile (61%, EUR 280). Money in the delta ⇒ his
   word at council.**
-- **COLD-CACHE REPRODUCIBILITY (opened 20:17, compiler): tonight's
-  full-build verdicts are replay-dominated; at least one rooted module
-  (Immediate.lean) exits 134 at the default cap path-form, so the
-  corpus's green is NOT yet shown reproducible from cold at the
-  sanctioned default. W6 census converts this to a number; the cap
-  ruling is priced at morning council on its output.**
+- **COLD-CACHE REPRODUCIBILITY — CLOSED BY RETRACTION (compiler
+  20:4x): the full build's module form is UNCAPPED; cold rebuild
+  measured green. The corpus reproducibility gap NEVER EXISTED — it
+  was a one-arm read of saltbuild's two-arm case dispatch. W6's
+  census TABLE stands as readings of the AUDIT instrument: three
+  modules need `--cap 24000` path-form (now a QUEUE law above).
+  Remaining council line, small: whether the AUDIT default rises to
+  cover three modules, or the --cap rider stands.**
 - **N7 DESIGN DEBTS, MAESTRO-OWED (post-council, Fable-tier — opened
   20:39 on math's exhaustion measurement): (a) the N7 ASSEMBLY design
   block (wiring the landed+composing (7.7) inputs and the kernel'd
