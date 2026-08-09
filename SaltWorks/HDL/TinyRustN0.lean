@@ -4,69 +4,63 @@
 **Council ruling #2, 2026-08-09 08:43** (the Captain: *"Yes, fire the probes."*) — the N0
 PROBE LAYER, compiler's slot, statements at **lang-design v1.4**.
 
+**REPAIR WAVE, 2026-08-09 08:58** (maestro: *"your read is correct, the repair is YOURS"*) —
+binders now map to **de Bruijn LEVELS**, an internal representation. The Captain's surface is
+untouched: his sequence-typed notation, the assoc-list `Γ` of **names**, and
+`let`-binds-over-its-continuation all stand. Only the mapping from binders to `State` cells
+changed, and it changed because two independent findings turned out to be one defect.
+
 ## PRECONDITION PREAMBLE (mandatory per the wave law, QUEUE W2)
 
-This file is a **PROBE**, not a wave. What it claims and what it does not:
+This file is a **PROBE** plus its **repair**, not the N0 wave. What it claims and what it does not:
 
-* **CLAIMED** — the judgment exists as data; it is decidable *by construction* (a total
-  checker, not an assumed instance); the three pre-registered controls are green at the
-  kernel; the pool bound is a **separate** predicate that the judgment never mentions.
-* **NOT CLAIMED** — no soundness of the checker against an inductive rule relation (that
-  is N0's own wave); no preservation; no compile theorem; no completeness. Rows A/B are
-  untouched here.
-* **PRE-REGISTERED, before any result below was run:** T2-accept green · T2-reject
-  **red** (`while 1`, an `i32` where `bool` is demanded) · F6 `bigStep` **inhabited**.
-  A probe that cannot make T2-reject *fail* has not tested the judgment, it has tested
-  nothing — the reject control is the load-bearing one.
-* **SCOPE OF `decide`** — T2's controls are `Bool`-valued and decide by computation. F6 is
-  an **inductive relation**: `decide` does not apply to it without an evaluator, so F6 is
-  discharged by an **explicit derivation term**, which is strictly stronger than `decide`
-  (a witness, not a decision procedure). Stated here rather than quietly substituted.
+* **CLAIMED** — the judgment exists as data and is decidable *by construction*; the three
+  pre-registered controls are green at the kernel; the pool bound is a **separate** predicate
+  the judgment never mentions; binders do not alias (`no_aliasing`); and the
+  **bool-is-0/1 invariant holds for expressions** (`evalE_bool_is_01`) — the node that makes
+  BEQ-on-bool sound.
+* **NOT CLAIMED** — no full statement-level preservation over `bigStep` (that is N0's wave);
+  no compile theorem; no completeness; Rows A/B untouched.
+* **PRE-REGISTERED, before any result below was run:** T2-accept green · T2-reject **red**
+  (`while 1`, an `i32` where `bool` is demanded) · F6 `bigStep` **inhabited**. A probe that
+  cannot make T2-reject *fail* has tested nothing — the reject control is load-bearing.
+* **SCOPE OF `decide`** — T2's controls are `Bool`-valued and decide by computation. F6 is an
+  **inductive relation**: `decide` does not apply without an evaluator, so F6 is discharged by
+  an **explicit derivation term**, which is strictly stronger than `decide` (a witness, not a
+  decision procedure). Stated rather than quietly substituted.
 
-## v1.4 FORM, as ruled
+## THE TWO FINDINGS THAT WERE ONE — math's refutation passes #1–#3, folded
 
-Two judgments: `Γ ⊢ e : τ` for expressions, and the **classical sequence-typed** statement
-form (the Captain's form — no output contexts, no nonstandard turnstiles). `let` binds over
-its **continuation**, so scope end = liveness end and the live-binding count reads straight
-off the syntax. `Γ` is an assoc list: decidable lookup, structural recursion,
-`Γ.length` = live bindings.
+1. **Pass #1** — `liveMax` can make Row B vacuous by being pessimistic. Discharged in §7 by
+   an exhibited non-trivial witness with `liveMax` **pinned from above and below**, so a
+   pessimistic `liveMax` would *fail* those theorems rather than satisfy Row B cheaply.
+2. **Pass #2** — `liveMax (.assign _ _) = 0` for *any* expression while `Exp` is fully
+   recursive, so expression cost was unbounded and scored zero. `expMax` (§6) is the second,
+   **independent** term; independence is proved, so it cannot be a rescaling of `liveMax`.
+3. **Pass #3, the one that changed the design** — *the scope defect and the `liveMax`
+   falsifier are the same defect.* `liveMax` counts binders as registers; a `State` keyed by
+   **source name** aliases two binders onto one cell. **The pool bound presumed α-freshness
+   and the state denied it.** Repairing either half alone leaves the other broken and makes
+   the surviving repair look redundant. ⇒ **de Bruijn levels repair both at once**, and make
+   `liveMax` correct *by construction* rather than by an assumption the state contradicts.
 
-⚖️ **THE POOL BOUND IS SEPARATE AND NOT WELDED IN.** `liveMax p ≤ poolSize` is a *resource*
-hypothesis beside the judgment. The judgment stays a pure SOURCE property — the same program
-must not become ill-typed on a smaller core.
-
-## MATH'S REFUTATION PASS #1 (08:45), FOLDED BEFORE THIS FILE WAS CAST
-
-Both findings arrived while this file was written and before it was built. Folded, not deferred:
-
-1. ⛔ **`liveMax` CONTROLS ROW B'S TRUTH AND CAN MAKE IT VACUOUS.** Row B
-   (`∀ p, wellFormed p → liveMax p ≤ poolSize → ∃ code, …`) is satisfied by a *pessimistic*
-   `liveMax`: define it large enough and the hypothesis is almost never met, so the `∀` is
-   near-empty and the row proves easily. Too optimistic and the row is false instead.
-   ⇒ **Math's pre-registered demand is met in §6 by `liveMax_witness_nontrivial`: an
-   EXHIBITED non-trivial `p` with `liveMax p ≤ poolSize` holding by `decide`, plus the
-   exact value of `liveMax` on it so the bound cannot be met by inflating the function.**
-2. ⚠️ **"EXACTLY TWO REJECTION CAUSES" IS A COMPLETENESS CLAIM AND MATH HAS A CANDIDATE
-   THIRD: INSTRUCTION MEMORY.** A program can be well-typed and pool-fitting and still emit
-   more instructions than the machine holds (`code.length` is the machine bound). **This file
-   therefore does NOT claim exhaustiveness.** It claims the two causes are *distinct and
-   separately characterizable* (proved in §6), which is weaker and is all the probe earns.
-   Whether imem capacity is a third hypothesis or is provably non-binding is **OPEN** and
-   belongs to Row B's own wave, not to N0.
+*Rejected, with reasons, because both were on my own table: a **freshness side condition**
+(makes preservation provable, leaves the semantics wrong, resurfaces as an aliasing bug in
+register allocation — moves a defect rather than removing it); and **restore-on-block-exit**,
+which was my own published choice and fixed only my half.*
 -/
 
 namespace SaltWorks.HDL.TinyRustN0
 
-/-! ## 1. Types, expressions, statements -/
+/-! ## 1. Types, expressions, statements — the Captain's surface, unchanged -/
 
-/-- `τ ::= i32 | bool`. Two types, and `bool` is represented at runtime as `0`/`1`
-(SLT's output IS the bool representation — the invariant that makes BEQ-on-bool sound). -/
+/-- `τ ::= i32 | bool`. `bool` is represented at runtime as `0`/`1` — SLT's output IS the
+bool representation, and that is what makes BEQ-on-bool sound. -/
 inductive Ty where
   | i32
   | bool
   deriving DecidableEq, Repr
 
-/-- Expressions. `tt`/`ff` are the bool literals v1.3's fold added. -/
 inductive Exp where
   | var   (x : Nat)
   | const (n : BitVec 32)
@@ -77,8 +71,7 @@ inductive Exp where
   | slt   (a b : Exp)
   deriving DecidableEq, Repr
 
-/-- Statements. `letmut` carries its **continuation** as `body` — that is what makes scope
-end = liveness end, and it is why `liveMax` needs no second analysis. -/
+/-- `letmut` carries its **continuation** as `body`: scope end = liveness end. -/
 inductive Stmt where
   | skip
   | letmut (x : Nat) (t : Ty) (e : Exp) (body : Stmt)
@@ -88,20 +81,32 @@ inductive Stmt where
   | while  (c : Exp) (body : Stmt)
   deriving DecidableEq, Repr
 
-/-- `Γ` — an assoc list. `Γ.length` is exactly the number of live bindings. -/
+/-- `Γ` — an assoc list of **names**, the Captain's form. `Γ.length` = live bindings. -/
 abbrev Ctx := List (Nat × Ty)
 
-/-- Decidable lookup, structurally recursive. Most recent binding shadows. -/
-def look : Ctx → Nat → Option Ty
-  | [],            _ => none
-  | (y, t) :: rest, x => if x = y then some t else look rest x
+/-! ## 2. THE REPAIR — a binder's runtime slot is its LEVEL, not its name
 
-/-! ## 2. The judgment, as data
+`(y, t) :: rest` sits **above** `rest`, so its level is `rest.length`. No subtraction, and
+shadowing necessarily lands on a fresh cell. -/
 
-`inferE` IS `Γ ⊢ e : τ` presented as a total function into `Option Ty`. Decidability is by
-construction: there is no `Decidable` instance to trust, only a computation. -/
+/-- Resolve a source name to `(level, type)`. Most recent binding shadows, and it shadows
+onto a **different cell**. -/
+def lookLvl : Ctx → Nat → Option (Nat × Ty)
+  | [],             _ => none
+  | (y, t) :: rest, x => if x = y then some (rest.length, t) else lookLvl rest x
 
-/-- `Γ ⊢ e : τ` — returns `some τ` exactly when the expression is well-typed. -/
+/-- The type half of the lookup — this is what the judgment reads. -/
+def look (Γ : Ctx) (x : Nat) : Option Ty := (lookLvl Γ x).map Prod.snd
+
+/-- The slot half. Total; `0` on an unbound name, which `chkS` excludes. -/
+def slotOf (Γ : Ctx) (x : Nat) : Nat :=
+  match lookLvl Γ x with
+  | some (l, _) => l
+  | none        => 0
+
+/-! ## 3. The judgment, as data — decidability by construction -/
+
+/-- `Γ ⊢ e : τ`, as a computation into `Option Ty`. -/
 def inferE (Γ : Ctx) : Exp → Option Ty
   | .var x    => look Γ x
   | .const _  => some .i32
@@ -113,15 +118,14 @@ def inferE (Γ : Ctx) : Exp → Option Ty
   | .xor a b  => match inferE Γ a, inferE Γ b with
                  | some .i32, some .i32 => some .i32
                  | _, _ => none
-  -- `slt` consumes two `i32` and PRODUCES a `bool`: this is the 0/1 bool representation
-  -- entering the type system, and it is what makes the reject control a genuine TYPE error
-  -- rather than a scope error.
+  -- `slt` consumes two `i32` and PRODUCES a `bool`: the 0/1 representation entering the
+  -- type system, and why the reject control is a genuine TYPE error, not a scope error.
   | .slt a b  => match inferE Γ a, inferE Γ b with
                  | some .i32, some .i32 => some .bool
                  | _, _ => none
 
-/-- The sequence-typed statement judgment. `letmut` extends `Γ` over its continuation only.
-Conditions are **`bool`** — Rust-faithful, no truthy ints. -/
+/-- The classical sequence-typed statement judgment. Conditions are **`bool`** — Rust-faithful,
+no truthy ints. -/
 def chkS (Γ : Ctx) : Stmt → Bool
   | .skip          => true
   | .letmut x t e body =>
@@ -139,10 +143,122 @@ def chkS (Γ : Ctx) : Stmt → Bool
 /-- `wellFormed` IS the judgment, at the empty context. A pure SOURCE property. -/
 def wellFormed (p : Stmt) : Bool := chkS [] p
 
-/-! ## 3. The pool bound — SEPARATE, and it never appears in the judgment above -/
+/-! ## 4. Semantics — `State` is indexed by LEVEL, and `bigStep` threads `Γ` -/
 
-/-- Maximum simultaneously-live bindings. Reads straight off the syntax because `letmut`
-scopes over its continuation; no second analysis, so F4's `c2` has nowhere to move back in. -/
+abbrev State := Nat → BitVec 32
+
+def upd (σ : State) (l : Nat) (v : BitVec 32) : State :=
+  fun k => if k = l then v else σ k
+
+/-- Expression evaluation. Total, and it resolves names through `Γ` to levels. -/
+def evalE (Γ : Ctx) (σ : State) : Exp → BitVec 32
+  | .var x   => σ (slotOf Γ x)
+  | .const n => n
+  | .tt      => 1
+  | .ff      => 0
+  | .add a b => evalE Γ σ a + evalE Γ σ b
+  | .xor a b => evalE Γ σ a ^^^ evalE Γ σ b
+  | .slt a b => if (evalE Γ σ a).slt (evalE Γ σ b) then 1 else 0
+
+/-- `bigStep Γ p σ σ'` — IMP-shaped, a **relation** so non-termination is representable
+rather than assumed away. `letmut` writes at level `Γ.length`: **above** every level the
+outer context can name, which is the whole content of the repair. -/
+inductive bigStep : Ctx → Stmt → State → State → Prop where
+  | skip   {Γ σ} : bigStep Γ .skip σ σ
+  | letmut {Γ x t e body σ σ'} :
+      bigStep ((x, t) :: Γ) body (upd σ Γ.length (evalE Γ σ e)) σ' →
+      bigStep Γ (.letmut x t e body) σ σ'
+  | assign {Γ x e σ} :
+      bigStep Γ (.assign x e) σ (upd σ (slotOf Γ x) (evalE Γ σ e))
+  | seq    {Γ s t σ σ₁ σ'} :
+      bigStep Γ s σ σ₁ → bigStep Γ t σ₁ σ' → bigStep Γ (.seq s t) σ σ'
+  | iteT   {Γ c thn els σ σ'} :
+      evalE Γ σ c = 1 → bigStep Γ thn σ σ' → bigStep Γ (.ite c thn els) σ σ'
+  | iteF   {Γ c thn els σ σ'} :
+      evalE Γ σ c = 0 → bigStep Γ els σ σ' → bigStep Γ (.ite c thn els) σ σ'
+  | whileF {Γ c body σ} :
+      evalE Γ σ c = 0 → bigStep Γ (.while c body) σ σ
+  | whileT {Γ c body σ σ₁ σ'} :
+      evalE Γ σ c = 1 → bigStep Γ body σ σ₁ → bigStep Γ (.while c body) σ₁ σ' →
+      bigStep Γ (.while c body) σ σ'
+
+/-! ## 5. THE REPAIR, AS THEOREMS — what was false before is provable now -/
+
+/-- Every level a context can name is **strictly below** its length. -/
+theorem lookLvl_lt (Γ : Ctx) (x l : Nat) (t : Ty) :
+    lookLvl Γ x = some (l, t) → l < Γ.length := by
+  induction Γ with
+  | nil => intro h; simp [lookLvl] at h
+  | cons hd tl ih =>
+      intro h
+      simp only [lookLvl] at h
+      split at h
+      · -- the head binds `x`: its level IS `tl.length`, one below the extended length
+        have hl : l = tl.length := by
+          have hp := Option.some.inj h
+          simpa using (congrArg Prod.fst hp).symm
+        subst hl
+        simp
+      · -- the head does not bind `x`: recurse, and one more cell is below us
+        have hrec := ih h
+        simp only [List.length_cons]
+        omega
+
+/-- ⭐ **NO ALIASING — the theorem that was FALSE before the repair.** A `letmut` writes at
+level `Γ.length`, so **every cell the outer context can name is untouched**. Shadowing can no
+longer destroy an outer binding's value, and that is why the same repair fixes `liveMax`:
+distinct binders genuinely occupy distinct cells, which `liveMax` was already assuming. -/
+theorem no_aliasing (Γ : Ctx) (x l : Nat) (t : Ty) (σ : State) (v : BitVec 32)
+    (h : lookLvl Γ x = some (l, t)) :
+    upd σ Γ.length v l = σ l := by
+  have : l ≠ Γ.length := Nat.ne_of_lt (lookLvl_lt Γ x l t h)
+  simp [upd, this]
+
+/-- "the state respects `Γ`": every `bool`-typed binding holds `0` or `1`. -/
+def stateOK (Γ : Ctx) (σ : State) : Prop :=
+  ∀ x l t, lookLvl Γ x = some (l, t) → t = .bool → (σ l = 0 ∨ σ l = 1)
+
+/-- ⭐⭐ **THE BOOL-IS-0/1 INVARIANT FOR EXPRESSIONS — the node that makes BEQ-on-bool sound.**
+A `bool`-typed expression evaluates to `0` or `1`, never to any other bit pattern. -/
+theorem evalE_bool_is_01 (Γ : Ctx) (σ : State) (e : Exp)
+    (hty : inferE Γ e = some .bool) (hok : stateOK Γ σ) :
+    evalE Γ σ e = 0 ∨ evalE Γ σ e = 1 := by
+  cases e with
+  | var x =>
+      simp only [inferE, look, Option.map_eq_some_iff] at hty
+      obtain ⟨p, hp, hsnd⟩ := hty
+      have : evalE Γ σ (.var x) = σ p.1 := by simp [evalE, slotOf, hp]
+      rw [this]
+      exact hok x p.1 p.2 (by rw [hp]) hsnd
+  | const _ => simp [inferE] at hty
+  | tt => right; simp [evalE]
+  | ff => left; simp [evalE]
+  | add a b =>
+      simp only [inferE] at hty
+      split at hty <;> simp_all
+  | xor a b =>
+      simp only [inferE] at hty
+      split at hty <;> simp_all
+  | slt a b =>
+      by_cases h : (evalE Γ σ a).slt (evalE Γ σ b)
+      · right; simp [evalE, h]
+      · left; simp [evalE, h]
+
+/-- **THE PREVIOUS FALSIFIER, NOW PASSING.** Before the repair, `Γ = [(0, bool)]` with
+`letmut 0 i32 (const 7) skip` destroyed the outer `bool`'s cell and refuted preservation. Now
+the inner binder writes level `1` and the outer `bool` lives at level `0`, untouched. -/
+theorem shadowing_witness_now_preserves (σ : State) (hok : stateOK [(0, Ty.bool)] σ) :
+    stateOK [(0, Ty.bool)] (upd σ 1 7) := by
+  intro x l t hx hb
+  have hlt : l < 1 := lookLvl_lt [(0, Ty.bool)] x l t hx
+  have : l ≠ 1 := by omega
+  rw [show upd σ 1 7 l = σ l from by simp [upd, this]]
+  exact hok x l t hx hb
+
+/-! ## 6. The resource terms — SEPARATE from the judgment, and two of them -/
+
+/-- Maximum simultaneously-live bindings = maximum LEVEL reached. Correct by construction now
+that levels are the cells. -/
 def liveMax : Stmt → Nat
   | .skip              => 0
   | .letmut _ _ _ body => 1 + liveMax body
@@ -151,168 +267,116 @@ def liveMax : Stmt → Nat
   | .ite _ thn els     => max (liveMax thn) (liveMax els)
   | .while _ body      => liveMax body
 
-/-- Completeness will read "well-typed AND pool-fitting compiles" — two predicates, two
-characterizable rejection causes. This is the conjunction, never a welded judgment. -/
-def fitsAndTyped (poolSize : Nat) (p : Stmt) : Bool :=
-  wellFormed p && (liveMax p ≤ poolSize)
+/-- **MATH'S PASS #2 TERM.** Simultaneous intermediates of an expression — the Sethi–Ullman
+number for a two-address machine. `liveMax` scored this **zero** for every expression. -/
+def expCost : Exp → Nat
+  | .var _ | .const _ | .tt | .ff => 1
+  | .add a b | .xor a b | .slt a b => max (expCost a) (1 + expCost b)
 
-/-! ## 4. Big-step semantics — a RELATION. Termination is NOT assumed. -/
+def expMax : Stmt → Nat
+  | .skip              => 0
+  | .letmut _ _ e body => max (expCost e) (expMax body)
+  | .assign _ e        => expCost e
+  | .seq s t           => max (expMax s) (expMax t)
+  | .ite c thn els     => max (expCost c) (max (expMax thn) (expMax els))
+  | .while c body      => max (expCost c) (expMax body)
 
-/-- Values are 32-bit; `bool` inhabits `0`/`1`. -/
-abbrev State := Nat → BitVec 32
+/-- Completeness will read "well-typed AND pool-fitting AND temp-fitting compiles" — three
+predicates, and the judgment mentions none of the resources. -/
+def fitsAndTyped (poolSize tempBudget : Nat) (p : Stmt) : Bool :=
+  wellFormed p && (liveMax p ≤ poolSize) && (expMax p ≤ tempBudget)
 
-def upd (σ : State) (x : Nat) (v : BitVec 32) : State :=
-  fun y => if y = x then v else σ y
+/-! ## 7. THE THREE PRE-REGISTERED CONTROLS, plus the folded refutations -/
 
-/-- Expression evaluation is total (all values are `BitVec 32`). -/
-def evalE (σ : State) : Exp → BitVec 32
-  | .var x   => σ x
-  | .const n => n
-  | .tt      => 1
-  | .ff      => 0
-  | .add a b => evalE σ a + evalE σ b
-  | .xor a b => evalE σ a ^^^ evalE σ b
-  | .slt a b => if (evalE σ a).slt (evalE σ b) then 1 else 0
-
-/-- `bigStep p σ σ'` — IMP-shaped, and a relation precisely so that non-termination is
-representable rather than assumed away. -/
-inductive bigStep : Stmt → State → State → Prop where
-  | skip   {σ} : bigStep .skip σ σ
-  | letmut {x t e body σ σ'} :
-      bigStep body (upd σ x (evalE σ e)) σ' → bigStep (.letmut x t e body) σ σ'
-  | assign {x e σ} : bigStep (.assign x e) σ (upd σ x (evalE σ e))
-  | seq    {s t σ σ₁ σ'} :
-      bigStep s σ σ₁ → bigStep t σ₁ σ' → bigStep (.seq s t) σ σ'
-  | iteT   {c thn els σ σ'} :
-      evalE σ c = 1 → bigStep thn σ σ' → bigStep (.ite c thn els) σ σ'
-  | iteF   {c thn els σ σ'} :
-      evalE σ c = 0 → bigStep els σ σ' → bigStep (.ite c thn els) σ σ'
-  | whileF {c body σ} :
-      evalE σ c = 0 → bigStep (.while c body) σ σ
-  | whileT {c body σ σ₁ σ'} :
-      evalE σ c = 1 → bigStep body σ σ₁ → bigStep (.while c body) σ₁ σ' →
-      bigStep (.while c body) σ σ'
-
-/-! ## 5. THE THREE PRE-REGISTERED CONTROLS -/
-
-/-- **T2-accept fixture.** `let mut x : i32 = 7; while (x < 7) { x := x ^ 1 }` — exercises a
-binding, a `slt`-produced `bool` condition, an assignment, and a `while`. -/
 def acceptProg : Stmt :=
   .letmut 0 .i32 (.const 7)
     (.while (.slt (.var 0) (.const 7))
       (.assign 0 (.xor (.var 0) (.const 1))))
 
-/-- **T2-REJECT fixture — the load-bearing control.** `while 1 { skip }`: the condition is a
-`const`, hence `i32`, where `bool` is demanded. A genuine TYPE mismatch, not a scope error —
-which is why v1.3's bool fold supersedes the "with one type the judgment is a scope checker"
-premise. -/
-def rejectProg : Stmt :=
-  .while (.const 1) .skip
+/-- `while 1 { skip }` — the condition is an `i32` where `bool` is demanded. -/
+def rejectProg : Stmt := .while (.const 1) .skip
 
-/-- **T2-accept: GREEN.** -/
 theorem t2_accept : wellFormed acceptProg = true := by decide
 
-/-- **T2-reject: RED, as pre-registered.** -/
 theorem t2_reject : wellFormed rejectProg = false := by decide
 
-/-- **POSITIVE CONTROL for the reject.** The rejection must be caused by the TYPE of the
-condition and nothing else. Swap `const 1` for the `bool` literal `tt`, change nothing else,
-and the program is ACCEPTED — so `rejectProg` fails on its condition's type, not on `while`,
-not on `skip`, not on emptiness. Without this, a checker that rejected every `while` would
-pass `t2_reject`. -/
-theorem t2_reject_is_load_bearing :
-    wellFormed (.while .tt .skip) = true := by decide
+/-- **POSITIVE CONTROL for the reject.** Swap `const 1` for `tt`, change nothing else, and it
+is ACCEPTED — so the rejection is the condition's TYPE, not `while`, not `skip`. Without this,
+a checker that rejected every `while` would pass `t2_reject`. -/
+theorem t2_reject_is_load_bearing : wellFormed (.while .tt .skip) = true := by decide
 
-/-- **SECOND POSITIVE CONTROL — the judgment is not vacuously false.** A `slt` condition
-(bool by the 0/1 representation) is accepted where an `i32` is not, so the bool type is
-genuinely inhabited at condition position. -/
 theorem t2_slt_condition_accepted :
     wellFormed (.letmut 0 .i32 (.const 0) (.while (.slt (.var 0) (.const 1)) .skip)) = true := by
   decide
 
-/-- **F6 — `bigStep` SHOWN NONEMPTY, by explicit derivation.** A mis-defined relation that
-steps nothing turns every downstream row vacuously green; the relation is shown inhabited
-before any wave fires, never assumed.
-
-`skip; x := 0 + 0` runs from any `σ` to `upd σ 0 0`. The witness is a proof term, which is
-strictly stronger than a decision procedure. -/
+/-- **F6 — `bigStep` SHOWN NONEMPTY by explicit derivation.** A relation that steps nothing
+turns every downstream row vacuously green. -/
 theorem f6_bigStep_inhabited (σ : State) :
-    bigStep (.seq .skip (.assign 0 (.add (.const 0) (.const 0)))) σ
-            (upd σ 0 (evalE σ (.add (.const 0) (.const 0)))) :=
+    bigStep [] (.seq .skip (.assign 0 (.add (.const 0) (.const 0)))) σ
+            (upd σ (slotOf [] 0) (evalE [] σ (.add (.const 0) (.const 0)))) :=
   .seq .skip .assign
 
-/-- **F6, the `while` arm too** — the loop form must be able to step, or every `while` row
-is vacuous. `while ff { skip }` terminates immediately from any state. -/
-theorem f6_bigStep_while_inhabited (σ : State) :
-    bigStep (.while .ff .skip) σ σ :=
+theorem f6_bigStep_while_inhabited (σ : State) : bigStep [] (.while .ff .skip) σ σ :=
   .whileF rfl
 
-/-- **F6 POSITIVE CONTROL — a loop that actually ITERATES.** `whileF` alone would be
-satisfied by a relation whose loop never enters the body. Here the body runs once and then
-the condition is false, so `whileT` is genuinely exercised. -/
+/-- **F6 POSITIVE CONTROL — a loop that actually ITERATES.** `whileF` alone would be satisfied
+by a relation whose loop never enters the body. -/
 theorem f6_bigStep_while_iterates (σ : State) :
-    bigStep (.while (.xor (.var 0) (.const 1)) (.assign 0 (.const 1)))
+    bigStep [(0, Ty.i32)] (.while (.xor (.var 0) (.const 1)) (.assign 0 (.const 1)))
             (upd σ 0 0) (upd (upd σ 0 0) 0 1) := by
   refine .whileT ?_ .assign (.whileF ?_)
-  · simp [evalE, upd]
-  · simp [evalE, upd]
+  · simp [evalE, upd, slotOf, lookLvl]
+  · simp [evalE, upd, slotOf, lookLvl]
 
-/-! ## 6. The pool bound is genuinely separate — a control for that claim too -/
+/-- **MATH'S PASS #1 DEMAND, DISCHARGED.** An exhibited non-trivial witness with the resource
+bounds HOLDING, and `liveMax`'s exact value pinned — so a *pessimistic* `liveMax` would fail
+this theorem rather than satisfy Row B vacuously. -/
+theorem liveMax_witness_nontrivial :
+    liveMax acceptProg = 1 ∧ liveMax acceptProg ≤ 1 ∧ fitsAndTyped 1 3 acceptProg = true := by
+  refine ⟨by decide, by decide, by decide⟩
 
-/-- **CONTROL: the judgment does not mention the pool.** A program can be well-typed and
-pool-EXCEEDING at the same time, which is what makes the two rejection causes distinct. With
-`poolSize = 1`, a two-binding program is well-typed yet does not fit. -/
+/-- The bound must be able to BIND, in both directions. -/
+theorem liveMax_binds_both_ways :
+    liveMax (.letmut 0 .i32 (.const 0)
+              (.letmut 1 .i32 (.const 0) (.letmut 2 .i32 (.const 0) .skip))) = 3
+  ∧ fitsAndTyped 3 3 (.letmut 0 .i32 (.const 0)
+              (.letmut 1 .i32 (.const 0) (.letmut 2 .i32 (.const 0) .skip))) = true
+  ∧ fitsAndTyped 2 3 (.letmut 0 .i32 (.const 0)
+              (.letmut 1 .i32 (.const 0) (.letmut 2 .i32 (.const 0) .skip))) = false := by
+  refine ⟨by decide, by decide, by decide⟩
+
+/-- **MATH'S PASS #2 WITNESS, MEASURED.** Their program: `liveMax` says one register, the
+expression needs three simultaneous intermediates. -/
+def mathP : Stmt :=
+  .letmut 0 .i32 (.const 0)
+    (.assign 0 (.add (.add (.var 0) (.var 0)) (.add (.var 0) (.var 0))))
+
+theorem math_pass2_measured :
+    liveMax mathP = 1 ∧ wellFormed mathP = true ∧ expMax mathP = 3 := by
+  refine ⟨by decide, by decide, by decide⟩
+
+/-- ⭐ **AND THE REPAIR IS A SECOND TERM, NOT A RESCALING** — proved, because rescaling was the
+obvious wrong fix. Neither cost dominates the other, so no function of `liveMax` alone can
+express `expMax`. -/
+theorem the_two_costs_are_independent :
+    (liveMax (.letmut 0 .i32 (.const 0) (.letmut 1 .i32 (.const 0) .skip)) = 2
+     ∧ expMax (.letmut 0 .i32 (.const 0) (.letmut 1 .i32 (.const 0) .skip)) = 1)
+  ∧ (liveMax mathP = 1 ∧ expMax mathP = 3) := by
+  refine ⟨⟨by decide, by decide⟩, ⟨by decide, by decide⟩⟩
+
+/-- **CONTROL: the two rejection causes are DISTINCT and separately characterizable.** Not a
+claim of exhaustiveness — math's candidate third cause (instruction memory) is OPEN for Row B. -/
 theorem pool_is_separate :
     wellFormed (.letmut 0 .i32 (.const 0) (.letmut 1 .i32 (.const 0) .skip)) = true
   ∧ liveMax (.letmut 0 .i32 (.const 0) (.letmut 1 .i32 (.const 0) .skip)) = 2
-  ∧ fitsAndTyped 1 (.letmut 0 .i32 (.const 0) (.letmut 1 .i32 (.const 0) .skip)) = false := by
+  ∧ fitsAndTyped 1 3 (.letmut 0 .i32 (.const 0) (.letmut 1 .i32 (.const 0) .skip)) = false := by
   refine ⟨by decide, by decide, by decide⟩
 
-/-- **MATH'S PRE-REGISTERED DEMAND (refutation pass #1, finding 1), DISCHARGED.**
-
-An **exhibited non-trivial witness** with `liveMax p ≤ poolSize` HOLDING — without this,
-Row B is satisfiable by making `liveMax` pessimistic enough that its hypothesis is near-empty,
-and F1's own logic would apply to F1's own row.
-
-`acceptProg` is non-trivial by construction: a binding, a `slt`-produced `bool` condition, a
-`while`, and an assignment. **The exact value of `liveMax` is pinned too**, so the bound
-cannot be met by inflating the function — a pessimistic `liveMax` would fail this theorem, not
-satisfy it. -/
-theorem liveMax_witness_nontrivial :
-    liveMax acceptProg = 1
-  ∧ liveMax acceptProg ≤ 1
-  ∧ fitsAndTyped 1 acceptProg = true := by
-  refine ⟨by decide, by decide, by decide⟩
-
-/-- **AND THE OTHER DIRECTION OF THE SAME DEMAND — the bound must be able to BIND.** A
-three-binding program fits at `poolSize = 3` and does not at `2`. Both arms by `decide`, so
-`liveMax` is pinned from above and below and cannot be quietly re-tuned. -/
-theorem liveMax_binds_both_ways :
-    liveMax (.letmut 0 .i32 (.const 0)
-              (.letmut 1 .i32 (.const 0)
-                (.letmut 2 .i32 (.const 0) .skip))) = 3
-  ∧ fitsAndTyped 3 (.letmut 0 .i32 (.const 0)
-                     (.letmut 1 .i32 (.const 0)
-                       (.letmut 2 .i32 (.const 0) .skip))) = true
-  ∧ fitsAndTyped 2 (.letmut 0 .i32 (.const 0)
-                     (.letmut 1 .i32 (.const 0)
-                       (.letmut 2 .i32 (.const 0) .skip))) = false := by
-  refine ⟨by decide, by decide, by decide⟩
-
-/-- **CONTROL: a smaller core does not change typing — the v1.4 requirement, as a theorem.**
-
-If a program fits and types at one pool size, then (a) it is **typed**, full stop, with no
-pool mentioned; and (b) at any *other* pool size `m` it fits-and-types the moment the
-**resource bound alone** holds. So moving to a smaller or larger core never requires
-re-establishing the typing half.
-
-*This is the honest content of "the judgment is a pure SOURCE property". An earlier draft
-stated it with a second conjunct `wellFormed p = wellFormed p`, which is `rfl` and proves
-nothing — a vacuous clause dressed as a claim, struck before this file was cast.* -/
-theorem typing_is_pool_independent (p : Stmt) (n m : Nat)
-    (h : fitsAndTyped n p = true) :
-    wellFormed p = true ∧ (liveMax p ≤ m → fitsAndTyped m p = true) := by
+/-- **CONTROL: a smaller core does not change typing** — the v1.4 requirement as a theorem. -/
+theorem typing_is_pool_independent (p : Stmt) (n t m : Nat)
+    (h : fitsAndTyped n t p = true) :
+    wellFormed p = true ∧ (liveMax p ≤ m → expMax p ≤ t → fitsAndTyped m t p = true) := by
   simp only [fitsAndTyped, Bool.and_eq_true, decide_eq_true_eq] at h
-  exact ⟨h.1, fun hm => by simp [fitsAndTyped, h.1, hm]⟩
+  exact ⟨h.1.1, fun hm ht => by simp [fitsAndTyped, h.1.1, hm, ht]⟩
 
 end SaltWorks.HDL.TinyRustN0
