@@ -87,4 +87,16 @@ yosys -q -p "
   tee -o $HERE/${TOP}_stat.txt stat -liberty $LIB
 "
 echo "synth: wrote ${TOP}_nl.v and ${TOP}_stat.txt"
-grep -E "^ +[0-9]+ +[0-9.]+ +sky130" "$HERE/${TOP}_stat.txt" || true
+# ⛔ THE SUMMARY PATTERN USED TO DROP ROWS SILENTLY (silicon, 8/8 19:1x).
+# It was `[0-9.]+` for the AREA column — but yosys prints a large per-cell-type
+# area in SCIENTIFIC NOTATION (`992  1.12E+04  sky130_fd_sc_hd__mux2_1`), which
+# contains `E` and `+` and therefore never matched. MEASURED over the 30
+# committed stat files: 28 of 593 cell-type rows were invisible, and for
+# `readtreem` — 992 cells, one type — the summary printed NOTHING AT ALL, so a
+# synthesized module looked like it had no cells.
+# I inherited this pattern into my own analysis and published a table with 14 of
+# 30 cell counts wrong, `core32` by 3.1x, before the nonsense reading caught it.
+# A tool whose SUMMARY silently omits rows teaches everyone who copies it.
+awk '/sky130_fd_sc_hd__/ && NF>=3' "$HERE/${TOP}_stat.txt" || true
+awk '/sky130_fd_sc_hd__/ && NF>=3 {n+=$1} END{printf "  TOTAL CELLS: %d\n", n+0}' "$HERE/${TOP}_stat.txt" || true
+awk -F": " '/Chip area for module/ {printf "  CHIP AREA:   %.0f um2\n", $2}' "$HERE/${TOP}_stat.txt" || true
