@@ -83,9 +83,11 @@ after.**
 
 ## 6 · ⛔ NOT MEASURED HERE — scope inside the verdict
 
-- **Post-layout.** These are yosys pre-layout areas. *A LibreLane run on this
-  same core is in flight tonight; post-layout numbers supersede these for any
-  tile-fit claim.*
+- **Post-layout.** These are yosys pre-layout areas. ✅ **SUPERSEDED — §7 below
+  carries the measured post-layout figures (1.55× these); use those for any
+  tile-fit claim, never this section's.** *(Written while the run was in flight;
+  the pointer is kept rather than deleted so a reader who arrives at §6 first is
+  sent forward instead of quoting a pre-layout number as final.)*
 - **Timing.** Combinational depth is 69 levels (`ltp -noff`) with the critical
   path originating in the register file. **A depth is not a delay** — no STA has
   been run, so nothing here says whether 25 MHz closes.
