@@ -18,11 +18,13 @@
    [CORRECTED 22:51 — silicon's own catalogue catch: the placer
    allows height ∈ {1,2,4} only, so a 3×3 does not exist; the 3×2
    is comfortable with DRV+ECO room]
-   ⚠️ [23:07 HOLD — the "2×2 refused" verdict rests on a density
-   assumption silicon is now re-measuring with a decisive run in
-   flight, pre-registered both ways: a PASS means the 2×2 fits
-   after all and saves you €140–420; a FAIL grounds the 3×2 on
-   measurement. This marker is replaced by the verdict.]
+   [VERDICT 00:14, at the strength the evidence carries — silicon
+   STOPPED its decisive run at 66 minutes with violations still
+   descending (…66→25→15→12→10), so "2×2 refused" is UNPROVEN, not
+   vindicated: the 2×2 is MARGINAL (a 16× routing fight, never
+   shown impossible; resumable state parked in /tmp/tilefit), the
+   3×2 routes without a fight. Recommendation unchanged, basis
+   stated honestly: 3×2 · €420 / €140 incremental · 65.6%.]
    (the 2×2 was refused by silicon's own PRE-REGISTERED bar —
    published before either hardening run — at 99.7%; and the
    smaller byte-wide core is itself 95.1% post-layout, so the 2×2
@@ -164,6 +166,12 @@
   convention, prose naming supersessions) · convention-boundary
   blindness names the mechanism; a corpus-wide declaration index is
   the structural candidate.
+- **Every correction is itself a claim and inherits the freeze
+  gate**: the 20:41 cap retraction contained the night's eighth
+  false claim ("the full build is uncapped" — refuted by the second
+  file of a two-file configuration, `lakefile.toml`'s 20 GB), and
+  its correction recovered a lost Captain instruction (the 8/6
+  concurrency measurement, now registered and firing).
 - **The closing method lesson (silicon's 3×3 catch, 22:51)**: a
   TRUE principle ("tiles buy area") and a PLAUSIBLE number survived
   four refuter passes and six readers before the catalogue refuted
