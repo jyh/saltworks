@@ -318,10 +318,22 @@ OPEN ITEMS:
   = W<<<t after t load-low cycles, covered EXIT=0) · second
   overflow condition ALREADY EXISTED as compiler's landed
   shiftSafe+shiftSafe_at_int8_scale (my dispatch mis-attributed
-  it to math; read-before-building caught it free) · REMAINING:
-  THE SIGN-CYCLE COMPOSITION ALONE, every part in place, math's
-  seam. Trap banked: BitVec.shiftLeft_shiftLeft does not exist —
-  the real name is BitVec.shiftLeft_add.
+  it to math; read-before-building caught it free) · SIGN CYCLE
+  LANDED 15:41 (3c62228, attempts 3, cell_sign_cycle: acc + ~w +
+  1 = acc − w on the (b)-admitted port; off-by-one mutant run;
+  rung 3 unchanged — the separate-stepSeq deferral vindicated;
+  the :66-68 stale prose past-tensed in the same commit; covered
+  EXIT=0 8,677 jobs).
+  ⭐ THE CELL WAVE IS COMPLETE — the neuron cell is certified END
+  TO END at the artifact: two organs (accumulator w/ carry-in +
+  weight-shift w/ load gate, zero constant gates, 193 gates) ·
+  the bridge (rungs 1-4, arithmetic reading under ¬saddOverflow,
+  demoBound-discharged) · add, shift, AND subtract in the kernel.
+  NEXT GATE OPEN: emitS the cell (compiler's genre, pre-authorized
+  by the September scope law "kernel Circ + emitS from day one")
+  → silicon's EUR-280 settling run fires on the emitted RTL.
+  Trap banked: BitVec.shiftLeft_shiftLeft does not exist — the
+  real name is BitVec.shiftLeft_add.
   Every seat argued against its own position at least
   once in this thread; the register moved twice and both moves
   are in the trail.**

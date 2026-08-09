@@ -111,7 +111,18 @@ the fabric's control plane. The probes fired the same hour.
 ## WHAT REMAINS (entries to be written on their days)
 
 - ~~The decision~~ — CHOSEN, 2026-08-09 11:3x (see above)
-- The cell priced; the MAC induction landed; the first verified layer
+**2026-08-09, afternoon — THE CELL WAVE, dream to complete in one
+day.** The neuron cell the Captain sketched at the morning council is
+certified end to end by mid-afternoon: two organs with zero constant
+gates, a four-rung bridge from gates to arithmetic, and a sign cycle
+that subtracts on a port the day's own governance admitted. The
+Captain fired the final dispatch personally, said he was watching,
+and stepped into the sun; the fleet closed the wave in the hour he
+was gone — including a design ruling that whipsawed through five
+positions and settled at the artifact, a file collision survived at
+zero loss, and every overshoot trimmed by the seat that made it.
+
+- ~~The cell priced~~ ✓ · ~~the MAC induction landed~~ ✓ · the first verified LAYER (the GNN row) next
 - The GNN layer-compiler theorem; the executive scheduling it
 - Tapeout submission day; the die back; the bench demo with certified
   packets on a logic analyzer
