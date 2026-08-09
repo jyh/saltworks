@@ -268,6 +268,19 @@ OPEN ITEMS:
   GATE: §1 final row table awaits assembly rows 15-16; halves
   proceed now.**
 
+- **THE COMPOSED CELL — STATE AT ITS EXACT SIZE (compiler's 16:03
+  trim of the maestro's verdict — the FOURTH one-theorem-larger
+  sentence today and the FIRST cut by the seat that would benefit):
+  one module, 193/193, SHAPE-CERTIFIED with the seam and
+  disjointness proved (cell_seam_is_the_addend — the right-wire
+  claim port by port; cell_instances_are_disjoint — the pair
+  property instOK cannot express) — **the composition's per-cycle
+  theorem OWED at compiler's seam**, named as owed in the file.
+  "Kernel to netlist" is emission fidelity, NOT semantic
+  inheritance; the join does not mention cellSeq and cannot (it
+  predates it). The maestro's "join theorem riding inside" is
+  STRUCK.**
+
 - **THE NDF CLOCK — RULED 15:5x at silicon's discriminator (the
   red is REAL, not a die artifact: mac_acc's 32-bit ripple carry
   misses 25 MHz by 0.9%; quadrupled density bought 0.046 of the
