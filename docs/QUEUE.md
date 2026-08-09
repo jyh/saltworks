@@ -150,6 +150,10 @@ OPEN ITEMS:
   the counter was ALREADY 4-bit from the 13:47 $clog2 fix — the
   earlier "implements in RTL" wording was half-stale and silicon
   read past it correctly). CLOSED.
+- **POST-FAB, CAPTAIN'S OWN (18:5x, his words): chips to the
+  BELLCORE TEAM — Chet, his first manager, "still alive and
+  breathing... deeply caring and important to me." Carried with the
+  PCB decision (boards make chips giftable) and the B5 fact sheet.**
 - PCBs 0/80 (T1, money): the Captain is UNDECIDED, will decide
   later — resurface gently with the B5 fact sheet, not before.
 - **THE ③+④ DEEP SESSION — CAPTAIN-COMMITTED, do-not-forget duty
