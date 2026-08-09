@@ -186,7 +186,18 @@ knows the wiring. `sem_adder32_gen` is math's certificate in math's file, and la
 there. *Splitting at the artifact boundary rather than at the arithmetic one.*
 -/
 
-/-- The 32 bits of a word, LSB first — the `Seq` trace's representation of a datapath value. -/
+/-- The 32 bits of a word, LSB first — the `Seq` trace's representation of a datapath value.
+
+⚠️ **NAME COLLISION, DOCUMENTED RATHER THAN RENAMED.** `SaltWorks.HDL.bitsOf` already exists
+(`Sem.lean:180`) and means something **different**: `(j : Nat) : Env`, a test-bit *environment*. With
+`open SaltWorks.HDL.MacCell` from outside, both are visible and an unqualified `bitsOf` is ambiguous
+— I hit that myself in a scratch probe. **Consumers must qualify (`MacCell.bitsOf`), and math's
+`MacBridge` already does.**
+
+*Not renamed because math's landed rung 3 (`c754b29`) cites `MacCell.bitsOf` eight times: a rename is
+a breaking change to another seat's proved theorem for a cosmetic gain
+(`statement-shape-is-an-interface`). Flagged here so the next reader does not lose the minutes I
+did.* -/
 def bitsOf (w : BitVec 32) : List Bool := (List.range 32).map w.getLsbD
 
 theorem bitsOf_length (w : BitVec 32) : (bitsOf w).length = 32 := by simp [bitsOf]
@@ -473,6 +484,56 @@ are not a machine. Wiring organ 2's output into organ 1's addend port is a furth
 `organs_compose_at_32_bits` says only that the seam FITS.
 -/
 
+/-! ### THE FREEZE MUTANT, MADE KERNEL-VISIBLE
+
+**Silicon's 14:28 point, and it is a commission for this seat:** the asymmetric state discipline is
+invisible to their whole toolchain — *"DRC, LVS, timing and my gate all pass a design that freezes W
+across inputs. It is caught by a theorem or not at all."*
+
+And their sharper observation is the reason it matters: ***`runTrace`'s `st₀` is a MODELLING DEVICE. In
+silicon it is not a mechanism — a register does not acquire a value because a theorem quantified over
+one.*** So "the shift costs no gates" is true of the SHIFT and says nothing about the LOAD, exactly as
+"the bias costs zero gates" was true only of the streamed form.
+
+⇒ **The theorem below exhibits the freeze by EVALUATION: the weight register's state MOVES, so a
+second input continued from it is weighted by `W <<< n`, not by `W`.** *No wire is wrong in that
+design; there is nothing for a port map or a disjointness control to point at.* -/
+
+/-- ⛔⛔ **RELOADING IS REQUIRED, AND HERE IS THE ARITHMETIC THAT PROVES IT.** Starting from weight
+`1`, the register holds `2` after one cycle and `4` after two — so it does **not** hold `1`, and an
+input processed without re-initialisation is multiplied by the wrong weight.
+
+**Concrete witnesses rather than a ∀-statement on purpose:** the claim being excluded is a *design*
+(one `runTrace` spanning two inputs), and a single arithmetic witness refutes it. -/
+theorem weight_state_moves_so_reload_is_required :
+    (runTrace wshiftSeq (bitsOf (1 : BitVec 32)) [[false]]).2 = bitsOf (2 : BitVec 32)
+  ∧ (runTrace wshiftSeq (bitsOf (1 : BitVec 32)) [[false], [false]]).2 = bitsOf (4 : BitVec 32)
+  ∧ (runTrace wshiftSeq (bitsOf (1 : BitVec 32)) [[false]]).2 ≠ bitsOf (1 : BitVec 32) := by
+  refine ⟨by decide +kernel, by decide +kernel, by decide +kernel⟩
+
+/-- **CONTROL: the stream bit does not reach the weight register.** Which is why the load path is a
+*silicon* question and not a wiring one — there is no port to load through, so the mechanism must be
+added, not merely connected. Measured: no next-state net is the stream-bit net. -/
+theorem stream_bit_never_enters_the_weight_register :
+    wsX ∉ wsCore.outs.drop 32 := by decide +kernel
+
+/-! ⚖️ **THE LOAD PATH IS A DESIGN DECISION AND NOT MINE — priced here in KERNEL GATES, which is my
+axis, beside silicon's area:**
+
+```
+   (a) SERIAL LOAD through the existing chain — the LSB selects `wsX` instead of the constant on
+       load cycles. Needs ONE control input (`load`) and a 1-bit mux (~3 gates in this corpus's
+       idiom): 33 -> ~36 gates, nIn 1 -> 2. The organ's single input does double duty, and
+       LOAD_W then STREAM_X uses one wire for both.
+   (b) PARALLEL LOAD — 32 muxes (~96 gates) and 32 new input ports: nIn 1 -> 34.
+```
+
+**(a) is the standard serial-load shift register and is ~30× cheaper in gates.** *A mode bit is
+unavoidable in (a): with the LSB always taking `wsX`, streaming would inject stream bits INTO the
+weight register — so the cheap option is cheap but not free, and saying "one mux" without the control
+input would understate it.* **Maestro's call; I will implement either.**
+-/
+
 /-! ### The axiom audit — one declaration per call
 
 *Added WITH the cell, not after it. `CorePlace` ran fourteen placements with `EXIT=0` and zero
@@ -511,5 +572,7 @@ everything after a failure reads as clean. -/
 #audit_axioms wshift_addend_bit
 #audit_axioms wshift_next_bit_zero
 #audit_axioms wshift_next_bit_succ
+#audit_axioms weight_state_moves_so_reload_is_required
+#audit_axioms stream_bit_never_enters_the_weight_register
 
 end SaltWorks.HDL.MacCell
