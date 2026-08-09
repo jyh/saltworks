@@ -196,7 +196,18 @@ OPEN ITEMS:
   (2,706 cells vs serial's 2,709) at 6.25M instr/s. Hardening:
   LibreLane UP (additive, PDK-copy guard); slicea16b harden
   in flight as the FLOW verdict; -ma becomes the tapeout candidate
-  on silicon's green.**
+  on silicon's green. HARDEN VERDICT (21:23): flow COMPLETE — GDS ·
+  DRC 0 · LVS clear · STA +19.29 ns at 40 ns (25 MHz answered by
+  STA). ⚠️ POST-LAYOUT IS 1.56× PRE-LAYOUT: 43,120 µm² stdcell =
+  95.1% of a 2×2 — past silicon's registered 80% bar, the sheet
+  word is TIGHT, and the 4.9% headroom predates the address path.
+  The Captain's condition therefore remains genuinely OPEN on AREA
+  (pins near-yes): silicon measures slicea16b-ma rather than
+  reasons. Named escape if 2×2 fails: TILES BUY AREA — a larger
+  tile (3×2+) preserves "own tile" at higher EUR; his word named
+  the tile, not the size. DRV violations (1,391 slew/21 cap/17
+  fanout) owed before any real submission; the true TT tile-fit
+  run (FP_SIZING absolute) is the next measurement.**
 - **COLD-CACHE REPRODUCIBILITY — CLOSED BY RETRACTION (compiler
   20:4x): the full build's module form is UNCAPPED; cold rebuild
   measured green. The corpus reproducibility gap NEVER EXISTED — it
