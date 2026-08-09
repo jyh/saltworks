@@ -75,5 +75,6 @@ import SaltWorks.HDL.PayloadL0
 import SaltWorks.HDL.PayloadL1
 import SaltWorks.HDL.PayloadL2
 import SaltWorks.HDL.PayloadL4
+import SaltWorks.HDL.Cell1988
 import SaltWorks.HDL.Rotation
 import SaltWorks.Tactic.AuditAxioms
