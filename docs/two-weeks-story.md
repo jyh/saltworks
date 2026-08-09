@@ -46,12 +46,15 @@ design's one-cycle offset was causally forced, not a pipelining cost.
 **A 5-op RISC-V ISA slice with a certified spine.** ADD/ADDI/XOR/
 SLT/BEQ, with a certified ALU-select and instruction-encoder (each
 carrying its own semantics theorem and mutation controls) and an
-executing interpreter in the corpus. Stated exactly: the Batcher-sort
-demonstration is DESIGNED — its feasibility demand-traced with two
-provable compile-around lowerings — and its program artifact is
-queued, not yet written [corrected 8/8 19:1x by compiler's inventory
-before this document traveled anywhere; the claim previously here
-outran the corpus]. A
+executing interpreter in the corpus. The Batcher-sort demonstration
+is DEMONSTRATED: its program is generated from the silicon sorter's
+own 24-comparator list, its two compile-around lowerings are theorems
+over the real interpreter, and it is certified on 13 kernel-checked
+inputs — a certificate suite, not a universal sortedness proof, which
+needs Mathlib and is out of scope for this leg. [Twice revised 8/8:
+first DOWN when the claim outran the corpus, then UP when the
+artifact landed at 5f3e622 eight minutes later — a corrected claim
+rots exactly like the claim it replaced, and this one failed safe.] A
 same-day re-sizing of the select (10 sources → the ruled (3,2) pair)
 ran ruling-to-census-close in one day — 99.65% of surviving theorem
 statements byte-identical across the swap — with the freed 1,154
