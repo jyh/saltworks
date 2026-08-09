@@ -12,7 +12,7 @@ finding that by reading is much cheaper than finding it at assembly time.*
 the counts below are REGENERATED and not original.** *A census that keeps its
 first number after the number has moved is the exact defect this campaign has
 found four times today — and it would be especially cheap to commit in the
-document whose whole subject is missing pieces.* **Live count: 8 found, 6 closed; 0 open builds, 1 silicon decision (`sll`/`sra`).**
+document whose whole subject is missing pieces.* **Live count: 8 found, 6 closed; 0 open builds, ~~1 silicon decision (`sll`/`sra`)~~ — the `sll`/`sra` decision is MOOT as of 2026-08-09: the Slice-A reprice ruled the 5-op ISA with no shifts (see the §3/§4 supersession banners below).**
 
 ---
 
@@ -229,6 +229,14 @@ too — 32 sum bits plus carry-out — so the same off-by-one lives at the new o
 as well, and a positional `outs` list cannot catch either by type.*
 
 ---
+
+> ⚠️ **CLOSED 2026-08-09 (maestro): both blocks now exist in ruled form.
+> ① the encoder: `ruledEnc_drives_opIndex` drives the ruled select's
+> control bits, chained through `sliceASelect_of_decoder_driven` +
+> `opIndex_lt_rsOps` — kernel fact. ② the operand-B mux: `OperandBMux`
+> is a landed organ (`sem_obMux` among the 47 ∀-env-verified rows; row 8
+> of `CoreOffsets`' measured 13) — and this section's own tail records
+> ALUSEL-PARAM landing 8/7 22:18. Kept as history of the find.**
 
 ## 3.5. ⛔ TWO BLOCKS ON THE CRITICAL PATH THAT DO NOT EXIST
 
