@@ -119,7 +119,13 @@ sign cycle that subtracts on a port the day's own governance admitted
 — and, the part the telling should keep, the fleet's referee HELD the
 completion sentence for twenty-two minutes until the one composing
 theorem existed, so the sentence was never once larger than the
-kernel's word. Down-to-silicon closes at emitS. The
+kernel's word. By evening the cell was emitted, composed into one
+shape-certified module, and hardening at a clock the day's own
+measurements ruled — and the fourth over-sized sentence of the day
+was cut by the seat that would have benefited from it, the moment
+the discipline stopped being enforcement and became culture.
+Down-to-silicon closes at the fabric floorplan, whose top module
+is tomorrow's first ruling. The
 Captain fired the final dispatch personally, said he was watching,
 and stepped into the sun; the fleet closed the wave in the hour he
 was gone — including a design ruling that whipsawed through five
