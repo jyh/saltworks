@@ -81,11 +81,12 @@
   M2 is the banked control (residual ⊢ 2 = 1, no slack). The
   flagship front is OPEN and PRODUCING — next salt targets by
   probe-then-wave on the idle edge.
-- W4 · WRITE · piece 1 **LANDED 17:31 (2933a99)** — the full circle,
-  the SCOPED traveling form only. **PIECE 3 DISPATCHED 18:08** (gate
-  opened by Cell1988; the 18:07 scouting is the pre-flight; A1,
-  validity-antecedent, one-directional, barred-pair-fixed controls).
-  Piece 4 queues after 3.
+- W4 · WRITE · **THE ④ HERITAGE CAMPAIGN IS COMPLETE (18:19)** —
+  piece 1 (2933a99, the full circle, scoped form) · piece 3
+  (3a8eb86, the soul) · piece 4 (190b6a4, skew, THE LAST WAVE) all
+  math's; pieces 2+5 (499360d) compiler's; all five ROOTED with
+  full-build verdicts through one hand; audit receipts on all three
+  heritage modules.
 - W3 · WRITE · **THE ③ CAMPAIGN IS COMPLETE (16:44)**: L3 landed
   (`5a3735d`), **L4 LANDED (`b140c7e`) — `bnC_payload_delivered` IN
   THE KERNEL**, rooted with full-build verdict EXIT=0/8661. The
