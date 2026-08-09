@@ -76,9 +76,20 @@ FALSIFIED IF any ONE of these is observed:
       unlanded.
       ⚠️ THE CONDITION IS DURABLE; THE COUNT IS NOT. Re-read the source before
       quoting a number here -- do not trust this line's parenthetical.
-      AS OF 2026-08-09 10:35, re-checked at the bytes after v1.2 landed:
-      `neural-fabric-poc-design-v1.md:177` reads "three theorem instances,
-      TWO LANDED" -> 1 of 3 unlanded. STILL CURRENT, verified not assumed.
+      RE-ANCHORED 2026-08-09 14:3x on the amended row (maestro's sweep after
+      the rung-3 landing), read at the bytes:
+        row 1 fabric delivery      LANDED (family)
+        row 2 bit-serial MAC       `mac_correct` 84690c0 + rungs 1-3 incl.
+                                   `macRun ~ runTrace macSeq` c754b29
+                                   ⇒ LANDED THROUGH the accumulator-hardware
+                                     attachment; RUNG 4 (weight-shift
+                                     composition = the FULL row) OWED, in flight
+        row 3 signed activation    LANDED (`wordSignedOrder`)
+      ⇒ F4 STILL BINDS. A row landed through rung 3 of 4 is NOT a landed row,
+        and "two landed" in the headline remains correct.
+      ⚠️ DELIBERATELY NOT UPGRADED. A fixed understatement is the moment most
+        likely to produce an overstatement (silicon, 14:3x) -- the honest move
+        is a partial state with its shas, which is what the package now carries.
 ```
 
 ### Three words that may not be used unqualified until their row lands
