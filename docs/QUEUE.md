@@ -285,7 +285,13 @@ OPEN ITEMS:
   recommended). MYTH BUST: the "24-tile cap" = the 6x4 SHAPE (and
   the pinout count) — documented max is 8x4=32. Density lever
   50->60% ≈ +20% cells, NOT recommended without a slew run.
-  MAESTRO RECOMMENDATION: 6x2 at EUR 840.**
+  MAESTRO RECOMMENDATION: 6x2 at EUR 840.
+  RESERVATION TIMING RULED (11:5x, the Captain, verbatim: "I'll
+  not reserve the 6x2 until we are close to layout. If we get
+  bumped to the next one (2 weeks later) it is ok"): NO early
+  reservation; reserve at layout-readiness; a one-shuttle slip
+  (~2 weeks past ~Sept 7) is ACCEPTABLE. Full throttle unchanged —
+  the target stands, the deadline is soft by his word.**
 
 - **NDF BENCH HARNESS (registered 11:4x at the Captain's memory-
   hassle question): RP2040 firmware = the memory-server side of the
