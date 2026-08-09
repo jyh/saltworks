@@ -89,6 +89,16 @@
   construction: the seam between machine words and gates (compiler's
   named next, inventory Q1). Registered, not fired: capacity may be
   redirected to tiny-Rust/B-ISA waves at review.
+- W6 · MEAS · **APPROVED 20:18 (maestro), compiler's slot** — the
+  TARGETED COLD-COST CENSUS: path-form elaboration at the DEFAULT cap
+  of plausibly-over-cap modules (decide +kernel over large ranges),
+  pass/fail PER MODULE with the invocation attached (compiler's own
+  pre-registered trap: no bare totals — a count is not a scope).
+  Through saltbuild.sh (the fleet lock serializes the heavy runs;
+  EXIT=134 rows are expected OUTCOMES, not failures of the census).
+  Output feeds the morning cap ruling: it converts "at least one
+  module is cold-unbuildable at the default" (Immediate.lean,
+  measured EXIT=134) into a NUMBER.
 
 ## MATH
 
@@ -167,6 +177,19 @@ preemption per the named small-step/fuel deferral, and beyond).
 Morning: he reviews the council pack + tiny-Rust v1.9 + the story.
 
 OPEN ITEMS:
+- **TILE DECISION (T1, his, SIMPLIFIED — silicon 20:16): the parallel
+  core is NOT TAPEABLE at any tile size (64 signals vs TT's 24 total —
+  tiles buy area, never pins), so SERIAL is the only shape in BOTH
+  options and 32 registers is excluded by AREA in both. The whole
+  decision: (a) co-tenant on the switch's 2×2 (66%, one pin to
+  recover) vs (b) own tile (61%, EUR 280). Money in the delta ⇒ his
+  word at council.**
+- **COLD-CACHE REPRODUCIBILITY (opened 20:17, compiler): tonight's
+  full-build verdicts are replay-dominated; at least one rooted module
+  (Immediate.lean) exits 134 at the default cap path-form, so the
+  corpus's green is NOT yet shown reproducible from cold at the
+  sanctioned default. W6 census converts this to a number; the cap
+  ruling is priced at morning council on its output.**
 - B5 (T1): the click; Sept-7 13:00 PDT close; REF QUESTION + floor
   law remain his; fact sheet on his word. Adjacent MONEY item from
   the muster flags: PCBs 0/80 — the real TT scarcity; ordering is
