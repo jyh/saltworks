@@ -1,3 +1,7 @@
+import SaltWorks
+
+set_option maxRecDepth 100000
+
 /-!
 # W5-asm, increment 1 — the assembly ORDER as data, and the σ arithmetic it forces
 
@@ -36,6 +40,8 @@ this in their first five minutes; it is recorded here so they do not have to re-
 -/
 
 namespace SaltWorks.HDL.CoreOffsets
+
+open SaltWorks.HDL
 
 /-- One row of the assembly order: a label, and the organ's MEASURED `(nIn, gates, outs)`. -/
 structure Row where
@@ -83,7 +89,7 @@ def totalGates : Nat := (order.map Row.gates).foldl (· + ·) 0
 /-- ⭐ **THE MEASURED ORDER SUMS TO THE REPRICED SLICE-A TOTAL.**
 
 `10,371` is the figure I derived on 2026-08-08 two independent ways: the kernel's sum over the
-14 organs, and the 8/7 plan's table plus six named semantic deltas (shifter out, aluSelect
+**14 DISTINCT organs** (this list has **15 ROWS** — `readTree` and `adder32` each appear twice), and the 8/7 plan's table plus six named semantic deltas (shifter out, aluSelect
 retired, sliceASelect in, bitwise→XOR-only, sltu out, the real 97-gate `obMux`). **This is a
 THIRD derivation — a per-row measurement of the artifacts — and it agrees to the gate.** -/
 theorem total_reconciles : totalGates = 10371 := by decide
@@ -125,5 +131,52 @@ by a chain that never advances at all — thirteen of the fourteen steps DO adva
 theorem chain_advances_almost_everywhere :
     offsets[0]! < offsets[1]! ∧ offsets[13]! < offsets[14]! ∧ offsets.length = 16 := by
   refine ⟨by decide, by decide, by decide⟩
+
+/-! ## ⭐ FIDELITY — every literal LINKED TO ITS ARTIFACT at the kernel
+
+**Silicon's 09:42 critique, folded: this file originally had ZERO IMPORTS, so
+`total_reconciles` proved only that the LITERALS sum correctly — it could not check the literals
+against the organ definitions, and the file's fidelity rested on my transcription.** *My numbers
+were genuinely `#eval`-measured, but a measurement that happened in a scratch file protects
+nothing: change an organ tomorrow and my literal goes stale with the theorem still green.*
+
+⇒ ***The file now IMPORTS the organs and proves each row against the real `Circ`. Fidelity is
+kernel-checked rather than asserted, and `total_reconciles` finally rests on something.***
+-/
+
+theorem row_decoder      : decoder.gates.length      = 102  := by decide +kernel
+theorem row_immBCirc     : immBCirc.gates.length     = 1    := by decide +kernel
+theorem row_readTree     : readTree.gates.length     = 2982 := by decide +kernel
+theorem row_bitXor32     : bitXor32.gates.length     = 32   := by decide +kernel
+theorem row_bitNot32     : bitNot32.gates.length     = 32   := by decide +kernel
+theorem row_adder32      : adder32.gates.length      = 160  := by decide +kernel
+theorem row_sltCirc      : sltCirc.gates.length      = 5    := by decide +kernel
+theorem row_sliceASelect : SelectCut32.sliceASelect.gates.length = 291 := by decide +kernel
+theorem row_ruledEnc     : EncoderE1.ruledEnc.gates.length       = 0   := by decide +kernel
+theorem row_obMux        : OperandB.obMux.gates.length            = 97  := by decide +kernel
+theorem row_regWrite     : regWrite.gates.length     = 163  := by decide +kernel
+theorem row_pcAdd        : SaltWorks.Stack.Program.pcAdd.gates.length = 260 := by decide +kernel
+theorem row_regNext      : regNext.gates.length      = 3104 := by decide +kernel
+
+/-- ⭐⭐ **AND THE SUM, NOW ANCHORED: the same 10,371, written entirely in terms of the ARTIFACTS
+rather than of my literals.** If any organ changes, THIS theorem breaks — which is the property
+the literal-only version did not have. -/
+theorem total_reconciles_against_artifacts :
+    decoder.gates.length + immBCirc.gates.length
+      + 2 * readTree.gates.length + bitXor32.gates.length + bitNot32.gates.length
+      + 2 * adder32.gates.length + sltCirc.gates.length
+      + SelectCut32.sliceASelect.gates.length + EncoderE1.ruledEnc.gates.length
+      + OperandB.obMux.gates.length + regWrite.gates.length
+      + SaltWorks.Stack.Program.pcAdd.gates.length + regNext.gates.length
+    = 10371 := by decide +kernel
+
+/-- **AND THE TWO ROWS SILICON MEASURED INDEPENDENTLY, pinned here** — their silicon-side
+readings and this corpus's `Circ`s agree, so the agreement is now in the kernel too. -/
+theorem silicon_confirmed_rows :
+    (regWrite.gates.length = 163 ∧ regWrite.nIn = 7 ∧ regWrite.outs.length = 32)
+  ∧ (regNext.gates.length = 3104 ∧ regNext.nIn = 1088 ∧ regNext.outs.length = 1024) := by
+  refine ⟨⟨by decide +kernel, by decide +kernel, by decide +kernel⟩,
+          ⟨by decide +kernel, by decide +kernel, by decide +kernel⟩⟩
+
 
 end SaltWorks.HDL.CoreOffsets
