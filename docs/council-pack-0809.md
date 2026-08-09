@@ -14,13 +14,16 @@
    word (21:2x: byte-wide, 32-bit multiplexed addresses, own tile)
    was MET the same hour: `slicea16bma` is hardened end-to-end
    (GDS · DRC 0 · LVS clear · timing met at 25 MHz, +16.9 ns; pins
-   18/24 with six to spare). Honest fit: **your own 3×3 at 44%**
+   18/24 with six to spare). Honest fit: **your own 3×2 at 65.6%**
+   [CORRECTED 22:51 — silicon's own catalogue catch: the placer
+   allows height ∈ {1,2,4} only, so a 3×3 does not exist; the 3×2
+   is comfortable with DRV+ECO room]
    (the 2×2 was refused by silicon's own PRE-REGISTERED bar —
    published before either hardening run — at 99.7%; and the
    smaller byte-wide core is itself 95.1% post-layout, so the 2×2
    was never comfortable for this core family: "own tile" was
    forced before your byte-wide preference arrived, not by it). The ONLY
-   residual: €350 (if the 4 owned tiles apply toward 9) vs €630
+   residual: €140 (if the 4 owned tiles apply toward 6) vs €420
    (fresh purchase) — readable only in your authenticated
    tinytapeout calculator, one browser minute. Bonus your
    architecture bought unasked: the 32-bit PC became architecturally

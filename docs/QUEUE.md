@@ -225,12 +225,15 @@ OPEN ITEMS:
   (+16.91 ns at 25 MHz) · pins 18/24 · post-layout 45,205.9 µm² =
   99.7% of a 2×2 — silicon REFUSES the technical pass (25 cells of
   headroom with 1,678 max-slew fixes owed that ADD cells): the
-  honest reading is -ma DOES NOT FIT a 2×2; A 3×3 IS 44%,
+  honest reading is -ma DOES NOT FIT a 2×2; A 3×2 IS 65.6%
+  (CORRECTED 22:51: height ∈ {1,2,4} per the placer — no 3×3
+  exists; silicon's catalogue catch),
   comfortable with DRV+ECO room. Family finding: even -b is 95.1%
   — a 2×2 was never comfortable for 16-reg/32-bit Slice A; the
   register file is the mass, fourth instrument agreeing. ⇒ THE
   CAPTAIN'S CONDITION IS MET; the executable form of his word is
-  BYTE-WIDE -ma ON ITS OWN 3×3. RESIDUAL (T1, money): the 3×3's
+  BYTE-WIDE -ma ON ITS OWN 3×2 (€420 fresh / €140 incremental if
+  the owned 4 apply toward 6). RESIDUAL (T1, money): the 3×2's
   actual EUR (the 280 was the 2×2 figure — real TT price to be
   read, never inferred) — his one-word confirmation at morning.
   DRV repair owed pre-submission.**
