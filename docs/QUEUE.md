@@ -180,13 +180,24 @@ preemption per the named small-step/fuel deferral, and beyond).
 Morning: he reviews the council pack + tiny-Rust v1.9 + the story.
 
 OPEN ITEMS:
-- **TILE DECISION (T1, his, SIMPLIFIED — silicon 20:16): the parallel
-  core is NOT TAPEABLE at any tile size (64 signals vs TT's 24 total —
-  tiles buy area, never pins), so SERIAL is the only shape in BOTH
-  options and 32 registers is excluded by AREA in both. The whole
-  decision: (a) co-tenant on the switch's 2×2 (66%, one pin to
-  recover) vs (b) own tile (61%, EUR 280). Money in the delta ⇒ his
-  word at council.**
+- **TILE DECISION (T1, his — silicon 20:16 + the Captain's 21:0x
+  fork): the parallel core is NOT TAPEABLE at any tile size (64
+  signals vs TT's 24 total — tiles buy area, never pins) and 32
+  registers is excluded by AREA in both options. The feed shapes:
+  bit-serial (slicea16s, 3 signals, 32 cyc/word, PRICED) and — THE
+  CAPTAIN'S OWN PROPOSAL, 21:0x at the helm — BYTE-WIDE (8-bit
+  pinout, a 32-bit load in 4 cycles): DISPATCHED to silicon to
+  price as a named variant (signal count from the port list, area
+  delta vs slicea16s, co-tenancy interaction — readings, not
+  inference). The (a) co-tenant 66%/one-pin vs (b) own-tile
+  61%/EUR 280 split stands; his word after the byte-wide pricing.
+  HARDENING DEPENDENCY (silicon 21:07, readings): hardening's first
+  step (synthesis) consumes the tile word — the options differ in
+  top-module identity, contents, uio_oe mask; the config-independent
+  leg (core standalone synthesis) is DONE, 2,709 cells, depth 69;
+  NO HARDENING TOOL IS INSTALLED — container bring-up AUTHORIZED
+  for tonight (maestro, PRE-AUTH, additive-only) so any tile word
+  goes straight to hardening.**
 - **COLD-CACHE REPRODUCIBILITY — CLOSED BY RETRACTION (compiler
   20:4x): the full build's module form is UNCAPPED; cold rebuild
   measured green. The corpus reproducibility gap NEVER EXISTED — it
