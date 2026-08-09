@@ -574,6 +574,23 @@ WITNESSES    how many independent readings, BY WHOM?  A one-witness column is
              struck. Two readings by the same author are ONE claim.
 ```
 
+#### ⭐ AMENDMENT (compiler, 13:5x) — **THE BAR EXTENDS TO PROSE ABOUT LIVE OBJECTS**
+
+*Published as a test for FIGURES. Compiler demonstrated it applies to SENTENCES,
+by watching one paragraph go stale three times in thirty minutes:*
+
+```
+① "not rooted on purpose"          true at the §4 seal · FALSE 7 min later
+② "conversion planned, noise
+   accepted until it lands"        true when written · FALSE at 4264e3b
+③ the current version              true at 4264e3b — AND IT SAYS SO
+```
+🔑 ***A SENTENCE DESCRIBING A LIVE OBJECT NEEDS A WINDOW AS MUCH AS A NUMBER
+DOES. Every version was correct when written and none of them said WHEN.***
+⇒ **So the WINDOW column binds prose too, and the sequence is kept rather than
+overwritten — the three states are one defect receding a layer at a time, and
+that history is worth more than the paragraph.**
+
 ### 4.2 The three failure modes this pass exists to catch
 
 *Named in advance so nobody has to be surprised by the verdict:*
