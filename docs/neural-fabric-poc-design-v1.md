@@ -336,7 +336,12 @@ SELF     each cell streams its own h_v against the latched W_self
 ACT      CE vs 0 in every cell; EMIT h'_v
 ```
 
-**The verified decomposition — three theorem instances, two landed:**
+**The verified decomposition — three rows: delivery LANDED (family),
+activation LANDED (signed order), MAC all-parts-landed with the one
+composing join in flight (evidence's 15:44 headline fix — the third
+favorable drift of the day; and its F3 boundary stands: this chain is
+certified at the KERNEL MODEL, "down to silicon" closes at emitS + a
+synthesis run, not here):**
 
 | claim | instrument | status |
 |---|---|---|
