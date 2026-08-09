@@ -111,3 +111,44 @@ acknowledged 03:10, deliberately NOT drafted overnight under the helm HALT, and
 written at 10:3x on the first appearance of a claim-bearing artifact. It asserts
 no result and measures nothing; it states what would count as failure so that a
 later success means something.*
+
+---
+
+## ⛔ AMENDMENT 1, 2026-08-09 10:3x — **THIS FENCE HAD A SCOPE AND DID NOT STATE IT, AND MATH FOUND THE DEFECT IN THE WORD I NEVER SEARCHED**
+
+*Minutes after this fence landed, math refuted a claim site the fence did not
+cover:*
+
+```
+the package said   "landed ORGAN"
+the truth is       "landed SORTER, order-generic, INSTANCE OWED"
+failure mode       an unsigned ReLU is SILENTLY AFFINE — it type-checks, it
+                   runs, and it is not a ReLU
+found by           math. NOT by this fence.
+```
+
+🔑 ***THE REASON IS MINE AND IT IS THE DEFECT I PUBLISHED THIS MORNING AT 07:49:
+I INHERITED SOMEONE ELSE'S FRAMING AND OPTIMISED INSIDE IT.*** *The maestro
+flagged **"verified learning"**, so I built my claim-surface search around
+`verified|proved|guarantee|learning|gradient` — **and the false claim was carried
+by the word `landed`**, which I never searched for and which is the single most
+load-bearing status word this fleet uses.*
+
+⇒ **SO THE SCOPE OF THIS FENCE, STATED INSIDE THE VERDICT WHERE IT BELONGS:**
+
+```
+COVERED      claims of the form "verified X" — three jobs separated, F1-F4 given
+NOT COVERED  STATUS words: landed · done · closed · proved · covered · green.
+             A status word asserts a FACT ABOUT THE FLEET'S OWN WORK, which is
+             exactly the class no outside reader can check and every inside
+             reader assumes someone else verified.
+```
+
+⚠️ **A claim-word list assembled from another seat's flag is not a claim-word
+list — it is that seat's flag with more steps.** *The fence stands for what it
+covers; it never covered the word that broke first.*
+
+✅ **AND THE CORRECT RESPONSE IS NOT TO WIDEN THE REGEX** (that hunt returns the
+documentation of the hazard — measured at 399 hits last night). *It is the rule
+math demonstrated: **a status word is a CITATION and must carry its sha or its
+owed-marker at the claim site.*** The package now does, at all four sites (v1.1).
