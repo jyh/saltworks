@@ -206,6 +206,35 @@ clocks. Bench-visible with a logic analyzer on the PMOD pins.
 | process/scale (sky130, TT) | ~9 orders of magnitude off a datacenter part | $500-class fabrication; the claim is the VERIFIED INSTANCE of a vindicated architecture class (Groq/Cerebras/TPU-adjacent organization), not a competitive part | say this loudly in every telling |
 | programmability | a config compiler must exist and be trusted | ours comes WITH THEOREMS — aimed at the exact flank that killed dataflow machines historically | the compiler theorems are the differentiator; scope them per-family, never "general" |
 
+### 5b. THE FLOAT QUESTION (asked by the Captain 10:4x; every audience will ask it)
+
+Most NNs train in float; we compute in int32/int8. **Not a defect — the
+industry-standard deployment split, plus our verification superpower:**
+
+- **Quantized integer INFERENCE is the norm** (TFLite/TensorRT/ONNX
+  int8; LLMs at int8/int4; QAT typically costs <1% accuracy). The
+  precedent: **TPUv1 was an int8 inference-only machine.** Train in
+  float off-chip, quantize, deploy integer — exactly this doc's split.
+- **Integers make the theorems TOTAL:** exact arithmetic, bit-for-bit
+  statements, `decide`-certifiable (the 2^64-pair adder cert exists
+  because ints). Float would drag IEEE rounding through every layer
+  and the tropical algebra (§6) would leak — float + is not even
+  associative.
+- **The float→int gap moves into the OFF-CHIP compiler where it is
+  honest:** proved = "the chip computes exactly this integer
+  function"; empirical = "this integer function approximates the
+  trained model" — measured on the bench, separable, never entangled
+  with the kernel chain.
+- **The one design consequence: requantization** at layer boundaries
+  (int8×int8 → 32b accumulate → scale, shift, CLAMP to 8b — the
+  standard int8-NPU pattern and already our accumulator shape). The
+  clamp is saturation = min ∘ max = **two CEs: the requantizer's
+  nonlinearity is in the certified max family too.** One small organ
+  (shift + saturate), not an architecture change.
+- bf16-on-fabric is a possible FUTURE organ, named with its honest
+  cost: bit-serial float is control-heavy, an FMA dwarfs an int8 MAC,
+  and the verification bill balloons. Not PoC territory.
+
 ## 6. WHAT IS NEW HERE (the Captain's "anything new, or just a dream" test)
 
 Not the hardware genre — bit-serial neural silicon and dataflow machines
