@@ -260,6 +260,12 @@ OPEN ITEMS:
   discussion"; #1 and #2 use offboard memory (his word), #3's
   memory story is part of the open discussion.**
 
+- **NDF PACKAGE APPROVED (13:2x, the Captain, verbatim: "NDF
+  lgtm") — the design package v1 (through the r-convention, the
+  k-collision banner, §§1-6 + 2b/2c/3b/5b/5c) stands APPROVED as
+  the NDF's design baseline. Subsequent changes are amendments to
+  an approved document, not drafts.**
+
 - **COUNCIL BUNDLE (12:0x, the Captain, slate items): (2) COST
   WINDOWS "so ruled" — story row = dream->ruling (1.14M measured),
   cost row = NDF-from-T0, campaign total separate, every number
