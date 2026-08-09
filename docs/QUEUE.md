@@ -263,6 +263,13 @@ OPEN ITEMS:
   discussion"; #1 and #2 use offboard memory (his word), #3's
   memory story is part of the open discussion.**
 
+- **THE SHUTTLE DEADLINE — THE SCHEDULE ANCHOR (fetched from
+  tinytapeout.com 8/9 11:5x): SKY26c (our PDK) open, deadline in
+  44 days ≈ SEPTEMBER 22. Login portal = app.tinytapeout.com
+  (GitHub sign-in; the main site has no login link — separate
+  subdomain). Early-bird pricing limited per shuttle — reserving
+  sooner is cheaper. All NDF scheduling backs out from Sept 22.**
+
 - **NDF TILE SHAPE — AWAITING THE CAPTAIN'S PURSE RULING (silicon's
   probe answer, 11:46, post-layout measured): minimal demo (k=4 +
   8x8 BB + core) requires 6x2 = 12 TILES, EUR 840, TWO-HIGH
