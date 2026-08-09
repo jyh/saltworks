@@ -52,17 +52,31 @@ SLICE A EXACTLY AS IT EXISTS — no memory, no waiting on Slice B.
   bool-is-0/1 invariant) is a kernel node — it is what makes
   BEQ-on-bool sound. v2 grows u32 + references in the SAME judgment;
   borrow rules enter as typing rules (ownership-as-theorem's static
-  face). T1 UNIFICATION (math, 19:20): the judgment IS wellFormed —
-  one relation carrying typing + scope + live-binding budget +
-  ranges; no separate predicate, F4 discharged by construction;
-  completeness reads "well-typed programs compile." T2 CONTROLS
-  pre-registered: one accepted and one REJECTED program (while 1 —
-  i32 where bool is demanded), both by decide. T3: the unsigned-<
-  lowering is LIVE in the backend (the comparator spec compares
-  unsigned bit-strings — compiler's unification consumes it) and
-  DEAD at the source until v2's u32 — marked so, not shipped
-  silently. T4: the types do NOT close overflow — the semantics'
-  named wrap choice does.
+  face). T1 UNIFICATION (math, 19:20; FORM RULED v1.4 on math's
+  statement-forms proposal, helm 20:0x): the judgment IS wellFormed —
+  TWO judgments, `Γ ⊢ e : τ` and the THREADING statement form
+  `Γ ⊢ s ⊣ Γ'` (let extends, block-end contracts: the live-binding
+  count is a computable function OF THE DERIVATION, so the register
+  budget needs no second analysis — F4's c2 has nowhere to move back
+  in). Γ is an assoc list (decidable lookup, structural recursion,
+  Γ.length = live bindings). ⚖️ THE POOL BOUND IS SEPARATE, not
+  welded in: `liveMax p ≤ poolSize` is a RESOURCE hypothesis beside
+  the judgment — the judgment stays a pure SOURCE property (the same
+  program must not become ill-typed on a smaller core), and rejection
+  keeps exactly two characterizable causes (ill-typed | pool-exceeded).
+  "Ranges" do NOT ride in the judgment — that was exit-B residue;
+  F7's named wrap choice (exit A) needs no range analysis. F4
+  discharged by construction; completeness reads "well-typed,
+  pool-fitting programs compile." T2 CONTROLS pre-registered: one
+  accepted and one REJECTED program (while 1 — i32 where bool is
+  demanded), both by decide; NOTE the proposal's "with one type the
+  judgment is a scope checker" premise is SUPERSEDED by this v1.3
+  bool fold — the reject control fails on a genuine TYPE mismatch.
+  T3: the unsigned-< lowering is LIVE in the backend (the comparator
+  spec compares unsigned bit-strings — compiler's unification
+  consumes it) and DEAD at the source until v2's u32 — marked so,
+  not shipped silently. T4: the types do NOT close overflow — the
+  semantics' named wrap choice does.
 - Statements: `skip` · `let mut x : τ = e` (block-scoped binding —
   scope end = liveness end, feeding the judgment's register budget) ·
   assignment · `seq` · `if` · `while`. Expressions add `true`/`false`
@@ -75,7 +89,9 @@ SLICE A EXACTLY AS IT EXISTS — no memory, no waiting on Slice B.
 ## 2. THE STATEMENT (v1.1 — math's slate folded; the PAIR is the
 ## theorem)
 
-ROW A (correctness): for p with wellFormed p, compile p = some code →
+ROW A (correctness): for p with wellFormed p (the judgment, v1.4) and
+  liveMax p ≤ poolSize (the separate resource bound),
+  compile p = some code →
   ∀ s s', bigStep p s s' →
     machRun code (encode s) = encode s'  ∧
     ∀ r ∉ pool p, (machRun code (encode s)) r = (encode s) r
@@ -85,7 +101,10 @@ ROW A (correctness): for p with wellFormed p, compile p = some code →
   ∀-w clause is the asset, not the risk).
 ROW B (completeness; F1 — without it Row A is satisfied by
   `compile := fun _ => none`):
-  ∀ p, wellFormed p → ∃ code, compile p = some code.
+  ∀ p, wellFormed p → liveMax p ≤ poolSize →
+    ∃ code, compile p = some code.
+  ("Well-typed, POOL-FITTING programs compile" — the two hypotheses
+  are the two honest rejection causes, and there is no third.)
 HYPOTHESES IN THE STATEMENT: `Function.Injective encode` (F2 — the
   hdi lesson, dropped = false at a two-line witness).
 `wellFormed` is a STANDALONE DECIDABLE predicate, independent of the
