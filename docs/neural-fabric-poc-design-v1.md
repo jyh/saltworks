@@ -244,6 +244,26 @@ hardwired network. Its dmem8 + offboard memory (ruling #5) suffices —
 configuration state lives in the cells and routing registers, not in
 CPU memory.
 
+### 3b. THE PIN BUDGET — memory access on 24 pins (the Captain's 11:3x
+### question; TT supplies clk/rst OUTSIDE the 24)
+
+**Option A — RULED FOR SEPTEMBER (maestro recommendation at dispatch):
+the Captain's multiplexed memory bus, unchanged.** 8 addr + 8 data +
+2 phase = 18 pins, CPU served by the RP2040 exactly as slicea16bma
+already does — zero new memory design, the verified core as-is.
+Remaining **6 pins = 3 packet ports** (edge-in weights/inputs ·
+edge-out results · spare/debug). Fabric ports: 8 = 4 cells + CPU
+client + 2 edge + 1 spare. **18 + 6 = 24 — exact fit.**
+
+**Option B — the v2 evolution, named: memory as a PACKET SERVICE.**
+No memory bus; fetch and data are request/response packets to an
+edge memory server — one protocol, one theorem family, the
+packet-boot story realized (executive resident in a small onboard
+imem, booted through the fabric). Honest price: ~2 tiles for even a
+64-word latch imem + new design and proof surface on a September
+clock. Revisit from silicon's floorplan data; the architecture
+accepts either without structural change.
+
 ## 4. A SMALL GNN, COMPILED — the worked example
 
 **The network:** 4 nodes {0,1,2,3}, edges {0–1, 0–2, 1–2, 2–3},
