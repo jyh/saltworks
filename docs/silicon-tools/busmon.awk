@@ -41,7 +41,15 @@
 # So an over-long ORDER is announced BEFORE its text, where no downstream cap can
 # reach it.
 function emit(st, body,   marked, n) {
-  marked = (body ~ /FLEET|CAPTAIN|HALT|STAND DOWN|STAND-DOWN|ALL SEATS|ALL HANDS|SILICON|silicon/)
+    # ⛔ CASE, FOURTH TIME (2026-08-09 07:3x, on evidence's all-seats warning).
+  # This alternation had CAPTAIN and SILICON and silicon — but NOT `Captain`.
+  # MEASURED: 4 of 5 realistic Captain-return phrasings went UNMARKED —
+  #   "the Captain is back at the helm" · "Captain returned ~08:00" ·
+  #   "good morning, the Captain is awake" · "welcome back Captain"
+  # Unmarked is not unseen (the line still emits, clipped at 200 chars), but a
+  # peer's greeting can sit PAST that clip in a long post. ADDITIVE fix — the
+  # working terms are untouched, mixed/lower case merely added beside them.
+  marked = (body ~ /FLEET|Fleet|CAPTAIN|Captain|captain|HALT|Halt|STAND DOWN|STAND-DOWN|Stand down|ALL SEATS|ALL HANDS|All seats|SILICON|Silicon|silicon/)
   # Asymmetric by design: a long routine line is noise, a truncated order is a
   # missed order. Marker-bearing lines are NEVER clipped BY US.
   if (marked) {
