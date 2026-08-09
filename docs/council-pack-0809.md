@@ -80,7 +80,11 @@
    the hazard is THREAD-driven (threads=2 buys back 18 GB for 1.6×
    wall); the FLEET LOCK is the load-bearing machine-level guard,
    and `-M 20000` has never bound on this tree — nobody should
-   "fix" the cap · the ③+④ DEEP SESSION remains
+   "fix" the cap. [And the part worth reading twice: compiler's
+   "three modules are over-cap and I cannot say why" (20:2x) and
+   your 8/6 "measure the concurrency hazard" were THE SAME FACT
+   seen from opposite ends — you asked the question two days
+   before either the symptom or the instrument existed] · the ③+④ DEEP SESSION remains
    Captain-committed, five-plus refutation rounds richer · salt
    (7.3) is ONE CLICK, yours ("the cost changed, the ownership did
    not") · PCBs 0/80 + Chet's chips ride with the B5 fact sheet
