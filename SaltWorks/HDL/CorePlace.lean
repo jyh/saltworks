@@ -691,11 +691,11 @@ answered from scratch by whoever happened to look:
 ④ sltCirc row 9       sign bit vs carry-out                          (11:53, mine, above)
 ```
 
-⭐ ***THE INVARIANT, stated ONCE for this placement layer: every comparison, extension and
-narrowing on this datapath is SIGNED — at `BitVec.toInt`, with the order bundle PASSED EXPLICITLY
-and never promoted to an instance.*** *The corpus already owns the object (`wordSignedOrder`, an
-`abbrev` deliberately not an `instance` — `Perm.lean:74-77`). What it lacked was one place per
-layer saying that every organ here answers to it.*
+⭐ ***CITED, NOT RESTATED: `docs/the-order-invariant-v1.md` (math seat, 2026-08-09), whose own
+instruction is "THE ANCHORS — cite these, do not restate them."*** *An earlier draft of this
+section restated the rule in its own words, which is one restatement more than the discipline
+allows — and restating a shared invariant per layer is exactly how four independent answers to one
+question happen. **This layer's placements answer to that object; the object lives there.***
 
 ⇒ **CONSEQUENCE FOR ROWS 10–15: each remaining placement CITES this section rather than
 re-deriving the question. A fifth instance then costs a citation, not a discovery — and math's
@@ -707,9 +707,10 @@ carrying a real value; `zeroExtend` is total. **The certificate is always about 
 about which order the caller meant** — so no amount of per-organ verification finds the class, and
 only a statement that spans organs does.* -/
 
-/-- The placement-layer order invariant, as a proposition this file can cite. `sltCirc` reads the
-SIGN bit (`adder32.outs` index 31), never the carry-out (index 32) — instance ④, and the shape
-every later row is checked against. -/
+/-- **This layer's WITNESS to the cited invariant** — not a restatement of it. `sltCirc` reads the
+SIGN bit (`adder32.outs` index 31), never the carry-out (index 32): instance ④ of the four, and the
+shape every later row is checked against. *A citation with no local witness is a footnote; a witness
+with no citation is a fifth independent answer.* -/
 theorem order_invariant_at_slt : sltSig 2 = subOut 31 ∧ subOut 31 ≠ subOut 32 :=
   slt_reads_sign_not_carry
 
