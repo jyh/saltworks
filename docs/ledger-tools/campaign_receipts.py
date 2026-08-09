@@ -91,12 +91,38 @@ REFUTED = re.compile(
 CLEAN_PASS = re.compile(r"\bclean\b", re.I)
 
 
+class GitFailed(RuntimeError):
+    """A git call that did not succeed. NEVER silently an empty result."""
+
+
 def git(repo, *args):
+    # ⛔⛔ THIS HELPER HAD THE EXACT DEFECT I POSTED A CURE FOR AT 21:54, AND
+    # WORSE — found 21:5x by running my own strengthening against my own tool.
+    #
+    # It returned "" on ANY exception and NEVER CHECKED returncode. So a git
+    # call that failed — bad ref, missing repo, timeout — produced an empty
+    # string indistinguishable from "the search found nothing", and
+    # `added_decls` would have reported **0 declarations added** as a
+    # MEASUREMENT. These are the council's numbers.
+    #
+    # 🔑 A FAILED COMMAND AND AN EMPTY RESULT ARE THE SAME VALUE AND NOT THE
+    # SAME FACT. The rule I published: capture the status, and REFUSE the
+    # verdict rather than report one. [[exit-code-dies-in-a-pipe]] is the same
+    # law where the pipe eats the status; here the `except` ate it.
+    #
+    # ⚠️ It RAISES rather than returning a sentinel, deliberately: a sentinel is
+    # something a caller can forget to check, and every caller here feeds a
+    # count. A tool whose numbers reach a council should die rather than
+    # under-report.
     try:
-        return subprocess.run(["git", "-C", repo, *args],
-                              capture_output=True, text=True, timeout=120).stdout
-    except Exception:
-        return ""
+        p = subprocess.run(["git", "-C", repo, *args],
+                           capture_output=True, text=True, timeout=120)
+    except Exception as e:                       # timeout, missing binary, …
+        raise GitFailed(f"git {' '.join(args)[:60]} in {repo}: {e}") from e
+    if p.returncode != 0:
+        raise GitFailed(f"git {' '.join(args)[:60]} in {repo} "
+                        f"exited {p.returncode}: {p.stderr.strip()[:120]}")
+    return p.stdout
 
 
 def added_decls(repo, since, until):
