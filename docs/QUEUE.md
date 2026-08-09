@@ -247,6 +247,21 @@ OPEN ITEMS:
   council I] the seam doctrine stands ratified. Originals at their
   bus lines; this entry is the durable recall surface.**
 
+- **COUNCIL RULING #5 (09:4x, the Captain, verbatim: "for the pure
+  RISC-V path let's keep the dmem8 + offboard memory"): the pure
+  RISC-V core's memory architecture is SETTLED — dmem8 onboard as
+  data scratch, program + bulk data offboard via the 8-bit
+  multiplexed pinout (RP2040-served, the standard TT pattern).
+  The latch-array probe continues as LADDER KNOWLEDGE (it gates
+  the packet-boot idea, not this path). ACCOUNT-CHECK COMPLETE
+  same sitting: five seats, five accounts, one-to-one, zero
+  divergence (one account per seat); maestro is ALONE on jason — the
+  tier-drop seat had no same-account control, now measured.
+  PACKET-IO APPLICATION SLATE under discussion, his framing:
+  1) packet filter, 2) CPU as smart neuron, 3) switch fabric as
+  NN "presumably using bit-serial multipliers, requires
+  discussion"; #1 and #2 use offboard memory (his word), #3's
+  memory story is part of the open discussion.**
 - **COUNCIL RULING #3 (09:0x, the Captain): B-ISA AND B-EXEC WAVES
   ARE GO — "Either way, we will want to do the B-ISA, B-EXEC
   waves." SEQUENCING per the block's own capacity law: B-ISA
