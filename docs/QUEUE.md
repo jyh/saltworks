@@ -268,6 +268,23 @@ OPEN ITEMS:
   GATE: §1 final row table awaits assembly rows 15-16; halves
   proceed now.**
 
+- **THE CELL WAVE — THE BRIDGE NODE, RULED at math's 13:36
+  refusal-of-credit (its own wave's): maestro's "NDF critical path
+  CLOSED" is STRUCK — the honest state is TWO hardware theorems
+  (bnC_payload_delivered about batcherNetC; batcher8_sortsTo_word
+  about runNetW) + ONE SPEC (mac_correct, arithmetic model, no
+  hardware attached). THE BRIDGE = the ONE unbuilt node: (i)
+  macSeq — the neuron cell as a kernel Seq/Circ over the organs
+  (COMPILER's genre, sequenced after W5-asm rows 15-16; this IS
+  the September scope-law "cell as kernel Circ + emitS from day
+  one" item, now named as the bridge); (ii) the refinement lemma
+  macRun ≈ runTrace macSeq (MATH, author-anywhere land-at-owner
+  against its own mac_correct; bit-level carry reasoning — priced
+  honestly as NOT-four-minutes); (iii) emitS of the cell (the
+  fabbed-is-verified law); (iv) silicon's EUR-280 settling run
+  FIRES on the RTL from (i). Genre closed; bridge OPEN; the chain
+  completes at (ii).**
+
 - **FUEL COLUMNS — CONFIRMED AT GROUND TRUTH (13:3x, the Captain,
   verbatim: "the columns are account-name,5h,all-models,fable-only
   (fable gets to spend at most half the total budget). Budget on
