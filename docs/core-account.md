@@ -338,8 +338,28 @@ but the account states it as open.
 |---|---:|---:|---:|---:|
 | `readTree` → `RTL/readtree.v` | 2,982 | **2,981** | 18,636.62 µm² | 6.252 |
 
-✅ **THE ONE-GATE DIFFERENCE IS EXPLAINED (compiler, 14:25) AND THE EMITTER IS
-EXACT — THE COMMITTED FILE IS THE STALE OBJECT.**
+⛔⛔ **THE 14:25 EXPLANATION BELOW IS SUPERSEDED (15:45). THE ONE-GATE GAP IS
+DISSOLVED, NOT EXPLAINED — AND `readtree.v` WAS NEVER `emitS` OUTPUT AT ALL.**
+```
+readtree.v's OWN HEADER:  "READ-PATH ATTACK, candidate 3 … NOT a submission artifact."
+readtree.v / readtreem.v: `default_nettype 0` · VECTOR ports [31:0] · 0 assigns
+emitS output (measured):  `default_nettype 1` · SCALAR ports i0/o0 · ONE ASSIGN
+                          PER OUTPUT (EmitS.lean:172, by design)
+⇒ DIFFERENT ARTIFACT CLASSES. There was no emitter defect and no stale file —
+  I compared a hand-shaped candidate module against a kernel gate count and
+  called the 1-gate residue a property of the emitter.
+```
+🔑 ***MY ROOT ERROR: I TOOK `readtree.v` AS AN ORACLE FOR `emitS` OUTPUT AND NEVER
+READ ITS HEADER. I read the file for its NUMBERS and not for WHAT IT WAS — the same
+error as quoting the bit-serial `cmpex` at 116.4 µm² for a 32-bit CE, one section
+above, which I caught only because I opened the surrounding table.***
+✅ **AND THE EMITTER'S EXACTNESS IS CONFIRMED ON THE OBJECT THAT MATTERS — the cell,
+measured 15:45: `mac_acc` 160 gates → 160 cells · `mac_wshift` 33 → 33 · zero tie
+cells, both ties now admitted PORTS. The one-cell-per-gate relation HOLDS; it simply
+was never demonstrable from `readtree.v`.**
+
+*The superseded 14:25 reading is kept below because it dates the correction and
+because its reasoning was sound over the wrong object:*
 ```
 emitS readTree, RUN AT HEAD:   kernel gates 2,982  ·  cell instances 2,982  EXACT
                                of which conb (tie) lines: 1
