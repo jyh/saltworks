@@ -31,7 +31,17 @@ for f in "$RTL" "$LEAN"; do
   [ -f "$f" ] || { echo "pool_drift: REFUSING — no file at $f" >&2; exit 2; }
 done
 
-rtl=$(grep -oE 'rf *\[1:[0-9]+\]' "$RTL" | head -1 | grep -oE '[0-9]+\]$' | tr -d ']')
+# NOT `head -1`: silicon's 12:11 residual. Taking the FIRST match would silently pick one of
+# several register files, and a single-number check over an ambiguous source is meaningless.
+# Count first, REFUSE on ambiguity — same discipline as the unparseable arm.
+rtl_n=$(grep -cE 'rf *\[[0-9]+:[0-9]+\]' "$RTL")
+if [ "$rtl_n" -gt 1 ]; then
+  echo "pool_drift: REFUSING — $rtl_n register-file declarations in $RTL." >&2
+  echo "  This tool compares ONE number. With more than one regfile, slicea16bmaPool cannot" >&2
+  echo "  mean what it claims, and picking the first would hide that rather than report it." >&2
+  exit 2
+fi
+rtl=$(grep -oE 'rf *\[1:[0-9]+\]' "$RTL" | grep -oE '[0-9]+\]$' | tr -d ']')
 lean=$(grep -oE 'slicea16bmaPool : Nat := [0-9]+' "$LEAN" | grep -oE '[0-9]+$')
 
 if [ -z "$rtl" ]; then
