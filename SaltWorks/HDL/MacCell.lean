@@ -301,8 +301,25 @@ It supplies exactly the addend `macAfter` asks for:
 ```
    macAfter (t+2) = macAfter (t+1) + (if x t then W * 2^t else 0)
                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^ THIS organ's output
-   state  W << t     (32 bits)      input  x_t (ONE bit)      output  the addend (32 bits)
+   state  W_i << t   (32 bits)      input  x_t (ONE bit)      output  the addend (32 bits)
 ```
+
+⚠️ **`W_i`, NOT `W` — THE STATE IS THE *CURRENT INPUT'S* WEIGHT** (dual-stream ruling, maestro
+2026-08-09 14:24: per-input weights, unbounded fan-in; weight-stationary is now the CNN *special
+case*). **This organ has NO LOAD PATH and needs none** — measured: `nIn = 1` (the stream bit alone),
+`wsCore.nIn = 33 = 1 + 32` so there is no spare port, and no next-state net is the stream-bit net,
+i.e. *the next state is a function of state alone*. Re-loading happens through **`runTrace`'s initial
+state**, which `Seq.lean:41-44` provides as an argument precisely because power-gating bans reset
+assumptions. Each input is a fresh `runTrace` starting at `W_i`.
+
+⛔ ***AND THE COMPOSITION MUST GIVE THE TWO ORGANS OPPOSITE STATE DISCIPLINE: the accumulator's state
+PERSISTS across inputs (it is accumulating the sum); this organ's state RE-INITIALISES per input.***
+*Running both under one `runTrace` from one initial state typechecks and places cleanly, and is wrong
+in one of two ways — it either freezes `W` across inputs (weight-stationary, the special case) or
+resets the accumulator every input (destroying the dot product). **The first composition hazard in
+this file that is about TIME rather than NETS: no wire is wrong in either mistake, only which state
+crosses which trace boundary.*** The theorems below are `∀ w` and are unaffected by the ruling; this
+paragraph exists because the *framing* is what a reader carries into the design package.
 
 ⭐ **THE SHIFT COSTS NO GATES — it is pure rewiring.** `outs` may name input nets directly, so the
 next state is `[0, wsh₀, …, wsh₃₀]`: thirty-one wires moved up one place and a constant in the
