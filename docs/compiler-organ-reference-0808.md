@@ -74,23 +74,37 @@ thing that can catch a mis-wiring. For RTL: do not emit a module; emit the two n
 
 ---
 
-## 3. THE CERTIFICATE EACH ORGAN CARRIES — what an RTL cut is allowed to claim
+## 3. THE CERTIFICATE EACH ORGAN CARRIES — ⛔⛔ **CORRECTED 21:5x. MY FIRST TABLE WAS WRONG IN THE DIRECTION THAT UNDERSELLS THE CORPUS, AND SILICON READ IT FOR THREE HOURS.**
 
-| organ | the theorem to cite | what it says, and its LIMIT |
+> **What I published at 19:1x:** *"`sliceASelect` and `decoder` are UNCONDITIONAL; the adder,
+> the bitwise blocks and the comparators are SAMPLED."* ⛔ **FALSE.** I cited the
+> `*_on_sample` certificates in `SaltWorks/HDL/` and **never searched
+> `SaltWorks/Stack/Program.lean`, where the ∀-level `sem_*` theorems live.** I looked for my
+> own naming convention (`bitXor32_sem`) in my own slot; the corpus's convention is
+> `sem_<organ>` and it is math's file. *`Bitwise.lean:101` and `Program.lean:2598` discuss the
+> superseded name explicitly — I grepped that file tonight and read past it twice.*
+
+| organ | the theorem to cite | what it says |
 |---|---|---|
-| `adder32` | `adder32_adds_on_sample`, `adder32_carry_out_on_sample` | **SAMPLED**, not ∀-input. `adder32_outs_len = 33` is total. |
-| `bitXor32` | `bitXor32_correct_on_sample` + `_ssa` / `_wf` | sampled against `(· ^^^ ·)`; structure is total |
-| `sltCirc` | `sltCirc_correct_on_sample` + `_ssa` / `_wf` | sampled, driven through the REAL adder; **certifies the block, not the chain** |
-| `sliceASelect` | `sliceASelect_cert` | ⭐ **UNCONDITIONAL, ∀ Env** — the strongest certificate in the set |
-| | `sliceASelect_selects` | **GUARDED** on `gsSelOf 3 2 E < 3` |
+| `adder32` | ⭐⭐ **`sem_adder32`** (`Program.lean:3188`) | **`sem adder32 (bwEnv a b) = map (a+b).getLsbD ++ [carry]` — ON ALL 2^64 OPERAND PAIRS.** Its own docstring says it supersedes the two `_on_sample` certs. |
+| | `sem_adder32_gen`, `_cout`, `_getD`, `_off_the_sample` | general carry-in; carry-out; per-bit; explicit off-fixture witness |
+| `bitXor32` | ⭐⭐ **`sem_bitXor32`** (`:2737`) | `= map (a ^^^ b).getLsbD`, **∀ both words**; `sem_bitXor32_off_the_sample` witnesses two non-fixture inputs |
+| `bitAnd32` / `bitOr32` / `bitNot32` | ⭐⭐ **`sem_bitAnd32`** (`:3572`) · **`sem_bitOr32`** (`:3584`) · **`sem_bitNot32`** (`:3596`) | all ∀-word |
+| *(the generator)* | ⭐ **`sem_bwCirc`** (`:3544`) | the parametric lemma for any `bwCirc mk` given `hfan`/`hev` |
+| `sltCirc` / `sltuCirc` | ⭐ **`sem_sltCirc`** · **`sem_sltuCirc`** | ∀ input bits — **but still the BLOCK, not the three-organ chain (§2a stands)** |
+| `sliceASelect` | `sliceASelect_cert` | ⭐ **UNCONDITIONAL, ∀ Env** |
+| | `sliceASelect_selects` | **GUARDED** on `gsSelOf 3 2 E < 3`; discharged at every word by `C1Organ.sliceASelect_of_decoder_driven` |
 | `ruledEnc` | `ruledEnc_cert` | `rfl`, exact, ∀ env |
-| `decoder` | `decoder_correct` (`Program.lean:7487`) | ⭐ **UNCONDITIONAL**, `∀ w, ctrlOf w = ctrlSpec w` |
-| | `decoder_wf` | total |
+| `decoder` | ⭐ `decoder_correct` (`Program.lean:7899`) | **UNCONDITIONAL**, `∀ w, ctrlOf w = ctrlSpec w` |
+| `pcNext` / `pcAdd` | `sem_pcNext` · `sem_pcAdd` | ∀ words — the pc path is ∀-level too |
+| *(operand-B mux)* | `sem_obMux` (`HDL/OperandBMux.lean`) | ⚠️ **A DEDICATED ORGAN EXISTS.** My §3.5 re-price offered `genSelect 2 1` as the missing part; that was a substitute for a part already built. |
 
-⚠️ **SO THE HONEST SUMMARY OF CERTIFICATE STRENGTH, because an RTL datasheet will want
-to overstate it: `sliceASelect` and `decoder` are UNCONDITIONAL; the adder, the bitwise
-blocks and the comparators are SAMPLED.** *"Certified organs" is true and does not mean
-"∀-input verified" for all of them. `docs/LEDGER.md` is the flags-style record.*
+✅ **THE CORRECTED SUMMARY: essentially every Slice-A organ carries a ∀-level `sem_*`
+theorem.** *The `*_on_sample` certificates are points of theorems that now hold everywhere —
+`sem_adder32`'s own docstring says exactly that.*
+⚠️ **WHAT REMAINS GENUINELY LIMITED, and it is much smaller than what I claimed:** `sltCirc`'s
+theorem is about the **block**, not the `bitNot32 → adder32 → sltCirc` **chain** (§2a); and
+`sliceASelect_selects`' guard, though discharged for decoder-driven selects.
 
 ## 4. ⛔ WHAT SILICON MUST NOT TAKE FROM THIS
 
