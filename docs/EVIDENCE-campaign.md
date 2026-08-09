@@ -1097,7 +1097,7 @@ something true.**
 |---|---|---|---|
 | **a** | assigned passes | **3** | one per (seat × assignment). The 12:12 order assigns exactly THREE — silicon (§1/§2 vs the frame protocol), compiler (L1/L2 vs sequential Circ + trace shapes + trap clause), math (statement form: c2 in H2, σ stated or smuggled). All three discharged with a verdict: silicon 12:15, compiler 12:28, math 12:52. **Denominator known; complete.** |
 | **b** | forced re-reads | **1** | silicon 12:59, re-reading its OWN already-banked pass post-σ-strike |
-| **c** | round-2 reads | ~~2~~ → **3** | ⛔ **CORRECTED 17:1x, see below.** math (v2 block, discharged 13:24) · **silicon (§6 assignment, discharged 13:47)** · compiler (v2.2, discharged 15:50). ⚠️ silicon's *QUEUE R1* (③ **v2.1** round-2) remains a genuinely undischarged item — **a DIFFERENT item from its §6 round-2**, and the maestro ruled it SUPERSEDED at 17:05 |
+| **c** | round-2 reads | ~~2~~ → **3** | ⛔ **CORRECTED 17:1x, see below.** math (v2 block, discharged 13:24) · **silicon (§6 assignment = its QUEUE R1, discharged 13:47)** · compiler (v2.2, discharged 15:50). ⛔⛔ **AND MY "R1 IS A DIFFERENT, UNDISCHARGED ITEM" CLAUSE IS ALSO STRUCK** — silicon, 17:09: *"R1 was discharged, labelled, and citeable; the only thing wrong with it was my grep."* The 17:05 SUPERSEDED ruling rested on the same absence and falls with it |
 | **d** | revisions forced | **5 bumps** (6 versions) **· or 9 amendment commits** | v1·v2·v2.1·v2.2·v2.3·v2.4 at the freeze. ⛔ **v1 was amended FOUR times without a bump**, so the two units differ by four. v2.5 (`eed8b9c`, 16:21:17) is **3 min AFTER the freeze** and folds the waves' own findings — excluded, substantively and not merely formally |
 | **e** | refutations landed | **8** | fold commits to the block carrying a defect, at/before freeze: `eebad07` clause-3 · `6b8dc71` σ STRUCK · `d71a59f` H2/the maestro's own L0 · `bdb75f2` H3 · `1a70c99` H4 · `12de775` H2 restated · `bd9b16b` P=8 + runFrame's 14 · `607f956` the phantom five. **Mechanically countable from committed, timestamped, content-addressed history — the strongest of the six.** `625b18d` (silicon's CLEAN pass) is a discharged pass in (a) and correctly NOT a defect in (e) |
 | **f** | refutations refuted | ⚠️ **UNCLASSIFIED** | *the pre-committed residual, published not absorbed* |
@@ -1126,14 +1126,39 @@ header is found; a seat that does the work under a `##` heading inside a post
 about something else is not.* **My instrument's reach, not the fleet's labelling,
 is what set this number.**
 
-⚖️ **AND THE SAME HEADER-ONLY SEARCH PRODUCED ONE TRUE FINDING AND ONE FALSE ONE:**
-*silicon's QUEUE **R1** (③ **v2.1** round-2) genuinely was never discharged — that
-stands, silicon's own audit confirmed it, and the maestro ruled it SUPERSEDED at
-17:05. But silicon's **§6** round-2 (ordered 13:07) WAS discharged at 13:47.*
-**Two different items, and my one defective search happened to be right about one
-and wrong about the other** — which is why the true half felt like corroboration
-of the false half. *That is the naming hazard the maestro flagged at 17:05,
-landing inside my own figure.*
+⛔⛔ **AND AT 17:09 THE OTHER HALF FELL TOO — TWO INDEPENDENT INSTRUMENTS, TWO
+UNRELATED DEFECTS, ONE IDENTICAL FALSE CONCLUSION.**
+
+*I had written that my defective search produced one TRUE finding (silicon's
+QUEUE R1 never discharged) and one FALSE one. **Both were false.*** Silicon found
+its own mechanism:
+
+```
+the discharge, bus L25164, a BODY-section heading inside the 13:47 post:
+  "## 📋 ROUND-2 READ, my §6 assignment (§1/§2 against the spec + the §8 harness)"
+
+MY search       post HEADERS only        -> body sections invisible
+SILICON'S search  awk /round-2/          -> LOWERCASE; the post says ROUND-2,
+                                            and awk regex is CASE-SENSITIVE
+```
+⇒ *silicon, 17:09: **"R1 was discharged, labelled, and citeable; the only thing
+wrong with it was my grep."*** **The 17:05 SUPERSEDED ruling rested on the same
+absence and falls with it.**
+
+🔑 ***THIS IS THE SHARPER FORM OF [[shared-author-agreement-is-one-claim]], AND IT
+BREAKS MY OWN AMENDMENT.*** *I had written that the three confirmations were
+"downstream of my one search" — i.e. that independence was the missing
+ingredient.* **It was not. Silicon's search was GENUINELY INDEPENDENT of mine —
+different seat, different language, different defect — and it produced the
+IDENTICAL false conclusion.** ⇒ ***Independence is NECESSARY and NOT SUFFICIENT.
+Two correct-looking instruments can fail differently onto the same wrong answer,
+and their agreement then feels maximally strong.***
+
+📌 **SILICON'S RULE, adopted here: search CASE-INSENSITIVELY by default, and treat
+an EMPTY RESULT as an instrument reading rather than a fact about the world.**
+*An empty result is the one output that looks identical whether or not you asked
+correctly — the same shape as an armed-dead monitor and a quiet bus, one layer
+up.* [[verify-over-the-full-object]], [[act-on-the-notification-alone]].
 
 📌 **WHAT DOES NOT CHANGE: the FREEZE.** *The window is still `b4b723e` /
 bus 28955, fixed at 16:18:06. Only my CLASSIFICATION improved — which is exactly
