@@ -49,16 +49,20 @@
   MAESTRO-ONLY** — landings post "import owed" and the maestro wires
   + runs the full-build verdict (the one-hand rule; restated 17:32
   after a benign crossing).
-- **THE AUDIT-CAP TRAP (as CORRECTED by compiler's 20:4x retraction —
-  the earlier "unlandable-to" law here was FALSE and is struck): the
-  cap applies ONLY to saltbuild's AUDIT form (path form, `-M 12000`);
-  the full build's module form is UNCAPPED and cold-rebuilds fine
-  (measured: Immediate cold module-form EXIT=0, 79s). What survives:
-  path-form audits of `Immediate`, `Decoder`, `FabricRoutes` exit 134
-  at the default — USE `--cap 24000` FOR THOSE THREE, and an EXIT=134
-  on them is the CAP, not your edit.** ADD-BESIDE remains good
-  practice on its own merits; its cap justification is retracted. The
-  default cap does not move without a maestro ruling (20:09).
+- **THE CAP PICTURE (THIRD REVISION, 08-09 00:2x — the 20:4x
+  retraction itself contained a false claim, corrected by compiler
+  reading the lakefile): audit form `-M 12000` (the wrapper's path
+  arm); module form `-M 20000` PER PROCESS from `lakefile.toml`'s
+  weakLeanArgs — the full build is NOT uncapped; cold
+  reproducibility survives FOR THE RIGHT REASON (20,000 > 12,000;
+  Immediate cold-rebuilds EXIT=0, 79s, measured). Path-form audits
+  of `Immediate`, `Decoder`, `FabricRoutes` still exit 134 at
+  12000 — use `--cap 24000` for those three; EXIT=134 there is the
+  cap, not your edit. ⚠️ THE MACHINE-LEVEL GUARANTEE DOES NOT
+  EXIST: 4 seats × 20 GB = 80 GB of license on 64 GiB — the
+  Captain's own 8/6 measurement instruction covers exactly this
+  (see OPEN ITEMS).** ADD-BESIDE remains good practice on its own
+  merits. Caps do not move without a maestro ruling.
 
 ## COMPILER
 
@@ -267,6 +271,16 @@ OPEN ITEMS:
   would masquerade as a design problem). THE RULE: the core's
   submission config sets CLOCK_PERIOD to match the declared
   clock_hz, and the two files are reconciled in the same commit.**
+- **THE CAPTAIN'S CONCURRENCY-MEMORY MEASUREMENT (his own 8/6
+  close-of-board instruction, "measure the concurrency hazard
+  tomorrow" — LOST TWO DAYS, resurfaced 08-09 00:2x by silicon's
+  rollover-sweep line "a sweep that only deletes is half a sweep"):
+  compiler's, method fully banked (250 ms RSS sampling over live
+  lean pids, cold .lake/build, LEAN_NUM_THREADS as control). FIRES
+  WHEN SILICON'S TILE-FIT RUN CLEARS (maestro's word 00:2x — no
+  contention with a live Captain-facing measurement). Its output
+  prices the 80-GB-license-on-64-GiB question the third-revision
+  cap law names.**
 - B5 (T1): the click; Sept-7 13:00 PDT close; REF QUESTION + floor
   law remain his; fact sheet on his word. Adjacent MONEY item from
   the muster flags: PCBs 0/80 — the real TT scarcity; ordering is
