@@ -83,9 +83,14 @@ fact.
   load/store with the ISA).
 - **A verified executive** (cooperative first) with fairness and
   isolation invariants stated on a total-transition ISA spec.
-- **The RISC-V slice laid out** — possibly as co-tenant of the
-  switch's tile (88% headroom by design), making one submission a
-  verified system-on-tile.
+- **The RISC-V slice laid out** — first cut as RTL (no 5-op module
+  exists yet; `core32` is full RV32I, not a submission artifact),
+  then hardened; possibly as co-tenant of the switch's tile, where
+  silicon's measured shape says co-tenancy is nearly free and the
+  register file decides — one submission as a verified
+  system-on-tile if the numbers hold. [The "88% headroom" that
+  briefly stood here was an adjacent-object misread of a third
+  party's utilization figure; struck 8/8 19:1x.]
 - Slice B of the ISA (LW/SW/JAL/JALR/BNE) against the banked gates.
 
 ## Why this is repeatable (the method, one paragraph)
