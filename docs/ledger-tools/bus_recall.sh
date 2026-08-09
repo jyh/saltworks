@@ -81,6 +81,15 @@ END {
     print "   figure over an empty scope. A 100% on nothing is not a green."
     exit 3
   }
+  # WHOSE recall is this? Shipped rev1 without saying, and silicon read the
+  # output as its OWN filter results and had to withdraw a finding. The tool
+  # measures ONE anchor -- mine -- and the invitation "measure your recall"
+  # made that ambiguous. An instrument must name its subject in its output,
+  # not in the head of the seat that shipped it.
+  print  "⚠️  THIS MEASURES THE EVIDENCE UNION ANCHOR (a header is real if it"
+  print  "    follows a blank line OR its stamp is >= the running max). If YOUR"
+  print  "    filter differs, THESE ARE NOT YOUR MISSES -- they are mine, scored"
+  print  "    against the same bus. Compare anchors before comparing numbers."
   printf "bus_recall over %s (%d lines, %d headers in scope)\n", bus, lines, total
   printf "  accepted by the union anchor : %d\n", acc + 0
   printf "  MISSED                       : %d\n", miss + 0
