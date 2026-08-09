@@ -12,18 +12,15 @@
 ### ANSWERED by silicon 20:51/36a37a5: NOT a whole-core net and it
 ### CANNOT be made one — no whole-core object exists in the corpus,
 ### the parts have never been composed; against the named-parts
-### inventory — ⚠️ FIGURE ON HOLD (compiler 21:0x: regWrite is the
-### 32-way write-enable decoder composing IN SERIES with regNext,
-### +163 owed back into the 6,574; silicon RE-DERIVING; do not quote
-### the 17.6%/92.6% until its re-derivation lands; the SENTENCES'
-### directions are unaffected — the saving stays a small fraction,
-### the register file stays dominant) — it is a SUM not a
-### composition. Spend the −1,154 as REALIZED and SELECT-LOCAL,
-### never as a system figure. And the convergent tile finding,
-### STRENGTHENED by the amendment: the register file is 92.6% of the
-### named inventory — B1's memory organ competes with the REGISTER
-### FILE for the tile, not with the select. Both big #evals are now
-### kernel theorems (0625cc8: readTree=2982, regNext=3104)).
+### inventory (6,737 — SETTLED 21:03/5436bba after a three-layer
+### correction chain, 3,633→6,574→6,737, each layer caught by a
+### different seat; a SUM not a composition) it is 17.1%, and 11.9%
+### on the two-read-port model. Spend the −1,154 as REALIZED and
+### SELECT-LOCAL, never as a system figure. The register file is
+### 92.8% of the named inventory — B1's memory organ competes with
+### the REGISTER FILE for the tile, not with the select; both big
+### #evals are kernel theorems (0625cc8: readTree=2982,
+### regNext=3104)).
 ### PRECONDITIONS: phase 3+3b closed (constants at the ruled pair);
 ### the census at PASS/FAIL/UNREACHED/UNWIRED; compiler's night
 ### inventory may amend §B1. Scope audit: evidence 20:04,
