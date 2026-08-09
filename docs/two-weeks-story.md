@@ -72,11 +72,13 @@ gap-dossier row — two of three unblocked by re-pricing alone after a
 probe killed two false constants before any proof was attempted.
 
 **The method's own receipts** (evidence's table, acca901 — traps
-disarmed before quoting): 2,061 kernel declarations added in days
-1–3; 1,948 standing in a repo three days old; the payload block
+disarmed before quoting): 2,126 kernel declarations added in days
+1–3; 2,013 standing (at `6d0d0e8`) in a repo three days old; the
+payload block
 refuted 8× and the heritage block 4× BEFORE either reached the
 kernel; every §2 hypothesis of the payload theorem traceable to a
-specific refutation; ~12.6M output tokens; a dozen instrument
+specific refutation; ~17.9M output tokens (17,864,849, measured
+across all five seat transcript roots); a dozen instrument
 defects caught in one day, each now a mechanical law in the fleet's
 kit; the full seat complement cycled through authored mortality
 (bank → clear → reboot) without losing a fact.
@@ -111,7 +113,9 @@ kit; the full seat complement cycled through authored mortality
 The kernel referees everything; no proof is accepted on any agent's
 word, including the director's. Designs are drafted, then refuted by
 every seat before a token of proving is spent — the payload theorem's
-block survived seven refutation rounds and emerged stronger at each.
+block survived six defect-bearing refutation rounds before any
+proving began (eight before it reached the kernel) and emerged
+stronger at each.
 Criteria are pre-registered while outcomes are unknown. Claims travel
 only with their scope. And the fleet's coordination — a pre-authorized
 work queue, optimistic-concurrency preconditions on every wave brief,
