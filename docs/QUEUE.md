@@ -108,10 +108,23 @@
   lifted by rewrite with zero re-execution, the undecodable-word
   boundary shown with witnesses. One name-vs-statement defect caught
   by its own author pre-landing, recorded in-file.
-- W5 · WRITE · **GATED(the Captain's morning review)** — the `core`
-  construction: the seam between machine words and gates (compiler's
-  named next, inventory Q1). Registered, not fired: capacity may be
-  redirected to tiny-Rust/B-ISA waves at review.
+- W5 · WRITE · **OPEN — COUNCIL RULING #4 (09:2x, the Captain,
+  option (a) interleaved): "even if we choose the packet-IO route,
+  I'd like our original plan to be complete, verified, and ready
+  for tapeout... I would actually tend toward (a), in case we
+  encounter issues it may feed back."** The `core` construction:
+  assemble the certified organs into ONE machine and prove the
+  single-cycle refinement (assembled gates, clocked once, = stepT).
+  METHOD: the probe pattern at scale — instOK per organ, sem_*
+  certificates consumed by rewrite, never re-proved; the 8/7
+  assembly plan's row map + StateCodec conformance. PRE-NAMED
+  RISKS: sigma off-by-ones (the probe's own bar-3 class), composite
+  heaviness (the audit-cap rider stands), StateCodec/encode
+  agreement. THE PRIZE: emitS the completed core as the tapeout
+  RTL — the fabbed thing becomes the verified thing. INTERLEAVED
+  at compiler's seam with tiny-Rust N-waves and B-ISA (one write
+  track, compiler's sequencing judgment); issues FEED BACK to the
+  design docs immediately, per the Captain's rationale.
 - W6 · MEAS · **APPROVED 20:18 (maestro), compiler's slot** — the
   TARGETED COLD-COST CENSUS: path-form elaboration at the DEFAULT cap
   of plausibly-over-cap modules (decide +kernel over large ranges),
