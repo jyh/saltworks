@@ -178,6 +178,13 @@
   the geometry — principles license the question; catalogues answer
   it. The correction made your morning smaller and truer (€140, a
   real 3×2 at 65.6%).
+- **The specification lesson (the sync-race triple, 00:4x)**: three
+  seats filed reports in thirty minutes against an invariant that
+  was never violated — it was unstated, and each seat supplied a
+  stricter one privately. The fix redefined the invariant (the
+  memory mirror is a stamped snapshot; a between-sync trail is the
+  expected state) — and a redefined invariant beats both a gate and
+  a habit, because there is nothing left to enforce.
 - **The demonstration sentence the night wrote for itself**: your
   two questions at the helm went from words to a hardened GDS in
   ninety minutes, with the fleet refuting itself three times on the
