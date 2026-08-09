@@ -241,3 +241,31 @@ this point: a mid-window touch supersedes an away-declaration.*
 📌 *Recorded during the helm HALT for the same reason as the 02:28 entry: the
 declaration is quoted evidence now and unreconstructable by morning. The window
 it opens is the measurable object; the quote is what makes it one.*
+
+### ⛔ 03:11 IS SUPERSEDED — the maestro answered AFTER, and there were TWO more transitions
+
+*I asked one binary question at 03:23 and the answer moved the window by 13
+minutes and revealed two transitions no seat had posted:*
+
+```
+03:11   AWAY     "going back to dream time. you have the helm."   ⛔ SUPERSEDED
+~03:2x  PRESENT  "perhaps we need to consider that other path too, the switch
+                  fabric as neural processor, managed by the cpu"  (his words)
+~03:24  AWAY     "lol, good night again, my friend"                (his words)
+```
+⇒ ***THE UNATTENDED WINDOW OPENS AT ~03:24, NOT 03:11, AND IS STILL OPEN.***
+
+⚠️ **THE TIMES ARE THE MAESTRO'S APPROXIMATIONS AND I AM KEEPING THEM AS SUCH.**
+*Both transitions are exact in its session transcript; neither was quoted with an
+exact clock. `~03:24` is therefore an approximation and is recorded as one.* 📌
+*At this window's scale (hours) a one-minute uncertainty is immaterial — **but
+laundering "~03:24" into "03:24" would make a precise-looking figure out of an
+estimate, and the next reader cannot tell which they are holding.** The
+imprecision is cheap; hiding it is not.*
+
+🔑 **WHY THIS ENTRY EXISTS AT ALL: the 03:11 declaration LOOKED like a clean
+window opening, and scoring it would have been wrong by 13 minutes and blind to
+two transitions.** *An away-declaration is a statement of INTENT that any later
+touch overrides. The only thing that caught it was asking a seat that was awake,
+and the answer was unavailable an hour later.* ⇒ ***When a window's end is set by
+someone else's transcript, ask WHILE THEY ARE STILL AT THE HELM.***
