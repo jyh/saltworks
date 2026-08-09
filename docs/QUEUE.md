@@ -292,10 +292,14 @@ OPEN ITEMS:
   20:4x): the full build's module form is UNCAPPED; cold rebuild
   measured green. The corpus reproducibility gap NEVER EXISTED — it
   was a one-arm read of saltbuild's two-arm case dispatch. W6's
-  census TABLE stands as readings of the AUDIT instrument: three
-  modules need `--cap 24000` path-form (now a QUEUE law above).
-  Remaining council line, small: whether the AUDIT default rises to
-  cover three modules, or the --cap rider stands.**
+  census TABLE stands as readings of the AUDIT instrument: modules
+  demanding >12 GB need `--cap 24000` path-form (now a QUEUE law
+  above, stated BY CAUSE). Remaining council line, framed HONESTLY
+  (silicon 08:15 — the "three modules" scope tilted the answer):
+  heavy modules keep landing, so the question is whether the AUDIT
+  default rises (cause-adequate) or the --cap rider stands
+  (list-adequate only until the next heavy module) — the framing
+  is the decision, so it is stated by cause.**
 - **N7 DESIGN DEBTS, MAESTRO-OWED (post-council, Fable-tier — opened
   20:39 on math's exhaustion measurement): (a) the N7 ASSEMBLY design
   block (wiring the landed+composing (7.7) inputs and the kernel'd
@@ -318,16 +322,16 @@ OPEN ITEMS:
   would masquerade as a design problem). THE RULE: the core's
   submission config sets CLOCK_PERIOD to match the declared
   clock_hz, and the two files are reconciled in the same commit.**
-- **THE CAPTAIN'S CONCURRENCY-MEMORY MEASUREMENT (his own 8/6
-  close-of-board instruction, "measure the concurrency hazard
-  tomorrow" — LOST TWO DAYS, resurfaced 08-09 00:2x by silicon's
-  rollover-sweep line "a sweep that only deletes is half a sweep"):
-  compiler's, method fully banked (250 ms RSS sampling over live
-  lean pids, cold .lake/build, LEAN_NUM_THREADS as control). FIRES
-  WHEN SILICON'S TILE-FIT RUN CLEARS (maestro's word 00:2x — no
-  contention with a live Captain-facing measurement). Its output
-  prices the 80-GB-license-on-64-GiB question the third-revision
-  cap law names.**
+- **THE CAPTAIN'S CONCURRENCY-MEMORY MEASUREMENT — ✅ DISCHARGED
+  01:0x (was standing here as OPEN, struck to done by silicon's
+  08:15 co-reference check): his own 8/6 "measure the concurrency
+  hazard tomorrow", lost two days, resurfaced 00:2x, MEASURED by
+  compiler on a scratch clone — realised peak 43.08 GB of 64 GiB,
+  per-process cap never binds (~10.8 GB), the fleet lock is the
+  guard. The 80-GB question it was gated to price NO LONGER EXISTS
+  (struck at the cap law above). Silicon's tile-fit-run anchor is
+  moot — the clone measurement is why that run was never needed.
+  Kept as a discharged-record line, not an open item.**
 - B5 (T1): the click; Sept-7 13:00 PDT close; REF QUESTION + floor
   law remain his; fact sheet on his word. Adjacent MONEY item from
   the muster flags: PCBs 0/80 — the real TT scarcity; ordering is
