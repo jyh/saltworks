@@ -73,10 +73,46 @@ completely different instrument.** *Two tools, no shared input, one structure.*
    lesson). If B1 wants more than 16 words, the question to ask is "SRAM macro?",
    not "how many more flops can we afford?"*
 
-## 6 · ⛔ NOT PRICED HERE — the scope, inside the verdict
+## 6 · B4's ALIGNMENT MASK — STATED AT THE RTL, AND IT IS EFFECTIVELY FREE
 
-- **B4's alignment mask** — a separate assigned row; these are word-addressed
-  with NO byte enables. *Byte writes would add a mask layer this table omits.*
+`SaltWorks/Silicon/RTL/dmem_addr16.v`, same flow and PDK:
+```
+                    cells   area µm²   % of the dmem16 it guards
+alignment mask         14       83.8            0.40%
+```
+**THE MASK, stated exactly** (32-bit words, 16 words = 64 bytes at base 0):
+```
+misaligned    <=>  byte_addr[1:0] != 2'b00
+out_of_range  <=>  byte_addr[31:6] != 0
+trap          <=>  req & (misaligned | out_of_range)
+effective we  <=>  we & req & !misaligned & !out_of_range
+```
+⇒ ***AT 0.40% THERE IS NO COST ARGUMENT FOR OMITTING IT.*** *B4 can be answered
+"state the mask, prove the mask" without any budget conversation at all.*
+
+### ⭐ AND A DESIGN FINDING, not packaging: THE MASK CANNOT LIVE IN THE ORGAN
+
+**`dmem8/16/32` take `addr` as a WORD INDEX. A word-indexed memory CANNOT
+EXPRESS A MISALIGNED ACCESS — there is no bit in its interface that could be
+wrong.** *So the alignment trap lives in the ADDRESS PATH upstream, never inside
+the memory.* 🔑 ***This satisfies B4's "the memory organ must not silently widen
+the state the executive later quantifies over" BY CONSTRUCTION: the organ's
+state is 16×32 bits and no address input can reach outside it.*** **Anyone
+pricing "the memory with alignment" as one number is pricing two separable
+organs — and the separation is exactly what makes the trap provable.**
+
+⚠️ **THE LOAD-BEARING TERM IS THE WRITE SUPPRESSION, not the trap flag.** *A trap
+that raises a flag but still lets `we` through writes the wrong word and then
+reports an error — **B-EXEC E2's isolation frame theorem would be FALSE while the
+trap logic looked correct.*** `we_out` is gated on the SAME predicate `trap` is
+raised on, so the two cannot disagree. *That is the one line in this module worth
+a reviewer's attention.*
+
+⛔ **IT DOES NOT COVER LB/LH/SB/SH** — not among Slice-B's five ops. *If they
+arrive this module is **WRONG**, not incomplete: the mask becomes width-dependent
+and `we_out` needs byte enables. Named so it fails loudly rather than quietly.*
+
+## 7 · ⛔ NOT PRICED HERE — the scope, inside the verdict
 - **The SRAM-macro alternative** — named above as the lever, not measured. *TT
   tile support for macros is unverified by me.*
 - **Routing, placement, congestion** — yosys pre-layout areas, one mapping pass.
