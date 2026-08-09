@@ -111,4 +111,33 @@ theorem macSeq_step_word (acc addend : BitVec 32) :
   simp only [stepSeq, sem, hcore, hnout, houts, List.map_append, hmapped]
   rw [ht, hd]
 
+/-! ## RUNG 3 — THE TRACE INDUCTION
+
+The rung the cell-wave ruling actually names: `macRun ≈ runTrace macSeq`. With
+rung 2 supplying one cycle, this is an induction on the addend list — the trace
+length **is** the cycle index, so no fuel parameter appears here either. -/
+
+/-- ⭐⭐ **RUNG 3.** Running a whole trace of addends leaves the accumulator
+holding their sum. Still `BitVec`, still unconditional. -/
+theorem macSeq_runTrace_state (acc : BitVec 32) :
+    ∀ addends : List (BitVec 32),
+      (runTrace macSeq (MacCell.bitsOf acc) (addends.map MacCell.bitsOf)).2
+        = MacCell.bitsOf (acc + addends.sum)
+  | [] => by simp [runTrace]
+  | a :: as => by
+      have hstep := macSeq_step_word acc a
+      simp only [List.map_cons, runTrace, hstep, List.sum_cons]
+      rw [macSeq_runTrace_state (acc + a) as, add_assoc]
+
+/-- **CONTROL — the trace rung computes, and it is not the empty statement.**
+Three addends `1, 2, 4` from a zero accumulator leave `7`. -/
+theorem runTrace_witness :
+    ((0 : BitVec 32) + ([1, 2, 4] : List (BitVec 32)).sum) = 7 := by decide
+
+/-- **MUTANT — order does not matter for `+`, but PRESENCE does.** Dropping one
+addend changes the result, so the induction is not silently ignoring its input. -/
+theorem runTrace_mutant_dropped_addend :
+    ((0 : BitVec 32) + ([1, 2] : List (BitVec 32)).sum)
+      ≠ ((0 : BitVec 32) + ([1, 2, 4] : List (BitVec 32)).sum) := by decide
+
 end SaltWorks.HDL.MacBridge
