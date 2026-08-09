@@ -43,10 +43,15 @@ the way: a framework-level law — no sequential machine, of any state
 width, rotates a bit-serial stream at zero offset — so the 1988
 design's one-cycle offset was causally forced, not a pipelining cost.
 
-**A 5-op RISC-V slice that runs programs.** ADD/ADDI/XOR/SLT/BEQ,
-with a certified ALU-select and instruction-encoder (each carrying
-its own semantics theorem and mutation controls), demonstrated on a
-Batcher-sort program using two proved compile-around lowerings. A
+**A 5-op RISC-V ISA slice with a certified spine.** ADD/ADDI/XOR/
+SLT/BEQ, with a certified ALU-select and instruction-encoder (each
+carrying its own semantics theorem and mutation controls) and an
+executing interpreter in the corpus. Stated exactly: the Batcher-sort
+demonstration is DESIGNED — its feasibility demand-traced with two
+provable compile-around lowerings — and its program artifact is
+queued, not yet written [corrected 8/8 19:1x by compiler's inventory
+before this document traveled anywhere; the claim previously here
+outran the corpus]. A
 same-day re-sizing of the select (10 sources → the ruled (3,2) pair)
 ran ruling-to-census-close in one day — 99.65% of surviving theorem
 statements byte-identical across the swap — with the freed 1,154
