@@ -59,6 +59,10 @@ set -u
 
 SALTBUILD=/Users/jyh/projects/claude/saltbuild.sh
 [ -x "$SALTBUILD" ] || { echo "⛔ meas_build: $SALTBUILD not executable"; exit 2; }
+# The retry cap for the differential test below. saltbuild.sh's default is
+# 12000 MB and applies to the PATH form only (its :35 arm). 24000 is the value
+# at which compiler measured all three of their heavy modules passing.
+HICAP=24000
 
 rc_all=0
 
@@ -80,6 +84,7 @@ for target in "$@"; do
   # ⛔ NEVER PIPE saltbuild.sh — `$?` after a pipe is the tail's status and it
   # fails in the reassuring direction. Capture to a file, judge by the TEXT.
   out=$(mktemp) || { echo "⛔ meas_build: mktemp failed"; exit 2; }
+  capnote=""
   attempt=0
   while : ; do
     attempt=$((attempt + 1))
@@ -120,6 +125,34 @@ for target in "$@"; do
   # taken from cache; the correct number is one I can actually measure.
   nimp=$(grep -cE '^import ' "$target")
 
+  # ⭐⭐ THE CAP IS THE INSTRUMENT'S, NOT THE FILE'S — compiler's 20:40 retraction,
+  # and it lands squarely on this gate. saltbuild.sh:35 gives the PATH form
+  # `-M $CAP` (default 12000 MB); :36 gives the MODULE form no `-M` at all. Since
+  # this gate REFUSES the module form, it runs the only capped arm — so on a heavy
+  # module it gets EXIT=134 and would report a failure that is the CAP, not the
+  # file. That misread is the whole of compiler's real finding: they hit it and
+  # concluded the corpus was frozen.
+  #
+  # ⛔ DO NOT classify this by exit code or by Lean's message text, and do not
+  # hardcode the three known-heavy modules (Immediate, Decoder, FabricRoutes) —
+  # a fourth appears the moment someone lands one. [[lean-memory-cap-strings]]:
+  # CLASSIFY BY DIFFERENTIAL TEST. Re-run at a higher cap; if it passes, the cap
+  # was the cause, and that is a fact about the instrument.
+  if [ "$code" != "0" ] && [ "$h1" = "$h2" ]; then
+    out2=$(mktemp) || { echo "⛔ meas_build: mktemp failed"; exit 2; }
+    g1=$(shasum -a 256 "$target" | cut -c1-12)
+    "$SALTBUILD" --cap "$HICAP" "$target" > "$out2" 2>&1
+    g2=$(shasum -a 256 "$target" | cut -c1-12)
+    line2=$(grep -E '^saltbuild EXIT=[0-9]+$' "$out2" | tail -1)
+    if [ "$line2" = "saltbuild EXIT=0" ] && [ "$g1" = "$g2" ]; then
+      code=0
+      capnote=" · needed --cap $HICAP"
+      printf 'ℹ  %s — EXIT=%s at the default cap, EXIT=0 at %sMB.\n' "$target" "${line#saltbuild EXIT=}" "$HICAP"
+      printf '   ⇒ THE CAP IS THE INSTRUMENT, NOT THE FILE. Not a defect in this module.\n'
+    fi
+    rm -f "$out2"
+  fi
+
   # The custody pin is judged BEFORE the exit code, because an unattributable
   # green is not a weaker green — it is not evidence at all, and reporting it
   # as green with a footnote is how it gets quoted without the footnote.
@@ -132,7 +165,7 @@ for target in "$@"; do
   fi
 
   if [ "$code" = "0" ]; then
-    printf '✅ %s — KERNEL-CHECKED under this hand · %ss · EXIT=0 @ sha %s\n' "$target" "$wall" "$h1"
+    printf '✅ %s — KERNEL-CHECKED under this hand · %ss · EXIT=0 @ sha %s%s\n' "$target" "$wall" "$h1" "$capnote"
     printf '   scope: TARGET elaborated fresh by the kernel. Its %s direct imports and\n' "$nimp"
     printf '          their transitive closure came from cached oleans — NOT re-checked here.\n'
   else
