@@ -15,8 +15,12 @@ everyone makes in their head — *"but the circuit cannot see `rd` or `rs1`"* �
 and nameless**, and the `ADDI` sign-extension path is the one the ISA's own docstring
 calls *"the single most common formalisation bug"*. So it is named here.
 
-⇒ ***`immICirc_correct_on_any_word` is what a `core` assembly actually needs, because the
-assembled instruction word is not a fixture.***
+⇒ ***`immICirc_extracts_the_field` (§2b) is what a `core` assembly actually needs, because
+the assembled instruction word is not a fixture — it takes a WORD and no hypothesis.***
+📌 *This sentence originally named §2's `immICirc_correct_on_any_word` and was corrected
+20:3x in the same commit that landed §2b, per the standing law that when you land a fact you
+grep the corpus for prose asserting otherwise. §2 still routes through the `wordI v`
+fixture; that is precisely the shape mismatch §2b exists to fix.*
 
 ## ⛔ WHY THIS IS A SEPARATE FILE AND NOT THREE THEOREMS APPENDED TO `Immediate.lean`
 
@@ -101,6 +105,47 @@ theorem immICirc_correct_on_any_word (w : BitVec 32) (v : Nat) (hv : v < 4096)
   have h := List.all_eq_true.mp immI_correct v (List.mem_range.mpr hv)
   exact eq_of_beq h
 
+/-! ## 2b · ⭐⭐ THE CONSUMER'S SHAPE — added 20:3x, and it is a SELF-CATCH
+
+⛔ **MATH'S 20:28 LAW, AIMED AT THIS FILE FIFTEEN MINUTES AFTER IT LANDED.** Their words:
+*"A supply row stated in a shape its consumer does not use is a mismatch someone discovers
+MID-WAVE"* — they found one in the row they were proudest of, and **the same disease was
+in §2 above.**
+
+`immICirc_correct_on_any_word` routes through the fixture: it wants a `v`, a proof that
+`v < 4096`, and a proof that `w` agrees with **`wordI v`** on bits `20…31`. ⚠️ ***But a
+`core` assembly does not have a `v` and an agreement proof. It has a WORD.*** So the
+theorem was true and awkward — and nothing in the kernel was ever going to refuse it,
+exactly as math observed. **The row was true, just unusable.**
+
+⇒ ***Below is the shape a consumer actually uses: no fixture, no `v`, NO HYPOTHESIS AT
+ALL.*** Given any word, the organ emits the sign extension of **that word's own** I-type
+immediate field, `w.extractLsb' 20 12` — the same extraction idiom `ISA.lean`'s own field
+lemmas use (`:386-411`). *§2 is kept, not deleted: it is the direct tie to `immI_correct`'s
+exhaustive 4096-value kernel sweep, which is the provenance. But §2b is the one to cite.* -/
+
+/-- ⭐⭐ **`immICirc` SIGN-EXTENDS THE WORD'S OWN IMMEDIATE FIELD — `∀ w`, no hypothesis.**
+The consumer's shape. `w.extractLsb' 20 12` is the I-type immediate (`imm[11:0]` at word
+bits `31:20`), and the organ's 32 outputs are exactly its sign extension.
+
+The proof is the wiring read twice: for `k < 12` output `k` is word bit `20 + k`, which is
+`getElem_extractLsb'`; for `k ≥ 12` it is word bit `31`, which is the extract's `msb`. **The
+two branches of `immI` ARE the two branches of `signExtend`** — that correspondence is the
+whole content, and it is why the organ needs zero gates. -/
+theorem immICirc_extracts_the_field (w : BitVec 32) :
+    sem immICirc (fun i => w.getLsbD i)
+      = (List.range 32).map ((w.extractLsb' 20 12).signExtend 32).getLsbD := by
+  simp only [sem, immICirc, run_nil, List.map_map]
+  apply List.map_congr_left
+  intro k hk
+  have hk32 : k < 32 := List.mem_range.mp hk
+  simp only [Function.comp_def, immI]
+  rw [BitVec.getLsbD_eq_getElem hk32, BitVec.getElem_signExtend hk32]
+  by_cases h : k < 12
+  · rw [if_pos h, dif_pos h, BitVec.getElem_extractLsb' h]
+  · rw [if_neg h, dif_neg h]
+    simp [BitVec.getMsbD_eq_getLsbD]
+
 /-! ## 3 · ⛔ WHAT THIS DOES NOT SAY
 
 1. **It does not widen `immI_correct`'s coverage of the IMMEDIATE.** That was already
@@ -118,5 +163,6 @@ theorem immICirc_correct_on_any_word (w : BitVec 32) (v : Nat) (hv : v < 4096)
 #audit_axioms immI_outs_in_field
 #audit_axioms immICirc_reads_only_the_imm_field
 #audit_axioms immICirc_correct_on_any_word
+#audit_axioms immICirc_extracts_the_field
 
 end SaltWorks.HDL
