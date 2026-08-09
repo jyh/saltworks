@@ -88,4 +88,6 @@ import SaltWorks.HDL.CorePlace
 import SaltWorks.HDL.SingleLevel
 import SaltWorks.HDL.SubFragment
 import SaltWorks.HDL.MacInduction
+import SaltWorks.HDL.MacCell
+import SaltWorks.HDL.AccountMeasure
 import SaltWorks.Tactic.AuditAxioms
