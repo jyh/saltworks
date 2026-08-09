@@ -121,4 +121,16 @@ non-uniform, sums to `3 ≡ 0 (mod 3)`, and **heals**.  `Σrᵢ ≢ 0 (mod k)` i
 theorem schedule_12_heals :
     applySchedule (addr88 true 4) [1, 2] = addr88 true 4 := by decide
 
+#audit_axioms hdr88
+#audit_axioms hdr88_zero
+#audit_axioms hdr88_succ
+#audit_axioms hdr88_eq_iterate
+#audit_axioms addr88_length
+#audit_axioms hdr88_full_circle
+#audit_axioms stage_reads_original_bit
+#audit_axioms rotFrame88_hdr
+#audit_axioms applySchedule
+#audit_axioms schedule_11_does_not_heal
+#audit_axioms schedule_12_heals
+
 end SaltWorks.HDL

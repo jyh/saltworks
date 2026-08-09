@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Jason Hickey, Claude
 -/
 import Mathlib
+import SaltWorks.Tactic.AuditAxioms
 
 /-!
 # ④ piece 1 — the full circle: `rot^k = id`
@@ -84,5 +85,11 @@ theorem rotate_full_circle (addr : List α) (k : ℕ) (hk : addr.length = k) :
 theorem rotStage_iterate_id (addr : List α) (k : ℕ) (hk : addr.length = k) :
     rotStage^[k] addr = id addr :=
   rotate_full_circle addr k hk
+
+#audit_axioms rotStage
+#audit_axioms rotStage_eq
+#audit_axioms rotStage_iterate
+#audit_axioms rotate_full_circle
+#audit_axioms rotStage_iterate_id
 
 end SaltWorks.HDL
