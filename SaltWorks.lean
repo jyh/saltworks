@@ -81,4 +81,5 @@ import SaltWorks.HDL.RotationInvariant
 import SaltWorks.HDL.Skew
 import SaltWorks.HDL.SortDemo
 import SaltWorks.HDL.Rotation
+import SaltWorks.HDL.Executive
 import SaltWorks.Tactic.AuditAxioms
