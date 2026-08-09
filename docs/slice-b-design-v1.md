@@ -12,12 +12,13 @@
 ### ANSWERED by silicon 20:51/36a37a5: NOT a whole-core net and it
 ### CANNOT be made one — no whole-core object exists in the corpus,
 ### the parts have never been composed; against the named-parts
-### inventory (6,737 — SETTLED 21:03/5436bba after a three-layer
-### correction chain, 3,633→6,574→6,737, each layer caught by a
-### different seat; a SUM not a composition) it is 17.1%, and 11.9%
-### on the two-read-port model. Spend the −1,154 as REALIZED and
+### inventory (6,898 — FOURTH AND FINAL pass 22:02, the correction
+### chain 3,633→6,574→6,737→6,898, three of four layers caught by
+### peers, the last a census-population gap exposed by compiler's
+### retraction — Stack/Program.lean was never scanned; a SUM not a
+### composition) it is 16.7%. Spend the −1,154 as REALIZED and
 ### SELECT-LOCAL, never as a system figure. The register file is
-### 92.8% of the named inventory — B1's memory organ competes with
+### 90.6% of the named inventory — B1's memory organ competes with
 ### the REGISTER FILE for the tile, not with the select; both big
 ### #evals are kernel theorems (0625cc8: readTree=2982,
 ### regNext=3104)).
