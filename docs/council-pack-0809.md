@@ -18,6 +18,11 @@
    [CORRECTED 22:51 — silicon's own catalogue catch: the placer
    allows height ∈ {1,2,4} only, so a 3×3 does not exist; the 3×2
    is comfortable with DRV+ECO room]
+   ⚠️ [23:07 HOLD — the "2×2 refused" verdict rests on a density
+   assumption silicon is now re-measuring with a decisive run in
+   flight, pre-registered both ways: a PASS means the 2×2 fits
+   after all and saves you €140–420; a FAIL grounds the 3×2 on
+   measurement. This marker is replaced by the verdict.]
    (the 2×2 was refused by silicon's own PRE-REGISTERED bar —
    published before either hardening run — at 99.7%; and the
    smaller byte-wide core is itself 95.1% post-layout, so the 2×2
