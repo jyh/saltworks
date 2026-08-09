@@ -1,4 +1,14 @@
-import SaltWorks
+import SaltWorks.HDL.Decoder
+import SaltWorks.HDL.Immediate
+import SaltWorks.HDL.ReadTree
+import SaltWorks.HDL.Bitwise
+import SaltWorks.HDL.Adder
+import SaltWorks.HDL.SelectCut32
+import SaltWorks.HDL.EncoderE1
+import SaltWorks.HDL.OperandBMux
+import SaltWorks.HDL.RegWrite
+import SaltWorks.HDL.RegNext
+import SaltWorks.Stack.Program
 
 set_option maxRecDepth 100000
 
