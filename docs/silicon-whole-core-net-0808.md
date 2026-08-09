@@ -2,12 +2,37 @@
 ### 2026-08-08 ~20:5x, SILICON. Owed per `slice-b-design-v1.md:10–14` before
 ### the banked figure is spent as a system budget. Measured, not reasoned.
 
+## ⛔ AMENDED 21:0x — MY INVENTORY MISSED THE WRITE PATH. THE SUM NEARLY DOUBLES.
+
+**`regNext` (`regNextN 32 32`: nIn 1088, outs 1024) is 3,104 gates — the WHOLE
+FILE's next-state logic. I inventoried `regWrite` (163) instead, which is ONE
+register's write cell and a COMPONENT of `regNext`, not an addition to it.**
+*Found because compiler landed `regNext_gate_count` beside the `readTree` row I
+asked for; their "sibling" was an object I did not know existed.*
+```
+                        published 20:5x    CORRECTED
+named datapath sum          3,633           6,574
+−1,154 as a fraction          32%            17.6%
+register-file share            82%           92.6%   (readTree + regNext)
+```
+🔑 ***THE CORRECTION STRENGTHENS EVERY CONCLUSION BELOW AND CHANGES NONE OF
+THEM.*** *The register file is 93% of the named datapath, not 82%; −1,154 is a
+smaller fraction of the core, not a larger one; and "the memory organ competes
+with the register file" is now the overwhelming reading rather than the merely
+dominant one.*
+⚠️ **AND MY 17% WAS RIGHT FOR THE WRONG REASON** — I got it by DOUBLING the read
+port (2 × 2,982). The truth is that the write path was missing mass. *Both
+corrections together — two read ports AND `regNext` — give **9,556 gates and
+12.1%**.* See [[right-conclusion-wrong-reason]].
+📌 **CITERS: `slice-b-design-v1.md` B1 carries `3,633` and `32%`. Replace with
+`6,574` and `17.6%`; the register-file share becomes `92.6%`.**
+
 ## THE ONE LINE
 
 > **NO — and it cannot be made one from this corpus, because THERE IS NO
 > WHOLE-CORE OBJECT TO TOTAL. Against the named datapath, measured tonight at
-> 3,633 gates, the −1,154 is 32% — and against a realistic two-read-port
-> datapath (~6,615) it is 17%, not the ~70% it looks like read select-locally.**
+> 6,574 gates (AMENDED — see above), the −1,154 is 17.6%, not the ~70% it looks
+> like read select-locally. With a second read port it is 12.1%.**
 
 ## 1 · WHY IT CANNOT BE MADE ONE — the composition does not exist
 
@@ -32,26 +57,44 @@ honest one: the parts have never been wired together in the kernel.*
 
 ```
 object       gates   how known        note
-readTree     2,982   #eval ONLY       nIn 997 = 31 regs x 32 bits + 5 sel; outs 32
+regNext      3,104   THEOREM (0625cc8) regNextN 32 32; nIn 1088, outs 1024 —
+                                       the WHOLE FILE's next-state (write path)
+readTree     2,982   THEOREM (0625cc8) nIn 997 = 31 regs x 32 bits + 5 sel; outs 32
 aluSelect      291   THEOREM          post-recut; asSelBits = 2; 96*(2^2-1)+2+1
-regWrite       163   #eval ONLY       nIn 7, outs 32 — the write DECODER
 pcNext          99   THEOREM
 obMux           97   THEOREM          namespace SaltWorks.HDL.OperandB
 immBCirc         1   THEOREM
 immICirc         0   THEOREM
              ─────
-SUM          3,633   ← a SUM OF NAMED PARTS, *not* a verified composition
+SUM          6,574   ← a SUM OF NAMED PARTS, *not* a verified composition
+                       of which the REGISTER FILE is 6,086 = 92.6%
+
+  regWrite     163   NOT SUMMED — it is ONE register's write cell and a
+                     COMPONENT of regNext (RegNext.lean imports RegWrite).
+                     Adding both would double-count. This is the error the
+                     20:5x version of this file shipped.
 ```
+✅ **Both `#eval`s in the 20:5x version are THEOREMS now** — compiler landed
+`readTree_gate_count = 2982` (matching my independent evaluation exactly) and
+`regNext_gate_count = 3104` in `0625cc8`. *The recommendation in §3 below is
+DISCHARGED; it is kept because the reasoning for it still applies to the next
+uncounted object.*
 ⚠️ **The sum is mine, computed outside the kernel. Nothing proves these parts
 compose, and the sum omits the decoder, control, and all glue.** *Quote it as an
 inventory, never as a core.*
 
 ## 3 · ⭐ THE FINDING THAT MATTERS MOST — the biggest object has no theorem
 
-🔑 ***`readTree` is 2,982 gates — 82% of the entire named inventory, and more
-than TWICE the whole pre-cut select (1,445). Its size is an `#eval`. So is
-`regWrite`'s. The corpus holds 88 proven gate-count theorems and they cover
-everything EXCEPT the two largest objects in it.***
+🔑 ***AS WRITTEN AT 20:5x, AND THE REASONING IS WHY THE CORRECTION ABOVE EXISTS:
+`readTree` is 2,982 gates — more than TWICE the whole pre-cut select (1,445) —
+and its size was an `#eval`, not a theorem. The corpus held 88 proven gate-count
+theorems and they covered everything EXCEPT its largest objects.***
+✅ **DISCHARGED within four minutes: compiler landed both counts as
+`decide +kernel` theorems (`0625cc8`).** ⚠️ **AND THE LANDING IS WHAT EXPOSED MY
+OWN ERROR — the "sibling" they added was `regNext`, the 3,104-gate object I had
+never found, which is why the corrected register-file share is 92.6% and not the
+82% this section originally claimed for `readTree` alone.** *Asking for a number
+to be checked is how I discovered I had measured the wrong object.*
 
 ⚠️ **An `#eval` is not a theorem**: it is evaluated by the compiler, carries no
 kernel check, and `#audit_axioms` never sees it. *The number is almost certainly
