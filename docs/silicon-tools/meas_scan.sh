@@ -116,7 +116,16 @@ else
   printf '  ✅ sorry/admit none — searched CODE ONLY (comments stripped first)\n'
 fi
 printf '  — duplicate propositions are a CORPUS check, not a module one:\n'
-printf '      sh %s/dup_props.sh %s "SaltWorks/HDL/*.lean"   # read it WHOLE\n' "$HERE" "$REF"
+# ⛔⛔ THE GLOB WAS TOO NARROW AND THIS LINE WAS TEACHING IT (fixed 8/8 22:1x).
+# It used to say "SaltWorks/HDL/*.lean", which scans 62 files / 1,177 theorems
+# and EXCLUDES SaltWorks/Stack/Program.lean — 422 KB and 861 further theorems.
+# Measured at a132cd9: the narrow glob finds 2 duplicate propositions; the wide
+# one finds SEVEN. Every "residue is 2" I published tonight was scoped to 58% of
+# the corpus, and the extra five include immI_OK/immB_OK — which corroborates
+# compiler's independent finding that ImmediateScope duplicates Program.lean.
+# ⇒ A CORPUS CHECK MUST NAME THE WHOLE CORPUS. Same population error as my
+#   inventory census an hour earlier; third consequence of one wrong glob.
+printf '      sh %s/dup_props.sh %s "SaltWorks/*/*.lean"   # WHOLE corpus — read it WHOLE\n' "$HERE" "$REF"
 # ⛔ THIS PASS IS STRUCTURAL — it reads SOURCE TEXT at a ref and runs NO KERNEL.
 # A green scan says the audits are PRESENT, never that they PASSED. Say so here,
 # or the next reader (me) treats a clean scan as a checked module.
