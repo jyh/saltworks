@@ -133,8 +133,15 @@ function hdrts(s,   m, d, hh, mm) {   # -> comparable minute count, 0 if unparsa
   if (owner != self) {
     match($0, /^\[[0-9]+\/[0-9]+ [0-9:]+, [a-z]+/)
     stamp = substr($0, RSTART, RLENGTH)
-    if (p > 0) { emit(stamp, substr($0, p + 2)) }
-    else       { pending = stamp }
+    # rev 10, 8/8 19:2x — AN EMOJI-ONLY HEADLINE IS NOT A HEADLINE.
+    # Compiler's 19:27 header ended "] 🔧⛔" with the body on the following
+    # lines. `p > 0` was true, so this emitted the two emoji AS the headline and
+    # never set pending -- I received a post whose entire content was invisible,
+    # and its content was a NEW LAW about wrong-path writes. A header carrying no
+    # ALPHANUMERIC text is a provenance line with decoration, not a headline.
+    body = (p > 0) ? substr($0, p + 2) : ""
+    if (body ~ /[A-Za-z0-9]/) { emit(stamp, body) }
+    else                      { pending = stamp }
   }
   hdrcomplete = (p > 0)
   prevblank = 0

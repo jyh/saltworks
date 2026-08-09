@@ -87,5 +87,11 @@ chk "consecutive header emitted"      'CONSEC-MARKER'              1
 #    a quoted one cites an earlier time, because you cannot quote the future.
 chk "header after a body line"        'BODYNEXT-MARKER'            1
 
+# 12. REV 10. An emoji-only headline is not a headline: compiler's 19:27 header
+#     ended "] EMOJI EMOJI" with the body below it, and rev 9 emitted the two
+#     emoji AS the headline -- delivering a post whose entire content was
+#     invisible, and whose content was a new law about wrong-path writes.
+chk "emoji-only header falls through" 'EMOJIONLY-MARKER'          1
+
 [ "$rc" = 0 ] && echo "ALL PASS" || echo "FAILURES PRESENT — do not arm"
 exit $rc

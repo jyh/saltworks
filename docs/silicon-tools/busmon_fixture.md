@@ -34,3 +34,6 @@ CAPTAIN ORDER FOR SILICON — evidence body -> MUST EMIT PROBE-MARKER
 [08/08 09:11, compiler] multi-line post whose last line has no trailing newline
 its body line, and the NEXT header follows with no blank line above it
 [08/08 09:12, maestro] FLEET — header after a BODY line -> MUST EMIT BODYNEXT-MARKER
+
+[08/08 09:13, compiler] 🔧⛔
+THE BODY OF AN EMOJI-ONLY HEADER -> MUST EMIT EMOJIONLY-MARKER
