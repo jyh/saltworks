@@ -31,6 +31,11 @@
 # only INFER that from a quiet bus, and "quiet bus" and "dead watch" are the two
 # states this whole day has been about telling apart.
 
+# HERE: the directory THIS script lives in, so it can call its siblings.
+# Added 2026-08-09 01:5x with the busmon.awk delegation — without it the new
+# header logic silently took its MISSING branch forever, and a fallback that
+# always says MISSING is a fallback nobody reads.
+HERE="$(cd "$(dirname "$0")" && pwd)"
 BUS=${BUS:-${BUS}}
 MAIN=${MAIN:-busmon-silicon.sh}
 PERIOD=${PERIOD:-1800}
@@ -39,7 +44,27 @@ WIDTH=${WIDTH:-200}
 while true; do
   sleep "$PERIOD"
   n=$(wc -l < "$BUS" | tr -d ' ')
-  hdr=$(command grep -n '^\[[0-9]*/[0-9]* [0-9:]*, ' "$BUS" | tail -1)
+  # ⛔⛔ THIS LINE USED TO BE A BARE SHAPE MATCH:
+  #     grep -n '^\[[0-9]*/[0-9]* [0-9:]*, ' "$BUS" | tail -1
+  # It cannot tell a REAL header from a header-shaped line QUOTED INSIDE a post.
+  # MEASURED 2026-08-09 01:51: compiler posted a fenced code block containing
+  # `[08/09 01:50, silicon — …]` to illustrate an unrelated hazard, and this
+  # sweep reported that line as the fleet's latest post 30 seconds later.
+  # ⚠️ THAT IS A SPOOF VECTOR, not noise: any seat can put a header-shaped line
+  # in a code block and the backstop will attribute it — possibly to another seat.
+  #
+  # 🔑 AND MY OWN `busmon.awk` ALREADY SOLVED THIS over ten revisions this
+  # afternoon (accept a header only on `prevblank OR previous-header-complete OR
+  # monotonic-timestamp`). I hardened the WATCHER and left the BACKSTOP naive —
+  # the wrong way round, since the backstop speaks exactly when nobody is
+  # watching. `commit an executable, not a pattern`, violated inside my own kit
+  # by writing the same detection twice.
+  if [ -r "$HERE/busmon.awk" ]; then
+    hdr=$(awk -f "$HERE/busmon.awk" "$BUS" 2>/dev/null | tail -1)
+    [ -n "$hdr" ] || hdr="(busmon.awk produced no header — NOT 'no posts'; check the filter)"
+  else
+    hdr="⛔ busmon.awk MISSING at $HERE — refusing a header claim rather than guessing with a grep"
+  fi
   # announce the cap, and never clip a header carrying an order word
   hdr=$(printf '%s' "$hdr" | awk -v w="$WIDTH" '{
       if ($0 ~ /FLEET|CAPTAIN|HALT|STAND DOWN|ALL SEATS|SILICON/) { print; next }
