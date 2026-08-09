@@ -177,6 +177,35 @@ certified traffic crossing it.
   around the fault set — re-verifiable by the same checker. Fault
   tolerance becomes recompilation, not redundant hardware.
 
+### 2c. COMMERCIAL SIZING (the Captain's 10:5x baseline question; ALL
+### figures order-of-magnitude estimates, labeled as such)
+
+Figure: `figures/scale-diagram.svg` (the five-level recursion).
+
+- **Node jump sky130→N5-class:** ~100–300× density × ~40–80× clock ≈
+  **4k–20k× per unit silicon** (the Captain's "10K times" guess lands
+  inside the band). The PoC (~0.25 mm² @130nm) ≈ 0.002 mm² @N5: one
+  400 mm² die ≈ hundreds of thousands of PoC-equivalents — so
+  commercially the recursion's levels SLIDE (big on-die fabric →
+  chiplets → SerDes board → optics rack), 64k tiny chips is not the
+  shape.
+- **Density vs H100 int8 (~5 TOPS/mm²):** int8 serial cells at N5 ≈
+  2–10 TOPS/mm² — same order; parallel MACs win dense matmul by
+  ~4–20× at the margin. **On dense matmul we would be building a
+  worse TPU — say it plainly.**
+- **The two real advantages:** (1) UTILIZATION on irregular
+  workloads — GPU GNN utilization is notoriously 1–10% (gather/
+  scatter through the memory system); our routing IS the operation.
+  A 10× utilization gap erases a 10× peak gap. (2) ENERGY — no
+  HBM round trips; activations never leave the wire (Groq-class
+  argument, compounding with utilization on graphs).
+- **Trust at scale:** one chip theorem + one induction + one schedule
+  checker vs testing budgets that grow per-unit across 64k devices.
+- **The commercial one-liner: THE VERIFIED GRAPH MACHINE** —
+  deterministic, energy-lean, high-utilization where GPUs crater,
+  correctness scaling by induction. Not a TPU competitor; a
+  category the incumbents do not occupy.
+
 ## 3. THE ON-DIE CPU — yes, and it is the machine we are already building
 
 The core (slicea16, W5-asm assembly underway) rides along as the
