@@ -46,6 +46,41 @@ from zoneinfo import ZoneInfo
 TZ = ZoneInfo("America/Los_Angeles")
 PROJECTS_ROOT = Path.home() / ".claude" / "projects"
 
+# ⛔⛔ THE DISCOVERY BLIND SPOT, born 2026-08-08 and flagged by the maestro at
+# 19:51 after the Captain asked "are we recording tokens?".
+#
+# Until today every seat wrote into ``~/.claude/projects``. The per-seat
+# ISOLATION moved four of them to ``${SEAT_CONFIG_DIR}
+# evidence}/projects/`` -- and this module knew only the original root, so every
+# tool built on ``discover_personal_projects`` silently measured ONE seat's
+# transcripts and reported it as the fleet's.
+#
+# 🔑 THE PART THAT IS MINE: I BUILT A CROSS-SEAT READER AT 15:1x TODAY
+# (``watch_transport_census.py`` enumerates all five roots by name) AND NEVER
+# ASKED WHETHER MY OTHER INSTRUMENTS HAD THE SAME BLIND SPOT. I had the fact and
+# did not carry it one file sideways. [[a-count-is-not-a-scope]]
+#
+# ⚠️ AND THE FAILURE IS SILENT BY CONSTRUCTION: a missing root yields no error,
+# no warning and a smaller number -- the shape that reads as "less happened",
+# never as "I looked in fewer places". ``roots_report()`` exists so a run can
+# SAY where it looked, because an unstated scope is how this survived at all.
+def _project_roots() -> list[Path]:
+    roots = [PROJECTS_ROOT]
+    for d in sorted(Path.home().glob("${SEAT_CONFIG_DIR}")):
+        p = d / "projects"
+        if p.is_dir():
+            roots.append(p)
+    return [r for r in roots if r.is_dir()]
+
+
+PROJECTS_ROOTS = _project_roots()
+
+
+def roots_report() -> str:
+    """Human-readable statement of WHERE a run looked. Print it beside totals."""
+    return " · ".join(f"{r.parent.name}:{len(list(r.glob('*/*.jsonl')))}"
+                      for r in PROJECTS_ROOTS)
+
 # --- the firewall (portfolio CLAUDE.md, JYH-ratified 2026-07-21) -----------
 # Outside-lane material never enters a personal-lane artifact. These are
 # matched against the project directory name; the check is substring-based
@@ -189,20 +224,27 @@ def discover_personal_projects() -> list[Path]:
     Outside-lane directories are excluded here and nowhere else -- this is
     the only gate, and it is unconditional.
     """
+    # ⛔ UNIONS ALL ROOTS — it must NOT switch to the seat roots. Compiler's
+    # in-seat ground truth, 19:5x: its history is SPLIT, not moved —
+    # ~/.claude/projects holds Aug 6 → Aug 8 08:23, the seat root holds 13:13
+    # onward. Repointing would silently drop the majority of the campaign FROM
+    # THE EARLY END, which is exactly the half the T0 rows depend on.
+    # ✅ Union is safe from double-counting: the roots share ZERO session ids
+    # (checked by identity, not by date range — adjacent ranges would have
+    # looked the same and proved less).
     out = []
-    if not PROJECTS_ROOT.is_dir():
-        return out
-    for d in sorted(PROJECTS_ROOT.iterdir()):
-        if not d.is_dir() or is_employer_lane(d.name):
-            continue
-        if not any(hint in d.name for hint in PERSONAL_LANE_HINTS):
-            continue
-        # scratchpad mirrors carry no human messages; skip the noise
-        if "scratchpad" in d.name:
-            continue
-        if not list(d.glob("*.jsonl")):
-            continue
-        out.append(d)
+    for root in PROJECTS_ROOTS:
+        for d in sorted(root.iterdir()):
+            if not d.is_dir() or is_employer_lane(d.name):
+                continue
+            if not any(hint in d.name for hint in PERSONAL_LANE_HINTS):
+                continue
+            # scratchpad mirrors carry no human messages; skip the noise
+            if "scratchpad" in d.name:
+                continue
+            if not list(d.glob("*.jsonl")):
+                continue
+            out.append(d)
     return out
 
 
