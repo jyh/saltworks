@@ -10,11 +10,31 @@ register's write cell and a COMPONENT of `regNext`, not an addition to it.**
 *Found because compiler landed `regNext_gate_count` beside the `readTree` row I
 asked for; their "sibling" was an object I did not know existed.*
 ```
-                        published 20:5x    CORRECTED
-named datapath sum          3,633           6,574
-−1,154 as a fraction          32%            17.6%
-register-file share            82%           92.6%   (readTree + regNext)
+                        published 20:5x   amended 21:0x   CORRECTED 21:0x
+named datapath sum          3,633             6,574            6,737
+−1,154 as a fraction          32%              17.6%           17.1%
+register-file share            82%             92.6%           92.8%
 ```
+⛔⛔ **MY AMENDMENT'S PREMISE WAS WRONG AND COMPILER REFUTED IT WITHIN MINUTES
+(21:01). `regWrite` IS NOT A COMPONENT OF `regNext`; EXCLUDING IT LOST 163
+GATES.** *Verified independently before accepting:*
+```
+regNext's gates account for THEMSELVES, with nothing left over:
+    32 nots (rnWe r is an INPUT NET)  +  32 regs × 32 bits × 3  =  3,104   ✓ exact
+ports show the direction:  regNext nIn 1088 = 1024 state + 32 res + 32 WE  (CONSUMES)
+                           regWrite outs 32                                (PRODUCES)
+`regWrite` appears ZERO times in RegNext.lean's body
+```
+⇒ ***They compose IN SERIES — `regWrite` → 32 enables → `regNext` — so BOTH are
+needed and summing them does not double-count.***
+🔑 **MY MECHANISM: I INFERRED "COMPONENT OF" FROM AN `import`. An import is a
+dependency of the FILE, not of the DEFINITION** — and the identifier I "found"
+was the capitalised MODULE name `RegWrite`, not the term `regWrite`. *Case, for
+the third time today.* ⚠️ **AND I HAD THE REFUTING DATUM IN MY OWN TABLE: I wrote
+`regWrite … nIn 7, outs 32` and then called it "one register's write cell."
+`outs = 32` says 32-WAY DECODER. I read past my own measurement to reach a
+relationship I had already assumed.** *Same class as compiler's one-arm `case`
+read: a fragment generalised to a whole.*
 🔑 ***THE CORRECTION STRENGTHENS EVERY CONCLUSION BELOW AND CHANGES NONE OF
 THEM.*** *The register file is 93% of the named datapath, not 82%; −1,154 is a
 smaller fraction of the core, not a larger one; and "the memory organ competes
@@ -31,8 +51,15 @@ corrections together — two read ports AND `regNext` — give **9,556 gates and
 
 > **NO — and it cannot be made one from this corpus, because THERE IS NO
 > WHOLE-CORE OBJECT TO TOTAL. Against the named datapath, measured tonight at
-> 6,574 gates (AMENDED — see above), the −1,154 is 17.6%, not the ~70% it looks
-> like read select-locally. With a second read port it is 12.1%.**
+> 6,737 gates (AMENDED TWICE — see above), the −1,154 is 17.1%, not the ~70% it
+> looks like read select-locally. With a second read port (9,719) it is 11.9%.**
+
+📌 **THE FIGURE MOVED TWICE IN TWENTY MINUTES — 3,633 → 6,574 → 6,737 — and the
+SENTENCES never moved at all: no whole-core object; the saving is a small
+fraction of the core; the register file dominates and is what the memory organ
+competes with.** *Both corrections came from a peer, both raised the sum, and
+both made the conclusions stronger. A number under active refutation is worth
+more than a number nobody checked, and this is what that looks like in flight.*
 
 ## 1 · WHY IT CANNOT BE MADE ONE — the composition does not exist
 
@@ -57,23 +84,26 @@ honest one: the parts have never been wired together in the kernel.*
 
 ```
 object       gates   how known        note
-regNext      3,104   THEOREM (0625cc8) regNextN 32 32; nIn 1088, outs 1024 —
-                                       the WHOLE FILE's next-state (write path)
+regNext      3,104   THEOREM (0625cc8) regNextN 32 32; nIn 1088 = 1024 state
+                                       + 32 res + 32 WE; outs 1024. CONSUMES
+                                       the enables — the next-state mux array.
 readTree     2,982   THEOREM (0625cc8) nIn 997 = 31 regs x 32 bits + 5 sel; outs 32
+regWrite       163   #eval            nIn 7, outs 32 — the 32-WAY WRITE-ENABLE
+                                       DECODER. PRODUCES the enables regNext
+                                       consumes: they compose IN SERIES, so both
+                                       are summed and nothing double-counts.
 aluSelect      291   THEOREM          post-recut; asSelBits = 2; 96*(2^2-1)+2+1
 pcNext          99   THEOREM
 obMux           97   THEOREM          namespace SaltWorks.HDL.OperandB
 immBCirc         1   THEOREM
 immICirc         0   THEOREM
              ─────
-SUM          6,574   ← a SUM OF NAMED PARTS, *not* a verified composition
-                       of which the REGISTER FILE is 6,086 = 92.6%
-
-  regWrite     163   NOT SUMMED — it is ONE register's write cell and a
-                     COMPONENT of regNext (RegNext.lean imports RegWrite).
-                     Adding both would double-count. This is the error the
-                     20:5x version of this file shipped.
+SUM          6,737   ← a SUM OF NAMED PARTS, *not* a verified composition
+                       of which the REGISTER FILE is 6,249 = 92.8%
+                       (regNext + readTree + regWrite)
 ```
+📌 *`regWrite` is the one figure here still resting on an `#eval` rather than a
+theorem — the same gap that `readTree` and `regNext` had until `0625cc8`.*
 ✅ **Both `#eval`s in the 20:5x version are THEOREMS now** — compiler landed
 `readTree_gate_count = 2982` (matching my independent evaluation exactly) and
 `regNext_gate_count = 3104` in `0625cc8`. *The recommendation in §3 below is
