@@ -29,8 +29,12 @@ cites HERE); (3) the writeup's hardware chapter seed.
 **`SaltWorks/HDL/AccountMeasure.lean` — tracked, and re-runnable by anyone** as
 `../saltbuild.sh SaltWorks/HDL/AccountMeasure.lean`. It elaborates against the
 real `Circ` artifacts through `SaltWorks.HDL.CorePlace`'s olean at `5f1abb7`.
-*It is not rooted in the hub on purpose: an `#eval`-only module would print on
-every fleet build. Not a build target, so no `import owed`.*
+*ROOTED at the maestro's 13:47 sweep (`SaltWorks.lean:92`) — superseding this
+paragraph's original not-rooted-on-purpose rationale, which was true at the §4
+seal and went false seven minutes later (evidence's post-seal-drift catch,
+13:49; the drift was the maestro's own sweep). The original concern was real —
+an `#eval` module prints on every fleet build — and is accepted as temporary
+noise until compiler's planned eval-to-theorems conversion lands and re-covers.*
 *(Evidence's §4 finding 1: v1 was named `Scratch*`, which `.gitignore:2`
 excludes — so §1 named an instrument no third party could run. Naming a tool
 answers "which tool" and not "can another party reproduce it".)*
