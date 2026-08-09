@@ -69,6 +69,19 @@ git grep -h -E "^theorem [A-Za-z_0-9']+ ?:.*:=" "$REF" -- "$GLOB" \
 | while IFS= read -r prop; do
     [ -z "$prop" ] && continue
     hits=$(git grep -n -F "$prop" "$REF" -- "$GLOB" | sed "s|^$REF:||" | grep -E ':[0-9]+:theorem')
+    # ⛔ AN EMPTY `hits` IS IMPOSSIBLE BY CONSTRUCTION — `$prop` was just EXTRACTED
+    # from this same ref and glob, so it must be findable in them. Empty therefore
+    # means the PIPELINE FAILED, not that the proposition vanished. Without this,
+    # a failure here makes `indep` 0 and the `continue` below silently DROPS a real
+    # duplicate — under-reporting, which is the direction that cost me three
+    # published "residue still 1" verdicts on 8/8.
+    # (The pipeline's own status is `grep`'s, so it cannot be tested directly here;
+    # this invariant check is the substitute. See meas_scan.sh's third-pass note.)
+    if [ -z "$hits" ]; then
+      echo "⛔ dup_props: '$prop' was extracted from $REF but cannot be found in it."
+      echo "   The lookup pipeline FAILED. Refusing to continue — the count would under-report."
+      exit 2
+    fi
     # ⭐ ONLY REPORT A PROPOSITION WITH >=2 INDEPENDENT PROOFS. A proposition that
     # has been CURED -- one proof plus aliases -- must drop off the list, or the
     # headline count never falls and a reader concludes the fix did nothing.
