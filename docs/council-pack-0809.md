@@ -81,7 +81,16 @@
    theorem), and lands an application with teeth: the world's
    smallest verified firewall, policy in tiny-Rust, updated
    through its own dataplane. Sketch only — nothing dispatched or
-   priced; the opens are §4 of the sketch. We discuss.**
+   priced; the opens are §4 of the sketch. We discuss.
+   ⭐ EVOLVED AT THE 03:0x HELM: the application the Captain's pull
+   chose is `docs/neural-graph-machine-sketch.md` — THE CPU AS
+   SMART NEURON on the fabric-as-synapse-matrix: a graph network,
+   dynamic/configurable/scalable, with DIFFERENTIABILITY as the
+   hard requirement (and the no-while freeze makes autodiff
+   STRUCTURAL — the flagship theorem candidate: verified AD down
+   to silicon). Firewall and exchange variants to the drawer,
+   alive. His words verbatim in the doc's §0; the design team's
+   questions pre-listed in its §4. EXPLORATION — council explores.**
 7. **Small lines:** the audit-cap rider stands (--cap 24000 for
    Immediate/Decoder/FabricRoutes only; default unmoved) — AND YOUR
    8/6 CONCURRENCY ITEM IS DISCHARGED, measured overnight on a
