@@ -158,6 +158,28 @@ cleanly and computes the wrong machine:
 | `regWrite_is_NOT_placeable_at_off0` | a placement ordered before its producer |
 | `subtraction_is_a_plus_not_b_plus_one` | `a + ~b` (off by one on every subtraction) |
 
+**And a second family — DISJOINTNESS controls, which are cross-instance and so
+cannot be derived from any `instOK`.** *This family was completed by silicon's
+hand-read of the repair: my first draft of §1.3 listed the wiring controls and
+missed three of these, which is exactly the incompleteness a second witness is
+for.*
+
+| control | the collision it excludes |
+|---|---|
+| `immB_and_regWrite_do_not_overlap` | two organs' gates sharing net 1192 (**the repaired defect**) |
+| `operand_banks_are_disjoint` | the XOR reading one register twice |
+| `select_banks_are_disjoint` | the select's three result banks overlapping pairwise |
+| `tie_nets_are_distinct` | the two host constants collapsing to one net |
+| `slt_operand_signs_are_distinct` | `SLT` comparing a sign bit against itself |
+| `we_and_res_banks_are_not_swapped` | `regNext`'s two organ banks exchanged |
+| `rd_bits_are_in_the_instruction` | `rd` read from the state instead of the instruction word |
+
+⇒ **THE GENERAL LAW, and it is the one obligation neither half of this account
+could generate on its own: a per-instance predicate cannot be strengthened into
+a cross-instance one. The pair property must be ASSERTED.** *`instOK`
+constrains one instance against its own inputs; two placements sharing a net is
+invisible to every one of the sixteen.*
+
 **Axiom audit.** 41 `#audit_axioms` calls, **one declaration per call** — a
 multi-name call aborts its own list at the first failure and everything after
 reads as clean. **41/41 ticks, 0 failures, maximum `[3 axioms]` = the whitelist
