@@ -6,7 +6,35 @@ Authors: Jason Hickey, Claude
 import SaltWorks.HDL.Immediate
 
 /-!
-# THE SCOPE OF `immI_correct`, MADE A THEOREM
+# THE SCOPE OF `immI_correct`, MADE A THEOREM  ⛔ **SUPERSEDED — SEE BANNER**
+
+> ## ⛔⛔ THIS ENTIRE MODULE IS REDUNDANT. `Stack/Program.lean` HAD ALL OF IT.
+> **Discovered 22:1x by the post-retraction re-check, after this file had been landed, extended,
+> corrected and posted about three times.**
+> ```
+> this file                                    the corpus, all pre-existing
+> immICirc_extracts_the_field          ⇢  sem_immICirc_word      Program.lean:8361
+>   sem immICirc (fun i => w.getLsbD i)     ⭐ THE SAME STATEMENT — same extractLsb' 20 12,
+>   = map ((w.extractLsb' 20 12)               same signExtend 32, same (List.range 32).map
+>          .signExtend 32).getLsbD
+> immICirc_reads_only_the_imm_field    ⇢  sem_immICirc (E : Env) Program.lean:8265
+> immICirc_correct_given_field_agreement ⇢ strictly WEAKER than sem_immICirc_word
+> immI_outs_in_field                   ⇢  subsumed by sem_immICirc's own proof
+> ```
+> ⚠️ ***And §2b presents `immICirc_extracts_the_field` as a DISCOVERY — a self-catch prompted by
+> math's consumer-shape law, with a paragraph on what "a core assembly actually needs". It was
+> already there, in the same idiom.***
+>
+> 🔑 **THE ROOT, identical in all five of my false-absence claims tonight: I searched MY naming
+> convention (`immICirc_*`) in MY OWN SLOT (`SaltWorks/HDL/`). The corpus uses `sem_<organ>` and
+> keeps them in math's file.** *`docs/compiler-inventory-0808.md` closes with "a negative search
+> result is a claim about an instrument plus a root plus a filter, never about the world" — mine,
+> written hours earlier.*
+>
+> ✅ **CITE THE CORPUS'S THEOREMS, NOT THIS FILE.** *The declarations below build and are audited,
+> so nothing is broken; they are simply a second copy. Retiring the module is the maestro's call
+> (it is rooted in `SaltWorks.lean`) and I am not unrooting anything tonight — I have been wrong
+> five times in three hours and this is prose, which is where every one of those errors lived.*
 
 `Immediate.lean`'s `immI_correct` is **exhaustive over the immediate** — all 4096 field
 values, kernel-checked — and it is stated at **one register pair**: `wordI v` fixes
