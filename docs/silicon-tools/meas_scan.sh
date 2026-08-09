@@ -62,14 +62,30 @@ NAUD=$(printf '%s\n' "$AUD" | grep -c .)
 # this file's header warns about, committed inside the file that warns about it,
 # and caught only because I ran a control instead of trusting the output.
 # POSIX temp files, and the exit status of `comm` is CHECKED.
+#
+# ⛔⛔⛔ THIRD PASS ON THIS ONE LINE (2026-08-08 21:5x) — THE FIX ABOVE WAS ALSO
+# BROKEN, AND THE CLAIM "the exit status of `comm` is CHECKED" WAS FALSE:
+#     if ! MISS=$(comm -23 "$_d" "$_a" | tr '\n' ' '); then …
+# `$?` of a PIPELINE is the LAST command's — `tr`'s — so `comm` failing was
+# invisible and MISS came back EMPTY. The guard could not fire. Controlled:
+#     comm -23 /nonexistent/a /nonexistent/b | tr '\n' ' '   -> guard SILENT
+#     comm -23 /nonexistent/a /nonexistent/b                 -> guard FIRES
+# That is [[exit-code-dies-in-a-pipe]] — MY OWN BANKED LAW — reintroduced by the
+# fix for the process-substitution bug, in the guard whose comment boasts of
+# catching exactly this. THREE mechanisms, one failure mode, same two lines:
+#   ① bash process substitution under `sh`   -> syntax error, MISS empty
+#   ② pipeline exit status                   -> comm's failure swallowed
+#   ③ (the shape both share) an empty MISS reads as "nothing unaudited"
+# ⇒ CAPTURE THE STATUS BEFORE ANY PIPE. Transform AFTER the check, never in it.
 _d=$(mktemp) ; _a=$(mktemp)
 trap 'rm -f "$_d" "$_a"' EXIT
 printf '%s\n' "$DECLS" > "$_d"
 printf '%s\n' "$AUD"   > "$_a"
-if ! MISS=$(comm -23 "$_d" "$_a" | tr '\n' ' '); then
+if ! MISS_RAW=$(comm -23 "$_d" "$_a"); then
   echo "⛔ meas_scan: the coverage diff FAILED to run — refusing to report clean"
   exit 2
 fi
+MISS=$(printf '%s' "$MISS_RAW" | tr '\n' ' ')
 
 # ⭐ ANCHORED, not substring: a real `sorry` is a PROOF TERM, so it follows `:=`
 # or `by` or sits alone. "admits" in prose must not fire, or the check gets
