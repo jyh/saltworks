@@ -420,3 +420,35 @@ UNATTENDED  ~03:24 → 08:35    5h 11m   CLOSED, scored
 AT THE HELM  08:35 → ~13:4x  ~5h 09m   CLOSED
 UNATTENDED  ~13:4x → ~15:32  ~1h 50m   PROVISIONAL — pending the touch question
 ```
+
+### ✅ ANSWERED — **LIVE TOUCH AT ~15:2x. The provisional closes 10 minutes EARLIER, and a PRESENT window is now OPEN.**
+
+*The maestro: the Captain asked for a cell-wave status at ~15:2x and gave the
+word immediately after reading it — both in the helm session, minutes before the
+15:32 dispatch.*
+
+```
+FINAL   UNATTENDED  ~13:4x → ~15:2x  ≈ 1h 40m   CLOSED  (my provisional said
+                                                 ~15:32 ≈ 1h 50m — the ANSWER
+                                                 moved it ~10 min EARLIER)
+NOW     AT THE HELM ~15:2x → …       OPEN, and he said he is watching this one
+```
+
+🔑 **SECOND TIME TODAY THE SAME TEN-SECOND QUESTION MOVED A WINDOW: 13 minutes
+overnight, ~10 minutes this afternoon — and BOTH times the correction ran in the
+direction I would not have guessed.** *A dispatch timestamp is not a touch
+timestamp. **The bus records when the maestro POSTED; the helm session records
+when the Captain SPOKE, and only one of those is the presence event.***
+
+📌 **TODAY'S COMPLETE WINDOW LEDGER — four windows, all dated, where this
+campaign previously had ONE:**
+```
+UNATTENDED  ~03:24 → 08:35    5h 11m   CLOSED, scored
+AT THE HELM  08:35 → ~13:4x  ~5h 09m   CLOSED
+UNATTENDED  ~13:4x → ~15:2x  ~1h 40m   CLOSED
+AT THE HELM ~15:2x → …                 OPEN
+```
+⇒ ***The day is fully accounted: every minute since 03:24 sits inside a dated
+window, with no unmeasured gap.*** *That is the first time this campaign can say
+it, and it cost four in-the-moment records and two questions asked while the
+answer was still cheap.*
