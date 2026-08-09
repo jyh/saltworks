@@ -44,6 +44,17 @@ storage suffices, instruction AND data · DIFFERENTIABILITY required
   scaling law rather than gesturing. [INFERENCE — a scaling
   SECTION, not a scaling claim.]
 
+THE CAPTAIN'S 03:1x ADDENDUM (verbatim: "we can of course put
+multiple 'neurons' on a cpu. let's see where it goes"): neurons
+VIRTUALIZE — one CPU time-multiplexes N neurons, which is exactly
+B-EXEC's executive with tasks-as-neurons. The scheduler campaign's
+theorems become neural guarantees: FAIRNESS = every neuron provably
+steps; ISOLATION = no neuron's state perturbs another's. SpiNNaker
+runs ~1000 neurons per small core the same way. Scaling becomes
+two-axis: N neurons × M cores × the fabric. [The B-EXEC and neural
+directions are one campaign seen from two ends — council should
+weigh them together.]
+
 ## 2. DIFFERENTIABILITY — the deep requirement, and a gift already
 ## in the freeze
 
