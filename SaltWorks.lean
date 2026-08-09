@@ -87,4 +87,5 @@ import SaltWorks.HDL.CoreOffsets
 import SaltWorks.HDL.CorePlace
 import SaltWorks.HDL.SingleLevel
 import SaltWorks.HDL.SubFragment
+import SaltWorks.HDL.MacInduction
 import SaltWorks.Tactic.AuditAxioms

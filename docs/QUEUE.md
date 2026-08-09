@@ -268,6 +268,19 @@ OPEN ITEMS:
   GATE: §1 final row table awaits assembly rows 15-16; halves
   proceed now.**
 
+- **FUEL COLUMNS — CONFIRMED AT GROUND TRUTH (13:3x, the Captain,
+  verbatim: "the columns are account-name,5h,all-models,fable-only
+  (fable gets to spend at most half the total budget). Budget on
+  jason has the weekly reset tomorrow 4pm, I believe we are going
+  to make it."): triple = (5-hour session %, all-models weekly %,
+  FABLE-ONLY weekly %); STRUCTURAL LAW: fable's allowance = at
+  most HALF the total budget. jason reset = SUNDAY 8/10 16:00
+  (SUPERSEDES the earlier "Mon 4pm" note). Burn arithmetic at
+  confirmation: fable 51->62 over ~18h ≈ 0.6%/h -> ~78 at reset —
+  WE MAKE IT, per his word and the numbers agreeing. Watch rule
+  >= 80 stands as backstop. compiler-acct 7/jasonh 3 = fable residue from
+  pre-switch sessions (prediction: frozen until reset).
+  [History below: the narrowed-hypothesis entry this supersedes.]**
 - **THIRD FUEL COLUMN — SEMANTICS NARROWED BY THE CAPTAIN'S DATUM
   (13:3x, verbatim: "*all* the other seats run Opus 5, and credits
   are not being used on any of them"): the CREDITS reading is DEAD
