@@ -263,6 +263,25 @@ OPEN ITEMS:
   discussion"; #1 and #2 use offboard memory (his word), #3's
   memory story is part of the open discussion.**
 
+- **COUNCIL BUNDLE (12:0x, the Captain, slate items): (2) COST
+  WINDOWS "so ruled" — story row = dream->ruling (1.14M measured),
+  cost row = NDF-from-T0, campaign total separate, every number
+  names its window; (5) PCBs RIDE THE NDF ("for the BB I will
+  probably not get PCBs, but let's use them on NF"); IMMEDIATESCOPE
+  RETIRED (authorized + executed: remove + saltbuild EXIT=0,
+  8674->8673 jobs, the rider's own proof form); DEFAULT AUDIT CAP
+  RAISED 12000->24000 (saltbuild.sh CAP line + comment; the --cap
+  dance for known heavies retired; machine guard remains the fleet
+  lock); (7.3) CLICK MECHANICS delivered — the click is his
+  sentence "assemble (7.3)" at the helm, wave fires on it, still
+  unspent; (4) the 3+4 deep session CONFIRMED NOT YET HELD (the
+  evening went to the tile/packet/neural arc; subjects crossed the
+  helm at their landings — the deja vu source); proposal open:
+  fold into an NDF theory review sitting. RISC-V ACCOUNT DOC:
+  does not exist as one artifact; commissioning offered (the
+  bb-switch-account 70-min pattern). THIRD FUEL COLUMN: "credits"
+  hypothesis before him, awaiting one-word confirmation.**
+
 - **THE SHUTTLE DEADLINE — THE SCHEDULE ANCHOR, CAPTAIN-CORRECTED
   11:5x: HIS LOGGED-IN PORTAL SHOWS 29 DAYS TO RESUBMIT ≈ SEPT 7
   (corroborates the standing B5 Sept-7 date; GOVERNS over the
