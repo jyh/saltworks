@@ -429,4 +429,56 @@ theorem cell_state_toInt_eq_macAfter
   rw [sum_toInt_of_noOverflowFrom (addendTrace Wsh x n) b hno,
       addendTrace_toInt_sum W Wsh x n hW, Mac.mac_partial]
 
+/-! ## THE hW-DISCHARGE — the weight-shift organ, composed
+
+Rung 4's corollary assumes a schedule via `hW : (Wsh t).toInt = W * 2^t`. This
+section replaces the assumption with the landed organ: `wshift_next_bit_zero`
+and `wshift_next_bit_succ` give one cycle, and the trace induction gives
+`W <<< t` after `t` cycles. -/
+
+/-- One shift cycle with `load` low: the next state is the left shift by one.
+`wsCore.outs` is the 32 AND-bits then the next state, so `drop 32` is the state
+half — `wsLsb` (which is `ld && x`, here `false`) followed by bits `0…30`. -/
+theorem wshift_step_word (w : BitVec 32) (x : Bool) :
+    (stepSeq wshiftSeq (MacCell.bitsOf w) [x, false]).2 = MacCell.bitsOf (w <<< 1) := by
+  have houts : wsCore.outs
+      = (List.range 32).map wsAnd ++ (wsLsb :: (List.range 31).map wsW) := rfl
+  have hcore : wshiftSeq.core = wsCore := rfl
+  have hnout : wshiftSeq.nOut = 32 := rfl
+  have hlenA : (((List.range 32).map wsAnd).map
+      (run (wshiftSeq.env [x, false] (MacCell.bitsOf w)) wsCore.gates)).length = 32 := by simp
+  simp only [stepSeq, sem, hcore, hnout, houts, List.map_append]
+  rw [List.drop_left' hlenA]
+  have hstate : (wsLsb :: (List.range 31).map wsW).map
+        (run (wshiftSeq.env [x, false] (MacCell.bitsOf w)) wsCore.gates)
+      = MacCell.bitsOf (w <<< 1) := by
+    simp only [List.map_cons, List.map_map, Function.comp_def,
+               wshift_next_bit_zero_when_not_loading x w]
+    have : MacCell.bitsOf (w <<< 1)
+        = false :: (List.range 31).map (fun k => w.getLsbD k) := by
+      simp [MacCell.bitsOf, List.range_succ_eq_map, BitVec.getLsbD_shiftLeft]
+    rw [this]
+    refine congrArg (List.cons false) (List.map_congr_left ?_)
+    intro k hk
+    exact wshift_next_bit_succ x false w k (List.mem_range.mp hk)
+  exact hstate
+
+/-- ⭐⭐ **THE hW-DISCHARGE, TRACE FORM.** After `t` load-low cycles the weight
+register holds `W <<< t` — the schedule `hW` assumed is now a theorem about the
+landed organ. -/
+theorem wshift_runTrace_state (W : BitVec 32) (x : Bool) :
+    ∀ t : ℕ, (runTrace wshiftSeq (MacCell.bitsOf W) (List.replicate t [x, false])).2
+      = MacCell.bitsOf (W <<< t)
+  | 0 => by simp [runTrace]
+  | t + 1 => by
+      have hstep := wshift_step_word W x
+      simp only [List.replicate_succ, runTrace]
+      rw [show (stepSeq wshiftSeq (MacCell.bitsOf W) [x, false]).2
+            = MacCell.bitsOf (W <<< 1) from hstep,
+          wshift_runTrace_state (W <<< 1) x t]
+      congr 1
+      rw [← BitVec.shiftLeft_add]
+      congr 1
+      omega
+
 end SaltWorks.HDL.MacBridge
