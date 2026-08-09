@@ -278,31 +278,29 @@ OPEN ITEMS:
   weight-shift organ (its per-cycle theorems ARE the assumed
   weight schedule) + the SECOND overflow condition compiler flagged
   (W<<<t register overflow — exists nowhere yet, needs shaping);
-  (ii) SIGN-CYCLE COMPOSITION — RULED 14:5x, then AMENDED
-  MINUTES LATER when silicon's argument (written before my ruling
-  posted, crossing in flight) dominated both built options:
-  **SCHEDULE-NEGATED** — the edge loads −W for the sign cycle;
-  ZERO gates, ZERO interface change, ZERO restatements (the weight
-  register already re-initialises per input under dual-stream;
-  −W is the same load path carrying a different value). THE
-  MANDATORY COMPANION, silicon's own honest cost: the correctness
-  obligation MOVES INTO THE SCHEDULE where every physical
-  instrument passes a wrong sign — a GUARD THEOREM is REQUIRED
-  (the layer-compiler's sign-cycle lemma; compiler's :487
-  freeze-guard shape is the template). One assumption to verify
-  at the artifact before math shapes the guard: (−W)<<<t =
-  −(W<<<t) as BitVec (mod 2^32) — expected trivially true, check
-  not assume. THE LOAD-PATH HALF STANDS AS RULED (option A, port
-  not constant — it is what −W rides). Compiler's carry-in
-  construction stands as the PRICED ALTERNATIVE on record (160
-  gates, landed idiom) if the schedule form ever fails review.
-  PATTERNS BANKED: tied-constant-is-an-unadmitted-port (3rd
-  instance) AND wiring-or-traffic-beats-organs (4th instance) —
-  the second now strong enough that "build an organ" must argue
-  against it. GOVERNANCE NOTE: a ruling amended in minutes by a
-  better crossing argument is draft-until-refuted applying to
-  RULINGS — the amendment cost nothing because nothing had been
-  built on the ruled shape yet.**
+  (ii) SIGN-CYCLE COMPOSITION — FINAL: COMPILER'S OPTION (b) +
+  LOAD-PATH OPTION A, RULED TOGETHER (restored 14:5x after a
+  ten-minute governance arc, full trail): macSeq gains a carry-in
+  port (nIn 32→33, gates 161→160, const gates 0); sign cycle =
+  acc + ~x + 1 via the LANDED idiom
+  subtraction_is_a_plus_not_b_plus_one + certified bitNot32;
+  load path = port not constant; carry_in_is_low retires
+  deliberately; the cell ends ZERO constant gates, two admitted
+  ports; six per-cycle restatements ONCE. MATH'S LEDGER NOTE now
+  IN the ruling per its 14:52 ask: the proof-side cost (the
+  restatements + the carry-in composition lemma) is real and
+  owned at math/compiler's seams — "strictly dominates" was
+  gates-only. THE ARC, kept for governance: ruled → amended on
+  silicon's crossing schedule-negated argument → silicon WITHDREW
+  in six minutes (it priced a MID-STREAM reload, a mechanism its
+  own stream_bit_never_enters_the_weight_register proves absent —
+  "second time in fifteen minutes I estimated where they built")
+  → restored. LESSONS BANKED: constructions outrank estimates
+  EVEN when the estimate's principle is banked-and-true — a
+  principle applies only where its mechanism exists; and the
+  tied-constant-is-an-unadmitted-port pattern stands (3rd
+  measured instance). Nothing was built on any intermediate
+  state; the whipsaw cost zero work.**
 
 - **CROSS-SESSION MESSAGING — ADOPTION PLANNED AT NEXT RELIGHT
   (the Captain flagged the new system 14:1x; assessed from the doc
