@@ -51,9 +51,33 @@ answer was unknown:
 - *wire-length driven* → more room, longer routes, slew **worse or flat**
 - *congestion/repair driven* → more room to buffer, slew **better**
 
-🔑 **THE WIRE-LENGTH BRANCH, confirmed by an INDEPENDENT counter:**
+⛔⛔ **STRUCK 2026-08-09 10:46 — THIS EXPLANATION WAS REFUTED BY MY OWN FOLLOW-UP
+RUN. The paragraph below is kept, struck, because the reasoning is the lesson.**
+
+*What it said:* **"THE WIRE-LENGTH BRANCH, confirmed by an INDEPENDENT counter:**
 `route__wirelength` 159,680 → 172,703 (**+8.2%**), and −2.10 ns of slack is what
-8% more wire costs. *A second instrument agreeing — not a story that fits.*
+8% more wire costs. *A second instrument agreeing — not a story that fits.*"
+
+**THE REFUTATION (S3, margins-only diff, same die/clock/density/PDK):**
+```
+                     3×2 BASELINE   3×2 COMPACT
+routed wirelength         172,703       167,297   ⬇ −3.1%   ← the premise FELL
+SLEW viol ss/max            2,019         2,114   ⬆ +4.7%   ← and slew ROSE
+setup slack ss/max      +14.819 ns    +11.997 ns  ⬇ −2.8 ns on SHORTER wires
+```
+🔑 ***TOTAL WIRELENGTH IS AN AGGREGATE; SLEW VIOLATIONS ARE PER-NET. An aggregate
+that tracks a per-instance phenomenon in ONE comparison is not its cause. I had a
+real correlation and promoted it to a mechanism — and called it "a second
+instrument AGREEING" when it was only a second NUMBER MOVING.***
+📌 **The kill condition was pre-registered before the run ("if wirelength falls and
+slew does not, my mechanism is wrong"), which is the only reason this was settled
+in nine minutes instead of surviving as a plausible story.**
+⚖️ *What still stands, measured: free floorplan (die 80,985 · util 63.2%) → 1,678
+slew · 3×2 baseline (114,858 · 44.65%) → 2,019 · 3×2 compact (114,858 · 48.77%) →
+2,114. **Slew is NON-MONOTONE in utilisation and the best result is the smallest
+die.** Die size and utilisation are confounded across these three points, so NO
+replacement mechanism is named here — proposing one from three confounded points is
+the exact error this strike records.*
 
 ⚠️ **Why the pre-registration earned its keep:** routing violations fell
 3,208 → 141 → 2 during this run. *"The real die improved routing" is TRUE and
