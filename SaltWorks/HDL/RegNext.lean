@@ -301,4 +301,14 @@ theorem regNext32_holds_current_on_sample : rnBit 1 false true = true := by deci
 #audit_axioms regNext8_writes_only_the_enabled
 #audit_axioms rnPatterns_differ
 
+/-! ## THE SIZE, CHECKED — the same treatment as `readTree_gate_count`, same reason -/
+
+/-- **`regNext` is 3,104 gates, checked.** The second-largest object in a Slice-A assembly
+after the two read ports, and it was likewise being quoted from `#eval` rather than proved.
+*Landed unasked alongside silicon's `readTree` request because the argument for it is
+identical: a dominant number that no theorem pins is a number that can drift.* -/
+theorem regNext_gate_count : regNext.gates.length = 3104 := by decide +kernel
+
+#audit_axioms regNext_gate_count
+
 end SaltWorks.HDL

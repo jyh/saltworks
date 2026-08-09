@@ -391,4 +391,20 @@ theorem readTree_check_discriminates :
 #audit_axioms readTree_wf
 #audit_axioms readTreeCuts
 
+/-! ## THE SIZE, CHECKED — asked for by the SILICON seat, 2026-08-08 20:51 -/
+
+/-- **`readTree` is 2,982 gates, and now it is a theorem rather than an assertion.**
+Landed on silicon's ask: this organ is the corpus's dominant object — **the datapath uses
+TWO of it** (rs1 and rs2), so 5,964 of any Slice-A gate total is this one number, and it
+was being quoted from `#eval` output.
+
+📌 **Silicon's decomposition, which agrees with the measurement: `31 × 3 × 32 + 6` = 2,976
+mux gates + 6 decode.** ⚠️ *That arithmetic is offered as an EXPLANATION, not as a proof of
+the structure — a theorem `31 * 3 * 32 + 6 = 2982` would be true, trivial, and would say
+nothing about `readTree`. The structural decomposition (that the gates really are 31 muxes
+of 32 bits plus a 6-gate decode) is a separate, provable statement and is not claimed here.* -/
+theorem readTree_gate_count : readTree.gates.length = 2982 := by decide +kernel
+
+#audit_axioms readTree_gate_count
+
 end SaltWorks.HDL
