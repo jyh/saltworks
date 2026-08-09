@@ -192,6 +192,17 @@ preemption per the named small-step/fuel deferral, and beyond).
 Morning: he reviews the council pack + tiny-Rust v1.9 + the story.
 
 OPEN ITEMS:
+- **THE CAPTAIN'S STANDING WORDS (recovered 08-09 02:1x from the 22
+  early-format posts invisible to every filter — silicon's triage,
+  compiler's ask; now in the register where standing law lives,
+  single-ownership rule): [8/6 18:11] the public-TT-repo is GO
+  ("#1: yes", verbatim) · [8/6 19:16] THE CHARGE, verbatim: "No
+  idling…" · [8/7 10:50] CAPTAIN'S INTENT: HE WANTS THE CPU
+  FABRICATED, his sizing "BB in ~2 tiles" (the night's tile arc
+  executed this intent before the filters could see it) · [8/6
+  council I] the seam doctrine stands ratified. Originals at their
+  bus lines; this entry is the durable recall surface.**
+
 - **TILE DECISION — THE CAPTAIN'S CONDITIONAL WORD IS GIVEN (21:2x,
   at the helm, verbatim on the bus): byte-wide feed + 32-BIT
   ADDRESSES multiplexed onto the 8 address pins (4 byte-phases, like
