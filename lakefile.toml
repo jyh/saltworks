@@ -96,4 +96,4 @@ name = "SaltWorks"
 # here, never to SaltWorks.lean.
 [[lean_lib]]
 name = "SaltWorksAudit"
-roots = ["SaltWorks.HDL.PortLengths"]
+roots = ["SaltWorks.HDL.PortLengths", "SaltWorks.HDL.CoreOffsets"]
