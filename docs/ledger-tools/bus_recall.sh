@@ -110,7 +110,12 @@ END {
     if (miss > cap)
       printf "  ⚠️  CAPPED: showing %d of %d. Re-run with --cap %d for the rest.\n",
              cap, miss, miss
-    for (i = 1; i <= shown; i++) printf "      %s\n", ex[i]
+    # Each data line carries its OWN class token. A heading is not a boundary:
+    # silicon date-grepped this output and swept 5 exclusion lines into a miss
+    # count, because a printed exclusion looks exactly like a printed miss to
+    # any reader that does not track which section it is in. Now `grep MISS`
+    # and `grep EXCL` are exact, and no section state is required.
+    for (i = 1; i <= shown; i++) printf "      MISS %s\n", ex[i]
     print  "  ⚠️  BEFORE believing this ratio: how many of the above are SYNTHETIC"
     print  "      (illustrative headers inside another seat post)? On 2026-08-09"
     print  "      three seats measured recall and EVERY miss in the live window"
@@ -131,7 +136,7 @@ END {
     if (excl > cap)
       printf "  ⚠️  CAPPED: showing %d of %d. Re-run with --cap %d for the rest.\n",
              cap, excl, excl
-    for (i = 1; i <= eshown; i++) printf "      %s\n", exl[i]
+    for (i = 1; i <= eshown; i++) printf "      EXCL %s\n", exl[i]
   }
 
   printf "  recall = %.1f%% OVER THIS SCOPE (headers matching the anchor pattern,\n",
