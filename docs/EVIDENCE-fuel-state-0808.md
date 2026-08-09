@@ -120,6 +120,31 @@ announced in this triple, and I have not assumed they share it.* **Four unknown
 reset anchors is a real gap in the fuel picture, and it is cheap to close: one
 line per seat at the next daily announcement.**
 
+## 🕐 THE PRESENCE RECORD FOR 8/8 — four state changes, and NO category-4 window is claimable
+
+*Kept because my charter's category-4 bar requires the away AND return declarations
+quoted with their clocks, and because tonight would otherwise look like a long
+unattended run to anyone counting spans.*
+
+```
+12:14  AWAY    "you have the helm"                          (his words, relayed)
+18:35  RETURN  "That is deeply meaningful my friend…"       (his words, relayed)
+19:53  AWAY    "away for family time and sleep… Sancho has
+                the helm until the morning council"          (maestro, relayed)
+21:04  PRESENT "The Captain is AT THE HELM tonight and
+                asked after layout"                          (maestro, relayed)
+```
+
+⛔ ***THE 19:53 → 21:04 SPAN IS NOT UNATTENDED AND MUST NOT BE SCORED AS ONE.***
+*An away declaration is not a guarantee of absence; it is a statement of intent
+that a later touch supersedes.* **The only closed category-4 window this campaign
+has is still 12:14 → 13:12 (58 m, corrected DOWN from 1 h 11 m on a mid-window
+intervention) — and it is closed precisely because BOTH ends are dated.**
+
+📌 *Recorded now rather than reconstructed later: the 8/6 migration cost this seat
+a measurement it could not recover because nobody dated the ends while they were
+happening (charter ADDENDUM 2 §I).* **Four dated transitions cost four lines.**
+
 ## 🔥 THE OVERNIGHT ALLOCATION — 2026-08-08 20:00, the Captain's last order before sleep
 
 > ***"For jason, overnight, we have 40%, full throttle."***
