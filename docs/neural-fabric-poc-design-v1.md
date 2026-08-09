@@ -82,9 +82,12 @@ standard details, both cheap:
   subtractive — on that one cycle the adder subtracts instead of adds.
   One mux on the adder op.
 - **Guard bits:** accumulating N products needs log2(N) headroom above
-  the product width. PoC number format: **8-bit weights, 8-bit
-  activations, 32-bit accumulator** (classical edge-NPU quantization) —
-  an 8-bit stream also makes every MAC 8 cycles, not 32.
+  the product width. Number format per **RULING #8**: **int8 fixpoint
+  VALUES on the landed 32-bit datapath** (sign-extended at ingress;
+  activation compares at 32 with `wordSignedOrder`; the int8 bound
+  makes overflow witnesses a one-line `decide`). The 8-bit-NATIVE
+  datapath — 8b latches, 8-cycle MACs, shift+saturate requant — is
+  the v2/production optimization, priced as reference only.
 
 **Cost, to be priced exactly by silicon:** order 100–150 flops + an
 adder + AND row + small FSM ≈ **~500 cells**; the CE is the existing
