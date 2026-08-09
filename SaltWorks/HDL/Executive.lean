@@ -290,6 +290,77 @@ theorem demo_image_head :
       = some (encode (.ADDI 1 0 5)) := by
   decide +kernel
 
+/-! ## 7 · ⛔ FUEL EXHAUSTION IS NOT A HALT — the boundary PROVED, not described
+
+**Added 20:4x on math's independent statement audit of this file (20:43), and the finding
+is theirs.** They observed that §1's docstring separates *undecodable-word* from *halt*
+deliberately and precisely — *"collapsing those would silently make an undecodable word a
+halt"* — and that **fuel-exhaustion-vs-halt is the same class, one line up, and I did not
+separate it.** That is correct and it was an oversight, not a choice.
+
+📌 The header fence's item 4 does state that `run`'s `code.length` fuel is a *sufficient*
+bound only because every emitted branch is forward. ⚠️ **But it says so in the FENCE, not on
+`runW` — where a reader of the definition would actually meet it — and it never names the
+CONFLATION.** `runForW 0 _ s => s` returns the mid-run state through the same door a genuine
+halt uses, so the two are indistinguishable at the type.
+
+⭐ **So rather than add a sentence, the boundary is exhibited — the same treatment §4 gives
+the undecodable word, which is the part of this file math could audit at all.** -/
+
+/-- A two-word program that loops forever: increment `x1`, then branch back. `x0 = x0`
+holds unconditionally (`St.get` reads `x0` as zero by the READ PORT), so the branch is
+always taken. `bOffset (-2) = -4`, so `pc = 4` returns to `pc = 0`. -/
+def loopProg : List Instr := [.ADDI 1 1 1, .BEQ 0 0 (BitVec.ofInt 12 (-2))]
+
+theorem loop_image_length : (loopProg.map encode).length = 2 := by decide +kernel
+
+/-- ⛔⛔ **THE WITNESS: `runW` STOPS WITH AN INSTRUCTION STILL FETCHABLE.** `runW`'s fuel is
+the WORD COUNT, and a program's STEP COUNT is not bounded by its word count — `BEQ` makes
+loops. So on this image the machine runs out of fuel at `pc = 0` with word 0 available.
+
+⇒ ***A genuine halt is `fetchW img s.pc = none`. This state's fetch is `some`. The two exits
+are therefore DISTINGUISHABLE FROM OUTSIDE even though `runForW` returns both as `s` —
+which is exactly what makes this statable rather than merely regrettable.*** -/
+theorem fuel_exhaustion_is_not_a_halt :
+    fetchW (loopProg.map encode) (runW (loopProg.map encode) St.init).pc ≠ none := by
+  decide +kernel
+
+/-- And the bound is genuinely insufficient here, not merely tight: more fuel computes a
+different answer. `x1` counts loop iterations, so the word-count fuel truncates it. -/
+theorem more_fuel_changes_the_answer :
+    (runForW 6 (loopProg.map encode) St.init).get 1
+      ≠ (runForW 2 (loopProg.map encode) St.init).get 1 := by
+  decide +kernel
+
+/-- ✅ **AND THE SORT DEMO IS IN THE SAFE REGIME, PROVED RATHER THAN ASSUMED** — its exit
+`pc` is off the end of the image, so it halted rather than ran out of fuel. *This is the
+theorem that licenses §5's lifts; without it "the demo works" would rest on the word-count
+fuel happening to suffice.* -/
+theorem demo_halts_rather_than_exhausting_fuel :
+    fetchW ((progOf cexSeq [5, -3, 0, 7, -8, 2, 2, -1]).map encode)
+      (demoRunW cexSeq [5, -3, 0, 7, -8, 2, 2, -1]).pc = none := by
+  decide +kernel
+
+/-! ⇒ ***THE REGIME, STATED WHERE IT BELONGS: `runW` (and `ISA.run`) execute to completion
+ONLY on images whose step count is bounded by their word count — straight-line and
+forward-branching programs.*** For those, `fetchW … = none` at the exit certifies it, as
+`demo_halts_rather_than_exhausting_fuel` does for the sort demo.
+
+🎯 **AND THE OPEN ROW, named because math's Slice-B slate will meet it from the other side:
+an EXECUTIVE schedules in LOOPS and its fairness invariant quantifies over INFINITE runs. A
+driver whose fuel is the image length cannot express an infinite run at all.** ⇒ ***B-EXEC
+needs a different driver — a coinductive/step-indexed relation or an explicit fuel
+parameter — and that is a DESIGN row, not a lemma. It should be decided before B-EXEC's
+statements are drafted against a driver that cannot carry them.*** *Math's E-5 ("does an
+infinite run exist?") and the language block's §5 fuel deferral are this same gap arriving
+from two other directions.* -/
+
+#audit_axioms loopProg
+#audit_axioms loop_image_length
+#audit_axioms fuel_exhaustion_is_not_a_halt
+#audit_axioms more_fuel_changes_the_answer
+#audit_axioms demo_halts_rather_than_exhausting_fuel
+
 #audit_axioms fetchW
 #audit_axioms runForW
 #audit_axioms runW
