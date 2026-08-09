@@ -36,7 +36,15 @@ done
 
 if [ ! -f "$BUS" ]; then
   echo "⛔ bus_recall: no bus at $BUS — REFUSING to report a recall over a file I cannot read." >&2
-  exit 2
+  echo "   (set FLEET_BUS to point elsewhere; cwd is irrelevant, this path is absolute)" >&2
+  # EXIT 4, NOT 2, and the reason is a real incident: awk exits 2 on a syntax
+  # error, so under `set -e` a BROKEN version of this tool returned the same
+  # code as this deliberate refusal. A peer hit rc=2 on 2026-08-09 02:0x and
+  # could not tell which had happened -- and neither could I. Never adopt an
+  # exit code that a tool in your own pipeline already uses for "I am broken":
+  # it makes a malfunction indistinguishable from a correct refusal, and the
+  # refusal is the one that reassures.
+  exit 4
 fi
 
 LINES=$(wc -l < "$BUS" | tr -d ' ')
