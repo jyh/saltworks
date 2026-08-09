@@ -28,7 +28,7 @@ flowchart LR
     WREG["weight register<br/>int8 VALUE, 32b datapath<br/>(ruling #8)"]
     AND["AND row<br/>x_bit · W"]
     ADD["adder<br/>(op mux: +/− on sign cycle)"]
-    ACC["accumulator<br/>32b + guard bits<br/>(bias PRELOADED here)"]
+    ACC["accumulator<br/>32b + guard bits<br/>(bias = FIRST ADDEND, ruling)"]
     CE["CE vs 0 = ReLU<br/>signed order passed EXPLICITLY<br/>(wordSignedOrder, landed)"]
     SER["parallel→serial<br/>shift-out"]
   end
@@ -43,8 +43,10 @@ flowchart LR
 **Operation.** Weights arrive as packets on the W-port and latch (weight-
 stationary). Values stream LSB-first on the X-port; each bit ANDs against
 the full latched weight and shift-adds into the accumulator — a classic
-serial-parallel MAC. The **bias costs zero gates**: it is the accumulator's
-preload value. After the last input, the nonlinearity is applied **in
+serial-parallel MAC. The **bias costs zero gates and one cycle**: it STREAMS as the
+first addend through the MAC path itself (maestro ruling at silicon's
+11:3x catch — a parallel preload would cost a 32-flop load mux; the
+streamed form is the one that is actually free). After the last input, the nonlinearity is applied **in
 parallel** by the compare-exchange organ with one input tied to
 zero (ReLU = max(a,0) = half a CE); the result re-serializes out
 LSB-first for the next layer's MACs.
@@ -280,7 +282,7 @@ h'_v = ReLU( W_self · h_v  +  Σ_{u ∈ N(v)} W_msg · h_u  +  b )
 
 ```
 CONFIG   broadcast W_msg to all 4 cells (ONE weight stream — sharing is
-         multicast, not storage); W_self, b per cell (b = acc preload)
+         multicast, not storage); W_self, b per cell (b = first addend, streamed)
 ROUND 1  permutation (0 1)(2 3):   h_0↔h_1, h_2↔h_3 cross the fabric;
          each cell MAC-accumulates the arriving message
 ROUND 2  permutation (0 2):        h_0↔h_2
