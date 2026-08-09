@@ -231,6 +231,19 @@ OPEN ITEMS:
   council I] the seam doctrine stands ratified. Originals at their
   bus lines; this entry is the durable recall surface.**
 
+- **COUNCIL RULING #1 (2026-08-09 08:4x, the Captain, verbatim: "we
+  have the RISC-V layout fitting in a 3x2 -- we will want this
+  layout no matter what, even if we decide not to submit it, so
+  let's approve and make it real"): THE 3×2 LAYOUT IS APPROVED —
+  MAKE IT REAL. The work is DECOUPLED from the submission decision:
+  hardening fires NOW (silicon's slot, PRE-AUTH under this ruling);
+  the calculator read (€140/€420) no longer gates work and moves to
+  SUBMISSION time (rides the B5 window, his word then). THE
+  CAMPAIGN: slicea16bma at the REAL 3×2 die (FP_SIZING absolute) ·
+  DRV repair (637 typical/1,678 worst-corner slew) · the
+  submission-config checklist (CLOCK_PERIOD=40 reconciliation, the
+  registered trap) · pin map finalization (18/24) · fetch-protocol
+  design question runs in parallel, does not gate the hardening.**
 - **TILE DECISION — THE CAPTAIN'S CONDITIONAL WORD IS GIVEN (21:2x,
   at the helm, verbatim on the bus): byte-wide feed + 32-BIT
   ADDRESSES multiplexed onto the 8 address pins (4 byte-phases, like
