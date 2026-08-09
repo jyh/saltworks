@@ -54,6 +54,19 @@ GLOB=${2:-SaltWorks/HDL/*.lean}
 # ⇒ So it now states its POPULATION first, and REFUSES outright if that
 #   population is zero. A detector that has scanned nothing has not shown it can
 #   detect anything.
+#
+# ⛔⛔ WHAT THIS TOOL CANNOT SEE — say it whenever you quote its number, because
+# "residue 7" means "7 EXACT-TEXT duplicates", NOT "7 duplicates". The real count
+# is bounded BELOW by this figure and not above. Demonstrated 2026-08-08 22:17:
+# compiler found `run_level_map` (SingleLevel) duplicating `run_pointwise`
+# (Program.lean:3494) — and THIS TOOL, run over the full corpus, did not list it.
+# Three independent reasons, each sufficient on its own:
+#   α-RENAMING          `env`/`f` vs `E`/`mk` — identical logic, different text
+#   CONJUNCT CONTAINMENT `B` vs `A ∧ B` — one is half of the other
+#   BINDER PLACEMENT     `(n : Nat)` in the signature vs `∀ n` in the body
+# ⇒ THIS IS A TEXT MATCHER, AND LOGICAL DUPLICATION IS NOT A TEXTUAL RELATION.
+#   It is genuinely useful — it found 7 real ones — but a clean run is NOT
+#   evidence of no duplication, and must never be reported as one.
 FILES=$(git ls-tree -r --name-only "$REF" -- $GLOB 2>/dev/null | wc -l | tr -d ' ')
 THMS=$(git grep -h -cE "^theorem " "$REF" -- "$GLOB" 2>/dev/null | awk -F: '{n+=$NF} END{print n+0}')
 if [ "${FILES:-0}" -eq 0 ] || [ "${THMS:-0}" -eq 0 ]; then
