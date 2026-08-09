@@ -263,6 +263,19 @@ OPEN ITEMS:
   discussion"; #1 and #2 use offboard memory (his word), #3's
   memory story is part of the open discussion.**
 
+- **NDF TILE SHAPE — AWAITING THE CAPTAIN'S PURSE RULING (silicon's
+  probe answer, 11:46, post-layout measured): minimal demo (k=4 +
+  8x8 BB + core) requires 6x2 = 12 TILES, EUR 840, TWO-HIGH
+  (unscarce shape; 3x4 = same capacity but burns one of two scarce
+  4-high slots — refused). 6x2 actually delivers k=7-9 headroom.
+  Ladder: 2x2 core-does-not-fit · 3x2 core-only (1,399 um^2 spare
+  — this morning's approval stands FOR THE CORE, cannot be the NDF
+  tile) · 4x2 k=2-3 short · 8x2 EUR 1,120 k=12-15 (stretch, not
+  recommended). MYTH BUST: the "24-tile cap" = the 6x4 SHAPE (and
+  the pinout count) — documented max is 8x4=32. Density lever
+  50->60% ≈ +20% cells, NOT recommended without a slew run.
+  MAESTRO RECOMMENDATION: 6x2 at EUR 840.**
+
 - **NDF BENCH HARNESS (registered 11:4x at the Captain's memory-
   hassle question): RP2040 firmware = the memory-server side of the
   8->32 multiplexed bus (PIO state machines: latch 4 addr bytes,
