@@ -46,13 +46,48 @@ the encoding admits a value the source list does not have. Making it
 unconditional is not this block's job — it is the SEAM's, and it is discharged
 by showing the decoder never drives `select = 3`.
 
-## 🔑 AND THAT SEAM OBLIGATION IS CURRENTLY UNPROVED IN THIS CORPUS
+## ✅ THAT SEAM OBLIGATION IS **DISCHARGED** — corrected 2026-08-08 19:4x
 
 At the ruled pair each select bit is a WIRE from exactly one class line, so
 `select = 3` (binary `11`) ⟺ **two class lines hot at once** ⟺ a one-hot
-violation. Silicon reports **no at-most-one-hot theorem over `dcMatches` or
-`decoder.outs` anywhere in the corpus**. Mutual exclusion is therefore
-load-bearing for correctness and nobody has proved it.
+violation. **That violation is proved impossible:**
+
+| theorem | where | says |
+|---|---|---|
+| `alu_classes_atMostOne` | `C1Organ.lean:98` | `∀ w`, no two of `dcADDm`/`dcXORm`/`dcSLTm` are hot together — **unconditional** |
+| `gsSelOf_of_decoder_driven` | `C1Organ.lean:158` | a decoder-driven select value **is** `opIndex w`, with **no one-hotness hypothesis** — it uses the theorem above |
+| `sliceASelect_of_decoder_driven` | `C1Organ.lean:178` | all 32 ports, arbitrary `Env`: the block delivers the source the decoder **named**, and `opIndex_lt_rsOps` discharges the `< 3` guard at every word |
+
+⇒ ***So `select = 3` is unreachable from a decoder-driven select, and the
+`false`-arm hazard below is a property of the BLOCK in isolation, not a hazard of
+the assembled organ.*** `mutPadTrue` remains the mutant proving that arm is real
+*as a block-level fact* — which is still worth having, because the block is
+certified separately from the seam.
+
+⚠️ **SCOPE, so this is not over-read in the other direction:** those theorems are
+stated over the **matcher predicates** (`dcXORm w`, `dcSLTm w`) driving the select
+nets. That the *gate-level* `decoder.outs` nets carry exactly those matchers is
+the `decoder_correct` link (`Program.lean:7487`), which is **not audited in this
+correction pass**. Block-to-matcher: proved. Matcher-to-gates: cited, unchecked here.
+
+### 🔴 AND THE PARAGRAPH THIS REPLACED, KEPT VERBATIM BECAUSE IT WAS QUOTED ELSEWHERE
+
+> *"## 🔑 AND THAT SEAM OBLIGATION IS CURRENTLY UNPROVED IN THIS CORPUS … Silicon
+> reports **no at-most-one-hot theorem over `dcMatches` or `decoder.outs` anywhere
+> in the corpus**. Mutual exclusion is therefore load-bearing for correctness and
+> nobody has proved it."*
+
+**It was true when written and `C1Organ.lean` landed the proof afterwards; nobody
+came back for the header.** ⭐ **THE LESSON IS A DEFECT CLASS: A GREEN BUILD DOES
+NOT DATE ITS PROSE.** This file compiled, every theorem in it was true, and one of
+its section headers was false — no build, no audit and no census can catch that,
+because the kernel checks *statements*, not claims about what is *missing*. The
+word *"currently"* inside a versioned file is a promise nothing enforces.
+📌 **And an "UNPROVED" note rots in the DANGEROUS direction: it survives its own
+repair.** A stale *"proved"* claim is caught the moment someone tries to cite the
+theorem; a stale *"unproved"* claim quietly causes duplicated or defensive work
+forever. *This one was published to the silicon seat in
+`docs/compiler-organ-reference-0808.md` §4 and acted on before it was caught.*
 
 ⚠️ **The sizing change makes that fault LOUDER, not likelier.** At `(10, 4)`
 two hot lines gave a wrong-but-in-range index — a wrong op, silently. At

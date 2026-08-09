@@ -97,12 +97,37 @@ blocks and the comparators are SAMPLED.** *"Certified organs" is true and does n
 1. **The 5-op ISA has no shifts, no memory, no jumps** — `sll`/`sra` have NO producer
    in the corpus and are outside Slice A. Do not leave holes for them in the top module
    expecting a block to arrive.
-2. **`select = 3` is REACHABLE and defined.** At `(3,2)` the two select bits encode a
-   value the three sources do not have; `sliceASelect_at_select_three` proves the block
-   emits **32 proved zeros** there. It is not "don't care" and it is not undefined. The
-   seam obligation — that the decoder never drives `select = 3` — is **UNPROVED in this
-   corpus** (`SelectCut32.lean` §"AND THAT SEAM OBLIGATION IS CURRENTLY UNPROVED"), and
-   at the ruled pair it corresponds to a one-hot violation on the class lines.
+2. ⛔ **CORRECTED 19:4x — THIS ITEM WAS WRONG IN THE DIRECTION THAT COSTS SILICON WORK.**
+   `select = 3` is reachable and defined *as a block-level fact*: at `(3,2)` the two
+   select bits encode a value the three sources do not have, and
+   `sliceASelect_at_select_three` proves the block emits **32 proved zeros** there — not
+   "don't care", not undefined. **But I then told you the seam obligation was UNPROVED,
+   and it is PROVED:**
+   - `alu_classes_atMostOne` (`C1Organ.lean:98`) — `∀ w`, no two class matchers hot
+     together, **unconditional**;
+   - `gsSelOf_of_decoder_driven` (`:158`) — a decoder-driven select **is** `opIndex w`,
+     **no one-hotness hypothesis**;
+   - `sliceASelect_of_decoder_driven` (`:178`) — all 32 ports, arbitrary `Env`, the guard
+     discharged at **every word** by `opIndex_lt_rsOps`.
+
+   ⇒ ***So a decoder-driven `select` is provably in `{0,1,2}`. DO NOT synthesise a fourth
+   arm and DO NOT add a defensive guard for it.*** C1Organ is wired into `SaltWorks.lean`
+   (`:25`), builds `EXIT=0`, and those theorems tick with whitelisted axioms only —
+   verified before this correction was posted.
+
+   ⚠️ **Scope, so it is not over-read the other way:** those theorems are stated over the
+   **matcher predicates** driving the select nets. That the gate-level `decoder.outs` nets
+   carry exactly those matchers is the `decoder_correct` link (`Program.lean:7487`),
+   **not audited in this pass.** Block-to-matcher: proved. Matcher-to-gates: cited.
+
+   📌 **What I did wrong: I cited a FILE'S OWN PROSE instead of the corpus.**
+   `SelectCut32.lean:49` carried a section header saying the obligation was *"currently
+   unproved"*; I quoted it faithfully and it was stale, because `C1Organ.lean` landed the
+   proof afterwards and nobody came back for the header. ⭐ **A green build does not date
+   its prose** — that file compiled, every theorem in it was true, and one header was
+   false. And an *"unproved"* note rots in the dangerous direction: **it survives its own
+   repair**, quietly causing defensive work forever. The header is now fixed in place with
+   the stale text kept as a dated quotation.
 3. **There is no assembled `core`** — see `docs/compiler-inventory-0808.md` §Q1. The RTL
    cut is being built from organs whose JOIN has no theorem yet. That is a known and
    stated position, not an oversight, but the datasheet must not imply a verified core.
