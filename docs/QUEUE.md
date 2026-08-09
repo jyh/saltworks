@@ -324,8 +324,12 @@ OPEN ITEMS:
   rung 3 unchanged — the separate-stepSeq deferral vindicated;
   the :66-68 stale prose past-tensed in the same commit; covered
   EXIT=0 8,677 jobs).
-  ⭐ THE CELL WAVE IS COMPLETE — the neuron cell is certified END
-  TO END at the artifact: two organs (accumulator w/ carry-in +
+  ⭐ THE CELL WAVE: ALL PARTS LANDED, THE JOIN IN FLIGHT (math's
+  15:44 trim of the maestro's completion claim — macFinal/sval
+  appear only in a docstring, never a theorem; the composing
+  theorem is ONE join short, small because every part is in
+  place; math claimed MacBridge and is building it, shaped w/
+  the library-native ¬ssubOverflow twin). The parts: two organs (accumulator w/ carry-in +
   weight-shift w/ load gate, zero constant gates, 193 gates) ·
   the bridge (rungs 1-4, arithmetic reading under ¬saddOverflow,
   demoBound-discharged) · add, shift, AND subtract in the kernel.
