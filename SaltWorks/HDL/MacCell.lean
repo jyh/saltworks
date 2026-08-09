@@ -290,6 +290,102 @@ with the no-wrap hypothesis gives the `ℤ` statement `macAfter` needs. **Three 
 the overflow condition appears only in the third.**
 -/
 
+/-! ## THE WEIGHT-SHIFT ORGAN — the cell's second `Seq`
+
+**Ruled** (maestro 13:46): *"the 2^t weighting + AND with x_t = the WEIGHT-SHIFT ORGAN, a second
+small `Seq` (`W_reg` shifting left per cycle + the AND row) — yours as the next increment."* This is
+the organ `macSeq`'s docstring named as OUTSIDE the accumulator, now built rather than deferred.
+
+It supplies exactly the addend `macAfter` asks for:
+
+```
+   macAfter (t+2) = macAfter (t+1) + (if x t then W * 2^t else 0)
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^ THIS organ's output
+   state  W << t     (32 bits)      input  x_t (ONE bit)      output  the addend (32 bits)
+```
+
+⭐ **THE SHIFT COSTS NO GATES — it is pure rewiring.** `outs` may name input nets directly, so the
+next state is `[0, wsh₀, …, wsh₃₀]`: thirty-one wires moved up one place and a constant in the
+vacated LSB. **The only gates are the AND row and that one constant.** *A shifter built as gates
+would have cost 32 more and computed the same thing.* -/
+
+/-- The stream bit — the organ's single primary input, net `0`. -/
+def wsX : Net := 0
+/-- The shifted weight `W << t` — the organ's STATE, nets `1…32`. -/
+def wsW (k : Nat) : Net := 1 + k
+/-- `nIn + nState` = 1 + 32. -/
+def wsCoreIn : Nat := 33
+/-- The constant that fills the LSB the shift vacates — one of this organ's two gate kinds. -/
+def wsZero : Net := 33
+/-- The AND row: `addend[k] = x_t ∧ (W << t)[k]`, nets `34…65`. -/
+def wsAnd (k : Nat) : Net := 34 + k
+
+def wsGates : List Gate :=
+  ⟨wsZero, Op.const false⟩ :: (List.range 32).map (fun k => ⟨wsAnd k, Op.and wsX (wsW k)⟩)
+
+/-- ⭐⭐ **THE CORE.** Outputs: the 32 addend bits, then the 32 next-state bits. The next state is
+the left shift, expressed as WIRES — `wsZero` then `wsW 0 … wsW 30`. -/
+def wsCore : Circ :=
+  { nIn := wsCoreIn
+    gates := wsGates
+    outs := (List.range 32).map wsAnd ++ (wsZero :: (List.range 31).map wsW) }
+
+/-- ⭐ **THE ORGAN.** -/
+def wshiftSeq : Seq := { nIn := 1, nOut := 32, nState := 32, core := wsCore }
+
+theorem wsCore_ssa : wsCore.ssa = true := by decide +kernel
+theorem wsCore_wf : wsCore.wf = true := Circ.wf_of_ssa wsCore_ssa
+
+/-- **The widths are consistent** — `core.nIn = 1 + 32`, `core.outs.length = 32 + 32`. -/
+theorem wshiftSeq_wf : wshiftSeq.wf = true := by decide +kernel
+
+/-- **33 gates: one constant + a 32-wide AND row.** The shift itself is free. -/
+theorem wsCore_gate_count : wsCore.gates.length = 33 := by decide +kernel
+
+/-- ⛔ **BIRTH-ASSERTION (the maestro asked for this pattern in every organ from here): the constant
+net is not an AND output.** The pair property no per-instance certificate can express, stated at the
+organ's birth rather than found later. -/
+theorem wsZero_does_not_collide :
+    wsZero ∉ ((List.range 32).map (fun k => wsAnd k)) := by decide +kernel
+
+/-- ⛔⛔ **THE MUTANT: A ROTATE PLACES EXACTLY AS CLEANLY AS A SHIFT.** Filling the vacated LSB from
+`wsh₃₁` instead of from a constant is well-formed, same gate count, same widths — and computes
+`W · 2^t mod (2^32 − 1)`-ish garbage the moment the weight's top bit is set. **Both halves asserted:
+the LSB IS the constant, and the constant is NOT the top state bit.** -/
+theorem shift_is_not_a_rotate :
+    (wsCore.outs.drop 32).headD 0 = wsZero ∧ wsZero ≠ wsW 31 := by
+  refine ⟨by decide +kernel, by decide +kernel⟩
+
+/-- ⛔ **THE OTHER MUTANT: LEFT, NOT RIGHT.** A right shift is also pure rewiring and also places
+cleanly; it would weight bit `t` by `2^(-t)`. Next-state bit 1 must be state bit **0**. -/
+theorem shift_is_left_not_right :
+    (wsCore.outs.drop 32).getD 1 0 = wsW 0 ∧ (wsCore.outs.drop 32).getD 1 0 ≠ wsW 2 := by
+  refine ⟨by decide +kernel, by decide +kernel⟩
+
+/-- **CONTROL: the AND row reads the STREAM BIT, not a state bit.** Every addend gate must have
+`wsX` as one operand — an organ that ANDed two state bits would emit `wsh[k] ∧ wsh[k]` and ignore
+the stream entirely, accumulating `W · 2^t` on every cycle regardless of `x`. -/
+theorem and_row_reads_the_stream (k : Nat) (hk : k < 32) :
+    (⟨wsAnd k, Op.and wsX (wsW k)⟩ : Gate) ∈ wsGates := by
+  revert hk; revert k; decide +kernel
+
+/-- **CONTROL: the two organs' state widths match, so they compose.** `wshiftSeq`'s 32 output bits
+are exactly `macSeq`'s 32 addend inputs — the seam the composition layer will use. -/
+theorem organs_compose_at_32_bits :
+    wshiftSeq.nOut = macSeq.nIn ∧ wshiftSeq.nState = 32 ∧ macSeq.nState = 32 := by
+  refine ⟨rfl, rfl, rfl⟩
+
+/-! ### OWED, with its shape named
+
+The per-cycle semantics of this organ — `stepSeq wshiftSeq [x] (bitsOf w) = (bitsOf (if x then w
+else 0), bitsOf (w <<< 1))` — is the next rung and it is cheap: 33 gates, no instantiation, so no
+`inst_sem` and no frame argument. **Stated as owed rather than left to be inferred from silence**,
+exactly as `macSeq`'s per-cycle lemma was before layer 1 landed.
+
+⛔ **AND STILL NOT CLAIMED: the composition.** Two organs with matching widths are not a machine.
+`organs_compose_at_32_bits` says the seam FITS; it does not say anything is wired.
+-/
+
 /-! ### The axiom audit — one declaration per call
 
 *Added WITH the cell, not after it. `CorePlace` ran fourteen placements with `EXIT=0` and zero
@@ -313,5 +409,14 @@ everything after a failure reads as clean. -/
 #audit_axioms mac_hin
 #audit_axioms step_bit_is_adder_bit
 #audit_axioms step_halves_agree
+#audit_axioms wsCore_ssa
+#audit_axioms wsCore_wf
+#audit_axioms wshiftSeq_wf
+#audit_axioms wsCore_gate_count
+#audit_axioms wsZero_does_not_collide
+#audit_axioms shift_is_not_a_rotate
+#audit_axioms shift_is_left_not_right
+#audit_axioms and_row_reads_the_stream
+#audit_axioms organs_compose_at_32_bits
 
 end SaltWorks.HDL.MacCell
