@@ -90,12 +90,20 @@ E2. THE TWO INVARIANTS (stated on B-ISA's spec; v1.1 — math's
      CONSTRUCTION (static memory ranges at Slice-B scale), so
      isolation is provable without an MMU — say so honestly; an MMU
      is a different artifact.
-E3. DECOMPOSITION: the executive as a Slice-B PROGRAM (compiled by
-   the language when ready — hand-assembled as the fallback, and the
-   theorem is about the MACHINE CODE either way, so the language is
-   an on-ramp, not a dependency) · the scheduler-step lemma ·
-   fairness by induction on yield events · isolation as the frame
-   lemma family.
+E3. DECOMPOSITION: **THE DRIVER FIRST (named row, v1.2 — math's
+   Executive.lean audit 20:43): B-EXEC needs a run form that can
+   EXPRESS infinite runs — `runW`'s fuel is `img.length`, sound only
+   for straight-line images, and fuel-exhaustion returns a state
+   indistinguishable from a halt. The step-indexed/fuel-parameterized
+   (or coinductive) driver is the executive's own first row and lands
+   BEFORE the invariant rows are stated against it. Three sightings,
+   one gap: this audit + E-5's inhabitance control + the language
+   block's §5 small-step/fuel deferral.** · the executive as a
+   Slice-B PROGRAM (compiled by the language when ready —
+   hand-assembled as the fallback, and the theorem is about the
+   MACHINE CODE either way, so the language is an on-ramp, not a
+   dependency) · the scheduler-step lemma · fairness by induction on
+   yield events · isolation as the frame lemma family.
 E4. TRAPS: the executive's own state must live INSIDE the isolation
    story (it is task 0, not a ghost); yield-entry re-entrancy (the
    link register at nested entry — JAL's B4 trap arriving one level
