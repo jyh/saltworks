@@ -4,10 +4,15 @@
 ### B-EXEC states its invariants against B-ISA's total-transition
 ### spec. Captain-ratified roadmap (muster ruling ①/②): +LW/SW/JAL/
 ### JALR/BNE, ALU op-set UNCHANGED — the (3,2) select carries it;
-### cooperative first; the −1,154 banked gates are the budget.
+### cooperative first; the −1,154 gates banked AT THE SELECT are the
+### budget (evidence 20:04: a SELECT delta, verified 1445→291 exact;
+### the whole-core net is UNVERIFIED — the corpus holds no whole-core
+### total — silicon's one-line answer owed before the budget is spent
+### as a system figure).
 ### PRECONDITIONS: phase 3+3b closed (constants at the ruled pair);
 ### the census at PASS/FAIL/UNREACHED/UNWIRED; compiler's night
-### inventory may amend §B1.
+### inventory may amend §B1. Scope audit: evidence 20:04,
+### preconditions 3/3 verified.
 
 ## B-ISA — the datapath extension
 
