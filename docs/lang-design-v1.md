@@ -58,7 +58,10 @@ SLICE A EXACTLY AS IT EXISTS — no memory, no waiting on Slice B.
   DEAD at the source until v2's u32 — marked so, not shipped
   silently. T4: the types do NOT close overflow — the semantics'
   named wrap choice does.
-- Statements: `skip` · assignment · `seq` · `if` · `while`.
+- Statements: `skip` · `let mut x : τ = e` (block-scoped binding —
+  scope end = liveness end, feeding the judgment's register budget) ·
+  assignment · `seq` · `if` · `while`. Expressions add `true`/`false`
+  literals with the bool type.
   Big-step semantics in Lean (IMP-shaped; termination NOT assumed —
   the semantics is a relation, and the compiler theorem quantifies
   over terminating runs in v1; a fuel/small-step variant is §5's

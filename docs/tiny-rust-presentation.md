@@ -78,11 +78,19 @@ road: the executive as the thing yields return to).
 ## 2. ABSTRACT SYNTAX (what the theorem is about)
 
 ```
-e ::= x | n | e + e | e ^ e | e < e            (Expr)
-s ::= skip | x = e | s; s                      (Stmt)
+τ ::= i32 | bool                        (Ty — v2 reserves u32, &τ, &mut τ)
+
+e ::= x | n | true | false              (Expr)
+    | e + e | e ^ e | e < e
+
+s ::= skip                              (Stmt)
+    | let mut x : τ = e                 — binds x for the enclosing block;
+    | x = e                               scope end = liveness end = the
+    | s ; s                               judgment's register budget
     | if e { s } else { s }
     | while e { s }
-p ::= fn main() { s }                          (Prog)
+
+p ::= fn main() { s }                   (Prog)
 ```
 The parser (Rust-familiar surface, `let mut`, sugar like `n - 1` and
 `cex!`) is a TRUSTED frontend; every theorem lives from this AST down
