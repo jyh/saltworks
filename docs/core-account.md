@@ -23,26 +23,179 @@ cites HERE); (3) the writeup's hardware chapter seed.
 
 ## 1. THE KERNEL HALF — compiler's slot
 
-<!-- COMPILER FILLS. Sources: CoreOffsets.lean (measured dimensions),
-     CorePlace.lean (placements, port maps, instOK), the organ modules
-     (sem_* certificates), the mutation-control runs. -->
+### ✅ STATUS: **FILLED** (compiler, 2026-08-09 13:3x). Window: **`5f1abb7`**.
+
+**INSTRUMENT for every figure in §1.1–§1.2:** `#eval` in
+`SaltWorks/HDL/ScratchAccountMeasure.lean`, elaborating against the real `Circ`
+artifacts through `SaltWorks.HDL.CorePlace`'s olean at `5f1abb7`.
+**Nothing here is transcribed from `CoreOffsets`' literals, from the assembly
+plan, or from a memory** — the harness reads `c.gates.length`, `c.nIn`,
+`c.outs.length` and the `instNext` chain off the artifacts themselves.
+
+**DENOMINATOR — what §1 refuses to count, stated up front:**
+
+- **Gates are `Circ` gates, pre-synthesis.** Not cells, not area. §2 is the
+  independent axis and the two must not be added.
+- **`readTree` and `adder32` are ONE `Circ` each, placed TWICE.** The netlist
+  duplicates their gates (`instGates` maps every gate into the host); the
+  *source* does not. So "16 rows" is **13 distinct organs in 16 placements**.
+- **The tie-cell row is a host preamble, not an organ.** It is counted in the
+  net span and excluded from "organs only".
+- **No `core` object exists and no semantics is claimed here.** §1 is a
+  *placement* account. See §1.4.
+
+**WITNESSES:** the dimensions carry **two independent readings** — this harness
+(derived chain) and `CoreOffsets.lean`'s independently-landed `row_*` theorems
+(literal table, kernel-checked by `decide +kernel`). They reconcile exactly:
+`11461 = 11459 + 2` (§1.2). Columns marked **⚠️1W** are single-witness (mine
+alone) and are struck if §4 wants them struck.
 
 ### 1.1 The organ inventory (sixteen rows)
 
-| row | organ | gates | state bits | offset | port map | sem_* certificate | instOK | controls run |
-|---|---|---|---|---|---|---|---|---|
-| 0 | tie cells | | | | | | | |
-| … | | | | | | | | |
+| row | organ | gates | nIn | outs | offset | `sem_*` certificate | `instOK` theorem |
+|---|---|---|---|---|---|---|---|
+| 0 | tie cells | 2 | 0 | 2 | 1088 | *(none — two `const` gates)* | `tieCells_instOK` |
+| 1 | `decoder` | 102 | 32 | 6 | 1090 | `sem_decoder`, `sem_decoder_eq_ctrlSpec` | `decoder_instOK` |
+| 2 | `immBCirc` | 1 | 32 | 32 | 1192 | `sem_immBCirc`, `sem_immBCirc_of_decode` | `immB_instOK` |
+| 3 | `readTree`.rs1 | 2982 | 997 | 32 | 1193 | `sem_readTree`, `sem_readTree_uncond` | `readTree_rs1_instOK` |
+| 4 | `readTree`.rs2 | 2982 | 997 | 32 | 4175 | *(same `Circ`, same certificates)* | `readTree_rs2_instOK` |
+| 5 | `bitXor32` | 32 | 64 | 32 | 7157 | `sem_bitXor32` | `bitXor32_instOK` |
+| 6 | `bitNot32` | 32 | 32 | 32 | 7189 | `sem_bitNot32` | `bitNot32_instOK` |
+| 7 | `obMux` | 97 | 65 | 32 | 7221 | `sem_obMux`, `sem_operandBMux` | `ob_instOK` |
+| 8 | `adder32`.add | 160 | 65 | 33 | 7318 | `sem_adder32` (all 2⁶⁴ pairs) | `add_instOK` |
+| 9 | `adder32`.sub | 160 | 65 | 33 | 7478 | *(same `Circ`, same certificate)* | `sub_instOK` |
+| 10 | `sltCirc` | 5 | 3 | 32 | 7638 | `sem_sltCirc` | `slt_instOK` |
+| 11 | `sliceASelect` | 291 | 98 | 32 | 7643 | `sem_sliceASelect`, `sem_genSelect` | `sel_instOK` |
+| 12 | `ruledEnc` | **0** | 3 | 2 | 7934 | ⚠️ **none** — see §1.4 | `enc_instOK` |
+| 13 | `regWrite` | 163 | 7 | 32 | 7934 | `regWrite_correct` | `regWrite_instOK` |
+| 14 | `pcAdd` *(math's)* | 260 | 129 | 32 | 8097 | `sem_pcAdd` | `pcAdd_instOK` |
+| 15 | `regNext` | 3104 | 1088 | 1024 | 8357 | `sem_regNext`, `sem_regNext_drive` | `regNext_instOK` |
+
+⚠️ **ROWS 12 AND 13 SHARE OFFSET 7934, AND THAT IS LEGITIMATE ONLY BECAUSE ROW
+12 HAS ZERO GATES.** `ruledEnc` is a pure re-wiring of the decoder's class
+lines, so `instNext ruledEnc off = off` for every `off`
+(`enc_row_does_not_advance`, stated ∀-offset). **Two rows sharing an offset when
+the earlier one has gates is a defect, not a feature** — it occurred in this
+file and is described in §1.4.
+
+#### Port maps
+
+`instOK` certifies that a wire is *computed in time*. It never certifies that it
+is the *right wire*. So the two organs whose ports are not a uniform shift carry
+an explicit map:
+
+| organ | port range | source that must drive it |
+|---|---|---|
+| `pcAdd` | 0…31 | state `pc` bits — core input `1024+k` |
+| `pcAdd` | 32…63 | `readTree.rs1` **value** (row 3) |
+| `pcAdd` | 64…95 | `readTree.rs2` **value** (row 4) |
+| `pcAdd` | 96…127 | `immBCirc` B-offset (row 2) |
+| `pcAdd` | 128 | `decoder` output 4 = `isBEQ` |
+| `regNext` | 0…31 | `we[r]` ← `regWrite` outputs (row 13) |
+| `regNext` | 32…63 | `res[k]` ← `sliceASelect` outputs (row 11) |
+| `regNext` | 64…1087 | `cur[r][k]` ← core input `32r+k` (the shift `i-64`) |
+
+*Source: `pcAddPortMap` in `CorePlace.lean`, printed by the harness — it is data
+in the file, not prose, and `pcAddSig_follows_the_port_map` proves the σ is that
+table read back. `pcAddPortMap_is_total` proves it covers `nIn` with no gap and
+no overlap: a gap in the map is where a wrong wire hides.*
 
 ### 1.2 Totals and state
 
-<!-- total gates · total flops (regfile 480 + PC 31 + …) · nets -->
+| quantity | value | instrument |
+|---|---|---|
+| rows | 16 | harness `#eval` |
+| gates, organs only | **10371** | harness; reconciles with `CoreOffsets.total_reconciles` |
+| gates, including tie cells | **10373** | harness |
+| state bits (`stWidth`) | 1056 | `StateCodec.stWidth` |
+| — register file | 1024 | 32 × 32 |
+| — pc | 32 | `stWidth − 1024` |
+| instruction word base (`instrBase`) | 1056 | `StateCodec` |
+| core input width (`coreInWidth`) | 1088 | `stWidth + 32` |
+| first gate net | 1088 | `offTie` |
+| last net | 11460 | harness |
+| **total nets** | **11461** | harness |
+
+**THE CROSS-CHECK — two instruments, and it is the reason §1's numbers are
+two-witness:**
+
+```
+CorePlace derived chain end            = 11461     (instNext regNext offRegNext)
+CoreOffsets chain_last (literal table) = 11459     (landed earlier, decide +kernel)
+tie cells CoreOffsets does not model   =     2
+expected: 11459 + 2                    = 11461     RECONCILES = true
+coverage: offTie + placedGateTotal     = 11461     matches = true
+```
+
+*`chain_accounts_for_every_placed_organ` states the coverage identity as a
+theorem, proved structurally so no offset is ever forced to a numeral.*
 
 ### 1.3 The theorem inventory
 
-<!-- which certificate covers which organ; the composition machinery
-     (instOK / inst_compose); what remains for the single-cycle
-     refinement; axioms audit summary -->
+**The composition machinery.** `instOK c σ off` = `c.ssa ∧ c.wf ∧ ∀ i < c.nIn,
+σ i < off`. Sixteen certificates, one per row, all discharged at `5f1abb7`.
+`instOK_mono` lifts a certificate up the chain when an organ's inputs all lie
+below an earlier offset (used for rows 1–4 and for `regWrite`).
+
+**The invariant no per-organ certificate can express** —
+`chain_accounts_for_every_placed_organ`, plus the pairwise
+`immB_and_regWrite_do_not_overlap`. `instOK` constrains ONE instance against ITS
+OWN inputs and cannot see another instance at all.
+
+**Wiring controls, all run and audited** — each excludes a mutant that places
+cleanly and computes the wrong machine:
+
+| control | the mutant it excludes |
+|---|---|
+| `wrong_wire_mutant_fails_at_addi` | `ADDI` receiving `rs2` instead of the immediate |
+| `addSig_b_bank_is_obMux_not_rs2` | the adder's b-bank bypassing the operand-B mux |
+| `subSig_b_bank_is_unchanged` | "consistently" re-routing `sub` — which would break `SLT` |
+| `obMux_precedes_the_adder` | the mux placed after its consumer |
+| `pcAdd_compares_values_not_indices` | `BEQ` comparing register *numbers* |
+| `isBEQ_agrees_with_regWrite` | `valid`/`isBEQ` swapped across two consumers |
+| `cur_bank_is_row_major_not_transposed` | the register file read column-wise |
+| `we_and_res_banks_are_not_swapped` | write-enables and result bits exchanged |
+| `regWrite_is_NOT_placeable_at_off0` | a placement ordered before its producer |
+| `subtraction_is_a_plus_not_b_plus_one` | `a + ~b` (off by one on every subtraction) |
+
+**Axiom audit.** 41 `#audit_axioms` calls, **one declaration per call** — a
+multi-name call aborts its own list at the first failure and everything after
+reads as clean. **41/41 ticks, 0 failures, maximum `[3 axioms]` = the whitelist
+(`propext`, `Classical.choice`, `Quot.sound`).**
+*Instrument: build ticks at `5f1abb7`, counted as `grep -c '^✓'` — positionally
+anchored, because `grep -c '#audit_axioms'` returns 38 against 36 real calls,
+the two extras being prose ABOUT the instrument.*
+
+### 1.4 What §1 does NOT claim — and one defect it found
+
+**`instOK` certifies `ssa`, `wf`, and inputs-computed-in-time. Nothing else.**
+There is **no `core` object and no semantics** in this account. The composition
+theorem is the next object, and it is where "the right wire" gets *proved*
+rather than asserted by a port map.
+
+**Row 12 (`ruledEnc`) has no `sem_*` certificate.** It is a zero-gate
+re-wiring, so there is no gate behaviour to certify; what stands in its place is
+`encoder_select_seam_closed`, which proves its outputs ARE the nets row 11 wired
+into the select. **Stated rather than left blank.**
+
+⛔ **A DEFECT THIS ACCOUNT'S OWN DISCIPLINE FOUND, ten minutes after the
+commission.** At `52d11f3` this section would have reported "16 of 16 complete".
+The cross-check above disagreed by 161:
+
+```
+regWrite was placed at off1 = 1192 — the offset immBCirc already occupied
+immBCirc out-nets [1192] · regWrite out-nets [1192, 1193, …] · OVERLAP [1192]
+regWrite's 163 gates appeared in NO downstream offset
+161 = 163 (regWrite) − 2 (tie cells)
+```
+
+**Sixteen `instOK` certificates were all true over a netlist that could not
+compose.** Root cause: a docstring concluded `regWrite` was *"placeable from
+`off1` onward"* — a lower **bound** — and the placement collapsed that
+half-open interval to its left endpoint. **A bound is not a position.** Repaired
+at `5f1abb7` by restoring `CoreOffsets`' already-ruled row 13, and the coverage
+invariant now makes the class unlandable. *The harness reproduces the defect at
+the old offset, so it carries its own positive control: it could have failed.*
 
 ## 2. THE PRICED HALF — silicon's slot
 
