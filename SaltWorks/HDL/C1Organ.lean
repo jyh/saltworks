@@ -185,6 +185,57 @@ theorem sliceASelect_of_decoder_driven (w : BitVec 32) (E : Env)
   have hg : gsSelOf 3 2 E < 3 := hsel ▸ opIndex_lt_rsOps w
   rw [sliceASelect_selects E hg, hsel]
 
+/-! ## ⭐ THE CHAIN CLOSED AT THE GATES — added 2026-08-08 19:5x
+
+⛔ **THIS SECTION EXISTS BECAUSE ITS ABSENCE COST A PEER REAL WORK.** Everything
+above is stated over the **matcher predicates** `dcXORm w` / `dcSLTm w`, which are
+pure functions of the word (bit-field tests, `Program.lean:7813`) — *not* the
+decoder's gate outputs. So a reader auditing the seam found "the select is proved
+correct when driven by `dcXORm`" and could not tell whether the **circuit** drives
+that value. I was that reader, twice: first I published the seam as UNPROVED
+(wrong — §above proves it), then, correcting myself, I wrote that the
+matcher-to-gates link was *"cited, not audited."* **It was neither: it was proved,
+in a third file, and no statement anywhere composed the two.**
+
+⇒ ***The bridge is `Program.lean`'s `ctrlSpec_eq` — `ctrlSpec w` IS the matcher
+list — which with the unconditional `decoder_correct` makes the GATE-LEVEL decoder
+outputs literally the matchers.*** Nobody had written that down, so establishing
+it required holding two files in your head, which is exactly how I got it wrong.
+**One name, stated once, so no one has to do that again.** -/
+
+/-- **The gate-level decoder's output list IS the matcher list**, `∀ w`, no
+hypothesis. `ctrlOf` is `sem decoder` on the word's bits (`Decoder.lean:190`) — a
+real circuit evaluation, not a definition in terms of the matchers, which is what
+makes this an equation rather than a restatement. -/
+theorem ctrlOf_eq_matchers (w : BitVec 32) :
+    ctrlOf w = [dcADDm w, dcXORm w, dcSLTm w, dcADDIm w, dcBEQm w, dcValidm w] := by
+  rw [decoder_correct, ctrlSpec_eq]
+
+/-- ⭐⭐ **THE SEAM, WITH THE CIRCUIT IN THE HYPOTHESIS.** Wire the two select nets
+to output nets **1** and **2** of the *actual decoder* — `isXOR` and `isSLT`, in
+`decoder.outs` order — and `sliceASelect` delivers the source the ISA names, at all
+32 ports, for arbitrary `Env`, at **every** word.
+
+⇒ ***This is the sentence a `core` assembly can be built against:*** it mentions no
+spec predicate. `sliceASelect_of_decoder_driven` above needed the assembler to
+*believe* the decoder emits `dcXORm`; this needs them only to wire net 1 to net 1. -/
+theorem sliceASelect_of_gate_decoder (w : BitVec 32) (E : Env)
+    (h0 : E (gsSel rsOps rsSelBits 0) = (ctrlOf w)[1]!)
+    (h1 : E (gsSel rsOps rsSelBits 1) = (ctrlOf w)[2]!) :
+    sem sliceASelect E = (List.range 32).map (fun k => E (gsRes (opIndex w) k)) :=
+  sliceASelect_of_decoder_driven w E
+    ⟨by rw [h0, ctrlOf_eq_matchers]; rfl, by rw [h1, ctrlOf_eq_matchers]; rfl⟩
+
+/-- And the select index itself, from the gates — the `< 3` fact an assembly needs
+in order to know the fourth arm is dead, now with no matcher in sight. -/
+theorem gsSelOf_of_gate_decoder (w : BitVec 32) (E : Env)
+    (h0 : E (gsSel rsOps rsSelBits 0) = (ctrlOf w)[1]!)
+    (h1 : E (gsSel rsOps rsSelBits 1) = (ctrlOf w)[2]!) :
+    gsSelOf rsOps rsSelBits E = opIndex w ∧ gsSelOf rsOps rsSelBits E < 3 :=
+  let h := gsSelOf_of_decoder_driven w E
+    ⟨by rw [h0, ctrlOf_eq_matchers]; rfl, by rw [h1, ctrlOf_eq_matchers]; rfl⟩
+  ⟨h, h ▸ opIndex_lt_rsOps w⟩
+
 /-! ## THE AUDIT
 
 One name per line: `#audit_axioms` abandons the rest of its own argument list at
@@ -198,6 +249,9 @@ the first failure, so a batched list can hide everything after the first entry. 
 #audit_axioms gsSelOf_eq_selVal_of_wired
 #audit_axioms gsSelOf_of_decoder_driven
 #audit_axioms sliceASelect_of_decoder_driven
+#audit_axioms ctrlOf_eq_matchers
+#audit_axioms sliceASelect_of_gate_decoder
+#audit_axioms gsSelOf_of_gate_decoder
 
 end C1Organ
 end SaltWorks.HDL
