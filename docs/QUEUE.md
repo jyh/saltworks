@@ -192,6 +192,16 @@ preemption per the named small-step/fuel deferral, and beyond).
 Morning: he reviews the council pack + tiny-Rust v1.9 + the story.
 
 OPEN ITEMS:
+- **RE-RAISE CLOCKS ON GATED ITEMS (silicon 07:5x, `a standing order
+  outlives its world`): every authorization-gated open item wants a
+  RE-RAISE cadence, or it dies quietly the day the authorizing word
+  stops coming — a gate is not a grave. Rule: any item GATED on the
+  Captain's word that has not moved in a review cycle gets
+  re-surfaced at the next council, not left to rot in silence.
+  Applies to W5, the ③+④ session, (7.3), B5, and the two neural
+  sketches' design-team questions (those are SCHEDULES awaiting a
+  Fable-tier slot, not ruling-dependencies — re-raise when the slot
+  opens, not when a word is owed).**
 - **THE CAPTAIN'S STANDING WORDS (recovered 08-09 02:1x from the 22
   early-format posts invisible to every filter — silicon's triage,
   compiler's ask; now in the register where standing law lives,
