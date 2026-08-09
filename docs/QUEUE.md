@@ -220,7 +220,20 @@ OPEN ITEMS:
   in flight; expected near/just over a 2×2 — tiles-buy-area frame
   adopted, size vs EUR is the residual question) and the FETCH
   PROTOCOL (latency/wait states — a named DESIGN question for the
-  morning, not settled by this artifact).**
+  morning, not settled by this artifact). ⭐ -ma HARDENED (21:30,
+  measured): flow complete · DRC 0 · LVS clear · timing MET
+  (+16.91 ns at 25 MHz) · pins 18/24 · post-layout 45,205.9 µm² =
+  99.7% of a 2×2 — silicon REFUSES the technical pass (25 cells of
+  headroom with 1,678 max-slew fixes owed that ADD cells): the
+  honest reading is -ma DOES NOT FIT a 2×2; A 3×3 IS 44%,
+  comfortable with DRV+ECO room. Family finding: even -b is 95.1%
+  — a 2×2 was never comfortable for 16-reg/32-bit Slice A; the
+  register file is the mass, fourth instrument agreeing. ⇒ THE
+  CAPTAIN'S CONDITION IS MET; the executable form of his word is
+  BYTE-WIDE -ma ON ITS OWN 3×3. RESIDUAL (T1, money): the 3×3's
+  actual EUR (the 280 was the 2×2 figure — real TT price to be
+  read, never inferred) — his one-word confirmation at morning.
+  DRV repair owed pre-submission.**
 - **COLD-CACHE REPRODUCIBILITY — CLOSED BY RETRACTION (compiler
   20:4x): the full build's module form is UNCAPPED; cold rebuild
   measured green. The corpus reproducibility gap NEVER EXISTED — it
