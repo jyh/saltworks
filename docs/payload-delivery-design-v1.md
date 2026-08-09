@@ -73,11 +73,10 @@ For the k=3 fabric under:
   `true :: List.replicate n false` — one pulse at cycle 0, none
   after. Without it a mid-frame rst erases `decided` and the element
   re-decides on PAYLOAD bits: a correct-looking delivery with the
-  WRONG payload tail (kernel-exhibited IN SCRATCH 8/8 12:28 —
-  EXIT=0 32/32 on compiler's hand; the scratch is deleted by law so
-  `l1_fails_when_rst_returns`/`l1_failure_is_a_mid_frame_flip` DO
-  NOT RESOLVE — math's 16:09 find; permanent `example`s are QUEUED
-  to compiler's next seam) — exactly the failure class this block
+  WRONG payload tail (kernel-exhibited: `l1_fails_when_rst_returns` /
+  `l1_failure_is_a_mid_frame_flip`, PROMOTED to a tracked module at
+  f3751d2 — the names RESOLVE; scratch-provenance 12:28 in the
+  module's history) — exactly the failure class this block
   exists to certify against;
 - H4 (the wire-tie — math's round-2 WAVE-BLOCKER, 13:33): B4's `hin`
   binder — `∀ i : Fin 8, tr.map (fun c => c.getD (1 + i.val) false)
@@ -178,9 +177,8 @@ Riders:
   from header bits on the wire. And the locked element is a
   CLAIM-GATED OR, not a mux — a 2-permutation in 2 of 16 latched
   states, and full-load conflict-merge is non-injective; §2's idle
-  rider does NOT cover it. (Both facts scratch-measured 12:28, not
-  preserved — the exhibit names do not resolve; permanent examples
-  queued per the 16:09 ruling.) L2's true form:
+  rider does NOT cover it. (Both exhibits PROMOTED to a tracked module at f3751d2 — the
+  names resolve; scratch-provenance 12:28 recorded there.) L2's true form:
   transparency UNDER HYPOTHESIS `act0 ∧ act1 ∧ (sel0 ≠ sel1)` at
   each element; transporting H1's distinct destinations down to
   per-element sel-distinctness is L4's work. (The old heading "two
@@ -189,8 +187,7 @@ Riders:
 - **L3 (composition — PROOF ROUTE RE-LAID at compiler's ③ pass)**:
   the old route ("ride B4's hseam discharge") is refuted at the
   bytes: B4 concludes about `cDestOf ∘ output column`, and `cDestOf`
-  reads header indices 1/3/5 and nothing else (scratch-measured
-  12:28, exhibit name unresolved, permanent example queued) —
+  reads header indices 1/3/5 and nothing else (`cDestOf_is_payload_blind`, tracked at f3751d2) —
   payload-blind BY CONSTRUCTION, it
   survives every payload-mangling transformation and cannot carry a
   payload theorem. The machinery that CAN is landed elsewhere:
