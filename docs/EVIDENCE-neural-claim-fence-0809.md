@@ -121,8 +121,27 @@ FALSIFIED IF any ONE of these is observed:
         measured that THE JOIN — the one theorem composing trace + sign cycle
         + mac_correct into b + W·sval — IS NOT YET STATED. The parts are
         landed; the row is not.
-      ⇒ **F4 STILL BINDS.** The package now reads "ALL PARTS LANDED, the one
-        composing join IN FLIGHT", which is the accurate form.
+      ⇒ F4 still bound at 15:45. **CLEARED AT 15:47, AND THIS TIME VERIFIED AT
+        THE ARTIFACT RATHER THAN AT A STATUS LINE — which is the whole
+        difference from my withdrawn 15:44 clearance:**
+```
+        git show --stat c732aaa   → a real commit, 2026-08-09 15:45:35
+        declarations ADDED by it  → theorem cell_full_mac
+                                    theorem cell_computes_signed_mac
+        MacBridge.lean            → `sorry` count 0 · rooted in SaltWorks.lean
+        covering verdict          → EXIT=0, 8,677 jobs
+```
+      ⇒ **THE JOIN IS STATED. F4 IS CLEARED — no row unlanded, no join
+        unstated.** *Cleared on declarations read out of a commit, not on the
+        word "landed" read out of the document I am auditing.*
+
+      📌 METHOD NOTE, because my first attempt failed and the failure is
+        instructive: I grepped `MacBridge.lean` for a theorem named
+        `join|compose` and found NOTHING — and "my pattern found nothing" is
+        not "it is absent". **The fleet's PROSE calls it "the join"; the
+        ARTIFACT names theorems by what they SAY (`cell_computes_signed_mac`).
+        Role vocabulary does not index source.** Reading the commit answered
+        in one command what the name-grep could not answer at all.
 
       🔑 SECOND TIME TODAY I INHERITED A STATUS WORD FROM THE ARTIFACT I WAS
         AUDITING — "in flight" at 14:3x, "LANDED IN FULL" here. **That is my
