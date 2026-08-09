@@ -91,6 +91,20 @@ standard details, both cheap:
   datapath — 8b latches, 8-cycle MACs, shift+saturate requant — is
   the v2/production optimization, priced as reference only.
 
+> 📌 **FAN-IN — GENERAL NEURONS, ruled at the Captain's 14:2x catch
+> ("a neuron has an unbounded number of inputs, each with different
+> weights"): the general mode is DUAL-STREAM — the W-port and X-port
+> advance in lockstep (w_i latches, x_i streams against it; repeat
+> indefinitely), the accumulator folding across all inputs. UNBOUNDED
+> FAN-IN COSTS TIME, NOT SILICON: weights are traffic from the edge,
+> never cell storage ("a small amount of storage is fine" — the 3am
+> spec, architecturally vindicated). "Weight-stationary" is the CNN
+> SPECIAL CASE (one kernel latched, image streamed). Phase sequence
+> generalizes to (LOAD_W → STREAM_X)* → ACTIVATE → EMIT — an FSM/
+> schedule loop, zero new silicon, landed organs unchanged. The real
+> fan-in bound is the B5 overflow bound (int8 products in a 32b
+> accumulator: fan-in ~10^5 headroom), compiler-checked per network.**
+
 **Cost, to be priced exactly by silicon:** order 100–150 flops + an
 adder + AND row + small FSM ≈ **~500 cells**; the CE is the existing
 certified organ. Several cells fit beside the fabric on a TT allocation.
