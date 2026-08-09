@@ -201,6 +201,24 @@ Figure: `figures/scale-diagram.svg` (the five-level recursion).
   argument, compounding with utilization on graphs).
 - **Trust at scale:** one chip theorem + one induction + one schedule
   checker vs testing budgets that grow per-unit across 64k devices.
+- **LEVEL-1 PRODUCTION SIZING (the Captain's 150 mm²/30B-transistor
+  baseline; his k≈80K guess lands in-band):** the cell's cost is its
+  WEIGHT MEMORY, not its MAC — int8 serial MAC ≈ 3–5k Tr, 1 KB
+  resident weights ≈ 50k Tr ⇒ ~55k Tr/cell. Budget: **k ≈ 100–150K
+  cells** (~7B) + a 128K-port on-die butterfly (~1.1M switch nodes,
+  ~5.5B — interconnect costs as much as compute, the classic result)
+  + SerDes/control/margin inside 30B. A single Batcher front at 100K
+  ports alone would cost ~26B Tr (the §2b global-sort wall, visible
+  in silicon) ⇒ **the production die is two-tier: 64-port BB islands
+  (non-blocking, Batcher affordable) + a compile-time-scheduled
+  global butterfly — the recursion starts ON-die, and the PoC's 8×8
+  BB is literally the island tile, replicated ~2,000× per die.**
+  Throughput: ~30–40 int8 TOPS serial; ~300 TOPS with 8-lane cells —
+  one order under H100 peak, erased on graphs by the utilization
+  gap. The product knob is three-way: cells × weights/cell ×
+  lanes/cell; the workload picks it. Size anchor, carefully bounded:
+  64k dies × 1–8M logical neurons/die ≈ 10¹¹ — a brain's NEURON
+  count (synapse count far short; an anchor, not a claim).
 - **The commercial one-liner: THE VERIFIED GRAPH MACHINE** —
   deterministic, energy-lean, high-utilization where GPUs crater,
   correctness scaling by induction. Not a TPU competitor; a
