@@ -140,6 +140,13 @@
   Tier-1-adjacent artifacts are FLAGGED with their veto point named
   (the pin pattern, 13:49).
 
+STANDING ORDER (the Captain, 8/8 night, verbatim): "be aggressive,
+you have more ability than you know" — 11 days remain on the
+two-week clock; the plan holds. HIS NAMED NEXT STEP if the current
+plan lands soon: **GENERALIZING THE EXECUTIVE** (post-B-EXEC:
+preemption per the named small-step/fuel deferral, and beyond).
+Morning: he reviews the council pack + tiny-Rust v1.9 + the story.
+
 OPEN ITEMS:
 - B5 (T1): the click; Sept-7 13:00 PDT close; REF QUESTION + floor
   law remain his; fact sheet on his word. Adjacent MONEY item from
