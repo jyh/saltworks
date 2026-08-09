@@ -6,6 +6,7 @@ Authors: Jason Hickey, Claude
 import SaltWorks.HDL.Adder
 import SaltWorks.HDL.Bitwise
 import SaltWorks.HDL.Compose
+import SaltWorks.HDL.SingleLevel
 
 /-!
 # THE FIRST ASSEMBLED FRAGMENT — `bitNot32` → `adder32`, instantiated
@@ -32,27 +33,40 @@ composite: 192 gates (32 + 160), 33 outputs
 | 1 | the composite is constructed and measured | ✅ **MET** — 192 gates, 33 outs, `instNext` = 97 |
 | 2 | `instOK bitNot32 σ₁ 65` discharges | ✅ **MET** (`ok1`) |
 | 3 | `instOK adder32 σ₂ 97` — *"the one I expect to bite"* | ✅ **MET** (`ok2`) — the one-gate margin (max σ₂ = 96 < 97) held |
-| 4 | the two organs' specs COMPOSE | ⚠️ **PARTIALLY MET — see below** |
+| 4 | the two organs' specs COMPOSE | ✅ **MET IN FULL, 21:4x — `frag_subtraction`** |
 | 5 | the composition is REFUTABLE by mis-wiring | ✅ **MET, after my first control proved VACUOUS** |
 
-## ⚠️ BAR 4 IS PARTIAL, AND WHY IS THE PROBE'S MOST USEFUL RESULT
+## ✅ BAR 4 WAS PARTIAL FOR TWO HOURS, AND WHY IT WAS IS THE PROBE'S MOST USEFUL RESULT
 
-`frag_sem` is `∀ env` with no side condition — **but the environment `adder32` sees is
-`fedEnv`, which is DEFINED BY THE CIRCUIT.** So the ∀-form says *"the composite computes
-`adder32` on whatever the composite feeds it"*, which is sound and nearly content-free. The
-SUBTRACTION content — that what it feeds is `a`, `~b`, `1` — is carried by
-`frag_is_subtraction_on_sample`, which is **one concrete pair**.
+**Closed at 21:4x by `frag_subtraction`:**
+```lean
+frag_subtraction (env) : sem subFragment env = sem adder32 (subOperands env)
+subOperands env a = if a < 32 then env a else if a < 64 then !(env a) else env 64
+```
+***∀ env, no side condition, no fixture: the composite computes `adder32` on `a`, `~b`, `one`.
+THE TWO ORGANS' SPECS COMPOSE.***
 
-⛔ **THE OBSTRUCTION IS NOT THE COMPOSITION MACHINERY. IT IS THE ORGANS' OWN CERTIFICATES.**
-A `∀ env` subtraction theorem needs `bitNot32`'s semantics at every input, and **this corpus has
-no such theorem** — `bitNot32_correct_on_sample` is a Bool sweep over fixtures
-(`Bitwise.lean:142`), and the same is true of `bitXor32` and both comparators
-(`docs/compiler-organ-reference-0808.md` §3).
-⇒ ***So the blocker for an assembled datapath with a ∀-level spec is that the BITWISE ORGANS
-ARE CERTIFIED BY SAMPLE. `Compose.lean`'s four lemmas did everything asked of them; the
-sampled certs became load-bearing the moment two organs met.*** *That is a different repair
-from the one "a construction, not a lemma" implies, and it is cheap to state and not cheap to
-do: `bitNot32` needs a `∀ env` spec before any composed datapath can have one.*
+⛔ **BUT THE REASON IT TOOK TWO HOURS IS THE FINDING, AND IT IS NOT ABOUT THIS FILE.** The
+missing premise was `bitNot32`'s semantics at every input — **which this corpus did not have.**
+`bitNot32_correct_on_sample` is a Bool sweep over fixtures. It took a new module
+(`SingleLevel.lean`, `run_level_map` + `bitNot32_sem`) to supply it.
+⇒ ***`Compose.lean`'s four lemmas did everything asked of them. THE SAMPLED CERTIFICATES BECAME
+LOAD-BEARING THE MOMENT TWO ORGANS MET*** — a different repair from what *"a construction, not a
+lemma"* implies. ⚠️ **And `bitXor32`, `bitAnd32`, `bitOr32` are STILL sampled-only, so the next
+organ pair will hit the same wall.**
+
+📌 **AND THE SECOND OBSTRUCTION, WHICH COST MORE THAN THE FIRST: `omega` DOES NOT WORK ON
+`Net`-ASCRIBED GOALS.** Measured with `pp.all`: `Net` occupies the TYPE ARGUMENT of `LT.lt` and
+`OfNat.ofNat` (`@LT.lt.{0} SaltWorks.HDL.Net instLTNat …`) while the *instance* is the `Nat` one —
+and omega matches syntactically on `Nat`, so it collects **no constraints at all**.
+```
+✅ CURED BY   simp only [Net] at h ⊢          (unfolds the reducible type in the type slot)
+✅ OR BY      explicit Nat.* lemmas, no omega  (the instances are already Nat's)
+⛔ NOT BY     `show (a : Nat) …`  — defeq no-op, does not change the elaborated term
+⛔ NOR BY     rebinding through a Nat-typed `have`
+```
+*Every layout constant here is also a `Nat`-valued `def`, which is a SEPARATE omega failure cured
+by `simp only [<the def>]`. The proofs below use both cures.*
 
 ## ⛔ AND MY FIRST CONTROL WAS VACUOUS — the kernel caught it, not me
 
@@ -75,7 +89,11 @@ replacements target the two things that actually make this a subtractor: the neg
 | `fedEnv` | the env `adder32` sees — **circuit-defined; this is why bar 4 is partial** |
 | `adder_outs_are_gates` | every `adder32` output is a gate output (`inst_compose_sem`'s side condition) |
 | `frag_sem` | ⭐ **∀ env, the composite computes `adder32` on `fedEnv`** |
-| `frag_is_subtraction_on_sample` | the content: it really is `a + ~b + 1` — **one pair** |
+| `frag_is_subtraction_on_sample` | the content on one concrete pair — kept as the provenance |
+| `notInst_shape` | the instantiated `bitNot32` is ITSELF single-level at `hOff`, so `run_level_map` applies with **no `inst_sem` detour** |
+| `notInst_fanin`, `below_untouched` | the side condition, and: the composite leaves every net below `hOff` untouched |
+| `fedEnv_closed`, `subOperands`, `fedEnv_eq_subOperands` | ⭐ what the composite feeds `adder32`, IN CLOSED FORM, ∀ a |
+| ⭐⭐ `frag_subtraction` | **BAR 4: `sem subFragment env = sem adder32 (subOperands env)`, ∀ env** |
 | `fragNoNot`, `control_negation_is_load_bearing` | drop the negation ⇒ refuted |
 | `hostEnvNoCin`, `control_carry_in_is_load_bearing` | drop the carry-in ⇒ refuted |
 
@@ -179,6 +197,68 @@ theorem control_carry_in_is_load_bearing :
     sem subFragment (hostEnvNoCin 100 37) ≠ sem adder32 (subEnv 100 37) := by
   decide +kernel
 
+theorem notInst_shape :
+    instGates bitNot32 sig1 hOff
+      = (List.range 32).map (fun k => (⟨hOff + k, Op.not (32 + k)⟩ : Gate)) := by
+  simp only [instGates, bitNot32, List.map_map]
+  apply List.map_congr_left
+  intro k hk
+  have hk32 : k < 32 := List.mem_range.mp hk
+  have h1 : ¬ (32 + k < 32) := Nat.not_lt.mpr (Nat.le_add_right 32 k)
+  simp [instMap, sig1, Op.rename, hk32, h1]
+
+theorem notInst_fanin (k : Nat) (hk : k < 32) :
+    ∀ x ∈ (Op.not (32 + k)).fanin, x < hOff := by
+  intro x hx
+  simp only [Op.fanin, List.mem_singleton] at hx
+  subst hx
+  show 32 + k < hOff
+  simp only [hOff]; omega
+
+/-- the composite leaves every net below `hOff` untouched -/
+theorem below_untouched (env : Env) (x : Net) (hx : x < hOff) :
+    run env (instGates bitNot32 sig1 hOff) x = env x := by
+  refine run_of_unwritten env _ x (fun g hg => ?_)
+  rw [notInst_shape] at hg
+  obtain ⟨k, _, hgk⟩ := List.mem_map.mp hg
+  subst hgk
+  show hOff + k ≠ x
+  intro hc
+  exact absurd (hc ▸ hx) (Nat.not_lt.mpr (Nat.le_add_right hOff k))
+
+/-- ⭐ what the composite feeds `adder32`, IN CLOSED FORM -/
+theorem fedEnv_closed (env : Env) (a : Net) :
+    fedEnv env a = (if a < 32 then env a else if a < 64 then !(env a) else env 64) := by
+  unfold fedEnv sig2
+  by_cases h1 : a < 32
+  · rw [if_pos h1, if_pos h1]
+    exact below_untouched env a (by simp only [hOff, Net] at h1 ⊢; omega)
+  · rw [if_neg h1, if_neg h1]
+    by_cases h2 : a < 64
+    · rw [if_pos h2, if_pos h2, notInst_shape]
+      have ha32 : 32 ≤ a := Nat.not_lt.mp h1
+      have ha64 : a < 64 := h2
+      have hk : a - 32 < 32 := by simp only [Net] at ha32 ha64 ⊢; omega
+      rw [run_level_map hOff 32 (fun k => Op.not (32 + k)) env
+            (fun k hk' => notInst_fanin k hk') (a - 32) hk]
+      have he : 32 + (a - 32) = a := Nat.add_sub_cancel' ha32
+      simp [Op.eval, he]
+    · rw [if_neg h2, if_neg h2]
+      exact below_untouched env 64 (by simp only [hOff]; decide)
+
+/-- the closed-form environment: `a`, then `~b`, then the carry-in -/
+def subOperands (env : Env) (a : Net) : Bool :=
+  if a < 32 then env a else if a < 64 then !(env a) else env 64
+
+theorem fedEnv_eq_subOperands (env : Env) : fedEnv env = subOperands env :=
+  funext (fun a => fedEnv_closed env a)
+
+/-- ⭐⭐⭐ BAR 4, FULLY MET: the composite computes `adder32` on `a`, `~b`, `one` —
+`∀ env`, no side condition, no fixture. THE TWO ORGANS' SPECS COMPOSE. -/
+theorem frag_subtraction (env : Env) :
+    sem subFragment env = sem adder32 (subOperands env) := by
+  rw [frag_sem, fedEnv_eq_subOperands]
+
 #audit_axioms hOff
 #audit_axioms sig1
 #audit_axioms n1
@@ -199,6 +279,13 @@ theorem control_carry_in_is_load_bearing :
 #audit_axioms control_negation_is_load_bearing
 #audit_axioms hostEnvNoCin
 #audit_axioms control_carry_in_is_load_bearing
+#audit_axioms notInst_shape
+#audit_axioms notInst_fanin
+#audit_axioms below_untouched
+#audit_axioms fedEnv_closed
+#audit_axioms subOperands
+#audit_axioms fedEnv_eq_subOperands
+#audit_axioms frag_subtraction
 
 end SubFrag
 end SaltWorks.HDL
