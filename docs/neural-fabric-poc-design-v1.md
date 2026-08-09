@@ -252,7 +252,10 @@ CPU memory.
 ### 3b. THE PIN BUDGET — memory access on 24 pins (the Captain's 11:3x
 ### question; TT supplies clk/rst OUTSIDE the 24)
 
-**Option A — RULED FOR SEPTEMBER (maestro recommendation at dispatch):
+**Option A — RULED FOR SEPTEMBER, CAPTAIN-RATIFIED 11:4x ("we will
+surface only weights/inputs/results, otherwise we switch only the
+internal k cells... When the time comes to scale to multi-chip
+systems, we will add external pins"):
 the Captain's multiplexed memory bus, unchanged.** 8 addr + 8 data +
 2 phase = 18 pins, CPU served by the RP2040 exactly as slicea16bma
 already does — zero new memory design, the verified core as-is.
