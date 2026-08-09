@@ -604,4 +604,78 @@ theorem carry_ins_come_from_row_zero :
     decide +kernel
 
 
+/-! ## 10. INCREMENT 2h — ROW 9: `sltCirc`, and THE THREE-ORGAN CHAIN CLOSED IN THE ASSEMBLY
+
+On 2026-08-08 I warned silicon, in `docs/compiler-organ-reference-0808.md`, that **`sltCirc` is
+not a standalone comparator**: *"`SLT rd rs1 rs2` ⇒ `bitNot32(rs2) → adder32(rs1, ~rs2, cin=1) →
+sltCirc(a31, b31, s31)` — THREE organs, wired in that order,"* and that instantiating `sltCirc`
+alone gives a 3-input block with no indication where its inputs come from.
+
+**All three links are now placed, so the warning becomes a theorem rather than a caution.**
+
+`sltCirc.nIn = 3` — `a31`, `b31`, and `s31`, the subtraction's sign bit. `adder32.outs` is
+`(range 32).map adS ++ [adC 32]`, so **output 31 is the sign bit and output 32 is the carry-out**;
+`sltCirc` wants 31, and `sltuCirc` (out of Slice A) would have wanted 32. -/
+
+/-- Row 9's offset — after the subtracting adder. -/
+def offSlt : Nat := instNext adder32 offSub
+
+theorem offSlt_value : offSlt = 7541 := by
+  simp only [offSlt, offSub, offAdd, off5, off4, off3, off2, off1, off0, instNext,
+             tieCells, offTie, coreInWidth, stWidth]
+  decide +kernel
+
+/-- The subtracting adder's output `k`. Index 31 is the SIGN BIT; 32 is the carry-out. -/
+def subOut (k : Nat) : Net := (instOuts adder32 subSig offSub).getD k 0
+
+/-- `sltCirc`'s σ: the two operands' sign bits, and the subtraction's sign bit. -/
+def sltSig (j : Net) : Net :=
+  if j = 0 then rs1Out 31 else if j = 1 then rs2Out 31 else subOut 31
+
+/-- ⭐ **PLACEMENT #10 — `sltCirc` at row 9, `instOK` DISCHARGED.** -/
+theorem slt_instOK : instOK sltCirc sltSig offSlt := by
+  refine ⟨sltCirc_ssa, sltCirc_wf, ?_⟩
+  intro j hj
+  have hnn : sltCirc.nIn = 3 := by decide +kernel
+  rw [hnn] at hj
+  revert hj; revert j
+  decide +kernel
+
+/-- ⭐⭐ **THE THREE-ORGAN CHAIN, CLOSED IN THE ASSEMBLY.** `sltCirc`'s third input is the
+SUBTRACTING adder's sign output — not the adding one — and that adder's `b` bank is `bitNot32`'s
+outputs with the carry-in tied HIGH. So `bitNot32 → adder32(sub) → sltCirc` is *wired*, and the
+8/8 caution is discharged rather than repeated. -/
+theorem slt_chain_is_closed :
+    sltSig 2 = subOut 31
+  ∧ subSig 32 = notOut 0
+  ∧ subSig 64 = tieTrue
+  ∧ subOut 31 ≠ (instOuts adder32 addSig offAdd).getD 31 0 := by
+  refine ⟨rfl, rfl, rfl, ?_⟩
+  simp only [subOut, instOuts, instMap, subSig, addSig, offSub, offAdd, off5, off4, off3,
+             off2, off1, off0, instNext, tieCells, offTie, coreInWidth, stWidth]
+  decide +kernel
+
+/-- ⛔ **CONTROL: `sltCirc` READS THE SIGN BIT, NOT THE CARRY-OUT.** Output 31 is `a - b`'s sign;
+output 32 is the carry. `sltuCirc` — the UNSIGNED comparator, deliberately out of Slice A — is the
+organ that wants 32, and its `nIn` is 1. **Reading 32 here would compute unsigned comparison with
+every certificate still green**, which is this morning's ReLU defect in the datapath instead of the
+activation function: *the certified thing computes an order and nobody wrote down which one.* -/
+theorem slt_reads_sign_not_carry :
+    sltSig 2 = subOut 31 ∧ subOut 31 ≠ subOut 32 := by
+  refine ⟨rfl, ?_⟩
+  simp only [subOut, instOuts, instMap, subSig, offSub, offAdd, off5, off4, off3, off2,
+             off1, off0, instNext, tieCells, offTie, coreInWidth, stWidth]
+  decide +kernel
+
+/-- **CONTROL: the two sign bits come from DIFFERENT operands.** `a31` and `b31` must be `rs1`'s
+and `rs2`'s bit 31 respectively; swapping them inverts the comparison for mixed-sign pairs only —
+green on every same-sign test. -/
+theorem slt_operand_signs_are_distinct :
+    sltSig 0 = rs1Out 31 ∧ sltSig 1 = rs2Out 31 ∧ sltSig 0 ≠ sltSig 1 := by
+  refine ⟨rfl, rfl, ?_⟩
+  simp only [sltSig, rs1Out, rs2Out, off3, off2, off1, off0, instNext, tieCells,
+             offTie, coreInWidth, stWidth]
+  decide +kernel
+
+
 end SaltWorks.HDL.CorePlace
