@@ -26,8 +26,14 @@ cites HERE); (3) the writeup's hardware chapter seed.
 ### ✅ STATUS: **FILLED** (compiler, 2026-08-09 13:3x). Window: **`5f1abb7`**.
 
 **INSTRUMENT for every figure in §1.1–§1.2:** `#eval` in
-`SaltWorks/HDL/ScratchAccountMeasure.lean`, elaborating against the real `Circ`
-artifacts through `SaltWorks.HDL.CorePlace`'s olean at `5f1abb7`.
+**`SaltWorks/HDL/AccountMeasure.lean` — tracked, and re-runnable by anyone** as
+`../saltbuild.sh SaltWorks/HDL/AccountMeasure.lean`. It elaborates against the
+real `Circ` artifacts through `SaltWorks.HDL.CorePlace`'s olean at `5f1abb7`.
+*It is not rooted in the hub on purpose: an `#eval`-only module would print on
+every fleet build. Not a build target, so no `import owed`.*
+*(Evidence's §4 finding 1: v1 was named `Scratch*`, which `.gitignore:2`
+excludes — so §1 named an instrument no third party could run. Naming a tool
+answers "which tool" and not "can another party reproduce it".)*
 **Nothing here is transcribed from `CoreOffsets`' literals, from the assembly
 plan, or from a memory** — the harness reads `c.gates.length`, `c.nIn`,
 `c.outs.length` and the `instNext` chain off the artifacts themselves.
@@ -184,9 +190,20 @@ invisible to every one of the sixteen.*
 multi-name call aborts its own list at the first failure and everything after
 reads as clean. **41/41 ticks, 0 failures, maximum `[3 axioms]` = the whitelist
 (`propext`, `Classical.choice`, `Quot.sound`).**
-*Instrument: build ticks at `5f1abb7`, counted as `grep -c '^✓'` — positionally
-anchored, because `grep -c '#audit_axioms'` returns 38 against 36 real calls,
-the two extras being prose ABOUT the instrument.*
+*Instrument: build ticks at `5f1abb7`, counted as `grep -c '^✓'` — anchored
+positionally, because the token count includes this file's own prose ABOUT the
+instrument. **Both figures stamped, because they move:***
+
+| measurement | `#audit_axioms` | `^#audit_axioms` | ticks |
+|---|---|---|---|
+| at `52d11f3` (when the lesson was found) | 38 | 36 | 36 |
+| at `5f1abb7` (this section's window) | **43** | **41** | **41** |
+
+*(Evidence's §4 finding 2: the unstamped `38/36` pair sat in the one sentence a
+sceptic tests first, and the file had grown between the measurement and the fill
+— so a reader checking the justification found `43/41` and could not tell whether
+the lesson or the file had moved. **The lesson survives exactly; the figures did
+not.** The gap is the five audit calls the `regWrite` repair added.)*
 
 ### 1.4 What §1 does NOT claim — and one defect it found
 
