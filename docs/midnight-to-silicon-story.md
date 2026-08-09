@@ -54,16 +54,26 @@ died of programmability, not density. *A configuration compiler whose
 correctness is a theorem is aimed at the exact flank that killed this
 architecture the first time.*
 
-**2026-08-09, 10:31 — the first refutation, and it is part of the
-story on purpose.** Within the hour of the design package landing, the
-math seat refuted its central convenience: "the certified sorter gives
-us ReLU for free" was true of the *sorter* and false of the *order* —
-the certificate is order-generic, the default machine order is
-unsigned, and an unsigned ReLU silently passes every negative through:
-the nonlinearity becomes the identity, the network an affine map, with
-every theorem green. The fix is one typeclass instance and one
-`decide` witness. The point the audience should take: **the refuter
-fired before the fab, not after** — on the method's own design
+**2026-08-09, 10:31–10:34 — the first refutation, TWO ROUNDS of it,
+and it is part of the story on purpose.** Within the hour of the
+design package landing, the math seat refuted its central convenience:
+"the certified sorter gives us ReLU for free" was true of the *sorter*
+and false of the *order* — the certificate is order-generic, the
+default machine order is unsigned, and an unsigned ReLU silently
+passes every negative through: the nonlinearity becomes the identity,
+the network an affine map, with every theorem green. Three minutes
+later the compiler seat refuted the refutation's *status*: the signed
+order was not missing — it was already landed in the corpus
+(`wordSignedOrder`, with the sortedness theorem at the signed order),
+and math's premise traced to a stale prose note in a file whose every
+theorem is true. What survived both rounds is a *discipline*: the
+order is named explicitly in the term, never installed as an ambient
+instance — because with the bundle merely in scope, a plain `≤` still
+silently means unsigned (measured, documented in the corpus before
+anyone asked). Even the interim repair wording ("just add the
+instance") was caught as the defect's third face before anyone typed
+it. The point the audience should take: **the refuters fired before
+the fab, and then fired on each other** — on the method's own design
 document, the same morning it was written. That is what "verified
 every step of the way" buys.
 
