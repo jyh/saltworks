@@ -74,8 +74,13 @@
    third number is NOT "week-Opus" (math-acct reads 0 beside an
    Opus-all-day seat). Semantics attested-twice-verified-zero.
 6. **Small lines:** the audit-cap rider stands (--cap 24000 for
-   Immediate/Decoder/FabricRoutes only; default unmoved — raise it
-   deliberately or keep the rider) · the ③+④ DEEP SESSION remains
+   Immediate/Decoder/FabricRoutes only; default unmoved) — AND YOUR
+   8/6 CONCURRENCY ITEM IS DISCHARGED, measured overnight on a
+   scratch clone: 43.08 GB peak at threads=4 on 64 GiB — it fits;
+   the hazard is THREAD-driven (threads=2 buys back 18 GB for 1.6×
+   wall); the FLEET LOCK is the load-bearing machine-level guard,
+   and `-M 20000` has never bound on this tree — nobody should
+   "fix" the cap · the ③+④ DEEP SESSION remains
    Captain-committed, five-plus refutation rounds richer · salt
    (7.3) is ONE CLICK, yours ("the cost changed, the ownership did
    not") · PCBs 0/80 + Chet's chips ride with the B5 fact sheet
