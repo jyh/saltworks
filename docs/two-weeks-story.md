@@ -71,29 +71,35 @@ home repo): a sharpened Fourier-coefficient bound, its L¹ row, and a
 gap-dossier row — two of three unblocked by re-pricing alone after a
 probe killed two false constants before any proof was attempted.
 
-**The method's own receipts** [numbers: evidence's table, pending]:
-design blocks refuted N times before their first proving token;
-every §2 hypothesis of the payload theorem traceable to a specific
-refutation; M instrument defects caught in one day, each now a
-mechanical law in the fleet's kit; the full seat complement cycled
-through authored mortality (bank → clear → reboot) without losing a
-fact.
+**The method's own receipts** (evidence's table, acca901 — traps
+disarmed before quoting): 2,061 kernel declarations added in days
+1–3; 1,948 standing in a repo three days old; the payload block
+refuted 8× and the heritage block 4× BEFORE either reached the
+kernel; every §2 hypothesis of the payload theorem traceable to a
+specific refutation; ~12.6M output tokens; a dozen instrument
+defects caught in one day, each now a mechanical law in the fleet's
+kit; the full seat complement cycled through authored mortality
+(bank → clear → reboot) without losing a fact.
 
 ## Days 4–14 [PLAN — stated as plan]
 
-- **A small imperative language with a verified compiler** to the
-  5-op ISA (v1: register programs, structured control; v2 grows
-  load/store with the ISA).
+- **TINY-RUST, with a verified compiler** to the 5-op ISA — the
+  language is DESIGNED and Captain-shaped (night of day 3): typed
+  (i32/bool, judgment-structured, the judgment IS the correctness
+  theorem's hypothesis), multiple functions by verified inlining
+  with a DAG-checked call graph, Rust surface syntax, nineteen
+  refutation findings folded before any proving. v1 registers-only;
+  v2 grows memory + ownership-as-isolation with Slice B.
 - **A verified executive** (cooperative first) with fairness and
   isolation invariants stated on a total-transition ISA spec.
-- **The RISC-V slice laid out** — first cut as RTL (no 5-op module
-  exists yet; `core32` is full RV32I, not a submission artifact),
-  then hardened; possibly as co-tenant of the switch's tile, where
-  silicon's measured shape says co-tenancy is nearly free and the
-  register file decides — one submission as a verified
-  system-on-tile if the numbers hold. [The "88% headroom" that
-  briefly stood here was an adjacent-object misread of a third
-  party's utilization figure; struck 8/8 19:1x.]
+- **The RISC-V slice laid out** — the Slice-A RTL now EXISTS and is
+  SYNTHESIZED (night of day 3, both register-file widths, same flow
+  as every number in the tree); hardening next. Co-tenancy with the
+  switch moved from blocked to viable when serializing the
+  instruction feed measured at −0.2% area; the register file and one
+  remaining pin decide — a verified system-on-tile if the numbers
+  hold. [The "88% headroom" that briefly stood here was an
+  adjacent-object misread; struck 8/8 19:1x.]
 - Slice B of the ISA (LW/SW/JAL/JALR/BNE) against the banked gates.
 
 ## Why this is repeatable (the method, one paragraph)
