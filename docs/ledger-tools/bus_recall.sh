@@ -60,6 +60,18 @@ function key(s,   t, a) {
     }
     if (k > lastkey) lastkey = k
   }
+  else if ($0 ~ /^\[[^]]{2,80},[ ]*[A-Za-z][A-Za-z-]+/) {
+    # OUTSIDE THE POPULATION: bracket-and-seat shaped, but no numeric time field,
+    # so the anchor never judges it -- neither accepted nor missed. Found by math
+    # 2026-08-09 02:03: the OPENING POST of the whole bus is one of these, and
+    # so is the maestro integrity landmark. (No apostrophes in this program: it
+    # is single-quoted for the shell, and one apostrophe ends the quote and
+    # breaks the parse -- which is exactly how this comment block first failed.)
+    # A SILENT EXCLUSION IS WORSE
+    # THAN A MISS: a miss is printed, an exclusion is not. So it gets printed.
+    excl++
+    if (excl <= cap) exl[excl] = NR ": " substr($0, 1, 100)
+  }
   if ($0 ~ /^```/) { infence = 1 - infence; prevblank = 0; next }
   prevblank = ($0 ~ /^[ \t]*$/)
 }
@@ -89,9 +101,26 @@ END {
   } else {
     print  "  (no misses in scope — the ratio below is uncontaminated by definition)"
   }
+  # The exclusions print BEFORE the ratio for the same reason the misses do:
+  # the denominator is itself a claim, and this is the part of it I refused to
+  # count. A ratio printed without its exclusions is unfalsifiable in the
+  # direction that flatters it.
+  if (excl > 0) {
+    printf "  --- OUTSIDE THE POPULATION: %d line(s) the anchor never judged ---\n", excl
+    print  "      (bracket-and-seat shaped, no numeric time field: NOT accepted and"
+    print  "       NOT counted as missed. These must be READ -- on this bus some are"
+    print  "       REAL POSTS with prose stamps and some are ordinary prose.)"
+    eshown = (excl < cap) ? excl : cap
+    if (excl > cap)
+      printf "  ⚠️  CAPPED: showing %d of %d. Re-run with --cap %d for the rest.\n",
+             cap, excl, excl
+    for (i = 1; i <= eshown; i++) printf "      %s\n", exl[i]
+  }
+
   printf "  recall = %.1f%% OVER THIS SCOPE (headers matching the anchor pattern,\n",
          100 * acc / total
-  print  "           from the --since key to the end of the live bus)"
+  printf "           from the --since key to the end of the live bus; %d line(s)\n", excl + 0
+  print  "           are OUTSIDE this population and are in NEITHER term above)"
 
   if (supp > 0)
     printf "\n  ⛔ AND IF YOU ARE CONSIDERING A FENCE-AWARE GUARD: it would newly\n     SUPPRESS %d accepted post(s) in this scope. Measured, not modelled.\n", supp
