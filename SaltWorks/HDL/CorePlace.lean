@@ -44,10 +44,73 @@ open SaltWorks.HDL
 `1056…1087`, and `coreInWidth = 1088`. This file cites those rather than restating the numbers,
 so a change to the layout breaks the placement instead of silently misaligning it. -/
 
-/-- The host's first free net: everything below is core INPUT (state, then instruction). -/
-def off0 : Nat := coreInWidth
+/-! ### ROW 0 — THE TIE CELLS (maestro's preamble ruling, 2026-08-09 11:27)
 
-theorem off0_value : off0 = 1088 := coreInWidth_value
+**RULED: shape (a), refined.** The constants the adders' carry-ins need become **row 0** — a named
+two-gate organ. Every organ shifts up by 2; the assembly has **sixteen rows**. Shape (b) was
+refused because it breaks `instOK`'s inputs-strictly-below invariant.
+
+⛔ **AND WHY *TWO* GATES, NOT ONE — silicon's free-zero does not survive in this model.** They
+proposed (11:26) wiring `add`'s `cin = 0` to net `0` for free, since `slicea16bma.v` declares
+`rf [1:15]` and muxes register 0 to `32'd0`, **so x0 has no storage to be nonzero in.** Correct
+about the RTL, false about the model:
+```
+ISA.lean:72-74  structure St where regs : Vector (BitVec 32) 32   ← x0 HAS STORAGE
+StateCodec      stBit s 0 = (s.regs[0]).getLsbD 0                 ← net 0 READS it
+ISA.lean:96     "x0 reads as zero unconditionally — NOT AS AN INVARIANT"
+ISA.lean:163    "x0 reads zero. NO HYPOTHESIS — the point of enforcing on the READ"
+```
+⇒ ***x0-reads-zero is enforced AT THE READ, not on the state, so net `0` in an arbitrary `Env` is
+UNCONSTRAINED. A carry-in wired there is a latent bug firing exactly when `s.regs[0] ≠ 0` —
+invisible in every test whose initial state happens to zero it. The RTL cannot express that state;
+the model can.*** *Two tie cells is the right count, and the ruling had it before this check did.* -/
+
+/-- The core's first free net — row 0 sits here. -/
+def offTie : Nat := coreInWidth
+
+/-- **Row 0 — the tie cells.** Gate `0` is `const false`, gate `1` is `const true`. No inputs:
+`Op.fanin (.const _) = []`, so a constant reads nothing and is pure source. *"Tie cell" is real
+silicon's own name for exactly this.* -/
+def tieCells : Circ :=
+  { nIn := 0, gates := [⟨0, .const false⟩, ⟨1, .const true⟩], outs := [0, 1] }
+
+theorem tieCells_ssa : tieCells.ssa = true := by decide +kernel
+theorem tieCells_wf  : tieCells.wf  = true := by decide +kernel
+
+/-- A zero-input organ satisfies `instOK` at **every** offset — vacuously in the third clause, and
+the vacuity is honest: a constant genuinely depends on nothing. Stated so no reader mistakes it for
+an unproved obligation. -/
+theorem tieCells_instOK (σ : Net → Net) (off : Nat) : instOK tieCells σ off := by
+  refine ⟨tieCells_ssa, tieCells_wf, ?_⟩
+  intro i hi
+  simp only [tieCells] at hi
+  omega
+
+/-- The host net carrying `false`, and the one carrying `true`. -/
+def tieFalse : Net := (instOuts tieCells id offTie).getD 0 0
+def tieTrue  : Net := (instOuts tieCells id offTie).getD 1 0
+
+theorem tie_nets_are_the_first_two : tieFalse = 1088 ∧ tieTrue = 1089 := by
+  simp only [tieFalse, tieTrue, instOuts, instMap, tieCells, offTie, coreInWidth, stWidth]
+  decide +kernel
+
+/-- **CONTROL: the two tie nets are DISTINCT.** One net serving both carry-ins would place cleanly
+and compute `a + b` where `a - b` was meant, on every subtraction, silently. -/
+theorem tie_nets_are_distinct : tieFalse ≠ tieTrue := by
+  simp only [tieFalse, tieTrue, instOuts, instMap, tieCells, offTie, coreInWidth, stWidth]
+  decide +kernel
+
+/-- The first ORGAN offset — row 1, immediately above the tie cells.
+
+⭐ **THE SHIFT IS ONE LINE BECAUSE NOTHING DOWNSTREAM WAS A LITERAL.** Every later offset is
+`instNext <organ> <previous>`, so redefining this one moves the whole chain; and `decOut`,
+`rs1Out`, `rs2Out` are computed FROM the offsets, so every σ follows automatically. Only the
+theorems that PIN literals break — which is what they are for. -/
+def off0 : Nat := instNext tieCells offTie
+
+theorem off0_value : off0 = 1090 := by
+  simp only [off0, instNext, tieCells, offTie, coreInWidth, stWidth]
+  decide +kernel
 
 /-! ## 2. The first placement — `decoder`, reading the instruction word
 
@@ -67,22 +130,29 @@ theorem decoder_instOK : instOK decoder decoderSig off0 := by
   have h32 : i < 32 := by
     have : decoder.nIn = 32 := by decide +kernel
     omega
-  simp only [decoderSig, instrNet, instrBase, off0, coreInWidth, stWidth, Net]
+  simp only [decoderSig, instrNet, instrBase, off0, instNext, tieCells, offTie, coreInWidth, stWidth, Net]
   omega
 
 /-- ⚠️ **THE MARGIN IS EXACTLY ZERO — the tightest a legal placement can be.**
 
 The instruction word occupies `1056…1087` and the host's gates begin at `1088`. So the LAST input
-wire sits one below `off0` (stated as `+ 1 = off0`, never as `off0 - 1` — truncated
-subtraction is what defeats `omega` on `Net`-typed goals): one more input bit, or one fewer state net, and `instOK` fails.
+wire sat one below `off0` — **until row 0 landed.**
+
+⭐⭐ **THIS THEOREM BROKE AT THE 11:27 SHIFT AND THAT IS THE POINT OF IT.** `decide` reported the
+proposition FALSE: the tie cells now occupy exactly the two nets between the instruction word and
+the first organ's gates, so the margin is **2, not 0**. *A margin theorem that survived a row-0
+insertion would have been telling me nothing. Restated with the tie cells named in it, and the
+second clause re-anchored on `instrBase + 32` — the end of the instruction word — because THAT is
+the fact about the input space, and it does not move when the gate space grows.* (Stated additively,
+never as `off0 - 1`: truncated subtraction is what defeats `omega` on `Net`-typed goals.) one more input bit, or one fewer state net, and `instOK` fails.
 
 *`SubFragment` held by a one-gate margin and that was worth remarking. This holds by NONE.
 Recorded as a theorem because a zero margin is invisible to inspection and fatal to an edit —
 anyone widening the instruction field or narrowing the state must re-derive this placement.* -/
 theorem placement_margin_is_exactly_tight :
-    decoderSig 31 + 1 = off0 ∧ ¬ (decoderSig 32 < off0) := by
+    decoderSig 31 + 1 + 2 = off0 ∧ ¬ (decoderSig 32 < instrBase + 32) := by
   refine ⟨by decide +kernel, ?_⟩
-  simp only [decoderSig, instrNet, instrBase, off0, coreInWidth, stWidth, Net]
+  simp only [decoderSig, instrNet, instrBase, off0, instNext, tieCells, offTie, coreInWidth, stWidth, Net]
   omega
 
 /-- **CONTROL: the placement is not vacuous.** `instOK`'s third clause is a `∀ i < c.nIn`, so a
@@ -96,7 +166,7 @@ because the placement's correctness depends on it and a citation that is never e
 citation nobody has checked. -/
 theorem decoder_reads_only_the_instruction (k : Nat) (hk : k < 32) :
     stWidth ≤ decoderSig k ∧ decoderSig k < off0 := by
-  simp only [decoderSig, instrNet, instrBase, off0, coreInWidth, stWidth, Net]
+  simp only [decoderSig, instrNet, instrBase, off0, instNext, tieCells, offTie, coreInWidth, stWidth, Net]
   omega
 
 /-! ## 3. INCREMENT 2b — the chain step, and the second placement
@@ -117,8 +187,8 @@ theorem instOK_mono {c : Circ} {σ : Net → Net} {off off' : Nat}
 /-- The second placement's offset: the decoder's `instNext`. -/
 def off1 : Nat := instNext decoder off0
 
-theorem off1_value : off1 = 1190 := by
-  simp only [off1, instNext, off0, coreInWidth, stWidth]
+theorem off1_value : off1 = 1192 := by
+  simp only [off1, instNext, off0, instNext, tieCells, offTie, coreInWidth, stWidth]
   decide +kernel
 
 /-- `immBCirc` reads the instruction word, so its σ is `instrNet` — the same named accessor as
@@ -134,7 +204,7 @@ theorem immB_instOK : instOK immBCirc immBSig off1 := by
     intro i hi
     have hnn : immBCirc.nIn = 32 := by decide +kernel
     rw [hnn] at hi
-    simp only [immBSig, instrNet, instrBase, off0, coreInWidth, stWidth, Net]
+    simp only [immBSig, instrNet, instrBase, off0, instNext, tieCells, offTie, coreInWidth, stWidth, Net]
     omega
   · simp only [off1, instNext, off0]
     omega
@@ -144,7 +214,7 @@ a no-op dressed as progress — and a zero-gate organ would make exactly that ha
 `zero_gate_organ_does_not_advance`). The decoder has 102 gates, so this step is real. -/
 theorem chain_step_advanced : off0 < off1 ∧ off1 = off0 + 102 := by
   refine ⟨?_, ?_⟩
-  · simp only [off1, instNext, off0, coreInWidth, stWidth]
+  · simp only [off1, instNext, off0, instNext, tieCells, offTie, coreInWidth, stWidth]
     decide +kernel
   · simp only [off1, instNext, off0]
     congr 1
@@ -204,7 +274,7 @@ theorem readTree_rs1_instOK : instOK readTree readTreeRs1Sig off0 := by
   intro j hj
   have hnn : readTree.nIn = 997 := by decide +kernel
   rw [hnn] at hj
-  simp only [readTreeRs1Sig, rs1Bit, instrNet, instrBase, off0, coreInWidth, stWidth, Net]
+  simp only [readTreeRs1Sig, rs1Bit, instrNet, instrBase, off0, instNext, tieCells, offTie, coreInWidth, stWidth, Net]
   split
   · omega          -- the address branch: the field sits at 1071…1075
   · omega          -- the register branch: j + 27 ≤ 1023
@@ -215,7 +285,7 @@ theorem readTree_rs2_instOK : instOK readTree readTreeRs2Sig off0 := by
   intro j hj
   have hnn : readTree.nIn = 997 := by decide +kernel
   rw [hnn] at hj
-  simp only [readTreeRs2Sig, rs2Bit, instrNet, instrBase, off0, coreInWidth, stWidth, Net]
+  simp only [readTreeRs2Sig, rs2Bit, instrNet, instrBase, off0, instNext, tieCells, offTie, coreInWidth, stWidth, Net]
   split
   · omega          -- the address branch: the field sits at 1071…1075
   · omega          -- the register branch: j + 27 ≤ 1023
@@ -244,7 +314,7 @@ the decoder's, re-exercised because σ is now a two-branch function and the bran
 instruction is the one an off-by-one would silently move into the state. -/
 theorem address_bits_are_in_the_instruction (j : Nat) (hj : j < 5) :
     stWidth ≤ readTreeRs1Sig j ∧ readTreeRs1Sig j < off0 := by
-  simp only [readTreeRs1Sig, rs1Bit, instrNet, instrBase, off0, coreInWidth, stWidth, Net]
+  simp only [readTreeRs1Sig, rs1Bit, instrNet, instrBase, off0, instNext, tieCells, offTie, coreInWidth, stWidth, Net]
   split
   · omega
   · omega
@@ -287,7 +357,7 @@ theorem regWrite_instOK : instOK regWrite regWriteSig off1 := by
   have hnn : regWrite.nIn = 7 := by decide +kernel
   rw [hnn] at hj
   simp only [regWriteSig, rdBit, instrNet, instrBase, decOut, decoderSig, off1, off0,
-             instNext, coreInWidth, stWidth, Net]
+             instNext, tieCells, offTie, coreInWidth, stWidth, Net]
   split
   · omega
   · split <;> decide +kernel
@@ -300,7 +370,7 @@ not, and the difference is exhibited rather than asserted. *Anyone extending thi
 `instOK_mono` covers every organ will produce a placement that type-checks against the wrong
 offset.* -/
 theorem regWrite_is_NOT_placeable_at_off0 : ¬ (regWriteSig 5 < off0) := by
-  simp only [regWriteSig, decOut, decoderSig, off0, coreInWidth, stWidth, Net]
+  simp only [regWriteSig, decOut, decoderSig, off0, instNext, tieCells, offTie, coreInWidth, stWidth, Net]
   decide +kernel
 
 /-- **CONTROL: the two decoder-driven wires are DISTINCT and correctly ordered.** `valid` is
@@ -309,14 +379,14 @@ on the wrong predicate. Both facts asserted, because the σ picks them by INDEX.
 theorem valid_and_isBEQ_are_distinct_and_ordered :
     regWriteSig 5 = decOut 5 ∧ regWriteSig 6 = decOut 4 ∧ decOut 4 ≠ decOut 5 := by
   refine ⟨by simp [regWriteSig], by simp [regWriteSig], ?_⟩
-  simp only [decOut, decoderSig, off0, coreInWidth, stWidth]
+  simp only [decOut, decoderSig, off0, instNext, tieCells, offTie, coreInWidth, stWidth]
   decide +kernel
 
 /-- **CONTROL: `rd` lands in the instruction, not in the state and not in the decoder's gates.**
 Three regions now exist below `off1` and σ must hit the right one for each input. -/
 theorem rd_bits_are_in_the_instruction (j : Nat) (hj : j < 5) :
     stWidth ≤ regWriteSig j ∧ regWriteSig j < off0 := by
-  simp only [regWriteSig, rdBit, instrNet, instrBase, off0, coreInWidth, stWidth, Net]
+  simp only [regWriteSig, rdBit, instrNet, instrBase, off0, instNext, tieCells, offTie, coreInWidth, stWidth, Net]
   split
   · omega
   · omega
@@ -338,9 +408,9 @@ def off3 : Nat := instNext readTree off2
 /-- Row 5 — the first ALU organ. -/
 def off4 : Nat := instNext readTree off3
 
-theorem chain_offsets_derived : off2 = 1191 ∧ off3 = 4173 ∧ off4 = 7155 := by
+theorem chain_offsets_derived : off2 = 1193 ∧ off3 = 4175 ∧ off4 = 7157 := by
   refine ⟨?_, ?_, ?_⟩ <;>
-    simp only [off4, off3, off2, off1, off0, instNext, coreInWidth, stWidth] <;> decide +kernel
+    simp only [off4, off3, off2, off1, off0, instNext, tieCells, offTie, coreInWidth, stWidth] <;> decide +kernel
 
 /-- `readTree.rs1`'s output `k`, at its chain position. Read from `instOuts` — a literal here
 would stop tracking both the organ AND its placement. -/
@@ -366,7 +436,7 @@ theorem bitXor32_instOK : instOK bitXor32 bitXor32Sig off4 := by
 /-- ⛔ **AND IT IS NOT PLACEABLE EARLIER — the chain is forced twice over.** `rs2`'s outputs live
 above `off3`, so `bitXor32` cannot sit at `off3`: its second operand bank does not exist yet. -/
 theorem bitXor32_is_NOT_placeable_at_off3 : ¬ (bitXor32Sig 32 < off3) := by
-  simp only [bitXor32Sig, rs2Out, off3, off2, off1, off0, instNext, coreInWidth, stWidth]
+  simp only [bitXor32Sig, rs2Out, off3, off2, off1, off0, instNext, tieCells, offTie, coreInWidth, stWidth]
   decide +kernel
 
 /-- **CONTROL: the two operand banks are DISJOINT.** `rs1`'s outputs and `rs2`'s outputs must not
@@ -388,7 +458,7 @@ theorem operand_banks_are_fully_populated :
   ∧ (instOuts readTree readTreeRs2Sig off3).length = 32
   ∧ rs1Out 31 ≠ 0 ∧ rs2Out 31 ≠ 0 := by
   refine ⟨by decide +kernel, by decide +kernel, ?_, ?_⟩ <;>
-    simp only [rs1Out, rs2Out, off3, off2, off1, off0, instNext, coreInWidth, stWidth] <;>
+    simp only [rs1Out, rs2Out, off3, off2, off1, off0, instNext, tieCells, offTie, coreInWidth, stWidth] <;>
     decide +kernel
 
 
@@ -420,8 +490,8 @@ def bitNot32Sig (j : Net) : Net := rs2Out j
 /-- Row 6's offset: after the XOR. -/
 def off5 : Nat := instNext bitXor32 off4
 
-theorem off5_value : off5 = 7187 := by
-  simp only [off5, off4, off3, off2, off1, off0, instNext, coreInWidth, stWidth]
+theorem off5_value : off5 = 7189 := by
+  simp only [off5, off4, off3, off2, off1, off0, instNext, tieCells, offTie, coreInWidth, stWidth]
   decide +kernel
 
 /-- ⭐ **PLACEMENT #7 — `bitNot32` at `off5`, `instOK` DISCHARGED.** Shape C: its 32 wires are
