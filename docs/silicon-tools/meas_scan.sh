@@ -80,3 +80,9 @@ else
 fi
 printf '  — duplicate propositions are a CORPUS check, not a module one:\n'
 printf '      sh %s/dup_props.sh %s "SaltWorks/HDL/*.lean"   # read it WHOLE\n' "$HERE" "$REF"
+# ⛔ THIS PASS IS STRUCTURAL — it reads SOURCE TEXT at a ref and runs NO KERNEL.
+# A green scan says the audits are PRESENT, never that they PASSED. Say so here,
+# or the next reader (me) treats a clean scan as a checked module.
+printf '  — ⛔ STRUCTURAL ONLY: no kernel ran. This says the audits are PRESENT,\n'
+printf '       not that they PASS. For the independent kernel witness:\n'
+printf '      sh %s/meas_build.sh %s   # PATH form; the module form only REPLAYS\n' "$HERE" "$MOD"
