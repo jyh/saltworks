@@ -79,3 +79,48 @@ bigger die   ->  free routing,   LONGER wires,  worse slew
 prefer, not a defect to be fixed.** *Next step (S3): a compactness run at the same
 fixed 3×2 die with core margins tightened, so the design clusters — same
 one-variable discipline.*
+
+---
+
+## THE 2×2, RUN TO A PRE-REGISTERED CAP (2026-08-09 09:03–10:34)
+
+**Same one-variable discipline: the config differs from the 3×2 by ONE line,
+`DIE_AREA [0,0,334.88,225.76]`. Everything else identical.**
+
+| | 3×2 REAL DIE | 2×2 REAL DIE |
+|---|---|---|
+| wall clock | ~8 min, **Flow complete** | **90 min, stopped at the cap** |
+| final stage | signoff + GDS | `DetailedRouting` — never left it |
+| routing floor | 0 DRC | **10 violations, 168 iterations** |
+| signoff | DRC 0 · LVS clean · timing met, 9 corners | **none — no metrics, no GDS** |
+
+**Full routing trajectory** (51 distinct successive values):
+```
+0 -> 1707 -> 3223 -> 4836 -> 6236 -> 6541 -> 6487 -> 5767 -> 5342 -> 4921 -> 5052 -> 4850 -> 4709 -> 4462 -> 3796 -> 3276 -> 2616 -> 1899 -> 1778 -> 1482 -> 1381 -> 1147 -> 1134 -> 1046 -> 929 -> 784 -> 763 -> 716 -> 667 -> 553 -> 552 -> 485 -> 473 -> 278 -> 277 -> 264 -> 255 -> 241 -> 236 -> 216 -> 128 -> 73 -> 67 -> 66 -> 27 -> 25 -> 23 -> 21 -> 15 -> 12 -> 10
+```
+
+### ⚖️ VERDICT: **MARGINAL. Not refused, not proven.**
+
+*The 2×2 was never shown impossible — 10 violations is close, and this trajectory
+broke a long plateau once already (21 → 10), so "stuck" is not "converged". But it
+did not close in **eleven times** the wall clock the 3×2 needed.*
+
+### ⛔ WHAT THIS CORRECTS
+
+**On 2026-08-08 I stopped a 2×2 run at 66 minutes and published "REFUSED".** That
+verdict was overclaimed and was withdrawn on 08-09. This run reached 10 at ~35 min
+and sat there for 168 iterations.
+🔑 ***So the INSTINCT (it is at its floor) was right and the VERDICT (impossible)
+was wrong — and only a run to a pre-registered cap can separate those two.***
+
+### 🔑 THE STOP WAS MECHANICAL, NOT A JUDGEMENT
+
+The 90-minute cap ran in a background watcher that stopped the container whether or
+not anyone was watching the clock. **The failure being corrected was precisely a
+stop made by a tired judgement in the moment; a pre-registered rule that depends on
+the author noticing the time is not pre-registered.**
+
+### DECISION-RELEVANT
+
+**The 3×2 is a routable tile. The 2×2 is a research project.** *Its remaining 10
+violations are worth an afternoon only if the tile arithmetic says otherwise.*
