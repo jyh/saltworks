@@ -45,7 +45,10 @@
 - Laws that ride every item: saltbuild-only builds; pathspec-only
   commits; trailer-free; unique Scratch<NODE>-<agent>.lean
   (per-AGENT); explicit-brief law for executors; the kernel-census
-  aiming rider for any deletion.
+  aiming rider for any deletion; **SaltWorks.lean (the root) is
+  MAESTRO-ONLY** — landings post "import owed" and the maestro wires
+  + runs the full-build verdict (the one-hand rule; restated 17:32
+  after a benign crossing).
 
 ## COMPILER
 
