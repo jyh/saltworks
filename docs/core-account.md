@@ -338,12 +338,24 @@ but the account states it as open.
 |---|---:|---:|---:|---:|
 | `readTree` → `RTL/readtree.v` | 2,982 | **2,981** | 18,636.62 µm² | 6.252 |
 
-⚠️ **2,982 gates against 2,981 instances — a ONE-GATE DIFFERENCE I HAVE NOT
-EXPLAINED, stated rather than rounded away.** *`EmitS.lean:189` independently
-reports 2,981 instances and 0 `assign` lines, so the emitter and my count agree
-with each other and disagree with the kernel row by one. Compiler's slot to
-resolve; a plausible cause is a `.const` gate emitting as a tie rather than a cell,
-but that is a GUESS and is labelled one.*
+✅ **THE ONE-GATE DIFFERENCE IS EXPLAINED (compiler, 14:25) AND THE EMITTER IS
+EXACT — THE COMMITTED FILE IS THE STALE OBJECT.**
+```
+emitS readTree, RUN AT HEAD:   kernel gates 2,982  ·  cell instances 2,982  EXACT
+                               of which conb (tie) lines: 1
+committed RTL/readtree.v:      2,981 sky130 lines  ·  .HI( lines 0  ·  conb 0
+⇒ the missing cell is THE TIE CELL, which `emitCell` emits today
+  (`EmitS.lean:137-145`, a `conb_1`). The FILE predates that emitter.
+```
+*My earlier guess — "a `.const` gate emitting as a tie rather than a cell" — was
+the right ORGAN and the wrong DIRECTION: the tie is emitted AS a cell now, and the
+committed artifact simply lacks it. **And the obvious alternative was REFUTED by
+measurement before mine was preferred: `readTree`'s tie net is LIVE (32 gates read
+it) and `opt readTree` removes nothing, so "dead gate elided by `opt`" is dead.***
+📌 **MY 2,981 WAS NEVER WRONG — it is a TRUE COUNT OF THE FILE, and evidence's
+independent 2,981 confirms the file. The file is stale; the count is not.** *Two
+correct measurements of two different objects, which is this account's own
+recurring lesson in miniature.*
 
 ⛔ **AND A MODULE THAT IS *NOT* EMITTER OUTPUT, WHICH IS WHY A SINGLE µm²/gate
 FACTOR WOULD BE WRONG:**
