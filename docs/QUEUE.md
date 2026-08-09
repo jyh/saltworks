@@ -324,12 +324,18 @@ OPEN ITEMS:
   rung 3 unchanged — the separate-stepSeq deferral vindicated;
   the :66-68 stale prose past-tensed in the same commit; covered
   EXIT=0 8,677 jobs).
-  ⭐ THE CELL WAVE: ALL PARTS LANDED, THE JOIN IN FLIGHT (math's
-  15:44 trim of the maestro's completion claim — macFinal/sval
-  appear only in a docstring, never a theorem; the composing
-  theorem is ONE join short, small because every part is in
-  place; math claimed MacBridge and is building it, shaped w/
-  the library-native ¬ssubOverflow twin). The parts: two organs (accumulator w/ carry-in +
+  ⭐⭐ THE CELL WAVE IS COMPLETE AT THE KERNEL MODEL — THE JOIN
+  LANDED FIRST ATTEMPT (c732aaa, 15:46, covered EXIT=0 8,677):
+  the composing theorem exists — trace + sign cycle + mac_correct
+  = b + W·sval — so the trimmed sentence is now TRUE AS A THEOREM
+  (trim 15:44 → truth 15:46, twenty-two minutes). BOUNDARIES
+  INTACT: evidence's F3 (kernel-model certified; down-to-silicon
+  closes at emitS + synthesis) and F4 re-running at evidence's
+  fence against ARTIFACTS not status lines (its own 15:46
+  clearance withdrawal — trusted the audited doc's status line,
+  second instance). NEXT: emitS (compiler, gate open; its 15:45
+  emission-criterion corrections govern silicon's parked run).
+  The parts: two organs (accumulator w/ carry-in +
   weight-shift w/ load gate, zero constant gates, 193 gates) ·
   the bridge (rungs 1-4, arithmetic reading under ¬saddOverflow,
   demoBound-discharged) · add, shift, AND subtract in the kernel.

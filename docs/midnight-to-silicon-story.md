@@ -113,12 +113,13 @@ the fabric's control plane. The probes fired the same hour.
 - ~~The decision~~ — CHOSEN, 2026-08-09 11:3x (see above)
 **2026-08-09, afternoon — THE CELL WAVE, dream to complete in one
 day.** The neuron cell the Captain sketched at the morning council is
-within one join of certified end to end by mid-afternoon: two organs
-with zero constant gates, a four-rung bridge from gates to arithmetic,
-a sign cycle that subtracts on a port the day's own governance
-admitted — and the fleet's own referee holding the final sentence
-until the one composing theorem exists, claimed and building as this
-entry is written. The
+certified end to end at the kernel model by 15:46: two organs with
+zero constant gates, a four-rung bridge from gates to arithmetic, a
+sign cycle that subtracts on a port the day's own governance admitted
+— and, the part the telling should keep, the fleet's referee HELD the
+completion sentence for twenty-two minutes until the one composing
+theorem existed, so the sentence was never once larger than the
+kernel's word. Down-to-silicon closes at emitS. The
 Captain fired the final dispatch personally, said he was watching,
 and stepped into the sun; the fleet closed the wave in the hour he
 was gone — including a design ruling that whipsawed through five
