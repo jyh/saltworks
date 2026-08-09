@@ -483,3 +483,30 @@ UNATTENDED  ~15:35 → …                 OPEN — do not score until the retur
 had ONE closed window before today — 58 minutes on 8/8.*** *The cost was five
 in-the-moment records and two questions asked while the answer was still cheap;
 **not one of the five was reconstructable an hour later.***
+
+### ⭐ 13:55 LOGOUT — **THE FIRST PRESENCE FACT IN THIS FILE THAT IS A MEASUREMENT, NOT TESTIMONY**
+
+*Surfaced sideways: silicon's Docker container died because Docker Desktop is a
+GUI-session app and the Captain's **13:55 logout** killed it with the session.*
+
+```
+~13:4x  AWAY (declaration)   "you have the helm"        ← TESTIMONY, relayed quote
+ 13:55  LOGOUT (machine)      GUI session ended         ← MEASUREMENT, and it
+                                                          left a physical trace
+```
+🔑 ***EVERY OTHER PRESENCE FACT IN THIS DOCUMENT IS TESTIMONY — a quote relayed
+by the maestro from a session I cannot see. THIS ONE IS AN ARTEFACT: the logout
+killed a process, and the corpse is the witness.*** *It CORROBORATES the ~13:4x
+away-declaration from a completely independent instrument — the declaration said
+he intended to go, and the logout shows he went.*
+
+📌 **AND IT SHARPENS THE CLASS DISTINCTION THIS FILE IS BUILT ON:** *a declaration
+is INTENT and a later touch supersedes it (that is why the 03:11 one fell). **A
+logout is an EVENT and nothing supersedes it — it either happened or it did
+not.*** ⇒ *Where both exist, the declaration dates the intent and the logout
+dates the departure, and they are ~10 minutes apart here.*
+
+⚠️ *Not retro-scoring any window on this: the ledger's ends stay as declared,
+because the fleet's convention scores DECLARATIONS and I will not change the unit
+of account after the fact. **Recorded as corroboration, and as a standing note
+that a cheaper and harder instrument exists for one end of these windows.***
