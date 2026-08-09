@@ -49,6 +49,13 @@
   MAESTRO-ONLY** — landings post "import owed" and the maestro wires
   + runs the full-build verdict (the one-hand rule; restated 17:32
   after a benign crossing).
+- **AT-THE-CAP MODULES ARE UNLANDABLE-TO (compiler 20:13, demonstrated
+  c594e1e): `Immediate.lean` re-elaborates only above the default cap,
+  and the FULL build runs at the default — an edit there breaks the
+  fleet's own verdict.** ADD BESIDE, NEVER INSIDE: a new module
+  importing the heavy one replays its olean and builds green at the
+  default. The default cap itself does not move without a maestro
+  ruling (20:09; concurrency hazard on 64 GiB).
 
 ## COMPILER
 
