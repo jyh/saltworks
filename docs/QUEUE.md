@@ -259,6 +259,14 @@ OPEN ITEMS:
   absence list rotted from success (SW, large sieve, Mertens,
   Vaughan all corpus-landed since). The four-agent recon re-runs
   against today's corpus before any next-rung planning consumes it.**
+- **SUBMISSION-CONFIG CHECKLIST (named 23:09, silicon — a trap, not
+  a live defect): TT/info.yaml declares 25 MHz (40 ns) but the
+  switch's TT/src/config.json ships CLOCK_PERIOD 20 (50 MHz) — fine
+  for the switch, FATAL-BY-INHERITANCE for the core's future config
+  (measured: core slack +16.9 at 40 ns, −3.1 at 20 ns; the failure
+  would masquerade as a design problem). THE RULE: the core's
+  submission config sets CLOCK_PERIOD to match the declared
+  clock_hz, and the two files are reconciled in the same commit.**
 - B5 (T1): the click; Sept-7 13:00 PDT close; REF QUESTION + floor
   law remain his; fact sheet on his word. Adjacent MONEY item from
   the muster flags: PCBs 0/80 — the real TT scarcity; ordering is
