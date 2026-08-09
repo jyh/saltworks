@@ -285,8 +285,15 @@ OPEN ITEMS:
   red is REAL, not a die artifact: mac_acc's 32-bit ripple carry
   misses 25 MHz by 0.9%; quadrupled density bought 0.046 of the
   0.388 ns needed, wirelength unchanged — the chain is the floor):
-  **THE NDF RUNS AT 20 MHz — CLOCK_PERIOD 50** — zero silicon, one
-  config line, +9.66 ns slack, the frame protocol indifferent.
+  **RE-RULED 16:0x — THE NDF RUNS AT CLOCK_PERIOD 55 (~18.2 MHz)**:
+  silicon's composed-cell measurement showed the 20 MHz valve was
+  priced on mac_acc ALONE — the composed cell's worst path is
+  50.939 ns (the WSHIFT→AND→ADDER seam adds 10.60 ns THAT NO
+  PARTS-MEASUREMENT COULD PREDICT — the parts-vs-composition
+  lesson as a number). 52 closes with +1.06 ns; 55 ships with
+  +4.06 ns — margin bought in the free currency ahead of the
+  floorplan run's unknown costs. Still zero silicon, still one
+  config line, frame protocol still indifferent.
   ADDER SURGERY REFUSED for the PoC (config-beats-organs, the
   wiring-beats-organs prior's cousin; CLA/skip stays priced on
   record if a future clock demands it). THE AGREEMENT LAW RIDES:
