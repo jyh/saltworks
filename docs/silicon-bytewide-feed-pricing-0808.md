@@ -132,3 +132,35 @@ timing-repair buffering, which synthesis cannot see at all.*
 ⛔ **STILL NOT A TT TILE-FIT TEST:** both runs used `FP_CORE_UTIL 45`, not TT's
 `FP_SIZING: absolute` at the fixed tile die. *These give trustworthy CELL AREA;
 the fit test is a separate run and is now worth doing.*
+
+## 8 · ⚠️ THE DRV NUMBERS ARE CORNER-SCOPED — read this before quoting them
+
+**A single reported DRV count is an AGGREGATE OVER PVT CORNERS and LibreLane
+reports the WORST one. I published "1,678 max-slew violations" four times before
+reading the breakdown.**
+```
+max-slew violations, all nine corners        max     min     nom
+ff  (fast, −40 C, 1.95 V)                    337     112     216
+tt  (typical, 25 C, 1.80 V)                  637     473     565
+ss  (slow, 100 C, 1.60 V)                   1678    1280    1460   ← reported
+```
+⇒ **The typical-corner figure is 637, not 1,678.** *Quoting a DRV count without
+its corner is quoting an unnamed scope — [[a-count-is-not-a-scope]].*
+⚠️ **The debt is REAL nonetheless: slew violates at EVERY corner including
+typical, so it is not a worst-case artifact.** *Max-cap, by contrast, IS nearly
+a worst-case artifact — 39 at `ss`, ZERO at `tt` and `ff`.*
+
+✅ **AND SETUP IS STRONGER THAN FIRST REPORTED — IT CLOSES AT ALL NINE CORNERS:**
+```
+worst  +16.914 ns (ss/max) · typical +27.596 ns · best +29.335 ns   on 40 ns
+```
+*"Setup met" and "setup met at all nine corners with 16.9 ns of worst-case
+margin" are different sentences; the second is the one the pack should carry, and
+that margin is headroom the DRV repair can spend.*
+
+📌 **REFUTED EN ROUTE, recorded so nobody retries it: `MAX_FANOUT_CONSTRAINT: 10`
+does NOT help.** *A controlled pair came back bit-identical (slew 1678, cap 39,
+fanout 11, area and setup slack to 15 digits). **The discriminator was already in
+the metrics — `max_fanout_violation__count` is 11 while slew is 1,678, so fanout
+was never the lever.** Four minutes spent answering a question the file had
+already answered.*
