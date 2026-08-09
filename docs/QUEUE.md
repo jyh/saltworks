@@ -274,7 +274,15 @@ OPEN ITEMS:
   pattern; flags anchors 21293/22150/22257 as statement source,
   precondition preamble, saltbuild-only, warnings-by-difference,
   axiom check, one pathspec commit, stop-loudly-on-resistance);
-  verdict lands as a task notification; (4) the 3+4 deep session CONFIRMED NOT YET HELD (the
+  ✅ LANDED 12:2x FIRST ATTEMPT — sawtoothMajorant_fourier_expansion
+  + hasSum_majorantCoeff (Salt/Weil/MajorantExpansion.lean, salt
+  e2307cc pushed): HB (7.3) literally, K>=2, every real theta;
+  axioms clean x7 rows verified twice; saltbuild EXIT=0, 9722 jobs,
+  warnings 190->190; mutation control ran properly (FALSE mutant ->
+  EXIT=1, byte-identical restore, green rebuild); two flags naming
+  facts corrected (root-namespace fourierCoeff; Fact (0<1) local);
+  the one out-of-pathspec stale dossier row fixed by maestro
+  (a1f8f0b). THE WEIL SAWTOOTH KIT (7.2)+(7.3)+(7.4) IS COMPLETE; (4) the 3+4 deep session CONFIRMED NOT YET HELD (the
   evening went to the tile/packet/neural arc; subjects crossed the
   helm at their landings — the deja vu source); proposal open:
   fold into an NDF theory review sitting. RISC-V ACCOUNT DOC:
