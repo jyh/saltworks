@@ -9,6 +9,7 @@ import SaltWorks.HDL.AluSelect
 import SaltWorks.HDL.EncoderE1
 import SaltWorks.HDL.OperandBMux
 import SaltWorks.HDL.Bitwise
+import SaltWorks.HDL.RegNext
 -- Row 14's organ is math's: `SaltWorks.Stack.Program.pcAdd`. `CoreOffsets` already carries this
 -- dependency (its `row_pcAdd` cites the same artifact), so the seam is not new to my slot.
 import SaltWorks.Stack.Program
@@ -1029,11 +1030,13 @@ theorem pc_bits_are_core_inputs (k : Nat) (hk : k < 32) :
     unfold pcAddSig pcNet
     rw [if_pos hk]
   have hs : stWidth = 1056 := by decide +kernel
-  -- ⚠️ `omega` FAILED on the CONJUNCTION even with the goal fully reduced to
-  -- `1024 ≤ 1024 + k ∧ 1024 + k < 1056` and `hk : k < 32` in context (traced, not guessed): its
-  -- counterexample listed ONLY `hk`'s constraint, i.e. it never ingested the goal at all. Each
-  -- half alone is immediate. So the conjunction is the obstacle, not the arithmetic — which is a
-  -- different failure from the two in `omega-vs-Net-typed-equations` and worth its own note.
+  -- ⚠️ CORRECTED: omega failed here because the goal's `<` SITS AT `Net`, not because of the
+  -- conjunction. `abbrev Net := Nat` is not transparent to omega's preprocessing: it DROPS such
+  -- a goal and then tries to derive `False` from the context, so its "counterexample" is made
+  -- purely of the hypotheses — exactly what it printed. Math documented this at
+  -- `Program.lean:2994` and `:3471` before I ever hit it. The cure below (bounds proved at `Nat`
+  -- and supplied as terms) is the same one row 15 needs, and it is why `hlt` works here while
+  -- the direct call did not. My first diagnosis named the conjunction; that was wrong.
   have hlt : 1024 + k < 1056 := by omega
   refine ⟨?_, ?_⟩
   · rw [h]; exact Nat.le_add_right 1024 k
@@ -1117,7 +1120,130 @@ theorem subSig_b_bank_is_unchanged :
              coreInWidth, stWidth]
   decide +kernel
 
-/-! ## 14. THE AXIOM AUDIT — closing a gap this file had carried since placement #1
+/-! ## 14. INCREMENT 2l — ROW 15: `regNext`, THE LAST ORGAN, AND THE LARGEST σ IN THE ASSEMBLY
+
+`regNext.nIn = 1088` — **more inputs than the core has**, and three banks of them
+(`RegNext.lean:76-81`):
+
+```
+   we[r]      nets 0…31        one write-enable per register   <- regWrite, ROW 5
+   res[k]     nets 32…63       the value to write              <- the select, ROW 10
+   cur[r][k]  nets 64…1087     the CURRENT register file       <- core inputs 32r + k
+```
+
+⭐ **THE `cur` BANK IS A PURE SHIFT, AND THAT IS THE WHOLE REASON 1,088 INPUTS ARE AFFORDABLE.**
+`rnCur r k = 64 + 32*r + k` and `StateCodec` puts register `r` bit `k` at net `32*r + k`, so the wire
+is exactly `i - 64` — no lookup, no organ, no chain. **1,024 of the 1,088 obligations are arithmetic**,
+which is why `instOK` below splits the banks instead of asking `decide` for 1,088 cases.
+
+⚠️ ***AND THE TRANSPOSE IS THE MUTANT HERE.*** `StateCodec:174` names it: *"A plausible mistake: it is
+the same 1024 bits, read column-wise."* Wiring `32*k + r` instead of `32*r + k` is **also a bijection
+on `0…1023`**, so it discharges `instOK` exactly as well and yields a machine whose entire register
+file is transposed — register 1 built from bit 1 of every register. *Asserted below, not trusted.* -/
+
+/-- Row 15's offset — after math's pc composite. -/
+def offRegNext : Nat := instNext SaltWorks.Stack.Program.pcAdd offPc
+
+/-- `regWrite`'s output `k` at row 5: the write-enable for register `k`. -/
+def rwOut (k : Nat) : Net := (instOuts regWrite regWriteSig off1).getD k 0
+
+/-- The select's output `k` at row 10: bit `k` of the value to be written. -/
+def selOut (k : Nat) : Net := (instOuts SelectCut32.sliceASelect selSig offSel).getD k 0
+
+/-- Row 15 — `regNext`'s σ. Three banks; the third is a shift, not a lookup. -/
+def regNextSig (i : Net) : Net :=
+  if i < 32 then rwOut i else if i < 64 then selOut (i - 32) else i - 64
+
+/-- **The chain only ever grows.** Every offset is `instNext c off = off + c.gates.length`, so the
+whole chain is `offTie` plus a sum of lengths — provable WITHOUT evaluating a single gate list.
+*Forcing these offsets to numerals is what made an earlier row time out; this is the cheap form and
+it is also the stronger statement.* -/
+theorem offTie_le_offRegNext : offTie ≤ offRegNext := by
+  simp only [offRegNext, offPc, offEnc, offSel, offSlt, offSub, offAdd, offOb, off5, off4, off3,
+             off2, off1, off0, instNext]
+  omega
+
+/-- The `cur` bank's obligation, discharged by arithmetic over 1,024 inputs at once. -/
+theorem regNextSig_cur_lt (i : Nat) (h1 : 64 ≤ i) (h2 : i < 1088) : regNextSig i < offRegNext := by
+  -- ⚠️ `omega` CANNOT READ A GOAL WHOSE `<` SITS AT `Net`. It drops the goal and then tries to
+  -- derive `False` from the context alone, so its "counterexample" is made purely of the
+  -- hypotheses — on a goal that is trivially true. Math documented this twice
+  -- (`Program.lean:2994`, `:3471`); the cure is theirs: state every bound at `Nat` and feed it in
+  -- as a term, never leave it for `omega` to read off a `Net`-typed goal.
+  have e1 : ¬(i < 32) := Nat.not_lt.mpr (by omega)
+  have e2 : ¬(i < 64) := Nat.not_lt.mpr (by omega)
+  have hsig : regNextSig i = i - 64 := by
+    unfold regNextSig
+    rw [if_neg e1, if_neg e2]
+  have htie : offTie = 1088 := by
+    simp only [offTie, coreInWidth, stWidth]
+  have hle : offTie ≤ offRegNext := offTie_le_offRegNext
+  have hb : (1088 : Nat) ≤ offRegNext := by omega
+  have hsmall : i - 64 < 1088 := by omega
+  rw [hsig]
+  exact Nat.lt_of_lt_of_le hsmall hb
+
+/-- The two organ banks — 64 cases, each a real `instOuts` lookup. -/
+theorem regNextSig_organs_lt : ∀ i, i < 64 → regNextSig i < offRegNext := by
+  decide +kernel
+
+/-- ⭐⭐ **PLACEMENT #15 — `regNext` at row 15, `instOK` DISCHARGED. FIFTEEN OF FIFTEEN ORGAN ROWS.**
+*Every organ of the W5 core now has a certified position, and the two certificates it needs are
+math's landed `regNext_ssa`/`regNext_wf`, consumed rather than re-proved.* -/
+theorem regNext_instOK : instOK regNext regNextSig offRegNext := by
+  refine ⟨regNext_ssa, regNext_wf, ?_⟩
+  intro i hi
+  have hnn : regNext.nIn = 1088 := by decide +kernel
+  rw [hnn] at hi
+  by_cases h : i < 64
+  · exact regNextSig_organs_lt i h
+  · exact regNextSig_cur_lt i (by omega) hi
+
+/-- ⛔⛔ **THE TRANSPOSE MUTANT, EXCLUDED BY ASSERTION.** Input `65` is `cur[0][1]` — register 0,
+bit 1 — which is core net `1`. A column-wise reading would send it to net `32`, i.e. to bit 0 of
+register 1. **Both wirings are bijections on `0…1023` and both discharge `instOK`**; only one builds
+the register file the ISA describes. -/
+theorem cur_bank_is_row_major_not_transposed :
+    regNextSig 65 = 1 ∧ regNextSig 65 ≠ 32 := by
+  refine ⟨by decide, by decide⟩
+
+/-- **CONTROL: the `cur` bank reads the STATE, never an organ.** Its whole range lands strictly
+below `stWidth`, i.e. inside the core's input space where the register file lives. -/
+theorem cur_bank_lands_in_the_state (i : Nat) (h1 : 64 ≤ i) (h2 : i < 1088) :
+    regNextSig i < stWidth := by
+  have e1 : ¬(i < 32) := Nat.not_lt.mpr (by omega)
+  have e2 : ¬(i < 64) := Nat.not_lt.mpr (by omega)
+  have hsig : regNextSig i = i - 64 := by
+    unfold regNextSig
+    rw [if_neg e1, if_neg e2]
+  have hs : stWidth = 1056 := by decide +kernel
+  have hsmall : i - 64 < 1056 := by omega
+  rw [hsig, hs]
+  exact hsmall
+
+/-- ⭐ **CONTROL: THE TWO ORGAN BANKS ARE NOT SWAPPED.** `we` is `regWrite`'s output and `res` is the
+select's — swapping them places just as cleanly and builds a machine that write-enables from ALU
+result bits and stores the write-enable pattern into the register. -/
+theorem we_and_res_banks_are_not_swapped :
+    regNextSig 0 = rwOut 0 ∧ regNextSig 32 = selOut 0
+  ∧ regNextSig 0 ≠ selOut 0 ∧ regNextSig 32 ≠ rwOut 0 := by
+  refine ⟨rfl, rfl, ?_, ?_⟩ <;>
+    simp only [regNextSig, rwOut, selOut, regWriteSig, selSig, instOuts, instMap, offSel, offSlt,
+               offSub, offAdd, offOb, off5, off4, off3, off2, off1, off0, instNext, tieCells,
+               offTie, coreInWidth, stWidth] <;>
+    decide +kernel
+
+/-- **CONTROL: `regNext` is placed strictly after both of its organ producers.** Stated over the
+offsets so no numeral is ever forced. -/
+theorem regNext_follows_its_producers : off1 < offRegNext ∧ offSel < offRegNext := by
+  constructor <;>
+    simp only [offRegNext, offPc, offEnc, offSel, offSlt, offSub, offAdd, offOb, off5, off4, off3,
+               off2, off1, instNext] <;>
+    · have h : 0 < SaltWorks.Stack.Program.pcAdd.gates.length := by decide +kernel
+      omega
+
+
+/-! ## 15. THE AXIOM AUDIT — closing a gap this file had carried since placement #1
 
 ⛔ **`CorePlace.lean` reached FOURTEEN placements with `EXIT=0` and NOT ONE `#audit_axioms` call**,
 while every neighbouring organ file (`AluSelect`, `OperandBMux`, `Adder`, …) audits each declaration.
@@ -1159,5 +1285,14 @@ list at the first failure, so everything after a failing name silently reads as 
 #audit_axioms regWrite_is_NOT_placeable_at_off0
 #audit_axioms valid_and_isBEQ_are_distinct_and_ordered
 #audit_axioms encoder_select_seam_closed
+
+#audit_axioms regNext_instOK
+#audit_axioms offTie_le_offRegNext
+#audit_axioms regNextSig_organs_lt
+#audit_axioms regNextSig_cur_lt
+#audit_axioms cur_bank_is_row_major_not_transposed
+#audit_axioms cur_bank_lands_in_the_state
+#audit_axioms we_and_res_banks_are_not_swapped
+#audit_axioms regNext_follows_its_producers
 
 end SaltWorks.HDL.CorePlace
