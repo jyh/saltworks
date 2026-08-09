@@ -4,6 +4,8 @@ import SaltWorks.HDL.Decoder
 import SaltWorks.HDL.Immediate
 import SaltWorks.HDL.ReadTree
 import SaltWorks.HDL.RegWrite
+import SaltWorks.HDL.SelectCut32
+import SaltWorks.HDL.AluSelect
 import SaltWorks.HDL.Bitwise
 
 -- Evaluating `instOuts` over real organs (readTree is 2,982 gates) exceeds the default depth.
@@ -720,6 +722,95 @@ adder published one net for both, the invariant would be unfalsifiable here and 
 stated at the organ instead. -/
 theorem order_invariant_is_falsifiable_here : subOut 31 ≠ subOut 32 :=
   order_invariant_at_slt.2
+
+
+/-! ## 12. INCREMENT 2i — ROW 10: `sliceASelect`, the ruled 3-source select
+
+`AluSelect.lean:319-324` gives the layout exactly, so no index is guessed:
+```
+gsIn n b   = n*32 + b        ⇒ (3,2) has 98 inputs
+gsRes r k  = r*32 + k        ⇒ inputs 0…95 are THREE 32-bit source banks
+gsSel n _ j = n*32 + j       ⇒ inputs 96, 97 are the select bits
+```
+And `C1Organ.lean:113` fixes which bank is which: `opIndex w = if dcSLTm then 2 else if dcXORm
+then 1 else 0`, with `C1Organ:149-150` pinning select bit 0 to `lineXOR` and bit 1 to `lineSLT`.
+
+```
+bank 0  the ADD adder's sum   (the default arm: ADD / ADDI)
+bank 1  bitXor32's output     (XOR)
+bank 2  sltCirc's output      (SLT)
+sel 0   decOut 1 = isXOR      sel 1   decOut 2 = isSLT
+```
+*Order invariant: cited, see §11.* -/
+
+/-- Row 10's offset — after `sltCirc`. -/
+def offSel : Nat := instNext sltCirc offSlt
+
+theorem offSel_value : offSel = 7546 := by
+  simp only [offSel, offSlt, offSub, offAdd, off5, off4, off3, off2, off1, off0, instNext,
+             tieCells, offTie, coreInWidth, stWidth]
+  decide +kernel
+
+/-- The ADD adder's output `k` — bank 0. -/
+def addOut (k : Nat) : Net := (instOuts adder32 addSig offAdd).getD k 0
+/-- `bitXor32`'s output `k` — bank 1. -/
+def xorOut (k : Nat) : Net := (instOuts bitXor32 bitXor32Sig off4).getD k 0
+/-- `sltCirc`'s output `k` — bank 2. -/
+def sltOut (k : Nat) : Net := (instOuts sltCirc sltSig offSlt).getD k 0
+
+/-- `sliceASelect`'s σ: three source banks by `gsRes`, then the two decoder-driven select bits. -/
+def selSig (j : Net) : Net :=
+  if j < 32 then addOut j
+  else if j < 64 then xorOut (j - 32)
+  else if j < 96 then sltOut (j - 64)
+  else if j = 96 then decOut 1
+  else decOut 2
+
+/-- ⭐ **PLACEMENT #11 — `sliceASelect` at row 10, `instOK` DISCHARGED.** Eleven of sixteen rows. -/
+theorem sel_instOK : instOK SelectCut32.sliceASelect selSig offSel := by
+  refine ⟨?_, ?_, ?_⟩
+  · decide +kernel
+  · decide +kernel
+  · intro j hj
+    have hnn : SelectCut32.sliceASelect.nIn = 98 := by decide +kernel
+    rw [hnn] at hj
+    revert hj; revert j
+    decide +kernel
+
+/-- ⭐⭐ **THE BROADCAST, EXHIBITED — my 8/8 organ reference warned silicon about exactly this.**
+
+*"BOTH COMPARATORS BROADCAST — 32 outputs, ONE meaningful bit. `sltCirc.outs = 6 :: replicate 31 7`,
+where net 7 is `const false`, so outputs 1…31 are a SHARED constant-zero net by construction."*
+
+Bank 2 therefore has **one real bit and 31 ties**, and that is correct — the ISA says `rd := if
+rs1 <ₛ rs2 then 1 else 0`. **An RTL cut that synthesised 32 independent comparator outputs would be
+building 31 gates that cannot differ.** -/
+theorem slt_bank_broadcasts :
+    sltOut 0 ≠ sltOut 1 ∧ sltOut 1 = sltOut 31 := by
+  refine ⟨?_, ?_⟩ <;>
+    simp only [sltOut, instOuts, instMap, sltSig, offSlt, offSub, offAdd, off5, off4, off3,
+               off2, off1, off0, instNext, tieCells, offTie, coreInWidth, stWidth] <;>
+    decide +kernel
+
+/-- **CONTROL: the three banks are pairwise DISJOINT at their first bits.** Two banks sharing a net
+would make the select return the same source for different opcodes, with `sliceASelect_cert` still
+green — the cert is about the BLOCK, never about my wiring. -/
+theorem select_banks_are_disjoint :
+    selSig 0 ≠ selSig 32 ∧ selSig 32 ≠ selSig 64 ∧ selSig 0 ≠ selSig 64 := by
+  refine ⟨?_, ?_, ?_⟩ <;>
+    simp only [selSig, addOut, xorOut, sltOut, instOuts, instMap, addSig, bitXor32Sig, sltSig,
+               offSlt, offSub, offAdd, off4, off5, off4, off3, off2, off1, off0, instNext,
+               tieCells, offTie, coreInWidth, stWidth] <;>
+    decide +kernel
+
+/-- **CONTROL: the select bits are the DECODER's, in the ruled order.** Bit 0 is `isXOR`
+(`decOut 1`) and bit 1 is `isSLT` (`decOut 2`), per `C1Organ:149-150`. Swapping them would make
+`opIndex` name bank 1 for SLT and bank 2 for XOR — a well-typed core computing the wrong op. -/
+theorem select_bits_are_decoder_driven_in_order :
+    selSig 96 = decOut 1 ∧ selSig 97 = decOut 2 ∧ decOut 1 ≠ decOut 2 := by
+  refine ⟨rfl, rfl, ?_⟩
+  simp only [decOut, decoderSig, off0, instNext, tieCells, offTie, coreInWidth, stWidth]
+  decide +kernel
 
 
 end SaltWorks.HDL.CorePlace
