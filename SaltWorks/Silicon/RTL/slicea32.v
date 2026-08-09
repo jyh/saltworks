@@ -61,7 +61,11 @@ module slicea32(clk, rst_n, instr, imem_addr);
 
     // ---- branch ----------------------------------------------------------
     wire        br_taken = is_beq & (rs1_v == rs2_v);
-    wire [31:0] pc_next  = br_taken ? (pc_q + imm_b) : (pc_q + 32'd4);
+    // ⭐ ONE PC ADDER, NOT TWO: mux the ADDEND, not the SUM. Written as
+    // `br_taken ? (pc+imm_b) : (pc+4)` this infers two 32-bit adders whose
+    // results are then discarded one apiece. Measured saving below.
+    wire [31:0] pc_addend = br_taken ? imm_b : 32'd4;
+    wire [31:0] pc_next   = pc_q + pc_addend;
 
     // ---- sequential ------------------------------------------------------
     integer i;
