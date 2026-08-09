@@ -377,8 +377,11 @@ special case, not the ruled dual-stream mode) or it resets the accumulator
 (destroying the dot product). The guards are already in the artifact and are cited
 rather than duplicated: `MacCell.weight_state_moves_so_reload_is_required` (from
 weight `1` the register holds `2`, then `4` — never `1` again) and
-`MacCell.stream_bit_never_enters_the_weight_register` (there is no port to reload
-through). **A multi-input statement must therefore be per-input traces, never one
+`MacCell.stream_enters_only_through_the_load_gate` (the reload port EXISTS since
+load-path option A — b801003 — but is a gated, scheduled phase, not a mid-stream
+path; prose updated 15:3x when the pre-A citation went stale: its predecessor
+said "no port to reload through", true before A and false after).
+**A multi-input statement must therefore be per-input traces, never one
 trace spanning inputs — and this corollary is deliberately the per-input one.** -/
 
 /-- The addend trace of one input's `n` accumulation cycles: `Wsh t` when the stream
