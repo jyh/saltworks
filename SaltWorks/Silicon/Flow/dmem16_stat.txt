@@ -1,0 +1,35 @@
+
+7. Printing statistics.
+
+=== dmem16 ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+      847        - wires
+     1408        - wire bits
+       22        - public wires
+      583        - public wire bits
+        6        - ports
+       71        - port bits
+     1369 2.12E+04 cells
+        3   26.275   sky130_fd_sc_hd__a211o_1
+       18  157.651   sky130_fd_sc_hd__a221oi_1
+       60  600.576   sky130_fd_sc_hd__a222oi_1
+       18  157.651   sky130_fd_sc_hd__a22o_1
+      118   885.85   sky130_fd_sc_hd__a22oi_1
+       19   166.41   sky130_fd_sc_hd__and4_1
+        4   40.038   sky130_fd_sc_hd__and4b_1
+      512 1.28E+04   sky130_fd_sc_hd__dfrtp_1
+       11   68.816   sky130_fd_sc_hd__lpflow_inputiso1p_1
+      512  5765.53   sky130_fd_sc_hd__mux2_1
+       44  165.158   sky130_fd_sc_hd__nand2_1
+        7   35.034   sky130_fd_sc_hd__nand3_1
+       32  200.192   sky130_fd_sc_hd__nand4_1
+        1    6.256   sky130_fd_sc_hd__nor4_1
+        4   35.034   sky130_fd_sc_hd__nor4b_1
+        6   60.058   sky130_fd_sc_hd__nor4bb_1
+
+   Chip area for module '\dmem16': 21182.816000
+     of which used for sequential elements: 12812.288000 (60.48%)
+
