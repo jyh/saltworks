@@ -49,7 +49,7 @@ structure Row where
   nIn   : Nat
   gates : Nat
   outs  : Nat
-  deriving Repr, DecidableEq
+  deriving Repr, DecidableEq, Inhabited
 
 /-- The Slice-A assembly order, **measured**. Order is forced by data dependency — `instOK`
 requires every input wire `σ i < off`, so an organ cannot precede its producers.
@@ -89,7 +89,7 @@ def totalGates : Nat := (order.map Row.gates).foldl (· + ·) 0
 /-- ⭐ **THE MEASURED ORDER SUMS TO THE REPRICED SLICE-A TOTAL.**
 
 `10,371` is the figure I derived on 2026-08-08 two independent ways: the kernel's sum over the
-**14 DISTINCT organs** (this list has **15 ROWS** — `readTree` and `adder32` each appear twice), and the 8/7 plan's table plus six named semantic deltas (shifter out, aluSelect
+**13 DISTINCT organs in 15 PLACEMENTS** (silicon's phrasing, 09:47 — `readTree` and `adder32` are each ONE `Circ` placed TWICE, so there are 13 `row_` theorems and 15 rows), and the 8/7 plan's table plus six named semantic deltas (shifter out, aluSelect
 retired, sliceASelect in, bitwise→XOR-only, sltu out, the real 97-gate `obMux`). **This is a
 THIRD derivation — a per-row measurement of the artifacts — and it agrees to the gate.** -/
 theorem total_reconciles : totalGates = 10371 := by decide
@@ -177,6 +177,24 @@ theorem silicon_confirmed_rows :
   ∧ (regNext.gates.length = 3104 ∧ regNext.nIn = 1088 ∧ regNext.outs.length = 1024) := by
   refine ⟨⟨by decide +kernel, by decide +kernel, by decide +kernel⟩,
           ⟨by decide +kernel, by decide +kernel, by decide +kernel⟩⟩
+
+
+/-- ⭐ **THE TWO COUNTS, PINNED — because my prose got them wrong THREE TIMES.**
+
+`order` has **15 rows**; there are **13 `row_` theorems**, one per DISTINCT organ, because
+`readTree` and `adder32` are each a single `Circ` PLACED TWICE. I wrote "14 organs" twice (once
+in the original, once in the *fix*), carrying a count from my 8/8 reprice doc whose enumeration
+was a different set. ⇒ ***A COUNT IMPORTED FROM ANOTHER DOCUMENT'S SCOPE IS A NUMBER ABOUT THAT
+DOCUMENT, NOT ABOUT THIS ONE*** — `a-count-is-not-a-scope`, committed by carrying rather than by
+miscounting. The row count is now a theorem; the distinct-organ count is the `row_` block itself. -/
+theorem order_has_fifteen_placements : order.length = 15 := by decide
+
+/-- And the two doubled organs are genuinely ONE definition each — the fact that makes
+"13 distinct, 15 placements" true rather than a bookkeeping convenience. -/
+theorem doubled_organs_are_one_circ_each :
+    (order[2]!).gates = readTree.gates.length ∧ (order[3]!).gates = readTree.gates.length
+  ∧ (order[6]!).gates = adder32.gates.length  ∧ (order[7]!).gates = adder32.gates.length := by
+  refine ⟨by decide +kernel, by decide +kernel, by decide +kernel, by decide +kernel⟩
 
 
 end SaltWorks.HDL.CoreOffsets
