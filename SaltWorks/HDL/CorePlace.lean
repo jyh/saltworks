@@ -9,6 +9,9 @@ import SaltWorks.HDL.AluSelect
 import SaltWorks.HDL.EncoderE1
 import SaltWorks.HDL.OperandBMux
 import SaltWorks.HDL.Bitwise
+-- Row 14's organ is math's: `SaltWorks.Stack.Program.pcAdd`. `CoreOffsets` already carries this
+-- dependency (its `row_pcAdd` cites the same artifact), so the seam is not new to my slot.
+import SaltWorks.Stack.Program
 
 -- Evaluating `instOuts` over real organs (readTree is 2,982 gates) exceeds the default depth.
 -- `CoreOffsets` carries the same option for the same reason. (A `/--` docstring cannot attach to
@@ -894,6 +897,148 @@ theorem encoder_select_seam_closed :
              off0, instNext, tieCells, offTie, coreInWidth, stWidth]
   decide +kernel
 
+
+/-! ## 13. INCREMENT 2k — ROW 14: `Program.pcAdd`, AND THE SOURCE-PORT MAP AS DATA
+
+**The organ is math's, not mine** — `SaltWorks.Stack.Program.pcAdd`, the composite that computes
+the next pc: `pcNext`'s addend selected by the BEQ test, added to the pc by an instantiated
+`adder32`. `Program.lean:4184` fixes its host layout, and the whole content of this row is
+honouring it:
+
+```
+   pc 0…31   rs1 32…63   rs2 64…95   off 96…127   isBEQ 128        (nIn = 129)
+```
+
+⚠️ ***AND THE `rs1`/`rs2` PORTS TAKE REGISTER **VALUES**, NOT THE INSTRUCTION'S 5-BIT INDEX
+FIELDS.*** `pcAdd` exists to decide `BEQ`, which compares register *contents*; wiring the `rs1`/`rs2`
+index fields there would place perfectly cleanly, discharge `instOK` without complaint, and build a
+machine that branches when two register *numbers* are equal. *That is the operand-B defect's exact
+shape — a σ that is valid and wrong — so it is asserted below rather than trusted
+(`pcAdd_compares_values_not_indices`).*
+
+⭐ **AND THIS ROW PAYS THE MAESTRO'S REGISTERED IMPROVEMENT (b), THE SOURCE-PORT MAP AS DATA.**
+`instOK` certifies that a wire is computed in time; it never certifies that it is the *right* wire.
+So the four producers are written down as a citable table — `pcAddPortMap` — beside the offset
+table, and `pcAddSig_follows_the_port_map` proves the σ is exactly that table read back. A reviewer
+checks a five-row list against `Program.lean:4184` instead of re-deriving five `if` branches. -/
+
+/-- Row 14's offset. `ruledEnc` has **zero gates**, so this is `offEnc` unchanged — the one place
+in the chain where two organs share a starting net (`CoreOffsets.zero_gate_organ_does_not_advance`
+is the same fact, stated over the offset list). -/
+def offPc : Nat := instNext EncoderE1.ruledEnc offEnc
+
+/-- **The pc lives in the core's INPUT space, not in any organ's gates.** `StateCodec:43` — pc bit
+`k` is net `1024 + k`. *A plausible and silent error is to look for the pc among the organs, since
+every other multi-bit operand in this file comes from one.* -/
+def pcNet (k : Nat) : Net := 1024 + k
+
+/-- ⭐ **THE SOURCE-PORT MAP, AS DATA.** One row per port group of `Program.pcAdd`: the port range,
+and the producer that must drive it. This is the artifact `instOK` cannot be: it says *which wire*,
+where `instOK` says *computed in time*. -/
+structure PortRow where
+  loNet   : Nat
+  hiNet   : Nat
+  source  : String
+deriving DecidableEq, Repr
+
+/-- `Program.lean:4184`, transcribed once and cited thereafter. -/
+def pcAddPortMap : List PortRow :=
+  [ ⟨0,   31,  "state pc bits, core input 1024+k"⟩
+  , ⟨32,  63,  "readTree.rs1 VALUE at off2"⟩
+  , ⟨64,  95,  "readTree.rs2 VALUE at off3"⟩
+  , ⟨96,  127, "immBCirc B-offset at off1"⟩
+  , ⟨128, 128, "decoder output 4 = isBEQ"⟩ ]
+
+/-- The port map covers `pcAdd`'s inputs exactly — no gap, no overlap, no port past `nIn`. *A map
+that omitted a port would let a wrong wire hide in the gap it left.* -/
+theorem pcAddPortMap_is_total :
+    pcAddPortMap.length = 5
+  ∧ (pcAddPortMap.getD 0 ⟨0,0,""⟩).loNet = 0
+  ∧ (pcAddPortMap.getD 4 ⟨0,0,""⟩).hiNet + 1 = 129
+  ∧ ∀ i, i < 4 →
+      (pcAddPortMap.getD i ⟨0,0,""⟩).hiNet + 1 = (pcAddPortMap.getD (i+1) ⟨0,0,""⟩).loNet := by
+  -- The guard must be `i < k` with `k` a literal for `Nat.decidableBallLT` to fire. Written as
+  -- `i + 1 < 5` it is the same set of `i` and there is NO instance: `failed to synthesize
+  -- Decidable`. Same law as the `CoreOffsets.chain_monotone` guard, third time it has bitten.
+  refine ⟨by decide, by decide, by decide, ?_⟩
+  decide
+
+/-- Row 14 — `Program.pcAdd`'s σ, one branch per row of `pcAddPortMap`. -/
+def pcAddSig (i : Net) : Net :=
+  if i < 32 then pcNet i
+  else if i < 64 then rs1Out (i - 32)
+  else if i < 96 then rs2Out (i - 64)
+  else if i < 128 then immOut (i - 96)
+  else decOut 4
+
+/-- ⭐ **PLACEMENT #14 — `Program.pcAdd` at row 14, `instOK` DISCHARGED.** Fourteen of fifteen organ
+rows. *`ssa` and `wf` are consumed as math's landed certificates, never re-proved.* -/
+theorem pcAdd_instOK : instOK SaltWorks.Stack.Program.pcAdd pcAddSig offPc := by
+  refine ⟨SaltWorks.Stack.Program.pcAdd_ssa, SaltWorks.Stack.Program.pcAdd_wf, ?_⟩
+  intro i hi
+  have hnn : SaltWorks.Stack.Program.pcAdd.nIn = 129 := rfl
+  rw [hnn] at hi
+  revert hi; revert i
+  decide +kernel
+
+/-- **The zero-gate row: `pcAdd` starts where `ruledEnc` started.** Stated over the offsets rather
+than over a numeral, so the whole chain is never evaluated. -/
+theorem pc_row_does_not_shift : offPc = offEnc := by
+  have h : EncoderE1.ruledEnc.gates.length = 0 := by decide +kernel
+  simp only [offPc, instNext, h, Nat.add_zero]
+
+/-- ⭐⭐ **THE MUTANT THE PORT MAP EXISTS TO EXCLUDE: `rs1`/`rs2` ARE VALUES, NOT INDICES.**
+Both halves asserted — the first says the wire is the register-file read, the second says that is a
+real difference rather than a renaming. *`rs1Bit 0` is the instruction's `rs1` field; a `pcAdd` wired
+to it branches when two register NUMBERS are equal, and every `instOK` in this file stays true.* -/
+theorem pcAdd_compares_values_not_indices :
+    pcAddSig 32 = rs1Out 0 ∧ pcAddSig 32 ≠ rs1Bit 0
+  ∧ pcAddSig 64 = rs2Out 0 ∧ pcAddSig 64 ≠ rs2Bit 0 := by
+  refine ⟨rfl, ?_, rfl, ?_⟩ <;>
+    simp only [pcAddSig, rs1Out, rs2Out, rs1Bit, rs2Bit, instrNet, instrBase, instOuts, instMap,
+               off3, off2, off1, off0, instNext, tieCells, offTie, coreInWidth, stWidth] <;>
+    decide +kernel
+
+/-- **CONTROL: the σ is exactly the port map read back.** The map is prose-adjacent data; this makes
+it load-bearing, so a σ edited without the map (or a map edited without the σ) breaks the build. -/
+theorem pcAddSig_follows_the_port_map :
+    pcAddSig 0 = pcNet 0 ∧ pcAddSig 31 = pcNet 31
+  ∧ pcAddSig 32 = rs1Out 0 ∧ pcAddSig 63 = rs1Out 31
+  ∧ pcAddSig 64 = rs2Out 0 ∧ pcAddSig 95 = rs2Out 31
+  ∧ pcAddSig 96 = immOut 0 ∧ pcAddSig 127 = immOut 31
+  ∧ pcAddSig 128 = decOut 4 := by
+  refine ⟨rfl, rfl, rfl, rfl, rfl, rfl, rfl, rfl, rfl⟩
+
+/-- **CONTROL: `isBEQ` is decoder output 4, the SAME net `regWrite` reads at row 5 — and it is not
+`valid` (output 5).** Two organs now depend on that index; if it were wrong, `regWrite` would
+write-enable on the branch predicate and `pcAdd` would branch on validity. -/
+theorem isBEQ_agrees_with_regWrite :
+    pcAddSig 128 = regWriteSig 6 ∧ pcAddSig 128 ≠ regWriteSig 5 := by
+  refine ⟨rfl, ?_⟩
+  simp only [pcAddSig, regWriteSig, decOut, decoderSig, off0, instNext, tieCells, offTie,
+             coreInWidth, stWidth]
+  decide +kernel
+
+/-- **CONTROL: the pc comes from the input space, strictly below every organ's gates.** -/
+theorem pc_bits_are_core_inputs (k : Nat) (hk : k < 32) :
+    1024 ≤ pcAddSig k ∧ pcAddSig k < stWidth := by
+  -- `stWidth` stays an OPAQUE ATOM for omega unless it is pinned to a numeral first: the failure
+  -- printed a counterexample mentioning only `k`, i.e. it never learned the bound it was compared
+  -- against. Pin both sides, THEN call omega. (`omega-vs-Net-typed-equations`, arm ①.)
+  have h : pcAddSig k = 1024 + k := by
+    unfold pcAddSig pcNet
+    rw [if_pos hk]
+  have hs : stWidth = 1056 := by decide +kernel
+  -- ⚠️ `omega` FAILED on the CONJUNCTION even with the goal fully reduced to
+  -- `1024 ≤ 1024 + k ∧ 1024 + k < 1056` and `hk : k < 32` in context (traced, not guessed): its
+  -- counterexample listed ONLY `hk`'s constraint, i.e. it never ingested the goal at all. Each
+  -- half alone is immediate. So the conjunction is the obstacle, not the arithmetic — which is a
+  -- different failure from the two in `omega-vs-Net-typed-equations` and worth its own note.
+  have hlt : 1024 + k < 1056 := by omega
+  refine ⟨?_, ?_⟩
+  · rw [h]; exact Nat.le_add_right 1024 k
+  · rw [h, hs]; exact hlt
+
 /-- ⛔ **THE ZERO-GATE ROW DOES NOT ADVANCE THE CHAIN — increment 1's prediction, realised.**
 `instNext ruledEnc offEnc = offEnc`, so row 12 begins exactly where row 11 did. An assembly checker
 demanding a strictly increasing chain would reject this correct assembly, which is why increment 1
@@ -972,5 +1117,47 @@ theorem subSig_b_bank_is_unchanged :
              coreInWidth, stWidth]
   decide +kernel
 
+/-! ## 14. THE AXIOM AUDIT — closing a gap this file had carried since placement #1
+
+⛔ **`CorePlace.lean` reached FOURTEEN placements with `EXIT=0` and NOT ONE `#audit_axioms` call**,
+while every neighbouring organ file (`AluSelect`, `OperandBMux`, `Adder`, …) audits each declaration.
+*`EXIT=0` proves the elaborator accepted the file; it does not prove the proofs rest on nothing but
+the whitelist. A failed tactic errors AND fills the hole, so a green build can still depend on
+`sorryAx` — hygiene is `EXIT=0` **plus** a clean audit, never a grep for `sorry`.*
+
+**ONE declaration per call, never a list:** `#audit_axioms` aborts the remainder of its own argument
+list at the first failure, so everything after a failing name silently reads as clean. Fifteen
+`instOK` certificates first — the load-bearing claims — then the wiring controls. -/
+
+#audit_axioms tieCells_instOK
+#audit_axioms decoder_instOK
+#audit_axioms immB_instOK
+#audit_axioms readTree_rs1_instOK
+#audit_axioms readTree_rs2_instOK
+#audit_axioms regWrite_instOK
+#audit_axioms bitXor32_instOK
+#audit_axioms bitNot32_instOK
+#audit_axioms ob_instOK
+#audit_axioms add_instOK
+#audit_axioms sub_instOK
+#audit_axioms slt_instOK
+#audit_axioms sel_instOK
+#audit_axioms enc_instOK
+#audit_axioms pcAdd_instOK
+
+#audit_axioms pcAddPortMap_is_total
+#audit_axioms pcAddSig_follows_the_port_map
+#audit_axioms pcAdd_compares_values_not_indices
+#audit_axioms isBEQ_agrees_with_regWrite
+#audit_axioms pc_bits_are_core_inputs
+#audit_axioms pc_row_does_not_shift
+
+#audit_axioms wrong_wire_mutant_fails_at_addi
+#audit_axioms addSig_b_bank_is_obMux_not_rs2
+#audit_axioms obMux_precedes_the_adder
+#audit_axioms subSig_b_bank_is_unchanged
+#audit_axioms regWrite_is_NOT_placeable_at_off0
+#audit_axioms valid_and_isBEQ_are_distinct_and_ordered
+#audit_axioms encoder_select_seam_closed
 
 end SaltWorks.HDL.CorePlace
