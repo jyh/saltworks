@@ -132,10 +132,14 @@ named assumption, never silently.
 2. **Cell denotation**: FSM + per-frame semantics (routes by the
    post-validity bit; rotates the address; forwards validity+payload
    untouched). B-class in the sequential Circ framework — same genre
-   as the landed ceCcore work, WIDER state (compiler's ④ read):
-   ceC's nState = 4 is the non-rotating cell; the 1988 cell needs
-   the 4 named FSM states PLUS storage for every wrapped bit — the
-   causality floor's hardware form.
+   as the landed ceCcore work. STATE, CORRECTED AT THE WAVE
+   (compiler's landing, three corrections): SIX states at k=3, not
+   four (route-latched counts out the remaining k−1 bits;
+   locked-pass has a distinguished wrap cycle — the two-cycle window
+   is load-bearing, `cell88_rejects_early_wrap`); and the wrap
+   storage is NOT additive — at rotate-1 the wrapped bit IS the
+   route bit, one flop shared with the routing latch. LANDED as
+   Cell1988.lean (499360d, rooted, full build green).
 3. **The rotation invariant** (the soul): under A1, for every VALID
    packet — validity is the antecedent, static; an "in-flight"
    binder is dead weight, the σ-strike disease (math's own ④
@@ -158,8 +162,16 @@ named assumption, never silently.
    identification is a premise. C-class; the analogue of B2M's
    self-routing induction.
 4. **Skew bookkeeping**: per-stage offsets in the trace statement.
-   THE +1-CYCLE PRICE IS REVIVED — as a CAUSALITY FLOOR, not a model
-   number (compiler's ④ read, kernel-checked
+   THE +1-CYCLE OFFSET, FINAL FORM (the wave's second correction):
+   it is a REQUIREMENT, not a price — the validity bit leaves at
+   cycle 1 in the SAME cycle its route bit is on the wire; a
+   zero-offset cell would route the validity bit before its route
+   bit existed. Kernel form, framework-level and stronger than the
+   briefed floor: `zero_offset_rotation_is_impossible` — NO Seq
+   machine, of any state width, from any initial state, rotates at
+   zero offset (content-refuting witnesses, lengths matched). The
+   floor became a law. (History: revived as a CAUSALITY FLOOR, not
+   a model number (compiler's ④ read, kernel-checked
    `r2_first_out_is_second_in` with a rotate-0 control): a
    rotate-by-1 on a bit-serial stream cannot be realised with zero
    delay in ANY timing model — the first output bit is the second
