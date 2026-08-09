@@ -101,7 +101,7 @@ flowchart TB
     RP["RP2040 on the TT board<br/>= THE EDGE MEMORY<br/>weights, inputs, schedules<br/>(big, cheap, off-die)"]
     subgraph CHIP["THE CHIP (one TT project, combined)"]
       CPU["verified RISC-V core<br/>(slicea16, W5-asm)<br/>= CONTROL PLANE<br/>executive schedules phases"]
-      FAB["8×8 banyan of certified<br/>CE switch nodes<br/>= THE DATAPLANE"]
+      FAB["8×8 BATCHER-BANYAN (BB)<br/>certified CE nodes<br/>= THE DATAPLANE<br/>(Batcher half employed twice:<br/>non-blocking routing + max-family compute)"]
       C1["cell 1"] & C2["cell 2"] & C3["…"] & C4["cell k"]
     end
     HOST <--> RP
@@ -116,7 +116,19 @@ on-die packets require it, since separate TT projects are power-gated and
 never coexist): the certified 8×8 fabric in the middle; k neuron cells on
 its leaf ports (k sized by area after silicon prices the cell — target
 4–8); the small verified core attached as one more fabric client; 2-pin
-serial packet ports at the pins. Three traffic classes, one substrate:
+serial packet ports at the pins.
+
+> 📌 **THE FABRIC IS THE BB — Batcher-banyan, the Captain's
+> architecture — not a bare banyan (clarified at his 10:4x question).
+> The Batcher half is employed TWICE: (a) as the classical
+> non-blocking front-end — sort by destination, then route — which
+> gives the layer-compiler total schedule freedom (ANY permutation
+> per round, no banyan-admissibility side-condition in the delivery
+> theorems); (b) as the max-family COMPUTE engine (§1, §5) — in a
+> phone switch the sorter is routing tax; here the same certified
+> silicon (`batcher8_sorts`) is the nonlinearity. Port budget: 8
+> ports = k cells + the CPU client + edge ports (e.g. 5 + 1 + 2) —
+> the classic effective-ports discount, deliberately spent.** Three traffic classes, one substrate:
 **weight packets** (edge → cells, config phases), **activation packets**
 (cell → cell, compute phases), **gradient packets** (the reverse routes —
 the recorded-winner paths make backprop *routing*, demo-tier).
