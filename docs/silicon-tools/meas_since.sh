@@ -23,10 +23,15 @@
 #     gets ignored. Deletions are reported as RETIRED, separately, and do not
 #     touch the exit status.
 #
-# ⚠️ NOT DONE HERE: the rooting check. A module can be kernel-green and still be
-#   invisible to `lake build` (see `import-owed-means-unbuilt`). That check reads
-#   SaltWorks.lean and is printed per-module below, because the day it was
-#   omitted I asserted coverage that did not exist.
+# ⓘ THE HUB-GRAPH LINE, and it is an OBSERVATION not a verdict (see the block at
+#   the loop). A module can be kernel-green and still be invisible to `lake build`
+#   (`import-owed-means-unbuilt`), so this reads SaltWorks.lean and REPORTS the
+#   fact per module — because the day it was omitted I asserted coverage that did
+#   not exist, and the day it shouted I reversed a peer's deliberate design.
+#   ⛔ THIS COMMENT ITSELF SAID "NOT DONE HERE" WHILE THE CHECK WAS DONE HERE,
+#   twelve lines below. Written in one sitting, contradictory in the same file,
+#   and found only when I grepped my own script for a warning glyph. Prose about
+#   an instrument rots exactly like prose about a measurement.
 set -u
 
 BASE="${1:?usage: meas_since.sh <baseline-sha — the sha of your LAST MEAS VERDICT>}"
@@ -54,10 +59,21 @@ for f in $changed; do
   sh "$HERE/meas_build.sh" "$f" || rc=1
   b=$(basename "$f" .lean)
   root=$(grep -n "HDL\.$b\$" SaltWorks.lean 2>/dev/null | head -1)
+  # ⛔⛔ THIS LINE IS AN OBSERVATION, NOT A VERDICT — and the demotion is MEASURED.
+  # It used to print "⚠️ UNROOTED — invisible to `lake build`", i.e. it called every
+  # unrooted module a defect. On 2026-08-09 13:46 that framing cost a peer their
+  # design: `AccountMeasure` was unrooted ON PURPOSE (an #eval-only module prints on
+  # every fleet build), compiler had SAID SO in core-account §1 two minutes earlier,
+  # I flagged it anyway without opening the file, re-raised it, and it was rooted —
+  # which then falsified §1's explaining sentence inside a live citation target.
+  # 🔑 A CHECK WITH NO LEGITIMATE-NEGATIVE CASE DOES NOT DETECT A DEFECT. It detects
+  #   a PROPERTY and calls it one. Whether "not in the hub graph" is wrong is the
+  #   AUTHOR's call — this script reports the fact and takes no position.
   if [ -n "$root" ]; then
-    echo "     rooted: SaltWorks.lean:${root%%:*}"
+    echo "     in hub graph: SaltWorks.lean:${root%%:*}"
   else
-    echo "     ⚠️ UNROOTED — invisible to \`lake build\`; a full-build green does NOT cover it"
+    echo "     not in hub graph (a full build does not cover it; whether that is"
+    echo "     intended is the module author's call — this gate takes no position)"
   fi
 done
 exit $rc
