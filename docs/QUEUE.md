@@ -269,9 +269,12 @@ OPEN ITEMS:
   8674->8673 jobs, the rider's own proof form); DEFAULT AUDIT CAP
   RAISED 12000->24000 (saltbuild.sh CAP line + comment; the --cap
   dance for known heavies retired; machine guard remains the fleet
-  lock); (7.3) CLICK MECHANICS delivered — the click is his
-  sentence "assemble (7.3)" at the helm, wave fires on it, still
-  unspent; (4) the 3+4 deep session CONFIRMED NOT YET HELD (the
+  lock); (7.3) CLICK SPENT (12:0x, his verbatim "assemble (7.3)")
+  — the Opus assembly wave DISPATCHED (salt repo, math-seat
+  pattern; flags anchors 21293/22150/22257 as statement source,
+  precondition preamble, saltbuild-only, warnings-by-difference,
+  axiom check, one pathspec commit, stop-loudly-on-resistance);
+  verdict lands as a task notification; (4) the 3+4 deep session CONFIRMED NOT YET HELD (the
   evening went to the tile/packet/neural arc; subjects crossed the
   helm at their landings — the deja vu source); proposal open:
   fold into an NDF theory review sitting. RISC-V ACCOUNT DOC:
