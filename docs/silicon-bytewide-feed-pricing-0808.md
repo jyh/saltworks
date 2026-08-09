@@ -116,7 +116,27 @@ slicea16bma        0   ✅        0     +16.91 ns   +0.122 ns       1,678
 ⛔ ***THE HEADLINE: `-ma` CLEARS A 2×2 BY 155.7 µm² — ABOUT 25 STANDARD CELLS.
 THAT IS TECHNICALLY A FIT AND PRACTICALLY NOT ONE***, because 1,678 max-slew
 violations remain and DRV repair ADDS cells. **Reported as DOES NOT FIT a 2×2.**
-✅ **A 3×3 puts it at 44% — comfortable, with room for repair and an ECO.**
+⛔⛔ **CORRECTED 22:5x — I ORIGINALLY WROTE "a 3×3 puts it at 44%". THERE IS NO
+3×3 TILE. The placer hard-validates `height ∈ {1, 2, 4}`, so height 3 is
+rejected** (`tinytapeout-dossier.md:189-193`, `[V-SRC]` from
+`tt-multiplexer py/tt/placer.py`). *I reasoned from my own "tiles buy area"
+principle and never opened the catalogue — which has been in our dossier all
+along, as an authoritative table.*
+```
+tiles  die µm            area µm²  usable@60%     -ma      -b       €
+2x2    334.88 × 225.76     75,603      45,362   99.7%   95.1%    280   ⛔ refused
+3x2    508.76 × 225.76    114,858      68,915   65.6%   62.6%    420   ✅ THE ANSWER
+4x2    682.64 × 225.76    154,113      92,468   48.9%   46.6%    560
+```
+✅ **`3x2` AT €420 puts `-ma` at 65.6% — comfortable, with room for the DRV repair
+and an ECO.** *Money: 6 tiles fresh = €420; 4 already owned, so €140 incremental
+if they apply — the Captain's calculator read is the same question, smaller.*
+⚠️ **NOBODY CAUGHT IT BECAUSE THE NUMBER WAS PLAUSIBLE AND THE PRINCIPLE WAS
+TRUE.** *Six seats read "3×3" tonight, four of those times from me. **A true
+principle attached to an unchecked number survives every refuter pass, because
+each reader checks the reasoning and the reasoning is sound.*** *The catalogue is
+the only thing that could have refuted it, and reasoning is what stopped me
+opening it.*
 *The Captain's word named "its own tile", not its size, and tiles buy area; the
 pin count (18 ≤ 24) is the thing a tile could never fix, and it was already yes.*
 
