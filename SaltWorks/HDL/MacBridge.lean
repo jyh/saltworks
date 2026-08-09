@@ -36,9 +36,10 @@ bit of `a + b`.
 This is `sem_adder32_gen` read at one index. `adder32.outs` is 32 sum bits then
 the carry-out, so index `k < 32` selects `adS k` on the left and the arithmetic
 bit on the right — the carry-out tail is untouched by the extraction. -/
-theorem adder_run_is_sum_bit (a b : BitVec 32) (k : Nat) (hk : k < 32) :
-    run (adEnv a b false) adder32.gates (adS k) = (a + b).getLsbD k := by
-  have h := congrArg (fun l : List Bool => l.getD k false) (sem_adder32_gen a b false)
+theorem adder_run_is_sum_bit (a b : BitVec 32) (cin : Bool) (k : Nat) (hk : k < 32) :
+    run (adEnv a b cin) adder32.gates (adS k)
+      = (a + b + BitVec.setWidth 32 (BitVec.ofBool cin)).getLsbD k := by
+  have h := congrArg (fun l : List Bool => l.getD k false) (sem_adder32_gen a b cin)
   have houts : adder32.outs = (List.range 32).map adS ++ [adC 32] := rfl
   simpa [sem, houts, List.getD_eq_getElem?_getD, List.getElem?_append, List.getElem?_map,
          List.getElem?_range, hk] using h
@@ -49,10 +50,10 @@ of `acc + addend`.
 Compiler's artifact half (`step_bit_is_adder_bit`) ∘ this file's arithmetic half
 (`adder_run_is_sum_bit`). Still unconditional — the overflow question does not
 arise until a rung states the value in `ℤ`. -/
-theorem cell_sum_bit (acc addend : BitVec 32) (k : Nat) (hk : k < 32) :
-    run (macSeq.env (MacCell.bitsOf addend) (MacCell.bitsOf acc)) macCore.gates (maSum k)
-      = (acc + addend).getLsbD k := by
-  rw [step_bit_is_adder_bit acc addend k hk, adder_run_is_sum_bit acc addend k hk]
+theorem cell_sum_bit (acc addend : BitVec 32) (cin : Bool) (k : Nat) (hk : k < 32) :
+    run (macSeq.env (MacCell.bitsOf addend ++ [cin]) (MacCell.bitsOf acc)) macCore.gates (maSum k)
+      = (acc + addend + BitVec.setWidth 32 (BitVec.ofBool cin)).getLsbD k := by
+  rw [step_bit_is_adder_bit acc addend cin k hk, adder_run_is_sum_bit acc addend cin k hk]
 
 /-- **CONTROL — the rung is not vacuous and it computes.** A concrete cycle:
 `1 + 1 = 2`, so bit 0 is `false` and bit 1 is `true`. If `cell_sum_bit` were an
@@ -78,20 +79,22 @@ reads `take nOut` as this cycle's output and `drop nOut` as the next state — s
 both halves fall out of the same pointwise fact. -/
 
 /-- The cell's output list for one cycle, as a word's bits. -/
-theorem macSeq_cycle_bits (acc addend : BitVec 32) :
+theorem macSeq_cycle_bits (acc addend : BitVec 32) (cin : Bool) :
     (List.range 32).map (fun k =>
-        run (macSeq.env (MacCell.bitsOf addend) (MacCell.bitsOf acc)) macCore.gates (maSum k))
-      = MacCell.bitsOf (acc + addend) := by
+        run (macSeq.env (MacCell.bitsOf addend ++ [cin]) (MacCell.bitsOf acc))
+          macCore.gates (maSum k))
+      = MacCell.bitsOf (acc + addend + BitVec.setWidth 32 (BitVec.ofBool cin)) := by
   refine List.map_congr_left ?_
   intro k hk
-  exact cell_sum_bit acc addend k (List.mem_range.mp hk)
+  exact cell_sum_bit acc addend cin k (List.mem_range.mp hk)
 
 /-- ⭐⭐ **RUNG 2 — ONE CYCLE, AT THE WORD.** Feeding the cell an accumulator and
 an addend leaves `acc + addend` on **both** the output port and the next state.
 Still no `ℤ`: this is `BitVec` addition, which is total. -/
-theorem macSeq_step_word (acc addend : BitVec 32) :
-    stepSeq macSeq (MacCell.bitsOf acc) (MacCell.bitsOf addend)
-      = (MacCell.bitsOf (acc + addend), MacCell.bitsOf (acc + addend)) := by
+theorem macSeq_step_word (acc addend : BitVec 32) (cin : Bool) :
+    stepSeq macSeq (MacCell.bitsOf acc) (MacCell.bitsOf addend ++ [cin])
+      = (MacCell.bitsOf (acc + addend + BitVec.setWidth 32 (BitVec.ofBool cin)),
+         MacCell.bitsOf (acc + addend + BitVec.setWidth 32 (BitVec.ofBool cin))) := by
   -- ⚠️ `macCore` is kept OPAQUE: unfolding it expands `instGates adder32` (160 gates) and the
   -- kernel times out. Compiler documented this at `step_halves_agree`; the shape of `outs` is all
   -- either proof needs, and `macSeq`'s fields are PROJECTED by `rfl` rather than unfolded.
@@ -99,11 +102,12 @@ theorem macSeq_step_word (acc addend : BitVec 32) :
   have hcore : macSeq.core = macCore := rfl
   have hnout : macSeq.nOut = 32 := rfl
   have hmapped : ((List.range 32).map maSum).map
-        (run (macSeq.env (MacCell.bitsOf addend) (MacCell.bitsOf acc)) macCore.gates)
-      = MacCell.bitsOf (acc + addend) := by
+        (run (macSeq.env (MacCell.bitsOf addend ++ [cin]) (MacCell.bitsOf acc)) macCore.gates)
+      = MacCell.bitsOf (acc + addend + BitVec.setWidth 32 (BitVec.ofBool cin)) := by
     simp only [List.map_map, Function.comp_def]
-    exact macSeq_cycle_bits acc addend
-  have hl : (MacCell.bitsOf (acc + addend)).length = 32 := MacCell.bitsOf_length _
+    exact macSeq_cycle_bits acc addend cin
+  have hl : (MacCell.bitsOf (acc + addend + BitVec.setWidth 32 (BitVec.ofBool cin))).length = 32 :=
+    MacCell.bitsOf_length _
   have hdup : ∀ (l : List Bool) (n : Nat), l.length = n →
       (l ++ l).take n = l ∧ (l ++ l).drop n = l := by
     intro l n h; subst h; exact ⟨List.take_left, List.drop_left⟩
@@ -121,11 +125,14 @@ length **is** the cycle index, so no fuel parameter appears here either. -/
 holding their sum. Still `BitVec`, still unconditional. -/
 theorem macSeq_runTrace_state (acc : BitVec 32) :
     ∀ addends : List (BitVec 32),
-      (runTrace macSeq (MacCell.bitsOf acc) (addends.map MacCell.bitsOf)).2
+      (runTrace macSeq (MacCell.bitsOf acc)
+          (addends.map (fun a => MacCell.bitsOf a ++ [false]))).2
         = MacCell.bitsOf (acc + addends.sum)
   | [] => by simp [runTrace]
   | a :: as => by
-      have hstep := macSeq_step_word acc a
+      have h0 : BitVec.setWidth 32 (BitVec.ofBool false) = (0 : BitVec 32) := by decide
+      have hstep := macSeq_step_word acc a false
+      rw [h0, add_zero] at hstep
       simp only [List.map_cons, runTrace, hstep, List.sum_cons]
       rw [macSeq_runTrace_state (acc + a) as, add_assoc]
 
@@ -414,7 +421,8 @@ theorem cell_state_toInt_eq_macAfter
     (W : ℤ) (b : BitVec 32) (Wsh : ℕ → BitVec 32) (x : ℕ → Bool) (n : ℕ)
     (hW : ∀ t, t < n → (Wsh t).toInt = W * 2 ^ t)
     (hno : noOverflowFrom b (addendTrace Wsh x n) = true) :
-    (runTrace macSeq (MacCell.bitsOf b) ((addendTrace Wsh x n).map MacCell.bitsOf)).2
+    (runTrace macSeq (MacCell.bitsOf b)
+          ((addendTrace Wsh x n).map (fun a => MacCell.bitsOf a ++ [false]))).2
         = MacCell.bitsOf (b + (addendTrace Wsh x n).sum)
   ∧ (b + (addendTrace Wsh x n).sum).toInt = Mac.macAfter W b.toInt x (n + 1) := by
   refine ⟨macSeq_runTrace_state b (addendTrace Wsh x n), ?_⟩
