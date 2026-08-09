@@ -207,7 +207,20 @@ OPEN ITEMS:
   tile (3×2+) preserves "own tile" at higher EUR; his word named
   the tile, not the size. DRV violations (1,391 slew/21 cap/17
   fanout) owed before any real submission; the true TT tile-fit
-  run (FP_SIZING absolute) is the next measurement.**
+  run (FP_SIZING absolute) is the next measurement. -ma MEASURED
+  (21:26, c939abe): PINS YES — 18 of 24, six to spare, and the
+  bring-up port DISAPPEARS (the address bus IS the PC, better debug
+  for free); pre-layout 29,583 µm² (+7% vs -b; fewer cells MORE
+  area — flops beat logic cells; area the honest axis). ⭐ THE
+  UNASKED CORRECTNESS FINDING: in -s/-b yosys DELETES 17 of 32 PC
+  bits (unobservable) — "has a 32-bit PC" was true of the RTL, not
+  the gates; -ma is the FIRST variant whose PC is architecturally
+  REAL in silicon (31 pc_q flops). The Captain's pinout choice
+  fixed a truth gap nobody had seen. OPEN: post-layout area (harden
+  in flight; expected near/just over a 2×2 — tiles-buy-area frame
+  adopted, size vs EUR is the residual question) and the FETCH
+  PROTOCOL (latency/wait states — a named DESIGN question for the
+  morning, not settled by this artifact).**
 - **COLD-CACHE REPRODUCIBILITY — CLOSED BY RETRACTION (compiler
   20:4x): the full build's module form is UNCAPPED; cold rebuild
   measured green. The corpus reproducibility gap NEVER EXISTED — it
