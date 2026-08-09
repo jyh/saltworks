@@ -144,19 +144,25 @@ Two types in v1, and the second is the machine's own gift:
 ─────────────────────────── (+,^)     ─────────────────────────── (<)
 Γ ⊢ e₁ + e₂ : i32                     Γ ⊢ e₁ < e₂ : bool
 
-Γ ⊢ x : τ    Γ ⊢ e : τ                Γ ⊢ e : bool   Γ ⊢ s ⊣ Γ
-────────────────────── (assign)       ──────────────────────── (while)
-Γ ⊢ x = e ⊣ Γ                         Γ ⊢ while e { s } ⊣ Γ
+Γ ⊢ x : τ    Γ ⊢ e : τ                Γ ⊢ e : bool   Γ ⊢ s ok
+────────────────────── (assign)       ─────────────────────── (while)
+Γ ⊢ x = e ok                          Γ ⊢ while e { s } ok
+
+Γ ⊢ e : τ    Γ, x:τ ⊢ ss ok
+──────────────────────────── (let — binds over its continuation;
+Γ ⊢ (let mut x:τ = e); ss ok         the block's end ends the scope)
 ```
 
-The var rule reads its binding from the context's shape (the
-Captain's house notation — Γ, x:τ, Δ — no dictionary lookup), and
-ASSIGN IS SYMMETRIC: both sides are typed as expressions through the
-same rules. The grammar still restricts the lhs to a variable in v1
-— but typing it through (var) rather than a side-condition is
-exactly the form that generalizes: in v2 the lhs premise becomes a
-PLACE judgment and `*p = e` types with no change to the rule's
-shape. The symmetry is the lvalue story, arriving early.
+Statements are typed as SEQUENCES with a single context on the left
+— no output contexts, no nonstandard turnstiles: `let` extends Γ for
+exactly the rest of its block, which is also where the liveness
+budget reads straight off the syntax. The var rule reads its binding
+from the context's shape (the Captain's house notation — Γ, x:τ, Δ —
+no dictionary lookup), and ASSIGN IS SYMMETRIC: both sides typed as
+expressions through the same rules. The lhs is a variable in v1 only
+because the grammar says so — typing it through (var) is the form
+that generalizes to the v2 PLACE judgment (`*p = e`) with the rule's
+shape unchanged. The symmetry is the lvalue story, arriving early.
 
 **Function signatures live in Δ, not in τ** (the Captain's
 double-check, answered): calls are by name only — no first-class
