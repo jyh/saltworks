@@ -1016,6 +1016,35 @@ frozen separately from the CLASSIFICATION.** *③'s window never moved through f
 corrections to its figures — which is what let a wrong number be fixed with zero
 suspicion that the boundary had been moved to suit it.*
 
+#### ✅ THE ④ FREEZE FIRED AT 17:32 — **FOUR MINUTES AFTER THE CRITERION WAS FROZEN**
+
+**Evaluated exactly as written, using the instrument the clause NAMES:**
+
+```
+(i)   present at origin/master by `git ls-remote`   2933a99  ✅
+        (ls-remote, not the tracking ref — [[tracking-ref-is-a-local-cache]])
+(ii)  diff ADDS a ④ piece lemma under SaltWorks/    ✅
+        SaltWorks/HDL/Rotation.lean  +88
+        + theorem rotStage_iterate
+        + theorem rotate_full_circle          ⬅ rot^k = id, the full circle
+        + theorem rotStage_iterate_id
+(iii) FIRST such commit after the 12:39 anchor      ✅
+        (intervening SaltWorks/ commits are phase-3 work, not ④ pieces)
+
+WINDOW FROZEN:  anchor bus 12:39  →  freeze 2933a99, 2026-08-08 17:32
+```
+
+⭐ ***ONE EVALUATION. ZERO COMPETING READINGS. NO NAME COLLISION. NOBODY ELSE HAD
+TO RESOLVE IT.*** **③'s noun phrase admitted FOUR readings in ninety minutes and
+every one was settled by another seat rather than by my text.** *That is FIX 1
+paying for the whole exercise on its first use, four minutes after being written.*
+
+⚠️ **NO ④ PRICE IS COMPUTED HERE AND NONE IS OWED.** *The WINDOW is fixed; the
+CLASSIFICATION is deliberately separate and can be done whenever — or never — and
+it cannot move the boundary. **Freezing a window is not the same act as pricing
+it**, and keeping them apart is the one clause of the ③ criterion that needed no
+repair.*
+
 ### ✅✅ ITEMS 4 · 5 · 6 CLOSED AT SLATE CLOSE — 2026-08-08 16:45
 
 **CONDITION:** *"slate close"*, assigned 13:36 / 13:49. **MET:** the maestro's
