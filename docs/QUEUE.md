@@ -231,6 +231,19 @@ OPEN ITEMS:
   council I] the seam doctrine stands ratified. Originals at their
   bus lines; this entry is the durable recall surface.**
 
+- **COUNCIL RULING #2 (08:4x, the Captain: "Yes, fire the probes"):
+  THE TINY-RUST PROVING CAMPAIGN IS FIRED, PROBE-FIRST per the
+  probe-then-wave doctrine. The hpool-separate flag stood UNVETOED —
+  "well-typed, pool-fitting programs compile" is the campaign form
+  (lang-design v1.4). SEQUENCE: N0 PROBE LAYER first (compiler's
+  slot, the HDL/CodegenSpec frame): the typing judgment as data +
+  the pre-registered controls — T2 accept AND reject (`while 1`,
+  i32-where-bool), F6 bigStep-inhabitation — all by decide, positive
+  controls carried per the Purse; waves N0→N5 fire as probes come
+  back green, statements at the v1.4 forms. MATH's standing
+  refutation pass rides every statement BEFORE its wave fires (the
+  slate system that produced 20 findings pre-kernel stays in the
+  loop). W5 remains its own decision (agenda #4), unconflated.**
 - **COUNCIL RULING #1 (2026-08-09 08:4x, the Captain, verbatim: "we
   have the RISC-V layout fitting in a 3x2 -- we will want this
   layout no matter what, even if we decide not to submit it, so
