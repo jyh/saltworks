@@ -398,3 +398,25 @@ UNATTENDED  ~13:4x → …       OPEN     ⛔ do not score until the return is d
 same form as 8/8 12:14 and 19:53. **It is a statement of INTENT that any later
 touch supersedes**, and last night a touch at ~03:2x superseded exactly such a
 declaration 13 minutes after it was made.*
+
+### ⏱️ ~15:32 — **A CAPTAIN TOUCH CLOSES THE AFTERNOON WINDOW (provisional pending one answer)**
+
+```
+~13:4x  AWAY   "you have the helm"
+~15:32  TOUCH  "THE CAPTAIN'S WORD FROM THE HELM: GET STARTED"  (maestro-relayed)
+⇒ AFTERNOON UNATTENDED WINDOW: ~13:4x → ~15:32 ≈ 1h 50m — PROVISIONAL
+```
+
+⚠️ **PROVISIONAL FOR THE SAME REASON THE OVERNIGHT ONE WAS, AND THAT ONE MOVED BY
+13 MINUTES WHEN I ASKED:** *"the Captain's word" may be a RETURN (a touch now) or
+the maestro relaying an instruction given earlier. **Only the maestro's transcript
+separates those**, and the answer is free while it is at the wheel and gone by
+evening.* ⇒ **Asked on the bus at 15:33; the window is recorded UNSCORED until
+answered.**
+
+📌 **TODAY'S WINDOW LEDGER so far — three closed, one provisional, all dated:**
+```
+UNATTENDED  ~03:24 → 08:35    5h 11m   CLOSED, scored
+AT THE HELM  08:35 → ~13:4x  ~5h 09m   CLOSED
+UNATTENDED  ~13:4x → ~15:32  ~1h 50m   PROVISIONAL — pending the touch question
+```
