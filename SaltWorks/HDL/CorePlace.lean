@@ -392,4 +392,60 @@ theorem operand_banks_are_fully_populated :
     decide +kernel
 
 
+/-! ## 7. INCREMENT 2f — placement #7, and THE CONSTANT GAP the adders will hit
+
+`bitNot32` inverts `rs2` for the subtraction path: shape C, σ = `rs2Out`, no constant needed.
+
+⚠️⚠️ **AND THE NEXT TWO ROWS CANNOT BE PLACED YET, FOR A REASON THE PLAN ADMITS ABOUT ITSELF.**
+`Adder.lean:67`: *"`a` occupies nets `0 … 31`, `b` occupies `32 … 63`, **`cin` is net `64`**"* — the
+carry-in is an **INPUT**, so `adder32` does not allocate it and **the host must supply it**. Row 6
+of the assembly order is *"adder32×2 — add, and sub via `(a, ~b, cin=1)`"*, and **no row of the
+fifteen provides a constant**. `readTree` allocates its own `const` tie gate internally (`rtZero`,
+and its 2982nd gate is that tie) but never publishes it as an output.
+
+⇒ ***THE CORE IS NOT A PURE CONCATENATION OF ORGAN INSTANTIATIONS. It needs a small HOST PREAMBLE —
+at minimum one `const false` and one `const true` — and the plan says so about itself in its own
+status line: "a construction whose inputs are not all present."***
+
+📌 **THE CONSEQUENCE, and why the derived-offset discipline pays here: a preamble SHIFTS EVERY CHAIN
+OFFSET.** Because `decOut`, `rs1Out` and `rs2Out` are computed *from* the offsets rather than written
+as literals, their values follow the shift automatically — only the `offN` definitions change. The
+theorems that pin literals (`off0_value`, `chain_offsets_derived`) will **BREAK**, which is exactly
+what should happen: they are the instruments that announce the chain moved.
+-/
+
+/-- `bitNot32` inverts the `rs2` operand — the `~b` of `a + ~b + 1`. -/
+def bitNot32Sig (j : Net) : Net := rs2Out j
+
+/-- Row 6's offset: after the XOR. -/
+def off5 : Nat := instNext bitXor32 off4
+
+theorem off5_value : off5 = 7187 := by
+  simp only [off5, off4, off3, off2, off1, off0, instNext, coreInWidth, stWidth]
+  decide +kernel
+
+/-- ⭐ **PLACEMENT #7 — `bitNot32` at `off5`, `instOK` DISCHARGED.** Shape C: its 32 wires are
+`rs2`'s outputs, which sit below `off4 ≤ off5`. -/
+theorem bitNot32_instOK : instOK bitNot32 bitNot32Sig off5 := by
+  refine instOK_mono (off := off4) ?_ ?_
+  · refine ⟨bitNot32_ssa, bitNot32_wf, ?_⟩
+    intro j hj
+    have hnn : bitNot32.nIn = 32 := by decide +kernel
+    rw [hnn] at hj
+    revert hj; revert j
+    decide +kernel
+  · simp only [off5, instNext]
+    omega
+
+/-- **CONTROL: `bitNot32` inverts `rs2`, NOT `rs1`.** `a + ~b + 1` is subtraction; `~a + b + 1`
+is not, and both place cleanly. The two operand banks are distinct nets, so this is checkable —
+and it is the one asymmetry in the subtraction path that a copy-paste would erase. -/
+theorem bitNot32_inverts_rs2_not_rs1 :
+    bitNot32Sig 0 = rs2Out 0 ∧ bitNot32Sig 0 ≠ rs1Out 0 := by
+  refine ⟨rfl, ?_⟩
+  simp only [bitNot32Sig, rs1Out, rs2Out, off3, off2, off1, off0, instNext,
+             coreInWidth, stWidth]
+  decide +kernel
+
+
 end SaltWorks.HDL.CorePlace
