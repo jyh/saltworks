@@ -159,6 +159,48 @@ the configuration compiler (weights/routing as compiled artifacts;
 does Rows A/B extend to layer configs?) · EVIDENCE — the same
 claim fence covers both designs; one fence, one family.
 
+### 6b. THE TWO SUB-PATHS, NAMED AT MORNING COUNCIL (09:4x — the
+### Captain: "switch fabric as NN, presumably using bit-serial
+### multipliers, requires discussion")
+
+**3a — BIT-SERIAL (the Captain's route).** Each switch node gains a
+bit-serial MAC: a full adder + carry flop + AND per stage — tens of
+cells, not the ~10k of a parallel array multiplier. Two harmonies
+found at council:
+
+- **Packet streams are ALREADY bit-serial** — a 2-pin port feeds a
+  bit-serial MAC natively; no deserialization stage exists to build
+  or verify.
+- **Weights arrive IN-BAND as packets**, latched in per-node
+  registers — which answers Design B's memory question with
+  NEITHER offboard memory NOR an SRAM rung. Configuration through
+  the fabric: the neuron-config dream, literally.
+
+Costs, honestly: new switch silicon (the CE-mutation pricing frame
+applies — price a MAC-augmented switch cell); a new organ proof —
+bit-serial MAC correctness is a cycle-indexed Seq induction,
+on-method with rotation/payload but new work; throughput is
+demo-scale (one 32-bit MAC per 32 cycles per node) and that is
+fine — the claim is VERIFIED neural silicon, not fast neural
+silicon. Precision note: stream length = precision, so quantized
+8-bit inference is an 8-cycle MAC with no design change.
+
+**3b — TROPICAL (the sketch's route, above).** Zero new silicon;
+the certified Batcher network is already a certified layer; weights
+are additive constants; gradient-is-routing. The catch: training
+must quantize into the tropical representation, and the framing is
+unconventional enough to need care in the demo's telling.
+
+**The trade in one sentence:** 3a buys STANDARD NN semantics at the
+price of new switch silicon + a new sequential proof; 3b buys ZERO
+new silicon and mostly-landed proofs at the price of an
+unconventional representation. **They compose as stages, not
+forks:** 3b as the near demo on existing certified organs, 3a as
+the switch-cell upgrade if the fabric earns a second tapeout.
+Ruled context from the same sitting: applications #1 (filter) and
+#2 (smart neuron) use OFFBOARD memory (ruling recorded in QUEUE);
+#3's memory story is the in-band answer above.
+
 ## 5. WHY THIS ONE (the era answer)
 
 The firewall was this era's plumbing; the exchange was 1990's
