@@ -46,7 +46,10 @@ now_lines=$(command wc -l < "$BUS" | tr -d ' ')
 
 if [ ! -f "$STATE" ]; then
   d=$(head -n "$now_lines" "$BUS" | shasum -a 256 | cut -d' ' -f1)
-  printf '%s %s\n' "$now_lines" "$d" > "$STATE"
+  # temp+rename: a truncating write leaves a window where STATE exists but is
+  # EMPTY, and an empty read here parses as 0 lines -- which this tool would
+  # report as a SHRINK. The detector must not manufacture its own alarm.
+  printf '%s %s\n' "$now_lines" "$d" > "$STATE.tmp.$$" && mv "$STATE.tmp.$$" "$STATE"
   echo "ℹ️  bus_integrity: FIRST RUN — baseline set at $now_lines lines."
   echo "    Nothing is verified yet; a first run cannot detect anything."
   exit 0
@@ -99,6 +102,9 @@ fi
 
 if [ "$MODE" != "--check" ]; then
   d=$(head -n "$now_lines" "$BUS" | shasum -a 256 | cut -d' ' -f1)
-  printf '%s %s\n' "$now_lines" "$d" > "$STATE"
+  # temp+rename: a truncating write leaves a window where STATE exists but is
+  # EMPTY, and an empty read here parses as 0 lines -- which this tool would
+  # report as a SHRINK. The detector must not manufacture its own alarm.
+  printf '%s %s\n' "$now_lines" "$d" > "$STATE.tmp.$$" && mv "$STATE.tmp.$$" "$STATE"
 fi
 exit 0

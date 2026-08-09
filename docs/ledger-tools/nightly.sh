@@ -23,7 +23,21 @@ SINCE=${CAMPAIGN_SINCE:-"2026-08-05 22:00"}
 HARVEST_SINCE=${HARVEST_SINCE:-"2026-07-23 00:00"}
 
 DATE=$(TZ=America/Los_Angeles date +%Y-%m-%d)
-OUT="$DOCS/EVIDENCE-ledger-$DATE.md"
+FINAL="$DOCS/EVIDENCE-ledger-$DATE.md"
+LATEST="$DOCS/EVIDENCE-ledger-latest.md"
+
+# THE WRITE IDIOM FOLLOWS THE READER (fleet law, 2026-08-09). These ledgers are
+# read by SNAPSHOT readers -- the maestro's rsync to seat/, and any council read
+# -- which open by NAME at a point in time. So the file must never exist in a
+# half-built state: we build into a temp and RENAME, which is atomic within a
+# filesystem, so a reader gets the previous COMPLETE ledger or the new one.
+#
+# The old shape truncated the real ledger at the header and appended section by
+# section for the whole run: for those minutes the published file was a partial
+# that still LOOKED finished (header present, tables missing). Under `set -e` a
+# mid-run failure also LEFT it that way. Both are closed by the rename.
+OUT="$DOCS/.EVIDENCE-ledger-$DATE.md.partial"
+trap 'rm -f "$OUT" "$LATEST.tmp.$$"' EXIT
 
 cd "$HERE"
 python3 selftest.py
@@ -75,5 +89,10 @@ python3 tile_drain.py >> "$OUT" 2>&1 || \
 
 
 
-cp "$OUT" "$DOCS/EVIDENCE-ledger-latest.md"
-echo "wrote $OUT and EVIDENCE-ledger-latest.md"
+# Publish both by RENAME, never by truncating writes. `cp` onto LATEST would
+# reintroduce exactly the window this run just avoided -- cp opens the
+# destination for truncation and fills it, so a reader mid-copy sees a partial.
+mv "$OUT" "$FINAL"
+cp "$FINAL" "$LATEST.tmp.$$"
+mv "$LATEST.tmp.$$" "$LATEST"
+echo "wrote $FINAL and EVIDENCE-ledger-latest.md (both published by rename)"

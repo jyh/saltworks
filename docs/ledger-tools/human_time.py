@@ -334,7 +334,7 @@ def main():
     args = ap.parse_args()
     md = build(args)
     if args.out:
-        Path(args.out).expanduser().write_text(md)
+        lc.write_atomic(args.out, md)
         print(f"wrote {args.out} ({len(md.splitlines())} lines)")
     else:
         print(md)

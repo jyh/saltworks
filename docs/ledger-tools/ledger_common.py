@@ -777,3 +777,30 @@ def iso_local(dt: datetime) -> str:
 
 def day_local(dt: datetime) -> str:
     return dt.astimezone(TZ).strftime("%Y-%m-%d")
+
+
+def write_atomic(path: str | Path, text: str) -> Path:
+    """Publish ``text`` at ``path`` by RENAME, never by truncating in place.
+
+    THE WRITE IDIOM FOLLOWS THE READER (fleet law, 2026-08-09). Every report
+    this kit emits is consumed by SNAPSHOT readers -- the maestro's rsync to
+    ``seat/``, a council read, a git add -- which open the file by NAME at a
+    point in time. ``Path.write_text`` truncates first and fills after, so such
+    a reader can observe an empty or half-written report that is
+    indistinguishable from a finished one. ``os.replace`` is atomic within a
+    filesystem: the reader gets the previous COMPLETE file or the new one.
+
+    The temp name carries the pid so two concurrent runs cannot share it, and
+    it is written beside the target (not in /tmp) because a rename across
+    filesystems is not atomic and would silently degrade to a copy.
+    """
+    path = Path(path).expanduser()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_name(f".{path.name}.tmp{os.getpid()}")
+    try:
+        tmp.write_text(text, encoding="utf-8")
+        os.replace(tmp, path)
+    except BaseException:
+        tmp.unlink(missing_ok=True)     # never leave a partial temp behind
+        raise
+    return path
