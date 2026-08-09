@@ -59,10 +59,31 @@ set -u
 
 SALTBUILD=/Users/jyh/projects/claude/saltbuild.sh
 [ -x "$SALTBUILD" ] || { echo "⛔ meas_build: $SALTBUILD not executable"; exit 2; }
-# The retry cap for the differential test below. saltbuild.sh's default is
-# 12000 MB and applies to the PATH form only (its :35 arm). 24000 is the value
-# at which compiler measured all three of their heavy modules passing.
-HICAP=24000
+# The retry cap for the differential test below, DERIVED FROM saltbuild's OWN
+# DEFAULT rather than hardcoded.
+#
+# ⛔⛔ WHY IT IS DERIVED (2026-08-09 12:0x, and the defect was LIVE for minutes):
+# this line read `HICAP=24000` while saltbuild's default was 12000, so the retry
+# meant "try double". Council ruling (d) then RAISED THE DEFAULT TO 24000 —
+# correctly, it retires the --cap dance — and my constant silently became EQUAL
+# to the default.
+#   ⇒ THE DIFFERENTIAL TEST BECAME A NO-OP: on failure it re-ran at the SAME cap,
+#     burned a full elaboration, and could never emit its own diagnostic line.
+# 🔑 A CONSTANT THAT TRACKS SOMEONE ELSE'S CONSTANT IS A DEFECT WAITING FOR THEM
+#   TO EDIT IT. Read the value, do not mirror it — and REFUSE if the relationship
+#   the test depends on has stopped holding.
+DEFCAP=$(awk -F= '/^CAP=/{gsub(/[^0-9]/,"",$2); print $2; exit}' "$SALTBUILD" 2>/dev/null)
+case "$DEFCAP" in ''|*[!0-9]*) DEFCAP=0 ;; esac
+if [ "$DEFCAP" -eq 0 ]; then
+  echo "⛔ meas_build: cannot read CAP= from $SALTBUILD — refusing to guess the retry cap"
+  exit 2
+fi
+HICAP=${HICAP:-$(( DEFCAP * 2 ))}
+if [ "$HICAP" -le "$DEFCAP" ]; then
+  echo "⛔ meas_build: HICAP ($HICAP) is not ABOVE saltbuild's default ($DEFCAP)."
+  echo "   The differential test would compare a cap against itself and prove nothing."
+  exit 2
+fi
 
 rc_all=0
 
