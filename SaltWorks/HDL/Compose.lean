@@ -674,4 +674,106 @@ theorem instNext_under_reports_without_ssa :
 #audit_axioms compose_frame_fails_below_instNext
 #audit_axioms instNext_ha_is_four
 
+
+/-! ## FLAT GATE LISTS — evaluating one gate without walking the list
+
+**Approved and assigned** (maestro 2026-08-09 14:02), **statement passed by math before landing**
+(14:08, checked at the definitions of `ssaFrom` and `run`). Added BESIDE the existing composition
+machinery; nothing above is touched.
+
+**The class it retires.** To read one gate's value out of a list you otherwise split the list at
+that gate and apply `run_of_unwritten` twice — once to show later gates do not overwrite it, once to
+show earlier gates do not disturb what it reads. Every organ in this corpus would repeat that
+bookkeeping. *An unnamed composition gets re-derived, and someone eventually gets it wrong.*
+
+⛔ ***THE BOUNDARY, AND IT IS THE WHOLE REASON THE NAME SAYS `flat`: THIS COVERS FLAT ORGANS ONLY. IT
+IS FALSE THE MOMENT AN ORGAN HAS AN INTERNAL CHAIN.*** Measured, not asserted:
+
+```
+                          flatBelow nIn      ssaFrom nIn
+   MacCell.wsCore  (AND array)   TRUE            true      ⇒ COVERED
+   MacCell.macCore (adder inside) FALSE          true      ⇒ REFUSED
+```
+
+⚠️ **`ssaFrom` IS NOT FLATNESS, and the two circuits above separate them.** `ssaFrom base` requires
+`fanin.all (· < base)` **and `base` rises by one per gate** (`EmitN.lean:69`) — so dense SSA
+explicitly PERMITS a gate to read an earlier gate's output. *Dense SSA is what an internal chain
+looks like.* Hence both hypotheses are load-bearing: `hssa` gives `g.out` a unique writer, which is
+what makes the left-hand side well-defined; `hflat` gives order-independence. **Neither is
+decorative, and a reader who collapses them will reach for this lemma on an adder.** -/
+
+/-- Every gate reads only nets **below `n`** — the list is FLAT: no gate depends on another gate's
+output, so evaluation order is irrelevant. -/
+def flatBelow (n : Nat) (gs : List Gate) : Bool :=
+  gs.all (fun g => g.op.fanin.all (fun m => decide (m < n)))
+
+theorem flatBelow_mem {n : Nat} {gs : List Gate} (h : flatBelow n gs = true)
+    {g : Gate} (hg : g ∈ gs) : ∀ m ∈ g.op.fanin, m < n := by
+  intro m hm
+  have h1 : (g.op.fanin.all (fun m => decide (m < n))) = true :=
+    List.all_eq_true.mp h g hg
+  exact of_decide_eq_true (List.all_eq_true.mp h1 m hm)
+
+theorem flatBelow_tail {n : Nat} {g : Gate} {gs : List Gate}
+    (h : flatBelow n (g :: gs) = true) : flatBelow n gs = true := by
+  simp only [flatBelow, List.all_cons, Bool.and_eq_true] at h
+  exact h.2
+
+/-- The induction carries **two** bounds: flatness below `nf`, SSA from `ns`, with `nf ≤ ns`. They
+must differ because the recursive call sees `ssaFrom (ns + 1)` while flatness stays at `nf` — the
+whole point being that a gate never reads anything a gate wrote. -/
+theorem run_of_flat_gates_aux : ∀ (gs : List Gate) (nf ns : Nat) (E : Env),
+    nf ≤ ns → flatBelow nf gs = true → ssaFrom ns gs = true →
+    ∀ g ∈ gs, run E gs g.out = g.op.eval E := by
+  intro gs
+  induction gs with
+  | nil => intro _ _ _ _ _ _ g hg; simp at hg
+  | cons g' gs' ih =>
+    intro nf ns E hle hflat hssa g hg
+    simp only [ssaFrom, Bool.and_eq_true, beq_iff_eq] at hssa
+    obtain ⟨⟨hout, _hfan⟩, hrest⟩ := hssa
+    rw [run_cons]
+    rcases List.mem_cons.mp hg with rfl | hmem
+    · -- `g = g'`: its net is never rewritten — every later out is `≥ ns + 1` and `g.out = ns`.
+      have hne : ∀ h ∈ gs', h.out ≠ g.out := by
+        intro h hh hEq
+        have hb : ns + 1 ≤ h.out := ssaFrom_out_ge gs' (ns + 1) hrest h hh
+        rw [hEq, hout] at hb
+        omega
+      rw [run_of_unwritten _ _ _ hne, hout, upd_self]
+    · -- `g ∈ gs'`: the only net just written is `ns`, and flatness puts every net `g` reads
+      -- below `nf ≤ ns`, so the update is invisible to it.
+      have hgo : g.op.eval (upd E g'.out (g'.op.eval E)) = g.op.eval E := by
+        refine Op.eval_congr g.op ?_
+        intro m hm
+        have hmn : m < nf := flatBelow_mem (flatBelow_tail hflat) hmem m hm
+        refine upd_of_ne _ ?_
+        intro hEq
+        -- ⚠️ NO `omega` here: `hmn`'s `<` was born at `Net` and omega DROPS such a goal, even
+        -- after both sides are rewritten to `Nat`-typed terms. Contrast `hne` above, where the
+        -- same shape DOES yield — because `ssaFrom_out_ge` produces a `Nat`-born `≤`.
+        -- ***THE HYPOTHESIS'S ORIGIN FIXES THE INSTANCE, NOT ITS CURRENT SHAPE.*** Cure: `Nat`
+        -- lemmas supplied as TERMS (`Program.lean:2994`, `:3471`).
+        have h1 : m < ns := Nat.lt_of_lt_of_le hmn hle
+        have h2 : m = ns := by rw [hEq, hout]
+        exact absurd h2 (Nat.ne_of_lt h1)
+      rw [ih nf (ns + 1) _ (by omega) (flatBelow_tail hflat) hrest g hmem, hgo]
+
+/-- ⭐⭐ **ONE GATE'S VALUE, WITHOUT WALKING THE LIST.** In a flat SSA gate list, running the whole
+list and reading a gate's output net gives exactly that gate's operation evaluated on the original
+environment.
+
+**Named for what it REQUIRES** — `run_of_flat_gates`, not `run_of_gates` — so the applicability lives
+in the identifier and a successor acts on the name rather than on a docstring they did not read. -/
+theorem run_of_flat_gates {gs : List Gate} {n : Nat} (E : Env)
+    (hflat : flatBelow n gs = true) (hssa : ssaFrom n gs = true)
+    {g : Gate} (hg : g ∈ gs) :
+    run E gs g.out = g.op.eval E :=
+  run_of_flat_gates_aux gs n n E le_rfl hflat hssa g hg
+
+#audit_axioms flatBelow_mem
+#audit_axioms flatBelow_tail
+#audit_axioms run_of_flat_gates_aux
+#audit_axioms run_of_flat_gates
+
 end SaltWorks.HDL
