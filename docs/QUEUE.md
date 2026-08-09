@@ -268,6 +268,23 @@ OPEN ITEMS:
   GATE: §1 final row table awaits assembly rows 15-16; halves
   proceed now.**
 
+- **THIRD FUEL COLUMN — SEMANTICS NARROWED BY THE CAPTAIN'S DATUM
+  (13:3x, verbatim: "*all* the other seats run Opus 5, and credits
+  are not being used on any of them"): the CREDITS reading is DEAD
+  for the peers (compiler-acct 7 / jasonh 3 are NOT credits); the surviving
+  reading = the PREMIUM-TIER WEEKLY METER (effectively the FABLE
+  meter) — jason 62 climbing = the maestro's Fable hours; peers'
+  zeros = in-plan Opus 5; compiler-acct/jasonh small residues = candidate
+  provenance: pre-switch maestro sessions earlier in the week
+  (PREDICTION: frozen until Mon reset while jason alone climbs).
+  RESIDUALS for the Captain's next portal glance: the column's
+  literal LABEL + the pre-switch-host confirmation. WATCH RULE
+  ARMED (maestro): any reported jason triple with third column
+  >= 80 -> immediate flag + the HARD house-split (Opus for
+  coordination/ceremony, Fable strictly for design blocks).
+  Operational fact: the fleet's entire premium burn is ONE seat;
+  four seats run at zero marginal premium cost.**
+
 - **NDF PACKAGE APPROVED (13:2x, the Captain, verbatim: "NDF
   lgtm") — the design package v1 (through the r-convention, the
   k-collision banner, §§1-6 + 2b/2c/3b/5b/5c) stands APPROVED as
