@@ -6,6 +6,7 @@ import SaltWorks.HDL.ReadTree
 import SaltWorks.HDL.RegWrite
 import SaltWorks.HDL.SelectCut32
 import SaltWorks.HDL.AluSelect
+import SaltWorks.HDL.EncoderE1
 import SaltWorks.HDL.Bitwise
 
 -- Evaluating `instOuts` over real organs (readTree is 2,982 gates) exceeds the default depth.
@@ -811,6 +812,75 @@ theorem select_bits_are_decoder_driven_in_order :
   refine ⟨rfl, rfl, ?_⟩
   simp only [decOut, decoderSig, off0, instNext, tieCells, offTie, coreInWidth, stWidth]
   decide +kernel
+
+
+/-! ## 13. INCREMENT 2j — ROW 11: `ruledEnc`, the ZERO-GATE row, and the seam it closes
+
+`EncoderE1.lean:218-222`: `lineADD = line 0`, `lineXOR = line 1`, `lineSLT = line 2`, and
+`selDrivers = [lineXOR, lineSLT]` — so `ruledEnc`'s three inputs are the decoder's one-hot class
+lines, and its two outputs are **inputs 1 and 2**. `lineADD` drives no select bit: code 0 *is* the
+default arm.
+
+⭐ **WITH `gates = []`, `instMap` sends every output through σ, so `instOuts ruledEnc σ off =
+[σ lineXOR, σ lineSLT]` — THE PLACEMENT CREATES NO NET.** That makes row 11 the row increment 1
+predicted: `zero_gate_organ_does_not_advance` proved the offset chain is monotone but **not
+strictly** monotone, before I knew which organ would exercise it.
+
+⇒ ***AND IT CLOSES THE ENCODER/SELECT SEAM BY PROOF RATHER THAN BY ASSERTION: I wired
+`sliceASelect`'s select bits to `decOut 1` and `decOut 2` at row 10 on the strength of
+`C1Organ:149-150`. Placing `ruledEnc` shows those ARE its outputs — so the two rows agree because
+they are equal, not because I said so.*** -/
+
+/-- Row 11's offset — after the select. -/
+def offEnc : Nat := instNext SelectCut32.sliceASelect offSel
+
+/-- `ruledEnc`'s σ: the decoder's three one-hot class lines. -/
+def encSig (j : Net) : Net :=
+  if j = 0 then decOut 0 else if j = 1 then decOut 1 else decOut 2
+
+/-- ⭐ **PLACEMENT #12 — `ruledEnc` at row 11, `instOK` DISCHARGED.** Twelve of sixteen rows. -/
+theorem enc_instOK : instOK EncoderE1.ruledEnc encSig offEnc := by
+  refine ⟨by decide +kernel, by decide +kernel, ?_⟩
+  intro j hj
+  have hnn : EncoderE1.ruledEnc.nIn = 3 := by decide +kernel
+  rw [hnn] at hj
+  revert hj; revert j
+  decide +kernel
+
+/-- ⭐⭐ **THE ENCODER/SELECT SEAM, CLOSED BY EQUALITY.** `ruledEnc`'s outputs at row 11 are exactly
+the nets row 10 wired into `sliceASelect`'s two select inputs. The rows agree because they are
+equal — not because both cite the same docstring. -/
+theorem encoder_select_seam_closed :
+    instOuts EncoderE1.ruledEnc encSig offEnc = [selSig 96, selSig 97] := by
+  simp only [instOuts, instMap, EncoderE1.ruledEnc, EncoderE1.selDrivers, EncoderE1.lineXOR,
+             EncoderE1.lineSLT, EncoderE1.line, encSig, selSig, decOut, decoderSig, offEnc,
+             off0, instNext, tieCells, offTie, coreInWidth, stWidth]
+  decide +kernel
+
+/-- ⛔ **THE ZERO-GATE ROW DOES NOT ADVANCE THE CHAIN — increment 1's prediction, realised.**
+`instNext ruledEnc offEnc = offEnc`, so row 12 begins exactly where row 11 did. An assembly checker
+demanding a strictly increasing chain would reject this correct assembly, which is why increment 1
+proved the invariant as `≥`. -/
+theorem enc_row_does_not_advance (off : Nat) : instNext EncoderE1.ruledEnc off = off := by
+  -- Stated for EVERY offset, which is both STRONGER and CHEAPER than the instance at `offEnc`:
+  -- `rfl` there forced `offEnc` to a numeral, unfolding the whole chain back to the tie cells and
+  -- timing out at `whnf` (200,000 heartbeats). A structural proof evaluates no offset at all.
+  simp only [instNext, EncoderE1.ruledEnc, List.length_nil, Nat.add_zero]
+
+/-- **CONTROL: `lineADD` is wired and drives NO select bit.** `ruledEnc` takes three inputs and
+publishes two; input 0 (`isADD`) is consumed and deliberately not forwarded, because code 0 is the
+default arm. If it were forwarded, the select would have three select bits for a `(3,2)` block. -/
+theorem lineADD_is_consumed_not_forwarded :
+    encSig 0 = decOut 0
+  ∧ decOut 0 ≠ selSig 96 ∧ decOut 0 ≠ selSig 97 := by
+  -- stated as two concrete inequalities rather than `∉`: the published list has exactly two
+  -- known elements, and deciding MEMBERSHIP with everything unfolded times out at `whnf`
+  -- (200,000 heartbeats). Same content, and it names WHICH nets differ rather than that one
+  -- is absent from a list.
+  refine ⟨rfl, ?_, ?_⟩ <;>
+    simp only [selSig, encSig, decOut, decoderSig, off0, instNext, tieCells, offTie,
+               coreInWidth, stWidth] <;>
+    decide +kernel
 
 
 end SaltWorks.HDL.CorePlace
