@@ -50,7 +50,7 @@ THE TWO ORGANS' SPECS COMPOSE.***
 missing premise was `bitNot32`'s semantics at every input — **which this corpus did not have.**
 `bitNot32_correct_on_sample` is a Bool sweep over fixtures. It took a new module
 (`SingleLevel.lean`, `run_level_map` + `bitNot32_sem`) to supply it.
-⛔⛔ **CORRECTED 21:5x: THAT DIAGNOSIS WAS FALSE.** The corpus already had ∀-level organ
+⛔⛔ **CORRECTED 2026-08-08 21:5x: THAT DIAGNOSIS WAS FALSE.** The corpus already had ∀-level organ
 semantics — `sem_bitNot32`, `sem_bitXor32`, `sem_adder32` (*on all 2^64 pairs*) and `sem_bwCirc`
 all live in `Stack/Program.lean`. **I searched my own naming convention in my own slot and
 concluded absence.** ⇒ ***So "the sampled certificates became load-bearing" was never the

@@ -8,7 +8,7 @@ import SaltWorks.HDL.Bitwise
 /-!
 # SINGLE-LEVEL CIRCUITS — and the first ∀-env spec for a bitwise organ
 
-⛔⛔ **CORRECTED 21:5x — THIS FILE'S ORIGINAL PREMISE WAS FALSE AND IS STRUCK.**
+⛔⛔ **CORRECTED 2026-08-08 21:5x — THIS FILE'S ORIGINAL PREMISE WAS FALSE AND IS STRUCK.**
 
 > **What it said:** *"a `∀ env` subtraction theorem needs `bitNot32`'s semantics at every input,
 > and this corpus had none"*, and that `bitNot32_sem` is *"the FIRST unconditional semantics for
@@ -48,7 +48,7 @@ silently, so the only thing that catches one is looking.*
 over an ARBITRARY env, which is the form `SubFragment`'s bar 4 consumed. ⚠️ **NOT the first
 unconditional semantics for a bitwise organ: `sem_bitNot32` (`Program.lean:3596`) predates it.**
 
-## ✅ ALL FOUR BITWISE ORGANS NOW HAVE ∀-env SPECS — closed 21:5x
+## ✅ ALL FOUR BITWISE ORGANS NOW HAVE ∀-env SPECS — closed 2026-08-08 21:5x
 
 **When this file first landed, three of the four were still sampled-only and I published that as
 an open item for the fleet.** It is closed. `bitXor32_sem`, `bitAnd32_sem` and `bitOr32_sem` are

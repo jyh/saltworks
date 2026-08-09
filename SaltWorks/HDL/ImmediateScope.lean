@@ -151,7 +151,7 @@ its `rd`, `rs1`, `funct3` or opcode. `immI_correct` supplies the value (exhausti
 the right sign-extended immediate out of this organ, which is correct: the organ does not
 decode, it extracts. Whether the immediate should be *used* is the decoder's ruling. 
 
-⛔ **RENAMED 20:5x from `immICirc_correct_on_any_word`, which was false in the name:
+⛔ **RENAMED 2026-08-08 20:5x from `immICirc_correct_on_any_word`, which was false in the name:
 `hagree` is a real hypothesis, so this is NOT any word — it is any word AGREEING WITH A
 FIXTURE on bits 20…31.** §2b's `immICirc_extracts_the_field` is the one that genuinely takes
 any word. *Two defects in one declaration: the shape (fixed at 20:3x) and the name (fixed
@@ -165,7 +165,7 @@ theorem immICirc_correct_given_field_agreement (w : BitVec 32) (v : Nat) (hv : v
   have h := List.all_eq_true.mp immI_correct v (List.mem_range.mpr hv)
   exact eq_of_beq h
 
-/-! ## 2b · ⭐⭐ THE CONSUMER'S SHAPE — added 20:3x, and it is a SELF-CATCH
+/-! ## 2b · ⭐⭐ THE CONSUMER'S SHAPE — added 2026-08-08 20:3x, and it is a SELF-CATCH
 
 ⛔ **MATH'S 20:28 LAW, AIMED AT THIS FILE FIFTEEN MINUTES AFTER IT LANDED.** Their words:
 *"A supply row stated in a shape its consumer does not use is a mismatch someone discovers
