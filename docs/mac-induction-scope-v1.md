@@ -181,3 +181,37 @@ certified pipeline whose numeric meaning turns on an unstated convention*
 (after the activation's order and the accumulator's range). It is one lemma and
 it should be named rather than assumed, precisely because the wrong call is
 invisible at every other layer.
+
+## E. AMENDED AGAIN (11:37) — BIAS STREAMS, SO THE CYCLE INDEX GAINS AN OFFSET
+
+**Ruled:** the bias is **not a parallel preload**; it *streams as the first
+addend*, one cycle, zero gates.
+
+⚠️ **§B2's invariant assumed a PRELOAD and is wrong as written under this
+mechanism.** With `b` arriving as the first addend the accumulator starts at `0`,
+not at `b`, and every subsequent index shifts by one:
+
+```
+WRONG (preload form, §B2)   acc_after t       = b + Σ_{j ∈ range t} W·x_j·2^j
+RIGHT (streamed form)       acc_after 0       = 0
+                            acc_after 1       = b
+                            acc_after (1 + t) = b + Σ_{j ∈ range t} W·x_j·2^j
+                            acc_after (1 + n) = ... - W·x_{n-1}·2^(n-1)   (sign cycle)
+```
+
+**Three consequences, all of them statement-level:**
+
+1. **The induction is over `t` with the base case at cycle 1, not cycle 0.** The
+   `+1` must live in the statement, not be quietly absorbed by `take t` — the
+   trace length is the cycle index (§B1), so an off-by-one here is an off-by-one
+   in the theorem, not in a comment.
+2. **The total is `n + 1` cycles per MAC, not `n`.** Anything downstream that
+   counts bit-times (the §4 "few hundred bit-times per layer pass") is computed
+   from the *streamed* count.
+3. **The sign cycle sits at index `1 + n`**, so `mac_sign_cycle` (§B3) composes
+   onto `acc_after (1 + (n-1))`, not `acc_after (n-1)`.
+
+📌 *This is the maestro's own 11:37 law arriving at the statement layer: **every
+width or value transition gets written down.** A preload and a streamed first
+addend compute the same number and index it differently — **and the index is what
+the induction is about.***
