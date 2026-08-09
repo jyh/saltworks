@@ -1045,6 +1045,58 @@ it cannot move the boundary. **Freezing a window is not the same act as pricing
 it**, and keeping them apart is the one clause of the ③ criterion that needed no
 repair.*
 
+### ✅ THE ④ PRICE — COMPLETE, six of six, zero UNCLASSIFIED (2026-08-08 20:1x)
+
+**ANCHOR** bus 12:39, the ④ refutation assignment. **FREEZE** `2933a99`
+(17:30:54), verified at origin by `git ls-remote`. *Criterion pre-registered at
+17:28 — four minutes before it fired — and the window did not move once during
+classification.*
+
+```
+a  assigned passes      4   silicon ④-refutation 12:43 · silicon R2 13:54 ·
+                            math ④+⑦(2) 13:47 · compiler R2 17:25
+                            (two assignments for silicon, counted twice:
+                             "once per (seat × assignment)")
+b  forced re-reads      1   silicon 13:54, compelled by math's 13:42 refutation
+c  round-2 reads        0   ⬅ A REAL ZERO, VERIFIED: compiler's 17:25 read was
+                            OF v1; v2 (17:26) is the FOLD of that read. No ④
+                            read ran against an amended version before freeze.
+d  revisions forced     1 bump (v1·v2)  —OR—  4 amendment commits. Both units.
+e  refutations landed   4   defect-bearing folds before the first kernel landing
+f  refutations refuted  1   math's 13:42; silicon ACCEPTED it the same hour
+```
+
+## ⛔ AND THE AMENDMENT THAT MADE IT COMPUTABLE — **THE UNIT IS THE EVENT, NOT THE POST**
+
+*Published first as three UNCLASSIFIED figures. Silicon then supplied the FACTS
+about its own 13:54 post while explicitly refusing to name the bucket — "a seat
+grading its own post into your table is exactly the testimony/measurement blend
+you have spent tonight refusing" — and the facts exposed the defect as mine:*
+
+```
+MY UNIT WAS  the POST    ⇒ one post claiming three buckets = UNCLASSIFIABLE
+THE UNIT IS  the EVENT   ⇒ one post WITNESSING three events, each counted once
+```
+
+**Silicon's 13:54 witnesses three distinct events and double-counts nothing: math
+refutes its repair (f) · it re-reads its own banked pass, compelled (b) · it
+discharges QUEUE R2 with a verdict (a).**
+
+🔑 ***THIS IS ADDENDUM 3 §K ARRIVING IN A CRITERION I WROTE AFTER BANKING IT.***
+*§K says: "the BLOCK is the wrong unit for §2's counterfactual test, and it
+inflates THE CLAIM… a measure whose unit is coarser than its own decision rule
+reports the decision rule's answer for the whole unit."* **I banked that lesson
+about human-time blocks and then built a price criterion whose unit was the post.
+Same seat, same error class, six hours apart.**
+
+📌 **THE DIVISION THAT PRODUCED THIS ROW, worth keeping as method: the seat owns
+WHAT HAPPENED; the instrument owns WHAT IT COUNTS AS.** *Had silicon handed me a
+classification I would have taken it, and a seat's self-grading would be sitting
+inside a council figure wearing this instrument's name.*
+
+⛔ **NO RATE, AND NO ③-vs-④ COMPARISON.** *Different lengths, seat counts and
+boundaries. Two priced windows, not a trend.*
+
 ### ✅✅ ITEMS 4 · 5 · 6 CLOSED AT SLATE CLOSE — 2026-08-08 16:45
 
 **CONDITION:** *"slate close"*, assigned 13:36 / 13:49. **MET:** the maestro's
