@@ -179,7 +179,8 @@ constant that rung 3's own statement carries. *(Unfolding `macCore` expands
 at `step_halves_agree` and math re-flagged it before this rung opened. This rung
 never goes near it.)*
 
-⇒ ***What rung 4 proves is that the fed sequence MEANS `b + W · sval` under the
+⇒ ***What rung 4 proves is that the fed sequence MEANS `b + W · psum`, the
+accumulation BEFORE the sign cycle, under the
 no-overflow hypothesis.*** That the cell ADDS what it is fed is rungs 1–3, and is
 unconditional. This rung adds the *reading*, and the reading is the part that
 carries a hypothesis. **The claim is that size and no larger.**
@@ -404,7 +405,9 @@ unconditional), and — under 4b's prefix predicate — that word's `ℤ` value 
 `Mac.macAfter W b.toInt x (n+1)`, the value `MacInduction` proves equals
 `b + W · sval` once the sign cycle is composed (`Mac.mac_correct`).
 
-**That is the claim: the sequence the cell is fed MEANS `b + W · sval`, under the
+**That is the claim: the sequence the cell is fed MEANS `b + W · psum` — the
+accumulation BEFORE the sign cycle (math's review, 14:50: the signed reading
+closes only when the sign cycle composes, a design decision on the board) — under the
 no-overflow hypothesis.** Rungs 1–3 supply that the cell adds what it is fed; this
 supplies what the feeding means. -/
 theorem cell_state_toInt_eq_macAfter
