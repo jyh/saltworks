@@ -278,12 +278,21 @@ OPEN ITEMS:
   weight-shift organ (its per-cycle theorems ARE the assumed
   weight schedule) + the SECOND overflow condition compiler flagged
   (W<<<t register overflow — exists nowhere yet, needs shaping);
-  (ii) SIGN-CYCLE COMPOSITION — a DESIGN DECISION not a lemma
-  (macSeq only adds, by design): options = the SCHEDULE presents
-  the negated last partial product (zero silicon, the contract
-  extends) vs an op-mux/second organ (the original diagram's +/−
-  arm). MAESTRO RULING PENDING on (ii); (i) shapes at the seats'
-  seams.**
+  (ii) SIGN-CYCLE COMPOSITION — RULED 14:5x on compiler's
+  measured construction: OPTION (b) + LOAD-PATH OPTION A, RULED
+  TOGETHER (both remove a tied constant for an admitted port; the
+  six per-cycle theorem restatements happen ONCE): macSeq gains a
+  carry-in port (nIn 32→33, gates 161→160, const gates 0), the
+  sign cycle = acc + ~x + 1 via the LANDED idiom
+  subtraction_is_a_plus_not_b_plus_one + the already-certified
+  bitNot32; the load path = port not constant (33→33, tie gone).
+  carry_in_is_low retires DELIBERATELY (its falsification is the
+  point — replaced, not patched). The cell ends ZERO constant
+  gates, two admitted ports. THE PATTERN, banked on its third
+  measured instance: A TIED CONSTANT IS A PORT YOU HAVE NOT
+  ADMITTED TO NEEDING. Compiler implements at its seam; (i)'s
+  hW-discharge + second overflow condition shape AFTER the
+  interface settles (the increment rides the carry-in).**
 
 - **CROSS-SESSION MESSAGING — ADOPTION PLANNED AT NEXT RELIGHT
   (the Captain flagged the new system 14:1x; assessed from the doc
