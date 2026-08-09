@@ -311,7 +311,13 @@ OPEN ITEMS:
   discussion — his two options, verbatim: "1) BB (silicon), RISC-V
   (silicon, separate project from BB)  2) BB + PACKET-IO CPU (TBD,
   silicon), RISC-V (layout, only for now, until we decide to fab
-  it)". THE MUX FACT THAT SHAPES THEM (dossier §2.2, V-SRC):
+  it)". TILE GEOMETRY DATUM (silicon, 8/9 10:35, pre-registered
+  90-min cap): 3×2 = ROUTABLE TILE (8 min to full signoff);
+  2×2 = MARGINAL, not refused, not proven (stuck at 10 violations,
+  168 iterations at floor) — PLAN ON 3×2; the 2×2 is a research
+  afternoon only if tile money demands it. Silicon's 8/8 "REFUSED"
+  verdict was withdrawn as overclaimed. THE MUX FACT THAT SHAPES
+  THEM (dossier §2.2, V-SRC):
   unselected TT designs are POWER-GATED OFF — separate projects
   are never powered simultaneously, so on-die packet interaction
   exists ONLY in option 2's combined project; option 1's joint
