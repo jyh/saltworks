@@ -21,7 +21,8 @@
 
 B1. SCOPE: five new ops — LW, SW (the FIRST memory; a small SRAM or
    register-backed memory at Slice-B scale — silicon prices it in
-   CELLS against the banked 1,154), JAL, JALR (the FIRST link
+   CELLS against the 1,154 banked AT THE SELECT — a select delta,
+   not a verified whole-core budget), JAL, JALR (the FIRST link
    register discipline), BNE (BEQ's dual — likely near-free against
    the existing compare). ALU op-set UNCHANGED (ruled): the (3,2)
    select carries the whole slice.
@@ -125,7 +126,8 @@ campaign, two files, per §B1.
   the emitted path; BNE against the landed compare; the encoder
   extension against the c1 organ); E3's executive-as-program
   feasibility at Slice-B's op budget.
-- SILICON: B1's memory pricing IN CELLS vs the banked 1,154; the
+- SILICON: B1's memory pricing IN CELLS vs the 1,154 banked AT THE
+  SELECT (whole-core net unverified — your one-line answer owed); the
   tile question interaction (does Slice B still fit co-tenant?);
   B4's alignment mask at the RTL.
 - MATH: B2's totality form (the trap/no-op/wrap trichotomy — is it
