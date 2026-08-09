@@ -311,7 +311,18 @@ OPEN ITEMS:
   the loop, not by default. Implementation clear: compiler (b)+A;
   math the rung-1-3 restatements (rung 3 → (addend,carry) pairs)
   + hW-discharge + second overflow condition against the settled
-  interface. Every seat argued against its own position at least
+  interface. PROGRESS 15:3x: (b)+A implemented (b070e38+b801003,
+  193 gates, zero constants) · restatements landed (d7d1d6a,
+  collision survived 7/7) · compatibility corollary (c08f6a1) ·
+  hW-DISCHARGE LANDED (03f5885, attempts 2, wshift_runTrace_state
+  = W<<<t after t load-low cycles, covered EXIT=0) · second
+  overflow condition ALREADY EXISTED as compiler's landed
+  shiftSafe+shiftSafe_at_int8_scale (my dispatch mis-attributed
+  it to math; read-before-building caught it free) · REMAINING:
+  THE SIGN-CYCLE COMPOSITION ALONE, every part in place, math's
+  seam. Trap banked: BitVec.shiftLeft_shiftLeft does not exist —
+  the real name is BitVec.shiftLeft_add.
+  Every seat argued against its own position at least
   once in this thread; the register moved twice and both moves
   are in the trail.**
 
