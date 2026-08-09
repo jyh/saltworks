@@ -653,6 +653,117 @@ and math owns that machinery. **With `shiftSafe` named and discharged, the remai
 mechanical rather than exploratory.**
 -/
 
+/-! ## THE COMPOSED CELL — one `Seq`, one module, zero constant gates
+
+**Cleared at 15:48** once math's join (`c732aaa`) existed to carry its meaning. Until then I refused
+to build it, because a composed module that emits cleanly and has no join behind it is exactly the
+artifact that would let *"the cell is emitted"* travel further than it earns.
+
+```
+   primary inputs   x = 0 · load = 1 · cin = 2                    (nIn 3)
+   state            wsh 3…34 · acc 35…66                          (nState 64)
+   core.nIn         67 = 3 + 64
+   gates            instGates wsCore ++ instGates macCore = 33 + 160 = 193
+   outs             acc' (32) ++ [ wsh' (32) ++ acc' (32) ]        = 96 = nOut + nState
+```
+
+⭐ **NO TIE CELLS ANYWHERE IN THE CELL.** *Both constants became ports under (b)+A, so the composed
+artifact needs none of its own either — the tied-constant pattern paying a third time, at the level
+above the organs that admitted it.* -/
+
+def ccX : Net := 0
+def ccLoad : Net := 1
+def ccCin : Net := 2
+def ccWsh (k : Nat) : Net := 3 + k
+def ccAcc (k : Nat) : Net := 35 + k
+def ccIn : Nat := 67
+def ccWOff : Nat := 67
+def ccMOff : Nat := 100
+
+/-- `wsCore`'s σ: the stream bit, the load enable, then the weight register. -/
+def ccWSig (i : Nat) : Net :=
+  if i = 0 then ccX else if i = 1 then ccLoad else ccWsh (i - 2)
+
+/-- ⭐ **THE SEAM: the addend `macCore` consumes is `wsCore`'s AND-row output**, in host numbering. -/
+def ccAddend (k : Nat) : Net := instMap wsCore ccWSig ccWOff (wsAnd k)
+
+/-- `macCore`'s σ: the addend from organ 2, the carry-in port, then the accumulator. -/
+def ccMSig (i : Nat) : Net :=
+  if i < 32 then ccAddend i else if i = 32 then ccCin else ccAcc (i - 33)
+
+def ccCore : Circ :=
+  { nIn := ccIn
+    gates := instGates wsCore ccWSig ccWOff ++ instGates macCore ccMSig ccMOff
+    outs := ((List.range 32).map (fun k => instMap macCore ccMSig ccMOff (maSum k)))
+            ++ ((List.range 32).map (fun k => instMap wsCore ccWSig ccWOff ((wsCore.outs.drop 32).getD k 0)))
+            ++ ((List.range 32).map (fun k => instMap macCore ccMSig ccMOff (maSum k))) }
+
+/-- ⭐⭐ **THE CELL AS ONE MACHINE.** -/
+def cellSeq : Seq := { nIn := 3, nOut := 32, nState := 64, core := ccCore }
+
+theorem ccCore_ssa : ccCore.ssa = true := by decide +kernel
+theorem ccCore_wf : ccCore.wf = true := Circ.wf_of_ssa ccCore_ssa
+theorem cellSeq_wf : cellSeq.wf = true := by decide +kernel
+
+/-- **193 gates: 33 + 160, and not one more.** The composition adds no glue. -/
+theorem ccCore_gate_count : ccCore.gates.length = 193 := by decide +kernel
+
+/-- **ZERO constant gates in the whole cell.** -/
+theorem cell_has_no_constant_gates :
+    ccCore.gates.filter (fun g => match g.op with | .const _ => true | _ => false) = [] := by
+  decide +kernel
+
+theorem cellSeq_dimensions :
+    cellSeq.nIn = 3 ∧ cellSeq.nOut = 32 ∧ cellSeq.nState = 64 ∧ ccCore.nIn = 67 := by
+  refine ⟨rfl, rfl, rfl, rfl⟩
+
+/-- ⭐ **BOTH PLACEMENTS SOUND.** -/
+theorem cc_wsCore_instOK : instOK wsCore ccWSig ccWOff := by
+  refine ⟨wsCore_ssa, wsCore_wf, ?_⟩
+  intro i hi
+  have h : wsCore.nIn = 34 := by decide +kernel
+  rw [h] at hi; revert hi; revert i; decide +kernel
+
+theorem cc_macCore_instOK : instOK macCore ccMSig ccMOff := by
+  refine ⟨macCore_ssa, macCore_wf, ?_⟩
+  intro i hi
+  have h : macCore.nIn = 65 := by decide +kernel
+  rw [h] at hi; revert hi; revert i; decide +kernel
+
+/-- ⛔⛔ **THE BIRTH-ASSERTION: THE TWO INSTANCES DO NOT COLLIDE.** `instOK` constrains each instance
+against its own inputs and cannot see the other — the lesson that cost sixteen true certificates over
+a broken netlist this morning. Stated at the composition's birth. -/
+theorem cell_instances_are_disjoint : ccWOff + wsCore.gates.length ≤ ccMOff := by
+  have h : wsCore.gates.length = 33 := by decide +kernel
+  simp only [ccWOff, ccMOff, h]
+  decide
+
+/-- ⭐⭐ **THE WIRING CLAIM `instOK` CANNOT MAKE: `macCore`'s addend port `k` IS `wsCore`'s AND-row
+output `k`.** *`instOK` says the wire is computed in time; this says it is the RIGHT wire — the
+source-port-map discipline, applied to the seam that defines the cell.* -/
+theorem cell_seam_is_the_addend (k : Nat) (hk : k < 32) :
+    ccMSig k = instMap wsCore ccWSig ccWOff (wsAnd k) := by
+  simp only [ccMSig, ccAddend, if_pos hk]
+
+/-- **CONTROL: the addend is NOT the accumulator or the carry-in.** Both would place cleanly. -/
+theorem cell_seam_is_not_acc_or_cin :
+    ccMSig 0 ≠ ccAcc 0 ∧ ccMSig 0 ≠ ccCin := by
+  refine ⟨by decide +kernel, by decide +kernel⟩
+
+/-- **CONTROL: the state halves are in the declared order — `wsh` first, `acc` second.** Swapping
+them places cleanly and feeds the accumulator's bits to the shifter. -/
+theorem cell_state_layout :
+    (ccCore.outs.drop 32).getD 0 0 = instMap wsCore ccWSig ccWOff ((wsCore.outs.drop 32).getD 0 0)
+  ∧ (ccCore.outs.drop 32).getD 32 0 = instMap macCore ccMSig ccMOff (maSum 0) := by
+  refine ⟨by decide +kernel, by decide +kernel⟩
+
+/-! ⛔ **NOT CLAIMED: the per-cycle composition semantics.** This file certifies the cell's SHAPE —
+`ssa`, `wf`, widths, both placements, disjointness, the seam, and the state layout. **That one
+`stepSeq cellSeq` equals the two organs' steps in the intended relation is a further theorem**, and
+it is what would let the cell's emission inherit math's join. *Stated as owed rather than left to be
+inferred from the file's silence — the same discipline `macSeq` and `wshiftSeq` were landed under.*
+-/
+
 /-! ### The axiom audit — one declaration per call
 
 *Added WITH the cell, not after it. `CorePlace` ran fourteen placements with `EXIT=0` and zero
@@ -695,6 +806,18 @@ everything after a failure reads as clean. -/
 #audit_axioms weight_state_moves_so_reload_is_required
 #audit_axioms stream_enters_only_through_the_load_gate
 #audit_axioms wshift_next_bit_zero_when_not_loading
+#audit_axioms ccCore_ssa
+#audit_axioms ccCore_wf
+#audit_axioms cellSeq_wf
+#audit_axioms ccCore_gate_count
+#audit_axioms cell_has_no_constant_gates
+#audit_axioms cellSeq_dimensions
+#audit_axioms cc_wsCore_instOK
+#audit_axioms cc_macCore_instOK
+#audit_axioms cell_instances_are_disjoint
+#audit_axioms cell_seam_is_the_addend
+#audit_axioms cell_seam_is_not_acc_or_cin
+#audit_axioms cell_state_layout
 #audit_axioms shift_overflow_is_real
 #audit_axioms shiftSafe_at_int8_scale
 #audit_axioms hW_is_shiftSafe
