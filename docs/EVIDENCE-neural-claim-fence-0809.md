@@ -73,7 +73,11 @@ FALSIFIED IF any ONE of these is observed:
       instantiates (the model-vs-artifact gap — INSTRUMENT: the same
       olean-in-the-hub-graph check the maestro used on CoreOffsets at 09:51)
   F4  "down to silicon" is asserted while any row of the decomposition is
-      unlanded.
+      unlanded, OR while the COMPOSING JOIN over those rows is unstated.
+      (Amended 15:45: the original gated on rows only, and I cleared it on a
+       row status line while the join was still unstated. PARTS ARE NOT A
+       PRODUCT — a decomposition whose every row is landed is a set of
+       theorems, not the theorem.)
       ⚠️ THE CONDITION IS DURABLE; THE COUNT IS NOT. Re-read the source before
       quoting a number here -- do not trust this line's parenthetical.
       RE-ANCHORED 2026-08-09 14:3x on the amended row (maestro's sweep after
@@ -112,7 +116,24 @@ FALSIFIED IF any ONE of these is observed:
          + the arithmetic reading through rung 4 under ¬saddOverflow with
          demoBound discharging it (a2c6470+03f5885) + the sign cycle at the
          artifact (3c62228)"
-      ⇒ ALL THREE ROWS LANDED. **F4 IS CLEARED** — no row is unlanded.
+      ⛔⛔ MY CLEARANCE WAS WRONG AND IS WITHDRAWN (15:45). I read the row's
+        own status line "LANDED IN FULL" and cleared F4 on it. Math then
+        measured that THE JOIN — the one theorem composing trace + sign cycle
+        + mac_correct into b + W·sval — IS NOT YET STATED. The parts are
+        landed; the row is not.
+      ⇒ **F4 STILL BINDS.** The package now reads "ALL PARTS LANDED, the one
+        composing join IN FLIGHT", which is the accurate form.
+
+      🔑 SECOND TIME TODAY I INHERITED A STATUS WORD FROM THE ARTIFACT I WAS
+        AUDITING — "in flight" at 14:3x, "LANDED IN FULL" here. **That is my
+        own §4.2 failure mode 2, committed BY THE FENCE, twice, against the
+        same document.** An auditor that reads the subject's status line and
+        repeats it has performed no audit at that line.
+      ⇒ **F4's CONDITION IS AMENDED, because it was under-specified and that
+        is what let the status word through: rows landing is NOT the same as
+        the decomposition composing.**
+        F4 now reads: asserted while any row is unlanded, OR WHILE THE
+        COMPOSING JOIN IS UNSTATED. Parts are not a product.
 
       ⛔ AND AN INTERNAL INCONSISTENCY IN THE SAME FILE, which needs no
         external check to see:
