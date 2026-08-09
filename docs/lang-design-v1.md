@@ -24,16 +24,22 @@ SLICE A EXACTLY AS IT EXISTS — no memory, no waiting on Slice B.
 
 ## 1. THE SOURCE LANGUAGE (v1 scope, deliberately small)
 
-- Values: machine words (the core's width; from compiler's inventory).
+- Values: `i32` ONLY in v1 — signed, WRAPPING arithmetic BY
+  DEFINITION (F7 exit 1, chosen by name: Tiny-Rust is
+  release-semantics Rust; the machine wraps, the source wraps, the
+  theorem is provable). `u32` is v2, typed (F8: SLT is signed;
+  Rust's < is type-directed; one type in v1 makes every comparison
+  unambiguous).
 - State: the REGISTER FILE only (v1 has no heap — Slice A has no
   loads/stores; variables are register-allocated at compile time from
   a fixed pool; programs exceeding the pool are REJECTED, not
   spilled — spilling arrives with Slice B's memory).
 - Expressions: variables · constants · `+` · `xor` · `<` (the ISA's
   own operations, nothing the backend must fake except:)
-- Proved lowerings, promoted from the sort demo's compile-arounds:
-  `*4` (self-adds), unsigned `<` (sign-bit XOR + SLT). These enter as
-  verified rewrite lemmas in the backend, not as source primitives.
+- Proved lowerings, promoted from the demand-traced compile-arounds:
+  `*4` (self-adds) at the source; unsigned `<` (sign-bit XOR + SLT)
+  lives in the BACKEND for the comparator spec (unsigned bit-string
+  compare) and reaches the source only with v2's u32 (F8 rescope).
 - Statements: `skip` · assignment · `seq` · `if` · `while`.
   Big-step semantics in Lean (IMP-shaped; termination NOT assumed —
   the semantics is a relation, and the compiler theorem quantifies
@@ -100,6 +106,13 @@ embedding.
 
 - Memory (arrays, load/store): arrives WITH Slice B — the language's
   v2 and B-ISA are one campaign in two files.
+- References, OWNERSHIP and BORROWING (F9, named so the title cannot
+  over-claim): VACUOUS in v1 — registers only, nothing to own; v1's
+  Tiny-Rust is the register-only fragment. The borrow discipline
+  arrives with Slice B's memory, as the isolation theorem's static
+  face.
+- `u32` and typed signedness (F8): v2, with the source-level unsigned
+  compare.
 - Divergence-sensitive semantics (small-step + fuel): needed by
   B-EXEC's preemption story; v1's big-step terminating-runs form is
   the honest first cut. NAMED with it (math's slate): nothing in v1

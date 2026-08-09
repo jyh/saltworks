@@ -1,0 +1,139 @@
+# TINY-RUST — the language, presented (for the Captain's morning)
+### Maestro-drafted 8/8 night, on the v1.1 block (math's six findings
+### already folded — what you see is the post-refutation design).
+### The campaign: A VERIFIED COMPILER FROM TINY-RUST TO 5-OP.
+### v1.2: math's F7-F9 folded — three decisions the NAME forces,
+### each chosen by name below, none by silence.
+
+## 1. THE FEEL — three programs you can read cold
+
+**Compare-exchange (the ISA's own idiom).** No SUB and no temp
+needed — the XOR-swap is native to Slice A:
+
+```rust
+fn main() {
+    let mut a = 7;
+    let mut b = 3;
+    if b < a {          // one SLT + one BEQ
+        a = a ^ b;      // the classic three-XOR swap:
+        b = a ^ b;      // after these, a and b have traded —
+        a = a ^ b;      // no scratch register, pure Slice-A ops
+    }
+}                       // post: a ≤ b
+```
+
+**A loop.** Subtraction-by-constant is sugar for ADDI with a negative
+immediate — exactly what the hardware does:
+
+```rust
+fn main() {
+    let mut n = 10;
+    let mut sum = 0;
+    while 0 < n {
+        sum = sum + n;
+        n = n - 1;      // sugar: n + (-1), one ADDI
+    }
+}                       // post: sum = 55
+```
+
+**The sort — the story's centerpiece.** v1 has registers, not arrays,
+so we sort four named values through Batcher's 4-input network — the
+SAME comparator specification the silicon sorter is proved against
+(compiler is unifying the two specs tonight). `cex!` is frontend
+sugar that expands to the if-block above:
+
+```rust
+fn main() {
+    let mut x0 = 9;
+    let mut x1 = 3;
+    let mut x2 = 7;
+    let mut x3 = 1;
+    cex!(x0, x1);  cex!(x2, x3);   // Batcher: two column-1 exchanges
+    cex!(x0, x2);  cex!(x1, x3);   // column 2
+    cex!(x1, x2);                  // the merge exchange
+}   // post: x0 ≤ x1 ≤ x2 ≤ x3 — the same network as the tile
+```
+
+Reserved for the executive (v2): `yield;` — a first-class statement
+compiled to the JAL convention (the harvest from the ML-effects
+road: the executive as the thing yields return to).
+
+**Three decisions the name "Rust" forces, chosen out loud (v1):**
+1. **Arithmetic WRAPS.** Tiny-Rust is release-semantics Rust: `+` is
+   two's-complement wrapping, exactly the machine's — no panics, no
+   hidden range analysis. (The alternatives either hide a lemma in
+   wellFormed or defer a panic case; we take the honest cheap one.)
+2. **One type in v1: `i32`, signed.** So `<` IS the machine's SLT,
+   natively — no lowering needed at the source level. `u32` and the
+   unsigned-compare lowering stay in the backend for the comparator
+   spec (which compares unsigned bit-strings) and reach the SOURCE
+   in v2, typed.
+3. **Ownership is VACUOUS in v1 and says so**: registers only, no
+   heap, no references — nothing to own, nothing to borrow. The
+   borrow-checker you may be imagining does not exist yet; it
+   arrives with Slice B's memory, as a theorem (§6).
+
+## 2. ABSTRACT SYNTAX (what the theorem is about)
+
+```
+e ::= x | n | e + e | e ^ e | e < e            (Expr)
+s ::= skip | x = e | s; s                      (Stmt)
+    | if e { s } else { s }
+    | while e { s }
+p ::= fn main() { s }                          (Prog)
+```
+The parser (Rust-familiar surface, `let mut`, sugar like `n - 1` and
+`cex!`) is a TRUSTED frontend; every theorem lives from this AST down
+to machine code — CompCert's own posture, stated plainly.
+
+## 3. STATIC SEMANTICS (well-formedness — standalone and decidable)
+
+`wellFormed p` iff: every variable assigned before use · MAX LIVE
+BINDINGS ≤ pool size (Rust's block scoping makes liveness ends
+syntactic — the language choice discharges this cleanly; math's
+observation) · every literal fits i32. Decidable by construction and
+INDEPENDENT of the compiler — the bridge "wellFormed → the allocator
+succeeds" is a proved theorem, never a definition (the c2 shape,
+barred). Types in v1: everything is i32; signedness is therefore
+unambiguous in every comparison (F8).
+
+## 4. OPERATIONAL SEMANTICS (big-step, three rules shown)
+
+```
+────────────────── skip        σ ⊢ e ⇓ v
+σ ⊢ skip ⇓ σ                  ─────────────────── assign
+                               σ ⊢ (x = e) ⇓ σ[x↦v]
+
+σ ⊢ e ⇓ v   v ≠ 0   σ ⊢ s ⇓ σ'   σ' ⊢ while e {s} ⇓ σ''
+──────────────────────────────────────────────────────── while-true
+σ ⊢ while e {s} ⇓ σ''
+```
+A relation, not a function — divergence is representable and v1's
+theorem honestly quantifies over terminating runs. Nonemptiness of
+the relation itself is a pre-registered kernel control (a concrete
+program shown to step, by decide), so no row can go vacuously green.
+
+## 5. THE THEOREM PAIR (v1.1 — the post-refutation form)
+
+**Row A (correctness).** For well-formed p, if `compile p = some
+code`, then for every source run σ ⇓ σ′: `machRun code (encode σ) =
+encode σ′`, AND every register outside p's pool is untouched — a
+function equality against the certified core semantics (the machine
+is deterministic; a mere reachability claim would under-specify it),
+with `encode` injective as a stated hypothesis.
+
+**Row B (completeness).** Every well-formed program compiles:
+`∀ p, wellFormed p → ∃ code, compile p = some code` — without this
+row, Row A is satisfied by a compiler that rejects everything.
+
+Together: *the program does what the source says* — composable with
+*the core does what the ISA says* (landed) and, later, *the
+executive schedules what the core runs* (Slice B).
+
+## 6. THE v2 HORIZON (named, not promised)
+
+Memory and arrays arrive with Slice B's LW/SW — and with them,
+tiny-Rust's OWNERSHIP rules stop being syntax: the borrow discipline
+becomes the proved isolation frame the verified executive consumes.
+"A tiny Rust whose ownership is a theorem" is the arc's star
+sentence, and it is two campaigns away, not one.
