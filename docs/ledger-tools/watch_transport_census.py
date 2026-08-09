@@ -362,10 +362,24 @@ def main():
         print("      it can detect anything, so 'none' and 'unasked' are the same")
         print("      reading. Verify the notification marker still matches the")
         print("      transcript format BEFORE drawing any conclusion.")
-    elif zero_seats:
-        print(f"\n  ✅ DETECTOR DEMONSTRATED LIVE on {len(live_seats)} seat(s), so a"
-              f" zero for {', '.join(zero_seats)}")
-        print("     is a finding about that seat rather than about this scan.")
+    else:
+        # ⛔ FOUND 17:2x BY APPLYING SILICON'S 17:20 FLEET LAW TO THIS FILE:
+        # "the instrument you build to catch a defect class very often exhibits
+        # that class." This guard existed to stop an EMPTY result being read as a
+        # fact — and it announced its own liveness ONLY when some seat read zero.
+        # In the all-healthy case it said NOTHING about whether it can detect
+        # anything, which is the same silence-carries-no-information defect it
+        # was built to prevent, in the tool built to prevent it.
+        # ⇒ The liveness line is now UNCONDITIONAL: a reader never has to infer
+        # from silence that the detector worked.
+        print(f"\n  ✅ DETECTOR DEMONSTRATED LIVE on {len(live_seats)} seat(s)"
+              f" ({', '.join(live_seats)}).")
+        if zero_seats:
+            print(f"     ⇒ a zero for {', '.join(zero_seats)} is a finding about"
+                  f" THAT SEAT, not about this scan.")
+        else:
+            print("     ⇒ no seat read zero, so no absence claim is being made"
+                  " at all.")
 
     print("\n" + "=" * 74)
 
