@@ -190,6 +190,14 @@ OPEN ITEMS:
   corpus's green is NOT yet shown reproducible from cold at the
   sanctioned default. W6 census converts this to a number; the cap
   ruling is priced at morning council on its output.**
+- **N7 DESIGN DEBTS, MAESTRO-OWED (post-council, Fable-tier — opened
+  20:39 on math's exhaustion measurement): (a) the N7 ASSEMBLY design
+  block (wiring the landed+composing (7.7) inputs and the kernel'd
+  2-adic collapse into the road row); (b) the W4-a DESIGN CAMPAIGN
+  (gap row 8: real-primitive-conductor 2-part classification;
+  1,300–2,600 ln pricing CONFIRMED by math's shrink attempt — mathlib
+  has the tools, not the theorem). The flagship front at solo tier is
+  exhausted until one of these opens a gate.**
 - B5 (T1): the click; Sept-7 13:00 PDT close; REF QUESTION + floor
   law remain his; fact sheet on his word. Adjacent MONEY item from
   the muster flags: PCBs 0/80 — the real TT scarcity; ordering is
