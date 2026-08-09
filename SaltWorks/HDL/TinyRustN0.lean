@@ -437,7 +437,14 @@ theorem typing_is_pool_independent (p : Stmt) (n m : Nat)
 /-! ## 8. SILICON'S RTL ANSWER, AS THEOREMS — the single pool, and why two budgets lied -/
 
 /-- The pool of `slicea16bma` **as built** — `rf [1:15]`, read from the RTL by silicon at
-09:30, not from an inventory note. A **named constant with provenance**, so nobody instantiates
+09:30, not from an inventory note.
+
+⚠️ **THIS LITERAL MIRRORS AN ARTIFACT LEAN CANNOT READ, so the mirror is CHECKED, not hoped:
+`docs/ledger-tools/pool_drift.sh` parses `rf [1:N]` out of `slicea16bma.v` and compares. Run it
+after any RTL change.** *Silicon's law (`fb73853`): a constant that tracks someone else's constant
+is a defect waiting for them to edit it — and it degrades in the worst direction, since every
+`fitsAndTyped slicea16bmaPool` theorem stays GREEN while describing a machine that no longer
+exists. Lean cannot read Verilog, so the literal is unavoidable and the check is mandatory.* A **named constant with provenance**, so nobody instantiates
 "32, because RISC-V-shaped": that error is over by more than 2× and is *independent* of the
 shape error below. -/
 def slicea16bmaPool : Nat := 15
