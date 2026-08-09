@@ -159,6 +159,12 @@
   convention, prose naming supersessions) · convention-boundary
   blindness names the mechanism; a corpus-wide declaration index is
   the structural candidate.
+- **The closing method lesson (silicon's 3×3 catch, 22:51)**: a
+  TRUE principle ("tiles buy area") and a PLAUSIBLE number survived
+  four refuter passes and six readers before the catalogue refuted
+  the geometry — principles license the question; catalogues answer
+  it. The correction made your morning smaller and truer (€140, a
+  real 3×2 at 65.6%).
 - **The demonstration sentence the night wrote for itself**: your
   two questions at the helm went from words to a hardened GDS in
   ninety minutes, with the fleet refuting itself three times on the
