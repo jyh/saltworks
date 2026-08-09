@@ -99,6 +99,34 @@ aggregator (verified counting). The filter is the one with teeth.
 5. Every pin, cell, and rate number above dies until built — the
    night's iron law, pre-applied.
 
+## 4b. MATH'S AST CHECK (02:30 — the sketch's own open #4, answered
+## against CodegenSpec.lean, not the intent)
+
+1. **Opens 1 and 4 are COUPLED — council decides them together.**
+   v1 has no AND and no SHIFT (neither derivable from add/xor), so
+   packed header words cannot be field-extracted in the language.
+   Either the PORT ORGAN delivers each field in its own variable
+   (v1 then suffices) or the language grows two operators.
+2. **SECURITY-RELEVANT: `slt` is signed; addresses are not.** An
+   address with the top bit set is negative under slt, so an
+   unsigned range check silently inverts on the entire upper half
+   of the space. Fix is one constructor (`ult`) or a documented
+   bias-by-2³¹ idiom — cheap now, invisible later. [Math: reasoned
+   from the semantics, analytic.]
+3. **Scope line: no loops ⇒ fixed-offset headers only** (no
+   options-style variable headers in v1). The drop/pass/rewrite
+   arms are fine, and B2's no-silent-default is STRUCTURAL — ite
+   always carries an else.
+4. **THE THEOREM, restated honestly — two premises were missing:**
+   containment = fabric INTEGRITY (bnC_payload_delivered) ∘
+   compiler correctness (Rows A/B) ∘ arm totality (B2) ∘
+   **source ⊨ P** (or P is DEFINED as the policy source's
+   denotation — say which) ∘ **COMPLETE MEDIATION** (every
+   ingress→egress path passes the filter — a port/topology
+   obligation, not given by integrity). Integrity alone does not
+   yield containment; mediation is the port organ's design burden
+   and must be its own row.
+
 ## 5. WHAT THIS BUYS THE CAMPAIGN (why it may be the crown demo)
 
 The two-week story's stack — language → compiler → ISA → core →
