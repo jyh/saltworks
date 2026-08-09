@@ -1,0 +1,208 @@
+# THE NEURAL DATAFLOW FABRIC — PoC DESIGN PACKAGE v1
+
+### Maestro, 2026-08-09 ~10:2x, at the Captain's six asks ("But if we do
+### this, I'd want details like…"). STATUS: DESIGN PACKAGE FOR DECISION —
+### nothing here is dispatched to silicon/build until the Captain chooses
+### the path. Extends `neural-graph-machine-sketch.md` (the dream record,
+### §0–§6b) and `packet-io-demo-sketch.md` (the port substrate). The
+### personal story is documented separately: `midnight-to-silicon-story.md`.
+
+**The one-sentence architecture:** a packet-routed dataflow machine —
+bit-serial neuron cells at the leaves of the certified banyan fabric,
+weights stationary in the cells, activations streaming through wires and
+never touching memory, big cheap memory at the edge, a small verified
+RISC-V core as control plane — every step from configuration to activation
+a theorem. Architecturally distinct from systolic-array accelerators
+(TPU-class): asynchronous packet routing over a switching network, not a
+synchronous matrix pipeline; the natural workload is *irregular* dataflow
+(GNNs, sparsity), where a GPU's bottleneck is gather/scatter and ours is
+native wiring.
+
+---
+
+## 1. THE CELL (the unit of operation)
+
+```mermaid
+flowchart LR
+  subgraph CELL["NEURON CELL (~500 cells + certified CE)"]
+    WREG["weight register<br/>32b latch"]
+    AND["AND row<br/>x_bit · W"]
+    ADD["32b adder<br/>(op mux: +/− on sign cycle)"]
+    ACC["accumulator<br/>32b + guard bits<br/>(bias PRELOADED here)"]
+    CE["certified CE vs 0<br/>= ReLU (landed organ)"]
+    SER["parallel→serial<br/>shift-out"]
+  end
+  WP(("W-port<br/>serial in")) --> WREG
+  XP(("X-port<br/>serial in, LSB-first")) --> AND
+  WREG --> AND --> ADD --> ACC
+  ACC -->|shift-add feedback| ADD
+  ACC --> CE --> SER --> OP(("OUT-port<br/>serial, LSB-first"))
+  FSM["phase FSM:<br/>LOAD_W → STREAM_X → ACTIVATE → EMIT"] -.controls.-> WREG & ACC & CE & SER
+```
+
+**Operation.** Weights arrive as packets on the W-port and latch (weight-
+stationary). Values stream LSB-first on the X-port; each bit ANDs against
+the full latched weight and shift-adds into the accumulator — a classic
+serial-parallel MAC. The **bias costs zero gates**: it is the accumulator's
+preload value. After the last input, the nonlinearity is applied **in
+parallel** by the landed compare-exchange organ with one input tied to
+zero (ReLU = max(a,0) = half a CE); the result re-serializes out
+LSB-first for the next layer's MACs.
+
+**The LSB-first question — answered, not a problem.** Addition wants
+LSB-first; comparison wants MSB-first; the tension dissolves because the
+accumulator is a *parallel* register: serial in → parallel accumulate →
+parallel CE → serial out. No serial comparator exists in the design. Two
+standard details, both cheap:
+
+- **Sign (two's complement):** the value's final (sign) bit is
+  subtractive — on that one cycle the adder subtracts instead of adds.
+  One mux on the adder op.
+- **Guard bits:** accumulating N products needs log2(N) headroom above
+  the product width. PoC number format: **8-bit weights, 8-bit
+  activations, 32-bit accumulator** (classical edge-NPU quantization) —
+  an 8-bit stream also makes every MAC 8 cycles, not 32.
+
+**Cost, to be priced exactly by silicon:** order 100–150 flops + an
+adder + AND row + small FSM ≈ **~500 cells**; the CE is the existing
+certified organ. Several cells fit beside the fabric on a TT allocation.
+Multiple *logical* neurons time-multiplex on one physical cell (weights
+re-latch per phase — weights are traffic, not storage).
+
+## 2. THE FABRIC — chip level and system level
+
+```mermaid
+flowchart TB
+  subgraph SYS["SYSTEM (the $500 story)"]
+    HOST["laptop / host<br/>model + dataset + training"]
+    RP["RP2040 on the TT board<br/>= THE EDGE MEMORY<br/>weights, inputs, schedules<br/>(big, cheap, off-die)"]
+    subgraph CHIP["THE CHIP (one TT project, combined)"]
+      CPU["verified RISC-V core<br/>(slicea16, W5-asm)<br/>= CONTROL PLANE<br/>executive schedules phases"]
+      FAB["8×8 banyan of certified<br/>CE switch nodes<br/>= THE DATAPLANE"]
+      C1["cell 1"] & C2["cell 2"] & C3["…"] & C4["cell k"]
+    end
+    HOST <--> RP
+    RP <-->|"2-pin serial packet ports"| FAB
+    CPU <-->|"config + telemetry packets"| FAB
+    FAB <--> C1 & C2 & C3 & C4
+  end
+```
+
+**Chip level.** One combined TT project (the layout-fork option 2 shape —
+on-die packets require it, since separate TT projects are power-gated and
+never coexist): the certified 8×8 fabric in the middle; k neuron cells on
+its leaf ports (k sized by area after silicon prices the cell — target
+4–8); the small verified core attached as one more fabric client; 2-pin
+serial packet ports at the pins. Three traffic classes, one substrate:
+**weight packets** (edge → cells, config phases), **activation packets**
+(cell → cell, compute phases), **gradient packets** (the reverse routes —
+the recorded-winner paths make backprop *routing*, demo-tier).
+
+**System level.** The TT board's RP2040 is the edge memory — exactly the
+"lots of memory at the edge where it is cheap" half of the thesis. It
+holds the model and dataset, feeds weight/input packets, collects
+outputs. The host trains (PoC trains off-chip; the chip demonstrates
+verified inference + gradient routing). **Scaling story:** two TT boards
+PMOD-bridged = two fabric stages — the fabric composes (banyan of
+banyans), and the demo photograph is two chips with a visible wire and
+certified traffic crossing it.
+
+## 3. THE ON-DIE CPU — yes, and it is the machine we are already building
+
+The core (slicea16, W5-asm assembly underway) rides along as the
+**control plane**: it runs the verified executive (B-EXEC) that
+sequences phases (LOAD_W / route round / ACTIVATE / EMIT), owns the
+routing schedule, maps logical neurons onto physical cells, and handles
+telemetry. The dataplane never waits on it — the classic dataflow split,
+and the Captain's own 3am words: *"the switch fabric as neural
+processor, **managed by the cpu**."*
+
+Stated honestly: a bare FSM sequencer could run a fixed demo without a
+CPU. The CPU is included because it is the *point*: it makes the chip
+self-hosting (**packet-boot** — the configuration program arrives
+through the fabric it will manage), it carries the verified-software
+story (tiny-Rust → typed executive → scheduled phases, each a theorem),
+and it is the piece that makes the platform *general* rather than one
+hardwired network. Its dmem8 + offboard memory (ruling #5) suffices —
+configuration state lives in the cells and routing registers, not in
+CPU memory.
+
+## 4. A SMALL GNN, COMPILED — the worked example
+
+**The network:** 4 nodes {0,1,2,3}, edges {0–1, 0–2, 1–2, 2–3},
+features h ∈ Z² (8-bit fixed point), one message-passing layer:
+
+```
+h'_v = ReLU( W_self · h_v  +  Σ_{u ∈ N(v)} W_msg · h_u  +  b )
+```
+
+**Compilation output** (the artifact the layer-compiler emits):
+
+```
+CONFIG   broadcast W_msg to all 4 cells (ONE weight stream — sharing is
+         multicast, not storage); W_self, b per cell (b = acc preload)
+ROUND 1  permutation (0 1)(2 3):   h_0↔h_1, h_2↔h_3 cross the fabric;
+         each cell MAC-accumulates the arriving message
+ROUND 2  permutation (0 2):        h_0↔h_2
+ROUND 3  permutation (1 2):        h_1↔h_2
+         [the edge set decomposed into 3 matchings; each matching is a
+          permutation the banyan routes without conflict]
+SELF     each cell streams its own h_v against the latched W_self
+ACT      CE vs 0 in every cell; EMIT h'_v
+```
+
+**The verified decomposition — three theorem instances, two landed:**
+
+| claim | instrument | status |
+|---|---|---|
+| each round delivers exactly the multiset {h_u : u ∈ N(v)} to cell v | fabric delivery theorem (per-permutation instance) | **landed family** |
+| cell v computes b + Σ (W·x) with the sign cycle correct | bit-serial MAC induction (Seq, cycle-indexed) | **the one new proof** |
+| activation = max(·, 0) | CE certificate | **landed** |
+
+⇒ composed: `h'_v = ReLU(W_self h_v + Σ W_msg h_u + b)` — **the layer
+equation as a kernel theorem**, per compiled schedule. "The platform is
+general" is then a staged claim: *the layer-compiler for family F is
+verified*, one family at a time — MLP and CNN reuse the same three rows
+(a CNN is the same cell with the kernel latched once and the image
+streamed past; pooling is the certified Batcher doing order statistics).
+
+**Scale of the demo:** 3 rounds × 4 packets × (2 dims × 8 bits + header)
+≈ a few hundred bit-times per layer pass — tens of microseconds at TT
+clocks. Bench-visible with a logic analyzer on the PMOD pins.
+
+## 5. THE TRADEOFFS, spelled out
+
+| axis | what we pay | what we get | honest note |
+|---|---|---|---|
+| bit-serial MAC | 8–32× cycles per MAC | ~same area×time as parallel; 1-wire operands (fabric stays routable); precision = stream length (free 8-bit mode) | high per-op latency — a throughput/pipeline machine, not a latency machine |
+| weights streamed in-band | edge port carries weight traffic | zero on-die weight memory; config-through-fabric (the neuron dream literally) | batch-1 dense inference reuses weights poorly on EVERY architecture; ours does not fix LLM-decode-class workloads and we will not claim it |
+| weight-stationary cells | re-latch per logical neuron | one weight-load amortized over a whole stream (TPU's own trick, packet-shaped) | virtualization ratio (logical/physical neurons) is bounded by weight-reload traffic |
+| banyan topology | log-depth network is BLOCKING; schedules must be permutation-decomposed | landed certified organs; Batcher+banyan = non-blocking if ever needed; natural multicast by rounds | at large n, wire length favors 2D mesh (Cerebras-style); irrelevant at n=8, named for honesty |
+| nonlinearity set | smooth functions (softmax, tanh, exp) need LUTs or hard variants | the ENTIRE max family free and certified: ReLU, max-pool, hard-sigmoid/tanh (= 2 CEs), top-k/argmax (the sorter's specialty) | transformers approximable (hardmax attention), not native |
+| fixed-point only | no floats anywhere | exactness — theorems are about the actual arithmetic, no ulp gaps | training in fixed point is delicate; PoC trains off-chip, chip does verified inference + gradient ROUTING |
+| process/scale (sky130, TT) | ~9 orders of magnitude off a datacenter part | $500-class fabrication; the claim is the VERIFIED INSTANCE of a vindicated architecture class (Groq/Cerebras/TPU-adjacent organization), not a competitive part | say this loudly in every telling |
+| programmability | a config compiler must exist and be trusted | ours comes WITH THEOREMS — aimed at the exact flank that killed dataflow machines historically | the compiler theorems are the differentiator; scope them per-family, never "general" |
+
+## 6. WHAT IS NEW HERE (the Captain's "anything new, or just a dream" test)
+
+Not the hardware genre — bit-serial neural silicon and dataflow machines
+are heritage, and we cite them. New, and checkably new: **(i)** the
+verified stack end-to-end (routing theorem ∘ MAC induction ∘ nonlinearity
+certificate ∘ layer-compiler theorems ∘ executive scheduling — one kernel
+chain from GNN equation to gates); **(ii)** the certified-sorter-as-
+nonlinearity fusion (the nonlinear engine's proof came free); **(iii)**
+gradient-is-routing made literal in a packet machine (backprop as the
+fabric's recorded winner paths). The demo sentence: *a graph network
+whose every message, weight, activation, and gradient path is a theorem,
+on $500 silicon, from a midnight dream.*
+
+## 7. OPEN QUESTIONS FOR THE SEAT REVIEW (fire on the Captain's word)
+
+- SILICON: price the cell exactly (8-bit format); floorplan fabric + k
+  cells + core on candidate tile shapes; k = ?
+- MATH: scope the MAC induction (statement form, fuel/cycle indexing);
+  confirm the delivery theorem instantiates per-permutation as assumed.
+- COMPILER: the layer-compiler rows (GNN first) — schedule emission +
+  the three-row correctness table as Lean statements.
+- EVIDENCE: the claim fence for the story numbers (tokens, days, $) —
+  measured, not vibes, before anything is published.

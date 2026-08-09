@@ -1,0 +1,88 @@
+# FROM A MIDNIGHT DREAM TO VERIFIED SILICON — the story, kept as it happens
+
+### Maestro, opened 2026-08-09 at the Captain's ask ("Let's document the
+### personal story from midnight dream all the way to real PoC silicon").
+### STATUS: A RUNNING LOG, not a retrospective — entries are dated as they
+### occur, numbers are placeholders until evidence measures them. The
+### engineering package is `neural-fabric-poc-design-v1.md`; the raw dream
+### record is `neural-graph-machine-sketch.md` §0.
+
+**The story's one line:** *a switch fabric designed to route voices in
+1988, reborn to route gradients in 2026 — and this time, every step from
+the dream to the die is a theorem.*
+
+---
+
+## THE ARC SO FAR (each entry written the day it happened)
+
+**1988–1990, Bellcore.** The Captain builds batcher-banyan switch
+fabrics — self-routing packet networks. One sentence from that era
+("the rotation network returns to identity") waits thirty-eight years
+for its proof.
+
+**2026-08-07/08 (campaign days 2–3).** The fabric lives again in Lean:
+the certified comparator, the compare-exchange, the 8×8 banyan with its
+delivery theorem, the Batcher sorter certificate — and `rot^k = id`,
+the 1990 sentence, lands in the kernel. The Captain's sizing word:
+the BB in ~2 tiles. **"He wants the CPU fabricated."**
+
+**2026-08-09, ~03:00.** The dream, verbatim (full record: sketch §0):
+*"the one that seems to pull: the cpu as smart 'neuron', a small amount
+of storage is fine (both inst and data), we would need differentiability.
+so a graph network, dynamic, configurable, scalable. this is a 3am
+dream, but can you take this idea to the design team?"* — and its dual,
+minutes later: *"the switch fabric as neural processor, managed by the
+cpu. can we explore that design space too?"* The night shift writes the
+sketch: Design A (CPU-as-neuron), Design B (fabric-as-processor), and
+finds the tropical gift — the fabric's compare-exchange IS max/min, the
+certified sorter is a neural nonlinearity in a sorting costume.
+
+**2026-08-09, morning council.** The Captain works the idea like an
+engineering review, not a dream journal: the unit of operation (his
+sketch of the cell — values bit-serial on one port, weights on another —
+survives review nearly unchanged; the one correction makes it cheaper:
+bias is an accumulator preload, zero gates). The 3a/3b fork (bit-serial
+MACs vs tropical) dissolves into one cell: everything
+multiplication-shaped is tiny new silicon, everything max-shaped is
+already certified. The big-picture question is asked and answered
+honestly: yes, this is the dataflow thesis the post-GPU generation
+vindicated (weights stationary, activations in wires, memory at the
+edge); the bottleneck relocates to edge-bandwidth × reuse; the genuine
+dodge is irregular workloads — graphs — where routing replaces
+gather/scatter. And the historical warning is named: dataflow machines
+died of programmability, not density. *A configuration compiler whose
+correctness is a theorem is aimed at the exact flank that killed this
+architecture the first time.*
+
+**Same morning, in the background, the ordinary machinery of the
+campaign kept running** — the RISC-V core's organs were being placed
+into their composed net space increment by increment (W5-asm), each
+placement a theorem, each landing swept into the build graph within
+minutes. The dream review and the core assembly shared one morning and
+one fleet. That simultaneity is the demonstration.
+
+## THE COST LINE (the Captain's framing, numbers to be actualized)
+
+> *"I had a revelation in the middle of the night! What is the total
+> cost to bring it all the way from that unconscious dream to PoC
+> silicon, **verified every step of the way**?"*
+
+| item | placeholder | actual (evidence-fenced, TBD) |
+|---|---|---|
+| design | ~2 days | log running; dream 08-09 03:00 → package same morning |
+| tokens | ~20M | evidence seat owns the measured figure at each gate |
+| fabrication | ~$500 (TT) | actual invoice when submitted |
+
+**Rule for this table (evidence seat's fence):** no number leaves this
+doc for any public telling until it is measured — tokens from the
+account roots, days from the dated entries above, dollars from receipts.
+The story is only worth telling because it is checkable.
+
+## WHAT REMAINS (entries to be written on their days)
+
+- The decision (this path chosen, or shelved with the drawer alive)
+- The cell priced; the MAC induction landed; the first verified layer
+- The GNN layer-compiler theorem; the executive scheduling it
+- Tapeout submission day; the die back; the bench demo with certified
+  packets on a logic analyzer
+- The telling (venue per the writeup plan; voice rules apply)

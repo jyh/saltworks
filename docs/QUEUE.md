@@ -263,6 +263,25 @@ OPEN ITEMS:
   discussion"; #1 and #2 use offboard memory (his word), #3's
   memory story is part of the open discussion.**
 
+- **COUNCIL ITEM (10:2x, the Captain — the #3 DETAIL PACKAGE,
+  conditional not yet a ruling): "Yes, dataflow architecture, of
+  course :)" — he likes the path ("close to home but not too close…
+  very close to home personally") and framed THE STORY: "I had a
+  revelation in the middle of the night! What is the total cost to
+  bring it all the way from that unconscious dream to PoC silicon,
+  *verified* every step of the way? ~2days for the design, ~20M
+  tokens, ~$500 for TT" (numbers adjustable). His SIX ASKS, all
+  delivered 10:2x in docs/neural-fabric-poc-design-v1.md (§1 cell
+  + block diagram + LSB-first answered: not a problem, sign-cycle
+  op mux, parallel accumulator boundary; §2 fabric chip+system;
+  §3 CPU role: yes, control plane, the W5-asm core; §4 GNN worked
+  example w/ 3-row verified decomposition; §5 tradeoff table) and
+  docs/midnight-to-silicon-story.md (§6 the running story log w/
+  evidence-fenced cost table). SEAT PROBES (§7: silicon cell
+  pricing/floorplan · math MAC-induction scoping · compiler
+  layer-compiler rows · evidence number fence) FIRE ON HIS WORD.
+  DECISION PENDING: choose this path / shelve with drawer alive.**
+
 - **COUNCIL RULING #6 (10:0x, the Captain, verbatim: "Both 1 and 2
   are good choices, but I need to work through 3a/3b to convince
   myself if there is anything new here, or it was just a dream. So
