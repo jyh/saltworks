@@ -136,15 +136,27 @@ Two types in v1, and the second is the machine's own gift:
 ```
 τ ::= i32 | bool          (v2 reserves: u32, &τ, &mut τ)
 
-Γ ⊢ n : i32   (literal in range)      Γ ⊢ x : Γ(x)
+                                       ─────────────────── (var)
+─────────────── (lit, n in range)      Γ, x:τ, Δ ⊢ x : τ
+Γ ⊢ n : i32
+
 Γ ⊢ e₁ : i32   Γ ⊢ e₂ : i32           Γ ⊢ e₁ : i32   Γ ⊢ e₂ : i32
 ─────────────────────────── (+,^)     ─────────────────────────── (<)
 Γ ⊢ e₁ + e₂ : i32                     Γ ⊢ e₁ < e₂ : bool
 
-Γ(x) = τ   Γ ⊢ e : τ                  Γ ⊢ e : bool   Γ ⊢ s ⊣ Γ
-──────────────────── (assign)         ──────────────────────── (while)
+Γ ⊢ x : τ    Γ ⊢ e : τ                Γ ⊢ e : bool   Γ ⊢ s ⊣ Γ
+────────────────────── (assign)       ──────────────────────── (while)
 Γ ⊢ x = e ⊣ Γ                         Γ ⊢ while e { s } ⊣ Γ
 ```
+
+The var rule reads its binding from the context's shape (the
+Captain's house notation — Γ, x:τ, Δ — no dictionary lookup), and
+ASSIGN IS SYMMETRIC: both sides are typed as expressions through the
+same rules. The grammar still restricts the lhs to a variable in v1
+— but typing it through (var) rather than a side-condition is
+exactly the form that generalizes: in v2 the lhs premise becomes a
+PLACE judgment and `*p = e` types with no change to the rule's
+shape. The symmetry is the lvalue story, arriving early.
 
 **Function signatures live in Δ, not in τ** (the Captain's
 double-check, answered): calls are by name only — no first-class
