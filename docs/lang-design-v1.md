@@ -2,7 +2,14 @@
 ### Status: DRAFT-UNTIL-REFUTED. Captain-opened 8/8 evening ("let's
 ### pick a software language"); the maestro's recommended fork drafted
 ### here — a small IMPERATIVE language — with the Lean-DSL fallback
-### recorded. The Captain christens the name; redirection is cheap.
+### recorded. CAPTAIN-CHOSEN 8/8 19:1x: **TINY-RUST** — the campaign
+### is named "a verified compiler from tiny-Rust to 5-op." Concrete
+### syntax: Rust-familiar (fn/let mut/while/if, curly braces), parsed
+### by a TRUSTED frontend — the theorem lives AST→machine (CompCert's
+### posture, stated plainly). `yield` RESERVED as a primitive for
+### B-EXEC (the ML-effects harvest). v2's star, named now: ownership
+### becomes the proved isolation discipline B-EXEC consumes.
+### MATH'S SLATE FOLDED (19:12, six findings — v1.1): see §2/§4/§5.
 ### PRECONDITIONS: Slice-A ISA as landed (ADD/ADDI/XOR/SLT/BEQ; the
 ### certified encoder organ; sem_* family in Stack/Program.lean at
 ### current bytes). Compiler's night inventory may amend §1.
@@ -33,16 +40,28 @@ SLICE A EXACTLY AS IT EXISTS — no memory, no waiting on Slice B.
   over terminating runs in v1; a fuel/small-step variant is §5's
   successor for the executive's preemption story).
 
-## 2. THE STATEMENT (shape)
+## 2. THE STATEMENT (v1.1 — math's slate folded; the PAIR is the
+## theorem)
 
-For a well-formed program p (register-allocable, in-range constants):
-  compile p = some code →
-  ∀ s s', bigStep p s s' → machRun code (encode s) ⇓ (encode s')
-where machRun is the EXISTING core semantics (Stack/Program.lean's
-sem_* family — the compiler theorem consumes the certified organs,
-it does not restate them), and encode is the register-file embedding.
-- The compiler is a FUNCTION (may reject: `none` on pool overflow or
-  width overflow — rejection is not a theorem obligation).
+ROW A (correctness): for p with wellFormed p, compile p = some code →
+  ∀ s s', bigStep p s s' →
+    machRun code (encode s) = encode s'  ∧
+    ∀ r ∉ pool p, (machRun code (encode s)) r = (encode s) r
+  — the conclusion is FUNCTION EQUALITY (the machine is
+  deterministic; F5), and the frame clause (registers outside the
+  pool untouched) is IN the statement (F3 — today's L4 proved the
+  ∀-w clause is the asset, not the risk).
+ROW B (completeness; F1 — without it Row A is satisfied by
+  `compile := fun _ => none`):
+  ∀ p, wellFormed p → ∃ code, compile p = some code.
+HYPOTHESES IN THE STATEMENT: `Function.Injective encode` (F2 — the
+  hdi lesson, dropped = false at a two-line witness).
+`wellFormed` is a STANDALONE DECIDABLE predicate, independent of the
+  allocator; the bridge wellFormed → allocator-succeeds is a PROVED
+  row, never a definition (F4 — the c2, named and barred).
+machRun is the EXISTING core semantics (Stack/Program.lean's sem_*
+family — consumed, not restated); encode is the register-file
+embedding.
 - Branch offsets: BEQ's actual offset arithmetic per the ISA — the
   known trap class (off-by-one, sign) gets its own lemma + mutation
   controls, not inline arithmetic.
@@ -71,9 +90,11 @@ it does not restate them), and encode is the register-file embedding.
 - Do NOT quantify over the machine's runFrame-style drivers — the
   theorem lives at the ISA semantics layer (the ③ lesson, ∀-P's
   ghost, pre-applied).
-- The rejection path is not decorative: `compile p = none` cases need
-  a completeness note (what v1 rejects and why), or the theorem
-  reads stronger than it is.
+- Rejection is governed by Row B, not by prose (F1).
+- PRE-REGISTERED CONTROL on bigStep itself (F6): one concrete program
+  with `bigStep p s s'` INHABITED, by decide, before any wave — a
+  mis-defined relation that steps nothing turns every row vacuously
+  green; the relation is shown NONEMPTY, never assumed.
 
 ## 5. DEFERRED, BY NAME
 
@@ -81,7 +102,10 @@ it does not restate them), and encode is the register-file embedding.
   v2 and B-ISA are one campaign in two files.
 - Divergence-sensitive semantics (small-step + fuel): needed by
   B-EXEC's preemption story; v1's big-step terminating-runs form is
-  the honest first cut.
+  the honest first cut. NAMED with it (math's slate): nothing in v1
+  gives machine-termination ⇒ source-termination — that direction
+  belongs to the preemption story and is deferred BY NAME so it is
+  never assumed.
 - The Lean-DSL fallback: if the two-week clock tightens, N1-N2 keep,
   N3 simplifies to macro-verification; ~3 days cheaper, weaker story.
 
