@@ -9,9 +9,15 @@
 ### JALR/BNE, ALU op-set UNCHANGED — the (3,2) select carries it;
 ### cooperative first; the −1,154 gates banked AT THE SELECT are the
 ### budget (evidence 20:04: a SELECT delta, verified 1445→291 exact;
-### the whole-core net is UNVERIFIED — the corpus holds no whole-core
-### total — silicon's one-line answer owed before the budget is spent
-### as a system figure).
+### ANSWERED by silicon 20:51/36a37a5: NOT a whole-core net and it
+### CANNOT be made one — no whole-core object exists in the corpus,
+### the parts have never been composed; against the named-parts
+### inventory (3,633 gates, a SUM not a composition) it is 32%,
+### against a realistic two-read-port datapath ~17%. Spend it as
+### REALIZED and SELECT-LOCAL, never as a system figure. And the
+### convergent tile finding: readTree is 82% of the named inventory —
+### B1's memory organ competes with the REGISTER FILE for the tile,
+### not with the select).
 ### PRECONDITIONS: phase 3+3b closed (constants at the ruled pair);
 ### the census at PASS/FAIL/UNREACHED/UNWIRED; compiler's night
 ### inventory may amend §B1. Scope audit: evidence 20:04,
