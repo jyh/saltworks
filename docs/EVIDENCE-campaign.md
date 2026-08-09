@@ -960,6 +960,62 @@ carry at slate close" — which is the helm adopting the same discipline: an
 assignment that names WHEN it records is an assignment that cannot rot into a
 number nobody can source.***
 
+### 🔒 ④ PRICE — CRITERION PRE-REGISTERED 2026-08-08 17:2x, BEFORE ANY FIGURE EXISTS
+
+⚠️ **NO ④ PRICE IS OWED, ASKED FOR, OR PROMISED.** *This is insurance: the ④
+waves dispatched at 17:26 and no piece lemma has landed yet, so the criterion can
+still be fixed while every figure is unknown. **If a price is ever wanted it can
+then be given honestly; if it is never wanted this cost one commit.*** *The ③
+figure drifted **3 → 4 → 7 in 38 minutes** because nobody fixed the units first —
+that is the whole reason this exists.*
+
+**THIS CRITERION IS BUILT FROM THE FIVE WAYS THE ③ ONE FAILED TODAY.** Each fix
+is named beside the clause it repairs:
+
+```
+ANCHOR   the maestro's ④ refutation assignment, bus 12:39
+         "SILICON — your ④ refutation assignment FIRES at this seam"
+
+FREEZE   the FIRST COMMIT whose diff ADDS a ④ piece lemma under SaltWorks/,
+         CONFIRMED PRESENT AT origin/master BY `git ls-remote`
+         ⬅ FIX 1: an EVENT TYPE + ITS INSTRUMENT, never a noun phrase.
+            "the first ④ wave post" would admit the same FOUR readings the ③
+            phrase admitted in ninety minutes (dispatch · in-flight · landing ·
+            a sibling wave), each resolved by whoever posted next.
+```
+
+| # | figure | unit + counting rule |
+|---|---|---|
+| a | assigned passes | one per (seat × assignment); **the denominator is enumerated FROM THE ASSIGNING ORDER before counting discharges** |
+| b | forced re-reads | re-read of an already-banked pass, compelled by a change to the object |
+| c | round-2 reads | reads against an amended version — **scan post BODIES, not headers** ⬅ FIX 2 |
+| d | revisions forced | version count of the block **AND** amendment-commit count — **both units, always, labelled** ⬅ FIX 3 (v1 was amended 4× without a bump: 5 vs 9) |
+| e | refutations landed | fold commits carrying a defect, from committed history |
+| f | refutations refuted | the fleet's own self-correction rate |
+
+⛔ **PRE-COMMITTED RULES, all five of them, fixed here and not later:**
+1. **NO single "the price was N" headline.** Every figure carries unit + anchor +
+   freeze inside the verdict.
+2. **UNCLASSIFIED is published, never absorbed** into whichever bucket tidies the
+   story.
+3. **Self-authored posts EXCLUDED by construction** — a charter cannot count its
+   own commentary as a pass on the slate it prices.
+4. ⬅ **FIX 2, stated as a method:** *classification scans post **BODIES**, and
+   **CASE-INSENSITIVELY**.* **My ③ `(c)` was wrong because I searched HEADERS;
+   silicon's independent check was wrong because its regex was lowercase against
+   a CAPS heading. Two seats, two unrelated defects, one identical false answer.**
+5. ⬅ **FIX 4:** *an **EMPTY RESULT IS AN INSTRUMENT READING**, not a fact. Before
+   recording "none", make the search return something known to be there.*
+
+📌 ⬅ **FIX 5 — ANCHORS ARE CONTENT-ADDRESSED.** *Commit SHAs (resolvable at a
+remote, forever). Bus line numbers may accompany them as a convenience but are
+NEVER the citation: FLEET.md is in no git repo and has no remote.*
+
+⚖️ **AND THE PROPERTY THAT MADE ③ SURVIVABLE, kept deliberately: the WINDOW is
+frozen separately from the CLASSIFICATION.** *③'s window never moved through five
+corrections to its figures — which is what let a wrong number be fixed with zero
+suspicion that the boundary had been moved to suit it.*
+
 ### ✅✅ ITEMS 4 · 5 · 6 CLOSED AT SLATE CLOSE — 2026-08-08 16:45
 
 **CONDITION:** *"slate close"*, assigned 13:36 / 13:49. **MET:** the maestro's
