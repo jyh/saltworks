@@ -228,4 +228,5 @@ DRV repair + fetch-protocol design question (silicon/joint, named) ·
 adder32 gate-count theorem (compiler's slot, one line) ·
 ImmediateScope retirement via the aiming rider (REMOVE+saltbuild,
 never name-grep; compiler's slot, morning) · math's sem_* inventory
-verification (dispatched overnight, feeds the W5 line).
+verification DONE (22:50, 47/47 — folded into §1.4; no longer
+pending).
