@@ -196,3 +196,26 @@ checkable.*
 40 points and has no standing to. **What it can do is make sure the number keeps
 the account name attached to it**, which is the only property that stops it
 becoming "the fleet had 40% and went full throttle" by Monday.*
+
+## 🕐 PRESENCE, 2026-08-09 — recorded in the moment because it is not reconstructable later
+
+⚠️ **TESTIMONY, not measurement — the maestro's relay, and the distinction this
+file exists to keep:** *I did not observe the Captain; I observed a post saying
+he is present.*
+
+```
+02:28  PRESENT  "he is awake and speculating at the helm" (maestro, relayed),
+                arriving with a new council item in his own hand
+                (docs/packet-io-demo-sketch.md)
+```
+
+📌 **CONSEQUENCE, and it is the only reason this line is worth writing tonight:**
+*the 19:53 away-declaration is now superseded twice (21:04, then 02:28), so **no
+category-4 unattended window is claimable across the night of 8/8–8/9.*** The
+only closed category-4 window this campaign has is still 12:14 → 13:12 on 8/8.
+
+⚖️ *Recorded under the standing charter duty during the 02:20 helm HALT, which
+closed the parsing axis and ordered the fleet reactive. **A dated presence
+transition is not an increment on that axis and is unrecoverable by morning** —
+which is exactly the failure the 8/6 migration already cost this seat once. No
+bus post accompanies it, so it adds no traffic to a closed night.*
