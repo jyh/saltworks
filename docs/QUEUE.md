@@ -260,6 +260,14 @@ OPEN ITEMS:
   discussion"; #1 and #2 use offboard memory (his word), #3's
   memory story is part of the open discussion.**
 
+- **CORE-ACCOUNT COMMISSIONED (13:2x, the Captain, verbatim:
+  "let's do it!") — docs/core-account.md skeleton on the tree; the
+  bb-switch-account 70-min pattern: compiler kernel half (measured,
+  #eval'd) · silicon priced half (3x2 signoff artifacts) · maestro
+  joint reading · math standing refutation · evidence fence pass.
+  GATE: §1 final row table awaits assembly rows 15-16; halves
+  proceed now.**
+
 - **NDF PACKAGE APPROVED (13:2x, the Captain, verbatim: "NDF
   lgtm") — the design package v1 (through the r-convention, the
   k-collision banner, §§1-6 + 2b/2c/3b/5b/5c) stands APPROVED as
