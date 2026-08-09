@@ -278,6 +278,39 @@ theorem step_bit_is_adder_bit (acc addend : BitVec 32) (cin : Bool) (k : Nat) (h
   rw [show macCore.gates = instGates adder32 maSigma maOff from rfl, maSum]
   exact h
 
+/-- ⭐ **THE COMPATIBILITY COROLLARY — the form I should have landed BESIDE the new one instead of
+replacing it.** `MacBridge` passes a 32-bit input word; with `nIn = 33` position `32` reads
+`getD 32 false = false`, so **that call is already semantically "carry-in = 0"** — only my
+*signature* broke it, not its meaning.
+
+*`statement-shape-is-an-interface`, which I wrote down and then skipped: a truth-preserving
+restatement is still a breaking change; land the new form beside and repoint. The red window this
+corollary closes is the cost of not doing that, and it is one word at each call site.* -/
+theorem step_bit_is_adder_bit_no_carry (acc addend : BitVec 32) (k : Nat) (hk : k < 32) :
+    run (macSeq.env (bitsOf addend) (bitsOf acc)) macCore.gates (maSum k)
+      = run (SaltWorks.Stack.Program.adEnv acc addend false) adder32.gates (adS k) := by
+  have hagree : ∀ n, macSeq.env (bitsOf addend) (bitsOf acc) n
+      = macSeq.env (bitsOf addend ++ [false]) (bitsOf acc) n := by
+    intro n
+    have hlen : (bitsOf addend).length = 32 := bitsOf_length addend
+    simp only [Seq.env, macSeq]
+    by_cases h : n < 33
+    · rw [if_pos h, if_pos h]
+      by_cases h32 : n < 32
+      · -- both sides are `addend.getLsbD n`; rewrite each with its own lemma
+        rw [bitsOf_getD addend n h32, word_getD_lo addend false n h32]
+      · -- n = 32: the short word is OUT OF RANGE (default false), the long word HOLDS false
+        -- ⚠️ NOT `omega`: `h`/`h32` are `Net`-typed and omega DROPS them (its counterexample
+        -- mentioned only the `Nat`-typed `hk`). Fourth instance today. Terms, not tactics.
+        have hn : n = 32 := Nat.le_antisymm (Nat.lt_succ_iff.mp h) (Nat.not_lt.mp h32)
+        subst hn
+        rw [List.getD_eq_getElem?_getD, List.getD_eq_getElem?_getD,
+            List.getElem?_append_right (by rw [hlen]), List.getElem?_eq_none (by rw [hlen])]
+        simp [hlen]
+    · rw [if_neg h, if_neg h]
+  rw [run_congr macCore.gates hagree]
+  exact step_bit_is_adder_bit acc addend false k hk
+
 /-- **The output half and the state half of a cycle are the same bits** — so the pointwise lemma
 above characterises both. *`Seq.wf` checks only the LENGTH of `outs`; this is the value claim.* -/
 theorem step_halves_agree (st inp : List Bool) :
@@ -642,6 +675,7 @@ everything after a failure reads as clean. -/
 #audit_axioms word_getD_cin
 #audit_axioms mac_hin
 #audit_axioms step_bit_is_adder_bit
+#audit_axioms step_bit_is_adder_bit_no_carry
 #audit_axioms step_halves_agree
 #audit_axioms wsCore_ssa
 #audit_axioms wsCore_wf
