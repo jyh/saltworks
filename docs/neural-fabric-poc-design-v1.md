@@ -29,7 +29,7 @@ flowchart LR
     AND["AND row<br/>x_bit · W"]
     ADD["32b adder<br/>(op mux: +/− on sign cycle)"]
     ACC["accumulator<br/>32b + guard bits<br/>(bias PRELOADED here)"]
-    CE["certified CE vs 0<br/>= ReLU (landed organ)"]
+    CE["CE vs 0 = ReLU<br/>⚠ needs the SIGNED-order<br/>instance (math 10:31)"]
     SER["parallel→serial<br/>shift-out"]
   end
   WP(("W-port<br/>serial in")) --> WREG
@@ -45,9 +45,23 @@ stationary). Values stream LSB-first on the X-port; each bit ANDs against
 the full latched weight and shift-adds into the accumulator — a classic
 serial-parallel MAC. The **bias costs zero gates**: it is the accumulator's
 preload value. After the last input, the nonlinearity is applied **in
-parallel** by the landed compare-exchange organ with one input tied to
+parallel** by the compare-exchange organ with one input tied to
 zero (ReLU = max(a,0) = half a CE); the result re-serializes out
 LSB-first for the next layer's MACs.
+
+> ⛔ **REFUTED-AS-FIRST-STATED (math, 10:31, same sitting):** this row
+> originally said "landed organ" — over-claimed. The sorter certificate
+> is landed **over an arbitrary `LinearOrder`; it does not supply the
+> order**, and BitVec's default order is UNSIGNED, under which
+> max(a, 0) = a for every negative a (top bit ⇒ huge) — ReLU silently
+> becomes the identity on exactly the half-domain it exists to clip,
+> and the network degenerates to an affine map with every theorem
+> green. **The owed piece, small and named: `LinearOrder (BitVec 32)`
+> at the SIGNED order, exhibited, + witness `max(-1, 0) = 0` by
+> `decide`.** Same defect class as the packet-filter's `slt` catch,
+> one floor up: *the certified thing computes an order; the
+> instantiation carries the semantics.* This row is in the MAC-
+> induction wave's scope (§7, math).
 
 **The LSB-first question — answered, not a problem.** Addition wants
 LSB-first; comparison wants MSB-first; the tension dissolves because the
@@ -157,7 +171,7 @@ ACT      CE vs 0 in every cell; EMIT h'_v
 |---|---|---|
 | each round delivers exactly the multiset {h_u : u ∈ N(v)} to cell v | fabric delivery theorem (per-permutation instance) | **landed family** |
 | cell v computes b + Σ (W·x) with the sign cycle correct | bit-serial MAC induction (Seq, cycle-indexed) | **the one new proof** |
-| activation = max(·, 0) | CE certificate | **landed** |
+| activation = SIGNED max(·, 0) | CE certificate **+ the signed-order instance (OWED — math's 10:31 refutation)** | **sorter landed over arbitrary `LinearOrder`; the `LinearOrder (BitVec 32)` at the SIGNED order is NOT yet exhibited. Unsigned instantiation silently makes ReLU the identity on negatives (top bit ⇒ huge unsigned) and the network affine. Fix named: the signed instance + witness `max(-1,0) = 0` by `decide`.** |
 
 ⇒ composed: `h'_v = ReLU(W_self h_v + Σ W_msg h_u + b)` — **the layer
 equation as a kernel theorem**, per compiled schedule. "The platform is
@@ -178,7 +192,7 @@ clocks. Bench-visible with a logic analyzer on the PMOD pins.
 | weights streamed in-band | edge port carries weight traffic | zero on-die weight memory; config-through-fabric (the neuron dream literally) | batch-1 dense inference reuses weights poorly on EVERY architecture; ours does not fix LLM-decode-class workloads and we will not claim it |
 | weight-stationary cells | re-latch per logical neuron | one weight-load amortized over a whole stream (TPU's own trick, packet-shaped) | virtualization ratio (logical/physical neurons) is bounded by weight-reload traffic |
 | banyan topology | log-depth network is BLOCKING; schedules must be permutation-decomposed | landed certified organs; Batcher+banyan = non-blocking if ever needed; natural multicast by rounds | at large n, wire length favors 2D mesh (Cerebras-style); irrelevant at n=8, named for honesty |
-| nonlinearity set | smooth functions (softmax, tanh, exp) need LUTs or hard variants | the ENTIRE max family free and certified: ReLU, max-pool, hard-sigmoid/tanh (= 2 CEs), top-k/argmax (the sorter's specialty) | transformers approximable (hardmax attention), not native |
+| nonlinearity set | smooth functions (softmax, tanh, exp) need LUTs or hard variants | the ENTIRE max family from the certified sorter — ReLU, max-pool, hard-sigmoid/tanh (= 2 CEs), top-k/argmax — ONCE the signed-order instance lands (§1 banner; owed, small) | transformers approximable (hardmax attention), not native |
 | fixed-point only | no floats anywhere | exactness — theorems are about the actual arithmetic, no ulp gaps | training in fixed point is delicate; PoC trains off-chip, chip does verified inference + gradient ROUTING |
 | process/scale (sky130, TT) | ~9 orders of magnitude off a datacenter part | $500-class fabrication; the claim is the VERIFIED INSTANCE of a vindicated architecture class (Groq/Cerebras/TPU-adjacent organization), not a competitive part | say this loudly in every telling |
 | programmability | a config compiler must exist and be trusted | ours comes WITH THEOREMS — aimed at the exact flank that killed dataflow machines historically | the compiler theorems are the differentiator; scope them per-family, never "general" |
@@ -190,7 +204,10 @@ are heritage, and we cite them. New, and checkably new: **(i)** the
 verified stack end-to-end (routing theorem ∘ MAC induction ∘ nonlinearity
 certificate ∘ layer-compiler theorems ∘ executive scheduling — one kernel
 chain from GNN equation to gates); **(ii)** the certified-sorter-as-
-nonlinearity fusion (the nonlinear engine's proof came free); **(iii)**
+nonlinearity fusion (the nonlinear engine's proof comes ALMOST free —
+the sorter is order-generic and the SIGNED-order instance is owed, §1
+banner; the near-miss is itself part of the story: an unsigned ReLU is
+silently affine); **(iii)**
 gradient-is-routing made literal in a packet machine (backprop as the
 fabric's recorded winner paths). The demo sentence: *a graph network
 whose every message, weight, activation, and gradient path is a theorem,
