@@ -300,7 +300,20 @@ OPEN ITEMS:
   principle applies only where its mechanism exists; and the
   tied-constant-is-an-unadmitted-port pattern stands (3rd
   measured instance). Nothing was built on any intermediate
-  state; the whipsaw cost zero work.**
+  state; the whipsaw cost zero work.
+  SETTLEMENT COMPLETE 14:58 — THE FREEZE LIFTS: all three protocol
+  pieces delivered (silicon's specifics · math's two-form proof
+  ledger · compiler's artifact adjudication), and the adjudicator
+  ruled against its own last reversal: schedule-alone is
+  arithmetically sufficient but MECHANICALLY costs +32 cycles per
+  input (option A's injection width is one bit per cycle — no
+  short load exists in the artifact). (b)+A CONFIRMED FINAL by
+  the loop, not by default. Implementation clear: compiler (b)+A;
+  math the rung-1-3 restatements (rung 3 → (addend,carry) pairs)
+  + hW-discharge + second overflow condition against the settled
+  interface. Every seat argued against its own position at least
+  once in this thread; the register moved twice and both moves
+  are in the trail.**
 
 - **CROSS-SESSION MESSAGING — ADOPTION PLANNED AT NEXT RELIGHT
   (the Captain flagged the new system 14:1x; assessed from the doc
