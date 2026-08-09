@@ -9,8 +9,9 @@
 
 **The one-sentence architecture:** a packet-routed dataflow machine —
 bit-serial neuron cells at the leaves of the certified banyan fabric,
-weights stationary in the cells, activations streaming through wires and
-never touching memory, big cheap memory at the edge, a small verified
+weights streaming from the edge in lockstep with values (traffic, not
+storage — §1 fan-in), activations crossing in wires and never touching
+memory, big cheap memory at the edge, a small verified
 RISC-V core as control plane — every step from configuration to activation
 a theorem. Architecturally distinct from systolic-array accelerators
 (TPU-class): asynchronous packet routing over a switching network, not a
@@ -40,8 +41,9 @@ flowchart LR
   FSM["phase FSM:<br/>LOAD_W → STREAM_X → ACTIVATE → EMIT"] -.controls.-> WREG & ACC & CE & SER
 ```
 
-**Operation.** Weights arrive as packets on the W-port and latch (weight-
-stationary). Values stream LSB-first on the X-port; each bit ANDs against
+**Operation.** Weights arrive as packets on the W-port and latch — one
+per input in the general dual-stream mode (§ fan-in below; latch-once is
+the CNN special case). Values stream LSB-first on the X-port; each bit ANDs against
 the full latched weight and shift-adds into the accumulator — a classic
 serial-parallel MAC. The **bias costs zero gates and one cycle**: it STREAMS as the
 first addend through the MAC path itself (maestro ruling at silicon's
