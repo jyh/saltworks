@@ -48,11 +48,18 @@
    post-retraction re-check then found the organ-level ∀-env
    semantics layer essentially COMPLETE in Program.lean — the
    missing piece is the assembly and its StateCodec conformance,
-   not organ semantics. [Compiler's own caveat attached: a reading
-   of a theorem list by a seat wrong five times tonight about what
-   exists; math's independent verification pass — its slot, its
-   theorems — was dispatched overnight and its result rides beside
-   this line.] Open W5, or redirect capacity to waves.
+   not organ semantics. MATH'S INDEPENDENT VERIFICATION (22:50,
+   its slot, its theorems, checked at the bytes): STRENGTH pass —
+   all 47 sem_* rows are ∀-arbitrary-Env, unconstrained, in the
+   conclusion; COVERAGE confirmed at the organ level (decoder →
+   regfile → muxes → ALU → select → writeback → PC → immediates,
+   complete for a single-cycle datapath); and NO ASSEMBLY ROW
+   EXISTS — with one named trap: `sem_coreShaped` LOOKS like a core
+   theorem and is a ZERO-GATE conformance witness proved by rfl; do
+   not read it as a head start. Net: the CHEAPER W5 is real
+   (assembly consumes the organs rather than re-proving them) but
+   its price is building the composition from nothing. Open W5, or
+   redirect capacity to waves.
 5. **THE THIRD FUEL COLUMN — name it in one word.** Your triples'
    third number is NOT "week-Opus" (math-acct reads 0 beside an
    Opus-all-day seat). Semantics attested-twice-verified-zero.
