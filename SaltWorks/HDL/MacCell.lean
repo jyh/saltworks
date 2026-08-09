@@ -534,6 +534,57 @@ weight register — so the cheap option is cheap but not free, and saying "one m
 input would understate it.* **Maestro's call; I will implement either.**
 -/
 
+/-! ## THE SECOND OVERFLOW CONDITION — the weight shift's own
+
+**Residue item (i), assigned to this seat** (maestro 14:51, from my 14:48 seam finding): rung 4's
+`cell_state_toInt_eq_macAfter` assumes `hW : ∀ t < n, (Wsh t).toInt = W * 2 ^ t`, and **my per-cycle
+theorems are that schedule** — the organ's state after `t` cycles is `w <<< t`, exactly.
+
+⚠️ ***BUT THE `ℤ` READING OF THAT SHIFT IS CONDITIONAL, AND THE CONDITION IS NOT `noOverflowFrom`.***
+`noOverflowFrom` (math's, rung 4b) is a predicate on the ACCUMULATOR'S ADDITIONS. **A signed left
+shift can wrap independently of any sum**, so `hW` silently carries a second, unnamed hypothesis.
+Named here, and it is `¬saddOverflow`'s sibling for the shift. -/
+
+/-- **THE SECOND OVERFLOW CONDITION.** The `ℤ` reading of a left shift, which is *false* on wrap. -/
+def shiftSafe (w : BitVec 32) (t : Nat) : Prop := (w <<< t).toInt = w.toInt * 2 ^ t
+
+instance (w : BitVec 32) (t : Nat) : Decidable (shiftSafe w t) := by
+  unfold shiftSafe; infer_instance
+
+/-- ⛔⛔ **THE CONDITION IS REAL, AND ITS FAILURE FLIPS THE WEIGHT'S SIGN.** At `w = 2^30`, one
+shift gives `-2147483648` where the arithmetic wants `+2147483648`. *A MAC whose weight silently
+negates does not compute a slightly wrong dot product; it computes the wrong sign. **This is why the
+condition is stated rather than assumed away** — and it is the exact shape of math's `2^30` witness
+one layer down, arrived at independently.* -/
+theorem shift_overflow_is_real :
+    ¬ shiftSafe ((1 : BitVec 32) <<< 30) 1 := by decide
+
+/-- ⭐⭐ **DISCHARGED AT THE RULED SCALE, EXHAUSTIVELY.** Ruling #8 fixes int8 values on the 32-bit
+datapath, and the stream is 8 bits, so `t < 8`. **All 256 int8 weights at all 8 shift positions are
+safe** — 2,048 cases, every one evaluated, in the style of math's own `sval_eq_toInt`.
+
+*So `hW` is dischargeable today at the scale the September chip runs; what was missing was the
+statement, not the fact.* -/
+theorem shiftSafe_at_int8_scale :
+    (List.range 256).all (fun n =>
+      (List.range 8).all (fun t =>
+        decide (shiftSafe (((BitVec.ofNat 8 n)).signExtend 32) t))) = true := by
+  decide +kernel
+
+/-- **AND THE BRIDGE TO `hW`, which is definitional once the condition is named.** The organ's state
+after `t` cycles is `w <<< t`; `shiftSafe` says precisely that its `ℤ` reading is `w.toInt * 2 ^ t`,
+which is rung 4's `hW` at `Wsh t = w <<< t`. *The content is in the condition, not in this step —
+which is why the condition was worth finding and this line is worth only one.* -/
+theorem hW_is_shiftSafe (w : BitVec 32) (t : Nat) (h : shiftSafe w t) :
+    (w <<< t).toInt = w.toInt * 2 ^ t := h
+
+/-! ⚖️ **WHAT REMAINS OF ITEM (i), and it is math's genre not mine:** the organ's per-cycle theorems
+give ONE cycle (`wshift_next_bit_zero` / `_succ` ⇒ next state is `w <<< 1`). Lifting that to *state
+after `t` cycles is `w <<< t`* is a **trace induction over `runTrace`** — the same shape as rung 3,
+and math owns that machinery. **With `shiftSafe` named and discharged, the remaining step is
+mechanical rather than exploratory.**
+-/
+
 /-! ### The axiom audit — one declaration per call
 
 *Added WITH the cell, not after it. `CorePlace` ran fourteen placements with `EXIT=0` and zero
@@ -574,5 +625,8 @@ everything after a failure reads as clean. -/
 #audit_axioms wshift_next_bit_succ
 #audit_axioms weight_state_moves_so_reload_is_required
 #audit_axioms stream_bit_never_enters_the_weight_register
+#audit_axioms shift_overflow_is_real
+#audit_axioms shiftSafe_at_int8_scale
+#audit_axioms hW_is_shiftSafe
 
 end SaltWorks.HDL.MacCell
