@@ -83,4 +83,5 @@ import SaltWorks.HDL.SortDemo
 import SaltWorks.HDL.Rotation
 import SaltWorks.HDL.Executive
 import SaltWorks.HDL.ImmediateScope
+import SaltWorks.HDL.TinyRustN0
 import SaltWorks.Tactic.AuditAxioms
