@@ -50,6 +50,37 @@ abstract level could not meet it; this level can.
    *sufficient* bound only because every emitted branch is forward. Both sides of the
    simulation use the same bound, so the theorem is indifferent to it — but a program
    with a backward branch would be under-run at BOTH levels equally.
+   ⇒ ***§7 makes that concrete and it is not a remark: `loop_image_exits_with_work_pending`
+   exhibits an image where the bound is INSUFFICIENT, and it names the B-EXEC driver
+   question (an executive loops; a fairness invariant quantifies over INFINITE runs; a
+   length-fuel driver cannot express one).*** *Added 21:0x — this fence had four items and
+   did not know §7 existed.*
+
+## THE ROWS THIS FILE CARRIES, BY NAME
+
+⛔ **This block exists because math's `docstring_coverage.py` (salt) found that THIS HEADER
+NAMED NOT ONE THEOREM — zero of 25.** Their taxonomy calls that class (2), *"describes a row
+but does not name it — a usability gap, not a lie."*
+⭐ **I think it is more than that, and my own file is the evidence: CLASS (2) IS WHAT MAKES
+CLASS (1) POSSIBLE.** A header that names no row is tied to no row, so it can drift freely and
+nothing — not the kernel, not a grep, not their tool — can notice. ***Naming the rows is what
+makes a header CHECKABLE; the prose was never the point.***
+
+| § | row | says |
+|---|---|---|
+| 2 | `runForW_step`, `runForW_stop` | the unroll/stop pair, so §3's induction never unfolds a `match`. *Named though they are helpers: to the tool a DELIBERATE omission and an accidental one are identical, so naming them turns a permanent ambiguous flag into a clean baseline where silence means something.* |
+| 3 | `stepT_encode` | `stepT s (encode i) = step s i`, unconditional |
+| 3 | `fetchW_map` | the image's fetch IS the source's fetch, encoded |
+| 3 | `runForW_map` | the simulation at fixed fuel |
+| 3 | ⭐ `runW_map` | **the simulation theorem**, ∀ code ∀ s, no side condition |
+| 4 | `undecodable_skips`, `zero_word_is_undecodable` | an undecodable word SKIPS; one exists |
+| 4 | `undecodable_image_is_not_encoded`, `witness_image_outside_simulation` | the boundary is inhabited |
+| 5 | `demoRunW_eq`, `caseOKW_eq` | where the simulation is spent |
+| 5 | `demo_output_exact_at_word_level`, `sort_sweep_at_word_level`, `compiler_check_all_at_word_level`, `compiler_check_both_boundaries_at_word_level`, `compiler_check_no_zero_at_word_level` | the lifts |
+| 6 | `demo_image_length`, `demo_image_head` | the lift is not vacuous |
+| 7 | `loopProg`, `loop_image_length` | a two-word forever-loop |
+| 7 | ⛔ `loop_image_exits_with_work_pending`, `more_fuel_changes_the_answer` | fuel exhaustion leaves work pending, and the bound is insufficient there |
+| 7 | ✅ `demo_exit_has_no_work_pending`, `demo_is_not_truncated` | the sort demo is in the safe regime — **the premise §5's lifts rest on** |
 -/
 
 namespace SaltWorks.Executive

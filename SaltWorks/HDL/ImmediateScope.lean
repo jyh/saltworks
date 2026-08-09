@@ -22,6 +22,19 @@ the assembled instruction word is not a fixture — it takes a WORD and no hypot
 grep the corpus for prose asserting otherwise. §2 still routes through the `wordI v`
 fixture; that is precisely the shape mismatch §2b exists to fix.*
 
+## THE ROWS, BY NAME
+
+*Added 21:0x after math's `docstring_coverage.py` flagged this header for naming 3 of its 5
+rows. Class (2) in their taxonomy — and **class (2) is what lets class (1) happen**, since a
+header tied to no row can drift with nothing able to notice.*
+
+| § | row | says |
+|---|---|---|
+| 1 | `immI_outs_in_field` | every net `immICirc` reads lies in the field `20…31` |
+| 1 | `immICirc_reads_only_the_imm_field` | valuations agreeing there give the same output |
+| 2 | `immICirc_correct_given_field_agreement` | correct given agreement with a fixture — the provenance tie to `immI_correct`'s exhaustive 4096 |
+| 2b | ⭐ `immICirc_extracts_the_field` | **the consumer's shape: ∀ w, no hypothesis** |
+
 ## ⚠️ WHY THIS IS A SEPARATE FILE — CORRECTED 2026-08-08 20:4x, MY FIRST REASON WAS FALSE
 
 **What is measured and true:** `Immediate.lean` cannot be elaborated by `saltbuild.sh`'s
