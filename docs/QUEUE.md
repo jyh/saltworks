@@ -263,6 +263,36 @@ OPEN ITEMS:
   discussion"; #1 and #2 use offboard memory (his word), #3's
   memory story is part of the open discussion.**
 
+- **COUNCIL RULING #7 — THE PATH RULING (11:3x, the Captain,
+  verbatim): "This is my proposal: * Keep the pure BB switch, I
+  will update TT * Keep the pure RISC-V + 5 op ISA + EXEC + tiny
+  Rust + sort demo; defer submission to TT * Full throttle on the
+  new Neural Dataflow Fabric, new submission to TT, target in
+  Sept, we start as shown in the THE FABRIC, I assume we adapt
+  EXEC as needed, tiny-Rust is probably unchanged."
+  ⇒ THREE-PROJECT STRUCTURE: (1) BB switch — kept, Captain
+  handles the TT update himself; (2) pure RISC-V stack — runs to
+  COMPLETION (per ruling #4: complete/verified/tapeout-ready),
+  TT submission DEFERRED — costs nothing, the core ships INSIDE
+  the NDF as its control plane; (3) NEURAL DATAFLOW FABRIC (NDF,
+  his "THE FABRIC" = design package Sec2 chip diagram: BB + k
+  cells + core, one combined project) — FULL THROTTLE, NEW TT
+  submission, SEPTEMBER TARGET. EXEC adapts (phase sequencer:
+  LOAD_W/rounds/ACTIVATE/EMIT as executive-scheduled tasks);
+  tiny-Rust ~unchanged (possible v2.1 packet-IO intrinsics).
+  ALL FOUR Sec7 PROBES FIRED at this ruling (silicon cell+
+  floorplan vs the 24-tile cap · math MAC induction — CRITICAL
+  PATH — + signed-order discipline · compiler layer-compiler
+  rows beside W5-asm · evidence fence armed, clock starts).
+  MAESTRO'S FLAGGED RISKS AT DISPATCH: (a) NDF is the LARGEST
+  project yet — tile count vs 24 must land EARLY; (b) Sept =
+  ~3-4 weeks — demo scope freezes early (minimal: k=4 cells +
+  8x8 BB + core, ONE GNN layer, bench demo; multi-layer/training
+  = stretch); (c) the cell is built as a KERNEL Circ + emitS from
+  day one (the fabbed thing IS the verified thing — no hand RTL);
+  (d) the actual TT shuttle deadline is the Captain's TT-update
+  errand — flagged as the schedule anchor.**
+
 - **COUNCIL ITEM (10:2x, the Captain — the #3 DETAIL PACKAGE,
   conditional not yet a ruling): "Yes, dataflow architecture, of
   course :)" — he likes the path ("close to home but not too close…

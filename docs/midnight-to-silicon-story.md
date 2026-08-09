@@ -101,9 +101,16 @@ doc for any public telling until it is measured — tokens from the
 account roots, days from the dated entries above, dollars from receipts.
 The story is only worth telling because it is checkable.
 
+**2026-08-09, 11:3x — THE DECISION. Chosen.** The Captain's words:
+*"Full throttle on the new Neural Dataflow Fabric, new submission to
+TT, target in Sept."* Eight and a half hours from the 3am dream to a
+ruled, funded, scheduled silicon project — with the BB switch kept as
+its own submission and the verified RISC-V core rolling forward as
+the fabric's control plane. The probes fired the same hour.
+
 ## WHAT REMAINS (entries to be written on their days)
 
-- The decision (this path chosen, or shelved with the drawer alive)
+- ~~The decision~~ — CHOSEN, 2026-08-09 11:3x (see above)
 - The cell priced; the MAC induction landed; the first verified layer
 - The GNN layer-compiler theorem; the executive scheduling it
 - Tapeout submission day; the die back; the bench demo with certified
