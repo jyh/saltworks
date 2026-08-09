@@ -329,6 +329,36 @@ industry-standard deployment split, plus our verification superpower:**
   cost: bit-serial float is control-heavy, an FMA dwarfs an int8 MAC,
   and the verification bill balloons. Not PoC territory.
 
+### 5c. THE POWER LEDGER vs TPU/GPU (the Captain's 11:1x question; his
+### guess — "well on sparse/GNN, TPU superior on dense" — CONFIRMED in
+### both directions, with the mechanisms; all figures order-of-magnitude)
+
+Shared physics (classic per-op figures, modern node): int8 MAC ~0.2 pJ ·
+local SRAM ~5 pJ · on-die wire ~0.15 pJ/bit·mm · HBM ~3–7 pJ/bit ·
+SerDes ~2–5 pJ/bit. The question is which each architecture pays per
+USEFUL op.
+
+- **DENSE: TPU wins 2–5×, at the circuit level.** Systolic reuse
+  approaches MAC-limited energy; our serial cell does the same
+  adder work but pays clock/control EVERY cycle (~1.5–3× penalty)
+  and dense gives routing nothing to buy it back. Delivered:
+  H100/TPU ~2–6 int8 TOPS/W vs ours ~1–3. On dense we are a worse
+  TPU in energy too — stated plainly.
+- **SPARSE/GNN: we win 10–50×, at the system level.** The GPU's
+  per-useful-op stack: 1–10% utilization under full static/scheduler
+  draw × ~16× cache-line waste on random gathers (4B feature drags a
+  64B line) × the HBM round trip per message ⇒ ~1–3 nJ per useful
+  feature (~0.05–0.5 TOPS/W delivered on graphs). Ours: 50–250 pJ
+  per 32-bit message point-to-point through wires and stages
+  (10–30× cheaper), exact-payload packets (no line waste), high
+  utilization (routing IS the op), zero scheduler/coherence power
+  (the compile-time schedule is silent; deterministic phases
+  clock-gate precisely). Delivered ~1–3 TOPS/W held.
+- **The ledger in one line: TPUs win dense by doing the same MACs
+  with less ceremony; we win sparse by not paying for ceremony
+  sparse workloads cannot use.** The win is from not wasting their
+  circuits, not from beating them.
+
 ## 6. WHAT IS NEW HERE (the Captain's "anything new, or just a dream" test)
 
 Not the hardware genre — bit-serial neural silicon and dataflow machines
