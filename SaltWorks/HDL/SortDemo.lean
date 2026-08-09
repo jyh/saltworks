@@ -289,7 +289,7 @@ XOR i i j          --
 and Slice A has no `SUB` and no `BNE`, so the *only* way to test "out of order"
 with one instruction and skip on the negative is to compute `rj <ₛ ri` and branch
 on **equal to `x0`**. Reversing the two operands compiles, runs, and sorts
-**descending** — see `neg_slt_order_sorts_descending`.
+**descending** — see `neg_slt_order_descending_on_the_sample`.
 
 ⚠️ **`bOffset 8 = 16`, not 8.** The `BEQ` immediate holds `imm[12:1]`; the low
 zero bit is structural. Three skipped instructions are 12 bytes measured from the
@@ -308,7 +308,13 @@ theorem cex_beq_taken (t i j : Fin 32) (ht : t ≠ 0) (s : St)
     (step s (.SLT t j i)).get t = (step s (.SLT t j i)).get 0 := by
   rw [St.get_zero, get_step_slt_self _ _ _ _ ht, h, if_neg (by decide)]
 
-theorem cex_beq_not_taken (t i j : Fin 32) (ht : t ≠ 0) (s : St)
+/-- ⛔ **RENAMED 20:5x from `cex_beq_not_taken`, which named the CONSEQUENCE while the
+statement proves the ANTECEDENT.** What is proved is that the `SLT` result register differs
+from `x0`'s value; *that* is what `pc_step_beq_not` then consumes to conclude the branch is
+not taken. **The old name asserted the conclusion of a step this theorem only enables** —
+found by running the name-vs-statement read over my own landings after math ran it on theirs
+(3 hits in 15 for them; 4 in 120 here). -/
+theorem cex_slt_result_differs_from_x0 (t i j : Fin 32) (ht : t ≠ 0) (s : St)
     (h : (s.get j).slt (s.get i) = true) :
     (step s (.SLT t j i)).get t ≠ (step s (.SLT t j i)).get 0 := by
   rw [St.get_zero, get_step_slt_self _ _ _ _ ht, h, if_pos rfl]
@@ -346,7 +352,7 @@ theorem cex_reduce_swap (t i j : Fin 32) (ht : t ≠ 0) (s : St) (hpc : s.pc = 0
   have e1 : fetch (cexSeq t i j) (step s (.SLT t j i)).pc = some (.BEQ t 0 8) := by
     rw [fetch_at _ _ 1 (by rw [p1]; decide)]; rfl
   have p2 : (step (step s (.SLT t j i)) (.BEQ t 0 8)).pc = 0 + 4 + 4 := by
-    rw [pc_step_beq_not _ _ _ _ (cex_beq_not_taken t i j ht s h), p1]
+    rw [pc_step_beq_not _ _ _ _ (cex_slt_result_differs_from_x0 t i j ht s h), p1]
   have e2 : fetch (cexSeq t i j) (step (step s (.SLT t j i)) (.BEQ t 0 8)).pc
       = some (.XOR i i j) := by
     rw [fetch_at _ _ 2 (by rw [p2]; decide)]; rfl
@@ -426,7 +432,7 @@ theorem cex_lowering (t i j : Fin 32) (ht : t ≠ 0) (hi : i ≠ 0) (hj : j ≠ 
     · intro r hrt hri hrj
       rw [swapExec_get _ _ hi hj hij, if_neg hri, if_neg hrj, get_step_beq,
         get_step_slt_ne _ _ _ _ _ ht hrt]
-    · rw [swapExec_pc, pc_step_beq_not _ _ _ _ (cex_beq_not_taken t i j ht s hslt),
+    · rw [swapExec_pc, pc_step_beq_not _ _ _ _ (cex_slt_result_differs_from_x0 t i j ht s hslt),
         pc_step_slt, hpc]
       decide
 
@@ -615,8 +621,12 @@ theorem neg_slt_order_not_sorted :
 /-- … and the failure is *informative*: with the `SLT` operands reversed the
 network sorts **DESCENDING**. The operand order is not a detail, it is the sort
 direction, and this is the exact shape a "the network sorts, ship it" spot check
-on `≤` would have caught only by luck. -/
-theorem neg_slt_order_sorts_descending :
+on `≤` would have caught only by luck. 
+
+⚠️ **RENAMED 20:5x from `neg_slt_order_sorts_descending`: one input's output being
+descending is a SAMPLE, and the old name stated it as a PROPERTY of the mutant.** The
+statement is unchanged and is exactly as strong as it was; only the promise shrank. -/
+theorem neg_slt_order_descending_on_the_sample :
     outWords (demoRun cexBadOrder [5, -3, 0, 7, -8, 2, 2, -1])
       = [7, 5, 2, 2, 0, -1, -3, -8].map (BitVec.ofInt 32) := by decide +kernel
 
@@ -719,7 +729,7 @@ theorem mutants_are_same_length :
 #audit_axioms swap_lowering
 #audit_axioms cexSeq
 #audit_axioms cex_beq_taken
-#audit_axioms cex_beq_not_taken
+#audit_axioms cex_slt_result_differs_from_x0
 #audit_axioms cex_reduce_keep
 #audit_axioms cex_reduce_swap
 #audit_axioms cex_lowering
@@ -755,7 +765,7 @@ theorem mutants_are_same_length :
 #audit_axioms cexShortSkip
 #audit_axioms cexLongSkip
 #audit_axioms neg_slt_order_not_sorted
-#audit_axioms neg_slt_order_sorts_descending
+#audit_axioms neg_slt_order_descending_on_the_sample
 #audit_axioms neg_drop_xor_not_sorted
 #audit_axioms neg_drop_xor_loses_a_value
 #audit_axioms two_xors_leave_a_residue

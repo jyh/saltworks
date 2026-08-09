@@ -320,8 +320,13 @@ loops. So on this image the machine runs out of fuel at `pc = 0` with word 0 ava
 
 ⇒ ***A genuine halt is `fetchW img s.pc = none`. This state's fetch is `some`. The two exits
 are therefore DISTINGUISHABLE FROM OUTSIDE even though `runForW` returns both as `s` —
-which is exactly what makes this statable rather than merely regrettable.*** -/
-theorem fuel_exhaustion_is_not_a_halt :
+which is exactly what makes this statable rather than merely regrettable.*** 
+
+⚠️ **RENAMED 20:5x from `fuel_exhaustion_is_not_a_halt`.** That name stated a GENERAL
+proposition; this statement is a **single witness** — for *this* loop image the exit has a
+fetchable word. The general claim is the docstring's argument above, and it is sound, but a
+one-image theorem should not carry it in its name. -/
+theorem loop_image_exits_with_work_pending :
     fetchW (loopProg.map encode) (runW (loopProg.map encode) St.init).pc ≠ none := by
   decide +kernel
 
@@ -382,7 +387,7 @@ from two other directions.* -/
 
 #audit_axioms loopProg
 #audit_axioms loop_image_length
-#audit_axioms fuel_exhaustion_is_not_a_halt
+#audit_axioms loop_image_exits_with_work_pending
 #audit_axioms more_fuel_changes_the_answer
 #audit_axioms demo_exit_has_no_work_pending
 #audit_axioms demo_is_not_truncated

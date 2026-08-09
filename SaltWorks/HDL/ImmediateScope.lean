@@ -17,7 +17,7 @@ calls *"the single most common formalisation bug"*. So it is named here.
 
 ⇒ ***`immICirc_extracts_the_field` (§2b) is what a `core` assembly actually needs, because
 the assembled instruction word is not a fixture — it takes a WORD and no hypothesis.***
-📌 *This sentence originally named §2's `immICirc_correct_on_any_word` and was corrected
+📌 *This sentence originally named §2's `immICirc_correct_given_field_agreement` and was corrected
 20:3x in the same commit that landed §2b, per the standing law that when you land a fact you
 grep the corpus for prose asserting otherwise. §2 still routes through the `wordI v`
 fixture; that is precisely the shape mismatch §2b exists to fix.*
@@ -108,8 +108,14 @@ its `rd`, `rs1`, `funct3` or opcode. `immI_correct` supplies the value (exhausti
 ⚠️ **`hagree` is a hypothesis about bits `20…31` only, and it is genuinely weaker than
 `w = wordI v`** — that is the whole content. A word that is not even an `ADDI` still gets
 the right sign-extended immediate out of this organ, which is correct: the organ does not
-decode, it extracts. Whether the immediate should be *used* is the decoder's ruling. -/
-theorem immICirc_correct_on_any_word (w : BitVec 32) (v : Nat) (hv : v < 4096)
+decode, it extracts. Whether the immediate should be *used* is the decoder's ruling. 
+
+⛔ **RENAMED 20:5x from `immICirc_correct_on_any_word`, which was false in the name:
+`hagree` is a real hypothesis, so this is NOT any word — it is any word AGREEING WITH A
+FIXTURE on bits 20…31.** §2b's `immICirc_extracts_the_field` is the one that genuinely takes
+any word. *Two defects in one declaration: the shape (fixed at 20:3x) and the name (fixed
+now) — the shape mismatch was what made the overstated name feel earned.* -/
+theorem immICirc_correct_given_field_agreement (w : BitVec 32) (v : Nat) (hv : v < 4096)
     (hagree : ∀ n, 20 ≤ n → n < 32 → w.getLsbD n = (wordI v).getLsbD n) :
     sem immICirc (fun i => w.getLsbD i)
       = (List.range 32).map ((BitVec.ofNat 12 v).signExtend 32).getLsbD := by
@@ -125,7 +131,7 @@ theorem immICirc_correct_on_any_word (w : BitVec 32) (v : Nat) (hv : v < 4096)
 MID-WAVE"* — they found one in the row they were proudest of, and **the same disease was
 in §2 above.**
 
-`immICirc_correct_on_any_word` routes through the fixture: it wants a `v`, a proof that
+`immICirc_correct_given_field_agreement` routes through the fixture: it wants a `v`, a proof that
 `v < 4096`, and a proof that `w` agrees with **`wordI v`** on bits `20…31`. ⚠️ ***But a
 `core` assembly does not have a `v` and an agreement proof. It has a WORD.*** So the
 theorem was true and awkward — and nothing in the kernel was ever going to refuse it,
@@ -175,7 +181,7 @@ theorem immICirc_extracts_the_field (w : BitVec 32) :
 
 #audit_axioms immI_outs_in_field
 #audit_axioms immICirc_reads_only_the_imm_field
-#audit_axioms immICirc_correct_on_any_word
+#audit_axioms immICirc_correct_given_field_agreement
 #audit_axioms immICirc_extracts_the_field
 
 end SaltWorks.HDL
