@@ -12,12 +12,15 @@
 ### ANSWERED by silicon 20:51/36a37a5: NOT a whole-core net and it
 ### CANNOT be made one — no whole-core object exists in the corpus,
 ### the parts have never been composed; against the named-parts
-### inventory (3,633 gates, a SUM not a composition) it is 32%,
-### against a realistic two-read-port datapath ~17%. Spend it as
-### REALIZED and SELECT-LOCAL, never as a system figure. And the
-### convergent tile finding: readTree is 82% of the named inventory —
-### B1's memory organ competes with the REGISTER FILE for the tile,
-### not with the select).
+### inventory (6,574 gates — AMENDED 20:59/4f1df3b, the write path
+### regNext was the missing mass; a SUM not a composition) it is
+### 17.6%, and against the fuller two-read-port + write-path model
+### (9,556) it is 12.1%. Spend it as REALIZED and SELECT-LOCAL,
+### never as a system figure. And the convergent tile finding,
+### STRENGTHENED by the amendment: the register file is 92.6% of the
+### named inventory — B1's memory organ competes with the REGISTER
+### FILE for the tile, not with the select. Both big #evals are now
+### kernel theorems (0625cc8: readTree=2982, regNext=3104)).
 ### PRECONDITIONS: phase 3+3b closed (constants at the ruled pair);
 ### the census at PASS/FAIL/UNREACHED/UNWIRED; compiler's night
 ### inventory may amend §B1. Scope audit: evidence 20:04,
