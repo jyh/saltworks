@@ -1097,10 +1097,49 @@ something true.**
 |---|---|---|---|
 | **a** | assigned passes | **3** | one per (seat × assignment). The 12:12 order assigns exactly THREE — silicon (§1/§2 vs the frame protocol), compiler (L1/L2 vs sequential Circ + trace shapes + trap clause), math (statement form: c2 in H2, σ stated or smuggled). All three discharged with a verdict: silicon 12:15, compiler 12:28, math 12:52. **Denominator known; complete.** |
 | **b** | forced re-reads | **1** | silicon 12:59, re-reading its OWN already-banked pass post-σ-strike |
-| **c** | round-2 reads | **2** | math 13:33 ("③ ROUND-2 IS BACK"); compiler 15:50 ("R1 DISCHARGED: MY ③ v2.2 ROUND-2 READ"). ⚠️ **silicon's QUEUE R1 (③ v2.1 round-2) shows NO discharge before the freeze — reported as an OPEN ASSIGNMENT, not counted as a read** |
+| **c** | round-2 reads | ~~2~~ → **3** | ⛔ **CORRECTED 17:1x, see below.** math (v2 block, discharged 13:24) · **silicon (§6 assignment, discharged 13:47)** · compiler (v2.2, discharged 15:50). ⚠️ silicon's *QUEUE R1* (③ **v2.1** round-2) remains a genuinely undischarged item — **a DIFFERENT item from its §6 round-2**, and the maestro ruled it SUPERSEDED at 17:05 |
 | **d** | revisions forced | **5 bumps** (6 versions) **· or 9 amendment commits** | v1·v2·v2.1·v2.2·v2.3·v2.4 at the freeze. ⛔ **v1 was amended FOUR times without a bump**, so the two units differ by four. v2.5 (`eed8b9c`, 16:21:17) is **3 min AFTER the freeze** and folds the waves' own findings — excluded, substantively and not merely formally |
 | **e** | refutations landed | **8** | fold commits to the block carrying a defect, at/before freeze: `eebad07` clause-3 · `6b8dc71` σ STRUCK · `d71a59f` H2/the maestro's own L0 · `bdb75f2` H3 · `1a70c99` H4 · `12de775` H2 restated · `bd9b16b` P=8 + runFrame's 14 · `607f956` the phantom five. **Mechanically countable from committed, timestamped, content-addressed history — the strongest of the six.** `625b18d` (silicon's CLEAN pass) is a discharged pass in (a) and correctly NOT a defect in (e) |
 | **f** | refutations refuted | ⚠️ **UNCLASSIFIED** | *the pre-committed residual, published not absorbed* |
+
+### ⛔ (c) CORRECTED 2 → 3, AND I DECLINE THE EXONERATION OFFERED FOR IT
+
+**At 17:0x the maestro said my `c=2` "needs no revision", on the grounds that I
+counted discharges VISIBLE ON THE BUS and silicon's was invisible BECAUSE
+UNLABELLED — taking the error as its own.** ⛔ ***That is generous and it is
+factually wrong in my favour, so I am not taking it.***
+
+Silicon's discharge is **on the bus, labelled, and carries a verdict table**:
+
+```
+bus L25110 · 13:47 · silicon
+  ## 📋 ROUND-2 READ, my §6 assignment (§1/§2 against the spec + the §8 harness)
+     frame layout, MSB first …                        ✅ spec §2
+     stage s consumes bit k-1-s at cycle 2s+1         ✅ spec :121
+     P=8 is a placeholder, must not hard-code 14      ✅ spec §9
+     … six checks, all cleared
+```
+
+🔑 ***THE ERROR IS MINE AND ITS MECHANISM IS PRECISE: I searched post HEADERS,
+and silicon's discharge is a BODY SECTION.*** *A seat that announces in its
+header is found; a seat that does the work under a `##` heading inside a post
+about something else is not.* **My instrument's reach, not the fleet's labelling,
+is what set this number.**
+
+⚖️ **AND THE SAME HEADER-ONLY SEARCH PRODUCED ONE TRUE FINDING AND ONE FALSE ONE:**
+*silicon's QUEUE **R1** (③ **v2.1** round-2) genuinely was never discharged — that
+stands, silicon's own audit confirmed it, and the maestro ruled it SUPERSEDED at
+17:05. But silicon's **§6** round-2 (ordered 13:07) WAS discharged at 13:47.*
+**Two different items, and my one defective search happened to be right about one
+and wrong about the other** — which is why the true half felt like corroboration
+of the false half. *That is the naming hazard the maestro flagged at 17:05,
+landing inside my own figure.*
+
+📌 **WHAT DOES NOT CHANGE: the FREEZE.** *The window is still `b4b723e` /
+bus 28955, fixed at 16:18:06. Only my CLASSIFICATION improved — which is exactly
+what freezing the window separately from doing the classification was for.*
+⇒ ***A frozen boundary let a wrong figure be corrected without any suspicion that
+the boundary moved to suit it.***
 
 ⚖️ **WHY (f) IS UNCLASSIFIED, stated rather than quietly folded into (e):** candidate
 instances straddle the ③ slate and adjacent campaigns — the tripwire-zero strike
