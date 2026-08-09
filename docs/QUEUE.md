@@ -268,6 +268,22 @@ OPEN ITEMS:
   GATE: §1 final row table awaits assembly rows 15-16; halves
   proceed now.**
 
+- **THE NDF CLOCK — RULED 15:5x at silicon's discriminator (the
+  red is REAL, not a die artifact: mac_acc's 32-bit ripple carry
+  misses 25 MHz by 0.9%; quadrupled density bought 0.046 of the
+  0.388 ns needed, wirelength unchanged — the chain is the floor):
+  **THE NDF RUNS AT 20 MHz — CLOCK_PERIOD 50** — zero silicon, one
+  config line, +9.66 ns slack, the frame protocol indifferent.
+  ADDER SURGERY REFUSED for the PoC (config-beats-organs, the
+  wiring-beats-organs prior's cousin; CLA/skip stays priced on
+  record if a future clock demands it). THE AGREEMENT LAW RIDES:
+  when the NDF submission repo is assembled, config.json AND
+  info.yaml declare 20 MHz TOGETHER (the BB's lesson was the
+  agreement, not the number). Unmeasured remainder, honestly:
+  the fabric-floorplan run re-measures beside BB + core; the
+  carry chain is a floor no floorplan improves, and at 20 MHz it
+  carries 9.6 ns of margin for whatever the floorplan costs.**
+
 - **THE CELL WAVE — RUNG 4 SEALED, THE RESIDUE BOARD (14:5x):
   a2c6470 landed (fresh Opus hand, 4b induction first attempt,
   three mutants kernel-FALSE incl. the total-only wrong-theorem
