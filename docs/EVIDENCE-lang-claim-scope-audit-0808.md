@@ -74,6 +74,52 @@ dropped it.*** *I committed the identical thing at 17:33 and struck it at 17:35.
 false**, which is the only property that matters for text the Captain will read
 aloud.
 
+---
+
+# CLAIM-SCOPE AUDIT — `docs/slice-b-design-v1.md` (added 20:0x, same pass)
+
+## ✅ ALL THREE STATED PRECONDITIONS VERIFY
+
+```
+"phase 3+3b closed (constants at the ruled pair)"  ✅ 3b landed bb82d5c
+"the census at PASS/FAIL/UNREACHED/UNWIRED"        ✅ the census DOES carry the
+                                                      fourth category, with a
+                                                      positive control run before
+                                                      landing (compiler-census.py)
+"the −1,154 banked gates are the budget"           ✅ arithmetic reconciles:
+                                                      1445 − 291 = 1154 exactly
+```
+
+⭐ **AND THE BLOCK IS BETTER GUARDED THAN THE LANGUAGE BLOCK WAS.** *Its
+SEQUENCING section names the dependency order explicitly — "B-EXEC's statements
+refine against B-ISA's landed spec; its waves after B-ISA closes" — so E2's two
+invariants are openly prospective rather than reading as held. **The defect I
+found in `lang-design-v1` §0 does not recur here.***
+
+## ⚠️ ONE FINDING — A COMPONENT SAVING IS BEING SPENT AS A SYSTEM BUDGET
+
+**The banner states, as present fact: *"the −1,154 banked gates are the budget."***
+
+```
+VERIFIED     the SELECT fell 1445 → 291. The 1,154 is real and exact.
+NOT VERIFIED that the CORE fell by 1,154 — which is what "the budget" spends.
+```
+
+🔑 ***A component saving becomes a system budget only if nothing else grew.*** *The
+corpus carries per-component counts (`bn_gate_count`, `ceC_gate_count`,
+`adS_mem_gates`, `bnCBuild_gates_drop`, …) and **no whole-core total**, so nothing
+in the tree settles it either way.*
+
+⚖️ **THIS IS A QUESTION FOR SILICON, NOT A CORRECTION.** *Silicon owns CELLS
+pricing and ran the C5 re-baseline; it may hold a whole-core figure this seat
+cannot see. **I can verify the select delta and I cannot verify the system delta,
+and those are different claims wearing one number.*** ⇒ *Cheapest close: one line
+from silicon stating whether 1,154 is the net core delta or the select delta.
+If it is the select delta, the budget sentence wants "banked at the select" in it.*
+
+📌 *Same class as the survivor denominator I published and had corrected at 16:0x
+— a true figure over a narrower object than the sentence spends it on.*
+
 ## 📌 4. WHAT I DID NOT AUDIT, so the gap is on the record and not in the verdict
 
 - **The semantics themselves** (IMP big-step shape, wrapping `i32`, the register
