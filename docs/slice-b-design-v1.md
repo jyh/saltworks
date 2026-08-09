@@ -25,10 +25,15 @@
 
 ## B-ISA — the datapath extension
 
-B1. SCOPE: five new ops — LW, SW (the FIRST memory; a small SRAM or
-   register-backed memory at Slice-B scale — silicon prices it in
-   CELLS against the 1,154 banked AT THE SELECT — a select delta,
-   not a verified whole-core budget), JAL, JALR (the FIRST link
+B1. SCOPE: five new ops — LW, SW (the FIRST memory; PRICED by
+   silicon 20:56/6707c3b: it does NOT fit the select saving at any
+   size — dmem8 is 1.50× the 1,154-gate budget BY AREA (µm² the only
+   honest axis; by cell COUNT it falsely looks 42% under), flops are
+   ~60% at every size, 16 words is the honest co-tenant ceiling,
+   32 words is not co-tenantable, and beyond 16 the lever is an SRAM
+   macro — a DIFFERENT REGIME, never a shared column. The organ
+   competes with the REGISTER FILE for the tile, not with the
+   select: three instruments converge on that), JAL, JALR (the FIRST link
    register discipline), BNE (BEQ's dual — likely near-free against
    the existing compare). ALU op-set UNCHANGED (ruled): the (3,2)
    select carries the whole slice.
