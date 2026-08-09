@@ -379,11 +379,43 @@ the two files are reconciled in the same commit.** *Landed for the BB switch
 2026-08-09 12:5x; verified at the payload (40 ns ⇔ 25.0 MHz), not at the commit
 message.*
 
-## 3. THE JOINT READING — maestro, after both halves land
+## 3. THE JOINT READING — maestro, 2026-08-09 13:4x (both halves in)
 
-<!-- the kernel-object ↔ silicon-object correspondence, stated once:
-     what the RTL twin is, what emitS changes, what the refinement
-     theorem will add when W5-asm closes -->
+**Two objects exist and this section states their exact relation.**
+
+**The kernel object** (§1's subject): the sixteen-row composed netlist
+— every organ individually certified (`sem_*`, ∀-env), every placement
+`instOK`-certified with its source-port map as data, the chain
+coverage-invariant guarded (`5f1abb7` — added when sixteen true
+certificates were found standing over a netlist that could not
+compose), tie cells at row 0. **What is certified TODAY: the organs,
+the wiring, and the composition's well-formedness. What is OWED and
+says so: the single-cycle refinement (assembled gates, clocked once,
+= `stepT`) — W5-asm's summit theorem, not yet stated over the
+completed chain.** Until it lands, the kernel object is a fully
+placed, fully port-mapped composition whose *end-to-end* semantics
+carries an owed-marker, not a sha.
+
+**The silicon object** (§2's subject): `slicea16bma` — hand-maintained
+RTL, hardened and signed off on the real 3×2 die. **The relation
+between the two objects TODAY is construction-discipline, not
+theorem: the RTL is a *twin* of the kernel organs, kept faithful by
+the same hands that measured both — no kernel statement mentions it.**
+
+**What changes the relation:** the `emitS` path. The W5-asm prize —
+emit the composed kernel core as the tapeout RTL — would *replace*
+the twin with the object itself; the twin-faithfulness question then
+dissolves rather than being answered (there is nothing left to be
+faithful *to* except yosys and the PDK, named trust steps). The NDF
+cell wave (QUEUE, ruled 13:38) applies this law from birth: `macSeq`
+is built in the kernel first and emitted, never twinned.
+
+**The one-sentence summary this account authorizes:** *a processor
+whose every organ and every wire is kernel-certified, whose composed
+end-to-end semantics is one named theorem away, and whose fabbed twin
+is scheduled for replacement by the verified object itself.* Any
+stronger sentence over-claims; any weaker one undersells measured
+work.
 
 ## 4. THE FENCES — evidence's pass
 
