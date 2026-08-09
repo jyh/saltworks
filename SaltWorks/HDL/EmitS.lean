@@ -185,10 +185,26 @@ path it is **3.0× fewer cells and 40% less area** (2981 → 992 cells,
 passthrough stays exact at 992 in → 992 out, 128/128 boundaries.
 
 ⚠️ **THE ORDER SAID `emitV`; IT IS IMPLEMENTED HERE, AND THE ORACLE IS WHY.**
-The acceptance artifacts the silicon seat committed at `60f04b7` are
-`RTL/readtree.v` (**2981 cell instances, 0 `assign` lines**) and
-`RTL/readtreem.v` (**992 cell instances, 0 `assign` lines**) — **both
-STRUCTURAL**. `emitV` emits `assign n5 = i0 & i1;` and produces **zero** cell
+⛔ **CORRECTED 2026-08-09 15:44 — THIS PARAGRAPH MISATTRIBUTED ITS OWN ORACLE.**
+`RTL/readtree.v` (2981 cells, 0 assigns) and `RTL/readtreem.v` (992, 0) are
+**NOT `emitS` output.** Measured: no `default_nettype`, **vector** ports
+(`output [31:0] rdata`) where `emitS` emits scalar `o0…`, and **zero** output
+drives where `emitS` emits one `assign` per output (line 172 below).
+`readtree.v`'s own header says *"READ-PATH ATTACK, candidate 3 … NOT a
+submission artifact."* Other RTL in that directory **is** `emitS`-shaped
+(`banyan_element_s.v`, `batcher_c.v`, `ce_c.v`), which is what made the
+mismatch visible.
+
+⇒ **CONSEQUENCE, and it was live for a €280 run: an acceptance criterion of
+"0 assign lines" taken from those files would FAIL a correct `emitS` emission**,
+which drives every primary output. *And the "one-gate gap" (2,981 cells vs
+`readTree`'s 2,982 kernel gates) was never an emitter property at all — it
+compared a kernel `Circ` against a hand-shaped Verilog module of the same
+function. There is no `emitS` defect and there never was.*
+
+*The peephole argument below is unaffected: it is about `emitV` vs `emitS`
+OUTPUT SHAPES, not about which file demonstrated them.* The historical claim
+was: `emitV` emits `assign n5 = i0 & i1;` and produces **zero** cell
 instances, so a peephole there cannot turn the first into the second: *it never
 emits the input shape.* **The transform, the price and the safety argument are
 all silicon's and all unchanged — only the file differs**, and it differs
