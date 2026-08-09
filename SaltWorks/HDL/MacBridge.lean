@@ -69,4 +69,46 @@ theorem mutant_carry_high_differs :
     ((1 : BitVec 32) + (1 : BitVec 32) + (1 : BitVec 32)).getLsbD 0
       ≠ ((1 : BitVec 32) + (1 : BitVec 32)).getLsbD 0 := by decide
 
+
+/-! ## RUNG 2 — the word-level cycle
+
+Rung 1 is pointwise. `Seq` speaks in lists, so the induction of rung 3 needs the
+whole cycle as one equation. `macCore.outs` is the sum list **twice** — `Seq`
+reads `take nOut` as this cycle's output and `drop nOut` as the next state — so
+both halves fall out of the same pointwise fact. -/
+
+/-- The cell's output list for one cycle, as a word's bits. -/
+theorem macSeq_cycle_bits (acc addend : BitVec 32) :
+    (List.range 32).map (fun k =>
+        run (macSeq.env (MacCell.bitsOf addend) (MacCell.bitsOf acc)) macCore.gates (maSum k))
+      = MacCell.bitsOf (acc + addend) := by
+  refine List.map_congr_left ?_
+  intro k hk
+  exact cell_sum_bit acc addend k (List.mem_range.mp hk)
+
+/-- ⭐⭐ **RUNG 2 — ONE CYCLE, AT THE WORD.** Feeding the cell an accumulator and
+an addend leaves `acc + addend` on **both** the output port and the next state.
+Still no `ℤ`: this is `BitVec` addition, which is total. -/
+theorem macSeq_step_word (acc addend : BitVec 32) :
+    stepSeq macSeq (MacCell.bitsOf acc) (MacCell.bitsOf addend)
+      = (MacCell.bitsOf (acc + addend), MacCell.bitsOf (acc + addend)) := by
+  -- ⚠️ `macCore` is kept OPAQUE: unfolding it expands `instGates adder32` (160 gates) and the
+  -- kernel times out. Compiler documented this at `step_halves_agree`; the shape of `outs` is all
+  -- either proof needs, and `macSeq`'s fields are PROJECTED by `rfl` rather than unfolded.
+  have houts : macCore.outs = (List.range 32).map maSum ++ (List.range 32).map maSum := rfl
+  have hcore : macSeq.core = macCore := rfl
+  have hnout : macSeq.nOut = 32 := rfl
+  have hmapped : ((List.range 32).map maSum).map
+        (run (macSeq.env (MacCell.bitsOf addend) (MacCell.bitsOf acc)) macCore.gates)
+      = MacCell.bitsOf (acc + addend) := by
+    simp only [List.map_map, Function.comp_def]
+    exact macSeq_cycle_bits acc addend
+  have hl : (MacCell.bitsOf (acc + addend)).length = 32 := MacCell.bitsOf_length _
+  have hdup : ∀ (l : List Bool) (n : Nat), l.length = n →
+      (l ++ l).take n = l ∧ (l ++ l).drop n = l := by
+    intro l n h; subst h; exact ⟨List.take_left, List.drop_left⟩
+  obtain ⟨ht, hd⟩ := hdup _ 32 hl
+  simp only [stepSeq, sem, hcore, hnout, houts, List.map_append, hmapped]
+  rw [ht, hd]
+
 end SaltWorks.HDL.MacBridge
