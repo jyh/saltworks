@@ -529,4 +529,60 @@ placement certificate. -/
 theorem mutant_sign_cycle_without_carry_is_off_by_one :
     ((5 : BitVec 32) + (~~~(3 : BitVec 32))) ≠ ((5 : BitVec 32) - 3) := by decide
 
+/-! ## THE JOIN — the cell computes `b + W · sval`, end to end
+
+Every part was landed and none of them were composed. This is the composition:
+`m` addend cycles (rung 3 → `macAfter`), then ONE sign cycle (the complement with
+carry-in high → subtraction), read in `ℤ` under the two library-native
+no-overflow hypotheses. Indexing at `m + 1` avoids `Nat` subtraction: the trace
+carries bits `0…m-1` and the sign cycle carries bit `m`. -/
+
+/-- The sign cycle's operand: the top shifted weight when its stream bit is set. -/
+def signOperand (Wsh : ℕ → BitVec 32) (x : ℕ → Bool) (m : ℕ) : BitVec 32 :=
+  if x m then Wsh m else 0
+
+/-- ⭐⭐⭐ **THE CELL COMPUTES THE SIGNED MAC.** After `m` addend cycles and one
+sign cycle, the state is a word whose `ℤ` value is `Mac.macFinal` — which
+`Mac.mac_correct` reads as `b + W · sval x (m+1)`.
+
+*This is the sentence "the cell is certified" is allowed to mean.* -/
+theorem cell_full_mac
+    (W : ℤ) (b : BitVec 32) (Wsh : ℕ → BitVec 32) (x : ℕ → Bool) (m : ℕ)
+    (hW : ∀ t, t < m → (Wsh t).toInt = W * 2 ^ t)
+    (hWm : (Wsh m).toInt = W * 2 ^ m)
+    (hno : noOverflowFrom b (addendTrace Wsh x m) = true)
+    (hsign : ¬ BitVec.ssubOverflow (b + (addendTrace Wsh x m).sum)
+                (signOperand Wsh x m)) :
+    (runTrace macSeq (MacCell.bitsOf b)
+        ((addendTrace Wsh x m).map (fun a => MacCell.bitsOf a ++ [false])
+          ++ [MacCell.bitsOf (~~~(signOperand Wsh x m)) ++ [true]])).2
+      = MacCell.bitsOf ((b + (addendTrace Wsh x m).sum) - signOperand Wsh x m)
+  ∧ ((b + (addendTrace Wsh x m).sum) - signOperand Wsh x m).toInt
+      = Mac.macFinal W b.toInt x (m + 1) := by
+  obtain ⟨hstate, hval⟩ := cell_state_toInt_eq_macAfter W b Wsh x m hW hno
+  constructor
+  · rw [runTrace_append, hstate]
+    show (stepSeq macSeq (MacCell.bitsOf (b + (addendTrace Wsh x m).sum))
+            (MacCell.bitsOf (~~~(signOperand Wsh x m)) ++ [true])).2 = _
+    exact cell_sign_cycle _ _
+  · rw [BitVec.toInt_sub_of_not_ssubOverflow hsign, hval, Mac.macFinal]
+    simp only [Nat.add_sub_cancel, signOperand]
+    by_cases hx : x m
+    · simp [hx, hWm]
+    · simp [hx]
+
+/-- ⭐ **AND THE SENTENCE ITSELF**, with `Mac.mac_correct` composed: the cell's
+final state reads as `b + W · sval`. -/
+theorem cell_computes_signed_mac
+    (W : ℤ) (b : BitVec 32) (Wsh : ℕ → BitVec 32) (x : ℕ → Bool) (m : ℕ)
+    (hW : ∀ t, t < m → (Wsh t).toInt = W * 2 ^ t)
+    (hWm : (Wsh m).toInt = W * 2 ^ m)
+    (hno : noOverflowFrom b (addendTrace Wsh x m) = true)
+    (hsign : ¬ BitVec.ssubOverflow (b + (addendTrace Wsh x m).sum)
+                (signOperand Wsh x m)) :
+    ((b + (addendTrace Wsh x m).sum) - signOperand Wsh x m).toInt
+      = b.toInt + W * Mac.sval x (m + 1) := by
+  rw [(cell_full_mac W b Wsh x m hW hWm hno hsign).2,
+      Mac.mac_correct W b.toInt x (m + 1) (by omega)]
+
 end SaltWorks.HDL.MacBridge
