@@ -386,6 +386,76 @@ exactly as `macSeq`'s per-cycle lemma was before layer 1 landed.
 `organs_compose_at_32_bits` says the seam FITS; it does not say anything is wired.
 -/
 
+/-! ### ORGAN 2'S PER-CYCLE SEMANTICS — the item I re-priced, now cheap for the stated reason
+
+`run_of_flat_gates` (`Compose.lean`, landed `6969fa4`) exists because of this proof: without it, each
+bit needs the gate list split at a **variable** index and `run_of_unwritten` applied twice. With it,
+both halves are three lines. **The re-pricing said the cheap path was a named lemma rather than a
+faster bespoke proof; this is that claim being cashed.**
+
+`wsCore` is FLAT — every gate reads only `wsX` and a state net, both below `wsCoreIn` — which is
+exactly the hypothesis the lemma's name carries and the reason it applies here and refuses `macCore`.
+-/
+
+theorem wsGates_flat : flatBelow wsCoreIn wsGates = true := by decide +kernel
+theorem wsGates_ssa : ssaFrom wsCoreIn wsGates = true := by decide +kernel
+
+/-- The organ's environment reads: the stream bit at `wsX`, state bit `k` at `wsW k`. -/
+theorem wshift_env (x : Bool) (w : BitVec 32) (k : Nat) (hk : k < 32) :
+    wshiftSeq.env [x] (bitsOf w) wsX = x
+  ∧ wshiftSeq.env [x] (bitsOf w) (wsW k) = w.getLsbD k := by
+  refine ⟨?_, ?_⟩
+  · simp only [Seq.env, wshiftSeq, wsX]
+    norm_num
+  · have hne : ¬(1 + k < 1) := by omega
+    simp only [Seq.env, wshiftSeq, wsW, if_neg hne, Nat.add_sub_cancel_left]
+    exact bitsOf_getD w k hk
+
+/-- ⭐⭐ **THE ADDEND BIT: `addend[k] = x_t ∧ (W << t)[k]`.** This is exactly the `macAfter` term
+`if x t then W · 2^t else 0`, bit by bit. -/
+theorem wshift_addend_bit (x : Bool) (w : BitVec 32) (k : Nat) (hk : k < 32) :
+    run (wshiftSeq.env [x] (bitsOf w)) wsCore.gates (wsAnd k) = (x && w.getLsbD k) := by
+  -- `wsCore.gates` and `wsGates` are definitionally equal but NOT syntactically, so `simpa`
+  -- cannot close the gap on its own. Rewrite once, then the lemma applies.
+  rw [show wsCore.gates = wsGates from rfl]
+  have hmem : (⟨wsAnd k, Op.and wsX (wsW k)⟩ : Gate) ∈ wsGates := and_row_reads_the_stream k hk
+  have h := run_of_flat_gates (wshiftSeq.env [x] (bitsOf w)) wsGates_flat wsGates_ssa hmem
+  obtain ⟨hx, hw⟩ := wshift_env x w k hk
+  simpa [Op.eval, hx, hw] using h
+
+/-- ⭐ **THE SHIFT, BIT 0: the vacated LSB is the CONSTANT, not a wrapped bit.** Proved through the
+same lemma — the tie is a gate of the flat list like any other. -/
+theorem wshift_next_bit_zero (x : Bool) (w : BitVec 32) :
+    run (wshiftSeq.env [x] (bitsOf w)) wsCore.gates wsZero = false := by
+  rw [show wsCore.gates = wsGates from rfl]
+  have hmem : (⟨wsZero, Op.const false⟩ : Gate) ∈ wsGates := by simp [wsGates]
+  have h := run_of_flat_gates (wshiftSeq.env [x] (bitsOf w)) wsGates_flat wsGates_ssa hmem
+  simpa [Op.eval] using h
+
+/-- ⭐ **THE SHIFT, BITS 1…31: next-state bit `k+1` is state bit `k`.** These nets are INPUTS, never
+written, so this is the frame rather than the flat-gate lemma — the two halves of the shift are
+proved by different tools and that is the honest structure. -/
+theorem wshift_next_bit_succ (x : Bool) (w : BitVec 32) (k : Nat) (hk : k < 31) :
+    run (wshiftSeq.env [x] (bitsOf w)) wsCore.gates (wsW k) = w.getLsbD k := by
+  have hne : ∀ g ∈ wsCore.gates, g.out ≠ wsW k := by
+    intro g hg hEq
+    have hb : wsCoreIn ≤ g.out := ssaFrom_out_ge wsGates wsCoreIn wsGates_ssa g hg
+    rw [hEq] at hb
+    have : (1 + k : Nat) < 33 := by omega
+    simp only [wsCoreIn, wsW] at hb
+    omega
+  rw [run_of_unwritten _ _ _ hne]
+  exact (wshift_env x w k (by omega)).2
+
+/-! **WHAT THIS COMPLETES.** Organ 2's cycle is characterised: the addend is `x ∧ (W << t)`, and the
+next state is `W << (t+1)` — bit 0 the constant, bits `1…31` the previous bits shifted up. Together
+with `macSeq`'s layer 1 (`step_bit_is_adder_bit`), both cell organs now have per-cycle semantics.
+
+⛔ **STILL NOT CLAIMED: THE COMPOSITION.** Two organs with per-cycle semantics and matching widths
+are not a machine. Wiring organ 2's output into organ 1's addend port is a further object, and
+`organs_compose_at_32_bits` says only that the seam FITS.
+-/
+
 /-! ### The axiom audit — one declaration per call
 
 *Added WITH the cell, not after it. `CorePlace` ran fourteen placements with `EXIT=0` and zero
@@ -418,5 +488,11 @@ everything after a failure reads as clean. -/
 #audit_axioms shift_is_left_not_right
 #audit_axioms and_row_reads_the_stream
 #audit_axioms organs_compose_at_32_bits
+#audit_axioms wsGates_flat
+#audit_axioms wsGates_ssa
+#audit_axioms wshift_env
+#audit_axioms wshift_addend_bit
+#audit_axioms wshift_next_bit_zero
+#audit_axioms wshift_next_bit_succ
 
 end SaltWorks.HDL.MacCell
