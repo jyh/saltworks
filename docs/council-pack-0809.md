@@ -41,10 +41,18 @@
    (length-fuel cannot express infinite runs — three independent
    sightings), and every economic axis measured (memory organ:
    16-word co-tenant ceiling, competes with the register file).
-4. **W5 (the core construction) — gated on this review.**
-   Compiler's named next; the subtraction-fragment probe ran and
-   its results are PARKED pending compiler's post-retraction
-   re-check (see §4). Open it, or redirect capacity to waves.
+4. **W5 (the core construction) — gated on this review, and likely
+   CHEAPER than yesterday's framing.** The probe proved the
+   composition MACHINERY (instOK discharged for both instances;
+   `frag_subtraction` in the kernel, MEAS'd clean). Compiler's
+   post-retraction re-check then found the organ-level ∀-env
+   semantics layer essentially COMPLETE in Program.lean — the
+   missing piece is the assembly and its StateCodec conformance,
+   not organ semantics. [Compiler's own caveat attached: a reading
+   of a theorem list by a seat wrong five times tonight about what
+   exists; math's independent verification pass — its slot, its
+   theorems — was dispatched overnight and its result rides beside
+   this line.] Open W5, or redirect capacity to waves.
 5. **THE THIRD FUEL COLUMN — name it in one word.** Your triples'
    third number is NOT "week-Opus" (math-acct reads 0 beside an
    Opus-all-day seat). Semantics attested-twice-verified-zero.
@@ -66,8 +74,12 @@
 - **The executive rooted and strengthened**: Executive.lean
   (runW_map UNCONDITIONAL — the simulation prize), rooted 5446a98;
   the fuel/halt boundary witnessed in-kernel after math's audit
-  (ece7ddf); ImmediateScope rooted 4167e2b (the fixed-register
-  scope made irrelevant by theorem).
+  (ece7ddf). [ImmediateScope, rooted 4167e2b, was found
+  REDUNDANT-IN-FULL by its own author's re-check hours later — the
+  night's fifth false-absence, same mechanism; its retirement via
+  the kernel-census aiming rider is a registered morning task, and
+  the honest accounting is that its content already existed in
+  Program.lean.]
 - **The tile arc** (§1.1): three feed shapes priced (serial 781K
   instr/s · your byte-wide 6.25M · parallel untapeable), the
   toolchain brought up additively (LibreLane 3.0.5, shared PDK
@@ -150,4 +162,7 @@ resurfacing) · the ③+④ deep session (Captain-committed, do not
 forget) · (7.3) one click (T1) · N7 design debts + next-rung
 re-recon + doc-refresh candidate (maestro-owed, post-council) ·
 DRV repair + fetch-protocol design question (silicon/joint, named) ·
-adder32 gate-count theorem (compiler's slot, one line).
+adder32 gate-count theorem (compiler's slot, one line) ·
+ImmediateScope retirement via the aiming rider (REMOVE+saltbuild,
+never name-grep; compiler's slot, morning) · math's sem_* inventory
+verification (dispatched overnight, feeds the W5 line).
