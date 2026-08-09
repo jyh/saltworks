@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Cold-cost census — which ROOTED modules can still be ELABORATED at saltbuild's
-default memory cap?
+"""Audit-cap census — which ROOTED modules can the AUDIT form (`saltbuild.sh <path>.lean`,
+`-M 12000`) still elaborate? NOT a statement about the full build, which is uncapped.
 
 WHY THIS EXISTS (compiler, 2026-08-08 20:1x)
 --------------------------------------------
@@ -9,16 +9,29 @@ Every full-build verdict in this campaign is dominated by REPLAY. A measured exa
 3.3 seconds**. That green says the cache is intact. It does not say this machine's kernel
 can still elaborate the corpus.
 
-And it matters, because at least one rooted module CANNOT:
+⛔⛔ CORRECTION 20:4x, BEFORE READING FURTHER: the paragraph below is about the AUDIT form
+only, and the conclusions this docstring originally drew from it were FALSE. saltbuild.sh
+is a two-arm dispatch -- `*.lean` runs `lake env lean -M "$CAP"`, everything else runs a
+bare, UNCAPPED `lake build`. The FULL BUILD uses the second arm. So a module over the audit
+cap is NOT frozen, NOT unlandable-to, and the corpus IS reproducible from cold: tested by
+deleting Immediate's olean/hash/trace and running the module form -- EXIT=0, Built (79s),
+olean regenerated. I had read one arm of the `case` and published a fact about the tool.
+
+WHAT THIS TOOL ACTUALLY MEASURES, THEN: which rooted modules the AUDIT form can elaborate
+at its default cap. That is worth knowing -- a seat auditing such a file gets EXIT=134 and
+reads it as their own edit's fault, which is what happened to the author -- but it is a
+fact about an instrument, not a reproducibility gap.
+
+And the measurement that prompted it:
 
     SaltWorks/HDL/Immediate.lean  pristine, path form, DEFAULT cap -> EXIT=134
                                   lean::memory_exception at 'interpreter'
                                   ... and --cap 24000 -> EXIT=0 (80 s)
 
-A cold cache is not hypothetical: a fresh clone, a new machine, a CI runner, a
-cache-cleared successor and the eventual public gate all start cold. The 2026-08-06
-laptop->Mac-Mini migration already taught this fleet that oleans travel by rsync and the
-kernel does not.
+(The replay observation itself stands and is worth keeping: a green whose modules all say
+"Replayed" proves the cache, not this machine's kernel. That is a real distinction. What it
+does NOT imply is that the tree cannot be rebuilt -- which is the leap this docstring
+originally made.)
 
 WHAT IT REPORTS, AND THE RULE IT OBEYS
 --------------------------------------
@@ -107,7 +120,8 @@ def main() -> int:
     print(f"COLD-COST CENSUS · rooted modules = {len(mods)} · "
           f"candidates = {len(cands)} (heuristic: decide+kernel > 0 AND max List.range >= {min_range})")
     print(f"⚠️  A module NOT LISTED BELOW IS UNTESTED, NOT CHEAP — the selection is a heuristic.")
-    print(f"⚠️  PASS = elaborates at the DEFAULT cap today, ALONE, on this machine. Deps still replay.")
+    print(f"⚠️  PASS = elaborates under the AUDIT form's default cap today, ALONE, on this machine.")
+    print(f"⚠️  This says NOTHING about the full build: `lake build` passes no -M and is UNCAPPED.")
     print()
 
     fails = []

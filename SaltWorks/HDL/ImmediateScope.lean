@@ -22,32 +22,45 @@ the assembled instruction word is not a fixture — it takes a WORD and no hypot
 grep the corpus for prose asserting otherwise. §2 still routes through the `wordI v`
 fixture; that is precisely the shape mismatch §2b exists to fix.*
 
-## ⛔ WHY THIS IS A SEPARATE FILE AND NOT THREE THEOREMS APPENDED TO `Immediate.lean`
+## ⚠️ WHY THIS IS A SEPARATE FILE — CORRECTED 2026-08-08 20:4x, MY FIRST REASON WAS FALSE
 
-**Measured 2026-08-08 20:0x, and it is a fact about the module, not a preference:**
+**What is measured and true:** `Immediate.lean` cannot be elaborated by `saltbuild.sh`'s
+**AUDIT form** at its default cap.
 ```
-SaltWorks/HDL/Immediate.lean, PRISTINE FROM GIT
-  ../saltbuild.sh                → EXIT=134, lean::memory_exception at 'interpreter'
-  ../saltbuild.sh --cap 24000    → EXIT=0   (80 s)
+../saltbuild.sh SaltWorks/HDL/Immediate.lean                → EXIT=134  memory_exception
+../saltbuild.sh --cap 24000 SaltWorks/HDL/Immediate.lean    → EXIT=0    (80 s)
 ```
-`saltbuild.sh`'s default cap is **12000 MB** and that module needs more. It is **not
-broken** — it is correct and over the default. ⚠️ **So ANY edit to `Immediate.lean` forces
-a re-elaboration that fails at the default cap, which would break the fleet's full-build
-verdict.** The maestro ruled at 20:09 that the default does not move tonight and that
-per-invocation `--cap` is the sanctioned mechanism — *but a per-invocation flag does not
-help the full build, which runs at the default.*
 
-⇒ ***So `Immediate.lean` is effectively FROZEN under the current default, and the remedy
-is the one this file is: ADD BESIDE, DON'T ADD INSIDE.*** Importing it **replays** its
-olean, so this module is cheap and the expensive module is never re-elaborated. *That is
-expand-contract discipline applied to a MEMORY constraint rather than to an interface, and
-it is the general move for any module sitting at the cap.*
+⛔ **AND HERE IS WHAT I GOT WRONG AND PUBLISHED FOUR TIMES BEFORE CHECKING.** I wrote that
+any edit to `Immediate.lean` "would break the fleet's full-build verdict", that the module
+was "FROZEN / unlandable-to", and that the corpus was not reproducible from cold. **All
+false.** `saltbuild.sh:32-37` is a two-arm dispatch:
+```sh
+*.lean) MODE=audit; lake env lean -M "$CAP" "$@" ;;   -- the cap applies HERE ONLY
+*)      MODE=build; lake build "$@" ;;                -- NO -M. UNCAPPED.
+```
+***The `-M` is the AUDIT form's cap. The FULL BUILD uses the module form and passes no `-M`
+at all.*** ✅ **Tested rather than inferred a second time:** with Immediate's olean, hash and
+trace deleted, `../saltbuild.sh SaltWorks.HDL.Immediate` gave `EXIT=0`,
+`Built SaltWorks.HDL.Immediate (79s)`, and regenerated a byte-size-identical olean.
+📌 **I read line 35 and never read line 36 — a true reading of ONE ARM of a `case`
+statement, published as a fact about the tool.**
 
-📌 **The suspected cost, flagged as UNMEASURED:** four `decide +kernel` blocks in
+⇒ ***SO THE HONEST, SMALLER JUSTIFICATION FOR THIS FILE: it keeps these theorems AUDITABLE
+AT THE DEFAULT CAP.*** Appended to `Immediate.lean`, every path-form audit of them would
+need `--cap 24000` and ~80 s; here they audit in seconds because the heavy module
+**replays**. That is a real convenience and a real reproducibility benefit for anyone
+checking *this* file's axioms. **It is NOT protection against a broken build, because there
+was never a broken build to protect against.**
+
+⚠️ **The trap that IS real, and it is the whole of the finding: a seat auditing
+`Immediate.lean`, `Decoder.lean` or `Silicon/Equiv/FabricRoutes.lean` path-form gets
+`EXIT=134` and will read it as their own edit's fault.** It cost me two builds doing exactly
+that. See `docs/compiler-cold-cost-census-0808.md`; the remedy is `--cap 24000`.
+
+📌 **The suspected cost, still UNMEASURED:** four `decide +kernel` blocks in
 `Immediate.lean`, each sweeping all 4096 immediate values through a 32-net circuit
-simulation. **I did not bisect which one, or whether it is the sum** — the honest
-long-term fix is probably to move those four certificates into their own module, which is
-a restructuring of a rooted file and therefore a ruling, not a landing.
+simulation. I did not bisect which one, or whether it is the sum.
 -/
 
 namespace SaltWorks.HDL

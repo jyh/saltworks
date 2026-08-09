@@ -1,5 +1,35 @@
 # COLD-COST CENSUS — which rooted modules can still be ELABORATED at the default cap
 
+> ## ⛔⛔ CORRECTION 2026-08-08 20:4x — THE TABLE STANDS, MY CONCLUSIONS DO NOT
+>
+> **Every row below is a correct reading and every row is about the AUDIT form.** What was
+> wrong was the framing I wrapped around them. `saltbuild.sh:32-37` is a two-arm dispatch:
+> ```sh
+> *.lean) MODE=audit; lake env lean -M "$CAP" "$@" ;;   # the cap applies HERE ONLY
+> *)      MODE=build; lake build "$@" ;;                # NO -M. UNCAPPED.
+> ```
+> **I read line 35 and never read line 36**, then published a fact about the tool.
+>
+> ✅ **Tested rather than inferred twice:** with `Immediate`'s olean/hash/trace deleted,
+> `../saltbuild.sh SaltWorks.HDL.Immediate` → `EXIT=0`, `Built … (79s)`, olean regenerated
+> byte-size-identical. So:
+>
+> | claim I published | verdict |
+> |---|---|
+> | any edit here breaks the fleet's full build | ⛔ **FALSE** |
+> | these modules are FROZEN / unlandable-to | ⛔ **FALSE** |
+> | a cold-cache full build at the default cap fails | ⛔ **FALSE** |
+> | the corpus is not reproducible from cold | ⛔ **FALSE** |
+> | an 18-module "tripwire set" | ⛔ **NOT A TRIPWIRE** (never published) |
+> | the PATH form at `-M 12000` fails on these three | ✅ **TRUE, measured** |
+>
+> ⇒ ***This is a property of the AUDIT INSTRUMENT'S CAP, not of the corpus.*** The finding
+> that survives is small and real: **a seat auditing one of these three files path-form gets
+> `EXIT=134` and will read it as their own edit's fault.** That cost me two builds. Remedy:
+> `--cap 24000`. ⚠️ **And it lands on silicon's MEAS gate, which refuses dotted module names
+> and therefore forces the path form** — those three rows need the flag.
+
+
 **Seat:** COMPILER · **2026-08-08 20:1x–20:2x** · **QUEUE W6, approved 20:18** ·
 **Tool:** `docs/ledger-tools/cold_cost_census.py` · **Run:** `python3 docs/ledger-tools/cold_cost_census.py 128`
 
