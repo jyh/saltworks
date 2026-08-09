@@ -6,6 +6,11 @@ import SaltWorks.HDL.ReadTree
 import SaltWorks.HDL.RegWrite
 import SaltWorks.HDL.Bitwise
 
+-- Evaluating `instOuts` over real organs (readTree is 2,982 gates) exceeds the default depth.
+-- `CoreOffsets` carries the same option for the same reason. (A `/--` docstring cannot attach to
+-- `set_option` -- it must bind a declaration; that is the docstring-boundary law, self-inflicted.)
+set_option maxRecDepth 100000
+
 /-!
 # W5-asm, increment 2a — the FIRST organ placed at the real offset, `instOK` discharged
 
@@ -516,6 +521,87 @@ theorem bitNot32_inverts_rs2_not_rs1 :
   simp only [bitNot32Sig, rs1Out, rs2Out, off3, off2, off1, off0, instNext,
              coreInWidth, stWidth]
   decide +kernel
+
+
+/-! ## 9. INCREMENT 2g — ROWS 7 AND 8: the two adders, and the tie cells earning their row
+
+`adder32.nIn = 65 = a[32] + b[32] + cin[1]` (`Adder.lean:67`). Both adders share `rs1` as `a`; they
+differ in `b` and in the carry-in, and **that difference is the whole of `sub`**:
+
+```
+row 7  add   a = rs1Out · b = rs2Out              · cin = tieFalse
+row 8  sub   a = rs1Out · b = bitNot32's outputs  · cin = tieTrue     ⇒ a + ~b + 1
+```
+*Row 0 exists for exactly these two wires. Every other input in the assembly comes from the core's
+state, its instruction, or another organ's gates; the carry-ins are the only nets that had no
+producer at all, which is why "no row provides it" was a real gap and not a missing organ.* -/
+
+/-- Row 7's offset — after `bitNot32`. -/
+def offAdd : Nat := instNext bitNot32 off5
+/-- Row 8's offset — after the first adder. -/
+def offSub : Nat := instNext adder32 offAdd
+
+theorem adder_offsets : offAdd = 7221 ∧ offSub = 7381 := by
+  refine ⟨?_, ?_⟩ <;>
+    simp only [offSub, offAdd, off5, off4, off3, off2, off1, off0, instNext, tieCells,
+               offTie, coreInWidth, stWidth] <;> decide +kernel
+
+/-- `bitNot32`'s output `k` at its chain position — the `~b` bank. -/
+def notOut (k : Nat) : Net := (instOuts bitNot32 bitNot32Sig off5).getD k 0
+
+/-- Row 7 — `add`: both operands straight from the register file, carry-in tied LOW. -/
+def addSig (j : Net) : Net :=
+  if j < 32 then rs1Out j else if j < 64 then rs2Out (j - 32) else tieFalse
+
+/-- Row 8 — `sub`: `a + ~b + 1`. The inverted bank and the carry-in tied HIGH. -/
+def subSig (j : Net) : Net :=
+  if j < 32 then rs1Out j else if j < 64 then notOut (j - 32) else tieTrue
+
+/-- ⭐ **PLACEMENT #8 — `add` at row 7, `instOK` DISCHARGED.** -/
+theorem add_instOK : instOK adder32 addSig offAdd := by
+  refine ⟨adder32_ssa, adder32_wf, ?_⟩
+  intro j hj
+  have hnn : adder32.nIn = 65 := by decide +kernel
+  rw [hnn] at hj
+  revert hj; revert j
+  decide +kernel
+
+/-- ⭐ **PLACEMENT #9 — `sub` at row 8, `instOK` DISCHARGED.** -/
+theorem sub_instOK : instOK adder32 subSig offSub := by
+  refine ⟨adder32_ssa, adder32_wf, ?_⟩
+  intro j hj
+  have hnn : adder32.nIn = 65 := by decide +kernel
+  rw [hnn] at hj
+  revert hj; revert j
+  decide +kernel
+
+/-- ⭐⭐ **THE SUBTRACTION IS `a + ~b + 1` AND ALL THREE PARTS ARE ASSERTED.** Each of the three
+differences from `add` is independently wrong-able, and each would place cleanly:
+
+* same `a` — using `rs2` as `a` computes `b - a`;
+* **inverted** `b` — using `rs2Out` uninverted computes `a + b + 1`;
+* carry-in **HIGH** — using `tieFalse` computes `a + ~b`, which is `a - b - 1`.
+
+*The last is the one that would survive casual testing: off by exactly one, on every subtraction.* -/
+theorem subtraction_is_a_plus_not_b_plus_one :
+    addSig 0 = subSig 0
+  ∧ addSig 32 ≠ subSig 32
+  ∧ addSig 64 = tieFalse ∧ subSig 64 = tieTrue
+  ∧ tieFalse ≠ tieTrue := by
+  refine ⟨rfl, ?_, rfl, rfl, tie_nets_are_distinct⟩
+  simp only [addSig, subSig, rs2Out, notOut, off5, off4, off3, off2, off1, off0,
+             instNext, tieCells, offTie, coreInWidth, stWidth]
+  decide +kernel
+
+/-- **CONTROL: the tie cells are genuinely LOAD-BEARING for row 0's existence.** Both carry-ins
+resolve to tie nets — i.e. to gates that exist only because row 0 exists. Without row 0 these two
+inputs have no producer at all, which is the gap that forced the ruling. -/
+theorem carry_ins_come_from_row_zero :
+    addSig 64 = tieFalse ∧ subSig 64 = tieTrue
+  ∧ tieFalse = offTie ∧ tieTrue = offTie + 1 := by
+  refine ⟨rfl, rfl, ?_, ?_⟩ <;>
+    simp only [tieFalse, tieTrue, instOuts, instMap, tieCells, offTie, coreInWidth, stWidth] <;>
+    decide +kernel
 
 
 end SaltWorks.HDL.CorePlace
