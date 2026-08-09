@@ -1134,8 +1134,24 @@ in my own charter item, found **before** the close rather than after.
 
 ✅ **THE EXHIBIT, QUOTED VERBATIM SO THE CLOSE HAS SOMETHING TO CITE** *(source:
 `ScratchP3CUT.lean`, gitignored, mtime 2026-08-08 13:57 — quoted AS SCRATCH,
-per the ruling; not landed, because it is compiler's file and its subject was
-deleted at the flip)*:
+per the ruling)*:
+
+> ⛔ **REASON CORRECTED 18:1x — I PUBLISHED A FALSE JUSTIFICATION FOR NOT LANDING
+> IT.** *I wrote "not landed, because it is compiler's file and **its subject was
+> deleted at the flip**". **The second half is untrue.** Measured at
+> origin/master: `sliceASelect` 4 files · `genSelect` 8 · `rsOps` 2 ·
+> `rsSelBits` 2 — **every subject of `p3c_the_blocks_coincide` is alive.** Only
+> `p3c_nIn_becomes_slice` is absent, and that is one of the exhibit's OWN lemmas,
+> not a subject.*
+> ⇒ ***LANDING IT IS POSSIBLE, and compiler has since demonstrated the promotion
+> path on the phantom five (rooted, full build green).*** **The true position:
+> this is compiler's file and compiler's call — the same disposition the maestro
+> gave the phantom five — so I flag it as AVAILABLE FOR PROMOTION rather than
+> assert it cannot be.**
+> 🔑 *[[right-conclusion-wrong-reason]], in my own charter item: the conclusion
+> (quote it now, so the close has something to cite) was right and remains right;
+> the reason I gave for it was wrong and would have propagated as a fact about
+> the tree.*
 
 ```lean
 theorem p3c_the_blocks_coincide : genSelect rsOps rsSelBits = sliceASelect := rfl
