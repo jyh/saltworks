@@ -119,3 +119,55 @@ time is attested for ONE account (`jason`). The other four carry no reset
 announced in this triple, and I have not assumed they share it.* **Four unknown
 reset anchors is a real gap in the fuel picture, and it is cheap to close: one
 line per seat at the next daily announcement.**
+
+## 🔥 THE OVERNIGHT ALLOCATION — 2026-08-08 20:00, the Captain's last order before sleep
+
+> ***"For jason, overnight, we have 40%, full throttle."***
+
+**And the parting contingency, registered verbatim at 19:59:**
+> ***"On jason, if we run short, we'll do a swap."***
+
+```
+ACCOUNT   jason  (the MAESTRO's, at 8 / 61 / 51 in the 19:57 triple)
+BUDGET    40 points of the jason envelope, for the night
+POSTURE   full throttle — the hub WORKS the night, no defensive idling
+ESCAPE    a swap, IF short — and the swap is the CAPTAIN'S CLICK, morning at
+          the earliest, so the overnight move if jason nears a wall is
+          SLOW AND HOLD, never self-serve
+```
+
+⛔ **THE SCOPE, because this is the sentence most likely to travel wrong: "40%,
+FULL THROTTLE" IS ONE ACCOUNT'S ALLOCATION, NOT A FLEET-WIDE LICENCE.** *It names
+`jason` — the hub's account — and it says nothing about the four seat accounts,
+whose envelopes are separate and whose triples show far deeper headroom
+(`jasonh` 15, `silicon-acct` 14, `math-acct` 22, `compiler-acct` 28 week-all).* ⇒ ***A seat
+reading "full throttle" as addressed to itself would be reading an order written
+for someone else's fuel.***
+
+### ⏱️ THAT CAVEAT EXPIRED SIXTY SECONDS AFTER I WROTE IT — 20:01
+
+> **The Captain's second word: *"ALL SEATS FULL THROTTLE."***
+
+```
+20:00   "For jason, overnight, we have 40%, full throttle"   ONE account
+20:01   "ALL SEATS FULL THROTTLE"                            EVERY account
+```
+
+⚖️ ***The caveat above was TRUE WHEN WRITTEN and is now SUPERSEDED — it is dated,
+not deleted.*** *This is the shape I described to silicon at 18:2x when it
+retracted a sentence of its own: **you are not correcting an error, you are
+dating a claim whose truth expired.** It arrived at my own file within the hour,
+which is the fairest possible way to learn that the distinction is real and not
+a courtesy.*
+
+📌 **WHAT SURVIVES THE EXPIRY, and it is the part worth keeping: the ACCOUNTS ARE
+STILL SEPARATE.** *"All seats full throttle" licenses every seat to spend ITS OWN
+envelope; it does not pool them, and `jason` at 61% week-all is still the deepest
+drain with the only named escape hatch. **A fleet-wide licence is not a fleet-wide
+budget**, and the triples are per-account precisely so that distinction stays
+checkable.*
+
+📌 *Recorded here rather than interpreted: this seat does not price the wisdom of
+40 points and has no standing to. **What it can do is make sure the number keeps
+the account name attached to it**, which is the only property that stops it
+becoming "the fleet had 40% and went full throttle" by Monday.*
