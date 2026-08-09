@@ -5,9 +5,16 @@
 # The emitted RTL belongs in SaltWorks/Silicon/RTL/, which is SILICON's directory. After the
 # 15:1x collision I hold a rule stricter than fleet law: NEVER WRITE A FILE I DO NOT OWN, not
 # even to create one. So this tool prints; silicon redirects and owns the artifact.
-#   ./emit_cell.sh acc     > SaltWorks/Silicon/RTL/mac_acc.v
-#   ./emit_cell.sh wshift  > SaltWorks/Silicon/RTL/mac_wshift.v
+#   ./emit_cell.sh acc     > SaltWorks/Silicon/RTL/mac_acc.v      160/160 cells
+#   ./emit_cell.sh wshift  > SaltWorks/Silicon/RTL/mac_wshift.v     33/33  cells
+#   ./emit_cell.sh cell    > SaltWorks/Silicon/RTL/mac_cell.v      193/193, ONE module
 #   ./emit_cell.sh counts            # the acceptance numbers, no file written
+#
+# THE `cell` ARM is the COMPOSED cell (`cellSeq`, landed 260bf43): one module, nIn 3
+# (x · load · cin), nState 64 (wsh ‖ acc), 193 gates = 33 + 160 with NO GLUE and NO tie
+# cells. ⛔ Its per-cycle composition semantics is NOT yet a theorem — the artifact is
+# certified for SHAPE (ssa, wf, widths, both placements, instance disjointness, the seam
+# wiring). Synthesise it; do not yet cite it as carrying math's join.
 #
 # THE ACCEPTANCE CRITERION, as amended by silicon at 15:46 after I found a false-fail in it:
 #   ONE CELL PER KERNEL GATE — mac_acc 160/160, mac_wshift 33/33, cell total 193/193.
@@ -23,6 +30,7 @@ MODE=${1:-counts}
 case "$MODE" in
   acc)    ORGAN=macCore;              NAME=mac_acc ;;
   wshift) ORGAN=MacCell.wsCore;       NAME=mac_wshift ;;
+  cell)   ORGAN=MacCell.ccCore;       NAME=mac_cell ;;
   counts) ORGAN=;                     NAME= ;;
   *) echo "usage: $0 [acc|wshift|counts]" >&2; exit 2 ;;
 esac
