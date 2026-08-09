@@ -57,7 +57,9 @@
   in the HDL slot, statements per v2.3 (P=8 scope; H1–H4 in full;
   three undecided cases; claim-gated-OR transparency; ∀-P off
   runFrame traces); precondition preambles mandatory.
-- R1 · READ · **PRE-AUTH** — ③ v2.1 round-2 read (bdb75f2/1a70c99).
+- R1 · READ · **DISCHARGED 15:50** — the last ③ gate read (one
+  load-bearing refutation, folded as v2.3; the waves dispatched on
+  it).
 - R2 · READ · **PRE-AUTH** — ④ refutation pass (the FSM model's fit
   in sequential Circ; piece-4 trace shapes; piece-5 well-formedness
   over Banyan.line).
@@ -89,10 +91,11 @@
   your artifact; the spec §5 sof-phase amendment IF the measurement
   confirms conservative+inert (your file, your bar; the ③ block
   cites the amended spec second).
-- R1 · READ · **PRE-AUTH** — ③ v2.1 round-2 read.
-- R2 · READ · **PRE-AUTH** — ④ timing RIGHT-OF-REPLY: math's 13:42
-  refutation of your 4-clock repair is folded as UNFIXED-BY-PROSE
-  (d_cell symbolic); confirm or contest — the doc awaits your word.
+- R1 · READ · **SUPERSEDED 17:03 (silicon's own reading, receipted)**
+  — the ③ campaign completed past it; substance covered by its 13:47
+  pass + the landing verifications.
+- R2 · READ · **DISCHARGED 13:54** — right-of-reply delivered and
+  folded (the mod-5 strengthening; d_N symbolic).
 - MEAS · **STANDING** — conveyor refutation on every compiler
   landing; CELLS pricing on request. C5 re-baseline: **DISCHARGED
   15:52 (3bf84a0)** — run after its registered gate opened at 3b,
