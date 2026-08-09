@@ -62,6 +62,35 @@ DECL = re.compile(
 )
 
 
+# The two design blocks the campaign refuted-then-proved, with the timestamp of
+# each one's FIRST kernel landing — the boundary the method's claim rests on.
+BLOCKS = [
+    ("docs/payload-delivery-design-v1.md", "③ payload certificate", "08-08 16:18"),
+    ("docs/heritage-1988-rotation-design-v1.md", "④ heritage rotation", "08-08 17:32"),
+]
+
+# A fold that RECORDS A DEFECT. Drafting ("drafted") and pure repair-completions
+# ("reach final form") are deliberately excluded.
+REFUTED = re.compile(
+    r"REFUTED|refutation folded|pass resolved|hazard folded|pass folded"
+    r"|round-2 folded|RESTATED|R1 folded|scope folded|findings folded"
+    r"|corrections folded|right-of-reply folded|read folded",
+    re.I,
+)
+
+# ⛔ AND THE EXCLUSION THAT KEEPS THIS HONEST — caught 19:1x by cross-checking
+# this tool against item 2's figure (e), computed by hand this afternoon.
+# The tool said 9 folds before the ③ landing; (e) said 8 REFUTATIONS. The extra
+# is `silicon's CLEAN ③ pass folded` (12:27) — a discharged pass that found
+# NOTHING. It belongs in "passes run" and NOT in "defects found", and item 2
+# already said so in writing: "625b18d (silicon's CLEAN pass) is a discharged
+# pass in (a) and correctly NOT a defect in (e)".
+# 🔑 A CLEAN PASS IS EVIDENCE THE METHOD RAN, NOT EVIDENCE IT CAUGHT SOMETHING.
+# Counting it as a refutation would inflate the story's central number by
+# exactly the passes that found nothing — the most flattering possible error.
+CLEAN_PASS = re.compile(r"\bclean\b", re.I)
+
+
 def git(repo, *args):
     try:
         return subprocess.run(["git", "-C", repo, *args],
@@ -179,6 +208,33 @@ def main():
             print(f"    {'':10s} ⇒ quote its ADDED row above, never this one. A story")
             print(f"    {'':10s}   pairing this total with 'two weeks' would be false")
             print(f"    {'':10s}   by roughly the whole pre-campaign corpus.")
+
+    print("\n--- REFUTATION ROUNDS per design block (fold commits to the block doc) ---")
+    print("    counting rule: a commit to the block's doc that FOLDS a refutation —")
+    print("    i.e. records a defect a read/pass found. Drafting commits and pure")
+    print("    repair-completions are NOT rounds. Classified by reading each subject;")
+    print("    anything unclassifiable would print UNCLASSIFIED rather than be assigned.")
+    for doc, label, first_wave in BLOCKS:
+        subs = [l for l in git(REPOS["saltworks"], "log", "--reverse",
+                               "--format=%ad|%s", "--date=format:%m-%d %H:%M",
+                               "--", doc).split("\n") if l.strip()]
+        folds = [s for s in subs if REFUTED.search(s.split("|", 1)[1])]
+        clean = [s for s in folds if CLEAN_PASS.search(s.split("|", 1)[1])]
+        rounds = [s for s in folds if s not in clean]
+        before = [s for s in rounds if s.split("|", 1)[0] < first_wave]
+        print(f"\n    {label}   ({len(subs)} commits to the doc)")
+        print(f"      DEFECT-BEARING folds TOTAL      {len(rounds)}")
+        print(f"      folds BEFORE the first landing  {len(before)}   ⬅ the method's claim")
+        if clean:
+            print(f"      CLEAN passes folded, EXCLUDED   {len(clean)}"
+                  f"   (ran, found nothing — not a catch)")
+        for s in rounds:
+            when, sub = s.split("|", 1)
+            mark = "·" if when < first_wave else "(after)"
+            print(f"        {mark:7s} {when}  {sub[:78]}")
+        for s in clean:
+            when, sub = s.split("|", 1)
+            print(f"        (clean) {when}  {sub[:78]}")
 
     print("\n" + "=" * 76)
     print("⛔ NO RATE, VELOCITY OR PER-DAY AVERAGE IS COMPUTED HERE, DELIBERATELY.")
