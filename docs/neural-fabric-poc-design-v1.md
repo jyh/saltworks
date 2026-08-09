@@ -25,9 +25,9 @@ native wiring.
 ```mermaid
 flowchart LR
   subgraph CELL["NEURON CELL (~500 cells + certified CE)"]
-    WREG["weight register<br/>32b latch"]
-    AND["AND row<br/>x_bit · W"]
-    ADD["32b adder<br/>(op mux: +/− on sign cycle)"]
+    WREG["weight register<br/>8b latch (PoC format, §5b)"]
+    AND["AND row ×8<br/>x_bit · W"]
+    ADD["adder<br/>(op mux: +/− on sign cycle)"]
     ACC["accumulator<br/>32b + guard bits<br/>(bias PRELOADED here)"]
     CE["CE vs 0 = ReLU<br/>signed order passed EXPLICITLY<br/>(wordSignedOrder, landed)"]
     SER["parallel→serial<br/>shift-out"]
