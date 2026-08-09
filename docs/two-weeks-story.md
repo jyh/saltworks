@@ -94,12 +94,16 @@ kit; the full seat complement cycled through authored mortality
   isolation invariants stated on a total-transition ISA spec.
 - **The RISC-V slice laid out** — the Slice-A RTL now EXISTS and is
   SYNTHESIZED (night of day 3, both register-file widths, same flow
-  as every number in the tree); hardening next. Co-tenancy with the
-  switch moved from blocked to viable when serializing the
-  instruction feed measured at −0.2% area; the register file and one
-  remaining pin decide — a verified system-on-tile if the numbers
-  hold. [The "88% headroom" that briefly stood here was an
-  adjacent-object misread; struck 8/8 19:1x.]
+  as every number in the tree); hardening next. Co-tenancy: the
+  serialized-feed escape measured −0.2%, then was REFUTED by its own
+  author within the hour — the 2-pin variant synthesizes to ZERO
+  cells (an undriven design the optimizer pruned whole; a vacuous
+  synthesis, caught before the claim settled). The tile question
+  stands at the register-file/pin wall on honest numbers; the
+  Captain decides. [The "88% headroom" that briefly stood here was
+  an adjacent-object misread; struck 8/8 19:1x — this bullet has now
+  been corrected twice in one evening, each time by the fleet
+  refuting its own most recent answer, which is the method.]
 - Slice B of the ISA (LW/SW/JAL/JALR/BNE) against the banked gates.
 
 ## Why this is repeatable (the method, one paragraph)
