@@ -2,6 +2,7 @@ import SaltWorks.HDL.Compose
 import SaltWorks.HDL.StateCodec
 import SaltWorks.HDL.Decoder
 import SaltWorks.HDL.Immediate
+import SaltWorks.HDL.ReadTree
 
 /-!
 # W5-asm, increment 2a — the FIRST organ placed at the real offset, `instOK` discharged
@@ -58,7 +59,7 @@ def decoderSig : Net → Net := instrNet
 /-- ⭐ **`instOK` DISCHARGED for the first placement.** Not assumed, not `sorry`ed: `decoder` is
 SSA and well-formed, and every one of its 32 input wires lands strictly below `off0`. -/
 theorem decoder_instOK : instOK decoder decoderSig off0 := by
-  refine ⟨by decide +kernel, by decide +kernel, ?_⟩
+  refine ⟨decoder_ssa, decoder_wf, ?_⟩
   intro i hi
   -- `decoder.nIn = 32`, so `i < 32`; `instrNet i = 1056 + i < 1088`.
   have h32 : i < 32 := by
@@ -154,6 +155,97 @@ theorem placements_do_not_collide :
   refine ⟨rfl, ?_⟩
   simp only [instNext]
   congr 1
+
+
+/-! ## 4. INCREMENT 2c — the first organs that read STATE, and σ as the field extractor
+
+`readTree` is placement #3/#4 and the first organ whose inputs are not all instruction bits.
+Its layout (`ReadTree.lean:101`): `raddr` on inputs `0…4`, and **stored** register `i`
+(`1 ≤ i ≤ 31`) bit `k` on input `5 + (i-1)*32 + k`.
+
+**THE CORE'S LAYOUT COMPOSES WITH IT AS A PURE SHIFT.** `StateCodec.stBit` puts register `r`
+bit `k` at net `32*r + k` (and `decQ` reads it back the same way). `readTree` skips `x0` exactly
+as the core's nets `0…31` *are* `x0`, and both are register-major with 32-bit rows — so for
+`j ≥ 5`:
+
+```
+σ j = 32 * ((j-5)/32 + 1) + (j-5) % 32  =  (j-5) + 32  =  j + 27
+```
+*Checked at both ends: `j = 5 ↦ 32` (x1 bit 0) and `j = 996 ↦ 1023` (x31 bit 31 = 32*31+31).*
+
+📌 **AND σ IS THE FIELD EXTRACTOR — there is no missing organ.** `regWrite` consumes `rd` already
+isolated on its inputs `0…4` (`RegWrite.lean:46`), and `readTree` likewise wants an index, not a
+word. Extracting a field from the instruction is **pure wiring**, so it belongs in σ, not in a
+circuit: the same fact as `ruledEnc` costing zero gates — *emit the nets, not a module.* Field
+positions are taken from the corpus's own encoder (`ISA.wR`: `funct7 rs2 rs1 funct3 rd opcode`),
+so `rs1` is bits `15…19` and `rs2` is `20…24` — read, not recalled.
+-/
+
+/-- Bits `15…19` of the instruction: the `rs1` index. -/
+def rs1Bit (j : Nat) : Net := instrNet (15 + j)
+
+/-- Bits `20…24` of the instruction: the `rs2` index. -/
+def rs2Bit (j : Nat) : Net := instrNet (20 + j)
+
+/-- `readTree`'s σ for the rs1 port: address bits from the `rs1` field, and the stored register
+file as the pure shift `j + 27`. -/
+def readTreeRs1Sig (j : Net) : Net := if j < 5 then rs1Bit j else j + 27
+
+/-- The rs2 port differs from the rs1 port in the FIVE ADDRESS BITS AND NOTHING ELSE — the same
+register file, a different index. -/
+def readTreeRs2Sig (j : Net) : Net := if j < 5 then rs2Bit j else j + 27
+
+/-- ⭐ **PLACEMENT #3 — `readTree` on the rs1 port, `instOK` DISCHARGED.** Both halves of σ land
+below `off0`: the `rs1` field at `1071…1075`, and the register file at `32…1023`. -/
+theorem readTree_rs1_instOK : instOK readTree readTreeRs1Sig off0 := by
+  refine ⟨readTree_ssa, readTree_wf, ?_⟩
+  intro j hj
+  have hnn : readTree.nIn = 997 := by decide +kernel
+  rw [hnn] at hj
+  simp only [readTreeRs1Sig, rs1Bit, instrNet, instrBase, off0, coreInWidth, stWidth, Net]
+  split
+  · omega          -- the address branch: the field sits at 1071…1075
+  · omega          -- the register branch: j + 27 ≤ 1023
+
+/-- **PLACEMENT #4 — the rs2 port.** Same organ, same register file, different five bits. -/
+theorem readTree_rs2_instOK : instOK readTree readTreeRs2Sig off0 := by
+  refine ⟨readTree_ssa, readTree_wf, ?_⟩
+  intro j hj
+  have hnn : readTree.nIn = 997 := by decide +kernel
+  rw [hnn] at hj
+  simp only [readTreeRs2Sig, rs2Bit, instrNet, instrBase, off0, coreInWidth, stWidth, Net]
+  split
+  · omega          -- the address branch: the field sits at 1071…1075
+  · omega          -- the register branch: j + 27 ≤ 1023
+
+/-- ⭐ **THE SHIFT IS EXACT AT BOTH ENDS — the claim that makes the pure-shift σ legitimate.**
+Input `5` is register `x1` bit `0` (net `32`), and input `996` is register `x31` bit `31`
+(net `1023 = 32*31 + 31`). If either end were off by one, the core would read a neighbouring
+register's bit and every `sem` theorem above it would be about the wrong wires. -/
+theorem register_shift_is_exact :
+    readTreeRs1Sig 5 = 32 ∧ readTreeRs1Sig 996 = 32 * 31 + 31 := by
+  refine ⟨by decide, by decide⟩
+
+/-- **CONTROL: the two ports differ, and differ ONLY in the address.** A copy-paste that left
+both ports reading `rs1` would type-check, place cleanly, and compute the wrong instruction —
+so the difference is asserted, and the agreement on the register file is asserted too. -/
+theorem rs1_and_rs2_differ_only_in_the_address :
+    readTreeRs1Sig 0 ≠ readTreeRs2Sig 0
+  ∧ readTreeRs1Sig 4 ≠ readTreeRs2Sig 4
+  ∧ readTreeRs1Sig 5 = readTreeRs2Sig 5
+  ∧ readTreeRs1Sig 996 = readTreeRs2Sig 996 := by
+  refine ⟨by decide, by decide, by decide, by decide⟩
+
+/-- **CONTROL: the address bits land in the instruction, not in the state.** `rs1`'s five wires
+sit at or above `stWidth`, so a port cannot be reading a register by accident — the same guard as
+the decoder's, re-exercised because σ is now a two-branch function and the branch that reads the
+instruction is the one an off-by-one would silently move into the state. -/
+theorem address_bits_are_in_the_instruction (j : Nat) (hj : j < 5) :
+    stWidth ≤ readTreeRs1Sig j ∧ readTreeRs1Sig j < off0 := by
+  simp only [readTreeRs1Sig, rs1Bit, instrNet, instrBase, off0, coreInWidth, stWidth, Net]
+  split
+  · omega
+  · omega
 
 
 end SaltWorks.HDL.CorePlace
