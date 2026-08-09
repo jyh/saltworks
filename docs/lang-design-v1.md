@@ -102,7 +102,10 @@ embedding.
 
 - N0 the type system + PRESERVATION (B): the judgment, decidability,
   and the bool-representation invariant — N1-N3 consume it. The
-  judgment carries function signatures (Δ) and DEMANDS the call
+  judgment carries function signatures in a SEPARATE context Δ —
+  arrows never enter τ (no first-class functions; this is what makes
+  inlining complete and the DAG check well-defined; if arrows ever
+  move into τ, JALR is the waiting hardware) — and DEMANDS the call
   graph be a DAG (decidable; recursion rejected in v1 — a
   pre-registered reject control alongside while-1).
 - N0.5 VERIFIED INLINING (B/C): multiple functions with tail-

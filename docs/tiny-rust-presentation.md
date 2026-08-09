@@ -146,6 +146,25 @@ Two types in v1, and the second is the machine's own gift:
 Γ ⊢ x = e ⊣ Γ                         Γ ⊢ while e { s } ⊣ Γ
 ```
 
+**Function signatures live in Δ, not in τ** (the Captain's
+double-check, answered): calls are by name only — no first-class
+functions — so the judgment carries a signature context
+Δ(f) = (τ₁,…,τₙ) → τ used solely by the call rule
+
+```
+Δ(f) = (τ₁,…,τₙ) → τ    Γ ⊢ eᵢ : τᵢ  (each i)
+─────────────────────────────────────────── (call)
+Γ ⊢ f(e₁,…,eₙ) : τ
+```
+
+and the arrow NEVER enters τ: no variable holds a function, no
+expression has arrow type, which is exactly what makes inlining
+COMPLETE (every call target is statically known) and the DAG check
+well-defined. If first-class functions ever arrive, the arrow moves
+from Δ into τ — and the hardware for it is already named: JALR is
+the indirect-call instruction, waiting in Slice B. Named, not
+promised.
+
 Rust-faithful, so: conditions are `bool`, not truthy integers — and
 here the machine cooperates beautifully, because SLT already
 produces exactly 0 or 1. The representation invariant (bool values
