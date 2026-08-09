@@ -678,4 +678,47 @@ theorem slt_operand_signs_are_distinct :
   decide +kernel
 
 
+/-! ## 11. THE ORDER INVARIANT — one place in this file, cited rather than re-derived
+
+**Math's 11:54 diagnosis: four appearances in one day is not a coincidence, it is a MISSING NAMED
+OBJECT.** Every one of these asks *which order does this organ compute?*, and every one was
+answered from scratch by whoever happened to look:
+
+```
+① the packet filter   `slt` is SIGNED, addresses are not              (08:5x, §4b)
+② the activation      unsigned `max` ⇒ ReLU becomes the IDENTITY      (10:31)
+③ the ingress         `zeroExtend` inverts every negative weight     (11:36, math's, owed)
+④ sltCirc row 9       sign bit vs carry-out                          (11:53, mine, above)
+```
+
+⭐ ***THE INVARIANT, stated ONCE for this placement layer: every comparison, extension and
+narrowing on this datapath is SIGNED — at `BitVec.toInt`, with the order bundle PASSED EXPLICITLY
+and never promoted to an instance.*** *The corpus already owns the object (`wordSignedOrder`, an
+`abbrev` deliberately not an `instance` — `Perm.lean:74-77`). What it lacked was one place per
+layer saying that every organ here answers to it.*
+
+⇒ **CONSEQUENCE FOR ROWS 10–15: each remaining placement CITES this section rather than
+re-deriving the question. A fifth instance then costs a citation, not a discovery — and math's
+fifth is already scheduled, arriving with the MAC's sign cycle.**
+
+⚠️ **AND THE REASON A NAMED INVARIANT BEATS FOUR GOOD CONTROLS: every one of ①–④ stays GREEN
+through its own failure.** *Unsigned `max` proves theorems about `max`; a carry-out is a real net
+carrying a real value; `zeroExtend` is total. **The certificate is always about the organ, never
+about which order the caller meant** — so no amount of per-organ verification finds the class, and
+only a statement that spans organs does.* -/
+
+/-- The placement-layer order invariant, as a proposition this file can cite. `sltCirc` reads the
+SIGN bit (`adder32.outs` index 31), never the carry-out (index 32) — instance ④, and the shape
+every later row is checked against. -/
+theorem order_invariant_at_slt : sltSig 2 = subOut 31 ∧ subOut 31 ≠ subOut 32 :=
+  slt_reads_sign_not_carry
+
+/-- **CONTROL: the invariant is not vacuous at this layer** — the two candidate nets genuinely
+differ, so "reads the sign, not the carry" is a real constraint rather than a restatement. If the
+adder published one net for both, the invariant would be unfalsifiable here and would need to be
+stated at the organ instead. -/
+theorem order_invariant_is_falsifiable_here : subOut 31 ≠ subOut 32 :=
+  order_invariant_at_slt.2
+
+
 end SaltWorks.HDL.CorePlace
