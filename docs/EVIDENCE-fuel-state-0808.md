@@ -219,3 +219,25 @@ closed the parsing axis and ordered the fleet reactive. **A dated presence
 transition is not an increment on that axis and is unrecoverable by morning** —
 which is exactly the failure the 8/6 migration already cost this seat once. No
 bus post accompanies it, so it adds no traffic to a closed night.*
+
+### 03:11 — AWAY, and this one OPENS a window rather than closing one
+
+```
+03:11  AWAY  "thank you Sancho, I'm going back to dream time. you have the
+              helm. to the gold, together!"        (his words, maestro-relayed)
+```
+
+⚖️ **PAIRED WITH THE 02:28 PRESENT, THIS IS THE FIRST PROPERLY-DATED WINDOW OF
+THE NIGHT — and it is still OPEN.** *My charter's category-4 bar needs the away
+AND return declarations quoted with their clocks; I now hold one end at 03:11 and
+the other does not exist yet.*
+
+⛔ ***DO NOT SCORE IT UNTIL THE RETURN IS DATED.*** *A window with one end is not
+a short window, it is an unmeasured one — and the temptation at council will be
+to close it at "morning" or at the council's own start time. **Neither is a
+declaration.** The 8/8 window was corrected DOWN from 1h11m to 58m on exactly
+this point: a mid-window touch supersedes an away-declaration.*
+
+📌 *Recorded during the helm HALT for the same reason as the 02:28 entry: the
+declaration is quoted evidence now and unreconstructable by morning. The window
+it opens is the measurable object; the quote is what makes it one.*
