@@ -263,12 +263,16 @@ OPEN ITEMS:
   discussion"; #1 and #2 use offboard memory (his word), #3's
   memory story is part of the open discussion.**
 
-- **THE SHUTTLE DEADLINE — THE SCHEDULE ANCHOR (fetched from
-  tinytapeout.com 8/9 11:5x): SKY26c (our PDK) open, deadline in
-  44 days ≈ SEPTEMBER 22. Login portal = app.tinytapeout.com
-  (GitHub sign-in; the main site has no login link — separate
-  subdomain). Early-bird pricing limited per shuttle — reserving
-  sooner is cheaper. All NDF scheduling backs out from Sept 22.**
+- **THE SHUTTLE DEADLINE — THE SCHEDULE ANCHOR, CAPTAIN-CORRECTED
+  11:5x: HIS LOGGED-IN PORTAL SHOWS 29 DAYS TO RESUBMIT ≈ SEPT 7
+  (corroborates the standing B5 Sept-7 date; GOVERNS over the
+  public-site fetch's "SKY26c, 44 days ≈ Sept 22" — possibly a
+  different shuttle; his account view is authoritative). 3x2 slots
+  still available per his read. Login portal = app.tinytapeout.com
+  (GitHub sign-in — separate subdomain, no login link on the main
+  site). Early-bird pricing limited per shuttle. ALL NDF
+  SCHEDULING BACKS OUT FROM ~SEPT 7 — two weeks tighter than the
+  first estimate.**
 
 - **NDF TILE SHAPE — AWAITING THE CAPTAIN'S PURSE RULING (silicon's
   probe answer, 11:46, post-layout measured): minimal demo (k=4 +
