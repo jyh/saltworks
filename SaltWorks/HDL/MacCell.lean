@@ -350,29 +350,35 @@ next state is `[0, wsh₀, …, wsh₃₀]`: thirty-one wires moved up one place
 vacated LSB. **The only gates are the AND row and that one constant.** *A shifter built as gates
 would have cost 32 more and computed the same thing.* -/
 
-/-- The stream bit — the organ's single primary input, net `0`. -/
+/-- The stream bit — primary input `0`. -/
 def wsX : Net := 0
+
+/-- ⭐ **THE LOAD ENABLE — the second admitted port** (load-path A, ruled). On load cycles the
+vacated LSB takes the stream bit instead of a constant, so `W_i` enters serially through the wire
+that later streams `x`. **`nIn` 1 → 2 and the gate count does not move**: the `const false` is
+REPLACED by `and load x`, which *is* `false` when `load` is low — i.e. exactly the shift fill. -/
+def wsLoad : Net := 1
 /-- The shifted weight `W << t` — the organ's STATE, nets `1…32`. -/
-def wsW (k : Nat) : Net := 1 + k
+def wsW (k : Nat) : Net := 2 + k
 /-- `nIn + nState` = 1 + 32. -/
-def wsCoreIn : Nat := 33
-/-- The constant that fills the LSB the shift vacates — one of this organ's two gate kinds. -/
-def wsZero : Net := 33
+def wsCoreIn : Nat := 34
+/-- The LSB the shift vacates — **no longer a constant**: `and load x`. -/
+def wsLsb : Net := 34
 /-- The AND row: `addend[k] = x_t ∧ (W << t)[k]`, nets `34…65`. -/
-def wsAnd (k : Nat) : Net := 34 + k
+def wsAnd (k : Nat) : Net := 35 + k
 
 def wsGates : List Gate :=
-  ⟨wsZero, Op.const false⟩ :: (List.range 32).map (fun k => ⟨wsAnd k, Op.and wsX (wsW k)⟩)
+  ⟨wsLsb, Op.and wsLoad wsX⟩ :: (List.range 32).map (fun k => ⟨wsAnd k, Op.and wsX (wsW k)⟩)
 
 /-- ⭐⭐ **THE CORE.** Outputs: the 32 addend bits, then the 32 next-state bits. The next state is
 the left shift, expressed as WIRES — `wsZero` then `wsW 0 … wsW 30`. -/
 def wsCore : Circ :=
   { nIn := wsCoreIn
     gates := wsGates
-    outs := (List.range 32).map wsAnd ++ (wsZero :: (List.range 31).map wsW) }
+    outs := (List.range 32).map wsAnd ++ (wsLsb :: (List.range 31).map wsW) }
 
 /-- ⭐ **THE ORGAN.** -/
-def wshiftSeq : Seq := { nIn := 1, nOut := 32, nState := 32, core := wsCore }
+def wshiftSeq : Seq := { nIn := 2, nOut := 32, nState := 32, core := wsCore }
 
 theorem wsCore_ssa : wsCore.ssa = true := by decide +kernel
 theorem wsCore_wf : wsCore.wf = true := Circ.wf_of_ssa wsCore_ssa
@@ -386,15 +392,15 @@ theorem wsCore_gate_count : wsCore.gates.length = 33 := by decide +kernel
 /-- ⛔ **BIRTH-ASSERTION (the maestro asked for this pattern in every organ from here): the constant
 net is not an AND output.** The pair property no per-instance certificate can express, stated at the
 organ's birth rather than found later. -/
-theorem wsZero_does_not_collide :
-    wsZero ∉ ((List.range 32).map (fun k => wsAnd k)) := by decide +kernel
+theorem wsLsb_does_not_collide :
+    wsLsb ∉ ((List.range 32).map (fun k => wsAnd k)) := by decide +kernel
 
 /-- ⛔⛔ **THE MUTANT: A ROTATE PLACES EXACTLY AS CLEANLY AS A SHIFT.** Filling the vacated LSB from
 `wsh₃₁` instead of from a constant is well-formed, same gate count, same widths — and computes
 `W · 2^t mod (2^32 − 1)`-ish garbage the moment the weight's top bit is set. **Both halves asserted:
 the LSB IS the constant, and the constant is NOT the top state bit.** -/
 theorem shift_is_not_a_rotate :
-    (wsCore.outs.drop 32).headD 0 = wsZero ∧ wsZero ≠ wsW 31 := by
+    (wsCore.outs.drop 32).headD 0 = wsLsb ∧ wsLsb ≠ wsW 31 := by
   refine ⟨by decide +kernel, by decide +kernel⟩
 
 /-- ⛔ **THE OTHER MUTANT: LEFT, NOT RIGHT.** A right shift is also pure rewiring and also places
@@ -442,42 +448,52 @@ theorem wsGates_flat : flatBelow wsCoreIn wsGates = true := by decide +kernel
 theorem wsGates_ssa : ssaFrom wsCoreIn wsGates = true := by decide +kernel
 
 /-- The organ's environment reads: the stream bit at `wsX`, state bit `k` at `wsW k`. -/
-theorem wshift_env (x : Bool) (w : BitVec 32) (k : Nat) (hk : k < 32) :
-    wshiftSeq.env [x] (bitsOf w) wsX = x
-  ∧ wshiftSeq.env [x] (bitsOf w) (wsW k) = w.getLsbD k := by
-  refine ⟨?_, ?_⟩
-  · simp only [Seq.env, wshiftSeq, wsX]
-    norm_num
-  · have hne : ¬(1 + k < 1) := by omega
+theorem wshift_env (x ld : Bool) (w : BitVec 32) (k : Nat) (hk : k < 32) :
+    wshiftSeq.env [x, ld] (bitsOf w) wsX = x
+  ∧ wshiftSeq.env [x, ld] (bitsOf w) wsLoad = ld
+  ∧ wshiftSeq.env [x, ld] (bitsOf w) (wsW k) = w.getLsbD k := by
+  refine ⟨?_, ?_, ?_⟩
+  · simp only [Seq.env, wshiftSeq, wsX]; norm_num
+  · simp only [Seq.env, wshiftSeq, wsLoad]; norm_num
+  · have hne : ¬(2 + k < 2) := by omega
     simp only [Seq.env, wshiftSeq, wsW, if_neg hne, Nat.add_sub_cancel_left]
     exact bitsOf_getD w k hk
 
 /-- ⭐⭐ **THE ADDEND BIT: `addend[k] = x_t ∧ (W << t)[k]`.** This is exactly the `macAfter` term
 `if x t then W · 2^t else 0`, bit by bit. -/
-theorem wshift_addend_bit (x : Bool) (w : BitVec 32) (k : Nat) (hk : k < 32) :
-    run (wshiftSeq.env [x] (bitsOf w)) wsCore.gates (wsAnd k) = (x && w.getLsbD k) := by
+theorem wshift_addend_bit (x ld : Bool) (w : BitVec 32) (k : Nat) (hk : k < 32) :
+    run (wshiftSeq.env [x, ld] (bitsOf w)) wsCore.gates (wsAnd k) = (x && w.getLsbD k) := by
   -- `wsCore.gates` and `wsGates` are definitionally equal but NOT syntactically, so `simpa`
   -- cannot close the gap on its own. Rewrite once, then the lemma applies.
   rw [show wsCore.gates = wsGates from rfl]
   have hmem : (⟨wsAnd k, Op.and wsX (wsW k)⟩ : Gate) ∈ wsGates := and_row_reads_the_stream k hk
-  have h := run_of_flat_gates (wshiftSeq.env [x] (bitsOf w)) wsGates_flat wsGates_ssa hmem
-  obtain ⟨hx, hw⟩ := wshift_env x w k hk
+  have h := run_of_flat_gates (wshiftSeq.env [x, ld] (bitsOf w)) wsGates_flat wsGates_ssa hmem
+  obtain ⟨hx, _, hw⟩ := wshift_env x ld w k hk
   simpa [Op.eval, hx, hw] using h
 
-/-- ⭐ **THE SHIFT, BIT 0: the vacated LSB is the CONSTANT, not a wrapped bit.** Proved through the
-same lemma — the tie is a gate of the flat list like any other. -/
-theorem wshift_next_bit_zero (x : Bool) (w : BitVec 32) :
-    run (wshiftSeq.env [x] (bitsOf w)) wsCore.gates wsZero = false := by
+/-- ⭐⭐ **THE SHIFT'S LSB IS NOW `load ∧ x` — AND THIS ONE THEOREM CARRIES BOTH MODES.** With `load`
+low it is `false`, so the organ shifts exactly as it did before load-path A; with `load` high it is
+the stream bit, which is how `W_i` enters serially. *One statement, both behaviours, and the
+`load = false` corollary below is the old theorem recovered.* -/
+theorem wshift_next_bit_zero (x ld : Bool) (w : BitVec 32) :
+    run (wshiftSeq.env [x, ld] (bitsOf w)) wsCore.gates wsLsb = (ld && x) := by
   rw [show wsCore.gates = wsGates from rfl]
-  have hmem : (⟨wsZero, Op.const false⟩ : Gate) ∈ wsGates := by simp [wsGates]
-  have h := run_of_flat_gates (wshiftSeq.env [x] (bitsOf w)) wsGates_flat wsGates_ssa hmem
-  simpa [Op.eval] using h
+  have hmem : (⟨wsLsb, Op.and wsLoad wsX⟩ : Gate) ∈ wsGates := by simp [wsGates]
+  have h := run_of_flat_gates (wshiftSeq.env [x, ld] (bitsOf w)) wsGates_flat wsGates_ssa hmem
+  obtain ⟨hx, hld, _⟩ := wshift_env x ld w 0 (by omega)
+  simpa [Op.eval, hx, hld] using h
+
+/-- **AND THE OLD THEOREM, RECOVERED AS THE `load = false` CASE.** The shift is unchanged when the
+organ is not loading — which is the compatibility claim load-path A owes. -/
+theorem wshift_next_bit_zero_when_not_loading (x : Bool) (w : BitVec 32) :
+    run (wshiftSeq.env [x, false] (bitsOf w)) wsCore.gates wsLsb = false := by
+  simpa using wshift_next_bit_zero x false w
 
 /-- ⭐ **THE SHIFT, BITS 1…31: next-state bit `k+1` is state bit `k`.** These nets are INPUTS, never
 written, so this is the frame rather than the flat-gate lemma — the two halves of the shift are
 proved by different tools and that is the honest structure. -/
-theorem wshift_next_bit_succ (x : Bool) (w : BitVec 32) (k : Nat) (hk : k < 31) :
-    run (wshiftSeq.env [x] (bitsOf w)) wsCore.gates (wsW k) = w.getLsbD k := by
+theorem wshift_next_bit_succ (x ld : Bool) (w : BitVec 32) (k : Nat) (hk : k < 31) :
+    run (wshiftSeq.env [x, ld] (bitsOf w)) wsCore.gates (wsW k) = w.getLsbD k := by
   have hne : ∀ g ∈ wsCore.gates, g.out ≠ wsW k := by
     intro g hg hEq
     have hb : wsCoreIn ≤ g.out := ssaFrom_out_ge wsGates wsCoreIn wsGates_ssa g hg
@@ -486,7 +502,7 @@ theorem wshift_next_bit_succ (x : Bool) (w : BitVec 32) (k : Nat) (hk : k < 31) 
     simp only [wsCoreIn, wsW] at hb
     omega
   rw [run_of_unwritten _ _ _ hne]
-  exact (wshift_env x w k (by omega)).2
+  exact (wshift_env x ld w k (by omega)).2.2
 
 /-! **WHAT THIS COMPLETES.** Organ 2's cycle is characterised: the addend is `x ∧ (W << t)`, and the
 next state is `W << (t+1)` — bit 0 the constant, bits `1…31` the previous bits shifted up. Together
@@ -519,16 +535,22 @@ input processed without re-initialisation is multiplied by the wrong weight.
 **Concrete witnesses rather than a ∀-statement on purpose:** the claim being excluded is a *design*
 (one `runTrace` spanning two inputs), and a single arithmetic witness refutes it. -/
 theorem weight_state_moves_so_reload_is_required :
-    (runTrace wshiftSeq (bitsOf (1 : BitVec 32)) [[false]]).2 = bitsOf (2 : BitVec 32)
-  ∧ (runTrace wshiftSeq (bitsOf (1 : BitVec 32)) [[false], [false]]).2 = bitsOf (4 : BitVec 32)
-  ∧ (runTrace wshiftSeq (bitsOf (1 : BitVec 32)) [[false]]).2 ≠ bitsOf (1 : BitVec 32) := by
+    (runTrace wshiftSeq (bitsOf (1 : BitVec 32)) [[false, false]]).2 = bitsOf (2 : BitVec 32)
+  ∧ (runTrace wshiftSeq (bitsOf (1 : BitVec 32)) [[false, false], [false, false]]).2 = bitsOf (4 : BitVec 32)
+  ∧ (runTrace wshiftSeq (bitsOf (1 : BitVec 32)) [[false, false]]).2 ≠ bitsOf (1 : BitVec 32) := by
   refine ⟨by decide +kernel, by decide +kernel, by decide +kernel⟩
 
-/-- **CONTROL: the stream bit does not reach the weight register.** Which is why the load path is a
-*silicon* question and not a wiring one — there is no port to load through, so the mechanism must be
-added, not merely connected. Measured: no next-state net is the stream-bit net. -/
-theorem stream_bit_never_enters_the_weight_register :
-    wsX ∉ wsCore.outs.drop 32 := by decide +kernel
+/-- ⭐ **THE SUCCESSOR OF `stream_bit_never_enters_the_weight_register`, WHICH LOAD-PATH A
+DELIBERATELY FALSIFIED.** That theorem said there was no path in; A builds one, on purpose. What must
+still hold is the *gated* form: the stream bit reaches the register **only through the load gate**,
+so with `load` low the LSB fill is still `false` and the organ shifts exactly as before.
+
+*This is the pair that shows a retired control being replaced rather than dropped: the old statement
+was true of the old artifact and its falsification IS the ruling working.* -/
+theorem stream_enters_only_through_the_load_gate :
+    (⟨wsLsb, Op.and wsLoad wsX⟩ : Gate) ∈ wsGates
+  ∧ wsX ∉ (wsCore.outs.drop 32).tail := by
+  refine ⟨by simp [wsGates], by decide +kernel⟩
 
 /-! ⚖️ **THE LOAD PATH IS A DESIGN DECISION AND NOT MINE — priced here in KERNEL GATES, which is my
 axis, beside silicon's area:**
@@ -625,7 +647,7 @@ everything after a failure reads as clean. -/
 #audit_axioms wsCore_wf
 #audit_axioms wshiftSeq_wf
 #audit_axioms wsCore_gate_count
-#audit_axioms wsZero_does_not_collide
+#audit_axioms wsLsb_does_not_collide
 #audit_axioms shift_is_not_a_rotate
 #audit_axioms shift_is_left_not_right
 #audit_axioms and_row_reads_the_stream
@@ -637,7 +659,8 @@ everything after a failure reads as clean. -/
 #audit_axioms wshift_next_bit_zero
 #audit_axioms wshift_next_bit_succ
 #audit_axioms weight_state_moves_so_reload_is_required
-#audit_axioms stream_bit_never_enters_the_weight_register
+#audit_axioms stream_enters_only_through_the_load_gate
+#audit_axioms wshift_next_bit_zero_when_not_loading
 #audit_axioms shift_overflow_is_real
 #audit_axioms shiftSafe_at_int8_scale
 #audit_axioms hW_is_shiftSafe
