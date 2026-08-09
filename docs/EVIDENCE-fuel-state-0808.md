@@ -371,3 +371,30 @@ one tier — so the tier-drop question could never be settled from peer transcri
 and that is a property of the SEATING, not a gap in the instruments.*** *Anyone
 re-opening the wall question needs the Captain's panel or a deliberate second
 Fable seat; no amount of reading our logs will do it.*
+
+### ✅ 13:4x — **THE CAPTAIN HANDS THE HELM. A PRESENT WINDOW CLOSES; AN UNATTENDED ONE OPENS.**
+
+```
+ 08:35  RETURN  "Good morning, Sancho! …let's convene council"
+~13:4x  AWAY    "Perfect, lots of items today, all good, especially the new
+                 pivot. you have the helm"          (his words, maestro-relayed)
+⇒ PRESENT WINDOW: 08:35 → ~13:4x  =  ~5h 09m AT THE HELM
+⇒ a NEW unattended window OPENS at ~13:4x, and is OPEN as this is written.
+```
+
+⚠️ **The AWAY end is again the maestro's approximation (`~13:4x`); the RETURN end
+(08:35) was exact and quoted.** *Same discipline as the overnight window: the
+imprecision is carried, not rounded away, so a reader can tell which end was
+measured and which estimated.*
+
+📌 **TODAY'S PAIR OF WINDOWS, both fully dated, which is the first time this
+campaign has had two in one day:**
+```
+UNATTENDED  ~03:24 → 08:35   5h 11m   (closed, scored)
+AT THE HELM  08:35 → ~13:4x  ~5h 09m  (closed)
+UNATTENDED  ~13:4x → …       OPEN     ⛔ do not score until the return is dated
+```
+🔑 *"You have the helm" is an away-declaration in this fleet's own idiom — the
+same form as 8/8 12:14 and 19:53. **It is a statement of INTENT that any later
+touch supersedes**, and last night a touch at ~03:2x superseded exactly such a
+declaration 13 minutes after it was made.*
