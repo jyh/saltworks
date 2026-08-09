@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""CENSUS TRICHOTOMY — classify every tracked module of a build as PASS / FAIL /
-UNREACHED, because a build's error list CANNOT do it.
+"""CENSUS — classify every tracked module as PASS / FAIL / UNREACHED / UNWIRED, because a build's error list CANNOT do it.
 
 WHY THIS EXISTS (compiler, 2026-08-08, phase 3).  A module that fails to compile
 masks its dependents: lake reports the failure, the dependents never elaborate,
@@ -52,9 +51,12 @@ build.  Current by coincidence; rechecked by nothing.
    Caught on `SaltWorks.HDL.PayloadRefutations`: I landed it, targeted-built it, read
    `PASS 82 / FAIL 0 / UNREACHED 0`, and only then noticed `SaltWorks.lean` never
    imports it.  **The census had certified a module the default build does not touch.**
-   ⇒ This script answers "was this module ELABORATED at some point", NOT "is it
-     COVERED".  For coverage, check root membership separately:
-         grep -c '^import <Module>$' SaltWorks.lean
+   ✅ CLOSED 18:1x — the tool now walks the ROOTS (SaltWorks.lean plus every lakefile
+     `roots = [...]`) to a transitive closure, and a green tracked module no root reaches
+     is reported UNWIRED rather than PASS.  Positive control run before landing: with the
+     root import the module classifies PASS, without it UNWIRED, and no other module
+     loses reachability.  I tested the LOGIC directly rather than edit the maestro-only
+     root to force the case.
      The lakefile's own comment records the neighbouring hazard — above-hub audit
      modules can never be imported BY the hub, hence the second root.  This is its
      MIRROR: a module below the hub that simply never got wired.
@@ -104,6 +106,28 @@ def main() -> int:
         for m, s in src_of.items()
     }
 
+    # --- ROOT REACHABILITY (LIMIT 2's closure): which modules can any root reach? ---
+    roots: list[str] = []
+    rootfile = Path("SaltWorks.lean")
+    if rootfile.is_file():
+        roots.append("SaltWorks")
+        imports_of["SaltWorks"] = [
+            ln.split()[1] for ln in rootfile.read_text(errors="replace").splitlines()
+            if ln.startswith("import SaltWorks")
+        ]
+    lake = Path("lakefile.toml")
+    if lake.is_file():
+        for m in re.finditer(r'roots\s*=\s*\[([^\]]*)\]', lake.read_text(errors="replace")):
+            roots += re.findall(r'"([^"]+)"', m.group(1))
+    reachable: set[str] = set()
+    frontier = list(roots)
+    while frontier:
+        cur = frontier.pop()
+        if cur in reachable:
+            continue
+        reachable.add(cur)
+        frontier += imports_of.get(cur, [])
+
     status: dict[str, str] = {}
     err_count: dict[str, int] = {}
     for mod, src in src_of.items():
@@ -126,7 +150,12 @@ def main() -> int:
         if mod in status:
             continue
         olean = LIBDIR / Path(src).with_suffix(".olean")
-        status[mod] = "PASS" if olean.is_file() else "UNREACHED"
+        if not olean.is_file():
+            status[mod] = "UNREACHED"
+        elif mod not in reachable:
+            status[mod] = "UNWIRED"
+        else:
+            status[mod] = "PASS"
 
     print(f"\n{'STATUS':<11} MODULE")
     print("-" * 76)
@@ -134,14 +163,18 @@ def main() -> int:
         st = status[mod]
         if st == "FAIL":
             print(f"{st:<11} {mod}  ({err_count[mod]} error lines)")
+        elif st == "UNWIRED":
+            print(f"{st:<11} {mod}  (green, tracked — and NO ROOT REACHES IT)")
         elif st == "UNREACHED":
             why = "masked behind a FAIL" if any(
                 status.get(d) in ("FAIL", "UNREACHED") for d in imports_of[mod]
             ) else "no olean produced"
             print(f"{st:<11} {mod}  ({why})")
     print("-" * 76)
-    tally = {k: sum(1 for v in status.values() if v == k) for k in ("PASS", "FAIL", "UNREACHED")}
+    tally = {k: sum(1 for v in status.values() if v == k)
+             for k in ("PASS", "FAIL", "UNREACHED", "UNWIRED")}
     print(f"PASS {tally['PASS']}   FAIL {tally['FAIL']}   UNREACHED {tally['UNREACHED']}"
+          f"   UNWIRED {tally['UNWIRED']}"
           f"   (of {len(src_of)} tracked modules; PASS rows omitted —")
     print("                                    only the classes a green-looking census HIDES are printed)")
 
@@ -154,6 +187,10 @@ def main() -> int:
               "Trust lake; this script's FAIL detection missed something.")
     if tally["UNREACHED"]:
         print("\n⛔ UNREACHED IS NOT PASS — those modules were not elaborated by this build.")
+    if tally["UNWIRED"]:
+        print("⛔ UNWIRED IS NOT PASS EITHER — green and tracked, but no root reaches them, "
+              "so nothing rebuilds them when their dependencies move.")
+    print(f"\n(roots walked for reachability: {sorted(roots)})")
     return 0
 
 
