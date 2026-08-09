@@ -262,6 +262,27 @@ OPEN ITEMS:
   NN "presumably using bit-serial multipliers, requires
   discussion"; #1 and #2 use offboard memory (his word), #3's
   memory story is part of the open discussion.**
+
+- **COUNCIL RULING #6 (10:0x, the Captain, verbatim: "Both 1 and 2
+  are good choices, but I need to work through 3a/3b to convince
+  myself if there is anything new here, or it was just a dream. So
+  let's defer 1 and 2 for the #3a/b discussion, then we will circle
+  back."): #1 AND #2 DEFERRED-NOT-DROPPED; #3 discussion is the
+  active council thread. His lead questions on the table: (q1) the
+  unit of operation — his sketch: values bit-serial on one input,
+  weights (+bias?) on another, weighted sum then nonlinearity
+  ("the Batcher mux?"); (q2) generality — CNNs, GNNs, etc.
+  Maestro's council answer given (the fused cell: latched-weight
+  serial MAC + bias-as-preload + certified CE-as-ReLU; generality
+  via the {affine,max,route} = piecewise-linear = ReLU-family
+  characterization; GNN-native reading; softmax honestly flagged
+  approximable-not-native; novelty = the VERIFIED stack, not the
+  hardware genre). LATCH LADDER same sitting: storage 35%
+  smaller/bit than flops (silicon, method validated against
+  measured flop table); does NOT rescue packet-boot imem — SRAM
+  remains the onboard-program rung; full latch figure needs
+  explicit PDK cell instantiation, Captain's call whether the
+  rung closes at 35%-on-storage.**
 - **COUNCIL RULING #3 (09:0x, the Captain): B-ISA AND B-EXEC WAVES
   ARE GO — "Either way, we will want to do the B-ISA, B-EXEC
   waves." SEQUENCING per the block's own capacity law: B-ISA
