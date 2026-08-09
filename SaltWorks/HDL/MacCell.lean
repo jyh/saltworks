@@ -1,6 +1,8 @@
 import SaltWorks.HDL.Seq
 import SaltWorks.HDL.Compose
 import SaltWorks.HDL.Adder
+-- for `adEnv` and `sem_adder32_gen`, the adder's landed certificate (math's slot).
+import SaltWorks.Stack.Program
 
 /-! # `macSeq` — THE MAC CELL AS A KERNEL `Seq`
 
@@ -168,6 +170,126 @@ ruling, and the per-cycle lemma above is the piece it will induct over.** *State
 than left to be inferred from the file's silence.*
 -/
 
+/-! ### LAYER 1 — THE PER-CYCLE LEMMA, IN `BitVec`, UNCONDITIONAL
+
+**Math's layer ruling (13:46), accepted:** this stays in `BitVec` and carries **no overflow
+hypothesis**. The `ℤ` reading — where `(a + b).toInt = a.toInt + b.toInt` is *false* on wrap — lives
+in layer 2 with the no-wrap condition that already exists there.
+
+⇒ ***"A HYPOTHESIS IN THE WRONG LAYER IS HOW A BOUND BECOMES FOLKLORE."*** *I was heading for an `ℤ`
+statement, which would have dragged the MAC's overflow bound into a fact about XOR gates.*
+
+**AND A SECOND DIVISION, mine to state:** the lemma below reduces one cycle of the cell to
+**`adder32`'s own `run`** rather than to BitVec arithmetic. The instantiation bookkeeping — the σ
+agreement and the frame over the tie gate — is the part only this seat can do, because only this file
+knows the wiring. `sem_adder32_gen` is math's certificate in math's file, and layer 2 applies it
+there. *Splitting at the artifact boundary rather than at the arithmetic one.*
+-/
+
+/-- The 32 bits of a word, LSB first — the `Seq` trace's representation of a datapath value. -/
+def bitsOf (w : BitVec 32) : List Bool := (List.range 32).map w.getLsbD
+
+theorem bitsOf_length (w : BitVec 32) : (bitsOf w).length = 32 := by simp [bitsOf]
+
+theorem bitsOf_getD (w : BitVec 32) (k : Nat) (hk : k < 32) :
+    (bitsOf w).getD k false = w.getLsbD k := by
+  simp only [bitsOf, List.getD_eq_getElem?_getD, List.getElem?_map, List.getElem?_range, hk,
+             if_pos, Option.map_some, Option.getD_some]
+
+/-- The cell's own gate list is exactly the tie, so the frame argument is a one-gate step. -/
+theorem macCore_gates_split :
+    macCore.gates = [⟨maZero, Op.const false⟩] ++ instGates adder32 maSigma maOff := rfl
+
+/-- The tie gate drives its net to `false`. -/
+theorem tie_runs_to_false (E : Env) :
+    run E [(⟨maZero, Op.const false⟩ : Gate)] maZero = false := by
+  simp [run, upd, Op.eval]
+
+/-- …and disturbs nothing else. **This is the frame the carry-in arm needs**: `adder32`'s `cin` port
+reads a GATE, not an input, which is the arm math flagged and the same shape as `pcAdd`'s
+`hin_adder` at its net `129`. -/
+theorem tie_frame (E : Env) (n : Net) (hn : n ≠ maZero) :
+    run E [(⟨maZero, Op.const false⟩ : Gate)] n = E n := by
+  simp [run, upd, Op.eval, hn]
+
+/-- ⭐ **THE σ AGREEMENT — `inst_sem`'s `hin`, discharged in three arms.** The `a` port reads the
+state, the `b` port reads the primary inputs, and the carry-in reads the tie GATE. -/
+theorem mac_hin (acc addend : BitVec 32) :
+    ∀ i, i < adder32.nIn →
+      run (macSeq.env (bitsOf addend) (bitsOf acc)) [(⟨maZero, Op.const false⟩ : Gate)] (maSigma i)
+        = SaltWorks.Stack.Program.adEnv acc addend false i := by
+  intro i hi
+  have h65 : adder32.nIn = 65 := by decide +kernel
+  rw [h65] at hi
+  by_cases h1 : i < 32
+  · have hne : (32 + i : Nat) ≠ 64 := by omega
+    rw [maSigma, if_pos h1, maAcc, tie_frame _ _ hne]
+    simp only [Seq.env, macSeq, SaltWorks.Stack.Program.adEnv,
+               if_neg (show ¬(32 + i < 32) by omega), if_pos h1, Nat.add_sub_cancel_left]
+    exact bitsOf_getD acc i h1
+  · by_cases h2 : i < 64
+    · have hne : (i - 32 : Nat) ≠ 64 := by omega
+      rw [maSigma, if_neg h1, if_pos h2, maAddend, tie_frame _ _ hne]
+      simp only [Seq.env, macSeq, SaltWorks.Stack.Program.adEnv,
+                 if_pos (show i - 32 < 32 by omega), if_neg h1, if_pos h2]
+      exact bitsOf_getD addend (i - 32) (by omega)
+    · have h64 : i = 64 := by omega
+      subst h64
+      rw [maSigma, if_neg h1, if_neg h2, tie_runs_to_false]
+      simp only [SaltWorks.Stack.Program.adEnv, if_neg h1, if_neg h2]
+
+/-- ⭐⭐ **LAYER 1, POINTWISE. Sum bit `k` of one cycle IS `adder32`'s sum bit `k`, run on the
+adder's own environment.** No hypothesis, no `ℤ`, no overflow condition — and no re-derivation of
+math's certificate: the right-hand side is the adder's `run`, so layer 2 applies
+`sem_adder32_gen` in the file that owns it. -/
+theorem step_bit_is_adder_bit (acc addend : BitVec 32) (k : Nat) (hk : k < 32) :
+    run (macSeq.env (bitsOf addend) (bitsOf acc)) macCore.gates (maSum k)
+      = run (SaltWorks.Stack.Program.adEnv acc addend false) adder32.gates (adS k) := by
+  have hmem : (adder32.gates.map Gate.out).contains (adS k) = true := by
+    revert hk; revert k; decide +kernel
+  have h := inst_sem adder32 maSigma maOff
+      (run (macSeq.env (bitsOf addend) (bitsOf acc)) [(⟨maZero, Op.const false⟩ : Gate)])
+      (SaltWorks.Stack.Program.adEnv acc addend false) mac_instOK (mac_hin acc addend)
+      (adS k) (Or.inr hmem)
+  rw [macCore_gates_split, run_append, maSum]
+  exact h
+
+/-- **The output half and the state half of a cycle are the same bits** — so the pointwise lemma
+above characterises both. *`Seq.wf` checks only the LENGTH of `outs`; this is the value claim.* -/
+theorem step_halves_agree (st inp : List Bool) :
+    (stepSeq macSeq st inp).1 = (stepSeq macSeq st inp).2 := by
+  -- ⚠️ The obvious `simp only [..., macCore]` UNFOLDS `instGates adder32 …` — 160 gates — and the
+  -- kernel times out. The proof needs only the SHAPE of `outs` (`A ++ A`), never the gates, so
+  -- `run E macCore.gates` is kept OPAQUE throughout. *Same lesson as the offset chain: state it
+  -- structurally and no artifact is ever evaluated.*
+  have hdup : ∀ (l : List Bool) (n : Nat), l.length = n →
+      (l ++ l).take n = l ∧ (l ++ l).drop n = l := by
+    intro l n h; subst h; exact ⟨List.take_left, List.drop_left⟩
+  have houts : macCore.outs = (List.range 32).map maSum ++ (List.range 32).map maSum := rfl
+  have hmap : macCore.outs.map (run (macSeq.env inp st) macCore.gates)
+      = ((List.range 32).map maSum).map (run (macSeq.env inp st) macCore.gates)
+        ++ ((List.range 32).map maSum).map (run (macSeq.env inp st) macCore.gates) := by
+    rw [houts, List.map_append]
+  have hl : (((List.range 32).map maSum).map (run (macSeq.env inp st) macCore.gates)).length = 32 := by
+    simp
+  obtain ⟨ht, hd⟩ := hdup _ 32 hl
+  -- ⚠️ do NOT put `macSeq` in the simp set: it expands to the anonymous structure literal
+  -- `{ nIn := 32, … }` and then `macSeq.env` in the hypotheses no longer matches the goal
+  -- syntactically. Project the two fields it needs instead, and leave the machine folded.
+  have hcore : macSeq.core = macCore := rfl
+  have hnout : macSeq.nOut = 32 := rfl
+  simp only [stepSeq, sem, hcore, hnout]
+  rw [hmap, ht, hd]
+
+/-! ### What layer 2 receives, stated plainly
+
+`step_bit_is_adder_bit` + `step_halves_agree` say: **one cycle of `macSeq` computes, bit for bit,
+what `adder32` computes on `(acc, addend, cin = 0)`, and stores it as the next state.** Composing
+that with `sem_adder32_gen` (math's file) gives `acc' = acc + addend` in `BitVec 32`; composing THAT
+with the no-wrap hypothesis gives the `ℤ` statement `macAfter` needs. **Three steps, three owners, and
+the overflow condition appears only in the third.**
+-/
+
 /-! ### The axiom audit — one declaration per call
 
 *Added WITH the cell, not after it. `CorePlace` ran fourteen placements with `EXIT=0` and zero
@@ -185,5 +307,11 @@ everything after a failure reads as clean. -/
 #audit_axioms output_equals_next_state
 #audit_axioms acc_is_the_a_port_and_addend_is_the_b_port
 #audit_axioms carry_in_is_low
+#audit_axioms bitsOf_getD
+#audit_axioms tie_runs_to_false
+#audit_axioms tie_frame
+#audit_axioms mac_hin
+#audit_axioms step_bit_is_adder_bit
+#audit_axioms step_halves_agree
 
 end SaltWorks.HDL.MacCell
