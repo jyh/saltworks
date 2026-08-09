@@ -263,6 +263,24 @@ OPEN ITEMS:
   discussion"; #1 and #2 use offboard memory (his word), #3's
   memory story is part of the open discussion.**
 
+- **COUNCIL RULING #8 — THE WIDTH RULING (11:3x, the Captain,
+  verbatim: "Yes, the word width is not important for the PoC,
+  let's rule 8-bit"): VALUES ARE 8-BIT FIXPOINT (weights +
+  activations — the quantization story stands and supplies the
+  cheap overflow bounds); WORD WIDTH ruled UNIMPORTANT for the
+  PoC ⇒ implementation takes the seats' converged free path:
+  the LANDED 32-BIT DATAPATH carrying int8 values sign-extended
+  at ingress (option-2 mechanics). Zero new certificates
+  (wordSignedOrder + CE + adder32 all reused at 32); activation
+  compares at 32 (math's width question CLOSED); no-overflow
+  witness trivial from the int8 bound (B5 discharged by decide);
+  NO requantization organ in the minimal demo; 8-bit-NATIVE
+  datapath (8b latches, 8-cycle MACs, shift+saturate requant) =
+  the v2/production optimization, priced as reference only.
+  Decision inputs that converged: math's certificate ranking
+  (2)<<(1)<(3); silicon's "area should not decide this" (native
+  saving does not change tile count).**
+
 - **COUNCIL RULING #7 — THE PATH RULING (11:3x, the Captain,
   verbatim): "This is my proposal: * Keep the pure BB switch, I
   will update TT * Keep the pure RISC-V + 5 op ISA + EXEC + tiny
