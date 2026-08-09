@@ -189,7 +189,18 @@ def main():
     print(f"    {'TOTAL':8s} {totals['saltworks']:6d} decls{'':10s}"
           f"{totals['salt']:6d} decls")
 
-    print("\n--- KERNEL DECLARATIONS **SURVIVING** at HEAD ---")
+    # ⛔ "AT HEAD" IS NOT A CITATION — it is a reading whose subject moves.
+    # Caught 19:4x: I published "1,948 stand at HEAD" at 19:15; HEAD had moved
+    # TWICE in the three minutes before (SortDemo landed 5f3e622, rooted 777c5b4)
+    # and the true current figure was 2,013. A peer handed me the delta rather
+    # than re-deriving my total, and their independent hand count of SortDemo's
+    # 65 theorems matched my instrument's delta EXACTLY.
+    # 🔑 This is my own content-addressing law, which I applied to freeze anchors
+    # and did NOT apply to my own headline figure. The row now PINS the sha it
+    # read, so a quoted figure can never outlive its subject.
+    head = git(REPOS["saltworks"], "rev-parse", "--short", "HEAD").strip()
+    print(f"\n--- KERNEL DECLARATIONS **SURVIVING**, pinned at `{head}` ---")
+    print("    ⛔ NOT 'at HEAD' — HEAD moves. Quote the sha, never the word.")
     print("    ⛔ THIS ROW IS ONLY A CAMPAIGN FIGURE FOR A REPO WHOSE HISTORY *IS*")
     print("       THE CAMPAIGN. Measured, not assumed — commits predating T0:")
     for repo in ("saltworks", "salt"):
