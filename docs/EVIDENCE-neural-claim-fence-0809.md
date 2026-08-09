@@ -73,7 +73,12 @@ FALSIFIED IF any ONE of these is observed:
       instantiates (the model-vs-artifact gap — INSTRUMENT: the same
       olean-in-the-hub-graph check the maestro used on CoreOffsets at 09:51)
   F4  "down to silicon" is asserted while any row of the decomposition is
-      unlanded (TODAY: 1 of 3 is unlanded, and the design doc says so)
+      unlanded.
+      ⚠️ THE CONDITION IS DURABLE; THE COUNT IS NOT. Re-read the source before
+      quoting a number here -- do not trust this line's parenthetical.
+      AS OF 2026-08-09 10:35, re-checked at the bytes after v1.2 landed:
+      `neural-fabric-poc-design-v1.md:177` reads "three theorem instances,
+      TWO LANDED" -> 1 of 3 unlanded. STILL CURRENT, verified not assumed.
 ```
 
 ### Three words that may not be used unqualified until their row lands
