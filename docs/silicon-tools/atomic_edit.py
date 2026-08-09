@@ -49,12 +49,28 @@ import pathlib
 def atomic_replace(path: pathlib.Path, data: str) -> None:
     """Write `data` to `path` so a concurrent reader sees old-or-new, never partial."""
     # Same directory: `os.replace` is atomic only WITHIN a filesystem.
+    # ⛔⛔ `os.replace` CARRIES THE TEMP FILE'S METADATA, NOT THE TARGET'S — and
+    # `mkstemp` creates 0600. Caught by compiler 2026-08-09 01:49, MEASURED here:
+    # a 644 target came out 600 after one edit. My three self-tests all PASSED
+    # while this was broken, because none of them looked at the mode — a
+    # self-test encodes its author's model of what can go wrong, so it is blind
+    # to exactly the failure he has not met. Copy the mode BEFORE the rename.
+    try:
+        st = path.stat()
+    except OSError:
+        st = None
     fd, tmp = tempfile.mkstemp(dir=str(path.parent), prefix=".atomic-", suffix=".tmp")
     try:
         with os.fdopen(fd, "w") as fh:
             fh.write(data)
             fh.flush()
             os.fsync(fh.fileno())      # durable before the rename, not after
+        if st is not None:
+            os.chmod(tmp, st.st_mode & 0o7777)
+            try:                        # best-effort: ownership needs privilege
+                os.chown(tmp, st.st_uid, st.st_gid)
+            except (OSError, AttributeError):
+                pass
         os.replace(tmp, path)          # atomic rename; readers get one or the other
     except BaseException:
         # Never leave the scratch file behind to be mistaken for content.
