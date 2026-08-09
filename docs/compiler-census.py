@@ -41,9 +41,25 @@ THE SOUND DISCRIMINATOR IS THE IMPORT GRAPH, NOT A TIMESTAMP:
 No mtimes anywhere.  Sound on cached builds, partial builds, and retrospectively
 -- the three places version (1) lied.
 
-LIMIT, honestly: FAIL is read from error TEXT, so a failure lake reports without a
+LIMIT 1, honestly: FAIL is read from error TEXT, so a failure lake reports without a
 `path:line:` prefix would be missed.  The output cross-checks against lake's own
 "- SaltWorks.X" failed-module list and DISAGREES LOUDLY if the two differ.
+
+⛔ LIMIT 2 — FOUND 2026-08-08 18:0x.  **PASS DOES NOT MEAN "COVERED BY THE BUILD
+GRAPH".**  The PASS rule is "no error AND an olean exists", so a module that NO ROOT
+IMPORTS still scores PASS — on the strength of an olean left by an earlier TARGETED
+build.  Current by coincidence; rechecked by nothing.
+   Caught on `SaltWorks.HDL.PayloadRefutations`: I landed it, targeted-built it, read
+   `PASS 82 / FAIL 0 / UNREACHED 0`, and only then noticed `SaltWorks.lean` never
+   imports it.  **The census had certified a module the default build does not touch.**
+   ⇒ This script answers "was this module ELABORATED at some point", NOT "is it
+     COVERED".  For coverage, check root membership separately:
+         grep -c '^import <Module>$' SaltWorks.lean
+     The lakefile's own comment records the neighbouring hazard — above-hub audit
+     modules can never be imported BY the hub, hence the second root.  This is its
+     MIRROR: a module below the hub that simply never got wired.
+   ⇒ Same family as this file's other defects: an instrument that reports faithfully on
+     the objects it can see, and is silent about membership in the set that matters.
 
 USAGE:  docs/compiler-census.py <build-output-file>
 """
