@@ -136,6 +136,30 @@ the interface law applies (a later re-shape is a breaking change).
 
 ## 5. THE TWO THINGS THAT MUST BE SAID OUT LOUD
 
+> ## ⛔ **[CORRECTED 2026-08-08 20:5x, BY THE AUTHOR — BOTH ITEMS BELOW ARE STALE]**
+>
+> **This section was written against `lang-design-v1.md` as I read it at 19:07. The block has
+> since moved to v1.3+/v1.4 and BOTH of my items are superseded. The helm named T2's staleness
+> in its ruling; I found T3's myself while checking whether T2's sibling had moved too.**
+>
+> **T2 — STRUCK. The premise "with one type" is false.** τ is now `i32 | bool` (Captain's
+> council ask, folded at v1.3). So the judgment **can** fail on a genuine TYPE mismatch — the
+> block's own reject control is `while 1`, an `i32` where `bool` is required. ⇒ ***No
+> scope-checker disclaimer is needed and the control is stronger than the one I proposed.***
+> *My reasoning was sound on an `i32`-only universe; the universe changed under it.*
+>
+> **T3 — SUPERSEDED, and the block's resolution is sharper than my fork.** I offered
+> "u32 enters, or the lemma is dead in v1." The block took **neither**: the unsigned-`<`
+> lowering is **LIVE IN THE BACKEND** (it is the comparator spec's unsigned bit-string compare)
+> and reaches the **source** only with v2's `u32`. ⇒ ***Not dead — dead-at-the-source and live
+> one layer down.*** *My fork was a false dichotomy because I only considered the source layer.*
+>
+> 🔑 **I am correcting IN PLACE rather than rewriting, per the fleet's 8/8 law that a corrected
+> claim rots exactly like the claim it replaced. The original text stands below so the revision
+> is part of the record.**
+
+**⚠️ THE TEXT BELOW IS THE 19:07 ORIGINAL AND IS SUPERSEDED BY THE BLOCK ABOVE.**
+
 **(T2) With one type, the judgment cannot fail on a type mismatch.** The only thing it can reject
 is an unbound variable. ⇒ ***In v1 the "type system" is, honestly, a SCOPE CHECKER in judgment
 clothing.*** That is the right thing to build early and the right shape to build it in — **but the
