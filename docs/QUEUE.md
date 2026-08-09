@@ -263,6 +263,17 @@ OPEN ITEMS:
   discussion"; #1 and #2 use offboard memory (his word), #3's
   memory story is part of the open discussion.**
 
+- **NDF BENCH HARNESS (registered 11:4x at the Captain's memory-
+  hassle question): RP2040 firmware = the memory-server side of the
+  8->32 multiplexed bus (PIO state machines: latch 4 addr bytes,
+  serve 4 data bytes — the standard TT ROM/RAM-emulator pattern,
+  ~100 lines PIO+C) + the packet-port side (feed weight/input
+  packets, capture results). STATUS: scheduled September work,
+  small; OUTSIDE the verified surface (test equipment, same trust
+  class as the logic analyzer). The CHIP side of the protocol is
+  ALREADY BUILT AND SIGNED OFF (slicea16bma's phase demux, 3x2
+  die). Owner: assign at the harness seam (compiler or silicon).**
+
 - **COUNCIL RULING #8 — THE WIDTH RULING (11:3x, the Captain,
   verbatim: "Yes, the word width is not important for the PoC,
   let's rule 8-bit"): VALUES ARE 8-BIT FIXPOINT (weights +
