@@ -231,6 +231,22 @@ OPEN ITEMS:
   council I] the seam doctrine stands ratified. Originals at their
   bus lines; this entry is the durable recall surface.**
 
+- **COUNCIL RULING #3 (09:0x, the Captain): B-ISA AND B-EXEC WAVES
+  ARE GO — "Either way, we will want to do the B-ISA, B-EXEC
+  waves." SEQUENCING per the block's own capacity law: B-ISA
+  per-op waves interleave at compiler's seam as tiny-Rust N-waves
+  clear (one write track); B-EXEC follows B-ISA structurally,
+  DRIVER row first. FINAL LAYOUT IS DEFERRED until the packet-IO
+  discussion — his two options, verbatim: "1) BB (silicon), RISC-V
+  (silicon, separate project from BB)  2) BB + PACKET-IO CPU (TBD,
+  silicon), RISC-V (layout, only for now, until we decide to fab
+  it)". THE MUX FACT THAT SHAPES THEM (dossier §2.2, V-SRC):
+  unselected TT designs are POWER-GATED OFF — separate projects
+  are never powered simultaneously, so on-die packet interaction
+  exists ONLY in option 2's combined project; option 1's joint
+  demo is two chips + host wiring. Per-project tile pricing; the
+  owned-4 reallocation question remains the Captain's checkout
+  read.**
 - **COUNCIL RULING #2 (08:4x, the Captain: "Yes, fire the probes"):
   THE TINY-RUST PROVING CAMPAIGN IS FIRED, PROBE-FIRST per the
   probe-then-wave doctrine. The hpool-separate flag stood UNVETOED —
