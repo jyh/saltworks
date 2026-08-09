@@ -300,10 +300,46 @@ def expMaxNoSwap : Stmt → Nat
   | .ite c thn els     => max (expCostNoSwap c) (max (expMaxNoSwap thn) (expMaxNoSwap els))
   | .while c body      => max (expCostNoSwap c) (expMaxNoSwap body)
 
-/-- Completeness will read "well-typed AND pool-fitting AND temp-fitting compiles" — three
-predicates, and the judgment mentions none of the resources. -/
-def fitsAndTyped (poolSize tempBudget : Nat) (p : Stmt) : Bool :=
-  wellFormed p && (liveMax p ≤ poolSize) && (expMaxNoSwap p ≤ tempBudget)
+/-! ### ⛔ THE TWO-BUDGET FORM WAS WRONG — silicon's RTL reading, 09:30
+
+I asked whether bindings and temporaries share one physical pool. **They do, and there is no
+scratch at all.** Read from `slicea16bma.v` as built:
+
+* `:81  reg [31:0] rf [1:15]` — the register file **is** the whole pool.
+* `:90  wire [31:0] alu_y` — **COMBINATIONAL.** The ALU result goes to `rf` in the same commit
+  or it is gone. ⇒ *A temporary that must survive occupies a register-file cell, exactly like a
+  live binding.*
+* And the pool is **15**, not 32: `rf [1:15]`, indices decoded at `[3:0]`, `x0` a mux to
+  constant zero, and `:70` rejects any instruction with bit 4 set. **Independent of the first
+  finding** — repairing the predicate's *shape* would not have caught the *size*.
+
+⇒ ***A two-budget predicate is MORE PERMISSIVE THAN THE MACHINE: it admits programs whose
+bindings and temporaries each fit their own budget while their SUM exceeds the one real pool.
+The honest form is a single constraint over CONCURRENT demand.*** -/
+
+/-- Peak **concurrent** cell demand, threading the binding depth. At each point the machine
+must hold the live bindings *and* that point's expression temporaries **at the same time**.
+
+`letmut`'s initialiser is evaluated **before** its binding exists, so it costs `depth + cost e`;
+the body then runs one level deeper. -/
+def demandAt (depth : Nat) : Stmt → Nat
+  | .skip              => depth
+  | .letmut _ _ e body => max (depth + expCostNoSwap e) (demandAt (depth + 1) body)
+  | .assign _ e        => depth + expCostNoSwap e
+  | .seq s t           => max (demandAt depth s) (demandAt depth t)
+  | .ite c thn els     => max (depth + expCostNoSwap c)
+                              (max (demandAt depth thn) (demandAt depth els))
+  | .while c body      => max (depth + expCostNoSwap c) (demandAt depth body)
+
+/-- The one resource bound the machine actually imposes. `poolSize` is a **parameter**, not a
+literal — silicon's own caveat: a future core with an accumulator or a wider `rf` changes the
+number, and a literal would rot silently. -/
+def poolDemand (p : Stmt) : Nat := demandAt 0 p
+
+/-- Completeness reads "well-typed AND pool-fitting compiles" — two predicates, and the
+judgment mentions no resource at all. -/
+def fitsAndTyped (poolSize : Nat) (p : Stmt) : Bool :=
+  wellFormed p && (poolDemand p ≤ poolSize)
 
 /-! ## 7. THE THREE PRE-REGISTERED CONTROLS, plus the folded refutations -/
 
@@ -351,16 +387,16 @@ theorem f6_bigStep_while_iterates (σ : State) :
 bounds HOLDING, and `liveMax`'s exact value pinned — so a *pessimistic* `liveMax` would fail
 this theorem rather than satisfy Row B vacuously. -/
 theorem liveMax_witness_nontrivial :
-    liveMax acceptProg = 1 ∧ liveMax acceptProg ≤ 1 ∧ fitsAndTyped 1 3 acceptProg = true := by
+    liveMax acceptProg = 1 ∧ liveMax acceptProg ≤ 1 ∧ fitsAndTyped 3 acceptProg = true := by
   refine ⟨by decide, by decide, by decide⟩
 
 /-- The bound must be able to BIND, in both directions. -/
 theorem liveMax_binds_both_ways :
     liveMax (.letmut 0 .i32 (.const 0)
               (.letmut 1 .i32 (.const 0) (.letmut 2 .i32 (.const 0) .skip))) = 3
-  ∧ fitsAndTyped 3 3 (.letmut 0 .i32 (.const 0)
+  ∧ fitsAndTyped 3 (.letmut 0 .i32 (.const 0)
               (.letmut 1 .i32 (.const 0) (.letmut 2 .i32 (.const 0) .skip))) = true
-  ∧ fitsAndTyped 2 3 (.letmut 0 .i32 (.const 0)
+  ∧ fitsAndTyped 2 (.letmut 0 .i32 (.const 0)
               (.letmut 1 .i32 (.const 0) (.letmut 2 .i32 (.const 0) .skip))) = false := by
   refine ⟨by decide, by decide, by decide⟩
 
@@ -388,14 +424,60 @@ claim of exhaustiveness — math's candidate third cause (instruction memory) is
 theorem pool_is_separate :
     wellFormed (.letmut 0 .i32 (.const 0) (.letmut 1 .i32 (.const 0) .skip)) = true
   ∧ liveMax (.letmut 0 .i32 (.const 0) (.letmut 1 .i32 (.const 0) .skip)) = 2
-  ∧ fitsAndTyped 1 3 (.letmut 0 .i32 (.const 0) (.letmut 1 .i32 (.const 0) .skip)) = false := by
+  ∧ fitsAndTyped 1 (.letmut 0 .i32 (.const 0) (.letmut 1 .i32 (.const 0) .skip)) = false := by
   refine ⟨by decide, by decide, by decide⟩
 
 /-- **CONTROL: a smaller core does not change typing** — the v1.4 requirement as a theorem. -/
-theorem typing_is_pool_independent (p : Stmt) (n t m : Nat)
-    (h : fitsAndTyped n t p = true) :
-    wellFormed p = true ∧ (liveMax p ≤ m → expMaxNoSwap p ≤ t → fitsAndTyped m t p = true) := by
+theorem typing_is_pool_independent (p : Stmt) (n m : Nat)
+    (h : fitsAndTyped n p = true) :
+    wellFormed p = true ∧ (poolDemand p ≤ m → fitsAndTyped m p = true) := by
   simp only [fitsAndTyped, Bool.and_eq_true, decide_eq_true_eq] at h
-  exact ⟨h.1.1, fun hm ht => by simp [fitsAndTyped, h.1.1, hm, ht]⟩
+  exact ⟨h.1, fun hm => by simp [fitsAndTyped, h.1, hm]⟩
+
+/-! ## 8. SILICON'S RTL ANSWER, AS THEOREMS — the single pool, and why two budgets lied -/
+
+/-- The pool of `slicea16bma` **as built** — `rf [1:15]`, read from the RTL by silicon at
+09:30, not from an inventory note. A **named constant with provenance**, so nobody instantiates
+"32, because RISC-V-shaped": that error is over by more than 2× and is *independent* of the
+shape error below. -/
+def slicea16bmaPool : Nat := 15
+
+theorem poolDemand_acceptProg : poolDemand acceptProg = 3 := by decide
+
+theorem poolDemand_mathP : poolDemand mathP = 4 := by decide
+
+/-- ⛔⭐ **THE TWO-BUDGET FORM WAS MORE PERMISSIVE THAN THE MACHINE — proved on math's own
+witness, which is the program that started this.**
+
+Under the retired predicate, `mathP` fitted `poolSize = 1` and `tempBudget = 3`: each component
+was inside its own budget. Its **concurrent** demand is `4`. So the old form admitted a program
+the one real pool cannot hold, and it did so while both of its conjuncts were satisfied — the
+failure was in the predicate's SHAPE, invisible to any tightening of either number. -/
+theorem single_pool_is_strictly_tighter :
+    liveMax mathP ≤ 1 ∧ expMaxNoSwap mathP ≤ 3 ∧ ¬ (poolDemand mathP ≤ 3) := by
+  refine ⟨by decide, by decide, by decide⟩
+
+/-- **AND BOTH PROGRAMS FIT THE REAL MACHINE** — so the repair is not vacuously strict. A bound
+nothing satisfies would be the mirror-image defect of the one just fixed. -/
+theorem both_fit_the_real_pool :
+    fitsAndTyped slicea16bmaPool acceptProg = true
+  ∧ fitsAndTyped slicea16bmaPool mathP = true := by
+  refine ⟨by decide, by decide⟩
+
+/-- **CONTROL: the pool bound can still BIND at the real size.** Sixteen nested bindings exceed
+fifteen cells, so `slicea16bmaPool` is a real constraint and not decoration. -/
+theorem real_pool_binds :
+    poolDemand (.letmut 0 .i32 (.const 0) (.letmut 1 .i32 (.const 0)
+      (.letmut 2 .i32 (.const 0) (.letmut 3 .i32 (.const 0)
+      (.letmut 4 .i32 (.const 0) (.letmut 5 .i32 (.const 0)
+      (.letmut 6 .i32 (.const 0) (.letmut 7 .i32 (.const 0)
+      (.letmut 8 .i32 (.const 0) (.letmut 9 .i32 (.const 0)
+      (.letmut 10 .i32 (.const 0) (.letmut 11 .i32 (.const 0)
+      (.letmut 12 .i32 (.const 0) (.letmut 13 .i32 (.const 0)
+      (.letmut 14 .i32 (.const 0) (.letmut 15 .i32 (.const 0) .skip))))))))))))))))
+      = 16
+  ∧ ¬ (16 ≤ slicea16bmaPool) := by
+  refine ⟨by decide, by decide⟩
+
 
 end SaltWorks.HDL.TinyRustN0
