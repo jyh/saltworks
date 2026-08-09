@@ -86,4 +86,6 @@ import SaltWorks.HDL.ImmediateScope
 import SaltWorks.HDL.TinyRustN0
 import SaltWorks.HDL.CoreOffsets
 import SaltWorks.HDL.CorePlace
+import SaltWorks.HDL.SingleLevel
+import SaltWorks.HDL.SubFragment
 import SaltWorks.Tactic.AuditAxioms
