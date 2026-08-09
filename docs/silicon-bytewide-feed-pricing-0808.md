@@ -94,3 +94,41 @@ after.**
 - **`instr_commit` sharing.** Both variants spend a pin on commit. *A protocol
   that encoded commit in the data stream would save one signal in both, and
   would change the serial core's co-tenant margin from 4 spare to 5.*
+
+---
+
+## 7 · ⭐ POST-LAYOUT — MEASURED, AND IT MOVES THE TILE ANSWER (21:3x)
+
+**LibreLane 3.0.5, PDK `c6d73a35`, `CLOCK_PERIOD 40` (25 MHz), `FP_CORE_UTIL 45`.
+Metrics committed under `Flow/layout-metrics/`.**
+```
+                 pins  cyc/word   pre-layout   POST-LAYOUT   ratio   % of 2×2 usable
+slicea16b          10         4     27,646.5      43,120.1   1.56×        95.1%
+slicea16bma        18         4     29,583.4      45,205.9   1.53×        99.7%
+                                                       2×2 usable @60% = 45,361.6
+```
+```
+                 DRC  LVS  antenna   setup slack   hold slack   max-slew
+slicea16b          0   ✅        0     +19.29 ns   +0.112 ns       1,391
+slicea16bma        0   ✅        0     +16.91 ns   +0.122 ns       1,678
+```
+
+⛔ ***THE HEADLINE: `-ma` CLEARS A 2×2 BY 155.7 µm² — ABOUT 25 STANDARD CELLS.
+THAT IS TECHNICALLY A FIT AND PRACTICALLY NOT ONE***, because 1,678 max-slew
+violations remain and DRV repair ADDS cells. **Reported as DOES NOT FIT a 2×2.**
+✅ **A 3×3 puts it at 44% — comfortable, with room for repair and an ECO.**
+*The Captain's word named "its own tile", not its size, and tiles buy area; the
+pin count (18 ≤ 24) is the thing a tile could never fix, and it was already yes.*
+
+🔑 **AND THE FAMILY-WIDE READING: even the SMALLER `-b` is at 95.1%. A 2×2 was
+never comfortable for a 16-register Slice-A at 32 bits — my pre-layout "61%" hid
+that, and only the real flow found it.** *Fourth independent instrument naming
+the register file as the mass.*
+
+📌 **USE 1.55× AS THE YOSYS→POST-LAYOUT RULE** for this cell family and this
+flow — measured twice, 1.56× and 1.53×. *About 22% of the growth is
+timing-repair buffering, which synthesis cannot see at all.*
+
+⛔ **STILL NOT A TT TILE-FIT TEST:** both runs used `FP_CORE_UTIL 45`, not TT's
+`FP_SIZING: absolute` at the fixed tile die. *These give trustworthy CELL AREA;
+the fit test is a separate run and is now worth doing.*
