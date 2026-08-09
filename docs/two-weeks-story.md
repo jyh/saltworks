@@ -1,5 +1,6 @@
 # TWO WEEKS WITH THE SALT METHOD — the story (LIVING DRAFT v0)
-### Maestro-drafted 2026-08-08 (day 3 of 14; the clock lands Aug 20).
+### Maestro-drafted 2026-08-08 (day 3 of 14; work runs through
+### Aug 19 — the clock lands as Aug 20 opens).
 ### Purpose: if anyone comes early with an inquiry, this
 ### account is ready. Revised as we go; every strong adjective must be
 ### paid by a number from evidence's receipts table before this leaves
