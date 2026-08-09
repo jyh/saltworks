@@ -103,7 +103,33 @@ FALSIFIED IF any ONE of these is observed:
           ARITHMETIC READING (b + W·psum) ℤ-only, reaches the cell at rung 4,
                              carrying the chain's ONLY hypothesis
                              (¬saddOverflow, discharged by demoBound) ⛔ OPEN
-      ⇒ F4 STILL BINDS, and the headline "two landed" is STILL correct.
+      ⛔ SUPERSEDED 15:4x — SEE THE FINAL RE-ANCHOR BELOW. F4 NO LONGER BINDS
+        on the decomposition, and the headline is now the STALE half.
+
+      ═══ FINAL RE-ANCHOR, 2026-08-09 15:4x — THE CELL WAVE COMPLETED ═══
+      row 2 now reads, IN THE PACKAGE ITSELF:
+        "LANDED IN FULL (8/9 15:41): accumulation hardware theorem (c754b29)
+         + the arithmetic reading through rung 4 under ¬saddOverflow with
+         demoBound discharging it (a2c6470+03f5885) + the sign cycle at the
+         artifact (3c62228)"
+      ⇒ ALL THREE ROWS LANDED. **F4 IS CLEARED** — no row is unlanded.
+
+      ⛔ AND AN INTERNAL INCONSISTENCY IN THE SAME FILE, which needs no
+        external check to see:
+          :339 headline  "three theorem instances, TWO LANDED"   ← STALE
+          :344 row 2     "LANDED IN FULL (8/9 15:41)"            ← current
+        The headline now UNDERSTATES its own table. Favorable drift again,
+        and again nobody would look.
+
+      ⚠️ F1–F3 STILL BIND, AND F3 IS THE ONE THAT MATTERS FOR "DOWN TO
+        SILICON": the theorems hold of a MODEL; no synthesis run has
+        instantiated this cell. A cleared F4 clears the DECOMPOSITION, not
+        the phrase.
+      ✅ AND THE ROW EARNS ITS "IN FULL": it states the hypothesis
+        (¬saddOverflow), names what discharges it (demoBound), and KEEPS
+        math's distinction between "the cell adds what it is fed" and "the
+        fed sequence MEANS b + W·x". A landed-in-full that still shows its
+        hypothesis is the shape this fence was written to protect.
       🔑 Nobody asked them to split that row. A seat that distinguishes "the
         cell adds what it is fed" from "the fed sequence MEANS b + W·x" is
         doing the fence's job upstream of the fence — which is the only place
