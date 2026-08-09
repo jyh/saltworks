@@ -1,0 +1,193 @@
+#!/usr/bin/env python3
+"""
+campaign_receipts.py — THE TWO-WEEKS STORY'S RECEIPTS.
+
+Assigned by the maestro 2026-08-08 19:02: "the measured numbers of days 1-3
+(theorems, refutation rounds, catches, costs where charted) pulled into a
+citable table -- the story quotes ONLY instrument readings, and your ledger is
+the instrument."
+
+⚠️ THESE FIGURES ARE INTENDED FOR PUBLIC QUOTATION BY THE CAPTAIN. That raises
+the bar rather than lowering it, and this file is built to the standard the day
+of 2026-08-08 taught, at the cost of five of my own published figures being
+wrong first:
+
+ 1. EVERY ROW CARRIES ITS SCOPE. A count without the repo, the window, the
+    declaration pattern and the add-vs-net rule is not quotable.
+    [[a-count-is-not-a-scope]]
+ 2. NO SINGLE HEADLINE. The story may pick a number; this file will not pick it
+    for the story, because a bare count is what drifts.
+ 3. THE DECLARATION PATTERN INCLUDES ATTRIBUTES. `^theorem` misses
+    `@[simp] theorem` -- and the simp-set declarations are the ones applied
+    IMPLICITLY by tactics that never name them, i.e. the widest blast radius.
+    Two seats made this exact error today; it cost 3 of 13 in one file pair.
+ 4. ADDED vs SURVIVING ARE DIFFERENT NUMBERS AND BOTH ARE REPORTED. Phase 3
+    deliberately DELETED 16 declarations. "Theorems written" and "theorems
+    standing" are different claims and the story must not blur them.
+ 5. AN EMPTY RESULT IS AN INSTRUMENT READING, NOT A FACT. Every query that can
+    return zero is positive-controlled; if a control fails the row REFUSES.
+    [[printed-is-not-gated]] -- the refusal is an exit code, not a warning.
+
+WHAT THIS FILE DOES NOT DO: it does not compute a rate, a velocity, or a
+per-day average. The charter refuses those ("the window is evidence, not a
+percentage") and a two-week story is exactly where such a figure would travel
+furthest from its scope.
+
+    python3 campaign_receipts.py            # the table
+    python3 campaign_receipts.py --controls # show the positive controls too
+"""
+
+import re
+import subprocess
+import sys
+
+REPOS = {
+    "saltworks": "/Users/jyh/projects/claude/saltworks",
+    "salt": "/Users/jyh/projects/claude/salt",
+}
+
+# T0 of the triple campaign: 2026-08-05 22:02 PDT (FLEET.md), per nightly.sh.
+DAYS = [
+    ("DAY 1", "2026-08-05 22:02", "2026-08-07 00:00"),
+    ("DAY 2", "2026-08-07 00:00", "2026-08-08 00:00"),
+    ("DAY 3", "2026-08-08 00:00", "2026-08-09 00:00"),
+]
+
+# Line-start, optional attribute blocks and modifiers, then the keyword.
+# NOT `^theorem` (misses @[simp]); NOT unanchored (catches prose, e.g.
+# "That is the theorem below").
+DECL = re.compile(
+    r"^(@\[[^\]]*\][ \t]*)*(private |protected |noncomputable |partial )*"
+    r"(theorem|lemma)[ \t]",
+)
+
+
+def git(repo, *args):
+    try:
+        return subprocess.run(["git", "-C", repo, *args],
+                              capture_output=True, text=True, timeout=120).stdout
+    except Exception:
+        return ""
+
+
+def added_decls(repo, since, until):
+    """Count declaration lines ADDED to *.lean in the window. Returns (added, commits)."""
+    out = git(repo, "log", f"--since={since}", f"--until={until}",
+              "--format=%H", "--", "*.lean")
+    shas = [s for s in out.split() if s]
+    added = 0
+    for sha in shas:
+        diff = git(repo, "show", sha, "--format=", "--unified=0", "--", "*.lean")
+        for line in diff.split("\n"):
+            if line.startswith("+") and not line.startswith("+++"):
+                if DECL.match(line[1:]):
+                    added += 1
+    return added, len(shas)
+
+
+def surviving_decls(repo, ref="HEAD"):
+    """Declarations standing in the tree at ref — a different claim from 'added'."""
+    files = [f for f in git(repo, "ls-tree", "-r", "--name-only", ref).split("\n")
+             if f.endswith(".lean")]
+    n = 0
+    for f in files:
+        for line in git(repo, "show", f"{ref}:{f}").split("\n"):
+            if DECL.match(line):
+                n += 1
+    return n, len(files)
+
+
+def controls():
+    """POSITIVE CONTROLS. If these fail, every zero below is uninterpretable.
+    Returns (ok, lines)."""
+    out, ok = [], True
+
+    # C1: the pattern must catch an attribute-prefixed declaration.
+    c1 = bool(DECL.match("@[simp] theorem rotStage_eq (l : List α) : x := rfl"))
+    out.append(f"  C1 attribute-prefixed decl matches      {'PASS' if c1 else 'FAIL'}")
+    ok &= c1
+
+    # C2: the pattern must NOT catch prose containing the keyword.
+    c2 = not DECL.match("That is the theorem below — the Captain's phrase")
+    out.append(f"  C2 prose containing 'theorem' rejected  {'PASS' if c2 else 'FAIL'}")
+    ok &= c2
+
+    # C3: a plain declaration must match.
+    c3 = bool(DECL.match("theorem foo : True := trivial"))
+    out.append(f"  C3 plain declaration matches            {'PASS' if c3 else 'FAIL'}")
+    ok &= c3
+
+    # C4: both repos must be readable and non-empty.
+    for name, path in REPOS.items():
+        h = git(path, "rev-parse", "HEAD").strip()
+        good = len(h) == 40
+        out.append(f"  C4 repo {name:10s} readable            {'PASS' if good else 'FAIL'}")
+        ok &= good
+    return ok, out
+
+
+def main():
+    ok, ctl = controls()
+    show_controls = "--controls" in sys.argv
+
+    print("=" * 76)
+    print("TWO-WEEKS STORY — RECEIPTS, days 1-3    (instrument readings only)")
+    print("=" * 76)
+
+    if show_controls or not ok:
+        print("\nPOSITIVE CONTROLS — an empty result is uninterpretable without these:")
+        print("\n".join(ctl))
+
+    if not ok:
+        print("\n⛔⛔ A CONTROL FAILED. NO FIGURES PRINTED.")
+        print("   Every count below could be zero because the world is empty or")
+        print("   because the instrument is broken, and those are the same output.")
+        return 2
+
+    print("\n--- KERNEL DECLARATIONS **ADDED** per day (theorem|lemma, *.lean) ---")
+    print("    scope: additions to tracked .lean files, both campaign repos.")
+    print("    pattern: line-start, attributes/modifiers allowed, then the keyword.")
+    print("    ⚠️ ADDED, not SURVIVING — phase 3 deliberately deleted 16 on day 3.")
+    print(f"    {'window':8s} {'saltworks':>22s} {'salt':>22s}")
+    totals = {r: 0 for r in REPOS}
+    for label, since, until in DAYS:
+        cells = []
+        for repo in ("saltworks", "salt"):
+            n, c = added_decls(REPOS[repo], since, until)
+            totals[repo] += n
+            cells.append(f"{n:6d} decls / {c:3d} commits")
+        print(f"    {label:8s} {cells[0]:>22s} {cells[1]:>22s}")
+    print(f"    {'TOTAL':8s} {totals['saltworks']:6d} decls{'':10s}"
+          f"{totals['salt']:6d} decls")
+
+    print("\n--- KERNEL DECLARATIONS **SURVIVING** at HEAD ---")
+    print("    ⛔ THIS ROW IS ONLY A CAMPAIGN FIGURE FOR A REPO WHOSE HISTORY *IS*")
+    print("       THE CAMPAIGN. Measured, not assumed — commits predating T0:")
+    for repo in ("saltworks", "salt"):
+        n, f = surviving_decls(REPOS[repo])
+        pre = git(REPOS[repo], "rev-list", "--count",
+                  "--until=2026-08-05 22:02", "HEAD").strip() or "?"
+        first = git(REPOS[repo], "log", "--reverse", "--format=%ad",
+                    "--date=format:%Y-%m-%d").split("\n")[0]
+        if pre == "0":
+            print(f"    {repo:10s} {n:6d} standing / {f:4d} files"
+                  f"   ✅ CAMPAIGN FIGURE — repo born {first}, {pre} commits before T0")
+        else:
+            print(f"    {repo:10s} {n:6d} standing / {f:4d} files"
+                  f"   ⛔ NOT A CAMPAIGN FIGURE")
+            print(f"    {'':10s} repo born {first}; {pre} of its commits PREDATE T0.")
+            print(f"    {'':10s} ⇒ quote its ADDED row above, never this one. A story")
+            print(f"    {'':10s}   pairing this total with 'two weeks' would be false")
+            print(f"    {'':10s}   by roughly the whole pre-campaign corpus.")
+
+    print("\n" + "=" * 76)
+    print("⛔ NO RATE, VELOCITY OR PER-DAY AVERAGE IS COMPUTED HERE, DELIBERATELY.")
+    print("   The charter refuses them ('the window is evidence, not a percentage')")
+    print("   and a two-week story is where such a figure travels furthest from")
+    print("   its scope. Quote a row with its scope line, or do not quote it.")
+    print("=" * 76)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
