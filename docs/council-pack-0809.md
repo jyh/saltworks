@@ -15,7 +15,8 @@
    was MET the same hour: `slicea16bma` is hardened end-to-end
    (GDS · DRC 0 · LVS clear · timing met at 25 MHz, +16.9 ns; pins
    18/24 with six to spare). Honest fit: **your own 3×3 at 44%**
-   (the 2×2 was refused by silicon's own bar at 99.7% — and the
+   (the 2×2 was refused by silicon's own PRE-REGISTERED bar —
+   published before either hardening run — at 99.7%; and the
    smaller byte-wide core is itself 95.1% post-layout, so the 2×2
    was never comfortable for this core family: "own tile" was
    forced before your byte-wide preference arrived, not by it). The ONLY
