@@ -341,7 +341,7 @@ ACT      CE vs 0 in every cell; EMIT h'_v
 | claim | instrument | status |
 |---|---|---|
 | each round delivers exactly the multiset {h_u : u ∈ N(v)} to cell v | fabric delivery theorem (per-permutation instance) | **landed family** |
-| cell v computes b + Σ (W·x) with the sign cycle correct | `mac_correct` (arithmetic, 84690c0) + `macSeq`/weight-shift organs + bridge rungs 1–3 incl. `macRun ≈ runTrace macSeq` (c754b29) | **LANDED through the accumulator-hardware attachment (8/9 14:2x); rung 4 (weight-shift composition = the full MAC row) OWED and in flight** |
+| cell v accumulates b + Σ (W·x) with the sign cycle correct | `MacInduction` (ℤ arithmetic, 12 rows, mutants run) + `MacBridge` rungs 1–3 (hardware: the cell ADDS its trace, BitVec) | **ACCUMULATION: hardware theorem, landed ✅ (c754b29). THE ARITHMETIC READING (b + W·sval): ℤ-only, reaches the cell at RUNG 4 — hypothesis ¬saddOverflow, demoBound discharges it — ⛔ OPEN.** What is verified in hardware is that the cell adds what it is fed; that the fed sequence *means* b + W·x closes at rung 4, the rung carrying the chain's only hypothesis (math's exact text, 14:28) |
 | activation = SIGNED max(·, 0) | CE certificate at `wordSignedOrder`, passed **explicitly in the term** (the `runNetW` pattern) | **landed** (`wordSignedOrder` + `batcher8_sortsTo_word`, Perm.lean) — the binding discipline: never an `instance`; unsigned instantiation would silently make ReLU the identity on negatives (§1 banner, two-round history) |
 
 ⇒ composed: `h'_v = ReLU(W_self h_v + Σ W_msg h_u + b)` — **the layer
