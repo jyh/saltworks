@@ -35,7 +35,7 @@ This file is a **PROBE** plus its **repair**, not the N0 wave. What it claims an
    an exhibited non-trivial witness with `liveMax` **pinned from above and below**, so a
    pessimistic `liveMax` would *fail* those theorems rather than satisfy Row B cheaply.
 2. **Pass #2** — `liveMax (.assign _ _) = 0` for *any* expression while `Exp` is fully
-   recursive, so expression cost was unbounded and scored zero. `expMax` (§6) is the second,
+   recursive, so expression cost was unbounded and scored zero. `expMaxNoSwap` (§6) is the second,
    **independent** term; independence is proved, so it cannot be a rescaling of `liveMax`.
 3. **Pass #3, the one that changed the design** — *the scope defect and the `liveMax`
    falsifier are the same defect.* `liveMax` counts binders as registers; a `State` keyed by
@@ -267,24 +267,43 @@ def liveMax : Stmt → Nat
   | .ite _ thn els     => max (liveMax thn) (liveMax els)
   | .while _ body      => liveMax body
 
-/-- **MATH'S PASS #2 TERM.** Simultaneous intermediates of an expression — the Sethi–Ullman
-number for a two-address machine. `liveMax` scored this **zero** for every expression. -/
-def expCost : Exp → Nat
-  | .var _ | .const _ | .tt | .ff => 1
-  | .add a b | .xor a b | .slt a b => max (expCost a) (1 + expCost b)
+/-- **MATH'S PASS #2 TERM** — simultaneous intermediates of an expression, for a two-address
+machine evaluating operands **left-to-right with no swapping**. `liveMax` scored this **zero**
+for every expression.
 
-def expMax : Stmt → Nat
+⛔⛔ **THIS IS NOT THE SETHI–ULLMAN NUMBER, AND THE NAME IS IN THE IDENTIFIER SO IT CANNOT BE
+MISREAD** (math's refutation pass #4 — a defect in a *name*, not in the arithmetic).
+
+Classic Sethi–Ullman assumes the codegen may **swap operands** (`equal ⇒ n+1, else max`) and is
+strictly **smaller**: for `a` a leaf and `b` an operation on two leaves, this function gives
+`max 1 (1+2) = 3` where classic SU gives `2`. ⇒ ***The classic number is UNREACHABLE here
+because `slt` is not commutative, so codegen cannot always swap.*** A reader who trusted a
+"Sethi–Ullman" label and "corrected" this formula to the classic one would make it
+**UNDER-count**, and Row B would go from true-and-conservative to **FALSE** — with a green
+build and a correct-looking citation. The divergence is recorded as a theorem below, not left
+in prose. -/
+def expCostNoSwap : Exp → Nat
+  | .var _ | .const _ | .tt | .ff => 1
+  | .add a b | .xor a b | .slt a b => max (expCostNoSwap a) (1 + expCostNoSwap b)
+
+/-- **THE DIVERGENCE FROM CLASSIC SETHI–ULLMAN, AS A FACT.** Math's witness: this function
+says 3 where classic SU says 2. Kept as a theorem so the gap cannot be "tidied away" by a
+future reader who recognises the shape but not the assumption. -/
+theorem expCostNoSwap_exceeds_classic_SU :
+    expCostNoSwap (.add (.var 0) (.add (.var 0) (.var 0))) = 3 := by decide
+
+def expMaxNoSwap : Stmt → Nat
   | .skip              => 0
-  | .letmut _ _ e body => max (expCost e) (expMax body)
-  | .assign _ e        => expCost e
-  | .seq s t           => max (expMax s) (expMax t)
-  | .ite c thn els     => max (expCost c) (max (expMax thn) (expMax els))
-  | .while c body      => max (expCost c) (expMax body)
+  | .letmut _ _ e body => max (expCostNoSwap e) (expMaxNoSwap body)
+  | .assign _ e        => expCostNoSwap e
+  | .seq s t           => max (expMaxNoSwap s) (expMaxNoSwap t)
+  | .ite c thn els     => max (expCostNoSwap c) (max (expMaxNoSwap thn) (expMaxNoSwap els))
+  | .while c body      => max (expCostNoSwap c) (expMaxNoSwap body)
 
 /-- Completeness will read "well-typed AND pool-fitting AND temp-fitting compiles" — three
 predicates, and the judgment mentions none of the resources. -/
 def fitsAndTyped (poolSize tempBudget : Nat) (p : Stmt) : Bool :=
-  wellFormed p && (liveMax p ≤ poolSize) && (expMax p ≤ tempBudget)
+  wellFormed p && (liveMax p ≤ poolSize) && (expMaxNoSwap p ≤ tempBudget)
 
 /-! ## 7. THE THREE PRE-REGISTERED CONTROLS, plus the folded refutations -/
 
@@ -352,16 +371,16 @@ def mathP : Stmt :=
     (.assign 0 (.add (.add (.var 0) (.var 0)) (.add (.var 0) (.var 0))))
 
 theorem math_pass2_measured :
-    liveMax mathP = 1 ∧ wellFormed mathP = true ∧ expMax mathP = 3 := by
+    liveMax mathP = 1 ∧ wellFormed mathP = true ∧ expMaxNoSwap mathP = 3 := by
   refine ⟨by decide, by decide, by decide⟩
 
 /-- ⭐ **AND THE REPAIR IS A SECOND TERM, NOT A RESCALING** — proved, because rescaling was the
 obvious wrong fix. Neither cost dominates the other, so no function of `liveMax` alone can
-express `expMax`. -/
+express `expMaxNoSwap`. -/
 theorem the_two_costs_are_independent :
     (liveMax (.letmut 0 .i32 (.const 0) (.letmut 1 .i32 (.const 0) .skip)) = 2
-     ∧ expMax (.letmut 0 .i32 (.const 0) (.letmut 1 .i32 (.const 0) .skip)) = 1)
-  ∧ (liveMax mathP = 1 ∧ expMax mathP = 3) := by
+     ∧ expMaxNoSwap (.letmut 0 .i32 (.const 0) (.letmut 1 .i32 (.const 0) .skip)) = 1)
+  ∧ (liveMax mathP = 1 ∧ expMaxNoSwap mathP = 3) := by
   refine ⟨⟨by decide, by decide⟩, ⟨by decide, by decide⟩⟩
 
 /-- **CONTROL: the two rejection causes are DISTINCT and separately characterizable.** Not a
@@ -375,7 +394,7 @@ theorem pool_is_separate :
 /-- **CONTROL: a smaller core does not change typing** — the v1.4 requirement as a theorem. -/
 theorem typing_is_pool_independent (p : Stmt) (n t m : Nat)
     (h : fitsAndTyped n t p = true) :
-    wellFormed p = true ∧ (liveMax p ≤ m → expMax p ≤ t → fitsAndTyped m t p = true) := by
+    wellFormed p = true ∧ (liveMax p ≤ m → expMaxNoSwap p ≤ t → fitsAndTyped m t p = true) := by
   simp only [fitsAndTyped, Bool.and_eq_true, decide_eq_true_eq] at h
   exact ⟨h.1.1, fun hm ht => by simp [fitsAndTyped, h.1.1, hm, ht]⟩
 
