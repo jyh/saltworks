@@ -47,8 +47,17 @@ SLICE A EXACTLY AS IT EXISTS — no memory, no waiting on Slice B.
   bool-is-0/1 invariant) is a kernel node — it is what makes
   BEQ-on-bool sound. v2 grows u32 + references in the SAME judgment;
   borrow rules enter as typing rules (ownership-as-theorem's static
-  face). wellFormed = well-typed ∧ liveness ≤ pool ∧ literals in
-  range.
+  face). T1 UNIFICATION (math, 19:20): the judgment IS wellFormed —
+  one relation carrying typing + scope + live-binding budget +
+  ranges; no separate predicate, F4 discharged by construction;
+  completeness reads "well-typed programs compile." T2 CONTROLS
+  pre-registered: one accepted and one REJECTED program (while 1 —
+  i32 where bool is demanded), both by decide. T3: the unsigned-<
+  lowering is LIVE in the backend (the comparator spec compares
+  unsigned bit-strings — compiler's unification consumes it) and
+  DEAD at the source until v2's u32 — marked so, not shipped
+  silently. T4: the types do NOT close overflow — the semantics'
+  named wrap choice does.
 - Statements: `skip` · assignment · `seq` · `if` · `while`.
   Big-step semantics in Lean (IMP-shaped; termination NOT assumed —
   the semantics is a relation, and the compiler theorem quantifies

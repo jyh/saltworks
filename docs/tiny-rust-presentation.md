@@ -114,10 +114,21 @@ are 0/1 in their register) is the type system's one runtime theorem:
 makes BEQ-on-a-bool sound, and it is a real, small kernel row, not
 ceremony. No implicit coercions (Rust has none; neither do we).
 
-`wellFormed p` = WELL-TYPED (the judgment above) ∧ max live bindings
-≤ pool size (block scoping makes liveness syntactic) ∧ literals in
-range. Decidable, standalone, independent of the compiler — the
-bridge to allocator-success stays a proved row (the c2 bar). In v2
+THE JUDGMENT **IS** THE HYPOTHESIS (math's T1 — the ask pays for
+itself): there is no separate `wellFormed` — `Γ ⊢ p ok` carries
+typing, scope, the live-binding budget (≤ pool; block scoping makes
+liveness syntactic), and literal ranges, as ONE syntactic decidable
+relation that never mentions the compiler. F4's circularity is
+discharged BY CONSTRUCTION, and the completeness row takes its
+natural form: **well-typed programs compile** — the whole point of a
+type system, and the row that kills the reject-everything vacuity.
+TWO controls pre-registered at birth (T2): a program the judgment
+ACCEPTS and one it REJECTS (`while 1 { … }` — 1 is i32, not bool),
+both by decide — a judgment that can refuse nothing proves nothing,
+and bool is what gives v1 its teeth. What the types did NOT fix
+(T4): overflow — `i32 + i32 : i32` checks and still wraps; that
+choice was made in the SEMANTICS, by name (wrapping, release-Rust).
+In v2
 the same judgment grows u32 (type-directed comparison lands F8's
 lowering at the source) and references — where the borrow rules
 enter AS TYPING RULES, which is how ownership becomes a theorem.
