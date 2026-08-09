@@ -7,6 +7,7 @@ import SaltWorks.HDL.RegWrite
 import SaltWorks.HDL.SelectCut32
 import SaltWorks.HDL.AluSelect
 import SaltWorks.HDL.EncoderE1
+import SaltWorks.HDL.OperandBMux
 import SaltWorks.HDL.Bitwise
 
 -- Evaluating `instOuts` over real organs (readTree is 2,982 gates) exceeds the default depth.
@@ -539,14 +540,50 @@ row 8  sub   a = rs1Out · b = bitNot32's outputs  · cin = tieTrue     ⇒ a + 
 state, its instruction, or another organ's gates; the carry-ins are the only nets that had no
 producer at all, which is why "no row provides it" was a real gap and not a missing organ.* -/
 
-/-- Row 7's offset — after `bitNot32`. -/
-def offAdd : Nat := instNext bitNot32 off5
+/-! ### ⚠️ RE-SEQUENCED at the maestro's 12:29 ORDER-RULING — `obMux` MOVES BEFORE THE ADDERS
+
+`OperandBMux.lean:200-202`: `a = rs2` on nets 0…31, `b = IMMEDIATE` on 32…63, `sel = useImm` on 64.
+**`obMux` is the operand-B mux, so it must FEED the ALU** — and the plan's order had it at row 12,
+*after* the adders, which is how my rows 7–8 came to wire the b-bank straight to `rs2Out`. **For
+`ADDI` that adder received `rs2` instead of the immediate**, and the organ's own pre-registered
+mutant (`:179` ②, *"a circuit that takes `rs2` when the immediate was requested"*) is that defect
+exactly. Every `instOK` I proved stayed TRUE: it certifies a wire is **computed in time**, never
+that it is **the right wire**.
+
+*Refused alternative (keep the order, reach σ upward) — it breaks `instOK`'s inputs-strictly-below
+invariant, the same reason preamble shape (b) was refused.* -/
+
+/-- Row 7 — `obMux`, now BEFORE the adders. -/
+def offOb : Nat := instNext bitNot32 off5
+
+/-- `immBCirc`'s output `k` — the immediate bank. -/
+def immOut (k : Nat) : Net := (instOuts immBCirc immBSig off1).getD k 0
+
+/-- `obMux`'s σ: `rs2` on 0…31, the IMMEDIATE on 32…63, `useImm` (= `isADDI`, decoder output 3)
+on 64. -/
+def obSig (j : Net) : Net :=
+  if j < 32 then rs2Out j else if j < 64 then immOut (j - 32) else decOut 3
+
+/-- ⭐ **PLACEMENT #13 — `obMux` at row 7, `instOK` DISCHARGED.** -/
+theorem ob_instOK : instOK OperandB.obMux obSig offOb := by
+  refine ⟨by decide +kernel, by decide +kernel, ?_⟩
+  intro j hj
+  have hnn : OperandB.obMux.nIn = 65 := by decide +kernel
+  rw [hnn] at hj
+  revert hj; revert j
+  decide +kernel
+
+/-- `obMux`'s output `k` — **the ALU's operand B**. -/
+def obOut (k : Nat) : Net := (instOuts OperandB.obMux obSig offOb).getD k 0
+
+/-- Row 8's offset — after the operand-B mux. -/
+def offAdd : Nat := instNext OperandB.obMux offOb
 /-- Row 8's offset — after the first adder. -/
 def offSub : Nat := instNext adder32 offAdd
 
-theorem adder_offsets : offAdd = 7221 ∧ offSub = 7381 := by
+theorem adder_offsets : offAdd = 7318 ∧ offSub = 7478 := by
   refine ⟨?_, ?_⟩ <;>
-    simp only [offSub, offAdd, off5, off4, off3, off2, off1, off0, instNext, tieCells,
+    simp only [offSub, offAdd, offOb, off5, off4, off3, off2, off1, off0, instNext, tieCells,
                offTie, coreInWidth, stWidth] <;> decide +kernel
 
 /-- `bitNot32`'s output `k` at its chain position — the `~b` bank. -/
@@ -554,7 +591,7 @@ def notOut (k : Nat) : Net := (instOuts bitNot32 bitNot32Sig off5).getD k 0
 
 /-- Row 7 — `add`: both operands straight from the register file, carry-in tied LOW. -/
 def addSig (j : Net) : Net :=
-  if j < 32 then rs1Out j else if j < 64 then rs2Out (j - 32) else tieFalse
+  if j < 32 then rs1Out j else if j < 64 then obOut (j - 32) else tieFalse
 
 /-- Row 8 — `sub`: `a + ~b + 1`. The inverted bank and the carry-in tied HIGH. -/
 def subSig (j : Net) : Net :=
@@ -623,8 +660,8 @@ alone gives a 3-input block with no indication where its inputs come from.
 /-- Row 9's offset — after the subtracting adder. -/
 def offSlt : Nat := instNext adder32 offSub
 
-theorem offSlt_value : offSlt = 7541 := by
-  simp only [offSlt, offSub, offAdd, off5, off4, off3, off2, off1, off0, instNext,
+theorem offSlt_value : offSlt = 7638 := by
+  simp only [offSlt, offSub, offAdd, offOb, off5, off4, off3, off2, off1, off0, instNext,
              tieCells, offTie, coreInWidth, stWidth]
   decide +kernel
 
@@ -654,7 +691,7 @@ theorem slt_chain_is_closed :
   ∧ subSig 64 = tieTrue
   ∧ subOut 31 ≠ (instOuts adder32 addSig offAdd).getD 31 0 := by
   refine ⟨rfl, rfl, rfl, ?_⟩
-  simp only [subOut, instOuts, instMap, subSig, addSig, offSub, offAdd, off5, off4, off3,
+  simp only [subOut, instOuts, instMap, subSig, addSig, offSub, offAdd, offOb, off5, off4, off3,
              off2, off1, off0, instNext, tieCells, offTie, coreInWidth, stWidth]
   decide +kernel
 
@@ -666,7 +703,7 @@ activation function: *the certified thing computes an order and nobody wrote dow
 theorem slt_reads_sign_not_carry :
     sltSig 2 = subOut 31 ∧ subOut 31 ≠ subOut 32 := by
   refine ⟨rfl, ?_⟩
-  simp only [subOut, instOuts, instMap, subSig, offSub, offAdd, off5, off4, off3, off2,
+  simp only [subOut, instOuts, instMap, subSig, offSub, offAdd, offOb, off5, off4, off3, off2,
              off1, off0, instNext, tieCells, offTie, coreInWidth, stWidth]
   decide +kernel
 
@@ -747,8 +784,8 @@ sel 0   decOut 1 = isXOR      sel 1   decOut 2 = isSLT
 /-- Row 10's offset — after `sltCirc`. -/
 def offSel : Nat := instNext sltCirc offSlt
 
-theorem offSel_value : offSel = 7546 := by
-  simp only [offSel, offSlt, offSub, offAdd, off5, off4, off3, off2, off1, off0, instNext,
+theorem offSel_value : offSel = 7643 := by
+  simp only [offSel, offSlt, offSub, offAdd, offOb, off5, off4, off3, off2, off1, off0, instNext,
              tieCells, offTie, coreInWidth, stWidth]
   decide +kernel
 
@@ -789,7 +826,7 @@ building 31 gates that cannot differ.** -/
 theorem slt_bank_broadcasts :
     sltOut 0 ≠ sltOut 1 ∧ sltOut 1 = sltOut 31 := by
   refine ⟨?_, ?_⟩ <;>
-    simp only [sltOut, instOuts, instMap, sltSig, offSlt, offSub, offAdd, off5, off4, off3,
+    simp only [sltOut, instOuts, instMap, sltSig, offSlt, offSub, offAdd, offOb, off5, off4, off3,
                off2, off1, off0, instNext, tieCells, offTie, coreInWidth, stWidth] <;>
     decide +kernel
 
@@ -881,6 +918,59 @@ theorem lineADD_is_consumed_not_forwarded :
     simp only [selSig, encSig, decOut, decoderSig, off0, instNext, tieCells, offTie,
                coreInWidth, stWidth] <;>
     decide +kernel
+
+
+/-! ## 14. THE MUTATION CONTROL, RUN — maestro's 12:29 requirement (a)
+
+*"Run the organ's OWN pre-registered mutation control against the FIXED wiring — the wrong-wire
+mutant must now FAIL a semantic check at an ADDI word; **a control that exists and is never run is
+a docstring**."*
+
+`OperandBMux.lean:179` ② pre-registers exactly the mutant I built by accident: *"a circuit that
+takes `rs2` when the immediate was requested."* Its landed semantics (`sem_obMux`) says
+`muxSpec ins = (range 32).map (fun k => if ins 64 then ins (32+k) else ins k)` — so at
+`useImm = true` the mux delivers the **immediate** bank. -/
+
+/-- ⛔⭐ **THE WRONG-WIRE MUTANT FAILS AT AN ADDI WORD — run, not cited.**
+
+A concrete valuation with `useImm` HIGH, immediate bit 0 HIGH, and `rs2` bit 0 LOW: the mux delivers
+`true` (the immediate), while the wiring I shipped at row 7 would have delivered `false` (`rs2`).
+**The two disagree on this word, which is what makes the defect a defect rather than a preference.** -/
+theorem wrong_wire_mutant_fails_at_addi :
+    ∃ ins : Env, ins 64 = true ∧ (OperandB.muxSpec ins)[0]! ≠ ins 0 := by
+  refine ⟨fun n => n == 32 || n == 64, by decide, ?_⟩
+  simp only [OperandB.muxSpec]
+  decide
+
+/-- ⭐ **AND THE FIX IS IN PLACE AT THE WIRING: `addSig`'s b-bank is `obMux`'s OUTPUT, and it is NOT
+`rs2Out`.** Both halves asserted — the first says the repair landed, the second says it is a real
+change rather than a rename. -/
+theorem addSig_b_bank_is_obMux_not_rs2 :
+    addSig 32 = obOut 0 ∧ addSig 32 ≠ rs2Out 0 := by
+  refine ⟨rfl, ?_⟩
+  simp only [addSig, obOut, rs2Out, instOuts, instMap, obSig, OperandB.obMux, offOb, off5, off4,
+             off3, off2, off1, off0, instNext, tieCells, offTie, coreInWidth, stWidth]
+  decide +kernel
+
+/-- **CONTROL: `obMux` is placed STRICTLY BEFORE the adder that consumes it.** The ordering is the
+whole content of the ruling, and it is now a theorem rather than a row number in a plan. -/
+theorem obMux_precedes_the_adder : offOb < offAdd := by
+  -- the gate count as a FACT, not by unfolding: `offOb` never becomes a numeral, so the
+  -- whole chain back to the tie cells is never evaluated (the row-11 lesson, reused).
+  have h : 0 < OperandB.obMux.gates.length := by decide +kernel
+  simp only [offAdd, instNext]
+  omega
+
+/-- **CONTROL: `sub`'s b-bank is still `bitNot32`'s output, NOT `obMux`'s.** There is no `SUBI` in
+the 5-op ISA, so the subtraction path is register-register and must NOT be re-routed through the
+operand-B mux. *Fixing one adder and "consistently" fixing the other would have broken SLT.* -/
+theorem subSig_b_bank_is_unchanged :
+    subSig 32 = notOut 0 ∧ subSig 32 ≠ obOut 0 := by
+  refine ⟨rfl, ?_⟩
+  simp only [subSig, notOut, obOut, instOuts, instMap, bitNot32Sig, obSig, OperandB.obMux,
+             offOb, off5, off4, off3, off2, off1, off0, instNext, tieCells, offTie,
+             coreInWidth, stWidth]
+  decide +kernel
 
 
 end SaltWorks.HDL.CorePlace
