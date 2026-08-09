@@ -341,7 +341,7 @@ ACT      CE vs 0 in every cell; EMIT h'_v
 | claim | instrument | status |
 |---|---|---|
 | each round delivers exactly the multiset {h_u : u ∈ N(v)} to cell v | fabric delivery theorem (per-permutation instance) | **landed family** |
-| cell v computes b + Σ (W·x) with the sign cycle correct | bit-serial MAC induction (Seq, cycle-indexed) | **the one new proof** |
+| cell v computes b + Σ (W·x) with the sign cycle correct | `mac_correct` (arithmetic, 84690c0) + `macSeq`/weight-shift organs + bridge rungs 1–3 incl. `macRun ≈ runTrace macSeq` (c754b29) | **LANDED through the accumulator-hardware attachment (8/9 14:2x); rung 4 (weight-shift composition = the full MAC row) OWED and in flight** |
 | activation = SIGNED max(·, 0) | CE certificate at `wordSignedOrder`, passed **explicitly in the term** (the `runNetW` pattern) | **landed** (`wordSignedOrder` + `batcher8_sortsTo_word`, Perm.lean) — the binding discipline: never an `instance`; unsigned instantiation would silently make ReLU the identity on negatives (§1 banner, two-round history) |
 
 ⇒ composed: `h'_v = ReLU(W_self h_v + Σ W_msg h_u + b)` — **the layer
