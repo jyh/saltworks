@@ -77,9 +77,11 @@
   solo-tier rows remain — the flagship frontier is design-tier
   everywhere** (N7 assembly + W4-a campaign, maestro-owed).
 - **The forgotten summit RESURFACED**: `bounded_gaps_unconditional`
-  (Salt/SW/Gate.lean:376) — infinitely many prime pairs within a
-  bounded gap, NO hypothesis, collected 7/13 — while its design doc
-  still framed the goal as future. Caught by math's
+  — locate by that SYMBOL in `Salt/SW/Gate.lean` (near :376 as of
+  tonight; the name is the durable citation, the line a hint) —
+  infinitely many prime pairs within a bounded gap, NO hypothesis,
+  collected 7/13 — while its design doc still framed the goal as
+  future. Caught by math's
   read-the-statement discipline. **The doc layer is the fleet's
   stale layer, MEASURED: six of eleven governing docs are 3–4 weeks
   behind their own code** (track_scan, 21:55). The roadmap doc now
