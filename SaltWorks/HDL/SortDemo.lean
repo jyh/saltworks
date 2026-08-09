@@ -40,11 +40,32 @@ that silently normalised pair order would sort nothing.*
 
 1. **There is NO universally-quantified sortedness theorem for the program.**
    `sort_sweep` is **8 concrete inputs, kernel-checked** — a certificate suite,
-   not a proof that `sortProg` sorts every input. The route to the universal
-   statement is named and unbuilt: `Stack.ZeroOne.batcher8_sorts` already gives
-   *"the network sorts every `LinearOrder`"*, so what is missing is (a) a
-   `LinearOrder (BitVec 32)` for the SIGNED order and (b) a simulation theorem
-   `run sortProg ≈ runNet batcher8`. Both need Mathlib, which leg 2 excludes.
+   not a proof that `sortProg` sorts every input.
+
+   ⛔⛔ **CORRECTED 2026-08-09 10:3x — THE TEXT THAT STOOD HERE WAS STALE AND IT
+   MANUFACTURED A FINDING IN ANOTHER SEAT.** It said *"what is missing is (a) a
+   `LinearOrder (BitVec 32)` for the SIGNED order and (b) a simulation theorem …
+   Both need Mathlib, which leg 2 excludes."* **(a) IS LANDED.** True when written
+   — leg 2 did exclude Mathlib — and false since `Perm.lean` landed:
+   * `wordSignedOrder : LinearOrder Word` (`Perm.lean:74`), where `wle a b` is *by
+     definition* `a.toInt ≤ b.toInt` — the **signed** order.
+   * `runNetW net v = @runNet _ Word wordSignedOrder net v` (`:363`) — the network
+     run with the **signed comparator, visible in the term**.
+   * `batcher8_sortsTo_word` (`:384`) — a landed word-level sortedness theorem
+     **at that order**.
+
+   ⚠️ **AND IT IS DELIBERATELY AN `abbrev`, NOT AN `instance`** (`:74-77`): promoting
+   it would silently change the meaning of every `≤` on `BitVec 32` downstream, and
+   `:85-94` measures that trap. **A consumer passes the bundle EXPLICITLY.**
+
+   ⇒ ***SO ONLY (b) REMAINS: the simulation theorem `run sortProg ≈ runNetW batcher8`.***
+   *On 2026-08-09 math read the stale sentence above, correctly, and raised a live
+   finding against the neural PoC's "certified ReLU" claim on the strength of it —
+   a real hazard (instantiate the generic sorter at mathlib's UNSIGNED default and
+   ReLU becomes the identity on negatives, so a ReLU net becomes an affine map),
+   but resting on an ingredient that already existed. **Every link in that chain was
+   competent except this paragraph.** A stale gap-note does not merely rot: it
+   manufactures work in other seats, and this file compiled green throughout.*
 2. **The demo runs at the `Instr`/`step` level, not through `encode`/`stepT`.**
    `sortProg_round_trips` shows every instruction of the program decodes back to
    itself, but a word-level `run` harness (a `runFor` over `List (BitVec 32)`)
