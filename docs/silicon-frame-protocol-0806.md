@@ -1,4 +1,12 @@
 # THE SERIAL FRAME PROTOCOL — spec v1 (Silicon seat, leg 3)
+
+> 📌 **LETTER CONVENTION (2026-08-09, the Captain's ruling: "2k reads
+> as 2*1024"): the address-bit count written `k` throughout this spec
+> is renamed **`r` (route bits)** in all NEW documents — r = log2(ports),
+> header = 2r cycles. This spec keeps its historical `k` unedited;
+> read `k` here as `r`. The NDF design package carries the full
+> three-way disambiguation (cell-count k · route bits r · majorant K).**
+
 ### 2026-08-06. Implements the maestro's 11:13 ruling (frame leads with an
 ### ACTIVITY BIT, routing gated on it). JYH may override; until then this
 ### governs. **This document blocks D3.5** — the FSM refinement statement

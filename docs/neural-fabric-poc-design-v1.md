@@ -97,14 +97,15 @@ certified organ. Several cells fit beside the fabric on a TT allocation.
 Multiple *logical* neurons time-multiplex on one physical cell (weights
 re-latch per phase — weights are traffic, not storage).
 
-> ⚠️ **SYMBOL COLLISION, disambiguated at the Captain's 13:0x stumble
-> (the order-invariant's naming sibling): this document's `k` = the
-> number of NEURON CELLS (4 in the minimal demo). The FRAME
-> PROTOCOL's `k` = the number of ADDRESS BITS = log2(ports) = 3 for
-> the 8×8 fabric (header = 2k = 6 cycles, one ACT per address bit).
-> And salt's `K` is the (7.3) majorant parameter. Three objects, one
-> letter, one morning — where both fabric-k and cell-k appear in one
-> sentence, write `k_addr` and `k_cells`.**
+> ⚠️ **SYMBOL CONVENTION (ruled at the Captain's 13:0x stumble +
+> his letter ruling — "2k reads as 2*1024"): the frame protocol's
+> address-bit count is now **`r` (ROUTE BITS)** — r = log2(ports)
+> = 3 for the 8×8 fabric, **header = 2r = 6 cycles**, one ACT per
+> route bit. The 1990 paper's own vocabulary, and it cannot be
+> misread as kilo. This document's `k` remains the NEURON CELL
+> count (4 in the minimal demo); salt's `K` is the (7.3) majorant
+> parameter. Older ③/④ docs write the frame's `k` historically —
+> read their `k` as `r`.**
 
 ## 2. THE FABRIC — chip level and system level
 
