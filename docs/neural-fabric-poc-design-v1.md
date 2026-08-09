@@ -260,6 +260,20 @@ Remaining **6 pins = 3 packet ports** (edge-in weights/inputs ·
 edge-out results · spare/debug). Fabric ports: 8 = 4 cells + CPU
 client + 2 edge + 1 spare. **18 + 6 = 24 — exact fit.**
 
+> 📌 **THE PRINCIPLE THAT MAKES THE BUDGET CLOSE (the Captain's 11:4x
+> "how do we fit?"): pins are paid ONLY where traffic crosses the die
+> boundary. The standalone BB needs 16 IO pins because ALL its clients
+> are off-chip; on the NDF, 5 of its 8 ports terminate ON-DIE (4 cells
+> + the CPU client) as wires costing zero pins — integration converts
+> pins into wires. The CPU's packet side is likewise an internal port;
+> only its MEMORY bus crosses. Clocking: TT's harness supplies clk +
+> rst_n OUTSIDE the 24 user IOs; ONE clock domain covers fabric,
+> cells, CPU, and both ends of every serial port (the RP2040 shares
+> the board clock) — 2-pin ports are synchronous data+valid, no
+> per-port clocks. Relief valve if more edge bandwidth is ever
+> wanted: narrow the memory bus to 4 data pins (double the cycles),
+> freeing pins for more packet ports.**
+
 **Option B — the v2 evolution, named: memory as a PACKET SERVICE.**
 No memory bus; fetch and data are request/response packets to an
 edge memory server — one protocol, one theorem family, the
