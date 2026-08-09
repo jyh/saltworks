@@ -78,5 +78,6 @@ import SaltWorks.HDL.PayloadL4
 import SaltWorks.HDL.Cell1988
 import SaltWorks.HDL.PayloadRefutations
 import SaltWorks.HDL.RotationInvariant
+import SaltWorks.HDL.Skew
 import SaltWorks.HDL.Rotation
 import SaltWorks.Tactic.AuditAxioms
