@@ -134,15 +134,20 @@ def machine_state() -> dict:
     """
     import subprocess
 
-    state = {"procs": [], "lock_held": False, "lock_pid": None,
+    state = {"procs": [], "procs_measured": False, "procs_error": None,
+             "lock_held": False, "lock_pid": None,
              "lock_orphaned": None, "lock_age_s": None,
              "ram_free_gb": None, "ram_inactive_gb": None,
              "swap_used_gb": None, "swap_free_gb": None,
              "swap_total_gb": None}
 
     try:
-        out = subprocess.run(["ps", "-eo", "pid,ppid,rss,etime,args"],
-                             capture_output=True, text=True, timeout=20).stdout
+        ps = subprocess.run(["ps", "-eo", "pid,ppid,rss,etime,args"],
+                            capture_output=True, text=True, timeout=20)
+        if ps.returncode != 0:
+            raise RuntimeError(f"ps exited {ps.returncode}: "
+                               f"{ps.stderr.strip()[:120]}")
+        out = ps.stdout
         procs: dict[int, dict] = {}
         for line in out.splitlines()[1:]:
             parts = line.split(None, 4)
@@ -200,8 +205,15 @@ def machine_state() -> dict:
                 "cap_mb": cap_mb,
                 "over_cap": bool(cap_mb and p["rss_gb"] * 1024 > cap_mb * 1.05),
             })
-    except Exception:
-        pass
+        state["procs_measured"] = True
+    except Exception as e:
+        # WAS `except Exception: pass`, and the bare swallow was the defect:
+        # a ps failure, a timeout and a parse error ALL produced an empty
+        # process list, which the report below rendered as "0 lean processes"
+        # -- indistinguishable from a genuinely idle machine. The reassuring
+        # direction, which is the one nobody checks. Now the failure is
+        # recorded and every consumer must say UNMEASURED instead of zero.
+        state["procs_error"] = f"{type(e).__name__}: {e}"
 
     # --- the lock, and whether it is ORPHANED -----------------------------
     #
@@ -307,9 +319,13 @@ def machine_report(st: dict) -> list[str]:
     out.append("")
     out.append("| Check | Value |")
     out.append("|---|---|")
-    out.append(f"| Lean/lake processes running | **{len(procs)}** "
-               f"({len(procs) - len(bare)} under `saltbuild.sh`, "
-               f"**{len(bare)} bare**) |")
+    if not st.get("procs_measured"):
+        out.append("| Lean/lake processes running | ⛔ **UNMEASURED** — "
+                   f"`ps` failed ({st.get('procs_error')}). This is NOT zero. |")
+    else:
+        out.append(f"| Lean/lake processes running | **{len(procs)}** "
+                   f"({len(procs) - len(bare)} under `saltbuild.sh`, "
+                   f"**{len(bare)} bare**) |")
     lock_cell = ("**⛔ ORPHANED — " + st["lock_orphaned"] + "**") if st.get("lock_orphaned") \
         else ("HELD by pid " + str(st["lock_pid"]) if st["lock_held"] else "not held")
     out.append(f"| Fleet build lock (`{BUILD_LOCK}`) | {lock_cell} |")
@@ -528,7 +544,10 @@ def build(args) -> str:
         if st is not None:
             n = len(st["procs"])
             nbare = sum(1 for p in st["procs"] if not p.get("wrapped"))
-            if nbare:
+            if not st.get("procs_measured"):
+                out.append(f"UNMEASURED lean/lake procs — ps failed "
+                           f"({st.get('procs_error')}); this is NOT a clean zero")
+            elif nbare:
                 out.append(f"VIOLATION {nbare} BARE lean/lake proc(s) of {n} "
                            f"(no saltbuild.sh ancestor)")
             else:
