@@ -443,6 +443,16 @@ work.
 >
 > **The account IS a citation target as of this verdict, with the two items
 > below carried openly and the refinement's OWED-MARKER intact.**
+>
+> ### ✅ **BOTH ITEMS CLOSED 13:4x — FIXED BY COMPILER, RE-VERIFIED BY THIS SEAT AT HEAD**
+> ```
+> ITEM 1  AccountMeasure.lean — tracked=1, NOT ignored, Scratch name gone.
+>         Re-runnable by anyone: ../saltbuild.sh SaltWorks/HDL/AccountMeasure.lean
+> ITEM 2  §1.3's stale 38/36 parenthetical REMOVED; headline 41/41 unchanged
+>         and still correct (ground truth at HEAD: ^-anchored = 41, token = 43)
+> ⚠️ AND THE SAME STALE PAIR WAS FOUND IN §4.2 — THIS SECTION'S OWN TEXT — and
+>    is now stamped `as of 52d11f3`. The fence carried the defect it raised.
+> ```
 
 ### 4.0 The verdict, and what it is a verdict ABOUT
 
@@ -551,10 +561,16 @@ WITNESSES    how many independent readings, BY WHOM?  A one-witness column is
 *Named in advance so nobody has to be surprised by the verdict:*
 
 1. **A TOKEN COUNT WHERE A COMMAND COUNT IS MEANT.** *Live example from this
-   fleet today: `grep -c '#audit_axioms'` = 38, `grep -c '^#audit_axioms'` = 36,
-   build ticks = 36. The two extras were prose ABOUT the instrument.* **In a
-   document that describes its own instruments, grepping the instrument's name
-   hits the description. Anchor positionally.**
+   fleet, **`CorePlace.lean` AS OF `52d11f3`, 2026-08-09 13:2x**: token grep = 38,
+   `^`-anchored = 36, build ticks = 36 — the two extras being prose ABOUT the
+   instrument.* **In a document that describes its own instruments, grepping the
+   instrument's name hits the description. Anchor positionally.**
+   > ⛔ **AND THIS EXAMPLE ROTTED WHILE THE PASS THAT CITES IT WAS BEING WRITTEN —
+   > the same file measures 43 / 41 by 13:4x.** *Stamped rather than refreshed,
+   > because the figures are an ILLUSTRATION of a defect at a moment, not a live
+   > count of anything. **§4.2′ raised exactly this against §1.3 and this section
+   > carried it unstamped at the same time**: the fence exhibited the class it
+   > was written to catch, which is why the stamp is here and not an apology.*
 2. **A STATUS WORD USED AS A MEASUREMENT.** *`landed`, `covered`, `green`,
    `done`. These assert facts about our own work — the class no outside reader
    can check and every inside reader assumes someone else verified.* **A status
