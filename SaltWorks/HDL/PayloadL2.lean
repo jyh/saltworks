@@ -293,7 +293,7 @@ def quads : List (Bool × Bool × Bool × Bool) :=
 theorem quads_length : quads.length = 16 := by decide +kernel
 
 /-- ⛔ **2 OF 16 — the prior finding CONFIRMED, now at the HDL artifact.**
-`l2_locked_is_a_wire_in_two_states` (`SaltWorks/HDL/ScratchPayloadRefut.lean:216`)
+`l2_locked_is_a_wire_in_two_states` (now TRACKED in `PayloadRefutations`)
 measured 2 of 16 at the SILICON element (`elemOut`, `FabricRoutes.lean:59`). The
 same count holds for the gate-level `element` of `Banyan.lean`, over the same 16
 `(act0, act1, sel0, sel1)` states. Two independent artifacts, one number — no
@@ -331,7 +331,7 @@ theorem l2_raw_claim_wire_states_named :
 
 Each of these is a REFUTATION of L2-without-the-hypothesis at the same `element`
 gates the positive theorems use. Cf. `l2_full_load_conflict_merges` and
-`l2_idle_partner_drops_the_line` (`ScratchPayloadRefut.lean:232,241`), which
+`l2_idle_partner_drops_the_line` (now TRACKED in `PayloadRefutations`), which
 measured the same two failures at the silicon element. -/
 
 /-- ⛔ **DROP `sel0 ≠ sel1`, KEEP FULL LOAD: the element MERGES.** Both ports
