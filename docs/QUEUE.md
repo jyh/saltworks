@@ -291,7 +291,15 @@ OPEN ITEMS:
   bumped to the next one (2 weeks later) it is ok"): NO early
   reservation; reserve at layout-readiness; a one-shuttle slip
   (~2 weeks past ~Sept 7) is ACCEPTABLE. Full throttle unchanged —
-  the target stands, the deadline is soft by his word.**
+  the target stands, the deadline is soft by his word.
+  THE EUR-280 QUESTION (silicon 11:55, pending measurement —
+  auto-resolves inside the timing ruling's window): 4x2/EUR 560
+  would hold the minimal demo at 52.7-56.2% utilization — the
+  UNMEASURED band (clean points 44.65/48.77%; the 63% datum was
+  free-floorplan, does not transfer). Settling instrument: one
+  ~10-min hardening run, 4x2 die, synthetic 71.8-76.6k um^2 load —
+  FIRES THE MOMENT THE CELL RTL EXISTS (silicon's first run).
+  Until then 6x2 stands, now measured-ROBUST (35-37% util).**
 
 - **NDF BENCH HARNESS (registered 11:4x at the Captain's memory-
   hassle question): RP2040 firmware = the memory-server side of the
