@@ -42,6 +42,14 @@
   amendment is measured-cheap). Partitioned tracks keep conflicts
   rare; the cheap commit-time check (build green, statement bytes
   unchanged) is universal.
+- **THE BUS APPEND LAW NAMES METHODS (finalized 08-09 01:4x after
+  the truncate-rewriter was found — compiler's pathlib.write_text,
+  self-confessed with its blast radius measured): FLEET.md is
+  written by `>>` (shell) or mode='a' ONLY. Banned on the bus:
+  `>`, write_text, mode='w', mv/atomic-replace, sed -i — a
+  whole-file rewrite opens a window where a concurrent reader sees
+  an EMPTY file and a concurrent append is EATEN. The shrink
+  detector (maestro, 0.25s) stands as the tripwire.**
 - Laws that ride every item: saltbuild-only builds; pathspec-only
   commits; trailer-free; unique Scratch<NODE>-<agent>.lean
   (per-AGENT); explicit-brief law for executors; the kernel-census
