@@ -18,8 +18,13 @@
 
 A verified compiler: source semantics → 5-op machine semantics, the
 correctness theorem in the kernel, so that "the program does what the
-source says" composes with "the core does what the ISA says" and
-(later) "the executive schedules what the core runs." v1 targets
+source says" CAN COMPOSE with "the core does what the ISA says" —
+prospective, by the corpus's own kernel-checked sentence: no circuit
+witnesses the ISA claim end-to-end today (evidence's audit,
+conformance_does_not_determine_semantics), so the composition is
+N4's obligation and the layout campaign's meeting point, never a
+free consequence — and (later) "the executive schedules what the
+core runs." v1 targets
 SLICE A EXACTLY AS IT EXISTS — no memory, no waiting on Slice B.
 
 ## 1. THE SOURCE LANGUAGE (v1 scope, deliberately small)
