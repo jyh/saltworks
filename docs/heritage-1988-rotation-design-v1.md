@@ -17,7 +17,14 @@
 ### banyan chip alone; piece 3 one-directional,
 ### validity-antecedent, no packet index; wave controls fixed
 ### (uniform mutants vacuous, kernel-proved). Method law: grep the
-### PROSE before artwork. COMPILER ④ pass OPEN (fires at its seam).
+### PROSE before artwork. ALL ④ READS IN (silicon 12:43 · math 13:42
+### · compiler 17:25, folded): the +1-cycle price REVIVED as a
+### causality floor; piece 5 re-founded over testBit, HDL slot ruled;
+### piece 4 symbolic + pinned fixture. THE ④ WAVES ARE DISPATCHED
+### (17:2x): piece 2 → compiler (the 1988 cell in Seq, wrap-sized
+### state) · piece 1 → math (three ingredients, the identification a
+### named premise) · then 3 (after 2, under A1, barred-pair-fixed
+### controls) · then 4 and 5 (after 2/3, per the folds).
 
 ## 0. THE DESIGN, AS THE PAPER STATES IT
 
@@ -125,7 +132,10 @@ named assumption, never silently.
 2. **Cell denotation**: FSM + per-frame semantics (routes by the
    post-validity bit; rotates the address; forwards validity+payload
    untouched). B-class in the sequential Circ framework — same genre
-   as the landed ceCcore work.
+   as the landed ceCcore work, WIDER state (compiler's ④ read):
+   ceC's nState = 4 is the non-rotating cell; the 1988 cell needs
+   the 4 named FSM states PLUS storage for every wrapped bit — the
+   causality floor's hardware form.
 3. **The rotation invariant** (the soul): under A1, for every VALID
    packet — validity is the antecedent, static; an "in-flight"
    binder is dead weight, the σ-strike disease (math's own ④
@@ -147,20 +157,37 @@ named assumption, never silently.
    length/stage-count mismatch — live precisely because piece 1's
    identification is a premise. C-class; the analogue of B2M's
    self-routing induction.
-4. **Skew bookkeeping**: per-stage offsets in the trace statement,
-   SYMBOLIC until §0's timing is fixed — the "+1-cycle" price was
-   computed on the twice-dead timing model and is struck (math's ④
-   (E)); RE-PRICE at wave time from the then-current d_N.
-   Mechanical in style; B4's driven-trace induction carries it.
-   (Convention C's zero-skew payload theorem — the ③ block — is
-   the easier sibling; do it first, reuse its lemma shapes here.)
-5. **The refinement bonus**: 1988-cell and bnC-element are TWO
-   implementations of ONE abstract spec — `Banyan.line` never learns
-   whether the route bit arrived by rotation or by clock phase.
-   Statement: route₁₉₈₈ = route_bnC as functions of (address, stage).
-   This is the frame study's thesis as a theorem: *uniformity bought
-   with data-mutation and uniformity bought with timing refine the
-   same mathematics.*
+4. **Skew bookkeeping**: per-stage offsets in the trace statement.
+   THE +1-CYCLE PRICE IS REVIVED — as a CAUSALITY FLOOR, not a model
+   number (compiler's ④ read, kernel-checked
+   `r2_first_out_is_second_in` with a rotate-0 control): a
+   rotate-by-1 on a bit-serial stream cannot be realised with zero
+   delay in ANY timing model — the first output bit is the second
+   input bit, so the only causal implementation holds the wrapped
+   bit and emits one cycle later. D is BOUNDED BELOW by the
+   rotating-stage count, statable now without §0's timing; the old
+   MODEL-derived number stays struck (math's (E) killed the model;
+   causality independently forces the floor). DISPOSITION (the
+   ③-proven pattern): state piece 4 SYMBOLICALLY over a free trace,
+   PIN the fixture at the tapeout instance, and name the driver's
+   hardcoded 14 as the price of any ∀-D claim — never let a symbolic
+   statement and a hardcoded fixture sit unlabelled in one block.
+   B4's driven-trace induction carries it. (The ③ payload theorem is
+   LANDED — reuse its lemma shapes here.)
+5. **The refinement bonus — RE-FOUNDED at compiler's ④ read**: the
+   old form was NOT well-formed over `Banyan.line` (wrong arity,
+   wrong codomain — `line` takes no route bit and returns no route
+   decision; its indifference is STRUCTURAL, there is nowhere for a
+   route bit to enter). THE STATABLE FORM: both implementations
+   deliver the same BIT SELECTOR — the 1988 rotation and convention
+   C's timing phase compute the same `Nat.testBit d m` at stage m
+   (`line`'s own arithmetic, d / 2^m, says so). SLOT RULED
+   (maestro): piece 5 LANDS IN THE HDL SLOT beside the 1988 cell,
+   referencing `Banyan.line` READ-ONLY via HDL's existing import —
+   Banyan/** stays untouched. The frame study's thesis survives with
+   a stronger ground: *uniformity bought with data-mutation and
+   uniformity bought with timing refine the same mathematics —
+   structurally, not epistemically.*
 
 ## 3. THE FRAME-STUDY TRIANGLE (the prose that survives, one page max)
 
