@@ -45,6 +45,24 @@
 REF=${1:-origin/master}
 GLOB=${2:-SaltWorks/HDL/*.lean}
 
+# ⛔ AN EMPTY RESULT MUST NOT LOOK LIKE A CLEAN ONE (silicon's law, 17:12; first
+# put into code by evidence at 17:13, and this is my own instance of it).
+# Before the fix this script printed NOTHING when the corpus was clean -- which is
+# byte-identical to what it prints when the glob matches no files, the ref is
+# wrong, or the theorem regex has rotted. "Nothing found" is the one output
+# that looks the same for every wrong question.
+# ⇒ So it now states its POPULATION first, and REFUSES outright if that
+#   population is zero. A detector that has scanned nothing has not shown it can
+#   detect anything.
+FILES=$(git ls-tree -r --name-only "$REF" -- $GLOB 2>/dev/null | wc -l | tr -d ' ')
+THMS=$(git grep -h -cE "^theorem " "$REF" -- "$GLOB" 2>/dev/null | awk -F: '{n+=$NF} END{print n+0}')
+if [ "${FILES:-0}" -eq 0 ] || [ "${THMS:-0}" -eq 0 ]; then
+  echo "⛔ dup_props: REFUSING — scanned $FILES files / $THMS theorems at '$REF' '$GLOB'."
+  echo "   A zero population cannot support a clean verdict. Check the ref and the glob."
+  exit 2
+fi
+echo "scanned: $FILES files, $THMS theorems at $REF -- $GLOB"
+
 git grep -h -E "^theorem [A-Za-z_0-9']+ ?:.*:=" "$REF" -- "$GLOB" \
 | sed -E "s/^theorem [A-Za-z_0-9']+ ?://; s/:=.*$//; s/^ *//; s/ *$//" \
 | grep -vE '^$' | sort | uniq -c | sort -rn | awk '$1>1 {$1=""; sub(/^ /,""); print}' \
@@ -69,3 +87,4 @@ git grep -h -E "^theorem [A-Za-z_0-9']+ ?:.*:=" "$REF" -- "$GLOB" \
         printf '  %-100s  %s\n' "$(echo "$hit" | cut -c1-100)" "$kind"
       done
   done
+echo "scan complete (a proposition is listed only with >=2 INDEPENDENT proofs)."
