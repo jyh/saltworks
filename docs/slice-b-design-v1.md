@@ -144,8 +144,10 @@ campaign, two files, per §B1.
   SELECT (whole-core net unverified — your one-line answer owed); the
   tile question interaction (does Slice B still fit co-tenant?);
   B4's alignment mask at the RTL.
-- MATH: B2's totality form (the trap/no-op/wrap trichotomy — is it
-  exhaustive and is each arm satisfiable); E2's invariant statements
+- MATH: B2's COVERAGE form (arm inhabitance · no-silent-default ·
+  the input classification — pointer moved with the v1.1 body per
+  math's 21:57 fold-verification; DISCHARGED by that same slate);
+  E2's invariant statements
   (fairness's infinite-run quantification; isolation's frame form —
   the σ-strike lesson applies: no object stronger than the property).
 - EVIDENCE: pre-register the Slice-B price criterion BEFORE any wave
