@@ -74,6 +74,10 @@
   M2 is the banked control (residual ⊢ 2 = 1, no slack). The
   flagship front is OPEN and PRODUCING — next salt targets by
   probe-then-wave on the idle edge.
+- W4 · WRITE · **FIRED 17:26 — ④ wave: piece 1** (rotate_rotate +
+  rotate_length + the identification as a NAMED premise); piece 3
+  queues after compiler's piece 2 (A1, validity-antecedent,
+  barred-pair-fixed controls); pieces 4/5 after 2/3.
 - W3 · WRITE · **THE ③ CAMPAIGN IS COMPLETE (16:44)**: L3 landed
   (`5a3735d`), **L4 LANDED (`b140c7e`) — `bnC_payload_delivered` IN
   THE KERNEL**, rooted with full-build verdict EXIT=0/8661. The
