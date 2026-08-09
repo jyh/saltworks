@@ -108,7 +108,10 @@
   lifted by rewrite with zero re-execution, the undecodable-word
   boundary shown with witnesses. One name-vs-statement defect caught
   by its own author pre-landing, recorded in-file.
-- W5 · WRITE · **OPEN — COUNCIL RULING #4 (09:2x, the Captain,
+- W5-asm (the core assembly — track-suffixed per math's 8/9 collision
+  catch: bare "W5" also names salt wave-5 nodes and a Weil-track label;
+  Captain-facing text carries the suffix) · WRITE · **OPEN — COUNCIL
+  RULING #4 (09:2x, the Captain,
   option (a) interleaved): "even if we choose the packet-IO route,
   I'd like our original plan to be complete, verified, and ready
   for tapeout... I would actually tend toward (a), in case we
