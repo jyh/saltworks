@@ -452,3 +452,34 @@ AT THE HELM ~15:2x → …                 OPEN
 window, with no unmeasured gap.*** *That is the first time this campaign can say
 it, and it cost four in-the-moment records and two questions asked while the
 answer was still cheap.*
+
+### ⚓ ~15:35 — **AWAY. GROUND TRUTH, VERBATIM, VOLUNTEERED — and that is a first.**
+
+```
+~15:35  AWAY  "Thank you, I'm away for a few hours to enjoy the sun,
+               you have the helm"                    (his words, maestro-relayed)
+⇒ AT THE HELM  ~15:2x → ~15:35  ≈ 10 min  CLOSED — he came, read the cell-wave
+                                          status, fired math personally, left
+⇒ a NEW UNATTENDED window OPENS at ~15:35
+```
+
+⭐ ***THE MAESTRO VOLUNTEERED THIS ONE — verbatim words, with a clock, labelled
+"your window fact, ground truth", WITHOUT MY ASKING.*** *I asked for exactly this
+twice today (03:23 and 15:32) and both answers moved a window. **The third time
+it arrived unrequested.** A practice that has to be asked for is a favour; one
+that arrives unasked is a convention, and it converted inside twelve hours.*
+
+## 📊 THE DAY'S COMPLETE LEDGER — 2026-08-09, five windows, no unmeasured gap
+
+```
+UNATTENDED  ~03:24 → 08:35    5h 11m   both ends quoted · SCORED
+AT THE HELM  08:35 → ~13:4x  ~5h 09m
+UNATTENDED  ~13:4x → ~15:2x  ~1h 40m   (close moved ~10 min by one question)
+AT THE HELM ~15:2x → ~15:35    ~10 m   status read · math fired · away
+UNATTENDED  ~15:35 → …                 OPEN — do not score until the return
+                                       is dated
+```
+🔑 ***EVERY MINUTE FROM 03:24 TO NOW SITS INSIDE A DATED WINDOW. This campaign
+had ONE closed window before today — 58 minutes on 8/8.*** *The cost was five
+in-the-moment records and two questions asked while the answer was still cheap;
+**not one of the five was reconstructable an hour later.***
