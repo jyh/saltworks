@@ -332,19 +332,44 @@ theorem more_fuel_changes_the_answer :
       ≠ (runForW 2 (loopProg.map encode) St.init).get 1 := by
   decide +kernel
 
-/-- ✅ **AND THE SORT DEMO IS IN THE SAFE REGIME, PROVED RATHER THAN ASSUMED** — its exit
-`pc` is off the end of the image, so it halted rather than ran out of fuel. *This is the
-theorem that licenses §5's lifts; without it "the demo works" would rest on the word-count
-fuel happening to suffice.* -/
-theorem demo_halts_rather_than_exhausting_fuel :
+/-- ✅ **THE SORT DEMO'S EXIT HAS NO WORK PENDING** — nothing is fetchable there. Together
+with the witness above this puts the demo in the safe regime, and it is the row that
+licenses §5's lifts.
+
+⛔ **RENAMED 20:4x FROM `demo_halts_rather_than_exhausting_fuel`, BECAUSE THAT NAME OUTRAN
+THIS STATEMENT — my own defect, three minutes after math corrected theirs.** The
+discriminator is **ASYMMETRIC**, and the asymmetry matters:
+```
+fetchW = some at the exit  ⇒ DEFINITELY TRUNCATED. Airtight: had fuel remained, runForW
+                             would have taken the step, so fuel must have hit 0 with work
+                             pending.
+fetchW = none at the exit  ⇒ no work remained, so the machine COMPLETED.
+                             ⚠️ It does NOT rule out fuel hitting 0 at that same moment.
+```
+⇒ ***So this theorem proves "no work pending", NOT "did not exhaust fuel". Those coincide
+in effect and not in content, and the old name asserted the second.*** The clean
+not-truncated certificate is the next theorem. -/
+theorem demo_exit_has_no_work_pending :
     fetchW ((progOf cexSeq [5, -3, 0, 7, -8, 2, 2, -1]).map encode)
       (demoRunW cexSeq [5, -3, 0, 7, -8, 2, 2, -1]).pc = none := by
   decide +kernel
 
+/-- ⭐ **AND THE DIRECT REFUTATION OF TRUNCATION: MORE FUEL COMPUTES THE SAME ANSWER.**
+`400` against the image's own `128`, on both the output words and the exit `pc`. This needs
+no reasoning about `fetchW` at all — **it observes the fixpoint instead of arguing for
+it** — and it is what actually licenses §5. -/
+theorem demo_is_not_truncated :
+    outWords (runForW 400 ((progOf cexSeq [5, -3, 0, 7, -8, 2, 2, -1]).map encode) St.init)
+        = outWords (demoRunW cexSeq [5, -3, 0, 7, -8, 2, 2, -1])
+      ∧ (runForW 400 ((progOf cexSeq [5, -3, 0, 7, -8, 2, 2, -1]).map encode) St.init).pc
+        = (demoRunW cexSeq [5, -3, 0, 7, -8, 2, 2, -1]).pc :=
+  ⟨by decide +kernel, by decide +kernel⟩
+
 /-! ⇒ ***THE REGIME, STATED WHERE IT BELONGS: `runW` (and `ISA.run`) execute to completion
 ONLY on images whose step count is bounded by their word count — straight-line and
 forward-branching programs.*** For those, `fetchW … = none` at the exit certifies it, as
-`demo_halts_rather_than_exhausting_fuel` does for the sort demo.
+`demo_exit_has_no_work_pending` does for the sort demo — with
+`demo_is_not_truncated` as the stronger, `fetchW`-free form.
 
 🎯 **AND THE OPEN ROW, named because math's Slice-B slate will meet it from the other side:
 an EXECUTIVE schedules in LOOPS and its fairness invariant quantifies over INFINITE runs. A
@@ -359,7 +384,8 @@ from two other directions.* -/
 #audit_axioms loop_image_length
 #audit_axioms fuel_exhaustion_is_not_a_halt
 #audit_axioms more_fuel_changes_the_answer
-#audit_axioms demo_halts_rather_than_exhausting_fuel
+#audit_axioms demo_exit_has_no_work_pending
+#audit_axioms demo_is_not_truncated
 
 #audit_axioms fetchW
 #audit_axioms runForW
