@@ -71,7 +71,9 @@ home repo): a sharpened Fourier-coefficient bound, its L¹ row, and a
 gap-dossier row — two of three unblocked by re-pricing alone after a
 probe killed two false constants before any proof was attempted.
 
-**The method's own receipts** (evidence's table, acca901 — traps
+**The method's own receipts** (two instruments, cited separately —
+theorem/refutation figures: `campaign_receipts.py` @ `7608961`;
+token figure: the nightly ledger regenerated after `dfde114`; traps
 disarmed before quoting): 2,126 kernel declarations added in days
 1–3; 2,013 standing (at `6d0d0e8`) in a repo three days old; the
 payload block
