@@ -60,9 +60,12 @@
 - R1 · READ · **DISCHARGED 15:50** — the last ③ gate read (one
   load-bearing refutation, folded as v2.3; the waves dispatched on
   it).
-- R2 · READ · **PRE-AUTH** — ④ refutation pass (the FSM model's fit
-  in sequential Circ; piece-4 trace shapes; piece-5 well-formedness
-  over Banyan.line).
+- R2 · READ · **DISCHARGED 17:25** — the last ④ read (the +1-cycle
+  price revived as a causality floor; piece 5 re-founded over
+  testBit; folded into the heritage doc).
+- W3 · WRITE · **FIRED 17:26 — ④ wave: piece 2**, the 1988 rotating
+  cell as a Seq FSM, wrap-sized state, HDL slot; piece 5 lands here
+  later per the slot ruling.
 
 ## MATH
 
