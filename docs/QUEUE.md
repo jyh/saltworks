@@ -278,21 +278,31 @@ OPEN ITEMS:
   weight-shift organ (its per-cycle theorems ARE the assumed
   weight schedule) + the SECOND overflow condition compiler flagged
   (W<<<t register overflow — exists nowhere yet, needs shaping);
-  (ii) SIGN-CYCLE COMPOSITION — RULED 14:5x on compiler's
-  measured construction: OPTION (b) + LOAD-PATH OPTION A, RULED
-  TOGETHER (both remove a tied constant for an admitted port; the
-  six per-cycle theorem restatements happen ONCE): macSeq gains a
-  carry-in port (nIn 32→33, gates 161→160, const gates 0), the
-  sign cycle = acc + ~x + 1 via the LANDED idiom
-  subtraction_is_a_plus_not_b_plus_one + the already-certified
-  bitNot32; the load path = port not constant (33→33, tie gone).
-  carry_in_is_low retires DELIBERATELY (its falsification is the
-  point — replaced, not patched). The cell ends ZERO constant
-  gates, two admitted ports. THE PATTERN, banked on its third
-  measured instance: A TIED CONSTANT IS A PORT YOU HAVE NOT
-  ADMITTED TO NEEDING. Compiler implements at its seam; (i)'s
-  hW-discharge + second overflow condition shape AFTER the
-  interface settles (the increment rides the carry-in).**
+  (ii) SIGN-CYCLE COMPOSITION — RULED 14:5x, then AMENDED
+  MINUTES LATER when silicon's argument (written before my ruling
+  posted, crossing in flight) dominated both built options:
+  **SCHEDULE-NEGATED** — the edge loads −W for the sign cycle;
+  ZERO gates, ZERO interface change, ZERO restatements (the weight
+  register already re-initialises per input under dual-stream;
+  −W is the same load path carrying a different value). THE
+  MANDATORY COMPANION, silicon's own honest cost: the correctness
+  obligation MOVES INTO THE SCHEDULE where every physical
+  instrument passes a wrong sign — a GUARD THEOREM is REQUIRED
+  (the layer-compiler's sign-cycle lemma; compiler's :487
+  freeze-guard shape is the template). One assumption to verify
+  at the artifact before math shapes the guard: (−W)<<<t =
+  −(W<<<t) as BitVec (mod 2^32) — expected trivially true, check
+  not assume. THE LOAD-PATH HALF STANDS AS RULED (option A, port
+  not constant — it is what −W rides). Compiler's carry-in
+  construction stands as the PRICED ALTERNATIVE on record (160
+  gates, landed idiom) if the schedule form ever fails review.
+  PATTERNS BANKED: tied-constant-is-an-unadmitted-port (3rd
+  instance) AND wiring-or-traffic-beats-organs (4th instance) —
+  the second now strong enough that "build an organ" must argue
+  against it. GOVERNANCE NOTE: a ruling amended in minutes by a
+  better crossing argument is draft-until-refuted applying to
+  RULINGS — the amendment cost nothing because nothing had been
+  built on the ruled shape yet.**
 
 - **CROSS-SESSION MESSAGING — ADOPTION PLANNED AT NEXT RELIGHT
   (the Captain flagged the new system 14:1x; assessed from the doc
