@@ -58,17 +58,20 @@ def maAddend (k : Nat) : Net := k
 
 /-- The accumulator — the cell's STATE, nets `32…63`. `Seq.env` puts primary inputs first and state
 immediately after, so this offset is forced by `Seq`, not chosen. -/
-def maAcc (k : Nat) : Net := 32 + k
+def maAcc (k : Nat) : Net := 33 + k
 
 /-- `nIn + nState` — what the CORE sees. Distinct from `macSeq.nIn`, and the distinction is the one
 my own cell account (`docs/compiler-cell-account-0808.md:14`) says readers get wrong: *"the core's
 `nIn` is the machine's `nIn` PLUS its `nState`"*. -/
-def maCoreIn : Nat := 64
+def maCoreIn : Nat := 65
 
-/-- The carry-in constant — this cell's single own gate. -/
-def maZero : Net := 64
+/-- ⭐ **THE CARRY-IN, NOW AN ADMITTED PORT** — ruled (b), final 14:58 after a full artifact loop.
+It was a tied `const false`; the sign cycle needs it settable, so the tie becomes an input and the
+organ **loses** a gate: 161 → 160. *A tied constant is a port you have not admitted to needing.* -/
+def maCin : Net := 32
 
-/-- Where the adder instance begins: one past the tie. -/
+/-- Where the adder instance begins. **No tie gate precedes it**, so the instance starts
+immediately above the core's inputs. -/
 def maOff : Nat := 65
 
 /-- ⭐ **THE WIRING. `a := the accumulator`, `b := the addend`, carry-in `:= 0`.**
@@ -77,7 +80,7 @@ def maOff : Nat := 65
 assignment is not symmetric in meaning even though `+` is commutative: naming `a` the accumulator
 keeps the cell readable as *accumulate*, and the state/primary split then falls out of `Seq.env`. -/
 def maSigma (i : Nat) : Net :=
-  if i < 32 then maAcc i else if i < 64 then maAddend (i - 32) else maZero
+  if i < 32 then maAcc i else if i < 64 then maAddend (i - 32) else maCin
 
 /-- The 32 sum nets of the instance, in the host's numbering. -/
 def maSum (k : Nat) : Net := instMap adder32 maSigma maOff (adS k)
@@ -88,11 +91,11 @@ an accumulator those are the same 32 nets. *Listing a net twice in `outs` is a p
 second gate; the gate count below is the check on that.* -/
 def macCore : Circ :=
   { nIn := maCoreIn
-    gates := ⟨maZero, .const false⟩ :: instGates adder32 maSigma maOff
+    gates := instGates adder32 maSigma maOff
     outs := (List.range 32).map maSum ++ (List.range 32).map maSum }
 
 /-- ⭐ **THE CELL.** -/
-def macSeq : Seq := { nIn := 32, nOut := 32, nState := 32, core := macCore }
+def macSeq : Seq := { nIn := 33, nOut := 32, nState := 32, core := macCore }
 
 /-! ### The certificates -/
 
@@ -106,13 +109,12 @@ theorem macCore_wf : macCore.wf = true := Circ.wf_of_ssa macCore_ssa
 accumulator whose state width does not match its adder. -/
 theorem macSeq_wf : macSeq.wf = true := by decide +kernel
 
-/-- **161 gates: 1 tie + 160 adder.** Measured, then pinned — the number in a docstring should come
-from the build, not from the author. -/
-theorem macCore_gate_count : macCore.gates.length = 161 := by decide +kernel
+/-- **160 gates — the adder instance alone.** Admitting the carry-in port REMOVED the tie. -/
+theorem macCore_gate_count : macCore.gates.length = 160 := by decide +kernel
 
 /-- **32 state bits, 32 outputs, 64 core inputs** — the cell account's four columns. -/
 theorem macSeq_dimensions :
-    macSeq.nIn = 32 ∧ macSeq.nOut = 32 ∧ macSeq.nState = 32 ∧ macSeq.core.nIn = 64 := by
+    macSeq.nIn = 33 ∧ macSeq.nOut = 32 ∧ macSeq.nState = 32 ∧ macSeq.core.nIn = 65 := by
   refine ⟨rfl, rfl, rfl, rfl⟩
 
 /-- ⭐ **THE PLACEMENT IS SOUND: every adder port lands strictly below the instance.** The same
@@ -130,9 +132,9 @@ any adder gate's output. *`instOK` cannot see this — it constrains one instanc
 inputs and says nothing about whether another gate already owns a net. Sixteen true `instOK`s over
 a colliding netlist is a defect this corpus shipped and repaired today (`5f1abb7`), so the pair
 property is stated here at the cell's birth instead of being discovered later.* -/
-theorem tie_does_not_collide_with_the_adder :
-    maZero ∉ (instGates adder32 maSigma maOff).map (·.out) := by
-  decide +kernel
+theorem cin_is_an_input_not_a_gate :
+    maCin < macCore.nIn ∧ maCin ∉ (instGates adder32 maSigma maOff).map (·.out) := by
+  refine ⟨by decide +kernel, by decide +kernel⟩
 
 /-- **CONTROL: the two output halves are the SAME nets.** An accumulator whose readable output and
 whose next state disagreed would compute one thing and report another — and `Seq.wf` would still
@@ -145,12 +147,13 @@ theorem output_equals_next_state :
 so this cannot change the arithmetic — it is stated because the *state/primary* split is not
 commutative: swapping them would feed the addend where `Seq.env` supplies state. -/
 theorem acc_is_the_a_port_and_addend_is_the_b_port :
-    maSigma 0 = maAcc 0 ∧ maSigma 32 = maAddend 0 ∧ maSigma 64 = maZero := by
+    maSigma 0 = maAcc 0 ∧ maSigma 32 = maAddend 0 ∧ maSigma 64 = maCin := by
   refine ⟨rfl, rfl, rfl⟩
 
 /-- **CONTROL: the carry-in is tied LOW.** Tied high would add one on every single cycle — an error
 of `n+1` per MAC that no single-cycle test distinguishes from a rounding choice. -/
-theorem carry_in_is_low : (⟨maZero, Op.const false⟩ : Gate) ∈ macCore.gates := by
+theorem no_constant_gates_remain :
+    macCore.gates.filter (fun g => match g.op with | .const _ => true | _ => false) = [] := by
   decide +kernel
 
 /-! ### What is OWED, named with its owner
@@ -207,62 +210,72 @@ theorem bitsOf_getD (w : BitVec 32) (k : Nat) (hk : k < 32) :
   simp only [bitsOf, List.getD_eq_getElem?_getD, List.getElem?_map, List.getElem?_range, hk,
              if_pos, Option.map_some, Option.getD_some]
 
-/-- The cell's own gate list is exactly the tie, so the frame argument is a one-gate step. -/
-theorem macCore_gates_split :
-    macCore.gates = [⟨maZero, Op.const false⟩] ++ instGates adder32 maSigma maOff := rfl
+/-! ⭐ **THE FRAME MACHINERY IS GONE, AND ITS ABSENCE IS THE POINT.** With the carry-in a tied GATE,
+`inst_sem`'s third arm read a gate and needed a one-gate frame argument (`tie_runs_to_false`,
+`tie_frame`) — the arm math flagged and `pcAdd` solves at its net `129`. **Admitting the port makes
+all three arms read INPUTS, so the frame lemmas are deleted rather than repointed.** *Option (b)
+removed a gate, a theorem, and two lemmas; the interface was carrying proof weight.*
 
-/-- The tie gate drives its net to `false`. -/
-theorem tie_runs_to_false (E : Env) :
-    run E [(⟨maZero, Op.const false⟩ : Gate)] maZero = false := by
-  simp [run, upd, Op.eval]
+The input word is now **33 bits: the 32-bit addend, then the carry-in.** -/
 
-/-- …and disturbs nothing else. **This is the frame the carry-in arm needs**: `adder32`'s `cin` port
-reads a GATE, not an input, which is the arm math flagged and the same shape as `pcAdd`'s
-`hin_adder` at its net `129`. -/
-theorem tie_frame (E : Env) (n : Net) (hn : n ≠ maZero) :
-    run E [(⟨maZero, Op.const false⟩ : Gate)] n = E n := by
-  simp [run, upd, Op.eval, hn]
+/-- The input word is `addend ++ [cin]`: positions `0…31` are the addend. -/
+theorem word_getD_lo (w : BitVec 32) (c : Bool) (k : Nat) (hk : k < 32) :
+    (bitsOf w ++ [c]).getD k false = w.getLsbD k := by
+  have hlen : (bitsOf w).length = 32 := bitsOf_length w
+  rw [List.getD_eq_getElem?_getD, List.getElem?_append_left (by omega),
+      ← List.getD_eq_getElem?_getD]
+  exact bitsOf_getD w k hk
 
-/-- ⭐ **THE σ AGREEMENT — `inst_sem`'s `hin`, discharged in three arms.** The `a` port reads the
-state, the `b` port reads the primary inputs, and the carry-in reads the tie GATE. -/
-theorem mac_hin (acc addend : BitVec 32) :
+/-- …and position `32` is the carry-in. -/
+theorem word_getD_cin (w : BitVec 32) (c : Bool) :
+    (bitsOf w ++ [c]).getD 32 false = c := by
+  have hlen : (bitsOf w).length = 32 := bitsOf_length w
+  rw [List.getD_eq_getElem?_getD, List.getElem?_append_right (by omega)]
+  simp [hlen]
+
+/-- ⭐ **THE σ AGREEMENT — `inst_sem`'s `hin`, three arms, all reading INPUTS.** -/
+theorem mac_hin (acc addend : BitVec 32) (cin : Bool) :
     ∀ i, i < adder32.nIn →
-      run (macSeq.env (bitsOf addend) (bitsOf acc)) [(⟨maZero, Op.const false⟩ : Gate)] (maSigma i)
-        = SaltWorks.Stack.Program.adEnv acc addend false i := by
+      macSeq.env (bitsOf addend ++ [cin]) (bitsOf acc) (maSigma i)
+        = SaltWorks.Stack.Program.adEnv acc addend cin i := by
   intro i hi
   have h65 : adder32.nIn = 65 := by decide +kernel
   rw [h65] at hi
+  have hlen : (bitsOf addend).length = 32 := bitsOf_length addend
   by_cases h1 : i < 32
-  · have hne : (32 + i : Nat) ≠ 64 := by omega
-    rw [maSigma, if_pos h1, maAcc, tie_frame _ _ hne]
+  · -- the `a` port reads the STATE
+    rw [maSigma, if_pos h1, maAcc]
     simp only [Seq.env, macSeq, SaltWorks.Stack.Program.adEnv,
-               if_neg (show ¬(32 + i < 32) by omega), if_pos h1, Nat.add_sub_cancel_left]
+               if_neg (show ¬(33 + i < 33) by omega), if_pos h1, Nat.add_sub_cancel_left]
     exact bitsOf_getD acc i h1
   · by_cases h2 : i < 64
-    · have hne : (i - 32 : Nat) ≠ 64 := by omega
-      rw [maSigma, if_neg h1, if_pos h2, maAddend, tie_frame _ _ hne]
+    · -- the `b` port reads the ADDEND, inside the first 32 of the input word
+      rw [maSigma, if_neg h1, if_pos h2, maAddend]
       simp only [Seq.env, macSeq, SaltWorks.Stack.Program.adEnv,
-                 if_pos (show i - 32 < 32 by omega), if_neg h1, if_pos h2]
-      exact bitsOf_getD addend (i - 32) (by omega)
-    · have h64 : i = 64 := by omega
+                 if_pos (show i - 32 < 33 by omega), if_neg h1, if_pos h2]
+      exact word_getD_lo addend cin (i - 32) (by omega)
+    · -- ⭐ the carry-in now reads an INPUT — the last position of the word
+      have h64 : i = 64 := by omega
       subst h64
-      rw [maSigma, if_neg h1, if_neg h2, tie_runs_to_false]
-      simp only [SaltWorks.Stack.Program.adEnv, if_neg h1, if_neg h2]
+      rw [maSigma, if_neg h1, if_neg h2, maCin]
+      simp only [Seq.env, macSeq, SaltWorks.Stack.Program.adEnv, if_pos (show 32 < 33 by omega),
+                 if_neg h1, if_neg h2]
+      exact word_getD_cin addend cin
 
-/-- ⭐⭐ **LAYER 1, POINTWISE. Sum bit `k` of one cycle IS `adder32`'s sum bit `k`, run on the
-adder's own environment.** No hypothesis, no `ℤ`, no overflow condition — and no re-derivation of
-math's certificate: the right-hand side is the adder's `run`, so layer 2 applies
-`sem_adder32_gen` in the file that owns it. -/
-theorem step_bit_is_adder_bit (acc addend : BitVec 32) (k : Nat) (hk : k < 32) :
-    run (macSeq.env (bitsOf addend) (bitsOf acc)) macCore.gates (maSum k)
-      = run (SaltWorks.Stack.Program.adEnv acc addend false) adder32.gates (adS k) := by
+/-- ⭐⭐ **LAYER 1, POINTWISE, AND NOW WITH A SETTABLE CARRY-IN.** Sum bit `k` of one cycle IS
+`adder32`'s sum bit `k` on the adder's own environment — for **every** `cin`, which is what makes the
+sign cycle a cycle of this cell. No hypothesis, no `ℤ`, no overflow condition, and no re-derivation
+of math's certificate. -/
+theorem step_bit_is_adder_bit (acc addend : BitVec 32) (cin : Bool) (k : Nat) (hk : k < 32) :
+    run (macSeq.env (bitsOf addend ++ [cin]) (bitsOf acc)) macCore.gates (maSum k)
+      = run (SaltWorks.Stack.Program.adEnv acc addend cin) adder32.gates (adS k) := by
   have hmem : (adder32.gates.map Gate.out).contains (adS k) = true := by
     revert hk; revert k; decide +kernel
   have h := inst_sem adder32 maSigma maOff
-      (run (macSeq.env (bitsOf addend) (bitsOf acc)) [(⟨maZero, Op.const false⟩ : Gate)])
-      (SaltWorks.Stack.Program.adEnv acc addend false) mac_instOK (mac_hin acc addend)
+      (macSeq.env (bitsOf addend ++ [cin]) (bitsOf acc))
+      (SaltWorks.Stack.Program.adEnv acc addend cin) mac_instOK (mac_hin acc addend cin)
       (adS k) (Or.inr hmem)
-  rw [macCore_gates_split, run_append, maSum]
+  rw [show macCore.gates = instGates adder32 maSigma maOff from rfl, maSum]
   exact h
 
 /-- **The output half and the state half of a cycle are the same bits** — so the pointwise lemma
@@ -400,8 +413,8 @@ theorem and_row_reads_the_stream (k : Nat) (hk : k < 32) :
 /-- **CONTROL: the two organs' state widths match, so they compose.** `wshiftSeq`'s 32 output bits
 are exactly `macSeq`'s 32 addend inputs — the seam the composition layer will use. -/
 theorem organs_compose_at_32_bits :
-    wshiftSeq.nOut = macSeq.nIn ∧ wshiftSeq.nState = 32 ∧ macSeq.nState = 32 := by
-  refine ⟨rfl, rfl, rfl⟩
+    wshiftSeq.nOut = 32 ∧ macSeq.nIn = 32 + 1 ∧ wshiftSeq.nState = 32 ∧ macSeq.nState = 32 := by
+  refine ⟨rfl, rfl, rfl, rfl⟩
 
 /-! ### OWED, with its shape named
 
@@ -598,13 +611,13 @@ everything after a failure reads as clean. -/
 #audit_axioms macCore_gate_count
 #audit_axioms macSeq_dimensions
 #audit_axioms mac_instOK
-#audit_axioms tie_does_not_collide_with_the_adder
+#audit_axioms cin_is_an_input_not_a_gate
 #audit_axioms output_equals_next_state
 #audit_axioms acc_is_the_a_port_and_addend_is_the_b_port
-#audit_axioms carry_in_is_low
+#audit_axioms no_constant_gates_remain
 #audit_axioms bitsOf_getD
-#audit_axioms tie_runs_to_false
-#audit_axioms tie_frame
+#audit_axioms word_getD_lo
+#audit_axioms word_getD_cin
 #audit_axioms mac_hin
 #audit_axioms step_bit_is_adder_bit
 #audit_axioms step_halves_agree
