@@ -92,6 +92,22 @@ FALSIFIED IF any ONE of these is observed:
                                      fence, so the fence inherited a status
                                      word it did not verify.
         row 3 signed activation    LANDED (`wordSignedOrder`)
+
+      ⭐ RE-ANCHORED AGAIN 2026-08-09 14:5x, AT THE SETTLE POINT — rung 4 SEALED
+        (math at the content, silicon at the gate, EXIT=0 twice, e2e966b). I
+        deliberately did NOT track the intermediate states; F4 gates on a
+        CONDITION and re-anchors when the source settles.
+        THE ROW NOW SPLITS ITSELF, and the split is the fleet's own work:
+          ACCUMULATION       hardware theorem, LANDED ✅ (c754b29)
+                             — "the cell adds what it is fed"
+          ARITHMETIC READING (b + W·psum) ℤ-only, reaches the cell at rung 4,
+                             carrying the chain's ONLY hypothesis
+                             (¬saddOverflow, discharged by demoBound) ⛔ OPEN
+      ⇒ F4 STILL BINDS, and the headline "two landed" is STILL correct.
+      🔑 Nobody asked them to split that row. A seat that distinguishes "the
+        cell adds what it is fed" from "the fed sequence MEANS b + W·x" is
+        doing the fence's job upstream of the fence — which is the only place
+        it is cheap.
       ⇒ F4 STILL BINDS. A row landed through rung 3 of 4 is NOT a landed row,
         and "two landed" in the headline remains correct.
       ⚠️ DELIBERATELY NOT UPGRADED. A fixed understatement is the moment most
