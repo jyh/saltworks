@@ -180,24 +180,23 @@ preemption per the named small-step/fuel deferral, and beyond).
 Morning: he reviews the council pack + tiny-Rust v1.9 + the story.
 
 OPEN ITEMS:
-- **TILE DECISION (T1, his — silicon 20:16 + the Captain's 21:0x
-  fork): the parallel core is NOT TAPEABLE at any tile size (64
-  signals vs TT's 24 total — tiles buy area, never pins) and 32
-  registers is excluded by AREA in both options. The feed shapes:
-  bit-serial (slicea16s, 3 signals, 32 cyc/word, PRICED) and — THE
-  CAPTAIN'S OWN PROPOSAL, 21:0x at the helm — BYTE-WIDE (8-bit
-  pinout, a 32-bit load in 4 cycles): DISPATCHED to silicon to
-  price as a named variant (signal count from the port list, area
-  delta vs slicea16s, co-tenancy interaction — readings, not
-  inference). The (a) co-tenant 66%/one-pin vs (b) own-tile
-  61%/EUR 280 split stands; his word after the byte-wide pricing.
-  HARDENING DEPENDENCY (silicon 21:07, readings): hardening's first
-  step (synthesis) consumes the tile word — the options differ in
-  top-module identity, contents, uio_oe mask; the config-independent
-  leg (core standalone synthesis) is DONE, 2,709 cells, depth 69;
-  NO HARDENING TOOL IS INSTALLED — container bring-up AUTHORIZED
-  for tonight (maestro, PRE-AUTH, additive-only) so any tile word
-  goes straight to hardening.**
+- **TILE DECISION — THE CAPTAIN'S CONDITIONAL WORD IS GIVEN (21:2x,
+  at the helm, verbatim on the bus): byte-wide feed + 32-BIT
+  ADDRESSES multiplexed onto the 8 address pins (4 byte-phases, like
+  the data) + OWN TILE — "if so, we should choose it, on its own
+  tile." The EUR 280 is authorized BY HIS WORD, conditional only on
+  silicon BUILDING the multiplexed-address variant (slicea16b-ma)
+  green: 32-bit PC out in 4 phases over uo_out, instruction in over
+  ui_in, phase strobe on uio; the pipelining question (overlap
+  next-address with current-data for ~4 cyc/word vs 8 naive)
+  answered at the bytes. The (a)-vs-(b) fork is CLOSED — (b) chosen;
+  co-tenancy retired (byte-wide needs 10+ vs 7 available; the switch
+  is itself byte-wide). History: parallel untapeable (64 sig vs 24);
+  serial priced 781K instr/s; byte-wide priced FREE IN AREA
+  (2,706 cells vs serial's 2,709) at 6.25M instr/s. Hardening:
+  LibreLane UP (additive, PDK-copy guard); slicea16b harden
+  in flight as the FLOW verdict; -ma becomes the tapeout candidate
+  on silicon's green.**
 - **COLD-CACHE REPRODUCIBILITY — CLOSED BY RETRACTION (compiler
   20:4x): the full build's module form is UNCAPPED; cold rebuild
   measured green. The corpus reproducibility gap NEVER EXISTED — it
