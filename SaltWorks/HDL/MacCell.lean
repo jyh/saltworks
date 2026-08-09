@@ -404,7 +404,7 @@ def wsGates : List Gate :=
   ⟨wsLsb, Op.and wsLoad wsX⟩ :: (List.range 32).map (fun k => ⟨wsAnd k, Op.and wsX (wsW k)⟩)
 
 /-- ⭐⭐ **THE CORE.** Outputs: the 32 addend bits, then the 32 next-state bits. The next state is
-the left shift, expressed as WIRES — `wsZero` then `wsW 0 … wsW 30`. -/
+the left shift, expressed as WIRES — `wsLsb` then `wsW 0 … wsW 30`. -/
 def wsCore : Circ :=
   { nIn := wsCoreIn
     gates := wsGates
