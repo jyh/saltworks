@@ -4,6 +4,7 @@ import SaltWorks.HDL.Decoder
 import SaltWorks.HDL.Immediate
 import SaltWorks.HDL.ReadTree
 import SaltWorks.HDL.RegWrite
+import SaltWorks.HDL.Bitwise
 
 /-!
 # W5-asm, increment 2a — the FIRST organ placed at the real offset, `instOK` discharged
@@ -319,6 +320,76 @@ theorem rd_bits_are_in_the_instruction (j : Nat) (hj : j < 5) :
   split
   · omega
   · omega
+
+
+/-! ## 6. INCREMENT 2e — BINDING THE CHAIN: a σ that depends on where its producers SIT
+
+Placements #1–#5 needed only `off0` and `off1`. **`bitXor32` is the first organ whose σ depends on
+the actual chain positions of its producers** — it reads `readTree`'s two ports, so its wires are
+determined by *where readTree was placed*, not merely by what readTree is.
+
+Offsets are **derived by `instNext` composition, never written as literals**, so the chain cannot
+drift from the organs that generate it. -/
+
+/-- Row 3 — `readTree.rs1` sits at `immBCirc`'s `instNext`. -/
+def off2 : Nat := instNext immBCirc off1
+/-- Row 4 — `readTree.rs2`, one `readTree` further on. -/
+def off3 : Nat := instNext readTree off2
+/-- Row 5 — the first ALU organ. -/
+def off4 : Nat := instNext readTree off3
+
+theorem chain_offsets_derived : off2 = 1191 ∧ off3 = 4173 ∧ off4 = 7155 := by
+  refine ⟨?_, ?_, ?_⟩ <;>
+    simp only [off4, off3, off2, off1, off0, instNext, coreInWidth, stWidth] <;> decide +kernel
+
+/-- `readTree.rs1`'s output `k`, at its chain position. Read from `instOuts` — a literal here
+would stop tracking both the organ AND its placement. -/
+def rs1Out (k : Nat) : Net := (instOuts readTree readTreeRs1Sig off2).getD k 0
+/-- `readTree.rs2`'s output `k`, at its chain position. -/
+def rs2Out (k : Nat) : Net := (instOuts readTree readTreeRs2Sig off3).getD k 0
+
+/-- `bitXor32` reads the two operands: `rs1` on inputs `0…31`, `rs2` on `32…63`. -/
+def bitXor32Sig (j : Net) : Net := if j < 32 then rs1Out j else rs2Out (j - 32)
+
+/-- ⭐ **PLACEMENT #6 — `bitXor32` at its chain offset, `instOK` DISCHARGED.** The first placement
+whose correctness depends on WHERE its producers were placed: `rs1`'s outputs top out below `off3`
+and `rs2`'s below `off4`, so both operand banks are computed before the XOR runs. -/
+theorem bitXor32_instOK : instOK bitXor32 bitXor32Sig off4 := by
+  refine ⟨bitXor32_ssa, bitXor32_wf, ?_⟩
+  intro j hj
+  have hnn : bitXor32.nIn = 64 := by decide +kernel
+  rw [hnn] at hj
+  revert hj
+  revert j
+  decide +kernel
+
+/-- ⛔ **AND IT IS NOT PLACEABLE EARLIER — the chain is forced twice over.** `rs2`'s outputs live
+above `off3`, so `bitXor32` cannot sit at `off3`: its second operand bank does not exist yet. -/
+theorem bitXor32_is_NOT_placeable_at_off3 : ¬ (bitXor32Sig 32 < off3) := by
+  simp only [bitXor32Sig, rs2Out, off3, off2, off1, off0, instNext, coreInWidth, stWidth]
+  decide +kernel
+
+/-- **CONTROL: the two operand banks are DISJOINT.** `rs1`'s outputs and `rs2`'s outputs must not
+overlap, or the XOR would read one register twice and every downstream `sem` theorem would be
+about a different instruction. Checked at both bank boundaries. -/
+theorem operand_banks_are_disjoint :
+    bitXor32Sig 0 ≠ bitXor32Sig 32 ∧ bitXor32Sig 31 ≠ bitXor32Sig 63
+  ∧ bitXor32Sig 0 < off3 ∧ off3 ≤ bitXor32Sig 32 := by
+  refine ⟨?_, ?_, ?_, ?_⟩ <;>
+    simp only [bitXor32Sig, rs1Out, rs2Out, off3, off2, off1, off0, instNext,
+               coreInWidth, stWidth] <;> decide +kernel
+
+/-- **CONTROL: the operand banks are not vacuous** — `readTree` really does publish 32 outputs per
+port, so `rs1Out`/`rs2Out` are not silently reading a `getD` default of `0`. Without this, a σ that
+fell off the end of the list would place cleanly and wire every operand bit to net `0` (which is
+register `x0` bit `0`). -/
+theorem operand_banks_are_fully_populated :
+    (instOuts readTree readTreeRs1Sig off2).length = 32
+  ∧ (instOuts readTree readTreeRs2Sig off3).length = 32
+  ∧ rs1Out 31 ≠ 0 ∧ rs2Out 31 ≠ 0 := by
+  refine ⟨by decide +kernel, by decide +kernel, ?_, ?_⟩ <;>
+    simp only [rs1Out, rs2Out, off3, off2, off1, off0, instNext, coreInWidth, stWidth] <;>
+    decide +kernel
 
 
 end SaltWorks.HDL.CorePlace
