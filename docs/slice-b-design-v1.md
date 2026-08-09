@@ -12,10 +12,13 @@
 ### ANSWERED by silicon 20:51/36a37a5: NOT a whole-core net and it
 ### CANNOT be made one — no whole-core object exists in the corpus,
 ### the parts have never been composed; against the named-parts
-### inventory (6,574 gates — AMENDED 20:59/4f1df3b, the write path
-### regNext was the missing mass; a SUM not a composition) it is
-### 17.6%, and against the fuller two-read-port + write-path model
-### (9,556) it is 12.1%. Spend it as REALIZED and SELECT-LOCAL,
+### inventory — ⚠️ FIGURE ON HOLD (compiler 21:0x: regWrite is the
+### 32-way write-enable decoder composing IN SERIES with regNext,
+### +163 owed back into the 6,574; silicon RE-DERIVING; do not quote
+### the 17.6%/92.6% until its re-derivation lands; the SENTENCES'
+### directions are unaffected — the saving stays a small fraction,
+### the register file stays dominant) — it is a SUM not a
+### composition. Spend the −1,154 as REALIZED and SELECT-LOCAL,
 ### never as a system figure. And the convergent tile finding,
 ### STRENGTHENED by the amendment: the register file is 92.6% of the
 ### named inventory — B1's memory organ competes with the REGISTER
