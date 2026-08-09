@@ -299,3 +299,75 @@ previous was 8/8 12:14 → 13:12 (58 m). *Every prior overnight span was
 unscoreable because nobody dated both ends while they were happening. This one is
 scoreable because four transitions were recorded in the moment, one of them
 against a helm HALT, and a peer was asked for a clock while still at the wheel.*
+
+---
+
+# ⛽ THE 09:3x READING, 2026-08-09 — **THE FUEL MAP IS NOW COMPLETE AND EVERY ROW IS MEASURED BY ITS OWNER**
+
+**Captain's order, verbatim (09:3x): *"please have the seats do an account check"*.**
+All five seats ran the maestro's one-liner against their OWN per-seat config and
+posted one line each.
+
+## ✅ PART 1 — ACCOUNT ↔ SEAT, and this is MEASUREMENT, not testimony
+
+```
+seat       account (in-seat read)        register says   verdict
+[REDACTED: per-seat account↔directory map — five rows, all MATCH]
+⇒ MISMATCHES: 0 of 5.
+```
+
+⭐ ***AND THE PROVENANCE IS THE STRONGEST THIS FILE HAS EVER CARRIED: FIVE ROWS,
+FIVE DIFFERENT AUTHORS, EACH READING A CONFIG ONLY THAT SEAT CAN SEE.*** *This is
+the exact inverse of [[shared-author-agreement-is-one-claim]] — no seat could
+have written another's row, so five agreeing rows are five claims and not one.*
+**On 2026-08-08 19:57 this mapping was 2 of 5 verified and 3 assumed. It is now
+5 of 5 measured, and the upgrade cost one command per seat.**
+
+📌 *`accountUuid` is again deliberately absent: this seat's published cost row
+promises the records carry no account identifier, and the email suffices for the
+mapping. Compiler established that reasoning on 8/8 and it still holds.*
+
+## ⚠️ PART 2 — THE TRIPLES, WHICH ARE STILL TESTIMONY AND MUST NOT BE BLENDED WITH PART 1
+
+**Captain's panel reading, 09:3x (session % / week-all % / week-Opus %):**
+
+```
+account      09:3x  (session, week, opus)     8/8 19:57 was      week delta
+jason         0, 67, 62   (window RESET)      8, 61, 51            +6
+compiler-acct         3, 31,  7                       5, 28,  7            +3
+math-acct          1, 24,  0                       1, 22,  0            +2
+jasonh        0, 17,  3                       2, 15,  3            +2
+silicon-acct    2, 16,  0                       2, 14,  0            +2
+```
+
+⛔ ***DO NOT SUM THAT DELTA COLUMN. Each figure is a percentage of a DIFFERENT
+account's envelope, so "the fleet spent 15 points overnight" is arithmetic on
+five incompatible denominators and means nothing.*** *The per-account deltas are
+each meaningful; their total is not. This is the same defect class as averaging a
+ratio across a convention change, and it is the most inviting error on this page.*
+
+✅ **WHAT THE DELTAS DO SUPPORT, stated narrowly:** *the maestro's account moved
+furthest (+6 week-all, and +11 on the Opus line, 51→62) — consistent with the hub
+carrying the overnight load under the Captain's 40% full-throttle grant, and
+**well inside it.** Every seat account moved 2–3 points. No account is near a wall
+on these figures.*
+
+## 🔗 PART 3 — THE PAIRING, which is the point of the order
+
+**The tier investigation (02:4x–08:35) established WHICH MODEL each seat runs;
+this order establishes WHICH ACCOUNT each drains. Together they are the fuel map:**
+
+```
+seat       account        model tier (measured 07:4x–08:35)
+maestro    jason          claude-fable-5 — the ONLY Fable seat; fell to opus-4-8
+                          twice overnight and was RESTORED by /model fable at 08:35
+evidence   jasonh         claude-opus-5
+compiler   compiler-acct          claude-opus-5   (2,622 records, no fallback)
+silicon    silicon-acct     claude-opus-5   (0 fable records, ever)
+math       math-acct           claude-opus-5
+```
+🔑 ***THE MAP EXPLAINS WHY THE FLEET HAS NO FABLE CONTROL: one seat, one account,
+one tier — so the tier-drop question could never be settled from peer transcripts,
+and that is a property of the SEATING, not a gap in the instruments.*** *Anyone
+re-opening the wall question needs the Captain's panel or a deliberate second
+Fable seat; no amount of reading our logs will do it.*
