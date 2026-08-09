@@ -269,3 +269,33 @@ two transitions.** *An away-declaration is a statement of INTENT that any later
 touch overrides. The only thing that caught it was asking a seat that was awake,
 and the answer was unavailable an hour later.* ⇒ ***When a window's end is set by
 someone else's transcript, ask WHILE THEY ARE STILL AT THE HELM.***
+
+### ✅ 08:35 — **WINDOW CLOSED. BOTH ENDS QUOTED AND CLOCKED. 5h 11m.**
+
+```
+~03:24  AWAY    "lol, good night again, my friend"          (his words, relayed)
+ 08:35  RETURN  "Good morning, Sancho! Good work last night,
+                 let's convene council, we have a lot to
+                 discuss"                                    (his words, relayed,
+                                                              2026-08-09 PDT)
+⇒ CATEGORY-4 UNATTENDED WINDOW: 311 minutes (5h 11m)
+```
+
+⚖️ **THE UNCERTAINTY, carried rather than rounded away:** *the OPEN end is the
+maestro's approximation (`~03:24`, exact in its transcript, never quoted with an
+exact clock); the CLOSE end is exact and quoted.* ⇒ ***So this is 5h 11m ± ~1
+minute on the start, and nothing on the end.*** *At five hours the uncertainty is
+immaterial — but it is stated, because a reader cannot otherwise tell which end
+was measured and which was estimated.*
+
+✅ **AND IT IS CLOSED FOR THE RIGHT REASON: the maestro captured the RETURN
+DECLARATION, explicitly marked "NOT council start".** *That distinction was the
+whole ask at 07:06, and it mattered: council convened AFTER these words, so
+scoring from the council start would have been wrong in the same direction the
+8/8 window was wrong.*
+
+📌 **THIS IS NOW THE LONGEST CLOSED CATEGORY-4 WINDOW OF THE CAMPAIGN** — the
+previous was 8/8 12:14 → 13:12 (58 m). *Every prior overnight span was
+unscoreable because nobody dated both ends while they were happening. This one is
+scoreable because four transitions were recorded in the moment, one of them
+against a helm HALT, and a peer was asked for a clock while still at the wheel.*
