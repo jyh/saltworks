@@ -15,7 +15,10 @@
    was MET the same hour: `slicea16bma` is hardened end-to-end
    (GDS · DRC 0 · LVS clear · timing met at 25 MHz, +16.9 ns; pins
    18/24 with six to spare). Honest fit: **your own 3×3 at 44%**
-   (the 2×2 was refused by silicon's own bar at 99.7%). The ONLY
+   (the 2×2 was refused by silicon's own bar at 99.7% — and the
+   smaller byte-wide core is itself 95.1% post-layout, so the 2×2
+   was never comfortable for this core family: "own tile" was
+   forced before your byte-wide preference arrived, not by it). The ONLY
    residual: €350 (if the 4 owned tiles apply toward 9) vs €630
    (fresh purchase) — readable only in your authenticated
    tinytapeout calculator, one browser minute. Bonus your
@@ -104,7 +107,9 @@
 - **The story** (two-weeks-story.md): four figures corrected at
   evidence's audit (2,126 added · 2,013 @6d0d0e8 · 17.9M tokens ·
   six-before-proving/eight-before-kernel), the receipts re-anchored
-  to two instruments cited separately.
+  to two instruments cited separately. Reproduce the theorem and
+  refutation figures without leaving this page:
+  `python3 docs/ledger-tools/campaign_receipts.py --controls`.
 
 ## 4. METHOD — what the night proved about the method itself
 
