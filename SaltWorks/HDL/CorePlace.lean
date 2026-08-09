@@ -3,6 +3,7 @@ import SaltWorks.HDL.StateCodec
 import SaltWorks.HDL.Decoder
 import SaltWorks.HDL.Immediate
 import SaltWorks.HDL.ReadTree
+import SaltWorks.HDL.RegWrite
 
 /-!
 # W5-asm, increment 2a — the FIRST organ placed at the real offset, `instOK` discharged
@@ -243,6 +244,78 @@ instruction is the one an off-by-one would silently move into the state. -/
 theorem address_bits_are_in_the_instruction (j : Nat) (hj : j < 5) :
     stWidth ≤ readTreeRs1Sig j ∧ readTreeRs1Sig j < off0 := by
   simp only [readTreeRs1Sig, rs1Bit, instrNet, instrBase, off0, coreInWidth, stWidth, Net]
+  split
+  · omega
+  · omega
+
+
+/-! ## 5. INCREMENT 2d — the first σ that reads ANOTHER ORGAN'S OUTPUTS
+
+Placements #1–#4 all read only core INPUTS, so `instOK_mono` lifted them to every later offset
+for free. **`regWrite` is the first placement where that is false**, and the difference is the
+whole reason the assembly order exists.
+
+`RegWrite.lean:46` gives its layout: `rd` on inputs `0…4`, `valid` on `5`, `isBEQ` on `6`.
+* `rd` is an instruction field (bits `7…11` per `ISA.wR`) — a core input, below `off0`.
+* **`valid` and `isBEQ` are the DECODER'S OUTPUTS** — gate nets, and therefore *above* `off0`.
+
+`instMap c σ off n = if n < c.nIn then σ n else off + (n - c.nIn)`, so the decoder's six outputs
+land at `[1135, 1151, 1167, 1176, 1185, 1189]` — `isBEQ` at index 4, `valid` at index 5, both
+inside `off0 … off1 - 1`. ⇒ ***`regWrite` is placeable from `off1` onward and NOT at `off0`:
+the ordering constraint is now load-bearing rather than a formality.***
+-/
+
+/-- The host net carrying the decoder's output `k`, once the decoder is placed at `off0`.
+Read from `instOuts`, never written as a literal — a literal here would be a number that
+silently stops tracking the decoder. -/
+def decOut (k : Nat) : Net := (instOuts decoder decoderSig off0).getD k 0
+
+/-- Bits `7…11` of the instruction: the `rd` index (`ISA.wR`: `funct7 rs2 rs1 funct3 rd opcode`). -/
+def rdBit (j : Nat) : Net := instrNet (7 + j)
+
+/-- `regWrite`'s σ: `rd` from the instruction, `valid` from decoder output 5, `isBEQ` from
+decoder output 4. -/
+def regWriteSig (j : Net) : Net :=
+  if j < 5 then rdBit j else if j = 5 then decOut 5 else decOut 4
+
+/-- ⭐ **PLACEMENT #5 — `regWrite` at `off1`, `instOK` DISCHARGED, and the first placement whose
+σ reaches into another organ's gates.** -/
+theorem regWrite_instOK : instOK regWrite regWriteSig off1 := by
+  refine ⟨regWrite_ssa, regWrite_wf, ?_⟩
+  intro j hj
+  have hnn : regWrite.nIn = 7 := by decide +kernel
+  rw [hnn] at hj
+  simp only [regWriteSig, rdBit, instrNet, instrBase, decOut, decoderSig, off1, off0,
+             instNext, coreInWidth, stWidth, Net]
+  split
+  · omega
+  · split <;> decide +kernel
+
+/-- ⛔ **WHY `instOK_mono` CANNOT LIFT THIS ONE — the theorem that makes the ordering real.**
+
+The decoder's outputs sit ABOVE `off0`, so `regWrite`'s σ does *not* land below `off0` and the
+monotone lemma has no premise to work from. Placements #1–#4 were order-independent; this one is
+not, and the difference is exhibited rather than asserted. *Anyone extending this file who assumes
+`instOK_mono` covers every organ will produce a placement that type-checks against the wrong
+offset.* -/
+theorem regWrite_is_NOT_placeable_at_off0 : ¬ (regWriteSig 5 < off0) := by
+  simp only [regWriteSig, decOut, decoderSig, off0, coreInWidth, stWidth, Net]
+  decide +kernel
+
+/-- **CONTROL: the two decoder-driven wires are DISTINCT and correctly ordered.** `valid` is
+output 5 and `isBEQ` is output 4; swapping them would place a well-typed core that write-enables
+on the wrong predicate. Both facts asserted, because the σ picks them by INDEX. -/
+theorem valid_and_isBEQ_are_distinct_and_ordered :
+    regWriteSig 5 = decOut 5 ∧ regWriteSig 6 = decOut 4 ∧ decOut 4 ≠ decOut 5 := by
+  refine ⟨by simp [regWriteSig], by simp [regWriteSig], ?_⟩
+  simp only [decOut, decoderSig, off0, coreInWidth, stWidth]
+  decide +kernel
+
+/-- **CONTROL: `rd` lands in the instruction, not in the state and not in the decoder's gates.**
+Three regions now exist below `off1` and σ must hit the right one for each input. -/
+theorem rd_bits_are_in_the_instruction (j : Nat) (hj : j < 5) :
+    stWidth ≤ regWriteSig j ∧ regWriteSig j < off0 := by
+  simp only [regWriteSig, rdBit, instrNet, instrBase, off0, coreInWidth, stWidth, Net]
   split
   · omega
   · omega
