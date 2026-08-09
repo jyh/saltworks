@@ -136,3 +136,48 @@ outside the certificate.**
 No Lean written, nothing built, nothing landed. Item A is read off a landed
 theorem's binder list; item B is a proposed shape. **The bound in B5 is not
 computed here** — it is named as owed, with its inputs identified.
+
+---
+
+## D. AMENDED BY COUNCIL RULING #8 (2026-08-09 11:36) — THE WIDTH IS CLOSED
+
+**Ruled:** values are **int8 fixpoint on the landed 32-bit datapath**,
+sign-extended at ingress; the activation compares at 32 with `wordSignedOrder`
+passed explicitly; **no 8-bit order variants, ever, for the PoC**; no
+requantization organ in the minimal demo.
+
+**Consequences for this document, stated so a reader does not act on the
+superseded text:**
+
+**D1 — §B5's fork is RESOLVED to (b), and the hypothesis is now DISCHARGEABLE
+rather than assumed.** With int8 operands on a 32-bit accumulator:
+
+```
+int8 signed                   |W|, |h| ≤ 128
+one term = 2-dim dot product  |W·h| ≤ 2 · 128 · 128        =    32,768
+W_self + 3·W_msg (deg ≤ 3)    4 terms                      =   131,072
++ bias b                                                   ≤   131,200
+                                        2^31 = 2,147,483,648
+                              ⇒ margin ≈ 16,000×, holds by `decide`
+```
+The no-overflow condition becomes a **bound lemma with an exhibited witness**,
+which is what §B6 required for rows 2 and 3 to compose.
+
+**D2 — §A's narrowing/fourth-row finding does NOT apply to the minimal demo.**
+There is no width transition under the ruling, so no `narrow : Word → BitVec 8`
+row is owed here. *It returns for the 8-bit-native v2/production variant, where
+the fixed-shift bound is `s ≥ 11` (s = 10 overflows by 1.125 units at the
+maximal activation).* Kept because that variant is a named reference row.
+
+**D3 — NEW ROW OWED: INGRESS SIGN-EXTENSION.** "int8 on a 32-bit datapath,
+sign-extended at ingress" is a semantic operation with a correctness condition:
+
+```
+(w : BitVec 8).signExtend 32 |>.toInt  =  w.toInt
+```
+⚠️ **`zeroExtend` would typecheck, cost the same gates, and silently map every
+negative weight to a large positive one** — the third appearance today of *a
+certified pipeline whose numeric meaning turns on an unstated convention*
+(after the activation's order and the accumulator's range). It is one lemma and
+it should be named rather than assumed, precisely because the wrong call is
+invisible at every other layer.
