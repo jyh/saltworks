@@ -4,6 +4,11 @@
 ### The campaign: A VERIFIED COMPILER FROM TINY-RUST TO 5-OP.
 ### v1.2: math's F7-F9 folded — three decisions the NAME forces,
 ### each chosen by name below, none by silence.
+### v2.0 (heartbeat-2 coherence pass): the pool bound moved BESIDE
+### the judgment per the v1.4 hpool-separate ruling (completeness =
+### "well-typed, pool-fitting programs compile"); the Captain's
+### classical sequence-typing CONFIRMED as the ruling form (the
+### v1.4 threading turnstile is corrected to it, not the reverse).
 
 ## 1. THE FEEL — three programs you can read cold
 
@@ -193,11 +198,16 @@ ceremony. No implicit coercions (Rust has none; neither do we).
 
 THE JUDGMENT **IS** THE HYPOTHESIS (math's T1 — the ask pays for
 itself): there is no separate `wellFormed` — `Γ ⊢ p ok` carries
-typing, scope, the live-binding budget (≤ pool; block scoping makes
-liveness syntactic), and literal ranges, as ONE syntactic decidable
-relation that never mentions the compiler. F4's circularity is
-discharged BY CONSTRUCTION, and the completeness row takes its
-natural form: **well-typed programs compile** — the whole point of a
+typing, scope, and literal ranges, as ONE syntactic decidable
+relation that never mentions the compiler. Liveness is syntactic
+(block scoping: scope end = liveness end), and the POOL BOUND rides
+BESIDE the judgment, not inside it — `liveMax p ≤ poolSize` is the
+machine's resource hypothesis, kept separate so the judgment stays a
+pure source property: the same program never becomes ill-typed on a
+smaller core, and rejection has exactly two nameable causes
+(ill-typed, or pool-exceeded). F4's circularity is discharged BY
+CONSTRUCTION, and the completeness row takes its natural form:
+**well-typed, pool-fitting programs compile** — the whole point of a
 type system, and the row that kills the reject-everything vacuity.
 TWO controls pre-registered at birth (T2): a program the judgment
 ACCEPTS and one it REJECTS (`while 1 { … }` — 1 is i32, not bool),
@@ -228,16 +238,18 @@ program shown to step, by decide), so no row can go vacuously green.
 
 ## 5. THE THEOREM PAIR (v1.1 — the post-refutation form)
 
-**Row A (correctness).** For well-formed p, if `compile p = some
+**Row A (correctness).** For well-formed, pool-fitting p, if `compile p = some
 code`, then for every source run σ ⇓ σ′: `machRun code (encode σ) =
 encode σ′`, AND every register outside p's pool is untouched — a
 function equality against the certified core semantics (the machine
 is deterministic; a mere reachability claim would under-specify it),
 with `encode` injective as a stated hypothesis.
 
-**Row B (completeness).** Every well-formed program compiles:
-`∀ p, wellFormed p → ∃ code, compile p = some code` — without this
-row, Row A is satisfied by a compiler that rejects everything.
+**Row B (completeness).** Every well-typed, pool-fitting program
+compiles: `∀ p, wellFormed p → liveMax p ≤ poolSize → ∃ code,
+compile p = some code` — without this row, Row A is satisfied by a
+compiler that rejects everything, and the two hypotheses are the two
+honest rejection causes; there is no third.
 
 Together: *the program does what the source says* — composable with
 *the core does what the ISA says* (landed) and, later, *the

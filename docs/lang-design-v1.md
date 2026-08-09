@@ -53,13 +53,19 @@ SLICE A EXACTLY AS IT EXISTS — no memory, no waiting on Slice B.
   BEQ-on-bool sound. v2 grows u32 + references in the SAME judgment;
   borrow rules enter as typing rules (ownership-as-theorem's static
   face). T1 UNIFICATION (math, 19:20; FORM RULED v1.4 on math's
-  statement-forms proposal, helm 20:0x): the judgment IS wellFormed —
-  TWO judgments, `Γ ⊢ e : τ` and the THREADING statement form
-  `Γ ⊢ s ⊣ Γ'` (let extends, block-end contracts: the live-binding
-  count is a computable function OF THE DERIVATION, so the register
-  budget needs no second analysis — F4's c2 has nowhere to move back
-  in). Γ is an assoc list (decidable lookup, structural recursion,
-  Γ.length = live bindings). ⚖️ THE POOL BOUND IS SEPARATE, not
+  statement-forms proposal, helm 20:0x; FORM CORRECTED at the
+  heartbeat-2 coherence pass — the ⊣ Γ' turnstile I adopted at v1.4
+  CONFLICTED with v1.9's Captain-shaped CLASSICAL SEQUENCE-TYPING
+  and the Captain's form wins): the judgment IS wellFormed — TWO
+  judgments, `Γ ⊢ e : τ` and the sequence-typed statement form (his
+  notation: no output contexts, no nonstandard turnstiles; `let`
+  binds over its continuation, so scope end = liveness end and the
+  live-binding count reads straight off the syntax). Math's actual
+  requirement — the budget computable with no second analysis, so
+  F4's c2 has nowhere to move back in — is SATISFIED by this form;
+  the threading variant is not adopted. Γ is an assoc list
+  (decidable lookup, structural recursion, Γ.length = live
+  bindings). ⚖️ THE POOL BOUND IS SEPARATE, not
   welded in: `liveMax p ≤ poolSize` is a RESOURCE hypothesis beside
   the judgment — the judgment stays a pure SOURCE property (the same
   program must not become ill-typed on a smaller core), and rejection
