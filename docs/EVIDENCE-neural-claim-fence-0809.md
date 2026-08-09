@@ -72,6 +72,23 @@ FALSIFIED IF any ONE of these is observed:
   F3  the theorem is proved for a MODEL of the fabric that no synthesis run
       instantiates (the model-vs-artifact gap — INSTRUMENT: the same
       olean-in-the-hub-graph check the maestro used on CoreOffsets at 09:51)
+
+      ⭐ SCOPE, PRE-REGISTERED 2026-08-09 16:0x — BEFORE THE RUN THAT WOULD
+        CLEAR IT, because silicon's run covers THE CELL ALONE and a cell-level
+        clearance must not read as a chip-level one:
+```
+        F3 CLEARS AT THE SCOPE THE RUN COVERS, AND NO WIDER.
+          cell synthesised      ⇒ "the CELL is certified down to silicon"
+          fabric NOT run        ⇒ the CHIP phrase stays at the kernel model
+        The fabric floorplan is the last link and it still needs a top module
+        nobody has ruled — so no run yet exists that could clear the chip.
+```
+      ⇒ **A CLEARED F3 CARRIES ITS SUBJECT IN THE SENTENCE.** *"Down to
+        silicon" with no subject is the ambiguity this whole fence exists to
+        prevent, and it would be created by a TRUE cell-level result.*
+      *(Same shape as this seat's a-count-is-not-a-scope, pointed at my own
+       falsifier: the result will be real and the scope is what a reader
+       cannot see from it.)*
   F4  "down to silicon" is asserted while any row of the decomposition is
       unlanded, OR while the COMPOSING JOIN over those rows is unstated.
       (Amended 15:45: the original gated on rows only, and I cleared it on a
