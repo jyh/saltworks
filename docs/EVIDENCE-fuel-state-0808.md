@@ -49,13 +49,46 @@ compiler-acct         5, 28,  7                              COMPILER
 math-acct          1, 22,  0                              MATH
 ```
 
-**Column semantics** are the maestro's reading — *"the standard usage-panel
-triple (session / week-all / week-model)"* — and were published **with an
-explicit invitation to correct**. ⚠️ **I cannot verify them from inside this
-seat: no usage panel is reachable from a shell, and the transcripts provably
-carry no account field.** *So the semantics are ATTESTED TWICE (Captain's
-reading, maestro's labelling) and VERIFIED ZERO TIMES. That is a weaker
-provenance than the numbers themselves and it is stated rather than smoothed.*
+### ✅ UPGRADE 19:59 — THE MAPPING IS VERIFIABLE IN-SEAT, AND TWO ROWS NOW ARE
+
+*I first wrote that none of this could be checked from inside a seat. **Compiler
+refuted that within two minutes** by reading its own config, and the method is
+free because every seat already owes the read as a boot duty.*
+
+```
+row 4  compiler-acct  → COMPILER    ✅ [REDACTED-ACCOUNT]   ($CLAUDE_CONFIG_DIR/.claude.json,
+                               read in-seat by compiler, 19:58:19 PDT)
+row 1  jasonh → EVIDENCE    ✅ jasonh@gmail.com  (read in-seat by me, 19:59:49 PDT,
+                               CLAUDE_CONFIG_DIR=${SEAT_CONFIG_DIR})
+rows 2,3,5                  ⏳ silicon · maestro · math — one command each
+```
+
+⚖️ **BUT BE PRECISE ABOUT WHICH CLAIM GOT UPGRADED — they are two claims and only
+one moved:**
+
+```
+ACCOUNT ↔ SEAT MAPPING     2 of 5 rows now VERIFIED at the machine, in-seat
+COLUMN SEMANTICS           still ATTESTED TWICE (Captain's reading, maestro's
+  (session/week-all/       labelling) and VERIFIED ZERO TIMES — no usage panel
+   week-model)             is reachable from a shell, and the transcripts carry
+                           no account field. Nothing about it has changed.
+```
+📌 *Conflating those two would be the easy mistake: "two rows verified" is about
+WHO owns which account, not about WHAT the three percentages mean.*
+
+## ⛔ AND THE `accountUuid` IS DELIBERATELY ABSENT FROM THIS FILE
+
+**Compiler read its UUID, found it present and stable — and did not publish it,
+on the explicit grounds that THIS SEAT'S OWN COST ROW promises *"the records
+carry no prices and no account identifier."*** *Publishing a UUID onto an
+archived bus, in a document bound for a council pack, would introduce exactly the
+identifier that row excludes.*
+
+🔑 ***A peer protected my published claim from me.*** *I read my own config in the
+same minute and did not print the UUID either — because compiler had already
+worked out why not.* **The mapping is the finding; the identifier is not needed
+for it, and it is available over a non-archived channel if the ledger ever
+genuinely needs it.**
 
 ## ⚖️ THE READ — the maestro's, marked correctable, and I am not upgrading it
 
