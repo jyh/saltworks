@@ -62,10 +62,16 @@ theorem cell_sum_bit_witness :
     ((1 : BitVec 32) + (1 : BitVec 32)).getLsbD 0 = false
   ∧ ((1 : BitVec 32) + (1 : BitVec 32)).getLsbD 1 = true := by decide
 
-/-- **MUTANT — a tied-HIGH carry-in is FALSE at the same witness.** With the
-carry-in high the cycle would compute `1 + 1 + 1 = 3`, whose bit 0 is `true`.
-Compiler's `carry_in_is_low` is what excludes this at the artifact; this shows
-the two arms genuinely differ, so that control could have failed. -/
+/-- **THE TWO CARRY-IN ARMS GENUINELY DIFFER.** With the carry-in high a cycle
+computes `1 + 1 + 1 = 3`, whose bit 0 is `true`; with it low, `2`, whose bit 0 is
+`false`.
+
+⚠️ *Historical note, corrected at the (b) ruling: this was once framed as a MUTANT
+excluded by `MacCell.carry_in_is_low`. **That control was DELIBERATELY RETIRED
+when ruling (b) untied the carry-in and admitted it as a port — nothing excludes a
+high carry-in any more, BY DESIGN, because the sign cycle needs it.** What the
+statement below still earns is the arms' distinctness, which is what makes the
+carry-in load-bearing rather than decorative.* -/
 theorem mutant_carry_high_differs :
     ((1 : BitVec 32) + (1 : BitVec 32) + (1 : BitVec 32)).getLsbD 0
       ≠ ((1 : BitVec 32) + (1 : BitVec 32)).getLsbD 0 := by decide
@@ -483,5 +489,44 @@ theorem wshift_runTrace_state (W : BitVec 32) (x : Bool) :
       rw [← BitVec.shiftLeft_add]
       congr 1
       omega
+
+/-! ## THE SIGN CYCLE — one further cycle, carry-in HIGH
+
+`MacInduction.mac_sign_cycle` keeps the sign step OUT of the accumulation
+recursion so the induction stays uniform. This is that discipline at the
+artifact: rung 3 stands unchanged over the addend trace, and the sign cycle is
+**one more `stepSeq`** — which is why the `(addend, carry)` pair form was not
+needed. The carry-in exists because ruling (b) admitted it as a port. -/
+
+/-- One cycle with carry-in HIGH: the cell computes `acc + c + 1`. -/
+theorem cell_carry_cycle (acc c : BitVec 32) :
+    (stepSeq macSeq (MacCell.bitsOf acc) (MacCell.bitsOf c ++ [true])).2
+      = MacCell.bitsOf (acc + c + 1) := by
+  have h1 : BitVec.setWidth 32 (BitVec.ofBool true) = (1 : BitVec 32) := by decide
+  have h := macSeq_step_word acc c true
+  rw [h1] at h
+  rw [h]
+
+/-- ⭐⭐ **THE SIGN CYCLE.** Feeding the COMPLEMENT of the top shifted weight with
+the carry-in HIGH subtracts it — `acc + ~w + 1 = acc - w`, the landed subtraction
+idiom (`CorePlace.subtraction_is_a_plus_not_b_plus_one`) running on the cell. -/
+theorem cell_sign_cycle (acc w : BitVec 32) :
+    (stepSeq macSeq (MacCell.bitsOf acc) (MacCell.bitsOf (~~~w) ++ [true])).2
+      = MacCell.bitsOf (acc - w) := by
+  rw [cell_carry_cycle acc (~~~w)]
+  congr 1
+  rw [sub_eq_add_neg, BitVec.neg_eq_not_add, ← add_assoc]
+  rfl
+
+/-- **CONTROL — it computes, and subtraction is what it computes.** -/
+theorem cell_sign_cycle_witness :
+    ((5 : BitVec 32) + (~~~(3 : BitVec 32)) + 1) = 2 := by decide
+
+/-- ⛔ **MUTANT — CARRY-IN LOW IS OFF BY ONE, at the same witness.** With the
+complement but no carry-in the cell computes `acc - w - 1`. This is precisely the
+error `subtraction_is_a_plus_not_b_plus_one` names, and it is invisible to every
+placement certificate. -/
+theorem mutant_sign_cycle_without_carry_is_off_by_one :
+    ((5 : BitVec 32) + (~~~(3 : BitVec 32))) ≠ ((5 : BitVec 32) - 3) := by decide
 
 end SaltWorks.HDL.MacBridge
