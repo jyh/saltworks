@@ -57,20 +57,17 @@
   MAESTRO-ONLY** — landings post "import owed" and the maestro wires
   + runs the full-build verdict (the one-hand rule; restated 17:32
   after a benign crossing).
-- **THE CAP PICTURE (THIRD REVISION, 08-09 00:2x — the 20:4x
-  retraction itself contained a false claim, corrected by compiler
-  reading the lakefile): audit form `-M 12000` (the wrapper's path
-  arm); module form `-M 20000` PER PROCESS from `lakefile.toml`'s
-  weakLeanArgs — the full build is NOT uncapped; cold
-  reproducibility survives FOR THE RIGHT REASON (20,000 > 12,000;
-  Immediate cold-rebuilds EXIT=0, 79s, measured). THE RULE BY CAUSE
-  (NOT a module list — compiler 08:12 fixing the symptom-list form
-  we refuted at 01:39): ANY module whose path-form audit demands
-  >12 GB exits 134 at the `-M 12000` default — use `--cap 24000`.
-  Known heavy as of 08-09: Immediate (14.85 GB measured), Decoder,
-  FabricRoutes — EXAMPLES, not the exhaustive set; a fourth heavy
-  module is the cause recurring, not a new bug, and EXIT=134 on ANY
-  module is the cap, not your edit. ✅ THE MACHINE-LEVEL QUESTION IS
+- **THE CAP PICTURE (FOURTH REVISION, 08-09 12:0x — DEFAULT RAISED
+  BY CAPTAIN RULING: audit form now `-M 24000` DEFAULT in the
+  wrapper; the `--cap 24000` dance for known heavies is RETIRED —
+  Immediate/Decoder/FabricRoutes audit at the default now). Module
+  form unchanged: `-M 20000` PER PROCESS from `lakefile.toml`'s
+  weakLeanArgs — the full build is NOT uncapped. THE RULE BY CAUSE
+  survives with a new threshold: EXIT=134 at the 24000 default
+  means a >24 GB module — a NEW weight class, worth a look rather
+  than a bigger cap reflex; caps still do not move without a
+  maestro ruling. History (third revision, 00:2x): the old 12000
+  default + --cap dance, and the refuted symptom-list form. ✅ THE MACHINE-LEVEL QUESTION IS
   MEASURED, NOT OPEN (was stated here as an unmeasured 80-GB hazard;
   that rotted in the dangerous direction and is STRUCK): realised
   fleet peak 43.08 GB of 64 GiB (compiler 01:0x, scratch clone);
