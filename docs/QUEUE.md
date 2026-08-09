@@ -318,7 +318,18 @@ OPEN ITEMS:
   free-floorplan, does not transfer). Settling instrument: one
   ~10-min hardening run, 4x2 die, synthetic 71.8-76.6k um^2 load —
   FIRES THE MOMENT THE CELL RTL EXISTS (silicon's first run).
-  Until then 6x2 stands, now measured-ROBUST (35-37% util).**
+  Until then 6x2 stands, now measured-ROBUST (35-37% util).
+  SILICON'S 12:09 ADVERSARIAL SELF-CORRECTION (recommendation
+  SURVIVES, inputs corrected): (i) the floorplan had used the bare
+  BANYAN not the BB — fabric understated ~4,159 um^2 (0.7 cell);
+  corrected 6x2 util = 36.5-38.8% still comfortable; 4x2 = 55.4-
+  58.9%, deeper into the unmeasured band. (ii) the "24-tile cap"
+  myth-bust WITHDRAWN — the 24 is the PIN budget (design doc §3b),
+  an arithmetic coincidence published as provenance. (iii) THE
+  INVERSION: k IS CAPPED AT 4 BY FABRIC PORTS (8 = 4 cells + CPU
+  + 2 edge + 1 spare), NOT by area — bigger tiles buy unaddressable
+  silicon; 6x2 is the RIGHT size, not merely sufficient; k>4 needs
+  a bigger FABRIC (16x16, v2), never a bigger tile.**
 
 - **NDF BENCH HARNESS (registered 11:4x at the Captain's memory-
   hassle question): RP2040 firmware = the memory-server side of the
