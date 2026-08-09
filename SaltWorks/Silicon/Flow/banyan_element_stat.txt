@@ -1,0 +1,20 @@
+
+7. Printing statistics.
+
+=== banyan_element ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+        8        - wires
+        8        - wire bits
+        8        - public wires
+        8        - public wire bits
+        8        - ports
+        8        - port bits
+        2   17.517 cells
+        2   17.517   sky130_fd_sc_hd__a22o_1
+
+   Chip area for module '\banyan_element': 17.516800
+     of which used for sequential elements: 0.000000 (0.00%)
+
