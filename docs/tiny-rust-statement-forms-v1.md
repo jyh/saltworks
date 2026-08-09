@@ -27,27 +27,45 @@ overflow semantics are not the machine's** — and that one is costed here, not 
 
 ## 1. THE TYPING JUDGMENT — SHAPE
 
-Two judgments, expression and statement, with the statement form **threading the context**:
+> ## ⛔ **[FORM CORRECTED 2026-08-08 21:3x — THE CAPTAIN'S NOTATION WINS]**
+> **I proposed a threading form `Γ ⊢ s ⊣ Γ'`.  It was adopted at lang v1.4 and then CORRECTED
+> at the heartbeat-2 coherence pass: it conflicted with v1.9's Captain-shaped CLASSICAL
+> SEQUENCE-TYPING — *his* notation, *his* session: "no output contexts, no nonstandard
+> turnstiles."**  ⇒ ***THE TURNSTILE YIELDS. THE CONTENT DOES NOT*** — the helm's ruling is that
+> my actual requirement (**the budget computable with no second analysis, so F4's c2 has nowhere
+> to move back in**) is satisfied by the sequence-typed form.
+> 📌 *I am correcting my own file rather than letting the pack's "presentation ↔ block ↔ proposal
+> agree" hold with mine dissenting in six places.  **The notation was never the finding.***
+
+Two judgments, expression and statement, in **classical sequence-typed form** (the ruled one):
 
 ```
 Γ ⊢ e : τ           expressions
-Γ ⊢ s ⊣ Γ'          statements: s is well-typed in Γ and leaves Γ'
+Γ ⊢ s               statements — NO output context, NO nonstandard turnstile
 ```
 
-**Why the statement judgment must thread (`⊣ Γ'`) rather than merely hold (`Γ ⊢ s ok`):**
-`let` extends the context and a block's end contracts it. Threading is what makes *"how many
-bindings are live at once"* a **computable function of the derivation** rather than a separate
-analysis — and that number is the register-pool bound. A non-threading judgment forces the pool
-analysis to be a second pass, which is precisely where an unwritten lemma (F4's c2) would move
-back in.
+**`let` binds over its CONTINUATION**, which is what carries the scope discipline without an
+output context:
+```
+        Γ ⊢ e : τ        Γ, x:τ ⊢ rest
+        ───────────────────────────────
+        Γ ⊢ (let x : τ = e;  rest)
+```
+**Why this satisfies the requirement the threading form was proposed for:** scope end **is**
+liveness end, so *"how many bindings are live at once"* reads straight off the syntax — the
+context depth at each point — and remains a **function of the derivation** rather than a
+separate analysis. **That is the whole content of the original argument, and it survives the
+change of notation intact:** a form that forced the pool analysis into a second pass is exactly
+where F4's c2 would move back in, and this one does not.
 
 **Context representation.** Proposed: an association list `Γ : List (Name × Ty)` with shadowing
 by most-recent lookup. *Rationale: decidable lookup, structural recursion, and `Γ.length` is the
 live-binding count directly.* ⚠️ *A `Finset`/`Std.HashMap` representation buys nothing in v1 and
 costs decidability plumbing.*
 
-**v1's type universe is `{ i32 }`** per the block. See §5(T2) — that is not a free choice, it has
-a consequence that must be stated in the same breath.
+**v1's type universe is `{ i32, bool }`** (Captain's council ask, folded at block v1.3 — conditions
+are `bool`, Rust-faithful, no truthy ints). ⚠️ *This line originally read `{ i32 }` and was stale
+within the hour; see §5's correction block, which the same drift produced twice in one file.*
 
 ---
 
@@ -61,14 +79,14 @@ by construction rather than by assertion:
 | independent of `compile` | it is a syntactic relation; `compile` does not occur in it |
 | decidable | that is what a type checker *is* |
 | carries types (F8) | `τ` is in the judgment |
-| carries scope | the threading of §1 |
+| carries scope | `let`-binds-over-continuation, §1 — scope end IS liveness end |
 
 ⇒ **PROPOSED TOP-LEVEL FORM:**
 
 ```lean
 theorem compile_correct
     {p : Prog} {Γ : Ctx} {code : List Instr}
-    (hty   : Γ ⊢ p ⊣ Γ')                 -- T1: the judgment as the well-formedness
+    (hty   : Γ ⊢ p)                       -- T1: the judgment as the well-formedness
     (hpool : liveMax p ≤ poolSize)        -- the resource bound, SEPARATE — see below
     (hc    : compile p = some code) :
     ∀ s s', bigStep p s s' →
@@ -97,8 +115,8 @@ INSIDE                  one hypothesis instead of two, and "well-typed" then mea
 
 ```lean
 theorem compile_total
-    {p : Prog} {Γ Γ' : Ctx}
-    (hty : Γ ⊢ p ⊣ Γ') (hpool : liveMax p ≤ poolSize) :
+    {p : Prog} {Γ : Ctx}
+    (hty : Γ ⊢ p) (hpool : liveMax p ≤ poolSize) :
     ∃ code, compile p = some code
 ```
 
@@ -108,8 +126,8 @@ system earns its place in a *compiler* correctness statement rather than only in
 **AND THE TWO DEGENERATE CONTROLS, pre-registered here so they are written before the draft
 hardens (F6, T2):**
 ```lean
-example : ∃ p Γ Γ' s s', (Γ ⊢ p ⊣ Γ') ∧ bigStep p s s'     -- the relation is INHABITED
-example : ¬ (∅ ⊢ ⟦ x = y + 1 ⟧ ⊣ _)                        -- the judgment REJECTS something
+example : ∃ p Γ s s', (Γ ⊢ p) ∧ bigStep p s s'             -- the relation is INHABITED
+example : ¬ (∅ ⊢ ⟦ x = y + 1 ⟧)                            -- the judgment REJECTS something
 ```
 ⚠️ **The second is the one v1 can barely satisfy, and §5 says why in plain terms.**
 
