@@ -268,6 +268,23 @@ OPEN ITEMS:
   GATE: §1 final row table awaits assembly rows 15-16; halves
   proceed now.**
 
+- **THE CELL WAVE — RUNG 4 SEALED, THE RESIDUE BOARD (14:5x):
+  a2c6470 landed (fresh Opus hand, 4b induction first attempt,
+  three mutants kernel-FALSE incl. the total-only wrong-theorem
+  refutation) + e2e966b headline amended per math's review (psum
+  not sval). SEALS: math ENDORSED (content) · silicon MEAS green ·
+  maestro saltbuild EXIT=0 x2. REMAINING, two named items, the
+  reviews' two halves of one rung: (i) hW-DISCHARGE — compose the
+  weight-shift organ (its per-cycle theorems ARE the assumed
+  weight schedule) + the SECOND overflow condition compiler flagged
+  (W<<<t register overflow — exists nowhere yet, needs shaping);
+  (ii) SIGN-CYCLE COMPOSITION — a DESIGN DECISION not a lemma
+  (macSeq only adds, by design): options = the SCHEDULE presents
+  the negated last partial product (zero silicon, the contract
+  extends) vs an op-mux/second organ (the original diagram's +/−
+  arm). MAESTRO RULING PENDING on (ii); (i) shapes at the seats'
+  seams.**
+
 - **CROSS-SESSION MESSAGING — ADOPTION PLANNED AT NEXT RELIGHT
   (the Captain flagged the new system 14:1x; assessed from the doc
   + live probes): binary 2.1.226 HAS it; every RUNNING session
