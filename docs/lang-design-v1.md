@@ -40,6 +40,15 @@ SLICE A EXACTLY AS IT EXISTS — no memory, no waiting on Slice B.
   `*4` (self-adds) at the source; unsigned `<` (sign-bit XOR + SLT)
   lives in the BACKEND for the comparator spec (unsigned bit-string
   compare) and reaches the source only with v2's u32 (F8 rescope).
+- TYPES (Captain's council ask, folded at v1.3): τ ::= i32 | bool,
+  judgment-structured (Γ ⊢ e : τ); conditions are bool (Rust-faithful,
+  no truthy ints), SLT's 0/1 output IS the bool representation; the
+  PRESERVATION row (big-step preserves state typing, chiefly the
+  bool-is-0/1 invariant) is a kernel node — it is what makes
+  BEQ-on-bool sound. v2 grows u32 + references in the SAME judgment;
+  borrow rules enter as typing rules (ownership-as-theorem's static
+  face). wellFormed = well-typed ∧ liveness ≤ pool ∧ literals in
+  range.
 - Statements: `skip` · assignment · `seq` · `if` · `while`.
   Big-step semantics in Lean (IMP-shaped; termination NOT assumed —
   the semantics is a relation, and the compiler theorem quantifies
@@ -74,6 +83,8 @@ embedding.
 
 ## 3. DECOMPOSITION
 
+- N0 the type system + PRESERVATION (B): the judgment, decidability,
+  and the bool-representation invariant — N1-N3 consume it.
 - N1 expression compilation + correctness (B): registers-and-ops,
   the two proved lowerings folded in.
 - N2 statement compilation, straightline (B): seq/assign; the

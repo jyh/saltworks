@@ -22,8 +22,10 @@ fn main() {
 }                       // post: a ≤ b
 ```
 
-**A loop.** Subtraction-by-constant is sugar for ADDI with a negative
-immediate — exactly what the hardware does:
+**A loop, with a typed condition.** Subtraction-by-constant is sugar
+for ADDI with a negative immediate — exactly what the hardware does;
+the `0 < n` is a `bool`, as Rust demands, and SLT hands us its 0/1
+representation for free:
 
 ```rust
 fn main() {
@@ -86,16 +88,39 @@ The parser (Rust-familiar surface, `let mut`, sugar like `n - 1` and
 `cex!`) is a TRUSTED frontend; every theorem lives from this AST down
 to machine code — CompCert's own posture, stated plainly.
 
-## 3. STATIC SEMANTICS (well-formedness — standalone and decidable)
+## 3. THE TYPE SYSTEM (the Captain's ask — judgment-structured from
+## birth)
 
-`wellFormed p` iff: every variable assigned before use · MAX LIVE
-BINDINGS ≤ pool size (Rust's block scoping makes liveness ends
-syntactic — the language choice discharges this cleanly; math's
-observation) · every literal fits i32. Decidable by construction and
-INDEPENDENT of the compiler — the bridge "wellFormed → the allocator
-succeeds" is a proved theorem, never a definition (the c2 shape,
-barred). Types in v1: everything is i32; signedness is therefore
-unambiguous in every comparison (F8).
+Two types in v1, and the second is the machine's own gift:
+
+```
+τ ::= i32 | bool          (v2 reserves: u32, &τ, &mut τ)
+
+Γ ⊢ n : i32   (literal in range)      Γ ⊢ x : Γ(x)
+Γ ⊢ e₁ : i32   Γ ⊢ e₂ : i32           Γ ⊢ e₁ : i32   Γ ⊢ e₂ : i32
+─────────────────────────── (+,^)     ─────────────────────────── (<)
+Γ ⊢ e₁ + e₂ : i32                     Γ ⊢ e₁ < e₂ : bool
+
+Γ(x) = τ   Γ ⊢ e : τ                  Γ ⊢ e : bool   Γ ⊢ s ⊣ Γ
+──────────────────── (assign)         ──────────────────────── (while)
+Γ ⊢ x = e ⊣ Γ                         Γ ⊢ while e { s } ⊣ Γ
+```
+
+Rust-faithful, so: conditions are `bool`, not truthy integers — and
+here the machine cooperates beautifully, because SLT already
+produces exactly 0 or 1. The representation invariant (bool values
+are 0/1 in their register) is the type system's one runtime theorem:
+**preservation** — every big-step preserves state typing — is what
+makes BEQ-on-a-bool sound, and it is a real, small kernel row, not
+ceremony. No implicit coercions (Rust has none; neither do we).
+
+`wellFormed p` = WELL-TYPED (the judgment above) ∧ max live bindings
+≤ pool size (block scoping makes liveness syntactic) ∧ literals in
+range. Decidable, standalone, independent of the compiler — the
+bridge to allocator-success stays a proved row (the c2 bar). In v2
+the same judgment grows u32 (type-directed comparison lands F8's
+lowering at the source) and references — where the borrow rules
+enter AS TYPING RULES, which is how ownership becomes a theorem.
 
 ## 4. OPERATIONAL SEMANTICS (big-step, three rules shown)
 
