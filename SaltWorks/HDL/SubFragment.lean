@@ -50,10 +50,13 @@ THE TWO ORGANS' SPECS COMPOSE.***
 missing premise was `bitNot32`'s semantics at every input — **which this corpus did not have.**
 `bitNot32_correct_on_sample` is a Bool sweep over fixtures. It took a new module
 (`SingleLevel.lean`, `run_level_map` + `bitNot32_sem`) to supply it.
-⇒ ***`Compose.lean`'s four lemmas did everything asked of them. THE SAMPLED CERTIFICATES BECAME
-LOAD-BEARING THE MOMENT TWO ORGANS MET*** — a different repair from what *"a construction, not a
-lemma"* implies. ⚠️ **And `bitXor32`, `bitAnd32`, `bitOr32` are STILL sampled-only, so the next
-organ pair will hit the same wall.**
+⛔⛔ **CORRECTED 21:5x: THAT DIAGNOSIS WAS FALSE.** The corpus already had ∀-level organ
+semantics — `sem_bitNot32`, `sem_bitXor32`, `sem_adder32` (*on all 2^64 pairs*) and `sem_bwCirc`
+all live in `Stack/Program.lean`. **I searched my own naming convention in my own slot and
+concluded absence.** ⇒ ***So "the sampled certificates became load-bearing" was never the
+obstruction. What I actually needed was the ARBITRARY-env form (the corpus's are over `bwEnv a b`,
+and a composite's env is circuit-fed) — a much narrower gap than the one I published.***
+⚠️ **[INFERENCE] And I have not checked whether `sem_congr` + `sem_bwCirc` reach it anyway.**
 
 📌 **AND THE SECOND OBSTRUCTION, WHICH COST MORE THAN THE FIRST: `omega` DOES NOT WORK ON
 `Net`-ASCRIBED GOALS.** Measured with `pp.all`: `Net` occupies the TYPE ARGUMENT of `LT.lt` and

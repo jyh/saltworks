@@ -8,12 +8,28 @@ import SaltWorks.HDL.Bitwise
 /-!
 # SINGLE-LEVEL CIRCUITS — and the first ∀-env spec for a bitwise organ
 
-⛔ **THIS FILE EXISTS BECAUSE `SubFragment.lean`'s PROBE NAMED ITS OWN BLOCKER.** That probe
-instantiated `bitNot32` → `adder32` and got a `∀ env` composition theorem whose content was
-thin, for one reason: **a `∀ env` subtraction theorem needs `bitNot32`'s semantics at EVERY
-input, and this corpus had none.** `bitNot32_correct_on_sample` (`Bitwise.lean:142`) is a Bool
-sweep over fixtures. ⇒ ***The sampled certificates became load-bearing the moment two organs
-met, and that — not the composition machinery — is what blocks an assembled datapath spec.***
+⛔⛔ **CORRECTED 21:5x — THIS FILE'S ORIGINAL PREMISE WAS FALSE AND IS STRUCK.**
+
+> **What it said:** *"a `∀ env` subtraction theorem needs `bitNot32`'s semantics at every input,
+> and this corpus had none"*, and that `bitNot32_sem` is *"the FIRST unconditional semantics for
+> any bitwise organ in this corpus."*
+
+⛔ **FALSE.** `SaltWorks/Stack/Program.lean` already carries `sem_bitXor32` (`:2737`),
+`sem_bitAnd32` (`:3572`), `sem_bitOr32` (`:3584`), `sem_bitNot32` (`:3596`), `sem_adder32`
+(`:3188`, *"on all 2^64 operand pairs"*), `sem_sltCirc`, `sem_pcAdd` — **and `sem_bwCirc`
+(`:3544`), which is exactly the parametric generator lemma this file deferred as
+elaboration-blocked.**
+📌 **How I missed it: I searched for MY naming convention (`bitNot32_sem`) in MY slot
+(`SaltWorks/HDL/`). The corpus's convention is `sem_<organ>` and the theorems are in math's
+file.** *A negative search result is a claim about an instrument plus a root plus a filter — my
+own banked law, violated four hours after I wrote it into `docs/compiler-inventory-0808.md`.*
+
+✅ **WHAT SURVIVES, STATED NARROWLY: the corpus's `sem_*` are over `bwEnv a b`; these are over an
+ARBITRARY `Env`.** That extra generality is what `SubFragment.frag_subtraction` consumed, because
+inside a composite the environment is **circuit-fed**, not `bwEnv`. ⚠️ **[INFERENCE] I have NOT
+established that `sem_congr` + `sem_bwCirc` could not reach the same place, and I am NOT claiming
+`run_level_map` is novel either.** *Anyone extending this should check `Program.lean` first — I
+did not.*
 
 ## ⭐ THE GENERAL LEMMA, `run_level_map`
 
@@ -28,9 +44,9 @@ silently, so the only thing that catches one is looking.*
 
 ## ✅ WHAT IT BUYS — `bitNot32_sem`
 
-`sem bitNot32 env = (List.range 32).map (fun k => !(env k))`, **∀ env, no side condition.**
-The first unconditional semantics for any bitwise organ in this corpus, and exactly the
-premise `SubFragment`'s bar 4 was missing.
+`sem bitNot32 env = (List.range 32).map (fun k => !(env k))`, **∀ env, no side condition** —
+over an ARBITRARY env, which is the form `SubFragment`'s bar 4 consumed. ⚠️ **NOT the first
+unconditional semantics for a bitwise organ: `sem_bitNot32` (`Program.lean:3596`) predates it.**
 
 ## ✅ ALL FOUR BITWISE ORGANS NOW HAVE ∀-env SPECS — closed 21:5x
 
@@ -42,8 +58,10 @@ here, each ∀ env with no side condition.
 ```
 theorem bwCirc_sem (mk) (hfan : ∀ x y, (mk x y).fanin = [x, y]) (env) : …
 ```
-**still does not elaborate** — deterministic `whnf` timeout at `maxHeartbeats 1000000`. [INFERENCE]
-*Unfolding `sem` + `bwCirc` with a VARIABLE `mk` appears to diverge where concrete gates do not.*
+**does not elaborate here** — deterministic `whnf` timeout at `maxHeartbeats 1000000`.
+⛔ **BUT `Program.lean:3544`'s `sem_bwCirc` IS that lemma, PROVED, with the `hfan`/`hev`
+hypotheses I was groping toward.** *So "the route is known" was wrong twice over: the route was
+already walked.*
 ⇒ ***So the three organs are covered by three CONCRETE INSTANCES of `run_level_map`, one per op —
 the route named when the generalisation was deferred. The general lemma over an arbitrary `mk`
 remains unproved and is not needed: `run_level_map` itself is the generalisation that matters, and
