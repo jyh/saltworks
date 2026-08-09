@@ -419,8 +419,94 @@ work.
 
 ## 4. THE FENCES — evidence's pass
 
-> ### ⏳ STATUS: **CRITERIA PRE-REGISTERED, PASS NOT YET RUN** (evidence, 2026-08-09 13:2x)
+> ### ✅ STATUS: **PASS — WITH TWO NOTED ITEMS, NEITHER TOUCHING A HEADLINE NUMBER**
+> **Run 2026-08-09 13:4x by the evidence seat, against the criteria in §4.1–4.3
+> published at 13:2x BEFORE either half was written.** *Window: `core-account.md`
+> at the §3 landing; §1 window `5f1abb7`, §2 window `RUN_2026-08-09_15-50-58`.*
 >
+> **The account IS a citation target as of this verdict, with the two items
+> below carried openly and the refinement's OWED-MARKER intact.**
+
+### 4.0 The verdict, and what it is a verdict ABOUT
+
+*The criteria were published before the halves were filled, so this pass is a
+CHECK against a standing bar and not an opinion formed after seeing the work.*
+
+```
+INSTRUMENT   §1 names #eval over the real Circ artifacts · §2 names LibreLane
+             3.0.5 + pinned sky130A + a run id + yosys stat -liberty      ✅
+WINDOW       §1 `5f1abb7` · §2 RUN_2026-08-09_15-50-58 · §3 dated           ✅
+DENOMINATOR  §1 states what it refuses to count UP FRONT (gates≠cells, 13
+             distinct organs in 16 placements, tie row excluded, no `core`
+             object); §2 separates emitS output from behavioural RTL and
+             refuses a single µm²/gate factor                              ✅
+WITNESSES    §1 reconciles TWO instruments (11461 = 11459 + 2) and marks its
+             single-witness columns ⚠️1W itself                            ✅
+```
+
+### 4.1′ ITEM 1 — §1's instrument is NAMED but NOT REPRODUCIBLE
+
+```
+[MEASURED] SaltWorks/HDL/ScratchAccountMeasure.lean
+           exists: yes · git-tracked: 0 · ignored by .gitignore:2 `Scratch*.lean`
+```
+**Not a strike.** *Naming the tool satisfies "which instrument"; it does not
+satisfy "another party can re-run it", and no one off this machine can.*
+⇒ **§1 survives on its OTHER witness: `CoreOffsets.lean`'s `row_*` literal table
+is tracked and `decide +kernel`-checked, and the two reconcile exactly.** The
+harness is the *derivation*; the tracked theorems are the *evidence*. **Fix is
+one line: track the harness under a non-`Scratch*` name, or state explicitly
+that `CoreOffsets` is the reproducible instrument.**
+
+### 4.2′ ITEM 2 — a STALE PAIR inside the sentence that justifies an instrument
+
+```
+§1.3 states  "grep -c '#audit_axioms' returns 38 against 36 real calls"
+MEASURED NOW  same file:  #audit_axioms = 43  ·  ^#audit_axioms = 41
+```
+**The headline is correct and unaffected: 41 calls, 41/41 ticks, `^`-anchoring
+is the right instrument.** *But the evidence offered FOR that choice is dated and
+unlabelled — a sceptic who checks the justification finds 43/41 and cannot tell
+whether the lesson moved or the file did.* **The lesson survives exactly (two
+extras, both prose about the instrument); the figures do not.**
+⇒ **Fix: stamp them (`38/36 as of 52d11f3`) or refresh to 43/41.** *This fence's
+own F4 in `EVIDENCE-neural-claim-fence-0809.md` carries exactly that stamp, added
+after the same class bit this seat at 10:36.*
+
+### 4.3′ ONE GLOSS ON §3's AUTHORIZED SENTENCE
+
+*"every organ and every wire is kernel-certified"* is **defensible and needs
+§1.4's gloss to stay so**: row 12 (`ruledEnc`) has **no `sem_*` certificate** —
+it is a zero-gate rewiring whose stand-in is `encoder_select_seam_closed`. *So
+every organ carries A kernel-checked theorem, but not all of the same kind.* §1.4
+discloses this plainly; **the sentence must not travel without that disclosure**,
+because "kernel-certified" will be read as "has a semantic certificate".
+
+### 4.4′ WHAT I VERIFIED CLEAN — reported because a pass listing only faults is not a pass
+
+```
+§2 artifacts    metrics json · realdie doc · synth.sh — ALL TRACKED
+                44 *_stat.txt reports tracked (the §2.2 window)
+§2 emitS claim  readtree.v TRACKED; I counted sky130 cell instances
+                INDEPENDENTLY as a third party: 2,981 — matches silicon exactly
+⇒ the one-gate gap (2,982 kernel gates vs 2,981 cells) is REAL, reproduced from
+  the artifact by a seat that did not write either half, and correctly left OPEN
+  with its candidate cause labelled a GUESS.
+```
+📌 ***That is the pass earning its keep in the positive direction: silicon's most
+uncomfortable number is the one an outside reading confirms.***
+
+### 4.5′ THE CITATION RULE, now active
+
+**This account may be cited.** *Two conditions travel with it: (1) the
+single-cycle refinement carries an OWED-MARKER, not a sha — any citation
+implying end-to-end semantics is stronger than the account; (2) §3's authorized
+sentence is the ceiling. **Any stronger sentence over-claims; any weaker one
+undersells measured work** — and that is §3's own wording, which this pass
+endorses unchanged.*
+
+<!-- criteria as published 13:2x, before either half was filled: -->
+
 > **The pass runs LAST, by commission — it needs §1 and §2 filled. But the BAR
 > is published NOW, before either half is written, for one reason: a criterion
 > published after the work is a rationalisation, and a criterion published
