@@ -83,7 +83,14 @@ FALSIFIED IF any ONE of these is observed:
                                    `macRun ~ runTrace macSeq` c754b29
                                    ⇒ LANDED THROUGH the accumulator-hardware
                                      attachment; RUNG 4 (weight-shift
-                                     composition = the FULL row) OWED, in flight
+                                     composition = the FULL row) OWED.
+                                   ⛔ CORRECTED 14:3x: NOT "in flight". The
+                                     maestro's own text said in-flight and math
+                                     corrected it to SHAPED, UNSTARTED — an
+                                     executor was dispatched only at 14:34. I
+                                     had copied the package's word into my
+                                     fence, so the fence inherited a status
+                                     word it did not verify.
         row 3 signed activation    LANDED (`wordSignedOrder`)
       ⇒ F4 STILL BINDS. A row landed through rung 3 of 4 is NOT a landed row,
         and "two landed" in the headline remains correct.
