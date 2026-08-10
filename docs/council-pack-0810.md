@@ -86,9 +86,12 @@ allocation. (g) Block ①'s Row A amended form (the `emit_runs` shape).
 
 **PRE-COUNCIL SEAT SIGN-OFFS (12:1x):** compiler checked block ①'s ladder
 against the corpus and DECLINES TO REPRICE (honest as scoped) — and ran an
-L2 PROBE before the ruling: the ∃-fuel form COMPOSES over `whileT`, carried
-by the already-landed `runFor_add` (ask-list item (g) is de-risked by a
-live probe, not an argument). Evidence
+L2 PROBE before the ruling: the ∃-fuel form COMPOSES over `whileT`,
+carried by the already-landed `runFor_add`. SCOPE, per compiler's own
+13:43 narrowing (the maestro's earlier "de-risks (g)" was too wide): the
+probe demonstrates ONE INGREDIENT of (g) — the fuel composition — NOT the
+`emit_runs` shape itself (entry-pc/`EmbedsAt`/exit-conjunct/frame), which
+remains untested and is the thing (g) actually rules on. Evidence
 FENCE-PASSED the pack and all three blocks (every raw phrase hit was a
 block citing the fence, not breaking it) and PRE-REGISTERED F6 — the
 three-tier "verified learning" earn criterion with falsification
