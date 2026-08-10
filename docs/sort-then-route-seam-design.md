@@ -60,30 +60,56 @@ second is backwards** — ours is sequential too. Same object class as ISS90 p.7
            controls: ceC_does_not_realise_cKey_naively · ceC_rejects_idle_sorts_low
                      ceCIdleLow_is_one_gate_from_ceC · ceC_idle_dest_is_unobservable
 ✅ LANDED  abstract sort -> routing   cSorted_concentrates · cSorted_strictMonoOn  (math's)
-⛔ MISSING NETWORK -> abstract sort:  that batcherNetC (24 ceC instances) computes cSorted
+✅ LANDED  NETWORK -> a sort          bnC_output_frames_driven: the output frame vector
+           IS runNetF (cDestOf · ≤ cDestOf ·) bnComps — for ARBITRARY st and trace…
+⛔ MISSING …⚠️ BUT ONLY UNDER `StageOK`, WHOSE FIRST CLAUSE IS `cFrame true d p`
+           ON EVERY WIRE. THE LANDED NETWORK THEOREM IS **FULL LOAD ONLY**.
 ```
-⛔ ***NOTHING IN `SaltWorks/Silicon/` MENTIONS `batcherNetC` — I grepped the whole tree.*** *The
-certified elements and the certified sort have **no connection through the network.** The file says
-so itself at `BatcherNetC.lean:152`: "**the 8x8 sorter has never been RUN in the kernel on either
-convention**", and the certificates that landed behind that note are trace-factoring and delivery,
-not sortedness.*
+🔑 ***THE SEAM IS THE PARTIAL-LOAD GAP, AND THAT IS WHY MATH'S MODULE IS CALLED `PartialLoad`.***
+*At full load `(¬active, dest)` collapses to `dest` — `cKey_degenerates_at_full_load` — which is
+exactly why `cDestOf` is a sound comparator inside `StageOK` and only inside it. The NDF's real
+traffic is partial: idle lines are normal, and concentration is the entire point of sorting first.*
+
+⛔ **AND THE LANDED COMPARATOR CANNOT SIMPLY BE EXTENDED — `SaltWorks/HDL/BatcherRun.lean`, 4
+theorems, `[1 axioms]` each:** *`cDestOf` samples only the address bits, so an idle line reads as
+**destination 0**, the most-preferred slot (`cDestOf_idle_is_zero`), and is indistinguishable from an
+active line bound for 0 (`cDestOf_blind_to_activity`).* ⇒ ***`cDestOf ≤` at partial load IS
+idle-sorts-low — the order `ceC_rejects_idle_sorts_low` refutes at the element and
+`cKey_partial_load_differs_from_dest` refutes at the key. Extending the network theorem by keeping
+its comparator would adopt the losing order.*** *`cDestOf_sound_at_full_load` is the control: the
+landed theorem is **narrow, not wrong**, and that pair of facts is the whole seam.*
+
+✅ **THE HARDWARE IS FINE — this is a PROOF gap, the good direction.** *Driven with five active
+frames (dest 5,2,7,0,3) and three idle, `rst` high on cycle 0 only, `batcherNetC` emits the actives
+on wires 0..4 in order 0,2,3,5,7 — each carrying its own line's payload — and the idles on 5,6,7.*
+⚠️ ***That is a `#eval`, not a theorem: `decide +kernel` on `runTrace batcherNetC` was OS-killed at
+24 GB (EXIT=137). 816 gates x 14 cycles is not a kernel computation — which is exactly why the
+corpus proves network results structurally. A brute-force fixture is not available at this scale.***
 
 ## 4. PRE-REGISTERED COUNTS — for the seam as relocated
 
 ```
-network sorts   batcherNetC's 8 outputs are cKey-sorted    1 theorem, and it is NOT a decide:
-                                                           96 state bits ⇒ 2^96 states.
-                                                           Route = bnC_trace_factors (LANDED) to
-                                                           24 per-element runs, then the Batcher
-                                                           comparator-sequence argument.
-seam            that sorted network == runNet batcher8     1 theorem, consumes the above
-composition     banyan on the sorted output                consumes cSorted_concentrates +
-                                                           cSorted_strictMonoOn — both LANDED
-new objects     none at the element level — the ties exist
+PartialStageOK  StageOK with `cFrame true d p` weakened to "active OR idle",
+                and the distinctness clause restated on cKey rather than cDestOf
+                (idles TIE under cDestOf, so the current clause is unsatisfiable
+                 the moment two lines are idle — that is the formal reason the
+                 landed hypothesis excludes the NDF's own traffic)
+network sorts   bnC_output_frames_driven with `runNetF (cKeyLE …)`   1 theorem
+seam            that == math's runNet batcher8 (cKey act dst)        1 theorem
+composition     banyan on the sorted output    consumes cSorted_concentrates +
+                                               cSorted_strictMonoOn — both LANDED
+new objects     a cKey-valued frame reader; the element tie already exists
 ```
+🔑 ***THE DISTINCTNESS CLAUSE IS THE LOAD-BEARING EDIT AND IT IS NOT COSMETIC: `StageOK` requires
+pairwise-distinct `cDestOf`, and `cDestOf_idle_is_zero` says every idle line reads 0 — so with two
+idle lines the hypothesis is FALSE, vacuously excluding exactly the traffic the NDF runs.*** *The
+element already misroutes on a genuine tie (`ceC_pair_tie_splices_the_payload` is the corpus's own
+control), so the replacement clause must be a real order, not a dropped requirement.*
+
 ⚠️ **I am NOT pricing the network theorem tonight.** *It is the one real proof in this design and my
-banked law is that an estimate assembled from absences is worthless. `bnC_trace_factors` is the
-lever and it is already landed; the comparator-sequence argument is the unknown.*
+banked law is that an estimate assembled from absences is worthless. `bnC_trace_factors` and
+`bnC_output_frames_are_the_fold` are the levers and both are landed; the unknown is whether the
+element's partial-load behaviour supports the same per-stage invariant.*
 
 ## 5. ⛔ WHAT THIS FILE'S FIRST DRAFT GOT WRONG, 65 MINUTES OLD
 
