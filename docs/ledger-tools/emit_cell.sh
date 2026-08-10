@@ -60,5 +60,24 @@ open SaltWorks.HDL.MacCell
 #eval IO.print (emitS "1" "$NAME" $ORGAN)
 LEOF
 fi
-cd "$REPO" && ../saltbuild.sh "$SCRATCH" 2>/dev/null | sed '/^saltbuild EXIT=/d;/^info:/d'
+# ⛔⛔ THE VERDICT WAS DESTROYED TWICE OVER HERE, AND THIS IS MY OWN KIT.
+# The old line was:
+#   ../saltbuild.sh "$SCRATCH" 2>/dev/null | sed '/^saltbuild EXIT=/d;/^info:/d'
+#   (1) PIPED, so $? is sed's status — always 0. [[exit-code-dies-in-a-pipe]],
+#       which this seat banked, and it fails in the REASSURING direction.
+#   (2) and it DELETED THE `saltbuild EXIT=` LINE, so a caller could not even
+#       read the verdict by eye. Both channels to the truth, closed by one line.
+# 🔑 The fleet already had the right pattern: silicon's meas_build.sh:124 saves
+# the output and GREPS the EXIT line out of the file, so the verdict survives
+# both the pipe and the filter. Adopted here.
+cd "$REPO" || exit 2
+_out=$(mktemp -t emitcell_out)
+../saltbuild.sh "$SCRATCH" > "$_out" 2>/dev/null
+_rc=$?
+_verdict=$(grep -E '^saltbuild EXIT=[0-9]+$' "$_out" | tail -1)
+sed '/^saltbuild EXIT=/d;/^info:/d' "$_out"
+# THE VERDICT IS PRINTED, NEVER SWALLOWED — to stderr so stdout stays pure RTL.
+echo "${_verdict:-saltbuild EXIT=<NO VERDICT LINE — the build did not report>}" >&2
+rm -f "$_out"
+[ "$_rc" -eq 0 ] || exit "$_rc"
 rm -f "$SCRATCH"
