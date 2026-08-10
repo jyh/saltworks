@@ -471,7 +471,28 @@ while true; do
     # posts that merely LIST their filter classes. Had I shipped the asserted
     # version, the comment would have argued the gate discards nothing while
     # the gate's whole value is the one line it keeps.
-    grep -oE "HALT|STAND DOWN|STAND-DOWN|ALL SEATS STOP|FLEET STOP" "$EVTMP/orders.txt" \
+    # ⛔⛔⛔⛔⛔⛔ FIFTEENTH DEFECT — TWO PHANTOM HALTS, AND NEITHER OF MY FIRST
+    # TWO FIXES CAUSED THEM. The real source, read from the instrument's OWN
+    # orders view rather than guessed a third time: the MAESTRO'S POST CONTAINED
+    # "the phantom-HALT resolution" -- the helm DESCRIBING the false alarm, and
+    # this arm firing on the description. [[description-becomes-a-carrier]],
+    # sixth instance and the purest yet: the discussion of my false alarm IS my
+    # false alarm. Owner-gating cannot help — the maestro really did write it.
+    #
+    # ⚠️ AND MY FIRST INSTINCT WAS A NARROWING THAT WOULD HAVE EATEN A REAL ORDER.
+    # I was about to require HALT within the first 200 bytes of the post body.
+    # MEASURED over the full bus before shipping it — 7 maestro-owned HALT tokens:
+    #     position rule (<200B)  keeps 2, DROPS 5
+    #     and this file's own history records a real halt "emitted at 281 chars"
+    # ⇒ THE POSITION RULE WOULD HAVE SUPPRESSED A GENUINE HALT ORDER. Measuring
+    #   what a guard SUPPRESSES over the full object, before shipping it, is
+    #   [[prefer-bounded-lookback-guards]] — and it is the only reason this arm
+    #   still works.
+    #
+    # ✅ SHIPPED INSTEAD: reject only a HALT welded into a compound by a hyphen or
+    # letter (phantom-HALT, non-HALT). MEASURED: drops exactly 1 of 7 — the false
+    # positive — and touches none of the other six.
+    grep -oE "(^|[^A-Za-z-])(HALT|STAND DOWN|STAND-DOWN|ALL SEATS STOP|FLEET STOP)" "$EVTMP/orders.txt" \
       | sed 's/^/⛔ MAESTRO ORDER WORD: /' | cap3 "MAESTRO ORDER WORD"
     # ⛔ THE FLEET GATE -- ADDED 2026-08-08 13:5x ON THE MAESTRO RULING THAT CLOSED
     # A GAP THIS SEAT NAMED AGAINST ITSELF AT 13:44. The order-owned view above is
