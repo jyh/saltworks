@@ -921,6 +921,38 @@ OPEN ITEMS:
   TONIGHT is the named target; the fabbed-is-verified law governs
   the SUBMISSION, not the first measurement run — V1-V3/V9/V10
   land behind the layout, before any tapeout word.**
+- **⭐⭐⭐ FIRST LAYOUT IS IN — THE CAPTAIN'S NAMED TARGET MET
+  (8/10 01:46, silicon 465c669): the composed NDF — 4 shelled
+  cells + 3 SER organs + the banyan fabric + the RISC-V core —
+  PLACED AND ROUTED on the 6x2 die. stdcell 69,776.9 µm² = 30.0%
+  of die · 902 flops · setup +8.1891 ns at the SLOW corner, hold
+  met, violations 0/0 · DRC 0 (magic AND klayout) · LVS 0 ·
+  antenna 0 · inferred latches 0. MEASUREMENT #1 ANSWERED BY
+  REFUTATION: the actual critical path is uio_in[2]→ser0.q30 —
+  an I/O path (input-delay-model-soft), NOT the predicted
+  internal SER→fabric→AND→XOR→ripple→acc chain; the pre-approved
+  port-register escape was NOT spent (+8.19 margin — a
+  pre-approval is not a reason to spend it, silicon's words).
+  THE CLOCK ON THE STORY: the Captain's 3am dream (8/9 ~03:06) →
+  composed first layout (8/10 01:46) ≈ 22h40m; ruling T0 (11:27)
+  → layout = 14h19m; his "can we get first layout tonight"
+  (01:0x) → layout = ~40 minutes of fleet time. THE CHAIN, every
+  link sealed under one hand: emitSeq/L1 (2704fa0, saltbuild
+  EXIT=0) → L1 layout (e7c76ca, 64/64 flops) → L2 shell (9915a60,
+  EXIT=0; layout 5da7a92, THE SHELL COSTS 51 ps) → SER (b9641c8,
+  EXIT=0; emitted 938206f, 99 cells exactly as pre-registered) →
+  wrapper (maestro draft v2 → compiler adoption 16d40c1 + the
+  linter-caught floating-input fix 34a1076) → the composed run.
+  SCOPE, BINDING (silicon's clause, evidence's fence): LibreLane
+  PDN, NOT a tile-fit signoff — the die was SET to 6x2 dims, not
+  fitted to TT's tile; trustworthy for area/timing/DRC/LVS/
+  antenna; batcher_c (the compute organ) is NOT in this
+  composition (routing per R1); functional demo correctness =
+  V10 fixtures + bench, behind. DEBTS NAMED: 1,757 max-slew +
+  31 max-cap (DRV, not DRC) + 7 non-critical disconnected pins —
+  September's submission answers for them. Revisions can come
+  after, should we decide — the Captain's own words, now with an
+  artifact under them.**
 - **EVIDENCE FENCE VERDICTS (registered at its 23:30 ask — the two
   lines the register lacked; its "settled both ends" catch): the ②
   fence reads (a)(b)(d) MET · (c) discharged at math's hand · F5
