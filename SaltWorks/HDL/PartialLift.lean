@@ -187,6 +187,70 @@ theorem ceCPort_partial_out1 (s : List Bool) (n : Nat) (a0 a1 : Bool) (d0 d1 : N
         (cFrame_ne_nil a1 d1 p1)]
   exact ceC_pair_partial_out1 a0 a1 d0 d1 h0 h1 hact hidle p0 p1 hp
 
+/-! ## (A) THE IDLE-VS-IDLE CASE
+
+The keystone excludes idle-vs-idle because nothing ever decides there. That
+costs nothing, and this is why: with both inputs carrying the same bit, both
+ports carry that bit **whatever the state**, so `ElemSortsAt` holds at such a
+comparator for ANY comparator function.
+
+The invariant will pin idle lines to the *silent* (all-false) payload, which by
+`cFrame_idle_is_silent` makes two idle frames literally the same bits — exactly
+the hypothesis these lemmas need. -/
+
+/-- Both output gates are `(!s && i0) || (s && i1)` and its mirror; at `i0 = i1`
+each collapses to `i0` for either `s`, so the swap decision is invisible. -/
+theorem ceC_step_identical (a b c d r x : Bool) :
+    (stepSeq ceC [a, b, c, d] [r, x, x]).1 = [x, x] := by
+  revert a b c d r x; decide +kernel
+
+theorem ceC_step_state_length (st inp : List Bool) :
+    (stepSeq ceC st inp).2.length = 4 := by
+  simp [stepSeq, sem, ceC]
+  decide +kernel
+
+theorem ceC_state_is_four_bits {l : List Bool} (h : l.length = 4) :
+    ∃ a b c d, l = [a, b, c, d] := by
+  match l, h with
+  | [a, b, c, d], _ => exact ⟨a, b, c, d, rfl⟩
+
+/-- ⭐ **IDENTICAL INPUT STREAMS PASS STRAIGHT THROUGH, ON BOTH PORTS.** -/
+theorem runTrace_ceC_identical (j : Nat) (hj : j < 2) :
+    ∀ (r f st : List Bool), st.length = 4 → r.length = f.length →
+      (runTrace ceC st (zip3Trace r f f)).1.map (fun o => o.getD j false) = f := by
+  intro r
+  induction r with
+  | nil => intro f st _ hlen
+           cases f with
+           | nil => rfl
+           | cons _ _ => simp at hlen
+  | cons x xs ih =>
+    intro f st hst hlen
+    cases f with
+    | nil => simp at hlen
+    | cons y ys =>
+      obtain ⟨a, b, c, d, rfl⟩ := ceC_state_is_four_bits hst
+      rw [zip3Trace_cons]
+      show (stepSeq ceC [a,b,c,d] [x,y,y]).1.getD j false ::
+            (runTrace ceC (stepSeq ceC [a,b,c,d] [x,y,y]).2 (zip3Trace xs ys ys)).1.map
+              (fun o => o.getD j false) = y :: ys
+      rw [ceC_step_identical a b c d x y,
+          ih ys _ (ceC_step_state_length _ _) (by simpa using hlen)]
+      congr 1
+      interval_cases j <;> rfl
+
+/-- ⭐ **THE PORT FORM FOR AN IDLE-VS-IDLE COMPARATOR** — the state comes in at
+length 4 from `bnCSlice_length`, and the conclusion holds for either port. -/
+theorem ceCPort_identical (s : List Bool) (hs : s.length = 4) (r f : List Bool)
+    (hlen : r.length = f.length) (j : Nat) (hj : j < 2) :
+    ceCPort s r f f j = f := by
+  rw [ceCPort]
+  exact runTrace_ceC_identical j hj r f s hs hlen
+
+#audit_axioms ceC_step_identical
+#audit_axioms ceC_step_state_length
+#audit_axioms runTrace_ceC_identical
+#audit_axioms ceCPort_identical
 #audit_axioms ceC_hdrOKP
 #audit_axioms idle_idle_never_decides
 #audit_axioms idle_headers_are_identical
