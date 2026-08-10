@@ -48,6 +48,31 @@ route bit for the subsequent Banyan cell directly after the packet
 address-validity bit" — each stage consumes its route bit and CYCLES
 the address, so every cell reads the same position. iSOP is
 duration-specific: the pulse width tells cells how much to rotate.
+**⭐⭐ CAPTAIN-RECALLED 8/10 AT COUNCIL (primary source, his words at
+the walk): "In the original cell, there is no k. The S2 timing
+signal starts at the first (or is it second?) bit of the address and
+stops after the last bit. The first address bit is latched when S2
+rises, held, and dropped back into the packet when S2 falls."
+⇒ THE 1988 CELL IS DURATION-CONTROLLED: no internal count exists —
+the rotation length lives entirely in the S2 pulse WIDTH, generated
+per column; latch-on-rise · hold · wrap-on-FALL. The count the
+kernel's cell88 internalizes as r−1 unary states, the 1988 silicon
+EXTERNALIZED into the strobe generator — O(1) cell state at ANY
+address length, priced in strobe distribution instead. (His
+first-vs-second-bit uncertainty is checkable against Figure 7's S2
+trace, ISS90 p.80.) AND THE SYSTEM FACT: k was EIGHT — the 256×256
+fabric; the first banyan chip rotated 4 bits, the second the other
+4 — the address-consumption recursion (§2b's banyan-of-banyans) was
+BUILT PRACTICE in 1990, not a new idea. CONSEQUENCE FOR THE
+SIX-STATE ITEM: cell88's six states are canonical FOR THE KERNEL'S
+OWN self-timed design; the 1988 architecture is a DIFFERENT point
+in the same design space (strobe-timed, stateless-count), and the
+"four states" memory was nearer the real cell's behavior classes
+than to any counter. Two objects, both true, now distinguished.
+Lineage note: the fleet's shipped convention-C fabric
+(frame-counter-DECODED per-stage strobes) is the strobe-timed
+descendant; cell88 is the self-timed cousin; the 1988
+pipelined-strobe cell is the original.**
 THE PAPER STATES THE THEOREM ITSELF (§3.2, math's ④ find — the
 doc's "reinsertion" inference is the paper's own word): "Each
 element routes on the first bit of the address, rotates the first
