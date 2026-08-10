@@ -149,24 +149,21 @@ theorem shell_transparent (hold nxt : Bool) : (muxB true hold nxt && !false) = n
 
 end SaltWorks.HDL.Shell
 
-/-! ## ⛔ THE OWED HALF, AND ITS OBSTACLE NAMED — a MISSING TOOL, not a hard proof
+/-! ## ⛔ THE OWED HALF — and the obstacle I named was OVER-PRICED
 
-The run-level refinement wants `run env shCore.gates (hWd j) = …`. The corpus has two tools and
-neither fits:
+**Superseding my own note here (10:3x → 10:4x).** I wrote that the run-level refinement was blocked
+because the corpus lacked the non-flat generalisation of `run_of_flat_gates`, offered two routes,
+and called the choice *"a design decision rather than a mechanical one"*.
 
-* `run_of_flat_gates` needs `flatBelow n gs` — every fanin BELOW the block's base. The shell's
-  selects read their own arms (`or` over two `and`s), so the block is **not flat**.
-* `inst_sem` carries a whole instantiated `Circ` — it reduces a composite to the component's own
-  `run`, which is exactly the thing still needed.
+***It was neither. `Compose.run_snoc` + `run_snoc_frame` are eight lines and needed no induction —
+`run_append` + `run_cons` give the peel directly, with no flatness hypothesis at all.***
 
-⇒ **What is missing corpus-wide is a lemma that `run` on an SSA-ordered list gives each gate
-`g.op.eval` of the environment AFTER its predecessors** — the non-flat generalisation of
-`run_of_flat_gates`. Two routes, and the choice is a design decision rather than a mechanical one:
+🔑 **The lesson is not the lemma, it is how I priced it: I reasoned from the shape of the tool I
+ALREADY HAD (`run_of_flat_gates`, whose whole content is its flatness hypothesis) to the difficulty
+of the tool I NEEDED — so a missing hypothesis read as a missing theory.** *`an-estimate-from-absences`
+one level up: I priced by what the existing lemma could not do instead of by what the new one
+required.*
 
-1. **Prove that lemma once** (a `List.take` induction) and every non-flat block in the corpus gets
-   its semantics for free — this is the third time a block has wanted it.
-2. **Make the per-bit select a tiny `Circ` and instantiate it 64 times**, so `inst_sem` applies and
-   the flat lemma covers the 3-gate component. Cheaper to prove, 64 instOK obligations to discharge.
-
-*Route 1 is the better artifact and the larger commit; it is named here rather than chosen quietly.*
--/
+**STILL OWED, and now genuinely mechanical rather than blocked:** the per-bit refinement
+(`run env shCore.gates (hWd j) = …`) via `run_snoc_frame`, peeling each select from the end. The
+cost is list-splitting per bit, not a new theory. -/

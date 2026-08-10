@@ -773,6 +773,36 @@ theorem run_of_flat_gates {gs : List Gate} {n : Nat} (E : Env)
 
 #audit_axioms flatBelow_mem
 #audit_axioms flatBelow_tail
+/-! ### The PEEL — the non-flat step `run_of_flat_gates` cannot take
+
+⛔ **I NAMED THIS A MISSING TOOL AND PRICED IT AS A DESIGN DECISION. It is eight lines.**
+`run_of_flat_gates` requires `flatBelow` — every fanin below the block's base — so it cannot see a
+gate that reads its own predecessors' outputs (a select built from `or` over two `and`s, which is
+what every mux-shaped block in this corpus is). I wrote in `ShellSeq.lean` that the corpus lacked
+the non-flat generalisation and offered two routes, calling the choice "a design decision rather
+than a mechanical one".
+
+***It needed neither route. `run_append` + `run_cons` give it directly, with no flatness hypothesis
+and no induction*** — and the honest lesson is that I priced an obstacle from the shape of the
+lemma I already had rather than from the one I needed. -/
+
+/-- ⭐ **A gate appended to a prefix evaluates its op on the PREFIX's environment.** No flatness
+required: the op may read anything the prefix computed. -/
+theorem run_snoc (E : Env) (gs : List Gate) (g : Gate) :
+    run E (gs ++ [g]) g.out = g.op.eval (run E gs) := by
+  rw [run_append, run_cons, run_nil, upd]
+  simp
+
+/-- …and a later block leaves it alone, provided that block does not write the net. Together these
+give any SSA list its per-gate semantics by peeling from the end. -/
+theorem run_snoc_frame (E : Env) (gs : List Gate) (g : Gate) (hs : List Gate)
+    (h : ∀ x ∈ hs, x.out ≠ g.out) :
+    run E ((gs ++ [g]) ++ hs) g.out = g.op.eval (run E gs) := by
+  rw [run_append, run_of_unwritten _ _ _ h, run_snoc]
+
+#audit_axioms run_snoc
+#audit_axioms run_snoc_frame
+
 #audit_axioms run_of_flat_gates_aux
 #audit_axioms run_of_flat_gates
 
