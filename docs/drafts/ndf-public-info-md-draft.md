@@ -27,12 +27,16 @@ specifies is the schedule the theorems quantify over). The emitted
 gate netlist is then proved equivalent to its arithmetic
 specification over all inputs by SAT. These are two different
 checkers: the kernel proves the model, SAT proves the netlist, and
-the generator connecting them is structural (one sky130 cell per
-model gate; the flow's own synthesis preserves the count). The
+the generator connecting them is structural — one cell per model
+gate for the MAC core, and a documented 3-gates-to-1-mux peephole
+in the serializer. Synthesis does not preserve the cell count — it
+drops unobservable gates and adds buffers — but it was proved to
+preserve the function, by SAT, against the emitted netlist. The
 sequencer, the pin wrapper, and the switch fabric are hand-written
 RTL and are outside both proofs; the banyan's routing behaviour is
-checked in the kernel against a Lean model of the fabric for the
-schedule class this design uses.
+checked in the kernel against a Lean model of the fabric for
+prefix-concentrated destination-monotone traffic; the demo's own
+routing rounds are not yet in that certified set.
 
 ## How to test
 
