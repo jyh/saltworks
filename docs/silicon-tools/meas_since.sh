@@ -47,6 +47,25 @@ git rev-parse --verify "$BASE^{commit}" >/dev/null 2>&1 || {
 HEAD_SHA=$(git rev-parse --short HEAD)
 echo "MEAS range ${BASE}..${HEAD_SHA}   (baseline = last MEAS verdict, NOT last commit)"
 
+# ⭐ THE HUB ROOT IS WATCHED TOO, 2026-08-10 06:2x. THE GAP THAT BOUGHT THIS:
+# this gate watched ONLY 'SaltWorks/HDL/*.lean', so a change to SaltWorks.lean was
+# INVISIBLE to it -- and a ROOT IMPORT is precisely what decides whether the covering
+# build covers a module AT ALL. Proven by the cure to a gap I had just found: SerOrgan
+# was in no import chain, its covering build said EXIT=0 over a closure that did not
+# contain it, and when 9938951 wired it into the root MY OWN GATE PRINTED "nothing
+# touched in SaltWorks/HDL". A module ENTERING THE CLOSURE is a MEAS-relevant event
+# exactly as much as a module changing. Reported before the morning brief; fixed here.
+rootchg=$(git diff --name-only "$BASE..HEAD" -- 'SaltWorks.lean' | sort -u)
+if [ -n "$rootchg" ]; then
+  echo "  ⚠️ HUB ROOT CHANGED in this range — SaltWorks.lean:"
+  git log --format='     %h %s' "$BASE..HEAD" -- 'SaltWorks.lean' | cut -c1-88
+  git diff "$BASE..HEAD" -- 'SaltWorks.lean' | awk '
+    /^\+import /{print "     + NOW IN THE CLOSURE: " $2}
+    /^-import /{print "     - LEFT THE CLOSURE:   " $2}'
+  echo "     ⇒ a covering build over this range covers a DIFFERENT SET of modules"
+  echo "       than one before it. A module entering the closure is MEAS-relevant."
+fi
+
 changed=$(git diff --name-only "$BASE..HEAD" -- 'SaltWorks/HDL/*.lean' | sort -u)
 [ -n "$changed" ] || { echo "  nothing touched in SaltWorks/HDL since $BASE"; exit 0; }
 
