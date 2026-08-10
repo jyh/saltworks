@@ -30,6 +30,25 @@
 # ..."). It refused loudly, which is the good case. Use -ignore_miss_func WITHOUT
 # -lib so the `function` attributes come in.
 #
+# ⭐ IT ALSO CLOSES LINK (2), on compiler's 19:45 proposal — the operands are just
+# two renderings of one Circ instead of two stages of one flow. `emitV` (Verilog
+# OPERATORS) and `emitS` (MAPPED CELLS) share port naming by design
+# (EmitS.lean:121), so the miter correspondence is trivial:
+#
+#   #eval IO.FS.writeFile "/tmp/mac_cell_signed_emitV.v" (emitV "mac_cell_signed" scCore)
+#   sh equiv_synth.sh --selftest /tmp/mac_cell_signed_emitV.v \
+#        SaltWorks/Silicon/RTL/mac_cell_signed.v mac_cell_signed
+#   -> 4,639 variables · 11,956 clauses · no model found: SUCCESS   (2026-08-09)
+#
+# ⛔ WHAT THAT DOES **NOT** GIVE, in compiler's words, because a green here is easy
+# to over-read: it does NOT prove `emitS ⊨ Circ semantics`. BOTH emitters are
+# outside the kernel (EmitS.lean:43 says so). A COMMON-MODE misreading of the same
+# Circ survives it. The residue narrows from "emitS is right" to "both emitters
+# read this Circ the same wrong way" -- small and NAMED, not gone.
+# ⛔ AND STRUCTURE DOES NOT TRANSFER UNDER FUNCTIONAL EQUIVALENCE (evidence): a
+# green miter carries NOTHING about criteria (a)/(b)/(d), which stay emitted-side
+# checks. FUNCTION transfers; STRUCTURE does not.
+#
 # EXIT 0 = equivalent (proof shown) · 1 = NOT equivalent (counterexample found)
 #          2 = could not run
 set -u
