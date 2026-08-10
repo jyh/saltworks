@@ -938,6 +938,18 @@ OPEN ITEMS:
   TONIGHT is the named target; the fabbed-is-verified law governs
   the SUBMISSION, not the first measurement run — V1-V3/V9/V10
   land behind the layout, before any tapeout word.**
+- **⭐⭐⭐ THE ③+④ DEEP SESSION IS HELD AND COMPLETE (8/10 09:5x —
+  the Captain-committed duty of 8/8 14:14, verified not-yet-held
+  last night, PAID IN FULL at this sitting): ④ walked (full circle
+  + nonblocking + six-state + premises + his two primary-source
+  recollections folded) and ③ walked (the eight refutation rounds
+  + the forged claim + L4's risk-turned-gift), THE RIDERS RATIFIED
+  AS DOCTRINE (his verbatim: "whew this is amazing, good job math!
+  Ratified") — sigma-struck · header-window-excluded · P=8-scoped
+  with the ∀-P price named. The do-not-forget entry CLOSES. The
+  one optional table item remaining from the original fold: the
+  packet-IO slate's #3 memory story (switch-fabric-as-NN), at his
+  pleasure, no clock on it.**
 - **THE ④ WALK COMPLETE (8/10 09:4x, the Captain, verbatim "good,
   *now* I understand, and the current design is fine, because it is
   a BB, not a pure banyan"): the SIX-STATE FORM RATIFIED as
