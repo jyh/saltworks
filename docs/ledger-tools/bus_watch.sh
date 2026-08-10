@@ -396,6 +396,31 @@ while true; do
     # and the clip is stated at the FRONT where the envelope cannot eat it.
     grep -oE "(CAPTAIN.{0,20}(RETURN|BACK|HELM)|CONVENE).*" /tmp/ev-peer.txt \
       | widen | cap3 "CAPTAIN-RETURN"
+
+    # ⛔ FENCE-SUBJECT ARM, 18:5x — AND I ARMED rev13 WITHOUT IT MINUTES AFTER AMENDING
+    # THE MEMORY THAT NAMES THIS EXACT GAP. My duty tonight fires on COMPILERs landing
+    # (design item #2) and the MAESTROs top-module block; rev13 covered neither, because
+    # its arms watch who ORDERS me, not the WORK my fence rides. That is the SEAT axis of
+    # [[watch-filter-watches-orders-not-triggers]], recommitted by the seat that had just
+    # written the amendment. The instrument exhibited its own class inside ten minutes.
+    # 📌 NOT a seat-header doorbell: measured 268 compiler+math headers on 08/09 alone
+    # (~22/hr, and the harness auto-stops noisy monitors). SUBJECT-scoped instead, each
+    # branch counted SEPARATELY over the full peer view because a union score is an alibi.
+    # ⛔⛔ AND THE FIRST VERSION WAS CASE-SENSITIVE AND WOULD HAVE MISSED THE TRIGGER.
+    # Measured against TONIGHTs live posts rather than the historical corpus:
+    #   case-sensitive 12 · case-insensitive 46  ⇒ it would have dropped 34 of 46 (74%),
+    #   including the maestros own "top-module design block (maestro drafts tonight)" --
+    #   the exact ④ trigger this arm exists for -- and compilers "XOR bank" gate rows.
+    # The historical corpus wrote the phrases in CAPS inside headlines; the working
+    # traffic writes them in prose. A corpus test over the wrong ERA is still a corpus
+    # test that agrees with you. Case is silicons fourth-time-in-this-seat defect class.
+    # -i is safe HERE and only here: this pass reads the OWNER-GATED peer view, so the
+    # broadening cannot reach my own post bodies the way a raw -i over the bus did.
+    # ⚠️ This arm is a VALUE, not a question, so it EXPIRES: it names TONIGHTs two
+    # artifacts. An enumeration is a fact with an expiry date -- it retires with the
+    # duty, and a successor should ask what THEIR fence rides, not inherit these strings.
+    grep -oiE "(COMPLEMENT PATH|XOR BANK|DESIGN ITEM #2|TOP.MODULE).*" /tmp/ev-peer.txt \
+      | widen | cap3 "FENCE-SUBJECT"
     # HALT/STAND DOWN only from the ORDER-OWNED view.
     # ⛔ AND I WROTE A NUMBER HERE BEFORE I MEASURED IT. The first version of
     # this comment claimed "27 seat-owned lines and 0 maestro-owned" and called
