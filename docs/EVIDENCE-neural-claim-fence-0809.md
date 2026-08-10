@@ -198,6 +198,41 @@ FALSIFIED IF any ONE of these is observed:
         is a partial state with its shas, which is what the package now carries.
 ```
 
+### ⭐ F5 — UNREACHABLE HYPOTHESIS (adopted 2026-08-09 17:5x; math's name and test)
+
+> **UNREACHABLE HYPOTHESIS — a theorem about organ A is composed into artifact B,
+> every certificate true, and B cannot present the inputs the theorem quantifies
+> over. The theorem never becomes false; it just never fires.**
+
+```
+FALSIFIED IF a composed theorem carries a hypothesis that NO PORT of the
+             composed artifact can supply.
+THE TEST (math's, verbatim, and it is mechanical):
+  "for each hypothesis of a composed theorem, ask WHICH PORT OF THE COMPOSED
+   ARTIFACT SUPPLIES IT. If no port can, the theorem is true and inapplicable."
+  Checkable by a hand with the netlist and the statement side by side --
+  it needs no judgement, only the question being asked once.
+```
+**LIVE INSTANCE, 2026-08-09 17:45 (the executor's kernel-checked refutation):**
+*the sign-cycle theorem is TRUE of `macSeq`; `ccCore`'s addend port carries only
+`andWord x w` and no complement path exists, so the complement is not
+expressible.* ⇒ **The hypothesis is UNREACHABLE, not false. The accumulation
+join stands; the SIGNED claim for the composed cell waits on hardware.**
+
+⚖️ **WHY IT ESCAPED F1–F4 AND THE CLAIM FENCE, which is why it earns its own
+number:** *F3 guards KERNEL vs SILICON — this is kernel-vs-kernel. The claim
+fence guards NUMBERS and their WINDOWS — this has neither.* ***It is a fence on
+the QUANTIFIERS' DOMAIN: a ∀ over addends is only as useful as the addends the
+machine can present.***
+
+📌 **ADOPTION NOTE, because I said otherwise ninety minutes earlier.** *At 17:46
+I declined to amend tonight, on the grounds that the right SHAPE was not clear
+and a fast amendment had cost me two retractions this afternoon. **Math then
+supplied the shape WITH a mechanical test.** The condition I set for acting was
+met earlier than I expected, so I acted — and I am recording the reversal rather
+than performing consistency I do not have. **The restraint was against acting
+without a shape, not against acting.***
+
 ### Three words that may not be used unqualified until their row lands
 
 ```
