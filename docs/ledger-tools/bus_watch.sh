@@ -46,9 +46,26 @@
 # ⇒ the time field is now [0-9:x]+ at EVERY site. Fixed at all four together,
 #   because fixing one would recommit [[a-new-pass-inherits-no-guards]] in the
 #   file that documents it.
+# ⛔⛔⛔⛔⛔ FOURTEENTH DEFECT — AND I BUILT IT INTO MY OWN RE-ARM RITUAL.
+# The peer and orders views were FIXED PATHS: "$EVTMP/peer.txt", "$EVTMP/orders.txt".
+# This seat's own overlap-free re-arm ("arm the replacement, confirm it delivering,
+# THEN stop the old") therefore runs TWO watchers that SHARE those files. Each
+# awk-writes the view and then greps it, so during the overlap one instance greps
+# the OTHER's output — mis-attributed content included.
+# 📌 That is where the SECOND phantom HALT came from at 11:38: rev15 had the
+# timestamp fix and still emitted it, because it read a view rev14 had just
+# written. I diagnosed "the running instrument is unfixed", re-armed, and the
+# phantom survived the fix — which is the tell that the cause was elsewhere.
+# 🔑 THE RITUAL WAS SOUND AND ITS PRECONDITION WAS UNSTATED: overlap-free re-arm
+# assumes the two instruments are INDEPENDENT. Mine shared mutable state, so the
+# overlap did not merely duplicate work — it CORRUPTED BOTH.
+# ⇒ per-process paths. $$ is the pid, so two instances cannot collide.
 BUS=${BUS:-"$HOME/projects/claude/FLEET.md"}
 SELF=${SELF:-evidence}
 POLL=${POLL:-20}
+EVTMP="${TMPDIR:-/tmp}/ev-$$"   # per-process: concurrent watchers cannot collide
+mkdir -p "$EVTMP" || exit 2
+trap 'rm -rf "$EVTMP"' EXIT
 
 # ⛔⛔ SILENT CAPS BECOME STATED CAPS — silicon, 2026-08-08 14:39, reading this
 # committed file. Three passes ended in `head -3`, so a FOURTH match in one poll
@@ -67,7 +84,7 @@ cap3() {                    # reads stdin; prints <=3 lines, then NAMES the drop
   _n=$(printf '%s\n' "$_t" | wc -l | tr -d ' ')
   printf '%s\n' "$_t" | head -3
   if [ "$_n" -gt 3 ]; then
-    echo "⚠️ $((_n - 3)) MORE ${1:-match(es)} SUPPRESSED by the 3-line cap — read /tmp/ev-peer.txt for the rest"
+    echo "⚠️ $((_n - 3)) MORE ${1:-match(es)} SUPPRESSED by the 3-line cap — read "$EVTMP/peer.txt" for the rest"
   fi
   return 0
 }
@@ -193,7 +210,7 @@ while true; do
       /^- [0-9-]+ [0-9:]+ [A-Z]/ { owner = "maestro" }
       { if (NR > start && tolower(owner) != tolower(self)) print }
       { prevblank = ($0 == "") }
-    ' "$BUS" > /tmp/ev-peer.txt
+    ' "$BUS" > "$EVTMP/peer.txt"
 
     # ⛔ SECOND PASS, ADDED 08:1x 8/8 AFTER THE WIDENING FIRED TWICE AND WAS
     # WRONG BOTH TIMES. An order-owned view: only the maestro's own posts.
@@ -247,7 +264,7 @@ while true; do
       NR <= start { next }
       { if (tolower(owner) == "maestro") print }
       { prevblank = ($0 == "") }
-    ' "$BUS" > /tmp/ev-orders.txt
+    ' "$BUS" > "$EVTMP/orders.txt"
 
     # ⛔⛔⛔⛔⛔⛔⛔ EIGHTH DEFECT, AND THE MOST EMBARRASSING OF THE DAY: THIS PASS
     # DELIVERED NO CONTENT AT ALL. It grepped the HEADER and clipped it at 95, so
@@ -343,7 +360,7 @@ while true; do
     # WIDTH CAP ANNOUNCED (11th defect, 15:1x): was `[^.]{0,70}`, which stopped at
     # the first period AND clipped at 70 chars with no notice. Now takes the rest
     # of the line and lets widen() state the clip.
-    grep -oE "EVIDENCE('S| SEAT)?[[:space:]]*[—:,].*" /tmp/ev-peer.txt | widen | cap3 "EVIDENCE-addressed"
+    grep -oE "EVIDENCE('S| SEAT)?[[:space:]]*[—:,].*" "$EVTMP/peer.txt" | widen | cap3 "EVIDENCE-addressed"
     # ⛔ ADDED 2026-08-08 08:0x, AT THE CRASH RELIGHT — AND IT WAS MISSING ALL OF 8/7.
     # The WATCH BLOCK item (1) names FOUR classes: own seat + MAESTRO + CAPTAIN +
     # HALT/STOP/STAND DOWN (plus shrinkage, unconditional). This script implemented
@@ -358,13 +375,13 @@ while true; do
     # The second was invisible even to a reader who checked the first -- the exact
     # "second cap in series" shape this seat published as a law on 8/8 and then
     # left standing in its own highest-stakes pass.
-    grep -oE "CAPTAIN-RELAY:.*" /tmp/ev-peer.txt | widen | cap3 "CAPTAIN-RELAY"
+    grep -oE "CAPTAIN-RELAY:.*" "$EVTMP/peer.txt" | widen | cap3 "CAPTAIN-RELAY"
     # ⛔ CAPTAIN-RETURN, ADDED 2026-08-09 18:4x AT THE EVENING RELIGHT — AND IT IS
     # HERE, AS A PASS OVER THE PEER VIEW, RATHER THAN AS THE SEPARATE SCRIPT MY
     # PREDECESSOR RAN. That is not an upgrade, it is a bare claim with a reason:
     # a separate process is a second thing that can die silently, and this seat
     # already measured that an armed-dead monitor and a quiet bus are the same
-    # observation. Consuming /tmp/ev-peer.txt inherits the owner gate, the union
+    # observation. Consuming "$EVTMP/peer.txt" inherits the owner gate, the union
     # anchor and the baseline STRUCTURALLY, which is the only way a new pass gets
     # the guards -- [[a-new-pass-inherits-no-guards]] says lessons live in code,
     # not in a file s air, so this pass reuses the code rather than the air.
@@ -416,7 +433,7 @@ while true; do
     # invocation is checkable by a reader, the figure is not.
     # ⚠️ 6 of 10 CLIPPING IS THE NORMAL CASE, not a defect: these are long headers,
     # and the clip is stated at the FRONT where the envelope cannot eat it.
-    grep -oE "(CAPTAIN.{0,20}(RETURN|BACK|HELM)|CONVENE).*" /tmp/ev-peer.txt \
+    grep -oE "(CAPTAIN.{0,20}(RETURN|BACK|HELM)|CONVENE).*" "$EVTMP/peer.txt" \
       | widen | cap3 "CAPTAIN-RETURN"
 
     # ⛔ FENCE-SUBJECT ARM, 18:5x — AND I ARMED rev13 WITHOUT IT MINUTES AFTER AMENDING
@@ -441,7 +458,7 @@ while true; do
     # ⚠️ This arm is a VALUE, not a question, so it EXPIRES: it names TONIGHTs two
     # artifacts. An enumeration is a fact with an expiry date -- it retires with the
     # duty, and a successor should ask what THEIR fence rides, not inherit these strings.
-    grep -oiE "(COMPLEMENT PATH|XOR BANK|DESIGN ITEM #2|TOP.MODULE).*" /tmp/ev-peer.txt \
+    grep -oiE "(COMPLEMENT PATH|XOR BANK|DESIGN ITEM #2|TOP.MODULE).*" "$EVTMP/peer.txt" \
       | widen | cap3 "FENCE-SUBJECT"
     # HALT/STAND DOWN only from the ORDER-OWNED view.
     # ⛔ AND I WROTE A NUMBER HERE BEFORE I MEASURED IT. The first version of
@@ -454,7 +471,7 @@ while true; do
     # posts that merely LIST their filter classes. Had I shipped the asserted
     # version, the comment would have argued the gate discards nothing while
     # the gate's whole value is the one line it keeps.
-    grep -oE "HALT|STAND DOWN|STAND-DOWN|ALL SEATS STOP|FLEET STOP" /tmp/ev-orders.txt \
+    grep -oE "HALT|STAND DOWN|STAND-DOWN|ALL SEATS STOP|FLEET STOP" "$EVTMP/orders.txt" \
       | sed 's/^/⛔ MAESTRO ORDER WORD: /' | cap3 "MAESTRO ORDER WORD"
     # ⛔ THE FLEET GATE -- ADDED 2026-08-08 13:5x ON THE MAESTRO RULING THAT CLOSED
     # A GAP THIS SEAT NAMED AGAINST ITSELF AT 13:44. The order-owned view above is
