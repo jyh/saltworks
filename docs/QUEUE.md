@@ -359,7 +359,20 @@ OPEN ITEMS:
   corpus-wide (CorePlace 38 · CoreOffsets 23 · TinyRustN0 23 ·
   MacBridge's 32 pre-existing · others); the executor audited its
   own 16 with an explicitly-scoped block. A sweep candidate for
-  the doc-refresh campaign.**
+  the doc-refresh campaign.
+  ⇒ **FIGURE SUPERSEDED 22:3x AT THE MEASUREMENT (three hands,
+  three methods, reconciled on the bus 21:4x-22:3x; registered on
+  silicon's 22:31 report — its own law arriving from the far side,
+  "my measurement never left the bus"): THE NUMBER IS 180, NOT
+  204 — 232 total − 52 in GITIGNORED Scratch*.lean (the census
+  tool counts development scaffolding; the tool lives in
+  docs/hdl-tools/ and ITS FIX IS UNCLAIMED); CorePlace is 37, not
+  38. THE PARTITION, claimed in protocol form overnight: compiler
+  83 · math 47 · silicon 35 · RESIDUAL 15 (floor of 10 =
+  SelfRouting) — the residual-15 assignment and the census-tool
+  fix are the sitting's two remaining decisions here. Sem.lean's
+  zero-note is still stale AND the 204 replacement was stale too
+  — both die at this line.**
 
 - **THE COMPOSED CELL — STATE AT ITS EXACT SIZE (compiler's 16:03
   trim of the maestro's verdict — the FOURTH one-theorem-larger
