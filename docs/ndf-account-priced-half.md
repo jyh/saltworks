@@ -144,8 +144,16 @@ variant not fitting a 1x1 costs nothing today — the growth path stays open.**
 
 ## 5 · WHAT THIS HALF DOES NOT CLAIM
 
-- **Not a tile-fit signoff** (§1 and §4 — neither run used TT's power-grid DEF) ·
-  **not a batcher fit result** (§2, a linear area projection) · **not a DRV
+- ⛔ **THIS BULLET'S REASON WAS FALSE AND MATH CAUGHT IT (13:53).** It read
+  "not a tile-fit signoff (§1 and §4 — NEITHER RUN USED TT'S POWER-GRID DEF)".
+  **§1's run DID use it** (`tilefit6x2`, `tt_block_6x2_pg.def`). The conclusion
+  survives; the REASON given for it did not. Restated on its true ground:
+- **§1 IS A TILE-FIT AND IS NOT A SIGNOFF** — it used TT's real power grid on the
+  real 6x2 die and passed, but a SIGNOFF is TinyTapeout's CI verdict on the
+  fabrication path, not a local LibreLane run at my knobs. *§4 (BB at 1x1) has
+  `tt_block_1x1_pg.def` in hand but has NOT been re-run with it — that one is
+  still not a tile-fit at all.*
+- **Not a batcher fit result** (§2, a linear area projection) · **not a DRV
   diagnosis** (§3 — two hypotheses, zero tests run).
 - ⚠️ **§4 IS a measured BB post-layout number** (1x1, run complete). This bullet
   previously said it was NOT — written when §4 held a 1x2 projection, and left
