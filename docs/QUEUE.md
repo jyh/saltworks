@@ -277,11 +277,14 @@ OPEN ITEMS:
   property instOK cannot express) — the composition's per-cycle
   theorem was OWED at compiler's seam — **DISCHARGED 17:20,
   covered EXIT=0: the cell's cycle IS the accumulator's cycle on
-  the addend the weight organ made. The emission now inherits the
-  join; the maestro's struck riding-inside clause is TRUE — made
-  so by the theorem being built, not the sentence being argued.
-  THE NEURON IS SEMANTICALLY WHOLE: arithmetic → join → composed
-  cell → emitted module, every arrow a theorem.**
+  the addend the weight organ made. The emission CAN now inherit the
+  join — math's 17:21 precision: A CAPABILITY, NOT YET A THEOREM;
+  the remaining arrow is the trace-level induction over cellSeq
+  (the same gap math crossed for macSeq at rung 3). The maestro's
+  fifth one-arrow-larger sentence, trimmed within minutes like
+  the other four. HONEST STATE: per-cycle composition PROVED ·
+  trace inheritance OWED (small, shaped by precedent) · then the
+  neuron is semantically whole.**
 
 - **THE NDF CLOCK — RULED 15:5x at silicon's discriminator (the
   red is REAL, not a die artifact: mac_acc's 32-bit ripple carry
