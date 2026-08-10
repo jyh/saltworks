@@ -3,6 +3,7 @@
 #
 #   sh docs/hdl-tools/emit_seq.sh            # L1: the signed cell, NO shell (V7's object)
 #   sh docs/hdl-tools/emit_seq.sh shell      # L2: the RATIFIED cell (R6 shell)
+#   sh docs/hdl-tools/emit_seq.sh ser        # R8 (3): the SER/activation organ
 #   sh docs/hdl-tools/emit_seq.sh shell > path.v    # caller decides where it lands
 #
 # PRINTS, NEVER WRITES — the .v files live in SaltWorks/Silicon/RTL/ and that is
@@ -41,6 +42,15 @@ import SaltWorks.HDL.MacCell
 open SaltWorks.HDL SaltWorks.HDL.MacCell
 -- clearFrom = 32: wsh occupies state 0..31, acc 32..63
 #eval IO.print (emitSeqShell "1" "2" 32 "mac_cell_signed_shell" scellSeq)
+LEAN
+fi
+if [ "$1" = "ser" ]; then
+cat > "$SCRATCH" <<'LEAN'
+import SaltWorks.HDL.EmitS
+import SaltWorks.HDL.SerOrgan
+open SaltWorks.HDL SaltWorks.HDL.Ser
+-- peephole ON: 32 selects collapse 3 gates -> 1 mux2_1. 163 cells -> 99.
+#eval IO.print (emitSeqMux "1" "2" "ser_organ" serSeq)
 LEAN
 fi
 # through the fleet wrapper: it holds the build lock and records the run

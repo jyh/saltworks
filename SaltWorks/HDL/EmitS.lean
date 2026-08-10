@@ -500,6 +500,51 @@ def manifestCuts (drive : String) (c : Circ) (cuts : List Net) : String :=
 #audit_axioms cellOf
 #audit_axioms sNet
 #audit_axioms instName
+/-! ### `emitSeqMux` — the clocked module WITH the mux peephole
+
+The peephole is defined below for `Circ`; a `Seq` whose next-state logic is selects (the SER organ:
+32 of them) pays 3 cells per select without it. **Measured on `serCore`: 131 gates → 67
+combinational cells, so the clocked module is 99 rather than 163 — a 39% reduction on an organ the
+design instantiates four times.**
+
+⚠️ *Peephole ON changes the CELL COUNT but not the `Circ`. The one-cell-per-gate correspondence
+that `emitS` exists to establish is DELIBERATELY BROKEN here — `mux2_1` stands for three gates, and
+the importer's `EXPAND` table is what re-establishes the mapping on the way back.* -/
+
+/-- The clocked module, mux peephole applied to the combinational body. -/
+def emitSeqMux (drive : String) (flopDrive : String) (name : String)
+    (m : SaltWorks.HDL.Seq) : String :=
+  let c := m.core
+  let sites := c.gates.filterMap fun g => (muxAt c g).map fun mm => (g.out, mm)
+  let cons  := sites.flatMap fun s => [s.2.arm0, s.2.arm1]
+  let live  := c.gates.filter fun g => !(cons.contains g.out)
+  let inPorts  := (List.range m.nIn).map fun i => "    input  wire " ++ sNet c.nIn i
+  let outPorts := (List.range m.nOut).map fun k => "    output wire o" ++ toString k
+  let stDecls  := (List.range m.nState).map fun j => "  wire " ++ sNet c.nIn (m.nIn + j) ++ ";"
+  let dDecls   := (List.range m.nState).map fun j => "  wire d" ++ toString j ++ ";"
+  let decls    := live.map fun g => "  wire " ++ sNet c.nIn g.out ++ ";"
+  let dummies  := live.filterMap dummyDecl
+  let body     := live.map fun g =>
+    match sites.find? fun s => s.1 == g.out with
+    | some (_, mm) =>
+        "  sky130_fd_sc_hd__mux2_" ++ drive ++ " " ++ instName g.out
+          ++ " (.A0(" ++ sNet c.nIn mm.a0 ++ "), .A1(" ++ sNet c.nIn mm.a1
+          ++ "), .S(" ++ sNet c.nIn mm.sel ++ "), .X(" ++ sNet c.nIn g.out ++ "));"
+    | none => emitCell drive c.nIn g
+  let flops    := (List.range m.nState).map (emitFlop flopDrive c.nIn m.nIn)
+  let odrives  := (List.range m.nOut).map fun k =>
+    "  assign o" ++ toString k ++ " = " ++ sNet c.nIn (c.outs.getD k 0) ++ ";"
+  let ddrives  := (List.range m.nState).map fun j =>
+    "  assign d" ++ toString j ++ " = " ++ sNet c.nIn (c.outs.getD (m.nOut + j) 0) ++ ";"
+  "`default_nettype none\n\nmodule " ++ name ++ " (\n"
+    ++ String.intercalate ",\n" (("    input  wire clk" :: inPorts) ++ outPorts) ++ "\n);\n"
+    ++ slines stDecls ++ "\n" ++ slines dDecls ++ "\n"
+    ++ slines decls ++ "\n" ++ slines dummies ++ "\n"
+    ++ slines body ++ "\n" ++ slines flops ++ "\n"
+    ++ slines odrives ++ "\n" ++ slines ddrives
+    ++ "\nendmodule\n\n`default_nettype wire\n"
+
+
 #audit_axioms emitCell
 #audit_axioms dummyDecl
 #audit_axioms emitS
