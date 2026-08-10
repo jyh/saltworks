@@ -91,5 +91,8 @@ import SaltWorks.HDL.MacInduction
 import SaltWorks.HDL.MacCell
 import SaltWorks.HDL.MacBridge
 import SaltWorks.HDL.SerOrgan
+import SaltWorks.HDL.BatcherRun
+import SaltWorks.HDL.ShellSeq
+import SaltWorks.HDL.PartialLift
 import SaltWorks.HDL.AccountMeasure
 import SaltWorks.Tactic.AuditAxioms
