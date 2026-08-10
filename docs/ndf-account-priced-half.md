@@ -131,9 +131,14 @@ variant not fitting a 1x1 costs nothing today — the growth path stays open.**
 
 ## 5 · WHAT THIS HALF DOES NOT CLAIM
 
-- **Not a tile-fit signoff** (§1) · **not a batcher fit result** (§2) · **not a
-  DRV diagnosis** — two hypotheses, zero tests run (§3) · **not a measured BB
-  post-layout number at 1x2** (§4).
+- **Not a tile-fit signoff** (§1 and §4 — neither run used TT's power-grid DEF) ·
+  **not a batcher fit result** (§2, a linear area projection) · **not a DRV
+  diagnosis** (§3 — two hypotheses, zero tests run).
+- ⚠️ **§4 IS a measured BB post-layout number** (1x1, run complete). This bullet
+  previously said it was NOT — written when §4 held a 1x2 projection, and left
+  standing for one commit after §4 became a measurement. **A disclaimer falsified
+  by the section it points at is worse than no disclaimer**, because it invites a
+  reader to discount a number that is real. Caught on re-reading my own file.
 - The clock-tree finding **post-dates** the layout it describes; nothing here has
   been re-run since.
 - ***Every number that is a projection says so on its own line. If a sentence in
