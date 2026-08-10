@@ -337,6 +337,65 @@ while true; do
     # "second cap in series" shape this seat published as a law on 8/8 and then
     # left standing in its own highest-stakes pass.
     grep -oE "CAPTAIN-RELAY:.*" /tmp/ev-peer.txt | widen | cap3 "CAPTAIN-RELAY"
+    # ⛔ CAPTAIN-RETURN, ADDED 2026-08-09 18:4x AT THE EVENING RELIGHT — AND IT IS
+    # HERE, AS A PASS OVER THE PEER VIEW, RATHER THAN AS THE SEPARATE SCRIPT MY
+    # PREDECESSOR RAN. That is not an upgrade, it is a bare claim with a reason:
+    # a separate process is a second thing that can die silently, and this seat
+    # already measured that an armed-dead monitor and a quiet bus are the same
+    # observation. Consuming /tmp/ev-peer.txt inherits the owner gate, the union
+    # anchor and the baseline STRUCTURALLY, which is the only way a new pass gets
+    # the guards -- [[a-new-pass-inherits-no-guards]] says lessons live in code,
+    # not in a file s air, so this pass reuses the code rather than the air.
+    #
+    # 🔑 WHY IT EXISTS AT ALL: my filter is NARROW, and a Captain return greeted by
+    # a PEER matches none of its other arms. On 8/9 that gap was covered by RELAY
+    # COMMITMENTS from compiler and silicon -- and at 18:16 a fleet-wide relight
+    # ordered BOTH to bank in the same minute. Two independent relays are not two
+    # independent seats when one order can take them together.
+    #
+    # 📌 MEASURED OVER THE FULL OBJECT BEFORE ARMING, never over the window I care
+    # about: 38,717 peer-view lines / 4 days -> 12 matches (~3/day), none clipping.
+    # Classified by hand: 7 BIND (the 08:35 return + its two relays, the 11:3x and
+    # 13:4x helm lines, the 8/9 18:16 return) and 3 DESCRIBE -- peers writing ABOUT
+    # this very watch, which is this file s founding carrier defect arriving in the
+    # newest pass exactly as it always does.
+    # ⚖️ THE CARRIERS ARE ACCEPTED, DELIBERATELY. A false alarm gets retracted; a
+    # false green never does. At three a day on a resting fleet, buying precision
+    # with a DESCRIBES-vs-BINDS discriminator would trade a cheap retraction for a
+    # missed return, and the return is the event this seat cannot reconstruct.
+    # ⚠️ AND THE ARM I WOULD HAVE GUESSED IS DEAD: "COUNCIL IS OPEN" / "COUNCIL
+    # OPENS" measure ZERO over the whole bus. The real vocabulary is CONVENE, and it
+    # rode inside the same post as the return -- so the guess would have added a
+    # pass that could never fire, and I would have called the seat covered.
+    # ⛔⛔ AND THE FIRST VERSION OF THIS LINE CARRIED THE EIGHTH DEFECT, THE ONE
+    # THIS FILE ALREADY RECORDS TWO SCREENS UP. I wrote the pattern WITHOUT a
+    # trailing `.*`, because that is the form I had just used to COUNT hits -- and
+    # `grep -o` then delivers only the matched fragment, so the highest-stakes
+    # class this seat watches would have arrived as the bare string
+    #     CAPTAIN HAS RETURN
+    # with no content, no clock, and nothing to act on. A counting pattern and a
+    # DELIVERY pattern are different objects that spell the same way, and I carried
+    # one into the other inside ten minutes of measuring with it.
+    # 🔑 [[act-on-the-notification-alone]]: "it delivered" is not "it delivered
+    # something I could ACT on". Caught by re-reading my own emit before arming,
+    # which is the only reason it is a comment here and not a silent five hours.
+    # ⇒ `.*` takes the rest of the line; widen() announces any clip.
+    # ⛔⛔⛔ AND THE NUMBER I FIRST WROTE HERE WAS FROM THE WRONG OBJECT. This
+    # comment said "11 emits, zero clipped". MEASURED IN THE SHIPPED FORM it is
+    #     10 emits, 6 of them clipped and ANNOUNCED
+    # The bad reading came from measuring with `"$SHIP.*"` where SHIP carries a
+    # TOP-LEVEL ALTERNATION: `.*` bound only to the LAST branch, so the CAPTAIN
+    # branch was still emitting bare fragments and every line measured short.
+    # 🔑 A REGEX PRECEDENCE SLIP IS AN [[adjacent-object-principle]] INSTANCE: the
+    # count was a TRUE reading of a pattern I was not shipping, and it failed in
+    # the reassuring direction -- "zero clipped" is the answer that ends inquiry.
+    # It survived one measurement and died the moment the shipped form ran, which
+    # is the whole argument for [[publish-the-program-not-the-number]]: the
+    # invocation is checkable by a reader, the figure is not.
+    # ⚠️ 6 of 10 CLIPPING IS THE NORMAL CASE, not a defect: these are long headers,
+    # and the clip is stated at the FRONT where the envelope cannot eat it.
+    grep -oE "(CAPTAIN.{0,20}(RETURN|BACK|HELM)|CONVENE).*" /tmp/ev-peer.txt \
+      | widen | cap3 "CAPTAIN-RETURN"
     # HALT/STAND DOWN only from the ORDER-OWNED view.
     # ⛔ AND I WROTE A NUMBER HERE BEFORE I MEASURED IT. The first version of
     # this comment claimed "27 seat-owned lines and 0 maestro-owned" and called
