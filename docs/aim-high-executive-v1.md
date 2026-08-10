@@ -5,6 +5,82 @@ Captain's push ②: "a MINI-OS instead of the executive." Recon basis:
 ${SEAT_DIR}/briefs/2026-08-10-aim-high-trio-recon.json (executive_os section).
 Refuter pass owed BEFORE council consumption.**
 
+## §A · REFUTER-PASS AMENDMENTS (v1.1, 12:1x — the FATAL is repaired here; the wave fires on THIS section where it conflicts with the body)
+
+- **B1 · FATAL REPAIRED — the state type (r-isolation).** X0's
+  `Vector St N` gives every task its own register file, making X1's
+  isolation theorem vacuous BY TYPE (cross-task integrity free from
+  `Vector.getElem_set_ne`; E-4's mutant unconstructible) — and making X3's
+  mailbox meaningless and X4's context switch 60 words against dmem8's 8.
+  AMENDED `SysSt`: **ONE shared `regs : Vector (BitVec 32) 32` +
+  `pcs : Vector (BitVec 32) N` + `cur` + fuel counters**; task i's slice
+  runs `step` on `{regs := sys.regs, pc := sys.pcs[i]}`, pc written back.
+  Partition disjointness now carries real content; the mailbox is a
+  register both partitions name; the switch saves N pcs (N=4 → 4 words,
+  FITS dmem8). If the Captain prefers `Vector St N`, then X1 is renamed
+  "context separation BY TYPE" (a design fact, not a theorem) and
+  "compiler-enforced isolation" leaves §1.
+- **B2 · The write-set claim and `step_frame` were both wrong (r-isolation).**
+  BEQ writes NO register (pc only); ADDI reads one; rd=0 writes none.
+  Amended: "each `Instr` writes AT MOST one register and ALWAYS writes
+  pc"; `writesInstr : Instr → Finset (Fin 32)` (BEQ ↦ ∅, rd=0 ↦ ∅);
+  `step_frame` BINDS the instruction to the image (`fetch code s.pc =
+  some i` or `i ∈ code`) — as drafted it was false (i was free). The
+  SysSt-level frame row carries an explicit pc clause. `Confined`
+  (branch targets inside own text) becomes mandatory at X4's single image;
+  per-task code lists are the load-bearing hypothesis at X0-X3, SAID.
+- **B3 · E-4 as a concrete witness (r-isolation + r-claims).** The overlap
+  mutant is pre-registered EXACTLY: N=2, P_A={1,2}, P_B={1,3}, progA=
+  [.ADDI 1 0 5], progB=[.ADDI 1 0 9], q=1 — `decide +kernel` that A's
+  reg 1 reads 9; paired with the disjoint control. The mutant must WRITE
+  the overlap. POSITIVE control added: a task image with `writesWithin =
+  true` by decide, plus its complement.
+- **B4 · Preemption claims re-fenced (r-isolation + r-sequencing).** No
+  timer and no interrupt exist anywhere in the corpus (trap32.v is
+  explicitly not a submission artifact); preemption has NO machine
+  realization at Slice A or B. X4's compiled executive is COOPERATIVE and
+  re-acquires the yield antecedent; X2's preemptive fairness theorem does
+  NOT refine to X4 — the cooperative theorem is a separate proof there.
+  X2's fairness as drafted is FALSE for any configuration containing a
+  halting task: amended with the explicit antecedent (every task's image
+  non-halting at every scheduled entry, OR the executive's re-dispatch
+  rule stated) — and X2's fairness class and X4's compiled-task class are
+  DISJOINT program classes (block ① compiles terminating programs).
+  §2.2's "E-6's scope caveat disappears" is STRUCK (preemption retires
+  never-YIELDS only; never-RUNNABLE stands, per E4). This executive is
+  also disambiguated BY NAME from the September die's EXEC sequencer:
+  X0-X3 produce no program, no image, no RTL.
+- **B5 · E-5 restated (r-isolation).** Under a total `Nat → SysSt` every
+  run is infinite by type and E-5 is decorative. Amended: an EXECUTION
+  witness — a concrete configuration in which the selected task EXECUTES
+  ≥1 instruction at every step (loopProg-based; needs a backward branch,
+  which is why the forward-branch predicate never governs executive tasks).
+- **B6 · Isolation = WRITE-confinement, said (r-isolation).** The X1
+  family is integrity only; task j may READ task i's registers. Either
+  `readsWithin` is added as its own rung or §1/§7 carry "read-isolation /
+  confidentiality NOT claimed." Default: the fence, not the extra rung.
+- **B7 · The ①/② seam was unowned and its arithmetic does not close
+  (r-isolation + r-sequencing).** `allocInto` exists in no other block.
+  Default: X1 lands against HAND-PARTITIONED programs and
+  "COMPILER-ENFORCED" leaves the star sentence until block ① prices the
+  allocator rung. The arithmetic, printed: pool 15, minus the executive's
+  own partition (task 0, per E4), over N tasks — N=4 → ~3 regs/task
+  (`poolDemand mathP = 4` does not fit); **N=2 → 7 (recommended)**.
+- **B8 · Ruling #3 lift is a veto point, not a scheduling remark
+  (r-claims + r-sequencing).** X0-X3 are SPEC-LEVEL rows, not B-EXEC
+  waves against B-ISA's spec; running them now amends "B-EXEC follows
+  B-ISA structurally" — veto point (e), the Captain's word. X4's gate is
+  also under-named: the context switch needs LW/SW, not only JAL/JALR.
+- **B9 · x0's storage is unconstrained (r-sequencing).** Every frame and
+  context-switch row is stated via `St.get`, never as `St`/Vector
+  equality; the switch never saves or restores regs[0].
+- **B10 · Star sentence re-fenced (r-claims).** §1 reads, amended:
+  "…ISOLATION AS A FRAME THEOREM ABOUT CODE — compiler-ENFORCEABLE once
+  block ①'s allocator targets a partition, landing against
+  HAND-PARTITIONED programs if block ① is cut" — and §2.1's honest form
+  becomes "cooperative when compiled and run on a core — both unlanded
+  (B-ISA for JAL, W5-asm for the core)."
+
 ## §0 · THE FENCE THIS BLOCK STANDS BEHIND, THEN REACHES OVER
 
 The corpus pre-committed twice: "Named EXECUTIVE, not OS, until it earns the

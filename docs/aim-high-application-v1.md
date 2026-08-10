@@ -11,6 +11,107 @@ self-referential, but a really good example." Recon basis:
 ${SEAT_DIR}/briefs/2026-08-10-aim-high-trio-recon.json (application section).
 Refuter pass owed BEFORE council consumption.**
 
+## §A · REFUTER-PASS AMENDMENTS (v1.1, 12:1x — one FATAL repaired by rescoping A4; the wave fires on THIS section where it conflicts with the body)
+
+- **C1 · The envelope arithmetic is REPLACED (r-envelope).** The imported
+  "~170 cycles/neuron" is the fan-in-2 case ONLY; the true form is
+  **49 + 40n cycles at fan-in n, with n = 2(1+deg) at 2-dim state — a
+  NODE is TWO neurons**. The demo's own numbers: 4 nodes / 2 dims /
+  3 rounds = 336-432 frames = 4,704-6,048 cycles = **259-333 µs**, not
+  "tens of µs" (still bench-visible; but the council rules on THIS
+  number). Weight reloads are 50% of fabric frames and 80% of cell time —
+  cite `weight_state_moves_so_reload_is_required` (MacCell.lean:570); the
+  "ONE weight stream" multicast framing is STRUCK (contradicted twice in
+  the corpus). The 2-2-1 anchor, int8-consistent: 19 frames / 266 cycles /
+  14.6 µs. Accounting basis: the OVERLAPPED timetable, named.
+- **C2 · The buffering seam, surfaced (r-envelope).** A round produces 8
+  node-states against 4 accumulators: at least half of every round's
+  states round-trip through the RP2040 — OUTSIDE the verified surface —
+  and round r+1's tape is DATA-DEPENDENT (the offline-tape premise breaks
+  at round composition). The round-composition seam is FENCED, not
+  proved, in September. Pre-registered control: a single-bit weight
+  mutation must change BOTH the emitted byte AND the byte re-injected
+  next round (the RP2040 replays what it CAPTURED, never a precomputed h).
+- **C3 · h ≤ 127 COMPOUNDS per round — RULING #8 RE-OPENS here as a new
+  veto point (r-envelope + r-claims).** The stable range is H ≤ 128/(S−1)
+  (S = positive weight mass per output); at deg 3 / R 3 with integer
+  weights the reachable state collapses to H ≈ 2 — numerically dead.
+  Ruling #8's stated premise ("one layer, no cell→cell chaining") was
+  already void for the 2-2-1. Branches for the Captain: **(A)** keep
+  no-requant → deg ≤ 2, H ≤ 64, ternary weights, and the target renamed
+  honestly (a threshold/erosion field update — "advection-diffusion" is
+  dropped); **(B)** land the requantizer the corpus already designed
+  (shift + saturate, ~40 gates, in the SER's sAct row) — converts h ≤ 127
+  from a per-network weight duty into a THEOREM, freeing the trainer —
+  priced as new silicon with a V9-class kernel model, and ruled TOGETHER
+  with §4's derivative convention (straight-through 2^-s, the floor's
+  zero-derivative region NAMED, else the adjoint theorem is satisfiable
+  by zero).
+- **C4 · Adjoint duties + the fixed §4 form (r-envelope + r-claims).**
+  New per-adjoint-round duties in §0: (i) a gradient-magnitude
+  certificate |g| ≤ G_r at every hop, G_r ≤ 127 on any int8 frame;
+  (ii) a FRESH `noOverflowFrom` instance on the ADJOINT addend trace
+  (demoBound is forward-only); (iii) shiftSafe at the adjoint's actual
+  stream length (proven range stops at t < 8) with the wide quantity on
+  the STREAMED side. §4's theorem takes the SYMBOLIC form: under the
+  forward certificate h ≤ 127 (so emission truncation is identity on the
+  reachable set), the emitted adjoint equals D(x)ᵀWᵀ with D the ReLU mask
+  RECORDED on the forward pass, convention at 0 named. The "1/256 of the
+  domain" sentence is DELETED (a fabricated constant — the kink set is
+  weight-dependent, its size a per-network measurement). Controls: the
+  transposed-weights mutant now carries a pre-registered `W ≠ Wᵀ` witness
+  (symmetric W would pass it), plus a dropped-mask (D = I) mutant.
+- **C5 · FATAL REPAIRED — A4 rescoped to ONE adjoint round (r-envelope).**
+  Over 3 rounds the int8-per-hop constraint caps the seed gradient below
+  1 — an identically-zero gradient no mutant can falsify. A4 is now a
+  SINGLE adjoint round with the seed bound stated in the rung (|g| ≤ 21
+  at deg 2, unit weights) and an anti-vacuity control: gradients
+  pre-registered NONZERO at every hop. "One byte per result honored" is
+  DELETED (it asserted what the arithmetic refutes). Multi-round backprop
+  moves to A5/v2 and carries the SER shift-enable + multi-frame operand
+  path + shiftSafe extension as NAMED, PRICED silicon.
+- **C6 · A5 is explicitly v2 (r-claims).** An on-chip update replaces the
+  compile-time-checked weights, so the range obligation for the
+  POST-UPDATE network is a new, unpriced proof (update rule
+  range-preserving over reachable weights) — and η has no mechanism on an
+  integer datapath without the requantizer's shift (η = 1 blows the range
+  on step one). The "VERIFIED LEARNING" earn criterion is EVIDENCE's to
+  pre-register (observable event + instrument); this block ASKS, it does
+  not grant. §4's earn sentence is amended accordingly.
+- **C7 · Fences at the claim site (r-claims).** §2's three-row sentence
+  now carries all three where it stands: the decomposition computes the
+  neuron **WHEN DRIVEN** (sequencer = hand RTL, V9's subject), **AT THE
+  KERNEL MODEL** (F3 stands — "down to silicon" clears only at a run on
+  this top module), and **on the certified traffic class only** (ZERO
+  demo rounds are in `fabric_routes`; V10 per-round fixtures OWED — they
+  are direct `decide +kernel` evaluations, so no theorem family is
+  waited on, said explicitly; single-source frames are outside the
+  prefix-concentrated class). Tile-fit retirement is scoped: the 6x2 AS
+  RUN; whether a LARGER application closes remains unrun (this block adds
+  no RTL). Partial-load status carries exact shas + 1b5453c's guard (NOT
+  "the Batcher sorts").
+- **C8 · The GraphCast fence is EXTENDED (r-claims).** Never "we ran
+  GraphCast" AND never "forecasts weather": the demo runs SYNTHETIC
+  dynamics on a 4-node mesh; no weather data enters, no forecast skill is
+  measured — applied at every use site including the star sentence and
+  the council pack. Any PUBLIC wording naming GraphCast routes through
+  clearance before it ships and carries a no-affiliation line. OWED before any
+  public wording: the paper's processor-section citation + the explicit
+  list of published-model features the PoC does NOT carry (from the
+  public paper only — the lane note stands).
+- **C9 · Schedule honesty (r-sequencing).** A1 is gated on V9 — a
+  compiler-owned live debt in no ladder (priced on compiler's track, or
+  A1's sentences ship permanently fenced WHEN DRIVEN). A2's V10 route
+  count is 16-20 classes (≈3× the 2-2-1's six; ~4-5 days at A0's rate) —
+  fixture cost scales with ROUTE CLASSES (which saturate), runtime and
+  range certificates scale with ROUNDS; §7(d) re-aimed at the right
+  variables. The in-window exhibit surface is GATE-LEVEL SIMULATION
+  (chips ~May 2027; the bench harness is September work outside the
+  verified surface). A0 is owed work — a credit, not capacity.
+- **C10 · The nine-day recommendation (r-sequencing).** In-window: **A0
+  only.** A1-A5 are September/v2 claims and the block says so before any
+  prose travels.
+
 ## §0 · THE ENVELOPE EVERY CANDIDATE LIVES INSIDE (measured, not argued)
 
 k=4 cells (fabric ports, not area — the cap is the 8-port map, FROZEN);

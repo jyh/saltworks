@@ -8,6 +8,60 @@ low." — QUEUE:1073-1075). Recon basis:
 ${SEAT_DIR}/briefs/2026-08-10-aim-high-trio-recon.json (language section, byte-cited);
 deltas since recon folded in §2. Refuter pass owed BEFORE council consumption.**
 
+## §A · REFUTER-PASS AMENDMENTS (v1.1, 12:1x — five refuters, all verdicts folded; the wave fires on THIS section where it conflicts with the body)
+
+- **A1 · Row A takes the `emit_runs` shape, not the bare ∃-fuel (r-fuel).**
+  The corpus already carries the fuel algebra LANDED and audited —
+  `runFor_add` (Stack/Program.lean:615, no side condition),
+  `runFor_of_fetch_none` (:598), `runFor_eq_of_halted` (:628) — so §4's
+  core unlock STANDS (better: it is already paid for), but the bare
+  `∃ n, runFor n code (encode σ) = encode σ'` is gameable two ways
+  (append-a-loop transit; n=0 on no-op-shaped programs). AMENDED FORM:
+  entry-pc + `EmbedsAt` hypotheses, exit conjunct
+  `(runFor k img st).pc.toNat = 4*off + 4*code.length` (which forces
+  `fetch = none` and stabilizes all larger fuel), frame at the EXIT state.
+  Pre-registered controls: the append-a-loop mutant and the emit-nothing
+  mutant must both FAIL the amended Row A.
+- **A2 · The planned reg-map hypothesis was a vacuity bomb (r-fuel).**
+  `Function.Injective (reg : Nat → Fin 32)` is pigeonhole-UNSATISFIABLE;
+  every theorem carrying `RegOk` as drafted would be vacuously green.
+  AMENDED: `reg : Fin poolSize → Fin 32` (poolSize = 15, RTL-mirrored) or
+  injectivity bounded below `poolDemand p`; an INHABITANCE control
+  (exhibit one `reg`) lands before any theorem consumes it. L1's
+  "injectivity as a theorem" re-aims at the finite-domain embedding.
+- **A3 · The frame clause ranges over scratch, not a fixed boundary
+  (r-fuel).** Scratch grows with `expCostNoSwap`; a fixed `t0` frame is
+  FALSE for `mathP`-shaped programs. Frame = complement of (Γ's registers
+  ∪ the node's scratch range), with `poolDemand p ≤ 15` carried.
+- **A4 · L6's closing sentence was an end-to-end regression (r-claims).**
+  Amended: L6 closes universal sortedness for the PROGRAM against the
+  certified NETWORK MODEL (`batcher8_sortsTo_word`); one comparator spec
+  by PROVENANCE; the compiler verified between source and machine WORDS;
+  netlist/silicon composition stays prospective behind W5-asm.
+- **A5 · Controls hardened (r-claims).** L0 gains a per-rung totality
+  lemma (`compileE` returns `some` on well-typed, in-pool expressions) so
+  the reject-everything mutant binds at L0, not only at L4; L3 gains the
+  paired ACCEPT control (a recursion-free two-function program whose DAG
+  check passes and whose inlining theorem is green).
+- **A6 · Stale status corrected (r-claims).** §2's "only stage
+  preservation remains" was already false at drafting: (A)(B)(C)(D) ALL
+  LANDED (`819c685`/`1b5453c`; `bnC_output_frames_partial`; silicon MEAS
+  no-defect 11:43). Carried WITH 1b5453c's own guard: this is NOT "the
+  Batcher sorts" — the abstract-fold↔cSorted seam remains, abstract to
+  abstract. §6's "at the door" gate is effectively OPEN on compiler's side.
+- **A7 · L6 has no seat, and the seat math does not close (r-sequencing).**
+  The cross-trio tally busts the window (see the council pack's bundle):
+  this block's in-window recommendation is **L0→L1→L2→L4 at compiler,
+  L3/L5 CUT unless math's X-ladder is cut instead, L6 RULED at council**
+  (default: named cut; stretch: compiler post-L4 if W5-asm/B-ISA deferral
+  is ruled). W5-asm/B-ISA deferral is the Captain's to rule — their slots
+  are his standing orders, not this block's to consume silently.
+- **A8 · L6 vs block ②'s partitions (r-sequencing).** `sortProg` needs
+  NINE registers concurrently (SortDemo.lean:462-465); a partitioned task
+  class at N=4 gives 3, at N=2 gives 7. L6 and compiler-enforced
+  partition isolation are incompatible demonstrations on this machine —
+  stated in both blocks; L6 runs only at N=1 (whole-pool).
+
 ## §0 · THE HONEST STARTING LINE, SAID FIRST
 
 There is no compiler. `def compile` → zero hits in the corpus (recon
