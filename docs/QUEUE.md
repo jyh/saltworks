@@ -297,6 +297,24 @@ OPEN ITEMS:
   is clean end-to-end.** Math gated behind the landing for the
   signed trace inheritance; silicon MEAS reactive; timing MEASURED
   never predicted (silicon's refusal binds all seats).
+  ✅ **LANDED 19:05 (7364548, compiler, fire-to-kernel in 16 min):
+  `scellSeq`/`scCore` 225 gates BESIDE `cellSeq` — math's object
+  and all 26 of its citing theorems UNTOUCHED (the expensive side,
+  taken deliberately: statement-shape-is-an-interface). `sign`
+  REPLACES cin, nIn stays 3, emitted boundary will stay 67/96.
+  31 audited theorems; one rfl coverage gap (scSign_eq_ccCin,
+  harmless, silicon-checked); three mutants on the real 225-gate
+  netlist. SEALS: silicon MEAS NO DEFECT (kernel-green own-hand)
+  · MAESTRO COVERING BUILD saltbuild EXIT=0, 8,677 jobs. MATH'S
+  GATE ② IS OPEN (compiler's three facts: the object is scellSeq;
+  macSeq untouched so cell_computes_signed_mac applies without
+  restatement, addend becomes cmplWord s (andWord x w);
+  scellSeq_env_is_cellEnv landed as rfl). ⚠️ F5 SEMANTIC DRIFT
+  REGISTERED (silicon's catch): mac_cell.v is STILL the unsigned
+  16:02 emission — f5_port_test EXIT 1 now means LANDED-NOT-YET-
+  EMITTED, not nothing-happened; silicon's signed emission is the
+  cure and is in flight. Timing: still NO nanoseconds published —
+  measure on the emitted artifact.**
   📌 FINDING 2 — AUDIT-COVERAGE CAMPAIGN CANDIDATE: Sem.lean's
   "real number is zero" note is stale — 204 unaudited theorems
   corpus-wide (CorePlace 38 · CoreOffsets 23 · TinyRustN0 23 ·
@@ -852,6 +870,25 @@ OPEN ITEMS:
   design block (drafts tonight, refuter pass behind it), and the
   packet-IO slate's #3 memory story. The do-not-forget duty
   becomes the sitting's opening.**
+  **VERIFIED NOT-YET-HELD 8/9 19:1x at the Captain's challenge
+  ("we already did the 3+4 review last night, please verify"):
+  12-reader sweep over the full 8/8-14:00→8/9-08:00 bus window +
+  the 8/9 noon council window, two ADVERSARIAL judges (one briefed
+  as the Captain's advocate) — both NOT_HELD, high confidence.
+  The trail: ③+④ PARKED at the 8/8 10:05 muster (ruling ⑦, "one
+  conversation") · his 14:14 commitment is itself proof ("please
+  don't let us forget") · 14:18 he left the helm · the evening =
+  the ④ LANDING CEREMONY at 18:35 (his correctly-scoped sentence,
+  "the paper's assertion, now proved!") + three NEW campaigns
+  (tiny-Rust/RTL-layout/Slice-B) + the 21:04-21:31 tile/pinout
+  design review. FOUR NAMED DEJA-VU ANCHORS, all real: the doc
+  headers say "Captain-sessioned 8/8" (recording the PARKED muster
+  touch) · his own 10:32 design premise folded into the heritage
+  block · the 18:35 scoping act · the genuine (but other-subject)
+  21:0x review. UNREVIEWED and waiting for the sitting: block ③'s
+  eight refutation rounds, block ④'s six-state correction + the
+  framework law + the stage-count premise + HIS OWN recalled-1988
+  timing as folded. The fold ruling STANDS.**
 - Endorsement + witness approval #2 (T1): his lanes, he monitors
   personally (his 8/7 disposition; no maestro re-surfacing).
 - Salt (7.3) (T1, the Captain's click): now **ONE CLICK** — its last
