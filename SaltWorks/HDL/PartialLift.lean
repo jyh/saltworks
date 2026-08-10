@@ -365,6 +365,70 @@ theorem elemSortsAt_of_partial_stage (st : List Bool) (tr : List (List Bool))
           ceCPort_identical (bnCSlice st k) (bnCSlice_length st k) _ _ hrl _ (by omega)] <;>
       simp
 
+/-! ## (C) PRESERVATION — and the payoff -/
+
+/-- (C) **PRESERVATION.** A comparator permutes the two frames on its own wires
+and leaves the other six alone, so both clauses of the invariant transport along
+`σ`. `frames_succ_perm` supplies the permutation and — like every other object in
+this chain — takes the comparator as a parameter. -/
+theorem partialStageOK_succ (st : List Bool) (tr : List (List Bool)) (n L k : Nat)
+    (hk : k < 24)
+    (hrst : tr.map (fun i => i.getD 0 false) = true :: List.replicate n false)
+    (hSt : PartialStageOK st tr L k) :
+    PartialStageOK st tr L (k + 1) := by
+  obtain ⟨σ, hσlt, hσinj, hσeq⟩ :=
+    frames_succ_perm st tr k hk _ (elemSortsAt_of_partial_stage st tr n L k hk hrst hSt)
+  obtain ⟨hframes, hdist⟩ := hSt
+  refine ⟨?_, ?_⟩
+  · intro w hw
+    rw [hσeq w]
+    exact hframes _ (hσlt w hw)
+  · intro w₁ w₂ hw₁ hw₂ hne d₁ p₁ d₂ p₂ h₁ h₂
+    rw [hσeq w₁] at h₁
+    rw [hσeq w₂] at h₂
+    exact hdist _ _ (hσlt w₁ hw₁) (hσlt w₂ hw₂) (hσinj w₁ w₂ hw₁ hw₂ hne) d₁ p₁ d₂ p₂ h₁ h₂
+
+theorem partialStageOK_all (st : List Bool) (tr : List (List Bool)) (n L : Nat)
+    (hrst : tr.map (fun i => i.getD 0 false) = true :: List.replicate n false)
+    (h0 : PartialStageOK st tr L 0) :
+    ∀ k, k ≤ 24 → PartialStageOK st tr L k := by
+  intro k
+  induction k with
+  | zero => intro _; exact h0
+  | succ m ih =>
+    intro hm
+    exact partialStageOK_succ st tr n L m (by omega) hrst (ih (by omega))
+
+theorem elemSortsAt_all_partial (st : List Bool) (tr : List (List Bool)) (n L : Nat)
+    (hrst : tr.map (fun i => i.getD 0 false) = true :: List.replicate n false)
+    (h0 : PartialStageOK st tr L 0) :
+    ∀ k, k < 24 → ElemSortsAt st tr k frameLE := by
+  intro k hk
+  exact elemSortsAt_of_partial_stage st tr n L k hk hrst
+    (partialStageOK_all st tr n L hrst h0 k (by omega))
+
+/-- ⭐⭐⭐ **THE NETLIST REFINES THE ABSTRACT FOLD AT PARTIAL LOAD, UNDER THE
+TWO-FIELD KEY** — from a condition on the caller's trace alone, with idle lines
+permitted throughout.
+
+⚠️ **This does NOT say "the Batcher sorts".** Its nouns are `runTrace
+batcherNetC` and `runNetF frameLE bnComps`: it says the 24-instance NETLIST
+computes what the abstract comparator fold computes. *Whether that fold sorts is
+a separate statement about `bnComps` as a sorting network, and connecting it to
+math's `cSorted` (= `runNet batcher8 (cKey act dst)`) is a further seam.* **What
+is closed here is the refinement, which is the half that was owed.** -/
+theorem bnC_output_frames_partial (st : List Bool) (tr : List (List Bool)) (n L : Nat)
+    (hrst : tr.map (fun i => i.getD 0 false) = true :: List.replicate n false)
+    (h0 : PartialStageOK st tr L 0) (w : Nat) (hw : w < 8) :
+    (runTrace batcherNetC st tr).1.map (fun o => o.getD w false)
+      = runNetF frameLE bnComps (fun i => bnCFrameAt st tr 0 i) w :=
+  bnC_output_frames_are_the_fold st tr frameLE
+    (elemSortsAt_all_partial st tr n L hrst h0) w hw
+
+#audit_axioms partialStageOK_succ
+#audit_axioms partialStageOK_all
+#audit_axioms elemSortsAt_all_partial
+#audit_axioms bnC_output_frames_partial
 #audit_axioms cFrame_getD0
 #audit_axioms cKeyOfFrame_active
 #audit_axioms cKeyOfFrame_idle
