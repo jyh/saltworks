@@ -109,6 +109,14 @@ anything.
 - Pi submission (the ratified venue; flagship skeleton at papers/flagship/).
 - arXiv endorsement effort — REOPENED ACTIVE at his word.
 - Clearance status: salt RE-APPROVED ✓ · jas APPROVED ✓ · SaltBench PENDING.
+- **MATH'S 15:59 FACT for this item (its own correction, register-checked):
+  the salt pillar is NOT idle for want of effort — it is GATED. QUEUE:885
+  carries the N7 DESIGN DEBTS, maestro-owed, Fable-tier, with the verdict
+  "the flagship front at solo tier is EXHAUSTED until one of these opens a
+  gate." So ask-list (f) splits: (i) "submit to Pi" is a WRITING task on
+  landed mathematics — unblocked, waits on nothing; (ii) the pillar's
+  PROVING front waits on the N7 gate, and opening it is a ruling on the
+  MAESTRO's hours (Fable-tier), not on math's.**
 
 ## ③ LTI MEETING PREP (Wednesday 8/12)
 
