@@ -939,6 +939,181 @@ theorem cellSeq_mutant_no_reload_is_not_two_inputs :
       ≠ MacCell.bitsOf 256 ++ MacCell.bitsOf 30 :=
   ⟨by decide +kernel, by decide +kernel, by decide +kernel⟩
 
+/-! ## ② THE SIGNED TRACE INHERITANCE — the subtraction becomes a CELL CYCLE
+
+⭐ **This section is the answer to `cell_addend_cannot_present_the_sign_operand` above.** That
+theorem is kernel-proved and stays true: the 193-gate `cellSeq` has no complement path, so
+`cellSeq_state_word_signed_reading`'s second conjunct had to be arithmetic ABOUT the word
+rather than a cycle OF the machine — true and inapplicable, the F5 shape.
+
+`MacCell.scellSeq` (compiler's `7364548`, 225 gates) carries `scSign`, and `scSign` feeds BOTH
+the XOR bank and `macCore`'s carry-in (`MacCell.sc_carry_is_the_sign`). So the sign step is
+now a cycle of one machine, and the join below is the SAME arithmetic theorem
+(`cell_computes_signed_mac`) applied to a trace `scellSeq` can actually present.
+
+⚠️ **WHAT THIS DOES NOT CLOSE.** The trace carries `sign` high at exactly cycle `m`;
+`scellSeq` permits it at ANY cycle, so the artifact is strictly MORE GENERAL than the
+theorem. The supplier of "sign high only at cycle `m`" is a sequencer, and no sequencer is
+emitted. **F5 clears on the DATAPATH here and keeps binding on the CONTROL.** -/
+
+/-- The accumulator's next word, both sign arms in one object. -/
+def scAccNext (s x : Bool) (w acc : BitVec 32) : BitVec 32 :=
+  if s then acc - andWord x w else acc + andWord x w
+
+/-- One cycle's accumulator bit, either sign — compiler's two arms joined. -/
+theorem sc_acc_bit (x ld s : Bool) (w acc : BitVec 32) (k : Nat) (hk : k < 32) :
+    run (cellEnv x ld s w acc) scCore.gates (instMap macCore scMSig scMOff (maSum k))
+      = (scAccNext s x w acc).getLsbD k := by
+  cases s with
+  | false => simpa [scAccNext] using sc_accumulate_cycle_unchanged x ld w acc k hk
+  | true  => simpa [scAccNext] using sc_sign_cycle_subtracts x ld w acc k hk
+
+/-- The accumulator half of one cycle, as a word. -/
+theorem scellSeq_cycle_acc_bits (x ld s : Bool) (w acc : BitVec 32) :
+    (List.range 32).map
+        (fun k => run (cellEnv x ld s w acc) scCore.gates
+                    (instMap macCore scMSig scMOff (maSum k)))
+      = MacCell.bitsOf (scAccNext s x w acc) := by
+  show _ = (List.range 32).map (scAccNext s x w acc).getLsbD
+  exact List.map_congr_left (fun k hk => sc_acc_bit x ld s w acc k (List.mem_range.mp hk))
+
+/-- The weight register's next bit on the SIGNED netlist. `sc_wsh_next` lands on the same
+right-hand side as the unsigned `cell_wsh_next`, so this mirrors `cell_wsh_next_bit`. -/
+theorem sc_wsh_next_bit (x s : Bool) (w acc : BitVec 32) (k : Nat) (hk : k < 32) :
+    run (cellEnv x false s w acc) scCore.gates (ccWshNext k) = (w <<< 1).getLsbD k := by
+  have hnet0 : (wsCore.outs.drop 32).getD 0 0 = wsLsb := by decide +kernel
+  have hnetS : ∀ j, j < 31 → (wsCore.outs.drop 32).getD (j + 1) 0 = wsW j := by
+    intro j hj; revert hj; revert j; decide +kernel
+  rw [sc_wsh_next x false s w acc k hk]
+  simp only [wEnv]
+  match k, hk with
+  | 0, _ =>
+      have hbit0 : (w <<< 1).getLsbD 0 = false := by
+        rw [BitVec.getLsbD_shiftLeft]; simp
+      rw [hnet0, wshift_next_bit_zero_when_not_loading x w, hbit0]
+  | (j + 1), hk =>
+      have hj : j < 31 := by omega
+      have h1 : j + 1 < 32 := by omega
+      have h2 : ¬ (j + 1 < 1) := by omega
+      have hbit : (w <<< 1).getLsbD (j + 1) = w.getLsbD j := by
+        rw [BitVec.getLsbD_shiftLeft]; simp [h1, h2]
+      rw [hnetS j hj, wshift_next_bit_succ x false w j hj, hbit]
+
+/-- The weight half of one cycle, as a word. -/
+theorem scellSeq_cycle_wsh_bits (x s : Bool) (w acc : BitVec 32) :
+    (List.range 32).map
+        (fun k => run (cellEnv x false s w acc) scCore.gates (ccWshNext k))
+      = MacCell.bitsOf (w <<< 1) := by
+  show _ = (List.range 32).map (w <<< 1).getLsbD
+  exact List.map_congr_left (fun k hk => sc_wsh_next_bit x s w acc k (List.mem_range.mp hk))
+
+/-- ⭐⭐ **ONE CYCLE OF THE SIGNED COMPOSED CELL, AT THE WORD, BOTH HALVES, EITHER SIGN.**
+This is the keystone ② rests on: at `s = false` it is the unsigned cell's step exactly, and
+at `s = true` the accumulator SUBTRACTS — on the netlist, not in the arithmetic. -/
+theorem scellSeq_step_word (x s : Bool) (w acc : BitVec 32) :
+    stepSeq scellSeq (MacCell.bitsOf w ++ MacCell.bitsOf acc) [x, false, s]
+      = (MacCell.bitsOf (scAccNext s x w acc),
+         MacCell.bitsOf (w <<< 1) ++ MacCell.bitsOf (scAccNext s x w acc)) := by
+  -- ⚠️ `scCore` stays OPAQUE: 225 gates expand `instGates adder32` and the kernel times out.
+  have hcore : scellSeq.core = scCore := rfl
+  have hnout : scellSeq.nOut = 32 := rfl
+  have henv : scellSeq.env [x, false, s] (MacCell.bitsOf w ++ MacCell.bitsOf acc)
+      = cellEnv x false s w acc := rfl
+  have houts : scCore.outs
+      = ((List.range 32).map (fun k => instMap macCore scMSig scMOff (maSum k)))
+        ++ (((List.range 32).map ccWshNext)
+            ++ ((List.range 32).map (fun k => instMap macCore scMSig scMOff (maSum k)))) := by
+    show (((List.range 32).map (fun k => instMap macCore scMSig scMOff (maSum k)))
+          ++ ((List.range 32).map ccWshNext))
+          ++ ((List.range 32).map (fun k => instMap macCore scMSig scMOff (maSum k))) = _
+    exact List.append_assoc _ _ _
+  have hlen : (MacCell.bitsOf (scAccNext s x w acc)).length = 32 := MacCell.bitsOf_length _
+  simp only [stepSeq, sem, hcore, hnout, henv, houts, List.map_append, List.map_map,
+             Function.comp_def, scellSeq_cycle_acc_bits, scellSeq_cycle_wsh_bits]
+  rw [List.take_left' hlen, List.drop_left' hlen]
+
+/-! ### THE TRACE INDUCTION — accumulation cycles on the SIGNED cell
+
+`cellInputs` is REUSED, not restated: its third entry is `false`, which on the unsigned cell
+was carry-in-low and on the signed cell is sign-low. Same list, and reusing it is what makes
+"the accumulation story is preserved" literal rather than argued. -/
+
+/-- ⭐⭐⭐ **THE SIGNED CELL'S ACCUMULATION TRACE.** Identical conclusion to
+`cellSeq_runTrace_state`, on the 225-gate netlist. Unconditional: no `ℤ`, no overflow
+hypothesis, no `hW`. -/
+theorem scellSeq_runTrace_state :
+    ∀ (n : ℕ) (W b : BitVec 32) (x : ℕ → Bool),
+      (runTrace scellSeq (MacCell.bitsOf W ++ MacCell.bitsOf b) (cellInputs x n)).2
+        = MacCell.bitsOf (W <<< n)
+            ++ MacCell.bitsOf (b + (addendTrace (fun t => W <<< t) x n).sum)
+  | 0, W, b, x => by simp [cellInputs, runTrace, addendTrace]
+  | n + 1, W, b, x => by
+      have hstep := scellSeq_step_word (x 0) false W b
+      simp only [scAccNext, if_neg (by simp : ¬ (false = true))] at hstep
+      simp only [cellInputs_succ, runTrace, hstep]
+      rw [scellSeq_runTrace_state n (W <<< 1) (b + MacCell.andWord (x 0) W) (fun t => x (t + 1)),
+          shiftLeft_one_shiftLeft W n,
+          show (fun t : ℕ => (W <<< 1) <<< t) = (fun t : ℕ => W <<< (t + 1)) from
+            funext (fun t => shiftLeft_one_shiftLeft W t),
+          addendTrace_succ (fun t => W <<< t) x n, List.sum_cons, ← add_assoc]
+      simp [MacCell.andWord]
+
+/-- The sign operand IS what the AND row presents at cycle `m`. Definitional, and it is the
+hinge: the unsigned cell's kernel-proved gap
+(`cell_addend_cannot_present_the_sign_operand`) was that no port could carry the COMPLEMENT
+of this word. `scSign` carries it, so this equation is now usable. -/
+theorem andWord_eq_signOperand (W : BitVec 32) (x : ℕ → Bool) (m : ℕ) :
+    MacCell.andWord (x m) (W <<< m) = signOperand (fun t => W <<< t) x m := rfl
+
+/-- ⭐⭐⭐ **② — THE SIGNED TRACE, AND THE SUBTRACTION IS A CELL CYCLE.** `m` accumulation
+cycles then ONE sign cycle, all on `scellSeq`. The state's accumulator half is
+`(b + Σ addends) − signOperand`, and the weight register has shifted `m+1` times.
+
+⭐ **Compare `cellSeq_state_word_signed_reading`, whose second conjunct had to be arithmetic
+because the unsigned cell had no complement path. Here the subtraction is performed BY THE
+NETLIST — `sc_sign_cycle_subtracts` at `scSign = 1`.** -/
+theorem scellSeq_signed_runTrace_state (W b : BitVec 32) (x : ℕ → Bool) (m : ℕ) :
+    (runTrace scellSeq (MacCell.bitsOf W ++ MacCell.bitsOf b)
+        (cellInputs x m ++ [[x m, false, true]])).2
+      = MacCell.bitsOf (W <<< (m + 1))
+        ++ MacCell.bitsOf ((b + (addendTrace (fun t => W <<< t) x m).sum)
+                            - signOperand (fun t => W <<< t) x m) := by
+  rw [runTrace_append, scellSeq_runTrace_state m W b x]
+  have hstep := scellSeq_step_word (x m) true (W <<< m)
+      (b + (addendTrace (fun t => W <<< t) x m).sum)
+  simp only [runTrace, hstep, scAccNext, if_true, andWord_eq_signOperand,
+             BitVec.shiftLeft_add]
+
+/-- ⭐⭐⭐⭐ **② COMPLETE — THE COMPOSED SIGNED CELL COMPUTES THE SIGNED MAC.** Under the
+join's four hypotheses, after `m` accumulation cycles and one sign cycle the signed cell's
+accumulator reads in `ℤ` as `b + W · sval x (m+1)`.
+
+**Every step is now a cycle of one machine.** `cell_computes_signed_mac` is applied
+UNCHANGED — it never needed restatement, because it was always stated over the trace and the
+trace is now one `scellSeq` can present.
+
+⚠️ **STILL A HYPOTHESIS, AND F5 STILL BINDS ON IT: the trace carries `sign` high at exactly
+cycle `m`. `scellSeq` permits it at any cycle — the artifact is MORE GENERAL than this
+theorem. The supplier of "sign high only at cycle m" is a sequencer, and no sequencer is
+emitted. F5 clears on the DATAPATH here; it keeps binding on the CONTROL.** -/
+theorem scellSeq_computes_signed_mac
+    (W : ℤ) (Wreg b : BitVec 32) (x : ℕ → Bool) (m : ℕ)
+    (hW : ∀ t, t < m → ((Wreg <<< t) : BitVec 32).toInt = W * 2 ^ t)
+    (hWm : ((Wreg <<< m) : BitVec 32).toInt = W * 2 ^ m)
+    (hno : noOverflowFrom b (addendTrace (fun t => Wreg <<< t) x m) = true)
+    (hsign : ¬ BitVec.ssubOverflow (b + (addendTrace (fun t => Wreg <<< t) x m).sum)
+                (signOperand (fun t => Wreg <<< t) x m)) :
+    (runTrace scellSeq (MacCell.bitsOf Wreg ++ MacCell.bitsOf b)
+        (cellInputs x m ++ [[x m, false, true]])).2
+        = MacCell.bitsOf (Wreg <<< (m + 1))
+          ++ MacCell.bitsOf ((b + (addendTrace (fun t => Wreg <<< t) x m).sum)
+                              - signOperand (fun t => Wreg <<< t) x m)
+  ∧ ((b + (addendTrace (fun t => Wreg <<< t) x m).sum)
+        - signOperand (fun t => Wreg <<< t) x m).toInt
+      = b.toInt + W * Mac.sval x (m + 1) :=
+  ⟨scellSeq_signed_runTrace_state Wreg b x m,
+   cell_computes_signed_mac W b (fun t => Wreg <<< t) x m hW hWm hno hsign⟩
+
 /-! ### The axiom audit for THIS SECTION
 
 ⚠️ **AND IT COVERS THIS SECTION ONLY.** `MacBridge` carried no `#audit_axioms` block before
@@ -964,5 +1139,15 @@ adopted here. -/
 #audit_axioms cellSeq_mutant_dropped_input
 #audit_axioms cellSeq_mutant_stream_bit_matters
 #audit_axioms cellSeq_mutant_no_reload_is_not_two_inputs
+
+#audit_axioms sc_acc_bit
+#audit_axioms scellSeq_cycle_acc_bits
+#audit_axioms sc_wsh_next_bit
+#audit_axioms scellSeq_cycle_wsh_bits
+#audit_axioms scellSeq_step_word
+#audit_axioms scellSeq_runTrace_state
+#audit_axioms andWord_eq_signOperand
+#audit_axioms scellSeq_signed_runTrace_state
+#audit_axioms scellSeq_computes_signed_mac
 
 end SaltWorks.HDL.MacBridge
