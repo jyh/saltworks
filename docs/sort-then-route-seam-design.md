@@ -127,6 +127,23 @@ fact about `bnComps`, and tying it to math's `cSorted` (`runNet batcher8 (cKey a
 dst)`) is a further, **abstract-to-abstract** seam with no hardware in it.*
 **The refinement was what was owed, and it is closed.**
 
+### ✅ AND THE KEY LEVEL TOO — the handoff shape
+
+```
+bnC_output_keys_partial :
+  natKey (netlist output on wire w) = runNetN bnComps (natKey of input frames) w
+natKey f = (if active f then 0 else 8) + cDestOf f
+```
+🔑 *`bnC_output_keys_are_runNetN` wanted a **Nat** key and `frameLE` is a
+**product** key — that mismatch is the whole reason this step exists. Sound
+because `cDestOf_lt_eight` holds for ANY stream with no hypotheses, so the
+8-weighted activity bit dominates the destination exactly as the product order
+does.*
+
+📌 ***THE REMAINING LINK TO MATH'S `cSorted` IS NOW `runNetN bnComps` vs
+`runNet batcher8` — abstract-to-abstract, a `Nat` key on both sides, no hardware,
+no frames, no `cKeyLE`.***
+
 ⭐ *Three times in this lift the network layer turned out already generic where
 work had been priced — the fold, the port lemmas' `cKeyLE` form, and preservation.
 `cDestOf` entered the whole chain at exactly one rewrite (`cKeyLE_full_load`);
