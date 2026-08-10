@@ -773,10 +773,10 @@ with tempfile.TemporaryDirectory() as _tmp:
 # BESIDE them as an integration row whose failure is a FINDING, not a broken
 # test — the pattern provenance_replay already uses in this file.
 
-def _f5_netlist(xor_specs, extra=()):
+def _f5_netlist(xor_specs, extra=(), ports=3):
     """A minimal emitS-shaped netlist. xor_specs: list of (a_net, b_net)."""
     lines = ["`default_nettype none", "", "module fixture ("]
-    lines += ["    input  wire i0,", "    input  wire i1,", "    input  wire i2,"]
+    lines += [f"    input  wire i{k}," for k in range(ports)]
     lines += ["    output wire o0", ");"]
     for k, (a, b) in enumerate(xor_specs):
         lines.append(f"  sky130_fd_sc_hd__xor2_1 gx{k} (.A({a}), .B({b}), .X(nx{k}));")
@@ -804,13 +804,13 @@ def _run_f5(text, port=None):
 if Path(__file__).with_name("f5_port_test.py").is_file():
     # NEGATIVE: 40 xor2, every one on a distinct net — no bank. Expect EXIT=1.
     neg = _f5_netlist([(f"n{k}", f"m{k}") for k in range(40)])
-    rc, out = _run_f5(neg)
+    rc, out = _run_f5(neg, port="i2")
     check(rc == 1, f"F5 NEGATIVE: no-bank netlist gave exit {rc}, expected 1")
     check("ABSENT" in out, "F5 NEGATIVE: did not report the bank ABSENT")
 
     # POSITIVE: 32 xor2 sharing i2 (the carry-in port). Expect EXIT=0.
     pos = _f5_netlist([(f"n{k}", "i2") for k in range(32)])
-    rc, out = _run_f5(pos)
+    rc, out = _run_f5(pos, port="i2")
     check(rc == 0, f"F5 POSITIVE: 32-wide bank on i2 gave exit {rc}, expected 0")
     check("PRESENT" in out, "F5 POSITIVE: did not report the bank PRESENT")
 
@@ -818,7 +818,7 @@ if Path(__file__).with_name("f5_port_test.py").is_file():
     # present but tied to the WRONG net must FAIL (b). Without this row, a tool
     # that ignored the carry-in port entirely would pass both controls above.
     wrong = _f5_netlist([(f"n{k}", "i1") for k in range(32)])
-    rc, out = _run_f5(wrong)
+    rc, out = _run_f5(wrong, port="i2")
     check(rc == 1, f"F5 (b): bank on the WRONG net gave exit {rc}, expected 1")
     check("NOT MET" in out, "F5 (b): wrong-net bank was not reported NOT MET")
     # and the SAME netlist passes when told the carry-in really is i1
@@ -826,7 +826,7 @@ if Path(__file__).with_name("f5_port_test.py").is_file():
     check(rc == 0, "F5 (b): argv[2] port override did not take effect")
 
     # (c) must be refused IN THE OUTPUT even on a fully green run.
-    rc, out = _run_f5(pos)
+    rc, out = _run_f5(pos, port="i2")
     check("NOT ANSWERED BY THIS TOOL" in out,
           "F5 (c): a green run did not refuse (c) in its own output")
 
@@ -840,13 +840,80 @@ if Path(__file__).with_name("f5_port_test.py").is_file():
                   capture_output=True, text=True).returncode
     check(rc == 2, f"F5 WRONG-TYPE: a non-netlist gave exit {rc}, expected 2")
 
+    # ⭐ REFUSAL ROWS — the distinction silicon's 19:07 hazard turns on:
+    # "the port map moved" and "criterion (b) failed" are DIFFERENT facts, and a
+    # tool that returns 1 for the first manufactures a false FAIL.
+    rc, out = _run_f5(pos)                      # outside a repo, no override
+    check(rc == 2, f"F5 REFUSAL: underivable index gave exit {rc}, expected 2")
+    check("no longer defaults to i2" in out,
+          "F5 REFUSAL: did not say it refuses to default the index")
+
+    # ⭐⭐ DERIVATION HAPPY PATH + THE PORT-COUNT GUARD, in an ISOLATED temp repo.
+    # ⛔ Deliberately NOT by writing a fixture into the shared tree: five seats
+    # share it and compiler is mid-wave. A test that needs a repo builds its own.
+    import subprocess as _sp4
+    with tempfile.TemporaryDirectory() as _td:
+        _root = Path(_td)
+        (_root / "SaltWorks/HDL").mkdir(parents=True)
+        (_root / "SaltWorks/HDL/MacCell.lean").write_text(
+            # ⛔ DELIBERATELY NOT (2, 67) — those are the LIVE artifact's values,
+            # and a fixture that copies reality cannot catch a tool that ASSUMES
+            # reality. Mutation-verified: hardcoding (2,67) survives a (2,67)
+            # fixture and dies against this one.
+            "def ccX : Net := 0\ndef ccLoad : Net := 1\n"
+            "def ccCin : Net := 5\ndef ccIn : Nat := 40\n")
+        _q = {"capture_output": True, "text": True, "cwd": _root}
+        _sp4.run(["git", "init", "-q"], **_q)
+        _sp4.run(["git", "add", "-A"], **_q)
+        _sp4.run(["git", "-c", "user.email=t@t", "-c", "user.name=t",
+                  "commit", "-qm", "fixture"], **_q)
+
+        _tool = str(Path(__file__).with_name("f5_port_test.py"))
+
+        def _in_repo(text, name):
+            f = _root / name
+            f.write_text(text)
+            r = _sp4.run([sys.executable, _tool, str(f)],
+                         capture_output=True, text=True, timeout=60)
+            return r.returncode, r.stdout + r.stderr
+
+        # 67 input ports, matching ccIn — derivation SUCCEEDS and the bank passes
+        _good = _f5_netlist([(f"n{k}", "i5") for k in range(32)], ports=40)
+        rc, out = _in_repo(_good, "good.v")
+        check(rc == 0, f"F5 DERIVE: matching netlist gave exit {rc}, expected 0")
+        check("MEASURED, not assumed" in out,
+              "F5 DERIVE: index was not reported as derived")
+        check("ccCin = 5" in out, "F5 DERIVE: did not name the derived ccCin")
+
+        # 3 input ports vs ccIn = 67 — the two objects disagree, so REFUSE (2)
+        _bad = _f5_netlist([(f"n{k}", "i5") for k in range(32)], ports=3)
+        rc, out = _in_repo(_bad, "bad.v")
+        check(rc == 2, f"F5 PORT-COUNT: disagreement gave exit {rc}, expected 2")
+        check("PORT-COUNT DISAGREEMENT" in out,
+              "F5 PORT-COUNT: the disagreement was not named")
+
+        # the source moved: ccCin gone -> refuse, and say WHICH name is missing
+        (_root / "SaltWorks/HDL/MacCell.lean").write_text("def ccIn : Nat := 40\n")
+        _sp4.run(["git", "add", "-A"], **_q)
+        _sp4.run(["git", "-c", "user.email=t@t", "-c", "user.name=t",
+                  "commit", "-qm", "moved"], **_q)
+        rc, out = _in_repo(_good, "good.v")
+        check(rc == 2, f"F5 SOURCE-MOVED: gave exit {rc}, expected 2")
+        check("ccCin NOT FOUND" in out, "F5 SOURCE-MOVED: did not name ccCin")
+
     # INTEGRATION ROW — the real emitted cell, if it is on this machine.
     # ⚠️ Its failure is a FINDING (the complement path landed, or the emit moved),
     # never a broken test. Stated so a red here is read correctly.
     _real = Path(__file__).resolve().parents[2] / "SaltWorks/Silicon/RTL/mac_cell.v"
     if _real.is_file():
-        rc, out = _run_f5(_real.read_text())
+        import subprocess as _sp3
+        _r = _sp3.run([sys.executable, str(Path(__file__).with_name("f5_port_test.py")),
+                       str(_real)], capture_output=True, text=True, timeout=60)
+        rc, out = _r.returncode, _r.stdout + _r.stderr
         check(rc in (0, 1), f"F5 INTEGRATION: real mac_cell.v gave exit {rc}")
+        # the index must be DERIVED here, never assumed — silicon's 19:07 hazard
+        check("MEASURED, not assumed" in out,
+              "F5 INTEGRATION: the carry-in index was not derived from the source")
         if rc == 0:
             print("  ⚠️ F5 INTEGRATION: the real mac_cell.v now PASSES (a)+(b) — "
                   "the complement path has landed. This is a FINDING, not a failure; "

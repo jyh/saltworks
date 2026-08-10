@@ -106,6 +106,57 @@ def blob_sha(path: Path) -> str:
         return f"GIT-UNAVAILABLE ({type(e).__name__})"
 
 
+def derive_port_map(start: Path):
+    """Read ccCin and ccIn out of the COMMITTED MacCell.lean. Never the worktree.
+
+    ⛔ WHY THIS EXISTS — silicon, 2026-08-09 19:07, turning this tool's own
+    disclosed assumption into a measurement and then naming the hazard it hides:
+
+        `i2` IS A POSITION, NOT A NAME. The emitted module has anonymous
+        positional ports (i0..i66); the netlist CANNOT name its own carry-in,
+        so the iN -> maCin mapping lives ONLY in the Lean source.
+
+    If the complement path reuses ccCin as the XOR sign (the one's-complement
+    identity), i2 stays the carry-in and the old default was right. If it adds a
+    SEPARATE sign port, every index at or above it SHIFTS and a hard-coded 2
+    compares the wrong net -- silently, with a confident verdict attached.
+    ⚠️ A FALSE PASS AND A FALSE FAIL ARE BOTH AVAILABLE FROM THAT SHIFT.
+
+    ⇒ So the index is DERIVED, and the derivation is cross-checked against the
+    netlist's own port count. The old `i2` default is GONE: a tool that guesses
+    is worse here than a tool that refuses, because the guess is checkable-looking.
+
+    📌 COMMITTED REF, NOT THE WORKING TREE, on purpose: five seats share this
+    tree and compiler is amending this very file tonight. Parsing a half-written
+    file is [[read-tools-inherit-the-shared-tree]] -- a source-parsing tool once
+    caught another seat mid-write and accused it of 544 unaudited theorems.
+    """
+    repo = start.resolve()
+    for cand in [repo, *repo.parents]:
+        if (cand / ".git").exists():
+            repo = cand
+            break
+    else:
+        return None, "NO GIT REPO ABOVE THE NETLIST"
+
+    rel = "SaltWorks/HDL/MacCell.lean"
+    try:
+        out = subprocess.run(["git", "show", f"HEAD:{rel}"],
+                             capture_output=True, text=True, cwd=repo, timeout=20)
+    except (OSError, subprocess.SubprocessError) as e:
+        return None, f"GIT UNAVAILABLE ({type(e).__name__})"
+    if out.returncode != 0:
+        return None, f"HEAD:{rel} UNREADABLE (rc={out.returncode})"
+
+    src = out.stdout
+    cin = re.search(r"^\s*def\s+ccCin\s*:\s*Net\s*:=\s*(\d+)", src, re.M)
+    nin = re.search(r"^\s*def\s+ccIn\s*:\s*Nat\s*:=\s*(\d+)", src, re.M)
+    if not cin or not nin:
+        missing = ", ".join(n for n, m in (("ccCin", cin), ("ccIn", nin)) if not m)
+        return None, f"HEAD:{rel} PARSED BUT {missing} NOT FOUND — the source moved"
+    return (int(cin.group(1)), int(nin.group(1))), f"HEAD:{rel}"
+
+
 def parse(path: Path):
     gates = []
     skipped = 0
@@ -129,9 +180,34 @@ def main() -> None:
     if len(sys.argv) < 2:
         die("usage: f5_port_test.py <emitted-netlist.v> [carry-in-port, default i2]")
     path = Path(sys.argv[1])
-    cin_port = sys.argv[2] if len(sys.argv) > 2 else "i2"
+    override = sys.argv[2] if len(sys.argv) > 2 else None
     if not path.is_file():
         die(f"no such file: {path}")
+
+    n_inputs = len(re.findall(r"^\s*input\s+wire\s+\w+", path.read_text(errors="replace"), re.M))
+    derived, prov = derive_port_map(path)
+
+    # THE INDEX IS A MEASUREMENT OR THE TOOL REFUSES. Every disagreement below
+    # exits 2 (COULD NOT CHECK) and never 1 (NOT MET): "the port map moved" and
+    # "criterion (b) failed" are different facts, and collapsing them would
+    # manufacture exactly the false FAIL this derivation exists to prevent.
+    if derived is None and override is None:
+        die(f"cannot derive the carry-in index ({prov}) and none was given. "
+            "Pass it as argv[2] once you have READ it from the landed source. "
+            "This tool no longer defaults to i2 — a positional guess is worse "
+            "than a refusal, because it comes with a confident verdict attached.")
+    if derived is not None:
+        cc_cin, cc_in = derived
+        if n_inputs != cc_in:
+            die(f"PORT-COUNT DISAGREEMENT: the netlist has {n_inputs} input ports, "
+                f"{prov} says ccIn = {cc_in}. The netlist and the source describe "
+                "DIFFERENT objects — re-emit, or point me at the matching pair.")
+        cin_port = f"i{cc_cin}"
+        if override and override != cin_port:
+            die(f"INDEX CONFLICT: you passed {override}, {prov} says {cin_port}. "
+                "Refusing to pick — one of them is stale and I cannot tell which.")
+    else:
+        cin_port = override
 
     gates, skipped = parse(path)
     if not gates:
@@ -151,8 +227,13 @@ def main() -> None:
           + (f"  ⚠️ {skipped} sky130 lines did NOT match the instance form and were SKIPPED"
              if skipped else "  (0 unparsed sky130 lines)"))
     print("HISTOGRAM     " + " · ".join(f"{t} {n}" for t, n in sorted(hist.items())))
-    print(f"CARRY-IN PORT assumed to be `{cin_port}` (override as argv[2]) — "
-          "this is an ASSUMPTION about the port order, not a measurement")
+    if derived is not None:
+        print(f"CARRY-IN PORT `{cin_port}` — DERIVED from {prov} (ccCin = {derived[0]}), "
+              f"cross-checked against the netlist's own {n_inputs} input ports "
+              f"(ccIn = {derived[1]}). MEASURED, not assumed.")
+    else:
+        print(f"CARRY-IN PORT `{cin_port}` — SUPPLIED BY THE CALLER. Derivation "
+              f"failed: {prov}. This verdict is only as good as that argument.")
 
     # ---- (a) is there an XOR bank: one net feeding >= BANK_MIN xor2 cells? ----
     fanout = defaultdict(list)
