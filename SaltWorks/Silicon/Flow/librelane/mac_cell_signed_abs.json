@@ -1,0 +1,12 @@
+{
+  "DESIGN_NAME": "mac_cell_signed",
+  "VERILOG_FILES": ["dir::mac_cell_signed.v"],
+  "CLOCK_PORT": null,
+  "CLOCK_PERIOD": 55,
+  "FP_SIZING": "absolute",
+  "DIE_AREA": [0, 0, 76.77, 87.49],
+  "PL_TARGET_DENSITY_PCT": 60,
+  "RUN_KLAYOUT_XOR": false,
+  "RUN_MAGIC_DRC": true,
+  "pdk::sky130A": { "MAX_FANOUT_CONSTRAINT": 10 }
+}
