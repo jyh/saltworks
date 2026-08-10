@@ -18,10 +18,19 @@ deltas since recon folded in §2. Refuter pass owed BEFORE council consumption.*
   `∃ n, runFor n code (encode σ) = encode σ'` is gameable two ways
   (append-a-loop transit; n=0 on no-op-shaped programs). AMENDED FORM:
   entry-pc + `EmbedsAt` hypotheses, exit conjunct
-  `(runFor k img st).pc.toNat = 4*off + 4*code.length` (which forces
-  `fetch = none` and stabilizes all larger fuel), frame at the EXIT state.
-  Pre-registered controls: the append-a-loop mutant and the emit-nothing
-  mutant must both FAIL the amended Row A.
+  `(runFor k img st).pc.toNat = 4*off + 4*code.length`, frame at the EXIT
+  state. CLARIFIED at compiler's 15:44 pre-ruling question (its catch —
+  this banner's first draft conflated two levels in one parenthetical):
+  the reading is COMPOSITIONAL — `img` is the ENCLOSING image and the
+  exit conjunct is a **HANDOFF** (control reached the block's exit),
+  which is what `seq`/`while` composition consumes and which does NOT
+  stabilize. HALT and stabilization live at the **TOP-LEVEL row only**
+  (compiler's option (i)): the whole-program instance adds
+  `img.length = off + code.length`, making the exit pc the image end —
+  `fetch = none` there, `runFor_eq_of_halted` stabilizes all larger
+  fuel, and the append-a-loop mutant dies AT THAT ROW. Pre-registered
+  controls: the append-a-loop mutant must FAIL the top-level Row A; the
+  emit-nothing mutant must fail on any non-no-op program.
 - **A2 · The planned reg-map hypothesis was a vacuity bomb (r-fuel).**
   `Function.Injective (reg : Nat → Fin 32)` is pigeonhole-UNSATISFIABLE;
   every theorem carrying `RegOk` as drafted would be vacuously green.
