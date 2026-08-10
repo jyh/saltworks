@@ -203,7 +203,21 @@ unchanged (narrow data bus to 4 pins) if v1.1 wants more edge ports.
 
 ## D7. STATE, AREA, TILE (estimates labeled)
 
-- Per cell: 64 flops (emitSeq) + SER 32 flops + strobe wiring.
+- Per cell: 64 flops (emitSeq) — **WITH THE ACC HALF ENABLE-GATED
+  (hold during LOAD_W), surfaced by the Captain's two-input-sequence
+  question 19:2x**: the kernel's per-input ruling (a second runTrace
+  carrying acc forward, weight back to W₂ — MacBridge "PER-INPUT
+  SHAPE, AND THE SHAPE IS THE RULING") is physically true only if
+  load cycles leave acc untouched, and the AND-row addend is LIVE
+  during load (andWord(w_bit, register) ≠ 0 whenever a streamed
+  weight 1-bit meets residue — 33 gates means the row is ungated).
+  An enable on the acc 32 (edfxtp, already modeled in the importer)
+  IS the two-trace composition realized in silicon. Corollary:
+  **LOAD_W is 32 cycles canonical** (full-width serial load, 8 value
+  bits + 24 sign-extension bits) so the register ends holding exactly
+  the `bitsOf W` the theorems start from — an 8-cycle load would
+  leave the prior input's residue in the high bits. + SER 32 flops
+  + strobe wiring.
   ESTIMATE from the liberty BOM (875.8 µm² / 35 flops ≈ 25 µm²/flop):
   ~2.4k µm²/cell state, ~9.7k µm² at k=4, pre-layout class. NOT
   MEASURED; silicon prices at emission. The 5,191 µm² organ figure
