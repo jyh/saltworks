@@ -355,11 +355,13 @@ OPEN ITEMS:
   "down to silicon" still closes only at the top-module run
   (F3).**
   📌 FINDING 2 — AUDIT-COVERAGE CAMPAIGN CANDIDATE: Sem.lean's
-  "real number is zero" note is stale — 204 unaudited theorems
-  corpus-wide (CorePlace 38 · CoreOffsets 23 · TinyRustN0 23 ·
-  MacBridge's 32 pre-existing · others); the executor audited its
-  own 16 with an explicitly-scoped block. A sweep candidate for
-  the doc-refresh campaign.
+  "real number is zero" note is stale — ⛔ 204 ⛔ (THIS FIGURE IS
+  STRUCK — the true number is 180; read the supersession block
+  below before quoting anything from this sentence) unaudited
+  theorems corpus-wide (CorePlace 38 [struck: 37] · CoreOffsets
+  23 · TinyRustN0 23 · MacBridge's 32 pre-existing · others); the
+  executor audited its own 16 with an explicitly-scoped block. A
+  sweep candidate for the doc-refresh campaign.
   ⇒ **FIGURE SUPERSEDED 22:3x AT THE MEASUREMENT (three hands,
   three methods, reconciled on the bus 21:4x-22:3x; registered on
   silicon's 22:31 report — its own law arriving from the far side,
