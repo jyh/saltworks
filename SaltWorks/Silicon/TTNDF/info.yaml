@@ -26,11 +26,19 @@ project:
   author:      "Jason Hickey"
   discord:     ""
 
+  # ⛔ AMENDED 2026-08-10 10:3x ON EVIDENCE'S FENCE STOP. My first draft said the core
+  # was "proved equivalent to its Lean specification INSIDE THE LEAN KERNEL -- ... CHECKED
+  # BY SAT". THOSE ARE TWO DIFFERENT CHECKERS and it gave the kernel credit for the SAT
+  # solver's work. The kernel proves properties of the Circ MODEL; SAT proves the EMITTED
+  # NETLIST equals its arithmetic spec. That the .v matches the Circ is NEVER proved in
+  # Lean -- the .v is a string and there is no Verilog semantics in Lean here.
+  # 🔑 "kernel-verified" is this project's DISTINCTIVE claim and I attached it to the one
+  # link a different tool checked -- while consciously fencing the sentence for scope.
   # ⚠️ FENCED LANGUAGE, on evidence's F3/F5 rulings (2026-08-09): the certified claim
   # is scoped to the CELL'S COMBINATIONAL CORE, and every whole-neuron sentence carries
   # WHEN DRIVEN (the driver is the sequencer, V9/R6). "verified silicon" unqualified is
   # false at the die: the core is proved; the sequencer, wrapper and fabric are hand RTL.
-  description: "A bit-serial neural dataflow fabric: MAC cells on a self-routing banyan switch. Each cell's combinational core is proved equivalent to its Lean specification inside the Lean kernel -- emitted netlist against kernel model, checked by SAT -- and the signed accumulation holds when driven by the sequencer. The sequencer, pin wrapper and fabric glue are hand-written RTL and are not part of that proof."
+  description: "A bit-serial neural dataflow fabric: MAC cells on a self-routing banyan switch. Each cell is generated from a Lean model proved correct in the Lean kernel, and the generated netlist is then proved equivalent to its arithmetic specification over ALL inputs by SAT. The signed accumulation is proved for the drive schedule the design specifies; the sequencer that produces it, the pin wrapper and the fabric glue are hand-written RTL and are not part of either proof."
 
   language:    "Verilog"
 
