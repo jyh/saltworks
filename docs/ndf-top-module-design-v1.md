@@ -325,6 +325,19 @@ Fabric port indices FROZEN (they decide fixture-class membership):
   UNFAVORABLE ~+20%), and they are RESIDUAL VIOLATIONS after the
   resizer — a signoff-closure debt, not a pending area increment.
 
+**THE NAMED LONGEST-PATH CANDIDATE (the Captain's 20:0x synchrony
+question surfaced it): cell-to-cell same-cycle transport — SER flop
+(cell 0) → 3 combinational fabric stages → cell 1's x input → AND
+row → XOR bank → 32-stage ripple → acc flop. The fabric is
+combinational end-to-end (a bit presented at cycle t LEAVES at
+cycle t), so this register-to-register path spans the die and
+EXCEEDS the measured cell-internal 50.939 ns worst path by the
+fabric's levels + wire. The floorplan run measures it FIRST. The
+named escape if it fails at 55: ONE port register per fabric port —
+a single pipeline cycle that shifts the receive window by a
+compile-time constant in the timetable; determinism unchanged, no
+protocol change.**
+
 ## D8. CLOCK — the pair, with the fresh measurement
 
 `config.json CLOCK_PERIOD: 55` + `info.yaml clock_hz: 18181818`
