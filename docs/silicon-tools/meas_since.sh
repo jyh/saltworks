@@ -50,6 +50,22 @@ echo "MEAS range ${BASE}..${HEAD_SHA}   (baseline = last MEAS verdict, NOT last 
 changed=$(git diff --name-only "$BASE..HEAD" -- 'SaltWorks/HDL/*.lean' | sort -u)
 [ -n "$changed" ] || { echo "  nothing touched in SaltWorks/HDL since $BASE"; exit 0; }
 
+# ⭐ NAME THE LANDING AND ITS OWED COVERING BUILD, 2026-08-09 21:4x.
+# COST THAT BOUGHT THIS: math's item ② sat sealed-but-undischarged for TWO AND A
+# HALF HOURS because the maestro read my 19:21 verdict as covering their own docs
+# commit and never opened it. Their banked fix was a READER-side heuristic -- "a
+# MEAS naming BOTH FILES names a landing, go read it". Reader-side heuristics rot:
+# they live in one person's head and die at the next relight, which is this seat's
+# own [[bus-resident-fixes-die-at-reboot]] pointed at a habit instead of a file.
+# The WRITER-side fix is structural and cannot be forgotten -- the verdict now says
+# WHOSE landing it covers and that a covering build is owed, in its own output.
+for c in $(git log --format=%h --reverse "$BASE..HEAD" -- 'SaltWorks/HDL/*.lean'); do
+  echo "  LANDING $c  $(git log -1 --format=%s "$c" | cut -c1-72)"
+done
+echo "  ⇒ COVERING BUILD OWED TO THE MAESTRO for the landing(s) above."
+echo "    A MEAS verdict is a KERNEL witness on ONE FILE at a time; it does NOT"
+echo "    seal a landing and never has. Do not read a green below as a seal."
+
 rc=0
 for f in $changed; do
   if [ ! -f "$f" ]; then
