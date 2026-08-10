@@ -168,7 +168,22 @@ def derive_port_map(start: Path):
         return None, f"HEAD:{rel} UNREADABLE (rc={out.returncode})"
 
     src = out.stdout
+    # ⛔ THE SIGNED CELL USES A DIFFERENT NAME FOR THE SAME NET, and the tool is
+    # correct today only because of a theorem it never read:
+    #     theorem scSign_eq_ccCin : scSign = ccCin := rfl
+    # scCore is the SIGNED 225-gate machine, ccCore the unsigned 193-gate one, and
+    # BOTH have nIn = 67 — `sign` REPLACED `cin` rather than joining it (compiler,
+    # 19:15). So deriving from ccCin lands on the right index for the signed
+    # artifact BY LUCK-BACKED-BY-A-THEOREM, not by design. If a future refactor
+    # breaks that equality, this tool reads the wrong port and says nothing.
+    # ⇒ Parse both, and REFUSE if they disagree.
+    sign = re.search(r"^\s*def\s+scSign\s*:\s*Net\s*:=\s*(\d+)", src, re.M)
     cin = re.search(r"^\s*def\s+ccCin\s*:\s*Net\s*:=\s*(\d+)", src, re.M)
+    if sign and cin and sign.group(1) != cin.group(1):
+        return None, (f"PORT-NAME SPLIT: scSign = {sign.group(1)} but ccCin = "
+                      f"{cin.group(1)}. scSign_eq_ccCin no longer holds, so the "
+                      "carry-in index depends on WHICH cell this netlist is, and "
+                      "the port count (67 for both) cannot tell me. Pass argv[2].")
     nin = re.search(r"^\s*def\s+ccIn\s*:\s*Nat\s*:=\s*(\d+)", src, re.M)
     if not cin or not nin:
         missing = ", ".join(n for n, m in (("ccCin", cin), ("ccIn", nin)) if not m)
@@ -234,6 +249,16 @@ def main() -> None:
     # 67 and the stale netlist still agrees on width. The guard I already had
     # passes precisely in the case that matters.
     # ⇒ Staleness is its own question, so it gets its own guard and its own exit 2.
+    #
+    # ⛔⛔ DO NOT PRUNE THIS AS REDUNDANT WITH THE PORT-COUNT CHECK. Compiler,
+    # 19:15, measured and frozen: ccCore.nIn = 67 (193 gates, unsigned) and
+    # scCore.nIn = 67 (225 gates, SIGNED) — `sign` REPLACED `cin`, so the widths
+    # are IDENTICAL, and the top-module block froze that boundary ("PIN INDICES
+    # ARE FROZEN", 67/96). The port-count check therefore CANNOT EVER separate a
+    # stale unsigned netlist from a current signed one, for this cell, forever.
+    # 🔑 This guard is the ONLY thing between a stale mac_cell.v and a confident
+    # verdict. The deletion argument now meets a measured counterexample instead
+    # of a judgement call -- which is why compiler spent a line on it.
     if derived is not None:
         try:
             src_epoch = int(subprocess.run(
@@ -328,6 +353,10 @@ def main() -> None:
     # ---- (b) is that sign net the carry-in port? ----
     print("-" * 72)
     print("(b) SAME NET  maCin and the XOR bank sign input, in the EMITTED module")
+    print("    ⚠️ SCOPE: this tests EMISSION FIDELITY, not design correctness. In the")
+    print("       source the identity is `scSign_eq_ccCin := rfl` — the DESIGN cannot")
+    print("       get it wrong, so a green (b) is NOT evidence that the design is")
+    print("       right. It is evidence that emitS preserved what the design proved.")
     if not verdict_a:
         print("    — NOT REACHED: (a) failed, so there is no sign net to compare.")
         verdict_b = False

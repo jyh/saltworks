@@ -907,6 +907,32 @@ if Path(__file__).with_name("f5_port_test.py").is_file():
         check("STALE NETLIST" in _r.stdout + _r.stderr,
               "F5 STALENESS: the staleness was not named")
 
+        # ⭐ PORT-NAME SPLIT: the tool is correct on the SIGNED cell only because
+        # `scSign_eq_ccCin := rfl`. If that equality ever breaks, deriving from
+        # ccCin silently reads the wrong port — and the port count (67 for BOTH
+        # cells, frozen) cannot tell them apart. Must REFUSE, not guess.
+        (_root / "SaltWorks/HDL/MacCell.lean").write_text(
+            "def ccCin : Net := 5\ndef scSign : Net := 7\ndef ccIn : Nat := 40\n")
+        _sp4.run(["git", "add", "-A"], **_q)
+        _sp4.run(["git", "-c", "user.email=t@t", "-c", "user.name=t",
+                  "commit", "-qm", "split"], **_q)
+        _r = _sp4.run([sys.executable, _tool, str(_root / "good.v")],
+                      capture_output=True, text=True, timeout=60)
+        check(_r.returncode == 2,
+              f"F5 NAME-SPLIT: divergent scSign/ccCin gave exit {_r.returncode}, expected 2")
+        check("PORT-NAME SPLIT" in _r.stdout + _r.stderr,
+              "F5 NAME-SPLIT: the split was not named")
+        # and agreement is accepted, so the guard is not just always-refuse
+        (_root / "SaltWorks/HDL/MacCell.lean").write_text(
+            "def ccCin : Net := 5\ndef scSign : Net := 5\ndef ccIn : Nat := 40\n")
+        _sp4.run(["git", "add", "-A"], **_q)
+        _sp4.run(["git", "-c", "user.email=t@t", "-c", "user.name=t",
+                  "commit", "-qm", "agree"], **_q)
+        _r = _sp4.run([sys.executable, _tool, str(_root / "good.v")],
+                      capture_output=True, text=True, timeout=60)
+        check(_r.returncode == 0,
+              f"F5 NAME-SPLIT: agreeing scSign/ccCin gave exit {_r.returncode}, expected 0")
+
         # the source moved: ccCin gone -> refuse, and say WHICH name is missing
         (_root / "SaltWorks/HDL/MacCell.lean").write_text("def ccIn : Nat := 40\n")
         _sp4.run(["git", "add", "-A"], **_q)
