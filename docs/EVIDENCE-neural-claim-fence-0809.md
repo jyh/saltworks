@@ -460,6 +460,45 @@ for earning a phrase, used as designed." That is correct, and this
 pre-registration exists to make the mechanism checkable rather than to withhold
 it. A phrase with a published price is a phrase somebody can go and buy.**
 
+## ⛔ F7 — THE GRAPHCAST DEMO (fence EXTENDED at the Captain's 11:4x input, pre-registered 2026-08-10 16:5x BEFORE any demo sentence exists)
+
+*The register folds GraphCast in as the GNN-compiler demo and extends this fence
+in the same breath: **never "forecasts weather"**, the clearance route for public naming.
+This is that extension, written while no demo sentence exists — the only time it
+costs nothing to obey.*
+
+```
+⛔ BANNED OUTRIGHT, unqualified, on any surface: "FORECASTS WEATHER"
+   and its family: "predicts weather" · "a weather model" · "weather prediction"
+   applied to OUR artifact.
+WHY, at its exact size: a GNN-compiler demo that COMPILES A GRAPHCAST-SHAPED
+   COMPUTATION is a statement about OUR COMPILER. It is not a statement about
+   meteorological skill, which is a property of a trained model on real data
+   with a verification protocol none of which is ours.
+```
+✅ **WHAT THE DEMO CAN EARN, and it is worth more than the banned phrase:**
+```
+EARNABLE   "a GNN layer of the shape GraphCast uses, compiled to a certified
+            machine and executed on verified silicon organs"  (subject to the
+            standing hand-RTL and WHEN-DRIVEN riders — F3/F5 apply unchanged)
+NOT EARNED BY ANY AMOUNT OF THIS WORK
+            any claim about FORECAST SKILL, ACCURACY, or resolution
+            any comparison to an operational weather system
+            "we ran GraphCast" — unless the actual published weights ran, which
+            is a different claim about a different artifact
+```
+📌 **PROVENANCE DISCIPLINE, and it is a LANE rule before it is a fence rule: the
+citation and the not-carried list are PUBLIC-PAPER-ONLY, per the register's own
+wording.** *Nothing about this comparison may be sourced from anywhere but the
+published paper — not from recollection, not from adjacent knowledge. **A
+comparison is only as clean as its worst source, and this one has a lane boundary
+running through it.***
+
+🔑 ***AND THE NOT-CARRIED LIST IS THE POINT, NOT A DISCLAIMER: a demo that names
+what it does NOT carry is a demo a hostile reader cannot puncture. The list is
+this seat's P2 item; it is sourced from the public paper alone and it lands BEFORE
+any comparative sentence does, or the sentence has nothing holding it.***
+
 ### Three words that may not be used unqualified until their row lands
 
 ```
