@@ -952,9 +952,14 @@ OPEN ITEMS:
   SCOPE, BINDING (silicon's clause, evidence's fence): LibreLane
   PDN, NOT a tile-fit signoff — the die was SET to 6x2 dims, not
   fitted to TT's tile; trustworthy for area/timing/DRC/LVS/
-  antenna; batcher_c (the compute organ) is NOT in this
-  composition (routing per R1); functional demo correctness =
-  V10 fixtures + bench, behind. DEBTS NAMED: 1,757 max-slew +
+  antenna; batcher_c is UNWIRED, NOT MISSING (silicon's 01:51
+  datum, measured: the organ EXISTS complete in RTL/ at 624
+  sky130 cells; instantiations in the wrapper: ZERO — a
+  COMPOSITION decision of an afternoon, not an organ to build;
+  the sort-then-route seam is R1's named v1.1 node; whether it
+  fits/closes beside the 30.0% die is A MEASUREMENT TO RUN, not
+  a number to guess); functional demo correctness = V10 fixtures
+  + bench, behind. DEBTS NAMED: 1,757 max-slew +
   31 max-cap (DRV, not DRC) + 7 non-critical disconnected pins —
   September's submission answers for them. Revisions can come
   after, should we decide — the Captain's own words, now with an
