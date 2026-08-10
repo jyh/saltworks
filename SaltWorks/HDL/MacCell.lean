@@ -948,6 +948,315 @@ theorem cell_wsh_next (x ld cin : Bool) (w acc : BitVec 32) (k : Nat) (hk : k < 
     (cellEnv x ld cin w acc) (wEnv x ld w) (cell_hin_w x ld cin w acc)
     ((wsCore.outs.drop 32).getD k 0) hmem
 
+/-! ## THE COMPLEMENT PATH — the SIGNED cell, landed BESIDE the unsigned one
+
+**Fire ① of the Captain's 18:49 PROCEED, XOR-bank form adopted by maestro ruling and confirmed by
+the Captain at 18:5x.** The refutation this answers was mine: `ccCore`'s addend port carries
+`andWord x w` **and nothing else**, so the sign cycle ruled at (b) was not executable on the
+composed cell. *I won that ruling by arguing a mechanism and then did not build the mechanism.*
+
+⭐ **THE FORM: `addend XOR sign`, with the SAME signal driving the adder's carry-in.**
+```
+   acc + (addend XOR sign) + sign  =  acc + addend    (sign = 0)
+                                   =  acc − addend    (sign = 1, two's complement)
+   ⇒ ONE gate level · 32 gates · no inverter bank · no mux · nIn STAYS 3
+     (`sign` REPLACES the old `cin` port — ruling (b)'s carry-in IS the sign signal,
+      so a separate `cin` port would be a second name for one wire)
+```
+
+⛔ **WHY THIS LANDS BESIDE `cellSeq` RATHER THAN REPLACING IT, and it is not timidity.**
+`MacBridge` (math's file) names `cellSeq` twenty-six times and **exercises the third port at 1**,
+where the old cell means `+1` and this one means *subtract*. Replacing the cell in place would
+change the meaning of a peer's landed theorems **in the exact region they are gated to work in
+tonight**. *`statement-shape-is-an-interface`: a truth-preserving restatement is still a breaking
+change — land the new form beside, repoint at the owner's pace.* **The unsigned cell remains true
+and remains math's precedent; retiring it is math's call, not mine, and it is not urgent.**
+
+⚠️ **The XOR bank sits BETWEEN the two instances, so the netlist is THREE segments and
+`inst_compose_sem` / `inst_compose_first` no longer apply.** Both per-cycle theorems are re-proved
+through `run_append` + `inst_sem` + frames — which is what those combinators do internally anyway.
+*Developed in a gitignored scratch and transplanted green; the shared tree never saw a red.* -/
+
+/-- The SIGN port — net `2`. It replaces the unsigned cell's `ccCin`. -/
+def scSign : Net := 2
+
+/-- The bank's base — exactly `instNext wsCore ccWOff`. -/
+def scXOff : Nat := 100
+
+/-- `macCore`'s instance base, pushed up by the bank's 32 gates (the unsigned cell's is `100`). -/
+def scMOff : Nat := 132
+
+/-- The AND-row output in host numbering — what the bank consumes. -/
+def scRaw (k : Nat) : Net := instMap wsCore ccWSig ccWOff (wsAnd k)
+
+/-- The bank's outputs. -/
+def scXor (k : Nat) : Net := scXOff + k
+
+/-- ⭐ **THE COMPLEMENT PATH.** -/
+def scXorGates : List Gate :=
+  (List.range 32).map (fun k => ⟨scXor k, Op.xor (scRaw k) scSign⟩)
+
+/-- `macCore`'s σ: the COMPLEMENTED addend, the sign as carry-in, then the accumulator. -/
+def scMSig (i : Nat) : Net :=
+  if i < 32 then scXor i else if i = 32 then scSign else ccAcc (i - 33)
+
+def scCore : Circ :=
+  { nIn := ccIn
+    gates := instGates wsCore ccWSig ccWOff ++ scXorGates ++ instGates macCore scMSig scMOff
+    outs := ((List.range 32).map (fun k => instMap macCore scMSig scMOff (maSum k)))
+            ++ ((List.range 32).map (fun k =>
+                  instMap wsCore ccWSig ccWOff ((wsCore.outs.drop 32).getD k 0)))
+            ++ ((List.range 32).map (fun k => instMap macCore scMSig scMOff (maSum k))) }
+
+/-- ⭐⭐ **THE SIGNED CELL AS ONE MACHINE.** -/
+def scellSeq : Seq := { nIn := 3, nOut := 32, nState := 64, core := scCore }
+
+theorem scCore_ssa : scCore.ssa = true := by decide +kernel
+theorem scCore_wf : scCore.wf = true := Circ.wf_of_ssa scCore_ssa
+theorem scellSeq_wf : scellSeq.wf = true := by decide +kernel
+
+/-- **225 gates: 33 + 32 + 160** — the bank is the whole difference from the unsigned `193`. -/
+theorem scCore_gate_count : scCore.gates.length = 225 := by decide +kernel
+
+/-- **STILL zero constant gates.** The bank adds none, so `(b)+A`'s property survives. -/
+theorem scCore_has_no_constant_gates :
+    scCore.gates.filter (fun g => match g.op with | .const _ => true | _ => false) = [] := by
+  decide +kernel
+
+theorem scellSeq_dimensions :
+    scellSeq.nIn = 3 ∧ scellSeq.nOut = 32 ∧ scellSeq.nState = 64 ∧ scCore.nIn = 67 := by
+  refine ⟨rfl, rfl, rfl, rfl⟩
+
+/-- **The signed cell's environment IS `cellEnv`** — `Seq.env` reads only `nIn`, and both cells
+declare `3`. Stated as a checked `rfl` rather than left as an implicit pun, so every `cellEnv`
+lemma below is being applied to the right object. -/
+theorem scellSeq_env_is_cellEnv (inp st : List Bool) : scellSeq.env inp st = cellSeq.env inp st :=
+  rfl
+
+theorem sc_wsCore_instOK : instOK wsCore ccWSig ccWOff := cc_wsCore_instOK
+
+theorem sc_macCore_instOK : instOK macCore scMSig scMOff := by
+  refine ⟨macCore_ssa, macCore_wf, ?_⟩
+  intro i hi
+  have h : macCore.nIn = 65 := by decide +kernel
+  rw [h] at hi; revert hi; revert i; decide +kernel
+
+/-- ⛔⛔ **DISJOINTNESS — THREE REGIONS, SO TWO BOUNDS.** The unsigned cell needed one; a reader
+who copies its single bound onto this netlist leaves the bank's region unguarded. -/
+theorem sc_ws_below_xor : ccWOff + wsCore.gates.length ≤ scXOff := by
+  have h : wsCore.gates.length = 33 := by decide +kernel
+  simp only [ccWOff, scXOff, h]
+  decide
+
+theorem sc_xor_below_mac : scXOff + scXorGates.length ≤ scMOff := by
+  have h : scXorGates.length = 32 := by decide +kernel
+  simp only [scXOff, scMOff, h]
+  decide
+
+/-- ⭐⭐ **THE THEOREM THE REFUTATION ASKED FOR: THE COMPLEMENT PATH EXISTS.** `macCore`'s addend
+port `k` is a XOR gate whose fanin is the AND row and the sign. *The unsigned cell's
+`cell_seam_is_the_addend` proved its port carried `andWord` and therefore ONLY that — a seam theorem
+says what crosses, and is silent on what cannot. This one says what crosses now.* -/
+theorem sc_seam_is_the_xor_of_the_and_row (k : Nat) (hk : k < 32) :
+    scMSig k = scXor k
+  ∧ (⟨scXor k, Op.xor (instMap wsCore ccWSig ccWOff (wsAnd k)) scSign⟩ : Gate) ∈ scXorGates := by
+  refine ⟨by simp only [scMSig, if_pos hk], ?_⟩
+  exact List.mem_map.mpr ⟨k, List.mem_range.mpr hk, rfl⟩
+
+/-- **CONTROL: the carry-in port and the bank read the SAME net** — the whole design in one line. -/
+theorem sc_carry_is_the_sign : scMSig 32 = scSign := by
+  simp only [scMSig]; norm_num
+
+theorem scXorGates_out_ge (g : Gate) (hg : g ∈ scXorGates) : scXOff ≤ g.out := by
+  obtain ⟨k, _hk, hg'⟩ := List.mem_map.mp hg
+  rw [← hg']
+  simp only [scXor]
+  exact Nat.le_add_right _ _
+
+theorem sc_xor_leaves_low_nets (n : Net) (hn : n < scXOff) : ∀ g ∈ scXorGates, g.out ≠ n := by
+  intro g hg heq
+  have hb := scXorGates_out_ge g hg
+  rw [heq] at hb
+  exact absurd hn (Nat.not_lt.mpr hb)
+
+theorem sc_m_instance_leaves_low_nets (n : Net) (hn : n < scMOff) :
+    ∀ g ∈ instGates macCore scMSig scMOff, g.out ≠ n := by
+  intro g hg heq
+  have hb := (instGates_out_range macCore scMSig scMOff macCore_ssa g hg).1
+  rw [heq] at hb
+  exact absurd hn (Nat.not_lt.mpr hb)
+
+theorem scXorGates_flat : flatBelow scXOff scXorGates = true := by decide +kernel
+theorem scXorGates_ssa : ssaFrom scXOff scXorGates = true := by decide +kernel
+
+open SaltWorks.Stack.Program in
+/-- The adder's arithmetic bit. ⚠️ **Duplicates `MacBridge.adder_run_is_sum_bit` (math's), which is
+DOWNSTREAM of this file and therefore unusable here.** Flagged rather than hidden; one of the two
+should retire once the files settle, and that is math's call. -/
+theorem sc_adder_bit (a b : BitVec 32) (cin : Bool) (k : Nat) (hk : k < 32) :
+    run (adEnv a b cin) adder32.gates (adS k)
+      = (a + b + BitVec.setWidth 32 (BitVec.ofBool cin)).getLsbD k := by
+  have h := congrArg (fun l : List Bool => l.getD k false) (sem_adder32_gen a b cin)
+  have houts : adder32.outs = (List.range 32).map adS ++ [adC 32] := rfl
+  simpa [sem, houts, List.getD_eq_getElem?_getD, List.getElem?_append, List.getElem?_map,
+         List.getElem?_range, hk] using h
+
+/-- The addend after the bank: passthrough at `sign = 0`, one's complement at `sign = 1`. -/
+def cmplWord (s : Bool) (v : BitVec 32) : BitVec 32 := if s then ~~~v else v
+
+theorem cmplWord_bit (s : Bool) (v : BitVec 32) (k : Nat) (hk : k < 32) :
+    (cmplWord s v).getLsbD k = (xor (v.getLsbD k) s) := by
+  cases s <;> simp [cmplWord, hk]
+
+/-- `macCore`'s standalone environment, on the addend the BANK made. -/
+abbrev scMEnv (x s : Bool) (w acc : BitVec 32) : Env :=
+  macSeq.env (bitsOf (cmplWord s (andWord x w)) ++ [s]) (bitsOf acc)
+
+theorem scSign_eq_ccCin : scSign = ccCin := rfl
+
+/-- The bank's output, over any environment that has already run the AND row. -/
+theorem sc_xor_value (E : Env) (k : Nat) (hk : k < 32) :
+    run E scXorGates (scXor k) = xor (E (scRaw k)) (E scSign) := by
+  have hmem : (⟨scXor k, Op.xor (scRaw k) scSign⟩ : Gate) ∈ scXorGates :=
+    List.mem_map.mpr ⟨k, List.mem_range.mpr hk, rfl⟩
+  simpa [Op.eval] using run_of_flat_gates E scXorGates_flat scXorGates_ssa hmem
+
+/-- ⭐ **`inst_sem`'s `hin` for `macCore`, read AFTER the wsCore instance AND the bank have run.**
+Three arms, and the first now crosses TWO segments instead of one. -/
+theorem sc_hin2 (x ld s : Bool) (w acc : BitVec 32) :
+    ∀ a, a < macCore.nIn →
+      run (cellEnv x ld s w acc) (instGates wsCore ccWSig ccWOff ++ scXorGates) (scMSig a)
+        = scMEnv x s w acc a := by
+  intro a ha
+  have h65 : macCore.nIn = 65 := by decide +kernel
+  rw [h65] at ha
+  by_cases h1 : a < 32
+  · have hmem : (wsCore.gates.map Gate.out).contains (wsAnd a) = true := by
+      revert h1; revert a; decide +kernel
+    have hstep := inst_sem wsCore ccWSig ccWOff (cellEnv x ld s w acc) (wEnv x ld w)
+      cc_wsCore_instOK (cell_hin_w x ld s w acc) (wsAnd a) (Or.inr hmem)
+    have hsign : run (cellEnv x ld s w acc) (instGates wsCore ccWSig ccWOff) scSign = s := by
+      rw [run_of_unwritten _ _ _ (w_instance_leaves_low_nets scSign (by decide))]
+      exact (cell_env_reads x ld s w acc 0 (by omega)).2.2.1
+    rw [scMSig, if_pos h1, run_append, sc_xor_value _ a h1, scRaw, hstep,
+        wshift_addend_bit x ld w a h1, hsign, ← andWord_bit x w a h1,
+        ← cmplWord_bit s (andWord x w) a h1]
+    simp only [scMEnv, Seq.env, macSeq, if_pos (show a < 33 by omega)]
+    exact (word_getD_lo (cmplWord s (andWord x w)) s a h1).symm
+  · by_cases h2 : a = 32
+    · subst h2
+      have e : scMSig 32 = scSign := sc_carry_is_the_sign
+      rw [e, run_append, run_of_unwritten _ _ _ (sc_xor_leaves_low_nets scSign (by decide)),
+          run_of_unwritten _ _ _ (w_instance_leaves_low_nets scSign (by decide)),
+          show cellEnv x ld s w acc scSign = s from
+            (cell_env_reads x ld s w acc 0 (by omega)).2.2.1]
+      exact (word_getD_cin (cmplWord s (andWord x w)) s).symm
+    · have hk : a - 33 < 32 := by omega
+      have e : scMSig a = ccAcc (a - 33) := by rw [scMSig, if_neg h1, if_neg h2]
+      -- ⚠️ Net-born `<`: omega drops it. Nat-typed intermediate, then transport. Twice.
+      have hnat : (35 + (a - 33)) < 67 := by omega
+      have hlow : ccAcc (a - 33) < ccWOff := by simpa [ccAcc, ccWOff] using hnat
+      have hlowx : ccAcc (a - 33) < scXOff := by
+        have hnat2 : (35 + (a - 33)) < 100 := by omega
+        simpa [ccAcc, scXOff] using hnat2
+      rw [e, run_append, run_of_unwritten _ _ _ (sc_xor_leaves_low_nets _ hlowx),
+          run_of_unwritten _ _ _ (w_instance_leaves_low_nets _ hlow),
+          (cell_env_reads x ld s w acc (a - 33) hk).2.2.2.2]
+      have hnl : ¬(a < 33) := by omega
+      simp only [scMEnv, Seq.env, macSeq, if_neg hnl]
+      exact (bitsOf_getD acc (a - 33) hk).symm
+
+/-- ⭐⭐ **THE COMPOSITION THEOREM, RE-PROVED ON THE THREE-SEGMENT NETLIST.** -/
+theorem sc_sum_bit (x ld s : Bool) (w acc : BitVec 32) (k : Nat) (hk : k < 32) :
+    run (cellEnv x ld s w acc) scCore.gates (instMap macCore scMSig scMOff (maSum k))
+      = run (scMEnv x s w acc) macCore.gates (maSum k) := by
+  have hmem : (macCore.gates.map Gate.out).contains (maSum k) = true := by
+    revert hk; revert k; decide +kernel
+  have hgates : scCore.gates
+      = (instGates wsCore ccWSig ccWOff ++ scXorGates) ++ instGates macCore scMSig scMOff := rfl
+  rw [hgates, run_append]
+  exact inst_sem macCore scMSig scMOff _ (scMEnv x s w acc) sc_macCore_instOK
+    (sc_hin2 x ld s w acc) (maSum k) (Or.inr hmem)
+
+/-- The weight register's next-state nets sit below the bank. **Standalone: proving it inside
+`sc_wsh_next` reverted `k` while `hmem` still mentioned it, and the goal stopped being decidable.** -/
+theorem scWshNext_below_xor (k : Nat) (hk : k < 32) : ccWshNext k < scXOff := by
+  revert hk; revert k; decide +kernel
+
+/-- ⭐ **THE OTHER HALF OF THE STEP, likewise re-proved** — the weight register's next value must
+now survive TWO downstream segments, not one. -/
+theorem sc_wsh_next (x ld s : Bool) (w acc : BitVec 32) (k : Nat) (hk : k < 32) :
+    run (cellEnv x ld s w acc) scCore.gates (ccWshNext k)
+      = run (wEnv x ld w) wsCore.gates ((wsCore.outs.drop 32).getD k 0) := by
+  have hmem : ((wsCore.outs.drop 32).getD k 0) < wsCore.nIn
+      ∨ (wsCore.gates.map Gate.out).contains ((wsCore.outs.drop 32).getD k 0) = true := by
+    revert hk; revert k; decide +kernel
+  have hb : ccWshNext k < scXOff := scWshNext_below_xor k hk
+  have hbm : ccWshNext k < scMOff := Nat.lt_trans hb (by decide)
+  have hgates : scCore.gates
+      = (instGates wsCore ccWSig ccWOff ++ scXorGates) ++ instGates macCore scMSig scMOff := rfl
+  rw [hgates, run_append, run_of_unwritten _ _ _ (sc_m_instance_leaves_low_nets _ hbm),
+      run_append, run_of_unwritten _ _ _ (sc_xor_leaves_low_nets _ hb), ccWshNext]
+  exact inst_sem wsCore ccWSig ccWOff _ (wEnv x ld w) cc_wsCore_instOK
+    (cell_hin_w x ld s w acc) _ hmem
+
+open SaltWorks.Stack.Program in
+theorem sc_sum_bit_is_adder_bit (x ld s : Bool) (w acc : BitVec 32) (k : Nat) (hk : k < 32) :
+    run (cellEnv x ld s w acc) scCore.gates (instMap macCore scMSig scMOff (maSum k))
+      = run (adEnv acc (cmplWord s (andWord x w)) s) adder32.gates (adS k) := by
+  rw [sc_sum_bit x ld s w acc k hk]
+  exact step_bit_is_adder_bit acc (cmplWord s (andWord x w)) s k hk
+
+/-- ⭐⭐ **THE THING THE UNSIGNED CELL COULD NOT DO: AT `sign = 1` THE CYCLE SUBTRACTS.**
+`acc + ~addend + 1 = acc − addend`, on the composed netlist, per bit. -/
+theorem sc_sign_cycle_subtracts (x ld : Bool) (w acc : BitVec 32) (k : Nat) (hk : k < 32) :
+    run (cellEnv x ld true w acc) scCore.gates (instMap macCore scMSig scMOff (maSum k))
+      = (acc - andWord x w).getLsbD k := by
+  rw [sc_sum_bit_is_adder_bit x ld true w acc k hk, sc_adder_bit _ _ _ k hk]
+  congr 1
+  have h1 : BitVec.setWidth 32 (BitVec.ofBool true) = 1#32 := by decide
+  rw [cmplWord, if_pos rfl, h1, add_assoc, ← BitVec.neg_eq_not_add, BitVec.add_neg_eq_sub]
+
+/-- ⭐ **AND AT `sign = 0` IT IS THE UNSIGNED CELL, EXACTLY** — the compatibility control, so
+"the accumulation story is preserved" is a theorem and not a hope. -/
+theorem sc_accumulate_cycle_unchanged (x ld : Bool) (w acc : BitVec 32) (k : Nat) (hk : k < 32) :
+    run (cellEnv x ld false w acc) scCore.gates (instMap macCore scMSig scMOff (maSum k))
+      = (acc + andWord x w).getLsbD k := by
+  rw [sc_sum_bit_is_adder_bit x ld false w acc k hk, sc_adder_bit _ _ _ k hk]
+  congr 1
+  have h0 : BitVec.setWidth 32 (BitVec.ofBool false) = 0#32 := by decide
+  rw [cmplWord, if_neg (by simp), h0, BitVec.add_zero]
+
+/-! ### CONTROLS — RUN ON THE REAL 225-GATE NETLIST, not cited
+
+*`decide +kernel` evaluates the actual composed machine. The first is deliberately the SAME
+witness the unsigned cell carries, so compatibility is checked against a number that was fixed
+before this cell existed.* -/
+
+/-- ⭐ **POSITIVE CONTROL — AND IT IS THE UNSIGNED CELL'S OWN WITNESS.** Weight `3`, accumulator
+`0`, stream `1,0,1`, **sign low throughout**: the signed netlist lands on `24 ‖ 15`, bit for bit
+what `MacBridge.cellSeq_behavioural_witness` gets from the 193-gate cell. -/
+theorem scellSeq_behavioural_witness :
+    (runTrace scellSeq (bitsOf 3 ++ bitsOf 0)
+        ((List.range 3).map (fun t => [!(t == 1), false, false]))).2
+      = bitsOf 24 ++ bitsOf 15 := by
+  decide +kernel
+
+/-- ⭐⭐ **THE SIGN CYCLE, ON THE NETLIST.** Weight `3`, one cycle, `x = 1`, `sign = 1`: the
+accumulator lands on `0 − 3` and the weight register still shifts to `6`. -/
+theorem scellSeq_sign_cycle_witness :
+    (runTrace scellSeq (bitsOf 3 ++ bitsOf 0) [[true, false, true]]).2
+      = bitsOf 6 ++ bitsOf ((0 : BitVec 32) - 3) := by
+  decide +kernel
+
+/-- ⛔ **MUTANT — THE SIGN BIT IS LOAD-BEARING.** Same weight, same stream, sign flipped: the
+state moves. A bank wired to a constant, or a carry-in left low, would pass every shape theorem
+above and fail exactly here. -/
+theorem scellSeq_mutant_sign_bit_matters :
+    (runTrace scellSeq (bitsOf 3 ++ bitsOf 0) [[true, false, true]]).2
+      ≠ (runTrace scellSeq (bitsOf 3 ++ bitsOf 0) [[true, false, false]]).2 := by
+  decide +kernel
+
 /-! ### The axiom audit — one declaration per call
 
 *Added WITH the cell, not after it. `CorePlace` ran fourteen placements with `EXIT=0` and zero
@@ -1012,5 +1321,40 @@ everything after a failure reads as clean. -/
 #audit_axioms shift_overflow_is_real
 #audit_axioms shiftSafe_at_int8_scale
 #audit_axioms hW_is_shiftSafe
+
+/-! ### …and the signed cell's own block. One per call: a multi-name call aborts its own list at
+the first failure, so everything after a failure reads as clean. -/
+
+#audit_axioms scCore_ssa
+#audit_axioms scCore_wf
+#audit_axioms scellSeq_wf
+#audit_axioms scCore_gate_count
+#audit_axioms scCore_has_no_constant_gates
+#audit_axioms scellSeq_dimensions
+#audit_axioms scellSeq_env_is_cellEnv
+#audit_axioms sc_wsCore_instOK
+#audit_axioms sc_macCore_instOK
+#audit_axioms sc_ws_below_xor
+#audit_axioms sc_xor_below_mac
+#audit_axioms sc_seam_is_the_xor_of_the_and_row
+#audit_axioms sc_carry_is_the_sign
+#audit_axioms scXorGates_out_ge
+#audit_axioms sc_xor_leaves_low_nets
+#audit_axioms sc_m_instance_leaves_low_nets
+#audit_axioms scXorGates_flat
+#audit_axioms scXorGates_ssa
+#audit_axioms sc_adder_bit
+#audit_axioms cmplWord_bit
+#audit_axioms sc_xor_value
+#audit_axioms sc_hin2
+#audit_axioms sc_sum_bit
+#audit_axioms scWshNext_below_xor
+#audit_axioms sc_wsh_next
+#audit_axioms sc_sum_bit_is_adder_bit
+#audit_axioms sc_sign_cycle_subtracts
+#audit_axioms sc_accumulate_cycle_unchanged
+#audit_axioms scellSeq_behavioural_witness
+#audit_axioms scellSeq_sign_cycle_witness
+#audit_axioms scellSeq_mutant_sign_bit_matters
 
 end SaltWorks.HDL.MacCell
