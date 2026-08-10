@@ -938,6 +938,19 @@ OPEN ITEMS:
   TONIGHT is the named target; the fabbed-is-verified law governs
   the SUBMISSION, not the first measurement run — V1-V3/V9/V10
   land behind the layout, before any tapeout word.**
+- **THE ④ WALK COMPLETE (8/10 09:4x, the Captain, verbatim "good,
+  *now* I understand, and the current design is fine, because it is
+  a BB, not a pure banyan"): the SIX-STATE FORM RATIFIED as
+  kernel-canonical, with the 1988 duration-controlled architecture
+  recorded as a distinct design point (his primary-source
+  recollection folded into the heritage block same sitting). AND
+  THE CAPTAIN'S DESIGN DICTUM, banked for v2/scale: "for
+  composable banyans the address-length-agnostic design is better"
+  — strobe-timed cells for any multi-chip/16x16 fabric where
+  addresses grow; irrelevant at the PoC's fixed r=3 BB, binding
+  wisdom beyond it. ④ is WALKED: full circle + nonblocking +
+  six-state + stage-count premise + framework law + his recalled
+  timing + his recalled S2 mechanism — all ratified or folded.**
 - **THE ④ WALK, FIRST RATIFICATIONS (8/10 09:2x, the Captain at
   council, verbatim "Both asks ratified"): ① THE STAGE-COUNT
   PREMISE stands ratified — identifying the paper's address-length
