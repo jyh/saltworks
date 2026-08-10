@@ -3169,6 +3169,29 @@ theorem sem_adder32_gen (a b : Word) (cin : Bool) :
   unfold sem
   rw [houts, hgates, List.map_append, h1, h2]
 
+/-- ⭐ **THE ADDER'S ARITHMETIC BIT** — `adder32`'s run at sum-bit `k` **is** bit `k`
+of `a + b + cin`. This is `sem_adder32_gen` read at one index: `adder32.outs` is 32
+sum bits then the carry-out, so `k < 32` selects `adS k` on the left and the
+arithmetic bit on the right, leaving the carry-out tail untouched.
+
+⚖️ **HOISTED HERE at the Captain's ruling (2026-08-10 07:31), beside its parent.**
+It had been proved TWICE — `MacBridge`'s (math's) and `MacCell.sc_adder_bit`
+(compiler's, disclosed in its own docstring). Neither was careless: **a Lean file
+may use what it imports and never the reverse**, and the fact was first proved in
+`MacBridge`, which sits DOWNSTREAM of `MacCell`, so the upstream file could not
+borrow it and re-proved it. Living beside `sem_adder32_gen` — above both — it is
+reachable from either, and both copies retire by repointing.
+
+⚠️ `run` is qualified: this region opens `SaltWorks.HDL` **hiding `run`** (:2968). -/
+theorem adder_run_is_sum_bit (a b : Word) (cin : Bool) (k : Nat) (hk : k < 32) :
+    SaltWorks.HDL.run (adEnv a b cin) adder32.gates (adS k)
+      = (a + b + BitVec.setWidth 32 (BitVec.ofBool cin)).getLsbD k := by
+  have h := congrArg (fun l : List Bool => l.getD k false) (sem_adder32_gen a b cin)
+  have houts : adder32.outs = (List.range 32).map adS ++ [adC 32] := rfl
+  simpa [sem, houts, List.getD_eq_getElem?_getD, List.getElem?_append, List.getElem?_map,
+         List.getElem?_range, hk] using h
+
+
 theorem bwEnv_eq_adEnv (a b : Word) (n : Nat) : bwEnv a b n = adEnv a b false n := by
   show (if n < 32 then a.getLsbD n else b.getLsbD (n - 32))
       = (if n < 32 then a.getLsbD n else if n < 64 then b.getLsbD (n - 32) else false)

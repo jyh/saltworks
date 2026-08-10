@@ -30,25 +30,12 @@ namespace SaltWorks.HDL.MacBridge
 
 open SaltWorks.HDL SaltWorks.HDL.MacCell SaltWorks.Stack.Program
 
-/-- `adder32`'s run at sum-bit `k`, with the carry-in tied low, **is** the `k`-th
-bit of `a + b`.
-
-This is `sem_adder32_gen` read at one index. `adder32.outs` is 32 sum bits then
-the carry-out, so index `k < 32` selects `adS k` on the left and the arithmetic
-bit on the right — the carry-out tail is untouched by the extraction. -/
-theorem adder_run_is_sum_bit (a b : BitVec 32) (cin : Bool) (k : Nat) (hk : k < 32) :
-    run (adEnv a b cin) adder32.gates (adS k)
-      = (a + b + BitVec.setWidth 32 (BitVec.ofBool cin)).getLsbD k := by
-  have h := congrArg (fun l : List Bool => l.getD k false) (sem_adder32_gen a b cin)
-  have houts : adder32.outs = (List.range 32).map adS ++ [adC 32] := rfl
-  simpa [sem, houts, List.getD_eq_getElem?_getD, List.getElem?_append, List.getElem?_map,
-         List.getElem?_range, hk] using h
-
 /-- ⭐ **THE CROSSING, RUNG 1.** The MAC cell's own sum bit `k` is the `k`-th bit
 of `acc + addend`.
 
-Compiler's artifact half (`step_bit_is_adder_bit`) ∘ this file's arithmetic half
-(`adder_run_is_sum_bit`). Still unconditional — the overflow question does not
+Compiler's artifact half (`step_bit_is_adder_bit`) ∘ the arithmetic half, now
+HOISTED to `Stack.Program.adder_run_is_sum_bit` (Captain's ruling 08-10) and
+reached through this file's `open`. Still unconditional — the overflow question does not
 arise until a rung states the value in `ℤ`. -/
 theorem cell_sum_bit (acc addend : BitVec 32) (cin : Bool) (k : Nat) (hk : k < 32) :
     run (macSeq.env (MacCell.bitsOf addend ++ [cin]) (MacCell.bitsOf acc)) macCore.gates (maSum k)
