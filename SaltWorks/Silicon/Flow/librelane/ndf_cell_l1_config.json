@@ -1,0 +1,44 @@
+{
+  "//": "L1 FIRST-LAYOUT CONFIG — the SEQUENTIAL cell, silicon seat, R8 night wave.",
+
+  "//": "TARGET: emitSeq's L1 object — V7's exact object, 289 cells = 225 gates + 64",
+  "//": "nState flops, dfxtp_2 per R2. The maestro at 01:13: 'L1 is your trigger and it",
+  "//": "IS the object your 19:34 numbers describe.' So this hardens the CELL. The 6x2",
+  "//": "fabric layout is a DIFFERENT object (the tt_um_saltworks_ndf wrapper, fire-plan",
+  "//": "item 4) and has its own config, ndf_6x2_config.json -- do not confuse them.",
+
+  "DESIGN_NAME": "mac_cell_seq",
+  "VERILOG_FILES": ["dir::../../RTL/mac_cell_seq.v"],
+
+  "//": "⚠️ FP_CORE_UTIL, NOT an absolute DIE_AREA, and the reason is a measurement from",
+  "//": "tonight rather than a preference. FP_CORE_UTIL derives the die FROM the cell",
+  "//": "area, so it is NOT a shared setting across two DIFFERENT designs -- that is why",
+  "//": "the unsigned/signed PAIR had to run at a fixed DIE_AREA (3a8b452), after the",
+  "//": "smaller arm failed placement (DPL-0036, 13 instances) at equal utilisation.",
+  "//": "HERE there is ONE object and no comparison, so deriving the die is correct and",
+  "//": "gives the honest cell area. If this later needs comparing to anything, it gets",
+  "//": "re-run at a fixed die -- the number does not transfer across knobs.",
+  "FP_SIZING": "effective_util",
+  "FP_CORE_UTIL": 45,
+
+  "//": "THE AGREEMENT-LAW PAIR, declared with its arithmetic: 1/55ns = 18181818.18 Hz",
+  "//": "-> clock_hz 18181818 (int). Same pair as ndf_6x2_config.json, one commit.",
+  "//": "This object HAS a real clock -- unlike the combinational cell, which had zero",
+  "//": "clock ports and zero flops. CTS matters here and did not there.",
+  "CLOCK_PORT": "clk",
+  "CLOCK_PERIOD": 55,
+  "RUN_CTS": 1,
+
+  "//": "MEASUREMENT #1, named in the order: the longest path",
+  "//": "SER -> fabric -> AND -> XOR -> ripple -> acc. Report timing__setup__ws at the",
+  "//": "SLOW corner; timing__setup__wns is CLAMPED AT ZERO and is not the margin.",
+  "//": "Report design__instance__area__stdcell, never design__instance__area (fill).",
+
+  "PL_TARGET_DENSITY_PCT": 60,
+  "GRT_ALLOW_CONGESTION": 1,
+  "RUN_KLAYOUT_XOR": false,
+  "RUN_MAGIC_DRC": true,
+
+  "PDK": "sky130A",
+  "pdk::sky130A": { "MAX_FANOUT_CONSTRAINT": 10 }
+}

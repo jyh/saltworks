@@ -1,0 +1,89 @@
+# TinyTapeout manifest — NDF (neural dataflow fabric). TTSKY26c.
+#
+# ⚠️ THIS IS A SCAFFOLD, PRE-RTL. Created 2026-08-10 01:1x on the maestro's explicit
+# word during the R8 night wave. `validate.py` WILL FAIL against it until compiler's
+# fire-plan item 4 (tt_um_saltworks_ndf + the 2-2-1 sequencer) lands the source files
+# listed below. That failure is EXPECTED and is not a defect in this file -- saying so
+# here because a red validator with no explanation is how a scaffold gets "fixed" by
+# someone deleting the very lines that are waiting to become true.
+#
+# ⛔ THE SHIPPED BB PROJECT (../TT/) IS A DIFFERENT SUBMISSION AND IS UNTOUCHED.
+# The Captain updates that one personally. This directory exists precisely so the NDF
+# never borrows the BB's manifest.
+#
+# Schema authority is tt-support-tools/project_info.py; yaml_version MUST be 6.
+# Validator foot-guns respected here, each one deliberately:
+#   * clock_hz must be a Python int -- 18.181818e6 would be a float and fails
+#   * source_files may not use wildcards; every file listed one per line
+#   * all 24 pinout keys must be present (may be empty) and >=1 non-empty
+#   * top_module must start with tt_um_
+# ⚠️ source_files must be kept in sync BY HAND with PROJECT_SOURCES in test/Makefile --
+#    nothing checks that they agree.
+yaml_version: 6
+
+project:
+  title:       "Neural dataflow fabric — bit-serial MAC cells on a verified switch"
+  author:      "Jason Hickey"
+  discord:     ""
+
+  # ⚠️ FENCED LANGUAGE, on evidence's F3/F5 rulings (2026-08-09): the certified claim
+  # is scoped to the CELL'S COMBINATIONAL CORE, and every whole-neuron sentence carries
+  # WHEN DRIVEN (the driver is the sequencer, V9/R6). "verified silicon" unqualified is
+  # false at the die: the core is proved; the sequencer, wrapper and fabric are hand RTL.
+  description: "A bit-serial neural dataflow fabric: MAC cells on a self-routing banyan switch. Each cell's combinational core is proved equivalent to its Lean specification inside the Lean kernel -- emitted netlist against kernel model, checked by SAT -- and the signed accumulation holds when driven by the sequencer. The sequencer, pin wrapper and fabric glue are hand-written RTL and are not part of that proof."
+
+  language:    "Verilog"
+
+  # THE AGREEMENT LAW, declared in this founding commit beside config.json's
+  # CLOCK_PERIOD 55: 1/55e-9 = 18,181,818.18 Hz. Nothing in either tool checks that
+  # these two fields agree; they are different fields in different files.
+  clock_hz:    18181818
+
+  # 6x2 = 1030.40 x 225.76 um (tinytapeout-dossier.md:187, verified against the table).
+  # `tiles` is the ONLY control for DIE_AREA and FP_DEF_TEMPLATE on the TT path --
+  # setting either in config.json is SILENTLY DISCARDED (dossier:409-419).
+  tiles: "6x2"
+
+  top_module: "tt_um_saltworks_ndf"
+
+  # PENDING compiler's fire-plan item 4. Listed so the manifest states its intent;
+  # keep in sync BY HAND with test/Makefile's PROJECT_SOURCES.
+  source_files:
+    - "tt_um_saltworks_ndf.v"
+
+# PIN MAP — bit-exact, transcribed from the FROZEN D6 map
+# (docs/ndf-top-module-design-v1.md:278), amendment CONFIRMED by the Captain at R5
+# (the D10.6 veto spent). 24/24 keys present.
+#   uio_oe = 8'b1011_0011 (static; lives in the RTL, recorded here for the reader)
+# Fabric port indices FROZEN: 0-3 cells · 4 edge-in · 5 edge-out · 6 CPU-client
+# (stubbed idle) · 7 spare (idle) -- actives are the 0-5 prefix.
+pinout:
+  ui[0]: "instr_byte[0] — CPU memory bus"
+  ui[1]: "instr_byte[1] — CPU memory bus"
+  ui[2]: "instr_byte[2] — CPU memory bus"
+  ui[3]: "instr_byte[3] — CPU memory bus"
+  ui[4]: "instr_byte[4] — CPU memory bus"
+  ui[5]: "instr_byte[5] — CPU memory bus"
+  ui[6]: "instr_byte[6] — CPU memory bus"
+  ui[7]: "instr_byte[7] — CPU memory bus"
+
+  uo[0]: "addr_byte[0] — PC bytes, 4 phases"
+  uo[1]: "addr_byte[1] — PC bytes, 4 phases"
+  uo[2]: "addr_byte[2] — PC bytes, 4 phases"
+  uo[3]: "addr_byte[3] — PC bytes, 4 phases"
+  uo[4]: "addr_byte[4] — PC bytes, 4 phases"
+  uo[5]: "addr_byte[5] — PC bytes, 4 phases"
+  uo[6]: "addr_byte[6] — PC bytes, 4 phases"
+  uo[7]: "addr_byte[7] — PC bytes, 4 phases"
+
+  uio[0]: "phase_o[0] (out): phase strobe"
+  uio[1]: "phase_o[1] (out): phase strobe"
+  uio[2]: "edge_in_data (in): packet port, weights/inputs"
+  uio[3]: "edge_in_valid (in): packet port, weights/inputs"
+  uio[4]: "edge_out_data (out): packet port, results"
+  uio[5]: "edge_out_valid (out): packet port, results"
+  uio[6]: "sof (in): non-destructive frame re-align; rst_n is DESTRUCTIVE once the die carries state"
+  uio[7]: "valid (out): payload-window flag; phase recovers from its rising edge, which uniquely names cycle 6 of a 14-cycle frame"
+
+# The shuttle to be submitted to.
+tt_shuttle: ttsky26c
