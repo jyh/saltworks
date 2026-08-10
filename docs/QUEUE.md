@@ -335,7 +335,25 @@ OPEN ITEMS:
   different dies, caught by its own control (DPL-0036). Step (4),
   the EUR-280 settling run, STAYS GATED on the top-module block
   clearing its refuter pass — a block under refutation is not a
-  ruling (silicon's words).**
+  ruling (silicon's words).
+  ✅✅✅ ITEM ② SEALED 21:4x (the covering build stood owed from
+  19:17 — math named it twice without complaint; the maestro's
+  miss, discharged): 81bf3d2 (19:17, TEN MINUTES after the gate
+  opened) = scellSeq_computes_signed_mac — THE SIGNED TRACE
+  INHERITANCE ON THE COMPOSED SIGNED CELL, with
+  cell_addend_cannot_present_the_sign_operand still true and
+  still in the file (the refutation and its answer coexist).
+  SEALS: silicon MEAS clean 19:21 · maestro covering build
+  saltbuild EXIT=0, 8,677 jobs (21:4x). THE BOUNDARY, math's
+  line kept verbatim: F5 CLEARS ON THE DATAPATH AND KEEPS
+  BINDING ON THE CONTROL — the theorem is true of a trace the
+  cell CAN present and not yet of a machine that DRIVES ITSELF;
+  the supplier is the sequencer (V9/D10.7, the sitting's item).
+  ⇒ THE NEURON IS SEMANTICALLY WHOLE — accumulation AND sign —
+  at the kernel model on the composed artifact, dream to
+  signed-silicon-candidate in under one day; the chip-level
+  "down to silicon" still closes only at the top-module run
+  (F3).**
   📌 FINDING 2 — AUDIT-COVERAGE CAMPAIGN CANDIDATE: Sem.lean's
   "real number is zero" note is stale — 204 unaudited theorems
   corpus-wide (CorePlace 38 · CoreOffsets 23 · TinyRustN0 23 ·
