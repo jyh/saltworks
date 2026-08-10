@@ -921,6 +921,20 @@ OPEN ITEMS:
   TONIGHT is the named target; the fabbed-is-verified law governs
   the SUBMISSION, not the first measurement run — V1-V3/V9/V10
   land behind the layout, before any tapeout word.**
+- **THE CAPTAIN'S MORNING RULINGS (8/10 07:3x-07:4x, three words
+  total): ① h ≤ 127 CONFIRMED (executed c2b16bc — the range
+  obligation names the SIGNED int8 bound, never byte width; math's
+  catch). ② THE DUPLICATE LEMMA = OPTION (b), THE HOIST: the
+  adder's arithmetic-bit lemma moves to Stack/Program BESIDE its
+  parent sem_adder32_gen; then BOTH copies retire by repointing —
+  math lands the hoist + retires MacBridge:39's copy (its file);
+  compiler repoints MacCell:1215/:1225 and retires sc_adder_bit
+  (its file). Land-at-owner, math's hoist first. FIRED at the
+  ruling. ③ THE AUDIT SCOPE = OPTION (a): when MacBridge's 32
+  pre-existing theorems are audited (math's 47-row), they land as
+  a NEW SEPARATELY-SCOPED audit block — the scoped-block style IS
+  the audit trail; whole-file certificates are not the house form;
+  the predecessor's refusal stands vindicated as doctrine.**
 - **⭐⭐⭐ FIRST LAYOUT IS IN — THE CAPTAIN'S NAMED TARGET MET
   (8/10 01:46, silicon 465c669): the composed NDF — 4 shelled
   cells + 3 SER organs + the banyan fabric + the RISC-V core —
