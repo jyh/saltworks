@@ -938,6 +938,34 @@ OPEN ITEMS:
   TONIGHT is the named target; the fabbed-is-verified law governs
   the SUBMISSION, not the first measurement run — V1-V3/V9/V10
   land behind the layout, before any tapeout word.**
+- **⭐⭐ THE SUBMISSION PUSH (8/10 10:3x, the Captain, T1 — his
+  words): "I want to submit NDF to TT today if possible" + the
+  VENDOR DATUM from TT's own reply (ground truth, his
+  correspondence): SIZE-UP IS ALLOWED, SIZE-DOWN IS NOT. HIS
+  RESIZE PLAY, under maestro analysis same sitting: upgrade the
+  owned 2x2 (the BB's) → 6x2 and put the NDF there; the BB switch
+  moves to a NEW separate 1x2. ⇒ FIRED: (a) THE NDF ACCOUNT
+  (docs/ndf-account.md) via the bb-switch-account pattern —
+  compiler kernel half (measured, #eval'd) + silicon priced half
+  (signoff artifacts) IN PARALLEL, then maestro joint reading,
+  math standing refutation, evidence fence pass; the account is
+  TODAY'S PRIORITY, V9/DRV resume behind it at their owners'
+  sequencing. (b) BB-at-1x2 feasibility + re-hardening (silicon,
+  after its account half): bare-banyan 4,031 µm² post-layout vs
+  ~32k µm² 1x2 core = trivial fit; PRICE NAMED: re-signoff at the
+  new die + the stale cocotb bench fix (test.py:247, registered,
+  still unowned) + the BB's own DRV debt rides along. (c) The
+  submission-today framing: HONEST ONLY AS update-until-close —
+  the artifact ships with named debts (no tile-fit signoff yet,
+  V10/bench behind, batcher unwired, y int8-only, DRV 1,757/31)
+  and improves until the ~Sept 7 freeze; the public README wording
+  takes EVIDENCE'S FENCE PASS BEFORE the Captain's click (public
+  = T1, the click is HIS). Money arithmetic (maestro, labeled):
+  resize play ≈ €980 total for both chips vs €1,120 for
+  keep-2x2-plus-new-6x2 — SAVES ≈ €140, exactly one 1x2, IF TT
+  upgrade pricing is pay-the-difference (UNVERIFIED — his checkout
+  read confirms). Reservation-timing ruling SATISFIED: "reserve at
+  layout-readiness" — the layout exists as of 01:46.**
 - **⭐⭐⭐ THE ③+④ DEEP SESSION IS HELD AND COMPLETE (8/10 09:5x —
   the Captain-committed duty of 8/8 14:14, verified not-yet-held
   last night, PAID IN FULL at this sitting): ④ walked (full circle
