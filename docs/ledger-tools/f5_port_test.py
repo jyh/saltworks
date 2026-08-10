@@ -368,6 +368,44 @@ def main() -> None:
         print("       Two nets, not one. acc + (addend XOR sign) + sign needs ONE signal.")
         verdict_b = False
 
+    # ---- (d) does the sign REACH THE CARRY CHAIN? ----
+    # ⭐ COMPILER'S DISCRIMINATOR, routed by silicon 19:2x, and it is the FIRST
+    # criterion in this fence that CAN FAIL.
+    #
+    # ⛔ A DESIGN WHOSE CARRY-IN IS TIED LOW PASSES (a) AND (b) BOTH: (a) sees >=32
+    # xor2 on the sign net, (b) sees that net IS the port at the carry index.
+    # NEITHER ASKS WHETHER THE PORT REACHES THE ADDER'S CARRY CHAIN. Without it the
+    # cell computes acc + ~v -- OFF BY ONE, and structurally invisible to (a)+(b).
+    # The two's-complement identity needs acc + ~v + 1, and that +1 IS the carry-in.
+    #
+    # ✅ THE DISCRIMINATOR IS CHEAP: the sign net must also feed at least one
+    # NON-xor2 gate -- the carry-GENERATE term at the macCore offset. Compiler
+    # measured the real artifact at total fanout 34 = 33 xor2 + ONE and2.
+    print("-" * 72)
+    print("(d) CARRY REACH  does the sign net reach the adder's carry chain?")
+    if not verdict_a:
+        print("    — NOT REACHED: (a) failed, so there is no sign net to trace.")
+        verdict_d = False
+    else:
+        consumers = [(g["type"], g["inst"]) for g in gates
+                     if sign_net in set(g["in"].values())]
+        non_xor = [(t, i) for t, i in consumers if not t.startswith("xor2")]
+        print(f"    sign net `{sign_net}` total fanout {len(consumers)} "
+              f"= {len(consumers) - len(non_xor)} xor2 + {len(non_xor)} non-xor2")
+        if non_xor:
+            print("    ✅ MET — non-xor2 consumer(s): "
+                  + ", ".join(f"{t}@{i}" for t, i in non_xor[:4])
+                  + (f" (+{len(non_xor) - 4} more)" if len(non_xor) > 4 else ""))
+            print("       A HAND MUST STILL CONFIRM that gate is the carry-GENERATE")
+            print("       term and not some unrelated consumer — this tool proves")
+            print("       the sign LEAVES the XOR bank, not WHERE it arrives.")
+            verdict_d = True
+        else:
+            print("    ⛔ NOT MET — the sign feeds ONLY xor2 cells. The carry-in is")
+            print("       not driven by it, so this computes acc + ~v: OFF BY ONE.")
+            print("       (a) and (b) both PASS on this design. That is why (d) exists.")
+            verdict_d = False
+
     # ---- (c) refused, loudly ----
     print("-" * 72)
     print("(c) HYPOTHESES→PORTS   ⛔ NOT ANSWERED BY THIS TOOL, BY CONSTRUCTION.")
@@ -376,10 +414,12 @@ def main() -> None:
     print("    name the supplying port for each hypothesis of the landed statement.")
 
     print("=" * 72)
-    if verdict_a and verdict_b:
-        print("VERDICT  (a) MET · (b) MET · (c) OWED TO A HAND — F5 not yet cleared.")
+    if verdict_a and verdict_b and verdict_d:
+        print("VERDICT  (a) MET · (b) MET · (d) MET · (c) OWED TO A HAND — "
+              "F5 not yet cleared.")
         sys.exit(0)
-    print("VERDICT  F5 (a)/(b) NOT MET on this artifact.")
+    _f = [n for n, v in (("a", verdict_a), ("b", verdict_b), ("d", verdict_d)) if not v]
+    print(f"VERDICT  F5 NOT MET on this artifact — failing: ({') ('.join(_f)}).")
     print("         Before the complement path lands, THIS IS THE EXPECTED ANSWER")
     print("         and it is this tool's negative control.")
     sys.exit(1)

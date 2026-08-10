@@ -773,6 +773,12 @@ with tempfile.TemporaryDirectory() as _tmp:
 # BESIDE them as an integration row whose failure is a FINDING, not a broken
 # test — the pattern provenance_replay already uses in this file.
 
+# ⛔⛔ NOTE ON THE "GOOD" FIXTURES BELOW — they all carry `extra=[("i2", "n0")]`,
+# a non-xor2 consumer of the sign net, and that is NOT decoration. Without it they
+# are the TIED-LOW design: 32 xor2 on the sign and nothing reaching the carry
+# chain, computing acc + ~v. They passed (a)+(b) and were labelled CORRECT here for
+# two hours, until compiler's (d) falsified them. A control that models a broken
+# design and is called the positive case is worse than no control.
 def _f5_netlist(xor_specs, extra=(), ports=3):
     """A minimal emitS-shaped netlist. xor_specs: list of (a_net, b_net)."""
     lines = ["`default_nettype none", "", "module fixture ("]
@@ -809,7 +815,7 @@ if Path(__file__).with_name("f5_port_test.py").is_file():
     check("ABSENT" in out, "F5 NEGATIVE: did not report the bank ABSENT")
 
     # POSITIVE: 32 xor2 sharing i2 (the carry-in port). Expect EXIT=0.
-    pos = _f5_netlist([(f"n{k}", "i2") for k in range(32)])
+    pos = _f5_netlist([(f"n{k}", "i2") for k in range(32)], extra=[("i2", "n0")])
     rc, out = _run_f5(pos, port="i2")
     check(rc == 0, f"F5 POSITIVE: 32-wide bank on i2 gave exit {rc}, expected 0")
     check("PRESENT" in out, "F5 POSITIVE: did not report the bank PRESENT")
@@ -817,7 +823,7 @@ if Path(__file__).with_name("f5_port_test.py").is_file():
     # ⭐ THE DISCRIMINATOR THE POSITIVE CONTROL ALONE CANNOT MAKE: a bank that is
     # present but tied to the WRONG net must FAIL (b). Without this row, a tool
     # that ignored the carry-in port entirely would pass both controls above.
-    wrong = _f5_netlist([(f"n{k}", "i1") for k in range(32)])
+    wrong = _f5_netlist([(f"n{k}", "i1") for k in range(32)], extra=[("i1", "n0")])
     rc, out = _run_f5(wrong, port="i2")
     check(rc == 1, f"F5 (b): bank on the WRONG net gave exit {rc}, expected 1")
     check("NOT MET" in out, "F5 (b): wrong-net bank was not reported NOT MET")
@@ -839,6 +845,25 @@ if Path(__file__).with_name("f5_port_test.py").is_file():
     rc = _sp2.run([sys.executable, _tool, __file__],
                   capture_output=True, text=True).returncode
     check(rc == 2, f"F5 WRONG-TYPE: a non-netlist gave exit {rc}, expected 2")
+
+    # ⭐⭐ (d) THE TIED-LOW DESIGN — the case that passes (a) AND (b) and is WRONG.
+    # This is the row the whole criterion exists for: 32 xor2 on the sign net and
+    # NOTHING ELSE, so the carry-in never reaches the adder and the cell computes
+    # acc + ~v, off by one. (a) sees the bank; (b) sees the right port; only (d)
+    # catches it. Compiler's discriminator, routed by silicon.
+    tied_low = _f5_netlist([(f"n{k}", "i2") for k in range(32)])
+    rc, out = _run_f5(tied_low, port="i2")
+    check(rc == 1, f"F5 (d) TIED-LOW: gave exit {rc}, expected 1")
+    check("OFF BY ONE" in out, "F5 (d) TIED-LOW: did not name the off-by-one")
+    check("(a) XOR BANK" in out and "PRESENT" in out,
+          "F5 (d) TIED-LOW: (a) should still PASS — that is the point of the row")
+
+    # and the same design WITH a non-xor2 consumer of the sign passes (d)
+    carried = _f5_netlist([(f"n{k}", "i2") for k in range(32)],
+                          extra=[("i2", "n0")])
+    rc, out = _run_f5(carried, port="i2")
+    check(rc == 0, f"F5 (d) CARRIED: gave exit {rc}, expected 0")
+    check("non-xor2 consumer" in out, "F5 (d) CARRIED: did not name the consumer")
 
     # ⭐ REFUSAL ROWS — the distinction silicon's 19:07 hazard turns on:
     # "the port map moved" and "criterion (b) failed" are DIFFERENT facts, and a
@@ -878,7 +903,7 @@ if Path(__file__).with_name("f5_port_test.py").is_file():
             return r.returncode, r.stdout + r.stderr
 
         # 67 input ports, matching ccIn — derivation SUCCEEDS and the bank passes
-        _good = _f5_netlist([(f"n{k}", "i5") for k in range(32)], ports=40)
+        _good = _f5_netlist([(f"n{k}", "i5") for k in range(32)], extra=[("i5", "n0")], ports=40)
         rc, out = _in_repo(_good, "good.v")
         check(rc == 0, f"F5 DERIVE: matching netlist gave exit {rc}, expected 0")
         check("MEASURED, not assumed" in out,
@@ -886,7 +911,7 @@ if Path(__file__).with_name("f5_port_test.py").is_file():
         check("ccCin = 5" in out, "F5 DERIVE: did not name the derived ccCin")
 
         # 3 input ports vs ccIn = 67 — the two objects disagree, so REFUSE (2)
-        _bad = _f5_netlist([(f"n{k}", "i5") for k in range(32)], ports=3)
+        _bad = _f5_netlist([(f"n{k}", "i5") for k in range(32)], extra=[("i5", "n0")], ports=3)
         rc, out = _in_repo(_bad, "bad.v")
         check(rc == 2, f"F5 PORT-COUNT: disagreement gave exit {rc}, expected 2")
         check("PORT-COUNT DISAGREEMENT" in out,
