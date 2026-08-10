@@ -390,6 +390,64 @@ INLINE (CLOCK_PERIOD 55 ns / 18.2 MHz, frame = 14 = 6 header + 8 payload).* **Th
 first numbers document this fence has seen that carries its own basis — a reader
 re-derives 17 µs without asking anyone.**
 
+## ⭐ F6 — THE "VERIFIED LEARNING" EARN CRITERION (pre-registered 2026-08-10 12:1x, at the aim-high application block's ASK, BEFORE rung A5 exists)
+
+*`aim-high-application-v1.md` asks rather than grants: "the 'VERIFIED LEARNING'
+earn criterion is EVIDENCE's to pre-register (observable event + instrument);
+this block ASKS, it does not grant." This is that pre-registration. **It is
+written while the phrase is unearnable, which is the only time it is worth
+anything** — the same reason this whole file was written before the first
+measurement existed.*
+
+⛔ **THE STANDING BAN IS UNCHANGED: "VERIFIED LEARNING" unqualified stays BANNED.**
+*The PoC performs inference and ROUTES gradients; training is off-chip by the
+design's own statement.*
+
+### What would EARN it, and at which size
+
+```
+TIER 1 — "one verified learning STEP"   (the application block's own phrase)
+  EVENT      the chip applies ONE weight update through the IN-BAND weight path,
+             and the post-update weight register equals the update equation's
+             value.
+  INSTRUMENT (a) the update equation is a KERNEL THEOREM at int8 semantics —
+                 new = old − η·grad, with η's mechanism named (the requantizer
+                 shift; η=1 blows the range on step one, per the block's own §)
+             (b) the applied value is read back from the ARTIFACT — the emitted
+                 netlist executed, or the die — not from the model
+             (c) the gradient used is the gradient OF THE STATED LOSS, proved,
+                 not merely "a delta the host supplied"
+  ⛔ FALSIFIED IF the update is computed off-chip and merely RELOADED while the
+     sentence implies the chip computed it.
+
+TIER 2 — "verified learning"  (unqualified, plural steps)
+  EVENT      a SEQUENCE of updates whose composition is proved to descend the
+             stated loss on the stated domain — not one step repeated in prose.
+  INSTRUMENT a kernel theorem over the ITERATION, not over a single step.
+  ⚠️ TIER 1 DOES NOT IMPLY TIER 2. One step is a step; learning is a sequence,
+     and PARTS ARE NOT A PRODUCT (this file's F4, same shape).
+
+TIER 3 — "the smallest verified learning machine"
+  ADDS a MINIMALITY claim, which is a comparative over a class and needs the
+  class NAMED. Absent that, it is marketing with a theorem attached.
+```
+🔑 ***THE THREE RIDERS THAT TRAVEL WITH ANY TIER, because every one of them has
+already bitten this campaign:***
+```
+WHEN DRIVEN   the sequencer is hand RTL (V9's subject). A learning claim about
+              the DIE inherits every hand-RTL exclusion the inference claim has.
+WHICH CHECKER the kernel proves the MODEL; SAT proves the NETLIST; a bench proves
+              neither. Name which one saw the update. (the public-manifest defect,
+              caught 2026-08-10 10:34 — do not re-import it here)
+WHICH ARTIFACT model · emitted netlist · synthesised netlist · die. A learning
+              step demonstrated on a simulator is a simulator result.
+```
+⚖️ **AND THE HONEST NOTE THE BLOCK EARNED: its own §5 already states the earned
+sentence as "one verified learning STEP" and calls it "the fence's own mechanism
+for earning a phrase, used as designed." That is correct, and this
+pre-registration exists to make the mechanism checkable rather than to withhold
+it. A phrase with a published price is a phrase somebody can go and buy.**
+
 ### Three words that may not be used unqualified until their row lands
 
 ```
