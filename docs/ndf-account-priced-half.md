@@ -91,24 +91,43 @@ with two causes and two repairs, and the severe one is the clock, not the logic.
 violations; the report lists 1,855 rows (67 + 1,788). I used the report's rows and
 do not know what the 98 difference counts.**
 
-## 4 · BB AT 1x2 — FEASIBILITY, AND ITS PRICE
+## 4 · BB AT 1x1 — **MEASURED BY RUN**, AND ITS PRICE
+
+*(This section replaced a 1x2 PROJECTION after the Captain's 10:35 refinement to a
+1x1 and the maestro's instruction to confirm by RUN. The projection is kept below
+only to score it.)*
 
 ```
-banyan_fabric synthesised (yosys)   2,143.31 um2   MEASURED (banyan_fabric_stat.txt)
-x 1.881 post/pre, banyan family     4,031.56 um2   PROJECTION — the ratio was
-                                                   measured ON THIS FAMILY at 13.2%
-                                                   utilisation, not on this run
-1x2 tile gross 161.00 x 225.76     36,347.36 um2
-1x2 usable @60%                    21,808.42 um2
-⇒ BB occupies ~18.5% of a 1x2's usable area — A TRIVIAL FIT
+MEASURED — LibreLane 3.0.5, pinned PDK, DIE_AREA 161.00 x 111.52 (dossier:182):
+  die              17,954.70 um2   = the 1x1 tile, exactly
+  stdcell           3,824.92 um2   sequential 1,106.06 · comb 1,537.72 · repair 565.54
+  flops                    52
+  SETUP __ws          +20.1426 ns at the SLOW corner, 40 ns clock — MET, large margin
+  HOLD  __ws           +0.1065 ns · setup violations 0
+  DRC 0 (magic AND klayout) · LVS 0 · antenna 0 · max-slew 11
 ```
-⚠️ **THE NAMED PRICE OF THE RESIZE, so the Captain buys with his eyes open:**
-1. **RE-HARDENING** — the BB must be hardened again at 1x2. Not yet run.
+⭐ **UTILISATION — AND THE DENOMINATOR IS PART OF THE NUMBER:**
+```
+stdcell 3,824.92  vs DIE  17,954.70  = 21.3%
+                  vs CORE 13,460.40  = 28.4%   ← design__core__area, the usable area
+```
+🔑 ***One measurement, two percentages, only the divisor differing. A utilisation
+figure without its denominator is not a number. The maestro's independent estimate
+of 26-28% against ~14.5k usable lands dead centre of the core-relative figure.***
+📌 **MY EARLIER PROJECTION SCORED: 4,031.56 um2 projected (2,143.31 x 1.881) vs
+3,824.92 MEASURED — the projection ran +5.4% HIGH, i.e. conservative. It is now
+RETIRED in favour of the measurement.**
+
+✅ **THE BB FITS A 1x1 WITH ROOM. Size-up remains allowed, so the batcher-wired
+variant not fitting a 1x1 costs nothing today — the growth path stays open.**
+
+⚠️ **THE NAMED PRICE OF THE RESIZE, so it is bought with open eyes:**
+1. **NOT A TILE-FIT SIGNOFF** — no TT power-grid DEF; this is LibreLane's PDN.
 2. **`test.py:247`** — the cocotb bench is STALE against the 8/8 `cnt[3]` ruling:
    it asserts `(uio >> 5) == 0` while `project.v:60` drives `cnt_o[3]` there.
    `FRAME=14`, so the FIRST FAILURE IS `t=8`. **The RTL is correct; one bench line
-   is not.** Diagnosed 20:13 on 8/9; **the fix is still UNOWNED.**
-3. **BB DRV debt** — carried over, not measured at 1x2.
+   is not.** Diagnosed 8/9 20:13; **the fix is still UNOWNED.**
+3. **11 max-slew violations** on this run — small, real, unrepaired.
 
 ## 5 · WHAT THIS HALF DOES NOT CLAIM
 
