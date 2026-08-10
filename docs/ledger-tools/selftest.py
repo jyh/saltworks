@@ -860,4 +860,5 @@ if FAILURES:
         print("  ✗", f)
     sys.exit(1)
 print(f"selftest: OK — {CHECKS} checks passed "
-      f"(classification, dedup, silence math, contamination regression, firewall)")
+      f"(classification, dedup, silence math, contamination regression, firewall, "
+      f"F5 port test)")
