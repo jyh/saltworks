@@ -374,7 +374,24 @@ OPEN ITEMS:
   SelfRouting) — the residual-15 assignment and the census-tool
   fix are the sitting's two remaining decisions here. Sem.lean's
   zero-note is still stale AND the 204 replacement was stale too
-  — both die at this line.**
+  — both die at this line.
+  ⛔⛔ AND THE 180 IS HELD TOO (silicon 07:31, found by opening
+  its own claimed files): the census tool has a SECOND defect — it
+  compares qualified #audit_axioms names against bare in-namespace
+  declarations WITHOUT NORMALISING, so 32 correctly-audited
+  theorems across SIX files read as unaudited. TRULY UNAUDITED:
+  138 (PartialLoad: census said 18; the file's own audit block
+  names 16 of them — truly 2). AND THE CONFESSION THAT MATTERS
+  MORE THAN THE NUMBER: the 21:51 "confirmed by a third hand, by
+  a different method" was FALSE in the half that mattered — all
+  three hands ran audit_completeness.py; one instrument thrice is
+  ONE measurement (agreement-is-not-corroboration, silicon's own
+  law, owned in full). WHAT SURVIVES: the gitignored-52 defect
+  (independently confirmed) and the PARTITION SHAPE by owner; the
+  per-owner NUMBERS re-derive after compiler's tool fix (which
+  now answers TWO defects: gitignore class + name normalization).
+  No figure from this entry travels to the Captain except
+  138-provisional-on-the-tool-fix.**
 
 - **THE COMPOSED CELL — STATE AT ITS EXACT SIZE (compiler's 16:03
   trim of the maestro's verdict — the FOURTH one-theorem-larger
