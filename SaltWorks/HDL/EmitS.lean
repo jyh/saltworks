@@ -4,6 +4,9 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Jason Hickey, Claude
 -/
 import SaltWorks.HDL.Syntax
+-- for `Seq` (emitSeq, R6/R8). NOTE: bare `Seq` resolves to Lean core's Seq TYPECLASS
+-- without this import — qualify as SaltWorks.HDL.Seq below rather than relying on it.
+import SaltWorks.HDL.Seq
 import SaltWorks.Tactic.AuditAxioms
 
 /-!
@@ -175,6 +178,60 @@ def emitS (drive : String) (name : String) (c : Circ) : String :=
     ++ String.intercalate ",\n" (inPorts ++ outPorts) ++ "\n);\n"
     ++ slines decls ++ "\n" ++ slines dummies ++ "\n"
     ++ slines cells ++ "\n" ++ slines drives
+    ++ "\nendmodule\n\n`default_nettype wire\n"
+
+/-! ## `emitSeq` — THE CLOCKED SHELL (R6/R8, the night council, 2026-08-10)
+
+**The scope-law exit.** `emitS` is combinational-only, so an emitted `Seq` had NO state elements:
+the 64 state bits entered as inputs and left as outputs, and something unbuilt had to hold them.
+Evidence re-derived that from the artifact at 19:36 and it is §D2(a) of the top-module block.
+
+```
+   core inputs  0 … nIn-1        PRIMARY INPUTS   (module ports)
+                nIn … nIn+nState-1  STATE         (wires, driven by the flops' Q)
+   core outs    0 … nOut-1       this cycle's outputs  -> `assign o<k>`
+                nOut … nOut+nState-1  NEXT STATE      -> `assign d<j>` -> flop D
+```
+
+⚠️ **THE FLOP IS `dfxtp_2`, NOT `dfxtp_1` — R2, and it is a PDK fact, not a taste:** `dfxtp_1` is
+on the pinned sky130A `no_synth.cells` (line 152); `_2` and `_4` are not. Emitting `_1` produces a
+netlist the flow is entitled to refuse.
+
+⛔ **NO `initial`, EVER — the power-gating law.** The refinement is stated `∀ st₀`, so the emitted
+machine must not claim a reset value it does not have. Clearing is the SHELL's job (R6), not a
+simulation artifact's.
+
+**V7 (pre-registered, v1.1):** `flops == nState` · `cells == gates + nState` · `conb == const-count`
+· `assigns == outs`. *For `scellSeq`: 64 · 289 · 0 · 96.* -/
+
+/-- One state flop: `Q` drives the core's state input, `D` comes from the next-state assign. -/
+def emitFlop (flopDrive : String) (coreIn : Nat) (nIn : Nat) (j : Nat) : String :=
+  "  sky130_fd_sc_hd__dfxtp_" ++ flopDrive ++ " q" ++ toString j
+    ++ " (.CLK(clk), .D(d" ++ toString j ++ "), .Q(" ++ sNet coreIn (nIn + j) ++ "));"
+
+/-- ⭐⭐ **THE CLOCKED MODULE.** `emitS`'s body for the combinational core, plus one flop per state
+bit and the feedback. Flat and fully mapped, exactly as `emitS` — no hierarchy for the flow to
+unmap. -/
+def emitSeq (drive : String) (flopDrive : String) (name : String) (m : SaltWorks.HDL.Seq) : String :=
+  let c := m.core
+  let inPorts  := (List.range m.nIn).map fun i => "    input  wire " ++ sNet c.nIn i
+  let outPorts := (List.range m.nOut).map fun k => "    output wire o" ++ toString k
+  let stDecls  := (List.range m.nState).map fun j => "  wire " ++ sNet c.nIn (m.nIn + j) ++ ";"
+  let dDecls   := (List.range m.nState).map fun j => "  wire d" ++ toString j ++ ";"
+  let decls    := c.gates.map fun g => "  wire " ++ sNet c.nIn g.out ++ ";"
+  let dummies  := c.gates.filterMap dummyDecl
+  let cells    := c.gates.map (emitCell drive c.nIn)
+  let flops    := (List.range m.nState).map (emitFlop flopDrive c.nIn m.nIn)
+  let odrives  := (List.range m.nOut).map fun k =>
+    "  assign o" ++ toString k ++ " = " ++ sNet c.nIn (c.outs.getD k 0) ++ ";"
+  let ddrives  := (List.range m.nState).map fun j =>
+    "  assign d" ++ toString j ++ " = " ++ sNet c.nIn (c.outs.getD (m.nOut + j) 0) ++ ";"
+  "`default_nettype none\n\nmodule " ++ name ++ " (\n"
+    ++ String.intercalate ",\n" (("    input  wire clk" :: inPorts) ++ outPorts) ++ "\n);\n"
+    ++ slines stDecls ++ "\n" ++ slines dDecls ++ "\n"
+    ++ slines decls ++ "\n" ++ slines dummies ++ "\n"
+    ++ slines cells ++ "\n" ++ slines flops ++ "\n"
+    ++ slines odrives ++ "\n" ++ slines ddrives
     ++ "\nendmodule\n\n`default_nettype wire\n"
 
 /-! ## The `mux2_1` peephole — the Captain's work order, 2026-08-07
