@@ -872,6 +872,54 @@ OPEN ITEMS:
   1,300–2,600 ln pricing CONFIRMED by math's shrink attempt — mathlib
   has the tools, not the theorem). The flagship front at solo tier is
   exhausted until one of these opens a gate.**
+- **⭐⭐⭐ THE 01:0x NIGHT COUNCIL — ALL EIGHT RATIFIED (the Captain,
+  at the helm past midnight, verbatim: "all recommendations
+  ratified, let's fire up the fleet" + the target: "can we get
+  first layout tonight"). The 07:30 sitting COLLAPSES to the ③+④
+  walk — the design decisions are ruled here:
+  R1 FABRIC STAGING: per-round decide+kernel fixtures for September
+  (each demo round its own check on the netlist model); the Batcher
+  sort-then-route seam = the named v1.1 node.
+  R2 DRIVE: _1 combinational (the owned TT-CI green) · _2 flops
+  (dfxtp_1 on no_synth.cells, one-sided) · the _2 settling
+  measurement rides emitSeq bring-up.
+  R3 FETCH = THE TAPE CONTRACT: byte k on phase (k+3) mod 4 (byte 0
+  leads its address by one phase); reset quirk documented (addr-0
+  instruction skipped, pc→4); the RP2040 plays a byte stream
+  generated OFFLINE from the Lean runW trace, bench-asserted at
+  phase_o.
+  R4 CPU: September = DEMONSTRATE (verified code on its own bus,
+  sequencer autonomous); conduct = B-ISA SW + port organ, v1.1;
+  PC-decode strobes stay priced, unbuilt.
+  R5 THE PIN AMENDMENT CONFIRMED (the Captain's word, the D10.6
+  veto spent): sof+valid replace the ruled third packet port;
+  frame-phase observability narrows to valid-only; the argument
+  is rst_n-destructiveness once the die carries state.
+  R6 THE SHELL RATIFIED: per-cell acc CLEAR + en_wsh + en_acc +
+  sign-extension hold; V9 kernel model owed; OWNER COMPILER; cost
+  lands in emitSeq flops — scCore and all 19:34 measurements
+  untouched.
+  R7: residual-15 audit theorems → MATH (SelfRouting floor, its
+  lane) · census-tool gitignore fix → COMPILER (its tool).
+  R8 FIRE PLAN LIVE — NIGHT WAVES AUTHORIZED, SUPERSEDES REST:
+  compiler = emitSeq → shell emission (4 cells) → SER/activation
+  organ → tt_um_saltworks_ndf wrapper + sequencer (hand RTL per
+  the D2(b) exemptions, 2-2-1 schedule) → per-round fixtures;
+  silicon = the 4x2 settling run + the 6x2 FIRST LAYOUT the
+  moment composed RTL exists (config pair 55/18181818, DIE_AREA
+  6x2, the agreement law in one commit); math = standing
+  refutation + residual-15 at its pace; evidence = fence rides
+  every landing, demo-sentence pass owed pre-walk. FIRST LAYOUT
+  TONIGHT is the named target; the fabbed-is-verified law governs
+  the SUBMISSION, not the first measurement run — V1-V3/V9/V10
+  land behind the layout, before any tapeout word.**
+- **EVIDENCE FENCE VERDICTS (registered at its 23:30 ask — the two
+  lines the register lacked; its "settled both ends" catch): the ②
+  fence reads (a)(b)(d) MET · (c) discharged at math's hand · F5
+  STILL BINDS on the composed cell's signed claim — every
+  whole-neuron sentence carries WHEN DRIVEN (driver = the
+  sequencer, V9/R6). The v1.1 demo sentence remains FENCE-PENDING
+  at evidence until its pass posts.**
 - **REFUTER-PASS OUT-OF-FREEZE FINDS (19:3x, registered from the
   five-refuter pass on the top-module block): (a) ⛔ THE BB COCOTB
   BENCH IS STALE against the 8/8 cnt[3] ruling — TT/test/test.py:247
