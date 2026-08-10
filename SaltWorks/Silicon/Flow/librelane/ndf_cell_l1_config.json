@@ -7,8 +7,8 @@
   "//": "fabric layout is a DIFFERENT object (the tt_um_saltworks_ndf wrapper, fire-plan",
   "//": "item 4) and has its own config, ndf_6x2_config.json -- do not confuse them.",
 
-  "DESIGN_NAME": "mac_cell_seq",
-  "VERILOG_FILES": ["dir::../../RTL/mac_cell_seq.v"],
+  "DESIGN_NAME": "mac_cell_signed_seq",
+  "VERILOG_FILES": ["dir::mac_cell_signed_seq.v"],
 
   "//": "⚠️ FP_CORE_UTIL, NOT an absolute DIE_AREA, and the reason is a measurement from",
   "//": "tonight rather than a preference. FP_CORE_UTIL derives the die FROM the cell",
@@ -18,7 +18,7 @@
   "//": "HERE there is ONE object and no comparison, so deriving the die is correct and",
   "//": "gives the honest cell area. If this later needs comparing to anything, it gets",
   "//": "re-run at a fixed die -- the number does not transfer across knobs.",
-  "FP_SIZING": "effective_util",
+  "//": "FP_SIZING omitted deliberately: relative is the default and 'effective_util' is NOT a valid value (LibreLane 3.0.5 rejected it outright at config load -- loudly, which is the good failure).",
   "FP_CORE_UTIL": 45,
 
   "//": "THE AGREEMENT-LAW PAIR, declared with its arithmetic: 1/55ns = 18181818.18 Hz",
