@@ -97,10 +97,11 @@ compiler with a proved pass, not a syntax tree walk.
   off-by-one mutant coexisting (CodegenSpec.lean:201-256).
 - A 120-instruction generated program with certificates (SortDemo) whose
   universal sortedness waits on exactly the simulation theorem N5 states.
-- ★ Since recon: the batcher-sort proof chain is nearly closed at partial load
-  (element layer complete, only stage preservation remains — compiler 11:39);
-  `BatcherRun`+`PortLengths` rooted (02155be). The "story-completing" pair the
-  Captain sequenced FIRST is landing — this block fires behind it, as ruled.
+- ★ Since recon: the partial-load lift is COMPLETE — (A)(B)(C)(D) all landed
+  (`819c685`, MEAS'd, not-refuted; see §A A6 for the guard: NOT "the Batcher
+  sorts"); `BatcherRun`+`PortLengths` rooted (02155be). The
+  "story-completing" pair the Captain sequenced FIRST has effectively sealed
+  on compiler's side — this block fires behind it, as ruled.
 
 ## §3 · THE WALLS THIS BLOCK RESPECTS (each quoted in the recon)
 
