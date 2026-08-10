@@ -757,6 +757,102 @@ with tempfile.TemporaryDirectory() as _tmp:
         check(False, "MODEL FIREWALL: a personal-lane path was refused")
 
 # --------------------------------------------------------------------------
+# f5_port_test.py — THE CONTROLS, MADE RE-RUNNABLE.
+#
+# ⛔ WHY THIS SECTION EXISTS: I ran a negative and a positive control before
+# landing that tool, and wrote the results into a COMMIT MESSAGE. The positive
+# fixture lived in a session scratchpad and died with the session — so the
+# controls existed as a CLAIM about a past run that nobody could reproduce.
+# A result kept only in prose has the same durability problem as a result kept
+# only in context. The fixtures are synthesised here so the controls are a
+# COMMAND, not a memory.
+#
+# The fixtures are SYNTHETIC and self-contained deliberately: a selftest that
+# depends on SaltWorks/Silicon/RTL/mac_cell.v would go red the day silicon
+# regenerates it, which is legitimate development. The real artifact is read
+# BESIDE them as an integration row whose failure is a FINDING, not a broken
+# test — the pattern provenance_replay already uses in this file.
+
+def _f5_netlist(xor_specs, extra=()):
+    """A minimal emitS-shaped netlist. xor_specs: list of (a_net, b_net)."""
+    lines = ["`default_nettype none", "", "module fixture ("]
+    lines += ["    input  wire i0,", "    input  wire i1,", "    input  wire i2,"]
+    lines += ["    output wire o0", ");"]
+    for k, (a, b) in enumerate(xor_specs):
+        lines.append(f"  sky130_fd_sc_hd__xor2_1 gx{k} (.A({a}), .B({b}), .X(nx{k}));")
+    for k, (a, b) in enumerate(extra):
+        lines.append(f"  sky130_fd_sc_hd__and2_1 ga{k} (.A({a}), .B({b}), .X(na{k}));")
+    lines += ["  assign o0 = nx0;", "endmodule", ""]
+    return "\n".join(lines)
+
+
+def _run_f5(text, port=None):
+    import subprocess as _sp
+    import tempfile as _tf
+    tool = Path(__file__).with_name("f5_port_test.py")
+    with _tf.NamedTemporaryFile("w", suffix=".v", delete=False) as fh:
+        fh.write(text)
+        p = fh.name
+    try:
+        cmd = [sys.executable, str(tool), p] + ([port] if port else [])
+        r = _sp.run(cmd, capture_output=True, text=True, timeout=60)
+        return r.returncode, r.stdout + r.stderr
+    finally:
+        os.unlink(p)
+
+
+if Path(__file__).with_name("f5_port_test.py").is_file():
+    # NEGATIVE: 40 xor2, every one on a distinct net — no bank. Expect EXIT=1.
+    neg = _f5_netlist([(f"n{k}", f"m{k}") for k in range(40)])
+    rc, out = _run_f5(neg)
+    check(rc == 1, f"F5 NEGATIVE: no-bank netlist gave exit {rc}, expected 1")
+    check("ABSENT" in out, "F5 NEGATIVE: did not report the bank ABSENT")
+
+    # POSITIVE: 32 xor2 sharing i2 (the carry-in port). Expect EXIT=0.
+    pos = _f5_netlist([(f"n{k}", "i2") for k in range(32)])
+    rc, out = _run_f5(pos)
+    check(rc == 0, f"F5 POSITIVE: 32-wide bank on i2 gave exit {rc}, expected 0")
+    check("PRESENT" in out, "F5 POSITIVE: did not report the bank PRESENT")
+
+    # ⭐ THE DISCRIMINATOR THE POSITIVE CONTROL ALONE CANNOT MAKE: a bank that is
+    # present but tied to the WRONG net must FAIL (b). Without this row, a tool
+    # that ignored the carry-in port entirely would pass both controls above.
+    wrong = _f5_netlist([(f"n{k}", "i1") for k in range(32)])
+    rc, out = _run_f5(wrong)
+    check(rc == 1, f"F5 (b): bank on the WRONG net gave exit {rc}, expected 1")
+    check("NOT MET" in out, "F5 (b): wrong-net bank was not reported NOT MET")
+    # and the SAME netlist passes when told the carry-in really is i1
+    rc, _ = _run_f5(wrong, port="i1")
+    check(rc == 0, "F5 (b): argv[2] port override did not take effect")
+
+    # (c) must be refused IN THE OUTPUT even on a fully green run.
+    rc, out = _run_f5(pos)
+    check("NOT ANSWERED BY THIS TOOL" in out,
+          "F5 (c): a green run did not refuse (c) in its own output")
+
+    # Unreadable and non-netlist both exit 2, and never 0 or 1.
+    import subprocess as _sp2
+    _tool = str(Path(__file__).with_name("f5_port_test.py"))
+    rc = _sp2.run([sys.executable, _tool, "/nonexistent-f5.v"],
+                  capture_output=True, text=True).returncode
+    check(rc == 2, f"F5 UNREADABLE: missing file gave exit {rc}, expected 2")
+    rc = _sp2.run([sys.executable, _tool, __file__],
+                  capture_output=True, text=True).returncode
+    check(rc == 2, f"F5 WRONG-TYPE: a non-netlist gave exit {rc}, expected 2")
+
+    # INTEGRATION ROW — the real emitted cell, if it is on this machine.
+    # ⚠️ Its failure is a FINDING (the complement path landed, or the emit moved),
+    # never a broken test. Stated so a red here is read correctly.
+    _real = Path(__file__).resolve().parents[2] / "SaltWorks/Silicon/RTL/mac_cell.v"
+    if _real.is_file():
+        rc, out = _run_f5(_real.read_text())
+        check(rc in (0, 1), f"F5 INTEGRATION: real mac_cell.v gave exit {rc}")
+        if rc == 0:
+            print("  ⚠️ F5 INTEGRATION: the real mac_cell.v now PASSES (a)+(b) — "
+                  "the complement path has landed. This is a FINDING, not a failure; "
+                  "(c) is still owed to a hand.")
+
+# --------------------------------------------------------------------------
 
 if FAILURES:
     print(f"selftest: {len(FAILURES)} FAILURE(S) out of {CHECKS} checks\n")
