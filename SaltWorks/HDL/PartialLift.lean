@@ -425,6 +425,46 @@ theorem bnC_output_frames_partial (st : List Bool) (tr : List (List Bool)) (n L 
   bnC_output_frames_are_the_fold st tr frameLE
     (elemSortsAt_all_partial st tr n L hrst h0) w hw
 
+/-! ## THE KEY LEVEL — the form math's abstract layer consumes -/
+
+/-- The two-field key `(¬active, dest)` encoded as a single `Nat`. Sound because
+`cDestOf` is three bits for ANY stream (`cDestOf_lt_eight`, no hypotheses), so
+the 8-weighted activity bit dominates the destination exactly as the product
+order does. -/
+def natKey (f : List Bool) : Nat := (if f.getD 0 false then 0 else 8) + cDestOf f
+
+/-- The encoding, proved about ABSTRACT data — no frames, no `getD`, so no stuck
+decidable instances. The frame-level statement is then an instantiation. -/
+theorem key_bridge (ax ay : Bool) (dx dy : Nat) (hx : dx < 8) (hy : dy < 8) :
+    cKeyLE (!ax, dx) (!ay, dy)
+      = decide ((if ax then 0 else 8) + dx ≤ (if ay then 0 else 8) + dy) := by
+  cases ax <;> cases ay <;> simp [cKeyLE] <;> omega
+
+theorem frameLE_eq_natKey (x y : List Bool) :
+    frameLE x y = decide (natKey x ≤ natKey y) :=
+  key_bridge _ _ _ _ (cDestOf_lt_eight x) (cDestOf_lt_eight y)
+
+theorem frameLE_eq : frameLE = fun x y => decide (natKey x ≤ natKey y) := by
+  funext x y; exact frameLE_eq_natKey x y
+
+/-- ⭐⭐⭐ **THE KEY-LEVEL STATEMENT AT PARTIAL LOAD** — the form math's abstract
+layer consumes. The netlist's output key on wire `w` is the abstract `runNetN`
+fold of the input keys. -/
+theorem bnC_output_keys_partial (st : List Bool) (tr : List (List Bool)) (n L : Nat)
+    (hrst : tr.map (fun i => i.getD 0 false) = true :: List.replicate n false)
+    (h0 : PartialStageOK st tr L 0) (w : Nat) (hw : w < 8) :
+    natKey ((runTrace batcherNetC st tr).1.map (fun o => o.getD w false))
+      = runNetN bnComps (fun i => natKey (bnCFrameAt st tr 0 i)) w := by
+  refine bnC_output_keys_are_runNetN st tr natKey ?_ w hw
+  intro k hk
+  have h := elemSortsAt_all_partial st tr n L hrst h0 k hk
+  rw [frameLE_eq] at h
+  exact h
+
+#audit_axioms natKey
+#audit_axioms key_bridge
+#audit_axioms frameLE_eq_natKey
+#audit_axioms bnC_output_keys_partial
 #audit_axioms partialStageOK_succ
 #audit_axioms partialStageOK_all
 #audit_axioms elemSortsAt_all_partial
