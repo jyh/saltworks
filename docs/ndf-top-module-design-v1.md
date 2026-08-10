@@ -206,6 +206,27 @@ into the schedule budget (§D5) — a schedule fact, not a footnote.
 coverage/disjointness theorem for the whole die + one seam theorem
 per wire class (the landed shapes).
 
+**(h) FRAME↔PHASE SYNCHRONIZATION (the Captain's 19:5x question).**
+One clock domain + the sof-aligned frame counter IS the shared grid;
+the sequencer walks the SAME grid — there is no handshake anywhere
+in the machine. A WEIGHT packet's payload window (frame cycles 6-13)
+= the cell's 8 load cycles; the SHELL then extends the sign LOCALLY
+for 24 more load cycles (the sender sends 8 bits ONCE — one frame
+per weight, matching §4's bandwidth arithmetic; the extension is a
+1-bit hold mux, priced in the shell). A VALUE packet's payload
+window IS the 8 accumulation cycles, with `sign` asserted at frame
+cycle 13 (LSB-first payload ⇒ the MSB arrives last). The bias costs
+one weight-frame (b) + ONE sequencer-local x=1 cycle (a constant —
+no packet). ACTIVATE reads; EMIT drives four result frames. The
+schedule compiler emits the whole thing as a frame-by-frame
+TIMETABLE and the RP2040 plays its side offline — deterministic
+phases, §5c's zero-scheduler clause made literal. **THE WEIGHT
+LATCH NEEDS NO RESET, EVER: the full-width load is self-cleaning
+(all 32 bits rewritten every load — which is also the weight half's
+∀st₀ power-gating discharge). The acc CLEAR is the cell's ONLY
+reset, and it opens the NEXT neuron rather than riding ACTIVATE —
+ACTIVATE is read-only on the cell.**
+
 ## D5. THE SEQUENCER AND THE CPU — honest staging
 
 **One CENTRAL sequencer.** A single FSM walking CLEAR → BIAS →
