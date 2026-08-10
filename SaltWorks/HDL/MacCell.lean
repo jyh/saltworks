@@ -908,6 +908,46 @@ theorem cell_sum_bit (x ld cin : Bool) (w acc : BitVec 32) (k : Nat) (hk : k < 3
     (cellEnv x ld cin w acc) (mEnv x cin w acc) (cell_hin2 x ld cin w acc)
     (maSum k) (Or.inr hmem)
 
+/-! ## THE OTHER HALF OF THE STEP — the cell's next weight-register bits
+
+⛔ **`cell_sum_bit` was HALF A STEP and I handed it over as the step lemma.** `cellSeq`'s state is
+64 bits — `wsh ‖ acc` — and a `runTrace` induction needs BOTH halves each cycle. The accumulator
+half was proved; **the shift half had no value theorem at all**, and `cell_state_layout` names those
+nets *without* their values, which is easy to mistake for coverage.
+
+*Caught by reading my own artifact against the purpose someone else was briefed to use it for —
+the read-the-consumer rule that found the operand-B defect this morning, run on my own step lemma
+several hours too late but before the executor hit the gap.*
+
+⭐ **THE TOOL IS THE MIRROR OF THE ONE THAT GAVE THE ACCUMULATOR HALF:** `inst_compose_sem` for the
+SECOND instance, **`inst_compose_first` for the FIRST** — same shape, other side of the `++`. -/
+
+
+/-- The cell's next-`wsh` nets, lifted from wsCore's own next-state outputs. -/
+def ccWshNext (k : Nat) : Net :=
+  instMap wsCore ccWSig ccWOff ((wsCore.outs.drop 32).getD k 0)
+
+/-- ⭐ **THE OTHER HALF OF THE STEP: the cell's next weight-register bits ARE wsCore's, run
+standalone.** Via `inst_compose_first` — the mirror of the `inst_compose_sem` that gave the
+accumulator half. -/
+theorem cell_wsh_next (x ld cin : Bool) (w acc : BitVec 32) (k : Nat) (hk : k < 32) :
+    run (cellEnv x ld cin w acc) ccCore.gates (ccWshNext k)
+      = run (wEnv x ld w) wsCore.gates ((wsCore.outs.drop 32).getD k 0) := by
+  -- k = 0 is the LSB GATE (`wsLsb`); k ≥ 1 are INPUT nets (`wsW`), so the disjunction
+  -- genuinely needs both arms — and `decide` settles all 32 at once.
+  have hmem : ((wsCore.outs.drop 32).getD k 0) < wsCore.nIn
+      ∨ (wsCore.gates.map Gate.out).contains ((wsCore.outs.drop 32).getD k 0) = true := by
+    revert hk; revert k; decide +kernel
+  have hnext : ccMOff = instNext wsCore ccWOff := by
+    simp only [ccMOff, ccWOff, instNext]; decide +kernel
+  have hgates : ccCore.gates
+      = instGates wsCore ccWSig ccWOff ++ instGates macCore ccMSig (instNext wsCore ccWOff) := by
+    rw [← hnext]; rfl
+  rw [hgates, ccWshNext]
+  exact inst_compose_first wsCore macCore ccWSig ccMSig ccWOff cc_wsCore_instOK macCore_ssa
+    (cellEnv x ld cin w acc) (wEnv x ld w) (cell_hin_w x ld cin w acc)
+    ((wsCore.outs.drop 32).getD k 0) hmem
+
 /-! ### The axiom audit — one declaration per call
 
 *Added WITH the cell, not after it. `CorePlace` ran fourteen placements with `EXIT=0` and zero
@@ -956,6 +996,7 @@ everything after a failure reads as clean. -/
 #audit_axioms cell_hin_w
 #audit_axioms cell_hin2
 #audit_axioms cell_sum_bit
+#audit_axioms cell_wsh_next
 #audit_axioms ccCore_ssa
 #audit_axioms ccCore_wf
 #audit_axioms cellSeq_wf
