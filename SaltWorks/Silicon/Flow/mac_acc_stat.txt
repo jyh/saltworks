@@ -1,0 +1,22 @@
+
+8. Printing statistics.
+
+=== mac_acc ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+      254        - wires
+      254        - wire bits
+      254        - public wires
+      254        - public wire bits
+      129        - ports
+      129        - port bits
+      157 1.14E+03 cells
+       62  387.872   sky130_fd_sc_hd__and2_1
+       31  193.936   sky130_fd_sc_hd__or2_1
+       64  560.538   sky130_fd_sc_hd__xor2_1
+
+   Chip area for module '\mac_acc': 1142.345600
+     of which used for sequential elements: 0.000000 (0.00%)
+
