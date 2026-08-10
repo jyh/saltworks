@@ -1,4 +1,5 @@
 import SaltWorks.HDL.SeamElement
+import SaltWorks.HDL.SeamJoinA
 
 /-!
 # THE PARTIAL-LOAD LIFT — the keystone
