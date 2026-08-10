@@ -102,9 +102,99 @@ theorem ceC_header_routes_partial (a0 a1 : Bool) (d0 d1 : Nat)
   rw [hact, hidle] at hB
   simpa using hB
 
+/-! ## The mirrors
+
+Everything from here is the full-load chain with `true` replaced by `a0`/`a1`
+and the final `cKeyLE_full_load` rewrite *omitted* — that rewrite is the only
+place `cDestOf` ever entered. Each went through first try, which is the evidence
+for calling the rest of the lift bookkeeping rather than content. -/
+
+/-- The whole frame at partial load — the mirror of `ceC_pair_full_load`.
+**Payload generality is free**: `cFrame_split` peels the header, the header
+decides, and `ceC_body_mux` makes the rest a static 2-permutation. -/
+theorem ceC_pair_partial (a0 a1 : Bool) (d0 d1 : Nat) (h0 : d0 < 8) (h1 : d1 < 8)
+    (hact : (a0 && a1 && (d0 == d1)) = false) (hidle : (!a0 && !a1) = false)
+    (p0 p1 : List Bool) :
+    (runTrace ceC [false, false, false, false]
+        (ceFrameTrace (cFrame a0 d0 p0) (cFrame a1 d1 p1))).1
+      = ceIL (if cKeyLE (cKey a0 d0) (cKey a1 d1) then cFrame a0 d0 p0
+              else cFrame a1 d1 p1)
+             (if cKeyLE (cKey a0 d0) (cKey a1 d1) then cFrame a1 d1 p1
+              else cFrame a0 d0 p0) := by
+  rw [cFrame_split a0 d0 p0, cFrame_split a1 d1 p1,
+      ceFrameTrace_append _ _ _ _ (ceHdr_ne_nil a0 d0)
+        (by rw [ceHdr_length, ceHdr_length]),
+      runTrace_append, ceC_header_routes_partial a0 a1 d0 d1 h0 h1 hact hidle]
+  simp only [ceC_body_mux]
+  cases hsw : cKeyLE (cKey a0 d0) (cKey a1 d1) with
+  | false => exact ceIL_append _ _ _ _ rfl
+  | true => exact ceIL_append _ _ _ _ rfl
+
+theorem ceC_pair_partial_out0 (a0 a1 : Bool) (d0 d1 : Nat) (h0 : d0 < 8) (h1 : d1 < 8)
+    (hact : (a0 && a1 && (d0 == d1)) = false) (hidle : (!a0 && !a1) = false)
+    (p0 p1 : List Bool) (hp : p0.length = p1.length) :
+    (runTrace ceC [false, false, false, false]
+        (ceFrameTrace (cFrame a0 d0 p0) (cFrame a1 d1 p1))).1.map
+        (fun o => o.getD 0 false)
+      = if cKeyLE (cKey a0 d0) (cKey a1 d1) then cFrame a0 d0 p0
+        else cFrame a1 d1 p1 := by
+  rw [ceC_pair_partial a0 a1 d0 d1 h0 h1 hact hidle]
+  refine ceIL_map_fst _ _ ?_
+  cases cKeyLE (cKey a0 d0) (cKey a1 d1) <;> simp [cFrame_length, hp]
+
+theorem ceC_pair_partial_out1 (a0 a1 : Bool) (d0 d1 : Nat) (h0 : d0 < 8) (h1 : d1 < 8)
+    (hact : (a0 && a1 && (d0 == d1)) = false) (hidle : (!a0 && !a1) = false)
+    (p0 p1 : List Bool) (hp : p0.length = p1.length) :
+    (runTrace ceC [false, false, false, false]
+        (ceFrameTrace (cFrame a0 d0 p0) (cFrame a1 d1 p1))).1.map
+        (fun o => o.getD 1 false)
+      = if cKeyLE (cKey a0 d0) (cKey a1 d1) then cFrame a1 d1 p1
+        else cFrame a0 d0 p0 := by
+  rw [ceC_pair_partial a0 a1 d0 d1 h0 h1 hact hidle]
+  refine ceIL_map_snd _ _ ?_
+  cases cKeyLE (cKey a0 d0) (cKey a1 d1) <;> simp [cFrame_length, hp]
+
+/-- ⭐ **THE PORT FORM, FROM ANY INITIAL ELEMENT STATE** — the frame's own reset
+cycle erases the state, so an interior comparator inherits nothing from the
+previous frame. This is the shape `ElemSortsAt` consumes. -/
+theorem ceCPort_partial_out0 (s : List Bool) (n : Nat) (a0 a1 : Bool) (d0 d1 : Nat)
+    (h0 : d0 < 8) (h1 : d1 < 8)
+    (hact : (a0 && a1 && (d0 == d1)) = false) (hidle : (!a0 && !a1) = false)
+    (p0 p1 : List Bool) (hp : p0.length = p1.length)
+    (hlen : (cFrame a0 d0 p0).length = n + 1) :
+    ceCPort s (true :: List.replicate n false) (cFrame a0 d0 p0) (cFrame a1 d1 p1) 0
+      = if cKeyLE (cKey a0 d0) (cKey a1 d1) then cFrame a0 d0 p0
+        else cFrame a1 d1 p1 := by
+  have hlen1 : (cFrame a1 d1 p1).length = n + 1 := by
+    rw [cFrame_length] at hlen ⊢; omega
+  rw [ceCPort, zip3Trace_rst_once n _ _ hlen hlen1,
+      runTrace_ceC_frame_any_state s _ _ (cFrame_ne_nil a0 d0 p0)
+        (cFrame_ne_nil a1 d1 p1)]
+  exact ceC_pair_partial_out0 a0 a1 d0 d1 h0 h1 hact hidle p0 p1 hp
+
+theorem ceCPort_partial_out1 (s : List Bool) (n : Nat) (a0 a1 : Bool) (d0 d1 : Nat)
+    (h0 : d0 < 8) (h1 : d1 < 8)
+    (hact : (a0 && a1 && (d0 == d1)) = false) (hidle : (!a0 && !a1) = false)
+    (p0 p1 : List Bool) (hp : p0.length = p1.length)
+    (hlen : (cFrame a0 d0 p0).length = n + 1) :
+    ceCPort s (true :: List.replicate n false) (cFrame a0 d0 p0) (cFrame a1 d1 p1) 1
+      = if cKeyLE (cKey a0 d0) (cKey a1 d1) then cFrame a1 d1 p1
+        else cFrame a0 d0 p0 := by
+  have hlen1 : (cFrame a1 d1 p1).length = n + 1 := by
+    rw [cFrame_length] at hlen ⊢; omega
+  rw [ceCPort, zip3Trace_rst_once n _ _ hlen hlen1,
+      runTrace_ceC_frame_any_state s _ _ (cFrame_ne_nil a0 d0 p0)
+        (cFrame_ne_nil a1 d1 p1)]
+  exact ceC_pair_partial_out1 a0 a1 d0 d1 h0 h1 hact hidle p0 p1 hp
+
 #audit_axioms ceC_hdrOKP
 #audit_axioms idle_idle_never_decides
 #audit_axioms idle_headers_are_identical
 #audit_axioms ceC_header_routes_partial
+#audit_axioms ceC_pair_partial
+#audit_axioms ceC_pair_partial_out0
+#audit_axioms ceC_pair_partial_out1
+#audit_axioms ceCPort_partial_out0
+#audit_axioms ceCPort_partial_out1
 
 end SaltWorks.HDL.PartialLift
