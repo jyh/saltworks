@@ -951,7 +951,19 @@ OPEN ITEMS:
   many form); silicon shells/composes/measures the 1x2 projection
   AT the composed object (its own struck-twice rule honored);
   math refutes the alignment arithmetic. The update window is the
-  deadline; today's submission unaffected.**
+  deadline; today's submission unaffected.SHARPENED 11:0x AT THE
+  CAPTAIN'S OBJECTION ("I don't even see how a combinational
+  Batcher would work because the packet is arbitrarily long"):
+  option (a) was never merely expensive — it is INCOHERENT at the
+  architecture level, a bounded-frame special case; with ∀-P
+  payloads (and 1990's 424-bit ATM cells behind 8-bit headers) the
+  sort decision MUST be made on the bounded header prefix while
+  the unbounded payload streams — first-difference-then-hold. The
+  certified object already embodies this: bnC_payload_delivered
+  holds for ARBITRARY-length payloads precisely because the
+  element decides on the header and goes transparent (B4's own
+  bonus finding: the sorter leg is already ∀-P). (b) is not a
+  preference; it is the only shape the architecture admits.**
 - **THE TILE PLAN IS CONFIRMED (8/10 10:4x, the Captain, verbatim
   "Ok, that's our plan, a 1x2 and a 6x2"): the standalone switch on
   a NEW 1x2 (submitted today with banyan content; the full
