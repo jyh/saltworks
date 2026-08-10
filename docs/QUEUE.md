@@ -938,6 +938,18 @@ OPEN ITEMS:
   TONIGHT is the named target; the fabbed-is-verified law governs
   the SUBMISSION, not the first measurement run — V1-V3/V9/V10
   land behind the layout, before any tapeout word.**
+- **THE ④ WALK, FIRST RATIFICATIONS (8/10 09:2x, the Captain at
+  council, verbatim "Both asks ratified"): ① THE STAGE-COUNT
+  PREMISE stands ratified — identifying the paper's address-length
+  restoration index with the routing-stage count k is the block's
+  OWNED premise (Rotation.lean:76-77's honesty note becomes doctrine).
+  ② THE FRAMEWORK-LAW PROMOTION stands ratified —
+  zero_offset_rotation_is_impossible is LAW, with
+  schedule_11_does_not_heal as its mutant witness. Same sitting:
+  the second 1990 claim walked — distinct-addresses-nonblocking =
+  composed_switch_of_bnC_driven's three conjuncts (landed 8/7);
+  its full partial-load generality = the convention-C seam = R1's
+  v1.1 node (one seam, already owned).**
 - **THE CAPTAIN'S MORNING RULINGS (8/10 07:3x-07:4x, three words
   total): ① h ≤ 127 CONFIRMED (executed c2b16bc — the range
   obligation names the SIGNED int8 bound, never byte width; math's
