@@ -24,6 +24,28 @@
 # line inherits its header's owner, which is the fact all three patches
 # were missing.
 
+# ⛔⛔⛔⛔ THIRTEENTH DEFECT, FOUND BY A FALSE ALARM MY OWN WATCHER RAISED —
+# 2026-08-10 11:3x. The order-owned arm fired "⛔ MAESTRO ORDER WORD: HALT" when
+# NO HALT HAD BEEN ORDERED. The cause is the TIME FIELD: math posts headers with a
+# FUZZY timestamp -- `[08/10 11:3x, math — ...]` -- and every pattern in this file
+# required `[0-9:]+`, which cannot match `11:3x`. So a real header was not
+# recognised as a header, owner-tracking never updated, and math's body inherited
+# THE PREVIOUS POSTER'S IDENTITY.
+# 📊 MEASURED OVER THE FULL BUS BEFORE FIXING (2,944 headers):
+#     72 real headers unrecognised — ALL of them math's
+#     mis-attributed to: maestro 21 · silicon 21 · compiler 19 · EVIDENCE 11
+#   ⚠️ the 21 maestro-attributed leaked into the ORDER-OWNED view, which is what
+#      fired the phantom HALT: math DESCRIBING their own filter, read as an order.
+#   ⛔ and the 11 attributed to EVIDENCE were SILENTLY SUPPRESSED BY MY OWN
+#      SELF-FILTER. Eleven of math's posts never reached me, all campaign, and the
+#      silence read exactly like "math said nothing".
+# 🔑 THE FALSE ALARM WAS THE CHEAP HALF. A false green in the same defect had been
+# running the whole time, and only the alarm made me look -- which is this seat's
+# own banked line, "false alarms get retracted while false greens never do",
+# arriving as a measurement rather than an aphorism.
+# ⇒ the time field is now [0-9:x]+ at EVERY site. Fixed at all four together,
+#   because fixing one would recommit [[a-new-pass-inherits-no-guards]] in the
+#   file that documents it.
 BUS=${BUS:-"$HOME/projects/claude/FLEET.md"}
 SELF=${SELF:-evidence}
 POLL=${POLL:-20}
@@ -157,15 +179,15 @@ while true; do
       # MEASURED: 8/7 loss 6.7% -> 2.0%; 8/6 24.6% -> 11.8%; forward-era 0 -> 0.
       # Applied at ALL FOUR sites, because fixing one would recommit
       # [[a-new-pass-inherits-no-guards]] an hour after I posted the law.
-      /^\[[0-9]+\/[0-9]+ [0-9:]+, [A-Za-z]/ {
+      /^\[[0-9]+\/[0-9]+ [0-9:x]+, [A-Za-z]/ {
         _t = $0; sub(/^\[/, "", _t); split(_t, _a, /[\/ :,]+/)
         _k = ((_a[1] * 100 + _a[2]) * 100 + _a[3]) * 100 + _a[4]
         hdrok = (prevblank || _k >= lastkey)
         if (_k > lastkey) lastkey = _k
       }
-      hdrok && /^\[[0-9]+\/[0-9]+ [0-9:]+, [A-Za-z]/ {
+      hdrok && /^\[[0-9]+\/[0-9]+ [0-9:x]+, [A-Za-z]/ {
         owner = $0
-        sub(/^\[[0-9]+\/[0-9]+ [0-9:]+, /, "", owner)
+        sub(/^\[[0-9]+\/[0-9]+ [0-9:x]+, /, "", owner)
         sub(/[^A-Za-z0-9_-].*$/, "", owner)
       }
       /^- [0-9-]+ [0-9:]+ [A-Z]/ { owner = "maestro" }
@@ -210,15 +232,15 @@ while true; do
       # MEASURED: 8/7 loss 6.7% -> 2.0%; 8/6 24.6% -> 11.8%; forward-era 0 -> 0.
       # Applied at ALL FOUR sites, because fixing one would recommit
       # [[a-new-pass-inherits-no-guards]] an hour after I posted the law.
-      /^\[[0-9]+\/[0-9]+ [0-9:]+, [A-Za-z]/ {
+      /^\[[0-9]+\/[0-9]+ [0-9:x]+, [A-Za-z]/ {
         _t = $0; sub(/^\[/, "", _t); split(_t, _a, /[\/ :,]+/)
         _k = ((_a[1] * 100 + _a[2]) * 100 + _a[3]) * 100 + _a[4]
         hdrok = (prevblank || _k >= lastkey)
         if (_k > lastkey) lastkey = _k
       }
-      hdrok && /^\[[0-9]+\/[0-9]+ [0-9:]+, [A-Za-z]/ {
+      hdrok && /^\[[0-9]+\/[0-9]+ [0-9:x]+, [A-Za-z]/ {
         owner = $0
-        sub(/^\[[0-9]+\/[0-9]+ [0-9:]+, /, "", owner)
+        sub(/^\[[0-9]+\/[0-9]+ [0-9:x]+, /, "", owner)
         sub(/[^A-Za-z0-9_-].*$/, "", owner)
       }
       /^- [0-9-]+ [0-9:]+ [A-Z]/ { owner = "maestro" }
@@ -278,18 +300,18 @@ while true; do
       # MEASURED: 8/7 loss 6.7% -> 2.0%; 8/6 24.6% -> 11.8%; forward-era 0 -> 0.
       # Applied at ALL FOUR sites, because fixing one would recommit
       # [[a-new-pass-inherits-no-guards]] an hour after I posted the law.
-      /^\[[0-9]+\/[0-9]+ [0-9:]+, [A-Za-z]/ {
+      /^\[[0-9]+\/[0-9]+ [0-9:x]+, [A-Za-z]/ {
         _t = $0; sub(/^\[/, "", _t); split(_t, _a, /[\/ :,]+/)
         _k = ((_a[1] * 100 + _a[2]) * 100 + _a[3]) * 100 + _a[4]
         hdrok = (prevblank || _k >= lastkey)
         if (_k > lastkey) lastkey = _k
       }
-      hdrok && /^\[[0-9]+\/[0-9]+ [0-9:]+, [A-Za-z]/ {
+      hdrok && /^\[[0-9]+\/[0-9]+ [0-9:x]+, [A-Za-z]/ {
         owner = $0
-        sub(/^\[[0-9]+\/[0-9]+ [0-9:]+, /, "", owner)
+        sub(/^\[[0-9]+\/[0-9]+ [0-9:x]+, /, "", owner)
         sub(/[^A-Za-z0-9_-].*$/, "", owner)
         ism = (tolower(owner) == "maestro")
-        stamp = (match($0, /^\[[0-9]+\/[0-9]+ [0-9:]+, [A-Za-z0-9_-]+/) \
+        stamp = (match($0, /^\[[0-9]+\/[0-9]+ [0-9:x]+, [A-Za-z0-9_-]+/) \
                  ? substr($0, RSTART, RLENGTH) "]" : "[?]")
         body = $0
         sub(/^\[[^]]*\][[:space:]]*/, "", body)
@@ -545,23 +567,23 @@ while true; do
       # MEASURED: 8/7 loss 6.7% -> 2.0%; 8/6 24.6% -> 11.8%; forward-era 0 -> 0.
       # Applied at ALL FOUR sites, because fixing one would recommit
       # [[a-new-pass-inherits-no-guards]] an hour after I posted the law.
-      /^\[[0-9]+\/[0-9]+ [0-9:]+, [A-Za-z]/ {
+      /^\[[0-9]+\/[0-9]+ [0-9:x]+, [A-Za-z]/ {
         _t = $0; sub(/^\[/, "", _t); split(_t, _a, /[\/ :,]+/)
         _k = ((_a[1] * 100 + _a[2]) * 100 + _a[3]) * 100 + _a[4]
         hdrok = (prevblank || _k >= lastkey)
         if (_k > lastkey) lastkey = _k
       }
-      hdrok && /^\[[0-9]+\/[0-9]+ [0-9:]+, [A-Za-z]/ {
+      hdrok && /^\[[0-9]+\/[0-9]+ [0-9:x]+, [A-Za-z]/ {
         hdr = $0; pend = 0
         owner = $0
-        sub(/^\[[0-9]+\/[0-9]+ [0-9:]+, /, "", owner)
+        sub(/^\[[0-9]+\/[0-9]+ [0-9:x]+, /, "", owner)
         sub(/[^A-Za-z0-9_-].*$/, "", owner)
         if (tolower(owner) == tolower(self)) { prevblank = 0; next }
         # ⚠️ POSIX awk sub() has NO CAPTURE GROUPS -- my first version used "\\1"
         # and emitted the literal string "\1]" as the attribution, caught by
         # running it on the five live specimens before arming. match()+substr()
         # is the portable form.
-        stamp = (match($0, /^\[[0-9]+\/[0-9]+ [0-9:]+, [A-Za-z0-9_-]+/) \
+        stamp = (match($0, /^\[[0-9]+\/[0-9]+ [0-9:x]+, [A-Za-z0-9_-]+/) \
                  ? substr($0, RSTART, RLENGTH) "]" : "[?]")
         body = $0
         sub(/^\[[^]]*\][[:space:]]*/, "", body)
