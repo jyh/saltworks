@@ -85,7 +85,9 @@ turns h≤127 into a theorem — ruled TOGETHER with the adjoint convention.
 allocation. (g) Block ①'s Row A amended form (the `emit_runs` shape).
 
 **PRE-COUNCIL SEAT SIGN-OFFS (12:1x):** compiler checked block ①'s ladder
-against the corpus and DECLINES TO REPRICE (honest as scoped) — and ran an
+against the corpus and DECLINES TO REPRICE (honest as scoped; its 12:11
+read, RE-CHECKED 14:13 against block ①'s `2a4af2d` — ladder section
+byte-identical, verdict re-pinned by its own hand) — and ran an
 L2 PROBE before the ruling: the ∃-fuel form COMPOSES over `whileT`,
 carried by the already-landed `runFor_add`. SCOPE, per compiler's own
 13:43 narrowing (the maestro's earlier "de-risks (g)" was too wide): the
