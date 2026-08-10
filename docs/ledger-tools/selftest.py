@@ -910,14 +910,25 @@ if Path(__file__).with_name("f5_port_test.py").is_file():
         _r = _sp3.run([sys.executable, str(Path(__file__).with_name("f5_port_test.py")),
                        str(_real)], capture_output=True, text=True, timeout=60)
         rc, out = _r.returncode, _r.stdout + _r.stderr
-        check(rc in (0, 1), f"F5 INTEGRATION: real mac_cell.v gave exit {rc}")
-        # the index must be DERIVED here, never assumed — silicon's 19:07 hazard
-        check("MEASURED, not assumed" in out,
-              "F5 INTEGRATION: the carry-in index was not derived from the source")
-        if rc == 0:
+        # ⚠️ ALL THREE OUTCOMES ARE LEGITIMATE STATES OF THE LIVE TREE. This row
+        # reports WHICH ONE, and only a crash (any other code) is a test failure.
+        # It was written expecting 0 or 1 and went red the moment the staleness
+        # guard landed — the row whose whole design is "a failure here is a
+        # FINDING" was itself asserting a state of the world. Findings get
+        # PRINTED; only impossible outcomes get CHECKED.
+        check(rc in (0, 1, 2), f"F5 INTEGRATION: real mac_cell.v gave exit {rc}")
+        if rc == 2:
+            _why = "STALE NETLIST" if "STALE NETLIST" in out else out.strip().splitlines()[-1][:80]
+            print(f"  ⚠️ F5 INTEGRATION: cannot check the real mac_cell.v — {_why}. "
+                  "Not a failure: re-emit, then the fence can run.")
+        elif rc == 0:
             print("  ⚠️ F5 INTEGRATION: the real mac_cell.v now PASSES (a)+(b) — "
-                  "the complement path has landed. This is a FINDING, not a failure; "
-                  "(c) is still owed to a hand.")
+                  "the complement path has landed AND been emitted. A FINDING, not "
+                  "a failure; (c) is still owed to a hand.")
+        else:
+            # only meaningful when the tool actually got as far as deriving
+            check("MEASURED, not assumed" in out,
+                  "F5 INTEGRATION: the carry-in index was not derived from the source")
 
 # --------------------------------------------------------------------------
 

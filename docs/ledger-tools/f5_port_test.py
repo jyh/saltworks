@@ -196,6 +196,42 @@ def main() -> None:
             "Pass it as argv[2] once you have READ it from the landed source. "
             "This tool no longer defaults to i2 — a positional guess is worse "
             "than a refusal, because it comes with a confident verdict attached.")
+    # ⛔⛔⛔ STALENESS GUARD — ADDED 2026-08-09 19:1x, ON A LIVE FALSE FAIL THAT
+    # THIS TOOL PRODUCED AND I ALMOST PUBLISHED.
+    #
+    # `7364548` is titled "THE COMPLEMENT PATH LANDS — the composed cell can
+    # subtract" and it changed `MacCell.lean` by 344 lines and touched ZERO `.v`
+    # files. The emitted `mac_cell.v` on the tree is still the 16:02 snapshot, so
+    # this tool read a netlist that PREDATES the source it was checking, found no
+    # XOR bank, and returned EXIT=1 NOT MET with full confidence.
+    #
+    # ⚠️ THAT VERDICT WOULD HAVE BEEN A FALSE FAIL AGAINST CORRECT WORK. The
+    # complement path may be entirely right in the kernel; nobody has RE-EMITTED
+    # yet. "The artifact does not have it" and "the artifact has not been
+    # regenerated" are different facts and only one of them is a fence finding.
+    #
+    # 🔑 AND THE PORT-COUNT CROSS-CHECK DOES NOT CATCH IT: if the complement path
+    # reuses `ccCin` as the XOR sign (the one's-complement identity), `ccIn` stays
+    # 67 and the stale netlist still agrees on width. The guard I already had
+    # passes precisely in the case that matters.
+    # ⇒ Staleness is its own question, so it gets its own guard and its own exit 2.
+    if derived is not None:
+        try:
+            src_epoch = int(subprocess.run(
+                ["git", "log", "-1", "--format=%ct", "--", "SaltWorks/HDL/MacCell.lean"],
+                capture_output=True, text=True, cwd=path.resolve().parents[3], timeout=20,
+            ).stdout.strip() or 0)
+        except (OSError, subprocess.SubprocessError, ValueError, IndexError):
+            src_epoch = 0
+        if src_epoch and path.stat().st_mtime < src_epoch:
+            die(f"STALE NETLIST: {path.name} mtime {int(path.stat().st_mtime)} PREDATES "
+                f"the last commit to MacCell.lean ({src_epoch}). The netlist was emitted "
+                "from an OLDER source, so a missing XOR bank here says nothing about the "
+                "landed design. RE-EMIT before running the fence:\n"
+                "         sh docs/ledger-tools/emit_cell.sh cell > "
+                "SaltWorks/Silicon/RTL/mac_cell.v\n"
+                "         (silicon owns that file; this tool does not write it)")
+
     if derived is not None:
         cc_cin, cc_in = derived
         if n_inputs != cc_in:
