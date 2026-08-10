@@ -86,7 +86,7 @@ CONSTRUCTION — invisible to every theorem over the `Seq`, and therefore a SHEL
 | | subject | status |
 |---|---|---|
 | V7 | `emitSeq` acceptance: flops==nState · cells==gates+nState · conb==const-count · assigns==outs | **MET** on the emitted artifacts (L1 64/289/0/96 · L2 64/386/0/96 · SER 32/99/0/33) ⚠️ these are COUNTS; the property half (every flop `D` driven exactly once, `Q` nets distinct) is the complement and both are run by `netlist_check.sh` |
-| V9 | the shell's kernel model | **HALF LANDED** (`28accfa`): shape proved (452 gates · 0 const · `instOK` · the clear reaches EXACTLY the acc bank) and the LOGIC proved at the Boolean level (select · holds · clear dominates · transparent when driven). ⛔ **The RUN-LEVEL refinement is OWED**, with its obstacle named in-file: the corpus lacks the non-flat generalisation of `run_of_flat_gates` |
+| V9 | the shell's kernel model | **HALF LANDED** (`28accfa`): shape proved (452 gates · 0 const · `instOK` · the clear reaches EXACTLY the acc bank) and the LOGIC proved at the Boolean level (select · holds · clear dominates · transparent when driven). ⛔ **The RUN-LEVEL refinement is OWED — and MECHANICAL.** ⚠️ *This row previously named a missing non-flat generalisation of `run_of_flat_gates` as the obstacle. **THAT OBSTACLE CLAIM WAS FALSE, and I struck it on the bus at 10:4x without amending here for three hours** — `run_snoc` and `run_snoc_frame` landed in `Compose.lean` (`81cd8f4`) and the peel needs no new theory.* Scope re-tested 12:43 and UNCHANGED: ~200 peels, because `shGates` is BIT-MAJOR (`[hWa j, hWb j, hWd j]` per bit) so no flat-layer shortcut exists without reordering `shCore` and breaking its landed shape theorems |
 | V10 | per-round `decide +kernel` schedule fixtures | ⛔ **OWED**, not started |
 | F3 | chip-level "down to silicon" | **STANDS** — clears only at the run on THIS top module |
 | F5 | the composed cell's signed claim | (a)(b)(d) **MET** on the emitted netlist · (c) discharged at math's hand · **STILL BINDS** — and the reason is §3, not a defect |
@@ -99,5 +99,5 @@ CONSTRUCTION — invisible to every theorem over the `Seq`, and therefore a SHEL
   structural emission buys is that the netlist coming BACK should correspond one-to-one.
 - **Not** a tile-fit signoff. Silicon's clause governs: good for area/timing/DRC/LVS/antenna;
   the die matches 6x2 because it was set there.
-- **Not** a complete cell. `batcher_c` is emitted and committed (624 cells) and **UNWIRED**; the
+- **Not** a complete cell. `batcher_c` is emitted and committed and **UNWIRED**. ⚠️ *And it is the CORE, not the design: 624 cells with ZERO flops, 105 in = 9 design + 96 state, 104 out = 8 data + 96 next-state. The clocked object is `emitSeq batcherNetC` — 720 cells, 96 flops (`8be6d48`); quoting 624 as "the sorter" understates it by the whole state file.* the
   SER has no shift-enable, so the edge emission is ONE int8 frame per result, not 32 bits.
