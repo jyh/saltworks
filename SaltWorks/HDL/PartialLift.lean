@@ -433,16 +433,27 @@ the 8-weighted activity bit dominates the destination exactly as the product
 order does. -/
 def natKey (f : List Bool) : Nat := (if f.getD 0 false then 0 else 8) + cDestOf f
 
-/-- The encoding, proved about ABSTRACT data — no frames, no `getD`, so no stuck
-decidable instances. The frame-level statement is then an instantiation. -/
-theorem key_bridge (ax ay : Bool) (dx dy : Nat) (hx : dx < 8) (hy : dy < 8) :
+/-- ⭐ **THE `cKey` ORDER *IS* THE `natKey` ORDER** — the two-field lexicographic
+key and the single-`Nat` key are the same object at two radixes, `cKey`'s
+activity field being the high bit of a base-8 numeral. *(Math's framing, 11:54,
+better than the one this proof was written under.)*
+
+📌 **THIS DISCHARGES THE SORT-THEN-ROUTE SEAM'S ORDER-PRESERVATION OBLIGATION.**
+It was first landed as unadvertised scaffolding under the name `key_bridge`,
+which named neither of its nouns — so a peer searching for "cKey order ≡ natKey
+order" could not find it, and listed it as owed while its name sat in their own
+terminal output. Renamed so the search that needs it will hit it.
+
+Proved about ABSTRACT data — no frames, no `getD`, hence no stuck decidable
+instances; the frame-level statement is an instantiation. -/
+theorem cKey_order_is_natKey_order (ax ay : Bool) (dx dy : Nat) (hx : dx < 8) (hy : dy < 8) :
     cKeyLE (!ax, dx) (!ay, dy)
       = decide ((if ax then 0 else 8) + dx ≤ (if ay then 0 else 8) + dy) := by
   cases ax <;> cases ay <;> simp [cKeyLE] <;> omega
 
 theorem frameLE_eq_natKey (x y : List Bool) :
     frameLE x y = decide (natKey x ≤ natKey y) :=
-  key_bridge _ _ _ _ (cDestOf_lt_eight x) (cDestOf_lt_eight y)
+  cKey_order_is_natKey_order _ _ _ _ (cDestOf_lt_eight x) (cDestOf_lt_eight y)
 
 theorem frameLE_eq : frameLE = fun x y => decide (natKey x ≤ natKey y) := by
   funext x y; exact frameLE_eq_natKey x y
@@ -462,7 +473,7 @@ theorem bnC_output_keys_partial (st : List Bool) (tr : List (List Bool)) (n L : 
   exact h
 
 #audit_axioms natKey
-#audit_axioms key_bridge
+#audit_axioms cKey_order_is_natKey_order
 #audit_axioms frameLE_eq_natKey
 #audit_axioms bnC_output_keys_partial
 #audit_axioms partialStageOK_succ
