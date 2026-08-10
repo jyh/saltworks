@@ -1057,6 +1057,33 @@ OPEN ITEMS:
   composed_switch_of_bnC_driven's three conjuncts (landed 8/7);
   its full partial-load generality = the convention-C seam = R1's
   v1.1 node (one seam, already owned).**
+- **⭐⭐⭐ THE SOFTWARE TURN + AIM-HIGH DOCTRINE (8/10 11:1x, the
+  Captain, strategic steer, his words): the hardware story is
+  POWERFUL AND SUFFICIENT ("switch + RISC-V + NDF (this one <24h)
+  all verified, 2 going to fab — this is very convincing") —
+  ATTENTION TURNS TO THE SOFTWARE SIDE, four pillars: verified
+  compiler (tiny-Rust→RISC-V) · verified executive · verified
+  application · verified math (salt). SEQUENCE: FIRST finish
+  minimal-executive + batcher-sort ("easy and completes the
+  story") — both already in flight. THEN HIGHER-RISK MODE for the
+  remaining 9 sprint days, his three named pushes: (1) a LARGER
+  LANGUAGE and more realistic compiler than tiny-Rust · (2) a
+  MINI-OS instead of the executive · (3) a SIGNIFICANT
+  APPLICATION. THE DOCTRINE, verbatim and standing: "We need to
+  aim high, beyond what we think is possible, because 1) we
+  already have a lot! and 2) we keep aiming too low." Fable-tier
+  scoping blocks for the trio: maestro drafts for the afternoon
+  council.**
+- **THE AFTERNOON COUNCIL (8/10, time at the Captain's word;
+  agenda registered): ① SALT NEXT STEPS — submit to Pi (the
+  ratified venue; flagship skeleton exists at papers/flagship/) ·
+  *continue* the arXiv endorsement effort (reopened from
+  his-lane-only to an active item at his word) · CLEARANCE STATUS
+  BANKED: salt RE-APPROVED ✓ · jas APPROVED ✓ · SaltBench NOT
+  YET (pending). ② LTI MEETING PREP (WEDNESDAY 8/12) — the
+  narrative REDONE now that the scheduled meeting changed the frame;
+  draft at council. ③ the higher-risk trio scoping blocks. ④ the
+  fab logistics tail (clicks/boards) as it stands by then.**
 - **THE CAPTAIN'S MORNING RULINGS (8/10 07:3x-07:4x, three words
   total): ① h ≤ 127 CONFIRMED (executed c2b16bc — the range
   obligation names the SIGNED int8 bound, never byte width; math's
