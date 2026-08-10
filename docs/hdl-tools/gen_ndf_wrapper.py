@@ -5,6 +5,16 @@
 
 PRINTS, NEVER WRITES — the .v lives in silicon's slot.
 
+⚠️ PROVENANCE, because the composed top module is the one file that becomes the DIE:
+this generator is PURE PYTHON — no Lean, no fleet lock, no PDK — so the .v is
+REPRODUCIBLE ON DEMAND from tracked bytes. Evidence verified that at 01:40 by
+regenerating and diffing byte-identically, which also proves NO HAND-EDIT: the
+file on disk is exactly what this script emits and nobody touched it after.
+⇒ If the emitted .v is NOT committed, that is a deliberate generated-on-demand
+  posture and this line is the record of it. Regenerate with the command above
+  before any flow run rather than trusting a file that a `git clean -fd` can
+  remove. (The ORGANS it instantiates are tracked separately by silicon.)
+
 WHY A GENERATOR AND NOT A HAND-EDIT: emitSeq emits SCALAR ports (o0..o31), so the
 composition needs 4 cells x 32 + 3 SERs x 32 = 224 scalar connections. Hand-wiring
 those is the defect class this fleet has paid for twice (instOK certified the wrong
@@ -106,6 +116,7 @@ module tt_um_saltworks_ndf (
     .din(fab_in), .dout(fab_out), .cnt_o(cnt_o), .valid(valid)
   );
   assign fab_in[4] = edge_in_dat;
+  assign fab_in[5] = 1'b0;   // edge-out is a DESTINATION: nothing sends into it
   assign fab_in[6] = 1'b0;
   assign fab_in[7] = 1'b0;
   assign edge_out_dat = fab_out[5];
