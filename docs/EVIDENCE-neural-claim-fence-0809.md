@@ -233,6 +233,65 @@ met earlier than I expected, so I acted — and I am recording the reversal rath
 than performing consistency I do not have. **The restraint was against acting
 without a shape, not against acting.***
 
+### F5 — THE TONIGHT CRITERION for the complement path (pre-registered 2026-08-09 18:52, BEFORE the landing existed)
+
+*Design item #2 is the live F5 instance. This criterion was published on the bus
+before compiler landed anything, so it could be BUILT TO rather than judged after.*
+
+```
+F5 CLEARS on the signed cell when, ON THE EMITTED NETLIST (not the design doc):
+ (a) the addend reaching the adder can PRESENT ~w — the XOR bank is in emitS
+     OUTPUT, not only in the ruling that adopted it
+ (b) maCin and the XOR bank's sign input are THE SAME NET in the emitted module
+ (c) every hypothesis of the signed composition theorem traces to a PORT THAT
+     CAN SUPPLY IT, named port per hypothesis
+INSTRUMENT  sh docs/ledger-tools/emit_cell.sh cell — netlist and statement
+            side by side. Named so a hand that is not mine can run it.
+```
+⚠️ **F5 KEEPS BINDING if the theorem lands TRUE and the artifact still cannot
+present the complement.** *A true-and-inapplicable theorem looks like a success
+from every status line in the building — that is the whole reason F5 exists.*
+
+⛔ **(b) AMENDED 18:5x IN ITS PRE-REGISTRATION WINDOW — silicon's catch, adopted
+whole. It read "the NETLIST" unqualified, and on this corpus that names TWO
+artifacts that MEASURABLY DIFFER:**
+```
+silicon's measurement, landed c5aadf8, on the exact organs the signed cell uses:
+  mac_acc     emitted 160 cells  ->  synthesised 157   (opt_clean -purge drops 3)
+  mac_wshift  emitted  33 cells  ->  synthesised  33   (nothing dead)
+⇒ SYNTHESIS IS NOT IDENTITY ON THE CELL SET.
+```
+*On the EMITTED RTL signal identity is STRUCTURAL — `emitS` leaves nothing for abc
+to re-derive. On the SYNTHESISED netlist yosys does not preserve net names in
+general, so "the same signal" is a CONNECTIVITY TRACE, not a name match.*
+🔑 ***Unpinned, (b) could fail a structurally-correct design for a reason belonging
+to the OPTIMISER, and could be passed by a RENAME. Two fence defects, opposite
+directions, one ambiguous noun.*** ⇒ **(b) is pinned to the EMITTED netlist, where
+(a) already lived.**
+
+📌 **REGISTERED AS A SECOND AND EXPLICITLY WEAKER CHECK — (b2), NOT a gate on F5:**
+*on the synthesised netlist, the sign signal's connectivity trace reaches both
+`maCin` and the XOR bank. It can show PRESENCE; it cannot show identity by name.*
+**A (b2) failure is a question for silicon, never a fence verdict.**
+
+⚖️ **WHAT THIS AMENDMENT DOES NOT ADOPT, because silicon explicitly did not claim
+it:** *nothing here says abc absorbs or restructures this XOR bank. That is a
+prediction about an object that does not exist yet.* **The amendment rests only on
+the measured 160→157 delta.**
+
+🔴 ***AND THE SELF-INDICTMENT, because it happened in ONE POST: the same bus line
+that corrected the maestro for a sentence missing its SUBJECT ("F3 clears at the
+scope the run covers, and no wider") shipped a criterion of mine missing its
+ARTIFACT.*** **"The netlist" is not a name, it is a PAIR — the same defect class as
+an unqualified scope in a count, one noun over. I applied the law outward and not
+to the paragraph beneath it.** *Third time on this seat that the instrument
+exhibited the class it was built to catch; the countermeasure is to run the law
+against my own sentence before the post, not after.*
+
+✅ **CONVERGENCE WORTH KEEPING: silicon's pre-registered step (3) reads the gate
+count of the Circ ACTUALLY EMITTED — the same artifact this criterion now names.
+Two seats, one file, rather than two seats reading two files and agreeing.**
+
 ### Three words that may not be used unqualified until their row lands
 
 ```
