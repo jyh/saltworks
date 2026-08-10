@@ -37,7 +37,7 @@ x1 ──┴─→ [neuron 1: b1, W10, W11] ──h1──┘
 | the SHELL: en_wsh + en_acc + acc CLEAR (freeze = parked state is valid; clear = the only reset) | v1.1 D4(f), V9 (kernel model owed, compiler) |
 | combinational fabric: payload bit in at cycle t is OUT at cycle t; the 2r=6 header is routing tax, not skew | banyan_fabric.v ("no pipeline latency") |
 | one frame per int8 value; the shell sign-extends weights locally (8 bits sent, never 32) | v1.1 D4(h) |
-| inter-layer h is int8 BY COMPILE-TIME RANGE GUARANTEE (the compiler-checked-per-network family; ReLU gives h≥0, the weight choice bounds it) — NO requant organ, per ruling #8 | noOverflowFrom discipline, extended one conjunct |
+| inter-layer h is int8 BY COMPILE-TIME RANGE GUARANTEE — **THE BOUND IS h ≤ 127, NOT 255 (Captain-confirmed 8/10 07:3x at math's catch): the wrapper SIGN-EXTENDS the byte, bit 7 is a SIGN — a width-based check would wrongly pass 128-255.** ReLU gives h≥0; the weight choice keeps h ≤ 127. NO requant organ, per ruling #8 | noOverflowFrom discipline, extended one conjunct |
 | multicast = repetition in the PoC (x0 sent once per destination); multicast rounds are a schedule optimization, not silicon | §5's "natural multicast by rounds" read honestly |
 
 ## THE TIMETABLE — every frame, every event
@@ -112,6 +112,8 @@ correctness question.
   compiler.
 - V10 — the six fixtures above as the demo's certificate set.
 - The inter-layer int8 range guarantee as a named compiler
-  obligation (new conjunct beside noOverflowFrom).
+  obligation (new conjunct beside noOverflowFrom). **RULED 8/10
+  07:3x (the Captain: "yes"): the obligation's bound is 0 ≤ h ≤
+  127 — the SIGNED int8 range, never the byte width.**
 
 🧂⚓
