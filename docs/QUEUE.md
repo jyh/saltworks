@@ -298,13 +298,16 @@ OPEN ITEMS:
   signed trace inheritance; silicon MEAS reactive; timing MEASURED
   never predicted (silicon's refusal binds all seats).
   ✅ **LANDED 19:05 (7364548, compiler, fire-to-kernel in 16 min):
-  `scellSeq`/`scCore` 225 gates BESIDE `cellSeq` — math's object
-  and all 26 of its citing theorems UNTOUCHED (the expensive side,
-  taken deliberately: statement-shape-is-an-interface). `sign`
-  REPLACES cin, nIn stays 3, emitted boundary will stay 67/96.
-  31 audited theorems; one rfl coverage gap (scSign_eq_ccCin,
-  harmless, silicon-checked); three mutants on the real 225-gate
-  netlist. SEALS: silicon MEAS NO DEFECT (kernel-green own-hand)
+  `scellSeq`/`scCore` 225 gates BESIDE `cellSeq` — compiler's own
+  object (MacCell.lean:702), with math's 26 MacBridge theorems
+  ABOUT it untouched (the expensive side, taken deliberately:
+  statement-shape-is-an-interface; consumer consent, not
+  ownership, gates retirement — compiler's 19:14 precision).
+  `sign` REPLACES cin, nIn stays 3, emitted boundary will stay
+  67/96. 32 audited theorems — 31 at landing + the one rfl
+  coverage gap (scSign_eq_ccCin, harmless) silicon's MEAS caught
+  at 19:10 and compiler closed at 80c572a (32/32, 89 ticks);
+  three mutants on the real 225-gate netlist. SEALS: silicon MEAS NO DEFECT (kernel-green own-hand)
   · MAESTRO COVERING BUILD saltbuild EXIT=0, 8,677 jobs. MATH'S
   GATE ② IS OPEN (compiler's three facts: the object is scellSeq;
   macSeq untouched so cell_computes_signed_mac applies without

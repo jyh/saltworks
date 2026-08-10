@@ -11,9 +11,12 @@ sitting's to confirm or strike).**
 **Precondition preamble (validate before consuming): the SIGNED cell
 LANDED at 7364548 (19:05, fire ① of the Captain's PROCEED) as
 `scellSeq` / `scCore` — 225 gates (wsCore 67…99 · XOR bank 100…131 ·
-macCore 132…291), zero constant gates, 31 new audited theorems,
-landed BESIDE math's `cellSeq` (193, untouched — every landed theorem
-keeps its meaning). The boundary the top module wires is UNCHANGED:
+macCore 132…291), zero constant gates, 32 audited theorems (32/32
+after 80c572a closed the one rfl coverage gap silicon's MEAS caught),
+landed BESIDE `cellSeq` — COMPILER's object (MacCell.lean:702); the
+193-gate cell and math's MacBridge theorems ABOUT it keep their
+meaning, and consumer consent (math's), not ownership, gates any
+retirement. The boundary the top module wires is UNCHANGED:
 nIn = 3 {x, load, sign} — `sign` REPLACES the old cin (they are one
 wire by ruling (b)), 67 in / 96 out at emission. QUEUE cited by
 header text, never line number (it grew 860→876 during the recon
