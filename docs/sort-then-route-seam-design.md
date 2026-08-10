@@ -102,7 +102,7 @@ idle_idle_never_decides · idle_headers_are_identical    (the exclusion controls
 `cKeyLE_full_load` rewrite OMITTED — **that rewrite is the only place `cDestOf`
 ever entered the chain.** All five went through first try.*
 
-### ✅ (A) (B) (D) ALSO LANDED — only (C) remains
+### ✅ COMPLETE — (A) (B) (C) (D) ALL LANDED
 
 ```
 ceCPort_identical             idle-vs-idle passes through, ANY comparator   (A)
@@ -116,10 +116,21 @@ PartialStageOK at stage k  →  ElemSortsAt st tr k frameLE
 …at every stage            →  bnC_output_frames_are_the_fold   (landed, generic)
                            →  runNetF frameLE bnComps (input frames)
 ```
-⛔ **STILL OWED: (C) — that `PartialStageOK` at stage `k` gives `PartialStageOK`
-at stage `k+1`.** *Route: a compare-exchange permutes the two frames on its wires
-and leaves the other six alone, so both clauses are preserved by a multiset
-argument. `elemSortsAt_all` is the full-load analogue to mirror.*
+✅ **(C) LANDED TOO — `partialStageOK_succ` was TEN LINES, because
+`frames_succ_perm` already takes the comparator as a parameter.** ⇒ **THE PAYOFF:
+`bnC_output_frames_partial`.**
+
+⚠️ ***WHAT THE PAYOFF DOES NOT SAY: it is NOT "the Batcher sorts".*** *Its nouns
+are `runTrace batcherNetC` and `runNetF frameLE bnComps` — the NETLIST computes
+what the abstract comparator fold computes. Whether that fold SORTS is a separate
+fact about `bnComps`, and tying it to math's `cSorted` (`runNet batcher8 (cKey act
+dst)`) is a further, **abstract-to-abstract** seam with no hardware in it.*
+**The refinement was what was owed, and it is closed.**
+
+⭐ *Three times in this lift the network layer turned out already generic where
+work had been priced — the fold, the port lemmas' `cKeyLE` form, and preservation.
+`cDestOf` entered the whole chain at exactly one rewrite (`cKeyLE_full_load`);
+omitting it generalised five theorems.*
 
 ### The original decomposition, kept for the record
 
