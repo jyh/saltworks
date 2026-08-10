@@ -126,6 +126,37 @@ a human against the same `Circ`. -/
 def sNet (nIn : Nat) (n : Net) : String :=
   if n < nIn then "i" ++ toString n else "n" ++ toString n
 
+/-! ### The net-naming property, NAMED — it was a habit, and criterion (d) rests on it
+
+⛔ **`emitS` renders kernel net `k` as the STRING `n<k>`, and F5's criterion (d) checks a
+KERNEL-SIDE BOUNDARY (`scMOff ≤ g.out`) on the EMITTED ARTIFACT entirely on the strength of that.**
+Until now it was an unstated habit of one `def`. **If `sNet` were ever changed to rename or
+renumber, (d) would not fail loudly — it would silently lose its boundary and degrade to the weak
+"feeds a non-xor2 cell" proxy that was retired 2026-08-09.**
+
+The load-bearing property is not the SHAPE of the name — it is that **distinct nets get distinct
+names**, because a boundary stated on indices is meaningless the moment two nets can share one. -/
+
+/-- Internal nets are named by their index: `n<k>`. -/
+theorem sNet_internal (nIn n : Net) (h : ¬ (n < nIn)) : sNet nIn n = "n" ++ toString n := by
+  simp [sNet, h]
+
+/-- Ports are named by their index: `i<k>`. -/
+theorem sNet_port (nIn n : Net) (h : n < nIn) : sNet nIn n = "i" ++ toString n := by
+  simp [sNet, h]
+
+/-- ⭐⭐ **THE PROPERTY CRITERION (d) RESTS ON: `sNet` IS INJECTIVE over the signed cell's whole net
+range.** Kernel-checked at `nIn = 67` over `0…291` — `ccIn` and the last net of `macCore`'s instance,
+so it covers every net `scCore` can name. *A `decide +kernel` rather than a general proof: the
+general statement needs `toString`'s injectivity on `Nat`, and the concrete range is what the
+criterion is actually quoted over.* -/
+theorem sNet_injective_on_scCore_range :
+    ∀ n < 292, ∀ m < 292, n ≠ m → sNet 67 n ≠ sNet 67 m := by decide +kernel
+
+#audit_axioms sNet_internal
+#audit_axioms sNet_port
+#audit_axioms sNet_injective_on_scCore_range
+
 /-- The instance name for the gate defining net `n`. **Stable and derived from
 the net number**, so the correspondence between a `Circ` gate and a netlist
 instance is recoverable from the name alone — that is what makes the re-import
