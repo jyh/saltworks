@@ -311,9 +311,12 @@ Fabric port indices FROZEN (they decide fixture-class membership):
 
 ## D7. STATE, AREA, TILE (labels per the pass)
 
-- Per cell: 64 state flops (acc 32 with CLEAR+ENABLE, §D4(f); wsh
-  32 plain) + SER 32. Per-TYPE pricing (refuter repair): acc ≈ 32 ×
-  30.0 (edfxtp-class, core32 precedent) + wsh 32 × 20.019 (dfxtp_1)
+- Per cell: 64 state flops — BOTH banks enabled-class per the 20:1x
+  D4(f) upgrade and R6 (compiler's 01:12 catch: an earlier version
+  of this line said "wsh 32 plain," predating en_wsh — R6 GOVERNS,
+  the plain-wsh pricing is STRUCK). Per-TYPE pricing: acc 32 ×
+  ~30.0 (enable-class, core32 precedent) + wsh 32 × ~30.0
+  (enable-class, same basis — NOT dfxtp_1's 20.019)
   + SER as the measured parallel-load organ 1,161.1 µm² pre-layout ⇒
   **~2.8–3.1k µm²/cell, ~11–12.3k at k=4, PRE-LAYOUT class**, plus
   the sequencer and edge-port registers, unpriced. (The 25.023/flop
