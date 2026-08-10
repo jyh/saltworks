@@ -19,13 +19,21 @@
 # one was the instrument I had built. I named that publicly as the weak link. This
 # removes it: same technique silicon used for (4), pointed at (2).
 #
-# ⚖️ SCOPE, and it is narrower than "the netlist is correct" -- state it or the
-# green over-reads: this proves the ACCUMULATOR NEXT-STATE (outs[64..95]) equals
-#     acc + (andWord x w XOR sign) + sign
-# over ALL inputs. It says NOTHING about the weight-shift next state (outs[32..63])
-# or the 32 primary outputs (outs[0..31]). Those need their own specs and do not
-# have them. F5 is about the signed accumulation, which is why that half was
-# proved first.
+# ⚖️ SCOPE. The first version of this comment claimed a remainder TWICE its real
+# size, and compiler halved it by measurement within a minute of the landing:
+#   ⭐ outs[0..31] ARE THE SAME NETS as outs[64..95] -- the cell's readable outputs
+#     and its accumulator next-state are one object emitted twice. Re-verified here
+#     independently: 32/32 identical assigns, o0 = o64 = n133. So the acc arm is
+#     LITERALLY a proof about the readable outputs, not a separate obligation.
+#   * outs[32..63], the weight-shift half, then got its own arm from compiler's
+#     landed kernel spec: wsh'[0] = load AND x, wsh'[k+1] = w[k].
+# ⇒ ALL 96 OUTPUTS of the combinational core are now proved over ALL inputs.
+#
+# ⛔ WHAT IS STILL NOT PROVED, so the shrinkage does not read as closure: this is
+# the COMBINATIONAL core. A CLOCKED cell does not exist (emitSeq, V7+V9), so
+# "every output of the cell is proved" is a sentence about a machine nobody has
+# emitted. The state elements, the sequencer and the pin wrapper remain hand RTL
+# and stay EXCLUDED BY NAME from any fabbed-is-verified sentence.
 #
 # ⛔ SILICON'S TWO TRAPS, inherited deliberately rather than rediscovered:
 #   * NEVER `yosys -q`: it produced an empty log and exit 0, which is
@@ -62,8 +70,12 @@ trap 'rm -rf "$TMP"' EXIT
 
 NIN=67
 ACC_LO=64
+WSH_LO=32
+ARM="${ARM:-both}"        # acc | wsh | both
 
-# ---- DUT: wrap the emitted netlist, tap ONLY the accumulator next state -------
+# ---- DUT: wrap the emitted netlist, tapping ONE 32-bit output window ---------
+write_dut() {   # $1 = low output index of the window
+  LO=$1
 {
   printf 'module dut (input wire [%d:0] i, output wire [31:0] accn);\n' $((NIN - 1))
   printf '  wire [95:0] o;\n  %s u (\n' "$TOP"
@@ -73,12 +85,29 @@ ACC_LO=64
     else printf '    .o%d(o[%d]),\n' $k $k; fi
     k=$((k + 1))
   done
-  printf '  );\n  assign accn = o[%d:%d];\nendmodule\n' $((ACC_LO + 31)) $ACC_LO
+  printf '  );\n  assign accn = o[%d:%d];\nendmodule\n' $((LO + 31)) $LO
 } > "$TMP/dut.v"
+}
 
 # ---- REF: the two's-complement identity, behaviourally ------------------------
 # port map from MacCell.lean: ccX 0 · ccLoad 1 · scSign/ccCin 2 ·
 #                             ccWsh k = 3+k · ccAcc k = 35+k
+write_ref_wsh() {   # $1 = 1 to BREAK it (drop the load gate) for the selftest
+  # compiler's spec, 19:48, from the kernel:
+  #   wsh'[0]   = load AND x        (wshift_next_bit_zero — the vacated LSB)
+  #   wsh'[k+1] = w[k], k < 31      (wshift_next_bit_succ — pure rewiring)
+  lsb='x & load'
+  [ "$1" = "1" ] && lsb="1'b0"
+  cat > "$TMP/ref.v" <<WEOF
+module dut (input wire [$((NIN - 1)):0] i, output wire [31:0] accn);
+  wire        x    = i[0];
+  wire        load = i[1];
+  wire [31:0] w    = i[34:3];
+  assign accn = {w[30:0], $lsb};
+endmodule
+WEOF
+}
+
 write_ref() {   # $1 = 1 to BREAK it (drop the carry) for the selftest
   carry='+ {31'"'"'b0, sign}'
   [ "$1" = "1" ] && carry=''
@@ -128,30 +157,46 @@ echo "======================================================================"
 echo "LINK (2) — the EMITTED netlist against the SPEC, exhaustively by SAT"
 echo "======================================================================"
 echo "ARTIFACT   $EMITTED  (top $TOP)"
-echo "SPEC       accn = acc + (andWord x w XOR sign) + sign     [outs 64..95]"
-echo "SCOPE      accumulator next-state ONLY. NOT outs[0..31], NOT the"
-echo "           weight-shift next state outs[32..63] — those have no spec here."
+echo "ARMS       acc  outs[64..95] = acc + (andWord x w XOR sign) + sign"
+echo "           wsh  outs[32..63] = {w[30:0], x AND load}"
+echo "⭐ outs[0..31] NEED NO ARM: they are the SAME NETS as outs[64..95]"
+echo "   (compiler 19:48, re-verified here: 32/32 identical assigns, o0=o64=n133)."
+echo "   So the acc arm is literally a proof about the readable outputs too."
+echo "SCOPE      the COMBINATIONAL core. A clocked cell does not exist (emitSeq,"
+echo "           V7+V9), so this is not a statement about a machine on a die."
 
-if [ "$SELFTEST" = "1" ]; then
-  echo "--- NEGATIVE CONTROL: carry-in dropped from the spec; MUST fail ---"
-  write_ref 1
-  if run_miter negative; then
-    echo "⛔ SELFTEST FAILED — the broken spec was proved EQUIVALENT."
-    echo "   The miter does not discriminate; every green from it is worthless."
-    exit 2
+do_arm() {   # $1 = arm name, $2 = low index, $3 = ref writer
+  echo "--- ARM $1 ---"
+  write_dut "$2"
+  if [ "$SELFTEST" = "1" ]; then
+    "$3" 1
+    if run_miter "neg_$1"; then
+      echo "⛔ SELFTEST FAILED ($1) — the BROKEN spec was proved equivalent."
+      echo "   The miter does not discriminate; every green from it is worthless."
+      exit 2
+    fi
+    grep -q 'model found: FAIL' "$TMP/neg_$1.log" || {
+      echo "⛔ SELFTEST INCONCLUSIVE ($1) — no FAIL line; SAT was not reached."; exit 2; }
+    echo "  ✅ discriminates"
   fi
-  grep -q 'model found: FAIL' "$TMP/negative.log" || {
-    echo "⛔ SELFTEST INCONCLUSIVE — no FAIL line; the run did not reach SAT."; exit 2; }
-  echo "  ✅ discriminates"
-fi
+  "$3" 0
+  if run_miter "eq_$1"; then
+    grep -q 'no model found: SUCCESS' "$TMP/eq_$1.log" || {
+      echo "⛔ exit 0 but NO SUCCESS LINE — refusing to call that a proof."; exit 2; }
+    echo "  ✅ $1 EQUIVALENT over ALL inputs"
+    return 0
+  fi
+  echo "  ⛔ $1 NOT EQUIVALENT — a counterexample exists. This is a finding."
+  return 1
+}
 
-echo "--- THE COMPARISON ---"
-write_ref 0
-if run_miter equivalence; then
-  grep -q 'no model found: SUCCESS' "$TMP/equivalence.log" || {
-    echo "⛔ exit 0 but NO SUCCESS LINE — refusing to call that a proof."; exit 2; }
-  echo "✅ EQUIVALENT over ALL inputs — link (2) is exhaustive, not sampled."
-  exit 0
-fi
-echo "⛔ NOT EQUIVALENT — a counterexample exists. This is a finding."
-exit 1
+rc=0
+case "$ARM" in
+  acc)  do_arm acc "$ACC_LO" write_ref     || rc=1 ;;
+  wsh)  do_arm wsh "$WSH_LO" write_ref_wsh || rc=1 ;;
+  both) do_arm acc "$ACC_LO" write_ref     || rc=1
+        do_arm wsh "$WSH_LO" write_ref_wsh || rc=1 ;;
+  *) echo "equiv_spec: unknown ARM=$ARM (acc|wsh|both)" >&2; exit 2 ;;
+esac
+[ "$rc" = "0" ] && echo "✅ ALL 96 OUTPUTS of the combinational core proved over ALL inputs."
+exit $rc
