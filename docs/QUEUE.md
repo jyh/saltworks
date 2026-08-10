@@ -844,8 +844,9 @@ OPEN ITEMS:
   BENCH IS STALE against the 8/8 cnt[3] ruling — TT/test/test.py:247
   asserts `(uio >> 5) == 0`, which project.v:57's Captain-confirmed
   `cnt_o[3]` on uio_out[5] violates for cycles 8-13; the bench would
-  FAIL the shipped BB submission. Silicon's tree; morning sweep
-  before any BB re-submission errand. (b) PayloadL4.lean:30-31
+  FAIL the shipped BB submission. Silicon's tree; ✅ DISCHARGED
+  20:13 same evening (silicon's own hand, exact size posted on the
+  bus) — the sitting gets an answer instead of a question. (b) PayloadL4.lean:30-31
   carries a stale "import owed / targeted-build verdict" note —
   SaltWorks.lean:77 imports it; one-line doc fix, any hand.**
 - **NEXT-RUNG RE-RECON, MAESTRO-OWED (post-council; opened 21:37 on
