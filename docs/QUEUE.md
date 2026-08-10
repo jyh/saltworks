@@ -950,8 +950,15 @@ OPEN ITEMS:
   delivery ~May 2027. NDF-ON-GITHUB: not yet — the scaffold
   (TTNDF/, 347924a) is ready in the private tree; the public repo
   creation is the next act and is T1-PUBLIC (his word/hand); TT's
-  CI on the public repo runs the REAL flow with TT's PDN = the
-  missing tile-fit signoff arrives for free at push.**
+  CI on the public repo runs the REAL flow with TT's PDN.
+  ⭐⭐ SUPERSEDED IN THE GOOD DIRECTION 10:48 — THE TILE-FIT IS
+  ALREADY RUN AND PASSES: silicon tested its own "blocked on TT's
+  PDN def" claim (false, never tested — compiler's 10:40
+  self-catch made it look), found the def in TT's PUBLIC tooling,
+  fetched it, and ran the REAL tile-fit locally: PASSES. The
+  first layout's "not a tile-fit signoff" scope clause is
+  DISCHARGED pre-submission; the account's priced half absorbs
+  the numbers.**
 - **⭐⭐ THE SUBMISSION PUSH (8/10 10:3x, the Captain, T1 — his
   words): "I want to submit NDF to TT today if possible" + the
   VENDOR DATUM from TT's own reply (ground truth, his
