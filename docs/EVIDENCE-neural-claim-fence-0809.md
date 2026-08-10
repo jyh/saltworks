@@ -105,11 +105,23 @@ FALSIFIED IF any ONE of these is observed:
           combinational CORE synthesised
               ⇒ "the cell's COMBINATIONAL CORE is certified down to silicon"
           a CLOCKED cell
-              ⇒ NOT AVAILABLE. It needs emitSeq, which does not exist
-                (§D2(a), compiler's genre on adoption; bar V7 pre-registered:
-                 flops == nState EXACTLY · cells == gates + nState · conb == 0 ·
-                 one assign per primary output · refinement stated ∀ st0 ·
-                 `initial` BANNED)
+              ⇒ ⛔ THIS LINE WAS STALE AND IS AMENDED 2026-08-10 13:5x.
+                IT READ: "NOT AVAILABLE. It needs emitSeq, which does not exist."
+                ***emitSeq LANDED 2026-08-10 01:1x (2704fa0) AND THE CLOCKED CELL
+                IS EMITTED: L1 meets V7 MECHANICALLY on the artifact — flops
+                64 == nState, cells 289 == 225+64, conb 0, 32/32 outputs driven
+                exactly once, no `initial`.***
+                ⇒ WHAT IS STILL OWED IS NOT THE TOOL BUT THE ∀ st0 REFINEMENT
+                  CLAUSE, which is a property of a LEAN STATEMENT and which no
+                  netlist check can clear. V9's run-level refinement is OWED with
+                  its obstacle named (the corpus lacks the non-flat
+                  generalisation of `run_of_flat_gates`).
+                🔑 CAUGHT BY COMPILER'S WIDER ABSENCE-PATTERN SWEEP, run on my
+                own file at their 13:5x flag. THIS IS THE EXPENSIVE DIRECTION OF
+                STALENESS: a successor reading this SCOPE BLOCK would have
+                enforced "no clocked cell is available" against an artifact that
+                has existed and passed its bar for twelve hours — obeying a
+                withdrawn rule, carefully, citing me.
           the pin wrapper, the sequencer FSM, the fabric
               ⇒ HAND RTL. EXCLUDED BY NAME from any fabbed-is-verified sentence.
 ```
