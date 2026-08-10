@@ -72,11 +72,73 @@ def _tree_state(files):
         return f'UNREADABLE({type(e).__name__})', ['⚠️ TREE-STATE-UNKNOWN']
 
 
+def _match(body: str):
+    """The matcher, extracted so the SELFTEST exercises the REAL logic and not a
+    re-typed copy of it. (A pattern re-typed is a pattern re-invented -- three
+    seats hand-rolled the same check in twelve hours and one copy was broken.)"""
+    thms = set(re.findall(r'^theorem\s+([A-Za-z_][A-Za-z0-9_\'\.!?]*)', body, re.M))
+    listed = set()
+    for m in re.findall(r'^#audit_axioms\s+([^\n]*(?:\n[ \t]+[^\n]*)*)', body, re.M):
+        for tok in m.split():
+            listed.add(tok)
+            listed.add(tok.split('.')[-1])
+    return sorted(t for t in thms if t not in listed and t.split('.')[-1] not in listed)
+
+
+def selftest() -> int:
+    """Each case must FAIL under exactly one historical defect, and the NEGATIVE
+    control must still be reported -- a fix whose only witness is a better number
+    is not a fix."""
+    cases = [
+        ("qualified name (defect 1)",
+         "theorem cCount_le : True := trivial\n#audit_axioms SaltWorks.Silicon.cCount_le\n", []),
+        ("continuation line (defect 2)",
+         "theorem a : True := trivial\ntheorem b : True := trivial\n"
+         "#audit_axioms a\n    b\n", []),
+        ("dotted THEOREM name, bare audit",
+         "theorem SortsTo.perm : True := trivial\n#audit_axioms SortsTo.perm\n", []),
+        ("NEGATIVE CONTROL: genuinely unaudited MUST be reported",
+         "theorem audited : True := trivial\ntheorem forgotten : True := trivial\n"
+         "#audit_axioms audited\n", ["forgotten"]),
+    ]
+    ok = True
+    for name, body, expect in cases:
+        got = _match(body)
+        good = got == expect
+        ok = ok and good
+        print(f"  {'PASS' if good else 'FAIL'}  {name}: expected {expect}, got {got}")
+    print("SELFTEST: " + ("all cases pass -- and the negative control still reports"
+                          if ok else "⛔ FAILED"))
+    return 0 if ok else 1
+
+
 def main() -> int:
+    if len(sys.argv) > 1 and sys.argv[1] == '--selftest':
+        return selftest()
     root = sys.argv[1] if len(sys.argv) > 1 else 'SaltWorks'
     # RECURSIVE.  The old flat glob made every subdirectory invisible, so the
     # honest-looking `audit_completeness.py SaltWorks` read nothing at all.
+    # ⛔ DEFECT (3), same family, found 2026-08-09 21:4x: this GLOBBED THE WORKTREE,
+    # so 52 theorems in 72 gitignored Scratch*.lean files counted as corpus. A census
+    # that enumerates the worktree measures how much scaffolding is on the disk.
+    # The file's OWN comments at :109-112 already named `git show <ref>:<path>` as the
+    # safe read -- the 8/7 fix landed on the CONTENT dimension and never swept the
+    # ENUMERATION dimension twenty lines above it. A fix is not a sweep.
     files = sorted(glob.glob(os.path.join(root, '**', '*.lean'), recursive=True))
+    try:
+        tracked = set(subprocess.run(['git', 'ls-files', os.path.join(root, '**/*.lean')],
+                                     capture_output=True, text=True, check=True
+                                     ).stdout.split())
+        if tracked:
+            skipped = [f for f in files if f not in tracked]
+            files = [f for f in files if f in tracked]
+            if skipped:
+                print(f"NOTE: {len(skipped)} untracked .lean excluded from the corpus "
+                      f"(gitignored scaffolding); tracked corpus only", file=sys.stderr)
+    except Exception as e:
+        print(f"⛔ COULD NOT CHECK: `git ls-files` failed ({e}) -- REFUSING rather than "
+              f"reporting a worktree count as a corpus count", file=sys.stderr)
+        return 2
     if not files:
         print(f"COULD NOT CHECK: no .lean files under {root}", file=sys.stderr)
         return 2
@@ -124,11 +186,38 @@ def main() -> int:
         # in SaltWorks/Tactic/AuditAxioms.lean, where the tactic documents itself
         # by quoting its own syntax.  Reading the raw source would credit a
         # theorem as audited on the strength of prose about auditing.
+        # ⛔⛔ TWO DEFECTS LIVED HERE UNTIL 2026-08-10 07:3x, and both were found by
+        # OPENING THE FILES to start a sweep -- not by running this tool again.
+        # Three seats ran it and agreed; agreement on one tool's output is ONE
+        # measurement. The tool was right 2,868 times and wrong 69: a 2.4% defect
+        # does not look like a defect, it looks like the corpus.
+        #
+        # (1) QUALIFIED NAMES.  `thms` holds BARE names (the regex captures the
+        #     name after `theorem`), but this set held whatever followed
+        #     `#audit_axioms` VERBATIM.  A block writing
+        #     `#audit_axioms SaltWorks.Silicon.cCount_le` could never match the
+        #     bare `cCount_le`, so a CORRECTLY AUDITED theorem read as unaudited.
+        #     57 qualified names corpus-wide.
+        # (2) CONTINUATION LINES.  `^#audit_axioms\s+(.*)$` reads ONE line, so a
+        #     block continued onto indented lines lost every name after the
+        #     first.  INDEPENDENT of (1): a BARE name on a continuation line was
+        #     lost too.  12 names corpus-wide.
+        #
+        # Both cures are normalisation, and the SELFTEST below is what proves
+        # they work -- a fix whose only witness is a better number is not a fix.
+        # ⚠️ NORMALISE BOTH SIDES, THE SAME WAY.  My first cure normalised only
+        # `listed` to the last dotted component -- and theorem names are dotted too
+        # (`theorem SortsTo.perm`), so it broke the match in the OTHER direction and
+        # the count went UP.  The rising number is what exposed it: read the DATA
+        # before the label.  A set holds each token verbatim AND its last component,
+        # and a theorem counts as audited if EITHER form is present.
         listed = set()
-        for m in re.findall(r'^#audit_axioms\s+(.*)$', body, re.M):
-            listed.update(m.split())
+        for m in re.findall(r'^#audit_axioms\s+([^\n]*(?:\n[ \t]+[^\n]*)*)', body, re.M):
+            for tok in m.split():
+                listed.add(tok)
+                listed.add(tok.split('.')[-1])
         total_thm += len(thms)
-        missing = sorted(thms - listed)
+        missing = sorted(t for t in thms if t not in listed and t.split('.')[-1] not in listed)
         if missing:
             bad.append((p, missing))
     dirs = sorted({os.path.dirname(f) for f in files})
