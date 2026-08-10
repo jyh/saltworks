@@ -35,6 +35,7 @@ EXIT 0 = every mechanical clause MET (statement clause still owed to a hand)
      2 = could not read / could not derive the expected numbers
 """
 
+import os
 import re
 import subprocess
 import sys
@@ -61,27 +62,59 @@ def find_repo(start: Path):
 
 
 def derive_nstate(start: Path, seq: str):
-    """nState from the COMMITTED MacCell.lean — never the worktree.
+    """nState from the COMMITTED tree — never the worktree, never guessed.
 
-    Five seats share this tree and the file is under active edit on a night with
-    waves running. Parsing a half-written file is a banked hazard; a committed
-    ref is the only honest source for an acceptance number.
+    Five seats share this tree and the sources are under active edit during waves.
+    Parsing a half-written file is a banked hazard; a committed ref is the only
+    honest source for an acceptance number.
+
+    ⛔ GENERALISED 2026-08-10 10:5x, BEFORE the batcherNetC landing rather than
+    after it. The first version hardcoded MacCell.lean, so it would have REFUSED
+    on `emitSeq(batcherNetC)` — safe, but useless exactly when needed. It now
+    searches every committed SaltWorks/HDL/*.lean for the named Seq.
+
+    ⚠️ AND THE SECOND HALF, WHICH A REGEX CANNOT SOLVE: `batcherNet` declares
+    `nState := 2 * bnElems` — a COMPUTED value, not a literal. This function will
+    NOT evaluate Lean arithmetic to invent a number. It reports what it found and
+    REFUSES; the caller may supply the value explicitly, and the tool then PRINTS
+    that the number was SUPPLIED rather than derived, so the verdict discloses its
+    own weaker provenance instead of hiding it.
     """
     repo = find_repo(start)
     if repo is None:
         return None, "NO GIT REPO ABOVE THE NETLIST"
     try:
-        out = subprocess.run(["git", "show", f"HEAD:SaltWorks/HDL/MacCell.lean"],
-                             capture_output=True, text=True, cwd=repo, timeout=20)
+        ls = subprocess.run(["git", "ls-tree", "--name-only", "HEAD", "SaltWorks/HDL/"],
+                            capture_output=True, text=True, cwd=repo, timeout=20)
+        files = [f for f in ls.stdout.split() if f.endswith(".lean")]
+        for f in files:
+            out = subprocess.run(["git", "show", f"HEAD:{f}"],
+                                 capture_output=True, text=True, cwd=repo, timeout=20)
+            if out.returncode != 0:
+                continue
+            m = re.search(rf"^\s*def\s+{re.escape(seq)}\s*:\s*Seq\s*:=(.*?)\}}",
+                          out.stdout, re.M | re.S)
+            if not m:
+                continue
+            body = m.group(1)
+            # ⛔⛔ THE REGEX MATCHED A PREFIX AND CALLED IT A DERIVATION.
+            # `nState := 2 * bnElems` made `(\d+)` capture the leading `2`,
+            # and the tool printed "nState 2 DERIVED ... not assumed" and
+            # rendered a confident verdict on a FABRICATED acceptance number —
+            # the exact failure the refusal branch below exists to prevent,
+            # defeated by my own pattern. A literal must be the WHOLE field.
+            lit = re.search(r"nState\s*:=\s*(\d+)\s*(?=[,}\n])", body)
+            if lit:
+                return int(lit.group(1)), f"HEAD:{f} ({seq})"
+            expr = re.search(r"nState\s*:=\s*([^,}}\n]+)", body)
+            found = expr.group(1).strip() if expr else "<no nState field>"
+            return None, (f"`{seq}` found in HEAD:{f} but nState is NOT A LITERAL: "
+                          f"`{found}`. I will not evaluate Lean arithmetic to invent "
+                          f"an acceptance number — pass it explicitly and I will "
+                          f"print that it was SUPPLIED.")
+        return None, f"Seq `{seq}` NOT FOUND in any committed SaltWorks/HDL/*.lean"
     except (OSError, subprocess.SubprocessError) as e:
         return None, f"GIT UNAVAILABLE ({type(e).__name__})"
-    if out.returncode != 0:
-        return None, f"HEAD:MacCell.lean UNREADABLE (rc={out.returncode})"
-    m = re.search(rf"^\s*def\s+{seq}\s*:\s*Seq\s*:=.*?nState\s*:=\s*(\d+)",
-                  out.stdout, re.M | re.S)
-    if not m:
-        return None, f"nState for `{seq}` NOT FOUND in HEAD:MacCell.lean"
-    return int(m.group(1)), f"HEAD:MacCell.lean ({seq})"
 
 
 def main() -> None:
@@ -116,7 +149,11 @@ def main() -> None:
     outs = sum(1 for ln in text.splitlines() if OUTPORT.match(ln))
     initials = len(re.findall(r"^\s*initial\b", text, re.M))
 
-    nstate, prov = derive_nstate(path, seq)
+    env_ns = os.environ.get("NSTATE")
+    if env_ns:
+        nstate, prov = int(env_ns), "SUPPLIED BY CALLER (env NSTATE) — NOT derived"
+    else:
+        nstate, prov = derive_nstate(path, seq)
     if nstate is None:
         die(f"cannot derive nState ({prov}). V7's bar is stated in terms of it, "
             "so I will not guess: an acceptance number invented by the checker "
@@ -129,7 +166,12 @@ def main() -> None:
     print("V7 ACCEPTANCE BAR — the emitSeq-emitted CLOCKED cell")
     print("=" * 70)
     print(f"ARTIFACT   {path}")
-    print(f"nState     {nstate}   DERIVED from {prov}, not assumed")
+    # a line that says both DERIVED and NOT derived is the ambiguity this tool
+    # exists to prevent, so the two provenances get two sentences.
+    if prov.startswith("SUPPLIED"):
+        print(f"nState     {nstate}   ⚠️ {prov}. This verdict is only as good\n           as that argument, and nothing here checked it.")
+    else:
+        print(f"nState     {nstate}   DERIVED from {prov}, not assumed")
     print(f"HISTOGRAM  " + " · ".join(f"{t} {n}" for t, n in sorted(hist.items())))
     print(f"COUNTS     total {total} · flops {flops} · combinational {comb} · "
           f"conb {conb} · assigns {assigns} · output ports {outs} · initial {initials}")
