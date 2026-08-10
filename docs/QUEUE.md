@@ -274,12 +274,14 @@ OPEN ITEMS:
   one module, 193/193, SHAPE-CERTIFIED with the seam and
   disjointness proved (cell_seam_is_the_addend — the right-wire
   claim port by port; cell_instances_are_disjoint — the pair
-  property instOK cannot express) — **the composition's per-cycle
-  theorem OWED at compiler's seam**, named as owed in the file.
-  "Kernel to netlist" is emission fidelity, NOT semantic
-  inheritance; the join does not mention cellSeq and cannot (it
-  predates it). The maestro's "join theorem riding inside" is
-  STRUCK.**
+  property instOK cannot express) — the composition's per-cycle
+  theorem was OWED at compiler's seam — **DISCHARGED 17:20,
+  covered EXIT=0: the cell's cycle IS the accumulator's cycle on
+  the addend the weight organ made. The emission now inherits the
+  join; the maestro's struck riding-inside clause is TRUE — made
+  so by the theorem being built, not the sentence being argued.
+  THE NEURON IS SEMANTICALLY WHOLE: arithmetic → join → composed
+  cell → emitted module, every arrow a theorem.**
 
 - **THE NDF CLOCK — RULED 15:5x at silicon's discriminator (the
   red is REAL, not a die artifact: mac_acc's 32-bit ripple carry
