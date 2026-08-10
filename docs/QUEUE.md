@@ -842,11 +842,14 @@ OPEN ITEMS:
 - **REFUTER-PASS OUT-OF-FREEZE FINDS (19:3x, registered from the
   five-refuter pass on the top-module block): (a) ⛔ THE BB COCOTB
   BENCH IS STALE against the 8/8 cnt[3] ruling — TT/test/test.py:247
-  asserts `(uio >> 5) == 0`, which project.v:57's Captain-confirmed
-  `cnt_o[3]` on uio_out[5] violates for cycles 8-13; the bench would
-  FAIL the shipped BB submission. Silicon's tree; ✅ DISCHARGED
-  20:13 same evening (silicon's own hand, exact size posted on the
-  bus) — the sitting gets an answer instead of a question. (b) PayloadL4.lean:30-31
+  asserts `(uio >> 5) == 0`, which the Captain-confirmed `cnt_o[3]`
+  on uio_out[5] (the assign at project.v:60) violates for cycles
+  8-13. THE SWEEP is discharged (silicon 20:13, exact size: first
+  failure t=8, window 8-13 — corroborated for free by project.v's
+  OWN 8/8 comment "cycles 8..13 alias onto 0..5", two provenances,
+  neither reading the other); THE BENCH ITSELF REMAINS STALE and
+  its FIX IS UNOWNED — a claimable float or a sitting assignment;
+  diagnosed ≠ fixed, kept separate here on silicon's 20:19 catch. (b) PayloadL4.lean:30-31
   carries a stale "import owed / targeted-build verdict" note —
   SaltWorks.lean:77 imports it; one-line doc fix, any hand.**
 - **NEXT-RUNG RE-RECON, MAESTRO-OWED (post-council; opened 21:37 on
