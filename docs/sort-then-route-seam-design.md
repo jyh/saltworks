@@ -1,0 +1,111 @@
+# SORT-THEN-ROUTE — the seam's KERNEL half
+
+**Compiler's half. Silicon's RTL half is the companion; math refutes; evidence fences.**
+**Supersedes this file's own 10:51 first draft, which was wrong in two places — §5 says how.**
+
+⚖️ **Does not gate today's submission.** The 1x2 ships banyan content; this lands in the update
+window before the ~Sept 7 freeze.
+
+---
+
+## 1. ① IS LANDED — `emitSeq(batcherNetC)`, the Captain's (b)
+
+*Invocation, not a number — re-run it rather than trusting the table:*
+
+```
+sh docs/hdl-tools/emit_seq.sh batcher
+```
+
+| check | pre-registered 10:55 | measured |
+|---|---|---|
+| `dfxtp` flops | 96 (`= nState`) | **96** ✅ |
+| `assign` | 104 (`= bnCCore.outs.length`) | **104** ✅ |
+| `conb` | 0 | **0** ✅ |
+| `dfxtp_1` | 0 (R2 — on `no_synth.cells`) | **0** ✅ |
+| `initial` | 0 (power-gating law) | **0** ✅ |
+| **cells** | **720 = 624 + 96** | **720** ✅ |
+
+⭐ ***The last row is a CROSS-CHECK, not a restatement: 624 is SILICON's independent measurement of
+the committed `batcher_c.v` at 10:50, made without reference to this emitter.*** *Two paths that
+were not derived from each other agree on the same core. **96 `mux2_1` also appear — the same
+peephole that took 816 gates to 624 cells.***
+
+## 2. THE FINDING THAT RESOLVED THE SHAPE FORK
+
+Silicon measured `batcher_c.v` exactly right — 624 cells, **zero flops, no clk**, 105 in / 104 out —
+and read it as a combinational parallel-in sorter, which would have made the seam a domain crossing.
+**It is not the design. It is the DESIGN'S CORE, with the state file exposed as ports:**
+
+```
+105 in  = 9 design inputs + 96 state        bnCCoreIn = bnCIn + 4 * bnCElems
+104 out = 8 data         + 96 next-state    bnCCore_outs_split : = 8 + 4 * 24   (LANDED)
+                                            bnC_core_outputs   : = 104          (LANDED)
+816 gates - 624 cells = 192 = 96 x 2        the mux2 peephole, exactly
+```
+🔑 ***`batcherNetC` was ALREADY bit-serial and sequential — `nState = 96`, 24 elements x 4 state
+bits. It was already shape (b). Nothing was missing but the emission.*** *The tell was that both
+port counts DECOMPOSE: 105 = 9 + 96 and 104 = 8 + 96. That is the signature of a core, and it is the
+`adjacent-object` shape — a true reading of the object next to the one named.*
+
+✅ **Silicon's heritage point INVERTS IN THEIR FAVOUR:** *they argued "16 bit-times" is a latency, so
+the 1990 Batcher was sequential and ours is a different object. **The first half is right and the
+second is backwards** — ours is sequential too. Same object class as ISS90 p.78 s3.1.*
+
+## 3. WHERE THE SEAM ACTUALLY IS — relocated, and it is bigger than an order tie
+
+```
+✅ LANDED  element -> key    ceC_realises_cKey_when_active        (CompareExchangeC)
+           with cKey active dest = (!active, dest) — LITERALLY (¬active, dest) —
+           cKeyLE_eq_lex · cKey_active_beats_idle · cKey_idle_never_beats_active
+           controls: ceC_does_not_realise_cKey_naively · ceC_rejects_idle_sorts_low
+                     ceCIdleLow_is_one_gate_from_ceC · ceC_idle_dest_is_unobservable
+✅ LANDED  abstract sort -> routing   cSorted_concentrates · cSorted_strictMonoOn  (math's)
+⛔ MISSING NETWORK -> abstract sort:  that batcherNetC (24 ceC instances) computes cSorted
+```
+⛔ ***NOTHING IN `SaltWorks/Silicon/` MENTIONS `batcherNetC` — I grepped the whole tree.*** *The
+certified elements and the certified sort have **no connection through the network.** The file says
+so itself at `BatcherNetC.lean:152`: "**the 8x8 sorter has never been RUN in the kernel on either
+convention**", and the certificates that landed behind that note are trace-factoring and delivery,
+not sortedness.*
+
+## 4. PRE-REGISTERED COUNTS — for the seam as relocated
+
+```
+network sorts   batcherNetC's 8 outputs are cKey-sorted    1 theorem, and it is NOT a decide:
+                                                           96 state bits ⇒ 2^96 states.
+                                                           Route = bnC_trace_factors (LANDED) to
+                                                           24 per-element runs, then the Batcher
+                                                           comparator-sequence argument.
+seam            that sorted network == runNet batcher8     1 theorem, consumes the above
+composition     banyan on the sorted output                consumes cSorted_concentrates +
+                                                           cSorted_strictMonoOn — both LANDED
+new objects     none at the element level — the ties exist
+```
+⚠️ **I am NOT pricing the network theorem tonight.** *It is the one real proof in this design and my
+banked law is that an estimate assembled from absences is worthless. `bnC_trace_factors` is the
+lever and it is already landed; the comparator-sequence argument is the unknown.*
+
+## 5. ⛔ WHAT THIS FILE'S FIRST DRAFT GOT WRONG, 65 MINUTES OLD
+
+```
+(1) It proposed a NEW theorem tying keyLE to the product order.
+    THAT TIE ALREADY EXISTS — as ceC_realises_cKey_when_active, under the
+    corpus's own cKey/cKeyLE names, in CompareExchangeC.lean.
+(2) It aimed at `ce` (2 state bits, CompareExchange.lean). The element the
+    NETWORK instances 24x is `ceC` (4 state bits, CompareExchangeC.lean).
+    keyLE appears in exactly ONE file and it is not the network's.
+```
+🔑 ***I grepped MY reading of the seam (`keyLE`) in the file I had open, and filed the corpus's
+silence as an absence. That is `absences-compound` firing on the same surface it was banked from:
+three greps before any "the corpus lacks X" — other seats' slots, the corpus's convention not
+yours, prose naming a superseded object. I ran none of them; the probe caught it, not the review.***
+*The draft would have spent a session rebuilding a landed theorem against the wrong element.*
+
+## 6. WHAT THIS DOES NOT CLAIM
+
+- **Not** that the sorter is timing-closed or tile-fits. 720 cells is a CELL COUNT; area and timing
+  are silicon's measurement at composition, and the alignment constant is theirs.
+- **Not** that `batcherNetC` sorts. §3 is explicit that this is the missing theorem; the emission
+  in §1 is a faithful clocking of the object, not a statement about what it computes.
+- **Not** that `emitSeq` is trusted — it returns a `String`. What §1 buys is that the artifact
+  coming back matches the kernel object's dimensions on six counts, one cross-checked.

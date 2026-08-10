@@ -4,6 +4,7 @@
 #   sh docs/hdl-tools/emit_seq.sh            # L1: the signed cell, NO shell (V7's object)
 #   sh docs/hdl-tools/emit_seq.sh shell      # L2: the RATIFIED cell (R6 shell)
 #   sh docs/hdl-tools/emit_seq.sh ser        # R8 (3): the SER/activation organ
+#   sh docs/hdl-tools/emit_seq.sh batcher    # the Captain's (b): the BIT-SERIAL sorter
 #   sh docs/hdl-tools/emit_seq.sh shell > path.v    # caller decides where it lands
 #
 # PRINTS, NEVER WRITES — the .v files live in SaltWorks/Silicon/RTL/ and that is
@@ -51,6 +52,19 @@ import SaltWorks.HDL.SerOrgan
 open SaltWorks.HDL SaltWorks.HDL.Ser
 -- peephole ON: 32 selects collapse 3 gates -> 1 mux2_1. 163 cells -> 99.
 #eval IO.print (emitSeqMux "1" "2" "ser_organ" serSeq)
+LEAN
+fi
+if [ "$1" = "batcher" ]; then
+cat > "$SCRATCH" <<'LEAN'
+import SaltWorks.HDL.EmitS
+import SaltWorks.HDL.BatcherNetC
+open SaltWorks.HDL
+-- THE CAPTAIN'S (b), 08-10: the 1990 shape. `batcherNetC` was ALREADY bit-serial
+-- (nState 96 = 24 elements x 4); what was missing was never a design, only this
+-- emission. `batcher_c.v` is the CORE of this object with the state file exposed
+-- as ports (105 in = 9 + 96, 104 out = 8 + 96) -- NOT a combinational sorter.
+-- peephole ON, matching how batcher_c.v itself was emitted.
+#eval IO.print (emitSeqMux "1" "2" "batcher_seq" batcherNetC)
 LEAN
 fi
 # through the fleet wrapper: it holds the build lock and records the run
