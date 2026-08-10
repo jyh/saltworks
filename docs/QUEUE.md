@@ -938,6 +938,20 @@ OPEN ITEMS:
   TONIGHT is the named target; the fabbed-is-verified law governs
   the SUBMISSION, not the first measurement run — V1-V3/V9/V10
   land behind the layout, before any tapeout word.**
+- **THE TILE PLAN IS CONFIRMED (8/10 10:4x, the Captain, verbatim
+  "Ok, that's our plan, a 1x2 and a 6x2"): the standalone switch on
+  a NEW 1x2 (submitted today with banyan content; the full
+  Batcher-banyan wired during the update window — his personal
+  word: the Bellcore team gets the full BB, "it is more
+  meaningful") + the NDF on the upgraded 6x2. Chip-count facts
+  banked from the dossier: chips ride DevKit PCBs at EUR 300+15
+  each (subsidized 80/80 SOLD OUT); EVERY board carries the ENTIRE
+  shuttle die mux-selected — each gifted board holds BOTH machines;
+  delivery ~May 2027. NDF-ON-GITHUB: not yet — the scaffold
+  (TTNDF/, 347924a) is ready in the private tree; the public repo
+  creation is the next act and is T1-PUBLIC (his word/hand); TT's
+  CI on the public repo runs the REAL flow with TT's PDN = the
+  missing tile-fit signoff arrives for free at push.**
 - **⭐⭐ THE SUBMISSION PUSH (8/10 10:3x, the Captain, T1 — his
   words): "I want to submit NDF to TT today if possible" + the
   VENDOR DATUM from TT's own reply (ground truth, his
