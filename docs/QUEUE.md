@@ -938,6 +938,20 @@ OPEN ITEMS:
   TONIGHT is the named target; the fabbed-is-verified law governs
   the SUBMISSION, not the first measurement run — V1-V3/V9/V10
   land behind the layout, before any tapeout word.**
+- **SORT-THEN-ROUTE SHAPE RULED (8/10 10:5x, the Captain, verbatim
+  "Yes (b) exactly"): THE BIT-SERIAL BATCHER — his own 1990 shape
+  (ISS90 p.78 §3.1: first-difference latching, "16 bit-times" =
+  sorted IN TIME). THE PATH: emitSeq(batcherNetC) + shell (the L1
+  play rehearsed on the cell) — the certified frame-streaming
+  sorter (the bnC theorem family's own object, 96 state bits)
+  gains its flops from last night's emitter; the domain crossing
+  dissolves into a FRAME-ALIGNMENT CONSTANT (the sorter's fixed
+  latency vs the banyan's sof) — a timetable number. FIRED:
+  compiler emits + pre-registers counts (per V7's which-not-how-
+  many form); silicon shells/composes/measures the 1x2 projection
+  AT the composed object (its own struck-twice rule honored);
+  math refutes the alignment arithmetic. The update window is the
+  deadline; today's submission unaffected.**
 - **THE TILE PLAN IS CONFIRMED (8/10 10:4x, the Captain, verbatim
   "Ok, that's our plan, a 1x2 and a 6x2"): the standalone switch on
   a NEW 1x2 (submitted today with banyan content; the full
