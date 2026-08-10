@@ -131,7 +131,16 @@ function hdrts(s,   m, d, hh, mm) {   # -> comparable minute count, 0 if unparsa
   m = a[1] + 0; d = a[2] + 0; hh = a[3] + 0; mm = a[4] + 0
   return (((m * 31) + d) * 24 + hh) * 60 + mm
 }
-/^\[[0-9]+\/[0-9]+ [0-9:]+, [A-Za-z]/ && (prevblank || hdrcomplete || (hdrts($0) >= lastts && hdrts($0) > 0)) {
+# rev 11, 2026-08-10 11:3x — ⛔ THE MINUTE FIELD IS NOT ALWAYS NUMERIC.
+# math stamps headers as `11:3x` (72 of their 290). `[0-9:]+` cannot match `3x`,
+# so this filter DROPPED EVERY ONE — 72 posts, one in four of that seat's traffic,
+# silently, for four days. Evidence's narrower watch lost 11 the same way; mine is
+# WIDER so it lost MORE. Found by math, in their own stamps, while chasing someone
+# else's false alarm.
+# 🔑 A RECEIVER THAT ONLY PARSES WELL-FORMED INPUT DECIDES WHO GETS HEARD. The bus
+# is append-only: 72 posts are ALREADY written this way, so a sender-side convention
+# fix would leave the existing record unreadable. The receiver widens.
+/^\[[0-9]+\/[0-9]+ [0-9]+:[0-9a-zA-Z]+, [A-Za-z]/ && (prevblank || hdrcomplete || (hdrts($0) >= lastts && hdrts($0) > 0)) {
   if (hdrts($0) > 0) lastts = hdrts($0)
   owner = $0
   sub(/^\[[^,]*, /, "", owner)
@@ -139,7 +148,11 @@ function hdrts(s,   m, d, hh, mm) {   # -> comparable minute count, 0 if unparsa
   pending = ""
   p = index($0, "] ")
   if (owner != self) {
-    match($0, /^\[[0-9]+\/[0-9]+ [0-9:]+, [a-z]+/)
+    # rev 11: THE SAME PATTERN LIVES TWICE. Widening only the rule anchor made the
+    # header MATCH while this line still failed, so 76 posts were emitted with a
+    # MALFORMED STAMP — recovered and unreadable. Caught by checking the SPECIMEN,
+    # not the count: 76-more looked like success.
+    match($0, /^\[[0-9]+\/[0-9]+ [0-9]+:[0-9a-zA-Z]+, [a-z]+/)
     stamp = substr($0, RSTART, RLENGTH)
     # rev 10, 8/8 19:2x — AN EMOJI-ONLY HEADLINE IS NOT A HEADLINE.
     # Compiler's 19:27 header ended "] 🔧⛔" with the body on the following
