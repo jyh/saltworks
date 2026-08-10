@@ -161,12 +161,36 @@ def main() -> None:
     if not ok:
         fails.append("conb tie cells present")
 
-    ok = assigns == outs and outs > 0
-    print(f"{'✅' if ok else '⛔'} one assign per output port   {assigns} assigns vs {outs} ports")
+    # ⛔⛔ THIS CLAUSE PRODUCED A FALSE FAIL ON THE REAL L1, AND THE DEFECT WAS
+    # MINE. I implemented "one assign per primary output" as `assigns == outs`.
+    # On the COMBINATIONAL cell that held (96 == 96) and looked correct. On the
+    # CLOCKED cell it is wrong by construction: the shell has 32 output PORTS
+    # (state is hidden in flops now) and 96 assigns — 32 driving the ports and 64
+    # driving the flop D inputs (`assign d0 = n67;` -> `dfxtp_2 q0 (.D(d0),
+    # .Q(i3))`). The extra 64 are the state feedback, which is the whole point of
+    # emitSeq.
+    # 🔑 V7's WORDS ARE PER-OUTPUT, NOT A TOTAL: "one assign per primary output".
+    # A total is not a per-item property, and the two agree only in the case I
+    # happened to test. [[a-count-is-not-a-scope]] inside a single clause.
+    # ⇒ check what the clause SAYS: every output port driven EXACTLY once.
+    driven = defaultdict(int)
+    for ln in text.splitlines():
+        m = ASSIGN.match(ln)
+        if m:
+            driven[m.group("lhs")] += 1
+    portnames = [m.group("name") for m in
+                 (OUTPORT.match(ln) for ln in text.splitlines()) if m]
+    once = sum(1 for o in portnames if driven[o] == 1)
+    undriven = [o for o in portnames if driven[o] == 0]
+    multi = [o for o in portnames if driven[o] > 1]
+    ok = outs > 0 and once == outs
+    print(f"{'✅' if ok else '⛔'} one assign per output port   {once}/{outs} driven exactly once"
+          + (f" · {len(undriven)} UNDRIVEN · {len(multi)} MULTI" if not ok else ""))
     if not ok:
-        fails.append("assign/output mismatch")
-    print("   📌 NOT '0 assigns' — emitS drives every primary output with an assign")
-    print("      BY DESIGN, so a 0-assign bar would fail a CORRECT emission.")
+        fails.append(f"{len(undriven)} undriven, {len(multi)} multiply-driven outputs")
+    print(f"   📌 {assigns} assigns total; the other {assigns - once} drive flop D")
+    print("      inputs (state feedback), which is emitSeq working, NOT a defect.")
+    print("      NOT '0 assigns' either — emitS drives every primary output BY DESIGN.")
 
     ok = initials == 0
     print(f"{'✅' if ok else '⛔'} `initial` BANNED             {initials} found")
