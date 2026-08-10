@@ -895,16 +895,22 @@ if Path(__file__).with_name("f5_port_test.py").is_file():
 
         _tool = str(Path(__file__).with_name("f5_port_test.py"))
 
-        def _in_repo(text, name):
+        def _in_repo(text, name, after_commit=False):
             f = _root / name
             f.write_text(text)
+            if after_commit:
+                # the netlist must be NEWER than the source commit, or the
+                # staleness guard correctly refuses and the row measures the
+                # guard instead of the thing it meant to measure
+                import time as _t
+                os.utime(f, (_t.time() + 2, _t.time() + 2))
             r = _sp4.run([sys.executable, _tool, str(f)],
                          capture_output=True, text=True, timeout=60)
             return r.returncode, r.stdout + r.stderr
 
         # 67 input ports, matching ccIn — derivation SUCCEEDS and the bank passes
         _good = _f5_netlist([(f"n{k}", "i5") for k in range(32)], extra=[("i5", "n0")], ports=40)
-        rc, out = _in_repo(_good, "good.v")
+        rc, out = _in_repo(_good, "good.v", after_commit=True)
         check(rc == 0, f"F5 DERIVE: matching netlist gave exit {rc}, expected 0")
         check("MEASURED, not assumed" in out,
               "F5 DERIVE: index was not reported as derived")
@@ -912,7 +918,7 @@ if Path(__file__).with_name("f5_port_test.py").is_file():
 
         # 3 input ports vs ccIn = 67 — the two objects disagree, so REFUSE (2)
         _bad = _f5_netlist([(f"n{k}", "i5") for k in range(32)], extra=[("i5", "n0")], ports=3)
-        rc, out = _in_repo(_bad, "bad.v")
+        rc, out = _in_repo(_bad, "bad.v", after_commit=True)
         check(rc == 2, f"F5 PORT-COUNT: disagreement gave exit {rc}, expected 2")
         check("PORT-COUNT DISAGREEMENT" in out,
               "F5 PORT-COUNT: the disagreement was not named")
@@ -941,7 +947,9 @@ if Path(__file__).with_name("f5_port_test.py").is_file():
         _sp4.run(["git", "add", "-A"], **_q)
         _sp4.run(["git", "-c", "user.email=t@t", "-c", "user.name=t",
                   "commit", "-qm", "split"], **_q)
-        _r = _sp4.run([sys.executable, _tool, str(_root / "good.v")],
+        _g = _root / "good.v"; _g.write_text(_good)
+        import time as _t2; os.utime(_g, (_t2.time() + 2, _t2.time() + 2))
+        _r = _sp4.run([sys.executable, _tool, str(_g)],
                       capture_output=True, text=True, timeout=60)
         check(_r.returncode == 2,
               f"F5 NAME-SPLIT: divergent scSign/ccCin gave exit {_r.returncode}, expected 2")
@@ -953,7 +961,9 @@ if Path(__file__).with_name("f5_port_test.py").is_file():
         _sp4.run(["git", "add", "-A"], **_q)
         _sp4.run(["git", "-c", "user.email=t@t", "-c", "user.name=t",
                   "commit", "-qm", "agree"], **_q)
-        _r = _sp4.run([sys.executable, _tool, str(_root / "good.v")],
+        _g = _root / "good.v"; _g.write_text(_good)
+        import time as _t2; os.utime(_g, (_t2.time() + 2, _t2.time() + 2))
+        _r = _sp4.run([sys.executable, _tool, str(_g)],
                       capture_output=True, text=True, timeout=60)
         check(_r.returncode == 0,
               f"F5 NAME-SPLIT: agreeing scSign/ccCin gave exit {_r.returncode}, expected 0")
@@ -963,7 +973,7 @@ if Path(__file__).with_name("f5_port_test.py").is_file():
         _sp4.run(["git", "add", "-A"], **_q)
         _sp4.run(["git", "-c", "user.email=t@t", "-c", "user.name=t",
                   "commit", "-qm", "moved"], **_q)
-        rc, out = _in_repo(_good, "good.v")
+        rc, out = _in_repo(_good, "good.v", after_commit=True)
         check(rc == 2, f"F5 SOURCE-MOVED: gave exit {rc}, expected 2")
         check("ccCin NOT FOUND" in out, "F5 SOURCE-MOVED: did not name ccCin")
 
