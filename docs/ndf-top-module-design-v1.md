@@ -185,7 +185,19 @@ live during load (33 gates = ungated row) and would otherwise dribble
 bias-as-first-addend ruling: after CLEAR, load `b` as the first
 "weight" and stream ONE x=1 cycle → acc = b; then load W₁. Both
 shell controls are NEW SILICON, priced at emission, and both need
-the V9 kernel model. **LOAD_W is 32 cycles canonical** (full-width
+the V9 kernel model. COMPILER-VERIFIED 19:42 on scCore by fanout
+measurement (`load` touches ONE gate; all 32 next-acc outputs are
+the adder sums unconditionally) with the repair NARROWED: the
+missing capability is ZERO-the-accumulator ONLY — no bias port
+(a second way in for something that has one); the cost lands in
+emitSeq's flops, NOT scCore, so the 19:34 area/timing/equivalence
+results all stand. THE CLASS RIDER (compiler's, adopted into
+V1-V3's method): at every composition seam, enumerate the
+capabilities each port used to accept and verify each one
+ABSORBED, PRESERVED, or DELIBERATELY KILLED — the addend port's
+four: two absorbed, two broken (sign 17:45, bias 19:40, one root
+cause). The top-module seams get this audit at V3.
+**LOAD_W is 32 cycles canonical** (full-width
 serial load: 8 value + 24 sign-extension bits) so the register ends
 holding exactly `bitsOf W`; the 4× weight-load cost is PROPAGATED
 into the schedule budget (§D5) — a schedule fact, not a footnote.
