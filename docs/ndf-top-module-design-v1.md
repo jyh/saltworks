@@ -179,9 +179,19 @@ adder's own feedback is their only writer; `runTrace`'s initial state
 is a MODELLING DEVICE, not a mechanism. Therefore THE SHELL supplies:
 (i) a synchronous CLEAR on the acc bank, sequencer-driven at neuron
 start — this also discharges the ∀st₀ power-gating obligation for
-those flops; (ii) the ENABLE (hold) during LOAD_W — the AND row is
-live during load (33 gates = ungated row) and would otherwise dribble
-`andWord(w_bit, residue)` into acc; (iii) bias entry by the LANDED
+those flops; (ii) TWO ENABLES, not one — **upgraded 20:1x at the Captain's
+timetable construction, the evening's THIRD question-found defect:
+the weight register shifts EVERY clocked cycle unconditionally
+(wshift_runTrace_state — W<<<t marches with the clock), so a weight
+parked between its load and its stream DECAYS by 2^gap. The shell
+therefore freezes the WHOLE cell outside its scheduled windows:
+`en_wsh` high during load/extension/stream/bias cycles, `en_acc`
+high during stream/bias cycles only (the acc hold during load —
+the AND row is live during load, 33 gates = ungated row, and would
+otherwise dribble andWord(w_bit, residue) into acc). Frozen gaps
+are nonexistent time in the kernel's two-runTrace model — the
+freeze IS what makes parking a weight valid, and V9's model covers
+both enables;** (iii) bias entry by the LANDED
 bias-as-first-addend ruling: after CLEAR, load `b` as the first
 "weight" and stream ONE x=1 cycle → acc = b; then load W₁. Both
 shell controls are NEW SILICON, priced at emission, and both need
