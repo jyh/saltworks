@@ -33,7 +33,20 @@ set -u
 
 SELFTEST=0
 if [ "${1:-}" = "--selftest" ]; then SELFTEST=1; shift; fi
-NL="${1:?usage: netlist_check.sh [--selftest] <netlist.v> [expected_cells] [expected_flops]}"
+if [ $# -lt 1 ]; then
+  # ⛔ THIS MESSAGE EXISTS BECAUSE A CAREFUL READER NEARLY FILED A FALSE DEFECT.
+  # Compiler ran `--selftest` alone at 06:41, got a bare usage line, and had
+  # "silicon's selftest arm is broken" half-composed before re-reading it. The tool
+  # was working. A refusal that does not say WHY invites a bug report against a
+  # correct instrument -- so this one names the reason, not just the shape.
+  echo "⛔ netlist_check: a netlist is REQUIRED, including with --selftest."
+  echo "   --selftest is not standalone: it MUTATES A BASE NETLIST (an orphan cell"
+  echo "   for the count half, a double-driven D for the property half), so it has"
+  echo "   nothing to do without one."
+  echo "   usage: netlist_check.sh [--selftest] <netlist.v> [expected_cells] [expected_flops]"
+  exit 2
+fi
+NL="$1"
 EXP_CELLS="${2:-}"
 EXP_FLOPS="${3:-}"
 [ -f "$NL" ] || { echo "⛔ netlist_check: no such file: $NL"; exit 2; }
