@@ -84,6 +84,15 @@ turns h≤127 into a theorem — ruled TOGETHER with the adjoint convention.
 (e) L6's fate (default cut; stretch only behind (a)). (f) The salt-pillar
 allocation. (g) Block ①'s Row A amended form (the `emit_runs` shape).
 
+**PRE-COUNCIL SEAT SIGN-OFFS (12:1x):** compiler checked block ①'s ladder
+against the corpus and DECLINES TO REPRICE (honest as scoped). Evidence
+FENCE-PASSED the pack and all three blocks (every raw phrase hit was a
+block citing the fence, not breaking it) and PRE-REGISTERED F6 — the
+three-tier "verified learning" earn criterion with falsification
+conditions and riders (`dec7872`, in the fence doc) — answering block ③
+C6's ask before rung A5 exists, which is the only time it is worth
+anything.
+
 ## ② SALT NEXT STEPS
 
 - Pi submission (the ratified venue; flagship skeleton at papers/flagship/).
