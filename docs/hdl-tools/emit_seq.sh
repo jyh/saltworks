@@ -1,8 +1,9 @@
 #!/bin/bash
 # emit_seq.sh — PRINT the clocked emission of a Seq. R6/R8, the night council.
 #
-#   sh docs/hdl-tools/emit_seq.sh            # the signed cell, L1 (no shell)
-#   sh docs/hdl-tools/emit_seq.sh > path.v   # caller decides where it lands
+#   sh docs/hdl-tools/emit_seq.sh            # L1: the signed cell, NO shell (V7's object)
+#   sh docs/hdl-tools/emit_seq.sh shell      # L2: the RATIFIED cell (R6 shell)
+#   sh docs/hdl-tools/emit_seq.sh shell > path.v    # caller decides where it lands
 #
 # PRINTS, NEVER WRITES — the .v files live in SaltWorks/Silicon/RTL/ and that is
 # SILICON's slot. This script hands you bytes; you own the file you put them in.
@@ -21,6 +22,9 @@
 #   grep -c '^  assign'          == outs.length         (96)
 #   grep -c 'initial'            == 0                   (the power-gating law)
 #   grep -c 'dfxtp_1'            == 0                   (R2)
+#
+# L2 (shell) criterion, PRE-REGISTERED on the bus before it was emitted:
+#   cells 386 (=289 + 64 mux2 + 32 and2 + 1 inv) · flops 64 · assigns 96 · conb 0
 set -e
 cd "$(dirname "$0")/../.."
 SCRATCH=$(mktemp -t emitseq).lean
@@ -30,6 +34,15 @@ import SaltWorks.HDL.MacCell
 open SaltWorks.HDL SaltWorks.HDL.MacCell
 #eval IO.print (emitSeq "1" "2" "mac_cell_signed_seq" scellSeq)
 LEAN
+if [ "$1" = "shell" ]; then
+cat > "$SCRATCH" <<'LEAN'
+import SaltWorks.HDL.EmitS
+import SaltWorks.HDL.MacCell
+open SaltWorks.HDL SaltWorks.HDL.MacCell
+-- clearFrom = 32: wsh occupies state 0..31, acc 32..63
+#eval IO.print (emitSeqShell "1" "2" 32 "mac_cell_signed_shell" scellSeq)
+LEAN
+fi
 # through the fleet wrapper: it holds the build lock and records the run
 ../saltbuild.sh "$SCRATCH" | sed '/^saltbuild EXIT=/d'
 rm -f "$SCRATCH"

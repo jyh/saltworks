@@ -234,6 +234,79 @@ def emitSeq (drive : String) (flopDrive : String) (name : String) (m : SaltWorks
     ++ slines odrives ++ "\n" ++ slines ddrives
     ++ "\nendmodule\n\n`default_nettype wire\n"
 
+/-! ### `emitSeqShell` — L2, the RATIFIED cell (R6)
+
+L1 above is V7's object and **is not the ruled cell**: its weight register shifts every clocked
+cycle unconditionally, so a weight parked between load and stream decays by `2^gap` (the Captain's
+2-2-1 timetable found it), and its accumulator has no way to be zeroed.
+
+```
+   wsh bit j        D = mux2(A0 = Q, A1 = next, S = en_wsh)          hold when en_wsh = 0
+   acc bit j        D = and2( mux2(A0 = Q, A1 = next, S = en_acc), nclr )
+   nclr             inv(clr) — ONE inverter shared by the whole acc bank
+```
+
+`mux2_1`'s map is `.A0/.A1/.S/.X` with **S = 1 selecting A1** (the landed peephole at :353-355 and
+`import_netlist.py:123`'s expansion, `X = (A0∧¬S) ∨ (A1∧S)`). So `S = en` holds on 0 and loads on 1.
+
+⚖️ **THIS IS RTL, NOT THE PROOF.** *That the freeze and the clear are CORRECT — frozen gaps as
+nonexistent time, `∀ st₀` surviving the CLEAR — is V9, and R8 places it behind the layout on
+purpose. Emission makes a capability EXIST; it does not certify it.* -/
+
+/-- The shell's per-bit input logic. `clearFrom` is the first state index that gets the CLEAR gate
+(for `scellSeq`: 32 — wsh occupies 0…31, acc 32…63). -/
+def emitShellBit (drive : String) (coreIn : Nat) (nIn : Nat) (clearFrom : Nat)
+    (j : Nat) : String :=
+  let hold := sNet coreIn (nIn + j)
+  -- wsh bits: the mux drives the flop input DIRECTLY. acc bits: the mux drives an
+  -- intermediate that the CLEAR gate consumes. No bridging `assign` in either case.
+  if j < clearFrom then
+    "  sky130_fd_sc_hd__mux2_" ++ drive ++ " m" ++ toString j
+      ++ " (.A0(" ++ hold ++ "), .A1(ns" ++ toString j
+      ++ "), .S(en_wsh), .X(d" ++ toString j ++ "));"
+  else
+    "  sky130_fd_sc_hd__mux2_" ++ drive ++ " m" ++ toString j
+      ++ " (.A0(" ++ hold ++ "), .A1(ns" ++ toString j
+      ++ "), .S(en_acc), .X(mo" ++ toString j ++ "));\n"
+      ++ "  sky130_fd_sc_hd__and2_" ++ drive ++ " c" ++ toString j
+      ++ " (.A(mo" ++ toString j ++ "), .B(nclr), .X(d" ++ toString j ++ "));"
+
+/-- ⭐⭐ **THE RATIFIED CELL.** `emitSeq` plus R6's shell: `en_wsh`, `en_acc`, and a synchronous
+CLEAR on the accumulator bank. -/
+def emitSeqShell (drive : String) (flopDrive : String) (clearFrom : Nat)
+    (name : String) (m : SaltWorks.HDL.Seq) : String :=
+  let c := m.core
+  let inPorts  := (List.range m.nIn).map fun i => "    input  wire " ++ sNet c.nIn i
+  let outPorts := (List.range m.nOut).map fun k => "    output wire o" ++ toString k
+  let stDecls  := (List.range m.nState).map fun j => "  wire " ++ sNet c.nIn (m.nIn + j) ++ ";"
+  let nsDecls  := (List.range m.nState).map fun j => "  wire ns" ++ toString j ++ ";"
+  let moDecls  := (List.range m.nState).map fun j => "  wire mo" ++ toString j ++ ";"
+  let dDecls   := (List.range m.nState).map fun j => "  wire d" ++ toString j ++ ";"
+  let decls    := c.gates.map fun g => "  wire " ++ sNet c.nIn g.out ++ ";"
+  let dummies  := c.gates.filterMap dummyDecl
+  let cells    := c.gates.map (emitCell drive c.nIn)
+  -- the flop's Q drives BOTH the core's state input and the mux's hold arm
+  let flops    := (List.range m.nState).map fun j =>
+    "  sky130_fd_sc_hd__dfxtp_" ++ flopDrive ++ " q" ++ toString j
+      ++ " (.CLK(clk), .D(d" ++ toString j ++ "), .Q(" ++ sNet c.nIn (m.nIn + j) ++ "));"
+  let shell    := (List.range m.nState).map (emitShellBit drive c.nIn m.nIn clearFrom)
+  let odrives  := (List.range m.nOut).map fun k =>
+    "  assign o" ++ toString k ++ " = " ++ sNet c.nIn (c.outs.getD k 0) ++ ";"
+  let nsdrives := (List.range m.nState).map fun j =>
+    "  assign ns" ++ toString j ++ " = " ++ sNet c.nIn (c.outs.getD (m.nOut + j) 0) ++ ";"
+  "`default_nettype none\n\nmodule " ++ name ++ " (\n"
+    ++ String.intercalate ",\n"
+         (("    input  wire clk" :: inPorts)
+            ++ ["    input  wire clr", "    input  wire en_acc", "    input  wire en_wsh"]
+            ++ outPorts) ++ "\n);\n"
+    ++ slines stDecls ++ "\n" ++ slines nsDecls ++ "\n"
+    ++ slines moDecls ++ "\n" ++ slines dDecls ++ "\n  wire nclr;\n"
+    ++ slines decls ++ "\n" ++ slines dummies ++ "\n"
+    ++ "  sky130_fd_sc_hd__inv_" ++ drive ++ " gnclr (.A(clr), .Y(nclr));\n"
+    ++ slines cells ++ "\n" ++ slines flops ++ "\n" ++ slines shell ++ "\n"
+    ++ slines odrives ++ "\n" ++ slines nsdrives
+    ++ "\nendmodule\n\n`default_nettype wire\n"
+
 /-! ## The `mux2_1` peephole — the Captain's work order, 2026-08-07
 
 Relayed by the silicon seat at 06:51 with a measured price: on the RV32I read
