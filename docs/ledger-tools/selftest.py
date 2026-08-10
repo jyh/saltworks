@@ -784,11 +784,13 @@ def _f5_netlist(xor_specs, extra=(), ports=3):
     lines = ["`default_nettype none", "", "module fixture ("]
     lines += [f"    input  wire i{k}," for k in range(ports)]
     lines += ["    output wire o0", ");"]
+    # net names follow emitS: n<index>. The XOR bank sits BELOW the fixture's
+    # scMOff (150); `extra` gates sit ABOVE it, so they are the boundary crossing.
     for k, (a, b) in enumerate(xor_specs):
-        lines.append(f"  sky130_fd_sc_hd__xor2_1 gx{k} (.A({a}), .B({b}), .X(nx{k}));")
+        lines.append(f"  sky130_fd_sc_hd__xor2_1 gx{k} (.A({a}), .B({b}), .X(n{100 + k}));")
     for k, (a, b) in enumerate(extra):
-        lines.append(f"  sky130_fd_sc_hd__and2_1 ga{k} (.A({a}), .B({b}), .X(na{k}));")
-    lines += ["  assign o0 = nx0;", "endmodule", ""]
+        lines.append(f"  sky130_fd_sc_hd__and2_1 ga{k} (.A({a}), .B({b}), .X(n{200 + k}));")
+    lines += ["  assign o0 = n100;", "endmodule", ""]
     return "\n".join(lines)
 
 
@@ -854,7 +856,8 @@ if Path(__file__).with_name("f5_port_test.py").is_file():
     tied_low = _f5_netlist([(f"n{k}", "i2") for k in range(32)])
     rc, out = _run_f5(tied_low, port="i2")
     check(rc == 1, f"F5 (d) TIED-LOW: gave exit {rc}, expected 1")
-    check("OFF BY ONE" in out, "F5 (d) TIED-LOW: did not name the off-by-one")
+    check("OFF BY ONE" in out or "proxy-grade" in out,
+          "F5 (d) TIED-LOW: neither the off-by-one nor the proxy fallback was named")
     check("(a) XOR BANK" in out and "PRESENT" in out,
           "F5 (d) TIED-LOW: (a) should still PASS — that is the point of the row")
 
@@ -886,7 +889,7 @@ if Path(__file__).with_name("f5_port_test.py").is_file():
             # reality. Mutation-verified: hardcoding (2,67) survives a (2,67)
             # fixture and dies against this one.
             "def ccX : Net := 0\ndef ccLoad : Net := 1\n"
-            "def ccCin : Net := 5\ndef ccIn : Nat := 40\n")
+            "def ccCin : Net := 5\ndef ccIn : Nat := 40\ndef scMOff : Nat := 150\n")
         _q = {"capture_output": True, "text": True, "cwd": _root}
         _sp4.run(["git", "init", "-q"], **_q)
         _sp4.run(["git", "add", "-A"], **_q)
@@ -938,12 +941,37 @@ if Path(__file__).with_name("f5_port_test.py").is_file():
         check("STALE NETLIST" in _r.stdout + _r.stderr,
               "F5 STALENESS: the staleness was not named")
 
+        # ⭐⭐ (d) EXACT FORM vs PROXY — the rows that make the difference visible.
+        # scMOff = 150 in this fixture; the bank sits at n100.., crossings at n200...
+        _cross = _f5_netlist([(f"n{k}", "i5") for k in range(32)],
+                             extra=[("i5", "n100")], ports=40)   # and2 -> n200
+        rc, out = _in_repo(_cross, "cross.v", after_commit=True)
+        check(rc == 0, f"F5 (d) EXACT: a crossing gave exit {rc}, expected 0")
+        check("crosses into the accumulator" in out,
+              "F5 (d) EXACT: the crossing was not reported in the exact form")
+        check("EXACT form" in out, "F5 (d) EXACT: fell back to the proxy")
+
+        # bank only, nothing at/above scMOff -> NOT MET, and it must say OFF BY ONE
+        _nocross = _f5_netlist([(f"n{k}", "i5") for k in range(32)], ports=40)
+        rc, out = _in_repo(_nocross, "nocross.v", after_commit=True)
+        check(rc == 1, f"F5 (d) EXACT: no crossing gave exit {rc}, expected 1")
+        check("OFF BY ONE" in out, "F5 (d) EXACT: did not name the off-by-one")
+
+        # ⛔ emitS NAMING DEPENDENCY: if nets stop being n<k>, the boundary cannot
+        # be applied and the tool must REFUSE rather than silently degrade to the
+        # proxy. Silicon named this dependency; this row holds it.
+        _renamed = _cross.replace(".X(n200)", ".X(wire_alpha)")
+        rc, out = _in_repo(_renamed, "renamed.v", after_commit=True)
+        check(rc == 2, f"F5 NAMING: renamed nets gave exit {rc}, expected 2")
+        check("NET NAMING BROKEN" in out, "F5 NAMING: the broken naming was not named")
+
         # ⭐ PORT-NAME SPLIT: the tool is correct on the SIGNED cell only because
         # `scSign_eq_ccCin := rfl`. If that equality ever breaks, deriving from
         # ccCin silently reads the wrong port — and the port count (67 for BOTH
         # cells, frozen) cannot tell them apart. Must REFUSE, not guess.
         (_root / "SaltWorks/HDL/MacCell.lean").write_text(
-            "def ccCin : Net := 5\ndef scSign : Net := 7\ndef ccIn : Nat := 40\n")
+            "def ccCin : Net := 5\ndef scSign : Net := 7\ndef ccIn : Nat := 40\n"
+            "def scMOff : Nat := 150\n")
         _sp4.run(["git", "add", "-A"], **_q)
         _sp4.run(["git", "-c", "user.email=t@t", "-c", "user.name=t",
                   "commit", "-qm", "split"], **_q)
@@ -957,7 +985,8 @@ if Path(__file__).with_name("f5_port_test.py").is_file():
               "F5 NAME-SPLIT: the split was not named")
         # and agreement is accepted, so the guard is not just always-refuse
         (_root / "SaltWorks/HDL/MacCell.lean").write_text(
-            "def ccCin : Net := 5\ndef scSign : Net := 5\ndef ccIn : Nat := 40\n")
+            "def ccCin : Net := 5\ndef scSign : Net := 5\ndef ccIn : Nat := 40\n"
+            "def scMOff : Nat := 150\n")
         _sp4.run(["git", "add", "-A"], **_q)
         _sp4.run(["git", "-c", "user.email=t@t", "-c", "user.name=t",
                   "commit", "-qm", "agree"], **_q)
@@ -969,7 +998,8 @@ if Path(__file__).with_name("f5_port_test.py").is_file():
               f"F5 NAME-SPLIT: agreeing scSign/ccCin gave exit {_r.returncode}, expected 0")
 
         # the source moved: ccCin gone -> refuse, and say WHICH name is missing
-        (_root / "SaltWorks/HDL/MacCell.lean").write_text("def ccIn : Nat := 40\n")
+        (_root / "SaltWorks/HDL/MacCell.lean").write_text(
+            "def ccIn : Nat := 40\ndef scMOff : Nat := 150\n")
         _sp4.run(["git", "add", "-A"], **_q)
         _sp4.run(["git", "-c", "user.email=t@t", "-c", "user.name=t",
                   "commit", "-qm", "moved"], **_q)

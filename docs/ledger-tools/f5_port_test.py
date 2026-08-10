@@ -185,6 +185,8 @@ def derive_port_map(start: Path):
                       "carry-in index depends on WHICH cell this netlist is, and "
                       "the port count (67 for both) cannot tell me. Pass argv[2].")
     nin = re.search(r"^\s*def\s+ccIn\s*:\s*Nat\s*:=\s*(\d+)", src, re.M)
+    moff = re.search(r"^\s*def\s+scMOff\s*:\s*Nat\s*:=\s*(\d+)", src, re.M)
+    globals()["_SCMOFF"] = int(moff.group(1)) if moff else None
     if not cin or not nin:
         missing = ", ".join(n for n, m in (("ccCin", cin), ("ccIn", nin)) if not m)
         return None, f"HEAD:{rel} PARSED BUT {missing} NOT FOUND — the source moved"
@@ -387,23 +389,63 @@ def main() -> None:
         print("    — NOT REACHED: (a) failed, so there is no sign net to trace.")
         verdict_d = False
     else:
-        consumers = [(g["type"], g["inst"]) for g in gates
-                     if sign_net in set(g["in"].values())]
-        non_xor = [(t, i) for t, i in consumers if not t.startswith("xor2")]
+        consumers = [g for g in gates if sign_net in set(g["in"].values())]
+        non_xor = [g for g in consumers if not g["type"].startswith("xor2")]
+        scmoff = globals().get("_SCMOFF")
+
+        # ⛔⛔ THE PROXY FORM ("feeds >=1 non-xor2 cell") IS THE WEAK ONE, and
+        # silicon measured why (19:25) after routing it to me an hour earlier.
+        # On mac_cell_signed.v the sign crosses into the accumulator TWICE:
+        #     xor2_1 g133 -> n133      <- the proxy is BLIND to this one
+        #     and2_1 g135 -> n135
+        # Both forms pass on the correct artifact, so nothing exposed the
+        # difference. But an adder that takes carry-in through its SUM path alone
+        # crosses only via an XOR, and the proxy would then report NOT MET on
+        # CORRECT work — the same rot compiler warned about for `== 33`, one
+        # criterion over: it encodes an accident of THIS adder.
+        # ✅ THE EXACT FORM, compiler's kernel predicate transferred VERBATIM:
+        #     kernel   g.out >= scMOff && g.op.fanin.contains scSign
+        #     verilog  any consumer of the sign whose OUTPUT net is n<k>, k >= scMOff
+        # ⚠️ AND IT RESTS ON AN emitS PROPERTY WORTH NAMING (silicon): NET INDICES
+        # SURVIVE EMISSION AS NET NAMES. That is what lets a kernel-side boundary be
+        # checked on the artifact. If emitS ever renames nets, this form silently
+        # loses its boundary and degrades to the proxy — so the naming is CHECKED
+        # below rather than trusted.
+        crossings, unnamed = [], 0
+        for g in consumers:
+            outs = [n for n in g["out"].values()]
+            idx = [int(m.group(1)) for m in (re.match(r"^n(\d+)$", o) for o in outs) if m]
+            if not idx:
+                unnamed += 1
+            elif scmoff is not None and max(idx) >= scmoff:
+                crossings.append(g)
+
         print(f"    sign net `{sign_net}` total fanout {len(consumers)} "
               f"= {len(consumers) - len(non_xor)} xor2 + {len(non_xor)} non-xor2")
-        if non_xor:
-            print("    ✅ MET — non-xor2 consumer(s): "
-                  + ", ".join(f"{t}@{i}" for t, i in non_xor[:4])
-                  + (f" (+{len(non_xor) - 4} more)" if len(non_xor) > 4 else ""))
-            print("       A HAND MUST STILL CONFIRM that gate is the carry-GENERATE")
-            print("       term and not some unrelated consumer — this tool proves")
-            print("       the sign LEAVES the XOR bank, not WHERE it arrives.")
+        if scmoff is None:
+            print("    ⚠️ scMOff NOT DERIVABLE from the source — falling back to the")
+            print("       PROXY form (>=1 non-xor2 consumer), which silicon measured")
+            print("       as weaker. This verdict is proxy-grade; say so if you cite it.")
+            verdict_d = bool(non_xor)
+        elif unnamed:
+            die(f"NET NAMING BROKEN: {unnamed} consumer(s) of the sign have output "
+                "nets not of the form n<k>, so the scMOff boundary cannot be applied. "
+                "emitS's index-survives-as-name property is what makes this check "
+                "possible; without it the tool would silently degrade to the proxy.")
+        elif crossings:
+            print(f"    ✅ MET — sign crosses into the accumulator (net >= {scmoff}) "
+                  f"{len(crossings)} time(s): "
+                  + ", ".join(f"{g['type']}@{g['inst']}->{list(g['out'].values())[0]}"
+                              for g in crossings[:4]))
+            print("       EXACT form (output net >= scMOff), not the non-xor2 proxy.")
+            print("       ⚠️ REACHABILITY ONLY: this proves the sign ENTERS the adder,")
+            print("       never that it arrives at the right terminal. A hand owns that.")
             verdict_d = True
         else:
-            print("    ⛔ NOT MET — the sign feeds ONLY xor2 cells. The carry-in is")
-            print("       not driven by it, so this computes acc + ~v: OFF BY ONE.")
-            print("       (a) and (b) both PASS on this design. That is why (d) exists.")
+            print(f"    ⛔ NOT MET — the sign reaches NO gate at or above scMOff "
+                  f"({scmoff}): it never enters the accumulator. This computes")
+            print("       acc + ~v: OFF BY ONE. (a) and (b) both PASS on this design.")
+            print("       That is exactly why (d) exists.")
             verdict_d = False
 
     # ---- (c) refused, loudly ----
