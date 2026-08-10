@@ -3,7 +3,14 @@ Copyright (c) 2026 Jason Hickey. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Jason Hickey, Claude
 -/
-import SaltWorks
+import SaltWorks.HDL.Adder
+import SaltWorks.HDL.Bitwise
+import SaltWorks.HDL.Shifter
+import SaltWorks.HDL.Immediate
+import SaltWorks.HDL.RegNext
+import SaltWorks.HDL.AluSelect
+import SaltWorks.HDL.PriorityEnc
+import SaltWorks.Tactic.AuditAxioms
 
 /-!
 # ScratchPortLens — port-list LENGTH certificates
@@ -16,10 +23,13 @@ written, had **no explicit `outs.length` theorem anywhere in the corpus**. The
 theorems are here *because the corpus did not have them* — they are not evidence
 that the corpus ever did.
 
-⚠️ **AND THIS FILE IS `Scratch*`, THEREFORE GITIGNORED, THEREFORE NOT IN THE
-BUILD GRAPH.** `SaltWorks.lean` does not import it; `lake build` of the corpus
-never elaborates it; nothing downstream can cite it. It becomes corpus only when
-the maestro sweeps it into a real module and adds the import.
+⚠️ **HISTORY OF THIS FILE'S STANDING** (the paragraph below described its birth
+and went stale in two steps; both are recorded because each state misled once):
+born `ScratchPortLens` (gitignored, outside the build graph) → swept to
+`PortLengths.lean` and COMMITTED 8/8 with "import owed" — but the import was
+NOT wired, leaving it tracked-yet-unelaborated for two days (the SerOrgan
+pattern; unreachable modules can be silently incompatible) → ROOTED in
+`SaltWorks.lean` 8/10 at the closure-check ritual. It is corpus now.
 
 ⇒ ⛔ **A CENSUS ASKING "WHAT DOES THE CORPUS PROVE ABOUT PORT-LIST LENGTHS" MUST
 EXCLUDE `Scratch*`.** A tree-wide `command grep` (which, unlike the shimmed
