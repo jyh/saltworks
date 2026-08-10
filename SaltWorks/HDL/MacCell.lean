@@ -1345,6 +1345,9 @@ the first failure, so everything after a failure reads as clean. -/
 #audit_axioms scXorGates_ssa
 #audit_axioms sc_adder_bit
 #audit_axioms cmplWord_bit
+-- ⛔ ADDED after silicon's 19:10 MEAS: this one was the section's ONE unaudited declaration, and
+-- my landing line ("31 new theorems · 31 audit ticks") hid it by stating the tick count twice.
+#audit_axioms scSign_eq_ccCin
 #audit_axioms sc_xor_value
 #audit_axioms sc_hin2
 #audit_axioms sc_sum_bit
