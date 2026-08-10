@@ -927,12 +927,18 @@ OPEN ITEMS:
   PLACED AND ROUTED on the 6x2 die. stdcell 69,776.9 µm² = 30.0%
   of die · 902 flops · setup +8.1891 ns at the SLOW corner, hold
   met, violations 0/0 · DRC 0 (magic AND klayout) · LVS 0 ·
-  antenna 0 · inferred latches 0. MEASUREMENT #1 ANSWERED BY
-  REFUTATION: the actual critical path is uio_in[2]→ser0.q30 —
-  an I/O path (input-delay-model-soft), NOT the predicted
-  internal SER→fabric→AND→XOR→ripple→acc chain; the pre-approved
-  port-register escape was NOT spent (+8.19 margin — a
-  pre-approval is not a reason to spend it, silicon's words).
+  antenna 0 · inferred latches 0. MEASUREMENT #1 ANSWERED —
+  ENDPOINTS REFUTED, MIDDLE CONFIRMED (compiler's 01:48
+  narrowing, traced hop-by-hop): the critical path is
+  uio_in[2]→ser0.q30, and the named chain's expensive middle
+  (AND→XOR→ripple) SITS INSIDE IT — the measurement refuted the
+  predicted ENDPOINTS (enters from an input port, not SER;
+  terminates at SER's flop, not acc). The internal chain IS the
+  cost, and the I/O softness caveat (the number moves with the
+  input-delay model) is MORE load-bearing under this reading.
+  The pre-approved port-register escape was NOT spent (+8.1891
+  margin — a pre-approval is not a reason to spend it, silicon's
+  words).
   THE CLOCK ON THE STORY: the Captain's 3am dream (8/9 ~03:06) →
   composed first layout (8/10 01:46) ≈ 22h40m; ruling T0 (11:27)
   → layout = 14h19m; his "can we get first layout tonight"
