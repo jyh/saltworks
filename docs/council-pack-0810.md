@@ -92,8 +92,11 @@ carried by the already-landed `runFor_add`. SCOPE, per compiler's own
 probe demonstrates ONE INGREDIENT of (g) — the fuel composition — NOT the
 `emit_runs` shape itself (entry-pc/`EmbedsAt`/exit-conjunct/frame), which
 remains untested and is the thing (g) actually rules on. Evidence
-FENCE-PASSED the pack and all three blocks (every raw phrase hit was a
-block citing the fence, not breaking it) and PRE-REGISTERED F6 — the
+FENCE-PASSED the pack and all three blocks **at `dec7872`**, and RE-RAN
+the pass on the amended pack **as of `2785d88`** (its 13:45 post) — a
+later amendment makes either pin visibly older than the document (every
+raw phrase hit was a block citing the fence, not breaking it) — and
+PRE-REGISTERED F6 — the
 three-tier "verified learning" earn criterion with falsification
 conditions and riders (`dec7872`, in the fence doc) — answering block ③
 C6's ask before rung A5 exists, which is the only time it is worth
