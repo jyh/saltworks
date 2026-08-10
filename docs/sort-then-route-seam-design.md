@@ -102,7 +102,26 @@ idle_idle_never_decides · idle_headers_are_identical    (the exclusion controls
 `cKeyLE_full_load` rewrite OMITTED — **that rewrite is the only place `cDestOf`
 ever entered the chain.** All five went through first try.*
 
-### ⛔ REMAINING — the STAGE half, and it is now one object
+### ✅ (A) (B) (D) ALSO LANDED — only (C) remains
+
+```
+ceCPort_identical             idle-vs-idle passes through, ANY comparator   (A)
+PartialStageOK                the invariant off full load                   (B)
+elemSortsAt_of_partial_stage  ElemSortsAt st tr k frameLE                   (D)
+cKeyOfFrame / frameLE         the two-field comparator read off the frame
+```
+⭐ ***THE CHAIN IS UNBROKEN FROM ELEMENT TO NETWORK OUTPUT:***
+```
+PartialStageOK at stage k  →  ElemSortsAt st tr k frameLE
+…at every stage            →  bnC_output_frames_are_the_fold   (landed, generic)
+                           →  runNetF frameLE bnComps (input frames)
+```
+⛔ **STILL OWED: (C) — that `PartialStageOK` at stage `k` gives `PartialStageOK`
+at stage `k+1`.** *Route: a compare-exchange permutes the two frames on its wires
+and leaves the other six alone, so both clauses are preserved by a multiset
+argument. `elemSortsAt_all` is the full-load analogue to mirror.*
+
+### The original decomposition, kept for the record
 
 ```
 (A) ceCPort_identical    idle-vs-idle: identical inputs ⇒ identical outputs, so
