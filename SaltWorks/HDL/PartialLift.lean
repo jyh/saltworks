@@ -1,5 +1,6 @@
 import SaltWorks.HDL.SeamElement
 import SaltWorks.HDL.SeamJoinA
+import SaltWorks.HDL.SeamJoinB
 
 /-!
 # THE PARTIAL-LOAD LIFT — the keystone
@@ -247,6 +248,127 @@ theorem ceCPort_identical (s : List Bool) (hs : s.length = 4) (r f : List Bool)
   rw [ceCPort]
   exact runTrace_ceC_identical j hj r f s hs hlen
 
+/-! ## (B) THE INVARIANT AND (D) THE PER-STAGE LEMMA -/
+
+/-- The key a frame actually presents: its activity bit and its decoded
+destination. -/
+def cKeyOfFrame (f : List Bool) : Bool × Nat := (!(f.getD 0 false), cDestOf f)
+
+/-- The comparator the partial-load chain concludes in — the two-field key,
+never `cDestOf` alone. -/
+def frameLE (x y : List Bool) : Bool := cKeyLE (cKeyOfFrame x) (cKeyOfFrame y)
+
+/-- An idle line is silent: `cFrame_idle_is_silent`, and its destination field
+is unobservable anyway (`ceC_idle_dest_is_unobservable`), so the invariant pins
+it to 0. -/
+def SilentIdle (L : Nat) : List Bool := cFrame false 0 (List.replicate L false)
+
+/-- A frame's leading bit IS its activity bit. -/
+theorem cFrame_getD0 (a : Bool) (d : Nat) (p : List Bool) :
+    (cFrame a d p).getD 0 false = a := rfl
+
+theorem cKeyOfFrame_active (d : Nat) (hd : d < 8) (p : List Bool) :
+    cKeyOfFrame (cFrame true d p) = cKey true d := by
+  rw [cKeyOfFrame, cKey, cFrame_getD0, cDestOf_cFrame d hd p]
+
+theorem cKeyOfFrame_idle (L : Nat) : cKeyOfFrame (SilentIdle L) = cKey false 0 := by
+  rw [SilentIdle, cKeyOfFrame, cKey, cFrame_getD0, cDestOf_idle_is_zero]
+
+/-- **The frame invariant at partial load.** Every wire carries either an ACTIVE
+frame or the SILENT idle frame; and any two distinct wires carrying ACTIVE
+frames carry distinct destinations.
+
+⚠️ The active-distinctness clause is load-bearing exactly as `StageOK`'s was:
+`ceC_pair_tie_splices_the_payload` shows a genuine active tie misroutes, and
+invisibly to any header-level invariant. What is dropped is only the demand that
+every wire be active — the clause `cDestOf_idle_is_zero` made unsatisfiable the
+moment two lines went idle. -/
+def PartialStageOK (st : List Bool) (tr : List (List Bool)) (L k : Nat) : Prop :=
+  (∀ w, w < 8 →
+      (∃ d p, d < 8 ∧ p.length = L ∧ bnCFrameAt st tr k w = cFrame true d p)
+      ∨ bnCFrameAt st tr k w = SilentIdle L)
+  ∧ (∀ w₁ w₂, w₁ < 8 → w₂ < 8 → w₁ ≠ w₂ →
+      ∀ d₁ p₁ d₂ p₂, bnCFrameAt st tr k w₁ = cFrame true d₁ p₁ →
+        bnCFrameAt st tr k w₂ = cFrame true d₂ p₂ → d₁ ≠ d₂)
+
+/-- ⭐⭐⭐ **`ElemSortsAt` AT PARTIAL LOAD, under `frameLE`.** The three cases a
+comparator can see are discharged by the three element lemmas: two actives and
+active-vs-idle by `ceCPort_partial_out0/1`, idle-vs-idle by `ceCPort_identical`. -/
+theorem elemSortsAt_of_partial_stage (st : List Bool) (tr : List (List Bool))
+    (n L k : Nat) (hk : k < 24)
+    (hrst : tr.map (fun i => i.getD 0 false) = true :: List.replicate n false)
+    (hSt : PartialStageOK st tr L k) :
+    ElemSortsAt st tr k frameLE := by
+  obtain ⟨hframes, hdist⟩ := hSt
+  have ha : (bnCCompAt k).1 < 8 := (bnComps_lt_eight _ (bnCCompAt_mem k hk)).1
+  have hb : (bnCCompAt k).2 < 8 := (bnComps_lt_eight _ (bnCCompAt_mem k hk)).2
+  have hab : (bnCCompAt k).1 ≠ (bnCCompAt k).2 := bnCCompAt_ne k hk
+  have htr : tr.length = n + 1 := by
+    have h := congrArg List.length hrst; simpa using h
+  -- the two frames, each active or silent-idle
+  have hlenAny : ∀ w, (bnCFrameAt st tr k w).length = n + 1 := by
+    intro w; rw [bnCFrameAt_length, htr]
+  rcases hframes _ ha with ⟨da, pa, hda, hpa, hfa⟩ | hfa <;>
+    rcases hframes _ hb with ⟨db, pb, hdb, hpb, hfb⟩ | hfb
+  · -- ACTIVE vs ACTIVE, distinct destinations
+    have hne : da ≠ db := hdist _ _ ha hb hab da pa db pb hfa hfb
+    have hlenA : (cFrame true da pa).length = n + 1 := by rw [← hfa]; exact hlenAny _
+    have hpab : pa.length = pb.length := by rw [hpa, hpb]
+    have hkey : frameLE (bnCFrameAt st tr k (bnCCompAt k).1)
+                        (bnCFrameAt st tr k (bnCCompAt k).2)
+        = cKeyLE (cKey true da) (cKey true db) := by
+      rw [frameLE, hfa, hfb, cKeyOfFrame_active da hda pa, cKeyOfFrame_active db hdb pb]
+    refine ⟨?_, ?_⟩
+    · rw [hkey, hfa, hfb, hrst,
+          ceCPort_partial_out0 (bnCSlice st k) n true true da db hda hdb
+            (by simp [hne]) (by simp) pa pb hpab hlenA]
+    · rw [hkey, hfa, hfb, hrst,
+          ceCPort_partial_out1 (bnCSlice st k) n true true da db hda hdb
+            (by simp [hne]) (by simp) pa pb hpab hlenA]
+  · -- ACTIVE vs IDLE
+    have hlenA : (cFrame true da pa).length = n + 1 := by rw [← hfa]; exact hlenAny _
+    have hlenB : (SilentIdle L).length = n + 1 := by rw [← hfb]; exact hlenAny _
+    have hpab : pa.length = (List.replicate L false).length := by
+      rw [hpa, List.length_replicate]
+    have hkey : frameLE (bnCFrameAt st tr k (bnCCompAt k).1)
+                        (bnCFrameAt st tr k (bnCCompAt k).2)
+        = cKeyLE (cKey true da) (cKey false 0) := by
+      rw [frameLE, hfa, hfb, cKeyOfFrame_active da hda pa, cKeyOfFrame_idle L]
+    refine ⟨?_, ?_⟩
+    · rw [hkey, hfa, hfb, hrst, SilentIdle,
+          ceCPort_partial_out0 (bnCSlice st k) n true false da 0 hda (by omega)
+            (by simp) (by simp) pa _ hpab hlenA]
+    · rw [hkey, hfa, hfb, hrst, SilentIdle,
+          ceCPort_partial_out1 (bnCSlice st k) n true false da 0 hda (by omega)
+            (by simp) (by simp) pa _ hpab hlenA]
+  · -- IDLE vs ACTIVE
+    have hlenA : (SilentIdle L).length = n + 1 := by rw [← hfa]; exact hlenAny _
+    have hpab : (List.replicate L false).length = pb.length := by
+      rw [hpb, List.length_replicate]
+    have hkey : frameLE (bnCFrameAt st tr k (bnCCompAt k).1)
+                        (bnCFrameAt st tr k (bnCCompAt k).2)
+        = cKeyLE (cKey false 0) (cKey true db) := by
+      rw [frameLE, hfa, hfb, cKeyOfFrame_idle L, cKeyOfFrame_active db hdb pb]
+    refine ⟨?_, ?_⟩
+    · rw [hkey, hfa, hfb, hrst, SilentIdle,
+          ceCPort_partial_out0 (bnCSlice st k) n false true 0 db (by omega) hdb
+            (by simp) (by simp) _ pb hpab hlenA]
+    · rw [hkey, hfa, hfb, hrst, SilentIdle,
+          ceCPort_partial_out1 (bnCSlice st k) n false true 0 db (by omega) hdb
+            (by simp) (by simp) _ pb hpab hlenA]
+  · -- IDLE vs IDLE — the swap decision is invisible, so ANY comparator works
+    have hlenA : (SilentIdle L).length = n + 1 := by rw [← hfa]; exact hlenAny _
+    have hrl : (true :: List.replicate n false).length = (SilentIdle L).length := by
+      rw [hlenA]; simp
+    refine ⟨?_, ?_⟩ <;>
+      rw [hfa, hfb, hrst,
+          ceCPort_identical (bnCSlice st k) (bnCSlice_length st k) _ _ hrl _ (by omega)] <;>
+      simp
+
+#audit_axioms cFrame_getD0
+#audit_axioms cKeyOfFrame_active
+#audit_axioms cKeyOfFrame_idle
+#audit_axioms elemSortsAt_of_partial_stage
 #audit_axioms ceC_step_identical
 #audit_axioms ceC_step_state_length
 #audit_axioms runTrace_ceC_identical
