@@ -764,6 +764,150 @@ it is what would let the cell's emission inherit math's join. *Stated as owed ra
 inferred from the file's silence — the same discipline `macSeq` and `wshiftSeq` were landed under.*
 -/
 
+/-! ## THE COMPOSITION THEOREM — the cell's cycle IS the accumulator's, on the addend organ 2 made
+
+**The item I owed since 16:0x, and the one I refused to hand-wave.** Until now the composed cell was
+a shape-certified wiring; this is what lets its emission inherit math's join.
+
+⭐ **THE TOOLS FIT EXACTLY, and the brief predicted the shape before a line was written:**
+`ccCore.gates` is literally `instGates wsCore … ++ instGates macCore …` with
+`ccMOff = instNext wsCore ccWOff`, so **`inst_compose_sem` applies directly** — and `hin2` splits
+three ways with **only the addend arm crossing the seam.** *`run_of_flat_gates` cannot help here:
+`ccCore` is not flat BY CONSTRUCTION, because the seam IS macCore reading wsCore's gate outputs.*
+
+*Developed entirely in a gitignored scratch and transplanted green — six iterations, none of which
+could have reddened the shared tree.* -/
+
+
+/-- The addend word organ 2 produces from stream bit `x` and weight register `w`. -/
+def andWord (x : Bool) (w : BitVec 32) : BitVec 32 := if x then w else 0
+
+theorem andWord_bit (x : Bool) (w : BitVec 32) (k : Nat) (hk : k < 32) :
+    (andWord x w).getLsbD k = (x && w.getLsbD k) := by
+  cases x <;> simp [andWord]
+
+/-- the cell's environment, and the two organs' standalone environments -/
+abbrev cellEnv (x ld cin : Bool) (w acc : BitVec 32) : Env :=
+  cellSeq.env [x, ld, cin] (bitsOf w ++ bitsOf acc)
+abbrev wEnv (x ld : Bool) (w : BitVec 32) : Env := wshiftSeq.env [x, ld] (bitsOf w)
+abbrev mEnv (x cin : Bool) (w acc : BitVec 32) : Env :=
+  macSeq.env (bitsOf (andWord x w) ++ [cin]) (bitsOf acc)
+
+theorem cell_env_reads (x ld cin : Bool) (w acc : BitVec 32) (k : Nat) (hk : k < 32) :
+    cellEnv x ld cin w acc ccX = x
+  ∧ cellEnv x ld cin w acc ccLoad = ld
+  ∧ cellEnv x ld cin w acc ccCin = cin
+  ∧ cellEnv x ld cin w acc (ccWsh k) = w.getLsbD k
+  ∧ cellEnv x ld cin w acc (ccAcc k) = acc.getLsbD k := by
+  have hlen : (bitsOf w).length = 32 := bitsOf_length w
+  refine ⟨?_, ?_, ?_, ?_, ?_⟩
+  · simp only [cellEnv, Seq.env, cellSeq, ccX]; norm_num
+  · simp only [cellEnv, Seq.env, cellSeq, ccLoad]; norm_num
+  · simp only [cellEnv, Seq.env, cellSeq, ccCin]; norm_num
+  · have hne : ¬(3 + k < 3) := by omega
+    simp only [cellEnv, Seq.env, cellSeq, ccWsh, if_neg hne, Nat.add_sub_cancel_left]
+    rw [List.getD_eq_getElem?_getD, List.getElem?_append_left (by omega),
+        ← List.getD_eq_getElem?_getD]
+    exact bitsOf_getD w k hk
+  · have hne : ¬(35 + k < 3) := by omega
+    simp only [cellEnv, Seq.env, cellSeq, ccAcc, if_neg hne]
+    have h32 : 35 + k - 3 = 32 + k := by omega
+    rw [h32, List.getD_eq_getElem?_getD, List.getElem?_append_right (by omega)]
+    simp only [hlen, Nat.add_sub_cancel_left]
+    rw [← List.getD_eq_getElem?_getD]
+    exact bitsOf_getD acc k hk
+
+/-- Every gate of wsCore's instance lands at or above `ccWOff = 67`, so any net below it is
+untouched by that instance. -/
+theorem w_instance_leaves_low_nets (n : Net) (hn : n < ccWOff) :
+    ∀ g ∈ instGates wsCore ccWSig ccWOff, g.out ≠ n := by
+  intro g hg heq
+  have hb := (instGates_out_range wsCore ccWSig ccWOff wsCore_ssa g hg).1
+  rw [heq] at hb
+  exact absurd hn (Nat.not_lt.mpr hb)
+
+/-- wsCore's σ agreement inside the cell: its three port groups read the cell's inputs and state. -/
+theorem cell_hin_w (x ld cin : Bool) (w acc : BitVec 32) :
+    ∀ i, i < wsCore.nIn → cellEnv x ld cin w acc (ccWSig i) = wEnv x ld w i := by
+  intro i hi
+  have h34 : wsCore.nIn = 34 := by decide +kernel
+  rw [h34] at hi
+  by_cases h0 : i = 0
+  · subst h0
+    have e : ccWSig 0 = ccX := rfl
+    rw [e, (cell_env_reads x ld cin w acc 0 (by omega)).1]
+    simp only [wEnv, Seq.env, wshiftSeq]; norm_num
+  · by_cases h1 : i = 1
+    · subst h1
+      have e : ccWSig 1 = ccLoad := rfl
+      rw [e, (cell_env_reads x ld cin w acc 0 (by omega)).2.1]
+      simp only [wEnv, Seq.env, wshiftSeq]; norm_num
+    · rw [ccWSig, if_neg h0, if_neg h1,
+          (cell_env_reads x ld cin w acc (i - 2) (by omega)).2.2.2.1]
+      have hnl : ¬(i < 2) := by omega
+      simp only [wEnv, Seq.env, wshiftSeq, if_neg hnl]
+      exact (bitsOf_getD w (i - 2) (by omega)).symm
+
+/-- ⭐ **`inst_compose_sem`'s `hin2`: macCore's ports, read AFTER wsCore's instance has run.**
+Three arms — and only the FIRST needs `inst_sem` on wsCore, because only the addend crosses the
+seam. -/
+theorem cell_hin2 (x ld cin : Bool) (w acc : BitVec 32) :
+    ∀ a, a < macCore.nIn →
+      run (cellEnv x ld cin w acc) (instGates wsCore ccWSig ccWOff) (ccMSig a)
+        = mEnv x cin w acc a := by
+  intro a ha
+  have h65 : macCore.nIn = 65 := by decide +kernel
+  rw [h65] at ha
+  have hmlen : (bitsOf (andWord x w)).length = 32 := bitsOf_length _
+  by_cases h1 : a < 32
+  · -- THE SEAM: the addend is wsCore's AND-row output
+    have hmem : (wsCore.gates.map Gate.out).contains (wsAnd a) = true := by
+      revert h1; revert a; decide +kernel
+    have hstep := inst_sem wsCore ccWSig ccWOff (cellEnv x ld cin w acc) (wEnv x ld w)
+      cc_wsCore_instOK (cell_hin_w x ld cin w acc) (wsAnd a) (Or.inr hmem)
+    rw [ccMSig, if_pos h1, ccAddend, hstep, wshift_addend_bit x ld w a h1,
+        ← andWord_bit x w a h1]
+    simp only [mEnv, Seq.env, macSeq, if_pos (show a < 33 by omega)]
+    exact (word_getD_lo (andWord x w) cin a h1).symm
+  · by_cases h2 : a = 32
+    · -- the carry-in: a primary input, untouched by wsCore's instance
+      subst h2
+      have e : ccMSig 32 = ccCin := by rw [ccMSig, if_neg h1]; simp
+      rw [e, run_of_unwritten _ _ _ (w_instance_leaves_low_nets ccCin (by decide)),
+          (cell_env_reads x ld cin w acc 0 (by omega)).2.2.1]
+      exact (word_getD_cin (andWord x w) cin).symm
+    · -- the accumulator: state nets, also untouched
+      have hk : a - 33 < 32 := by omega
+      have e : ccMSig a = ccAcc (a - 33) := by rw [ccMSig, if_neg h1, if_neg h2]
+      -- ⚠️ Net-born `<`: omega drops it. Nat-typed intermediate, then transport.
+      have hnat : (35 + (a - 33)) < 67 := by omega
+      have hlow : ccAcc (a - 33) < ccWOff := by simpa [ccAcc, ccWOff] using hnat
+      rw [e, run_of_unwritten _ _ _ (w_instance_leaves_low_nets _ hlow),
+          (cell_env_reads x ld cin w acc (a - 33) hk).2.2.2.2]
+      have hnl : ¬(a < 33) := by omega
+      simp only [mEnv, Seq.env, macSeq, if_neg hnl]
+      exact (bitsOf_getD acc (a - 33) hk).symm
+
+/-- ⭐⭐ **THE COMPOSITION THEOREM — one cycle of the CELL is one cycle of the accumulator on the
+addend the weight organ produced.** This is what the composed cell was missing: its emission can now
+inherit math's join, because the addend it feeds the accumulator IS `x ∧ (W<<<t)`. -/
+theorem cell_sum_bit (x ld cin : Bool) (w acc : BitVec 32) (k : Nat) (hk : k < 32) :
+    run (cellEnv x ld cin w acc) ccCore.gates (instMap macCore ccMSig ccMOff (maSum k))
+      = run (mEnv x cin w acc) macCore.gates (maSum k) := by
+  have hmem : (macCore.gates.map Gate.out).contains (maSum k) = true := by
+    revert hk; revert k; decide +kernel
+  have hnext : ccMOff = instNext wsCore ccWOff := by
+    simp only [ccMOff, ccWOff, instNext]; decide +kernel
+  have hgates : ccCore.gates
+      = instGates wsCore ccWSig ccWOff ++ instGates macCore ccMSig (instNext wsCore ccWOff) := by
+    rw [← hnext]; rfl
+  rw [hgates, hnext]
+  -- ccMOff and instNext wsCore ccWOff are definitionally equal (both 100), so the lemmas
+  -- stated at ccMOff are accepted here directly — no cast needed.
+  exact inst_compose_sem wsCore macCore ccWSig ccMSig ccWOff cc_macCore_instOK
+    (cellEnv x ld cin w acc) (mEnv x cin w acc) (cell_hin2 x ld cin w acc)
+    (maSum k) (Or.inr hmem)
+
 /-! ### The axiom audit — one declaration per call
 
 *Added WITH the cell, not after it. `CorePlace` ran fourteen placements with `EXIT=0` and zero
@@ -806,6 +950,12 @@ everything after a failure reads as clean. -/
 #audit_axioms weight_state_moves_so_reload_is_required
 #audit_axioms stream_enters_only_through_the_load_gate
 #audit_axioms wshift_next_bit_zero_when_not_loading
+#audit_axioms andWord_bit
+#audit_axioms cell_env_reads
+#audit_axioms w_instance_leaves_low_nets
+#audit_axioms cell_hin_w
+#audit_axioms cell_hin2
+#audit_axioms cell_sum_bit
 #audit_axioms ccCore_ssa
 #audit_axioms ccCore_wf
 #audit_axioms cellSeq_wf
