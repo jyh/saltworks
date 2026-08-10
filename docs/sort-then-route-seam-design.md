@@ -53,6 +53,11 @@ second is backwards** — ours is sequential too. Same object class as ISS90 p.7
 
 ## 3. WHERE THE SEAM ACTUALLY IS — relocated, and it is bigger than an order tie
 
+⏭️ **READ §4 BEFORE ACTING ON THIS SECTION.** *The `⛔ MISSING` below is accurate about its own
+subject — `bnC_output_frames_driven`, the `cDestOf` theorem, IS still full-load only — but the
+GAP it describes was CLOSED later the same day by `bnC_output_frames_partial` (§4). Kept
+unedited because it is the reasoning that located the seam; it is not the current state.*
+
 ```
 ✅ LANDED  element -> key    ceC_realises_cKey_when_active        (CompareExchangeC)
            with cKey active dest = (!active, dest) — LITERALLY (¬active, dest) —
