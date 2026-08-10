@@ -83,6 +83,47 @@ FALSIFIED IF any ONE of these is observed:
         The fabric floorplan is the last link and it still needs a top module
         nobody has ruled — so no run yet exists that could clear the chip.
 ```
+      ⛔⛔ **SCOPE AMENDED 2026-08-09 19:3x — MY OWN CELL-LEVEL LINE ABOVE IS
+        TOO GENEROUS, and I am narrowing it BEFORE the run that would have
+        cleared it.** *Math ran F5's (c) against the emitted module and found
+        what no shape test was looking for; I re-measured it independently
+        rather than inheriting it:*
+```
+        THE EMITTED MODULE CONTAINS NO STATE AT ALL.
+          instantiated cell types  and2_1 · or2_1 · xor2_1 — and nothing else
+          dfxtp 0 · dff 0 · latch 0 · always 0 · posedge 0 · reg 0 · clk 0
+          ports 163 (67 in + 96 out) · inout 0
+        The 64 state bits ENTER as i3..i66 and LEAVE as o32..o95.
+```
+        *Compiler answered the wrapper question by citation, from the
+        top-module block's §D2 (the maestro's words): **"emitS is
+        combinational-only; no emitSeq exists (grep 0 hits); every flop in the
+        fabricated tree is hand RTL. The law cannot be met for state as the
+        toolchain stands."***
+```
+        SO THE CELL ROW SPLITS, AND ONLY THE FIRST HALF IS EARNABLE TODAY:
+          combinational CORE synthesised
+              ⇒ "the cell's COMBINATIONAL CORE is certified down to silicon"
+          a CLOCKED cell
+              ⇒ NOT AVAILABLE. It needs emitSeq, which does not exist
+                (§D2(a), compiler's genre on adoption; bar V7 pre-registered:
+                 flops == nState EXACTLY · cells == gates + nState · conb == 0 ·
+                 one assign per primary output · refinement stated ∀ st0 ·
+                 `initial` BANNED)
+          the pin wrapper, the sequencer FSM, the fabric
+              ⇒ HAND RTL. EXCLUDED BY NAME from any fabbed-is-verified sentence.
+```
+      🔑 ***AND THE SHARPEST FORM OF IT IS COMPILER'S, ABOUT MY OWN INSTRUMENT:
+        the thing my simulator was silently supplying — holding 64 bits and
+        driving load/sign — IS PRECISELY THE THING THAT DOES NOT EXIST IN
+        SILICON.*** *My arithmetic control's undisclosed frame was standing in
+        for an unbuilt component, which is why the disclosure is worth more than
+        the green it qualifies.*
+      ⚖️ *Registered, not ruled: the top-module block is v1 under a five-refuter
+        pass, and a block under refutation is not a ruling. This amendment binds
+        MY fence, which is mine to narrow at any time; it claims nothing about
+        anyone's schedule.*
+
       ⇒ **A CLEARED F3 CARRIES ITS SUBJECT IN THE SENTENCE.** *"Down to
         silicon" with no subject is the ambiguity this whole fence exists to
         prevent, and it would be created by a TRUE cell-level result.*
