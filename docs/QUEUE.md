@@ -288,6 +288,15 @@ OPEN ITEMS:
   (bitNot32 row on the addend, or the priced XOR-bank alternative).
   The accumulation-phase join stands; the SIGNED claim for the
   COMPOSED cell waits on hardware, not proofs.
+  ⇒ FIRED TONIGHT 8/9 18:5x at the Captain's word ("we can
+  proceed"): compiler's write track, XOR-BANK FORM adopted by
+  maestro ruling (addend XOR sign, one gate level, 32 gates,
+  replaces inverter bank AND select, maCin same-signal; semantics
+  acc+~x+1 unchanged from ruling (b)). **CAPTAIN-CONFIRMED 18:5x
+  ("yes please fire away") — the amendment flag RETIRES; the path
+  is clean end-to-end.** Math gated behind the landing for the
+  signed trace inheritance; silicon MEAS reactive; timing MEASURED
+  never predicted (silicon's refusal binds all seats).
   📌 FINDING 2 — AUDIT-COVERAGE CAMPAIGN CANDIDATE: Sem.lean's
   "real number is zero" note is stale — 204 unaudited theorems
   corpus-wide (CorePlace 38 · CoreOffsets 23 · TinyRustN0 23 ·
@@ -836,6 +845,13 @@ OPEN ITEMS:
   before ~19:00, and again TOMORROW MORNING ~07:30 if not held
   tonight. Brief ready: the blocks are five refutation rounds
   richer; the 1990 paper states the full-circle theorem verbatim.
+  **RULED 8/9 18:5x (the Captain, at the maestro's recommendation,
+  re-surfaced on schedule before 19:00): FOLDED into the NDF
+  THEORY-REVIEW SITTING, tomorrow morning ~07:30 — ONE TABLE for
+  the ④ full-circle material, the ③ blocks, the NDF top-module
+  design block (drafts tonight, refuter pass behind it), and the
+  packet-IO slate's #3 memory story. The do-not-forget duty
+  becomes the sitting's opening.**
 - Endorsement + witness approval #2 (T1): his lanes, he monitors
   personally (his 8/7 disposition; no maestro re-surfacing).
 - Salt (7.3) (T1, the Captain's click): now **ONE CLICK** — its last
