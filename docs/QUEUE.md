@@ -944,7 +944,14 @@ OPEN ITEMS:
   correspondence): SIZE-UP IS ALLOWED, SIZE-DOWN IS NOT. HIS
   RESIZE PLAY, under maestro analysis same sitting: upgrade the
   owned 2x2 (the BB's) → 6x2 and put the NDF there; the BB switch
-  moves to a NEW separate 1x2. ⇒ FIRED: (a) THE NDF ACCOUNT
+  moves to a NEW separate 1x1 (the Captain's refinement 10:3x:
+  "if the BB fits on a 1x1, we should use that" — MAESTRO ANALYSIS:
+  the shipped submission is the bare banyan, 4,031 µm² post-layout,
+  vs a 1x1's ~14-15k usable core ≈ 26-28% util — FITS COMFORTABLY,
+  silicon's run confirms; the full-BB-with-batcher variant (~12.2k
+  projected) would NOT close on a 1x1 — AND THAT IS SAFE BY TT'S
+  OWN RULE: size-UP is allowed, so the growth path to a batcher-
+  wired switch stays open from the 1x1; a no-regret choice). ⇒ FIRED: (a) THE NDF ACCOUNT
   (docs/ndf-account.md) via the bb-switch-account pattern —
   compiler kernel half (measured, #eval'd) + silicon priced half
   (signoff artifacts) IN PARALLEL, then maestro joint reading,
@@ -961,8 +968,8 @@ OPEN ITEMS:
   and improves until the ~Sept 7 freeze; the public README wording
   takes EVIDENCE'S FENCE PASS BEFORE the Captain's click (public
   = T1, the click is HIS). Money arithmetic (maestro, labeled):
-  resize play ≈ €980 total for both chips vs €1,120 for
-  keep-2x2-plus-new-6x2 — SAVES ≈ €140, exactly one 1x2, IF TT
+  resize play ≈ €910 total (280 sunk + ~560 upgrade + 70 the 1x1)
+  vs €1,120 for keep-2x2-plus-new-6x2 — SAVES ≈ €210, IF TT
   upgrade pricing is pay-the-difference (UNVERIFIED — his checkout
   read confirms). Reservation-timing ruling SATISFIED: "reserve at
   layout-readiness" — the layout exists as of 01:46.**
