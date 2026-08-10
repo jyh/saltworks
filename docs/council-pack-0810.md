@@ -137,4 +137,10 @@ FROM THE CAPTAIN at this sitting (ask first, per the bank).**
 First seal `02155be` (BatcherRun + PortLengths rooted; closure ledger clean —
 disk-vs-graph now returns only Scratch*). The phantom-HALT affair resolved
 fleet-side with three watch fixes and a struck overstatement, all banked by
-their owners. Watches: bus v2 + sentinel + modelwatch + bus-sync alive.
+their owners. And in the hour before this council (13:4x-13:5x), every seat
+ran the mutable-document sweep on its OWN Captain-facing files: stale
+absence-claims and unpinned sign-offs found in four seats' documents — every
+one TRUE when written and falsified by the fleet's own progress — all fixed
+at their owners' hands, all verdicts re-issued at pinned shas. What you read
+tonight was re-checked against the tree this afternoon. Watches: bus v2 +
+sentinel + modelwatch + bus-sync alive.
