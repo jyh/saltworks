@@ -78,8 +78,18 @@ the ACC CLEAR    a cycle that RESETS                a refuter on the top-module 
 the WSH FREEZE   a cycle that DOES NOT HAPPEN       the Captain's own 2-2-1 timetable, 20:08 → V9
 ```
 🔑 ***`runTrace` is "one input → one step, ALWAYS". It has no stall, no reset, no alternate
-operation.*** *Every schedule feature that is not one-input-one-step sits outside the model BY
-CONSTRUCTION — invisible to every theorem over the `Seq`, and therefore a SHELL obligation.*
+operation.*** *A schedule feature that is not one-input-one-step sits outside the model BY
+CONSTRUCTION — invisible to every theorem over the `Seq`.*
+
+⚠️ **NARROWED 8/10 13:5x, and the narrowing is load-bearing in the CHEAP direction: "…and therefore
+a SHELL obligation" WAS TOO STRONG. It is a shell obligation only when the feature is not an
+admitted INPUT of the `Seq`.** *The three rows above are shell obligations because the cell's clear
+and freeze are not inputs. **The SORTER's reset IS one** — `bnCRst = 0` is a design input of
+`batcherNetC`, so its per-frame pulse rides the trace and is inside the model. `emitSeq batcherNetC`
+therefore needs NO shell, which is the answer the 8/10 night-council's ① asked for and which silicon
+confirmed from the router side (no stall in the composed schedule).* ⇒ **Ask whether the feature is
+an INPUT before pricing a shell for it; the blanket form would have bought the sorter a shell it
+does not need.**
 
 ## 5. THE V-TABLE — honest status, including what is in flight
 
