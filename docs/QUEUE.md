@@ -268,6 +268,33 @@ OPEN ITEMS:
   GATE: §1 final row table awaits assembly rows 15-16; halves
   proceed now.**
 
+- **THE TRACE INHERITANCE — LANDED (c2428b3, fresh executor,
+  covering build in flight): the full-state per-cycle step (both
+  64 state bits, compiler's cell_wsh_next citing), the trace
+  induction (cellSeq_runTrace_state), THE INHERITANCE
+  (cellSeq_inherits_macSeq_state — the composed cell's
+  accumulator half IS rung 3's state over the manufactured addend
+  trace), join + signed corollaries with cited conjuncts, four
+  mutants RUN on the real 193-gate netlist by decide +kernel incl.
+  the spanning-trace state-discipline mutant in full. Docstrings
+  theorem-sized; forbidden sentence absent.
+  ⛔ FINDING 1 — TOMORROW'S DESIGN ITEM #2 (beside the top module):
+  THE SIGN CYCLE IS NOT EXECUTABLE ON THE COMPOSED CELL, kernel-
+  checked refutation landed: ccCore's addend port carries only
+  andWord x w (0 or the weight register); NO COMPLEMENT PATH
+  EXISTS in the netlist — the (b) ruling's planned bitNot32 stage
+  was never integrated into ccCore. The signed MAC's full trace is
+  not a cellSeq trace until the complement path is designed in
+  (bitNot32 row on the addend, or the priced XOR-bank alternative).
+  The accumulation-phase join stands; the SIGNED claim for the
+  COMPOSED cell waits on hardware, not proofs.
+  📌 FINDING 2 — AUDIT-COVERAGE CAMPAIGN CANDIDATE: Sem.lean's
+  "real number is zero" note is stale — 204 unaudited theorems
+  corpus-wide (CorePlace 38 · CoreOffsets 23 · TinyRustN0 23 ·
+  MacBridge's 32 pre-existing · others); the executor audited its
+  own 16 with an explicitly-scoped block. A sweep candidate for
+  the doc-refresh campaign.**
+
 - **THE COMPOSED CELL — STATE AT ITS EXACT SIZE (compiler's 16:03
   trim of the maestro's verdict — the FOURTH one-theorem-larger
   sentence today and the FIRST cut by the seat that would benefit):
