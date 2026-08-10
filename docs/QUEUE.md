@@ -317,7 +317,25 @@ OPEN ITEMS:
   16:02 emission — f5_port_test EXIT 1 now means LANDED-NOT-YET-
   EMITTED, not nothing-happened; silicon's signed emission is the
   cure and is in flight. Timing: still NO nanoseconds published —
-  measure on the emitted artifact.**
+  measure on the emitted artifact.
+  ✅✅ SEALED THROUGH SILICON'S STEPS (1)(2)(3) BY 19:34: signed
+  cell EMITTED (F5 a+b met on the emitted netlist) + HARDENED as
+  a CONTROLLED PAIR ON ONE DIE (configs 3a8b452, netlist 0e88bad;
+  DRC/LVS/antenna/max-slew 0 both arms). THE MEASURED COST OF THE
+  COMPLEMENT PATH: +332.82 µm² stdcell (+9.79%), logic 190→222
+  (+32 = the XOR bank exactly; both arms purge the same 3
+  unobservable gates), setup margin at the slow corner +2.0831 →
+  +1.1123 ns — BOTH ARMS CLOSE AT 55 ns; THE CLOCK RULING HOLDS,
+  now measured on the signed artifact. The chain reconciles
+  kernel→emitted→liberty→post-layout to 0.0024 µm², and xor2
+  survives LibreLane's yosys 96→96 — fabbed-is-verified MEASURED
+  (net NAMES do not survive synthesis: criterion (d) checks the
+  EMITTED netlist only). Method note banked: FP_CORE_UTIL sizes
+  the die FROM the cell area — the first attempt was two
+  different dies, caught by its own control (DPL-0036). Step (4),
+  the EUR-280 settling run, STAYS GATED on the top-module block
+  clearing its refuter pass — a block under refutation is not a
+  ruling (silicon's words).**
   📌 FINDING 2 — AUDIT-COVERAGE CAMPAIGN CANDIDATE: Sem.lean's
   "real number is zero" note is stale — 204 unaudited theorems
   corpus-wide (CorePlace 38 · CoreOffsets 23 · TinyRustN0 23 ·
@@ -821,6 +839,15 @@ OPEN ITEMS:
   1,300–2,600 ln pricing CONFIRMED by math's shrink attempt — mathlib
   has the tools, not the theorem). The flagship front at solo tier is
   exhausted until one of these opens a gate.**
+- **REFUTER-PASS OUT-OF-FREEZE FINDS (19:3x, registered from the
+  five-refuter pass on the top-module block): (a) ⛔ THE BB COCOTB
+  BENCH IS STALE against the 8/8 cnt[3] ruling — TT/test/test.py:247
+  asserts `(uio >> 5) == 0`, which project.v:57's Captain-confirmed
+  `cnt_o[3]` on uio_out[5] violates for cycles 8-13; the bench would
+  FAIL the shipped BB submission. Silicon's tree; morning sweep
+  before any BB re-submission errand. (b) PayloadL4.lean:30-31
+  carries a stale "import owed / targeted-build verdict" note —
+  SaltWorks.lean:77 imports it; one-line doc fix, any hand.**
 - **NEXT-RUNG RE-RECON, MAESTRO-OWED (post-council; opened 21:37 on
   math's entry-2 scan): docs/blueprints/next-rung-scoping.md (Fable
   7/07) carries a dated staleness banner as of ea3fb1b — its S1
