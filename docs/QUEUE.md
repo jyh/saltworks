@@ -901,6 +901,14 @@ OPEN ITEMS:
   untouched.
   R7: residual-15 audit theorems → MATH (SelfRouting floor, its
   lane) · census-tool gitignore fix → COMPILER (its tool).
+  ⭐ THE 01:1x BLANKET (the Captain, verbatim): "do everything you
+  can to make this happen. don't wait, asking for correction is
+  better than asking for permission. you are pre-authorized for
+  all decisions. if we can make this tonight, that *is* the gold.
+  revisions can always come after should we decide." — ALL SEATS
+  operate correction-over-permission for the night push; the
+  maestro parallelizes by hand where it shortens the path
+  (author-anywhere land-at-owner).
   R8 FIRE PLAN LIVE — NIGHT WAVES AUTHORIZED, SUPERSEDES REST:
   compiler = emitSeq → shell emission (4 cells) → SER/activation
   organ → tt_um_saltworks_ndf wrapper + sequencer (hand RTL per
