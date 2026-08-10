@@ -40,6 +40,22 @@ cycle state only. It is a CONTROL, not a proof of emission fidelity. Compiler ow
 link (2) properly; this gives that link its first negative control from the ARTIFACT
 side, tonight, without the fleet lock.
 
+⛔⛔ AND THE DISCLOSURE THIS TOOL OWES, because math found it by RUNNING (c)
+rather than reasoning it (19:3x): THE EMITTED MODULE CONTAINS NO STATE AT ALL.
+Verified independently here: every instantiated cell is and2/or2/xor2 — zero
+dfxtp, zero latch, zero clk, zero always, zero posedge, 163 ports, no inout. The
+64 state bits ENTER as inputs i3..i66 and LEAVE as outputs o32..o95.
+
+⇒ SO THIS SIMULATOR IS THE SEQUENCER. It holds the state between cycles and drives
+i1 (load) and i2 (sign) itself. Those are exactly the two hypotheses math found with
+NO SUPPLIER in the artifact:
+      load LOW for all m+1 cycles   -> i1 is a FREE INPUT. No supplier.
+      sign LOW for m then HIGH at m -> i2 is a FREE INPUT. No supplier.
+🔑 A GREEN FROM THIS TOOL THEREFORE ASSUMES THE VERY SCHEDULE F5 SAYS NOTHING
+SUPPLIES. That does not make the green false -- it makes its FRAME explicit: this
+measures the core's COMBINATIONAL function given a schedule, and the schedule comes
+from me, not from the silicon.
+
 ⚠️ AND IT IS NOT A KERNEL RESULT. It is a Python simulation of a Verilog file. It
 can only ever DISAGREE usefully: a mismatch is a real finding, a match is evidence
 and not a theorem.
