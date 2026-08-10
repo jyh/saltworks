@@ -1089,17 +1089,11 @@ theorem sc_m_instance_leaves_low_nets (n : Net) (hn : n < scMOff) :
 theorem scXorGates_flat : flatBelow scXOff scXorGates = true := by decide +kernel
 theorem scXorGates_ssa : ssaFrom scXOff scXorGates = true := by decide +kernel
 
-open SaltWorks.Stack.Program in
-/-- The adder's arithmetic bit. ⚠️ **Duplicates `MacBridge.adder_run_is_sum_bit` (math's), which is
-DOWNSTREAM of this file and therefore unusable here.** Flagged rather than hidden; one of the two
-should retire once the files settle, and that is math's call. -/
-theorem sc_adder_bit (a b : BitVec 32) (cin : Bool) (k : Nat) (hk : k < 32) :
-    run (adEnv a b cin) adder32.gates (adS k)
-      = (a + b + BitVec.setWidth 32 (BitVec.ofBool cin)).getLsbD k := by
-  have h := congrArg (fun l : List Bool => l.getD k false) (sem_adder32_gen a b cin)
-  have houts : adder32.outs = (List.range 32).map adS ++ [adC 32] := rfl
-  simpa [sem, houts, List.getD_eq_getElem?_getD, List.getElem?_append, List.getElem?_map,
-         List.getElem?_range, hk] using h
+/-! ⚰️ `sc_adder_bit` RETIRED 2026-08-10 07:4x — the Captain's ruling (2)=(b), the hoist.
+It duplicated `MacBridge.adder_run_is_sum_bit` because that file is DOWNSTREAM of this one and a
+proof cannot reach downward. Math hoisted the lemma to `Stack/Program` beside its parent
+`sem_adder32_gen` (`510f6a3`) and retired their copy; these two call sites now point at the single
+home. **The duplicate I flagged at landing died the clean death I flagged it for.** -/
 
 /-- The addend after the bank: passthrough at `sign = 0`, one's complement at `sign = 1`. -/
 def cmplWord (s : Bool) (v : BitVec 32) : BitVec 32 := if s then ~~~v else v
@@ -1212,7 +1206,7 @@ theorem sc_sum_bit_is_adder_bit (x ld s : Bool) (w acc : BitVec 32) (k : Nat) (h
 theorem sc_sign_cycle_subtracts (x ld : Bool) (w acc : BitVec 32) (k : Nat) (hk : k < 32) :
     run (cellEnv x ld true w acc) scCore.gates (instMap macCore scMSig scMOff (maSum k))
       = (acc - andWord x w).getLsbD k := by
-  rw [sc_sum_bit_is_adder_bit x ld true w acc k hk, sc_adder_bit _ _ _ k hk]
+  rw [sc_sum_bit_is_adder_bit x ld true w acc k hk, SaltWorks.Stack.Program.adder_run_is_sum_bit _ _ _ k hk]
   congr 1
   have h1 : BitVec.setWidth 32 (BitVec.ofBool true) = 1#32 := by decide
   rw [cmplWord, if_pos rfl, h1, add_assoc, ← BitVec.neg_eq_not_add, BitVec.add_neg_eq_sub]
@@ -1222,7 +1216,7 @@ theorem sc_sign_cycle_subtracts (x ld : Bool) (w acc : BitVec 32) (k : Nat) (hk 
 theorem sc_accumulate_cycle_unchanged (x ld : Bool) (w acc : BitVec 32) (k : Nat) (hk : k < 32) :
     run (cellEnv x ld false w acc) scCore.gates (instMap macCore scMSig scMOff (maSum k))
       = (acc + andWord x w).getLsbD k := by
-  rw [sc_sum_bit_is_adder_bit x ld false w acc k hk, sc_adder_bit _ _ _ k hk]
+  rw [sc_sum_bit_is_adder_bit x ld false w acc k hk, SaltWorks.Stack.Program.adder_run_is_sum_bit _ _ _ k hk]
   congr 1
   have h0 : BitVec.setWidth 32 (BitVec.ofBool false) = 0#32 := by decide
   rw [cmplWord, if_neg (by simp), h0, BitVec.add_zero]
@@ -1343,7 +1337,6 @@ the first failure, so everything after a failure reads as clean. -/
 #audit_axioms sc_m_instance_leaves_low_nets
 #audit_axioms scXorGates_flat
 #audit_axioms scXorGates_ssa
-#audit_axioms sc_adder_bit
 #audit_axioms cmplWord_bit
 -- ⛔ ADDED after silicon's 19:10 MEAS: this one was the section's ONE unaudited declaration, and
 -- my landing line ("31 new theorems · 31 audit ticks") hid it by stating the tick count twice.
