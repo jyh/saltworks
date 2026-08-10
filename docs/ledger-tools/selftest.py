@@ -892,6 +892,21 @@ if Path(__file__).with_name("f5_port_test.py").is_file():
         check("PORT-COUNT DISAGREEMENT" in out,
               "F5 PORT-COUNT: the disagreement was not named")
 
+        # ⭐ STALENESS: a netlist whose mtime PREDATES the last commit to
+        # MacCell.lean must REFUSE, not judge. This row exists because the guard
+        # was mutation-tested and SURVIVED — the integration row PRINTS the
+        # finding instead of CHECKing it, so nothing failed when the guard was
+        # deleted. A guard whose only witness is a printed line is unguarded.
+        _stale = _root / "stale.v"
+        _stale.write_text(_good)
+        os.utime(_stale, (1, 1))          # 1970 — older than any commit
+        _r = _sp4.run([sys.executable, _tool, str(_stale)],
+                      capture_output=True, text=True, timeout=60)
+        check(_r.returncode == 2,
+              f"F5 STALENESS: stale netlist gave exit {_r.returncode}, expected 2")
+        check("STALE NETLIST" in _r.stdout + _r.stderr,
+              "F5 STALENESS: the staleness was not named")
+
         # the source moved: ccCin gone -> refuse, and say WHICH name is missing
         (_root / "SaltWorks/HDL/MacCell.lean").write_text("def ccIn : Nat := 40\n")
         _sp4.run(["git", "add", "-A"], **_q)

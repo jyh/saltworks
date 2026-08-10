@@ -33,8 +33,14 @@ means "I am broken" by:
     1  NOT MET -- no XOR bank, or the sign net is not the carry-in port
     2  COULD NOT READ -- missing file, unparsable, zero instances found
 
-📌 EXIT 1 IS THE EXPECTED ANSWER BEFORE THE COMPLEMENT PATH LANDS. It is the
-NEGATIVE CONTROL this tool was built against: at 16:02 on 2026-08-09 the emitted
+📌 EXIT 1 MEANS ONE THING ONLY: A CURRENT NETLIST WITHOUT THE BANK.
+⛔ IT DOES **NOT** MEAN "the complement path has not landed" — that reading was in
+this header until 2026-08-09 19:1x, and silicon caught that the two states read
+IDENTICALLY off an exit code. `7364548` landed the complement path in MacCell.lean
+and touched zero `.v` files, so "landed in Lean, NOT YET EMITTED" was arriving as
+exit 1 and would have been read as a design failure. That state is now EXIT 2 via
+the staleness guard, and exit 1 is unambiguous again.
+The original negative control, which remains valid on a CURRENT netlist: at 16:02 on 2026-08-09 the emitted
 mac_cell carried 193 cells (97 and2 + 64 xor2 + 32 or2), the 64 XORs were the
 ripple adder's two-per-bit sum gates, and NO net fed 32 of them. A tool that
 reports MET on that file is broken, and that is the first thing to re-run.
@@ -106,6 +112,23 @@ def blob_sha(path: Path) -> str:
         return f"GIT-UNAVAILABLE ({type(e).__name__})"
 
 
+def find_repo(start: Path):
+    """Walk up for a .git. ONE implementation, used by every caller.
+
+    ⛔ There were two: derive_port_map() walked up properly, and the staleness
+    guard hardcoded `parents[3]` — correct only for SaltWorks/Silicon/RTL/*.v and
+    silently wrong everywhere else, so `git log` failed, src_epoch fell to 0, and
+    THE GUARD SKIPPED ITSELF. It reported nothing and looked like a pass.
+    🔑 I wrote a correct repo-root walk and then hand-rolled a second one three
+    lines later — [[prefer-the-verified-instrument]] inside a single function.
+    """
+    p = start.resolve()
+    for cand in [p, *p.parents]:
+        if (cand / ".git").exists():
+            return cand
+    return None
+
+
 def derive_port_map(start: Path):
     """Read ccCin and ccIn out of the COMMITTED MacCell.lean. Never the worktree.
 
@@ -131,12 +154,8 @@ def derive_port_map(start: Path):
     file is [[read-tools-inherit-the-shared-tree]] -- a source-parsing tool once
     caught another seat mid-write and accused it of 544 unaudited theorems.
     """
-    repo = start.resolve()
-    for cand in [repo, *repo.parents]:
-        if (cand / ".git").exists():
-            repo = cand
-            break
-    else:
+    repo = find_repo(start)
+    if repo is None:
         return None, "NO GIT REPO ABOVE THE NETLIST"
 
     rel = "SaltWorks/HDL/MacCell.lean"
@@ -219,9 +238,9 @@ def main() -> None:
         try:
             src_epoch = int(subprocess.run(
                 ["git", "log", "-1", "--format=%ct", "--", "SaltWorks/HDL/MacCell.lean"],
-                capture_output=True, text=True, cwd=path.resolve().parents[3], timeout=20,
+                capture_output=True, text=True, cwd=find_repo(path), timeout=20,
             ).stdout.strip() or 0)
-        except (OSError, subprocess.SubprocessError, ValueError, IndexError):
+        except (OSError, subprocess.SubprocessError, ValueError, IndexError, TypeError):
             src_epoch = 0
         if src_epoch and path.stat().st_mtime < src_epoch:
             die(f"STALE NETLIST: {path.name} mtime {int(path.stat().st_mtime)} PREDATES "
