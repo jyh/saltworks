@@ -1,4 +1,5 @@
 import Mathlib
+import SaltWorks.Tactic.AuditAxioms
 
 /-! PROBE S1 — does the div/mod ("prefix-suffix") representation carry the
 Batcher–banyan nonblocking proof cheaply, parametric in k? -/
@@ -107,5 +108,38 @@ theorem banyan_selfrouting {k n : ℕ} {dest : ℕ → ℕ}
   ⟨fun m _ => no_conflict hdest m,
    fun s hs => line_of_lt k s (dest s) (by omega) (hlt s hs),
    fun s => line_zero s (dest s)⟩
+
+
+/-! ### The axiom audit for THIS FILE
+
+⚠️ **R7 (the night council, 08-10 01:0x): the residual-15 audit theorems fall to math, and
+`SelfRouting` is their floor of 10.** This file had NO audit block and no corpus import at all
+(`import Mathlib`, nothing else) — so the one line above is the whole cost, and it is
+`Lean`-deep: `AuditAxioms` imports `Lean` and nothing more.
+
+🔑 **The corpus audit command, not `#print axioms`, deliberately.** `#print axioms` is Lean core
+and needs no import — and `docs/hdl-tools/audit_completeness.py` counts the corpus command's
+TICKS, so an
+audit performed with the other instrument would discharge the mathematics and leave the census
+reading 10 unaudited forever. *Auditing with an instrument the counter cannot see is
+indistinguishable from not auditing.*
+
+⚠️ **This docstring deliberately avoids writing the audit command's literal token in prose: the
+census greps for it, so a mention would inflate this file's count from 10 to 13.** *Caught by
+counting my own edit before building it.*
+
+*These are pure `Nat` div/mod facts over mathlib; no `decide`, so the tick is not exposed to the
+audit-command-is-blind-to-`decide` defect this corpus records elsewhere.* -/
+
+#audit_axioms line_zero
+#audit_axioms line_of_lt
+#audit_axioms step_line
+#audit_axioms line_mod
+#audit_axioms line_div
+#audit_axioms gap_of_mod_eq
+#audit_axioms lt_of_div_eq
+#audit_axioms strictMonoOn_gap
+#audit_axioms no_conflict
+#audit_axioms banyan_selfrouting
 
 end SaltWorks.Banyan
