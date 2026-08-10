@@ -938,6 +938,46 @@ OPEN ITEMS:
   TONIGHT is the named target; the fabbed-is-verified law governs
   the SUBMISSION, not the first measurement run — V1-V3/V9/V10
   land behind the layout, before any tapeout word.**
+- **⭐⭐⭐ THE TWO-TRACK RULING — P1/P2 STRICT PRIORITY (8/10 16:2x, the
+  Captain at council, his words: "I am willing to bet my shirt that they
+  aim too low. However, I honor the refuters too… One main track
+  first priority, essential, label it P1. Secondary track for longer
+  shots… *if* a seat falls idle on the main track, it picks up a task on
+  the secondary track. Strict scheduling, P1 comes before P2, no
+  preemption." Ratified with the maestro's recommendations: "queue it
+  up, with your recommendations :)").**
+  **P1 (essential, the refuter bundle + the day-zero opener):**
+  MATH day 0: the abstract-fold↔cSorted seam (ONE obligation, its own
+  15:44 measurement) — closes the Captain's "easy and completes the
+  story" pair BEFORE the campaign draws breath · then X0 → X1 → X2
+  (per block ② §A: shared-regfile SysSt, bound step_frame, concrete E-4
+  witness, execution-witness E-5, non-halting fairness antecedent).
+  COMPILER: L0 → L1 → L2 → L4 (per block ① §A: emit_runs-shaped Row A,
+  handoff exit conjunct per the 15:44 clarification, finite-domain reg
+  map, range frame). SILICON: A0 (the 2-2-1 V10 fixtures).
+  **P2 (longer shots, pulled ONLY at P1 idle, per seat, in order):**
+  compiler: V9 (highest leverage — A1's fence AND its own debt) → A1 →
+  L5 (post-L2) → batcher_c composition + SER shift-enable (shared w/
+  silicon) → L6 source-side probe (no proofs). math: L3 math half
+  (inlining preservation, file-disjoint) → X3 mailbox → the 47-row audit
+  (decision then mechanical) → A3 adjoint semantics (gated on ruling d).
+  silicon: cocotb bench fix test.py:247 (unowned→OWNED here) → 1x2/BB
+  re-signoff → DRV two-population hypotheses → batcher-wired tile-fit →
+  gate-level sim harness for A2. evidence: GraphCast paper citation +
+  not-carried list (public-paper-only).
+  **THE THREE MECHANICS (law of the two tracks):** ① clean-boundary
+  switching — P2 parks AT THE NEXT COMMIT when P1 readies; banked,
+  never abandoned; P2 items must be parkable. ② P2 NEVER GATES P1 —
+  refutation asks on P2 landings queue as P2; no P1 rung may wait on a
+  P2 obligation. ③ one pen per seat still binds — P2 prefers files
+  disjoint from that seat's P1 range.
+  **RECORDED WITH THE RULING (the bundle's premise, stated at the
+  table, veto-in-the-moment if unintended): W5-asm and the B-ISA
+  per-op waves are DEFERRED for the sprint window.** Pending rulings
+  that now gate SPECIFIC rungs rather than cuts: (c) partition N →
+  X1 · (d) ruling-#8 fork → A2/A3's form · (g) Row A amended shape →
+  L2/L4 (compiler's reading confirmed; the form stands as clarified
+  at ff43d08 unless the Captain objects at its rung).**
 - **⭐⭐ THE AIM-HIGH TRIO: DRAFTED → REFUTED → AMENDED → COMMITTED (8/10
   11:4x-12:10, the successor maestro, Fable hand): the three scoping
   blocks docs/aim-high-{language,executive,application}-v1.md at
