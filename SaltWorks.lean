@@ -90,5 +90,6 @@ import SaltWorks.HDL.SubFragment
 import SaltWorks.HDL.MacInduction
 import SaltWorks.HDL.MacCell
 import SaltWorks.HDL.MacBridge
+import SaltWorks.HDL.SerOrgan
 import SaltWorks.HDL.AccountMeasure
 import SaltWorks.Tactic.AuditAxioms
