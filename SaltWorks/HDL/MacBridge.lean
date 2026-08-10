@@ -585,4 +585,384 @@ theorem cell_computes_signed_mac
   rw [(cell_full_mac W b Wsh x m hW hWm hno hsign).2,
       Mac.mac_correct W b.toInt x (m + 1) (by omega)]
 
+/-! ## THE TRACE INHERITANCE — the composed cell's trace, and what it inherits
+
+### ⚠️ PRECONDITION PREAMBLE — quoted from the live tree, checked before anything was proved
+
+**WHAT THIS SECTION CONSUMES, by name and exact statement** (toolchain
+`leanprover/lean4:v4.32.0-rc1`, tree at `3c07566`):
+
+* `MacCell.cell_sum_bit` (the composition theorem, `39af5fd`/`c253181`) — the **acc′ half**:
+  `run (cellEnv x ld cin w acc) ccCore.gates (instMap macCore ccMSig ccMOff (maSum k))
+   = run (mEnv x cin w acc) macCore.gates (maSum k)`, with
+  `mEnv x cin w acc = macSeq.env (bitsOf (andWord x w) ++ [cin]) (bitsOf acc)`.
+* `MacCell.cell_wsh_next` (`3c07566`) — the **wsh′ half**, which did not exist when this
+  section was briefed: `run (cellEnv …) ccCore.gates (ccWshNext k)
+  = run (wEnv x ld w) wsCore.gates ((wsCore.outs.drop 32).getD k 0)`. *Cited, not rebuilt.*
+* `MacCell.wshift_next_bit_zero_when_not_loading` and `MacCell.wshift_next_bit_succ` — the
+  weight organ's own two shift theorems, which turn that net-level equality into `w <<< 1`.
+* `macSeq_cycle_bits` and ⭐ `macSeq_runTrace_state` (rung 3, this file) — the **precedent**
+  this induction is the sibling of, one level up, and the theorem the inheritance cites.
+* `cell_state_toInt_eq_macAfter` and `cell_computes_signed_mac` (this file) — **the join**.
+  Cited whole; nothing in them is re-proved here.
+
+**SHAPE CHECKED, NOT ASSUMED.** `cellSeq.nState = 64` and `ccCore.outs` is
+`acc′(32) ++ wsh′(32) ++ acc′(32)`, so `stepSeq`'s `drop nOut` is `wsh′ ‖ acc′` **in that
+order** (`MacCell.cell_state_layout` names those nets; the two lemmas above give their
+VALUES, which is the difference this section had to close).
+
+**TRAPS BANKED, AND OBSERVED.** `macCore`/`ccCore` are kept **opaque** throughout — the
+193-gate list is never unfolded in `simp`; `macSeq`/`cellSeq` fields are projected by `rfl`.
+`BitVec.shiftLeft_shiftLeft` does not exist; the real name is `BitVec.shiftLeft_add`, used
+below exactly as `wshift_runTrace_state` uses it. No `bv_decide`.
+
+**NO EXISTING STATEMENT WAS ALTERED.** Everything below is added beside.
+
+### ⚠️ WHICH ARROWS ARE MINE AND WHICH ARE CITED
+
+```
+  mine    the wsh′ bit value        cell_wsh_next  ∘  the organ's two shift theorems
+  mine    the two halves at the word, and the full-state step   cellSeq_step_word
+  mine    THE TRACE INDUCTION                                   cellSeq_runTrace_state
+  mine    the inheritance, i.e. rung 3's state read off the cell's own trace
+  cited   the ℤ reading (macAfter, b + W·psum)     cell_state_toInt_eq_macAfter
+  cited   the signed reading (b + W·sval)          cell_computes_signed_mac
+```
+
+⛔ **AND ONE ARROW IS NEITHER — IT IS A GAP, AND IT IS NAMED RATHER THAN IMPLIED.** The
+landed sign cycle (`cell_sign_cycle`) needs the **complement** `~~~w` on the adder's
+addend port. `cellSeq` has three primary inputs — stream, load, carry-in — and its addend is
+`andWord x w`, i.e. `0` or `w` and nothing else. **So the sign cycle is not a `cellSeq`
+cycle: the composed cell as built has no complement path**
+(`cell_addend_cannot_present_the_sign_operand`, below, is that fact in the kernel).
+*The signed sentence therefore remains a sentence about the WORD the cell leaves, and about
+`macSeq`, and this section does not upgrade it to a sentence about the composed cell.*
+-/
+
+/-! ### The step, both halves -/
+
+/-- The composed cell's next weight-register bit `k`, with `load` low: bit `k` of `w <<< 1`.
+
+`MacCell.cell_wsh_next` carries the net across the composition; the weight organ's own two
+theorems supply the value — `wsLsb` is `false` when not loading, and next-state bit `j+1` is
+state bit `j`. The `k = 0` and `k = j+1` arms genuinely differ: the first net is a GATE, the
+rest are INPUT nets. -/
+theorem cell_wsh_next_bit (x cin : Bool) (w acc : BitVec 32) (k : Nat) (hk : k < 32) :
+    run (MacCell.cellEnv x false cin w acc) ccCore.gates (ccWshNext k)
+      = (w <<< 1).getLsbD k := by
+  have hnet0 : (wsCore.outs.drop 32).getD 0 0 = wsLsb := by decide +kernel
+  have hnetS : ∀ j, j < 31 → (wsCore.outs.drop 32).getD (j + 1) 0 = wsW j := by
+    intro j hj; revert hj; revert j; decide +kernel
+  rw [MacCell.cell_wsh_next x false cin w acc k hk]
+  simp only [MacCell.wEnv]
+  match k, hk with
+  | 0, _ =>
+      have hbit0 : (w <<< 1).getLsbD 0 = false := by
+        rw [BitVec.getLsbD_shiftLeft]; simp
+      rw [hnet0, MacCell.wshift_next_bit_zero_when_not_loading x w, hbit0]
+  | (j + 1), hk =>
+      have hj : j < 31 := by omega
+      have h1 : j + 1 < 32 := by omega
+      have h2 : ¬ (j + 1 < 1) := by omega
+      have hbit : (w <<< 1).getLsbD (j + 1) = w.getLsbD j := by
+        rw [BitVec.getLsbD_shiftLeft]; simp [h1, h2]
+      rw [hnetS j hj, MacCell.wshift_next_bit_succ x false w j hj, hbit]
+
+/-- The weight half of one cycle, as a word. -/
+theorem cellSeq_cycle_wsh_bits (x cin : Bool) (w acc : BitVec 32) :
+    (List.range 32).map
+        (fun k => run (MacCell.cellEnv x false cin w acc) ccCore.gates (ccWshNext k))
+      = MacCell.bitsOf (w <<< 1) := by
+  show _ = (List.range 32).map (w <<< 1).getLsbD
+  exact List.map_congr_left (fun k hk => cell_wsh_next_bit x cin w acc k (List.mem_range.mp hk))
+
+/-- The accumulator half of one cycle, as a word: `MacCell.cell_sum_bit` (the composition
+theorem) composed with `macSeq_cycle_bits` (rung 2's pointwise-to-word step), at the addend
+`andWord x w` the weight organ makes. -/
+theorem cellSeq_cycle_acc_bits (x ld cin : Bool) (w acc : BitVec 32) :
+    (List.range 32).map
+        (fun k => run (MacCell.cellEnv x ld cin w acc) ccCore.gates
+                    (instMap macCore ccMSig ccMOff (maSum k)))
+      = MacCell.bitsOf (acc + MacCell.andWord x w + BitVec.setWidth 32 (BitVec.ofBool cin)) := by
+  have h : (List.range 32).map
+        (fun k => run (MacCell.cellEnv x ld cin w acc) ccCore.gates
+                    (instMap macCore ccMSig ccMOff (maSum k)))
+      = (List.range 32).map
+          (fun k => run (MacCell.mEnv x cin w acc) macCore.gates (maSum k)) :=
+    List.map_congr_left
+      (fun k hk => MacCell.cell_sum_bit x ld cin w acc k (List.mem_range.mp hk))
+  rw [h]
+  exact macSeq_cycle_bits acc (MacCell.andWord x w) cin
+
+/-- ⭐⭐ **ONE CYCLE OF THE COMPOSED CELL, AT THE WORD, BOTH HALVES.** With `load` low, a
+cycle on stream bit `x` and carry-in `cin` from the state `w ‖ acc` puts
+`acc + (x ∧ w) + cin` on the output port and on the accumulator half of the next state, and
+`w <<< 1` on the weight half.
+
+**Both halves, because `cellSeq`'s state is 64 bits and an induction advances all of it.**
+The accumulator half is the composition theorem; the weight half is `cell_wsh_next`. Still
+`BitVec`, still unconditional, still no `ℤ`. -/
+theorem cellSeq_step_word (x cin : Bool) (w acc : BitVec 32) :
+    stepSeq cellSeq (MacCell.bitsOf w ++ MacCell.bitsOf acc) [x, false, cin]
+      = (MacCell.bitsOf (acc + MacCell.andWord x w + BitVec.setWidth 32 (BitVec.ofBool cin)),
+         MacCell.bitsOf (w <<< 1)
+           ++ MacCell.bitsOf (acc + MacCell.andWord x w
+                                + BitVec.setWidth 32 (BitVec.ofBool cin))) := by
+  -- ⚠️ `ccCore` stays OPAQUE: its 193 gates expand `instGates adder32` and the kernel times
+  -- out. `cellSeq`'s fields are PROJECTED by `rfl`; only `outs`' SHAPE is used.
+  have hcore : cellSeq.core = ccCore := rfl
+  have hnout : cellSeq.nOut = 32 := rfl
+  have henv : cellSeq.env [x, false, cin] (MacCell.bitsOf w ++ MacCell.bitsOf acc)
+      = MacCell.cellEnv x false cin w acc := rfl
+  have houts : ccCore.outs
+      = ((List.range 32).map (fun k => instMap macCore ccMSig ccMOff (maSum k)))
+        ++ (((List.range 32).map ccWshNext)
+            ++ ((List.range 32).map (fun k => instMap macCore ccMSig ccMOff (maSum k)))) := by
+    show (((List.range 32).map (fun k => instMap macCore ccMSig ccMOff (maSum k)))
+          ++ ((List.range 32).map ccWshNext))
+          ++ ((List.range 32).map (fun k => instMap macCore ccMSig ccMOff (maSum k))) = _
+    exact List.append_assoc _ _ _
+  have hlen : (MacCell.bitsOf
+      (acc + MacCell.andWord x w + BitVec.setWidth 32 (BitVec.ofBool cin))).length = 32 :=
+    MacCell.bitsOf_length _
+  simp only [stepSeq, sem, hcore, hnout, henv, houts, List.map_append, List.map_map,
+             Function.comp_def, cellSeq_cycle_acc_bits, cellSeq_cycle_wsh_bits]
+  rw [List.take_left' hlen, List.drop_left' hlen]
+
+/-! ### THE TRACE INDUCTION
+
+The sibling of rung 3 one level up: rung 3 inducted `macSeq` over `macSeq_step_word`; this
+inducts `cellSeq` over `cellSeq_step_word`. The trace length is the cycle index, so no fuel
+parameter appears here either.
+
+⚠️ **PER-INPUT SHAPE, AND THE SHAPE IS THE RULING.** `cellInputs` is **one input's**
+accumulation cycles — `load` LOW throughout, so no load phase is inside it. The two organs
+have opposite state discipline (`MacCell`'s dual-stream paragraph): the accumulator PERSISTS
+across inputs, the weight register RE-INITIALISES per input. A second input is therefore a
+SECOND `runTrace` whose initial state carries the accumulator forward and the weight back to
+`W₂` — never one trace spanning both. `cellSeq_mutant_no_reload_is_not_two_inputs` runs that
+mistake on the real netlist and shows it lands somewhere else. -/
+
+/-- One input's `n` accumulation cycles: the stream bit, `load` LOW, carry-in LOW.
+
+`load` low is what makes these accumulation cycles rather than load cycles — the guards
+`MacCell.weight_state_moves_so_reload_is_required` and
+`MacCell.stream_enters_only_through_the_load_gate` are the reason the distinction has to be
+in the definition and not in the prose. -/
+def cellInputs (x : ℕ → Bool) (n : ℕ) : List (List Bool) :=
+  (List.range n).map (fun t => [x t, false, false])
+
+theorem cellInputs_succ (x : ℕ → Bool) (n : ℕ) :
+    cellInputs x (n + 1) = [x 0, false, false] :: cellInputs (fun t => x (t + 1)) n := by
+  simp [cellInputs, List.range_succ_eq_map, Function.comp_def]
+
+/-- The addend trace, peeled at the head — the form the induction consumes. -/
+theorem addendTrace_succ (Wsh : ℕ → BitVec 32) (x : ℕ → Bool) (n : ℕ) :
+    addendTrace Wsh x (n + 1)
+      = (if x 0 then Wsh 0 else 0)
+          :: addendTrace (fun t => Wsh (t + 1)) (fun t => x (t + 1)) n := by
+  simp [addendTrace, List.range_succ_eq_map, Function.comp_def]
+
+/-- One shift then `t` more is `t+1` shifts. *`BitVec.shiftLeft_shiftLeft` does not exist;
+`BitVec.shiftLeft_add` is the name, as `wshift_runTrace_state` already records.* -/
+theorem shiftLeft_one_shiftLeft (W : BitVec 32) (t : ℕ) : (W <<< 1) <<< t = W <<< (t + 1) := by
+  rw [← BitVec.shiftLeft_add]; congr 1; omega
+
+/-- ⭐⭐⭐ **THE TRACE INHERITANCE, PART 1 — THE INDUCTION.** Running one input's `n`
+accumulation cycles from the state `W ‖ b` leaves the weight register holding `W <<< n` and
+the accumulator holding `b + Σ_{t<n} (if x t then W <<< t else 0)` — i.e. exactly
+`b + (addendTrace (W <<< ·) x n).sum`.
+
+**Both halves advance, which is the whole content**: the accumulator accumulates and the
+weight register shifts, and the induction needs the second to state the first. Still
+`BitVec`, still unconditional — no `ℤ`, no overflow hypothesis, no `hW`. -/
+theorem cellSeq_runTrace_state :
+    ∀ (n : ℕ) (W b : BitVec 32) (x : ℕ → Bool),
+      (runTrace cellSeq (MacCell.bitsOf W ++ MacCell.bitsOf b) (cellInputs x n)).2
+        = MacCell.bitsOf (W <<< n)
+            ++ MacCell.bitsOf (b + (addendTrace (fun t => W <<< t) x n).sum)
+  | 0, W, b, x => by simp [cellInputs, runTrace, addendTrace]
+  | n + 1, W, b, x => by
+      have h0 : BitVec.setWidth 32 (BitVec.ofBool false) = (0 : BitVec 32) := by decide
+      have hstep := cellSeq_step_word (x 0) false W b
+      rw [h0, add_zero] at hstep
+      simp only [cellInputs_succ, runTrace, hstep]
+      rw [cellSeq_runTrace_state n (W <<< 1) (b + MacCell.andWord (x 0) W) (fun t => x (t + 1)),
+          shiftLeft_one_shiftLeft W n,
+          show (fun t : ℕ => (W <<< 1) <<< t) = (fun t : ℕ => W <<< (t + 1)) from
+            funext (fun t => shiftLeft_one_shiftLeft W t),
+          addendTrace_succ (fun t => W <<< t) x n, List.sum_cons, ← add_assoc]
+      simp [MacCell.andWord]
+
+/-- ⭐⭐⭐ **THE TRACE INHERITANCE, PART 2 — THE INHERITANCE ITSELF.** The composed cell's
+accumulator half after one input's `n` cycles **IS** the state rung 3
+(`macSeq_runTrace_state`) leaves for the bare accumulator — over the addend trace the weight
+organ manufactures, rather than over addends handed to it from outside.
+
+*That is the arrow the join was waiting for: every sentence rung 4 and the join say about
+`(runTrace macSeq …).2` is a sentence about the composed cell's accumulator, because the two
+are the same list. The weight half is the shifted register and is carried alongside, not
+discarded.* -/
+theorem cellSeq_inherits_macSeq_state (n : ℕ) (W b : BitVec 32) (x : ℕ → Bool) :
+    (runTrace cellSeq (MacCell.bitsOf W ++ MacCell.bitsOf b) (cellInputs x n)).2
+      = MacCell.bitsOf (W <<< n)
+        ++ (runTrace macSeq (MacCell.bitsOf b)
+              ((addendTrace (fun t => W <<< t) x n).map
+                 (fun a => MacCell.bitsOf a ++ [false]))).2 := by
+  rw [cellSeq_runTrace_state n W b x,
+      macSeq_runTrace_state b (addendTrace (fun t => W <<< t) x n)]
+
+/-! ### THE JOIN, REACHED — cited, not re-proved
+
+Nothing below re-derives an arithmetic step. The first conjunct of each is this section's
+induction; the second is the landed join, applied at `Wsh := (W <<< ·)`. -/
+
+/-- ⭐⭐ **THE COMPOSED CELL REACHES `macAfter`.** For one input, under the prefix
+no-overflow predicate and the weight schedule `hW`: the cell's state is
+`W <<< n ‖ b + Σ addends` (unconditional), and that accumulator word's `ℤ` value is
+`Mac.macAfter W b.toInt x (n+1)` — the accumulation **before** the sign cycle, which
+`MacInduction` reads as `b + W · psum`.
+
+**That is the claim, at exactly that size.** The `hW` hypothesis is now about the register
+this cell actually shifts (`Wreg <<< t`), which is what `MacCell.shiftSafe` /
+`MacCell.hW_is_shiftSafe` price; it is still a hypothesis and it is still named. -/
+theorem cellSeq_state_toInt_eq_macAfter
+    (W : ℤ) (Wreg b : BitVec 32) (x : ℕ → Bool) (n : ℕ)
+    (hW : ∀ t, t < n → ((Wreg <<< t) : BitVec 32).toInt = W * 2 ^ t)
+    (hno : noOverflowFrom b (addendTrace (fun t => Wreg <<< t) x n) = true) :
+    (runTrace cellSeq (MacCell.bitsOf Wreg ++ MacCell.bitsOf b) (cellInputs x n)).2
+        = MacCell.bitsOf (Wreg <<< n)
+          ++ MacCell.bitsOf (b + (addendTrace (fun t => Wreg <<< t) x n).sum)
+  ∧ (b + (addendTrace (fun t => Wreg <<< t) x n).sum).toInt
+      = Mac.macAfter W b.toInt x (n + 1) :=
+  ⟨cellSeq_runTrace_state n Wreg b x,
+   (cell_state_toInt_eq_macAfter W b (fun t => Wreg <<< t) x n hW hno).2⟩
+
+/-- ⭐⭐ **AND THE SIGNED READING OF THE WORD IT LEAVES.** Under the join's three
+hypotheses — `hW`/`hWm` (the schedule), the prefix no-overflow predicate, and
+`¬ ssubOverflow` — the composed cell's state after one input's `m` cycles is
+`Wreg <<< m ‖ b + Σ addends`, and **that word, minus the sign operand**, reads in `ℤ` as
+`b.toInt + W · sval x (m+1)`: the signed dot product.
+
+⛔ **THE SUBTRACTION IS NOT A CELL CYCLE, AND THIS THEOREM DOES NOT SAY IT IS.** The first
+conjunct is about `runTrace cellSeq`; the second is `cell_computes_signed_mac`, an arithmetic
+fact about the word — and `cell_sign_cycle`, which performs that subtraction, runs on
+`macSeq` with the complement `~~~w` on its addend port. **`cellSeq` cannot present that
+operand** (`cell_addend_cannot_present_the_sign_operand`). *So what the composed cell is
+certified to do end to end is the ACCUMULATION; the sign step is certified on the
+accumulator organ and the composed cell has no path to it.* -/
+theorem cellSeq_state_word_signed_reading
+    (W : ℤ) (Wreg b : BitVec 32) (x : ℕ → Bool) (m : ℕ)
+    (hW : ∀ t, t < m → ((Wreg <<< t) : BitVec 32).toInt = W * 2 ^ t)
+    (hWm : ((Wreg <<< m) : BitVec 32).toInt = W * 2 ^ m)
+    (hno : noOverflowFrom b (addendTrace (fun t => Wreg <<< t) x m) = true)
+    (hsign : ¬ BitVec.ssubOverflow (b + (addendTrace (fun t => Wreg <<< t) x m).sum)
+                (signOperand (fun t => Wreg <<< t) x m)) :
+    (runTrace cellSeq (MacCell.bitsOf Wreg ++ MacCell.bitsOf b) (cellInputs x m)).2
+        = MacCell.bitsOf (Wreg <<< m)
+          ++ MacCell.bitsOf (b + (addendTrace (fun t => Wreg <<< t) x m).sum)
+  ∧ ((b + (addendTrace (fun t => Wreg <<< t) x m).sum)
+        - signOperand (fun t => Wreg <<< t) x m).toInt
+      = b.toInt + W * Mac.sval x (m + 1) :=
+  ⟨cellSeq_runTrace_state m Wreg b x,
+   cell_computes_signed_mac W b (fun t => Wreg <<< t) x m hW hWm hno hsign⟩
+
+/-- ⛔⛔ **THE GAP, IN THE KERNEL RATHER THAN IN PROSE.** The composed cell's addend is
+`andWord x w` — `0` or the weight register, and nothing else. The landed sign cycle needs
+`~~~(signOperand …)`. At weight register `1`, **neither arm of the AND row equals either arm
+of the complemented sign operand.** *So `cell_full_mac`'s trace is not a `cellSeq` trace, and
+no amount of quantifying over initial states makes it one: the complement path is a wire that
+does not exist.* -/
+theorem cell_addend_cannot_present_the_sign_operand (x xm : Bool) :
+    MacCell.andWord x (1 : BitVec 32)
+      ≠ ~~~(signOperand (fun _ => (1 : BitVec 32)) (fun _ => xm) 0) := by
+  cases x <;> cases xm <;> decide
+
+/-! ### CONTROLS — RUN, NOT CITED, AND RUN ON THE REAL NETLIST
+
+*The arithmetic mutants of rung 3 established that `+` notices its arguments. These are one
+level lower: `decide +kernel` evaluates the actual 193-gate `ccCore` for three to eight
+cycles, so a mis-stated induction that happened to be self-consistent would still be caught.
+Cost measured, not guessed: the whole block is seconds.* -/
+
+/-- **POSITIVE CONTROL — THE THEOREM DESCRIBES THE REAL MACHINE.** Weight `3`, accumulator
+`0`, stream `1,0,1`: the cell itself, run in the kernel, lands on weight `3 <<< 3 = 24` and
+accumulator `3 + 0 + 12 = 15` — which is what `cellSeq_runTrace_state` predicts.
+**The stream is deliberately NOT all-ones**: a cell that ignored `x` and added every cycle
+would pass an all-ones test. -/
+theorem cellSeq_behavioural_witness :
+    (runTrace cellSeq (MacCell.bitsOf 3 ++ MacCell.bitsOf 0)
+        (cellInputs (fun t => !(t == 1)) 3)).2
+      = MacCell.bitsOf 24 ++ MacCell.bitsOf 15 := by
+  decide +kernel
+
+/-- ⛔ **MUTANT — A DROPPED INPUT CHANGES THE STATE.** Two cycles of the same stream instead
+of three: the induction is not silently ignoring its trace. On the netlist. -/
+theorem cellSeq_mutant_dropped_input :
+    (runTrace cellSeq (MacCell.bitsOf 3 ++ MacCell.bitsOf 0)
+        (cellInputs (fun t => !(t == 1)) 2)).2
+      ≠ (runTrace cellSeq (MacCell.bitsOf 3 ++ MacCell.bitsOf 0)
+            (cellInputs (fun t => !(t == 1)) 3)).2 := by
+  decide +kernel
+
+/-- ⛔ **MUTANT — THE STREAM BIT IS LOAD-BEARING.** Flipping cycle 1's bit from `0` to `1`
+moves the state, so the AND row is doing work and the addend is not the weight unconditionally. -/
+theorem cellSeq_mutant_stream_bit_matters :
+    (runTrace cellSeq (MacCell.bitsOf 3 ++ MacCell.bitsOf 0)
+        (cellInputs (fun t => !(t == 1)) 3)).2
+      ≠ (runTrace cellSeq (MacCell.bitsOf 3 ++ MacCell.bitsOf 0)
+            (cellInputs (fun _ => true) 3)).2 := by
+  decide +kernel
+
+/-- ⛔⛔ **MUTANT — THE STATE DISCIPLINE. ONE TRACE SPANNING TWO INPUTS IS NOT TWO INPUTS.**
+
+Weight `1`, four cycles per input, stream all-ones. Read the three conjuncts as one sentence:
+
+```
+   input 1 alone, fresh weight        (1 ‖ 0)   -4 cycles->   (16 ‖ 15)
+   input 2, weight RELOADED to 1,
+     accumulator carried forward      (1 ‖ 15)  -4 cycles->   (16 ‖ 30)   <- CORRECT
+   one trace, eight cycles, no reload (1 ‖ 0)   -8 cycles->   NOT (256 ‖ 30)
+```
+
+**The third conjunct is the refutation**: without the reload the weight register keeps
+climbing, so the second input's bits are weighted `2⁴…2⁷` instead of `2⁰…2³` and the
+accumulator lands on `255`, not `30`. *No wire is wrong in that mistake — only which state
+crosses which trace boundary, which is exactly what `MacCell`'s dual-stream paragraph warns
+about and why `cellInputs` is per-input.* -/
+theorem cellSeq_mutant_no_reload_is_not_two_inputs :
+    (runTrace cellSeq (MacCell.bitsOf 1 ++ MacCell.bitsOf 0) (cellInputs (fun _ => true) 4)).2
+      = MacCell.bitsOf 16 ++ MacCell.bitsOf 15
+  ∧ (runTrace cellSeq (MacCell.bitsOf 1 ++ MacCell.bitsOf 15) (cellInputs (fun _ => true) 4)).2
+      = MacCell.bitsOf 16 ++ MacCell.bitsOf 30
+  ∧ (runTrace cellSeq (MacCell.bitsOf 1 ++ MacCell.bitsOf 0) (cellInputs (fun _ => true) 8)).2
+      ≠ MacCell.bitsOf 256 ++ MacCell.bitsOf 30 :=
+  ⟨by decide +kernel, by decide +kernel, by decide +kernel⟩
+
+/-! ### The axiom audit for THIS SECTION
+
+⚠️ **AND IT COVERS THIS SECTION ONLY.** `MacBridge` carried no `#audit_axioms` block before
+this one, and adding a partial block must not read as a whole-file certificate:
+`docs/hdl-tools/audit_completeness.py` at `3c07566` reports **204 unaudited theorems**
+corpus-wide, of which **32 are this file's earlier declarations**. *`Sem.lean`'s note that
+"The real number is zero" is STALE.* Those 32 are somebody's item; they are not silently
+adopted here. -/
+
+#audit_axioms cell_wsh_next_bit
+#audit_axioms cellSeq_cycle_wsh_bits
+#audit_axioms cellSeq_cycle_acc_bits
+#audit_axioms cellSeq_step_word
+#audit_axioms cellInputs_succ
+#audit_axioms addendTrace_succ
+#audit_axioms shiftLeft_one_shiftLeft
+#audit_axioms cellSeq_runTrace_state
+#audit_axioms cellSeq_inherits_macSeq_state
+#audit_axioms cellSeq_state_toInt_eq_macAfter
+#audit_axioms cellSeq_state_word_signed_reading
+#audit_axioms cell_addend_cannot_present_the_sign_operand
+#audit_axioms cellSeq_behavioural_witness
+#audit_axioms cellSeq_mutant_dropped_input
+#audit_axioms cellSeq_mutant_stream_bit_matters
+#audit_axioms cellSeq_mutant_no_reload_is_not_two_inputs
+
 end SaltWorks.HDL.MacBridge
