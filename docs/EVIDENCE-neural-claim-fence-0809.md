@@ -333,6 +333,63 @@ against my own sentence before the post, not after.*
 count of the Circ ACTUALLY EMITTED — the same artifact this criterion now names.
 Two seats, one file, rather than two seats reading two files and agreeing.**
 
+## 🚦 OPEN FENCE VERDICTS AT THE 2026-08-09 CLOSE — both reach the Captain at the 07:30 sitting
+
+*Recorded HERE and not only on the bus, because a verdict that lives in 50,000
+lines of append-only log is a verdict nobody re-reads. Both were routed to me;
+both are UNREPAIRED as of 20:1x; replacement language was supplied with each so
+the repair is one edit, not a round trip.*
+
+### ⛔ (1) THE DEMO SENTENCE — `ndf-top-module-design-v1.md` §D5. NOT CLEARED.
+
+```
+THE CLAUSE   "...a dataflow fabric whose netlist is kernel-checked against its
+              Lean model ON THE SCHEDULE CLASS WE RUN..."
+THE FACT     the block's OWN refutation ledger, FATAL-1: fabric_routes covers
+              only prefix-concentrated destination-monotone traffic, and ZERO
+              rounds of the §4 demo were in the certified set. V10 — the
+              per-round fixtures that would certify them — is marked NEW.
+⇒ "THE SCHEDULE CLASS WE RUN" IS PRECISELY THE UNCERTIFIED CLASS.
+   A future claim written in the present tense.
+```
+✅ **CHEAPEST TRUE FORM** (no gate, no future work): *"...kernel-checked against
+its Lean model on prefix-concentrated destination-monotone traffic."*
+⚠️ **TWO SECONDARY REPAIRS:** *(i) "a processor whose every organ and wire is
+kernel-certified ... ON ONE DIE" — the twin disclosure sits three clauses from
+the die, and the die carries 546 behavioural flops of hand RTL; put the twin
+adjacent. (ii) "its end-to-end refinement ONE NAMED THEOREM away" names no
+theorem — an unnamed named theorem cannot be checked.*
+
+### ⛔ (2) THE 221 CLAIM SENTENCE — `ndf-council-example-221.md`. NOT CLEARED.
+
+```
+THE CLAIM    "A neural network on VERIFIED SILICON where synchrony is
+              COMPILE-TIME ARITHMETIC..."
+THE RULE     "verified silicon" is banned unqualified in this file: it requires
+              naming WHICH ARTIFACT and WHICH CHECKER.
+THE STATE, measured 2026-08-09 evening:
+  proved over ALL inputs  the cell's COMBINATIONAL CORE, 96/96 outputs
+                          (SAT, docs/ledger-tools/equiv_spec.sh + compiler's
+                           kernel proof + silicon's synthesis miter)
+  NOT emitted             the CLOCKED cell — emitSeq does not exist (V7+V9)
+  HAND RTL                state · sequencer FSM · pin wrapper · fabric · CPU
+⇒ the silicon this network would run on is, today, MOSTLY HAND RTL.
+```
+✅ **REPLACEMENT, keeping the sentence's whole force:** *"A neural network whose
+CELL CORE is proved gate-for-gate against its Lean model over all inputs — on a
+die whose state elements, sequencer and fabric are still hand RTL — where
+synchrony is COMPILE-TIME ARITHMETIC: no handshakes, no arbiters, no credits, no
+schedulers in silicon."*
+🔑 ***The compile-time-synchrony claim is the interesting one and the fence does
+not touch it. It does not need "verified silicon" to land, and it is WEAKENED by
+riding beside a phrase a reader can puncture.***
+
+✅ **WHAT PASSED in that document, recomputed not assumed:** *22 frames × 14
+cycles = 308; 308 × 55 ns = 16.94 µs ≈ 17 µs at the ruled clock; constants named
+INLINE (CLOCK_PERIOD 55 ns / 18.2 MHz, frame = 14 = 6 header + 8 payload).* **The
+first numbers document this fence has seen that carries its own basis — a reader
+re-derives 17 µs without asking anyone.**
+
 ### Three words that may not be used unqualified until their row lands
 
 ```
