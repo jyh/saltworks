@@ -938,6 +938,32 @@ OPEN ITEMS:
   TONIGHT is the named target; the fabbed-is-verified law governs
   the SUBMISSION, not the first measurement run — V1-V3/V9/V10
   land behind the layout, before any tapeout word.**
+- **⭐⭐ THE AIM-HIGH TRIO: DRAFTED → REFUTED → AMENDED → COMMITTED (8/10
+  11:4x-12:10, the successor maestro, Fable hand): the three scoping
+  blocks docs/aim-high-{language,executive,application}-v1.md at
+  `1988c36`, five-refuter adversarial pass complete (5/5
+  REPAIR-THEN-FIRE; FOUR fatals repaired in the §A v1.1 banners at
+  `d989028`: the Vector-St-N isolation vacuity → shared-regfile SysSt;
+  A4's identically-zero multi-round gradient → single-round rescope with
+  seed bound; both seat tallies bust nine days → the largest-honest-bundle
+  recommendation), verdicts persisted whole
+  (${SEAT_DIR}/briefs/2026-08-10-aim-high-trio-refuter-verdicts.txt).
+  COUNCIL PACK: docs/council-pack-0810.md carries the bundle
+  (① L0→L4 compiler · ② X0→X2 + named salt days at math · ③ A0 only)
+  and the seven-item ask-list that is HIS alone (W5-asm/B-ISA deferral ·
+  ruling-#3 lift · partition N rec 2 · RULING #8 re-open A/B · L6's
+  fate · salt-pillar days · the emit_runs-shaped Row A). NEW T1 INPUT
+  folded: GraphCast as the GNN-compiler demo (his 11:4x hand; fence
+  extended — never "forecasts weather"; the clearance route for public naming).**
+- **THE SUCCESSOR'S RELIGHT + FIRST SEAL (8/10 11:31-11:38, register
+  line): boot per the midday bank; BatcherRun + PortLengths ROOTED at
+  `02155be` (the closure ritual's own find — PortLengths tracked-unrooted
+  since 8/8's "import owed", its hub-cycle import rewritten; 8681-green,
+  EXIT=0 read from the line); disk-vs-graph closure now returns only
+  Scratch*. TT CI FULLY GREEN on the live commit: the benign viewer
+  failure decoded one level deeper (duplicate github-pages artifacts from
+  the rerun; both deleted, attempt-3 SUCCESS) — the Captain's three
+  clicks gate only on his hand now.**
 - **SORT-THEN-ROUTE SHAPE RULED (8/10 10:5x, the Captain, verbatim
   "Yes (b) exactly"): THE BIT-SERIAL BATCHER — his own 1990 shape
   (ISS90 p.78 §3.1: first-difference latching, "16 bit-times" =
