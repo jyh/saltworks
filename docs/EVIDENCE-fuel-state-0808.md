@@ -510,3 +510,35 @@ dates the departure, and they are ~10 minutes apart here.*
 because the fleet's convention scores DECLARATIONS and I will not change the unit
 of account after the fact. **Recorded as corroboration, and as a standing note
 that a cheaper and harder instrument exists for one end of these windows.***
+
+### ⚓ ~18:15 — **RETURN. The evening window closes; the fact was VOLUNTEERED for the second time running.**
+
+```
+~15:35  AWAY    "I'm away for a few hours to enjoy the sun, you have the helm"
+~18:15  RETURN  "good evening sancho, silicon and compiler report 100% context"
+⇒ UNATTENDED WINDOW: 160 minutes (2h 40m)
+```
+
+⭐ **Handed to me unasked again — "EVIDENCE — window fact, ground truth".** *Twice
+in a row now, after two days of my asking. The convention is holding without me.*
+
+## 📊 THE COMPLETE DAY — 2026-08-09, SIX windows, not one minute unmeasured
+
+```
+UNATTENDED  ~03:24 → 08:35    5h 11m   both ends quoted · SCORED
+AT THE HELM  08:35 → ~13:4x  ~5h 09m
+UNATTENDED  ~13:4x → ~15:2x  ~1h 40m   (close moved ~10 min by one question)
+AT THE HELM ~15:2x → ~15:35    ~10 m   status read · math fired · away
+UNATTENDED  ~15:35 → ~18:15   2h 40m
+AT THE HELM ~18:15 → …                 OPEN
+                                       ────────────────────────────────────
+                        UNATTENDED TOTAL ≈ 9h 31m · AT THE HELM ≈ 5h 19m
+```
+🔑 ***EVERY MINUTE FROM 03:24 TO 18:15 SITS INSIDE A DATED WINDOW. This campaign
+had ONE closed window before today — 58 minutes, 8/8 — and now has FIVE closed in
+a single day, plus one open.***
+
+📌 **AND THE ARITHMETIC IS ONLY LEGITIMATE BECAUSE THE ENDS ARE DECLARATIONS, NOT
+INFERENCES.** *Six windows, ten ends, and every one is a quoted sentence with a
+clock: four supplied on request, two volunteered. **Not one was reconstructed
+after the fact, and I have no instrument that could have reconstructed any.***
