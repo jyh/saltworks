@@ -88,18 +88,43 @@ corpus proves network results structurally. A brute-force fixture is not availab
 
 ## 4. PRE-REGISTERED COUNTS — for the seam as relocated
 
+### ✅ LANDED — the ELEMENT half is complete (`SaltWorks/HDL/PartialLift.lean`)
+
 ```
-PartialStageOK  StageOK with `cFrame true d p` weakened to "active OR idle",
-                and the distinctness clause restated on cKey rather than cDestOf
-                (idles TIE under cDestOf, so the current clause is unsatisfiable
-                 the moment two lines are idle — that is the formal reason the
-                 landed hypothesis excludes the NDF's own traffic)
-network sorts   bnC_output_frames_driven with `runNetF (cKeyLE …)`   1 theorem
-seam            that == math's runNet batcher8 (cKey act dst)        1 theorem
-composition     banyan on the sorted output    consumes cSorted_concentrates +
-                                               cSorted_strictMonoOn — both LANDED
-new objects     a cKey-valued frame reader; the element tie already exists
+ceC_hdrOKP                the header decides+routes off full load, 256 configs
+ceC_header_routes_partial the extracted form
+ceC_pair_partial          the whole frame, ARBITRARY payloads
+ceC_pair_partial_out0/1   de-interleaved
+ceCPort_partial_out0/1    from ANY initial state — the shape ElemSortsAt consumes
+idle_idle_never_decides · idle_headers_are_identical    (the exclusion controls)
 ```
+🔑 *Each mirror is the full-load proof with `true → a0/a1` and the final
+`cKeyLE_full_load` rewrite OMITTED — **that rewrite is the only place `cDestOf`
+ever entered the chain.** All five went through first try.*
+
+### ⛔ REMAINING — the STAGE half, and it is now one object
+
+```
+(A) ceCPort_identical    idle-vs-idle: identical inputs ⇒ identical outputs, so
+                         ElemSortsAt holds there for ANY comparator. NEEDED because
+                         the keystone excludes idle-idle (it never decides), and
+                         PartialStageOK must let two idle wires meet.
+                         Route: the output gates compute (!s && i0) || (s && i1);
+                         with i0 = i1 this is i0 for either s. State-length 4 comes
+                         from bnCSlice_length (landed).
+(B) PartialStageOK       clause 1 → "active OR idle, idles carrying the SILENT
+                         (all-false) payload" — so two idles are the SAME BITS
+                         (cFrame_idle_is_silent), which is what makes (A) apply.
+                         clause 2 → distinctness on ACTIVE destinations only.
+                         ⚠️ Distinctness on ACTIVES stays load-bearing:
+                         ceC_pair_tie_splices_the_payload shows a genuine active
+                         tie misroutes INVISIBLY to any header-level invariant.
+(C) preservation         a compare-exchange permutes the two frames, so both
+                         clauses survive a stage.
+(D) elemSortsAt_of_stage_partial   →  THE EXISTING GENERIC FOLD, unchanged.
+```
+⭐ ***No new theory is owed. `bnC_output_frames_are_the_fold` already takes `le`
+as a parameter, so nothing above touches the network layer.***
 🔑 ***THE DISTINCTNESS CLAUSE IS THE LOAD-BEARING EDIT AND IT IS NOT COSMETIC: `StageOK` requires
 pairwise-distinct `cDestOf`, and `cDestOf_idle_is_zero` says every idle line reads 0 — so with two
 idle lines the hypothesis is FALSE, vacuously excluding exactly the traffic the NDF runs.*** *The
