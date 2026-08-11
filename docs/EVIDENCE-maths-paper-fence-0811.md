@@ -159,6 +159,25 @@ than pretend to a third:
    whom. "To our knowledge" with no recorded search is an unfalsifiable claim
    wearing a hedge.
 ```
+### ⭐ M3 VINDICATED AT WORLD SCALE — the Captain's audit, 2026-08-11 11:22
+
+*11 agents, 487 tool calls, adversarial, five live-web lanes. The stated search
+M3 demanded was fired, and it changed the paper:*
+```
+7 STAND · 3 THREATENED · 2 FALLEN
+  Vaughan          predated FOUR MONTHS as `Lambda_decomp` — invisible to every
+                   name-grep. "ABSENCE-BY-GREP LOST EVERY CONTESTED ROW."
+  Maynard-bundled  AxiomMath/PrimeGapsLib went public 8/08 and PUSHED DURING
+                   THE SURVEY.
+CROSS-CUTTING     every surviving first is a first on a PRIVATE TREE. Honest
+                  form: "first public" or "dated private" — never bare "first".
+RE-SURVEY CADENCE weeks; five decisive external artifacts in five days.
+```
+🔑 ***A PRIORITY CLAIM CAN GO FALSE WHILE YOU ARE CHECKING IT — not stale when
+read, stale when the check RETURNS. It is the only claim class where the WORLD,
+not the fleet, does the invalidating, and it has the shortest shelf life of any
+decay this seat has measured.***
+
 ⚠️ **M3 can never return a green. Its output is "N priority claims, each with /
 without a recorded search." The paper's authors clear it; the fence only makes
 the absence visible.**
