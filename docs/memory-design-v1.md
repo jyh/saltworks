@@ -238,6 +238,19 @@ discipline (author-anywhere, land-at-owner).
   trip as an identity is REWORDED to "identity on clean states;
   projection in general". (5) Control: full-hub build green +
   `#print axioms` on BOTH restated lemmas within the standing three.
+  **[CENSUS CLOSURE REASON + LIMIT (math 18:47; annotation, spec
+  unchanged): the four swept classes are exactly the constructions
+  that NAME the field list (literal · injEq · destructure · St.mk);
+  every other path is a `with`-update or delegates to one, copying
+  unnamed fields — so the census is re-derivable, not just swept.
+  "offEndEnv is clean by construction" is TRACED to bytes: stOfFn =
+  St.init + .set chains, all `with`-updates, so
+  `decQ_encD_of_clean`'s hypothesis discharges at :1264 by
+  definitional unfolding. NAMED LIMIT: an St-valued literal built
+  where the sweep did not look hides from all five paths — the
+  BUILD is the oracle; after growing St, read the error list and
+  treat any site outside this node's list as a census finding, not
+  a nuisance.]**
 - **M2 · `wS` + generalized `wI` + field lemmas + `decode_encode` for
   LW/SW (compiler owns; ISA.lean) — PLUS, IN THE SAME COMMIT, the
   decoder-census fixup (all three refuters' unassigned kill;
