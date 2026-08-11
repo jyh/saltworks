@@ -22,10 +22,16 @@ is documentation; a restatement with one is a certificate.
 1. **Minimal imports.** A cert file imports the landed theorem's module and prelude-grade
    vocabulary ONLY. If the restatement needs a corpus-internal definition, that definition
    gets UNFOLDED into primitive terms or the cert explains it in its docstring header.
-2. **No weakening, silently or otherwise.** The certificate states NO LESS than the paper
-   quotes. Where the cert is an implication (cert ← theorem), the docstring says exactly
-   what generality was traded for readability. Refuter check at seal: cert-vs-paper-quote,
-   side by side.
+2. **No weakening AND no strengthening — a translation has two ways to lie (evidence,
+   12:48, pre-registered before any cert exists).** Downward: the certificate states NO
+   LESS than the paper quotes. Upward: the cert's LEAN statement cannot overstate — rule 3
+   makes it kernel-proved from the landed theorem, so soundness is mechanical — but the
+   cert's DOCSTRING is prose, and prose is where readable forms quietly claim more than
+   formal ones ("kernel-proved" inheriting SAT links; "the engine's regime" hiding four
+   binders). Where the cert is an implication (cert ← theorem), the docstring says exactly
+   what generality was traded for readability. Refuter check at seal, TWO comparisons per
+   claim: cert-Lean vs paper-quote (adequacy) AND cert-docstring vs cert-Lean (the gloss
+   claims nothing the statement does not carry).
 3. **Direction declared**: `theorem cert_X : <plain form>` proved FROM the landed name —
    `iff` when true, `←`-implication otherwise, named in the docstring.
 4. **Axiom line per cert** (`#print axioms` residue quoted in the file header comment;
