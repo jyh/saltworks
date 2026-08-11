@@ -22,7 +22,7 @@
 yaml_version: 6
 
 project:
-  title:       "Neural dataflow fabric — bit-serial MAC cells on a verified switch"
+  title:       "Neural dataflow fabric — bit-serial MAC cells on a self-routing switch"
   author:      "Jason Hickey"
   discord:     ""
 
