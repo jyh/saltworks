@@ -1133,9 +1133,21 @@ OPEN ITEMS:
   the number banks; the seam-wire, the repo, and the tile purchase all
   drop to do-when-idle. The current-window tapeout attention is the
   NDF (6x2) alone; the switch rides P3 at its own pace. NO seat spends
-  P1 or NDF cycles on it. Repo scaffolds around the
-  full-BB target; the wording takes evidence's fence before public.
-  Deadline: submit-real-by-Aug-31, fits with room.**
+  P1 or NDF cycles on it.
+  ⭐ FIT ANSWER BANKED (silicon `3ab863a`, then stood down): the full
+  BB **FITS a 1x1** — stdcell 11,419.70 um2 (84.8% of core; the ~9,890
+  floor held at +15.5% composition), places/routes, DRC 0 (magic AND
+  klayout)/LVS 0/antenna 0 on TT's grid. The ONLY miss is TIMING:
+  setup −1.50 ns at 40 ns, and ALL 8 violating paths are
+  input-port→output-port, ZERO register-to-register (sort-then-route
+  crosses both organs combinationally in one cycle). ⇒ A BIGGER TILE
+  CANNOT FIX IT (area is not the failure; combinational depth is). The
+  levers are ours: declare ~24.1 MHz (clock_hz is our field), or fix
+  the IO_DELAY model (default books 16 of 40 ns at the ports — the
+  −1.50 is a default-external-delay reading, not silicon). ⇒ WHEN THE
+  SWITCH RIDES (Sept-27 or later), THE 1x1 IS THE TILE with a declared
+  clock. Composition stays in scratch; no repo, no purchase, until the
+  Captain revisits it.**
 - **THE TILE PLAN IS CONFIRMED (8/10 10:4x, the Captain, verbatim
   "Ok, that's our plan, a 1x2 and a 6x2") — ⭐ SWITCH HALF SUPERSEDED
   17:4x (see above: full BB on its own repo, 1x1 in play, 1x2
