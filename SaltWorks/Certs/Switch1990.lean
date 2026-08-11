@@ -93,12 +93,22 @@ this docstring as an English sentence. **It is not decorative**, and
 
 ## DIRECTION (iron rule 3)
 
-**Every certificate below is an equality or the same proposition as its landed
-theorem, proved by `exact`/`rw` from that theorem — no implication, no generality
-traded.** The plain vocabulary (`moveHeadToTail`, `afterStages`, `addressBits`) is
-*defined here and proved equal* to the corpus's own (`rotStage`, `Function.iterate`,
-`addr88`); that those bridges close by `rfl`/`simp` is the evidence that the
-translation is a renaming and not a weakening.
+The rotation certificates are equalities or the same proposition as their landed
+theorem, proved by `exact`/`rw` from it. The plain vocabulary (`moveHeadToTail`,
+`afterStages`, `addressBits`) is *defined here and proved equal* to the corpus's own
+(`rotStage`, `Function.iterate`, `addr88`); **those bridge lemmas are why "nothing
+was traded" is a kernel fact here rather than a promise** — a renaming that closes by
+`rfl`/`simp` cannot have weakened anything.
+
+⚠️ **`cert_payload_delivery` IS THE EXCEPTION AND IT IS NAMED RATHER THAN GLOSSED.**
+Read one cycle at a time, it is *on its own strictly weaker* than the landed list
+equality: it says nothing about the output's length, so it does not by itself exclude
+cycles past the eighth. **The gap is closed by proof, not by wording** —
+`cert_payload_delivery_length` supplies the length and
+`cert_payload_delivery_loses_nothing` recovers the landed statement from the two,
+generically. *This file's first version asserted "nothing traded" there in prose; the
+assertion was repaired into `cert_payload_delivery_recovers_the_landed_statement`
+after the campaign's own W-CERT-1 wave established the better discipline.*
 
 ## AXIOMS (iron rule 4)
 
@@ -107,11 +117,14 @@ rather than summarised, because four of the five are *stronger* than the campaig
 bar of "at most the standard three":
 
 ```
-cert_full_circle                          [propext, Quot.sound]
-cert_length_premise_is_load_bearing        depends on no axioms at all
-cert_address_restored_after_three_stages  [propext, Quot.sound]
-cert_stage_reads_original_bit             [propext, Quot.sound]
-cert_payload_delivery                     [propext, Classical.choice, Quot.sound]
+cert_full_circle                                    [propext, Quot.sound]
+cert_length_premise_is_load_bearing                  no axioms at all
+cert_address_restored_after_three_stages            [propext, Quot.sound]
+cert_stage_reads_original_bit                       [propext, Quot.sound]
+cert_payload_delivery                               [propext, Classical.choice, Quot.sound]
+cert_payload_delivery_length                        [propext, Classical.choice, Quot.sound]
+cert_payload_delivery_loses_nothing                 [propext, Classical.choice, Quot.sound]
+cert_payload_delivery_recovers_the_landed_statement [propext, Classical.choice, Quot.sound]
 ```
 
 No `sorryAx`, no corpus-local axiom. *`Classical.choice` enters only through the
@@ -231,8 +244,15 @@ Hypotheses, all of them real: both destinations are 3-bit (`< 8`), they are
 `P = 8` cycles.
 
 Direction: **equality**, proved from `L1Payload.l1_full_load_payload_delivery`
-together with the corpus's own indexing lemma. Nothing traded — this is that
-theorem read one cycle at a time instead of as an interleaving. -/
+together with the corpus's own indexing lemma.
+
+⚠️ **AND THE "NOTHING TRADED" CLAIM IS NOT FREE HERE — THIS STATEMENT ALONE IS
+STRICTLY WEAKER THAN THE LANDED ONE.** *It fixes the eight payload cycles and says
+nothing whatever about the length of the output, so on its own it does not rule out
+cycles past the eighth.* **So the claim is not asserted in prose: it is proved.**
+`cert_payload_delivery_length` supplies the missing length and
+`cert_payload_delivery_loses_nothing` recovers the landed list equality from the two
+together — see `cert_payload_delivery_recovers_the_landed_statement`. -/
 theorem cert_payload_delivery (d0 d1 : ℕ) (hd0 : d0 < 8) (hd1 : d1 < 8) (hne : d0 ≠ d1)
     (p0 p1 : List Bool) (hp0 : p0.length = 8) (hp1 : p1.length = 8)
     (u : ℕ) (hu : u < 8) :
@@ -247,12 +267,63 @@ theorem cert_payload_delivery (d0 d1 : ℕ) (hd0 : d0 < 8) (hd1 : d1 < 8) (hne :
   · rw [if_neg hle, if_neg hle]
     exact ceIL_getD p1 p0 (by rw [hp1, hp0]) u (by rw [hp1]; exact hu)
 
+/-- The payload window is exactly eight cycles long. Worth stating on its own: the
+certificate above is silent about cycles past the eighth, and **this is what rules
+out there being any**. -/
+theorem cert_payload_delivery_length (d0 d1 : ℕ) (hd0 : d0 < 8) (hd1 : d1 < 8)
+    (hne : d0 ≠ d1) (p0 p1 : List Bool) (hp0 : p0.length = 8) (hp1 : p1.length = 8) :
+    ((switchRun d0 d1 p0 p1).drop 6).length = 8 := by
+  simp only [switchRun]
+  rw [l1_full_load_payload_delivery d0 d1 hd0 hd1 hne p0 p1 hp0 hp1]
+  by_cases hle : d0 ≤ d1 <;> simp [ceIL, hle, hp0, hp1]
+
+/-- ⭐⭐ **THE NO-TRADE CLAIM, PROVED IN THE KERNEL INSTEAD OF ASSERTED IN PROSE.**
+Any output of the right length whose every cycle carries the two payload bits **is**
+the interleaving. So reading the landed theorem one cycle at a time loses nothing —
+and that sentence is now a theorem rather than a docstring's promise.
+
+*Stated generically: it mentions no landed theorem and no fabric, so it is a fact
+about the RESTATEMENT rather than a re-citation of the original.* -/
+theorem cert_payload_delivery_loses_nothing (out : List (List Bool)) (a b : List Bool)
+    (ha : a.length = 8) (hb : b.length = 8) (hout : out.length = 8)
+    (hcell : ∀ u, u < 8 → out.getD u [] = [a.getD u false, b.getD u false]) :
+    out = ceIL a b := by
+  apply List.ext_getElem
+  · simp [ceIL, hout, ha, hb]
+  · intro i h1 h2
+    have hi : i < 8 := by rwa [hout] at h1
+    have hcell' := hcell i hi
+    rw [List.getD_eq_getElem _ _ h1] at hcell'
+    rw [hcell', List.getD_eq_getElem _ _ (by rw [ha]; exact hi),
+      List.getD_eq_getElem _ _ (by rw [hb]; exact hi)]
+    simp [ceIL]
+
+/-- **The recovery, instantiated.** The per-cycle certificate, read at all eight
+cycles, gives back exactly `L1Payload.l1_full_load_payload_delivery`'s own
+statement — proved *from the certificate*, not by citing the theorem again. -/
+theorem cert_payload_delivery_recovers_the_landed_statement (d0 d1 : ℕ) (hd0 : d0 < 8)
+    (hd1 : d1 < 8) (hne : d0 ≠ d1) (p0 p1 : List Bool) (hp0 : p0.length = 8)
+    (hp1 : p1.length = 8) :
+    (switchRun d0 d1 p0 p1).drop 6
+      = ceIL (if d0 ≤ d1 then p0 else p1) (if d0 ≤ d1 then p1 else p0) :=
+  cert_payload_delivery_loses_nothing _ _ _
+    (by by_cases hle : d0 ≤ d1 <;> simp [hle, hp0, hp1])
+    (by by_cases hle : d0 ≤ d1 <;> simp [hle, hp0, hp1])
+    (cert_payload_delivery_length d0 d1 hd0 hd1 hne p0 p1 hp0 hp1)
+    (fun u hu => cert_payload_delivery d0 d1 hd0 hd1 hne p0 p1 hp0 hp1 u hu)
+
 #audit_axioms cert_full_circle
 #audit_axioms cert_length_premise_is_load_bearing
 #audit_axioms cert_address_restored_after_three_stages
 #audit_axioms cert_stage_reads_original_bit
 #audit_axioms cert_payload_delivery
+#audit_axioms cert_payload_delivery_length
+#audit_axioms cert_payload_delivery_loses_nothing
+#audit_axioms cert_payload_delivery_recovers_the_landed_statement
 
+#print axioms cert_payload_delivery_length
+#print axioms cert_payload_delivery_loses_nothing
+#print axioms cert_payload_delivery_recovers_the_landed_statement
 #print axioms cert_full_circle
 #print axioms cert_length_premise_is_load_bearing
 #print axioms cert_address_restored_after_three_stages

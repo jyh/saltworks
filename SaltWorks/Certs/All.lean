@@ -33,7 +33,11 @@ docstring exactly what, if anything, was traded for readability.
     certifying `SaltWorks.HDL.stage_reads_original_bit`.
   - `cert_payload_delivery` — the Batcher half at the tapeout instance `P = 8`,
     certifying `L1Payload.l1_full_load_payload_delivery`, read one payload cycle at
-    a time.
+    a time. ⭐ **Its no-trade claim is KERNEL-PROVED, not asserted**: the per-cycle
+    form is on its own strictly weaker (it fixes no length), so
+    `cert_payload_delivery_length` + `cert_payload_delivery_loses_nothing` recover
+    the landed statement in `cert_payload_delivery_recovers_the_landed_statement`.
+    *The first version of this file asserted "nothing traded" there in prose.*
   ⛔ **Its docstring carries the scope refusal that matters**: the paper's §4
   sentence conjoins *"proven in the kernel"* with *"rides on the die"* and *"drives
   the taped-out switch"*. **The certificate covers the kernel clause and explicitly
@@ -61,13 +65,23 @@ encodeOK Γ reg σ st  ≡  ∀ i : Fin poolSize, i.val < Γ.length → st.get (
      compiler assigned to it ends up holding that variable's value"
 ```
 
-## ⚖️ IMPORT OWED
+## ✅ ROOTED — and ⛔ **THE GREP THAT FALSE-PASSED IT**
 
-`SaltWorks.lean` is the maestro's file (`docs/SEATS.md`). This module is left for the
-maestro's sweep; until it is imported there, the hub build reaches this tree only when
-a file here is named as a build target. **The certificates below were built and
-audited at their landing regardless** — `Built SaltWorks.Certs.Switch1990`, EXIT=0,
-axioms measured and quoted in the file's own header.
+`SaltWorks.lean:8` imports `SaltWorks.Certs.All` (maestro, `5afc305`, 2026-08-11), so
+the hub build replays this tree rather than reaching it only when a file here is named
+as a target. *This paragraph replaced an "import owed" note that went false within
+minutes of being written — a present-tense caveat rots in the flattering direction the
+moment the obligation is met.*
+
+⛔⛔ **THE DECOY IS PERMANENT AND WORTH KEEPING AFTER THE FIX: DO NOT CHECK THIS
+ROOTING BY GREPPING `SaltWorks.lean` FOR "Certs".** *It also imports
+`SaltWorks.HDL.Certs` — a **different, pre-existing, unrelated module**, three lines
+above — so a name-grep hits, the check reads PASSED, and it would have read PASSED
+just as loudly while this tree sat outside the closure.* **Grep the full string
+`SaltWorks.Certs.All`, or check the closure rather than the text.** *(Measured by the
+silicon seat on `f327798` at 16:42, before the rooting: the adjacent-object law living
+in the import graph — the right query, the wrong object, and the wrong object named
+almost the same thing.)*
 -/
 
 #audit_axioms SaltWorks.Certs.cert_full_circle
@@ -75,3 +89,6 @@ axioms measured and quoted in the file's own header.
 #audit_axioms SaltWorks.Certs.cert_address_restored_after_three_stages
 #audit_axioms SaltWorks.Certs.cert_stage_reads_original_bit
 #audit_axioms SaltWorks.Certs.cert_payload_delivery
+#audit_axioms SaltWorks.Certs.cert_payload_delivery_length
+#audit_axioms SaltWorks.Certs.cert_payload_delivery_loses_nothing
+#audit_axioms SaltWorks.Certs.cert_payload_delivery_recovers_the_landed_statement
