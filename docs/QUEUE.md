@@ -953,6 +953,12 @@ OPEN ITEMS:
   ② the KERNEL LANDING (math+compiler shared, ~3 seat-days, gated on ①)
   · ③ SILICON INTEGRATION (dmem8+memif+layout, gated on ②,
   update-window scoped). No P2 pull exists until ① posts.
+  **RULING (c) — PARTITION COUNT, SAME SITTING (17:0x, the Captain,
+  verbatim "sure N=2"): N = 2 — two task partitions of ~7 registers
+  beside the executive's own slice (task 0). X1's theorem class ranges
+  over programs with `poolDemand ≤ 7`; both corpus witnesses fit; the
+  E-4 overlap witness and its positive control construct as
+  pre-registered. L6's N=1 incompatibility stands recorded.**
   **P3 = the former P2 rosters, unchanged in content and order:**
   compiler V9 → A1 → L5 → batcher_c/SER → L6 source probe · math L3
   half → X3 → 47-row → A3 (still gated on ruling d) · silicon cocotb
