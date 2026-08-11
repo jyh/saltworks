@@ -125,6 +125,20 @@ IGNORE_START = "prose_rot: ignore-start"
 IGNORE_END = "prose_rot: ignore-end"
 
 
+# prose_rot: ignore-start
+# ⛔ A DATE IN THE FILENAME IS STILL A DATE, and missing that ranked four
+# EVIDENCE-ledger-2026-08-0N.md files as carrying live normative scopes. A
+# dated artifact is a SNAPSHOT: every line in it records what was true then,
+# which is exactly what this tool's ranking law says is harmless. My DATED
+# regex assumed the date sits in the LINE; in this corpus it very often sits in
+# the NAME. Third instance tonight of an instrument's SHAPE being an assumption
+# about the document's shape — and the countermeasure I published an hour ago
+# (attack your own denominator with a looser method) is what found it, applied
+# BEFORE publishing this time rather than after.
+DATED_NAME = re.compile(r"(20\d\d-\d\d-\d\d|-\d{4}(?:\.|$|-))")
+# prose_rot: ignore-end
+
+
 def sweep_text(text, path):
     findings, targets = [], []
     excluded = 0
@@ -143,7 +157,8 @@ def sweep_text(text, path):
         # comment/prose both count: a stale scope in a code comment is obeyed too
         hit = ABSENCE_RE.search(line)
         if hit:
-            dated = bool(DATED.search(line))
+            dated = bool(DATED.search(line)) or bool(DATED_NAME.search(
+                pathlib.PurePath(path).name))
             norm = bool(NORMATIVE.search(line))
             # prose_rot: ignore-start  (quotes the fixture it explains)
             # ⚖️ DATEDNESS IS THE PRIMARY AXIS, not normativity — corrected after
@@ -189,6 +204,8 @@ def collect(paths):
 
 
 def main(argv):
+    quiet = "--quiet" in argv
+    argv = [a for a in argv if a != "--quiet"]
     if not argv:
         print(__doc__.split("EXIT")[0])
         sys.exit(2)
@@ -232,12 +249,27 @@ def main(argv):
 
     norm = [f for f in allf if f[0] <= 1]
     print("-" * 74)
-    if allf:
+    if allf and not quiet:
         for rank, path, n, tok, line, dated, isnorm in allf:
             tag = ("⛔ UNDATED+NORMATIVE" if rank == 0 else
                    "⚠️  UNDATED" if rank == 1 else "·  dated narrative")
             print(f"{tag:<20} {path}:{n}")
             print(f"     matched {tok!r}: {line}")
+    elif quiet:
+        # ⚖️ IN A REPORT, ONLY RANK 0 GETS A LINE. Rank 1 (undated but carrying
+        # no normative word) is real and worth a count, but 700 lines of it in a
+        # nightly ledger is the pasted-build-log defect this seat diagnosed on
+        # the bus the same hour. A report that buries its findings has none.
+        r1 = 0
+        for rank, path, n, tok, line, dated, isnorm in allf:
+            if rank == 0:
+                print(f"  ⛔ UNDATED+NORMATIVE  {path}:{n}  {tok!r}")
+            elif rank == 1:
+                r1 += 1
+        if r1:
+            print(f"  ⚠️  {r1} further UNDATED absence claim(s) carrying no "
+                  f"normative word — counted, not listed.")
+            print("      Re-run without --quiet to see them.")
     else:
         print("no (A) findings.")
     print("-" * 74)
@@ -254,9 +286,11 @@ def main(argv):
     print(f"{len(allt)} asserted number(s) found in claim-shaped lines. This tool")
     print("has NO corpus and CANNOT verify one of them. Each needs re-derivation")
     print("against the live source of truth — that is the only instrument for (B).")
-    for path, n, num, line in allt[:25]:
+    for path, n, num, line in ([] if quiet else allt[:25]):
         print(f"  ? {path}:{n}  [{num}]  {line}")
-    if len(allt) > 25:
+    if quiet:
+        print("  (list suppressed by --quiet; re-run per file to see it)")
+    elif len(allt) > 25:
         print(f"  … {len(allt) - 25} more (full list is the point; re-run per file)")
 
     # prose_rot: ignore-end

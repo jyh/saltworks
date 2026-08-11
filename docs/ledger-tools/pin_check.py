@@ -80,6 +80,25 @@ def resolve(repo, ref, path, index):
     return None, None
 
 
+def repo_root(start):
+    """⛔ THE REPO ROOT, RESOLVED — never the caller's cwd.
+
+    `git ls-tree -r HEAD` run from a SUBDIRECTORY lists only that subdirectory,
+    and `git show HEAD:path` resolves against the same prefix. Run from
+    docs/ledger-tools (which is exactly how nightly.sh invokes this), the index
+    came back with ZERO .lean files, every pin was labelled EXTERNAL, and the
+    tool printed a cheerful `TOTALS 4/4 ... resolve`.
+
+    THAT FALSE GREEN WAS PUBLISHED IN A NIGHTLY LEDGER BEFORE THIS GUARD
+    EXISTED. A tool that reports clean because it could see nothing is the
+    exact failure this seat has banked twice: an armed-dead monitor and a quiet
+    channel are the same observation.
+    """
+    r = subprocess.run(["git", "rev-parse", "--show-toplevel"],
+                       capture_output=True, text=True, cwd=start)
+    return r.stdout.strip() if r.returncode == 0 else start
+
+
 def build_index(repo, ref):
     r = subprocess.run(["git", "ls-tree", "-r", "--name-only", ref],
                        capture_output=True, text=True, cwd=repo)
@@ -190,6 +209,8 @@ def check_doc(repo, ref, doc, index):
 
 
 def main(argv):
+    quiet = "--quiet" in argv
+    argv = [a for a in argv if a != "--quiet"]
     repo, ref, docs = ".", "HEAD", []
     i = 0
     while i < len(argv):
@@ -201,17 +222,28 @@ def main(argv):
             docs.append(argv[i]); i += 1
     if not docs:
         print(__doc__.split("EXIT")[0]); sys.exit(2)
+    repo = repo_root(repo)
     index = build_index(repo, ref)
     if index is None:
         print(f"pin_check: cannot read ref {ref!r} in {repo!r}", file=sys.stderr)
+        sys.exit(2)
+    if not index:
+        # NEVER a green over an empty scope. This is the guard that would have
+        # stopped the false 4/4 from reaching a published ledger.
+        print(f"pin_check: ref {ref!r} in {repo!r} contains ZERO .lean files — "
+              f"refusing to report, because every pin would read EXTERNAL and "
+              f"the run would look clean.", file=sys.stderr)
         sys.exit(2)
 
     print("=" * 74)
     print("PIN CHECK — do the named citations still point at the declaration?")
     print("=" * 74)
-    print(f"REF        {ref}  in  {repo}   (a COMMITTED ref, never the worktree —")
+    print(f"REF        {ref}  in  {repo}")
+    print(f"           {len(index)} .lean basenames indexed  (a ZERO index is "
+          f"refused, not reported clean)")
+    print("           a COMMITTED ref, never the worktree —")
     print("           the tree is shared and a half-written file lies)")
-    rc, tot_bare = 0, 0
+    rc, tot_bare, tot_ok, tot_pins = 0, 0, 0, 0
     for doc in docs:
         rows, bare = check_doc(repo, ref, doc, index)
         tot_bare += bare
@@ -219,8 +251,11 @@ def main(argv):
         asdecl = sum(1 for r in rows if r[0] == "ok")
         ext = sum(1 for r in rows if r[0] == "external")
         loose = sum(1 for r in rows if r[0] == "loose")
-        print("-" * 74)
-        print(f"{doc}   {len(rows)} named pin(s)")
+        if not quiet:
+            print("-" * 74)
+            print(f"{doc}   {len(rows)} named pin(s)")
+        elif any(r[0] in ("drift", "driftuse", "absent") for r in rows):
+            print(f"-- {doc}")
         for kind, name, path, line, got in rows:
             if kind in ("ok", "okuse"):
                 continue
@@ -241,6 +276,9 @@ def main(argv):
             else:
                 print(f"  ❓ EXTERNAL {path} is not in this repo (cited for "
                       f"`{name}`) — a dependency pin, UNCHECKABLE here")
+        tot_ok += ok; tot_pins += len(rows) - ext - loose
+        if quiet:
+            continue
         print(f"  ✅ {ok}/{len(rows) - ext - loose} in-repo named pins resolve "
               f"({asdecl} at their DECLARATION, {ok - asdecl} at a USE)"
               + (f"  · {ext} external" if ext else "")
@@ -249,6 +287,8 @@ def main(argv):
             print(f"  EXCLUDED {bare} BARE pin(s) with no name — nothing to search")
             print("           for, so they are UNCHECKABLE, not clean.")
     print("-" * 74)
+    if quiet:
+        print(f"TOTALS     {tot_ok}/{tot_pins} in-repo named pins resolve")
     print(f"⚖️  A GREEN COVERS NAMED PINS ONLY. {tot_bare} bare pin(s) were "
           f"excluded across")
     print("    all inputs and no instrument in this kit can check them.")

@@ -88,6 +88,45 @@ python3 tile_drain.py >> "$OUT" 2>&1 || \
   echo "_(tile_drain: reading could not be taken; series unchanged — a gap is honest.)_" >> "$OUT"
 
 
+echo >> "$OUT"; echo '---' >> "$OUT"; echo >> "$OUT"
+
+# ---- ROT SECTION, added 2026-08-10 --------------------------------------
+# Three instruments built on 08/10 and wired in the SAME NIGHT, because an
+# unwired tool is a tool that rots: the seat that built it remembers to run it
+# and the successor never learns it exists. Each is non-fatal here -- a finding
+# is a REPORT, not a reason to abort the ledger -- but each prints its own
+# scope line, so a green in this file is never mistaken for "clean".
+{
+  echo "## Documentation rot — three sweeps"
+  echo
+  echo "Each tool below prints what it does NOT cover. A green is a green over"
+  echo "a STATED scope and nothing more. Findings here are reports, not"
+  echo "failures: the ledger continues past them by design."
+  echo
+  echo '### Drifted citations (`pin_check.py`)'
+  echo '```'
+} >> "$OUT"
+python3 pin_check.py --quiet $(find "$SALTWORKS/docs" -name '*.md' | sort) >> "$OUT" 2>&1 || true
+{
+  echo '```'
+  echo
+  echo '### Stale absence claims (`prose_rot.py`) — direction (A) only'
+  echo '```'
+} >> "$OUT"
+python3 prose_rot.py --quiet "$SALTWORKS/docs" >> "$OUT" 2>&1 || true
+{
+  echo '```'
+  echo
+  echo '### Claim fence over the published TT text (`claim_fence.py`)'
+  echo '```'
+} >> "$OUT"
+if gh api repos/jyh/tt-neural-dataflow-fabric/contents/docs/info.md --jq '.content' 2>/dev/null      | base64 -d > "${TMPDIR:-/tmp}/ndf_info_$$.md" 2>/dev/null; then
+  python3 claim_fence.py "${TMPDIR:-/tmp}/ndf_info_$$.md" >> "$OUT" 2>&1 || true
+  rm -f "${TMPDIR:-/tmp}/ndf_info_$$.md"
+else
+  echo "(published text unreachable tonight — NOT a pass; the fence did not run.)" >> "$OUT"
+fi
+echo '```' >> "$OUT"
 
 # Publish both by RENAME, never by truncating writes. `cp` onto LATEST would
 # reintroduce exactly the window this run just avoided -- cp opens the
