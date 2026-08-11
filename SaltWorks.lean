@@ -101,5 +101,6 @@ import SaltWorks.HDL.RegMap
 import SaltWorks.HDL.SeamCSorted
 import SaltWorks.HDL.ExecutiveX0
 import SaltWorks.HDL.ExecutiveX1
+import SaltWorks.HDL.ExecutiveX2
 import SaltWorks.HDL.AccountMeasure
 import SaltWorks.Tactic.AuditAxioms
