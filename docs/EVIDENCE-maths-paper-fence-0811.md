@@ -48,6 +48,36 @@ cleanly while the Lean version carries a rider. The gap is invisible from either
 side alone, and this is exactly the class the corpus's own name-gate does not
 check — it verifies that cited names RESOLVE, not that their statements MATCH.
 
+### ⭐ M1(d)'s PREDICTED FIRST TARGET — pre-registered by MATH at 01:26, before the tool
+
+*Named by the seat that wrote the sentence, which is the only seat that knows
+where it cut a corner if it cut one. Verified at HEAD by this seat — the Lean
+side is exactly as described:*
+
+```
+Salt/HB/L2cMasterUncond.lean:85   theorem hb_l2c_master_unconditional
+  LEAN BINDERS   (hsq : χ ^ 2 = 1) · (hz100 : 100 ^ 16 ≤ z)
+                 (hz8 : Lwin x ^ 8 ≤ z) · (hzx : (z : ℝ) ^ 3 ≤ x)
+                 ⇒ all four confirmed present at the bytes, 2026-08-11 01:2x
+  PAPER (Thm 6.1) states them as PROSE: "at parameters (z,x) IN THE ENGINE'S
+                 REGIME"
+```
+⚠️ **NOT yet a defect — "the engine's regime" may be defined elsewhere in the
+paper as exactly those inequalities, and nobody has checked.** *It is the site
+to look at first, fixed here before the instrument exists so the first run is a
+TEST OF A PREDICTION rather than a scan.*
+
+🔑 ***AND IT IS WHY M1(d) EXISTS: a rider hidden inside a prose noun is
+invisible from BOTH sides alone. The Lean looks complete, the paper looks clean,
+and only the PAIR shows the gap. Math's own name-gate passes it — that gate
+verifies a cited name RESOLVES, never that the two SENTENCES agree.***
+
+📌 **Outcome discipline for the eventual run:** *finds it ⇒ the instrument
+works and the site gets a ruling. Finds nothing ⇒ either the tool is broken or
+"the engine's regime" is properly defined, and those must be distinguished
+before either is claimed. **A prediction that cannot fail would tell us nothing
+about the tool.***
+
 ## M2 — DISCLOSURE-FALLBACK BAN ✅ mechanisable
 
 *A "disclosure fallback" is prose that softens a claim the theorem does not
