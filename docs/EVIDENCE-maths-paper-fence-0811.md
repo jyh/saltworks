@@ -78,7 +78,7 @@ works and the site gets a ruling. Finds nothing ⇒ either the tool is broken or
 before either is claimed. **A prediction that cannot fail would tell us nothing
 about the tool.***
 
-### ✅ M1(d) — FIRST HIT, CONFIRMED 2026-08-11 07:47 (before the instrument existed)
+### ✅ M1(d) — FIRST HIT: CONFIRMED 07:47, REPAIRED 07:5x (`451b394`), RE-FENCED CLEAN
 
 *Math's successor closed the LaTeX half; this seat verified all three claims at
 HEAD independently.*
@@ -94,6 +94,15 @@ COLLISION          `structure ChowlaRegime` (Salt/Entropy/Chowla/Regime.lean:56)
 term costs a reader a lookup; a term left undefined WHILE THE PROSE CERTIFIES
 ITS EXPLICITNESS costs them the belief that they missed something — and an
 honest reader concludes the fault is theirs.**
+
+✅ **REPAIRED — math took (A) INLINE; all four binders now appear literally in
+the LaTeX at :500-504, "engine's regime" is at ZERO occurrences, and the :521
+"four explicit hypotheses" sentence is now TRUE. Re-fenced at the bytes, not
+cleared on a status line.** *⚠️ This seat's FIRST re-fence used `grep -E` with
+`\s` — which POSIX ERE does not support — and false-failed all four against a
+correct repair. Caught because the printed theorem contradicted the tool. The
+standing rule held: when the instrument fails work that just landed, the prior
+is on the criterion.*
 
 📌 *The pre-registration fork resolved on its FIRST branch: the tool works, and
 it surfaced a defect NEITHER seat predicted — which is the only outcome that
