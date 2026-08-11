@@ -148,7 +148,7 @@ encodes 1056 bits, so the decoder rebuilds the new fields at their defaults and
 cannot agree with a state that has non-default ones. The codec's content is
 exactly the two encoded fields, and that is what this states. The whole-state
 equality survives *conditionally*, immediately below. -/
-theorem decQ_encD (s : St) :
+theorem decQ_encD_proj (s : St) :
     (decQ (fun j => (encD s).getD j false)).regs = s.regs ∧
     (decQ (fun j => (encD s).getD j false)).pc = s.pc := by
   obtain ⟨regs, pc, mem, tr⟩ := s
@@ -182,7 +182,7 @@ every state the codec is fed, since `St.init` and `decQ` build them that way and
 no slice-A instruction can dirty them — the codec still inverts exactly. -/
 theorem decQ_encD_of_clean (s : St) (hm : s.mem = Vector.replicate 8 0)
     (ht : s.trapped = false) : decQ (fun j => (encD s).getD j false) = s := by
-  obtain ⟨hr, hp⟩ := decQ_encD s
+  obtain ⟨hr, hp⟩ := decQ_encD_proj s
   obtain ⟨regs, pc, mem, tr⟩ := s
   subst hm; subst ht
   simp only [decQ, St.mk.injEq, and_true]
@@ -191,7 +191,7 @@ theorem decQ_encD_of_clean (s : St) (hm : s.mem = Vector.replicate 8 0)
 
 /-! ### NON-VACUITY — a WRONG layout must break the round trip
 
-*`decQ_encD` is an equality between two functions I wrote; if the layout were
+*`decQ_encD_proj` is an equality between two functions I wrote; if the layout were
 transposed in BOTH it would still hold. So the control is a decoder that reads
 the SAME bits under a different indexing, and it must fail.* -/
 
@@ -233,7 +233,7 @@ theorem correct_layout_recovers :
 #audit_axioms encD
 #audit_axioms decQ
 #audit_axioms encD_getD
-#audit_axioms decQ_encD
+#audit_axioms decQ_encD_proj
 #audit_axioms decQ_encD_of_clean
 #audit_axioms decQtransposed
 #audit_axioms sTest

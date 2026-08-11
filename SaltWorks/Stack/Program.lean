@@ -1223,7 +1223,7 @@ theorem sorts_of_entryLoaded {ins : SaltWorks.HDL.Env} {v : Fin 8 → Word}
 
 /-- ⭐ **AND IT IS SATISFIABLE** — a `Prop` nothing can meet is not a contract.
 The wire configuration is `stOfFn v`'s own encoding, and the proof is the landed
-round trip `decQ_encD`. *This is the discharge, modulo the one thing missing:
+round trip `decQ_encD_proj`. *This is the discharge, modulo the one thing missing:
 a theorem that says the flops actually come out of reset holding these bits.*
 Everything downstream of that is already here. -/
 theorem entryLoaded_encD_stOfFn (v : Fin 8 → Word) :
@@ -1499,7 +1499,7 @@ theorem decQ_envWith_eq (s : St) (w : Word) :
       = { s with mem := Vector.replicate 8 0, trapped := false } := by
   rw [decQ_congr (b := fun j => (SaltWorks.HDL.encD s).getD j false)
         (fun j hj => by simp only [envWith, if_pos hj])]
-  obtain ⟨hr, hp⟩ := SaltWorks.HDL.decQ_encD s
+  obtain ⟨hr, hp⟩ := SaltWorks.HDL.decQ_encD_proj s
   simp only [SaltWorks.HDL.decQ, St.mk.injEq, and_true] at hr hp ⊢
   exact ⟨hr, hp⟩
 
@@ -1860,7 +1860,7 @@ the end-to-end theorem fires with no further work.**
 
 `cycOfCirc` puts output port `j` on state net `j` — the D→Q flop transfer, in
 `StateCodec`'s own layout — and `nextW ins` on the instruction nets. `C4Spec`
-says the port list *is* `encD (stepT …)`, and `decQ_encD` turns that back into
+says the port list *is* `encD (stepT …)`, and `decQ_encD_proj` turns that back into
 the state. **That step is legal only because the two lists have the same length**
 (C4.lean's 14:17 hazard: 1055 against 1056, well-typed either way), and this
 section does not assume the length — it *carries the failure mode in the model*.
