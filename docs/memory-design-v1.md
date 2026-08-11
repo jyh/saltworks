@@ -233,11 +233,31 @@ discipline (author-anywhere, land-at-owner).
   trapped = false), expected to serve all nineteen with the
   hypothesis discharged definitionally — the six St.init sites gain
   the defaults from M1's own edit, and decQ-built/stepT states are
-  clean by M1a(1) + with-updates. ENTRY CONDITION for the atomic
-  commit (ruled 18:5x, option (a)): ALL NINETEEN instantiations
-  VERIFIED CLEAN by read BEFORE any file is touched — a
-  known-complete repair list, never a build-and-see. Any dirty site
-  found is a same-grade census finding and reopens this row.** · `entryLoaded_encD_stOfFn` (:1231) and
+  clean by M1a(1) + with-updates. THE (a)-READ IS EXECUTED (math
+  18:50-18:51, ⬥v1.3): NINE sites instantiate clean and take
+  `_of_clean` · TEN are ∀-quantified over arbitrary St (the per-op
+  field theorems :2789…:5822) and take THE (A)-FORM RULED 18:5x —
+  PER-CONSTRUCTOR projection facts, NO predicate: for each of the
+  five slice-A arms, `(step s i).regs`/`.pc` depend only on
+  `s.regs`/`s.pc` — DEFINITIONAL per arm (every arm is
+  `.set`/`.next`/`.get` with-updates; five tiny lemmas or inline
+  simp, whichever reads better per site; one rewrite each). RULED
+  AGAINST (B) (a `¬touchesMemory` predicate lemma): the ten
+  consumers each need exactly their own arm's fact — a quantified
+  form has no consumer today, and its predicate is a hand-maintained
+  interface every future op author must keep true (the
+  mirror-constant class, paid twice today). THE DOOR, NAMED: when a
+  future op family wants the quantified form, its author states
+  `step_projEq_of_memFree` WITH its live consumer; the ten sites do
+  not move. CONTROL (house mutation law, pre-registered): the
+  per-arm scoping must be FALSE outside the five — witness at M1:
+  two states equal on regs/pc differing at a loaded mem word make
+  the LW arm's projection-congruence FALSE (LW writes rd from mem).
+  FACT SETTLED BY THE READ, no ruling needed: every slice-A arm
+  PRESERVES mem/trapped (with-update shape) ⇒ "clean" propagates
+  through arbitrary slice-A runs with zero extra lemmas. Any
+  further dirty site is a same-grade census finding and reopens
+  this row.** · `entryLoaded_encD_stOfFn` (:1231) and
   `not_entryLoaded_offEndEnv` (:1252) land only on .pc/.get, so the
   projection suffices — at a TACTIC EDIT each (`rw [decQ_encD]`
   stops working on a conjunction; budget the `.1`/`.2` plumbing) ·
