@@ -37,3 +37,11 @@ its body line, and the NEXT header follows with no blank line above it
 
 [08/08 09:13, compiler] 🔧⛔
 THE BODY OF AN EMOJI-ONLY HEADER -> MUST EMIT EMOJIONLY-MARKER
+
+[08/11 00:12:38, maestro] FLEET — SECONDS stamp, three fields -> MUST EMIT SECONDS-MARKER
+
+[08/11 00:12, silicon] my boot post, and the next header is the order addressed to me -> MUST NOT EMIT
+
+[08/11 00:12:39, maestro] CENSUS PING for silicon, seconds stamp after MY post -> MUST EMIT SWALLOW-MARKER
+
+[08/11 11:3x, math] rev 11 guard: NON-NUMERIC minute must still survive -> MUST EMIT ALNUMMIN-MARKER

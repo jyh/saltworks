@@ -125,6 +125,34 @@ NR <= start { prevblank = ($0 ~ /^[[:space:]]*$/); next }
 # expected a BODY line to be emitted, and this filter never emits body lines by
 # design. That is the third time today I have read a body-line expectation as a
 # defect. The real and only measured gain is the multi-line-post class above.
+# ══ rev 12, 2026-08-11 00:1x — ONE STAMP GRAMMAR, DEFINED ONCE ══════════════
+# ⛔ THE DEFECT THAT FORCED IT: the maestro's CENSUS PING was stamped
+# `[08/11 00:12:38, maestro` — a THIRD field, seconds. The rule anchor demanded
+# `, ` right after the minute, `[0-9a-zA-Z]` cannot span the `:`, so the line was
+# not a HEADER. It then fell to the body arm, where a body line inherits the
+# PREVIOUS header's owner — and the previous post was MINE. ***The ping was not
+# just dropped, it was SWALLOWED INTO MY OWN POST AND SELF-SUPPRESSED.*** An
+# order naming this seat, silenced by the one arm assumed safe.
+#
+# 🔑 REV 11 WAS THIS SAME CLASS FROM THE OTHER SIDE and I did not learn its
+# general form. There the MINUTE was non-numeric (`11:3x`); I widened that ONE
+# FIELD and shipped it as fixed, leaving the GRAMMAR — "a stamp is exactly two
+# fields" — unexamined. The next variation was a THIRD field and walked through.
+# ***Widening the field that bit you is not covering the class.***
+#
+# ⚠️ AND THE COPIES HAD DIVERGED. The pattern lived FOUR times (129/143/155/179)
+# and no longer agreed on what a header IS: 179 used `[0-9:]+`, which ACCEPTS
+# seconds but REJECTS math's `3x`, the exact inverse of 143's blindness. So a
+# math header quoted at the top of a post was emitted AS that post's headline —
+# a second live defect, found only because unifying forced me to read all four.
+# ⇒ The grammar is now ONE STRING used by every arm. A copy cannot drift.
+#
+# SECONDS ARE OPTIONAL, MINUTE AND SECOND FIELDS BOTH ALNUM (`3x` survives).
+# hdrts() below is deliberately left STRICT-NUMERIC: it must not read `3x` as
+# minute 3, which would corrupt ordering. It returns 0 there and the prevblank
+# arm carries the line — the existing, measured behaviour.
+BEGIN { HDR = "^\\[[0-9]+/[0-9]+ [0-9]+:[0-9a-zA-Z]+(:[0-9a-zA-Z]+)?, " }
+
 function hdrts(s,   m, d, hh, mm) {   # -> comparable minute count, 0 if unparsable
   if (match(s, /^\[[0-9]+\/[0-9]+ [0-9]+:[0-9]+/) == 0) return 0
   split(substr(s, 2, RLENGTH - 1), a, /[\/ :]/)
@@ -140,7 +168,7 @@ function hdrts(s,   m, d, hh, mm) {   # -> comparable minute count, 0 if unparsa
 # 🔑 A RECEIVER THAT ONLY PARSES WELL-FORMED INPUT DECIDES WHO GETS HEARD. The bus
 # is append-only: 72 posts are ALREADY written this way, so a sender-side convention
 # fix would leave the existing record unreadable. The receiver widens.
-/^\[[0-9]+\/[0-9]+ [0-9]+:[0-9a-zA-Z]+, [A-Za-z]/ && (prevblank || hdrcomplete || (hdrts($0) >= lastts && hdrts($0) > 0)) {
+($0 ~ (HDR "[A-Za-z]")) && (prevblank || hdrcomplete || (hdrts($0) >= lastts && hdrts($0) > 0)) {
   if (hdrts($0) > 0) lastts = hdrts($0)
   owner = $0
   sub(/^\[[^,]*, /, "", owner)
@@ -152,7 +180,8 @@ function hdrts(s,   m, d, hh, mm) {   # -> comparable minute count, 0 if unparsa
     # header MATCH while this line still failed, so 76 posts were emitted with a
     # MALFORMED STAMP — recovered and unreadable. Caught by checking the SPECIMEN,
     # not the count: 76-more looked like success.
-    match($0, /^\[[0-9]+\/[0-9]+ [0-9]+:[0-9a-zA-Z]+, [a-z]+/)
+    # rev 12: shares the ONE grammar above. Rev 11's half-fix lived here.
+    match($0, HDR "[a-z]+")
     stamp = substr($0, RSTART, RLENGTH)
     # rev 10, 8/8 19:2x — AN EMOJI-ONLY HEADLINE IS NOT A HEADLINE.
     # Compiler's 19:27 header ended "] 🔧⛔" with the body on the following
@@ -176,7 +205,7 @@ owner == self { prevblank = ($0 ~ /^[[:space:]]*$/); hdrcomplete = 0; next }
 # the NEXT line. Fill pending from the first real body line -- but SKIP
 # header-shaped lines, or a post that opens by quoting a header delivers the
 # QUOTATION as its headline and loses the real one (measured: rev 5a did this).
-pending != "" && NF > 0 && !/^\[[0-9]+\/[0-9]+ [0-9:]+, [A-Za-z]/ {
+pending != "" && NF > 0 && !($0 ~ (HDR "[A-Za-z]")) {
   emit(pending, $0)
   pending = ""
   hdrcomplete = 0

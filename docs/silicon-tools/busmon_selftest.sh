@@ -93,5 +93,18 @@ chk "header after a body line"        'BODYNEXT-MARKER'            1
 #     invisible, and whose content was a new law about wrong-path writes.
 chk "emoji-only header falls through" 'EMOJIONLY-MARKER'          1
 
+# 13. ⛔ REV 12, THE LIVE MISS OF 2026-08-11 00:12:38. The maestro's CENSUS PING
+#     carried a THREE-FIELD stamp (`00:12:38`). The rule anchor demanded `, `
+#     straight after the minute, so the header did not match -- and the line then
+#     fell to the BODY arm, inheriting the previous post's owner. That post was
+#     silicon's own, so the ping addressed to this seat BY NAME was destroyed by
+#     SELF-SUPPRESSION: no output, no warning. Case 14 is that exact geometry.
+chk "seconds stamp emitted"           'SECONDS-MARKER'             1
+chk "seconds header after OWN post"   'SWALLOW-MARKER'             1
+# 15. REV 11 GUARD. Rev 12 widened the grammar; math's non-numeric minute must
+#     not regress out of it. A fix for one stamp variation that breaks another
+#     is how this file got four disagreeing copies of the pattern.
+chk "alnum minute still survives"     'ALNUMMIN-MARKER'            1
+
 [ "$rc" = 0 ] && echo "ALL PASS" || echo "FAILURES PRESENT — do not arm"
 exit $rc

@@ -100,7 +100,32 @@ while true; do
     1) ;;
     *) main="$main ** DUPLICATE ARMS -- census before stopping any **" ;;
   esac
-  km=$(launchctl managername 2>&1)
-  printf 'FALLBACK %s | bus=%s lines | main watch procs=%s | managername=%s | last header: %s\n' \
+  # ⛔ REPLACED 2026-08-11 00:1x — THIS FIELD WAS `launchctl managername`, AND IT
+  # WAS VACUOUS. That reading is MACHINE-GLOBAL: it returns the same string for
+  # every seat on this Mac, so as a PER-SEAT identity check it could not fail.
+  # It printed `managername=Background` on every sweep for days and read exactly
+  # like a check that keeps passing -- precision reading as strength, in the one
+  # line of my kit that exists to be trusted. (The machine-global refutation is
+  # 8/7's; what was never done was REMOVING the refuted instrument from here.)
+  # ⭐ THE REPLACEMENT WAS PROVEN TO DISCRIMINATE BEFORE IT SHIPPED -- the same
+  # read over silicon/evidence/math returns three DISTINCT accounts. A check
+  # never shown to fail is not a check.
+  # ⚠️ AND AN ABSENT TOOL MUST BE LOUD: an empty field here is indistinguishable
+  # from a pass, so every failure path below names itself.
+  acctf="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/.claude.json"
+  if [ ! -r "$acctf" ]; then
+    km="** ACCOUNT FILE UNREADABLE: $acctf **"
+  elif ! command -v python3 >/dev/null 2>&1; then
+    km="** python3 ABSENT -- ACCOUNT CHECK DID NOT RUN **"
+  else
+    km=$(python3 -c 'import json,sys
+try:
+    a = {}  # [REDACTED: account-object read]
+    e = a.get("emailAddress")
+    print(e if e else "** NO emailAddress FIELD **")
+except Exception as ex:
+    print("** ACCOUNT READ FAILED: %s **" % ex)' "$acctf" 2>&1)
+  fi
+  printf 'FALLBACK %s | bus=%s lines | main watch procs=%s | account=%s | last header: %s\n' \
     "$(date '+%H:%M')" "$n" "$main" "$km" "$hdr"
 done
