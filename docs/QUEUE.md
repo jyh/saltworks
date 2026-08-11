@@ -959,6 +959,11 @@ OPEN ITEMS:
   over programs with `poolDemand ≤ 7`; both corpus witnesses fit; the
   E-4 overlap witness and its positive control construct as
   pre-registered. L6's N=1 incompatibility stands recorded.**
+  **RULING (b) — RECORDED AS SUBSUMED (17:1x, register hygiene): the
+  Captain's P1 ratification fired X0→X2 at math as SPEC-LEVEL rows,
+  which IS the ruling-#3 lift the pack's ask (b) requested; math was on
+  X0 within the minute. Council ruling #3's "B-EXEC follows B-ISA"
+  continues to govern the COMPILED executive (X4+).**
   **RULING (d) — SAME SITTING (17:1x, the Captain, verbatim "Yes (B)"):
   RULING #8 IS RE-OPENED AND RESOLVED TO BRANCH (B) — the REQUANTIZER
   ORGAN lands: shift + saturate, ~40 gates, in the SER's sAct row, with
