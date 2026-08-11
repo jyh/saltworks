@@ -200,6 +200,11 @@ discipline (author-anywhere, land-at-owner).
   repair, live-verified pins).** (1) `decQ` (StateCodec.lean:127) and
   `decQtransposed` (:175) construct the new fields as defaults.
   (2) **`decQ_encD` (StateCodec.lean:140) is RESTATED TWICE —
+  ⬥v1.5.1 FINAL NAMES (ruled 19:5x, the restatement-renames law):
+  the projection headline is `decQ_encD_proj` — the OLD NAME
+  `decQ_encD` CEASES TO EXIST so every pre-tonight citation fails
+  loudly rather than resolving to a changed meaning; the
+  conditional whole-St form keeps `decQ_encD_of_clean` —
   ⬥v1.1.1, per math's 18:40 pre-pull consumer census (bus :59027),
   which found the v1.1 consumer list SHORT BY THREE and one consumer
   unrepaira­ble by the projection alone.** The HEADLINE form is the

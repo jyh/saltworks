@@ -65,7 +65,14 @@
   headline-watch read is not a claim check (the 18:25 M0
   collision: claim at :58120, "unclaimed as of :58126").**
 - Laws that ride every item: saltbuild-only builds; pathspec-only
-  commits; trailer-free; unique Scratch<NODE>-<agent>.lean
+  commits; trailer-free; **A RESTATEMENT RENAMES (8/10 19:5x, ruled
+  at math's name-vs-meaning find on its own M1 landing): when a
+  declaration's STATEMENT changes meaning, its NAME changes with it
+  — a stale citation to a deleted name fails LOUDLY at the first
+  grep; a stale citation to a restated name resolves SILENTLY to a
+  theorem the citing document never meant, forever. The namespace
+  is subject to the same law as counts: a name survives only if its
+  meaning does;** unique Scratch<NODE>-<agent>.lean
   (per-AGENT); explicit-brief law for executors; the kernel-census
   aiming rider for any deletion; **SaltWorks.lean (the root) is
   MAESTRO-ONLY** — landings post "import owed" and the maestro wires
