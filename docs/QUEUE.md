@@ -976,6 +976,19 @@ OPEN ITEMS:
   form; silicon's P3 roster gains the requantizer beside the SER
   shift-enable (one SER row, two organs, priced together);
   update-window silicon.**
+  **RULING (f) — THE SALT PILLAR, SAME SITTING (17:2x, the Captain,
+  verbatim "f-i: yes, f-ii: yes, I'll keep pursuing arXiv, no action
+  needed, the clearance body responded quickly, give them more time on SaltBench"):
+  (f-i) THE Pi WRITING TASK FIRES — math owns the flagship draft
+  (papers/flagship/main.tex, a week cold) on its named salt days (~2,
+  interleaved at its X-ladder's natural pauses); maestro reviews at
+  Fable tier; THE SUBMISSION CLICK IS PUBLIC/T1, THE CAPTAIN'S ALONE.
+  (f-ii) THE MAESTRO'S FABLE SEQUENCE STANDS RULED: memory design block
+  TONIGHT (gates P2) · the next-rung four-agent RE-RECON fired tonight
+  (agent-work, reads tomorrow) · the N7 GATE BLOCK tomorrow morning on
+  the fresh recon — the flagship proving front reopens behind it.
+  arXiv endorsement: HIS lane, no fleet action. clearance/SaltBench: give
+  them more time — no nudge.**
   **P3 = the former P2 rosters, unchanged in content and order:**
   compiler V9 → A1 → L5 → batcher_c/SER → L6 source probe · math L3
   half → X3 → 47-row → A3 (still gated on ruling d) · silicon cocotb
