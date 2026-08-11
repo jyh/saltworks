@@ -94,7 +94,18 @@ check_one() {   # file, name -> 0 pass/skip, 1 fail
   #   step_exit_taken     `st.pc.toNat = 4 * q`                    -> IN SCOPE
   #   while_certificates  `s.pc == BitVec.ofNat 32 (4 * img.len)`  -> concrete,
   #                       a closed run with no position variable   -> SKIP
-  if ! printf '%s\n' "$s" | grep -qE '(pc\.toNat[ \t]*=[ \t]*4[ \t]*\*|codeAt)'; then
+  # ⛔ REV 2c — H4 FIRED ON A REAL LANDING AND IT WAS RIGHT, 2026-08-11 02:5x.
+  # `run_compileS_correct_of_branchFree` CARRIES the bound (`hb : 4 * c.length <
+  # 2 ^ 32`) and was SKIPPED, because it pins position CONCRETELY (`hpc : st.pc
+  # = 0`) rather than symbolically. The theorem is COMPLIANT; my scope test was
+  # narrow, and a compliant theorem reported as N/A is a silent gap in coverage
+  # of exactly the property this gate exists to check.
+  # ⭐ THIS IS THE THIRD SCOPE REVISION AND THE SECOND IN THE "TOO NARROW"
+  # DIRECTION — the direction that prints ALL PASS while examining less than it
+  # claims. Both were caught by H4, the invariant, and NEITHER by reading output.
+  # IN SCOPE iff the statement PINS pc in ANY form (symbolic `pc.toNat = 4 * q`
+  # or concrete `pc = 0`) or speaks of `codeAt`.
+  if ! printf '%s\n' "$s" | grep -qE '(pc\.toNat[ \t]*=[ \t]*4[ \t]*\*|pc[ \t]*=[ \t]*0|codeAt)'; then
     printf '  %-34s ·  SKIP — no position in the statement, bound N/A\n' "$2"
     return 0
   fi
