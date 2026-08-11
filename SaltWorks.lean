@@ -105,4 +105,5 @@ import SaltWorks.HDL.ExecutiveX2
 import SaltWorks.HDL.AccountMeasure
 import SaltWorks.HDL.CompileE
 import SaltWorks.HDL.CompileS
+import SaltWorks.HDL.BlockCalc
 import SaltWorks.Tactic.AuditAxioms
