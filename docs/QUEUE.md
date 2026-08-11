@@ -1094,16 +1094,30 @@ OPEN ITEMS:
   **jyh/tt-verified-batcher-banyan** (distinct from the existing
   jyh/tt-verified-banyan-switch, the bare-banyan 2x2 record that was
   confusing TT); **THE 1x2 BARE-BANYAN PLAN IS DISCARDED.** THE FIT
-  REVERSAL: silicon's exact areas (cce8fc0/78ae523) retire the old
-  "full BB won't close on 1x1" — batcher_c is 4,023.86 um2 EXACT (the
-  5,928 projection ran +47.3% high, a flop-density applied to
-  combinational cells), bare banyan 3,829.92 um2 measured ⇒ full-BB
-  FLOOR ~7,850 um2 ≈ ~55% util on a 1x1's ~14-15k usable — LIKELY
-  FITS, where the projection said no. STILL A FLOOR (composition adds
-  glue/taps/repair) and the seam is R1's v1.1 node (UNWIRED — silicon
-  won't invent a composition to measure). ⇒ THE CERTAIN ANSWER IS ONE
-  RUN AWAY: wire the seam, run full-BB-on-1x1 on TT's grid (ask posted
-  17:47); if it closes, THE 1x1 IS THE BUY. Repo scaffolds around the
+  QUESTION — UNDECIDED, the run is the answer (CORRECTED 17:51 at
+  silicon's `48aadb5` self-catch; the maestro relayed a WRONG-OBJECT
+  number to the Captain 17:4x and struck it 17:5x): the sorter is
+  **batcher_seq 6,065.82 um2 EXACT** (720 cells, 96 flops — the full
+  next-state organ), NOT batcher_c 4,023.86 (its combinational core
+  only; quoting that understates the sorter by 50.7% — compiler's
+  ndf-account.md:112 warned this in advance). ⇒ FULL-BB FLOOR =
+  3,824.92 (banyan, measured) + 6,065.82 = **9,890.74 um2 = 73.5% of
+  the 1x1 core (13,460.40), CELLS ALONE**, before repair buffers/taps/
+  routing. That is BELOW the old ~12.2k "won't close" projection but
+  TIGHT — the call is settled in NEITHER direction by arithmetic. ⇒
+  THE RUN IS THE ONLY ANSWER: full-BB-on-1x1 on TT's grid IN FLIGHT
+  (accepted 17:51); NO TILE PURCHASE until close/no-close + util lands.
+  If it closes, THE 1x1 IS THE BUY.
+  ⭐ PRIORITY RULED 17:5x (the Captain, verbatim "let's move it to P3
+  — it is just for nostalgia, we can even move it to the Sept 27
+  shuttle"): THE FULL-BB SWITCH IS **P3** — nostalgia (the 1990
+  Bellcore switch, his patent), NOT deadline-critical, and it may
+  target the **Sept-27 shuttle** rather than the current one. So: the
+  in-flight 1x1 run FINISHES (near-done, the fit answer for free) and
+  the number banks; the seam-wire, the repo, and the tile purchase all
+  drop to do-when-idle. The current-window tapeout attention is the
+  NDF (6x2) alone; the switch rides P3 at its own pace. NO seat spends
+  P1 or NDF cycles on it. Repo scaffolds around the
   full-BB target; the wording takes evidence's fence before public.
   Deadline: submit-real-by-Aug-31, fits with room.**
 - **THE TILE PLAN IS CONFIRMED (8/10 10:4x, the Captain, verbatim
