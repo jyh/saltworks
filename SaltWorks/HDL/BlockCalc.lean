@@ -260,4 +260,64 @@ theorem reaches_is_inhabited_nontrivially :
 #audit_axioms relocation_control_is_load_bearing
 #audit_axioms reaches_is_inhabited_nontrivially
 
+/-! ## 6. THE `run` ↔ `Reaches` BRIDGE — math's third angle on `1b87d6e`, taken
+
+*Their finding, and it is correct: L0's and L1's top statements are `run`-shaped
+(`run_compileE_eq_evalE`, `run_compileS_correct`) while this calculus is `Reaches`-shaped,
+and nothing in the tree connected them. Not a defect inside L2 — a gap between rungs, and
+they named it forward of where it bites rather than at L4.*
+
+**The bridge is cheap in one direction and IMPOSSIBLE in the other, and the boundary
+between the two is exactly the fragment boundary.** -/
+
+/-- `Reaches` carrying a fuel BUDGET. This is the form that can be transported to `run`,
+and the budget is the whole content of the transport. -/
+def ReachesIn (image : List Instr) (k : Nat) (st st' : St) : Prop :=
+  ∃ n, n ≤ k ∧ runFor n image st = st'
+
+theorem ReachesIn.toReaches {image : List Instr} {k : Nat} {st st' : St}
+    (h : ReachesIn image k st st') : Reaches image st st' := by
+  obtain ⟨n, _, hn⟩ := h; exact ⟨n, hn⟩
+
+/-- ⭐⭐ **THE BRIDGE.** A run that fits inside `image.length` ticks **and has halted** is
+`run`. Halting is the fixed point `runFor_eq_of_halted` already supplies — the same fact
+`Reaches.trans` leans on, used in the other direction. -/
+theorem run_of_reachesIn {image : List Instr} {st st' : St}
+    (h : ReachesIn image image.length st st') (hhalt : fetch image st'.pc = none) :
+    run image st = st' := by
+  obtain ⟨n, hn, rfl⟩ := h
+  exact SaltWorks.Stack.Program.runFor_eq_of_halted hhalt hn
+
+/-- …and a straight-line whole image satisfies the budget by construction, so for the
+fragment L0 and L1 cover **the two shapes are interchangeable**. -/
+theorem reachesIn_of_straightline {image : List Instr} {st : St}
+    (hf : Forward image = true) (hb : 4 * image.length < 2 ^ 32) (hpc : st.pc.toNat = 0) :
+    ReachesIn image image.length st (exec st image) :=
+  ⟨image.length, Nat.le_refl _,
+   runFor_straightline image image 0 st (codeAt_self image) hf (by simpa using hpc)
+     (by simpa using hb)⟩
+
+/-- ⛔⛔ **AND IN THE OTHER DIRECTION NO BRIDGE CAN EXIST — this is not a missing lemma.**
+`run`'s fuel is `image.length`, one tick per instruction, and **a loop needs more ticks
+than the program has instructions.** `loopCode` is two instructions; `run` spends two ticks
+on it and stops mid-loop, and the landed control says the answer at two ticks differs from
+the answer at six.
+
+🔑 ***THE CONSEQUENCE, WHICH IS FOR L4 AND NOT FOR L2: Row A's top-level statement MUST be
+`Reaches`-shaped. A `run`-shaped statement is correct exactly on the straight-line fragment
+— which is why L0 and L1 are allowed to have one and the full compiler is not.*** *§4 said
+the ∃-fuel form was needed for `while`; this is the same fact seen from the `run` side, and
+it means the two shapes in the tree are not an inconsistency to be tidied away but a
+boundary to be respected.* -/
+theorem run_has_too_little_fuel_for_a_loop :
+    run loopCode St.init = runFor 2 loopCode St.init
+  ∧ ((runFor 2 loopCode St.init).get 1 == (runFor 6 loopCode St.init).get 1) = false := by
+  refine ⟨rfl, by decide⟩
+
+#audit_axioms ReachesIn
+#audit_axioms ReachesIn.toReaches
+#audit_axioms run_of_reachesIn
+#audit_axioms reachesIn_of_straightline
+#audit_axioms run_has_too_little_fuel_for_a_loop
+
 end SaltWorks.BlockCalc
