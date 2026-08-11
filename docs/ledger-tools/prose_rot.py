@@ -139,6 +139,13 @@ DATED_NAME = re.compile(r"(20\d\d-\d\d-\d\d|-\d{4}(?:\.|$|-))")
 # prose_rot: ignore-end
 
 
+class UnterminatedRegion(Exception):
+    def __init__(self, path, excluded):
+        super().__init__(path)
+        self.path = path
+        self.excluded = excluded
+
+
 def sweep_text(text, path):
     findings, targets = [], []
     excluded = 0
@@ -182,9 +189,14 @@ def sweep_text(text, path):
                     seen.add(m.group(0))
                     targets.append((path, n, m.group(0), line[:90]))
     if skipping:
-        # an unterminated region would silently swallow the file's whole tail
-        raise ValueError(f"{path}: {IGNORE_START} never closed — refusing to "
-                         f"report over a scope that silently ends at EOF")
+        # ⛔ ONE MALFORMED FILE MUST NOT KILL THE SWEEP. The first version
+        # raised, and `main` exited 2 — wholesale failure from a single file,
+        # which is precisely the global-state hazard this seat banked against.
+        # Worse, the file that triggered it was THIS TOOL'S OWN PUBLISHED
+        # OUTPUT: nightly.sh writes the report into docs/, the report contains
+        # the literal marker text, and the next run refuses on its own ledger.
+        # A tool whose output poisons its input is the carrier class, complete.
+        raise UnterminatedRegion(path, excluded)
     return findings, targets, excluded
 
 
@@ -215,7 +227,7 @@ def main(argv):
               "an empty scope (see: a count is not a scope)", file=sys.stderr)
         sys.exit(2)
 
-    allf, allt, excl = [], [], 0
+    allf, allt, excl, skipped = [], [], 0, []
     for f in files:
         try:
             t = f.read_text(errors="replace")
@@ -224,9 +236,12 @@ def main(argv):
             sys.exit(2)
         try:
             a, b, ex = sweep_text(t, str(f))
-        except ValueError as e:
-            print(f"prose_rot: {e}", file=sys.stderr)
-            sys.exit(2)
+        except UnterminatedRegion as e:
+            # skip THIS file, keep the sweep, and PRINT it — a silent skip is
+            # the failure this whole tool exists to prevent.
+            skipped.append(str(f))
+            excl += e.excluded
+            continue
         allf += a
         allt += b
         excl += ex
@@ -239,8 +254,17 @@ def main(argv):
           f"all suffixes .md/.py/.sh/.lean/.tex/.v")
     print(f"COVERS     (A) absence claims that ANNOUNCE THEIR TENSE — "
           f"{len(ABSENCE)} patterns, case-insensitive")
-    print(f"EXCLUDED   {excl} line(s) inside author-declared `{IGNORE_START}` "
-          f"regions —")
+    if skipped:
+        print(f"⚠️ SKIPPED  {len(skipped)} file(s) with an UNCLOSED ignore "
+              f"region — NOT swept, NOT clean:")
+        for s in skipped:
+            print(f"           {s}")
+    # ⛔ NEVER PRINT THE LITERAL MARKER. The first version echoed IGNORE_START
+    # into its own report; nightly.sh writes that report into docs/; the next
+    # run then read its own output as an unterminated region and REFUSED.
+    # A tool that emits its own control string poisons every document that
+    # quotes it. Printed descriptively instead.
+    print(f"EXCLUDED   {excl} line(s) inside author-declared ignore regions —")
     print("           description-of-the-pattern, not assertion. A MISS PRINTS")
     print("           ITSELF; AN EXCLUSION DOES NOT, so it is printed here.")
     print("DOES NOT   (B) a POSITIVE assertion the corpus made false. It carries")
