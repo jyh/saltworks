@@ -578,7 +578,7 @@ owed-marker at the claim site.*** The package now does, at all four sites (v1.1)
 
 ## OPEN FENCE VERDICTS
 
-### ⏳ OPEN — the NATURE-TRACK block's "under one referee" sentence (raised 2026-08-11 03:45)
+### ✅ CLOSED — the NATURE-TRACK block's "under one referee" sentence (raised 03:45, folded 08:52)
 
 `${SEAT_DIR}/briefs/2026-08-11-nature-track-block.md:14-17`, the Captain's 03:4x
 proposal, DRAFT-UNTIL-REFUTED, rides his morning surface as item zero:
@@ -609,7 +609,20 @@ M4 of every criterion this seat writes requires the tool to disclose its frame.*
 > one referee for everything the kernel touched, with the hand-written
 > remainder named."
 
-⏳ **OPEN pending the maestro's fold and the Captain's ruling. Two adjacent
+✅ **CLOSED 2026-08-11 08:52 at `4d1c8c2`, verified at the bytes not on a status
+line.** *The §1 thesis now reads "silicon whose arithmetic core is kernel-proved
+and fabricated — under one referee for everything the kernel touched, with the
+hand-written remainder named (the die: 352 of 902 flops kernel-emitted, 39.0%;
+the rest hand RTL)". Measured at `origin/master`: the false form "under one
+referee (the Lean kernel)" is at ZERO occurrences; the qualified clause, the
+partition and the remainder phrase each present.*
+⚠️ **IT TOOK A RE-RAISE AT 08:50 — the first refutation crossed the fold window
+at 03:45 and sat five hours while three other seats' counsel landed.** *Not a
+decline; a crossing. **The lesson is mine: I recorded it as OPEN and did not
+re-check it until the morning was arriving.** An item routed to another seat is
+not progressing because you filed it.*
+
+📌 **Remaining, and NOT this seat's to close: Two adjacent
 claims FLAGGED, NOT JUDGED, because they are not this seat's to measure: "a
 verified compiler" and "a verified executive" — their owners should state what
 those words cover before the sentence travels.** *"first formalizations" is an
