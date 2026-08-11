@@ -206,17 +206,24 @@ discipline (author-anywhere, land-at-owner).
   theorem (:186) restates freely — ZERO consumers outside StateCodec
   (math's census). (3) `SysSt.task` (ExecutiveX0.lean:66) gains
   default mem/trapped (sufficient BECAUSE of the §0.6 ruling: the
-  executive does not use memory). (4) **THE CONSUMER LIST, the full
-  five (was two in v1.1 — the atomic commit could not have closed):**
-  `decQ_congr` (Program.lean:1481) and `decQ_envWith` (:1494)
-  generalize as before · `entryLoaded_encD_stOfFn` (:1231) and
+  executive does not use memory). (4) **THE WORK LIST, WITH ITS
+  UNITS STATED (⬥v1.1.2, closing the math/silicon census delta — a
+  count is not a scope): FOUR direct tactic-level consumers of
+  `decQ_encD` (silicon's unit — :1231/:1252/:1264/:1494, three hands
+  agree) + ONE decQ-SHAPE consumer = FIVE work items (math's unit);
+  v1.1 named two and the atomic commit could not have closed.**
+  The direct four: `decQ_envWith` (:1494, exact) generalizes as
+  before · `entryLoaded_encD_stOfFn` (:1231) and
   `not_entryLoaded_offEndEnv` (:1252) land only on .pc/.get, so the
   projection suffices — at a TACTIC EDIT each (`rw [decQ_encD]`
   stops working on a conjunction; budget the `.1`/`.2` plumbing) ·
   **`offEndEnv_does_not_sort` (:1264) rewrites the WHOLE STATE under
   `run` — the projection deletes its first step; it rewrites with
   `decQ_encD_of_clean` instead** (offEndEnv is clean by
-  construction). The prose at :1226 and :1800 describing the round
+  construction). The FIFTH work item is NOT a `decQ_encD` consumer:
+  `decQ_congr` (:1481) assumes two-field `St.mk.injEq` injectivity —
+  r-stateform's original find — and generalizes under this same
+  node. The prose at :1226 and :1800 describing the round
   trip as an identity is REWORDED to "identity on clean states;
   projection in general". (5) Control: full-hub build green +
   `#print axioms` on BOTH restated lemmas within the standing three.
