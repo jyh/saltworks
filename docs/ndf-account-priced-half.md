@@ -76,9 +76,21 @@ to it. That is a COMPOSITION decision (R1's v1.1 seam), not an organ to build.**
 cells' liberty areas, which is precisely what `design__instance__area__stdcell`
 counts:**
 ```
-batcher_c        624 cells   4,023.8592 um2   EXACT
-batcher_struct   504 cells   3,573.4272 um2   EXACT
+batcher_seq      720 cells · 96 flops   6,065.82 um2   EXACT  <- THE SORTER
+batcher_c        624 cells ·  0 flops   4,023.86 um2   EXACT  <- its COMBINATIONAL CORE
+batcher_struct   504 cells ·  0 flops   3,573.43 um2   EXACT
 ```
+⛔⛔ **I FIRST PUBLISHED `batcher_c` (4,023.86) AS "THE ORGAN" AND THAT WAS THE
+WRONG OBJECT — corrected within the hour, and `docs/ndf-account.md:112` had said
+so in advance:** *"105 in = 9 design + **96 state**, 104 out = 8 data + **96
+next-state** … quoting 624 as 'the sorter' understates it by the whole state
+file."* **`batcher_c` is the NEXT-STATE FUNCTION; the 96 flops live outside it.
+The clocked design object is `batcher_seq`, and quoting the core understates the
+sorter by 2,041.96 um2 — `+50.7%`.**
+🔑 ***MY NUMBER WAS EXACT AND MY OBJECT WAS WRONG, WHICH IS THE MORE DANGEROUS
+FAILURE: "±0.003 um2, validated on two runs" is exactly the phrasing that stops a
+reader asking WHICH THING WAS MEASURED.*** *And a tile-purchase decision was being
+taken on it. The warning was already written down, in a peer's file, one line long.*
 ⭐ **METHOD VALIDATED ON TWO ALREADY-MEASURED RUNS BEFORE BEING TRUSTED HERE** —
 it reproduces the BB at 1x1 on both power grids to **±0.003 um2** and its cell
 count exactly (529/529):
@@ -102,20 +114,26 @@ included — and was applied to a HOMOGENEOUS one of small combinational cells
 (inv/and2/xor2/or2/mux2), whose true average is 6.449 um2/cell. An average density
 is a property of the population it was measured on.***
 
-⚠️ **STILL A PROJECTION, and the part that is: `69,776.9 + 4,023.86 = 73,800.76
-um2 = 31.7% of the 6x2 die` assumes composition ADDS ONLY THE ORGAN'S OWN CELLS.
-It will not — glue, taps, and the flow's own repair buffers scale with it.** *The
-organ's area is exact; the COMPOSED total is a floor, not a forecast.*
-⛔ **DO NOT READ 31.7% AS A FIT RESULT.** *(This line said **32.5%** until the
-exact measurement above retired that projection — the warning is unchanged, only
-the number it guards.)* **An area figure says nothing about ROUTING, about the
+⚠️ **STILL A PROJECTION, and now on the RIGHT object: `69,776.9 + 6,065.82 =
+75,842.72 um2 = 32.6% of the 6x2 die` assumes composition ADDS ONLY THE ORGAN'S
+OWN CELLS. It will not — glue, taps, and the flow's own repair buffers scale with
+it.** *The organ's area is exact; the COMPOSED total is a floor, not a forecast.*
+📌 *With `batcher_c`'s 4,023.86 this line read 31.7%. **The corrected figure lands
+within 0.1 pt of the ORIGINAL 32.5% projection — which was high for one reason and
+low for another, and the two nearly cancelled.** A number that survives a
+correction unchanged is not thereby confirmed.*
+⛔ **DO NOT READ 32.6% AS A FIT RESULT.** *(This line has said 32.5% and then
+31.7%; the warning is unchanged, only the number it guards.)* **An area figure says nothing about ROUTING, about the
 sort-then-route seam's effect on the timing arc, or about the critical path —
 which is already 93% inside a single cell. Whether the batcher fits and closes is
 a MEASUREMENT NOBODY HAS RUN, and the exact organ area does not change that.**
-📌 *It cannot be run honestly yet either: the wiring seam is **R1's v1.1 design
-node**, so inventing a composition to measure would measure MY invented seam and
-report it as the design's. That is why this section still ends in a projection
-while §1, §3 and §4 do not.*
+✅ **SUPERSEDED WITHIN THE HOUR — THE CAPTAIN RULED THE SEAM AT 17:47.** *This
+paragraph said the measurement "cannot be run honestly yet" because the wiring was
+**R1's v1.1 design node** and inventing a composition would measure MY seam and
+report it as the design's. **That reasoning was right and it EXPIRED: the switch is
+now ruled to BE the full batcher-banyan** (`batcher_c` wired to the banyan, own repo
+`jyh/tt-verified-batcher-banyan`; the 1x2 bare-banyan plan discarded).* **The
+full-BB-on-1x1 tile-purchase run is IN FLIGHT — see §6.**
 
 ## 3 · THE DRV DEBT — ⛔⛔ THIS SECTION WAS WRONG AND I REFUTED IT MYSELF (8/10 17:4x)
 
