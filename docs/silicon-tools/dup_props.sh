@@ -42,7 +42,14 @@
 # ⇒ Treat a clean run as "no single-line duplicates", which is the honest scope,
 #   and hand-check anything whose statement wraps.
 
-REF=${1:-origin/master}
+# ⛔ REF RESOLVED, NOT TYPED (2026-08-11 10:3x, the fleet's scratch-incident cure).
+# This line was `REF=${1:-origin/master}` — a TYPED default. It is correct in
+# saltworks (origin/HEAD → origin/master, checked) and WRONG in any repo on
+# `main`, which this fleet has. A typed ref fails in two ways: loudly if the ref
+# is absent, and SILENTLY against a stale branch if an old `origin/master` still
+# exists after a rename. Resolve it; fall back only if origin/HEAD is unset
+# (fresh clones often lack it), and say which one was used.
+REF=${1:-$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null || echo origin/master)}
 GLOB=${2:-SaltWorks/HDL/*.lean}
 
 # ⛔ AN EMPTY RESULT MUST NOT LOOK LIKE A CLEAN ONE (silicon's law, 17:12; first
