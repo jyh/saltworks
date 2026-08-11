@@ -1087,6 +1087,22 @@ OPEN ITEMS:
   element decides on the header and goes transparent (B4's own
   bonus finding: the sorter leg is already ∀-P). (b) is not a
   preference; it is the only shape the architecture admits.**
+- **⭐⭐⭐ THE NDF IS SUBMITTED — THE HARDWARE SUMMIT (8/10 17:5x, the
+  Captain, HIS HAND): "NDF is on the Sept 7 shuttle, additional 8
+  tiles paid for." TWO of the three clicks EXECUTED in one stroke —
+  (1) SUBMIT NDF ✓ (Sept-7 shuttle) · (2) UPGRADE 2x2→6x2 ✓ (the +8
+  tiles = 4→12, the ruled resize). THE THIRD CLICK (buy the 1x2) IS
+  MOOT — the switch went P3/nostalgia and the 1x2 banyan was
+  discarded. ⇒ THE CURRENT-SHUTTLE HARDWARE IS DONE: the composed 6x2
+  NDF (4 shelled cells + 3 SER organs + banyan fabric + RISC-V core),
+  placed/routed/DRC-LVS-antenna-clean, public repo CI green, on TT's
+  Sept-7 shuttle. THE ARC: the Captain's 3am dream (8/9 ~03:06) →
+  composed first layout (8/10 01:46) → SUBMITTED (8/10 17:5x). Money:
+  ~€840 committed (280 sunk + ~560 the upgrade; the ~70 1x1 NOT spent,
+  switch deferred). Remaining fab-tail is update-window polish
+  (V9/V10, DRV, the requantizer per ruling d) until the ~Sept-7
+  freeze — improvements, not blockers. TWO CHIPS TO FAB stands: the
+  switch (earlier) + the NDF (now).**
 - **⭐⭐ THE SWITCH RE-PLANNED — FULL BB, ITS OWN REPO, 1x1 IN PLAY
   (8/10 17:4x, the Captain at/after council): the standalone switch is
   the FULL BATCHER-BANYAN (batcher_c WIRED to the banyan — today's
