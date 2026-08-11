@@ -97,5 +97,6 @@ import SaltWorks.HDL.PartialLift
 import SaltWorks.HDL.BatcherRun
 import SaltWorks.HDL.PortLengths
 import SaltWorks.HDL.StraightLine
+import SaltWorks.HDL.RegMap
 import SaltWorks.HDL.AccountMeasure
 import SaltWorks.Tactic.AuditAxioms
