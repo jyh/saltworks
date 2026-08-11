@@ -3,9 +3,15 @@
 **Order ② of the 10:32 submission push. Compiler owns the KERNEL half
 (`docs/ndf-account.md`); this is the artifact-side ledger it pairs with.**
 
+🚀 **STATUS — THE NDF IS SUBMITTED (2026-08-10 17:5x): the composed 6x2 is on
+TinyTapeout's Sept-7 shuttle, 8 additional tiles paid for. §1 IS THE SUBMITTED
+DESIGN.** *This document was written to be read BEFORE that click; it is now the
+record of a design committed to fabrication, so its debts (§3) ride to silicon
+with it and its scope clauses matter MORE, not less.*
+
 ⚠️ **EVERY FIGURE HERE CARRIES ITS SCOPE CLAUSE, AND THE CLAUSES ARE NOT
 DECORATION.** This document is written to be read by TT's public page and by the
-Captain before a click that spends money. Evidence's fence governs it: **no
+Captain. Evidence's fence governs it: **no
 sentence stronger than the artifacts.** Where a number is a PROJECTION it says so
 on the same line; where it is MEASURED it names the run.
 
@@ -324,7 +330,11 @@ variant not fitting a 1x1 costs nothing today — the growth path stays open.**
   survives; the REASON given for it did not. Restated on its true ground:
 - **§1 IS A TILE-FIT AND IS NOT A SIGNOFF** — it used TT's real power grid on the
   real 6x2 die and passed, but a SIGNOFF is TinyTapeout's CI verdict on the
-  fabrication path, not a local LibreLane run at my knobs. ✅ ***§4 (BB at 1x1) is
+  fabrication path, not a local LibreLane run at my knobs. ✅ **AND THAT CONDITION
+  IS NOW REPORTED MET — TT's CI is green on the submitted 6x2 (the maestro's
+  17:54, the Captain's hand). I did NOT run it and I am not claiming it as my
+  measurement: it is the fabrication path's own verdict, attributed to whoever
+  read it.** ✅ ***§4 (BB at 1x1) is
   NOW a tile-fit as well*** *— re-run on `tt_block_1x1_pg.def` and passed. This
   clause previously read "has NOT been re-run with it — that one is still not a
   tile-fit at all"; it was true when written and is retired by the run.* **Both
