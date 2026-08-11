@@ -270,6 +270,90 @@ theorem loop_relocates :
 
 #audit_axioms loop_relocates
 
+/-! ## 5b. ⭐⭐⭐ THE OFFSETS, PROVED FOR **ALL** BLOCK SIZES — the six configurations are a
+SAMPLE, and this is the theorem they were sampling
+
+§7's caveat said plainly that three points per formula are *"a discriminating test, not a
+proof"*, and named the obligation: **a theorem about `bOffset`**. Here it is, in both
+directions, for every block size inside the representability bound.
+
+🔑 ***THE BACKWARD DIRECTION IS THE ONE THAT NEEDED PROVING.*** *A negative immediate reaches
+its target by WRAPPING: the displacement's `toNat` is `2^32 - 4*(n_c+n_b+1)`, and the landing
+is `(pc + that) mod 2^32`. **The loop closes because the arithmetic overflows, and no sample
+can show that it does so for every size.*** -/
+
+/-- The negative immediate, as a `Nat`: two's complement of the byte-halved distance. -/
+theorem whileBack_toNat (n_c n_b : Nat) (hk : 2 * (n_c + n_b + 1) ≤ 2048) :
+    (whileBack n_c n_b).toNat = 2 ^ 12 - 2 * (n_c + n_b + 1) := by
+  unfold whileBack
+  rw [BitVec.toNat_ofInt]
+  omega
+
+theorem whileBack_msb (n_c n_b : Nat) (hk : 2 * (n_c + n_b + 1) ≤ 2048) :
+    (whileBack n_c n_b).msb = true := by
+  have h : ¬ ((whileBack n_c n_b).msb = false) := by
+    rw [BitVec.msb_eq_false_iff_two_mul_lt, whileBack_toNat n_c n_b hk]
+    omega
+  simpa using h
+
+/-- ⭐⭐ **THE EXIT BRANCH LANDS PAST THE LOOP, FOR EVERY BODY SIZE.** From the branch's own
+address at block-relative index `n_c`, taking it puts the `pc` exactly one instruction past
+the backward branch — the first instruction after the loop. -/
+theorem exit_branch_lands {pc : BitVec 32} (n_b q : Nat)
+    (hb : 2 * (n_b + 2) ≤ 2047) (hq : pc.toNat = 4 * q)
+    (hp : 4 * (q + n_b + 2) < 2 ^ 32) :
+    (pc + bOffset (whileExit n_b)).toNat = 4 * (q + n_b + 2) := by
+  have hmsb : (whileExit n_b).msb = false := by
+    unfold whileExit
+    rw [BitVec.msb_eq_false_iff_two_mul_lt, BitVec.toNat_ofNat]
+    omega
+  unfold bOffset
+  rw [BitVec.toNat_add, BitVec.toNat_shiftLeft,
+      BitVec.signExtend_eq_setWidth_of_msb_false hmsb, BitVec.toNat_setWidth, hq]
+  unfold whileExit
+  rw [BitVec.toNat_ofNat]
+  omega
+
+/-- ⭐⭐⭐ **THE BACKWARD BRANCH LANDS ON THE CONDITION'S FIRST INSTRUCTION, FOR EVERY PAIR OF
+BLOCK SIZES — AND IT GETS THERE BY WRAPPING.** From its own address at block-relative index
+`n_c+n_b+1`, the loop closes onto index `0` of the block.
+
+*`2^32 - 4*(n_c+n_b+1)` is added, not subtracted; the `mod` in `BitVec.toNat_add` is doing
+the work. **This is the first COMPILED backward branch in the corpus and the first proof
+that one lands where it is aimed.*** -/
+theorem back_branch_lands {pc : BitVec 32} (n_c n_b q : Nat)
+    (hk : 2 * (n_c + n_b + 1) ≤ 2048) (hq : pc.toNat = 4 * (q + n_c + n_b + 1))
+    (hp : 4 * (q + n_c + n_b + 1) < 2 ^ 32) :
+    (pc + bOffset (whileBack n_c n_b)).toNat = 4 * q := by
+  unfold bOffset
+  rw [BitVec.toNat_add, BitVec.toNat_shiftLeft, BitVec.toNat_signExtend,
+      if_pos (whileBack_msb n_c n_b hk), BitVec.toNat_setWidth,
+      whileBack_toNat n_c n_b hk, hq]
+  omega
+
+/-- ⭐⭐ **AND AT THE `step` LEVEL, WHICH IS WHAT THE EMITTER'S PROOF WILL CONSUME.** The exit
+branch is taken exactly when the guard register holds zero — the condition being FALSE — and
+`x0` reads zero unconditionally, so no hypothesis about the register file is needed. -/
+theorem step_exit_taken {st : St} {rd : Fin 32} (n_b q : Nat)
+    (hz : st.get rd = 0) (hb : 2 * (n_b + 2) ≤ 2047) (hq : st.pc.toNat = 4 * q)
+    (hp : 4 * (q + n_b + 2) < 2 ^ 32) :
+    (step st (.BEQ rd 0 (whileExit n_b))).pc.toNat = 4 * (q + n_b + 2) := by
+  have h0 : st.get 0 = 0 := by simp [St.get]
+  simp only [step, hz, h0, if_pos rfl]
+  exact exit_branch_lands n_b q hb hq hp
+
+/-- …and the backward branch is UNCONDITIONAL (`BEQ x0 x0`), so it needs no guard at all. -/
+theorem step_back_taken {st : St} (n_c n_b q : Nat)
+    (hk : 2 * (n_c + n_b + 1) ≤ 2048) (hq : st.pc.toNat = 4 * (q + n_c + n_b + 1))
+    (hp : 4 * (q + n_c + n_b + 1) < 2 ^ 32) :
+    (step st (.BEQ 0 0 (whileBack n_c n_b))).pc.toNat = 4 * q := by
+  simp only [step, if_pos rfl]
+  exact back_branch_lands n_c n_b q hk hq hp
+
+#audit_axioms whileBack_toNat whileBack_msb
+#audit_axioms exit_branch_lands back_branch_lands
+#audit_axioms step_exit_taken step_back_taken
+
 /-! ## 6. WHY `whileExit` IS NOT `iteThenSkip`, THOUGH THEY ARE EQUAL TODAY
 
 `whileExit n = iteThenSkip n` **as functions**, and it is deliberate that this file defines
@@ -312,14 +396,28 @@ When L2's `while` clause lands, it passes only if **all** of these hold:
    until the `while` clause lands and false the moment it does** — it sits under a true
    theorem, which is the shape a green build cannot catch.
 
-⛔ **What this file does NOT establish, said plainly: that the formulas are correct for all
-block sizes, and that a loop whose body itself contains control flow lays out correctly.**
-Every configuration here has a straight-line body. *The nested case is where `n_c` and `n_b`
-stop being the lengths of straight-line blocks and become the lengths of compiled
-sub-blocks; the formulas are stated in those terms and should survive, but this file does
-not test it and does not claim it.* **The proof obligation is a theorem about `bOffset`,
-`codeAt` and `Reaches`, and it lands with the emitter; this bar makes its failure visible
-early and does not substitute for it.**
+✅ **UPDATED WHEN §5b LANDED — AND THE OLD TEXT WAS ROTTING IN THE SAFE-LOOKING DIRECTION.**
+*This section said the file "does NOT establish that the formulas are correct for all block
+sizes". **§5b now proves exactly that**, in both directions, for every size inside the
+representability bound (`exit_branch_lands`, `back_branch_lands`, and their `step`-level
+corollaries). A caveat that has been discharged reads as caution and is nobody's job to
+re-check, so it is corrected in the commit that discharged it rather than left to be
+believed.*
+
+⛔ **What is STILL not established, and the list is now shorter and sharper:**
+1. **A loop whose body itself contains control flow.** Every configuration here has a
+   straight-line body. *The nested case is where `n_c` and `n_b` stop being the lengths of
+   straight-line blocks and become the lengths of COMPILED SUB-BLOCKS. The formulas are
+   stated in those terms and §5b's theorems are proved in those terms — they quantify over
+   `n_c` and `n_b` as bare `Nat`s and never ask what produced them — so the arithmetic
+   should survive. **The LAYOUT is what is untested: that the emitter hands them the right
+   two numbers.***
+2. **That the emitter emits this scheme at all.** §5b proves where these immediates land;
+   it says nothing about which immediates `compileS` chooses. *That is bar clause 1, and it
+   is discharged by the emitter's own forward equation, not here.*
+3. **The simulation relation across the loop** — that reaching the exit means the source
+   `while` has finished. `Reaches` + `runFor_add` compose it; the derivation induction
+   builds it. **That is the emitter's theorem and the last real risk in this rung.**
 -/
 
 end SaltWorks.WhileScheme
