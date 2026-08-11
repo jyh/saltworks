@@ -108,4 +108,5 @@ import SaltWorks.HDL.CompileS
 import SaltWorks.HDL.BlockCalc
 import SaltWorks.HDL.IteScheme
 import SaltWorks.HDL.WhileScheme
+import SaltWorks.HDL.WhileSim
 import SaltWorks.Tactic.AuditAxioms
