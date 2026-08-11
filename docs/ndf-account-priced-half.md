@@ -345,3 +345,47 @@ variant not fitting a 1x1 costs nothing today — the growth path stays open.**
 - ***Every number that is a projection says so on its own line. If a sentence in
   the public README is stronger than the line it came from, the line is right and
   the sentence is wrong.***
+
+## 6 · FULL BATCHER-BANYAN ON A 1x1 — MEASURED (run `fullbb1x1`, TT's real grid)
+
+**The Captain's 17:47 tile-purchase gate. `batcher_seq` (the CLOCKED sorter) wired
+sort-then-route into `banyan_fabric`, hardened at 161.00 x 111.52 with
+`tt_block_1x1_pg.def`. Knobs IDENTICAL to today's bare-banyan 1x1 except sources
+and the DEF. The switch went P3 at 17:52; this is the answer the run had already
+produced, and it is the last of it.**
+```
+                        FULL BB        bare banyan (today)
+  die                  17,954.70          17,954.70   the 1x1, exactly
+  stdcell              11,419.70           3,829.92   = 63.6% of die, 84.8% of CORE
+  cells / flops        1,331 / 148          529 / 52
+  SETUP __ws            -1.5011 ns        +20.0047    ⛔ 24 violations
+  HOLD  __ws            +0.1058 ns         +0.1089    ✅ 0 violations
+  max-slew                    42                 11
+  magic DRC / klayout / LVS / antenna    0 / 0 / 0 / 0   BOTH RUNS
+```
+✅ **AREA: IT FITS. It places, routes and passes DRC (magic AND klayout), LVS and
+antenna on TinyTapeout's real power grid at 84.8% core utilisation.**
+⛔ **TIMING: IT DOES NOT CLOSE AT 40 ns.** *It closes at **41.50 ns = 24.10 MHz** —
+a 3.6% clock reduction, and `clock_hz` is a field WE declare.*
+
+🔑 ***THE FINDING THAT DECIDES THE TILE, AND IT INVERTS THE PROJECTION'S REASONING:
+ALL 8 VIOLATING PATHS RUN INPUT-PORT → OUTPUT-PORT. ZERO ARE REGISTER-TO-REGISTER.
+The design's internal timing is clean; the whole sort-then-route traverses both
+organs combinationally in ONE cycle, pin to pin.***
+⇒ ⛔ ***A BIGGER TILE CANNOT FIX THIS.*** *More area does not shorten combinational
+depth. "If it closes the 1x1 is the buy; if not, the next size up" — **the next
+size up would buy silicon that does not address the failure.** The levers are the
+clock declaration (ours), the I/O delay model, or pipelining the seam.*
+⚠️ **AND THE NUMBER IS MODEL-DEPENDENT: `IO_DELAY_CONSTRAINT = 20` books 20% of the
+period at EACH end — 16 of the 40 ns spent by assumption before any gate.** *Same
+clause as measurement #1 (§1): an I/O path moves with the I/O model in a way a
+register-to-register path does not. **-1.50 ns is a true reading under a default
+external-delay model, not a property of the silicon.***
+
+📌 **MY OWN FLOOR, SCORED: I published `3,824.92 + 6,065.82 = 9,890.74 um2` as a
+FLOOR, NOT A FORECAST. Measured 11,419.70 — composition cost `+1,528.96` (`+15.5%`)
+in glue, taps and repair. The floor held and the clause was the right one.** *Flops
+were exactly additive (96 + 52 = 148); cells were not (720 + 529 = 1,249 vs 1,331).*
+⚖️ *The `~12.2k um2` projection this gate was called on was an AREA argument, and
+**area was never the blocker.** It overshot the true 11,419.70 by 6.8% and pointed
+at the wrong failure mode entirely.*
