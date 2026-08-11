@@ -83,6 +83,14 @@ cells' liberty areas, which is precisely what `design__instance__area__stdcell`
 counts:**
 ```
 batcher_seq      720 cells · 96 flops   6,065.82 um2   EXACT  <- THE SORTER
+  ⚠️ PROVENANCE: this figure is measured off `RTL/batcher_seq.v`, which is
+     UNTRACKED in git (its three siblings are committed) and is REGENERABLE
+     OUTPUT of `emitSeq batcherNetC` (account cites `8be6d48`). Compiler's
+     point, sharper than "unreproducible": a number resting on that file today
+     would rest on a DIFFERENT file after a regeneration, silently.
+     ⇒ THE FIGURE IS VALID FOR THE FILE AS IT STOOD 2026-08-10 18:4x. Re-derive
+       it from the emitter before quoting it again; do not treat it as a
+       constant. [[bank-the-invocation-not-the-value]] applies exactly.
 batcher_c        624 cells ·  0 flops   4,023.86 um2   EXACT  <- its COMBINATIONAL CORE
 batcher_struct   504 cells ·  0 flops   3,573.43 um2   EXACT
 ```
