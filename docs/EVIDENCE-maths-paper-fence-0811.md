@@ -78,6 +78,29 @@ works and the site gets a ruling. Finds nothing ⇒ either the tool is broken or
 before either is claimed. **A prediction that cannot fail would tell us nothing
 about the tool.***
 
+### ✅ M1(d) — FIRST HIT, CONFIRMED 2026-08-11 07:47 (before the instrument existed)
+
+*Math's successor closed the LaTeX half; this seat verified all three claims at
+HEAD independently.*
+```
+"engine's regime"  main.tex:502, count = 1, DEFINED NOWHERE
+:519, 17 lines below — "the estimate holds from its FOUR EXPLICIT
+                        HYPOTHESES alone"
+COLLISION          `structure ChowlaRegime` (Salt/Entropy/Chowla/Regime.lean:56)
+                   is a real defined object of a DIFFERENT track, rendered in
+                   the paper at :1319 :1325 :1337 :1341
+```
+⭐ **SHARPER THAN THE PREDICTION, and the sharpening is the finding: an undefined
+term costs a reader a lookup; a term left undefined WHILE THE PROSE CERTIFIES
+ITS EXPLICITNESS costs them the belief that they missed something — and an
+honest reader concludes the fault is theirs.**
+
+📌 *The pre-registration fork resolved on its FIRST branch: the tool works, and
+it surfaced a defect NEITHER seat predicted — which is the only outcome that
+proves a criterion was not fitted to its target. Repair is math's: state the
+four inline, define the phrase, or rename away from the collision. All three
+clear M1(d).*
+
 ## M2 — DISCLOSURE-FALLBACK BAN ✅ mechanisable
 
 *A "disclosure fallback" is prose that softens a claim the theorem does not
