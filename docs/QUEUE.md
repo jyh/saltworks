@@ -938,7 +938,28 @@ OPEN ITEMS:
   TONIGHT is the named target; the fabbed-is-verified law governs
   the SUBMISSION, not the first measurement run — V1-V3/V9/V10
   land behind the layout, before any tapeout word.**
-- **⭐⭐⭐ THE TWO-TRACK RULING — P1/P2 STRICT PRIORITY (8/10 16:2x, the
+- **⭐⭐⭐ THE THREE-TIER AMENDMENT (8/10 17:0x, the Captain at council,
+  his words: "for PoC no memory is fine, but it is very unrealistic, you
+  can do a design today. P1 stays as it stands, LW/SW move into P2, and
+  the others become P3"): the two-track ruling below is AMENDED to three
+  tiers, same mechanics (clean-boundary switching · a lower tier NEVER
+  gates a higher · one pen per seat), strict priority P1 > P2 > P3.**
+  **P1: UNCHANGED** (the bundle + math's day-zero opener, below).
+  **P2 = THE LW/SW ARC, internally gated, in order:** ① the MEMORY
+  DESIGN BLOCK — maestro-owed, Fable-tier, TONIGHT (the byte-vs-word
+  ruling · misalignment in the address path · F4's bridging obligation
+  written before either side builds · B2's coverage discipline · the
+  wS/wI encoder plan; refuter pass BEFORE any seat consumes it) ·
+  ② the KERNEL LANDING (math+compiler shared, ~3 seat-days, gated on ①)
+  · ③ SILICON INTEGRATION (dmem8+memif+layout, gated on ②,
+  update-window scoped). No P2 pull exists until ① posts.
+  **P3 = the former P2 rosters, unchanged in content and order:**
+  compiler V9 → A1 → L5 → batcher_c/SER → L6 source probe · math L3
+  half → X3 → 47-row → A3 (still gated on ruling d) · silicon cocotb
+  fix → 1x2/BB → DRV → tile-fit → sim harness · evidence GraphCast
+  citation. NOTE: V9's demotion to P3 is the amendment's one real
+  trade (it was A1's fence) — priced at the table, the Captain's word
+  stands; A1 ships fenced WHEN DRIVEN until V9 lands from P3.
   Captain at council, his words: "I am willing to bet my shirt that they
   aim too low. However, I honor the refuters too… One main track
   first priority, essential, label it P1. Secondary track for longer
