@@ -370,8 +370,13 @@ BLOCK SIZES — AND IT GETS THERE BY WRAPPING.** From its own address at block-r
 `n_c+n_b+1`, the loop closes onto index `0` of the block.
 
 *`2^32 - 4*(n_c+n_b+1)` is added, not subtracted; the `mod` in `BitVec.toNat_add` is doing
-the work. **This is the first COMPILED backward branch in the corpus and the first proof
-that one lands where it is aimed.*** -/
+the work. **This is the first COMPILED backward branch in this corpus, and this corpus's
+first proof that one lands where it is aimed.***
+
+⚖️ *Scope made explicit 08-11 under the ratified claim-language law: the original read "…in
+the corpus and the first proof that one lands where it is aimed", where the scope attached to
+the first conjunct and a reader could take the second as a claim about the world. **It is a
+claim about THIS repository and nothing wider — I have surveyed no other.*** -/
 theorem back_branch_lands {pc : BitVec 32} (n_c n_b q : Nat)
     (hk : 2 * (n_c + n_b + 1) ≤ 2048) (hq : pc.toNat = 4 * (q + n_c + n_b + 1))
     (hp : 4 * (q + n_c + n_b + 1) < 2 ^ 32) :
