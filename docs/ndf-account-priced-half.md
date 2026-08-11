@@ -44,9 +44,16 @@ left is the one that gets read.*
 this is a LOCAL LibreLane run at my committed knobs — TT's own CI is the
 fabrication path and its result is theirs, not mine.**
 
-⛔ **THE `+8.1891 ns` RESTS ON AN UNREPAIRED CLOCK TREE — see §3.** It is the
-tool's honest output and it is computed on a clock whose worst leaf slew is 25%
-of the period. **The margin should not travel without this clause.**
+⛔⛔ **THIS PARAGRAPH READ: "THE `+8.1891 ns` RESTS ON AN UNREPAIRED CLOCK TREE …
+computed on a clock whose worst leaf slew is 25% of the period. The margin should
+not travel without this clause." ⇒ WITHDRAWN 8/10 17:4x — THE CLAUSE WAS FALSE.**
+*The final STA reports **ZERO slew violations on clock pins**; the "25% of the
+period" came from reading a fanout COUNT as nanoseconds (§3). **I hung a scary
+caveat on a GOOD result and suppressed a real +8.19 ns margin for a day** — the
+underclaim direction, which nobody complains about and nobody checks.*
+📌 **What survives, on its true ground: the clock tree carries 67 max-FANOUT
+violations (12-14 against a limit of 10). That is a real debt and it is not a
+slew debt, and it does not qualify the setup margin.**
 
 📌 **MEASUREMENT #1 — ENDPOINTS REFUTED, MIDDLE CONFIRMED.** The critical path is
 `uio_in[2] (edge_in_data) → ser0.q30`. The named candidate chain
@@ -77,32 +84,51 @@ seam's effect on the timing arc, or about the critical path — **which is alrea
 inside a single cell.** Whether the batcher fits and closes is a MEASUREMENT nobody
 has run.*
 
-## 3 · THE DRV DEBT — TWO POPULATIONS, ZERO OVERLAP
+## 3 · THE DRV DEBT — ⛔⛔ THIS SECTION WAS WRONG AND I REFUTED IT MYSELF (8/10 17:4x)
 
+⛔⛔ **THE PREVIOUS TEXT CLAIMED TWO SLEW POPULATIONS: "EXTREME >10 ns, 67 pins,
+ALL CLOCK-TREE, worst 14.00 ns = 18.7x limit = 25% OF THE 55 ns PERIOD" and a
+mild datapath band. THE EXTREME POPULATION DOES NOT EXIST. I read a
+DIMENSIONLESS FANOUT COUNT AS NANOSECONDS.** The report rows say so verbatim:
 ```
-slow corner, slew limit 0.750 ns:
-  EXTREME  >10 ns     67 pins   ALL 67 ARE CLOCK-TREE (clkbuf_leaf_*_clk)
-                                0 datapath.  Worst 14.00 ns = 18.7x limit
-                                            = 25% OF THE 55 ns PERIOD
-  MILD    <=10 ns  1,788 pins   ALL datapath, 0 clock.  Body 1.7-2.2 ns
-  max-cap             31 pins   ss corners ONLY; zero at tt and ff
+max fanout
+Pin                                   Limit Fanout  Slack
+clkbuf_leaf_57_clk/X                     10     14     -4 (VIOLATED)
 ```
-🔑 **The partition by instance type is PERFECT — not one clock cell in the mild
-band, not one datapath pin in the extreme band. "1,757 violations" is two faults
-with two causes and two repairs, and the severe one is the clock, not the logic.**
+*`14` is a FANOUT of 14 against a LIMIT of 10. I divided it by the 0.750 ns SLEW
+limit to manufacture "18.7x", then expressed that as a fraction of the clock
+period — **a physical quantity built out of a pin count.***
 
-⚠️ **HYPOTHESES, NEITHER TESTED, each with the experiment that would settle it:**
-- **CLOCK** — the run set `RUN_CTS 1` with no CTS constraints on a 1030 um-wide
-  die at 30% utilisation. *TEST: re-run with CTS max-slew/max-cap set. If the 67
-  collapse, it was configuration and not the design.*
+✅ **WHAT THE FINAL POST-PnR STA ACTUALLY REPORTS (`ndf6x2c`, stage 55,
+`max_ss_100C_1v60` — the corner the headline metric comes from):**
+```
+  max slew        1,757 VIOLATED   worst 2.2254 ns vs 0.750 limit = 2.97x
+                                   ZERO on clock pins · ZERO above 10 ns
+                                   body 1.7-2.2 ns — ALL DATAPATH
+  max fanout         67 VIOLATED   ALL clock-tree (clkbuf_leaf_*), 12-14 vs 10
+  max capacitance    31 VIOLATED   ss corners only; zero at tt and ff
+```
+🔑 ***AND THAT CLOSES THE "UNRESOLVED 98" EXACTLY: 1,757 + 67 + 31 = 1,855. The
+"1,855 rows" I could not reconcile was me SUMMING THREE DIFFERENT CHECKS and
+calling the total "slew rows". The discrepancy was never in the tool.***
+
+📌 **THE TRUE PICTURE, which is better news than the false one:** there IS still a
+clean partition, but it is **BETWEEN CHECKS, not between two slew bands** — every
+slew violation is datapath, every fanout violation is clock. **The worst slew is
+2.97x its limit, not 18.7x; it is 4.0% of the period, not 25%.**
+
+⚠️ **THE ONE SURVIVING HYPOTHESIS, still untested:**
 - **DATAPATH** — R2 rules `_1` drive for combinational cells; minimum drive at the
-  slow corner is exactly a 2-3x mild overshoot. *TEST: one organ at `_2`
-  combinational. **If that is the cause, the debt is the drive ruling's PRICE and
-  belongs in front of the Captain as a trade — not fixed silently.***
-
-📌 **UNRESOLVED, stated rather than smoothed: the metric reports 1,757 slew
-violations; the report lists 1,855 rows (67 + 1,788). I used the report's rows and
-do not know what the 98 difference counts.**
+  slow corner is exactly a 2-3x overshoot, and 2.97x measured is squarely in that
+  range. *TEST: one organ at `_2` combinational. **If that is the cause, the debt
+  is the drive ruling's PRICE and belongs in front of the Captain as a trade —
+  not fixed silently.***
+- ⛔ **THE "CLOCK" HYPOTHESIS IS WITHDRAWN.** It proposed re-running with CTS
+  max-slew/max-cap to collapse "the 67". *The 67 are a **max-fanout** check —
+  neither knob addresses them — and `Flow/harden.sh` already banks a controlled
+  pair showing `MAX_FANOUT_CONSTRAINT` changing NOTHING (bit-identical slew, area
+  and slack). **I would have spent a 6x2 run testing the wrong knob against a
+  population that was never in the final netlist.***
 
 ## 4 · BB AT 1x1 — **MEASURED BY RUN**, AND ITS PRICE
 
