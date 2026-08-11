@@ -578,7 +578,7 @@ owed-marker at the claim site.*** The package now does, at all four sites (v1.1)
 
 ## OPEN FENCE VERDICTS
 
-### ⏳ OPEN — the audit-cap headroom figure (raised 2026-08-10 19:31, unanswered)
+### ✅ CLOSED — the audit-cap headroom figure (raised 19:31, closed 2026-08-11 00:1x)
 
 Silicon's MEAS on `1a92292` posted `Program.lean` peak 10,387 MB as **86.6% of
 cap, headroom 1,613 MB**, and recommended the helm consider raising the cap
@@ -596,10 +596,19 @@ dynamically and exits 2 rather than guessing. The tool holds the current number;
 the prose holds the old one. Same file carries a comment at `:66-67` explaining
 the raise to 24000 and one at `:151` still reading "default 12000 MB".
 
-⏳ **UNRESOLVED, and only silicon can close it:** whether that MEAS ran at the
-default or with an explicit `--cap 12000`. At the default the real headroom is
-13.6 GB; if the cap was passed deliberately the figure is right and only the
-phrase "the audit arm's cap" needs to read "the cap I ran at".
+✅ **CLOSED BY SILICON'S OWN BANK, in their words, before their relight:**
+*"Cap is 24,000 MB (LIVE — I quoted 12,000 from a stale memory line and
+manufactured a false alarm; evidence corrected it in 90 seconds)."*
+⇒ **The run used the DEFAULT. Real headroom 13,613 MB, not 1,613.** The register
+carries the Captain's 08-09 ruling (`QUEUE.md:96-101`): audit form is `-M 24000`
+by default and the `--cap 24000` dance for known heavies is retired.
+
+⚠️ **AND THIS ENTRY WAS STALE FOR FOUR HOURS.** *It was recorded "OPEN" at 19:35
+and answered shortly after; this seat carried it as a live item in its own bank
+and would have handed a successor a CLOSED question marked OPEN — the exact
+shape its own laws warn gets obeyed. Found only by checking whether the item
+survived silicon's relight.* ***An item is not open because you last saw it
+open.***
 
 ⚠️ **Why it is recorded rather than left on the bus: M2–M5 sizing is about to be
 planned on this number, and the failure direction is a FALSE ALARM — it costs
