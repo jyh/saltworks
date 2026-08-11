@@ -129,6 +129,20 @@ for target in "$@"; do
     # after amending the memory that prescribes it, and the gap surfaced when
     # compiler landed 169eaf5 into ImmediateScope.lean inside my verify window.
     h1=$(shasum -a 256 "$target" | cut -c1-12)
+    # ⛔ SAMPLE CONTENTION *BEFORE* THE WORK. My first attempt sampled at PRINT
+    # time — after the elaboration — by which point the competing build has
+    # usually exited, so the guard read a quiet machine and stayed silent
+    # THROUGH A RUN THAT WENT 4s -> 19s. A guard that measures after the
+    # interference is over cannot see the interference. Caught by a deliberate
+    # negative control; it would never have fired in service.
+    # ⛔ THE BRACKET IS LOAD-BEARING: `[l]ean` matches the string "lean" but NOT
+    # the pattern text itself, so this census cannot count THE SHELL RUNNING THE
+    # CENSUS. Without it the quiet machine reported "1 peer" and the guard fired
+    # on every run — a false alarm on the one line that exists to be trusted.
+    # ***THIS IS THE FIRST DEFECT IN THIS SEAT'S BANK AND ITS FOURTH INSTANCE IN
+    # ONE NIGHT.*** Knowing a class by heart does not stop you writing it; only a
+    # FORM does, and the bracket is the form.
+    peers_pre=$(ps -Ao command= | grep -cE '(^|/)([l]ean|[l]ake)( |$)')
     start=$(date +%s)
     "$SALTBUILD" "$target" > "$out" 2>&1
     end=$(date +%s)
@@ -199,7 +213,32 @@ for target in "$@"; do
 
   if [ "$code" = "0" ]; then
     head_after=$(git rev-parse --short HEAD 2>/dev/null || echo '?')
-    printf '✅ %s — KERNEL-CHECKED under this hand · %ss · EXIT=0 @ sha %s%s\n' "$target" "$wall" "$h1" "$capnote"
+    # ⛔ CONTENTION LABEL, added 2026-08-11 02:5x AFTER I PUBLISHED A CONTENDED
+    # WALL AS AN ELABORATION COST. I reported "CompileS now costs 65s, up from
+    # 4s" and flagged it as the figure to price the next increment. Compiler
+    # could not reproduce it: 4.44/4.44/4.43, and on a quiet machine I got
+    # 4.42/4.42/4.52. The 65s was my run QUEUEING BEHIND THEIR 8694-job build —
+    # saltbuild takes a cross-seat lock, so a queued run's WALL INCLUDES THE WAIT.
+    # ***A QUEUE MEASUREMENT WEARING AN ELABORATION'S NAME.*** It is my own banked
+    # law (load-contended timings are worthless; the 8/6 2^12-vs-2^14 inversion)
+    # and compiler quoted it back to me from my own bank.
+    # 🔑 THIS HARNESS IS DESIGNED TO RUN CONTINUOUSLY, WHICH GUARANTEES IT WILL
+    # SOMETIMES MEASURE WHILE A PEER BUILDS. So the number cannot be trusted by
+    # default and the LABEL must say so — a form beats a prohibition, and
+    # "someone will remember the caveat" is exactly what failed here.
+    # Correctness columns are unaffected; only the wall is in question.
+    # ⭐ THE THRESHOLD IS 0 ON THE *PRE* SAMPLE, AND THAT IS THE WHOLE TRICK:
+    # BEFORE this run starts, this process owns NO lean/lake, so ANY live one
+    # belongs to a peer. Measured, not reasoned — a single build shows TWO
+    # matches (`lean -M ...` and `lake env lean -M ...`), which is why a
+    # threshold tuned on a POST sample was nonsense.
+    # ⛔ TWO WRONG VERSIONS PRECEDED THIS, BOTH SILENT THROUGH A 4s->19s RUN:
+    #   v1 sampled at PRINT time — the peer had already exited
+    #   v2 sampled pre-work but kept a >2 threshold calibrated for post-work
+    # Both were caught by a DELIBERATE two-elaboration control, never by use.
+    peers=$peers_pre
+    if [ "${peers:-0}" -gt 0 ]; then contnote=" ⚠️UNDER CONTENTION (${peers} peer lean/lake at start) — WALL IS NOT AN ELABORATION COST"; else contnote=""; fi
+    printf '✅ %s — KERNEL-CHECKED under this hand · %ss wall%s · EXIT=0 @ sha %s%s\n' "$target" "$wall" "$contnote" "$h1" "$capnote"
     if [ "$head_before" = "$head_after" ]; then
       printf '   tree PINNED at %s (re-read after elaboration, unchanged)%s\n' \
         "$head_before" "$([ "$dirty" -gt 0 ] && echo ' ⚠️ target has UNCOMMITTED local changes — the verdict is on the WORKING COPY, not on that commit')"
@@ -211,7 +250,7 @@ for target in "$@"; do
     printf '   scope: TARGET elaborated fresh by the kernel. Its %s direct imports and\n' "$nimp"
     printf '          their transitive closure came from cached oleans — NOT re-checked here.\n'
   else
-    printf '⛔ %s — EXIT=%s · %ss · NOT green\n' "$target" "$code" "$wall"
+    printf '⛔ %s — EXIT=%s · %ss wall%s · NOT green\n' "$target" "$code" "$wall" "$contnote"
     grep -E 'error:' "$out" | head -5
     printf '   (transcript kept: %s)\n' "$out"
     rc_all=1
