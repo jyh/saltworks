@@ -19,8 +19,12 @@ block sizes does NOT discriminate between the right formula and at least two wro
   imm2        6             2*(n_t+1)   ← derived here
   rival B     6             3*n_t
 ```
-*A test table is a sample. §3's certificates use `n_c = 1`, `n_s = 1`, `n_t = 3`, where
-every rival above gives a different number — so a pass separates them and a mutant fails.*
+*A test table is a sample.*
+
+⚠️ **AND ONE MORE SAMPLE IS NOT ENOUGH EITHER — math's 18:46 check, folded into §3.** Two
+points determine a line with nothing to spare, so a single bad sample would not fail the
+test, it would *pass a wrong formula*. **§3 carries THREE points per formula, in this file,
+with the code built from the formulas rather than from numbers once computed from them.**
 
 ## The layout, for a block starting at index 0
 
@@ -86,73 +90,108 @@ theorem iteThenSkip_wraps_past_the_bound :
 #audit_axioms iteFits_binds
 #audit_axioms iteThenSkip_wraps_past_the_bound
 
-/-! ## 3. THE DISCRIMINATING CERTIFICATES — `n_c = 1`, `n_s = 1`, `n_t = 3` -/
+/-! ## 3. THE CERTIFICATES — THREE POINTS PER FORMULA, IN ONE FILE, BUILT FROM THE FORMULAS
 
-/-- Instruction 0 sets the condition; every other instruction is shared between the two
-runs, so the ONLY difference between the branches is the condition's value. -/
-def iteCode (cond : BitVec 12) : List Instr :=
-  [ .ADDI 10 0 cond,                 -- 0  condition into t0
-    .BEQ 10 0 (iteThenSkip 1),       -- 1  FALSE -> jump to ELSE at index 4
-    .ADDI 2 0 111,                   -- 2  THEN block, n_s = 1
-    .BEQ 0 0 (iteElseSkip 3),        -- 3  unconditional -> index 7
-    .ADDI 2 0 222,                   -- 4  ELSE block, n_t = 3
-    .ADDI 3 0 1,                     -- 5
-    .ADDI 4 0 2 ]                    -- 6
+⚠️ **THIS SECTION WAS REBUILT AFTER MATH'S 18:46 CHECK, WHICH IS CORRECT AND SHARPER THAN
+WHAT IT CORRECTED.** My first version carried ONE new sample (`n_s = 1`) and leaned on the
+landed `CodegenSpec` certificate (`n_s = 2`) for the second point. Their finding:
 
-/-- ⭐ **CONDITION TRUE: the conditional branch is NOT taken, THEN runs, and the
-unconditional branch clears the ELSE block ENTIRELY** — `x3` and `x4` untouched. -/
-theorem ite_then_branch :
-    let s := run (iteCode 1) St.init
-    (s.get 2, s.get 3, s.get 4, s.pc) = (111, 0, 0, 28) := by
+> *One sample at `n_s = 1` cannot pin a linear formula — **every** line through `(1,6)`
+> survives it (`3n+3`, `4n+2`, `6n` all agree there). The separation is done by the PAIR,
+> and two points determine a line with **nothing to spare**. At zero redundancy, one bad
+> sample is not a failing test; it is a WRONG FORMULA THAT PASSES.*
+
+⚖️ ***And the part I cannot argue with: I had just refused to accept "the rival is
+implausible" from the old certificate, so I do not get to accept it for a quadratic.***
+Two repairs, both cheap:
+
+1. **A THIRD POINT PER FORMULA** — `n_s ∈ {1,2,3}` and `n_t ∈ {1,2,3,4}` below. Three
+   collinear points kill the one-parameter quadratic family `2n+4 + a(n−1)(n−2)`, **and,
+   the part that pays for itself, they make a transcription error in any single point
+   VISIBLE — which at two points nothing could do.**
+2. **THE POINTS LIVE IN THIS FILE AND THE CODE IS BUILT FROM THE FORMULAS.** Relying on a
+   sample in another module made the pair depend on a cross-file citation that can rot, and
+   hand-typed immediates are exactly the transcription risk being guarded against.
+   `iteOf` calls `iteThenSkip`/`iteElseSkip`, so the certificates test the FORMULAS rather
+   than numbers that were once computed from them. -/
+
+/-- The scheme's shape, with the two immediates left FREE — so a mutant differs from the
+real thing in nothing but a number. -/
+def iteBlock (cond i1 i2 : BitVec 12) (thenB elseB : List Instr) : List Instr :=
+  (.ADDI 10 0 cond) :: (.BEQ 10 0 i1) :: (thenB ++ (.BEQ 0 0 i2) :: elseB)
+
+/-- The scheme with the DERIVED immediates. -/
+def iteOf (cond : BitVec 12) (thenB elseB : List Instr) : List Instr :=
+  iteBlock cond (iteThenSkip thenB.length) (iteElseSkip elseB.length) thenB elseB
+
+/-- A THEN block of `n` instructions whose OBSERVABLE depends on `n` — so a block-length
+error changes the answer instead of hiding. -/
+def thenBlk (n : Nat) : List Instr :=
+  (List.range n).map (fun k => .ADDI 2 0 (BitVec.ofNat 12 (100 + k)))
+
+/-- …and an ELSE block, writing a different register. -/
+def elseBlk (n : Nat) : List Instr :=
+  (List.range n).map (fun k => .ADDI 3 0 (BitVec.ofNat 12 (200 + k)))
+
+/-- ⭐⭐⭐ **FOUR CONFIGURATIONS, BOTH BRANCHES EACH, ALL KERNEL-EXECUTED.**
+`n_s` ranges over `{1,2,3}` and `n_t` over `{1,2,3,4}`, so each formula has **three
+distinct points** and the total image length varies too (the `(2,4)` row breaks the
+`n_s + n_t = 4` coincidence the first three shared, which would otherwise have made the
+`pc` check identical in every row). -/
+theorem ite_certificates :
+    ([(1,3), (2,2), (3,1), (2,4)] : List (Nat × Nat)).all (fun cfg =>
+      let ns := cfg.1
+      let nt := cfg.2
+      let sT := run (iteOf 1 (thenBlk ns) (elseBlk nt)) St.init
+      let sF := run (iteOf 0 (thenBlk ns) (elseBlk nt)) St.init
+      (sT.get 2 == BitVec.ofNat 32 (100 + ns - 1)) && (sT.get 3 == 0) &&
+      (sF.get 2 == 0) && (sF.get 3 == BitVec.ofNat 32 (200 + nt - 1)) &&
+      (sT.pc == BitVec.ofNat 32 (4 * (ns + nt + 3))) &&
+      (sF.pc == BitVec.ofNat 32 (4 * (ns + nt + 3)))) = true := by
   decide +kernel
 
-/-- ⭐ **CONDITION FALSE: the conditional branch IS taken and lands on ELSE** — not on the
-unconditional branch one instruction earlier, which is where the frozen offset pointed. -/
-theorem ite_else_branch :
-    let s := run (iteCode 0) St.init
-    (s.get 2, s.get 3, s.get 4, s.pc) = (222, 1, 2, 28) := by
-  decide +kernel
+#audit_axioms iteBlock iteOf thenBlk elseBlk
+#audit_axioms ite_certificates
 
-/-! ## 4. THE MUTANTS — coexisting broken schemes, each failing in its OWN way
+/-! ## 4. THE MUTANTS — same shape, ONE number different
 
-*Three distinct wrong formulas producing three distinct failures. A single mutant would
-leave "the certificate passes" consistent with several rivals.* -/
+*Each rival is `iteBlock` with a wrong immediate, so nothing but the formula varies. Run at
+`(n_s, n_t) = (1,3)`, where every rival differs from the derived value.* -/
 
-/-- **RIVAL: `imm1 = 2*(n_s+1)`, the frozen off-by-one.** Lands on the unconditional branch
-instead of on ELSE, so the else-path silently executes the wrong code. -/
-def iteCode_offByOne : List Instr :=
-  [ .ADDI 10 0 0, .BEQ 10 0 4, .ADDI 2 0 111, .BEQ 0 0 (iteElseSkip 3),
-    .ADDI 2 0 222, .ADDI 3 0 1, .ADDI 4 0 2 ]
-
+/-- **RIVAL `imm1 = 2*(n_s+1) = 4`, the frozen off-by-one.** Lands on the unconditional
+branch instead of on ELSE: the else-path silently runs the wrong code. -/
 theorem offByOne_takes_the_wrong_path :
-    ((run iteCode_offByOne St.init).get 2 == 222) = false := by decide +kernel
+    ((run (iteBlock 0 4 (iteElseSkip 3) (thenBlk 1) (elseBlk 3)) St.init).get 3
+      == BitVec.ofNat 32 202) = false := by decide +kernel
 
-/-- **RIVAL: `imm2 = 3*n_t = 9`.** An ODD immediate, so the jump lands misaligned, `fetch`
-refuses at a non-multiple-of-four `pc`, and the machine stops somewhere it should not.
-*A different failure mode from the off-by-one, and worth separating.* -/
-def iteCode_oddImm : List Instr :=
-  [ .ADDI 10 0 1, .BEQ 10 0 (iteThenSkip 1), .ADDI 2 0 111, .BEQ 0 0 9,
-    .ADDI 2 0 222, .ADDI 3 0 1, .ADDI 4 0 2 ]
+/-- **RIVAL `imm1 = 4*n_s = 4`** — coincides with the off-by-one at `n_s = 1`, which is
+itself worth recording: *two distinct wrong formulas can produce the same wrong program at
+one sample, so a mutant that fails proves less than it appears to.* -/
+theorem rivalA_and_offByOne_coincide_here : (4 : BitVec 12) = 4 := rfl
 
+/-- **RIVAL `imm2 = 3*n_t = 9`.** An ODD immediate: the jump lands misaligned, `fetch`
+refuses at a non-multiple-of-four `pc`, and the machine stops where it should not. -/
 theorem oddImm_misses_the_end :
-    ((run iteCode_oddImm St.init).pc == 28) = false := by decide +kernel
+    ((run (iteBlock 1 (iteThenSkip 1) 9 (thenBlk 1) (elseBlk 3)) St.init).pc
+      == BitVec.ofNat 32 28) = false := by decide +kernel
 
-/-- **RIVAL: `imm2 = 2*n_t`, the plausible "count the else block" error.** Lands INSIDE
-the ELSE block instead of past it, so the then-path falls through into ELSE's tail — the
-answer for `x2` is still right and the program is still wrong. -/
-def iteCode_shortJump : List Instr :=
-  [ .ADDI 10 0 1, .BEQ 10 0 (iteThenSkip 1), .ADDI 2 0 111, .BEQ 0 0 6,
-    .ADDI 2 0 222, .ADDI 3 0 1, .ADDI 4 0 2 ]
+/-- ⭐⭐ **RIVAL `imm2 = 2*n_t = 6`, the "count the else block" error — AND MATH NAMES THIS
+AS THE ONE TO KEEP IF ONLY ONE COULD BE KEPT.** It lands INSIDE the ELSE block, so the
+then-path falls through into ELSE's tail: **`x2` is still RIGHT and the program is still
+WRONG.**
 
+*A mutant that leaves the observed value correct is the only kind that tests whether the
+control observes the right thing at all; the others fail loudly and any check would catch
+them.* -/
 theorem shortJump_falls_into_the_else_tail :
-    let s := run iteCode_shortJump St.init
-    (s.get 2 == 111, s.get 4 == 2) = (true, true) := by decide +kernel
+    let s := run (iteBlock 1 (iteThenSkip 1) 6 (thenBlk 1) (elseBlk 3)) St.init
+    (s.get 2 == BitVec.ofNat 32 100, s.get 3 == BitVec.ofNat 32 202) = (true, true) := by
+  decide +kernel
 
-#audit_axioms iteCode
-#audit_axioms ite_then_branch ite_else_branch
-#audit_axioms iteCode_offByOne offByOne_takes_the_wrong_path
-#audit_axioms iteCode_oddImm oddImm_misses_the_end
-#audit_axioms iteCode_shortJump shortJump_falls_into_the_else_tail
+#audit_axioms offByOne_takes_the_wrong_path
+#audit_axioms rivalA_and_offByOne_coincide_here
+#audit_axioms oddImm_misses_the_end
+#audit_axioms shortJump_falls_into_the_else_tail
 
 /-! ## 5. THE PASS/FAIL BAR, PRE-REGISTERED
 
@@ -160,17 +199,18 @@ When L2's `ite` clause lands, it passes only if **all** of these hold:
 
 1. its emitted immediates are literally `iteThenSkip n_s` and `iteElseSkip n_t` — *not
    numbers that happen to agree on some sample*;
-2. §3's two certificates still pass **against generated code**, not hand-written code;
-3. the three §4 mutants still FAIL, and each still fails in its own recorded way;
+2. §3's four configurations still pass **against generated code**, not against `iteOf`;
+3. the §4 mutants still fail, each in its own recorded way;
 4. `iteFits` is checked by the emitter, and an over-long block returns `none` — a
    **fourth** rejection cause, distinct from L0's three and named before it is met;
 5. `run`-shaped statements are NOT used for the branching fragment (`BlockCalc` §6:
    `run` has too little fuel for a loop, and Row A must be `Reaches`-shaped).
 
 ⛔ **What this file does NOT establish, said plainly: that the formulas are correct for ALL
-block sizes.** Two kernel-executed samples and three mutants are a *discriminating* test,
-not a proof. **The proof obligation is a theorem about `bOffset` and `codeAt`, and it lands
-with the emitter — this bar is what makes that theorem's failure visible early, not a
-substitute for it.** -/
+block sizes.** Three points per formula kill the linear and one-parameter-quadratic rivals
+and give the redundancy that makes a bad sample visible — **they are still a discriminating
+test, not a proof.** *The proof obligation is a theorem about `bOffset` and `codeAt`, and it
+lands with the emitter; this bar makes its failure visible early and does not substitute
+for it.* -/
 
 end SaltWorks.IteScheme
