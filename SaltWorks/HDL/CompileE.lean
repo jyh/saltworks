@@ -118,6 +118,14 @@ three arithmetic opcodes, is what keeps §5 and §6 from being written three tim
 
 @[simp] theorem St_next_get (s : St) (r : Fin 32) : s.next.get r = s.get r := rfl
 
+/-- ⭐ **`ADDI`'s WITH-UPDATES EQUATION, NAMED.** *Added 8/10 18:5x for math's M1a: the
+other four slice-A arms have their definitional shape under a name (`opShape_ADD/_XOR/_SLT`
+here, `get_step_beq` + `pc_step_beq_*` in `SortDemo`), and `ADDI` did not — it was reached
+by `show` at each use, which is `rfl`-true and UNCITABLE. A fact with no name is a fact the
+next hand re-proves.* -/
+theorem step_ADDI_eq (s : St) (rd rs : Fin 32) (imm : BitVec 12) :
+    step s (.ADDI rd rs imm) = (s.set rd (s.get rs + imm.signExtend 32)).next := rfl
+
 theorem step_ADDI_get_ne (st : St) (rd rs : Fin 32) (imm : BitVec 12) (r : Fin 32)
     (h : r ≠ rd) : (step st (.ADDI rd rs imm)).get r = st.get r := by
   show ((st.set rd (st.get rs + imm.signExtend 32)).next).get r = st.get r
@@ -147,6 +155,7 @@ theorem step_op_get_self {mk f} (hs : OpShape mk f) (st : St) (x y z : Fin 32) (
   rw [hs, St_next_get]; exact St.get_set_self _ _ _ h
 
 #audit_axioms St_next_get
+#audit_axioms step_ADDI_eq
 #audit_axioms step_ADDI_get_ne
 #audit_axioms step_ADDI_get_self
 #audit_axioms OpShape opShape_ADD opShape_XOR opShape_SLT
