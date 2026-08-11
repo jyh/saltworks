@@ -175,16 +175,26 @@ discipline (author-anywhere, land-at-owner).
   whole-state comparison. Run through ../saltbuild.sh. If (b) is
   slow: the controls below ALREADY observe specific fields, so the
   wall is survivable — but MEASURE it before M1 writes anything.
-- **M1 · `St` extension + `addrClass` + the two step arms (compiler
-  owns; ISA.lean).** `addrClass` keyed at 8 words (`outOfRange ↔
-  byte_addr ≥ 32`); the NAMED lemma `addrClass_ok_lt` (§0.3) proved
-  beside it; the trap-semantics fence written into the `step`
-  docstring in the same commit. Controls: each arm INHABITED by a
-  `decide` witness observing SPECIFIC FIELDS (`mem[a]`, `trapped`, a
-  BitVec — ISA.lean:196-198's discipline, never whole-St equality;
-  r-trap's unassigned kill), with the arm-witness discipline of §4;
-  St.init (ISA.lean:156) gains `mem := Vector.replicate 8 0,
-  trapped := false`.
+- **M1 · THE St-ATOMIC COMMIT (⬥v1.4, RULED (i) at math's 18:56
+  stop — THE BOUNDARY LAW, discovered the hard way tonight: THE
+  ATOMICITY BOUNDARY FOLLOWS THE TYPE; one type growth per atomic
+  commit, each with its own census. M1 SHEDS the Instr
+  constructors — `decode_encode` is ∀-quantified over Instr, so a
+  stub encode arm makes a landed theorem FALSE and no green
+  placeholder exists; the LW/SW constructors, the two step arms,
+  and every exhaustive Instr match ride the M2 Instr-atomic commit
+  where the encoder already lives.)** CONTENT: `St` gains
+  mem/trapped (INERT until M2 — no arm reads them); `addrClass`
+  keyed at 8 words (`outOfRange ↔ byte_addr ≥ 32`) with the NAMED
+  lemma `addrClass_ok_lt` (§0.3) proved beside it (its consumer
+  arrives at M2 — landing def+lemma one commit early is the cheap
+  direction); the trap-semantics fence text lands in the file
+  docstring now and moves onto `step` at M2; St.init (ISA.lean:156)
+  gains `mem := Vector.replicate 8 0, trapped := false`; PLUS ALL
+  OF M1a below (same commit). Every one of tonight's five censuses
+  is St-side: this commit is specified to the line, buildable, and
+  is the single-hand atomic landing the 18:47 ruling directs. The
+  arm-inhabitance controls move to M2 with the arms they witness.
 - **M1a · THE STATECODEC + EXECUTIVE RECONCILIATION (NEW — ATOMIC
   with M1, same commit or the hub red-builds; r-stateform Q1's
   repair, live-verified pins).** (1) `decQ` (StateCodec.lean:127) and
@@ -284,8 +294,25 @@ discipline (author-anywhere, land-at-owner).
   BUILD is the oracle; after growing St, read the error list and
   treat any site outside this node's list as a census finding, not
   a nuisance.]**
-- **M2 · `wS` + generalized `wI` + field lemmas + `decode_encode` for
-  LW/SW (compiler owns; ISA.lean) — PLUS, IN THE SAME COMMIT, the
+- **M2 · THE Instr-ATOMIC COMMIT (⬥v1.4 — this commit now carries
+  EVERYTHING the Instr growth forces, per the boundary law): the
+  LW/SW CONSTRUCTORS + the two `step` arms (with the arm-inhabitance
+  `decide` controls observing SPECIFIC fields — mem[a]/trapped, the
+  ISA.lean:196-198 discipline, aligned-out-of-range witness per §4 —
+  and the trap fence moving onto `step`'s docstring) + `wS` +
+  generalized `wI` + field lemmas + `decode_encode` for LW/SW
+  (ISA.lean) + **the exhaustive-match arms PULLED FORWARD from M3's
+  scope because the type forces them: `writesInstr` (LW ↦ `if rd =
+  0 then none else some rd`, SW ↦ none) and `step_frame_instr`'s
+  two arms (ExecutiveX1.lean — math's file rides the same commit)**.
+  ENTRY CONDITION: the Instr MATCH CENSUS (math 18:56, bus :59665):
+  exhaustive sites = step (ISA:120) · encode (ISA:549) · writesInstr
+  (ExecutiveX1) — all three repaired IN this commit; StraightLine
+  and Program carry catch-alls and are SAFE (verify at write time);
+  NO STUBS EVER (`decode_encode` refutes them). Assignment decided
+  at the pull (spans ISA + ExecutiveX1: single-hand again, or a
+  compiler+math patch-to-owner pair — the puller proposes). PLUS,
+  IN THE SAME COMMIT, the
   decoder-census fixup (all three refuters' unassigned kill;
   live-verified pins):** (a) delete the lw (0x00012083, :536) and sw
   (0x00112023, :537) rows from `sliceAExcluded`
@@ -301,10 +328,12 @@ discipline (author-anywhere, land-at-owner).
   scheduled at the harness's seam, not silently absorbed here.
   Controls: round-trip per op; the swapped-imm-fields wS mutant must
   FAIL it (a valid false-making control, r-encoder verified).
-- **M3 · The register-file frame extension (math owns;
-  ExecutiveX1.lean).** `writesInstr` gains LW ↦ `if rd = 0 then none
-  else some rd` (the x0-discard guard), SW ↦ `none`;
-  `step_frame_instr` gains both arms (LW needs an addrClass split);
+- **M3 · The register-file frame extension — ⬥v1.4: the
+  `writesInstr`/`step_frame_instr` ARM ADDITIONS moved INTO M2 (the
+  type forces them); M3 keeps the CONTROLS and the theorem work
+  (math owns; ExecutiveX1.lean).** LW's arm keeps the x0-discard
+  guard, SW ↦ `none` (landed at M2, verified here);
+  (`step_frame_instr`'s LW arm needs an addrClass split);
   X1's statements re-verify. **Controls (⬥v1.1, r-fences Q3's
   repair):** the load-bearing one is the **E-4 ANALOGUE WITH LW**:
   task-B program `[LW rd=1 <addr>]` writing the overlap register —
