@@ -119,6 +119,27 @@ MEASURED — LibreLane 3.0.5, pinned PDK, DIE_AREA 161.00 x 111.52 (dossier:182)
   HOLD  __ws           +0.1065 ns · setup violations 0
   DRC 0 (magic AND klayout) · LVS 0 · antenna 0 · max-slew 11
 ```
+✅ **AND THE TILE-FIT IS NOW DONE HERE TOO — RE-RUN ON TT'S OWN POWER GRID
+(run `bb1x1_tilefit`, `FP_DEF_TEMPLATE = tt_block_1x1_pg.def`; invocation banked
+at `Flow/tilefit.sh`):**
+```
+                   LibreLane PDN     TT PDN (REAL)
+  die / core        17,954.70          17,954.70   / 13,460.40  IDENTICAL
+  stdcell            3,824.92           3,829.92   (+5.00 um2, +0.13%)
+  flops / cells         52 / 529           52 / 529             IDENTICAL
+  SETUP __ws slow      +20.1426           +20.0047 ns — MET (40 ns clock)
+  HOLD  __ws            +0.1065            +0.1089 ns
+  max-slew / max-cap      11 / 0             11 / 0
+  magic DRC / klayout / LVS / antenna   0 / 0 / 0 / 0   BOTH RUNS
+```
+🔑 ***THE BB FITS A 1x1 ON TINYTAPEOUT'S REAL GRID.*** *The real grid costs
+5 um² and 138 ps here — the 6x2 paid a larger slew price (+138 violations); this
+design is small enough that the straps cost it almost nothing.*
+⚖️ **CONTROL ON MY OWN HARNESS, because the baseline predates it: the LibreLane-PDN
+run was RE-RUN through the same script and reproduced the published figures on
+**308 of 308 comparable metrics, zero differing**. So the TT-grid column is a
+difference in the GRID and not in the way I invoked the tool.**
+
 ⭐ **UTILISATION — AND THE DENOMINATOR IS PART OF THE NUMBER:**
 ```
 stdcell 3,824.92  vs DIE  17,954.70  = 21.3%
@@ -135,7 +156,11 @@ RETIRED in favour of the measurement.**
 variant not fitting a 1x1 costs nothing today — the growth path stays open.**
 
 ⚠️ **THE NAMED PRICE OF THE RESIZE, so it is bought with open eyes:**
-1. **NOT A TILE-FIT SIGNOFF** — no TT power-grid DEF; this is LibreLane's PDN.
+1. ⛔ **AMENDED — this read "NOT A TILE-FIT SIGNOFF — no TT power-grid DEF; this
+   is LibreLane's PDN." The DEF half is now FALSE: the run above used
+   `tt_block_1x1_pg.def` and passed.** *The SIGNOFF half stands and is restated
+   on its true ground: a signoff is TinyTapeout's CI verdict on the fabrication
+   path, not a local run at my knobs.*
 2. ✅ **`test.py:247` — REPAIRED 8/10 (silicon), and it was TWO defects, not the
    one diagnosed.** The bench was stale against the 8/8 `cnt[3]` ruling in both
    directions at once: it asserted `(uio >> 5) == 0` while `project.v:60` drives
@@ -160,9 +185,11 @@ variant not fitting a 1x1 costs nothing today — the growth path stays open.**
   survives; the REASON given for it did not. Restated on its true ground:
 - **§1 IS A TILE-FIT AND IS NOT A SIGNOFF** — it used TT's real power grid on the
   real 6x2 die and passed, but a SIGNOFF is TinyTapeout's CI verdict on the
-  fabrication path, not a local LibreLane run at my knobs. *§4 (BB at 1x1) has
-  `tt_block_1x1_pg.def` in hand but has NOT been re-run with it — that one is
-  still not a tile-fit at all.*
+  fabrication path, not a local LibreLane run at my knobs. ✅ ***§4 (BB at 1x1) is
+  NOW a tile-fit as well*** *— re-run on `tt_block_1x1_pg.def` and passed. This
+  clause previously read "has NOT been re-run with it — that one is still not a
+  tile-fit at all"; it was true when written and is retired by the run.* **Both
+  §1 and §4 are now tile-fits; NEITHER is a signoff.**
 - **Not a batcher fit result** (§2, a linear area projection) · **not a DRV
   diagnosis** (§3 — two hypotheses, zero tests run).
 - ⚠️ **§4 IS a measured BB post-layout number** (1x1, run complete). This bullet
