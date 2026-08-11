@@ -6,7 +6,7 @@ sentence is GATED on this campaign landing across the target list.**
 
 ## OBJECTIVE
 For each paper-cited headline claim, ONE certificate file: a restatement of the claim in
-simplified, primitive vocabulary, with a kernel-checked proof linking the restatement to the
+simplified vocabulary, with a kernel-checked proof linking the restatement to the
 landed theorem, so a reader comprehends what was proved from the certificate file ALONE.
 This is the artifact that makes statement-level review — the human's one remaining duty —
 tractable, and it is the fifth deliverable of the workflow the paper names.
@@ -21,7 +21,7 @@ is documentation; a restatement with one is a certificate.
 ## RULES (iron; every executor brief carries them)
 1. **Minimal imports.** A cert file imports the landed theorem's module and prelude-grade
    vocabulary ONLY. If the restatement needs a corpus-internal definition, that definition
-   gets UNFOLDED into primitive terms or the cert explains it in its docstring header.
+   gets UNFOLDED into simpler terms or the cert explains it in its docstring header.
 2. **No weakening AND no strengthening — a translation has two ways to lie (evidence,
    12:48, pre-registered before any cert exists).** Downward: the certificate states NO
    LESS than the paper quotes. Upward: the cert's LEAN statement cannot overstate — rule 3
@@ -55,9 +55,21 @@ decode_encode · the payload theorem + rot^k = id (THE 1990 CERT — the one the
 story rests on; write it first, write it beautifully) · witness_chain_discharged ·
 step_frame/writesInstr (the executive's isolation claims, plain form). **≈6 files.**
 
-## ASSIGNMENT (pull, don't wait)
-- **compiler**: saltworks-side — it is standing by BY CHOICE and this is fresh-head A/B
-  work in its own lane; the 1990 cert first. Its call, per its own seam discipline.
+## ASSIGNMENT (amended 12:5x after the seats' answers)
+- **saltworks side: COMPILER'S FRESH HEAD, on relight (ordered).** Both standing seats
+  declined at depth within a minute — compiler at ~12h ("authored design judgement, the
+  class I decline at depth") and silicon immediately after so the slot never waited — and
+  compiler COSTED THE LANE for its successor instead (bus 12:48:41): the exact theorem
+  names (run_compileS_correct_of_branchFree · compileS_correct_of_branchFree ·
+  reaches_of_compileS_of_branchFree · reaches_of_compileS_including_while · the scheme
+  pair · witness_chain_discharged) and THE TRAP, which is rule 2's upward direction made
+  concrete: encodeOK covers REGISTERS ONLY (not mem, not trapped), so the naive plain form
+  "the compiled code computes what the source says" is FALSE; the honest plain form is
+  "every variable the source has in scope ends in the register the compiler assigned,
+  holding that variable's value." The 1990 cert (payload + rot^k = id) first.
+- **SEATS.md**: the commit that CREATES each Certs/ directory adds its SEATS.md ownership
+  row in the SAME commit (silicon's 12:48 boundary line — two kinds of writer need a
+  declared owner before the first write).
 - **math**: salt-side at its seam — INTERLEAVE with Wave A at natural pauses (a cert file is
   a clean small unit between elaboration stretches) or after A's seal; its call.
 - **Opus executor waves**: permitted for the A/B rows under the standard dispatch laws
