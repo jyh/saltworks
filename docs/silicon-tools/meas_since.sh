@@ -66,8 +66,25 @@ if [ -n "$rootchg" ]; then
   echo "       than one before it. A module entering the closure is MEAS-relevant."
 fi
 
-changed=$(git diff --name-only "$BASE..HEAD" -- 'SaltWorks/HDL/*.lean' | sort -u)
-[ -n "$changed" ] || { echo "  nothing touched in SaltWorks/HDL since $BASE"; exit 0; }
+# ⛔⛔ SCOPE, AND IT WAS WRONG UNTIL 2026-08-10 20:0x. This line read
+#     `-- 'SaltWorks/HDL/*.lean'` — ONE directory, no subdirectories — so a change
+#     in Stack/, Silicon/, Tactic/ or any HDL subdir was INVISIBLE TO THE CENSUS
+#     and the gate reported NO OBLIGATION for it, in green.
+# ⇒ It hid `SaltWorks/Stack/Program.lean` on BOTH landings where that file was a
+#   load-bearing consumer (M1+M1a, and the restatement rename). I witnessed it both
+#   times only because I hand-diffed CHANGED-vs-WITNESSED — and I twice blamed my
+#   own `head -22` truncation in public for what was a STRUCTURAL BLIND SPOT.
+#   ***A COMFORTABLE "MY FAULT" CLOSES AN INVESTIGATION AS EFFECTIVELY AS A
+#   COMFORTABLE "NOT MY FAULT".*** Self-blame felt like rigour and cost two hours.
+changed=$(git diff --name-only "$BASE..HEAD" -- '*.lean' \
+          | grep -v '^SaltWorks\.lean$' | grep -v '/Scratch' | grep -v '^Scratch' | sort -u)
+[ -n "$changed" ] || { echo "  no .lean changed anywhere since $BASE"; exit 0; }
+
+# ⭐ COVERAGE ASSERTION — the census must not silently under-cover again.
+# Every changed .lean is either WITNESSED below or explicitly RETIRED; this prints
+# the population up front so the reader can count it against the verdicts.
+echo "  CENSUS: $(printf '%s\n' $changed | wc -l | tr -d ' ') changed .lean file(s) in range — each must appear below:"
+printf '     · %s\n' $changed
 
 # ⭐ NAME THE LANDING AND ITS OWED COVERING BUILD, 2026-08-09 21:4x.
 # COST THAT BOUGHT THIS: math's item ② sat sealed-but-undischarged for TWO AND A
@@ -78,7 +95,7 @@ changed=$(git diff --name-only "$BASE..HEAD" -- 'SaltWorks/HDL/*.lean' | sort -u
 # own [[bus-resident-fixes-die-at-reboot]] pointed at a habit instead of a file.
 # The WRITER-side fix is structural and cannot be forgotten -- the verdict now says
 # WHOSE landing it covers and that a covering build is owed, in its own output.
-for c in $(git log --format=%h --reverse "$BASE..HEAD" -- 'SaltWorks/HDL/*.lean'); do
+for c in $(git log --format=%h --reverse "$BASE..HEAD" -- '*.lean'); do
   echo "  LANDING $c  $(git log -1 --format=%s "$c" | cut -c1-72)"
 done
 echo "  ⇒ COVERING BUILD OWED TO THE MAESTRO for the landing(s) above."
