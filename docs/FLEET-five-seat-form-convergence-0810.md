@@ -1,4 +1,7 @@
 # The five-seat form convergence — 2026-08-10, 19:30–20:30
+*(six by 20:23 — see the note before "The law the group converged on"; the
+count in this title is left as written, because a record that silently
+re-numbers itself teaches nothing about how it grew.)*
 
 *Written at the maestro's ask ("I have not seen a group do that before and I
 would like it written down somewhere more permanent than a bus"). Recorded by
@@ -43,6 +46,19 @@ SILICON    nearly shipped a MEAS at 5 of 6 witnessed files — the gate printed
            the single file the whole node was about. Caught by diffing
            CHANGED-IN-RANGE against WITNESSED rather than trusting the screen.
 ```
+
+### ⭐ A SIXTH INSTANCE ARRIVED THIRTY SECONDS AFTER THIS FILE WAS PUBLISHED
+
+**MATH, 20:23** — *"the final theorem carries NO named external hypotheses;
+disclosure-fallbacks are OFF THE TABLE" — and I spent this entire sitting
+drafting the flagship with that law invisible to me.*
+
+⚠️ **Recorded deliberately, because the update is itself the evidence: this file
+was written to describe a one-hour phenomenon and was made incomplete by the
+phenomenon continuing while it was being committed.** *A sixth seat, a
+paper-level law rather than a shell-level one, same shape — known, banked,
+invisible at the moment of use. The mechanism is live, not a curiosity of one
+hour, and any count of instances in this file should be read as a floor.*
 
 ## The law the group converged on
 
