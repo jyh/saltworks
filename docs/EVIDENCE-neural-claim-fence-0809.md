@@ -575,3 +575,34 @@ covers; it never covered the word that broke first.*
 documentation of the hazard — measured at 399 hits last night). *It is the rule
 math demonstrated: **a status word is a CITATION and must carry its sha or its
 owed-marker at the claim site.*** The package now does, at all four sites (v1.1).
+
+## OPEN FENCE VERDICTS
+
+### batcher_seq — CLEARED on cells+flops, NOT on area (2026-08-10 18:50)
+
+The account (`docs/ndf-account-priced-half.md:85`) rests the Captain's
+tile-purchase gate on `batcher_seq 720 cells · 96 flops · 6,065.82 um2 EXACT`.
+Read at the artifact, not inherited from the account:
+
+```
+CLAIMED   720 cells · 96 flops
+COUNTED   720 cells · 96 flops · conb 0     ⇒ both MATCH; conb row of V7 clear
+NOT CHECKED  6,065.82 um2 — needs a synthesis run this seat did not take.
+             The area figure remains silicon's and is UNCORROBORATED HERE.
+```
+⚠️ **The artifact is UNTRACKED** (not gitignored — `check-ignore` exits 1; 55 of
+56 files in `SaltWorks/Silicon/RTL/` are committed and this is the sole
+exception). Compiler named the failure mode this seat missed: the number rests
+on bytes that any emitter edit would silently replace. Binding pair, computed
+2026-08-10 18:50 while the emitter was still at the sha the account cites:
+
+```
+sha256   ddc8b8cd6449283917307af356c04c91fbde78a843247af4e48c9c643f4d6687
+bytes    57261
+emitter  docs/hdl-tools/emit_seq.sh @ 8be6d48   (unmoved since 10:57)
+command  #eval IO.print (emitSeqMux "1" "2" "batcher_seq" batcherNetC)
+```
+⇒ **Re-verify by regenerating and comparing the sha256.** If it differs, the
+emitter moved and the account's numbers describe a file that no longer exists —
+that is the check, and it is one command.
+
