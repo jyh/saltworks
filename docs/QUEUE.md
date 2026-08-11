@@ -959,6 +959,18 @@ OPEN ITEMS:
   over programs with `poolDemand ≤ 7`; both corpus witnesses fit; the
   E-4 overlap witness and its positive control construct as
   pre-registered. L6's N=1 incompatibility stands recorded.**
+  **RULING (d) — SAME SITTING (17:1x, the Captain, verbatim "Yes (B)"):
+  RULING #8 IS RE-OPENED AND RESOLVED TO BRANCH (B) — the REQUANTIZER
+  ORGAN lands: shift + saturate, ~40 gates, in the SER's sAct row, with
+  its V9-class kernel model priced beside it. h ∈ [0,127] becomes a
+  THEOREM; the per-network weight-side duty RETIRES; the trainer is
+  freed. Ruled TOGETHER, as the refuters required: the adjoint
+  convention is STRAIGHT-THROUGH 2^-s with the floor's zero-derivative
+  region NAMED (the nonzero-gradient anti-vacuity control stands, else
+  the adjoint theorem is satisfiable by zero). A2/A3 (P3) take this
+  form; silicon's P3 roster gains the requantizer beside the SER
+  shift-enable (one SER row, two organs, priced together);
+  update-window silicon.**
   **P3 = the former P2 rosters, unchanged in content and order:**
   compiler V9 → A1 → L5 → batcher_c/SER → L6 source probe · math L3
   half → X3 → 47-row → A3 (still gated on ruling d) · silicon cocotb
