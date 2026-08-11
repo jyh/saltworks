@@ -776,6 +776,12 @@ theorem stepW_encode (s : St) (i : Instr) : stepW s (encode i) = some (step s i)
 
 /-! ## Axiom audit — every definition and every theorem, per the iron rules -/
 
+-- ⬥ M1: the two new declarations join the standing roll-call. They were
+-- audited with `#print axioms` at the landing, but that ran in a Scratch that
+-- is deleted by rule — a one-time audit is not a STANDING gate, and a
+-- declaration with no audit line is SILENT rather than failing.
+#audit_axioms addrClass
+#audit_axioms addrClass_ok_lt
 #audit_axioms St.get
 #audit_axioms St.set
 #audit_axioms St.next
