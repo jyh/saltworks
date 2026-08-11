@@ -189,19 +189,37 @@ discipline (author-anywhere, land-at-owner).
   with M1, same commit or the hub red-builds; r-stateform Q1's
   repair, live-verified pins).** (1) `decQ` (StateCodec.lean:127) and
   `decQtransposed` (:175) construct the new fields as defaults.
-  (2) **`decQ_encD` (StateCodec.lean:140) is RESTATED as the
-  (regs,pc)-PROJECTION**: `(decQ (encD s)).regs = s.regs ∧
-  (decQ (encD s)).pc = s.pc` — the whole-St form goes FALSE and the
-  alternative (extending encD to 1313 bits) reopens the flop budget
-  and contradicts the F4 two-object bridge. Proof shape: `obtain
-  ⟨regs, pc, mem, tr⟩ := s`; `St.mk.injEq` is now 4 conjuncts.
-  `decQtransposed`'s theorem (:186) restates identically.
-  (3) `SysSt.task` (ExecutiveX0.lean:66) gains default mem/trapped
-  (sufficient BECAUSE of the §0.6 ruling: the executive does not use
-  memory). (4) `Stack.Program.decQ_congr` (Program.lean:1481) and
-  `decQ_envWith` (:1491) generalize to the restated codec.
-  (5) Control: full-hub build green + `#print axioms` on the restated
-  `decQ_encD` within the standing three.
+  (2) **`decQ_encD` (StateCodec.lean:140) is RESTATED TWICE —
+  ⬥v1.1.1, per math's 18:40 pre-pull consumer census (bus :59027),
+  which found the v1.1 consumer list SHORT BY THREE and one consumer
+  unrepaira­ble by the projection alone.** The HEADLINE form is the
+  (regs,pc)-PROJECTION: `(decQ (encD s)).regs = s.regs ∧
+  (decQ (encD s)).pc = s.pc` — the whole-St form goes FALSE in
+  general and extending encD to 1313 bits reopens the flop budget
+  and contradicts the F4 two-object bridge. BESIDE it lands the
+  CONDITIONAL whole-St round trip, `decQ_encD_of_clean :
+  s.mem = Vector.replicate 8 0 → s.trapped = false →
+  decQ (encD s) = s` — true for every state this codec is ever fed
+  in the Stack lane, because `stOfFn`/`offEndEnv` build exactly such
+  states BY CONSTRUCTION. Proof shape: `obtain ⟨regs, pc, mem, tr⟩
+  := s`; `St.mk.injEq` is now 4 conjuncts. `decQtransposed`'s
+  theorem (:186) restates freely — ZERO consumers outside StateCodec
+  (math's census). (3) `SysSt.task` (ExecutiveX0.lean:66) gains
+  default mem/trapped (sufficient BECAUSE of the §0.6 ruling: the
+  executive does not use memory). (4) **THE CONSUMER LIST, the full
+  five (was two in v1.1 — the atomic commit could not have closed):**
+  `decQ_congr` (Program.lean:1481) and `decQ_envWith` (:1494)
+  generalize as before · `entryLoaded_encD_stOfFn` (:1231) and
+  `not_entryLoaded_offEndEnv` (:1252) land only on .pc/.get, so the
+  projection suffices — at a TACTIC EDIT each (`rw [decQ_encD]`
+  stops working on a conjunction; budget the `.1`/`.2` plumbing) ·
+  **`offEndEnv_does_not_sort` (:1264) rewrites the WHOLE STATE under
+  `run` — the projection deletes its first step; it rewrites with
+  `decQ_encD_of_clean` instead** (offEndEnv is clean by
+  construction). The prose at :1226 and :1800 describing the round
+  trip as an identity is REWORDED to "identity on clean states;
+  projection in general". (5) Control: full-hub build green +
+  `#print axioms` on BOTH restated lemmas within the standing three.
 - **M2 · `wS` + generalized `wI` + field lemmas + `decode_encode` for
   LW/SW (compiler owns; ISA.lean) — PLUS, IN THE SAME COMMIT, the
   decoder-census fixup (all three refuters' unassigned kill;
