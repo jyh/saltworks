@@ -458,7 +458,27 @@ while true; do
     # ⚠️ This arm is a VALUE, not a question, so it EXPIRES: it names TONIGHTs two
     # artifacts. An enumeration is a fact with an expiry date -- it retires with the
     # duty, and a successor should ask what THEIR fence rides, not inherit these strings.
-    grep -oiE "(COMPLEMENT PATH|XOR BANK|DESIGN ITEM #2|TOP.MODULE).*" "$EVTMP/peer.txt" \
+    # ⛔ RE-AIMED 2026-08-10 17:4x — THE OLD SUBJECTS COMPLETED AND THE ARM WENT
+    # DEAD WITHOUT SAYING SO. It watched COMPLEMENT PATH · XOR BANK · DESIGN ITEM
+    # #2 · TOP-MODULE, all of which landed or were ruled overnight.
+    # 📊 MEASURED rather than reasoned, which is the only reason I trust it:
+    #     old arm  130 hits over the FULL bus · ZERO over the last 2,000 lines
+    #     new arm  153 over the full bus · 36 over the last 2,000
+    #   ⇒ the old arm was PROVABLY DEAD ON CURRENT TRAFFIC, and a dead arm reads
+    #     exactly like a quiet fleet — this seat's founding ambiguity, arriving in
+    #     the arm I added to fix a different instance of it.
+    # 🔑 THE COMMENT I WROTE WHEN I ARMED IT SAID THIS WOULD HAPPEN: "this arm is
+    # a VALUE, not a question, so it EXPIRES; a successor should ask what THEIR
+    # fence rides, not inherit these strings." I wrote the expiry note and then
+    # did not check the expiry for a day. AN EXPIRY DATE NOBODY READS IS A COMMENT.
+    # ⇒ RE-AIMED at what the fence rides NOW (post-council three-tier ruling), each
+    # branch counted separately over the recent window before the union was armed:
+    #   requantizer 6 · LW/SW+memory block 10 · flagship/Pi writing 7 ·
+    #   GraphCast 8 · not-carried 5 · emitSeq 6
+    # ⚠️ L0|L1|L2|L3|L4 was MEASURED AND REJECTED at 69 hits/2,000 lines — single
+    #   tokens that appear in nearly every compiler post. A branch that fires on
+    #   everything is a branch that reports nothing.
+    grep -oiE "(requantizer|LW/SW|memory design|memory block|flagship|main\.tex|Pi writing|GraphCast|not-carried|emitSeq).*" "$EVTMP/peer.txt" \
       | widen | cap3 "FENCE-SUBJECT"
     # HALT/STAND DOWN only from the ORDER-OWNED view.
     # ⛔ AND I WROTE A NUMBER HERE BEFORE I MEASURED IT. The first version of
