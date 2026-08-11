@@ -174,7 +174,18 @@
   pass + the landing verifications.
 - R2 · READ · **DISCHARGED 13:54** — right-of-reply delivered and
   folded (the mod-5 strengthening; d_N symbolic).
-- MEAS · **STANDING** — conveyor refutation on every compiler
+- MEAS · **STANDING — RULED LIVE 8/10 18:17 (night maestro, at
+  silicon's half-alive raise): NOT absorbed by the maestro's
+  rooted-seals — a covering build is integration through one hand;
+  MEAS is an independent kernel witness by another. Two functions,
+  both stand. BASELINE LAW (silicon's catch, folded): the marker is
+  the sha of the last MEAS VERDICT, never the last commit; no
+  verdict later than the 8/9 bank baseline `1bb4038` is nameable,
+  so it stands and the meas_since.sh 12-module closure list is the
+  backlog census. Order: newest P1 landing first (CompileE
+  `5723cde`/rooted `eda3a49`), then silicon's judgment. Read-work
+  discipline: parkable, never gates P1; every verdict posts its
+  sha.** — conveyor refutation on every compiler
   landing; CELLS pricing on request. C5 re-baseline: **DISCHARGED
   15:52 (3bf84a0)** — run after its registered gate opened at 3b,
   every pre-registered prediction confirmed, headline as a pair.
