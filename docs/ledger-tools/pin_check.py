@@ -40,9 +40,26 @@ import subprocess
 import sys
 import pathlib
 
-# `name` (`path/File.lean:123`)  — the name must be backticked to count as a pin
+# ⛔ TWO MATCHERS, and the second exists because the first LIED ABOUT THE CORPUS.
+#
+# The strict form below requires the name to sit IMMEDIATELY before the path.
+# On the live corpus it matched 55 of 205 citations, and this seat published
+# "coverage 26.8%" — a figure that reads as an indictment of everyone's citation
+# discipline. The math seat then ran the same criterion on the flagship and
+# nearly published that its pins were bare, about a paper at 98%.
+#
+# MEASURED: 109 of the 150 "bare" pins carry a name within 120 characters, just
+# not adjacent. TRUE name-bearing rate is 80.0%, not 26.8%. The number was
+# measuring THIS REGEX'S BLIND SPOT and calling it a property of the documents.
+#
+# Association by proximity is weaker evidence than adjacency, so a proximity pin
+# can only ever be reported as OK or as DRIFT-when-the-name-is-declared-in-that-
+# file. It never yields an ABSENT finding — an unresolved loose association is
+# my parser's problem, not the author's.
 PIN = re.compile(
     r"`([A-Za-z_][\w'.]*)`\s*[（(\[]?\s*`([\w/\-.]+\.lean):(\d+)`")
+ANYPIN = re.compile(r"`([\w/\-.]+\.lean):(\d+)`")
+NEARNAME = re.compile(r"`([A-Za-z_][\w'.]{2,})`")
 DECL = r"(?:theorem|lemma|def|abbrev|structure|instance|inductive|noncomputable\s+def)"
 
 
@@ -116,8 +133,17 @@ def occurs_at(body, name, line):
 def check_doc(repo, ref, doc, index):
     text = pathlib.Path(doc).read_text(errors="replace")
     rows = []
-    for m in PIN.finditer(text):
-        name, path, line = m.group(1), m.group(2), int(m.group(3))
+    strict_spans = {m.span() for m in PIN.finditer(text)}
+    pins = [(m.group(1), m.group(2), int(m.group(3)), True)
+            for m in PIN.finditer(text)]
+    for m in ANYPIN.finditer(text):
+        if any(a <= m.start() and m.end() <= b for a, b in strict_spans):
+            continue
+        pre = text[max(0, m.start() - 120):m.start()]
+        cands = [n for n in NEARNAME.findall(pre) if not n.endswith(".lean")]
+        if cands:
+            pins.append((cands[-1], m.group(1), int(m.group(2)), False))
+    for name, path, line, strict in pins:
         real, body = resolve(repo, ref, path, index)
         if body is None:
             # ⚖️ EXTERNAL vs BROKEN, and the first sweep conflated them: six
@@ -133,17 +159,31 @@ def check_doc(repo, ref, doc, index):
         elif occurs_at(body, name, line):
             rows.append(("okuse", name, real, line, line))       # used there
         elif decls:
+            # a DECLARATION elsewhere in the cited file is strong evidence of a
+            # real pin that moved, under either association.
             nearest = min(decls, key=lambda d: abs(d - line))
             rows.append(("drift", name, real, line, nearest))
         else:
             short = name.rsplit(".", 1)[-1]
             hits = [i for i, l in enumerate(body.splitlines(), 1)
                     if re.search(rf"\b{re.escape(short)}\b", l)]
-            if hits:
+            if hits and strict:
+                # occurrence-only drift is reportable ONLY when the AUTHOR put
+                # the name adjacent to the path. Under a proximity association
+                # it is noise: `def`, `xor`, `core` and `Iff.rfl` all "occur"
+                # somewhere else in any file, and nearest-occurrence means
+                # nothing. Publishing 38 of these would have been this seat's
+                # third count-over-the-wrong-scope of the day.
                 rows.append(("driftuse", name, real, line,
                              min(hits, key=lambda d: abs(d - line))))
-            else:
+            elif hits:
+                rows.append(("loose", name, real, line, None))
+            elif strict:
                 rows.append(("absent", name, real, line, None))
+            else:
+                # loose association that did not resolve — MY parser's doubt,
+                # never the author's defect. Counted as unchecked, not failed.
+                rows.append(("loose", name, real, line, None))
     # what we could NOT check: bare pins with no name
     bare = len(re.findall(r"`[\w/\-.]+\.lean:\d+`", text)) - len(rows)
     return rows, max(bare, 0)
@@ -178,13 +218,16 @@ def main(argv):
         ok = sum(1 for r in rows if r[0] in ("ok", "okuse"))
         asdecl = sum(1 for r in rows if r[0] == "ok")
         ext = sum(1 for r in rows if r[0] == "external")
+        loose = sum(1 for r in rows if r[0] == "loose")
         print("-" * 74)
         print(f"{doc}   {len(rows)} named pin(s)")
         for kind, name, path, line, got in rows:
             if kind in ("ok", "okuse"):
                 continue
-            if kind != "external":
+            if kind not in ("external", "loose"):
                 rc = 1
+            if kind == "loose":
+                continue
             if kind == "drift":
                 d = got - line
                 print(f"  ⚠️  DRIFT   `{name}`  {path}:{line} → :{got}  "
@@ -198,9 +241,10 @@ def main(argv):
             else:
                 print(f"  ❓ EXTERNAL {path} is not in this repo (cited for "
                       f"`{name}`) — a dependency pin, UNCHECKABLE here")
-        print(f"  ✅ {ok}/{len(rows) - ext} in-repo named pins resolve "
+        print(f"  ✅ {ok}/{len(rows) - ext - loose} in-repo named pins resolve "
               f"({asdecl} at their DECLARATION, {ok - asdecl} at a USE)"
-              + (f"  · {ext} external pin(s) not counted" if ext else ""))
+              + (f"  · {ext} external" if ext else "")
+              + (f"  · {loose} loose-association unchecked" if loose else ""))
         if bare:
             print(f"  EXCLUDED {bare} BARE pin(s) with no name — nothing to search")
             print("           for, so they are UNCHECKABLE, not clean.")
