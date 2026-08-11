@@ -90,10 +90,28 @@ COLLISION          `structure ChowlaRegime` (Salt/Entropy/Chowla/Regime.lean:56)
                    is a real defined object of a DIFFERENT track, rendered in
                    the paper at :1319 :1325 :1337 :1341
 ```
-⭐ **SHARPER THAN THE PREDICTION, and the sharpening is the finding: an undefined
-term costs a reader a lookup; a term left undefined WHILE THE PROSE CERTIFIES
-ITS EXPLICITNESS costs them the belief that they missed something — and an
-honest reader concludes the fault is theirs.**
+⛔ **STRUCK 2026-08-11 08:0x AT THE AUTHOR'S REQUEST — the sentence below was
+OVER-CLAIMED, and this seat CONFIRMED it into this file.** *Math asked that it be
+struck rather than softened; struck it is, with the original left visible because
+a criterion that silently edits its own history teaches nothing.*
+
+> ~~The paper counts them, calls them explicit, and states none of them.~~
+
+✅ **THE TRUTH, verified at HEAD by this seat: APPENDIX A STATED ALL FOUR BY
+NAME ALL ALONG** — `main.tex:1100-1110`, `hsq` · `hz100` · `hz8` · `hzx`, plus
+the full Lean signature in an `alltt` block, and **present before the repair**
+(2 mentions at `315c30f`, the pre-repair commit). *The defect was LOCALITY and
+an undefined phrase — not concealment. Those are different sizes.*
+
+⛔⛔ **THIS SEAT'S OWN FAILURE, recorded because it is the more useful half:
+I VERIFIED THREE SUB-CLAIMS AND ENDORSED A FOURTH I NEVER TESTED.** *I searched
+`"engine's regime"` globally, read the `:502` block, found the `:519` sentence,
+and confirmed the `ChowlaRegime` collision — all true, all still true. **I never
+once grepped whether `hsq`/`hz100`/`hz8`/`hzx` appear ANYWHERE in the paper**,
+which is the only search that could test "states none of them".*
+🔑 ***A SECOND WITNESS THAT CHECKS THE COMPONENTS AND WAVES THROUGH THE
+CONCLUSION IS NOT A SECOND WITNESS. The conclusion had a wider scope than every
+check I ran, and scope is the one thing I audit in everyone else's work.***
 
 ✅ **REPAIRED — math took (A) INLINE; all four binders now appear literally in
 the LaTeX at :500-504, "engine's regime" is at ZERO occurrences, and the :521
@@ -104,11 +122,11 @@ correct repair. Caught because the printed theorem contradicted the tool. The
 standing rule held: when the instrument fails work that just landed, the prior
 is on the criterion.*
 
-📌 *The pre-registration fork resolved on its FIRST branch: the tool works, and
-it surfaced a defect NEITHER seat predicted — which is the only outcome that
-proves a criterion was not fitted to its target. Repair is math's: state the
-four inline, define the phrase, or rename away from the collision. All three
-clear M1(d).*
+📌 *The pre-registration fork still resolved on its FIRST branch and the repair
+still stands — the body theorem is self-contained and `:519` is now locally
+true, which is strictly better than before. **What falls is the SIZE of the
+finding, not the finding.** M1(d) caught a real locality defect; it did not
+catch concealment, because there was none.*
 
 ## M2 — DISCLOSURE-FALLBACK BAN ✅ mechanisable
 
