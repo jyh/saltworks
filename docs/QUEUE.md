@@ -1147,7 +1147,16 @@ OPEN ITEMS:
   −1.50 is a default-external-delay reading, not silicon). ⇒ WHEN THE
   SWITCH RIDES (Sept-27 or later), THE 1x1 IS THE TILE with a declared
   clock. Composition stays in scratch; no repo, no purchase, until the
-  Captain revisits it.**
+  Captain revisits it.
+  ⭐ CAPTAIN CONFIRMED 17:5x ("great on the 1x1 tile, whenever the
+  submission is ready, let me know") — THE 1x1 IS RULED for the switch,
+  and there is a STANDING MAESTRO NOTIFICATION DUTY: build the full-BB
+  switch submission at P3 pace (seam-wire from scratch · repo
+  jyh/tt-verified-batcher-banyan · datasheet with evidence's fence ·
+  clock_hz declared ~24.1 MHz · CI green), and SURFACE IT TO THE
+  CAPTAIN when it is assembled and green — his click, public/T1.
+  P3 priority: do-when-idle, no P1/NDF cycles; possibly the Sept-27
+  shuttle.**
 - **THE TILE PLAN IS CONFIRMED (8/10 10:4x, the Captain, verbatim
   "Ok, that's our plan, a 1x2 and a 6x2") — ⭐ SWITCH HALF SUPERSEDED
   17:4x (see above: full BB on its own repo, 1x1 in play, 1x2
