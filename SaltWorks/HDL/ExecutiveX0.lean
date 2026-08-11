@@ -81,15 +81,17 @@ def SysSt.rotate (sys : SysSt N) : SysSt N :=
 (B2: per-task code lists are the load-bearing hypothesis at X0–X3), executes at
 most one instruction, writes its pc back, and yields the turn.
 
+Written as a bare `match` with no `let`/`have` bindings **on purpose**: a
+`have`-bound intermediate erases its body, so the definition stops reducing and
+every downstream frame lemma has to fight it. X1 found this the hard way.
+
 A task whose fetch fails is **not** an error and does not stop the executive —
 it simply does nothing this turn. That is what makes X2's fairness antecedent
 (B4) necessary rather than decorative. -/
 def execStep (codes : Vector (List Instr) N) (sys : SysSt N) : SysSt N :=
-  let i := sys.cur
-  let s := sys.task i
-  match fetch codes[i.val] s.pc with
+  match fetch codes[sys.cur.val] (sys.task sys.cur).pc with
   | none     => sys.rotate
-  | some ins => (sys.put i (step s ins)).rotate
+  | some ins => (sys.put sys.cur (step (sys.task sys.cur) ins)).rotate
 
 /-- The step-indexed run generated from an initial state. -/
 def runSys (codes : Vector (List Instr) N) (init : SysSt N) : Nat → SysSt N
