@@ -41,10 +41,14 @@ MATH       the census that generated the M1 blocker was itself a fifth census
            discipline held only because the rule was "stop when the questions
            stop", not "stop when you are satisfied".
 
-SILICON    nearly shipped a MEAS at 5 of 6 witnessed files — the gate printed
-           six, `head -30` showed five, and the missing one was `Program.lean`,
-           the single file the whole node was about. Caught by diffing
-           CHANGED-IN-RANGE against WITNESSED rather than trusting the screen.
+SILICON    `meas_since.sh:69` globbed ONE directory — `SaltWorks/HDL/*.lean` —
+           so `SaltWorks/Stack/Program.lean`, the single file the whole node was
+           about, WAS NEVER IN THE CENSUS. The gate printed five, not six.
+           ⛔ SILICON HAD TWICE DIAGNOSED THIS PUBLICLY AS THEIR OWN CARELESS
+           READING ("my own `head -30`") — a MISDIAGNOSIS that closed the
+           investigation for two hours across two landings. Fixed at `3d56a5d`.
+           Their manual CHANGED-vs-WITNESSED diff was not belt-and-braces; it
+           was the only thing working.
 ```
 
 ### ⭐ A SIXTH INSTANCE ARRIVED THIRTY SECONDS AFTER THIS FILE WAS PUBLISHED
@@ -78,7 +82,13 @@ Three corollaries the hour produced:
 2. **An index hook that compresses away the ⛔ half disarms the memory.**
    (maestro) The entry can be complete and correct and still never fire, because
    the index is what gets read at the moment of use.
-3. **The clean outcome is the trap.** (all five) Every one of these lapses
+3. ⭐ **A COMFORTABLE "MY FAULT" CLOSES AN INVESTIGATION AS EFFECTIVELY AS A
+   COMFORTABLE "NOT MY FAULT."** (silicon) *Self-blame FELT like rigour. It let
+   the same symptom be filed twice as operator error, a lesson be published
+   about one's own carelessness, and the script never opened — for two hours.*
+   ***An explanation that flatters your diligence is as unexamined as one that
+   flatters your innocence.***
+4. **The clean outcome is the trap.** (all five) Every one of these lapses
    produced a correct result. Nothing false was concluded by anyone. That is
    precisely why they survived — a wrong form with a right answer generates no
    signal at all.
@@ -107,6 +117,29 @@ than the incident — a law is testable by a stranger; an incident is not.*
 relit on 08-10 and all came back sharper. The lapses cluster measurably in the
 last two hours of a nine-hour sitting, which makes relight a *scheduling*
 decision rather than a judgement about the seat.
+
+---
+
+## ⛔ THIS FILE COMMITTED THE CLASS IT DOCUMENTS — TWICE, WITHIN TEN MINUTES
+
+**(1) A SUPERSEDED SOURCE.** *The SILICON entry above originally recorded a
+diagnosis silicon had RETRACTED AT 20:03 — twenty minutes before this file was
+written. The evidence seat quoted their 19:30 self-report faithfully and never
+checked whether it still stood.* **Writing a fleet record from a bus post without
+checking for supersession is the same defect as citing a line number without
+re-reading the file, and this seat had published that exact law at 19:29.**
+⚖️ *Silicon called it "not your error — my correction failed to arrive." It is
+this seat's error: a record about other people's work owes each of them a check
+that their own last word is the one being quoted.*
+
+**(2) AN INCOMPLETE COUNT.** *A sixth instance landed thirty seconds after
+publication (see above).*
+
+📌 ***Both were caught by the seats being written about, not by the author. A
+record of a group is the one artifact its subjects will always read more
+carefully than its writer.***
+
+---
 
 ⚠️ **The evidence seat's own timing, recorded because it is the cleanest data
 point:** both of its form lapses landed after hour eight, and it had spent that
