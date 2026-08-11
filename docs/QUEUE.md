@@ -1087,8 +1087,29 @@ OPEN ITEMS:
   element decides on the header and goes transparent (B4's own
   bonus finding: the sorter leg is already ∀-P). (b) is not a
   preference; it is the only shape the architecture admits.**
+- **⭐⭐ THE SWITCH RE-PLANNED — FULL BB, ITS OWN REPO, 1x1 IN PLAY
+  (8/10 17:4x, the Captain at/after council): the standalone switch is
+  the FULL BATCHER-BANYAN (batcher_c WIRED to the banyan — today's
+  sort-then-route closure makes it honest), on its OWN public repo
+  **jyh/tt-verified-batcher-banyan** (distinct from the existing
+  jyh/tt-verified-banyan-switch, the bare-banyan 2x2 record that was
+  confusing TT); **THE 1x2 BARE-BANYAN PLAN IS DISCARDED.** THE FIT
+  REVERSAL: silicon's exact areas (cce8fc0/78ae523) retire the old
+  "full BB won't close on 1x1" — batcher_c is 4,023.86 um2 EXACT (the
+  5,928 projection ran +47.3% high, a flop-density applied to
+  combinational cells), bare banyan 3,829.92 um2 measured ⇒ full-BB
+  FLOOR ~7,850 um2 ≈ ~55% util on a 1x1's ~14-15k usable — LIKELY
+  FITS, where the projection said no. STILL A FLOOR (composition adds
+  glue/taps/repair) and the seam is R1's v1.1 node (UNWIRED — silicon
+  won't invent a composition to measure). ⇒ THE CERTAIN ANSWER IS ONE
+  RUN AWAY: wire the seam, run full-BB-on-1x1 on TT's grid (ask posted
+  17:47); if it closes, THE 1x1 IS THE BUY. Repo scaffolds around the
+  full-BB target; the wording takes evidence's fence before public.
+  Deadline: submit-real-by-Aug-31, fits with room.**
 - **THE TILE PLAN IS CONFIRMED (8/10 10:4x, the Captain, verbatim
-  "Ok, that's our plan, a 1x2 and a 6x2"): the standalone switch on
+  "Ok, that's our plan, a 1x2 and a 6x2") — ⭐ SWITCH HALF SUPERSEDED
+  17:4x (see above: full BB on its own repo, 1x1 in play, 1x2
+  discarded; the 6x2 NDF stands): the standalone switch on
   a NEW 1x2 (submitted today with banyan content; the full
   Batcher-banyan wired during the update window — his personal
   word: the Bellcore team gets the full BB, "it is more
