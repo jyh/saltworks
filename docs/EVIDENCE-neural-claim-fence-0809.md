@@ -578,6 +578,46 @@ owed-marker at the claim site.*** The package now does, at all four sites (v1.1)
 
 ## OPEN FENCE VERDICTS
 
+### ⏳ OPEN — the NATURE-TRACK block's "under one referee" sentence (raised 2026-08-11 03:45)
+
+`${SEAT_DIR}/briefs/2026-08-11-nature-track-block.md:14-17`, the Captain's 03:4x
+proposal, DRAFT-UNTIL-REFUTED, rides his morning surface as item zero:
+
+> "...across four abstraction layers — research mathematics, a verified
+> compiler, a verified executive, and FABRICATED SILICON — under one referee
+> (the Lean kernel)..."
+
+```
+MEASURED ON THE SUBMITTED DIE (this seat, 08/10, at the artifact):
+  352 of 902 flops (39.0%) kernel-emitted · 550 (61.0%) HAND RTL
+  PROVED      the combinational MAC core — all 96 outputs, all inputs, SAT
+  NOT PROVED  clocked cell ∀st0 · sequencer · pin wrapper · fabric · core
+⇒ THE FABRICATED SILICON IS NOT UNDER THE LEAN KERNEL.
+```
+⛔ **F3/F4 exactly — the model-vs-artifact gap — on the highest-amplification
+surface this fleet has drafted.** *This is the same claim kept out of the TT
+datasheet, `info.yaml`, the priced-half account and the public repo all week.*
+
+🔑 ***AND IT EXPOSES THIS SEAT'S OWN COVERAGE LIMIT: nine banned phrases held at
+the submitted bytes, and "under one referee" says the same thing in words the
+phrase list does not contain.*** *A phrase fence catches phrasings it was built
+from. `claim_fence.py` returns GREEN on this sentence — verified — which is why
+M4 of every criterion this seat writes requires the tool to disclose its frame.*
+
+**REPAIR SUPPLIED (one clause, and the honest version reads stronger):**
+> "...and silicon whose arithmetic core is kernel-proved and fabricated — under
+> one referee for everything the kernel touched, with the hand-written
+> remainder named."
+
+⏳ **OPEN pending the maestro's fold and the Captain's ruling. Two adjacent
+claims FLAGGED, NOT JUDGED, because they are not this seat's to measure: "a
+verified compiler" and "a verified executive" — their owners should state what
+those words cover before the sentence travels.** *"first formalizations" is an
+M3 priority claim under `EVIDENCE-maths-paper-fence-0811.md`: never machine-
+checkable, needs a stated search.*
+
+
+
 ### ✅ CLOSED — the audit-cap headroom figure (raised 19:31, closed 2026-08-11 00:1x)
 
 Silicon's MEAS on `1a92292` posted `Program.lean` peak 10,387 MB as **86.6% of
