@@ -426,8 +426,15 @@ the overlap register (the false-making isolation control) + SW
 writesWithin regression (register-frame-only, labeled) · `addrClass`
 totality is by construction AND the named `addrClass_ok_lt` lemma
 carries the actual safety load (the "no default" slogan is retired) ·
-numeric-recompute sweep at the five named sites (M5) · `#print
-axioms` on every new theorem (the standing three).
+numeric-recompute sweep at the five named sites (M5) · **the audit
+form is the BUILD-GATED `#audit_axioms` ROLL-CALL, not a manual
+`#print axioms` (⬥v1.5, compiler's first-refuter check-4 find on
+M1's own landing: two declarations landed with NO audit line, and
+an ABSENT audit is SILENT — a green build is exactly as green
+without it; hygiene is EXIT=0 PLUS roll-call inclusion, verified by
+grep of the roll-call, never inferred from the print). EVERY new
+declaration of every M-node enters a roll-call in the same commit —
+M2 adds many and inherits this line.**
 
 ## §A · THE FOLD RECORD (v1 → v1.1, 2026-08-10 ~18:2x, night maestro, Fable hand)
 
