@@ -98,7 +98,22 @@ levels `Γ` names, which is what a statement-level induction can actually carry:
 extends the scope by one and everything above it is none of the context's business. -/
 
 /-- The registers named by the map hold the source state's slots, **for the levels in
-scope**. -/
+scope**.
+
+⛔ **A SCOPE NOTE: THE MACHINE GREW UNDER THIS RELATION, 8/10.** `M1` grew `St` from two
+fields to four (`mem`, `trapped`). **Nothing here became false — but this relation
+characterises REGISTERS, so "the compiler is correct" covers a strictly smaller fraction of
+the machine state than it did when this was written.**
+
+✅ *It is still COMPLETE for this fragment, and the reason is a landed theorem rather than
+an argument: `step_mem_eq` and `step_trapped_eq` prove **all five slice-A arms preserve
+both new fields**, so code `compileS` emits provably cannot touch them.*
+
+🔑 ***Cited by NAME, never by line*** — my own pin into `ISA.lean` rotted the same evening
+when a peer's landing moved it 49 lines, and the names above were themselves verified
+AFTER the restatement-renames wave rather than recalled from before it. *A reader who does
+not know those two theorems exist cannot see why the two unmentioned fields are safe to
+ignore; that is the only gap this note closes.* -/
 def encodeOK (Γ : Ctx) (reg : RegMap) (σ : State) (st : St) : Prop :=
   ∀ i : Fin poolSize, i.val < Γ.length → st.get (reg i) = σ i.val
 
