@@ -136,10 +136,20 @@ variant not fitting a 1x1 costs nothing today — the growth path stays open.**
 
 ⚠️ **THE NAMED PRICE OF THE RESIZE, so it is bought with open eyes:**
 1. **NOT A TILE-FIT SIGNOFF** — no TT power-grid DEF; this is LibreLane's PDN.
-2. **`test.py:247`** — the cocotb bench is STALE against the 8/8 `cnt[3]` ruling:
-   it asserts `(uio >> 5) == 0` while `project.v:60` drives `cnt_o[3]` there.
-   `FRAME=14`, so the FIRST FAILURE IS `t=8`. **The RTL is correct; one bench line
-   is not.** Diagnosed 8/9 20:13; **the fix is still UNOWNED.**
+2. ✅ **`test.py:247` — REPAIRED 8/10 (silicon), and it was TWO defects, not the
+   one diagnosed.** The bench was stale against the 8/8 `cnt[3]` ruling in both
+   directions at once: it asserted `(uio >> 5) == 0` while `project.v:60` drives
+   `cnt_o[3]` there (**measured first failure `t=8`**, as diagnosed 8/9 20:13) —
+   *and* it read only THREE counter bits, so `cnt == t % 8` aliased cycles 8..13
+   onto 0..5 and **PASSED all 14 cycles**. ⛔ **The silent half is the worse one:
+   that aliasing is precisely the defect `cnt_o[3]` was added to eliminate, so
+   the bench could not tell cycle 8 from cycle 0 — the belief every other test in
+   the file rests on. A repair chasing only the red assert would have left it
+   certifying the pre-ruling design.** *The RTL was correct throughout; the
+   criterion was weaker than the artifact.* **Verified by re-running both forms
+   against the RTL under iverilog — `Sim/tt_bench_check/run.sh`, 5/5 expectations
+   — because cocotb does not import on this host and the bench itself CANNOT be
+   run here.**
 3. **11 max-slew violations** on this run — small, real, unrepaired.
 
 ## 5 · WHAT THIS HALF DOES NOT CLAIM

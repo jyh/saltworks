@@ -232,19 +232,41 @@ async def test_counter_alignment(dut):
     """The frame counter and `valid` must track the cycle index we believe we
     are driving. Every other test's correctness rests on that belief, so it is
     checked rather than assumed — an off-by-one here would otherwise show up as
-    a silently mis-aligned pass."""
+    a silently mis-aligned pass.
+
+    ⛔ REPAIRED 2026-08-10 (silicon). This test was STALE against the maestro's
+    8/8 ruling that put `cnt_o[3]` on `uio[5]` (`project.v:60`), and it was stale
+    in BOTH directions at once:
+
+      (1) `assert (uio >> 5) == 0` is FALSE against correct RTL — `uio[5]` now
+          carries `cnt_o[3]`. Measured first failure: cycle t=8, since FRAME=14.
+          This one is loud.
+      (2) `cnt = (uio >> 1) & 0x7` reads only THREE counter bits, so the check
+          `cnt == t % 8` lets cycles 8..13 alias onto 0..5 — and it PASSES, all
+          14 cycles, measured. ***That aliasing is the exact defect `cnt_o[3]`
+          was added to eliminate: this test could not tell cycle 8 from cycle 0,
+          which is the belief every other test here rests on.***
+
+    🔑 (1) fails loudly and (2) passes silently, so a repair that only chased the
+    red assert would have left the bench certifying the pre-ruling design. The
+    RTL was correct throughout; the criterion was weaker than the artifact.
+
+    Verified by re-running both forms against the RTL under iverilog (cocotb does
+    not import on this host): shipped `(uio>>5)==0` first fails at t=8, shipped
+    3-bit `cnt == t%8` reports 0 violations, and both repaired forms report 0."""
     await _start(dut)
 
     idle = [[0] * FRAME for _ in range(8)]
     for _ in range(2):
         for t in range(FRAME):
             _, uio = await _cycle(dut, 0, sample=True)
-            cnt = (uio >> 1) & 0x7
+            # FOUR counter bits: cnt_o[3] rides uio[5], cnt_o[2:0] ride uio[3:1].
+            cnt = (((uio >> 5) & 0x1) << 3) | ((uio >> 1) & 0x7)
             valid = (uio >> 4) & 0x1
-            assert cnt == t % 8, f"cycle {t}: cnt_o = {cnt}, expected {t % 8}"
+            assert cnt == t, f"cycle {t}: cnt_o = {cnt}, expected {t}"
             assert valid == (1 if t >= HDR else 0), \
                 f"cycle {t}: valid = {valid}, expected {1 if t >= HDR else 0}"
-            assert (uio >> 5) == 0, f"cycle {t}: uio[7:5] must be driven low"
+            assert (uio >> 6) == 0, f"cycle {t}: uio[7:6] must be driven low"
     assert idle  # keep the linter honest about the unused-idle case
 
 
