@@ -49,33 +49,32 @@ formula below; that is the claim, and §5 is where it is exercised against a rea
 open SaltWorks.ISA
 open SaltWorks.StraightLine
 
+open SaltWorks.CompileS
+
 namespace SaltWorks.WhileScheme
 
-/-! ## 1. The formulas -/
+/-! ## 1. The formulas — ⚠️ THEY NOW LIVE AT THE EMITTER, AND THIS FILE TESTS *THOSE*
 
-/-- The conditional branch's immediate: skip the BODY **and** the backward branch that
-follows it, landing past the loop. *Structurally the same skip `iteThenSkip` performs, and
-deliberately written as its own definition — see §6.* -/
-def whileExit (n_b : Nat) : BitVec 12 := BitVec.ofNat 12 (2 * (n_b + 2))
+`whileExit`, `whileBack` and `whileFits` **moved into `SaltWorks/HDL/CompileS.lean`** when
+the emitter was written. The move was FORCED — `WhileScheme → IteScheme → BlockCalc →
+CompileS`, so the emitter cannot reference constants defined here without a cycle — and it
+is the better placement anyway:
 
-/-- ⭐⭐ **THE BACKWARD BRANCH — NEGATIVE, AND A FUNCTION OF BOTH BLOCK LENGTHS.** From its
-own address at `p+n_c+n_b+1` back to the condition's first instruction at `p`: that is
-`n_c+n_b+1` instructions, `4*(n_c+n_b+1)` bytes, and therefore an immediate of
-`-(2*(n_c+n_b+1))`.
+🔑 ***§7's bar, clause 1, demands that the emitted immediates be LITERALLY these functions
+and not numbers that agree on a sample. With ONE definition serving both, that clause holds
+BY CONSTRUCTION, and everything below — the six configurations, the three mutants, and §5b's
+all-sizes landing theorems — now tests THE EMITTER'S OWN CONSTANTS instead of copies.***
 
-🔑 ***`n_c` IS IN THIS FORMULA AND IS IN NO `ite` FORMULA.*** *The condition block is not
-being jumped over — it is being jumped BACK TO — and an emitter that computes displacements
-from "the block I am skipping" will be right about `whileExit` and wrong here.* -/
-def whileBack (n_c n_b : Nat) : BitVec 12 := BitVec.ofInt 12 (-(2 * (n_c + n_b + 1) : Int))
+⛔ *Defining them twice would have minted the mirror-constant hazard by my own hand, after
+writing the guard for it. The cure for a mirror is not a second guard; it is not having a
+second constant.* -/
 
 /-! ## 2. ⛔ THE REPRESENTABILITY BOUND — AND IT IS ASYMMETRIC
 
 `imm` is 12-bit signed: `[-2048, 2047]`. **The two directions do NOT get the same room**,
-and the off-by-one in that asymmetry is the classic two's-complement trap. -/
-
-/-- Forward: `2*(n_b+2) ≤ 2047`. Backward: `2*(n_c+n_b+1) ≤ 2048` — **one more than the
-forward budget**, because two's complement spends its extra code point downward. -/
-def whileFits (n_c n_b : Nat) : Bool := 2 * (n_b + 2) ≤ 2047 && 2 * (n_c + n_b + 1) ≤ 2048
+and the off-by-one in that asymmetry is the classic two's-complement trap.
+*`whileFits` is the emitter's LOCAL check: forward `2*(n_b+2) ≤ 2047`, backward
+`2*(n_c+n_b+1) ≤ 2048`.* -/
 
 /-- ⭐ **THE ASYMMETRY IS REAL AND IT IS EXACTLY ONE STEP.** `-2048` is representable and
 `+2048` is not, so a bound written symmetrically is wrong on one side. *Recorded as a
@@ -100,7 +99,7 @@ theorem whileBack_wraps_past_the_bound :
     (whileBack 1024 0).msb = false ∧ (whileBack 1023 0).msb = true := by
   refine ⟨by decide, by decide⟩
 
-#audit_axioms whileExit whileBack whileFits
+-- whileExit / whileBack / whileFits are audited at their new home, in CompileS.lean
 #audit_axioms imm_range_is_asymmetric
 #audit_axioms whileFits_binds
 #audit_axioms whileBack_wraps_past_the_bound

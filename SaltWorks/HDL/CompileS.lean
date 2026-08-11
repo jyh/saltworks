@@ -203,6 +203,46 @@ theorem lvlReg_eq {reg : RegMap} {l : Nat} {r : Fin 32} (h : lvlReg reg l = some
 theorem varReg_eq_lvlReg (Γ : Ctx) (reg : RegMap) (x : Nat) :
     varReg Γ reg x = lvlReg reg (slotOf Γ x) := rfl
 
+/-! ### The `while` branch displacements — HERE, and not in `WhileScheme`, on purpose
+
+⛔ **THE PLACEMENT IS FORCED BY THE IMPORT GRAPH, not chosen for tidiness.** `WhileScheme`
+sits ABOVE this file (`WhileScheme → IteScheme → BlockCalc → CompileS`), so the emitter
+cannot reference constants defined up there — that is a cycle. They therefore live at the
+emitter and `WhileScheme` imports them.
+
+✅ **AND THE FORCED PLACEMENT IS THE BETTER ONE.** `WhileScheme`'s pass/fail bar, clause 1,
+demands that *"the emitted immediates are literally `whileExit n_b` and `whileBack n_c n_b`,
+not numbers that happen to agree on some sample."* With one definition serving both, **that
+clause holds BY CONSTRUCTION**, and the scheme's certificates and its all-sizes landing
+theorems (`exit_branch_lands`, `back_branch_lands`) apply to the EMITTER'S OWN constants
+rather than to copies of them.
+
+🔑 ***The alternative — defining them twice — would mint the mirror-constant hazard by my
+own hand, AFTER writing the guard for it. A declaration that mirrors another file's constant
+is exactly what `pool_drift.sh` exists to catch; the cure is not a second guard, it is not
+having a second constant.*** -/
+
+/-- The conditional branch's immediate: skip the BODY **and** the backward branch after it,
+landing past the loop. -/
+def whileExit (n_b : Nat) : BitVec 12 := BitVec.ofNat 12 (2 * (n_b + 2))
+
+/-- ⭐⭐ **THE BACKWARD BRANCH — NEGATIVE, AND A FUNCTION OF BOTH BLOCK LENGTHS.** From its
+own address at `p+n_c+n_b+1` back to the condition's first instruction at `p`.
+
+🔑 ***`n_c` is in this formula and in no `ite` formula*** — the condition block is not jumped
+OVER, it is jumped BACK TO, so an emitter threading "the block I am skipping" is right on the
+exit edge and wrong here. -/
+def whileBack (n_c n_b : Nat) : BitVec 12 := BitVec.ofInt 12 (-(2 * (n_c + n_b + 1) : Int))
+
+/-- The representability guard, **asymmetric**: forward `2*(n_b+2) ≤ 2047`, backward
+`2*(n_c+n_b+1) ≤ 2048` — one more code point downward, because two's complement spends it
+there. *This is the emitter's LOCAL check and it discharges the representability half of the
+branch obligations exactly; the pc-range half mentions the block's POSITION and is supplied
+by the caller, as at L0 and L1.* -/
+def whileFits (n_c n_b : Nat) : Bool := 2 * (n_b + 2) ≤ 2047 && 2 * (n_c + n_b + 1) ≤ 2048
+
+#audit_axioms whileExit whileBack whileFits
+
 /-- ⭐⭐⭐ **THE FRAGMENT PREDICATE, MADE EXPLICIT — a boundary whose whole job is to MOVE.**
 
 A statement is branch-free when it emits no `BEQ`. **Today this coincides with "`compileS`
