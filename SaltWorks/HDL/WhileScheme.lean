@@ -2,10 +2,19 @@ import SaltWorks.HDL.IteScheme
 
 /-! # THE `while` OFFSET SCHEME — PRE-REGISTERED, and the first BACKWARD branch in the corpus
 
-L2's `while` clause is not written. **This file publishes the offset formulas, the checks,
-the mutants and the pass/fail bar first**, exactly as `IteScheme` did for `ite`, per the
-house law that a criterion published before the work sometimes fixes the work. It emits
-nothing and changes no `compileS` clause — `compileS` still returns `none` for `.while`.
+⛔⛔ **HEADER CORRECTION, AND IT BELONGS AT THE TOP RATHER THAN 426 LINES DOWN — math's
+first-refuter finding, 08-11 07:39, and they are right: the two sentences below were FALSE
+from `a8582b8` onward, the correction lived only in §7, and A READER ARRIVES AT LINE 8, NOT
+AT LINE 434. A header is the part of a file people read INSTEAD of the rest.**
+*The clause IS written and `compileS` DOES emit `while`. See §7 for what that closed. The
+original text stands below so anyone who quoted it lands here and not on a gap.*
+
+> ~~L2's `while` clause is not written.~~ **This file publishes the offset formulas, the
+> checks, the mutants and the pass/fail bar first**, exactly as `IteScheme` did for `ite`,
+> per the house law that a criterion published before the work sometimes fixes the work.
+> ~~It emits nothing and changes no `compileS` clause — `compileS` still returns `none` for
+> `.while`.~~ *(That was true when this file was written and is the point of a
+> pre-registration: it describes the world BEFORE the work.)*
 
 ## What is NEW here, and it is not "the same thing pointing the other way"
 
@@ -99,10 +108,53 @@ theorem whileBack_wraps_past_the_bound :
     (whileBack 1024 0).msb = false ∧ (whileBack 1023 0).msb = true := by
   refine ⟨by decide, by decide⟩
 
+/-! ### ⭐⭐ C5 — IS THE 2048/2047 ASYMMETRY **DERIVED** OR **ASSERTED**? — math's owed row
+
+*Their criterion, run 08-11 07:39, left exactly one row without a verdict and named it rather
+than dropping it: is `whileFits`'s asymmetry a fact about the encoding, or a number somebody
+chose? **Compiler's own item 4 sharpened it: no certificate sat near either boundary, which
+is precisely the condition under which an off-by-one in either direction passes everything.***
+
+✅ **ANSWER: DERIVED, AND TIGHT ON BOTH SIDES — and the two sides fail in DIFFERENT WAYS.**
+```
+DERIVED  the bound is not asserted anywhere: it is the HYPOTHESIS §5b's landing
+         theorems require. back_branch_lands needs 2*(n_c+n_b+1) ≤ 2048 to prove
+         msb = true (via whileBack_msb) — one past, msb is false and the proof
+         has no case. The number is what the arithmetic needs, not a choice.
+TIGHT    below, at the exact last-accepted and first-rejected sizes.
+```
+⚠️ ***AND THE FAILURE MODES ARE NOT MIRROR IMAGES, which is why one bound is 2048 and the
+other 2047: past the BACKWARD limit a back-edge becomes a FORWARD jump (the loop falls out of
+itself); past the FORWARD limit an exit branch becomes a BACKWARD jump — an EXIT THAT RE-ENTERS,
+i.e. non-termination. Same off-by-one, opposite catastrophes.*** -/
+
+/-- The BACKWARD boundary, at the exact last-accepted and first-rejected sizes. -/
+theorem whileBack_boundary_is_tight :
+    whileFits 1023 0 = true ∧ (whileBack 1023 0).msb = true
+  ∧ whileFits 1024 0 = false ∧ (whileBack 1024 0).msb = false := by
+  refine ⟨by decide, by decide, by decide, by decide⟩
+
+/-- ⭐ The FORWARD boundary — **and one past it the EXIT branch points BACKWARD**, so an
+over-long body turns the loop's escape into a re-entry. *This is the mode `whileFits` exists
+to refuse, and nothing in §3 or §4 sits close enough to see it.* -/
+theorem whileExit_boundary_is_tight :
+    whileFits 1 1021 = true ∧ (whileExit 1021).msb = false
+  ∧ whileFits 1 1022 = false ∧ (whileExit 1022).msb = true := by
+  refine ⟨by decide, by decide, by decide, by decide⟩
+
+/-- …and the asymmetry is REAL rather than a rounding of one rule: at the size where the
+BACKWARD direction is still legal, the FORWARD direction with the same magnitude is not. -/
+theorem the_two_directions_differ_by_exactly_one :
+    (2 * (1023 + 0 + 1) = 2048 ∧ 2 * (1021 + 2) = 2046)
+  ∧ whileFits 1023 0 = true ∧ whileFits 1 1022 = false := by
+  refine ⟨⟨by decide, by decide⟩, by decide, by decide⟩
+
 -- whileExit / whileBack / whileFits are audited at their new home, in CompileS.lean
 #audit_axioms imm_range_is_asymmetric
 #audit_axioms whileFits_binds
 #audit_axioms whileBack_wraps_past_the_bound
+#audit_axioms whileBack_boundary_is_tight whileExit_boundary_is_tight
+#audit_axioms the_two_directions_differ_by_exactly_one
 
 /-! ## 3. THE CERTIFICATES — SIX CONFIGURATIONS, AND A HALT CHECK THAT CARRIES THE ROW
 

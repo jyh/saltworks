@@ -745,6 +745,16 @@ when the `while` emitter falsified it. **The converse is FALSE TODAY**, and this
 oversized constant is rejected by L0's immediate cause while the statement is perfectly
 branch-free.*
 
+⭐ **AND IT IS A *DIFFERENTIAL* CONTROL, WHICH THIS DOCSTRING PREVIOUSLY DID NOT SAY — math's
+first-refuter finding, 08-11, filed in the artifact's FAVOUR.** *Their predecessor
+pre-registered the worry that "a control pinned to `99999` is pinned to a CONSTANT". It is —
+and that is the point: it uses the SAME `regCanonical`, the SAME scratch base `16`, the SAME
+context and the SAME statement head as the COMPILING witness `witness_chain_discharged`.
+**The expression is the only thing that differs, so the `none` is attributable to the
+constant and to nothing else.*** ⚠️ *And if the immediate bound ever moves past `99999` this
+theorem goes FALSE and the build breaks LOUDLY — which is the correct failure mode for a
+control, and the reason it is pinned to a literal rather than to a symbol.*
+
 🔑 ***THE TWO REJECTION FAMILIES ARE ORTHOGONAL AND MUST NOT BE CONFLATED: `branchFree` is a
 fact about CONTROL FLOW; `compileE`'s causes are facts about REGISTERS AND IMMEDIATES. A
 biconditional would assert that L2 removing the control-flow boundary makes `compileS` total,
