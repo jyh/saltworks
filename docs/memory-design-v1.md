@@ -223,8 +223,21 @@ discipline (author-anywhere, land-at-owner).
   `decQ_encD` (silicon's unit — :1231/:1252/:1264/:1494, three hands
   agree) + ONE decQ-SHAPE consumer = FIVE work items (math's unit);
   v1.1 named two and the atomic commit could not have closed.**
-  The direct four: `decQ_envWith` (:1494, exact) generalizes as
-  before · `entryLoaded_encD_stOfFn` (:1231) and
+  The direct four: **`decQ_envWith` (:1491 statement, :1494 exact) —
+  ⬥v1.2, RE-CLASSED at math's 18:49 pre-start find (bus :59395):
+  NOT a "generalizes" leaf but a HUB of the headline's own kind —
+  `decQ (envWith s w) = s` is a whole-St equality that goes FALSE
+  for non-clean s after M1a, with NINETEEN tactic-level consumer
+  sites (:1521…:5822, enumerated on the bus). It RESTATES as
+  `decQ_envWith_of_clean` (hypothesis: mem = replicate 8 0 ∧
+  trapped = false), expected to serve all nineteen with the
+  hypothesis discharged definitionally — the six St.init sites gain
+  the defaults from M1's own edit, and decQ-built/stepT states are
+  clean by M1a(1) + with-updates. ENTRY CONDITION for the atomic
+  commit (ruled 18:5x, option (a)): ALL NINETEEN instantiations
+  VERIFIED CLEAN by read BEFORE any file is touched — a
+  known-complete repair list, never a build-and-see. Any dirty site
+  found is a same-grade census finding and reopens this row.** · `entryLoaded_encD_stOfFn` (:1231) and
   `not_entryLoaded_offEndEnv` (:1252) land only on .pc/.get, so the
   projection suffices — at a TACTIC EDIT each (`rw [decQ_encD]`
   stops working on a conjunction; budget the `.1`/`.2` plumbing) ·
