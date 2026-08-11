@@ -106,11 +106,16 @@ is a property of the population it was measured on.***
 um2 = 31.7% of the 6x2 die` assumes composition ADDS ONLY THE ORGAN'S OWN CELLS.
 It will not — glue, taps, and the flow's own repair buffers scale with it.** *The
 organ's area is exact; the COMPOSED total is a floor, not a forecast.*
-⛔ **DO NOT READ 32.5% AS A FIT RESULT.** *It is a linear area projection at one
-run's average cell density. It says nothing about ROUTING, about the sort-then-route
-seam's effect on the timing arc, or about the critical path — **which is already 93%
-inside a single cell.** Whether the batcher fits and closes is a MEASUREMENT nobody
-has run.*
+⛔ **DO NOT READ 31.7% AS A FIT RESULT.** *(This line said **32.5%** until the
+exact measurement above retired that projection — the warning is unchanged, only
+the number it guards.)* **An area figure says nothing about ROUTING, about the
+sort-then-route seam's effect on the timing arc, or about the critical path —
+which is already 93% inside a single cell. Whether the batcher fits and closes is
+a MEASUREMENT NOBODY HAS RUN, and the exact organ area does not change that.**
+📌 *It cannot be run honestly yet either: the wiring seam is **R1's v1.1 design
+node**, so inventing a composition to measure would measure MY invented seam and
+report it as the design's. That is why this section still ends in a projection
+while §1, §3 and §4 do not.*
 
 ## 3 · THE DRV DEBT — ⛔⛔ THIS SECTION WAS WRONG AND I REFUTED IT MYSELF (8/10 17:4x)
 
