@@ -931,14 +931,27 @@ OPEN ITEMS:
   default rises (cause-adequate) or the --cap rider stands
   (list-adequate only until the next heavy module) — the framing
   is the decision, so it is stated by cause.**
-- **N7 DESIGN DEBTS, MAESTRO-OWED (post-council, Fable-tier — opened
-  20:39 on math's exhaustion measurement): (a) the N7 ASSEMBLY design
-  block (wiring the landed+composing (7.7) inputs and the kernel'd
-  2-adic collapse into the road row); (b) the W4-a DESIGN CAMPAIGN
-  (gap row 8: real-primitive-conductor 2-part classification;
-  1,300–2,600 ln pricing CONFIRMED by math's shrink attempt — mathlib
-  has the tools, not the theorem). The flagship front at solo tier is
-  exhausted until one of these opens a gate.**
+- **N7 DESIGN DEBTS, MAESTRO-OWED — ✅ BOTH DISCHARGED 08/11 (the
+  Captain's "please fire" at morning council; ruling f-ii): (a) the
+  N7 ASSEMBLY design block is WRITTEN AND THE GATE IS OPEN —
+  salt `docs/exploration/n7-assembly-gate-0811.md` (three waves:
+  A = §7/Lemma 10 opens now, math pulls; B = §5 on A's seal;
+  C = §6 scout in parallel). (b) the W4-a DESIGN CAMPAIGN was
+  DISCHARGED BY EVENTS before it was registered: the structure
+  theorem landed at `eb14498` 08/06 10:28 (`Salt/HB/
+  RealPrimStructure.lean:737`, a ∈ {0,2,3}, 799 ln vs 1,300–2,600
+  priced) — this debt's original text ("mathlib has the tools, not
+  the theorem") was written 08/08 20:39, 58h AFTER the landing: a
+  register asserting world-state instead of measuring it. The
+  flagship front at solo tier REOPENS behind gate (a).**
+  <!-- original debt text, registered 1f4a313 08/08 20:39: "(a) the
+  N7 ASSEMBLY design block (wiring the landed+composing (7.7)
+  inputs and the kernel'd 2-adic collapse into the road row); (b)
+  the W4-a DESIGN CAMPAIGN (gap row 8: real-primitive-conductor
+  2-part classification; 1,300–2,600 ln pricing CONFIRMED by
+  math's shrink attempt — mathlib has the tools, not the theorem).
+  The flagship front at solo tier is exhausted until one of these
+  opens a gate." -->
 - **⭐⭐⭐ THE 01:0x NIGHT COUNCIL — ALL EIGHT RATIFIED (the Captain,
   at the helm past midnight, verbatim: "all recommendations
   ratified, let's fire up the fleet" + the target: "can we get
