@@ -110,7 +110,19 @@ for f in $changed; do
   fi
   sh "$HERE/meas_build.sh" "$f" || rc=1
   b=$(basename "$f" .lean)
-  root=$(grep -n "HDL\.$b\$" SaltWorks.lean 2>/dev/null | head -1)
+  # ⛔⛔ FIXED 2026-08-11 16:4x — THIS LINE HARDCODED `HDL\.` AND LIED ABOUT EVERY
+  # MODULE OUTSIDE THAT NAMESPACE. When SaltWorks/Certs/ landed, the hub imported
+  # `SaltWorks.Certs.All` at SaltWorks.lean:8 and this check still printed
+  # "not in hub graph" — for BOTH cert files, on a correctly-wired tree.
+  # ***It is my own banked gap recurring: the CENSUS was widened past HDL long ago
+  # and the HUB-GRAPH TEST was not. A fix that reaches one arm of a tool and not
+  # its sibling is the same defect this fleet has hit all day.***
+  # ⚠️ AND THE FAILURE DIRECTION WAS THE LOUD ONE: a permanent FALSE "not in hub
+  # graph" on every non-HDL landing trains a reader to ignore the line — which is
+  # how a real unrooted module would have walked past everyone.
+  # Now derives the FULL module name from the path, so it works for any namespace.
+  mod=$(printf '%s' "$f" | sed 's|/|.|g; s|\.lean$||')
+  root=$(grep -n "^import $mod\$" SaltWorks.lean 2>/dev/null | head -1)
   # ⛔⛔ THIS LINE IS AN OBSERVATION, NOT A VERDICT — and the demotion is MEASURED.
   # It used to print "⚠️ UNROOTED — invisible to `lake build`", i.e. it called every
   # unrooted module a defect. On 2026-08-09 13:46 that framing cost a peer their
