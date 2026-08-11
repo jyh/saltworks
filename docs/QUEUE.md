@@ -72,7 +72,16 @@
   grep; a stale citation to a restated name resolves SILENTLY to a
   theorem the citing document never meant, forever. The namespace
   is subject to the same law as counts: a name survives only if its
-  meaning does;** unique Scratch<NODE>-<agent>.lean
+  meaning does;** **CHECK THE ACTION'S OWN EXIT, NOT THE STATE
+  AFTERWARDS (8/10 20:1x, silicon's line, registered at three-seat
+  convergence — silicon/math/compiler each confirmed the idiom in
+  their own hands, so the fleet-law refuter gate is satisfied by
+  construction): a state check answers "what is true now", never
+  "did MY command run" — in a shared checkout the two diverge the
+  moment a peer commits; a failed command must never fall through
+  to its own verification step. The compliant form does BOTH:
+  `&&`-chain on the exit, then read the PAYLOAD (the shell-posts
+  law's other half);** unique Scratch<NODE>-<agent>.lean
   (per-AGENT); explicit-brief law for executors; the kernel-census
   aiming rider for any deletion; **SaltWorks.lean (the root) is
   MAESTRO-ONLY** — landings post "import owed" and the maestro wires
