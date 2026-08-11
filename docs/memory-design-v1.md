@@ -155,9 +155,20 @@ had already drifted; the live values are the ones printed here).**
 → M2 → M3/M4 → M5. Any P1-idle seat may pull per the stealing
 discipline (author-anywhere, land-at-owner).
 
-- **M0 · THE FEASIBILITY PROBE (NEW — gates M1; r-fences Q5's repair;
-  census §6.2/§6.3 named two O(n²) walls and said "before anything is
-  written").** A 3-line Scratch (unique per-agent name, never
+- **M0 · THE FEASIBILITY PROBE — ✅ DISCHARGED 8/10 18:31, JOINTLY
+  (math + silicon as independent MEAS witness; bus :58745 carries
+  the combined row): `deriving DecidableEq` handler succeeds on the
+  grown St (clause form, BOTH hands) · whole-state `decide +kernel`
+  FEASIBLE at ~1–1.34 s wall, **1.32 GB peak RSS at DEFAULT
+  limits** (18x clear of the 24 GB kill wall that took compiler's
+  batcherNetC probe — wall clock alone cannot see that wall; a
+  feasibility probe reports PEAK MEMORY or it has not answered) ·
+  direction-independent (controls differed at first AND last
+  fields) · falsity control proved the comparison evaluated ·
+  #audit_axioms clean. M1 IS UNGATED and quotes that one row.
+  (Original spec follows, kept for the record; r-fences Q5's
+  repair; census §6.2/§6.3 named two O(n²) walls and said "before
+  anything is written").** A 3-line Scratch (unique per-agent name, never
   committed) confirming: (a) `deriving DecidableEq` survives
   `Vector (BitVec 32) 8` + `Bool` on the grown St; (b) `decide
   +kernel` stays feasible on the 1313-bit St (1056 + 256 + 1) in one
