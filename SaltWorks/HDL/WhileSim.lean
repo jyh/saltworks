@@ -262,7 +262,54 @@ theorem wProg_actually_iterates :
       (fun c => ((runFor 8 c St.init).get 1).toNat) = some 0 := by
   decide +kernel
 
+/-- ⭐⭐⭐ **A LOOP INSIDE A LOOP — the shape nothing in this corpus had ever compiled, and
+the gap I publicly named as the one I would BET ON before measuring it.**
+
+*`outer: while i < 3 do (inner: while k < 2 do k := k+1); i := i+1` — the inner loop drains
+on the first outer pass and is false thereafter, so `i = 3` and `k = 2`.*
+
+🔑 ***THIS IS WHY IT WORKS, AND IT IS NOT LUCK: `reaches_of_compileS_including_while`'s
+`whileT` case takes `cb` from `compileS` of an ARBITRARY body and reasons from `cb.length`.
+It never asks what produced that block.*** *So a compiled sub-block — including another
+loop — is already inside the theorem's scope; this control CONFIRMS the theorem rather than
+extending it, which is the honest way round.* -/
+def pNested : Stmt :=
+  .letmut 0 .i32 (.const 0)
+    (.letmut 1 .i32 (.const 0)
+      (.while (.slt (.var 0) (.const 3))
+        (.seq (.while (.slt (.var 1) (.const 2))
+                (.assign 1 (.add (.var 1) (.const 1))))
+              (.assign 0 (.add (.var 0) (.const 1))))))
+
+theorem nested_loops_compile_and_run :
+    (compileS regCanonical 16 [] pNested).map (fun c =>
+      (c.length,
+       ((runFor 400 c St.init).get 1).toNat,
+       ((runFor 400 c St.init).get 2).toNat,
+       ((runFor 400 c St.init).pc.toNat == 4 * c.length),
+       ((runFor 400 c St.init).pc == (runFor 401 c St.init).pc)))
+      = some (22, 3, 2, true, true) := by
+  decide +kernel
+
+/-- …and a `letmut` RE-BOUND on every iteration inside a loop body, which is the other way a
+body stops being straight-line. -/
+def pLetInLoop : Stmt :=
+  .letmut 0 .i32 (.const 0)
+    (.while (.slt (.var 0) (.const 3))
+      (.letmut 1 .i32 (.const 7)
+        (.assign 0 (.add (.var 0) (.const 1)))))
+
+theorem letmut_in_loop_body_compiles_and_runs :
+    (compileS regCanonical 16 [] pLetInLoop).map (fun c =>
+      (c.length,
+       ((runFor 400 c St.init).get 1).toNat,
+       ((runFor 400 c St.init).pc == (runFor 401 c St.init).pc)))
+      = some (13, 3, true) := by
+  decide +kernel
+
 #audit_axioms wProg
 #audit_axioms wProg_compiles_and_loops wProg_actually_iterates
+#audit_axioms pNested pLetInLoop
+#audit_axioms nested_loops_compile_and_run letmut_in_loop_body_compiles_and_runs
 
 end SaltWorks.WhileSim

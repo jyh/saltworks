@@ -403,20 +403,39 @@ corollaries). A caveat that has been discharged reads as caution and is nobody's
 re-check, so it is corrected in the commit that discharged it rather than left to be
 believed.*
 
-⛔ **What is STILL not established, and the list is now shorter and sharper:**
-1. **A loop whose body itself contains control flow.** Every configuration here has a
-   straight-line body. *The nested case is where `n_c` and `n_b` stop being the lengths of
-   straight-line blocks and become the lengths of COMPILED SUB-BLOCKS. The formulas are
-   stated in those terms and §5b's theorems are proved in those terms — they quantify over
-   `n_c` and `n_b` as bare `Nat`s and never ask what produced them — so the arithmetic
-   should survive. **The LAYOUT is what is untested: that the emitter hands them the right
-   two numbers.***
-2. **That the emitter emits this scheme at all.** §5b proves where these immediates land;
+✅✅ **ALL THREE ITEMS BELOW WERE CLOSED BY `a8582b8` (the emitter + `WhileSim`), AND THIS
+BLOCK WAS LEFT READING AS THREE LIVE GAPS FOR SEVERAL HOURS AFTER THEY DIED.**
+
+⚠️ ***THE DEFECT IN THE PROSE IS WORTH MORE THAN THE ITEMS: THIS IS A FILE-SCOPED CAVEAT
+PHRASED AS A CORPUS-WIDE GAP.*** *Every sentence is TRUE OF THIS FILE — `WhileScheme`'s
+certificates do run straight-line bodies and this file emits nothing. But "what is STILL not
+established" is a claim about THE CORPUS, and another file closed all three.* **A caveat rots
+in the SAFE-LOOKING direction: it reads as caution, nobody re-reads it, and the next refuter
+spends their pass on three phantom gaps.** *Corrected in the same commit that measured the
+first one.*
+
+1. ~~**A loop whose body itself contains control flow.**~~ ✅ **CLOSED — AND IT WAS ALREADY
+   IN SCOPE, WHICH I HAD MISSED IN MY OWN THEOREM.** *`reaches_of_compileS_including_while`
+   inducts on the `bigStep` DERIVATION and its `whileT` case takes `cb` from `compileS` of an
+   ARBITRARY body, reasoning from `cb.length` without ever asking what produced that block.*
+   **So the LAYOUT for nested loops is PROVED, not merely plausible** — `nested_loops_compile_
+   and_run` and `letmut_in_loop_body_compiles_and_runs` (`WhileSim`) are CONFIRMATIONS of the
+   theorem, not extensions of it. *I had written that the arithmetic "should survive" and the
+   layout was "untested"; the layout was the half already covered.*
+2. ~~**That the emitter emits this scheme at all.**~~ ✅ **CLOSED — `compileS_while_eq` is
+   the forward equation and its immediates ARE `whileExit`/`whileBack`, so bar clause 1 holds
+   by construction rather than by inspection.** *Originally: §5b proves where these land;
    it says nothing about which immediates `compileS` chooses. *That is bar clause 1, and it
    is discharged by the emitter's own forward equation, not here.*
-3. **The simulation relation across the loop** — that reaching the exit means the source
-   `while` has finished. `Reaches` + `runFor_add` compose it; the derivation induction
-   builds it. **That is the emitter's theorem and the last real risk in this rung.**
+3. ~~**The simulation relation across the loop.**~~ ✅ **CLOSED — it IS
+   `reaches_of_compileS_including_while`, and it was the last real risk in this rung.**
+
+⚖️ **THE HEADER OF THIS FILE ALSO STILL SAYS "L2's `while` clause is not written" AND
+"`compileS` still returns `none` for `.while`". BOTH FALSE SINCE `a8582b8`** — left standing
+with this correction attached rather than silently rewritten, because a reader who quoted
+either sentence needs to find THIS and not a gap. *A pre-registration file describes the
+world before the work; the moment the work lands, its present tense is a lie in the
+flattering direction.*
 -/
 
 end SaltWorks.WhileScheme
