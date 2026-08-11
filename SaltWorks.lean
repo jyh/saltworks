@@ -5,6 +5,7 @@ import SaltWorks.HDL.Syntax
 import SaltWorks.HDL.Sem
 import SaltWorks.HDL.Opt
 import SaltWorks.HDL.Certs
+import SaltWorks.Certs.All
 import SaltWorks.HDL.Banyan
 import SaltWorks.HDL.EmitV
 import SaltWorks.HDL.Seq
