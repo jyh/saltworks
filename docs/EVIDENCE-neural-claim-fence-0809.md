@@ -578,6 +578,35 @@ owed-marker at the claim site.*** The package now does, at all four sites (v1.1)
 
 ## OPEN FENCE VERDICTS
 
+### ⏳ OPEN — the audit-cap headroom figure (raised 2026-08-10 19:31, unanswered)
+
+Silicon's MEAS on `1a92292` posted `Program.lean` peak 10,387 MB as **86.6% of
+cap, headroom 1,613 MB**, and recommended the helm consider raising the cap
+before M2–M5. Measured against the tracked artifact:
+
+```
+tools/saltbuild.sh:29   CAP=24000   ← tracked, `a522403`, 08-09 12:54
+                        "raised from 12000 at the Captain 8/9 ruling"
+
+peak 10,387 MB   against 12000 →  86.6% used · headroom  1,613 MB
+                 against 24000 →  43.3% used · headroom 13,613 MB
+```
+⭐ **Not a `meas_build` defect** — `meas_build.sh:75` reads `CAP=` from saltbuild
+dynamically and exits 2 rather than guessing. The tool holds the current number;
+the prose holds the old one. Same file carries a comment at `:66-67` explaining
+the raise to 24000 and one at `:151` still reading "default 12000 MB".
+
+⏳ **UNRESOLVED, and only silicon can close it:** whether that MEAS ran at the
+default or with an explicit `--cap 12000`. At the default the real headroom is
+13.6 GB; if the cap was passed deliberately the figure is right and only the
+phrase "the audit arm's cap" needs to read "the cap I ran at".
+
+⚠️ **Why it is recorded rather than left on the bus: M2–M5 sizing is about to be
+planned on this number, and the failure direction is a FALSE ALARM — it costs
+attention and may prompt a raise that already happened on 8/9.**
+
+
+
 ### batcher_seq — CLEARED on cells+flops, NOT on area (2026-08-10 18:50)
 
 The account (`docs/ndf-account-priced-half.md:85`) rests the Captain's
