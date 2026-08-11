@@ -179,12 +179,14 @@
   rooted-seals — a covering build is integration through one hand;
   MEAS is an independent kernel witness by another. Two functions,
   both stand. BASELINE LAW (silicon's catch, folded): the marker is
-  the sha of the last MEAS VERDICT, never the last commit; no
-  verdict later than the 8/9 bank baseline `1bb4038` is nameable,
-  so it stands and the meas_since.sh 12-module closure list is the
-  backlog census. Order: newest P1 landing first (CompileE
-  `5723cde`/rooted `eda3a49`), then silicon's judgment. Read-work
-  discipline: parkable, never gates P1; every verdict posts its
+  the sha of the last MEAS VERDICT, never the last commit.
+  BASELINE STRUCK 18:19 (silicon's own catch, adopted-on-say-so
+  corrected): the last verdict was `763d02a` (16:55, StraightLine),
+  not the bank's example `1bb4038`; true backlog 6 landings/7
+  modules — DISCHARGED 18:19, 6/6 kernel-checked NO DEFECT
+  (CompileE·X0·X1·X2·RegMap·SeamCSorted; A0Routes221 excluded as
+  same-hand). MEAS CURRENT at `2d4e218`. Read-work discipline:
+  parkable, never gates P1; every verdict posts its
   sha.** — conveyor refutation on every compiler
   landing; CELLS pricing on request. C5 re-baseline: **DISCHARGED
   15:52 (3bf84a0)** — run after its registered gate opened at 3b,
@@ -949,7 +951,20 @@ OPEN ITEMS:
   TONIGHT is the named target; the fabbed-is-verified law governs
   the SUBMISSION, not the first measurement run — V1-V3/V9/V10
   land behind the layout, before any tapeout word.**
-- **⭐⭐⭐ THE THREE-TIER AMENDMENT (8/10 17:0x, the Captain at council,
+- **⭐ P2 ① IS PAID — THE GATE IS OPEN (8/10 18:2x, the night
+  maestro, Fable hand, ritual on record): docs/memory-design-v1.md
+  is at v1.1 — the five-refuter pass (5/5 REPAIR-THEN-FIRE, 0 FATAL;
+  verdicts at ${SEAT_DIR}/briefs/2026-08-10-memory-block-refuter-verdicts
+  .json) FOLDED per the evening bank's majors (a)-(e): the St
+  extension's codec/executive breakage scoped as M1a (decQ_encD
+  restated as the (regs,pc) projection), the task-0-scratch claim
+  STRUCK (option (a): v1 memory is standalone-only, executive LW/SW
+  is the X4+ door), the slice_a_excluded fixup folded into M2's
+  commit, addrClass precisions folded (named lemma addrClass_ok_lt;
+  aligned-out-of-range witness; else-.ok slogan retired), M4
+  restated + mutant discipline fixed, dmem_addr8 ruled for stage ③,
+  M0 feasibility probe gates M1. P2 ② MAY PULL: M0 first (any
+  P1-idle seat), then M1+M1a atomic, per the stealing discipline.**
   his words: "for PoC no memory is fine, but it is very unrealistic, you
   can do a design today. P1 stays as it stands, LW/SW move into P2, and
   the others become P3"): the two-track ruling below is AMENDED to three
