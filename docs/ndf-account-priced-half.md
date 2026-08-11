@@ -146,11 +146,42 @@ sky130_fd_sc_hd default_max_transition = 1.50 ns   <- the PDK's actual limit
 count against a deliberately conservative margin (half the PDK limit) and is the
 right number for judging design quality. 336 is the count against the limit the
 library actually states.** *The organs are clean against the PDK limit outright.*
-⚠️ **THE REAL FINDING, AND IT IS NOT ABOUT OUR RTL: 40 of the buffers the flow
-INSERTED to repair fanout are themselves over the PDK's slew limit.** *The
-remaining lever is synthesis and resizer configuration, not the drive ruling —
-and that is LibreLane's knob set, not R2's. **UNTESTED: I am naming the lever, not
-claiming it.***
+⚠️ **40 of the buffers the flow INSERTED to repair fanout are themselves over the
+PDK's slew limit** — which was the clue that sent me to the stage trace.
+
+## 3b · WHERE THE SLEW DEBT IS BORN — THE STAGE TRACE SETTLES IT, NO RUN NEEDED
+
+**Same run, same corner (`nom_tt_025C_1v80`), every STA stage in order:**
+```
+12-openroad-staprepnr      1627   pre-PnR, on wire-load estimates
+31-openroad-stamidpnr      3223   after placement, before repair
+36-openroad-stamidpnr-1       0   <- DESIGN REPAIR FIXES ALL OF THEM
+38-openroad-stamidpnr-2       0
+43-openroad-stamidpnr-3       0   after antenna repair, BEFORE detailed routing
+55-openroad-stapostpnr      564   after DETAILED ROUTING + RC EXTRACTION
+```
+🔑 ***THE REPAIR WORKS PERFECTLY. 3,223 → 0. THE ENTIRE DEBT IS CREATED BY
+POST-ROUTE PARASITICS, AND REPAIR NEVER SEES THEM BECAUSE IT RUNS BEFORE
+ROUTING.*** **`GRT_DESIGN_REPAIR_RUN_GRT` is True and it did its job — the same
+netlist had ZERO slew violations three stages before the number we have been
+quoting all day.**
+
+⛔ **THIS RETIRES THE DRIVE-STRENGTH AND SYNTHESIS-QUALITY STORIES OUTRIGHT, not
+by argument but by timing: a netlist cannot have a drive-strength defect at stage
+55 and not at stage 43. It is the same netlist.** *What changed between them is
+wire RC on a **1030 µm-wide die at 30% utilisation**.*
+⭐ **AND THE CROSS-CHECK WAS ALREADY IN THIS DOCUMENT: the BB at 1x1 — a 161 µm
+die — carries ELEVEN slew violations and zero against the PDK limit. Same flow,
+same PDK, same knobs, 1/6th the width.** *Wire length is the variable.*
+
+📌 **THE LEVER, NAMED PRECISELY AND NOT PULLED:** `GRT_DESIGN_REPAIR_MAX_WIRE_LENGTH`
+and `DESIGN_REPAIR_MAX_WIRE_LENGTH` are both **0 (disabled)**, so nothing buffers a
+long net in anticipation of the RC that routing will add. *Setting them requires
+choosing a length, and choosing it is a design decision with an area cost — **not
+a knob I should pick unilaterally and quietly**. The alternatives are denser
+placement (shorter nets) or accepting the debt against a bar that is already half
+the PDK's.* ⚠️ **UNTESTED. I am naming the lever and its exact config keys; I have
+not run it, and 336-against-the-PDK-limit is what it would be trying to move.**
 - ⛔ **THE "CLOCK" HYPOTHESIS IS WITHDRAWN.** It proposed re-running with CTS
   max-slew/max-cap to collapse "the 67". *The 67 are a **max-fanout** check —
   neither knob addresses them — and `Flow/harden.sh` already banks a controlled
