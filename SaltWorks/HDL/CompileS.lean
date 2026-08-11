@@ -245,13 +245,16 @@ def whileFits (n_c n_b : Nat) : Bool := 2 * (n_b + 2) ≤ 2047 && 2 * (n_c + n_b
 
 /-- ⭐⭐⭐ **THE FRAGMENT PREDICATE, MADE EXPLICIT — a boundary whose whole job is to MOVE.**
 
-A statement is branch-free when it emits no `BEQ`. **Today this coincides with "`compileS`
-returns `some`" in one direction only, and that coincidence is a theorem provable exactly
-now** (`compileS_accepts_only_branchFree`, below) — the moment L2's emitters land, `compileS`
-accepts statements this predicate rejects and the pin becomes unprovable forever.
+A statement is branch-free when it emits no `BEQ`. ⭐ **THE DIVERGENCE THIS DEFINITION WAS
+CREATED TO SURVIVE HAS NOW HAPPENED: `while` compiles, so `branchFree` denotes a PROPER
+SUBSET of what `compileS` accepts.** *The pin that recorded the two agreeing was retired by
+the emitter that separated them (§5), and `fragment_now_includes_while` is the standing
+witness that they have parted.*
 
 🔑 ***WHY IT IS A DEFINITION AND NOT AN IDIOM: three theorems below discharge their `ite` and
-`while` cases TODAY by the contradiction that `compileS` returns `none`. That contradiction
+`while` cases by the PROPERTY rather than by the accident that `compileS` returns `none` —
+and that accident is now half-gone. Had they leaned on it, the `while` clause would have
+broken all three; as written it broke NONE.*** *That contradiction
 is the fragment boundary borrowed rather than named, and it evaporates the instant either
 emitter lands.*** *Naming the boundary lets those proofs depend on the PROPERTY instead of on
 the accident, so the `while` emitter and the `ite` emitter — which break them identically, at
@@ -286,9 +289,25 @@ def compileS (reg : RegMap) (d : Nat) : Ctx → Stmt → Option (List Instr)
             compileS reg d ((x, ty) :: Γ) body with
       | some ce, some rd, some rl, some cb => some (ce ++ [.ADDI rl rd 0] ++ cb)
       | _, _, _, _ => none
-  -- ⛔ THE FRAGMENT BOUNDARY. A branch is not straight-line; L2 owns it.
+  -- ⛔ THE FRAGMENT BOUNDARY, now half-crossed. `ite` is still L2's to take.
   | _, .ite _ _ _ => none
-  | _, .while _ _ => none
+  -- ⭐⭐⭐ **L2's `while`.** Layout and offsets are `WhileScheme`'s, pre-registered before
+  -- this clause existed; the immediates are `whileExit`/`whileBack` themselves, so the
+  -- bar's clause 1 holds by construction rather than by inspection.
+  --   cc                      condition code, result in `rd`
+  --   BEQ rd x0 (whileExit)   taken when the condition is FALSE  ⇒ exit
+  --   cb                      body
+  --   BEQ x0 x0 (whileBack)   unconditional, BACKWARD to the condition's first instruction
+  -- `whileFits` is the LOCAL check and discharges the representability half exactly; the
+  -- pc-range half mentions the block's POSITION and is the caller's, as at L0 and L1.
+  | Γ, .while c body =>
+      match compileE Γ reg c d, regAt d, compileS reg d Γ body with
+      | some cc, some rd, some cb =>
+          if whileFits cc.length cb.length then
+            some (cc ++ (.BEQ rd 0 (whileExit cb.length)) ::
+                  (cb ++ [.BEQ 0 0 (whileBack cc.length cb.length)]))
+          else none
+      | _, _, _ => none
 
 /-! ### Forward equations and the shape lemmas that invert them -/
 
@@ -364,10 +383,54 @@ theorem compileS_letmut_shape {reg : RegMap} {d : Nat} {Γ : Ctx} {x : Nat} {ty 
                   refine ⟨ce, rd, rl, cb, rfl, rfl, rfl, rfl, ?_⟩
                   rw [compileS_letmut_eq h1 h2 h3 h4] at h; exact (Option.some.inj h).symm
 
+/-- The `while` clause's forward equation. **The immediates are `whileExit`/`whileBack`
+THEMSELVES** — this equation is where the bar's clause 1 stops being a promise. -/
+theorem compileS_while_eq {reg : RegMap} {d : Nat} {Γ : Ctx} {c : Exp} {body : Stmt}
+    {cc cb : List Instr} {rd : Fin 32}
+    (h1 : compileE Γ reg c d = some cc) (h2 : regAt d = some rd)
+    (h3 : compileS reg d Γ body = some cb)
+    (h4 : whileFits cc.length cb.length = true) :
+    compileS reg d Γ (.while c body)
+      = some (cc ++ (Instr.BEQ rd 0 (whileExit cb.length)) ::
+              (cb ++ [Instr.BEQ 0 0 (whileBack cc.length cb.length)])) := by
+  simp [compileS, h1, h2, h3, h4]
+
+/-- …and its inversion. ⚠️ **`whileFits` comes OUT of a successful compile**, which is how
+the emitter hands the representability half of the branch obligations to every consumer
+without anyone re-deriving it. -/
+theorem compileS_while_shape {reg : RegMap} {d : Nat} {Γ : Ctx} {c : Exp} {body : Stmt}
+    {blk : List Instr} (h : compileS reg d Γ (.while c body) = some blk) :
+    ∃ cc rd cb, compileE Γ reg c d = some cc ∧ regAt d = some rd ∧
+      compileS reg d Γ body = some cb ∧ whileFits cc.length cb.length = true ∧
+      blk = cc ++ (Instr.BEQ rd 0 (whileExit cb.length)) ::
+              (cb ++ [Instr.BEQ 0 0 (whileBack cc.length cb.length)]) := by
+  cases h1 : compileE Γ reg c d with
+  | none => simp [compileS, h1] at h
+  | some cc =>
+      cases h2 : regAt d with
+      | none => simp [compileS, h1, h2] at h
+      | some rd =>
+          cases h3 : compileS reg d Γ body with
+          | none => simp [compileS, h1, h2, h3] at h
+          | some cb =>
+              by_cases h4 : whileFits cc.length cb.length = true
+              · refine ⟨cc, rd, cb, rfl, rfl, rfl, h4, ?_⟩
+                rw [compileS_while_eq h1 h2 h3 h4] at h; exact (Option.some.inj h).symm
+              · simp [compileS, h1, h2, h3, h4] at h
+
+/-- The emitted loop's length, as the layout says: condition · exit branch · body · back
+branch. *Every `codeAt` split below is stated in these four pieces.* -/
+theorem compileS_while_length {cc cb : List Instr} {rd : Fin 32} :
+    (cc ++ (Instr.BEQ rd 0 (whileExit cb.length)) ::
+      (cb ++ [Instr.BEQ 0 0 (whileBack cc.length cb.length)])).length
+      = cc.length + cb.length + 2 := by
+  simp; omega
+
 #audit_axioms lvlReg
 #audit_axioms lvlReg_eq varReg_eq_lvlReg
 #audit_axioms compileS
 #audit_axioms compileS_skip_eq compileS_assign_eq compileS_seq_eq compileS_letmut_eq
+#audit_axioms compileS_while_eq compileS_while_shape compileS_while_length
 #audit_axioms compileS_assign_shape compileS_seq_shape compileS_letmut_shape
 
 /-! ## 5. THE SIMULATION LEMMA
@@ -376,32 +439,41 @@ Induction on the `bigStep` DERIVATION, not on the statement — so `while`'s two
 distinguished and `ite`'s two branches carry their own condition. Both are discharged by
 the fragment boundary here; L2 replaces those four cases with real code. -/
 
-/-- ⭐⭐ **THE PIN, PROVABLE EXACTLY NOW: EVERYTHING THIS COMPILER ACCEPTS IS BRANCH-FREE.**
-*Math's refuter read asked for this before the emitter lands, and they were right to: it is
-the only moment in this compiler's life when it can be stated.* **The moment `while`
-compiles, `compileS` accepts a statement `branchFree` rejects and this theorem is false —
-it is a dated record that the predicate named the fragment correctly when the fragment was
-still here to be named.**
+/-! ### ⛔⛔ THE PIN IS GONE — THE `while` EMITTER CONSUMED IT, WHICH IS ITS ONE JOB
 
-⚠️ ***THE CONVERSE IS FALSE TODAY, so this is an implication and not the biconditional the
-proposal carried*** — see `branchFree_is_necessary_not_sufficient`. -/
-theorem compileS_accepts_only_branchFree (reg : RegMap) (d : Nat) :
-    ∀ (p : Stmt) (Γ : Ctx) (c : List Instr), compileS reg d Γ p = some c →
-      branchFree p = true := by
-  intro p
-  induction p with
-  | skip => intro _ _ _; rfl
-  | assign x e => intro _ _ _; rfl
-  | seq s t ihs iht =>
-      intro Γ c h
-      obtain ⟨cs, ct, hs, ht, rfl⟩ := compileS_seq_shape h
-      simp [branchFree, ihs Γ cs hs, iht Γ ct ht]
-  | ite c' thn els _ _ => intro Γ c h; simp [compileS] at h
-  | «while» c' body _ => intro Γ c h; simp [compileS] at h
-  | letmut x ty e body ih =>
-      intro Γ c h
-      obtain ⟨ce, rd, rl, cb, hce, _, _, hcb, rfl⟩ := compileS_letmut_shape h
-      simp [branchFree, ih ((x, ty) :: Γ) cb hcb]
+`compileS_accepts_only_branchFree` said *everything this compiler accepts is branch-free*.
+Math's refuter read asked for it before the emitter landed, on the grounds that it was
+provable in no other window.
+
+⭐ ***AND IT DYING IS IT WORKING — math's own line when it happened: "I designed it as an
+anchor to the CURRENT fragment, so it must become false the moment the fragment moves. A
+boundary marker that survived the boundary moving would have been measuring nothing."***
+
+`compileS_accepts_only_branchFree` stated `compileS reg d Γ p = some c → branchFree p =
+true`. **It was TRUE over exactly `1f83b9a … 0083614` and is FALSE of this file**: take
+`p = .while c body` that compiles, and `branchFree p = false` by definition.
+
+```
+RETIRED BECAUSE FALSE, not because restated — the two are different events and
+must not look alike in the log. There is ONE compiler; the statement is simply
+untrue of it, so it cannot be rescued with a hypothesis and cannot be kept.
+WHAT IT CERTIFIED   that `branchFree` named the fragment CORRECTLY at the moment
+                    the fragment was still there to be named.
+WHY IT COULD ONLY   the emitter destroys its own witness: after this clause there
+EVER BE STATED      is no window in which the equality holds again.
+THEN                math's refuter read asked for it before the emitter landed.
+```
+🔑 ***A pin whose DEATH is the evidence that the boundary moved. Nothing downstream cited
+it — it was a dated record, and this note is what the record becomes.*** *`branchFree`
+itself is untouched and load-bearing: it is the hypothesis of all three restated theorems,
+and it now denotes a PROPER SUBSET of what the compiler accepts, which is exactly the
+divergence the definition was created to survive.*
+
+✅ **AND THE RECORD IS NOT LEFT AS PROSE. `fragment_now_includes_while` below is the pin's
+DUAL — a concrete `p` with `(compileS … p).isSome = true ∧ branchFree p = false` — math's
+own proposal at 02:28 for what should replace it. *The retired pin said the two agreed; its
+successor says they have PARTED, and unlike the pin this one stays true forever.* A prose
+note claiming a boundary moved is a claim; this is a witness.** -/
 
 /-- `compileS` emits straight-line code for a BRANCH-FREE statement, so `run` is the right
 form and `runFor_extend` covers it.
@@ -475,7 +547,20 @@ theorem chkS_letmut_inv {Γ : Ctx} {x : Nat} {ty : Ty} {e : Exp} {body : Stmt}
     inferE Γ e = some ty ∧ chkS ((x, ty) :: Γ) body = true := by
   simp only [chkS, Bool.and_eq_true, beq_iff_eq] at h; exact h
 
-#audit_axioms chkS_assign_inv chkS_seq_inv chkS_letmut_inv
+theorem chkS_while_inv {Γ : Ctx} {c : Exp} {body : Stmt}
+    (h : chkS Γ (.while c body) = true) :
+    inferE Γ c = some .bool ∧ chkS Γ body = true := by
+  simp only [chkS, Bool.and_eq_true, beq_iff_eq] at h; exact h
+
+/-- ⭐ **A BRANCH WRITES NO REGISTER — it moves the `pc` and nothing else.** *The whole reason
+`encodeOK` survives both of a loop's branches for free, and the reason the simulation
+relation never has to be re-established across them.* -/
+theorem step_BEQ_get (s : St) (a b : Fin 32) (imm : BitVec 12) (r : Fin 32) :
+    (step s (.BEQ a b imm)).get r = s.get r := by
+  simp only [step]; split <;> rfl
+
+#audit_axioms chkS_assign_inv chkS_seq_inv chkS_letmut_inv chkS_while_inv
+#audit_axioms step_BEQ_get
 
 /-- The one-instruction move that ends every statement, seen from the level it writes. -/
 theorem move_writes_level {reg : RegMap} {d : Nat} (hreg : RegOk reg d)
@@ -568,7 +653,6 @@ theorem compileS_correct_of_branchFree {reg : RegMap} {d : Nat} (hreg : RegOk re
   | whileT _ _ _ _ _ => intro hbf _ c st _ _; simp [branchFree] at hbf
 
 #audit_axioms branchFree
-#audit_axioms compileS_accepts_only_branchFree
 #audit_axioms compileS_is_forward_of_branchFree
 #audit_axioms exec_move_get exec_move_get_self
 #audit_axioms compileS_correct_of_branchFree
@@ -624,21 +708,40 @@ theorem the_final_state_is_not_an_encoding :
 /-- ⛔ **THE FRAGMENT BOUNDARY, EXHIBITED — and it is a SCOPE MARKER, not a machine
 limit.** The same well-typed body compiles inside a `seq` and is rejected inside an `ite`.
 *L0's three `none` causes are facts about the hardware; this one is a fact about which
-rung you are standing on, and L2 removes it.* -/
-theorem cause_outside_the_straight_line_fragment :
+rung you are standing on.*
+
+⛔⛔ ***RESTATEMENT — THE OLD NAME CEASES TO EXIST.*** The retired form asserted that BOTH
+control forms return `none`, and **its third conjunct is FALSE of this file: `while`
+compiles now.** *The cause it exhibits is real and has simply SHRUNK — what remains outside
+the fragment is `ite` alone. Naming the theorem for the boundary AS IT STANDS beats leaving
+a true-sounding name over a false conjunct.* -/
+theorem cause_outside_the_fragment_is_now_ite_only :
     (compileS regCanonical 16 [(0, Ty.i32)] (.seq (.assign 0 (.const 5)) .skip)).isSome = true
   ∧ compileS regCanonical 16 [(0, Ty.i32)]
       (.ite (.slt (.var 0) (.const 5)) (.assign 0 (.const 5)) .skip) = none
-  ∧ compileS regCanonical 16 [(0, Ty.i32)]
-      (.while (.slt (.var 0) (.const 5)) .skip) = none := by
+  ∧ (compileS regCanonical 16 [(0, Ty.i32)]
+      (.while (.slt (.var 0) (.const 5)) .skip)).isSome = true := by
   refine ⟨by decide +kernel, by decide +kernel, by decide +kernel⟩
+
+/-- ⭐⭐⭐ **THE RETIRED PIN'S DUAL, AND MATH'S OWN PROPOSAL FOR WHAT SHOULD REPLACE IT: a
+CONCRETE witness that `branchFree` and "compiles" have PARTED.**
+
+*The pin said the two agreed and could only be stated while that was true. **This says they
+disagree, exhibits the `p` that separates them, and stays true forever.*** A prose note
+claiming the fragment moved is a claim; this is a witness — and it is the positive control
+for the whole 2b landing, because if it ever failed, the emitter would not be emitting. -/
+theorem fragment_now_includes_while :
+    (compileS regCanonical 16 [(0, Ty.i32)]
+       (.while (.slt (.var 0) (.const 5)) .skip)).isSome = true
+  ∧ branchFree (.while (.slt (.var 0) (.const 5)) .skip) = false := by
+  refine ⟨by decide +kernel, rfl⟩
 
 /-- ⭐⭐⭐ **`branchFree` IS NECESSARY AND NOT SUFFICIENT — the control that stops the pin
 from being "strengthened" into a false biconditional.**
 
 *Math's refuter read proposed pinning `branchFree p = true ↔ (compileS reg d Γ p).isSome`
-before the emitter lands. The forward direction is `compileS_accepts_only_branchFree` and it
-is right and worth having. **The converse is FALSE TODAY**, and this is the witness: an
+before the emitter lands. The forward direction was `compileS_accepts_only_branchFree`, retired
+when the `while` emitter falsified it. **The converse is FALSE TODAY**, and this is the witness: an
 oversized constant is rejected by L0's immediate cause while the statement is perfectly
 branch-free.*
 
@@ -720,7 +823,8 @@ theorem witness_chain_discharged :
 #audit_axioms witnessProg witnessProg_wellFormed
 #audit_axioms witness_runs
 #audit_axioms the_final_state_is_not_an_encoding
-#audit_axioms cause_outside_the_straight_line_fragment
+#audit_axioms cause_outside_the_fragment_is_now_ite_only
+#audit_axioms fragment_now_includes_while
 #audit_axioms cause_pool_exhaustion_at_letmut
 
 end SaltWorks.CompileS

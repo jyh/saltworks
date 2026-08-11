@@ -195,10 +195,21 @@ def runFor : Nat → List Instr → St → St
 /-- **Whole-program execution** — the freeze's `step*`, and row 7 of its seam
 manifest, which was unowned until now.
 
-`code.length` is a *sufficient* bound rather than a fuel parameter: every branch
-the code generator emits is forward (confirmed by kill-check R4 under all four
-candidate offset conventions), so `pc` strictly increases and at most
-`code.length` instructions can be fetched before it leaves the program. -/
+⛔⛔ **THIS DOCSTRING CLAIMED "every branch the code generator emits is forward", AND THAT
+SENTENCE DIED WHEN L2's `while` CLAUSE LANDED.** `compileS` now emits a BACKWARD `BEQ` to
+close a loop, so `pc` no longer strictly increases and `code.length` is **not** a sufficient
+bound for a program containing one.
+
+✅ **`run` IS STILL CORRECT — ON THE BRANCH-FREE FRAGMENT, which is exactly where it is now
+used.** *`run_compileS_correct_of_branchFree` carries the `branchFree` hypothesis for this
+reason, and `BlockCalc.run_has_too_little_fuel_for_a_loop` is the landed proof that no
+`run`-shaped statement can cover a loop: `run` spends one tick per instruction and a loop
+needs more ticks than the program has instructions.*
+
+🔑 ***A LOOP'S CORRECTNESS IS THEREFORE `Reaches`-SHAPED, NEVER `run`-SHAPED*** — see
+`reaches_of_compileS_including_while`. **The claim above was true for as long as the
+fragment was straight-line, and it sat under a true theorem, which is the shape a green
+build cannot catch: `run` itself never changed.** -/
 def run (code : List Instr) (s : St) : St := runFor code.length code s
 
 /-- The initial state: zeroed registers, `pc = 0`. -/
