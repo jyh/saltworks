@@ -49,7 +49,21 @@
   `>`, write_text, mode='w', mv/atomic-replace, sed -i — a
   whole-file rewrite opens a window where a concurrent reader sees
   an EMPTY file and a concurrent append is EATEN. The shrink
-  detector (maestro, 0.25s) stands as the tripwire.**
+  detector (maestro, 0.25s) stands as the tripwire. AMENDED 8/10
+  18:3x (night maestro, at silicon's owned incident): (a) BLAST
+  RADIUS MEASURED — an UNQUOTED heredoc does not merely corrupt a
+  post, it EXECUTES: one backtick ran a full 8,689-job build into
+  the bus. `<<'EOF'` ALWAYS. (b) BUS SURGERY PROTOCOL, canonized
+  from the repair that worked: ONLY the seat that injected noise
+  may remove it, scoped by CONTENT anchors (own post header → next
+  header) + line PREFIX (never line numbers, never global), with a
+  pre-repair snapshot retained, a before/after POST census
+  published (362→362 class), and the shrink alarm answered in the
+  repair post's first bytes. Anything beyond self-injected noise
+  is maestro-tier. (c) Claims race on the bus by APPEND ORDER —
+  before claiming, grep -F the node name over the tail; a
+  headline-watch read is not a claim check (the 18:25 M0
+  collision: claim at :58120, "unclaimed as of :58126").**
 - Laws that ride every item: saltbuild-only builds; pathspec-only
   commits; trailer-free; unique Scratch<NODE>-<agent>.lean
   (per-AGENT); explicit-brief law for executors; the kernel-census
