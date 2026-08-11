@@ -2,7 +2,12 @@
 # dup_props.sh — find propositions PROVED MORE THAN ONCE under different names.
 #
 #   sh docs/silicon-tools/dup_props.sh [git-ref] [path-glob]
-#   sh docs/silicon-tools/dup_props.sh origin/master 'SaltWorks/HDL/*.lean'
+#   sh docs/silicon-tools/dup_props.sh <ref> 'SaltWorks/HDL/*.lean'
+#   <ref> OPTIONAL — omit it and the default RESOLVES via origin/HEAD.
+#   Do NOT paste a literal branch name here: a worked example is the most-copied
+#   text in any file and the least audited, so a typed ref in USAGE TEACHES the
+#   defect even when the code is correct (compiler's 10:38 distinction —
+#   mine EXECUTED the wrong ref, this line would TEACH it).
 #
 # ⚖️ NOT the same class as docs/hdl-tools/dup_decls.py, and both are worth having:
 #     dup_decls.py  SAME NAME in two files -> Lean SILENTLY keeps the

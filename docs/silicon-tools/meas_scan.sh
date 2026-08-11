@@ -2,7 +2,11 @@
 # meas_scan.sh — the SILICON seat's MEAS structural pass, in one place.
 #
 #   sh docs/silicon-tools/meas_scan.sh <ref> <module-path>
-#   sh docs/silicon-tools/meas_scan.sh origin/master SaltWorks/HDL/SortDemo.lean
+#   sh docs/silicon-tools/meas_scan.sh <ref> SaltWorks/HDL/SortDemo.lean
+#   <ref>: resolve it, never type it —
+#     "$(git symbolic-ref --short refs/remotes/origin/HEAD)"
+#   A typed branch name in a USAGE LINE propagates by COPY into repos whose
+#   default is not master.
 #
 # ⛔ WHY THIS FILE EXISTS, AND IT IS THE ROOT CAUSE OF A WHOLE DAY OF DEFECTS:
 # I ran this pass eight times on 2026-08-08 and RE-WROTE THE PATTERNS EVERY TIME.
