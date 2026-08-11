@@ -202,7 +202,18 @@ discipline (author-anywhere, land-at-owner).
   decQ (encD s) = s` — true for every state this codec is ever fed
   in the Stack lane, because `stOfFn`/`offEndEnv` build exactly such
   states BY CONSTRUCTION. Proof shape: `obtain ⟨regs, pc, mem, tr⟩
-  := s`; `St.mk.injEq` is now 4 conjuncts. `decQtransposed`'s
+  := s`; `St.mk.injEq` is now 4 conjuncts — **and the two
+  RECONSTRUCTION sites in the same proof (`encD ⟨regs, pc⟩` at
+  StateCodec.lean:142 and :150) gain the two fields too (⬥v1.1.3,
+  math's shape census: patching the `obtain` alone fails three
+  lines below the edit). FALSE-POSITIVE FENCE (same census, the
+  expensive direction): the `{ regs := …, pcs := …, cur := … }`
+  literals at ExecutiveX0.lean:153 and ExecutiveX1.lean:217 are
+  `SysSt`, NOT `St` — same field NAME, different type. DO NOT
+  TOUCH: adding mem/trapped to SysSt is precisely the capability
+  §0.6 STRUCK; a sweep that "repairs" all six regs-literals
+  re-introduces the ruled-out design through the back door.**
+  `decQtransposed`'s
   theorem (:186) restates freely — ZERO consumers outside StateCodec
   (math's census). (3) `SysSt.task` (ExecutiveX0.lean:66) gains
   default mem/trapped (sufficient BECAUSE of the §0.6 ruling: the
