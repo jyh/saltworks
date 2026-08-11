@@ -88,6 +88,18 @@ fi
 rc_all=0
 
 for target in "$@"; do
+  # ⛔⛔ PIN THE TREE BEFORE ELABORATING — silicon, 2026-08-10 19:3x, a defect I
+  # reported against this very file. THIS SCRIPT ELABORATES THE WORKING TREE while
+  # `meas_since.sh` labels the verdict with a RANGE END. In the SHARED checkout
+  # those are DIFFERENT OBJECTS: a peer commits and the tree moves under the run.
+  # On 8/10 my label was true only because math's `747402e` landed FOUR MINUTES
+  # after my elaboration — true by TIMING, not by CONSTRUCTION. Had it landed
+  # first I would have published "MEAS ON <sha>" over a different tree, silently,
+  # green either way. ⇒ Read HEAD before, re-read after, and REFUSE to report a
+  # clean verdict if it moved. [[read-tools-inherit-the-shared-tree]]
+  head_before=$(git rev-parse --short HEAD 2>/dev/null || echo '?')
+  dirty=$(git status --porcelain -- "$target" 2>/dev/null | wc -l | tr -d ' ')
+
   # ⭐⭐ THE GATE. This is the whole point of the file: the false sentence must be
   # UNREACHABLE, not merely unlikely. A dotted module name cannot be built
   # independently, so it is refused here rather than trusted downstream.
@@ -186,7 +198,16 @@ for target in "$@"; do
   fi
 
   if [ "$code" = "0" ]; then
+    head_after=$(git rev-parse --short HEAD 2>/dev/null || echo '?')
     printf '✅ %s — KERNEL-CHECKED under this hand · %ss · EXIT=0 @ sha %s%s\n' "$target" "$wall" "$h1" "$capnote"
+    if [ "$head_before" = "$head_after" ]; then
+      printf '   tree PINNED at %s (re-read after elaboration, unchanged)%s\n' \
+        "$head_before" "$([ "$dirty" -gt 0 ] && echo ' ⚠️ target has UNCOMMITTED local changes — the verdict is on the WORKING COPY, not on that commit')"
+    else
+      printf '   ⛔⛔ THE TREE MOVED MID-RUN: %s -> %s. This verdict names a commit it did NOT elaborate.\n' "$head_before" "$head_after"
+      printf '      A peer committed into the shared checkout while the kernel ran. RE-RUN before quoting this.\n'
+      rc_all=1
+    fi
     printf '   scope: TARGET elaborated fresh by the kernel. Its %s direct imports and\n' "$nimp"
     printf '          their transitive closure came from cached oleans — NOT re-checked here.\n'
   else
