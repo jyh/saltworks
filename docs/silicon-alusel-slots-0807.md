@@ -53,7 +53,7 @@ slot is selected, the value there is the shift that instruction asked for.***
 ⇒ **All three slots carrying one producer is not a hack; it is the moded
 shifter's contract, spelled out in wiring.**
 🔑 **And (b)'s real cost is the one worth naming: it would throw away the
-freshest unconditional theorem in the campaign to save mux levels nobody has
+freshest unconditional theorem in the campaign to save mux levels nobody in this campaign has
 measured.** *That is the trade I refused to price at 15:20 and can now price:
 **don't**.*
 

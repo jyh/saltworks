@@ -37,7 +37,7 @@ same breath ("from the new theorems plus `decode_encode`").* ⇒ **The honest
 reading of math's claim is the narrow one, and on the narrow reading it is TRUE.**
 
 ⭐ **SO THE FINDING IS NOT "THE CLAIM IS WRONG" — IT IS THAT THE SUPERSESSION IS
-NOW QUANTIFIABLE, AND NOBODY HAS QUANTIFIED IT:**
+NOW QUANTIFIABLE, AND NOBODY IN THIS CAMPAIGN HAS QUANTIFIED IT:**
 
 > **8,192 immediate-sweep points → 0. A 32-point register-field sweep remains one
 > level down — and it is about `Fin 32` totality, not about immediate wiring at

@@ -102,7 +102,7 @@ named `*core` in the corpus is a COMPONENT core — `bnCore` (Batcher network),
 `ceCcore` (compare-exchange), `cell88core` (the 1988 cell) — **none is a
 processor core.** ⇒ *The question "what does the core total?" has no referent
 yet. That is a stronger statement than "the total is unverified," and it is the
-honest one: the parts have never been wired together in the kernel.*
+honest one: the parts have never been wired together in our kernel.*
 
 ## 2 · THE MEASURED INVENTORY — every landed datapath component
 
@@ -180,7 +180,7 @@ merely designed.*
 instantiations (`genSelect 10 4` − `genSelect 3 2`), and correct as such.
 ⛔ **It is NOT a system budget.** *Spending it as one means claiming the memory
 organ is free if it costs under 1,154 gates — but the core it is 32% (or 17%) of
-has never been assembled, so "free" has no denominator.*
+has never been assembled here, so "free" has no denominator.*
 
 📌 **RECOMMENDED WORDING for the block, if it wants one sentence:**
 *"−1,154 gates at the select (proven), which is 32% of the named datapath

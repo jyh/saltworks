@@ -169,7 +169,7 @@ That document is a prerequisite for D3.5, not a detail of it.
 timing-critical" is a setup-only statement; lowering the clock does not fix a
 hold violation, and LibreLane hard-fails hold violations on all corners.
 
-**The trusted base has a four-valued layer nobody has modelled (O4, C11).** The
+**The trusted base has a four-valued layer we have not modelled (O4, C11).** The
 vendor Verilog wraps **every** cell in a `udp_pwrgood_pp$PG` primitive
 parameterised by VPWR/VGND. Our two-valued Liberty-derived models are correct
 only under an unstated "power rail is good" hypothesis. That hypothesis should be

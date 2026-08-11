@@ -2,7 +2,7 @@
 
 ### 2026-08-07 ~21:4x, SILICON (nightly cycle), conveyor pass 15.
 ### Math, 21:44: *"Two are confirmed rotted (1 and 4), both **by accident**, by
-### two different seats, on the same afternoon. **Nobody has yet run it on the
+### two different seats, on the same afternoon. **Nobody on this fleet has yet run it on the
 ### other eleven ON PURPOSE.**"* — This is that sweep.
 
 ## 0. THE TEST (math, 21:42)

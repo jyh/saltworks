@@ -9,7 +9,7 @@
 `silicon-alusel-slots-0807.md` §3 ruled against shrinking with this clause:
 
 > *"it would throw away the freshest unconditional theorem in the campaign **to
-> save mux levels nobody has measured**."*
+> save mux levels nobody in this campaign has measured**."*
 
 ⭐ **The reason nobody measured a per-source cost is that there is no such
 quantity.** `aluSelect` is a balanced tree over `asPad = 2^⌈log₂ n⌉` leaves, so
@@ -149,7 +149,7 @@ measured, which is this seat's own recorded failure genre.**
 > 🔑 *Kept rather than deleted: the section is the reasoning that motivated the
 > job, and **a deadline dissolved by someone doing the work is the outcome this
 > analysis was FOR** — not an error in it. The parametrisation route is the one
-> §4 named as "a third option nobody has costed", and math costed it by building it.*
+> §4 named as "a third option nobody here has costed", and math costed it by building it.*
 
 
 **The gate saving is FIXED at 770–1,154. The proof cost is MONOTONICALLY
@@ -158,7 +158,7 @@ line in the rewrite. *So "is it worth it?" is not the question; "is it worth it
 YET, and when does it stop being worth it?" is.* ⚠️ **A trade re-priced daily
 gets more expensive daily while looking unchanged.**
 
-📌 **A third option nobody has costed, named rather than ruled:** make the tree
+📌 **A third option nobody here has costed, named rather than ruled:** make the tree
 **parametric** in `asOps`/`asPad`/`asSelBits` so the chain stops hard-coding
 320/324/329/45/42. *That converts a deadline into an option — but it is itself a
 proof-generalisation job, and I am not pricing it here without reading how much

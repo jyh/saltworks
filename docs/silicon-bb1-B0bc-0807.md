@@ -71,7 +71,7 @@ construction.
 
 **BB-1 is feasible on both counts checked.** The seam closes with **four**
 obligations, not three — the fourth being **the Mathlib-free statability of
-sortedness**, which no one had priced. The two substantive cautions are
+sortedness**, which no one here had priced. The two substantive cautions are
 `K2` (payload universality) and `K3` (full load is the sorter's case), and
 **both are about what the composed theorem should CLAIM, not about whether it can
 be built.**

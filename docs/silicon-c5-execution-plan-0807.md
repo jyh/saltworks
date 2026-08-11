@@ -322,7 +322,7 @@ core, projected:  ~11,900 cells ×1.45  ≈ 17,300 logic gates
 
 ⇒ ***The core's imported netlist is ~18,400 entries, not ~11,900 — about 1.5×
 bigger than the number the assembly plan hands you, and nobody had applied the
-expansion factor because until tonight it had never been measured at scale.***
+expansion factor because until tonight it had never been measured at scale in this campaign.***
 
 **Elaboration cost at that size, interpolated from the two measured rungs**
 (12,000 → 7 s, 24,000 → 22 s; ⇒ ≈ n^1.65):
