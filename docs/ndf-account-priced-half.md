@@ -72,12 +72,40 @@ instantiated in tt_um_saltworks_ndf.v              ZERO
 🔑 **The organ exists and is emitted; what does not exist is a wrapper connection
 to it. That is a COMPOSITION decision (R1's v1.1 seam), not an organ to build.**
 
-⚠️ **PROJECTED, NOT MEASURED — labelled as the order requires:**
+✅ **THE ORGAN'S AREA IS NOW EXACT, AND IT NEEDED NO RUN — it is the sum of its own
+cells' liberty areas, which is precisely what `design__instance__area__stdcell`
+counts:**
 ```
-composed run cell density   31,159.9 um2 / 3,280 comb cells = 9.500 um2/cell
-624 cells x that density                        ~5,928 um2   PROJECTION
-projected stdcell with batcher      ~75,705 um2 = 32.5% of die   PROJECTION
+batcher_c        624 cells   4,023.8592 um2   EXACT
+batcher_struct   504 cells   3,573.4272 um2   EXACT
 ```
+⭐ **METHOD VALIDATED ON TWO ALREADY-MEASURED RUNS BEFORE BEING TRUSTED HERE** —
+it reproduces the BB at 1x1 on both power grids to **±0.003 um2** and its cell
+count exactly (529/529):
+```
+  BB 1x1 LibreLane PDN   computed 3,824.9184  vs flow 3,824.92   ✅
+  BB 1x1 TT grid         computed 3,829.9232  vs flow 3,829.92   ✅
+```
+*Two corrections the controls forced, neither of which I would have found by
+inspection: `fill` and `decap` must be EXCLUDED (2,443 decaps inflated the first
+attempt by 233%), and `tapvpwrvgnd` must be INCLUDED at one site (1.2512 um2) —
+the liberty gives it no area at all, so the sum silently ran 240.23 um2 light
+while the cell COUNT already matched exactly.*
+
+⛔⛔ **THE OLD PROJECTION RAN +47.3% HIGH AND IT IS RETIRED:**
+```
+WAS: 624 cells x 9.500 um2/cell (composed-run average) = ~5,928 um2   PROJECTION
+IS:  the organ's own cells                             = 4,023.86 um2  EXACT
+```
+🔑 ***The average came from a MIXED population — flops and timing-repair buffers
+included — and was applied to a HOMOGENEOUS one of small combinational cells
+(inv/and2/xor2/or2/mux2), whose true average is 6.449 um2/cell. An average density
+is a property of the population it was measured on.***
+
+⚠️ **STILL A PROJECTION, and the part that is: `69,776.9 + 4,023.86 = 73,800.76
+um2 = 31.7% of the 6x2 die` assumes composition ADDS ONLY THE ORGAN'S OWN CELLS.
+It will not — glue, taps, and the flow's own repair buffers scale with it.** *The
+organ's area is exact; the COMPOSED total is a floor, not a forecast.*
 ⛔ **DO NOT READ 32.5% AS A FIT RESULT.** *It is a linear area projection at one
 run's average cell density. It says nothing about ROUTING, about the sort-then-route
 seam's effect on the timing arc, or about the critical path — **which is already 93%
