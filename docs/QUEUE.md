@@ -81,7 +81,14 @@
   moment a peer commits; a failed command must never fall through
   to its own verification step. The compliant form does BOTH:
   `&&`-chain on the exit, then read the PAYLOAD (the shell-posts
-  law's other half);** unique Scratch<NODE>-<agent>.lean
+  law's other half). SHARPENED 20:19 by compiler's deliberate-
+  failure measurement: saltbuild.sh PROPAGATES A REAL EXIT STATUS
+  (`exit $EXIT`, verified status 1 on a broken theorem) and PIPING
+  THROWS IT AWAY (`$?` after a pipe is the last stage's). The
+  canonical build form fleet-wide:
+  `../saltbuild.sh <target> > /tmp/b.txt 2>&1 && tail -3 /tmp/b.txt`
+  — never `| grep EXIT`, where an empty grep is indistinguishable
+  from a pass;** unique Scratch<NODE>-<agent>.lean
   (per-AGENT); explicit-brief law for executors; the kernel-census
   aiming rider for any deletion; **SaltWorks.lean (the root) is
   MAESTRO-ONLY** — landings post "import owed" and the maestro wires
