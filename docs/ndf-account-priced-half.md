@@ -117,12 +117,40 @@ clean partition, but it is **BETWEEN CHECKS, not between two slew bands** — ev
 slew violation is datapath, every fanout violation is clock. **The worst slew is
 2.97x its limit, not 18.7x; it is 4.0% of the period, not 25%.**
 
-⚠️ **THE ONE SURVIVING HYPOTHESIS, still untested:**
-- **DATAPATH** — R2 rules `_1` drive for combinational cells; minimum drive at the
-  slow corner is exactly a 2-3x overshoot, and 2.97x measured is squarely in that
-  range. *TEST: one organ at `_2` combinational. **If that is the cause, the debt
-  is the drive ruling's PRICE and belongs in front of the Captain as a trade —
-  not fixed silently.***
+⛔ **AND THE DATAPATH HYPOTHESIS IS REFUTED TOO — BY THE POPULATION, BEFORE ANY
+RUN.** It blamed R2's `_1` drive ruling. But that ruling governs only the EMITTED
+organs (485 mapped cells), and the violations are overwhelmingly elsewhere:
+```
+origin of the 1,757                       count   share   worst slew
+  synthesised logic (yosys _NNNN_)         1327   75.5%     2.2254 ns
+  flow-inserted fanout-repair buffers       307   17.5%     2.2238 ns
+  emitted organs (what R2 governs)          123    7.0%     1.0223 ns
+```
+🔑 ***THE RULED CELLS ARE 7% OF THE DEBT AND THE HEALTHIEST POPULATION IN IT.***
+*Upgrading an organ to `_2` could move at most 7%, and it would move the pins
+that are already closest to compliant. **The drive ruling is not the cause, and
+the experiment I had queued would have measured that at the price of a 6x2 run.***
+
+⭐ **AND THE BAR ITSELF IS NOT THE PDK'S — THIS IS THE NUMBER THAT ANSWERS "WOULD
+IT FABRICATE":**
+```
+MAX_TRANSITION_CONSTRAINT = 0.75 ns   <- LibreLane's own bar, set by the flow
+sky130_fd_sc_hd default_max_transition = 1.50 ns   <- the PDK's actual limit
+
+  violations vs the FLOW's 0.750 bar : 1,757
+  violations vs the PDK's 1.500 limit:   336   (19.1%)
+      296 synthesised · 40 repair buffers · ZERO in the emitted organs
+  worst 2.2254 ns = 1.48x the PDK limit
+```
+📌 **BOTH NUMBERS ARE HONEST AND THEY ANSWER DIFFERENT QUESTIONS. 1,757 is the
+count against a deliberately conservative margin (half the PDK limit) and is the
+right number for judging design quality. 336 is the count against the limit the
+library actually states.** *The organs are clean against the PDK limit outright.*
+⚠️ **THE REAL FINDING, AND IT IS NOT ABOUT OUR RTL: 40 of the buffers the flow
+INSERTED to repair fanout are themselves over the PDK's slew limit.** *The
+remaining lever is synthesis and resizer configuration, not the drive ruling —
+and that is LibreLane's knob set, not R2's. **UNTESTED: I am naming the lever, not
+claiming it.***
 - ⛔ **THE "CLOCK" HYPOTHESIS IS WITHDRAWN.** It proposed re-running with CTS
   max-slew/max-cap to collapse "the 67". *The 67 are a **max-fanout** check —
   neither knob addresses them — and `Flow/harden.sh` already banks a controlled
@@ -201,7 +229,10 @@ variant not fitting a 1x1 costs nothing today — the growth path stays open.**
    against the RTL under iverilog — `Sim/tt_bench_check/run.sh`, 5/5 expectations
    — because cocotb does not import on this host and the bench itself CANNOT be
    run here.**
-3. **11 max-slew violations** on this run — small, real, unrepaired.
+3. **11 max-slew violations** on this run — small, real, unrepaired — **and now
+   scoped against both bars as §3 requires: worst 0.7827 ns, which is over
+   LibreLane's self-imposed 0.750 and CLEANLY UNDER the PDK's stated 1.500.
+   ZERO of the 11 exceed the library's actual limit.**
 
 ## 5 · WHAT THIS HALF DOES NOT CLAIM
 
@@ -216,8 +247,12 @@ variant not fitting a 1x1 costs nothing today — the growth path stays open.**
   clause previously read "has NOT been re-run with it — that one is still not a
   tile-fit at all"; it was true when written and is retired by the run.* **Both
   §1 and §4 are now tile-fits; NEITHER is a signoff.**
-- **Not a batcher fit result** (§2, a linear area projection) · **not a DRV
-  diagnosis** (§3 — two hypotheses, zero tests run).
+- **Not a batcher fit result** (§2, a linear area projection). ⛔ **This bullet
+  also read "not a DRV diagnosis (§3 — two hypotheses, zero tests run)" — RETIRED
+  8/10: §3 IS now a diagnosis. Both hypotheses were REFUTED by measuring the
+  violating population, and neither refutation needed a run.** *What §3 still does
+  NOT claim is the remaining lever: the synthesis/resizer configuration behind the
+  1,327 synthesised and 307 flow-inserted violations is NAMED and UNTESTED.*
 - ⚠️ **§4 IS a measured BB post-layout number** (1x1, run complete). This bullet
   previously said it was NOT — written when §4 held a 1x2 projection, and left
   standing for one commit after §4 became a measurement. **A disclaimer falsified
