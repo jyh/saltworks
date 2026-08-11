@@ -34,7 +34,7 @@ does not replace it.*
 
 ## The lift, which is the point of the file
 
-`reaches_of_compileS` carries **L1's landed simulation theorem into this calculus without
+`reaches_of_compileS_of_branchFree` carries **L1's landed simulation theorem in without
 reproving it** — the same move `regState` made when L1 consumed L0's whole-pool statement
 under a scoped hypothesis. *Two rungs, two lifts, no re-induction. If L2's branch cases
 ever force L1 to be re-proved, that is the signal the calculus is wrong, not L1.*
@@ -201,20 +201,20 @@ be re-proved, that is the signal the calculus is wrong — not L1.* -/
 
 /-- ⭐⭐⭐ **L1, INSIDE ANY IMAGE.** A straight-line statement placed anywhere in a larger
 program reaches a state agreeing with `σ'` in scope, with the `pc` exactly past the block. -/
-theorem reaches_of_compileS {reg : RegMap} {d : Nat} (hreg : RegOk reg d)
+theorem reaches_of_compileS_of_branchFree {reg : RegMap} {d : Nat} (hreg : RegOk reg d)
     {Γ : Ctx} {p : Stmt} {σ σ' : State} {image blk : List Instr} {q : Nat} {st : St}
-    (hbs : bigStep Γ p σ σ') (hchk : chkS Γ p = true)
+    (hbs : bigStep Γ p σ σ') (hbf : branchFree p = true) (hchk : chkS Γ p = true)
     (hc : compileS reg d Γ p = some blk) (hat : codeAt image q blk)
     (henc : encodeOK Γ reg σ st) (hpc : st.pc.toNat = 4 * q)
     (hb : 4 * (q + blk.length) < 2 ^ 32) :
     ∃ st', Reaches image st st' ∧ encodeOK Γ reg σ' st' ∧
       st'.pc.toNat = 4 * (q + blk.length) := by
-  have hfwd : Forward blk = true := compileS_is_forward reg d p Γ blk hc
+  have hfwd : Forward blk = true := compileS_is_forward_of_branchFree reg d p Γ blk hbf hc
   refine ⟨exec st blk, Reaches.straightline hat hfwd hpc hb, ?_, ?_⟩
-  · exact compileS_correct hreg hbs hchk blk st hc henc
+  · exact compileS_correct_of_branchFree hreg hbs hbf hchk blk st hc henc
   · rw [exec_pc_toNat blk st hfwd (by omega), hpc]; omega
 
-#audit_axioms reaches_of_compileS
+#audit_axioms reaches_of_compileS_of_branchFree
 
 /-! ## 5. THE CONTROLS -/
 
@@ -263,7 +263,7 @@ theorem reaches_is_inhabited_nontrivially :
 /-! ## 6. THE `run` ↔ `Reaches` BRIDGE — math's third angle on `1b87d6e`, taken
 
 *Their finding, and it is correct: L0's and L1's top statements are `run`-shaped
-(`run_compileE_eq_evalE`, `run_compileS_correct`) while this calculus is `Reaches`-shaped,
+(`run_compileE_eq_evalE`, `run_compileS_correct_of_branchFree`) while this calculus is `Reaches`-shaped,
 and nothing in the tree connected them. Not a defect inside L2 — a gap between rungs, and
 they named it forward of where it bites rather than at L4.*
 

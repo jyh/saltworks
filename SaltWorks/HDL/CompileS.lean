@@ -129,7 +129,7 @@ theorem regsHold_regState (reg : RegMap) (σ : State) (st : St) :
   simp only [regState, dif_pos i.isLt]
 
 /-- …and it agrees with `σ` everywhere the context can see. **Above `poolSize` it agrees
-by construction, so no pool bound is needed here** — which is why `compileS_correct` does
+by construction, so no pool bound is needed here** — which is why `compileS_correct_of_branchFree` does
 not carry one. -/
 theorem regState_agrees {Γ : Ctx} {reg : RegMap} {σ : State} {st : St}
     (h : encodeOK Γ reg σ st) : ∀ l, l < Γ.length → σ l = regState reg σ st l := by
@@ -202,6 +202,32 @@ theorem lvlReg_eq {reg : RegMap} {l : Nat} {r : Fin 32} (h : lvlReg reg l = some
 
 theorem varReg_eq_lvlReg (Γ : Ctx) (reg : RegMap) (x : Nat) :
     varReg Γ reg x = lvlReg reg (slotOf Γ x) := rfl
+
+/-- ⭐⭐⭐ **THE FRAGMENT PREDICATE, MADE EXPLICIT — a boundary whose whole job is to MOVE.**
+
+A statement is branch-free when it emits no `BEQ`. **Today this coincides with "`compileS`
+returns `some`" in one direction only, and that coincidence is a theorem provable exactly
+now** (`compileS_accepts_only_branchFree`, below) — the moment L2's emitters land, `compileS`
+accepts statements this predicate rejects and the pin becomes unprovable forever.
+
+🔑 ***WHY IT IS A DEFINITION AND NOT AN IDIOM: three theorems below discharge their `ite` and
+`while` cases TODAY by the contradiction that `compileS` returns `none`. That contradiction
+is the fragment boundary borrowed rather than named, and it evaporates the instant either
+emitter lands.*** *Naming the boundary lets those proofs depend on the PROPERTY instead of on
+the accident, so the `while` emitter and the `ite` emitter — which break them identically, at
+sibling lines — cost one restatement between them rather than one each.*
+
+⚠️ **`branchFree` is NECESSARY, NOT SUFFICIENT, for compilability, and that is not a defect:
+L0's rejection causes are orthogonal to control flow.** A branch-free statement with an
+oversized constant is rejected too — see `branchFree_is_necessary_not_sufficient`, which
+exists so that nobody later "strengthens" the pin into a false biconditional. -/
+def branchFree : Stmt → Bool
+  | .skip            => true
+  | .assign _ _      => true
+  | .seq s t         => branchFree s && branchFree t
+  | .letmut _ _ _ b  => branchFree b
+  | .ite _ _ _       => false
+  | .while _ _       => false
 
 /-- ⭐⭐⭐ **L1's CODE GENERATOR.** `d` is the scratch base; every statement evaluates its
 expression there and then MOVES into the level's register, because there is no store. -/
@@ -310,34 +336,74 @@ Induction on the `bigStep` DERIVATION, not on the statement — so `while`'s two
 distinguished and `ite`'s two branches carry their own condition. Both are discharged by
 the fragment boundary here; L2 replaces those four cases with real code. -/
 
-/-- `compileS` emits straight-line code, so `run` is the right form and `runFor_extend`
-covers it. -/
-theorem compileS_is_forward (reg : RegMap) (d : Nat) :
+/-- ⭐⭐ **THE PIN, PROVABLE EXACTLY NOW: EVERYTHING THIS COMPILER ACCEPTS IS BRANCH-FREE.**
+*Math's refuter read asked for this before the emitter lands, and they were right to: it is
+the only moment in this compiler's life when it can be stated.* **The moment `while`
+compiles, `compileS` accepts a statement `branchFree` rejects and this theorem is false —
+it is a dated record that the predicate named the fragment correctly when the fragment was
+still here to be named.**
+
+⚠️ ***THE CONVERSE IS FALSE TODAY, so this is an implication and not the biconditional the
+proposal carried*** — see `branchFree_is_necessary_not_sufficient`. -/
+theorem compileS_accepts_only_branchFree (reg : RegMap) (d : Nat) :
     ∀ (p : Stmt) (Γ : Ctx) (c : List Instr), compileS reg d Γ p = some c →
-      Forward c = true := by
+      branchFree p = true := by
   intro p
   induction p with
-  | skip => intro Γ c h; rw [← Option.some.inj h]; rfl
-  | assign x e =>
-      intro Γ c h
-      obtain ⟨ce, rd, rx, hce, _, _, rfl⟩ := compileS_assign_shape h
-      have h1 : Forward ce = true := compileE_is_forward Γ reg e d ce hce
-      simp only [Forward] at h1 ⊢
-      simp [List.all_append, isForward, h1]
+  | skip => intro _ _ _; rfl
+  | assign x e => intro _ _ _; rfl
   | seq s t ihs iht =>
       intro Γ c h
       obtain ⟨cs, ct, hs, ht, rfl⟩ := compileS_seq_shape h
-      have h1 : Forward cs = true := ihs Γ cs hs
-      have h2 : Forward ct = true := iht Γ ct ht
-      simp only [Forward] at h1 h2 ⊢
-      simp [List.all_append, h1, h2]
+      simp [branchFree, ihs Γ cs hs, iht Γ ct ht]
   | ite c' thn els _ _ => intro Γ c h; simp [compileS] at h
   | «while» c' body _ => intro Γ c h; simp [compileS] at h
   | letmut x ty e body ih =>
       intro Γ c h
       obtain ⟨ce, rd, rl, cb, hce, _, _, hcb, rfl⟩ := compileS_letmut_shape h
+      simp [branchFree, ih ((x, ty) :: Γ) cb hcb]
+
+/-- `compileS` emits straight-line code for a BRANCH-FREE statement, so `run` is the right
+form and `runFor_extend` covers it.
+
+⛔⛔ ***RESTATEMENT OF `compileS_is_forward`, WHICH CEASES TO EXIST (restatement-renames law,
+`53175ce`; helm-approved 00:27).*** The old statement quantified over EVERY output of
+`compileS` and is **FALSE**, not weakened, once `while` emits its two `BEQ`s — it is not the
+kind of theorem that survives with a hypothesis bolted on under the same name, and a stale
+citation to the old name must fail loudly rather than silently acquire a weaker fact.
+
+🔑 ***AND THE `ite`/`while` CASES NOW DISCHARGE ON `hbf`, NOT ON THE `none` CONTRADICTION.***
+*Silicon's finding: both emitters break this theorem identically at sibling lines. Depending
+on the PROPERTY rather than on the accident makes this restatement pay for BOTH, so the `ite`
+emitter costs no second one.* -/
+theorem compileS_is_forward_of_branchFree (reg : RegMap) (d : Nat) :
+    ∀ (p : Stmt) (Γ : Ctx) (c : List Instr), branchFree p = true →
+      compileS reg d Γ p = some c → Forward c = true := by
+  intro p
+  induction p with
+  | skip => intro Γ c _ h; rw [← Option.some.inj h]; rfl
+  | assign x e =>
+      intro Γ c _ h
+      obtain ⟨ce, rd, rx, hce, _, _, rfl⟩ := compileS_assign_shape h
       have h1 : Forward ce = true := compileE_is_forward Γ reg e d ce hce
-      have h2 : Forward cb = true := ih ((x, ty) :: Γ) cb hcb
+      simp only [Forward] at h1 ⊢
+      simp [List.all_append, isForward, h1]
+  | seq s t ihs iht =>
+      intro Γ c hbf h
+      obtain ⟨cs, ct, hs, ht, rfl⟩ := compileS_seq_shape h
+      simp only [branchFree, Bool.and_eq_true] at hbf
+      have h1 : Forward cs = true := ihs Γ cs hbf.1 hs
+      have h2 : Forward ct = true := iht Γ ct hbf.2 ht
+      simp only [Forward] at h1 h2 ⊢
+      simp [List.all_append, h1, h2]
+  | ite c' thn els _ _ => intro Γ c hbf _; simp [branchFree] at hbf
+  | «while» c' body _ => intro Γ c hbf _; simp [branchFree] at hbf
+  | letmut x ty e body ih =>
+      intro Γ c hbf h
+      obtain ⟨ce, rd, rl, cb, hce, _, _, hcb, rfl⟩ := compileS_letmut_shape h
+      simp only [branchFree] at hbf
+      have h1 : Forward ce = true := compileE_is_forward Γ reg e d ce hce
+      have h2 : Forward cb = true := ih ((x, ty) :: Γ) cb hbf hcb
       simp only [Forward] at h1 h2 ⊢
       simp [List.all_append, isForward, h1, h2]
 
@@ -395,17 +461,18 @@ level it touches is inside the pool, and `regState` agrees with `σ` above the p
 construction — so demanding `Γ.length ≤ poolSize` would be assuming something already
 earned. *Typing IS a hypothesis and is load-bearing: `slotOf` is total and answers `0` on
 an unbound name, so an ill-typed `var` would read a slot the context never granted.* -/
-theorem compileS_correct {reg : RegMap} {d : Nat} (hreg : RegOk reg d) :
-    ∀ {Γ : Ctx} {p : Stmt} {σ σ' : State}, bigStep Γ p σ σ' → chkS Γ p = true →
+theorem compileS_correct_of_branchFree {reg : RegMap} {d : Nat} (hreg : RegOk reg d) :
+    ∀ {Γ : Ctx} {p : Stmt} {σ σ' : State}, bigStep Γ p σ σ' → branchFree p = true →
+      chkS Γ p = true →
       ∀ (c : List Instr) (st : St), compileS reg d Γ p = some c →
         encodeOK Γ reg σ st → encodeOK Γ reg σ' (exec st c) := by
   intro Γ p σ σ' hbs
   induction hbs with
   | skip =>
-      intro _ c st h henc
+      intro _ _ c st h henc
       rw [← Option.some.inj h]; simpa using henc
   | @assign Γ x e σ =>
-      intro hchk c st h henc
+      intro _ hchk c st h henc
       obtain ⟨ce, rd, rx, hce, hrd, hrx, rfl⟩ := compileS_assign_shape h
       obtain ⟨te, hie⟩ := chkS_assign_inv hchk
       have hval : (exec st ce).get rd = evalE Γ σ e :=
@@ -422,13 +489,15 @@ theorem compileS_correct {reg : RegMap} {d : Nat} (hreg : RegOk reg d) :
         rw [henc i hi]
         simp [upd, hsame]
   | @seq Γ s t σ σ₁ σ' _ _ ihs iht =>
-      intro hchk c st h henc
+      intro hbf hchk c st h henc
       obtain ⟨cs, ct, hs, ht, rfl⟩ := compileS_seq_shape h
       obtain ⟨hcs, hct⟩ := chkS_seq_inv hchk
+      simp only [branchFree, Bool.and_eq_true] at hbf
       rw [exec_append]
-      exact iht hct ct (exec st cs) ht (ihs hcs cs st hs henc)
+      exact iht hbf.2 hct ct (exec st cs) ht (ihs hbf.1 hcs cs st hs henc)
   | @letmut Γ x ty e body σ σ' _ ih =>
-      intro hchk c st h henc
+      intro hbf hchk c st h henc
+      simp only [branchFree] at hbf
       obtain ⟨ce, rd, rl, cb, hce, hrd, hrl, hcb, rfl⟩ := compileS_letmut_shape h
       obtain ⟨hie, hbody⟩ := chkS_letmut_inv hchk
       obtain ⟨hlen, rfl⟩ := lvlReg_eq hrl
@@ -447,31 +516,42 @@ theorem compileS_correct {reg : RegMap} {d : Nat} (hreg : RegOk reg d) :
               exec_compileE_preserves_below Γ reg e d ce st hce (reg i) (hreg.below i)]
           rw [henc i (by omega)]
           simp [upd, hsame]
-      have hfin := ih hbody cb _ hcb hmid
+      have hfin := ih hbf hbody cb _ hcb hmid
       intro i hi
       rw [exec_append, exec_append]
       exact hfin i (by simp only [List.length_cons]; omega)
-  | iteT _ _ _ => intro _ c st h _; simp [compileS] at h
-  | iteF _ _ _ => intro _ c st h _; simp [compileS] at h
-  | whileF _ => intro _ c st h _; simp [compileS] at h
-  | whileT _ _ _ _ _ => intro _ c st h _; simp [compileS] at h
+  -- ⛔ THE FOUR CONTROL CASES, now discharged on `branchFree` rather than on the accident
+  -- that `compileS` returns `none`. See the restatement note above.
+  | iteT _ _ _ => intro hbf _ c st _ _; simp [branchFree] at hbf
+  | iteF _ _ _ => intro hbf _ c st _ _; simp [branchFree] at hbf
+  | whileF _ => intro hbf _ c st _ _; simp [branchFree] at hbf
+  | whileT _ _ _ _ _ => intro hbf _ c st _ _; simp [branchFree] at hbf
 
-#audit_axioms compileS_is_forward
+#audit_axioms branchFree
+#audit_axioms compileS_accepts_only_branchFree
+#audit_axioms compileS_is_forward_of_branchFree
 #audit_axioms exec_move_get exec_move_get_self
-#audit_axioms compileS_correct
+#audit_axioms compileS_correct_of_branchFree
 
 /-! ## 6. AT THE MACHINE'S OWN `run`, AND THE CONTROLS -/
 
-/-- ⭐⭐⭐ **L1 AT `run`.** Compile a straight-line statement, run it from `pc = 0`, and the
-registers agree with the source semantics on every level in scope. -/
-theorem run_compileS_correct {reg : RegMap} {d : Nat} (hreg : RegOk reg d)
+/-- ⭐⭐⭐ **L1 AT `run`.** Compile a BRANCH-FREE statement, run it from `pc = 0`, and the
+registers agree with the source semantics on every level in scope.
+
+⛔ ***RESTATEMENT OF `run_compileS_correct`, WHICH CEASES TO EXIST.*** *`run`'s fuel is
+`image.length` — one tick per instruction — so this shape is correct EXACTLY on the
+branch-free fragment and cannot be extended to a loop even in principle (`BlockCalc` §6:
+`run_has_too_little_fuel_for_a_loop`). The hypothesis it gains is not a technicality; it is
+the boundary of what this statement SHAPE can express.* -/
+theorem run_compileS_correct_of_branchFree {reg : RegMap} {d : Nat} (hreg : RegOk reg d)
     {Γ : Ctx} {p : Stmt} {σ σ' : State} (hbs : bigStep Γ p σ σ')
+    (hbf : branchFree p = true)
     (hchk : chkS Γ p = true) (c : List Instr) (st : St)
     (hc : compileS reg d Γ p = some c) (henc : encodeOK Γ reg σ st)
     (hpc : st.pc = 0) (hb : 4 * c.length < 2 ^ 32) :
     encodeOK Γ reg σ' (run c st) := by
-  rw [run_eq_exec c st (compileS_is_forward reg d p Γ c hc) hb hpc]
-  exact compileS_correct hreg hbs hchk c st hc henc
+  rw [run_eq_exec c st (compileS_is_forward_of_branchFree reg d p Γ c hbf hc) hb hpc]
+  exact compileS_correct_of_branchFree hreg hbs hbf hchk c st hc henc
 
 /-- `let x = 7 in x := x + 5` — the running witness for the whole rung. -/
 def witnessProg : Stmt :=
@@ -512,6 +592,25 @@ theorem cause_outside_the_straight_line_fragment :
   ∧ compileS regCanonical 16 [(0, Ty.i32)]
       (.while (.slt (.var 0) (.const 5)) .skip) = none := by
   refine ⟨by decide +kernel, by decide +kernel, by decide +kernel⟩
+
+/-- ⭐⭐⭐ **`branchFree` IS NECESSARY AND NOT SUFFICIENT — the control that stops the pin
+from being "strengthened" into a false biconditional.**
+
+*Math's refuter read proposed pinning `branchFree p = true ↔ (compileS reg d Γ p).isSome`
+before the emitter lands. The forward direction is `compileS_accepts_only_branchFree` and it
+is right and worth having. **The converse is FALSE TODAY**, and this is the witness: an
+oversized constant is rejected by L0's immediate cause while the statement is perfectly
+branch-free.*
+
+🔑 ***THE TWO REJECTION FAMILIES ARE ORTHOGONAL AND MUST NOT BE CONFLATED: `branchFree` is a
+fact about CONTROL FLOW; `compileE`'s causes are facts about REGISTERS AND IMMEDIATES. A
+biconditional would assert that L2 removing the control-flow boundary makes `compileS` total,
+which is a `compileS_total`-shaped obligation carrying the whole `compileE_total` packet — a
+strictly bigger node, and not this one.*** -/
+theorem branchFree_is_necessary_not_sufficient :
+    branchFree (.assign 0 (.const 99999)) = true
+  ∧ compileS regCanonical 16 [(0, Ty.i32)] (.assign 0 (.const 99999)) = none := by
+  refine ⟨rfl, by decide +kernel⟩
 
 /-- ⭐ **AND THE POOL STILL BINDS AT THE STATEMENT LEVEL.** Sixteen nested bindings need a
 sixteenth cell; `lvlReg` refuses at level 15, so `compileS` refuses too. -/
@@ -563,8 +662,8 @@ theorem witness_chain_discharged :
       decide +kernel
     rw [hc] at h; simpa using h
   refine ⟨c, hc, hlen, ?_⟩
-  have hout := run_compileS_correct regOk_regCanonical
-    (Γ := ctx1) (p := witnessAssign) (σ := sigma7) .assign (by decide) c st7 hc
+  have hout := run_compileS_correct_of_branchFree regOk_regCanonical
+    (Γ := ctx1) (p := witnessAssign) (σ := sigma7) .assign (by decide) (by decide) c st7 hc
     st7_encodes (by decide +kernel) (by rw [hlen]; decide)
   have h1 := hout ⟨0, by decide⟩ (by decide)
   have h2 : (regCanonical ⟨0, by decide⟩ : Fin 32) = 1 := by decide
@@ -576,7 +675,8 @@ theorem witness_chain_discharged :
 #audit_axioms st7_encodes
 #audit_axioms witness_chain_discharged
 
-#audit_axioms run_compileS_correct
+#audit_axioms run_compileS_correct_of_branchFree
+#audit_axioms branchFree_is_necessary_not_sufficient
 #audit_axioms witnessProg witnessProg_wellFormed
 #audit_axioms witness_runs
 #audit_axioms the_final_state_is_not_an_encoding
