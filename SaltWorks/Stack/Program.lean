@@ -1228,7 +1228,7 @@ a theorem that says the flops actually come out of reset holding these bits.*
 Everything downstream of that is already here. -/
 theorem entryLoaded_encD_stOfFn (v : Fin 8 → Word) :
     EntryLoaded (fun j => (SaltWorks.HDL.encD (stOfFn v)).getD j false) v := by
-  refine ⟨?_, ?_⟩ <;> rw [SaltWorks.HDL.decQ_encD]
+  refine ⟨?_, ?_⟩ <;> rw [SaltWorks.HDL.decQ_encD_of_clean _ rfl rfl]
   · exact stOfFn_pc v
   · exact fun i => stOfFn_get_dataReg v i
 
@@ -1249,7 +1249,7 @@ theorem not_entryLoaded_offEndEnv :
     ¬ EntryLoaded offEndEnv ![9, 7, 3, 2, 0, -1, -2, -5] := by
   rintro ⟨hpc, -⟩
   unfold offEndEnv at hpc
-  rw [SaltWorks.HDL.decQ_encD] at hpc
+  rw [SaltWorks.HDL.decQ_encD_of_clean _ rfl rfl] at hpc
   exact absurd hpc (by decide +kernel)
 
 /-- ⭐ **AND THE CONCLUSION REALLY IS FALSE THERE.** Not merely unproved: at
@@ -1261,7 +1261,7 @@ theorem offEndEnv_does_not_sort :
     ¬ SortsTo (List.ofFn ![9, 7, 3, 2, 0, -1, -2, -5])
         (dataRegs.map (run batcherSort (SaltWorks.HDL.decQ offEndEnv)).get) := by
   unfold offEndEnv
-  rw [SaltWorks.HDL.decQ_encD]
+  rw [SaltWorks.HDL.decQ_encD_of_clean _ rfl rfl]
   decide +kernel
 
 /-! ### ⛔ THE SECOND OBLIGATION — the program has to reach the silicon too
@@ -1481,22 +1481,84 @@ right pin. -/
 theorem decQ_congr {a b : SaltWorks.HDL.Env}
     (hab : ∀ j, j < SaltWorks.HDL.stWidth → a j = b j) :
     SaltWorks.HDL.decQ a = SaltWorks.HDL.decQ b := by
-  simp only [SaltWorks.HDL.decQ, St.mk.injEq]
+  simp only [SaltWorks.HDL.decQ, St.mk.injEq, and_true]
   refine ⟨?_, wordOf_congr (fun k hk => hab (1024 + k) (by show 1024 + k < 1056; omega))⟩
   apply Vector.ext
   intro i hi
   rw [Vector.getElem_ofFn, Vector.getElem_ofFn]
   exact wordOf_congr (fun k hk => hab (32 * i + k) (by show 32 * i + k < 1056; omega))
 
-theorem decQ_envWith (s : St) (w : Word) : SaltWorks.HDL.decQ (envWith s w) = s := by
+/-- ⬥ **M1a — THE HUB, RESTATED.** `decQ (envWith s w) = s` is a whole-`St`
+equality and goes FALSE once `St` carries `mem`/`trapped`: `envWith` presents
+1056 encoded bits, so the decoder rebuilds the new fields at their defaults. The
+honest unconditional form names exactly that state — `s` with the defaults
+installed — and it serves every consumer, including the ten that quantify over an
+arbitrary `s` and so have no cleanliness hypothesis to discharge. -/
+theorem decQ_envWith_eq (s : St) (w : Word) :
+    SaltWorks.HDL.decQ (envWith s w)
+      = { s with mem := Vector.replicate 8 0, trapped := false } := by
   rw [decQ_congr (b := fun j => (SaltWorks.HDL.encD s).getD j false)
         (fun j hj => by simp only [envWith, if_pos hj])]
-  exact SaltWorks.HDL.decQ_encD s
+  obtain ⟨hr, hp⟩ := SaltWorks.HDL.decQ_encD s
+  simp only [SaltWorks.HDL.decQ, St.mk.injEq, and_true] at hr hp ⊢
+  exact ⟨hr, hp⟩
+
+/-- ⬥ **M1a — THE (A)-FORM, per the 18:53 ruling: per-constructor projection
+facts, no predicate.** Every slice-A arm is built from `.set` / `.next` / `.get`
+and one `{ s with pc := … }` — all `with`-updates that copy what they do not name
+— so installing different `mem`/`trapped` cannot move either projection. The
+ruling asked for five tiny lemmas; `cases i` gives all five arms at once, and the
+BEQ arm's `if` is the only one needing more than `rfl`. -/
+theorem step_regs_of_with (s : St) (m : Vector (BitVec 32) 8) (t : Bool) (i : Instr) :
+    (SaltWorks.ISA.step { s with mem := m, trapped := t } i).regs
+      = (SaltWorks.ISA.step s i).regs := by
+  cases i <;>
+    simp only [SaltWorks.ISA.step, St.set, St.next, St.get] <;>
+    split_ifs <;> rfl
+
+theorem step_pc_of_with (s : St) (m : Vector (BitVec 32) 8) (t : Bool) (i : Instr) :
+    (SaltWorks.ISA.step { s with mem := m, trapped := t } i).pc
+      = (SaltWorks.ISA.step s i).pc := by
+  cases i <;>
+    simp only [SaltWorks.ISA.step, St.set, St.next, St.get] <;>
+    split_ifs <;> rfl
+
+/-- ⬥ M1a — **no slice-A instruction can dirty the new fields.** The same
+`with`-update shape, read on the other two projections; `stepT` inherits it
+through `stepW`'s `getD`. This is what makes every `decQ`-built or `stepT`-built
+state provably clean rather than clean by inspection. -/
+theorem step_mem_eq (s : St) (i : Instr) :
+    (SaltWorks.ISA.step s i).mem = s.mem := by
+  cases i <;> simp only [SaltWorks.ISA.step, St.set, St.next] <;> split_ifs <;> rfl
+
+theorem step_trapped_eq (s : St) (i : Instr) :
+    (SaltWorks.ISA.step s i).trapped = s.trapped := by
+  cases i <;> simp only [SaltWorks.ISA.step, St.set, St.next] <;> split_ifs <;> rfl
+
+theorem stepT_mem_eq (s : St) (w : Word) :
+    (SaltWorks.ISA.stepT s w).mem = s.mem := by
+  simp only [SaltWorks.ISA.stepT, SaltWorks.ISA.stepW]
+  cases h : SaltWorks.ISA.decode w <;> simp [h, St.next, step_mem_eq]
+
+theorem stepT_trapped_eq (s : St) (w : Word) :
+    (SaltWorks.ISA.stepT s w).trapped = s.trapped := by
+  simp only [SaltWorks.ISA.stepT, SaltWorks.ISA.stepW]
+  cases h : SaltWorks.ISA.decode w <;> simp [h, St.next, step_trapped_eq]
+
+/-- The `= s` form survives exactly on clean states — which is every state the
+codec is fed. -/
+theorem decQ_envWith_of_clean (s : St) (w : Word)
+    (hm : s.mem = Vector.replicate 8 0) (ht : s.trapped = false) :
+    SaltWorks.HDL.decQ (envWith s w) = s := by
+  rw [decQ_envWith_eq]
+  obtain ⟨regs, pc, mem, tr⟩ := s
+  subst hm; subst ht; rfl
 
 theorem seenWord_envWith (s : St) (w : Word) : seenWord (envWith s w) = w := by
   apply BitVec.eq_of_getLsbD_eq
   intro k hk
   rw [seenWord, SaltWorks.HDL.wordOf_getLsbD _ _ hk]
+  try simp only [step_regs_of_with, step_pc_of_with]
   show (if SaltWorks.HDL.instrNet k < SaltWorks.HDL.stWidth
         then (SaltWorks.HDL.encD s).getD (SaltWorks.HDL.instrNet k) false
         else w.getLsbD (SaltWorks.HDL.instrNet k - SaltWorks.HDL.instrBase))
@@ -1518,7 +1580,8 @@ def cycOf (nextW : St → Word) (ins : SaltWorks.HDL.Env) : SaltWorks.HDL.Env :=
 
 theorem decQ_cycOf (nextW : St → Word) (ins : SaltWorks.HDL.Env) :
     SaltWorks.HDL.decQ (cycOf nextW ins)
-      = stepT (SaltWorks.HDL.decQ ins) (seenWord ins) := decQ_envWith _ _
+      = stepT (SaltWorks.HDL.decQ ins) (seenWord ins) :=
+  decQ_envWith_of_clean _ _ (by rw [stepT_mem_eq]; rfl) (by rw [stepT_trapped_eq]; rfl)
 
 /-- ⭐ **SATISFIABLE**, for every next-word policy. -/
 theorem cycleRealisesStep_cycOf (nextW : St → Word) :
@@ -1531,7 +1594,7 @@ hypothesis has content, and `cycles_realise_steps` is not true of every `cyc`. -
 theorem not_cycleRealisesStep_id : ¬ CycleRealisesStep id seenWord := by
   intro h
   have hh := h (envWith St.init (encode (Instr.ADDI 1 0 1)))
-  rw [id_eq, decQ_envWith, seenWord_envWith, stepT_encode] at hh
+  rw [id_eq, decQ_envWith_eq, seenWord_envWith, stepT_encode] at hh
   revert hh
   decide +kernel
 
@@ -1546,7 +1609,7 @@ theorem not_cycleRealisesStep_wordOf (nextW : St → Word) :
     ¬ CycleRealisesStep (cycOf nextW) (fun ins => SaltWorks.HDL.wordOf ins) := by
   intro h
   have hh := h (envWith St.init (encode (Instr.ADDI 1 0 1)))
-  rw [decQ_cycOf, decQ_envWith, seenWord_envWith, stepT_encode] at hh
+  rw [decQ_cycOf, decQ_envWith_eq, seenWord_envWith, stepT_encode] at hh
   revert hh
   decide +kernel
 
@@ -1869,7 +1932,7 @@ theorem envOfBits_of_length {bs : List Bool} (hlen : SaltWorks.HDL.stWidth ≤ b
   · rw [if_neg hj, if_neg hj]
 
 /-- At a full state encoding this **is** `envWith`, for every pad — so the whole
-existing witness apparatus (`decQ_envWith`, `seenWord_envWith`) applies. -/
+existing witness apparatus (`decQ_envWith_eq`, `seenWord_envWith`) applies. -/
 theorem envOfBits_encD (s : St) (pad : SaltWorks.HDL.Env) (w : Word) :
     envOfBits (SaltWorks.HDL.encD s) pad w = envWith s w := by
   rw [envOfBits_of_length (le_of_eq (encD_length s).symm) pad (fun _ => false) w]
@@ -1911,7 +1974,9 @@ theorem cycleRealisesStep_of_bits {f : SaltWorks.HDL.Env → List Bool}
     CycleRealisesStep (cycOfBits f nextW pad) seenWord := by
   intro ins
   rw [cycOfBits, h ins, envOfBits_encD]
-  exact decQ_envWith _ _
+  exact decQ_envWith_of_clean _ _
+    (by simp [stepT_mem_eq, SaltWorks.HDL.decQ])
+    (by simp [stepT_trapped_eq, SaltWorks.HDL.decQ])
 
 /-- ⭐ **THE CYCLE MAP A CIRCUIT INDUCES** — output port `j` becomes state net
 `j`, which is the D→Q transfer in `StateCodec`'s layout and is the definition
@@ -2014,7 +2079,9 @@ theorem decQ_cycOfBits_stalled (nextW : SaltWorks.HDL.Env → Word) (pad : SaltW
     (ins : SaltWorks.HDL.Env) :
     SaltWorks.HDL.decQ (cycOfBits stalledBits nextW pad ins) = SaltWorks.HDL.decQ ins := by
   rw [cycOfBits, stalledBits, envOfBits_encD]
-  exact decQ_envWith _ _
+  exact decQ_envWith_of_clean _ _
+    (by simp [stepT_mem_eq, SaltWorks.HDL.decQ])
+    (by simp [stepT_trapped_eq, SaltWorks.HDL.decQ])
 
 /-- ⛔ **CONTROL 1 — THE STALLED CORE FAILS THROUGH THE BRIDGE.** `cycOfBits` is
 not a construction that makes anything realise a step: at `St.init` with
@@ -2026,7 +2093,7 @@ theorem not_cycleRealisesStep_stalledBits (nextW : SaltWorks.HDL.Env → Word)
     ¬ CycleRealisesStep (cycOfBits stalledBits nextW pad) seenWord := by
   intro h
   have hh := h (envWith St.init (encode (Instr.ADDI 1 0 1)))
-  rw [decQ_cycOfBits_stalled, decQ_envWith, seenWord_envWith, stepT_encode] at hh
+  rw [decQ_cycOfBits_stalled, decQ_envWith_eq, seenWord_envWith, stepT_encode] at hh
   revert hh
   decide +kernel
 
@@ -2441,7 +2508,7 @@ theorem regField_zero_coreShaped : RegField SaltWorks.HDL.coreShaped 0 := by
 theorem not_regField_one_coreShaped : ¬ RegField SaltWorks.HDL.coreShaped 1 := by
   intro h
   have hh := h (envWith St.init (encode (Instr.ADDI 1 0 1)))
-  rw [outReg_coreShaped, decQ_envWith, seenWord_envWith, stepT_encode] at hh
+  rw [outReg_coreShaped, decQ_envWith_eq, seenWord_envWith, stepT_encode] at hh
   revert hh
   decide +kernel
 
@@ -2450,7 +2517,7 @@ not move it. -/
 theorem not_pcField_coreShaped : ¬ PcField SaltWorks.HDL.coreShaped := by
   intro h
   have hh := h (envWith St.init (encode (Instr.ADDI 1 0 1)))
-  rw [outPc_coreShaped, decQ_envWith, seenWord_envWith, stepT_encode] at hh
+  rw [outPc_coreShaped, decQ_envWith_eq, seenWord_envWith, stepT_encode] at hh
   revert hh
   decide +kernel
 
@@ -2493,7 +2560,7 @@ theorem outPc_coreShapedT (ins : SaltWorks.HDL.Env) :
 theorem not_pcField_coreShapedT : ¬ PcField SaltWorks.HDL.coreShapedT := by
   intro h
   have hh := h (envWith St.init (encode (Instr.ADDI 1 0 1)))
-  rw [outPc_coreShapedT, decQ_envWith, seenWord_envWith, stepT_encode] at hh
+  rw [outPc_coreShapedT, decQ_envWith_eq, seenWord_envWith, stepT_encode] at hh
   revert hh
   decide +kernel
 
@@ -2786,8 +2853,9 @@ theorem xorField_is_bitXor32 (s : St) (rd x y : Fin 32) (hrd : rd ≠ 0) :
       = SaltWorks.HDL.wordOf (fun k =>
           (SaltWorks.HDL.sem SaltWorks.HDL.bitXor32
             (SaltWorks.HDL.bwEnv (s.get x) (s.get y))).getD k false) := by
-  rw [decQ_envWith, seenWord_envWith, stepT_encode, sem_bitXor32,
+  rw [decQ_envWith_eq, seenWord_envWith, stepT_encode, sem_bitXor32,
     wordOf_getD_map_range, wordOf_getLsbD_self]
+  try simp only [step_regs_of_with, step_pc_of_with]
   show ((s.set rd (s.get x ^^^ s.get y)).next).regs[rd.val] = _
   show (s.set rd (s.get x ^^^ s.get y)).regs[rd.val] = _
   simp only [St.set, if_neg hrd]
@@ -2858,7 +2926,8 @@ theorem sltField_is_sltCirc (s : St) (rd x y : Fin 32) (hrd : rd ≠ 0)
            (seenWord (envWith s (encode (Instr.SLT rd x y))))).regs[rd.val]
       = SaltWorks.HDL.wordOf (fun k =>
           (SaltWorks.HDL.sltDrive (s.get x) (s.get y)).getD k false) := by
-  rw [decQ_envWith, seenWord_envWith, stepT_encode, sltDrive_eq_of_mem hx hy, wordOf_cmpWord]
+  rw [decQ_envWith_eq, seenWord_envWith, stepT_encode, sltDrive_eq_of_mem hx hy, wordOf_cmpWord]
+  try simp only [step_regs_of_with, step_pc_of_with]
   show ((s.set rd (if (s.get x).slt (s.get y) then 1 else 0)).next).regs[rd.val] = _
   show (s.set rd (if (s.get x).slt (s.get y) then 1 else 0)).regs[rd.val] = _
   simp only [St.set, if_neg hrd]
@@ -3361,8 +3430,9 @@ theorem addField_is_adder32 (s : St) (rd x y : Fin 32) (hrd : rd ≠ 0) :
            (seenWord (envWith s (encode (Instr.ADD rd x y))))).regs[rd.val]
       = wordOf (fun k =>
           (sem adder32 (bwEnv (s.get x) (s.get y))).getD k false) := by
-  rw [decQ_envWith, seenWord_envWith, stepT_encode, sem_adder32,
+  rw [decQ_envWith_eq, seenWord_envWith, stepT_encode, sem_adder32,
     wordOf_getD_range_append, wordOf_getLsbD_self]
+  try simp only [step_regs_of_with, step_pc_of_with]
   show ((s.set rd (s.get x + s.get y)).next).regs[rd.val] = _
   show (s.set rd (s.get x + s.get y)).regs[rd.val] = _
   simp only [St.set, if_neg hrd]
@@ -3373,8 +3443,9 @@ theorem addiField_is_adder32 (s : St) (rd x : Fin 32) (imm : BitVec 12) (hrd : r
            (seenWord (envWith s (encode (Instr.ADDI rd x imm))))).regs[rd.val]
       = wordOf (fun k =>
           (sem adder32 (bwEnv (s.get x) (imm.signExtend 32))).getD k false) := by
-  rw [decQ_envWith, seenWord_envWith, stepT_encode, sem_adder32,
+  rw [decQ_envWith_eq, seenWord_envWith, stepT_encode, sem_adder32,
     wordOf_getD_range_append, wordOf_getLsbD_self]
+  try simp only [step_regs_of_with, step_pc_of_with]
   show ((s.set rd (s.get x + imm.signExtend 32)).next).regs[rd.val] = _
   show (s.set rd (s.get x + imm.signExtend 32)).regs[rd.val] = _
   simp only [St.set, if_neg hrd]
@@ -3384,7 +3455,8 @@ theorem sltField_is_sltCirc_unconditional (s : St) (rd x y : Fin 32) (hrd : rd �
     (stepT (decQ (envWith s (encode (Instr.SLT rd x y))))
            (seenWord (envWith s (encode (Instr.SLT rd x y))))).regs[rd.val]
       = wordOf (fun k => (sltDrive (s.get x) (s.get y)).getD k false) := by
-  rw [decQ_envWith, seenWord_envWith, stepT_encode, sltDrive_uncond, wordOf_cmpWord]
+  rw [decQ_envWith_eq, seenWord_envWith, stepT_encode, sltDrive_uncond, wordOf_cmpWord]
+  try simp only [step_regs_of_with, step_pc_of_with]
   show ((s.set rd (if (s.get x).slt (s.get y) then 1 else 0)).next).regs[rd.val] = _
   show (s.set rd (if (s.get x).slt (s.get y) then 1 else 0)).regs[rd.val] = _
   simp only [St.set, if_neg hrd]
@@ -4135,7 +4207,8 @@ theorem pcField_is_pcNext_beq (s : St) (x y : Fin 32) (imm : BitVec 12) :
            (seenWord (envWith s (encode (Instr.BEQ x y imm))))).pc
       = s.pc + SaltWorks.HDL.wordOf (fun k =>
           (SaltWorks.HDL.pcRun (s.get x) (s.get y) (bOffset imm) true).getD k false) := by
-  rw [decQ_envWith, seenWord_envWith, stepT_encode, pcAddend_word]
+  rw [decQ_envWith_eq, seenWord_envWith, stepT_encode, pcAddend_word]
+  try simp only [step_regs_of_with, step_pc_of_with]
   show (if s.get x = s.get y then { s with pc := s.pc + bOffset imm } else s.next).pc = _
   by_cases h : s.get x = s.get y
   · rw [if_pos h, if_pos (by simp [h])]
@@ -4148,7 +4221,8 @@ theorem pcField_is_pcNext_add (s : St) (rd x y : Fin 32) :
            (seenWord (envWith s (encode (Instr.ADD rd x y))))).pc
       = s.pc + SaltWorks.HDL.wordOf (fun k =>
           (SaltWorks.HDL.pcRun (s.get x) (s.get y) 0 false).getD k false) := by
-  rw [decQ_envWith, seenWord_envWith, stepT_encode, pcAddend_word, if_neg (by simp)]
+  rw [decQ_envWith_eq, seenWord_envWith, stepT_encode, pcAddend_word, if_neg (by simp)]
+  try simp only [step_regs_of_with, step_pc_of_with]
   show ((s.set rd (s.get x + s.get y)).next).pc = _
   show (s.set rd (s.get x + s.get y)).pc + 4 = _
   rw [set_pc]
@@ -4561,7 +4635,8 @@ theorem pcField_is_pcAdd_beq (s : St) (x y : Fin 32) (imm : BitVec 12) :
            (seenWord (envWith s (encode (Instr.BEQ x y imm))))).pc
       = wordOf (fun k =>
           (sem pcAdd (pcAddEnv s.pc (s.get x) (s.get y) (bOffset imm) true)).getD k false) := by
-  rw [decQ_envWith, seenWord_envWith, stepT_encode, pcAdd_word]
+  rw [decQ_envWith_eq, seenWord_envWith, stepT_encode, pcAdd_word]
+  try simp only [step_regs_of_with, step_pc_of_with]
   show (if s.get x = s.get y then { s with pc := s.pc + bOffset imm } else s.next).pc = _
   by_cases h : s.get x = s.get y
   · rw [if_pos h, if_pos (by simp [h])]
@@ -4575,7 +4650,8 @@ theorem pcField_is_pcAdd_add (s : St) (rd x y : Fin 32) :
            (seenWord (envWith s (encode (Instr.ADD rd x y))))).pc
       = wordOf (fun k =>
           (sem pcAdd (pcAddEnv s.pc (s.get x) (s.get y) 0 false)).getD k false) := by
-  rw [decQ_envWith, seenWord_envWith, stepT_encode, pcAdd_word, if_neg (by simp)]
+  rw [decQ_envWith_eq, seenWord_envWith, stepT_encode, pcAdd_word, if_neg (by simp)]
+  try simp only [step_regs_of_with, step_pc_of_with]
   show ((s.set rd (s.get x + s.get y)).next).pc = _
   show (s.set rd (s.get x + s.get y)).pc + 4 = _
   rw [set_pc]
@@ -5819,7 +5895,8 @@ theorem aluField_is_aluSelect_add (s : St) (rd x y : Fin 32) (hrd : rd ≠ 0)
       = SaltWorks.HDL.wordOf (fun k =>
           (sem aluSelect (asDrive res 0)).getD k false) := by
   rw [aluSelect_word res 0 asOps_pos, h0,
-    decQ_envWith, seenWord_envWith, stepT_encode]
+    decQ_envWith_eq, seenWord_envWith, stepT_encode]
+  try simp only [step_regs_of_with, step_pc_of_with]
   show ((s.set rd (s.get x + s.get y)).next).regs[rd.val] = _
   show (s.set rd (s.get x + s.get y)).regs[rd.val] = _
   simp only [St.set, if_neg hrd]
@@ -8576,7 +8653,9 @@ open Salt.Tactic
 #audit_axioms runWords runWords_succ runWords_add
 #audit_axioms cycles cycles_succ cycles_add
 #audit_axioms seenWord CycleRealisesStep cycles_realise_steps
-#audit_axioms envWith wordOf_congr decQ_congr decQ_envWith seenWord_envWith
+#audit_axioms envWith wordOf_congr decQ_congr decQ_envWith_eq seenWord_envWith
+#audit_axioms decQ_envWith_of_clean step_regs_of_with step_pc_of_with
+#audit_axioms step_mem_eq step_trapped_eq stepT_mem_eq stepT_trapped_eq
 #audit_axioms cycOf decQ_cycOf cycleRealisesStep_cycOf
 #audit_axioms not_cycleRealisesStep_id not_cycleRealisesStep_wordOf
 #audit_axioms runFor_one_of_fetch runFor_succ_of_fetch runWords_eq_runFor

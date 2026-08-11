@@ -62,9 +62,17 @@ structure SysSt (N : Nat) where
 theorem SysSt.pos (sys : SysSt N) : 0 < N :=
   Nat.lt_of_le_of_lt (Nat.zero_le _) sys.cur.isLt
 
-/-- Task `i`'s single-task view: the shared registers, its own pc. -/
+/-- Task `i`'s single-task view: the shared registers, its own pc.
+
+⬥ **M1a — the new `St` fields are constructed at their defaults, and that is
+SUFFICIENT rather than provisional**: the memory block's §0.6 ruling is that the
+executive does not use LW/SW, so there is no task-private memory to project and
+`SysSt` deliberately does not carry one. `SysSt.put` discards everything but
+`regs`/`pcs`, so the capability does not exist to be lost here. Executive
+memory is the X4+ door, named and not pre-paid. -/
 def SysSt.task (sys : SysSt N) (i : Fin N) : St :=
-  { regs := sys.regs, pc := sys.pcs[i.val] }
+  { regs := sys.regs, pc := sys.pcs[i.val],
+    mem := Vector.replicate 8 0, trapped := false }
 
 /-- Write a task's slice back: registers are shared, the pc is its own. -/
 def SysSt.put (sys : SysSt N) (i : Fin N) (s : St) : SysSt N :=

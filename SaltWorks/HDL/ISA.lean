@@ -68,11 +68,60 @@ namespace SaltWorks.ISA
 
 `Vector`, not a function and not a `HashMap`: the brief's measurement `[V-ME]`
 puts `Vector` best for kernel `decide` (2,048-case regfile check in 2.4 s) and
-unusable under `bv_decide`, which is banned from shipped proofs anyway. -/
+unusable under `bv_decide`, which is banned from shipped proofs anyway.
+
+⬥ **M1 (memory block v1.4) — `mem` and `trapped` join the state and are INERT
+here.** No arm of `step` reads or writes either field in this commit: the LW/SW
+constructors, their arms, and every exhaustive `Instr` match ride the M2
+Instr-atomic commit, because `decode_encode` is `∀`-quantified over `Instr` and a
+stub `encode` arm would make a landed theorem FALSE. The fields land now so the
+`St` type growth is one atomic commit with its own census (the boundary law:
+*one type growth per atomic commit*).
+
+Every existing arm is built from `s.set` / `s.next` / `s.get` and one
+`{ s with pc := … }`, i.e. `with`-updates that copy what they do not name — so
+**no slice-A instruction can dirty `mem` or `trapped`**, and cleanliness
+propagates through arbitrary runs of the current machine with no extra lemma. -/
 structure St where
-  regs : Vector (BitVec 32) 32
-  pc   : BitVec 32
+  regs    : Vector (BitVec 32) 32
+  pc      : BitVec 32
+  /-- The data memory: EIGHT words (`dmem8`'s true size), never sixteen. -/
+  mem     : Vector (BitVec 32) 8
+  /-- Sticky trap flag. Set by a misaligned or out-of-range LW/SW at M2; nothing
+  in this commit can set it. -/
+  trapped : Bool
   deriving DecidableEq
+
+/-- The address classification for LW/SW, a TOTAL function into three values so
+no case can be missed. -/
+inductive AddrClass where
+  | ok
+  | misaligned
+  | outOfRange
+  deriving DecidableEq, Repr
+
+/-- **The kernel classification boundary** (memory block §0.3): `outOfRange ↔
+byte address ≥ 32` — eight words, `dmem8`'s true size, never the 16-word figure
+the existing mask would suggest.
+
+⚠️ **The order of the tests is chosen so that boundary reads as stated**: a
+misaligned address at or above 32 classifies `outOfRange`, not `misaligned`. Had
+alignment been tested first, `outOfRange ↔ byte_addr ≥ 32` would be FALSE — the
+block states the equivalence, so the range test comes first. -/
+def addrClass (a : BitVec 32) : AddrClass :=
+  if 32 ≤ a.toNat then .outOfRange
+  else if a.toNat % 4 ≠ 0 then .misaligned
+  else .ok
+
+/-- **THE LOAD-BEARING SAFETY PROPERTY — a required M1 deliverable** (§0.3).
+Totality is not what makes the classification safe; *this* is: an `ok` address
+has a word index inside the eight-word file, which is the fact `step` will need
+at M2 to construct the `Vector 8` index. The consumer arrives one commit later;
+landing the definition and its lemma together is the cheap direction. -/
+theorem addrClass_ok_lt {a : BitVec 32} (h : addrClass a = .ok) : a.toNat / 4 < 8 := by
+  by_cases h32 : 32 ≤ a.toNat
+  · simp [addrClass, h32] at h
+  · omega
 
 /-- Slice A. Five instructions, and the stated exclusions are everything else:
 no loads, no stores, no `LUI`/`AUIPC`, no `JAL`/`JALR`, no shifts, no `M`, no
@@ -153,7 +202,9 @@ candidate offset conventions), so `pc` strictly increases and at most
 def run (code : List Instr) (s : St) : St := runFor code.length code s
 
 /-- The initial state: zeroed registers, `pc = 0`. -/
-def St.init : St := { regs := Vector.replicate 32 0, pc := 0 }
+def St.init : St :=
+  { regs := Vector.replicate 32 0, pc := 0,
+    mem := Vector.replicate 8 0, trapped := false }
 
 /-! ## The register-file laws
 

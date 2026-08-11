@@ -125,8 +125,13 @@ def encD (s : St) : List Bool := (List.range stWidth).map (stBit s)
 
 /-- **`decQ` — the Q-leaves' decoding**, reading the same layout back. -/
 def decQ (ins : Env) : St :=
-  { regs := Vector.ofFn (fun r : Fin 32 => wordOf (fun k => ins (32 * r.val + k)))
-    pc   := wordOf (fun k => ins (1024 + k)) }
+  { regs    := Vector.ofFn (fun r : Fin 32 => wordOf (fun k => ins (32 * r.val + k)))
+    pc      := wordOf (fun k => ins (1024 + k))
+    -- ⬥ M1a: `encD` encodes 1056 bits — regs and pc ONLY. The decoder therefore
+    -- constructs the new fields at their defaults; it cannot read what was never
+    -- written, and extending `encD` to 1313 bits would reopen the flop budget.
+    mem     := Vector.replicate 8 0
+    trapped := false }
 
 /-- Reading `encD`'s list back at an index in range is `stBit`. -/
 theorem encD_getD (s : St) (j : Nat) (h : j < stWidth) :
@@ -135,11 +140,19 @@ theorem encD_getD (s : St) (j : Nat) (h : j < stWidth) :
   simp [stWidth] at h ⊢
   simp [h]
 
-/-- **THE ROUND TRIP — `decQ ∘ encD = id`.** *The property that makes the pair a
-codec rather than two unrelated functions, and the one a layout mistake breaks.* -/
-theorem decQ_encD (s : St) : decQ (fun j => (encD s).getD j false) = s := by
-  obtain ⟨regs, pc⟩ := s
-  have hpc : wordOf (fun k => (encD ⟨regs, pc⟩).getD (1024 + k) false) = pc := by
+/-- **THE ROUND TRIP, AS A PROJECTION** (⬥M1a). *The property that makes the pair
+a codec rather than two unrelated functions, and the one a layout mistake breaks.*
+
+⚠️ **The whole-`St` form is FALSE once `St` carries `mem`/`trapped`**: `encD`
+encodes 1056 bits, so the decoder rebuilds the new fields at their defaults and
+cannot agree with a state that has non-default ones. The codec's content is
+exactly the two encoded fields, and that is what this states. The whole-state
+equality survives *conditionally*, immediately below. -/
+theorem decQ_encD (s : St) :
+    (decQ (fun j => (encD s).getD j false)).regs = s.regs ∧
+    (decQ (fun j => (encD s).getD j false)).pc = s.pc := by
+  obtain ⟨regs, pc, mem, tr⟩ := s
+  have hpc : wordOf (fun k => (encD ⟨regs, pc, mem, tr⟩).getD (1024 + k) false) = pc := by
     apply BitVec.eq_of_getLsbD_eq
     intro k hk
     rw [wordOf_getLsbD _ _ hk, encD_getD _ _ (by simp [stWidth]; omega), stBit,
@@ -147,7 +160,7 @@ theorem decQ_encD (s : St) : decQ (fun j => (encD s).getD j false) = s := by
     have h1024 : 1024 + k - 1024 = k := by omega
     rw [h1024]
   have hreg : ∀ (i : Nat) (hi : i < 32),
-      wordOf (fun k => (encD ⟨regs, pc⟩).getD (32 * i + k) false) = regs[i] := by
+      wordOf (fun k => (encD ⟨regs, pc, mem, tr⟩).getD (32 * i + k) false) = regs[i] := by
     intro i hi
     apply BitVec.eq_of_getLsbD_eq
     intro k hk
@@ -156,12 +169,24 @@ theorem decQ_encD (s : St) : decQ (fun j => (encD s).getD j false) = s := by
     have hdiv : (32 * i + k) / 32 = i := by omega
     have hmod : (32 * i + k) % 32 = k := by omega
     rw [hdiv, hmod, getElem!_pos regs i hi]
-  simp only [decQ, St.mk.injEq]
   refine ⟨?_, hpc⟩
+  simp only [decQ]
   apply Vector.ext
   intro i hi
   rw [Vector.getElem_ofFn]
   exact hreg i hi
+
+/-- **THE CONDITIONAL WHOLE-`St` ROUND TRIP** (⬥M1a, the form the `run`-shaped
+consumers need). On a state whose new fields are at their defaults — which is
+every state the codec is fed, since `St.init` and `decQ` build them that way and
+no slice-A instruction can dirty them — the codec still inverts exactly. -/
+theorem decQ_encD_of_clean (s : St) (hm : s.mem = Vector.replicate 8 0)
+    (ht : s.trapped = false) : decQ (fun j => (encD s).getD j false) = s := by
+  obtain ⟨hr, hp⟩ := decQ_encD s
+  obtain ⟨regs, pc, mem, tr⟩ := s
+  subst hm; subst ht
+  simp only [decQ, St.mk.injEq, and_true]
+  exact ⟨hr, hp⟩
 
 
 /-! ### NON-VACUITY — a WRONG layout must break the round trip
@@ -173,8 +198,10 @@ the SAME bits under a different indexing, and it must fail.* -/
 /-- The transposed layout — register `r` bit `k` at `r + 32*k` instead of
 `32*r + k`. **A plausible mistake: it is the same 1024 bits, read column-wise.** -/
 def decQtransposed (ins : Env) : St :=
-  { regs := Vector.ofFn (fun r : Fin 32 => wordOf (fun k => ins (r.val + 32 * k)))
-    pc   := wordOf (fun k => ins (1024 + k)) }
+  { regs    := Vector.ofFn (fun r : Fin 32 => wordOf (fun k => ins (r.val + 32 * k)))
+    pc      := wordOf (fun k => ins (1024 + k))
+    mem     := Vector.replicate 8 0
+    trapped := false }
 
 /-- A state that distinguishes the two layouts: `x1 = 3`. -/
 def sTest : St := St.init.set 1 3
@@ -207,6 +234,7 @@ theorem correct_layout_recovers :
 #audit_axioms decQ
 #audit_axioms encD_getD
 #audit_axioms decQ_encD
+#audit_axioms decQ_encD_of_clean
 #audit_axioms decQtransposed
 #audit_axioms sTest
 #audit_axioms transposed_layout_breaks
