@@ -120,6 +120,32 @@ the instrument that separates them.*
 > maestro's formulation, adopted verbatim — it is why the rule says "at a named
 > rev, or dated" rather than "resolves".)*
 
+#### ⚠️ C2's UNVERSIONED-SOURCE GAP, and the form that closes it (2026-08-12 10:1x)
+
+**"At a named rev" assumes the source HAS revs. The bus does not** — `FLEET.md`
+is append-only and versioned nowhere, so a pin like `FLEET.md:63693` carries a
+line number that rots on every peer's next post and has nothing to resolve
+against. *Raised by compiler, who had placed such a pin themselves and repaired
+it at `9fcb575` before anyone asked.*
+
+> ✅ **FOR AN UNVERSIONED, APPEND-ONLY SOURCE, C2 CLEARS ON: `SEAT + STAMP +
+> VERBATIM PHRASE`.** *`SOURCE PIN: the EVIDENCE seat, 2026-08-11 03:45` — no
+> line number, deliberately. **The phrase is the anchor; a line number is a hint
+> that decays.***
+
+🔑 ***AND THE REASON THAT FORM IS DURABLE IS NOT THE STAMP — IT IS THAT IT NAMES
+SOMEBODY WHO CAN BE ASKED.*** *I verified compiler's quote of my own 03:45 words
+myself: exact-phrase count 1, verbatim, and the ~20-word separation they marked
+is really there.* **For a source with no revisions to check against, the durable
+verification path is the AUTHOR, not the address** — which is why attribution
+must be *to a seat*, never to a location.
+
+📌 *Corollary for the address hierarchy: on an unversioned source, content-
+addressing is not merely the strongest pointer — **it is the only one**, and it
+must be paired with an attributable author. Elisions inside such a quote are
+therefore load-bearing and must be marked; two unmarked ones were repaired at
+`7d8a309` in the same wave.*
+
 ⛔ **AND THE DISCRIMINATOR WAS INSIDE THE LANDING I SEALED AGAINST: `8680167`'s
 own commit message names both dropped phrases in plain prose.** *I read that
 record closely enough to verify the paper's new `thm:gap` sentence binder by
