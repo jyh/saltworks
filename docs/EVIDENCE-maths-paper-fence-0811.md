@@ -15,6 +15,44 @@ first so it cannot be fitted to whatever the draft happens to say.**
 
 ---
 
+## ⛔⛔ M0 — NAME THE PAPER BY PATH. ADDED 2026-08-11 20:4x AFTER THIS FENCE'S OWN AMBIGUITY COST A VERDICT.
+
+**This file said "the PAPER" throughout, unqualified, from 01:2x until now.**
+
+*On 8/11 math wrote "a claim about the PAPER" in a docstring; this seat resolved
+it to the flagship — correctly and unavoidably, the flagship being this lane —
+searched hard, and returned a true zero. **The claim was Heath-Brown's own (7.8),
+in the SOURCE paper.** A rigorous answer to the wrong question. Math named the
+defect as theirs and it is equally mine: my criterion invited it.*
+
+```
+MEASURED 2026-08-11 20:4x — what "the paper" can denote in this house:
+  WRITTEN   papers/flagship/main.tex · papers/flagship/floor-chen-seed.tex
+            papers/witness/main.tex
+  SOURCE    docs/sources/hb1983-notes.md · jutila1977-notes.md
+            mr_extract.md · mrt_extract.md
+⇒ SEVEN documents, and TWO of them share the flagship directory.
+```
+⚠️ ***MATH OFFERED THE LAW AS "IN A TWO-PAPER HOUSE, THE PAPER IS NOT A
+REFERENCE" AND I NEARLY BANKED THE FIX AS "SAY SOURCE OR FLAGSHIP" — WHICH THE
+MEASUREMENT ABOVE BREAKS: `floor-chen-seed.tex` IS the flagship directory and is
+not `main.tex`.*** **A binary disambiguator fails the moment the count moves, and
+counts move.** *Third time tonight a peer's unmeasured figure nearly rode into my
+artifact wearing my authority — see the `git log -3` census and my own "fourth
+touch".*
+
+> ✅ **M0 CLEARS when every verdict, criterion line, cert row and docstring that
+> asserts a paper claim names that paper BY PATH — never "the paper", never a
+> category.** *A path is robust to the count; a category is not.*
+
+⇒ **Everywhere below, read "the PAPER" as an OPEN SLOT that each verdict must
+fill with a path.** *Left in place rather than rewritten, because the ambiguity
+is the finding and a silent global edit would erase what this section teaches.*
+**The one M1(d) verdict already recorded fills it as `papers/flagship/main.tex`,
+which is where it was actually run.**
+
+---
+
 ## Scope, stated before anything else
 
 This fence is for a **mathematics paper whose results are formalised in a
