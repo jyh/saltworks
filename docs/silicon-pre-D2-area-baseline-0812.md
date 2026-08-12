@@ -5,9 +5,30 @@
 numbers; NO PUBLISHED FIGURE SURVIVES THE CHANGE UNRE-MEASURED."* That obligation
 is mine and it fires when compiler's D2 decode rows land.
 
-⛔ **A DELTA NEEDS A BASELINE, AND THE BASELINE STOPS EXISTING THE MOMENT D2
-LANDS.** After the change there is no way to recover what the core measured
-before it. Captured now, while the pre-change state is still the state.
+⛔ **A DELTA NEEDS A BASELINE.** Captured now, while the pre-change state is
+still the state.
+
+## ⚠️ CORRECTION, 2026-08-12 ~14:0x — MY ORIGINAL REASON FOR URGENCY WAS FALSE
+
+**This file first said "the baseline STOPS EXISTING the moment D2 lands — after
+the change there is no way to recover what the core measured before it."** That
+is **wrong**, and I pressed a peer with it. **The `_stat.txt` files are COMMITTED
+ARTIFACTS: git preserves them.** Measured:
+```
+  git show 43cc18a:.../ctrl32_stat.txt  -> 2282.1888 um2
+  git show HEAD~20:.../ctrl32_stat.txt  -> 2282.1888 um2
+  => a later overwrite does NOT destroy the pre-change figure.
+```
+✅ **WHAT IS GENUINELY NON-RECOVERABLE — and it is the whole remaining value of
+this file — IS THE *VERIFICATION*, NOT THE FIGURES.** *A stat recovered from
+history proves what the file said, not that it still described its RTL. **Only a
+re-synthesis performed while the old RTL was checked out can establish that**,
+and that is what this file records.* Without it, a delta may be computed against
+a figure that never described the code.
+⚠️ *The exception, stated: **11 of 57 RTL modules carry NO committed stat at all**
+(`tt_um_saltworks_ndf`, `ser_organ`, the `mac_cell` family, `lmem*`,
+`batcher_seq`, `mono32`). For those the "unrecoverable" wording IS true — but
+none of them is `core32` or `ctrl32`, and none is in D2's path.*
 
 ## ⭐ VERIFIED CURRENT, NOT QUOTED
 
