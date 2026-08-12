@@ -23,7 +23,10 @@ cells vs 47,438 filler). If the window is missed: ③ ships next shuttle, nothin
   (a) audit the existing netlists against the RULED semantics (outOfRange ≥ 32; the trap
   arms misaligned + out-of-range) — where they diverge, the RTL amends to the ruling,
   never the reverse (iron rule 1's hardware face); (b) the Lean netlist model + the
-  realisation proofs against the adopted netlists; (c) the SAT link. The provenance
+  realisation proofs against the adopted netlists — TRAP-ARM PHRASING per math's refuter
+  (repair-then-fire): the two trap causes (misaligned · outOfRange ≥ 32) stated as
+  SEPARATE kernel facts matched arm-for-arm to the ruled step semantics, never folded
+  into one disjunction the organ cannot distinguish; (c) the SAT link. The provenance
   fence rides: adopted netlists are HAND-RTL-era artifacts until their emission lineage
   is established — Fig-3's provenance coloring and §4's grades state whichever is true.
 - **D2 — THE MEMORY CONTROL PLANE**: decode rows for LW/SW opcodes + the new control bits
@@ -35,9 +38,13 @@ cells vs 47,438 filler). If the window is missed: ③ ships next shuttle, nothin
   the hardening numbers; NO published figure survives the change unre-measured.
 - **D3 — THE N-STEP BRIDGE**: organ + core joined so cycles_realise_steps discharges for
   memory-bearing streams — the C4 projection (M2's form) EXTENDS to a whole-St realisation
-  once mem is real. The M1a projection idiom governs the intermediate forms; the FINAL form
-  may restore the pre-M2 whole-St shape AS A THEOREM (the projection + the organ's mem
-  realisation compose) — that restoration is the campaign's summit theorem.
+  once mem is real. The M1a projection idiom governs the intermediate forms. THE SUMMIT
+  THEOREM [REPAIRED at math's refuter finding, 18:53]: stated over the PAIR — core codec
+  ⊕ organ state — which IS §0.2's two-object bridge. decQ is structurally 1056-bit
+  (regs+pc; mem literally zeroed, rfl-proved in M4); the pre-M2 sentence over decQ would
+  need the 1313-bit codec §0.2 REJECTED BY NAME. The width is earned OVER A DIFFERENT
+  OBJECT, and the summit carries a NEW NAME so no pre-M2 citation silently resolves to a
+  different theorem.
 
 ## §2 · SEAT SEAMS (pre-costed by the seats themselves where noted)
 - **compiler** (18:50 pre-cost, folded): the control plane (D2) in its glob; the
@@ -45,8 +52,14 @@ cells vs 47,438 filler). If the window is missed: ③ ships next shuttle, nothin
   no LW/SW — WHEN the compiler gains load/store emission, that is a SEPARATE campaign,
   not ③); ⚠️ its flagged hazard is a block LAW: **isForward's catch-all is a live hazard
   the moment any arm stops ending in .next — every new instruction class re-walks the
-  catch-all sites (the M2 census list is the map: ISA 15 · ExecutiveX1 10 · Program 6 ·
-  Decoder 5 · StraightLine 1, PLUS wrappers per the Option-T law).**
+  CATCH-ALL sites — and the map is a CATCH-ALL CENSUS, not the M2 arm counts [compiler's
+  refuter finding 18:53: arms and catch-alls are different objects — ExecutiveX1 has
+  7-10 arms and ZERO catch-alls; StraightLine has ONE arm and IS the hazard]; the census
+  re-runs at D2's opening, keyed on `| _` incl. multi-argument forms, plus wrappers per
+  the Option-T law. AND THE DISCRIMINATOR LAW: touchesMem (and every future
+  discriminator) is CASES-EXHAUSTIVE BY CONSTRUCTION — no catch-all, ever: a new
+  constructor must FAIL TO COMPILE at the discriminator, never default, because a
+  discriminator's default is silently dangerous in whichever direction it points.**
 - **silicon**: D1's RTL/hardening lane + the re-hardening runs (Linux CI path per #522's
   own finding: the submitted-die provenance standard) + MEAS throughout. Its relight
   REMAINS PENDING at its own seam (~17h) — the ③ sprint is the natural fresh-head start.
