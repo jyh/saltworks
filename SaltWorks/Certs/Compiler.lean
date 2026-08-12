@@ -242,7 +242,7 @@ flow — visible nowhere.**
 
 Direction: **same proposition** as `cause_outside_the_fragment_is_now_ite_only`.
 
-Witness: **NON-DEGENERACY** — three programs over the SAME context and register map, differing only in the construct. *A degenerate version would compare programs that differ in several ways at once and prove nothing about the construct; holding `regCanonical 16 [(0, Ty.i32)]` fixed is what makes the `.ite`/`.while` split attributable.* -/
+Witness: **NON-DEGENERACY** — three programs over the SAME context and register map. ⚠️ ***CORRECTED 10:36: my first version said they differ "only in the construct". THEY DO NOT — the `.while` body is `.skip` where the `.ite` then-branch is `.assign`, so the programs differ in more than one property, which is the very thing that sentence claimed to rule out.*** *The attribution survives on a DIFFERENT and checkable argument, which is the one that should have been written: **every component of the refused `.ite` appears inside a program that COMPILES** — its condition `(.slt (.var 0) (.const 5))` is the `.while`'s condition, and its branch `(.assign 0 (.const 5))` is the `.seq`'s body. So the refusal cannot be blamed on the condition or on the branch; only the construct is left. **Holding the context and register map fixed is necessary and was never sufficient.*** -/
 theorem cert_the_fragment_boundary :
     (compileS regCanonical 16 [(0, Ty.i32)]
         (.seq (.assign 0 (.const 5)) .skip)).isSome = true
