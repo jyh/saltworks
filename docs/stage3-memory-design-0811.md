@@ -1,4 +1,6 @@
-# STAGE ③ — VERIFIED LW/SW ON THE SUBMITTED DIE (the memory datapath campaign)
+# STAGE ③ — OBJECTIVE: LW/SW HARDWARE ON THE SEPT-7 DIE, VERIFIED BEFORE THE CLICK
+**STATE: NOT ON THE SUBMITTED DIE — measured, the 446-line wrapper carries
+ZERO dmem8 and ZERO memif. This block is a campaign, not a report.**
 **Maestro (Fable), 2026-08-11 evening, at the Captain's word: "I have no doubt that we can
 hit verified lw/sw in this submission if we keep at it." DRAFT-UNTIL-REFUTED: the refuter
 pass fires before any executor pulls. Governing inheritance: memory-design v1.5.1+
