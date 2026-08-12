@@ -26,7 +26,12 @@ Landed theorems certified here, by name:
 
 ## WHAT THE PAPER CLAIMS, quoted, and WHICH HALF THIS FILE CERTIFIES
 
-The manuscript makes the 1990 claim three times; §4 is the sharpest form:
+⚠️ **WHICH PAPER: the **Nature-track manuscript draft** (`${SEAT_DIR}/briefs/2026-08-11-nature-draft-v0.md`, read 2026-08-11; section numbers are DRAFT-RELATIVE and will move).** *This house holds THREE candidate documents — `salt/papers/flagship/`,
+`salt/papers/witness/`, and the Nature draft — so "the paper" is not a reference. A reader who
+follows an unqualified pointer to the flagship finds nothing, which is a real failure mode this
+fleet hit on 2026-08-11.*
+
+That draft makes the 1990 claim three times; §4 is the sharpest form:
 
 > "The 1990 switching-network theorem rides on the die: the routing schedule it
 > certifies is proven in the kernel (the full rotation-closure result) and drives

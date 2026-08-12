@@ -20,7 +20,7 @@ Landed by the **COMPILER seat**.
 
 ## ⭐ WHY THIS FILE EXISTS — the second half of a flag raised on the paper's pillars
 
-The evidence seat flagged two of the manuscript's four pillars as *"not mine to
+The evidence seat flagged two of the four pillars named in the **Nature-track manuscript draft** (`${SEAT_DIR}/briefs/2026-08-11-nature-draft-v0.md`, read 2026-08-11; section numbers are DRAFT-RELATIVE and will move) as *"not mine to
 measure — their owners should state what those words cover before the sentence
 travels"*: **a verified COMPILER** and **a verified EXECUTIVE**. `Certs/Compiler.lean`
 answered the first. **This file answers the second, in the same form: not a promise in

@@ -23,6 +23,11 @@ authorship was being inferred from memory of who announced what, and that key fa
 six times on 2026-08-11 alone. A one-line seat stamp costs nothing and is the only
 copy that survives the announcement.*
 
+⚠️ **"THE PAPER" IS NOT A REFERENCE IN THIS HOUSE — every cert names its source.** *Three
+candidate documents exist (`salt/papers/flagship/`, `salt/papers/witness/`, and the Nature-track
+draft at `${SEAT_DIR}/briefs/2026-08-11-nature-draft-v0.md`). The saltworks rows quote the LAST of
+those; section numbers are draft-relative and will move.*
+
 A certificate file restates one paper-cited headline claim in simplified vocabulary
 and carries a **kernel proof linking the restatement to the landed theorem** — the
 proof is what separates a certificate from documentation. Each file declares its
@@ -32,7 +37,7 @@ docstring exactly what, if anything, was traded for readability.
 ## LANDED
 
 * `SaltWorks/Certs/Switch1990.lean` — **THE 1990 CERT**, **nine declarations** over the
-  Batcher–banyan switch the paper's §1 story rests on. Direction: **equality or the
+  Batcher–banyan switch the Nature-track draft's §1 story rests on. Direction: **equality or the
   same proposition** throughout — with the one exception named in the file and closed
   by proof rather than by wording (`cert_payload_delivery`, below).
   - `cert_full_circle` / `cert_address_restored_after_three_stages` — `rot^k = id`
@@ -56,7 +61,7 @@ docstring exactly what, if anything, was traded for readability.
     `cert_payload_delivery_length` + `cert_payload_delivery_loses_nothing` recover
     the landed statement in `cert_payload_delivery_recovers_the_landed_statement`.
     *The first version of this file asserted "nothing traded" there in prose.*
-  ⛔ **Its docstring carries the scope refusal that matters**: the paper's §4
+  ⛔ **Its docstring carries the scope refusal that matters**: that draft's §4
   sentence conjoins *"proven in the kernel"* with *"rides on the die"* and *"drives
   the taped-out switch"*. **The certificate covers the kernel clause and explicitly
   disclaims the other two**, which are silicon's evidence about a netlist and a
