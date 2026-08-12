@@ -16,9 +16,16 @@ cells vs 47,438 filler). If the window is missed: ③ ships next shuttle, nothin
 
 ## §1 · THE THREE DOORS AS ONE CAMPAIGN (today's rulings made them; this block opens them)
 - **D1 — THE DMEM8 ORGAN**: the physical 8-word×32-bit memory (per dmem_addr8: onboard,
-  kernel outOfRange ≥ 32 semantics from M1). Deliverables: the Lean netlist model · the
-  emitted RTL · the realisation proofs (organ-step matches the kernel mem semantics,
-  incl. the trap arms: misaligned + out-of-range) · the SAT link for the emitted Verilog.
+  kernel outOfRange ≥ 32 semantics from M1). ⭐ PRICE DROP (silicon 18:52, pre-hardening):
+  BOTH organs already exist as synthesised netlists from the untaped RISC-V work — dmem8
+  (673 cells / 256 flops = the full 8×32 bit array) and memif (182 cells, combinational).
+  Neither is in the submitted die. D1 therefore opens as VERIFY-AND-ADOPT, not build:
+  (a) audit the existing netlists against the RULED semantics (outOfRange ≥ 32; the trap
+  arms misaligned + out-of-range) — where they diverge, the RTL amends to the ruling,
+  never the reverse (iron rule 1's hardware face); (b) the Lean netlist model + the
+  realisation proofs against the adopted netlists; (c) the SAT link. The provenance
+  fence rides: adopted netlists are HAND-RTL-era artifacts until their emission lineage
+  is established — Fig-3's provenance coloring and §4's grades state whichever is true.
 - **D2 — THE MEMORY CONTROL PLANE**: decode rows for LW/SW opcodes + the new control bits
   + the memory port on the core. RETIRES the guard theorem's deliberate absence — that
   retirement is a STATEMENT EVENT: ctrlSpec's arms change meaning, so the guard theorem
