@@ -15,6 +15,39 @@ repos, and they emit markdown.
 > counting, one line and thirty seconds later.** The reflex is not weaker in the
 > person who just named it; only the `ls` is.*
 
+## ⛔⛔ THE TABLE BELOW IS **PARTIAL** — measured 2026-08-11 20:0x: **it has rows for 10 of 34 tools**
+
+**Regenerate this, never trust the sentence above it:**
+```sh
+cd docs/ledger-tools && for f in *.py *.sh *.awk; do
+  grep -q "^| \`$f\`" README.md || echo "UNLISTED: $f"; done
+```
+⚠️ ***THE ANCHOR `^| \`` IS THE WHOLE CHECK, AND I SHIPPED IT WRONG FIRST.*** *My
+first version of this loop grepped the filename ANYWHERE in the file, so a tool
+merely CITED inside another tool's paragraph counted as inventoried — the row I
+added minutes earlier mentions `pin_check.py`, and the loop promptly reported it
+listed. **It measured MENTIONED, not INVENTORIED, and it over-reported in the
+reassuring direction.*** *One tool at this size; on a page that cross-references
+freely it would climb. **A completeness checker that counts prose mentions is
+this directory's thesis failing on its own front door for the third time.***
+⛔ ***AND THE PART THAT MATTERS MORE THAN THE NUMBER: the note directly above
+this one has recorded this exact defect since 8/7, when the gap was 4-of-15. It
+is now 9-of-34. **The confession stayed accurate and the table did not, and the
+gap roughly doubled while its own description sat above it.***
+
+🔑 ***A DOCUMENTED DEFECT IS NOT A FIXED DEFECT, AND THE DOCUMENTATION IS WHAT
+MAKES IT INVISIBLE.*** *A reader meeting a candid self-correction about
+miscounting concludes this page is careful about counting — so the confession
+suppresses the very check it describes.* **It is [[a-repair-invites-gratitude]]
+one step further along: a claim invites a check, a repair invites gratitude, and
+a CONFESSION invites trust.** *The 8/7 note did not fail; it was never wired to
+anything, so it aged into a decoration on an inventory that kept drifting.*
+
+⚠️ **So: this table is a set of ANNOTATIONS on tools that earned a paragraph, not
+an inventory. For the inventory, run the loop.** *The 24 rows still owed are
+owed; they are absent, not deliberately excluded, and no reading of this file
+should treat an unlisted tool as unowned or disposable.*
+
 | File | What it is |
 |---|---|
 | `ledger_common.py` | the shared transcript + git parser. The single place that decides "a human typed this" vs "the harness injected this". |
@@ -25,6 +58,7 @@ repos, and they emit markdown.
 | `provenance_replay.py` | **does a provenance bundle actually BIND the artifact it ships with?** Replays the executor transcript's `Write`/`Edit` calls and hashes the result against the committed blob. Driven by `docs/provenance/REPLAY-MANIFEST.tsv`, pinned to the artifact's **birth commit**. ⚠️ It was first anchored at `HEAD:…` on the reasoning that *"a pinned rev passes forever while the artifact drifts"* — **right for a frozen artifact, wrong for a live module.** Ninety minutes later math added 841 lines of S3(b) to `Program.lean` and the gate went permanently red on legitimate development. A birth record binds a BIRTH; whether HEAD has moved on is `docs/provenance/verify.sh`'s question, and it pins the current blob. **Three-way exit: 0 bound · 1 MISMATCH · 2 could not check** — the same lesson as `import-closure.py`. ✅ **Covered by `selftest.py`, mutation-verified** (each of three guards, disabled, fails exactly one check). ⚠️ It answers content-**BOUND**, never content-**VETTED**. |
 | `model_integrity.py` | **which MODEL actually served each message** — read out of the transcript's per-message `message.model` field, because **no session can detect this about itself**. Built 8/7 after the maestro session ran ~90 min on `claude-opus-4-8` undisclosed; this seat's independent run measured the window at **13:31 → 15:03**. Filters on the MESSAGE's date, never the file's mtime (a session file spans days). ⛔ Employer lane refused **in code, by raising** — a silent skip is how a firewall stops being one. **Three-way exit: 0 stable · 1 CHANGED · 2 could not check.** ✅ Covered by `selftest.py`, mutation-verified. ⚠️ A change is not a fault; an **undisclosed** change is. |
 | `f5_port_test.py` | **the F5 UNREACHABLE-HYPOTHESIS port test, mechanised** — does the EMITTED netlist have an XOR bank (criterion a), and is its sign net the carry-in port (criterion b)? Structural parse of emitS output; no Lean, no fleet lock. ⛔ It **refuses (c)** in its own output — hypotheses-to-ports needs the statement beside the netlist, so a green (a)+(b) does NOT clear F5. **Three-way exit: 0 met · 1 not met · 2 could not read**, and **exit 1 is the CORRECT answer before the complement path lands** — that is its negative control. ✅ Covered by `selftest.py`, **mutation-verified** (two mutants, each killing a different pair of rows). Expected post-landing reading pre-registered in the file: 225 cells, 96 xor2, bank net feeding **33** — not 32, because the carry-in already feeds one XOR. |
+| `pool_drift.sh` | **does the Lean pool constant still match the RTL it MIRRORS?** — `TinyRustN0.slicea16bmaPool` against `rf [1:N]` in `slicea16bma.v`. **Compiler seat's tool, this seat's directory** (added `37e7697` 08/09, edited `97e041f` 08/10) — the same cross-seat arrangement as `import-closure.py`, and the file names its own author and origin at line 4, which is the disclosure that matters. ⛔ **Its PATH is load-bearing: `SaltWorks/HDL/TinyRustN0.lean:443` and `CompileS.lean:230` both cite it by path in prose**, so a rename for tidiness would manufacture exactly the drifted-citation class `pin_check.py` exists to catch. ⚠️ **Measured 08-11 20:0x: nothing INVOKES it** — absent from `nightly.sh`, no caller anywhere in the repo. It is hand-run only, which makes it a guard whose firing depends on someone remembering it. *Compiler's call whether to wire it; recorded here so the next reader does not mistake "committed" for "running".* |
 | `nightly.sh` | runs all of it, writes `docs/EVIDENCE-ledger-<date>.md`. |
 
 ## Run it
