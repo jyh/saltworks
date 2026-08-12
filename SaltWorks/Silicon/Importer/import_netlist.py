@@ -429,11 +429,38 @@ def parse(path):
                     base = toks[i][1]
                     if (toks[i][0] == "ID" and i + 1 < n and toks[i + 1] == ("P", "[")):
                         base = f"{base}[{toks[i+2][1]}]"
+                        # RANGE IS NOT A BIT-SELECT. Taking the top bit silently is
+                        # the soundness class this file already names at line 79
+                        # ("it aliases distinct nets onto one"). MEASURED 8/12 on the
+                        # ADOPTED D1b netlist: `assign word_index = byte_addr[4:2];`
+                        # parsed as (word_index, byte_addr[4]) -- a THREE-BIT word
+                        # address collapsed to its TOP BIT. The datum carried ONE net
+                        # where three were required, RC=0, file written, nothing said.
+                        # The grammar at line 83 models `<vector_port>[<i>] = <scalar>`
+                        # and says nothing about a range. REFUSE rather than narrow an
+                        # unmodelled form to one the parser happens to handle.
+                        if i + 3 < n and toks[i + 3] == ("P", ":"):
+                            hi = toks[i+2][1]
+                            lo = toks[i+4][1] if i + 4 < n else "?"
+                            raise SystemExit(
+                                f"importer: assign uses a RANGE '{toks[i][1]}[{hi}:{lo}]' -- "
+                                "the grammar models bit-selects and scalars only. "
+                                "Refusing rather than collapsing the range to one bit. "
+                                "Emit per-bit assigns, or extend the grammar and this "
+                                "check together.")
                         i += 3
                     cur.append(base)
                 elif toks[i] == ("P", "="):
                     lhs, cur = cur[0], []
                 i += 1
+            # `cur[0]` DISCARDS every later element: a concatenation
+            # (`assign a = {b,c};`) is not modelled either, and taking the first
+            # term is the same silent narrowing as the range above.
+            if len(cur) > 1:
+                raise SystemExit(
+                    f"importer: assign right-hand side has {len(cur)} terms "
+                    f"({', '.join(cur[:4])}) -- concatenations are not modelled. "
+                    "Refusing rather than importing the first term.")
             rhs = cur[0] if cur else None
             if lhs and rhs:
                 assigns.append((lhs, rhs))
