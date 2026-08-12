@@ -15,9 +15,17 @@ no glob did).
 - SaltWorks.lean, lakefile.toml, lean-toolchain : MAESTRO ONLY. Seats leave "import owed: <module>" in commit messages; maestro sweeps.
 - docs/** : append-friendly; per-seat files preferred (docs/<seat>-*.md).
 - EXCEPTIONS (named, dated, removed on expiry — an exception recorded is the law consulted):
-  - SaltWorks/HDL/ISA.lean → THE M2 HAND (math's seat / its fresh head), granted by the compiler seat
-    2026-08-11 16:3x, EXPIRES AT M2's LANDING. Cause: decode_encode is ∀-quantified over `Instr`, so
-    splitting the new constructor across two seats opens a window with a new arm and an unproved
-    decode_encode. Atomicity beats slot purity here. The compiler seat is on SaltWorks/Certs/** and
-    then CompileS.lean (the ite emitter) — neither touches ISA.lean.
+  - ✅ EXPIRED AT THIS COMMIT — SaltWorks/HDL/ISA.lean → THE M2 HAND (math's seat / its fresh head),
+    granted by the compiler seat 2026-08-11 16:3x, expiring at M2's landing. Cause: decode_encode is
+    ∀-quantified over `Instr`, so splitting the new constructor across two seats opens a window with
+    a new arm and an unproved decode_encode. Atomicity beats slot purity here. **The grant is now
+    spent; ISA.lean returns to its normal ownership.**
+  - ⬥ RECORDED, NOT CLAIMED — M2's atomic commit also touched FOUR files outside math's slot, each
+    because the `Instr` growth made a landed statement FALSE there and green-on-main is absolute:
+    HDL/Decoder.lean (ctrlSpec + the guard theorem, helm ruling 17:07) · HDL/StraightLine.lean
+    (step_forward_pc's dite replay, predicted by the memory block §0.7) · HDL/SpikeVectors.lean (the
+    decoder-census fixup the block commissioned INTO this commit) · HDL/CompileS.lean (a docstring
+    citing two retired theorem names — the obligation compiler registered at 17:08 and which no
+    build could catch). **All four were bus-escalated and helm-ruled before the edit; none was taken
+    on math's own authority.** Ownership of all four is unchanged after this commit.
 - Discipline: commit small + `git pull --rebase` before every push; unique Scratch<SEAT>.lean; judge only your own final full build; flags-style honesty in docs/LEDGER.md (append-only).

@@ -486,3 +486,88 @@ folded), 9 CONFIRMED-REPAIRABLE (all repaired above), 11 kills folded
 
 **REFUTER PASS: POSTED AND FOLDED. P2 ② IS OPEN — M0 is the first
 pull (any P1-idle seat), then M1+M1a per the stealing discipline.**
+
+## §B · ⬥v1.6 — THE M2 AMENDMENT (2026-08-11 ~17:0x–17:1x, math hand, four helm rulings)
+
+**M2 landed as ONE atomic commit and grew four times while landing. Every
+growth was the same discovery in a different layer: a CORRESPONDENCE CLAIM
+THAT WAS TRUE OF A MEMORY-LESS MACHINE.** Nothing here was a proof
+difficulty; all four were statement-level, and all four were found before or
+by the type-checker rather than by review.
+
+### B.1 · THREE PREDICTED-AND-FIRED CONTROLS, NOW DISPOSED
+
+*A control that fires and is never disposed is a stale pointer with teeth.*
+
+1. **M1a's per-arm scoping control — FIRED, AS WRITTEN.** M1a said: *"the
+   per-arm scoping must be FALSE outside the five — two states equal on
+   regs/pc differing at a loaded mem word make the LW arm's
+   projection-congruence FALSE."* It did. **Disposition:** five landed
+   theorems were false under M2, not unproved, and were RE-CUT as conditional
+   frame laws under new names with `touchesMem` as the discriminator
+   (`step_mem_frame_of_not_touchesMem`, `step_trapped_frame_of_not_touchesMem`,
+   `step_regs_of_with_of_not_touchesMem`, and the two `stepT` twins).
+   `step_pc_of_with` SURVIVED unchanged — `pc` never depends on memory.
+   Positive complements landed beside them (what SW writes, what LW reads,
+   what a trapped step suppresses).
+2. **§0.2's F4 two-object PRICE — CAME DUE, NOW MARKED PAID.** §0.2 recorded
+   that *"the ISA step and the hardware step stop being the same function"*
+   and that the codec covers **(regs, pc) ONLY**. Under M2 that stopped being
+   a note and became a false theorem: `CycleRealisesStep`'s whole-`St`
+   equality is **UNSATISFIABLE** once `stepT` can store, because `decQ`
+   constructs `mem := replicate 8 0` for every `cyc`. **Disposition:** re-cut
+   to `CycleRealisesStepProj` (the `_proj` house form, after
+   `decQ_encD_proj`), with `decQ_cycOf_proj` and
+   `cycleRealisesStepProj_of_bits`. **Kernel-checked refutation of the old
+   form** on the witness `envWith (St.init.set 1 5) (encode (SW x0,x1,0))`:
+   ISA side `mem[0] = 5`, cycle side `mem[0] = 0`.
+3. **The `sliceAExcluded` EXPIRY — FIRED ON SCHEDULE.** `SpikeVectors.lean`
+   predicted (8/7, math seat) that *"the day loads land in Slice A this
+   theorem goes FALSE, breaking the build — that is the correct behaviour."*
+   It broke the build on the day, unprompted. **Disposition:** the two
+   word-sized rows deleted, `slice_a_excluded_size` 22 → 20; `lb`/`sb` KEPT
+   (v1 is word-only). *Nobody had to remember.*
+
+### B.2 · THE FOURTH FINDING — COMPOSITION IS AN EDGE
+
+**The projection is sound for ONE step and does NOT compose.** A store is
+invisible to `(regs,pc)`; a later load reads what it left and writes a
+REGISTER, so the divergence lands *inside* the projection two cycles in.
+⇒ `cycles_realise_steps` gains a **MEMORY-FREE-STREAM hypothesis**
+(`∀ i, decode w = some i → ¬ touchesMem i`, as `MemFree`) and is renamed
+`cycles_realise_steps_of_memFree`; `cycles_sort`, `sorts_of_C4` and
+`sorts_of_fieldwise` thread it. *It discharges by `decide` on any slice-A
+stream, which is every stream the compiler emits.*
+
+### B.3 · THE CONTROL PLANE — a kernel/silicon divergence, stated as a theorem
+
+`Decoder.ctrlSpec` matches on `Option Instr`, so **both** the math and
+compiler blast-radius censuses missed it and the BUILD caught it. The v1
+control word is five op-class bits plus `valid`; `dcMatches` has five rows;
+**there is no bit for a memory op and no gate matching its opcode.**
+⇒ `ctrlSpec`'s DEFINITION is unchanged and its DOCSTRING re-cuts to slice-A
+scope; the divergence lands as
+**`ctrlSpec_not_decoded_of_touchesMem`**. The 2048-point plane certificates
+survive — *they now certify that this core does not implement these ops.*
+
+### B.4 · ⛔ STAGE ③'s COMMISSIONED DOORS — NOW **THREE**, one price
+
+```
+1  dmem8 / dmem_addr8      the organ + the F4 equivalence theorem  (was §2)
+2  THE MEMORY CONTROL PLANE port, decode rows, control bits — the datapath
+                           this core does not have  (NEW, ⬥v1.6)
+3  THE n-STEP MEMORY BRIDGE what discharges MemFree for streams that DO touch
+                           memory; until it lands, memory realisation is
+                           hypothesised, never claimed  (NEW, ⬥v1.6)
+```
+**No kernel sentence may say memory "rides on the die" until all three land.**
+
+### B.5 · THE METHOD NOTES THE WAVE BOUGHT
+
+- ***A theorem red because it is FALSE and one red because it is UNPROVED are
+  the same line in a build log.*** Only pre-build witnesses tell them apart.
+- ***A type's blast radius is what matches on the type OR ON ANYTHING
+  CONTAINING IT.*** The wrapper (`Option T`) is where a census dies — it
+  killed two independent censuses within one hour.
+- ***A transitive closure over one edge type is not the closure: composition
+  is an edge.*** Walking "consumes the lemma" missed "consumes the predicate".

@@ -174,9 +174,26 @@ def decoder : Circ :=
 
 theorem decoder_wf : decoder.wf = true := by decide +kernel
 
-/-! ### The specification — read off `ISA.decode`, not off the manual -/
+/-! ### The specification — read off `ISA.decode`'s SLICE-A cases, not off the
+manual (⬥ M2: the qualifier is new, and it is the honest one — `decode` also
+accepts `LW`/`SW`, which this plane deliberately does not implement) -/
 
-/-- What `ISA.decode` says the control signals should be. -/
+/-- **The SLICE-A control plane's reading of `ISA.decode`** — the five op-class
+bits plus `valid`, and nothing else.
+
+⬥ **M2 RE-CUT THIS DOCSTRING, NOT THIS DEFINITION** (helm ruling 16:48/17:07).
+The old sentence, *"what `ISA.decode` says the control signals should be"*, was
+stated as if total, and it was an overclaim waiting for a bigger ISA. `decode`
+now accepts `LW`/`SW`; **this control plane does not, BY DESIGN — there is no
+memory datapath in the v1 core, no port, no decode row in `dcMatches`, and no
+bit in this six-signal vocabulary that could name one.** Every decoded
+instruction outside the five op-classes maps to the not-decoded word.
+
+⛔ **SO THE KERNEL DECODER AND THIS PLANE ARE NO LONGER THE SAME PARTIAL
+FUNCTION**, and that disagreement is stated as a theorem
+(`ctrlSpec_not_decoded_of_touchesMem`) rather than left to prose. *The memory
+control plane — port, decode rows, control bits — is **stage ③'s commissioned
+addition**, priced beside the `dmem8` door, not a gap in this file.* -/
 def ctrlSpec (w : BitVec 32) : List Bool :=
   match decode w with
   | some (.ADD _ _ _)  => [true, false, false, false, false, true]
@@ -184,7 +201,32 @@ def ctrlSpec (w : BitVec 32) : List Bool :=
   | some (.SLT _ _ _)  => [false, false, true, false, false, true]
   | some (.ADDI _ _ _) => [false, false, false, true, false, true]
   | some (.BEQ _ _ _)  => [false, false, false, false, true, true]
+  -- ⬥ M2 (ruled 17:07). The memory ops are DELIBERATELY not decoded by this
+  -- plane: no port, no row, no control bit. Stated as a theorem just below.
+  | some (.LW _ _ _)   => [false, false, false, false, false, false]
+  | some (.SW _ _ _)   => [false, false, false, false, false, false]
   | none               => [false, false, false, false, false, false]
+
+/-- ⬥⬥ **M2 — THE GUARD THEOREM: the kernel/plane divergence, made
+kernel-visible instead of prose-silent** (helm ruling 17:07).
+
+A word that `ISA.decode` accepts as a MEMORY op is reported by this control
+plane as *not decoded*. **That is a deliberate boundary of the v1 core, and
+stating it as a theorem is what stops it being a lie waiting for a reader**: a
+disagreement you can `#print axioms` is a specification; the same disagreement
+living only in a docstring is an omission.
+
+📌 *This is also why `decoder_plane_f7_zero`/`_one` still certify 2048 exhaustive
+points: the circuit already emits the invalid word on these opcodes, so spec and
+silicon agree — they agree that this core does not implement them.* -/
+theorem ctrlSpec_not_decoded_of_touchesMem (w : BitVec 32) (i : Instr)
+    (hd : decode w = some i) (ht : SaltWorks.ISA.touchesMem i = true) :
+    ctrlSpec w = [false, false, false, false, false, false] := by
+  simp only [ctrlSpec, hd]
+  cases i
+  case LW => rfl
+  case SW => rfl
+  all_goals exact absurd ht (by simp [SaltWorks.ISA.touchesMem])
 
 /-- The circuit's answer for a concrete word. -/
 def ctrlOf (w : BitVec 32) : List Bool := sem decoder (fun i => w.getLsbD i)
@@ -248,6 +290,7 @@ theorem decoder_ssa : decoder.ssa = true := by decide +kernel
 #audit_axioms decoder
 #audit_axioms decoder_wf
 #audit_axioms ctrlSpec
+#audit_axioms ctrlSpec_not_decoded_of_touchesMem
 #audit_axioms ctrlOf
 #audit_axioms decoder_plane_f7_zero
 #audit_axioms decoder_plane_f7_one

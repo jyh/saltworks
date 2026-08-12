@@ -1324,7 +1324,7 @@ stated against a real core today: `compile` and `core` do not exist**
 (`grep -rnE "^(def|theorem|abbrev) (core|compile)\b"` over `SaltWorks/` returns
 nothing). This section is the layer *above* C4 that does not depend on it: given
 one-cycle equivalence **as a hypothesis**, `n`-cycle equivalence, and then the
-whole program. When C4 lands it discharges `CycleRealisesStep` and the two halves
+whole program. When C4 lands it discharges `CycleRealisesStepProj` and the two halves
 meet with nothing left over.
 
 ### ⛔ THE FINDING: `stepT`-ITERATION AND `runFor` ARE **NOT** THE SAME OBJECT
@@ -1438,27 +1438,57 @@ the word the core saw.*
 
 Parameterised in **both** the cycle map and the word source, so it commits to no
 core, no netlist and no fetch path. C4 will instantiate `cyc` at the emitted
-netlist's one-cycle observation and `wordAt` at `seenWord`. -/
-def CycleRealisesStep (cyc : SaltWorks.HDL.Env → SaltWorks.HDL.Env)
-    (wordAt : SaltWorks.HDL.Env → Word) : Prop :=
-  ∀ ins, SaltWorks.HDL.decQ (cyc ins) = stepT (SaltWorks.HDL.decQ ins) (wordAt ins)
+netlist's one-cycle observation and `wordAt` at `seenWord`.
 
-/-- ⭐⭐ **THE DELIVERABLE — `n` CYCLES REALISE `n` STEPS.** One cycle of induction
-over the hypothesis; the stream the ISA side is driven by is read off the cycle
-sequence itself, which is what makes the statement need no fetch model. -/
-theorem cycles_realise_steps {cyc : SaltWorks.HDL.Env → SaltWorks.HDL.Env}
-    {wordAt : SaltWorks.HDL.Env → Word} (h : CycleRealisesStep cyc wordAt)
-    (n : Nat) (ins : SaltWorks.HDL.Env) :
-    SaltWorks.HDL.decQ (cycles cyc n ins)
-      = runWords (fun k => wordAt (cycles cyc k ins)) n (SaltWorks.HDL.decQ ins) := by
-  induction n with
-  | zero => rfl
-  | succ m ih => rw [cycles_succ, h (cycles cyc m ins), ih, runWords_succ]
+⬥⬥ **M2 — RE-CUT TO THE (regs,pc) PROJECTION, and the old name
+`CycleRealisesStep` IS RETIRED** (helm ruling 16:59).
+
+⛔ **THE WHOLE-St FORM IS NOT MERELY UNPROVED UNDER M2 — IT IS UNSATISFIABLE.**
+`decQ` CONSTRUCTS `mem := replicate 8 0` and `trapped := false` (M1a: `encD`
+encodes 1056 bits, regs and pc only), so the left side is clean **for every
+`cyc`, always**. Once `stepT` can execute a store the right side is dirty. No
+cycle map could meet it — the constraint would be a shape with no inhabitants,
+which is exactly what the non-vacuity section below exists to prevent.
+
+🔑 ***THE PROJECTION IS NOT A WEAKENING, IT IS THE CODEC'S ACTUAL COVERAGE.***
+§0.2 of the memory block always priced this: the core codec covers **(regs, pc)
+ONLY**; `mem` lives in the `dmem8` organ across the F4 bridge, deliberately not
+mirrored. *Memory realisation is stage ③'s commissioned obligation at that
+bridge — this predicate now says what it can honestly say, and no more.* -/
+def CycleRealisesStepProj (cyc : SaltWorks.HDL.Env → SaltWorks.HDL.Env)
+    (wordAt : SaltWorks.HDL.Env → Word) : Prop :=
+  ∀ ins, (SaltWorks.HDL.decQ (cyc ins)).regs
+           = (stepT (SaltWorks.HDL.decQ ins) (wordAt ins)).regs
+       ∧ (SaltWorks.HDL.decQ (cyc ins)).pc
+           = (stepT (SaltWorks.HDL.decQ ins) (wordAt ins)).pc
+
+/-- ⬥ **M2 — A WORD THAT CANNOT TOUCH MEMORY.** The hypothesis finding 4 showed
+the n-step deliverable needs: stated on the WORD, because that is what a cycle
+map sees. An undecodable word is vacuously memory-free — it is a NOP-advance. -/
+def MemFree (w : Word) : Prop :=
+  ∀ i, SaltWorks.ISA.decode w = some i → SaltWorks.ISA.touchesMem i = false
+
+/-- Field-wise extensionality for `St`, used to rebuild a whole-state equality
+from the projection once cleanliness supplies the other two fields. -/
+theorem St_eq_of_fields {a b : St} (hr : a.regs = b.regs) (hp : a.pc = b.pc)
+    (hm : a.mem = b.mem) (ht : a.trapped = b.trapped) : a = b := by
+  obtain ⟨r1, p1, m1, t1⟩ := a
+  obtain ⟨r2, p2, m2, t2⟩ := b
+  simp_all
+
+/-- `decQ` builds both new fields as literals, so cleanliness is definitional. -/
+theorem decQ_mem (e : SaltWorks.HDL.Env) :
+    (SaltWorks.HDL.decQ e).mem = Vector.replicate 8 0 := rfl
+
+theorem decQ_trapped (e : SaltWorks.HDL.Env) :
+    (SaltWorks.HDL.decQ e).trapped = false := rfl
+
+
 
 /-! ### ⭐ NON-VACUITY — the hypothesis is satisfiable, and the neighbours break
 
 Per this file's standing practice: a green `∀` over a hypothesis nothing can meet
-is not evidence. Below: a concrete cycle map that **meets** `CycleRealisesStep`,
+is not evidence. Below: a concrete cycle map that **meets** `CycleRealisesStepProj`,
 and two adjacent maps that **provably fail** it. -/
 
 /-- The wire configuration presenting state `s` on the Q-leaves and word `w` on
@@ -1506,16 +1536,34 @@ theorem decQ_envWith_eq (s : St) (w : Word) :
 /-- ⬥ **M1a — THE (A)-FORM, per the 18:53 ruling: per-constructor projection
 facts, no predicate.** Every slice-A arm is built from `.set` / `.next` / `.get`
 and one `{ s with pc := … }` — all `with`-updates that copy what they do not name
-— so installing different `mem`/`trapped` cannot move either projection. The
-ruling asked for five tiny lemmas; `cases i` gives all five arms at once, and the
-BEQ arm's `if` is the only one needing more than `rfl`. -/
-theorem step_regs_of_with (s : St) (m : Vector (BitVec 32) 8) (t : Bool) (i : Instr) :
+— so installing different `mem`/`trapped` cannot move either projection.
+
+⬥⬥ **M2 — RE-CUT (helm ruling 2026-08-11 16:48), and the old name
+`step_regs_of_with` IS RETIRED rather than kept.**
+
+⛔ **WHY THE RENAME IS NOT COSMETIC.** The unconditional form was TRUE for the
+memory-less machine and is FALSE the moment `LW` exists: `LW` writes `rd` FROM
+MEMORY, so installing a different `mem` moves the `regs` projection. Witness —
+`LW x2, 0(x0)` at an ok address with `m = replicate 8 1` against
+`s.mem = replicate 8 0` puts `1` in `x2` on one side and `0` on the other.
+**A narrowed meaning may not keep its name** (the restatement-renames law): every
+pre-M2 citation of `step_regs_of_with` must FAIL LOUDLY rather than resolve to a
+weaker theorem it never asked for. -/
+theorem step_regs_of_with_of_not_touchesMem (s : St) (m : Vector (BitVec 32) 8)
+    (t : Bool) (i : Instr) (h : SaltWorks.ISA.touchesMem i = false) :
     (SaltWorks.ISA.step { s with mem := m, trapped := t } i).regs
       = (SaltWorks.ISA.step s i).regs := by
-  cases i <;>
-    simp only [SaltWorks.ISA.step, St.set, St.next, St.get] <;>
-    split_ifs <;> rfl
+  cases i
+  case LW rd a imm => simp [SaltWorks.ISA.touchesMem] at h
+  case SW a b imm  => simp [SaltWorks.ISA.touchesMem] at h
+  all_goals
+    (simp only [SaltWorks.ISA.step, St.set, St.next, St.get]; split_ifs <;> rfl)
 
+/-- **This one SURVIVES UNCHANGED, and the reason is worth a sentence rather
+than a silence:** every new arm — the `ok` branch AND both trap branches — ends
+in `.next`, so `LW`/`SW` advance `pc` by four whatever the address does and
+whatever `mem` holds. `pc` never depends on memory. *It kept its name because it
+kept its meaning.* -/
 theorem step_pc_of_with (s : St) (m : Vector (BitVec 32) 8) (t : Bool) (i : Instr) :
     (SaltWorks.ISA.step { s with mem := m, trapped := t } i).pc
       = (SaltWorks.ISA.step s i).pc := by
@@ -1523,27 +1571,143 @@ theorem step_pc_of_with (s : St) (m : Vector (BitVec 32) 8) (t : Bool) (i : Inst
     simp only [SaltWorks.ISA.step, St.set, St.next, St.get] <;>
     split_ifs <;> rfl
 
-/-- ⬥ M1a — **no slice-A instruction can dirty the new fields.** The same
-`with`-update shape, read on the other two projections; `stepT` inherits it
-through `stepW`'s `getD`. This is what makes every `decQ`-built or `stepT`-built
-state provably clean rather than clean by inspection. -/
-theorem step_mem_eq (s : St) (i : Instr) :
+/-- ⬥⬥ **M2 — RE-CUT.** Was `step_mem_eq`, unconditional; that name is RETIRED.
+`SW` at an ok address writes `mem[a/4]`, so the unconditional form asserted that
+a memory write does not write memory. **There is no arm that proves it** — this
+is a statement whose era ended, not a proof obligation. Its positive complement
+(`step_SW_ok_writes_the_addressed_word`) lands below: the frame law and the
+write-characterization are the two halves of one truth. -/
+theorem step_mem_frame_of_not_touchesMem (s : St) (i : Instr)
+    (h : SaltWorks.ISA.touchesMem i = false) :
     (SaltWorks.ISA.step s i).mem = s.mem := by
-  cases i <;> simp only [SaltWorks.ISA.step, St.set, St.next] <;> split_ifs <;> rfl
+  cases i
+  case LW rd a imm => simp [SaltWorks.ISA.touchesMem] at h
+  case SW a b imm  => simp [SaltWorks.ISA.touchesMem] at h
+  all_goals (simp only [SaltWorks.ISA.step, St.set, St.next]; split_ifs <;> rfl)
 
-theorem step_trapped_eq (s : St) (i : Instr) :
+/-- ⬥⬥ **M2 — RE-CUT.** Was `step_trapped_eq`. Falsified by BOTH trap arms of
+BOTH new ops: a misaligned or out-of-range address sets the sticky flag. -/
+theorem step_trapped_frame_of_not_touchesMem (s : St) (i : Instr)
+    (h : SaltWorks.ISA.touchesMem i = false) :
     (SaltWorks.ISA.step s i).trapped = s.trapped := by
-  cases i <;> simp only [SaltWorks.ISA.step, St.set, St.next] <;> split_ifs <;> rfl
+  cases i
+  case LW rd a imm => simp [SaltWorks.ISA.touchesMem] at h
+  case SW a b imm  => simp [SaltWorks.ISA.touchesMem] at h
+  all_goals (simp only [SaltWorks.ISA.step, St.set, St.next]; split_ifs <;> rfl)
 
-theorem stepT_mem_eq (s : St) (w : Word) :
+/-- ⬥⬥ **M2 — RE-CUT of the `stepT` twin.** The hypothesis has to be about the
+word's DECODING rather than about an instruction, because `stepT` takes a word:
+whatever this word decodes to must not touch memory. On an undecodable word the
+NOP-advance keeps both fields, so that branch needs no hypothesis at all. -/
+theorem stepT_mem_frame_of_not_touchesMem (s : St) (w : Word)
+    (h : ∀ i, SaltWorks.ISA.decode w = some i → SaltWorks.ISA.touchesMem i = false) :
     (SaltWorks.ISA.stepT s w).mem = s.mem := by
   simp only [SaltWorks.ISA.stepT, SaltWorks.ISA.stepW]
-  cases h : SaltWorks.ISA.decode w <;> simp [h, St.next, step_mem_eq]
+  cases hd : SaltWorks.ISA.decode w with
+  | none   => simp [St.next]
+  | some i => simp [step_mem_frame_of_not_touchesMem s i (h i hd)]
 
-theorem stepT_trapped_eq (s : St) (w : Word) :
+/-- ⬥⬥ **M2 — RE-CUT of the `stepT` twin.** -/
+theorem stepT_trapped_frame_of_not_touchesMem (s : St) (w : Word)
+    (h : ∀ i, SaltWorks.ISA.decode w = some i → SaltWorks.ISA.touchesMem i = false) :
     (SaltWorks.ISA.stepT s w).trapped = s.trapped := by
   simp only [SaltWorks.ISA.stepT, SaltWorks.ISA.stepW]
-  cases h : SaltWorks.ISA.decode w <;> simp [h, St.next, step_trapped_eq]
+  cases hd : SaltWorks.ISA.decode w with
+  | none   => simp [St.next]
+  | some i => simp [step_trapped_frame_of_not_touchesMem s i (h i hd)]
+
+/-- ⭐ ⬥ **M2 — WHERE THE PROJECTION BECOMES A WHOLE-STATE EQUALITY AGAIN.** On a
+memory-free word both sides are clean — the left by `decQ`'s construction, the
+right because a memory-free `stepT` preserves what it started with — so the two
+missing fields agree for free and the projection carries the rest.
+
+🔑 ***THIS IS THE SEAM FINDING 4 WAS ABOUT.*** *The projection is sound for ONE
+step whatever the word; it is COMPOSITION that leaks, because a store is
+invisible to the projection yet feeds a later load that writes a register. This
+lemma is exactly the point where the leak is plugged by hypothesis rather than
+by hope.* -/
+theorem decQ_cyc_eq_of_memFree {cyc : SaltWorks.HDL.Env → SaltWorks.HDL.Env}
+    {wordAt : SaltWorks.HDL.Env → Word} (h : CycleRealisesStepProj cyc wordAt)
+    (ins : SaltWorks.HDL.Env) (hmf : MemFree (wordAt ins)) :
+    SaltWorks.HDL.decQ (cyc ins) = stepT (SaltWorks.HDL.decQ ins) (wordAt ins) := by
+  obtain ⟨hr, hp⟩ := h ins
+  refine St_eq_of_fields hr hp ?_ ?_
+  · rw [decQ_mem, stepT_mem_frame_of_not_touchesMem _ _ hmf, decQ_mem]
+  · rw [decQ_trapped, stepT_trapped_frame_of_not_touchesMem _ _ hmf, decQ_trapped]
+
+/-- ⭐⭐ **THE DELIVERABLE — `n` CYCLES REALISE `n` STEPS.** One cycle of induction
+over the hypothesis; the stream the ISA side is driven by is read off the cycle
+sequence itself, which is what makes the statement need no fetch model.
+
+⬥⬥ **M2 — GAINS THE MEMORY-FREE-STREAM HYPOTHESIS, and the old name
+`cycles_realise_steps` IS RETIRED** (helm ruling 17:13, finding 4).
+
+⛔ **THE PROJECTION ALONE DOES NOT COMPOSE, AND THE WITNESS IS SHARP:** a store
+writes no register, so it is invisible to the projection; a later load reads
+what the store left and writes it INTO A REGISTER. On the ISA side `runWords`
+threads memory forward; on the cycle side `decQ` wipes it every cycle, because
+memory is not in the codec. *Run `SW x1 → mem[0]` with `x1 = 5`, then
+`LW x2 ← mem[0]`: the ISA side has `x2 = 5`, the cycle side `x2 = 0` — **the
+divergence lands inside the projection**, two cycles in.*
+
+🔑 ***SO THE PROJECTION LEAKS AT THE SEAM BETWEEN STEPS, NOT INSIDE ONE.*** This
+hypothesis is the honest scope until stage ③'s bridge realises memory; it
+discharges by `decide` on any slice-A stream, which is every stream the compiler
+emits. -/
+theorem cycles_realise_steps_of_memFree {cyc : SaltWorks.HDL.Env → SaltWorks.HDL.Env}
+    {wordAt : SaltWorks.HDL.Env → Word} (h : CycleRealisesStepProj cyc wordAt)
+    (n : Nat) (ins : SaltWorks.HDL.Env)
+    (hmf : ∀ k, MemFree (wordAt (cycles cyc k ins))) :
+    SaltWorks.HDL.decQ (cycles cyc n ins)
+      = runWords (fun k => wordAt (cycles cyc k ins)) n (SaltWorks.HDL.decQ ins) := by
+  induction n with
+  | zero => rfl
+  | succ m ih =>
+      rw [cycles_succ, decQ_cyc_eq_of_memFree h (cycles cyc m ins) (hmf m), ih,
+        runWords_succ]
+
+/-! ### ⬥ M2 — THE POSITIVE COMPLEMENTS (helm ruling 16:48, item 3)
+
+*A frame law says what an instruction leaves alone. On its own that is only half
+a specification — it is satisfied by an instruction that does nothing. These say
+what the two new ops actually DO, so the pair pins the semantics from both
+sides.* -/
+
+/-- ⭐ **WHAT A STORE WRITES: EXACTLY ONE WORD, AT THE CHECKED ADDRESS.** The
+`Vector.set` form is the "exactly one" — every other slot is copied — and the
+index carries `addrClass_ok_lt`, so the theorem cannot be stated at all for an
+address the classifier rejected. -/
+theorem step_SW_ok_writes_the_addressed_word (s : St) (a b : Fin 32) (imm : BitVec 12)
+    (hok : SaltWorks.ISA.addrClass (s.get a + imm.signExtend 32) = .ok) :
+    (SaltWorks.ISA.step s (.SW a b imm)).mem
+      = s.mem.set ((s.get a + imm.signExtend 32).toNat / 4) (s.get b)
+          (SaltWorks.ISA.addrClass_ok_lt hok) := by
+  simp only [SaltWorks.ISA.step]
+  split_ifs
+  · rfl
+
+/-- ⭐ **WHAT A LOAD READS: the addressed word, into `rd`.** Stated at `rd ≠ 0`
+because a load into `x0` is discarded by `St.set`'s own law — which is the
+x0-discard guard `writesInstr` keeps for exactly this arm. -/
+theorem step_LW_ok_loads_the_addressed_word (s : St) (rd a : Fin 32) (imm : BitVec 12)
+    (hok : SaltWorks.ISA.addrClass (s.get a + imm.signExtend 32) = .ok) (hrd : rd ≠ 0) :
+    (SaltWorks.ISA.step s (.LW rd a imm)).get rd
+      = s.mem[(s.get a + imm.signExtend 32).toNat / 4]'(SaltWorks.ISA.addrClass_ok_lt hok) := by
+  simp only [SaltWorks.ISA.step]
+  split_ifs
+  · simpa [St.next, St.get] using St.get_set_self s rd _ hrd
+
+/-- ⭐ **A TRAPPED STEP CHANGES NO MEMORY CELL** — the suppression, which is the
+load-bearing term (the flag is only the announcement). Stated for both new ops
+at once via the classifier being non-`ok`. -/
+theorem step_SW_trapped_suppresses_the_write (s : St) (a b : Fin 32) (imm : BitVec 12)
+    (hbad : SaltWorks.ISA.addrClass (s.get a + imm.signExtend 32) ≠ .ok) :
+    (SaltWorks.ISA.step s (.SW a b imm)).mem = s.mem ∧
+      (SaltWorks.ISA.step s (.SW a b imm)).trapped = true := by
+  simp only [SaltWorks.ISA.step]
+  split_ifs with h
+  · exact absurd h hbad
+  · exact ⟨rfl, rfl⟩
 
 /-- The `= s` form survives exactly on clean states — which is every state the
 codec is fed. -/
@@ -1558,7 +1722,8 @@ theorem seenWord_envWith (s : St) (w : Word) : seenWord (envWith s w) = w := by
   apply BitVec.eq_of_getLsbD_eq
   intro k hk
   rw [seenWord, SaltWorks.HDL.wordOf_getLsbD _ _ hk]
-  try simp only [step_regs_of_with, step_pc_of_with]
+  try simp only [step_regs_of_with_of_not_touchesMem, SaltWorks.ISA.touchesMem]
+  try simp only [step_pc_of_with]
   show (if SaltWorks.HDL.instrNet k < SaltWorks.HDL.stWidth
         then (SaltWorks.HDL.encD s).getD (SaltWorks.HDL.instrNet k) false
         else w.getLsbD (SaltWorks.HDL.instrNet k - SaltWorks.HDL.instrBase))
@@ -1573,25 +1738,36 @@ step, and present the new state together with whatever word comes next.
 
 *This is the trivial witness and it is offered as one* — it is `encD ∘ stepT ∘
 decQ` and it proves nothing about any netlist. Its job is to show
-`CycleRealisesStep` is a satisfiable constraint rather than a shape, and it is
+`CycleRealisesStepProj` is a satisfiable constraint rather than a shape, and it is
 generic in the next-word policy so it does not smuggle a fetch model in. -/
 def cycOf (nextW : St → Word) (ins : SaltWorks.HDL.Env) : SaltWorks.HDL.Env :=
   envWith (stepT (SaltWorks.HDL.decQ ins) (seenWord ins)) (nextW (SaltWorks.HDL.decQ ins))
 
-theorem decQ_cycOf (nextW : St → Word) (ins : SaltWorks.HDL.Env) :
-    SaltWorks.HDL.decQ (cycOf nextW ins)
-      = stepT (SaltWorks.HDL.decQ ins) (seenWord ins) :=
-  decQ_envWith_of_clean _ _ (by rw [stepT_mem_eq]; rfl) (by rw [stepT_trapped_eq]; rfl)
+/-- ⬥⬥ **M2 — RE-CUT to the projection; `decQ_cycOf` is RETIRED.** The old proof
+discharged cleanliness through `stepT_mem_eq` on an ARBITRARY word — which is
+precisely the discharge M2 removes, since the word may be a store. On the two
+projected fields no discharge is needed at all: `decQ ∘ envWith` returns the
+state it was handed with only `mem`/`trapped` reset, and neither is a projection
+field. *This one gets SHORTER under M2, which is the tell that the projection is
+the natural statement rather than a retreat.* -/
+theorem decQ_cycOf_proj (nextW : St → Word) (ins : SaltWorks.HDL.Env) :
+    (SaltWorks.HDL.decQ (cycOf nextW ins)).regs
+        = (stepT (SaltWorks.HDL.decQ ins) (seenWord ins)).regs
+    ∧ (SaltWorks.HDL.decQ (cycOf nextW ins)).pc
+        = (stepT (SaltWorks.HDL.decQ ins) (seenWord ins)).pc := by
+  rw [cycOf, decQ_envWith_eq]
+  exact ⟨rfl, rfl⟩
 
-/-- ⭐ **SATISFIABLE**, for every next-word policy. -/
-theorem cycleRealisesStep_cycOf (nextW : St → Word) :
-    CycleRealisesStep (cycOf nextW) seenWord := fun ins => decQ_cycOf nextW ins
+/-- ⭐ **SATISFIABLE**, for every next-word policy — and now satisfiable for
+every WORD too, including stores, which the whole-St form could not be. -/
+theorem cycleRealisesStepProj_cycOf (nextW : St → Word) :
+    CycleRealisesStepProj (cycOf nextW) seenWord := fun ins => decQ_cycOf_proj nextW ins
 
 /-- ⛔ **CONTROL 1 — A STALLED CYCLE FAILS.** A netlist whose flops do not change
 satisfies nothing: at a wire configuration holding `St.init` with `addi x1, x0, 1`
 on the instruction nets, the ISA writes `x1 = 1` and the stall does not. ⇒ the
 hypothesis has content, and `cycles_realise_steps` is not true of every `cyc`. -/
-theorem not_cycleRealisesStep_id : ¬ CycleRealisesStep id seenWord := by
+theorem not_cycleRealisesStep_id : ¬ CycleRealisesStepProj id seenWord := by
   intro h
   have hh := h (envWith St.init (encode (Instr.ADDI 1 0 1)))
   rw [id_eq, decQ_envWith_eq, seenWord_envWith, stepT_encode] at hh
@@ -1606,10 +1782,11 @@ the decoder rejects, so the machine appears to NOP while the ISA executes.
 *`wordOf ins` typechecks and Lean says nothing.* This theorem is what says
 something. -/
 theorem not_cycleRealisesStep_wordOf (nextW : St → Word) :
-    ¬ CycleRealisesStep (cycOf nextW) (fun ins => SaltWorks.HDL.wordOf ins) := by
+    ¬ CycleRealisesStepProj (cycOf nextW) (fun ins => SaltWorks.HDL.wordOf ins) := by
   intro h
-  have hh := h (envWith St.init (encode (Instr.ADDI 1 0 1)))
-  rw [decQ_cycOf, decQ_envWith_eq, seenWord_envWith, stepT_encode] at hh
+  have hh := (h (envWith St.init (encode (Instr.ADDI 1 0 1)))).1
+  rw [(decQ_cycOf_proj nextW _).1, decQ_envWith_eq, seenWord_envWith,
+    stepT_encode] at hh
   revert hh
   decide +kernel
 
@@ -1810,8 +1987,8 @@ Everything on the right of the turnstile is already in the kernel: `emit_runs`
 supplies `K`, `batcher8_sortsTo_word` supplies the sort. What is hypothesised is
 exactly three things, and each is owned by a named lane:
 
-* `CycleRealisesStep` — **C4**, the compiler lane. Satisfiable
-  (`cycleRealisesStep_cycOf`), discriminating (`not_cycleRealisesStep_id`,
+* `CycleRealisesStepProj` — **C4**, the compiler lane. Satisfiable
+  (`cycleRealisesStepProj_cycOf`), discriminating (`not_cycleRealisesStep_id`,
   `not_cycleRealisesStep_wordOf`).
 * `EntryLoaded` — the reset, the silicon lane. Satisfiable
   (`entryLoaded_encD_stOfFn`), discriminating (`not_entryLoaded_offEndEnv`).
@@ -1823,8 +2000,9 @@ exactly three things, and each is owned by a named lane:
 Nothing else is assumed, and no statement above this one was weakened to get
 here. -/
 theorem cycles_sort {cyc : SaltWorks.HDL.Env → SaltWorks.HDL.Env}
-    {wordAt : SaltWorks.HDL.Env → Word} (h : CycleRealisesStep cyc wordAt)
-    {ins : SaltWorks.HDL.Env} {v : Fin 8 → Word} (hentry : EntryLoaded ins v) :
+    {wordAt : SaltWorks.HDL.Env → Word} (h : CycleRealisesStepProj cyc wordAt)
+    {ins : SaltWorks.HDL.Env} {v : Fin 8 → Word} (hentry : EntryLoaded ins v)
+    (hmf : ∀ k, MemFree (wordAt (cycles cyc k ins))) :
     ∃ K, K ≤ 120 ∧ ∀ N, K ≤ N →
       FeedsProgram batcherSort (fun k => wordAt (cycles cyc k ins))
         (SaltWorks.HDL.decQ ins) K →
@@ -1837,18 +2015,19 @@ theorem cycles_sort {cyc : SaltWorks.HDL.Env → SaltWorks.HDL.Env}
   have key : (fun i : Fin 8 => (SaltWorks.HDL.decQ (cycles cyc N ins)).get (dataReg i))
       = runNetW batcher8 v := by
     funext i
-    rw [cycles_realise_steps h N ins, runWords_get_eq_runFor hfeed hN (dataReg i),
+    rw [cycles_realise_steps_of_memFree h N ins hmf,
+      runWords_get_eq_runFor hfeed hN (dataReg i),
       hregs i, hv]
   rw [dataRegs_map_get, key]
   exact batcher8_sortsTo_word v
 
-/-! ## ⭐⭐ C4BRIDGE — THE MISSING LINK BETWEEN `C4Spec` AND `CycleRealisesStep`
+/-! ## ⭐⭐ C4BRIDGE — THE MISSING LINK BETWEEN `C4Spec` AND `CycleRealisesStepProj`
 
 **The two lanes wrote two halves of one sentence and nothing joined them.**
 
 * Compiler's `HDL.C4Spec c` is about **`sem c ins`** — a `List Bool`, the
   circuit's output ports in port order.
-* Math's `CycleRealisesStep cyc wordAt` is about a **cycle function**
+* Math's `CycleRealisesStepProj cyc wordAt` is about a **cycle function**
   `cyc : Env → Env` on wires.
 
 ⇒ *Even with C4 in hand, `cycles_sort` could not consume it*, because no
@@ -1897,7 +2076,7 @@ things, so **at most one of them can ever be bridged.** -/
 
 /-- The two seats wrote the same 32 wires. `HDL.seenWord` (C4.lean:66) and this
 file's `seenWord` are the same function, so `C4Spec`'s word and
-`CycleRealisesStep`'s word need no translation. *Stated rather than assumed: the
+`CycleRealisesStepProj`'s word need no translation. *Stated rather than assumed: the
 one thing a bridge between two lanes must not get wrong is which wires it is
 about, and `not_cycleRealisesStep_wordOf` is what the wrong answer looks like.* -/
 theorem seenWord_eq_hdl : seenWord = SaltWorks.HDL.seenWord := rfl
@@ -1966,17 +2145,18 @@ def cycOfBits (f : SaltWorks.HDL.Env → List Bool) (nextW : SaltWorks.HDL.Env �
 
 /-- ⭐ **THE BRIDGE, at the level its proof actually works at.** A bit function
 that agrees with `encD ∘ stepT ∘ decQ` induces a cycle map realising the step —
-for every next-word policy and every pad. -/
-theorem cycleRealisesStep_of_bits {f : SaltWorks.HDL.Env → List Bool}
+for every next-word policy and every pad.
+
+⬥⬥ **M2 — RE-CUT to the projection; `cycleRealisesStep_of_bits` is RETIRED.**
+Same discharge, same removal, same shortening as `decQ_cycOf_proj`. -/
+theorem cycleRealisesStepProj_of_bits {f : SaltWorks.HDL.Env → List Bool}
     (h : ∀ ins, f ins
       = SaltWorks.HDL.encD (stepT (SaltWorks.HDL.decQ ins) (seenWord ins)))
     (nextW : SaltWorks.HDL.Env → Word) (pad : SaltWorks.HDL.Env) :
-    CycleRealisesStep (cycOfBits f nextW pad) seenWord := by
+    CycleRealisesStepProj (cycOfBits f nextW pad) seenWord := by
   intro ins
-  rw [cycOfBits, h ins, envOfBits_encD]
-  exact decQ_envWith_of_clean _ _
-    (by simp [stepT_mem_eq, SaltWorks.HDL.decQ])
-    (by simp [stepT_trapped_eq, SaltWorks.HDL.decQ])
+  rw [cycOfBits, h ins, envOfBits_encD, decQ_envWith_eq]
+  exact ⟨rfl, rfl⟩
 
 /-- ⭐ **THE CYCLE MAP A CIRCUIT INDUCES** — output port `j` becomes state net
 `j`, which is the D→Q transfer in `StateCodec`'s layout and is the definition
@@ -1991,18 +2171,18 @@ theorem seenWord_cycOfCirc (c : SaltWorks.HDL.Circ) (nextW : SaltWorks.HDL.Env �
     (pad ins : SaltWorks.HDL.Env) : seenWord (cycOfCirc c nextW pad ins) = nextW ins :=
   seenWord_envOfBits _ _ _
 
-/-- ⭐⭐ **THE BRIDGE — `C4Spec` DISCHARGES `CycleRealisesStep`.** The theorem
+/-- ⭐⭐ **THE BRIDGE — `C4Spec` DISCHARGES `CycleRealisesStepProj`.** The theorem
 whose absence meant a proved C4 would still not reach `cycles_sort`. -/
 theorem cycleRealisesStep_of_C4Spec {c : SaltWorks.HDL.Circ} (h : SaltWorks.HDL.C4Spec c)
     (nextW : SaltWorks.HDL.Env → Word) (pad : SaltWorks.HDL.Env) :
-    CycleRealisesStep (cycOfCirc c nextW pad) seenWord :=
-  cycleRealisesStep_of_bits (f := SaltWorks.HDL.sem c) h nextW pad
+    CycleRealisesStepProj (cycOfCirc c nextW pad) seenWord :=
+  cycleRealisesStepProj_of_bits (f := SaltWorks.HDL.sem c) h nextW pad
 
 /-- The same, through the `C4` structure — *"C4 as it should be USED"*, in
 compiler's words. -/
 theorem cycleRealisesStep_of_C4 {c : SaltWorks.HDL.Circ} (hC4 : SaltWorks.HDL.C4 c)
     (nextW : SaltWorks.HDL.Env → Word) (pad : SaltWorks.HDL.Env) :
-    CycleRealisesStep (cycOfCirc c nextW pad) seenWord :=
+    CycleRealisesStepProj (cycOfCirc c nextW pad) seenWord :=
   cycleRealisesStep_of_C4Spec hC4.spec nextW pad
 
 /-- ⚠️ **`CoreConforms`'S THIRD CONJUNCT IS IMPLIED BY `C4Spec`.** The output
@@ -2041,14 +2221,15 @@ undriven state flops — so neither is a hypothesis, and no statement above this
 one was weakened to get here. -/
 theorem sorts_of_C4 {c : SaltWorks.HDL.Circ} (hC4 : SaltWorks.HDL.C4 c)
     (nextW : SaltWorks.HDL.Env → Word) (pad : SaltWorks.HDL.Env)
-    {ins : SaltWorks.HDL.Env} {v : Fin 8 → Word} (hentry : EntryLoaded ins v) :
+    {ins : SaltWorks.HDL.Env} {v : Fin 8 → Word} (hentry : EntryLoaded ins v)
+    (hmf : ∀ k, MemFree (seenWord (cycles (cycOfCirc c nextW pad) k ins))) :
     ∃ K, K ≤ 120 ∧ ∀ N, K ≤ N →
       FeedsProgram batcherSort
         (fun k => seenWord (cycles (cycOfCirc c nextW pad) k ins))
         (SaltWorks.HDL.decQ ins) K →
       SortsTo (List.ofFn v)
         (dataRegs.map (SaltWorks.HDL.decQ (cycles (cycOfCirc c nextW pad) N ins)).get) :=
-  cycles_sort (cycleRealisesStep_of_C4 hC4 nextW pad) hentry
+  cycles_sort (cycleRealisesStep_of_C4 hC4 nextW pad) hentry hmf
 
 /-! ### ⭐ NON-VACUITY AND THE CONTROLS
 
@@ -2068,8 +2249,8 @@ policy and every pad, and the conclusion comes out through
 `cycleRealisesStep_of_bits`. -/
 theorem cycleRealisesStep_idealBits (nextW : SaltWorks.HDL.Env → Word)
     (pad : SaltWorks.HDL.Env) :
-    CycleRealisesStep (cycOfBits idealBits nextW pad) seenWord :=
-  cycleRealisesStep_of_bits (fun _ => rfl) nextW pad
+    CycleRealisesStepProj (cycOfBits idealBits nextW pad) seenWord :=
+  cycleRealisesStepProj_of_bits (fun _ => rfl) nextW pad
 
 /-- A core whose outputs re-present the state it was given: the stall. -/
 def stalledBits (ins : SaltWorks.HDL.Env) : List Bool :=
@@ -2079,9 +2260,11 @@ theorem decQ_cycOfBits_stalled (nextW : SaltWorks.HDL.Env → Word) (pad : SaltW
     (ins : SaltWorks.HDL.Env) :
     SaltWorks.HDL.decQ (cycOfBits stalledBits nextW pad ins) = SaltWorks.HDL.decQ ins := by
   rw [cycOfBits, stalledBits, envOfBits_encD]
+  -- ⬥ M2: cleanliness here comes from `decQ`'s own construction, NOT from
+  -- `stepT` — `stalledBits` never steps. The retired `stepT_mem_eq` was a
+  -- gratuitous simp argument, which is why this theorem survives untouched.
   exact decQ_envWith_of_clean _ _
-    (by simp [stepT_mem_eq, SaltWorks.HDL.decQ])
-    (by simp [stepT_trapped_eq, SaltWorks.HDL.decQ])
+    (by simp [SaltWorks.HDL.decQ]) (by simp [SaltWorks.HDL.decQ])
 
 /-- ⛔ **CONTROL 1 — THE STALLED CORE FAILS THROUGH THE BRIDGE.** `cycOfBits` is
 not a construction that makes anything realise a step: at `St.init` with
@@ -2090,7 +2273,7 @@ does not. *`not_cycleRealisesStep_id`'s witness, now aimed at the circuit-level
 cycle map instead of the abstract one.* -/
 theorem not_cycleRealisesStep_stalledBits (nextW : SaltWorks.HDL.Env → Word)
     (pad : SaltWorks.HDL.Env) :
-    ¬ CycleRealisesStep (cycOfBits stalledBits nextW pad) seenWord := by
+    ¬ CycleRealisesStepProj (cycOfBits stalledBits nextW pad) seenWord := by
   intro h
   have hh := h (envWith St.init (encode (Instr.ADDI 1 0 1)))
   rw [decQ_cycOfBits_stalled, decQ_envWith_eq, seenWord_envWith, stepT_encode] at hh
@@ -2387,12 +2570,12 @@ theorem c4Spec_of_fieldwise {c : SaltWorks.HDL.Circ}
   (c4Spec_iff_fieldwise c).mpr ⟨hlen, hregs, hpc⟩
 
 /-- ⭐⭐ **AND STRAIGHT THROUGH THE BRIDGE.** Fields ⇒ `C4Spec` ⇒
-`CycleRealisesStep`, for every next-word policy and every pad. -/
+`CycleRealisesStepProj`, for every next-word policy and every pad. -/
 theorem cycleRealisesStep_of_fieldwise {c : SaltWorks.HDL.Circ}
     (hlen : c.outs.length = SaltWorks.HDL.stWidth)
     (hregs : ∀ r : Fin 32, RegField c r) (hpc : PcField c)
     (nextW : SaltWorks.HDL.Env → Word) (pad : SaltWorks.HDL.Env) :
-    CycleRealisesStep (cycOfCirc c nextW pad) seenWord :=
+    CycleRealisesStepProj (cycOfCirc c nextW pad) seenWord :=
   cycleRealisesStep_of_C4Spec (c4Spec_of_fieldwise hlen hregs hpc) nextW pad
 
 /-- ⭐⭐⭐ **THE END-TO-END THEOREM, FROM THE FIELDS.** `sorts_of_C4` with its
@@ -2404,14 +2587,15 @@ statement was weakened: this is `sorts_of_C4` composed with
 theorem sorts_of_fieldwise {c : SaltWorks.HDL.Circ} (hconf : SaltWorks.HDL.CoreConforms c)
     (hregs : ∀ r : Fin 32, RegField c r) (hpc : PcField c)
     (nextW : SaltWorks.HDL.Env → Word) (pad : SaltWorks.HDL.Env)
-    {ins : SaltWorks.HDL.Env} {v : Fin 8 → Word} (hentry : EntryLoaded ins v) :
+    {ins : SaltWorks.HDL.Env} {v : Fin 8 → Word} (hentry : EntryLoaded ins v)
+    (hmf : ∀ k, MemFree (seenWord (cycles (cycOfCirc c nextW pad) k ins))) :
     ∃ K, K ≤ 120 ∧ ∀ N, K ≤ N →
       FeedsProgram batcherSort
         (fun k => seenWord (cycles (cycOfCirc c nextW pad) k ins))
         (SaltWorks.HDL.decQ ins) K →
       SortsTo (List.ofFn v)
         (dataRegs.map (SaltWorks.HDL.decQ (cycles (cycOfCirc c nextW pad) N ins)).get) :=
-  sorts_of_C4 ⟨hconf, c4Spec_of_fieldwise hconf.2.2 hregs hpc⟩ nextW pad hentry
+  sorts_of_C4 ⟨hconf, c4Spec_of_fieldwise hconf.2.2 hregs hpc⟩ nextW pad hentry hmf
 
 /-! ### ⭐ THE ISOLATION DIRECTION — a failing core fails a NAMED field -/
 
@@ -2484,6 +2668,15 @@ theorem step_regs_zero (s : St) (i : Instr) : (step s i).regs[0] = s.regs[0] := 
   | XOR rd a b => exact set_regs_zero s rd _
   | SLT rd a b => exact set_regs_zero s rd _
   | BEQ a b imm => simp only [step]; split <;> rfl
+  -- ⬥ M2. LW's `ok` branch writes `rd` and so goes through `set_regs_zero`; its
+  -- two trap branches touch only `trapped`/`pc`. SW writes no register at all.
+  -- x0 is preserved on every path, which is what field 0 of the core needs.
+  | LW rd a imm =>
+      simp only [step]
+      split_ifs
+      · exact set_regs_zero s rd _
+      · rfl
+  | SW a b imm => simp only [step]; split_ifs <;> rfl
 
 /-- ⭐ **`x0` IS INVARIANT UNDER THE WHOLE TOTAL STEP** — decodable or not. This
 is `St.set_zero` (P5) propagated to `stepT`, and it is why the pass-through
@@ -2855,7 +3048,8 @@ theorem xorField_is_bitXor32 (s : St) (rd x y : Fin 32) (hrd : rd ≠ 0) :
             (SaltWorks.HDL.bwEnv (s.get x) (s.get y))).getD k false) := by
   rw [decQ_envWith_eq, seenWord_envWith, stepT_encode, sem_bitXor32,
     wordOf_getD_map_range, wordOf_getLsbD_self]
-  try simp only [step_regs_of_with, step_pc_of_with]
+  try simp only [step_regs_of_with_of_not_touchesMem, SaltWorks.ISA.touchesMem]
+  try simp only [step_pc_of_with]
   show ((s.set rd (s.get x ^^^ s.get y)).next).regs[rd.val] = _
   show (s.set rd (s.get x ^^^ s.get y)).regs[rd.val] = _
   simp only [St.set, if_neg hrd]
@@ -2927,7 +3121,8 @@ theorem sltField_is_sltCirc (s : St) (rd x y : Fin 32) (hrd : rd ≠ 0)
       = SaltWorks.HDL.wordOf (fun k =>
           (SaltWorks.HDL.sltDrive (s.get x) (s.get y)).getD k false) := by
   rw [decQ_envWith_eq, seenWord_envWith, stepT_encode, sltDrive_eq_of_mem hx hy, wordOf_cmpWord]
-  try simp only [step_regs_of_with, step_pc_of_with]
+  try simp only [step_regs_of_with_of_not_touchesMem, SaltWorks.ISA.touchesMem]
+  try simp only [step_pc_of_with]
   show ((s.set rd (if (s.get x).slt (s.get y) then 1 else 0)).next).regs[rd.val] = _
   show (s.set rd (if (s.get x).slt (s.get y) then 1 else 0)).regs[rd.val] = _
   simp only [St.set, if_neg hrd]
@@ -3432,7 +3627,8 @@ theorem addField_is_adder32 (s : St) (rd x y : Fin 32) (hrd : rd ≠ 0) :
           (sem adder32 (bwEnv (s.get x) (s.get y))).getD k false) := by
   rw [decQ_envWith_eq, seenWord_envWith, stepT_encode, sem_adder32,
     wordOf_getD_range_append, wordOf_getLsbD_self]
-  try simp only [step_regs_of_with, step_pc_of_with]
+  try simp only [step_regs_of_with_of_not_touchesMem, SaltWorks.ISA.touchesMem]
+  try simp only [step_pc_of_with]
   show ((s.set rd (s.get x + s.get y)).next).regs[rd.val] = _
   show (s.set rd (s.get x + s.get y)).regs[rd.val] = _
   simp only [St.set, if_neg hrd]
@@ -3445,7 +3641,8 @@ theorem addiField_is_adder32 (s : St) (rd x : Fin 32) (imm : BitVec 12) (hrd : r
           (sem adder32 (bwEnv (s.get x) (imm.signExtend 32))).getD k false) := by
   rw [decQ_envWith_eq, seenWord_envWith, stepT_encode, sem_adder32,
     wordOf_getD_range_append, wordOf_getLsbD_self]
-  try simp only [step_regs_of_with, step_pc_of_with]
+  try simp only [step_regs_of_with_of_not_touchesMem, SaltWorks.ISA.touchesMem]
+  try simp only [step_pc_of_with]
   show ((s.set rd (s.get x + imm.signExtend 32)).next).regs[rd.val] = _
   show (s.set rd (s.get x + imm.signExtend 32)).regs[rd.val] = _
   simp only [St.set, if_neg hrd]
@@ -3456,7 +3653,8 @@ theorem sltField_is_sltCirc_unconditional (s : St) (rd x y : Fin 32) (hrd : rd �
            (seenWord (envWith s (encode (Instr.SLT rd x y))))).regs[rd.val]
       = wordOf (fun k => (sltDrive (s.get x) (s.get y)).getD k false) := by
   rw [decQ_envWith_eq, seenWord_envWith, stepT_encode, sltDrive_uncond, wordOf_cmpWord]
-  try simp only [step_regs_of_with, step_pc_of_with]
+  try simp only [step_regs_of_with_of_not_touchesMem, SaltWorks.ISA.touchesMem]
+  try simp only [step_pc_of_with]
   show ((s.set rd (if (s.get x).slt (s.get y) then 1 else 0)).next).regs[rd.val] = _
   show (s.set rd (if (s.get x).slt (s.get y) then 1 else 0)).regs[rd.val] = _
   simp only [St.set, if_neg hrd]
@@ -4208,7 +4406,8 @@ theorem pcField_is_pcNext_beq (s : St) (x y : Fin 32) (imm : BitVec 12) :
       = s.pc + SaltWorks.HDL.wordOf (fun k =>
           (SaltWorks.HDL.pcRun (s.get x) (s.get y) (bOffset imm) true).getD k false) := by
   rw [decQ_envWith_eq, seenWord_envWith, stepT_encode, pcAddend_word]
-  try simp only [step_regs_of_with, step_pc_of_with]
+  try simp only [step_regs_of_with_of_not_touchesMem, SaltWorks.ISA.touchesMem]
+  try simp only [step_pc_of_with]
   show (if s.get x = s.get y then { s with pc := s.pc + bOffset imm } else s.next).pc = _
   by_cases h : s.get x = s.get y
   · rw [if_pos h, if_pos (by simp [h])]
@@ -4222,7 +4421,8 @@ theorem pcField_is_pcNext_add (s : St) (rd x y : Fin 32) :
       = s.pc + SaltWorks.HDL.wordOf (fun k =>
           (SaltWorks.HDL.pcRun (s.get x) (s.get y) 0 false).getD k false) := by
   rw [decQ_envWith_eq, seenWord_envWith, stepT_encode, pcAddend_word, if_neg (by simp)]
-  try simp only [step_regs_of_with, step_pc_of_with]
+  try simp only [step_regs_of_with_of_not_touchesMem, SaltWorks.ISA.touchesMem]
+  try simp only [step_pc_of_with]
   show ((s.set rd (s.get x + s.get y)).next).pc = _
   show (s.set rd (s.get x + s.get y)).pc + 4 = _
   rw [set_pc]
@@ -4636,7 +4836,8 @@ theorem pcField_is_pcAdd_beq (s : St) (x y : Fin 32) (imm : BitVec 12) :
       = wordOf (fun k =>
           (sem pcAdd (pcAddEnv s.pc (s.get x) (s.get y) (bOffset imm) true)).getD k false) := by
   rw [decQ_envWith_eq, seenWord_envWith, stepT_encode, pcAdd_word]
-  try simp only [step_regs_of_with, step_pc_of_with]
+  try simp only [step_regs_of_with_of_not_touchesMem, SaltWorks.ISA.touchesMem]
+  try simp only [step_pc_of_with]
   show (if s.get x = s.get y then { s with pc := s.pc + bOffset imm } else s.next).pc = _
   by_cases h : s.get x = s.get y
   · rw [if_pos h, if_pos (by simp [h])]
@@ -4651,7 +4852,8 @@ theorem pcField_is_pcAdd_add (s : St) (rd x y : Fin 32) :
       = wordOf (fun k =>
           (sem pcAdd (pcAddEnv s.pc (s.get x) (s.get y) 0 false)).getD k false) := by
   rw [decQ_envWith_eq, seenWord_envWith, stepT_encode, pcAdd_word, if_neg (by simp)]
-  try simp only [step_regs_of_with, step_pc_of_with]
+  try simp only [step_regs_of_with_of_not_touchesMem, SaltWorks.ISA.touchesMem]
+  try simp only [step_pc_of_with]
   show ((s.set rd (s.get x + s.get y)).next).pc = _
   show (s.set rd (s.get x + s.get y)).pc + 4 = _
   rw [set_pc]
@@ -5896,7 +6098,8 @@ theorem aluField_is_aluSelect_add (s : St) (rd x y : Fin 32) (hrd : rd ≠ 0)
           (sem aluSelect (asDrive res 0)).getD k false) := by
   rw [aluSelect_word res 0 asOps_pos, h0,
     decQ_envWith_eq, seenWord_envWith, stepT_encode]
-  try simp only [step_regs_of_with, step_pc_of_with]
+  try simp only [step_regs_of_with_of_not_touchesMem, SaltWorks.ISA.touchesMem]
+  try simp only [step_pc_of_with]
   show ((s.set rd (s.get x + s.get y)).next).regs[rd.val] = _
   show (s.set rd (s.get x + s.get y)).regs[rd.val] = _
   simp only [St.set, if_neg hrd]
@@ -8652,11 +8855,15 @@ open Salt.Tactic
 #audit_axioms fetchWord fetchWord_decodes DeliversProgram
 #audit_axioms runWords runWords_succ runWords_add
 #audit_axioms cycles cycles_succ cycles_add
-#audit_axioms seenWord CycleRealisesStep cycles_realise_steps
+#audit_axioms seenWord CycleRealisesStepProj cycles_realise_steps_of_memFree
+#audit_axioms MemFree St_eq_of_fields decQ_mem decQ_trapped decQ_cyc_eq_of_memFree
 #audit_axioms envWith wordOf_congr decQ_congr decQ_envWith_eq seenWord_envWith
-#audit_axioms decQ_envWith_of_clean step_regs_of_with step_pc_of_with
-#audit_axioms step_mem_eq step_trapped_eq stepT_mem_eq stepT_trapped_eq
-#audit_axioms cycOf decQ_cycOf cycleRealisesStep_cycOf
+#audit_axioms decQ_envWith_of_clean step_regs_of_with_of_not_touchesMem step_pc_of_with
+#audit_axioms step_mem_frame_of_not_touchesMem step_trapped_frame_of_not_touchesMem
+#audit_axioms stepT_mem_frame_of_not_touchesMem stepT_trapped_frame_of_not_touchesMem
+#audit_axioms step_SW_ok_writes_the_addressed_word step_LW_ok_loads_the_addressed_word
+#audit_axioms step_SW_trapped_suppresses_the_write
+#audit_axioms cycOf decQ_cycOf_proj cycleRealisesStepProj_cycOf
 #audit_axioms not_cycleRealisesStep_id not_cycleRealisesStep_wordOf
 #audit_axioms runFor_one_of_fetch runFor_succ_of_fetch runWords_eq_runFor
 #audit_axioms runWords_get_of_undecodable FeedsProgram runWords_get_eq_runFor
@@ -8665,7 +8872,7 @@ open Salt.Tactic
 #audit_axioms addiOnly addiStream feedsProgram_addi feedsProgram_addi_runs
 #audit_axioms noisy_tail_overwrites exists_halting_count cycles_sort
 #audit_axioms seenWord_eq_hdl encD_length envOfBits envOfBits_of_length envOfBits_encD
-#audit_axioms seenWord_envOfBits cycOfBits cycleRealisesStep_of_bits
+#audit_axioms seenWord_envOfBits cycOfBits cycleRealisesStepProj_of_bits
 #audit_axioms cycOfCirc seenWord_cycOfCirc
 #audit_axioms cycleRealisesStep_of_C4Spec cycleRealisesStep_of_C4
 #audit_axioms outs_length_of_C4Spec sorts_of_C4

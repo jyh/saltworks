@@ -123,9 +123,16 @@ theorem addrClass_ok_lt {a : BitVec 32} (h : addrClass a = .ok) : a.toNat / 4 < 
   · simp [addrClass, h32] at h
   · omega
 
-/-- Slice A. Five instructions, and the stated exclusions are everything else:
-no loads, no stores, no `LUI`/`AUIPC`, no `JAL`/`JALR`, no shifts, no `M`, no
-CSRs, no traps, no privilege modes, no memory model at all. -/
+/-- Slice A **plus the two v1 memory ops (M2)**. Seven instructions, and the
+stated exclusions are everything else: no `LUI`/`AUIPC`, no `JAL`/`JALR`, no
+shifts, no `M`, no CSRs, no privilege modes.
+
+⬥ **M2 amended this docstring's own claim.** It read *"no loads, no stores …
+no memory model at all"*, and that sentence was true until this commit and is
+false after it. **WORD-ONLY** (memory block §0.1): `LW`/`SW` and nothing else —
+no `LB`/`LH`/`LBU`/`LHU`/`SB`/`SH`, so there are no byte semantics to get
+wrong. The two new arms are the ONLY instructions that read or write `mem` or
+can set `trapped`; `touchesMem` below is that fact as a decidable function. -/
 inductive Instr where
   /-- `rd := rs1 + rs2`, wrapping. -/
   | ADD  (rd rs1 rs2 : Fin 32)
@@ -140,7 +147,31 @@ inductive Instr where
   /-- `if rs1 = rs2 then pc += sext(imm ++ 0) else pc += 4`. `imm` holds
   `imm[12:1]`; the low zero bit is structural. -/
   | BEQ  (rs1 rs2 : Fin 32) (imm : BitVec 12)
+  /-- ⬥ **M2 — `rd := mem[(rs1 + sext(imm)) / 4]`**, WORD-addressed into the
+  eight-word file. I-type, opcode `0000011`, funct3 `010`. On a misaligned or
+  out-of-range address the load is suppressed and `trapped` is set — see
+  `step`'s docstring for the fence. -/
+  | LW   (rd rs1 : Fin 32) (imm : BitVec 12)
+  /-- ⬥ **M2 — `mem[(rs1 + sext(imm)) / 4] := rs2`**. S-type, opcode `0100011`,
+  funct3 `010`. The immediate is split across two fields in the encoding; that
+  scrambling lives in `wS`. -/
+  | SW   (rs1 rs2 : Fin 32) (imm : BitVec 12)
   deriving DecidableEq
+
+/-- ⬥ **M2 — THE MEMORY DISCRIMINATOR** (helm ruling, 2026-08-11 16:48). True
+exactly on the two ops that can read or write `mem`, or set `trapped`.
+
+🔑 **Why a named decidable function rather than a constructor enumeration in
+each statement:** the frame laws below it are *conditional* — they hold for the
+instructions that do not touch memory — and a statement that enumerated
+`ADD/ADDI/XOR/SLT/BEQ` would have to be edited by every future op author, who
+would have no way to know that omitting their constructor silently WIDENS a
+theorem into falsity. **The discriminator makes the hypothesis mechanical: a
+new memory op sets this true and every frame law narrows itself.** -/
+def touchesMem : Instr → Bool
+  | .LW _ _ _ => true
+  | .SW _ _ _ => true
+  | _         => false
 
 /-- Register read. **`x0` reads as zero unconditionally** — not as an invariant
 about `regs[0]`, but as a fact about the read port, which is what the hardware
@@ -165,7 +196,37 @@ construction. -/
 def bOffset (imm : BitVec 12) : BitVec 32 := (imm.signExtend 32) <<< 1
 
 /-- **The ISA spec.** One instruction, one state transition, total, structurally
-recursive, no fuel and no side conditions. -/
+recursive, no fuel and no side conditions.
+
+🔴 ⬥ **M2 — THE TRAP-SEMANTICS FENCE** (memory block §0.3, at O7 strength, placed
+here because a reader meets the code before they meet the block):
+
+> **On a misaligned or out-of-range LW/SW address this machine suppresses the
+> write, advances PC+4, and sets a sticky `trapped` flag. That is a deliberate
+> v1 semantics, NOT RV32I — RV32I raises a load/store-address-misaligned or
+> access-fault exception.**
+
+⚠️ **THIS IS THE SECOND NON-CONFORMANCE FENCE, AND IT DOES NOT RETIRE THE
+FIRST.** The undecodable-word fence (at `stepT` below) still stands: a word
+outside the decodable set advances PC+4 with **no** trap, while these two ops
+carry real trap arms. ***Both must be said wherever either is quoted*** — they
+bound different things (which instructions exist vs. what a bad address does),
+and neither implies the other.
+
+📌 **The suppression is the load-bearing term, not the flag** (the silicon
+lesson): a trapped step writes no register and no memory cell. It is not a
+no-op, though — it sets `trapped` and advances `pc`, which is why the frame
+laws in `Stack/Program.lean` are conditional on `touchesMem`.
+
+⚠️ **WHY THE ARMS BRANCH ON `= .ok` RATHER THAN MATCHING THE THREE CLASSES.**
+`addrClass` remains the TOTAL three-valued classification — that is where "no
+case can be missed" lives, and `addrClass_ok_lt` is what licenses the `Vector 8`
+index. But **`misaligned` and `outOfRange` are specified to produce the IDENTICAL
+response** (§0.3: write suppressed, `trapped := true`, pc advances; §2 restates
+it as the fact the F4 bridge relates *responses*, not class labels). Writing one
+`else` says that once, instead of duplicating a branch and inviting the two to
+drift apart. *The classification is three-valued; the machine's answer to a bad
+address is one-valued, and this is where that stops being a comment.* -/
 def step (s : St) : Instr → St
   | .ADD  rd a b   => (s.set rd (s.get a + s.get b)).next
   | .ADDI rd a imm => (s.set rd (s.get a + imm.signExtend 32)).next
@@ -173,6 +234,16 @@ def step (s : St) : Instr → St
   | .SLT  rd a b   => (s.set rd (if (s.get a).slt (s.get b) then 1 else 0)).next
   | .BEQ  a b imm  =>
       if s.get a = s.get b then { s with pc := s.pc + bOffset imm } else s.next
+  | .LW   rd a imm =>
+      let addr := s.get a + imm.signExtend 32
+      if h : addrClass addr = .ok then
+        (s.set rd (s.mem[addr.toNat / 4]'(addrClass_ok_lt h))).next
+      else { s with trapped := true }.next
+  | .SW   a b imm  =>
+      let addr := s.get a + imm.signExtend 32
+      if h : addrClass addr = .ok then
+        { s with mem := s.mem.set (addr.toNat / 4) (s.get b) (addrClass_ok_lt h) }.next
+      else { s with trapped := true }.next
 
 /-- Instruction fetch. **`pc` is a BYTE address** and instructions are four bytes
 wide, so a misaligned `pc` fetches nothing rather than rounding down. This is
@@ -430,9 +501,24 @@ whole five-branch `decode` goal exhausted the heartbeat budget twice. -/
 def wR (f3 : BitVec 3) (rd a b : Fin 32) : BitVec 32 :=
   0#7 ++ (ofReg b ++ (ofReg a ++ (f3 ++ (ofReg rd ++ 0b0110011#7))))
 
-/-- I-type: `imm[11:0] rs1 funct3 rd opcode`. -/
-def wI (imm : BitVec 12) (rd a : Fin 32) : BitVec 32 :=
-  imm ++ (ofReg a ++ (0#3 ++ (ofReg rd ++ 0b0010011#7)))
+/-- I-type: `imm[11:0] rs1 funct3 rd opcode`.
+
+⬥ **M2 GENERALIZED this layout**: `opcode` and `funct3` were baked in at
+`(0b0010011, 000)` when `ADDI` was the only I-type instruction. `LW` is I-type
+too, at `(0b0000011, 010)`, so both become parameters and the two field lemmas
+that used to conclude with a literal now read the parameter back. -/
+def wI (op : BitVec 7) (f3 : BitVec 3) (imm : BitVec 12) (rd a : Fin 32) : BitVec 32 :=
+  imm ++ (ofReg a ++ (f3 ++ (ofReg rd ++ op)))
+
+/-- S-type: `imm[11:5] rs2 rs1 funct3 imm[4:0] opcode`. **The immediate arrives
+in TWO pieces** — fewer than B-type's four, but the low piece sits in the slot
+an R-type would use for `rd`, which is the whole reason a store has no `rd`.
+
+📌 *S-type and R-type have the SAME FIELD WIDTHS* (`7 · 5 · 5 · 3 · 5 · 7`);
+only the meanings differ, which is why every field lemma below mirrors `wR`'s
+script exactly. -/
+def wS (i115 : BitVec 7) (i40 : BitVec 5) (a b : Fin 32) : BitVec 32 :=
+  i115 ++ (ofReg b ++ (ofReg a ++ (0b010#3 ++ (i40 ++ 0b0100011#7))))
 
 /-- B-type: `imm[12] imm[10:5] rs2 rs1 funct3 imm[4:1] imm[11] opcode`. **The
 immediate arrives in four pieces and two of them are out of order** — this
@@ -494,43 +580,113 @@ theorem wR_op (f3 : BitVec 3) (rd a b : Fin 32) :
   rw [BitVec.extractLsb'_append_eq_right]
 
 /-- The 12-bit immediate, whole and unscrambled — I-type is the easy one. -/
-theorem wI_imm (imm : BitVec 12) (rd a : Fin 32) :
-    (wI imm rd a).extractLsb' 20 12 = imm := by
+theorem wI_imm (op : BitVec 7) (f3 : BitVec 3) (imm : BitVec 12) (rd a : Fin 32) :
+    (wI op f3 imm rd a).extractLsb' 20 12 = imm := by
   unfold wI
   rw [BitVec.extractLsb'_append_eq_left]
 
 /-- `rs1`. -/
-theorem wI_rs1 (imm : BitVec 12) (rd a : Fin 32) :
-    (wI imm rd a).extractLsb' 15 5 = ofReg a := by
+theorem wI_rs1 (op : BitVec 7) (f3 : BitVec 3) (imm : BitVec 12) (rd a : Fin 32) :
+    (wI op f3 imm rd a).extractLsb' 15 5 = ofReg a := by
   unfold wI
   rw [BitVec.extractLsb'_append_eq_of_add_le (by omega)]
   rw [BitVec.extractLsb'_append_eq_left]
 
-/-- `funct3` = 0 selects ADDI. -/
-theorem wI_f3 (imm : BitVec 12) (rd a : Fin 32) :
-    (wI imm rd a).extractLsb' 12 3 = 0#3 := by
+/-- `funct3` — ⬥ M2: was `= 0#3` (ADDI's literal); now reads the parameter back,
+so `000` selects ADDI and `010` selects LW. -/
+theorem wI_f3 (op : BitVec 7) (f3 : BitVec 3) (imm : BitVec 12) (rd a : Fin 32) :
+    (wI op f3 imm rd a).extractLsb' 12 3 = f3 := by
   unfold wI
   rw [BitVec.extractLsb'_append_eq_of_add_le (by omega)]
   rw [BitVec.extractLsb'_append_eq_of_add_le (by omega)]
   rw [BitVec.extractLsb'_append_eq_left]
 
 /-- `rd`. -/
-theorem wI_rd (imm : BitVec 12) (rd a : Fin 32) :
-    (wI imm rd a).extractLsb' 7 5 = ofReg rd := by
+theorem wI_rd (op : BitVec 7) (f3 : BitVec 3) (imm : BitVec 12) (rd a : Fin 32) :
+    (wI op f3 imm rd a).extractLsb' 7 5 = ofReg rd := by
   unfold wI
   rw [BitVec.extractLsb'_append_eq_of_add_le (by omega)]
   rw [BitVec.extractLsb'_append_eq_of_add_le (by omega)]
   rw [BitVec.extractLsb'_append_eq_of_add_le (by omega)]
   rw [BitVec.extractLsb'_append_eq_left]
 
-/-- The OP-IMM opcode. -/
-theorem wI_op (imm : BitVec 12) (rd a : Fin 32) :
-    (wI imm rd a).extractLsb' 0 7 = 0b0010011#7 := by
+/-- The opcode — ⬥ M2: was `= 0b0010011#7` (OP-IMM's literal); now reads the
+parameter back, so the one layout serves OP-IMM and LOAD. -/
+theorem wI_op (op : BitVec 7) (f3 : BitVec 3) (imm : BitVec 12) (rd a : Fin 32) :
+    (wI op f3 imm rd a).extractLsb' 0 7 = op := by
   unfold wI
   rw [BitVec.extractLsb'_append_eq_of_add_le (by omega)]
   rw [BitVec.extractLsb'_append_eq_of_add_le (by omega)]
   rw [BitVec.extractLsb'_append_eq_of_add_le (by omega)]
   rw [BitVec.extractLsb'_append_eq_right]
+
+/-! ### S-type's fields — ⬥ M2 -/
+
+/-- The immediate's HIGH piece, `imm[11:5]`, in bits 31:25. -/
+theorem wS_i115 (i115 : BitVec 7) (i40 : BitVec 5) (a b : Fin 32) :
+    (wS i115 i40 a b).extractLsb' 25 7 = i115 := by
+  unfold wS
+  rw [BitVec.extractLsb'_append_eq_left]
+
+/-- `rs2` — the value being stored. -/
+theorem wS_rs2 (i115 : BitVec 7) (i40 : BitVec 5) (a b : Fin 32) :
+    (wS i115 i40 a b).extractLsb' 20 5 = ofReg b := by
+  unfold wS
+  rw [BitVec.extractLsb'_append_eq_of_add_le (by omega)]
+  rw [BitVec.extractLsb'_append_eq_left]
+
+/-- `rs1` — the base address register. -/
+theorem wS_rs1 (i115 : BitVec 7) (i40 : BitVec 5) (a b : Fin 32) :
+    (wS i115 i40 a b).extractLsb' 15 5 = ofReg a := by
+  unfold wS
+  rw [BitVec.extractLsb'_append_eq_of_add_le (by omega)]
+  rw [BitVec.extractLsb'_append_eq_of_add_le (by omega)]
+  rw [BitVec.extractLsb'_append_eq_left]
+
+/-- `funct3` = `010` selects SW (word). -/
+theorem wS_f3 (i115 : BitVec 7) (i40 : BitVec 5) (a b : Fin 32) :
+    (wS i115 i40 a b).extractLsb' 12 3 = 0b010#3 := by
+  unfold wS
+  rw [BitVec.extractLsb'_append_eq_of_add_le (by omega)]
+  rw [BitVec.extractLsb'_append_eq_of_add_le (by omega)]
+  rw [BitVec.extractLsb'_append_eq_of_add_le (by omega)]
+  rw [BitVec.extractLsb'_append_eq_left]
+
+/-- **The immediate's LOW piece, `imm[4:0]`, in bits 11:7** — the S-type quirk:
+this is the slot an R-type spends on `rd`, which is exactly why a store, having
+no destination register, can afford to put immediate bits there. -/
+theorem wS_i40 (i115 : BitVec 7) (i40 : BitVec 5) (a b : Fin 32) :
+    (wS i115 i40 a b).extractLsb' 7 5 = i40 := by
+  unfold wS
+  rw [BitVec.extractLsb'_append_eq_of_add_le (by omega)]
+  rw [BitVec.extractLsb'_append_eq_of_add_le (by omega)]
+  rw [BitVec.extractLsb'_append_eq_of_add_le (by omega)]
+  rw [BitVec.extractLsb'_append_eq_of_add_le (by omega)]
+  rw [BitVec.extractLsb'_append_eq_left]
+
+/-- The STORE opcode. -/
+theorem wS_op (i115 : BitVec 7) (i40 : BitVec 5) (a b : Fin 32) :
+    (wS i115 i40 a b).extractLsb' 0 7 = 0b0100011#7 := by
+  unfold wS
+  rw [BitVec.extractLsb'_append_eq_of_add_le (by omega)]
+  rw [BitVec.extractLsb'_append_eq_of_add_le (by omega)]
+  rw [BitVec.extractLsb'_append_eq_of_add_le (by omega)]
+  rw [BitVec.extractLsb'_append_eq_of_add_le (by omega)]
+  rw [BitVec.extractLsb'_append_eq_right]
+
+/-- ⬥ **M2 — S-TYPE'S IMMEDIATE, PUT BACK TOGETHER**, as a NAMED fact rather
+than as a step of `decode_encode`'s tactic.
+
+📌 *Why named here when B-type's four-piece reassembly is left to the `repeat rw`
+in `decode_encode`:* B-type needs the peel applied **iteratively** (`4 = 0+4`,
+then `10 = 0+10`, then `11 = 0+11`), which is what `repeat` is for. S-type needs
+it **exactly once** (`5 = 0+5`), and the `repeat rw` does not reach it under the
+`SW` constructor — so the honest form is a one-line lemma that says what the
+store's split immediate does, which is also the fact a reader wants stated. -/
+theorem wS_imm_reassembles (imm : BitVec 12) :
+    imm.extractLsb' 5 7 ++ imm.extractLsb' 0 5 = imm := by
+  rw [BitVec.extractLsb'_append_extractLsb'_eq_extractLsb' (by omega)]
+  simp
 
 /-- Bit 31 carries the immediate's TOP bit — this file's bit 11. -/
 theorem wB_i11 (i11 : BitVec 1) (i94 : BitVec 6) (i30 : BitVec 4) (i10 : BitVec 1) (a b : Fin 32) :
@@ -612,10 +768,12 @@ def encode : Instr → BitVec 32
   | .ADD  rd a b   => wR 0#3 rd a b
   | .XOR  rd a b   => wR 4#3 rd a b
   | .SLT  rd a b   => wR 2#3 rd a b
-  | .ADDI rd a imm => wI imm rd a
+  | .ADDI rd a imm => wI 0b0010011#7 0#3 imm rd a
   | .BEQ  a b imm  =>
       wB (imm.extractLsb' 11 1) (imm.extractLsb' 4 6)
          (imm.extractLsb' 0 4)  (imm.extractLsb' 10 1) a b
+  | .LW   rd a imm => wI 0b0000011#7 0b010#3 imm rd a
+  | .SW   a b imm  => wS (imm.extractLsb' 5 7) (imm.extractLsb' 0 5) a b
 
 /-- **The decoder.** Partial by construction: an encoding this slice does not
 define returns `none` rather than a wrong instruction. That partiality is real
@@ -641,6 +799,12 @@ def decode (w : BitVec 32) : Option Instr :=
     some (.BEQ rs1 rs2
       (w.extractLsb' 31 1 ++ (w.extractLsb' 7 1 ++
         (w.extractLsb' 25 6 ++ w.extractLsb' 8 4))))
+  -- ⬥ M2. LOAD is I-type, so the immediate is whole and needs no reassembly.
+  else if opcode = 0b0000011#7 && funct3 = 0b010#3 then
+    some (.LW rd rs1 (w.extractLsb' 20 12))
+  -- ⬥ M2. STORE is S-type: imm[11:5] from w[31:25], imm[4:0] from w[11:7].
+  else if opcode = 0b0100011#7 && funct3 = 0b010#3 then
+    some (.SW rs1 rs2 (w.extractLsb' 25 7 ++ w.extractLsb' 7 5))
   else none
 
 /-- **THE ROUND-TRIP.** `decode` inverts `encode` on every instruction of Slice
@@ -656,6 +820,7 @@ theorem decode_encode (i : Instr) : decode (encode i) = some i := by
     simp only [encode, decode, wR_f7, wR_rs2, wR_rs1, wR_f3, wR_rd, wR_op,
       wI_imm, wI_rs1, wI_f3, wI_rd, wI_op,
       wB_i11, wB_i94, wB_rs2, wB_rs1, wB_f3, wB_i30, wB_i10, wB_op,
+      wS_i115, wS_rs2, wS_rs1, wS_f3, wS_i40, wS_op, wS_imm_reassembles,
       toReg_ofReg] <;>
     (repeat rw [BitVec.extractLsb'_append_extractLsb'_eq_extractLsb' (by omega)]) <;>
     simp
@@ -688,6 +853,106 @@ theorem encode_injective {i j : Instr} (h : encode i = encode j) : i = j := by
 /-- **`decode` REJECTS what Slice A excludes** — a `LUI` word (opcode `0110111`)
 is not silently read as something else. The partiality is real, not decorative. -/
 theorem decode_rejects_lui : decode 0x000010B7#32 = none := by
+  decide +kernel
+
+/-! ## ⬥ M2 — THE CONTROLS ROSTER, as pre-registered in the memory block §4
+
+Every control below was named in the block BEFORE this commit was written. They
+are here rather than in a Scratch because a one-time check is not a standing
+gate: a Scratch is deleted by rule and its result becomes an assertion. -/
+
+/-- `lw ra, 0(sp)` is `0x00012083` — hand-derived from the manual's I-type
+layout, and one of the two rows this commit deletes from `sliceAExcluded`. -/
+theorem encode_lw_matches_manual : encode (.LW 1 2 0) = 0x00012083#32 := by
+  decide +kernel
+
+/-- `sw ra, 0(sp)` is `0x00112023` — the S-type word the block triple-sourced,
+and the other deleted row. -/
+theorem encode_sw_matches_manual : encode (.SW 2 1 0) = 0x00112023#32 := by
+  decide +kernel
+
+/-- The two new opcodes collide with none of the three landed accepting ones,
+which is what lets them be appended to `decode`'s if-chain without shadowing. -/
+theorem new_opcodes_are_fresh :
+    (0b0000011#7 ≠ 0b0110011#7) ∧ (0b0000011#7 ≠ 0b0010011#7) ∧
+    (0b0000011#7 ≠ 0b1100011#7) ∧ (0b0100011#7 ≠ 0b0110011#7) ∧
+    (0b0100011#7 ≠ 0b0010011#7) ∧ (0b0100011#7 ≠ 0b1100011#7) ∧
+    (0b0000011#7 ≠ 0b0100011#7) := by
+  decide +kernel
+
+/-- The witness state for the arm-inhabitance controls: `x1 = 5`, `mem[1] = 7`,
+everything else zero and `trapped = false`. **Distinct values throughout**, so
+an observation cannot pass by coincidence. -/
+def m2Witness : St :=
+  { St.init.set 1 5 with mem := (Vector.replicate 8 0).set 1 7 }
+
+/-! ### Arm inhabitance ×3 — each observing SPECIFIC fields
+
+The block's discipline: a control that observes the whole state proves the arm
+was *taken*; one that observes `mem[a]` / `trapped` / a register proves the arm
+did **what it says**. -/
+
+/-- **THE `ok` ARM, LOAD.** `LW x2, 4(x0)` reads word 1 and lands `7` in `x2` —
+the value came from MEMORY, which no register held. `trapped` stays clear. -/
+theorem lw_ok_arm_is_inhabited :
+    (step m2Witness (.LW 2 0 4)).get 2 = 7 ∧
+      (step m2Witness (.LW 2 0 4)).trapped = false := by
+  decide +kernel
+
+/-- **THE `ok` ARM, STORE — and it writes EXACTLY ONE WORD.** `SW x1, 0(x0)`
+puts `5` in word 0 and leaves word 1's `7` alone. *Observing the untouched
+neighbour is the half that makes this a frame check and not just a write
+check.* -/
+theorem sw_ok_arm_is_inhabited :
+    (step m2Witness (.SW 0 1 0)).mem[0] = 5 ∧
+      (step m2Witness (.SW 0 1 0)).mem[1] = 7 ∧
+      (step m2Witness (.SW 0 1 0)).trapped = false := by
+  decide +kernel
+
+/-- **THE `misaligned` ARM.** Byte address 1. The load is SUPPRESSED — `x2` is
+still `0`, not `7` and not garbage — `trapped` is set, and `pc` advances. *The
+suppression is the load-bearing term; the flag is the announcement.* -/
+theorem lw_misaligned_arm_is_inhabited :
+    (step m2Witness (.LW 2 0 1)).trapped = true ∧
+      (step m2Witness (.LW 2 0 1)).get 2 = 0 ∧
+      (step m2Witness (.LW 2 0 1)).pc = m2Witness.pc + 4 := by
+  decide +kernel
+
+/-- **THE `outOfRange` ARM, WITNESSED AT AN *ALIGNED* ADDRESS** — byte 32, word
+8, the first word past the eight-word file.
+
+⚠️ **This is r-trap KC1c and it is the reason the witness is 32 and not 33.**
+`addrClass` tests range BEFORE alignment, so a misaligned-and-out-of-range
+address would classify `outOfRange` too — and the arm would be witnessed by an
+address that is bad for TWO reasons, proving nothing about range alone. The
+aligned witness isolates the range test. The second conjunct states the
+alignment explicitly so the isolation is on the record, not in a comment. -/
+theorem sw_out_of_range_arm_is_inhabited :
+    addrClass 32#32 = .outOfRange ∧ (32#32 : BitVec 32).toNat % 4 = 0 ∧
+      (step m2Witness (.SW 0 1 32)).trapped = true ∧
+      (step m2Witness (.SW 0 1 32)).mem[0] = 0 ∧
+      (step m2Witness (.SW 0 1 32)).mem[1] = 7 := by
+  decide +kernel
+
+/-! ### The swapped-immediate mutant — a control is valid only if it FALSIFIES -/
+
+/-- **THE MUTANT**: S-type with its two immediate pieces exchanged. It must
+COMPILE (a non-compiling mutant is not a control) and it must BREAK the
+round-trip on an exhibited witness. -/
+def wS_mutant (i115 : BitVec 7) (i40 : BitVec 5) (a b : Fin 32) : BitVec 32 :=
+  (i40 ++ (0#2)) ++ (ofReg b ++ (ofReg a ++ (0b010#3 ++
+    ((i115.extractLsb' 0 5) ++ 0b0100011#7))))
+
+/-- ⛔ **THE MUTANT IS KILLED, ON A WITNESS.** At `imm = 1` the swapped encoder
+produces a word that decodes to `SW x2, x1, 128` — not `1`. So `decode_encode`
+genuinely pins the field ORDER; it is not satisfied by any self-consistent pair
+of encoder and decoder. *Per the house mutation law: a mutant that merely fails
+to prove is not a control — this one makes the statement FALSE, and the value it
+decodes to is exhibited rather than described.* -/
+theorem wS_mutant_breaks_the_round_trip :
+    decode (wS_mutant ((1 : BitVec 12).extractLsb' 5 7)
+      ((1 : BitVec 12).extractLsb' 0 5) 2 1) = some (.SW 2 1 128) ∧
+    (128 : BitVec 12) ≠ 1 := by
   decide +kernel
 
 /-- **The brief's own signature**, `step : St → BitVec 32 → St`, recovered as a
@@ -861,5 +1126,28 @@ theorem stepW_encode (s : St) (i : Instr) : stepW s (encode i) = some (step s i)
 #audit_axioms stepT_encode
 #audit_axioms stepT_nop_is_reachable
 #audit_axioms stepW_none_where_stepT_advances
+
+-- ⬥ M2: every declaration this commit adds enters the standing roll-call in the
+-- SAME commit, per the block §4 ruling (⬥v1.5). An absent audit line is SILENT:
+-- a green build is exactly as green without it.
+#audit_axioms touchesMem
+#audit_axioms wS
+#audit_axioms wS_i115
+#audit_axioms wS_rs2
+#audit_axioms wS_rs1
+#audit_axioms wS_f3
+#audit_axioms wS_i40
+#audit_axioms wS_op
+#audit_axioms wS_imm_reassembles
+#audit_axioms encode_lw_matches_manual
+#audit_axioms encode_sw_matches_manual
+#audit_axioms new_opcodes_are_fresh
+#audit_axioms m2Witness
+#audit_axioms lw_ok_arm_is_inhabited
+#audit_axioms sw_ok_arm_is_inhabited
+#audit_axioms lw_misaligned_arm_is_inhabited
+#audit_axioms sw_out_of_range_arm_is_inhabited
+#audit_axioms wS_mutant
+#audit_axioms wS_mutant_breaks_the_round_trip
 
 end SaltWorks.ISA

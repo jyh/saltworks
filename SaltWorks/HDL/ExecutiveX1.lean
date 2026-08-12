@@ -64,6 +64,10 @@ def writesInstr : Instr → Option (Fin 32)
   | .XOR  rd _ _ => if rd = 0 then none else some rd
   | .SLT  rd _ _ => if rd = 0 then none else some rd
   | .BEQ  _ _ _  => none
+  -- ⬥ M2. LW writes `rd` and so KEEPS the x0-discard guard the other writing
+  -- arms use; SW writes no register at all, which is the whole shape of a store.
+  | .LW   rd _ _ => if rd = 0 then none else some rd
+  | .SW   _ _ _  => none
 
 /-- **The compiler-checkable side condition**, decidable by construction. -/
 def writesWithin (code : List Instr) (P : Partition) : Bool :=
@@ -123,6 +127,23 @@ theorem step_frame_instr (s : St) (ins : Instr) (r : Fin 32)
   | BEQ a b imm =>
       simp only [step]
       split <;> rfl
+  -- ⬥ M2. The LW arm splits on `addrClass … = .ok`: only that branch writes a
+  -- register, and the trap branch touches `trapped`/`pc` — neither of which
+  -- `St.get` can see. The `ok` branch is then the same argument as ADD/ADDI.
+  | LW rd a imm =>
+      simp only [step]
+      split_ifs
+      · by_cases h0 : rd = 0
+        · simp [St.set, h0, St.next, St.get]
+        · have : r ≠ rd := by
+            intro he; exact hr (by simp [writesInstr, h0, he])
+          simpa [St.next, St.get] using St.get_set_ne s rd r _ this
+      · rfl
+  -- ⬥ M2. SW writes NO register on either branch, so both close by
+  -- reflexivity — the store cannot move `r` whatever the address does.
+  | SW a b imm =>
+      simp only [step]
+      split_ifs <;> rfl
 
 /-- ⭐ **`step_frame` (B2's amended form).** The instruction is BOUND to the
 image — `ins ∈ code` — which is exactly the clause whose absence made the

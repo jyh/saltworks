@@ -533,8 +533,6 @@ def sliceAExcluded : List (BitVec 32) :=
   0x00001117#32,   -- auipc   sp, 0x1
   0x008000EF#32,   -- jal     pc + 0x8
   0x000100E7#32,   -- jalr    sp
-  0x00012083#32,   -- lw      ra, 0(sp)
-  0x00112023#32,   -- sw      ra, 0(sp)
   0x00410183#32,   -- lb      gp, 4(sp)
   0x00310223#32,   -- sb      gp, 4(sp)
   0x002091B3#32,   -- sll     gp, ra, sp
@@ -556,20 +554,26 @@ def sliceAExcluded : List (BitVec 32) :=
 /-- **THE EXCLUSION LIST, AS A THEOREM.** `decode` rejects every one — and
 Spike executes every one. *The disagreement is the specification working.*
 
-⏰ **THIS THEOREM HAS AN EXPIRY DATE, AND THAT IS DELIBERATE — but it was the
-MATH seat who noticed, not me** (S0/R2 census, 8/7, verified at the bytes).
-**Four of the 22 words are loads and stores:**
+⏰ ⬥ **THE EXPIRY DATE FIRED AT M2, EXACTLY AS THIS FILE PREDICTED IT WOULD.**
+The prediction (S0/R2 census, 8/7, math seat, verified at the bytes) read:
+*"the day loads land in Slice A, `decode` starts accepting them and this theorem
+goes FALSE, breaking the build — that is the correct behaviour."*
+
+**IT DID BREAK THE BUILD, AND THAT IS THE WHOLE POINT.** `LW`/`SW` landed at M2;
+the two word-sized rows are now DELETED and the length moved 22 → 20:
 
 ```
-0x00012083  lw ra, 0(sp)      0x00410183  lb gp, 4(sp)
-0x00112023  sw ra, 0(sp)      0x00310223  sb gp, 4(sp)
+REMOVED   0x00012083  lw ra, 0(sp)        KEPT   0x00410183  lb gp, 4(sp)
+          0x00112023  sw ra, 0(sp)               0x00310223  sb gp, 4(sp)
 ```
+**`lb`/`sb` STAY EXCLUDED** — v1 is WORD-ONLY (block §0.1: no byte or halfword
+ops, so there are no byte semantics to get wrong), and `decode` still rejects
+them on `funct3 = 000`.
 
-⇒ ***The day loads land in Slice A, `decode` starts accepting them and this
-theorem goes FALSE, breaking the build.*** **That is the correct behaviour and
-the reason to keep them in the list rather than a reason to remove them:** an
-exclusion list that silently survives its own exclusions being lifted is a stale
-claim shipping under a green build. *Here the build refuses.*
+🔑 ***A CAVEAT WITH AN EXPIRY ENFORCED BY THE BUILD IS WORTH MORE THAN ONE
+ENFORCED BY MEMORY, AND THIS IS THE RECEIPT: nobody had to remember.*** *An
+exclusion list that silently survived its own exclusions being lifted would be a
+stale claim shipping green. This one refused, on the day, without being asked.*
 
 📌 **It is math's own 10:53 principle applied to my file — a caveat with an
 expiry date, enforced by the build rather than by memory.** *The difference
@@ -591,7 +595,7 @@ theorem rejected_disjoint_from_suite :
       (fun w => spikeSuite.all (fun v => v.word != w)) = true := by decide +kernel
 
 theorem spike_illegal_size : spikeIllegal.length = 40 := by decide +kernel
-theorem slice_a_excluded_size : sliceAExcluded.length = 22 := by decide +kernel
+theorem slice_a_excluded_size : sliceAExcluded.length = 20 := by decide +kernel
 
 #audit_axioms spikeIllegal
 #audit_axioms spike_illegal_rejected

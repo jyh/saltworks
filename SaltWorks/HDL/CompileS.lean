@@ -106,8 +106,16 @@ characterises REGISTERS, so "the compiler is correct" covers a strictly smaller 
 the machine state than it did when this was written.**
 
 ✅ *It is still COMPLETE for this fragment, and the reason is a landed theorem rather than
-an argument: `step_mem_eq` and `step_trapped_eq` prove **all five slice-A arms preserve
-both new fields**, so code `compileS` emits provably cannot touch them.*
+an argument: `step_mem_frame_of_not_touchesMem` and `step_trapped_frame_of_not_touchesMem`
+prove that any instruction with `touchesMem i = false` preserves both new fields, so code
+`compileS` emits — which is exactly the five slice-A arms — provably cannot touch them.*
+
+⬥ **M2 RENAMED BOTH, and the old names are RETIRED** (helm ruling 16:48). The prose here
+was ALREADY scoped to slice A while the theorems were unconditional `∀ Instr`; M2 added
+`LW`/`SW` and made the theorems false, so they narrowed to meet the sentence that was
+right all along. *The citation is by NAME and no build would have caught it going stale —
+this line was updated because the obligation was registered at the rename, not because
+anything went red.*
 
 🔑 ***Cited by NAME, never by line*** — my own pin into `ISA.lean` rotted the same evening
 when a peer's landing moved it 49 lines, and the names above were themselves verified

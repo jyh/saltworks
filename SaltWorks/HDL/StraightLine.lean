@@ -37,7 +37,11 @@ theorem St_set_pc (s : St) (r : Fin 32) (v : BitVec 32) : (s.set r v).pc = s.pc 
 /-- ⭐ **A forward instruction advances `pc` by exactly four.** -/
 theorem step_forward_pc (s : St) (i : Instr) (h : isForward i = true) :
     (step s i).pc = s.pc + 4 := by
-  cases i <;> simp_all [step, isForward, St.next, St_set_pc]
+  -- ⬥ M2: `isForward`'s wildcard classifies LW/SW as forward, and they ARE —
+  -- every one of their branches ends in `.next`. The only new work is splitting
+  -- the address `dite`, which is the "replay, not a design change" the memory
+  -- block's §0.7 predicted for this exact theorem.
+  cases i <;> simp_all [step, isForward, St.next, St_set_pc] <;> split_ifs <;> rfl
 
 /-- A fetched instruction is a member of the code. -/
 theorem fetch_mem {code : List Instr} {pc : BitVec 32} {i : Instr}
