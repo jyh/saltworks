@@ -19,10 +19,16 @@ cells vs 47,438 filler). If the window is missed: ③ ships next shuttle, nothin
   kernel outOfRange ≥ 32 semantics from M1). ⭐ PRICE DROP (silicon 18:52, pre-hardening):
   BOTH organs already exist as synthesised netlists from the untaped RISC-V work — dmem8
   (673 cells / 256 flops = the full 8×32 bit array) and memif (182 cells, combinational).
-  Neither is in the submitted die. D1 therefore opens as VERIFY-AND-ADOPT, not build:
-  (a) audit the existing netlists against the RULED semantics (outOfRange ≥ 32; the trap
-  arms misaligned + out-of-range) — where they diverge, the RTL amends to the ruling,
-  never the reverse (iron rule 1's hardware face); (b) the Lean netlist model + the
+  Neither is in the submitted die. D1 therefore opens as VERIFY-AND-ADOPT for the ARRAY — RE-SCOPED at silicon's
+  refuter finding (18:55, against the clause its own price-drop created): dmem8's address
+  port is 3 BITS and it carries ZERO trap logic — there is nothing to audit against the
+  trap semantics, and that is the ARCHITECTURE, not a defect. The organ is PURE STORAGE
+  (word-addressed 0..7), adopted as-is; the kernel's step semantics are realised by a
+  COMPOSITION: (a-NEW) **D1t — THE ADDRESS CHECKER**, a new deliverable in memif's lane:
+  byte-address in, the TWO trap causes as separate hardware facts (misaligned = low bits
+  ≠ 0 · outOfRange = byte addr ≥ 32), word-address out to the organ only when clean —
+  arm-for-arm matched to the ruled step semantics at the CHECKER⊕ORGAN composition,
+  never inside the organ; (b) the Lean netlist model + the
   realisation proofs against the adopted netlists — TRAP-ARM PHRASING per math's refuter
   (repair-then-fire): the two trap causes (misaligned · outOfRange ≥ 32) stated as
   SEPARATE kernel facts matched arm-for-arm to the ruled step semantics, never folded
