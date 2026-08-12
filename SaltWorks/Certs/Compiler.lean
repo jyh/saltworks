@@ -160,7 +160,9 @@ holds its source variable's value to begin with* (`RegsHold`), and *the whole po
 sits strictly below the scratch register* (`PoolBelow`).
 
 ⚠️ `4 * c.length < 2 ^ 32` is the one hypothesis `compileE` does **not** check —
-carried, not assumed away. Direction: **same proposition**, closed by `exact`. -/
+carried, not assumed away. Direction: **same proposition**, closed by `exact`.
+
+Witness: **EXEMPT** — universal, no witness. -/
 theorem cert_compileE_value (Γ : Ctx) (reg : RegMap) (σ : State) (e : Exp) (d : Nat)
     (c : List Instr) (st : St) (rd : Fin 32)
     (hc : compileE Γ reg e d = some c) (hrd : regAt d = some rd)
@@ -181,7 +183,9 @@ Read the two quantified lines: they mention `st.get (reg i)` and nothing else. *
 statement says nothing about memory and nothing about the trap flag.**
 
 Direction: **same proposition** as `run_compileS_correct_of_branchFree`, closed by
-`exact`. -/
+`exact`.
+
+Witness: **EXEMPT** — universal, no witness. *The `hbf`/`hchk` binder is inhabited non-degenerately by the programs `cert_the_fragment_boundary` compiles.* -/
 theorem cert_compileS_simulation {reg : RegMap} {d : Nat} (hreg : RegOk reg d)
     {Γ : Ctx} {p : Stmt} {σ σ' : State} (hbs : bigStep Γ p σ σ')
     (hbf : branchFree p = true) (hchk : chkS Γ p = true)
@@ -207,7 +211,9 @@ statement expressible at all. *This is a different SHAPE from §2, not a weaker 
 of it.*
 
 Direction: **same proposition** as `reaches_of_compileS_including_while`, closed by
-`exact`. -/
+`exact`.
+
+Witness: **EXEMPT** — universal in its hypotheses. *The `∃ st'` is the CONCLUSION, not a control: this cert proves an existence claim, it does not offer a witness ABOUT itself. `cert_the_fragment_boundary` exhibits a `while` program that compiles, which is what inhabits `hc` here.* -/
 theorem cert_compileS_simulation_with_loops {reg : RegMap} {d : Nat} (hreg : RegOk reg d)
     {Γ : Ctx} {p : Stmt} {σ σ' : State} (hbs : bigStep Γ p σ σ') (hchk : chkS Γ p = true)
     {image blk : List Instr} {q : Nat} {st : St}
@@ -234,7 +240,9 @@ word for it.* **A certificate layer that only ever restates what was proved woul
 leave the most important fact about this compiler — that it refuses half of control
 flow — visible nowhere.**
 
-Direction: **same proposition** as `cause_outside_the_fragment_is_now_ite_only`. -/
+Direction: **same proposition** as `cause_outside_the_fragment_is_now_ite_only`.
+
+Witness: **NON-DEGENERACY** — three programs over the SAME context and register map, differing only in the construct. *A degenerate version would compare programs that differ in several ways at once and prove nothing about the construct; holding `regCanonical 16 [(0, Ty.i32)]` fixed is what makes the `.ite`/`.while` split attributable.* -/
 theorem cert_the_fragment_boundary :
     (compileS regCanonical 16 [(0, Ty.i32)]
         (.seq (.assign 0 (.const 5)) .skip)).isSome = true
@@ -260,7 +268,9 @@ it**, because the constant does not fit the machine's immediate field.
 *So `branchFree` is a NECESSARY condition in the L1 theorems and not a sufficient one:
 a reader must not conclude from "the branch-free fragment is verified" that every
 branch-free program compiles.* Direction: **same proposition** as
-`branchFree_is_necessary_not_sufficient`. -/
+`branchFree_is_necessary_not_sufficient`.
+
+Witness: **NON-DEGENERACY** — the literal `99999` is chosen to exceed the immediate field. *A small constant would compile, satisfy both conjuncts trivially in the wrong direction, and witness nothing; the witness only separates the two notions because the value is out of range.* -/
 theorem cert_branchFree_does_not_imply_compiles :
     branchFree (.assign 0 (.const 99999)) = true
   ∧ compileS regCanonical 16 [(0, Ty.i32)] (.assign 0 (.const 99999)) = none :=
@@ -272,7 +282,9 @@ refuses, and therefore so does `compileS`.
 
 *A "verified compiler" that silently spilled to memory here would be a different
 program; this one declines.* Direction: **same proposition** as
-`cause_pool_exhaustion_at_letmut`. -/
+`cause_pool_exhaustion_at_letmut`.
+
+Witness: **NON-DEGENERACY** — the pair `14`/`15` straddles the boundary. *Any two levels both inside or both outside the pool would be degenerate: the content is that the limit falls BETWEEN these two, so adjacency is load-bearing.* -/
 theorem cert_pool_exhaustion_is_a_real_limit :
     (lvlReg regCanonical 14).isSome = true ∧ lvlReg regCanonical 15 = none :=
   cause_pool_exhaustion_at_letmut
@@ -283,7 +295,9 @@ that the two notions have PARTED.** A loop compiles, and a loop is not `branchFr
 *This matters for reading §2 against §3: the L1 certificates are scoped to `branchFree`
 statements, but the compiler's domain is bigger than that scope. **The two are no
 longer the same set, and this is the program that separates them.*** Direction: **same
-proposition** as `fragment_now_includes_while`. -/
+proposition** as `fragment_now_includes_while`.
+
+Witness: **NON-DEGENERACY** — a `while` program that compiles AND is not branch-free. *A branch-free program would satisfy the first conjunct and refute nothing; the witness must sit in the gap between the two notions or it is not a witness.* -/
 theorem cert_the_fragment_exceeds_branch_free :
     (compileS regCanonical 16 [(0, Ty.i32)]
        (.while (.slt (.var 0) (.const 5)) .skip)).isSome = true

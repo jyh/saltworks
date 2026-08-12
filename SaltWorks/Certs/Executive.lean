@@ -22,22 +22,31 @@ Landed by the **COMPILER seat**.
 
 The evidence seat flagged two of the four pillars named in the **Nature-track manuscript draft** (`${SEAT_DIR}/briefs/2026-08-11-nature-draft-v0.md`, read 2026-08-11; section numbers are DRAFT-RELATIVE and will move) as *"not mine to
 measure … their owners should state what those words cover before the sentence
-travels"*: **a verified COMPILER** and **a verified EXECUTIVE**.
-
-⚠️ ***THE ELLIPSIS ABOVE WAS ADDED 2026-08-12 10:1x AND IT IS A PROVENANCE REPAIR, NOT A
-STYLE EDIT.*** *As landed, this file joined two of the evidence seat's phrases with an
-em-dash, which reads as ONE contiguous sentence. It is not: the source separates them by
-~20 words — "compiler's L0–L2 landed tonight and I have not read their scope;".
-**SOURCE PIN: the EVIDENCE seat, 2026-08-11 03:45**, on `FLEET.md`. *The seat-and-stamp
-is the durable pin and the line number is deliberately absent: **the bus is append-only
-and versioned NOWHERE, so a line cite has nothing to resolve against and rots on every
-peer's next post.** The phrase is the anchor; a line number would be a hint that decays —
-math's `anchor_pin_check` discipline, which applies with more force here than in a paper.* **Every word quoted is theirs and in
-order; the CONTIGUITY was mine.** Found by running evidence's own 10:08 C-amendment —
-*every quoted string attributed to a source must resolve in that source, not only the one
-the certificate is about* — against this already-sealed tier.* `Certs/Compiler.lean`
+travels"*: **a verified COMPILER** and **a verified EXECUTIVE**. `Certs/Compiler.lean`
 answered the first. **This file answers the second, in the same form: not a promise in
 a docstring, but the scope written into the statements themselves.**
+
+### ⚠️ PROVENANCE NOTE ON THE QUOTATION ABOVE (2026-08-12) — a repair, not a style edit
+
+**The ellipsis is load-bearing.** *As first landed, this file joined two of the evidence
+seat's phrases with an em-dash, which reads as ONE contiguous sentence. It is not: the
+source separates them by ~20 words — "compiler's L0–L2 landed tonight and I have not read
+their scope;". **Every word quoted is theirs and in order; the CONTIGUITY was mine.***
+
+**SOURCE PIN: the EVIDENCE seat, 2026-08-11 03:45, on `FLEET.md`.** *Seat and stamp, and
+the line number is deliberately absent: the bus is append-only and versioned NOWHERE, so a
+line cite has nothing to resolve against and rots on every peer's next post. The phrase is
+the anchor; a line number would be a hint that decays — math's `anchor_pin_check`
+discipline, which binds harder off-paper than on it.*
+
+*Found by running evidence's 10:08 C-amendment — **every quoted string attributed to a
+source must resolve in that source, not only the one the certificate is about** — against
+this already-sealed tier.*
+
+⛔ ***AND THE FIRST VERSION OF THIS VERY NOTE WAS SPLICED INTO THE MIDDLE OF THE SENTENCE
+IT ANNOTATES**, orphaning "`Certs/Compiler.lean` answered the first" to the far side of it.
+Repaired 10:27. **A docstring cannot fail a build, so a prose splice is invisible forever
+— which is the whole reason the note is worth its own heading instead of an inline aside.***
 
 ## WHAT "THE EXECUTIVE IS VERIFIED" IS ALLOWED TO MEAN
 
@@ -119,7 +128,12 @@ Direction: **`iff`** — so the plain reading and the machine test are the same 
 in the kernel, rather than in this docstring. *An instruction that writes nothing
 (`BEQ`, `SW`, or any write to `x0`, which the hardware discards) is unconstrained,
 which is why the inner quantifier is over `writesInstr ins = some rd` rather than over
-all registers.* -/
+all registers.*
+
+Witness: **EXEMPT** (rule 6, amended 8/12). *An `iff` universally quantified over `code`
+and `P` — it carries no witness, so there is no witness to be degenerate. The degenerate
+instance (`code = []`) makes both sides true and the biconditional still holds, which is
+correctness of the translation, not evidence about it.* -/
 theorem cert_side_condition_meaning (code : List Instr) (P : Partition) :
     writesWithin code P = true ↔
       ∀ ins ∈ code, ∀ rd : Fin 32, writesInstr ins = some rd → rd ∈ P := by
@@ -144,7 +158,13 @@ program* leaves every register outside `P` holding exactly what it held before.
 at all could be handed to `step` and the confinement claim would say nothing.*
 
 Direction: **same proposition** as `SaltWorks.HDL.Exec.step_frame`, with the side
-condition given in the plain form of §1. -/
+condition given in the plain form of §1.
+
+Witness: **EXEMPT** (rule 6, amended 8/12). *No witness — universally quantified. Worth
+recording WHY the binder is not degenerately satisfiable even so: `hin : ins ∈ code`
+forces `code` non-empty, so the vacuous reading (an empty program, about which `h` says
+nothing) cannot arise. That guard is stated two paragraphs above as a correctness point;
+under the amended rule it is also the non-degeneracy argument.* -/
 theorem cert_step_frame {code : List Instr} {P : Partition}
     (h : ∀ ins ∈ code, ∀ rd : Fin 32, writesInstr ins = some rd → rd ∈ P)
     {ins : Instr} (hin : ins ∈ code) (s : St) {r : Fin 32} (hr : r ∉ P) :
@@ -162,7 +182,21 @@ value** — read through the SHARED register file, which is what makes this a th
 program counter** — see the scope limits in this file's header.
 
 Direction: **same proposition** as `SaltWorks.HDL.Exec.execStep_frame_disjoint`, with
-the side condition in plain form. -/
+the side condition in plain form.
+
+Witness: ⚠️ **SATISFIABILITY — NOT WITNESSED IN THIS TIER. THE QUESTION IS STATED, NOT
+ANSWERED** (rule 6, amended 8/12). *This binder CONJOINS two hypotheses over shared
+objects — `hdisj : Disjoint Pcur Pother` and `h`, the writes-within condition on
+`codes[sys.cur.val]` — and **that conjunction is the exact shape that produced the one
+vacuous certificate this tier has already caught** (the `ControlFlow` exit/back split,
+where two step-level constraints on one `st` were contradictory in ℕ). Both are plainly
+satisfiable ALONE. Nothing in this file exhibits a system satisfying BOTH at once:
+`cert_isolation_needs_disjointness` below witnesses the OVERLAPPING case, which is the
+refutation, not an inhabitant of this theorem's binder. **I believe the binder is
+inhabited and I have not proved it, so I am recording the gap rather than asserting the
+kind.** Closing it wants a concrete `codes`/`Pcur`/`Pother`/`sys` with the conclusion
+evaluated — a satisfiability witness of the same form as `cert_one_whole_program_end_to_end`.
+The theorem is sound either way; this is a claim about the DOCSTRING, not the proof.* -/
 theorem cert_task_isolation {N : Nat} (codes : Vector (List Instr) N)
     (Pcur Pother : Partition) (hdisj : Disjoint Pcur Pother) (sys : SysSt N)
     (h : ∀ ins ∈ codes[sys.cur.val], ∀ rd : Fin 32, writesInstr ins = some rd → rd ∈ Pcur)
@@ -187,7 +221,14 @@ hypothesis and the conclusion fails on a program the kernel actually runs.* **A
 verified component whose guarantee cannot fail is not telling you anything, and this
 is the line that shows this one can.**
 
-Direction: **same proposition** as `SaltWorks.HDL.Exec.e4_overlap_refutes`. -/
+Direction: **same proposition** as `SaltWorks.HDL.Exec.e4_overlap_refutes`.
+
+Witness: **NON-DEGENERACY** (rule 6, amended 8/12). *A concrete refuting system, and its
+non-degeneracy is the two VALUES: task A writes `5` and task B writes `9` over it. **Had
+both tasks written the same value the trace would be identical and the refutation would
+prove nothing** — the counterexample would survive while its content evaporated. `5 ≠ 9`
+is what makes the overlap observable, and it is the reason this witness cannot be
+weakened into a degenerate one.* -/
 theorem cert_isolation_needs_disjointness :
     (1 : Fin 32) ∈ PA ∧ (1 : Fin 32) ∈ PB ∧
       (runSys codesE4 initE4 1).getReg 1 = 5 ∧

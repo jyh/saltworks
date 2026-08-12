@@ -207,7 +207,9 @@ started as** — the packet leaves the banyan with its address restored.
 docstring above for why that hypothesis is ours to state and why it is load-bearing.
 
 Direction: **equality**, proved from `SaltWorks.HDL.rotate_full_circle`. Nothing
-traded. -/
+traded.
+
+Witness: **EXEMPT** — universal in `addr` and `k`, no witness. *Its non-degeneracy control is the NEXT declaration, which exhibits a list whose length differs from the stage count and FAILS.* -/
 theorem cert_full_circle {α : Type*} (addr : List α) (k : ℕ) (hk : addr.length = k) :
     afterStages k addr = addr := by
   rw [afterStages_eq_iterate]
@@ -215,12 +217,16 @@ theorem cert_full_circle {α : Type*} (addr : List α) (k : ℕ) (hk : addr.leng
 
 /-- **The premise is load-bearing, in one line.** A 4-bit address does *not* heal in
 3 stages. So `cert_full_circle` without `hk` would be false, and the hypothesis is
-not decoration. -/
+not decoration.
+
+Witness: **NON-DEGENERACY** — and the choice is the point: `[1,2,3,4]` against `afterStages 3`. *A length-3 list would satisfy the premise and prove nothing; the witness is degenerate exactly when `length = stages`, so it is chosen off that diagonal.* -/
 theorem cert_length_premise_is_load_bearing :
     afterStages 3 [1, 2, 3, 4] ≠ ([1, 2, 3, 4] : List ℕ) := by decide
 
 /-- **The full circle at the fabric's own width**: three routing stages restore a
-3-bit destination address. An instance of `cert_full_circle`, not a separate fact. -/
+3-bit destination address. An instance of `cert_full_circle`, not a separate fact.
+
+Witness: **EXEMPT** — universal in `d`, no witness. -/
 theorem cert_address_restored_after_three_stages (d : ℕ) :
     afterStages 3 (addressBits d) = addressBits d :=
   cert_full_circle (addressBits d) 3 rfl
@@ -234,7 +240,9 @@ about lists.
 in general form (`k−1−m`) while the only theorem backing it was pinned at `k = 3`. **A
 prose formula with a free parameter, printed beside a Lean statement with that
 parameter fixed, reads as general and certifies an instance.** This is the general
-statement the prose was always describing.* -/
+statement the prose was always describing.*
+
+Witness: **EXEMPT** — universal, no witness. *`hm : m < l.length` is not vacuous: `cert_stage_reads_original_bit` instantiates it at `m < 3` on a real address.* -/
 theorem cert_head_after_stages {α : Type*} (l : List α) (m : ℕ) (hm : m < l.length) :
     (afterStages m l).head? = l[m]? := by
   rw [afterStages_eq_iterate, rotStage_iterate,
@@ -255,7 +263,9 @@ buys here is the translation from *list index* to *numeric bit*.
 Stated one-directionally (stage `m` ⇒ that bit); the converse is unavailable, see
 the header docstring. Direction: **same proposition** as
 `SaltWorks.HDL.stage_reads_original_bit` with the validity antecedent discharged at
-`v = true`. -/
+`v = true`.
+
+Witness: **EXEMPT** — universal in `d` and `m`. *The binder `m < 3` is inhabited by three distinct stages, so no single degenerate `m` carries the statement.* -/
 theorem cert_stage_reads_original_bit (d : ℕ) (m : ℕ) (hm : m < 3) :
     (afterStages m (addressBits d)).head? = some (d.testBit (2 - m)) := by
   rw [afterStages_eq_iterate, addressBits_eq_addr88, ← hdr88_eq_iterate]
@@ -294,7 +304,9 @@ nothing whatever about the length of the output, so on its own it does not rule 
 cycles past the eighth.* **So the claim is not asserted in prose: it is proved.**
 `cert_payload_delivery_length` supplies the missing length and
 `cert_payload_delivery_loses_nothing` recovers the landed list equality from the two
-together — see `cert_payload_delivery_recovers_the_landed_statement`. -/
+together — see `cert_payload_delivery_recovers_the_landed_statement`.
+
+Witness: **EXEMPT** — universal, no witness. *`hne : d0 ≠ d1` is the interesting hypothesis and it is NOT vacuous — the two-destination case is the whole content; `d0 = d1` is excluded because the switch's behaviour there is a different claim, not because it is impossible.* -/
 theorem cert_payload_delivery (d0 d1 : ℕ) (hd0 : d0 < 8) (hd1 : d1 < 8) (hne : d0 ≠ d1)
     (p0 p1 : List Bool) (hp0 : p0.length = 8) (hp1 : p1.length = 8)
     (u : ℕ) (hu : u < 8) :
@@ -311,7 +323,9 @@ theorem cert_payload_delivery (d0 d1 : ℕ) (hd0 : d0 < 8) (hd1 : d1 < 8) (hne :
 
 /-- The payload window is exactly eight cycles long. Worth stating on its own: the
 certificate above is silent about cycles past the eighth, and **this is what rules
-out there being any**. -/
+out there being any**.
+
+Witness: **EXEMPT** — universal, no witness. -/
 theorem cert_payload_delivery_length (d0 d1 : ℕ) (hd0 : d0 < 8) (hd1 : d1 < 8)
     (hne : d0 ≠ d1) (p0 p1 : List Bool) (hp0 : p0.length = 8) (hp1 : p1.length = 8) :
     ((switchRun d0 d1 p0 p1).drop 6).length = 8 := by
@@ -325,7 +339,9 @@ the interleaving. So reading the landed theorem one cycle at a time loses nothin
 and that sentence is now a theorem rather than a docstring's promise.
 
 *Stated generically: it mentions no landed theorem and no fabric, so it is a fact
-about the RESTATEMENT rather than a re-citation of the original.* -/
+about the RESTATEMENT rather than a re-citation of the original.*
+
+Witness: **EXEMPT** — universal, no witness. ⚠️ *Its hypothesis `hcell` is strong (a full pointwise description), so the honest question is whether anything satisfies it. **It does: the next declaration applies this lemma to a real `switchRun` output.** Naming an inhabitant is weaker than proving the binder inhabited in general, and I am recording which of the two this is.* -/
 theorem cert_payload_delivery_loses_nothing (out : List (List Bool)) (a b : List Bool)
     (ha : a.length = 8) (hb : b.length = 8) (hout : out.length = 8)
     (hcell : ∀ u, u < 8 → out.getD u [] = [a.getD u false, b.getD u false]) :
@@ -342,7 +358,9 @@ theorem cert_payload_delivery_loses_nothing (out : List (List Bool)) (a b : List
 
 /-- **The recovery, instantiated.** The per-cycle certificate, read at all eight
 cycles, gives back exactly `L1Payload.l1_full_load_payload_delivery`'s own
-statement — proved *from the certificate*, not by citing the theorem again. -/
+statement — proved *from the certificate*, not by citing the theorem again.
+
+Witness: **EXEMPT** — universal, no witness. *This is the declaration that inhabits the previous one's `hcell`, and it is why the pointwise restatement did not silently trade away the length.* -/
 theorem cert_payload_delivery_recovers_the_landed_statement (d0 d1 : ℕ) (hd0 : d0 < 8)
     (hd1 : d1 < 8) (hne : d0 ≠ d1) (p0 p1 : List Bool) (hp0 : p0.length = 8)
     (hp1 : p1.length = 8) :

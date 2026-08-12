@@ -121,7 +121,9 @@ open SaltWorks.ISA SaltWorks.CompileS SaltWorks.WhileScheme SaltWorks.IteScheme
 /-- ⭐⭐ **THE EXIT BRANCH LANDS PAST THE LOOP, AT EVERY BODY SIZE.** From the branch's
 own address, taking it puts the `pc` exactly one instruction past the backward branch.
 
-Direction: **same proposition** as `SaltWorks.WhileScheme.exit_branch_lands`. -/
+Direction: **same proposition** as `SaltWorks.WhileScheme.exit_branch_lands`.
+
+Witness: **EXEMPT** — universal in `n_b` and `q`, no witness. ⚠️ *This declaration and the next exist as a SPLIT PAIR because a single earlier certificate conjoined both `pc` constraints on one `st` and was VACUOUS — contradictory in ℕ. Each half is satisfiable alone, which is what the split bought; `cert_while_scheme_runs` exhibits configurations where both fire in sequence on a real run.* -/
 theorem cert_exit_branch_lands {pc : BitVec 32} (n_b q : Nat)
     (hb : 2 * (n_b + 2) ≤ 2047) (hq : pc.toNat = 4 * q)
     (hp : 4 * (q + n_b + 2) < 2 ^ 32) :
@@ -134,7 +136,9 @@ PAIR OF BLOCK SIZES — AND IT GETS THERE BY WRAPPING.** `2^32 − 4·(n_c+n_b+1
 
 *That is why a backward branch needs a proof and not an inspection.*
 
-Direction: **same proposition** as `SaltWorks.WhileScheme.back_branch_lands`. -/
+Direction: **same proposition** as `SaltWorks.WhileScheme.back_branch_lands`.
+
+Witness: **EXEMPT** — universal, no witness. *See the split note on `cert_exit_branch_lands`: these two must not be re-conjoined over one machine state.* -/
 theorem cert_back_branch_lands {pc : BitVec 32} (n_c n_b q : Nat)
     (hk : 2 * (n_c + n_b + 1) ≤ 2048) (hq : pc.toNat = 4 * (q + n_c + n_b + 1))
     (hp : 4 * (q + n_c + n_b + 1) < 2 ^ 32) :
@@ -154,7 +158,9 @@ TRUE**: it built green, audited clean, and said nothing.* **The two branches sit
 DIFFERENT addresses in the image — that is what makes them a loop — so no single `st`
 can satisfy both hypotheses.**
 
-Direction: **same proposition** as `step_exit_taken` / `step_back_taken` respectively. -/
+Direction: **same proposition** as `step_exit_taken` / `step_back_taken` respectively.
+
+Witness: **EXEMPT** — universal, no witness. *The machine-level half of the split pair; `hz : st.get rd = 0` is the taken-branch case and is inhabited by every run in `cert_while_scheme_runs`.* -/
 theorem cert_exit_branch_lands_at_the_machine {st : St} {rd : Fin 32} (n_b q : Nat)
     (hz : st.get rd = 0) (hb : 2 * (n_b + 2) ≤ 2047) (hq : st.pc.toNat = 4 * q)
     (hp : 4 * (q + n_b + 2) < 2 ^ 32) :
@@ -162,7 +168,9 @@ theorem cert_exit_branch_lands_at_the_machine {st : St} {rd : Fin 32} (n_b q : N
   step_exit_taken n_b q hz hb hq hp
 
 /-- …and the backward branch, **from its own address** at block-relative index
-`n_c+n_b+1`. Unconditional (`BEQ x0 x0`), so it needs no guard at all. -/
+`n_c+n_b+1`. Unconditional (`BEQ x0 x0`), so it needs no guard at all.
+
+Witness: **EXEMPT** — universal, no witness. *`.BEQ 0 0` is unconditional, so this half has no register hypothesis to be vacuous about.* -/
 theorem cert_back_branch_lands_at_the_machine {st : St} (n_c n_b q : Nat)
     (hk : 2 * (n_c + n_b + 1) ≤ 2048)
     (hq : st.pc.toNat = 4 * (q + n_c + n_b + 1))
@@ -182,7 +190,9 @@ wrapped **negative** — an exit that re-enters.
 require, and one past it the sign bit flips and the proof has no case.*
 
 Direction: **the conjunction of** `whileBack_boundary_is_tight` **and**
-`whileExit_boundary_is_tight`. -/
+`whileExit_boundary_is_tight`.
+
+Witness: **NON-DEGENERACY** — four boundary values, `1023`/`1024` and `1021`/`1022`. *Interior values would pass or fail together and show nothing; tightness is a claim about the STEP, so the witnesses must be adjacent pairs straddling it — and both directions are exhibited because they differ.* -/
 theorem cert_the_bound_is_tight_on_both_sides :
     (whileFits 1023 0 = true ∧ (whileBack 1023 0).msb = true
       ∧ whileFits 1024 0 = false ∧ (whileBack 1024 0).msb = false)
@@ -193,7 +203,9 @@ theorem cert_the_bound_is_tight_on_both_sides :
 /-- ⭐ **AND THE ASYMMETRY IS REAL, NOT A ROUNDING OF ONE RULE**: at a size the BACKWARD
 direction still accepts, the FORWARD direction with the same magnitude is refused.
 
-Direction: **same proposition** as `the_two_directions_differ_by_exactly_one`. -/
+Direction: **same proposition** as `the_two_directions_differ_by_exactly_one`.
+
+Witness: **NON-DEGENERACY** — the arithmetic `2048` vs `2046` beside the two `whileFits` verdicts. *The content is an asymmetry, so a witness that treated the directions alike would be degenerate by construction.* -/
 theorem cert_the_two_directions_differ_by_one :
     (2 * (1023 + 0 + 1) = 2048 ∧ 2 * (1021 + 2) = 2046)
   ∧ whileFits 1023 0 = true ∧ whileFits 1 1022 = false :=
@@ -207,7 +219,9 @@ there** — the last clause is what distinguishes a loop that finished from one 
 running.
 
 ⚠️ *Finite: this is non-vacuity evidence, not a universal claim. The universal claims
-are §1.* Direction: **same proposition** as `while_certificates`. -/
+are §1.* Direction: **same proposition** as `while_certificates`.
+
+Witness: **SATISFIABILITY** — six concrete `(n_c, n_b)` configurations, executed. *Non-degenerate by spread rather than by any single case: `(1,1)` through `(3,1)` and `(2,3)` vary both parameters independently, so no one configuration carries the result.* -/
 theorem cert_while_scheme_runs :
     ([(1,1), (1,2), (1,3), (2,1), (3,1), (2,3)] : List (Nat × Nat)).all (fun cfg =>
       let n_c := cfg.1
@@ -225,7 +239,9 @@ whole conditional.
 
 ⛔ ***AND THIS IS THE ROW THE SCOPE WARNING IS ABOUT: these programs are hand-built
 from the scheme, NOT emitted by the compiler. `compileS` returns `none` on every
-`ite`.*** Direction: **same proposition** as `ite_certificates`. -/
+`ite`.*** Direction: **same proposition** as `ite_certificates`.
+
+Witness: **SATISFIABILITY** — four concrete configurations, executed. ⚠️ *This scheme is PROVED AND NOT WIRED (see the header): the witness shows the offsets run, NOT that any emitter produces them.* -/
 theorem cert_ite_scheme_runs :
     ([(1,3), (2,2), (3,1), (2,4)] : List (Nat × Nat)).all (fun cfg =>
       let ns := cfg.1
@@ -253,7 +269,9 @@ is correct — and the machine is still running.
 🔑 ***Only the HALT check separates them.*** *This is why "the loop produced the right
 value" is not a test of a loop scheme, and why `whileHalts` is a clause of the bar.*
 
-Direction: **same proposition** as `exitShort_never_terminates`. -/
+Direction: **same proposition** as `exitShort_never_terminates`.
+
+Witness: **NON-DEGENERACY** — a mutant offset, and the check is a HALT check rather than a value check. *A diverging machine passes through the correct value, so a value comparison here would be an artifact of the fuel budget; only non-termination is fuel-robust.* -/
 theorem cert_a_wrong_backward_offset_never_terminates :
     let img := (.ADDI 2 0 3) :: whileBlock (condBlk 2) (BitVec.ofNat 12 (2 * (3 + 1)))
                  (whileBack 2 3) (bodyBlk 3)
@@ -268,7 +286,9 @@ has been written by code that should never have run.
 *A mutant that leaves the observed value correct is the only kind that tests whether
 the check observes the right thing at all.*
 
-Direction: **same proposition** as `shortJump_falls_into_the_else_tail`. -/
+Direction: **same proposition** as `shortJump_falls_into_the_else_tail`.
+
+Witness: **NON-DEGENERACY** — a mutant whose damage is INVISIBLE in the register file. *The witness exists precisely because the wrong offset still yields the right value: a fixture that could not survive the mutation would hide what this one exhibits.* -/
 theorem cert_a_wrong_ite_offset_keeps_the_right_value :
     let s := run (iteBlock 1 (iteThenSkip 1) 6 (thenBlk 1) (elseBlk 3)) St.init
     (s.get 2 == BitVec.ofNat 32 100, s.get 3 == BitVec.ofNat 32 202) = (true, true) :=

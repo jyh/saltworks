@@ -106,14 +106,18 @@ instruction you started with**.
 consistency — a necessary condition for calling the encoding real, and not conformance
 to the RISC-V specification. For evidence about that, see §2.*
 
-Direction: **same proposition** as `SaltWorks.ISA.decode_encode`. -/
+Direction: **same proposition** as `SaltWorks.ISA.decode_encode`.
+
+Witness: **EXEMPT** — universal in `i`, no witness. -/
 theorem cert_encode_decode_round_trip (i : Instr) : decode (encode i) = some i :=
   decode_encode i
 
 /-- **NO TWO INSTRUCTIONS SHARE AN ENCODING.** If two instructions produce the same
 word, they were the same instruction.
 
-Direction: **same proposition** as `SaltWorks.ISA.encode_injective`. -/
+Direction: **same proposition** as `SaltWorks.ISA.encode_injective`.
+
+Witness: **EXEMPT** — universal, no witness. -/
 theorem cert_no_two_instructions_share_an_encoding {i j : Instr}
     (h : encode i = encode j) : i = j :=
   encode_injective h
@@ -124,7 +128,9 @@ theorem cert_no_two_instructions_share_an_encoding {i j : Instr}
 *This is the bridge that makes the abstract instruction type an account of a bit-level
 machine rather than a parallel story about it.*
 
-Direction: **same proposition** as `SaltWorks.ISA.stepT_encode`. -/
+Direction: **same proposition** as `SaltWorks.ISA.stepT_encode`.
+
+Witness: **EXEMPT** — universal in `s` and `i`, no witness. -/
 theorem cert_the_bits_and_the_instruction_agree (s : St) (i : Instr) :
     stepT s (encode i) = step s i :=
   stepT_encode s i
@@ -141,7 +147,9 @@ instruction was expected to touch, so a clobber cannot hide.
 *Untrusted offline generator; disagreements get published, never resolved in the
 witness's favour by default. 120 is finite.*
 
-Direction: **same proposition** as `SaltWorks.ISA.spike_agrees`. -/
+Direction: **same proposition** as `SaltWorks.ISA.spike_agrees`.
+
+Witness: **SATISFIABILITY** — a fixed 120-vector suite, executed against an external simulator. ⚠️ ***Its non-degeneracy is NOT self-evident and is NOT claimed here: it is discharged by `cert_the_witness_suite_is_not_vacuous` below, which proves every vector decodes and the suite has the size claimed. An all-pass over a suite that decoded to nothing would read identically.*** -/
 theorem cert_an_outside_simulator_agrees : spikeSuite.all Vec.checkFull = true :=
   spike_agrees
 
@@ -149,7 +157,9 @@ theorem cert_an_outside_simulator_agrees : spikeSuite.all Vec.checkFull = true :
 agreement above is not the agreement of a decoder that returns `none` for everything —
 and the suite really is 120 vectors.
 
-Direction: **the conjunction of** `suite_words_decode` **and** `spike_suite_size`. -/
+Direction: **the conjunction of** `suite_words_decode` **and** `spike_suite_size`.
+
+Witness: **NON-DEGENERACY** — this declaration IS the control for the one above. *It exists because `all` over an empty or undecodable list is `true`, so the agreement result needed a companion that could fail.* -/
 theorem cert_the_witness_suite_is_not_vacuous :
     spikeSuite.all (fun v => (decode v.word).isSome) = true
   ∧ spikeSuite.length = 120 :=
@@ -158,7 +168,9 @@ theorem cert_the_witness_suite_is_not_vacuous :
 /-- **WORDS THAT ARE NOT INSTRUCTIONS ARE REFUSED.** Forty words that both witnesses
 reject, and this decoder rejects them too.
 
-Direction: **same proposition** as `SaltWorks.ISA.spike_illegal_rejected`. -/
+Direction: **same proposition** as `SaltWorks.ISA.spike_illegal_rejected`.
+
+Witness: **NON-DEGENERACY** — words chosen to be rejected. *The pairing with the decoding suite is what makes both meaningful: a decoder that accepted everything would pass one and fail this, and one that accepted nothing the reverse.* -/
 theorem cert_illegal_words_are_rejected :
     spikeIllegal.all (fun w => (decode w).isNone) = true :=
   spike_illegal_rejected
@@ -178,7 +190,9 @@ theorem went false, and the build broke on the day — exactly as predicted on
 2026-08-07. **A caveat that refuses to outlive its own subject, without anyone
 remembering to check.***
 
-Direction: **same proposition** as `SaltWorks.ISA.slice_a_excluded_rejected`. -/
+Direction: **same proposition** as `SaltWorks.ISA.slice_a_excluded_rejected`.
+
+Witness: **NON-DEGENERACY** — 20 encodings that a real RV32I simulator EXECUTES and this decoder refuses. *Degenerate alternatives — malformed words, or opcodes no machine implements — would be rejected for the wrong reason and would not measure the gap this cert names.* -/
 theorem cert_what_this_machine_does_not_implement :
     sliceAExcluded.all (fun w => (decode w).isNone) = true :=
   slice_a_excluded_rejected
@@ -198,7 +212,9 @@ nobody can run.**
 
 ⚠️ *It is ONE program. Non-vacuity, not generality.*
 
-Direction: **same proposition** as `SaltWorks.CompileS.witness_chain_discharged`. -/
+Direction: **same proposition** as `SaltWorks.CompileS.witness_chain_discharged`.
+
+Witness: **SATISFIABILITY** — a concrete program compiled, run, and its register READ (`= 12`). *Non-degenerate because the value is checked: a witness that only proved `compileS ... = some c` would show the pipeline accepts input, not that it computes.* -/
 theorem cert_one_whole_program_end_to_end :
     ∃ c, compileS regCanonical 16 ctx1 witnessAssign = some c ∧ c.length = 4
       ∧ (run c st7).get 1 = 12 :=

@@ -179,6 +179,38 @@ encodeOK Γ reg σ st  ≡  ∀ i : Fin poolSize, i.val < Γ.length → st.get (
      compiler assigned to it ends up holding that variable's value"
 ```
 
+## ⚖️ WITNESS KINDS — rule 6 as amended at council 2026-08-12 (`b1c7677`)
+
+*Rule 6 now asks each certificate to DECLARE what its witness proves, because a
+satisfiability witness and a non-degeneracy witness are different controls: a binder
+inhabited only by degenerate points survives "instantiate and evaluate" untouched.*
+**Every declaration below carries a `Witness:` line. Counts, measured at this landing:**
+
+```
+EXEMPT                                   20    no witness — universal statements
+NON-DEGENERACY                           13    a witness chosen so a degenerate one
+                                               would prove nothing
+SATISFIABILITY                            4    a binder exhibited as inhabited
+SATISFIABILITY — NOT WITNESSED, QUESTION  1    cert_task_isolation (Executive.lean)
+                                        ───
+                                         38
+```
+⚠️ **THE ONE OPEN ROW IS THE POINT OF THE EXERCISE, NOT AN OVERSIGHT.** *`cert_task_isolation`
+CONJOINS `Disjoint Pcur Pother` with the writes-within condition over shared objects —
+the same shape as the one vacuous certificate this tier has already caught (the
+`ControlFlow` exit/back split, contradictory in ℕ). Both hypotheses are plainly satisfiable
+ALONE; nothing here exhibits a system satisfying BOTH, and the neighbouring
+`cert_isolation_needs_disjointness` witnesses the OVERLAPPING case, which is the refutation
+rather than an inhabitant.* **The theorem is sound either way — this is a claim about the
+docstring, not the proof.**
+
+🔑 **WHAT CLOSING IT REQUIRES, so the next hand does not have to re-derive the cost:** an
+ADDITIVE `example` exhibiting two tasks with REAL WRITES and DISJOINT partitions, with the
+conclusion evaluated. ⛔ ***It must not be closed with empty partitions and empty code:
+that satisfies the binder and proves nothing, and a fixture inert enough to be safe is
+exactly what hides the defect.*** *That is fixture design, not instantiation — which is why
+it was declared open rather than answered.*
+
 ## ✅ ROOTED — and ⛔ **THE GREP THAT FALSE-PASSED IT**
 
 `SaltWorks.lean:8` imports `SaltWorks.Certs.All` (maestro, `5afc305`, 2026-08-11), so
