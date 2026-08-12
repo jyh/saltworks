@@ -19,7 +19,14 @@ cells vs 47,438 filler). If the window is missed: ③ ships next shuttle, nothin
   kernel outOfRange ≥ 32 semantics from M1). ⭐ PRICE DROP (silicon 18:52, pre-hardening):
   BOTH organs already exist as synthesised netlists from the untaped RISC-V work — dmem8
   (673 cells / 256 flops = the full 8×32 bit array) and memif (182 cells, combinational).
-  Neither is in the submitted die. D1 therefore opens as VERIFY-AND-ADOPT for the ARRAY — RE-SCOPED at silicon's
+  Neither is in the submitted die. D1 SPLITS IN THREE [math⊕silicon synthesis, 19:10 — "the RTL" was ambiguous
+  and the ruled module is UNWRITTEN]: **D1a — THE STORAGE ARRAY** (the shelf dmem8
+  netlist, 673c/256f): verify-and-adopt as pure storage, exactly as re-scoped below.
+  **D1b — dmem_addr8 ITSELF**: the module the memory-design §2 commissions stage ③ to
+  AUTHOR — it does not exist yet; the two trap bits live in its MASK, not the array;
+  authored to the ruled semantics, never reverse-engineered from the shelf. **D1t — THE
+  ADDRESS CHECKER** as minted below. Verify-and-adopt applies to D1a ONLY. Original
+  re-scope follows — RE-SCOPED at silicon's
   refuter finding (18:55, against the clause its own price-drop created): dmem8's address
   port is 3 BITS and it carries ZERO trap logic — there is nothing to audit against the
   trap semantics, and that is the ARCHITECTURE, not a defect. The organ is PURE STORAGE
