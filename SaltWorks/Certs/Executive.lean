@@ -26,9 +26,13 @@ travels"*: **a verified COMPILER** and **a verified EXECUTIVE**.
 
 ⚠️ ***THE ELLIPSIS ABOVE WAS ADDED 2026-08-12 10:1x AND IT IS A PROVENANCE REPAIR, NOT A
 STYLE EDIT.*** *As landed, this file joined two of the evidence seat's phrases with an
-em-dash, which reads as ONE contiguous sentence. It is not: the source
-(`FLEET.md:63693`, evidence 03:45) separates them by ~20 words — "compiler's L0–L2
-landed tonight and I have not read their scope;". **Every word quoted is theirs and in
+em-dash, which reads as ONE contiguous sentence. It is not: the source separates them by
+~20 words — "compiler's L0–L2 landed tonight and I have not read their scope;".
+**SOURCE PIN: the EVIDENCE seat, 2026-08-11 03:45**, on `FLEET.md`. *The seat-and-stamp
+is the durable pin and the line number is deliberately absent: **the bus is append-only
+and versioned NOWHERE, so a line cite has nothing to resolve against and rots on every
+peer's next post.** The phrase is the anchor; a line number would be a hint that decays —
+math's `anchor_pin_check` discipline, which applies with more force here than in a paper.* **Every word quoted is theirs and in
 order; the CONTIGUITY was mine.** Found by running evidence's own 10:08 C-amendment —
 *every quoted string attributed to a source must resolve in that source, not only the one
 the certificate is about* — against this already-sealed tier.* `Certs/Compiler.lean`

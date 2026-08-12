@@ -94,7 +94,9 @@ docstring exactly what, if anything, was traded for readability.
   (*"a verified COMPILER" and "a verified EXECUTIVE" … their owners should state what
   those words cover before the sentence travels*). ⚠️ *The ellipsis is a provenance
   repair (2026-08-12): as landed, an em-dash here implied contiguity across ~20 elided
-  words of the source (`FLEET.md:63693`). Second of two sites; see `Certs/Executive.lean`.*
+  words. **SOURCE PIN: the EVIDENCE seat, 2026-08-11 03:45**, on `FLEET.md` — seat and
+  stamp, not a line number, because the bus is append-only and versioned nowhere. Second
+  of two sites; the full note is in `Certs/Executive.lean`.*
   - `cert_side_condition_meaning` — ⭐ an **`iff`**: the decidable `writesWithin` test
     and its plain-English reading are proved the same claim, so the vocabulary
     translation is kernel-checked rather than asserted.
