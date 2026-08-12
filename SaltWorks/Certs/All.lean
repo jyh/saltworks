@@ -91,8 +91,10 @@ docstring exactly what, if anything, was traded for readability.
 
 * `SaltWorks/Certs/Executive.lean` — **THE EXECUTIVE'S ISOLATION CLAIMS**, four
   certificates, answering the second half of the evidence seat's 03:45 pillar flag
-  (*"a verified COMPILER" and "a verified EXECUTIVE" — their owners should state what
-  those words cover before the sentence travels*).
+  (*"a verified COMPILER" and "a verified EXECUTIVE" … their owners should state what
+  those words cover before the sentence travels*). ⚠️ *The ellipsis is a provenance
+  repair (2026-08-12): as landed, an em-dash here implied contiguity across ~20 elided
+  words of the source (`FLEET.md:63693`). Second of two sites; see `Certs/Executive.lean`.*
   - `cert_side_condition_meaning` — ⭐ an **`iff`**: the decidable `writesWithin` test
     and its plain-English reading are proved the same claim, so the vocabulary
     translation is kernel-checked rather than asserted.

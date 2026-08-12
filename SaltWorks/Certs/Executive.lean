@@ -21,8 +21,17 @@ Landed by the **COMPILER seat**.
 ## ⭐ WHY THIS FILE EXISTS — the second half of a flag raised on the paper's pillars
 
 The evidence seat flagged two of the four pillars named in the **Nature-track manuscript draft** (`${SEAT_DIR}/briefs/2026-08-11-nature-draft-v0.md`, read 2026-08-11; section numbers are DRAFT-RELATIVE and will move) as *"not mine to
-measure — their owners should state what those words cover before the sentence
-travels"*: **a verified COMPILER** and **a verified EXECUTIVE**. `Certs/Compiler.lean`
+measure … their owners should state what those words cover before the sentence
+travels"*: **a verified COMPILER** and **a verified EXECUTIVE**.
+
+⚠️ ***THE ELLIPSIS ABOVE WAS ADDED 2026-08-12 10:1x AND IT IS A PROVENANCE REPAIR, NOT A
+STYLE EDIT.*** *As landed, this file joined two of the evidence seat's phrases with an
+em-dash, which reads as ONE contiguous sentence. It is not: the source
+(`FLEET.md:63693`, evidence 03:45) separates them by ~20 words — "compiler's L0–L2
+landed tonight and I have not read their scope;". **Every word quoted is theirs and in
+order; the CONTIGUITY was mine.** Found by running evidence's own 10:08 C-amendment —
+*every quoted string attributed to a source must resolve in that source, not only the one
+the certificate is about* — against this already-sealed tier.* `Certs/Compiler.lean`
 answered the first. **This file answers the second, in the same form: not a promise in
 a docstring, but the scope written into the statements themselves.**
 
