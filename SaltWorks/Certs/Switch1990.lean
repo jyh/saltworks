@@ -10,6 +10,7 @@ import SaltWorks.HDL.PayloadL1
 # COMPREHENSIBILITY CERTIFICATE — the 1990 switching network
 
 Campaign: `docs/cert-layer-design-0811.md` (the fifth deliverable).
+Landed by the **COMPILER seat**.
 Source of the original claim: Marcus & Hickey, ISSCC 1990, WPM 2.4 —
 **words-only citation, never the figures** (the standing 8/7 firewall).
 

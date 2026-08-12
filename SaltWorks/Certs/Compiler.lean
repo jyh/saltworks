@@ -9,6 +9,7 @@ import SaltWorks.HDL.WhileSim
 # COMPREHENSIBILITY CERTIFICATE — the compiler's simulation theorems
 
 Campaign: `docs/cert-layer-design-0811.md` (the fifth deliverable).
+Landed by the **COMPILER seat**.
 
 | certificate | proved from | in |
 | --- | --- | --- |

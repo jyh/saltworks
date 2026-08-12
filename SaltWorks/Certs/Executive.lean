@@ -9,6 +9,7 @@ import SaltWorks.HDL.ExecutiveX1
 # COMPREHENSIBILITY CERTIFICATE — the multitasking executive's isolation claims
 
 Campaign: `docs/cert-layer-design-0811.md` (the fifth deliverable).
+Landed by the **COMPILER seat**.
 
 | certificate | proved from | in |
 | --- | --- | --- |

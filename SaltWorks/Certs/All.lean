@@ -14,6 +14,13 @@ Campaign: `docs/cert-layer-design-0811.md`, opened at the Captain's word 2026-08
 as the workflow's **fifth deliverable** (implementation · specification · proof ·
 tests · **certificates**). The salt-side twin is `Salt/Certs/All.lean`.
 
+⚠️ **EVERY FILE IN THIS DIRECTORY RECORDS THE SEAT THAT LANDED IT, in its own header.**
+*The campaign has four hands landing into two repos under one campaign name, and the
+standard file header (`Authors: Jason Hickey, Claude`) does not distinguish them — so
+authorship was being inferred from memory of who announced what, and that key failed
+six times on 2026-08-11 alone. A one-line seat stamp costs nothing and is the only
+copy that survives the announcement.*
+
 A certificate file restates one paper-cited headline claim in simplified vocabulary
 and carries a **kernel proof linking the restatement to the landed theorem** — the
 proof is what separates a certificate from documentation. Each file declares its
