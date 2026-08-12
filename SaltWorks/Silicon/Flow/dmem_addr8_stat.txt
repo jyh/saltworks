@@ -1,0 +1,26 @@
+
+7. Printing statistics.
+
+=== dmem_addr8 ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+       18        - wires
+       51        - wire bits
+        8        - public wires
+       41        - public wire bits
+        8        - ports
+       41        - port bits
+       14   85.082 cells
+        2   12.512   sky130_fd_sc_hd__lpflow_inputiso1p_1
+        1    3.754   sky130_fd_sc_hd__nand2_1
+        1    5.005   sky130_fd_sc_hd__nand3_1
+        1    6.256   sky130_fd_sc_hd__nand4_1
+        1    5.005   sky130_fd_sc_hd__nor3_1
+        7   43.792   sky130_fd_sc_hd__nor4_1
+        1    8.758   sky130_fd_sc_hd__o31a_1
+
+   Chip area for module '\dmem_addr8': 85.081600
+     of which used for sequential elements: 0.000000 (0.00%)
+
