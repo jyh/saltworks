@@ -219,7 +219,7 @@ theorem cert_full_circle {α : Type*} (addr : List α) (k : ℕ) (hk : addr.leng
 3 stages. So `cert_full_circle` without `hk` would be false, and the hypothesis is
 not decoration.
 
-Witness: **NON-DEGENERACY** — and the choice is the point: `[1,2,3,4]` against `afterStages 3`. *A length-3 list would satisfy the premise and prove nothing; the witness is degenerate exactly when `length = stages`, so it is chosen off that diagonal.* -/
+Witness: **NON-DEGENERACY** — and the choice is the point: `[1,2,3,4]` against `afterStages 3`. ⚠️ ***CORRECTED 10:35 AFTER KERNEL MEASUREMENT — my first version of this line said a length-3 list "would satisfy the premise and prove nothing", and that is WRONG IN THE SAFE-LOOKING DIRECTION.*** *Measured: `afterStages 3 [1,2,3] = [1,2,3]` (`decide`, in this seat's scratch). So at `length = stages` the inequality this cert asserts is **FALSE**, and a degenerate witness is not uninformative — **it is UNPROVABLE.** The truth is stronger than what I wrote, which is exactly why I had not checked it. The witness must sit off the `length = stages` diagonal, and `[1,2,3,4]` does.* -/
 theorem cert_length_premise_is_load_bearing :
     afterStages 3 [1, 2, 3, 4] ≠ ([1, 2, 3, 4] : List ℕ) := by decide
 
