@@ -132,8 +132,10 @@ if [ "$SOURCED" = 1 ]; then
   echo '  CHILD     : sh -c -- what every monitor and script in this fleet gets'
 else
   echo '  HERE      : this script own context (EXECUTED, not sourced)'
-  echo '  WARNING: BOTH COLUMNS ARE CHILD CONTEXTS, so DISAGREE CANNOT FIRE.'
-  echo '           To learn where your own shell differs, run:'
+  echo '  WARNING: BOTH COLUMNS WOULD BE CHILD CONTEXTS, so the comparison is'
+  echo '           STRUCTURALLY DEAD. HERE prints n/a and every row is marked'
+  echo '           NOT-CMP -- none of them is a clean result, because none of'
+  echo '           them was compared. To measure your own shell, run:'
   echo '             . tools/env_probe.sh'
 fi
 echo
@@ -166,6 +168,19 @@ while IFS='|' read -r tok what cmd; do
   [ "$c_rc" -eq 0 ] && c=ok || c=FAIL
   [ "$tok" = 'grep -E' ] && CTL_CHILD=$c
   flag=''
+  if [ "$SOURCED" != 1 ]; then
+    # ⛔ EXECUTED, NOT SOURCED: both columns are CHILD contexts, so the
+    # comparison is STRUCTURALLY DEAD and every row would print "ok ok" with an
+    # empty flag -- which reads as MEASURED AND CLEAN. Evidence hit exactly this
+    # (8/12 10:47): ran it the natural way, saw their own gitignore case report
+    # `ok ok`, no flag. The header said to source it and they read past it.
+    # A SILENT SKIP READS EXACTLY LIKE A PASS -- my own D1t S-line law, which I
+    # built into that instrument and not into this one. So the HERE column
+    # refuses to print a value it did not measure, and EVERY ROW carries the
+    # refusal, not just a header line a reader can skip.
+    h='n/a'
+    flag='NOT-CMP'
+  fi
   if [ "$SOURCED" = 1 ]; then
     if [ "$h_rc" != "$c_rc" ] && [ "$h_out" != "$c_out" ]; then flag='DISAGREE*'
     elif [ "$h_rc" != "$c_rc" ];                              then flag='DISAGREE'
@@ -196,8 +211,9 @@ elif [ "$SOURCED" = 1 ] && [ "$DISAGREE" -gt 0 ]; then
 elif [ "$SOURCED" = 1 ]; then
   echo '  no disagreements -- your shell and a child script agree on every token.'
 else
-  echo '  (executed, not sourced: the CHILD column is the answer for scripts.'
-  echo '   Source this file to find out where your own shell disagrees.)'
+  echo '  NOTHING WAS COMPARED. The CHILD column is a real measurement and is'
+  echo '  the answer for scripts; the HERE column and every flag read NOT-CMP'
+  echo '  because this was executed, not sourced. Run:  . tools/env_probe.sh'
 fi
 echo '  scope: THIS machine, THIS PATH, right now. Not a claim about Linux CI,'
 echo '         another seat, or this box after a PATH change.'
