@@ -5,6 +5,7 @@ Authors: Jason Hickey, Claude
 -/
 import SaltWorks.Certs.Switch1990
 import SaltWorks.Certs.Compiler
+import SaltWorks.Certs.Executive
 
 /-!
 # `SaltWorks/Certs/` — the comprehensibility-certificate layer, roll-call
@@ -66,11 +67,28 @@ docstring exactly what, if anything, was traded for readability.
     restated what was proved would leave the most important fact about this compiler —
     that it refuses half of control flow — visible nowhere.*
 
-## OWED — 4 of the target list's ≈6 rows remain (2 landed above)
+* `SaltWorks/Certs/Executive.lean` — **THE EXECUTIVE'S ISOLATION CLAIMS**, four
+  certificates, answering the second half of the evidence seat's 03:45 pillar flag
+  (*"a verified COMPILER" and "a verified EXECUTIVE" — their owners should state what
+  those words cover before the sentence travels*).
+  - `cert_side_condition_meaning` — ⭐ an **`iff`**: the decidable `writesWithin` test
+    and its plain-English reading are proved the same claim, so the vocabulary
+    translation is kernel-checked rather than asserted.
+  - `cert_step_frame` · `cert_task_isolation` — a task's instruction cannot move a
+    register outside its own set; disjoint tasks cannot disturb each other. **Read
+    through the SHARED register file**, which is what makes it a theorem rather than a
+    fact about the type.
+  - `cert_isolation_needs_disjointness` — ⛔ delete the disjointness hypothesis and
+    isolation is FALSE, with a kernel-executed witness (`5` becomes `9`).
+  ⚠️ **Its scope limits are the point: REGISTERS ONLY** (nothing about memory, the
+  trap flag, or `pc`), **ONE STEP**, partitions **given not derived**, and **no
+  liveness**. *Since M2 the machine has real load/store, so memory isolation is not
+  merely unproved here — it is not addressed.*
+
+## OWED — 3 of the target list's ≈6 rows remain (3 landed above)
 
 `the while/ite scheme correctness pair` · `decode_encode` (now unblocked — M2 landed
-at `acd3982`) · `witness_chain_discharged` · `step_frame/writesInstr` (the executive's
-isolation claims, plain form).
+at `acd3982`) · `witness_chain_discharged`.
 
 ⚠️ **THE TRAP FOR EVERY REMAINING ROW IN THIS DIRECTORY, and it is on the DOCSTRING
 surface only.** Iron rule 3 makes the Lean side mechanical — a certificate is *proved
@@ -120,3 +138,8 @@ almost the same thing.)*
 #audit_axioms SaltWorks.Certs.cert_compileS_simulation
 #audit_axioms SaltWorks.Certs.cert_compileS_simulation_with_loops
 #audit_axioms SaltWorks.Certs.cert_the_fragment_boundary
+
+#audit_axioms SaltWorks.Certs.cert_side_condition_meaning
+#audit_axioms SaltWorks.Certs.cert_step_frame
+#audit_axioms SaltWorks.Certs.cert_task_isolation
+#audit_axioms SaltWorks.Certs.cert_isolation_needs_disjointness
