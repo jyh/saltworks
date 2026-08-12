@@ -184,8 +184,11 @@ program counter** — see the scope limits in this file's header.
 Direction: **same proposition** as `SaltWorks.HDL.Exec.execStep_frame_disjoint`, with
 the side condition in plain form.
 
-Witness: ⚠️ **SATISFIABILITY — NOT WITNESSED IN THIS TIER. THE QUESTION IS STATED, NOT
-ANSWERED** (rule 6, amended 8/12). *This binder CONJOINS two hypotheses over shared
+Witness: ✅ **SATISFIABILITY — WITNESSED. CLOSED 2026-08-12 10:58**, by the `example` block
+below, on an assignment proposed by the EVIDENCE seat and typechecked here. *The paragraph that
+follows is kept verbatim because it is the argument that made the question worth asking, and the
+answer is only meaningful beside it.* ⬥ **The original declaration read: SATISFIABILITY — NOT
+WITNESSED, THE QUESTION IS STATED, NOT ANSWERED** (rule 6, amended 8/12). *This binder CONJOINS two hypotheses over shared
 objects — `hdisj : Disjoint Pcur Pother` and `h`, the writes-within condition on
 `codes[sys.cur.val]` — and **that conjunction is the exact shape that produced the one
 vacuous certificate this tier has already caught** (the `ControlFlow` exit/back split,
@@ -234,6 +237,45 @@ theorem cert_isolation_needs_disjointness :
       (runSys codesE4 initE4 1).getReg 1 = 5 ∧
       (runSys codesE4 initE4 2).getReg 1 = 9 :=
   e4_overlap_refutes
+
+
+/-! ## 5. THE SATISFIABILITY WITNESS for `cert_task_isolation` (rule 6, amended 8/12)
+
+⭐ **THE BINDER IS JOINTLY INHABITED, AND NON-DEGENERATELY.** *`cert_task_isolation` conjoins
+`Disjoint Pcur Pother` with the writes-within condition over shared objects — the shape that
+produced this tier's one vacuous certificate. Both hypotheses are obviously satisfiable ALONE;
+nothing exhibited them TOGETHER, so the cert was landed declaring the question open.*
+
+**PROVENANCE, because the two halves were done by different seats:** *the assignment below was
+proposed by the **EVIDENCE seat** at 2026-08-12 10:57, who stated plainly that they had not
+typechecked it. **This seat typechecked it.** The design judgement was the part the compiler seat
+had declined; a peer supplying it is what made the evaluation mechanical.*
+
+⛔ **WHY IT IS NOT THE DEGENERATE WITNESS:** *empty partitions and empty code satisfy this binder
+and prove nothing. Here the current task's program is NON-EMPTY and its instruction genuinely
+WRITES — `writesInstr (.ADD 1 1 1) = some 1`, a real register and not `x0`, whose write `St.set`
+would discard. The hypotheses below are each discharged by `decide`, not assumed.* -/
+
+def witPcur : Partition := {1}
+def witPother : Partition := {2}
+
+def witCodes : Vector (List Instr) 2 :=
+  Vector.ofFn (fun i : Fin 2 => if i = 0 then [Instr.ADD 1 1 1] else [])
+
+def witSys : SysSt 2 :=
+  { regs := Vector.replicate 32 0, pcs := Vector.replicate 2 0, cur := 0 }
+
+/-- The binder's three hypotheses, each DISCHARGED rather than assumed. -/
+example : Disjoint witPcur witPother := by decide
+example : ∀ ins ∈ witCodes[witSys.cur.val], ∀ rd : Fin 32,
+    writesInstr ins = some rd → rd ∈ witPcur := by decide
+example : (2 : Fin 32) ∈ witPother := by decide
+
+/-- ⭐ **THE WITNESS ITSELF** — `cert_task_isolation` instantiated at this assignment, so the
+certificate is applied to a system that exists rather than to a binder nobody has inhabited. -/
+example : (execStep witCodes witSys).getReg 2 = witSys.getReg 2 :=
+  cert_task_isolation witCodes witPcur witPother (by decide) witSys (by decide) (by decide)
+
 
 #audit_axioms cert_side_condition_meaning
 #audit_axioms cert_step_frame
