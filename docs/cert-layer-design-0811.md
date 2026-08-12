@@ -43,6 +43,12 @@ is documentation; a restatement with one is a certificate.
    an `example` instantiating the hypotheses at a concrete point. A control must be able
    to fail; a hypothesis set must be able to hold. Hypothesis-free certs are exempt
    (a closed false proposition cannot be proved at all).**
+   **AMENDED AT COUNCIL 8/12 (compiler's rule-6 question, Captain-accepted): a
+   satisfiability witness and a NON-DEGENERACY witness are different controls — a
+   binder inhabited only by degenerate points survives "instantiate and evaluate"
+   untouched. The witness must be non-degenerate WHERE A DEGENERATE ONE WOULD LEAVE
+   THE CHECK VACUOUS, and each cert's docstring DECLARES which kind it carries.
+   Not every cert needs a deep witness; every cert must say what its witness proves.**
 7. House laws ride: saltbuild BARE; grep -F (-e for alternation); pathspec-only commits;
    sorry only in Scratch (the glob covers both repos); give up loudly at ~3 attempts.
 

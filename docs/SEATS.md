@@ -12,6 +12,10 @@ no glob did).
   The block permits Opus executor waves on the A/B rows: executors DRAFT AND VERIFY ONLY, in scratch;
   this seat lands every file and its roll-call row. One writer, many drafters — the glob is CLAIMED,
   not shared (silicon's 12:48 boundary line: two kinds of hand need a declared owner before the first write).
+- SaltWorks/Tactic/**   : MAESTRO seat (council ruling 8/12, at compiler's unowned-glob flag) —
+  REFEREE INFRASTRUCTURE: the audit tactic must not be owned by any seat whose work it audits.
+  Same law governs salt's Salt/Tactic/**; changes by consult, as with root wires. 13 importers
+  across 4 slots at ruling time.
 - SaltWorks.lean, lakefile.toml, lean-toolchain : MAESTRO ONLY. Seats leave "import owed: <module>" in commit messages; maestro sweeps.
 - docs/** : append-friendly; per-seat files preferred (docs/<seat>-*.md).
 - EXCEPTIONS (named, dated, removed on expiry — an exception recorded is the law consulted):
