@@ -47,9 +47,16 @@ does.*
   anything about MEMORY, about the trap flag, or about the program counter.** *`St`
   carries all three. Since `M2` the machine has real load/store instructions, so
   "isolation" in the memory sense is not merely unproved here — it is not addressed.*
-* **ONE STEP.** `cert_task_isolation` is about a single `execStep`. *Lifting to a whole
-  run is a separate landed theorem (`runFor_frame`) for a single task's bounded
-  execution; this certificate does not claim a multi-quantum system-level invariant.*
+* **ONE STEP, and this is the sharpest limit in the list.** `cert_task_isolation` is
+  about a single `execStep`. *Lifting to a whole run is a separate landed theorem
+  (`runFor_frame`), and it covers a **single task's** bounded execution.*
+  ⛔ ***THE COROLLARY, CHECKED RATHER THAN ASSUMED (grep over `Executive*.lean`, all
+  frame/isolation theorems enumerated): THE ONLY MULTI-QUANTUM, SYSTEM-LEVEL STATEMENT
+  IN THIS CORPUS IS THE REFUTATION.*** `cert_isolation_needs_disjointness` runs the
+  system for two steps and shows corruption; **no theorem runs the system for two steps
+  and shows safety.** *So "the executive keeps tasks isolated over time" is not a
+  weaker version of what is proved here — it is unaddressed, and the only evidence
+  spanning quanta points the other way.*
 * **THE PARTITIONS ARE GIVEN, NOT DERIVED.** Nothing here computes a task's register
   set or proves one exists — `P` is an input, and `writesWithin` is the check that a
   given program respects a given `P`.
