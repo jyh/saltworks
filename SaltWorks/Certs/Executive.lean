@@ -278,22 +278,39 @@ def witCodes : Vector (List Instr) 2 :=
 def witSys : SysSt 2 :=
   { regs := Vector.replicate 32 0, pcs := Vector.replicate 2 0, cur := 0 }
 
-/-- The binder's three hypotheses, each DISCHARGED rather than assumed. -/
-example : Disjoint witPcur witPother := by decide
-example : ∀ ins ∈ witCodes[witSys.cur.val], ∀ rd : Fin 32,
-    writesInstr ins = some rd → rd ∈ witPcur := by decide
-example : (2 : Fin 32) ∈ witPother := by decide
+/-- The binder's three hypotheses, each DISCHARGED rather than assumed.
+
+⚠️ **NAMED, NOT `example`s — evidence's structural finding at 11:04, and it is about the apparatus
+rather than this file.** *`#audit_axioms` takes a NAME. An anonymous `example` has none, so **a
+certificate could read `[3 axioms]` clean while the witness proving it non-vacuous sat outside the
+axiom census entirely.*** *Rule 6 made witnesses mandatory on 8/12 and thereby made an UNAUDITED
+declaration mandatory with them; naming these puts the vacuity control and the axiom census back on
+the same page. Today it costs nothing — every one closes by `decide` — **which is exactly when to fix
+it, rather than after a witness needs `Classical.choice` and nobody is looking.*** -/
+theorem witness_partitions_disjoint : Disjoint witPcur witPother := by decide
+
+theorem witness_current_task_writes_within :
+    ∀ ins ∈ witCodes[witSys.cur.val], ∀ rd : Fin 32,
+      writesInstr ins = some rd → rd ∈ witPcur := by decide
+
+theorem witness_observed_register_is_other : (2 : Fin 32) ∈ witPother := by decide
 
 /-- ⭐ **THE WITNESS ITSELF** — `cert_task_isolation` instantiated at this assignment, so the
 certificate is applied to a system that exists rather than to a binder nobody has inhabited. -/
-example : (execStep witCodes witSys).getReg 2 = witSys.getReg 2 :=
-  cert_task_isolation witCodes witPcur witPother (by decide) witSys (by decide) (by decide)
+theorem witness_task_isolation_inhabited :
+    (execStep witCodes witSys).getReg 2 = witSys.getReg 2 :=
+  cert_task_isolation witCodes witPcur witPother witness_partitions_disjoint witSys
+    witness_current_task_writes_within witness_observed_register_is_other
 
 
 #audit_axioms cert_side_condition_meaning
 #audit_axioms cert_step_frame
 #audit_axioms cert_task_isolation
 #audit_axioms cert_isolation_needs_disjointness
+#audit_axioms witness_partitions_disjoint
+#audit_axioms witness_current_task_writes_within
+#audit_axioms witness_observed_register_is_other
+#audit_axioms witness_task_isolation_inhabited
 
 #print axioms cert_side_condition_meaning
 #print axioms cert_step_frame
