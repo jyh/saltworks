@@ -19,10 +19,29 @@ open SaltWorks.ISA
 
 namespace SaltWorks.StraightLine
 
-/-- The one instruction that can move `pc` by anything other than `+4`. -/
+/-- The one instruction that can move `pc` by anything other than `+4`.
+
+⬥⬥ **THE CATCH-ALL IS GONE (Captain's ruling, 2026-08-11 19:05: exhaustive arms
+preferred in all cases). SEMANTICS UNCHANGED — these seven arms return exactly
+what `| .BEQ _ _ _ => false | _ => true` returned**, constructor for constructor.
+
+⚖️ **This site was FENCED, and converting a fenced site is still the ruling.**
+`step_forward_pc` below is `∀ (i : Instr)` discharged by `cases i`, so a wrongly
+absorbed constructor produced an unprovable goal rather than a silent `true` —
+*measured by math at the refuter pass and recorded at `Stack/Program.lean:266`,
+where the genuinely UNFENCED sibling (`branchIsForward`, whose consumers only
+quantify over list membership) is dissected.* **A fence makes a catch-all
+survivable, not correct: it converts the silence into a red build only for
+whoever happens to touch this theorem next.** The arms make the decision
+unavoidable at the point the constructor is added, which is where it belongs. -/
 def isForward : Instr → Bool
-  | .BEQ _ _ _ => false
-  | _          => true
+  | .BEQ  _ _ _ => false
+  | .ADD  _ _ _ => true
+  | .ADDI _ _ _ => true
+  | .XOR  _ _ _ => true
+  | .SLT  _ _ _ => true
+  | .LW   _ _ _ => true
+  | .SW   _ _ _ => true
 
 /-- Straight-line: no branches. *Stated on the CODE, not on a run, so it is
 checkable by the emitter at L0 and survives into L1/L2 unchanged.* -/
@@ -37,10 +56,14 @@ theorem St_set_pc (s : St) (r : Fin 32) (v : BitVec 32) : (s.set r v).pc = s.pc 
 /-- ⭐ **A forward instruction advances `pc` by exactly four.** -/
 theorem step_forward_pc (s : St) (i : Instr) (h : isForward i = true) :
     (step s i).pc = s.pc + 4 := by
-  -- ⬥ M2: `isForward`'s wildcard classifies LW/SW as forward, and they ARE —
-  -- every one of their branches ends in `.next`. The only new work is splitting
-  -- the address `dite`, which is the "replay, not a design change" the memory
-  -- block's §0.7 predicted for this exact theorem.
+  -- ⬥ M2: LW/SW are forward — every one of their branches ends in `.next`. The
+  -- only new work was splitting the address `dite`, the "replay, not a design
+  -- change" the memory block's §0.7 predicted for this exact theorem.
+  -- ⚖️ **That work is what this theorem being `cases i`-exhaustive BOUGHT**: M2
+  -- could not add a constructor without discharging its goal here. The original
+  -- note said the *wildcard* classified LW/SW and read as a near-miss; it was
+  -- the fence firing. (Wildcard removed above; the note is kept because the
+  -- episode is the evidence that the fence works.)
   cases i <;> simp_all [step, isForward, St.next, St_set_pc] <;> split_ifs <;> rfl
 
 /-- A fetched instruction is a member of the code. -/

@@ -15,6 +15,15 @@ no glob did).
 - SaltWorks.lean, lakefile.toml, lean-toolchain : MAESTRO ONLY. Seats leave "import owed: <module>" in commit messages; maestro sweeps.
 - docs/** : append-friendly; per-seat files preferred (docs/<seat>-*.md).
 - EXCEPTIONS (named, dated, removed on expiry — an exception recorded is the law consulted):
+  - ✅ SPENT AT THIS COMMIT — the pre-grant below is retired. **`isForward` converted here, by the
+    OWNER's hand rather than a foreign one**, so the grant was never exercised: it existed in case
+    the ③ pull needed to reach in, and it did not. `touchesMem` did NOT convert and is unchanged —
+    it stays FENCED per the ruling and converts on next touch, in this seat's own file, needing no
+    exception. **A later foreign hand asks fresh; a grant that quietly outlives its commit makes
+    this list decorative.** *One correction carried into the artifact: this row's disposition said
+    `isForward` "had luck" where `touchesMem` "had a fence". **BOTH were fenced** — `step_forward_pc`
+    is `∀ (i : Instr)` by `cases i`, measured by math at the refuter pass (`Stack/Program.lean:266`).
+    The conversion still stands: exhaustive is the ruling for fenced sites too.*
   - ⏳ STANDING PRE-GRANT (compiler seat, 2026-08-11 18:58) — SaltWorks/HDL/ISA.lean AND
     SaltWorks/HDL/StraightLine.lean → WHOEVER HOLDS THE STAGE-③ PULL THAT NEEDS THEM,
     **for the CATCH-ALL FIX ONLY**, at `touchesMem` (ISA.lean:174) and `isForward`
