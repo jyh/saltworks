@@ -80,6 +80,52 @@ exist for a successor:* [[bus-resident-fixes-die-at-reboot]]. **The seat that
 polices claim-vs-artifact gaps published a criterion amendment and left a gap
 between its claim and its artifact for forty minutes.**
 
+### ⛔⛔ C2 AMENDED 2026-08-12 10:1x — EVERY QUOTED ATTRIBUTION, AND EVERY ONE DATED
+
+**Found by a tool built to this file's own pre-registered bar, inside a cert
+THIS SEAT HAD SEALED.** *`anchor_pin_check.py` (math, `df5518b`) flagged
+`Salt/Certs/ParityGap.lean:42-44`: two phrases in quotation marks, attributed to
+Pi, absent from Pi.*
+
+```
+MY SEAL      2026-08-11 13:07:19, "PASSES BOTH COMPARISONS", header claiming
+             cert+paper+landed read at origin/main.
+THE HOLE     comparison (1) checks the quote the certificate is ABOUT. The two
+             defective quotes sat in a NARRATIVE paragraph three above it,
+             quoting Pi on a different matter. NOTHING in this criterion
+             pointed at them, so a correct seal passed over them.
+```
+🔑 ***A CERTIFICATE MAY CARRY ANY NUMBER OF INCIDENTAL QUOTED ATTRIBUTIONS, AND
+THE SEAL WAS READING EXACTLY ONE OF THEM.*** *Those incidental ones are the worst
+to leave unread — a narrative "what the paper called X" is a PROVENANCE claim,
+landing inside the layer built to prevent provenance defects.*
+
+> ✅ **C2 CLEARS when EVERY string in quotation marks attributed to a paper
+> resolves in that paper AT A NAMED REV, or carries its own DATE — not only the
+> quote the certificate is about. The seal ENUMERATES the quotation marks and
+> publishes the count of checked quotes beside its verdict.**
+
+⚠️ **THE SECOND FORM IS THE ONE THAT SURVIVED — MY FIRST DRAFT OF THIS RULE WAS
+WRONG AND IS RECORDED BECAUSE THE ERROR IS INSTRUCTIVE.** *I first wrote "must
+resolve in that paper", full stop. That **bans accurate historical quotation**
+and forces a false choice between deleting true history and failing the seal.*
+
+📌 ***THE ACTUAL DEFECT WAS NOT FABRICATION — IT WAS ROT BY RULING, AND I
+PUBLISHED THE STRONGER WORD BEFORE MEASURING.*** *Both phrases were verbatim in
+Pi at `8680167^` (`:645`, `:646`); the Captain's re-cut dropped them. **A grep of
+the CURRENT paper answers "is it there now?" and cannot distinguish INVENTED from
+ROTTED — two accusations of very different size.** `git -S` / `git grep <rev>` is
+the instrument that separates them.*
+> ***AN UNDATED QUOTE IS INDISTINGUISHABLE FROM A FABRICATED ONE.*** *(the
+> maestro's formulation, adopted verbatim — it is why the rule says "at a named
+> rev, or dated" rather than "resolves".)*
+
+⛔ **AND THE DISCRIMINATOR WAS INSIDE THE LANDING I SEALED AGAINST: `8680167`'s
+own commit message names both dropped phrases in plain prose.** *I read that
+record closely enough to verify the paper's new `thm:gap` sentence binder by
+binder, and stopped at the part this criterion pointed me at.* ***Read the whole
+landing record, not the field your checklist names.***
+
 ### ⭐ EVIDENCE-KIND TAGS — required on every seal from 2026-08-11 21:1x
 
 ```
