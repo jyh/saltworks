@@ -23,10 +23,11 @@ authorship was being inferred from memory of who announced what, and that key fa
 six times on 2026-08-11 alone. A one-line seat stamp costs nothing and is the only
 copy that survives the announcement.*
 
-⚠️ **"THE PAPER" IS NOT A REFERENCE IN THIS HOUSE — every cert names its source.** *Three
-candidate documents exist (`salt/papers/flagship/`, `salt/papers/witness/`, and the Nature-track
-draft at `${SEAT_DIR}/briefs/2026-08-11-nature-draft-v0.md`). The saltworks rows quote the LAST of
-those; section numbers are draft-relative and will move.*
+⚠️ **"THE PAPER" IS NOT A REFERENCE IN THIS HOUSE — every cert names its source.** *At least NINE paper-shaped
+documents exist — three `.tex` under `salt/papers/` and six `nature-*` drafts in `${SEAT_DIR}/briefs/`,
+two of them sharing a directory and a date-prefix — so name the PATH, not the paper. The
+saltworks rows quote `${SEAT_DIR}/briefs/2026-08-11-nature-draft-v0.md`; its section numbers are
+draft-relative and will move.*
 
 A certificate file restates one paper-cited headline claim in simplified vocabulary
 and carries a **kernel proof linking the restatement to the landed theorem** — the

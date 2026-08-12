@@ -26,10 +26,14 @@ Landed theorems certified here, by name:
 
 ## WHAT THE PAPER CLAIMS, quoted, and WHICH HALF THIS FILE CERTIFIES
 
-⚠️ **WHICH PAPER: the **Nature-track manuscript draft** (`${SEAT_DIR}/briefs/2026-08-11-nature-draft-v0.md`, read 2026-08-11; section numbers are DRAFT-RELATIVE and will move).** *This house holds THREE candidate documents — `salt/papers/flagship/`,
-`salt/papers/witness/`, and the Nature draft — so "the paper" is not a reference. A reader who
-follows an unqualified pointer to the flagship finds nothing, which is a real failure mode this
-fleet hit on 2026-08-11.*
+⚠️ **WHICH PAPER: the **Nature-track manuscript draft** (`${SEAT_DIR}/briefs/2026-08-11-nature-draft-v0.md`, read 2026-08-11; section numbers are DRAFT-RELATIVE and will move).** *ENUMERATED, not recalled: this house holds **at least NINE** paper-shaped documents —
+three `.tex` under `salt/papers/` (flagship `main.tex`, flagship `floor-chen-seed.tex`, witness
+`main.tex`) and six `nature-*` drafts in `${SEAT_DIR}/briefs/`, **two of which share a directory and a
+date-prefix**. So "the paper" is not a reference, and neither is "the Nature draft". A reader
+following an unqualified pointer to the flagship finds nothing — a real failure mode this fleet
+hit twice on 2026-08-11.* ⚠️ *My first version of this note said THREE, counted from the three I
+happened to have open; a peer's independent measurement said seven and the enumeration says nine.
+**A count of a population you did not walk is a recollection wearing a number.**
 
 That draft makes the 1990 claim three times; §4 is the sharpest form:
 
