@@ -1709,6 +1709,110 @@ theorem step_SW_trapped_suppresses_the_write (s : St) (a b : Fin 32) (imm : BitV
   · exact absurd h hbad
   · exact ⟨rfl, rfl⟩
 
+/-! ## ⬥⬥ M4 — THE MEMORY FRAME ROWS (memory block :351, "math owns")
+
+*M2 landed the two complements the 16:48 ruling commissioned — what SW writes,
+what LW reads. **M4 is the rest of the block's commissioned list**, and it is
+here rather than at M2 because the plan puts it here: `M0 → M1(+M1a) → M2 →
+M3/M4 → M5`.*
+
+```
+"SW-ok writes exactly mem[a/4]"                         ✅ landed at M2 above
+"LW writes no memory"                                    ⬥ here
+"a trapped step changes NO MEMORY CELL and NO REGISTER"  ⬥ here, BOTH ops
+the r-trap KC2 mutant discipline + its pre-registered witness
+                                                         ⬥ here
+```
+⚠️ **The restated form matters: NEVER "a trapped step writes nothing"** — it
+DOES set the sticky flag and advance `pc`, so the literal form would be a false
+theorem. That correction is ⬥v1.1's own, made at the refuter fold. -/
+
+/-- ⬥ **M4 — LW WRITES NO MEMORY**, and unconditionally: on the `ok` path it
+writes a register, on the trap path it writes nothing at all. *No address
+hypothesis is needed, which is the cleanest evidence that a load is a load.* -/
+theorem step_LW_writes_no_memory (s : St) (rd a : Fin 32) (imm : BitVec 12) :
+    (SaltWorks.ISA.step s (.LW rd a imm)).mem = s.mem := by
+  simp only [SaltWorks.ISA.step, St.set, St.next]
+  split_ifs <;> rfl
+
+/-- ⬥ **M4 — A TRAPPED LOAD CHANGES NO MEMORY CELL AND NO REGISTER.** The
+suppression is the load-bearing term; the flag is the announcement; and `pc`
+still advances, which is why this is stated as four conjuncts and not as
+"writes nothing". -/
+theorem step_LW_trapped_changes_no_memory_and_no_register
+    (s : St) (rd a : Fin 32) (imm : BitVec 12)
+    (hbad : SaltWorks.ISA.addrClass (s.get a + imm.signExtend 32) ≠ .ok) :
+    (SaltWorks.ISA.step s (.LW rd a imm)).mem = s.mem
+    ∧ (∀ r, (SaltWorks.ISA.step s (.LW rd a imm)).get r = s.get r)
+    ∧ (SaltWorks.ISA.step s (.LW rd a imm)).trapped = true
+    ∧ (SaltWorks.ISA.step s (.LW rd a imm)).pc = s.pc + 4 := by
+  simp only [SaltWorks.ISA.step]
+  split_ifs with h
+  · exact absurd h hbad
+  · exact ⟨rfl, fun _ => rfl, rfl, rfl⟩
+
+/-- ⬥ **M4 — AND THE SAME FOR A TRAPPED STORE.** *This is the full commissioned
+sentence; the M2 complement above (`step_SW_trapped_suppresses_the_write`) is its
+memory half and remains true — it was landed as a control before M4 opened.* -/
+theorem step_SW_trapped_changes_no_memory_and_no_register
+    (s : St) (a b : Fin 32) (imm : BitVec 12)
+    (hbad : SaltWorks.ISA.addrClass (s.get a + imm.signExtend 32) ≠ .ok) :
+    (SaltWorks.ISA.step s (.SW a b imm)).mem = s.mem
+    ∧ (∀ r, (SaltWorks.ISA.step s (.SW a b imm)).get r = s.get r)
+    ∧ (SaltWorks.ISA.step s (.SW a b imm)).trapped = true
+    ∧ (SaltWorks.ISA.step s (.SW a b imm)).pc = s.pc + 4 := by
+  simp only [SaltWorks.ISA.step]
+  split_ifs with h
+  · exact absurd h hbad
+  · exact ⟨rfl, fun _ => rfl, rfl, rfl⟩
+
+/-! ### ⬥ M4's MUTANT DISCIPLINE (r-trap KC2) — it must COMPILE, and it must FALSIFY -/
+
+/-- The write-in-the-trapped-arm mutant. **It uses the TOTAL setter, because a
+non-compiling mutant is not a control** — the block's own requirement.
+
+📌 *The block names this form `Vector.setD`; in this toolchain it is
+`Vector.setIfInBounds` (Lean 4.31 core). Pin recorded rather than silently
+substituted.* -/
+def stepSW_mutant (s : St) (a b : Fin 32) (imm : BitVec 12) : St :=
+  let addr := s.get a + imm.signExtend 32
+  if h : SaltWorks.ISA.addrClass addr = .ok then
+    let m := s.mem.set (addr.toNat / 4) (s.get b) (SaltWorks.ISA.addrClass_ok_lt h)
+    { s with mem := m }.next
+  else
+    let m := s.mem.setIfInBounds (addr.toNat / 4) (s.get b)
+    { s with mem := m, trapped := true }.next
+
+/-- ⛔ **THE MUTANT IS KILLED, on the block's PRE-REGISTERED witness.** Byte
+address 5 is MISALIGNED **AND IN RANGE** (word 1 < 8), and `mem[1] = 7` differs
+from `x1 = 5`, so the write the honest machine suppresses is OBSERVABLE. -/
+theorem mutant_killed_at_misaligned_in_range :
+    (SaltWorks.ISA.step SaltWorks.ISA.m2Witness (.SW 0 1 5)).mem[1] = 7
+    ∧ (stepSW_mutant SaltWorks.ISA.m2Witness 0 1 5).mem[1] = 5 := by
+  decide +kernel
+
+/-- The witness's own preconditions, stated rather than trusted — misaligned, in
+range, and writing a value that differs from what is already there. -/
+theorem witness_is_misaligned_and_in_range :
+    SaltWorks.ISA.addrClass 5#32 = .misaligned
+    ∧ (5#32 : BitVec 32).toNat / 4 = 1
+    ∧ SaltWorks.ISA.m2Witness.mem[1] ≠ SaltWorks.ISA.m2Witness.get 1 := by
+  decide +kernel
+
+/-- ⚠️⚠️ **AND WHY ONE MISALIGNED MUTANT MUST NOT STAND IN FOR BOTH TRAP ARMS —
+the block's warning, promoted from prose to a kernel fact.** At an out-of-range
+address the truncating write is a NO-OP (word 8 has no slot in a `Vector 8`), so
+the mutant AGREES with `step` there and **would pass spuriously**.
+
+🔑 ***The out-of-range arm is free-by-typing in the kernel; its real control
+lives at the F4 bridge (stage ③'s dropped-gate RTL mutant). This theorem is what
+makes that a KNOWN gap rather than a covered one*** — a control roster that
+cannot say which arm it fails to test is a roster that reads complete. -/
+theorem out_of_range_mutant_passes_spuriously :
+    (stepSW_mutant SaltWorks.ISA.m2Witness 0 1 32).mem
+      = (SaltWorks.ISA.step SaltWorks.ISA.m2Witness (.SW 0 1 32)).mem := by
+  decide +kernel
+
 /-- The `= s` form survives exactly on clean states — which is every state the
 codec is fed. -/
 theorem decQ_envWith_of_clean (s : St) (w : Word)
@@ -8862,6 +8966,11 @@ open Salt.Tactic
 #audit_axioms step_mem_frame_of_not_touchesMem step_trapped_frame_of_not_touchesMem
 #audit_axioms stepT_mem_frame_of_not_touchesMem stepT_trapped_frame_of_not_touchesMem
 #audit_axioms step_SW_ok_writes_the_addressed_word step_LW_ok_loads_the_addressed_word
+#audit_axioms step_LW_writes_no_memory
+#audit_axioms step_LW_trapped_changes_no_memory_and_no_register
+#audit_axioms step_SW_trapped_changes_no_memory_and_no_register
+#audit_axioms stepSW_mutant mutant_killed_at_misaligned_in_range
+#audit_axioms witness_is_misaligned_and_in_range out_of_range_mutant_passes_spuriously
 #audit_axioms step_SW_trapped_suppresses_the_write
 #audit_axioms cycOf decQ_cycOf_proj cycleRealisesStepProj_cycOf
 #audit_axioms not_cycleRealisesStep_id not_cycleRealisesStep_wordOf

@@ -562,6 +562,29 @@ survive — *they now certify that this core does not implement these ops.*
 ```
 **No kernel sentence may say memory "rides on the die" until all three land.**
 
+### B.6 · ⬥ M4 LANDED (same evening, math's own slot — `Stack/Program.lean`)
+
+The rest of §1's M4 list is in the kernel: **`LW` writes no memory**
+(unconditional — no address hypothesis) and **a trapped step of EITHER op
+changes no memory cell and no register**, stated as four conjuncts because the
+flag *is* set and `pc` *does* advance (⬥v1.1's own restatement — "writes
+nothing" would be a false theorem). `SW`-ok's write-characterisation landed
+earlier at M2.
+
+**The r-trap KC2 mutant discipline is discharged in full**: `stepSW_mutant`
+compiles (total setter), and it is **KILLED on the block's pre-registered
+witness** — byte 5, misaligned AND in range, word 1 < 8, with `mem[1] = 7 ≠ 5`
+so the suppressed write is observable.
+⚠️ **And the block's own warning about that witness is now a KERNEL FACT rather
+than prose: `out_of_range_mutant_passes_spuriously`.** At an out-of-range
+address the truncating write is a no-op, so the mutant agrees with `step` and
+one misaligned mutant *cannot* stand in for both arms. **The out-of-range arm
+stays free-by-typing, its real control at the F4 bridge — a known gap, now
+stated by a theorem instead of remembered.**
+
+📌 **PIN, recorded not silently substituted:** the block names the total setter
+`Vector.setD`; in this toolchain (Lean 4.31 core) it is `Vector.setIfInBounds`.
+
 ### B.5 · THE METHOD NOTES THE WAVE BOUGHT
 
 - ***A theorem red because it is FALSE and one red because it is UNPROVED are
