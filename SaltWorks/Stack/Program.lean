@@ -256,10 +256,36 @@ theorem emit_length (net : Network 8) : (emit net).length = 5 * net.length := by
 
 /-- Is this instruction's branch forward? Non-branches trivially pass.
 
-⚠️ `imm.toInt`, **not** `imm.toNat`: see `forwardness_must_be_signed`. -/
+⚠️ `imm.toInt`, **not** `imm.toNat`: see `forwardness_must_be_signed`.
+
+⬥⬥ **THE CATCH-ALL IS GONE (Captain's ruling, 2026-08-11 19:05: exhaustive arms
+preferred in all cases). SEMANTICS UNCHANGED — these arms return exactly what
+`| _ => true` returned.**
+
+⛔ **WHY IT MATTERED HERE MORE THAN AT THE OTHER TWO CATCH-ALL SITES, measured
+at the refuter pass:** `isForward` and `touchesMem` are FENCED — each has a
+downstream theorem that is `cases i`-exhaustive and goes RED on a wrongly
+absorbed constructor. **This one was NOT.** Every consumer
+(`cmpEx_branches_forward`, `emit_branches_forward`,
+`batcherSort_branches_forward`) quantifies over MEMBERSHIP IN A CONCRETE LIST —
+`∀ i ∈ emit net, …` — never over `Instr`. So a new constructor was classified
+forward, **nothing went red, and every theorem stayed TRUE**, right up until the
+day someone emitted it.
+
+🔑 ***A catch-all is safe exactly when some downstream theorem is exhaustive over
+the same type and would break. List-membership consumers are not that theorem —
+they are the shape that makes the silence permanent.*** *Today the absorbed arms
+were genuinely forward (`LW`/`SW` are not branches). The hazard was a future
+branch-like op — `JAL`, `JALR`, a trap-return — which the ③ datapath campaign
+makes considerably less hypothetical.* -/
 def branchIsForward : Instr → Bool
-  | .BEQ _ _ imm => 0 < imm.toInt
-  | _            => true
+  | .BEQ  _ _ imm => 0 < imm.toInt
+  | .ADD  _ _ _   => true
+  | .ADDI _ _ _   => true
+  | .XOR  _ _ _   => true
+  | .SLT  _ _ _   => true
+  | .LW   _ _ _   => true
+  | .SW   _ _ _   => true
 
 /-- ⚠️ **THE VACUOUS CHECK, PINNED.** A backward immediate has a large positive
 `toNat`, so `0 < imm.toNat` accepts it. `branchIsForward` must read the
