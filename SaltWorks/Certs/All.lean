@@ -7,6 +7,7 @@ import SaltWorks.Certs.Switch1990
 import SaltWorks.Certs.Compiler
 import SaltWorks.Certs.Executive
 import SaltWorks.Certs.ControlFlow
+import SaltWorks.Certs.EndToEnd
 
 /-!
 # `SaltWorks/Certs/` — the comprehensibility-certificate layer, roll-call
@@ -122,9 +123,36 @@ docstring exactly what, if anything, was traded for readability.
     observable value is CORRECT and the program is BROKEN**. *Only the halt check
     separates the first; only observing the right thing separates the second.*
 
-## OWED — 2 of the target list's ≈6 rows remain (4 landed above)
+* `SaltWorks/Certs/EndToEnd.lean` — **THE ENCODING, THE WITNESS, AND ONE WHOLE
+  PROGRAM**, eight certificates. **Closes the last TWO target rows** (`decode_encode`,
+  `witness_chain_discharged`) and adds the external-witness rows that make the first
+  mean what a reader will think it means.
+  ⛔ **ITS SCOPE REFUSAL: "RV32I" IS NOT WHAT IS PROVED.** *`cert_encode_decode_round_trip`
+  says THIS corpus's encoder and decoder are inverse on THIS corpus's `Instr`. It does
+  **not** say the encoding conforms to the RISC-V specification, and no theorem in this
+  repository does.* **The conformance EVIDENCE is Spike** — `cert_an_outside_simulator_agrees`,
+  120 vectors from a third-party simulator that has never seen this repository, full-state
+  compared — *and the corpus's own ruling on it is that **Spike is a WITNESS, not an
+  oracle**.*
+  - ⭐⭐ `cert_what_this_machine_does_not_implement` — **twenty legal RV32I encodings that
+    Spike executes and this decoder REFUSES** (`lui`, `auipc`, `jal`, `jalr`, `lb`, `sb`,
+    the shifts, `sub`, `bne`/`blt`/`bge`). *A reader sizing "a verified RISC-V processor"
+    can read the gap instead of estimating it.* ⏰ *That list's expiry is enforced by the
+    BUILD: when M2 landed `LW`/`SW` the two word-sized rows stopped being excluded and the
+    theorem broke on the day, exactly as predicted on 2026-08-07.*
+  - `cert_the_bits_and_the_instruction_agree` — running the 32-bit WORD leaves the state
+    running the INSTRUCTION leaves; the bridge that makes the abstract type an account of a
+    bit-level machine rather than a parallel story about it.
+  - `cert_one_whole_program_end_to_end` — `x := x + 5` with `x = 7` compiles to four
+    instructions and leaves **12**. *Without a row like this, every theorem in the compiler
+    pillar is satisfiable by a `compileS` nobody can run.*
 
-`decode_encode` (now unblocked — M2 landed at `acd3982`) · `witness_chain_discharged`.
+## ✅ TARGET LIST v1 — **COMPLETE**. All six saltworks rows landed.
+
+*`the compileE/compileS simulation theorems` · `the while/ite scheme correctness pair` ·
+`decode_encode` · `witness_chain_discharged` · `step_frame/writesInstr` · the 1990 cert.*
+**Any paper-quoted claim added later gets its cert in the same wave (the block's
+freeze-week rule).**
 
 ⚠️ **THE TRAP FOR EVERY REMAINING ROW IN THIS DIRECTORY, and it is on the DOCSTRING
 surface only.** Iron rule 3 makes the Lean side mechanical — a certificate is *proved
@@ -193,3 +221,12 @@ almost the same thing.)*
 #audit_axioms SaltWorks.Certs.cert_ite_scheme_runs
 #audit_axioms SaltWorks.Certs.cert_a_wrong_backward_offset_never_terminates
 #audit_axioms SaltWorks.Certs.cert_a_wrong_ite_offset_keeps_the_right_value
+
+#audit_axioms SaltWorks.Certs.cert_encode_decode_round_trip
+#audit_axioms SaltWorks.Certs.cert_no_two_instructions_share_an_encoding
+#audit_axioms SaltWorks.Certs.cert_the_bits_and_the_instruction_agree
+#audit_axioms SaltWorks.Certs.cert_an_outside_simulator_agrees
+#audit_axioms SaltWorks.Certs.cert_the_witness_suite_is_not_vacuous
+#audit_axioms SaltWorks.Certs.cert_illegal_words_are_rejected
+#audit_axioms SaltWorks.Certs.cert_what_this_machine_does_not_implement
+#audit_axioms SaltWorks.Certs.cert_one_whole_program_end_to_end
