@@ -37,7 +37,13 @@ is documentation; a restatement with one is a certificate.
 4. **Axiom line per cert** (`#print axioms` residue quoted in the file header comment;
    at most the standard three).
 5. Roll-call row in the SAME commit (Salt/Certs/All.lean · SaltWorks/Certs/All.lean).
-6. House laws ride: saltbuild BARE; grep -F (-e for alternation); pathspec-only commits;
+6. **VACUITY CONTROL (compiler's 18:28 catch — green build + clean audit + contradictory
+   hypotheses = a certificate that says nothing, and no pipeline instrument reaches it):
+   every HYPOTHESIS-CARRYING cert lands with a satisfiability witness in the same file —
+   an `example` instantiating the hypotheses at a concrete point. A control must be able
+   to fail; a hypothesis set must be able to hold. Hypothesis-free certs are exempt
+   (a closed false proposition cannot be proved at all).**
+7. House laws ride: saltbuild BARE; grep -F (-e for alternation); pathspec-only commits;
    sorry only in Scratch (the glob covers both repos); give up loudly at ~3 attempts.
 
 ## TARGET LIST v1 — salt (`Salt/Certs/`), one file each
