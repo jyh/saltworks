@@ -181,35 +181,49 @@ encodeOK Γ reg σ st  ≡  ∀ i : Fin poolSize, i.val < Γ.length → st.get (
 
 ## ⚖️ WITNESS KINDS — rule 6 as amended at council 2026-08-12 (`b1c7677`)
 
-*Rule 6 now asks each certificate to DECLARE what its witness proves, because a
-satisfiability witness and a non-degeneracy witness are different controls: a binder
-inhabited only by degenerate points survives "instantiate and evaluate" untouched.*
-**Every declaration below carries a `Witness:` line. Counts, measured at this landing:**
+*Rule 6 asks each certificate to DECLARE what its witness proves, because a satisfiability
+witness and a non-degeneracy witness are different controls: a binder inhabited only by
+degenerate points survives "instantiate and evaluate" untouched.* **Every declaration below
+carries a `Witness:` line. Counts, RE-DERIVED at this landing (2026-08-12 11:0x):**
 
 ```
-EXEMPT                                   20    no witness — universal statements
-NON-DEGENERACY                           13    a witness chosen so a degenerate one
-                                               would prove nothing
-SATISFIABILITY                            4    a binder exhibited as inhabited
-SATISFIABILITY — NOT WITNESSED, QUESTION  1    cert_task_isolation (Executive.lean)
-                                        ───
-                                         38
+EXEMPT           20    no witness — universal statements
+NON-DEGENERACY   13    a witness chosen so a degenerate one would prove nothing
+SATISFIABILITY    5    a binder exhibited as inhabited
+                ───
+                 38    certificates.  OPEN ROWS: NONE.
+plus              4    NAMED witness_ declarations, all in the axiom census
 ```
-⚠️ **THE ONE OPEN ROW IS THE POINT OF THE EXERCISE, NOT AN OVERSIGHT.** *`cert_task_isolation`
-CONJOINS `Disjoint Pcur Pother` with the writes-within condition over shared objects —
-the same shape as the one vacuous certificate this tier has already caught (the
-`ControlFlow` exit/back split, contradictory in ℕ). Both hypotheses are plainly satisfiable
-ALONE; nothing here exhibits a system satisfying BOTH, and the neighbouring
-`cert_isolation_needs_disjointness` witnesses the OVERLAPPING case, which is the refutation
-rather than an inhabitant.* **The theorem is sound either way — this is a claim about the
-docstring, not the proof.**
+⚠️ ***THIS BLOCK FIRST LANDED WITH A FIFTH ROW — "SATISFIABILITY — NOT WITNESSED, QUESTION: 1"
+— AND IT WENT STALE WITHIN THE HOUR WHEN THE ROW CLOSED. It is re-derived here rather than
+edited in place, because a COUNT and a MISSING-LIST are both derived facts and both rot; a
+missing-list rots in ONE direction only, always over-reporting what is owed, which is why it
+reads as conservative and survives review.***
 
-🔑 **WHAT CLOSING IT REQUIRES, so the next hand does not have to re-derive the cost:** an
-ADDITIVE `example` exhibiting two tasks with REAL WRITES and DISJOINT partitions, with the
-conclusion evaluated. ⛔ ***It must not be closed with empty partitions and empty code:
-that satisfies the binder and proves nothing, and a fixture inert enough to be safe is
-exactly what hides the defect.*** *That is fixture design, not instantiation — which is why
-it was declared open rather than answered.*
+### THE ROW THAT WAS OPEN, and how it closed — kept because the argument is the useful part
+*`cert_task_isolation` CONJOINS `Disjoint Pcur Pother` with the writes-within condition over
+shared objects — the same shape as the one vacuous certificate this tier has caught (the
+`ControlFlow` exit/back split, contradictory in ℕ). Both hypotheses are satisfiable ALONE, and
+`cert_isolation_needs_disjointness` witnesses only the OVERLAPPING case, which is the refutation
+rather than an inhabitant. **So the certificate was landed declaring the question OPEN rather
+than asserting a kind.***
+
+✅ **CLOSED BY TWO SEATS, and the division of labour is the lesson:** *the EVIDENCE seat proposed
+the assignment and stated plainly they had not typechecked it; **this seat typechecked it.** The
+DESIGN judgement was the declined part — a degenerate fixture would have passed — and a peer
+supplying it turned the remainder into a build.* **A decline that names WHICH PART is hard is
+answerable; "wants a fresh head" is not.**
+⭐ **AND IT WAS STRENGTHENED AFTER LANDING, by its own designer reading it harder for that reason:**
+*the first witness used `.ADD 1 1 1`, which on a zeroed register file computes `0 + 0 = 0` — the
+write happened and **nothing moved.** With `.ADDI 1 0 5` register 1 goes `0 → 5` while register 2
+holds at `0`. **A witness that writes without changing anything cannot distinguish "isolation
+holds" from "the step did nothing", and those are the two readings a reader must tell apart.***
+
+📛 **THE WITNESSES ARE NAMED, NOT `example`s (evidence, 11:04).** *`#audit_axioms` takes a NAME, so
+an anonymous witness sits OUTSIDE the axiom census — a certificate could read `[3 axioms]` clean
+while the control proving it non-vacuous was invisible to the audit. **Rule 6 made witnesses
+mandatory and thereby made an unaudited declaration mandatory with them.*** *Fixed while every
+witness still closes by `decide` and the answer costs nothing.*
 
 ## ✅ ROOTED — and ⛔ **THE GREP THAT FALSE-PASSED IT**
 
