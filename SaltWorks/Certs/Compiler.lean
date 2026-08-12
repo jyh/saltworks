@@ -16,6 +16,9 @@ Campaign: `docs/cert-layer-design-0811.md` (the fifth deliverable).
 | `cert_compileS_simulation` | `run_compileS_correct_of_branchFree` | `HDL/CompileS.lean` |
 | `cert_compileS_simulation_with_loops` | `reaches_of_compileS_including_while` | `HDL/WhileSim.lean` |
 | `cert_the_fragment_boundary` | `cause_outside_the_fragment_is_now_ite_only` | `HDL/CompileS.lean` |
+| `cert_branchFree_does_not_imply_compiles` | `branchFree_is_necessary_not_sufficient` | `HDL/CompileS.lean` |
+| `cert_pool_exhaustion_is_a_real_limit` | `cause_pool_exhaustion_at_letmut` | `HDL/CompileS.lean` |
+| `cert_the_fragment_exceeds_branch_free` | `fragment_now_includes_while` | `HDL/CompileS.lean` |
 
 ## ⭐ THE ONE MOVE THIS FILE MAKES: `encodeOK` IS UNFOLDED INTO THE STATEMENTS
 
@@ -82,9 +85,12 @@ this docstring.**
 * **`cert_compileS_simulation_with_loops` is the shape that carries loops** — it says
   a reachable state exists, not that a fixed number of ticks suffices.
 * **The compiler is PARTIAL and this is not a defect of the proofs**: it refuses real
-  programs, and `cert_the_fragment_boundary` exhibits the refusal rather than
-  describing it. **Conditionals do not compile.** At the time of this file that is the
-  only source construct outside the fragment.
+  programs, and §5 EXHIBITS the refusals rather than describing them —
+  **a conditional does not compile** (`cert_the_fragment_boundary`), **an oversized
+  constant does not compile even though it is branch-free**
+  (`cert_branchFree_does_not_imply_compiles`), and **the register pool runs out at
+  level 15** (`cert_pool_exhaustion_is_a_real_limit`). *A conditional is the only
+  source CONSTRUCT outside the fragment; the other two are limits that bite inside it.*
 * **There is no whole-compiler theorem** — no `compile_correct` / `compile_total`
   anywhere in the corpus. These are per-construct simulation results, and a reader
   should not compose them in their head into a claim nobody has proved.
@@ -105,10 +111,13 @@ hold would not typecheck.
 Measured at the landing of this file, quoted from the `#print axioms` block below:
 
 ```
-cert_compileE_value                  [propext, Classical.choice, Quot.sound]
-cert_compileS_simulation             [propext, Classical.choice, Quot.sound]
-cert_compileS_simulation_with_loops  [propext, Classical.choice, Quot.sound]
-cert_the_fragment_boundary           [propext, Quot.sound]
+cert_compileE_value                     [propext, Classical.choice, Quot.sound]
+cert_compileS_simulation                [propext, Classical.choice, Quot.sound]
+cert_compileS_simulation_with_loops     [propext, Classical.choice, Quot.sound]
+cert_the_fragment_boundary              [propext, Quot.sound]
+cert_branchFree_does_not_imply_compiles [propext, Quot.sound]
+cert_pool_exhaustion_is_a_real_limit    [propext, Quot.sound]
+cert_the_fragment_exceeds_branch_free   [propext, Quot.sound]
 ```
 
 No `sorryAx`, no corpus-local axiom.
@@ -117,9 +126,10 @@ No `sorryAx`, no corpus-local axiom.
 
 Every certificate here closes by `exact <landed compiler theorem>`. **So if the `M2`
 node (`acd3982`, which grew `Instr` with `LW`/`SW` and re-cut four statement-level
-layers) had altered any of those four statements, every one of these `exact`s would
-have failed to typecheck.** They did not: this file was written before `M2` landed and
-needed **zero** edits after it.
+layers) had altered any of the landed statements this file cites, the corresponding
+`exact` would have failed to typecheck.** None did: the four simulation rows were
+written before `M2` landed and needed **zero** edits after it, and the three §5
+refusal rows — added after — went green against the post-`M2` corpus on first build.
 
 *That is a kernel-checked statement about `M2`'s reach into the compiler's simulation
 layer — obtained without a single grep, on a day when six census greps across four
@@ -232,6 +242,56 @@ theorem cert_the_fragment_boundary :
   ∧ (compileS regCanonical 16 [(0, Ty.i32)]
       (.while (.slt (.var 0) (.const 5)) .skip)).isSome = true :=
   cause_outside_the_fragment_is_now_ite_only
+
+/-! ## 5. WHAT ELSE IT REFUSES — the other rejection causes, kernel-exhibited
+
+*Added at the evidence seat's 18:14 observation on the executive row: **every other
+certificate in this campaign proves that a claim HOLDS; a certificate over a landed
+NEGATIVE CONTROL proves that a hypothesis is LOAD-BEARING.** "A theorem tells a
+referee the claim is true; a refutation of the hypothesis-free version tells them the
+claim is not vacuous." The corpus has more of these than the cert layer was reaching
+for; these three were landed and unreached.* -/
+
+/-- ⛔ **BEING BRANCH-FREE IS NOT ENOUGH TO COMPILE.** A perfectly ordinary
+straight-line assignment — `x := 99999` — is `branchFree`, and `compileS` **refuses
+it**, because the constant does not fit the machine's immediate field.
+
+*So `branchFree` is a NECESSARY condition in the L1 theorems and not a sufficient one:
+a reader must not conclude from "the branch-free fragment is verified" that every
+branch-free program compiles.* Direction: **same proposition** as
+`branchFree_is_necessary_not_sufficient`. -/
+theorem cert_branchFree_does_not_imply_compiles :
+    branchFree (.assign 0 (.const 99999)) = true
+  ∧ compileS regCanonical 16 [(0, Ty.i32)] (.assign 0 (.const 99999)) = none :=
+  branchFree_is_necessary_not_sufficient
+
+/-- ⛔ **THE REGISTER POOL IS A REAL LIMIT, AT THE STATEMENT LEVEL.** Level 14 has a
+register; level 15 does not. Sixteen nested bindings need a sixteenth cell, `lvlReg`
+refuses, and therefore so does `compileS`.
+
+*A "verified compiler" that silently spilled to memory here would be a different
+program; this one declines.* Direction: **same proposition** as
+`cause_pool_exhaustion_at_letmut`. -/
+theorem cert_pool_exhaustion_is_a_real_limit :
+    (lvlReg regCanonical 14).isSome = true ∧ lvlReg regCanonical 15 = none :=
+  cause_pool_exhaustion_at_letmut
+
+/-- ⭐ **AND THE FRAGMENT IS STRICTLY LARGER THAN THE BRANCH-FREE ONE — the witness
+that the two notions have PARTED.** A loop compiles, and a loop is not `branchFree`.
+
+*This matters for reading §2 against §3: the L1 certificates are scoped to `branchFree`
+statements, but the compiler's domain is bigger than that scope. **The two are no
+longer the same set, and this is the program that separates them.*** Direction: **same
+proposition** as `fragment_now_includes_while`. -/
+theorem cert_the_fragment_exceeds_branch_free :
+    (compileS regCanonical 16 [(0, Ty.i32)]
+       (.while (.slt (.var 0) (.const 5)) .skip)).isSome = true
+  ∧ branchFree (.while (.slt (.var 0) (.const 5)) .skip) = false :=
+  fragment_now_includes_while
+
+#audit_axioms cert_branchFree_does_not_imply_compiles
+#audit_axioms cert_pool_exhaustion_is_a_real_limit
+#audit_axioms cert_the_fragment_exceeds_branch_free
 
 #audit_axioms cert_compileE_value
 #audit_axioms cert_compileS_simulation

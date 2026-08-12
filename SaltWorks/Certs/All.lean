@@ -66,6 +66,13 @@ docstring exactly what, if anything, was traded for readability.
     sequence compiles, a **conditional does not**, a loop does. *A cert layer that only
     restated what was proved would leave the most important fact about this compiler —
     that it refuses half of control flow — visible nowhere.*
+  - ⭐ **THREE MORE REFUSALS, added at evidence's 18:14 observation** that a certificate
+    over a landed NEGATIVE CONTROL proves a hypothesis is load-bearing rather than that
+    a claim holds: `cert_branchFree_does_not_imply_compiles` (a branch-free assignment
+    with an oversized constant is REFUSED — so `branchFree` is necessary, not
+    sufficient) · `cert_pool_exhaustion_is_a_real_limit` (level 14 has a register, level
+    15 does not) · `cert_the_fragment_exceeds_branch_free` (a loop compiles and is not
+    branch-free — the witness that the two notions have PARTED).
 
 * `SaltWorks/Certs/Executive.lean` — **THE EXECUTIVE'S ISOLATION CLAIMS**, four
   certificates, answering the second half of the evidence seat's 03:45 pillar flag
@@ -138,6 +145,9 @@ almost the same thing.)*
 #audit_axioms SaltWorks.Certs.cert_compileS_simulation
 #audit_axioms SaltWorks.Certs.cert_compileS_simulation_with_loops
 #audit_axioms SaltWorks.Certs.cert_the_fragment_boundary
+#audit_axioms SaltWorks.Certs.cert_branchFree_does_not_imply_compiles
+#audit_axioms SaltWorks.Certs.cert_pool_exhaustion_is_a_real_limit
+#audit_axioms SaltWorks.Certs.cert_the_fragment_exceeds_branch_free
 
 #audit_axioms SaltWorks.Certs.cert_side_condition_meaning
 #audit_axioms SaltWorks.Certs.cert_step_frame
