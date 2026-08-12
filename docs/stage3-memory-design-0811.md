@@ -62,10 +62,15 @@ cells vs 47,438 filler). If the window is missed: ③ ships next shuttle, nothin
   refuter finding 18:53: arms and catch-alls are different objects — ExecutiveX1 has
   7-10 arms and ZERO catch-alls; StraightLine has ONE arm and IS the hazard]; the census
   re-runs at D2's opening, keyed on `| _` incl. multi-argument forms, plus wrappers per
-  the Option-T law. AND THE DISCRIMINATOR LAW: touchesMem (and every future
-  discriminator) is CASES-EXHAUSTIVE BY CONSTRUCTION — no catch-all, ever: a new
-  constructor must FAIL TO COMPILE at the discriminator, never default, because a
-  discriminator's default is silently dangerous in whichever direction it points.**
+  the Option-T law. AND THE EXHAUSTIVENESS LAW — RATIFIED BY THE CAPTAIN AT EVENING
+  COUNCIL 19:0x: EXHAUSTIVE ARMS ARE PREFERRED IN ALL CASES, catch-alls only where
+  enumeration is genuinely IMPRACTICAL, and there the FENCE THEOREM is the required
+  floor AND a census row (an uncounted fence recreates the silent class one level up).
+  A new constructor fails to compile at the classification site — the failure surfaces
+  where the bug is. Disposition of the known sites: branchIsForward → exhaustive NOW
+  (math's slot, tonight); isForward + the StraightLine site → exhaustive AT THE ③ PULL
+  (the pre-granted files open then; zero extra churn); touchesMem already fenced by the
+  frame laws (math's control run) and converts on next touch.**
 - **silicon**: D1's RTL/hardening lane + the re-hardening runs (Linux CI path per #522's
   own finding: the submitted-die provenance standard) + MEAS throughout. Its relight
   REMAINS PENDING at its own seam (~17h) — the ③ sprint is the natural fresh-head start.
