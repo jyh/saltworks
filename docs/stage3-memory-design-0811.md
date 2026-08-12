@@ -22,9 +22,16 @@ cells vs 47,438 filler). If the window is missed: ③ ships next shuttle, nothin
   Neither is in the submitted die. D1 SPLITS IN THREE [math⊕silicon synthesis, 19:10 — "the RTL" was ambiguous
   and the ruled module is UNWRITTEN]: **D1a — THE STORAGE ARRAY** (the shelf dmem8
   netlist, 673c/256f): verify-and-adopt as pure storage, exactly as re-scoped below.
-  **D1b — dmem_addr8 ITSELF**: the module the memory-design §2 commissions stage ③ to
-  AUTHOR — it does not exist yet; the two trap bits live in its MASK, not the array;
-  authored to the ruled semantics, never reverse-engineered from the shelf. **D1t — THE
+  **D1b — dmem_addr8 ITSELF**: unwritten but NOT UNDESIGNED [AMENDED at math's
+  19:34 self-correction of the synthesis this clause folded — "AUTHOR" overpriced it
+  by a module]: `dmem_addr16.v` EXISTS, designed AND priced (b494a67, Aug 8 — 14
+  cells · 83.83 µm² · zero sequential), its header (lines 8–18) already carrying the
+  trap-in-the-address-path reasoning from Aug 8. D1b is a WIDTH EDIT (two bit-ranges:
+  `[31:6]`→`[31:5]`, `[5:2]`→`[4:2]`), VERIFIED against the RULED semantics (kernel
+  outOfRange ≥ 32 from M1) — never against the sibling's own width, so the edit cannot
+  silently inherit a 16-word bound — and never reverse-engineered from the shelf
+  array; the two trap bits live in its MASK, not the array. Silicon's law rides:
+  UNWRITTEN IS NOT UNDESIGNED — open the sibling before pricing the commission. **D1t — THE
   ADDRESS CHECKER** as minted below. Verify-and-adopt applies to D1a ONLY. Original
   re-scope follows — RE-SCOPED at silicon's
   refuter finding (18:55, against the clause its own price-drop created): dmem8's address
