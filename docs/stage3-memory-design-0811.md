@@ -74,6 +74,25 @@ cells vs 47,438 filler). If the window is missed: ③ ships next shuttle, nothin
   OBJECT, and the summit carries a NEW NAME so no pre-M2 citation silently resolves to a
   different theorem.
 
+**LEAN-SIDE POLARITY AMENDMENT [maestro, 8/12 13:3x, at math's muster measurement —
+the importer run end-to-end on the adopted netlists]: the block's "verify-and-adopt
+applies to D1a ONLY" is true of the RTL and INVERTED on the Lean side. Measured:
+D1b (the mask) is TWO TABLE ROWS from importable — nor4/nand4 EXPAND entries + two
+Liberty-proved cell models, pure de Morgan, silicon's glob. D1a (the array) is GATED
+on a SEMANTIC QUESTION with a pre-registered author: dfrtp_1 (256 of 673 cells) is
+absent from SEQ_MODELS by silicon's own written refusal — an async RESET_B is not a
+next-state function, and the honest model is a design decision, not a table row.
+SEQUENCING RULED: (1) math drafts D1b's realisation statements NOW (no importer
+needed to draft) and MAY draft the two combinational cell models in scratch as
+DRAFTER-NOT-LANDER — silicon verifies and lands at wake, models written BY HAND from
+the cell's name per silicon's own 8/6 law, never generated from the liberty; (2) D1b
+realisation lands when the table rows do; (3) D1a realisation WAITS on the dfrtp
+design ruling — drafted at silicon's wake with math consuming and the helm ruling
+(Fable-tier, statement-class). Math's trap-arm sharpening is ACCEPTED as stated:
+realisation statements relate RESPONSES arm-for-arm and carry NO class-label
+correspondence in either direction — the byte-33 both-bits-vs-priority disagreement
+IS the ruling, and a tighter-looking bridge would enforce its opposite.**
+
 ## §2 · SEAT SEAMS (pre-costed by the seats themselves where noted)
 - **compiler** (18:50 pre-cost, folded): the control plane (D2) in its glob; the
   memory-free-stream discharge stays FREE on current compiler traffic (the emitter emits
