@@ -53,6 +53,27 @@ SRC=$(git show "$REF:$MOD" 2>/dev/null) || { echo "⛔ meas_scan: cannot read $R
 CODE=$(printf '%s\n' "$SRC" | awk -f "$HERE/strip_lean_comments.awk") || { echo "⛔ meas_scan: comment stripping FAILED — refusing to report clean"; exit 2; }
 [ -n "$CODE" ] || { echo "⛔ meas_scan: stripped source is EMPTY — refusing to report clean"; exit 2; }
 
+# ⛔⛔ GUARD, ADDED 8/12 AT THE SPLIT-TOKEN DISCRIMINATOR (evidence/math's class,
+# run against my own kit). THE EXTRACTOR BELOW IS `grep`, WHICH IS LINE-BASED, so
+# two LEGAL Lean forms are invisible to it — and invisible in the DANGEROUS
+# direction: a declaration it never sees cannot be reported as UNAUDITED, so the
+# coverage verdict reads COMPLETE while a theorem goes unchecked.
+#   CONTROL, 4 planted / 2 found:
+#     @[simp] theorem x            FOUND      theorem plain              FOUND
+#     @[simp,\n reducible] theorem  MISSED     theorem\n  name            MISSED
+# MEASURED LATENT on this corpus: 204 .lean files scanned (204 found — the
+# denominator is printed because my first sweep aborted after ONE file and
+# returned the SAME verdict). Zero occurrences of either form today.
+# ⇒ Rather than rewrite a line-based extractor, REFUSE when a blind form appears.
+# A silent miss becomes a loud stop, and clean input is unaffected.
+BLIND=$(printf '%s\n' "$CODE" | grep -cE '@\[[^]]*$|(^|[[:space:]])(theorem|lemma)[[:space:]]*$' || true)
+if [ "${BLIND:-0}" -gt 0 ]; then
+  echo "⛔ meas_scan: $BLIND line(s) carry a declaration form this extractor CANNOT SEE"
+  echo "⛔ meas_scan: (multi-line @[attribute], or theorem/lemma alone at end of line)"
+  echo "⛔ meas_scan: a missed declaration reads as FULL COVERAGE. Refusing to scan."
+  printf '%s\n' "$CODE" | grep -nE '@\[[^]]*$|(^|[[:space:]])(theorem|lemma)[[:space:]]*$' | head -5 | sed 's/^/    /'
+  exit 2
+fi
 # declarations: attribute prefixes and lemma/theorem both, keyword NOT anchored at col 0
 DECLS=$(printf '%s\n' "$CODE" | grep -oE "^[[:space:]]*(@\[[^]]*\][[:space:]]*)?(private |protected |noncomputable )*(theorem|lemma) [A-Za-z_0-9']+" | awk '{print $NF}' | sort -u)
 AUD=$(printf '%s\n' "$CODE" | grep "^#audit_axioms" | sed 's/^#audit_axioms //' | tr ' ' '\n' | grep -vE '^$' | sort -u)
