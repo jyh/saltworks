@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Jason Hickey, Claude
 -/
 import SaltWorks.Certs.Switch1990
+import SaltWorks.Certs.Compiler
 
 /-!
 # `SaltWorks/Certs/` — the comprehensibility-certificate layer, roll-call
@@ -51,11 +52,25 @@ docstring exactly what, if anything, was traded for readability.
   disclaims the other two**, which are silicon's evidence about a netlist and a
   shuttle submission and are not Lean theorems.
 
-## OWED (target list v1, ≈6 saltworks files)
+* `SaltWorks/Certs/Compiler.lean` — **THE COMPILER'S SIMULATION THEOREMS**, four
+  certificates. Direction: **same proposition** throughout, each closing by `exact`.
+  ⭐ **Its one move is that `encodeOK` is UNFOLDED INTO EVERY STATEMENT** — the landed
+  theorems are stated through that defined predicate, whose name reads like *"the
+  machine state encodes the source state"* while its definition constrains REGISTERS
+  and says nothing about `mem` or the trap flag. With the quantifier written out, the
+  scope is visible in the theorem instead of in a docstring a reader must trust.
+  - `cert_compileE_value` · `cert_compileS_simulation` ·
+    `cert_compileS_simulation_with_loops` — L0, L1 and the loop-carrying L2 shape.
+  - `cert_the_fragment_boundary` — ⛔ **what the compiler REFUSES**, exhibited: a
+    sequence compiles, a **conditional does not**, a loop does. *A cert layer that only
+    restated what was proved would leave the most important fact about this compiler —
+    that it refuses half of control flow — visible nowhere.*
 
-`the compileE/compileS simulation theorems` · `the while/ite scheme correctness pair`
-· `decode_encode` (behind M2) · `witness_chain_discharged` ·
-`step_frame/writesInstr` (the executive's isolation claims, plain form).
+## OWED — 4 of the target list's ≈6 rows remain (2 landed above)
+
+`the while/ite scheme correctness pair` · `decode_encode` (now unblocked — M2 landed
+at `acd3982`) · `witness_chain_discharged` · `step_frame/writesInstr` (the executive's
+isolation claims, plain form).
 
 ⚠️ **THE TRAP FOR EVERY REMAINING ROW IN THIS DIRECTORY, and it is on the DOCSTRING
 surface only.** Iron rule 3 makes the Lean side mechanical — a certificate is *proved
@@ -100,3 +115,8 @@ almost the same thing.)*
 #audit_axioms SaltWorks.Certs.cert_payload_delivery_length
 #audit_axioms SaltWorks.Certs.cert_payload_delivery_loses_nothing
 #audit_axioms SaltWorks.Certs.cert_payload_delivery_recovers_the_landed_statement
+
+#audit_axioms SaltWorks.Certs.cert_compileE_value
+#audit_axioms SaltWorks.Certs.cert_compileS_simulation
+#audit_axioms SaltWorks.Certs.cert_compileS_simulation_with_loops
+#audit_axioms SaltWorks.Certs.cert_the_fragment_boundary
