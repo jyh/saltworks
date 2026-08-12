@@ -23,9 +23,17 @@
 # grep is a FUNCTION in the seat's tool shell. Functions do not cross into a
 # child sh, and EVERY MONITOR IN THIS FLEET RUNS AS: sh /path/script.sh
 #
-# SO THE ONE ENVIRONMENT THAT IS NOT REPRESENTATIVE IS THE ONE WE ALL MEASURE
-# IN. A seat types grep -P, sees it work, ships it inside a backstop, and the
-# backstop gets rc=2 forever. And grep's rc=2 means ERROR -- but every
+# SO THE ENVIRONMENT WE ALL MEASURE IN IS NOT THE ONE OUR INSTRUMENTS RUN IN.
+# A seat types grep -P, sees it work, ships it inside a backstop, and the
+# backstop gets rc=2 forever.
+#
+# AND IT RUNS BOTH WAYS -- evidence measured the INVERSE the same hour: the
+# wrapper skips .gitignored files, so `grep -rl` returned 0 hits in the shell
+# and 106 in a script. The shell is not simply weaker or stronger; it is
+# DIFFERENT, and a search validated in one is not validated in the other.
+# That case also shows why comparing exit status alone is not enough: both
+# contexts returned rc=0 and disagreed on the ANSWER, which is why this tool
+# compares captured OUTPUT too and flags that case as ANSWER!. And grep's rc=2 means ERROR -- but every
 # "if grep -q" and every "&&" in the tree reads nonzero as NO MATCH. The
 # failure is silent, and silent in the reassuring direction.
 #
@@ -53,6 +61,11 @@
 PROBE_DIR="${TMPDIR:-/tmp}/env_probe.$$"
 mkdir -p "$PROBE_DIR" || exit 2
 printf 'abc\n' > "$PROBE_DIR/f"
+# fixture for the "same rc, different answer" probe: one ignored file, one not
+mkdir -p "$PROBE_DIR/gi"
+printf 'hidden.txt\n' > "$PROBE_DIR/gi/.gitignore"
+printf 'NEEDLE\n'     > "$PROBE_DIR/gi/hidden.txt"
+printf 'NEEDLE\n'     > "$PROBE_DIR/gi/shown.txt"
 trap 'rm -rf "$PROBE_DIR"' EXIT INT TERM
 
 # ---- THE TABLE ------------------------------------------------------------
@@ -61,20 +74,21 @@ trap 'rm -rf "$PROBE_DIR"' EXIT INT TERM
 # "timeout" or for "stat -c" over this file hits. Add rows; one line each.
 probe_table() {
 cat <<'TABLE'
-timeout|run a command under a time limit|command -v timeout >/dev/null
-tac|reverse a file's lines|command -v tac >/dev/null
-nproc|CPU count|command -v nproc >/dev/null
-realpath|resolve to an absolute path|command -v realpath >/dev/null
-sha256sum|GNU digest (vs BSD shasum -a 256)|command -v sha256sum >/dev/null
-grep -P|Perl regex, for \d \w and lookarounds|grep -P 'a[0-9]*' "$PROBE_DIR/f" >/dev/null 2>&1
-grep -E|CONTROL PROBE: must pass everywhere|grep -E 'a.c' "$PROBE_DIR/f" >/dev/null 2>&1
-sed -i|in-place edit, NO suffix arg (BSD eats the next arg)|cp "$PROBE_DIR/f" "$PROBE_DIR/s" && sed -i 's/a/A/' "$PROBE_DIR/s" >/dev/null 2>&1
-date -d|parse a date string|date -d '2026-01-01' '+%Y' >/dev/null 2>&1
-stat -c|GNU stat format (vs BSD stat -f)|stat -c '%s' "$PROBE_DIR/f" >/dev/null 2>&1
-base64 -w0|unwrapped base64|base64 -w0 "$PROBE_DIR/f" >/dev/null 2>&1
-readlink -f|resolve symlinks fully|readlink -f "$PROBE_DIR/f" >/dev/null 2>&1
-xargs -r|do not run on empty input|xargs -r echo < /dev/null >/dev/null 2>&1
-find -printf|GNU find output format|find "$PROBE_DIR/f" -printf '%p\n' >/dev/null 2>&1
+timeout|run a command under a time limit|command -v timeout
+tac|reverse a file's lines|command -v tac
+nproc|CPU count|command -v nproc
+realpath|resolve to an absolute path|command -v realpath
+sha256sum|GNU digest (vs BSD shasum -a 256)|command -v sha256sum
+grep -P|Perl regex, for \d \w and lookarounds|grep -P 'a[0-9]*' "$PROBE_DIR/f"
+grep -E|CONTROL PROBE: must pass everywhere|grep -E 'a.c' "$PROBE_DIR/f"
+grep -r ignore|SAME rc, DIFFERENT ANSWER: does -r skip .gitignore'd files?|grep -rl NEEDLE "$PROBE_DIR/gi"
+sed -i|in-place edit, NO suffix arg (BSD eats the next arg)|cp "$PROBE_DIR/f" "$PROBE_DIR/s" && sed -i 's/a/A/' "$PROBE_DIR/s"
+date -d|parse a date string|date -d '2026-01-01' '+%Y'
+stat -c|GNU stat format (vs BSD stat -f)|stat -c '%s' "$PROBE_DIR/f"
+base64 -w0|unwrapped base64|base64 -w0 "$PROBE_DIR/f"
+readlink -f|resolve symlinks fully|readlink -f "$PROBE_DIR/f"
+xargs -r|do not run on empty input|xargs -r echo < /dev/null
+find -printf|GNU find output format|find "$PROBE_DIR/f" -printf '%p\n'
 TABLE
 }
 
@@ -123,8 +137,8 @@ else
   echo '             . tools/env_probe.sh'
 fi
 echo
-printf '  %-12s %-6s %-6s %-10s %s\n' TOKEN HERE CHILD '' 'WHAT IT IS'
-printf '  %-12s %-6s %-6s %-10s %s\n' ------------ ------ ------ ---------- ----------------------------------
+printf '  %-14s %-6s %-6s %-10s %s\n' TOKEN HERE CHILD '' 'WHAT IT IS'
+printf '  %-14s %-6s %-6s %-10s %s\n' -------------- ------ ------ ---------- ----------------------------------
 
 # NO PIPE INTO THE LOOP. "probe_table | while read" runs the loop in a
 # SUBSHELL, so every counter set inside it is discarded at the closing done --
@@ -138,15 +152,28 @@ DISAGREE=0
 CTL_CHILD=FAIL
 while IFS='|' read -r tok what cmd; do
   [ -n "$tok" ] || continue
-  h=$(eval "$cmd" >/dev/null 2>&1 && echo ok || echo FAIL)
-  c=$(env PROBE_DIR="$PROBE_DIR" sh -c "$cmd" >/dev/null 2>&1 && echo ok || echo FAIL)
+  # ⛔ CAPTURE rc BEFORE ANY NORMALISATION, AND KEEP THE PROBE COMMANDS
+  # PIPE-FREE. Measured while building this: adding "| sed" to strip the temp
+  # path made rc the SED's, not the probe's — `find -printf` went from rc=FAIL
+  # to rc=ok in the child and the capability failure vanished from the table.
+  # exit-code-dies-in-a-pipe, inside the instrument built to catch silent
+  # environment failures. Normalisation happens below, on the captured string.
+  h_out=$(eval "$cmd" 2>/dev/null); h_rc=$?
+  c_out=$(env PROBE_DIR="$PROBE_DIR" sh -c "$cmd" 2>/dev/null); c_rc=$?
+  h_out=$(printf '%s' "$h_out" | sed "s|$PROBE_DIR||g" | sort)
+  c_out=$(printf '%s' "$c_out" | sed "s|$PROBE_DIR||g" | sort)
+  [ "$h_rc" -eq 0 ] && h=ok || h=FAIL
+  [ "$c_rc" -eq 0 ] && c=ok || c=FAIL
   [ "$tok" = 'grep -E' ] && CTL_CHILD=$c
   flag=''
-  if [ "$SOURCED" = 1 ] && [ "$h" != "$c" ]; then
-    flag='DISAGREE'
-    DISAGREE=$((DISAGREE + 1))
+  if [ "$SOURCED" = 1 ]; then
+    if [ "$h_rc" != "$c_rc" ] && [ "$h_out" != "$c_out" ]; then flag='DISAGREE*'
+    elif [ "$h_rc" != "$c_rc" ];                              then flag='DISAGREE'
+    elif [ "$h_out" != "$c_out" ];                            then flag='ANSWER!'
+    fi
+    [ -n "$flag" ] && DISAGREE=$((DISAGREE + 1))
   fi
-  printf '  %-12s %-6s %-6s %-10s %s\n' "$tok" "$h" "$c" "$flag" "$what"
+  printf '  %-14s %-6s %-6s %-10s %s\n' "$tok" "$h" "$c" "$flag" "$what"
 done < "$PROBE_DIR/table"
 
 echo
@@ -158,9 +185,13 @@ if [ "$CTL_CHILD" != ok ]; then
   RC=2
 elif [ "$SOURCED" = 1 ] && [ "$DISAGREE" -gt 0 ]; then
   echo "  $DISAGREE TOKEN(S) DISAGREE between your shell and a child script."
-  echo '  Each one WORKS WHEN YOU TEST IT AND FAILS WHEN IT RUNS. Use the CHILD'
-  echo '  column for anything a monitor, cron job, hook or CI executes. Your'
-  echo '  shell is the unrepresentative one.'
+  echo '  DISAGREE = different exit status.  ANSWER! = SAME exit status but'
+  echo '  DIFFERENT OUTPUT -- the dangerous one, invisible to every rc check.'
+  echo '  Use the CHILD column for anything a monitor, cron, hook or CI runs.'
+  echo '  THE DIFFERENCE RUNS BOTH WAYS. The shell can be MORE capable (grep -P'
+  echo '  here) or LESS revealing (evidence, 8/12: the wrapper skips gitignored'
+  echo '  files, so a script saw 106 hits where the shell saw 0). NEITHER'
+  echo '  context is the safe one to test in -- test in the one that will RUN.'
   RC=1
 elif [ "$SOURCED" = 1 ]; then
   echo '  no disagreements -- your shell and a child script agree on every token.'
