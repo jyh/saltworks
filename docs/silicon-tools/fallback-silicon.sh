@@ -126,6 +126,32 @@ try:
 except Exception as ex:
     print("** ACCOUNT READ FAILED: %s **" % ex)' "$acctf" 2>&1)
   fi
-  printf 'FALLBACK %s | bus=%s lines | main watch procs=%s | account=%s | last header: %s\n' \
-    "$(date '+%H:%M')" "$n" "$main" "$km" "$hdr"
+  # ⭐ ADDED 2026-08-11 19:2x — THE MEMORY INDEX OVERFLOWS ITS LOAD LIMIT SILENTLY,
+  # IN BOTH DIRECTIONS. Measured tonight: mine reached 29,040 B against a ~24,400 B
+  # read limit and the CUT FELL AT LINE 44 OF 56 — the last 12 entries had not
+  # loaded at any recent boot, including `pre-register-the-criterion` and
+  # `a-check-never-shown-to-fail`. Compiler independently measured 23,381/24,400
+  # the same hour, having compacted TWICE tonight, once with 395 bytes of headroom.
+  # ⇒ TWO SEATS CONVERGED ON THE CEILING BY THE SAME MECHANISM (appending each new
+  #   instance to the INDEX LINE, ~1 KB/day), so this is STRUCTURAL, not incidental.
+  # 🔑 AND IT EMITS NO SIGNAL EITHER WAY: you cannot see an unloaded tail from
+  #   inside the session, and you cannot see how close you are without `wc -c`.
+  #   A fact you can only learn by remembering to ask does not survive a relight —
+  #   so it goes in the line that already runs, not in a habit.
+  # ⚠️ FOLLOWS THE SEAT via CLAUDE_CONFIG_DIR, so a copy of this script in another
+  #   seat measures ITS OWN index rather than silently reporting mine.
+  IDX=${IDX:-${CLAUDE_CONFIG_DIR:-$HOME/.claude}/projects/-Users-jyh-projects-claude-saltworks/memory/MEMORY.md}
+  IDXLIM=${IDXLIM:-24400}
+  if [ ! -r "$IDX" ]; then
+    idx="** INDEX UNREADABLE at $IDX — CHECK DID NOT RUN **"
+  else
+    ib=$(wc -c < "$IDX" | tr -d ' ')
+    ipct=$(( ib * 100 / IDXLIM ))
+    if   [ "$ib" -ge "$IDXLIM" ]; then idx="$ib/$IDXLIM (${ipct}%) ** OVER — TAIL ENTRIES ARE NOT LOADING **"
+    elif [ "$ipct" -ge 85 ];     then idx="$ib/$IDXLIM (${ipct}%) ** APPROACHING THE CUT — compact now **"
+    else                              idx="$ib/$IDXLIM (${ipct}%)"
+    fi
+  fi
+  printf 'FALLBACK %s | bus=%s lines | main watch procs=%s | account=%s | index=%s | last header: %s\n' \
+    "$(date '+%H:%M')" "$n" "$main" "$km" "$idx" "$hdr"
 done
