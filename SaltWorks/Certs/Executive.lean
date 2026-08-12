@@ -253,14 +253,27 @@ had declined; a peer supplying it is what made the evaluation mechanical.*
 
 ⛔ **WHY IT IS NOT THE DEGENERATE WITNESS:** *empty partitions and empty code satisfy this binder
 and prove nothing. Here the current task's program is NON-EMPTY and its instruction genuinely
-WRITES — `writesInstr (.ADD 1 1 1) = some 1`, a real register and not `x0`, whose write `St.set`
-would discard. The hypotheses below are each discharged by `decide`, not assumed.* -/
+WRITES — `writesInstr (.ADDI 1 0 5) = some 1`, a real register and not `x0`, whose write `St.set`
+would discard. The hypotheses below are each discharged by `decide`, not assumed.*
+
+⭐ **AND THE STEP CHANGES A VALUE, WHICH IS A SECOND AND STRONGER CONDITION — evidence's
+strengthening at 11:02, taken.** *The witness first landed with `.ADD 1 1 1`, which on a zeroed
+register file computes `0 + 0 = 0`: **the write happened and nothing moved.** That inhabits the
+binder and exercises nothing. With `.ADDI 1 0 5` the machine actually does something, kernel-measured:*
+```
+register 1   0  →  5     the current task's own partition — CHANGED
+register 2   0  →  0     the other task's partition — the isolation claim, HELD
+```
+***A witness that writes without changing anything cannot distinguish "isolation holds" from "the
+step did nothing", and those are the two readings a reader has to tell apart.*** *Same class as the
+day's other findings: the witness was VALID and the claim about its strength was the weak part —
+found by the seat that designed it, reading their own proposal harder for exactly that reason.* -/
 
 def witPcur : Partition := {1}
 def witPother : Partition := {2}
 
 def witCodes : Vector (List Instr) 2 :=
-  Vector.ofFn (fun i : Fin 2 => if i = 0 then [Instr.ADD 1 1 1] else [])
+  Vector.ofFn (fun i : Fin 2 => if i = 0 then [Instr.ADDI 1 0 5] else [])
 
 def witSys : SysSt 2 :=
   { regs := Vector.replicate 32 0, pcs := Vector.replicate 2 0, cur := 0 }
