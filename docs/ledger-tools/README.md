@@ -44,9 +44,24 @@ a CONFESSION invites trust.** *The 8/7 note did not fail; it was never wired to
 anything, so it aged into a decoration on an inventory that kept drifting.*
 
 ⚠️ **So: this table is a set of ANNOTATIONS on tools that earned a paragraph, not
-an inventory. For the inventory, run the loop.** *The 24 rows still owed are
-owed; they are absent, not deliberately excluded, and no reading of this file
-should treat an unlisted tool as unowned or disposable.*
+an inventory. For the inventory, run the loop.** *The **24 rows owed as of
+2026-08-11 20:0x** are absent, not deliberately excluded — no reading of this
+file should treat an unlisted tool as unowned or disposable. **Re-run the loop
+before quoting that 24; it is a reading, not a property.***
+
+> 🔬 ***AND `prose_rot.py` — THIS SEAT'S OWN STALENESS SWEEP — WAS RUN AGAINST
+> THIS FILE AT 20:1x AND DID NOT FIND THE DEFECT ABOVE.*** *It returned three (A)
+> findings, all three pointing at sentences written twenty minutes earlier in
+> this very banner, plus a 38-row (B) list whose entries include `2026`, `08` and
+> `07` tokenized out of one date. **The stale thing was two days old and invisible;
+> the fresh thing was flagged three times.***
+> 🔑 ***THE REASON IS STRUCTURAL AND WORTH MORE THAN THE MISS: THIS DEFECT
+> CONTAINS NO FALSE SENTENCE.*** *The 8/7 note is accurate history. Every table row
+> is accurate. What was false is the COMPOSITION — an accurate confession above an
+> accurate partial table implies a completeness that nothing states.* **A sweep
+> that hunts false sentences cannot see a defect made of true ones, and no regex
+> fixes that. Only REGENERATION does — which is why the loop is in the file and
+> the count is dated.**
 
 | File | What it is |
 |---|---|
