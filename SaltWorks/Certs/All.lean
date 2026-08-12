@@ -6,6 +6,7 @@ Authors: Jason Hickey, Claude
 import SaltWorks.Certs.Switch1990
 import SaltWorks.Certs.Compiler
 import SaltWorks.Certs.Executive
+import SaltWorks.Certs.ControlFlow
 
 /-!
 # `SaltWorks/Certs/` — the comprehensibility-certificate layer, roll-call
@@ -99,10 +100,31 @@ docstring exactly what, if anything, was traded for readability.
   liveness**. *Since M2 the machine has real load/store, so memory isolation is not
   merely unproved here — it is not addressed.*
 
-## OWED — 3 of the target list's ≈6 rows remain (3 landed above)
+* `SaltWorks/Certs/ControlFlow.lean` — **THE `while` / `ite` OFFSET SCHEMES**, ten
+  certificates.
+  ⛔ **ITS HEADLINE IS A SCOPE REFUSAL: the `ite` half is PROVED AND NOT WIRED.** *A
+  reader who sees "the while/ite scheme pair is certified" will conclude the compiler
+  handles conditionals. It does not — `compileS` returns `none` on every `ite`, which
+  `Certs/Compiler.lean` proves. This file certifies the ite OFFSET ARITHMETIC and
+  nothing about a compiler path that does not exist.*
+  - `cert_exit_branch_lands` · `cert_back_branch_lands` — the offsets land correctly at
+    **every block size** (the backward one gets there by WRAPPING, which is why it
+    needed a proof rather than an inspection), plus the same pair at the machine's own
+    `step`.
+  - `cert_the_bound_is_tight_on_both_sides` · `cert_the_two_directions_differ_by_one` —
+    ⭐ the 12-bit bound is **asymmetric and DERIVED, not chosen**: past the backward
+    limit a back-edge becomes a forward jump; past the forward limit an exit becomes a
+    re-entry. *Same off-by-one, opposite catastrophes.*
+  - `cert_while_scheme_runs` · `cert_ite_scheme_runs` — finite, kernel-executed
+    non-vacuity, each loop row carrying its own HALT proof.
+  - `cert_a_wrong_backward_offset_never_terminates` ·
+    `cert_a_wrong_ite_offset_keeps_the_right_value` — ⛔ the two mutants where **the
+    observable value is CORRECT and the program is BROKEN**. *Only the halt check
+    separates the first; only observing the right thing separates the second.*
 
-`the while/ite scheme correctness pair` · `decode_encode` (now unblocked — M2 landed
-at `acd3982`) · `witness_chain_discharged`.
+## OWED — 2 of the target list's ≈6 rows remain (4 landed above)
+
+`decode_encode` (now unblocked — M2 landed at `acd3982`) · `witness_chain_discharged`.
 
 ⚠️ **THE TRAP FOR EVERY REMAINING ROW IN THIS DIRECTORY, and it is on the DOCSTRING
 surface only.** Iron rule 3 makes the Lean side mechanical — a certificate is *proved
@@ -160,3 +182,14 @@ almost the same thing.)*
 #audit_axioms SaltWorks.Certs.cert_step_frame
 #audit_axioms SaltWorks.Certs.cert_task_isolation
 #audit_axioms SaltWorks.Certs.cert_isolation_needs_disjointness
+
+#audit_axioms SaltWorks.Certs.cert_exit_branch_lands
+#audit_axioms SaltWorks.Certs.cert_back_branch_lands
+#audit_axioms SaltWorks.Certs.cert_exit_branch_lands_at_the_machine
+#audit_axioms SaltWorks.Certs.cert_back_branch_lands_at_the_machine
+#audit_axioms SaltWorks.Certs.cert_the_bound_is_tight_on_both_sides
+#audit_axioms SaltWorks.Certs.cert_the_two_directions_differ_by_one
+#audit_axioms SaltWorks.Certs.cert_while_scheme_runs
+#audit_axioms SaltWorks.Certs.cert_ite_scheme_runs
+#audit_axioms SaltWorks.Certs.cert_a_wrong_backward_offset_never_terminates
+#audit_axioms SaltWorks.Certs.cert_a_wrong_ite_offset_keeps_the_right_value
