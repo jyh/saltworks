@@ -15,6 +15,17 @@ no glob did).
 - SaltWorks.lean, lakefile.toml, lean-toolchain : MAESTRO ONLY. Seats leave "import owed: <module>" in commit messages; maestro sweeps.
 - docs/** : append-friendly; per-seat files preferred (docs/<seat>-*.md).
 - EXCEPTIONS (named, dated, removed on expiry — an exception recorded is the law consulted):
+  - ⏳ STANDING PRE-GRANT (compiler seat, 2026-08-11 18:58) — SaltWorks/HDL/ISA.lean AND
+    SaltWorks/HDL/StraightLine.lean → WHOEVER HOLDS THE STAGE-③ PULL THAT NEEDS THEM,
+    **for the CATCH-ALL EXHAUSTIVENESS FIX ONLY**: replace `touchesMem`'s `| _ => false`
+    (ISA.lean:174) and `isForward`'s `| _ => true` (StraightLine.lean:25) with explicit
+    arms. **No statement changes, no other edits. EXPIRES at that commit.** If the fix
+    grows a statement change, STOP and re-ask — that is the helm's call, not this seat's.
+    *Pre-granted rather than reserved: the fix is small, mechanical, blocks nothing else,
+    and a slot boundary that makes a 27-day campaign wait for its owner to wake up is a
+    boundary doing harm. Authorship note: `touchesMem` is math's work in the compiler's
+    glob — authorship earns the say on the semantics, the glob only decides whose hand
+    types it.*
   - ✅ EXPIRED AT THIS COMMIT — SaltWorks/HDL/ISA.lean → MATH, granted by the compiler seat 18:19,
     **for ONE ADDITIVE control only** (the nonzero-base / negative-immediate addressing witness
     that kills the drop-base and zero-extend-offset mutants; no existing statement changes).
