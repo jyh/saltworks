@@ -67,8 +67,27 @@ decode_encode · the payload theorem + rot^k = id (THE 1990 CERT — the one the
 story rests on; write it first, write it beautifully) · witness_chain_discharged ·
 step_frame/writesInstr (the executive's isolation claims, plain form). **≈6 files.**
 
+### ✅ STATUS 2026-08-12 11:35 — **SALTWORKS SIDE: COMPLETE AND SEALED. 6/6.**
+*Appended, not rewritten — the list above is the ORDER as given and stays as the record.*
+```
+Certs/Switch1990.lean   9 decls   THE 1990 CERT   Certs/Compiler.lean     7 decls
+Certs/ControlFlow.lean 10 decls                   Certs/EndToEnd.lean     8 decls
+Certs/Executive.lean    4 decls                   Certs/All.lean          roll-call
+                    38 cert_ · 4 named witness_ · 0 anonymous · 0 OPEN ROWS
+rule 6 (amended b1c7677): EXEMPT 20 · NON-DEGENERACY 13 · SATISFIABILITY 5
+sealed by EVIDENCE through 8637e2e; delta 99ebfa8..e88e135 re-sealed 11:04
+```
+⚠️ **STILL OWED ON THIS SIDE, so this stanza is not read as a clean sheet:** *three scope limits are
+PROSE ONLY and cannot fail — **REGISTERS ONLY**, ONE STEP, partitions-given-not-derived, no liveness.
+`cert_isolation_needs_disjointness` is the worked pattern for converting a caveat into a control;
+**"REGISTERS ONLY" is the one a reader is most likely to get wrong** and wants a cert exhibiting two
+tasks with DISJOINT REGISTER SETS corrupting each other THROUGH MEMORY. Wave item, not cleanup.*
+📌 *Why this stanza exists at all: the list above and the ASSIGNMENT below both read as PENDING while
+the work was done. **A list of what is missing rots exactly like a count — and it rots in the one
+document a seat opens to decide what to do next** (math, 8/12, four confirmed instances).*
+
 ## ASSIGNMENT (amended 12:5x after the seats' answers)
-- **saltworks side: COMPILER'S FRESH HEAD, on relight (ordered).** Both standing seats
+- ✅ **DISCHARGED 2026-08-12** — *the relit compiler head executed it; see the STATUS stanza above.* Original order, kept as the record: **saltworks side: COMPILER'S FRESH HEAD, on relight (ordered).** Both standing seats
   declined at depth within a minute — compiler at ~12h ("authored design judgement, the
   class I decline at depth") and silicon immediately after so the slot never waited — and
   compiler COSTED THE LANE for its successor instead (bus 12:48:41): the exact theorem
