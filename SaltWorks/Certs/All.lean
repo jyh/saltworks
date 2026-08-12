@@ -20,17 +20,24 @@ docstring exactly what, if anything, was traded for readability.
 
 ## LANDED
 
-* `SaltWorks/Certs/Switch1990.lean` — **THE 1990 CERT**, five certificates over the
+* `SaltWorks/Certs/Switch1990.lean` — **THE 1990 CERT**, **nine declarations** over the
   Batcher–banyan switch the paper's §1 story rests on. Direction: **equality or the
-  same proposition** throughout, nothing traded.
+  same proposition** throughout — with the one exception named in the file and closed
+  by proof rather than by wording (`cert_payload_delivery`, below).
   - `cert_full_circle` / `cert_address_restored_after_three_stages` — `rot^k = id`
     in plain vocabulary (`moveHeadToTail`, `afterStages`, both proved equal to the
     corpus's `rotStage`/`Function.iterate`), certifying
     `SaltWorks.HDL.rotate_full_circle`.
   - `cert_length_premise_is_load_bearing` — the one line showing the corpus's own
     `addr.length = k` identification is not decoration.
-  - `cert_stage_reads_original_bit` — the self-routing consequence, one-directional,
-    certifying `SaltWorks.HDL.stage_reads_original_bit`.
+  - `cert_head_after_stages` — ⭐ the self-routing consequence **at any width**: after
+    `m` stages the head is the original entry at index `m`. *Added at the refuter's
+    17:50 finding — the file's prose stated the reading rule generally (`k−1−m`) while
+    its only backing theorem was pinned at `k = 3`.*
+  - `cert_stage_reads_original_bit` — the same fact in the fabric's 3-bit MSB-first
+    numbering, certifying `SaltWorks.HDL.stage_reads_original_bit`. **Its `k = 3` scope
+    is now stated in its own docstring**, and the width-general content sits in the row
+    above rather than in a sentence.
   - `cert_payload_delivery` — the Batcher half at the tapeout instance `P = 8`,
     certifying `L1Payload.l1_full_load_payload_delivery`, read one payload cycle at
     a time. ⭐ **Its no-trade claim is KERNEL-PROVED, not asserted**: the per-cycle
@@ -85,6 +92,7 @@ almost the same thing.)*
 -/
 
 #audit_axioms SaltWorks.Certs.cert_full_circle
+#audit_axioms SaltWorks.Certs.cert_head_after_stages
 #audit_axioms SaltWorks.Certs.cert_length_premise_is_load_bearing
 #audit_axioms SaltWorks.Certs.cert_address_restored_after_three_stages
 #audit_axioms SaltWorks.Certs.cert_stage_reads_original_bit

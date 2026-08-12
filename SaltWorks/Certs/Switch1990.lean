@@ -19,6 +19,7 @@ Landed theorems certified here, by name:
 | --- | --- | --- |
 | `cert_full_circle` | `SaltWorks.HDL.rotate_full_circle` | `HDL/Rotation.lean` |
 | `cert_address_restored_after_three_stages` | the above, at `k = 3` | — |
+| `cert_head_after_stages` | proved directly (the width-general form) | — |
 | `cert_stage_reads_original_bit` | `SaltWorks.HDL.stage_reads_original_bit` | `HDL/RotationInvariant.lean` |
 | `cert_payload_delivery` | `L1Payload.l1_full_load_payload_delivery` | `HDL/PayloadL1.lean` |
 
@@ -44,11 +45,18 @@ both would be exactly the upward lie iron rule 2 forbids.**
   and then moves that bit to the end. Do that once per stage, and after as many
   stages as the address has bits, the address is **back to exactly what it was**.
   That is the paper's own §3.2 sentence, and it is `rot^k = id`.
-* **`cert_stage_reads_original_bit`** — the consequence that makes the trick
-  useful: because the address rotates under it, **every cell reads its route bit
-  in the same fixed position** (the head), and the bit sitting there at stage `m`
-  is original address bit `k−1−m`. The cells are identical; the address does the
-  work.
+* **`cert_head_after_stages`** — the consequence that makes the trick useful, **at
+  any width**: after `m` stages the entry at the head is the *original* entry at
+  index `m`. So every cell reads its route bit in the **same fixed position** (the
+  head); the cells are identical and the address supplies the difference by rotating.
+* **`cert_stage_reads_original_bit`** — the same fact **in the fabric's own bit
+  numbering, at `k = 3`**: the head at stage `m` is destination bit `2 − m`.
+  ⚠️ *The `k−1−m` phrasing of that rule is general, but this theorem is PINNED at
+  `k = 3` (`2 - m`, `m < 3`) because MSB-first bit numbering is a fact about the
+  fabric's 3-bit frame, not about rotation. **The general content lives in
+  `cert_head_after_stages`; this row is its instance.*** *(Refuter's finding,
+  2026-08-11: a prose formula with a free parameter beside a Lean statement with
+  that parameter fixed reads as general and certifies an instance.)*
 * **`cert_payload_delivery`** — the other half of the Batcher–banyan pair: after
   the six header cycles, the compare–exchange element carries the two payloads on
   its two output lines **ordered by destination**, one bit per cycle.
@@ -56,8 +64,9 @@ both would be exactly the upward lie iron rule 2 forbids.**
 ## ⚠️ TWO DEVICES, NOT ONE — and the certificate keeps them apart
 
 The 1990 chipset is a **Batcher–banyan** switch: a sorting network followed by a
-self-routing network. `cert_full_circle` and `cert_stage_reads_original_bit` are
-about the **banyan** cell (self-routing on a rotating address). `cert_payload_
+self-routing network. `cert_full_circle`, `cert_head_after_stages` and
+`cert_stage_reads_original_bit` are about the **banyan** cell (self-routing on a
+rotating address). `cert_payload_
 delivery` is about the **Batcher** compare–exchange element (sorting). They are
 different devices with different proofs, grouped in one file because the campaign's
 target list groups them. *A certificate that said "the switch" without saying which
@@ -75,8 +84,8 @@ this docstring as an English sentence. **It is not decorative**, and
 
 ## SCOPE LIMITS carried from the landed theorems (nothing here is wider)
 
-* **One-directional.** `cert_stage_reads_original_bit` states *stage `m` ⇒ the head
-  is original bit `k−1−m`*, never the converse. Recovering `m` from a healed header
+* **One-directional.** `cert_head_after_stages` and `cert_stage_reads_original_bit`
+  state *stage `m` ⇒ that entry / that bit*, never the converse. Recovering `m` from a healed header
   is **unavailable, not merely unproved**: it would need the address bits to be
   duplicate-free, and a 3-bit list of booleans never is.
 * **Validity antecedent.** The rotation-invariant results are about a *valid*
@@ -113,13 +122,14 @@ after the campaign's own W-CERT-1 wave established the better discipline.*
 ## AXIOMS (iron rule 4)
 
 Measured at the landing of this file, from the `#print axioms` block below — quoted
-rather than summarised, because four of the five are *stronger* than the campaign's
+rather than summarised, because five of the nine are *stronger* than the campaign's
 bar of "at most the standard three":
 
 ```
 cert_full_circle                                    [propext, Quot.sound]
 cert_length_premise_is_load_bearing                  no axioms at all
 cert_address_restored_after_three_stages            [propext, Quot.sound]
+cert_head_after_stages                              [propext, Quot.sound]
 cert_stage_reads_original_bit                       [propext, Quot.sound]
 cert_payload_delivery                               [propext, Classical.choice, Quot.sound]
 cert_payload_delivery_length                        [propext, Classical.choice, Quot.sound]
@@ -205,13 +215,35 @@ theorem cert_address_restored_after_three_stages (d : ℕ) :
     afterStages 3 (addressBits d) = addressBits d :=
   cert_full_circle (addressBits d) 3 rfl
 
+/-- ⭐⭐ **THE GENERAL FORM — every stage reads the next original entry, at ANY width.**
+After `m` stages, the entry at the head is the original entry at index `m`. No `k = 3`,
+no address vocabulary, no fabric: this is the whole self-routing mechanism as a fact
+about lists.
+
+*Added 2026-08-11 at the refuter's finding: this file's prose claimed the reading rule
+in general form (`k−1−m`) while the only theorem backing it was pinned at `k = 3`. **A
+prose formula with a free parameter, printed beside a Lean statement with that
+parameter fixed, reads as general and certifies an instance.** This is the general
+statement the prose was always describing.* -/
+theorem cert_head_after_stages {α : Type*} (l : List α) (m : ℕ) (hm : m < l.length) :
+    (afterStages m l).head? = l[m]? := by
+  rw [afterStages_eq_iterate, rotStage_iterate,
+    List.rotate_eq_drop_append_take hm.le, List.head?_eq_getElem?,
+    List.getElem?_append_left (by simp; omega), List.getElem?_drop, Nat.add_zero]
+
 /-- ⭐⭐ **WHY THE ROTATION IS THE POINT — every cell reads the same position.**
 At stage `m`, the bit at the *head* of the address is original destination bit
 `2 − m`. So all three stages are the **identical cell** reading the **identical
 wire**, and the address supplies the difference by rotating.
 
+⚠️ **SCOPE: this is the `k = 3` INSTANCE**, and deliberately so — `2 - m` and
+`m < 3` are the fabric's 3-bit MSB-first frame, not a simplification of a general
+proof. **The width-general content is `cert_head_after_stages` above** (the head
+after `m` stages is the original entry at index `m`, for any list); what `k = 3`
+buys here is the translation from *list index* to *numeric bit*.
+
 Stated one-directionally (stage `m` ⇒ that bit); the converse is unavailable, see
-the docstring. Direction: **same proposition** as
+the header docstring. Direction: **same proposition** as
 `SaltWorks.HDL.stage_reads_original_bit` with the validity antecedent discharged at
 `v = true`. -/
 theorem cert_stage_reads_original_bit (d : ℕ) (m : ℕ) (hm : m < 3) :
@@ -312,6 +344,7 @@ theorem cert_payload_delivery_recovers_the_landed_statement (d0 d1 : ℕ) (hd0 :
     (cert_payload_delivery_length d0 d1 hd0 hd1 hne p0 p1 hp0 hp1)
     (fun u hu => cert_payload_delivery d0 d1 hd0 hd1 hne p0 p1 hp0 hp1 u hu)
 
+#audit_axioms cert_head_after_stages
 #audit_axioms cert_full_circle
 #audit_axioms cert_length_premise_is_load_bearing
 #audit_axioms cert_address_restored_after_three_stages
@@ -324,6 +357,7 @@ theorem cert_payload_delivery_recovers_the_landed_statement (d0 d1 : ℕ) (hd0 :
 #print axioms cert_payload_delivery_length
 #print axioms cert_payload_delivery_loses_nothing
 #print axioms cert_payload_delivery_recovers_the_landed_statement
+#print axioms cert_head_after_stages
 #print axioms cert_full_circle
 #print axioms cert_length_premise_is_load_bearing
 #print axioms cert_address_restored_after_three_stages
