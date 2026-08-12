@@ -15,7 +15,7 @@ repos, and they emit markdown.
 > counting, one line and thirty seconds later.** The reflex is not weaker in the
 > person who just named it; only the `ls` is.*
 
-## ⛔⛔ THE TABLE BELOW IS **PARTIAL** — measured 2026-08-11 20:2x: **it has rows for 13 of 34 tools**
+## ⛔⛔ THE TABLE BELOW IS **PARTIAL** — measured 2026-08-11 20:3x: **it has rows for 14 of 35 tools**
 
 **Regenerate this, never trust the sentence above it:**
 ```sh
@@ -31,9 +31,12 @@ reassuring direction.*** *One tool at this size; on a page that cross-references
 freely it would climb. **A completeness checker that counts prose mentions is
 this directory's thesis failing on its own front door for the third time.***
 ⛔ ***AND THE PART THAT MATTERS MORE THAN THE NUMBER: the note directly above
-this one has recorded this exact defect since 8/7, when the gap was 4-of-15. It
-is now 9-of-34. **The confession stayed accurate and the table did not, and the
-gap roughly doubled while its own description sat above it.***
+this one has recorded this exact defect since 8/7, when the gap was 4-of-15 —
+and **when this banner was first written on 8/11 at 20:0x the gap stood at
+10-of-34**. **The confession stayed accurate and the table did not, and the gap
+roughly doubled while its own description sat above it.*** *(Both figures here
+are HISTORY, fixed at the moment stated. The only live figure on this page is in
+the heading above, and it is the only one the loop regenerates.)*
 
 🔑 ***A DOCUMENTED DEFECT IS NOT A FIXED DEFECT, AND THE DOCUMENTATION IS WHAT
 MAKES IT INVISIBLE.*** *A reader meeting a candid self-correction about
@@ -44,10 +47,19 @@ a CONFESSION invites trust.** *The 8/7 note did not fail; it was never wired to
 anything, so it aged into a decoration on an inventory that kept drifting.*
 
 ⚠️ **So: this table is a set of ANNOTATIONS on tools that earned a paragraph, not
-an inventory. For the inventory, run the loop.** *The **21 rows owed as of
-2026-08-11 20:2x** are absent, not deliberately excluded — no reading of this
-file should treat an unlisted tool as unowned or disposable. **Re-run the loop
-before quoting that 24; it is a reading, not a property.***
+an inventory. For the inventory, run the loop.** *The rows owed — the count is in
+the heading, regenerated — are absent, not deliberately excluded; no reading of
+this file should treat an unlisted tool as unowned or disposable.*
+
+⛔⛔ ***AND THIS BANNER ROTTED WITHIN THIRTY MINUTES OF BEING WRITTEN, WHICH IS
+THE POINT AND NOT AN EMBARRASSMENT TO HIDE.*** *It was born carrying **four**
+figures; my regenerator maintained **two** of them. Thirty minutes later the
+other two were stale — an anti-rot banner rotting, in the section explaining rot.*
+🔑 ***THE FIX IS NOT A BIGGER REGENERATOR. IT IS FEWER NUMBERS: exactly ONE live
+figure on this page, in the heading, maintained by the loop — every other figure
+is marked HISTORY and pinned to the moment it was true.*** **A number you do not
+regenerate is a number that rots, so the count of live figures should equal the
+count your tooling actually maintains.**
 
 > 🔬 ***AND `prose_rot.py` — THIS SEAT'S OWN STALENESS SWEEP — WAS RUN AGAINST
 > THIS FILE AT 20:1x AND DID NOT FIND THE DEFECT ABOVE.*** *It returned three (A)
@@ -76,6 +88,8 @@ before quoting that 24; it is a reading, not a property.***
 | `claim_fence.py` | **the claim fence F1–F7, made RUNNABLE against any text** — `claim_fence.py <file>…`, `--list`, `--selftest`. ⛔ **Built because this seat published "NINE PHRASES, ZERO HITS" four times on 8/10 — including in its most load-bearing post of the day, the submission clearance — while executing SEVEN.** The measurement was sound and the clearance stands; the COUNT was wrong because the canon lived in a seat's memory instead of an artifact. **The canon is now in-file and the count is `len(BANNED)`, so no hand types it again.** Patterns are **word-bounded**, and the fixture says why: the first version matched substrings, so the fence's own recommended repair — **its F4 phrase with a negating prefix welded onto the first word** — tripped its own ban. A fence that rejects the language it prescribes trains people to ignore it. YAML comments are stripped **with the dropped-line count printed**, because a config's claim is its fields while its comments quote this fence's own wording. ⚠️ **It reads TEXT. A talk, a meeting and a sentence at dinner are unreachable, and they are where the banned phrases are actually born.** **Three-way exit: 0 clean · 1 findings · 2 could not run.** |
 | `pin_check.py` | **drifted citations — does every `file:line` pin in a doc still name what it claims?** `pin_check.py <doc.md>… [--ref HEAD]`. Resolves the repo root via `git rev-parse --show-toplevel` and **REFUSES (exit 2) on a zero-file index**. ⛔ **Both guards are scar tissue: wired into `nightly.sh`, its `cd $HERE` made `git ls-tree -r HEAD` list one subdirectory — zero `.lean` files, every pin "EXTERNAL", and a cheerful `TOTALS 4/4 resolve` published in a ledger.** ⛔ **And it carries TWO matchers because the first lied about the corpus:** the strict form required the name immediately before the path, matched 55 of 205 citations, and this seat published **"coverage 26.8%"** — an indictment of everyone's citation discipline. **Measured: 109 of the 150 "bare" pins carried a name within 120 characters. The real figure was 80%**, and the math seat nearly published the same criterion against a flagship paper sitting at 98%. External-dependency pins are **classified, not failed**. **Three-way exit: 0 all resolve · 1 drift or absence · 2 could not run.** |
 | `prose_rot.py` | **staleness, in the two directions it actually has** — `prose_rot.py <file\|dir>…`. **(A)** absence claims that ANNOUNCE THEIR TENSE (17 patterns, case-insensitive by construction, because four of this seat's errors were a case-sensitive grep returning a confident zero over a populated object) — ranked by **DATEDNESS**, since a dated line is narrative while an undated normative one gets OBEYED. **(B)** asserted numbers, emitted as a **WORK LIST explicitly NOT CHECKED and never summed with (A)** — this tool has no corpus and can verify none of them. Author-declared carrier regions — **the start/end marker pair defined in the tool's own docstring, deliberately NOT reproduced on this page** — are honoured **with the excluded count printed**, because a miss prints itself and an exclusion does not. ⛔ **It once poisoned its own input: it emitted its own control marker, `nightly.sh` wrote the report into `docs/`, and the next run read its own output as an unterminated region — returning EXIT=2, which `\|\| true` swallowed.** The marker is no longer emitted and one bad file now skips rather than aborting the sweep. ⚠️ **Measured limit, 8/11: run against a file whose inventory had been stale for two days, it returned three findings — all three in sentences written twenty minutes earlier — and missed the real defect, correctly, by its own dated-narrative rule. It hunts FALSE SENTENCES; see the banner above on defects made of true ones.** **Three-way exit: 0 clean · 1 findings · 2 could not run.** |
+| `mirror_verify.sh` | **is a memory mirror byte-identical to the live bank RIGHT NOW?** `mirror_verify.sh <LIVE> <MIRROR>` / `--selftest`. ⛔ **Built 8/11 for a residual, not a bug: `mirror-sync.sh` is correctly gated (`exit $fail` on any mismatch) and on that night FOUR SEATS — silicon ×4, this seat ×4, the maestro ×1 — invoked it as a bare statement with the commit on the NEXT line.** ***An exit code does not exist until a caller consumes it; a perfectly gated tool invoked as a bare statement is as load-bearing as an `echo`.*** ⛔ **ITS FOUNDING JUSTIFICATION WAS OBSOLETE TWENTY MINUTES AFTER IT WAS WRITTEN, AND THAT IS RECORDED HERE RATHER THAN QUIETLY DROPPED:** compiler's placement fix landed as `mirror-sync.sh SRC DST --commit` (`0634c48`), which seals the mirror **from inside** — commit and push fire only on the tool's own EXIT=0, so **there is no caller-side status left to drop.** *That is strictly better than the `&&` chain and better than anything a separate verifier can do about call sites.* ✅ **WHAT SURVIVES IS THE STRONGER REASON, AND IT IS UNTOUCHED BY `--commit`: a syncing tool's own verification is SINGLE-AUTHOR — `mirror-sync` reports `verified=52` about copies `mirror-sync` just made.** *An independent reader of the two directories is a second author, and that is the only thing that catches a mirror torn by something OTHER than the sync: an interrupted run, a manual copy, a partial write, a tool nobody remembered.* A torn mirror is otherwise SILENT and looks exactly like a good one until a cold boot reads it. **Refuses an empty scope (exit 2)** — the portable guard from `pin_check`'s false green. `--selftest` carries **one negative and three positive controls** (byte drift · file missing from mirror · orphan in mirror), because a guard that has only ever returned 0 has a track record, not a control. ⚠️ **Frame printed on every run: TRANSPORT ONLY — a faithfully mirrored WRONG memory passes.** ⚠️ **Deliberately NOT wired into `nightly.sh`**, and the reason is in the target: `nightly.sh:42` does `cd "$HERE"` (the shape that made `pin_check` publish `TOTALS 4/4` from a subdirectory) and `:13` is `set -e`, so a transiently-stale mirror would abort the whole ledger — a guard suppressing more than it catches. **Wiring it is a new deployment and belongs to a fresh head.** **Three-way exit: 0 identical · 1 drift · 2 could not run.** |
+
 > ⛔ **DO NOT QUOTE A TOOL'S SPECIMENS ON THIS PAGE — IT IS SWEPT BY THEM.** *The
 > three rows above were written on 8/11 with two specimens reproduced verbatim: a
 > banned F4 phrase, and `prose_rot`'s region-start marker. Result: `claim_fence`
