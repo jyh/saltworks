@@ -15,11 +15,12 @@ no glob did).
 - SaltWorks.lean, lakefile.toml, lean-toolchain : MAESTRO ONLY. Seats leave "import owed: <module>" in commit messages; maestro sweeps.
 - docs/** : append-friendly; per-seat files preferred (docs/<seat>-*.md).
 - EXCEPTIONS (named, dated, removed on expiry — an exception recorded is the law consulted):
-  - ⏳ ACTIVE — SaltWorks/HDL/ISA.lean → MATH, granted by the compiler seat 2026-08-11 18:19,
+  - ✅ EXPIRED AT THIS COMMIT — SaltWorks/HDL/ISA.lean → MATH, granted by the compiler seat 18:19,
     **for ONE ADDITIVE control only** (the nonzero-base / negative-immediate addressing witness
     that kills the drop-base and zero-extend-offset mutants; no existing statement changes).
-    **EXPIRES AT THAT COMMIT.** If the patch grows a statement change it is a different request
-    and needs the helm, not this seat. *Granted because math declined to re-enter the file on
+    **SPENT AT THIS COMMIT — the patch stayed ADDITIVE as granted: three new theorems and three
+    roll-call rows, zero existing statements touched.** If it had grown a statement change it would
+    have been a different request needing the helm, not this seat. *Granted because math declined to re-enter the file on
     the strength of having recently held it — the previous grant expired at M2 and they marked
     it spent themselves. An expired exception that quietly keeps working makes this list
     decorative.*

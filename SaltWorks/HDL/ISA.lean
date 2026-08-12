@@ -934,6 +934,50 @@ theorem sw_out_of_range_arm_is_inhabited :
       (step m2Witness (.SW 0 1 32)).mem[1] = 7 := by
   decide +kernel
 
+/-! ### ⬥ THE ADDRESSING CONTROL — the hole the four arms above do NOT cover
+
+⛔ **FOUND BY THE AUTHOR WHILE PINNING INPUTS FOR THE ADEQUACY REVIEW, after the
+four controls above had already landed green.** Every one of them uses `rs1 = x0`
+(`.LW 2 0 4` · `.SW 0 1 0` · `.LW 2 0 1` · `.SW 0 1 32`), so `s.get a` is
+**identically zero** in all four and the effective address is carried entirely by
+the immediate. ⇒ ***TWO MUTANTS PASSED ALL FOUR:*** dropping the base register
+(`addr := imm.signExtend 32`) and zero-extending the offset
+(`addr := s.get a + imm.zeroExtend 32`).
+
+🔑 ***THE SECOND IS THIS FILE'S OWN NAMED "single most common formalisation bug"
+— `ADDI`'s docstring says so and `addi_sign_extends` controls it. LW/SW shipped
+a sign-extended offset with no such control.*** *A control set can be exhaustive
+over the ARMS and blind on an OPERAND: the four above pin the classifier, the
+suppression, the flag and the untouched neighbour, and say nothing whatever
+about the base register.* -/
+
+/-- **THE ADDRESSING CONTROL: nonzero base AND negative immediate, so both terms
+of `s.get rs1 + sext(imm)` are load-bearing.** `LW x2, -1(x1)` on the witness
+(`x1 = 5`, `mem[1] = 7`) has effective address `5 + (-1) = 4` — word 1 — so `x2`
+receives `7` from memory. Under the drop-base mutant the address is `sext(-1)`
+and under the zero-extend mutant it is `4100`; **both are out of range, both
+trap, and both leave `x2 = 0 ≠ 7`.** One witness, two mutants dead. -/
+theorem lw_uses_base_register_and_sign_extends :
+    (step m2Witness (.LW 2 1 (BitVec.ofInt 12 (-1)))).get 2 = 7 ∧
+      (step m2Witness (.LW 2 1 (BitVec.ofInt 12 (-1)))).trapped = false := by
+  decide +kernel
+
+/-- The two mutants' addresses, exhibited as arithmetic rather than described —
+per the house mutation law, a control is valid only if the mutation is FALSE and
+the witness is shown. -/
+theorem addressing_mutants_are_out_of_range :
+    addrClass ((BitVec.ofInt 12 (-1)).signExtend 32) = .outOfRange ∧
+      addrClass (5#32 + (BitVec.ofInt 12 (-1)).zeroExtend 32) = .outOfRange := by
+  decide +kernel
+
+/-- …and the honest address is IN range at word 1, so the control above cannot be
+passing for want of a trap. *The positive half of a negative control is the half
+people forget.* -/
+theorem honest_address_is_in_range_at_word_one :
+    addrClass (5#32 + (BitVec.ofInt 12 (-1)).signExtend 32) = .ok ∧
+      (5#32 + (BitVec.ofInt 12 (-1)).signExtend 32).toNat / 4 = 1 := by
+  decide +kernel
+
 /-! ### The swapped-immediate mutant — a control is valid only if it FALSIFIES -/
 
 /-- **THE MUTANT**: S-type with its two immediate pieces exchanged. It must
@@ -1149,5 +1193,8 @@ theorem stepW_encode (s : St) (i : Instr) : stepW s (encode i) = some (step s i)
 #audit_axioms sw_out_of_range_arm_is_inhabited
 #audit_axioms wS_mutant
 #audit_axioms wS_mutant_breaks_the_round_trip
+#audit_axioms lw_uses_base_register_and_sign_extends
+#audit_axioms addressing_mutants_are_out_of_range
+#audit_axioms honest_address_is_in_range_at_word_one
 
 end SaltWorks.ISA
