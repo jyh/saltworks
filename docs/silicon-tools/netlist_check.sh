@@ -125,6 +125,33 @@ if selftest:
     else:
         print("  (b) ⛔ could not build the double-drive mutant (no dfxtp_2 with a .D found)")
         rc = 2
+    # (c) MULTI-LINE INSTANTIATION — PINS THE NEWLINE-SPANNING PROPERTY.
+    #     Added 8/12 at evidence's taxonomy: a tool is IMMUNE BY FIXTURE (a test
+    #     goes red if the property is removed) or IMMUNE BY LUCK (it happens to
+    #     hold and NOTHING asserts it must). `parse()`'s connection regex uses
+    #     `[^;]*`, which INCLUDES newline, so it reads multi-line instances. That
+    #     was LUCK — the class was chosen for its delimiter, not for line
+    #     spanning. A future hand writing `[^;\n]*` would make every multi-line
+    #     instance INVISIBLE, silently, and real netlists format one connection
+    #     per line.
+    #     ⚠️ DELIBERATELY INDEPENDENT OF (b): the first version of this arm was
+    #     gated on the same `dfxtp_2` search and therefore DID NOT RUN on the
+    #     netlist I tested it with — a fixture that silently skips is the very
+    #     thing it exists to prevent. This one needs nothing from the netlist but
+    #     an `endmodule`.
+    probe = "n_selftest_multiline"
+    mut_c = src.replace("endmodule",
+        "  sky130_fd_sc_hd__and2_1 gSELFTEST4 (\n"
+        "      .A(i0),\n"
+        "      .B(i1),\n"
+        f"      .X({probe})\n"
+        f"  );\n  wire {probe};\nendmodule", 1)
+    seen = parse(mut_c)[0].get(probe, 0) > 0
+    base = parse(src)[0].get(probe, 0) == 0
+    print(f"  (c) MULTI-LINE INSTANCE   parser sees it: {'✅ YES' if seen else '⛔ NO — the connection regex no longer spans newlines; multi-line instances are INVISIBLE'}"
+          + (" · absent from base ✅" if base else " · ⛔ probe net already in base, arm is vacuous"))
+    if not (seen and base):
+        rc = 2
     print("  ⇒ COMPLEMENTARY: each half catches what the other cannot." if rc == 0
           else "  ⇒ ⛔ SELFTEST FAILED — do not trust a green from this tool.")
     print()

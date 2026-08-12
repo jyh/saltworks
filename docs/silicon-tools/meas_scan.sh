@@ -34,6 +34,30 @@
 #   flattering direction.
 
 set -u
+# ⭐ --selftest: PINS THE BLIND-FORM GUARD BELOW. Added 8/12 at evidence's
+# taxonomy — a guard nothing tests is IMMUNE BY LUCK: if a future hand deletes or
+# weakens it, NOTHING GOES RED. This plants both blind forms and requires the
+# guard's predicate to fire on each, and requires a clean declaration NOT to fire.
+if [ "${1:-}" = "--selftest" ]; then
+  P='@\[[^]]*$|(^|[[:space:]])(theorem|lemma)[[:space:]]*$'
+  rc=0
+  chk() { # $1=label $2=expect(FIRE|QUIET) $3=text
+    n=$(printf '%s\n' "$3" | grep -cE "$P" || true)
+    got=$([ "${n:-0}" -gt 0 ] && echo FIRE || echo QUIET)
+    [ "$got" = "$2" ] && r='✅' || { r='⛔'; rc=2; }
+    printf '  %s %-34s expect %-5s got %-5s\n' "$r" "$1" "$2" "$got"
+  }
+  echo "meas_scan --selftest: the blind-form guard"
+  chk "multi-line @[attribute]"  FIRE  "@[simp,
+  reducible] theorem x : True := trivial"
+  chk "theorem alone at end of line" FIRE "theorem
+  y : True := trivial"
+  chk "single-line @[attr] (clean)" QUIET "@[simp] theorem z : True := trivial"
+  chk "plain declaration (clean)"    QUIET "theorem w : True := trivial"
+  [ $rc -eq 0 ] && echo "  SELFTEST PASS — the guard fires on both blind forms and stays quiet on clean input." \
+                || echo "  ⛔ SELFTEST FAIL — the guard no longer discriminates. DO NOT TRUST ITS SILENCE."
+  exit $rc
+fi
 REF="${1:?usage: meas_scan.sh <ref> <path/to/Module.lean>}"
 MOD="${2:?usage: meas_scan.sh <ref> <path/to/Module.lean>}"
 HERE="$(cd "$(dirname "$0")" && pwd)"
