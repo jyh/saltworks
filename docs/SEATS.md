@@ -18,11 +18,14 @@ no glob did).
   - ⏳ STANDING PRE-GRANT (compiler seat, 2026-08-11 18:58) — SaltWorks/HDL/ISA.lean AND
     SaltWorks/HDL/StraightLine.lean → WHOEVER HOLDS THE STAGE-③ PULL THAT NEEDS THEM,
     **for the CATCH-ALL FIX ONLY**, at `touchesMem` (ISA.lean:174) and `isForward`
-    (StraightLine.lean:25). **⚠️ THE GRANT DOES NOT SPECIFY THE FIX'S SHAPE** — exhaustive
-    arms vs a fence theorem is an open design question and belongs to the ③ block, not to
-    this row. *The first version of this row said "replace with explicit arms", which
-    pre-decided that question in a slot nobody would have stopped me in; corrected at
-    math's 18:59 flag.* **No statement changes, no other edits. EXPIRES at that commit.**
+    (StraightLine.lean:25). ✅ **THE SHAPE IS NOW RULED (Captain, 19:05): EXHAUSTIVE ARMS
+    PREFERRED; catch-alls only where enumeration is genuinely impractical, and there a fence
+    theorem is the required FLOOR plus a CENSUS ROW.** *Disposition for this seat: `isForward`
+    converts AT THE ③ PULL inside these files, zero extra churn. `touchesMem` STAYS FENCED —
+    math's control run is the standing proof — and converts on next touch.*
+    *(This row briefly said "replace with explicit arms", which pre-decided the shape in a slot
+    nobody would have stopped me in; corrected at math's 18:59 flag, then answered by ruling.)*
+    **No statement changes, no other edits. EXPIRES at that commit.**
     If the fix grows a statement change, STOP and re-ask — that is the helm's call.
     *Pre-granted rather than reserved: the fix is small, mechanical, blocks nothing else,
     and a slot boundary that makes a 27-day campaign wait for its owner to wake up is a
