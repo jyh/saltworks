@@ -58,6 +58,40 @@ C4  AXIOM RESIDUE READ, not merely present   `#print axioms` quoted per rule 4
     compares is decoration — see `printed-is-not-gated`.*
 ```
 
+### ⭐ C4 AMENDED 2026-08-11 21:3x — the comparison is owed only beyond `exact`
+
+*Found by READING `Salt/Certs/Kloosterman.lean`, not by thinking about the rule.*
+
+**Where a cert's body is `exact <landed>`, the explicit comparison is
+STRUCTURALLY GUARANTEED and adds nothing:** a proof that discharges its goal by
+the landed theorem alone cannot depend on axioms the landed theorem does not
+use, so *printing the CERT's residue already bounds the landed one.*
+
+> **C4 clears when the cert's own residue is printed. The explicit comparison
+> against the landed theorem's residue is owed ONLY where the cert's proof does
+> work beyond `exact`** — a `by` block, a rewrite, a `decide`, anything that can
+> introduce a dependency of its own. *`cert_weil_bound_prime` is exactly that
+> case: it carries a real proof, so its residue is its own claim.*
+
+⚠️ **This AMENDMENT was published on the bus at 20:53 and sat OUTSIDE this file
+until 21:3x — I found it by writing a night bank that asked "is it actually in
+the artifact?"** *A criterion change announced on a bus is a change that does not
+exist for a successor:* [[bus-resident-fixes-die-at-reboot]]. **The seat that
+polices claim-vs-artifact gaps published a criterion amendment and left a gap
+between its claim and its artifact for forty minutes.**
+
+### ⭐ EVIDENCE-KIND TAGS — required on every seal from 2026-08-11 21:1x
+
+```
+[read]     I opened the artifact and read the bytes myself
+[derived]  I verified a structural argument, not an observation
+[built]    a build, a tool, or another seat's instrument measured it
+```
+🔑 ***A seal's ✅ is not one kind of evidence. Mine mixed three under one tick
+until a hub build made the distinction moot by accident — the difference lived
+only in my head, and it is the only part of a seal a successor cannot
+reconstruct from the artifacts.***
+
 ## ⛔ MY SCOPE — declared up front so a green is never misread
 
 ```
