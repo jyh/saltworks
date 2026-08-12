@@ -141,7 +141,19 @@ except Exception as ex:
   # ⚠️ FOLLOWS THE SEAT via CLAUDE_CONFIG_DIR, so a copy of this script in another
   #   seat measures ITS OWN index rather than silently reporting mine.
   IDX=${IDX:-${CLAUDE_CONFIG_DIR:-$HOME/.claude}/projects/-Users-jyh-projects-claude-saltworks/memory/MEMORY.md}
-  IDXLIM=${IDXLIM:-24400}
+  # ⛔ THE DENOMINATOR, AND ITS DERIVATION, BANKED TOGETHER — because I shipped
+  # 24400 first and four seats divided by it within six minutes. The figure came
+  # from a hook message reading "over its 24.4KB read limit", and I rendered KB
+  # DECIMALLY out of habit. It is BINARY:
+  #   the same message called my 29,040-byte file "28KB".
+  #   29040/1024 = 28.36 -> "28KB" ✅ consistent
+  #   29040/1000 = 29.04 -> "29KB" ⛔ contradicts the message
+  # ⇒ unit is KiB, so 24.4 KiB = 24,986 B. My 24,400 was LOW BY 586.
+  # ⚠️ STILL A DERIVED FIGURE, not a spec: it comes from a rounded human-readable
+  # string, so treat ±512 B as unresolved and do not quote it to three digits.
+  # Erring LOW is the safe direction (the check fires early), which is exactly why
+  # the error survived — a conservative wrong number produces no symptom.
+  IDXLIM=${IDXLIM:-24986}
   if [ ! -r "$IDX" ]; then
     idx="** INDEX UNREADABLE at $IDX — CHECK DID NOT RUN **"
   else
