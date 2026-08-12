@@ -40,11 +40,17 @@ cells vs 47,438 filler). If the window is missed: ③ ships next shuttle, nothin
   port is 3 BITS and it carries ZERO trap logic — there is nothing to audit against the
   trap semantics, and that is the ARCHITECTURE, not a defect. The organ is PURE STORAGE
   (word-addressed 0..7), adopted as-is; the kernel's step semantics are realised by a
-  COMPOSITION: (a-NEW) **D1t — THE ADDRESS CHECKER**, a new deliverable in memif's lane:
-  byte-address in, the TWO trap causes as separate hardware facts (misaligned = low bits
-  ≠ 0 · outOfRange = byte addr ≥ 32), word-address out to the organ only when clean —
-  arm-for-arm matched to the ruled step semantics at the CHECKER⊕ORGAN composition,
-  never inside the organ; (b) the Lean netlist model + the
+  COMPOSITION [AMENDED at silicon's 10:27 8/12 finding — the original text here
+  commissioned the address-path HARDWARE under the id D1t, and the 19:34 re-price then
+  gave the SAME hardware to D1b, orphaning this clause's name onto a second phantom
+  module]: the address-path hardware is **D1b — dmem_addr8, ONE module**: byte-address
+  in, the TWO trap causes as separate hardware facts (misaligned = low bits ≠ 0 ·
+  outOfRange = byte addr ≥ 32) carried in its MASK, word-address out to the organ only
+  when clean — arm-for-arm matched to the ruled step semantics at the CHECKER⊕ORGAN
+  composition, never inside the organ. **D1t IS THE INSTRUMENT, not hardware**: the
+  acceptance checker + its PRE-REGISTERED bar (planted failures, runner exit = the
+  gate; delivered d96de83, cleared 7/7 independently). Both objects exist; no third
+  module is owed; (b) the Lean netlist model + the
   realisation proofs against the adopted netlists — TRAP-ARM PHRASING per math's refuter
   (repair-then-fire): the two trap causes (misaligned · outOfRange ≥ 32) stated as
   SEPARATE kernel facts matched arm-for-arm to the ruled step semantics, never folded
