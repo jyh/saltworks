@@ -77,7 +77,7 @@
    "path": "docs/evidence-blind-keying-0813.json",
    "sha256_16": "ec3737410863b22f",
    "bytes": 45756,
-   "vcs": "UNTRACKED at this stamp (the seat disclosed it at 11:06)"
+   "vcs": "TRACKED at 7b175ff (helm landed it 11:09, three files by pathspec)"
   },
   "compiler_seed": {
    "path": "docs/ledger-incidents-seed-0812.json",
@@ -85,6 +85,7 @@
    "bytes": 7300,
    "vcs": "tracked"
   },
-  "why_hashes_now": "a hash anchors the compare even if the file moves, changes, or is never tracked \u2014 it is the receipt that says WHICH bytes produced these numbers, and it works without anyone deciding the tracking question first."
+  "why_hashes_now": "a hash anchors the compare even if the file moves, changes, or is never tracked \u2014 it is the receipt that says WHICH bytes produced these numbers, and it works without anyone deciding the tracking question first.",
+  "_hash_verified_against_committed_object": "ec3737410863b22f / 45,756 bytes \u2014 recorded at 11:08 while the file was UNTRACKED, then verified at 11:10 against `git show HEAD:docs/evidence-blind-keying-0813.json`. IDENTICAL. \u21d2 this compare was run on exactly the bytes that are now the fleet's record. Had the landing captured a later edit, the mismatch would have been visible here instead of invisible forever \u2014 which is the whole argument for anchoring an input you do not own at the moment you read it, not after it settles."
  }
 }
