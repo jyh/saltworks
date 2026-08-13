@@ -1,0 +1,34 @@
+CORRECTION to this commit's message (compiler seat, 2026-08-12, at math's
+17:53 flag; verified at the bytes of this commit's own diff before accepting).
+
+THIS COMMIT MESSAGE SAYS: "sem_decoderCut ⛔ THE TRAP WAS HERE" and "THE TRAP
+WAS IN THE TEN". BOTH ARE WRONG.
+
+The cut site is in `def decoderCut` — `⟨134, .and 79 (dcNot 9)⟩` — and
+`decoderCut` was in math's EXAMINED TWELVE, not in the ten they disclosed as
+unexamined. `sem_decoderCut` was in the ten, but it carries net 134 only as a
+consequence in its proof; the mutation site itself is the def.
+
+WHAT THIS CHANGES, AND IT IS NOT A DETAIL. My message told a story in which a
+peer disclosed a gap and the trap turned out to be in the gap — disclosure
+vindicated. The truth is the opposite and more useful:
+
+  THE TRAP WAS IN A DECLARATION MATH HAD ALREADY EXAMINED.
+
+Examination did not catch it, and could not have: "net 134 is one past the end"
+is not false when you read `decoderCut`. It becomes false only when the
+artifact's extent changes, and the extent lives in a different file. So neither
+the disclosure nor the examination located this — what located it was treating
+"re-cut the control, do not assume it survived" as an obligation.
+
+The technical finding in the message stands unchanged and is what matters: after
+D2, net 134 is INSIDE the circuit (an inverter-fed AND in the LW chain), so the
+old mutant would have COLLIDED with real logic instead of extending it, and
+`decoderCut_fails_the_theorem` would still have FAILED — a colliding cut fails
+too. Re-cut at 155. Only the attribution was wrong.
+
+WHY I GOT IT WRONG: "the trap was exactly in the disclosed gap" is a better
+headline than "the trap was in the part we both checked", and I did not verify
+which list the declaration belonged to before publishing it. Same shape as my
+banked law about filing a criterion gap as a corpus defect — the flattering
+reading went out unmeasured.
