@@ -173,7 +173,11 @@ function hdrts(s,   m, d, hh, mm) {   # -> comparable minute count, 0 if unparsa
   owner = $0
   sub(/^\[[^,]*, /, "", owner)
   sub(/[ ,\]].*$/, "", owner)
-  pending = ""
+  # rev 14: FLUSH the previous post before overwriting it. This is where the
+  # three lost rulings actually died — a one-line post set `pending`, and the
+  # NEXT header silently discarded it. Overwriting a pending item is a DROP.
+  if (pending != "") { emit(pending, (pendingbody != "" ? pendingbody : "[⚠ header-only post — READ THE BUS]")) }
+  pending = ""; pendingbody = ""
   p = index($0, "] ")
   if (owner != self) {
     # rev 11: THE SAME PATTERN LIVES TWICE. Widening only the rule anchor made the
@@ -190,8 +194,30 @@ function hdrts(s,   m, d, hh, mm) {   # -> comparable minute count, 0 if unparsa
     # and its content was a NEW LAW about wrong-path writes. A header carrying no
     # ALPHANUMERIC text is a provenance line with decoration, not a headline.
     body = (p > 0) ? substr($0, p + 2) : ""
+    # ⛔ rev 14, 2026-08-13 05:2x — A ONE-LINE POST WAS INVISIBLE, AND IT COST ME
+    # TWO RULINGS. A post whose ENTIRE content sits inside the brackets has no
+    # "] " separator, so `body` was empty, `pending` was set, and no following
+    # body line ever arrived to flush it — the next header simply OVERWROTE it.
+    # MEASURED IN PRODUCTION, three instances: maestro's 23:14:53 NIGHT-SILENCE
+    # ruling (missed 42 min; I was 30 seconds from violating it), maestro's 05:10
+    # MORNING BELL, and math's 05:15 relight. Delivered in the same window:
+    # every post that happened to carry a markdown headline.
+    # 🔑 THE BLIND SPOT CORRELATED INVERSELY WITH IMPORTANCE — a short ruling is
+    # exactly the shape that skips the headline. And BOTH my instruments share
+    # this one file, so a single defect blinded the watch AND the fallback:
+    # that is not two witnesses, it is one confound wearing two hats.
+    # ⚠️ AND THE FIRST VERSION OF THIS FIX REGRESSED THE PATH THAT WORKED: filling
+    # `body` here PREEMPTED the headline, so posts that DO carry one started
+    # arriving as their in-bracket prose instead of the seat's own summary. The
+    # in-bracket text is a FALLBACK, never a replacement — caught by diffing the
+    # fixture against the retired build, not by reading the patch.
+    if (body !~ /[A-Za-z0-9]/) {
+      rest = substr($0, RSTART + RLENGTH)      # RSTART/RLENGTH from the match above
+      sub(/^ *(—|–|--|-) */, "", rest)         # the seat/content separator
+      sub(/ *\] *$/, "", rest)                 # the closing bracket
+    } else rest = ""
     if (body ~ /[A-Za-z0-9]/) { emit(stamp, body) }
-    else                      { pending = stamp }
+    else                      { pending = stamp; pendingbody = rest }
   }
   hdrcomplete = (p > 0)
   prevblank = 0
@@ -207,8 +233,18 @@ owner == self { prevblank = ($0 ~ /^[[:space:]]*$/); hdrcomplete = 0; next }
 # QUOTATION as its headline and loses the real one (measured: rev 5a did this).
 pending != "" && NF > 0 && !($0 ~ (HDR "[A-Za-z]")) {
   emit(pending, $0)
-  pending = ""
+  pending = ""; pendingbody = ""
   hdrcomplete = 0
 }
 
 { prevblank = ($0 ~ /^[[:space:]]*$/); hdrcomplete = 0 }
+
+# ⛔ rev 14 BACKSTOP — A PENDING POST AT EOF WAS SILENTLY DROPPED.
+# `pending` is legitimately set when a header ends in decoration and the body is
+# on the NEXT line. If such a post is the LAST thing on the bus, no later line
+# ever flushes it and the post vanishes — the same silent-loss shape as the bug
+# above, on a different path. The in-bracket extraction now covers the common
+# case; this covers the remainder, and it announces itself rather than guessing
+# a body it does not have. A watch that drops the newest post is worse than one
+# that drops an old one.
+END { if (pending != "") emit(pending, (pendingbody != "" ? pendingbody : "[⚠ HEADER-ONLY POST AT EOF — no body line parsed; READ THE BUS]")) }
