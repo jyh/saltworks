@@ -216,3 +216,89 @@ bottleneck holding up corpus coverage.*
 not promised to import. **Two of the four it freed then failed to import for a
 non-cell reason.** *The caveat was not boilerplate; it was load-bearing, and it
 is the reason the four were RUN rather than reported clean from the table.*
+
+---
+
+# ADDENDUM 2 — GROUND TRUTH: the import sweep, and how wrong the proxy was
+
+### `SaltWorks/Silicon/Importer/import_sweep.py`. Cell coverage was a **proxy**;
+### this runs the actual importer on all 46 and records what actually gates each one.
+
+## G.1 · THE RESULT
+
+```
+17 import  +  28 blocked  +  1 skipped  =  46 of 46
+```
+
+**BLOCKERS — ⚠ the FIRST gate hit, not the only one:**
+
+| class | netlists | detail |
+|---|---|---|
+| `unmodelled-cell` | 13 | `xnor2_1`×5, `mux4_2`×4, `o211ai_1`×2, `a311oi_1`, `a41oi_1` |
+| `range-grammar` | 13 | `imm_b[31:12]`×3, `pc_q[31:2]`×2, `pc_plus_4[1:0]`×2, … |
+| **concatenation** | 2 | *"RHS has 2 terms (cout, cin) — concatenations are not modelled"* |
+
+## G.2 · ⚠️ A CLASS COUNT IS NOT A DELIVERY COUNT — THE SAME TRAP, ONE LEVEL UP
+
+The importer refuses at the **first** problem it meets, and **the range check runs
+before cell expansion.** So a netlist filed under `range-grammar` may *also* be
+missing cells, and clearing the grammar would merely advance it to its next
+refusal.
+
+```
+range-grammar is the FIRST gate for      13 netlists
+range-grammar is the ONLY remaining gate  2 netlists   (dmem_addr8, dmem_addr16)
+```
+🔑 ***Read carelessly, this table says math's grammar call unblocks 13. It
+unblocks 2.*** *Same shape as the "appears in is not frees" error in §3, caught
+one level up — and the two analyses agree exactly once first-blocker semantics
+are accounted for, which is what makes them a cross-check rather than two
+guesses.*
+
+## G.3 · HOW WRONG THE PROXY WAS — AND IN WHICH DIRECTION
+
+```
+cell-clean (proxy)   20
+actually import      17
+false POSITIVES       3   adder8s (concatenation) · dmem_addr8 · dmem_addr16 (range)
+false NEGATIVES       0   nothing imports that the census called blocked
+```
+⭐ ***So cell coverage is a strictly NECESSARY, NOT SUFFICIENT condition — it errs
+only optimistically, by 15%.*** *That is worth stating precisely, because a proxy
+with no false negatives is safe to use as a filter and unsafe to use as a
+promise, and the census doc claimed exactly that in §7 before it was measured.*
+
+## G.4 · THE CONTROLS, AND THE OWN-GOAL THAT NEARLY BURIED THIS
+
+**Agreement with facts fixed independently, hours earlier and by hand:**
+```
+dmem8   1984 gates ·  256 flops      dmem16  3964 ·  512      dmem32  8450 · 1024
+```
+**identical to the hand-built port lists** — so the sweep's automatic port
+derivation is not inventing a different design. And its 13 range-blocked
+netlists match the 13 found by an independent text scan.
+
+⛔ **THE FIRST RUN REPORTED `0 import + 45 blocked` — INCLUDING `dmem8`, `dmem16`
+AND `dmem32`, WHICH I HAD PROVED CLEAN TWENTY MINUTES EARLIER.**
+```
+CAUSE   the sweep passed --out /dev/null; readback reads the emitted datum back
+        FROM DISK, and /dev/null reads empty
+EFFECT  every netlist that got far enough to be CHECKED was recorded as a
+        FAILURE -- the sweep was strictest exactly where the importer worked
+        hardest, and its verdict was inverted for precisely the good cases
+CAUGHT  not by care. By the result contradicting a measurement already banked.
+```
+*A second instrument tonight that failed in the alarming direction, which remains
+the lucky one — and the second whose only catch was a number that could not be
+true.* **The fixture that survives is the one whose output can be checked against
+something already known.**
+
+## G.5 · ⛔ WHAT "IMPORTS" DOES NOT MEAN
+
+The sweep derives *a* valid port list from each module's own declaration, purely
+to drive the importer. **Port ORDER is load-bearing and is not recoverable from
+the netlist** — `reimport.sh` records two data whose orders were lost, and
+`readback.py` records that swapping two `--outputs` entries permutes the datum
+and its reference *identically*, so nothing catches it. ⇒ **A netlist reported
+`IMPORTS` has not been shown to yield the datum any downstream proof wants.**
+Nothing the sweep produces is written to the tree.
