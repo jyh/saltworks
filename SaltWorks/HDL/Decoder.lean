@@ -525,21 +525,82 @@ theorem, because a colliding cut yields a wrong decoder too.* ⇒ ***The green
 would have been indistinguishable from health.***
 
 ✅ **The question that detects this is not "does it still fail?" but "is the cut
-still WHERE I SAID IT WAS, relative to the artifact's current extent?"** *Stated
-here, in the file that OWNS the extent, so that the next edit which grows this
-circuit is told what it is re-arming.* -/
+still WHERE I SAID IT WAS, relative to the artifact's current extent?"**
 
-/-- ⛔ **The pre-D2 cut site is now occupied by real logic.** -/
+⚖️⚖️ **AND THE ANSWER IS TWO DIFFERENT KINDS OF THEOREM, WHICH ARE NOT
+SUBSTITUTES — the distinction the math seat drew when this section was rewritten,
+correcting their own first framing before it cost us:**
+
+> ***THE RELATIONAL FORM IS AN INVARIANT. THE LITERAL FORM IS AN ALARM.***
+
+*An **INVARIANT** (`decoder_cut_site_extends`, `decoder_last_net_occupied`) names
+no net number, so it stays true at every future size and **therefore never fires**
+— it is what makes `decoderCut` correct BY CONSTRUCTION. An **ALARM**
+(`decoder_gate_count`, `decoder_first_free_net_is_155`) pins the size as it is
+TODAY, so it goes **false the moment the circuit grows and breaks the build
+loudly** — that is not a defect of it, it is the entire function it serves.*
+
+⛔ **KEEP BOTH. Landing only the invariants would keep the guarantee and lose the
+alarm, and the next growth would then be correct-by-construction AND SILENT —
+strictly worse than a red build that sends somebody to look at the control.**
+***The maintenance item was never the cost; it was the product.*** -/
+
+/-- The first conjunct of `decoder.ssa`, in the form the extent lemmas consume. -/
+theorem decoder_ssaFrom : ssaFrom decoder.nIn decoder.gates = true := by
+  have h := decoder_ssa
+  simp only [Circ.ssa, Bool.and_eq_true] at h
+  exact h.1
+
+/-- ✅ **INVARIANT — the cut site EXTENDS rather than collides, at any size.**
+Every gate output is below `nIn + gates.length`, so a cut placed there is past the
+end whatever the circuit becomes. **This statement carries no net number and
+survives every future growth unedited.** -/
+theorem decoder_cut_site_extends :
+    ∀ g ∈ decoder.gates, g.out < decoder.nIn + decoder.gates.length :=
+  ssaFrom_out_lt decoder.gates decoder.nIn decoder_ssaFrom
+
+/-- ✅ **INVARIANT — and the cut is EXACTLY one past the end, not floating beyond
+it**: the net immediately below it is occupied. With `decoder_cut_site_extends`
+this is the relational form of "first free net", and it is the citation that
+`decoder_first_free_net_is_155`'s NAME leans on. -/
+theorem decoder_last_net_occupied :
+    ∃ g ∈ decoder.gates, g.out = decoder.nIn + decoder.gates.length - 1 := by
+  have hpos : 0 < decoder.gates.length := by decide +kernel
+  refine ssaFrom_out_surj decoder.gates decoder.nIn decoder_ssaFrom _ ?_ ?_
+  · omega
+  · omega
+
+/-- ⏰ **ALARM — the extent as of D2.** Nothing consumes this and nothing should:
+**an alarm's job is to BREAK, not to be used.** It goes red on the first edit that
+adds or removes a gate, which is the moment someone must re-read the two facts
+below. *Cheap to re-arm — the build reports the new number.* -/
+theorem decoder_gate_count : decoder.gates.length = 123 := by decide +kernel
+
+/-- ⛔ **The pre-D2 cut site is now occupied by real logic.** *A literal is the
+honest spelling here: this is a claim about the PAST — where the old control cut —
+and unlike the alarms it stays true as the circuit grows.* -/
 theorem decoder_net_134_is_occupied :
     decoder.gates.any (fun g => g.out == 134) = true := by decide +kernel
 
-/-- ✅ **And 155 is genuinely one past the end**: every gate output is below it,
-and `valid`'s net 154 is present — so a cut at 155 EXTENDS rather than collides. -/
+/-- ⏰ **ALARM — and 155 is genuinely one past the end**: every gate output is
+below it, and `valid`'s net 154 is present — so a cut at 155 EXTENDS rather than
+collides.
+
+⚠️ **The NAME says "first free" while the STATEMENT proves "one past the LAST", and
+those differ the moment the net space has a hole.** *The claim is TRUE and the
+citation was missing: `decoder_cut_site_extends` + `decoder_last_net_occupied`
+above supply it — gates are dense SSA from `nIn` (`decoder_ssaFrom`), so there are
+no holes and last+1 IS first-free.* **Kept as an ALARM: it is false at the next
+growth, by design.** -/
 theorem decoder_first_free_net_is_155 :
     decoder.gates.all (fun g => decide (g.out < 155)) = true
     ∧ decoder.gates.any (fun g => g.out == 154) = true := by decide +kernel
 
 #audit_axioms dcMatches_literal_margin_is_zero
+#audit_axioms decoder_ssaFrom
+#audit_axioms decoder_cut_site_extends
+#audit_axioms decoder_last_net_occupied
+#audit_axioms decoder_gate_count
 #audit_axioms decoder_net_134_is_occupied
 #audit_axioms decoder_first_free_net_is_155
 #audit_axioms decoder_ssa

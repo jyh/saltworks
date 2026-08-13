@@ -73,6 +73,71 @@ primary output names a net the netlist will actually contain. -/
 def Circ.ssa (c : Circ) : Bool :=
   ssaFrom c.nIn c.gates && c.outs.all (fun n => n < c.nIn + c.gates.length)
 
+/-! ### EXTENT — the two halves `Compose.lean`'s siblings do not carry
+
+`ssaFrom_out_ge` (outputs at or above the base) and `ssaFrom_defined` live in
+`Compose.lean`. **They sit HERE instead, beside `ssaFrom` itself, because
+`Decoder.lean` imports this file and NOT `Compose.lean`** — a consumer that cannot
+reach a lemma has to restate the fact as a literal, which is exactly the debt these
+retire. *Density says WHERE gate `k` goes; these say HOW MANY there are, so together
+they pin a net layout with no net number in either statement.*
+
+Drafted by the math seat (`ScratchD2math13.lean`, kernel-green, axiom-clean) at the
+compiler seat's request; landed here by the owning seat, helm order 08/13 05:36. -/
+
+/-- Every gate output is strictly below `base + length` — the upper bound whose
+absence left every cut-site fact pinned to a literal. Mirrors `ssaFrom_out_ge`'s
+induction exactly. -/
+theorem ssaFrom_out_lt : ∀ (gs : List Gate) (base : Nat), ssaFrom base gs = true →
+    ∀ g ∈ gs, g.out < base + gs.length := by
+  intro gs
+  induction gs with
+  | nil => intro base _ g hg; simp at hg
+  | cons g gs ih =>
+    intro base hssa x hx
+    simp only [ssaFrom, Bool.and_eq_true, beq_iff_eq] at hssa
+    obtain ⟨⟨hout, _⟩, hrest⟩ := hssa
+    -- ⚠️⚠️ `unfold Net at <hyp> ⊢` IS LOAD-BEARING, AND `at <hyp>` IS THE HALF THAT
+    -- IS EASY TO MISS. `Gate.out : Net`, and although `abbrev Net := Nat` is
+    -- reducible, `omega` does not unfold it — it reports "No usable constraints"
+    -- on goals as trivial as `x.out + 0 = x.out`.
+    -- ⛔ UNFOLDING THE GOAL ALONE FAILS QUIETLY IN THE WORST WAY: omega then parses
+    -- the goal, prints a plausible counterexample, and SILENTLY IGNORES every
+    -- `Net`-typed hypothesis — so a true statement looks FALSE rather than
+    -- under-hypothesised. Measured over six probe forms by the math seat, at a cost
+    -- of two builds; a `(· : Nat)` ascription does NOT help (`Net` is an abbrev, so
+    -- it is a no-op). 📌 Very likely why this layer proves so much by
+    -- `decide +kernel`: the tactic structural induction needs is blind here.
+    have hlen : (g :: gs).length = gs.length + 1 := rfl
+    rcases List.mem_cons.mp hx with h | h
+    · subst h
+      rw [hlen]; unfold Net at hout ⊢; omega
+    · have hlt := ih (base + 1) hrest x h
+      rw [hlen]; unfold Net at hlt ⊢; omega
+
+/-- Every net in `[base, base + length)` IS some gate's output — density in the
+surjective direction. **This is what makes "is net `n` occupied?" answerable without
+naming a number.** -/
+theorem ssaFrom_out_surj : ∀ (gs : List Gate) (base : Nat), ssaFrom base gs = true →
+    ∀ n, base ≤ n → n < base + gs.length → ∃ g ∈ gs, g.out = n := by
+  intro gs
+  induction gs with
+  | nil => intro base _ n _ hlt; simp only [List.length_nil] at hlt; omega
+  | cons g gs ih =>
+    intro base hssa n hge hlt
+    simp only [ssaFrom, Bool.and_eq_true, beq_iff_eq] at hssa
+    obtain ⟨⟨hout, _⟩, hrest⟩ := hssa
+    by_cases hn : n = base
+    · exact ⟨g, List.mem_cons_self .., by rw [hout, hn]⟩
+    · have hge' : base + 1 ≤ n := by omega
+      have hlt' : n < base + 1 + gs.length := by
+        simp only [List.length_cons] at hlt; omega
+      obtain ⟨x, hx, hxout⟩ := ih (base + 1) hrest n hge' hlt'
+      exact ⟨x, List.mem_cons_of_mem _ hx, hxout⟩
+
+#audit_axioms ssaFrom_out_lt
+#audit_axioms ssaFrom_out_surj
+
 /-! ## The translation -/
 
 /-- One `Circ` operation as a netlist gate. Net names are carried through
