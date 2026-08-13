@@ -143,3 +143,10 @@ python3 docs/ledger-tools/brief_leakcheck.py docs/compiler-blind-keying-brief-08
 **If it reports a leak, this brief is disqualifying and must be repaired, not
 explained.** *Written as a form and not a promise, because the seat that wrote it is
 exactly the seat whose judgement is under test.*
+
+⛔ **AND THE CHECK IS SECONDARY, NOT PRIMARY — MEASURED, not conceded.** *Six spellings
+of a covered value walk through it, and the first is not adversarial: **rounding to one
+fraction digit is simply how people write in prose.*** **The PRIMARY protection is
+§4 — the withholding list, which keeps the analysis off this reader's path entirely.**
+*A green check means "no distinctive value in its formal spelling". It is worth running
+and it is never quotable as coverage.*

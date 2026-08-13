@@ -261,7 +261,18 @@ def main():
     print("                 Also not covered: a leading CHARACTERISATION in prose.")
     print("     THE REST    is covered by SEQUENCING -- the analysis those integers")
     print("                 belong to does not travel on this channel at all.")
-    print("   ⇒ A PASS MEANS 'CARRIES NO DISTINCTIVE VALUE', NOT 'CARRIES NO RESULT'.")
+    print("   ⛔ MEASURED MISS SURFACE -- every rate quoted for this tool until")
+    print("      2026-08-12 21:18 was a BLOCK rate; NONE was a MISS rate. Six")
+    print("      spellings of a covered value walk straight through:")
+    print("        rounded to ONE fraction digit   <- NOT adversarial: it is how")
+    print("                                           people write in prose")
+    print("        a PERCENT · WORDS · a FRACTION · split by inline MARKUP")
+    print("        a THOUSANDS separator")
+    print("      The rule is tuned to the FORMAL table-shaped spelling and blind to")
+    print("      the CONVERSATIONAL one this channel is actually made of.")
+    print("   ⇒ SEQUENCING IS THE PRIMARY MECHANISM. THIS GATE IS A CHEAP SECONDARY.")
+    print("   ⇒ A PASS MEANS 'CARRIES NO DISTINCTIVE VALUE IN ITS FORMAL SPELLING'.")
+    print("      IT IS WORTH RUNNING AND IS NEVER QUOTABLE AS COVERAGE.")
     return 0
 
 
