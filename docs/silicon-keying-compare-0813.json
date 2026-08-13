@@ -1,0 +1,67 @@
+{
+ "compare": "incident-identity re-key: compiler seed vs evidence blind keying",
+ "run_by": "silicon (authored neither keying; spent, so reading is free)",
+ "unit": "INCIDENTS throughout \u2014 carriers never conflated into an incident count",
+ "counts_incidents": {
+  "compiler": 17,
+  "evidence": 57
+ },
+ "identity_axis": {
+  "method": "predicate token Jaccard, key-independent (the two keyings invented labels independently and blind)",
+  "threshold": 0.2,
+  "controls": {
+   "self_match": 1.0,
+   "noise_floor_median": 0.017,
+   "noise_floor_max": 0.11
+  },
+  "compiler_incidents_with_counterpart": 7,
+  "compiler_incidents_without": 10,
+  "evidence_incidents_matched": 7,
+  "pairs": [
+   {
+    "compiler_key": "citecheck-self-referential-payload",
+    "evidence_key": "citecheck-file-own-name-as-payload",
+    "jaccard": 0.533
+   },
+   {
+    "compiler_key": "citecheck-generic-payload",
+    "evidence_key": "citecheck-generic-payload-convicts",
+    "jaccard": 0.381
+   },
+   {
+    "compiler_key": "citecheck-same-line-foreign-clause",
+    "evidence_key": "citecheck-foreign-clause-one-line",
+    "jaccard": 0.345
+   },
+   {
+    "compiler_key": "citecheck-cross-repo-conviction",
+    "evidence_key": "citecheck-unresolvable-path-convicts",
+    "jaccard": 0.265
+   },
+   {
+    "compiler_key": "right-conclusion-wrong-mechanism",
+    "evidence_key": "compiler-wrong-mechanism-for-the-miss",
+    "jaccard": 0.257
+   },
+   {
+    "compiler_key": "citecheck-repo-prefixed-path",
+    "evidence_key": "citecheck-also-root-repo-prefixed-path",
+    "jaccard": 0.225
+   },
+   {
+    "compiler_key": "citecheck-trailing-gloss",
+    "evidence_key": "citecheck-trailing-gloss-mined",
+    "jaccard": 0.211
+   }
+  ]
+ },
+ "axes_reported_as_ARTEFACT_not_finding": {
+  "key_string_overlap": 0,
+  "why": "both keyers invented key strings independently while blind; string equality cannot measure incident identity",
+  "carrier_file_overlap": "4 shared of 75 (evidence) and 15 (compiler)"
+ },
+ "declined": {
+  "provenance_decomposition": "NOT PUBLISHED. Three successive classifiers gave three different splits; each was tuned to one keyer's phrasing and mislabelled the other's (compiler writes 'verified at the bytes', evidence writes 'at the bytes...'). That is key-inheritance (rider 5) inside this compare. A sound version needs a classifier derived from neither keying."
+ },
+ "not_examined": "whether each evidence incident satisfies \u00a73 eligibility (lived or verified at the bytes inside the window) \u2014 not computable from the files alone"
+}
