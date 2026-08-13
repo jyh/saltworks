@@ -104,8 +104,18 @@ names a CHANNEL, and it is the one that spent a live candidate this morning.*
 > ***A CHANNEL READ REFLEXIVELY IS A BOOT SURFACE, whatever the kit says.***
 
 ✅ **THE RULE IS STATED AS A CAPABILITY YOU DO NOT NEED, NOT AS A TEMPTATION TO RESIST —
-READ YOUR CORPUS BY PLAIN FILE READS AT THE PATHS §3 NAMES.** *You never need `git` to do
-this task.* **So: no `log`, no `show`, no `blame`, no `diff`, no history browsing, in
+READ YOUR CORPUS BY PLAIN FILE READS.** *§3 names a **source file and a stamp window**,
+not a path list — do not go hunting for one. Its "any artifact those posts point at" are
+ordinary files too.* ⇒ **You never need `git` to do this task.**
+
+📌 **MEASURED, not assumed, because this clause and §3 could have contradicted each
+other:** *if a post in the window pointed at something reachable ONLY through `git`, §3
+would order you to fetch what this section forbids — and you would have to choose between
+an incomplete corpus and a broken fence, silently.* ✅ **Swept the whole window: the only
+`git` references in it are commands a seat QUOTED WITH THEIR RESULTS STATED INLINE, and
+the command named as a topic of discussion. Nothing in your corpus sits behind `git`.**
+*If you ever hit one anyway, STOP and ask the helm — do not run it, and do not skip it
+quietly.* **So: no `log`, no `show`, no `blame`, no `diff`, no history browsing, in
 `seat`, `saltworks`, `salt`, or any other shared repo — until your keying is on the bus.**
 
 ⚠️ **WHY THIS ONE IS WORSE THAN THE FILE LIST, and why it needs no discipline from you:**
