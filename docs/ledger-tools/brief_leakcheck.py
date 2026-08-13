@@ -45,6 +45,25 @@ import sys
 # before every append must run from anywhere. `docs/ledger-tools/x.py` -> repo root.
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+# Spans that are CALENDAR/FILENAME furniture, not results. Masked before scanning.
+# ⚠️ Masked by WHOLE PATTERN, never by "adjacent to a hyphen": a delta is written
+# `-1.32x`, so a hyphen-adjacency rule would swallow a real sensitive value. An
+# exclusion filter that is too broad returns a clean-looking list, and the removed
+# rows are by definition not in front of you -- so every mask is PRINTED.
+FURNITURE = re.compile(
+    r"\d{4}-\d{2}-\d{2}"                       # 2026-08-12
+    r"|-\d{4}\.(?:md|json|py)"                  # -0812.md
+    r"|\d{4}-\d{2}"                             # 2026-08
+    # the bus stamp 08/12. Constrained to a PLAUSIBLE month/day so a result
+    # written as a fraction (66/17) is NOT swallowed -- 66 is not a month.
+    r"|(?:0[1-9]|1[0-2])/(?:[0-2]\d|3[01])"
+    # git SHAs. `ac44a81` contains "44"; widening the harvest to multi-digit
+    # integers made every landing sha a false positive, and this tool exists
+    # to be run on posts that CITE their landing. Requires >=1 hex LETTER so a
+    # pure-digit result can never be masked by this arm.
+    r"|\b(?=[0-9a-f]{7,40}\b)[0-9a-f]*[a-f][0-9a-f]*\b"
+)
+
 
 def seed_totals(seed_path):
     """The four totals the exhibit publishes, computed from the seed itself."""
@@ -58,23 +77,50 @@ def seed_totals(seed_path):
     }
 
 
-def ratios_in(paths):
+def values_in(paths):
+    """Harvest RESULT VALUES from the result document(s).
+
+    ⚠️ WIDENED 2026-08-12 21:0x, and the reason is the finding: the first version
+    harvested DECIMALS ONLY. My audit also published INTEGER results that are not
+    seed totals -- a percentage-of-numerator, and a two-ended bracket on one row --
+    and NONE of them was in the forbidden set. Four posts I called "machine-verified
+    result-free" measured clean, but they were clean BY HOW I HAPPENED TO WORD THEM,
+    not because this gate would have caught the leak. A passing control proves the
+    tool runs; it says nothing about which part is doing the work.
+
+    Now harvests decimals AND multi-digit integers. Single-digit values are still
+    NOT covered -- stated in the DOMAIN block rather than quietly tolerated, because
+    a gate whose limit is undeclared reads as a gate with no limit."""
     out = {}
     for p in paths:
         if not os.path.isfile(p):
             continue
-        for m in re.finditer(r"\d+\.\d+", open(p, encoding="utf-8",
-                                               errors="replace").read()):
+        text = open(p, encoding="utf-8", errors="replace").read()
+        # SAME furniture masking as the scan side. Asymmetry here is a defect in its
+        # own right: harvesting from an UNMASKED result document scooped a CITATION
+        # LINE NUMBER (`...-0813.md:90`) into the forbidden set, and that junk token
+        # then convicted an innocent post. A forbidden set is only as clean as the
+        # text it is derived from.
+        text = FURNITURE.sub(lambda m: "\u0000" * len(m.group(0)), text)
+        for m in re.finditer(r"\d+\.\d+|(?<![\d.])\d{2,}(?![\d.])", text):
+            if text[m.start() - 1:m.start()] == ":" or text[m.end():m.end() + 1] == ":":
+                continue          # a locator or clock, not a result
             out.setdefault(m.group(0), p)
     return out
 
 
+
+
 def scan(brief_path, tokens):
-    """Return hits. A number inside a CLOCK TIME (17:08) or a path:line locator is not
-    a leak, so matches adjacent to a colon are excluded -- and the exclusions are
-    PRINTED, because an exclusion filter that is too broad returns a clean-looking
-    list and the removed rows are by definition not in front of you."""
+    """Return hits. A number inside a CLOCK TIME (17:08), a path:line locator, or a
+    DATE is not a leak. Clocks/locators are excluded by colon-adjacency; dates and
+    dated filenames are masked by whole pattern. Both are PRINTED."""
     text = open(brief_path, encoding="utf-8", errors="replace").read()
+    masked = []
+    def _mask(m):
+        masked.append(m.group(0))
+        return "\u0000" * len(m.group(0))
+    text = FURNITURE.sub(_mask, text)
     lines = text.splitlines()
     hits, excluded = [], []
     for tok, why in tokens.items():
@@ -87,7 +133,7 @@ def scan(brief_path, tokens):
                     excluded.append((i, tok, "clock/locator", line.strip()[:70]))
                 else:
                     hits.append((i, tok, why, line.strip()[:70]))
-    return hits, excluded
+    return hits, excluded, masked
 
 
 def main():
@@ -115,14 +161,14 @@ def main():
               % args.seed)
         print("   forbidden set has not checked anything.")
         return 1
-    r = ratios_in(args.results)
+    r = values_in(args.results)
     if not r:
-        print("⛔ no ratio tokens harvested from %s -- REFUSING. An empty forbidden"
+        print("⛔ no result values harvested from %s -- REFUSING. An empty forbidden"
               % ", ".join(args.results))
         print("   set would pass ANY document, which is the failure that flatters.")
         return 1
     for tok, src in r.items():
-        tokens[tok] = "ratio in %s" % os.path.basename(src)
+        tokens[tok] = "value in %s" % os.path.basename(src)
 
     print("=" * 76)
     print("BRIEF LEAK-CHECK -- does the recruitment carry the result?")
@@ -130,7 +176,12 @@ def main():
     print("  brief            %s" % args.brief)
     print("  forbidden set    %d token(s), DERIVED at runtime (none stored here)"
           % len(tokens))
-    hits, excluded = scan(args.brief, tokens)
+    hits, excluded, masked = scan(args.brief, tokens)
+    if masked:
+        uniq = sorted(set(masked))
+        print("  masked           %d date/filename span(s), %d distinct: %s"
+              % (len(masked), len(uniq), ", ".join(uniq[:6])
+                 + (" ..." if len(uniq) > 6 else "")))
     if excluded:
         print("  excluded         %d match(es) adjacent to ':' (clock or locator):"
               % len(excluded))
@@ -149,8 +200,13 @@ def main():
     print("✅ NO LEAK. Every forbidden token is absent; this brief can be read by a")
     print("   candidate keyer without spending them.")
     print()
-    print("⛔ DOMAIN: proves the FIGURES are absent. Cannot prove a leading")
-    print("   CHARACTERISATION is absent -- that half is a human read.")
+    print("⛔ DOMAIN -- what a PASS here does and does NOT mean:")
+    print("     COVERS      decimals + multi-digit integers appearing in the result")
+    print("                 document(s), and the seed totals. Derived, never typed.")
+    print("     DOES NOT    single-digit values; a value that appears NOWHERE in the")
+    print("                 named result documents; and any leading CHARACTERISATION")
+    print("                 in prose (\"smaller than we thought\") -- a human read.")
+    print("   A PASS IS THE ABSENCE OF THE DERIVED SET, NOT OF EVERY RESULT.")
     return 0
 
 
