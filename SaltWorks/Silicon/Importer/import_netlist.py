@@ -118,6 +118,8 @@ EXPAND = {
     "nor2_1":              ([("a", "or", "A", "B"), ("t", "not", "a", None)], ("Y", "t")),
     "nand3_1":             ([("a", "and", "A", "B"), ("b", "and", "a", "C"),
                              ("t", "not", "b", None)], ("Y", "t")),
+    "nand4_1":             ([("a", "and", "A", "B"), ("b", "and", "a", "C"),
+                             ("c", "and", "b", "D"), ("t", "not", "c", None)], ("Y", "t")),
     "nor3_1":              ([("a", "or", "A", "B"), ("b", "or", "a", "C"),
                              ("t", "not", "b", None)], ("Y", "t")),
     "mux2_1":              ([("n", "not", "S", None), ("a", "and", "A0", "n"),

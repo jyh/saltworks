@@ -274,6 +274,12 @@ def nand3 (A B C : Bool) : Bool := !(A && B && C)
 theorem nand3_liberty (A B C : Bool) :
     nand3 A B C = ((!A) || (!B) || (!C)) := by decide +kernel +revert
 
+/-- `nand4` -/
+def nand4 (A B C D : Bool) : Bool := !(A && B && C && D)
+
+theorem nand4_liberty (A B C D : Bool) :
+    nand4 A B C D = ((!A) || (!B) || (!C) || (!D)) := by decide +kernel +revert
+
 /-- `nor3` -/
 def nor3 (A B C : Bool) : Bool := !(A || B || C)
 
@@ -413,7 +419,7 @@ theorem conb_LO_liberty : conb_LO = false := by decide +kernel
 #audit_axioms dfxtp_1_next_liberty
 #audit_axioms inv_liberty buf_liberty clkbuf_liberty dlygate4sd3_liberty
 #audit_axioms clkdlybuf4s25_liberty or2_liberty nor2_liberty and3_liberty
-#audit_axioms nand3_liberty nor3_liberty xor2_liberty and2b_liberty
+#audit_axioms nand3_liberty nand4_liberty nor3_liberty xor2_liberty and2b_liberty
 #audit_axioms and3b_liberty and4bb_liberty nand2b_liberty nand3b_liberty
 #audit_axioms nor3b_liberty or3b_liberty a21o_liberty a21oi_liberty
 #audit_axioms a21boi_liberty a31o_liberty a32o_liberty a211o_liberty

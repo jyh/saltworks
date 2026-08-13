@@ -250,3 +250,91 @@ PASS-expected**, and the PASS rows are load-bearing: the script's own comment
 records that *a run which always fails satisfies every RED row for free.* The bar
 this seat reads, and ran, is **the nine-row fixture exits 0** — which it does; the
 EXIT=1 above comes from C3.A2 alone.
+
+---
+
+# ADDENDUM B — `nand4_1` LANDED · D1a's HARDWARE DOOR IS OPEN
+
+### Authorised as routine by the same helm ruling (18:49, item 2): *"a combinational
+### model in your lane's standard class; the sensitive class was and remains sequential."*
+
+## B.1 · ⭐ `dmem8` NOW IMPORTS CLEAN — **EXIT=0, readback GREEN**
+
+```
+instances     : 673  (417 logic, 256 physical/sequential)
+gates emitted : 1984
+flops cut     : 256  (256 by the treatment, 0 listed by the caller)
+clock domain  : one — root 'clk', parity 0, via 1 CLK net(s)
+⚠ RESTRICTED  : 'rst_n' PINNED to 1 — 256 async-reset flop(s) imported under it
+pin fan-out   : 0 other consumers — 'rst_n' feeds only reset pins
+conservation  : text scan 256, parsed 256, cut 256 + 0 caller-listed  OK
+readback      : 32 random vectors, 288 outputs each — agrees with vendor Liberty
+```
+⚓ **The predecessor's measurement was exact: one unmodelled combinational cell
+stood between the flow and a clean `dmem8` import. It is modelled, and the door
+is open.** `nand4_1` is **17 instances** of the 673.
+
+⛔ **THE DATUM STILL DOES NOT LAND.** The bar governs (Addendum A), and helm
+condition (4) holds the emitted **statement form** for math. This is the
+*hardware* door, not the theorem.
+
+## B.2 · THE MODEL, AND WHY ITS THEOREM IS NOT VACUOUS
+
+Written **by hand from what the name means**, per the rule in
+`Cells/CI-cell-census.md`: *"If the model is generated from that same liberty, the
+theorem compares a value with itself and proves nothing."*
+
+```lean
+def nand4 (A B C D : Bool) : Bool := !(A && B && C && D)      -- from the NAME
+theorem nand4_liberty (A B C D : Bool) :
+    nand4 A B C D = ((!A) || (!B) || (!C) || (!D))            -- from the VENDOR
+  := by decide +kernel +revert
+```
+The two sides are **syntactically different expressions** — a conjunction under a
+negation versus a disjunction of negations. The theorem is De Morgan on this pin
+set, and it is the reason the model is trusted rather than assumed.
+
+```
+vendor      nand4_1  in=(A,B,C,D)   Y = (!A) | (!B) | (!C) | (!D)
+            read by Cells/extract_liberty.py from the PDK's own Liberty
+kernel      ✓ SaltWorks.Silicon.Cells.nand4_liberty [0 axioms]   saltbuild EXIT=0
+            (a real build — 29s, not a Replayed module)
+EXPAND      independently cross-checked by readback.py, which takes the cell's
+            function from Liberty and NOT from the importer's own table
+regression  reimport.sh EXIT=0, 4 of 7, ALL REPRODUCE byte-for-byte
+```
+
+## B.3 · A NUMBER THAT LOOKED LIKE A CONTRADICTION AND WAS NOT
+
+The importer prints **`cell types : 10`**; the predecessor measured **11**. Both
+are right and they count different objects — the importer's line is **logic types
+only**, excluding the sequential `dfrtp_1`. Census of the netlist itself:
+
+```
+256 mux2_1 · 256 dfrtp_1 · 83 a22oi_1 · 30 a222oi_1 · 17 nand4_1 · 15 nand3_1
+  8 nand2_1 · 3 nor3b_1 · 3 and3b_1 · 1 nor3_1 · 1 and3_1        = 11 distinct
+```
+*Recorded because the adjacent-object reading is the one that gets published.*
+
+## B.4 · ⚠️ A DEFECT IN THE FROZEN PRE-REGISTRATION'S OWN REPRODUCTION COMMAND
+
+§1.3 documents the run as `--inputs clk,rst_n,we,addr[0..2],wdata[0..31]
+--outputs rdata[0..31]`. **`[0..31]` is not importer syntax.** The importer takes
+an explicitly enumerated list (`rdata[0],rdata[1],…`, as `reimport.sh`'s `seq8`
+builds it), and the documented command fails with `net 'rdata[0..31]' has no
+driver and is not an input`.
+
+🔑 ***It was never caught because the `dfrtp` refusal fired FIRST.*** The command
+was only ever run in a configuration that exits before the port list is parsed,
+so its later arguments were never exercised. ⇒ **A reproduction command that
+always fails early has not been shown to reproduce anything** — the
+[[a-check-never-shown-to-fail]] pattern, one level up, in a documented command
+rather than in a check. *(Also: `rst_n` must be OMITTED from `--inputs` under
+`--pin-reset`, which control NCx enforces.)*
+
+The prereg is frozen and stays frozen. **The working command is recorded here:**
+```
+--inputs  clk,we,addr[0],addr[1],addr[2],wdata[0]…wdata[31]     (rst_n OMITTED)
+--outputs rdata[0]…rdata[31]
+--pin-reset rst_n
+```
