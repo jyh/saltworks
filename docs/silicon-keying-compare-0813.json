@@ -70,5 +70,21 @@
   "why_the_floor_was_predictable": "a similarity threshold trades recall for precision by construction. 0.20 sat clear of a 0.11 noise max, which bought confidence in every pair reported and guaranteed misses below the cut. The artefact should be read as 'at least 7', never as '7'.",
   "credit": "the five recoveries are evidence's, found by READING the rows rather than re-running a metric",
   "note_on_a_misreading_of_mine": "I first read a bus fragment as an accusation that MY matcher mis-paired a row. It was not: the seat was reporting a defect in THEIR OWN rebuilt metric, explicitly against their own instrument. Recorded because the fragment-vs-sentence error is the same class this compare's other findings are about."
+ },
+ "inputs": {
+  "_defect_disclosed": "the delivered artefact recorded NEITHER input paths NOR hashes. A comparison that cannot name and fingerprint its inputs is not reproducible \u2014 my numbers could not be re-derived, and a changed input could not be detected. Mine, not the keyers'.",
+  "evidence_keying": {
+   "path": "docs/evidence-blind-keying-0813.json",
+   "sha256_16": "ec3737410863b22f",
+   "bytes": 45756,
+   "vcs": "UNTRACKED at this stamp (the seat disclosed it at 11:06)"
+  },
+  "compiler_seed": {
+   "path": "docs/ledger-incidents-seed-0812.json",
+   "sha256_16": "22802c719bd20a2c",
+   "bytes": 7300,
+   "vcs": "tracked"
+  },
+  "why_hashes_now": "a hash anchors the compare even if the file moves, changes, or is never tracked \u2014 it is the receipt that says WHICH bytes produced these numbers, and it works without anyone deciding the tracking question first."
  }
 }
