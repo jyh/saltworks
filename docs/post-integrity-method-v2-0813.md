@@ -22,9 +22,18 @@ what actually happened
   08:38:37  this method is first offered — TEN MINUTES AFTER the corruption was fixed
 ```
 🔑 ***THIS METHOD HAS NEVER FIRED ON A LIVE CORRUPTION. Its entire live-fire record is a
-shell error message a seat happened to read. Every positive it has ever produced is a
-planted control.*** **Any adoption argument that starts from a catch is starting from a
-fiction. The argument for it is prospective only.**
+shell error message a seat happened to read.*** **Any adoption argument that starts from a
+catch is starting from a fiction. The argument for it is prospective only.**
+
+⚖️ **AND THE PRECISE FORM OF THAT INDICTMENT, corrected before the cold pass by a peer's
+correction against their OWN instrument — because v1's author got the emphasis wrong
+here too:** *the defect is **NOT** that its positives are planted. **Planted controls are
+what rider 4 demands**, and §6 of this file mandates eight of them.* ⇒ ***The indictment is
+(a) a WARRANT that claimed a live catch the instrument never made, and (b) an unknown BASE
+RATE and unexamined AIM — one real corruption in the whole record, self-found, and no
+measurement of how often the thing this detects actually occurs.***
+⛔ **Do not read §0 as "plants are worthless" and §6 as its contradiction. §0 is about what
+the method may CLAIM; §6 is about what every run must RUN.**
 
 📌 *Also corrected: **three** seats ran instruments (silicon, compiler, math), not four.
 The fourth header in that window was the helm's closing order, which ran no instrument.*
