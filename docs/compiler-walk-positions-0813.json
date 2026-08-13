@@ -1,0 +1,62 @@
+{
+ "walk": "compiler's half of the joint adjudication ordered by the helm 10:13:21",
+ "author": "compiler seat",
+ "seed_sha256_frozen": "22802c719bd20a2c37b0de0c756960e74769fa4be3a46830711a3a4e8de58852",
+ "method": "READ the predicates. A similarity score near its own noise ceiling cannot decide identity -- my own rebuilt metric mis-paired prep-locator-ctrl32 to a citecheck row, and the evidence keyer's rebuilt metric mis-paired the SAME row. Scores below are candidate-generation only, never the basis of a position.",
+ "eligibility_rule_applied": "helm 10:16 -- population is the WINDOW'S CONTENTS, evidenced there by whichever seat; not any keyer's witness",
+ "positions": [
+  {
+   "key": "design-doc-locator-ranking",
+   "outcome": "c-INELIGIBLE",
+   "reason": "provenance says 'caught before landing' -- never entered the window's record, so the window cannot evidence it. Fails the ruled bar. Mine, dropped."
+  },
+  {
+   "key": "ledger-population-repo-path",
+   "outcome": "c-INELIGIBLE",
+   "reason": "provenance says 'caught before the disclosure was published' -- pre-publication, not in the window's record. Fails the ruled bar. Mine, dropped."
+  },
+  {
+   "key": "head-is-not-my-landing",
+   "outcome": "c-INELIGIBLE",
+   "reason": "provenance says 'NEVER PUBLISHED -- caught in the composing window'. The window's record cannot evidence a defect that never reached it. Fails the ruled bar. Mine, dropped."
+  },
+  {
+   "key": "prep-locator-ctrl32",
+   "outcome": "a-SAME-ROOT",
+   "reason": "one of three locator rows I keyed from ONE document's citations on 'different locus => different incident'. The other keying holds them as a single root (compiler-prep-doc-locators). Under the registered identity rule -- distinct ROOT defect -- one careless citation pass is one root. My split was finer than the rule. Merges; my count falls."
+  },
+  {
+   "key": "prep-locator-program-path",
+   "outcome": "a-SAME-ROOT",
+   "reason": "same root as prep-locator-ctrl32; see that row. Merges."
+  },
+  {
+   "key": "prep-locator-isa-arm",
+   "outcome": "a-SAME-ROOT",
+   "reason": "same root as prep-locator-ctrl32; see that row. Merges."
+  },
+  {
+   "key": "die-rtl-scope-mix",
+   "outcome": "a-SAME-ROOT",
+   "reason": "the other keying's rtl-numerator-over-die-denominator states the same defect: an RTL-side numerator over a die denominator. Same root under independently invented labels; the metric missed it at 0.171, below silicon's 0.20. READ, not scored."
+  },
+  {
+   "key": "citecheck-context-bleed",
+   "outcome": "a-SAME-ROOT",
+   "reason": "the other keying's citecheck-context-bleeds-across-citations is the same defect: payload context crossing into the following citation. Sub-threshold on the metric, identical on reading."
+  },
+  {
+   "key": "citecheck-backticks-only",
+   "outcome": "a-SAME-ROOT",
+   "reason": "the other keying's citecheck-mines-only-backticks is the same defect: only backticked spans mined, so other delimiters fall to UNCHECKED. Sub-threshold on the metric, identical on reading."
+  },
+  {
+   "key": "false-eviction-claim",
+   "outcome": "a-SAME-ROOT",
+   "reason": "the other keying's compiler-eviction-claim-case-blind states the same root: an index-eviction finding produced by a case-blind probe. Same defect, independently labelled."
+  }
+ ],
+ "my_bottom_line": "ZERO of my ten unmatched rows is a root defect the other keying missed. Three fail the ruled eligibility bar and are mine to drop; the rest are the same roots under different labels, or my own finer-than-the-rule splitting. My seed contributes nothing the other keying lacks.",
+ "against_my_own_count": "3 rows drop as ineligible; 3 prep-locator rows merge to 1. My 17 does not survive as 17 under the registered rules.",
+ "granularity_caveat": "the reconciled total must apply ONE granularity to BOTH sides -- scoring their rows at my finer split raises theirs too. Score both the same or not at all."
+}
