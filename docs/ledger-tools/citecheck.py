@@ -114,6 +114,17 @@ def resolve_across(cited, roots):
         paths, how = resolve(cited, rpath, rindex)
         if paths:
             return rname, rpath, paths, how
+        # ⛔ A PATH MAY CARRY ITS OWN REPO NAME AS ITS FIRST SEGMENT — evidence,
+        # 2026-08-12 19:08. `${SEAT_DIR}/fleet/PROGRAM-BOARD.md` is written relative to the
+        # repo's PARENT, while the index holds `fleet/PROGRAM-BOARD.md` relative to the
+        # repo ROOT, so `endswith` can never match and --also-root seat silently failed
+        # to fix the very citations it was added for. Strip the root's own name and retry.
+        prefix = rname + "/"
+        if cited.startswith(prefix):
+            trimmed = cited[len(prefix):]
+            paths, how = resolve(trimmed, rpath, rindex)
+            if paths:
+                return rname, rpath, paths, how + "+stripped-repo-prefix"
     return None, None, [], "unresolved"
 
 
