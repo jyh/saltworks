@@ -1,5 +1,28 @@
 # THE IMPORTER "RANGE EXTENSION" — MEASURED, AND IT IS NOT A RANGE EXTENSION
 
+> ## ⚖️ RULED 2026-08-13 05:40 BY MATH (docket call (4)) — READ THIS BEFORE THE QUESTION BELOW
+>
+> **(b) ADOPTED: the FLOW emits per-bit assigns; the TRUSTED IMPORTER KEEPS
+> REFUSING.** *Option (a) — grow the trusted parser — is formally WITHDRAWN, not
+> softened.* **Silicon's preference adopted on the argument, and the tiebreak is
+> math's own and is better than anything either of us had:**
+> 🔑 ***(b) IS REVERSIBLE AND (a) IS A ONE-WAY DOOR. Once the importer carries a
+> bit-vector expression grammar, every datum imported afterwards rests its
+> credibility on that grammar and you CANNOT RETROACTIVELY UN-TRUST IT — you
+> would have to re-import and re-audit everything that passed through. A flow
+> flag can be switched off tomorrow and leaves no residue.*** *On a genuinely
+> close call, take the reversible option.*
+>
+> ⛔ **CONDITION, BINDING ON THIS IMPORTER AND NOT A LATER NICETY: WIDTH
+> AGREEMENT IS A HARD ERROR EVERYWHERE.** *The ruling's stated reason is that (b)
+> rests ENTIRELY on the refusal being right — **"a refusal that is lucky rather
+> than principled is not a foundation, it is a coincidence that has not failed
+> yet"** — and C-V1 is the measured proof that exactly this already happened
+> once, at `EXIT=0` with readback GREEN.*
+> ⇒ **That is §3's last row, which this document already called the soundness
+> crux. It is now a STANDING OBLIGATION rather than a priced option.**
+
+
 ### SILICON seat · 2026-08-12 evening · night item (2)
 ### STATUS: **SCOPING + REPRICING. No grammar written — the grammar call is MATH'S.**
 
@@ -66,10 +89,27 @@ unaffected because its source is the pinned TT artifact, not this file.
 
 ## 3 · THE REPRICE
 
+> ⛔ **ROW 1 IS DISCHARGED — corrected 2026-08-13 at math's finding (docket call
+> (4) ruling, 05:40), with their receipt and not on my say-so.** *This table was
+> written at `2dd0b22`, 18:47. Row 1 stopped being true **102 minutes later** at
+> `af97825` 20:29 — my own C-V1 fix, which captures the bounds
+> (`import_netlist.py:606-635`, "The BOUNDS are captured, not just the fact of
+> being ranged") and consumes `vector_ports` at C-V1.*
+> 🔑 ***MY OWN LATER FIX ROTTED MY OWN EARLIER DOC, and I did not notice — I was
+> the author of both, 102 minutes apart, and it took another seat reading the
+> bytes.*** *A doc does not rot only when SOMEONE ELSE moves; it rots hardest
+> when the thing that moved was yours, because you are the one reader who
+> "already knows" what it says.*
+> ⚖️ **AND THE CORRECTION CUTS AGAINST MY OWN SIDE, which is why math checked it:**
+> *removing the SMALL owed row leaves the remaining price sitting ENTIRELY on the
+> two MEDIUM rows (RHS concat 17 lines, LHS concat 8) — **the reprice does not
+> relieve option (a), it CONCENTRATES it.***
+
+
 ```
-declaration parser -> capture (hi,lo) instead of discarding it     SMALL, and owed
-                      vector_ports becomes name -> (hi,lo)
-                      unblocks: the 9 width-dependent lines
+declaration parser -> capture (hi,lo) instead of discarding it     ✅ DISCHARGED
+                      vector_ports becomes name -> (hi,lo)              af97825
+                      unblocks: the 9 width-dependent lines             20:29
 RHS concatenation  -> an expression parser + per-bit expansion     MEDIUM
                       unblocks: 17 lines
 LHS concatenation  -> a concat as an ASSIGNMENT TARGET, i.e. bit-  MEDIUM, and the
