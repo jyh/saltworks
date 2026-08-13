@@ -102,7 +102,28 @@ STRIP=docs/silicon-tools/strip_lean_comments.awk
 # deleted comment leaves a blank line behind; comparing those blanks measures
 # ALIGNMENT, not logic, and reports a false RED. Caught on this check's own
 # first run — it failed in the alarming direction, which is the lucky one.
-logic() { awk -f "$STRIP" "$1" | grep -v '^[[:space:]]*$'; }
+# ⛔ NARROWED 2026-08-13 by math's ruling 15:31:23, and note WHY it is a SCOPE
+# CORRECTION rather than a tolerance: A1 tests GATE-FOR-GATE LOGIC IDENTITY, and a
+# `namespace`/`end` declaration was never logic. A2′ characterises the WHOLE diff,
+# so an exclusion THERE would remove something it is FOR — a tolerance. The
+# distinction is the one this exchange existed to separate.
+#
+# ⭐ THE DECISIVE WARRANT WAS A1'S OWN HISTORY, NOT THE PRINCIPLE: RESULTS:236
+# records that A1 was ALREADY measuring ALIGNMENT rather than logic until blank
+# lines were stripped. Namespace/end lines are the SAME CLASS — this is the
+# SECOND instance of a correction A1 has already accepted once, which makes it a
+# precedent rather than a judgement call.
+#
+# The ruling's three-part guard on scope corrections, because the move could
+# swallow any tolerance if left unbounded:
+#   (i)   derivable from the instrument's PRE-EXISTING stated purpose — A1 was
+#         named "logic identity" at RESULTS:157, before this red;
+#   (ii)  a CLASS, not an instance — non-logic scoping declarations, not one line;
+#   (iii) ⚠️ NC3a MUST BE RE-RUN. A stripper change is precisely the edit that can
+#         silently break the control proving A1 can still go red. An instrument
+#         just made blind to one class must be shown to still see the class it
+#         exists for.
+logic() { awk -f "$STRIP" "$1" | grep -v '^[[:space:]]*$' | grep -vE '^(namespace|end) '; }
 
 # emit <tag> <src.v> <pin|nopin>
 emit() {
@@ -136,19 +157,32 @@ cellcol() { grep -E '^\* `' "$1" | sed 's/.*, \(df[rx]tp_1\))/\1/'; }
 # ⛔ EXTRACTED INTO A FUNCTION ON PURPOSE: as straight-line code it could not be
 # invoked on a planted input, so it could not be controlled. A criterion that
 # cannot be handed a fixture cannot be shown to fail.
+SFX_RE='^namespace .*\.Restricted_[A-Za-z0-9_]+$'
+# DIFFLINES — the lines A2′ expects to move, extracted FROM THE ARTIFACT IN FILE
+# ORDER rather than hand-listed. Measured 8/13: renaming the namespace changes
+# TWO lines, `namespace` AND `end` — hand-ordering would have missed the second.
+difflines() { grep -E '^\* `|^namespace |^end ' "$1"; }
 a2p() { # $1 = pinned datum, $2 = rewrite datum
   local npc nxc
-  cat "$GOLD" >"$TMP/gold2"
-  grep -E '^\* `' "$1" >>"$TMP/gold2"
+  # expected ADDITIONS: the golden marker, then p's namespace/flop/end lines.
+  cat "$GOLD" >"$TMP/gold2"; difflines "$1" >>"$TMP/gold2"
+  # expected REMOVALS: x's namespace/flop/end lines, and nothing else.
+  difflines "$2" >"$TMP/xcells"
   diff "$2" "$1" >"$TMP/d2"
   grep '^< ' "$TMP/d2" | sed 's/^< //' >"$TMP/rm2"
   grep '^> ' "$TMP/d2" | sed 's/^> //' >"$TMP/add2"
-  grep -E '^\* `' "$2" >"$TMP/xcells"
   cellcol "$1" >"$TMP/pc"; cellcol "$2" >"$TMP/xc"
   npc=$(grep -c . "$TMP/pc"); nxc=$(grep -c . "$TMP/xc")
+  # ⭐ THE NAME CLAUSE, asserted as a STRUCTURAL PREDICATE and not a literal line
+  # (math 15:24:05): a literal namespace in the golden would make it datum-
+  # specific — dmem8/16/32 would each need their own — so assert instead THAT the
+  # pinned arm's namespace carries a restriction suffix and the rewrite arm's does
+  # not. Same shape, and the same reason, as the cell-name column clause below.
   [ "$npc" -gt 0 ] && [ "$npc" -eq "$nxc" ] \
     && [ "$(grep -c '^dfrtp_1$' "$TMP/pc")" -eq "$npc" ] \
     && [ "$(grep -c '^dfxtp_1$' "$TMP/xc")" -eq "$nxc" ] \
+    && grep -qE "$SFX_RE" "$1" \
+    && ! grep -qE "$SFX_RE" "$2" \
     && cmp -s "$TMP/rm2" "$TMP/xcells" && cmp -s "$TMP/add2" "$TMP/gold2"
 }
 
@@ -275,6 +309,101 @@ else
       echo "     vacuity clause does not discriminate; A2′ would pass a comparison"
       echo "     in which the treatment never applied"; fail=1
     else echo "  ✅ NC3d A2′ goes RED when the arms are NOT DISTINCT (vacuity clause fires)"; fi
+
+    # --- NC3e  THE NAME-CLAUSE CONTROL. math 15:24:05 put the name difference in
+    # A2′'s ASSERTED set; an asserted clause with no control is an assertion
+    # nobody has tested. Strip the restriction suffix from the pinned arm and A2′
+    # must refuse — otherwise a datum whose name dropped the restriction would
+    # certify clean, which is the whole failure the clause exists to prevent.
+    sed 's/^\(namespace .*\)\.Restricted_[A-Za-z0-9_]*$/\1/; s/^\(end .*\)\.Restricted_[A-Za-z0-9_]*$/\1/' \
+        "$TMP/p.lean" >"$TMP/p_noname.lean"
+    if cmp -s "$TMP/p.lean" "$TMP/p_noname.lean"; then
+      echo "  ⛔ NC3e plant did not apply — control VOID"; fail=1
+    elif a2p "$TMP/p_noname.lean" "$TMP/x.lean"; then
+      echo "  ✗ NC3e A2′ stayed GREEN with the restriction stripped from the NAME"; fail=1
+    else echo "  ✅ NC3e A2′ goes RED when the NAME drops the restriction"; fi
+  fi
+fi
+
+# --- C7  THE NAME-CLAUSE CONSUMPTION FENCE -------------------------------------
+# Helm disposition 2026-08-13 15:22:51: the name clause (rst_n≡1 riding in the
+# datum's NAME, mechanically enforced — math, 05:20) is a DECLARED DEFERRAL whose
+# release condition is an EVENT: "completes BEFORE the datum's first downstream
+# citation — nothing consumes it until the name carries the restriction."
+#
+# ⛔ AN EVENT-ANCHORED DEFERRAL FAILS OPEN. The event arrives, nobody is watching
+# for it, and the obligation is discovered afterwards — which is the exact class
+# that cost this seat nineteen hours today (a ruling that lived only in prose).
+# The fleet ratified the cure this afternoon: to protect something during
+# construction you REMOVE THE CAPABILITY rather than forbid its use. So the helm's
+# "nothing consumes it" is implemented here as a REFUSAL, not as a sentence.
+#
+# Measured at this landing: 0 restricted datums committed, 0 citations — the event
+# CANNOT fire yet, which is precisely why the trigger is cheap to build now and
+# expensive to build later, when whoever writes the citation has none of this
+# context. The fence RETIRES ITSELF the moment the name clause lands.
+
+# name_clause_enforced <emitted.lean> <name-passed> — probes the REAL emitted
+# datum rather than grepping the importer, so it cannot drift from behaviour.
+name_clause_enforced() { grep -qE "$SFX_RE" "$1"; }
+# cites_restricted <root> — counts files that reference a restricted datum's
+# namespace WITHOUT being that datum. Takes a root so the control can drive it
+# on a planted tree: a fence that cannot be handed a fixture cannot be controlled.
+cites_restricted() {
+  local root=$1 c=0 d ns
+  for d in $(grep -rl 'RESTRICTED DATUM' --include=*.lean "$root" 2>/dev/null); do
+    ns=$(grep -m1 '^namespace ' "$d" | awk '{print $2}')
+    [ -n "$ns" ] || continue
+    c=$((c + $(grep -rl "\\b$ns\\b" --include=*.lean "$root" 2>/dev/null | grep -vc "^$d\$")))
+  done
+  echo "$c"
+}
+
+emit probe "$FX/pinreset_base.v" pin
+if [ ! -s "$TMP/probe.lean" ]; then
+  echo "  ⛔ C7 — probe emitted nothing; refusing to report the fence's state"; fail=1
+else
+  # --- NC-NAME  math 15:24:05 part (3): NOT absorbed into A2′, for a reason of
+  # TRIGGER rather than principle. A2′ only runs when BOTH ARMS are built — a
+  # deliberate, expensive act — but the name rule must fire on EVERY pinned
+  # import, including the ones nobody ever builds a rewrite arm for, because its
+  # failure mode is a caller omitting a flag.
+  if name_clause_enforced "$TMP/probe.lean"; then
+    echo "  ✅ NC-NAME  every pinned import's namespace carries the restriction"
+  else
+    echo "  ⛔ NC-NAME  a PINNED import emitted a namespace with no restriction suffix"; fail=1
+  fi
+  # its negative control: an UNPINNED import must NOT carry the suffix, or the
+  # predicate is satisfied by everything and discriminates nothing.
+  emit unpin "$FX/pinreset_dfxtp.v" nopin
+  if [ ! -s "$TMP/unpin.lean" ]; then
+    echo "  ⛔ NC-NAMEb probe emitted nothing — control VOID"; fail=1
+  elif name_clause_enforced "$TMP/unpin.lean"; then
+    echo "  ✗ NC-NAMEb an UNPINNED import carried the restriction suffix"; fail=1
+  else echo "  ✅ NC-NAMEb an UNPINNED import does NOT carry the suffix"; fi
+
+  if name_clause_enforced "$TMP/probe.lean"; then
+    echo "  ✅ C7  name clause ENFORCED — this fence has retired itself"
+  else
+    cites=$(cites_restricted SaltWorks)
+    if [ "$cites" -gt 0 ]; then
+      echo "  ⛔ C7  NAME CLAUSE UNMET AND THE DATUM IS BEING CONSUMED ($cites citation(s))."
+      echo "     The helm's release condition has FIRED: the name must carry rst_n≡1"
+      echo "     before anything cites this datum. Land the name clause or drop the cite."
+      fail=1
+    else
+      echo "  ⓘ  C7  name clause OPEN, citations 0 — deferral live and unconsumed (helm 15:22:51)"
+    fi
+  fi
+  # NC7 — the fence must be SHOWN able to refuse, or its ⓘ above is untested.
+  # Planted tree: a restricted datum plus a separate file naming its namespace.
+  mkdir -p "$TMP/fence/a" "$TMP/fence/b"
+  printf -- '-- ⚠ RESTRICTED DATUM\nnamespace FakeNL\nend FakeNL\n' >"$TMP/fence/a/d.lean"
+  printf -- 'open FakeNL\n' >"$TMP/fence/b/c.lean"
+  if [ "$(cites_restricted "$TMP/fence")" -gt 0 ]; then
+    echo "  ✅ NC7 fence DETECTS a planted citation of a restricted datum"
+  else
+    echo "  ✗ NC7 fence missed a planted citation — C7's zero is UNTESTED"; fail=1
   fi
 fi
 

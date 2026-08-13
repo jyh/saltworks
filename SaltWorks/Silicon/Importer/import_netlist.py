@@ -1226,6 +1226,22 @@ out_idx = ([net(o) for o in outs_named]
 logic = [i for i in insts
          if not i[0].startswith(PHYSICAL_PREFIX) and not i[0].startswith(SEQ_PREFIX)]
 phys = len(insts) - len(logic)
+# ⛔ THE NAME CLAUSE — math's muster ruling 2026-08-13 05:20, refined 15:24:05:
+# rst_n≡1 must ride in the datum's NAME, MECHANICALLY ENFORCED. Until this landed
+# the restriction lived only in comment lines, and `--name`/`--ns` were free
+# caller strings: a caller who said nothing got an unrestricted-LOOKING datum
+# carrying a warning nobody has to read.
+#
+# ⭐ DERIVED, NEVER ACCEPTED FROM THE CALLER. The suffix is computed from the
+# `pinned` map itself, so it cannot be omitted, misspelled, or opted out of by
+# any invocation. That is what "mechanically enforced" has to mean — a naming
+# rule a caller can decline is a naming convention, not a restriction.
+if pinned:
+    _sfx = "Restricted_" + "_".join(
+        re.sub(r'[^A-Za-z0-9]', '_', f"{nm}_eq_{int(val)}")
+        for nm, val in sorted(pinned.items()))
+    a.ns = f"{a.ns}.{_sfx}"
+
 open(a.out, "w").write(to_lean(gates, a.ns, a.name, out_idx, len(ins_all), a.netlist,
                                state=auto, ndesign_in=len(ins), ndesign_out=len(outs_named),
                                clockinfo=clockinfo, cuts=cuts, pinned=pinned))

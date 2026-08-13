@@ -15,25 +15,41 @@ pinreset controls: C3 under A2′ (A1 logic identity · A2′ marker + required 
   ⓘ  C3.A2 (SUPERSEDED, non-discharging) RED as expected — the diff carries
       the cell-name column, which A2′ asserts positively instead of tolerating.
       removed (must be none):
+        namespace SaltWorks.Silicon.Imported
         * `  0`  Q `s0`  ←— `w0`   (_02_, dfxtp_1)
         * `  1`  Q `s1`  ←— `d1`   (_03_, dfxtp_1)
+        end SaltWorks.Silicon.Imported
   ✅ C3.A2′ diff is EXACTLY the marker PLUS the required cell-name column
   ✅ NC3a A1 goes RED on a perturbed gate
   ✅ NC3b A2′ goes RED on an extra non-marker difference
   ✅ NC3c A2′ goes RED when the mandated marker is absent
   ✅ NC3d A2′ goes RED when the arms are NOT DISTINCT (vacuity clause fires)
+  ✅ NC3e A2′ goes RED when the NAME drops the restriction
+  ✅ NC-NAME  every pinned import's namespace carries the restriction
+  ✅ NC-NAMEb an UNPINNED import does NOT carry the suffix
+  ✅ C7  name clause ENFORCED — this fence has retired itself
+  ✅ NC7 fence DETECTS a planted citation of a restricted datum
 pinreset controls: 9 planted row(s), ALL BEHAVED
 
-════ ADJUDICATION vs the pre-registration (written before the edits) ════
-E1 C3.A1 GREEN                          -> MET
-E2 C3.M  GREEN                          -> MET
-E3 C3.A2 informational RED, not gating  -> MET
-E4 C3.A2' DISCHARGING GREEN             -> MET
-E5 NC3a fires                           -> MET
-E6 NC3b re-pointed to A2', fires        -> MET
-E7 NC3c re-pointed to A2', fires        -> MET
-E8 NC3d VACUITY control fires (NEW)     -> MET  <- never run before today
-E9 EXIT = 0                             -> MET
-ALL NINE MET. No unpredicted green, no deviation.
-R3 HELD: this is the pinreset FIXTURE scale. The dmem8-scale green was
-   measured separately on 8/12 (d99842a) and is NOT re-claimed here.
+════ SECOND LANDING — CRITERION VERSION C3/A2′ rev-2 ════
+rev-1  (7958286): A1 logic identity · A2′ = marker + required cell-name column
+rev-2  (this):    rev-1 + the NAME CLAUSE as a STRUCTURAL PREDICATE
+                  + A1 narrowed to exclude non-logic scoping declarations
+Authority: math 15:24:05 (name clause, (a) adopted / (b) refused, predicate
+not literal) and math 15:31:23 (narrow A1; three-part guard on scope
+corrections; NC3a re-run REQUIRED).
+
+RULING (iii) DISCHARGED AND VERIFIED, NOT ASSUMED:
+  NC3a re-run after the stripper change -> ✅ A1 still goes RED on a
+  perturbed gate. An instrument just made blind to one class was shown to
+  still see the class it exists for.
+
+NEW CONTROLS AT THIS LANDING:
+  NC3e     A2′ RED when the NAME drops the restriction
+  NC-NAME  every PINNED import's namespace carries the restriction
+  NC-NAMEb an UNPINNED import does NOT (the predicate discriminates)
+  C7/NC7   consumption fence; retired itself the moment the clause landed
+
+SCOPE: pinreset FIXTURE. dmem8-scale green (d99842a, 8/12) NOT re-claimed.
+No committed .lean changed: the suffix applies only when --pin-reset is
+given, so unpinned datums are byte-identical.
