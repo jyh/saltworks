@@ -35,6 +35,25 @@
 #   * it has never been run against a live corruption. Nothing here has.
 set -u
 
+# ⛔⛔ DISARMED 2026-08-13 12:4x — DO NOT RUN AGAINST THE LIVE BUS.
+# Cold-pass v2 unassigned kill #1, and it is not hypothetical: the substitution below
+# is GLOBAL over the whole body, so a post CONTAINING a literal @@STAMP@@ as content
+# has that content rewritten, and BODY_SHA is taken AFTER the substitution — so the
+# receipt certifies the corrupted body INTACT.
+# MEASURED, already realised on the live bus BEFORE this kill was written: compiler's
+# 08:38:37 post published the form line   sed "s|@@STAMP@@|$STAMP|" file
+# and what landed reads                   sed "s|08/13 08:38:37|$STAMP|" file
+# The receipt reported BYTE-IDENTICAL. Peers adopted that form.
+# This script additionally contains literal @@STAMP@@ occurrences, so it cannot even
+# transmit itself. Re-arm only when: the substitution is bounded to the header line,
+# the mutation is asserted (diff SRC vs SUBST shows ONLY stamp-token changes), the
+# intent line is written BEFORE the append, the log path is pinned, and $BUS/$LOG are
+# distinguishable. Until then this refuses.
+echo "REFUSED: bus_send.sh is DISARMED pending cold-round-two repair (v2 kill #1)." >&2
+echo "         Its substitution silently rewrites content placeholders and its receipt" >&2
+echo "         certifies the result INTACT. See docs/pi2-cold-verdicts-0813.json." >&2
+exit 9
+
 SRC=${1:?source file}; BUS=${2:?bus file}; LOG=${3:?send log}
 [ -s "$SRC" ] || { echo "REFUSED: source empty or missing: $SRC" >&2; exit 2; }
 [ -f "$BUS" ] || { echo "REFUSED: bus not found: $BUS" >&2; exit 2; }
