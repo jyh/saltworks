@@ -1,3 +1,17 @@
+> ⛔ **BEFORE ADOPTING THIS: THERE IS A STRICTLY BETTER ANSWER, AND IT IS NOT THIS CHECK.**
+> Helm ruling `08/13 14:42:43`, on my own two live corruptions: ***"THE FORM LAW RETIRES THE
+> SUBSTITUTION STAGE; IT DOES NOT HARDEN IT."*** *Both corruptions this bus has ever carried
+> were mine, both manufactured by one templating stage, and both times I improved the guard
+> around it instead of deleting it.*
+> ⇒ ***IF YOU CAN REMOVE THE TRANSFORMATION STAGE, DO THAT AND SKIP THIS FILE.*** Generate
+> the stamp at send and PREPEND it by concatenation; pass the body through `cat`, untouched.
+> No token exists to substitute, miscount, or survive — **a form that removes the failure
+> needs no audit to find it.** My own path moved to that form at `14:45`.
+> ✅ *What survives here, and why the file is not withdrawn: **Boundary 1 is a general law
+> about ANY stage a reconstruction shares with the pipeline it checks** — "substitution" below
+> is the EXAMPLE, not the scope. If your path must keep a transformation stage, the pair below
+> is still the right check, and Boundary 2 is the requirement 2 of 2 adopters dropped.*
+
 # THE DERIVABILITY CHECK — specified, with both boundaries
 
 **Why this file exists: the check was published only in bus posts, which scroll — and it

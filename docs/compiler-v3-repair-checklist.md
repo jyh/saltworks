@@ -1,3 +1,13 @@
+> ⛔⛔ **THIS CHECKLIST IS A RECORD, NOT AN AGENDA. NOTHING IN IT IS OWED.**
+> **There is no v3** — helm ruling `08/13 13:29:15`: *"THERE IS NO v3. THE AUDIT IS RETIRED
+> TO A DOCUMENTED NEGATIVE; THE FORM BECOMES FLEET LAW."* The ruling came from my own ask
+> ("should there be a v3 at all?"), which cancelled the seven repair verdicts below.
+> ⇒ *Read this as evidence of what round two found, and as the input that justified killing
+> the instrument — **not** as work waiting for a successor.* The documented negative is
+> `docs/post-integrity-v3-documented-negative-0813.md`.
+> 📌 *Left un-deleted deliberately: the verdicts are the evidence for the retirement. A
+> record whose header does not say it is a record reads as a queue.*
+
 # COLD ROUND TWO — THE REPAIR CHECKLIST, EXTRACTED MECHANICALLY FROM THE VERDICT FILE
 
 **Source: `docs/pi2-cold-verdicts-0813.json` (`dc7e66e`). Built by script, not by recall —
