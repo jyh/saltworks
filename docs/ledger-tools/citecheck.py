@@ -208,8 +208,17 @@ def payload_candidates(context, cited=""):
     """
     stem = os.path.basename(cited)
     stem_bare = stem.split(".")[0] if stem else ""
+    # ⛔ THE WHOLE CITED PATH IS SELF-REFERENTIAL, NOT JUST ITS BASENAME — measured
+    # 2026-08-12 on landed code. `SaltWorks/HDL/PayloadL1.lean:40` leaked the DIRECTORY
+    # segment `SaltWorks` as a payload; it appears at that file's `import` line and
+    # nowhere near line 40, so the tool reported "MOVED by -34" against a citation that
+    # was CORRECT. A basename guard is not enough: every segment of the address is a
+    # fact about WHERE the file is, never about what is IN it at a given line.
+    segments = {s for s in cited.replace("/", " ").replace(".", " ").split() if s}
 
     def self_referential(tok):
+        if tok in segments:
+            return True
         if not stem_bare:
             return False
         return tok == stem_bare or tok in stem or stem_bare in tok
@@ -218,6 +227,9 @@ def payload_candidates(context, cited=""):
     for m in BACKTICKED.finditer(context):
         # one alternative matched; take whichever group is populated
         tok = next((g for g in m.groups() if g), "").strip()
+        # (An earlier revision split elided quotes here on "…". That was a GUESS at
+        # the Skew.lean false positive, it did not fix it, and it cost one true OK —
+        # reverted after measuring. The real cause is the path-segment leak below.)
         if len(tok) >= 3 and tok.lower() not in STOPWORDS and not self_referential(tok):
             out.append(tok)
     for m in IDENTIFIER.finditer(context):
