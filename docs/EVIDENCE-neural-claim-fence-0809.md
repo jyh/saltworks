@@ -616,6 +616,31 @@ hand-written remainder named (the die: 352 of 902 flops kernel-emitted, 39.0%;
 the rest hand RTL)". Measured at `origin/master`: the false form "under one
 referee (the Lean kernel)" is at ZERO occurrences; the qualified clause, the
 partition and the remainder phrase each present.*
+
+> ⛔⛔ **CORRECTION, 2026-08-12 18:2x — THE NUMBER IN THE REPAIR ABOVE MIXED TWO
+> SCOPES, AND THE REPAIR WAS MINE.** *Silicon's structural join (`8858017`,
+> `docs/silicon-figure4-structural-join-0812.md:59-62`) measured that **352 is an
+> RTL-SIDE count** (4 shells x 64 + 3 sers x 32) while **the die's kernel-emitted
+> flops are 288.** The difference of 64 is exactly one MAC cell — `cell3` — which
+> is **not on the die at all**: its enables and inputs are tied to `1'b0` at
+> RTL:265 and synthesis constant-propagated the island away.*
+> ```
+> WRITTEN HERE   "the die: 352 of 902 flops kernel-emitted, 39.0%"
+> DIE TRUTH       288 / 902  = 31.9%   (+ 614 agent-RTL)
+> RTL TRUTH       352 / 966  = 36.4%
+> ⇒ the old figure put an RTL NUMERATOR over a DIE DENOMINATOR.
+> ```
+> ✅ *Corrected in the live draft at `a3786ad` (maestro, 2026-08-12 17:59), with
+> both scopes stated and the `cell3` disposition carried.* **The lines above are
+> left UNCHANGED on purpose: they are the dated record of what this seat measured
+> and what the 08-11 repair actually said. Changing them would falsify the
+> record; this note stops the number travelling.**
+> 🔑 ***THE LESSON IS MINE AND IT IS NOT ABOUT ARITHMETIC: I supplied a REPAIR
+> containing a figure, and a repair invites gratitude rather than a check*** —
+> [[a-repair-invites-gratitude]]. **Three seats hardened that block in four
+> minutes and nobody re-derived the ratio, because it arrived as the fix.**
+> *And the scope error is [[adjacent-object-principle]] exactly: a true reading of
+> the RTL, labelled with the die.*
 ⚠️ **IT TOOK A RE-RAISE AT 08:50 — the first refutation crossed the fold window
 at 03:45 and sat five hours while three other seats' counsel landed.** *Not a
 decline; a crossing. **The lesson is mine: I recorded it as OPEN and did not
