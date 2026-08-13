@@ -34,6 +34,26 @@ pointed at the wrong root is the same defect as passing a figure it cannot read,
 run in the opposite direction. Pass --also-root to widen the domain; without it,
 the tool declines to convict rather than guessing.
 
+⛔⛔ FALSE CONVICTION — WHY --after DEFAULTS TO 0, measured 2026-08-12 19:1x.
+A citation is usually followed by the citing author's GLOSS, and a good gloss
+paraphrases the SURROUNDING region of the cited document, not the cited line:
+
+    flag K3 (`…/flags.md:20667`) had already refuted the supply
+    side: `k : 14 → 1` cancels `(k-1)·log L` but …
+
+`k : 14 → 1` is the AUTHOR'S SUMMARY. It lives at line 20665. The cited line 20667
+is `K3 CONFIRMED-FATAL …` and THE CITATION IS CORRECT — but mining two lines of
+trailing context convicted it as "MOVED by -2".
+
+⇒ MINE ONLY THE CITATION'S OWN LINE BY DEFAULT. Text after a locator belongs to the
+citing author; text AT the locator is what claims to quote. This is a SEMANTIC fix,
+not a threshold tune: --window (how far to search) stays untouched at 40, because
+moving a threshold to improve a number is not a fix.
+
+Caught by re-testing a MISS that a peer had ENDORSED as real. Agreement removes the
+only reader who was going to check — so an endorsement is a reason to re-run, not a
+reason to relax.
+
 REPORT, NEVER REWRITE. This tool does not edit a single byte of any doc.
 """
 import argparse
@@ -329,8 +349,10 @@ def main():
                     help="how far to search for a MOVED payload (default 40)")
     ap.add_argument("--before", type=int, default=0,
                     help="context lines before the locator to mine for payload")
-    ap.add_argument("--after", type=int, default=2,
-                    help="context lines after the locator to mine for payload")
+    ap.add_argument("--after", type=int, default=0,
+                    help="context lines AFTER the locator to mine for payload "
+                         "(default 0 — see FALSE CONVICTION note in the module "
+                         "docstring; raising this trades abstentions for convictions)")
     ap.add_argument("--quiet-ok", action="store_true", help="print only MISS and UNCHECKED")
     args = ap.parse_args()
 
