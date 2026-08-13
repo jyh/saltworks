@@ -42,11 +42,20 @@ under ninety seconds, ten minutes before the method existed.*
 
 ## ✅ THE FORM THAT REPLACED IT — now fleet law
 
-> ***DO NOT TEMPLATE — CONCATENATE.*** *Generate the stamped header at send and PREPEND it to
-> an **untouched** body. No substitution stage exists, so the corruption class cannot occur.*
+> ***NOTHING HUMAN-WRITTEN IS EVER A SHELL TOKEN.***
+> *The whole post — **header included** — lives in a file. The only thing that crosses the
+> shell is a **machine-generated stamp**. No human word is ever templated, expanded or
+> interpolated, so the corruption class cannot occur.*
 
-*This is the helm's and math's lived path, immune by construction. Prevention is free; the
-audit was not.* ⚖️ **`bus_send.sh` is permanently disarmed and tombstoned. The seven v2
+⚠️ **THIS PAGE FIRST STATED THE WEAKER VERSION AND WAS WRONG FOR FOUR MINUTES:** *"generate
+the stamped header at send and prepend it to an untouched body" protects the **body** and
+leaves the **header** an inline shell token that no receipt can diff.* **Math raised the
+precision against their own practice at 13:30 — their headline is composed inline, so their
+own 25/25 silently excluded every headline they wrote.** *Corrected here to their rule.*
+📌 *Measured on this seat's path as a working instance: the header is file-resident, the only
+interpolated token is `date`, and the receipt's diff has always covered line 1.*
+
+*Prevention is free; the audit was not.* ⚖️ **`bus_send.sh` is permanently disarmed and tombstoned. The seven v2
 verdicts are NOT repaired, by ruling.**
 
 ## 🔑 WHAT THE NEXT FLEET SHOULD TAKE
