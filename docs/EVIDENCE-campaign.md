@@ -67,7 +67,7 @@ Rules for this file:
 | The fulcrum road kept running through the fortnight | ⟨IN FLIGHT — math, as of 10:09⟩ | Lean paused until 20:00 per the 09:22 order; read-only queue cleared |
 | N7-PREP dossier (three read-only scouts, zero Lean) | **LANDED** | salt `docs/exploration/n7-prep-dossier-0806.md` (1019c0e) |
 | The W3 refutation delivered to the WEIL-TRIO seat via `flags.md` | **LANDED** | salt `docs/blueprints/flags.md` (a7fa34e) |
-| CHAR-TRIO / WEIL-TRIO campaigns (second salt seat) | ⟨IN FLIGHT — third-hand, ages fast; **believe that seat, not this row**⟩ | W4Q reported landed at `flags.md:20889` « WEIL-TRIO-W4Q HOME »; **W3 reported LANDED** (maestro, 10:11) as `norm_kloosterman_estermann`, sharp `2^{v₂/2}` fold verified, road collapse **honestly gated on W4-a**; W5 firing |
+| CHAR-TRIO / WEIL-TRIO campaigns (second salt seat) | ⟨IN FLIGHT — third-hand, ages fast; **believe that seat, not this row**⟩ | W4Q reported landed at `flags.md:20889` `WEIL-TRIO-W4Q HOME`; **W3 reported LANDED** (maestro, 10:11) as `norm_kloosterman_estermann`, sharp `2^{v₂/2}` fold verified, road collapse **honestly gated on W4-a**; W5 firing |
 | **A cross-seat delivery loop that closed** | **LANDED** | math's W3 refutation (10:02) → evidence flags the recipient has never posted (10:05) → math re-delivers via `flags.md` `a7fa34e`, a channel that seat *writes* to (10:09) → W3 lands with the dependency gated (10:11). **The finding arrived and changed the artifact.** |
 
 ### Leg 2 — CODE: the verified circuit compiler (seat: compiler)
