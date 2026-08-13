@@ -338,3 +338,65 @@ The prereg is frozen and stays frozen. **The working command is recorded here:**
 --outputs rdata[0]…rdata[31]
 --pin-reset rst_n
 ```
+
+---
+
+# ADDENDUM C — C3 RE-RUN ON THE **REAL `dmem8`**, NOT THE 7-GATE FIXTURE
+
+### Every C3 result before this one — the original, and Addendum A — was measured on
+### `pinreset_base.v`: **7 gates, 2 flops.** `nand4_1` made the real artifact reachable,
+### so the criterion has now been run on **1984 gates and 256 flops**.
+
+## C.1 · THE ARMS, AND THE PROOF THAT THE REWRITE IS FAITHFUL
+
+The comparison arm is the registered textual rewrite, applied to the real
+netlist. `dmem8`'s `dfrtp` instances are multi-line, and `.RESET_B` is the **last
+port**, so a naive line-delete leaves a dangling comma — the port and its comma
+are removed together.
+
+```
+dfrtp_1 occurrences rewritten : 256        residual RESET_B in rewrite : 0
+RESET_B ports removed         : 256        residual dfrtp   in rewrite : 0
+rst_n mentions   259 -> 3      == exactly the three DECLARATIONS, which is the
+                                  arithmetic the frozen prereg §1.2 predicted
+```
+Both arms import **EXIT=0 with readback GREEN** (32 vectors × 288 outputs).
+
+## C.2 · ⭐ A1 IS GREEN AT FULL SCALE
+
+```
+emitted LOGIC lines   pinned 2000   dfxtp 2000   —   byte-identical
+```
+⇒ **On 1984 gates and 256 flops, the pinned `dfrtp` reading is GATE-FOR-GATE the
+`dfxtp` reading.** *§3's field-for-field vendor argument, which predicted this
+before any code was written, holds on the real artifact and not merely on a
+seven-gate toy.*
+
+## C.3 · A2 IS RED — AND THE RESIDUAL IS **THE SAME TWO CLASSES**, AT 256× THE SCALE
+
+```
+total differing lines   523  =  11 marker  +  256 removed  +  256 added
+removed NON-flop lines    0      <- "nothing else" holds outside the two classes
+all 256 flop rows differ ONLY in the cell-name column; Q/D pairing IDENTICAL
+column purity          256/256 name dfrtp_1  ·  256/256 name dfxtp_1
+```
+🔑 ***The fixture and the real artifact agree on the residual CLASS. Scale changes
+the count and changes nothing else*** — so the pending ruling does not become
+riskier on the real datum, which is the thing worth knowing before ruling.
+
+## C.4 · A2′ IS GREEN ON THE REAL `dmem8` — MEASURED, NOT INFERRED
+
+The proposed predicate was run against these arms, including its **structural**
+column clause (every pinned row must name `dfrtp_1`, every rewrite row
+`dfxtp_1` — not a bare inequality):
+
+```
+✅ A2′ (PROPOSED) is GREEN on the REAL dmem8
+```
+⛔ **This still does not discharge C3.A2, and no datum lands.** A2′ is a proposal
+awaiting the helm; the ruled criterion is RED, at the fixture and at scale alike.
+
+*Reproduction: the arms are built by the rewrite in C.1 and imported into the
+SAME BASENAME in two directories, exactly as `pinreset_controls.sh` does for the
+fixture. Not added to that script as a row — two full `dmem8` imports are far too
+heavy for a fixture that must stay cheap enough to run on every change.*
