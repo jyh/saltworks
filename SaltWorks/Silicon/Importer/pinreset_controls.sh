@@ -143,6 +143,26 @@ else
       diff "$TMP/l2" "$TMP/l1" | head -12 | sed 's/^/        /'
       fail=1
     fi
+    # --- C3.M  MARKER INTEGRITY, asserted INDEPENDENTLY of A2.
+    # ⛔ Found by the instrument self-test 2026-08-12: while A2 is red (as it is,
+    # by ruling), a CORRUPTED golden — as opposed to an absent one — changed
+    # NOTHING that gates. A2 was already failing, NC3b and NC3c only require a2()
+    # to fail, and the exit code was 1 either way. The golden could rot in place
+    # and every discharging row would print exactly what it prints now.
+    # The cure is a check that does not route through A2: the golden must appear
+    # VERBATIM AND CONTIGUOUSLY in the emitted datum.
+    if python3 -c 'import sys; g=open(sys.argv[1]).read(); d=open(sys.argv[2]).read(); sys.exit(0 if g and g in d else 1)' \
+         "$GOLD" "$TMP/p.lean"; then
+      echo "  ✅ C3.M  golden marker appears VERBATIM in the emitted datum"
+    else
+      echo "  ⛔ C3.M  MARKER INTEGRITY — the golden does not appear verbatim in"
+      echo "     the emitted datum. Either the importer's marker changed or the"
+      echo "     golden was edited; both are defects of the scope chain (helm"
+      echo "     condition (2)) and neither is visible through A2 while A2 is red."
+      diff <(sed -n '/RESTRICTED DATUM/,/prereg-0812.md/p' "$TMP/p.lean") "$GOLD" \
+        | head -8 | sed 's/^/       /'
+      fail=1
+    fi
     if a2 "$TMP/p.lean" "$TMP/x.lean"; then
       echo "  ✅ C3.A2 file diff is EXACTLY the mandated scope marker"
     else
