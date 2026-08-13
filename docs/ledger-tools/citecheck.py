@@ -203,16 +203,25 @@ def context_for(text, start, end, before, after, next_start=None):
     could show it.
     """
     ls = text.rfind("\n", 0, start) + 1
-    lines = text[:ls].count("\n")
-    all_lines = text.split("\n")
-    lo = max(0, lines - before)
-    hi = min(len(all_lines), lines + after + 1)
+    # walk back `before` lines, forward `after` lines, in CHARACTER offsets
+    lo = ls
+    for _ in range(before):
+        prev = text.rfind("\n", 0, max(lo - 1, 0))
+        lo = prev + 1 if prev != -1 else 0
+    hi = text.find("\n", end)
+    if hi == -1:
+        hi = len(text)
+    for _ in range(after):
+        nxt = text.find("\n", hi + 1)
+        hi = nxt if nxt != -1 else len(text)
+    # ⛔ TRUNCATE AT THE NEXT CITATION'S EXACT OFFSET, NOT ITS LINE — residual of the
+    # bleed bug, found 2026-08-12 while ADJUDICATING corpus MISSes rather than by any
+    # test. Line-granular truncation does nothing when two citations SHARE A LINE:
+    # `Bitwise.lean:101` and `Program.lean:2598` sit in one sentence, so the first
+    # inherited the second's payload and was convicted for it. Offsets fix both cases.
     if next_start is not None:
-        # never read past the start of the next citation's own line
-        nls = text.rfind("\n", 0, next_start) + 1
-        nline = text[:nls].count("\n")
-        hi = min(hi, max(nline, lines + 1))
-    return "\n".join(all_lines[lo:hi])
+        hi = min(hi, next_start)
+    return text[lo:max(hi, ls)]
 
 
 def check_doc(docpath, roots, window, before, after):
