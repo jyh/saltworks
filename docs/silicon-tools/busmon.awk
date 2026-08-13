@@ -40,6 +40,25 @@
 # byte 512 -- the envelope would eat the notice that the envelope ate something.
 # So an over-long ORDER is announced BEFORE its text, where no downstream cap can
 # reach it.
+# ⚠️ KNOWN LIMITATION, MEASURED 2026-08-13 05:3x AND DELIBERATELY NOT FIXED TODAY.
+# `p = index($0, "] ")` takes the FIRST "] " on the line. A post whose IN-BRACKET
+# prose itself contains "] " is therefore split at that point, and everything
+# BEFORE it is cut from the emitted summary. Not a loss (the post is delivered)
+# but a FRONT-truncation -- and this seat's own law is that alarms are
+# front-loaded, so the cut lands exactly where the warning lives.
+#   MEASURED: 70 of 3147 header lines (2.22%) carry a "] " before their final "]".
+#   FIRST SPECIMEN: my own 05:26 post, which quoted the separator while describing
+#   this very parser, and was rendered starting mid-sentence.
+# CANDIDATE FIX with its ambiguity stated, so the next head starts from the
+# measurement and not from scratch: if the line ENDS with "]" it is a one-line
+# post and p should be 0 (use the in-bracket path); otherwise p should be the
+# LAST "] ", not the first. ⛔ THE AMBIGUITY: a `[prov] **HEADLINE**` whose
+# headline itself ends in "]" would then be misread as a one-line post. That case
+# was not measured and the rule must not ship before it is.
+# NOT FIXED NOW BY CHOICE: rev 14 already shipped one regression in this file
+# today (the eager-body preempt), the helm's 05:26 format amendment now gives
+# every order a headline line so the ORDER class is covered sender-side, and a
+# second heuristic written under council pressure is how the first one happened.
 function emit(st, body,   marked, n) {
     # ⛔ CASE, FOURTH TIME (2026-08-09 07:3x, on evidence's all-seats warning).
   # This alternation had CAPTAIN and SILICON and silicon — but NOT `Captain`.
