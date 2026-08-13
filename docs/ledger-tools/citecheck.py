@@ -252,6 +252,19 @@ def context_for(text, start, end, before, after, next_start=None):
     # inherited the second's payload and was convicted for it. Offsets fix both cases.
     if next_start is not None:
         hi = min(hi, next_start)
+    # ⛔ A LOCATOR AND A PAYLOAD ON ONE LINE ARE NOT NECESSARILY ABOUT EACH OTHER —
+    # evidence, 2026-08-12 19:19. A TABLE ROW carries several claims: their row cited
+    # `flags.md:20887` for W4Q and then, past a `;`, named `norm_kloosterman_estermann`
+    # for a DIFFERENT result (W3). The tool mined the W3 token as the W4Q payload,
+    # found it 160 lines away, and convicted a correct citation. A line boundary was
+    # too coarse; the CLAUSE is the unit of claim.
+    # Only the AFTER side is clipped: in table-style rows the name legitimately sits in
+    # an EARLIER cell (`| sliceASelect | … | SelectCut32.lean:75 |`), so clipping the
+    # before-side on `|` would discard real payloads.
+    for delim in (";", "·", "|"):
+        d = text.find(delim, end, hi)
+        if d != -1:
+            hi = d
     return text[lo:max(hi, ls)]
 
 
