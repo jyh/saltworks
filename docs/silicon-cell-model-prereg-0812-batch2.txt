@@ -1,0 +1,35 @@
+PRE-REGISTERED MODEL DERIVATIONS, BATCH 2 — written from the CELL NAME and the
+sky130 naming convention, BEFORE reading each cell's Liberty function.
+
+Convention, as decoded in batch 1 and confirmed there 9/9:
+  aNNN..oi  = AND groups of the given sizes, OR'd together, then INVERTED
+  oNNN..ai  = OR  groups of the given sizes, AND'd together, then INVERTED
+  trailing 'i' is the inversion; group sizes are read left to right
+
+ 1 xnor2_1    Y = !(A != B)          i.e. A == B
+ 2 o211ai_1   Y = !((A1 || A2) && B1 && C1)
+ 3 o221ai_1   Y = !((A1 || A2) && (B1 || B2) && C1)
+ 4 a311oi_1   Y = !((A1 && A2 && A3) || B1 || C1)
+ 5 maj3_1     X = (A && B) || (A && C) || (B && C)
+ 6 mux4_2     X = S1 ? (S0 ? A3 : A2) : (S0 ? A1 : A0)
+
+RISKS NAMED IN ADVANCE:
+
+ (a) mux4_2 is the one I am least sure of. The NAME gives no pin names and no
+     select ENCODING. I am assuming pins A0..A3 with selects S0,S1 and the
+     conventional binary encoding with S1 as the high bit. If sky130 uses
+     one-hot selects, names the pins differently, or orders the selects the
+     other way, this is wrong. It is the only entry here whose SHAPE, not just
+     whose polarity, is a guess.
+
+ (b) xnor2_1's polarity. XNOR is equality, but I have been burned by assuming a
+     trailing letter is inversion; if the vendor gives Y = A xor B this is
+     inverted and the theorem fails.
+
+ (c) maj3_1 has no group-size convention to lean on — "maj3" is read as a plain
+     majority-of-three. If sky130's maj3 is something else, no naming rule
+     protects me.
+
+In every case a mis-derivation FAILS its `decide +kernel` theorem rather than
+misleading anyone, which is why the model is checked against Liberty instead of
+trusted. Recording the risks so the outcome is a measurement and not a boast.

@@ -350,6 +350,60 @@ theorem a2111oi_liberty (A1 A2 B1 C1 D1 : Bool) :
       = ((!A1 && !B1 && !C1 && !D1) || (!A2 && !B1 && !C1 && !D1)) := by
   decide +kernel +revert
 
+/-! ### Batch 2 — the six cells that make 8 more netlists actually IMPORT.
+
+Chosen by crossing the cell census with the import sweep: these serve netlists
+whose ONLY blocker is cells, so modelling them buys a real import rather than
+advancing a netlist to the range grammar. Derivations pre-registered in
+`docs/silicon-cell-model-prereg-0812-batch2.txt` with three risks named, and
+they came out 6 for 6 — including `mux4`, whose SHAPE (pin names, binary select
+encoding, S1 as the high bit) was a guess and not merely its polarity. -/
+
+/-- `xnor2` -/
+def xnor2 (A B : Bool) : Bool := A == B
+
+theorem xnor2_liberty (A B : Bool) :
+    xnor2 A B = ((!A && !B) || (A && B)) := by decide +kernel +revert
+
+/-- `o211ai` — one OR2 group and two singletons, AND'd, then inverted. -/
+def o211ai (A1 A2 B1 C1 : Bool) : Bool := !((A1 || A2) && B1 && C1)
+
+theorem o211ai_liberty (A1 A2 B1 C1 : Bool) :
+    o211ai A1 A2 B1 C1 = ((!A1 && !A2) || (!B1) || (!C1)) := by decide +kernel +revert
+
+/-- `o221ai` — two OR2 groups and a singleton, AND'd, then inverted. -/
+def o221ai (A1 A2 B1 B2 C1 : Bool) : Bool := !((A1 || A2) && (B1 || B2) && C1)
+
+theorem o221ai_liberty (A1 A2 B1 B2 C1 : Bool) :
+    o221ai A1 A2 B1 B2 C1
+      = ((!B1 && !B2) || (!A1 && !A2) || (!C1)) := by decide +kernel +revert
+
+/-- `a311oi` — one AND3 group and two singletons, OR'd, then inverted. -/
+def a311oi (A1 A2 A3 B1 C1 : Bool) : Bool := !((A1 && A2 && A3) || B1 || C1)
+
+theorem a311oi_liberty (A1 A2 A3 B1 C1 : Bool) :
+    a311oi A1 A2 A3 B1 C1
+      = ((!A1 && !B1 && !C1) || (!A2 && !B1 && !C1) || (!A3 && !B1 && !C1)) := by
+  decide +kernel +revert
+
+/-- `maj3` — majority of three. ⚠️ WEAK THEOREM, like `and4`/`or4`: the standard
+majority form and the vendor's function are the SAME expression, so this
+confirms arity and pin order and little else. -/
+def maj3 (A B C : Bool) : Bool := (A && B) || (A && C) || (B && C)
+
+theorem maj3_liberty (A B C : Bool) :
+    maj3 A B C = ((A && B) || (A && C) || (B && C)) := by decide +kernel +revert
+
+/-- `mux4` — `S1` is the HIGH select bit; binary encoding, confirmed against the
+vendor rather than assumed. -/
+def mux4 (A0 A1 A2 A3 S0 S1 : Bool) : Bool :=
+  if S1 then (if S0 then A3 else A2) else (if S0 then A1 else A0)
+
+theorem mux4_liberty (A0 A1 A2 A3 S0 S1 : Bool) :
+    mux4 A0 A1 A2 A3 S0 S1
+      = ((A0 && !S0 && !S1) || (A1 && S0 && !S1)
+         || (A2 && !S0 && S1) || (A3 && S0 && S1)) := by decide +kernel +revert
+
 /-- `nor3` -/
 def nor3 (A B C : Bool) : Bool := !(A || B || C)
 
@@ -492,6 +546,8 @@ theorem conb_LO_liberty : conb_LO = false := by decide +kernel
 #audit_axioms nand3_liberty nand4_liberty nor3_liberty xor2_liberty and2b_liberty
 #audit_axioms and4_liberty or4_liberty nor4_liberty and4b_liberty nand4b_liberty
 #audit_axioms nand4bb_liberty nor4b_liberty nor4bb_liberty a2111oi_liberty
+#audit_axioms xnor2_liberty o211ai_liberty o221ai_liberty a311oi_liberty
+#audit_axioms maj3_liberty mux4_liberty
 #audit_axioms and3b_liberty and4bb_liberty nand2b_liberty nand3b_liberty
 #audit_axioms nor3b_liberty or3b_liberty a21o_liberty a21oi_liberty
 #audit_axioms a21boi_liberty a31o_liberty a32o_liberty a211o_liberty

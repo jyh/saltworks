@@ -302,3 +302,64 @@ the netlist** — `reimport.sh` records two data whose orders were lost, and
 and its reference *identically*, so nothing catches it. ⇒ **A netlist reported
 `IMPORTS` has not been shown to yield the datum any downstream proof wants.**
 Nothing the sweep produces is written to the tree.
+
+---
+
+# ADDENDUM 3 — BATCH 2: six cells chosen by CROSSING the two instruments
+
+## H.1 · THE TARGETING, WHICH IS THE POINT
+
+The corpus-wide greedy cover in §3 is **back-loaded** — 13 cells free 8 netlists,
+the last 18 free 21 — so "model the highest-leverage cells" is bad advice on its
+own. **Crossing the census with the sweep changes the answer:** 13 netlists are
+blocked *only* by cells (no range assign, no concatenation), and those are the
+ones where a cell model buys a **real import** instead of advancing a netlist to
+its next refusal.
+
+```
+restricted to those 13, the curve FLIPS to front-loaded:
+  +xnor2  +mux4  +o211ai  +o221ai  +a311oi  +maj3   =  6 cells -> 8 netlists
+```
+🔑 ***Same cells, same corpus, opposite prioritisation — because the first
+ranking optimised a proxy and the second optimised the outcome.***
+
+## H.2 · PREDICTED BEFORE, MEASURED AFTER
+
+```
+PREDICTED (before the work)   17 -> 25 imports
+MEASURED  (after)             25 import + 20 blocked + 1 skipped = 46 of 46
+                              +8 exactly · regressions: NONE
+new: adder8r · batcher_net · cmpex · cmptree · csr32 · csr32b · regfile16 · wbpath
+```
+*The forecast was written into the targeting, not fitted afterwards.*
+
+## H.3 · THE DERIVATIONS WENT 6 FOR 6 — 15 OF 15 ACROSS BOTH BATCHES
+
+Pre-registered in `docs/silicon-cell-model-prereg-0812-batch2.txt` with **three
+risks named in advance**, the sharpest being:
+
+> *"`mux4_2` is the one I am least sure of. The NAME gives no pin names and no
+> select ENCODING… It is the only entry here whose SHAPE, not just whose
+> polarity, is a guess."*
+
+**The vendor returned `in=(A0,A1,A2,A3,S0,S1)` with binary encoding and `S1` as
+the high bit — the guess was right in every particular.** *Which is the useful
+result: the sky130 naming convention has now carried 15 derivations across two
+independent batches, including one where it had to supply pin names and an
+encoding, not just a polarity.*
+
+⚠️ **`maj3` joins `and4` and `or4` as a WEAK theorem** — the standard majority
+form and the vendor function are the same expression, so it confirms arity and
+pin order and little else. Flagged in the source, not just here.
+
+## H.4 · STATE AFTER BATCH 2
+
+```
+cell coverage   28 clean + 17 blocked + 1 empty = 46      (was 20 / 25 / 1)
+import sweep    25 import + 20 blocked + 1 skipped = 46   (was 17 / 28 / 1)
+proxy gap       3, unchanged and still all optimistic
+gates           reimport EXIT=0 4 of 7 ALL REPRODUCE · pinreset EXIT=1 from C3.A2 alone
+all 15 models   [0 axioms] · saltbuild EXIT=0
+```
+⛔ **No datum has landed.** The bar and helm condition (4) are untouched by any
+of this; every netlist above was imported to a temporary file and discarded.
