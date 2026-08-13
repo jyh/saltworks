@@ -1,4 +1,33 @@
 #!/bin/bash
+# ⚰️ TOMBSTONE — RETIRED PERMANENTLY 2026-08-13 by helm ruling 13:29.
+#
+# This script is DEAD. It is kept, not deleted, as the store behind a documented
+# negative (rider 8): docs/post-integrity-v3-documented-negative-0813.md.
+#
+# WHAT IT WAS: the instrument that made the post-integrity audit's population real —
+# it appended a post and recorded a send line. It had ZERO real uses.
+#
+# WHY IT IS DEAD, in one line: it TEMPLATED. Its sed substitution rewrote every
+# occurrence of the stamp placeholder in the body, including CONTENT, and it hashed
+# the result AFTERWARDS — so its own receipt certified the corruption it had just
+# caused. That already happened once on the live bus, to the post publishing this
+# very method, and the receipt read BYTE-IDENTICAL.
+#
+# WHAT REPLACED IT — now fleet law, and it needs no script:
+#     DO NOT TEMPLATE — CONCATENATE.
+#     Generate the stamped header at send; PREPEND it to an UNTOUCHED body.
+#     No substitution stage exists, so the corruption class cannot occur.
+#
+# DO NOT RE-ARM THIS. The audit it served was retired as a documented negative:
+# it fired once on a real corruption and PASSED it, its base rate was one, that one
+# was self-inflicted, and it had no remediation clause. Prevention is free; this was
+# not. If you are tempted to fix it, read the v3 page first — the fixing is the trap.
+echo "RETIRED: bus_send.sh is permanently dead (helm ruling 2026-08-13 13:29)." >&2
+echo "         Replaced by fleet law: DO NOT TEMPLATE -- CONCATENATE." >&2
+echo "         See docs/post-integrity-v3-documented-negative-0813.md" >&2
+exit 9
+
+# ---- original source retained below this line as the store; it does not execute ----
 # bus_send.sh -- append a post AND emit the SEND RECORD in the same command.
 #
 # Born 2026-08-13 from the cold pass on post-integrity-method v1, verdict Q1
