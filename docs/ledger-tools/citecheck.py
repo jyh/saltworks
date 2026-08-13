@@ -68,9 +68,23 @@ LOCATOR = re.compile(
     r":(\d+)(?!\d)"
 )
 
-# A payload we can actually verify: a backticked span, or a bare identifier-ish token
+# A payload we can actually verify: a QUOTED span, or a bare identifier-ish token
 # (theorem/wire/def names) of reasonable length.
-BACKTICKED = re.compile(r"`([^`\n]{2,120})`")
+#
+# ⛔ BACKTICKS WERE ONCE THE ONLY FORM MINED — evidence, 2026-08-12 19:25, who planted
+# one specimen per delimiter and measured that «guillemets», "quotes" and bare ALLCAPS
+# all fell through to UNCHECKED while only `backticks` verified. That matters more than
+# a missed convenience: THEIR OWN citation was genuinely off by two, and abstaining on
+# an unreadable payload is how a REAL defect becomes invisible. UNCHECKED is where rot
+# hides, so every form this can safely read SHRINKS the hiding place.
+# Straight single quotes are deliberately NOT included: they collide with apostrophes.
+QUOTED = re.compile(
+    r"`([^`\n]{2,120})`"                 # `backticks`
+    r"|«\s*([^»\n]{2,120}?)\s*»"         # «guillemets»
+    r"|“([^”\n]{2,120})”"  # “smart quotes”
+    r"|\"([^\"\n]{2,120})\""             # "straight quotes"
+)
+BACKTICKED = QUOTED                       # name kept for call sites
 IDENTIFIER = re.compile(r"\b([A-Za-z_][A-Za-z0-9_']{4,}(?:\.[A-Za-z_][A-Za-z0-9_']+)*)\b")
 
 # Tokens too generic to be evidence that a line is the right line.
@@ -202,7 +216,8 @@ def payload_candidates(context, cited=""):
 
     out = []
     for m in BACKTICKED.finditer(context):
-        tok = m.group(1).strip()
+        # one alternative matched; take whichever group is populated
+        tok = next((g for g in m.groups() if g), "").strip()
         if len(tok) >= 3 and tok.lower() not in STOPWORDS and not self_referential(tok):
             out.append(tok)
     for m in IDENTIFIER.finditer(context):
