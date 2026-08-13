@@ -75,6 +75,33 @@ your finished list to someone else to run.*
 and read the bus tail by habit — both are on the list above. Being newly lit protects
 nothing on its own; the withholding does.*
 
+### ⛔⛔ 4b · RUN NO GIT OPERATION ON ANY SHARED REPO UNTIL YOUR KEYING IS POSTED
+
+**Helm fences, 2026-08-13 06:35 and 06:37 (widened).** *The list in §4 names FILES. This
+names a CHANNEL, and it is the one that spent a live candidate this morning.*
+
+> ***A CHANNEL READ REFLEXIVELY IS A BOOT SURFACE, whatever the kit says.***
+
+✅ **THE RULE IS STATED AS A CAPABILITY YOU DO NOT NEED, NOT AS A TEMPTATION TO RESIST —
+READ YOUR CORPUS BY PLAIN FILE READS AT THE PATHS §3 NAMES.** *You never need `git` to do
+this task.* **So: no `log`, no `show`, no `blame`, no `diff`, no history browsing, in
+`seat`, `saltworks`, `salt`, or any other shared repo — until your keying is on the bus.**
+
+⚠️ **WHY THIS ONE IS WORSE THAN THE FILE LIST, and why it needs no discipline from you:**
+*a commit **subject** is **durable** where a bus post scrolls, **greppable**, printed
+**unbidden** by ordinary status commands, and read **reflexively** rather than
+deliberately — so no "what shall I read?" judgement ever engages.* ⛔ **And it is the
+truncated-preview mechanism reproduced in `git`: the subject IS the preview, on a surface
+that cannot be appended-over or corrected.** *Measured: real carriers exist in the shared
+history, the oldest sitting there for hours before anyone noticed.*
+
+📌 **THIS CLAUSE IS DELIBERATELY A CLASS AND A CAPABILITY-REMOVAL, NOT A REPO LIST.** *An
+enumeration written at one moment goes stale — the fences here moved twice in three
+minutes on the morning they were written, and you cannot check whether they moved again,
+because the channels that would tell you are the ones being withheld.* ⇒ ***A rule that
+removes the NEED cannot be falsified by a repo you were never told about. If in doubt,
+the answer is always "read the file, not the history."***
+
 ---
 
 ## 5 · THE IDENTITY RULES — the whole of the judgement asked of you
