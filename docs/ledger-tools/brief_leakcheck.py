@@ -39,6 +39,12 @@ import os
 import re
 import sys
 
+# Defaults resolve against THIS FILE, never the working directory. Measured
+# 2026-08-12 21:0x: with cwd-relative defaults the gate refused for every seat but
+# mine -- SAFELY (EXIT=1, never a false pass), but a gate the fleet is told to run
+# before every append must run from anywhere. `docs/ledger-tools/x.py` -> repo root.
+REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 
 def seed_totals(seed_path):
     """The four totals the exhibit publishes, computed from the seed itself."""
@@ -88,9 +94,11 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("brief")
-    ap.add_argument("--seed", default="docs/ledger-incidents-seed-0812.json")
+    ap.add_argument("--seed",
+                    default=os.path.join(REPO, "docs/ledger-incidents-seed-0812.json"))
     ap.add_argument("--results", action="append",
-                    default=["docs/compiler-ledger-seed-audit-0812.md"],
+                    default=[os.path.join(REPO,
+                             "docs/compiler-ledger-seed-audit-0812.md")],
                     help="result document(s) to harvest ratio tokens from")
     args = ap.parse_args()
 
