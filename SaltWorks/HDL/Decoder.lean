@@ -201,6 +201,25 @@ and was re-measured, not re-guessed.* -/
 theorem dcMatches_literal_counts :
     dcMatches.map List.length = [17, 17, 17, 10, 10, 10, 10] := by decide +kernel
 
+/-- ⚠️⚠️ **THE SURVIVING TRIPWIRE NOW PASSES WITH EXACTLY ZERO MARGIN, AND THAT IS
+DECLARED RATHER THAN LEFT TO BE NOTICED.**
+
+`dcMatches_are_all_long` (`Stack/Program.lean`) pins `10 ≤ m.length` for every
+row. **The two D2 memory rows have EXACTLY 10 literals** — opcode 7 + funct3 3,
+and no `funct7`. So it stays green and keeps testifying, sitting precisely on its
+bound.
+
+**The second conjunct is the declaration: the bound cannot be raised to 11.**
+
+🔑 ***A theorem that passes by exactly zero is a different object from a theorem
+that passes, and only a measurement tells them apart.*** *The next row with a
+shorter match is the first thing that fires — which is the tripwire working, but
+a reader who has not been told the margin will read the green as comfortable.* -/
+theorem dcMatches_literal_margin_is_zero :
+    (dcMatches.map List.length).all (fun n => decide (10 ≤ n)) = true
+    ∧ (dcMatches.map List.length).all (fun n => decide (11 ≤ n)) = false := by
+  decide +kernel
+
 /-- Lay the matches out one after another, collecting their output nets. -/
 def dcLayout : Nat → List (List Net) → List Gate × List Net × Nat
   | b, []      => ([], [], b)
@@ -486,6 +505,37 @@ theorem decoder_gate_prefix :
       = dcInvs ++ (dcLayout dcBase (dcMatches.take dcSliceA)).1 := by
   decide +kernel
 
+/-! ### ⬥⬥ D2 — WHY THE NEGATIVE CONTROL HAD TO BE RE-CUT, AS KERNEL FACTS
+
+`Stack/Program.lean`'s `decoderCut` mutates this circuit by adding a gate at
+**`valid` + 1** and re-pointing the ADD output at it. Before D2 that was net 134;
+`valid` is now 154, so the cut is 155.
+
+⛔⛔ **THE TWO FACTS BELOW ARE WHY "does the control still fail?" WAS THE WRONG
+CHECK.** *Net 134 is now OCCUPIED — it is a gate output inside the `LW` chain —
+so the pre-D2 cut would have **collided with real logic instead of extending the
+circuit**, producing a mutant nobody designed. And it would still have FAILED the
+theorem, because a colliding cut yields a wrong decoder too.* ⇒ ***The green
+would have been indistinguishable from health.***
+
+✅ **The question that detects this is not "does it still fail?" but "is the cut
+still WHERE I SAID IT WAS, relative to the artifact's current extent?"** *Stated
+here, in the file that OWNS the extent, so that the next edit which grows this
+circuit is told what it is re-arming.* -/
+
+/-- ⛔ **The pre-D2 cut site is now occupied by real logic.** -/
+theorem decoder_net_134_is_occupied :
+    decoder.gates.any (fun g => g.out == 134) = true := by decide +kernel
+
+/-- ✅ **And 155 is genuinely one past the end**: every gate output is below it,
+and `valid`'s net 154 is present — so a cut at 155 EXTENDS rather than collides. -/
+theorem decoder_first_free_net_is_155 :
+    decoder.gates.all (fun g => decide (g.out < 155)) = true
+    ∧ decoder.gates.any (fun g => g.out == 154) = true := by decide +kernel
+
+#audit_axioms dcMatches_literal_margin_is_zero
+#audit_axioms decoder_net_134_is_occupied
+#audit_axioms decoder_first_free_net_is_155
 #audit_axioms decoder_ssa
 #audit_axioms dcIn
 #audit_axioms dcNot

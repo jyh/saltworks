@@ -19,62 +19,32 @@ no glob did).
 - SaltWorks.lean, lakefile.toml, lean-toolchain : MAESTRO ONLY. Seats leave "import owed: <module>" in commit messages; maestro sweeps.
 - docs/** : append-friendly; per-seat files preferred (docs/<seat>-*.md).
 - EXCEPTIONS (named, dated, removed on expiry — an exception recorded is the law consulted):
-  - ⏳ **D2-CROSS-SLOT-EXCEPTION** (helm ruling 2026-08-12 17:15, RE-SCOPED 17:31 at compiler's
-    measured finding) — **SaltWorks/Stack/Program.lean, THE DECODER BLOCK, lines 8000-8650 as of
-    tonight's bytes → writable by the COMPILER seat. SITE COUNT 1.** Nothing outside that range.
-    **EXPIRES AT THE D2 SEAL.** *Cause: the D2 edit is ATOMIC across the slot boundary — 22 of the
-    24 declarations first named, and 31 by the later mechanical sweep, live in math's file, and
-    `decoder_outs_eq` goes FALSE the instant `dcMatches` grows in the compiler's own file. There is
-    no compiler-half that lands green.* **Scoped to a REGION rather than a LIST because the
-    enumeration is the thing that failed: compiler's own boundary list was measured too small
-    (22 vs 31) and a longer list would repeat the defect with a bigger number.** Slot owner
-    (math, 17:16) verified the boundary independently and raised NO OBJECTION, while disclosing
-    that 10 of the 22 were unexamined by them.
-    ⛔ **THIS LINE'S DEATH IS SCHEDULED, NOT TRUSTED** (math's specimen, 17:16; helm amendment
-    17:22): the seal commit MUST carry the pasted output of `grep -c D2-CROSS-SLOT-EXCEPTION`
-    showing **zero**, and evidence's cert-canary array carries the same phrase so an INSTRUMENT
-    reads the retirement as well as a hand. *A self-retiring marker is a manual step wearing the
-    word "self" — the word does the reassuring; nothing does the deleting.*
-  - ✅ SPENT AT THIS COMMIT — the pre-grant below is retired. **`isForward` converted here, by the
-    OWNER's hand rather than a foreign one**, so the grant was never exercised: it existed in case
-    the ③ pull needed to reach in, and it did not. `touchesMem` did NOT convert and is unchanged —
-    it stays FENCED per the ruling and converts on next touch, in this seat's own file, needing no
-    exception. **A later foreign hand asks fresh; a grant that quietly outlives its commit makes
-    this list decorative.** *One correction carried into the artifact: this row's disposition said
-    `isForward` "had luck" where `touchesMem` "had a fence". **BOTH were fenced** — `step_forward_pc`
-    is `∀ (i : Instr)` by `cases i`, measured by math at the refuter pass (`Stack/Program.lean:266`).
-    The conversion still stands: exhaustive is the ruling for fenced sites too.*
-  - ⏳ STANDING PRE-GRANT (compiler seat, 2026-08-11 18:58) — SaltWorks/HDL/ISA.lean AND
-    SaltWorks/HDL/StraightLine.lean → WHOEVER HOLDS THE STAGE-③ PULL THAT NEEDS THEM,
-    **for the CATCH-ALL FIX ONLY**, at `touchesMem` (ISA.lean:174) and `isForward`
-    (StraightLine.lean:25). ✅ **THE SHAPE IS NOW RULED (Captain, 19:05): EXHAUSTIVE ARMS
-    PREFERRED; catch-alls only where enumeration is genuinely impractical, and there a fence
-    theorem is the required FLOOR plus a CENSUS ROW.** *Disposition for this seat: `isForward`
-    converts AT THE ③ PULL inside these files, zero extra churn. `touchesMem` STAYS FENCED —
-    math's control run is the standing proof — and converts on next touch.*
-    *(This row briefly said "replace with explicit arms", which pre-decided the shape in a slot
-    nobody would have stopped me in; corrected at math's 18:59 flag, then answered by ruling.)*
-    **No statement changes, no other edits. EXPIRES at that commit.**
-    If the fix grows a statement change, STOP and re-ask — that is the helm's call.
-    *Pre-granted rather than reserved: the fix is small, mechanical, blocks nothing else,
-    and a slot boundary that makes a 27-day campaign wait for its owner to wake up is a
-    boundary doing harm. Authorship note: `touchesMem` is math's work in the compiler's
-    glob — authorship earns the say on the semantics, the glob only decides whose hand
-    types it.*
-  - ✅ EXPIRED AT THIS COMMIT — SaltWorks/HDL/ISA.lean → MATH, granted by the compiler seat 18:19,
-    **for ONE ADDITIVE control only** (the nonzero-base / negative-immediate addressing witness
-    that kills the drop-base and zero-extend-offset mutants; no existing statement changes).
-    **SPENT AT THIS COMMIT — the patch stayed ADDITIVE as granted: three new theorems and three
-    roll-call rows, zero existing statements touched.** If it had grown a statement change it would
-    have been a different request needing the helm, not this seat. *Granted because math declined to re-enter the file on
-    the strength of having recently held it — the previous grant expired at M2 and they marked
-    it spent themselves. An expired exception that quietly keeps working makes this list
-    decorative.*
-  - ✅ EXPIRED AT THIS COMMIT — SaltWorks/HDL/ISA.lean → THE M2 HAND (math's seat / its fresh head),
-    granted by the compiler seat 2026-08-11 16:3x, expiring at M2's landing. Cause: decode_encode is
-    ∀-quantified over `Instr`, so splitting the new constructor across two seats opens a window with
-    a new arm and an unproved decode_encode. Atomicity beats slot purity here. **The grant is now
-    spent; ISA.lean returns to its normal ownership.**
+  - ⬥ RECORDED, NOT CLAIMED — the D2 cross-slot grant is SPENT and its marker is retired here.
+    Helm ruling 2026-08-12 17:15, re-scoped 17:31 from a LIST to the REGION `Stack/Program.lean`
+    8000-8650: compiler landed D2 atomically at `fb3842a` because `decoder_outs_eq` goes FALSE the
+    instant `dcMatches` grows in the compiler's own file, so no compiler-half could land green.
+    Slot owner (math) verified the boundary independently and verified containment after the fact:
+    13 hunks, all inside the granted region, nothing in that file outside it. **Ownership of
+    `Stack/Program.lean` is unchanged after this commit.** *Kept as a record and not as a grant,
+    because the next cross-slot case needs the precedent — and because the grant's own scope had to
+    be widened once when the enumeration that justified it was measured too small (22 named vs 31
+    swept), which is the part a later reader will need.*
+  - ✅ SPENT — the catch-all pre-grant on `HDL/ISA.lean` + `HDL/StraightLine.lean` is retired, and
+    **BOTH its targets are converted, so nothing live survives this deletion.** *`isForward` →
+    exhaustive arms earlier, by the owner's own hand, so the grant was never exercised.
+    `touchesMem` → exhaustive arms at `HDL/ISA.lean:183` in `fb3842a`: **D2 WAS the "next touch"
+    the disposition named**, taken in this seat's own file under the standing disposition and
+    using no exception.* ⚠️ **Stated as the CURRENT reading rather than as the sweep instruction
+    said it, which described `touchesMem` as still a catch-all at `:171` — true when written at
+    ~17:28 and falsified by the landing ~19 minutes later.** *An instruction written to stop a
+    live obligation being erased had itself gone stale first; the disposition is a figure, and
+    figures get read at the bytes.*
+  - ✅ SPENT — `HDL/ISA.lean` → MATH, for ONE ADDITIVE control (nonzero-base / negative-immediate
+    addressing witness). Stayed additive as granted: three new theorems, zero existing statements
+    touched.
+  - ✅ SPENT — `HDL/ISA.lean` → THE M2 HAND, expiring at M2's landing. `decode_encode` is
+    ∀-quantified over `Instr`, so splitting the new constructor across two seats would have opened
+    a window with a new arm and an unproved `decode_encode`; atomicity beat slot purity.
   - ⬥ RECORDED, NOT CLAIMED — M2's atomic commit also touched FOUR files outside math's slot, each
     because the `Instr` growth made a landed statement FALSE there and green-on-main is absolute:
     HDL/Decoder.lean (ctrlSpec + the guard theorem, helm ruling 17:07) · HDL/StraightLine.lean
