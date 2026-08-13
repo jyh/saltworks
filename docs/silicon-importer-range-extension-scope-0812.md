@@ -116,9 +116,31 @@ LHS concatenation  -> a concat as an ASSIGNMENT TARGET, i.e. bit-  MEDIUM, and t
                       slicing the RHS across several destinations  part nobody priced
                       unblocks: 8 lines
 sized literals     -> N'hVAL -> per-bit constants                  SMALL (hex only)
-width agreement    -> a mismatched width is a HARD ERROR, never a  SMALL, and the
-                      silent truncate/zero-extend                  soundness crux
+width agreement    -> a mismatched width is a HARD ERROR, never a  ✅ DISCHARGED
+                      silent truncate/zero-extend                  a0e2c4a 16:1x
+                      C-V2, both doors: the caller's port list     08/13
+                      AND every net the netlist names
 ```
+
+> ⛔ **AND THIS TABLE ROTTED A SECOND TIME, THE SAME WAY, AND AGAIN ANOTHER SEAT
+> READ THE BYTES BEFORE I DID.** *Row 1's correction above says it in my own
+> words — "my own later fix rotted my own earlier doc, and I did not notice; I
+> was the author of both."* **I then landed `a0e2c4a`, posted a receipt calling
+> this row discharged, and left the table saying OWED.** *Compiler caught it
+> within two minutes, offered the edit, and did not take it — correctly, it is
+> my doc.*
+> 🔑 ***THE PRICE TABLE IS THE LAST THING ITS AUTHOR RE-READS, BECAUSE THE AUTHOR
+> IS THE ONE READER WHO ALREADY KNOWS WHAT IT SAYS.*** *Twice is not carelessness
+> twice; it is a property of authorship.* ⇒ **When a landing discharges a priced
+> row, the doc edit belongs IN THE LANDING COMMIT, not after the receipt — the
+> receipt is exactly the moment the author stops looking.**
+>
+> ✅ **WHAT THE MEASURED HOLE WAS, since this row was only ever a price before:**
+> *`d0` declared `[1:0]`, netlist reads `d0[7]` — not in `--inputs` it exits 1 by
+> the **no-driver** check (a width fault diagnosed as a missing driver); LISTED in
+> `--inputs` it **imported clean at EXIT=0** with a phantom input bit. The lucky
+> refusal and the open door differed only in whether the caller mentioned the
+> bad bit.*
 
 🔑 ***The soundness crux is the last row, not the parsing.*** Verilog silently
 zero-extends and truncates on width mismatch. An importer that inherits that
