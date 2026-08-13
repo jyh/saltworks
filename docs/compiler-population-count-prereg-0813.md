@@ -72,10 +72,18 @@ REJECTED      R1+R2 matched, R3 or R4 rejected      (C4)
 FENCED        rejected by R4 alone                  (C3)
 ```
 
-⛔ **I WILL NOT PICK A WINNER between my count and the design doc's 3,095.** The doc's
-method is not recoverable from the file — a strict parse of its window returns a number
-nowhere near it, so it used a third instrument. **Both figures get published with their
-methods; the disagreement is the finding until someone adjudicates it.**
+⛔ **I WILL NOT PICK A WINNER between my count and the design doc's stated figure.** *The
+doc's method is not recoverable from the file — a strict parse of its own window returns a
+number nowhere near what it states, so it used a third instrument.* **Both figures get
+published with their methods; the disagreement is the finding until someone adjudicates it.**
+
+> ⛔ **THE PRIOR FIGURES ARE DELIBERATELY NOT QUOTED HERE, and the first version of this file
+> quoted one.** *I wrote "result-free by construction" at the top, then wrote the design doc's
+> count into §3, and committed it asserting the file was clean — **caught by a mechanical
+> `grep` for digits that I had put in the commit command myself.*** *My own card: **a verifier
+> handed the previous answer is not briefed, they are REPLACED.*** ⇒ *If you want the prior
+> figures, they are in `docs/compiler-error-ledger-extractor-design-0812.md` and on the bus —
+> **but read them AFTER you have run R1–R4, not before.***
 
 ⛔ **THE RULE MAY BE WRONG AND THAT IS A PUBLISHABLE OUTCOME.** If C3 returns nonzero, R3
 is leaking and the count is an upper bound — *that* is the result, stated as such. This
