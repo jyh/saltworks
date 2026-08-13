@@ -177,6 +177,30 @@ want "import_sweep: unmodelled cell -> BLOCKED, never IMPORTS" \
      'perl -0pi -e "s/\"nand4_1\":/\"nand4_1x\":/" "$IMPDIR/import_netlist.py"' \
      'dmem8_nl\.v +unmodelled-cell' '✅ dmem8_nl\.v'
 
+# --- C-V1: port list vs the netlist's OWN vector declarations ---------------
+# The refusal these rows fire was, until 20:2x on 8/12, INCIDENTAL: the honest
+# port list only refused because the generic no-driver check happened to miss the
+# base name, and it only got that chance because import_sweep.py happens to
+# bit-expand. On a hand-written port list the same netlist imported at EXIT=0
+# with a 2-bit port bound to ONE net and readback GREEN.
+#
+# ⭐ THE FAULT IS THE REALISTIC ONE and that is the point: the port list is left
+# ALONE and the NETLIST's port is widened. That is what actually happens — RTL
+# grows a bit, a hand-recorded port order does not follow. The clean run of the
+# very same command imports at 0.
+CV1='"$IMPDIR/import_netlist.py" "$IMPDIR/fixtures/vecbase_nl.v" --top vecbase \
+     --out "$SBOX/cv1.lean" --name cv1NL --inputs a,b --outputs y'
+
+row "C-V1: input port widened, port list not" \
+    'perl -0pi -e "s/  input b;\n  wire b;/  input [1:0] b;\n  wire [1:0] b;/" "$IMPDIR/fixtures/vecbase_nl.v"' \
+    "$CV1" \
+    "names 'b' by its BASE name.*VECTOR \[1:0\] \(2 bits\)"
+
+row "C-V1: output port widened, port list not" \
+    'perl -0pi -e "s/  output y;\n  wire y;/  output [3:0] y;\n  wire [3:0] y;/" "$IMPDIR/fixtures/vecbase_nl.v"' \
+    "$CV1" \
+    "names 'y' by its BASE name.*VECTOR \[3:0\] \(4 bits\)"
+
 echo
 echo "instrument self-test: $n row(s), $( [ $fail -eq 0 ] && echo 'EVERY GUARD FIRED, EACH CONTROLLED' || echo 'FAILURES ABOVE' )"
 exit $fail

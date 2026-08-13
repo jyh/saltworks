@@ -603,15 +603,23 @@ def parse(path):
     i, n = 0, len(toks)
     insts, decls = [], collections.defaultdict(set)
     assigns = []
-    vector_ports = set()
+    vector_ports = {}          # name -> (hi, lo) for every RANGED declaration
     while i < n:
         k, v = toks[i]
         if k == "ID" and v in ("input", "output", "wire", "inout"):
             decl, i = v, i + 1
             ranged = False
+            # The BOUNDS are captured, not just the fact of being ranged: C-V1
+            # (below, at the CLI) refuses a vector passed by BASE name, and a
+            # refusal that cannot print the width the caller should have expanded
+            # to is a symptom, not a diagnosis. That is the same defect this
+            # seat registered against the whole-vector assign at 20:09.
+            bounds = []
             if i < n and toks[i] == ("P", "["):
                 ranged = True
                 while i < n and toks[i] != ("P", "]"):
+                    if toks[i][0] == "NUM":
+                        bounds.append(int(toks[i][1]))
                     i += 1
                 i += 1
             names = []
@@ -621,7 +629,10 @@ def parse(path):
                 i += 1
             decls[decl].update(names)
             if ranged:
-                vector_ports.update(names)
+                hi = max(bounds) if bounds else 0
+                lo = min(bounds) if bounds else 0
+                for nm_ in names:
+                    vector_ports[nm_] = (hi, lo)
             i += 1
         elif k == "ID" and v == "assign":
             i += 1
@@ -717,7 +728,15 @@ def parse(path):
                         elif toks[i][0] == "ID":
                             base = toks[i][1]
                             if i + 1 < n and toks[i + 1] == ("P", "["):
-                                assert base in vector_ports or True
+                                # ⛔ THERE WAS A CHECK HERE AND IT WAS A TAUTOLOGY:
+                                # `assert base in vector_ports or True` is always
+                                # true, so `vector_ports` was COMPUTED and consumed
+                                # by nothing. It read like enforcement. Removed
+                                # rather than enabled: whether a bit-selected net
+                                # must be a DECLARED vector is a separate question
+                                # (escaped register names reach here too), and it is
+                                # not what the 20:1x control measured. The knowledge
+                                # this set carries is now genuinely used, at C-V1.
                                 base = f"{base}[{toks[i+2][1]}]"
                                 i += 3
                                 net = base
@@ -1034,6 +1053,48 @@ a = ap.parse_args()
 insts, decls, assigns, vports = parse(a.netlist)
 ins = [x for x in a.inputs.split(",") if x]
 outs_named = [x for x in a.outputs.split(",") if x]
+
+# --- C-V1: THE PORT LIST MUST AGREE WITH THE NETLIST'S OWN DECLARATIONS -----
+# ⛔ MEASURED 2026-08-12 20:1x, and it is a SOUNDNESS hole in the trusted
+# component, not a convenience check. Netlist `wvE` declares `input [1:0] b`
+# and one cell reads it. The SAME netlist, same importer:
+#     --inputs a,b[0],b[1]  -> EXIT=1 "net 'b' has no driver and is not an input"
+#     --inputs a,b          -> EXIT=0, datum WRITTEN with 2 primary inputs for a
+#                              3-bit design port, and READBACK GREEN
+# A whole 2-bit vector collapsed onto ONE input gate, RC=0, nothing said. This
+# is the exact soundness class this file already names twice for ranges and
+# concatenations ("it aliases distinct nets onto one") and it was live on a
+# third route nobody had modelled.
+#
+# 🔑 THE REFUSAL THAT EXISTED WAS INCIDENTAL. Nothing here knew about vectors:
+# the honest port list only refuses because the generic no-driver check happens
+# to miss `b`, and it only gets that chance because import_sweep.py happens to
+# bit-expand. A check that fires for a reason unrelated to the property it is
+# credited with has not been shown to hold — it has been shown to be lucky.
+#
+# ⚠️ AND READBACK CANNOT COVER THIS. Readback re-simulates the EMITTED datum
+# under the SAME port mapping that did the narrowing, so it agreed. A gate
+# downstream of a binding cannot audit that binding.
+# `--cut` is deliberately NOT checked here: it is a REGEX over net names, not a
+# net list, so a base-name match against it would be a category error. The first
+# draft of this line included it and, worse, its `if a.cut else []` bound to the
+# WHOLE expression -- with no --cut given, C-V1 would have examined an EMPTY list
+# and passed everything, silently. A check that skips is a check that reads green.
+_cv1_names = ins + outs_named + ([a.pin_reset] if a.pin_reset else [])
+_cv1 = [nm for nm in _cv1_names if nm in vports]
+if _cv1:
+    nm = _cv1[0]
+    hi, lo = vports[nm]
+    width = abs(hi - lo) + 1
+    expanded = ",".join(f"{nm}[{i}]" for i in range(min(hi, lo), max(hi, lo) + 1))
+    raise SystemExit(
+        f"importer: port list names '{nm}' by its BASE name, but the netlist "
+        f"declares it as the VECTOR [{hi}:{lo}] ({width} bits). Passing a vector "
+        f"by base name binds ALL {width} bits to ONE net and the datum silently "
+        f"loses {width - 1} bit(s) of input space -- readback does NOT catch this, "
+        f"because it re-simulates the emitted datum under the same mapping. "
+        f"Pass the bits: --inputs/--outputs ...,{expanded},... "
+        f"({len(_cv1)} name(s) affected: {', '.join(_cv1)})")
 
 # --- THE FLOP TREATMENT ----------------------------------------------------
 # Discover every flop, verify they share one latching event, then cut them:

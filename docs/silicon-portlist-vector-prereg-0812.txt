@@ -1,0 +1,84 @@
+PRE-REGISTRATION — importer port-list / vector-declaration consistency
+CRITERION FIXED: 2026-08-12 20:18:34 PDT   seat: silicon
+                 (before any edit to import_netlist.py)
+
+TRANSPORT NOTE, recorded rather than quietly repaired: the first write of this
+file used an UNQUOTED heredoc so that $STAMP would interpolate, which made the
+whole body live to the shell. The backticked source text on the vector_ports
+line was EXECUTED and its output (nothing) substituted, silently deleting the
+most load-bearing sentence in the file. I caught it ONLY because `assert base
+in vector_ports or True` is not a valid command and bash said so. Had the
+backticks contained a VALID command, its stdout would have been spliced in with
+no error and this pre-registration would have shipped corrupted. That is the
+banked law "a tool that guarantees the WRITE does not guarantee the PAYLOAD"
+with a new and worse edge: the detection is an ACCIDENT OF THE PAYLOAD, not a
+property of the transport. Rewritten via the no-shell file tool.
+
+WHY THIS EXISTS
+  At 20:09 I published, on the bus and in the bank, a UNIVERSAL safety claim
+  about the whole-vector assign form:
+      "either the assign feeds nothing or the net it feeds is caught, and
+       NO PATH EMITS A DATUM THAT SILENTLY LOST THE ASSIGNMENT"
+  supported by 5 instances that fell into exactly 2 categories (4 dead alias,
+  1 output). The third category -- an alias read by LIVE logic -- did not occur
+  in the corpus, so the claim had never been shown to fail. I built the control.
+
+WHAT THE CONTROL MEASURED (fixtures reproduced by the harness this adds)
+  Same netlist wvE, one cell reading a declared 2-bit vector by its BASE name:
+      --inputs a,b[0],b[1]   -> EXIT=1  "net 'b' has no driver and is not an input"
+      --inputs a,b           -> EXIT=0  datum WRITTEN, 2 primary inputs for a
+                                        3-bit design port, readback GREEN
+  NO ASSIGN IS INVOLVED. The whole-vector assign was one route in; the defect is
+  that the importer never checks the caller's port list against the netlist's own
+  vector declarations. The refusal I measured at 20:09 is INCIDENTAL -- produced
+  by the generic no-driver check, and only because the sweep happens to
+  bit-expand. It is not a check that knows about vectors.
+  The parser COMPUTES vector_ports (line 606/624) and its only consumer is the
+  line-720 statement "assert base in vector_ports or True" -- a tautology, since
+  "X or True" is always true. The knowledge was present in the file and neutered.
+
+  READBACK DID NOT CATCH IT, and that is the part worth the fleet's time. My
+  strongest gate agreed with a datum that had lost a bit of its input space,
+  because readback re-simulates the EMITTED datum under the SAME port mapping
+  that did the narrowing. A gate downstream of a binding cannot audit the
+  binding.
+
+SCOPE OF THE EXPOSURE, MEASURED BEFORE THE FIX
+  import_sweep.py bit-expands every vector port, so all 46 sweep results are
+  UNAFFECTED. reimport.sh's four recorded port lists were read: comparator uses
+  seq8 (bit-expanded), switch/ce/ceC are scalar-only. NO LANDED DATUM IS WRONG.
+  This is a live hazard on hand-written callers, not a defect in shipped data.
+  That is a claim about 4 recorded lists + 46 sweep rows and nothing wider.
+
+THE CRITERION (what I will add)
+  C-V1  A name in --inputs/--outputs/--pin-reset/--cut that is a DECLARED VECTOR
+        port referenced by BASE name is REFUSED, naming the port, its width, and
+        the bit-expansion the caller should have passed.
+  C-V2  Correct bit-selects (b[0],b[1]) must NOT trigger C-V1.
+  C-V3  Scalar ports must NOT trigger C-V1.
+
+THE BAR -- pre-registered, pass/fail, no post-hoc adjustment
+  1. NEGATIVE CONTROL, causation not correlation: the C-V1 message must be
+     ABSENT on the honest port list and PRESENT on the base-name port list, for
+     the SAME netlist. A row that cannot be made to fail does not count.
+  2. reimport.sh EXIT=0 and all four data reproduce BYTE-IDENTICAL. If the fix
+     changes one committed byte, the fix is wrong, not the datum.
+  3. import_sweep.py still reports 29 of 46 importing -- unchanged. Any movement
+     means C-V1 fired on a netlist the sweep was handling correctly.
+  4. saltbuild EXIT=0.
+  5. instrument_selftest EXIT=0 with the new rows included.
+
+RISKS NAMED IN ADVANCE (the interesting part)
+  R1  A [0:0] port is a vector of width 1. I predict C-V1 FIRES on it by base
+      name, and that this is CORRECT -- yosys writes its cells as foo[0]. If a
+      real netlist breaks on this, R1 is refuted and I report it.
+  R2  An INCOMPLETE bit list (b[0] given, b[1] omitted) is a DIFFERENT defect
+      and C-V1 does not address it. I predict it is already caught incidentally
+      when b[1] is read, and not caught when b[1] is dead -- where nothing is
+      lost. I will measure rather than assert this.
+  R3  The flop treatment appends discovered state nets to inputs_order. Those
+      are net names, not declared ports, so I predict C-V1 never sees them.
+      If it does, C-V1 is in the wrong place.
+
+WHAT WOULD MAKE ME WITHDRAW THE WHOLE THING
+  If bar 2 or 3 moves, this fix is refused and reported as refused.
