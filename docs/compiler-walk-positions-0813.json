@@ -58,5 +58,29 @@
  ],
  "my_bottom_line": "ZERO of my ten unmatched rows is a root defect the other keying missed. Three fail the ruled eligibility bar and are mine to drop; the rest are the same roots under different labels, or my own finer-than-the-rule splitting. My seed contributes nothing the other keying lacks.",
  "against_my_own_count": "3 rows drop as ineligible; 3 prep-locator rows merge to 1. My 17 does not survive as 17 under the registered rules.",
- "granularity_caveat": "the reconciled total must apply ONE granularity to BOTH sides -- scoring their rows at my finer split raises theirs too. Score both the same or not at all."
+ "granularity_caveat": "the reconciled total must apply ONE granularity to BOTH sides -- scoring their rows at my finer split raises theirs too. Score both the same or not at all.",
+ "inputs": [
+  {
+   "path": "docs/ledger-incidents-seed-0812.json",
+   "sha256": "22802c719bd20a2c37b0de0c756960e74769fa4be3a46830711a3a4e8de58852",
+   "role": "my own keying, FROZEN and attested on the bus 10:08"
+  },
+  {
+   "path": "docs/evidence-blind-keying-0813.json",
+   "sha256": "ec3737410863b22f7b14eca006f562bacb2e655e1a1f4e38e308c34b0cc6623b",
+   "role": "the blind keyer's output; my positions cite its row keys"
+  },
+  {
+   "path": "docs/silicon-keying-compare-0813.json",
+   "sha256": "046c1a7cb60ad1e839cc9a48f457491f5a045b9c67173a58205f88e74acdecd0",
+   "role": "the compare; my UNMATCHED SET is derived from its identity_axis pairs"
+  }
+ ],
+ "candidate_metric": {
+  "spec": "Jaccard over predicate tokens matching [a-z0-9]+ with length>=4, lowercased",
+  "why_recorded": "a free-text method name UNDERDETERMINES the implementation -- my first tokenizer ([a-z0-9]+, no length filter) reproduced only 6 of silicon's 7 published pairs and put 3 of my rows above their threshold, which would have read as a defect in their instrument. The length>=4 variant reproduces 7/7.",
+  "status": "CANDIDATE GENERATION ONLY. No position in this file rests on a score; every one was taken by READING the predicates.",
+  "validation": "reproduces 7/7 of the compare's published pairs above its stated 0.20 threshold"
+ },
+ "amended": "2026-08-13 11:1x -- added inputs (paths+sha256) and the candidate metric spec. Prompted by silicon's 11:08 self-report that their accepted compare named neither its inputs nor their hashes; I checked mine on that trigger and it had the same defect, plus an unrecorded tokenizer. NO POSITION CHANGED."
 }
