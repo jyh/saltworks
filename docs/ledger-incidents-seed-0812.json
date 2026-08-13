@@ -1,0 +1,150 @@
+[
+  {
+    "key": "die-rtl-scope-mix",
+    "predicate": "a provenance ratio stated with an RTL-side numerator over a die denominator (352/902) where the die carries 288/902",
+    "carriers": [
+      "saltworks/docs/EVIDENCE-neural-claim-fence-0809.md",
+      "${SEAT_DIR}/briefs/2026-08-11-nature-draft-v0.md",
+      "${SEAT_DIR}/briefs/2026-08-11-nature-track-block.md",
+      "${SEAT_DIR}/briefs/2026-08-11-nature-draft-v0-skeleton.md",
+      "${SEAT_DIR}/briefs/figures/fig-preview.md",
+      "${SEAT_DIR}/briefs/figures/fig1-spine.mmd",
+      "${SEAT_DIR}/briefs/figures/fig1-spine.svg",
+      "${SEAT_DIR}/memory-seats/compiler/a-count-is-not-a-scope.md"
+    ],
+    "mentions": 25,
+    "found_by": "silicon's structural join; carriers swept by evidence and compiler",
+    "provenance": "verified at the bytes by this seat in every carrier listed"
+  },
+  {
+    "key": "prep-locator-ctrl32",
+    "predicate": "cited ctrl32.v:26/27 for is_load/is_store; the wires are at :25/26",
+    "carriers": ["saltworks/docs/compiler-two-plane-link-prep-0812.md"],
+    "mentions": 4,
+    "found_by": "compiler (fresh head, re-deriving a predecessor's document)",
+    "provenance": "verified at the bytes"
+  },
+  {
+    "key": "prep-locator-program-path",
+    "predicate": "cited HDL/Program.lean, which does not exist; the matchers live in Stack/Program.lean, a different seat's slot",
+    "carriers": ["saltworks/docs/compiler-two-plane-link-prep-0812.md"],
+    "mentions": 4,
+    "found_by": "compiler (fresh head)",
+    "provenance": "verified: ls of the cited path fails; landed defs found at Stack/Program.lean:8336-8337"
+  },
+  {
+    "key": "prep-locator-isa-arm",
+    "predicate": "cited ISA.lean:803 for decode's LW arm; :803 is a funct7 binding, the arm is at :819",
+    "carriers": ["saltworks/docs/compiler-two-plane-link-prep-0812.md"],
+    "mentions": 4,
+    "found_by": "compiler (fresh head)",
+    "provenance": "verified at the bytes; independently re-verified by evidence"
+  },
+  {
+    "key": "design-doc-locator-ranking",
+    "predicate": "cited the draft's unbracketed ranking at :197; :197 is the register-integrity sentence, the ranking is at :198-199",
+    "carriers": ["saltworks/docs/compiler-error-ledger-extractor-design-0812.md"],
+    "mentions": 3,
+    "found_by": "compiler, on its own unlanded draft, by hand-running its own proposed check",
+    "provenance": "caught before landing"
+  },
+  {
+    "key": "citecheck-context-bleed",
+    "predicate": "payload context crossed into the following citation, so a row cited for one wire matched its neighbour and reported OK on a known defect",
+    "carriers": ["saltworks/docs/ledger-tools/citecheck.py"],
+    "mentions": 3,
+    "found_by": "compiler, via a ground-truth fixture pulled from git history",
+    "provenance": "reproduced on the fixture before and after the fix"
+  },
+  {
+    "key": "citecheck-generic-payload",
+    "predicate": "a generic payload token convicted a hand-verified locator by matching five lines away",
+    "carriers": ["saltworks/docs/ledger-tools/citecheck.py"],
+    "mentions": 2,
+    "found_by": "compiler, on the negative control",
+    "provenance": "reproduced"
+  },
+  {
+    "key": "citecheck-self-referential-payload",
+    "predicate": "the cited file's own basename was mined as payload and matched its module declaration, convicting a correct citation",
+    "carriers": ["saltworks/docs/ledger-tools/citecheck.py"],
+    "mentions": 2,
+    "found_by": "compiler, by hand-verifying the tool's output",
+    "provenance": "reproduced"
+  },
+  {
+    "key": "citecheck-cross-repo-conviction",
+    "predicate": "a path unresolvable in the given root was reported MISS rather than abstained; 20 such paths resolved in a sibling repo",
+    "carriers": ["saltworks/docs/ledger-tools/citecheck.py"],
+    "mentions": 3,
+    "found_by": "evidence, at corpus scale (148 docs / 543 locators)",
+    "provenance": "peer-measured; fix verified by the finder against pre-stated predictions"
+  },
+  {
+    "key": "citecheck-repo-prefixed-path",
+    "predicate": "a path carrying its own repo name as first segment never resolved, so --also-root silently failed on the citations it was added for",
+    "carriers": ["saltworks/docs/ledger-tools/citecheck.py"],
+    "mentions": 2,
+    "found_by": "evidence",
+    "provenance": "peer-measured; fix verified end-to-end across the repo boundary"
+  },
+  {
+    "key": "citecheck-trailing-gloss",
+    "predicate": "payload mined from the citing author's summary after the locator, convicting correct citations that explain what they cite",
+    "carriers": ["saltworks/docs/ledger-tools/citecheck.py"],
+    "mentions": 3,
+    "found_by": "compiler, by re-testing a MISS a peer had ENDORSED",
+    "provenance": "verified at the bytes; the endorsed finding was retracted"
+  },
+  {
+    "key": "citecheck-same-line-foreign-clause",
+    "predicate": "a table row carrying two claims let one locator mine the other claim's token, found 160 lines away, and convict",
+    "carriers": ["saltworks/docs/ledger-tools/citecheck.py"],
+    "mentions": 2,
+    "found_by": "evidence",
+    "provenance": "peer-measured; fix verified by the finder"
+  },
+  {
+    "key": "citecheck-backticks-only",
+    "predicate": "only backticked spans were mined, so guillemet- and quote-delimited payloads fell to UNCHECKED where real rot hides",
+    "carriers": ["saltworks/docs/ledger-tools/citecheck.py"],
+    "mentions": 2,
+    "found_by": "evidence, by planting one specimen per delimiter",
+    "provenance": "peer-measured; fix verified by the finder"
+  },
+  {
+    "key": "ledger-population-repo-path",
+    "predicate": "repos resolved one directory too high, so the COMMITS source reported zero members",
+    "carriers": ["saltworks/docs/ledger-tools/ledger_population.py"],
+    "mentions": 1,
+    "found_by": "compiler, via the tool's own printed exclusions and positive control",
+    "provenance": "caught before the disclosure was published; 4,892 members recovered"
+  },
+  {
+    "key": "false-eviction-claim",
+    "predicate": "published an index-eviction finding produced by a case-sensitive probe, beside a positive control that shared none of the probe's failure mode",
+    "carriers": [
+      "${SEAT_DIR}/memory-seats/compiler/named-external-test-beats-self-review.md",
+      "${SEAT_DIR}/fleet/BUS-triple-campaign.md"
+    ],
+    "mentions": 3,
+    "found_by": "compiler, prompted by a peer's retraction of the same class",
+    "provenance": "retracted at the artifact with the false-alarm banner kept"
+  },
+  {
+    "key": "head-is-not-my-landing",
+    "predicate": "read git rev-parse HEAD as this seat's own landing sha in a shared five-seat tree; HEAD was a peer's commit landed seconds later",
+    "carriers": ["saltworks/docs/ledger-tools/(bus post, pre-publication)"],
+    "mentions": 1,
+    "found_by": "compiler, caught when a peer announced the same sha as theirs",
+    "provenance": "NEVER PUBLISHED — caught in the composing window"
+  },
+  {
+    "key": "right-conclusion-wrong-mechanism",
+    "predicate": "attributed a peer's missed files to grep pattern reach; the actual cause was file-level exclusion from their sweep population",
+    "carriers": ["${SEAT_DIR}/fleet/BUS-triple-campaign.md"],
+    "mentions": 2,
+    "found_by": "evidence, by auditing their own denominator",
+    "provenance": "conclusion survived; the offered mechanism did not"
+  }
+]
