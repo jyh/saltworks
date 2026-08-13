@@ -1096,6 +1096,79 @@ if _cv1:
         f"Pass the bits: --inputs/--outputs ...,{expanded},... "
         f"({len(_cv1)} name(s) affected: {', '.join(_cv1)})")
 
+# --- C-V2: WIDTH AGREEMENT IS A HARD ERROR (math docket call (4), 08/13 05:40)
+# ⛔ THE RULING'S BINDING CONDITION, and its stated reason is why this is not a
+# nicety: option (b) — the flow emits per-bit assigns and the TRUSTED IMPORTER
+# KEEPS REFUSING — rests ENTIRELY on the refusal being right. "A refusal that is
+# LUCKY rather than PRINCIPLED is not a foundation, it is a coincidence that has
+# not failed yet."
+#
+# MEASURED 2026-08-13 16:1x, exits captured without a pipe:
+#   d0 declared [1:0], netlist reads d0[7], NOT in --inputs -> EXIT=1, but the
+#     message is "net 'd0[7]' has no driver and is not an input". A WIDTH fault
+#     caught by a DRIVER check: it refuses for the wrong reason and misdiagnoses.
+#   the SAME netlist with d0[7] LISTED in --inputs          -> EXIT=0, IMPORTED
+#     CLEAN, "primary inputs: 4 (4 design)" for a module declaring three bits.
+# ⇒ THE DATUM GAINED A PHANTOM INPUT BIT THE DESIGN NEVER DECLARED. Same family
+# as C-V1 and the opposite direction: C-V1 LOSES bits by naming a vector by its
+# base; this GAINS one that does not exist. Both produce a datum that parses,
+# typechecks and proves theorems about the wrong machine.
+#
+# The check is narrow ON PURPOSE: it fires only when the base IS a declared
+# vector. Escaped register names (`\regs[20] [26]`) reach the same syntax and are
+# NOT declared vectors; whether those must be declared is a DIFFERENT question and
+# is not this ruling's to answer here.
+def _bit_ref(s):
+    """'d0[7]' -> ('d0', 7); anything else -> (None, None). Escaped names, which
+    carry their own brackets, are never split here — they are not in vports."""
+    if s.endswith("]") and "[" in s:
+        b, _, i = s[:-1].partition("[")
+        if b and i.isdigit():
+            return b, int(i)
+    return None, None
+
+# BOTH DOORS, because "everywhere" is the ruling's word: the caller-supplied port
+# list AND every net the netlist itself names. Case C above enters through the
+# port list, so the netlist scan alone would not have closed it.
+#
+# ⛔ SCANNED AFTER PARSE, NOT INLINE, AND THE REASON IS FAIL-OPEN: a bit-select
+# encountered BEFORE its declaration would not yet be in vports, so an inline
+# check would silently pass exactly the netlists whose declarations come last.
+# A guard whose coverage depends on token order is a guard that reads green on
+# the file that defeats it. Post-parse, vports is complete by construction.
+_width_srcs = [(nm, "the port list") for nm in _cv1_names]
+for _c, _in, _conns in insts:
+    _width_srcs.extend((v, f"cell instance '{_in}'") for v in _conns.values())
+for _lhs, _rhs in assigns:
+    _width_srcs.extend([(_lhs, "an assign"), (_rhs, "an assign")])
+
+# ⚠️ THE SOURCE IS CARRIED, NOT ASSUMED. A first draft named every offender "the
+# port list" — and case A's offender is in the NETLIST. That would have shipped a
+# width fix whose own diagnosis misdiagnosed, which is precisely the fault this
+# check exists to remove (the no-driver refusal calling a width fault a missing
+# driver). A refusal that names the wrong door sends the reader to the wrong file.
+_cv2, _seen = [], set()
+for _nm, _src in _width_srcs:
+    if not isinstance(_nm, str) or _nm in _seen:
+        continue
+    _seen.add(_nm)
+    _b, _i = _bit_ref(_nm)
+    if _b in vports:
+        _hi, _lo = vports[_b]
+        if not (min(_hi, _lo) <= _i <= max(_hi, _lo)):
+            _cv2.append((_nm, _b, _hi, _lo, _i, _src))
+if _cv2:
+    nm, b, hi, lo, idx, src = _cv2[0]
+    raise SystemExit(
+        f"importer: {src} names '{nm}', but the netlist declares '{b}' as "
+        f"[{hi}:{lo}] and bit {idx} IS OUTSIDE THAT RANGE. Verilog would silently "
+        f"zero-extend or truncate here; this importer refuses, because a datum "
+        f"built on a bit the design does not have proves theorems about a "
+        f"different machine. Note the generic no-driver check does NOT cover this "
+        f"case -- listing the bit as an input gives it a driver and the import "
+        f"then succeeds at EXIT=0. "
+        f"({len(_cv2)} out-of-range bit(s): {', '.join(x[0] for x in _cv2)})")
+
 # --- THE FLOP TREATMENT ----------------------------------------------------
 # Discover every flop, verify they share one latching event, then cut them:
 # Q -> appended to the primary inputs (leaf), D -> appended to the outputs

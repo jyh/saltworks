@@ -1,0 +1,78 @@
+SILICON — PRE-REGISTRATION: WIDTH AGREEMENT AS A HARD ERROR (the soundness crux)
+Written 2026-08-13 ~16:1x PDT, BEFORE any edit to the TRUSTED importer.
+Authority: math docket call (4), 08/13 05:40 — "(b) ADOPTED … CONDITION, BINDING
+ON THIS IMPORTER AND NOT A LATER NICETY: WIDTH AGREEMENT IS A HARD ERROR
+EVERYWHERE", whose stated reason is that (b) rests entirely on the refusal being
+right: "a refusal that is lucky rather than principled is not a foundation, it is
+a coincidence that has not failed yet."
+
+THE MEASURED HOLE (taken before writing any fix, exits captured WITHOUT a pipe):
+  A  out-of-range d0[7], not in --inputs   EXIT=1, "net 'd0[7]' has no driver
+                                           and is not an input"
+     ⇒ a WIDTH fault caught by a DRIVER check. It refuses, and it refuses for
+       the wrong reason and prints the wrong diagnosis. THIS IS THE LUCKY
+       REFUSAL THE RULING NAMES.
+  B  in-range d0[1]                        EXIT=0    (positive control)
+  C  out-of-range d0[7] LISTED in --inputs EXIT=0, "primary inputs: 4 (4 design)"
+     ⛔ A WIDTH ERROR IMPORTS CLEAN. The datum gains a phantom input bit the
+       module never declared. Same family as C-V1, opposite direction: C-V1 LOST
+       bits by passing a vector by base name; this GAINS one that does not exist.
+
+WHAT CHANGES — the narrowest rule that makes the refusal principled:
+  W1  In the netlist bit-select path (import_netlist.py ~:728-743): when a base
+      name IS a declared vector, require lo <= idx <= hi. Out of range = HARD
+      ERROR naming the declared bounds and the offending index.
+  W2  In the --inputs path: the same check for caller-supplied `base[idx]`
+      entries. Case C enters here, so W1 alone would not close it — "everywhere"
+      is the ruling's word and it means both doors.
+  ⛔ DELIBERATELY NOT CHANGED: the ESCAPED-name path (`\regs[20] [26]`). Those
+      names are not declared vectors and reach the same code; the check applies
+      ONLY when the base is in vector_ports. Whether an escaped bit-select must
+      be a declared vector is a DIFFERENT question and is not this ruling's.
+
+PRE-STATED EXPECTED OUTCOME (the bar, recorded before running):
+  E1  case A  -> EXIT=1 with a WIDTH diagnosis naming [1:0] and index 7
+                (it already exits 1; the CLAIM is that the reason changes)
+  E2  case B  -> EXIT=0, unchanged
+  E3  case C  -> EXIT=1  (currently 0 — this is the hole being closed)
+  E4  pinreset_controls.sh -> EXIT=0, all rows behaved, NC3a still firing
+  E5  import_sweep -> the 46-netlist denominator UNCHANGED, and the count of
+                      importing netlists UNCHANGED at 29. A soundness check that
+                      silently changes the corpus result is not a check, it is a
+                      regression.
+  E6  instrument_selftest.sh -> EXIT=0
+
+PASS CRITERION: E1-E6 all as stated. Any deviation is a FAILURE and gets posted
+as one, including a green I did not predict.
+
+RISKS:
+  R1  The escaped-name path shares this code. If my guard fires on `\regs[20]`
+      style names the sweep will move — E5 is the detector, and a moved sweep
+      count means the guard is WRONG, not that the corpus was wrong.
+  R2  Case A's exit is ALREADY 1, so "it refuses" cannot distinguish the fix from
+      the status quo. The discriminating evidence is the MESSAGE, not the exit.
+  R3  A negative control is required in both directions: an IN-RANGE index must
+      still import (E2), or the guard is satisfied by refusing everything.
+════ RESULTS — measured after the change, adjudicated at the bytes ════
+E1 case A (netlist reads d0[7])        EXIT=1, diagnosis now names the WIDTH
+                                       and the door: "cell instance '_01_'"   MET
+E2 case B (in-range d0[1])             EXIT=0 — still imports                  MET
+E3 case C (d0[7] listed in --inputs)   EXIT=1 — WAS 0; THE HOLE IS CLOSED      MET
+E4 pinreset_controls.sh                EXIT=0, 0 failures, NC3a firing         MET
+E5 import_sweep  46 netlists / 29 importing / 17 blocked (29+17=46)            MET
+E6 instrument_selftest.sh              EXIT=0, 12 rows                         MET
+R1 CLEAR: the guard fired ZERO times across the corpus — no escaped-name
+   false positives. The narrowness (base must be a DECLARED vector) holds.
+
+⛔ E5 READ RED ON THE FIRST PASS AND THE RED WAS MY INSTRUMENT, NOT THE CORPUS:
+   my IMPORTS tally counted a REMINDER LINE that contains the word 'IMPORTS',
+   and my denominator pattern missed a row format (45/30 instead of 46/29).
+   Adjudicated by counting the actual object — distinct *_nl.v filenames —
+   and corroborated by 29+17=46. Third time today a red was a wrong
+   expectation rather than a defect; a red says the artifact and the
+   expectation disagree, never which of them is at fault.
+
+⚠️ FIRST DRAFT DEFECT, CAUGHT BEFORE LANDING: the refusal named 'the port
+   list' for every offender, but case A's offender is in the NETLIST. That
+   would have shipped a width fix whose own diagnosis misdiagnosed — the
+   exact fault being removed. The source is now carried, not assumed.
