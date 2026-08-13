@@ -16,13 +16,23 @@ because docs do not build at all. Same law as a docstring citing a renamed theor
 
 VERDICTS — three, and the third is the point:
     OK           the citation's payload was found at the cited line.
-    MISS         payload NOT found at the cited line, or the path does not resolve.
-    UNCHECKED    a locator whose payload this tool cannot extract, or a path that
-                 resolves ambiguously. ***PRINTED, NEVER COUNTED AS OK.***
+    MISS         the payload is in the file but NOT at the cited line. A MISS that
+                 reports "MOVED by ±N" is a REPAIR INSTRUCTION, not a complaint.
+    UNCHECKED    anything outside this instrument's domain: no extractable payload,
+                 a payload too generic to convict, a prose citation that never
+                 quoted the file, an ambiguous path, or a path not found in any
+                 root we were GIVEN. ***PRINTED, NEVER COUNTED AS OK.***
 
 An UNCHECKED row is an instrument limit, not a pass. A tool that silently drops what
 it cannot read reports N-1 greens as N — which is the defect this fleet spent the
 evening on, one layer up.
+
+⛔ AND THE LIMIT CUTS BOTH WAYS — evidence, at corpus scale, 2026-08-12 19:00:
+an unresolvable path is UNCHECKED, NEVER a MISS. 20 of their 230 MISSes were paths
+resolving perfectly in a SIBLING REPO. Convicting a citation because this tool was
+pointed at the wrong root is the same defect as passing a figure it cannot read,
+run in the opposite direction. Pass --also-root to widen the domain; without it,
+the tool declines to convict rather than guessing.
 
 REPORT, NEVER REWRITE. This tool does not edit a single byte of any doc.
 """
@@ -76,7 +86,7 @@ def build_index(root):
 
 
 def resolve(cited, root, index):
-    """Resolve a cited path to real paths. Returns (list_of_paths, how)."""
+    """Resolve a cited path to real paths within ONE root. Returns (paths, how)."""
     direct = os.path.join(root, cited)
     if os.path.isfile(direct):
         return [cited], "direct"
@@ -86,6 +96,25 @@ def resolve(cited, root, index):
         # cited carries directories: keep only paths whose tail matches.
         cands = [p for p in cands if p.endswith(cited)]
     return cands, "suffix"
+
+
+def resolve_across(cited, roots):
+    """Resolve against the primary root first, then any --also-root.
+
+    ⛔ OUTSIDE MY ROOT IS AN INSTRUMENT LIMIT, NOT A WRONG CITATION — evidence's
+    finding at corpus scale (2026-08-12 19:00, 148 docs / 543 locators): 20 MISSes
+    were paths resolving PERFECTLY in a sibling repo. Convicting them is the same
+    error as counting an unreadable figure as clean, run in the opposite direction —
+    the instrument's DOMAIN has to sit inside the verdict either way.
+
+    So: a path that resolves nowhere we were TOLD to look is UNCHECKED, never MISS.
+    Only a path absent from every known root is a genuine dangling citation.
+    """
+    for (rname, rpath, rindex) in roots:
+        paths, how = resolve(cited, rpath, rindex)
+        if paths:
+            return rname, rpath, paths, how
+    return None, None, [], "unresolved"
 
 
 def read_line(root, relpath, lineno):
@@ -186,7 +215,7 @@ def context_for(text, start, end, before, after, next_start=None):
     return "\n".join(all_lines[lo:hi])
 
 
-def check_doc(docpath, root, index, window, before, after):
+def check_doc(docpath, roots, window, before, after):
     with open(docpath, encoding="utf-8", errors="replace") as fh:
         text = fh.read()
     rows = []
@@ -195,15 +224,20 @@ def check_doc(docpath, root, index, window, before, after):
         next_start = matches[idx + 1].start() if idx + 1 < len(matches) else None
         cited, lineno = m.group(1), int(m.group(2))
         docline = text[: m.start()].count("\n") + 1
-        paths, _how = resolve(cited, root, index)
+        rname, rpath, paths, _how = resolve_across(cited, roots)
         if not paths:
-            rows.append(("MISS", docline, cited, lineno, "path does not resolve", ""))
+            # UNCHECKED, not MISS: we can only speak for the roots we were given.
+            rows.append(("UNCHECKED", docline, cited, lineno,
+                         "path not found in %d known root(s) — may live in another "
+                         "repo; pass --also-root to check it" % len(roots), ""))
             continue
         if len(paths) > 1:
             rows.append(("UNCHECKED", docline, cited, lineno,
-                         "path is AMBIGUOUS (%d matches); not guessing" % len(paths), ""))
+                         "path is AMBIGUOUS (%d matches in %s); not guessing"
+                         % (len(paths), rname), ""))
             continue
         rel = paths[0]
+        root = rpath
         target = read_line(root, rel, lineno)
         if target is None:
             rows.append(("MISS", docline, cited, lineno,
@@ -267,6 +301,10 @@ def main():
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("docs", nargs="+", help="markdown/text files whose citations to check")
     ap.add_argument("--root", default=None, help="repo root (default: git root of first doc)")
+    ap.add_argument("--also-root", action="append", default=[],
+                    help="additional repo root(s) to resolve citations against; "
+                         "repeatable. Without these, an unresolvable path is "
+                         "UNCHECKED, never MISS.")
     ap.add_argument("--window", type=int, default=40,
                     help="how far to search for a MOVED payload (default 40)")
     ap.add_argument("--before", type=int, default=0,
@@ -276,12 +314,17 @@ def main():
     ap.add_argument("--quiet-ok", action="store_true", help="print only MISS and UNCHECKED")
     args = ap.parse_args()
 
-    root = args.root or repo_root(os.path.dirname(os.path.abspath(args.docs[0])))
-    index = build_index(root)
+    primary = args.root or repo_root(os.path.dirname(os.path.abspath(args.docs[0])))
+    roots = [(os.path.basename(os.path.abspath(primary)), os.path.abspath(primary),
+              build_index(primary))]
+    for extra in args.also_root or []:
+        ap_ = os.path.abspath(extra)
+        roots.append((os.path.basename(ap_), ap_, build_index(ap_)))
+    root = roots[0][1]
 
     totals = {"OK": 0, "MISS": 0, "UNCHECKED": 0}
     for doc in args.docs:
-        rows = check_doc(doc, root, index, args.window, args.before, args.after)
+        rows = check_doc(doc, roots, args.window, args.before, args.after)
         if not rows:
             print("%s: no citations parsed" % doc)
             continue
