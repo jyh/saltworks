@@ -14,6 +14,25 @@ overstate ROOT incidents **3.9×**, now a §I FOR-RATIFICATION item.
 The honest test of a hand-keyed seed is **a second keyer who has not seen the ratio.**
 I have seen it. **THAT TEST REMAINS OPEN AND UNCLAIMED; nothing here discharges it.**
 
+> ✅ **DISCHARGED 2026-08-13 — the sentence directly above was true when written and is
+> FALSE NOW; it is left standing because it is the record of what this pass could not do.**
+> *The test it names was run: **two independent blind keyers** (`evidence-blind-keying-0813.json`
+> `7b175ff` · `silicon-keying-compare-0813.json` `160b7c0`), a joint adjudication with written
+> reasons per row (`compiler-walk-positions-0813.json` `c60412c`), and a **committed** comparer
+> run from its committed copy (`walk_rederive.py` `24920e5`) — 10 rederived, SET IDENTICAL,
+> control 7/7.*
+> 📌 *Found by a peer's detection class, not my own: I had swept my docs for a retired
+> MECHANISM by name, which cannot see a false claim about anything else. **Theirs was
+> "a BOLD PRESENT-TENSE claim inside an otherwise-accurate historical section"** — which is
+> exactly the shape of the line above, and exactly what a mechanism-keyed grep misses.*
+
+> ⚖️ **AND THE SIBLING I AM DELIBERATELY *NOT* FIXING:** `compiler-blind-keying-brief-0812.md`
+> still reads as a live instruction set for a keyer, and **marking it complete would destroy
+> it.** *It is result-free by construction — "you may read all of it and remain eligible" —
+> so writing the outcome into it would spend the eligibility of every future reader.* ⇒ ***An
+> artifact whose VALUE IS ITS IGNORANCE must not be updated with the answer; a re-key needs a
+> brief that can still be read cold.*** **The obvious fix is the defect there.**
+
 What needs no blindness is mechanical sensitivity — a jackknife does not care what its
 author believes. That is what this pass does, and it is a *narrower* instrument than
 the one the question deserves.
