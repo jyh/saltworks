@@ -180,9 +180,13 @@ def dcMatches : List (List Net) :=
   , dcOpcode 0b0110011 ++ dcFunct7Zero ++ dcFunct3 0b010    -- SLT
   , dcOpcode 0b0010011 ++ dcFunct3 0b000                    -- ADDI
   , dcOpcode 0b1100011 ++ dcFunct3 0b000                    -- BEQ
-  -- ⬥ D2. `decode`'s LW/SW arms test OPCODE and FUNCT3 only (`ISA.lean:819-823`,
-  -- corrected 8/12 from `:806-811`, which is the ADDI/BEQ region — the arms moved
-  -- and the comment did not; a docstring locator builds green forever),
+  -- ⬥ D2. `decode`'s LW/SW arms test OPCODE and FUNCT3 only.
+  -- `ISA.lean:819` opens `0b0000011#7 && funct3 = 0b010#3`
+  -- (corrected 8/12 from `:806-811`, the ADDI/BEQ region: the arms moved and the
+  -- comment did not, and a docstring locator builds green forever). The literal
+  -- rides ON THE LOCATOR'S OWN LINE deliberately — citecheck mines only that line,
+  -- so an anchor one line below is invisible to it, and with just the word `decode`
+  -- it returns the SAME verdict for the stale address and the repaired one.
   -- so these rows carry NO `funct7` literals — which is exactly what keeps the
   -- projection argument above intact for the new bits rather than widening it.
   , dcOpcode 0b0000011 ++ dcFunct3 0b010                    -- LW

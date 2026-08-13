@@ -13,7 +13,8 @@ at L0 needs in order to compose without threading a fuel number.
 The mechanism, all landed: only `BEQ` can move `pc` by anything but `+4`
 (`step`, ISA.lean:120-126), so a `BEQ`-free program advances four bytes per
 step; from `pc = 4*j` it runs off the end within `code.length - j` steps; and
-once `fetch = none`, `runFor_eq_of_halted` (Program.lean:628) freezes it. -/
+once `fetch = none`, `runFor_eq_of_halted` (Program.lean:654, corrected 8/12 from
+:628 — the theorem moved and the comment did not) freezes it. -/
 
 open SaltWorks.ISA
 
