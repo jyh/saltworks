@@ -62,18 +62,26 @@
  "inputs": [
   {
    "path": "docs/ledger-incidents-seed-0812.json",
-   "sha256": "22802c719bd20a2c37b0de0c756960e74769fa4be3a46830711a3a4e8de58852",
-   "role": "my own keying, FROZEN and attested on the bus 10:08"
-  },
-  {
-   "path": "docs/evidence-blind-keying-0813.json",
-   "sha256": "ec3737410863b22f7b14eca006f562bacb2e655e1a1f4e38e308c34b0cc6623b",
-   "role": "the blind keyer's output; my positions cite its row keys"
+   "sha256_AS_READ": "22802c719bd20a2c37b0de0c756960e74769fa4be3a46830711a3a4e8de58852",
+   "pinned_at": "5b7ceb9 (its only commit; FROZEN and attested on the bus 10:08)",
+   "read_time_bytes_verified": true,
+   "role": "my own keying"
   },
   {
    "path": "docs/silicon-keying-compare-0813.json",
-   "sha256": "046c1a7cb60ad1e839cc9a48f457491f5a045b9c67173a58205f88e74acdecd0",
-   "role": "the compare; my UNMATCHED SET is derived from its identity_axis pairs"
+   "sha256_AS_READ": "74eeef86b93d3abea9d21a1f805e4f8cc3a2419214ecf636bce65fab580acd5c",
+   "pinned_at": "385e8aa (10:11:37) -- the version my UNMATCHED SET was derived from",
+   "read_time_bytes_verified": true,
+   "role": "the compare; my unmatched set comes from its identity_axis pairs",
+   "WARNING": "this file has since been amended TWICE (0d16dc0 addendum 10:57, 364c918 input-anchoring 11:07). My positions never saw either. Fetch the PINNED rev, not HEAD."
+  },
+  {
+   "path": "docs/evidence-blind-keying-0813.json",
+   "sha256_AS_READ": "ec3737410863b22f7b14eca006f562bacb2e655e1a1f4e38e308c34b0cc6623b",
+   "pinned_at": "7b175ff (11:08:51) -- the FIRST commit of this file",
+   "read_time_bytes_verified": false,
+   "role": "the blind keyer's output; my positions cite its row keys",
+   "DECLARED ABSENCE": "I read this file at ~10:19 while it was UNTRACKED, so no history exists for the bytes I actually read. The hash above is the first COMMITTED version (11:08). Whether it equals the bytes I read is NOT VERIFIABLE and I am not asserting it."
   }
  ],
  "candidate_metric": {
@@ -82,5 +90,5 @@
   "status": "CANDIDATE GENERATION ONLY. No position in this file rests on a score; every one was taken by READING the predicates.",
   "validation": "reproduces 7/7 of the compare's published pairs above its stated 0.20 threshold"
  },
- "amended": "2026-08-13 11:1x -- added inputs (paths+sha256) and the candidate metric spec. Prompted by silicon's 11:08 self-report that their accepted compare named neither its inputs nor their hashes; I checked mine on that trigger and it had the same defect, plus an unrecorded tokenizer. NO POSITION CHANGED."
+ "amended": "2026-08-13 11:1x -- inputs + candidate metric added (prompted by silicon's 11:08 self-report). CORRECTED minutes later: my first version recorded the CURRENT hash of each input rather than the hash of what I READ. Silicon's compare had moved twice between my reading it and my hashing it, so the block I added to make this artifact reproducible would have made it reproducibly WRONG. Inputs are now pinned by COMMIT SHA where one exists -- a commit sha is a fact about a moment; a content hash taken later is a fact about the wrong moment. NO POSITION CHANGED at any step."
 }
