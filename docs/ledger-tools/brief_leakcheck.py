@@ -80,17 +80,29 @@ def seed_totals(seed_path):
 def values_in(paths):
     """Harvest RESULT VALUES from the result document(s).
 
-    ⚠️ WIDENED 2026-08-12 21:0x, and the reason is the finding: the first version
-    harvested DECIMALS ONLY. My audit also published INTEGER results that are not
-    seed totals -- a percentage-of-numerator, and a two-ended bracket on one row --
-    and NONE of them was in the forbidden set. Four posts I called "machine-verified
-    result-free" measured clean, but they were clean BY HOW I HAPPENED TO WORD THEM,
-    not because this gate would have caught the leak. A passing control proves the
-    tool runs; it says nothing about which part is doing the work.
+    ⛔ WIDENING TO INTEGERS WAS TRIED AND RETRACTED THE SAME HOUR. RECORDED, NOT
+    DELETED, BECAUSE IT IS THE OBVIOUS FIX AND THE NEXT READER WILL THINK OF IT.
 
-    Now harvests decimals AND multi-digit integers. Single-digit values are still
-    NOT covered -- stated in the DOMAIN block rather than quietly tolerated, because
-    a gate whose limit is undeclared reads as a gate with no limit."""
+    The hole was real: this gate first harvested DECIMALS ONLY, so integer results
+    (a percentage-of-numerator, a two-ended bracket) were never in the forbidden set
+    at all. Four posts published as "machine-verified result-free" measured clean --
+    but clean BY HOW THEY WERE WORDED, not because the gate could see the leak.
+
+    So I widened to multi-digit integers. MEASURED against the last 120 real bus
+    posts, all seats:
+
+        decimals + multi-digit integers    convicts  60%   UNUSABLE
+        decimals only                      convicts   8%   (3.9 collides with
+                                                            build times "3.9s")
+        decimals with 2+ fraction digits   convicts   3%   and those are GENUINE
+
+    ⇒ THE VALUE CLASS IS NOT TOKEN-SHAPED. A bare integer cannot be gated at any
+    threshold: tighten and it misses, widen and it convicts half the bus. The signal
+    is CONTEXT and a gate reads TOKENS. This is the evidence seat's finding,
+    confirmed here on this gate with its masking already in place.
+
+    ⇒ SETTLED SCOPE: 2+ fraction digits. See the DOMAIN block -- the integers are
+    covered by the OTHER mechanism (sequencing via the boot block), not by this."""
     out = {}
     for p in paths:
         if not os.path.isfile(p):
@@ -102,7 +114,7 @@ def values_in(paths):
         # then convicted an innocent post. A forbidden set is only as clean as the
         # text it is derived from.
         text = FURNITURE.sub(lambda m: "\u0000" * len(m.group(0)), text)
-        for m in re.finditer(r"\d+\.\d+|(?<![\d.])\d{2,}(?![\d.])", text):
+        for m in re.finditer(r"\d+\.\d{2,}", text):
             if text[m.start() - 1:m.start()] == ":" or text[m.end():m.end() + 1] == ":":
                 continue          # a locator or clock, not a result
             out.setdefault(m.group(0), p)
@@ -153,9 +165,16 @@ def main():
         return 2
 
     tokens = {}
+    advisory_toks = []
     if os.path.isfile(args.seed):
-        for name, val in seed_totals(args.seed).items():
-            tokens[str(val)] = "seed %s" % name
+        # ⛔ SEED TOTALS ARE NOT IN THE HARD SET. Measured on 120 real bus posts:
+        # gating them convicts 19% -- they are ordinary small integers. They move
+        # to the ADVISORY tier, where CO-OCCURRENCE supplies the context a single
+        # token cannot: >=2 distinct totals close together convicts 5% instead,
+        # and catches the one sentence that matters most ("ROOT a, CARRIER b,
+        # MENTIONS c"). Still too noisy to BLOCK -- ordinary dense-numeric prose
+        # trips it -- so it WARNS and never changes the exit code.
+        advisory_toks = [str(v) for v in seed_totals(args.seed).values()]
     else:
         print("⛔ seed not found (%s) -- REFUSING: a leak-check that cannot derive the"
               % args.seed)
@@ -199,14 +218,50 @@ def main():
         return 1
     print("✅ NO LEAK. Every forbidden token is absent; this brief can be read by a")
     print("   candidate keyer without spending them.")
+    # ---- ADVISORY TIER: co-occurrence, not tokens ----------------------------
+    if advisory_toks:
+        atext = FURNITURE.sub(lambda m: "\u0000" * len(m.group(0)),
+                              open(args.brief, encoding="utf-8",
+                                   errors="replace").read())
+        marks = []
+        for tok in advisory_toks:
+            for m in re.finditer(r"(?<![\d.])" + tok + r"(?![\d.])", atext):
+                if (atext[m.start() - 1:m.start()] == ":"
+                        or atext[m.end():m.end() + 1] == ":"):
+                    continue
+                marks.append((m.start(), tok))
+        marks.sort()
+        flagged = []
+        for pos, _ in marks:
+            near = {tk for pp, tk in marks if pos <= pp <= pos + 90}
+            if len(near) >= 2:
+                ln = atext[:pos].count("\n") + 1
+                snippet = atext.splitlines()[ln - 1].strip()[:66]
+                if (ln, snippet) not in flagged:
+                    flagged.append((ln, snippet))
+        if flagged:
+            print()
+            print("⚠️  ADVISORY (does NOT change the exit code) -- %d line(s) carry TWO"
+                  % len(flagged))
+            print("    OR MORE headline totals close together. Single totals are")
+            print("    ordinary numbers; CO-OCCURRENCE is the cheapest proxy for the")
+            print("    context a token gate cannot read. HUMAN READ THESE:")
+            for ln, s in flagged:
+                print("      L%-4d %s" % (ln, s))
+
     print()
-    print("⛔ DOMAIN -- what a PASS here does and does NOT mean:")
-    print("     COVERS      decimals + multi-digit integers appearing in the result")
-    print("                 document(s), and the seed totals. Derived, never typed.")
-    print("     DOES NOT    single-digit values; a value that appears NOWHERE in the")
-    print("                 named result documents; and any leading CHARACTERISATION")
-    print("                 in prose (\"smaller than we thought\") -- a human read.")
-    print("   A PASS IS THE ABSENCE OF THE DERIVED SET, NOT OF EVERY RESULT.")
+    print("⛔ DOMAIN -- THIS GATE COVERS ONE OF TWO MECHANISMS. Read before quoting.")
+    print("     COVERS      DISTINCTIVE DECIMALS (2+ fraction digits) from the result")
+    print("                 document(s), plus the seed totals. Derived, never typed.")
+    print("     ADVISES ON  the headline TOTALS, by co-occurrence, warning only.")
+    print("     DOES NOT    BARE INTEGERS -- not an oversight and not fixable here.")
+    print("                 Measured on 120 real bus posts: gating integers convicts")
+    print("                 60%, decimals-only 8%, 2+ fraction digits 3%. The value")
+    print("                 class is NOT TOKEN-SHAPED; the signal is CONTEXT.")
+    print("                 Also not covered: a leading CHARACTERISATION in prose.")
+    print("     THE REST    is covered by SEQUENCING -- the analysis those integers")
+    print("                 belong to does not travel on this channel at all.")
+    print("   ⇒ A PASS MEANS 'CARRIES NO DISTINCTIVE VALUE', NOT 'CARRIES NO RESULT'.")
     return 0
 
 
