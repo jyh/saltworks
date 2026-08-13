@@ -1,0 +1,32 @@
+PRE-REGISTERED MODEL DERIVATIONS — written from the CELL NAME and the conventions
+already encoded in Sky130.lean, BEFORE reading each cell's Liberty function.
+
+Convention read off the EXISTING models in the file (not invented here):
+  AND/NAND family bubbles the FIRST input   and3b  = (!A_N) && B && C
+  NOR/OR   family bubbles the LAST  input   nor3b  = !(A || B || (!C_N))
+  aNNNoi   = AND groups, OR'd together, then Inverted
+
+ 1 and4_1      X = A && B && C && D
+ 2 and4b_1     X = (!A_N) && B && C && D
+ 3 nand4b_1    Y = !((!A_N) && B && C && D)
+ 4 nand4bb_1   Y = !((!A_N) && (!B_N) && C && D)
+ 5 nor4_1      Y = !(A || B || C || D)
+ 6 nor4b_1     Y = !(A || B || C || (!D_N))
+ 7 nor4bb_1    Y = !(A || B || (!C_N) || (!D_N))
+ 8 or4_1       X = A || B || C || D
+ 9 a2111oi_0   Y = !((A1 && A2) || B1 || C1 || D1)
+
+RISK NAMED IN ADVANCE: entries 6 and 7 rest on the NOR-family-bubbles-last
+convention, which I read from a single existing model (nor3b). If the vendor
+bubbles a different pin, those two are wrong and their `decide +kernel`
+theorems will FAIL rather than mislead — which is the whole reason the model is
+checked against Liberty instead of trusted.
+
+---
+Provenance, stated honestly: this file was written to scratch BEFORE
+./Cells/extract_liberty.py was run on these nine cells, and copied into the repo
+afterwards with the outcome. Its git timestamp therefore records the COMMIT, not
+the prediction. What it does establish is the derivations and the named risk in
+their original wording, unedited -- including the two entries flagged as resting
+on a convention read from a single example. Outcome: 9 of 9 matched the vendor,
+and all nine are kernel-checked in Cells/Sky130.lean.

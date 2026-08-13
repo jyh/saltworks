@@ -133,3 +133,86 @@ to serve a census would invert the dependency for no gain.*
   landed separately at `5688ee2` under its own discipline.
 * **Not a claim about the fabricated TT artifact**, whose census lives in
   `Cells/CI-cell-census.md` and is a different population (the `_2` drive family).
+
+---
+
+# ADDENDUM — THE NINE CELLS LANDED, AND THE `dmem` FAMILY IS OPEN
+
+### Taken immediately after the census, under the same routine-combinational class
+### the helm named at 18:49. **All nine are combinational; none is sequential.**
+
+## A · THE MODELS WERE PRE-REGISTERED, AND CAME OUT 9 FOR 9
+
+`Cells/CI-cell-census.md` forbids generating a model from the Liberty it is
+checked against. So the nine derivations were **written down first**, from the
+cell names and the bubbling conventions already encoded in `Sky130.lean`
+(AND/NAND bubble the FIRST input, per `and3b`; NOR/OR bubble the LAST, per
+`nor3b`), **before the vendor file was read** — with the risk named in advance:
+
+> *"Entries 6 and 7 rest on the NOR-bubbles-last convention, which I read from a
+> single existing model. If the vendor bubbles a different pin, those two are
+> wrong and their theorems will FAIL rather than mislead."*
+
+**The vendor pin lists came back `nor4b(A,B,C,D_N)` and `nor4bb(A,B,C_N,D_N)` —
+the convention held, and all nine derivations matched.** *A convention read off
+one example is a guess until a second case tests it; this tested seven more.*
+
+```
+✓ and4_liberty  ✓ or4_liberty   ✓ nor4_liberty     ✓ and4b_liberty  ✓ nand4b_liberty
+✓ nand4bb_liberty  ✓ nor4b_liberty  ✓ nor4bb_liberty  ✓ a2111oi_liberty
+all [0 axioms] · saltbuild EXIT=0
+```
+⚠️ **Two of the nine carry a weak theorem, said plainly:** for `and4` and `or4`
+the name and the vendor function are the **same expression**, so those theorems
+confirm arity and pin order and little else. The content is in the bubbled and
+AOI cells, where the model is a conjunction under a negation and the vendor
+states a disjunction of negations.
+
+## B · THE CENSUS MOVED EXACTLY AS IT PREDICTED
+
+```
+before   16 clean + 29 blocked + 1 empty
+after    20 clean + 25 blocked + 1 empty
+```
+**The four that flipped are the four the census named** — `dmem16`, `dmem32`,
+`dmem_addr8`, `dmem_addr16`. *The census predicted its own effect and was right,
+which is a better check on it than any control I could plant.*
+
+## C · ⭐ `dmem16` AND `dmem32` IMPORT CLEAN
+
+```
+dmem16   3964 gates ·  512 flops cut · conservation OK · readback 32 vectors ×  544 outputs · EXIT=0
+dmem32   8450 gates · 1024 flops cut · conservation OK · readback 32 vectors × 1056 outputs · EXIT=0
+```
+⇒ **The whole `dmem` memory family now imports** — 8, 16 and 32 — each under the
+`rst_n ≡ 1` restriction with the scope marker riding on the datum. **No datum
+lands**; the bar and helm condition (4) are unchanged.
+
+## D · 📐 THE OTHER TWO ARE CELL-CLEAN AND BLOCKED ON **MATH's** OPEN CALL
+
+`dmem_addr8` and `dmem_addr16` are cell-clean and still refuse:
+
+```
+importer: assign uses a RANGE 'byte_addr[4:2]' -- the grammar models bit-selects
+and scalars only. Refusing rather than collapsing the range to one bit.
+```
+**That is the range-extension grammar — the question already at math's muster,
+not a cell problem.** Measured across the corpus:
+
+| | |
+|---|---|
+| netlists with range assigns | **13**, 31 lines *(independently reproduces the predecessor's count)* |
+| cell-clean **and** range-blocked — freed by the grammar call **alone** | **2** (`dmem_addr8`, `dmem_addr16`, **one line each**) |
+| range-using netlists that **also** still need cells | 11 |
+
+🔑 ***So the grammar call unblocks exactly two netlists today, each gated by a
+single line.*** *That is a scoping datum for math and it cuts against urgency:
+the grammar is a correctness question worth answering carefully, not a
+bottleneck holding up corpus coverage.*
+
+## E · THE DOC'S OWN CAVEAT WAS EXERCISED WITHIN THE HOUR
+
+§7 said this census measures **cell coverage only**, and that a listed netlist is
+not promised to import. **Two of the four it freed then failed to import for a
+non-cell reason.** *The caveat was not boilerplate; it was load-bearing, and it
+is the reason the four were RUN rather than reported clean from the table.*

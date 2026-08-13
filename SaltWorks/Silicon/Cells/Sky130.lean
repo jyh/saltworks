@@ -280,6 +280,76 @@ def nand4 (A B C D : Bool) : Bool := !(A && B && C && D)
 theorem nand4_liberty (A B C D : Bool) :
     nand4 A B C D = ((!A) || (!B) || (!C) || (!D)) := by decide +kernel +revert
 
+/-! ### The remaining 4-input family — the nine cells that open the `dmem` family.
+
+Each `def` is derived from the CELL NAME and the bubbling conventions already
+encoded above (AND/NAND bubble the FIRST input, `and3b`; NOR/OR bubble the LAST,
+`nor3b`), and each was written down BEFORE its Liberty was read — the derivations
+were pre-registered and came out 9 for 9, including the two that rested on the
+NOR-bubbles-last reading. The `_liberty` theorem is what makes that safe: a
+mis-derived model fails `decide +kernel` rather than misleading anyone.
+
+⚠️ HONEST NOTE ON TWO OF THEM: for `and4` and `or4` the name and the vendor
+function are the SAME expression, so their theorems confirm arity and pin order
+and little else. The content is in the bubbled and AOI cells, where the model is
+a conjunction under a negation and the vendor states a disjunction of negations. -/
+
+/-- `and4` -/
+def and4 (A B C D : Bool) : Bool := A && B && C && D
+
+theorem and4_liberty (A B C D : Bool) :
+    and4 A B C D = ((A && B && C && D)) := by decide +kernel +revert
+
+/-- `or4` -/
+def or4 (A B C D : Bool) : Bool := A || B || C || D
+
+theorem or4_liberty (A B C D : Bool) :
+    or4 A B C D = ((A) || (B) || (C) || (D)) := by decide +kernel +revert
+
+/-- `nor4` -/
+def nor4 (A B C D : Bool) : Bool := !(A || B || C || D)
+
+theorem nor4_liberty (A B C D : Bool) :
+    nor4 A B C D = ((!A && !B && !C && !D)) := by decide +kernel +revert
+
+/-- `and4b` — AND4 with the FIRST input bubbled. -/
+def and4b (A_N B C D : Bool) : Bool := (!A_N) && B && C && D
+
+theorem and4b_liberty (A_N B C D : Bool) :
+    and4b A_N B C D = ((!A_N && B && C && D)) := by decide +kernel +revert
+
+/-- `nand4b` — NAND4 with the FIRST input bubbled. -/
+def nand4b (A_N B C D : Bool) : Bool := !((!A_N) && B && C && D)
+
+theorem nand4b_liberty (A_N B C D : Bool) :
+    nand4b A_N B C D = ((A_N) || (!B) || (!C) || (!D)) := by decide +kernel +revert
+
+/-- `nand4bb` — NAND4 with the first TWO inputs bubbled. -/
+def nand4bb (A_N B_N C D : Bool) : Bool := !((!A_N) && (!B_N) && C && D)
+
+theorem nand4bb_liberty (A_N B_N C D : Bool) :
+    nand4bb A_N B_N C D = ((A_N) || (B_N) || (!C) || (!D)) := by decide +kernel +revert
+
+/-- `nor4b` — NOR4 with the LAST input bubbled. -/
+def nor4b (A B C D_N : Bool) : Bool := !(A || B || C || (!D_N))
+
+theorem nor4b_liberty (A B C D_N : Bool) :
+    nor4b A B C D_N = ((!A && !B && !C && D_N)) := by decide +kernel +revert
+
+/-- `nor4bb` — NOR4 with the last TWO inputs bubbled. -/
+def nor4bb (A B C_N D_N : Bool) : Bool := !(A || B || (!C_N) || (!D_N))
+
+theorem nor4bb_liberty (A B C_N D_N : Bool) :
+    nor4bb A B C_N D_N = ((!A && !B && C_N && D_N)) := by decide +kernel +revert
+
+/-- `a2111oi` — one AND2 group and three singletons, OR'd, then inverted. -/
+def a2111oi (A1 A2 B1 C1 D1 : Bool) : Bool := !((A1 && A2) || B1 || C1 || D1)
+
+theorem a2111oi_liberty (A1 A2 B1 C1 D1 : Bool) :
+    a2111oi A1 A2 B1 C1 D1
+      = ((!A1 && !B1 && !C1 && !D1) || (!A2 && !B1 && !C1 && !D1)) := by
+  decide +kernel +revert
+
 /-- `nor3` -/
 def nor3 (A B C : Bool) : Bool := !(A || B || C)
 
@@ -420,6 +490,8 @@ theorem conb_LO_liberty : conb_LO = false := by decide +kernel
 #audit_axioms inv_liberty buf_liberty clkbuf_liberty dlygate4sd3_liberty
 #audit_axioms clkdlybuf4s25_liberty or2_liberty nor2_liberty and3_liberty
 #audit_axioms nand3_liberty nand4_liberty nor3_liberty xor2_liberty and2b_liberty
+#audit_axioms and4_liberty or4_liberty nor4_liberty and4b_liberty nand4b_liberty
+#audit_axioms nand4bb_liberty nor4b_liberty nor4bb_liberty a2111oi_liberty
 #audit_axioms and3b_liberty and4bb_liberty nand2b_liberty nand3b_liberty
 #audit_axioms nor3b_liberty or3b_liberty a21o_liberty a21oi_liberty
 #audit_axioms a21boi_liberty a31o_liberty a32o_liberty a211o_liberty
