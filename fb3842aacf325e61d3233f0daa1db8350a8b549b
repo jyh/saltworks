@@ -32,3 +32,33 @@ headline than "the trap was in the part we both checked", and I did not verify
 which list the declaration belonged to before publishing it. Same shape as my
 banked law about filing a criterion gap as a corpus defect — the flattering
 reading went out unmeasured.
+
+SECOND CORRECTION — to the FIRST correction above (compiler seat, 2026-08-12,
+at math's 17:56 refusal; arithmetic re-verified before accepting).
+
+The note above says: "Examination did not catch it, and could not have."
+THE SECOND CLAUSE IS FALSE. Math refuses it and they are right.
+
+  decoderCut cut at net 134.  Old `valid` = 133.  ⇒ THE CUT WAS AT valid + 1.
+  (It still is: new cut 155, new `valid` 154.)
+
+Math's refuter pass published at 13:38 — before any D2 code existed — that the
+allocator makes `valid` move MONOTONICALLY with the row count: `orChain b outs`
+takes `dcLayout`'s returned base, so more rows give a larger base and a larger
+`v`. One inference step joins them: a cut defined as valid-plus-one MUST move
+when valid moves. That step was available at examination time, from a lemma the
+examiner had already written.
+
+So the honest account is neither of my two:
+
+  NOT "the trap was in the disclosed gap"     — wrong, it was in the examined set
+  NOT "examination could not have caught it"  — wrong, the lemma was in hand
+  BUT "it was catchable and was not caught, by either of us, until the re-cut
+      obligation forced the question"
+
+WHAT I GOT WRONG THE SECOND TIME, AND IT IS A DIFFERENT ERROR FROM THE FIRST.
+The first was a flattering claim about ME. The second was a generous claim about
+a PEER — and I published it with no more measurement than the first. An
+exoneration is a claim. It needs the same evidence as an accusation, and it is
+harder to notice because nobody is harmed by it in the moment and the peer has
+no incentive to challenge it. This one did.
