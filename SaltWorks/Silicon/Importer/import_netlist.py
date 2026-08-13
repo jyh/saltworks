@@ -252,14 +252,41 @@ def base_of(cell):
 # lose a gate, it loses a STATE BIT, and the resulting netlist would still parse,
 # still typecheck, and still prove theorems about the wrong machine.
 #
-# ⚠️ WHY `dfrtp` IS NOT HERE, though adding a line would make it import.
-# `dfrtp` carries an asynchronous `RESET_B`.  Asynchronous reset is not a
-# next-state function of the flop's inputs at all — it acts between edges — so
-# the honest model is not `next = D & RESET_B`; that formula is a *synchronous*
-# reset, correct only under an assumption about reset being held across an edge
-# that nothing in the netlist states.  The RV32I work will bring resettable
-# flops, and when it does, this comment is the question that has to be answered
-# rather than a line that has to be typed.
+# ⚠️ WHY `dfrtp` IS PRESENT BUT **GATED** (8/12, helm-ruled 18:28).
+# `dfrtp` carries an asynchronous `RESET_B`, and the tempting `next = D & RESET_B`
+# is NOT merely an approximation — it is a category error, which the vendor's own
+# file says more sharply than the behavioural argument does:
+#
+#     liberty ff group, sky130_fd_sc_hd__tt_025C_1v80.lib
+#       dfxtp_1   clocked_on "CLK"   next_state "D"
+#       dfrtp_1   clocked_on "CLK"   next_state "D"      clear : "!RESET_B"
+#
+# `next_state` and `clear` are SEPARATE FIELDS of the Liberty `ff` group, and
+# `dfrtp_1`'s `next_state` is the string "D" — byte-identical to `dfxtp_1`'s.  The
+# asynchronous reset therefore contributes EXACTLY ZERO to the next-state
+# function; `next = D & RESET_B` merges two fields the standard keeps disjoint.
+# (Corroborated twice more: the behavioural model wires `RESET_B` through `not0`
+# into `udp_dff$PR`, whose port is distinct from CLK; and that UDP's table has the
+# row `?  ?  1 : ? : 0  // async reset`, which fires with CLK as DON'T-CARE.)
+#
+# ⇒ The consequence runs the other way too: `{"d": "D"}` below is ALREADY the
+# correct next-state model for `dfrtp`.  What `dfrtp` lacked was never a
+# next-state model — it was a treatment for `clear`, which is not a next-state
+# phenomenon at all.
+#
+# ⛔ SO THE MODEL IS GATED, NOT FREE.  Because the datum has no notion of the
+# between-edge event `clear` describes, this cell imports ONLY under `--pin-reset`,
+# which holds the reset net at its INACTIVE value.  Under `RESET_B ≡ 1`,
+# `clear = !1 = 0` never asserts and the ff group reduces to `clocked_on CLK,
+# next_state D` — *literally dfxtp_1's group, field for field*.  The equivalence is
+# a syntactic identity in the vendor model, not an argument this importer makes.
+# Without the flag `dfrtp` STILL REFUSES, exactly as before.
+#
+# ⚠️ THE RESTRICTION IS REAL AND RIDES THE WHOLE CHAIN: the emitted datum models
+# the design only for traces where the reset is held inactive throughout, and it
+# says NOTHING about the deassertion seam.  A theorem proved on a pinned datum
+# MUST NOT be cited as covering reset or bring-up.  Pre-registration, checks, bar
+# and the declared gap: docs/silicon-dfrtp-async-reset-prereg-0812.md.
 # ---------------------------------------------------------------------------
 # An entry is either
 #   "d"    : the next state IS this pin's net — the root is that net, unchanged;
@@ -268,6 +295,12 @@ def base_of(cell):
 #            root is the gate that expression emits.
 # "pins" lists every non-power pin the model accounts for; anything else
 # connected is a hard error.
+# "reset" : (PIN, INACTIVE_VALUE) — an ASYNCHRONOUS clear/preset this model can
+#           only honour by PINNING.  Its presence makes the cell gated: it
+#           imports under `--pin-reset` and refuses without it.  The inactive
+#           value is declared HERE, per cell, and is never supplied by the
+#           caller — otherwise the flag could be pointed at an active-high reset
+#           and would pin it to the value that HOLDS the design in reset.
 SEQ_MODELS = {
     "dfxtp":  {"clk": "CLK", "q": "Q", "pins": {"CLK", "D", "Q"}, "d": "D"},
 
@@ -290,16 +323,23 @@ SEQ_MODELS = {
                         ("a", "and", "DE", "D"),
                         ("b", "and", "n", "Q"),
                         ("t", "or", "a", "b")]},
+
+    # GATED — see the block above. `d: "D"` is the vendor's own `next_state`,
+    # unchanged from dfxtp; `reset` is the `clear` field the datum cannot express
+    # and therefore pins.  RESET_B is ACTIVE-LOW, so its inactive value is 1.
+    "dfrtp":  {"clk": "CLK", "q": "Q", "pins": {"CLK", "D", "Q", "RESET_B"},
+               "d": "D", "reset": ("RESET_B", 1)},
 }
 
 
-def find_flops(insts):
+def find_flops(insts, pin_reset=None):
     """-> [ {cell, iname, q, d, clk} ], one per sequential instance.
 
-    Refuses on: an unmodelled sequential cell, a missing modelled pin, and any
+    Refuses on: an unmodelled sequential cell, a missing modelled pin, any
     connected non-power pin the model does not account for (which is how a
-    silently-dropped reset would be caught)."""
-    flops, unmodelled = [], collections.Counter()
+    silently-dropped reset would be caught), and a GATED cell (one carrying an
+    asynchronous `reset`) when `--pin-reset` was not given."""
+    flops, unmodelled, gated = [], collections.Counter(), collections.Counter()
     for (cell, iname, conns) in insts:
         if not cell.startswith(SEQ_PREFIX):
             continue
@@ -319,9 +359,31 @@ def find_flops(insts):
                 f"importer: flop {iname} ({cell}) has connected pin(s) {', '.join(extra)} "
                 f"that SEQ_MODELS['{base_of(cell)}'] does not model. Dropping them would "
                 f"silently change the machine; extend the model deliberately instead.")
-        flops.append({"cell": cell, "iname": iname, "model": m,
-                      "q": conns[m["q"]], "clk": conns[m["clk"]], "conns": conns,
-                      "d": conns[m["d"]] if "d" in m else None})
+        # ⛔ C4 — THE GATE. A cell carrying an asynchronous `reset` imports only
+        # under --pin-reset. This arm is the DEFAULT path for dfrtp, and it must
+        # stay reachable: it is the behaviour every caller gets who has not asked
+        # for the restriction, and the pre-registration bars landing without it.
+        if "reset" in m and pin_reset is None:
+            gated[cell] += 1
+            continue
+        rec = {"cell": cell, "iname": iname, "model": m,
+               "q": conns[m["q"]], "clk": conns[m["clk"]], "conns": conns,
+               "d": conns[m["d"]] if "d" in m else None}
+        if "reset" in m:
+            rec["reset_net"] = conns[m["reset"][0]]
+            rec["reset_inactive"] = m["reset"][1]
+        flops.append(rec)
+    if gated:
+        listing = ", ".join(f"{c} x{n}" for c, n in sorted(gated.items()))
+        pins = sorted({SEQ_MODELS[base_of(c)]["reset"][0] for c in gated})
+        raise SystemExit(
+            f"importer: sequential cell(s) with an ASYNCHRONOUS reset: {listing}. Their "
+            f"{'/'.join(pins)} is not a next-state function of the flop's inputs — the vendor "
+            f"Liberty puts it in `clear`, a SEPARATE FIELD from `next_state`, and `next_state` "
+            f"is plain \"D\". Importing them requires --pin-reset NET, which holds the reset "
+            f"INACTIVE and restricts the datum to traces where it stays so. Refusing rather "
+            f"than importing a machine whose reset behaviour the datum cannot express. "
+            f"See docs/silicon-dfrtp-async-reset-prereg-0812.md.")
     if unmodelled:
         listing = ", ".join(f"{c} x{n}" for c, n in sorted(unmodelled.items()))
         raise SystemExit(
@@ -329,6 +391,63 @@ def find_flops(insts):
             f"STATE BIT, not a gate — add it to SEQ_MODELS only with a justified next-state "
             f"model (see the note on `dfrtp` there).")
     return flops
+
+
+def check_pinned_reset(flops, pin_reset, insts, drv, inputs_set):
+    """C1 + C2 of the pre-registration. -> (n_pinned, other_consumers).
+
+    C1 (BLOCKING) every gated flop's reset pin is on the SAME net; that net is
+       the one named by --pin-reset; and it is NOT DRIVEN by a cell, i.e. it is a
+       primary input or a constant. A derived or gated reset is not pinnable:
+       holding a WIRE inactive says nothing about the logic that drives it.
+    C2 (DISCLOSURE, never blocking) every OTHER consumer of the pinned net is
+       named. Pinning restricts the trace set, and where the net feeds real logic
+       that restriction bites something besides the flops. Measured on the dmem
+       family the count is 0 — but that is a property of THOSE artifacts, not of
+       the technique, so it is reported per-run rather than assumed."""
+    gatedf = [f for f in flops if "reset_net" in f]
+    if not gatedf:
+        raise SystemExit(
+            f"importer: --pin-reset '{pin_reset}' was given but no imported cell has an "
+            f"asynchronous reset to pin. A flag that restricts the datum must not be a no-op: "
+            f"it would advertise a restriction nothing applied.")
+
+    nets = sorted({f["reset_net"] for f in gatedf})
+    if len(nets) > 1:
+        raise SystemExit(
+            f"importer: gated flops' reset pins span {len(nets)} nets ({', '.join(nets[:4])}). "
+            f"--pin-reset holds ONE net inactive; pinning one of several would leave the others "
+            f"live and unmodelled.")
+    if nets[0] != pin_reset:
+        raise SystemExit(
+            f"importer: --pin-reset names '{pin_reset}' but every gated flop's reset pin is on "
+            f"'{nets[0]}'. Refusing rather than pinning a net the flops do not use.")
+    if pin_reset in drv:
+        cell, iname, _ = drv[pin_reset]
+        raise SystemExit(
+            f"importer: --pin-reset '{pin_reset}' is DRIVEN by {iname} ({cell}), so it is a "
+            f"derived reset, not a primary input or a constant. Holding a driven wire inactive "
+            f"asserts nothing about the logic driving it, and the restriction would be "
+            f"unverifiable. Refusing.")
+    if pin_reset in inputs_set:
+        raise SystemExit(
+            f"importer: --pin-reset '{pin_reset}' is ALSO listed in --inputs. A pinned net is "
+            f"held at a CONSTANT, so it is not an input of the resulting datum — leaving it in "
+            f"--inputs would let a theorem drive the very net the restriction fixes, which is "
+            f"precisely the trace class this datum does not model. Remove it from --inputs.")
+
+    # C2 — disclosure. Every pin, on every instance, that is NOT one of the gated
+    # flops' reset pins but sits on the pinned net.
+    other = []
+    for (cell, iname, conns) in insts:
+        for p, nm in conns.items():
+            if nm != pin_reset:
+                continue
+            m = SEQ_MODELS.get(base_of(cell))
+            if m is not None and "reset" in m and p == m["reset"][0]:
+                continue
+            other.append(f"{iname}.{p} ({cell})")
+    return len(gatedf), sorted(other)
 
 
 def all_drivers(insts):
@@ -535,8 +654,12 @@ def parse(path):
     return insts, decls, assigns, vector_ports
 
 
-def build(insts, decls, assigns, inputs_order):
-    """-> (gates, netindex) with gates a list of ('inp'|op, args...)"""
+def build(insts, decls, assigns, inputs_order, pinned=None):
+    """-> (gates, netindex) with gates a list of ('inp'|op, args...)
+
+    `pinned` maps net -> bool for nets held at a CONSTANT (see --pin-reset). The
+    binding is seeded AFTER the primary inputs so input gate indices stay
+    0..n-1, which is what keeps every unpinned datum byte-identical."""
     gates, idx = [], {}
 
     def emit(op, *args):
@@ -600,6 +723,19 @@ def build(insts, decls, assigns, inputs_order):
     def net(nm):
         if nm in idx:
             return idx[nm]
+        # A PINNED net binds to its constant ON FIRST READ, not eagerly.
+        # Seeding it up front emitted a `.const` even when nothing read the net —
+        # and when the reset feeds ONLY reset pins (which the flop treatment never
+        # reads) that constant is DEAD, yet it still inflates the gate count and
+        # shifts every later index. Pre-registered check C3 caught exactly that:
+        # 8 gates against the dfxtp arm's 7. Lazily, a pinned reset with no other
+        # consumer yields a datum GATE-FOR-GATE identical to the dfxtp reading —
+        # which is what the vendor ff-group identity predicts, and the whole
+        # substantive claim M1 rests on. Where the net does feed logic (the case
+        # C2 discloses), the constant is emitted and genuinely used.
+        if nm in (pinned or {}):
+            idx[nm] = emit("const", bool(pinned[nm]))
+            return idx[nm]
         if nm.startswith("1'b"):
             idx[nm] = emit("const", nm.endswith("1"))
             return idx[nm]
@@ -635,14 +771,33 @@ def build(insts, decls, assigns, inputs_order):
 
 
 def to_lean(gates, ns, name, outs, ninputs, src, state=(), ndesign_in=None,
-            ndesign_out=None, clockinfo=None, cuts=()):
+            ndesign_out=None, clockinfo=None, cuts=(), pinned=None):
     L = [f"-- GENERATED by SaltWorks/Silicon/Importer/import_netlist.py",
          f"-- source: {os.path.basename(src)}",
          f"-- DO NOT EDIT. The generator is UNTRUSTED; this datum is checked",
          f"-- per-instance by the importer's round-trip census, and its cell",
-         f"-- expansions are proved against Liberty in SaltWorks.Silicon.Cells.Sky130.",
-         "import SaltWorks.Silicon.Equiv.BitSliced", "",
-         f"namespace {ns}", ""]
+         f"-- expansions are proved against Liberty in SaltWorks.Silicon.Cells.Sky130."]
+    # ⛔ THE SCOPE MARKER RIDES THE DATUM (helm ruling 8/12 18:28, condition 2).
+    # It is emitted FIRST, in the header a reader cannot scroll past, because the
+    # restriction is a property of what this datum MEANS — not a footnote about
+    # how it was made. The ruling extends it further than this file can reach:
+    # every certificate that restates a theorem over this datum must carry the
+    # restriction too, and a cert that drops it is a defect of the cert layer.
+    if pinned:
+        for nm, val in sorted(pinned.items()):
+            L += ["--",
+                  f"-- ⚠ RESTRICTED DATUM — '{nm}' IS PINNED TO {int(val)}.",
+                  f"-- This models the design ONLY on traces where '{nm}' is held {int(val)}",
+                  f"-- THROUGHOUT. Asynchronously-resettable flops were imported under that",
+                  f"-- restriction: their vendor `clear` field is unasserted at {int(val)}, so",
+                  f"-- the Liberty ff group reduces to dfxtp's field for field. It says NOTHING",
+                  f"-- about the deassertion seam — the one cycle where the async path and the",
+                  f"-- clock interact. A THEOREM PROVED ON THIS DATUM MUST NOT BE CITED AS",
+                  f"-- COVERING RESET OR BRING-UP, and any certificate restating such a theorem",
+                  f"-- must carry this restriction with it.",
+                  f"-- docs/silicon-dfrtp-async-reset-prereg-0812.md"]
+    L += ["import SaltWorks.Silicon.Equiv.BitSliced", "",
+          f"namespace {ns}", ""]
     body = []
     for (op, args) in gates:
         if op == "inp":
@@ -783,6 +938,14 @@ ap.add_argument("--cut", default=None, metavar="REGEX",
                      "(the logic driving it) and a leaf (an input for its consumers). "
                      "Same semantics as Sim/cones.py --cut. Use it at `(* keep *)` "
                      "boundaries that survived the flow.")
+ap.add_argument("--pin-reset", default=None, metavar="NET",
+                help="hold NET at the INACTIVE value declared by the cell model, making "
+                     "asynchronously-resettable flops (dfrtp) importable. The datum is then "
+                     "RESTRICTED to traces where that net stays inactive throughout, and says "
+                     "nothing about the deassertion seam; a theorem proved on it must not be "
+                     "cited as covering reset or bring-up. The inactive value comes from "
+                     "SEQ_MODELS, never from the caller. See "
+                     "docs/silicon-dfrtp-async-reset-prereg-0812.md")
 a = ap.parse_args()
 
 insts, decls, assigns, vports = parse(a.netlist)
@@ -793,12 +956,31 @@ outs_named = [x for x in a.outputs.split(",") if x]
 # Discover every flop, verify they share one latching event, then cut them:
 # Q -> appended to the primary inputs (leaf), D -> appended to the outputs
 # (root), paired by position and ordered by Q net name.
-flops = find_flops(insts)
+flops = find_flops(insts, pin_reset=a.pin_reset)
 clockinfo = None
 auto = []
+pinned = {}
+reset_others = []
+# Guarded BEFORE the treatment, and deliberately not as an `elif` on the block
+# below: an `elif` here silently re-parents the whole backward-compatibility body
+# that follows into its own branch, leaving `auto` empty and every flop uncut.
+# (It did exactly that when first written; the fixture caught it in one run.)
+if not flops and a.pin_reset:
+    raise SystemExit(
+        f"importer: --pin-reset '{a.pin_reset}' was given but this netlist has no flops at "
+        f"all. A flag that restricts the datum must not be a silent no-op.")
 if flops:
     drv_all = all_drivers(insts)
     clockinfo = check_clock_domain(flops, drv_all, assigns, set(ins))
+    if a.pin_reset:
+        # C1 (blocking) + C2 (disclosure) of the pre-registration.
+        n_pinned, reset_others = check_pinned_reset(
+            flops, a.pin_reset, insts, drv_all, set(ins))
+        inactive = {f["reset_inactive"] for f in flops if "reset_net" in f}
+        if len(inactive) != 1:
+            raise SystemExit(f"importer: gated flops declare {len(inactive)} different "
+                             f"inactive reset values; they cannot share one pin.")
+        pinned[a.pin_reset] = bool(inactive.pop())
 
     # BACKWARD COMPATIBILITY, and the reason byte-identity is provable: a flop
     # the caller has ALREADY cut by hand — Q listed in --inputs and D in
@@ -866,7 +1048,7 @@ if a.cut:
 ins_all = ins_all + cuts
 outs_all = outs_all + cuts
 
-gates, net, root_value, emit = build(insts, decls, assigns, ins_all)
+gates, net, root_value, emit = build(insts, decls, assigns, ins_all, pinned=pinned)
 
 
 def state_root(f):
@@ -902,7 +1084,7 @@ logic = [i for i in insts
 phys = len(insts) - len(logic)
 open(a.out, "w").write(to_lean(gates, a.ns, a.name, out_idx, len(ins_all), a.netlist,
                                state=auto, ndesign_in=len(ins), ndesign_out=len(outs_named),
-                               clockinfo=clockinfo, cuts=cuts))
+                               clockinfo=clockinfo, cuts=cuts, pinned=pinned))
 
 print(f"importer: {a.netlist}")
 print(f"  instances     : {len(insts)}  ({len(logic)} logic, {phys} physical/sequential)")
@@ -919,6 +1101,60 @@ if flops:
     print(f"  flops cut     : {len(flops)}  ({len(auto)} by the treatment, "
           f"{len(flops) - len(auto)} listed by the caller)")
     print(f"  clock domain  : one — root '{root}', parity {parity}, via {nleaf} CLK net(s)")
+
+if a.pin_reset:
+    ngated = len([f for f in flops if "reset_net" in f])
+    val = int(pinned[a.pin_reset])
+    print(f"  ⚠ RESTRICTED  : '{a.pin_reset}' PINNED to {val} — {ngated} async-reset flop(s) "
+          f"imported under it")
+    print(f"                  this datum models ONLY traces with '{a.pin_reset}' ≡ {val}; it "
+          f"says NOTHING about the deassertion seam")
+    # C2 — DISCLOSURE, never blocking. Zero on the dmem family; a non-zero count
+    # is not a failure, it is the restriction biting logic besides the flops, and
+    # it must be visible in the run rather than inferred from the netlist.
+    if reset_others:
+        print(f"  ⚠ pin affects : {len(reset_others)} OTHER consumer(s) of '{a.pin_reset}', "
+              f"now reading the constant:")
+        for o in reset_others[:8]:
+            print(f"                    {o}")
+        if len(reset_others) > 8:
+            print(f"                    … and {len(reset_others) - 8} more")
+    else:
+        print(f"  pin fan-out   : 0 other consumers — '{a.pin_reset}' feeds only reset pins")
+
+# C6 — CONSERVATION, against an INDEPENDENT count.
+#
+# ⚠️ The first version of this check compared len(ins)+len(auto)+len(cuts) against
+# len(ins_all) — and `ins_all` IS that sum, so the comparison was an identity that
+# could not fail in any run. It read exactly like a check. The cure is the one
+# `cones.py` already demonstrates for the cone census: measure the same quantity a
+# SECOND way that shares no code with the first. Here the second way is a raw
+# regex over the netlist TEXT, which never touches the tokenizer or the instance
+# list, so a parser that silently dropped a sequential instance diverges here.
+#
+# ⚠️ KNOWN SENSITIVITY, recorded rather than hidden: the scan reads RAW text, so a
+# COMMENTED-OUT sequential instance counts here and not in the parse, and the run
+# fails. That is a FALSE POSITIVE — and it is the direction this file chooses on
+# purpose. Refusing on a commented-out flop is noisy; missing a dropped one loses
+# a state bit silently, and every doctrine in this importer prefers the noise.
+# (It is also how the check was SHOWN to go red: planting a commented flop turns
+# a green run into `text scan 3, parsed 2 ⛔ MISMATCH`, exit 1. A check never
+# demonstrated failing has not been shown to discriminate.)
+seq_in_text = len(re.findall(
+    r"sky130_fd_sc_hd__(?:" + "|".join(SEQ_PREFIX) + r")\w*\s+\S+\s*\(",
+    open(a.netlist).read()))
+if flops or seq_in_text:
+    dup_q = len(flops) - len({f["q"] for f in flops})
+    ok6 = (seq_in_text == len(flops) and dup_q == 0)
+    print(f"  conservation  : sequential instances — text scan {seq_in_text}, parsed "
+          f"{len(flops)}, cut {len(auto)} + {len(flops) - len(auto)} caller-listed"
+          + (f", DUPLICATE Q x{dup_q}" if dup_q else "")
+          + f"  {'OK' if ok6 else '⛔ MISMATCH'}")
+    if not ok6:
+        raise SystemExit(
+            "importer: state-bit conservation FAILED — an independent text scan of the "
+            "netlist and the parsed instance list disagree on how many sequential cells "
+            "there are. Skipping a flop loses a STATE BIT, not a gate.")
 print(f"  wrote         : {a.out}")
 
 # --- THE READBACK CHECK ----------------------------------------------------
