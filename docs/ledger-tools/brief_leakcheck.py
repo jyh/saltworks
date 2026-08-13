@@ -158,11 +158,42 @@ def main():
                     default=[os.path.join(REPO,
                              "docs/compiler-ledger-seed-audit-0812.md")],
                     help="result document(s) to harvest ratio tokens from")
+    ap.add_argument("--show-tokens", action="store_true",
+                    help="NAME the offending tokens. DOING SO SPENDS A CANDIDATE "
+                         "READER -- verdict-only is the DEFAULT for that reason.")
+    ap.add_argument("--verdict-only", action="store_true",
+                    help="accepted and redundant: verdict-only is now the DEFAULT")
     args = ap.parse_args()
 
     if not os.path.isfile(args.brief):
         print("brief not found: %s" % args.brief, file=sys.stderr)
         return 2
+
+    # ---- CHRONOLOGY PRE-CHECK (math seat's method, 2026-08-13) -----------------
+    # A file whose last write PREDATES the birth of the seed and the results
+    # document CANNOT carry a value derived from them. Math cleared SIX of TEN
+    # fleet flags this way WITHOUT READING A TOKEN, measuring a 60% false-positive
+    # rate over the raw flag set. Mechanised here so the argument is not re-made by
+    # hand at midnight: NO FLAG FROM THIS TOOL IS A FINDING UNTIL ITS FILE'S MTIME
+    # HAS BEEN CHECKED.
+    src_m = [os.path.getmtime(q) for q in ([args.seed] + list(args.results))
+             if os.path.isfile(q)]
+    if src_m:
+        born = min(src_m)
+        if os.path.getmtime(args.brief) < born:
+            import time as _t
+            fmt = lambda s: _t.strftime("%Y-%m-%d %H:%M", _t.localtime(s))
+            print("=" * 76)
+            print("BRIEF LEAK-CHECK -- does the recruitment carry the result?")
+            print("=" * 76)
+            print("  brief            %s" % args.brief)
+            print("✅ CLEARED BY CHRONOLOGY -- NOT SCANNED, NO TOKEN READ.")
+            print("   file last written  %s" % fmt(os.path.getmtime(args.brief)))
+            print("   sources born       %s" % fmt(born))
+            print("   A file written before its sources existed cannot carry a value")
+            print("   derived from them. This clearance is SAFE FOR A CANDIDATE to run")
+            print("   AND to read: it names no token and reads no content.")
+            return 0
 
     tokens = {}
     advisory_toks = []
@@ -208,11 +239,21 @@ def main():
             print("      L%-4d %-8s %s" % (i, tok, line))
     print()
     if hits:
-        print("⛔ LEAK -- %d occurrence(s). This brief DISQUALIFIES its readers:"
+        print("⛔ LEAK -- %d occurrence(s). This brief DISQUALIFIES its readers."
               % len(hits))
-        for i, tok, why, line in hits:
-            print("    L%-4d %-8s (%s)" % (i, tok, why))
-            print("          %s" % line)
+        if args.show_tokens:
+            print("   ⛔ TOKENS NAMED BELOW -- READING FURTHER SPENDS YOU:")
+            for i, tok, why, line in hits:
+                print("    L%-4d %-8s (%s)" % (i, tok, why))
+                print("          %s" % line)
+        else:
+            print("   Lines: %s" % ", ".join("L%d" % i for i, _, _, _ in hits[:12]))
+            print("   ⛔ TOKENS NOT NAMED -- THIS OUTPUT IS SAFE FOR A CANDIDATE TO READ.")
+            print("      A LEAK-CHECKER NAMES THE OFFENDING TOKEN WHEN IT FAILS, so on a")
+            print("      real hit the gate would spend the very reader running it to")
+            print("      prove they are clean (math seat, 2026-08-13: they masked every")
+            print("      digit of this tool's stdout by hand to stay eligible).")
+            print("      Re-run with --show-tokens ONLY IF ALREADY CONTAMINATED.")
         print()
         print("   Repair the brief. Do not explain the leak in the brief.")
         return 1
