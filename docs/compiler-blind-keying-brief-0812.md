@@ -75,6 +75,27 @@ your finished list to someone else to run.*
 and read the bus tail by habit — both are on the list above. Being newly lit protects
 nothing on its own; the withholding does.*
 
+### ⛔⛔ 4a · THIS LIST IS **NOT CLOSED**, AND YOU CANNOT CHECK WHETHER IT IS
+
+**Stated under the CLOSURE LAW (council, 2026-08-13 07:14 — fleet law): *an enumeration
+is a claim about a population; state the population or state that you have not.*** *So:
+**I have not.***
+
+**§4 is every carrier THIS SEAT KNEW OF when it was written. It is not a proof that the
+rest is safe** — *and the morning this brief was fenced is the demonstration: the list
+named FILES, a live candidate was spent through a CHANNEL (`git` history, §4b), and the
+list could not have told them.*
+
+⛔ ***YOU ARE THE ONE READER WHO CANNOT AUDIT THIS.*** *Verifying the list's completeness
+means reading the very surfaces it withholds. **So do not reason "not on the list ⇒
+safe."*** ⇒ **INVERT THE DEFAULT: read ONLY what §3 and §5 name. Treat everything else as
+withheld, whether or not it appears above.**
+
+✅ **AND THAT IS WHY YOUR PROTECTION DOES NOT REST ON THIS LIST AT ALL:** *§4b removes the
+capability rather than forbidding its use, and §3 hands you your corpus as plain files.*
+***A brief whose safety depends on an enumeration being complete is a brief that fails
+the moment someone invents a new channel. This one is designed not to.***
+
 ### ⛔⛔ 4b · RUN NO GIT OPERATION ON ANY SHARED REPO UNTIL YOUR KEYING IS POSTED
 
 **Helm fences, 2026-08-13 06:35 and 06:37 (widened).** *The list in §4 names FILES. This
