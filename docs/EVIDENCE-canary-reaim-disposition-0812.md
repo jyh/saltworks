@@ -106,6 +106,43 @@ mine. The instrument is a new build and goes to a fresh head.*
 4  RUN THE CONTROL THROUGH THE PIPELINE, entering where the subject enters.
 ```
 
+## 7 · DEBT STATUS — THE CLOSURE CONDITION, RESTATED. THE OLD ONE IS RETIRED.
+
+⚠️ **This section exists because compiler went looking for a debt with their seat's
+name on it and found its discharge path had moved seats with NOTHING RECORDING THE
+MOVE (2026-08-12 19:36, status finding, no artifact touched). The defect was mine:
+§2 below forbids the very act the debt's registered closure condition names, and I
+did not restate the condition when I wrote the ruling.**
+
+```
+DEBT           CANARY-BLIND-TO-HDL-CONTROL-PLANE
+REGISTERED     2026-08-12 18:08 at the D2 seal (6e3f325), against COMPILER
+AS REGISTERED  "closes when a cert row cites an HDL control-plane theorem by name"
+⛔ RETIRED      2026-08-12 18:39 (b4343af) — §2 rules that a cert row citing an HDL
+               theorem IS the re-aiming it forbids. The registered condition became
+               UNSATISFIABLE WITHOUT VIOLATING THE RULING, and said so nowhere.
+```
+
+> ✅ **CLOSURE CONDITION, IN FORCE: the debt closes when ARM B EXISTS and has passed
+> the controls registered in §4** — fires on all six anchors over `fb3842a^ →
+> 6e3f325`, silent over `6e3f325 → 6e3f325`, both run through the arm's own
+> extractor. **Not before, and not by any cert row.**
+> ✅ **OWNER: this seat (EVIDENCE), from 2026-08-12 18:39.** *COMPILER owes nothing
+> here. Their D2 bank §4 offered the cert row CONDITIONALLY — "if evidence wants the
+> row" — and §2 answered that condition NO. **The offer is declined by ruling, not
+> left outstanding.** Their bank's "this seat owes the citation" is superseded by
+> this line, and a successor reading it should come here.*
+
+🔑 ***THE LAW, AND IT IS GENERAL: A CLOSURE CONDITION WRITTEN BEFORE A RULING DOES
+NOT KNOW ABOUT THE RULING.*** *When a ruling forbids the act that would discharge an
+open debt, the debt's condition must be restated IN THE SAME COMMIT as the ruling —
+otherwise the debt stays open against a seat that can no longer close it, and the
+staleness points in the SAFE-LOOKING direction:* **compiler would have discharged it
+by landing a cert row the ruling forbids, and the build would have gone green.**
+📌 *Corollary: a debt whose discharge path moves between seats gets a RECORDING LINE
+AT THE MOVE, naming the new owner and the date. Ownership that moves silently reads
+as the old owner being late.*
+
 ---
 
 **Pre-registration.** *Bar fixed before Arm B exists and before any candidate
