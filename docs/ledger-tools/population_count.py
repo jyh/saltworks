@@ -17,22 +17,29 @@ R2 = re.compile(r'^\[\d{1,2}/\d{1,2} \d{2}:\d{2}(:\d{2})?')
 
 lines = open(BUS, encoding='utf-8', errors='replace').read().split('\n')
 
-posts, rej_r3, rej_r4, fenced_hits = [], [], [], []
-depth = 0                                    # R4: odd number of ``` markers => inside a fence
-for i, L in enumerate(lines):
-    inside = (depth % 2) == 1
-    if L.lstrip().startswith('```'):
-        depth += 1
-    if not L.startswith('['):                # R1
-        continue
-    if not R2.match(L):                      # R2
-        continue
-    blank_before = (i > 0 and lines[i-1].strip() == '')
-    if not blank_before:                     # R3
-        rej_r3.append((i+1, L)); continue
-    if inside:                               # R4
+# R4-v2: fence depth RESETS at each CONFIRMED post start. A fence cannot span posts,
+# so one post's unbalanced fence must not invert R4 for every post after it.
+cand = [(i, L) for i, L in enumerate(lines)
+        if L.startswith('[') and R2.match(L) and i > 0 and lines[i-1].strip() == '']
+rej_r3 = [(i+1, L) for i, L in enumerate(lines)
+          if L.startswith('[') and R2.match(L) and not (i > 0 and lines[i-1].strip() == '')]
+posts, rej_r4, fenced_hits, last = [], [], [], None
+for i, L in cand:
+    if last is None:
+        posts.append((i+1, L)); last = i; continue
+    if sum(1 for x in lines[last:i] if x.lstrip().startswith('```')) % 2:
         rej_r4.append((i+1, L)); fenced_hits.append((i+1, L)); continue
-    posts.append((i+1, L))
+    posts.append((i+1, L)); last = i
+
+# C3-v2: fence BALANCE per post. THIS ONE CAN FAIL. An odd count means that post leaves a
+# fence open, which under GLOBAL depth tracking inverts R4 for everything downstream.
+unbalanced = []
+_starts = [i for i, _ in cand]
+for j, s0 in enumerate(_starts):
+    e0 = _starts[j+1] if j+1 < len(_starts) else len(lines)
+    n = sum(1 for x in lines[s0:e0] if x.lstrip().startswith('```'))
+    if n % 2:
+        unbalanced.append((s0+1, n))
 
 def in_window(rows, n=DOC_WINDOW): return [r for r in rows if r[0] <= n]
 
@@ -66,14 +73,17 @@ if rej_r3:
 else:
     print('  C2 NEGATIVE  ⛔ NO FIXTURE FOUND — control cannot fire; count is UNVERIFIED')
 
-# C3 FENCE: residual of R3. Nonzero => R3 leaks and POSTS is an UPPER BOUND.
-print(f'  C3 FENCE     matches inside fenced blocks    : {len(fenced_hits)}')
-if fenced_hits:
-    print('               ⚠️ NONZERO ⇒ R3 leaks; R4 caught these. Sample:')
-    for ln, L in fenced_hits[:3]:
-        print(f'                 L{ln}: {L[:64]}')
+# C3-v2 FENCE BALANCE — CAN FAIL. (C3-v1 was VOID: "matches inside a fence AFTER R4",
+# which is 0 by construction because R4 is what removes them.)
+print(f'  C3-v2 BALANCE posts with an ODD fence count  : {len(unbalanced)}   (expected 0)')
+if unbalanced:
+    print('               ⛔ FIRES — under GLOBAL fence tracking each of these inverts R4')
+    print('               for every post downstream. R4-v2 (per-post reset) is immune.')
+    for ln, n in unbalanced[:3]:
+        print(f'                 L{ln}  fences={n}')
 else:
-    print('               (zero: no fenced candidate survived R3 to need R4)')
+    print('               ✅ no post leaves a fence open')
+print(f'  C4 RESIDUAL  candidates caught by R4         : {len(fenced_hits)}')
 
 # C5 STABILITY: recompute the frozen prefix; a moving invariant means the population is wrong
 again = len(in_window(posts))
