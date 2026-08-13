@@ -63,5 +63,12 @@
  "declined": {
   "provenance_decomposition": "NOT PUBLISHED. Three successive classifiers gave three different splits; each was tuned to one keyer's phrasing and mislabelled the other's (compiler writes 'verified at the bytes', evidence writes 'at the bytes...'). That is key-inheritance (rider 5) inside this compare. A sound version needs a classifier derived from neither keying."
  },
- "not_examined": "whether each evidence incident satisfies \u00a73 eligibility (lived or verified at the bytes inside the window) \u2014 not computable from the files alone"
+ "not_examined": "whether each evidence incident satisfies \u00a73 eligibility (lived or verified at the bytes inside the window) \u2014 not computable from the files alone",
+ "addendum_0813_1058": {
+  "status": "the delivered numbers above are UNCHANGED; this addendum records what the adjudication established afterwards",
+  "seven_is_a_floor": "evidence recovered FIVE further matches BY READING that my 0.20 threshold missed \u2014 four threshold artefacts (die-rtl-scope-mix, citecheck-context-bleed, citecheck-backticks-only, false-eviction-claim, all present in their 57 under other names) plus a locator fold. Read-recovered total: 12 evidence rows.",
+  "why_the_floor_was_predictable": "a similarity threshold trades recall for precision by construction. 0.20 sat clear of a 0.11 noise max, which bought confidence in every pair reported and guaranteed misses below the cut. The artefact should be read as 'at least 7', never as '7'.",
+  "credit": "the five recoveries are evidence's, found by READING the rows rather than re-running a metric",
+  "note_on_a_misreading_of_mine": "I first read a bus fragment as an accusation that MY matcher mis-paired a row. It was not: the seat was reporting a defect in THEIR OWN rebuilt metric, explicitly against their own instrument. Recorded because the fragment-vs-sentence error is the same class this compare's other findings are about."
+ }
 }
