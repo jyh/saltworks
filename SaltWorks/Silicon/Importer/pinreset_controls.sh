@@ -76,7 +76,14 @@ row "NCy  --pin-reset on a flopless netlist"     pinreset_dfxtp.v RED  "clk,d0,d
 # ASSERTED rather than excluded.
 #
 #   A1  gate-for-gate identity of the emitted LOGIC
-#   A2  the file diff EQUALS EXACTLY the mandated scope marker, nothing else
+#   A2′ the file diff is EXACTLY the mandated scope marker PLUS the flop
+#       table's cell-name column, each asserted in its REQUIRED direction
+#       — including that the two arms' columns DIFFER (the independent
+#       variable). DISCHARGING since the helm's 08/12 19:07:52 ruling.
+#   A2  the older form: diff == marker and nothing else. SUPERSEDED and
+#       now INFORMATIONAL — it is red by design, because it counts the
+#       required cell-name difference as a residual. An exception list
+#       was the wrong SHAPE; A2′ characterises the whole diff positively.
 #
 # ⭐ BOTH ARMS ARE GENERATED FROM ONE BASE NETLIST BY THE REGISTERED METHOD (a
 # textual rewrite), into THE SAME BASENAME in two directories. The predecessor's
@@ -85,7 +92,7 @@ row "NCy  --pin-reset on a flopless netlist"     pinreset_dfxtp.v RED  "clk,d0,d
 # put its files, not a property of the datum, and (b) let the comparison arm
 # drift from the base. Verified at this landing: the committed
 # `pinreset_dfxtp.v` IS byte-identical to the rewrite. It is kept for row NCy.
-echo "pinreset controls: C3 as amended (A1 logic identity · A2 diff == scope marker)"
+echo "pinreset controls: C3 under A2′ (A1 logic identity · A2′ marker + required cell-name column)"
 
 GOLD=$FX/pinreset_scope_marker.txt
 STRIP=docs/silicon-tools/strip_lean_comments.awk
@@ -114,6 +121,35 @@ a2() { # diff must be EXACTLY the golden marker: no removals, additions == golde
   grep '^> ' "$TMP/d" | sed 's/^> //' >"$TMP/add"
   [ ! -s "$TMP/rm" ] || return 1
   cmp -s "$TMP/add" "$GOLD"
+}
+
+cellcol() { grep -E '^\* `' "$1" | sed 's/.*, \(df[rx]tp_1\))/\1/'; }
+
+# a2p  — A2′, ADOPTED by the helm 08/12 19:07:52 and re-confirmed 19:15:19.
+# Characterises the ENTIRE diff positively: the mandated scope marker PLUS the
+# flop table's cell-name column, each asserted in its REQUIRED DIRECTION, nothing
+# tolerated. The column clause is the experiment's INDEPENDENT VARIABLE and is
+# asserted STRUCTURALLY (every pinned row names dfrtp_1, every rewrite row names
+# dfxtp_1) — never as "pc != xc", which any difference would satisfy, including a
+# wrong one. ⭐ THE VACUITY CLAUSE: if the two arms' columns MATCH, the arms were
+# the same input and the comparison reports nothing — that is a RED, not a pass.
+# ⛔ EXTRACTED INTO A FUNCTION ON PURPOSE: as straight-line code it could not be
+# invoked on a planted input, so it could not be controlled. A criterion that
+# cannot be handed a fixture cannot be shown to fail.
+a2p() { # $1 = pinned datum, $2 = rewrite datum
+  local npc nxc
+  cat "$GOLD" >"$TMP/gold2"
+  grep -E '^\* `' "$1" >>"$TMP/gold2"
+  diff "$2" "$1" >"$TMP/d2"
+  grep '^< ' "$TMP/d2" | sed 's/^< //' >"$TMP/rm2"
+  grep '^> ' "$TMP/d2" | sed 's/^> //' >"$TMP/add2"
+  grep -E '^\* `' "$2" >"$TMP/xcells"
+  cellcol "$1" >"$TMP/pc"; cellcol "$2" >"$TMP/xc"
+  npc=$(grep -c . "$TMP/pc"); nxc=$(grep -c . "$TMP/xc")
+  [ "$npc" -gt 0 ] && [ "$npc" -eq "$nxc" ] \
+    && [ "$(grep -c '^dfrtp_1$' "$TMP/pc")" -eq "$npc" ] \
+    && [ "$(grep -c '^dfxtp_1$' "$TMP/xc")" -eq "$nxc" ] \
+    && cmp -s "$TMP/rm2" "$TMP/xcells" && cmp -s "$TMP/add2" "$TMP/gold2"
 }
 
 # ⛔ A MISSING FIXTURE IS A REFUSAL, NEVER A PASS. An earlier draft of this block
@@ -163,42 +199,35 @@ else
         | head -8 | sed 's/^/       /'
       fail=1
     fi
+    # --- C3.A2, the SUPERSEDED criterion. ⓘ INFORMATIONAL as of the helm's
+    # 08/12 19:07:52 ruling: it does not touch `fail`. It is RED BY DESIGN and
+    # always will be — the flop table's cell-name column is the experiment's
+    # INDEPENDENT VARIABLE, and A2 counts that required difference as a residual.
+    # Kept, not deleted, because its red is the EVIDENCE for the amendment: an
+    # exception list was the wrong SHAPE, which is what A2′ replaces.
     if a2 "$TMP/p.lean" "$TMP/x.lean"; then
-      echo "  ✅ C3.A2 file diff is EXACTLY the mandated scope marker"
+      echo "  ⓘ  C3.A2 (SUPERSEDED, non-discharging) GREEN — diff is exactly the marker"
     else
-      echo "  ⛔ C3.A2 RED — the diff carries a residual beyond the scope marker."
-      echo "     PRINTING THE OBJECT BESIDE THE VERDICT (evidence's law, 8/12):"
-      [ -s "$TMP/rm" ] && { echo "     removed (must be none):"; sed 's/^/       /' "$TMP/rm"; }
-      echo "     added vs golden:"; diff "$GOLD" "$TMP/add" | sed 's/^/       /'
-      fail=1
+      echo "  ⓘ  C3.A2 (SUPERSEDED, non-discharging) RED as expected — the diff carries"
+      echo "      the cell-name column, which A2′ asserts positively instead of tolerating."
+      [ -s "$TMP/rm" ] && { echo "      removed (must be none):"; sed 's/^/        /' "$TMP/rm"; }
     fi
-    # --- A2′, the SECOND amendment PROPOSED to the helm in RESULTS ADDENDUM A.
-    # ⛔ INFORMATIONAL. It does not discharge C3.A2 and does not touch `fail`.
-    # Reported because a proposal carrying a predicted verdict and no measurement
-    # is advice, and advice travels unchecked. A2′ = marker + the flop table's
-    # cell-name column, WITH that column REQUIRED to differ (identical arms mean
-    # the treatment never applied).
-    cellcol() { grep -E '^\* `' "$1" | sed 's/.*, \(df[rx]tp_1\))/\1/'; }
-    cat "$GOLD" >"$TMP/gold2"
-    grep -E '^\* `' "$TMP/p.lean" >>"$TMP/gold2"
-    diff "$TMP/x.lean" "$TMP/p.lean" >"$TMP/d2"
-    grep '^< ' "$TMP/d2" | sed 's/^< //' >"$TMP/rm2"
-    grep '^> ' "$TMP/d2" | sed 's/^> //' >"$TMP/add2"
-    grep -E '^\* `' "$TMP/x.lean" >"$TMP/xcells"
-    cellcol "$TMP/p.lean" >"$TMP/pc"; cellcol "$TMP/x.lean" >"$TMP/xc"
-    # the column clause is asserted STRUCTURALLY (every pinned row names dfrtp_1,
-    # every rewrite row names dfxtp_1) rather than as "pc != xc", which would be
-    # satisfied by any difference at all — including a wrong one.
-    npc=$(grep -c . "$TMP/pc"); nxc=$(grep -c . "$TMP/xc")
-    if [ "$npc" -gt 0 ] && [ "$npc" -eq "$nxc" ] \
-       && [ "$(grep -c '^dfrtp_1$' "$TMP/pc")" -eq "$npc" ] \
-       && [ "$(grep -c '^dfxtp_1$' "$TMP/xc")" -eq "$nxc" ] \
-       && cmp -s "$TMP/rm2" "$TMP/xcells" && cmp -s "$TMP/add2" "$TMP/gold2"; then
-      echo "  ⓘ  C3.A2′ (PROPOSED, non-discharging) would be GREEN — measured, not predicted"
+    # --- C3.A2′ — DISCHARGING. Adopted by the helm 08/12 19:07:52, re-confirmed
+    # 19:15:19, released to this seat 08/13 15:01:02. This is the criterion the
+    # bar now closes on. Evidence prints IMMEDIATELY, before any control runs, so
+    # a later control invocation cannot clobber the scratch it reads (risk R1 of
+    # docs/silicon-a2prime-promotion-prereg-0813.txt).
+    if a2p "$TMP/p.lean" "$TMP/x.lean"; then
+      echo "  ✅ C3.A2′ diff is EXACTLY the marker PLUS the required cell-name column"
     else
-      echo "  ⓘ  C3.A2′ (PROPOSED, non-discharging) would be RED — measured:"
-      diff "$TMP/gold2" "$TMP/add2" | sed 's/^/       /'
-      cmp -s "$TMP/pc" "$TMP/xc" && echo "       cell-name column IDENTICAL — arms not distinct"
+      echo "  ⛔ C3.A2′ RED — the positive characterisation of the diff does not hold."
+      echo "     PRINTING THE OBJECT BESIDE THE VERDICT (evidence's law, 8/12):"
+      [ -s "$TMP/rm2" ] && { echo "     removed vs the rewrite arm's flop rows:";
+                             diff "$TMP/xcells" "$TMP/rm2" | sed 's/^/       /'; }
+      echo "     added vs marker+column:"; diff "$TMP/gold2" "$TMP/add2" | sed 's/^/       /'
+      cmp -s "$TMP/pc" "$TMP/xc" && echo "     ⛔ cell-name column IDENTICAL — THE ARMS ARE NOT DISTINCT,"
+      cmp -s "$TMP/pc" "$TMP/xc" && echo "        so this comparison reports that the treatment never applied."
+      fail=1
     fi
 
     # --- the controls for the amended check. A1 and A2 must each be SHOWN able
@@ -210,21 +239,42 @@ else
       echo "  ✗ NC3a A1 stayed GREEN on a perturbed gate"; fail=1
     else echo "  ✅ NC3a A1 goes RED on a perturbed gate"; fi
 
+    # ⛔ NC3b/NC3c ARE RE-POINTED FROM a2 TO a2p AT THIS LANDING. A2 no longer
+    # discharges, so a control that still tested it would be testing a MUTE row:
+    # the promoted criterion would ship with no negative control at all. A control
+    # must be aimed at the check that actually gates.
     sed 's/^-- DO NOT EDIT\..*/-- DO NOT EDIT. tampered/' "$TMP/p.lean" >"$TMP/p_cmt.lean"
     if cmp -s "$TMP/p.lean" "$TMP/p_cmt.lean"; then
       echo "  ⛔ NC3b plant did not apply — control VOID"; fail=1
-    elif a2 "$TMP/p_cmt.lean" "$TMP/x.lean"; then
-      echo "  ✗ NC3b A2 stayed GREEN on an extra non-marker difference"; fail=1
-    else echo "  ✅ NC3b A2 goes RED on an extra non-marker difference"; fi
+    elif a2p "$TMP/p_cmt.lean" "$TMP/x.lean"; then
+      echo "  ✗ NC3b A2′ stayed GREEN on an extra non-marker difference"; fail=1
+    else echo "  ✅ NC3b A2′ goes RED on an extra non-marker difference"; fi
 
     # NC3c is the direct test of helm condition (2): the marker must RIDE.
     grep -v 'RESTRICTED DATUM\|traces where\|THROUGHOUT\|vendor .clear\|Liberty ff group\|deassertion seam\|clock interact\|COVERING RESET\|must carry this\|dfrtp-async-reset-prereg' \
         "$TMP/p.lean" >"$TMP/p_nomark.lean"
     if cmp -s "$TMP/p.lean" "$TMP/p_nomark.lean"; then
       echo "  ⛔ NC3c plant did not apply — control VOID"; fail=1
-    elif a2 "$TMP/p_nomark.lean" "$TMP/x.lean"; then
-      echo "  ✗ NC3c A2 stayed GREEN with the mandated marker stripped"; fail=1
-    else echo "  ✅ NC3c A2 goes RED when the mandated marker is absent"; fi
+    elif a2p "$TMP/p_nomark.lean" "$TMP/x.lean"; then
+      echo "  ✗ NC3c A2′ stayed GREEN with the mandated marker stripped"; fail=1
+    else echo "  ✅ NC3c A2′ goes RED when the mandated marker is absent"; fi
+
+    # --- NC3d  ⭐ THE VACUITY CONTROL. NEW AT THIS LANDING, AND IT HAD NEVER
+    # EXISTED. A2′'s column clause asserts THE ARMS ARE DISTINCT; nothing had
+    # ever shown that clause could fail, so its green was untested. The helm
+    # called the vacuity sentence the night's deepest — "an equivalence check
+    # that passes when the independent variable vanishes is not reporting
+    # equivalence, it is reporting that the treatment never applied." A criterion
+    # carrying that sentence with no control is the sentence unexercised.
+    # The plant makes the PINNED arm name dfxtp_1, so both columns match.
+    sed 's/, dfrtp_1)/, dfxtp_1)/' "$TMP/p.lean" >"$TMP/p_vac.lean"
+    if cmp -s "$TMP/p.lean" "$TMP/p_vac.lean"; then
+      echo "  ⛔ NC3d plant did not apply — control VOID"; fail=1
+    elif a2p "$TMP/p_vac.lean" "$TMP/x.lean"; then
+      echo "  ✗ NC3d A2′ stayed GREEN when the arms were NOT DISTINCT — the"
+      echo "     vacuity clause does not discriminate; A2′ would pass a comparison"
+      echo "     in which the treatment never applied"; fail=1
+    else echo "  ✅ NC3d A2′ goes RED when the arms are NOT DISTINCT (vacuity clause fires)"; fi
   fi
 fi
 

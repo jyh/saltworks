@@ -1,0 +1,39 @@
+pinreset controls: planting defects and driving the real importer
+  ✅ C4  no --pin-reset: dfrtp must REFUSE          RED (exit 1)
+  ✅ C1  base + --pin-reset: must IMPORT            PASS (exit 0)
+  ✅ NC1  reset pins span two nets                  RED (exit 1)
+  ✅ NC1b single reset net, DRIVEN by a cell        RED (exit 1)
+  ✅ NC2  other consumer: report, do NOT block      PASS (exit 0)
+  ✅ NC2b live consumer reaching an output          PASS (exit 0)
+  ✅ NC6  commented-out flop: conservation RED      RED (exit 1)
+  ✅ NCx  pinned net also listed in --inputs        RED (exit 1)
+  ✅ NCy  --pin-reset on a flopless netlist         RED (exit 1)
+pinreset controls: C3 under A2′ (A1 logic identity · A2′ marker + required cell-name column)
+  ✅ C3  arm provenance: committed dfxtp fixture IS the registered rewrite
+  ✅ C3.A1 pinned datum is GATE-FOR-GATE the dfxtp reading
+  ✅ C3.M  golden marker appears VERBATIM in the emitted datum
+  ⓘ  C3.A2 (SUPERSEDED, non-discharging) RED as expected — the diff carries
+      the cell-name column, which A2′ asserts positively instead of tolerating.
+      removed (must be none):
+        * `  0`  Q `s0`  ←— `w0`   (_02_, dfxtp_1)
+        * `  1`  Q `s1`  ←— `d1`   (_03_, dfxtp_1)
+  ✅ C3.A2′ diff is EXACTLY the marker PLUS the required cell-name column
+  ✅ NC3a A1 goes RED on a perturbed gate
+  ✅ NC3b A2′ goes RED on an extra non-marker difference
+  ✅ NC3c A2′ goes RED when the mandated marker is absent
+  ✅ NC3d A2′ goes RED when the arms are NOT DISTINCT (vacuity clause fires)
+pinreset controls: 9 planted row(s), ALL BEHAVED
+
+════ ADJUDICATION vs the pre-registration (written before the edits) ════
+E1 C3.A1 GREEN                          -> MET
+E2 C3.M  GREEN                          -> MET
+E3 C3.A2 informational RED, not gating  -> MET
+E4 C3.A2' DISCHARGING GREEN             -> MET
+E5 NC3a fires                           -> MET
+E6 NC3b re-pointed to A2', fires        -> MET
+E7 NC3c re-pointed to A2', fires        -> MET
+E8 NC3d VACUITY control fires (NEW)     -> MET  <- never run before today
+E9 EXIT = 0                             -> MET
+ALL NINE MET. No unpredicted green, no deviation.
+R3 HELD: this is the pinreset FIXTURE scale. The dmem8-scale green was
+   measured separately on 8/12 (d99842a) and is NOT re-claimed here.

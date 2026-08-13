@@ -1,0 +1,46 @@
+SILICON — PRE-REGISTRATION: PROMOTING A2′ TO THE DISCHARGING CRITERION
+Written 2026-08-13 ~15:05 PDT, BEFORE any edit to pinreset_controls.sh.
+Authority: helm 08/12 19:07:52 + 19:15:19 (A2-PRIME IS ADOPTED; bar closes on the
+existing run), released explicitly 08/13 15:01:02; math ruled the Lean statement
+form at 08/13 05:20.
+
+WHAT CHANGES (and nothing else — the helm said "with no other change"):
+  1. A2′ becomes DISCHARGING (sets fail).  A2 becomes INFORMATIONAL.
+     Rationale: A2 is RED BY DESIGN — the flop table's cell-name column is the
+     experiment's INDEPENDENT VARIABLE and must differ. A2′ characterises the
+     ENTIRE diff positively: marker + cell-name column, each asserted in its
+     required direction, nothing tolerated.
+  2. The A2′ predicate is EXTRACTED INTO A FUNCTION a2p() so that controls can
+     invoke it on planted inputs. Straight-line inline code cannot be controlled.
+  3. NC3b and NC3c are RE-POINTED from a2() to a2p().
+     ⛔ REASON THIS IS MANDATORY: a control on a criterion that no longer
+     discharges is theatre. If A2 stops gating and its controls keep testing it,
+     the promoted criterion ships with NO negative control.
+  4. NEW ROW NC3d — THE VACUITY CONTROL, which does not exist today.
+     A2′'s column clause says the arms must be DISTINCT. Nothing has ever shown
+     that clause can fail. NC3d plants a pinned datum whose cell column reads
+     dfxtp_1 (identical to the rewrite arm) and REQUIRES A2′ TO GO RED.
+
+PRE-STATED EXPECTED OUTCOME (the bar; recorded before running):
+  E1  C3.A1              GREEN   (unchanged — logic identity already held)
+  E2  C3.M               GREEN   (unchanged — marker integrity, independent)
+  E3  C3.A2  (info)      RED     and NOT gating — it is red by design
+  E4  C3.A2′ (discharging) GREEN — it measured green at fixture AND dmem8 scale
+  E5  NC3a  A1 red on perturbed gate            FIRES
+  E6  NC3b  A2′ red on extra non-marker diff    FIRES
+  E7  NC3c  A2′ red when marker stripped        FIRES
+  E8  NC3d  A2′ red when arms are NOT distinct  FIRES   ← new, never run before
+  E9  SCRIPT EXIT = 0
+
+PASS CRITERION: E1–E9 all as stated. ANY deviation is a FAILURE and gets posted
+as one, including a green I did not predict.
+
+RISKS I EXPECT AND WILL NOT EXPLAIN AWAY:
+  R1  a2p() reuses $TMP scratch names; a control invocation could clobber the
+      evidence the main verdict prints. Mitigation: main verdict prints its
+      evidence IMMEDIATELY, before any control runs. If ordering breaks, that is
+      a real defect, not a nuisance.
+  R2  NC3d's plant may not apply (sed matches nothing) — then the control is
+      VOID, not passing. It must refuse loudly like the other three plants do.
+  R3  A2′ green here is at the pinreset FIXTURE. The dmem8-scale green was
+      measured separately on 8/12 (d99842a). I will not claim scale from this run.
