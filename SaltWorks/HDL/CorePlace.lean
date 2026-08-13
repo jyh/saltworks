@@ -200,7 +200,7 @@ theorem instOK_mono {c : Circ} {σ : Net → Net} {off off' : Nat}
 /-- The second placement's offset: the decoder's `instNext`. -/
 def off1 : Nat := instNext decoder off0
 
-theorem off1_value : off1 = 1192 := by
+theorem off1_value : off1 = 1213 := by
   simp only [off1, instNext, off0, instNext, tieCells, offTie, coreInWidth, stWidth]
   decide +kernel
 
@@ -225,7 +225,7 @@ theorem immB_instOK : instOK immBCirc immBSig off1 := by
 /-- **CONTROL: the chain step genuinely ADVANCED.** If `off1 = off0` the second placement would be
 a no-op dressed as progress — and a zero-gate organ would make exactly that happen (increment 1's
 `zero_gate_organ_does_not_advance`). The decoder has 102 gates, so this step is real. -/
-theorem chain_step_advanced : off0 < off1 ∧ off1 = off0 + 102 := by
+theorem chain_step_advanced : off0 < off1 ∧ off1 = off0 + 123 := by
   refine ⟨?_, ?_⟩
   · simp only [off1, instNext, off0, instNext, tieCells, offTie, coreInWidth, stWidth]
     decide +kernel
@@ -421,7 +421,7 @@ def off3 : Nat := instNext readTree off2
 /-- Row 5 — the first ALU organ. -/
 def off4 : Nat := instNext readTree off3
 
-theorem chain_offsets_derived : off2 = 1193 ∧ off3 = 4175 ∧ off4 = 7157 := by
+theorem chain_offsets_derived : off2 = 1214 ∧ off3 = 4196 ∧ off4 = 7178 := by
   refine ⟨?_, ?_, ?_⟩ <;>
     simp only [off4, off3, off2, off1, off0, instNext, tieCells, offTie, coreInWidth, stWidth] <;> decide +kernel
 
@@ -503,7 +503,7 @@ def bitNot32Sig (j : Net) : Net := rs2Out j
 /-- Row 6's offset: after the XOR. -/
 def off5 : Nat := instNext bitXor32 off4
 
-theorem off5_value : off5 = 7189 := by
+theorem off5_value : off5 = 7210 := by
   simp only [off5, off4, off3, off2, off1, off0, instNext, tieCells, offTie, coreInWidth, stWidth]
   decide +kernel
 
@@ -585,7 +585,7 @@ def offAdd : Nat := instNext OperandB.obMux offOb
 /-- Row 8's offset — after the first adder. -/
 def offSub : Nat := instNext adder32 offAdd
 
-theorem adder_offsets : offAdd = 7318 ∧ offSub = 7478 := by
+theorem adder_offsets : offAdd = 7339 ∧ offSub = 7499 := by
   refine ⟨?_, ?_⟩ <;>
     simp only [offSub, offAdd, offOb, off5, off4, off3, off2, off1, off0, instNext, tieCells,
                offTie, coreInWidth, stWidth] <;> decide +kernel
@@ -664,7 +664,7 @@ alone gives a 3-input block with no indication where its inputs come from.
 /-- Row 9's offset — after the subtracting adder. -/
 def offSlt : Nat := instNext adder32 offSub
 
-theorem offSlt_value : offSlt = 7638 := by
+theorem offSlt_value : offSlt = 7659 := by
   simp only [offSlt, offSub, offAdd, offOb, off5, off4, off3, off2, off1, off0, instNext,
              tieCells, offTie, coreInWidth, stWidth]
   decide +kernel
@@ -788,7 +788,7 @@ sel 0   decOut 1 = isXOR      sel 1   decOut 2 = isSLT
 /-- Row 10's offset — after `sltCirc`. -/
 def offSel : Nat := instNext sltCirc offSlt
 
-theorem offSel_value : offSel = 7643 := by
+theorem offSel_value : offSel = 7664 := by
   simp only [offSel, offSlt, offSub, offAdd, offOb, off5, off4, off3, off2, off1, off0, instNext,
              tieCells, offTie, coreInWidth, stWidth]
   decide +kernel

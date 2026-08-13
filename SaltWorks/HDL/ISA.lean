@@ -167,11 +167,27 @@ instructions that do not touch memory — and a statement that enumerated
 `ADD/ADDI/XOR/SLT/BEQ` would have to be edited by every future op author, who
 would have no way to know that omitting their constructor silently WIDENS a
 theorem into falsity. **The discriminator makes the hypothesis mechanical: a
-new memory op sets this true and every frame law narrows itself.** -/
+new memory op sets this true and every frame law narrows itself.**
+
+⬥⬥ **D2 CONVERTED THE CATCH-ALL TO EXHAUSTIVE ARMS** (Captain's ruling 8/11
+19:05: *exhaustive arms preferred; catch-alls only where enumeration is genuinely
+impractical*, and this seat's standing disposition — `touchesMem` converts on
+next touch, in its own file, needing no exception). **D2 is that touch.**
+
+🔑 ***The catch-all was the hazard the ruling names: `| _ => false` silently
+classifies EVERY future constructor as memory-free.*** *A new memory op added by
+a later author would land as `touchesMem = false`, and every frame law
+conditional on it would WIDEN INTO FALSITY without a single red build — the
+author having no way to know the omission mattered.* **With the arms enumerated,
+the same edit fails to compile until they answer the question.** -/
 def touchesMem : Instr → Bool
-  | .LW _ _ _ => true
-  | .SW _ _ _ => true
-  | _         => false
+  | .LW   _ _ _ => true
+  | .SW   _ _ _ => true
+  | .ADD  _ _ _ => false
+  | .ADDI _ _ _ => false
+  | .XOR  _ _ _ => false
+  | .SLT  _ _ _ => false
+  | .BEQ  _ _ _ => false
 
 /-- Register read. **`x0` reads as zero unconditionally** — not as an invariant
 about `regs[0]`, but as a fact about the read port, which is what the hardware

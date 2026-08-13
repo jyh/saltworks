@@ -66,7 +66,7 @@ requires every input wire `σ i < off`, so an organ cannot precede its producers
 
 `readTree` and `adder32` appear **twice** (rs1/rs2 and add/sub), as the plan's `×2` rows. -/
 def order : List Row :=
-  [ ⟨"decoder",      32,  102,   6⟩
+  [ ⟨"decoder",      32,  123,   9⟩   -- ⬥ D2: was 102 gates / 6 outs
   , ⟨"immBCirc",     32,    1,  32⟩
   , ⟨"readTree.rs1", 997, 2982,  32⟩
   , ⟨"readTree.rs2", 997, 2982,  32⟩
@@ -101,14 +101,19 @@ def totalGates : Nat := (order.map Row.gates).foldl (· + ·) 0
 `10,371` is the figure I derived on 2026-08-08 two independent ways: the kernel's sum over the
 **13 DISTINCT organs in 15 PLACEMENTS** (silicon's phrasing, 09:47 — `readTree` and `adder32` are each ONE `Circ` placed TWICE, so there are 13 `row_` theorems and 15 rows), and the 8/7 plan's table plus six named semantic deltas (shifter out, aluSelect
 retired, sliceASelect in, bitwise→XOR-only, sltu out, the real 97-gate `obMux`). **This is a
-THIRD derivation — a per-row measurement of the artifacts — and it agrees to the gate.** -/
-theorem total_reconciles : totalGates = 10371 := by decide
+THIRD derivation — a per-row measurement of the artifacts — and it agrees to the gate.**
+
+⬥ **D2 MOVED IT TO 10,392.** *The decoder gained 21 gates (102 → 123) and three outputs, so the
+total moved by exactly that. `10,371` above is the PRE-D2 figure, kept because that sentence is an
+account of how the number was DERIVED rather than a claim about today; the live figure is the
+theorem below, which is the only one a build can check.* -/
+theorem total_reconciles : totalGates = 10392 := by decide
 
 /-- The last offset is `off0` plus every gate — i.e. the chain does not lose or invent nets. -/
 theorem chain_closes : offsets.getLast! = off0 + totalGates := by decide
 
 /-- And the closing net, concretely. -/
-theorem chain_last : offsets.getLast! = 11459 := by decide
+theorem chain_last : offsets.getLast! = 11480 := by decide
 
 /-! ## ⚠️ THE ZERO-GATE HAZARD, exhibited before it bites
 
@@ -154,7 +159,9 @@ nothing: change an organ tomorrow and my literal goes stale with the theorem sti
 kernel-checked rather than asserted, and `total_reconciles` finally rests on something.***
 -/
 
-theorem row_decoder      : decoder.gates.length      = 102  := by decide +kernel
+-- ⬥ D2: 102 → 123. Two AND chains (9 gates each), `req`'s single OR gate, and
+-- `valid`'s chain widening from 4 gates to 6. The inverter bank is untouched.
+theorem row_decoder      : decoder.gates.length      = 123  := by decide +kernel
 theorem row_immBCirc     : immBCirc.gates.length     = 1    := by decide +kernel
 theorem row_readTree     : readTree.gates.length     = 2982 := by decide +kernel
 theorem row_bitXor32     : bitXor32.gates.length     = 32   := by decide +kernel
@@ -178,7 +185,7 @@ theorem total_reconciles_against_artifacts :
       + SelectCut32.sliceASelect.gates.length + EncoderE1.ruledEnc.gates.length
       + OperandB.obMux.gates.length + regWrite.gates.length
       + SaltWorks.Stack.Program.pcAdd.gates.length + regNext.gates.length
-    = 10371 := by decide +kernel
+    = 10392 := by decide +kernel
 
 /-- **AND THE TWO ROWS SILICON MEASURED INDEPENDENTLY, pinned here** — their silicon-side
 readings and this corpus's `Circ`s agree, so the agreement is now in the kernel too. -/

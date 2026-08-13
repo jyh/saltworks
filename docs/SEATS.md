@@ -19,6 +19,22 @@ no glob did).
 - SaltWorks.lean, lakefile.toml, lean-toolchain : MAESTRO ONLY. Seats leave "import owed: <module>" in commit messages; maestro sweeps.
 - docs/** : append-friendly; per-seat files preferred (docs/<seat>-*.md).
 - EXCEPTIONS (named, dated, removed on expiry — an exception recorded is the law consulted):
+  - ⏳ **D2-CROSS-SLOT-EXCEPTION** (helm ruling 2026-08-12 17:15, RE-SCOPED 17:31 at compiler's
+    measured finding) — **SaltWorks/Stack/Program.lean, THE DECODER BLOCK, lines 8000-8650 as of
+    tonight's bytes → writable by the COMPILER seat. SITE COUNT 1.** Nothing outside that range.
+    **EXPIRES AT THE D2 SEAL.** *Cause: the D2 edit is ATOMIC across the slot boundary — 22 of the
+    24 declarations first named, and 31 by the later mechanical sweep, live in math's file, and
+    `decoder_outs_eq` goes FALSE the instant `dcMatches` grows in the compiler's own file. There is
+    no compiler-half that lands green.* **Scoped to a REGION rather than a LIST because the
+    enumeration is the thing that failed: compiler's own boundary list was measured too small
+    (22 vs 31) and a longer list would repeat the defect with a bigger number.** Slot owner
+    (math, 17:16) verified the boundary independently and raised NO OBJECTION, while disclosing
+    that 10 of the 22 were unexamined by them.
+    ⛔ **THIS LINE'S DEATH IS SCHEDULED, NOT TRUSTED** (math's specimen, 17:16; helm amendment
+    17:22): the seal commit MUST carry the pasted output of `grep -c D2-CROSS-SLOT-EXCEPTION`
+    showing **zero**, and evidence's cert-canary array carries the same phrase so an INSTRUMENT
+    reads the retirement as well as a hand. *A self-retiring marker is a manual step wearing the
+    word "self" — the word does the reassuring; nothing does the deleting.*
   - ✅ SPENT AT THIS COMMIT — the pre-grant below is retired. **`isForward` converted here, by the
     OWNER's hand rather than a foreign one**, so the grant was never exercised: it existed in case
     the ③ pull needed to reach in, and it did not. `touchesMem` did NOT convert and is unchanged —

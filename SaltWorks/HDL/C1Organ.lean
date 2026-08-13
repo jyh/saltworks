@@ -208,8 +208,34 @@ hypothesis. `ctrlOf` is `sem decoder` on the word's bits (`Decoder.lean:190`) �
 real circuit evaluation, not a definition in terms of the matchers, which is what
 makes this an equation rather than a restatement. -/
 theorem ctrlOf_eq_matchers (w : BitVec 32) :
-    ctrlOf w = [dcADDm w, dcXORm w, dcSLTm w, dcADDIm w, dcBEQm w, dcValidm w] := by
+    ctrlOf w = [dcADDm w, dcXORm w, dcSLTm w, dcADDIm w, dcBEQm w,
+                dcLWm w, dcSWm w, dcReqm w, dcValidm w] := by
   rw [decoder_correct, ctrlSpec_eq]
+
+/-! ### ⬥⬥ D2 — THE MAGIC NUMBERS, NAMED
+
+⚠️ **The two theorems below exist because the docstring immediately following
+promises a NAME-to-INDEX binding — *"output nets 1 and 2 … `isXOR` and `isSLT`"* —
+and until now that binding lived ONLY IN PROSE.**
+
+*Under a reorder of `dcMatches` the seam theorems stay TRUE and GREEN (their
+proofs re-derive whatever is at positions 1 and 2), while that sentence goes
+false — **and the assembler wires by the sentence.*** ⇒ *The kernel does catch a
+reorder today, but only inside another theorem's anonymous `rfl`, which reports
+"some proof broke" rather than "the isXOR wire moved".*
+
+✅ **Named, a reorder breaks a theorem whose NAME says what it meant.** *D2 is the
+first edit that could have moved them — it did not (`decoder_out_prefix`), and
+that is exactly when the guard is cheap to install.* -/
+
+/-- **Output index 1 is `isXOR`** — the binding `sliceASelect_of_gate_decoder`
+reads by number, stated by name. -/
+theorem ctrlOf_index1_is_isXOR (w : BitVec 32) : (ctrlOf w)[1]! = dcXORm w := by
+  rw [ctrlOf_eq_matchers]; rfl
+
+/-- **Output index 2 is `isSLT`.** -/
+theorem ctrlOf_index2_is_isSLT (w : BitVec 32) : (ctrlOf w)[2]! = dcSLTm w := by
+  rw [ctrlOf_eq_matchers]; rfl
 
 /-- ⭐⭐ **THE SEAM, WITH THE CIRCUIT IN THE HYPOTHESIS.** Wire the two select nets
 to output nets **1** and **2** of the *actual decoder* — `isXOR` and `isSLT`, in

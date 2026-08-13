@@ -45,13 +45,13 @@ in `CorePlace` and cited above rather than repeated here.
 rows legitimately share a starting net — the distinction from the `regWrite` collision repaired at
 `5f1abb7`, which is one word wide and is why both appear in this conjunction.* -/
 theorem offsets_pinned :
-    offTie = 1088 ∧ offOb = 7221 ∧ offEnc = 7934 ∧ offRw = 7934
-      ∧ offPc = 8097 ∧ offRegNext = 8357 := by
+    offTie = 1088 ∧ offOb = 7242 ∧ offEnc = 7955 ∧ offRw = 7955
+      ∧ offPc = 8118 ∧ offRegNext = 8378 := by
   refine ⟨by decide +kernel, by decide +kernel, by decide +kernel, by decide +kernel,
           by decide +kernel, by decide +kernel⟩
 
 /-- **The chain's end — §1.2's "total nets".** -/
-theorem chain_end_is_11461 : instNext regNext offRegNext = 11461 := by decide +kernel
+theorem chain_end_is_11482 : instNext regNext offRegNext = 11482 := by decide +kernel
 
 /-- ⭐⭐ **THE CROSS-INSTRUMENT RECONCILIATION — the reason §1's figures are two-witness.**
 
@@ -59,20 +59,24 @@ theorem chain_end_is_11461 : instNext regNext offRegNext = 11461 := by decide +k
 derived chain must exceed its literal `chain_last` by exactly `tieCells.gates.length`. Stated with the
 tie count as a TERM rather than as `+ 2`, so the identity survives a change to the preamble.
 
-⚠️ *The harness that first checked this printed `11459 - chainEnd` in `Nat`, which TRUNCATED TO 0 and
-reported "difference = 0" — indistinguishable from agreement, and unable to tell 11461 from a 2-short
-11459. As a theorem the truncation cannot hide: the equation is either true or it fails.* -/
+⚠️ *The harness that first checked this printed `chain_last - chainEnd` in `Nat`, which TRUNCATED TO
+0 and reported "difference = 0" — indistinguishable from agreement, and unable to tell the true end
+from a 2-short one. As a theorem the truncation cannot hide: the equation is either true or it fails.*
+
+⬥ **D2 MOVED BOTH SIDES BY +21** — the decoder grew from 102 gates to 123, so every organ placed
+after it shifts by the same amount. *The pair was `11459 / 11461` before D2 and is `11480 / 11482`
+now; the RECONCILIATION is what did not move, which is the property this theorem exists to state.* -/
 theorem chain_reconciles_with_CoreOffsets :
-    instNext regNext offRegNext = 11459 + tieCells.gates.length := by decide +kernel
+    instNext regNext offRegNext = 11480 + tieCells.gates.length := by decide +kernel
 
 /-- **CONTROL: the reconciliation is not vacuous.** Both sides are pinned independently, so a reader
 can see the two instruments agreeing rather than an identity that holds by construction. -/
 theorem reconciliation_is_not_vacuous :
-    instNext regNext offRegNext = 11461 ∧ 11459 + tieCells.gates.length = 11461 := by
-  refine ⟨chain_end_is_11461, by decide +kernel⟩
+    instNext regNext offRegNext = 11482 ∧ 11480 + tieCells.gates.length = 11482 := by
+  refine ⟨chain_end_is_11482, by decide +kernel⟩
 
 #audit_axioms offsets_pinned
-#audit_axioms chain_end_is_11461
+#audit_axioms chain_end_is_11482
 #audit_axioms chain_reconciles_with_CoreOffsets
 #audit_axioms reconciliation_is_not_vacuous
 

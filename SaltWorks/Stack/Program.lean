@@ -8048,37 +8048,65 @@ def dcL2 : List Net := dcOpcode 0b0110011 ++ dcFunct7Zero ++ dcFunct3 0b100
 def dcL3 : List Net := dcOpcode 0b0110011 ++ dcFunct7Zero ++ dcFunct3 0b010
 def dcL4 : List Net := dcOpcode 0b0010011 ++ dcFunct3 0b000
 def dcL5 : List Net := dcOpcode 0b1100011 ++ dcFunct3 0b000
+-- ⬥ D2. The two memory rows, APPENDED. Opcode and funct3 only, no `funct7`.
+def dcL6 : List Net := dcOpcode 0b0000011 ++ dcFunct3 0b010
+def dcL7 : List Net := dcOpcode 0b0100011 ++ dcFunct3 0b010
 
 def dcG1 : List Gate := (andChain 64 dcL1).1
 def dcG2 : List Gate := (andChain 80 dcL2).1
 def dcG3 : List Gate := (andChain 96 dcL3).1
 def dcG4 : List Gate := (andChain 112 dcL4).1
 def dcG5 : List Gate := (andChain 121 dcL5).1
-def dcGM : List Gate := dcG1 ++ (dcG2 ++ (dcG3 ++ (dcG4 ++ dcG5)))
-def dcGO : List Gate := (orChain 130 [79, 95, 111, 120, 129]).1
+def dcG6 : List Gate := (andChain 130 dcL6).1
+def dcG7 : List Gate := (andChain 139 dcL7).1
+def dcGM : List Gate := dcG1 ++ (dcG2 ++ (dcG3 ++ (dcG4 ++ (dcG5 ++ (dcG6 ++ dcG7)))))
+/-- ⬥ **D2 — the memory-access aggregate's OR chain.** *One gate: `req = isLW ∨
+isSW`. It is allocated BEFORE `valid`'s chain, which is what puts `req` at
+index 7 and keeps `valid` on the tail.* -/
+def dcGR : List Gate := (orChain 148 [138, 147]).1
+def dcGO : List Gate := (orChain 149 [79, 95, 111, 120, 129, 138, 147]).1
 
-theorem decoder_gates_eq : decoder.gates = dcInvs ++ (dcGM ++ dcGO) := by decide +kernel
+/-- ⬥ **D2 re-cut this: 70 gates → 123, and the STRUCTURE gained a layer.**
+*`dcGM` grew by two AND chains; `dcGR` is new; `dcGO` moved base and widened from
+five inputs to seven. **The inverter bank and `dcG1…dcG5` are untouched** — that
+is `decoder_gate_prefix` in `HDL/Decoder.lean`, and it is why the ~25 net-numbered
+declarations below this line did not move.* -/
+theorem decoder_gates_eq : decoder.gates = dcInvs ++ (dcGM ++ (dcGR ++ dcGO)) := by
+  decide +kernel
 
-theorem decoder_outs_eq : decoder.outs = [79, 95, 111, 120, 129, 133] := by decide +kernel
+/-- ⬥ **D2 re-cut this, and `run_decoder_out` moved WITH it, in this commit.**
+*They are one fact in two shapes: the output NET list and what each net carries.
+Splitting them across commits leaves a window where the file says where to look
+and lies about what is there.* -/
+theorem decoder_outs_eq :
+    decoder.outs = [79, 95, 111, 120, 129, 138, 147, 148, 154] := by decide +kernel
 
 theorem dcOut1 : (andChain 64 dcL1).2.1 = 79 := by decide +kernel
 theorem dcOut2 : (andChain 80 dcL2).2.1 = 95 := by decide +kernel
 theorem dcOut3 : (andChain 96 dcL3).2.1 = 111 := by decide +kernel
 theorem dcOut4 : (andChain 112 dcL4).2.1 = 120 := by decide +kernel
 theorem dcOut5 : (andChain 121 dcL5).2.1 = 129 := by decide +kernel
-theorem dcOutO : (orChain 130 [79, 95, 111, 120, 129]).2.1 = 133 := by decide +kernel
+theorem dcOut6 : (andChain 130 dcL6).2.1 = 138 := by decide +kernel
+theorem dcOut7 : (andChain 139 dcL7).2.1 = 147 := by decide +kernel
+theorem dcOutR : (orChain 148 [138, 147]).2.1 = 148 := by decide +kernel
+theorem dcOutO :
+    (orChain 149 [79, 95, 111, 120, 129, 138, 147]).2.1 = 154 := by decide +kernel
 
 theorem dcL1_lt : ∀ m ∈ dcL1, m < 64 := by decide
 theorem dcL2_lt : ∀ m ∈ dcL2, m < 64 := by decide
 theorem dcL3_lt : ∀ m ∈ dcL3, m < 64 := by decide
 theorem dcL4_lt : ∀ m ∈ dcL4, m < 64 := by decide
 theorem dcL5_lt : ∀ m ∈ dcL5, m < 64 := by decide
+theorem dcL6_lt : ∀ m ∈ dcL6, m < 64 := by decide
+theorem dcL7_lt : ∀ m ∈ dcL7, m < 64 := by decide
 
 theorem dcL1_ne : dcL1 ≠ [] := by decide
 theorem dcL2_ne : dcL2 ≠ [] := by decide
 theorem dcL3_ne : dcL3 ≠ [] := by decide
 theorem dcL4_ne : dcL4 ≠ [] := by decide
 theorem dcL5_ne : dcL5 ≠ [] := by decide
+theorem dcL6_ne : dcL6 ≠ [] := by decide
+theorem dcL7_ne : dcL7 ≠ [] := by decide
 
 /-! ### Frames and values, one per chain -/
 
@@ -8092,8 +8120,14 @@ theorem dcG4_frame (E : Env) (m : Nat) (h : m < 112) : run E dcG4 m = E m :=
   run_andChain_frame 10 E dcL4 112 (by decide) m h
 theorem dcG5_frame (E : Env) (m : Nat) (h : m < 121) : run E dcG5 m = E m :=
   run_andChain_frame 10 E dcL5 121 (by decide) m h
-theorem dcGO_frame (E : Env) (m : Nat) (h : m < 130) : run E dcGO m = E m :=
-  run_orChain_frame 5 E [79, 95, 111, 120, 129] 130 (by decide) m h
+theorem dcG6_frame (E : Env) (m : Nat) (h : m < 130) : run E dcG6 m = E m :=
+  run_andChain_frame 10 E dcL6 130 (by decide) m h
+theorem dcG7_frame (E : Env) (m : Nat) (h : m < 139) : run E dcG7 m = E m :=
+  run_andChain_frame 10 E dcL7 139 (by decide) m h
+theorem dcGR_frame (E : Env) (m : Nat) (h : m < 148) : run E dcGR m = E m :=
+  run_orChain_frame 2 E [138, 147] 148 (by decide) m h
+theorem dcGO_frame (E : Env) (m : Nat) (h : m < 149) : run E dcGO m = E m :=
+  run_orChain_frame 7 E [79, 95, 111, 120, 129, 138, 147] 149 (by decide) m h
 
 theorem dcG1_val (E : Env) : run E dcG1 79 = dcL1.all E := by
   have := run_andChain 17 E dcL1 64 (by decide) dcL1_ne (fun m hm => dcL1_lt m hm)
@@ -8119,8 +8153,26 @@ theorem dcG5_val (E : Env) : run E dcG5 129 = dcL5.all E := by
     (fun m hm => Nat.lt_trans (dcL5_lt m hm) (by norm_num))
   rw [dcOut5] at this
   exact this
-theorem dcGO_val (E : Env) : run E dcGO 133 = [79, 95, 111, 120, 129].any E := by
-  have := run_orChain 5 E [79, 95, 111, 120, 129] 130 (by decide) (by decide) (by decide)
+theorem dcG6_val (E : Env) : run E dcG6 138 = dcL6.all E := by
+  have := run_andChain 10 E dcL6 130 (by decide) dcL6_ne
+    (fun m hm => Nat.lt_trans (dcL6_lt m hm) (by norm_num))
+  rw [dcOut6] at this
+  exact this
+theorem dcG7_val (E : Env) : run E dcG7 147 = dcL7.all E := by
+  have := run_andChain 10 E dcL7 139 (by decide) dcL7_ne
+    (fun m hm => Nat.lt_trans (dcL7_lt m hm) (by norm_num))
+  rw [dcOut7] at this
+  exact this
+/-- ⬥ **D2 — `req`'s value.** *The aggregate is one OR of the two memory
+matchers; `dmem_addr8.v:80` takes exactly this wire as its access strobe.* -/
+theorem dcGR_val (E : Env) : run E dcGR 148 = [138, 147].any E := by
+  have := run_orChain 2 E [138, 147] 148 (by decide) (by decide) (by decide)
+  rw [dcOutR] at this
+  exact this
+theorem dcGO_val (E : Env) :
+    run E dcGO 154 = [79, 95, 111, 120, 129, 138, 147].any E := by
+  have := run_orChain 7 E [79, 95, 111, 120, 129, 138, 147] 149
+    (by decide) (by decide) (by decide)
   rw [dcOutO] at this
   exact this
 
@@ -8129,41 +8181,72 @@ theorem dcGO_val (E : Env) : run E dcGO 133 = [79, 95, 111, 120, 129].any E := b
 theorem run_dcGM (E : Env) :
     run E dcGM 79 = dcL1.all E ∧ run E dcGM 95 = dcL2.all E
     ∧ run E dcGM 111 = dcL3.all E ∧ run E dcGM 120 = dcL4.all E
-    ∧ run E dcGM 129 = dcL5.all E := by
-  have hM : dcGM = dcG1 ++ (dcG2 ++ (dcG3 ++ (dcG4 ++ dcG5))) := rfl
-  rw [hM, run_append, run_append, run_append, run_append]
+    ∧ run E dcGM 129 = dcL5.all E ∧ run E dcGM 138 = dcL6.all E
+    ∧ run E dcGM 147 = dcL7.all E := by
+  have hM : dcGM
+      = dcG1 ++ (dcG2 ++ (dcG3 ++ (dcG4 ++ (dcG5 ++ (dcG6 ++ dcG7))))) := rfl
+  rw [hM, run_append, run_append, run_append, run_append, run_append, run_append]
   set A1 := run E dcG1 with hA1
   set A2 := run A1 dcG2 with hA2
   set A3 := run A2 dcG3 with hA3
   set A4 := run A3 dcG4 with hA4
-  refine ⟨?_, ?_, ?_, ?_, ?_⟩
-  · rw [dcG5_frame A4 79 (by norm_num), hA4, dcG4_frame A3 79 (by norm_num),
+  set A5 := run A4 dcG5 with hA5
+  set A6 := run A5 dcG6 with hA6
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+  · rw [dcG7_frame A6 79 (by norm_num), hA6, dcG6_frame A5 79 (by norm_num), hA5,
+      dcG5_frame A4 79 (by norm_num), hA4, dcG4_frame A3 79 (by norm_num),
       hA3, dcG3_frame A2 79 (by norm_num), hA2, dcG2_frame A1 79 (by norm_num),
       hA1, dcG1_val E]
-  · rw [dcG5_frame A4 95 (by norm_num), hA4, dcG4_frame A3 95 (by norm_num),
+  · rw [dcG7_frame A6 95 (by norm_num), hA6, dcG6_frame A5 95 (by norm_num), hA5,
+      dcG5_frame A4 95 (by norm_num), hA4, dcG4_frame A3 95 (by norm_num),
       hA3, dcG3_frame A2 95 (by norm_num), hA2, dcG2_val A1, hA1]
     exact all_congr_mem (fun m hm => dcG1_frame E m (dcL2_lt m hm))
-  · rw [dcG5_frame A4 111 (by norm_num), hA4, dcG4_frame A3 111 (by norm_num),
+  · rw [dcG7_frame A6 111 (by norm_num), hA6, dcG6_frame A5 111 (by norm_num), hA5,
+      dcG5_frame A4 111 (by norm_num), hA4, dcG4_frame A3 111 (by norm_num),
       hA3, dcG3_val A2, hA2, hA1]
     refine all_congr_mem (fun m hm => ?_)
     rw [dcG2_frame (run E dcG1) m (Nat.lt_trans (dcL3_lt m hm) (by norm_num)),
       dcG1_frame E m (dcL3_lt m hm)]
-  · rw [dcG5_frame A4 120 (by norm_num), hA4, dcG4_val A3, hA3, hA2, hA1]
+  · rw [dcG7_frame A6 120 (by norm_num), hA6, dcG6_frame A5 120 (by norm_num), hA5,
+      dcG5_frame A4 120 (by norm_num), hA4, dcG4_val A3, hA3, hA2, hA1]
     refine all_congr_mem (fun m hm => ?_)
     rw [dcG3_frame (run (run E dcG1) dcG2) m (Nat.lt_trans (dcL4_lt m hm) (by norm_num)),
       dcG2_frame (run E dcG1) m (Nat.lt_trans (dcL4_lt m hm) (by norm_num)),
       dcG1_frame E m (dcL4_lt m hm)]
-  · rw [dcG5_val A4, hA4, hA3, hA2, hA1]
+  · rw [dcG7_frame A6 129 (by norm_num), hA6, dcG6_frame A5 129 (by norm_num), hA5,
+      dcG5_val A4, hA4, hA3, hA2, hA1]
     refine all_congr_mem (fun m hm => ?_)
     rw [dcG4_frame (run (run (run E dcG1) dcG2) dcG3) m
         (Nat.lt_trans (dcL5_lt m hm) (by norm_num)),
       dcG3_frame (run (run E dcG1) dcG2) m (Nat.lt_trans (dcL5_lt m hm) (by norm_num)),
       dcG2_frame (run E dcG1) m (Nat.lt_trans (dcL5_lt m hm) (by norm_num)),
       dcG1_frame E m (dcL5_lt m hm)]
+  · rw [dcG7_frame A6 138 (by norm_num), hA6, dcG6_val A5, hA5, hA4, hA3, hA2, hA1]
+    refine all_congr_mem (fun m hm => ?_)
+    rw [dcG5_frame (run (run (run (run E dcG1) dcG2) dcG3) dcG4) m
+        (Nat.lt_trans (dcL6_lt m hm) (by norm_num)),
+      dcG4_frame (run (run (run E dcG1) dcG2) dcG3) m
+        (Nat.lt_trans (dcL6_lt m hm) (by norm_num)),
+      dcG3_frame (run (run E dcG1) dcG2) m (Nat.lt_trans (dcL6_lt m hm) (by norm_num)),
+      dcG2_frame (run E dcG1) m (Nat.lt_trans (dcL6_lt m hm) (by norm_num)),
+      dcG1_frame E m (dcL6_lt m hm)]
+  · rw [dcG7_val A6, hA6, hA5, hA4, hA3, hA2, hA1]
+    refine all_congr_mem (fun m hm => ?_)
+    rw [dcG6_frame (run (run (run (run (run E dcG1) dcG2) dcG3) dcG4) dcG5) m
+        (Nat.lt_trans (dcL7_lt m hm) (by norm_num)),
+      dcG5_frame (run (run (run (run E dcG1) dcG2) dcG3) dcG4) m
+        (Nat.lt_trans (dcL7_lt m hm) (by norm_num)),
+      dcG4_frame (run (run (run E dcG1) dcG2) dcG3) m
+        (Nat.lt_trans (dcL7_lt m hm) (by norm_num)),
+      dcG3_frame (run (run E dcG1) dcG2) m (Nat.lt_trans (dcL7_lt m hm) (by norm_num)),
+      dcG2_frame (run E dcG1) m (Nat.lt_trans (dcL7_lt m hm) (by norm_num)),
+      dcG1_frame E m (dcL7_lt m hm)]
 
 theorem dcGM_frame (E : Env) (m : Nat) (h : m < 64) : run E dcGM m = E m := by
-  have hM : dcGM = dcG1 ++ (dcG2 ++ (dcG3 ++ (dcG4 ++ dcG5))) := rfl
-  rw [hM, run_append, run_append, run_append, run_append,
+  have hM : dcGM
+      = dcG1 ++ (dcG2 ++ (dcG3 ++ (dcG4 ++ (dcG5 ++ (dcG6 ++ dcG7))))) := rfl
+  rw [hM, run_append, run_append, run_append, run_append, run_append, run_append,
+    dcG7_frame _ m (by omega), dcG6_frame _ m (by omega),
     dcG5_frame _ m (by omega), dcG4_frame _ m (by omega), dcG3_frame _ m (by omega),
     dcG2_frame _ m (by omega), dcG1_frame E m h]
 
@@ -8248,8 +8331,20 @@ def dcXORm  (w : BitVec 32) : Bool := dcOpIs w 0b0110011 && dcF7Z w && dcF3Is w 
 def dcSLTm  (w : BitVec 32) : Bool := dcOpIs w 0b0110011 && dcF7Z w && dcF3Is w 0b010
 def dcADDIm (w : BitVec 32) : Bool := dcOpIs w 0b0010011 && dcF3Is w 0b000
 def dcBEQm  (w : BitVec 32) : Bool := dcOpIs w 0b1100011 && dcF3Is w 0b000
+-- ⬥ D2. The two memory matchers. `decode`'s LW/SW arms consult OPCODE and
+-- FUNCT3 only, so neither predicate mentions `dcF7Z`.
+def dcLWm   (w : BitVec 32) : Bool := dcOpIs w 0b0000011 && dcF3Is w 0b010
+def dcSWm   (w : BitVec 32) : Bool := dcOpIs w 0b0100011 && dcF3Is w 0b010
+/-- ⬥ **D2 — the memory-access aggregate.** *The ONE derived control bit: it is
+not a `dcMatches` row because it aggregates, and `dmem_addr8.v:80` needs a single
+access strobe. `dcSWm` reaches the port's `we_in` directly, needing no
+combinator — the port takes one of each kind.* -/
+def dcReqm  (w : BitVec 32) : Bool := dcLWm w || dcSWm w
+/-- ⬥ **D2 widened this: `valid` now includes the memory ops.** *That is the
+positive counterpart of M2's retired guard — the plane and `ISA.decode` are the
+same partial function again.* -/
 def dcValidm (w : BitVec 32) : Bool :=
-  dcADDm w || dcXORm w || dcSLTm w || dcADDIm w || dcBEQm w
+  dcADDm w || dcXORm w || dcSLTm w || dcADDIm w || dcBEQm w || dcLWm w || dcSWm w
 
 theorem dcL1_all (w : BitVec 32) : dcL1.all (run (fun i => w.getLsbD i) dcInvs) = dcADDm w := by
   show ((dcOpcode 0b0110011 ++ dcFunct7Zero) ++ dcFunct3 0b000).all _ = _
@@ -8276,39 +8371,65 @@ theorem dcL5_all (w : BitVec 32) : dcL5.all (run (fun i => w.getLsbD i) dcInvs) 
   rw [List.all_append, dcOpcode_all, dcFunct3_all]
   rfl
 
+theorem dcL6_all (w : BitVec 32) : dcL6.all (run (fun i => w.getLsbD i) dcInvs) = dcLWm w := by
+  show (dcOpcode 0b0000011 ++ dcFunct3 0b010).all _ = _
+  rw [List.all_append, dcOpcode_all, dcFunct3_all]
+  rfl
+
+theorem dcL7_all (w : BitVec 32) : dcL7.all (run (fun i => w.getLsbD i) dcInvs) = dcSWm w := by
+  show (dcOpcode 0b0100011 ++ dcFunct3 0b010).all _ = _
+  rw [List.all_append, dcOpcode_all, dcFunct3_all]
+  rfl
+
 theorem run_decoder_out (w : BitVec 32) :
     run (fun i => w.getLsbD i) decoder.gates 79 = dcADDm w
     ∧ run (fun i => w.getLsbD i) decoder.gates 95 = dcXORm w
     ∧ run (fun i => w.getLsbD i) decoder.gates 111 = dcSLTm w
     ∧ run (fun i => w.getLsbD i) decoder.gates 120 = dcADDIm w
     ∧ run (fun i => w.getLsbD i) decoder.gates 129 = dcBEQm w
-    ∧ run (fun i => w.getLsbD i) decoder.gates 133 = dcValidm w
+    ∧ run (fun i => w.getLsbD i) decoder.gates 138 = dcLWm w
+    ∧ run (fun i => w.getLsbD i) decoder.gates 147 = dcSWm w
+    ∧ run (fun i => w.getLsbD i) decoder.gates 148 = dcReqm w
+    ∧ run (fun i => w.getLsbD i) decoder.gates 154 = dcValidm w
     ∧ run (fun i => w.getLsbD i) decoder.gates 41 = !(w.getLsbD 9) := by
   have hg : ∀ n : Nat, run (fun i => w.getLsbD i) decoder.gates n
-      = run (run (run (fun i => w.getLsbD i) dcInvs) dcGM) dcGO n := by
+      = run (run (run (run (fun i => w.getLsbD i) dcInvs) dcGM) dcGR) dcGO n := by
     intro n
-    rw [decoder_gates_eq, run_append, run_append]
-  obtain ⟨v1, v2, v3, v4, v5⟩ := run_dcGM (run (fun i => w.getLsbD i) dcInvs)
-  refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
-  · rw [hg, dcGO_frame _ 79 (by norm_num), v1, dcL1_all]
-  · rw [hg, dcGO_frame _ 95 (by norm_num), v2, dcL2_all]
-  · rw [hg, dcGO_frame _ 111 (by norm_num), v3, dcL3_all]
-  · rw [hg, dcGO_frame _ 120 (by norm_num), v4, dcL4_all]
-  · rw [hg, dcGO_frame _ 129 (by norm_num), v5, dcL5_all]
+    rw [decoder_gates_eq, run_append, run_append, run_append]
+  obtain ⟨v1, v2, v3, v4, v5, v6, v7⟩ := run_dcGM (run (fun i => w.getLsbD i) dcInvs)
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+  · rw [hg, dcGO_frame _ 79 (by norm_num), dcGR_frame _ 79 (by norm_num), v1, dcL1_all]
+  · rw [hg, dcGO_frame _ 95 (by norm_num), dcGR_frame _ 95 (by norm_num), v2, dcL2_all]
+  · rw [hg, dcGO_frame _ 111 (by norm_num), dcGR_frame _ 111 (by norm_num), v3, dcL3_all]
+  · rw [hg, dcGO_frame _ 120 (by norm_num), dcGR_frame _ 120 (by norm_num), v4, dcL4_all]
+  · rw [hg, dcGO_frame _ 129 (by norm_num), dcGR_frame _ 129 (by norm_num), v5, dcL5_all]
+  · rw [hg, dcGO_frame _ 138 (by norm_num), dcGR_frame _ 138 (by norm_num), v6, dcL6_all]
+  · rw [hg, dcGO_frame _ 147 (by norm_num), dcGR_frame _ 147 (by norm_num), v7, dcL7_all]
+  · rw [hg, dcGO_frame _ 148 (by norm_num), dcGR_val]
+    simp only [List.any_cons, List.any_nil, Bool.or_false]
+    rw [v6, v7, dcL6_all, dcL7_all]
+    rfl
   · rw [hg, dcGO_val]
     simp only [List.any_cons, List.any_nil, Bool.or_false]
-    rw [v1, v2, v3, v4, v5, dcL1_all, dcL2_all, dcL3_all, dcL4_all, dcL5_all]
+    rw [dcGR_frame _ 79 (by norm_num), dcGR_frame _ 95 (by norm_num),
+      dcGR_frame _ 111 (by norm_num), dcGR_frame _ 120 (by norm_num),
+      dcGR_frame _ 129 (by norm_num), dcGR_frame _ 138 (by norm_num),
+      dcGR_frame _ 147 (by norm_num),
+      v1, v2, v3, v4, v5, v6, v7,
+      dcL1_all, dcL2_all, dcL3_all, dcL4_all, dcL5_all, dcL6_all, dcL7_all]
     simp [dcValidm, Bool.or_assoc]
-  · rw [hg, dcGO_frame _ 41 (by norm_num), dcGM_frame _ 41 (by norm_num)]
+  · rw [hg, dcGO_frame _ 41 (by norm_num), dcGR_frame _ 41 (by norm_num),
+      dcGM_frame _ 41 (by norm_num)]
     exact (run_dcInvs (fun i => w.getLsbD i)).2 9 (by norm_num)
 
 theorem sem_decoder (w : BitVec 32) :
     sem decoder (fun i => w.getLsbD i)
-      = [dcADDm w, dcXORm w, dcSLTm w, dcADDIm w, dcBEQm w, dcValidm w] := by
-  obtain ⟨a1, a2, a3, a4, a5, a6, _⟩ := run_decoder_out w
+      = [dcADDm w, dcXORm w, dcSLTm w, dcADDIm w, dcBEQm w,
+         dcLWm w, dcSWm w, dcReqm w, dcValidm w] := by
+  obtain ⟨a1, a2, a3, a4, a5, a6, a7, a8, a9, _⟩ := run_decoder_out w
   show decoder.outs.map (run (fun i => w.getLsbD i) decoder.gates) = _
   rw [decoder_outs_eq]
-  simp only [List.map_cons, List.map_nil, a1, a2, a3, a4, a5, a6]
+  simp only [List.map_cons, List.map_nil, a1, a2, a3, a4, a5, a6, a7, a8, a9]
 
 /-! ### The spec side, read off `ISA.decode`'s nested `if`-chain
 
@@ -8322,10 +8443,11 @@ the resulting concrete `BitVec` disequalities. Opcode-disjointness is what makes
 those disequalities discharge, and it is named separately below. -/
 
 theorem ctrlSpec_eq (w : BitVec 32) :
-    ctrlSpec w = [dcADDm w, dcXORm w, dcSLTm w, dcADDIm w, dcBEQm w, dcValidm w] := by
+    ctrlSpec w = [dcADDm w, dcXORm w, dcSLTm w, dcADDIm w, dcBEQm w,
+                  dcLWm w, dcSWm w, dcReqm w, dcValidm w] := by
   simp only [ctrlSpec, SaltWorks.ISA.decode, dcADDm, dcXORm, dcSLTm, dcADDIm, dcBEQm,
-    dcValidm, dcOpIs, dcF3Is, dcF7Z]
-  split_ifs with h1 h2 h3 h4 h5 h6 <;> simp_all
+    dcLWm, dcSWm, dcReqm, dcValidm, dcOpIs, dcF3Is, dcF7Z]
+  split_ifs <;> simp_all
 
 /-! ### ⭐ THE UNCONDITIONAL THEOREM -/
 
@@ -8377,10 +8499,17 @@ theorem ctrl_projection (w w' : BitVec 32)
   have hSLT : dcSLTm w = dcSLTm w' := by simp [dcSLTm, dcOpIs, dcF3Is, dcF7Z, e0, e12, e25]
   have hADI : dcADDIm w = dcADDIm w' := by simp [dcADDIm, dcOpIs, dcF3Is, e0, e12]
   have hBEQ : dcBEQm w = dcBEQm w' := by simp [dcBEQm, dcOpIs, dcF3Is, e0, e12]
+  -- ⬥ D2. The memory matchers read the same two fields, so the projection
+  -- extends to them with no new hypothesis — `funct7` never enters.
+  have hLW : dcLWm w = dcLWm w' := by simp [dcLWm, dcOpIs, dcF3Is, e0, e12]
+  have hSW : dcSWm w = dcSWm w' := by simp [dcSWm, dcOpIs, dcF3Is, e0, e12]
+  have hReq : dcReqm w = dcReqm w' := by simp only [dcReqm, hLW, hSW]
   have hVal : dcValidm w = dcValidm w' := by
-    simp only [dcValidm, hADD, hXOR, hSLT, hADI, hBEQ]
-  exact ⟨by rw [sem_decoder, sem_decoder, hADD, hXOR, hSLT, hADI, hBEQ, hVal],
-         by rw [ctrlSpec_eq, ctrlSpec_eq, hADD, hXOR, hSLT, hADI, hBEQ, hVal]⟩
+    simp only [dcValidm, hADD, hXOR, hSLT, hADI, hBEQ, hLW, hSW]
+  exact ⟨by rw [sem_decoder, sem_decoder, hADD, hXOR, hSLT, hADI, hBEQ,
+                hLW, hSW, hReq, hVal],
+         by rw [ctrlSpec_eq, ctrlSpec_eq, hADD, hXOR, hSLT, hADI, hBEQ,
+                hLW, hSW, hReq, hVal]⟩
 
 theorem ctrl_ignores_the_data_bits (w w' : BitVec 32)
     (h : ∀ i, i < 32 → (i < 7 ∨ (12 ≤ i ∧ i < 15) ∨ 25 ≤ i) → w.getLsbD i = w'.getLsbD i) :
@@ -8400,18 +8529,18 @@ theorem dc_opcodes_disjoint :
 theorem dc_both_none_paths (w : BitVec 32) :
     (w.extractLsb' 0 7 = 0b0110011#7 → w.extractLsb' 25 7 = 0#7 →
       w.extractLsb' 12 3 ≠ 0#3 → w.extractLsb' 12 3 ≠ 4#3 → w.extractLsb' 12 3 ≠ 2#3 →
-      ctrlOf w = [false, false, false, false, false, false])
+      ctrlOf w = [false, false, false, false, false, false, false, false, false])
     ∧ (w.extractLsb' 0 7 = 0b0110011#7 → w.extractLsb' 25 7 ≠ 0#7 →
-      ctrlOf w = [false, false, false, false, false, false]) := by
+      ctrlOf w = [false, false, false, false, false, false, false, false, false]) := by
   constructor
   · intro hop hz h0 h4 h2
     rw [ctrlOf, sem_decoder]
-    simp [dcADDm, dcXORm, dcSLTm, dcADDIm, dcBEQm, dcValidm, dcOpIs, dcF3Is, dcF7Z,
-      hop, hz, h0, h4, h2]
+    simp [dcADDm, dcXORm, dcSLTm, dcADDIm, dcBEQm, dcLWm, dcSWm, dcReqm, dcValidm,
+      dcOpIs, dcF3Is, dcF7Z, hop, hz, h0, h4, h2]
   · intro hop hz
     rw [ctrlOf, sem_decoder]
-    simp [dcADDm, dcXORm, dcSLTm, dcADDIm, dcBEQm, dcValidm, dcOpIs, dcF3Is, dcF7Z,
-      hop, hz]
+    simp [dcADDm, dcXORm, dcSLTm, dcADDIm, dcBEQm, dcLWm, dcSWm, dcReqm, dcValidm,
+      dcOpIs, dcF3Is, dcF7Z, hop, hz]
 
 /-! ### Control 1 — the theorem IMPLIES the landed certificates, and more
 
@@ -8455,35 +8584,46 @@ the mutant over the 3,056 points by `decide +kernel` — was built first and
 **hit the memory cap** on the `funct7` sweep. So did the REAL `dcFunct7OK`, run
 as a control from an importing module: see the note at the end of this section. -/
 
+/-- ⬥ **D2 RE-CUT THIS MUTANT RATHER THAN ASSUMING IT SURVIVED.**
+
+*The cut net was `134` — one past the old `valid`. After D2 that net is INSIDE
+the circuit (it is an inverter-fed AND in the `LW` chain), so the old mutant
+would have silently collided with real logic instead of extending it.* ⇒ ***A
+negative control is only a control while it is still the mutation it claims to
+be; re-cutting is the work, and "it still fails" would have been the wrong
+check.*** **The fresh cut is `155`, one past the new `valid` at `154`.** -/
 def decoderCut : Circ :=
   { nIn := dcIn
-  , gates := decoder.gates ++ [(⟨134, .and 79 (dcNot 9)⟩ : Gate)]
-  , outs := [134, 95, 111, 120, 129, 133] }
+  , gates := decoder.gates ++ [(⟨155, .and 79 (dcNot 9)⟩ : Gate)]
+  , outs := [155, 95, 111, 120, 129, 138, 147, 148, 154] }
 
 def ctrlOfCut (w : BitVec 32) : List Bool := sem decoderCut (fun i => w.getLsbD i)
 
 theorem sem_decoderCut (w : BitVec 32) :
     ctrlOfCut w = [dcADDm w && !(w.getLsbD 9), dcXORm w, dcSLTm w, dcADDIm w,
-                   dcBEQm w, dcValidm w] := by
-  obtain ⟨a1, a2, a3, a4, a5, a6, a7⟩ := run_decoder_out w
+                   dcBEQm w, dcLWm w, dcSWm w, dcReqm w, dcValidm w] := by
+  obtain ⟨a1, a2, a3, a4, a5, a6, a7, a8, a9, a10⟩ := run_decoder_out w
   have hg : ∀ n : Nat, run (fun i => w.getLsbD i) decoderCut.gates n
-      = upd (run (fun i => w.getLsbD i) decoder.gates) 134
+      = upd (run (fun i => w.getLsbD i) decoder.gates) 155
           ((Op.and 79 (dcNot 9)).eval (run (fun i => w.getLsbD i) decoder.gates)) n := by
     intro n
     show run (fun i => w.getLsbD i) (decoder.gates ++ _) n = _
     rw [run_append]
     rfl
-  show ([134, 95, 111, 120, 129, 133] : List Net).map
+  show ([155, 95, 111, 120, 129, 138, 147, 148, 154] : List Net).map
       (run (fun i => w.getLsbD i) decoderCut.gates) = _
   simp only [List.map_cons, List.map_nil, hg, upd_self,
-    upd_of_ne _ (by norm_num : (95 : Nat) ≠ 134),
-    upd_of_ne _ (by norm_num : (111 : Nat) ≠ 134),
-    upd_of_ne _ (by norm_num : (120 : Nat) ≠ 134),
-    upd_of_ne _ (by norm_num : (129 : Nat) ≠ 134),
-    upd_of_ne _ (by norm_num : (133 : Nat) ≠ 134)]
+    upd_of_ne _ (by norm_num : (95 : Nat) ≠ 155),
+    upd_of_ne _ (by norm_num : (111 : Nat) ≠ 155),
+    upd_of_ne _ (by norm_num : (120 : Nat) ≠ 155),
+    upd_of_ne _ (by norm_num : (129 : Nat) ≠ 155),
+    upd_of_ne _ (by norm_num : (138 : Nat) ≠ 155),
+    upd_of_ne _ (by norm_num : (147 : Nat) ≠ 155),
+    upd_of_ne _ (by norm_num : (148 : Nat) ≠ 155),
+    upd_of_ne _ (by norm_num : (154 : Nat) ≠ 155)]
   show [(run (fun i => w.getLsbD i) decoder.gates 79
-          && run (fun i => w.getLsbD i) decoder.gates 41), _, _, _, _, _] = _
-  rw [a1, a2, a3, a4, a5, a6, a7]
+          && run (fun i => w.getLsbD i) decoder.gates 41), _, _, _, _, _, _, _, _] = _
+  rw [a1, a2, a3, a4, a5, a6, a7, a8, a9, a10]
 
 theorem decoderCut_agrees_where_bit9_is_low (w : BitVec 32) (h : w.getLsbD 9 = false) :
     ctrlOfCut w = ctrlOf w := by
@@ -8501,13 +8641,26 @@ theorem decoderCut_passes_the_whole_dcWord_family (op f3 f7 : Nat) (hop : op < 5
   rw [decoderCut_agrees_where_bit9_is_low _ (dcWord_bit9 op f3 f7 hop), decoder_correct]
 
 theorem decoderCut_passes_the_reachability_witnesses :
-    ctrlOfCut (SaltWorks.ISA.encode (.ADD 3 1 2))  = [true, false, false, false, false, true] ∧
-    ctrlOfCut (SaltWorks.ISA.encode (.XOR 3 1 2))  = [false, true, false, false, false, true] ∧
-    ctrlOfCut (SaltWorks.ISA.encode (.SLT 3 1 2))  = [false, false, true, false, false, true] ∧
-    ctrlOfCut (SaltWorks.ISA.encode (.ADDI 1 0 5)) = [false, false, false, true, false, true] ∧
-    ctrlOfCut (SaltWorks.ISA.encode (.BEQ 1 2 4))  = [false, false, false, false, true, true] ∧
-    ctrlOfCut 0x000010B7#32 = [false, false, false, false, false, false] := by
-  refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩ <;>
+    ctrlOfCut (SaltWorks.ISA.encode (.ADD 3 1 2))
+      = [true, false, false, false, false, false, false, false, true] ∧
+    ctrlOfCut (SaltWorks.ISA.encode (.XOR 3 1 2))
+      = [false, true, false, false, false, false, false, false, true] ∧
+    ctrlOfCut (SaltWorks.ISA.encode (.SLT 3 1 2))
+      = [false, false, true, false, false, false, false, false, true] ∧
+    ctrlOfCut (SaltWorks.ISA.encode (.ADDI 1 0 5))
+      = [false, false, false, true, false, false, false, false, true] ∧
+    ctrlOfCut (SaltWorks.ISA.encode (.BEQ 1 2 4))
+      = [false, false, false, false, true, false, false, false, true] ∧
+    -- ⬥ D2. The mutant passes the MEMORY witnesses too — it cuts only the ADD
+    -- output, so the new rows give it no extra chance to be caught. Stated so
+    -- nobody reads the D2 rows as strengthening this control.
+    ctrlOfCut (SaltWorks.ISA.encode (.LW 3 1 8))
+      = [false, false, false, false, false, true, false, true, true] ∧
+    ctrlOfCut (SaltWorks.ISA.encode (.SW 1 2 8))
+      = [false, false, false, false, false, false, true, true, true] ∧
+    ctrlOfCut 0x000010B7#32
+      = [false, false, false, false, false, false, false, false, false] := by
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩ <;>
     (rw [decoderCut_agrees_where_bit9_is_low _ (by decide +kernel)]; decide +kernel)
 
 theorem decoderCut_fails_the_theorem :
@@ -8519,12 +8672,22 @@ theorem decoderCut_is_rejected : ¬ (∀ w : BitVec 32, ctrlOfCut w = ctrlSpec w
   fun h => decoderCut_fails_the_theorem (h _)
 
 theorem decoder_correct_implies_reachability :
-    ctrlOf (SaltWorks.ISA.encode (.ADD 3 1 2))  = [true, false, false, false, false, true] ∧
-    ctrlOf (SaltWorks.ISA.encode (.XOR 3 1 2))  = [false, true, false, false, false, true] ∧
-    ctrlOf (SaltWorks.ISA.encode (.SLT 3 1 2))  = [false, false, true, false, false, true] ∧
-    ctrlOf (SaltWorks.ISA.encode (.ADDI 1 0 5)) = [false, false, false, true, false, true] ∧
-    ctrlOf (SaltWorks.ISA.encode (.BEQ 1 2 4))  = [false, false, false, false, true, true] ∧
-    ctrlOf 0x000010B7#32 = [false, false, false, false, false, false] := by
+    ctrlOf (SaltWorks.ISA.encode (.ADD 3 1 2))
+      = [true, false, false, false, false, false, false, false, true] ∧
+    ctrlOf (SaltWorks.ISA.encode (.XOR 3 1 2))
+      = [false, true, false, false, false, false, false, false, true] ∧
+    ctrlOf (SaltWorks.ISA.encode (.SLT 3 1 2))
+      = [false, false, true, false, false, false, false, false, true] ∧
+    ctrlOf (SaltWorks.ISA.encode (.ADDI 1 0 5))
+      = [false, false, false, true, false, false, false, false, true] ∧
+    ctrlOf (SaltWorks.ISA.encode (.BEQ 1 2 4))
+      = [false, false, false, false, true, false, false, false, true] ∧
+    ctrlOf (SaltWorks.ISA.encode (.LW 3 1 8))
+      = [false, false, false, false, false, true, false, true, true] ∧
+    ctrlOf (SaltWorks.ISA.encode (.SW 1 2 8))
+      = [false, false, false, false, false, false, true, true, true] ∧
+    ctrlOf 0x000010B7#32
+      = [false, false, false, false, false, false, false, false, false] := by
   simp only [decoder_correct]
   decide +kernel
 
@@ -8553,13 +8716,17 @@ theorem andChain_empty_arm_is_word_bit_zero (b : Nat) (E : Env) :
 theorem dcMatches_are_all_long : dcMatches.all (fun m => 10 ≤ m.length) = true := by decide
 
 theorem decoder_out_length (w : BitVec 32) :
-    (sem decoder (fun i => w.getLsbD i)).length = 6 := by
+    (sem decoder (fun i => w.getLsbD i)).length = 9 := by
   rw [sem_decoder]
   rfl
 
+/-- ⬥ **D2 widened this to nine falses, and the theorem's CONTENT is unchanged:**
+an undecodable word asserts nothing — not the op classes, not the memory bits,
+not `req`, not `valid`. *`req = false` here is what stops the `dmem_addr8` mask
+trapping on a word the ISA never accepted.* -/
 theorem valid_is_false_on_every_undecodable_word (w : BitVec 32)
     (h : SaltWorks.ISA.decode w = none) :
-    ctrlOf w = [false, false, false, false, false, false] := by
+    ctrlOf w = [false, false, false, false, false, false, false, false, false] := by
   rw [decoder_correct, ctrlSpec, h]
 
 /-! ### C-D1, split so each side is its own named theorem -/
