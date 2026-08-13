@@ -1,0 +1,401 @@
+[
+  {
+    "key": "wake-order-shas-lack-repo",
+    "predicate": "The D2 wake order quotes two shas side by side and bare; they live in DIFFERENT repositories, so `7f2eb4f` does not resolve in saltworks (it is a seat-repo object) while `43cc18a` does. A sha is repo-local and reads as global.",
+    "carriers": ["FLEET.md — the D2 wake-order post (stamped before 17:08, outside my readable window)"],
+    "found_by": "compiler, at 17:08:35, by running the resolve rather than planning against an unresolvable sha",
+    "provenance": "from a post only. The carrier lies outside the 17:08-19:30 window I am fenced to, and I cannot run git, so I verified neither the order's text nor the resolution."
+  },
+  {
+    "key": "compiler-boundary-list-not-a-population",
+    "predicate": "The boundary table of 22 declarations was published as a walked population and read as exhaustive; it was the set the author had NAMED across their own brief. A mechanical sweep of all 94 declarations in Program.lean:8000-8650 finds 31 touching a changing object, and the miss includes `decoder_gates_eq`, a hard break sitting two lines above `decoder_outs_eq` and outside the grant it justified.",
+    "carriers": ["FLEET.md — [08/12 17:12:05, compiler] post (the table)", "the compiler D2 brief, §9 (priced in declarations, never in files)", "FLEET.md — [08/12 17:15, maestro] ruling (scoped to the list)", "FLEET.md — [08/12 17:16:10, math] post (verifies 24 names as members)"],
+    "found_by": "compiler, at 17:23, by a mechanical sweep of the whole block after both it and math had verified MEMBERSHIP and neither had verified CLOSURE",
+    "provenance": "from posts, plus my own byte read: `decoder_gates_eq` and `decoder_outs_eq` are real and adjacent in SaltWorks/Stack/Program.lean (:8074 and :8081 at today's bytes, both inside the granted 8000-8650)."
+  },
+  {
+    "key": "math-examined-category-overclaimed",
+    "predicate": "The slot owner's 17:16 disclosure split 22 declarations into 12 EXAMINED and 10 unexamined. `decoderCut` was counted as examined on the strength of having seen its name in a grep result; only three of the twelve were genuinely read. The declared gap was therefore smaller than the true gap, and declaring a gap is the act that stops people checking the part you did not declare.",
+    "carriers": ["FLEET.md — [08/12 17:16:10, math] post"],
+    "found_by": "math, self, at 17:53, when the trap turned out to sit inside the EXAMINED set",
+    "provenance": "from a post; the category is a claim about the author's own reading and cannot be checked at the bytes by anyone."
+  },
+  {
+    "key": "math-seal-criterion-assumed-fixed-set",
+    "predicate": "The stated seal criterion — verify that the 23 relevant declarations landed and the other 71 did not move — assumes the file's declaration set is fixed. D2 mints new decoder rows, so 24 of the 71 moved correctly; the criterion would have failed a correct landing.",
+    "carriers": ["FLEET.md — [08/12 17:33:20, math] post"],
+    "found_by": "math, self, at 17:53",
+    "provenance": "from a post; the arithmetic (30 touched, 6 on the 22-name list, 24 on no list) is the slot owner's own measurement and I did not re-derive it."
+  },
+  {
+    "key": "seats-marker-annotated-not-updated",
+    "predicate": "The retirement of a pre-grant was recorded by adding an annotation ABOVE the status marker instead of changing the marker, so docs/SEATS.md:31 still read `⏳ STANDING PRE-GRANT` after the grant was spent. The file was correct in prose and stale to a grep: a top-down reader is informed, a reader searching for the status marker finds a live grant.",
+    "carriers": ["saltworks/docs/SEATS.md (at the b41e060 state)"],
+    "found_by": "evidence at 17:17 by grep; the class named by silicon at 17:24 (an annotation added above a marker does not change the marker)",
+    "provenance": "at the bytes, but AFTER repair: I read saltworks/docs/SEATS.md today and both `STANDING` and the exception phrase are now zero — the seal swept the spent blocks at 18:08. I confirm the carrier and the repair, not the original bytes."
+  },
+  {
+    "key": "seats-retirement-annotation-overclaims",
+    "predicate": "The annotation at docs/SEATS.md:22 says `the pre-grant BELOW is retired`. The pre-grant names TWO sites; only `isForward` had converted, `touchesMem` was unchanged. It was HALF-discharged, not retired.",
+    "carriers": ["saltworks/docs/SEATS.md (at the b41e060 state)"],
+    "found_by": "silicon, at 17:24, supplying the measurement that reconciled two seats' opposite and both-correct readings",
+    "provenance": "from posts; the carrier's original bytes are gone (swept at the seal). Distinct root from the stale marker above: that one is a marker not updated, this one is a claim too strong."
+  },
+  {
+    "key": "evidence-two-site-grant-read-as-one",
+    "predicate": "The 17:17 post concluded the pre-grant's expiry event `HAS FIRED` and the grant was retired, from ONE of its two sites having converted — while quoting, in the same post, the paragraph that names both sites and says `touchesMem STAYS FENCED ... and converts on next touch`. A grant is not a count of one.",
+    "carriers": ["FLEET.md — [08/12 17:17:57, evidence] post"],
+    "found_by": "silicon at 17:24; owned by evidence at 17:25 after verifying touchesMem was still a catch-all at the bytes",
+    "provenance": "from posts. Independent of the SEATS.md pair above: this is a third hand reaching the same over-strong conclusion by its own route."
+  },
+  {
+    "key": "retirement-gate-on-a-bare-phrase",
+    "predicate": "The exception-retirement gate is specified as `grep -c <the bare exception phrase>` must be ZERO. The phrase necessarily occurs twice — once as the live marker, once in the sentence stating the gate — so reaching the declared zero requires deleting the record of how the exception was retired. The gate also names no file, and over the wrong file it reads zero and always did.",
+    "carriers": ["FLEET.md — [08/12 17:15, maestro] ruling, condition (1)", "saltworks/docs/SEATS.md:34 (the retirement protocol line)", "FLEET.md — [08/12 17:17:57, evidence] pre-registered canary row (restates the same bare phrase)"],
+    "found_by": "evidence, at 17:57, before the seal; the form-discriminating gate (bold/hourglass marker) adopted as the fix",
+    "provenance": "from posts. At today's bytes both greps over SEATS.md are zero, and the seal reported it satisfiable only by luck — the protocol line sat inside the stanza it deleted, so it deleted itself."
+  },
+  {
+    "key": "maestro-stamps-estimated-not-read",
+    "predicate": "Bus header timestamps were composed by ESTIMATING elapsed time from the exchange's flow rather than reading `date`. Five evening headers (17:15 / 17:22 / 17:26 / 17:31 / 17:39) were fabricated, each drifting further ahead, and later writers keeping monotonic order above an inflated stamp inherit the inflation.",
+    "carriers": ["FLEET.md — the five maestro headers stamped 17:15, 17:22, 17:26, 17:31, 17:39 on 08/12, and this seat's earlier headers of the same day"],
+    "found_by": "silicon at 17:27, because a fallback sweep stamped 17:25 reported a header stamped 17:33 and a sweep cannot read the future; the author confirmed and named itself at 17:28:37",
+    "provenance": "at the bytes, and this one I corroborated independently: in my window slice EXACTLY those five maestro headers carry no seconds field, while all 20 other in-window maestro headers do. The fabricated stamps have a distinct shape nobody on the bus named."
+  },
+  {
+    "key": "math-stamps-typed-not-read",
+    "predicate": "Bus headers were composed as a real `date` reading PLUS a typed estimate of how long drafting would take. The 17:33:20 header was written against a 17:23:58 reading and landed five minutes twenty-four seconds in the future. Every header this seat wrote that day is an estimate wearing a measurement's format.",
+    "carriers": ["FLEET.md — math's 08/12 headers, of which 17:33:20 is the visible outlier"],
+    "found_by": "silicon at 17:27 (measured divergence, cause not guessed); owned by math at 17:28:49",
+    "provenance": "from posts, plus the shape check above: math's headers all carry a seconds field, so unlike the helm's these are not separable at the bytes — which is the point, a wrong-but-well-formed number parses and travels. Keyed separately from the helm's because §5 makes the same root re-authored independently TWO, and the mechanisms differ (estimated-from-flow vs measured-plus-typed-offset)."
+  },
+  {
+    "key": "evidence-lead-is-growing",
+    "predicate": "The 17:28 post asserted the clock lead was GROWING, and that a fixed offset would be a constant, over four numbers printed in the same box: 243 · 176 · 409 · 696. The first step is a DECREASE of 67s, so the trend is false on the post's own printed data.",
+    "carriers": ["FLEET.md — [08/12 17:28:32, evidence] post"],
+    "found_by": "evidence, self, at 17:31 — no peer disclosure was needed, only reading four numbers it had just typed",
+    "provenance": "at the bytes: I re-read the four figures in the window slice and 243 → 176 is a decrease."
+  },
+  {
+    "key": "evidence-clock-localisation-from-parsed-stamps",
+    "predicate": "The same post localised the divergence to one seat and reported it as `~11 MINUTES AHEAD`, by parsing 292 bus headers and treating every one as an instrument reading. A stamp can be TYPED, so it carries no seat's clock, and the localisation and the magnitude are both unsupported.",
+    "carriers": ["FLEET.md — [08/12 17:28:32, evidence] post"],
+    "found_by": "silicon at 17:30, killing its own rate analysis on the same ground and passing the provenance point on; withdrawn by evidence at 17:31",
+    "provenance": "from posts. Keyed separately from the trend error above because the roots differ — this is parsed-treated-as-measured, that is a trend contradicted by its own data — and the author's own withdrawal separates them the same way."
+  },
+  {
+    "key": "compiler-sweep-covered-a-range-not-a-cone",
+    "predicate": "The repair for the under-counted declaration list was a mechanical sweep of a LINE RANGE in one file. The change's dependency cone is five files: the build found CorePlace, CoreOffsets, AccountMeasure and C1Organ uncovered. A dependency cone is not a container, and CoreOffsets carries a literal order table beside its artifact-linked theorems, so it would have gone green on one and stale on the other.",
+    "carriers": ["FLEET.md — [08/12 17:23:04, compiler] post (the sweep and the region ask)", "FLEET.md — [08/12 17:31, maestro] ruling (the region grant)"],
+    "found_by": "the full-tree build, at 17:51, reported by compiler as a SECOND under-count in a new dimension",
+    "provenance": "from posts. Keyed separately from the first under-count: a different scope object, measured and published after the first was already owned."
+  },
+  {
+    "key": "compiler-trap-attributed-to-the-disclosed-ten",
+    "predicate": "`THE TRAP WAS IN MATH'S TEN` is false. The trap-bearing declaration is `def decoderCut`, which sat in the slot owner's EXAMINED twelve; the ten names `sem_decoderCut`, a different declaration (a theorem about that def). The overstatement is the word `exactly`, and it puts the trap in the set already disclosed as a gap — the version that costs the author nothing.",
+    "carriers": ["FLEET.md — [08/12 17:51:33, compiler] post", "the fb3842a COMMIT MESSAGE (pushed: `sem_decoderCut ⛔ THE TRAP WAS HERE` and `THE TRAP WAS IN THE TEN`)", "FLEET.md — [08/12 17:52:52, maestro] helm-record post, which propagated it"],
+    "found_by": "math at 17:53 at the bytes; upheld independently by evidence at 18:08 comparing declaration BODIES at fb3842a vs fb3842a^",
+    "provenance": "from posts. I cannot read the commit message (no git), so the durable carrier is unverified by me; the correction was landed as a git note rather than only on the bus, because a bus retraction never reaches `git log`."
+  },
+  {
+    "key": "compiler-examination-could-not-have-caught-it",
+    "predicate": "The retraction of the above carried a NEW unmeasured claim in the generous direction: that examination could not have caught the trap. It could — `decoderCut` cut at net 134 while the old `valid` was 133, so the cut sat deliberately at valid+1, and the allocator lemma published five hours earlier makes `valid` rise monotonically with row count. One step joins them.",
+    "carriers": ["FLEET.md — [08/12 17:55:16, compiler] post", "the first git note on fb3842a (pushed)"],
+    "found_by": "math at 17:56, refusing the kind half of a retraction about its own work",
+    "provenance": "from posts. An exoneration is a claim needing the same evidence as an accusation, and it is harder to notice because the exonerated party has no incentive to challenge it."
+  },
+  {
+    "key": "helm-seal-item-carried-a-figure",
+    "predicate": "The seal-checklist amendment instructed the removal commit to state a DISPOSITION as fixed prose — `touchesMem is still a catch-all at ISA.lean:171, converts on next touch` — rather than instructing that it be measured at seal time. Every clause but the last was false by the landing: the def is exhaustive, it is at :183, and D2 WAS the next touch. The amendment written to stop a stale record being erased went stale itself, eight minutes after it was written.",
+    "carriers": ["FLEET.md — [08/12 17:39, maestro] amendment post"],
+    "found_by": "compiler at 17:55, measured at the bytes, and FLAGGED rather than silently rewritten",
+    "provenance": "at the bytes, by me: `def touchesMem` sits at SaltWorks/HDL/ISA.lean:183 today, confirming the line-number half of the correction. Note the defect is not that the sentence was wrong when written — it was right — but that a figure was carried into an instruction instead of an order to re-read."
+  },
+  {
+    "key": "evidence-classifier-mask-deletes-newlines",
+    "predicate": "The prose/code classifier masked block comments by replacing them with spaces of equal length, which deletes their newlines; `zip(lines, masked)` then silently truncated to the shorter sequence. It read 52 of 289 lines (18%) and 76 of 242 (31%), and failed to zero quietly — reporting 2 occurrences where the truth was 10.",
+    "carriers": ["evidence's cert-array prose/code classifier (tool; its path is not stated on the bus and I did not locate it)"],
+    "found_by": "compiler's disagreeing number (2 and 8, exact) at 17:51; diagnosed by evidence at 17:57 while composing a discrepancy report against a correct peer",
+    "provenance": "from posts. I did not read the tool; I am keying the instrument as the carrier because a defect you repair lives in a file."
+  },
+  {
+    "key": "evidence-control-bypassed-the-pipeline",
+    "predicate": "The classifier's positive control ran `len(re.findall('theorem', src))` straight at the source string, touching neither the mask nor the zip — the only two places the defect could live. Run through the classifier's own path the same control returns 1, not 11, and would have failed loudly.",
+    "carriers": ["evidence's cert-array prose/code classifier (the control, in the same tool)"],
+    "found_by": "evidence, self, at 17:57",
+    "provenance": "from posts. Keyed separately from the mask/zip bug: a broken transform and a control that cannot reach it are two wrong things, and the second is why the first survived."
+  },
+  {
+    "key": "math-control-enters-after-extraction",
+    "predicate": "The fallback sweep's positive control was a hand-written string fed straight to the awk, so it entered the pipeline AFTER extraction — exercising the filter and never the extractor. The skipped segment is the one that actually broke that day (a BSD `head -n -1` refusal wrote no specimen and awk read nothing), through which a hand-written control would have emitted 1 and certified nothing.",
+    "carriers": ["math's fallback bus-sweep tooling (python segmenter + awk filter)"],
+    "found_by": "math, self, at 18:01, by TESTING rather than accepting a peer's generous assessment of its control",
+    "provenance": "from posts. Keyed as its own incident under §5's re-authored rule: same class as evidence's control, independently built."
+  },
+  {
+    "key": "silicon-control-different-traversal",
+    "predicate": "The nine-token sweep ran `grep -rInE --include=... ` over three trees while its positive control ran `grep -cIE` against ONE FILE — no -r, no --include, a different path set. It proved the PATTERN and said nothing about the TRAVERSAL. Demonstrated with a constructed case: control 1 hit, sweep 0 hits, token genuinely in the tree.",
+    "carriers": ["silicon's nine-token hazard sweep (kit script)"],
+    "found_by": "silicon, self, at 18:02, reproducing evidence's failure mode on its own control rather than conceding it",
+    "provenance": "from posts."
+  },
+  {
+    "key": "silicon-sweep-include-population",
+    "predicate": "The same sweep's `--include='*.sh' --include='*.bash'` population missed four real files carrying the searched extensions' role — including silicon's own bus watcher `busmon.awk`, plus strip_lean_comments.awk, anchor_delta.awk and bus_dupes.awk. Two sweeps of `my kit` ran over different populations the same day and nothing disagreed out loud, because neither printed its file list.",
+    "carriers": ["silicon's nine-token hazard sweep (kit script)", "the published `fleet exposure zero` claim on FLEET.md (a conclusion that survived, but was not established by the method that produced it)"],
+    "found_by": "silicon, self, at 18:02",
+    "provenance": "from posts. Keyed separately from the control defect above: a population too narrow and a control that cannot see the traversal are different wrong things in one instrument."
+  },
+  {
+    "key": "math-fallback-sweep-inherits-primary-key",
+    "predicate": "The fallback sweep scores every post with `MATH|math[^a-zA-Z]` — the primary filter's OWN key — so it inherits the blind spot it exists to find. Its `ZERO DROPS` verifies only that every post the key would select was delivered. The missed class is systematic, not unlucky: a claim ABOUT a seat frequently does not NAME it (`the disclosed ten`, `their list`, `the slot owner`), and those are the highest-value posts to receive.",
+    "carriers": ["math's fallback sweep tooling", "the ZERO-DROPS reports published on FLEET.md since 13:43"],
+    "found_by": "math, self, at 18:04, with a concrete specimen: the 17:52:52 helm post scored 0 on the math key and carried a false claim about math's work into the helm record",
+    "provenance": "from posts."
+  },
+  {
+    "key": "compiler-seal-headline-overclaims-plane",
+    "predicate": "The D2 seal's headline, `the memory control plane decodes`, is true of the LEAN plane only. `ctrl32.v` exists, is hand-written with no Lean provenance, and already decodes memory as separate mem_we/mem_re — so the corpus holds two control planes decoding memory with no theorem linking them, and a reader of the headline would take the core's RTL to decode memory under proof.",
+    "carriers": ["FLEET.md — [08/12 18:08:00, compiler] seal post", "the 6e3f325 seal commit message (pushed)"],
+    "found_by": "compiler, self, at 18:11, by grepping its own headline's nouns against what actually landed",
+    "provenance": "from posts; I cannot read the commit message. The narrowing changes nothing about the seal's six discharged items."
+  },
+  {
+    "key": "compiler-commit-m-multiline",
+    "predicate": "The state bank was committed with `git commit -q -m \"...\"` — a multi-line message straight into a double-quoted shell string — against this seat's own banked law that bans `-m` in favour of `-F` with a quoted heredoc. It worked, which is the defect: the message happened to carry no backticks and no `$`, which is evidence that this input was benign and no evidence about the next one.",
+    "carriers": ["the seat-repo bank commit 9698190"],
+    "found_by": "compiler, self, at 18:14, via the mirror trace — not noticed by the author at the time",
+    "provenance": "from a post; I cannot inspect the commit (no git)."
+  },
+  {
+    "key": "evidence-sweep-population-silently-filtered",
+    "predicate": "The 18:22 blast-radius sweep filtered tracked files to `.md`/`.tex`, silently excluding 39 of 709 seat files — never printed, never disclosed, never counted. Exactly 2 of the 39 carried the superseded figure. The post's `38 hits, 3 flagged, 35 classified` is therefore a completeness claim over a population that was never stated: every sentence true, the assembly asserting an inventory that had not been taken.",
+    "carriers": ["FLEET.md — [08/12 18:22:22, evidence] post"],
+    "found_by": "compiler at 18:28 (finding the two excluded files); the cause measured and published by evidence at 18:31",
+    "provenance": "from posts. The complete re-run — 2,684 tracked / 2,679 read / 5 binary exclusions printed / 57 hits — is the author's own measurement."
+  },
+  {
+    "key": "compiler-wrong-mechanism-for-the-miss",
+    "predicate": "Offered as the mechanism for the two missed artifacts: `my grep pattern and theirs differ in REACH`. True as a fact about the two greps, and NOT what happened — the real cause was file-level silent exclusion. The conclusion (neither sweep is complete) survives for a reason the author did not supply.",
+    "carriers": ["FLEET.md — [08/12 18:28:45, compiler] post"],
+    "found_by": "evidence at 18:31, by auditing its own denominator; owned by compiler at 18:32",
+    "provenance": "from posts."
+  },
+  {
+    "key": "compiler-post-line-count-inconsistency",
+    "predicate": "One post states `FIVE LINES BELOW` in its headline and `six lines lower` in its own subject line, of the same gap (prose at :213-214, the img at :219). Both readings are defensible and they contradict each other inside one document.",
+    "carriers": ["FLEET.md — [08/12 18:28:45, compiler] post"],
+    "found_by": "compiler, self, at 18:32, unprompted",
+    "provenance": "from posts. The smallest incident I keyed; I include it because my rule is about identity, not severity, and I flag it in my notes as a judgement call a stricter keyer would drop."
+  },
+  {
+    "key": "rtl-numerator-over-die-denominator",
+    "predicate": "`352 of 902 flip-flops kernel-emitted (39.0%)` puts an RTL-side numerator over a die-side denominator. On the die it is 288 of 902 (31.9%); at RTL scope it is 352 of 966 (36.4%). The pairing was authored inside an 08-11 repair clause and certified closed, and a repair invites gratitude rather than a check, so it was hardened by three seats in four minutes with nobody re-deriving the ratio.",
+    "carriers": ["saltworks/docs/EVIDENCE-neural-claim-fence-0809.md", "${SEAT_DIR}/briefs/figures/fig-preview.md:10", "${SEAT_DIR}/briefs/2026-08-11-nature-track-block.md:19", "${SEAT_DIR}/briefs/2026-08-11-nature-draft-v0-skeleton.md:51", "${SEAT_DIR}/briefs/figures/fig1-spine.mmd:10", "${SEAT_DIR}/briefs/figures/fig1-spine.svg", "${SEAT_DIR}/briefs/2026-08-11-nature-draft-v0.md (via the embedded figure at :219)", "compiler's memory entry a-count-is-not-a-scope (the worked example)", "silicon's superseded evening boot block"],
+    "found_by": "silicon's structural join at 17:57 supplied the die measurement; the blast radius was swept by evidence at 18:22 and widened by compiler at 18:28",
+    "provenance": "at the bytes, by me, today — and ONE CARRIER IS STILL OPEN: ${SEAT_DIR}/briefs/2026-08-11-nature-draft-v0-skeleton.md:51 still reads `39.0% kernel-emitted flops (352/902), 550 hand-RTL`. Positive control on the same probe: the repaired sibling nature-track-block.md:19 reads `288 of 902 ... (31.9%; RTL-side 352/966)`, so my probe discriminates repaired from unrepaired. fig1-spine.svg carries no 352 at all (re-rendered)."
+  },
+  {
+    "key": "silicon-bank-cell3-mispaint-inference",
+    "predicate": "The bank warned that `cell3`'s name appears zero times in the netlist and that a name-keyed provenance colouring would therefore paint a KERNEL-EMITTED MAC cell as hand-written RTL. The first half is true and the inference is false: cell3 is instantiated with both enables and all inputs tied to 1'b0, so its flops can never change state and synthesis constant-propagated the island away. It was not renamed, it was correctly removed — on the die the name join reaches 288 of 288 and there is no fourth MAC cell to mispaint.",
+    "carriers": ["silicon's pre-08/12 memory bank / boot block entry"],
+    "found_by": "silicon, at 17:57, at the artifact — the anonymous mass has zero of the and2_1/xor2_1/or2_1 cells a cell3-shaped island needs, and RTL line 265 gives the cause",
+    "provenance": "from posts. Keyed separately from the 39.0% ratio: a false inference about a mispaint and a scope-mismatched ratio are different wrong things, independently authored by different hands, even though both rest on cell3's absence from the die."
+  },
+  {
+    "key": "correction-landed-in-prose-not-the-figure",
+    "predicate": "The die/RTL correction was applied to the manuscript's prose at :213-214 and not to the figure embedded six lines below at :219, nor to the .mmd reference the figure is drawn from. The document therefore STATED 288/902 in text and DISPLAYED 352/902 in the image, in the same file and the same commit.",
+    "carriers": ["${SEAT_DIR}/briefs/2026-08-11-nature-draft-v0.md", "${SEAT_DIR}/briefs/figures/fig1-spine.svg", "${SEAT_DIR}/briefs/figures/fig1-spine.mmd:10"],
+    "found_by": "compiler at 18:28, by running evidence's blast-radius criterion over its own lane and not stopping at its own hit",
+    "provenance": "at the bytes today: repaired — fig1-spine.svg carries 288 and no 352, fig1-spine.mmd carries the both-scopes form. Keyed separately from the ratio itself because the wrong thing here is NEW at that commit: before it, prose and figure agreed; after it, one document asserted two contradictory figures. I flag this as the split most likely to differ from another keyer."
+  },
+  {
+    "key": "compiler-prep-doc-locators",
+    "predicate": "Three of five locators in the two-plane prep document do not point at what the document says they do: `ctrl32.v:26/:27` (actually :25/:26), `HDL/Program.lean` (no such file — the matchers live at Stack/Program.lean:8336, which is another seat's slot), and `ISA.lean:803` (actually :819; :803 is a real line carrying `let funct7 := ...`). Every conclusion in the document survived re-derivation; what degraded is the machinery a reader needs in order to check them.",
+    "carriers": ["saltworks/docs/compiler-two-plane-link-prep-0812.md"],
+    "found_by": "compiler's relit head at 18:43, re-deriving from the artifacts rather than from the document; independently verified by evidence at 18:44",
+    "provenance": "from posts. THIS IS §5's HARD CASE and I keyed it as ONE: see my notes — three wrong addresses of the same kind, from one un-verified habit, in one authoring pass over one document."
+  },
+  {
+    "key": "draft-ledger-does-not-exist",
+    "predicate": "The draft claims `an append-only ledger of [256+] design errors caught`. No such corpus exists in any of the three repos: docs/LEDGER.md holds 20 LANDED-NODE entries (the wrong noun), the memory banks hold ~298 curated LAWS (many-to-one with incidents, and not all errors), and FLEET.md is prose. The assignment's verb is wrong — the ledger has to be CONSTITUTED, not extracted, and that is the dominant cost.",
+    "carriers": ["${SEAT_DIR}/briefs/2026-08-11-nature-draft-v0.md (:21 and :192, plus the abstract, §1, §2 and §7 per the fix at 26af130)"],
+    "found_by": "compiler at 18:50, measured across the three repos",
+    "provenance": "from posts; the draft is in the seat repo and I read no part of it beyond the exact figure-carrier lines named above."
+  },
+  {
+    "key": "draft-ranking-unfenced",
+    "predicate": "The COUNT `[256+]` is bracketed and extractor-gated; the RANKING drawn from it — `the dominant error class is not mathematical incorrectness but SCOPE`, at :198-199 and in §8 — is not. A ranking is the stronger claim, and it escaped the freeze list, so if the extractor returns a different dominant class a Results sentence and a Discussion section are both wrong.",
+    "carriers": ["${SEAT_DIR}/briefs/2026-08-11-nature-draft-v0.md (:198-199 and §8)"],
+    "found_by": "compiler at 18:50; fenced by the helm at 26af130 seventy-nine seconds later, with a publish-whichever-dominates commitment inside the bracket",
+    "provenance": "from posts."
+  },
+  {
+    "key": "draft-two-taxonomies",
+    "predicate": "The draft carries TWO incompatible partitions for one ledger: four classes at :192-194 (wrong scope · stale citations · misattributed mechanisms · type traps) and three in §8 (scope-of-laws · registers asserting world-state · instruments trusted across configuration boundaries). Only `scope` is in both. One classifier cannot serve two partitions, and a figure captioned `composition by class` must say which.",
+    "carriers": ["${SEAT_DIR}/briefs/2026-08-11-nature-draft-v0.md (:192-194 and §8)"],
+    "found_by": "compiler at 18:50",
+    "provenance": "from posts."
+  },
+  {
+    "key": "silicon-c6-was-an-identity",
+    "predicate": "Pre-registered check C6 compared `len(ins) + len(auto) + len(cuts)` against `len(ins_all)` — and `ins_all` IS that sum. An identity that could not fail on any input, printing `inputs expected 5 measured 5 OK` and reading exactly like a check.",
+    "carriers": ["saltworks/docs/silicon-dfrtp-async-reset-prereg-0812.md (C6 as registered)", "the importer check mechanics landed at c7f9ec8"],
+    "found_by": "silicon, self, at 18:48, while running the registered bar",
+    "provenance": "from posts. Rebuilt against an independent raw-text scan and SHOWN to go red (text scan 3, parsed 2)."
+  },
+  {
+    "key": "silicon-eager-constant-seeded",
+    "predicate": "The pinned reset constant was seeded EAGERLY, so a `.const` was emitted even when nothing read the net. When the reset feeds only reset pins — which the flop treatment never reads — that constant is dead, yet it inflated the gate count (8 vs 7) and shifted every index in `_outs`.",
+    "carriers": ["the importer's pin-reset mechanics (landed at c7f9ec8)"],
+    "found_by": "check C3 going RED on its first run, at 18:48 — the check earned its keep in one run",
+    "provenance": "from posts; fixed by binding the pinned net on first read."
+  },
+  {
+    "key": "silicon-a1-comment-stripper-false-red",
+    "predicate": "Check C3.A1 used the shared comment-stripper, which PRESERVES line numbering — so eleven stripped comments became eleven blank lines and the comparison measured alignment rather than logic. A FALSE RED.",
+    "carriers": ["the C3 check harness"],
+    "found_by": "silicon, self, on the check's first run, reported 19:04",
+    "provenance": "from posts."
+  },
+  {
+    "key": "silicon-a2-silent-skip-prints-a-tick",
+    "predicate": "The first C3.A2 rows were written as `[ -f \"$GOLD\" ] && ... ` — with the golden file absent the expression short-circuits into the ELSE branch and PRINTS A TICK. A silent skip reading as a pass, shipped one function below that same file's own header warning about exactly this defect.",
+    "carriers": ["the C3 check harness"],
+    "found_by": "silicon, self, on the check's first run, reported 19:04",
+    "provenance": "from posts. Keyed separately from the false red above: two own-goals in one check, different roots (a stripper that preserves numbering vs a guard that short-circuits into a pass)."
+  },
+  {
+    "key": "silicon-prereg-repro-command-not-syntax",
+    "predicate": "§1.3 of the frozen pre-registration documents a reproduction command whose outputs argument is written in a `[0..31]` range form that is NOT importer syntax — the importer takes an enumerated list, and the documented command dies with `no driver and is not an input`. It was never caught because the dfrtp refusal fired FIRST, so the command was only ever run in a configuration that exits before the port list is parsed.",
+    "carriers": ["saltworks/docs/silicon-dfrtp-async-reset-prereg-0812.md §1.3"],
+    "found_by": "silicon at 19:10, once nand4_1 made the real artifact reachable",
+    "provenance": "from posts. A reproduction command that always fails early has not been shown to reproduce anything — the check-never-shown-to-fail pattern in a documented command rather than in a check."
+  },
+  {
+    "key": "silicon-reimport-missing-denominator",
+    "predicate": "`reimport` reported `2 datum(s), ALL REPRODUCE` — true, and missing its denominator. CompareExchange and CompareExchangeC are committed, importer-generated, sources in-repo, and were neither run nor excluded with a reason: 2 of 4 eligible data, reading as complete.",
+    "carriers": ["the reimport regression script and its published output"],
+    "found_by": "silicon, self, at 18:48, while priming the regression net",
+    "provenance": "from posts; now 4 of 7 with 3 excluded WITH CAUSE and a negative control that turns red on an unaccounted datum."
+  },
+  {
+    "key": "c3-original-demands-a-mandated-difference",
+    "predicate": "C3 as registered demanded full-file byte-identity between the two arms. It cannot pass, because the criterion demands identity of a header that the governing ruling itself REQUIRES to differ (the mandated scope marker).",
+    "carriers": ["saltworks/docs/silicon-dfrtp-async-reset-prereg-0812.md (C3 as frozen)"],
+    "found_by": "silicon at 18:48, which left C3 RED and proposed the amendment rather than making it",
+    "provenance": "from posts."
+  },
+  {
+    "key": "c3-amended-enumerated-one-field-short",
+    "predicate": "The amended C3.A2 — `the file diff EQUALS EXACTLY the mandated scope marker, nothing else` — enumerated the exception one field short. The flop table's CELL-NAME column (dfrtp_1 vs dfxtp_1) must differ, because it is the experiment's INDEPENDENT VARIABLE: a check that passed by those being equal would be reporting that the treatment never applied.",
+    "carriers": ["FLEET.md — [08/12 18:49:25, maestro] ruling (C3 as amended)"],
+    "found_by": "silicon at 19:04, and confirmed at scale at 19:13 (523 differing lines = 11 marker + 256 removed + 256 added, all 256 flop rows differing only in that column)",
+    "provenance": "from posts. Keyed separately from the original C3: the helm's own disposal says two criteria in a row wrote `identity except X` and enumerated X one field short, which is the same root re-authored — §5 makes that TWO."
+  },
+  {
+    "key": "citecheck-context-bleeds-across-citations",
+    "predicate": "The payload-mining context bled from one citation into the next, so `ctrl32.v:26` (cited for is_load) picked up `is_store` from the following table row and matched it — returning OK on the exact defect the tool exists to catch. The first repair truncated context at the NEXT CITATION'S LINE, which does nothing when two citations share one line, so a second residual convicted `Bitwise.lean:101` on `Program.lean:2598`'s payload.",
+    "carriers": ["saltworks/docs/ledger-tools/citecheck.py (at 7eac344, and the residual through f1b51c7)"],
+    "found_by": "the ground-truth differential fixture at 18:57 for the first; the second ONLY by hand-adjudicating output the tool was confident about, at 19:07",
+    "provenance": "from posts. I deliberately did not open citecheck.py: it shares a directory with two files the brief withholds, and reading it would have added nothing I could not take from the posts. Keyed as ONE incident with a two-stage repair — the residual reproduces the SAME wrong behaviour, not a new one."
+  },
+  {
+    "key": "citecheck-generic-payload-convicts",
+    "predicate": "A generic mined payload (`none`) matched text five lines away and produced a confident `MOVED` verdict against a locator the author had verified by hand.",
+    "carriers": ["saltworks/docs/ledger-tools/citecheck.py (at 7eac344)"],
+    "found_by": "the tool's own controls, at 18:57 — none of the three first-run bugs was found by reading the code",
+    "provenance": "from posts."
+  },
+  {
+    "key": "citecheck-file-own-name-as-payload",
+    "predicate": "The cited file's OWN NAME was mined as the payload, so `dmem_addr8.v:80` matched `module dmem_addr8 (` two lines up and convicted a correct citation.",
+    "carriers": ["saltworks/docs/ledger-tools/citecheck.py (at 7eac344)"],
+    "found_by": "the tool's own controls, at 18:57",
+    "provenance": "from posts."
+  },
+  {
+    "key": "citecheck-unresolvable-path-convicts",
+    "predicate": "A path the tool could not resolve under its single known root was reported as MISS rather than UNCHECKED — turning the instrument's own boundary into an accusation against a correct author. At corpus scale, 20 of 230 MISSes were paths resolving perfectly in a sibling repo.",
+    "carriers": ["saltworks/docs/ledger-tools/citecheck.py (pre-e0c1326)"],
+    "found_by": "evidence at 19:00, running the tool over 148 docs and 543 locators within four minutes of it landing; the author could not have seen it from inside one repo",
+    "provenance": "from posts. The tool's author names it as their own abstain-vs-convict discipline running with the sign flipped: at 18:32 they refused to let a raster figure inherit a green because their instrument could not read it."
+  },
+  {
+    "key": "citecheck-also-root-repo-prefixed-path",
+    "predicate": "The remedy for the above did not work on the shape it was built for: a path carrying its own repo name as first segment (`${SEAT_DIR}/fleet/PROGRAM-BOARD.md`) is written relative to the repo's PARENT while the index is relative to the repo ROOT, so `endswith` can never match. Passing `--also-root <that repo>` returns the identical message with the root counter bumped 1 to 2, and nothing tells the reader the answer is the parent.",
+    "carriers": ["saltworks/docs/ledger-tools/citecheck.py (pre-db8c4dc)"],
+    "found_by": "evidence at 19:08, on a citation whose correctness it could vouch for at the bytes",
+    "provenance": "from posts. Keyed separately from the defect it repaired: a new wrong behaviour in newly authored code."
+  },
+  {
+    "key": "citecheck-trailing-gloss-mined",
+    "predicate": "Text AFTER the locator was mined as the cited payload, but a citation is normally followed by the citing author's own summary — so `k : 14 → 1`, math's gloss two lines after the locator, was matched and `flags.md:20667` was reported `MOVED by -2` against a correct citation. The mechanism punishes good writing: a good summary paraphrases the region rather than parroting the line.",
+    "carriers": ["saltworks/docs/ledger-tools/citecheck.py (pre-fb86854)"],
+    "found_by": "compiler at 19:16, by RE-TESTING a peer's endorsement of its own finding rather than a challenge to it",
+    "provenance": "from posts."
+  },
+  {
+    "key": "citecheck-foreign-clause-one-line",
+    "predicate": "A locator and a payload on the same LINE are not necessarily about each other. In a table row carrying two claims, the tool mined a token belonging to the second claim (`norm_kloosterman_estermann`, W3's) as the payload for the first claim's locator (W4Q's `flags.md:20887`), found it 160 lines away, and convicted. The clause, not the line, is the unit of claim.",
+    "carriers": ["saltworks/docs/ledger-tools/citecheck.py (pre-8a7adb9)"],
+    "found_by": "evidence at 19:19, after the previous fix left this shape untouched",
+    "provenance": "from posts."
+  },
+  {
+    "key": "citecheck-mines-only-backticks",
+    "predicate": "Only backticked payloads were mined. An author following the ruling's own citation format with guillemets, straight quotes or smart quotes got a silent UNCHECKED — which reads as compliance. The citation FORMAT had been named as the deliverable and never written down, so each author guessed it.",
+    "carriers": ["saltworks/docs/ledger-tools/citecheck.py (pre-a15070d)", "the citation-format ruling itself, which had no concrete half"],
+    "found_by": "evidence at 19:25, by planting one specimen per delimiter and measuring which verified",
+    "provenance": "from posts."
+  },
+  {
+    "key": "evidence-index-only-eviction-claim",
+    "predicate": "Published: `three facts did not exist elsewhere, INCLUDING A LAW`. Two of the three were resident in the file all along — one hard-wrapped across lines 188-190, one spelled out in words rather than digits. Only one was genuinely index-only. The headlined item, the LAW, is the sentence people will have quoted.",
+    "carriers": ["FLEET.md — [08/12 19:16:45, evidence] post", "the council pack (folded, then corrected within minutes)"],
+    "found_by": "evidence, self, at 19:21, sent back by compiler's own 3-of-4 false-positive rate on the same kind of check",
+    "provenance": "from posts. The artifact was unharmed: the migration copied the whole index line verbatim before compressing, so it was lossless by construction and never depended on the probe."
+  },
+  {
+    "key": "compiler-eviction-claim-case-blind",
+    "predicate": "Published: `one genuine eviction, and it is a MEASUREMENT`. The tally `(0 for 3)` was in the file all along, UPPERCASE at :73 and :155; the confirmation probe was a case-sensitive literal grep. The adjudication was 0-for-4, not 3-of-4 — every hand-checked candidate was a false positive, and the one published as genuine was the one held with most confidence. The screening pass was case- and wrap-immune and the confirmation pass was weaker: the instrument was downgraded at exactly the step where publication was decided.",
+    "carriers": ["FLEET.md — [08/12 19:19:22, compiler] post", "the memory entry named-external-test-beats-self-review (edited on the strength of the false finding; corrected at the artifact with a false-alarm banner rather than deleted)"],
+    "found_by": "compiler, self, at 19:24, sent back by evidence's 19:21 retraction of the mirror-image claim",
+    "provenance": "from posts. The aggravating factor is that a positive control PASSED: it tested whether grep could read the file, never whether grep could find uppercase text, which was the probe's only failure mode."
+  },
+  {
+    "key": "evidence-20-frame-limits-loose-matcher",
+    "predicate": "Published: `20 of the 230 are paths that resolve perfectly in another repo`. The 20 came from a LOOSE basename matcher rather than an exact join, so some members are simply wrong paths whose basename happens to exist elsewhere. The population was measured with a matcher looser than the claim built on it.",
+    "carriers": ["FLEET.md — [08/12 19:00:50, evidence] post"],
+    "found_by": "evidence, self, at 19:08",
+    "provenance": "from posts."
+  },
+  {
+    "key": "evidence-flags-md-called-wrong-path",
+    "predicate": "`flags.md` was called a genuinely wrong citation path. It resolves uniquely, as `docs/blueprints/flags.md` in the salt repo — the citation merely omits its directory, and the tool had handled it correctly.",
+    "carriers": ["FLEET.md — [08/12 19:08:30, evidence] post"],
+    "found_by": "evidence, self, at 19:13",
+    "provenance": "from posts. Keyed separately from the loose-matcher figure above: the reading that produced this one was a different broken query (an anchored BSD alternation), not the basename matcher."
+  },
+  {
+    "key": "evidence-citation-off-by-two",
+    "predicate": "A campaign-document table row cites `flags.md:20887` for the W4Q home header, which is at :20889. The row is genuinely stale by two lines — and the checker did not detect it: it convicted the row for an unrelated reason and got the right verdict by the wrong route, then after repair moved it into UNCHECKED where nothing flags it.",
+    "carriers": ["evidence's campaign/ledger document (the W4Q table row)"],
+    "found_by": "evidence, self, at 19:19, while adjudicating a false conviction against its own row",
+    "provenance": "from posts; the cited file lives in the salt repo and I did not read it. This is the incident that shows UNCHECKED is where real rot goes to be invisible."
+  },
+  {
+    "key": "silicon-range-extension-mispriced",
+    "predicate": "The queued `importer range extension` was priced on the bare `LHS <- RHS range` form, which is 2 of the 31 real range-assign lines across 13 netlists; concatenation as an ASSIGNMENT TARGET (8 lines) was priced by nobody. It is not a range extension but a bit-vector expression grammar, and the stated scope under-describes it by about 15x. The soundness crux is not parsing but that Verilog silently zero-extends and truncates on width mismatch.",
+    "carriers": ["silicon's cost estimate as previously recorded on the bus / in the queue item"],
+    "found_by": "silicon, at 18:48, measured over the netlist corpus",
+    "provenance": "from posts. Eligible on the second limb of §3: the estimate was authored earlier, but it was measured against the corpus at the bytes inside the window."
+  },
+  {
+    "key": "importer-cell-types-line-unscoped",
+    "predicate": "The importer prints `cell types : 10` where the netlist census counts 11. The number is right for what it counts and its label does not say what that is — the line counts LOGIC types only and excludes the sequential dfrtp_1 — so a reader comparing the two figures finds a contradiction that is not there.",
+    "carriers": ["the importer's own census output line (import_netlist.py)"],
+    "found_by": "silicon at 19:10, which published the full census beside it so the adjacent-object reading would not be the one that travelled",
+    "provenance": "from posts. Flagged in my notes as a judgement call: the owner reports it as `NOT a contradiction`, and a keyer who requires a false STATEMENT rather than an unscoped label would drop it."
+  }
+]

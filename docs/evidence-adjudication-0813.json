@@ -1,0 +1,320 @@
+{
+  "adjudication": "unmatched-row walk, both directions, per helm order 08/13 10:13:21",
+  "by": "evidence keyer head (compiler adjudicates jointly; this is my half, posted for their walk)",
+  "unit": "INCIDENTS throughout; carriers never folded into an incident count",
+  "pairing_method": "BY READING THE PREDICATES. Token metrics were not used to decide identity: I rebuilt one independently and it MIS-PAIRED prep-locator-ctrl32 to a citecheck row, so two independent metrics disagree on the same pairs. A threshold near the noise ceiling cannot decide identity — which is why the helm ordered this walk.",
+  "matched": {
+    "by_silicon": 7,
+    "recovered_by_reading": 5,
+    "note": "5 recovered = 4 threshold artefacts + the 3-to-1 locator fold (counted as one evidence row)"
+  },
+  "compiler_rows_unmatched": [
+    {
+      "key": "die-rtl-scope-mix",
+      "outcome": "SAME_ROOT",
+      "reason": "Already keyed by me as rtl-numerator-over-die-denominator (9 carriers to their 8). Not a disagreement: a similarity-threshold artefact. Recovered by reading both predicates."
+    },
+    {
+      "key": "citecheck-context-bleed",
+      "outcome": "SAME_ROOT",
+      "reason": "Already keyed as citecheck-context-bleeds-across-citations. I folded their same-line residual into it; they did not key the residual separately, so on this row our rules agree in effect."
+    },
+    {
+      "key": "citecheck-backticks-only",
+      "outcome": "SAME_ROOT",
+      "reason": "Already keyed as citecheck-mines-only-backticks. Threshold artefact."
+    },
+    {
+      "key": "false-eviction-claim",
+      "outcome": "SAME_ROOT",
+      "reason": "Already keyed as compiler-eviction-claim-case-blind. Threshold artefact."
+    },
+    {
+      "key": "prep-locator-ctrl32",
+      "outcome": "SAME_ROOT",
+      "reason": "Folded into my compiler-prep-doc-locators. THE HARD-CASE RULE DIVERGENCE, and it is the one §5 predicted: they keyed per-locus, I keyed per-pass. Both defensible; both stated."
+    },
+    {
+      "key": "prep-locator-program-path",
+      "outcome": "SAME_ROOT",
+      "reason": "Same fold, same divergence. Note this locator is the one that crossed a slot boundary, which is the strongest single argument for THEIR per-locus rule: it is a different KIND of wrong than an off-by-N line."
+    },
+    {
+      "key": "prep-locator-isa-arm",
+      "outcome": "SAME_ROOT",
+      "reason": "Same fold, same divergence."
+    },
+    {
+      "key": "design-doc-locator-ranking",
+      "outcome": "NEW_ROOT_RULE_DEPENDENT",
+      "reason": "Their own provenance reads 'caught before landing'. This is my published NEAR-MISS #9 — enumerated and excluded by my stated carrier rule, not overlooked. Admitting it admits the looser rule."
+    },
+    {
+      "key": "ledger-population-repo-path",
+      "outcome": "NEW_ROOT_RULE_DEPENDENT",
+      "reason": "Their own provenance reads 'caught before the disclosure was published'. My published NEAR-MISS #12."
+    },
+    {
+      "key": "head-is-not-my-landing",
+      "outcome": "NEW_ROOT_RULE_DEPENDENT",
+      "reason": "Their own provenance reads 'NEVER PUBLISHED — caught in the composing window' and their carrier field literally says '(bus post, pre-publication)'. My published NEAR-MISS #11."
+    }
+  ],
+  "evidence_rows_unmatched": [
+    {
+      "key": "compiler-boundary-list-not-a-population",
+      "outcome": "NEW_ROOT",
+      "reason": "D2 grant/closure family — the seed has no row in it. A published boundary table that was never a swept population; 22 named vs 31 touching, and the miss was a hard break outside the grant it justified."
+    },
+    {
+      "key": "compiler-sweep-covered-a-range-not-a-cone",
+      "outcome": "NEW_ROOT",
+      "reason": "Second under-count, new dimension (a line range in one file vs a five-file dependency cone), authored after the first was owned. Distinct root, distinct authoring act."
+    },
+    {
+      "key": "math-examined-category-overclaimed",
+      "outcome": "NEW_ROOT",
+      "reason": "math's lane — the seed keys nothing from it. An EXAMINED category counted on the strength of a grep result; the declared gap was smaller than the true gap."
+    },
+    {
+      "key": "math-seal-criterion-assumed-fixed-set",
+      "outcome": "NEW_ROOT",
+      "reason": "math's lane. A verification criterion that assumed a fixed declaration set, so it would have failed a correct landing."
+    },
+    {
+      "key": "compiler-trap-attributed-to-the-disclosed-ten",
+      "outcome": "NEW_ROOT",
+      "reason": "A false attribution that reached a PUSHED COMMIT MESSAGE and the helm record, and needed a git note to correct. Three carriers; the seed has no row for it."
+    },
+    {
+      "key": "compiler-examination-could-not-have-caught-it",
+      "outcome": "NEW_ROOT",
+      "reason": "A NEW unmeasured claim authored inside the retraction of the above, in the generous direction. An exoneration is a claim."
+    },
+    {
+      "key": "helm-seal-item-carried-a-figure",
+      "outcome": "NEW_ROOT",
+      "reason": "A figure carried into a seal INSTRUCTION instead of an order to re-measure; every clause but one was false by the landing. I verified the line-number half at the bytes (ISA.lean:183)."
+    },
+    {
+      "key": "retirement-gate-on-a-bare-phrase",
+      "outcome": "NEW_ROOT",
+      "reason": "A retirement gate specified on a bare phrase, unsatisfiable by construction and unscoped to a file. Three carriers across two authors."
+    },
+    {
+      "key": "seats-marker-annotated-not-updated",
+      "outcome": "NEW_ROOT",
+      "reason": "A status marker annotated ABOVE rather than updated in place: correct in prose, stale to a grep."
+    },
+    {
+      "key": "seats-retirement-annotation-overclaims",
+      "outcome": "NEW_ROOT",
+      "reason": "Distinct root from the marker: a two-site grant declared retired when one site was live. Half-discharged, not retired."
+    },
+    {
+      "key": "evidence-two-site-grant-read-as-one",
+      "outcome": "NEW_ROOT",
+      "reason": "A third hand reaching the same over-strong conclusion by its own route, while quoting the paragraph that refutes it."
+    },
+    {
+      "key": "compiler-seal-headline-overclaims-plane",
+      "outcome": "NEW_ROOT",
+      "reason": "A sealed headline true of the Lean plane only, with a second hand-written plane decoding memory and no theorem linking them."
+    },
+    {
+      "key": "wake-order-shas-lack-repo",
+      "outcome": "NEW_ROOT",
+      "reason": "Two shas from different repos quoted bare; one does not resolve where it is read. FLAGGED: the weakest row in my keying — its carrier lies outside my fenced window and I verified nothing myself."
+    },
+    {
+      "key": "maestro-stamps-estimated-not-read",
+      "outcome": "NEW_ROOT",
+      "reason": "The clock cascade — the seed has no row for it. Five bus stamps estimated rather than read. I corroborated it independently at the bytes: exactly those five in-window maestro headers carry no seconds field, against 20 that do."
+    },
+    {
+      "key": "math-stamps-typed-not-read",
+      "outcome": "NEW_ROOT",
+      "reason": "Same class, independently authored by a different seat with a different mechanism (measured-plus-typed-offset vs estimated-from-flow). §5 makes that TWO."
+    },
+    {
+      "key": "evidence-lead-is-growing",
+      "outcome": "NEW_ROOT",
+      "reason": "A trend asserted over four numbers printed in the same box, one of which goes the other way. Refutable from the post's own bytes."
+    },
+    {
+      "key": "evidence-clock-localisation-from-parsed-stamps",
+      "outcome": "NEW_ROOT",
+      "reason": "Distinct root: parsed-treated-as-measured. A typed stamp carries no clock, so the localisation and the magnitude both fail."
+    },
+    {
+      "key": "evidence-classifier-mask-deletes-newlines",
+      "outcome": "NEW_ROOT",
+      "reason": "Control-traversal family — the seed has no row in it. A mask that deleted newlines and a zip that truncated; read 18% of its file and failed to zero quietly."
+    },
+    {
+      "key": "evidence-control-bypassed-the-pipeline",
+      "outcome": "NEW_ROOT",
+      "reason": "Distinct root: a control that touched neither the mask nor the zip, i.e. neither place the defect could live. It is why the transform survived."
+    },
+    {
+      "key": "math-control-enters-after-extraction",
+      "outcome": "NEW_ROOT",
+      "reason": "Independently authored instance in another seat's instrument: the control entered after extraction, and the skipped stage is the one that actually broke that day."
+    },
+    {
+      "key": "silicon-control-different-traversal",
+      "outcome": "NEW_ROOT",
+      "reason": "Independently authored instance: the control ran without -r and without --include, proving the pattern and nothing about the traversal."
+    },
+    {
+      "key": "silicon-sweep-include-population",
+      "outcome": "NEW_ROOT",
+      "reason": "Distinct root from that control: an extension-keyed population that missed four real files, one of them the author's own bus watcher."
+    },
+    {
+      "key": "math-fallback-sweep-inherits-primary-key",
+      "outcome": "NEW_ROOT",
+      "reason": "A fallback sweep scored with the primary filter's own key, so it inherits the blind spot it exists to find. Its zero-drops verifies only key-visible posts."
+    },
+    {
+      "key": "evidence-sweep-population-silently-filtered",
+      "outcome": "NEW_ROOT",
+      "reason": "39 of 709 files excluded silently, and a completeness claim published over a population never stated. Every sentence true, the assembly false."
+    },
+    {
+      "key": "silicon-c6-was-an-identity",
+      "outcome": "NEW_ROOT",
+      "reason": "silicon's dfrtp/C3/importer lane — the seed has no row in it. A registered check that was an identity and could not fail on any input."
+    },
+    {
+      "key": "silicon-eager-constant-seeded",
+      "outcome": "NEW_ROOT",
+      "reason": "A dead constant emitted because the pinned net was seeded eagerly, inflating the gate count and shifting every index."
+    },
+    {
+      "key": "silicon-a1-comment-stripper-false-red",
+      "outcome": "NEW_ROOT",
+      "reason": "A comment stripper preserving line numbering, so the check measured alignment rather than logic. A false RED."
+    },
+    {
+      "key": "silicon-a2-silent-skip-prints-a-tick",
+      "outcome": "NEW_ROOT",
+      "reason": "Distinct root: a guard short-circuiting into a branch that PRINTS A TICK — a silent skip reading as a pass, shipped below that file's own header warning about it."
+    },
+    {
+      "key": "silicon-prereg-repro-command-not-syntax",
+      "outcome": "NEW_ROOT",
+      "reason": "A documented reproduction command in a frozen pre-registration that is not the tool's syntax, never caught because an earlier refusal always fired first."
+    },
+    {
+      "key": "silicon-reimport-missing-denominator",
+      "outcome": "NEW_ROOT",
+      "reason": "2 of 4 eligible data reported as ALL REPRODUCE — true, and missing its denominator."
+    },
+    {
+      "key": "c3-original-demands-a-mandated-difference",
+      "outcome": "NEW_ROOT",
+      "reason": "A criterion demanding identity of a header the governing ruling itself requires to differ."
+    },
+    {
+      "key": "c3-amended-enumerated-one-field-short",
+      "outcome": "NEW_ROOT",
+      "reason": "The repair repeated the shape: the amended criterion enumerated the exception one field short, excluding the experiment's own independent variable. The ruling authority's disposal names these as two."
+    },
+    {
+      "key": "silicon-range-extension-mispriced",
+      "outcome": "NEW_ROOT",
+      "reason": "A queued item priced on 2 of its 31 real lines; not a range extension but a bit-vector grammar, under-described ~15x. Eligible on §3's second limb: measured at the bytes in-window."
+    },
+    {
+      "key": "importer-cell-types-line-unscoped",
+      "outcome": "NEW_ROOT",
+      "reason": "An instrument printing a count whose label does not say what it counts. FLAGGED as my weakest 'is this a defect' row — the owner calls it not a contradiction, and I offer it as my first concession."
+    },
+    {
+      "key": "silicon-bank-cell3-mispaint-inference",
+      "outcome": "NEW_ROOT",
+      "reason": "A false inference in a memory bank (a cell believed present-but-renamed on the die was constant-propagated away). Distinct root from the ratio, independently authored by a different hand."
+    },
+    {
+      "key": "draft-ledger-does-not-exist",
+      "outcome": "NEW_ROOT",
+      "reason": "The paper's own defects — the seed has no row in this family. The draft claims an artifact that does not exist in any of the three repos; the verb is wrong and the ledger must be constituted."
+    },
+    {
+      "key": "draft-ranking-unfenced",
+      "outcome": "NEW_ROOT",
+      "reason": "The count is bracketed and the stronger claim drawn from it is not; a ranking escaped the freeze list."
+    },
+    {
+      "key": "draft-two-taxonomies",
+      "outcome": "NEW_ROOT",
+      "reason": "Two incompatible partitions for one ledger, sharing one class. One classifier cannot serve both."
+    },
+    {
+      "key": "evidence-index-only-eviction-claim",
+      "outcome": "NEW_ROOT",
+      "reason": "A published claim that three facts were index-only; two were resident, one hard-wrapped and one spelled differently. Carried on the bus and folded into a pack."
+    },
+    {
+      "key": "evidence-20-frame-limits-loose-matcher",
+      "outcome": "NEW_ROOT",
+      "reason": "A published population measured with a matcher looser than the claim built on it."
+    },
+    {
+      "key": "evidence-flags-md-called-wrong-path",
+      "outcome": "NEW_ROOT",
+      "reason": "A path called genuinely wrong that resolves uniquely; distinct root from the loose matcher above (this one came from a broken anchored alternation)."
+    },
+    {
+      "key": "evidence-citation-off-by-two",
+      "outcome": "NEW_ROOT",
+      "reason": "A landed citation stale by two lines that the checker did not detect — it convicted for an unrelated reason, then abstained. The specimen for UNCHECKED being where real rot hides."
+    },
+    {
+      "key": "compiler-commit-m-multiline",
+      "outcome": "NEW_ROOT",
+      "reason": "A multi-line commit message passed through a double-quoted shell string, against the author's own banked ban. It worked, which is the defect."
+    },
+    {
+      "key": "compiler-post-line-count-inconsistency",
+      "outcome": "NEW_ROOT",
+      "reason": "A landed post contradicting itself on the same gap. FLAGGED: my smallest row. Severity is not a ground to drop it under an IDENTITY rule, but I record it as a concession candidate."
+    },
+    {
+      "key": "correction-landed-in-prose-not-the-figure",
+      "outcome": "DISPUTED_TO_HELM",
+      "my_position": "MY POSITION: a NEW root authored at the correcting commit — before it, prose and figure agreed; after it, one document asserted two contradictory figures six lines apart. The wrong thing is the partial correction, not the original ratio.",
+      "opposing_position": "THE OPPOSING POSITION I AM OBLIGED TO STATE: the bytes that carry it are the SAME stale bytes as the ratio incident, and the seed folds the whole blast radius into one row. Under 'distinct root defect' read strictly at the artifact, it merges."
+    }
+  ],
+  "ineligible_under_brief_section_3": [],
+  "ineligibility_note": "I re-tested all 57 against \"lived or verified at the bytes inside the window\" and dropped none. The two closest to the bar are named in their rows (wake-order-shas-lack-repo, silicon-range-extension-mispriced); both pass on the disjunction, the second on its second limb.",
+  "totals": {
+    "compiler_unmatched_walked": 10,
+    "evidence_unmatched_walked": 45,
+    "compiler_rows_that_are_NEW_ROOTS_I_MISSED": 0,
+    "compiler_rows_rule_dependent": 3,
+    "evidence_rows_NEW_ROOT": 44,
+    "evidence_rows_disputed": 1
+  },
+  "helm_eligibility_ruling_0813_1016": "The population is the WINDOW'S CONTENTS, not any keyer's witness: lived or verified at the bytes there BY WHICHEVER SEAT. This confirms the reading I keyed under and resolves my one flagged row — wake-order-shas-lack-repo is ELIGIBLE (compiler verified it at the bytes at 17:08:35, inside the window) even though I could verify nothing of it myself. I dropped no row for ineligibility before the ruling and drop none after it.",
+  "reconciliation": {
+    "finding": "The reconciled TOTAL is decided by two stated rules, not by either keyer's diligence. Both sides must be scored under the SAME rule.",
+    "under_the_carrier_rule_I_published": {
+      "evidence": 57,
+      "compiler": "17 -> 14 (its 3 self-declared pre-publication rows drop)",
+      "union": 57,
+      "why": "all 14 surviving compiler rows sit inside my 57 (the 3 locator rows fold into 1)"
+    },
+    "under_the_looser_rule_the_seed_actually_used": {
+      "evidence": "57 + my 16 published near-misses = 73, + 2 for splitting my locator row per-locus = 75",
+      "compiler": 17,
+      "union": ">=75",
+      "why": "a floor, not a ceiling: other rows of mine may split further under a per-locus rule"
+    },
+    "the_load_bearing_sentence": "If compiler's 3 pre-publication rows are ADMITTED, my 16 published near-misses must be admitted too. If they are EXCLUDED, compiler's seed is 14. Applying the rule to one side only is the only outcome that is definitely wrong.",
+    "what_the_gap_is_NOT": "It is not mainly a splitting difference. Measured on the seed's OWN carrier lists: 15 distinct carriers over 17 rows; 8 rows carry docs/ledger-tools/citecheck.py and 3 carry one prep doc. No carrier path lies in math's or silicon's lane, and there is no row for the clock cascade, the D2 grant/closure family, the control-traversal family, or the paper's own defects.",
+    "and_that_is_not_a_defect_in_the_seed": "§3 says it outright: one seat's visible window is not a census and is not meant to be. The seed keyed the lane its author could see. The blind second pass is what makes that measurable instead of invisible — which is what the pipeline was built to produce."
+  }
+}
