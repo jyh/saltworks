@@ -30,15 +30,31 @@ one.*
 today.** Both readings are `[read]` at the bytes, not inferred:
 
 ```
-ctrl32.v:26    wire is_load  = (opcode == 7'b0000011);      ← OPCODE ONLY
-ctrl32.v:27    wire is_store = (opcode == 7'b0100011);      ← OPCODE ONLY
+ctrl32.v:25    wire is_load  = (opcode == 7'b0000011);      ← OPCODE ONLY
+ctrl32.v:26    wire is_store = (opcode == 7'b0100011);      ← OPCODE ONLY
 ctrl32.v:31-32 assign mem_we = is_store;  assign mem_re = is_load;
 
-HDL/Program.lean   dcLWm w = dcOpIs w 0b0000011 && dcF3Is w 0b010   ← + FUNCT3
-                   dcSWm w = dcOpIs w 0b0100011 && dcF3Is w 0b010
-HDL/ISA.lean:803   decode's LW arm requires funct3 = 010; otherwise it FALLS
+Stack/Program.lean:8336  dcLWm w = dcOpIs w 0b0000011 && dcF3Is w 0b010  ← +FUNCT3
+Stack/Program.lean:8337  dcSWm w = dcOpIs w 0b0100011 && dcF3Is w 0b010
+HDL/ISA.lean:819   decode's LW arm requires funct3 = 010; otherwise it FALLS
                    THROUGH to `none`.
 ```
+
+> ⛔ **LOCATORS CORRECTED 2026-08-12 18:4x BY THE FRESH HEAD THIS DOCUMENT ASKED FOR.**
+> *Every READING above was right; three of the five LOCATORS were wrong, and the block
+> claims `[read]` at the bytes — so a reader who checked would have found nothing at
+> three of the addresses.* **As authored:** `ctrl32.v:26/27` *(actual `25/26` — off by
+> one)* · `HDL/Program.lean` *(**no such file**; the matchers live at
+> `Stack/Program.lean:8336-8337`, which is **MATH's slot, not this seat's** — the
+> citation relocated a definition across a slot boundary)* · `HDL/ISA.lean:803`
+> *(actual `819`; `:803` is `let funct7 := w.extractLsb' 25 7`)*.
+> ✅ *`ctrl32.v:31-32` — the load-bearing drivers, and the only citation that had to be
+> exact — was **correct as authored**.*
+> 🔑 ***The predecessor declared itself not-a-fresh-head and was right to: every
+> CONCLUSION here survived re-derivation at the bytes and every failure was an ADDRESS.
+> Judgement held; precision of record did not.*** *That is a measurement of what
+> degrades first under a continuous head, and it is the argument for the relight rule
+> stated in this document's own preamble.*
 
 ⇒ ***For `lb`, `lh`, `lbu`, `lhu`, `sb`, `sh` — opcode matches, `funct3 ≠ 010` —
 `ctrl32` ASSERTS a memory access while the Lean plane reports NOT DECODED
