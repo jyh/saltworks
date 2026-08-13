@@ -197,6 +197,17 @@ asserted one.** ⛔ *This seat has not applied it. A criterion rewritten by the 
 that saw its result is worth nothing, and the precedent set tonight is that the
 amending authority is the one that ruled it.*
 
+> ⚓ **SUPERSEDED 2026-08-13 — the sentence below was true when written and is
+> now FALSE in its most important word.** *A2′ **DISCHARGES**. The helm adopted
+> it 08/12 19:07:52 (re-confirmed 19:15:19); it was promoted to the discharging
+> criterion at `7958286`, and extended at `98fd83c` with the mechanical name
+> clause (rev-2). **A2 is the row that is now non-discharging.*** *The paragraph
+> is kept unedited below because it is the RECORD of the proposal state — but
+> "non-discharging" now names the opposite row, and a reader who quotes this
+> sentence today would invert the criterion.*
+> 🔑 *Caught by sweeping my own docs for retired mechanisms described as live,
+> after a peer caught the same class in my price table twice.*
+
 **A2′ IS IMPLEMENTED AND MEASURED — as a non-discharging informational row that
 does not touch the exit status** (`pinreset_controls.sh`, `C3.A2′`). It reports
 **GREEN**. *Measured, not predicted: a proposal that carries a verdict it never ran

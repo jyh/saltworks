@@ -364,6 +364,23 @@ all 15 models   [0 axioms] · saltbuild EXIT=0
 ⛔ **No datum has landed.** The bar and helm condition (4) are untouched by any
 of this; every netlist above was imported to a temporary file and discarded.
 
+> ⚓ **SUPERSEDED 2026-08-13 — READ THE TENSE.** *Everything above is a **dated
+> snapshot**: "STATE AFTER BATCH 2", 08/12, and it is accurate as history and
+> kept unedited on purpose.* **The sentence immediately above it is not tense-safe
+> and I am correcting it rather than rewriting the section: A DATUM HAS SINCE
+> LANDED.** *It is certified under **C3/A2′ rev-2** — `7958286` promoted A2′ to
+> the discharging criterion, `98fd83c` added the mechanical name clause and
+> narrowed A1. Helm condition (4)'s binding row — width agreement as a HARD ERROR
+> — is discharged at `a0e2c4a`.*
+> ⚠️ *The `pinreset EXIT=1 from C3.A2 alone` receipt above is likewise historical:
+> **A2 no longer gates** (superseded 08/12 19:07:52), and `pinreset_controls.sh`
+> now exits 0.*
+> 🔑 ***WHY THIS NOTE AND NOT AN EDIT: a dated snapshot is evidence and must not be
+> rewritten; a bolded present-tense sentence inside one is a trap, because a reader
+> who lands on the section reads the CLAIM and not the HEADING.*** *Correct the
+> tense, keep the record.* **Found by sweeping my own docs for retired mechanisms
+> described as live — the first time today I caught this class before a peer did.**
+
 ---
 
 # ADDENDUM 4 — BATCH 3 CLOSES THE CELLS-ONLY CLASS, AND MY PREDICTION WAS WRONG
