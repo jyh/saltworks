@@ -1,0 +1,46 @@
+PRE-REGISTERED MODEL DERIVATIONS, BATCH 3 — from the CELL NAME and the sky130
+naming convention, written BEFORE reading any Liberty function.
+
+TARGETING (re-run on CURRENT state, not reused from the pre-batch-2 ranking):
+5 netlists remain blocked ONLY by cells, and they need exactly these 10. The
+greedy curve is FLAT here (10 cells -> 5 netlists, no front-loaded prefix), so
+there is no clever subset and the honest move is to close the class. After this,
+every remaining blocked netlist is gated by the GRAMMAR or by CONCATENATION,
+both of which are math's call and not mine.
+
+Convention, carried 15/15 across batches 1-2:
+  aNN..o / oNN..a   groups combined, output NON-inverted   -> output pin X
+  aNN..oi / oNN..ai groups combined, then INVERTED         -> output pin Y
+  'b' bubbles an input; the letter's POSITION names which group
+
+ 1 o2111ai_1  Y = !((A1 || A2) && B1 && C1 && D1)
+ 2 o311ai_0   Y = !((A1 || A2 || A3) && B1 && C1)
+ 3 a21bo_1    X =  (A1 && A2) || (!B1_N)
+ 4 a41o_1     X =  (A1 && A2 && A3 && A4) || B1
+ 5 a41oi_1    Y = !((A1 && A2 && A3 && A4) || B1)
+ 6 o2111a_1   X =  (A1 || A2) && B1 && C1 && D1
+ 7 o21ba_1    X =  (A1 || A2) && (!B1_N)
+ 8 o221a_1    X =  (A1 || A2) && (B1 || B2) && C1
+ 9 o22a_1     X =  (A1 || A2) && (B1 || B2)
+10 o32a_1     X =  (A1 || A2 || A3) && (B1 || B2)
+
+RISKS NAMED IN ADVANCE:
+
+ (a) THE OUTPUT PIN. I am asserting that non-inverting cells drive X and
+     inverting cells drive Y. That held for every cell modelled so far, but it
+     is a convention I have never seen contradicted rather than one I have
+     tested — and batch 3 is the first batch where most entries are
+     NON-inverting, so this assumption carries far more weight here than it
+     ever has. If it is wrong it is wrong for SIX of these ten at once.
+
+ (b) THE BUBBLED PIN in entries 3 and 7 (`a21bo`, `o21ba`). I read the 'b' as
+     bubbling the SINGLETON and name it B1_N. Both the position and the pin
+     NAME are guesses; either could differ.
+
+ (c) `o311ai_0` carries drive suffix _0, not _1. I assume the drive strength
+     does not change the function, which the resolver's drive-stripped fallback
+     already assumes for every cell. Stated because it is an assumption I am
+     inheriting rather than one I checked.
+
+As ever a mis-derivation FAILS its `decide +kernel` theorem rather than
+misleading anyone. Recording the risks so the outcome is a measurement.

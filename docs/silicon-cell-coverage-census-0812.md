@@ -363,3 +363,84 @@ all 15 models   [0 axioms] · saltbuild EXIT=0
 ```
 ⛔ **No datum has landed.** The bar and helm condition (4) are untouched by any
 of this; every netlist above was imported to a temporary file and discarded.
+
+---
+
+# ADDENDUM 4 — BATCH 3 CLOSES THE CELLS-ONLY CLASS, AND MY PREDICTION WAS WRONG
+
+## J.1 · THE RESULT, AND THE MISS
+
+Targeting re-run on the **post-batch-2** state rather than reused: 5 netlists
+remained blocked only by cells, needing 10 cells, and the curve there is **flat**
+(no front-loaded prefix) — so there is no clever subset and the honest move is to
+close the class.
+
+```
+PREDICTED   25 -> 30 imports          MEASURED   29 import + 16 blocked + 1 skipped
+                                                 +4, not +5.  Regressions: NONE
+cell coverage 35 clean + 10 blocked + 1 empty · unmodelled-cell blockers: ZERO
+```
+⚠️ ***The cells-only class IS closed — no netlist is gated on a cell any more —
+but one of the five did not import.*** `trap32` advanced to a gate my targeting
+did not model.
+
+## J.2 · 🔑 A **THIRD** GRAMMAR CLASS, MISSED BECAUSE I ONLY EXCLUDED TWO
+
+My "blocked only by cells" filter excluded **range assigns** and
+**concatenations**. The corpus has a third form:
+
+```verilog
+assign trap_pc = mtvec;      // WHOLE-VECTOR alias: no range, no concatenation
+```
+**5 netlists, 5 lines** — `branch32 · core32 · csr32 · csr32b · trap32`. **It is
+not in the range-extension pricing**, which measured range-assign lines and RHS
+concatenations. *So the scope already referred to math is short by one form.*
+
+📌 ***The prediction failed for exactly the reason I have been publishing all
+night: clearing one gate reveals the next, and a filter can only exclude the
+classes its author knows about.*** *I priced the miss at zero and it was one in
+five.*
+
+## J.3 · ✅ THE IMPORTER IS **SAFE** ON THIS CLASS — measured, not assumed
+
+A silently-dropped assign is the shape that should worry anyone, so it was
+checked rather than argued:
+
+```
+4 of 5   the aliased LHS is a DEAD ALIAS — declared, assigned, referenced
+         NOWHERE else (verified on branch32 `tgt`, csr32 `csr_wdata`).
+         Dropping it changes nothing, and those netlists import.
+1 of 5   trap32: `trap_pc` is an OUTPUT, so dropping its only driver leaves it
+         undriven — and the importer's driver check REFUSES.
+```
+⇒ **Either the assign feeds nothing, or the net it feeds is caught as undriven.
+No path emits a datum that silently lost the assignment.**
+
+## J.4 · ⚠️ BUT THE DIAGNOSTIC IS WRONG, AND THAT IS A REAL DEFECT
+
+```
+range form   "assign uses a RANGE 'byte_addr[4:2]' -- the grammar models
+              bit-selects and scalars only. Refusing rather than collapsing..."
+              -> names ITSELF, names the CURE
+whole-vector "net 'trap_pc[0]' has no driver and is not an input"
+              -> names a SYMPTOM, and points at the PORT LIST
+```
+🔑 ***The refusal is correct and its explanation sends the reader to the wrong
+file.*** *I spent the first minute of this investigation checking my own
+auto-derived port list, because that is what the message accused.* **An
+unmodelled grammar form should refuse by naming itself, exactly as its sibling
+already does** — the two forms are one feature apart and a world apart in how
+they fail. Registered as a defect of this seat's importer; **not fixed here**,
+because the grammar question it belongs to is at math's muster.
+
+## J.5 · STATE
+
+```
+25 cell models, ALL [0 axioms] · derivations pre-registered 25 of 25 over 3 batches
+import sweep    29 import / 16 blocked / 1 skipped
+cell coverage   35 clean / 10 blocked / 1 empty      proxy gap now 6, all optimistic
+remaining gates range-grammar 13 · concatenation 2 · whole-vector 1 · CELLS 0
+reimport EXIT=0 · pinreset EXIT=1 from C3.A2 alone · selftest EXIT=0
+```
+⇒ **Every netlist still blocked is blocked on the GRAMMAR, in one of its three
+forms. Nothing left in this corpus is a cell problem, and nothing left is mine.**

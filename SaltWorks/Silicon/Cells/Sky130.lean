@@ -404,6 +404,91 @@ theorem mux4_liberty (A0 A1 A2 A3 S0 S1 : Bool) :
       = ((A0 && !S0 && !S1) || (A1 && S0 && !S1)
          || (A2 && !S0 && S1) || (A3 && S0 && S1)) := by decide +kernel +revert
 
+/-! ### Batch 3 — the ten cells that CLOSE the cells-only class.
+
+After these, every still-blocked netlist in `Flow/` is gated by the range
+grammar or by concatenation — both math's call, neither this seat's. Targeting
+was re-run on the post-batch-2 state rather than reused: the greedy curve here
+is FLAT (10 cells, 5 netlists, no front-loaded prefix), so there is no clever
+subset and closing the class is the honest move.
+
+Derivations pre-registered in `docs/silicon-cell-model-prereg-0812-batch3.txt`
+with three risks named — and all three held, giving 10/10 and **25/25 across the
+three batches**. The load-bearing one was the OUTPUT PIN convention (X when
+non-inverting, Y when inverted): batch 3 is the first batch that is mostly
+non-inverting, so that single assumption carried SIX of these ten at once, and
+it had never been tested at that weight before. -/
+
+/-- `o2111ai` -/
+def o2111ai (A1 A2 B1 C1 D1 : Bool) : Bool := !((A1 || A2) && B1 && C1 && D1)
+
+theorem o2111ai_liberty (A1 A2 B1 C1 D1 : Bool) :
+    o2111ai A1 A2 B1 C1 D1
+      = ((!A1 && !A2) || (!B1) || (!C1) || (!D1)) := by decide +kernel +revert
+
+/-- `o311ai` -/
+def o311ai (A1 A2 A3 B1 C1 : Bool) : Bool := !((A1 || A2 || A3) && B1 && C1)
+
+theorem o311ai_liberty (A1 A2 A3 B1 C1 : Bool) :
+    o311ai A1 A2 A3 B1 C1
+      = ((!A1 && !A2 && !A3) || (!B1) || (!C1)) := by decide +kernel +revert
+
+/-- `a21bo` — AND2 OR'd with a BUBBLED singleton, non-inverting. -/
+def a21bo (A1 A2 B1_N : Bool) : Bool := (A1 && A2) || (!B1_N)
+
+theorem a21bo_liberty (A1 A2 B1_N : Bool) :
+    a21bo A1 A2 B1_N = ((A1 && A2) || (!B1_N)) := by decide +kernel +revert
+
+/-- `a41o` -/
+def a41o (A1 A2 A3 A4 B1 : Bool) : Bool := (A1 && A2 && A3 && A4) || B1
+
+theorem a41o_liberty (A1 A2 A3 A4 B1 : Bool) :
+    a41o A1 A2 A3 A4 B1 = ((A1 && A2 && A3 && A4) || (B1)) := by decide +kernel +revert
+
+/-- `a41oi` -/
+def a41oi (A1 A2 A3 A4 B1 : Bool) : Bool := !((A1 && A2 && A3 && A4) || B1)
+
+theorem a41oi_liberty (A1 A2 A3 A4 B1 : Bool) :
+    a41oi A1 A2 A3 A4 B1
+      = ((!A1 && !B1) || (!A2 && !B1) || (!A3 && !B1) || (!A4 && !B1)) := by
+  decide +kernel +revert
+
+/-- `o2111a` -/
+def o2111a (A1 A2 B1 C1 D1 : Bool) : Bool := (A1 || A2) && B1 && C1 && D1
+
+theorem o2111a_liberty (A1 A2 B1 C1 D1 : Bool) :
+    o2111a A1 A2 B1 C1 D1
+      = ((A1 && B1 && C1 && D1) || (A2 && B1 && C1 && D1)) := by decide +kernel +revert
+
+/-- `o21ba` — OR2 AND'd with a BUBBLED singleton, non-inverting. -/
+def o21ba (A1 A2 B1_N : Bool) : Bool := (A1 || A2) && (!B1_N)
+
+theorem o21ba_liberty (A1 A2 B1_N : Bool) :
+    o21ba A1 A2 B1_N = ((A1 && !B1_N) || (A2 && !B1_N)) := by decide +kernel +revert
+
+/-- `o221a` -/
+def o221a (A1 A2 B1 B2 C1 : Bool) : Bool := (A1 || A2) && (B1 || B2) && C1
+
+theorem o221a_liberty (A1 A2 B1 B2 C1 : Bool) :
+    o221a A1 A2 B1 B2 C1
+      = ((A1 && B1 && C1) || (A2 && B1 && C1)
+         || (A1 && B2 && C1) || (A2 && B2 && C1)) := by decide +kernel +revert
+
+/-- `o22a` -/
+def o22a (A1 A2 B1 B2 : Bool) : Bool := (A1 || A2) && (B1 || B2)
+
+theorem o22a_liberty (A1 A2 B1 B2 : Bool) :
+    o22a A1 A2 B1 B2
+      = ((A1 && B1) || (A2 && B1) || (A1 && B2) || (A2 && B2)) := by decide +kernel +revert
+
+/-- `o32a` -/
+def o32a (A1 A2 A3 B1 B2 : Bool) : Bool := (A1 || A2 || A3) && (B1 || B2)
+
+theorem o32a_liberty (A1 A2 A3 B1 B2 : Bool) :
+    o32a A1 A2 A3 B1 B2
+      = ((A1 && B1) || (A1 && B2) || (A2 && B1)
+         || (A3 && B1) || (A2 && B2) || (A3 && B2)) := by decide +kernel +revert
+
 /-- `nor3` -/
 def nor3 (A B C : Bool) : Bool := !(A || B || C)
 
@@ -548,6 +633,9 @@ theorem conb_LO_liberty : conb_LO = false := by decide +kernel
 #audit_axioms nand4bb_liberty nor4b_liberty nor4bb_liberty a2111oi_liberty
 #audit_axioms xnor2_liberty o211ai_liberty o221ai_liberty a311oi_liberty
 #audit_axioms maj3_liberty mux4_liberty
+#audit_axioms o2111ai_liberty o311ai_liberty a21bo_liberty a41o_liberty
+#audit_axioms a41oi_liberty o2111a_liberty o21ba_liberty o221a_liberty
+#audit_axioms o22a_liberty o32a_liberty
 #audit_axioms and3b_liberty and4bb_liberty nand2b_liberty nand3b_liberty
 #audit_axioms nor3b_liberty or3b_liberty a21o_liberty a21oi_liberty
 #audit_axioms a21boi_liberty a31o_liberty a32o_liberty a211o_liberty
