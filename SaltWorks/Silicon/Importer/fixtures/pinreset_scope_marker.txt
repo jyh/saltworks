@@ -1,0 +1,11 @@
+--
+-- ⚠ RESTRICTED DATUM — 'rst_n' IS PINNED TO 1.
+-- This models the design ONLY on traces where 'rst_n' is held 1
+-- THROUGHOUT. Asynchronously-resettable flops were imported under that
+-- restriction: their vendor `clear` field is unasserted at 1, so
+-- the Liberty ff group reduces to dfxtp's field for field. It says NOTHING
+-- about the deassertion seam — the one cycle where the async path and the
+-- clock interact. A THEOREM PROVED ON THIS DATUM MUST NOT BE CITED AS
+-- COVERING RESET OR BRING-UP, and any certificate restating such a theorem
+-- must carry this restriction with it.
+-- docs/silicon-dfrtp-async-reset-prereg-0812.md
