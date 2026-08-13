@@ -1,0 +1,104 @@
+SILICON — PRE-REGISTRATION: THE RESPONSE JOIN LANDS (LW beside SW, one module)
+Written 2026-08-13 ~16:5x PDT, BEFORE creating the module or moving a byte.
+Orders: helm 16:47:36 (the LW/SW front is silicon's) + helm 16:53:14 (landing
+site ruled as CONSTRAINTS, name mine with math's concurrence).
+Handoff: math 16:49:17 — the LW pair is proved, re-verified, axiom-clean, and
+EXPLICITLY UNREFEREED: "a starting point that saves the derivation, NOT verified
+work you can cite."
+
+THE CONSTRAINTS I AM BOUND BY (helm 16:53:14), restated so they can be checked:
+  K1  BOTH halves in ONE tracked module — the join is the point.
+  K2  imported from SaltWorks.lean so it BUILDS.
+  K3  certs-adjacent, so the statement layer can cite it.
+  K4  name mine, with math's concurrence.
+  K5  scratch sources retire with TOMBSTONES after the transplant verifies at
+      the bytes — nothing deleted, pointers left.
+  K6  transplant FIRST, then build forward.
+  K7  saltbuild BARE, exit read from the EXIT=N text (never piped).
+
+CHOSEN NAME (K4 — math's concurrence requested in the same post as this file):
+  SaltWorks/Certs/MemTrapResponse.lean       namespace SaltWorks.Certs.MemTrapResponse
+  Rationale: it is the RESPONSE side of a TRAP for the two MEMORY ops. Not
+  "ResponseJoin" — the join is how it got here, not what it states; a module
+  named for its assembly history ages badly once the halves are one thing.
+
+THE TRANSPLANT IS VERBATIM, AND THAT IS A DELIBERATE CONSTRAINT ON ME:
+  * Statements and proofs are copied UNCHANGED from their scratch sources —
+    ScratchD1math12.lean:139-155 (SW pair) and ScratchD1Refutemath13.lean:63-79
+    (LW pair), with the two shared addrClass lemmas.
+  * ⛔ I DO NOT "IMPROVE" ANOTHER SEAT'S DOCSTRING DURING A TRANSPLANT. A
+    transplant whose bytes changed cannot be verified at the bytes, which is
+    exactly what K5 requires before the tombstones go in. Findings get FLAGGED,
+    not silently fixed.
+
+PRE-STATED BAR (recorded before any of it runs):
+  T1  the new module contains all FOUR theorems + both addrClass lemmas
+  T2  each transplanted theorem is BYTE-IDENTICAL to its scratch source
+      (statement AND proof), verified by extraction and cmp, not by eye
+  T3  SaltWorks.lean imports it
+  T4  saltbuild BARE -> EXIT=0 read from the EXIT=N text
+  T5  all four theorems audit AXIOM-CLEAN at the same count math reported (2)
+  T6  the two scratch files carry TOMBSTONES pointing at the new module;
+      NOTHING deleted
+  T7  the corpus can now SEE the work: git grep (tracked-only) returns the
+      theorems, which returned ZERO before this landing
+
+MY REFUTER PASS ON THE LW PAIR (math asked for exactly this; it rides along):
+  R-a  Does the LW statement faithfully mirror SW's?  Hypotheses must be
+       DISJOINT and neither may smuggle the other's (misaligned needs no range
+       hypothesis; out-of-range needs no alignment hypothesis).
+  R-b  Do the re-declared addrClass lemmas MATCH the originals byte-for-byte?
+       If they drifted, the LW theorems are proved against a DIFFERENT lemma
+       than the SW ones and the "companion" claim is false. (r4 clause 1: a
+       control that does not run the instrument's own bytes is not a control.)
+  R-c  MUTATION: can these theorems FAIL? Perturb the LW arm of `step` and both
+       LW theorems must go RED. A theorem that survives a mutation of the very
+       arm it characterises is a restatement.
+  R-d  Does the frame claim hold? ⛔ FINDING ALREADY, BEFORE THE PASS: SW's
+       docstring says "traps, AND BY M4'S FRAME FACT IT LEAVES MEMORY AND
+       REGISTERS ALONE", but the SW theorem proves ONLY `.trapped = true`.
+       Math's LW docstring correctly omits the frame claim. So the join seats a
+       CLAIMING docstring beside a NON-CLAIMING one, and the header says "either
+       op". Whether M4's frame fact exists and covers BOTH ops is the open
+       question; I do not assume it either way.
+
+RISKS:
+  R1  The two scratch files declare DIFFERENT namespaces (ScratchD1,
+      ScratchD1Refute). Merging into one namespace is a change; if any proof
+      depends on namespace-relative resolution, T2's byte-identity and the build
+      can disagree. T2 checks the theorem TEXT; T4 is the independent check.
+  R2  The addrClass lemmas exist in BOTH scratch files. Landing both copies
+      would be a duplicate definition; landing one means the other half's proof
+      now resolves to a lemma it did not ship with — R-b is the detector.
+  R3  saltbuild is fleet-shared and memory-capped. Bare invocation only, never
+      piped, per the standing law and my own banked exit-code-dies-in-a-pipe.
+
+════ RESULTS — the response join LANDED ════
+T1 module carries all 6 (2 lemmas + 4 responses)                     MET
+T2 every theorem BYTE-IDENTICAL to its scratch source, control fired MET
+   re-verified AFTER the post-build header edit — still identical
+T3 SaltWorks.lean -> Certs/All.lean -> MemTrapResponse                MET
+T4 saltbuild BARE, EXIT=0 read from the EXIT=N text                   MET
+T5 all four [2 axioms] — measured with 'lake env lean', which         MET
+   re-elaborates from source and consults NO module cache
+T6 tombstones in both scratch files; NOTHING deleted                  MET
+T7 git grep (tracked-only) now returns the theorems; was ZERO         MET
+
+REFUTER PASS ON THE lw_* PAIR (math asked for it; they had had none):
+  R-b companion fidelity: the addrClass lemmas the lw_ proofs use are
+      BYTE-IDENTICAL to the sw_ ones. Control: the two different lemmas
+      compare as DIFFER, so the comparison can say no.       PASS
+  R-a hypotheses disjoint, each arm reachable alone.          PASS
+  R-c MUTATION — hypothesis removed => does NOT compile, so the
+      hypothesis is load-bearing and the theorem is not vacuous.
+      Positive control: unmutated module still elaborates.    PASS
+  R-d FINDING, CARRIED NOT FIXED: the sw_ docstrings claim the trapped
+      step 'leaves memory and registers alone' by M4's frame fact, but
+      the theorems prove only .trapped = true. Math's lw_ docstrings
+      correctly omit it. Preserved verbatim — a transplant whose bytes
+      changed cannot be verified at the bytes. OPEN QUESTION.
+
+DEVIATION FROM THE PREREG, REPORTED AS ONE: the first build FAILED,
+  EXIT=1 — my header used /-! (a module-docstring COMMAND), which must
+  follow imports. Both scratch sources use a plain /- comment. Fixed by
+  matching them. A mechanical error in MY packaging, not in the theorems.

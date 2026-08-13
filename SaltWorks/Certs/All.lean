@@ -8,6 +8,7 @@ import SaltWorks.Certs.Compiler
 import SaltWorks.Certs.Executive
 import SaltWorks.Certs.ControlFlow
 import SaltWorks.Certs.EndToEnd
+import SaltWorks.Certs.MemTrapResponse
 
 /-!
 # `SaltWorks/Certs/` — the comprehensibility-certificate layer, roll-call
