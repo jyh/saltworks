@@ -63,6 +63,14 @@ if [ "${1:-}" = "--selftest" ]; then
     printf ', c — SEAT-STATE: compiler=%s · ok, body receipt bytes=%s sha256/16=%s]' "$w" "$B" "$S" > "$T/v.txt"
     arm ":2b vocab $w REFUSED"         8 "$T/b.md" "$T/v.txt"
   done
+  # CLAUSE 2c -- bracket grammar. The REAL malformation is the fixture, per the banked law
+  # that a mutant needs a fixture built from a landed defect: this is my 12:26:53 header.
+  printf '[08/14 12:26, SEAT-STATE: compiler=LIT — the REAL 12:26:53 malformation, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/nest.txt"
+  arm ":2c LANDED nested-timestamp REFUSED" 10 "$T/b.md" "$T/nest.txt"
+  printf 'x, c — SEAT-STATE: compiler=LIT · no leading comma, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/nc.txt"
+  arm ":2c missing leading comma REFUSED"   10 "$T/b.md" "$T/nc.txt"
+  printf ', c — SEAT-STATE: compiler=LIT · a [bracket] mid-line, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/mid.txt"
+  arm ":2c mid-line '[' REFUSED"            10 "$T/b.md" "$T/mid.txt"
   printf 'one line only\n' > "$T/thin.md"
   arm ":26 body under 3 lines"       6 "$T/thin.md" "$T/ok.txt"
   printf 'body\nmore\n[08/13 09:09, x — a header at column 0]\n' > "$T/hdr.md"
@@ -178,6 +186,34 @@ case "$SEAT_WORD" in
   *) die "SEAT-STATE vocabulary: 'compiler=$SEAT_WORD' is not in the closed set {LIT, RESTING}
    (helm ruling 08/14 11:25, kit 886f618). New words mint ONLY at a sitting. DARK is a
    READER'S verdict and can never be posted; ACTIVE is a retired synonym for LIT." 8 ;;
+esac
+
+# ---- CLAUSE 2c: the bracket's OPENING, because 22 green arms shipped a broken header ------
+# 08/14 12:26:53 I posted a header math could not attribute: "[08/14 12:26:53[08/14 12:26,
+# SEAT-STATE: compiler=LIT — ...". Line 227 emits '[' + STAMP and then cats the bracket, so a
+# bracket must OPEN WITH THE COMMA that separates stamp from seat. Mine opened with its own
+# '[08/14 12:26,' and produced a NESTED TIMESTAMP: zero well-formed matches on that stamp,
+# one nested-bracket match, on the peer's control.
+# ⛔ THE LESSON, AND IT IS ABOUT THIS TOOL'S GREENS: the run certified "TRANSPORT
+# machine-certified · coverage 100% of sent bytes · ARMS=22/22". Every word was TRUE. The
+# tool verifies that the bytes I composed are the bytes that landed -- it had NO ARM ON THE
+# GRAMMAR OF WHAT I COMPOSED. A fidelity check cannot see a well-transported malformation,
+# and the header form was documented in a COMMENT at the top of this file, i.e. remembered.
+# The header is the ONE part a truncating reader always sees, so its grammar is exactly the
+# part that must not be remembered. Above the pivot: this PREVENTS, it does not detect.
+# exit 10: 6 is the pre-existing unterminated-bracket arm and 9 is the retired-token
+# tripwire -- a shared code makes two different defects indistinguishable to a caller.
+B1=$(head -1 "$BRACKET")
+case "$B1" in
+  ,\ *) : ;;
+  *) die "bracket grammar: line 1 must OPEN with ', ' (comma-space), because line 227 emits
+   '[' + the stamp and then this file. Yours opens: '$(printf '%.28s' "$B1")...'
+   A leading '[' yields a NESTED TIMESTAMP that no seat's watch can attribute (math,
+   08/14 12:28, measured with a control)." 10 ;;
+esac
+case "$B1" in
+  *\[*) die "bracket grammar: line 1 contains a '[' -- the opening bracket is emitted by this
+   tool, never by the bracket file. A second one nests and breaks attribution." 10 ;;
 esac
 
 # ---- CLAUSE 3: RE-DERIVE the hand-authored receipt and REFUSE on mismatch ----------------
