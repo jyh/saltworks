@@ -2,8 +2,9 @@
 
 **Seat:** compiler · **2026-08-14** · **Commissioned:** helm ruling L-1 under the
 legislative delegation (sitting ruling 3), at the Captain's word.
-**Status: DRAFT · ONE CLASS OF FOUR · NOT RATIFIED · COLD-VALIDATED ON THE DECLINE SIDE ONLY
-(3/3 blind, §3.3) — THE FIRE SIDE HAS NO BLIND POSITIVE.**
+**Status: DRAFT · ONE CLASS OF FOUR · NOT RATIFIED · ✅ BLIND-VALIDATED ON BOTH SIDES AS OF
+12:30 — decline 7/7, FIRE 1/3 (§9). The fire side has ONE confirmed positive and that is the
+honest denominator; it is no longer zero, and it is not a rate.**
 
 ## 0 · THE COMMISSION AND ITS BINDING CONSTRAINTS
 
@@ -107,17 +108,20 @@ FIRE and then confirmed, this procedure is validated only for saying no.
 
 ## 4 · ⛔ WHAT THIS DRAFT DOES NOT YET HAVE
 
-- **A BLIND POSITIVE.** §3.3 cold-validated the DECLINE side 3/3; no row I have never seen
-  has been predicted to FIRE and then confirmed. **A rule validated only for saying no is
-  half a rule** — and the half it lacks is the one that would repair this seat's blind spot.
+- ~~**A BLIND POSITIVE.**~~ ✅ **DISCHARGED 12:30 — see §9.** `67127` was predicted to FIRE
+  before any lookup and came back `statement-level-type-traps` from the independent coder,
+  whose written reason is Q4 in other words. *Struck, not deleted: the debt stood for the
+  life of the draft and the record should show when it was paid.*
 - **The other three classes.** T2 is the sharpest open question: it decided **0 of 30**, and
   §6-R3 could not separate *rare* from *structurally shadowed by T1's precedence*. A
   test-shaped T2 would separate them — that is the next class, not the easiest one.
 - **The R-2 `47%` fork.** Folds in here per L-1: both readings stated, the term defined
   test-shaped, coverage recomputed under it. Not started.
-- **A PRICE.** C-R3 forbids pricing a row without opening it. T1 took one class; I will
-  price the remaining three from T1's measured cost once the FIRE side has a blind positive
-  — the decline-side cold test (§3.3) is not the survival this clause was waiting on.
+- **A PRICE.** C-R3 forbids pricing a row without opening it. The condition this clause
+  named — *"once the FIRE side has a blind positive"* — **is now met**, so pricing the
+  remaining three classes from T1's measured cost is UNBLOCKED and is the next owed item
+  after T2's procedure. ⚠️ *One confirmed fire is a weak base for extrapolating cost; the
+  price will ship with that stated, not smoothed.*
 
 ## 5 · THE FENCE, RESTATED BECAUSE I ALREADY BREACHED IT ONCE TODAY
 
@@ -152,3 +156,51 @@ holding** — and building a procedure FOR a class is exactly what puts it in my
 is a prediction. Tested-then-repaired is a fit. The repaired Q1 does decline both blind
 failures — **and that is worth nothing, because I now know their verdicts.** Only a fresh draw,
 unread and unlooked-up, can produce the blind positive §4 still owes.*
+
+
+## 9 · ✅ BLIND DRAW #3 — THE FIRE SIDE, AND THE LEAK THAT NEARLY VOIDED IT
+
+Repaired Q1 landed `bcf6453`; **rows drawn after**; **five predictions posted to the bus at
+12:26 before a single verdict was looked up**; verdicts read at 12:29.
+
+```
+row     PREDICTED                     ACTUAL                              
+67127   ⭐ FIRES T1                   pass2 statement-level-type-traps   ✅
+56531   declines; reads T4            pass1 wrong-scope · pass2 OTHER    ✅ decline only
+1905    declines at Q1                both OTHER                         ✅
+15082   declines at Q1                pass2 stale-citations   (not T1)   ✅
+41943   declines at Q1                pass2 misattributed     (not T1)   ✅
+
+CUMULATIVE OVER ALL THREE BLIND DRAWS:   decline 7/7   ·   FIRE 1/3
+```
+The coder's reason for `67127`, unread at prediction time: *"The Lean statement carried a
+hypothesis its own proof never used, making the formalization weaker than both the proof and
+the paper."* **Q4 asks whether the object's written form fails to support the claim. Two
+heads, no contact, same finding.**
+
+### 9.1 ⛔ ONE PREDICTION WITHDRAWN — AND THE FILTER DEFECT BEHIND IT
+`56531`'s class is **disclosed in running prose** in a file I had opened (DRAFT2:535 — *"it
+splits pass 1's four wrong-scope calls … 56531 fires it"*). I predicted **T4 = wrong-scope**.
+**I cannot prove I was not recalling that sentence, so the T4 half is withdrawn. The decline
+half stands** — neither coder called it `type-traps`.
+
+📌 **The generalisable defect: I built the "already seen" exclusion set from the LISTS I had
+read. The codebook also states classes in PROSE, and a prose disclosure does not look like a
+list.** Measured: **168** rows are named in DRAFT2 within 260 characters of a class word;
+`56531` is among them, `67127` is not. ⇒ ***A list-shaped exclusion filter cannot see a
+prose-shaped leak*** — the same shape as the morning's `^\[08/` walker, verifying membership
+against the population I could enumerate rather than the one that exists.
+
+### 9.2 ⚠️ WHAT WAS LUCK, AND THE REPAIR IT ORDERS
+**I ran the proximity check AFTER posting the predictions.** Had `67127` come back TRUE I
+would have learned the blind positive was contaminated *after publishing it*. It came back
+FALSE. **The disjointness check belongs INSIDE the draw, not in the post-mortem** — until it
+is moved there, no fire this procedure reports is protected by anything but that outcome.
+**OWED, and it blocks nothing else: T2 gets the checked draw from the start.**
+
+### 9.3 THE CITATION BRANCH — CORRECTED AT ITS AUTHOR'S PEN
+I wrote that if the sitting reads citations as uncodeable the `67127` fire *evaporates*.
+**Math, whose criterion it is, corrected it: it RELOCATES** — to the cited artifact (math's
+cert), by the same construction that relocates a confession to the author's earlier act.
+**It vanishes only if the cited artifact is outside the population, which is a question about
+the DRAW, not a property of the criterion.** *Adopted; "evaporates" is withdrawn.*
