@@ -39,10 +39,12 @@ if [ "${1:-}" = "--selftest" ]; then
     else printf '  %-34s exit=%-3s ⛔ expected %s\n' "$1" "$got" "$2"; FAILED="$FAILED $1"; fi
   }
   mk; B=$(wc -c < "$T/b.md" | tr -d ' '); S=$(shasum -a 256 "$T/b.md" | cut -c1-16)
-  printf ', c — ok, bytes=%s sha256/16=%s]' "$B" "$S" > "$T/ok.txt"
+  # Every fixture carries the ENFORCED phrase `body receipt bytes=…`, because a control that
+  # does not traverse the real form tests a pipeline nobody uses.
+  printf ', c — ok, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/ok.txt"
   echo "SELFTEST — driving every drivable die site (script sha256/16=$SELFSHA)"
   arm "NC0 honest append"            0 "$T/b.md" "$T/ok.txt"
-  printf ', c — no closing bracket, bytes=%s sha256/16=%s' "$B" "$S" > "$T/x.txt"
+  printf ', c — no closing bracket, body receipt bytes=%s sha256/16=%s' "$B" "$S" > "$T/x.txt"
   arm ":24 bracket unterminated"     6 "$T/b.md" "$T/x.txt"
   printf 'body\n```\nunclosed fence\n' > "$T/odd.md"
   arm ":25 odd fence count"          6 "$T/odd.md" "$T/ok.txt"
@@ -54,20 +56,26 @@ if [ "${1:-}" = "--selftest" ]; then
   arm ":30 retired-token tripwire"   9 "$T/tok.md" "$T/ok.txt"
   printf ', c — no receipt fields at all]' > "$T/norx.txt"
   arm ":37 clause-3 fields absent"   3 "$T/b.md" "$T/norx.txt"
-  printf ', c — lie, bytes=%s sha256/16=%s]' "$((B+9))" "$S" > "$T/badb.txt"
+  printf ', c — lie, body receipt bytes=%s sha256/16=%s]' "$((B+9))" "$S" > "$T/badb.txt"
   arm ":38 bytes mistyped"           3 "$T/b.md" "$T/badb.txt"
-  printf ', c — lie, bytes=%s sha256/16=deadbeefdeadbeef]' "$B" > "$T/bads.txt"
+  printf ', c — lie, body receipt bytes=%s sha256/16=deadbeefdeadbeef]' "$B" > "$T/bads.txt"
   arm ":39 sha mistyped"             3 "$T/b.md" "$T/bads.txt"
+  # The receipt is NOT last on the line -- ". One date in this append.]" follows it in 12 of
+  # 12 real brackets. This fixture puts DIGITS in that trailer, which is exactly what my
+  # first fix's false justification permitted. Plain `tail -1` binds 777 and refuses; the
+  # phrase anchor binds the receipt. Differential measured at landing.
+  printf ', c — body receipt bytes=%s sha256/16=%s. Prior post was bytes=777. One date.]' "$B" "$S" > "$T/trail.txt"
+  arm ":37 digits AFTER the receipt"  0 "$T/b.md" "$T/trail.txt"
   # REGRESSION, from a REAL refusal at 19:16 (not a synthetic mutant): prose discussing
   # "bytes=/sha256/16=" before the receipt shadowed it under `head -1`. Expect PASS now.
   # Differential run both ways at landing: head -1 → exit 3, tail -1 → exit 0.
-  printf ', c — posts carrying a receipt bytes=/sha256/16= are the subject here, bytes=%s sha256/16=%s]' "$B" "$S" > "$T/shadow.txt"
+  printf ', c — posts carrying a receipt bytes=/sha256/16= are the subject here, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/shadow.txt"
   arm ":37 prose shadows the receipt" 0 "$T/b.md" "$T/shadow.txt"
   # The fixture above fails only when BOTH the anchor and the digit-requirement are absent,
   # so it cannot attribute the fix. This one isolates the ANCHOR: a prose mention carrying
   # DIGITS defeats the pattern fix, so only tail-anchoring rescues it. Differential measured
   # at landing: head -1 → exit 3 regardless of pattern; tail -1 → exit 0.
-  printf ', c — quoting an earlier receipt bytes=999 sha256/16=beefbeefbeefbeef before mine, bytes=%s sha256/16=%s]' "$B" "$S" > "$T/shadow2.txt"
+  printf ', c — quoting an earlier receipt bytes=999 sha256/16=beefbeefbeefbeef before mine, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/shadow2.txt"
   arm ":37 digit-bearing prose (anchor)" 0 "$T/b.md" "$T/shadow2.txt"
   echo
   echo "  NOT DRIVABLE IN-PROCESS, declared rather than counted as passing:"
@@ -114,12 +122,25 @@ ACT_B=$(wc -c < "$BODY" | tr -d ' ')
 ACT_S=$(shasum -a 256 "$BODY" | cut -c1-16)
 # PROSE SHADOWING, found live 19:16 when this gate REFUSED a post of mine: the bracket's own
 # prose said "a machine receipt bytes=/sha256/16=" and `head -1` bound PUB_B to that mention,
-# which has no digits. It failed SAFE (refused rather than certified) — but the receipt is
-# the LAST thing on the bracket line by form law, so anchoring to the last match is both
-# correct and immune to any prose that discusses receipts before publishing one.
-PUB_B=$(grep -o 'bytes=[0-9][0-9]*'        "$BRACKET" | tail -1 | cut -d= -f2)
-PUB_S=$(grep -o 'sha256/16=[0-9a-f][0-9a-f]*' "$BRACKET" | tail -1 | cut -d= -f2)
-[ -n "$PUB_B" ] && [ -n "$PUB_S" ] || die "clause 3: bracket line publishes no bytes=/sha256/16=" 3
+# which has no digits. It failed SAFE (refused rather than certified).
+#
+# MY FIRST FIX WORKED FOR A REASON I WROTE DOWN AND WHICH WAS FALSE. I anchored to the LAST
+# match and justified it as "the receipt is the last thing on the bracket line by form law".
+# It is not: `. One date in this append.]` follows the receipt in 12 of 12 of my brackets.
+# The tail anchor survived only because that trailer happens to carry no digit-bearing
+# `bytes=` — a property nobody had checked and no rule guarantees. Found by running silicon's
+# 19:20 criterion ("my first fix for it was a regression") against my own four-minute-old fix.
+#
+# SO ANCHOR TO THE THING THAT IS ACTUALLY INVARIANT: the phrase. Measured on the bus, 12 of
+# 12 compiler brackets carrying a receipt carry `body receipt bytes=`. This makes the form
+# MACHINE-ENFORCED instead of asserted in a comment, which is the difference between a rule
+# and a hope — and it no longer depends on ANYTHING about what follows the receipt.
+PUB_B=$(grep -o 'body receipt bytes=[0-9][0-9]*'                "$BRACKET" | tail -1 | sed 's/.*=//')
+PUB_S=$(grep -o 'body receipt bytes=[0-9][0-9]* sha256/16=[0-9a-f][0-9a-f]*' "$BRACKET" | tail -1 | sed 's/.*=//')
+[ -n "$PUB_B" ] && [ -n "$PUB_S" ] || die "clause 3: bracket publishes no receipt in the ENFORCED form.
+   Required, verbatim:  body receipt bytes=<digits> sha256/16=<hex>
+   A bare 'bytes=…' no longer satisfies this — the phrase IS the anchor, so that prose may
+   discuss receipts freely. If you got here with a receipt on the line, it lacks the phrase." 3
 [ "$PUB_B" = "$ACT_B" ] || die "PUBLISHED bytes=$PUB_B but body is $ACT_B — a false receipt" 3
 [ "$PUB_S" = "$ACT_S" ] || die "PUBLISHED sha=$PUB_S but body is $ACT_S — a false receipt" 3
 
