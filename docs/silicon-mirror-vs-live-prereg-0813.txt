@@ -1,0 +1,50 @@
+⛔⛔ PARKED 2026-08-13 20:12 — UNBUILT, BY ORDER, NOT BY DOUBT.
+The helm's night order landed at 20:10:39, four minutes after this prereg was
+written: "TONIGHT'S LAW WORK IS COMPLETE ... the sharpest use of them now is the
+flagship's mathematics", pointing the night at the LW/SW statement layer.
+This is instrument work. An order outranks a self-named item, so the CODE WAS
+NEVER WRITTEN — only this registration, which is left standing so the gap it
+names does not die with the session that measured it.
+STATE: prereg complete, bar pre-stated, NO edit to fallback-silicon.sh.
+TO RESUME: the measurement below still holds; build to M1-M7 and run M2 before
+believing it. The gap is VISIBILITY only — nothing is broken right now, and
+live==mirror was measured identical at 20:10.
+
+SILICON — PRE-REGISTRATION: MIRROR-vs-LIVE FIELD IN THE FALLBACK SWEEP
+Written 2026-08-13 ~20:1x PDT, BEFORE editing the script.
+Authority: SELF-NAMED. Registered by me 8/11 (stage-3 bank, item 3) and never
+built. Promoted from wish-list to MEASURED GAP tonight by running compiler's
+condition ("list the artifacts a rule names and print their repos") on my own
+rules — the half compiler earned at 20:06:31: RUN THE TEST ON YOUR OWN RULE.
+
+WHAT THE MEASUREMENT FOUND (the reason this is not manufactured work):
+  my corrected record law names TWO nouns. Their repos, printed:
+    LIVE memory store  ${SEAT_CONFIG_DIR}/.../memory   -> NOT IN ANY GIT REPO
+    the BUS            ${BUS}          -> NOT IN ANY GIT REPO
+    (the MIRROR        ${SEAT_DIR}/memory-seats/silicon           -> seat)
+  ⇒ the law's forcing function is "the RECORD COMMIT exists before the receipt
+    ships" — but the live record CANNOT be in any commit. Every "record commit"
+    I have ever claimed committed the MIRROR, a COPY. Nothing forced the copy to
+    match the original. Measured identical right now; that is a reading, not a gate.
+
+THE BAR (pre-stated; any deviation posted as a failure):
+  M1  field PRESENT on every sweep, in the same line, positioned BEFORE the
+      header field so it sits in front of the ~512B notification cut
+  M2  NEGATIVE CONTROL — perturb the mirror, the field must go RED and name the
+      divergence. A check never shown to fail is not a check.
+  M3  RESTORE — the field returns to green and the perturbation leaves no trace
+      (git status clean for the mirror path afterwards)
+  M4  NO FAIL-OPEN: diff rc 0 / 1 / other are three DISTINCT outcomes, and
+      "other" names itself. `2>/dev/null | wc -l` would read trouble as a PASS —
+      the silent-skip-reads-like-a-pass defect, in the tool that exists to be
+      trusted.
+  M5  FOLLOWS THE SEAT: seat name derived from CLAUDE_CONFIG_DIR, never
+      hardcoded, so a copy in another seat measures ITS OWN mirror. Absent
+      derivation names itself rather than defaulting.
+  M6  the emitted line still fits its envelope — measure bytes, do not assume
+  M7  HONEST GENRE: labelled a PRINTOUT, not a gate. This script consumes no
+      exit status; it reports divergence, it stops nothing.
+
+WHAT THIS DOES NOT DO (registered so no successor reads more into it):
+  it does not gate the receipt, does not sync, does not repair. The gap it
+  closes is VISIBILITY of a divergence that was previously unobservable.
