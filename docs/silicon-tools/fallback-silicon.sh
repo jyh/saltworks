@@ -153,6 +153,17 @@ except Exception as ex:
   # string, so treat ±512 B as unresolved and do not quote it to three digits.
   # Erring LOW is the safe direction (the check fires early), which is exactly why
   # the error survived — a conservative wrong number produces no symptom.
+  # ⛔ AND THE OUTPUT USED TO CONTRADICT THIS COMMENT: the caution says DO NOT
+  # QUOTE IT TO THREE DIGITS and the printf quoted FIVE, bare, with no marker —
+  # so every sweep all day published a derived figure in the costume of a spec.
+  # Found 2026-08-13 while running a peer's "never opened the instrument" class
+  # against my own tools: I grepped for the literal, saw an assignment, and was
+  # about to publish "an undocumented inherited constant" as a FINDING — when
+  # this very comment, three lines up, already said it better than my finding
+  # would have. ⇒ THE NEAR-MISS IS THE LESSON: I diagnosed my own instrument from
+  # a grep hit without reading the lines attached to it, WHILE CHECKING FOR
+  # EXACTLY THAT DEFECT. The real fault was never the number; it was that the
+  # output dropped the caveat the source carries.
   IDXLIM=${IDXLIM:-24986}
   if [ ! -r "$IDX" ]; then
     idx="** INDEX UNREADABLE at $IDX — CHECK DID NOT RUN **"
@@ -161,7 +172,7 @@ except Exception as ex:
     ipct=$(( ib * 100 / IDXLIM ))
     if   [ "$ib" -ge "$IDXLIM" ]; then idx="$ib/$IDXLIM (${ipct}%) ** OVER — TAIL ENTRIES ARE NOT LOADING **"
     elif [ "$ipct" -ge 85 ];     then idx="$ib/$IDXLIM (${ipct}%) ** APPROACHING THE CUT — compact now **"
-    else                              idx="$ib/$IDXLIM (${ipct}%)"
+    else                              idx="$ib/~${IDXLIM} (${ipct}%, limit DERIVED ±512B)"
     fi
   fi
   printf 'FALLBACK %s | bus=%s lines | main watch procs=%s | account=%s | index=%s | last header: %s\n' \
