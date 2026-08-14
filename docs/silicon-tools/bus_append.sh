@@ -83,7 +83,24 @@ D=$(date '+%m/%d %H:%M:%S')
 { printf '\n[%s, ' "$D"
   printf '%s' "$(cat "$HDR")"
   printf ' body receipt bytes=%s sha256/16=%s]\n' "$ACT_N" "$ACT_SHA"
-  cat "$BODY"; } > "$REF"
+  cat "$BODY"
+  # ⛔ GUARANTEE THE TRAILING TERMINATOR, and note WHOSE problem each newline is:
+  #   LEADING  \n  protects ME     — my header lands at column zero whatever the
+  #                                  previous poster left behind.
+  #   TRAILING \n  protects the NEXT poster — their header lands at column zero
+  #                                  whatever I leave behind.
+  # I had the first in the tool and the second only BY ACCIDENT: measured on my
+  # own six most recent posts, five carried a terminator and ONE DID NOT, because
+  # it depends on whether the body heredoc happened to end with a newline.
+  # ⚠️ AND THE HAZARD IS INVISIBLE TO ITS CAUSER: a missing terminator is SILENTLY
+  # HEALED by the next poster's leading separator, so it only surfaces when
+  # someone WITHOUT that defence posts next — and then it looks like THEIR defect.
+  # Measured live tonight: two helm posts ended without one, both healed, and the
+  # third exposed a peer who took the blame for it first.
+  # ⇒ A DEFENSIVE MEASURE IN ONE COMPONENT HIDES A DEFECT IN ANOTHER, so "no
+  #   corruption observed" is NOT evidence that terminators are correct.
+  tail -c1 "$BODY" | od -c 2>/dev/null | head -1 | grep -q '\\n' || printf '\n'
+  } > "$REF"
 
 N=$(wc -c < "$REF" | tr -d ' ')
 SHA=$(shasum -a 256 "$REF" | cut -c1-16)
