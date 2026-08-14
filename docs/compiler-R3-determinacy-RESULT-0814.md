@@ -1,5 +1,12 @@
 # §6-R3 CLASS-DETERMINACY AUDIT — RESULT
 
+> ## ⛔ AMENDED 2026-08-14 12:15 — **THE PER-CLASS COUNTS IN §2 ARE SUPERSEDED.**
+> A blind test refuted the T1 procedure built from these rows (0/2 on the fire side), and
+> re-scoring by §4's actual ladder — *what must the repair touch* — moves six of the seven
+> T1 rows. **`T1 7 · T2 0 · T3 2 · T4 4` becomes `T1 1 · T2 1 · T3 3 · T4 8`.**
+> **T4 is the most frequent class, not T1.** See §7. **§1's headline is UNAFFECTED** — the
+> 43.3%/86.7% split turns on whether *any* class fires, never on which.
+
 **Seat:** compiler · **Pre-registration:** `f63975e`, committed 09:15:56, **before any
 drawn row was opened.** Nothing in the pre-registration was edited afterwards; where
 it turned out defective (§5 below) the defect is reported, not repaired.
@@ -94,3 +101,41 @@ same morning, committed inside the next task.*
 - Row-level bases for all 30 verdicts are in the run's score table and can be re-read
   against the bodies by anyone who disagrees; **every verdict names the test and the span
   that fires it, or says why nothing fires.**
+
+
+## 7 · ⛔ THE RE-SCORE — WHY §2's PER-CLASS COUNTS ARE SUPERSEDED
+
+**What refuted them.** L-1 commissioned a test-shaped T1. I built one from the seven rows §2
+scored `T1`, and its **blind** test failed 0-of-2 on the fire side (`1696` → misattributed;
+`65828` → the codebook lists it among rows that *"exhibit none and do not fire"*).
+
+**The diagnosis, corrected once.** My first explanation — that I omitted §3.4's *silent
+acceptance* clause — was **wrong**: silence holds for **7 of 7** and explains nothing. §4's
+rationale gives the real one: *"they are ordered by what the repair has to touch — a
+kernel-checked statement, then the causal story, then the referenced object, then the claim's
+boundary."*
+
+```
+of the 7 rows §2 scored T1, what the repair must actually touch:
+  71730  ADD THE HYPOTHESIS 1<=E to the lemma statement ...... a STATEMENT  → T1 holds
+  10759  a name read for a statement ......................... the OBJECT   → T3
+  82239  a push wrongly credited to a peer .................... the STORY    → T2
+  12530  fix the gate check ................................... an INSTRUMENT → T4
+  38216  widen the regex ...................................... an INSTRUMENT → T4
+  61392  use both keys ........................................ an INSTRUMENT → T4
+  52323  restate V7 as a property, not a count ................ an INSTRUMENT → T4
+```
+⇒ **`T1 1 · T2 1 · T3 3 · T4 8`.** *An instrument's repair touches an instrument. §2 counted
+five instruments as kernel-checked statements.*
+
+### ⚠️ THIS RE-SCORE'S OWN BIAS, WHICH I CANNOT RESOLVE FROM INSIDE
+§4 records that **pass 1 (this seat) used `wrong-scope` as its within-taxonomy catch-all, 13 of
+21 rows.** Building a T1 procedure, I collapsed to T1 — 5 of 7. **I did not fix a catch-all; I
+moved it.** I am now holding *"T4 is the residual"*, and **six of my seven moves went to T4.**
+That is either the correct redistribution or the same defect with the opposite sign. **A fresh
+head is the only instrument that separates them** — which is what pass 3 is for, and why this
+seat's eligibility to code it remains spent.
+
+📌 **The original per-row scoring is preserved unamended in
+`compiler-R3-determinacy-scores-0814.tsv`.** Stale rows are struck, never silently revised —
+the re-score lives here, beside the record it supersedes, so both readings stay auditable.
