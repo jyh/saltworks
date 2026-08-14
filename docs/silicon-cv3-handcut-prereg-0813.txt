@@ -1,0 +1,88 @@
+SILICON — PRE-REGISTRATION: C-V3 WIDENS FOR THE HAND CUT (the standing red)
+Written 2026-08-13 ~18:1x PDT, BEFORE editing the trusted importer.
+Order: helm 18:05:38 — "SILICON: the repair is yours on your own bar, and it is
+the same accept-the-honest-caller shape — C-V3 widens to accept a net the caller
+has hand-cut on BOTH sides (Q in --inputs and D in --outputs); Switch re-verified
+byte-identical after; it lands BEFORE or WITH the name-table commit."
+
+⛔ THE RED IS MINE AND THE MISS IS THE POINT. C-V3 (26865be) refuses Switch's
+hand-cut flop D nets, breaking the importer's own backward-compatibility contract
+(import_netlist.py:1256-1260): "re-running its original command must still
+produce the committed bytes". Reproduced at HEAD: reimport.sh EXIT=1,
+"--outputs names '_00_', '_01_', '_02_', '_03_'".
+⚠️ AND WHY I DID NOT CATCH IT: my 26865be receipt said "ZERO C-V3 refusals across
+the corpus". TRUE — of the SWEEP population. reimport.sh's population was never
+measured. That is A COUNT IS NOT A SCOPE, my own most-banked law, on the landing
+that shipped it. The bar below therefore measures BOTH populations, every time.
+
+THE HAND-CUT SIGNATURE, measured on the real caller before writing the rule:
+```
+bitserial_switch declares  input : rst_n act_stb sel_stb in0 in1 clk
+                           output: out0 out1
+the caller passes          --inputs  … act0 act1 sel0 sel1   ← 4, all WIRE
+                           --outputs out0,out1,_00_.._03_    ← 4, all WIRE
+⇒ EQUAL COUNTS OF NON-PORT NETS ON BOTH SIDES, ALL DECLARED `wire`.
+  That is the cut: Q nets read as inputs, D nets written as outputs, paired
+  by position — precisely what the flop treatment now does automatically.
+```
+THE RULE (narrowest form that admits the honest caller):
+  an --outputs name that is NOT a declared output is ACCEPTED iff
+    (a) it is a declared NET (wire) in the module, AND
+    (b) the caller is performing a SYMMETRIC hand cut: the count of --inputs
+        names that are not declared inputs EQUALS the count of --outputs names
+        that are not declared outputs, and both are > 0, and all are wires.
+  Anything else still REFUSES.
+
+WHAT THE RULE DELIBERATELY STILL CATCHES — the teeth must survive:
+  * a FABRICATED name (declared nowhere) — refuses; it is not a wire.
+  * an INPUT passed as an output — refuses; it is declared `input`, not `wire`.
+  * a wire named as an output with NO matching input-side cut — refuses;
+    clause (b) fails, so a lone stray wire cannot slip through.
+
+PRE-STATED BAR — and it measures BOTH POPULATIONS, which is the whole lesson:
+  H1  reimport.sh EXIT=0, and Switch.lean reproduces BYTE-FOR-BYTE
+  H2  the other three regenerable rows STILL reproduce byte-for-byte
+      (Comparator, CompareExchange, CompareExchangeC)
+  H3  V1 regression: a fabricated output name still REFUSES
+  H4  V2 regression: an INPUT passed as an output still REFUSES
+  H5  a WIRE named as an output with NO input-side cut still REFUSES
+      (the new clause's own negative control — without it, (a) alone would
+      accept any wire and C-V3 would be gutted)
+  H6  import_sweep: 46 · 31 importing · 15 blocked, UNMOVED, judged by DIFFING
+      all 46 rows against the current baseline, not by two counts
+  H7  pinreset_controls.sh EXIT=0 · instrument_selftest.sh EXIT=0
+  H8  saltbuild BARE EXIT=0
+  every row's verification pattern carries exp>0 on its source (my own 17:38
+  law, after a typed ALL-CAPS pattern matched nothing and passed vacuously)
+
+PASS CRITERION: H1–H8 all as stated. Any deviation is a FAILURE and gets posted
+as one, including a green I did not predict.
+
+RISKS:
+  R1  Clause (b) counts NAMES, not nets. If a caller bit-expands one side and
+      not the other the counts differ legitimately and an honest cut would
+      refuse. NOT SEEN in the register today (Switch is 4/4); recorded as the
+      first thing to revisit if another hand-cut datum ever refuses.
+  R2  The rule reads `decls` for 'wire'. Yosys re-declares ports as wires, so a
+      declared OUTPUT may also appear under 'wire' — clause (a) must not become
+      a back door for the input-as-output case. H4 is the detector.
+  R3  ⛔ MY RECURRING DEFECT, NAMED AGAIN: I have three times today tested a risk
+      on an object that could not exhibit it. H5 is hand-built for exactly this
+      reason and does NOT come from the sweep or the register.
+
+════ RESULTS — C-V3 hand-cut widening ════
+H1 reimport.sh EXIT=0 — Switch.lean REPRODUCES BYTE-FOR-BYTE          MET
+H2 the other three regenerable rows still reproduce                    MET
+H3 fabricated output name still REFUSES                                MET
+H4 INPUT passed as an output still REFUSES                             MET
+H5 a lone WIRE with no input-side cut still REFUSES (new clause's own
+   negative control — without it, clause (a) alone guts C-V3)          MET
+H6 sweep 46 · 31 importing · 15 blocked, UNMOVED by full-row diff      MET
+H7 pinreset_controls EXIT=0 · instrument_selftest EXIT=0 12/12         MET
+H8 saltbuild BARE EXIT=0                                               MET
+
+THE MISS THAT CAUSED THE RED, recorded because it is the transferable part:
+  26865be's receipt said 'ZERO C-V3 refusals across the corpus'. TRUE — of
+  the SWEEP population. reimport.sh's population was never measured, and it
+  is the one that carries the backward-compatibility contract. A COUNT IS
+  NOT A SCOPE, on the landing that shipped it. This bar measures BOTH.

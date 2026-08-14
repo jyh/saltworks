@@ -1139,11 +1139,54 @@ def _bit_ref(s):
 # netlist, which is all scalars — A FIXTURE THAT COULD NOT EXHIBIT THE DEFECT.
 # The self-test's `unmodelled cell` row found it in one run.
 _declared_outs = set(decls.get("output", ()))
+_declared_ins = set(decls.get("input", ()))
+_declared_wires = set(decls.get("wire", ()))
+
+# ⛔⛔ AND THE HAND-CUT WIDENING — helm ruling 18:05:38, repairing a STANDING RED
+# THIS CHECK CAUSED. C-V3 as first shipped (26865be) refused Switch's hand-cut
+# flop D nets and broke this importer's own backward-compatibility contract
+# (:1256-1260): "re-running its original command must still produce the committed
+# bytes" became unsatisfiable. My receipt said "ZERO C-V3 refusals across the
+# corpus" — TRUE of the SWEEP population; reimport.sh's population was never
+# measured. A count is not a scope.
+#
+# THE SIGNATURE OF AN HONEST HAND CUT, measured on the real caller rather than
+# imagined: bitserial_switch declares neither act0/act1/sel0/sel1 (flop Q, read
+# as inputs) nor _00_.._03_ (flop D, written as outputs) as PORTS — all eight are
+# `wire`, FOUR ON EACH SIDE. The caller cut the flops by hand and paired state
+# with next-state by position, which is exactly what the flop treatment now does
+# automatically. So the cut is visible as SYMMETRY, and symmetry is checkable.
+def _handcut_active():
+    """True when the caller is cutting by hand on BOTH sides in equal measure."""
+    def _undeclared(names, declared):
+        out = []
+        for nm in names:
+            if nm in declared:
+                continue
+            b, _i = _bit_ref(nm)
+            if b is not None and b in declared:
+                continue
+            out.append(nm)
+        return out
+    cut_in = _undeclared(ins, _declared_ins)
+    cut_out = _undeclared(outs_named, _declared_outs)
+    return (len(cut_in) > 0 and len(cut_in) == len(cut_out)
+            and all(n in _declared_wires for n in cut_in + cut_out))
+
+_handcut = _handcut_active()
+
 def _out_declared(nm):
     if nm in _declared_outs:
         return True
     b, _i = _bit_ref(nm)          # `rdata[7]` -> ('rdata', 7)
-    return b is not None and b in _declared_outs   # bit of a declared vector
+    if b is not None and b in _declared_outs:   # bit of a declared vector
+        return True
+    # ⚖️ THE TEETH SURVIVE, and each clause earns its place:
+    #   a FABRICATED name is declared NOWHERE            -> not a wire  -> refuses
+    #   an INPUT passed as an output is declared `input` -> H4 detector -> refuses
+    #   a lone stray WIRE with no matching input-side cut-> _handcut False-> refuses
+    # Only a SYMMETRIC two-sided cut of declared nets is admitted.
+    return _handcut and nm in _declared_wires
 _cv3 = [nm for nm in outs_named if not _out_declared(nm)]
 if _cv3:
     _as_input = [nm for nm in _cv3 if nm in set(decls.get("input", ()))]
