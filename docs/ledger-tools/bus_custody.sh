@@ -16,6 +16,75 @@
 # unsubstituted token on the bus at 14:40, both this seat's. The figures are AUTHORED by
 # hand and RE-DERIVED here; the tool refuses on mismatch. (Silicon's shape, 18:25.)
 set -u
+
+# ============================================================================
+# --selftest : the fourth-eyes review's ONE CHANGE (2026-08-13).
+# Drives every die site it CAN on a scratch bus, DECLARES the ones it cannot,
+# and writes an arm-count stamp keyed to THIS script's sha. A normal run refuses
+# to certify unless a passing selftest exists FOR THESE BYTES.
+# Rationale, from the review: "every failure on this record is an arm that did
+# not fire in this run, reported as a clean verdict."
+# ============================================================================
+SELF="${BASH_SOURCE[0]}"
+SELFSHA=$(shasum -a 256 "$SELF" | cut -c1-16)
+STAMPF="${TMPDIR:-/tmp}/bus_custody_selftest_${SELFSHA}"
+
+if [ "${1:-}" = "--selftest" ]; then
+  T=$(mktemp -d); FIRED=0; TOTAL=0; FAILED=""
+  mk() { printf 'a control body line\nsecond line\nthird line\n' > "$T/b.md"; }
+  arm() { # name, expected-exit, body, bracket
+    TOTAL=$((TOTAL+1)); : > "$T/bus"
+    BUS_CUSTODY_SELFTEST_CHILD=1 bash "$SELF" "$3" "$4" "$T/bus" >/dev/null 2>&1; local got=$?
+    if [ "$got" -eq "$2" ]; then FIRED=$((FIRED+1)); printf '  %-34s exit=%-3s ✅\n' "$1" "$got"
+    else printf '  %-34s exit=%-3s ⛔ expected %s\n' "$1" "$got" "$2"; FAILED="$FAILED $1"; fi
+  }
+  mk; B=$(wc -c < "$T/b.md" | tr -d ' '); S=$(shasum -a 256 "$T/b.md" | cut -c1-16)
+  printf ', c — ok, bytes=%s sha256/16=%s]' "$B" "$S" > "$T/ok.txt"
+  echo "SELFTEST — driving every drivable die site (script sha256/16=$SELFSHA)"
+  arm "NC0 honest append"            0 "$T/b.md" "$T/ok.txt"
+  printf ', c — no closing bracket, bytes=%s sha256/16=%s' "$B" "$S" > "$T/x.txt"
+  arm ":24 bracket unterminated"     6 "$T/b.md" "$T/x.txt"
+  printf 'body\n```\nunclosed fence\n' > "$T/odd.md"
+  arm ":25 odd fence count"          6 "$T/odd.md" "$T/ok.txt"
+  printf 'one line only\n' > "$T/thin.md"
+  arm ":26 body under 3 lines"       6 "$T/thin.md" "$T/ok.txt"
+  printf 'body\nmore\n[08/13 09:09, x — a header at column 0]\n' > "$T/hdr.md"
+  arm ":28 header-shaped line"       6 "$T/hdr.md" "$T/ok.txt"
+  printf 'body\nmore\nthird @@STAMP@@ token\n' > "$T/tok.md"
+  arm ":30 retired-token tripwire"   9 "$T/tok.md" "$T/ok.txt"
+  printf ', c — no receipt fields at all]' > "$T/norx.txt"
+  arm ":37 clause-3 fields absent"   3 "$T/b.md" "$T/norx.txt"
+  printf ', c — lie, bytes=%s sha256/16=%s]' "$((B+9))" "$S" > "$T/badb.txt"
+  arm ":38 bytes mistyped"           3 "$T/b.md" "$T/badb.txt"
+  printf ', c — lie, bytes=%s sha256/16=deadbeefdeadbeef]' "$B" > "$T/bads.txt"
+  arm ":39 sha mistyped"             3 "$T/b.md" "$T/bads.txt"
+  echo
+  echo "  NOT DRIVABLE IN-PROCESS, declared rather than counted as passing:"
+  echo "    :55 bus shorter than OFF+N  — needs the append itself to fail mid-write"
+  echo "    :57 CMP MISMATCH at offset  — needs a concurrent writer between :48 and :55;"
+  echo "        the fourth-eyes reviewer drove it with a cat shim. NOT self-drivable."
+  echo
+  if [ -n "$FAILED" ]; then
+    echo "⛔ SELFTEST FAILED — arms:$FAILED"; rm -f "$STAMPF"; rm -rf "$T"; exit 1; fi
+  printf 'ARMS=%s/%s UNDRIVABLE=2 SHA=%s\n' "$FIRED" "$TOTAL" "$SELFSHA" > "$STAMPF"
+  echo "✅ SELFTEST PASSED — ARMS=$FIRED/$TOTAL fired, 2 declared undrivable"
+  echo "   stamp written for script sha256/16=$SELFSHA"
+  rm -rf "$T"; exit 0
+fi
+
+# The selftest drives this script recursively; its children must bypass the gate the
+# selftest exists to satisfy, or the gate blocks the only thing that can open it.
+# Caught on the selftest's FIRST run — 9/9 arms returned exit 5 (the gate) instead of
+# their own codes. A certification gate that refuses its own certifier is a deadlock,
+# and it fails in the SAFE direction, which is why it was visible at once.
+if [ "${BUS_CUSTODY_SELFTEST_CHILD:-}" != "1" ] && [ ! -f "$STAMPF" ]; then
+  echo "⛔ REFUSING: no passing selftest for THESE script bytes (sha256/16=$SELFSHA)."
+  echo "   The tool changed since its arms were last shown to fire, or never was."
+  echo "   Run:  bash $SELF --selftest"
+  exit 5
+fi
+ARMLINE=$(cat "$STAMPF" 2>/dev/null || echo "ARMS=selftest-child")
+
 BODY=${1:?body.md}; BRACKET=${2:?bracket.txt}
 BUS=${3:-${BUS}}
 die() { echo "⛔ $1"; exit "$2"; }
@@ -59,7 +128,7 @@ dd if="$BUS" bs=1 skip="$OFF" count="$N" status=none 2>/dev/null | cmp -s - "$RE
 rm -f "$REF"
 
 # ---- CLAUSE 2: coverage declared, two labelled halves ------------------------------------
-echo "✅ TRANSPORT machine-certified · coverage 100% of sent bytes"
+echo "✅ TRANSPORT machine-certified · coverage 100% of sent bytes · $ARMLINE"
 echo "   bytes=$N  offset-pre-append=$OFF  region-sha256/16=$RSHA  stamp=$STAMP"
 echo "   body receipt RE-DERIVED and matched: bytes=$ACT_B sha256/16=$ACT_S"
 echo "⚠️ CONTENT author-read-back: the AUTHOR's claim, not this tool's. State it yourself."
