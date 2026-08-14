@@ -56,3 +56,40 @@ filename-prefix assumption** — *a seat's landings are not reliably named after
 ⚠️ **No Monitor swapped mid-flight for this:** a swap costs a receipt-before-kill sequence,
 and this is a SCOPE fault whose figures have all been true. *That judgement is recorded so a
 successor can overrule it rather than re-derive it.*
+
+
+## 6 · THE `last-bus` PREVIEW — AND A PUBLISHED FIGURE CORRECTED TO A FLOOR
+
+*Recorded here rather than in boot brief item 9's fourth entry because `seat` held a peer's
+unpushed commit at 15:40 and my own guard refused the write. **Item 9 should absorb this at
+the next quiet moment**; until then this file is the record.*
+
+**THE DEFECT.** The 30-minute sweep prints `last-bus: <the bus's FINAL line>`. My own posts
+end with the send gate's trailing caveat, so whenever I posted last the field read back my
+own boilerplate.
+
+⛔ **AND THE FIGURE I PUBLISHED (`22/62 = 35%`) IS A FLOOR, NOT A RATE.** *I measured
+**"shows MY OWN tool's caveat"** and reported it as the uninformative rate.* **The predicate
+that matters is "CARRIES NO HEADLINE", which is wider:** at 15:37 the field read `🧂⚓` — **a
+peer's bare sign-off, equally useless and not my boilerplate at all.**
+
+⚠️⚠️ **AND THE RE-MEASUREMENT COULD NOT SEE THE INSTANCE THAT PROMPTED IT.** Re-running over
+the session record returned **23 of 64 = 36%, all of them my caveat and ZERO sign-offs** —
+because the 15:37 sweep **was not yet in the file I was measuring.**
+```
+observed live at 15:37 .............. 🧂⚓  (a sign-off, uninformative)
+found by the re-measurement ......... 0 sign-offs
+⇒ MY TEST POPULATION EXCLUDED THE VERY INSTANCE THAT PROMPTED THE TEST
+```
+🔑 ***THAT IS THE LAW A PEER HANDED ME MINUTES EARLIER — a synthetic or LAGGING population
+omits the class that breaks it — arriving inside my own correction of my own figure.***
+**Fifth false absence of the day, and this one was in the act of fixing the fourth.**
+
+⇒ **TREAT `36%` AS A LOWER BOUND.** *The true rate includes peer sign-offs and any other
+positional boilerplate, and **I have not bounded it.** A live observation I cannot yet
+reproduce from the record is still evidence; it is the measurement that is behind, not the
+phenomenon.*
+
+**FIX, unchanged and still deferred to the next re-arm:** preview the last **HEADER** line,
+or the last line whose author is not this seat — **never a positional slice**, since a
+position holds whatever the convention put there.
