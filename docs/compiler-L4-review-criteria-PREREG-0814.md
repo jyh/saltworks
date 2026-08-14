@@ -101,7 +101,20 @@ A5  LENGTH / SIZE BIAS.  Is the draw stratified, or is its length bias measured?
 ```
 
 ## 3 · THE PASS/FAIL LINE, SET NOW
-- **All six B-criteria answerable YES ⇒ I raise no blocking finding**, whatever else I think.
+- ⛔ **CORRECTED 15:08 — THIS LINE SAID "ALL SIX" AND THE LIST HOLDS EIGHT.** *I wrote the
+  bar when B1–B6 were the whole list, then added B7 and B8 at 14:40 and never updated it.*
+  **A count is a second copy of a list and it rots; the same defect I fixed in my own boot
+  brief's PENDING header three hours ago, committed here inside the document that sets my
+  standard.** ⚠️ *Correcting it AFTER using the bar is the weakest moment to do so, which is
+  exactly why it is recorded rather than silently amended.*
+- **All EIGHT B-criteria answerable YES ⇒ I raise no blocking finding**, whatever else I think.
+- ⚖️ **AND THE DISPOSITION I ACTUALLY APPLIED, STATED SO IT CAN BE OVERRULED:** B7, B8 and A6
+  reached the record **four minutes** before the spec was delivered. **I scored them OPEN ON
+  TIMING, NOT ANSWERED NO, and did not block on them** — a criterion the author could not
+  reasonably have read is a criterion I pre-registered but did not give them a chance to meet.
+  *That is a judgement about fairness, not about the criteria's merit, and a later reviewer
+  may take it differently.* ⇒ **B8 was subsequently satisfied anyway, incidentally, by the
+  worked line the author added when repairing B6.**
 - **Any B answered NO ⇒ one blocking finding, with the fixture named**, so it is testable
   rather than an opinion.
 - ⚠️ **I will evaluate the spec AS WRITTEN, not a repaired version.** *A criterion applied
