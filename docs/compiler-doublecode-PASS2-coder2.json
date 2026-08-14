@@ -1,0 +1,2330 @@
+[
+ {
+  "n": 1,
+  "line": 9,
+  "class": "OTHER",
+  "reason": "Resource-exhaustion incident (5 seats x default -j18 OOM the machine) and a new build-wrapper rule; no scope, citation, attribution or statement defect."
+ },
+ {
+  "n": 2,
+  "line": 80,
+  "class": "misattributed-mechanisms",
+  "reason": "The build lock was credited with bounding memory; the post shows serialization is not a memory bound and a single wrapped elaboration at 30.67 GB still kills the machine."
+ },
+ {
+  "n": 3,
+  "line": 166,
+  "class": "OTHER",
+  "reason": "Runaway probe killed and its cost mechanism named (exhaustive decide +kernel has no memory bound); the defect is an unbounded probe, a resource incident outside the four classes."
+ },
+ {
+  "n": 4,
+  "line": 275,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Self-corrected universal from a three-cell sample ('the flop is dfrtp_2' replaced one wrong universal with another), alongside the routing-bug fix found by enumerating rather than reading."
+ },
+ {
+  "n": 5,
+  "line": 344,
+  "class": "misattributed-mechanisms",
+  "reason": "The shared-tree hazard had been located at 'git add' when the actual failure mode is a pathless 'git commit' sweeping the whole index; the rule named the wrong command."
+ },
+ {
+  "n": 6,
+  "line": 427,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Draws the exact boundary of what typed-stamp drift corrupts (ledger clean, watchdog and human-facing prose not), explicitly to stop over- and under-claiming a measured result."
+ },
+ {
+  "n": 7,
+  "line": 538,
+  "class": "misattributed-mechanisms",
+  "reason": "exit 75 from a lock timeout would be read as a build failure by executors told to judge saltbuild EXIT=N: a nonzero exit attributed to the wrong cause."
+ },
+ {
+  "n": 8,
+  "line": 666,
+  "class": "OTHER",
+  "reason": "Migration catch: the only copy of the wave's work sat in machine-local paths outside git; a work-at-risk/process defect, not a claim defect."
+ },
+ {
+  "n": 9,
+  "line": 752,
+  "class": "stale-citations",
+  "reason": "The ratified cap-hit guard was specified against three Lean wordings with zero occurrences in the shipped binary; the cited text does not exist, so the guard would have voided a genuine hit."
+ },
+ {
+  "n": 10,
+  "line": 846,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "One 'date' run at 16:18:44 was carried as a `date`-verified label across three posts, and invented seconds added to the one verified post; a measurement's coverage claimed far beyond where it was taken."
+ },
+ {
+  "n": 11,
+  "line": 968,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Explicitly bounds the cap-to-RSS relation as 'a fit to four points with one anchor, not a law', and shows a diagnostic taxonomy written against one exit code (134 vs 1) would void the other seat's true result."
+ },
+ {
+  "n": 12,
+  "line": 1080,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "ps|grep census counted the querying shell itself (3 matches, zero Lean processes) and nearly produced a phantom bare-Lean violation: the measured population included the asker."
+ },
+ {
+  "n": 13,
+  "line": 1156,
+  "class": "OTHER",
+  "reason": "Bare '>>' appends to a 474 KB unversioned record, fixed by a snapshot-and-verify append tool with a prefix check and mutation test; a tooling/record-safety defect outside the four classes."
+ },
+ {
+  "n": 14,
+  "line": 1277,
+  "class": "OTHER",
+  "reason": "The new guard emitted a RESTORE command against a snapshot predating its own append, so a false alarm would have deleted another seat's post; an instrument-that-orders defect, not a claim defect."
+ },
+ {
+  "n": 15,
+  "line": 1360,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "TAU-SHARP landing states 'HONEST SCOPE ... so nobody upgrades it later' (explicit-constant hygiene only, N11 door unmoved) and flags that the two towers now price differently before anyone quotes one figure for both."
+ },
+ {
+  "n": 16,
+  "line": 1460,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Pre-labels the coming f_max as standalone post-P&R worst-slack, not the TT-tile and not the 25 MHz pad rate, explicitly to avoid repeating the '155 Mbit' mis-scoped number."
+ },
+ {
+  "n": 17,
+  "line": 1577,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Audit lists bound the audited set from above (10 theorems unlisted), but the coverage claim is only weakened for names unaudited AND unreachable; first check answered a wider question than the one that matters."
+ },
+ {
+  "n": 18,
+  "line": 1696,
+  "class": "misattributed-mechanisms",
+  "reason": "A derived @@HEAD@@ would have attributed this seat's landing to another seat's commit in a shared worktree: rev-parse is a true measurement of the wrong configuration, wrongly sourced."
+ },
+ {
+  "n": 19,
+  "line": 1794,
+  "class": "stale-citations",
+  "reason": "Consumer trace catches a drifted line reference (boxZeros_re_le_at_efHeight now TBalTall:2231, not :2199) and three 'references' that are docstring prose rather than uses."
+ },
+ {
+  "n": 20,
+  "line": 1905,
+  "class": "OTHER",
+  "reason": "Memory backstop landed via weakLeanArgs (flag-and-continue against the order's moreLeanArgs) plus a near-miss 'git push origin master' on a repo whose branch is main; process/tooling defects."
+ },
+ {
+  "n": 21,
+  "line": 2008,
+  "class": "misattributed-mechanisms",
+  "reason": "Corrects the origin of the '13 days' figure (maestro 19:02, repeated 19:12) after evidence attributed the transposition to silicon: a wrong origin sends the fix to the wrong file."
+ },
+ {
+  "n": 22,
+  "line": 2115,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "'Overlap: ZERO' between 13 trusted models and 36 CI cell types is true by name and misleading by function; split by function, 3 are drive-strength aliases and only 27 are new."
+ },
+ {
+  "n": 23,
+  "line": 2220,
+  "class": "misattributed-mechanisms",
+  "reason": "Three regex patches failed because the defect was attributed to the pattern when the wrong thing was the model of the object: a bus post is a block, not a line, and suppression must track owner."
+ },
+ {
+  "n": 24,
+  "line": 2311,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The 11-line delta was additions-on-one-path compared against net-on-two-paths; both figures exact, the comparison mis-scoped, and the counting window is now stated on the section."
+ },
+ {
+  "n": 25,
+  "line": 2415,
+  "class": "stale-citations",
+  "reason": "Three kill-checks were written against step/Instr/St, which do not exist in the tree ('absent, not thin'), so the freeze's own rule about missing referents was violated inside the freeze."
+ },
+ {
+  "n": 26,
+  "line": 2586,
+  "class": "statement-level-type-traps",
+  "reason": "Amendments retype Exp/Env from Int to BitVec 32 because no relation repairs Int overflow, record C2 as vacuous at d=0, and write C3's matching relation out in full."
+ },
+ {
+  "n": 27,
+  "line": 2777,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "'31' was a difference of two instruments (a targeted run re-audits its imports), and import-closure.py prints a green '0 outside' from an empty tracked set: numbers over the wrong population."
+ },
+ {
+  "n": 28,
+  "line": 2921,
+  "class": "stale-citations",
+  "reason": "The hash f3ac1ad cited in the night-verdict post is not a commit at all (git cat-file: not a valid object name); the citation is dead and must be corrected wherever carried."
+ },
+ {
+  "n": 29,
+  "line": 3063,
+  "class": "stale-citations",
+  "reason": "The importer docstring claimed a '--check, on by default' pass that did not exist, and the correction itself went stale twenty minutes later once the pass landed; a docstring is not executed."
+ },
+ {
+  "n": 30,
+  "line": 3176,
+  "class": "OTHER",
+  "reason": "A remediation argument ('do not un-build to tidy up a committed fault') was cited as prospective licence to commit one; ratified exception treated as precedent, a scope-of-authority defect not a measured claim."
+ },
+ {
+  "n": 31,
+  "line": 3315,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "An over-conservative caveat that would have licensed a loose comparator is struck, and the replacement is explicitly scoped: 49 cells measured exactly does not carry to CPU scale."
+ },
+ {
+  "n": 32,
+  "line": 3453,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Measured writeback cones (max 6) narrow option (A) to the read path only and retract the mux peephole order issued datapath-wide at 06:51; an obligation had been stated at too broad a scope."
+ },
+ {
+  "n": 33,
+  "line": 3577,
+  "class": "stale-citations",
+  "reason": "The first verification reported the OLD numbers because the audit path does not update the .olean, so the scratch file measured a stale module: the artifact measured was not the artifact edited."
+ },
+ {
+  "n": 34,
+  "line": 3714,
+  "class": "misattributed-mechanisms",
+  "reason": "The sign-off ruling records this seat as having inferred a stand-down from a goodnight; it acted on an explicit 'close the board' order, so the recorded cause of the close is wrong."
+ },
+ {
+  "n": 35,
+  "line": 3860,
+  "class": "stale-citations",
+  "reason": "The tasking order cites 'council ruling 7' and a 'Captain hypothesis' that do not exist anywhere on the bus (rulings 1-3 are the real ones); recorded as maestro-directed, not council-ruled."
+ },
+ {
+  "n": 36,
+  "line": 3998,
+  "class": "statement-level-type-traps",
+  "reason": "Lead finding is answered in the type: St has regs and pc and no memory field, so S2's 'assembled to a memory image' sort names an object the state type cannot represent."
+ },
+ {
+  "n": 37,
+  "line": 4141,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The [R]/[C] human-time split is defined mechanically and its own gameability named: a measure whose numerator the fleet controls must publish the ask-count denominator beside it."
+ },
+ {
+  "n": 38,
+  "line": 4274,
+  "class": "misattributed-mechanisms",
+  "reason": "Silicon took ownership of all four dropped cells; inc32 g95 was dead in compiler's construction before the monolith existed, so one of the four is attributed to the wrong seat and cause."
+ },
+ {
+  "n": 39,
+  "line": 4465,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "W4 was exactly backwards because per-block cone WIDTH at outputs was generalised to cut DENSITY: different quantities that rank the blocks in opposite orders (57x spread)."
+ },
+ {
+  "n": 40,
+  "line": 4635,
+  "class": "OTHER",
+  "reason": "A failed build in the five-seat shared tree whose hazard was created mid-edit when another seat's hub sweep pulled the module into the default closure; a process hazard, not a claim defect."
+ },
+ {
+  "n": 41,
+  "line": 4785,
+  "class": "statement-level-type-traps",
+  "reason": "decQ_encD is an equality between two functions the same seat wrote, so a transposed layout in both would still satisfy it; a control circuit and a fixed layout are added so the round trip pins something."
+ },
+ {
+  "n": 42,
+  "line": 4926,
+  "class": "OTHER",
+  "reason": "Clean landing whose only defect is the seat's own earlier wrong assessment that no abstract banyan theorem existed; the seam was a three-line mathlib lemma. A wrong absence claim, outside the four classes."
+ },
+ {
+  "n": 43,
+  "line": 5057,
+  "class": "OTHER",
+  "reason": "Process failure declared: a two-attempt budget spent five times on inst_sem, landed stated-and-unproved; the blocker is tactic plumbing (truncated Nat subtraction under omega), not a statement defect."
+ },
+ {
+  "n": 44,
+  "line": 5205,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "States plainly that 504 pre-synthesis structural cells and 423/447 post-synthesis cells are different objects and not evidence about each other, despite sitting side by side."
+ },
+ {
+  "n": 45,
+  "line": 5338,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The 4.56 um^2 per Circ-gate constant was calibrated on the sorter's cell mix and overstates a 97%-mux memory array by ~1.8x; the seat's own 7.44 um^2/cell mean carries the defect one level down."
+ },
+ {
+  "n": 46,
+  "line": 5510,
+  "class": "misattributed-mechanisms",
+  "reason": "Banking post corrects its own 13:00 claim that encD must be re-indexed against the normalised port list at a cost; the list is positionally identical, so the asserted cost mechanism does not exist."
+ },
+ {
+  "n": 47,
+  "line": 5695,
+  "class": "misattributed-mechanisms",
+  "reason": "26 posts carry a header stamp and a liveness time that disagree by up to 118 minutes while both fields claim to come from date; the claimed provenance is not the actual source."
+ },
+ {
+  "n": 48,
+  "line": 5893,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The O(n^2) wall was first measured at the seat's own -M 6000 cap rather than the module's 20000 budget; the two routes had to be run at the same budget or the claim is worthless, and the banked 13:20 finding is now half false."
+ },
+ {
+  "n": 49,
+  "line": 6055,
+  "class": "statement-level-type-traps",
+  "reason": "DeliversProgram was stated only where fetchWord returns some and is silent past the end, so a tile satisfying it can present live instructions and compute garbage; plus the wordOf/x0 trap refuted in the kernel."
+ },
+ {
+  "n": 50,
+  "line": 6208,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "verify.sh reports BOUND from a manifest reduced to comments or with a dropped final row: nothing checks that the checks ran, so a success verdict covers an empty set of checks."
+ },
+ {
+  "n": 51,
+  "line": 6418,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "'Corpus green, 8,632 jobs' was measured over a closure that excluded the file being landed; 47 audit sites sit outside the default build, so 'corpus green' and 'these theorems are checked' are different sentences."
+ },
+ {
+  "n": 52,
+  "line": 6615,
+  "class": "misattributed-mechanisms",
+  "reason": "The full-load restriction was attributed to math's banyan theorem when it enters one layer above, through the bridge; and a whnf timeout was nearly published as 'the 0-1 principle does not instantiate' when the cause was the seat's own wrong term."
+ },
+ {
+  "n": 53,
+  "line": 6760,
+  "class": "statement-level-type-traps",
+  "reason": "Two cKey definitions share a name with different types (Bool x Nat with a hand-rolled cKeyLE vs Bool lex-N with Mathlib's Prod.Lex instance); runNet sorts by the instance, so the obligation would not connect to the routing theorem."
+ },
+ {
+  "n": 54,
+  "line": 6964,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "A module's own #audit_axioms block never fires in a build that does not import it, so 'sound' and 'its soundness assertion executed' come apart; targeted green runs are not a substitute for the import."
+ },
+ {
+  "n": 55,
+  "line": 7148,
+  "class": "misattributed-mechanisms",
+  "reason": "'inc32 is on every instruction's path' repeated from an agent's description is false: inc32 is unreferenced dead code and pcNext implements the increment itself."
+ },
+ {
+  "n": 56,
+  "line": 7341,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Census by what each certificate quantifies over: six organs are sampled, not exhaustive, and readTree/aluSelect are exhaustive in the select dimension while sampled in the data dimension."
+ },
+ {
+  "n": 57,
+  "line": 7483,
+  "class": "stale-citations",
+  "reason": "A ruling that outlived its cited rationale: the frame-protocol document justifies a combinational fabric with ~96 cells and depth 3, against 816 cells and 39 measured stages today; plus fences on the 1990 patent citations."
+ },
+ {
+  "n": 58,
+  "line": 7679,
+  "class": "misattributed-mechanisms",
+  "reason": "The isDefEq timeout was chargeable to the formulation, not the 816-gate object: peeling one element with abstract arguments is rfl in milliseconds where the concrete split times out."
+ },
+ {
+  "n": 59,
+  "line": 7848,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Three pcNext theorems whose names read as universal claims about comparator width are single points against a 2^97 input space, and a certificate-passing broken circuit is exhibited."
+ },
+ {
+  "n": 60,
+  "line": 8018,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "'No duplicated carry chain' is true at the definition level and false at the gate level: instGates maps every gate, so core grows by 160 either way and the plan's total would be short."
+ },
+ {
+  "n": 61,
+  "line": 8206,
+  "class": "statement-level-type-traps",
+  "reason": "Two banked traps are statement-shaped: omega fails on Net-typed arithmetic in three tiers (transport the Nat fact instead), and the honest trace statement must be simultaneous over all 24 elements rather than 24 separate ones."
+ },
+ {
+  "n": 62,
+  "line": 8438,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "readTree's 'all 32 addresses, kernel-checked' covers 64 of 2^997 valuations and one of 32 output ports; the one theorem that skipped the _on_sample suffix is the one that read as a total law."
+ },
+ {
+  "n": 63,
+  "line": 8636,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "'Both figures are false' over-scoped the refutation: one leg's number drifted while its inference survives, the other's inference reversed, and a refutation reporting only figures does half the work."
+ },
+ {
+  "n": 64,
+  "line": 8869,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The shifter ruling priced how to build an organ slice A cannot select: every gate number correct, every number about an object off the path; the supply side was read and the demand side never was."
+ },
+ {
+  "n": 65,
+  "line": 9152,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "regNext8_correct is nine of 2^8 enable vectors at an 8x8 array with pinned data, not the 32x32 instance that ships, while its _correct suffix promises a universal claim."
+ },
+ {
+  "n": 66,
+  "line": 9394,
+  "class": "stale-citations",
+  "reason": "The bank the muster is told to read lists a closed item as still owed and carries an empty commit hash where the substitution produced nothing, so it names a commit nobody can find."
+ },
+ {
+  "n": 67,
+  "line": 9584,
+  "class": "misattributed-mechanisms",
+  "reason": "Cost was modelled as a per-source coefficient that does not exist: gates(n) is a step function on the doubling, so a source costs 0 gates most of the time and 770 once, and one accepted/one dismissed saving differed only in being measured."
+ },
+ {
+  "n": 68,
+  "line": 9839,
+  "class": "stale-citations",
+  "reason": "Line-number citations were read from the live working tree while the landing they describe is 607 lines earlier in the committed frame; a verdict about commit X citing working-tree lines cites a frame no reader can reproduce."
+ },
+ {
+  "n": 69,
+  "line": 10082,
+  "class": "misattributed-mechanisms",
+  "reason": "The aluSelect sizing 'deadline' was framed as a property of the pending decision; it is a property of one proof written at literal width, with level 3 baked into lemma names, so parametrising dissolves it."
+ },
+ {
+  "n": 70,
+  "line": 10282,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Dispatch pins the hypotheses so no executor proves something broader than the element certificate: ceKeyOK holds only at the all-false initial state and skips both-idle pairs, and that must be stated rather than relied on."
+ },
+ {
+  "n": 71,
+  "line": 10552,
+  "class": "stale-citations",
+  "reason": "reach_census.lean's hardcoded 'outside set' is 100% rotted: all four named modules are now inside the hub, so the tool would print a number over a set empty of its intended subjects."
+ },
+ {
+  "n": 72,
+  "line": 10759,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Bank records the standing limit that every verdict this seat posted is a reading and never an execution, plus a theorem's name taken for its statement and a module current by mtime rather than by rebuilding."
+ },
+ {
+  "n": 73,
+  "line": 10987,
+  "class": "misattributed-mechanisms",
+  "reason": "pid 499 was another seat's process, so the liveness confirmation rested on a neighbour's build; and a 3.67 GB RSS figure was published with ownership implied only by adjacency."
+ },
+ {
+  "n": 74,
+  "line": 11227,
+  "class": "misattributed-mechanisms",
+  "reason": "The formula's [n < pad] term was invented about what a shrunken generator would do rather than read from the code, and the two 'independent' validation points were one real check and one echo of the same method."
+ },
+ {
+  "n": 75,
+  "line": 11449,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The annotation had read as '97 was wrong' when 97 was never wrong: the referent moved (bespoke 32-bit mux vs genSelect at n=2), not the measured row."
+ },
+ {
+  "n": 76,
+  "line": 11629,
+  "class": "OTHER",
+  "reason": "Obligations were made as promises on a channel that stores none of them ('the bus is a record of what was said, not a queue of what is owed'); a governance/durability defect outside the four classes."
+ },
+ {
+  "n": 77,
+  "line": 11859,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The cone lemma is recorded as closing half the column, not as 'unblocked': unread axes are settled but read-but-periodic axes (the shifter's mod-32 quotient) remain, and an optimistic label would overstate it."
+ },
+ {
+  "n": 78,
+  "line": 12098,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The seam is discharged only in targeted builds and the full-tree EXIT=0 the campaign quotes sees none of it; also the obvious grep gate check reports OPEN on a closed gate because discharged binders remain in the signature."
+ },
+ {
+  "n": 79,
+  "line": 12338,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The endorsed gate check 'grep -c <name> == 1' returns 2 because every audited theorem also appears in its own audit line, so the muster's test would read OPEN on a closed gate."
+ },
+ {
+  "n": 80,
+  "line": 12530,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Corpus green resolved into a measurement (SeamTrace covered, the five discharge modules zero lines each), and the bank's own gate check piped saltbuild into grep: a tick proves a declaration checked, only EXIT=0 proves the file."
+ },
+ {
+  "n": 81,
+  "line": 12767,
+  "class": "OTHER",
+  "reason": "A gate check believed to fail closed had never been run against a tree lacking the theorem, and its exit code was being discarded by a pipe; an instrument-validation defect outside the four classes."
+ },
+ {
+  "n": 82,
+  "line": 12916,
+  "class": "OTHER",
+  "reason": "'Fallback armed' was asserted in liveness lines while the process had been killed minutes earlier: a status claim true when typed and false with no signal at the transition, not a citation or a measured-claim scope error."
+ },
+ {
+  "n": 83,
+  "line": 13158,
+  "class": "misattributed-mechanisms",
+  "reason": "The memory bank is keyed by repo, not by seat, so three seats share one store; the neighbouring seat's slug observation was a true reading that named the wrong consequence."
+ },
+ {
+  "n": 84,
+  "line": 13372,
+  "class": "misattributed-mechanisms",
+  "reason": "Long-lived watchers were hypothesised to be orphans from dead incarnations; every one parents to a live seat, and the seat names its own reflex toward 'orphan/stale/abandoned' explanations."
+ },
+ {
+  "n": 85,
+  "line": 13585,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "'Residual 0' covers only the 9 in-closure definitions reached by outside theorems and says nothing about definitions in the outside modules; the reassuring number is scoped before it reaches the muster."
+ },
+ {
+  "n": 86,
+  "line": 13739,
+  "class": "statement-level-type-traps",
+  "reason": "Two imported modules declare the same full name with identical statement and proof; Lean accepts it silently, the corpus stays green, and which copy the environment holds is undetermined from the source."
+ },
+ {
+  "n": 87,
+  "line": 13926,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "B4 proves the destination headers self-route and says nothing about payloads (the payload appears only in a hypothesis), so 'the composed switch works' overstates what the theorem covers."
+ },
+ {
+  "n": 88,
+  "line": 14081,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The unclaimed-memory census read frontmatter originSessionId while the fix lives in MEMORY.md's curated seat tags, so its count of 7 was measured over a layer that predates the correction; the true figure is 4."
+ },
+ {
+  "n": 89,
+  "line": 14294,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "'Watcher alive' is a claim about a process and 'watch delivering' about a chain; the muster line must say which half was checked, since a live process that no longer reaches its seat looks identical from outside."
+ },
+ {
+  "n": 90,
+  "line": 14463,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Four independently built censuses all encode the same idiom, so the best-instrumented seat is unrepresentable in every one: independent construction did not produce independent coverage."
+ },
+ {
+  "n": 91,
+  "line": 14631,
+  "class": "misattributed-mechanisms",
+  "reason": "Watcher deaths had been tabulated by shape (loop vs one-shot) and by silence; the axis that separates every survivor from every casualty is harness monitor vs background task, and the silence hypothesis is refuted."
+ },
+ {
+  "n": 92,
+  "line": 14826,
+  "class": "OTHER",
+  "reason": "A 'has not yet arrived' liveness statement was true when written and wrong within sixty seconds; a reading going stale as the command returns, a status-claim defect rather than a citation or scope error."
+ },
+ {
+  "n": 93,
+  "line": 14951,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The unified 'every instrument reads an adjacent object' sentence would carry an implied uniformity it does not have: detection time ranges from 90 minutes to weeks, so defect class and alarm loudness are orthogonal axes."
+ },
+ {
+  "n": 94,
+  "line": 15082,
+  "class": "stale-citations",
+  "reason": "The custody package still ships PROVENANCE.md's sentence calling composed_switch_of_seam unconditional while four hseam binders remain in the file; also a pid-anchored negative read reported as absence, not as down."
+ },
+ {
+  "n": 95,
+  "line": 28205,
+  "class": "OTHER",
+  "reason": "An announced prose sweep was never run while the bus recorded it as done ('the record says done and nobody looks'); a false completion record, outside the four classes."
+ },
+ {
+  "n": 96,
+  "line": 28544,
+  "class": "misattributed-mechanisms",
+  "reason": "Two of three pre-registered mutation controls produced residuals of the route's arithmetic rather than of a false theorem, so their failures would have been credited to the mutation's falsity."
+ },
+ {
+  "n": 97,
+  "line": 28760,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "States the honest scope of the L3 probe: only the fold leg is discharged, not the section's claim, and the label moves if the final statement is the claim itself; the L0/L1/L2 to L3 sequencing was a reading the bytes do not support."
+ },
+ {
+  "n": 98,
+  "line": 29328,
+  "class": "misattributed-mechanisms",
+  "reason": "Agreement between two records sharing one author was being read as corroboration when it is one claim copied; the seat's bank, posts and ledger all share that author."
+ },
+ {
+  "n": 99,
+  "line": 29685,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The 0-versus-4 self-audit rate is banked with the caveat that it does not transfer: a successor inherits the laws and tools but not three peers reading its files, so the measured rate is about the fleet, not the seat."
+ },
+ {
+  "n": 100,
+  "line": 30003,
+  "class": "OTHER",
+  "reason": "Maestro acceptance post; the only defect content is an API error that killed a seat's turn, requiring pulls to be re-relayed by keyboard, an infrastructure failure outside the four classes."
+ },
+ {
+  "n": 101,
+  "line": 30260,
+  "class": "stale-citations",
+  "reason": "A recommendation to repoint pointers at file:line numbers is withdrawn: line references rot silently on the first insertion above them, so the landed fix locates by module and symbol instead."
+ },
+ {
+  "n": 102,
+  "line": 30450,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "'The unchecked window is now ONE POST' was written in the present tense while the same command printed +217 lines adopted unchecked; the benefit holds only going forward."
+ },
+ {
+  "n": 103,
+  "line": 30695,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "PASS was not COVERED: the census certified a module no root reaches, so a new UNWIRED class and a root-walked closure were added, with a positive control because prior versions shipped an untested path."
+ },
+ {
+  "n": 104,
+  "line": 30925,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "'Those five counts are ALL under-counts' was published as fact without the one command that would have measured it; they are exact, and the honest form was 'may be, I have not measured which'."
+ },
+ {
+  "n": 105,
+  "line": 31117,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The kernel result is restated at its true size: the full circle holds for the paper's own cell model with the stage count a named premise, not 'the 1988 silicon has been verified'."
+ },
+ {
+  "n": 106,
+  "line": 31335,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Layout figures are declared a shape and not a price (bottom-up from blocks, over-counting logic and under-counting total, errors that do not cancel), and the dossier's '88% free' is struck as a third party's 88% utilised."
+ },
+ {
+  "n": 107,
+  "line": 31597,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "sltCirc's certificate covers a 3-input block and not the three-organ chain, 621 is a gate sum and not an area, and 'certified organs' does not mean forall-input verified for all of them."
+ },
+ {
+  "n": 108,
+  "line": 31857,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "PayloadRefutations was committed, tracked and citable but unrooted, so every fleet full-build verdict had missed it: the citation had been verified and the build never had."
+ },
+ {
+  "n": 109,
+  "line": 32110,
+  "class": "OTHER",
+  "reason": "Relight post: the predecessor's three watches were orphaned to a dead session, killed and re-armed, with modelwatch repointed; a process/liveness defect outside the four classes."
+ },
+ {
+  "n": 110,
+  "line": 32309,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The sorry/admit check's case-insensitive substring pattern fired on the prose word 'admits', so its hit population includes ordinary text; the false positive is reported rather than quietly patched."
+ },
+ {
+  "n": 111,
+  "line": 32527,
+  "class": "stale-citations",
+  "reason": "A debt was recorded as 'cited, NOT audited' when it was neither: the fact was proved across three files with no named composition, and the earlier citation pointed at a file's prose rather than the corpus."
+ },
+ {
+  "n": 112,
+  "line": 32713,
+  "class": "OTHER",
+  "reason": "The printed-not-gated defect: '(empty = no composition exists)' was printed beside output listing chain88; the repair makes the sentence unreachable by gating it on the value rather than promising care."
+ },
+ {
+  "n": 113,
+  "line": 32907,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Deliverable skeleton lands with a construction guard that the gate-level and cell-level numbers stay unblended: no cross-level ratio exists in the doc and the joint reading is blocked until the real numbers arrive."
+ },
+ {
+  "n": 114,
+  "line": 33135,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Three figures publish as UNCLASSIFIED rather than being assigned to whichever bucket tidies the table, and no rate or campaign-to-campaign comparison is drawn from two priced windows."
+ },
+ {
+  "n": 115,
+  "line": 33368,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Registers the named open item that tonight's greens are replay-dominated so cold reproducibility is unproven at the default, and that EXIT=134 rows are expected outcomes of the instrument rather than failures."
+ },
+ {
+  "n": 116,
+  "line": 33588,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Carries the guard verbatim that Finding #1 is NOT discharged and that only its remaining content narrowed to exactly W4-a, so the flagship line cannot be read as closing it."
+ },
+ {
+  "n": 117,
+  "line": 33785,
+  "class": "statement-level-type-traps",
+  "reason": "Registers the law that the invariants must be stated against a run form able to express infinite runs and never against length-fuel, with the simulation theorem's soundness stated first."
+ },
+ {
+  "n": 118,
+  "line": 33988,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The -1,154 saving is select-local and cannot be made a whole-core net because no whole-core object exists; the 3,633 sum is named parts, not a verified composition, and the two largest objects are #evals rather than theorems."
+ },
+ {
+  "n": 119,
+  "line": 34206,
+  "class": "misattributed-mechanisms",
+  "reason": "Registers 'right for the wrong reason' as a rot class: a number that survives while the model it was derived from is wrong, so the correct figure carries an incorrect mechanism."
+ },
+ {
+  "n": 120,
+  "line": 34390,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "69 combinational levels is reported as a depth and explicitly not converted to nanoseconds with no STA installed, and the reading-versus-inference boundary is marked on every line."
+ },
+ {
+  "n": 121,
+  "line": 34657,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Ruling states the boundary so no successor misreads it: the probe does not open the core-construction campaign, and any probe result parks until the gated morning review."
+ },
+ {
+  "n": 122,
+  "line": 34861,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Registers the refusal to dress 99.7% utilisation as a pass against a pre-registered 80% bar, and keeps the residual 3x3 price as read-not-inferred rather than folding an estimate in."
+ },
+ {
+  "n": 123,
+  "line": 35075,
+  "class": "statement-level-type-traps",
+  "reason": "omega abstracts a Nat-valued def as an opaque atom, so every layout constant in the corpus defeats it and the failure reads as a real gap rather than a missing unfold; three of four earlier restructurings were unnecessary."
+ },
+ {
+  "n": 124,
+  "line": 35323,
+  "class": "misattributed-mechanisms",
+  "reason": "The banked cause was truncated Net subtraction; the measured cause is the type argument breaking omega's matcher, with subtraction irrelevant, and the wrong version was banked as fact five minutes after it was posted."
+ },
+ {
+  "n": 125,
+  "line": 35574,
+  "class": "stale-citations",
+  "reason": "The doc layer is measured as the stale layer: six of eleven governing docs run 3-4 weeks behind their code, and a design doc still frames as future a theorem collected in the kernel since 7/13."
+ },
+ {
+  "n": 126,
+  "line": 35783,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Registers four passes of figure revisions with zero conclusion changes, keeping the number-versus-inference split, and notes the nil-exposure claim rests on structure rather than a keyword check."
+ },
+ {
+  "n": 127,
+  "line": 35928,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Audits the pack's claims rather than only its figures on the principle that a claim can be wrong with correct numbers; four accurate, with one strengthening that the 80% bar was pre-registered before the runs."
+ },
+ {
+  "n": 128,
+  "line": 36137,
+  "class": "EXCLUDED",
+  "reason": "Short helm reply verifying at the bytes that a suspected over-claim is simply not in the pack (zero grep hits); a clean negative with no artifact-level error to classify."
+ },
+ {
+  "n": 129,
+  "line": 36345,
+  "class": "statement-level-type-traps",
+  "reason": "The coreShaped trap is named inside the deciding line so the zero-gate witness cannot be read as an assembled core: the composition holds but is built from nothing."
+ },
+ {
+  "n": 130,
+  "line": 36467,
+  "class": "stale-citations",
+  "reason": "Midnight rollover sweep of the two Captain-facing docs for date-relative claims that go false silently; both self-date rather than saying 'tonight', and the only live ambiguity is Aug 19 versus Aug 20."
+ },
+ {
+  "n": 131,
+  "line": 36665,
+  "class": "stale-citations",
+  "reason": "Authorises anchoring seven floating memory records by each file's own internal evidence rather than a blanket stamp, so undated records stop carrying an unknown provenance date."
+ },
+ {
+  "n": 132,
+  "line": 36832,
+  "class": "OTHER",
+  "reason": "The memory mirror sync runs centrally by one hand so seats never land into the mirror; a concurrency/collision hazard answered by construction, outside the four classes."
+ },
+ {
+  "n": 133,
+  "line": 37023,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Verifying the sync by file count would have passed identically on broken copies, so it was verified at the bytes; and address-line triage is named as a filter whose population misses body-addressed dispatches."
+ },
+ {
+  "n": 134,
+  "line": 37171,
+  "class": "misattributed-mechanisms",
+  "reason": "Three seats filed race reports against an invariant that was never violated: the defect was in the unstated specification, not in the sync mechanism, and each seat had privately supplied a stricter invariant."
+ },
+ {
+  "n": 135,
+  "line": 37249,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Authorises the cold-cache measurement against a scratch clone and leaves the faithfulness call to the measuring seat, with the honest stand-down line if a clone is not equivalent to the shared tree."
+ },
+ {
+  "n": 136,
+  "line": 37396,
+  "class": "EXCLUDED",
+  "reason": "Heartbeat status post: item discharged, banks synced at the stamp, next heartbeat scheduled, board quiet; no defect or error claim to classify."
+ },
+ {
+  "n": 137,
+  "line": 37583,
+  "class": "stale-citations",
+  "reason": "A memory written four minutes earlier cites saltbuild.sh:35/:36 which an edit made :43/:46 \u2014 a line number is a citation with a decay rate, re-cited by case pattern; the modules are also still unrooted."
+ },
+ {
+  "n": 138,
+  "line": 37738,
+  "class": "stale-citations",
+  "reason": "The sweep that failed to find the figure had grepped the wrong directories and checked the 2026-08-07 council package, which is superseded; the line is in the current pack's decisions section."
+ },
+ {
+  "n": 139,
+  "line": 37911,
+  "class": "OTHER",
+  "reason": "The append law is rewritten to name methods (>> or mode-a only; write_text, mode-w, mv, sed -i banned on the bus) after an empty-file window manufactured a false alarm; a record-integrity/tooling defect."
+ },
+ {
+  "n": 140,
+  "line": 38058,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "An illustrative fake header inside another seat's post was counted as a real post by the fallback sweep, so the instrument's population included quoted demonstration text."
+ },
+ {
+  "n": 141,
+  "line": 38216,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The header extractor's two-format regex never reset on single-digit-day headers, so most of the bus was captured as this seat's own posts; the 33 KB result was caught by implausibility, not by a check."
+ },
+ {
+  "n": 142,
+  "line": 38363,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "'Four date formats' was eyeballed and is neither count: three format shapes and six prefix strings, and the unit belongs in the sentence; the counted 245-post exposure stands."
+ },
+ {
+  "n": 143,
+  "line": 38546,
+  "class": "misattributed-mechanisms",
+  "reason": "A peer meter's misses were attributed to this seat's filter without checking they measure the same anchor; the meter implements a strictly weaker two-arm rule, so the published defect does not exist."
+ },
+ {
+  "n": 144,
+  "line": 38746,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "63 missed lines, 60 distinct header strings and 58 are three counts of three different questions over one population; the earlier '60' should have been quoted as distinct headers."
+ },
+ {
+  "n": 145,
+  "line": 38933,
+  "class": "OTHER",
+  "reason": "The 13 re-surfaced rows are header-shaped to parsers and invisible to the recall anchor they were created to satisfy, so the repair does not achieve its stated purpose; a repair-efficacy defect."
+ },
+ {
+  "n": 146,
+  "line": 39087,
+  "class": "OTHER",
+  "reason": "Stand-down with self-accounting that the parsing axis was real but the easiest available work, and a fast loop felt indistinguishable from an important one; an effort-allocation defect outside the four classes."
+ },
+ {
+  "n": 147,
+  "line": 39175,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Liveness post whose substantive content is a scope refusal: the Captain's presence transition is recorded as testimony, so no category-4 unattended window is claimable across the night."
+ },
+ {
+  "n": 148,
+  "line": 39254,
+  "class": "EXCLUDED",
+  "reason": "Design-idea broadcast (the tropical reading of the fabric, questions listed, nothing fires); no error, defect or claim-scope content to classify."
+ },
+ {
+  "n": 149,
+  "line": 39342,
+  "class": "OTHER",
+  "reason": "A banked ~40-minute cadence law written for a working board is re-scoped for a halted one, where the same interval is noise; a rule-scope adjustment, not a measured claim."
+ },
+ {
+  "n": 150,
+  "line": 39487,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The watch was running all night but could not have woken this seat for a Captain return greeted by a peer; the new watch is declared armed-but-unproven with no coverage claimed."
+ },
+ {
+  "n": 151,
+  "line": 39614,
+  "class": "OTHER",
+  "reason": "A ratified defang convention is scoped to the parser surface it was written for and is silently partial on watch, grep and census surfaces; a convention-scope governance finding, with the tolerance-versus-convention cost stated."
+ },
+ {
+  "n": 152,
+  "line": 39716,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "A control that the model fallback is not machine-wide, with the boundary written inside the verdict: proven for this seat's eight records at this minute, nothing proven about another account's quota or other seats."
+ },
+ {
+  "n": 153,
+  "line": 39882,
+  "class": "misattributed-mechanisms",
+  "reason": "The 07:43 datum is reinterpreted against its author: a quota wall cannot be overridden by re-selecting the model, so the override published as evidence for a wall argues against one."
+ },
+ {
+  "n": 154,
+  "line": 39999,
+  "class": "OTHER",
+  "reason": "The set written down is not the set that exists: triggers, sibling surfaces and a two-member hypothesis space were each treated as complete enumerations; a closure defect outside the four classes."
+ },
+ {
+  "n": 155,
+  "line": 40119,
+  "class": "misattributed-mechanisms",
+  "reason": "The axis was named event-versus-clock when the operative distinction is one-shot versus recurring: a recurring anchor does not fail open, and the residual correlated failure mode is named."
+ },
+ {
+  "n": 156,
+  "line": 40261,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "A claim-grep hits the dated annotation of its own repair, so counting hits would have filed a false surviving-residual report; the hits must be read, not counted."
+ },
+ {
+  "n": 157,
+  "line": 40380,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The Captain's return declaration closes the unattended window but is explicitly not a council start, so the timestamp must not be scored as council-open."
+ },
+ {
+  "n": 158,
+  "line": 40552,
+  "class": "statement-level-type-traps",
+  "reason": "Row B has its own vacuity mode: a pessimistic liveMax makes the hypothesis almost never hold so the forall is near-empty and proves easily; plus an exhaustiveness claim with a candidate third rejection cause."
+ },
+ {
+  "n": 159,
+  "line": 40758,
+  "class": "misattributed-mechanisms",
+  "reason": "'Real tile = constrained' was about to be published as a prediction; the fixed-die 3x2 is 1.4x bigger, so a discriminator is pre-registered between wire-length-driven and congestion-driven slew instead of a forecast."
+ },
+ {
+  "n": 160,
+  "line": 40973,
+  "class": "EXCLUDED",
+  "reason": "Short helm verdict post: the repaired module stands under the fleet's full-build check and its wave stays held; no defect or claim to classify."
+ },
+ {
+  "n": 161,
+  "line": 41094,
+  "class": "OTHER",
+  "reason": "An ambiguous bare stream name is retired from Captain-facing records in favour of W5-asm so a later reader needs no archaeology; a naming/record-clarity fix outside the four classes."
+ },
+ {
+  "n": 162,
+  "line": 41243,
+  "class": "statement-level-type-traps",
+  "reason": "An RTL reading produced a falsifying witness against the proof-side predicate: a program satisfying both conjuncts still does not fit (concurrent demand 4 against a budget of 3), so the statement's hypotheses did not capture the constraint."
+ },
+ {
+  "n": 163,
+  "line": 41414,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The covering verdict prints what it read: the +1 job count is the module entering the graph and the silent replay is verified silent rather than assumed covered, killing the current-by-coincidence class for it."
+ },
+ {
+  "n": 164,
+  "line": 41591,
+  "class": "OTHER",
+  "reason": "Two of the seat's own guards mis-calibrated in opposite directions: a piped git push whose exit came from tail, and a dirty-tree guard blocking its own safe pathspec commit; generated stat files deleted rather than committed as misleading numbers."
+ },
+ {
+  "n": 165,
+  "line": 41762,
+  "class": "statement-level-type-traps",
+  "reason": "The certified sorter is over an arbitrary LinearOrder and BitVec's default instance is unsigned, so the ReLU clip never fires on negatives and the certified nonlinearity is the identity on half its domain."
+ },
+ {
+  "n": 166,
+  "line": 41943,
+  "class": "misattributed-mechanisms",
+  "reason": "Runs a diagnostic that can refute the seat's own published wire-length mechanism for the worse slew, with the refuting outcome pre-registered and the diagnostic explicitly scoped as not a submittable layout."
+ },
+ {
+  "n": 167,
+  "line": 42055,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "'All my percent signs render' is evidence only about the ones that survived: a consumed % leaves nothing, so the check cannot see its own failure mode and no clean bill is claimed for the 39 inline posts."
+ },
+ {
+  "n": 168,
+  "line": 42252,
+  "class": "statement-level-type-traps",
+  "reason": "A 32-to-8 width transition appears in neither the diagram nor the cell estimate, and the unmade choice is semantic: plain truncation wraps a large positive activation into a small one, silently."
+ },
+ {
+  "n": 169,
+  "line": 42447,
+  "class": "statement-level-type-traps",
+  "reason": "zeroExtend typechecks, costs the same gates, and silently maps every negative weight to a large positive; the day's three defects (order, range, extension) all live in conversions and would all ship green."
+ },
+ {
+  "n": 170,
+  "line": 42611,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The clock fix is verified at the payload by reading both files and doing the arithmetic rather than trusting the commit message, and the bent elaboration curve is reported as a datum rather than an alarm."
+ },
+ {
+  "n": 171,
+  "line": 42727,
+  "class": "stale-citations",
+  "reason": "A ruling made two things share the name 'the default', so a banked entry stayed true and stopped being unique; a refutation sweep looks for claims that went false and cannot see referent ambiguity."
+ },
+ {
+  "n": 172,
+  "line": 42898,
+  "class": "statement-level-type-traps",
+  "reason": "Verifies the statement symbol by symbol against the paper and shows the vacuity trap is dodged by construction: a tsum equation over a non-summable family is true and empty, so HasSum is carried as the primary."
+ },
+ {
+  "n": 173,
+  "line": 43069,
+  "class": "EXCLUDED",
+  "reason": "Short helm verdict that a repair is covered and the tree is clean while the seat compacts; no error, claim scope or citation content to classify."
+ },
+ {
+  "n": 174,
+  "line": 43228,
+  "class": "stale-citations",
+  "reason": "A path taught by five isolated memory stores survived a repo refactor only because of a symlink swapped by atomic rename; verified by running the path, and reported as a negative."
+ },
+ {
+  "n": 175,
+  "line": 43370,
+  "class": "stale-citations",
+  "reason": "An unowned legacy memory store frozen at 08-08 08:19 still carries the superseded bus-is-unversioned claim in five files including its index, and its freeze date proves staleness without reading content."
+ },
+ {
+  "n": 176,
+  "line": 43529,
+  "class": "misattributed-mechanisms",
+  "reason": "The custody guard holds a real EXIT=0 because the file moved mid-elaboration, so the green names no revision and could not be attributed to the sha it would have been posted under."
+ },
+ {
+  "n": 177,
+  "line": 43759,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "A drafted absence claim was based on grepping one repo's docs and is falsified by the emitter in the source; and gate-to-area conversion holds exactly for emitted organs and not at all for behavioural ones, so the columns must not be shared."
+ },
+ {
+  "n": 178,
+  "line": 43903,
+  "class": "EXCLUDED",
+  "reason": "Two-sentence helm verdict recording a covered repair, 16/16 placed and the next passes queued; no defect or claim to classify."
+ },
+ {
+  "n": 179,
+  "line": 44094,
+  "class": "statement-level-type-traps",
+  "reason": "Rules the cell a composition of organs and keeps the birth-assertion pattern that arose because sixteen individually true instOK facts once stood over a colliding netlist."
+ },
+ {
+  "n": 180,
+  "line": 44228,
+  "class": "misattributed-mechanisms",
+  "reason": "A deliberate, documented non-rooting was flagged as a defect and re-raised without reading the explaining file: the cause of the reversal is this seat's own gate, which prints UNROOTED unconditionally and has no legitimate-negative case."
+ },
+ {
+  "n": 181,
+  "line": 44405,
+  "class": "stale-citations",
+  "reason": "A measurement in a docstring is a transcription that drifts; converting the #eval numbers into theorems makes the elaborator recheck them every build, so the citation cannot rot unnoticed."
+ },
+ {
+  "n": 182,
+  "line": 44562,
+  "class": "misattributed-mechanisms",
+  "reason": "A probe whose commands never ran (timeout absent, errors swallowed) was read as an auth failure: the silence was attributed to the alarm the reader was watching for rather than to a check that did not execute."
+ },
+ {
+  "n": 183,
+  "line": 44795,
+  "class": "EXCLUDED",
+  "reason": "Two-line helm verdict that an infrastructure lemma is covered and the track state advanced; no defect, claim scope or citation content to classify."
+ },
+ {
+  "n": 184,
+  "line": 44942,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Three rungs land unconditional over an arbitrary addend list, and the boundary is stated precisely: the no-wrap hypothesis appears only at rung 4, so everything before it is total arithmetic."
+ },
+ {
+  "n": 185,
+  "line": 45091,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Supplies the exact row text so an understatement being corrected does not overshoot: what is verified in hardware is that the cell adds what it is fed, never 'the MAC is verified in hardware'."
+ },
+ {
+  "n": 186,
+  "line": 45252,
+  "class": "statement-level-type-traps",
+  "reason": "Warns that the natural total-only overflow bound is the wrong theorem: a fold can overflow at an intermediate step and return, so the predicate must be no-prefix-sum-overflows, and the weaker form would pass every test."
+ },
+ {
+  "n": 187,
+  "line": 45406,
+  "class": "statement-level-type-traps",
+  "reason": "The weaker-theorem warning is made kernel-visible by badTrace = [2^30, 2^30], where the total-only hypothesis holds and the total-only conclusion is false; a warning the elaborator now checks."
+ },
+ {
+  "n": 188,
+  "line": 45577,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Withdraws a priced option nobody proposed and admits the 'costs nothing' figure was cell-scoped while reading as system-scoped: the negation moves rather than vanishes, and the count's scope changed without the word changing."
+ },
+ {
+  "n": 189,
+  "line": 45710,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "'Strictly dominates' was true only over a two-item enumeration that omitted the cheap third option (load the negated weight), and the seat reverted a half-applied edit that had broken the shared worktree."
+ },
+ {
+  "n": 190,
+  "line": 45908,
+  "class": "misattributed-mechanisms",
+  "reason": "The red read as a semantic break when only the signature moved (the old call already read carry-in false), and the seat's own ledger had over-priced the wave by assuming generality had to arrive first."
+ },
+ {
+  "n": 191,
+  "line": 46063,
+  "class": "EXCLUDED",
+  "reason": "Hot-file claim notice reserving a module before the first write and disclaiming the neighbouring file; a coordination post with no defect or claim to classify."
+ },
+ {
+  "n": 192,
+  "line": 46187,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "MEAS run after the release rather than racing it, and the cell's last assumed schedule becomes a theorem so its timing is no longer taken on trust \u2014 the gap this seat's toolchain cannot see."
+ },
+ {
+  "n": 193,
+  "line": 46326,
+  "class": "OTHER",
+  "reason": "A backtick executed inside a python -c string destroyed a sentence: the law was scoped to the bus as a place when the hazard belongs to the character, and it fails on every new surface."
+ },
+ {
+  "n": 194,
+  "line": 46464,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The headline is fixed at the quote site to carry its own table and the F3 boundary (kernel-model certified, down-to-silicon closing at emission plus synthesis), with the three-part state line made canonical."
+ },
+ {
+  "n": 195,
+  "line": 46642,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Pre-registers that the coming area figure will state explicitly whether it includes glue, since a cell area silently excluding its own composition is the moved-not-saved error one level down; armed and not firing until the files exist."
+ },
+ {
+  "n": 196,
+  "line": 46788,
+  "class": "misattributed-mechanisms",
+  "reason": "The comforting explanation (abc re-derives carries as lookahead) is true of the behavioural case the fleet deliberately does not use; six lines further on, structural emission preserves the ripple, so the timing red is architectural."
+ },
+ {
+  "n": 197,
+  "line": 46927,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "'F4 cleared' is bounded to the decomposition it names and must not be read as the cell being fully certified: the composed module's per-cycle theorem is a different object and is owed."
+ },
+ {
+  "n": 198,
+  "line": 47070,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Banks three scope substitutions from one afternoon, each a true measurement of one object carried onto its neighbour, including one a ruling rested on; naming a scope limit does not discharge it."
+ },
+ {
+  "n": 199,
+  "line": 47222,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Accepts a trim: can-inherit is a capability, so the register reads per-cycle proved with trace inheritance owed \u2014 a landing's sentence is written at the theorem that exists, not the one it enables."
+ },
+ {
+  "n": 200,
+  "line": 47364,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "A step lemma covering half the 64-bit state had been called the composition theorem and was already named in another hand's work order; the missing half is landed and the both-arms detail relayed."
+ },
+ {
+  "n": 201,
+  "line": 47497,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Every published cell figure prices an unsigned cell one organ short of the design: correct measurements of a smaller object whose smallness is invisible in the number, with the timing explicitly not extrapolated."
+ },
+ {
+  "n": 202,
+  "line": 47634,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "States the coverage that survives a helm restart (this seat's watches live, the hub's die) and the one line a successor must not misread: the signed theorem is about macSeq, not the composed cell."
+ },
+ {
+  "n": 203,
+  "line": 47789,
+  "class": "stale-citations",
+  "reason": "The banked fixture hash no longer matches the live file (rev 9 to rev 10): a banked hash is a claim about a file that kept moving, so the gate must be run and its delta explained rather than compared."
+ },
+ {
+  "n": 204,
+  "line": 48083,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Criterion (b) says 'the netlist' unqualified while emitted and synthesised netlists measurably differ (160 cells to 157), so the same test is a different check on each artifact."
+ },
+ {
+  "n": 205,
+  "line": 48510,
+  "class": "misattributed-mechanisms",
+  "reason": "'31 new theorems, 31 audit ticks' was one number stated twice: both sides came from the same grep, so a restatement was published wearing the costume of a cross-check that never ran."
+ },
+ {
+  "n": 206,
+  "line": 48821,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "A negative control shows a wrong cell matching the correct one on gate count, op histogram and boundary while being off by one every sign cycle, so the fence's measured quantities do not cover the property."
+ },
+ {
+  "n": 207,
+  "line": 49178,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "'The cell is certified down to silicon' is true of the combinational core and not of a clocked cell, since no clocked cell has been emitted and the simulator was standing in for an unbuilt component."
+ },
+ {
+  "n": 208,
+  "line": 49449,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The repair is free where it was measured (the cell) and unmeasured where it is not (shell flops and muxes); the published area and timing deltas price the cell and only the cell."
+ },
+ {
+  "n": 209,
+  "line": 49789,
+  "class": "OTHER",
+  "reason": "Design defect found by the Captain's worked example: the weight shift register shifts every clocked cycle, so a parked weight decays as W times 2^gap; the fix adds two enables and a clear in the shell."
+ },
+ {
+  "n": 210,
+  "line": 50033,
+  "class": "stale-citations",
+  "reason": "The predecessor's brief still names the complement path as the morning item after it landed, so a successor booting on it would re-derive finished work; a bank is durable only while true."
+ },
+ {
+  "n": 211,
+  "line": 50268,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The MEAS verdict never distinguished a one-file kernel witness from a covering build seal in its own output, so a green was read as sealing a landing; fixed in the tool and controlled both ways."
+ },
+ {
+  "n": 212,
+  "line": 50576,
+  "class": "stale-citations",
+  "reason": "The register the morning assembly reads still carries 204 unaudited theorems, superseded hours earlier by a three-hand measurement of 180 that counted out gitignored scratch files; the correction lives only on the bus."
+ },
+ {
+  "n": 213,
+  "line": 50808,
+  "class": "stale-citations",
+  "reason": "Two governing documents disagree because the per-type pricing was not updated after the ruling that added the weight-shift enable, and the per-cell figure rests on the superseded one."
+ },
+ {
+  "n": 214,
+  "line": 51092,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The first layout closes, but the +2.7145 ns is explicitly not the named-path measurement since the SER organ and fabric do not exist yet, and the instance-area figure is disclosed as fill."
+ },
+ {
+  "n": 215,
+  "line": 51336,
+  "class": "OTHER",
+  "reason": "Wrapper draft rewritten against the landed artifacts' real ports rather than assumed ones, with one design call (single-frame emission, because the serialiser has no shift-enable) flagged for the owner to override."
+ },
+ {
+  "n": 216,
+  "line": 51654,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "A provenance certification was run against the working tree, so the diff matched a generator nobody else had; re-run from tracked bytes, and an elaborator's rc=0 could not see an undriven fabric input."
+ },
+ {
+  "n": 217,
+  "line": 51851,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "'The batcher_c absence' names a state the artifact is not in (emitted, committed, tracked; one wiring connection missing), and the +19.0% figure is disclaimed as neither a die fraction nor a fit prediction."
+ },
+ {
+  "n": 218,
+  "line": 52049,
+  "class": "EXCLUDED",
+  "reason": "One-line night heartbeat recording monitors green, a quiet bus and the next sweep time; no defect or claim content to classify."
+ },
+ {
+  "n": 219,
+  "line": 52323,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The pre-registered V7 bar is four counts, and 'cells == 289' passes on 289 wrong cells; the property checks that actually bound the artifact were filed as footnotes beneath the correlate."
+ },
+ {
+  "n": 220,
+  "line": 52599,
+  "class": "OTHER",
+  "reason": "One eight-line lemma is proved twice because the file that needed it sits below the file that had it in the import order; three exits named with owners, declared a tidiness item and not a soundness one."
+ },
+ {
+  "n": 221,
+  "line": 52908,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "A deletion's damage shows up in consumers, so only the build arm covers it; the audit arm would have typechecked against a stale olean and reported nothing, and the gate was read at the commit rather than the dirty worktree."
+ },
+ {
+  "n": 222,
+  "line": 53139,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "A new evidence class passes because the source's own hedge survives verbatim and the conclusion rests only on what he stated flatly; the downstream risk is a quotable line lifted without its class marker."
+ },
+ {
+  "n": 223,
+  "line": 53458,
+  "class": "stale-citations",
+  "reason": "The document's own non-claims section still said there was no measured BB post-layout number after the section it points at became a measured run: a disclaimer falsified by its own target."
+ },
+ {
+  "n": 224,
+  "line": 53750,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Diffing the tree against its generators proves the sources are current and not that the public assembly copied them faithfully; two claims, one measured, and the limit is stated."
+ },
+ {
+  "n": 225,
+  "line": 54104,
+  "class": "misattributed-mechanisms",
+  "reason": "The seam was thought to need a stall and a shell; the router only needs to be told when the sorted frame started, so the whole mechanism reduces to one delayed alignment pulse."
+ },
+ {
+  "n": 226,
+  "line": 54392,
+  "class": "OTHER",
+  "reason": "A pre-written 'saltbuild EXIT=0' seal was posted without reading the verdict and the build was red; a receipt-shaped decoration published as a measurement, struck by its author."
+ },
+ {
+  "n": 227,
+  "line": 54678,
+  "class": "statement-level-type-traps",
+  "reason": "The closure gap was hiding a defect: one module re-declared a name another owned and the two had never met in one environment, so wiring an import changes what can collide."
+ },
+ {
+  "n": 228,
+  "line": 54918,
+  "class": "misattributed-mechanisms",
+  "reason": "A design law about gate width was built on a peer's still-being-audited figure; the fault is in the anchor, not the gate, so an effect the parser caused was attributed to filter width."
+ },
+ {
+  "n": 229,
+  "line": 55149,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The census that could not find the elaboration record was taken one minute before the run that produced it, and the post explicitly claims no absence anywhere, naming only what was looked at."
+ },
+ {
+  "n": 230,
+  "line": 55345,
+  "class": "OTHER",
+  "reason": "An obligation on a peer's list was already landed as scaffolding under a different name and never advertised as the seam obligation, so it would have been rebuilt; withdrawn before the peer paid for it."
+ },
+ {
+  "n": 231,
+  "line": 55532,
+  "class": "statement-level-type-traps",
+  "reason": "The hoped-for flat-layer split fails because the gate list is bit-major, and reordering it would break the landed shape theorems stated about that exact list: statement shape is an interface."
+ },
+ {
+  "n": 232,
+  "line": 55731,
+  "class": "stale-citations",
+  "reason": "A pre-registered caveat inherited a premise that was struck elsewhere and did not move, leaving a fence tight after the evidence landed; the unmeasured impossibility cost a signoff for a day."
+ },
+ {
+  "n": 233,
+  "line": 55953,
+  "class": "stale-citations",
+  "reason": "A live stale absence claim in the seat's own bank ('never dispatched') contradicts a register entry opened on its predecessor's own measurement; the item is owned and gating, not neglected."
+ },
+ {
+  "n": 234,
+  "line": 56163,
+  "class": "stale-citations",
+  "reason": "The sign-off is re-run and pinned to the convening sha so an earlier clearance cannot silently cover three later amendments, and a banned phrase is read rather than counted (carrier, not claim)."
+ },
+ {
+  "n": 235,
+  "line": 56338,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Corrects a self-assessment made without looking up the register (the flagship front is gated, not idle) and asks the table to read this seat's eliminations at their stated scope and no wider."
+ },
+ {
+  "n": 236,
+  "line": 56531,
+  "class": "OTHER",
+  "reason": "A scoping post claimed an obligation needed building; it was already landed and better, so the grep must run before the CLAIM rather than before the landing. A false-absence claim, corrected by its author."
+ },
+ {
+  "n": 237,
+  "line": 56733,
+  "class": "OTHER",
+  "reason": "One organ sits on two seats' rosters and is ceded before either pulls it, avoiding the same organ being priced twice; a coordination/duplication item outside the four classes."
+ },
+ {
+  "n": 238,
+  "line": 56887,
+  "class": "statement-level-type-traps",
+  "reason": "The state type was repaired because a per-task vector would have made the next rung vacuous by type, and a halting mutant proves the execution witness is a fact about the program rather than the type."
+ },
+ {
+  "n": 239,
+  "line": 57101,
+  "class": "statement-level-type-traps",
+  "reason": "The fairness antecedent is pinned from both sides: it fails on the halting configuration and holds on the looping one, so the hypothesis is proved non-vacuous rather than assumed."
+ },
+ {
+  "n": 240,
+  "line": 57283,
+  "class": "misattributed-mechanisms",
+  "reason": "The stage trace retires the drive-strength and synthesis-quality stories by timing rather than argument: the same netlist is clean before detailed routing, so the whole debt is post-route parasitics."
+ },
+ {
+  "n": 241,
+  "line": 57511,
+  "class": "EXCLUDED",
+  "reason": "Submission announcement: the clicks are done, the composed tile is on the shuttle, remaining work is update-window polish; celebration and record, with no error or claim to classify."
+ },
+ {
+  "n": 242,
+  "line": 57709,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "A count disagreeing (59 versus 60 declarations) is flagged with both readings rather than edited since the corpus did not move, the priority claims are named as uncheckable by any in-repo instrument, and zero commits is declared to prove no rot rather than to re-verify."
+ },
+ {
+  "n": 243,
+  "line": 57941,
+  "class": "stale-citations",
+  "reason": "Successor boot post: the review is re-pinned to HEAD rather than to the bank's stale pin, the blind window is read from the anchor as left, and the night's docket is corrected against the bus."
+ },
+ {
+  "n": 244,
+  "line": 58129,
+  "class": "OTHER",
+  "reason": "The claim post's own record is damaged: inline code spans were consumed and the body is spliced with build-log and Verilog text mid-sentence, so the durable record of the claim is corrupted."
+ },
+ {
+  "n": 245,
+  "line": 58719,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The feasibility probe measured wall clock, which cannot see the wall that kills these runs (an OOM kill at 24 GB), and a compressed post rendering deleted the load-bearing line of an artifact deleted by rule."
+ },
+ {
+  "n": 246,
+  "line": 58956,
+  "class": "statement-level-type-traps",
+  "reason": "The L0 top statement is run-shaped with fixed fuel while the L2 calculus is Reaches-shaped with the fuel discarded, and no run-shaped whole-program theorem can exist for a looping program."
+ },
+ {
+  "n": 247,
+  "line": 59170,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "A verification sentence glued two instruments' outputs, citing a site that came from a different search than the one named, and the label conflated two units; every count in the spec now names its unit."
+ },
+ {
+  "n": 248,
+  "line": 59349,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The helm supplies a read-only git status explicitly as evidence and not as the answer, since an editor buffer or an about-to-write state is invisible to git; the question stays with the seat that can answer it."
+ },
+ {
+  "n": 249,
+  "line": 59556,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "'The tree is clean, take the node' rested on git status, which was telling the truth about the filesystem while a peer had work in flight: a filesystem cannot represent unsaved intent."
+ },
+ {
+  "n": 250,
+  "line": 59770,
+  "class": "stale-citations",
+  "reason": "A ruling's work item was written against an absence filled one minute earlier, and an import-owed claim was already false when posted; an absence must be verified at the moment it is acted on."
+ },
+ {
+  "n": 251,
+  "line": 59985,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The verdict was nearly issued over five of six changed files because the screen showed only the first five, and a green module outside the hub graph is flagged so a covering build is not read as covering it."
+ },
+ {
+  "n": 252,
+  "line": 60178,
+  "class": "misattributed-mechanisms",
+  "reason": "The gate elaborated the working tree while labelling the verdict with a range end, so a green could name a commit it did not elaborate; fixed in the tool with a negative control on both arms."
+ },
+ {
+  "n": 253,
+  "line": 60377,
+  "class": "stale-citations",
+  "reason": "A restatement retires the old name so pre-existing citations fail loudly, with the unknown-identifier error exhibited as the witness, and the law is scoped to meaning changes rather than proof changes."
+ },
+ {
+  "n": 254,
+  "line": 60524,
+  "class": "misattributed-mechanisms",
+  "reason": "rev-parse HEAD answers what HEAD is and never whether this seat's commit ran, so every green tick was true about the wrong commit; and a comfortable self-blame closed the investigation for two hours."
+ },
+ {
+  "n": 255,
+  "line": 60718,
+  "class": "EXCLUDED",
+  "reason": "Bank-and-posture post listing the sitting's landings, what the successor inherits and a refusal to start new work; its defect content is retrospective reference to lapses reported elsewhere."
+ },
+ {
+  "n": 256,
+  "line": 60871,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Testing a peer's defect against this seat's own index returns a style difference rather than the defect, and the claim is declined; the matcher's own vocabulary had moved the count twice."
+ },
+ {
+  "n": 257,
+  "line": 61080,
+  "class": "stale-citations",
+  "reason": "Two seats cured a stale index claim by editing the index rather than the file it points at, minting a new falsity in the pointer: content that exists only in a pointer disappears when the pointer is followed."
+ },
+ {
+  "n": 258,
+  "line": 61237,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The watch census keyed on a script-name convention and correctly answered zero for a seat whose watches are a different shape; the question the fleet needed was whether the seat is watching."
+ },
+ {
+  "n": 259,
+  "line": 61392,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The file key answers presence and cannot answer attribution while the name key carries the owner and drifts; neither subsumes the other, and five watchers resolve to no seat."
+ },
+ {
+  "n": 260,
+  "line": 61600,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "'13 watches' counted processes, not watches: it is three watchers plus ten wrappers across at least three seats, and an off-by-one labeller that mislabelled the author's own watchers was deleted rather than debugged."
+ },
+ {
+  "n": 261,
+  "line": 61817,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Four instrument errors in one hour, each a domain mismatch (mentions counted as processes, a truncated tree, a truncated 'raw' list, an exclusion that silently deleted six real rows), with two committed while fixing the first two."
+ },
+ {
+  "n": 262,
+  "line": 61993,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Arm-time proof is a delivered line and not a ps row, so the fallback with only a process row is declared unproven; the clear wiped context and not the session, which is why re-arming would double a watch."
+ },
+ {
+  "n": 263,
+  "line": 62163,
+  "class": "EXCLUDED",
+  "reason": "Muster/status post recording four seats plus the helm answering by receipt and the midnight orders executed; no error or claim to classify."
+ },
+ {
+  "n": 264,
+  "line": 62354,
+  "class": "statement-level-type-traps",
+  "reason": "The proposed biconditional pin is refuted: a branch-free statement whose expression exceeds the register pool compiles to none, so only the one-directional anchor holds; the control was derived from the argument's shape rather than from the definition."
+ },
+ {
+  "n": 265,
+  "line": 62588,
+  "class": "stale-citations",
+  "reason": "A caveat saying the file does not establish the formulas for all block sizes went false when the theorems landed and is corrected in the same commit; a discharged caveat reads as caution and is nobody's job to re-check."
+ },
+ {
+  "n": 266,
+  "line": 62764,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The helm answers the open channel in the census's own currency because under echo-primary an unacknowledged delivery proves nothing to anyone else, however ordinary the quiet posture was."
+ },
+ {
+  "n": 267,
+  "line": 62993,
+  "class": "misattributed-mechanisms",
+  "reason": "Two piped checks reported exit=0 from tail rather than from the tool, and both were caught only by distrusting an instrument whose output agreed with a story already held; the protection was the tool's loud payload, not discipline."
+ },
+ {
+  "n": 268,
+  "line": 63200,
+  "class": "stale-citations",
+  "reason": "A banked morning fix is amended out of the bank because the ruling it would re-derive was already measured, and a quoted header is byte-identical in form to a real one so no reader-side fix exists."
+ },
+ {
+  "n": 269,
+  "line": 63372,
+  "class": "statement-level-type-traps",
+  "reason": "Landing the while clause makes a theorem landed ninety minutes earlier false by construction (a compiling loop is not branch-free), and a docstring asserting every emitted branch is forward goes false in the same commit."
+ },
+ {
+  "n": 270,
+  "line": 63569,
+  "class": "stale-citations",
+  "reason": "A successor bank supersedes one whose headline had gone false, and a retracted 65s figure is banked rather than left on the bus because the wrong number sits ahead of its retraction in an append-only file."
+ },
+ {
+  "n": 271,
+  "line": 63730,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The governing doc requires a Linux pass before any published number; it was cited twice on day one as a reason to skip local work and never carried, so every silicon figure is macOS-only and unqualified."
+ },
+ {
+  "n": 272,
+  "line": 63874,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "'Conveyor clean' at 04:50 rested on a 04:20 fetch and was true only by luck of what landed; a claim about a range must carry the range end it was measured against rather than a moving referent."
+ },
+ {
+  "n": 273,
+  "line": 64022,
+  "class": "misattributed-mechanisms",
+  "reason": "A three-minute liveness lapse is attributed to arithmetic rather than diligence: a 40-minute cadence cannot be held by an actor whose wakes are 30 minutes apart and unaligned, which is the actionable fact."
+ },
+ {
+  "n": 274,
+  "line": 64155,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Self-measurement: three published-and-retracted claims, all scope errors off correct measurements, and the clean interval is declared low-demand rather than evidence of recovery."
+ },
+ {
+  "n": 275,
+  "line": 64409,
+  "class": "stale-citations",
+  "reason": "A false header sentence was left standing with its correction 400 lines away; amend-in-place was satisfied and discoverability was not, since a header is what people read instead of the rest."
+ },
+ {
+  "n": 276,
+  "line": 64680,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "A null result is published because 'checked and found nothing' and 'was not watching' produce the same silent bus, and a filter change reporting only what it catches is half a measurement without its lost-count."
+ },
+ {
+  "n": 277,
+  "line": 64884,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The framing paragraph says fabricated silicon under one referee while 550 of 902 flops are hand RTL and the sequencer, wrapper, fabric and core are unproved; the phrase fence returns green so only a reader can catch it."
+ },
+ {
+  "n": 278,
+  "line": 65106,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "A shape query returned nonzero counts that looked like a refutation of a peer's zero; read for direction, all six occurrences are writes and none are reads, so the absence is corroborated by an independent query class."
+ },
+ {
+  "n": 279,
+  "line": 65312,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "'Closed, not idle' is measured rather than asserted: the front is gated on an owed Fable-tier item roughly 44 hours shut, which is a different record than an idle one."
+ },
+ {
+  "n": 280,
+  "line": 65484,
+  "class": "OTHER",
+  "reason": "The bank carried mortality assertions about which watches survive, found false twice, and an earlier correction had replaced a guess with a better-sourced guess; a false claim beside a true imperative inherits its authority."
+ },
+ {
+  "n": 281,
+  "line": 65641,
+  "class": "OTHER",
+  "reason": "Offers a tested workflow (develop with sorries in a gitignored scratch, land only at zero) and frames the milestone as a definition question, since a landed sorry is indistinguishable downstream from a proof that broke."
+ },
+ {
+  "n": 282,
+  "line": 65828,
+  "class": "stale-citations",
+  "reason": "The ignore list is an enumeration of the scratch names someone had thought of and ages on every new one, exactly like the filter vocabulary fixed hours earlier; the discriminator glob is the principled fix."
+ },
+ {
+  "n": 283,
+  "line": 66000,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The helm's one-line restatement dropped the dossier's sup over k of at least 2, and the folded row now carries the quantifier, the margin and the discharge site."
+ },
+ {
+  "n": 284,
+  "line": 66155,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Six bare priority claims across two surfaces, including a flat absence claim about four theorems: the one sentence a name-search structurally cannot support, and the class that had just cost a prior-art miss."
+ },
+ {
+  "n": 285,
+  "line": 66314,
+  "class": "misattributed-mechanisms",
+  "reason": "Stamps ran fast because a date reading was carried across turns in a long context rather than read in the append command, so the times claim a machine source they did not have."
+ },
+ {
+  "n": 286,
+  "line": 66466,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Claim-language law acknowledged with the surfaces swept by a wider pattern than the one that found the sites, since the verifying sweep would otherwise inherit the finding sweep's blind spot."
+ },
+ {
+  "n": 287,
+  "line": 66636,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The sweep was an enumeration on both axes, so its misses are published with it: an unpublished wordlist makes a null result unfalsifiable, and a discriminator exists only where the property is decidable from the text."
+ },
+ {
+  "n": 288,
+  "line": 66811,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The natural plain-language restatement of the simulation theorems says more than they prove, since the encoding covers named registers only and not memory or trap state; a cert that overstates is false, not weak."
+ },
+ {
+  "n": 289,
+  "line": 66953,
+  "class": "misattributed-mechanisms",
+  "reason": "A replay burst in every watcher is the signature of an in-place rewrite (tail -F re-reads a replaced file), not of a truncated bus; the file was checked intact before any alarm was raised."
+ },
+ {
+  "n": 290,
+  "line": 67127,
+  "class": "statement-level-type-traps",
+  "reason": "The Lean statement carried a hypothesis its own proof never used, making the formalization weaker than both the proof and the paper; the fence can see two statements differ but cannot say which side is wrong."
+ },
+ {
+  "n": 291,
+  "line": 67300,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The Linux gate is discharged for the fabricated die only, with the local macOS figures explicitly still caveated, and a self-invented field label was caught before the claim rested on it."
+ },
+ {
+  "n": 292,
+  "line": 67479,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "A name-based provenance join reaches 288 of 902 flops and stops, and 288 named does not equal the banked 352 kernel-emitted, so the partition cannot be rebuilt from netlist hierarchy."
+ },
+ {
+  "n": 293,
+  "line": 67641,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Quiet is distinguished from deaf with both halves evidenced (transport by the fallback's arrival, filter by replay), and a fourth certificate is declined because the docstring surface is the part no gate checks."
+ },
+ {
+  "n": 294,
+  "line": 67830,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "A bank sha typed once and carried through eleven liveness lines is now derived at post time; it resolves to the same value, which is why the old form survived and why sameness is not evidence of method."
+ },
+ {
+  "n": 295,
+  "line": 67972,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The census was keyed per file where the truth is per site, so a file marked safe by catch-all hid an exhaustive site in the same file; a hasty re-count nearly published a false threefold undercount."
+ },
+ {
+  "n": 296,
+  "line": 68158,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The obvious hub check greps the root for Certs and hits a pre-existing, unrelated module of nearly the same name, so the check passes while both new cert files sit outside the closure."
+ },
+ {
+  "n": 297,
+  "line": 68435,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The published blast radius answered which theorems mention the type and was headed as the radius; the transitive step was never walked, and two named consumer sites are not sweepable because they go false."
+ },
+ {
+  "n": 298,
+  "line": 68668,
+  "class": "statement-level-type-traps",
+  "reason": "Restated over the (regs,pc) projection the n-cycle theorem is false rather than unproved, with a load-after-store witness diverging inside the projection; the closure walk had a second edge type never traversed."
+ },
+ {
+  "n": 299,
+  "line": 68837,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "A peer's 'every remaining cert depends on a dirty file' was true of the pending cert and applied to the landed ones without walking the graph; zero dirty modules are in their closure, and a contended wall is marked unquotable."
+ },
+ {
+  "n": 300,
+  "line": 69075,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The gate's 'not in hub graph' overstates what it measures, since the module is reachable through an imported aggregator; it must be read as not directly imported until the sentence is narrowed."
+ },
+ {
+  "n": 301,
+  "line": 69278,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "A theorem named 'suppresses the write' proves only memory preservation and the trap flag, so a reader ticking commission rows by name credits register coverage it never had; the absence is confirmed with a bracketing nonzero."
+ },
+ {
+  "n": 302,
+  "line": 69485,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The lane-level gate claim holds for three of five cert files and is false for two, so a hold keyed on a lane summary either witnesses through a dirty dependency or blocks a clean file; the gate is per-target."
+ },
+ {
+  "n": 303,
+  "line": 69687,
+  "class": "statement-level-type-traps",
+  "reason": "isForward's catch-all silently classifies every future constructor as forward, and the fence is only a downstream exhaustive cases; the fix is to make the arms exhaustive while the constructor set is small."
+ },
+ {
+  "n": 304,
+  "line": 69946,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "A catch-all census walked one slot and was published as the map, and the dangerous third site sits in another seat's slot where the instrument could not see it at any level of care."
+ },
+ {
+  "n": 305,
+  "line": 70169,
+  "class": "statement-level-type-traps",
+  "reason": "Rules exhaustive arms preferred over catch-alls, with a fence theorem as the floor and a census row required wherever enumeration is impractical, so the failure lands at the classification site."
+ },
+ {
+  "n": 306,
+  "line": 70354,
+  "class": "misattributed-mechanisms",
+  "reason": "Marks the discipline of retracting a cause without substituting another, since a replacement inherits the dead hypothesis's investigation as if it were evidence; offers a state capture instead of a new cause."
+ },
+ {
+  "n": 307,
+  "line": 70564,
+  "class": "stale-citations",
+  "reason": "Three of four memory mirrors are stale against their live files by up to 8.5 KB, and a census run over mirrors measures mirrors: it would report the fleet healthy while a live index goes dark."
+ },
+ {
+  "n": 308,
+  "line": 70753,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "'Banked and pushed' had been read as covering both the brief and the memory store, so a dozen owed-zero lines were true of one artifact while twenty laws sat single-copy in a config directory."
+ },
+ {
+  "n": 309,
+  "line": 70912,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The earlier defect was one paper label naming two declarations with the cert covering one; this file opens with a phrase-to-declaration map that names the row it does not cover, and the paper pin is checked at the bytes."
+ },
+ {
+  "n": 310,
+  "line": 71066,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "A null from a differently-armed instrument was treated as a control: two instruments are a control only when both would respond to the same cause, and the two facts that settled it lived in one seat."
+ },
+ {
+  "n": 311,
+  "line": 71191,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "A negative result fenced in writing by its author was used beyond its scope by the reader; the fence is prose and the null is a number, and the misuse is claimed by the one who drew the inference."
+ },
+ {
+  "n": 312,
+  "line": 71379,
+  "class": "OTHER",
+  "reason": "Second-seat verification of an untracking repair on four arms, including that the log file still exists, since the delete form would have silently killed the watcher and looked like a quiet bus."
+ },
+ {
+  "n": 313,
+  "line": 71554,
+  "class": "stale-citations",
+  "reason": "A tool's path is cited by two Lean files so a tidiness rename would manufacture drifted citations, and the directory README has rows for 10 of 34 tools while its own candid note about miscounting aged into decoration."
+ },
+ {
+  "n": 314,
+  "line": 71730,
+  "class": "statement-level-type-traps",
+  "reason": "The card lemma is false without the lower bound on E and was first written without it, with the empty index set as the counterexample: the falsity lives outside the interval reasoning entirely."
+ },
+ {
+  "n": 315,
+  "line": 71881,
+  "class": "stale-citations",
+  "reason": "A claim attributed to the paper is not in it: the literal cube lives in the seat's own gate block, so a fence verdict filed against the paper would be a phantom row for any successor."
+ },
+ {
+  "n": 316,
+  "line": 72058,
+  "class": "OTHER",
+  "reason": "A cross-file sweep ran over a shared glob containing a peer's open rows with no claim line first; the practice ratified is one claim line to the bus before the first edit, even for docstring passes."
+ },
+ {
+  "n": 317,
+  "line": 72237,
+  "class": "OTHER",
+  "reason": "A notice banner that depended on detecting a condition is killed in favour of carrying the rationale inside the sealed commit message, so it fires only when a seal happened and needs no detection."
+ },
+ {
+  "n": 318,
+  "line": 72396,
+  "class": "OTHER",
+  "reason": "The helm tallies six hand-rolled slips in one evening, all caught, and treats the rate rather than any single slip as the signal, reducing scope to built tools, folds and rulings until morning."
+ },
+ {
+  "n": 319,
+  "line": 72515,
+  "class": "statement-level-type-traps",
+  "reason": "The certificate had to unfold two names deep or leave a definition wearing the costume of a primitive, and a first-draft rule-6 theorem restating the identical proposition was deleted as a redundant conclusion."
+ },
+ {
+  "n": 320,
+  "line": 72707,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The audit's population came from the same trailer grep as its file list, so an untrailered commit would be invisible to numerator and denominator; crude-beside-precise (38 versus 15) is what exposes it."
+ },
+ {
+  "n": 321,
+  "line": 72846,
+  "class": "stale-citations",
+  "reason": "The tier-close line recited the remaining open rows from memory of the table rather than reading it, so a row landed that afternoon was still listed as open."
+ },
+ {
+  "n": 322,
+  "line": 72961,
+  "class": "misattributed-mechanisms",
+  "reason": "A gap figure was hand-written into prose while the same command measured it in the table: the prose number carries the authority of a measurement it never had, and any figure written twice is two instruments."
+ },
+ {
+  "n": 323,
+  "line": 73131,
+  "class": "stale-citations",
+  "reason": "Every number was measured first-hand but the framing sentence was borrowed from a peer who had retracted it twenty-two seconds earlier; a borrowed frame is a stale frame."
+ },
+ {
+  "n": 324,
+  "line": 73298,
+  "class": "OTHER",
+  "reason": "Standing night ruling that sentinel idle events are pre-ruled while every seat is in a declared hold, so pane stillness is the ordered state; a monitoring-policy decision outside the four classes."
+ },
+ {
+  "n": 325,
+  "line": 73485,
+  "class": "OTHER",
+  "reason": "Withdraws a conditional offer to take the sharpest remaining row at depth, on the ground that a bar which bends once it can see the artifact is not a bar; an allocation-discipline decision."
+ },
+ {
+  "n": 326,
+  "line": 73683,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The canary set is pre-registered with a must-not-fire list so a genuine break cannot hide among budgeted alarms, and the first measurement was against the wrong cert population entirely, where an all-clear would have been true and worthless."
+ },
+ {
+  "n": 327,
+  "line": 73876,
+  "class": "EXCLUDED",
+  "reason": "Administrative ruling on fuel, account merges and seat continuity; no defect, measurement or claim to classify."
+ },
+ {
+  "n": 328,
+  "line": 74088,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "'The tool already does this' mislabelled what an existing arm covers (one sweeps the doc, another the cert files), and the residual is named: this tier is covered by a one-time hand check rather than by an arm."
+ },
+ {
+  "n": 329,
+  "line": 74305,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Arm attribution shows the original plant could never exercise the bound arm, so a bar built on it would have read 6/6 clean; the runner's own first invocation printed a green from a nonexistent timeout wrapper."
+ },
+ {
+  "n": 330,
+  "line": 74552,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The witness now runs the search its label claims: smallest-admissible and non-degenerate are different searches, and a point picked for smallness owes a per-summand check before the label stands."
+ },
+ {
+  "n": 331,
+  "line": 74767,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The environment probe compared exit codes only, so a same-rc different-answer disagreement was invisible to it; the normalising fix then put the rc behind a pipe inside the instrument itself."
+ },
+ {
+  "n": 332,
+  "line": 74994,
+  "class": "stale-citations",
+  "reason": "A stale absence (the owed list versus the anchor table's open rows) gets its own arm because a disclosure is not a fix, and the arm's first run exposed two extraction defects where prose was shaped like structure."
+ },
+ {
+  "n": 333,
+  "line": 75264,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The axiom census takes a name, so the anonymous rule-6 witnesses sit outside it entirely: a certificate can read clean while the witness proving it non-vacuous is uncounted."
+ },
+ {
+  "n": 334,
+  "line": 75501,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "A zero axiom line measures the proof's logical dependencies and not the statement's content: two substantive non-degeneracy rows read zero because decide closes by rfl, so the line is evidence of computability."
+ },
+ {
+  "n": 335,
+  "line": 75732,
+  "class": "misattributed-mechanisms",
+  "reason": "Right fix, wrong reason: the missing denominator was framed as a coverage hole inviting a hunt for lost files, when the glob is doctrinal and the true defect is a scope claim with no scope in it."
+ },
+ {
+  "n": 336,
+  "line": 75896,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The four-number mirror check globbed one extension on both sides, so a stray file would have been invisible; each of four versions was shaped by the last defect shown, and the fix is to enumerate rather than glob."
+ },
+ {
+  "n": 337,
+  "line": 76096,
+  "class": "stale-citations",
+  "reason": "Supersession was recorded forward-only five times, so each predecessor bank stayed silent about being superseded; the predecessor is the file a stranger opens and the only one that cannot know."
+ },
+ {
+  "n": 338,
+  "line": 76254,
+  "class": "stale-citations",
+  "reason": "Git stores no mtimes, so the newest-first boot ritual degenerates in a fresh clone and hands a cloud-booted head the superseded bank; the local touch repairs cannot travel and the fixes are disjoint."
+ },
+ {
+  "n": 339,
+  "line": 76455,
+  "class": "OTHER",
+  "reason": "A backticked constant in a post was command-substituted away, so a sentence about a load-bearing hypothesis landed with the hypothesis missing, and three verification greps passed by checking phrases away from the damage."
+ },
+ {
+  "n": 340,
+  "line": 76636,
+  "class": "misattributed-mechanisms",
+  "reason": "The bus record is correct and the watcher delivery attributed the post to another seat, because the header carried peers' names as data and the parser read one of them as the author."
+ },
+ {
+  "n": 341,
+  "line": 76830,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "One discriminator is guaranteed by the emitter's format string and the other is only a habit, so 52 of the fleet's headers are structurally safe and the rest are a streak; the habit half is disclosed rather than covered by the good half."
+ },
+ {
+  "n": 342,
+  "line": 77005,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "A tell defined as a collapse is a delta-detector blind to a seat that starts at the alarming value, and a fleet aggregate was published in a thread about one seat's own rhythm."
+ },
+ {
+  "n": 343,
+  "line": 77131,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The canary set is re-anchored before the landing because its population moved, and the firing semantics (including what a silent set would mean) are fixed so no outcome can be fitted afterwards."
+ },
+ {
+  "n": 344,
+  "line": 77393,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The statement set does not classify the unconditional hub every other file cites, and three of the objects its section names are corollaries of that hub, so the diagnosis sits one level below the root."
+ },
+ {
+  "n": 345,
+  "line": 77740,
+  "class": "misattributed-mechanisms",
+  "reason": "A malformed empty-timestamp header makes every position-parsing watcher inherit the previous post's owner, so one seat is credited with another's measurement and confession; the fallback never ran because printf succeeded."
+ },
+ {
+  "n": 346,
+  "line": 78108,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The price covered one of three files, so the sweep that found three gaps could never have found the original; two counts are different domains and both are screens, and the honest number is given with its breakdown."
+ },
+ {
+  "n": 347,
+  "line": 78471,
+  "class": "statement-level-type-traps",
+  "reason": "The staged theorem relates matcher predicates to decode and says nothing about any decoder output net, so landing it alone would put a named object in the corpus that the circuit does not compute."
+ },
+ {
+  "n": 348,
+  "line": 78725,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The first origin-versus-disk comparison counted top-level files against a recursive listing \u2014 two populations under one operator \u2014 and would have contradicted a correct finding; the claim table is verified honest at its own line."
+ },
+ {
+  "n": 349,
+  "line": 78949,
+  "class": "OTHER",
+  "reason": "Every Captain-attributed instruction reaching this seat was relayed and no seat holds a channel to check one, so the verification gap is structural; an authorization/governance defect outside the four classes."
+ },
+ {
+  "n": 350,
+  "line": 79169,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "A claim about remote state was read from an unfetched tracking ref, which is a local cache; the count was right by a two-second margin and by luck, so the new freeze law must name its instrument."
+ },
+ {
+  "n": 351,
+  "line": 79397,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "A raw line count over a mixed corpus measures the synthesiser's verbosity rather than the design's size, the classification criterion is a machine marker rather than a filename join, and the sensitivity is published."
+ },
+ {
+  "n": 352,
+  "line": 79598,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The pricing document counted declarations and never files, so it hid that 22 of 24 sit in another seat's read-only slot; the count was right and a count is not a scope."
+ },
+ {
+  "n": 353,
+  "line": 79798,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "A line range is a proxy for 'what the change makes false' and approximates it by covering more, so the fix for under-coverage is 71 extra writable declarations; the trade is named rather than discovered later."
+ },
+ {
+  "n": 354,
+  "line": 79994,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Seven corrections in a day were all inferences laid over sound readings and none was on a measurement, so the seat's scope narrows to measurements with the excluded forms enumerated."
+ },
+ {
+  "n": 355,
+  "line": 80307,
+  "class": "misattributed-mechanisms",
+  "reason": "Two successive causal accounts are both wrong \u2014 the trap was in the examined set, and the lemma that would have caught it was already in hand \u2014 and the retraction carried a new unmeasured exoneration."
+ },
+ {
+  "n": 356,
+  "line": 80565,
+  "class": "EXCLUDED",
+  "reason": "Close-of-board post recording the day's landings, seals, riders and the banked evening state; no defect or claim of its own to classify."
+ },
+ {
+  "n": 357,
+  "line": 80866,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Approves a restricted datum on condition that the restriction marker rides the emitted artifact and every certificate restating it, and that a theorem proved on the pinned datum is never cited as covering reset."
+ },
+ {
+  "n": 358,
+  "line": 81151,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The bar is reported as not met, and one pre-registered check compared a sum against its own definition so it could never fail; rebuilt against an independent scan it goes red, and a red byte-identity check caught a real dead-constant defect."
+ },
+ {
+  "n": 359,
+  "line": 81502,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Two criteria in a row wrote 'identity except X' and enumerated X one field short, so the replacement characterises the whole difference positively; and an equivalence that passes when the variable vanishes reports only that the treatment never applied."
+ },
+ {
+  "n": 360,
+  "line": 81744,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The citation checker's unit was a line where the claim is a clause, so it mined a neighbouring token as the payload and convicted a correct citation; five defects, all in the accusing direction, with no claim that a sixth does not exist."
+ },
+ {
+  "n": 361,
+  "line": 81979,
+  "class": "stale-citations",
+  "reason": "A debt registered against this seat is now dischargeable only by another seat's unbuilt instrument, and nothing records the move: the bank still says this seat owes the citation and the ruling states no closure condition at all."
+ },
+ {
+  "n": 362,
+  "line": 82239,
+  "class": "misattributed-mechanisms",
+  "reason": "Publication of one commit is corrected with a bracket from the peer's own measurement, and the other is conceded unknowable because quiet pushes leave zero-byte receipts that cannot distinguish 'I sent this' from 'someone already had'."
+ },
+ {
+  "n": 363,
+  "line": 82566,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The document recruiting a blind second keyer carries the contaminating figures itself, and a first contamination sweep counting loose token hits said all five seats were exposed where reading the hits leaves one."
+ },
+ {
+  "n": 364,
+  "line": 82986,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The verification inherited the forbidden set's own scope, so it established 'none of those four tokens' and not 'no results'; widening to bare integers convicts the whole bus because the value class is not token-shaped."
+ },
+ {
+  "n": 365,
+  "line": 83370,
+  "class": "OTHER",
+  "reason": "Retroactive exception line: the night's work splits into compelled-and-in-scope, compelled-but-outside-the-declared-posture, and drift, with eleven instrument defects as the measured cost and no exception ever declared at the act."
+ },
+ {
+  "n": 366,
+  "line": 83663,
+  "class": "misattributed-mechanisms",
+  "reason": "A real mechanism that genuinely produces the symptom is not the cause here: the same measurement idiom was reused on a second repo without its filter, so the number was correct under a wrong noun."
+ },
+ {
+  "n": 367,
+  "line": 83966,
+  "class": "stale-citations",
+  "reason": "The seat's own later landing rotted its own earlier table 102 minutes after writing it, and a doc rots hardest when the mover is its author, who is the one reader who never re-reads it."
+ },
+ {
+  "n": 368,
+  "line": 84464,
+  "class": "EXCLUDED",
+  "reason": "Helm acknowledgment honouring a seat's self-called halt and promising a fresh relight; no defect, measurement or claim of its own to classify."
+ },
+ {
+  "n": 369,
+  "line": 84685,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The containment reasoning was true and wrongly scoped: sequencing protects a reader who chooses while a watch is a push channel, and the leak checker's own domain note names the gap the post then walked into."
+ },
+ {
+  "n": 370,
+  "line": 84901,
+  "class": "OTHER",
+  "reason": "Council ruling making rebirth-by-trigger fleet law and requiring a declared exception line for acts compelled during a halt; a process/governance statute outside the four classes."
+ },
+ {
+  "n": 371,
+  "line": 85026,
+  "class": "misattributed-mechanisms",
+  "reason": "Ratifies that an exoneration is a claim carrying the accusation's evidence bar, on the specimen of a retraction whose replacement account was an unmeasured generosity toward a peer."
+ },
+ {
+  "n": 372,
+  "line": 85212,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The new receipt failed at its own hand: an empty extraction diffed against a 37-line source only differed by luck, since an empty-versus-empty diff reports agreement, and the drafted warning was false of the one seat that adopted the form."
+ },
+ {
+  "n": 373,
+  "line": 85454,
+  "class": "OTHER",
+  "reason": "The law-of-laws preamble: laws are cached lessons binding as defaults, exceptions are taken with a declared reason, every law keeps its birth case and is retired when its reason expires, and no law binds backward."
+ },
+ {
+  "n": 374,
+  "line": 85595,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Three matching axes gave three answers and only the controlled one is published as a finding: zero key-string overlap means nothing when labels were invented independently, and the provenance axis is declined because each classifier inherited one keyer's phrasing."
+ },
+ {
+  "n": 375,
+  "line": 85826,
+  "class": "stale-citations",
+  "reason": "An accepted deliverable named neither the paths nor the hashes of its inputs, so its numbers could not be re-derived and a changed input could not be detected; fixed by anchoring the inputs with sizes and hashes."
+ },
+ {
+  "n": 376,
+  "line": 86063,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The closed thread's record keeps three states apart so the good one cannot absorb the others: numbers that re-derive from pinned inputs, a bridge voided because its comparer was unsaved, and a permanently unanchored read window."
+ },
+ {
+  "n": 377,
+  "line": 86193,
+  "class": "OTHER",
+  "reason": "Kit-revision ruling folding two laws into named clauses only if their operative specifics are inlined and the birth-case cards are written in the same commit; a governance condition that fails closed."
+ },
+ {
+  "n": 378,
+  "line": 86382,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "A substring count said 26 of 27 files and a word-boundary read said zero, and the peer's receipt certified corrupted bytes clean by diffing them against the source that had passed through the same substitution."
+ },
+ {
+  "n": 379,
+  "line": 86568,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Four seats enumerated their fields and each missed one outside its list, so the proposed test asserts the posted region equals a function of the file and the stamp, with its one blind spot (an upstream mutation) named."
+ },
+ {
+  "n": 380,
+  "line": 86832,
+  "class": "misattributed-mechanisms",
+  "reason": "Guard failures were being attributed to wording and placement; measured across the afternoon, four structural guards held and four written ones failed, so a written guard cannot be moved into the construction path by rephrasing."
+ },
+ {
+  "n": 381,
+  "line": 87122,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Freezes a thread on its own findings: a fixed-byte envelope cut preserves claims and systematically drops their qualifiers, 'read at the bytes' is not binary, and a guard taxonomy built from one's own tools is tautological."
+ },
+ {
+  "n": 382,
+  "line": 87354,
+  "class": "misattributed-mechanisms",
+  "reason": "A self-indicting figure received from a peer was republished larger within 100 seconds and banked without checking a row; the true split is smaller, and a self-indictment is a claim with no natural adversary."
+ },
+ {
+  "n": 383,
+  "line": 87679,
+  "class": "OTHER",
+  "reason": "The templating stage that manufactured both of the bus's live corruptions is retired rather than guarded, since a form that removes the failure needs no audit; a record-integrity defect outside the four classes."
+ },
+ {
+  "n": 384,
+  "line": 87900,
+  "class": "OTHER",
+  "reason": "A halted seat's durable-surface corrections were written but uncommitted, so the helm commits them and the write-to-commit gap is registered as a standing hazard of the halted posture."
+ },
+ {
+  "n": 385,
+  "line": 88119,
+  "class": "statement-level-type-traps",
+  "reason": "With the out-of-range bit listed the importer accepted a module declaring three bits as having four, so the datum gains a phantom input: it parses, typechecks and proves theorems about the wrong machine."
+ },
+ {
+  "n": 386,
+  "line": 88288,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The pointer's stamp meant pointer-creation time while the bank's content ended earlier, leaving a window covered by neither; it now means the bank's last content commit and is required to err early rather than late."
+ },
+ {
+  "n": 387,
+  "line": 88517,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "The old control expected zero by construction and could not fail; rewritten it fires on 20 real cases, and the alarm that it invalidated the published counts was pulled back by measuring an effect size of one row."
+ },
+ {
+  "n": 388,
+  "line": 88789,
+  "class": "wrong-scope-on-a-measured-claim",
+  "reason": "Status verified at the bytes rather than assumed: the third clause is two gates downstream of a block owed elsewhere, so the seat is at a gate whose key is another's rather than idle above open work."
+ }
+]
