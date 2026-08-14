@@ -44,7 +44,23 @@ BODY="${2:?missing body}"
 CLAIM_N="${3:?missing claimed bytes}"
 CLAIM_SHA="${4:?missing claimed sha16}"
 BUS="${5:-${BUS}}"
-SEEN="${6:-}"   # optional: bus line-count when the author STARTED composing
+SEEN="${6:-}"   # optional: bus line-count when the author STARTED READING
+SEEN_AT="${7:-}" # optional: epoch seconds when $SEEN was captured
+
+# ⛔⛔ THE WINDOW IS THE MEASUREMENT. Added 04:41 after this detector stayed
+# SILENT through the exact event it was built for: at 04:38:01 I answered a
+# referral the helm had already ruled at 04:37:37, and no gap warning printed.
+# NOT A BUG IN THE CHECK — a bug in WHERE THE WINDOW STARTS:
+#   I READ the bus            ~04:37:0x   <- the gap begins HERE
+#   I compose (between calls)  ~55s       <- the helm's ruling lands in here
+#   SEEN=$(wc -l …)           ~04:37:5x   <- I captured the anchor AFTER it
+#   append                     04:38:01
+# ⇒ SEEN measured COMMAND-START-to-SEND (~5s), not READ-to-SEND (~55s), so the
+#   window excluded precisely the interval the defect lives in. A detector whose
+#   anchor is captured at send time has a DEGENERATE WINDOW and cannot fire.
+# ⚠️ AND A DEGENERATE WINDOW PRINTS THE SAME NOTHING AS A CLEAN ONE — which is
+#   the statute: a silent instrument failure is indistinguishable from a
+#   measurement of zero. So the tool now REFUSES TO CALL IT A CHECK.
 
 # ⛔ WRITE-TO-SEND GAP — math's law, caught across three seats tonight and at
 # least once by me (23:42:19: I published a correlated-failure claim while the
@@ -165,7 +181,11 @@ if tail -c "+$((OFF + 1))" "$BUS" | head -c "$N" | cmp -s - "$REF"; then
   # arrived while I composed and warned on a quiet bus. Caught by the negative
   # control ("nothing landed" must print nothing) about ninety seconds after I
   # wrote it. A gap detector with a gap: the instrument carrying its own defect.
-  if [ -n "$SEEN" ]; then
+  if [ -n "$SEEN" ] && [ -n "$SEEN_AT" ] && [ $(( $(date +%s) - SEEN_AT )) -lt 15 ]; then
+    echo "bus_append: ⚠️ GAP CHECK NOT RUN — anchor captured $(( $(date +%s) - SEEN_AT ))s ago." >&2
+    echo "bus_append:    A window that short excludes your compose time. Capture SEEN in the" >&2
+    echo "bus_append:    SAME call where you READ the bus, not in the call where you send." >&2
+  elif [ -n "$SEEN" ]; then
     NEW=$((PRE - SEEN))
     if [ "$NEW" -gt 0 ]; then
       echo "bus_append: ⚠️ WRITE-TO-SEND GAP — $NEW line(s) landed while you composed:" >&2
