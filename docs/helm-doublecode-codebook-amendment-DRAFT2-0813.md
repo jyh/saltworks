@@ -56,7 +56,7 @@ THE CHOICE    RATIFY the gate at this strictness and accept the priced under-cou
               LOOSEN it (the named loosening levers are §2.3's act/harm line, §2.4's
               enumerated-vs-bare-count line, and G2's reach over self-audit posts).
               DRAFT 3 does NOT choose. It states the rule, prints the price, and hands
-              the choice to the ratifying sitting. R-4 (§6) must re-score the survival
+              the choice to the ratifying sitting. B-4 (§6) must re-score the survival
               run under the repaired rules BEFORE that choice is made.
 ```
 
@@ -93,7 +93,7 @@ COVERAGE — WITHDRAWN, NOT CARRIED FORWARD
   never stated whether the verdicts were derived from the ROWS or from the two written
   reasons — and 131 of 278 reason-pairs (47%) carry no quoted text at all, which §4.2(c)
   forbids filing from. Re-derivation from the rows under this pipeline is a BLOCKING
-  pre-ratification condition (§6, R-2).
+  pre-ratification condition (§6, B-2).
 ```
 
 📌 *All line numbers in this file are line numbers into `${BUS}` as
@@ -305,7 +305,7 @@ with it, both required by the same finding:*
    above; strike that rule and §2.1 has no in-genre discriminator at all, and the gate
    reverts in practice to a genre filter that voids every helm-verdict post. The sitting is
    told this plainly rather than sold the pair as a finished proof.*
-2. ⛔ **THE BLAST RADIUS IS A BLOCKING MEASUREMENT (§6, R-5).** *A presupposition trigger is
+2. ⛔ **THE BLAST RADIUS IS A BLOCKING MEASUREMENT (§6, B-5).** *A presupposition trigger is
    cheap prose and it is everywhere. Before ratification, measure how many rows currently on
    the `EXCLUDED` side carry one — G1 guard-installed posts especially — because every one of
    them is a row this rule moves back onto the ladder.*
@@ -453,7 +453,7 @@ extrapolated over all 42                  ~17            ~8              ~17
 ⚠️ *Two facts about that table the sitting must have. **(i) THE SURVIVALS ARE SOFT.** Four of
 the five round-2 survivors are coin-flips (666, 1905, 11629, 30003 — each with a named
 alternative reading); under a strict-gate coder the exit is 8/10, under a loose-gate coder
-3/10. This is why R-4 must print the CONTESTED count beside the verdict count. **(ii) THE LOSS
+3/10. This is why B-4 must print the CONTESTED count beside the verdict count. **(ii) THE LOSS
 HAD A SHAPE, AND R-A AND R-B ARE THE ANSWER TO IT.** All four round-2 exits were posts where
 a seat inventories its OWN already-caught defects — an averted race (72058), six named slips
 (72396), four low-value instruments (39087), a measured structural gap (78949) — stripped by
@@ -462,14 +462,14 @@ G2. For an extractor whose downstream use is measuring defect RATES that is a di
 measurement bias, not merely an under-count. **R-A recovers 72058, R-B recovers 72396 and
 39087; 78949 stays `EXCLUDED` (a measured structural GAP with "no verdict offered on the
 relay" — an absent channel is not a way something failed).** The numbers in this section are
-therefore PRE-REPAIR: they are the honest price of the gate as DRAFT 2 wrote it, and R-4 must
+therefore PRE-REPAIR: they are the honest price of the gate as DRAFT 2 wrote it, and B-4 must
 re-score them under R-A and R-B before the sitting rules (§6).*
 
 ⛔ **Two things must therefore ship with the `EXCLUDED` set, in the same breath, not as a
 later discovery: (i) THE UNDER-COUNT LEDGER — every `EXCLUDED` row that mentions a fault by
 BARE count or by name-only reference, and every row `EXCLUDED` under §1.5's specimen seam
 (R-D), ships with a pointer to the row where the fault IS codable, so the under-count is
-visible and recoverable; (ii) THE AGREED-`OTHER` SURVIVAL NUMBER (§6, R-4), printed beside
+visible and recoverable; (ii) THE AGREED-`OTHER` SURVIVAL NUMBER (§6, B-4), printed beside
 any coverage figure and beside its own contested count. That is the correct call for a per-row
 coding pass — the incidents are codable at their own rows, where the mode is stated — but it
 is an UNDER-COUNT, and an under-count that ships silent is a defect of this codebook, not of
@@ -591,7 +591,7 @@ prose said "36 decided, 8 contested", so the contested rows sat INSIDE the verdi
 unmarked — a coder reading the lists received verdicts on rows §5 declared open, violating
 DRAFT 1's own §6.1(2). Under DRAFT 2 all 44 are single-answered on the test; the prose count
 was the error, not the lists. **But every list entry reading `OTHER` is now a LADDER result
-only and must still be run through the gate (§6, R-1) before it is a final code.** The lists
+only and must still be run through the gate (§6, B-1) before it is a final code.** The lists
 are therefore reprinted as ladder outcomes, explicitly labelled:*
 
 ```
@@ -798,7 +798,7 @@ row falls on; a pass-3 coder picks a CLASS from five, with no pair in front of t
 instances from the refuter's unnamed-row sample: **275** → `misattributed` (neither coder),
 **75501** → `type-traps` (neither coder), **5893** → `wrong-scope` after test 3's temporal
 clause declines it, **45252** → `EXCLUDED` (neither coder). Class-determinacy was audited in
-DRAFT 1 on the 6 rows of §4.1 only; §6 R-3 makes a fresh N≥30 class audit blocking.*
+DRAFT 1 on the 6 rows of §4.1 only; §6 B-3 makes a fresh N≥30 class audit blocking.*
 
 **WORKED EXEMPLARS**
 
@@ -829,7 +829,7 @@ effect, so the row falls through to `wrong-scope` even though "the rationale was
 merely the numbers" sounds mechanism-shaped. (c) WHERE BOTH WRITTEN REASONS ARE PARAPHRASE
 WITH NO QUOTED TEXT, the tests cannot be applied to the reasons and **the row must be re-read
 from `FLEET.md` before it is filed.** 131 of 278 reason-pairs (47%) are in this class, mean
-reason-1 length 58 characters — see §6 R-2, which is why the coverage figure is withdrawn.*
+reason-1 length 58 characters — see §6 B-2, which is why the coverage figure is withdrawn.*
 
 ---
 
@@ -865,7 +865,7 @@ the refuter's DRAFT-1 mechanical result.*
 | 8018 | UNDECIDED | **`stale-citations`** | §1.5 all-findings + (3) before (4); the expired premises are exhibited | |
 
 ⛔ **THESE 20 ROWS ARE NOW FITTED AND NO LONGER COUNT AS VALIDATION.** *Answering a refuter's
-sample is repair, not measurement. The class-determinacy audit (§6 R-3) must draw FRESH rows,
+sample is repair, not measurement. The class-determinacy audit (§6 B-3) must draw FRESH rows,
 unnamed in this file, or it measures nothing — the same defect that made DRAFT 1's 90.3%
 unusable, since 128 of the 278 disputes were cited by line number in it.*
 
@@ -886,7 +886,7 @@ filters (10282, 28760, 36345, 40552, 42447 — **a defect DRAFT 2 itself created
 untested second prong (47222, 56887), and §3.4(1)'s undecidable "did the instrument look"
 (75264). Repairs D and E close the two unstated lines the run exposed (344/52908,
 60871/85595). **All 20 of these rows, and the 10 of the bias refuter's fresh draw, are now
-FITTED TOO** — R-3's eligible pool of unfitted disputed rows falls from 140 to about 120, and
+FITTED TOO** — B-3's eligible pool of unfitted disputed rows falls from 140 to about 120, and
 the pass-3 sampler must verify disjointness against THIS file, not against DRAFT 2.*
 
 ⚠️ *One measured bias signal, recorded rather than smoothed: of the 12 decided rows the
@@ -922,7 +922,7 @@ and 85595 move from the ladder to the residual (§3.1(6)).*
 **WHAT IS OPEN — five blocking items and a thin list.**
 
 ```
-R-1  THE GATE SWEEP, NOT YET RUN.                                            BLOCKING
+B-1  THE GATE SWEEP, NOT YET RUN.                                            BLOCKING
      Every row DRAFT 1 filed `OTHER` was filed under a pipeline in which the gate ran
      SECOND and G1/G2/G3 routed to `OTHER`. Under DRAFT 2 each must be re-run through
      the gate. This file demonstrably moves 13 of them (§2.4) and has not touched the
@@ -930,14 +930,14 @@ R-1  THE GATE SWEEP, NOT YET RUN.                                            BLO
      type-traps, plus the 42 agreed-`OTHER` rows outside the disputes entirely.
      NO `OTHER` VERDICT IN THIS FILE IS FINAL UNTIL THAT SWEEP RUNS.
 
-R-2  THE COVERAGE FIGURE, RE-DERIVED FROM THE ROWS.                          BLOCKING
+B-2  THE COVERAGE FIGURE, RE-DERIVED FROM THE ROWS.                          BLOCKING
      Withdrawn at §0 on four counts. Re-derivation must state, in §0, whether each
      verdict came from the ROW or from the two written reasons — 47% of reason-pairs
      carry no quoted text and §4.2(c) forbids filing those from reasons alone. If the
      251 was derived from COMPARE-0813.txt reasons, >=131 verdicts violate the draft's
      own rule and the number cannot be repaired, only recomputed.
 
-R-3  CLASS-DETERMINACY AUDIT, FRESH DRAW, N >= 30.                           BLOCKING
+B-3  CLASS-DETERMINACY AUDIT, FRESH DRAW, N >= 30.                           BLOCKING
      Not side-determinacy. Rows unnamed in this file (§5's 20 are now fitted; so are
      DRAFT 1's 128 and round 2's 20 at §5-R2; round 2's other 10 are AGREED rows and sit
      outside the 278 entirely, at §2.5). The refuter measured DRAFT 1 at 5/20
@@ -946,7 +946,7 @@ R-3  CLASS-DETERMINACY AUDIT, FRESH DRAW, N >= 30.                           BLO
      DRAFT 3 adds round 2's 20, so roughly 158 are fitted and about 120 remain; N >= 30
      is affordable, but verify each drawn row's absence FROM THIS FILE before drawing.
 
-R-4  THE AGREED-`OTHER` SURVIVAL RUN — RE-SCORED, WITH ITS VARIANCE.         BLOCKING
+B-4  THE AGREED-`OTHER` SURVIVAL RUN — RE-SCORED, WITH ITS VARIANCE.         BLOCKING
      110 agreements exist as a free held-out set and were never used: not one of them
      appears anywhere in DRAFT 1. Run this pipeline over all 110 and PRINT the
      agreed-`OTHER` survival rate beside any coverage figure. Two 10-row samples,
@@ -965,7 +965,7 @@ R-4  THE AGREED-`OTHER` SURVIVAL RUN — RE-SCORED, WITH ITS VARIANCE.         B
            its own variance will mislead the sitting exactly as the withdrawn 90.3%
            did." No single number ships without its contested count.
 
-R-5  THE PRESUPPOSITION RULE'S BLAST RADIUS.                                 BLOCKING
+B-5  THE PRESUPPOSITION RULE'S BLAST RADIUS.                                 BLOCKING
      §2.1 now states explicitly that "never … again" / "no longer" / "can never hide
      again" LICENSES the prior instance as stated — the rule 43903's filing was already
      using in silence, and the thing that keeps the gate from reverting to a genre
@@ -1005,7 +1005,7 @@ R-5  THE PRESUPPOSITION RULE'S BLAST RADIUS.                                 BLO
    round-2 mechanical filing). The object ruling does not settle it; the sitting should.
 8. **43903** (§2.1, presupposition rule) — the mode is carried by the adverb "again", and the
    only independent read on record (pass 2) coded the row `EXCLUDED`. The gate's whole
-   in-genre discriminator rests on this one row. Re-read it first, and read R-5 with it.
+   in-genre discriminator rests on this one row. Re-read it first, and read B-5 with it.
 
 **ARITHMETIC, PRINTED CORRECTED RATHER THAN SMOOTHED** *(the file's own standard; row
 identities verify against `disputes.json` — WS pass-1 split 125/4, stale 40/2 = 55345/65484,
@@ -1021,7 +1021,7 @@ sound, DRAFT 1's sums were not):*
 §5   DRAFT 1  the 27-row remainder double-counts 6 rows filed by §4/§4.1.
 §5.2 DRAFT 1  8 contested reported, 7 named. The eighth does not exist.
 ALL FOUR      cannot be patched in place; they are consequences of the two-codebook
-              pipeline and are superseded by R-1 and R-2.
+              pipeline and are superseded by B-1 and B-2.
 ```
 
 ---
@@ -1050,9 +1050,9 @@ print the check with it.
 
 ### 7.1 · Conditions on the pass-3 brief
 
-1. **THE FIVE BLOCKING ITEMS OF §6 CLEAR FIRST.** R-1 gate sweep, R-2 coverage re-derivation
-   from the rows, R-3 fresh class-determinacy audit, R-4 agreed-`OTHER` survival re-scored
-   after R-A/R-B and printed with its contested count, R-5 the presupposition rule's blast
+1. **THE FIVE BLOCKING ITEMS OF §6 CLEAR FIRST.** B-1 gate sweep, B-2 coverage re-derivation
+   from the rows, B-3 fresh class-determinacy audit, B-4 agreed-`OTHER` survival re-scored
+   after R-A/R-B and printed with its contested count, B-5 the presupposition rule's blast
    radius across the `EXCLUDED` side.
 2. **CARRY THE RULED STIPULATIONS, NOT THE OPEN ONES.** Twenty are pre-registered above —
    DRAFT 2's eleven plus DRAFT 3's nine (repairs A, B, C, D, E and R-A, R-B, R-C, R-D) — each
@@ -1122,15 +1122,15 @@ repairs to DRAFT 1; **rows 16-27 are DRAFT 3's repairs to DRAFT 2**.*
 | **3** | **THE EXEMPLARS RECONCILED ONTO ONE SIDE** (§2.4 table). 36467 → `EXCLUDED` beside 36137; 56163, 43228 → `EXCLUDED`; the E2 shapes 85026, 70169, 33785 → `EXCLUDED` with their instances 80307, 69687, 58956 gated in; E1 shapes 46642, 40758, 60377, 44405 → `EXCLUDED`; 43903, 84464, 3176, 28205 gated in. | **[B]** the 36467/36137 verbatim pair and the §1.2↔§3 exemplar table; **[D]** repair 1 ("re-code the exemplars it currently gets wrong") |
 | **4** | **THE INSTANTIATION CLAUSE** (§2.3): occurred passes, occurred-then-repaired passes, averted/prescribed/anticipated/proven-absent fails, unstated fails. Closes the near-miss family in one clause instead of five per-row stipulations. | **[D]** rows 39716, 45252, 46063 UNDECIDED on it; **[B]** 41094 ("harm is prospective"), 36832; DRAFT 1 §5.5's own open ruling |
 | **5** | **THE UNIT IS RULED: the POST, all findings** (§1.5). §2.2's headline proposal WITHDRAWN with the losing reading printed. | **[D]** C2 + BLOCKER 2 — "§2.4's exemplar 13739 already presumes the all-findings unit… the real blast radius in my sample is 8 of 20 rows"; DRAFT 1 §5.7 shipped both answers |
-| **6** | **THE WINNING CLASS MAY LIE OUTSIDE THE DISPUTED PAIR** (§1.1 step 1, §4). Coverage restated as SIDES vs CLASSES and withdrawn at §0; class-determinacy audit made blocking (§6 R-3). | **[D]** C3 + BLOCKER 3 — "§0's 251/278 is a claim about sides, not classes; pass-3 coders pick classes" |
+| **6** | **THE WINNING CLASS MAY LIE OUTSIDE THE DISPUTED PAIR** (§1.1 step 1, §4). Coverage restated as SIDES vs CLASSES and withdrawn at §0; class-determinacy audit made blocking (§6 B-3). | **[D]** C3 + BLOCKER 3 — "§0's 251/278 is a claim about sides, not classes; pass-3 coders pick classes" |
 | **7** | **FOURTH ADMISSIBLE EVIDENCE FORM** (§1.4(d)): a prior position stated in reported speech as the fleet's or the author's own. Keeps rows 80 and 57283 at `misattributed` on evidence the rule now actually licenses. | **[D]** C4 + repair 4 — "either the list gains a fourth admissible form or those filings are unsupported" |
 | **8** | **MIXED-CONTENT vs PREVENTION PRIORITY RULED** (§3.3): prevention wins only where NO decayed reference is exhibited. Settles 63569, 15082, 32527, 55731, 71554, 63200 against 44405, 60377, 65828, 85826. | **[D]** row 63569 AMBIG + repair 5 — "no priority stated between the two sub-rules" |
 | **9** | **TYPE-TRAP STIPULATIONS RULED AS GENRES** (§3.4): non-Lean hosts YES, bounded by DID THE INSTRUMENT LOOK *(that bound SUPERSEDED by row 18 — the bound is now DOMAIN)*; vacuity vs wrong admission; LIVE exhibition (44094 out, 2586 in); NO prospective-trap exception to the gate (42252, 45252 out); exhibited-and-rejected vs certified-sound (45406, 42898 in; 57101 out). | **[D]** repair 6 ("rule the three §5.4 stipulations as genres, not rows — 3 of my 4 type-trap rows turn on them"); **[B]** R3 ("say whether a NON-Lean instrument can host a type trap; the exemplar 88119 is broader than the rule") |
 | **10** | **THE TWO RECURRING SCOPE/STALE STIPULATIONS RULED**: citation-as-motivation NO (§3.1(4)); the temporal clause is binding, false-when-made is not stale (§3.3) — which re-files 2415, 3860, 5893 and generalizes §4.1's own row 1696. Plus new §3.1(2) implied-uniformity for 14951. | **[D]** repair 7 — "both recur outside the rows §5 names (14951, 39716; 3063, 5893)" |
 | **11** | **ARITHMETIC PRINTED CORRECTED; COVERAGE WITHDRAWN.** Four breaks named at §6 with their true sums; the 6 double-counted remainder rows removed; §5.2's phantom eighth row closed; §2.2's duplicate 46788 resolved and its lists relabelled as ladder outcomes pending the gate sweep. | **[D]** repair 8; **[B]** R5 — "the contested rows are inside the decided lists, unmarked, so a coder reading the lists receives verdicts on rows §5 declares open" |
 | **12** | **HARNESS PINNED** (§7.1(4)): `^\[\d{1,2}/\d{1,2}[ ,]` as the post-header regex, per-row start/end/char-count printed by the sampler, FLEET.md sha and byte length pinned at draw time. | **[D]** repair 9 — "1,258 of 4,861 headers (25.9%) are single-digit; 59 of the 278 disputed rows sit on one; a `^\[\d\d/\d\d` regex serves the coder a headline, mechanically reproducing the pass-1 failure" |
-| **13** | **DERIVATION PROVENANCE DECLARED UNKNOWN AND BLOCKING** (§0, §6 R-2, §4.2(c)): whether the 251 came from the rows or the reasons is not stated in DRAFT 1, and 131 of 278 reason-pairs (47%) carry no quoted text. | **[D]** repair 10 + the measured 47% |
-| **14** | **THE VALIDATION HOLE PRICED AND CLOSED** (§2.5, §6 R-4): the 110 agreements were never used; DRAFT 2 prints the re-run of the refuter's 10-row agreed sample (3 survive / 3 to specifics / 4 to `EXCLUDED`), makes the full 110-row survival run blocking, and requires the `EXCLUDED` under-count pointer ledger to ship with the excluded set. | **[B]** "THE VALIDATION HOLE (verified, decisive)" + R4 — "a fresh sample has no agreed baseline to lose" |
+| **13** | **DERIVATION PROVENANCE DECLARED UNKNOWN AND BLOCKING** (§0, §6 B-2, §4.2(c)): whether the 251 came from the rows or the reasons is not stated in DRAFT 1, and 131 of 278 reason-pairs (47%) carry no quoted text. | **[D]** repair 10 + the measured 47% |
+| **14** | **THE VALIDATION HOLE PRICED AND CLOSED** (§2.5, §6 B-4): the 110 agreements were never used; DRAFT 2 prints the re-run of the refuter's 10-row agreed sample (3 survive / 3 to specifics / 4 to `EXCLUDED`), makes the full 110-row survival run blocking, and requires the `EXCLUDED` under-count pointer ledger to ship with the excluded set. | **[B]** "THE VALIDATION HOLE (verified, decisive)" + R4 — "a fresh sample has no agreed baseline to lose" |
 | **15** | **NAMESPACE CORRECTED.** The codebook is a helm instrument; DRAFT 1 sat in the author seat's namespace. This file is `helm-doublecode-codebook-amendment-DRAFT2-0813.md`; the old path is overwritten with a tombstone pointing here. | the repair order, not a refuter finding |
 | **16** | **REPAIR A — THE FINDING MUST ITSELF PASS THE GATE** (§1.5). A finding puts the post on the ladder only if that finding is itself instantiated, live, and in the row's own subject matter; prospective, averted, prescribed and historically-cited findings never fire a class test. Restores §3.4(4) in every mixed post. | **[D2]** gap (A), 5 of its 8 ambiguous rows (10282, 28760, 36345, 40552, 42447) — *"This is a defect DRAFT 2 created… §1.5 gates on ANY finding and then files at the first class ANY finding instantiates… repair 5 walks a hole through repair 9"* |
 | **17** | **REPAIR B — THE GATE'S SECOND PRONG NOW HAS A TEST** (§2). The mode is named when the row states what the object DID or WOULD DO wrongly; a defective STATE, a COUNT of faults, or a stated CORRECTIVE is not a mode. Rules 60718 by rule instead of by exemplar. | **[D2]** gap (B) — *"'The way it failed' is carried entirely by exemplars… DRAFT 2 flags 60718 as thin AS ONE ROW; on a fresh draw it is a ~10% class"* (47222, 56887; nearly decided 3453, 33368) |
@@ -1139,11 +1139,11 @@ repairs to DRAFT 1; **rows 16-27 are DRAFT 3's repairs to DRAFT 2**.*
 | **20** | **REPAIR E — "STANDING" MEANS ON THE RECORD** (§3.1(6)): posted, banked, committed, or in an instrument's PUBLISHED output; unpublished internal output is not standing. Moves 60871 and 85595 from `wrong-scope` to `OTHER`, with the losing reading printed. | **[D2]** repair E — *"'printed by an instrument' as written admits UNPUBLISHED internal output… state which"* |
 | **21** | **REPAIR R-A — THE DEFECTIVE ACT, NOT THE HARM** (§2.3, narrowing G3). A harm averted by a peer's catch, an existing guard, or luck does not un-instantiate the act; only a fault whose act never occurred fails the gate. **72058 recovers; 69687 gates in, reconciling §3.4(4) with §3.4's exemplar table.** | **[B2]** R-A + finding (b) — *"§3.4(4) and §3.4's exemplar table give the same shape opposite answers"*; and finding (c), the directional bias on the self-audit genre |
 | **22** | **REPAIR R-B — ENUMERATED INVENTORY ≠ BARE COUNT** (§2.4). N faults each with its own object and mode fill N ledger entries and gate in; faults by bare count are `EXCLUDED` with a §2.5 pointer. **72396 and 39087 recover; 80565 and 62163 stay out.** | **[B2]** R-B + finding (c) — *"72396's own sentence is 'every one caught but the RATE is the signal'; the codebook deletes the row that says the rate is the signal"* — a directional measurement bias for a defect-rate extractor |
-| **23** | **REPAIR R-C — THE PRESUPPOSITION RULE, STATED** (§2.1, option (i)): "never … again" / "no longer" licenses the prior instance as stated. Ships with pass 2's contradicting read on 43903 printed, and with R-5 making the blast radius across the `EXCLUDED` side a BLOCKING measurement. | **[B2]** finding (a) — *"the failure mode is not stated but PRESUPPOSED by the single adverb 'again'… the only independent read on record went the other way: pass 2 coded 43903 `EXCLUDED`"* |
+| **23** | **REPAIR R-C — THE PRESUPPOSITION RULE, STATED** (§2.1, option (i)): "never … again" / "no longer" licenses the prior instance as stated. Ships with pass 2's contradicting read on 43903 printed, and with B-5 making the blast radius across the `EXCLUDED` side a BLOCKING measurement. | **[B2]** finding (a) — *"the failure mode is not stated but PRESUPPOSED by the single adverb 'again'… the only independent read on record went the other way: pass 2 coded 43903 `EXCLUDED`"* |
 | **24** | **REPAIR R-D — THE SPECIMEN SEAM** (§1.5). A finding is a fault the row asserts of its OWN subject matter; a fault cited as a SPECIMEN of a rule the row is making is coded at the specimen's row with a §2.5 pointer. **85026 becomes DERIVED rather than asserted.** | **[B2]** §4 — *"85026 → the table says `EXCLUDED`; the gate as written says GATED IN… DRAFT 1's disease at lower amplitude: an exemplar table that its own rule contradicts"* |
 | **25** | **THE BUS PINNED BY SHA AND BYTE LENGTH** (§7.1(4)): sha256 `6b2d387f…c088770e`, 13,061,733 bytes, 91,199 lines, 4,873 headers, measured at edit time — with the three-readings-one-day drift table (4,861 → 4,868 → 4,873). | **[D2]** harness fact (i) — *"the bus has moved… all 278 line numbers still land on headers today, but THAT IS LUCK, NOT CONSTRUCTION; pin the sha and byte length NOW"* |
-| **26** | **R-4 RE-SCORED AND ITS VARIANCE PRINTED** (§6). The 110-row survival run must re-score AFTER R-A and R-B land, and must print the CONTESTED count beside the verdict count. §2.5's figures are relabelled PRE-REPAIR and carry the second disjoint draw (5/1/4; combined 40% out). Plus R-5 (new blocking item) and the fitted-pool note at R-3. | **[B2]** blocking condition — *"my 5 survivors contain 4 coin-flips; a survival figure that hides its own variance will mislead the sitting exactly as the withdrawn 90.3% did"*; **[D2]** harness fact (ii), the shrinking unfitted pool |
-| **27** | **THE THREE SELF-INCONSISTENT EXEMPLARS NOW DERIVE FROM THE RULES** — 85026 (via R-D), 43903 (via R-C's presupposition rule, with its contradicting read and R-5), 69687 (via R-A's act/harm line, restoring the 70169↔69687 pair the base-rate caveat depends on). Header to DRAFT 3; §0 states the one open design question and hands it to the sitting. | **[B2]** §7 — *"DRAFT 2's own exemplar table has three rows (85026, 43903, 69687) that its own rule does not produce"* |
+| **26** | **B-4 RE-SCORED AND ITS VARIANCE PRINTED** (§6). The 110-row survival run must re-score AFTER R-A and R-B land, and must print the CONTESTED count beside the verdict count. §2.5's figures are relabelled PRE-REPAIR and carry the second disjoint draw (5/1/4; combined 40% out). Plus B-5 (new blocking item) and the fitted-pool note at B-3. | **[B2]** blocking condition — *"my 5 survivors contain 4 coin-flips; a survival figure that hides its own variance will mislead the sitting exactly as the withdrawn 90.3% did"*; **[D2]** harness fact (ii), the shrinking unfitted pool |
+| **27** | **THE THREE SELF-INCONSISTENT EXEMPLARS NOW DERIVE FROM THE RULES** — 85026 (via R-D), 43903 (via R-C's presupposition rule, with its contradicting read and B-5), 69687 (via R-A's act/harm line, restoring the 70169↔69687 pair the base-rate caveat depends on). Header to DRAFT 3; §0 states the one open design question and hands it to the sitting. | **[B2]** §7 — *"DRAFT 2's own exemplar table has three rows (85026, 43903, 69687) that its own rule does not produce"* |
 
 ---
 
@@ -1160,3 +1160,10 @@ readings printed; the bus pinned by sha and byte length; five blocking items and
 rows declared open at §6; the coverage figure withdrawn rather than repaired; and **ONE OPEN
 DESIGN QUESTION carried to the sitting rather than answered here (§0, priced at §2.5): how
 strict is the gate.** Not committed by this hand.*
+
+CHANGELOG row 28 (2026-08-14 08:31, helm, post-ratification, semantics
+untouched): this document's five blocking items renamed R-1..R-5 → B-1..B-5
+throughout, resolving a fleet-wide name collision with the estimation laws
+of kit-revision-0813.md ADDENDUM C (ratified the same sitting, same names) —
+compiler's 08:29 catch. A citation "R-N" now always means the estimation law;
+"B-N" always means this document's blockers.
