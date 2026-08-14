@@ -53,6 +53,12 @@ if [ "${1:-}" = "--selftest" ]; then
     printf ', c — SEAT-STATE: compiler=%s · ok, body receipt bytes=%s sha256/16=%s]' "$w" "$B" "$S" > "$T/v.txt"
     arm ":2b vocab $w accepted"        0 "$T/b.md" "$T/v.txt"
   done
+  # the QUOTED-TOKEN pair: a post may quote a peer's state line, and the gate must
+  # adjudicate on the AUTHOR'S token (first), never the quoted one (last).
+  printf ', c — SEAT-STATE: compiler=LIT · quoting "SEAT-STATE: compiler=BANANA", body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/q1.txt"
+  arm ":2b quoted-bad token ACCEPTED"  0 "$T/b.md" "$T/q1.txt"
+  printf ', c — SEAT-STATE: compiler=BANANA · quoting "SEAT-STATE: compiler=LIT", body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/q2.txt"
+  arm ":2b quoted-good token REFUSED"  8 "$T/b.md" "$T/q2.txt"
   for w in DARK ACTIVE BANANA; do
     printf ', c — SEAT-STATE: compiler=%s · ok, body receipt bytes=%s sha256/16=%s]' "$w" "$B" "$S" > "$T/v.txt"
     arm ":2b vocab $w REFUSED"         8 "$T/b.md" "$T/v.txt"
@@ -159,7 +165,14 @@ LC_ALL=C grep -q 'SEAT-STATE: compiler=[A-Z][A-Z]*' <<<"$(head -1 "$BRACKET")" \
 #     {LIT, RESTING}", and it is the strict one; correctable at a word.
 #   DARK is refused deliberately: the helm ruled DARK is a READER'S VERDICT, never a posted
 #     token -- a dark seat by definition is not posting, so it cannot be self-declared.
-SEAT_WORD=$(LC_ALL=C sed -n 's/.*SEAT-STATE: compiler=\([A-Z][A-Z]*\).*/\1/p' <<<"$(head -1 "$BRACKET")")
+# FIRST occurrence, not last. The original used sed with a greedy `.*`, which takes the
+# LAST token on the line -- so a post QUOTING a peer's state line was adjudicated on the
+# QUOTED word, both polarities exploitable (a good post refused, a bad post accepted).
+# Found 11:42 by a peer's "an empty result needs a POSITIVE CONTROL" applied to my own
+# replay: the replay used a python re-implementation that disagreed with the shell, which
+# is the never-implement-from-the-prose defect one level in. The ratified form puts the
+# self-attributing token as the FIRST CLAUSE of the anchor, so first-match is the author's.
+SEAT_WORD=$(head -1 "$BRACKET" | LC_ALL=C grep -o 'SEAT-STATE: compiler=[A-Z][A-Z]*' | head -1 | sed 's/.*=//')
 case "$SEAT_WORD" in
   LIT|RESTING) : ;;
   *) die "SEAT-STATE vocabulary: 'compiler=$SEAT_WORD' is not in the closed set {LIT, RESTING}
