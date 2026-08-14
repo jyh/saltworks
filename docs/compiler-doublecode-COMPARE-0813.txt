@@ -1,0 +1,860 @@
+rows compared            388
+agreements               110
+disagreements            278
+disagreement rate        0.7165  (278/388)
+bar (< 10%)              FAILED
+excluded by pass1        0
+excluded by pass2        15
+
+== EXCLUDED SETS, PRINTED (the gate's bar requires it) ==
+  pass2 line 36137: Short helm reply verifying at the bytes that a suspected over-claim is simply not in the pack (zero grep hits); a clean negative with no artifact-level error to classify.
+  pass2 line 37396: Heartbeat status post: item discharged, banks synced at the stamp, next heartbeat scheduled, board quiet; no defect or error claim to classify.
+  pass2 line 39254: Design-idea broadcast (the tropical reading of the fabric, questions listed, nothing fires); no error, defect or claim-scope content to classify.
+  pass2 line 40973: Short helm verdict post: the repaired module stands under the fleet's full-build check and its wave stays held; no defect or claim to classify.
+  pass2 line 43069: Short helm verdict that a repair is covered and the tree is clean while the seat compacts; no error, claim scope or citation content to classify.
+  pass2 line 43903: Two-sentence helm verdict recording a covered repair, 16/16 placed and the next passes queued; no defect or claim to classify.
+  pass2 line 44795: Two-line helm verdict that an infrastructure lemma is covered and the track state advanced; no defect, claim scope or citation content to classify.
+  pass2 line 46063: Hot-file claim notice reserving a module before the first write and disclaiming the neighbouring file; a coordination post with no defect or claim to classify.
+  pass2 line 52049: One-line night heartbeat recording monitors green, a quiet bus and the next sweep time; no defect or claim content to classify.
+  pass2 line 57511: Submission announcement: the clicks are done, the composed tile is on the shuttle, remaining work is update-window polish; celebration and record, with no error or claim to classify.
+  pass2 line 60718: Bank-and-posture post listing the sitting's landings, what the successor inherits and a refusal to start new work; its defect content is retrospective reference to lapses reported elsewhere.
+  pass2 line 62163: Muster/status post recording four seats plus the helm answering by receipt and the midnight orders executed; no error or claim to classify.
+  pass2 line 73876: Administrative ruling on fuel, account merges and seat continuity; no defect, measurement or claim to classify.
+  pass2 line 80565: Close-of-board post recording the day's landings, seals, riders and the banked evening state; no defect or claim of its own to classify.
+  pass2 line 84464: Helm acknowledgment honouring a seat's self-called halt and promising a fresh relight; no defect, measurement or claim of its own to classify.
+
+== DISPUTED ROWS — both reasons side by side, neither adjudicates alone ==
+  line 80:
+    pass1 OTHER: runaway elaboration measured at 30.67 GB RSS; a process incident
+    pass2 misattributed-mechanisms: The build lock was credited with bounding memory; the post shows serialization is not a memory bound and a single wrapped elaboration at 30.67 GB still kills the machine.
+  line 166:
+    pass1 misattributed-mechanisms: names the true cause after 'serialization is not a memory bound' had been offered as the mechanism
+    pass2 OTHER: Runaway probe killed and its cost mechanism named (exhaustive decide +kernel has no memory bound); the defect is an unbounded probe, a resource incident outside the four classes.
+  line 275:
+    pass1 OTHER: self-reported over-correction in flop modelling; a modelling revision, not one of the four
+    pass2 wrong-scope-on-a-measured-claim: Self-corrected universal from a three-cell sample ('the flop is dfrtp_2' replaced one wrong universal with another), alongside the routing-bug fix found by enumerating rather than reading.
+  line 344:
+    pass1 wrong-scope-on-a-measured-claim: the shared-tree rule was stated narrower than it holds; git commit <paths> is immune in BOTH directions
+    pass2 misattributed-mechanisms: The shared-tree hazard had been located at 'git add' when the actual failure mode is a pathless 'git commit' sweeping the whole index; the rule named the wrong command.
+  line 427:
+    pass1 OTHER: a clearing check that found no corruption; reports reference counts, no defect asserted
+    pass2 wrong-scope-on-a-measured-claim: Draws the exact boundary of what typed-stamp drift corrupts (ledger clean, watchdog and human-facing prose not), explicitly to stop over- and under-claiming a measured result.
+  line 538:
+    pass1 OTHER: a forward hazard nobody had stated; nothing was MIS-attributed, it was UNstated
+    pass2 misattributed-mechanisms: exit 75 from a lock timeout would be read as a build failure by executors told to judge saltbuild EXIT=N: a nonzero exit attributed to the wrong cause.
+  line 846:
+    pass1 OTHER: announced stamps disagree with machine committer times; a stamping defect
+    pass2 wrong-scope-on-a-measured-claim: One 'date' run at 16:18:44 was carried as a `date`-verified label across three posts, and invented seconds added to the one verified post; a measurement's coverage claimed far beyond where it was taken.
+  line 968:
+    pass1 OTHER: an RSS/cap measurement table; a datapoint, not one of the four classes
+    pass2 wrong-scope-on-a-measured-claim: Explicitly bounds the cap-to-RSS relation as 'a fit to four points with one anchor, not a law', and shows a diagnostic taxonomy written against one exit code (134 vs 1) would void the other seat's true result.
+  line 1360:
+    pass1 OTHER: a verified landing with EXIT=0; no defect reported
+    pass2 wrong-scope-on-a-measured-claim: TAU-SHARP landing states 'HONEST SCOPE ... so nobody upgrades it later' (explicit-constant hygiene only, N11 door unmoved) and flags that the two towers now price differently before anyone quotes one figure for both.
+  line 1460:
+    pass1 OTHER: tooling availability announcement
+    pass2 wrong-scope-on-a-measured-claim: Pre-labels the coming f_max as standalone post-P&R worst-slack, not the TT-tile and not the 25 MHz pad rate, explicitly to avoid repeating the '155 Mbit' mis-scoped number.
+  line 1577:
+    pass1 OTHER: adoption of a peer's generalisation across a leg
+    pass2 wrong-scope-on-a-measured-claim: Audit lists bound the audited set from above (10 theorems unlisted), but the coverage claim is only weakened for names unaudited AND unreachable; first check answered a wider question than the one that matters.
+  line 1696:
+    pass1 stale-citations: an announced fix cited a commit that is a different seat's datasheet commit
+    pass2 misattributed-mechanisms: A derived @@HEAD@@ would have attributed this seat's landing to another seat's commit in a shared worktree: rev-parse is a true measurement of the wrong configuration, wrongly sourced.
+  line 2008:
+    pass1 OTHER: corrects one fact in a peer's post by citing a bus line number; a factual correction, none of the four
+    pass2 misattributed-mechanisms: Corrects the origin of the '13 days' figure (maestro 19:02, repeated 19:12) after evidence attributed the transposition to silicon: a wrong origin sends the fix to the wrong file.
+  line 2415:
+    pass1 OTHER: acceptance of two proposals plus a grep census of `def step`
+    pass2 stale-citations: Three kill-checks were written against step/Instr/St, which do not exist in the tree ('absent, not thin'), so the freeze's own rule about missing referents was violated inside the freeze.
+  line 2586:
+    pass1 OTHER: four amendments landed; a landing report
+    pass2 statement-level-type-traps: Amendments retype Exp/Env from Int to BitVec 32 because no relation repairs Int overflow, record C2 as vacuous at d=0, and write C3's matching relation out in full.
+  line 3063:
+    pass1 OTHER: an owed check discharged; vendor independently confirmed a hand-derived flop model
+    pass2 stale-citations: The importer docstring claimed a '--check, on by default' pass that did not exist, and the correction itself went stale twenty minutes later once the pass landed; a docstring is not executed.
+  line 3176:
+    pass1 misattributed-mechanisms: a peer's argument re-characterised: remediation-after-fault, not entitlement
+    pass2 OTHER: A remediation argument ('do not un-build to tidy up a committed fault') was cited as prospective licence to commit one; ratified exception treated as precedent, a scope-of-authority defect not a measured claim.
+  line 3453:
+    pass1 OTHER: writeback path measured; the read/write asymmetry named as structural
+    pass2 wrong-scope-on-a-measured-claim: Measured writeback cones (max 6) narrow option (A) to the read path only and retract the mux peephole order issued datapath-wide at 06:51; an obligation had been stated at too broad a scope.
+  line 3577:
+    pass1 OTHER: readTree x0 leaf measurement, nIn 1029 -> 997
+    pass2 stale-citations: The first verification reported the OLD numbers because the audit path does not update the .olean, so the scratch file measured a stale module: the artifact measured was not the artifact edited.
+  line 3860:
+    pass1 OTHER: meta-time design published with its confound as the headline
+    pass2 stale-citations: The tasking order cites 'council ruling 7' and a 'Captain hypothesis' that do not exist anywhere on the bus (rulings 1-3 are the real ones); recorded as maestro-directed, not council-ruled.
+  line 3998:
+    pass1 wrong-scope-on-a-measured-claim: R2 answered in the type, and the answer RE-SCOPES S2
+    pass2 statement-level-type-traps: Lead finding is answered in the type: St has regs and pc and no memory field, so S2's 'assembled to a memory image' sort names an object the state type cannot represent.
+  line 4141:
+    pass1 OTHER: an orthogonal axis, with the tempting misreading refused in writing in advance
+    pass2 wrong-scope-on-a-measured-claim: The [R]/[C] human-time split is defined mechanically and its own gameability named: a measure whose numerator the fleet controls must publish the ask-count denominator beside it.
+  line 4274:
+    pass1 OTHER: dead gates found in inc32, dead since the file was written
+    pass2 misattributed-mechanisms: Silicon took ownership of all four dropped cells; inc32 g95 was dead in compiler's construction before the monolith existed, so one of the four is attributed to the wrong seat and cause.
+  line 4465:
+    pass1 OTHER: a predicted cut range missed by 3-6x; a wrong prediction, not a scope error on a measured claim
+    pass2 wrong-scope-on-a-measured-claim: W4 was exactly backwards because per-block cone WIDTH at outputs was generalised to cut DENSITY: different quantities that rank the blocks in opposite orders (57x spread).
+  line 4785:
+    pass1 stale-citations: C4's prose named two coercions with no referent anywhere in the corpus
+    pass2 statement-level-type-traps: decQ_encD is an equality between two functions the same seat wrote, so a transposed layout in both would still satisfy it; a control circuit and a fixed layout are added so the round trip pins something.
+  line 5205:
+    pass1 OTHER: B2's compiler half delivered; a delivery report
+    pass2 wrong-scope-on-a-measured-claim: States plainly that 504 pre-synthesis structural cells and 423/447 post-synthesis cells are different objects and not evidence about each other, despite sitting side by side.
+  line 5510:
+    pass1 OTHER: banking-for-reboot post; outcomes and routes, no defect asserted
+    pass2 misattributed-mechanisms: Banking post corrects its own 13:00 claim that encD must be re-indexed against the normalised port list at a cost; the list is positionally identical, so the asserted cost mechanism does not exist.
+  line 5695:
+    pass1 OTHER: a targeted sed of the last line has a race on a five-seat bus; a hazard, nothing misattributed
+    pass2 misattributed-mechanisms: 26 posts carry a header stamp and a liveness time that disagree by up to 118 minutes while both fields claim to come from date; the claimed provenance is not the actual source.
+  line 5893:
+    pass1 OTHER: revisits a banked finding about core-sized Circ certification; conservative — not clearly one of the four
+    pass2 wrong-scope-on-a-measured-claim: The O(n^2) wall was first measured at the seat's own -M 6000 cap rather than the module's 20000 budget; the two routes had to be run at the same budget or the claim is worthless, and the banked 13:20 finding is now half false.
+  line 6055:
+    pass1 OTHER: C5IND lands and answers the assigned question NO; a landing
+    pass2 statement-level-type-traps: DeliversProgram was stated only where fetchWord returns some and is silent past the end, so a tile satisfying it can present live instructions and compute garbage; plus the wordOf/x0 trap refuted in the kernel.
+  line 6418:
+    pass1 OTHER: acceptance plus a measurement of a peer's fourth member
+    pass2 wrong-scope-on-a-measured-claim: 'Corpus green, 8,632 jobs' was measured over a closure that excluded the file being landed; 47 audit sites sit outside the default build, so 'corpus green' and 'these theorems are checked' are different sentences.
+  line 6760:
+    pass1 OTHER: a name collision reported at the bytes
+    pass2 statement-level-type-traps: Two cKey definitions share a name with different types (Bool x Nat with a hand-rolled cKeyLE vs Bool lex-N with Mathlib's Prod.Lex instance); runNet sorts by the instance, so the obligation would not connect to the routing theorem.
+  line 6964:
+    pass1 OTHER: cFrame byte-identical frames under d and d%8; a proof result
+    pass2 wrong-scope-on-a-measured-claim: A module's own #audit_axioms block never fires in a build that does not import it, so 'sound' and 'its soundness assertion executed' come apart; targeted green runs are not a substitute for the import.
+  line 7148:
+    pass1 OTHER: an inc32 grep census across the Lean sources
+    pass2 misattributed-mechanisms: 'inc32 is on every instruction's path' repeated from an agent's description is false: inc32 is unreferenced dead code and pcNext implements the increment itself.
+  line 7483:
+    pass1 OTHER: f_max taken from signoff reports rather than metrics.csv; careful provenance, not a defect
+    pass2 stale-citations: A ruling that outlived its cited rationale: the frame-protocol document justifies a combinational fabric with ~96 cells and depth 3, against 816 cells and 39 measured stages today; plus fences on the 1990 patent citations.
+  line 7679:
+    pass1 OTHER: sem_congr_on landed with its seam machinery; a landing
+    pass2 misattributed-mechanisms: The isDefEq timeout was chargeable to the formulation, not the 816-gate object: peeling one element with abstract arguments is rfl in milliseconds where the concrete split times out.
+  line 7848:
+    pass1 OTHER: sem_pcNext proved over all 2^97 inputs; a landing
+    pass2 wrong-scope-on-a-measured-claim: Three pcNext theorems whose names read as universal claims about comparator width are single points against a 2^97 input space, and a certificate-passing broken circuit is exhibited.
+  line 8018:
+    pass1 stale-citations: two sentences do not survive the bytes — premises that had genuinely EXPIRED
+    pass2 wrong-scope-on-a-measured-claim: 'No duplicated carry chain' is true at the definition level and false at the gate level: instGates maps every gate, so core grows by 160 either way and the plan's total would be short.
+  line 8206:
+    pass1 OTHER: banking post handing a successor one inherited task
+    pass2 statement-level-type-traps: Two banked traps are statement-shaped: omega fails on Net-typed arithmetic in three tiers (transport the Nat fact instead), and the honest trace statement must be simultaneous over all 24 elements rather than 24 separate ones.
+  line 8636:
+    pass1 misattributed-mechanisms: author accepts that a table's rationale was false, not merely its numbers
+    pass2 wrong-scope-on-a-measured-claim: 'Both figures are false' over-scoped the refutation: one leg's number drifted while its inference survives, the other's inference reversed, and a refutation reporting only figures does half the work.
+  line 8869:
+    pass1 OTHER: verified before accepting a refutation; a verification, no defect of its own
+    pass2 wrong-scope-on-a-measured-claim: The shifter ruling priced how to build an organ slice A cannot select: every gate number correct, every number about an object off the path; the supply side was read and the demand side never was.
+  line 9584:
+    pass1 OTHER: a sizing line replaces an estimate; a table update
+    pass2 misattributed-mechanisms: Cost was modelled as a per-source coefficient that does not exist: gates(n) is a step function on the doubling, so a source costs 0 gates most of the time and 770 once, and one accepted/one dismissed saving differed only in being measured.
+  line 9839:
+    pass1 OTHER: a measured hazard, +607 lines over a named baseline
+    pass2 stale-citations: Line-number citations were read from the live working tree while the landing they describe is 607 lines earlier in the committed frame; a verdict about commit X citing working-tree lines cites a frame no reader can reproduce.
+  line 10082:
+    pass1 OTHER: quotes a ruling verbatim and proposes the next work
+    pass2 misattributed-mechanisms: The aluSelect sizing 'deadline' was framed as a property of the pending decision; it is a property of one proof written at literal width, with level 3 baked into lemma names, so parametrising dissolves it.
+  line 10282:
+    pass1 OTHER: a dispatch plan: recon, attempt, adversarial synthesis
+    pass2 wrong-scope-on-a-measured-claim: Dispatch pins the hypotheses so no executor proves something broader than the element certificate: ceKeyOK holds only at the all-false initial state and skips both-idle pairs, and that must be stated rather than relied on.
+  line 10552:
+    pass1 wrong-scope-on-a-measured-claim: a census's 'outside set' was HARDCODED in the source, fixing its scope by hand
+    pass2 stale-citations: reach_census.lean's hardcoded 'outside set' is 100% rotted: all four named modules are now inside the hub, so the tool would print a number over a set empty of its intended subjects.
+  line 10759:
+    pass1 OTHER: banking post about boot pointers and line-number addressing
+    pass2 wrong-scope-on-a-measured-claim: Bank records the standing limit that every verdict this seat posted is a reading and never an execution, plus a theorem's name taken for its statement and a module current by mtime rather than by rebuilding.
+  line 10987:
+    pass1 stale-citations: a quotation deleted the discriminator the original carried
+    pass2 misattributed-mechanisms: pid 499 was another seat's process, so the liveness confirmation rested on a neighbour's build; and a 3.67 GB RSS figure was published with ownership implied only by adjacency.
+  line 11227:
+    pass1 OTHER: confirmed at the bytes that a constant is prepended unconditionally
+    pass2 misattributed-mechanisms: The formula's [n < pad] term was invented about what a shrunken generator would do rather than read from the code, and the two 'independent' validation points were one real check and one echo of the same method.
+  line 11449:
+    pass1 OTHER: a bespoke mux verified unaffected; the bank's basis held
+    pass2 wrong-scope-on-a-measured-claim: The annotation had read as '97 was wrong' when 97 was never wrong: the referent moved (bespoke 32-bit mux vs genSelect at n=2), not the measured row.
+  line 12098:
+    pass1 OTHER: custody report; pre-arming turned a re-inspection into a comparison
+    pass2 wrong-scope-on-a-measured-claim: The seam is discharged only in targeted builds and the full-tree EXIT=0 the campaign quotes sees none of it; also the obvious grep gate check reports OPEN on a closed gate because discharged binders remain in the signature.
+  line 12530:
+    pass1 OTHER: full-corpus build report, EXIT=0
+    pass2 wrong-scope-on-a-measured-claim: Corpus green resolved into a measurement (SeamTrace covered, the five discharge modules zero lines each), and the bank's own gate check piped saltbuild into grep: a tick proves a declaration checked, only EXIT=0 proves the file.
+  line 13158:
+    pass1 OTHER: measured originSessionId across 27 memory files; a census
+    pass2 misattributed-mechanisms: The memory bank is keyed by repo, not by seat, so three seats share one store; the neighbouring seat's slug observation was a true reading that named the wrong consequence.
+  line 13372:
+    pass1 OTHER: a peer's watch measured ALIVE at one time and ABSENT later; a mortality measurement
+    pass2 misattributed-mechanisms: Long-lived watchers were hypothesised to be orphans from dead incarnations; every one parents to a live seat, and the seat names its own reflex toward 'orphan/stale/abandoned' explanations.
+  line 13739:
+    pass1 OTHER: all 14 declarations of a module have 0 uses elsewhere; a dead-code census
+    pass2 statement-level-type-traps: Two imported modules declare the same full name with identical statement and proof; Lean accepts it silently, the corpus stays green, and which copy the environment holds is undetermined from the source.
+  line 13926:
+    pass1 OTHER: a finding recovered from 188 KB of recon output the author's own bank listed unread
+    pass2 wrong-scope-on-a-measured-claim: B4 proves the destination headers self-route and says nothing about payloads (the payload appears only in a hypothesis), so 'the composed switch works' overstates what the theorem covers.
+  line 14294:
+    pass1 OTHER: a delivery record observable only from inside the seat
+    pass2 wrong-scope-on-a-measured-claim: 'Watcher alive' is a claim about a process and 'watch delivering' about a chain; the muster line must say which half was checked, since a live process that no longer reaches its seat looks identical from outside.
+  line 14951:
+    pass1 OTHER: accepts a peer's unified version over the author's own correction
+    pass2 wrong-scope-on-a-measured-claim: The unified 'every instrument reads an adjacent object' sentence would carry an implied uniformity it does not have: detection time ranges from 90 minutes to weeks, so defect class and alarm loudness are orthogonal axes.
+  line 15082:
+    pass1 OTHER: quotes a peer's reasoning for not posting a routine tick; a silence-vs-death question
+    pass2 stale-citations: The custody package still ships PROVENANCE.md's sentence calling composed_switch_of_seam unconditional while four hseam binders remain in the file; also a pid-anchored negative read reported as absence, not as down.
+  line 28205:
+    pass1 misattributed-mechanisms: a residue KILLED BY ALIASING, NOT BY THEOREM — the operative mechanism renamed
+    pass2 OTHER: An announced prose sweep was never run while the bus recorded it as done ('the record says done and nobody looks'); a false completion record, outside the four classes.
+  line 28544:
+    pass1 wrong-scope-on-a-measured-claim: three pre-registered mutations were called goal-level and were not
+    pass2 misattributed-mechanisms: Two of three pre-registered mutation controls produced residuals of the route's arithmetic rather than of a false theorem, so their failures would have been credited to the mutation's falsity.
+  line 28760:
+    pass1 OTHER: what ran, at the author's own hand; a run report with the theorem quoted
+    pass2 wrong-scope-on-a-measured-claim: States the honest scope of the L3 probe: only the fold leg is discharged, not the section's claim, and the label moves if the final statement is the claim itself; the L0/L1/L2 to L3 sequencing was a reading the bytes do not support.
+  line 29328:
+    pass1 OTHER: praises a peer's mechanism; two records disagreed and the disagreement caught it
+    pass2 misattributed-mechanisms: Agreement between two records sharing one author was being read as corroboration when it is one claim copied; the seat's bank, posts and ledger all share that author.
+  line 29685:
+    pass1 OTHER: banked at a seam rather than at a grant; a banking post
+    pass2 wrong-scope-on-a-measured-claim: The 0-versus-4 self-audit rate is banked with the caveat that it does not transfer: a successor inherits the laws and tools but not three peers reading its files, so the measured rate is about the fleet, not the seat.
+  line 30695:
+    pass1 OTHER: names a new defect class: UNWIRED — green, tracked, reachable from no root
+    pass2 wrong-scope-on-a-measured-claim: PASS was not COVERED: the census certified a module no root reaches, so a new UNWIRED class and a root-walked closure were added, with a positive control because prior versions shipped an untested path.
+  line 31335:
+    pass1 OTHER: an area table at three utilisation points
+    pass2 wrong-scope-on-a-measured-claim: Layout figures are declared a shape and not a price (bottom-up from blocks, over-counting logic and under-counting total, errors that do not cancel), and the dossier's '88% free' is struck as a third party's 88% utilised.
+  line 31597:
+    pass1 OTHER: three hazards named for a downstream RTL author
+    pass2 wrong-scope-on-a-measured-claim: sltCirc's certificate covers a 3-input block and not the three-organ chain, 621 is a gate sum and not an area, and 'certified organs' does not mean forall-input verified for all of them.
+  line 31857:
+    pass1 OTHER: duplicate-proposition scan across 58 files and 1,119 theorems; residue reported
+    pass2 wrong-scope-on-a-measured-claim: PayloadRefutations was committed, tracked and citable but unrooted, so every fleet full-build verdict had missed it: the citation had been verified and the build never had.
+  line 32309:
+    pass1 OTHER: an audit census: 41 declarations, 55 audited names, none unaudited
+    pass2 wrong-scope-on-a-measured-claim: The sorry/admit check's case-insensitive substring pattern fired on the prose word 'admits', so its hit population includes ordinary text; the false positive is reported rather than quietly patched.
+  line 32527:
+    pass1 OTHER: decoder-to-select chain closed at the gates; a landing with no import owed
+    pass2 stale-citations: A debt was recorded as 'cited, NOT audited' when it was neither: the fact was proved across three files with no named composition, and the earlier citation pointed at a file's prose rather than the corpus.
+  line 32713:
+    pass1 misattributed-mechanisms: accepts a peer's split and names the REASON the author had missed
+    pass2 OTHER: The printed-not-gated defect: '(empty = no composition exists)' was printed beside output listing chain88; the repair makes the sentence unreachable by gating it on the value rather than promising care.
+  line 32907:
+    pass1 OTHER: one-line: a council deliverable has its assembly
+    pass2 wrong-scope-on-a-measured-claim: Deliverable skeleton lands with a construction guard that the gate-level and cell-level numbers stay unblended: no cross-level ratio exists in the doc and the joint reading is blocked until the real numbers arrive.
+  line 33135:
+    pass1 OTHER: a window stability check — unchanged, and did not move during classification
+    pass2 wrong-scope-on-a-measured-claim: Three figures publish as UNCLASSIFIED rather than being assigned to whichever bucket tidies the table, and no rate or campaign-to-campaign comparison is drawn from two priced windows.
+  line 33368:
+    pass1 OTHER: one-line approval of a cold-cost census
+    pass2 wrong-scope-on-a-measured-claim: Registers the named open item that tonight's greens are replay-dominated so cold reproducibility is unproven at the default, and that EXIT=134 rows are expected outcomes of the instrument rather than failures.
+  line 33588:
+    pass1 OTHER: one-line registration carrying a guard verbatim
+    pass2 wrong-scope-on-a-measured-claim: Carries the guard verbatim that Finding #1 is NOT discharged and that only its remaining content narrowed to exactly W4-a, so the flagship line cannot be read as closing it.
+  line 33785:
+    pass1 OTHER: one-line: audit registered
+    pass2 statement-level-type-traps: Registers the law that the invariants must be stated against a run form able to express infinite runs and never against length-fuel, with the simulation theorem's soundness stated first.
+  line 34206:
+    pass1 OTHER: one-line acknowledgement of a re-fold after an amendment
+    pass2 misattributed-mechanisms: Registers 'right for the wrong reason' as a rot class: a number that survives while the model it was derived from is wrong, so the correct figure carries an incorrect mechanism.
+  line 34390:
+    pass1 OTHER: hardening question answered from reading three named files, not inference
+    pass2 wrong-scope-on-a-measured-claim: 69 combinational levels is reported as a depth and explicitly not converted to nanoseconds with no STA installed, and the reading-versus-inference boundary is marked on every line.
+  line 34657:
+    pass1 OTHER: one-line ruling: proceed in-slot
+    pass2 wrong-scope-on-a-measured-claim: Ruling states the boundary so no successor misreads it: the probe does not open the core-construction campaign, and any probe result parks until the gated morning review.
+  line 34861:
+    pass1 OTHER: one-line: the night's tile arc registered
+    pass2 wrong-scope-on-a-measured-claim: Registers the refusal to dress 99.7% utilisation as a pass against a pre-registered 80% bar, and keeps the residual 3x3 price as read-not-inferred rather than folding an estimate in.
+  line 35075:
+    pass1 OTHER: a one-tactic cure found by a controlled pair; a method result
+    pass2 statement-level-type-traps: omega abstracts a Nat-valued def as an opaque atom, so every layout constant in the corpus defeats it and the failure reads as a real gap rather than a missing unfold; three of four earlier restructurings were unnecessary.
+  line 35323:
+    pass1 OTHER: a self-correction owed after a peer's third pass caught the author
+    pass2 misattributed-mechanisms: The banked cause was truncated Net subtraction; the measured cause is the type argument breaking omega's matcher, with subtraction irrelevant, and the wrong version was banked as fact five minutes after it was posted.
+  line 35574:
+    pass1 OTHER: one-line: a scan registered whole
+    pass2 stale-citations: The doc layer is measured as the stale layer: six of eleven governing docs run 3-4 weeks behind their code, and a design doc still frames as future a theorem collected in the kernel since 7/13.
+  line 35783:
+    pass1 OTHER: one-line: fourth pass folded at the spending bar
+    pass2 wrong-scope-on-a-measured-claim: Registers four passes of figure revisions with zero conclusion changes, keeping the number-versus-inference split, and notes the nil-exposure claim rests on structure rather than a keyword check.
+  line 35928:
+    pass1 OTHER: a quoted figure re-checked and found exact
+    pass2 wrong-scope-on-a-measured-claim: Audits the pack's claims rather than only its figures on the principle that a claim can be wrong with correct numbers; four accurate, with one strengthening that the 80% bar was pre-registered before the runs.
+  line 36137:
+    pass1 OTHER: one-line: checked at the bytes before answering
+    pass2 EXCLUDED: Short helm reply verifying at the bytes that a suspected over-claim is simply not in the pack (zero grep hits); a clean negative with no artifact-level error to classify.
+  line 36345:
+    pass1 OTHER: one-line: a verdict folded
+    pass2 statement-level-type-traps: The coreShaped trap is named inside the deciding line so the zero-gate witness cannot be read as an assembled core: the composition holds but is built from nothing.
+  line 36467:
+    pass1 OTHER: rollover staleness check — a clean negative, reported as one
+    pass2 stale-citations: Midnight rollover sweep of the two Captain-facing docs for date-relative claims that go false silently; both self-date rather than saying 'tonight', and the only live ambiguity is Aug 19 versus Aug 20.
+  line 36665:
+    pass1 OTHER: one-line ruling given in the shape asked for
+    pass2 stale-citations: Authorises anchoring seven floating memory records by each file's own internal evidence rather than a blanket stamp, so undated records stop carrying an unknown provenance date.
+  line 37023:
+    pass1 OTHER: a reported gap closed and verified, including the part that could have looked right
+    pass2 wrong-scope-on-a-measured-claim: Verifying the sync by file count would have passed identically on broken copies, so it was verified at the bytes; and address-line triage is named as a filter whose population misses body-addressed dispatches.
+  line 37171:
+    pass1 OTHER: prefers a steady-state RULE over seat-side discipline four seats must remember
+    pass2 misattributed-mechanisms: Three seats filed race reports against an invariant that was never violated: the defect was in the unstated specification, not in the sync mechanism, and each seat had privately supplied a stricter invariant.
+  line 37249:
+    pass1 OTHER: one-line: a cache blocker has a route
+    pass2 wrong-scope-on-a-measured-claim: Authorises the cold-cache measurement against a scratch clone and leaves the faithfulness call to the measuring seat, with the honest stand-down line if a clone is not equivalent to the shared tree.
+  line 37396:
+    pass1 OTHER: one-line heartbeat closed
+    pass2 EXCLUDED: Heartbeat status post: item discharged, banks synced at the stamp, next heartbeat scheduled, board quiet; no defect or error claim to classify.
+  line 37583:
+    pass1 OTHER: a morning sweep de-risked; targeted build EXIT=0
+    pass2 stale-citations: A memory written four minutes earlier cites saltbuild.sh:35/:36 which an edit made :43/:46 — a line number is a citation with a decay rate, re-cited by case pattern; the modules are also still unrooted.
+  line 37738:
+    pass1 OTHER: one-line: checked at the bytes before answering
+    pass2 stale-citations: The sweep that failed to find the figure had grepped the wrong directories and checked the 2026-08-07 council package, which is superseded; the line is in the current pack's decisions section.
+  line 38216:
+    pass1 OTHER: a plant-census reporting none, with the first measurement attempt broken by a peer's finding
+    pass2 wrong-scope-on-a-measured-claim: The header extractor's two-format regex never reset on single-digit-day headers, so most of the bus was captured as this seat's own posts; the 33 KB result was caught by implausibility, not by a check.
+  line 38363:
+    pass1 OTHER: a date-format census across the bus
+    pass2 wrong-scope-on-a-measured-claim: 'Four date formats' was eyeballed and is neither count: three format shapes and six prefix strings, and the unit belongs in the sentence; the counted 245-post exposure stands.
+  line 38933:
+    pass1 wrong-scope-on-a-measured-claim: an anchor pattern needs COMMA then a LETTER; the pattern did not match its intended target
+    pass2 OTHER: The 13 re-surfaced rows are header-shaped to parsers and invisible to the recall anchor they were created to satisfy, so the repair does not achieve its stated purpose; a repair-efficacy defect.
+  line 39175:
+    pass1 OTHER: a liveness post
+    pass2 wrong-scope-on-a-measured-claim: Liveness post whose substantive content is a scope refusal: the Captain's presence transition is recorded as testimony, so no category-4 unattended window is claimable across the night.
+  line 39254:
+    pass1 OTHER: a read-when-you-wake announcement to the design team
+    pass2 EXCLUDED: Design-idea broadcast (the tropical reading of the fabric, questions listed, nothing fires); no error, defect or claim-scope content to classify.
+  line 39342:
+    pass1 wrong-scope-on-a-measured-claim: a banked ~40 min law was written for a WORKING board and applied outside that context
+    pass2 OTHER: A banked ~40-minute cadence law written for a working board is re-scoped for a halted one, where the same interval is noise; a rule-scope adjustment, not a measured claim.
+  line 39614:
+    pass1 wrong-scope-on-a-measured-claim: a ratified convention is SCOPED — governance form about the reach of a convention
+    pass2 OTHER: A ratified defang convention is scoped to the parser surface it was written for and is silently partial on watch, grep and census surfaces; a convention-scope governance finding, with the tolerance-versus-convention cost stated.
+  line 39716:
+    pass1 OTHER: offers a control the recipient cannot run on themselves
+    pass2 wrong-scope-on-a-measured-claim: A control that the model fallback is not machine-wide, with the boundary written inside the verdict: proven for this seat's eight records at this minute, nothing proven about another account's quota or other seats.
+  line 39882:
+    pass1 OTHER: a ruling on a hypothesis
+    pass2 misattributed-mechanisms: The 07:43 datum is reinterpreted against its author: a quota wall cannot be overridden by re-selecting the model, so the override published as evidence for a wall argues against one.
+  line 40119:
+    pass1 OTHER: re-raise-at-council accepted; notes a one-shot trigger that slips to never firing
+    pass2 misattributed-mechanisms: The axis was named event-versus-clock when the operative distinction is one-shot versus recurring: a recurring anchor does not fail open, and the residual correlated failure mode is named.
+  line 40261:
+    pass1 OTHER: ran a new prescription on the fix that produced it; proposes a companion rule
+    pass2 wrong-scope-on-a-measured-claim: A claim-grep hits the dated annotation of its own repair, so counting hits would have filed a false surviving-residual report; the hits must be read, not counted.
+  line 40552:
+    pass1 OTHER: state verified with three different patterns, because an empty grep is not evidence
+    pass2 statement-level-type-traps: Row B has its own vacuity mode: a pessimistic liveMax makes the hypothesis almost never hold so the forall is near-empty and proves easily; plus an exhaustiveness claim with a candidate third rejection cause.
+  line 40758:
+    pass1 OTHER: metrics pre-registered before the numbers existed
+    pass2 misattributed-mechanisms: 'Real tile = constrained' was about to be published as a prediction; the fixed-die 3x2 is 1.4x bigger, so a discriminator is pre-registered between wire-length-driven and congestion-driven slew instead of a forecast.
+  line 40973:
+    pass1 OTHER: a ruling on full-build re-verification
+    pass2 EXCLUDED: Short helm verdict post: the repaired module stands under the fleet's full-build check and its wave stays held; no defect or claim to classify.
+  line 41243:
+    pass1 OTHER: a kernel-green measurement whose RTL reading also narrowed a predicate
+    pass2 statement-level-type-traps: An RTL reading produced a falsifying witness against the proof-side predicate: a program satisfying both conjuncts still does not fit (concurrent demand 4 against a budget of 3), so the statement's hypotheses did not capture the constraint.
+  line 41414:
+    pass1 OTHER: a covering verdict
+    pass2 wrong-scope-on-a-measured-claim: The covering verdict prints what it read: the +1 job count is the module entering the graph and the silent replay is verified silent rather than assumed covered, killing the current-by-coincidence class for it.
+  line 41762:
+    pass1 wrong-scope-on-a-measured-claim: WHAT IS ACTUALLY LANDED — the theorem sorts over an ARBITRARY order, not the narrower claim made
+    pass2 statement-level-type-traps: The certified sorter is over an arbitrary LinearOrder and BitVec's default instance is unsigned, so the ReLU clip never fires on negatives and the certified nonlinearity is the identity on half its domain.
+  line 41943:
+    pass1 OTHER: a 2x2 verdict landed; margins-only against the baseline
+    pass2 misattributed-mechanisms: Runs a diagnostic that can refute the seat's own published wire-length mechanism for the worse slew, with the refuting outcome pre-registered and the diagnostic explicitly scoped as not a submittable layout.
+  line 42055:
+    pass1 OTHER: a post census for one seat's day
+    pass2 wrong-scope-on-a-measured-claim: 'All my percent signs render' is evidence only about the ones that survived: a consumed % leaves nothing, so the check cannot see its own failure mode and no clean bill is claimed for the 39 inline posts.
+  line 42252:
+    pass1 OTHER: an activation width fact read from the spec source
+    pass2 statement-level-type-traps: A 32-to-8 width transition appears in neither the diagram nor the cell estimate, and the unmade choice is semantic: plain truncation wraps a large positive activation into a small one, silently.
+  line 42447:
+    pass1 OTHER: a hypothesis resolved into arithmetic on the landed datapath
+    pass2 statement-level-type-traps: zeroExtend typechecks, costs the same gates, and silently maps every negative weight to a large positive; the day's three defects (order, range, extension) all live in conversions and would all ship green.
+  line 42611:
+    pass1 OTHER: a clock-period fix verified plus a kernel-green measurement
+    pass2 wrong-scope-on-a-measured-claim: The clock fix is verified at the payload by reading both files and doing the arithmetic rather than trusting the commit message, and the bent elaboration curve is reported as a datum rather than an alarm.
+  line 42727:
+    pass1 OTHER: a cap ruling left two different things sharing one name; an ambiguity, none of the four
+    pass2 stale-citations: A ruling made two things share the name 'the default', so a banked entry stayed true and stopped being unique; a refutation sweep looks for claims that went false and cannot see referent ambiguity.
+  line 42898:
+    pass1 OTHER: a definition quoted
+    pass2 statement-level-type-traps: Verifies the statement symbol by symbol against the paper and shows the vacuity trap is dodged by construction: a tsum equation over a non-summable family is true and empty, so HasSum is carried as the primary.
+  line 43069:
+    pass1 OTHER: a repair verdict
+    pass2 EXCLUDED: Short helm verdict that a repair is covered and the tree is clean while the seat compacts; no error, claim scope or citation content to classify.
+  line 43228:
+    pass1 OTHER: a symlink and executability measured at the path
+    pass2 stale-citations: A path taught by five isolated memory stores survived a repo refactor only because of a symlink swapped by atomic rename; verified by running the path, and reported as a negative.
+  line 43370:
+    pass1 OTHER: identifies a legacy memory store by path
+    pass2 stale-citations: An unowned legacy memory store frozen at 08-08 08:19 still carries the superseded bus-is-unversioned claim in five files including its index, and its freeze date proves staleness without reading content.
+  line 43529:
+    pass1 wrong-scope-on-a-measured-claim: VERDICT NOT ATTRIBUTABLE — the artifact moved mid-build, so the measurement lost its object
+    pass2 misattributed-mechanisms: The custody guard holds a real EXIT=0 because the file moved mid-elaboration, so the green names no revision and could not be attributed to the sha it would have been posted under.
+  line 43759:
+    pass1 OTHER: a drafted claim revised before posting
+    pass2 wrong-scope-on-a-measured-claim: A drafted absence claim was based on grepping one repo's docs and is falsified by the emitter in the source; and gate-to-area conversion holds exactly for emitted organs and not at all for behavioural ones, so the columns must not be shared.
+  line 43903:
+    pass1 OTHER: a repair verdict
+    pass2 EXCLUDED: Two-sentence helm verdict recording a covered repair, 16/16 placed and the next passes queued; no defect or claim to classify.
+  line 44094:
+    pass1 OTHER: a ruling that the narrow read governs
+    pass2 statement-level-type-traps: Rules the cell a composition of organs and keeps the birth-assertion pattern that arose because sixteen individually true instOK facts once stood over a colliding netlist.
+  line 44228:
+    pass1 stale-citations: a claim that WENT FALSE after it was written, with the writing commit and time cited
+    pass2 misattributed-mechanisms: A deliberate, documented non-rooting was flagged as a defect and re-raised without reading the explaining file: the cause of the reversal is this seat's own gate, which prints UNROOTED unconditionally and has no legitimate-negative case.
+  line 44405:
+    pass1 OTHER: a bridge measurement with sha, timing and import count
+    pass2 stale-citations: A measurement in a docstring is a transcription that drifts; converting the #eval numbers into theorems makes the elaborator recheck them every build, so the citation cannot rot unnoticed.
+  line 44562:
+    pass1 wrong-scope-on-a-measured-claim: a probe that cannot report bad news reads as GREEN — the check's domain was empty
+    pass2 misattributed-mechanisms: A probe whose commands never ran (timeout absent, errors swallowed) was read as an auth failure: the silence was attributed to the alarm the reader was watching for rather than to a check that did not execute.
+  line 44795:
+    pass1 OTHER: a verdict on a gate-level theorem
+    pass2 EXCLUDED: Two-line helm verdict that an infrastructure lemma is covered and the track state advanced; no defect, claim scope or citation content to classify.
+  line 44942:
+    pass1 OTHER: a whole-trace accumulator theorem
+    pass2 wrong-scope-on-a-measured-claim: Three rungs land unconditional over an arbitrary addend list, and the boundary is stated precisely: the no-wrap hypothesis appears only at rung 4, so everything before it is total arithmetic.
+  line 45091:
+    pass1 OTHER: a paper row stamped accurate as of a named commit
+    pass2 wrong-scope-on-a-measured-claim: Supplies the exact row text so an understatement being corrected does not overshoot: what is verified in hardware is that the cell adds what it is fed, never 'the MAC is verified in hardware'.
+  line 45252:
+    pass1 misattributed-mechanisms: RUNG 4 NEVER TOUCHES macSeq — the operative mechanism was misidentified as sequential
+    pass2 statement-level-type-traps: Warns that the natural total-only overflow bound is the wrong theorem: a fold can overflow at an intermediate step and return, so the predicate must be no-prefix-sum-overflows, and the weaker form would pass every test.
+  line 45406:
+    pass1 OTHER: elaboration timings measured across four rungs
+    pass2 statement-level-type-traps: The weaker-theorem warning is made kernel-visible by badTrace = [2^30, 2^30], where the total-only hypothesis holds and the total-only conclusion is false; a warning the elaborator now checks.
+  line 45710:
+    pass1 OTHER: freeze acknowledged with the seat's tree state declared mid-edit
+    pass2 wrong-scope-on-a-measured-claim: 'Strictly dominates' was true only over a two-item enumeration that omitted the cheap third option (load the negated weight), and the seat reverted a half-applied edit that had broken the shared worktree.
+  line 45908:
+    pass1 OTHER: a theorem generalised in its carry input
+    pass2 misattributed-mechanisms: The red read as a semantic break when only the signature moved (the old call already read carry-in false), and the seat's own ledger had over-priced the wave by assuming generality had to arrive first.
+  line 46063:
+    pass1 OTHER: a dispatched wave enumerated
+    pass2 EXCLUDED: Hot-file claim notice reserving a module before the first write and disclaiming the neighbouring file; a coordination post with no defect or claim to classify.
+  line 46187:
+    pass1 OTHER: the hot-file law working from the reader's side; a restraint that paid
+    pass2 wrong-scope-on-a-measured-claim: MEAS run after the release rather than racing it, and the cell's last assumed schedule becomes a theorem so its timing is no longer taken on trust — the gap this seat's toolchain cannot see.
+  line 46464:
+    pass1 OTHER: a headline fixed
+    pass2 wrong-scope-on-a-measured-claim: The headline is fixed at the quote site to carry its own table and the F3 boundary (kernel-model certified, down-to-silicon closing at emission plus synthesis), with the three-part state line made canonical.
+  line 46642:
+    pass1 OTHER: dispatch accepted; a named RTL file reported ABSENT
+    pass2 wrong-scope-on-a-measured-claim: Pre-registers that the coming area figure will state explicitly whether it includes glue, since a cell area silently excluding its own composition is the moved-not-saved error one level down; armed and not firing until the files exist.
+  line 46788:
+    pass1 OTHER: one module measured, against a composed alternative
+    pass2 misattributed-mechanisms: The comforting explanation (abc re-derives carries as lookahead) is true of the behavioural case the fleet deliberately does not use; six lines further on, structural emission preserves the ripple, so the timing red is architectural.
+  line 47070:
+    pass1 OTHER: a liveness with tree state and owed count
+    pass2 wrong-scope-on-a-measured-claim: Banks three scope substitutions from one afternoon, each a true measurement of one object carried onto its neighbour, including one a ruling rested on; naming a scope limit does not discharge it.
+  line 47222:
+    pass1 OTHER: a trim accepted
+    pass2 wrong-scope-on-a-measured-claim: Accepts a trim: can-inherit is a capability, so the register reads per-cycle proved with trace inheritance owed — a landing's sentence is written at the theorem that exists, not the one it enables.
+  line 47364:
+    pass1 OTHER: the missing half landed; a theorem statement
+    pass2 wrong-scope-on-a-measured-claim: A step lemma covering half the 64-bit state had been called the composition theorem and was already named in another hand's work order; the missing half is landed and the both-arms detail relayed.
+  line 47497:
+    pass1 OTHER: a trace-inheritance measurement finding no complement path on an addend port
+    pass2 wrong-scope-on-a-measured-claim: Every published cell figure prices an unsigned cell one organ short of the design: correct measurements of a smaller object whose smallness is invisible in the number, with the timing explicitly not extrapolated.
+  line 47634:
+    pass1 OTHER: watches die at restart and a successor re-arms from the bank's list; a mortality fact
+    pass2 wrong-scope-on-a-measured-claim: States the coverage that survives a helm restart (this seat's watches live, the hub's die) and the one line a successor must not misread: the signed theorem is about macSeq, not the composed cell.
+  line 47789:
+    pass1 OTHER: a bank pin with sha
+    pass2 stale-citations: The banked fixture hash no longer matches the live file (rev 9 to rev 10): a banked hash is a claim about a file that kept moving, so the gate must be run and its delta explained rather than compared.
+  line 48510:
+    pass1 OTHER: a check run before taking a peer's word for it
+    pass2 misattributed-mechanisms: '31 new theorems, 31 audit ticks' was one number stated twice: both sides came from the same grep, so a restatement was published wearing the costume of a cross-check that never ran.
+  line 49178:
+    pass1 OTHER: a wrapper question answered from the record, quoting the block already written
+    pass2 wrong-scope-on-a-measured-claim: 'The cell is certified down to silicon' is true of the combinational core and not of a clocked cell, since no clocked cell has been emitted and the simulator was standing in for an unbuilt component.
+  line 49449:
+    pass1 OTHER: a repair cost answered: the cell already has the path through its own ports
+    pass2 wrong-scope-on-a-measured-claim: The repair is free where it was measured (the cell) and unmeasured where it is not (shell flops and muxes); the published area and timing deltas price the cell and only the cell.
+  line 50033:
+    pass1 OTHER: night posture acknowledged with the bank path named
+    pass2 stale-citations: The predecessor's brief still names the complement path as the morning item after it landed, so a successor booting on it would re-derive finished work; a bank is durable only while true.
+  line 50576:
+    pass1 OTHER: ran a peer's reach-gap analysis and quoted the queue line verbatim
+    pass2 stale-citations: The register the morning assembly reads still carries 204 unaudited theorems, superseded hours earlier by a three-hand measurement of 180 that counted out gitignored scratch files; the correction lives only on the bus.
+  line 50808:
+    pass1 OTHER: claiming an item in flight, by the owner line
+    pass2 stale-citations: Two governing documents disagree because the per-type pricing was not updated after the ruling that added the weight-shift enable, and the per-cell figure rests on the superseded one.
+  line 51092:
+    pass1 OTHER: first layout; acceptance taken on the ARTIFACT rather than the source
+    pass2 wrong-scope-on-a-measured-claim: The first layout closes, but the +2.7145 ns is explicitly not the named-path measurement since the SER organ and fabric do not exist yet, and the instance-area figure is disclosed as fill.
+  line 52049:
+    pass1 OTHER: a night heartbeat listing monitors
+    pass2 EXCLUDED: One-line night heartbeat recording monitors green, a quiet bus and the next sweep time; no defect or claim content to classify.
+  line 52323:
+    pass1 OTHER: a pre-registration quoted back as four quantities
+    pass2 wrong-scope-on-a-measured-claim: The pre-registered V7 bar is four counts, and 'cells == 289' passes on 289 wrong cells; the property checks that actually bound the artifact were filed as footnotes beneath the correlate.
+  line 52908:
+    pass1 OTHER: a gate opened with both halves named
+    pass2 wrong-scope-on-a-measured-claim: A deletion's damage shows up in consumers, so only the build arm covers it; the audit arm would have typechecked against a stale olean and reported nothing, and the gate was read at the commit rather than the dirty worktree.
+  line 53139:
+    pass1 OTHER: a new corpus class entered and passed the fence
+    pass2 wrong-scope-on-a-measured-claim: A new evidence class passes because the source's own hedge survives verbatim and the conclusion rests only on what he stated flatly; the downstream risk is a quotable line lifted without its class marker.
+  line 53458:
+    pass1 OTHER: an order completed with the priced half landed
+    pass2 stale-citations: The document's own non-claims section still said there was no measured BB post-layout number after the section it points at became a measured run: a disclaimer falsified by its own target.
+  line 53750:
+    pass1 OTHER: artifacts regenerated and diffed against what the public repo was assembled from
+    pass2 wrong-scope-on-a-measured-claim: Diffing the tree against its generators proves the sources are current and not that the public assembly copied them faithfully; two claims, one measured, and the limit is stated.
+  line 54104:
+    pass1 OTHER: an open question answered from a measurement in the RTL
+    pass2 misattributed-mechanisms: The seam was thought to need a stall and a shell; the router only needs to be told when the sorted frame started, so the whole mechanism reduces to one delayed alignment pulse.
+  line 54678:
+    pass1 OTHER: a green measurement plus a successor state handoff
+    pass2 statement-level-type-traps: The closure gap was hiding a defect: one module re-declared a name another owned and the two had never met in one environment, so wiring an import changes what can collide.
+  line 54918:
+    pass1 wrong-scope-on-a-measured-claim: a strike: 459/460 was compared against 11 lost — two incommensurable quantities
+    pass2 misattributed-mechanisms: A design law about gate width was built on a peer's still-being-audited figure; the fault is in the anchor, not the gate, so an effect the parser caused was attributed to filter width.
+  line 55149:
+    pass1 OTHER: a suspension lifted and the pass run, with elaboration cited rather than assumed
+    pass2 wrong-scope-on-a-measured-claim: The census that could not find the elaboration record was taken one minute before the run that produced it, and the post explicitly claims no absence anywhere, naming only what was looked at.
+  line 55345:
+    pass1 stale-citations: an obligation listed as owed was ALREADY LANDED — do not build it
+    pass2 OTHER: An obligation on a peer's list was already landed as scaffolding under a different name and never advertised as the seam obligation, so it would have been rebuilt; withdrawn before the peer paid for it.
+  line 55532:
+    pass1 wrong-scope-on-a-measured-claim: three times in a day a layer priced for work turned out already generic
+    pass2 statement-level-type-traps: The hoped-for flat-layer split fails because the gate list is bit-major, and reordering it would break the landed shape theorems stated about that exact list: statement shape is an interface.
+  line 55731:
+    pass1 OTHER: the priced half passes the phrase fence with every banned phrase at zero
+    pass2 stale-citations: A pre-registered caveat inherited a premise that was struck elsewhere and did not move, leaving a fence tight after the evidence landed; the unmeasured impossibility cost a signoff for a day.
+  line 56163:
+    pass1 OTHER: re-passed at the convening bytes; a named commit is clear
+    pass2 stale-citations: The sign-off is re-run and pinned to the convening sha so an earlier clearance cannot silently cover three later amendments, and a banned phrase is read rather than counted (carrier, not claim).
+  line 56338:
+    pass1 OTHER: a sitting liveness with owed zero
+    pass2 wrong-scope-on-a-measured-claim: Corrects a self-assessment made without looking up the register (the flagship front is gated, not idle) and asks the table to read this seat's eliminations at their stated scope and no wider.
+  line 56531:
+    pass1 wrong-scope-on-a-measured-claim: self-correction of what was posted about the day-0 seam
+    pass2 OTHER: A scoping post claimed an obligation needed building; it was already landed and better, so the grep must run before the CLAIM rather than before the landing. A false-absence claim, corrected by its author.
+  line 56887:
+    pass1 OTHER: a landing
+    pass2 statement-level-type-traps: The state type was repaired because a per-task vector would have made the next rung vacuous by type, and a halting mutant proves the execution witness is a fact about the program rather than the type.
+  line 57101:
+    pass1 OTHER: a landing
+    pass2 statement-level-type-traps: The fairness antecedent is pinned from both sides: it fails on the halting configuration and holds on the looping one, so the hypothesis is proved non-vacuous rather than assumed.
+  line 57283:
+    pass1 OTHER: a DRV debt diagnosed with stage timings
+    pass2 misattributed-mechanisms: The stage trace retires the drive-strength and synthesis-quality stories by timing rather than argument: the same netlist is clean before detailed routing, so the whole debt is post-route parasitics.
+  line 57511:
+    pass1 OTHER: a summit announcement
+    pass2 EXCLUDED: Submission announcement: the clicks are done, the composed tile is on the shuttle, remaining work is update-window polish; celebration and record, with no error or claim to classify.
+  line 57709:
+    pass1 OTHER: a sweep run over a target list of exponents, constants and shapes
+    pass2 wrong-scope-on-a-measured-claim: A count disagreeing (59 versus 60 declarations) is flagged with both readings rather than edited since the corpus did not move, the priority claims are named as uncheckable by any in-repo instrument, and zero commits is declared to prove no rot rather than to re-verify.
+  line 57941:
+    pass1 OTHER: the watch handed to a successor, with per-seat acknowledgements
+    pass2 stale-citations: Successor boot post: the review is re-pinned to HEAD rather than to the bank's stale pin, the blind window is read from the anchor as left, and the night's docket is corrected against the bus.
+  line 58956:
+    pass1 OTHER: two claims died on contact with the statements
+    pass2 statement-level-type-traps: The L0 top statement is run-shaped with fixed fuel while the L2 calculus is Reaches-shaped with the fuel discarded, and no run-shaped whole-program theorem can exist for a looping program.
+  line 59349:
+    pass1 OTHER: a ruling that an atomic type-growth commit cannot be challenged afterward
+    pass2 wrong-scope-on-a-measured-claim: The helm supplies a read-only git status explicitly as evidence and not as the answer, since an editor buffer or an about-to-write state is invisible to git; the question stays with the seat that can answer it.
+  line 59770:
+    pass1 OTHER: verified at POST time rather than recalled, with the command shown
+    pass2 stale-citations: A ruling's work item was written against an absence filled one minute earlier, and an import-owed claim was already false when posted; an absence must be verified at the moment it is acted on.
+  line 59985:
+    pass1 OTHER: per-module measurement timings
+    pass2 wrong-scope-on-a-measured-claim: The verdict was nearly issued over five of six changed files because the screen showed only the first five, and a green module outside the hub graph is flagged so a covering build is not read as covering it.
+  line 60178:
+    pass1 wrong-scope-on-a-measured-claim: the script elaborated the WORKING TREE while the label said the committed one
+    pass2 misattributed-mechanisms: The gate elaborated the working tree while labelling the verdict with a range end, so a green could name a commit it did not elaborate; fixed in the tool with a negative control on both arms.
+  line 60377:
+    pass1 OTHER: a rename census; one name kept because it says what it is
+    pass2 stale-citations: A restatement retires the old name so pre-existing citations fail loudly, with the unknown-identifier error exhibited as the witness, and the law is scoped to meaning changes rather than proof changes.
+  line 60524:
+    pass1 OTHER: a class named: verify the action, not the state after it
+    pass2 misattributed-mechanisms: rev-parse HEAD answers what HEAD is and never whether this seat's commit ran, so every green tick was true about the wrong commit; and a comfortable self-blame closed the investigation for two hours.
+  line 60718:
+    pass1 OTHER: agreement on relight-at-depth plus the sitting's landings, judged on the build arm
+    pass2 EXCLUDED: Bank-and-posture post listing the sitting's landings, what the successor inherits and a refusal to start new work; its defect content is retrospective reference to lapses reported elsewhere.
+  line 60871:
+    pass1 OTHER: a convergence document written down as asked
+    pass2 wrong-scope-on-a-measured-claim: Testing a peer's defect against this seat's own index returns a style difference rather than the defect, and the claim is declined; the matcher's own vocabulary had moved the count twice.
+  line 61392:
+    pass1 OTHER: option (a) run against the live machine before it settles; a gap found
+    pass2 wrong-scope-on-a-measured-claim: The file key answers presence and cannot answer attribution while the name key carries the owner and drifts; neither subsumes the other, and five watchers resolve to no seat.
+  line 61600:
+    pass1 OTHER: a quoted item reproduced verbatim with its pid census
+    pass2 wrong-scope-on-a-measured-claim: '13 watches' counted processes, not watches: it is three watchers plus ten wrappers across at least three seats, and an off-by-one labeller that mislabelled the author's own watchers was deleted rather than debugged.
+  line 61817:
+    pass1 OTHER: a seat reports four instrument errors of its own in one hour
+    pass2 wrong-scope-on-a-measured-claim: Four instrument errors in one hour, each a domain mismatch (mentions counted as processes, a truncated tree, a truncated 'raw' list, an exclusion that silently deleted six real rows), with two committed while fixing the first two.
+  line 61993:
+    pass1 OTHER: a boot with the bank read in full
+    pass2 wrong-scope-on-a-measured-claim: Arm-time proof is a delivered line and not a ps row, so the fallback with only a process row is declared unproven; the clear wiped context and not the session, which is why re-arming would double a watch.
+  line 62163:
+    pass1 OTHER: one-line roster: four of four by receipt
+    pass2 EXCLUDED: Muster/status post recording four seats plus the helm answering by receipt and the midnight orders executed; no error or claim to classify.
+  line 62354:
+    pass1 stale-citations: a definition believed to be needed was ALREADY IN THE TREE
+    pass2 statement-level-type-traps: The proposed biconditional pin is refuted: a branch-free statement whose expression exceeds the register pool compiles to none, so only the one-directional anchor holds; the control was derived from the argument's shape rather than from the definition.
+  line 62588:
+    pass1 OTHER: while-offsets proved for all block sizes; a landing
+    pass2 stale-citations: A caveat saying the file does not establish the formulas for all block sizes went false when the theorems landed and is corrected in the same commit; a discharged caveat reads as caution and is nobody's job to re-check.
+  line 62764:
+    pass1 OTHER: one-line liveness by receipt
+    pass2 wrong-scope-on-a-measured-claim: The helm answers the open channel in the census's own currency because under echo-primary an unacknowledged delivery proves nothing to anyone else, however ordinary the quiet posture was.
+  line 62993:
+    pass1 OTHER: names a cross-check as the real corroboration
+    pass2 misattributed-mechanisms: Two piped checks reported exit=0 from tail rather than from the tool, and both were caught only by distrusting an instrument whose output agreed with a story already held; the protection was the tool's loud payload, not discipline.
+  line 63200:
+    pass1 OTHER: a ruling adopted that OBSOLETES the author's own morning item
+    pass2 stale-citations: A banked morning fix is amended out of the bank because the ruling it would re-derive was already measured, and a quoted header is byte-identical in form to a real one so no reader-side fix exists.
+  line 63372:
+    pass1 OTHER: a claim line declaring a file hot and expected red
+    pass2 statement-level-type-traps: Landing the while clause makes a theorem landed ninety minutes earlier false by construction (a compiling loop is not branch-free), and a docstring asserting every emitted branch is forward goes false in the same commit.
+  line 63569:
+    pass1 OTHER: liveness; the quiet window was durable-artifact work
+    pass2 stale-citations: A successor bank supersedes one whose headline had gone false, and a retracted 65s figure is banked rather than left on the bus because the wrong number sits ahead of its retraction in an append-only file.
+  line 63730:
+    pass1 OTHER: one fact for the morning surface, explicitly not counsel
+    pass2 wrong-scope-on-a-measured-claim: The governing doc requires a Linux pass before any published number; it was cited twice on day one as a reason to skip local work and never carried, so every silicon figure is macOS-only and unqualified.
+  line 63874:
+    pass1 OTHER: re-verified from the other side; the conveyor is clean
+    pass2 wrong-scope-on-a-measured-claim: 'Conveyor clean' at 04:50 rested on a 04:20 fetch and was true only by luck of what landed; a claim about a range must carry the range end it was measured against rather than a moving referent.
+  line 64022:
+    pass1 OTHER: a liveness three minutes late, with the lateness named
+    pass2 misattributed-mechanisms: A three-minute liveness lapse is attributed to arithmetic rather than diligence: a 40-minute cadence cannot be held by an actor whose wakes are 30 minutes apart and unaligned, which is the actionable fact.
+  line 64155:
+    pass1 OTHER: self-measurement published before the docket assigns
+    pass2 wrong-scope-on-a-measured-claim: Self-measurement: three published-and-retracted claims, all scope errors off correct measurements, and the clean interval is declared low-demand rather than evidence of recovery.
+  line 64409:
+    pass1 OTHER: a placement decision REVERSED on a peer's sharper finding
+    pass2 stale-citations: A false header sentence was left standing with its correction 400 lines away; amend-in-place was satisfied and discoverability was not, since a header is what people read instead of the rest.
+  line 64680:
+    pass1 OTHER: ran a peer's overlap class against the author's own filter; clean
+    pass2 wrong-scope-on-a-measured-claim: A null result is published because 'checked and found nothing' and 'was not watching' produce the same silent bus, and a filter change reporting only what it catches is half a measurement without its lost-count.
+  line 64884:
+    pass1 OTHER: a refutation re-raised once, because the morning is now
+    pass2 wrong-scope-on-a-measured-claim: The framing paragraph says fabricated silicon under one referee while 550 of 902 flops are hand RTL and the sequencer, wrapper, fabric and core are unproved; the phrase fence returns green so only a reader can catch it.
+  line 65312:
+    pass1 OTHER: one-line acknowledgement; the chain surfaced
+    pass2 wrong-scope-on-a-measured-claim: 'Closed, not idle' is measured rather than asserted: the front is gated on an owed Fable-tier item roughly 44 hours shut, which is a different record than an idle one.
+  line 65484:
+    pass1 stale-citations: a bank asserted monitor children survive a /clear and keep delivering; the law convicted it
+    pass2 OTHER: The bank carried mortality assertions about which watches survive, found false twice, and an earlier correction had replaced a guess with a better-sourced guess; a false claim beside a true imperative inherits its authority.
+  line 65828:
+    pass1 OTHER: two defects unified as one class across a gitignore gap and a filter rescue
+    pass2 stale-citations: The ignore list is an enumeration of the scratch names someone had thought of and ages on every new one, exactly like the filter vocabulary fixed hours earlier; the discriminator glob is the principled fix.
+  line 66000:
+    pass1 OTHER: one-line fold of a finding at the block row
+    pass2 wrong-scope-on-a-measured-claim: The helm's one-line restatement dropped the dossier's sup over k of at least 2, and the folded row now carries the quantifier, the margin and the discharge site.
+  line 66155:
+    pass1 OTHER: a never-bare-first rule applied to the flagship; six sites found
+    pass2 wrong-scope-on-a-measured-claim: Six bare priority claims across two surfaces, including a flat absence claim about four theorems: the one sentence a name-search structurally cannot support, and the class that had just cost a prior-art miss.
+  line 66314:
+    pass1 OTHER: a banked law arriving at the helm from the other direction
+    pass2 misattributed-mechanisms: Stamps ran fast because a date reading was carried across turns in a long context rather than read in the append command, so the times claim a machine source they did not have.
+  line 66811:
+    pass1 OTHER: a lane costed by exact name so a fresh head need not find them
+    pass2 wrong-scope-on-a-measured-claim: The natural plain-language restatement of the simulation theorems says more than they prove, since the encoding covers named registers only and not memory or trap state; a cert that overstates is false, not weak.
+  line 66953:
+    pass1 OTHER: a replay burst confirmed from the watcher side — history delivered as new
+    pass2 misattributed-mechanisms: A replay burst in every watcher is the signature of an in-place rewrite (tail -F re-reads a replaced file), not of a truncated bus; the file was checked intact before any alarm was raised.
+  line 67127:
+    pass1 OTHER: a parity gap passes both comparisons at a named commit
+    pass2 statement-level-type-traps: The Lean statement carried a hypothesis its own proof never used, making the formalization weaker than both the proof and the paper; the fence can see two statements differ but cannot say which side is wrong.
+  line 67300:
+    pass1 OTHER: the oldest open item discharged
+    pass2 wrong-scope-on-a-measured-claim: The Linux gate is discharged for the fabricated die only, with the local macOS figures explicitly still caveated, and a self-invented field label was caught before the claim rested on it.
+  line 67641:
+    pass1 OTHER: a liveness over its own cadence, with the overrun named
+    pass2 wrong-scope-on-a-measured-claim: Quiet is distinguished from deaf with both halves evidenced (transport by the fallback's arrival, filter by replay), and a fourth certificate is declined because the docstring surface is the part no gate checks.
+  line 67830:
+    pass1 OTHER: a liveness whose shas were RESOLVED at post time rather than copied forward
+    pass2 wrong-scope-on-a-measured-claim: A bank sha typed once and carried through eleven liveness lines is now derived at post time; it resolves to the same value, which is why the old form survived and why sameness is not evidence of method.
+  line 67972:
+    pass1 OTHER: an item pulled with its blast radius re-measured at a named commit
+    pass2 wrong-scope-on-a-measured-claim: The census was keyed per file where the truth is per site, so a file marked safe by catch-all hid an exhaustive site in the same file; a hasty re-count nearly published a false threefold undercount.
+  line 68158:
+    pass1 OTHER: a measurement: no defect, two of two witnessed
+    pass2 wrong-scope-on-a-measured-claim: The obvious hub check greps the root for Certs and hits a pre-existing, unrelated module of nearly the same name, so the check passes while both new cert files sit outside the closure.
+  line 68668:
+    pass1 wrong-scope-on-a-measured-claim: a projection is INSUFFICIENT at arity n — the abstraction loses what the claim needs
+    pass2 statement-level-type-traps: Restated over the (regs,pc) projection the n-cycle theorem is false rather than unproved, with a load-after-store witness diverging inside the projection; the closure walk had a second edge type never traversed.
+  line 68837:
+    pass1 OTHER: a hold released by its own author because it was wrong
+    pass2 wrong-scope-on-a-measured-claim: A peer's 'every remaining cert depends on a dirty file' was true of the pending cert and applied to the landed ones without walking the graph; zero dirty modules are in their closure, and a contended wall is marked unquotable.
+  line 69075:
+    pass1 OTHER: a measurement with exit, wall time, sha and hub line
+    pass2 wrong-scope-on-a-measured-claim: The gate's 'not in hub graph' overstates what it measures, since the module is reachable through an imported aggregator; it must be read as not directly imported until the sentence is narrowed.
+  line 69278:
+    pass1 OTHER: a commissioned-semantics row run at a named commit
+    pass2 wrong-scope-on-a-measured-claim: A theorem named 'suppresses the write' proves only memory preservation and the trap flag, so a reader ticking commission rows by name credits register coverage it never had; the absence is confirmed with a bracketing nonzero.
+  line 69485:
+    pass1 OTHER: a gate correction checked against the author's own walker rather than absorbed
+    pass2 wrong-scope-on-a-measured-claim: The lane-level gate claim holds for three of five cert files and is false for two, so a hold keyed on a lane summary either witnesses through a dirty dependency or blocks a clean file; the gate is per-target.
+  line 69687:
+    pass1 OTHER: seams measured before the block is written rather than after
+    pass2 statement-level-type-traps: isForward's catch-all silently classifies every future constructor as forward, and the fence is only a downstream exhaustive cases; the fix is to make the arms exhaustive while the constructor set is small.
+  line 70169:
+    pass1 OTHER: a shape ruled at council: exhaustive preferred
+    pass2 statement-level-type-traps: Rules exhaustive arms preferred over catch-alls, with a fence theorem as the floor and a census row required wherever enumeration is impractical, so the failure lands at the classification site.
+  line 70354:
+    pass1 OTHER: praise for retracting a cause without substituting another
+    pass2 misattributed-mechanisms: Marks the discipline of retracting a cause without substituting another, since a replacement inherits the dead hypothesis's investigation as if it were evidence; offers a state capture instead of a new cause.
+  line 70564:
+    pass1 OTHER: a census across all four seats' live indexes
+    pass2 stale-citations: Three of four memory mirrors are stale against their live files by up to 8.5 KB, and a census run over mirrors measures mirrors: it would report the fleet healthy while a live index goes dark.
+  line 70753:
+    pass1 OTHER: a mirror sync with absent files landed and payload verified
+    pass2 wrong-scope-on-a-measured-claim: 'Banked and pushed' had been read as covering both the brief and the memory store, so a dozen owed-zero lines were true of one artifact while twenty laws sat single-copy in a config directory.
+  line 70912:
+    pass1 OTHER: a pair sealed and the queue reported empty
+    pass2 wrong-scope-on-a-measured-claim: The earlier defect was one paper label naming two declarations with the cert covering one; this file opens with a phrase-to-declaration map that names the row it does not cover, and the paper pin is checked at the bytes.
+  line 71066:
+    pass1 misattributed-mechanisms: one fact against the WRONG LESSON — the true cause needed two facts, not the one being credited
+    pass2 wrong-scope-on-a-measured-claim: A null from a differently-armed instrument was treated as a control: two instruments are a control only when both would respond to the same cause, and the two facts that settled it lived in one seat.
+  line 71191:
+    pass1 OTHER: declines half of a peer's withdrawal; the praise is theirs to keep
+    pass2 wrong-scope-on-a-measured-claim: A negative result fenced in writing by its author was used beyond its scope by the reader; the fence is prose and the null is a number, and the misuse is claimed by the one who drew the inference.
+  line 71554:
+    pass1 OTHER: leave it, and the reason is measured rather than a preference
+    pass2 stale-citations: A tool's path is cited by two Lean files so a tidiness rename would manufacture drifted citations, and the directory README has rows for 10 of 34 tools while its own candid note about miscounting aged into decoration.
+  line 71730:
+    pass1 OTHER: a wave's first proving landing
+    pass2 statement-level-type-traps: The card lemma is false without the lower bound on E and was first written without it, with the empty index set as the counterexample: the falsity lives outside the interval reasoning entirely.
+  line 72515:
+    pass1 OTHER: a cert row landed, replacing two opaque names
+    pass2 statement-level-type-traps: The certificate had to unfold two names deep or leave a definition wearing the costume of a primitive, and a first-draft rule-6 theorem restating the identical proposition was deleted as a redundant conclusion.
+  line 72961:
+    pass1 OTHER: a self-correction where the prose figure disagreed with the computed one
+    pass2 misattributed-mechanisms: A gap figure was hand-written into prose while the same command measured it in the table: the prose number carries the authority of a measurement it never had, and any figure written twice is two instruments.
+  line 73683:
+    pass1 OTHER: a canary set pre-registered before the change it guards
+    pass2 wrong-scope-on-a-measured-claim: The canary set is pre-registered with a must-not-fire list so a genuine break cannot hide among budgeted alarms, and the first measurement was against the wrong cert population entirely, where an all-clear would have been true and worthless.
+  line 73876:
+    pass1 OTHER: a fuel ruling
+    pass2 EXCLUDED: Administrative ruling on fuel, account merges and seat continuity; no defect, measurement or claim to classify.
+  line 74088:
+    pass1 OTHER: an arm CHECKED rather than thanked
+    pass2 wrong-scope-on-a-measured-claim: 'The tool already does this' mislabelled what an existing arm covers (one sweeps the doc, another the cert files), and the residual is named: this tier is covered by a one-time hand check rather than by an arm.
+  line 74305:
+    pass1 OTHER: the check a seat could not run for itself, run independently, 7/7 as registered
+    pass2 wrong-scope-on-a-measured-claim: Arm attribution shows the original plant could never exercise the bound arm, so a bar built on it would have read 6/6 clean; the runner's own first invocation printed a green from a nonexistent timeout wrapper.
+  line 74994:
+    pass1 OTHER: an arm landed covering a defect class its author flagged in their own commit message
+    pass2 stale-citations: A stale absence (the owed list versus the anchor table's open rows) gets its own arm because a disclosure is not a fix, and the arm's first run exposed two extraction defects where prose was shaped like structure.
+  line 75264:
+    pass1 OTHER: a range sealed with anonymous witnesses
+    pass2 wrong-scope-on-a-measured-claim: The axiom census takes a name, so the anonymous rule-6 witnesses sit outside it entirely: a certificate can read clean while the witness proving it non-vacuous is uncounted.
+  line 75501:
+    pass1 OTHER: ran a peer's axiom observation as a check on the author's own non-degenerate set
+    pass2 wrong-scope-on-a-measured-claim: A zero axiom line measures the proof's logical dependencies and not the statement's content: two substantive non-degeneracy rows read zero because decide closes by rfl, so the line is evidence of computability.
+  line 75732:
+    pass1 OTHER: a correction taken as the useful kind; the fix was right about one half
+    pass2 misattributed-mechanisms: Right fix, wrong reason: the missing denominator was framed as a coverage hole inviting a hunt for lost files, when the glob is doctrinal and the true defect is a scope claim with no scope in it.
+  line 76096:
+    pass1 OTHER: a reachability sweep clean, and a peer's mechanism explains the residue exactly
+    pass2 stale-citations: Supersession was recorded forward-only five times, so each predecessor bank stayed silent about being superseded; the predecessor is the file a stranger opens and the only one that cannot know.
+  line 76254:
+    pass1 OTHER: a peer's hazard committed within a minute; an all-seats alert
+    pass2 stale-citations: Git stores no mtimes, so the newest-first boot ritual degenerates in a fresh clone and hands a cloud-booted head the superseded bank; the local touch repairs cannot travel and the fixes are disjoint.
+  line 76636:
+    pass1 OTHER: a transport defect with the author's own last post as the specimen
+    pass2 misattributed-mechanisms: The bus record is correct and the watcher delivery attributed the post to another seat, because the header carried peers' names as data and the parser read one of them as the author.
+  line 76830:
+    pass1 OTHER: a definite answer at one seat to a peer's streak-not-a-safeguard question
+    pass2 wrong-scope-on-a-measured-claim: One discriminator is guaranteed by the emitter's format string and the other is only a habit, so 52 of the fleet's headers are structurally safe and the rest are a streak; the habit half is disclosed rather than covered by the good half.
+  line 77131:
+    pass1 OTHER: mustered for fence duty with figures read in the writing command
+    pass2 wrong-scope-on-a-measured-claim: The canary set is re-anchored before the landing because its population moved, and the firing semantics (including what a silent set would mean) are fixed so no outcome can be fitted afterwards.
+  line 77393:
+    pass1 OTHER: a refuter pass returns DOES NOT PASS AS WRITTEN
+    pass2 wrong-scope-on-a-measured-claim: The statement set does not classify the unconditional hub every other file cites, and three of the objects its section names are corollaries of that hub, so the diagnosis sits one level below the root.
+  line 77740:
+    pass1 OTHER: an attribution correction: a malformed empty header on the bus
+    pass2 misattributed-mechanisms: A malformed empty-timestamp header makes every position-parsing watcher inherit the previous post's owner, so one seat is credited with another's measurement and confession; the fallback never ran because printf succeeded.
+  line 78108:
+    pass1 OTHER: a gate taken; a peer's additive finding does more than extend the author's
+    pass2 wrong-scope-on-a-measured-claim: The price covered one of three files, so the sweep that found three gaps could never have found the original; two counts are different domains and both are screens, and the honest number is given with its breakdown.
+  line 78471:
+    pass1 OTHER: a peer's scheduling note stopped a landing one command from being made
+    pass2 statement-level-type-traps: The staged theorem relates matcher predicates to decode and says nothing about any decoder output net, so landing it alone would put a named object in the corpus that the circuit does not compute.
+  line 79169:
+    pass1 OTHER: a finding accepted and raised into a law
+    pass2 wrong-scope-on-a-measured-claim: A claim about remote state was read from an unfetched tracking ref, which is a local cache; the count was right by a two-second margin and by luck, so the new freeze law must name its instrument.
+  line 79798:
+    pass1 OTHER: slot ownership on a re-scoped region, measured, with the trade named
+    pass2 wrong-scope-on-a-measured-claim: A line range is a proxy for 'what the change makes false' and approximates it by covering more, so the fix for under-coverage is 71 extra writable declarations; the trade is named rather than discovered later.
+  line 80307:
+    pass1 OTHER: taken in full with the arithmetic re-verified before accepting
+    pass2 misattributed-mechanisms: Two successive causal accounts are both wrong — the trap was in the examined set, and the lemma that would have caught it was already in hand — and the retraction carried a new unmeasured exoneration.
+  line 80565:
+    pass1 OTHER: one-line: the board closes at the seal
+    pass2 EXCLUDED: Close-of-board post recording the day's landings, seals, riders and the banked evening state; no defect or claim of its own to classify.
+  line 80866:
+    pass1 OTHER: one-line ruling on a pre-registration
+    pass2 wrong-scope-on-a-measured-claim: Approves a restricted datum on condition that the restriction marker rides the emitted artifact and every certificate restating it, and that a theorem proved on the pinned datum is never cited as covering reset.
+  line 81151:
+    pass1 OTHER: both night items delivered, with a FAILED BAR as the headline
+    pass2 wrong-scope-on-a-measured-claim: The bar is reported as not met, and one pre-registered check compared a sum against its own definition so it could never fail; rebuilt against an independent scan it goes red, and a red byte-identity check caught a real dead-constant defect.
+  line 81502:
+    pass1 OTHER: one-line ruling: a criterion adopted and a bar closed
+    pass2 wrong-scope-on-a-measured-claim: Two criteria in a row wrote 'identity except X' and enumerated X one field short, so the replacement characterises the whole difference positively; and an equivalence that passes when the variable vanishes reports only that the treatment never applied.
+  line 81744:
+    pass1 OTHER: a row fixed, and a catch the author would otherwise have carried
+    pass2 wrong-scope-on-a-measured-claim: The citation checker's unit was a line where the claim is a clause, so it mined a neighbouring token as the payload and convicted a correct citation; five defects, all in the accusing direction, with no claim that a sixth does not exist.
+  line 81979:
+    pass1 OTHER: self-named a debt after going looking for one
+    pass2 stale-citations: A debt registered against this seat is now dischargeable only by another seat's unbuilt instrument, and nothing records the move: the bank still says this seat owes the citation and the ruling states no closure condition at all.
+  line 82239:
+    pass1 wrong-scope-on-a-measured-claim: the law is right and the CORRECTION OVER-CORRECTS on one commit
+    pass2 misattributed-mechanisms: Publication of one commit is corrected with a bracket from the peer's own measurement, and the other is conceded unknowable because quiet pushes leave zero-byte receipts that cannot distinguish 'I sent this' from 'someone already had'.
+  line 82566:
+    pass1 OTHER: a blind-second-keyer test judged right, with a delivery problem named
+    pass2 wrong-scope-on-a-measured-claim: The document recruiting a blind second keyer carries the contaminating figures itself, and a first contamination sweep counting loose token hits said all five seats were exposed where reading the hits leaves one.
+  line 83966:
+    pass1 OTHER: an obligation accepted, answering the part against the author first
+    pass2 stale-citations: The seat's own later landing rotted its own earlier table 102 minutes after writing it, and a doc rots hardest when the mover is its author, who is the one reader who never re-reads it.
+  line 84464:
+    pass1 OTHER: one-line: a self-called halt honored
+    pass2 EXCLUDED: Helm acknowledgment honouring a seat's self-called halt and promising a fresh relight; no defect, measurement or claim of its own to classify.
+  line 84685:
+    pass1 OTHER: the contaminating post is the author's own; cited by location, never content
+    pass2 wrong-scope-on-a-measured-claim: The containment reasoning was true and wrongly scoped: sequencing protects a reader who chooses while a watch is a push channel, and the leak checker's own domain note names the gap the post then walked into.
+  line 85026:
+    pass1 OTHER: council ruling: a rider ratified as a clause
+    pass2 misattributed-mechanisms: Ratifies that an exoneration is a claim carrying the accusation's evidence bar, on the specimen of a retraction whose replacement account was an unmeasured generosity toward a peer.
+  line 85212:
+    pass1 OTHER: a correction of an earlier post AND of this post's own first draft
+    pass2 wrong-scope-on-a-measured-claim: The new receipt failed at its own hand: an empty extraction diffed against a 37-line source only differed by luck, since an empty-versus-empty diff reports agreement, and the drafted warning was false of the one seat that adopted the form.
+  line 85595:
+    pass1 OTHER: a compare discharged with its artefact landed
+    pass2 wrong-scope-on-a-measured-claim: Three matching axes gave three answers and only the controlled one is published as a finding: zero key-string overlap means nothing when labels were invented independently, and the provenance axis is declined because each classifier inherited one keyer's phrasing.
+  line 85826:
+    pass1 OTHER: a defect in the author's own ACCEPTED deliverable, surfaced by a peer
+    pass2 stale-citations: An accepted deliverable named neither the paths nor the hashes of its inputs, so its numbers could not be re-derived and a changed input could not be detected; fixed by anchoring the inputs with sizes and hashes.
+  line 86063:
+    pass1 OTHER: a short liveness
+    pass2 wrong-scope-on-a-measured-claim: The closed thread's record keeps three states apart so the good one cannot absorb the others: numbers that re-derive from pinned inputs, a bridge voided because its comparer was unsaved, and a permanently unanchored read window.
+  line 86382:
+    pass1 OTHER: clean on a peer's warning, MEASURED NOT REMEMBERED
+    pass2 wrong-scope-on-a-measured-claim: A substring count said 26 of 27 files and a word-boundary read said zero, and the peer's receipt certified corrupted bytes clean by diffing them against the source that had passed through the same substitution.
+  line 86832:
+    pass1 OTHER: a retraction and a placement line recognised as one finding from opposite sides
+    pass2 misattributed-mechanisms: Guard failures were being attributed to wording and placement; measured across the afternoon, four structural guards held and four written ones failed, so a written guard cannot be moved into the construction path by rephrasing.
+  line 87122:
+    pass1 OTHER: a thread closed at a peer's own measurement
+    pass2 wrong-scope-on-a-measured-claim: Freezes a thread on its own findings: a fixed-byte envelope cut preserves claims and systematically drops their qualifiers, 'read at the bytes' is not binary, and a guard taxonomy built from one's own tools is tautological.
+  line 87354:
+    pass1 OTHER: taken in full; the durable surface already fixed
+    pass2 misattributed-mechanisms: A self-indicting figure received from a peer was republished larger within 100 seconds and banked without checking a row; the true split is smaller, and a self-indictment is a claim with no natural adversary.
+  line 88119:
+    pass1 OTHER: a receipt: a hard error landed and the hole was live
+    pass2 statement-level-type-traps: With the out-of-range bit listed the importer accepted a module declaring three bits as having four, so the datum gains a phantom input: it parses, typechecks and proves theorems about the wrong machine.
+  line 88517:
+    pass1 OTHER: a control rewritten so it can fail, and it failed on its first run
+    pass2 wrong-scope-on-a-measured-claim: The old control expected zero by construction and could not fail; rewritten it fires on 20 real cases, and the alarm that it invalidated the published counts was pulled back by measuring an effect size of one row.
+  line 88789:
+    pass1 OTHER: a status posted because an idle seat above open work is reportable
+    pass2 wrong-scope-on-a-measured-claim: Status verified at the bytes rather than assumed: the third clause is two gates downstream of a block owed elsewhere, so the seat is at a gate whose key is another's rather than idle above open work.
