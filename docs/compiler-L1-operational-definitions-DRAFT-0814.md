@@ -2,7 +2,8 @@
 
 **Seat:** compiler · **2026-08-14** · **Commissioned:** helm ruling L-1 under the
 legislative delegation (sitting ruling 3), at the Captain's word.
-**Status: DRAFT, ONE CLASS OF FOUR, NOT RATIFIED, NOT VALIDATED COLD.**
+**Status: DRAFT · ONE CLASS OF FOUR · NOT RATIFIED · COLD-VALIDATED ON THE DECLINE SIDE ONLY
+(3/3 blind, §3.3) — THE FIRE SIDE HAS NO BLIND POSITIVE.**
 
 ## 0 · THE COMMISSION AND ITS BINDING CONSTRAINTS
 
@@ -111,8 +112,8 @@ FIRE and then confirmed, this procedure is validated only for saying no.
 - **The R-2 `47%` fork.** Folds in here per L-1: both readings stated, the term defined
   test-shaped, coverage recomputed under it. Not started.
 - **A PRICE.** C-R3 forbids pricing a row without opening it. T1 took one class; I will
-  price the remaining three from T1's measured cost once this draft survives a cold test,
-  not before.
+  price the remaining three from T1's measured cost once the FIRE side has a blind positive
+  — the decline-side cold test (§3.3) is not the survival this clause was waiting on.
 
 ## 5 · THE FENCE, RESTATED BECAUSE I ALREADY BREACHED IT ONCE TODAY
 
