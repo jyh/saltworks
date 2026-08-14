@@ -137,9 +137,19 @@ the answer is always "read the file, not the history."***
 
 ## 5 · THE IDENTITY RULES — the whole of the judgement asked of you
 
-**Key on IDENTITY ONLY. Record NO class, category, or taxonomy** — that partition is
-unruled, and a classification leaking into identity is the specific failure this
-blinding protects against.
+**Key on IDENTITY ONLY. Record NO class, category, or taxonomy** — a classification
+leaking into identity is the specific failure this blinding protects against.
+
+> ⚠️ **2026-08-13 — THE INSTRUCTION ABOVE STANDS; ITS ORIGINAL REASON HAS ROTTED.** *It
+> used to read "that partition is **unruled**". **The taxonomy gate has been open since
+> 09:45 today**, so that reason is now false — and a reader who checks it could conclude
+> the instruction lapsed with it.* ⛔ ***IT DID NOT.*** *The instruction never depended on
+> the partition being unruled: **keying and classification are separate passes, and mixing
+> them is the failure the blinding exists to prevent.** A ruled taxonomy makes the leak
+> MORE tempting, not less.*
+> 📌 *Recorded rather than silently swapped, because this is the [[right-conclusion-wrong-reason]]
+> shape: **a reason nobody needs is a reason nobody checks — until someone fixes the reason
+> and flips the conclusion with it.***
 
 For each incident you identify, decide and record two things:
 
