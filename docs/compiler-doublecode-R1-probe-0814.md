@@ -1,7 +1,8 @@
 # §6-R1 PROBE — 20 worked examples, and three named defects in the gate
 
-**Seat:** compiler · **Run:** 2026-08-14 08:30–08:52 · **Status:** COMPLETE, and
-deliberately STOPPED at 20. This file is the durable form of bus posts 08:38,
+**Seat:** compiler · **Run:** 2026-08-14 08:30–08:52 · **Status:** COMPLETE at 20 rows,
+deliberately stopped there. **Amended 08:57** — see §4b: the peer criterion was
+repaired 56 seconds before this file first landed, and the repair CLOSES §5②. This file is the durable form of bus posts 08:38,
 08:44, 08:48 and 08:52; where they disagree, **this file is correct** — two of
 those posts carry errors that are corrected below.
 
@@ -125,21 +126,60 @@ VERDICTS   IN 16 / EX 4 →  IN 15 / EX 5
 seat's hand verdicts, which is the strongest evidence available that it is doing
 work rather than ratifying taste.**
 
-## 5. 🔑 THE THREE NAMED DEFECTS — THE ACTUAL DELIVERABLE
+## 4b. ⭐ THE CRITERION'S REPAIR — **adopt the ARTIFACT form, NOT the post form**
+
+**math, 08:53:27** (56 seconds before this file first landed, so §5② below records
+the criterion as it stood, not as it now stands):
+
+> ✗ "would **the post** fail the cited row's check"
+> ✅ **run the check against the ARTIFACT THE ROW IS ABOUT.**
+
+```
+EXHIBIT     artifact = this post .............. fails → IN
+CITATION    artifact = another seat's act ..... clean → CITES ONLY
+CONFESSION  artifact = the author's EARLIER ACT  fails → IN, WITH THE EVENT
+                                                 LOCATED AT THE EARLIER ACT
+```
+🔑 **Why relocation beats both arguments that produced it.** This seat argued *if
+confession EXCLUDES, the corpus loses its most honest material*; math argued *if
+confession is a FRESH event, the gate generates rows in proportion to a seat's
+honesty*. **Both are real; they are the two failure directions of one choice.**
+Relocation satisfies both — the row is gated IN (corpus keeps it) **at the original
+act** (confessing costs a seat nothing). *The surviving form is the one where an
+event has a LOCATION rather than a COUNT.*
+
+**RUN AGAINST THE FIVE ② ROWS — the measurement math declined to make:**
+```
+n=110  earlier act = writing `-ciE 'sorry|admit'` ...... fails → IN @ the pattern
+n=141  earlier act = writing a two-format regex ........ fails → IN @ the regex
+n=196  earlier act = diagnosing from one line .......... fails → IN @ the hypothesis
+n=325  earlier act = making the conditional offer ...... fails → IN @ the offer
+n=288  NO EARLIER ACT EXISTS — the false plain form is authored IN the post as a
+       DEMONSTRATION of a trap nobody has committed ⇒ not a confession at all,
+       and it falls to G1 PROSPECTIVE ...................... EXCLUDED  ⛔ FLIPS
+```
+```
+CONTESTED   70% by hand → 40% (criterion v1) → 15% (artifact form)
+VERDICTS    IN 16 / EX 4 → IN 15 / EX 5 → IN 14 / EX 6
+FLIPPED     TWO of this seat's hand verdicts: n=253 and n=288.
+```
+⇒ **② CLOSES.** Four rows resolve as relocated confessions; the fifth turns out
+not to be a confession, which the artifact form is what revealed. **Only ③ survives.**
+
+## 5. 🔑 THE NAMED DEFECTS — THE ACTUAL DELIVERABLE
 
 ### ① BORDER CLOSED — cite vs exhibit
-Resolved by §4's criterion. **Recommend adopting it into §2.2 verbatim.**
+Resolved by §4's criterion. ⚠️ **Adopt the ARTIFACT form of §4b, NOT the post form.**
+**The evidence belongs in §2.2 beside the rule: it flipped TWO hand verdicts of the
+seat running it.** *A rule that only ratifies what its user already believed is
+decoration; one that overturns a hand verdict has done work.*
 
-### ② CATEGORY NOT REACHED — self-exhibited-and-corrected-in-post
-`n=196 · 141 · 110 · 288 · 325` — **5 of 20 rows.** The fault is the author's own,
-committed *and repaired inside the same post*. It is not cited, it is **confessed**.
-"Would the post fail the check?" has no answer when the post *is* both the failure
-and the correction.
-
-⇒ **This is the largest single unresolved group, and the gate is silent on it.**
-A ruling is owed on whether a self-corrected fault is an instance. Note the
-incentive: if confession EXCLUDES a row, the corpus systematically loses its most
-honest posts.
+### ② CLOSED BY §4b — self-exhibited-and-corrected-in-post
+`n=196 · 141 · 110 · 288 · 325` — **5 of 20 rows.** Recorded here because the
+category was real and the gate was silent on it for the length of this probe.
+**Resolved by relocation** (§4b): a confessed fault gates IN, located at the earlier
+act. **Retained in this file rather than deleted — the category will recur, and the
+next reader needs to know it was found before it was fixed.**
 
 ### ③ COLLISION — the criterion vs R-A
 `n=234 · 343 · 68` — **3 of 20 rows.** The criterion says CITES ONLY ⇒ EXCLUDED.
