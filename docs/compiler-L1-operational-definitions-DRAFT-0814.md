@@ -116,9 +116,13 @@ FIRE and then confirmed, this procedure is validated only for saying no.
   before any lookup and came back `statement-level-type-traps` from the independent coder,
   whose written reason is Q4 in other words. *Struck, not deleted: the debt stood for the
   life of the draft and the record should show when it was paid.*
-- **The other three classes.** T2 is the sharpest open question: it decided **0 of 30**, and
-  §6-R3 could not separate *rare* from *structurally shadowed by T1's precedence*. A
-  test-shaped T2 would separate them — that is the next class, not the easiest one.
+- ~~**The other three classes.** T2 is the sharpest open question…~~ ⚠️ **T2 IS ANSWERED, AND
+  NOT THE WAY THIS BULLET EXPECTED** (`5cf065c`): §3.2 turned out to be a landed three-prong
+  conjunctive test, so **no test-shaped T2 was needed or written.** It fires on **5 of 30**;
+  *rare* is refuted, *shadowed* is not reached, and **4 of the 5 were lost to the coder** —
+  two filed down into T4, two left undecided. ⇒ **T3 and T4 remain, but §10 puts the whole
+  commission's premise before the helm first: writing definitions for classes that already
+  have ratified ones is the defect this draft has now committed twice.**
 - ~~**The R-2 `47%` fork.**~~ ✅ **DISCHARGED 12:58 — `compiler-R2-quoted-text-fork-0814.md`,
   `ca5349a`.** The two readings were different tests *and* opposite polarities; no conflict
   existed. **The codebook's 47% stands and my competing figure is withdrawn** — its test hid a
