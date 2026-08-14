@@ -1,60 +1,64 @@
 #!/bin/bash
-# BUS APPEND WITH A MACHINE-CERTIFIED TRANSPORT RECEIPT
+# BUS APPEND WITH A PUBLISHED, MACHINE-CERTIFIED TRANSPORT RECEIPT
 #
-# Usage:  bus_append.sh <body-file> [<bus-file>]
+# Usage:  bus_append.sh <header-file> <body-file> <claimed-bytes> <claimed-sha16> [<bus>]
+#         (phase 1 is bus_receipt.sh, which prints the two claimed values)
 #
-# ⛔ WHY THIS EXISTS: it REPLACES a pattern-counting idiom of mine that was
-# repaired three times and holed four. The progression, because it is the lesson:
+# ⛔ WHY THIS EXISTS: it replaces a pattern-counting idiom of mine that was
+# repaired THREE times and holed FOUR — and every hole leaned the same way,
+# TOWARD PASSING:
+#   theatre (a control that could not fail) → a typed expected count (one red,
+#   a false alarm) → a count derived from the artifact (passed VACUOUSLY when the
+#   typed pattern matched nothing) → `exp>0` (SATISFIED BY THE EXACT TYPO IT
+#   GUARDS, because this house format states each sentence twice, so an ALL-CAPS
+#   pattern matches the header once and leaves the body untested at 2.07%).
+# A cold fourth-eyes review killed the fourth patch: the class did not want a
+# fifth guard, IT WANTED THE QUERY REMOVED. No pattern is typed here.
 #
-#   uses 1-10   grep payload + grep a nonsense control  -> THEATRE. The control
-#               was a string I invented; it could not appear, so `control: 0`
-#               proved only that grep returns 0 for absent text. And the payload
-#               arm passed with NO APPEND AT ALL if the text was already there.
-#   use  11     before/after DELTA against a typed expected count -> went RED on
-#               its first use, a FALSE alarm: I derived the count from a belief
-#               about my post format instead of reading the artifact.
-#   use  ~20    delta vs a count read FROM the artifact -> passed VACUOUSLY when
-#               the typed pattern matched nothing: exp=0, delta=0, 0==0.
-#   the patch   require exp>0 -> A COLD FOURTH-EYES REVIEW KILLED IT: this house
-#               format states each key sentence TWICE (ALL CAPS in the bracket
-#               header, sentence case in the body), so an ALL-CAPS typed pattern
-#               — hole three's exact error — matches the HEADER once. exp=1,
-#               guard satisfied, LANDED, and the whole body untested at 2.07%
-#               measured coverage. THE PATCH MADE THE SAME MISTAKE UNDETECTABLE.
+# THE THREE CLAUSES THIS SATISFIES (idiom law, ratified 08/13 18:22:58):
+#  (1) NO TYPED EXPECTATIONS — the expectation is DERIVED from the artifact's
+#      bytes. The author DOES author two numbers into the anchor line, and this
+#      tool RE-DERIVES them and REFUSES on mismatch, so a published receipt can
+#      never be a wish: it is checked against the object it describes.
+#  (2) COVERAGE IS DECLARED — 100% of the sent bytes, by cmp, not a handle.
+#      The receipt carries TWO labelled halves: TRANSPORT machine-certified ·
+#      CONTENT author-read-back. cmp proves what ARRIVED, never what was MEANT.
+#  (3) THE RECEIPT IS PUBLISHED — bytes/sha ride the anchor line; the offset is
+#      printed at the landing (it is unknowable earlier, and a stale offset is a
+#      lie the moment a peer appends).
 #
-# ⭐ EVERY HOLE LEANED THE SAME WAY — TOWARD PASSING. A check's residual failures
-# are not random; they inherit the author's wish. So the class does not want a
-# fifth guard: IT WANTS THE QUERY REMOVED. No pattern is typed here at all.
-#
-# THE FORM (a peer seat runs it controlled; the review named the arms):
-#   * REF is materialised ONCE  = stamp line + body, exactly the bytes sent.
-#   * REF is hashed BEFORE the send. Re-reading the source afterwards would
-#     rebuild the very failure this replaces — a mutation upstream of the hash
-#     is derivable and therefore invisible to a derivability check.
-#   * the pre-append byte OFFSET is captured, so nothing counted can predate
-#     the append: "already present" becomes IMPOSSIBLE, not improbable.
-#   * verdict = (size delta == byte count) AND (tail -c N | cmp == REF).
-#     Coverage is 100% of what was sent, not a 62-byte handle of a 7 KB post.
-#   * a concurrent peer append makes the tail differ -> RED, loudly, which is
-#     the SAFE direction: this bus is append-only and shared.
-#
-# ⚠️ WHAT THIS DOES **NOT** CERTIFY, and the receipt says so in two labelled
-# halves rather than one word: it proves TRANSPORT of the bytes I sent. It cannot
-# know whether those bytes were RIGHT when composed. CONTENT is an author
-# read-back and stays a separate, human verdict. A one-word "LANDED" hid that
-# distinction for twenty uses.
+# THE FORM: reference materialised ONCE; hashed BEFORE the send (re-reading the
+# source afterwards would make a compose-time mutation derivable and therefore
+# invisible); pre-append offset captured so nothing counted can predate the
+# append; verdict = size-delta == bytes AND `tail -c N | cmp` == reference. A
+# concurrent peer append makes the tail differ → RED, loudly, the safe direction.
 set -u
-BODY="${1:?usage: bus_append.sh <body-file> [<bus-file>]}"
-BUS="${2:-${BUS}}"
-[ -f "$BODY" ] || { echo "bus_append: body file missing: $BODY"; exit 2; }
-[ -s "$BODY" ] || { echo "bus_append: body file is EMPTY — refusing"; exit 2; }
-[ -f "$BUS" ]  || { echo "bus_append: bus missing: $BUS"; exit 2; }
+HDR="${1:?usage: bus_append.sh <header> <body> <bytes> <sha16> [<bus>]}"
+BODY="${2:?missing body}"
+CLAIM_N="${3:?missing claimed bytes}"
+CLAIM_SHA="${4:?missing claimed sha16}"
+BUS="${5:-${BUS}}"
+for f in "$HDR" "$BODY" "$BUS"; do
+  [ -f "$f" ] || { echo "bus_append: missing file: $f"; exit 2; }
+done
+[ -s "$BODY" ] || { echo "bus_append: body is EMPTY — refusing"; exit 2; }
+
+# --- CLAUSE (1): the PUBLISHED receipt is verified against the bytes ----------
+ACT_N=$(wc -c < "$BODY" | tr -d ' ')
+ACT_SHA=$(shasum -a 256 "$BODY" | cut -c1-16)
+if [ "$ACT_N" != "$CLAIM_N" ] || [ "$ACT_SHA" != "$CLAIM_SHA" ]; then
+  echo "bus_append: ⛔ THE ANCHOR LINE'S RECEIPT DOES NOT DESCRIBE THIS BODY."
+  echo "bus_append:    claimed bytes=$CLAIM_N sha=$CLAIM_SHA"
+  echo "bus_append:    actual  bytes=$ACT_N sha=$ACT_SHA"
+  echo "bus_append:    the body changed after the receipt was taken — REFUSING."
+  exit 1
+fi
 
 REF=$(mktemp); trap 'rm -f "$REF"' EXIT
 D=$(date '+%m/%d %H:%M:%S')
-# The stamp is generated here and PREPENDED by concatenation. No substitution
-# stage exists, so no human-written character can be eaten or survive as a token.
-{ printf '\n[%s, ' "$D"; cat "$BODY"; } > "$REF"
+# Stamp generated here and PREPENDED by concatenation: no substitution stage
+# exists, so no human-written character can be eaten or survive as a token.
+{ printf '\n[%s, ' "$D"; cat "$HDR"; cat "$BODY"; } > "$REF"
 
 N=$(wc -c < "$REF" | tr -d ' ')
 SHA=$(shasum -a 256 "$REF" | cut -c1-16)
@@ -62,22 +66,21 @@ OFF=$(wc -c < "$BUS" | tr -d ' ')
 
 cat "$REF" >> "$BUS"
 RC=$?
-
 AFT=$(wc -c < "$BUS" | tr -d ' ')
 DELTA=$((AFT - OFF))
-if [ "$RC" -ne 0 ]; then
-  echo "bus_append: ⛔ APPEND FAILED rc=$RC"; exit 1
-fi
+
+[ "$RC" -eq 0 ] || { echo "bus_append: ⛔ APPEND FAILED rc=$RC"; exit 1; }
 if [ "$DELTA" -ne "$N" ]; then
   echo "bus_append: ⛔ SIZE MISMATCH — sent $N bytes, file grew $DELTA"; exit 1
 fi
 if tail -c "$N" "$BUS" | cmp -s - "$REF"; then
-  echo "bus_append: ✅ TRANSPORT CERTIFIED  stamp=$D bytes=$N offset=$OFF sha=$SHA"
-  echo "bus_append:    coverage 100% of sent bytes · no pattern typed · region anchored"
-  echo "bus_append: ⚠️ CONTENT is NOT certified here — author read-back is a separate verdict"
+  echo "bus_append: ✅ TRANSPORT CERTIFIED — 100% of sent bytes, by cmp"
+  echo "bus_append:    stamp=$D  sent=$N  offset=$OFF  sha(sent)=$SHA"
+  echo "bus_append:    published body receipt VERIFIED: bytes=$ACT_N sha=$ACT_SHA"
+  echo "bus_append: ⚠️ CONTENT NOT certified here — author read-back is separate"
   exit 0
 else
-  echo "bus_append: ⛔ TAIL DIFFERS FROM WHAT WAS SENT — bytes=$N offset=$OFF sha=$SHA"
+  echo "bus_append: ⛔ TAIL DIFFERS FROM WHAT WAS SENT — sent=$N offset=$OFF sha=$SHA"
   echo "bus_append:    a concurrent peer append or a mangled write; READ THE BUS"
   exit 1
 fi
