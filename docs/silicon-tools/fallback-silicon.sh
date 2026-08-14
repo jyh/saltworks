@@ -219,8 +219,20 @@ except Exception as ex:
   else
     am=$(python3 -c 'import sys,datetime
 try:
-    n=datetime.datetime.now(); p=datetime.datetime.strptime(sys.argv[1],"%m/%d %H:%M:%S").replace(year=n.year)
-    if p>n: p=p.replace(year=n.year-1)          # a Dec-31 post read on Jan-1
+    # ⛔ EXPLICIT YEAR IN THE PARSE, not .replace() afterwards. Python warns that
+    # "%m/%d" without a year is ambiguous AND *FAILS TO PARSE LEAP DAY* — the
+    # implicit default year is 1900, which is not a leap year, so a 02/29 stamp
+    # raises ValueError and this whole field goes to its refusal arm. That is a
+    # THIRD boundary in this one tool (day, year, and now leap day), each
+    # invisible until its own date arrives. Found by reading a DeprecationWarning
+    # rather than dismissing it; 3.15 will make the ambiguity an error outright.
+    n=datetime.datetime.now(); p=None
+    for y in (n.year, n.year-1):
+        try: q=datetime.datetime.strptime("%d/%s"%(y,sys.argv[1]),"%Y/%m/%d %H:%M:%S")
+        except ValueError: continue          # 02/29 in a non-leap year: try the other
+        if q<=n: p=q; break
+        p=p or q
+    if p is None or p>n: raise ValueError("unresolvable stamp")
     print(int((n-p).total_seconds()//60))
 except Exception: print(-1)' "$mine" 2>/dev/null)
     # ⛔ THRESHOLDS REPAIRED 00:43, ON THIS FIELD'S FIRST REAL FIRING. It printed
