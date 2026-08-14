@@ -29,9 +29,15 @@
 #
 # THE FORM: reference materialised ONCE; hashed BEFORE the send (re-reading the
 # source afterwards would make a compose-time mutation derivable and therefore
-# invisible); pre-append offset captured so nothing counted can predate the
-# append; verdict = size-delta == bytes AND `tail -c N | cmp` == reference. A
-# concurrent peer append makes the tail differ → RED, loudly, the safe direction.
+# invisible); pre-append offset captured AND USED AS THE READ ANCHOR, so nothing
+# counted can predate the append; verdict = size-delta == bytes AND the region
+# [offset, offset+N) compared byte-for-byte against the reference.
+# ⚠️ THIS PARAGRAPH ITSELF ROTTED ONCE, WITHIN MINUTES, AND IS CORRECTED HERE:
+# it used to describe a `tail -c N` read and call a concurrent peer append "RED,
+# the safe direction". That WAS the defect — a peer appending between the write
+# and the verification made tail compare THEIR bytes against my reference and go
+# red on bytes that were intact. Safe direction, yes; still a check that cries
+# wolf, and those teach their reader to wave past the real one.
 set -u
 HDR="${1:?usage: bus_append.sh <header> <body> <bytes> <sha16> [<bus>]}"
 BODY="${2:?missing body}"
@@ -73,14 +79,24 @@ DELTA=$((AFT - OFF))
 if [ "$DELTA" -ne "$N" ]; then
   echo "bus_append: ⛔ SIZE MISMATCH — sent $N bytes, file grew $DELTA"; exit 1
 fi
-if tail -c "$N" "$BUS" | cmp -s - "$REF"; then
+# ⛔ THE READ IS ANCHORED AT THE OFFSET, NOT TAKEN FROM THE TAIL — evidence's NC4
+# convicted compiler's tool on this and the same diagnosis is mine: I PUBLISHED
+# THE OFFSET AND DID NOT USE IT. `tail -c N` reads the LAST N bytes, so a peer
+# appending between my write and my verification makes it compare THEIR bytes
+# against my reference: RED on bytes that are perfectly intact. MEASURED, not
+# reasoned — with a peer append planted mid-verification, tail says RED and the
+# offset-anchored read says GREEN.
+# The failure direction was SAFE (false red, never false green), which is exactly
+# why it could have survived: a check that cries wolf on a non-defect teaches its
+# reader to wave past the real one.
+if tail -c "+$((OFF + 1))" "$BUS" | head -c "$N" | cmp -s - "$REF"; then
   echo "bus_append: ✅ TRANSPORT CERTIFIED — 100% of sent bytes, by cmp"
   echo "bus_append:    stamp=$D  sent=$N  offset=$OFF  sha(sent)=$SHA"
   echo "bus_append:    published body receipt VERIFIED: bytes=$ACT_N sha=$ACT_SHA"
   echo "bus_append: ⚠️ CONTENT NOT certified here — author read-back is separate"
   exit 0
 else
-  echo "bus_append: ⛔ TAIL DIFFERS FROM WHAT WAS SENT — sent=$N offset=$OFF sha=$SHA"
-  echo "bus_append:    a concurrent peer append or a mangled write; READ THE BUS"
+  echo "bus_append: ⛔ THE REGION AT THE OFFSET DIFFERS FROM WHAT WAS SENT — sent=$N offset=$OFF sha=$SHA"
+  echo "bus_append:    a mangled write or an interleaved writer; READ THE BUS"
   exit 1
 fi
