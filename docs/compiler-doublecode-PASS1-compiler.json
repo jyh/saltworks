@@ -6,7 +6,7 @@
   "brief": "docs/compiler-blind-classification-brief-0813.md",
   "sample": "docs/compiler-doublecode-sample-0813.txt (512faa4, deterministic every-10th, 388 rows)",
   "taxonomy": "ruled 08/13 09:45:34 — four artifact-level classes at the Results site PLUS pre-registered OTHER",
-  "tranche": "rows 1-344 of 388",
+  "tranche": "ALL 388 of 388 — COMPLETE",
   "pass_committed_before_any_second_coder_existed": true,
   "distribution_withheld_from_the_bus": true,
   "rows": [
@@ -2073,6 +2073,270 @@
       "line": 77393,
       "class": "OTHER",
       "reason": "a refuter pass returns DOES NOT PASS AS WRITTEN"
+    },
+    {
+      "n": 345,
+      "line": 77740,
+      "class": "OTHER",
+      "reason": "an attribution correction: a malformed empty header on the bus"
+    },
+    {
+      "n": 346,
+      "line": 78108,
+      "class": "OTHER",
+      "reason": "a gate taken; a peer's additive finding does more than extend the author's"
+    },
+    {
+      "n": 347,
+      "line": 78471,
+      "class": "OTHER",
+      "reason": "a peer's scheduling note stopped a landing one command from being made"
+    },
+    {
+      "n": 348,
+      "line": 78725,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "an escalation confirmed only once compared LIKE-FOR-LIKE; the original comparison was not"
+    },
+    {
+      "n": 349,
+      "line": 78949,
+      "class": "OTHER",
+      "reason": "a structural point confirmed from a second seat as a measurement"
+    },
+    {
+      "n": 350,
+      "line": 79169,
+      "class": "OTHER",
+      "reason": "a finding accepted and raised into a law"
+    },
+    {
+      "n": 351,
+      "line": 79397,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "a figure's row measured and landed; THE TABLE SAID otherwise"
+    },
+    {
+      "n": 352,
+      "line": 79598,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "D2 blocked on a slot boundary THE AUTHOR'S OWN STATEMENT SET HID"
+    },
+    {
+      "n": 353,
+      "line": 79798,
+      "class": "OTHER",
+      "reason": "slot ownership on a re-scoped region, measured, with the trade named"
+    },
+    {
+      "n": 354,
+      "line": 79994,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "scope tightened ON A MEASUREMENT AND NOT A MOOD, after seven corrections"
+    },
+    {
+      "n": 355,
+      "line": 80307,
+      "class": "OTHER",
+      "reason": "taken in full with the arithmetic re-verified before accepting"
+    },
+    {
+      "n": 356,
+      "line": 80565,
+      "class": "OTHER",
+      "reason": "one-line: the board closes at the seal"
+    },
+    {
+      "n": 357,
+      "line": 80866,
+      "class": "OTHER",
+      "reason": "one-line ruling on a pre-registration"
+    },
+    {
+      "n": 358,
+      "line": 81151,
+      "class": "OTHER",
+      "reason": "both night items delivered, with a FAILED BAR as the headline"
+    },
+    {
+      "n": 359,
+      "line": 81502,
+      "class": "OTHER",
+      "reason": "one-line ruling: a criterion adopted and a bar closed"
+    },
+    {
+      "n": 360,
+      "line": 81744,
+      "class": "OTHER",
+      "reason": "a row fixed, and a catch the author would otherwise have carried"
+    },
+    {
+      "n": 361,
+      "line": 81979,
+      "class": "OTHER",
+      "reason": "self-named a debt after going looking for one"
+    },
+    {
+      "n": 362,
+      "line": 82239,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "the law is right and the CORRECTION OVER-CORRECTS on one commit"
+    },
+    {
+      "n": 363,
+      "line": 82566,
+      "class": "OTHER",
+      "reason": "a blind-second-keyer test judged right, with a delivery problem named"
+    },
+    {
+      "n": 364,
+      "line": 82986,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "a set-incompleteness finding RETROSPECTIVELY NARROWS a prior verification"
+    },
+    {
+      "n": 365,
+      "line": 83370,
+      "class": "OTHER",
+      "reason": "a compelled-duty clause accepted as landing on the reader too"
+    },
+    {
+      "n": 366,
+      "line": 83663,
+      "class": "misattributed-mechanisms",
+      "reason": "the mechanism is REAL and IS NOT THE CAUSE of the number — attribution refused"
+    },
+    {
+      "n": 367,
+      "line": 83966,
+      "class": "OTHER",
+      "reason": "an obligation accepted, answering the part against the author first"
+    },
+    {
+      "n": 368,
+      "line": 84464,
+      "class": "OTHER",
+      "reason": "one-line: a self-called halt honored"
+    },
+    {
+      "n": 369,
+      "line": 84685,
+      "class": "OTHER",
+      "reason": "the contaminating post is the author's own; cited by location, never content"
+    },
+    {
+      "n": 370,
+      "line": 84901,
+      "class": "OTHER",
+      "reason": "council ruling: two riders ratified"
+    },
+    {
+      "n": 371,
+      "line": 85026,
+      "class": "OTHER",
+      "reason": "council ruling: a rider ratified as a clause"
+    },
+    {
+      "n": 372,
+      "line": 85212,
+      "class": "OTHER",
+      "reason": "a correction of an earlier post AND of this post's own first draft"
+    },
+    {
+      "n": 373,
+      "line": 85454,
+      "class": "OTHER",
+      "reason": "council ruling: the tenth and final law of the sitting"
+    },
+    {
+      "n": 374,
+      "line": 85595,
+      "class": "OTHER",
+      "reason": "a compare discharged with its artefact landed"
+    },
+    {
+      "n": 375,
+      "line": 85826,
+      "class": "OTHER",
+      "reason": "a defect in the author's own ACCEPTED deliverable, surfaced by a peer"
+    },
+    {
+      "n": 376,
+      "line": 86063,
+      "class": "OTHER",
+      "reason": "a short liveness"
+    },
+    {
+      "n": 377,
+      "line": 86193,
+      "class": "OTHER",
+      "reason": "council ruling: a kit revision call ratified"
+    },
+    {
+      "n": 378,
+      "line": 86382,
+      "class": "OTHER",
+      "reason": "clean on a peer's warning, MEASURED NOT REMEMBERED"
+    },
+    {
+      "n": 379,
+      "line": 86568,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "four seats enumerated their fields and EACH ENUMERATION MISSED something"
+    },
+    {
+      "n": 380,
+      "line": 86832,
+      "class": "OTHER",
+      "reason": "a retraction and a placement line recognised as one finding from opposite sides"
+    },
+    {
+      "n": 381,
+      "line": 87122,
+      "class": "OTHER",
+      "reason": "a thread closed at a peer's own measurement"
+    },
+    {
+      "n": 382,
+      "line": 87354,
+      "class": "OTHER",
+      "reason": "taken in full; the durable surface already fixed"
+    },
+    {
+      "n": 383,
+      "line": 87679,
+      "class": "OTHER",
+      "reason": "an order taken and executed in the same append; a stage retired"
+    },
+    {
+      "n": 384,
+      "line": 87900,
+      "class": "OTHER",
+      "reason": "a bank's load-bearing corrections committed for a halted seat"
+    },
+    {
+      "n": 385,
+      "line": 88119,
+      "class": "OTHER",
+      "reason": "a receipt: a hard error landed and the hole was live"
+    },
+    {
+      "n": 386,
+      "line": 88288,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "a pointer field carried POINTER-CREATION time where it meant BANK CURRENCY"
+    },
+    {
+      "n": 387,
+      "line": 88517,
+      "class": "OTHER",
+      "reason": "a control rewritten so it can fail, and it failed on its first run"
+    },
+    {
+      "n": 388,
+      "line": 88789,
+      "class": "OTHER",
+      "reason": "a status posted because an idle seat above open work is reportable"
     }
   ],
   "_note_on_statement_level_type_traps": "no row in rows 1-60 was assigned that class. Recorded so the second coder's disagreement on it is meaningful rather than an artifact of my having forgotten the class existed. If it stays empty to 388 that is itself a finding about the Results-site taxonomy, not about the coder.",
@@ -2083,5 +2347,6 @@
     "COMMIT-MESSAGE LEAK, disclosed: my tranche-3 commit message implied a class was empty. The brief's blinding clause already fences `git log`, so the protocol was not breached — but that fence is a DISCIPLINE, and this project's design principle has been CAPABILITY REMOVAL over discipline. Blinding that depends on a coder obeying a clause is weaker than blinding that gives them nothing to disobey with. Rule adopted from tranche 4: COMMIT MESSAGES CARRY NO DISTRIBUTION CONTENT EITHER. The offending message is left as landed rather than rewritten -- history in a shared repo is not mine to rewrite, and annotate-don't-rewrite is the same discipline applied here.",
     "RATE FIGURE IS PROVISIONAL: the 20-rows-per-tranche rate I published at 17:59 was measured with a row-puller that displayed code-fence markers as body content, making a material fraction of rows unjudgeable at that depth. I attempted a 40-row tranche, found ~6 of 40 had no usable context, and did NOT code them. Filtering fence and quote markers restored full context at the SAME output budget. The binding constraint was the INSTRUMENT, not the reading — so the published rate was a property of a defective puller and should be re-measured before anyone derives time from it.",
     "INSTRUMENT DEFECT FOUND AT ROW 100 AND AUDITED BACKWARD: my row-puller took a fixed window after each header with NO BOUND at the next post, so for one- and two-line posts it displayed the FOLLOWING post's content as body. Audited all 100 coded rows: 3 were affected (rows 9, 93, 100). All three verdicts SURVIVE re-reading within true bounds — but only because this bus's bracket lines are claim-first by form law, so the header had already determined the class. That is the fleet's convention protecting me, NOT the instrument being adequate; on a corpus without claim-first headers those 3 rows would have been coded against the wrong post. Puller bounded at the next post start from row 101 onward."
-  ]
+  ],
+  "_SEALED_COMPLETE": "all 388 rows coded; no row added or altered after this point without a published amendment"
 }
