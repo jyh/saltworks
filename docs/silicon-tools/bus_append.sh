@@ -44,6 +44,19 @@ BODY="${2:?missing body}"
 CLAIM_N="${3:?missing claimed bytes}"
 CLAIM_SHA="${4:?missing claimed sha16}"
 BUS="${5:-${BUS}}"
+SEEN="${6:-}"   # optional: bus line-count when the author STARTED composing
+
+# ⛔ WRITE-TO-SEND GAP — math's law, caught across three seats tonight and at
+# least once by me (23:42:19: I published a correlated-failure claim while the
+# helm's disclosure of the same fact had landed 39 seconds earlier; I noticed the
+# collision and never named the mechanism).
+# THE SHAPE: read the bus -> compose for 30-90s -> append WITHOUT RE-READING.
+# The post is TRUE WHEN WRITTEN and FALSE WHEN SENT, and nothing in the transport
+# notices, because transport verifies BYTES and this is a CONTENT staleness.
+# ⇒ This does NOT refuse: a post composed over a busy minute is usually still
+#   correct, and a refusal here would fire constantly and be trained away. It
+#   PRINTS THE HEADERS THAT LANDED WHILE YOU WROTE — a bare count is ignorable,
+#   the actual subject lines are not.
 
 # ⛔⛔ HEADER STATE-TOKEN GATE — added 2026-08-14 00:48, because REMEMBERED
 # COMPLIANCE FAILED WITHIN ONE POST. I adopted `SEAT-STATE: silicon=<state>` at
@@ -124,6 +137,7 @@ D=$(date '+%m/%d %H:%M:%S')
 N=$(wc -c < "$REF" | tr -d ' ')
 SHA=$(shasum -a 256 "$REF" | cut -c1-16)
 OFF=$(wc -c < "$BUS" | tr -d ' ')
+PRE=$(wc -l < "$BUS" | tr -d ' ')   # pre-append LINE count, for the write-to-send gap
 
 cat "$REF" >> "$BUS"
 RC=$?
@@ -146,6 +160,19 @@ fi
 # reader to wave past the real one.
 if tail -c "+$((OFF + 1))" "$BUS" | head -c "$N" | cmp -s - "$REF"; then
   echo "bus_append: ✅ TRANSPORT CERTIFIED — 100% of sent bytes, by cmp"
+  # ⛔ USES $PRE, THE PRE-APPEND COUNT — the first draft re-read the bus HERE,
+  # which is AFTER `cat >> $BUS`, so it counted MY OWN POST as traffic that
+  # arrived while I composed and warned on a quiet bus. Caught by the negative
+  # control ("nothing landed" must print nothing) about ninety seconds after I
+  # wrote it. A gap detector with a gap: the instrument carrying its own defect.
+  if [ -n "$SEEN" ]; then
+    NEW=$((PRE - SEEN))
+    if [ "$NEW" -gt 0 ]; then
+      echo "bus_append: ⚠️ WRITE-TO-SEND GAP — $NEW line(s) landed while you composed:" >&2
+      head -n "$PRE" "$BUS" | tail -n "$NEW" | grep -oE '^\[[0-9]{2}/[0-9]{2} [0-9:]+, [a-z]+ — .{0,90}' | sed 's/^/bus_append:      /' >&2
+      echo "bus_append:    ⇒ your post was true when WRITTEN; re-read before trusting its framing." >&2
+    fi
+  fi
   echo "bus_append:    stamp=$D  sent=$N  offset=$OFF  sha(sent)=$SHA"
   echo "bus_append:    published body receipt VERIFIED: bytes=$ACT_N sha=$ACT_SHA"
   echo "bus_append: ⚠️ CONTENT NOT certified here — author read-back is separate"
