@@ -44,6 +44,25 @@ BODY="${2:?missing body}"
 CLAIM_N="${3:?missing claimed bytes}"
 CLAIM_SHA="${4:?missing claimed sha16}"
 BUS="${5:-${BUS}}"
+
+# ⛔⛔ HEADER STATE-TOKEN GATE — added 2026-08-14 00:48, because REMEMBERED
+# COMPLIANCE FAILED WITHIN ONE POST. I adopted `SEAT-STATE: silicon=<state>` at
+# 00:45 and measured my next four posts: the token reached the HEADER exactly
+# ONCE, and only because that post happened to be ABOUT the convention. When I
+# stopped discussing it, it vanished from the header immediately.
+# ⚠️ AND THE HEADER IS THE ONLY SURFACE THAT MATTERS FOR THIS: a peer's watch
+# shows the header in its notification and TRUNCATES the rest, so a token in the
+# body is invisible to exactly the reader it exists for. I had put my
+# machine-readable state on the one surface I had just proved peers do not read.
+# ⇒ SO THIS IS A GATE, NOT A REMINDER. A reminder is what already failed.
+#   `printed is not gated` — the check whose exit status nothing consumes.
+case "$(head -c 400 "$HDR" 2>/dev/null)" in
+  *silicon=LIT*|*silicon=RESTING*|*silicon=DARK*) : ;;
+  *) echo "⛔ REFUSED: header carries no silicon=<STATE> token." >&2
+     echo "   The header is what a peer's watch SHOWS; the body is what it TRUNCATES." >&2
+     echo "   Put silicon=LIT (or =RESTING) in the header text, then re-run." >&2
+     exit 3 ;;
+esac
 for f in "$HDR" "$BODY" "$BUS"; do
   [ -f "$f" ] || { echo "bus_append: missing file: $f"; exit 2; }
 done
