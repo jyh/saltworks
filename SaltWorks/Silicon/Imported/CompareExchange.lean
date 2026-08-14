@@ -61,8 +61,20 @@ def ceNL : SaltWorks.Silicon.Netlist := [
   .not 21
 ]
 
-/-- Output net indices, in declaration order. -/
+/-- Output net indices, in the CALLER'S `--outputs` order (then state,
+then cuts). NOT declaration order — this importer discards that. -/
 def ceNL_outs : List Nat := [25, 29, 33, 37, 48, 49]
+
+/-- DESIGN output NAMES, positionally aligned with `ceNL_outs`:
+`ceNL_outs[k]` is the net carrying the port named at position k.
+Each name is VALIDATED against the module's declared outputs (C-V3),
+never derived from declaration order. One entry per EMITTED BIT. -/
+def ceNL_out_names : List String := ["out0", "out1", "oact0", "oact1"]
+
+/-- Number of DESIGN outputs. `ceNL_outs` entries from here on are
+next-state bits then cut roots, paired by position with the state inputs;
+on a datum with neither, this is simply the length of `ceNL_outs`. -/
+def ceNL_ndesign_out : Nat := 4
 
 /-! ## The flop treatment — 2 flops cut, Q as leaf, D as root
 
@@ -82,10 +94,6 @@ through 1 distinct CLK net(s) of the synthesised clock tree.
 
 /-- Number of DESIGN primary inputs; inputs from here on are state bits. -/
 def ceNL_ndesign_in : Nat := 5
-
-/-- Number of DESIGN outputs; `ceNL_outs` entries from here on are
-next-state bits, paired by position with the state inputs. -/
-def ceNL_ndesign_out : Nat := 4
 
 /-- Number of flops cut by the treatment. -/
 def ceNL_nstate : Nat := 2

@@ -64,7 +64,19 @@ def switchNL : SaltWorks.Silicon.Netlist := [
   .and 0 51
 ]
 
-/-- Output net indices, in declaration order. -/
+/-- Output net indices, in the CALLER'S `--outputs` order (then state,
+then cuts). NOT declaration order — this importer discards that. -/
 def switchNL_outs : List Nat := [16, 24, 31, 38, 45, 52]
+
+/-- DESIGN output NAMES, positionally aligned with `switchNL_outs`:
+`switchNL_outs[k]` is the net carrying the port named at position k.
+Each name is VALIDATED against the module's declared outputs (C-V3),
+never derived from declaration order. One entry per EMITTED BIT. -/
+def switchNL_out_names : List String := ["out0", "out1", "_00_", "_01_", "_02_", "_03_"]
+
+/-- Number of DESIGN outputs. `switchNL_outs` entries from here on are
+next-state bits then cut roots, paired by position with the state inputs;
+on a datum with neither, this is simply the length of `switchNL_outs`. -/
+def switchNL_ndesign_out : Nat := 6
 
 end SaltWorks.Silicon.Imported

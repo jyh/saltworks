@@ -411,3 +411,72 @@ awaiting the helm; the ruled criterion is RED, at the fixture and at scale alike
 SAME BASENAME in two directories, exactly as `pinreset_controls.sh` does for the
 fixture. Not added to that script as a row — two full `dmem8` imports are far too
 heavy for a fixture that must stay cheap enough to run on every change.*
+
+---
+
+## ⚓ ADDENDUM C — 2026-08-13: A2′ rev-3, THE DATUM NAME TABLE
+
+*Dated addendum. The frozen prereg (the 8/12 19:07 form) is NOT touched.
+Authority: helm ruling 18:05:38 (criterion amendment, split of pens) and math's
+statement-form ruling 18:31:46, with the helm accepting the pre-boot answer as
+discharging the gate at 18:32:39.*
+
+⛔ **WHAT THE TABLE KILLS, AND IT IS THE STRONGEST ARGUMENT FOR IT.**
+`import_netlist.py:964` emitted *"Output net indices, in declaration order."*
+**That sentence was FALSE and shipped in all seven live datums** — declaration
+order is discarded at parse (`decls` is a `defaultdict(set)`); the emitted order
+is the CALLER's `--outputs` order, then Q-sorted state, then cuts. A reader had
+no way to check `outs[k]` against anything, and the one sentence that claimed to
+help pointed at an order this importer never had. Corrected in the same commit.
+
+✅ **THE AMENDMENT IS STRONGER THAN THE ORIGINAL, NOT A TOLERANCE.** A2′ still
+characterises the **ENTIRE** diff. ***The table is admissible only because
+ARM-INVARIANCE keeps it OUT of the diff*** — it is asserted to be present and
+byte-identical in both arms, never listed among the expected MOVES. `difflines`
+is NOT amended: it is the expected-moves set, an arm-invariant line never moves,
+and amending it would have been the defect rather than the cure.
+
+```
+SCOPE     table.length == <name>_ndesign_out   (never outs.length)
+TRIPWIRE  outs.length  == table.length + nstate + ncut
+UNIT      one entry per EMITTED BIT (C-V1 forces bit-expanded callers)
+ORDER     the caller's --outputs order, RECORDED — that order IS the datum's
+          index semantics; VALIDATED against the declared set by C-V3, never
+          derived (there is no importer-side order to derive)
+SHAPE     disjoint from BOTH sweeps — measured: cellcol() and difflines() each
+          catch ZERO table rows
+```
+⭐ **`ndesign_out` IS NOW EMITTED UNCONDITIONALLY** (math 18:31:46, refusing a
+two-case predicate): *the anchor must be a property of the DATUM, not of the
+datum's CLASS,* or the criterion means one thing on a flopped datum and another
+on a combinational one — **same formula, different theorem, invisible in the
+output.** On a combinational datum the value is not inapplicable but
+**degenerate-but-defined** (= `outs.length` by construction); verified on
+`adder8r`: table = outs = ndesign_out = 9.
+
+⚠️ **NOT `sorted()`, deliberately.** The list derives from an ORDERED caller
+argument, not from a set, and the order IS the index semantics. The determinism
+rule (sort anything set-derived, because the two arms are two python3 processes
+with per-process hash order) does not reach it, and sorting would destroy the
+very property the table records. Stated here so nobody "fixes" it later.
+
+**CONTROLS ADDED — an asserted clause with no control is an assertion nobody has
+tested:** `NC3f` arms disagree on the table → RED · `NC3g` table absent → RED ·
+`NC3h` table length ≠ `ndesign_out` → RED. *Each plant is well-formed Lean, so
+each row tests its own property rather than going red on malformed quoting.*
+**And the RED evidence block now prints npc/nxc, both cell counts, the table's
+presence/arm-identity/length and the suffix counts** — the ruling ordered it, and
+it immediately earned itself: a real RED arrived with two empty diffs and told me
+nothing until the extension named the clause.
+
+**APPLICATION SCOPE + REGISTERED DEBT.** The amendment applies to datums the
+importer can REGENERATE; `reimport.sh` is the register. 4 of 7 reproduce
+byte-identical after `--write` (Comparator, Switch, CompareExchange,
+CompareExchangeC). **DEBT, named rather than hidden: RefComparator (hand-written
+on purpose), Fabric and FabricCut (CI-artifact source) carry no table** — every
+totality-style consumer predicate must read *"on every regenerable datum"* with
+this list printed beside it.
+
+**DISCHARGE:** `pinreset_controls.sh` EXIT=0 (C3.M green, A2′ rev-3 green, all
+planted rows behaving) · `reimport.sh` EXIT=0 after `--write` · `saltbuild` BARE
+EXIT=0 · sweep 46/31/15 unmoved by full-row diff. **Criterion version: A2′ rev-3.**

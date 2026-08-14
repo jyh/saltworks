@@ -138,7 +138,19 @@ def comparatorNL : SaltWorks.Silicon.Netlist := [
   .or 15 7
 ]
 
-/-- Output net indices, in declaration order. -/
+/-- Output net indices, in the CALLER'S `--outputs` order (then state,
+then cuts). NOT declaration order — this importer discards that. -/
 def comparatorNL_outs : List Nat := [70, 74, 78, 82, 86, 91, 95, 96, 100, 104, 108, 112, 116, 121, 125, 126]
+
+/-- DESIGN output NAMES, positionally aligned with `comparatorNL_outs`:
+`comparatorNL_outs[k]` is the net carrying the port named at position k.
+Each name is VALIDATED against the module's declared outputs (C-V3),
+never derived from declaration order. One entry per EMITTED BIT. -/
+def comparatorNL_out_names : List String := ["lo[0]", "lo[1]", "lo[2]", "lo[3]", "lo[4]", "lo[5]", "lo[6]", "lo[7]", "hi[0]", "hi[1]", "hi[2]", "hi[3]", "hi[4]", "hi[5]", "hi[6]", "hi[7]"]
+
+/-- Number of DESIGN outputs. `comparatorNL_outs` entries from here on are
+next-state bits then cut roots, paired by position with the state inputs;
+on a datum with neither, this is simply the length of `comparatorNL_outs`. -/
+def comparatorNL_ndesign_out : Nat := 16
 
 end SaltWorks.Silicon.Imported

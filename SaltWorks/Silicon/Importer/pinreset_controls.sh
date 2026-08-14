@@ -178,6 +178,39 @@ a2p() { # $1 = pinned datum, $2 = rewrite datum
   # specific — dmem8/16/32 would each need their own — so assert instead THAT the
   # pinned arm's namespace carries a restriction suffix and the rewrite arm's does
   # not. Same shape, and the same reason, as the cell-name column clause below.
+  # ⭐ A2′ rev-3 — THE NAME TABLE, asserted STRUCTURALLY (helm 18:05:38).
+  # `outs[k]` was checkable against nothing: the datum recorded indices and no
+  # names, so k's binding to a port lived only in a command-line argument. The
+  # table is admissible inside a criterion that "tolerates nothing" ONLY because
+  # ARM-INVARIANCE keeps it OUT of the diff — it is asserted to be present and
+  # identical in both arms, never listed as an expected MOVE.
+  local ptab xtab pnames pn pdesign pouts pstate pcut
+  ptab=$(grep -c '_out_names : List String' "$1")
+  xtab=$(grep -c '_out_names : List String' "$2")
+  [ "$ptab" -eq 1 ] && [ "$xtab" -eq 1 ] || return 1     # EXISTS in both arms
+  grep '_out_names : List String' "$1" > "$TMP/ptab"
+  grep '_out_names : List String' "$2" > "$TMP/xtab"
+  cmp -s "$TMP/ptab" "$TMP/xtab" || return 1             # ARM-INVARIANT
+  # SCOPE predicate: table length == ndesign_out, NEVER outs.length. On any
+  # sequential or cut datum a declared-outputs table can never match outs.length
+  # (fabric: outs 76, design 24), so equating them would be false by construction.
+  # ⛔ COUNT DOUBLE QUOTES. This counted SINGLE quotes until 18:4x and went RED
+  # the moment the emission switched to Lean-valid `"name"` strings — the clause
+  # was measuring the OLD syntax while the evidence block (counting `"`/2) read
+  # the new one, so the two DISAGREED and only the evidence was right. That
+  # disagreement is what found it: a criterion and its own evidence block
+  # computing the same quantity two ways is a cheap, permanent cross-check.
+  pn=$(grep -o '"' "$TMP/ptab" | wc -l | awk '{print int($1/2)}')
+  pdesign=$(grep -oE '_ndesign_out : Nat := [0-9]+' "$1" | grep -oE '[0-9]+$')
+  [ -n "$pdesign" ] && [ "$pn" -eq "$pdesign" ] || return 1
+  # TRIPWIRE so the deliberately UNNAMED tail stays guarded: flop D nets and cut
+  # roots are not ports and get no names, but their COUNT must still account for
+  # every entry of outs — otherwise an unnamed entry could appear from nowhere.
+  pouts=$(sed 's/.*:= \[//; s/\]//' <(grep -m1 '_outs : List Nat' "$1") | tr ',' '\n' | grep -c '[0-9]')
+  pstate=$(grep -oE '_nstate : Nat := [0-9]+' "$1" | grep -oE '[0-9]+$'); pstate=${pstate:-0}
+  pcut=$(grep -oE '_ncut : Nat := [0-9]+' "$1" | grep -oE '[0-9]+$'); pcut=${pcut:-0}
+  [ "$pouts" -eq $((pn + pstate + pcut)) ] || return 1
+
   [ "$npc" -gt 0 ] && [ "$npc" -eq "$nxc" ] \
     && [ "$(grep -c '^dfrtp_1$' "$TMP/pc")" -eq "$npc" ] \
     && [ "$(grep -c '^dfxtp_1$' "$TMP/xc")" -eq "$nxc" ] \
@@ -256,6 +289,19 @@ else
     else
       echo "  ⛔ C3.A2′ RED — the positive characterisation of the diff does not hold."
       echo "     PRINTING THE OBJECT BESIDE THE VERDICT (evidence's law, 8/12):"
+      # ⛔ THE COUNT CLAUSES PRINT THEIR OWN NUMBERS — helm ruling 18:05:38.
+      # Before this, a RED from the cell-count clause or a name-table clause
+      # produced TWO EMPTY DIFFS and nothing else: cellcol()'s regex is a strict
+      # SUBSET of difflines()'s and fires FIRST in the && chain, so the verdict
+      # was correct and the evidence was silent — in the file whose own stated
+      # law is that INSTRUMENTS PRINT WHAT THEY READ. Measured live: this block
+      # was reached with both diffs empty and told me nothing about which clause
+      # refused.
+      echo "     cell-name column: pinned rows npc=$(grep -c . "$TMP/pc") dfrtp=$(grep -c '^dfrtp_1$' "$TMP/pc")"
+      echo "                       rewrite rows nxc=$(grep -c . "$TMP/xc") dfxtp=$(grep -c '^dfxtp_1$' "$TMP/xc")"
+      echo "     name table      : pinned=$(grep -c '_out_names : List String' "$TMP/p.lean") rewrite=$(grep -c '_out_names : List String' "$TMP/x.lean") arm-identical=$(cmp -s <(grep '_out_names' "$TMP/p.lean") <(grep '_out_names' "$TMP/x.lean") && echo yes || echo NO)"
+      echo "     table length    : $(grep '_out_names : List String' "$TMP/p.lean" | grep -o '"' | wc -l | awk '{print $1/2}')  ndesign_out=$(grep -oE '_ndesign_out : Nat := [0-9]+' "$TMP/p.lean" | grep -oE '[0-9]+$')"
+      echo "     restriction sfx : pinned=$(grep -cE "$SFX_RE" "$TMP/p.lean") rewrite=$(grep -cE "$SFX_RE" "$TMP/x.lean") (want 1 and 0)"
       [ -s "$TMP/rm2" ] && { echo "     removed vs the rewrite arm's flop rows:";
                              diff "$TMP/xcells" "$TMP/rm2" | sed 's/^/       /'; }
       echo "     added vs marker+column:"; diff "$TMP/gold2" "$TMP/add2" | sed 's/^/       /'
@@ -322,6 +368,37 @@ else
     elif a2p "$TMP/p_noname.lean" "$TMP/x.lean"; then
       echo "  ✗ NC3e A2′ stayed GREEN with the restriction stripped from the NAME"; fail=1
     else echo "  ✅ NC3e A2′ goes RED when the NAME drops the restriction"; fi
+
+    # --- NC3f/g/h  THE NAME-TABLE CONTROLS (A2′ rev-3). An asserted clause with
+    # no control is an assertion nobody has tested — and a table that A2′ merely
+    # TOLERATES would be decoration. Each row plants exactly one violation.
+    # ⚠️ the plants below use DOUBLE quotes deliberately: a single-quoted plant
+    # would be malformed Lean and would go RED on the QUOTING, not on the
+    # property the row claims to test — a control passing for the wrong reason.
+    sed 's/^\(def fxNL_out_names : List String := \).*/\1["zz"]/' \
+        "$TMP/p.lean" > "$TMP/p_tabdiff.lean"
+    if cmp -s "$TMP/p.lean" "$TMP/p_tabdiff.lean"; then
+      echo "  ⛔ NC3f plant did not apply — control VOID"; fail=1
+    elif a2p "$TMP/p_tabdiff.lean" "$TMP/x.lean"; then
+      echo "  ✗ NC3f A2′ stayed GREEN with the arms DISAGREEING on the table"; fail=1
+    else echo "  ✅ NC3f A2′ goes RED when the arms disagree on the name table"; fi
+
+    grep -v '_out_names : List String' "$TMP/p.lean" > "$TMP/p_notab.lean"
+    if cmp -s "$TMP/p.lean" "$TMP/p_notab.lean"; then
+      echo "  ⛔ NC3g plant did not apply — control VOID"; fail=1
+    elif a2p "$TMP/p_notab.lean" "$TMP/x.lean"; then
+      echo "  ✗ NC3g A2′ stayed GREEN with the name table ABSENT"; fail=1
+    else echo "  ✅ NC3g A2′ goes RED when the name table is absent"; fi
+
+    # the SCOPE predicate itself: a table whose length no longer equals
+    # ndesign_out must refuse, or "table.length == ndesign_out" is inert.
+    sed 's/^\(def fxNL_out_names : List String := \).*/\1["q0", "q1", "q2"]/' \
+        "$TMP/p.lean" > "$TMP/p_tablen.lean"
+    if cmp -s "$TMP/p.lean" "$TMP/p_tablen.lean"; then
+      echo "  ⛔ NC3h plant did not apply — control VOID"; fail=1
+    elif a2p "$TMP/p_tablen.lean" "$TMP/x.lean"; then
+      echo "  ✗ NC3h A2′ stayed GREEN with table length != ndesign_out"; fail=1
+    else echo "  ✅ NC3h A2′ goes RED when table length ≠ ndesign_out"; fi
   fi
 fi
 

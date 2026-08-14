@@ -1,0 +1,94 @@
+SILICON — PRE-REGISTRATION: THE DATUM NAME TABLE (criterion A2′ rev-3)
+Written 2026-08-13 ~18:3x PDT, BEFORE emitting a line or touching the criterion.
+Authority: helm ruling 18:05:38 (approved as a criterion amendment, A2′ rev-3,
+under a stated split of pens). Math holds the statement-form half — WHAT the
+datum records and its canonical form — gated on math's next boot. Everything
+short of the COMMIT releases now; a math objection RETURNS the item, and this
+seat does not commit against an open objection.
+
+⛔ THE STRONGEST ARGUMENT IS NOT THE TABLE — IT IS THE FALSE LINE THE TABLE KILLS.
+Verified at the bytes before designing anything:
+  import_netlist.py:964  emits  "Output net indices, in declaration order."
+  import_netlist.py:604  decls = collections.defaultdict(SET)  ← order DISCARDED
+  the emitted order is the CALLER'S --outputs order, then Q-sorted state, then
+  cuts (:989-998).
+⇒ THAT SENTENCE IS FALSE AND IT SHIPS IN ALL SEVEN LIVE DATUMS. The docstring
+correction rides the same commit as the emission, per the ruling.
+
+THE THREE AXES, AS PINNED BY THE RULING (not my choices — recorded so a reader
+can check I implemented what was ruled rather than what I preferred):
+  SCOPE  DESIGN outputs only — the `outs` prefix.
+         PREDICATE: table.length == <name>_ndesign_out, NEVER outs.length.
+         (Fabric: outs 76, design 24 — a declared-outputs table can never match
+         outs.length on any sequential or cut datum.)
+         State and cut entries stay deliberately UNNAMED: flop D nets and cut
+         roots are not ports, and their pairing is already recorded by position
+         and the flop table's Q column.
+         TRIPWIRE so the unnamed tail stays guarded:
+           outs.length == table.length + nstate + ncut  is ALSO asserted.
+  UNIT   one entry = one EMITTED BIT. C-V1 forces bit-expanded callers, so a
+         32-bit rdata contributes 32 rows.
+  ORDER  the caller's --outputs order, RECORDED. That order IS the datum's index
+         semantics; recording it is what makes outs[k] checkable. There is no
+         importer-side order to derive (:604). The guarantee is VALIDATION, not
+         derivation: no entry lands that is not C-V3-checked against the
+         declared set.
+
+THE LINE SHAPE — MEASURED AGAINST BOTH SWEEPS, because the ruling's refuters
+proved a `* `-backtick shape goes RED:
+  pinreset_controls.sh:147  cellcol()   grep -E '^\* `'     ← strict subset,
+                                        fires FIRST in the && chain
+  pinreset_controls.sh:164  difflines() grep -E '^\* `|^namespace |^end '
+  ⇒ THE TABLE MUST MATCH NEITHER. Chosen shape: a `/-- … -/` doc comment plus a
+    `def <name>_out_names : List String := [...]` line. Neither begins with
+    "* `", "namespace " or "end ".
+  ⛔ AND difflines IS NOT AMENDED. The ruling struck that escape hatch: difflines
+    is the EXPECTED-MOVES set, and an ARM-INVARIANT line never moves — amending
+    it would be the defect, not the cure.
+  ⚠️ LATENT KIN the ruling flagged: cut datums already emit `* `-shaped rows at
+    import_netlist.py:1011. The new line must not collide there either.
+
+THE STRUCTURAL PREDICATE (never literal — math 15:24:05):
+  the table EXISTS in BOTH arms and is ARM-INVARIANT — byte-identical between
+  the pinned and rewrite arms — scoped to OUTPUT ports. Arms disagreeing on the
+  table were not the same module: RED. Literal names never enter the golden; a
+  literal marker would be datum-specific (dmem8/16/32 would need three goldens).
+
+DETERMINISM: every emitted line deriving from a set passes through sorted() —
+the two arms are two python3 processes and hash order is per-process random
+(the ruling measured six runs, six orders).
+
+PRE-STATED BAR — every row able to FAIL, and the transport of any bus receipt
+carried under the ratified idiom law (bytes/sha published, cmp-verified):
+  N1  the landed table, BOTH arms            -> A2′ GREEN
+  N2  a planted ARM-DIFFERING table          -> A2′ RED  (arms are not the
+                                                same module)
+  N3  a planted `* `-SHAPED arm-invariant table -> A2′ RED, WITH NON-EMPTY
+                                                EVIDENCE (the ruling's refuters
+                                                found cellcol fires first and
+                                                today prints nothing)
+  N4  table.length != ndesign_out            -> RED
+  N5  the tripwire: outs.length != table + nstate + ncut -> RED
+  N6  the same import twice                  -> BYTE-IDENTICAL (determinism)
+  N7  reimport.sh EXIT=0 on the regenerable set AFTER --write
+  N8  pinreset_controls.sh EXIT=0 · instrument_selftest.sh EXIT=0
+  N9  import_sweep 46 · 31 · 15 UNMOVED, judged by DIFFING all rows
+  N10 saltbuild BARE EXIT=0
+
+APPLICATION SCOPE + THE REGISTER (the ruling's, restated so it can be checked):
+  the amendment applies to datums the importer can REGENERATE; reimport.sh is
+  the register. Today 3 of 7 reproduce byte-identical (Comparator,
+  CompareExchange, CompareExchangeC) and Switch reproduces again after a6209c2
+  — 4 of 7. RefComparator (hand-written on purpose), Fabric and FabricCut
+  (CI-artifact source) carry a REGISTERED DEBT named in the addendum, and every
+  totality-style consumer predicate reads "on every regenerable datum" with the
+  debt list printed beside it.
+
+LANDING FORM: a DATED ADDENDUM to the RESULTS companion; the frozen prereg (the
+8/12 19:07 form) is NOT touched. ONE commit: emission + criterion + the :964
+docstring fix. The receipt names its criterion version — A2′ rev-3.
+
+⛔ GATE: THE COMMIT WAITS ON MATH. Design, this prereg, and the working-tree
+emission release now; a math objection on the datum's shape RETURNS the item.
+I held a red tree at 15:28 rather than land against an open question, and this
+is the same posture with the question not yet asked.

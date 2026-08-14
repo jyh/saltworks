@@ -52,7 +52,19 @@ def ceCNL : SaltWorks.Silicon.Netlist := [
   .or 38 39
 ]
 
-/-- Output net indices, in declaration order. -/
+/-- Output net indices, in the CALLER'S `--outputs` order (then state,
+then cuts). NOT declaration order — this importer discards that. -/
 def ceCNL_outs : List Nat := [30, 33, 35, 26, 36, 40]
+
+/-- DESIGN output NAMES, positionally aligned with `ceCNL_outs`:
+`ceCNL_outs[k]` is the net carrying the port named at position k.
+Each name is VALIDATED against the module's declared outputs (C-V3),
+never derived from declaration order. One entry per EMITTED BIT. -/
+def ceCNL_out_names : List String := ["o0", "o1", "o2", "o3", "o4", "o5"]
+
+/-- Number of DESIGN outputs. `ceCNL_outs` entries from here on are
+next-state bits then cut roots, paired by position with the state inputs;
+on a datum with neither, this is simply the length of `ceCNL_outs`. -/
+def ceCNL_ndesign_out : Nat := 6
 
 end SaltWorks.Silicon.Imported
