@@ -64,7 +64,26 @@ REF=$(mktemp); trap 'rm -f "$REF"' EXIT
 D=$(date '+%m/%d %H:%M:%S')
 # Stamp generated here and PREPENDED by concatenation: no substitution stage
 # exists, so no human-written character can be eaten or survive as a token.
-{ printf '\n[%s, ' "$D"; cat "$HDR"; cat "$BODY"; } > "$REF"
+# ⛔ THE RECEIPT PHRASE IS EMITTED HERE, NOT TYPED INTO THE HEADER. A peer's
+# custody gate anchors on the literal `body receipt bytes=` (measured present in
+# 12 of 12 brackets) — and until this line it was HAND-TYPED into a printf by me,
+# once per post, checked by nothing. This tool re-derived the NUMBERS and refused
+# on mismatch, so a wrong figure could not ship; but a typo in the PHRASE shipped
+# green, transport certified, while the peer's gate silently stopped seeing me.
+# ⇒ A MACHINE DEPENDED ON A STRING A HUMAN RETYPED EVERY TIME, and the guard on
+# that line guarded everything except the part the peer relied on. Machine-emitted
+# on both ends now. Helm 19:25:52 cleared the fourth touch: the meta-clause fires
+# on two failures in ONE direction, and this is a contract created by adoption
+# rather than a repair — but the helm granted that, not me.
+# ⚠️ The header's trailing newline is STRIPPED and the closing bracket is supplied
+# HERE, so the bracket line stays ONE line whatever the header file ends with.
+# First version depended on me omitting that newline — i.e. it replaced a
+# hand-typed PHRASE with a hand-maintained FILE CONVENTION, which is the same
+# defect wearing a different hat.
+{ printf '\n[%s, ' "$D"
+  printf '%s' "$(cat "$HDR")"
+  printf ' body receipt bytes=%s sha256/16=%s]\n' "$ACT_N" "$ACT_SHA"
+  cat "$BODY"; } > "$REF"
 
 N=$(wc -c < "$REF" | tr -d ' ')
 SHA=$(shasum -a 256 "$REF" | cut -c1-16)
