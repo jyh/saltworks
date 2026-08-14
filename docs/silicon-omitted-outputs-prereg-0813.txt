@@ -1,0 +1,83 @@
+SILICON — PRE-REGISTRATION: OMITTED DECLARED OUTPUTS — DECLARE, NEVER REFUSE
+Written 2026-08-13 ~18:5x PDT, BEFORE emitting a line.
+Authority: helm ruling 18:05:38, RULING (2). Unblocked by the soundness coupling
+it states: "(2) DOES NOT LAND WITHOUT (1)" — and (1), the name table, landed at
+cc32a96.
+
+THE RULE AS GIVEN (restated so a reader can check I implemented what was ruled):
+  REFUSAL IS WRONG — a sub-cone import is legitimate (C-V3's own scope note, and
+  the half I deliberately did not take when I landed C-V3).
+  A WARNING IS A CARRIED LINE — and this fleet measured today what a carried line
+  is worth: a blocker phrase repeated 41 times without once being re-derived.
+  ⇒ THE IMPORTER ALWAYS EMITS THE OMITTED-DECLARED-OUTPUTS SET, PRESENT EVEN
+    WHEN EMPTY. An ABSENT line is indistinguishable from an old-format datum; a
+    PRESENT EMPTY line is a measured zero.
+
+  COMPUTATION  OMITTED := (bit-expansion of vector declared outputs
+                           ∪ scalar declared outputs) MINUS set(outs_named)
+               escapes normalised as the parser normalises; emitted sorted().
+               ⛔ The naive "declared minus requested" is UNSATISFIABLE and
+               NON-DISCRIMINATING on exactly the vector ports that motivated
+               this: `decls` holds BASE names while C-V1 forces bit callers, so
+               `rdata` would always appear "omitted" while `rdata[0..31]` were
+               all requested. That is the same trap that made C-V3's first draft
+               mutually unsatisfiable with C-V1.
+  PLACEMENT    strictly AFTER the scope-marker block. C3.M asserts the golden
+               appears VERBATIM AND CONTIGUOUSLY, and interleaving was MEASURED
+               to break it — its red then misdirects to "the golden was edited".
+  NAME         must NOT match readback.py:321's first-match pattern
+               `_outs : List Nat :=`  ⇒  <name>_outs_omitted, NEVER
+               <name>_omitted_outs.
+  SORTED       yes — this one DOES derive from a SET, so the determinism rule
+               reaches it (two arms are two python3 processes; hash order is
+               per-process random). Note this is the OPPOSITE call from the name
+               table, and for the opposite reason: that list derives from an
+               ORDERED caller argument and sorting it would destroy the index
+               semantics. Same rule, different objects.
+
+PRE-STATED BAR:
+  O1  all declared bits requested        -> the line is PRESENT and EMPTY
+  O2  a proper subset requested          -> exactly the missing bits, sorted
+  O3  a VECTOR port fully bit-expanded   -> EMPTY (the trap above: the base name
+      must not appear as "omitted" when every bit was requested)
+  O4  re-run the same import twice       -> BYTE-IDENTICAL
+  O5  the line does NOT match `_outs : List Nat :=` (readback's first-match)
+  O6  C3.M still GREEN — the marker block is still verbatim and contiguous
+  O7  pinreset_controls EXIT=0 · instrument_selftest EXIT=0
+  O8  reimport EXIT=0 after --write · sweep 46/31/15 unmoved by full-row diff
+  O9  saltbuild BARE EXIT=0 — the only arm that reads Lean as a language, which
+      is how the single-quote defect was caught at cc32a96 while every criterion
+      predicate passed
+PASS CRITERION: O1–O9 all as stated; any deviation posted as a failure.
+
+RISKS:
+  R1  PLACEMENT vs C3.M is the sharp one — O6 is its detector, and a C3.M red
+      would MISDIRECT to a golden edit, so if O6 goes red I check placement
+      FIRST and do not touch the golden.
+  R2  The emitted line changes every regenerable datum's bytes again (one-time,
+      verified by reimport --write). Second such re-emission today; both were
+      ruled, neither elective.
+  R3  My own recurring defect: three times today I tested a risk on an object
+      that could not exhibit it. O3 exists precisely because a scalar-only
+      fixture cannot show the vector trap, and it is driven by a REAL vector
+      datum, not by the pinreset fixtures.
+
+════ RESULTS — omitted declared outputs ════
+O1 all bits requested      -> PRESENT and EMPTY  def t_outs_omitted := []      MET
+O2 proper subset           -> exactly ["q1"]                                  MET
+O3 vector fully expanded   -> EMPTY (the base-name trap avoided, on a REAL
+   vector datum, not a scalar fixture that could not exhibit it)            MET
+O4 same import twice       -> BYTE-IDENTICAL                                 MET
+O5 readback first-match still reads the REAL outs line                       MET
+O6 C3.M GREEN — marker still verbatim and contiguous                         MET
+O7 pinreset_controls EXIT=0 · instrument_selftest EXIT=0 12/12               MET
+O8 reimport EXIT=0 4/4 after --write · sweep 46/31/15 unmoved by full diff   MET
+O9 saltbuild BARE EXIT=0                                                     MET
+
+NO DEVIATIONS. Every row passed first time — recorded plainly, because a
+clean run gets published as loudly as a failure or a refutation seat's greens
+are worth nothing. What made it clean was that the two traps were KNOWN:
+the base-name/bit-expansion trap had already made C-V3's first draft
+mutually unsatisfiable with C-V1, and the readback first-match collision was
+named in the ruling. Neither was found by me tonight; both were paid for
+earlier today.

@@ -71,6 +71,13 @@ Each name is VALIDATED against the module's declared outputs (C-V3),
 never derived from declaration order. One entry per EMITTED BIT. -/
 def ceNL_out_names : List String := ["out0", "out1", "oact0", "oact1"]
 
+/-- Declared outputs the caller did NOT request, sorted. PRESENT EVEN
+WHEN EMPTY: an absent line means an old-format datum, an empty line is a
+measured zero. A sub-cone import is legitimate — this DECLARES the scope
+rather than refusing it, so a reader can see what the datum leaves out. -/
+def ceNL_outs_omitted : List String := []
+
+
 /-- Number of DESIGN outputs. `ceNL_outs` entries from here on are
 next-state bits then cut roots, paired by position with the state inputs;
 on a datum with neither, this is simply the length of `ceNL_outs`. -/

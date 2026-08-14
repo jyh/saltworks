@@ -148,6 +148,13 @@ Each name is VALIDATED against the module's declared outputs (C-V3),
 never derived from declaration order. One entry per EMITTED BIT. -/
 def comparatorNL_out_names : List String := ["lo[0]", "lo[1]", "lo[2]", "lo[3]", "lo[4]", "lo[5]", "lo[6]", "lo[7]", "hi[0]", "hi[1]", "hi[2]", "hi[3]", "hi[4]", "hi[5]", "hi[6]", "hi[7]"]
 
+/-- Declared outputs the caller did NOT request, sorted. PRESENT EVEN
+WHEN EMPTY: an absent line means an old-format datum, an empty line is a
+measured zero. A sub-cone import is legitimate — this DECLARES the scope
+rather than refusing it, so a reader can see what the datum leaves out. -/
+def comparatorNL_outs_omitted : List String := []
+
+
 /-- Number of DESIGN outputs. `comparatorNL_outs` entries from here on are
 next-state bits then cut roots, paired by position with the state inputs;
 on a datum with neither, this is simply the length of `comparatorNL_outs`. -/
