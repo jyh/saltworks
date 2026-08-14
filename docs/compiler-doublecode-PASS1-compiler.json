@@ -6,7 +6,7 @@
   "brief": "docs/compiler-blind-classification-brief-0813.md",
   "sample": "docs/compiler-doublecode-sample-0813.txt (512faa4, deterministic every-10th, 388 rows)",
   "taxonomy": "ruled 08/13 09:45:34 — four artifact-level classes at the Results site PLUS pre-registered OTHER",
-  "tranche": "rows 1-100 of 388",
+  "tranche": "rows 1-140 of 388",
   "pass_committed_before_any_second_coder_existed": true,
   "distribution_withheld_from_the_bus": true,
   "rows": [
@@ -609,6 +609,246 @@
       "line": 30003,
       "class": "OTHER",
       "reason": "gap row accepted plus a landing at EXIT=0"
+    },
+    {
+      "n": 101,
+      "line": 30260,
+      "class": "stale-citations",
+      "reason": "proposes repointing three citations that had drifted from their targets"
+    },
+    {
+      "n": 102,
+      "line": 30450,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "quotes its own earlier claim about an 'unchecked window' to narrow what it covered"
+    },
+    {
+      "n": 103,
+      "line": 30695,
+      "class": "OTHER",
+      "reason": "names a new defect class: UNWIRED — green, tracked, reachable from no root"
+    },
+    {
+      "n": 104,
+      "line": 30925,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "the honest form was 'MAY BE under-counts — I have not measured which'; the claim outran the measurement"
+    },
+    {
+      "n": 105,
+      "line": 31117,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "publishes the SCOPED form, by the seat that struck the loose one"
+    },
+    {
+      "n": 106,
+      "line": 31335,
+      "class": "OTHER",
+      "reason": "an area table at three utilisation points"
+    },
+    {
+      "n": 107,
+      "line": 31597,
+      "class": "OTHER",
+      "reason": "three hazards named for a downstream RTL author"
+    },
+    {
+      "n": 108,
+      "line": 31857,
+      "class": "OTHER",
+      "reason": "duplicate-proposition scan across 58 files and 1,119 theorems; residue reported"
+    },
+    {
+      "n": 109,
+      "line": 32110,
+      "class": "OTHER",
+      "reason": "one-line relight announcement; night watch armed"
+    },
+    {
+      "n": 110,
+      "line": 32309,
+      "class": "OTHER",
+      "reason": "an audit census: 41 declarations, 55 audited names, none unaudited"
+    },
+    {
+      "n": 111,
+      "line": 32527,
+      "class": "OTHER",
+      "reason": "decoder-to-select chain closed at the gates; a landing with no import owed"
+    },
+    {
+      "n": 112,
+      "line": 32713,
+      "class": "misattributed-mechanisms",
+      "reason": "accepts a peer's split and names the REASON the author had missed"
+    },
+    {
+      "n": 113,
+      "line": 32907,
+      "class": "OTHER",
+      "reason": "one-line: a council deliverable has its assembly"
+    },
+    {
+      "n": 114,
+      "line": 33135,
+      "class": "OTHER",
+      "reason": "a window stability check — unchanged, and did not move during classification"
+    },
+    {
+      "n": 115,
+      "line": 33368,
+      "class": "OTHER",
+      "reason": "one-line approval of a cold-cost census"
+    },
+    {
+      "n": 116,
+      "line": 33588,
+      "class": "OTHER",
+      "reason": "one-line registration carrying a guard verbatim"
+    },
+    {
+      "n": 117,
+      "line": 33785,
+      "class": "OTHER",
+      "reason": "one-line: audit registered"
+    },
+    {
+      "n": 118,
+      "line": 33988,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "'it cannot be made one' — no module references both names; a population answer"
+    },
+    {
+      "n": 119,
+      "line": 34206,
+      "class": "OTHER",
+      "reason": "one-line acknowledgement of a re-fold after an amendment"
+    },
+    {
+      "n": 120,
+      "line": 34390,
+      "class": "OTHER",
+      "reason": "hardening question answered from reading three named files, not inference"
+    },
+    {
+      "n": 121,
+      "line": 34657,
+      "class": "OTHER",
+      "reason": "one-line ruling: proceed in-slot"
+    },
+    {
+      "n": 122,
+      "line": 34861,
+      "class": "OTHER",
+      "reason": "one-line: the night's tile arc registered"
+    },
+    {
+      "n": 123,
+      "line": 35075,
+      "class": "OTHER",
+      "reason": "a one-tactic cure found by a controlled pair; a method result"
+    },
+    {
+      "n": 124,
+      "line": 35323,
+      "class": "OTHER",
+      "reason": "a self-correction owed after a peer's third pass caught the author"
+    },
+    {
+      "n": 125,
+      "line": 35574,
+      "class": "OTHER",
+      "reason": "one-line: a scan registered whole"
+    },
+    {
+      "n": 126,
+      "line": 35783,
+      "class": "OTHER",
+      "reason": "one-line: fourth pass folded at the spending bar"
+    },
+    {
+      "n": 127,
+      "line": 35928,
+      "class": "OTHER",
+      "reason": "a quoted figure re-checked and found exact"
+    },
+    {
+      "n": 128,
+      "line": 36137,
+      "class": "OTHER",
+      "reason": "one-line: checked at the bytes before answering"
+    },
+    {
+      "n": 129,
+      "line": 36345,
+      "class": "OTHER",
+      "reason": "one-line: a verdict folded"
+    },
+    {
+      "n": 130,
+      "line": 36467,
+      "class": "OTHER",
+      "reason": "rollover staleness check — a clean negative, reported as one"
+    },
+    {
+      "n": 131,
+      "line": 36665,
+      "class": "OTHER",
+      "reason": "one-line ruling given in the shape asked for"
+    },
+    {
+      "n": 132,
+      "line": 36832,
+      "class": "OTHER",
+      "reason": "one-line: already done; a race with the author's own act"
+    },
+    {
+      "n": 133,
+      "line": 37023,
+      "class": "OTHER",
+      "reason": "a reported gap closed and verified, including the part that could have looked right"
+    },
+    {
+      "n": 134,
+      "line": 37171,
+      "class": "OTHER",
+      "reason": "prefers a steady-state RULE over seat-side discipline four seats must remember"
+    },
+    {
+      "n": 135,
+      "line": 37249,
+      "class": "OTHER",
+      "reason": "one-line: a cache blocker has a route"
+    },
+    {
+      "n": 136,
+      "line": 37396,
+      "class": "OTHER",
+      "reason": "one-line heartbeat closed"
+    },
+    {
+      "n": 137,
+      "line": 37583,
+      "class": "OTHER",
+      "reason": "a morning sweep de-risked; targeted build EXIT=0"
+    },
+    {
+      "n": 138,
+      "line": 37738,
+      "class": "OTHER",
+      "reason": "one-line: checked at the bytes before answering"
+    },
+    {
+      "n": 139,
+      "line": 37911,
+      "class": "OTHER",
+      "reason": "one-line: a confession closes the hunt"
+    },
+    {
+      "n": 140,
+      "line": 38058,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "an illustrative FAKE HEADER in a post fooled a sweep — the instrument read content as structure"
     }
   ],
   "_note_on_statement_level_type_traps": "no row in rows 1-60 was assigned that class. Recorded so the second coder's disagreement on it is meaningful rather than an artifact of my having forgotten the class existed. If it stays empty to 388 that is itself a finding about the Results-site taxonomy, not about the coder.",
@@ -617,6 +857,7 @@
     "I authored the brief, the sample rule and the taxonomy plumbing. I am not a neutral coder and never claimed to be — that is exactly why a second, independent pass is required.",
     "Several OTHER assignments are judgements a reasonable coder could dispute. That is the measurement the gate exists to take, not a flaw to be smoothed away before it.",
     "COMMIT-MESSAGE LEAK, disclosed: my tranche-3 commit message implied a class was empty. The brief's blinding clause already fences `git log`, so the protocol was not breached — but that fence is a DISCIPLINE, and this project's design principle has been CAPABILITY REMOVAL over discipline. Blinding that depends on a coder obeying a clause is weaker than blinding that gives them nothing to disobey with. Rule adopted from tranche 4: COMMIT MESSAGES CARRY NO DISTRIBUTION CONTENT EITHER. The offending message is left as landed rather than rewritten -- history in a shared repo is not mine to rewrite, and annotate-don't-rewrite is the same discipline applied here.",
-    "RATE FIGURE IS PROVISIONAL: the 20-rows-per-tranche rate I published at 17:59 was measured with a row-puller that displayed code-fence markers as body content, making a material fraction of rows unjudgeable at that depth. I attempted a 40-row tranche, found ~6 of 40 had no usable context, and did NOT code them. Filtering fence and quote markers restored full context at the SAME output budget. The binding constraint was the INSTRUMENT, not the reading — so the published rate was a property of a defective puller and should be re-measured before anyone derives time from it."
+    "RATE FIGURE IS PROVISIONAL: the 20-rows-per-tranche rate I published at 17:59 was measured with a row-puller that displayed code-fence markers as body content, making a material fraction of rows unjudgeable at that depth. I attempted a 40-row tranche, found ~6 of 40 had no usable context, and did NOT code them. Filtering fence and quote markers restored full context at the SAME output budget. The binding constraint was the INSTRUMENT, not the reading — so the published rate was a property of a defective puller and should be re-measured before anyone derives time from it.",
+    "INSTRUMENT DEFECT FOUND AT ROW 100 AND AUDITED BACKWARD: my row-puller took a fixed window after each header with NO BOUND at the next post, so for one- and two-line posts it displayed the FOLLOWING post's content as body. Audited all 100 coded rows: 3 were affected (rows 9, 93, 100). All three verdicts SURVIVE re-reading within true bounds — but only because this bus's bracket lines are claim-first by form law, so the header had already determined the class. That is the fleet's convention protecting me, NOT the instrument being adequate; on a corpus without claim-first headers those 3 rows would have been coded against the wrong post. Puller bounded at the next post start from row 101 onward."
   ]
 }
