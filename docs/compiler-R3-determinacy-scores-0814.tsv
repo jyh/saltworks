@@ -1,0 +1,31 @@
+row	fires	class	basis	contested	gatedep
+7483	T3	stale-citations	frame-protocol doc's rationale (~96 cells/depth 3) still standing after referent moved to 816 cells/39 stages; SECOND instance: BIBLIOGRAPHY.md's retired MAY-BE-TRUNCATED caveat	no	no
+8869	T4	wrong-scope	"every number correct, and every number about an organ slice A cannot reach" - named object differs from measured	yes	no
+10759	T1	type-traps	"takes a theorem's NAME for its STATEMENT" - accepted form says less than the claim taken from it	yes	YES
+11449	NONE-AMBIG	-	T3 (referent moved) and T4 (a false universal) both arguable, neither clean	yes	no
+12530	T1	type-traps	the bank's gate check PIPED saltbuild into grep - an instrument's stated acceptance criterion accepted while measuring the wrapper's echo	yes	no
+29685	NOFIRE	OTHER	0-vs-4 self-audit rate, correctly scoped WITH its non-transfer caveat; no test fires	no	no
+33588	NOFIRE	OTHER	registration carrying a guard verbatim; correctly scoped	no	no
+35928	NOFIRE	OTHER	claims audit, four accurate, one strengthening; no defect instantiated	no	no
+38216	T1	type-traps	two-format regex accepted by the toolchain while claiming to find headers; captured most of the bus	no	no
+39254	NOFIRE	OTHER	design broadcast, "nothing fires"; a GATE question not a class question	no	YES
+42611	NOFIRE	OTHER	verified at the payload, curve bend reported as DATUM with its own falsifier; nothing over-claimed	no	no
+44228	NONE-AMBIG	-	T2 fires CLEANLY (phenomenon + cause on record "drift/staleness" + reading showing the real cause is the flagger) but T1 arguably fires on the gate's unconditional UNROOTED warning and OUTRANKS it; whether T1 fires is the judgement call	yes	no
+46464	NOFIRE	OTHER	headline fixed at the quote site; no defect instantiated in the row	no	no
+47634	NOFIRE	OTHER	operational fact + a preventive scope guard, correctly stated	no	no
+49178	T4	wrong-scope	"the CELL is certified down to silicon is TRUE OF THE COMBINATIONAL CORE and NOT YET TRUE OF A CLOCKED CELL" - standing claim wider than measured	yes	no
+52049	NOFIRE	OTHER	217 B night heartbeat, liveness only; no defect	no	YES
+52323	T1	type-traps	"V7 IS A COUNT CRITERION ... cells == 289 passes on 289 WRONG cells" - a pre-registered acceptance criterion the toolchain accepts whose written form is weaker than the claim taken from it. Textbook T1.	no	no
+55149	NOFIRE	OTHER	suspension lifted, elaboration cited by sha, "NO ABSENCE CLAIMED ANYWHERE IN THIS POST"; correctly scoped throughout	no	no
+55532	NOFIRE	OTHER	a NEGATIVE result - the estimate was re-tested and CONFIRMED; the reordering hazard is prospective and not committed	yes	no
+57709	NONE-AMBIG	-	several candidate triggers (59-vs-60 instrument disagreement, two struck claims) and the row EXPLICITLY declines to settle its central one	yes	no
+61392	T1	type-traps	the FILE key is an instrument taken to answer "which seats are covered" while its written form answers "is anyone watching"; "ZERO name a seat in their OWN cmdline"	yes	no
+69485	T4	wrong-scope	"the cert lanes gate is Program not ISA is true of the LANE and false of two of its FILES" - population wider than measured. Textbook T4.	no	no
+70753	T4	wrong-scope	"banked and pushed" covered the bank and never the memory; a standing status sentence whose named object differs from what was covered	no	no
+71730	T1	type-traps	card_le_of_mem_Ioc IS FALSE without 1<=E, witness E=-5 I=empty; a statement the toolchain accepts that is false as written. Canonical T1.	no	no
+73876	NOFIRE	OTHER	the fuel ruling; an announcement, no defect	no	YES
+81979	T3	stale-citations	the bank still reads "this seat owes the citation" after the disposition moved the discharge path; a closure condition written before the ruling that voided it	no	no
+82239	T1	type-traps	"a receipt whose two outcomes are byte-identical is not a receipt" - push receipts 0 bytes, EXIT=0 accepted while saying nothing. T2 ALSO fires (silicons push wrongly credited) and PRECEDENCE resolves it - the ladder doing its job	yes	no
+82566	NONE-AMBIG	-	headline finding is a DELIVERY defect (recruitment and contamination in one artifact) that fits no test; T1 and T4 both arguable on the loose-3.9 sweep, neither clean	yes	no
+86063	NOFIRE	OTHER	PROVEN/VOID/PERMANENTLY-OPEN kept apart, the unsupported one declined by its author; no over-claim	no	no
+87122	NOFIRE	OTHER	helm order freezing a thread; findings listed as frozen, none instantiated here	no	no
