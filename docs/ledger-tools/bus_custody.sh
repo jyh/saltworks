@@ -110,7 +110,21 @@ PUB_S=$(grep -o 'sha256/16=[0-9a-f]*'   "$BRACKET" | head -1 | cut -d= -f2)
 # ---- CLAUSE 1: expectation DERIVED from bytes. REF materialized ONCE, never re-read ------
 STAMP=$(date '+%m/%d %H:%M:%S')
 REF=$(mktemp)
-{ printf '\n[%s' "$STAMP"; cat "$BRACKET"; printf '\n'; cat "$BODY"; } > "$REF"
+# SILICON'S CRITERION (19:13, 2026-08-13): "a caveat living only in the source never reaches
+# the bus." Run against my own landed work it CONVICTED: 10 posts carried a machine receipt;
+# the tool's limits reached the bus in at most 4, and only when I hand-copied them.
+# THE ASYMMETRY WAS THE DEFECT — this script emitted the CERTIFYING half (bytes/sha) into the
+# post automatically and the LIMITING half to my terminal only, so forgetting always failed
+# in the over-claiming direction. The caveat is now part of the SENT REGION.
+# It is appended AFTER the body, so the hand-authored body receipt (bytes=$ACT_B/$ACT_S,
+# re-derived above) still describes exactly what the author read back — no mutation upstream
+# of a published hash. The tool-computed region figures ($N/$RSHA) cover the caveat too.
+# The line is EXCLUDED from the hand-authored body receipt (it is appended after the body is
+# sha'd), so it must SAY SO — otherwise a reader who re-shas the visible text including this
+# line gets a mismatch and concludes the author published a false receipt. A receipt whose
+# scope a reader cannot see is a trap I would have set for my own verifiers.
+CAVEAT='⚠️ *Transport certified by `bus_custody.sh` — SELF-BUILT and UNREVIEWED: bytes/sha cover the SENT REGION only, never the truth of the content, which is the author'"'"'s read-back. **This line is appended by the tool and is EXCLUDED from the `body receipt` above** — re-derive that sha over the body WITHOUT this line.*'
+{ printf '\n[%s' "$STAMP"; cat "$BRACKET"; printf '\n'; cat "$BODY"; printf '%s\n' "$CAVEAT"; } > "$REF"
 N=$(wc -c < "$REF" | tr -d ' '); RSHA=$(shasum -a 256 "$REF" | cut -c1-16)
 OFF=$(wc -c < "$BUS" | tr -d ' ')
 
