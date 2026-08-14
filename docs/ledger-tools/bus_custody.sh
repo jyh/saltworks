@@ -58,6 +58,17 @@ if [ "${1:-}" = "--selftest" ]; then
   arm ":38 bytes mistyped"           3 "$T/b.md" "$T/badb.txt"
   printf ', c — lie, bytes=%s sha256/16=deadbeefdeadbeef]' "$B" > "$T/bads.txt"
   arm ":39 sha mistyped"             3 "$T/b.md" "$T/bads.txt"
+  # REGRESSION, from a REAL refusal at 19:16 (not a synthetic mutant): prose discussing
+  # "bytes=/sha256/16=" before the receipt shadowed it under `head -1`. Expect PASS now.
+  # Differential run both ways at landing: head -1 → exit 3, tail -1 → exit 0.
+  printf ', c — posts carrying a receipt bytes=/sha256/16= are the subject here, bytes=%s sha256/16=%s]' "$B" "$S" > "$T/shadow.txt"
+  arm ":37 prose shadows the receipt" 0 "$T/b.md" "$T/shadow.txt"
+  # The fixture above fails only when BOTH the anchor and the digit-requirement are absent,
+  # so it cannot attribute the fix. This one isolates the ANCHOR: a prose mention carrying
+  # DIGITS defeats the pattern fix, so only tail-anchoring rescues it. Differential measured
+  # at landing: head -1 → exit 3 regardless of pattern; tail -1 → exit 0.
+  printf ', c — quoting an earlier receipt bytes=999 sha256/16=beefbeefbeefbeef before mine, bytes=%s sha256/16=%s]' "$B" "$S" > "$T/shadow2.txt"
+  arm ":37 digit-bearing prose (anchor)" 0 "$T/b.md" "$T/shadow2.txt"
   echo
   echo "  NOT DRIVABLE IN-PROCESS, declared rather than counted as passing:"
   echo "    :55 bus shorter than OFF+N  — needs the append itself to fail mid-write"
@@ -101,8 +112,13 @@ LC_ALL=C grep -q ']$' <<<"$(head -1 "$BRACKET")"           || die "bracket line 
 # ---- CLAUSE 3: RE-DERIVE the hand-authored receipt and REFUSE on mismatch ----------------
 ACT_B=$(wc -c < "$BODY" | tr -d ' ')
 ACT_S=$(shasum -a 256 "$BODY" | cut -c1-16)
-PUB_B=$(grep -o 'bytes=[0-9]*'          "$BRACKET" | head -1 | cut -d= -f2)
-PUB_S=$(grep -o 'sha256/16=[0-9a-f]*'   "$BRACKET" | head -1 | cut -d= -f2)
+# PROSE SHADOWING, found live 19:16 when this gate REFUSED a post of mine: the bracket's own
+# prose said "a machine receipt bytes=/sha256/16=" and `head -1` bound PUB_B to that mention,
+# which has no digits. It failed SAFE (refused rather than certified) — but the receipt is
+# the LAST thing on the bracket line by form law, so anchoring to the last match is both
+# correct and immune to any prose that discusses receipts before publishing one.
+PUB_B=$(grep -o 'bytes=[0-9][0-9]*'        "$BRACKET" | tail -1 | cut -d= -f2)
+PUB_S=$(grep -o 'sha256/16=[0-9a-f][0-9a-f]*' "$BRACKET" | tail -1 | cut -d= -f2)
 [ -n "$PUB_B" ] && [ -n "$PUB_S" ] || die "clause 3: bracket line publishes no bytes=/sha256/16=" 3
 [ "$PUB_B" = "$ACT_B" ] || die "PUBLISHED bytes=$PUB_B but body is $ACT_B — a false receipt" 3
 [ "$PUB_S" = "$ACT_S" ] || die "PUBLISHED sha=$PUB_S but body is $ACT_S — a false receipt" 3
