@@ -32,6 +32,25 @@ ${SEAT_DIR}/memory-seats/**            298 entries   ← curated LAWS (compiler 
                                                 and NOT ALL ARE ERRORS.
 FLEET.md                      3,095 posts     ← 81,149 lines, append-only, prose.
 ```
+> ⛔⛔ **2026-08-13 — THE `3,095` FIGURE IS UNSUPPORTED. ITS METHOD WAS NEVER RECORDED, AND
+> ITS AUTHOR COULD NOT REPRODUCE IT ONE DAY LATER.** *The figure STAYS — this is a note, not
+> a correction, because the number is the record of what was believed when the phase was
+> priced on it.*
+> *Attempted recovery, over this file's own 81,149-line window: **eight rule variants** —
+> any column-zero header-ish line · seat field required · blank-line-preceded · unique stamps
+> · seconds required · and the combinations. **Results ranged 544–4,269. None produced 3,095;
+> the nearest was 3,980, off by 885.** A "captured at different moments" hypothesis was
+> refuted by this file's own line 25 ("measured just now") and its 08/12 18:49 commit.*
+> 🔑 ***"MEASURED JUST NOW" IS NOT A METHOD. It is a claim about WHEN, not about HOW — and
+> WHEN is the half that does not help anyone re-run it.*** *A measurement without its method
+> is not a measurement; it is a memory. This document asserts four "measured" findings and
+> records no method for the one figure the whole phase is priced on.*
+> ✅ **THE REPRODUCIBLE ALTERNATIVE, offered as such and not as truth:** *rule R1–R4 in
+> `docs/compiler-population-count-prereg-0813.md` (pre-registered, result-free), tool pinned
+> at `90fd79d` in `docs/ledger-tools/population_count.py`, run from its committed copy, with
+> a control that **failed** on its first run. Same window: **POSTS 3570 · REJECTED 190 ·
+> FENCED 509**.* ⚠️ ***A reproducible number and an unreproducible one are not two opinions —
+> but neither is the reproducible one thereby TRUE.*** *Anyone may reproduce or refute either.*
 ⇒ ***The assignment's verb is wrong, and that is the whole cost. "Extractor" presupposes a
 corpus to extract FROM. There is no such corpus — the ledger must first be CONSTITUTED.***
 **Priced as a positive quantity, per this seat's own law after mis-pricing D2 by 5×: the
