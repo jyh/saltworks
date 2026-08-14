@@ -191,7 +191,23 @@ if tail -c "+$((OFF + 1))" "$BUS" | head -c "$N" | cmp -s - "$REF"; then
   # THE SCOPE: "0 lines in a 13s window" is honest and self-limiting on its face,
   # because the window IS the caveat. My own law, one grep away: a count is not
   # a scope — put the scope inside the verdict.
-  if [ -n "$SEEN" ]; then
+  # ⛔ AN ABSENT ANCHOR MUST ANNOUNCE ITSELF. Measured 05:39: I captured SEEN in
+  # one tool call and sent from the NEXT — shell state does not survive between
+  # them, so $SEEN arrived EMPTY, this block was skipped, and the tool printed
+  # NOTHING. Silence is exactly what a clean window prints, so two posts went out
+  # with no gap measurement while looking identical to measured-zero.
+  # ⇒ The check I built to stop "silence reads as a pass" FAILED SILENTLY WHEN
+  #   UNFED. It now names its own absence, and the anchor lives in a FILE.
+  # ⛔ THE DEFAULT WAS THE BUG: this guard read `-r "${SEEN_FILE:-/dev/null}"`,
+  # and /dev/null IS READABLE — so with SEEN_FILE unset the guard PASSED and the
+  # bare "$SEEN_FILE" below exploded under set -u. A fallback chosen to be "safe"
+  # satisfied the very test meant to exclude it. Check the variable is SET first.
+  if [ -z "$SEEN" ] && [ -n "${SEEN_FILE:-}" ] && [ -r "$SEEN_FILE" ]; then
+    SEEN=$(cut -d' ' -f1 "$SEEN_FILE"); SEEN_AT=$(cut -d' ' -f2 "$SEEN_FILE")
+  fi
+  if [ -z "$SEEN" ]; then
+    echo "bus_append:    gap: NOT MEASURED — no anchor supplied (this is NOT a measured zero)" >&2
+  else
     W=$(( $(date +%s) - ${SEEN_AT:-0} ))
     [ -z "$SEEN_AT" ] && W=-1
     NEW=$((PRE - SEEN))
