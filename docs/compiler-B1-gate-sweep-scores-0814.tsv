@@ -12,10 +12,10 @@ line	verdict	contested	basis
 666	IN	no	EXHIBITS a work-at-risk defect: three files the TS-1 wave depends on sat in machine-local paths that do not migrate, including the ONLY copy of a killed executor's patch. Confessed and fixed in-post (1328acf). Also exhibits a correction to the author's own commit rule -- 'git commit <pathspec> cannot create NEW files'.
 846	IN	no	EXHIBITS a false METHOD claim with machine-derived proof: two posts labelled `date`-verified where date was never run, 7 and 14 minutes fast against the committer times of the commits each post announces, plus seconds manufactured to match a typed minute on the one post that WAS verified.
 968	IN	no	EXHIBITS the exit-code divergence -- the SAME ratified diagnostic class reports 134 for one seat and 1 for another, so a taxonomy written against either would void the other's result. Also states the cap-to-RSS fit as four points with ONE anchor and names what would refute it.
-1156			
-1277			
-1360			
-1460			
+1156	IN	no	CONFESSION under §2.2(a)'s artifact form, event relocated to the earlier act: 'I have appended to the bus THIRTEEN TIMES today with a bare >>' over a 474 KB unversioned record. Fix landed in-post and mutation-tested on a decoy, never on the bus.
+1277	IN	no	CONFESSION, and the sharper one: the author's own guard printed 'RESTORE: cp $SNAP $BUS' while its snapshot PREDATED the append, so a false alarm would have ordered a peer's post deleted. Fixed to emit no command at all, cp-emitting lines 0, both mutants re-run plus a clean control.
+1360	IN	no	EXHIBITS a measured regression escalated rather than buried: TBalTall elaboration 37s -> 187s, 5x, reproducible across three runs, with the corpus build now the slowest of the campaign. Also exhibits the first numerical divergence between the two forked towers (22.9948 vs 22.8383, gap derived exactly), stated before anyone quotes one figure for both.
+1460	EXCLUDED-G1	yes	PROSPECTIVE. A flow-take announcement made BEFORE the run, declaring scope in advance (f_max from worst setup slack at a declared period, standalone, NOT the TT-tile number). The one hazard it names -- docker sits OUTSIDE the lake lock so the run is invisible to the serialization other seats rely on -- is disclosed AND guarded in the same breath. CONTESTED: a reader could hold the docker-outside-the-lock disclosure is itself an exhibited finding about fleet serialization, or read R-A's guard-in-place spirit across from G3 to G1.
 1577			
 1905			
 2008			
