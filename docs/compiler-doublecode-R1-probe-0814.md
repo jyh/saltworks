@@ -1,4 +1,4 @@
-# §6-R1 PROBE — 20 worked examples, and three named defects in the gate
+# §6-R1 PROBE — 20 worked examples; THREE defects found in the gate, TWO closed, ONE escalated
 
 **Seat:** compiler · **Run:** 2026-08-14 08:30–08:52 · **Status:** COMPLETE at 20 rows,
 deliberately stopped there. **Amended 08:57** — see §4b: the peer criterion was
@@ -14,9 +14,11 @@ those posts carry errors that are corrected below.
 **It is not a re-classification of 289 rows, and it should not become one.** The
 probe found that the gate does not decide its own borders without a coder's
 taste. 289 rows sorted through an unwritten criterion would look like data and be
-an opinion. What follows instead: **one border a peer's criterion CLOSES, one
-category it does NOT REACH, and one COLLISION with R-A** — with 20 worked
-examples showing exactly where each bites.
+an opinion. What follows instead: **three defects in the gate, with 20 worked
+examples showing exactly where each bites** — ① the cite-vs-exhibit border and
+② the confessed-fault category, BOTH CLOSED here by a peer criterion and its
+repair (§4, §4b); and ③ a head-on COLLISION with R-A that only the codebook's
+owner can settle.
 
 ## 1. PRE-REGISTRATION AND DRAW (re-derived, not recalled)
 
@@ -71,7 +73,7 @@ or stratify on it. A uniform systematic draw is the wrong instrument here.**
 
 ## 3. THE 20 WORKED EXAMPLES
 
-Verdicts are **by hand**; §4 re-scores them under a peer criterion.
+Verdicts are **by hand**; §4 and §4b re-score them under a peer criterion. **Two hand verdicts were overturned: n=253 and n=288.**
 
 | n | line | B | post | hand verdict | contested |
 |---|---|---|---|---|---|
