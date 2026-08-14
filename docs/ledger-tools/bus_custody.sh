@@ -81,6 +81,13 @@ if [ "${1:-}" = "--selftest" ]; then
   arm ":2d canonical owner ACCEPTED"           0 "$T/b.md" "$T/own3.txt"
   printf ', compiler=LIT — SEAT-STATE: compiler=LIT · attested variant, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/own4.txt"
   arm ":2d attested seat=STATE ACCEPTED"       0 "$T/b.md" "$T/own4.txt"
+  # CLAUSE 2e -- decoy owner. Fixture 1 is my REAL 13:08:06 bracket, abridged.
+  printf ', compiler — SEAT-STATE: compiler=LIT · V7 names 3 objects (mine, silicon watch revisions, maestro V7-A..V7-E), body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/dec1.txt"
+  arm ":2e LANDED decoy-owner REFUSED"     10 "$T/b.md" "$T/dec1.txt"
+  printf ', compiler — SEAT-STATE: compiler=LIT · thanks to silicon and math, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/dec2.txt"
+  arm ":2e 'and <seat>' form ACCEPTED"      0 "$T/b.md" "$T/dec2.txt"
+  printf ', compiler — SEAT-STATE: compiler=LIT · silicon'"'"'s zero refuted, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/dec3.txt"
+  arm ":2e possessive form ACCEPTED"        0 "$T/b.md" "$T/dec3.txt"
   printf 'one line only\n' > "$T/thin.md"
   arm ":26 body under 3 lines"       6 "$T/thin.md" "$T/ok.txt"
   printf 'body\nmore\n[08/13 09:09, x — a header at column 0]\n' > "$T/hdr.md"
@@ -249,6 +256,27 @@ case "$OWNER" in
    Yours would post under another seat's name or under no seat at all -- and a well-formed
    WRONG owner is unfindable forever, where a malformed one merely fails loud." 10 ;;
 esac
+
+# ---- CLAUSE 2e: NO DECOY OWNER LATER IN THE LINE -----------------------------------------
+# 13:08:06 I posted about a NAMING COLLISION and my own header caused a MISATTRIBUTION. My
+# bracket carried ", silicon" and ", maestro" while listing which seats use a token. A peer's
+# watch scans the WHOLE line for ", <seat>" and filed my post under the helm -- reported by
+# math at 13:10 with both filters compared live.
+# THE GRAMMAR IS THE REASON: the owner sits after the FIRST comma (clause 2d). Every LATER
+# ", <seat>" is indistinguishable from an owner to a scanner that does not stop at the first.
+# I fixed exactly this shape inside clause 2b (greedy sed took the LAST SEAT-STATE token
+# instead of the author's) and did not ask where else a last-match could win. Same law,
+# same file, second surface -- and the post it broke was ABOUT names.
+# ⛔ THE FIX IS FREE AT THE AUTHOR'S END: write "silicon's" or "and silicon", never
+# ", silicon". This arm refuses the comma form so the rewording is forced, not remembered.
+REST=$(printf '%s' "$B1" | sed 's/^,[[:space:]]*[^[:space:]—-]*//')
+DECOY=$(printf '%s' "$REST" | LC_ALL=C grep -o ',[[:space:]]*\(maestro\|math\|silicon\|evidence\|compiler\)' | head -1)
+if [ -n "$DECOY" ]; then
+  die "bracket grammar: a DECOY OWNER '$DECOY' appears after the owner slot. A watch that
+   scans the whole header line cannot tell it from the author, and one filed a post of mine
+   under the wrong seat at 13:08:06 (math, 13:10, measured against two filters).
+   Rewrite as \"<seat>'s\" or \"and <seat>\" -- the comma is the whole problem." 10
+fi
 
 # ---- CLAUSE 3: RE-DERIVE the hand-authored receipt and REFUSE on mismatch ----------------
 ACT_B=$(wc -c < "$BODY" | tr -d ' ')
