@@ -73,20 +73,32 @@ selftest() {
   row "cache stale + remote unreadable"     REFUSE "$H"
   mv "$T/remote.git.OFF" "$T/remote.git"
   row "same sha, remote readable: NOT there" FAIL  "$H"
-  [ $rc -eq 0 ] && echo "push_confirm selftest: 5 row(s), EVERY OUTCOME EXERCISED (pass, refuse, and TWO distinct NOs)" \
+  row "sha that is not a commit (compiler NC1)" REFUSE "0000000000000000000000000000000000000000"
+  row "a BLOB's sha, not a commit"              REFUSE "$(cd "$W" && git rev-parse HEAD:f)"
+  [ $rc -eq 0 ] && echo "push_confirm selftest: 7 row(s), EVERY OUTCOME EXERCISED — 2 PASS, 2 distinct NOs, 2 distinct REFUSALS (unreadable remote, bad input)" \
                 || echo "push_confirm selftest: ⛔ A ROW MISBEHAVED"
   return $rc
 }
 [ "${1:-}" = "--selftest" ] && { selftest; exit $?; }
 LANDED=${1:-}
 [ -n "$LANDED" ] || { echo "⛔ no sha given — pass the commit you landed, NEVER 'HEAD' at close time"; exit 2; }
+# ⛔ BAD INPUT IS NOT A FAILED PUSH. Added 2026-08-13 20:55 from a NEGATIVE
+# CONTROL COMPILER CONTRIBUTED (a fabricated all-zeros sha) — my own selftest
+# never fed this tool a bad sha, because I only ever handed it real ones.
+# Before the fix, an unknown sha printed "IS NOT ON origin/$LB" and exited 1:
+# a FALSE RED saying your push failed when your ARGUMENT was wrong. Worse, a
+# typo of a real sha abbreviated to the SAME seven characters as the tip, so
+# the line read "4e5d4b3 IS NOT ON origin/master (remote tip 4e5d4b3)" —
+# self-contradictory, and exactly how a seat learns to distrust its close check.
+git rev-parse --verify --quiet "${LANDED}^{commit}" >/dev/null 2>&1 || {
+  echo "⛔ $LANDED IS NOT A COMMIT IN THIS REPO — CHECK DID NOT RUN (bad input, NOT a failed push)"; exit 2; }
 LB=$(git rev-parse --abbrev-ref HEAD) || exit 2
 R=$(git ls-remote origin "refs/heads/$LB" 2>/dev/null | cut -f1)
 [ -n "$R" ] || { echo "⛔ REMOTE UNREADABLE (branch $LB) — CHECK DID NOT RUN, THIS IS NOT A PASS"; exit 2; }
 git cat-file -e "$R^{commit}" 2>/dev/null || git fetch -q origin "$LB" 2>/dev/null || {
   echo "⛔ FETCH FAILED — cannot compare against $R, CHECK DID NOT RUN"; exit 2; }
 if git merge-base --is-ancestor "$LANDED" "$R" 2>/dev/null; then
-  echo "LANDED ✅ ${LANDED:0:7} is on origin/$LB (remote read, containment)"; exit 0
+  echo "LANDED ✅ $LANDED is on origin/$LB (remote read, containment)"; exit 0
 else
-  echo "⛔ ${LANDED:0:7} IS NOT ON origin/$LB (remote tip ${R:0:7})"; exit 1
+  echo "⛔ $LANDED IS NOT ON origin/$LB (remote tip ${R:0:12})"; exit 1
 fi
