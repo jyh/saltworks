@@ -1,34 +1,42 @@
-# L-1 VALIDATION FENCE — 22 ROWS, ENUMERATED AT CREATION per ADDENDUM F.
-# Created 2026-08-14 13:35 by compiler (REDRAWN; the 13:33 draw was withdrawn,
-# it contained row 80 whose class is in the codebook's own exemplar table --
-# the scanner's \d{3,5} pattern could not see a two-digit row number).
-# Drawn from the 388 double-coded rows, minus the 78 already in
-# compiler-drawn-rows.txt, minus 168 whose class is disclosed within 260 chars in
-# any docs/ file EXCEPT the answer key (PASS1/PASS2/COMPARE) and this file.
-# Eligible pool at creation: 142. Stride 6.
+# L-1 VALIDATION FENCE — ⛔ NOT CONSTRUCTIBLE. THIS FILE IS THE FINDING, NOT A FENCE.
+# compiler · 2026-08-14 13:38 · Addendum F requires membership enumerated at creation.
+# There is no membership to enumerate: THE BLIND POOL IS EMPTY.
 #
-# ⛔ NOT READ AND NOT LOOKED UP. Line numbers only; no body opened, no verdict
-# consulted. FORBIDDEN as a worked example (Addendum F).
-# RELEASE: spend ONLY to validate the L-1 application procedure, once.
-6615
-9152
-13585
-30450
-33988
-37171
-38546
-40261
-43529
-45710
-48083
-50808
-54678
-59170
-61237
-64409
-66466
-68435
-70912
-73131
-76096
-77740
+# THE MEASUREMENT
+#   coded rows, both passes ................................. 388
+#   − already drawn/opened by this seat (drawn-rows ledger) .. 78
+#   − NAMED in some docs/ file outside the answer key ........ 310
+#   = ELIGIBLE for a blind fence ............................. 0
+#
+# THREE DRAWS WERE ATTEMPTED AND ALL THREE ARE WITHDRAWN. Recorded, not deleted:
+#   13:33  contained row 80 — the scanner matched \d{3,5} and CANNOT SEE a two-digit
+#          row. 80 is a codebook exemplar: "| 80 | fires -> misattributed |".
+#          A blind spot CORRELATED with the variable: low line numbers are the
+#          earliest and most-quoted rows, so it was blindest where risk was highest.
+#   13:35  contained 37171 and 77740 — they sit in a BARE LIST under a heading
+#          "FIRES TEST 2:". A PROXIMITY scanner cannot see a list; the label is
+#          hundreds of characters from the later members.
+#   13:37  parameter-free rule (exclude any row NAMED AT ALL outside the answer key)
+#          returns ELIGIBLE 0.
+#
+# THE HONEST BOUND, because neither rule is the truth:
+#   proximity-260, answer key excluded ..... 142 eligible  (MISSES list disclosures — proven)
+#   named-anywhere ..........................  0 eligible  (over-excludes bare mentions)
+#   ⇒ THE TRUE BLIND POOL IS BETWEEN 0 AND 142 AND I CANNOT PIN IT MECHANICALLY.
+#     "Is this row's CLASS recoverable from what I have read?" is not a lexical property,
+#     and every rule I can write is either demonstrably leaky or demonstrably over-broad.
+#
+# ⭐ THE STRUCTURAL FINDING, WHICH IS BIGGER THAN THIS COMMISSION:
+#   310 of 388 double-coded rows are NAMED in this fleet's own narrative documents.
+#   THE DOCUMENTATION HAS CONSUMED ITS OWN TEST SET. Addendum F was ratified today at
+#   11:55 to prevent exactly this, and the measurement shows it arrived after the
+#   corpus was already spent. The statute is right and it is not retroactive.
+#
+# ⇒ CONSEQUENCE FOR L-1, per the helm's own bar ("BOTH-SIDED blind validation or
+#   ships marked incomplete"): THE APPLICATION PROCEDURE SHIPS MARKED INCOMPLETE.
+#   The reason is a measured property of the corpus, not a shortfall of effort, and
+#   no amount of care by this seat can manufacture a blind row that still exists.
+#
+# ⇒ WHAT A REAL VALIDATION WOULD NEED: FRESH rows drawn from the bus and coded by a
+#   FRESH head — pass-3 material — never a fence carved out of the double-coded 388.
+#   That is a proposal for the sitting, not a decision by this seat.
