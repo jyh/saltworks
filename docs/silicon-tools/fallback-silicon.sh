@@ -176,7 +176,14 @@ except Exception as ex:
     idx="** INDEX UNREADABLE at $IDX — CHECK DID NOT RUN **"
   else
     ib=$(wc -c < "$IDX" | tr -d ' ')
-    ipct=$(( ib * 100 / IDXLIM ))
+    # ⛔ ROUND, DO NOT TRUNCATE. Shell integer division always rounds DOWN, so
+    # this meter under-reported headroom use by up to a full point — and it does
+    # so at the ONE place it matters: the >=85 "approaching the cut" arm could
+    # stay silent at a true 85.9%. An error that only ever errs toward
+    # complacency is not a conservative error, it is a late alarm.
+    # Found because my own post said 64% while this line said 63% for the same
+    # file, two minutes apart — in a post about a 1% measurement discrepancy.
+    ipct=$(( (ib * 200 + IDXLIM) / (2 * IDXLIM) ))
     if   [ "$ib" -ge "$IDXLIM" ]; then idx="$ib/$IDXLIM (${ipct}%) ** OVER — TAIL ENTRIES ARE NOT LOADING **"
     elif [ "$ipct" -ge 85 ];     then idx="$ib/$IDXLIM (${ipct}%) ** APPROACHING THE CUT — compact now **"
     else                              idx="$ib/~${IDXLIM} (${ipct}%, limit DERIVED ±512B)"
