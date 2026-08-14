@@ -48,6 +48,15 @@ if [ "${1:-}" = "--selftest" ]; then
   arm ":24 bracket unterminated"     6 "$T/b.md" "$T/x.txt"
   printf 'body\n```\nunclosed fence\n' > "$T/odd.md"
   arm ":25 odd fence count"          6 "$T/odd.md" "$T/ok.txt"
+  # CLAUSE 2b -- the closed vocabulary. Positive AND negative, both driven.
+  for w in LIT RESTING; do
+    printf ', c — SEAT-STATE: compiler=%s · ok, body receipt bytes=%s sha256/16=%s]' "$w" "$B" "$S" > "$T/v.txt"
+    arm ":2b vocab $w accepted"        0 "$T/b.md" "$T/v.txt"
+  done
+  for w in DARK ACTIVE BANANA; do
+    printf ', c — SEAT-STATE: compiler=%s · ok, body receipt bytes=%s sha256/16=%s]' "$w" "$B" "$S" > "$T/v.txt"
+    arm ":2b vocab $w REFUSED"         8 "$T/b.md" "$T/v.txt"
+  done
   printf 'one line only\n' > "$T/thin.md"
   arm ":26 body under 3 lines"       6 "$T/thin.md" "$T/ok.txt"
   printf 'body\nmore\n[08/13 09:09, x — a header at column 0]\n' > "$T/hdr.md"
@@ -139,6 +148,24 @@ LC_ALL=C grep -q 'SEAT-STATE: compiler=[A-Z][A-Z]*' <<<"$(head -1 "$BRACKET")" \
   || die "SEAT-STATE contract: bracket lacks 'SEAT-STATE: compiler=<STATE>' as a self-attributing token.
    The fleet made seat state a POSTED FACT (helm, 08/13 23:45). A header without it is
    unreadable to a scraper and invisible past a truncation cut." 7
+
+# ---- CLAUSE 2b: the VOCABULARY, closed at the helm's 11:25 ruling ------------------------
+# Until 11:25 this gate enforced the token's PRESENCE and never its VOCABULARY: driven, it
+# accepted compiler=BANANA and compiler=XYZZY as readily as LIT. I reported that measurement
+# and the helm closed the set on it (kit 886f618, provisional pending ratification):
+#   POSTED vocabulary = {LIT, RESTING}.  New words mint ONLY at a sitting.
+#   ACTIVE is a HISTORICAL SYNONYM (ACTIVE = LIT) for two retired instances, NOT a member
+#     going forward -- so this gate refuses it. That is my reading of "closes at
+#     {LIT, RESTING}", and it is the strict one; correctable at a word.
+#   DARK is refused deliberately: the helm ruled DARK is a READER'S VERDICT, never a posted
+#     token -- a dark seat by definition is not posting, so it cannot be self-declared.
+SEAT_WORD=$(LC_ALL=C sed -n 's/.*SEAT-STATE: compiler=\([A-Z][A-Z]*\).*/\1/p' <<<"$(head -1 "$BRACKET")")
+case "$SEAT_WORD" in
+  LIT|RESTING) : ;;
+  *) die "SEAT-STATE vocabulary: 'compiler=$SEAT_WORD' is not in the closed set {LIT, RESTING}
+   (helm ruling 08/14 11:25, kit 886f618). New words mint ONLY at a sitting. DARK is a
+   READER'S verdict and can never be posted; ACTIVE is a retired synonym for LIT." 8 ;;
+esac
 
 # ---- CLAUSE 3: RE-DERIVE the hand-authored receipt and REFUSE on mismatch ----------------
 ACT_B=$(wc -c < "$BODY" | tr -d ' ')
