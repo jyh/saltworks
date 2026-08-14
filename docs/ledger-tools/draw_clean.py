@@ -61,6 +61,14 @@ def disclosed(prox):
     for f in sorted(DOCS.rglob("*")):
         if not f.is_file() or f.suffix not in (".md", ".txt", ".json", ".tsv"):
             continue
+        # ⛔ NEVER scan the ANSWER KEY. The PASS1/PASS2 files pair EVERY coded row with its
+        # class by construction, so including them marks the whole corpus "disclosed" and
+        # reports an exhausted pool. Found 13:32 by a threshold sweep that came back FLAT --
+        # 309 excluded at every window from 40 to 400 chars. I nearly read that flatness as
+        # ROBUSTNESS; it meant one source dominated and the parameter was irrelevant.
+        # A withheld verdict record is the thing being protected, not a leak of it.
+        if "PASS1" in f.name or "PASS2" in f.name or "COMPARE" in f.name:
+            continue
         scanned += 1
         t = f.read_text(errors="replace")
         for m in NUM.finditer(t):

@@ -1,0 +1,32 @@
+# L-1 VALIDATION FENCE — 22 ROWS, ENUMERATED AT CREATION per ADDENDUM F.
+# Created 2026-08-14 13:33 by compiler. Drawn from the 388 double-coded rows,
+# minus the 78 in compiler-drawn-rows.txt, minus rows whose class is disclosed
+# within 260 chars in any docs/ file EXCEPT the answer key (PASS1/PASS2/COMPARE).
+# Eligible pool at creation: 143. Stride 6.
+#
+# ⛔ NOT READ AND NOT LOOKED UP. Line numbers only; no body has been opened and
+# no verdict consulted. FORBIDDEN as a worked example (Addendum F: worked
+# examples come from the spent pile, never the fence).
+# RELEASE: spend ONLY to validate the L-1 application procedure, once.
+80
+8438
+12338
+30260
+32907
+37023
+38363
+40119
+42898
+45577
+47789
+50268
+53750
+58719
+61080
+62764
+66314
+67972
+69946
+72846
+75896
+77393
