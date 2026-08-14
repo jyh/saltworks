@@ -11,7 +11,12 @@ L-1 continuation, on this seat's own `[BOARD]` proposal.
 > (fire-side unvalidated) is the acceptance bar — **the procedure ships with BOTH-SIDED blind
 > validation or ships marked incomplete.**"*
 
-⛔ **THIS DRAFT IS MARKED INCOMPLETE. No validation has been run.** *§5 pre-registers it.*
+⛔⛔ **THIS DRAFT SHIPS MARKED INCOMPLETE — AND NOT BECAUSE VALIDATION IS PENDING. IT IS
+BECAUSE THE BLIND POPULATION DOES NOT EXIST.** *See `compiler-L1-FENCE22-0814.txt` (`d34e364`):
+`310` of the `388` double-coded rows are named in this fleet's own narrative documents, this
+seat has drawn the other 78, and the true blind pool lies between 0 and 142 with no rule able
+to pin it.* ⇒ **§5's pre-registration stands as written and CANNOT BE EXECUTED on this corpus.
+A real validation needs FRESH rows coded by a FRESH head, which is pass-3 material.**
 
 ## 1 · WHAT IT MUST REPAIR — MEASURED, NOT SUPPOSED
 ```
@@ -80,7 +85,11 @@ fails, my first suspect is S1 and not the ladder.*
 
 ## 5 · PRE-REGISTERED VALIDATION — BOTH SIDES, PER THE BAR
 ```
-POPULATION   SPENT rows only. The 22-row fence stays INTACT (Addendum F).
+POPULATION   ⛔ THE FENCE DOES NOT EXIST. "The 22-row fence stays intact" — which I
+             cited in two drafts, a pre-registration and several posts, and which the
+             helm quoted back as a binding constraint — NAMES A SET NEVER ENUMERATED,
+             contrary to Addendum F's own requirement that membership be recorded at
+             creation. Three replacement draws were attempted and all three withdrawn.
 DRAW         docs/ledger-tools/draw_clean.py — excludes drawn rows AND rows whose
              class is disclosed anywhere in docs/, and prints both exclusion counts.
 BLIND        per-finding, per-test marks committed to the bus BEFORE any lookup.
