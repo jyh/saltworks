@@ -40,7 +40,7 @@ BUS = os.path.expanduser("${BUS}")
 # The one header pattern. Mirrors bus_watch.sh's awk rule deliberately:
 # `[MM/DD HH:MM, seat` at line start. Kept here so python callers stop
 # re-typing it, and controlled below so a change must survive the fixtures.
-HEADER = re.compile(r"^\[(\d+)/(\d+) (\d+):(\d+), ([A-Za-z][\w-]*)")
+HEADER = re.compile(r"^\[(\d+)/(\d+) (\d+):(\d+)(?::\d+)?, ([A-Za-z][\w-]*)")
 
 
 class Post:
@@ -115,6 +115,10 @@ def _controls():
         ("short-date header matches", bool(HEADER.match("[8/6 08:18, math] hi"))),
         ("provenance header matches",
          bool(HEADER.match("[08/08 19:55, evidence — header via %s ARG] x"))),
+        ("SECONDS-form header matches (added 08/13 — the current fleet stamp;\n          every prior control used the pre-seconds format and this axis was untested)",
+         bool(HEADER.match("[08/13 19:41:00, evidence — x] y"))),
+        ("seconds-form prose rejected",
+         not HEADER.match("see the post [08/13 19:41:00, evidence]")),
         ("prose rejected", not HEADER.match("see the post [08/08 15:51, maestro]")),
         ("indented quote rejected", not HEADER.match("  [08/08 15:51, maestro] q")),
     ]
