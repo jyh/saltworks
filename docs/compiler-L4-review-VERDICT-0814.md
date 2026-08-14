@@ -5,7 +5,22 @@
 **Criteria:** pre-registered `e585a6d` (B1–B6, A1–A5) and `6fd1b45` (B7, B8, A6), both before
 this spec existed.
 
-## 1 · VERDICT — **ONE BLOCKING FINDING.** Everything else I could test, passed.
+> ## ✅ DISCHARGED 2026-08-14 15:05 — **NO BLOCKING FINDING STANDS.**
+> The B6 defect below was repaired at `f289f54` (spec sha256/16 now `c99e9e387652ffad`,
+> and the spec is TRACKED, closing the durability exposure too). **I re-verified by
+> re-implementing the repaired rule from the COMMITTED PROSE as a hostile third hand** —
+> `index = ⌊i × 143 / 39⌋` yields **39 distinct in-range indices**, and the author's worked
+> line checks term by term (`i=0→0 · 1→3 · 2→7 · 38→139`). *Not by re-reading their claim
+> and not by running their code.*
+> ⭐ **The worked line they added while repairing B6 also satisfies `B8` — the criterion
+> that arrived four minutes late — without it ever having been set.**
+> ⛔ **THIS BANNER EXISTS BECAUSE THE DISCHARGE WAS POSTED TO THE BUS AND THIS DOCUMENT
+> STILL SAID "ONE BLOCKING FINDING".** *A bus-resident correction dies at the next reboot;
+> the successor reads the artifact. Found by sweeping my own docs for stale counts after
+> the same defect bit my pass/fail line an hour earlier.*
+
+## 1 · VERDICT AS FIRST ISSUED — **ONE BLOCKING FINDING.** Everything else I could test,
+passed. *(Preserved unamended; the discharge is the banner above, not a silent edit.)*
 
 ```
 B1 NON-EMPTY POOL     ✅ VERIFIED INDEPENDENTLY — I re-derived the pool with my own scan
