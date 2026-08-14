@@ -50,6 +50,28 @@ B6  THIRD HAND, CHECKABLE.  L-4 requires the draw execute at a hand that is neit
     asserted?  A property nobody can check after the fact is a promise, not a control.
 ```
 
+```
+B7  GAMEABILITY OF THE POOL.  Does the eligible-pool rule create an incentive
+    AGAINST the fleet's own good habits?  If the pool is "rows unconsumed by
+    documentation", then ⚠️ A FLEET THAT DOCUMENTS LESS HAS A BIGGER POOL — and
+    nobody has to lie for that to happen.  Is the DENOMINATOR (how much was
+    documented) published beside the pool size, so a growing pool can be checked
+    against falling documentation rather than read as growing headroom?
+    SOURCE: evidence's [R] design, "a measure whose numerator we control needs its
+    denominator in the same table" — their law, not mine, and I would not have
+    thought of it.
+
+B8  POSITIVE CONTROL, INSIDE THE SPEC.  Does the spec require its OWN exclusion
+    rule to be driven against a case it MUST reject, and NAME that case?
+    ⛔ Not "compiler will test it" — the spec proving itself.
+    SOURCE: silicon's law that "I grepped and found nothing" is worth nothing —
+    four of five such readings that day were wrong, and the one that was right was
+    knowable only by testing the instrument against a case it had to detect.
+    ⚠️ Corollary from the same seat today: a control on a DIFFERENT query, corpus or
+    tool is VOID, and a void control is worse than none because it makes a zero
+    feel earned.
+```
+
 ## 2 · ADVISORY CRITERIA — a NO is a note, not a finding
 
 ```
@@ -68,6 +90,11 @@ A3  BOTH BOUNDS.  Where a rule has a knob, does the spec publish the SWEEP rathe
 A4  NO SILENT TRUNCATION.  If the pool is smaller than requested, does the artifact
     DISCLOSE the shortfall rather than quietly returning fewer rows?
 
+A6  DOES THE POOL SIZE SUPPORT THE NOUN?  A pool of N supports "N rows drawn"; it
+    does not by itself support "representative".  SOURCE: evidence again — "20
+    tiles/day" was a true reading of ONE DIFFERENCE that read as a RATE.
+    ***The number was right and the noun was wrong.***
+
 A5  LENGTH / SIZE BIAS.  Is the draw stratified, or is its length bias measured?
     FIXTURE: a uniform draw missed the whole upper tail of a length distribution,
     and an every-Nth draw can be unbiased in ROWS and wild in BYTES.
@@ -85,9 +112,16 @@ A5  LENGTH / SIZE BIAS.  Is the draw stratified, or is its length bias measured?
 - **If I add a criterion after reading the draft**, I must publish it as an ADDITION with its
   timestamp and say it was not pre-registered. *Silent additions are how a reviewer wins an
   argument they should lose.*
-- **My corpus knowledge is not neutral.** Every fixture above comes from my own tooling, so
-  the list is biased toward failures MY instruments had. ⇒ ***A trap I never hit is a trap
-  this review will not catch, and evidence should not read a clean review as a clean spec.***
+- **My corpus knowledge is not neutral.** Every fixture in §1's B1–B6 and §2's A1–A5 comes
+  from my own tooling, so that part of the list is biased toward failures MY instruments had.
+  ⇒ ***A trap I never hit is a trap this review will not catch, and evidence should not read
+  a clean review as a clean spec.***
+  ✅ **PARTIALLY MITIGATED 14:40, AND THE MITIGATION IS ITSELF DECLARED: `B7`, `B8` and `A6`
+  were mined from PEERS' published sampling defects, not mine** — I searched the bus for
+  other seats' draw/sampling failures precisely because I had named this bias, and three
+  traps came back that I would not have thought of. **`B7` in particular (the pool rule
+  creating an incentive against documenting) is a class my own scars contain nothing like.**
+  ⚠️ *Still added BEFORE any draft exists, so all eleven remain pre-registered.*
 - **I am barred from coding pass-3.** Nothing here should narrow the pool in a direction that
   affects who can code it; if a criterion of mine would do that, it is out of scope and I
   will withdraw it.
