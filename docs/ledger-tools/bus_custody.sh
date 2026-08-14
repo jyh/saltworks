@@ -289,6 +289,37 @@ if [ -n "$DECOY" ]; then
    Rewrite as \"<seat>'s\" or \"and <seat>\" -- the comma is the whole problem." 10
 fi
 
+# ---- CLAUSE 2f: "owed 0" IS A CLAIM ABOUT **TWO** ARTIFACTS -- and this one REPORTS ------
+# 2026-08-14: I wrote "owed 0" in ~20 posts while my memory MIRROR sat EIGHTEEN FILES behind
+# the live bank. Every one was true about the BANK and silent about the MIRROR, which is
+# word-for-word what my own card `memory-mirror-is-the-second-noun` (banked 08/11) exists to
+# prevent. THE LAW WAS WRITTEN DOWN AND NOT INSTALLED.
+# ⭐ THIS IS A DETECTOR, NOT A GUARD, AND THE DISTINCTION IS DELIBERATE: a guard's false
+# positive BLOCKS work and the author reroutes silently; a detector's false positive costs a
+# GLANCE. The mirror is legitimately behind mid-work, so refusing would be wrong -- it warns
+# and always exits 0 on its own account. It also FAILS OPEN if the mirror is absent: a
+# detector that breaks the pipeline is a guard wearing the wrong label.
+MIRROR="${SEAT_DIR}/memory-seats/compiler"
+LIVEBANK="${CLAUDE_MEMORY_DIR:-${SEAT_CONFIG_DIR}/projects/-Users-jyh-projects-claude-saltworks/memory}"
+if LC_ALL=C grep -qi 'owed[[:space:]]*[:=]\?[[:space:]]*\(0\|ZERO\|none\)' <<<"$B1" 2>/dev/null; then
+  if [ -d "$MIRROR" ] && [ -d "$LIVEBANK" ]; then
+    STALE=0
+    for lf in "$LIVEBANK"/*.md; do
+      [ -e "$lf" ] || continue
+      bn=$(basename "$lf")
+      cmp -s "$lf" "$MIRROR/$bn" || STALE=$((STALE+1))
+    done
+    if [ "$STALE" -gt 0 ]; then
+      printf '⚠️  MIRROR NOT CURRENT: %d live memory file(s) differ from ${SEAT_DIR}/memory-seats/compiler.
+' "$STALE" >&2
+      printf '   Your bracket claims "owed 0". That is a claim about TWO artifacts -- the BANK
+' >&2
+      printf '   and the MIRROR -- and it is currently true of one. (Detector: not blocking.)
+' >&2
+    fi
+  fi
+fi
+
 # ---- CLAUSE 3: RE-DERIVE the hand-authored receipt and REFUSE on mismatch ----------------
 ACT_B=$(wc -c < "$BODY" | tr -d ' ')
 ACT_S=$(shasum -a 256 "$BODY" | cut -c1-16)
