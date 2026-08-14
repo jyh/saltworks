@@ -6,7 +6,7 @@
   "brief": "docs/compiler-blind-classification-brief-0813.md",
   "sample": "docs/compiler-doublecode-sample-0813.txt (512faa4, deterministic every-10th, 388 rows)",
   "taxonomy": "ruled 08/13 09:45:34 — four artifact-level classes at the Results site PLUS pre-registered OTHER",
-  "tranche": "rows 1-260 of 388",
+  "tranche": "rows 1-300 of 388",
   "pass_committed_before_any_second_coder_existed": true,
   "distribution_withheld_from_the_bus": true,
   "rows": [
@@ -1569,6 +1569,246 @@
       "line": 61600,
       "class": "OTHER",
       "reason": "a quoted item reproduced verbatim with its pid census"
+    },
+    {
+      "n": 261,
+      "line": 61817,
+      "class": "OTHER",
+      "reason": "a seat reports four instrument errors of its own in one hour"
+    },
+    {
+      "n": 262,
+      "line": 61993,
+      "class": "OTHER",
+      "reason": "a boot with the bank read in full"
+    },
+    {
+      "n": 263,
+      "line": 62163,
+      "class": "OTHER",
+      "reason": "one-line roster: four of four by receipt"
+    },
+    {
+      "n": 264,
+      "line": 62354,
+      "class": "stale-citations",
+      "reason": "a definition believed to be needed was ALREADY IN THE TREE"
+    },
+    {
+      "n": 265,
+      "line": 62588,
+      "class": "OTHER",
+      "reason": "while-offsets proved for all block sizes; a landing"
+    },
+    {
+      "n": 266,
+      "line": 62764,
+      "class": "OTHER",
+      "reason": "one-line liveness by receipt"
+    },
+    {
+      "n": 267,
+      "line": 62993,
+      "class": "OTHER",
+      "reason": "names a cross-check as the real corroboration"
+    },
+    {
+      "n": 268,
+      "line": 63200,
+      "class": "OTHER",
+      "reason": "a ruling adopted that OBSOLETES the author's own morning item"
+    },
+    {
+      "n": 269,
+      "line": 63372,
+      "class": "OTHER",
+      "reason": "a claim line declaring a file hot and expected red"
+    },
+    {
+      "n": 270,
+      "line": 63569,
+      "class": "OTHER",
+      "reason": "liveness; the quiet window was durable-artifact work"
+    },
+    {
+      "n": 271,
+      "line": 63730,
+      "class": "OTHER",
+      "reason": "one fact for the morning surface, explicitly not counsel"
+    },
+    {
+      "n": 272,
+      "line": 63874,
+      "class": "OTHER",
+      "reason": "re-verified from the other side; the conveyor is clean"
+    },
+    {
+      "n": 273,
+      "line": 64022,
+      "class": "OTHER",
+      "reason": "a liveness three minutes late, with the lateness named"
+    },
+    {
+      "n": 274,
+      "line": 64155,
+      "class": "OTHER",
+      "reason": "self-measurement published before the docket assigns"
+    },
+    {
+      "n": 275,
+      "line": 64409,
+      "class": "OTHER",
+      "reason": "a placement decision REVERSED on a peer's sharper finding"
+    },
+    {
+      "n": 276,
+      "line": 64680,
+      "class": "OTHER",
+      "reason": "ran a peer's overlap class against the author's own filter; clean"
+    },
+    {
+      "n": 277,
+      "line": 64884,
+      "class": "OTHER",
+      "reason": "a refutation re-raised once, because the morning is now"
+    },
+    {
+      "n": 278,
+      "line": 65106,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "an absence claim was searched BY NAME — the search was narrower than the claim"
+    },
+    {
+      "n": 279,
+      "line": 65312,
+      "class": "OTHER",
+      "reason": "one-line acknowledgement; the chain surfaced"
+    },
+    {
+      "n": 280,
+      "line": 65484,
+      "class": "stale-citations",
+      "reason": "a bank asserted monitor children survive a /clear and keep delivering; the law convicted it"
+    },
+    {
+      "n": 281,
+      "line": 65641,
+      "class": "OTHER",
+      "reason": "a tested precedent: gitignored scratch is invisible to git and to the hub build"
+    },
+    {
+      "n": 282,
+      "line": 65828,
+      "class": "OTHER",
+      "reason": "two defects unified as one class across a gitignore gap and a filter rescue"
+    },
+    {
+      "n": 283,
+      "line": 66000,
+      "class": "OTHER",
+      "reason": "one-line fold of a finding at the block row"
+    },
+    {
+      "n": 284,
+      "line": 66155,
+      "class": "OTHER",
+      "reason": "a never-bare-first rule applied to the flagship; six sites found"
+    },
+    {
+      "n": 285,
+      "line": 66314,
+      "class": "OTHER",
+      "reason": "a banked law arriving at the helm from the other direction"
+    },
+    {
+      "n": 286,
+      "line": 66466,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "eleven implied-quantifier sites SCOPED — claims whose reach was unstated"
+    },
+    {
+      "n": 287,
+      "line": 66636,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "the author's own sweep had the same defect, and it BOUNDS the enumeration"
+    },
+    {
+      "n": 288,
+      "line": 66811,
+      "class": "OTHER",
+      "reason": "a lane costed by exact name so a fresh head need not find them"
+    },
+    {
+      "n": 289,
+      "line": 66953,
+      "class": "OTHER",
+      "reason": "a replay burst confirmed from the watcher side — history delivered as new"
+    },
+    {
+      "n": 290,
+      "line": 67127,
+      "class": "OTHER",
+      "reason": "a parity gap passes both comparisons at a named commit"
+    },
+    {
+      "n": 291,
+      "line": 67300,
+      "class": "OTHER",
+      "reason": "the oldest open item discharged"
+    },
+    {
+      "n": 292,
+      "line": 67479,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "de-risking without taking the join, after an ORDER-OF-MAGNITUDE scope error"
+    },
+    {
+      "n": 293,
+      "line": 67641,
+      "class": "OTHER",
+      "reason": "a liveness over its own cadence, with the overrun named"
+    },
+    {
+      "n": 294,
+      "line": 67830,
+      "class": "OTHER",
+      "reason": "a liveness whose shas were RESOLVED at post time rather than copied forward"
+    },
+    {
+      "n": 295,
+      "line": 67972,
+      "class": "OTHER",
+      "reason": "an item pulled with its blast radius re-measured at a named commit"
+    },
+    {
+      "n": 296,
+      "line": 68158,
+      "class": "OTHER",
+      "reason": "a measurement: no defect, two of two witnessed"
+    },
+    {
+      "n": 297,
+      "line": 68435,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "a second finding that CORRECTS the author's own earlier blast radius"
+    },
+    {
+      "n": 298,
+      "line": 68668,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "a projection is INSUFFICIENT at arity n — the abstraction loses what the claim needs"
+    },
+    {
+      "n": 299,
+      "line": 68837,
+      "class": "OTHER",
+      "reason": "a hold released by its own author because it was wrong"
+    },
+    {
+      "n": 300,
+      "line": 69075,
+      "class": "OTHER",
+      "reason": "a measurement with exit, wall time, sha and hub line"
     }
   ],
   "_note_on_statement_level_type_traps": "no row in rows 1-60 was assigned that class. Recorded so the second coder's disagreement on it is meaningful rather than an artifact of my having forgotten the class existed. If it stays empty to 388 that is itself a finding about the Results-site taxonomy, not about the coder.",
