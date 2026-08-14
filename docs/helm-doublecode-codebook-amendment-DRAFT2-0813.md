@@ -330,6 +330,42 @@ G3  NULL RESULT      a check that ran and found the suspected fault ABSENT; a co
                                                     -> EXCLUDED   (36467 · 56163 · 43228)
 ```
 
+
+### 2.2(a) · **EXHIBITS vs CITES — THE OPERATIVE TEST** *(RATIFIED 2026-08-14, sitting ruling 1 of 10; the Captain's word)*
+
+All three families above turn on one phrase — *"exhibits no instance"* — and until this
+ruling that phrase had no test. Four contested rows in the §6-R1 probe turned on it, decided
+four times by hand. **The criterion, of record in its REPAIRED ARTIFACT FORM (math, 08:53:27):**
+
+> ### **RUN THE CHECK AGAINST THE ARTIFACT THE ROW IS ABOUT.**
+
+```
+EXHIBIT      the artifact is THIS POST .................. it fails  -> GATED IN
+CITATION     the artifact is ANOTHER PARTY'S act, and
+             this post is clean against the cited check .. CITES ONLY -> the family applies
+CONFESSION   the artifact is the AUTHOR'S EARLIER ACT .... it fails  -> GATED IN,
+             ** WITH THE EVENT LOCATED AT THE EARLIER ACT ** (RELOCATION)
+```
+⚖️ **RELOCATION IS PART OF THE RULING, not a gloss.** It settles two real and opposite
+failures: excluding a confession would make the corpus lose its most honest material, while
+counting it as a FRESH event would generate rows in proportion to a seat's honesty.
+Relocation satisfies both — **the row is gated in (the corpus keeps it) AT THE ORIGINAL ACT
+(so confessing costs a seat nothing).** The surviving form is the one where an event has a
+LOCATION rather than a COUNT.
+
+📌 **A defective claim ABOUT a defect exhibits a CITATION defect, not the cited one.** Those
+are different rows. A citation is a claim about a defect, and a claim can itself be faulty.
+
+⚠️ **THE REJECTED WORDING IS RECORDED WITH ITS PRICE, because the price is the argument.**
+The earlier form asked whether *THE POST ITSELF* would fail the cited check. Run over the 22
+truly-held-out agreed-`OTHER` rows (§6-R4, `97c60ee`): **it gated in 0 of 22 — 0.0% survival.**
+Structurally, not by accident: **a post announcing a fix is written USING the fix**, so the act
+of correcting is what makes the subject pass its own cited check, and the better a seat's
+correction hygiene the more certainly its row is excluded. The artifact form gates in 15 of 22
+(68.2%). **That 68-point delta is the measured price of one clause, and the Form B column is
+the verdict set OF RECORD; Form A's 0.0% stands as the price of the rejected wording and is
+not a verdict set.**
+
 ⚠️ *In DRAFT 1 these three read `-> OTHER` in §1.2 and `-> EXCLUDED` in §3. **They are one
 side now: `EXCLUDED`.** They are gate failures, not residual verdicts, and they are named
 here as DIAGNOSTIC FAMILIES, not as a genre list: a governance post that DOES exhibit an
