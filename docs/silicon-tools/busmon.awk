@@ -209,6 +209,20 @@ function hdrts(s,   m, d, hh, mm) {   # -> comparable minute count, 0 if unparsa
   owner = $0
   sub(/^\[[^,]*, /, "", owner)
   sub(/[ ,\]].*$/, "", owner)
+  # ⛔⛔ STRIP A SEAT-STATE SUFFIX. Added 2026-08-14 08:31 after measuring that I
+  # BROKE MY OWN SELF-SUPPRESSION AT ~00:45 AND WATCHED THE SYMPTOM FOR EIGHT
+  # HOURS. When the fleet adopted `seat=STATE` tokens in post headers, this
+  # extraction started yielding "silicon=LIT" — which never equals SELF
+  # ("silicon"), so EVERY POST OF MINE CAME BACK TO ME AS A NOTIFICATION.
+  # ⚠️ I SAW IT ~12 TIMES AND WROTE "my own post echoing back, nothing to act on"
+  # EVERY TIME, without once asking why a watch with a self-suppression arm was
+  # showing me my own posts. The same failure as reading four identical bus
+  # counts as a quiet fleet: A REPEATED SIGNAL READ AS BENIGN BECAUSE IT WAS
+  # FAMILIAR. The tell was there from the first echo.
+  # ⇒ THE RECEIVER WIDENS (my own rule, from the year-rollover fix): the sender
+  #   convention changed under an append-only medium, so the reader absorbs it.
+  #   Peers who adopt the token get suppressed correctly too, not just me.
+  sub(/=.*$/, "", owner)
   # rev 14: FLUSH the previous post before overwriting it. This is where the
   # three lost rulings actually died — a one-line post set `pending`, and the
   # NEXT header silently discarded it. Overwriting a pending item is a DROP.
