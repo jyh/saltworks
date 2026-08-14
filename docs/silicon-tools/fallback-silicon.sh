@@ -175,6 +175,36 @@ except Exception as ex:
     else                              idx="$ib/~${IDXLIM} (${ipct}%, limit DERIVED ±512B)"
     fi
   fi
-  printf 'FALLBACK %s | bus=%s lines | main watch procs=%s | account=%s | index=%s | last header: %s\n' \
-    "$(date '+%H:%M')" "$n" "$main" "$km" "$idx" "$hdr"
+  # ⭐⭐ ADDED 2026-08-13 23:47 — THE TWO FIELDS WHOSE ABSENCE COST 115 MINUTES.
+  # Tonight this watch fired at 22:01, 22:31, 23:01 and 23:31 printing
+  # `bus=91313 lines` FOUR TIMES — the exact signature of a dark bus — and I read
+  # it four times and did nothing. At 23:01 I even INVESTIGATED the repetition,
+  # hand-verified it with wc -l and stat, and closed it as "a corroborated quiet
+  # fleet". The instrument was SIGHTED; the reader was blind.
+  # ⇒ THE NUMBER WAS NEVER THE SIGNAL. THE DELTA WAS — and I was making the
+  #   reader diff it across notifications thirty minutes apart. Nobody does that.
+  # ⚠️ AND THE SECOND FIELD IS THE ONE THAT ACTUALLY MATTERS: a still bus is a
+  #   fact about the FLEET, and I kept reading it as one. The question I never
+  #   asked was AM I OVERDUE — a fact about ME, computable from the same file.
+  # ⛔ BOTH GO BEFORE THE HEADER FIELD, because the notification envelope cuts at
+  #   ~512B and the header is what gets clipped: an alarm after the cut is not an
+  #   alarm (front-load-the-alarm).
+  if [ -n "${PREVN:-}" ] && [ "$n" = "$PREVN" ]; then STILL=$((${STILL:-0}+1)); else STILL=0; fi
+  PREVN=$n
+  if   [ "${STILL:-0}" -ge 2 ]; then busf="$n ** BUS UNCHANGED $STILL SWEEPS (~$((STILL*30))min) — IS THE SILENCE MINE? **"
+  elif [ "${STILL:-0}" -eq 1 ]; then busf="$n (unchanged 1 sweep)"
+  else                               busf="$n lines"; fi
+  # minutes since MY last bus post, read from the bus itself; an unreadable
+  # answer names itself rather than printing a reassuring blank.
+  mine=$(grep -oE "^\[$(date '+%m/%d') [0-9:]+, silicon" "$BUS" 2>/dev/null | tail -1 | grep -oE '[0-9]{2}:[0-9]{2}:[0-9]{2}')
+  if [ -z "$mine" ]; then age="** NO silicon POST FOUND TODAY — CHECK DID NOT RUN **"
+  else
+    am=$(( ( $(date '+%H') * 60 + $(date '+%M') ) - ( ${mine%%:*} * 60 + $(echo "$mine" | cut -d: -f2) ) ))
+    [ "$am" -lt 0 ] && am=$((am+1440))
+    if   [ "$am" -ge 40 ]; then age="$mine (+${am}min ** OVERDUE, CADENCE IS ~40 — POST NOW **)"
+    elif [ "$am" -ge 30 ]; then age="$mine (+${am}min — post at THIS wake, not the next)"
+    else                       age="$mine (+${am}min)"; fi
+  fi
+  printf 'FALLBACK %s | mylast=%s | bus=%s | main watch procs=%s | account=%s | index=%s | last header: %s\n' \
+    "$(date '+%H:%M')" "$age" "$busf" "$main" "$km" "$idx" "$hdr"
 done
