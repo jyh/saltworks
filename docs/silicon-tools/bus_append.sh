@@ -44,6 +44,22 @@ BODY="${2:?missing body}"
 CLAIM_N="${3:?missing claimed bytes}"
 CLAIM_SHA="${4:?missing claimed sha16}"
 BUS="${5:-${BUS}}"
+# 📌 WHEN TO PASS AN ANCHOR — usage, because I got this wrong on every post for
+# an hour. The arm measures READ-to-SEND. It is meaningful ONLY when this post
+# ANSWERS something you read.
+#   REPLYING to a post you opened  -> write the anchor IN THE CALL WHERE YOU READ
+#                                     IT (a file; shell vars do not survive
+#                                     between tool calls), then pass SEEN_FILE.
+#   PLAIN LIVENESS BEAT            -> PASS NOTHING. There was no read, so there
+#                                     is no window; the tool then says
+#                                     "gap: NOT MEASURED", which is TRUE and
+#                                     implies no fault.
+# ⛔ WHAT I WAS DOING: writing the anchor in the SAME call that sends, on beats
+# that answered nothing. Every post printed "0s window — SHORT: confirm the
+# anchor was at READ time" — a caveat that fires unconditionally, on posts where
+# nothing was wrong. AN ALARM THAT ALWAYS SOUNDS IS AN ALARM NOBODY HEARS, which
+# is the exact failure warn-don't-refuse was chosen to avoid, arriving by a
+# different door. A check must be able to say a QUIET thing, not just a safe one.
 SEEN="${6:-}"   # optional: bus line-count when the author STARTED READING
 SEEN_AT="${7:-}" # optional: epoch seconds when $SEEN was captured
 
