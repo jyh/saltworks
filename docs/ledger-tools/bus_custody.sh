@@ -41,10 +41,10 @@ if [ "${1:-}" = "--selftest" ]; then
   mk; B=$(wc -c < "$T/b.md" | tr -d ' '); S=$(shasum -a 256 "$T/b.md" | cut -c1-16)
   # Every fixture carries the ENFORCED phrase `body receipt bytes=…`, because a control that
   # does not traverse the real form tests a pipeline nobody uses.
-  printf ', c — ok, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/ok.txt"
+  printf ', c — SEAT-STATE: compiler=LIT · ok, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/ok.txt"
   echo "SELFTEST — driving every drivable die site (script sha256/16=$SELFSHA)"
   arm "NC0 honest append"            0 "$T/b.md" "$T/ok.txt"
-  printf ', c — no closing bracket, body receipt bytes=%s sha256/16=%s' "$B" "$S" > "$T/x.txt"
+  printf ', c — SEAT-STATE: compiler=LIT · no closing bracket, body receipt bytes=%s sha256/16=%s' "$B" "$S" > "$T/x.txt"
   arm ":24 bracket unterminated"     6 "$T/b.md" "$T/x.txt"
   printf 'body\n```\nunclosed fence\n' > "$T/odd.md"
   arm ":25 odd fence count"          6 "$T/odd.md" "$T/ok.txt"
@@ -54,28 +54,37 @@ if [ "${1:-}" = "--selftest" ]; then
   arm ":28 header-shaped line"       6 "$T/hdr.md" "$T/ok.txt"
   printf 'body\nmore\nthird @@STAMP@@ token\n' > "$T/tok.md"
   arm ":30 retired-token tripwire"   9 "$T/tok.md" "$T/ok.txt"
-  printf ', c — no receipt fields at all]' > "$T/norx.txt"
+  # SEAT-STATE arms. The helm's 04:37 release ORDERED a control that fires in the
+  # DISCRIMINATING SET: a refusal driven on a post that is NOT about state. That is the
+  # arm below — its bracket is about a build result and carries no token.
+  printf ', c — SEAT-STATE: compiler=LIT · ok, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/tok_ok.txt"
+  arm ":33 SEAT-STATE present"       0 "$T/b.md" "$T/tok_ok.txt"
+  printf ', c — build green on three modules, no state mentioned anywhere, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/tok_missing.txt"
+  arm ":33 SEAT-STATE absent (NOT-about-state)" 7 "$T/b.md" "$T/tok_missing.txt"
+  printf ', c — SEAT-STATE: helm=LIT · wrong seat bound, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/tok_wrongseat.txt"
+  arm ":33 SEAT-STATE bound to WRONG seat" 7 "$T/b.md" "$T/tok_wrongseat.txt"
+  printf ', c — SEAT-STATE: compiler=LIT · no receipt fields at all]' > "$T/norx.txt"
   arm ":37 clause-3 fields absent"   3 "$T/b.md" "$T/norx.txt"
-  printf ', c — lie, body receipt bytes=%s sha256/16=%s]' "$((B+9))" "$S" > "$T/badb.txt"
+  printf ', c — SEAT-STATE: compiler=LIT · lie, body receipt bytes=%s sha256/16=%s]' "$((B+9))" "$S" > "$T/badb.txt"
   arm ":38 bytes mistyped"           3 "$T/b.md" "$T/badb.txt"
-  printf ', c — lie, body receipt bytes=%s sha256/16=deadbeefdeadbeef]' "$B" > "$T/bads.txt"
+  printf ', c — SEAT-STATE: compiler=LIT · lie, body receipt bytes=%s sha256/16=deadbeefdeadbeef]' "$B" > "$T/bads.txt"
   arm ":39 sha mistyped"             3 "$T/b.md" "$T/bads.txt"
   # The receipt is NOT last on the line -- ". One date in this append.]" follows it in 12 of
   # 12 real brackets. This fixture puts DIGITS in that trailer, which is exactly what my
   # first fix's false justification permitted. Plain `tail -1` binds 777 and refuses; the
   # phrase anchor binds the receipt. Differential measured at landing.
-  printf ', c — body receipt bytes=%s sha256/16=%s. Prior post was bytes=777. One date.]' "$B" "$S" > "$T/trail.txt"
+  printf ', c — SEAT-STATE: compiler=LIT · body receipt bytes=%s sha256/16=%s. Prior post was bytes=777. One date.]' "$B" "$S" > "$T/trail.txt"
   arm ":37 digits AFTER the receipt"  0 "$T/b.md" "$T/trail.txt"
   # REGRESSION, from a REAL refusal at 19:16 (not a synthetic mutant): prose discussing
   # "bytes=/sha256/16=" before the receipt shadowed it under `head -1`. Expect PASS now.
   # Differential run both ways at landing: head -1 → exit 3, tail -1 → exit 0.
-  printf ', c — posts carrying a receipt bytes=/sha256/16= are the subject here, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/shadow.txt"
+  printf ', c — SEAT-STATE: compiler=LIT · posts carrying a receipt bytes=/sha256/16= are the subject here, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/shadow.txt"
   arm ":37 prose shadows the receipt" 0 "$T/b.md" "$T/shadow.txt"
   # The fixture above fails only when BOTH the anchor and the digit-requirement are absent,
   # so it cannot attribute the fix. This one isolates the ANCHOR: a prose mention carrying
   # DIGITS defeats the pattern fix, so only tail-anchoring rescues it. Differential measured
   # at landing: head -1 → exit 3 regardless of pattern; tail -1 → exit 0.
-  printf ', c — quoting an earlier receipt bytes=999 sha256/16=beefbeefbeefbeef before mine, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/shadow2.txt"
+  printf ', c — SEAT-STATE: compiler=LIT · quoting an earlier receipt bytes=999 sha256/16=beefbeefbeefbeef before mine, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/shadow2.txt"
   arm ":37 digit-bearing prose (anchor)" 0 "$T/b.md" "$T/shadow2.txt"
   echo
   echo "  NOT DRIVABLE IN-PROCESS, declared rather than counted as passing:"
@@ -116,6 +125,20 @@ LC_ALL=C grep -q ']$' <<<"$(head -1 "$BRACKET")"           || die "bracket line 
                                                            || die "a header-shaped line at column 0 in the body" 6
 [ "$(command grep -o '@@STAMP@@' "$BODY" "$BRACKET" | wc -l | tr -d ' ')" -eq 0 ] \
                                                            || die "TRIPWIRE: the retired substitution token is present" 9
+
+# SEAT-STATE CONTRACT (fleet, 2026-08-14 00:45-00:48; helm released this arm 04:37 as
+# CONTRACT ADOPTION rather than self-revision). Two reader kinds force both properties:
+# a TRUNCATING reader needs the state FIRST, a SCRAPING reader needs it BOUND to the seat
+# name — a body-grep cannot tell "compiler declaring LIT" from "the helm reporting compiler
+# LIT". Measured 08/14: I carried the token 2-for-2 and BOTH posts were ABOUT state, i.e.
+# zero traffic in the discriminating set; a peer measured the identical adoption decaying to
+# 1-in-4 within minutes. A remembered contract is not a contract.
+# ABOVE THE PIVOT deliberately: this question is answerable BEFORE the append, so its green
+# is a GUARANTEE and not a report.
+LC_ALL=C grep -q 'SEAT-STATE: compiler=[A-Z][A-Z]*' <<<"$(head -1 "$BRACKET")" \
+  || die "SEAT-STATE contract: bracket lacks 'SEAT-STATE: compiler=<STATE>' as a self-attributing token.
+   The fleet made seat state a POSTED FACT (helm, 08/13 23:45). A header without it is
+   unreadable to a scraper and invisible past a truncation cut." 7
 
 # ---- CLAUSE 3: RE-DERIVE the hand-authored receipt and REFUSE on mismatch ----------------
 ACT_B=$(wc -c < "$BODY" | tr -d ' ')
