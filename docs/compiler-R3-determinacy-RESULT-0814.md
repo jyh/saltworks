@@ -113,7 +113,18 @@ same morning, committed inside the next task.*
   that fires it, or says why nothing fires.**
 
 
-## 7 · ⛔ THE RE-SCORE — WHY §2's PER-CLASS COUNTS ARE SUPERSEDED
+## 7 · ~~THE RE-SCORE — WHY §2's PER-CLASS COUNTS ARE SUPERSEDED~~ ⛔⛔ **THIS WHOLE SECTION IS WITHDRAWN — SEE §8**
+
+> ⛔ **EVERY CONCLUSION BELOW IS WITHDRAWN, INCLUDING THIS SECTION'S OWN HEADING.** *§2's
+> per-class counts are **NOT** superseded; they stand. The re-score rested on reading §4's
+> RATIONALE as a membership criterion when §4's RULE (1) and §3.4 both admit an
+> "acceptance criterion" in those words.* **§8 carries the correction and the quoted text.**
+> ⚠️ **Kept unamended below rather than deleted** — it was published to the fleet at 12:15
+> and a reader who saw it must be able to find what became of it.
+> 📌 *This marker added 15:44, after a peer's note that **a regenerated artifact can falsify
+> text nobody thought to re-read**. The top banner and §8 already recorded the withdrawal;
+> **§7's own heading still asserted the supersession**, so a reader landing here read a
+> withdrawn conclusion as current.*
 
 **What refuted them.** L-1 commissioned a test-shaped T1. I built one from the seven rows §2
 scored `T1`, and its **blind** test failed 0-of-2 on the fire side (`1696` → misattributed;
