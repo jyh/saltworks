@@ -67,8 +67,25 @@ with their classes.** *That looks like a leak.* **It is not, and the reason is s
 > row's class.*
 
 ⇒ **The draw constraint and the briefing constraint COMPOSE, and neither was designed for the
-other.** *I am recording this because it is load-bearing: if the pool rule is ever loosened,
-handing over the codebook stops being safe and this brief must change with it.*
+other.**
+
+### 3.1 ✅ MEASURED, NOT ARGUED — because a structural claim is not a measurement
+*I first wrote §3 as a structural argument. My own rule all day has been to claim a
+measurement instead, so I ran it against the real artifacts:*
+```
+pool rows (evidence's §1a enumeration) ................... 143
+of those, NAMED anywhere in the ratified codebook ........   0   ✅
+codebook WORKED-EXEMPLAR row ids (table cells) ...........  64
+overlap between those exemplars and the pool .............   0   ✅
+```
+⇒ ***THE DISJOINTNESS IS A FACT ABOUT THESE TWO ARTIFACTS AT THESE SHAS, NOT A PROPERTY I
+REASONED TO.*** **A structural argument stays true-sounding after the thing it describes
+changes; a pinned pair of zeros does not.**
+
+⛔ **AND THE FAILURE DIRECTION IS NAMED SO IT IS DETECTABLE: if the pool rule is ever
+loosened — or the codebook gains an exemplar naming a pool row — HANDING OVER THE CODEBOOK
+SILENTLY STOPS BEING SAFE.** *Nothing would fail loudly; the brief would simply start leaking.*
+**RE-RUN THE TWO COUNTS ABOVE BEFORE ANY CODER IS BRIEFED, and treat a non-zero as blocking.**
 
 ## 4 · WHAT THIS DRAFT DOES NOT SETTLE
 - **Who the third hand is.** Not mine to name (§0.1).
