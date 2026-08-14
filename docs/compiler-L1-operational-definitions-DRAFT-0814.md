@@ -198,6 +198,30 @@ FALSE. **The disjointness check belongs INSIDE the draw, not in the post-mortem*
 is moved there, no fire this procedure reports is protected by anything but that outcome.
 **OWED, and it blocks nothing else: T2 gets the checked draw from the start.**
 
+✅ **DISCHARGED 12:37 — `docs/ledger-tools/draw_clean.py`.** It excludes rows already drawn
+(a committed ledger) and rows disclosed anywhere in `docs/`, and it prints the eligible pool
+and both exclusion counts. ⭐ **Its one design rule: it reports CONTAMINATED / CLEAN and never
+which class it saw** — *a contamination checker that names the contaminant contaminates its
+caller, which is the failure mode wearing a helpful face.* It also refuses to truncate
+silently: a short pool prints the shortfall rather than returning fewer rows quietly.
+
+### 9.4 ⛔ AND THE TOOL IMMEDIATELY FOUND A SECOND, DIFFERENT LEAK IN MY OWN LEDGER
+Seeding it, **82 recorded rows resolved to only 64 bus headers.** The cause: the R-1 probe's
+table is `| n | line | …` and **I had banked the FIRST column — `n`, the sample index — where
+the BUS LINE NUMBER belongs.**
+```
+banked as "read":   1  21  46  68  87 110 …    ← sample indices; I never read these lines
+ACTUALLY read:      9 2008 5510 9839 13926 …   ← and TEN of these were still ELIGIBLE
+```
+⇒ ***A TRUE READING OF AN ADJACENT OBJECT, SUBSTITUTED FOR THE OBJECT I MEANT*** — the same
+law as the morning's `wc -c` vs `len(s)`. **Blind draw #3 is unaffected: checked, zero
+overlap with the 20 real R-1 lines, and `67127` is not among them. That is an outcome, not a
+protection** — the draw was eligible to hit ten rows I had read in full.
+
+📌 **The instrument that caught it was the count disagreeing with itself (82 in, 64 out), not
+an audit.** *Corrected ledger: 78 rows, and all 78 now resolve to real headers — the check
+that failed is now the check that passes.*
+
 ### 9.3 THE CITATION BRANCH — CORRECTED AT ITS AUTHOR'S PEN
 I wrote that if the sitting reads citations as uncodeable the `67127` fire *evaporates*.
 **Math, whose criterion it is, corrected it: it RELOCATES** — to the cited artifact (math's

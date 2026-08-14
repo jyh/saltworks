@@ -1,0 +1,92 @@
+# Rows this seat has DRAWN or OPENED. draw_clean.py excludes them.
+# Seeded 2026-08-14 12:35 from R-1, R-3, R-4 and blind draws 1-3.
+#
+# CORRECTED 12:37, and the correction is the point. The first seeding took the
+# R-1 probe's FIRST table column -- which is `n`, the SAMPLE INDEX -- where the
+# BUS LINE NUMBER belongs (the second column). So it excluded bus lines
+# 1,21,46,68,... which I never read, and LEFT ELIGIBLE the 20 lines I actually
+# did read: 9, 9839, 13926, 32309, 35783, 41243, 51092, 66811, 70354, 77131 were
+# reachable by a draw. A TRUE READING OF AN ADJACENT OBJECT, substituted for the
+# object I meant. Blind draw #3 is unaffected -- checked, zero overlap -- but that
+# is an outcome and not a protection.
+#
+# NOT a claim of completeness: rows I merely read inside a peer's post are not
+# here, and draw_clean.py says so in its own output rather than implying otherwise.
+9
+1156
+1277
+1460
+1696
+1905
+2008
+4926
+5057
+5510
+7483
+8869
+9839
+10759
+11449
+12530
+12916
+13926
+14826
+15082
+29685
+31335
+32110
+32309
+33588
+35323
+35783
+35928
+37911
+38216
+39254
+39999
+41243
+41591
+41943
+43903
+44228
+46464
+46788
+49178
+49789
+51092
+51336
+52049
+52323
+55149
+55532
+56163
+56531
+56733
+57709
+58129
+60377
+60871
+61392
+63569
+65828
+66811
+67127
+69485
+70354
+70753
+71379
+71730
+72237
+73485
+73876
+76455
+77131
+81979
+82239
+82566
+84901
+85454
+86063
+86193
+87122
+87679
