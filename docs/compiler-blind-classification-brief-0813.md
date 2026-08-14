@@ -10,6 +10,44 @@ you do not need it here.***
 
 ---
 
+## 0 · ⛔ EVERYTHING YOU NEED, IN ONE BLOCK — read this before anything else
+
+> ⛔⛔ **DO NOT OPEN `docs/compiler-doublecode-PASS1-compiler.json`.** *It is the FIRST
+> coder's output. **Reading it replaces you** — the gate needs two independent passes, and a
+> coder who has seen those assignments is an echo, not a measurement. It is committed and
+> visible; the blinding is yours to keep, and this line is the only warning you get.*
+
+```
+YOUR SAMPLE   docs/compiler-doublecode-sample-0813.txt   (pinned 512faa4)
+              line numbers into ${BUS}, one per line, 388 rows.
+              Deterministic (every 10th post) — you may re-derive it, you need not trust it.
+YOUR CLASSES  ruled 2026-08-13 09:45:34 by council: the FOUR artifact-level classes at the
+              Results site, PLUS a pre-registered OTHER.
+                1  wrong-scope-on-a-measured-claim
+                2  stale-citations
+                3  misattributed-mechanisms
+                4  statement-level-type-traps
+                5  OTHER
+              OTHER is the closure law applied to our own taxonomy: a seed list is a claim
+              about a population not yet enumerated. ⭐ OTHER DOMINATING IS A PUBLISHABLE
+              OUTCOME, not a failure of your coding — the ruling says so explicitly.
+YOUR OUTPUT   docs/compiler-doublecode-PASS2-<yourseat>.json
+              one object per row: {n, line, class, reason}. A row without a written REASON
+              is void and the count is reported without it.
+EXCLUDED      a row you judge unclassifiable goes to class EXCLUDED, with its reason.
+              The excluded set is PRINTED — the gate's BAR requires it.
+```
+⚠️ **You are not asked to agree with me. You are asked to code the same rows independently.**
+*Where we differ, both reasons get printed side by side and neither of us adjudicates alone.*
+
+📌 *This §0 was added after the brief failed its own sufficiency test: **four of five things a
+booted head needs were missing**, including the warning above. The file claimed to be
+"self-contained" and I had verified only the RESULT-FREE half, which was the half that was
+easy to check mechanically.* ***Ask of any artifact someone will BOOT from: could they act on
+this ALONE?***
+
+---
+
 ## 1 · WHY THIS EXISTS, AND WHAT IT IS NOT
 
 *The pre-registered gate (`compiler-error-ledger-extractor-design-0812.md`) reads:*
