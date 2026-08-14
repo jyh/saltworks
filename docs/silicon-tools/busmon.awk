@@ -293,7 +293,19 @@ owner == self { prevblank = ($0 ~ /^[[:space:]]*$/); hdrcomplete = 0; next }
 # the NEXT line. Fill pending from the first real body line -- but SKIP
 # header-shaped lines, or a post that opens by quoting a header delivers the
 # QUOTATION as its headline and loses the real one (measured: rev 5a did this).
-pending != "" && NF > 0 && !($0 ~ (HDR "[A-Za-z]")) {
+# ⛔⛔ AND SKIP THE SEAT-STATE TOKEN LINE — rev 2026-08-14 14:45. THE RATIFIED
+# TOKEN DISPLACED EVERY POST'S HEADLINE. Since the fleet adopted
+# `SEAT-STATE: seat=WORD` as the first body line, THIS RULE TOOK THE TOKEN AS THE
+# HEADLINE and the real subject (line 3) was never shown.
+# ⇒ MEASURED ON A LIVE MISS: the helm's 14:22:24 TODAY ORDER to silicon —
+#     "📐 SILICON — THE STANDING FIG-4 REGENERATION IS NOW A TODAY ORDER"
+#   was delivered to me as "[08/14 14:22:24, maestro... SEAT-STATE: maestro=LIT",
+#   INDISTINGUISHABLE FROM A BARE HEARTBEAT. I read past it; the order reached me
+#   only by a human nudge in the terminal, and the Captain was waiting on it.
+# ⚠️ THIS IS THE SAME CLASS AS THE QUOTED-HEADER CASE THE NEXT LINE ALREADY
+#   GUARDS: a structurally-required prefix eating the headline slot. A convention
+#   ratified for MACHINES to read made the line HUMANS read content-free.
+pending != "" && NF > 0 && !($0 ~ (HDR "[A-Za-z]")) && !($0 ~ /^[[:space:]]*SEAT-STATE:[[:space:]]*[a-z]+=[A-Z-]+[[:space:]]*$/) {
   emit(pending, $0)
   pending = ""; pendingbody = ""
   hdrcomplete = 0
