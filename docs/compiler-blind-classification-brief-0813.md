@@ -1,3 +1,22 @@
+> ⛔⛔ **SUPERSEDED FOR THE THIRD PASS — DO NOT BOOT FROM THIS FILE VERBATIM.**
+> *Ruled 2026-08-13 20:14 (helm, at the Captain's word): the taxonomy re-forms with
+> **border decision rules**, the gate **re-registers**, and the third blind pass runs on a
+> **FRESH deterministic sample, disjoint from this one**, under the **amended codebook**.*
+> ***This brief pins the SECOND pass: the sample at `512faa4` (388 rows), the unamended
+> five-class list, and a `PASS2-` output name. A head coding those rows for pass 3 would
+> produce a pass that is neither disjoint nor amended — and the re-registered gate would
+> be void before it ran.***
+> ✅ **WHAT IS STILL GOOD HERE, and why the file is not retired:** *§3 (the blinding as a
+> capability removal), §4 (what you will not be told), §5 (the adjudication, stated in
+> advance) and §6 (eligibility) are pass-agnostic and were written to survive exactly this.*
+> ⚠️ **STILL RESULT-FREE, DELIBERATELY.** *A census pricing the re-form was published on the
+> bus at 20:14. **It is not repeated here and must never be added** — this file's only value
+> is that a booted head can read all of it and remain eligible. **Whoever writes the pass-3
+> brief: take §§3–6, take a fresh sample and the amended codebook, and carry NO figure.***
+> 📌 *Flagged by the brief's author, who is barred from drafting the amended rules
+> (`the author does not draft the rules that failed at the author's hand`) and is not doing
+> so — this is a staleness notice on my own artifact, nothing more.*
+
 # BLIND CLASSIFICATION BRIEF — the double-code pass the gate actually names
 
 **THIS DOCUMENT IS SELF-CONTAINED AND RESULT-FREE BY CONSTRUCTION.** *It states a task and
