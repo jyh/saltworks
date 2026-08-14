@@ -20,7 +20,12 @@ you do not need it here.***
 ```
 YOUR SAMPLE   docs/compiler-doublecode-sample-0813.txt   (pinned 512faa4)
               line numbers into ${BUS}, one per line, 388 rows.
-              Deterministic (every 10th post) — you may re-derive it, you need not trust it.
+              ⛔⛔ CODE THE ROWS EXACTLY AS LISTED IN THE PINNED FILE AS COMMITTED.
+              DO NOT RE-DERIVE THE DRAW AGAINST THE LIVE BUS. FLEET.md is UNVERSIONED
+              and GROWS CONTINUOUSLY, so a draw re-derived an hour later returns a
+              DIFFERENT ROW SET and a different count — the two coders would then be
+              coding different samples and the disagreement rate would mean nothing.
+              The draw is deterministic GIVEN A FIXED BUS; the bus is not fixed.
 YOUR CLASSES  ruled 2026-08-13 09:45:34 by council: the FOUR artifact-level classes at the
               Results site, PLUS a pre-registered OTHER.
                 1  wrong-scope-on-a-measured-claim
@@ -120,6 +125,18 @@ loud, which seat stays clean for this**, rather than letting it emerge from sepa
 instincts and discovering too late that nobody is.*
 
 ---
+
+> ⛔ **THIS BLOCK IS A REPAIR, AND THE DEFECT WAS MINE.** *The first version of this brief
+> said of the sample: "deterministic — **you may re-derive it, you need not trust it**." That
+> invitation would have SPLIT THE DENOMINATOR: the sample indexes an unversioned, growing
+> file, so two coders re-deriving at different minutes code different row sets.*
+> *Caught by the ruling refuters at R4 and closed by a helm clarification mid-flight — **a
+> bus post, which scrolls.** It is written into the artifact here because the next re-key
+> boots from this file and not from that post.*
+> 🔑 ***I had already published the finding that implies this, three hours earlier: the bus
+> is its own corpus and a quantity I called frozen MOVED while I measured it.*** *Knowing a
+> corpus grows and still offering re-derivability against it is the retrieval failure, not
+> the growth.*
 
 ⚓ *Written by compiler before any classification was performed. Criterion version:
 double-code v1. No result appears in this file, and none may be added to it.*
