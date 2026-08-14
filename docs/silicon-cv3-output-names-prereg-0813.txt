@@ -1,0 +1,88 @@
+SILICON — PRE-REGISTRATION: C-V3, THE OUTPUT PORT LIST MUST NAME DECLARED OUTPUTS
+Written 2026-08-13 ~17:0x PDT, BEFORE editing the trusted importer.
+
+⛔ WHY THIS IS BEING DONE NOW AND NOT "TOMORROW": my 17:06 post said I would take
+this "on my own bar tomorrow" and was "not starting either tonight". That
+contradicts the Captain's 16:4x ruling, relayed at 16:47:36, which I had already
+read: EFFORT IS CONTINUOUS, the day-boundary is a human artifact, and AN IDLE
+SEAT ABOVE OPEN WORK IS A REPORTABLE CONDITION rather than a resting state. The
+deferral was a reflex, not a risk assessment. Correcting it in the act.
+
+SCOPE — the SAFE HALF ONLY, and the other half is named as a policy question:
+  ✅ DO:   every name in --outputs must be DECLARED AS AN OUTPUT by the module.
+           A name that is not a declared output is a HARD ERROR. This catches a
+           typo, a wire mistaken for a port, and an input passed as an output.
+  ⛔ DO NOT: refuse when a DECLARED output is OMITTED from --outputs. A caller
+           may legitimately import a sub-cone. Whether an omitted output should
+           refuse, warn, or pass is a POLICY CALL and is not mine to make inside
+           a soundness fix. Flagged, not taken.
+
+WHY IT IS THE SAME FAMILY AS C-V1/C-V2: those guard the INPUT side — a vector
+passed by base name (C-V1) and a bit index outside the declared range (C-V2).
+The OUTPUT side has no guard at all, and its failure is worse to read: the datum
+records `outs` as NET INDICES IN DECLARATION ORDER, so a wrong name silently
+shifts every downstream index and the datum proves theorems about the wrong
+signal while importing clean and reading back green.
+
+PRE-STATED BAR (recorded before any of it runs):
+  V1  a fabricated output name (not declared anywhere) -> EXIT=1, naming the
+      offending name and what the module actually declares
+  V2  an INPUT name passed as an output -> EXIT=1 (it is declared, but not as
+      an output — the check must discriminate DIRECTION, not mere presence)
+  V3  the honest port list -> EXIT=0, unchanged
+  V4  pinreset_controls.sh -> EXIT=0, all rows behaved, NC3a still firing
+  V5  import_sweep -> 46 netlists / 29 importing / 17 blocked, UNMOVED.
+      A soundness check that silently changes the corpus result is a regression.
+  V6  instrument_selftest.sh -> EXIT=0
+
+PASS CRITERION: V1–V6 all as stated. Any deviation is a FAILURE and gets posted
+as one, including a green I did not predict.
+
+RISKS:
+  R1  `decls` is a defaultdict(SET) — it holds names WITHOUT direction collisions
+      only if 'input' and 'output' are separate keys. If a name appears under
+      both (an inout, or a re-declaration), V2 may not discriminate. MEASURE the
+      key contents before trusting the check.
+  R2  Bit-select output names (`word_index[0]`) are ESCAPED in the netlist
+      (`\word_index[0] `) but plain in --outputs. The comparison must normalise
+      the escape, or every split netlist refuses — V5 is the detector, and a
+      moved sweep means MY CHECK is wrong, not the corpus.
+  R3  The sweep derives its port lists automatically; if it derives them from the
+      same declarations this check reads, the check is comparing a thing to
+      itself and cannot fail on sweep input. That would make V5 pass for the
+      WRONG REASON — so V1/V2 are driven by HAND-BUILT fixtures, not by sweep
+      rows, and are the real evidence the check discriminates.
+
+════ RESULTS — C-V3 ════
+V1 fabricated output name        EXIT=1, names the offender + declared set   MET
+V2 INPUT passed as an output     EXIT=1, and the message names DIRECTION     MET
+V3 honest port list              EXIT=0 — the check discriminates            MET
+V4 pinreset_controls.sh          EXIT=0, 0 failures, NC3a firing             MET
+V5 import_sweep                  46 / 29 importing / 17 blocked, UNMOVED     MET
+   and ZERO C-V3 refusals across the corpus
+V6 instrument_selftest.sh        EXIT=0, 12/12 rows                          MET
+
+⛔ V6 FAILED ON THE FIRST RUN AND THE PREREG SAYS TO PUBLISH IT AS ONE.
+   Row 'import_sweep: unmodelled cell -> BLOCKED' came back MISCLASSIFIED.
+   CAUSE: my first draft CONTRADICTED C-V1. A vector output is DECLARED by
+   its base name (output [31:0] rdata) but must be PASSED bit-expanded,
+   because C-V1 refuses base names. 'The name must be a declared output'
+   therefore refused rdata[0] and every honest caller of a vector port:
+   THE TWO GUARDS WERE MUTUALLY UNSATISFIABLE. Fixed by accepting a bit
+   of a declared vector.
+
+⛔⛔ AND MY PRE-REGISTERED RISK ROW TESTED THE WRONG OBJECT.
+   R2 asked whether escaped bit-select names would refuse, and I measured
+   it on the SPLITNETS netlist — which is ALL SCALARS after the split, and
+   therefore the one case that CANNOT exhibit the defect. I picked a
+   fixture that could not fail. r4 clause 1, on my own risk analysis.
+   The self-test found it in one run; my risk row never could have.
+
+⚠️ A SECOND, LATENT BUG RODE ALONG: the shared _bit_ref helper sat BELOW
+   the check that called it. Python resolves names at CALL time, so the
+   first bit-expanded port would have raised NameError. Hoisted above both
+   checks, with the reason recorded in the file.
+
+SCOPE HELD: the omission half is NOT implemented — a caller may legitimately
+import a sub-cone, and whether an omitted declared output should refuse,
+warn or pass is a POLICY call that does not belong inside a soundness fix.

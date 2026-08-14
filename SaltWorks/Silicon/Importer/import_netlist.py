@@ -1096,6 +1096,68 @@ if _cv1:
         f"Pass the bits: --inputs/--outputs ...,{expanded},... "
         f"({len(_cv1)} name(s) affected: {', '.join(_cv1)})")
 
+# `base[idx]` splitter — SHARED by C-V3 and C-V2, hoisted above both because
+# C-V3 runs first and a helper defined later resolves at CALL time, not def
+# time: the first arrangement raised NameError on the first bit-expanded port.
+def _bit_ref(s):
+    """'d0[7]' -> ('d0', 7); anything else -> (None, None). Escaped names, which
+    carry their own brackets, are never split here — they are not in vports."""
+    if s.endswith("]") and "[" in s:
+        b, _, i = s[:-1].partition("[")
+        if b and i.isdigit():
+            return b, int(i)
+    return None, None
+
+# --- C-V3: THE OUTPUT PORT LIST MUST NAME DECLARED OUTPUTS -------------------
+# ⛔ THE OUTPUT SIDE HAD NO GUARD AT ALL, and its failure reads worse than the
+# input side's. The emitted datum records `<name>_outs` as NET INDICES IN
+# DECLARATION ORDER and carries no port names, so a name that is not really an
+# output SHIFTS EVERY DOWNSTREAM INDEX: the datum imports clean, reads back
+# green, and every theorem citing `outs[k]` is then about a different signal.
+# C-V1 guards a vector passed by base name and C-V2 an out-of-range bit; this is
+# the same family on the side nothing watched.
+#
+# ⚖️ SCOPE IS THE SAFE HALF ONLY, DELIBERATELY. A name that is NOT a declared
+# output refuses. A declared output that the caller OMITS does NOT refuse — a
+# caller may legitimately import a sub-cone, and whether an omission should
+# refuse, warn or pass is a POLICY call that does not belong inside a soundness
+# fix. Flagged in docs/silicon-cv3-output-names-prereg-0813.txt, not taken.
+#
+# Measured before writing this, because both were real risks: `decls` keeps
+# 'input'/'output'/'wire' as SEPARATE keys, so DIRECTION is discriminable rather
+# than mere presence; and the parser already normalises escaped names
+# (`\word_index[0] ` is stored as `word_index[0]`), so no escape handling is
+# needed and no split netlist refuses for that reason.
+#
+# ⛔⛔ AND THE FIRST DRAFT OF THIS CHECK CONTRADICTED C-V1 OUTRIGHT — caught by
+# instrument_selftest, not by reasoning. A vector output is DECLARED by its base
+# name (`output [31:0] rdata`) but must be PASSED bit-expanded, because C-V1
+# refuses the base name. So a naive "the name must be a declared output" refuses
+# `rdata[0]` and every bit-expanded caller — which is every honest caller of a
+# vector port. The two guards would have been mutually unsatisfiable.
+# ⚠️ Worse, my pre-registered risk row tested escaped names on a SPLITNETS
+# netlist, which is all scalars — A FIXTURE THAT COULD NOT EXHIBIT THE DEFECT.
+# The self-test's `unmodelled cell` row found it in one run.
+_declared_outs = set(decls.get("output", ()))
+def _out_declared(nm):
+    if nm in _declared_outs:
+        return True
+    b, _i = _bit_ref(nm)          # `rdata[7]` -> ('rdata', 7)
+    return b is not None and b in _declared_outs   # bit of a declared vector
+_cv3 = [nm for nm in outs_named if not _out_declared(nm)]
+if _cv3:
+    _as_input = [nm for nm in _cv3 if nm in set(decls.get("input", ()))]
+    _hint = (f" '{_as_input[0]}' IS declared, but as an INPUT — direction, not "
+             f"presence, is what this checks." if _as_input else "")
+    raise SystemExit(
+        f"importer: --outputs names {', '.join(repr(x) for x in _cv3)}, which the "
+        f"module does not declare as output(s).{_hint} The datum records outputs "
+        f"as NET INDICES IN DECLARATION ORDER and carries no names, so an "
+        f"unrecognised output shifts every later index and each theorem citing "
+        f"'outs[k]' would then be about a different signal -- imported clean and "
+        f"read back green. Declared outputs are: "
+        f"{', '.join(sorted(_declared_outs)) or '(none)'}")
+
 # --- C-V2: WIDTH AGREEMENT IS A HARD ERROR (math docket call (4), 08/13 05:40)
 # ⛔ THE RULING'S BINDING CONDITION, and its stated reason is why this is not a
 # nicety: option (b) — the flow emits per-bit assigns and the TRUSTED IMPORTER
@@ -1118,14 +1180,6 @@ if _cv1:
 # vector. Escaped register names (`\regs[20] [26]`) reach the same syntax and are
 # NOT declared vectors; whether those must be declared is a DIFFERENT question and
 # is not this ruling's to answer here.
-def _bit_ref(s):
-    """'d0[7]' -> ('d0', 7); anything else -> (None, None). Escaped names, which
-    carry their own brackets, are never split here — they are not in vports."""
-    if s.endswith("]") and "[" in s:
-        b, _, i = s[:-1].partition("[")
-        if b and i.isdigit():
-            return b, int(i)
-    return None, None
 
 # BOTH DOORS, because "everywhere" is the ruling's word: the caller-supplied port
 # list AND every net the netlist itself names. Case C above enters through the
