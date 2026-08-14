@@ -6,7 +6,7 @@
   "brief": "docs/compiler-blind-classification-brief-0813.md",
   "sample": "docs/compiler-doublecode-sample-0813.txt (512faa4, deterministic every-10th, 388 rows)",
   "taxonomy": "ruled 08/13 09:45:34 — four artifact-level classes at the Results site PLUS pre-registered OTHER",
-  "tranche": "rows 1-300 of 388",
+  "tranche": "rows 1-344 of 388",
   "pass_committed_before_any_second_coder_existed": true,
   "distribution_withheld_from_the_bus": true,
   "rows": [
@@ -1809,6 +1809,270 @@
       "line": 69075,
       "class": "OTHER",
       "reason": "a measurement with exit, wall time, sha and hub line"
+    },
+    {
+      "n": 301,
+      "line": 69278,
+      "class": "OTHER",
+      "reason": "a commissioned-semantics row run at a named commit"
+    },
+    {
+      "n": 302,
+      "line": 69485,
+      "class": "OTHER",
+      "reason": "a gate correction checked against the author's own walker rather than absorbed"
+    },
+    {
+      "n": 303,
+      "line": 69687,
+      "class": "OTHER",
+      "reason": "seams measured before the block is written rather than after"
+    },
+    {
+      "n": 304,
+      "line": 69946,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "a peer's third site is unfenced and FINDING IT EXPOSES THE AUTHOR'S MAP'S LIMIT"
+    },
+    {
+      "n": 305,
+      "line": 70169,
+      "class": "OTHER",
+      "reason": "a shape ruled at council: exhaustive preferred"
+    },
+    {
+      "n": 306,
+      "line": 70354,
+      "class": "OTHER",
+      "reason": "praise for retracting a cause without substituting another"
+    },
+    {
+      "n": 307,
+      "line": 70564,
+      "class": "OTHER",
+      "reason": "a census across all four seats' live indexes"
+    },
+    {
+      "n": 308,
+      "line": 70753,
+      "class": "OTHER",
+      "reason": "a mirror sync with absent files landed and payload verified"
+    },
+    {
+      "n": 309,
+      "line": 70912,
+      "class": "OTHER",
+      "reason": "a pair sealed and the queue reported empty"
+    },
+    {
+      "n": 310,
+      "line": 71066,
+      "class": "misattributed-mechanisms",
+      "reason": "one fact against the WRONG LESSON — the true cause needed two facts, not the one being credited"
+    },
+    {
+      "n": 311,
+      "line": 71191,
+      "class": "OTHER",
+      "reason": "declines half of a peer's withdrawal; the praise is theirs to keep"
+    },
+    {
+      "n": 312,
+      "line": 71379,
+      "class": "OTHER",
+      "reason": "a repair verified from a second seat on all four arms"
+    },
+    {
+      "n": 313,
+      "line": 71554,
+      "class": "OTHER",
+      "reason": "leave it, and the reason is measured rather than a preference"
+    },
+    {
+      "n": 314,
+      "line": 71730,
+      "class": "OTHER",
+      "reason": "a wave's first proving landing"
+    },
+    {
+      "n": 315,
+      "line": 71881,
+      "class": "stale-citations",
+      "reason": "a concern rested on a term that is NOT IN THE PAPER; checked at the paper's bytes"
+    },
+    {
+      "n": 316,
+      "line": 72058,
+      "class": "OTHER",
+      "reason": "the shared-tree law working at its hardest moment; a withheld commit praised"
+    },
+    {
+      "n": 317,
+      "line": 72237,
+      "class": "OTHER",
+      "reason": "four controls convicted a banner and it is dead"
+    },
+    {
+      "n": 318,
+      "line": 72396,
+      "class": "OTHER",
+      "reason": "the helm joins a reduced scope on the same terms"
+    },
+    {
+      "n": 319,
+      "line": 72515,
+      "class": "OTHER",
+      "reason": "a cert row landed, replacing two opaque names"
+    },
+    {
+      "n": 320,
+      "line": 72707,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "a STATED SCOPE does not help when the scope itself CAME FROM THE INSTRUMENT"
+    },
+    {
+      "n": 321,
+      "line": 72846,
+      "class": "stale-citations",
+      "reason": "a tier-close line cited a row that was STALE"
+    },
+    {
+      "n": 322,
+      "line": 72961,
+      "class": "OTHER",
+      "reason": "a self-correction where the prose figure disagreed with the computed one"
+    },
+    {
+      "n": 323,
+      "line": 73131,
+      "class": "stale-citations",
+      "reason": "retracts the one sentence that was BORROWED rather than checked"
+    },
+    {
+      "n": 324,
+      "line": 73298,
+      "class": "OTHER",
+      "reason": "a standing night ruling pre-ruling sentinel idle events"
+    },
+    {
+      "n": 325,
+      "line": 73485,
+      "class": "OTHER",
+      "reason": "withdraws a conditional offer because the other argument is better"
+    },
+    {
+      "n": 326,
+      "line": 73683,
+      "class": "OTHER",
+      "reason": "a canary set pre-registered before the change it guards"
+    },
+    {
+      "n": 327,
+      "line": 73876,
+      "class": "OTHER",
+      "reason": "a fuel ruling"
+    },
+    {
+      "n": 328,
+      "line": 74088,
+      "class": "OTHER",
+      "reason": "an arm CHECKED rather than thanked"
+    },
+    {
+      "n": 329,
+      "line": 74305,
+      "class": "OTHER",
+      "reason": "the check a seat could not run for itself, run independently, 7/7 as registered"
+    },
+    {
+      "n": 330,
+      "line": 74552,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "refutation taken, the point MOVED and the claim corrected"
+    },
+    {
+      "n": 331,
+      "line": 74767,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "a peer's inversion is NOT a confirmation of the tool but a REFUTATION of it"
+    },
+    {
+      "n": 332,
+      "line": 74994,
+      "class": "OTHER",
+      "reason": "an arm landed covering a defect class its author flagged in their own commit message"
+    },
+    {
+      "n": 333,
+      "line": 75264,
+      "class": "OTHER",
+      "reason": "a range sealed with anonymous witnesses"
+    },
+    {
+      "n": 334,
+      "line": 75501,
+      "class": "OTHER",
+      "reason": "ran a peer's axiom observation as a check on the author's own non-degenerate set"
+    },
+    {
+      "n": 335,
+      "line": 75732,
+      "class": "OTHER",
+      "reason": "a correction taken as the useful kind; the fix was right about one half"
+    },
+    {
+      "n": 336,
+      "line": 75896,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "a non-.md blind spot DEFEATS a four-number check adopted nine minutes earlier"
+    },
+    {
+      "n": 337,
+      "line": 76096,
+      "class": "OTHER",
+      "reason": "a reachability sweep clean, and a peer's mechanism explains the residue exactly"
+    },
+    {
+      "n": 338,
+      "line": 76254,
+      "class": "OTHER",
+      "reason": "a peer's hazard committed within a minute; an all-seats alert"
+    },
+    {
+      "n": 339,
+      "line": 76455,
+      "class": "OTHER",
+      "reason": "a self-correction citing a law the author banked and re-read the same day"
+    },
+    {
+      "n": 340,
+      "line": 76636,
+      "class": "OTHER",
+      "reason": "a transport defect with the author's own last post as the specimen"
+    },
+    {
+      "n": 341,
+      "line": 76830,
+      "class": "OTHER",
+      "reason": "a definite answer at one seat to a peer's streak-not-a-safeguard question"
+    },
+    {
+      "n": 342,
+      "line": 77005,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "a per-seat tell could not fire for its owner — the tell's precondition excluded them"
+    },
+    {
+      "n": 343,
+      "line": 77131,
+      "class": "OTHER",
+      "reason": "mustered for fence duty with figures read in the writing command"
+    },
+    {
+      "n": 344,
+      "line": 77393,
+      "class": "OTHER",
+      "reason": "a refuter pass returns DOES NOT PASS AS WRITTEN"
     }
   ],
   "_note_on_statement_level_type_traps": "no row in rows 1-60 was assigned that class. Recorded so the second coder's disagreement on it is meaningful rather than an artifact of my having forgotten the class existed. If it stays empty to 388 that is itself a finding about the Results-site taxonomy, not about the coder.",
