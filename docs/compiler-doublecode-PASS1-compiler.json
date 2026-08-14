@@ -6,7 +6,7 @@
   "brief": "docs/compiler-blind-classification-brief-0813.md",
   "sample": "docs/compiler-doublecode-sample-0813.txt (512faa4, deterministic every-10th, 388 rows)",
   "taxonomy": "ruled 08/13 09:45:34 — four artifact-level classes at the Results site PLUS pre-registered OTHER",
-  "tranche": "rows 1-220 of 388",
+  "tranche": "rows 1-260 of 388",
   "pass_committed_before_any_second_coder_existed": true,
   "distribution_withheld_from_the_bus": true,
   "rows": [
@@ -1329,6 +1329,246 @@
       "line": 52599,
       "class": "OTHER",
       "reason": "a duplicate identified with the import direction measured"
+    },
+    {
+      "n": 221,
+      "line": 52908,
+      "class": "OTHER",
+      "reason": "a gate opened with both halves named"
+    },
+    {
+      "n": 222,
+      "line": 53139,
+      "class": "OTHER",
+      "reason": "a new corpus class entered and passed the fence"
+    },
+    {
+      "n": 223,
+      "line": 53458,
+      "class": "OTHER",
+      "reason": "an order completed with the priced half landed"
+    },
+    {
+      "n": 224,
+      "line": 53750,
+      "class": "OTHER",
+      "reason": "artifacts regenerated and diffed against what the public repo was assembled from"
+    },
+    {
+      "n": 225,
+      "line": 54104,
+      "class": "OTHER",
+      "reason": "an open question answered from a measurement in the RTL"
+    },
+    {
+      "n": 226,
+      "line": 54392,
+      "class": "OTHER",
+      "reason": "STRIKE MY LAST POST — the build is red; a withdrawal"
+    },
+    {
+      "n": 227,
+      "line": 54678,
+      "class": "OTHER",
+      "reason": "a green measurement plus a successor state handoff"
+    },
+    {
+      "n": 228,
+      "line": 54918,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "a strike: 459/460 was compared against 11 lost — two incommensurable quantities"
+    },
+    {
+      "n": 229,
+      "line": 55149,
+      "class": "OTHER",
+      "reason": "a suspension lifted and the pass run, with elaboration cited rather than assumed"
+    },
+    {
+      "n": 230,
+      "line": 55345,
+      "class": "stale-citations",
+      "reason": "an obligation listed as owed was ALREADY LANDED — do not build it"
+    },
+    {
+      "n": 231,
+      "line": 55532,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "three times in a day a layer priced for work turned out already generic"
+    },
+    {
+      "n": 232,
+      "line": 55731,
+      "class": "OTHER",
+      "reason": "the priced half passes the phrase fence with every banned phrase at zero"
+    },
+    {
+      "n": 233,
+      "line": 55953,
+      "class": "stale-citations",
+      "reason": "a bank asserted rows NEVER DISPATCHED across three lives; the sweep tested it"
+    },
+    {
+      "n": 234,
+      "line": 56163,
+      "class": "OTHER",
+      "reason": "re-passed at the convening bytes; a named commit is clear"
+    },
+    {
+      "n": 235,
+      "line": 56338,
+      "class": "OTHER",
+      "reason": "a sitting liveness with owed zero"
+    },
+    {
+      "n": 236,
+      "line": 56531,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "self-correction of what was posted about the day-0 seam"
+    },
+    {
+      "n": 237,
+      "line": 56733,
+      "class": "OTHER",
+      "reason": "a read acknowledgement; nothing lands on this seat"
+    },
+    {
+      "n": 238,
+      "line": 56887,
+      "class": "OTHER",
+      "reason": "a landing"
+    },
+    {
+      "n": 239,
+      "line": 57101,
+      "class": "OTHER",
+      "reason": "a landing"
+    },
+    {
+      "n": 240,
+      "line": 57283,
+      "class": "OTHER",
+      "reason": "a DRV debt diagnosed with stage timings"
+    },
+    {
+      "n": 241,
+      "line": 57511,
+      "class": "OTHER",
+      "reason": "a summit announcement"
+    },
+    {
+      "n": 242,
+      "line": 57709,
+      "class": "OTHER",
+      "reason": "a sweep run over a target list of exponents, constants and shapes"
+    },
+    {
+      "n": 243,
+      "line": 57941,
+      "class": "OTHER",
+      "reason": "the watch handed to a successor, with per-seat acknowledgements"
+    },
+    {
+      "n": 244,
+      "line": 58129,
+      "class": "OTHER",
+      "reason": "claiming an item ahead of its gated stage, with the reason stated"
+    },
+    {
+      "n": 245,
+      "line": 58719,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "wall clock was measured and WALL CLOCK CANNOT SEE THE WALL THAT ACTUALLY BINDS"
+    },
+    {
+      "n": 246,
+      "line": 58956,
+      "class": "OTHER",
+      "reason": "two claims died on contact with the statements"
+    },
+    {
+      "n": 247,
+      "line": 59170,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "a release post CLAIMED TOO MUCH; the author names their own line in the chain"
+    },
+    {
+      "n": 248,
+      "line": 59349,
+      "class": "OTHER",
+      "reason": "a ruling that an atomic type-growth commit cannot be challenged afterward"
+    },
+    {
+      "n": 249,
+      "line": 59556,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "'the tree is clean' was false at the minute it was written — work was in flight"
+    },
+    {
+      "n": 250,
+      "line": 59770,
+      "class": "OTHER",
+      "reason": "verified at POST time rather than recalled, with the command shown"
+    },
+    {
+      "n": 251,
+      "line": 59985,
+      "class": "OTHER",
+      "reason": "per-module measurement timings"
+    },
+    {
+      "n": 252,
+      "line": 60178,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "the script elaborated the WORKING TREE while the label said the committed one"
+    },
+    {
+      "n": 253,
+      "line": 60377,
+      "class": "OTHER",
+      "reason": "a rename census; one name kept because it says what it is"
+    },
+    {
+      "n": 254,
+      "line": 60524,
+      "class": "OTHER",
+      "reason": "a class named: verify the action, not the state after it"
+    },
+    {
+      "n": 255,
+      "line": 60718,
+      "class": "OTHER",
+      "reason": "agreement on relight-at-depth plus the sitting's landings, judged on the build arm"
+    },
+    {
+      "n": 256,
+      "line": 60871,
+      "class": "OTHER",
+      "reason": "a convergence document written down as asked"
+    },
+    {
+      "n": 257,
+      "line": 61080,
+      "class": "stale-citations",
+      "reason": "the defect was A STALE CLAIM IN AN INDEX — identity, not analogy"
+    },
+    {
+      "n": 258,
+      "line": 61237,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "the census is CORRECT and its CONCLUSION is not"
+    },
+    {
+      "n": 259,
+      "line": 61392,
+      "class": "OTHER",
+      "reason": "option (a) run against the live machine before it settles; a gap found"
+    },
+    {
+      "n": 260,
+      "line": 61600,
+      "class": "OTHER",
+      "reason": "a quoted item reproduced verbatim with its pid census"
     }
   ],
   "_note_on_statement_level_type_traps": "no row in rows 1-60 was assigned that class. Recorded so the second coder's disagreement on it is meaningful rather than an artifact of my having forgotten the class existed. If it stays empty to 388 that is itself a finding about the Results-site taxonomy, not about the coder.",
