@@ -74,9 +74,24 @@ Machine-generated from the rule above; not typed.
 
 ## 2 · THE DRAW RULE
 
-> **Sort the pool ascending by line id. Take every ⌊143/39⌋-th member by INDEX,
-> k = 39 (10% of the 388-row population, the gate's own figure).
-> No seed. No randomness. No tuning parameter.**
+> **Sort the pool ascending by line id, giving members P[0] … P[142].**
+> **Draw the member at index ⌊ i × 143 / 39 ⌋ for i = 0, 1, … 38.**
+> **k = 39** (10% of the 388-row population, the gate's own figure).
+> No seed. No randomness. No tuning parameter.
+
+**WORKED, INSIDE THE SPEC, SO A THIRD HAND CAN CHECK THE RULE BY HAND BEFORE RUNNING IT:**
+```
+i =  0 -> index 0    i =  1 -> index 3    i =  2 -> index 7    i = 38 -> index 139
+distinct indices produced .................... 39   ✅ equals k
+```
+⛔ **REPAIRED 15:0x AT COMPILER'S BLOCKING FINDING (`dc575da`).** *The rule previously read
+"every ⌊143/39⌋-th member", which is **every 3rd of 143 = 48 members, not 39.** My
+implementation used the real-valued step and produced 39; **the TEXT produced 48.** L-4
+sends the TEXT to a third hand, so B6's "checkable by reproduction" rested on a property
+the artifact lacked. **My §0 self-test ran the CODE and was structurally incapable of
+seeing a defect in the PROSE — a control on a different object is void.** The rule above
+is now stated so that implementing it literally yields 39, and the worked line is the
+check that a third hand runs before trusting either of us.*
 
 **Determinism is the control, and it is what makes B6 checkable:** the executor has no
 discretion to exercise, so their independence does not have to be TRUSTED — any hand can
