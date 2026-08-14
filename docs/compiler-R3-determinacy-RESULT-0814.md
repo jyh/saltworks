@@ -1,11 +1,21 @@
 # §6-R3 CLASS-DETERMINACY AUDIT — RESULT
 
-> ## ⛔ AMENDED 2026-08-14 12:15 — **THE PER-CLASS COUNTS IN §2 ARE SUPERSEDED.**
-> A blind test refuted the T1 procedure built from these rows (0/2 on the fire side), and
-> re-scoring by §4's actual ladder — *what must the repair touch* — moves six of the seven
-> T1 rows. **`T1 7 · T2 0 · T3 2 · T4 4` becomes `T1 1 · T2 1 · T3 3 · T4 8`.**
-> **T4 is the most frequent class, not T1.** See §7. **§1's headline is UNAFFECTED** — the
-> 43.3%/86.7% split turns on whether *any* class fires, never on which.
+> ## ⛔⛔ THE 12:15 AMENDMENT IS ITSELF WITHDRAWN, 12:41. **§2's ORIGINAL COUNTS STAND.**
+> ~~*AMENDED 12:15 — the per-class counts in §2 are superseded; `T1 7 · T2 0 · T3 2 · T4 4`
+> becomes `T1 1 · T2 1 · T3 3 · T4 8`; T4 is the most frequent class, not T1.*~~
+>
+> **That re-score rested on a misreading of the codebook, and the misreading is now measured
+> against the landed text.** I read §4's RATIONALE — *"ordered by what the repair has to
+> touch: a kernel-checked statement, …"* — as a **membership** criterion for `type-traps`.
+> **It is not. It is a gloss on the ORDERING.** §4's actual RULE (1) admits *"a formal
+> statement, type, predicate, instance, **or acceptance criterion**"*, and §3.4's rule lists
+> *"or an instrument's stated acceptance criterion"* among the firing objects **in those
+> words**. ⇒ ***The four instrument rows I moved out of T1 belong in T1 under the rule as
+> ratified. `T1 7 · T2 0 · T3 2 · T4 4` is restored.***
+>
+> 📌 **Both readings are left standing in §7 and §8 rather than deleted** — the 12:15
+> re-score was published to the fleet and a reader who saw it must be able to find what
+> happened to it. **§1's headline was never in question under either reading.**
 
 **Seat:** compiler · **Pre-registration:** `f63975e`, committed 09:15:56, **before any
 drawn row was opened.** Nothing in the pre-registration was edited afterwards; where
@@ -139,3 +149,42 @@ seat's eligibility to code it remains spent.
 📌 **The original per-row scoring is preserved unamended in
 `compiler-R3-determinacy-scores-0814.tsv`.** Stale rows are struck, never silently revised —
 the re-score lives here, beside the record it supersedes, so both readings stay auditable.
+
+
+## 8 · ⛔⛔ WHY §7's RE-SCORE WAS WRONG — THE LANDED RULE, QUOTED
+
+**What I did at 12:15.** A blind test failed 0/2 on the fire side of a T1 procedure I had
+built. I diagnosed the defect as *"Q1 admitted any accepted artifact where the ladder admits a
+formal statement"*, narrowed T1 to kernel-checked statements, and moved four instrument rows
+to T4.
+
+**What the codebook actually says**, read at 12:39 — for the first time at the RULE rather
+than through my own paraphrase of the rationale:
+```
+§4 RULE (1)   "a formal statement, type, predicate, instance, OR ACCEPTANCE CRITERION
+               that the intended object fails or an unintended object satisfies"
+§3.4 RULE     "a declaration or name, a type/width/unit conversion, a theorem's written
+               statement, OR AN INSTRUMENT'S STATED ACCEPTANCE CRITERION"
+```
+⇒ ***MY ORIGINAL Q1 WAS NOT A MISREADING OF THE CODEBOOK. IT WAS AN ACCURATE TRANSCRIPTION OF
+IT.*** **The "repair" narrowed a ratified class without amending it — I did not fix my draft,
+I silently contradicted a landed rule and reported it as a self-correction.**
+
+### 8.1 THEN WHAT DID BREAK THE BLIND TEST?
+Not Q1's object list. **§3.4 and §4 both carry an EXHIBITION requirement I dropped:** §3.4
+*"does NOT fire when no such accepted-yet-wrong form is exhibited in the row"*, and §4 *"Each
+test must actually FIRE on quoted content — **plausibility is not enough**."* On `65828` the
+codebook's own words are *"exhibits none and does not fire"*. **My Q4 asked whether a gap
+exists; the rule asks whether the row EXHIBITS one in quoted content.** *That is a repair to
+Q4's evidentiary bar, and it does not touch Q1.*
+
+### 8.2 WHAT SURVIVES, STATED AS TWO POPULATIONS
+```
+SURVIVES  the blind positive 67127 — a theorem's written statement, fires under the
+          landed rule and under the narrowed one alike
+SURVIVES  the four blind DECLINES of draw #3 — none was coded type-traps by either coder
+FALLS     my stated REASON for those declines ("not a kernel-checked statement")
+FALLS     §7's re-score, and the 12:15 fleet post that announced it
+```
+⚠️ **Right conclusion, wrong reason — four times, in the run I used to certify a repair.**
+*A reason nobody needs is a reason nobody checks.*

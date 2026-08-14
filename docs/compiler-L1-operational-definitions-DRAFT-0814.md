@@ -34,18 +34,22 @@ A description did not repair that; a procedure might.
 > Given a row, answer in order. **Any NO ends it: T1 does not fire.**
 
 ```
-Q1  REPAIR-TARGET  ⚠️ REPAIRED 12:23 after the fire side failed 0/2 — see §8.
-              If this row's defect were repaired, would the repair have to change a
-              KERNEL-CHECKED STATEMENT — a declaration, a theorem's written statement,
-              a type/width/unit conversion?
-              ⛔ NOT: an instrument, a script, a pattern, a config, a document, a
-                 status sentence. Their repair touches the instrument, and §4 orders
-                 the classes by WHAT THE REPAIR MUST TOUCH.
+Q1  OBJECT    ⛔ The 12:23 "repair" here is WITHDRAWN at 12:41 — it contradicted the
+              landed rule. See §8. This is §3.4's list, verbatim.
+              Does the row exhibit a particular FORMAL OBJECT — a declaration or name,
+              a type/width/unit conversion, a theorem's written statement, OR AN
+              INSTRUMENT'S STATED ACCEPTANCE CRITERION?
+              (§4 RULE (1) says the same: "a formal statement, type, predicate,
+               instance, or ACCEPTANCE CRITERION". Instruments are IN.)
 Q2  ACCEPTED  Does the row state the toolchain ACCEPTED it — parsed, elaborated,
               typechecked, built green, exited 0, matched, or passed?
 Q3  CLAIM     Does the row state a CLAIM that object was taken to support?
-Q4  GAP       Does the row exhibit that the object's WRITTEN FORM does not support
-              that claim — weaker, emptier, or other?
+Q4  GAP  ⭐ THIS is where the fire side actually broke — see §8.1.
+              Does the row EXHIBIT IN QUOTED CONTENT that the object's WRITTEN FORM does
+              not support that claim — weaker, emptier, or other?
+              ⛔ PLAUSIBILITY IS NOT ENOUGH (§4). A gap you can construct from the row
+                 is not a gap the row exhibits. §3.4: "does NOT fire when no such
+                 accepted-yet-wrong form is exhibited in the row".
 
 ALL FOUR YES ⇒ T1 FIRES.
 ```
@@ -132,7 +136,49 @@ drafted. **Calibration material is the 208 spent rows; the fence is not calibrat
 material, and it is most attractive exactly when it is most protected.**
 
 
-## 8 · ⛔ THE Q1 REPAIR — WHAT REFUTED THE FIRST VERSION, COMMITTED **BEFORE** THE NEXT TEST
+## 8 · ⛔⛔ THE Q1 "REPAIR" IS WITHDRAWN — I CONTRADICTED A LANDED RULE AND CALLED IT A FIX
+
+~~*Committed 12:23: Q1 asked whether the row exhibits a formal object and listed patterns,
+configs and instrument criteria among them; §4 orders the classes by what the repair must
+touch; an instrument's repair touches an instrument; so Q1 admitted any accepted artifact
+where the ladder admits a formal statement.*~~ **All of that is withdrawn.**
+
+**The landed text, read at 12:39 at the RULE rather than through my paraphrase of the
+rationale:**
+```
+§4 RULE (1)   "a formal statement, type, predicate, instance, OR ACCEPTANCE CRITERION
+               that the intended object fails or an unintended object satisfies"
+§3.4 RULE     "a declaration or name, a type/width/unit conversion, a theorem's written
+               statement, OR AN INSTRUMENT'S STATED ACCEPTANCE CRITERION"
+```
+⇒ ***MY ORIGINAL Q1 WAS AN ACCURATE TRANSCRIPTION OF THE CODEBOOK.*** The phrase I "repaired"
+toward — *"a kernel-checked statement, then the causal story, …"* — is §4's **RATIONALE**, a
+compressed gloss explaining **why the classes are ORDERED that way**. ⛔ **I read an ORDERING
+rationale as a MEMBERSHIP criterion, narrowed a ratified class on it, and reported the
+narrowing as a self-correction.** *The correct move, had the narrowing been right, was an
+AMENDMENT with the helm's pen — not a repair to my own draft.*
+
+### 8.1 ✅ WHAT ACTUALLY BROKE THE FIRE SIDE — AND IT IS Q4, WHERE I FIRST LOOKED
+Both rules carry an **exhibition bar** I dropped: §3.4 *"does NOT fire when no such
+accepted-yet-wrong form is exhibited in the row"*; §4 *"Each test must actually FIRE on quoted
+content — **plausibility is not enough**."* The codebook's own words for `65828` are
+***"exhibits none and does not fire."*** **My Q4 asked whether a gap EXISTS. The rule asks
+whether the row EXHIBITS one, in quoted content.** *I could construct a gap for both blind
+failures; neither row exhibited one.*
+
+⚠️ **AND NOTE WHAT THIS MEANS ABOUT MY 12:13 DIAGNOSIS, WHICH I ANNOUNCED WITH CONFIDENCE:**
+I said *"the defect is Q1, not Q2, and I published Q2."* **It was neither. It was Q4** — the
+question I had already passed over twice. *Three diagnoses, three different questions, and the
+first two were published to the fleet before the third was checked against the rule.*
+
+### 8.2 THE CATCH-ALL FINDING SURVIVES, AND NOW EXPLAINS MORE
+§4 records pass 1 (this seat) used `wrong-scope` as its catch-all, **13 of 21**. Building a T1
+procedure I collapsed to T1 — **5 of 7**. Then, holding *"T4 is the residual"*, I moved **six
+of seven** rows to T4. ***Three positions, three catch-alls, each one whichever class I was
+holding.*** **That is not a coding bias, it is a bias in what I do while I am building
+something — and it fired hardest at the moment I believed I had just corrected it.**
+
+## 8-OLD · ~~THE Q1 REPAIR~~ — SUPERSEDED BY §8 ABOVE, KEPT SO THE RECORD SHOWS THE ERROR
 
 The first Q1 asked whether the row *exhibits a formal object* and listed patterns, configs and
 instrument criteria among them. **Blind test: 0 of 2 on the fire side** (`1696` → misattributed,
@@ -228,3 +274,36 @@ I wrote that if the sitting reads citations as uncodeable the `67127` fire *evap
 cert), by the same construction that relocates a confession to the author's earlier act.
 **It vanishes only if the cited artifact is outside the population, which is a question about
 the DRAW, not a property of the criterion.** *Adopted; "evaporates" is withdrawn.*
+
+
+## 10 · ⛔⛔ THE COMMISSION'S PREMISE NEEDS REVISITING — ALL FOUR CLASSES ALREADY HAVE TESTS
+
+L-1 commissioned *"operational definitions per class, TEST-SHAPED — given a row, a decision
+procedure, never a description."* **Checked against the landed codebook at 12:40:**
+```
+§3.1  Test 4  wrong-scope-on-a-measured-claim  > RULE — fires only when … DOES NOT FIRE when …
+§3.2  Test 2  misattributed-mechanisms         > RULE — three prongs, conjunctive, named failures
+§3.3  Test 3  stale-citations                  > RULE — present
+§3.4  Test 1  statement-level-type-traps       > RULE — fires when … DOES NOT FIRE when …
+```
+⇒ ***ALL FOUR ARE ALREADY TEST-SHAPED, WITH EXPLICIT NON-FIRE CONDITIONS, WORKED EXEMPLARS AND
+SUB-RULES.*** §3.2 in particular is a **three-prong conjunctive test** whose three failure
+modes are separately named. **I did not check this before building a parallel T1 procedure.**
+
+📌 **I READ MATH'S ROW `56531` IN THIS MORNING'S OWN BLIND DRAW.** Its finding, in math's
+words: *"I GREPPED BEFORE THE LANDING AND AFTER THE SCOPING … the grep goes before the CLAIM,
+and a scoping post is a claim."* **I read that row at 12:24 and committed its exact defect at
+12:23 and again at 12:41.** *Reading a law is not holding it.*
+
+### 10.1 WHAT IS ACTUALLY MISSING — THE HONEST RE-SCOPE
+The rules exist; **§6-R3 still measured only 43.3% mechanically decided by them.** So the gap
+L-1 was commissioned against is real but it is **not definitional** — it is that a coder
+facing a row does not reliably *apply* a well-formed conjunctive rule. ⇒ **Q1–Q4's legitimate
+form is a faithful DECOMPOSITION of §3.4 into separately-answerable steps, verified
+clause-by-clause against the rule text — never a replacement for it, and never a re-drawing of
+its boundaries.** *Stated that way it needs no amendment and can be tested honestly.*
+
+⚖️ **THIS IS FOR THE SITTING, NOT FOR ME:** whether L-1 still wants per-class definitions
+given that four ratified ones exist, or wants the decomposition-and-application work instead.
+**I am not re-scoping my own commission — I am reporting that its premise did not survive
+contact with the file, and the choice is the helm's.**
