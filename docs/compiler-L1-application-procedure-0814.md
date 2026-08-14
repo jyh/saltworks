@@ -101,3 +101,46 @@ FALSIFIER    a row where the form is followed and STILL yields a ladder violatio
 ⚠️ **AND THE HONEST LIMIT ON WHO IS RUNNING IT: I am the coder these measurements convict,
 three times over. I can show the form CATCHES MY OWN failure modes; I cannot show it catches
 a fresh coder's.** *That second claim needs pass-3's head and I will not make it here.*
+
+
+## 6 · ⚙️ MECHANISM EXERCISE — RUN AGAINST MY OWN FIVE REAL MISFILINGS
+
+**Not validation. Validation is blind and is owed (§5).** This tests one narrower thing:
+***does the FORM make my measured failures require a visible contradiction?*** Per the
+banked law that a mutant needs a fixture built from a **real landed defect**, the fixtures
+are the five T2-firing rows from `5cf065c` — **my own misfilings, not invented ones.**
+
+```
+row     what I DID          under the FORM, what I must WRITE            caught?
+82239   filed T1            T1 FIRE <span> · T2 FIRE <span> → S3 files T1   ✅ correctly PERMITS
+                            (T1 outranks T2; no contradiction, legitimate)
+69485   filed T4            T2 FIRE <span> … then "filed T4"                ⛔→✅ CONTRADICTION
+8869    filed T4            T2 FIRE <span> … then "filed T4"                ⛔→✅ CONTRADICTION
+44228   filed AMBIG         T2 FIRE <span> … then "AMBIG"                   ⛔→✅ UNWRITABLE
+82566   filed AMBIG         T2 FIRE <span> … then "AMBIG"                   ⛔→✅ UNWRITABLE
+```
+✅ **4 of 4 failures become visible on the page; the 1 legitimate call is correctly permitted.**
+*The discriminating case matters as much as the four: a form that flagged `82239` too would
+be refusing the ladder itself.*
+
+### 6.1 ⛔ AND THE CLAIM IN §2.1 IS TOO STRONG — I AM NARROWING IT MYSELF
+§2.1 says the form makes these failures *"require a visible self-contradiction."* **That holds
+only if I mark `T2 FIRE` in the first place.** ⇒ ***IF I MISJUDGE T2 AS `NO`, NO CONTRADICTION
+APPEARS AND THE ROW MISFILES SILENTLY, EXACTLY AS BEFORE.***
+
+**What the form actually does, stated precisely:**
+> ***IT DOES NOT ELIMINATE THE ERROR. IT RELOCATES IT — from an invisible RECORDING failure
+> to an explicit WRONG MARK that a second reader can point at, on a named test, with a
+> quoted span.***
+
+*That is a real gain and a smaller one than §2.1 claimed:* **a disagreement about `T2 NO` on
+`69485` is arguable in a way that a bare `filed T4` never was.** ⚠️ **But it converts a
+failure I could measure alone into one that needs a second reader — which means the form's
+value is UNPROVEN until two coders run it, and that is the same debt §5 already carries.**
+
+### 6.2 WHAT THIS EXERCISE CANNOT SHOW
+- **It is retrospective on rows whose verdicts I know.** *It shows the form catches failures
+  I have already diagnosed; it says nothing about unseen rows.*
+- **I reasoned about marks I WOULD write, rather than writing them cold.** *A genuine run
+  needs a coder who does not already know which test fires.*
+- ⇒ **Neither gap is closable by this seat on this corpus** (§5, and `compiler-L1-FENCE22-0814.txt`).
