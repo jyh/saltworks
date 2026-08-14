@@ -48,3 +48,17 @@ THE BAR (pre-stated; any deviation posted as a failure):
 WHAT THIS DOES NOT DO (registered so no successor reads more into it):
   it does not gate the receipt, does not sync, does not repair. The gap it
   closes is VISIBILITY of a divergence that was previously unobservable.
+
+════ AMENDMENT 2026-08-13 20:47 — BEFORE ANYONE BUILDS THIS, CHECK FOR OVERLAP ══
+A peer's commit landing in the shared seat worktree at 20:44 carries the message
+"mirror sync: copied=85 verified=85 only-in-mirror=1", i.e. mirror-sync.sh ALREADY
+COMPUTES AND REPORTS a live-vs-mirror divergence count for the seats that sync
+through it. I do not sync through it — I use `rsync -a --delete` directly — so
+the gap I measured is real FOR THIS SEAT, but a successor must not build a second
+instrument beside an existing one.
+⇒ RESUME BY READING mirror-sync.sh FIRST and asking whether the right fix is to
+  ROUTE THROUGH IT rather than to add a field to my fallback sweep. Cheaper, and
+  it puts one instrument in the fleet instead of two that can disagree.
+⚠️ NOT VERIFIED: I have not opened mirror-sync.sh. This is a POINTER derived from
+  a commit message, which is the weakest kind of evidence — it is recorded to stop
+  duplicate work, not to license skipping the read.
