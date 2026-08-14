@@ -261,9 +261,18 @@ guesses.*
 > refusing. Landed for the first module tonight — `synth.sh` gained an **opt-in**
 > `SYNTH_SPLITNETS=1` pass and `dmem_addr8` was regenerated under it.*
 > **RESULT: `dmem_addr8_nl.v` NOW IMPORTS (79 gates), sweep 29 → 30 importing,
-> 17 → 16 blocked, and it was the ONLY row that changed class.** *So of the two
-> netlists this table names as gated on grammar alone, **one is discharged** and
-> `dmem_addr16` remains — the count "it unblocks 2" was exact.*
+> 17 → 16 blocked, and it was the ONLY row that changed class.**
+> ⚓ **AND THE SECOND ONE FOLLOWED THE SAME NIGHT — `dmem_addr16_nl.v` IMPORTS
+> (78 gates), sweep 30 → 31 importing, 16 → 15 blocked, again the only row to
+> move.** ⇒ ***BOTH NETLISTS THIS TABLE NAMES AS GATED ON GRAMMAR ALONE ARE NOW
+> DISCHARGED, AND THE COUNT "IT UNBLOCKS 2" WAS EXACT — measured a day later,
+> against a prediction made before the mechanism existed.***
+> ⚠️ *I nearly filed `dmem_addr16` as a THIRD case: a hand-rolled scan told me it
+> used two unmodelled cells, which would have meant grammar was **not** its only
+> gate. That contradicted a fact already in hand — `dmem_addr8` uses one of those
+> same cells and imports — so the extraction was wrong, not the census. **A
+> hand-derived number that contradicts a measured one is the hand-derivation.***
+> **CURRENT SWEEP BASELINE: 46 netlists · 31 importing · 15 blocked.**
 > ⚠️ *And the discharge cost a second fix the table could not have foreseen: the
 > sweep's own `PORT_RE` matched port names with `\w+`, which **cannot match a
 > Verilog escaped identifier** — and `splitnets` renames every vector bit to one.
