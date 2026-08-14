@@ -33,9 +33,13 @@ A description did not repair that; a procedure might.
 > Given a row, answer in order. **Any NO ends it: T1 does not fire.**
 
 ```
-Q1  OBJECT    Does the row exhibit a FORMAL OBJECT — a declaration, a name, a
-              type/width/unit, a theorem's written statement, a pattern or regex,
-              a config value, or an instrument's stated acceptance criterion?
+Q1  REPAIR-TARGET  ⚠️ REPAIRED 12:23 after the fire side failed 0/2 — see §8.
+              If this row's defect were repaired, would the repair have to change a
+              KERNEL-CHECKED STATEMENT — a declaration, a theorem's written statement,
+              a type/width/unit conversion?
+              ⛔ NOT: an instrument, a script, a pattern, a config, a document, a
+                 status sentence. Their repair touches the instrument, and §4 orders
+                 the classes by WHAT THE REPAIR MUST TOUCH.
 Q2  ACCEPTED  Does the row state the toolchain ACCEPTED it — parsed, elaborated,
               typechecked, built green, exited 0, matched, or passed?
 Q3  CLAIM     Does the row state a CLAIM that object was taken to support?
@@ -122,3 +126,29 @@ Addendum F, which I proposed, made spending them the named defect.** L-1's const
 caught it. The 22 remain untouched and exist to verify these definitions *after* they are
 drafted. **Calibration material is the 208 spent rows; the fence is not calibration
 material, and it is most attractive exactly when it is most protected.**
+
+
+## 8 · ⛔ THE Q1 REPAIR — WHAT REFUTED THE FIRST VERSION, COMMITTED **BEFORE** THE NEXT TEST
+
+The first Q1 asked whether the row *exhibits a formal object* and listed patterns, configs and
+instrument criteria among them. **Blind test: 0 of 2 on the fire side** (`1696` → misattributed,
+`65828` → *"exhibits none and does not fire"*).
+
+**First diagnosis, wrong:** that I had omitted §3.4's *silent acceptance* clause. **Silence
+holds for 7 of 7** and explains nothing.
+
+**Real diagnosis:** §4 orders the classes *"by what the repair has to touch — a kernel-checked
+statement, then the causal story, then the referenced object, then the claim's boundary."* An
+instrument's repair touches an instrument. **Q1 admitted any accepted artifact; the ladder
+admits a formal statement.**
+
+⚠️ **AND THE DEEPER ONE, RECORDED BECAUSE IT PREDICTS THE NEXT FAILURE:** §4 notes pass 1 (this
+seat) used `wrong-scope` as its within-taxonomy catch-all, **13 of 21 rows**. Building a T1
+procedure, I collapsed to T1 — **5 of 7**. ***I did not fix a catch-all; I moved it.*** The
+defect is not which class I over-use but that **I reach for whichever class I am currently
+holding** — and building a procedure FOR a class is exactly what puts it in my hand.
+
+📌 **THIS REPAIR IS COMMITTED BEFORE THE NEXT BLIND TEST, DELIBERATELY.** *Repaired-then-tested
+is a prediction. Tested-then-repaired is a fit. The repaired Q1 does decline both blind
+failures — **and that is worth nothing, because I now know their verdicts.** Only a fresh draw,
+unread and unlooked-up, can produce the blind positive §4 still owes.*
