@@ -66,3 +66,26 @@ the mechanism only supports a sign.*
   find it wants amending, that is a FINDING to report, never an edit to apply mid-sweep.*
 - **My own catch-all pull.** *Measured three times today: I reach for whichever class I am
   holding. Here the pull is toward EXCLUDED, because it is the cheaper verdict to write.*
+
+
+## 6 · ⛔ AMENDMENT, 16:40 — R-1's TWENTY VERDICTS CANNOT BE CARRIED, AND THE REASON IS TIMING
+*Added BEFORE the first row was adjudicated, so it is a design decision and not a rescue.*
+
+**Twenty of B-1's 289 rows already carry a gate verdict from R-1.** Carrying them would save
+**22 minutes of 318** — and I checked whether I could before assuming either way:
+```
+R-1's run window ............ 08:30 – 08:52   (its own header)
+§2.2(a) ratified at ......... 11:55:40        (1c52970, sitting ruling 1)
+⇒ R-1's verdicts PREDATE the ratified criterion by three hours.
+```
+⇒ ***A VERDICT REACHED BEFORE A CRITERION WAS RATIFIED IS NOT A VERDICT UNDER THAT
+CRITERION.*** **R-1 ran against the pre-ratification draft — including the cite-vs-exhibit
+question that §2.2(a) settled in its ARTIFACT form, which is exactly the kind of change that
+moves a borderline row.** *All 289 are adjudicated fresh; the price stands at 5.3 hours with
+no discount.*
+
+⚠️ **AND THE REASON THIS IS WORTH A SECTION RATHER THAN A LINE: THE SAVING WAS SMALL.** *Twenty
+rows, 22 minutes, 7% of the run.* ***A shortcut worth an hour gets examined; a shortcut worth
+twenty minutes gets taken.*** **If I had carried them, 20 of 289 verdicts would sit under a
+superseded criterion and nothing in the output would say so** — the same silent-heterogeneity
+defect as a stale citation, one level up from prose and into data.
