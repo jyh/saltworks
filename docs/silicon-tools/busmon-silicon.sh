@@ -35,6 +35,14 @@
 
 BUS=${BUS:-${BUS}}
 SELF=${SELF:-silicon}
+
+# NOTE: no roster-collision assertion here, deliberately. The owner extraction in
+# busmon.awk stops at the first delimiter, so "math" and "math2" resolve to
+# DIFFERENT owners and neither can swallow the other. An assertion guarding an
+# impossible case is an unconditional check that can never fire — the same
+# defect as an alarm that always sounds, mirrored. IF ANYONE SWITCHES THE OWNER
+# ARM TO A PREFIX MATCH, THE ASSERTION BECOMES NECESSARY: assert that no seat
+# name prefixes another, mechanically, and exit rather than comment.
 POLL=${POLL:-20}
 AWKPROG=${AWKPROG:-$(dirname "$0")/busmon.awk}
 prev=${BASELINE:?hand in the last line actually READ; never sample at arm time}

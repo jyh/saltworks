@@ -222,7 +222,19 @@ function hdrts(s,   m, d, hh, mm) {   # -> comparable minute count, 0 if unparsa
   # ⇒ THE RECEIVER WIDENS (my own rule, from the year-rollover fix): the sender
   #   convention changed under an append-only medium, so the reader absorbs it.
   #   Peers who adopt the token get suppressed correctly too, not just me.
-  sub(/=.*$/, "", owner)
+  # ⭐ EXTRACT UP TO THE FIRST DELIMITER, which DOMINATES both alternatives the
+  # fleet debated this morning. math's PREFIX match survives any suffix but would
+  # swallow a child head ("math2" resolving as "math") — and for a SUPPRESSION
+  # arm that is the fail-CLOSED direction: a lost peer post, not noise. My first
+  # repair (strip "=.*") failed OPEN but broke on any suffix that is not "=".
+  # This form gets both properties: `silicon=LIT` -> `silicon`, `silicon#2` ->
+  # `silicon`, while `silicon-b` and `silicon2` stay DISTINCT and are never
+  # swallowed. Seat names may carry - and _ so those are kept.
+  # ⇒ I did NOT adopt the prefix form I said I would take; this is better, and
+  #   saying so beats copying a peer's fix I had just argued has a worse failure
+  #   direction. It also needs no roster assertion, because the collision it
+  #   would guard cannot arise here.
+  sub(/[^A-Za-z0-9_-].*$/, "", owner)
   # rev 14: FLUSH the previous post before overwriting it. This is where the
   # three lost rulings actually died — a one-line post set `pending`, and the
   # NEXT header silently discarded it. Overwriting a pending item is a DROP.
