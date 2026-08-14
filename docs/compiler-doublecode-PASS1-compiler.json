@@ -6,7 +6,7 @@
   "brief": "docs/compiler-blind-classification-brief-0813.md",
   "sample": "docs/compiler-doublecode-sample-0813.txt (512faa4, deterministic every-10th, 388 rows)",
   "taxonomy": "ruled 08/13 09:45:34 — four artifact-level classes at the Results site PLUS pre-registered OTHER",
-  "tranche": "rows 1-60 of 388",
+  "tranche": "rows 1-80 of 388",
   "pass_committed_before_any_second_coder_existed": true,
   "distribution_withheld_from_the_bus": true,
   "rows": [
@@ -369,6 +369,126 @@
       "line": 8018,
       "class": "stale-citations",
       "reason": "two sentences do not survive the bytes — premises that had genuinely EXPIRED"
+    },
+    {
+      "n": 61,
+      "line": 8206,
+      "class": "OTHER",
+      "reason": "banking post handing a successor one inherited task"
+    },
+    {
+      "n": 62,
+      "line": 8438,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "a correction landed only where it was FOUND; the sweep found the same defect untouched elsewhere"
+    },
+    {
+      "n": 63,
+      "line": 8636,
+      "class": "misattributed-mechanisms",
+      "reason": "author accepts that a table's rationale was false, not merely its numbers"
+    },
+    {
+      "n": 64,
+      "line": 8869,
+      "class": "OTHER",
+      "reason": "verified before accepting a refutation; a verification, no defect of its own"
+    },
+    {
+      "n": 65,
+      "line": 9152,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "regNext8_correct was weaker than 'sampled' implied — the claim outran the proof"
+    },
+    {
+      "n": 66,
+      "line": 9394,
+      "class": "stale-citations",
+      "reason": "a bank still lists a closed item open, and its own commit hash field is empty"
+    },
+    {
+      "n": 67,
+      "line": 9584,
+      "class": "OTHER",
+      "reason": "a sizing line replaces an estimate; a table update"
+    },
+    {
+      "n": 68,
+      "line": 9839,
+      "class": "OTHER",
+      "reason": "a measured hazard, +607 lines over a named baseline"
+    },
+    {
+      "n": 69,
+      "line": 10082,
+      "class": "OTHER",
+      "reason": "quotes a ruling verbatim and proposes the next work"
+    },
+    {
+      "n": 70,
+      "line": 10282,
+      "class": "OTHER",
+      "reason": "a dispatch plan: recon, attempt, adversarial synthesis"
+    },
+    {
+      "n": 71,
+      "line": 10552,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "a census's 'outside set' was HARDCODED in the source, fixing its scope by hand"
+    },
+    {
+      "n": 72,
+      "line": 10759,
+      "class": "OTHER",
+      "reason": "banking post about boot pointers and line-number addressing"
+    },
+    {
+      "n": 73,
+      "line": 10987,
+      "class": "stale-citations",
+      "reason": "a quotation deleted the discriminator the original carried"
+    },
+    {
+      "n": 74,
+      "line": 11227,
+      "class": "OTHER",
+      "reason": "confirmed at the bytes that a constant is prepended unconditionally"
+    },
+    {
+      "n": 75,
+      "line": 11449,
+      "class": "OTHER",
+      "reason": "a bespoke mux verified unaffected; the bank's basis held"
+    },
+    {
+      "n": 76,
+      "line": 11629,
+      "class": "OTHER",
+      "reason": "clarifies what a fence exists for; no defect asserted"
+    },
+    {
+      "n": 77,
+      "line": 11859,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "recorded as HALF rather than 'unblocked' — refuses to let the claim outrun the evidence"
+    },
+    {
+      "n": 78,
+      "line": 12098,
+      "class": "OTHER",
+      "reason": "custody report; pre-arming turned a re-inspection into a comparison"
+    },
+    {
+      "n": 79,
+      "line": 12338,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "a grep count of 1 was read as CLOSED; presence taken for closure"
+    },
+    {
+      "n": 80,
+      "line": 12530,
+      "class": "OTHER",
+      "reason": "full-corpus build report, EXIT=0"
     }
   ],
   "_note_on_statement_level_type_traps": "no row in rows 1-60 was assigned that class. Recorded so the second coder's disagreement on it is meaningful rather than an artifact of my having forgotten the class existed. If it stays empty to 388 that is itself a finding about the Results-site taxonomy, not about the coder.",
