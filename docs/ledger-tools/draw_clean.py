@@ -39,7 +39,14 @@ CLASS_WORDS = re.compile(
     re.I,
 )
 HDR = re.compile(r"^\[\d{1,2}/\d{1,2}[ ,]")
-NUM = re.compile(r"(?<!\d)(\d{3,5})(?!\d)")
+# ⛔ NOT a generic digit pattern. The first version was r"(?<!\d)(\d{3,5})(?!\d)" and it
+# STRUCTURALLY COULD NOT SEE ANY ROW BELOW 100 -- row 80 landed in a fence with its class
+# disclosed in the codebook's own exemplar table ("| 80 | fires -> misattributed |"), because
+# "80" is two digits. A blind spot CORRELATED with the variable (low line numbers are the
+# earliest, most-quoted rows) fabricates safety exactly where it is least deserved.
+# The population is KNOWN -- scan for the ACTUAL row numbers as tokens, no width assumption.
+def _row_token(n):
+    return re.compile(r"(?<!\d)%d(?!\d)" % n)
 
 
 def header_lines():
@@ -50,14 +57,14 @@ def header_lines():
     return [i + 1 for i, ln in enumerate(text) if HDR.match(ln)]
 
 
-def disclosed(prox):
+def disclosed(prox, population):
     """Rows whose number appears within `prox` chars of a class word in ANY doc.
 
     Scope is every file in docs/, not merely the ones I remember opening --
     "files I read" is a remembered set and this is exactly the place where a
     remembered set already failed once.
     """
-    hits, scanned = set(), 0
+    hits, scanned, texts = set(), 0, []
     for f in sorted(DOCS.rglob("*")):
         if not f.is_file() or f.suffix not in (".md", ".txt", ".json", ".tsv"):
             continue
@@ -70,11 +77,17 @@ def disclosed(prox):
         if "PASS1" in f.name or "PASS2" in f.name or "COMPARE" in f.name:
             continue
         scanned += 1
-        t = f.read_text(errors="replace")
-        for m in NUM.finditer(t):
-            a, b = max(0, m.start() - prox), m.end() + prox
-            if CLASS_WORDS.search(t[a:b]):
-                hits.add(int(m.group(1)))
+        texts.append(f.read_text(errors="replace"))
+    for n in population:
+        pat = _row_token(n)
+        for t in texts:
+            hit = False
+            for m in pat.finditer(t):
+                a, b = max(0, m.start() - prox), m.end() + prox
+                if CLASS_WORDS.search(t[a:b]):
+                    hits.add(n); hit = True; break
+            if hit:
+                break
     return hits, scanned
 
 
@@ -100,7 +113,7 @@ def main():
 
     rows = header_lines()
     seen = already_drawn()
-    leaked, nfiles = disclosed(a.prox)
+    leaked, nfiles = disclosed(a.prox, rows)
 
     clean = [r for r in rows if r not in seen and r not in leaked]
     stride = a.stride or max(1, len(clean) // max(1, a.count))
