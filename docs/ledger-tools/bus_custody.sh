@@ -41,26 +41,26 @@ if [ "${1:-}" = "--selftest" ]; then
   mk; B=$(wc -c < "$T/b.md" | tr -d ' '); S=$(shasum -a 256 "$T/b.md" | cut -c1-16)
   # Every fixture carries the ENFORCED phrase `body receipt bytes=…`, because a control that
   # does not traverse the real form tests a pipeline nobody uses.
-  printf ', c — SEAT-STATE: compiler=LIT · ok, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/ok.txt"
+  printf ', compiler — SEAT-STATE: compiler=LIT · ok, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/ok.txt"
   echo "SELFTEST — driving every drivable die site (script sha256/16=$SELFSHA)"
   arm "NC0 honest append"            0 "$T/b.md" "$T/ok.txt"
-  printf ', c — SEAT-STATE: compiler=LIT · no closing bracket, body receipt bytes=%s sha256/16=%s' "$B" "$S" > "$T/x.txt"
+  printf ', compiler — SEAT-STATE: compiler=LIT · no closing bracket, body receipt bytes=%s sha256/16=%s' "$B" "$S" > "$T/x.txt"
   arm ":24 bracket unterminated"     6 "$T/b.md" "$T/x.txt"
   printf 'body\n```\nunclosed fence\n' > "$T/odd.md"
   arm ":25 odd fence count"          6 "$T/odd.md" "$T/ok.txt"
   # CLAUSE 2b -- the closed vocabulary. Positive AND negative, both driven.
   for w in LIT RESTING; do
-    printf ', c — SEAT-STATE: compiler=%s · ok, body receipt bytes=%s sha256/16=%s]' "$w" "$B" "$S" > "$T/v.txt"
+    printf ', compiler — SEAT-STATE: compiler=%s · ok, body receipt bytes=%s sha256/16=%s]' "$w" "$B" "$S" > "$T/v.txt"
     arm ":2b vocab $w accepted"        0 "$T/b.md" "$T/v.txt"
   done
   # the QUOTED-TOKEN pair: a post may quote a peer's state line, and the gate must
   # adjudicate on the AUTHOR'S token (first), never the quoted one (last).
-  printf ', c — SEAT-STATE: compiler=LIT · quoting "SEAT-STATE: compiler=BANANA", body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/q1.txt"
+  printf ', compiler — SEAT-STATE: compiler=LIT · quoting "SEAT-STATE: compiler=BANANA", body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/q1.txt"
   arm ":2b quoted-bad token ACCEPTED"  0 "$T/b.md" "$T/q1.txt"
-  printf ', c — SEAT-STATE: compiler=BANANA · quoting "SEAT-STATE: compiler=LIT", body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/q2.txt"
+  printf ', compiler — SEAT-STATE: compiler=BANANA · quoting "SEAT-STATE: compiler=LIT", body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/q2.txt"
   arm ":2b quoted-good token REFUSED"  8 "$T/b.md" "$T/q2.txt"
   for w in DARK ACTIVE BANANA; do
-    printf ', c — SEAT-STATE: compiler=%s · ok, body receipt bytes=%s sha256/16=%s]' "$w" "$B" "$S" > "$T/v.txt"
+    printf ', compiler — SEAT-STATE: compiler=%s · ok, body receipt bytes=%s sha256/16=%s]' "$w" "$B" "$S" > "$T/v.txt"
     arm ":2b vocab $w REFUSED"         8 "$T/b.md" "$T/v.txt"
   done
   # CLAUSE 2c -- bracket grammar. The REAL malformation is the fixture, per the banked law
@@ -69,8 +69,18 @@ if [ "${1:-}" = "--selftest" ]; then
   arm ":2c LANDED nested-timestamp REFUSED" 10 "$T/b.md" "$T/nest.txt"
   printf 'x, c — SEAT-STATE: compiler=LIT · no leading comma, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/nc.txt"
   arm ":2c missing leading comma REFUSED"   10 "$T/b.md" "$T/nc.txt"
-  printf ', c — SEAT-STATE: compiler=LIT · a [bracket] mid-line, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/mid.txt"
+  printf ', compiler — SEAT-STATE: compiler=LIT · a [bracket] mid-line, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/mid.txt"
   arm ":2c mid-line '[' REFUSED"            10 "$T/b.md" "$T/mid.txt"
+  # CLAUSE 2d -- the owner slot. Fixture 1 is the REAL 12:30:56 malformation.
+  printf ', SEAT-STATE: compiler=LIT — the REAL 12:30:56 malformation, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/own1.txt"
+  arm ":2d LANDED SEAT-STATE-in-slot REFUSED" 10 "$T/b.md" "$T/own1.txt"
+  # the DANGEROUS direction: well-formed, wrong seat. This one would NOT fail loud.
+  printf ', math — SEAT-STATE: compiler=LIT · well-formed WRONG owner, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/own2.txt"
+  arm ":2d well-formed WRONG seat REFUSED"    10 "$T/b.md" "$T/own2.txt"
+  printf ', compiler — SEAT-STATE: compiler=LIT · canonical, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/own3.txt"
+  arm ":2d canonical owner ACCEPTED"           0 "$T/b.md" "$T/own3.txt"
+  printf ', compiler=LIT — SEAT-STATE: compiler=LIT · attested variant, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/own4.txt"
+  arm ":2d attested seat=STATE ACCEPTED"       0 "$T/b.md" "$T/own4.txt"
   printf 'one line only\n' > "$T/thin.md"
   arm ":26 body under 3 lines"       6 "$T/thin.md" "$T/ok.txt"
   printf 'body\nmore\n[08/13 09:09, x — a header at column 0]\n' > "$T/hdr.md"
@@ -80,34 +90,34 @@ if [ "${1:-}" = "--selftest" ]; then
   # SEAT-STATE arms. The helm's 04:37 release ORDERED a control that fires in the
   # DISCRIMINATING SET: a refusal driven on a post that is NOT about state. That is the
   # arm below — its bracket is about a build result and carries no token.
-  printf ', c — SEAT-STATE: compiler=LIT · ok, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/tok_ok.txt"
+  printf ', compiler — SEAT-STATE: compiler=LIT · ok, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/tok_ok.txt"
   arm ":33 SEAT-STATE present"       0 "$T/b.md" "$T/tok_ok.txt"
-  printf ', c — build green on three modules, no state mentioned anywhere, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/tok_missing.txt"
+  printf ', compiler — build green on three modules, no state mentioned anywhere, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/tok_missing.txt"
   arm ":33 SEAT-STATE absent (NOT-about-state)" 7 "$T/b.md" "$T/tok_missing.txt"
-  printf ', c — SEAT-STATE: helm=LIT · wrong seat bound, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/tok_wrongseat.txt"
+  printf ', compiler — SEAT-STATE: helm=LIT · wrong seat bound, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/tok_wrongseat.txt"
   arm ":33 SEAT-STATE bound to WRONG seat" 7 "$T/b.md" "$T/tok_wrongseat.txt"
-  printf ', c — SEAT-STATE: compiler=LIT · no receipt fields at all]' > "$T/norx.txt"
+  printf ', compiler — SEAT-STATE: compiler=LIT · no receipt fields at all]' > "$T/norx.txt"
   arm ":37 clause-3 fields absent"   3 "$T/b.md" "$T/norx.txt"
-  printf ', c — SEAT-STATE: compiler=LIT · lie, body receipt bytes=%s sha256/16=%s]' "$((B+9))" "$S" > "$T/badb.txt"
+  printf ', compiler — SEAT-STATE: compiler=LIT · lie, body receipt bytes=%s sha256/16=%s]' "$((B+9))" "$S" > "$T/badb.txt"
   arm ":38 bytes mistyped"           3 "$T/b.md" "$T/badb.txt"
-  printf ', c — SEAT-STATE: compiler=LIT · lie, body receipt bytes=%s sha256/16=deadbeefdeadbeef]' "$B" > "$T/bads.txt"
+  printf ', compiler — SEAT-STATE: compiler=LIT · lie, body receipt bytes=%s sha256/16=deadbeefdeadbeef]' "$B" > "$T/bads.txt"
   arm ":39 sha mistyped"             3 "$T/b.md" "$T/bads.txt"
   # The receipt is NOT last on the line -- ". One date in this append.]" follows it in 12 of
   # 12 real brackets. This fixture puts DIGITS in that trailer, which is exactly what my
   # first fix's false justification permitted. Plain `tail -1` binds 777 and refuses; the
   # phrase anchor binds the receipt. Differential measured at landing.
-  printf ', c — SEAT-STATE: compiler=LIT · body receipt bytes=%s sha256/16=%s. Prior post was bytes=777. One date.]' "$B" "$S" > "$T/trail.txt"
+  printf ', compiler — SEAT-STATE: compiler=LIT · body receipt bytes=%s sha256/16=%s. Prior post was bytes=777. One date.]' "$B" "$S" > "$T/trail.txt"
   arm ":37 digits AFTER the receipt"  0 "$T/b.md" "$T/trail.txt"
   # REGRESSION, from a REAL refusal at 19:16 (not a synthetic mutant): prose discussing
   # "bytes=/sha256/16=" before the receipt shadowed it under `head -1`. Expect PASS now.
   # Differential run both ways at landing: head -1 → exit 3, tail -1 → exit 0.
-  printf ', c — SEAT-STATE: compiler=LIT · posts carrying a receipt bytes=/sha256/16= are the subject here, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/shadow.txt"
+  printf ', compiler — SEAT-STATE: compiler=LIT · posts carrying a receipt bytes=/sha256/16= are the subject here, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/shadow.txt"
   arm ":37 prose shadows the receipt" 0 "$T/b.md" "$T/shadow.txt"
   # The fixture above fails only when BOTH the anchor and the digit-requirement are absent,
   # so it cannot attribute the fix. This one isolates the ANCHOR: a prose mention carrying
   # DIGITS defeats the pattern fix, so only tail-anchoring rescues it. Differential measured
   # at landing: head -1 → exit 3 regardless of pattern; tail -1 → exit 0.
-  printf ', c — SEAT-STATE: compiler=LIT · quoting an earlier receipt bytes=999 sha256/16=beefbeefbeefbeef before mine, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/shadow2.txt"
+  printf ', compiler — SEAT-STATE: compiler=LIT · quoting an earlier receipt bytes=999 sha256/16=beefbeefbeefbeef before mine, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/shadow2.txt"
   arm ":37 digit-bearing prose (anchor)" 0 "$T/b.md" "$T/shadow2.txt"
   echo
   echo "  NOT DRIVABLE IN-PROCESS, declared rather than counted as passing:"
@@ -214,6 +224,30 @@ esac
 case "$B1" in
   *\[*) die "bracket grammar: line 1 contains a '[' -- the opening bracket is emitted by this
    tool, never by the bracket file. A second one nests and breaks attribution." 10 ;;
+esac
+
+# ---- CLAUSE 2d: the OWNER SLOT ------------------------------------------------------------
+# 12:30:56, five minutes after shipping 2c, I posted ", SEAT-STATE: compiler=LIT — ..." and
+# math's watch lost me AGAIN: the owner slot held "SEAT-STATE:" where the grammar wants a bare
+# seat name. 2c checked the leading comma and the nested bracket and NOTHING ELSE, because I
+# repaired the token that had just hurt instead of enumerating the grammar. That is the
+# where-else-does-this-law-apply defect, committed inside the repair for the previous one.
+# DERIVED FROM THE CORPUS, NOT FROM MY MEMORY OF IT (5149 headers measured 12:32):
+#   owner slot = compiler 1205 · silicon 1178 · math 885 · evidence 795 · maestro 563,
+#   plus an attested "seat=STATE" variant (silicon=LIT 39, maestro=LIT 34);
+#   separator after the name is the em-dash, 4695 of them.
+# ⛔ AND THE SECOND ARM IS THE ONE THAT MATTERS MOST, per math 12:28: "A MALFORMED VALUE FAILS
+# LOUD AND A WELL-FORMED WRONG ONE IS UNFINDABLE FOREVER." Both my slips failed loud -- a
+# bracket that read ", math —" would not have. So the slot is pinned to THIS seat.
+OWNER=$(printf '%s' "$B1" | sed -n 's/^,[[:space:]]*\([^[:space:]—-]*\).*/\1/p')
+case "$OWNER" in
+  compiler|compiler=*) : ;;
+  "") die "bracket grammar: no owner in the slot after ', '. The corpus puts a bare seat name
+   there in 4626 of 5149 headers." 10 ;;
+  *) die "bracket grammar: owner slot holds '$OWNER'; it must be 'compiler' (optionally
+   'compiler=STATE'). Measured on 5149 corpus headers: the slot carries a BARE SEAT NAME.
+   Yours would post under another seat's name or under no seat at all -- and a well-formed
+   WRONG owner is unfindable forever, where a malformed one merely fails loud." 10 ;;
 esac
 
 # ---- CLAUSE 3: RE-DERIVE the hand-authored receipt and REFUSE on mismatch ----------------
