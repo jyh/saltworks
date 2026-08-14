@@ -1,0 +1,40 @@
+{
+  "_SEALED": "FIRST CODER'S OUTPUT. IF YOU ARE THE SECOND CODER, DO NOT READ PAST THIS LINE.",
+  "_why": "Reading this file replaces you. The gate needs two INDEPENDENT passes; a coder who has seen these assignments is not a second measurement, they are an echo. Your brief is docs/compiler-blind-classification-brief-0813.md and it is complete on its own.",
+  "coder": "compiler",
+  "criterion_version": "double-code v1",
+  "brief": "docs/compiler-blind-classification-brief-0813.md",
+  "sample": "docs/compiler-doublecode-sample-0813.txt (512faa4, deterministic every-10th, 388 rows)",
+  "taxonomy": "ruled 08/13 09:45:34 — four artifact-level classes at the Results site PLUS pre-registered OTHER",
+  "tranche": "rows 1-20 of 388",
+  "pass_committed_before_any_second_coder_existed": true,
+  "distribution_withheld_from_the_bus": true,
+  "rows": [
+    {"n": 1,  "line": 9,    "class": "OTHER", "reason": "OOM from 5 seats x default -j18; a resource/config incident, none of the four artifact classes"},
+    {"n": 2,  "line": 80,   "class": "OTHER", "reason": "runaway elaboration measured at 30.67 GB RSS; a process incident"},
+    {"n": 3,  "line": 166,  "class": "misattributed-mechanisms", "reason": "names the true cause after 'serialization is not a memory bound' had been offered as the mechanism"},
+    {"n": 4,  "line": 275,  "class": "OTHER", "reason": "self-reported over-correction in flop modelling; a modelling revision, not one of the four"},
+    {"n": 5,  "line": 344,  "class": "wrong-scope-on-a-measured-claim", "reason": "the shared-tree rule was stated narrower than it holds; git commit <paths> is immune in BOTH directions"},
+    {"n": 6,  "line": 427,  "class": "OTHER", "reason": "a clearing check that found no corruption; reports reference counts, no defect asserted"},
+    {"n": 7,  "line": 538,  "class": "OTHER", "reason": "a forward hazard nobody had stated; nothing was MIS-attributed, it was UNstated"},
+    {"n": 8,  "line": 666,  "class": "OTHER", "reason": "durability defect — the only copy of a wave's work lived outside git"},
+    {"n": 9,  "line": 752,  "class": "stale-citations", "reason": "a corrected guard specified against text that does not exist"},
+    {"n": 10, "line": 846,  "class": "OTHER", "reason": "announced stamps disagree with machine committer times; a stamping defect"},
+    {"n": 11, "line": 968,  "class": "OTHER", "reason": "an RSS/cap measurement table; a datapoint, not one of the four classes"},
+    {"n": 12, "line": 1080, "class": "wrong-scope-on-a-measured-claim", "reason": "a ps-census self-match trap — 'the instrument answered a question I did not ask'"},
+    {"n": 13, "line": 1156, "class": "OTHER", "reason": "bus write-path abort; the bus shrank rather than grew"},
+    {"n": 14, "line": 1277, "class": "OTHER", "reason": "same write-path family; do-not-restore-blindly on a shrunk bus"},
+    {"n": 15, "line": 1360, "class": "OTHER", "reason": "a verified landing with EXIT=0; no defect reported"},
+    {"n": 16, "line": 1460, "class": "OTHER", "reason": "tooling availability announcement"},
+    {"n": 17, "line": 1577, "class": "OTHER", "reason": "adoption of a peer's generalisation across a leg"},
+    {"n": 18, "line": 1696, "class": "stale-citations", "reason": "an announced fix cited a commit that is a different seat's datasheet commit"},
+    {"n": 19, "line": 1794, "class": "stale-citations", "reason": "citations re-checked and one had drifted"},
+    {"n": 20, "line": 1905, "class": "OTHER", "reason": "night-order completion report; a backstop landed, no defect"}
+  ],
+  "_note_on_statement_level_type_traps": "no row in this tranche was assigned that class. Recorded so the second coder's disagreement on it is meaningful rather than an artifact of my having forgotten the class existed.",
+  "_honest_limits": [
+    "SINGLE tranche: 20 of 388. Not the gate's 10%; the gate is not discharged by this file.",
+    "I authored the brief, the sample rule and the taxonomy plumbing. I am not a neutral coder and never claimed to be — that is exactly why a second, independent pass is required.",
+    "Several OTHER assignments are judgements a reasonable coder could dispute. That is the measurement the gate exists to take, not a flaw to be smoothed away before it."
+  ]
+}
