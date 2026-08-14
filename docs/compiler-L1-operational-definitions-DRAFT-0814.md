@@ -119,8 +119,11 @@ FIRE and then confirmed, this procedure is validated only for saying no.
 - **The other three classes.** T2 is the sharpest open question: it decided **0 of 30**, and
   §6-R3 could not separate *rare* from *structurally shadowed by T1's precedence*. A
   test-shaped T2 would separate them — that is the next class, not the easiest one.
-- **The R-2 `47%` fork.** Folds in here per L-1: both readings stated, the term defined
-  test-shaped, coverage recomputed under it. Not started.
+- ~~**The R-2 `47%` fork.**~~ ✅ **DISCHARGED 12:58 — `compiler-R2-quoted-text-fork-0814.md`,
+  `ca5349a`.** The two readings were different tests *and* opposite polarities; no conflict
+  existed. **The codebook's 47% stands and my competing figure is withdrawn** — its test hid a
+  span threshold that moves the answer from 5% to 100%. ⚠️ *Coverage over all 388 is NOT
+  recomputed; 278 is the disputed set and the doc says so.*
 - **A PRICE.** C-R3 forbids pricing a row without opening it. The condition this clause
   named — *"once the FIRE side has a blind positive"* — **is now met**, so pricing the
   remaining three classes from T1's measured cost is UNBLOCKED and is the next owed item
