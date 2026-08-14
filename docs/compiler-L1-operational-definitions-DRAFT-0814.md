@@ -69,11 +69,42 @@ construction:
 all six stopped at one gate, that gate would be doing the work and the other three would be
 decoration. *A classifier that puts everything in one bin is not doing work.*
 
+## 3.3 · ✅ THE COLD TEST — RUN, AND IT VALIDATES ONE SIDE ONLY
+
+**Semi-blind positives (verdict seen first, so these can refute but not confirm):**
+`88119` — an importer accepting a fourth out-of-range bit at EXIT=0 for a module declaring
+three, *"a datum that parses, typechecks and proves theorems about the wrong machine"* → all
+four YES, **fires**. `13739` — a duplicate declaration, same full name and namespace, hub
+imports both, *"corpus EXIT=0, no warning"* → all four YES, **fires**. Both match the
+codebook's `type-traps`. **Neither refuted the procedure; neither confirms it either.**
+
+**Fully blind (verdicts withheld until after the calls were committed on the bus):**
+```
+1460   PREDICTED T1 declines at Q1 (a flow-take announcement; no formal object)
+       ACTUAL  pass1 OTHER · pass2 wrong-scope           ✅ correct
+35323  PREDICTED T1 declines at Q4 (the type ascription's form is CORRECT — omega
+       is limited) AND reads as T2
+       ACTUAL  pass2 misattributed-mechanisms, and the codebook lists 35323 in its
+       own "FIRES TEST 2" set — a list I had not read   ✅✅ correct on BOTH halves
+60871  PREDICTED T1 declines at Q1 (a record of a mechanism)
+       ACTUAL  pass1 OTHER · pass2 wrong-scope           ✅ correct
+```
+🔑 **3 of 3 blind declines correct, at two different questions, on rows whose verdicts I did
+not know.** And `35323` is the load-bearing one: **a positive prediction — "this is T2" —
+from a procedure built for a different class, confirmed against a list I had never opened.**
+That is evidence the Q1–Q4 structure tracks something outside my own hand.
+
+⚠️ **WHAT THE COLD TEST DOES *NOT* ESTABLISH, and the asymmetry is the point:**
+**T1's DECLINE side is cold-validated 3/3. T1's FIRE side is not.** Every row on which T1
+fires is either one I built the procedure from (circular) or one whose verdict I read first
+(semi-blind). **There is no blind positive.** Until a row I have never seen is predicted to
+FIRE and then confirmed, this procedure is validated only for saying no.
+
 ## 4 · ⛔ WHAT THIS DRAFT DOES NOT YET HAVE
 
-- **A COLD TEST.** Every row above I read during §6-R3. **The validation that matters is
-  rows I have never read**, drawn from the spent pool (158 named disputed · 20 adjudicated
-  agreed-`OTHER`). Until then this is a procedure that fits data I have seen.
+- **A BLIND POSITIVE.** §3.3 cold-validated the DECLINE side 3/3; no row I have never seen
+  has been predicted to FIRE and then confirmed. **A rule validated only for saying no is
+  half a rule** — and the half it lacks is the one that would repair this seat's blind spot.
 - **The other three classes.** T2 is the sharpest open question: it decided **0 of 30**, and
   §6-R3 could not separate *rare* from *structurally shadowed by T1's precedence*. A
   test-shaped T2 would separate them — that is the next class, not the easiest one.
