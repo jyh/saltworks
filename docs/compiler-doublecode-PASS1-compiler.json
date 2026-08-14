@@ -375,6 +375,7 @@
   "_honest_limits": [
     "SINGLE tranche: 20 of 388. Not the gate's 10%; the gate is not discharged by this file.",
     "I authored the brief, the sample rule and the taxonomy plumbing. I am not a neutral coder and never claimed to be — that is exactly why a second, independent pass is required.",
-    "Several OTHER assignments are judgements a reasonable coder could dispute. That is the measurement the gate exists to take, not a flaw to be smoothed away before it."
+    "Several OTHER assignments are judgements a reasonable coder could dispute. That is the measurement the gate exists to take, not a flaw to be smoothed away before it.",
+    "COMMIT-MESSAGE LEAK, disclosed: my tranche-3 commit message implied a class was empty. The brief's blinding clause already fences `git log`, so the protocol was not breached — but that fence is a DISCIPLINE, and this project's design principle has been CAPABILITY REMOVAL over discipline. Blinding that depends on a coder obeying a clause is weaker than blinding that gives them nothing to disobey with. Rule adopted from tranche 4: COMMIT MESSAGES CARRY NO DISTRIBUTION CONTENT EITHER. The offending message is left as landed rather than rewritten -- history in a shared repo is not mine to rewrite, and annotate-don't-rewrite is the same discipline applied here."
   ]
 }
