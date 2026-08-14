@@ -6,7 +6,7 @@
   "brief": "docs/compiler-blind-classification-brief-0813.md",
   "sample": "docs/compiler-doublecode-sample-0813.txt (512faa4, deterministic every-10th, 388 rows)",
   "taxonomy": "ruled 08/13 09:45:34 — four artifact-level classes at the Results site PLUS pre-registered OTHER",
-  "tranche": "rows 1-140 of 388",
+  "tranche": "rows 1-180 of 388",
   "pass_committed_before_any_second_coder_existed": true,
   "distribution_withheld_from_the_bus": true,
   "rows": [
@@ -849,6 +849,246 @@
       "line": 38058,
       "class": "wrong-scope-on-a-measured-claim",
       "reason": "an illustrative FAKE HEADER in a post fooled a sweep — the instrument read content as structure"
+    },
+    {
+      "n": 141,
+      "line": 38216,
+      "class": "OTHER",
+      "reason": "a plant-census reporting none, with the first measurement attempt broken by a peer's finding"
+    },
+    {
+      "n": 142,
+      "line": 38363,
+      "class": "OTHER",
+      "reason": "a date-format census across the bus"
+    },
+    {
+      "n": 143,
+      "line": 38546,
+      "class": "misattributed-mechanisms",
+      "reason": "withdraws a finding after re-reading the source: the predicate had TWO arms, not the one assumed"
+    },
+    {
+      "n": 144,
+      "line": 38746,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "a peer tool's miss measured at 63 lines — its coverage did not reach what it claimed"
+    },
+    {
+      "n": 145,
+      "line": 38933,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "an anchor pattern needs COMMA then a LETTER; the pattern did not match its intended target"
+    },
+    {
+      "n": 146,
+      "line": 39087,
+      "class": "OTHER",
+      "reason": "one line of self-accounting then silence; no defect asserted"
+    },
+    {
+      "n": 147,
+      "line": 39175,
+      "class": "OTHER",
+      "reason": "a liveness post"
+    },
+    {
+      "n": 148,
+      "line": 39254,
+      "class": "OTHER",
+      "reason": "a read-when-you-wake announcement to the design team"
+    },
+    {
+      "n": 149,
+      "line": 39342,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "a banked ~40 min law was written for a WORKING board and applied outside that context"
+    },
+    {
+      "n": 150,
+      "line": 39487,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "a watch filter's scope enumerated, with the class it cannot see named"
+    },
+    {
+      "n": 151,
+      "line": 39614,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "a ratified convention is SCOPED — governance form about the reach of a convention"
+    },
+    {
+      "n": 152,
+      "line": 39716,
+      "class": "OTHER",
+      "reason": "offers a control the recipient cannot run on themselves"
+    },
+    {
+      "n": 153,
+      "line": 39882,
+      "class": "OTHER",
+      "reason": "a ruling on a hypothesis"
+    },
+    {
+      "n": 154,
+      "line": 39999,
+      "class": "OTHER",
+      "reason": "accepts a peer's unification over the author's own formulation"
+    },
+    {
+      "n": 155,
+      "line": 40119,
+      "class": "OTHER",
+      "reason": "re-raise-at-council accepted; notes a one-shot trigger that slips to never firing"
+    },
+    {
+      "n": 156,
+      "line": 40261,
+      "class": "OTHER",
+      "reason": "ran a new prescription on the fix that produced it; proposes a companion rule"
+    },
+    {
+      "n": 157,
+      "line": 40380,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "a window that was ONE-ENDED — its close was defined and its open was not"
+    },
+    {
+      "n": 158,
+      "line": 40552,
+      "class": "OTHER",
+      "reason": "state verified with three different patterns, because an empty grep is not evidence"
+    },
+    {
+      "n": 159,
+      "line": 40758,
+      "class": "OTHER",
+      "reason": "metrics pre-registered before the numbers existed"
+    },
+    {
+      "n": 160,
+      "line": 40973,
+      "class": "OTHER",
+      "reason": "a ruling on full-build re-verification"
+    },
+    {
+      "n": 161,
+      "line": 41094,
+      "class": "OTHER",
+      "reason": "an acceptance, named as the cheapest kind"
+    },
+    {
+      "n": 162,
+      "line": 41243,
+      "class": "OTHER",
+      "reason": "a kernel-green measurement whose RTL reading also narrowed a predicate"
+    },
+    {
+      "n": 163,
+      "line": 41414,
+      "class": "OTHER",
+      "reason": "a covering verdict"
+    },
+    {
+      "n": 164,
+      "line": 41591,
+      "class": "OTHER",
+      "reason": "a landing with a doc recording a void number, its tell and the real price"
+    },
+    {
+      "n": 165,
+      "line": 41762,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "WHAT IS ACTUALLY LANDED — the theorem sorts over an ARBITRARY order, not the narrower claim made"
+    },
+    {
+      "n": 166,
+      "line": 41943,
+      "class": "OTHER",
+      "reason": "a 2x2 verdict landed; margins-only against the baseline"
+    },
+    {
+      "n": 167,
+      "line": 42055,
+      "class": "OTHER",
+      "reason": "a post census for one seat's day"
+    },
+    {
+      "n": 168,
+      "line": 42252,
+      "class": "OTHER",
+      "reason": "an activation width fact read from the spec source"
+    },
+    {
+      "n": 169,
+      "line": 42447,
+      "class": "OTHER",
+      "reason": "a hypothesis resolved into arithmetic on the landed datapath"
+    },
+    {
+      "n": 170,
+      "line": 42611,
+      "class": "OTHER",
+      "reason": "a clock-period fix verified plus a kernel-green measurement"
+    },
+    {
+      "n": 171,
+      "line": 42727,
+      "class": "OTHER",
+      "reason": "a cap ruling left two different things sharing one name; an ambiguity, none of the four"
+    },
+    {
+      "n": 172,
+      "line": 42898,
+      "class": "OTHER",
+      "reason": "a definition quoted"
+    },
+    {
+      "n": 173,
+      "line": 43069,
+      "class": "OTHER",
+      "reason": "a repair verdict"
+    },
+    {
+      "n": 174,
+      "line": 43228,
+      "class": "OTHER",
+      "reason": "a symlink and executability measured at the path"
+    },
+    {
+      "n": 175,
+      "line": 43370,
+      "class": "OTHER",
+      "reason": "identifies a legacy memory store by path"
+    },
+    {
+      "n": 176,
+      "line": 43529,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "VERDICT NOT ATTRIBUTABLE — the artifact moved mid-build, so the measurement lost its object"
+    },
+    {
+      "n": 177,
+      "line": 43759,
+      "class": "OTHER",
+      "reason": "a drafted claim revised before posting"
+    },
+    {
+      "n": 178,
+      "line": 43903,
+      "class": "OTHER",
+      "reason": "a repair verdict"
+    },
+    {
+      "n": 179,
+      "line": 44094,
+      "class": "OTHER",
+      "reason": "a ruling that the narrow read governs"
+    },
+    {
+      "n": 180,
+      "line": 44228,
+      "class": "stale-citations",
+      "reason": "a claim that WENT FALSE after it was written, with the writing commit and time cited"
     }
   ],
   "_note_on_statement_level_type_traps": "no row in rows 1-60 was assigned that class. Recorded so the second coder's disagreement on it is meaningful rather than an artifact of my having forgotten the class existed. If it stays empty to 388 that is itself a finding about the Results-site taxonomy, not about the coder.",
