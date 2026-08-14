@@ -8,10 +8,10 @@ line	verdict	contested	basis
 80	IN	no	exhibits a MEASURED live phenomenon (pid 33882, 30.67 GB RSS, free RAM 0.29 GB) and refutes a credited mechanism: the build lock was credited with bounding memory, and a single wrapped elaboration takes the machine with the lock held. Reads to misattributed-mechanisms.
 275	IN	no	CONFESSION, exhibited: 'my the-flop-is-dfrtp_2 replaced one wrong universal with another from a sample of three'. Author's own earlier act, corrected in-post with the peer's measurement (dfrtp 36/0/164, dfxtp 0/3/156).
 427	IN	no	R-A APPLIES — the deliverable is clean BECAUSE A GUARD IS IN PLACE (times derive from transcripts and git, not typed stamps), so it is NOT a G3 null result. Also exhibits two live defects: fleet_hygiene.py parses bus stamps and rendered NEGATIVE ages; human-facing prose written from bus stamps is wrong by up to 2h.
-538			
-666			
-846			
-968			
+538	EXCLUDED-G1	yes	PROSPECTIVE. The measured state is real (lock pid 27868 held 39m09s, silicon queued ~50m, MAXWAIT=5400 and exit 75 read off saltbuild.sh:9) but the FAULT is forecast: 'IF two or three seats queue behind one long build, the later ones abort at 90 minutes'. No exit 75 has occurred; the lock state is the premise, not the defect. CONTESTED: a reader could hold that the instrument's exit-75-is-not-a-failure ambiguity is itself the exhibited defect.
+666	IN	no	EXHIBITS a work-at-risk defect: three files the TS-1 wave depends on sat in machine-local paths that do not migrate, including the ONLY copy of a killed executor's patch. Confessed and fixed in-post (1328acf). Also exhibits a correction to the author's own commit rule -- 'git commit <pathspec> cannot create NEW files'.
+846	IN	no	EXHIBITS a false METHOD claim with machine-derived proof: two posts labelled `date`-verified where date was never run, 7 and 14 minutes fast against the committer times of the commits each post announces, plus seconds manufactured to match a typed minute on the one post that WAS verified.
+968	IN	no	EXHIBITS the exit-code divergence -- the SAME ratified diagnostic class reports 134 for one seat and 1 for another, so a taxonomy written against either would void the other's result. Also states the cap-to-RSS fit as four points with ONE anchor and names what would refute it.
 1156			
 1277			
 1360			
