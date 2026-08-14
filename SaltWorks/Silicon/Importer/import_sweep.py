@@ -30,7 +30,14 @@ FLOW = os.path.join(HERE, "..", "Flow")
 IMP = os.path.join(HERE, "import_netlist.py")
 
 MODULE_RE = re.compile(r"^\s*module\s+(\w+)\s*\(", re.M)
-PORT_RE = re.compile(r"^\s*(input|output)\s+(?:\[\s*(\d+)\s*:\s*(\d+)\s*\]\s*)?(\w+)\s*;", re.M)
+# ⛔ THE NAME GROUP MUST ACCEPT A VERILOG *ESCAPED IDENTIFIER*, NOT JUST \w+.
+# `splitnets -ports` (call (4) option (b)) renames every bit of a vector port to
+# an escaped name — `input \byte_addr[0] ;` — and `\w+` cannot match one. With the
+# old pattern this parser saw 2 of 34 input ports on a split netlist and the sweep
+# then reported the netlist BLOCKED for a missing driver: a defect in the
+# MEASUREMENT TOOL, reported as a property of the thing measured.
+PORT_RE = re.compile(
+    r"^\s*(input|output)\s+(?:\[\s*(\d+)\s*:\s*(\d+)\s*\]\s*)?(\\\S+|\w+)\s*;", re.M)
 
 
 def ports_of(text):
@@ -43,6 +50,12 @@ def ports_of(text):
         return None, []
     seen, out = set(), []
     for d, hi, lo, name in PORT_RE.findall(text):
+        # An escaped identifier keeps its backslash in the source but NOT in the
+        # importer's own net table, which normalises it away — so strip it here
+        # or every escaped port would be passed under a name the importer has
+        # never heard of.
+        if name.startswith("\\"):
+            name = name[1:]
         if name in seen:
             continue                      # yosys re-declares each port as a wire
         seen.add(name)

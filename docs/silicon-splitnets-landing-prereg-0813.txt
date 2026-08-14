@@ -1,0 +1,91 @@
+SILICON — PRE-REGISTRATION: LANDING THE SPLITNETS CHAIN (dmem_addr8 imports)
+Written 2026-08-13 ~17:2x PDT, BEFORE touching synth.sh or regenerating anything.
+Order: helm 17:25:55 — "continue the statement-layer build forward on your 17:04
+we_out trace — the chain you measured in temp is the LW/SW front's next TRACKED
+landing and needs no key that is not yours."
+Authority for the mechanism: math docket call (4), 08/13 05:40 — option (b), THE
+FLOW EMITS PER-BIT ASSIGNS AND THE TRUSTED IMPORTER KEEPS REFUSING. This landing
+is (b) exercised for the first time on a real module.
+
+WHAT I MEASURED IN TEMP (17:0x), and am now making tracked:
+  yosys ... opt_clean -purge ; splitnets -ports ; opt_clean -purge
+  ⇒ ranged assigns 1 -> 0 · we_out SURVIVED · importer EXIT=0
+    (34 primary inputs, 79 gates, 7 outputs)
+  The trusted importer needed NO change, which is exactly (b)'s promise.
+
+⛔ THE DESIGN CONSTRAINT THAT DECIDES THE SHAPE — REPRODUCIBILITY OF WHAT IS
+ALREADY LANDED. Every committed netlist was produced WITHOUT splitnets. If I add
+the pass unconditionally, synth.sh NO LONGER REPRODUCES the committed netlists,
+and the next seat to re-run it gets a different file with no warning. That would
+silently break provenance checks that compare a committed fixture against the
+registered rewrite (pinreset_controls' C3 arm-provenance row is exactly such a
+check). So:
+  ⇒ SPLITNETS IS OPT-IN VIA ENV VAR (SYNTH_SPLITNETS=1), matching the file's own
+    existing idiom (SYNTH_STRUCTURAL=1). Default behaviour is BYTE-UNCHANGED.
+  ⇒ Only dmem_addr8 is regenerated. I am NOT re-synthesising the corpus: 15 of
+    17 blocked netlists are range-grammar, and moving them all would move landed
+    data including d99842a. The helm gave me this chain, not that sweep.
+
+PRE-STATED BAR (recorded before any of it runs). NOTE THE SWEEP BAR INVERTS —
+this landing is SUPPOSED to move it, by exactly one:
+  S1  synth.sh with SYNTH_SPLITNETS unset reproduces a netlist BYTE-IDENTICAL to
+      what it produced before the edit (default path unchanged)
+  S2  dmem_addr8_nl.v regenerated with SYNTH_SPLITNETS=1 has ZERO ranged assigns
+  S3  we_out is still a declared output of the regenerated netlist
+  S4  the regenerated dmem_addr8_nl.v IMPORTS at EXIT=0
+  S5  import_sweep: 46 netlists, IMPORTING 29 -> 30, BLOCKED 17 -> 16, and the
+      ONLY row that changes class is dmem_addr8_nl.v. Any other row moving is a
+      FAILURE, not a bonus.
+  S6  pinreset_controls.sh EXIT=0 (the C3 arm-provenance row must still hold —
+      it is the detector for "I broke reproducibility")
+  S7  instrument_selftest.sh EXIT=0
+  S8  saltbuild BARE EXIT=0 (nothing in Lean should move; this is a .v landing)
+
+PASS CRITERION: S1–S8 all as stated. Any deviation is a FAILURE and gets posted
+as one, including a green I did not predict.
+
+RISKS:
+  R1  splitnets renames ports to escaped bit names (\byte_addr[0] ). Downstream
+      consumers of dmem_addr8_nl.v — if any exist — would break. MEASURE who
+      consumes it before regenerating; if anything does, this becomes a
+      coordination question, not a solo landing.
+  R2  The gate/area figures change (splitnets can inhibit some optimisation).
+      The _stat.txt companion moves with the netlist; that is expected, but the
+      DELTA must be recorded, not waved past.
+  R3  ⛔ MY OWN RECURRING DEFECT, NAMED IN ADVANCE: I have twice today tested a
+      risk on a fixture that could not exhibit it. S5's "only one row changes"
+      is the row that catches a broad regression, and it must be measured by
+      DIFFING the full classification against the pre-landing sweep — not by
+      reading the two counts, which can net out.
+
+════ RESULTS — the splitnets chain LANDED ════
+S1 default path (flag unset) BYTE-IDENTICAL, netlist AND stat            MET
+S2 ranged assigns in dmem_addr8_nl.v: 1 -> 0                             MET
+S3 we_out still a declared output                                        MET
+S4 dmem_addr8_nl.v IMPORTS at 79 gates                                   MET
+S5 sweep 46 · importing 29 -> 30 · blocked 17 -> 16 · ONLY dmem_addr8    MET*
+S6 pinreset_controls EXIT=0, C3 arm-provenance row intact                MET
+S7 instrument_selftest EXIT=0, 12/12                                     MET
+S8 saltbuild BARE EXIT=0                                                 MET
+R1 consumers cite the RTL SOURCE (dmem_addr8.v:80/:81), not the netlist  CLEAR
+R2 area 85.081600 BEFORE and AFTER — the area-baseline doc does NOT rot  CLEAR
+
+⛔ *S5 FAILED ON ITS FIRST RUN AND THE PREREG SAYS TO PUBLISH IT AS ONE.
+   Importing stayed 29; dmem_addr8 moved range-grammar -> 'other',
+   refusing with "net 'byte_addr[1]' has no driver and is not an input".
+   ROOT CAUSE, AND IT IS NOT THE FLOW AND NOT THE IMPORTER: the SWEEP's
+   own PORT_RE matched port names with \w+, which CANNOT MATCH A VERILOG
+   ESCAPED IDENTIFIER — and splitnets renames every vector bit to one.
+   ports_of saw 2 OF 34 INPUT PORTS, built a port list missing 32, and
+   the importer correctly refused. A DEFECT IN THE MEASUREMENT TOOL,
+   REPORTED AS A PROPERTY OF THE THING MEASURED — the same family as the
+   ignore-aware search that nearly convinced me the join's theorems did
+   not exist, three hours earlier. Fixed in import_sweep.py (UNTRUSTED);
+   the trusted importer needed no change, which is what (b) promised.
+
+R3 DISCHARGED AS WRITTEN: S5 was judged by DIFFING the full 46-row
+   classification against the pre-landing baseline, not by reading two
+   counts that can net out. The diff is what showed the FIRST run's
+   failure was a RECLASSIFICATION rather than no-change.
+   ⚠️ And the baseline itself was rebuilt after my first capture regex
+   silently dropped slicea16t_nl.v — 45 rows where 46 exist.

@@ -1,16 +1,16 @@
 
-7. Printing statistics.
+9. Printing statistics.
 
 === dmem_addr8 ===
 
         +----------Local Count, excluding submodules.
         |        +-Local Area, excluding submodules.
         |        | 
-       18        - wires
+       51        - wires
        51        - wire bits
-        8        - public wires
+       41        - public wires
        41        - public wire bits
-        8        - ports
+       41        - ports
        41        - port bits
        14   85.082 cells
         2   12.512   sky130_fd_sc_hd__lpflow_inputiso1p_1

@@ -71,6 +71,29 @@ echo "synth: reading$READ"
 # OPT-IN, never default: `SYNTH_STRUCTURAL=1 ./synth.sh <top>`. The committed
 # netlists were produced by the default path and must stay byte-reproducible by
 # it — `Importer/reimport.sh` checks exactly that.
+# ⛔ SPLITNETS IS OPT-IN, AND THE DEFAULT PATH IS BYTE-UNCHANGED ON PURPOSE.
+# math's docket call (4) ruling, 08/13 05:40, chose option (b): THE FLOW EMITS
+# PER-BIT ASSIGNS AND THE TRUSTED IMPORTER KEEPS REFUSING. `splitnets -ports` is
+# that emission — it removes the ranged assigns (`assign word_index =
+# byte_addr[4:2];`) that the importer refuses, WITHOUT the importer growing a
+# bit-vector grammar. The ruling's own tiebreak is why it is a flag and not a
+# default: (b) IS REVERSIBLE AND (a) IS A ONE-WAY DOOR, and a flag can be
+# switched off tomorrow leaving no residue.
+#
+# ⚠️ AND THE REASON IT IS NOT UNCONDITIONAL: every committed netlist was produced
+# WITHOUT this pass. Turning it on for everyone means synth.sh no longer
+# REPRODUCES the committed files, and the next seat to re-run it gets a different
+# netlist with no warning — silently breaking any provenance check that compares
+# a committed fixture against the registered rewrite (pinreset_controls' C3
+# arm-provenance row is exactly such a check). Verified before this edit: the
+# unmodified flow reproduces dmem_addr8_nl.v AND its stat file BYTE-IDENTICALLY,
+# so that reproducibility is a real property worth not breaking.
+SPLIT=""
+if [ "${SYNTH_SPLITNETS:-0}" = "1" ]; then
+  SPLIT="splitnets -ports
+  opt_clean -purge"
+  echo "synth: SPLITNETS mode — per-bit ports/assigns (call (4) option (b))"
+fi
 PRELUDE=""
 if [ "${SYNTH_STRUCTURAL:-0}" = "1" ]; then
   PRELUDE="read_liberty -lib $LIB"
@@ -83,6 +106,7 @@ yosys -q -p "
   dfflibmap -liberty $LIB
   abc -liberty $LIB
   opt_clean -purge
+  $SPLIT
   write_verilog -noattr $HERE/${TOP}_nl.v
   tee -o $HERE/${TOP}_stat.txt stat -liberty $LIB
 "

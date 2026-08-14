@@ -255,6 +255,23 @@ one level up — and the two analyses agree exactly once first-blocker semantics
 are accounted for, which is what makes them a cross-check rather than two
 guesses.*
 
+> ⚓ **CONFIRMED AND HALF-DISCHARGED 2026-08-13 — the prediction above was RIGHT
+> AND IS NOW PARTLY HISTORY.** *Math ruled docket call (4) at 05:40 in favour of
+> option **(b)**: the FLOW emits per-bit assigns and the trusted importer keeps
+> refusing. Landed for the first module tonight — `synth.sh` gained an **opt-in**
+> `SYNTH_SPLITNETS=1` pass and `dmem_addr8` was regenerated under it.*
+> **RESULT: `dmem_addr8_nl.v` NOW IMPORTS (79 gates), sweep 29 → 30 importing,
+> 17 → 16 blocked, and it was the ONLY row that changed class.** *So of the two
+> netlists this table names as gated on grammar alone, **one is discharged** and
+> `dmem_addr16` remains — the count "it unblocks 2" was exact.*
+> ⚠️ *And the discharge cost a second fix the table could not have foreseen: the
+> sweep's own `PORT_RE` matched port names with `\w+`, which **cannot match a
+> Verilog escaped identifier** — and `splitnets` renames every vector bit to one.
+> The sweep saw **2 of 34 input ports** and reported the netlist blocked for a
+> missing driver: **a defect in the measurement tool, published as a property of
+> the thing measured.** Fixed in `import_sweep.py`, which is untrusted; the
+> trusted importer needed no change at all, which is precisely what (b) promised.*
+
 ## G.3 · HOW WRONG THE PROXY WAS — AND IN WHICH DIRECTION
 
 ```
