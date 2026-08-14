@@ -3,8 +3,11 @@
 ## 0 · STATUS — read this before any rule below
 
 ```
-STATUS        DRAFT 3. NOT IN FORCE. SHIPS TO RATIFICATION (2026-08-14) WITH ONE OPEN
-              DESIGN QUESTION, stated below and priced at §2.5.
+STATUS        RATIFIED AS LANDED at the Captain's word, 2026-08-14 morning sitting.
+              IN FORCE. The one open design question (gate strictness, ~40% of
+              legacy agreed-OTHER exiting to EXCLUDED, priced at §2.5) was RULED:
+              the strict gate STANDS; the under-count ledger ships beside every
+              published count. The §6 blocking items precede the pass-3 brief.
               DRAFT 3 = DRAFT 2 with the NINE EXACT REPAIRS the round-2 refuters
               forced, applied in place. The file keeps its `DRAFT2` basename by the
               repair order (edit-in-place, one file) so every standing citation
