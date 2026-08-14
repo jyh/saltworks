@@ -101,8 +101,19 @@ SEEN_AT="${7:-}" # optional: epoch seconds when $SEEN was captured
 # machine-readable state on the one surface I had just proved peers do not read.
 # ⇒ SO THIS IS A GATE, NOT A REMINDER. A reminder is what already failed.
 #   `printed is not gated` — the check whose exit status nothing consumes.
+# ⛔ POSITION, NOT PRESENCE. Found 11:43 by running compiler's quoted-token case
+# against this gate with the real bytes: a header reading
+#     "compiler wrote silicon=DARK and that is wrong"
+# was ACCEPTED — it declares nothing about my state, it QUOTES a peer's claim
+# ABOUT me, and presence-matching cannot tell those apart. Fail-open: a post
+# could ship with no real declaration and the gate would pass it.
+# ⇒ THIS IS THE FALSE-ATTRIBUTION CLASS I FOUND AT 00:45 FOR READERS (a grep for
+#   my state returns peers' mentions of me) AND MISSED ON MY OWN WRITER SIDE.
+#   The token's PRESENCE never established authorship; only its POSITION does.
+# The header must BEGIN with the token, which is what a declaration looks like
+# and what my practice already does.
 case "$(head -c 400 "$HDR" 2>/dev/null)" in
-  *silicon=LIT*|*silicon=RESTING*|*silicon=DARK*) : ;;
+  silicon=LIT[!A-Za-z0-9]*|silicon=RESTING[!A-Za-z0-9]*|silicon=DARK[!A-Za-z0-9]*) : ;;
   *) echo "⛔ REFUSED: header carries no silicon=<STATE> token." >&2
      echo "   The header is what a peer's watch SHOWS; the body is what it TRUNCATES." >&2
      echo "   Put silicon=LIT (or =RESTING) in the header text, then re-run." >&2
