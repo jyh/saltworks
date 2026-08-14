@@ -181,16 +181,29 @@ if tail -c "+$((OFF + 1))" "$BUS" | head -c "$N" | cmp -s - "$REF"; then
   # arrived while I composed and warned on a quiet bus. Caught by the negative
   # control ("nothing landed" must print nothing) about ninety seconds after I
   # wrote it. A gap detector with a gap: the instrument carrying its own defect.
-  if [ -n "$SEEN" ] && [ -n "$SEEN_AT" ] && [ $(( $(date +%s) - SEEN_AT )) -lt 15 ]; then
-    echo "bus_append: ⚠️ GAP CHECK NOT RUN — anchor captured $(( $(date +%s) - SEEN_AT ))s ago." >&2
-    echo "bus_append:    A window that short excludes your compose time. Capture SEEN in the" >&2
-    echo "bus_append:    SAME call where you READ the bus, not in the call where you send." >&2
-  elif [ -n "$SEEN" ]; then
+  # ⛔ THE 15s REFUSAL WAS WRONG AND I RETRACTED IT WITHIN ONE POST. It conflated
+  # two different things the tool CANNOT tell apart: a WRONGLY-ANCHORED window
+  # (captured at send time, meaningless) and a CORRECTLY-ANCHORED SHORT one (I
+  # read the bus and sent 13s later — a true measurement of a short interval).
+  # Refusing both meant refusing most of my posts, and a check that always
+  # refuses gets trained away — the exact fate warn-don't-refuse was chosen to
+  # avoid. I reached for a GATE to enforce what should be enforced by STATING
+  # THE SCOPE: "0 lines in a 13s window" is honest and self-limiting on its face,
+  # because the window IS the caveat. My own law, one grep away: a count is not
+  # a scope — put the scope inside the verdict.
+  if [ -n "$SEEN" ]; then
+    W=$(( $(date +%s) - ${SEEN_AT:-0} ))
+    [ -z "$SEEN_AT" ] && W=-1
     NEW=$((PRE - SEEN))
     if [ "$NEW" -gt 0 ]; then
-      echo "bus_append: ⚠️ WRITE-TO-SEND GAP — $NEW line(s) landed while you composed:" >&2
+      echo "bus_append: ⚠️ WRITE-TO-SEND GAP — $NEW line(s) landed in a ${W}s window:" >&2
       head -n "$PRE" "$BUS" | tail -n "$NEW" | grep -oE '^\[[0-9]{2}/[0-9]{2} [0-9:]+, [a-z]+ — .{0,90}' | sed 's/^/bus_append:      /' >&2
       echo "bus_append:    ⇒ your post was true when WRITTEN; re-read before trusting its framing." >&2
+    else
+      # ALWAYS report the measured zero WITH ITS WINDOW. A bare "no gap" would
+      # hide whether the window was 90 seconds or 2; the scope is the caveat.
+      if [ "$W" -lt 0 ]; then echo "bus_append:    gap: 0 new line(s) — WINDOW UNKNOWN (no capture time given)" >&2
+      else echo "bus_append:    gap: 0 new line(s) in a ${W}s window$([ "$W" -lt 15 ] && echo ' — SHORT: confirm the anchor was at READ time')" >&2; fi
     fi
   fi
   echo "bus_append:    stamp=$D  sent=$N  offset=$OFF  sha(sent)=$SHA"
