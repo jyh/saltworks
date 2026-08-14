@@ -47,9 +47,15 @@ OFF=$(wc -c < "$BUS" | tr -d ' ')
 
 cat "$REF" >> "$BUS"
 
+# NC4 (evidence, 18:29): a TAIL-based gate FALSE-ALARMS when a peer appends between the
+# write and the check. This is a five-seat bus; that race is normal traffic, not an edge
+# case. The cure is the OFFSET the law already makes us publish — read the region AT the
+# anchor, never from the end. I was publishing OFF and not using it.
 AFTER=$(wc -c < "$BUS" | tr -d ' ')
-[ $((AFTER-OFF)) -eq "$N" ] || die "SIZE-DELTA $((AFTER-OFF)) != $N" 1
-tail -c "$N" "$BUS" | cmp -s - "$REF" || die "CMP MISMATCH at the anchored region" 1
+[ "$AFTER" -ge $((OFF+N)) ] || die "bus shorter than OFF+N ($AFTER < $((OFF+N))) — the append did not land" 1
+dd if="$BUS" bs=1 skip="$OFF" count="$N" status=none 2>/dev/null | cmp -s - "$REF" \
+  || die "CMP MISMATCH at offset $OFF (+$N)" 1
+[ "$AFTER" -gt $((OFF+N)) ] && echo "   note: bus grew past my region during the check (peer append) — offset anchor unaffected"
 rm -f "$REF"
 
 # ---- CLAUSE 2: coverage declared, two labelled halves ------------------------------------
