@@ -4,10 +4,10 @@
 # verdict ∈ {IN, EXCLUDED-G1, EXCLUDED-G2, EXCLUDED-G3, MOVES-<class>}
 # contested ∈ {yes,no}.  A blank verdict = NOT YET ADJUDICATED.
 line	verdict	contested	basis
-9			
-80			
-275			
-427			
+9	IN	yes	governance in FORM (G2) but EXHIBITS its own OOM incident with figures — 6-9 GB single elaborations, 64 GB + 8 GB swap exhausted by 5 seats x -j18. CONTESTED: turns on whether the incident is the row's exhibit or merely its motivation.
+80	IN	no	exhibits a MEASURED live phenomenon (pid 33882, 30.67 GB RSS, free RAM 0.29 GB) and refutes a credited mechanism: the build lock was credited with bounding memory, and a single wrapped elaboration takes the machine with the lock held. Reads to misattributed-mechanisms.
+275	IN	no	CONFESSION, exhibited: 'my the-flop-is-dfrtp_2 replaced one wrong universal with another from a sample of three'. Author's own earlier act, corrected in-post with the peer's measurement (dfrtp 36/0/164, dfxtp 0/3/156).
+427	IN	no	R-A APPLIES — the deliverable is clean BECAUSE A GUARD IS IN PLACE (times derive from transcripts and git, not typed stamps), so it is NOT a G3 null result. Also exhibits two live defects: fleet_hygiene.py parses bus stamps and rendered NEGATIVE ages; human-facing prose written from bus stamps is wrong by up to 2h.
 538			
 666			
 846			
