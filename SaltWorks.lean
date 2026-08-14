@@ -61,6 +61,7 @@ import SaltWorks.Silicon.Imported.CompareExchange
 import SaltWorks.Silicon.Imported.Switch
 import SaltWorks.Silicon.Imported.Fabric
 import SaltWorks.Silicon.Imported.FabricCut
+import SaltWorks.Silicon.Imported.DmemAddr8
 import SaltWorks.Silicon.Equiv.ComparatorEquiv
 import SaltWorks.Silicon.Equiv.Columns
 import SaltWorks.Silicon.Equiv.BitSliced
@@ -73,6 +74,7 @@ import SaltWorks.Silicon.Equiv.CERefinement
 import SaltWorks.Silicon.Equiv.CERefinementC
 import SaltWorks.Silicon.Equiv.PartialLoad
 import SaltWorks.Silicon.Equiv.ScenarioComplete
+import SaltWorks.Silicon.Equiv.DmemAddr8Suppress
 import SaltWorks.HDL.PayloadL0
 import SaltWorks.HDL.PayloadL1
 import SaltWorks.HDL.PayloadL2

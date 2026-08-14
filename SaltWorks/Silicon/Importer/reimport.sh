@@ -88,6 +88,20 @@ run ceNL CompareExchange.lean SaltWorks/Silicon/Flow/ce_elem_nl.v ce_elem \
 run ceCNL CompareExchangeC.lean SaltWorks/Silicon/Flow/ce_c_nl.v ce_c \
     "i0,i1,i2,i3,i4,i5,i6" "o0,o1,o2,o3,o4,o5"
 
+# --- dmem_addr8: THE LW/SW ADDRESS MASK, carrying `we_out`. ------------------
+# ADDED 8/13 with the datum itself, so it is never a landed-but-unreproduced
+# datum — the class the block below exists to make impossible. Its ports are
+# BIT-SPLIT because call (4) option (b) re-synthesised this netlist through
+# `splitnets -ports` (61fcc74): `byte_addr` and `word_index` are declared as
+# escaped per-bit identifiers, so the caller names bits, not vectors.
+# The --outputs ORDER here is the module's own declaration order, and it is no
+# longer a guess that only the byte-comparison adjudicates: the datum now
+# RECORDS the names, and DmemAddr8Suppress.lean checks index 3 against the
+# recorded "we_out" before proving anything about it.
+run dmemAddr8NL DmemAddr8.lean SaltWorks/Silicon/Flow/dmem_addr8_nl.v dmem_addr8 \
+    "$(python3 -c "print(','.join(f'byte_addr[{i}]' for i in range(32)))"),req,we_in" \
+    "misaligned,out_of_range,trap,we_out,word_index[0],word_index[1],word_index[2]"
+
 # NOTE: RefComparator.lean is NOT listed — it is hand-written on purpose, a
 # structurally different reference design so that agreeing with the imported
 # netlist is a real check rather than a tautology. Adding it here would be a
