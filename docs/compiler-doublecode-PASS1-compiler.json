@@ -6,7 +6,7 @@
   "brief": "docs/compiler-blind-classification-brief-0813.md",
   "sample": "docs/compiler-doublecode-sample-0813.txt (512faa4, deterministic every-10th, 388 rows)",
   "taxonomy": "ruled 08/13 09:45:34 — four artifact-level classes at the Results site PLUS pre-registered OTHER",
-  "tranche": "rows 1-40 of 388",
+  "tranche": "rows 1-60 of 388",
   "pass_committed_before_any_second_coder_existed": true,
   "distribution_withheld_from_the_bus": true,
   "rows": [
@@ -249,9 +249,129 @@
       "line": 4635,
       "class": "OTHER",
       "reason": "hub import build report, 8619 jobs, EXIT=0"
+    },
+    {
+      "n": 41,
+      "line": 4785,
+      "class": "stale-citations",
+      "reason": "C4's prose named two coercions with no referent anywhere in the corpus"
+    },
+    {
+      "n": 42,
+      "line": 4926,
+      "class": "OTHER",
+      "reason": "banyan_selfrouting applied to a batcher-sorted input; a theorem landing"
+    },
+    {
+      "n": 43,
+      "line": 5057,
+      "class": "OTHER",
+      "reason": "inst_sem ATTEMPTED, NOT PROVED — an honest non-result, reported as such"
+    },
+    {
+      "n": 44,
+      "line": 5205,
+      "class": "OTHER",
+      "reason": "B2's compiler half delivered; a delivery report"
+    },
+    {
+      "n": 45,
+      "line": 5338,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "4.56 was travelling as a constant beyond the domain it was measured in"
+    },
+    {
+      "n": 46,
+      "line": 5510,
+      "class": "OTHER",
+      "reason": "banking-for-reboot post; outcomes and routes, no defect asserted"
+    },
+    {
+      "n": 47,
+      "line": 5695,
+      "class": "OTHER",
+      "reason": "a targeted sed of the last line has a race on a five-seat bus; a hazard, nothing misattributed"
+    },
+    {
+      "n": 48,
+      "line": 5893,
+      "class": "OTHER",
+      "reason": "revisits a banked finding about core-sized Circ certification; conservative — not clearly one of the four"
+    },
+    {
+      "n": 49,
+      "line": 6055,
+      "class": "OTHER",
+      "reason": "C5IND lands and answers the assigned question NO; a landing"
+    },
+    {
+      "n": 50,
+      "line": 6208,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "three of six attacks got through by one route — NOTHING CHECKS the property the gate claimed"
+    },
+    {
+      "n": 51,
+      "line": 6418,
+      "class": "OTHER",
+      "reason": "acceptance plus a measurement of a peer's fourth member"
+    },
+    {
+      "n": 52,
+      "line": 6615,
+      "class": "misattributed-mechanisms",
+      "reason": "the full-load restriction was attributed to the banyan; it was OURS and entered elsewhere"
+    },
+    {
+      "n": 53,
+      "line": 6760,
+      "class": "OTHER",
+      "reason": "a name collision reported at the bytes"
+    },
+    {
+      "n": 54,
+      "line": 6964,
+      "class": "OTHER",
+      "reason": "cFrame byte-identical frames under d and d%8; a proof result"
+    },
+    {
+      "n": 55,
+      "line": 7148,
+      "class": "OTHER",
+      "reason": "an inc32 grep census across the Lean sources"
+    },
+    {
+      "n": 56,
+      "line": 7341,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "distinguishes GENUINELY EXHAUSTIVE from a sample — the scope of an exhaustiveness claim"
+    },
+    {
+      "n": 57,
+      "line": 7483,
+      "class": "OTHER",
+      "reason": "f_max taken from signoff reports rather than metrics.csv; careful provenance, not a defect"
+    },
+    {
+      "n": 58,
+      "line": 7679,
+      "class": "OTHER",
+      "reason": "sem_congr_on landed with its seam machinery; a landing"
+    },
+    {
+      "n": 59,
+      "line": 7848,
+      "class": "OTHER",
+      "reason": "sem_pcNext proved over all 2^97 inputs; a landing"
+    },
+    {
+      "n": 60,
+      "line": 8018,
+      "class": "stale-citations",
+      "reason": "two sentences do not survive the bytes — premises that had genuinely EXPIRED"
     }
   ],
-  "_note_on_statement_level_type_traps": "no row in this tranche was assigned that class. Recorded so the second coder's disagreement on it is meaningful rather than an artifact of my having forgotten the class existed.",
+  "_note_on_statement_level_type_traps": "no row in rows 1-60 was assigned that class. Recorded so the second coder's disagreement on it is meaningful rather than an artifact of my having forgotten the class existed. If it stays empty to 388 that is itself a finding about the Results-site taxonomy, not about the coder.",
   "_honest_limits": [
     "SINGLE tranche: 20 of 388. Not the gate's 10%; the gate is not discharged by this file.",
     "I authored the brief, the sample rule and the taxonomy plumbing. I am not a neutral coder and never claimed to be — that is exactly why a second, independent pass is required.",
