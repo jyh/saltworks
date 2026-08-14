@@ -2,8 +2,8 @@
 
 **Seat:** compiler · **2026-08-14 12:50** · **Pre-registration:** `db7e335`, committed 12:44
 **before any row was re-opened.** Prediction registered there: **3–5, indeterminate leaning
-rare.** ⛔ **STATUS: INCOMPLETE — 18 of 30 rows are NOT adjudicated. Every count below is a
-LOWER BOUND and is labelled as one.**
+rare.** ✅ **STATUS: COMPLETE as of 12:56 — all 30 bodies read in full. §1–§3 below were
+written at the LOWER-BOUND stage and are preserved unedited; §6 carries the finished count.**
 
 ## 1 · THE ANSWER THE PARTIAL RUN ALREADY SUPPORTS
 
@@ -67,3 +67,59 @@ measurement. **~45 KB of reading; it is the only honest completion and it is owe
 - The four verdicts are mine and re-readable: each names the phenomenon, the party whose
   stated cause is refuted, and the measurement in the same row that refutes it.
 - **N=30 is R-3's spent draw. No new rows, no new coverage, and the 22-row fence is untouched.**
+
+
+## 6 · ✅ COMPLETED — ALL 30 READ IN FULL, NO SCREEN
+
+The 18 rows §3 left unexamined are now read whole against §3.2's three prongs.
+
+```
+T2's three prongs FIRE on ....... 5 of 30
+   44228 · 69485 · 82239 · 82566 · 8869        ← 8869 is the one the screen missed
+
+PRE-REGISTERED BANDS:  ≤2 RARE      ⛔ REFUTED
+                       ≥6 SHADOWED  ⛔ NOT REACHED
+                       3–5          ✅ INDETERMINATE — and my prediction was
+                                       "3–5, leaning rare". The band is right and
+                                       the lean is wrong.
+```
+
+### 6.1 ⭐ THE SECOND MEASUREMENT, COMPLETE — AND IT IS NOT THE LADDER
+```
+82239   fires · coded T1     ✅ LEGITIMATE PRECEDENCE (T1 outranks T2)
+69485   fires · coded T4     ⛔ LADDER VIOLATION — T2 outranks T4
+8869    fires · coded T4     ⛔ LADDER VIOLATION — T2 outranks T4
+44228   fires · coded AMBIG  ⛔ UNDECIDED (my own basis reads "T2 fires CLEANLY")
+82566   fires · coded AMBIG  ⛔ UNDECIDED
+```
+⇒ ***ONE OF FIVE WAS LOST TO THE LADDER. FOUR WERE LOST TO ME.*** **T2's "zero of thirty" is a
+coder artefact.** *`8869` is the sharpest: silicon writes* "I called `aluSelect`'s three shift
+slots the carry-in hazard at 64× width — they are not the same hazard", *quotes the RHS showing
+the unselected wires do not occur in it, and concludes* "I aggregated two different things into
+one family." **Phenomenon, cause on the record in the author's own words, refuting reading in
+the same row. I filed it `wrong-scope`.**
+
+### 6.2 ⛔ THE SCREEN'S REAL COST — 5.6% OF ROWS, 20% OF THE POSITIVES
+```
+wide prong-2 screen admitted ......... 12 of 30, containing 4 of the 5 firings
+rows it wrongly excluded ..............  1 of 18  =  5.6%   ← sounds tolerable
+FIRINGS it wrongly excluded ...........  1 of 5   =  20%    ← the number that matters
+```
+🔑 ***A FALSE-NEGATIVE RATE OVER ROWS AND OVER POSITIVES ARE DIFFERENT NUMBERS, AND THE
+FLATTERING ONE IS THE DENOMINATOR NOBODY CARES ABOUT.*** *Had I reported "the screen missed
+5.6%" I would have been TRUE and useless: the screen lost a fifth of the answer.*
+
+📌 **And §3's alarm needs its own correction: the second vocabulary admitted 11 of 18, and
+reading them shows 10 were NOISE** — negation phrases like *"not a ruling"*, *"not a
+register"* — with exactly one real firing among them. **The alarm was right that the screen
+leaked and wrong about the size by an order of magnitude.** *Two screens, two error
+directions, and only reading the population settled either.* ⇒ **§6-R5's law, third instance
+today: instrument a speech act with a word list and you get a number about the word list.**
+
+### 6.3 WHAT THE SITTING SHOULD TAKE
+**T2 does not need a sharper definition.** §3.2 is a well-formed conjunctive test that fired
+cleanly on five rows; a coder mis-ordered two, left two undecided, and the ladder correctly
+took one. ⚠️ **Both ladder violations went the SAME direction — T2 filed down to T4, the
+residual.** *That is the catch-all pull measured a third time in this seat, now against a rule
+that is not ambiguous.* ⇒ **The repair is to CODER PROCEDURE — apply the ladder in order and
+record which test was run — not to the taxonomy.**
