@@ -116,7 +116,25 @@ for f in "$OUT"/*.lean; do
   case " $excluded " in *" $b("*) continue;; esac
   uncovered="$uncovered $b"
 done
-echo "reimport: $n of $committed committed datum(s) reproduced, 3 excluded with cause"
+# ⛔ THE DEBT IS PRINTED, NOT MERELY HELD. This used to say "3 excluded with
+# cause" and keep the cause in the source, then print a bare "ALL REPRODUCE" — a
+# TOTALITY CLAIM with its own exclusions invisible to every reader of the output.
+# The helm's 18:05:38 ruling requires the opposite in words: every totality-style
+# predicate reads "on every REGENERABLE datum" WITH THE DEBT LIST PRINTED BESIDE
+# IT. And silicon's own 19:13 criterion says why it matters generally:
+# ⇒ A CAVEAT THAT LIVES ONLY IN THE SOURCE IS NOT CARRIED BY THE OUTPUT, AND THE
+#   OUTPUT IS WHAT TRAVELS. This file's exclusions were correct, reasoned and
+#   dated at :91-:111 — and none of that ever reached a reader of a green run.
+# ⚠️ SPLIT ON ')' AND NOT ON WHITESPACE. My first version of this block used
+# `for _e in $excluded` and `wc -w` — but each entry is `Name.lean(cause with
+# spaces)`, so word-splitting cut them mid-entry and reported SIX exclusions
+# where there are THREE. I had replaced a CORRECT hardcoded 3 with a DERIVED
+# count that was wrong: deriving a figure is not automatically better than a
+# constant that happens to be right, and a derivation is only an improvement if
+# its delimiter matches the data.
+_nexcl=$(printf '%s' "$excluded" | tr ')' '\n' | grep -c '[A-Za-z]')
+echo "reimport: $n of $committed committed datum(s) reproduced, $_nexcl excluded — REGISTERED DEBT, named:"
+printf '%s' "$excluded" | tr ')' '\n' | sed '/[A-Za-z]/!d; s/^ *//; s/$/)/; s/^/    · /' 
 [ -n "$uncovered" ] && { echo "  ⛔ UNACCOUNTED (neither run nor excluded):$uncovered"; fail=1; }
-echo "reimport: $( [ $fail -eq 0 ] && echo "ALL REPRODUCE" || echo "FAILURES ABOVE" )"
+echo "reimport: $( [ $fail -eq 0 ] && echo "ALL REGENERABLE DATUMS REPRODUCE (not all committed — see the debt above)" || echo "FAILURES ABOVE" )"
 exit $fail
