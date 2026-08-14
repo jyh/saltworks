@@ -196,12 +196,28 @@ except Exception as ex:
   else                               busf="$n lines"; fi
   # minutes since MY last bus post, read from the bus itself; an unreadable
   # answer names itself rather than printing a reassuring blank.
-  mine=$(grep -oE "^\[$(date '+%m/%d') [0-9:]+, silicon" "$BUS" 2>/dev/null | tail -1 | grep -oE '[0-9]{2}:[0-9]{2}:[0-9]{2}')
-  if [ -z "$mine" ]; then age="** NO silicon POST FOUND TODAY — CHECK DID NOT RUN **"
+  # ⛔⛔ REPAIRED 2026-08-14 00:1x, NINETEEN MINUTES AFTER SHIPPING IT. The first
+  # version grepped `^\[$(date +%m/%d) ... silicon` — TODAY'S DATE ONLY. The date
+  # rolled at 00:00 while my last post was stamped 08/13, so the field could not
+  # find it and printed the refusal. It FAILED SAFE (loud, not a false +0min),
+  # which is the only reason this is a repair and not an incident — but a cadence
+  # alarm that goes blind every night at midnight is blind exactly when a seat is
+  # most likely to be drifting unattended.
+  # ⇒ THE DEFECT: I used a DATE-SCOPED SEARCH to answer a TIME-SINCE question.
+  #   The quantity wanted is an INTERVAL; scoping the search to a calendar day
+  #   silently bounds it at the day boundary. Match ANY date, then subtract.
+  mine=$(grep -oE "^\[[0-9]{2}/[0-9]{2} [0-9:]{8}, silicon" "$BUS" 2>/dev/null | tail -1 | grep -oE '[0-9]{2}/[0-9]{2} [0-9:]{8}')
+  if [ -z "$mine" ]; then age="** NO silicon POST FOUND ON THIS BUS — CHECK DID NOT RUN **"
+  elif ! command -v python3 >/dev/null 2>&1; then age="** python3 ABSENT — CADENCE CHECK DID NOT RUN **"
   else
-    am=$(( ( $(date '+%H') * 60 + $(date '+%M') ) - ( ${mine%%:*} * 60 + $(echo "$mine" | cut -d: -f2) ) ))
-    [ "$am" -lt 0 ] && am=$((am+1440))
-    if   [ "$am" -ge 40 ]; then age="$mine (+${am}min ** OVERDUE, CADENCE IS ~40 — POST NOW **)"
+    am=$(python3 -c 'import sys,datetime
+try:
+    n=datetime.datetime.now(); p=datetime.datetime.strptime(sys.argv[1],"%m/%d %H:%M:%S").replace(year=n.year)
+    if p>n: p=p.replace(year=n.year-1)          # a Dec-31 post read on Jan-1
+    print(int((n-p).total_seconds()//60))
+except Exception: print(-1)' "$mine" 2>/dev/null)
+    if   [ -z "$am" ] || [ "$am" -lt 0 ]; then age="$mine ** AGE UNCOMPUTABLE — CHECK DID NOT RUN **"
+    elif [ "$am" -ge 40 ]; then age="$mine (+${am}min ** OVERDUE, CADENCE IS ~40 — POST NOW **)"
     elif [ "$am" -ge 30 ]; then age="$mine (+${am}min — post at THIS wake, not the next)"
     else                       age="$mine (+${am}min)"; fi
   fi
