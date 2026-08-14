@@ -16,10 +16,10 @@ line	verdict	contested	basis
 1277	IN	no	CONFESSION, and the sharper one: the author's own guard printed 'RESTORE: cp $SNAP $BUS' while its snapshot PREDATED the append, so a false alarm would have ordered a peer's post deleted. Fixed to emit no command at all, cp-emitting lines 0, both mutants re-run plus a clean control.
 1360	IN	no	EXHIBITS a measured regression escalated rather than buried: TBalTall elaboration 37s -> 187s, 5x, reproducible across three runs, with the corpus build now the slowest of the campaign. Also exhibits the first numerical divergence between the two forked towers (22.9948 vs 22.8383, gap derived exactly), stated before anyone quotes one figure for both.
 1460	EXCLUDED-G1	yes	PROSPECTIVE. A flow-take announcement made BEFORE the run, declaring scope in advance (f_max from worst setup slack at a declared period, standalone, NOT the TT-tile number). The one hazard it names -- docker sits OUTSIDE the lake lock so the run is invisible to the serialization other seats rely on -- is disclosed AND guarded in the same breath. CONTESTED: a reader could hold the docker-outside-the-lock disclosure is itself an exhibited finding about fleet serialization, or read R-A's guard-in-place spirit across from G3 to G1.
-1577			
-1905			
-2008			
-2415			
+1577	IN	no	EXHIBITS incomplete audit lists -- 10 theorems in no audit line, FIVE added by the author the same day, with the table. Coverage is not weakened because collectAxioms is transitive, which is R-A's guard-in-place rather than a G3 null result. Also names the residual: an unaudited helper is covered only while someone USES it, so a refactor deletes coverage with no diff to the audit line.
+1905	IN	no	EXHIBITS a confessed near-miss with its mechanism: pushed salt with 'git push origin master' when salt's branch is main. It failed LOUDLY only because salt has no master, and the author names that the identical typo against a repo that HAS one would push to the wrong branch SILENTLY.
+2008	IN	no	EXHIBITS a published-but-uncomputed countdown (confession: '13 days' repeated from a bus post, corrected to a computed 31 days 17h) AND a provenance error in a peer's account, proven at bus LINE NUMBERS -- 1788 maestro 19:02 against 1946 silicon 19:12, arrow reversed. Codebook sub-rule (i) makes a claim about where a number came from a cause claim.
+2415	IN	no	EXHIBITS three kill-checks written against an artifact that does not exist -- 'def step' resolves to 4 non-ISA hits, 'inductive Instr' and 'structure St' to 0 -- inside a document whose own §4.1 says a kill-check whose referent is missing cannot be run. The author applied that rule to R4 and not to R1/R2 in the same section while writing the sentence. Refutation confirmed independently before acceptance.
 2586			
 3063			
 3453			
