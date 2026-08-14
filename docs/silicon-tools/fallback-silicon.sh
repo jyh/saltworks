@@ -41,8 +41,15 @@ MAIN=${MAIN:-busmon-silicon.sh}
 PERIOD=${PERIOD:-1800}
 WIDTH=${WIDTH:-200}
 
+# ⭐ SLEEP MOVED TO THE END OF THE LOOP, 2026-08-14 00:44. It used to sleep FIRST,
+# so an armed watch said nothing for a full period — which meant a re-arm produced
+# NO deployment receipt and I had to claim "armed" on faith for 30 minutes, twice
+# tonight. It also made the thresholds untestable: any fast-loop test necessarily
+# used a tiny PERIOD, and PERIOD is an INPUT to the projection being tested.
+# ⇒ Sweep first, then sleep: the first line out of an armed watch IS the receipt
+#   that the running process has the new code, and a test can capture it in 2s
+#   while PERIOD stays at its real value.
 while true; do
-  sleep "$PERIOD"
   n=$(wc -l < "$BUS" | tr -d ' ')
   # ⛔⛔ THIS LINE USED TO BE A BARE SHAPE MATCH:
   #     grep -n '^\[[0-9]*/[0-9]* [0-9:]*, ' "$BUS" | tail -1
@@ -216,11 +223,24 @@ try:
     if p>n: p=p.replace(year=n.year-1)          # a Dec-31 post read on Jan-1
     print(int((n-p).total_seconds()//60))
 except Exception: print(-1)' "$mine" 2>/dev/null)
+    # ⛔ THRESHOLDS REPAIRED 00:43, ON THIS FIELD'S FIRST REAL FIRING. It printed
+    # "+29min" with NO prompt while the next sweep was 30 minutes away and would
+    # have landed me at +59 — past the cadence, with the instrument having said
+    # nothing. I HAD ENCODED THE DEADLINE (40) AND NOT THE RULE.
+    # The rule the helm's own amendment states is: POST AT THE LAST WAKE BEFORE
+    # THE DEADLINE. For a seat that wakes only on events, that is a statement
+    # about the NEXT WAKE, not about now — and with a 30-minute sweep, ANY age
+    # at or above ~10 means the following sweep is already too late.
+    # ⇒ ALARM ON THE PROJECTION, NOT THE PRESENT. A threshold copied from a
+    #   human-readable cadence assumes you can act at an arbitrary moment; an
+    #   event-driven actor must price its own wake interval into the test.
+    nxt=$(( am + PERIOD / 60 ))
     if   [ -z "$am" ] || [ "$am" -lt 0 ]; then age="$mine ** AGE UNCOMPUTABLE — CHECK DID NOT RUN **"
-    elif [ "$am" -ge 40 ]; then age="$mine (+${am}min ** OVERDUE, CADENCE IS ~40 — POST NOW **)"
-    elif [ "$am" -ge 30 ]; then age="$mine (+${am}min — post at THIS wake, not the next)"
-    else                       age="$mine (+${am}min)"; fi
+    elif [ "$am" -ge 40 ];  then age="$mine (+${am}min ** ALREADY OVERDUE, CADENCE ~40 — POST NOW **)"
+    elif [ "$nxt" -ge 40 ]; then age="$mine (+${am}min ** POST AT THIS WAKE — next sweep lands at +${nxt}, past ~40 **)"
+    else                         age="$mine (+${am}min, next sweep +${nxt} — still inside)"; fi
   fi
   printf 'FALLBACK %s | mylast=%s | bus=%s | main watch procs=%s | account=%s | index=%s | last header: %s\n' \
     "$(date '+%H:%M')" "$age" "$busf" "$main" "$km" "$idx" "$hdr"
+  sleep "$PERIOD"
 done
