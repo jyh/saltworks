@@ -69,8 +69,12 @@ if [ "${1:-}" = "--selftest" ]; then
   arm ":2c LANDED nested-timestamp REFUSED" 10 "$T/b.md" "$T/nest.txt"
   printf 'x, c — SEAT-STATE: compiler=LIT · no leading comma, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/nc.txt"
   arm ":2c missing leading comma REFUSED"   10 "$T/b.md" "$T/nc.txt"
-  printf ', compiler — SEAT-STATE: compiler=LIT · a [bracket] mid-line, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/mid.txt"
-  arm ":2c mid-line '[' REFUSED"            10 "$T/b.md" "$T/mid.txt"
+  # NARROWED 13:25: a TAG bracket must be ACCEPTED -- [BOARD] is the fleet's own marker and
+  # my first version refused it. The positive arm is the one that would have caught that.
+  printf ', compiler — SEAT-STATE: compiler=LIT · [BOARD] queue at zero, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/tag.txt"
+  arm ":2c [BOARD] tag ACCEPTED"             0 "$T/b.md" "$T/tag.txt"
+  printf ', compiler — SEAT-STATE: compiler=LIT · a nested [08/14 09:00 stamp, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/mid.txt"
+  arm ":2c mid-line nested TIMESTAMP REFUSED" 10 "$T/b.md" "$T/mid.txt"
   # CLAUSE 2d -- the owner slot. Fixture 1 is the REAL 12:30:56 malformation.
   printf ', SEAT-STATE: compiler=LIT — the REAL 12:30:56 malformation, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/own1.txt"
   arm ":2d LANDED SEAT-STATE-in-slot REFUSED" 10 "$T/b.md" "$T/own1.txt"
@@ -228,10 +232,17 @@ case "$B1" in
    A leading '[' yields a NESTED TIMESTAMP that no seat's watch can attribute (math,
    08/14 12:28, measured with a control)." 10 ;;
 esac
-case "$B1" in
-  *\[*) die "bracket grammar: line 1 contains a '[' -- the opening bracket is emitted by this
-   tool, never by the bracket file. A second one nests and breaks attribution." 10 ;;
-esac
+# NARROWED 13:25: the first version refused ANY '[' and that was over-broad -- it blocked
+# `[BOARD]`, the fleet's own marker for a queue-state post (PROGRAM BOARD invariant 2), and
+# I found out by being refused while trying to file one. THE HAZARD IS A NESTED TIMESTAMP,
+# not a bracket character. A guard that blocks a ratified convention is a defect even when
+# every refusal it makes is "safe" -- the cost lands on legitimate traffic and it lands
+# silently, because the author reaches for a workaround instead of reporting it.
+if printf '%s' "$B1" | LC_ALL=C grep -q '\[[0-9]\{1,2\}/[0-9]\{1,2\}'; then
+  die "bracket grammar: line 1 contains a NESTED TIMESTAMP '[<m>/<d>'. The opening bracket
+   and stamp are emitted by this tool, never by the bracket file; a second one nests and
+   breaks attribution (the real 12:26:53 malformation). Tag brackets like [BOARD] are fine." 10
+fi
 
 # ---- CLAUSE 2d: the OWNER SLOT ------------------------------------------------------------
 # 12:30:56, five minutes after shipping 2c, I posted ", SEAT-STATE: compiler=LIT — ..." and
