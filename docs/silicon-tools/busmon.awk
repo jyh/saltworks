@@ -170,7 +170,8 @@ NR <= start { prevblank = ($0 ~ /^[[:space:]]*$/); next }
 # hdrts() below is deliberately left STRICT-NUMERIC: it must not read `3x` as
 # minute 3, which would corrupt ordering. It returns 0 there and the prevblank
 # arm carries the line — the existing, measured behaviour.
-BEGIN { HDR = "^\\[[0-9]+/[0-9]+ [0-9]+:[0-9a-zA-Z]+(:[0-9a-zA-Z]+)?, " }
+BEGIN { YEARWRAP = 300000   # minutes; a Dec->Jan key drop is ~535,674, jitter is <2000
+        HDR = "^\\[[0-9]+/[0-9]+ [0-9]+:[0-9a-zA-Z]+(:[0-9a-zA-Z]+)?, " }
 
 function hdrts(s,   m, d, hh, mm) {   # -> comparable minute count, 0 if unparsable
   if (match(s, /^\[[0-9]+\/[0-9]+ [0-9]+:[0-9]+/) == 0) return 0
@@ -187,7 +188,23 @@ function hdrts(s,   m, d, hh, mm) {   # -> comparable minute count, 0 if unparsa
 # 🔑 A RECEIVER THAT ONLY PARSES WELL-FORMED INPUT DECIDES WHO GETS HEARD. The bus
 # is append-only: 72 posts are ALREADY written this way, so a sender-side convention
 # fix would leave the existing record unreadable. The receiver widens.
-($0 ~ (HDR "[A-Za-z]")) && (prevblank || hdrcomplete || (hdrts($0) >= lastts && hdrts($0) > 0)) {
+# ⛔⛔ YEAR-ROLLOVER DEAFNESS — found 2026-08-14 01:38 by running math's re-arm
+# item 4 against my own watch. hdrts() encodes NO YEAR, so the key is not
+# monotonic across 12/31 -> 01/01:
+#     12/31 23:59 -> 581759        01/01 00:05 -> 46085
+# and the ordering arm tests `>= lastts`, so EVERY JANUARY POST FAILS IT.
+# ⚠️ MEASURED, with the control that isolates the cause:
+#     year rollover + no blank line  -> JANUARY POST DROPPED
+#     same year     + no blank line  -> both posts emitted
+#   So the `prevblank` arm MASKS this whenever posts are blank-separated, which
+#   is why it has never shown. It is a LATENT deafness that arms itself once a
+#   year, on a bus where newline handling is actively being repaired by three
+#   seats tonight — i.e. prevblank=false is a live condition, not a hypothetical.
+# ⇒ FIX: a year wrap is a HUGE backward jump (~535,000 minutes) while genuine
+#   out-of-order jitter is minutes-to-days. Accept a drop larger than YEARWRAP as
+#   a rollover rather than as a stale line. hdrts() stays PURE — it is called
+#   twice per line here, so a side-effecting year counter would double-count.
+($0 ~ (HDR "[A-Za-z]")) && (prevblank || hdrcomplete || (hdrts($0) > 0 && (hdrts($0) >= lastts || (lastts - hdrts($0)) > YEARWRAP))) {
   if (hdrts($0) > 0) lastts = hdrts($0)
   owner = $0
   sub(/^\[[^,]*, /, "", owner)
