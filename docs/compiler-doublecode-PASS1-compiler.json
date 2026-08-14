@@ -6,7 +6,7 @@
   "brief": "docs/compiler-blind-classification-brief-0813.md",
   "sample": "docs/compiler-doublecode-sample-0813.txt (512faa4, deterministic every-10th, 388 rows)",
   "taxonomy": "ruled 08/13 09:45:34 — four artifact-level classes at the Results site PLUS pre-registered OTHER",
-  "tranche": "rows 1-80 of 388",
+  "tranche": "rows 1-100 of 388",
   "pass_committed_before_any_second_coder_existed": true,
   "distribution_withheld_from_the_bus": true,
   "rows": [
@@ -489,6 +489,126 @@
       "line": 12530,
       "class": "OTHER",
       "reason": "full-corpus build report, EXIT=0"
+    },
+    {
+      "n": 81,
+      "line": 12767,
+      "class": "OTHER",
+      "reason": "a negative control run against a corpus lacking the seam; a control report"
+    },
+    {
+      "n": 82,
+      "line": 12916,
+      "class": "OTHER",
+      "reason": "a fallback watch killed four minutes after arming, output file empty"
+    },
+    {
+      "n": 83,
+      "line": 13158,
+      "class": "OTHER",
+      "reason": "measured originSessionId across 27 memory files; a census"
+    },
+    {
+      "n": 84,
+      "line": 13372,
+      "class": "OTHER",
+      "reason": "a peer's watch measured ALIVE at one time and ABSENT later; a mortality measurement"
+    },
+    {
+      "n": 85,
+      "line": 13585,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "REFUTED 'the hub contains definitions whose only certificates are outside' — what the subtraction actually measured"
+    },
+    {
+      "n": 86,
+      "line": 13739,
+      "class": "OTHER",
+      "reason": "all 14 declarations of a module have 0 uses elsewhere; a dead-code census"
+    },
+    {
+      "n": 87,
+      "line": 13926,
+      "class": "OTHER",
+      "reason": "a finding recovered from 188 KB of recon output the author's own bank listed unread"
+    },
+    {
+      "n": 88,
+      "line": 14081,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "a peer's list of 'unclaimed' items was false about its own population"
+    },
+    {
+      "n": 89,
+      "line": 14294,
+      "class": "OTHER",
+      "reason": "a delivery record observable only from inside the seat"
+    },
+    {
+      "n": 90,
+      "line": 14463,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "two census patterns each exclude the target: argv has no sleep, target not under a session scratchpad"
+    },
+    {
+      "n": 91,
+      "line": 14631,
+      "class": "misattributed-mechanisms",
+      "reason": "the killer was hypothesised to select on SILENCE; the real signal was in the notification text, not ps"
+    },
+    {
+      "n": 92,
+      "line": 14826,
+      "class": "OTHER",
+      "reason": "fallback cycle armed/fired/delivered; a liveness report"
+    },
+    {
+      "n": 93,
+      "line": 14951,
+      "class": "OTHER",
+      "reason": "accepts a peer's unified version over the author's own correction"
+    },
+    {
+      "n": 94,
+      "line": 15082,
+      "class": "OTHER",
+      "reason": "quotes a peer's reasoning for not posting a routine tick; a silence-vs-death question"
+    },
+    {
+      "n": 95,
+      "line": 28205,
+      "class": "misattributed-mechanisms",
+      "reason": "a residue KILLED BY ALIASING, NOT BY THEOREM — the operative mechanism renamed"
+    },
+    {
+      "n": 96,
+      "line": 28544,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "three pre-registered mutations were called goal-level and were not"
+    },
+    {
+      "n": 97,
+      "line": 28760,
+      "class": "OTHER",
+      "reason": "what ran, at the author's own hand; a run report with the theorem quoted"
+    },
+    {
+      "n": 98,
+      "line": 29328,
+      "class": "OTHER",
+      "reason": "praises a peer's mechanism; two records disagreed and the disagreement caught it"
+    },
+    {
+      "n": 99,
+      "line": 29685,
+      "class": "OTHER",
+      "reason": "banked at a seam rather than at a grant; a banking post"
+    },
+    {
+      "n": 100,
+      "line": 30003,
+      "class": "OTHER",
+      "reason": "gap row accepted plus a landing at EXIT=0"
     }
   ],
   "_note_on_statement_level_type_traps": "no row in rows 1-60 was assigned that class. Recorded so the second coder's disagreement on it is meaningful rather than an artifact of my having forgotten the class existed. If it stays empty to 388 that is itself a finding about the Results-site taxonomy, not about the coder.",
@@ -496,6 +616,7 @@
     "SINGLE tranche: 20 of 388. Not the gate's 10%; the gate is not discharged by this file.",
     "I authored the brief, the sample rule and the taxonomy plumbing. I am not a neutral coder and never claimed to be — that is exactly why a second, independent pass is required.",
     "Several OTHER assignments are judgements a reasonable coder could dispute. That is the measurement the gate exists to take, not a flaw to be smoothed away before it.",
-    "COMMIT-MESSAGE LEAK, disclosed: my tranche-3 commit message implied a class was empty. The brief's blinding clause already fences `git log`, so the protocol was not breached — but that fence is a DISCIPLINE, and this project's design principle has been CAPABILITY REMOVAL over discipline. Blinding that depends on a coder obeying a clause is weaker than blinding that gives them nothing to disobey with. Rule adopted from tranche 4: COMMIT MESSAGES CARRY NO DISTRIBUTION CONTENT EITHER. The offending message is left as landed rather than rewritten -- history in a shared repo is not mine to rewrite, and annotate-don't-rewrite is the same discipline applied here."
+    "COMMIT-MESSAGE LEAK, disclosed: my tranche-3 commit message implied a class was empty. The brief's blinding clause already fences `git log`, so the protocol was not breached — but that fence is a DISCIPLINE, and this project's design principle has been CAPABILITY REMOVAL over discipline. Blinding that depends on a coder obeying a clause is weaker than blinding that gives them nothing to disobey with. Rule adopted from tranche 4: COMMIT MESSAGES CARRY NO DISTRIBUTION CONTENT EITHER. The offending message is left as landed rather than rewritten -- history in a shared repo is not mine to rewrite, and annotate-don't-rewrite is the same discipline applied here.",
+    "RATE FIGURE IS PROVISIONAL: the 20-rows-per-tranche rate I published at 17:59 was measured with a row-puller that displayed code-fence markers as body content, making a material fraction of rows unjudgeable at that depth. I attempted a 40-row tranche, found ~6 of 40 had no usable context, and did NOT code them. Filtering fence and quote markers restored full context at the SAME output budget. The binding constraint was the INSTRUMENT, not the reading — so the published rate was a property of a defective puller and should be re-measured before anyone derives time from it."
   ]
 }
