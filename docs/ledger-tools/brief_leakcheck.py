@@ -176,25 +176,29 @@ def main():
     # rate over the raw flag set. Mechanised here so the argument is not re-made by
     # hand at midnight: NO FLAG FROM THIS TOOL IS A FINDING UNTIL ITS FILE'S MTIME
     # HAS BEEN CHECKED.
+    # ⛔⛔ REPAIR 1 of the fourth-eyes review (2026-08-13, helm-filed): the `return 0`
+    # that used to live here was an UNCONDITIONAL, UNSCANNED CLEARANCE on any fresh
+    # checkout. mtime is a MUTABLE STAT FIELD reset by clone, checkout, worktree, cp,
+    # rsync, tar, restore and touch -- and the reviewer measured it firing 3/3 on fresh
+    # clones of this repo, because git checks out in index order and the brief filenames
+    # sort before their sources. It cleared a copy carrying a REAL INJECTED TOKEN whose
+    # mtime had been backdated: EXIT=0, "CLEARED". It sat ABOVE every refusal in this
+    # tool and advertised itself as safer than a scan.
+    # ⇒ CHRONOLOGY IS NOW A NOTE. THE SCAN ALWAYS RUNS. My own banked sentence names
+    #   what this was: a silent instrument failure is indistinguishable from a
+    #   measurement of zero.
     src_m = [os.path.getmtime(q) for q in ([args.seed] + list(args.results))
              if os.path.isfile(q)]
+    chronology_note = None
     if src_m:
         born = min(src_m)
         if os.path.getmtime(args.brief) < born:
-            import time as _t
-            fmt = lambda s: _t.strftime("%Y-%m-%d %H:%M", _t.localtime(s))
-            print("=" * 76)
-            print("BRIEF LEAK-CHECK -- does the recruitment carry the result?")
-            print("=" * 76)
-            print("  brief            %s" % args.brief)
-            print("✅ CLEARED BY CHRONOLOGY -- NOT SCANNED, NO TOKEN READ.")
-            print("   file last written  %s" % fmt(os.path.getmtime(args.brief)))
-            print("   sources born       %s" % fmt(born))
-            print("   A file written before its sources existed cannot carry a value")
-            print("   derived from them. This clearance is SAFE FOR A CANDIDATE to run")
-            print("   AND to read: it names no token and reads no content.")
-            return 0
+            chronology_note = ("NOTE: this file's mtime predates its sources' mtimes. "
+                               "That is NOT a clearance -- mtime is reset by clone, "
+                               "checkout, cp, rsync, tar and touch. SCANNING ANYWAY.")
 
+    if chronology_note:
+        print("⚠️  " + chronology_note)
     tokens = {}
     advisory_toks = []
     if os.path.isfile(args.seed):
@@ -257,8 +261,21 @@ def main():
         print()
         print("   Repair the brief. Do not explain the leak in the brief.")
         return 1
-    print("✅ NO LEAK. Every forbidden token is absent; this brief can be read by a")
-    print("   candidate keyer without spending them.")
+    # ⛔ REPAIR 2 (fourth-eyes review, 2026-08-13): this headline used to read "NO LEAK",
+    # full stop, and was then followed by a DOMAIN block explaining how narrow it is.
+    # A verdict that states its scope AFTER the green is quoted without the scope — my
+    # own banked law, and the review measured the cost: pointed at a classification-shaped
+    # results file this tool harvests a handful of tokens and issues this green, while its
+    # intersection with that brief's actual hazard class is EMPTY. The review predicted a
+    # refuse arm here; MEASURED, IT DOES NOT FIRE — it greens, which is strictly worse.
+    # ⇒ THE SCOPE NOW RIDES IN THE VERDICT LINE ITSELF.
+    print("✅ NO LEAK IN THE COVERED CLASS ONLY -- distinctive decimals (2+ fraction")
+    print("   digits) from the named result document(s), plus seed totals by advisory")
+    print("   co-occurrence. THIS IS NOT A CLEARANCE OF THE BRIEF.")
+    print("⛔ IF THE BRIEF'S HAZARD IS NOT DECIMAL-SHAPED, THIS GREEN IS VACUOUS: the")
+    print("   forbidden set is derived from the results file you named, so pointing this")
+    print("   tool at a document whose values are not decimals harvests almost nothing")
+    print("   and certifies almost nothing. Read the DOMAIN block below before quoting.")
     # ---- ADVISORY TIER: co-occurrence, not tokens ----------------------------
     if advisory_toks:
         atext = FURNITURE.sub(lambda m: "\u0000" * len(m.group(0)),
