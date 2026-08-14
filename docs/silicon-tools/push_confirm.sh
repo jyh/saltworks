@@ -75,7 +75,14 @@ selftest() {
   row "same sha, remote readable: NOT there" FAIL  "$H"
   row "sha that is not a commit (compiler NC1)" REFUSE "0000000000000000000000000000000000000000"
   row "a BLOB's sha, not a commit"              REFUSE "$(cd "$W" && git rev-parse HEAD:f)"
-  [ $rc -eq 0 ] && echo "push_confirm selftest: 7 row(s), EVERY OUTCOME EXERCISED — 2 PASS, 2 distinct NOs, 2 distinct REFUSALS (unreadable remote, bad input)" \
+  P=$(cd "$W" && git rev-parse HEAD)
+  ( cd "$W" && git checkout -q --detach HEAD )
+  row "DETACHED HEAD — remote is fine"         REFUSE "$P"
+  ( cd "$W" && git checkout -q trunk && git checkout -q -b never_pushed && echo z >> f && git commit -qam z )
+  row "branch never pushed — a NO, not an outage" FAIL "$(cd "$W" && git rev-parse HEAD)"
+  ( cd "$W" && git checkout -q trunk && git branch -qD never_pushed && git remote remove origin )
+  row "no 'origin' remote configured"          REFUSE "$P"
+  [ $rc -eq 0 ] && echo "push_confirm selftest: 10 row(s) — 2 PASS, 3 distinct NOs, 5 REFUSALS across 4 distinct causes" \
                 || echo "push_confirm selftest: ⛔ A ROW MISBEHAVED"
   return $rc
 }
@@ -93,8 +100,23 @@ LANDED=${1:-}
 git rev-parse --verify --quiet "${LANDED}^{commit}" >/dev/null 2>&1 || {
   echo "⛔ $LANDED IS NOT A COMMIT IN THIS REPO — CHECK DID NOT RUN (bad input, NOT a failed push)"; exit 2; }
 LB=$(git rev-parse --abbrev-ref HEAD) || exit 2
-R=$(git ls-remote origin "refs/heads/$LB" 2>/dev/null | cut -f1)
-[ -n "$R" ] || { echo "⛔ REMOTE UNREADABLE (branch $LB) — CHECK DID NOT RUN, THIS IS NOT A PASS"; exit 2; }
+# ⛔ FOUR CAUSES, NOT ONE. Added 2026-08-13 20:58 after applying compiler's own
+# finding to myself: they published "I could not build the real fixture, this is
+# a shared tree" — a TRUE constraint that manufactured a FALSE limitation because
+# only one VENUE was considered. My matching caveat was "this has run on one
+# MACHINE, mine", which reads as rigour and functioned as a stopping point. What
+# actually matters is CONFIGURATION, and I can generate configurations myself in
+# temp repos — which is how the rows below were found, with no second machine.
+#   Before this, detached HEAD / never-pushed branch / no origin ALL printed
+#   "REMOTE UNREADABLE". Exit 2 was fail-SAFE, so nothing was ever mis-answered —
+#   but the message NAMED THE WRONG CAUSE and would send a reader on a detached
+#   HEAD to go debug their network or keychain.
+[ "$LB" = "HEAD" ] && { echo "⛔ DETACHED HEAD — no branch to compare against; check out a branch (the remote is fine)"; exit 2; }
+git remote get-url origin >/dev/null 2>&1 || { echo "⛔ NO 'origin' REMOTE CONFIGURED — CHECK DID NOT RUN (nothing to compare against)"; exit 2; }
+ALL=$(git ls-remote --heads origin 2>/dev/null); LSRC=$?
+[ $LSRC -eq 0 ] || { echo "⛔ REMOTE UNREADABLE (ls-remote exit $LSRC) — CHECK DID NOT RUN, THIS IS NOT A PASS"; exit 2; }
+R=$(printf '%s\n' "$ALL" | awk -v b="refs/heads/$LB" '$2==b{print $1}')
+[ -n "$R" ] || { echo "⛔ BRANCH $LB DOES NOT EXIST ON origin — so $LANDED is NOT there (this is a NO, not an outage)"; exit 1; }
 git cat-file -e "$R^{commit}" 2>/dev/null || git fetch -q origin "$LB" 2>/dev/null || {
   echo "⛔ FETCH FAILED — cannot compare against $R, CHECK DID NOT RUN"; exit 2; }
 if git merge-base --is-ancestor "$LANDED" "$R" 2>/dev/null; then
