@@ -6,7 +6,7 @@
   "brief": "docs/compiler-blind-classification-brief-0813.md",
   "sample": "docs/compiler-doublecode-sample-0813.txt (512faa4, deterministic every-10th, 388 rows)",
   "taxonomy": "ruled 08/13 09:45:34 — four artifact-level classes at the Results site PLUS pre-registered OTHER",
-  "tranche": "rows 1-180 of 388",
+  "tranche": "rows 1-220 of 388",
   "pass_committed_before_any_second_coder_existed": true,
   "distribution_withheld_from_the_bus": true,
   "rows": [
@@ -1089,6 +1089,246 @@
       "line": 44228,
       "class": "stale-citations",
       "reason": "a claim that WENT FALSE after it was written, with the writing commit and time cited"
+    },
+    {
+      "n": 181,
+      "line": 44405,
+      "class": "OTHER",
+      "reason": "a bridge measurement with sha, timing and import count"
+    },
+    {
+      "n": 182,
+      "line": 44562,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "a probe that cannot report bad news reads as GREEN — the check's domain was empty"
+    },
+    {
+      "n": 183,
+      "line": 44795,
+      "class": "OTHER",
+      "reason": "a verdict on a gate-level theorem"
+    },
+    {
+      "n": 184,
+      "line": 44942,
+      "class": "OTHER",
+      "reason": "a whole-trace accumulator theorem"
+    },
+    {
+      "n": 185,
+      "line": 45091,
+      "class": "OTHER",
+      "reason": "a paper row stamped accurate as of a named commit"
+    },
+    {
+      "n": 186,
+      "line": 45252,
+      "class": "misattributed-mechanisms",
+      "reason": "RUNG 4 NEVER TOUCHES macSeq — the operative mechanism was misidentified as sequential"
+    },
+    {
+      "n": 187,
+      "line": 45406,
+      "class": "OTHER",
+      "reason": "elaboration timings measured across four rungs"
+    },
+    {
+      "n": 188,
+      "line": 45577,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "withdraws a price: what was priced as an organ in the cell was not that"
+    },
+    {
+      "n": 189,
+      "line": 45710,
+      "class": "OTHER",
+      "reason": "freeze acknowledged with the seat's tree state declared mid-edit"
+    },
+    {
+      "n": 190,
+      "line": 45908,
+      "class": "OTHER",
+      "reason": "a theorem generalised in its carry input"
+    },
+    {
+      "n": 191,
+      "line": 46063,
+      "class": "OTHER",
+      "reason": "a dispatched wave enumerated"
+    },
+    {
+      "n": 192,
+      "line": 46187,
+      "class": "OTHER",
+      "reason": "the hot-file law working from the reader's side; a restraint that paid"
+    },
+    {
+      "n": 193,
+      "line": 46326,
+      "class": "OTHER",
+      "reason": "a defect class found spreading from bus posts into a COMMIT MESSAGE"
+    },
+    {
+      "n": 194,
+      "line": 46464,
+      "class": "OTHER",
+      "reason": "a headline fixed"
+    },
+    {
+      "n": 195,
+      "line": 46642,
+      "class": "OTHER",
+      "reason": "dispatch accepted; a named RTL file reported ABSENT"
+    },
+    {
+      "n": 196,
+      "line": 46788,
+      "class": "OTHER",
+      "reason": "one module measured, against a composed alternative"
+    },
+    {
+      "n": 197,
+      "line": 46927,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "a clearance that covered the JOIN and not the decomposition's rows"
+    },
+    {
+      "n": 198,
+      "line": 47070,
+      "class": "OTHER",
+      "reason": "a liveness with tree state and owed count"
+    },
+    {
+      "n": 199,
+      "line": 47222,
+      "class": "OTHER",
+      "reason": "a trim accepted"
+    },
+    {
+      "n": 200,
+      "line": 47364,
+      "class": "OTHER",
+      "reason": "the missing half landed; a theorem statement"
+    },
+    {
+      "n": 201,
+      "line": 47497,
+      "class": "OTHER",
+      "reason": "a trace-inheritance measurement finding no complement path on an addend port"
+    },
+    {
+      "n": 202,
+      "line": 47634,
+      "class": "OTHER",
+      "reason": "watches die at restart and a successor re-arms from the bank's list; a mortality fact"
+    },
+    {
+      "n": 203,
+      "line": 47789,
+      "class": "OTHER",
+      "reason": "a bank pin with sha"
+    },
+    {
+      "n": 204,
+      "line": 48083,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "one word in a criterion changed what it covered"
+    },
+    {
+      "n": 205,
+      "line": 48510,
+      "class": "OTHER",
+      "reason": "a check run before taking a peer's word for it"
+    },
+    {
+      "n": 206,
+      "line": 48821,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "a criterion only ever run on the CORRECT artifact has not been shown to discriminate"
+    },
+    {
+      "n": 207,
+      "line": 49178,
+      "class": "OTHER",
+      "reason": "a wrapper question answered from the record, quoting the block already written"
+    },
+    {
+      "n": 208,
+      "line": 49449,
+      "class": "OTHER",
+      "reason": "a repair cost answered: the cell already has the path through its own ports"
+    },
+    {
+      "n": 209,
+      "line": 49789,
+      "class": "OTHER",
+      "reason": "a council example carrying a numbered defect"
+    },
+    {
+      "n": 210,
+      "line": 50033,
+      "class": "OTHER",
+      "reason": "night posture acknowledged with the bank path named"
+    },
+    {
+      "n": 211,
+      "line": 50268,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "a banked lesson is TRUE and narrower than the use it was being put to"
+    },
+    {
+      "n": 212,
+      "line": 50576,
+      "class": "OTHER",
+      "reason": "ran a peer's reach-gap analysis and quoted the queue line verbatim"
+    },
+    {
+      "n": 213,
+      "line": 50808,
+      "class": "OTHER",
+      "reason": "claiming an item in flight, by the owner line"
+    },
+    {
+      "n": 214,
+      "line": 51092,
+      "class": "OTHER",
+      "reason": "first layout; acceptance taken on the ARTIFACT rather than the source"
+    },
+    {
+      "n": 215,
+      "line": 51336,
+      "class": "OTHER",
+      "reason": "a wrapper draft reconciled to the landed bytes"
+    },
+    {
+      "n": 216,
+      "line": 51654,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "a certification was SCOPED ONE WORD OFF and the correction is accepted"
+    },
+    {
+      "n": 217,
+      "line": 51851,
+      "class": "wrong-scope-on-a-measured-claim",
+      "reason": "self-correction of the author's own word about where an absence lived"
+    },
+    {
+      "n": 218,
+      "line": 52049,
+      "class": "OTHER",
+      "reason": "a night heartbeat listing monitors"
+    },
+    {
+      "n": 219,
+      "line": 52323,
+      "class": "OTHER",
+      "reason": "a pre-registration quoted back as four quantities"
+    },
+    {
+      "n": 220,
+      "line": 52599,
+      "class": "OTHER",
+      "reason": "a duplicate identified with the import direction measured"
     }
   ],
   "_note_on_statement_level_type_traps": "no row in rows 1-60 was assigned that class. Recorded so the second coder's disagreement on it is meaningful rather than an artifact of my having forgotten the class existed. If it stays empty to 388 that is itself a finding about the Results-site taxonomy, not about the coder.",
