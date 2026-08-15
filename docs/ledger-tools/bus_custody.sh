@@ -311,8 +311,28 @@ esac
 #   So this arm ships as a PARTIAL BY DESIGN, not by blockage: it convicts the IMPOSSIBLE
 #   (an author cannot read past the end) and DISCLOSES the gap, which is the most an
 #   instrument can honestly say about a fact whose subject is the reader.
-RT=$(printf '%s' "$B1" | sed -n 's/.*read to FLEET\.md \([0-9][0-9]*\).*/\1/p')
+# ⛔⛔ 2026-08-15 11:4x -- THIS ARM WAS INERT ON 67 OF MY 67 POSTS TODAY. MEASURED, not feared.
+#   It matched only "read to FLEET.md <N>". At 08/14 23:00 I adopted the TWO-VERB form and my
+#   brackets have said "headlines-only to FLEET.md <N>" ever since. I RENAMED THE FIELD AND
+#   LEFT ITS ONLY GUARD READING THE OLD CONTRACT -- statement-shape-is-an-interface, and
+#   fix-the-format-fix-the-writer, on my own gate.
+#   ⇒ THIRD INSTANCE OF ONE CLASS TODAY: the fallback glob (bare `HDL` vs `SaltWorks/HDL`,
+#     inert a full day), my clause-enumeration grep (matched only the style of the clauses I
+#     wrote last night, so it reported 2d/2b UNDEFINED), and this. In all three the pattern
+#     froze the form I happened to be writing AT ONE MOMENT and the traffic moved.
+# ⭐ THE STRUCTURAL FIX IS NOT A WIDER PATTERN, IT IS BREAKING THE SILENCE. A guard that
+#   matches NOTHING prints exactly what a guard that finds nothing WRONG prints. So this arm
+#   now ANNOUNCES its own inertness -- the same repair the fallback's DEAD-ENTRY ARM already
+#   makes for scope globs, carried to its sibling surface before it hurts a second time.
+RT=$(printf '%s' "$B1" | LC_ALL=C grep -Eo '(read|headlines-only|bodies-in-full) to FLEET\.md [0-9]+' \
+     | LC_ALL=C grep -Eo '[0-9]+$' | sort -n | tail -1)
+if [ -z "$RT" ]; then
+  printf '   ⚠️  read-through arm INERT: no "<verb> to FLEET.md <N>" marker in this bracket.\n'
+  printf '       Not a refusal (the marker is optional by design) -- but this arm is now SILENT\n'
+  printf '       about your read-through, and silence here once meant 67/67 posts unchecked.\n'
+fi
 if [ -n "$RT" ]; then
+  # the MAX of all markers: the most-claiming figure is the one that can be impossible.
   NOW=$(wc -l < "$BUS" | tr -d ' ')
   if [ "$RT" -gt "$NOW" ]; then
     die "read-through marker IMPOSSIBLE: you claim to have read to line $RT but the bus
