@@ -1001,6 +1001,40 @@ OPEN ITEMS:
   TONIGHT is the named target; the fabbed-is-verified law governs
   the SUBMISSION, not the first measurement run — V1-V3/V9/V10
   land behind the layout, before any tapeout word.**
+- **⭐⭐ P2 RECONCILED — THE REGISTER WAS THREE DAYS STALE AND THE
+  STALENESS MANUFACTURED A DEBT (8/14 17:5x, the evening helm, Fable
+  hand): tonight three seats reconstructed "① maestro-owed TONIGHT"
+  from the amendment entry below — whose HEADER commit ce8857e
+  destroyed when it inserted the PAYMENT entry beneath this one. Of
+  record: ① PAID 8/10 (memory-design-v1.md, now at v1.6); ② EXECUTED
+  — M0 discharged (da168dc) · M1+M1a landed atomic (1a92292, 8/10
+  19:26) · M2 Instr-atomic landed (acd3982, 8/11 18:03; the wS/wI
+  encoder plan EXECUTED: wI generalized to (opcode,funct3), wS built,
+  six field lemmas + reassembly + the Spike-word and swapped-imm
+  controls) · M4 frame rows at Stack/Program.lean:1766-1775; ③ has
+  its OWN block (stage3-memory-design-0811.md, three doors, update
+  window 2026-09-07) and silicon has been executing its edge
+  (cfeb1cc 8/13: DmemAddr8Suppress — the we_out response half at the
+  emitted gates, total, plus the no-manufactured-strobe theorem).
+  THE ③ SCOPE LINE BELOW IS STALE ON memif — corrected out 8/12
+  (silicon-pre-D2-area-baseline-0812.md:56-58; the word-only ruling
+  forecloses it). THE ARC'S TRUE OPEN ITEMS, from tonight's
+  four-reader sweep (recorded landings cited by sha, not re-built
+  tonight): the F4 BRIDGE THEOREM — the two halves live in DISJOINT
+  import cones (DmemAddr8Suppress imports only the datum; no
+  ISA/kernel name reachable), door 1's exit criterion, UNBUILT;
+  kernel-side seam partially discharged at HDL/Decoder.lean:355-374
+  · the INPUT-SIDE NAMING HOLE — the ins↔byte_addr binding lives
+  only in reimport.sh's argument order (:101-103), the importer
+  emits no input name table (import_netlist.py:1002,:1067) — the
+  same defect class the output name table was built to close; NEW
+  finding, unowned · D1a's Lean datum behind the SHUT dfrtp gate
+  (silicon's prereg verdict, silicon-dfrtp-async-reset-prereg-0812
+  .RESULTS.md:8-13) · D2's silicon-half re-hardening (inferred from
+  fb3842a's file list — seat confirmation owed) · the sw_* docstring
+  frame-claim gap (Certs/MemTrapResponse.lean:28-33, carried open by
+  silicon). The destroyed header below is RESTORED in this same
+  edit.**
 - **⭐ P2 ① IS PAID — THE GATE IS OPEN (8/10 18:2x, the night
   maestro, Fable hand, ritual on record): docs/memory-design-v1.md
   is at v1.1 — the five-refuter pass (5/5 REPAIR-THEN-FIRE, 0 FATAL;
@@ -1015,6 +1049,7 @@ OPEN ITEMS:
   restated + mutant discipline fixed, dmem_addr8 ruled for stage ③,
   M0 feasibility probe gates M1. P2 ② MAY PULL: M0 first (any
   P1-idle seat), then M1+M1a atomic, per the stealing discipline.**
+- **⭐⭐⭐ THE THREE-TIER AMENDMENT (8/10 17:0x, the Captain at council,
   his words: "for PoC no memory is fine, but it is very unrealistic, you
   can do a design today. P1 stays as it stands, LW/SW move into P2, and
   the others become P3"): the two-track ruling below is AMENDED to three
