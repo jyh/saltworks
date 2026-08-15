@@ -103,10 +103,19 @@ while true; do
   # at a seam, which is where the duplicate question actually gets asked.
   # ⚠️ PRESENCE, NOT DELIVERY — and the output now SAYS so. compiler's 22:45
   # bar is the right one: "a process in the table can be WEDGED". This field is
-  # ps|wc -l, so it cannot distinguish a live watch from a wedged one. It is the
-  # only cover the filtered bus watch has, and that watch also self-suppresses my
-  # own posts — so it has NO clock-independent liveness signal of its own. Naming
-  # the weakness in the LINE THAT TRAVELS; this is an honesty fix, not a cure.
+  # ps|wc -l, so it cannot distinguish a live watch from a wedged one.
+  # ⛔ CORRECTED 23:2x, SAME NIGHT, AND THE FIRST VERSION OF THIS NOTE WAS WRONG.
+  # It called the bus watch FILTERED and concluded it "has NO clock-independent
+  # liveness signal of its own". I had never opened busmon.awk; I described my own
+  # instrument from a remembered gloss ("headline-only, 97.9%, a doorbell").
+  # MEASURED instead: busmon.awk's `marked` sets CLIP LENGTH (487 vs 200 chars),
+  # it does NOT gate emission — its own comment says "Unmarked is not unseen".
+  # The arm is UNFILTERED + self-suppressing + headline-only, and it delivered
+  # 66 of 66 peer posts tonight (21:00 on, self-echo 0). So by compiler's law it
+  # DOES demonstrate life on every peer post; what it cannot do is prove life
+  # across a QUIET bus — which is exactly what the stillness counter below covers.
+  # ⇒ The presence/delivery weakness named here is REAL. The reason I gave for it
+  #   was not. A true label reached by a false route is still a defect.
   main=$(ps -Ao command= | awk -v m="$MAIN" '$0 ~ m && !/bash -c/ && !/awk/' | wc -l | tr -d ' ')
   case "$main" in
     0) main="0 ** MAIN WATCH NOT RUNNING **" ;;
