@@ -327,3 +327,53 @@ of it at 18:53 and 19:00.
 that has never been touched, and the codebook already prints the pre-repair sample (8 survive,
 4 to specifics, 8 to `EXCLUDED`) as the figure to beat. It also carries two DRAFT-3 conditions —
 re-score AFTER R-A and R-B, and print the CONTESTED count beside the verdict count.**
+
+---
+
+## 11 · B-2's SCORABILITY FROM THIS SEAT — MEASURED, AND THE CONTAMINATION IS **CORRELATED WITH DIFFICULTY**
+
+**B-4's contaminated half measured 20/20 unscorable. The same test, applied to B-2's full
+population:**
+```
+disputed rows needing a CLASS for B-2 ................... 278
+  codebook verdict-word within ±200 chars ............... 115  = 41%
+  codebook verdict-word within ±400 chars ............... 149  = 54%
+⇒ scorable by me: between 129 and 163 rows
+```
+*Better than B-4's 100% — because B-4's dirty half was SELECTED for being mentioned, while
+B-2's population is the whole disputed set.*
+
+### 11.1 · ⛔ BUT THE CLEAN REMAINDER IS NOT A RANDOM SAMPLE
+
+***The rows the codebook discusses are the rows the drafters found WORTH DISCUSSING — the
+contested ones, the ones that needed a ruling.*** ⇒ **So the clean 129–163 are the complement of
+"hard enough to argue about", and a coverage figure computed over them would be measured on the
+EASY half and would read as the whole.**
+
+📌 **A coverage number from the clean subset is not merely partial — it is partial in a
+direction that flatters the amendment**, and nothing on its face would say so.
+
+### 11.2 · What this does NOT impugn: B-3
+
+⚠️ **B-3's 52% is measured over the unnamed pool too — but that is what B-3 ASKS FOR**, in its
+own words: *"rows unnamed in this file … verify each drawn row's absence FROM THIS FILE before
+drawing."* **B-3 wants the unfitted complement by design, because a fitted row cannot test
+whether the ladder decides unfitted ones.** *The same property that biases a B-2 coverage figure
+is the property B-3 requires. I state it here so the two are not confused later.*
+
+### 11.3 · Where B-2 actually stands
+
+```
+count (d), PROVENANCE — the blocking condition:
+   DISCHARGEABLE for 247 of 278 rows, ROW-derived via B-1, already on the record
+count (c), CLASSES not sides:
+   needs a class for every row. 41–54% of them I cannot score without knowing the answer.
+the coverage UNIT:
+   still undefined; referred up at 20:09 and unanswered
+the figure it must sit beside (B-4):
+   delivered at n=22 only
+```
+⇒ ***B-2's COVERAGE FIGURE OVER THE FULL 278 IS NOT PRODUCIBLE FROM THIS SEAT.*** *The options
+are (a) an unexposed hand, or (b) an explicit decision to report over the clean subset **with
+the easy-half bias named on the figure itself, not in a footnote.*** **I am not choosing between
+those, and I am not producing a number under either until the unit exists.**
