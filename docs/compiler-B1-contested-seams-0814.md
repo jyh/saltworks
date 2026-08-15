@@ -276,10 +276,25 @@ class in the corpus, and it is the class that only exists because seats indict t
 13.0%, and this line said "13%", which rounds correctly from BOTH.*** *A percentage is a lossy
 function of its operands, so quoting it beside them proves nothing — **the check that works is
 re-deriving the DENOMINATOR from the artifact, not re-reading the ratio.***
-📌 **THE NUMERATOR IS NOT RE-VERIFIED HERE.** *31 is the count as landed 08/14. Confession rows
-are NOT identifiable by grep — the basis prose carries no marker word, and a pattern I tried today
-missed `64022`, a confession row I had walked and confirmed by hand. Re-deriving 31 means reading
-rows, and I have not done it; the figure stands on its original pass.*
+📌 **THE NUMERATOR IS NOT RE-VERIFIED HERE.** *31 is the count as landed 08/14.*
+
+⛔ **AND IT IS NOT CHEAPLY RE-DERIVABLE — TWO INSTRUMENTS TRIED, FAILING IN OPPOSITE DIRECTIONS.
+Recorded so the next hand does not spend the same hour:**
+```
+(1) grep the BASIS column for confession/relocation language
+      ⇒ MISSED 64022 — a confession row walked and confirmed BY HAND.
+        My adjudication notes carry no marker word. TOO NARROW, and it
+        fails its positive control, so any count from it is fiction.
+(2) grep the POST TEXT for the author's own voice
+      (MINE · my own error · RETRACTING · I certified · that was mine)
+      ⇒ positive control PASSES (64022 caught) and returns 112 of 229.
+        TOO BROAD by ~3.6x: those words appear in ordinary reporting.
+```
+⇒ ***THE CLASS IS A JUDGEMENT, NOT A KEYWORD: §2.2(a) asks whether the fault is the AUTHOR'S OWN
+EARLIER ACT, and no surface feature separates that from a seat quoting, citing, or merely using
+the word "mine".*** **Re-deriving 31 means READING 229 rows.** *That is a real cost estimate, and
+it is the reason this figure is labelled rather than refreshed — a bound nobody can compute in
+four seconds should say so instead of inviting a third attempt.*
 
 ## 6 · B-2 IS NOW UNBLOCKED — AND INHERITS TWO STATED OBLIGATIONS
 
