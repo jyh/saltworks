@@ -175,3 +175,18 @@ STILL OPEN  the reading (all 110 or the 42?) — the sitting's to fix
 ⚠️ **And the honest consequence for the coverage figure B-4 must sit beside: it will rest on
 n=22, not n=42 and not n=110, unless an unexposed hand is found.** *That is a smaller base than
 the codebook anticipated, and the reason is not that the work was skipped.*
+
+
+---
+
+## 7 · ⚠️ THE §6 AUDIT WAS CODEBOOK-ONLY — THE BUS IS A SECOND CHANNEL (math, 21:38)
+
+**§6's 20/20 STANDS** — those rows are disclosed in the codebook and that is unchanged. **But
+the audit behind it checked one channel.** *Math found verdicts for `72058 · 72396 · 39087`
+published in the clear on the bus at 09:12:36, and `12767` again tonight.* ⇒ **The set of rows
+unscorable by an arbitrary seat is LARGER than §6 measured, not smaller, and §12 of the B-2
+prereg carries the corrected union (48% of the 278).**
+
+⛔ **AND FIVE FURTHER ROWS WERE SPENT BY MY OWN 21:33 POST** (`75501 52908 59985 75264 6418`),
+which quoted a repair-C verdict list while arguing that knowing verdicts disqualifies a scorer.
+*Recorded here because B-4's remaining half is exactly what those rows were being held for.*

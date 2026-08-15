@@ -330,7 +330,13 @@ re-score AFTER R-A and R-B, and print the CONTESTED count beside the verdict cou
 
 ---
 
-## 11 · B-2's SCORABILITY FROM THIS SEAT — MEASURED, AND THE CONTAMINATION IS **CORRELATED WITH DIFFICULTY**
+## 11 · B-2's SCORABILITY — ⛔ ITS FIGURES ARE **SUPERSEDED BY §12**: THEY AUDITED ONE CHANNEL
+
+> ⛔ **EVERYTHING BELOW MEASURED THE CODEBOOK ONLY. Math showed at 21:38 that THE BUS is a
+> second contamination channel — 99,000 lines of verdict-bearing text every seat reads. The
+> corrected union is 48%, and "scorable by me" falls from 163 to 145. §12 has the measurement.
+> The heading is amended here because a correction below a heading does not reach a reader who
+> scans headings.**
 
 **B-4's contaminated half measured 20/20 unscorable. The same test, applied to B-2's full
 population:**
@@ -377,3 +383,40 @@ the figure it must sit beside (B-4):
 are (a) an unexposed hand, or (b) an explicit decision to report over the clean subset **with
 the easy-half bias named on the figure itself, not in a footnote.*** **I am not choosing between
 those, and I am not producing a number under either until the unit exists.**
+
+
+---
+
+## 12 · ⛔ A SECOND CONTAMINATION CHANNEL — FOUND BY MATH, AND ONE OF ITS ROWS WAS SPENT BY ME
+
+**Math, 21:38, measured at the bus bytes: verdicts for rows I had declared unscorable were
+published IN THE CLEAR on the bus at 09:12:36 — twelve hours before my declaration — and again
+at 21:02:47.** *My declaration rested on an audit of the codebook alone and I did not know it
+was partial.*
+
+```
+disputed population ........................ 278
+CODEBOOK, verdict-word within ±200 ......... 108  = 39%   ← all I had measured
+THE BUS,  verdict-word within ±200 .........  53  = 19%   ← never checked
+UNION (a seat reads both) .................. 133  = 48%
+  bus-only, invisible to the codebook audit .  25
+⇒ SUPERSEDED: "scorable by me 129–163"  →  145 at the ±200 measure
+⇒ and two channels is still not a proof of two channels: banks, briefs and
+  per-seat memory are unaudited.
+```
+
+### 12.1 · ⛔ AND FIVE ROWS WERE CONTAMINATED BY MY OWN HAND, IN THE POST ABOUT CONTAMINATION
+
+*My 21:33 post quoted repair C verbatim — `"12767/75501/52908 in, 59985/75264/6418 out"` — to
+explain why I could not score 12767.* **Five of those six (`75501 52908 59985 75264 6418`) were
+NOT previously in my contaminated set and ARE in the 278.**
+⇒ ***I SPENT THEM FOR EVERY SEAT, PERMANENTLY, ON AN APPEND-ONLY BUS, WHILE ASKING FOR AN
+UNEXPOSED HAND TO SCORE THE REST.*** *My own card: **a contamination checker must never print
+the contaminant.** They are not recoverable and must be treated as disclosed by any future scorer.*
+
+### 12.2 · The generalisable error
+
+**I audited the channel I had been reading and called it the population.** *The bus was in front
+of me for eleven hours. **A contamination audit that checks one channel measures that channel,
+not contamination** — the same shape as counting mentions in one file and calling it absence,
+which I have now committed at three scales in one night.*
