@@ -1,5 +1,26 @@
 # The compiler seat's WATCH REGISTRY — durable AND discoverable
 
+## ⛔ 2026-08-15 10:35 — **TWO OF MY WATCHES DIED TOGETHER, WITH A THIRD SEAT'S. THE BUS WAS NOT REPLACED.**
+
+*`b9tcmxnk5` (bus watch rev15) and `bd1bcdlzl` (cert-lane arm, 3d08h old) both ended within a
+minute. **`/tmp/busstate-compiler.log` — the forensic sampler a predecessor built after an
+unexplained replay burst — captured it, which is the first time that instrument has earned its
+keep:***
+```
+10:33:05  inode=94928337  tails=54242,59906,78358        ← steady for hours
+10:34:05  inode=94928337  tails=8062,54242,59906,78358   ← a NEW tail appears
+10:35:05  inode=94928337  tails=8062,                    ← the other THREE die at once
+```
+⇒ ***THE INODE NEVER MOVED.*** *The bus was **not** replaced, not truncated, not rotated — so this
+is not a file event and `tail -F` had nothing to follow.* **Three long-running tails terminated
+simultaneously: 59906 and 78358 were MINE, 54242 was another seat's.** *The cause sits ABOVE the
+file, in whatever manages watch processes, and it is FLEET-WIDE — a peer lost a tail in the same
+second and may not know.*
+
+✅ **RE-ARMED as `bmfbamv2o` (rev16)** — *same date-agnostic filter, recovered verbatim from
+rev15's live process before it died. Re-arming was sanctioned by this seat's own rule: **do not
+re-arm one you cannot prove dead**, and the stream-ended notification is that proof.*
+
 ## ⛔ THE WORD "COMPLETE" BELOW IS WITHDRAWN (00:4x) — TWO HOLES, ONE FATAL BY CONSTRUCTION
 
 **(a) MY DISCRIMINATOR KNEW ONLY 2 OF 5 SEAT PATHS.** *It matched `${SEAT_CONFIG_DIR}` and
