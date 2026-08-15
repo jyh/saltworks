@@ -218,3 +218,62 @@ RIGHT, AND I WILL NOT REPORT IT AS IF IT COULD.***
 must be re-run at N ≥ 30 with B-3's own conditions; this one informs B-2's coverage input and
 nothing else.** *Stated now because a 20-row determinacy number sitting in the record is exactly
 the kind of figure that gets quoted as the 30-row audit later.*
+
+---
+
+## 9 · ⛔⛔ THE DRAW IS WITHDRAWN: I FIXED k=20 OVER A POOL THAT DOES NOT EXIST, AND THE CODEBOOK SAYS SO IN A PASSAGE I HAD READ
+
+**§6.2 pre-registered a draw over "257 eligible" rows — the 278 disputed minus the 21 my parser
+found in TABLES. The draw executed cleanly. Then my own discard rule fired on 8 of 20 rows.**
+
+### 9.1 · The list-shaped filter could not see the prose-shaped leak
+
+*My banked card says exactly that, in those words. **I built the list-shaped filter anyway.***
+
+```
+THE DRAW (k=20, deterministic, reproducible):
+  166 2415 5510 8636 13372 31857 35323 38216 41414 44228
+  46788 52049 56531 60524 63372 66155 69278 73876 78108 83966
+
+DISCARDED per the pre-registered rule — class disclosed in the codebook's PROSE,
+which the table-based `named` set never saw:
+  166 · 2415 · 8636 · 13372 · 46788 · 56531 · 60524 · 63372     ⇒ 8 of 20 = 40%
+surviving blind set: 12   ← below any useful bar
+```
+⚠️ **`56531` is the row my own memory card was written about** — its class disclosed in running
+prose in a draft I had opened. *It came back in the very first draw, and the rule I wrote in
+advance is the only reason it was caught.*
+
+### 9.2 · The true pool, measured — and it REPRODUCES THE CODEBOOK'S OWN FIGURES
+
+```
+disputed population ................................... 278
+mentioned ANYWHERE in the codebook (strict, no knob) ... 158   ⇒ eligible 120
+proximity sweep, because ± chars is a parameter:
+   ±120 → 93 disclosed (185 eligible)   ±400 → 149 (129)
+   ±220 → 118 disclosed (160 eligible)  ±800 → 153 (125)
+⇒ true eligible pool: between 120 and 185. NOT 257.
+```
+⛔⛔ **AND THE CODEBOOK STATES THIS ITSELF, IN THE B-3 ENTRY, TWO PARAGRAPHS BELOW THE B-2 RULE
+I QUOTED AT §1 OF THIS FILE:**
+> *"DRAFT 2 named 138 of the 278 disputed rows and DRAFT 3 adds round 2's 20, so **roughly 158
+> are fitted and about 120 remain**; N ≥ 30 is affordable, but **verify each drawn row's absence
+> FROM THIS FILE before drawing**."*
+
+⇒ ***MY INDEPENDENT MEASUREMENT — 158 FITTED, 120 REMAINING — REPRODUCES THOSE TWO NUMBERS
+EXACTLY. The corroboration is total, and so is the indictment: I read that passage tonight when
+I looked up B-2, and then wrote 257.***
+
+### 9.3 · What is withdrawn, what is kept, and the re-draw
+
+```
+WITHDRAWN   the k=20 draw and its "257 eligible" premise
+KEPT        the discard rule — it worked, on its first firing, on the row I had banked
+KEPT        the §8 finding that only DETERMINACY and COVERAGE are measurable here
+RE-DRAW     over the STRICT pool (120 rows: mentioned nowhere in the codebook), with the
+            codebook's own sequencing — ABSENCE VERIFIED BEFORE DRAWING, not after
+NOTE        N ≥ 30 IS AFFORDABLE over 120, exactly as the codebook says. My k=20 was
+            below B-3's bar for no reason except that I chose it before measuring.
+```
+📌 **The one thing I did right here was pre-registering a discard rule I could not weasel out of.
+Everything else in §6.2 was authored before I measured the thing it was about.**
