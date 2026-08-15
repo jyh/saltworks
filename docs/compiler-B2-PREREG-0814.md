@@ -277,3 +277,53 @@ NOTE        N ≥ 30 IS AFFORDABLE over 120, exactly as the codebook says. My k=
 ```
 📌 **The one thing I did right here was pre-registering a discard rule I could not weasel out of.
 Everything else in §6.2 was authored before I measured the thing it was about.**
+
+---
+
+## 10 · ⭐ READING PAST B-3 INTO B-4: MY "BLIND SET" **IS** B-3, AND B-2's FIGURE IS GATED ON B-4
+
+**I applied the rule I banked forty minutes ago — read the enclosing section, not just your
+item — and it returned two findings about my own lane immediately.**
+
+### 10.1 · The blind set I was designing already exists as a BLOCKING item
+
+> **B-3 CLASS-DETERMINACY AUDIT, FRESH DRAW, N ≥ 30. BLOCKING.** *Not side-determinacy. Rows
+> unnamed in this file … N ≥ 30 is affordable, but verify each drawn row's absence FROM THIS
+> FILE before drawing.*
+
+**§8 of this file concluded, independently, that a blind draw over unnamed rows can measure
+DETERMINACY and nothing else. That is B-3, word for word.** ⇒ ***I was one step from building a
+parallel procedure for a specified blocking item — the exact defect my own card names ("before
+building a procedure FOR a rule, grep for the rule"), which I banked THIS MORNING.***
+
+📌 **RESOLVED: there is no separate "B-2 blind set." The draw is B-3's, run to B-3's bar
+(N ≥ 30, absence verified BEFORE drawing), and its determinacy output feeds B-2's coverage
+input. One draw, one procedure, the codebook's.**
+
+### 10.2 · ⛔ AND B-2's COVERAGE FIGURE IS GATED ON B-4 — A DEPENDENCY I HAD NOT REGISTERED
+
+> **B-4 THE AGREED-`OTHER` SURVIVAL RUN. BLOCKING.** *110 agreements exist as a free held-out
+> set and were never used … Run this pipeline over all 110 and **PRINT the agreed-`OTHER`
+> survival rate BESIDE ANY COVERAGE FIGURE**.*
+
+⇒ ***B-2's NUMBER CANNOT BE PUBLISHED ALONE.*** *And this is the SECOND of the two things
+`:503-515` requires to ship with the `EXCLUDED` set — I discharged (i), the under-count ledger,
+at `faecbcd`, and read straight past (ii) in the same clause.*
+
+```
+THE ORDER, AS THE CODEBOOK ACTUALLY SPECIFIES IT — not as I was reconstructing it
+  B-1  gate sweep ................ DONE (289/289, re-run, 15/15 on the ruling column)
+  B-3  determinacy, N ≥ 30 ....... the draw I was about to reinvent; feeds B-2
+  B-4  110 agreed rows ........... a FREE held-out set, never used; its survival rate
+                                   must be PRINTED BESIDE any coverage figure
+  B-2  coverage ................... cannot ship until B-3 and B-4 exist
+```
+
+⚠️ **SO B-2 IS NOT THE NEXT ITEM. It is the LAST of the four, and I have been treating it as
+the next one all evening** — including in the two obligations I published against my paraphrase
+of it at 18:53 and 19:00.
+
+📌 **B-4 is the cheapest of the three and the only one needing no draw: 110 rows, a held-out set
+that has never been touched, and the codebook already prints the pre-repair sample (8 survive,
+4 to specifics, 8 to `EXCLUDED`) as the figure to beat. It also carries two DRAFT-3 conditions —
+re-score AFTER R-A and R-B, and print the CONTESTED count beside the verdict count.**
