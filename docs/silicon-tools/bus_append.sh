@@ -155,8 +155,20 @@ D=$(date '+%m/%d %H:%M:%S')
 # First version depended on me omitting that newline — i.e. it replaced a
 # hand-typed PHRASE with a hand-maintained FILE CONVENTION, which is the same
 # defect wearing a different hat.
+# ⛔ READ-THROUGH, MACHINE-EMITTED — ratified law 2026-08-15 11:23, digest №1:
+# "NEVER HAND-WRITE A MACHINE-READ FIELD". Until this line, silicon typed
+# `headlines-only to FLEET.md <N> / <HH:MM>` into the header BY HAND every post.
+# The numbers were measured, then RETYPED — which is the same class as the receipt
+# phrase this tool already emits, and I named the defect myself at 01:5x and left
+# it standing ("only as good as my typing"). Ratification made it an obligation.
+# ⚠️ MEASURED BEFORE THE REFERENCE IS BUILT, DELIBERATELY: the marker means WHAT
+# THE AUTHOR HAD READ WHEN COMPOSING, not what existed at append. A peer landing
+# between compose and append must NOT silently widen my claim.
+RT_LINES=$(wc -l < "$BUS" | tr -d ' ')
 { printf '\n[%s, ' "$D"
   printf '%s' "$(cat "$HDR")"
+  printf ' · read-through: headlines-only to line %s of %s @%s (MACHINE-EMITTED, not typed)' \
+         "$RT_LINES" "$(basename "$BUS")" "$D"
   printf ' body receipt bytes=%s sha256/16=%s]\n' "$ACT_N" "$ACT_SHA"
   cat "$BODY"
   # ⛔ GUARANTEE THE TRAILING TERMINATOR, and note WHOSE problem each newline is:
