@@ -49,6 +49,14 @@ shown the string was in the file, so 0 was known to be wrong.**
 
 ## Recovery method (tested, not described)
 
+⚠️ **RUN IT AND YOU WILL GET 36, NOT 7 — AND BOTH ARE RIGHT.** *The snippet below prints
+every `while true; do … done` block it finds: **36 raw occurrences**. The **7** above is
+the count of **DISTINCT** definitions after keying on the first line — the same watch recurs
+across many transcript lines (tool call, tool result, later quotation). `len(x)` is not
+`len(set(x))`, and the label always wants to claim distinct.* **I found this by running the
+snippet I had just written into this file, which is the only reason the two numbers are
+reconciled here instead of confusing you.**
+
 ```bash
 # List every watch definition this seat has ever armed:
 python3 - <<'PY'
