@@ -54,7 +54,19 @@ cd "$R" || { echo "FALLBACK-COMPILER: cannot cd $R"; exit 2; }
 #   My 23:3x differential "proved" the fix by moving the verdict — but it only ever exercised
 #   the entry I had just added. THE OTHER TWO WERE NEVER TESTED because I had not landed in
 #   SaltWorks/HDL all night. The drift arm caught it at 07:00 on first exposure.
-MINE=(SaltWorks/HDL SaltWorks/Certs docs/ledger-tools 'docs/compiler-*' 'docs/post-integrity-*')
+# ⛔ 2026-08-15 15:3x — THIRD STALENESS, AND THE DRIFT ARM CAUGHT THIS ONE ITSELF.
+#   I landed `tools/saltbuild.sh` at b380623 (helm-authorized) and the fallback reported
+#   my-landing=9b06fba with last-touch-any-seat=b380623 — MY OWN COMMIT SHOWING AS SOMEBODY'S
+#   TOUCH, because `tools/` was not in the glob. The arm printed exactly the line it exists to
+#   print: "paths touched: tools ⚠️ any path above that is MINE and not in scope means THIS
+#   GLOB IS STALE." First time this defect was caught BY THE INSTRUMENT rather than by luck
+#   (07:00) or by my happening to know my own sha (23:29).
+# ⚠️ NARROW, NOT `tools/`: that directory is FLEET INFRASTRUCTURE AT THE HELM'S CUSTODY. I am
+#   authorized in ONE file there, so only that file is claimed. Adding the directory would make
+#   every other seat's tools/ landing read as mine — the ownership-by-path law running backwards.
+#   Residual, stated rather than solved: if the helm edits saltbuild.sh, my-landing will wrongly
+#   read as mine until someone notices. A heuristic field with a known false-attribution case.
+MINE=(SaltWorks/HDL SaltWorks/Certs docs/ledger-tools 'docs/compiler-*' 'docs/post-integrity-*' tools/saltbuild.sh)
 # FALLBACK_SCOPE exists so the DRIFT ARM can be DRIVEN. Without it the arm is dead
 # code whenever my landing happens to be the newest commit -- which is exactly the
 # state it was in when I wrote it, i.e. it would have shipped unexercised.
