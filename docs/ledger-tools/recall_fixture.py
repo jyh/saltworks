@@ -118,7 +118,15 @@ if __name__ == "__main__":
             print(f"ITEM {n}\tFLEET.md:{lid}\t{key[lid]}")
     elif cmd == "score":
         ans = pathlib.Path(sys.argv[2]).read_text().strip().split("\n")
-        hit = sum(1 for n,lid in enumerate(pick) if n < len(ans) and key[lid].lower() in ans[n].lower())
+        # ⛔ REFUSE A SHORT SHEET. Found by end-to-end test: a 3-of-20 file scored 15%,
+        # BELOW the 17% chance baseline -- i.e. an incomplete submission reads as
+        # "recall is weak", which is exactly the result that CONFIRMS the author's
+        # hypothesis. A silent truncation must never look like evidence.
+        if len(ans) != len(pick):
+            raise SystemExit(f"⛔ REFUSING TO SCORE: {len(ans)} answers for {len(pick)} items. "
+                             f"An incomplete sheet scores LOW and a low score is the author's "
+                             f"preferred outcome. Submit one line per item (UNKNOWN is a valid line).")
+        hit = sum(1 for n,lid in enumerate(pick) if key[lid].lower() in ans[n].lower())
         print(f"correct: {hit}/{len(pick)} = {100*hit/len(pick):.0f}%")
         print(f"chance baseline for 6 classes: 17%")
         print("⇒ near chance ⇒ recall is WEAK ⇒ ID-blind scoring restores exposed seats.")
