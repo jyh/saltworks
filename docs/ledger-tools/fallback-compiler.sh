@@ -55,10 +55,16 @@ MINE=(HDL Certs docs/ledger-tools 'docs/compiler-*' 'docs/post-integrity-*')
 MYL=$(git log --oneline -1 --format=%h -- "${MINE[@]}" 2>/dev/null)
 ANY=$(git log --oneline -1 --format=%h 2>/dev/null)
 DIRTY=$(git status --porcelain -- "${MINE[@]}" 2>/dev/null | grep -c . || true)
+# ⛔ 2026-08-15 06:0x — THIS IS A CACHE READ AND THE LABEL NOW SAYS SO. `origin/master` is a
+#   LOCAL ref; without a fetch this answers "unpushed since my last fetch", not "unpushed".
+#   I quoted the unlabelled version ~50 times tonight before a peer's real-fetch beat exposed it
+#   (banked: tracking-ref-is-a-local-cache). NOT adding a fetch here on purpose: a 30-minute
+#   heartbeat must not acquire a network dependency that can hang or fail and take the liveness
+#   signal with it. An honest label costs nothing and cannot break the watch.
 UNPUSH=$(git rev-list --count origin/master..master 2>/dev/null || echo '?')
 STAMP=$(date '+%m/%d %H:%M:%S')
 
-printf 'FALLBACK-COMPILER %s · my-landing=%s · last-touch-any-seat=%s · MY-dirty=%s · unpushed=%s\n' \
+printf 'FALLBACK-COMPILER %s · my-landing=%s · last-touch-any-seat=%s · MY-dirty=%s · unpushed=%s(cached, no fetch)\n' \
   "$STAMP" "$MYL" "$ANY" "$DIRTY" "$UNPUSH"
 printf '  scope: %s\n' "${MINE[*]}"
 
