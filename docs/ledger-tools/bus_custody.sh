@@ -159,6 +159,15 @@ if [ "${1:-}" = "--selftest" ]; then
   WB=$(wc -c < "$T/abs_v3.md" | tr -d ' '); WS=$(shasum -a 256 "$T/abs_v3.md" | cut -c1-16)
   printf ', compiler — SEAT-STATE: compiler=LIT · ok, body receipt bytes=%s sha256/16=%s]' "$WB" "$WS" > "$T/abs_v3ok.txt"
   arm ":2h 'nothing unnamed' STAMPED"     0 "$T/abs_v3.md" "$T/abs_v3ok.txt"
+  # MENTION vs USE, built from the post that this arm refused at 00:5x.
+  printf 'a control body line.\nevidence published the word `unclaimed` as an example.\nthird line.\n' > "$T/men.md"
+  MB=$(wc -c < "$T/men.md" | tr -d ' '); MS=$(shasum -a 256 "$T/men.md" | cut -c1-16)
+  printf ', compiler — SEAT-STATE: compiler=LIT · ok, body receipt bytes=%s sha256/16=%s]' "$MB" "$MS" > "$T/menok.txt"
+  arm ":2h backticked MENTION exempt"     0 "$T/men.md" "$T/menok.txt"
+  printf 'a control body line.\nthe third orphan is unclaimed by anyone.\nthird line.\n' > "$T/use.md"
+  UB=$(wc -c < "$T/use.md" | tr -d ' '); US=$(shasum -a 256 "$T/use.md" | cut -c1-16)
+  printf ', compiler — SEAT-STATE: compiler=LIT · ok, body receipt bytes=%s sha256/16=%s]' "$UB" "$US" > "$T/useok.txt"
+  arm ":2h bare USE still convicts"      12 "$T/use.md" "$T/useok.txt"
   echo
   echo "  NOT DRIVABLE IN-PROCESS, declared rather than counted as passing:"
   echo "    :55 bus shorter than OFF+N  — needs the append itself to fail mid-write"
@@ -331,7 +340,18 @@ ALLTXT=$(cat "$BODY" "$BRACKET" 2>/dev/null)
 #   grep -Eoi over the sent bytes returned exactly 2 hits, both inside that example.
 # ⇒ A GUARD'S OWN STATEMENT OF ITS WEAKNESS WAS THE THING THAT WALKED THROUGH IT.
 #   The repair is SCOPE: the stamp must sit in the SAME SENTENCE as the claim it dates.
-BAD=$(printf '%s' "$ALLTXT" | tr '\n' ' ' | awk -v abs="$ABS" -v st="$STAMP" '
+# ⛔ 2026-08-15 00:5x — MENTION vs USE. The extension above refused the very post announcing
+#   it: 10 sentences, every one QUOTING a trigger phrase as an EXAMPLE. A guard that cannot tell
+#   `"unclaimed"` (mentioned) from unclaimed (asserted) blocks exactly the traffic that discusses
+#   it — the over-broad direction, whose refusals are SILENT because the author reroutes.
+#   Fix: strip quoted/backticked spans BEFORE matching. A phrase in `backticks` or "quotes" is a
+#   MENTION and is exempt; the same phrase bare is a USE and still convicts.
+#   ⛔ LIMIT: an asserted absence that HAPPENS to sit inside quotes is now exempt too. That is a
+#     real hole, accepted deliberately — a false negative here costs a missed stamp, while the
+#     false positive it replaces costs every post that discusses the rule.
+BAD=$(printf '%s' "$ALLTXT" | tr '\n' ' ' \
+  | sed -e 's/`[^`]*`/ /g' -e 's/"[^"]*"/ /g' -e "s/'[^']*'/ /g" \
+  | awk -v abs="$ABS" -v st="$STAMP" '
   BEGIN{RS="[.;]"} { s=tolower($0); if (s ~ abs && s !~ st) c++ } END{print c+0}')
 if [ "${BAD:-0}" -gt 0 ]; then
   die "ABSENCE CLAIM WITHOUT A MOMENT: $BAD sentence(s) assert something does not occur
