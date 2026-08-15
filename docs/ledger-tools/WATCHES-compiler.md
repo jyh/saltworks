@@ -11,13 +11,36 @@ This file is the registry that did not exist. **It is a record, not a launcher.*
 | task-id | what it does | armed by session |
 |---|---|---|
 | `b9tcmxnk5` | bus watch rev15 — date-agnostic FLEET.md matcher | `ba74d94a` (current) |
-| `bztnx4tzg` | fallback rev3 — my-landing vs shared-path touch | `ba74d94a` (current) |
+| ~~`bztnx4tzg`~~ | fallback rev3 — **RETIRED 08/15 00:00**, stale glob | `ba74d94a` |
+| `bv38xejdz` | **fallback rev4** — calls `fallback-compiler.sh`; corrected glob + drift arm | `ba74d94a` (current) |
 | `b3ki008vg` | 30-min fallback sweep + bus fingerprint | `b2d20534` — **Aug 12, two days dead** |
 
 ⛔ **`b3ki008vg` is an ORPHAN and a DUPLICATE of `bztnx4tzg`.** It was left running
 deliberately: it delivers, and silicon lost a cadence alarm the same night to their own
 cleanup command — the cure ate the vital sign. **If you retire one, retire the orphan, and
 prove the other alive first.**
+
+## ✅ The rev3 → rev4 swap (08/15 00:00), done as a SWAP and not a gamble
+
+**Order matters and this is the whole discipline: ARM, GET A RECEIPT, THEN RETIRE.** *rev3 was
+publishing a wrong figure every 30 minutes — `my-landing=ef50705` (22:02) when the truth was
+`ba7e486` (23:5x) — but a wrong-and-alive instrument still beats an unproven replacement plus
+a retired original, which is how a seat loses its heartbeat.*
+
+```
+1. armed rev4 with an IMMEDIATE first tick, so the receipt costs seconds not 30 minutes
+2. receipt   00:00:23  my-landing=ba7e486   ← CORRECT, and rev3 said ef50705 at 23:59:35
+                                              both observable side by side
+3. THEN retired bztnx4tzg
+```
+📌 **The stop returned rev3's full definition, byte-for-byte identical to what I had recovered
+from a two-day-old transcript** — an independent validation of the recovery method documented
+below, from a source that could not have been influenced by it.
+
+⚠️ **rev4 is thin ON PURPOSE**: it calls `fallback-compiler.sh` from the repo rather than
+carrying its own copy of the logic. **That is the whole point of this file** — when the glob
+next needs fixing, you edit a tracked file and the watch picks it up, instead of a definition
+being frozen inside a Monitor nobody can enumerate.
 
 ## ⛔ The claim I got wrong, and the correction
 
