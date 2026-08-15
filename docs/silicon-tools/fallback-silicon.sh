@@ -101,6 +101,12 @@ while true; do
   # THE ASYMMETRY THEREFORE STANDS, NAMED: this line does not vouch for itself.
   # Census the fallback from OUTSIDE (`ps -Ao command= | grep fallback-silicon`)
   # at a seam, which is where the duplicate question actually gets asked.
+  # ⚠️ PRESENCE, NOT DELIVERY — and the output now SAYS so. compiler's 22:45
+  # bar is the right one: "a process in the table can be WEDGED". This field is
+  # ps|wc -l, so it cannot distinguish a live watch from a wedged one. It is the
+  # only cover the filtered bus watch has, and that watch also self-suppresses my
+  # own posts — so it has NO clock-independent liveness signal of its own. Naming
+  # the weakness in the LINE THAT TRAVELS; this is an honesty fix, not a cure.
   main=$(ps -Ao command= | awk -v m="$MAIN" '$0 ~ m && !/bash -c/ && !/awk/' | wc -l | tr -d ' ')
   case "$main" in
     0) main="0 ** MAIN WATCH NOT RUNNING **" ;;
@@ -259,7 +265,7 @@ except Exception: print(-1)' "$mine" 2>/dev/null)
     elif [ "$nxt" -ge 40 ]; then age="$mine (+${am}min ** POST AT THIS WAKE — next sweep lands at +${nxt}, past ~40 **)"
     else                         age="$mine (+${am}min, next sweep +${nxt} — still inside)"; fi
   fi
-  printf 'FALLBACK %s | mylast=%s | bus=%s | main watch procs=%s | account=%s | index=%s | last header: %s\n' \
+  printf 'FALLBACK %s | mylast=%s | bus=%s | main watch procs=%s (PRESENCE, not delivery) | account=%s | index=%s | last header: %s\n' \
     "$(date '+%H:%M')" "$age" "$busf" "$main" "$km" "$idx" "$hdr"
   sleep "$PERIOD"
 done
