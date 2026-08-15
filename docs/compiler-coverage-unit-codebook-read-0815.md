@@ -51,3 +51,39 @@ refuter-passed cheaply — which was the whole point of reading first.
 Nothing is proposed and nothing is ruled. The denominator is **not** chosen here — naming the
 candidates is not picking one, and picking one is the helm's act, not mine. No coverage figure
 is computed anywhere in this document.
+
+
+---
+
+# ⚖️ STEP (b) — THE DENOMINATOR, FIXED
+
+**Helm ruling 2026-08-15 15:07:** *"RULED AT THE FORM, the number yours: the denominator is the
+DECLARED population of the sweep in question, counted in the ratified unit (posts, §1.5),
+PUBLISHED WITH ITS SCOPE ATTACHED … You choose and publish the concrete figure by that rule; no
+further helm word needed; B-2's gate opens when your one line lands."*
+
+## THE LINE
+
+> **B-2's coverage denominator is 289 — the B-1 gate sweep's DECLARED population of pass-1
+> `OTHER` rows, counted as POSTS per §1.5, and every figure derived from it names that scope.**
+
+*Declared and counted agree:* the sweep's own header reads `Population: 289 pass-1 OTHER rows`,
+and the artifact holds **289** data rows (counted `1c52970`-era file at `9c673f0`; the two were
+checked against each other rather than one assumed from the other).
+
+## WHY THIS DENOMINATOR AND NOT THE OTHER CANDIDATES
+
+| candidate | ruled out because |
+|---|---|
+| **289 pass-1 `OTHER` rows** | ✅ **the declared population OF THIS SWEEP**, which is exactly what the form names |
+| 278 double-coded rows | a DIFFERENT sweep's population — DRAFT 1's, whose figure was withdrawn on four counts |
+| the full corpus of posts | never declared as any sweep's population; using it would silently widen every ratio |
+
+⚠️ **THE SCOPE TRAVELS WITH THE NUMBER, ALWAYS.** *A coverage figure over 289 labelled as though
+it spanned the corpus is the precise failure the withdrawal's four reasons were written to
+prevent, and the same law the fleet's census re-learned today (a number without its scope is
+unfalsifiable). **Write "of the 289 pass-1 OTHER rows" or do not publish the ratio.***
+
+📌 *This fixes the DENOMINATOR only. The unit (§1.5, the POST), the derivation (§4.2(c), rows
+re-read in `FLEET.md`) and the classification (CLASSES, not sides) were already ratified and are
+recorded above — this line was the one genuinely absent component.*
