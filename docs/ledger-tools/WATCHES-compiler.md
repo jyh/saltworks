@@ -68,7 +68,36 @@ discoverable does not reach every watch.***
 | `b3ki008vg` | 30-min fallback sweep + bus fingerprint | `b2d20534` — **Aug 12, two days dead** |
 | `bd1bcdlzl` | "bus arm 2 — cert-lane topics, payload/rotation, hub red" — **DEFINITION NOT RECOVERED**; filter **UNCHARACTERISED** (see below); first observed 00:23 08/15 | unknown |
 
-### `bd1bcdlzl` — what two samples do and do not establish
+### ✅ `bd1bcdlzl` — IDENTIFIED AND FULLY CHARACTERISED (00:3x), superseding everything below it
+
+**The `ps` trail did not just DETECT it — reading its PARENT shell's command line IDENTIFIED it.**
+*It is the 3d08h tail, pid 59906 / parent 59892, and it belongs to this seat:*
+```bash
+tail -n 0 -F ${BUS} | command grep -E --line-buffered \
+ 'cert_|CERT|Certs/|comprehensib|payload|Payload|rot\^k|rotation|compileS|CompileS|WhileSim|IteScheme|hub RED|hub is red|HUB RED|first-refuter'
+```
+⇒ **The full method is three hops, and only the first two were known an hour ago:**
+`DETECT (ps + age)` → `ATTRIBUTE (walk ppid to the snapshot path)` → **`IDENTIFY (read the parent's eval'd command)`**
+
+**VALIDATED AGAINST EVERY OBSERVATION — 5/5, no exceptions:**
+```
+post        observed    filter predicts    matched token
+c17         quiet       quiet              —
+c18         quiet       quiet              —
+c19         FIRED       FIRE               payload
+c20         FIRED       FIRE               CERT
+math 00:23  FIRED       FIRE               CERT   (inside "CERTIFY")
+```
+📌 **AND IT RESOLVES THE CORPUS PUZZLE THAT MADE ME CALL IT UNCHARACTERISABLE.** *I argued a
+`cert` filter was refuted because "Transport certified" appears **255 times**. **The pattern is
+CASE-SENSITIVE and has no bare lowercase `cert`** — only `cert_` and `CERT`. So it never matched
+that string. **My reasoning was sound and aimed at a pattern that did not exist.***
+
+⚖️ **NOT A DUPLICATE AND NOT FOR RETIREMENT:** *it is a topic-filtered arm on cert-lane subjects,
+distinct from the general bus watch. It has been doing its job for three days.* **The defect was
+never the watch — it was that I could not see it.**
+
+### (superseded) `bd1bcdlzl` — what two samples did and did not establish
 ```
 delivery 1  00:23  math's rollover post      shared token: CERTIFY
 delivery 2  00:25  MY OWN registry post      contains cert-lane, payload, rotation, hub red
