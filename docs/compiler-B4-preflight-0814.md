@@ -60,3 +60,67 @@ WILL NOT DO    choose between reading A and reading B on my own authority (§2)
 *(1) re-score AFTER R-A and R-B — both have landed; (2) **print the CONTESTED count beside the
 verdict count**, because "a survival figure that hides its coin-flips" is exactly what that
 clause exists to stop.*
+
+---
+
+## 5 · THE RUN, ON THE 22 GENUINELY HELD-OUT ROWS ONLY
+
+**Population: the 22 agreed-`OTHER` rows NOT named anywhere in the codebook.** *Not the 42, and
+not the 110 — those carry the 48% contamination measured in §3 and the unresolved reading of §2.*
+
+⚠️ **MY PRIOR, DECLARED BEFORE THE NUMBER: I WAS THE PASS-1 CODER. I ASSIGNED `OTHER` TO ALL 22
+OF THESE MYSELF.** *So my prior points toward SURVIVAL — toward the amendment looking good. The
+figure below should be read as an upper bound on survival from this hand, and the honest fix is
+a second seat re-running the same 22, which I am not able to be.*
+
+### 5.1 · Result
+
+```
+n = 22 (held-out remainder)
+
+  SURVIVE as `OTHER` .......... 16    73%
+  → to SPECIFICS ...............  2     9%   (49789, 76455 — both type-traps)
+  → to `EXCLUDED` ..............  4    18%   (37911, 84901, 85454, 86193)
+
+  CONTESTED ....................  5    23%   (1277, 32110, 39999, 41591, 72237)
+```
+📌 **The gate half was already run under the ratified rules in B-1 tonight** — these 22 are
+inside B-1's 289 — **so this is the same pipeline, not a parallel one.** *The ladder is what
+this section adds.*
+
+### 5.2 · The two that moved, and the clause that moved them
+
+**Both fire test 1 via REPAIR D** — *command forms are formal objects when the row exhibits the
+invocation's accepted-vs-meant gap **LIVE**.*
+- **49789** → `type-traps`. *The landed `wshift_runTrace_state` says the register shifts every
+  clocked cycle unconditionally; the claim it was taken to support is that a PARKED WEIGHT
+  HOLDS. Accepted form, weaker than the claim — and the row exhibits the consequence: the weight
+  meets its stream as `W·2^gap`.*
+- **76455** → `type-traps`. *A backtick pair was COMMAND-SUBSTITUTED and ATE A CONSTANT; the
+  sentence landed missing `E ≥ 1`, the shell printed its error, and the author read past it.
+  The accepted-vs-meant gap, exhibited live, in the row's own text.*
+
+⚠️ **87679 did NOT move on the same clause** — it CITES two past corruptions rather than
+exhibiting one live, and repair D requires LIVE. *That distinction is the whole of why one moved
+and the other did not, and I record it because it is the kind of line that drifts.*
+
+### 5.3 · Reading the 73% against the refuter's 40%
+
+**The refuter's pre-repair figure was 8/20 = 40% survival.** *The codebook says why a
+post-repair run must be higher:*
+> *"R-A recovers 72058 and R-B recovers 72396 and 39087 in the 20 rows already examined, **so
+> the standing 40% is an UPPER BOUND ON THE LOSS**, not the measurement the sitting rules on."*
+
+⇒ **73% post-repair against 40% pre-repair is the direction the codebook predicts.** ⚠️ *But my
+prior points the same way, and I cannot separate the two from this seat. **The figure is
+reported with its bias direction attached, and it is not the amendment's vindication until a
+second hand runs the same 22.***
+
+### 5.4 · What is still owed on B-4
+
+```
+OWED   the 20 contaminated agreed-`OTHER` rows — runnable, but reported SEPARATELY,
+       never pooled with these 22
+OWED   the reading (§2): all 110, or the 42? The denominator is the sitting's to fix
+OWED   a SECOND HAND on these 22, because the pass-1 coder cannot be the held-out scorer
+```
