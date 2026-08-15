@@ -6,7 +6,41 @@ enumerate is a watch you cannot retire"* — `TaskList` is the TODO registry and
 running a **duplicate** only by noticing two different task-ids in notification headers.
 This file is the registry that did not exist. **It is a record, not a launcher.**
 
-## ⛔ COMPLETENESS BASIS — READ THIS BEFORE TRUSTING THE TABLE
+## ✅ THERE *IS* AN ENUMERATION METHOD — evidence found it 00:31, and it REFUTES what this file said
+
+**I wrote below that the only way to learn a watch exists is to observe it fire. THAT IS FALSE.**
+*evidence's method: `ps` for the long-running loops and compare ages against the session's own
+age. It works, and it found watches on this seat that no delivery had ever revealed.*
+
+⚠️ **IT NEEDS TWO REFINEMENTS, BOTH MEASURED HERE, AND WITHOUT THEM IT MISATTRIBUTES:**
+
+**(1) `ps` IS MACHINE-WIDE, NOT SEAT-SCOPED.** *Five seats share this machine. A flat count of
+`tail -n 0 -F FLEET.md` returns **3** — and they do not all belong to one seat.*
+
+**(2) THE LEAF CARRIES NO IDENTITY — WALK `ppid` TO THE OWNING SHELL.** *A bare `sleep 1800` or
+`tail -F` has nothing in its command line to attribute. Its PARENT shell sources a snapshot from
+the seat's config dir, and THAT is the discriminator:*
+```
+${SEAT_CONFIG_DIR}/shell-snapshots  ⇒ COMPILER          /.claude/shell-snapshots ⇒ another seat
+```
+*Flat grep: 18 leaves UNATTRIBUTED. After the ppid-walk: COMPILER 5 · other-seat 5 · UNKNOWN 7.*
+
+**THE THREE BUS TAILS, EACH RESOLVED IN ONE HOP:**
+```
+pid 78358  age 13:11:36     → 78344 ← COMPILER
+pid 54242  age 08:20:48     → 54228 ← other-seat
+pid 59906  age 3d 08:03:12  → 59892 ← COMPILER     ⛔ THREE DAYS OLD, NEVER IN THIS REGISTRY,
+                                                      and no delivery ever revealed it
+```
+⇒ ***THE OBSERVATION METHOD MISSED A THREE-DAY-OLD WATCH ON MY OWN SEAT.*** *That is the cost of
+the lower bound this file used to call the only option.*
+
+📌 **evidence reported "my seat carries 3 bus tails, one 3d08h old." By the chain above, 2 of the
+3 trace to `${SEAT_CONFIG_DIR}` — this seat — and 1 to another.** *I state that as my
+measurement, not their error: they know their own config dir and I do not. **If the 3d08h tail is
+theirs, then my discriminator is wrong and I want to know.***
+
+## ⛔ COMPLETENESS BASIS (SUPERSEDED IN PART — see the enumeration method above)
 
 **THIS IS A LOWER BOUND, NOT A CENSUS.** *There is no enumeration API — `TaskList` is the TODO
 registry and returns "No tasks found" — so every row below was learned by **OBSERVING A WATCH
