@@ -86,7 +86,19 @@ DEAD=""
 for pat in "${MINE[@]}"; do
   [ -z "$(git log -1 --format=%h -- "$pat" 2>/dev/null)" ] && DEAD="$DEAD $pat"
 done
-[ -n "$DEAD" ] && printf '  ⛔ DEAD SCOPE ENTRIES (match no commit, silently inert):%s\n' "$DEAD"
+# ⚠️ 2026-08-15 10:4x — FALSE-DEAD CASE, named because a peer's anchored `ps` pattern returned a
+#   FALSE ZERO and nearly had them announce a live watch dead. Mine has the same shape: this arm
+#   says DEAD on "matches no commit", so a LEGITIMATE path with no commits YET reads as inert.
+#   Checked 10:4x — all five entries have both commits and on-disk paths, so no false-dead today.
+#   The arm now prints whether the path EXISTS, which distinguishes "wrong pathspec" (the real
+#   defect, HDL vs SaltWorks/HDL) from "right path, no history yet".
+if [ -n "$DEAD" ]; then
+  printf '  ⛔ DEAD SCOPE ENTRIES (match no commit):%s\n' "$DEAD"
+  for d in $DEAD; do
+    n=$(ls -d $d 2>/dev/null | wc -l | tr -d ' ')
+    [ "$n" -gt 0 ] && printf '     ⚠️  %s EXISTS on disk (%s path(s)) — likely NO HISTORY YET, not a wrong pathspec\n' "$d" "$n"
+  done
+fi
 
 # ── THE DRIFT ARM: the thing rev3 could not do. If commits have landed since MY
 #    last one, say HOW MANY and IN WHICH PATHS. A silent under-report is the failure
