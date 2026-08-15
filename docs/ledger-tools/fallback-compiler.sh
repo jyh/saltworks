@@ -46,7 +46,15 @@ cd "$R" || { echo "FALLBACK-COMPILER: cannot cd $R"; exit 2; }
 
 # The ownership glob. KEEP THIS BESIDE THE LANDINGS IT MUST SEE — the whole defect
 # was a glob that stopped tracking where the work moved.
-MINE=(HDL Certs docs/ledger-tools 'docs/compiler-*' 'docs/post-integrity-*')
+# ⛔ 2026-08-15 07:0x — `HDL` and `Certs` MATCHED NOTHING. The real paths are SaltWorks/HDL
+#   and SaltWorks/Certs; the bare names are git pathspecs against the repo ROOT and have been
+#   INERT since I inherited this glob from rev3. I "corrected" the glob at 351ae5c by ADDING
+#   docs/ledger-tools and never checked the entries already there — the exact defect banked at
+#   02:3x (a structural repair is a RELOCATION; inventory the space before rearranging it).
+#   My 23:3x differential "proved" the fix by moving the verdict — but it only ever exercised
+#   the entry I had just added. THE OTHER TWO WERE NEVER TESTED because I had not landed in
+#   SaltWorks/HDL all night. The drift arm caught it at 07:00 on first exposure.
+MINE=(SaltWorks/HDL SaltWorks/Certs docs/ledger-tools 'docs/compiler-*' 'docs/post-integrity-*')
 # FALLBACK_SCOPE exists so the DRIFT ARM can be DRIVEN. Without it the arm is dead
 # code whenever my landing happens to be the newest commit -- which is exactly the
 # state it was in when I wrote it, i.e. it would have shipped unexercised.
@@ -67,6 +75,14 @@ STAMP=$(date '+%m/%d %H:%M:%S')
 printf 'FALLBACK-COMPILER %s · my-landing=%s · last-touch-any-seat=%s · MY-dirty=%s · unpushed=%s(cached, no fetch)\n' \
   "$STAMP" "$MYL" "$ANY" "$DIRTY" "$UNPUSH"
 printf '  scope: %s\n' "${MINE[*]}"
+
+# ── DEAD-ENTRY ARM: a scope entry matching NOTHING is silently inert, and an inert entry
+#    looks identical to a quiet one. Two of mine were dead for a day. Announce them.
+DEAD=""
+for pat in "${MINE[@]}"; do
+  [ -z "$(git log -1 --format=%h -- "$pat" 2>/dev/null)" ] && DEAD="$DEAD $pat"
+done
+[ -n "$DEAD" ] && printf '  ⛔ DEAD SCOPE ENTRIES (match no commit, silently inert):%s\n' "$DEAD"
 
 # ── THE DRIFT ARM: the thing rev3 could not do. If commits have landed since MY
 #    last one, say HOW MANY and IN WHICH PATHS. A silent under-report is the failure
