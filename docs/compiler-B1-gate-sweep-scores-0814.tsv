@@ -3,6 +3,15 @@
 # Population: 289 pass-1 OTHER rows, swept IN LINE ORDER so the run is resumable.
 # verdict ∈ {IN, EXCLUDED-G1, EXCLUDED-G2, EXCLUDED-G3, MOVES-<class>}
 # contested ∈ {yes,no}.  A blank verdict = NOT YET ADJUDICATED.
+#
+# ⚖️ GOVERNING RULE, ADDED 16:0x AFTER ROW 13158 FORCED IT:
+#   THE GATE ASKS WHAT A ROW EXHIBITS AT THE TIME IT WAS WRITTEN, NOT WHETHER ITS
+#   AUTHOR TURNED OUT RIGHT. A row whose DIAGNOSIS was later refuted still exhibits
+#   the investigation and the defect it found; it is scored on the exhibit and the
+#   refutation is ANNOTATED in the basis.
+#   ⇒ Re-scoring on hindsight would make the gate a truth-oracle it was never
+#     ratified to be; ignoring the refutation would leave a known-false conclusion
+#     sitting unmarked in a record the sitting reads. The annotation does both jobs.
 line	verdict	contested	basis
 9	IN	yes	governance in FORM (G2) but EXHIBITS its own OOM incident with figures — 6-9 GB single elaborations, 64 GB + 8 GB swap exhausted by 5 seats x -j18. CONTESTED: turns on whether the incident is the row's exhibit or merely its motivation.
 80	IN	no	exhibits a MEASURED live phenomenon (pid 33882, 30.67 GB RSS, free RAM 0.29 GB) and refutes a credited mechanism: the build lock was credited with bounding memory, and a single wrapped elaboration takes the machine with the lock held. Reads to misattributed-mechanisms.
