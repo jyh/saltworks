@@ -76,3 +76,59 @@ IN rows resting on aversion / near-miss / prereg 25 of 239 (10%)
 and G1's named families (pre-registration, prevention machinery) wherever I praised them.**
 ⚠️ **The 8 codebook-named disagreements are corrected first and serve as the calibration set —
 if my re-run still disagrees with a named exemplar, the re-run is wrong, not the codebook.**
+
+---
+
+## 5 · RE-RUN COMPLETE — AND IT VERIFIES 16/16 AGAINST THE EXTERNAL KEY
+
+**76 rows re-adjudicated against the ratified text** (45 G2 on the second prong, 23 IN on
+R-A's act-performed condition, 8 codebook-named corrections).
+
+```
+                    RETRACTED TABLE      AFTER THE RE-RUN
+IN                        239                  230
+EXCLUDED-G2                46                   42
+EXCLUDED-G1                 4                   10
+EXCLUDED-G3                 0                    7     ← a family I had never used
+                          289                  289
+```
+
+### 5.1 · The calibration check I pre-registered, run
+
+> *"if my re-run still disagrees with a named exemplar, the re-run is wrong, not the codebook."*
+
+```
+codebook-named rows present in my sweep ..... 16
+  BEFORE the re-run ....  8 agree ·  8 disagree   (50%)
+  AFTER  the re-run .... 16 agree ·  0 disagree   (100%)
+```
+
+⚠️ **AND THE LAST DISAGREEMENT WAS MY EXTRACTOR, NOT MY VERDICT.** *My checker collapsed
+`OTHER` into `EXCLUDED`. But repair #1 is explicit — **"`EXCLUDED` is a gate, `OTHER` a
+residual"** — so a row reaching `OTHER` PASSED the gate. Under my own binding rule I was one
+command from "correcting" row 74305 from a right answer to a wrong one, on the authority of a
+regex I wrote.* ⇒ ***A PRE-REGISTERED RULE THAT SAYS "DEFER TO THE KEY" STILL REQUIRES READING
+THE KEY, NOT YOUR PARSE OF IT.***
+
+### 5.2 · What actually moved, and the two rules that moved it
+
+**G2's second prong** (*exhibits no instance of it being done wrong*) — 45 rows re-tested,
+**4 moved IN**: `32110` (a rebirth post reporting the predecessor's THREE ORPHANED WATCHES),
+`56733` (a duplicate roster assignment), and `64022`/`67641` (liveness posts naming their own
+cadence breach). *The other 41 hold — their fault-shaped content is another party's and
+relocates under §2.2(a), which is the reason I should have written the first time.*
+
+**R-A's act-performed condition** — 23 rows re-tested, **6 moved out**: `3453`, `31857`,
+`59985`, `64680` → **G3** (checks that ran and found the fault ABSENT); `41943`, `73683` →
+**G1** (pre-registrations, which G1 names explicitly); `5205` → **G2**.
+⭐ **And R-A keeps genuine beneficiaries — `43759`, where a peer's check falsified the author's
+draft: the act WAS performed and a peer's catch averted the harm.** *That is the line: a guard
+that prevented the HARM after the act rescues; a guard that prevented the ACT is G3.*
+
+### 5.3 · Two rows where I disagree with the helm, recorded rather than resolved
+
+`64022` and `67641` are held **IN** and marked contested. *Mine: a row asserting its own
+cadence breach exhibits a fault of its own subject matter (R-D, §1.5 REPAIR A, :372). Theirs
+(19:33, point 4): "a pre-announcement paying off" is not a fault, and gating it in admits a
+non-defect row to a defect ledger.* **The question is whether a breach whose cause was
+pre-announced is still a breach. It should settle as ONE question, not two.**
