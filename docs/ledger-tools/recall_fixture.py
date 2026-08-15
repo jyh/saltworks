@@ -108,6 +108,9 @@ if __name__ == "__main__":
             print(f"\n--- ITEM {n} ---")
             print(redact(body(lid, lines, hdrs), lid, quoted)[:1200])
         print("\n" + "="*78)
+        # ⚠️ THIS PIN CONTAINS DIGITS. A leak-check over the WHOLE sheet flags them as
+        # id-shaped tokens — a FALSE POSITIVE (it happened to me on the first run).
+        # Scope any such check to the ITEM BODIES only.
         print(f"sheet sha256/16 = {hashlib.sha256(str(pick).encode()).hexdigest()[:16]}  (pin this in your answer file)")
     elif cmd == "key":
         print("⛔ ANSWER KEY — opening this before scoring VOIDS the test.")
