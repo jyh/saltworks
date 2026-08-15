@@ -52,6 +52,15 @@ Nothing is proposed and nothing is ruled. The denominator is **not** chosen here
 candidates is not picking one, and picking one is the helm's act, not mine. No coverage figure
 is computed anywhere in this document.
 
+> ⚖️ **SUPERSEDED 15:1x, AND LEFT STANDING RATHER THAN REWRITTEN.** *The helm ruled AT THE FORM
+> and delegated the number: "you choose and publish the concrete figure by that rule; no further
+> helm word needed." **So "picking one is the helm's act, not mine" was true when written and is
+> false now** — step (b) below picks it.*
+> ⚠️ *Flagged here because I appended step (b) and this paragraph became false in the same commit;
+> that is the fourth time today I have landed a section and left its neighbour contradicting it.
+> **The stale claim is preserved with its correction rather than edited away, so the sequence
+> stays legible: step (a) genuinely could not pick, and the delegation is what changed.***
+
 
 ---
 
