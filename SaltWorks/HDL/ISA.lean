@@ -1059,7 +1059,34 @@ does and the claim must say so.*
 0.1976% / 99.80% — the pre-M2 figures — while `decode` (this file, 797-824) has
 accepted SEVEN since LW and SW landed, both arms commented `⬥ M2` above. Understated
 the decodable space by a factor of 1.988. Figures recomputed from the decoder's arms,
-not transcribed. **The 10 downstream sites quoting `0.1976` are NOT yet corrected.***
+not transcribed.
+
+⛔ **AND THE SENTENCE THAT STOOD HERE WAS ITSELF UNMEASURED — struck 12:2x.** *It read
+"The 10 downstream sites quoting `0.1976` are NOT yet corrected." **I never counted the
+10, and "not yet corrected" was false by then.** Walked repo-wide over `git ls-files`
+at 12:2x — not over any inherited list:*
+
+```
+ 2  corrected alongside  SaltWorks/HDL/ISA.lean          (this file)
+ 1  corrected alongside  docs/QUEUE.md
+ 4  corrected alongside  docs/memory-design-v1.md
+ 7  corrected alongside  docs/s0-r2-memory-census-0807.md
+ 3  STALE-ONLY           docs/EVIDENCE-campaign.md
+ 3  STALE-ONLY           docs/hdl-c4-composition-check-0807.md
+ 1  STALE-ONLY           docs/LEDGER.md          <- found ONLY by the walk
+21 occurrences · 7 files · 3 stale-only
+```
+⚠️ *The three stale-only files are a dated 08/07 check doc, another lane's campaign
+file, and a dated LEDGER entry. **Recorded, not rewritten** — correcting a dated record
+falsifies it.*
+
+📌 ***THE CITATION LIST THAT NAMED THIS FENCE'S DOWNSTREAM SITES WAS WRONG AT ITS SOURCE
+AND PROPAGATED FOR EIGHT DAYS.*** *`docs/LEDGER.md:825-829` (08/07) states "four documents
+carry the old number" and names `RegWrite.lean:35–36` and `riscv-core-campaign-v0.md §C4`.
+**Neither file has EVER contained the string** — `git log -S "0.1976" --all` returns no
+commit that added or removed it in either. That list was copied into
+`s0-r2-memory-census-0807.md:647` and then into my own QUEUE row, gaining apparent
+authority at every hop, and nobody re-derived it — including me, twice.*
 
 ⚠️ **Why not the alternatives, per the pricing in
 `docs/hdl-c4-composition-check-0807.md`:** a hypothesis restricting inputs to
