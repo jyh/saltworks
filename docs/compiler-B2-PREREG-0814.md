@@ -136,3 +136,42 @@ named by the codebook (key, spent) ........  21
 ⚠️ **AND THE COST OF THAT CHOICE, NAMED: a deterministic draw is checkable but not unpredictable,
 so it proves reproducibility rather than independence-from-me.** *I take that trade knowingly —
 the fleet has an executor-independence precedent for when the stronger property is needed.*
+
+---
+
+## 7 · THE DERIVATION CHECK, RUN — 21/21, AND LABELLED FOR WHAT IT IS
+
+**Question asked:** *applying the four-test ladder as written, do I REACH the codebook's ruling,
+and can I name the clause that gets me there?* ⚠️ **NOT** *"does my unaided judgement agree" —
+I read the key to build it (§6).*
+
+```
+9  EXCLUDED rows ..... gate verdicts already agree with B-1 (verified at the ruling column)
+12 classed rows ...... DERIVED INDEPENDENTLY FROM THE LADDER, all 12 reaching the ruling
+                                                                            21/21
+```
+
+**The twelve, with the clause that decides each:**
+
+| row | ruling | the test that fires, from the row's own text |
+|---|---|---|
+| **80** | `misattributed` | phenomenon = the machine being eaten; cause on record = the lock/wrapping bounds memory; the row's own words refute it — *"CORRECTLY WRAPPED … and it is still eating the machine"* |
+| **13739** | `type-traps` | a duplicate declaration *"Lean accepts silently and the corpus green does not flag"* — accepted form ≠ the claim taken |
+| **41762** | `type-traps` | `batcher8_sorts` is green but *sorts over an ARBITRARY order*; the claim taken is ReLU at the SIGNED order. Test 1 outranks the range reading |
+| **50576** | `stale-citations` | `QUEUE.md:359` still asserts 204 four hours after a three-hand measurement of 180 superseded it, and a live assembly reads that register |
+| **10552** | `stale-citations` | `reach_census.lean:67-68` hardcodes four modules as "the outside set"; every one has since moved INSIDE |
+| **55345** | `stale-citations` | an obligation still listed open in a standing artifact, after the theorem discharging it had landed in the file just certified |
+| **61600** | `wrong-scope` | a standing sentence names 13 WATCHERS; the row's own raw list shows the 13 are watchers plus wrappers — population wider than the one measured |
+| **75732** | `misattributed` | a missing denominator framed as a COVERAGE HOLE; the peer's measurement shows the glob is DOCTRINAL, so the named cause is not operative |
+| **71066** | `misattributed` | a null from a DIFFERENTLY-ARMED instrument credited as ruling out the cause of an event both readings agree happened |
+| **88119** | `type-traps` | `d0` declared `[1:0]` while the netlist relies on `d0[7]` — the written width says something narrower than the claim |
+| **38933** | `OTHER` | no test fires: a format/filter mismatch (13 header-shaped rows, 0 matching the anchor) is not an accepted-form trap, a mis-cause, a moved referent, or a scope overreach |
+| **42727** | `OTHER` | no test fires: two things sharing the name "the default" is a naming collision; the bank's own sentence remains TRUE, so nothing has moved or been mis-caused |
+
+⭐ **Two of the twelve reproduce the codebook's own worked reasoning almost word for word
+(41762's "test 1 outranks the range reading", 71066's "differently-armed instrument"), which is
+the strongest form this check can take: the ladder decides them the same way twice.**
+
+⚠️ **WHAT THIS DOES NOT SHOW:** *that I would have reached those twelve unaided. I knew the
+answers. **21/21 is a derivation result and will never be quoted as agreement.*** The blind set
+of §6.2 remains undrawn and is the only thing that can test the other question.
