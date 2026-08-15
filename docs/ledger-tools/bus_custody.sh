@@ -150,6 +150,15 @@ if [ "${1:-}" = "--selftest" ]; then
   FB=$(wc -c < "$T/abs_far.md" | tr -d ' '); FS=$(shasum -a 256 "$T/abs_far.md" | cut -c1-16)
   printf ', compiler — SEAT-STATE: compiler=LIT · ok, body receipt bytes=%s sha256/16=%s]' "$FB" "$FS" > "$T/abs_farok.txt"
   arm ":2h stamp in ANOTHER sentence"  12 "$T/abs_far.md" "$T/abs_farok.txt"
+  # The phrasings the FLEET actually used tonight, which the original list missed entirely.
+  printf 'a control body line.\nthe third orphan is unclaimed.\nthird line here.\n' > "$T/abs_v2.md"
+  VB=$(wc -c < "$T/abs_v2.md" | tr -d ' '); VS=$(shasum -a 256 "$T/abs_v2.md" | cut -c1-16)
+  printf ', compiler — SEAT-STATE: compiler=LIT · ok, body receipt bytes=%s sha256/16=%s]' "$VB" "$VS" > "$T/abs_v2ok.txt"
+  arm ":2h 'unclaimed' (evidence's word)" 12 "$T/abs_v2.md" "$T/abs_v2ok.txt"
+  printf 'a control body line.\nnothing unnamed as of 00:44 before this append.\nthird line.\n' > "$T/abs_v3.md"
+  WB=$(wc -c < "$T/abs_v3.md" | tr -d ' '); WS=$(shasum -a 256 "$T/abs_v3.md" | cut -c1-16)
+  printf ', compiler — SEAT-STATE: compiler=LIT · ok, body receipt bytes=%s sha256/16=%s]' "$WB" "$WS" > "$T/abs_v3ok.txt"
+  arm ":2h 'nothing unnamed' STAMPED"     0 "$T/abs_v3.md" "$T/abs_v3ok.txt"
   echo
   echo "  NOT DRIVABLE IN-PROCESS, declared rather than counted as passing:"
   echo "    :55 bus shorter than OFF+N  — needs the append itself to fail mid-write"
@@ -302,7 +311,16 @@ fi
 #   CO-LOCATED, never that it is TRUE. "no other occurrence as of now" passes, and so
 #   does a stamp that names the wrong time. It converts an unfalsifiable sentence into a
 #   falsifiable one; it does not verify it.
-ABS='no other occurrence|nowhere else on the bus|only occurrence|appears (only )?once on the bus|no other post|zero other occurrences|the sole occurrence'
+# ⛔ 2026-08-15 00:4x — THIS LIST IS CLOSED, AND A CLOSED LIST IS THE DEFECT IT GUARDS AGAINST.
+#   Tonight four seats each withdrew a completeness claim, and every instrument involved failed
+#   the same way: a closed set of names/paths/phrases presented as coverage. THIS ARM IS THE SAME
+#   SHAPE. evidence published "UNCLAIMED" and silicon "nothing unnamed" — both are absence claims
+#   and NEITHER would have tripped the original pattern. Extended below with the phrasings the
+#   fleet actually used, which raises the floor and does NOT close the class.
+#   ⇒ IT CANNOT ENUMERATE ALL WAYS TO ASSERT AN ABSENCE. A post that says "I found none" in a
+#     phrasing nobody used tonight sails through. Stated here so the next author does not read
+#     a green as coverage.
+ABS='no other occurrence|nowhere else on the bus|only occurrence|appears (only )?once on the bus|no other post|zero other occurrences|the sole occurrence|unclaimed|nothing unnamed|nothing unaccounted|no [a-z]+ orphan exists|none exist|found nothing|nothing else (exists|remains)'
 STAMP='as of|before this (append|post)|at composition|prior to this (append|post)|at the moment of|when composed|measured at [0-9][0-9]:[0-9][0-9]'
 ALLTXT=$(cat "$BODY" "$BRACKET" 2>/dev/null)
 # ⛔ TIGHTENED 23:2x, ONE POST AFTER 2h LANDED, AND THE HOLE WAS EXPLOITED BY MY OWN
