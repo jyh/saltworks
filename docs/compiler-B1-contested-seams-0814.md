@@ -266,9 +266,20 @@ six slips (72396). **A gate keyed on the byline could not produce those.***
 
 ### 5.3 · What the corpus is made of
 
-**31 of 239 IN rows are CONFESSION form** — 13% of everything admitted is a seat reporting its
+**31 of 229 IN rows are CONFESSION form** — 13.5% of everything admitted is a seat reporting its
 own defect, with the event relocated to the earlier act. *That is the single largest identifiable
 class in the corpus, and it is the class that only exists because seats indict themselves.*
+
+⛔ **DENOMINATOR CORRECTED 2026-08-15 15:3x: this line read "31 of 239" and the IN count is 229**
+(counted from `compiler-B1-gate-sweep-scores-0814.tsv`: IN 229 · G2 42 · G1 10 · G3 8 = 289).
+⚠️ ***THE ERROR SURVIVED BECAUSE THE DERIVED FIGURE CANNOT SEE IT: 31/229 = 13.5% and 31/239 =
+13.0%, and this line said "13%", which rounds correctly from BOTH.*** *A percentage is a lossy
+function of its operands, so quoting it beside them proves nothing — **the check that works is
+re-deriving the DENOMINATOR from the artifact, not re-reading the ratio.***
+📌 **THE NUMERATOR IS NOT RE-VERIFIED HERE.** *31 is the count as landed 08/14. Confession rows
+are NOT identifiable by grep — the basis prose carries no marker word, and a pattern I tried today
+missed `64022`, a confession row I had walked and confirmed by hand. Re-deriving 31 means reading
+rows, and I have not done it; the figure stands on its original pass.*
 
 ## 6 · B-2 IS NOW UNBLOCKED — AND INHERITS TWO STATED OBLIGATIONS
 
