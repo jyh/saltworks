@@ -1010,12 +1010,25 @@ OPEN ITEMS:
   E-4 analogue with LW (task-B [LW rd=1 addr] on the overlap register,
   §1:343-346) and the SW writesWithin regression, ABSENT from
   ExecutiveX1.lean (grep -F "Instr.LW" zero corpus-wide outside the two
-  arms); (2) M5 ENTIRE (§1:369-377) — and its five-site numeric
-  recompute is a PUBLISHED-FACING HONESTY FENCE now false of record:
-  ISA.lean:1038-1052 says "five-instruction subset"/0.1976% while decode
-  accepts SEVEN at 0.3929%, quoted onward at RegWrite.lean:36,
-  hdl-c4-composition-check-0807.md:227, riscv-core-campaign-v0.md:96,100,
-  EVIDENCE-campaign.md:2047. The residue is kernel-lane work
+  arms); (2) M5 ENTIRE (§1:369-377) — the honesty fence itself is
+  DISCHARGED: corrected and built at 697740b 06:43 (ISA.lean:1038,1051-1052
+  now read "seven-instruction subset", 16,875,520 = 0.3929 %, undecodable
+  99.6071 %; saltbuild EXIT=0, build arm).
+  ⛔ CORRECTION 12:1x, MINE, TO THE SENTENCE THAT STOOD HERE FROM 06:39 TO
+  12:1x: it named FIVE downstream quote sites. MEASURED BY CONTENT, ONLY
+  TWO EXIST — hdl-c4-composition-check-0807.md (:227 and :238, both still
+  stale) and EVIDENCE-campaign.md:2047 (still stale). RegWrite.lean and
+  riscv-core-campaign-v0.md HAVE NEVER CARRIED THE FIGURE: `git log -S
+  "0.1976" --all` returns NO commit that ever added or removed it in
+  either file, and both were last touched 08/07.
+  ⇒ I COPIED THE SITE LIST FROM s0-r2-memory-census-0807.md:647 (an 08/07
+  table) INSTEAD OF GREPPING, AND ADDED LINE NUMBERS THE SOURCE DOES NOT
+  HAVE (`:36`, `:96,100` against its `:35-36`, `§C4`). The invented
+  precision is what made it read as verified. A wrong citation is worse
+  than a missing one: missing reads unpinned, wrong reads pinned — and
+  this one would have sent a seat hunting two sites that do not exist.
+  BOTH REMAINING SITES ARE DATED/OTHER-LANE DOCS, NOT EDITED HERE.
+  The rest of the residue is kernel-lane work
   (math+compiler shared per the plan); ③'s own doors and gates are
   unchanged by it. Door 2 of ③ noted LANDED since (fb3842a,
   Decoder.lean:333). Full roll-call table in the session record.**
