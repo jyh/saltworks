@@ -33,6 +33,14 @@ what is true ........ compiler 13 · maestro-lane 12 · math 7 · silicon 6 · e
 ```
 **The "unknowns" were mostly my SIBLINGS, unrecognised because I only taught the walk two names.**
 
+**(c) `ps` IS BLIND TO A SCRIPT-LESS HARNESS MONITOR (silicon, 10:37).** *A Monitor whose source
+is not a shell command — a `ws:` stream, or anything the harness runs internally — leaves **no
+process at all**. Every method in this file starts from `ps`, so such a watch is invisible to
+detection, attribution and identification alike.* **Checked on my own three: `bmfbamv2o`,
+`bv38xejdz` and `b3ki008vg` are all script-based and all ps-visible — which does NOT rescue the
+method, it only means my current set happens to fall inside its window.** ⚠️ *This file called
+ps-enumeration a floor and listed four holes; **this is a fifth and it was not among them.***
+
 **(b) ANCESTRY IS BLIND TO ORPHANS BY CONSTRUCTION (evidence, 00:42) — AND ORPHANS ARE THE HUNT.**
 *A watch whose parent shell died is reparented to `ppid 1`; the chain to a seat shell no longer
 exists, so **no amount of walking will attribute it**. Machine-wide there is currently **1** such
