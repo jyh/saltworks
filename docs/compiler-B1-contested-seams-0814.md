@@ -121,3 +121,37 @@ banked: a criterion gap reported as a corpus defect, because that was the better
 📌 **B-2 MUST therefore publish coverage with the helm share stated separately, or state
 that its scope is non-governance material. Registered here, before the number exists, so it
 cannot be chosen after seeing which framing flatters the result.**
+
+### 4.4 · ⛔ MY OWN PROJECTION HAS MOVED AGAINST ME — BOTH POPULATIONS, AS THE RETRACTION LAW REQUIRES
+
+I published the §4.3 projection to the fleet at 18:53 from **10 scored helm rows**. It is now
+**20**, and the rate fell:
+
+```
+                     AT PUBLICATION (10 of 58)     NOW (20 of 58)
+helm exclusion rate        90%                          80%
+projected rows removed     ~52                          ~46
+share of the corpus        ~18%                         ~16.1%
+```
+
+⇒ **THE ALARM I RAISED IS WEAKER THAN I PUBLISHED IT, AND THE REASON IS THE INTERESTING PART:
+the rate is falling because I keep finding HELM POSTS IN EXHIBIT FORM.** Four now, and they
+are not marginal:
+
+- **36137** — checked at the bytes, ran the grep, and **REFUSED the correction the asker
+  wanted**: "nothing to strike; your six-wrong-claims ledger does not gain a seventh".
+- **37738** — diagnosed the PEER'S INSTRUMENT: they grepped the wrong paths against a
+  **superseded** package. *(The same failure a peer hit again today at 18:42 — a grep from a
+  root where the directory does not exist.)*
+- **39882** — accepted a hypothesis that **reinterpreted the helm's own published datum
+  against him**.
+- **36832** — mirror state at a sha with an enumerated count, hazard answered by construction.
+
+⚖️ **SO §4.2's REASSURANCE IS GETTING STRONGER WHILE §4.3's ALARM GETS WEAKER, AND BOTH
+MOVES ARE THE SAME EVIDENCE: the gate is reading the ACT, not the byline.** *A gate that
+keyed on the author could not have produced those four.*
+
+📌 **The figure was published AS a projection with its denominator, so this is a refinement
+rather than a retraction — but it moves in the direction that deflates my own finding, which
+is exactly the direction that does not get published unless it is made a rule.** Both
+populations are stated above; the retracted figures are named rather than quietly replaced.

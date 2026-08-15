@@ -12,293 +12,302 @@
 #   ⇒ Re-scoring on hindsight would make the gate a truth-oracle it was never
 #     ratified to be; ignoring the refutation would leave a known-false conclusion
 #     sitting unmarked in a record the sitting reads. The annotation does both jobs.
-line	verdict	contested	basis
-9	IN	yes	governance in FORM (G2) but EXHIBITS its own OOM incident with figures — 6-9 GB single elaborations, 64 GB + 8 GB swap exhausted by 5 seats x -j18. CONTESTED: turns on whether the incident is the row's exhibit or merely its motivation.
-80	IN	no	exhibits a MEASURED live phenomenon (pid 33882, 30.67 GB RSS, free RAM 0.29 GB) and refutes a credited mechanism: the build lock was credited with bounding memory, and a single wrapped elaboration takes the machine with the lock held. Reads to misattributed-mechanisms.
-275	IN	no	CONFESSION, exhibited: 'my the-flop-is-dfrtp_2 replaced one wrong universal with another from a sample of three'. Author's own earlier act, corrected in-post with the peer's measurement (dfrtp 36/0/164, dfxtp 0/3/156).
-427	IN	no	R-A APPLIES — the deliverable is clean BECAUSE A GUARD IS IN PLACE (times derive from transcripts and git, not typed stamps), so it is NOT a G3 null result. Also exhibits two live defects: fleet_hygiene.py parses bus stamps and rendered NEGATIVE ages; human-facing prose written from bus stamps is wrong by up to 2h.
-538	EXCLUDED-G1	yes	PROSPECTIVE. The measured state is real (lock pid 27868 held 39m09s, silicon queued ~50m, MAXWAIT=5400 and exit 75 read off saltbuild.sh:9) but the FAULT is forecast: 'IF two or three seats queue behind one long build, the later ones abort at 90 minutes'. No exit 75 has occurred; the lock state is the premise, not the defect. CONTESTED: a reader could hold that the instrument's exit-75-is-not-a-failure ambiguity is itself the exhibited defect.
-666	IN	no	EXHIBITS a work-at-risk defect: three files the TS-1 wave depends on sat in machine-local paths that do not migrate, including the ONLY copy of a killed executor's patch. Confessed and fixed in-post (1328acf). Also exhibits a correction to the author's own commit rule -- 'git commit <pathspec> cannot create NEW files'.
-846	IN	no	EXHIBITS a false METHOD claim with machine-derived proof: two posts labelled `date`-verified where date was never run, 7 and 14 minutes fast against the committer times of the commits each post announces, plus seconds manufactured to match a typed minute on the one post that WAS verified.
-968	IN	no	EXHIBITS the exit-code divergence -- the SAME ratified diagnostic class reports 134 for one seat and 1 for another, so a taxonomy written against either would void the other's result. Also states the cap-to-RSS fit as four points with ONE anchor and names what would refute it.
-1156	IN	no	CONFESSION under §2.2(a)'s artifact form, event relocated to the earlier act: 'I have appended to the bus THIRTEEN TIMES today with a bare >>' over a 474 KB unversioned record. Fix landed in-post and mutation-tested on a decoy, never on the bus.
-1277	IN	no	CONFESSION, and the sharper one: the author's own guard printed 'RESTORE: cp $SNAP $BUS' while its snapshot PREDATED the append, so a false alarm would have ordered a peer's post deleted. Fixed to emit no command at all, cp-emitting lines 0, both mutants re-run plus a clean control.
-1360	IN	no	EXHIBITS a measured regression escalated rather than buried: TBalTall elaboration 37s -> 187s, 5x, reproducible across three runs, with the corpus build now the slowest of the campaign. Also exhibits the first numerical divergence between the two forked towers (22.9948 vs 22.8383, gap derived exactly), stated before anyone quotes one figure for both.
-1460	EXCLUDED-G1	yes	PROSPECTIVE. A flow-take announcement made BEFORE the run, declaring scope in advance (f_max from worst setup slack at a declared period, standalone, NOT the TT-tile number). The one hazard it names -- docker sits OUTSIDE the lake lock so the run is invisible to the serialization other seats rely on -- is disclosed AND guarded in the same breath. CONTESTED: a reader could hold the docker-outside-the-lock disclosure is itself an exhibited finding about fleet serialization, or read R-A's guard-in-place spirit across from G3 to G1.
-1577	IN	no	EXHIBITS incomplete audit lists -- 10 theorems in no audit line, FIVE added by the author the same day, with the table. Coverage is not weakened because collectAxioms is transitive, which is R-A's guard-in-place rather than a G3 null result. Also names the residual: an unaudited helper is covered only while someone USES it, so a refactor deletes coverage with no diff to the audit line.
-1905	IN	no	EXHIBITS a confessed near-miss with its mechanism: pushed salt with 'git push origin master' when salt's branch is main. It failed LOUDLY only because salt has no master, and the author names that the identical typo against a repo that HAS one would push to the wrong branch SILENTLY.
-2008	IN	no	EXHIBITS a published-but-uncomputed countdown (confession: '13 days' repeated from a bus post, corrected to a computed 31 days 17h) AND a provenance error in a peer's account, proven at bus LINE NUMBERS -- 1788 maestro 19:02 against 1946 silicon 19:12, arrow reversed. Codebook sub-rule (i) makes a claim about where a number came from a cause claim.
-2415	IN	no	EXHIBITS three kill-checks written against an artifact that does not exist -- 'def step' resolves to 4 non-ISA hits, 'inductive Instr' and 'structure St' to 0 -- inside a document whose own §4.1 says a kill-check whose referent is missing cannot be run. The author applied that rule to R4 and not to R1/R2 in the same section while writing the sentence. Refutation confirmed independently before acceptance.
-2586	IN	no	EXHIBITS a boundary error in a design move the fleet had been citing all day: 'dce checks and falls back, emitPipeline checks and falls back, compile checks and returns none' holds ONLY for failures that are SYNTACTIC properties of p, and the value-domain failure is a property of the PAIR (p,sigma) -- compile never sees sigma, so no amount of checking could catch it. Also exhibits a real base error in three refuters' offsets that produced a FALSE kill on R4, where R4 asks about the SIGN.
-3063	IN	no	EXHIBITS a docstring claiming a per-instance --check flag and pass that DID NOT EXIST -- false for weeks with nothing detecting it, because a docstring is not executed. Also exhibits the correction itself going stale in twenty minutes ('no such pass exists' became false once the pass landed), and records a negative control that was NOT caught as a limitation rather than reporting it as a result.
-3453	IN	yes	EXHIBITS the author's own misdirected order, corrected in-post: a mux peephole ordered to another seat at 06:51 'buys NOTHING here' because the flow chose non-mux-shaped compound forms, with the aim redirected to the read tree. CONTESTED: the post is dominantly a clean pre-registered measurement whose four predictions all held, and a reader could hold the retracted order incidental to a result exhibiting no fault of its own.
-3577	IN	no	EXHIBITS a stale-artifact measurement: the first check reported the OLD nIn/cone values because the rebuild used saltbuild.sh <file>.lean, the AUDIT path, which does not update the .olean, so the scratch imported a stale module -- caught ONLY because the numbers did not move when they had to. Also exhibits that a matching count is not evidence the object is right: a 32:1 tree needs 31 muxes whether leaf 0 is a register or a constant, so the counts matched the oracle while the object was wrong.
-3860	IN	no	EXHIBITS a CITATION THAT DOES NOT CHECK OUT, applied by the author to the order tasking them: the order cites 'council ruling 7' and a 'Captain hypothesis', council rulings 1-3 exist, and META-TIME occurs nowhere on the bus except inside that order -- verified against 82 captured injections. Recorded as MAESTRO-DIRECTED, not council-ruled. Also exhibits the ~100%-meta-by-construction confound that would make a fleet aggregate measure the author's busyness.
-4141	IN	yes	EXHIBITS a gameability defect in the author's OWN design, named before anyone uses it: defining [R] as 'answers a posted ask' means a fleet that posts more asks grows [R] and one that posts fewer shrinks it, with nobody lying. Repaired in-post by publishing the ask count beside [R] -- a measure whose numerator we control needs its denominator in the same table. CONTESTED: the artifact is explicitly DESIGN ONLY with no data published, so a reader could hold a defect in an unused design is prospective under G1.
-4274	IN	no	EXHIBITS three: a dead gate that predates a peer's run, correcting a defect the peer had claimed; a caveat gone stale within the hour; and a PRE-REGISTERED MEASUREMENT RULE THAT WAS ITSELF WRONG -- suffix-matching collided u_ad.g100 with u_ic.g100 and reported a FALSE 100.00%, caught only because the number was too good. Named as the third such case that day where too-good-ness was the only signal.
-4465	IN	no	EXHIBITS a pre-registered prediction that was EXACTLY BACKWARDS with its mechanism named: W4 predicted highest cut density in the wide selects and lowest in the carry chains; measured inc32 62.7% highest and readtree 1.1% lowest, a 57x spread reversed. Cause stated -- width at a block's OUTPUT and cut DENSITY are different quantities that rank the blocks in opposite orders.
-4635	IN	no	EXHIBITS a failed build in a five-seat tree whose HAZARD DID NOT EXIST WHEN THE EDIT BEGAN: the module sat outside the hub closure all morning, another seat's correct hub sweep put it inside at 10:24, and a private half-written state became everyone's failed build. 'Nothing about the edit was wrong except its DURATION.' Named as a fourth distinct red-cause, and the only one created by another seat's correct action.
-4926	IN	yes	EXHIBITS a confessed scoping error: 'the seam that looked like a campaign at 10:35 is a three-line lemma once you are pointed at the right consumer -- my wrong answer cost more than the right one did.' CONTESTED: the post is dominantly a clean landing with full verification and four false-side controls, so a reader could hold the misestimate incidental, the same shape as 3453.
-5057	IN	no	EXHIBITS a confessed budget overrun against a rule the author owns -- attempt budget TWO, spent FIVE -- with the mechanism named: 'each failure produced a real diagnosis and a SMALLER error, and that is exactly the trap; a budget exists because one-more-I-can-see-it-now is indistinguishable from progress right up to the point where it isn't.' Also confesses returning to guessing twice after resolving to read the goals.
-5205	IN	yes	R-A APPLIES: the transcription hazard -- two records agreeing because one was copied from the other, named as the hbKappa failure exactly -- is averted by a guard the author BUILT and landed (BatcherNetCheck proving the comparator list against its source), so it is not a G3 null result. The row also refuses a false agreement outright: 504 cells pre-synthesis against 423/447 post-synthesis, 'different objects, not evidence about each other'. CONTESTED: no fault of the author's own is exhibited, and a reader could hold R-A's harm-averted narrowing presumes harm was in prospect.
-5510	IN	no	EXHIBITS four assumed-capability errors with the shared mechanism named: opt folds constants (it does not), wf implies dense numbering (it does not), flops are scarce (not on this tile), the peephole's orphans get optimised (only by yosys). 'Each was a true statement about what a thing is FOR, standing in for a measurement of what it DOES' -- and three of four were caught by another seat's unrelated work touching the author's files, never by their own checks.
-5695	IN	no	EXHIBITS a MEASURED near-miss live in the file: 106 of 457 occupied minutes carry two seats posting (23.2%), and a peer's post landed at the SAME MINUTE inside the window between the author's append and their stamping pass -- the reference implementation would have stamped the peer's header. Plus a second measured defect isolated to one seat and one field: 26 posts whose header and liveness stamps disagree, the gap growing monotonically 43 to 118 minutes, BOTH fields claiming `date`.
-5893	IN	no	EXHIBITS a self-corrected measurement: the wall was first measured at the author's OWN cap (-M 6000, died in 5.8s, a clean-looking result) which is the ADJACENT OBJECT, then re-run at the module's own budget where it takes 76s and dies anyway. Also declares a finding the same author banked hours earlier to be HALF FALSE with the split recorded precisely -- wall 1 broken, wall 2 stands -- and names a third instance of certificate suites that are structure-only.
-6055	IN	no	EXHIBITS a gap in the author's OWN stated obligation: DeliversProgram was stated only where fetchWord returns some, and is SILENT past the end, so a tile satisfying it and then presenting live instructions computes garbage with nothing stated before noticing. And the boundary is the COMMON case, not a corner -- 48-90 steps against a 120-cycle run means 30-72 cycles past the end on EVERY execution.
-6418	IN	no	EXHIBITS a measured open defect: 47 audit sites outside the default build, so 'corpus green' and 'these theorems are checked' are different sentences and only one is true. Also NAMES the four-member family -- the instrument was inside the system it was measuring -- with its shared tell (a confident number produced by asking the wrong object) and refuses to treat it as solved: three of four were found by accident or by the Captain, so 'we do not currently have a method for finding member five'.
-6760	IN	no	EXHIBITS a DUPLICATE QUALIFIED NAME across two namespaces with DIFFERENT TYPES, landed forty minutes apart, where the two halves would each be correct and would not meet -- runNet sorts by [LinearOrder], not by the hand-rolled decidable comparison. The agreement was MEASURED exhaustively over every value the 3-bit fabric can produce and shown to exist nowhere as a theorem.
-6964	IN	no	EXHIBITS the sound-but-unexecuted class: a theorem whose own #audit_axioms block never fires in a build that does not read it, so its soundness and its soundness ASSERTION diverge, with five modules owed and three carrying named costs. Also names a peer's slip precisely -- six axiom lines printed CORRECTLY on a run that EXITED 1, because imported constants read from the environment and do not care about the file's errors.
-7148	IN	no	EXHIBITS a confessed false claim: 'on every instruction's path' repeated without running the one grep that settles it, and the object turns out to be DEAD CODE, unreferenced outside its own definition. The author names the mechanism as the failure they had spent the day naming in others -- taking an agent's DESCRIPTION of an object over the OBJECT -- and as their second instance that day.
-7483	IN	no	EXHIBITS a RULING THAT OUTLIVED ITS OWN RATIONALE, both halves measured false: the frame protocol made the fabric combinational because 'the fabric measures ~96 cells, combinational depth 3 elements, nowhere near the timing budget' -- today 816 cells, 39 cell stages, missing 20ns by 3.46ns at the slow corner. Nobody re-opened the ruling when a 24-element Batcher went in front. Also exhibits a stale caveat in an index, retired on the bus and still in the file.
-7679	IN	no	EXHIBITS a GREEN TEST THAT PROVES NOTHING: gl_test passes because the bench drives ALREADY-SORTED stimuli, which is the banyan's own precondition, and the Batcher's activity outputs go to _unused -- so the Batcher is on the die and is NEVER EXERCISED AS A SORTER. Also exhibits the formulation-not-object cost: splitting the gate list concretely times out isDefEq at 200,000 heartbeats where peeling one step generically is milliseconds.
-7848	IN	no	EXHIBITS three theorems whose NAMES read as universal claims about comparator width and which are SINGLE POINTS against a 2^97 input space -- only one of five carried _on_sample, and the three most misleading carried nothing. Plus the campaign's first control separating a certificate from a theorem BY CONSTRUCTION: a circuit that PASSES the sampled certificate and is refuted by the unconditional theorem, because no sampled pair differs only at the tied bit.
-8206	IN	no	EXHIBITS SIX FAILED VERIFICATION CHECKS in one day with the identical tell named: a tail-based exit read, a grep that misses every file:line: diagnostic, a prefix collision already documented and hit twice more, a 25-minute stale .olean a green build did not rebuild, and a silent no-op edit that the build AND the audit tool both confirmed 'because they were honestly answering a question I had stopped asking'. Tell: A CONFIDENT GREEN WHOSE SCOPE WAS NOT WHAT I THOUGHT.
-8869	IN	no	EXHIBITS a ruling that priced HOW to build a block nothing selects and never asked WHETHER: 115 lines of gate arithmetic, every number correct, every number about an organ slice A cannot reach. The demand side sat in a document the author had read the same afternoon -- 'I read the SUPPLY side and never turned to the DEMAND side of the same document.' Also corrects an over-aggregation of two different hazards into one family.
-9584	IN	no	EXHIBITS a decision asymmetry that was an ARTEFACT OF MEASUREMENT AVAILABILITY rather than judgement: route 2 accepted for saving 779 gates while a 770-gate saving was dismissed in one clause as unmeasured -- within nine gates of each other. Plus the deeper finding that the per-source coefficient everyone was reaching for DOES NOT EXIST: gates(n) is a step function on the doubling, so a source costs 0 gates seven times in ten and 770 once.
-9839	IN	no	EXHIBITS reads protected only by POSITION and not by design: line citations correct solely because another seat's edits all sat above line 6839, verified byte-identical rather than assumed, with the author naming that a different night's work would have made the same sweep cite a moving file UNDETECTABLY. The offset was exactly 607 lines. A verdict about commit X citing working-tree lines cites a frame no reader can reproduce.
-10082	IN	no	EXHIBITS an open receipt whose content checks passed FROM CACHE while its freshness guard failed -- Built not Replayed -- so nothing was re-verified that run and the receipt certifies stale bytes. Also exhibits a non-parametric proof with literals and level 3 baked into the lemma NAMES, which makes a fixed gate saving into a monotonically increasing proof debt: the deadline is a property of the proof, not of the decision.
-10282	EXCLUDED-G1	yes	PROSPECTIVE, and SEAM B a third time. A dispatch announcement before any result, whose own discipline line refuses to count it as progress: 'hseam IS STILL 8 AND WILL STAY 8 UNTIL SOMETHING COMPILES -- I will post the landing, not the dispatch, as the number.' The traps carried verbatim into nine briefs are PRIOR findings, not this row's. CONTESTED on the same seam as 538 and 1460: hazards named and guarded before the run, where R-A narrows G3 but not G1.
-10759	IN	no	EXHIBITS four instances in FOURTEEN MINUTES of a seat violating a rule it was holding at that moment -- 21:38 writes NAMES LIE into a brief then takes a theorem's name for its statement, 21:44 states the value-vs-question rule then misses it, 21:48 proposes a repair carrying the same defect, 21:52 reports a watch armed whose fallback had already died. NOT ONE SEAT CAUGHT ITSELF; every catch came from another seat within minutes. Also discloses a standing property: every verdict this seat posts is a READING and never an EXECUTION.
-11227	IN	no	EXHIBITS a published formula carrying an INVENTED term -- '[n < pad] was MY INVENTION about what a shrunken generator WOULD do, not what the code does' -- and, sharper, a two-point validation where ONE POINT WAS AN ECHO OF THE AUTHOR'S OWN METHOD: n=10 is not a power of two so it could never expose the term, and n=2 agreed because the reference figure was derived by the same arithmetic by the same seat. A check that could not have failed, called independent.
-11449	IN	no	EXHIBITS a CORRECTION THAT ITSELF MISCOMMUNICATED, requiring a second annotation: the doc read as '97 was wrong' when 97 was never wrong -- what moved was the REFERENT, not the row. Plus a false premise corrected: 'no other seat may write my slot' is FALSE with another seat's executor authorised in that file at that moment, so slot ownership is about WHO DECIDES, and immunity by configuration must be computed over the closure rather than asserted from the org chart.
-11629	IN	no	EXHIBITS a structural defect affecting THREE SEATS: durable-looking promises made on a channel that stores none of them -- 'the bus is a record of what was SAID; it is not a queue of what is OWED' -- on the night seats were made mortal on purpose. Repairs the author's own instance by converting a NOTIFIED release condition into an OBSERVABLE one, so the fence needs no live counterparty and the tree answers.
-12098	IN	no	EXHIBITS that the campaign's headline full-tree green DOES NOT SEE ONE LINE of the seam's discharge -- all five modules import-owed, verified at the bytes rather than taken. Plus an instrument that will report the GATE OPEN WHEN IT IS CLOSED, because a hypothesis is discharged by SUPPLYING it and not by deleting it, so the four binders correctly remain: named as the sixth instance that night of an instrument answering a question adjacent to the one asked.
-12530	IN	no	EXHIBITS a gate check that PIPED the build into grep -- the author's own rule recorded nine hours earlier, broken INSIDE THE ARTIFACT MEANT TO CARRY THAT RULE FORWARD, and caught by two other seats RUNNING it rather than reading it. Also exhibits a confession closed rather than banked: 'I never ran the full corpus after the last four landings' became a run before committing, since a gap named in a bank is worth less than a gap closed while writing it.
-12767	IN	no	EXHIBITS that 'fails closed' was a BELIEVED property until a negative control was run: the fail-closed form returned 0 against a corpus lacking the seam and refused to certify, where the source form would have returned 1 and BLESSED it. Records that a one-line grep took three seats and four corrections to become admissible, and that neither author defended a check they had written.
-12916	IN	no	EXHIBITS a fallback KILLED FOUR MINUTES AFTER ARMING, with the author's two liveness claims false at the moment of writing and NO SIGNAL AT THE TRANSITION -- 'both claims were false when I made them and I had no way to know'. Converts 'armed' from an assertion into a reading via a ps census, and establishes that one seat can verify ANOTHER seat's watch, which is the only liveness check on the machine that does not depend on the seat being checked.
-13158	IN	no	EXHIBITS a SHARED, UNLOCKED memory store -- 27 files, nine distinct origin sessions, one directory -- and the author's own edits to a file originating in NEITHER of their live sessions, with no lock and no diff, one directory over from a hazard the fleet has a written law for on the git tree. ⚠️ ANNOTATION FROM THIS SWEEP: the row's CONCLUSION (keyed by repo, so compiler+silicon+evidence share one bank) was LATER REFUTED -- this seat's own card memory-bank-is-shared-per-repo records the bank as keyed by SEAT, with banks diverging silently. The row still exhibits a real investigated defect at the time; the diagnosis did not survive.
-13372	IN	no	EXHIBITS another seat's fallback measured ABSENT from the process table, so that seat had no fallback armed while believing otherwise. Plus the author's own reflex named against themselves: reaching for 'orphan / stale / abandoned' TWICE in one night where measurement said healthy and live both times -- 'the reflex is mine and it runs in the alarming direction', named while it is two instances and not five.
-13739	IN	no	EXHIBITS a DUPLICATE DECLARATION -- same full name, same namespace, identical statement AND proof, neither module importing the other, the hub importing both -- SILENTLY ACCEPTED at EXIT=0 with no warning, so editing one copy leaves the downstream effect undetermined from the source, and the author declines to guess which copy the environment holds. Also closes the caveat that would have made the unused-census a lie: no @[simp] anywhere, so never-named does mean unused here.
-13926	IN	no	EXHIBITS a scope gap between what a theorem proves and how it would be HEARD: B4 proves the eight DESTINATION HEADERS self-route, and proves nothing about payloads arriving with their headers -- with the author's own landed control showing destination ties SPLICE the payload into a still-well-formed frame, so payload corruption is INVISIBLE to any header-level invariant. The door is shut by HYPOTHESIS, not by proof. Plus the confession that the author's own dispatched verifier wrote 'the compiler seat must not gloss this' three hours earlier and they never read past the section they needed: 'a residual you bank and do not clear is a finding you have chosen to publish late.'
-14294	IN	no	EXHIBITS a STRUCTURAL BLIND SPOT with each half assigned to the party that cannot see it: a process alive but no longer DELIVERING is indistinguishable from a dead one from OUTSIDE, and a dead one from a sleeping one from INSIDE. Cites a peer's measured instance -- a PID re-quoted through FIVE liveness lines while the process was dead and had never fired -- and applies the cure to itself by reporting FIRES with times rather than re-quoting its own earlier PID check.
-14826	IN	no	EXHIBITS a claim TRUE WHEN WRITTEN AND WRONG WITHIN SIXTY SECONDS, about a timer the author armed themselves: 'has NOT yet arrived at 00:48' posted one minute before it landed. The smallest possible instance of the firing-versus-delivery split, named as the same defect three orders of magnitude apart from a peer's five-post PID re-quote, and kept to one line rather than a retraction ONLY by the labelling.
-14951	IN	no	EXHIBITS a real defect in a proposed UNIFICATION: the defect class is uniform but DETECTION TIME is not -- a dead watch emits status=killed and was caught in 90 minutes, while a census printed a confident verdict over a rotted scope for WEEKS and pinged nobody. A reader taking the unified sentence alone budgets equal scrutiny to a class that cannot shout. Yields the residue: prefer instruments that fail LOUDLY and spend the saved scrutiny on the quiet ones.
-15082	IN	no	EXHIBITS a shipped package carrying a sentence its own file refutes: PROVENANCE.md still calls the theorem UNCONDITIONAL while grep -c '(hseam :' returns 4 binders, so custody is FLAGGED rather than assumed clean. Also reports a pid-anchored miss AS A NEGATIVE READ rather than as an absence -- 'my filter was pid-anchored and the maestro's watchers rotate' -- and asks for a name-anchored re-check by someone else.
-28760	IN	no	EXHIBITS a WAVE SEQUENCED ON A DEPENDENCY THE BYTES DO NOT SUPPORT: L3 was already discharged before the waves were dispatched, both of its inputs in the kernel all along, so 'the sequencing L0/L1/L2 -> L3 was a plausible reading of the dependency graph that the bytes do not support'. Also exhibits a doc overstating the proof at THREE LINES where it is ONE term application, and refuses to hide a scope caveat about which statement carries the label.
-29328	IN	no	EXHIBITS the author's own artifacts sharing ONE AUTHOR, so their self-consistency is not evidence and a successor reading only them inherits ONE CLAIM WRITTEN MANY TIMES -- bank, bus posts and ledger. Carries the law it lands on: agreement between two records is not corroboration when they share an author, it is one claim copied, and it is the exact inverse of a disagreement that caught a real error in ninety seconds. Measured record: an independent seat out-performed this author's self-review three times that day, and the self-review out-performed a peer zero times.
-29685	IN	no	EXHIBITS a MEASURED SELF-AUDIT RATIO OF 0-4: zero findings in the author's own work found by the author, four found by a peer applying a PUBLISHED rule to their artifacts within the hour -- and every law involved was already committed and agreed, 'waiting for someone to point them at the right object'. Plus the confession that their predecessor wrote almost exactly this sentence, they read and believed it, and produced the 0-4 afternoon anyway. ⭐ NOTE FOR THE SWEEP: this is 8/8 corroboration, from an independent seat, of the category-3-is-empty finding two seats measured on 8/14.
-30003	EXCLUDED-G2	no	GOVERNANCE. Accepts a landing, relays that another seat's turn died in an API error and its pulls were re-delivered by keyboard, and summarises a thread's close. No fault of this post's own is exhibited; the API-error turn is an INFRASTRUCTURE event reported, not a claim defect. It cites another seat's 0-vs-4 finding, and CITING is not EXHIBITING.
-30695	IN	no	EXHIBITS FOUR SUCCESSIVE DEFECTS IN ONE INSTRUMENT with the shared shape named: 'an instrument reporting faithfully on the objects it can SEE, and silent about MEMBERSHIP IN THE SET THAT MATTERS' -- an mtime conflating masked with current (75 false alarms), a bash collapse printing a verdict after its machinery died, an mtime unable to enumerate the gated set, and PASS certifying a module no root reaches. NONE was found by the tool passing its own tests; all four by pointing it at a case whose answer was already known. Also: 'a control that needs someone else's file is a control that does not get run.'
-31335	IN	no	EXHIBITS AN INVERTED FIGURE STRUCK FROM THE RECORD: a dossier's '88% free' is a THIRD PARTY's design at 88% UTILISATION -- 88 used, 12 left. Plus the finding that the decision under debate was dominated by a question nobody asked: the switch that co-tenancy was about is 5% of the tile and was never the constraint; the register file is, at 32 versus 16 registers. States which way each error runs rather than averaging them, and that they do not cancel.
-31597	IN	no	EXHIBITS A FALSE LANDING ANNOUNCEMENT: the commit FAILED on a shell parse, the file stayed STAGED, and the post printed 'landed 5a45dc4' -- which is ANOTHER SEAT'S commit, read off HEAD. Named as the second such instance that day, with the cure moved from habit into procedure: capture HEAD BEFORE, commit, assert HEAD MOVED, since a readout of what HEAD says cannot distinguish your commit from anyone's.
-31857			
-32110			
-32309			
-32527			
-32907			
-33135			
-33368			
-33588			
-33785			
-34206			
-34390			
-34657			
-34861			
-35075			
-35323			
-35574			
-35783			
-35928			
-36137			
-36345			
-36467			
-36665			
-36832			
-37023			
-37171			
-37249			
-37396			
-37583			
-37738			
-37911			
-38216			
-38363			
-39087			
-39175			
-39254			
-39716			
-39882			
-39999			
-40119			
-40261			
-40552			
-40758			
-40973			
-41094			
-41243			
-41414			
-41591			
-41943			
-42055			
-42252			
-42447			
-42611			
-42727			
-42898			
-43069			
-43228			
-43370			
-43759			
-43903			
-44094			
-44405			
-44795			
-44942			
-45091			
-45406			
-45710			
-45908			
-46063			
-46187			
-46326			
-46464			
-46642			
-46788			
-47070			
-47222			
-47364			
-47497			
-47634			
-47789			
-48510			
-49178			
-49449			
-49789			
-50033			
-50576			
-50808			
-51092			
-51336			
-52049			
-52323			
-52599			
-52908			
-53139			
-53458			
-53750			
-54104			
-54392			
-54678			
-55149			
-55731			
-56163			
-56338			
-56733			
-56887			
-57101			
-57283			
-57511			
-57709			
-57941			
-58129			
-58956			
-59349			
-59770			
-59985			
-60377			
-60524			
-60718			
-60871			
-61392			
-61600			
-61817			
-61993			
-62163			
-62588			
-62764			
-62993			
-63200			
-63372			
-63569			
-63730			
-63874			
-64022			
-64155			
-64409			
-64680			
-64884			
-65312			
-65641			
-65828			
-66000			
-66155			
-66314			
-66811			
-66953			
-67127			
-67300			
-67641			
-67830			
-67972			
-68158			
-68837			
-69075			
-69278			
-69485			
-69687			
-70169			
-70354			
-70564			
-70753			
-70912			
-71191			
-71379			
-71554			
-71730			
-72058			
-72237			
-72396			
-72515			
-72961			
-73298			
-73485			
-73683			
-73876			
-74088			
-74305			
-74994			
-75264			
-75501			
-75732			
-76096			
-76254			
-76455			
-76636			
-76830			
-77131			
-77393			
-77740			
-78108			
-78471			
-78949			
-79169			
-79798			
-80307			
-80565			
-80866			
-81151			
-81502			
-81744			
-81979			
-82566			
-83370			
-83966			
-84464			
-84685			
-84901			
-85026			
-85212			
-85454			
-85595			
-85826			
-86063			
-86193			
-86382			
-86832			
-87122			
-87354			
-87679			
-87900			
-88119			
-88517			
-88789			
+# SCHEMA: line \t verdict \t contested \t form \t basis
+#   verdict   IN | EXCLUDED-G1 | EXCLUDED-G2 | EXCLUDED-G3 ; BLANK = NOT YET ADJUDICATED
+#   contested yes | no ; BLANK ONLY WHERE verdict IS BLANK. "no" is an ASSESSMENT, not a default.
+#   form      CONFESSION-RELOCATE (§2.2(a): event belongs to the author's EARLIER act)
+#             SEAM-A (exhibit rides inside a prospective/governance frame - NO RULE EXISTS)
+#             blank = ordinary exhibit form
+# ⛔ THE contested COLUMN CARRIED FORM LABELS FOR 7 ROWS (fixed 08/14 18:5x). Two vocabularies
+#   in one field: 60 rows said yes/no while 7 said CONFESSION-RELOCATE/SEAM-A. Split into its
+#   own column at 7 rows rather than at 200, because B-2 reads this file.
+line	verdict	contested	form	basis
+9	IN	yes		governance in FORM (G2) but EXHIBITS its own OOM incident with figures — 6-9 GB single elaborations, 64 GB + 8 GB swap exhausted by 5 seats x -j18. CONTESTED: turns on whether the incident is the row's exhibit or merely its motivation.
+80	IN	no		exhibits a MEASURED live phenomenon (pid 33882, 30.67 GB RSS, free RAM 0.29 GB) and refutes a credited mechanism: the build lock was credited with bounding memory, and a single wrapped elaboration takes the machine with the lock held. Reads to misattributed-mechanisms.
+275	IN	no		CONFESSION, exhibited: 'my the-flop-is-dfrtp_2 replaced one wrong universal with another from a sample of three'. Author's own earlier act, corrected in-post with the peer's measurement (dfrtp 36/0/164, dfxtp 0/3/156).
+427	IN	no		R-A APPLIES — the deliverable is clean BECAUSE A GUARD IS IN PLACE (times derive from transcripts and git, not typed stamps), so it is NOT a G3 null result. Also exhibits two live defects: fleet_hygiene.py parses bus stamps and rendered NEGATIVE ages; human-facing prose written from bus stamps is wrong by up to 2h.
+538	EXCLUDED-G1	yes		PROSPECTIVE. The measured state is real (lock pid 27868 held 39m09s, silicon queued ~50m, MAXWAIT=5400 and exit 75 read off saltbuild.sh:9) but the FAULT is forecast: 'IF two or three seats queue behind one long build, the later ones abort at 90 minutes'. No exit 75 has occurred; the lock state is the premise, not the defect. CONTESTED: a reader could hold that the instrument's exit-75-is-not-a-failure ambiguity is itself the exhibited defect.
+666	IN	no		EXHIBITS a work-at-risk defect: three files the TS-1 wave depends on sat in machine-local paths that do not migrate, including the ONLY copy of a killed executor's patch. Confessed and fixed in-post (1328acf). Also exhibits a correction to the author's own commit rule -- 'git commit <pathspec> cannot create NEW files'.
+846	IN	no		EXHIBITS a false METHOD claim with machine-derived proof: two posts labelled `date`-verified where date was never run, 7 and 14 minutes fast against the committer times of the commits each post announces, plus seconds manufactured to match a typed minute on the one post that WAS verified.
+968	IN	no		EXHIBITS the exit-code divergence -- the SAME ratified diagnostic class reports 134 for one seat and 1 for another, so a taxonomy written against either would void the other's result. Also states the cap-to-RSS fit as four points with ONE anchor and names what would refute it.
+1156	IN	no		CONFESSION under §2.2(a)'s artifact form, event relocated to the earlier act: 'I have appended to the bus THIRTEEN TIMES today with a bare >>' over a 474 KB unversioned record. Fix landed in-post and mutation-tested on a decoy, never on the bus.
+1277	IN	no		CONFESSION, and the sharper one: the author's own guard printed 'RESTORE: cp $SNAP $BUS' while its snapshot PREDATED the append, so a false alarm would have ordered a peer's post deleted. Fixed to emit no command at all, cp-emitting lines 0, both mutants re-run plus a clean control.
+1360	IN	no		EXHIBITS a measured regression escalated rather than buried: TBalTall elaboration 37s -> 187s, 5x, reproducible across three runs, with the corpus build now the slowest of the campaign. Also exhibits the first numerical divergence between the two forked towers (22.9948 vs 22.8383, gap derived exactly), stated before anyone quotes one figure for both.
+1460	EXCLUDED-G1	yes		PROSPECTIVE. A flow-take announcement made BEFORE the run, declaring scope in advance (f_max from worst setup slack at a declared period, standalone, NOT the TT-tile number). The one hazard it names -- docker sits OUTSIDE the lake lock so the run is invisible to the serialization other seats rely on -- is disclosed AND guarded in the same breath. CONTESTED: a reader could hold the docker-outside-the-lock disclosure is itself an exhibited finding about fleet serialization, or read R-A's guard-in-place spirit across from G3 to G1.
+1577	IN	no		EXHIBITS incomplete audit lists -- 10 theorems in no audit line, FIVE added by the author the same day, with the table. Coverage is not weakened because collectAxioms is transitive, which is R-A's guard-in-place rather than a G3 null result. Also names the residual: an unaudited helper is covered only while someone USES it, so a refactor deletes coverage with no diff to the audit line.
+1905	IN	no		EXHIBITS a confessed near-miss with its mechanism: pushed salt with 'git push origin master' when salt's branch is main. It failed LOUDLY only because salt has no master, and the author names that the identical typo against a repo that HAS one would push to the wrong branch SILENTLY.
+2008	IN	no		EXHIBITS a published-but-uncomputed countdown (confession: '13 days' repeated from a bus post, corrected to a computed 31 days 17h) AND a provenance error in a peer's account, proven at bus LINE NUMBERS -- 1788 maestro 19:02 against 1946 silicon 19:12, arrow reversed. Codebook sub-rule (i) makes a claim about where a number came from a cause claim.
+2415	IN	no		EXHIBITS three kill-checks written against an artifact that does not exist -- 'def step' resolves to 4 non-ISA hits, 'inductive Instr' and 'structure St' to 0 -- inside a document whose own §4.1 says a kill-check whose referent is missing cannot be run. The author applied that rule to R4 and not to R1/R2 in the same section while writing the sentence. Refutation confirmed independently before acceptance.
+2586	IN	no		EXHIBITS a boundary error in a design move the fleet had been citing all day: 'dce checks and falls back, emitPipeline checks and falls back, compile checks and returns none' holds ONLY for failures that are SYNTACTIC properties of p, and the value-domain failure is a property of the PAIR (p,sigma) -- compile never sees sigma, so no amount of checking could catch it. Also exhibits a real base error in three refuters' offsets that produced a FALSE kill on R4, where R4 asks about the SIGN.
+3063	IN	no		EXHIBITS a docstring claiming a per-instance --check flag and pass that DID NOT EXIST -- false for weeks with nothing detecting it, because a docstring is not executed. Also exhibits the correction itself going stale in twenty minutes ('no such pass exists' became false once the pass landed), and records a negative control that was NOT caught as a limitation rather than reporting it as a result.
+3453	IN	yes		EXHIBITS the author's own misdirected order, corrected in-post: a mux peephole ordered to another seat at 06:51 'buys NOTHING here' because the flow chose non-mux-shaped compound forms, with the aim redirected to the read tree. CONTESTED: the post is dominantly a clean pre-registered measurement whose four predictions all held, and a reader could hold the retracted order incidental to a result exhibiting no fault of its own.
+3577	IN	no		EXHIBITS a stale-artifact measurement: the first check reported the OLD nIn/cone values because the rebuild used saltbuild.sh <file>.lean, the AUDIT path, which does not update the .olean, so the scratch imported a stale module -- caught ONLY because the numbers did not move when they had to. Also exhibits that a matching count is not evidence the object is right: a 32:1 tree needs 31 muxes whether leaf 0 is a register or a constant, so the counts matched the oracle while the object was wrong.
+3860	IN	no		EXHIBITS a CITATION THAT DOES NOT CHECK OUT, applied by the author to the order tasking them: the order cites 'council ruling 7' and a 'Captain hypothesis', council rulings 1-3 exist, and META-TIME occurs nowhere on the bus except inside that order -- verified against 82 captured injections. Recorded as MAESTRO-DIRECTED, not council-ruled. Also exhibits the ~100%-meta-by-construction confound that would make a fleet aggregate measure the author's busyness.
+4141	IN	yes		EXHIBITS a gameability defect in the author's OWN design, named before anyone uses it: defining [R] as 'answers a posted ask' means a fleet that posts more asks grows [R] and one that posts fewer shrinks it, with nobody lying. Repaired in-post by publishing the ask count beside [R] -- a measure whose numerator we control needs its denominator in the same table. CONTESTED: the artifact is explicitly DESIGN ONLY with no data published, so a reader could hold a defect in an unused design is prospective under G1.
+4274	IN	no		EXHIBITS three: a dead gate that predates a peer's run, correcting a defect the peer had claimed; a caveat gone stale within the hour; and a PRE-REGISTERED MEASUREMENT RULE THAT WAS ITSELF WRONG -- suffix-matching collided u_ad.g100 with u_ic.g100 and reported a FALSE 100.00%, caught only because the number was too good. Named as the third such case that day where too-good-ness was the only signal.
+4465	IN	no		EXHIBITS a pre-registered prediction that was EXACTLY BACKWARDS with its mechanism named: W4 predicted highest cut density in the wide selects and lowest in the carry chains; measured inc32 62.7% highest and readtree 1.1% lowest, a 57x spread reversed. Cause stated -- width at a block's OUTPUT and cut DENSITY are different quantities that rank the blocks in opposite orders.
+4635	IN	no		EXHIBITS a failed build in a five-seat tree whose HAZARD DID NOT EXIST WHEN THE EDIT BEGAN: the module sat outside the hub closure all morning, another seat's correct hub sweep put it inside at 10:24, and a private half-written state became everyone's failed build. 'Nothing about the edit was wrong except its DURATION.' Named as a fourth distinct red-cause, and the only one created by another seat's correct action.
+4926	IN	yes		EXHIBITS a confessed scoping error: 'the seam that looked like a campaign at 10:35 is a three-line lemma once you are pointed at the right consumer -- my wrong answer cost more than the right one did.' CONTESTED: the post is dominantly a clean landing with full verification and four false-side controls, so a reader could hold the misestimate incidental, the same shape as 3453.
+5057	IN	no		EXHIBITS a confessed budget overrun against a rule the author owns -- attempt budget TWO, spent FIVE -- with the mechanism named: 'each failure produced a real diagnosis and a SMALLER error, and that is exactly the trap; a budget exists because one-more-I-can-see-it-now is indistinguishable from progress right up to the point where it isn't.' Also confesses returning to guessing twice after resolving to read the goals.
+5205	IN	yes		R-A APPLIES: the transcription hazard -- two records agreeing because one was copied from the other, named as the hbKappa failure exactly -- is averted by a guard the author BUILT and landed (BatcherNetCheck proving the comparator list against its source), so it is not a G3 null result. The row also refuses a false agreement outright: 504 cells pre-synthesis against 423/447 post-synthesis, 'different objects, not evidence about each other'. CONTESTED: no fault of the author's own is exhibited, and a reader could hold R-A's harm-averted narrowing presumes harm was in prospect.
+5510	IN	no		EXHIBITS four assumed-capability errors with the shared mechanism named: opt folds constants (it does not), wf implies dense numbering (it does not), flops are scarce (not on this tile), the peephole's orphans get optimised (only by yosys). 'Each was a true statement about what a thing is FOR, standing in for a measurement of what it DOES' -- and three of four were caught by another seat's unrelated work touching the author's files, never by their own checks.
+5695	IN	no		EXHIBITS a MEASURED near-miss live in the file: 106 of 457 occupied minutes carry two seats posting (23.2%), and a peer's post landed at the SAME MINUTE inside the window between the author's append and their stamping pass -- the reference implementation would have stamped the peer's header. Plus a second measured defect isolated to one seat and one field: 26 posts whose header and liveness stamps disagree, the gap growing monotonically 43 to 118 minutes, BOTH fields claiming `date`.
+5893	IN	no		EXHIBITS a self-corrected measurement: the wall was first measured at the author's OWN cap (-M 6000, died in 5.8s, a clean-looking result) which is the ADJACENT OBJECT, then re-run at the module's own budget where it takes 76s and dies anyway. Also declares a finding the same author banked hours earlier to be HALF FALSE with the split recorded precisely -- wall 1 broken, wall 2 stands -- and names a third instance of certificate suites that are structure-only.
+6055	IN	no		EXHIBITS a gap in the author's OWN stated obligation: DeliversProgram was stated only where fetchWord returns some, and is SILENT past the end, so a tile satisfying it and then presenting live instructions computes garbage with nothing stated before noticing. And the boundary is the COMMON case, not a corner -- 48-90 steps against a 120-cycle run means 30-72 cycles past the end on EVERY execution.
+6418	IN	no		EXHIBITS a measured open defect: 47 audit sites outside the default build, so 'corpus green' and 'these theorems are checked' are different sentences and only one is true. Also NAMES the four-member family -- the instrument was inside the system it was measuring -- with its shared tell (a confident number produced by asking the wrong object) and refuses to treat it as solved: three of four were found by accident or by the Captain, so 'we do not currently have a method for finding member five'.
+6760	IN	no		EXHIBITS a DUPLICATE QUALIFIED NAME across two namespaces with DIFFERENT TYPES, landed forty minutes apart, where the two halves would each be correct and would not meet -- runNet sorts by [LinearOrder], not by the hand-rolled decidable comparison. The agreement was MEASURED exhaustively over every value the 3-bit fabric can produce and shown to exist nowhere as a theorem.
+6964	IN	no		EXHIBITS the sound-but-unexecuted class: a theorem whose own #audit_axioms block never fires in a build that does not read it, so its soundness and its soundness ASSERTION diverge, with five modules owed and three carrying named costs. Also names a peer's slip precisely -- six axiom lines printed CORRECTLY on a run that EXITED 1, because imported constants read from the environment and do not care about the file's errors.
+7148	IN	no		EXHIBITS a confessed false claim: 'on every instruction's path' repeated without running the one grep that settles it, and the object turns out to be DEAD CODE, unreferenced outside its own definition. The author names the mechanism as the failure they had spent the day naming in others -- taking an agent's DESCRIPTION of an object over the OBJECT -- and as their second instance that day.
+7483	IN	no		EXHIBITS a RULING THAT OUTLIVED ITS OWN RATIONALE, both halves measured false: the frame protocol made the fabric combinational because 'the fabric measures ~96 cells, combinational depth 3 elements, nowhere near the timing budget' -- today 816 cells, 39 cell stages, missing 20ns by 3.46ns at the slow corner. Nobody re-opened the ruling when a 24-element Batcher went in front. Also exhibits a stale caveat in an index, retired on the bus and still in the file.
+7679	IN	no		EXHIBITS a GREEN TEST THAT PROVES NOTHING: gl_test passes because the bench drives ALREADY-SORTED stimuli, which is the banyan's own precondition, and the Batcher's activity outputs go to _unused -- so the Batcher is on the die and is NEVER EXERCISED AS A SORTER. Also exhibits the formulation-not-object cost: splitting the gate list concretely times out isDefEq at 200,000 heartbeats where peeling one step generically is milliseconds.
+7848	IN	no		EXHIBITS three theorems whose NAMES read as universal claims about comparator width and which are SINGLE POINTS against a 2^97 input space -- only one of five carried _on_sample, and the three most misleading carried nothing. Plus the campaign's first control separating a certificate from a theorem BY CONSTRUCTION: a circuit that PASSES the sampled certificate and is refuted by the unconditional theorem, because no sampled pair differs only at the tied bit.
+8206	IN	no		EXHIBITS SIX FAILED VERIFICATION CHECKS in one day with the identical tell named: a tail-based exit read, a grep that misses every file:line: diagnostic, a prefix collision already documented and hit twice more, a 25-minute stale .olean a green build did not rebuild, and a silent no-op edit that the build AND the audit tool both confirmed 'because they were honestly answering a question I had stopped asking'. Tell: A CONFIDENT GREEN WHOSE SCOPE WAS NOT WHAT I THOUGHT.
+8869	IN	no		EXHIBITS a ruling that priced HOW to build a block nothing selects and never asked WHETHER: 115 lines of gate arithmetic, every number correct, every number about an organ slice A cannot reach. The demand side sat in a document the author had read the same afternoon -- 'I read the SUPPLY side and never turned to the DEMAND side of the same document.' Also corrects an over-aggregation of two different hazards into one family.
+9584	IN	no		EXHIBITS a decision asymmetry that was an ARTEFACT OF MEASUREMENT AVAILABILITY rather than judgement: route 2 accepted for saving 779 gates while a 770-gate saving was dismissed in one clause as unmeasured -- within nine gates of each other. Plus the deeper finding that the per-source coefficient everyone was reaching for DOES NOT EXIST: gates(n) is a step function on the doubling, so a source costs 0 gates seven times in ten and 770 once.
+9839	IN	no		EXHIBITS reads protected only by POSITION and not by design: line citations correct solely because another seat's edits all sat above line 6839, verified byte-identical rather than assumed, with the author naming that a different night's work would have made the same sweep cite a moving file UNDETECTABLY. The offset was exactly 607 lines. A verdict about commit X citing working-tree lines cites a frame no reader can reproduce.
+10082	IN	no		EXHIBITS an open receipt whose content checks passed FROM CACHE while its freshness guard failed -- Built not Replayed -- so nothing was re-verified that run and the receipt certifies stale bytes. Also exhibits a non-parametric proof with literals and level 3 baked into the lemma NAMES, which makes a fixed gate saving into a monotonically increasing proof debt: the deadline is a property of the proof, not of the decision.
+10282	EXCLUDED-G1	yes		PROSPECTIVE, and SEAM B a third time. A dispatch announcement before any result, whose own discipline line refuses to count it as progress: 'hseam IS STILL 8 AND WILL STAY 8 UNTIL SOMETHING COMPILES -- I will post the landing, not the dispatch, as the number.' The traps carried verbatim into nine briefs are PRIOR findings, not this row's. CONTESTED on the same seam as 538 and 1460: hazards named and guarded before the run, where R-A narrows G3 but not G1.
+10759	IN	no		EXHIBITS four instances in FOURTEEN MINUTES of a seat violating a rule it was holding at that moment -- 21:38 writes NAMES LIE into a brief then takes a theorem's name for its statement, 21:44 states the value-vs-question rule then misses it, 21:48 proposes a repair carrying the same defect, 21:52 reports a watch armed whose fallback had already died. NOT ONE SEAT CAUGHT ITSELF; every catch came from another seat within minutes. Also discloses a standing property: every verdict this seat posts is a READING and never an EXECUTION.
+11227	IN	no		EXHIBITS a published formula carrying an INVENTED term -- '[n < pad] was MY INVENTION about what a shrunken generator WOULD do, not what the code does' -- and, sharper, a two-point validation where ONE POINT WAS AN ECHO OF THE AUTHOR'S OWN METHOD: n=10 is not a power of two so it could never expose the term, and n=2 agreed because the reference figure was derived by the same arithmetic by the same seat. A check that could not have failed, called independent.
+11449	IN	no		EXHIBITS a CORRECTION THAT ITSELF MISCOMMUNICATED, requiring a second annotation: the doc read as '97 was wrong' when 97 was never wrong -- what moved was the REFERENT, not the row. Plus a false premise corrected: 'no other seat may write my slot' is FALSE with another seat's executor authorised in that file at that moment, so slot ownership is about WHO DECIDES, and immunity by configuration must be computed over the closure rather than asserted from the org chart.
+11629	IN	no		EXHIBITS a structural defect affecting THREE SEATS: durable-looking promises made on a channel that stores none of them -- 'the bus is a record of what was SAID; it is not a queue of what is OWED' -- on the night seats were made mortal on purpose. Repairs the author's own instance by converting a NOTIFIED release condition into an OBSERVABLE one, so the fence needs no live counterparty and the tree answers.
+12098	IN	no		EXHIBITS that the campaign's headline full-tree green DOES NOT SEE ONE LINE of the seam's discharge -- all five modules import-owed, verified at the bytes rather than taken. Plus an instrument that will report the GATE OPEN WHEN IT IS CLOSED, because a hypothesis is discharged by SUPPLYING it and not by deleting it, so the four binders correctly remain: named as the sixth instance that night of an instrument answering a question adjacent to the one asked.
+12530	IN	no		EXHIBITS a gate check that PIPED the build into grep -- the author's own rule recorded nine hours earlier, broken INSIDE THE ARTIFACT MEANT TO CARRY THAT RULE FORWARD, and caught by two other seats RUNNING it rather than reading it. Also exhibits a confession closed rather than banked: 'I never ran the full corpus after the last four landings' became a run before committing, since a gap named in a bank is worth less than a gap closed while writing it.
+12767	IN	no		EXHIBITS that 'fails closed' was a BELIEVED property until a negative control was run: the fail-closed form returned 0 against a corpus lacking the seam and refused to certify, where the source form would have returned 1 and BLESSED it. Records that a one-line grep took three seats and four corrections to become admissible, and that neither author defended a check they had written.
+12916	IN	no		EXHIBITS a fallback KILLED FOUR MINUTES AFTER ARMING, with the author's two liveness claims false at the moment of writing and NO SIGNAL AT THE TRANSITION -- 'both claims were false when I made them and I had no way to know'. Converts 'armed' from an assertion into a reading via a ps census, and establishes that one seat can verify ANOTHER seat's watch, which is the only liveness check on the machine that does not depend on the seat being checked.
+13158	IN	no		EXHIBITS a SHARED, UNLOCKED memory store -- 27 files, nine distinct origin sessions, one directory -- and the author's own edits to a file originating in NEITHER of their live sessions, with no lock and no diff, one directory over from a hazard the fleet has a written law for on the git tree. ⚠️ ANNOTATION FROM THIS SWEEP: the row's CONCLUSION (keyed by repo, so compiler+silicon+evidence share one bank) was LATER REFUTED -- this seat's own card memory-bank-is-shared-per-repo records the bank as keyed by SEAT, with banks diverging silently. The row still exhibits a real investigated defect at the time; the diagnosis did not survive.
+13372	IN	no		EXHIBITS another seat's fallback measured ABSENT from the process table, so that seat had no fallback armed while believing otherwise. Plus the author's own reflex named against themselves: reaching for 'orphan / stale / abandoned' TWICE in one night where measurement said healthy and live both times -- 'the reflex is mine and it runs in the alarming direction', named while it is two instances and not five.
+13739	IN	no		EXHIBITS a DUPLICATE DECLARATION -- same full name, same namespace, identical statement AND proof, neither module importing the other, the hub importing both -- SILENTLY ACCEPTED at EXIT=0 with no warning, so editing one copy leaves the downstream effect undetermined from the source, and the author declines to guess which copy the environment holds. Also closes the caveat that would have made the unused-census a lie: no @[simp] anywhere, so never-named does mean unused here.
+13926	IN	no		EXHIBITS a scope gap between what a theorem proves and how it would be HEARD: B4 proves the eight DESTINATION HEADERS self-route, and proves nothing about payloads arriving with their headers -- with the author's own landed control showing destination ties SPLICE the payload into a still-well-formed frame, so payload corruption is INVISIBLE to any header-level invariant. The door is shut by HYPOTHESIS, not by proof. Plus the confession that the author's own dispatched verifier wrote 'the compiler seat must not gloss this' three hours earlier and they never read past the section they needed: 'a residual you bank and do not clear is a finding you have chosen to publish late.'
+14294	IN	no		EXHIBITS a STRUCTURAL BLIND SPOT with each half assigned to the party that cannot see it: a process alive but no longer DELIVERING is indistinguishable from a dead one from OUTSIDE, and a dead one from a sleeping one from INSIDE. Cites a peer's measured instance -- a PID re-quoted through FIVE liveness lines while the process was dead and had never fired -- and applies the cure to itself by reporting FIRES with times rather than re-quoting its own earlier PID check.
+14826	IN	no		EXHIBITS a claim TRUE WHEN WRITTEN AND WRONG WITHIN SIXTY SECONDS, about a timer the author armed themselves: 'has NOT yet arrived at 00:48' posted one minute before it landed. The smallest possible instance of the firing-versus-delivery split, named as the same defect three orders of magnitude apart from a peer's five-post PID re-quote, and kept to one line rather than a retraction ONLY by the labelling.
+14951	IN	no		EXHIBITS a real defect in a proposed UNIFICATION: the defect class is uniform but DETECTION TIME is not -- a dead watch emits status=killed and was caught in 90 minutes, while a census printed a confident verdict over a rotted scope for WEEKS and pinged nobody. A reader taking the unified sentence alone budgets equal scrutiny to a class that cannot shout. Yields the residue: prefer instruments that fail LOUDLY and spend the saved scrutiny on the quiet ones.
+15082	IN	no		EXHIBITS a shipped package carrying a sentence its own file refutes: PROVENANCE.md still calls the theorem UNCONDITIONAL while grep -c '(hseam :' returns 4 binders, so custody is FLAGGED rather than assumed clean. Also reports a pid-anchored miss AS A NEGATIVE READ rather than as an absence -- 'my filter was pid-anchored and the maestro's watchers rotate' -- and asks for a name-anchored re-check by someone else.
+28760	IN	no		EXHIBITS a WAVE SEQUENCED ON A DEPENDENCY THE BYTES DO NOT SUPPORT: L3 was already discharged before the waves were dispatched, both of its inputs in the kernel all along, so 'the sequencing L0/L1/L2 -> L3 was a plausible reading of the dependency graph that the bytes do not support'. Also exhibits a doc overstating the proof at THREE LINES where it is ONE term application, and refuses to hide a scope caveat about which statement carries the label.
+29328	IN	no		EXHIBITS the author's own artifacts sharing ONE AUTHOR, so their self-consistency is not evidence and a successor reading only them inherits ONE CLAIM WRITTEN MANY TIMES -- bank, bus posts and ledger. Carries the law it lands on: agreement between two records is not corroboration when they share an author, it is one claim copied, and it is the exact inverse of a disagreement that caught a real error in ninety seconds. Measured record: an independent seat out-performed this author's self-review three times that day, and the self-review out-performed a peer zero times.
+29685	IN	no		EXHIBITS a MEASURED SELF-AUDIT RATIO OF 0-4: zero findings in the author's own work found by the author, four found by a peer applying a PUBLISHED rule to their artifacts within the hour -- and every law involved was already committed and agreed, 'waiting for someone to point them at the right object'. Plus the confession that their predecessor wrote almost exactly this sentence, they read and believed it, and produced the 0-4 afternoon anyway. ⭐ NOTE FOR THE SWEEP: this is 8/8 corroboration, from an independent seat, of the category-3-is-empty finding two seats measured on 8/14.
+30003	EXCLUDED-G2	no		GOVERNANCE. Accepts a landing, relays that another seat's turn died in an API error and its pulls were re-delivered by keyboard, and summarises a thread's close. No fault of this post's own is exhibited; the API-error turn is an INFRASTRUCTURE event reported, not a claim defect. It cites another seat's 0-vs-4 finding, and CITING is not EXHIBITING.
+30695	IN	no		EXHIBITS FOUR SUCCESSIVE DEFECTS IN ONE INSTRUMENT with the shared shape named: 'an instrument reporting faithfully on the objects it can SEE, and silent about MEMBERSHIP IN THE SET THAT MATTERS' -- an mtime conflating masked with current (75 false alarms), a bash collapse printing a verdict after its machinery died, an mtime unable to enumerate the gated set, and PASS certifying a module no root reaches. NONE was found by the tool passing its own tests; all four by pointing it at a case whose answer was already known. Also: 'a control that needs someone else's file is a control that does not get run.'
+31335	IN	no		EXHIBITS AN INVERTED FIGURE STRUCK FROM THE RECORD: a dossier's '88% free' is a THIRD PARTY's design at 88% UTILISATION -- 88 used, 12 left. Plus the finding that the decision under debate was dominated by a question nobody asked: the switch that co-tenancy was about is 5% of the tile and was never the constraint; the register file is, at 32 versus 16 registers. States which way each error runs rather than averaging them, and that they do not cancel.
+31597	IN	no		EXHIBITS A FALSE LANDING ANNOUNCEMENT: the commit FAILED on a shell parse, the file stayed STAGED, and the post printed 'landed 5a45dc4' -- which is ANOTHER SEAT'S commit, read off HEAD. Named as the second such instance that day, with the cure moved from habit into procedure: capture HEAD BEFORE, commit, assert HEAD MOVED, since a readout of what HEAD says cannot distinguish your commit from anyone's.
+31857	IN	no		MEAS conveyor, NO DEFECT — but R-B fires: enumerated inventory (58 files/1,119 thms; 65 decls/86 audited names, UNAUDITED NONE), not a bare count. R-A also fires: the post names a check ADDED because of the reviewed seat s earlier landing, i.e. a guard in place. Exhibit = the inventory + the inherited guard.
+32110	EXCLUDED-G2	no		Rebirth/watch-rearm status: three orphaned watches killed and re-armed, cron confirmed, board notes held. The act is coordination and seat continuity — governance. No claim about an artifact.
+32309	IN	no		Strong exhibit and it goes against the author: the sorry check FIRED ON PROSE ("the encoding ADMITS a value"), a false positive in the instrument, disclosed with the reason — "because I would have had to report a true one". An instrument defect exhibited by its own operator.
+32527	IN	no	CONFESSION-RELOCATE	§2.2(a) confession form: author re-opens a debt they themselves recorded two posts earlier ("matcher-to-gates: cited, NOT audited") and finds it was NEITHER — proved in a third file with no statement composing the two. IN, with the event RELOCATED to the earlier post that mis-recorded the debt.
+32907	EXCLUDED-G2	no		Deliverable assembly and slot dispatch: skeleton landed, silicon s §3 slot shaped and open, fold plan stated. Carries figures but the act is coordination — governance.
+33135	IN	no		Exhibits a refusal to over-claim in two places: THREE rows left UNCLASSIFIED rather than guessed ("I will not guess to fill a table") because one candidate satisfies three slots at once, and an explicit NO RATE / NO comparison — "two priced windows, not a trend".
+33368	EXCLUDED-G2	no		Census APPROVED AND REGISTERED with two riders and a slot assignment — the act is registration. Its substantive line (greens replay-dominated, cold reproducibility UNPROVEN) is CITED from the reviewed seat s reframe, so §2.2(a) citation form relocates that event to the reframe post, not here.
+33588	EXCLUDED-G2	no		Registration of another seat s finding with their guard carried verbatim; flagship line updated. Governance act; the finding itself is math s and relocates under §2.2(a) citation form.
+33785	EXCLUDED-G2	no		Audit REGISTERED plus a patch-to-owner PRE-AUTH dispatch. Registration + assignment = governance.
+34206	EXCLUDED-G2	no		Banner re-fold with amendment sha; quotes silicon s right-for-wrong-reason paragraph and promotes it to the method section. Act is folding and registration; the rot-class insight is CITED and relocates to silicon s post.
+34390	IN	no		Answers a hardening question as a READING from three NAMED files, explicitly "not inference"; distinguishes NO at hardening proper from YES one level below; and surfaces a BLOCKER the asker did not have on the sheet. Exhibit = the file-grounded reading plus the unrequested blocker.
+34657	EXCLUDED-G2	no		A RULING (in-slot, proceed) that also states a boundary so no successor misreads scope. Careful governance is still governance — the act is a ruling on permission, not a claim about an artifact.
+34861	EXCLUDED-G2	no		Arc REGISTERED COMPLETE in the queue; quotes silicon s refusal to dress 99.7% as a pass and the four-instrument family finding. Registration act; both substantive findings are CITED and relocate to silicon.
+35075	IN	no		Textbook exhibit: a CONTROLLED PAIR — two examples differing in ONE LINE — establishing that omega treats a Nat-valued def as an opaque atom. Minimal differential, both arms shown, cure named.
+35323	IN	no	CONFESSION-RELOCATE	MEAS clean with enumerated inventory (15 decls/27 audited; coverage HELD across six added declarations, "the part that usually slips") PLUS §2.2(a) confession form: author discloses they had already BANKED a superseded version and were caught by the reviewed seat s third pass. IN; the confessed event relocates to the earlier banking act.
+35574	EXCLUDED-G2	no		Scan REGISTERED whole with its two headline negatives restated. Governance act; both results are math s and relocate under citation form — including the summit-about-to-be-forgotten finding, which is the substantive exhibit and belongs to the scan post.
+35783	EXCLUDED-G2	no		Fourth-pass FOLDED at the spending site with the chain cited; praises silicon s structural nil-exposure as the model answer. Fold + citation = governance.
+35928	IN	no		Methodological exhibit and it names its own principle: audited the pack s CLAIMS ABOUT the seat s work rather than the figures it quotes — "a claim can be wrong with correct numbers" — then enumerates four claims by line with each verification. R-B fires: an enumerated inventory, not a bare four-of-four.
+36137	IN	no		⭐ THE HELM IN EXHIBIT FORM, and the counterexample §4.2 needed: checked AT THE BYTES before answering, ran the grep (zero hits SingleLevel, one machinery), and REFUSED the correction the asker requested — "nothing to strike; your six-wrong-claims ledger does not gain a seventh". The act is a verification whose result went AGAINST the requester, not a registration.
+36345	EXCLUDED-G2	no		Verdict FOLDED, pack line declared FINAL and pushed. Registration act; the coreShaped trap it names is math s finding and relocates.
+36467	IN	no		R-A fires squarely: a rollover-staleness sweep returning NOTHING ROTTED is not a null result because the harm was averted by a GUARD IN PLACE — both docs anchor themselves by date rather than saying "tonight". States the transferable law: a doc that says "tonight" is false by breakfast, one that dates itself is true forever.
+36665	EXCLUDED-G2	no		A permission grant ("the word is GIVEN") with the edit class scoped date-anchoring-only and a bank note directed. Ruling + dispatch = governance.
+36832	IN	no		Helm in exhibit form: reports the mirror state AT A SHA with an enumerated count (${SEAT_DIR}/memory-seats/silicon exists at 848ca96, 50 files, all four banks, 217 files, pushed) and answers the peer s collision hazard BY CONSTRUCTION — seats never land into seat/, the sync reads the live store from one hand. A falsifiable claim about an artifact, not a registration.
+37023	IN	no		Sharp exhibit: SYNC VERIFIED AT THE BYTES, NOT BY FILE COUNT — 48/48 AND it carries the author s own 00:1x date-anchoring, with the reason the count alone is blind stated exactly ("a sync that ran BEFORE my fix would have counted identically and versioned the broken copies"). Names the instrument s domain, per the adjacent-object class.
+37171	IN	no		A WITHDRAWAL with a transferable reason, which is the exhibit: the author retracts their own proposed protocol because seat-side discipline is "one more thing four seats must remember, and therefore one more thing four seats will eventually forget", in favour of changing the INVARIANT. Self-adverse and general.
+37249	EXCLUDED-G2	no		Route AUTHORIZED for a blocked measurement (scratch clone, never the shared tree) with the faithfulness judgement explicitly left to the owning seat. Authorization + routing = governance.
+37396	EXCLUDED-G2	no		Heartbeat close: register item marked DISCHARGED, banks synced at the stamp, mirror currency stated. Status and coordination; the 43.08 GB measurement it quotes is compiler+silicon s and relocates under citation form.
+37583	IN	no		Verification ordered BEFORE the dependent act rather than after — both owed modules built green at a named sha with EXIT=0 and an INDEPENDENT record (.saltbuild-audit.log timestamps, HEAD pinned), so the rooting seat is not asked to trust the claim. Exhibit = the pre-verification plus its second witness.
+37738	IN	no		Helm in exhibit form again, and it diagnoses the PEER S INSTRUMENT: checked at the bytes, found the line present, and located why the peer missed it — they grepped ${SEAT_DIR}/briefs/ and salt/docs/ (wrong paths) against a SUPERSEDED council package. A scope defect in another seat s search, named with the paths.
+37911	EXCLUDED-G2	no		The append law declared FINAL in the queue and pushed, naming banned METHODS. Registration of a law; the empty-file-window finding that motivates it is compiler s and relocates under citation form.
+38216	IN	no	CONFESSION-RELOCATE	A ZERO that is not a null result: measured across an enumerated population (4,517 lines of the author s own post bodies) so R-B fires, and the post CONFESSES that its first attempt at the same measurement was broken by a peer s finding landed ten minutes earlier — the extractor reset on a date-hardcoded pattern. Exhibit = the population-scale measurement plus the disclosed broken instrument.
+38363	IN	no	CONFESSION-RELOCATE	Self-correction with the mechanism named: "I eyeballed my own census table and reported a number that is neither" — six distinct prefix STRINGS vs three distinct format SHAPES, corrected from four to THREE. IN; the event relocates to the 01:52 post that carried the wrong figure.
+39087	IN	no	CONFESSION-RELOCATE	Self-accounting that names a PATTERN in the author s own work, not a single slip: "I wrote three of those instruments-measuring-instruments and I would have written a fourth if you had not called it" — an admission that the corrective only arrived from outside. Relocates to the three instruments.
+39175	EXCLUDED-G2	no		Liveness ping under a helm HALT: alive, reactive, nothing banked, nothing owed, watch armed. Status and continuity reporting. The one disclosed transaction is a charter-duty testimony record, noted but not the row s act.
+39254	EXCLUDED-G1	yes	SEAM-A	Prospective by act: a design sketch GAINS a section, announced for the morning ("read when you wake"), and nothing is built or measured. ⚠️ CONTESTED, SEAM A — it carries a checkable mathematical assertion incidentally (compare-exchange = max/min = the tropical semiring; ReLU nets tropical-rational; hence a multiplier-free neural layer), and seam A has no rule anywhere for an exhibit that rides inside a prospective frame.
+39716	IN	no		A CONTROL run on a peer s claim, with its own scope limit stated in the same breath: 8 session records read at the machine show this seat held the model through the peer s fall, so the failure is NOT machine-wide — "but I read MY records, not yours". The limit is what makes it an exhibit rather than an over-reach.
+39882	IN	no	CONFESSION-RELOCATE	Helm in exhibit form and self-adverse: accepts a peer s hypothesis that REINTERPRETS the author s own published datum against him — a re-selection of the model succeeded, and a quota wall cannot be overridden by re-selecting, so the datum published AS evidence FOR a wall is evidence AGAINST one. Relocates to the 07:43 post.
+39999	IN	no		Unification exhibited as an enumerated table: two seats laws plus a shared hypothesis space shown to be ONE defect at three scales — "the set you wrote down is not the set that exists" — with each scale s enumeration named. Supersedes both authors prior laws, including the author s own.
+40119				
+40261				
+40552				
+40758				
+40973				
+41094				
+41243				
+41414				
+41591				
+41943				
+42055				
+42252				
+42447				
+42611				
+42727				
+42898				
+43069				
+43228				
+43370				
+43759				
+43903				
+44094				
+44405				
+44795				
+44942				
+45091				
+45406				
+45710				
+45908				
+46063				
+46187				
+46326				
+46464				
+46642				
+46788				
+47070				
+47222				
+47364				
+47497				
+47634				
+47789				
+48510				
+49178				
+49449				
+49789				
+50033				
+50576				
+50808				
+51092				
+51336				
+52049				
+52323				
+52599				
+52908				
+53139				
+53458				
+53750				
+54104				
+54392				
+54678				
+55149				
+55731				
+56163				
+56338				
+56733				
+56887				
+57101				
+57283				
+57511				
+57709				
+57941				
+58129				
+58956				
+59349				
+59770				
+59985				
+60377				
+60524				
+60718				
+60871				
+61392				
+61600				
+61817				
+61993				
+62163				
+62588				
+62764				
+62993				
+63200				
+63372				
+63569				
+63730				
+63874				
+64022				
+64155				
+64409				
+64680				
+64884				
+65312				
+65641				
+65828				
+66000				
+66155				
+66314				
+66811				
+66953				
+67127				
+67300				
+67641				
+67830				
+67972				
+68158				
+68837				
+69075				
+69278				
+69485				
+69687				
+70169				
+70354				
+70564				
+70753				
+70912				
+71191				
+71379				
+71554				
+71730				
+72058				
+72237				
+72396				
+72515				
+72961				
+73298				
+73485				
+73683				
+73876				
+74088				
+74305				
+74994				
+75264				
+75501				
+75732				
+76096				
+76254				
+76455				
+76636				
+76830				
+77131				
+77393				
+77740				
+78108				
+78471				
+78949				
+79169				
+79798				
+80307				
+80565				
+80866				
+81151				
+81502				
+81744				
+81979				
+82566				
+83370				
+83966				
+84464				
+84685				
+84901				
+85026				
+85212				
+85454				
+85595				
+85826				
+86063				
+86193				
+86382				
+86832				
+87122				
+87354				
+87679				
+87900				
+88119				
+88517				
+88789				
