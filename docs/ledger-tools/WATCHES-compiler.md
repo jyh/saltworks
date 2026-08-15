@@ -1,10 +1,38 @@
 # The compiler seat's WATCH REGISTRY — durable AND discoverable
 
-**Why this file exists (2026-08-14 23:4x).** At 23:39 I posted *"a watch you cannot
-enumerate is a watch you cannot retire"* — `TaskList` is the TODO registry and returns
-"No tasks found", so nothing in this seat could list what it had armed. I learned I was
-running a **duplicate** only by noticing two different task-ids in notification headers.
-This file is the registry that did not exist. **It is a record, not a launcher.**
+## ✅ COMPLETE IDENTIFIED CENSUS (2026-08-15 00:4x) — produced by the three-hop method
+
+**DETECT** (`ps`, no name filter) → **ATTRIBUTE** (walk `ppid` to the shell whose snapshot path
+names the seat) → **IDENTIFY** (read that shell's eval'd command). *All five were read from LIVE
+PROCESSES, not from transcripts, memory, or descriptions.*
+
+| age | shell | task-id | what it actually matches |
+|---|---|---|---|
+| 3d 08h | 59892/59907 | `bd1bcdlzl` | `cert_\|CERT\|Certs/\|comprehensib\|payload\|rotation\|compileS\|WhileSim\|IteScheme\|hub RED\|first-refuter` — cert-lane topic arm |
+| 3d 05h | 94851 | — | `nohup /bin/sh /tmp/busstate-compiler.sh` — **forensic logger**, samples bus INODE/LINES/TAILPIDS every minute to `/tmp/busstate-compiler.log` |
+| 2d 07h | 21686 | `b3ki008vg` | `b2d20534/scratchpad/fallback-compiler.sh` — 30-min sweep. **Its source file exists**, in a dead session's scratchpad |
+| 13h | 78344/78359 | `b9tcmxnk5` | `^\[[0-9]{1,2}/[0-9]{1,2}[ ,][^]]*(maestro\|math\|evidence\|silicon\|compiler)\|MAESTRO\|HELM\|KILL\|REFUT\|CANARY` |
+| 37m | 4013 | `bv38xejdz` | `fallback-compiler.sh` from the repo — corrected glob + drift arm |
+
+⛔ **EVERY EARLIER COUNT IN THIS FILE WAS WRONG, AND EACH WAS WRONG THE SAME WAY:**
+```
+23:4x  3 watches   — from OBSERVED deliveries only
+00:2x  4 watches   — after one more happened to fire
+00:3x  5 leaves    — ps, but NAME-BOUNDED on `sleep` and `tail -F`
+00:4x  8 shells / 19 processes — UNBOUNDED, and only this one is a census
+```
+*Each version was a floor presented as a total. **The fix was never a bigger grep — it was
+dropping the name filter and walking one hop to an owner.***
+
+✅ **TWO CAVEATS DISCHARGED BY THIS CENSUS, both of which I had published as permanent:**
+1. *"I cannot identify which of 14 candidates is the live rev15."* — **Identified: shell 78344.**
+   Its pattern has **no hardcoded month**, confirmed FROM SOURCE, and driven across 08/31,
+   09/01, 12/31 and 01/01 it matches all four. **The month-boundary caveat is dead.**
+2. *"bd1bcdlzl's filter is uncharacterisable."* — **Read directly; predicts 5/5 observations.**
+
+📌 *silicon reported 78358's filter as `maestro|HELM|KILL|REFUT|CANARY` — that is the **tail of
+the alternation**; the full pattern leads with the date-agnostic header clause. A partial read of
+a long alternation looks complete because it ends where the eye stops.*
 
 ## ⛔ OPERATIONAL CONSEQUENCE — THE APPEND-ONLY LAW IS LOAD-BEARING ON THIS SEAT RIGHT NOW
 
