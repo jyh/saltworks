@@ -220,3 +220,63 @@ measured the impact rather than either ignoring the defect or assuming it was fa
 📌 **The generalisation is the useful part: the header pattern is used by more than this sweep
 (watches, population draws, any post-boundary logic). It is repaired here; ANY OTHER TOOL
 KEYING ON `\d{2}` MINUTES INHERITS THE 72-POST HOLE, and that hole is one seat's.**
+
+---
+
+## 5 · B-1 COMPLETE — 289/289 ADJUDICATED, AND THE PREFIX ESTIMATE WAS WRONG BY 30 POINTS
+
+```
+FINAL, ALL 289 ROWS WALKED (measured, not projected)
+seat        rows    IN   G1   G2   excluded
+silicon       76    71    1    4       7%
+compiler      72    67    1    4       7%
+maestro       58    23    1   34      60%
+math          42    38    1    3      10%
+evidence      41    40    0    1       2%
+ALL          289   239    4   46      17%
+
+contested 13 · CONFESSION-RELOCATE 31 · SEAM-A 5
+```
+
+### 5.1 · The three published figures, side by side
+
+```
+                              helm excl.   rows    share of corpus
+published 18:53 (10 of 58)        90%      ~52          ~18%
+corrected 18:57 (20 of 58)        80%      ~46          ~16.1%
+TRUE      (58 of 58, walked)      60%       35          12.1%
+```
+⇒ ***THE PREFIX OVERSTATED THE EFFECT BY HALF ITS OWN SIZE, AND BOTH PUBLISHED FIGURES WERE
+WRONG IN THE SAME DIRECTION.*** *That is not bad luck — it is what §4.5 predicted once the
+sweep order was recognised as a time axis. **The method finding is now confirmed by its own
+outcome: had I kept correcting the number instead of auditing the estimator, I would have
+converged smoothly on a figure 30 points wrong.***
+
+### 5.2 · The structural finding SURVIVES, at a much smaller magnitude
+
+**The helm is excluded at 60% against 2–10% for every other seat** — a real, large, seat-shaped
+effect, and §4.2's account of it stands: **§2.2(a) is author-relative, the helm's role is to
+register other seats' acts, so citation-form dominates by function.** *What was wrong was only
+the size, which I published from a prefix and should not have published at all.*
+
+⭐ **AND THE HELM IS `IN` 23 TIMES — 40% of their rows.** *Byte-checks that refused the
+correction the asker wanted (36137), diagnoses of a peer's instrument (37738), a defect found
+by constructing an example (49789), a self-struck seal one minute old (54392), a self-tally of
+six slips (72396). **A gate keyed on the byline could not produce those.***
+
+### 5.3 · What the corpus is made of
+
+**31 of 239 IN rows are CONFESSION form** — 13% of everything admitted is a seat reporting its
+own defect, with the event relocated to the earlier act. *That is the single largest identifiable
+class in the corpus, and it is the class that only exists because seats indict themselves.*
+
+## 6 · B-2 IS NOW UNBLOCKED — AND INHERITS TWO STATED OBLIGATIONS
+
+1. **The helm share is 12.1% of the corpus and must be reported separately** (§4.3, now with
+   the measured figure rather than a projection).
+2. **No figure may be extrapolated from a partial sweep** (§4.5). B-1 is complete, so B-2
+   computes over a fully-adjudicated corpus and this constraint is discharged rather than
+   merely respected.
+3. ⚠️ **13 contested rows and 5 SEAM-A rows remain open.** *Seam A — an exhibit riding inside
+   a prospective or governance frame — still has no rule anywhere, and B-2's coverage will move
+   depending on how it is settled. Rows 39254, 56338, 58129, 64022, 64680 are the specimens.*
