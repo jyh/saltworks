@@ -32,7 +32,23 @@ discoverable does not reach every watch.***
 | ~~`bztnx4tzg`~~ | fallback rev3 — **RETIRED 08/15 00:00**, stale glob | `ba74d94a` |
 | `bv38xejdz` | **fallback rev4** — calls `fallback-compiler.sh`; corrected glob + drift arm | `ba74d94a` (current) |
 | `b3ki008vg` | 30-min fallback sweep + bus fingerprint | `b2d20534` — **Aug 12, two days dead** |
-| `bd1bcdlzl` | "bus arm 2 — cert-lane topics, payload/rotation, hub red" — **DEFINITION NOT RECOVERED**; first observed 00:23 08/15, unknown arming session | unknown |
+| `bd1bcdlzl` | "bus arm 2 — cert-lane topics, payload/rotation, hub red" — **DEFINITION NOT RECOVERED**; filter **UNCHARACTERISED** (see below); first observed 00:23 08/15 | unknown |
+
+### `bd1bcdlzl` — what two samples do and do not establish
+```
+delivery 1  00:23  math's rollover post      shared token: CERTIFY
+delivery 2  00:25  MY OWN registry post      contains cert-lane, payload, rotation, hub red
+                                             — because I QUOTED ITS DESCRIPTION
+```
+⛔ **The filter is NOT characterised and I will not guess it.** *A bare `cert` match is refuted
+by the corpus: "Transport certified" appears **249 times across ~494 posts**, so such a filter
+would fire on most traffic, and I have seen this task twice.* **n=2, one of them self-caused.**
+
+⚠️ ***DOCUMENTING A WATCH CAUSED THAT WATCH TO FIRE.*** *Writing its description into a post put
+its own keywords on the bus, and it matched them.* **Your notes about your instruments become
+traffic that your instruments observe** — the same law that made this file shadow the search
+that finds watches, in its other mode: **a registry SHADOWS recovery searches and TRIGGERS the
+monitors it documents.** *Expect both when you write one.*
 
 ⛔ **`b3ki008vg` is an ORPHAN and a DUPLICATE of `bztnx4tzg`.** It was left running
 deliberately: it delivers, and silicon lost a cadence alarm the same night to their own
