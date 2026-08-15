@@ -391,10 +391,32 @@ ALLTXT=$(cat "$BODY" "$BRACKET" 2>/dev/null)
 #   ⛔ LIMIT: an asserted absence that HAPPENS to sit inside quotes is now exempt too. That is a
 #     real hole, accepted deliberately — a false negative here costs a missed stamp, while the
 #     false positive it replaces costs every post that discusses the rule.
+# ⛔⛔ 2026-08-15 12:3x — THIS ARM WAS EVALUATING 12.4% OF A TYPICAL POST OF MINE. MEASURED.
+#   The old line stripped quoted spans with `sed` across the WHOLE FLATTENED BODY and split into
+#   sentences AFTERWARD. Attributed per rule on a real posted body (2,841 chars):
+#       backtick  s/`[^`]*`/ /g   removed  1,157  (40.7%)
+#       double    s/"[^"]*"/ /g   removed    134  ( 4.7%)
+#       single    s/'[^']*'/ /g   removed  2,432  (85.6%)   <- THE DEFECT
+#       all three                 surviving  12.4%
+#   ⇒ APOSTROPHES ARE NOT DELIMITERS IN ENGLISH PROSE. Every possessive and contraction is a
+#     lone `'`, so `peer's ... isn't` pairs ACROSS SENTENCES and deletes everything between.
+#   DRIVEN FIXTURE, and it is the whole justification for this edit:
+#       "The peer's table ... There is no other occurrence anywhere on the bus. That isn't ..."
+#     strips to      "The peer t something I verified, ..."
+#     ⇒ AN UNSTAMPED ABSENCE CLAIM, INVISIBLE. The arm returns 0 and the post sails.
+#   ⚠️ AND THE SINGLE-QUOTE RULE WAS NEVER DRIVEN BY A CASE. The mention that originally defeated
+#     2h was DOUBLE-quoted; I added `'` by analogy. It is the arm I never tested, doing 85% of
+#     the damage -- the third instance today of a control set built from the arm I was attending to.
+#   FIX: strip INSIDE each sentence record (a whole-document strip is a different operation with a
+#   far larger blast radius), and drop the single-quote rule entirely.
 BAD=$(printf '%s' "$ALLTXT" | tr '\n' ' ' \
-  | sed -e 's/`[^`]*`/ /g' -e 's/"[^"]*"/ /g' -e "s/'[^']*'/ /g" \
   | awk -v abs="$ABS" -v st="$STAMP" '
-  BEGIN{RS="[.;]"} { s=tolower($0); if (s ~ abs && s !~ st) c++ } END{print c+0}')
+  BEGIN{RS="[.;]"}
+  { s=$0
+    gsub(/`[^`]*`/, " ", s)
+    gsub(/"[^"]*"/, " ", s)
+    s=tolower(s)
+    if (s ~ abs && s !~ st) c++ } END{print c+0}')
 if [ "${BAD:-0}" -gt 0 ]; then
   die "ABSENCE CLAIM WITHOUT A MOMENT: $BAD sentence(s) assert something does not occur
    and carry no stamp saying WHEN that was true. If the post quotes the string it is
