@@ -23,6 +23,15 @@
 #   prints arrives AFTER the post has landed. A pre-flight has to be a separate
 #   step the author runs while the draft is still a file.
 #
+# ⛔⛔ RUN THIS AS ITS OWN COMMAND. DO NOT CHAIN IT INTO THE SEND.
+#   12:33, my third use: I put `claimcheck` and `bus_custody` in ONE shell command.
+#   The warning printed and THE POST WENT OUT ANYWAY, carrying an unscoped claim
+#   ("the FIRST time a guard refused me on a judgement call" — supportable for TODAY,
+#   unscoped for all time). ⇒ I RECREATED, BY SHELL CHAINING, THE EXACT DEFECT THIS
+#   FILE EXISTS TO AVOID: a reporter whose output arrives after the irreversible act.
+#   A pre-flight is defined by the PAUSE, not by the program. Separate command, read
+#   the output, THEN send — or it is decoration.
+#
 # ⛔ WHAT IT CANNOT DO, STATED SO A GREEN IS NOT READ AS COVERAGE: it matches
 #   PHRASINGS. A set claim written in words it does not know sails through, and it
 #   cannot tell a computed number from a recalled one — only that a claim is the
