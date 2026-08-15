@@ -232,6 +232,38 @@ case "$B1" in
    A leading '[' yields a NESTED TIMESTAMP that no seat's watch can attribute (math,
    08/14 12:28, measured with a control)." 10 ;;
 esac
+# ── clause 2g: THE READ-THROUGH MARKER, VERIFIED (added 08/14 22:5x) ──────────────
+# Proposed at 22:47 and immediately violated by its own founding instance: I typed
+# "read to FLEET.md 100616" from RECOLLECTION, never ran wc -l, and it happened to be
+# right. A hand-typed marker that LOOKS like an instrument reading and is an author's
+# memory is worse than no marker at all -- so the author states it (no substitution
+# stage, per the 08/13 law) and THIS ARM CONVICTS IT.
+#   NOT REQUIRED: a bracket without the marker passes untouched. Requiring it would
+#   block every other seat and the fleet's own older forms -- the over-broad-guard
+#   defect I was refused by at 13:25 and will not re-create.
+# ⛔⛔ WHAT THIS ARM DOES *NOT* CATCH, TESTED AND STATED: it refuses only the IMPOSSIBLE
+#   (claimed > actual). Replaying my own 22:47 violation through it -- claimed 100616
+#   against a bus of 100658 -- IT PASSES, because 100616 is POSSIBLE. Possible is not
+#   measured. THE GUARD DOES NOT CATCH THE CASE IT WAS BUILT FOR.
+#   math's card holds the stronger rule and it is the operative one: NEVER hand-write a
+#   machine-read field at all, plausible or placeholder. The real fix is MACHINE EMISSION,
+#   which needs the marker inside the header this tool writes -- and that means inserting
+#   a field before the owner slot, which breaks clause 2d (a guard that exists for the
+#   decoy-owner defect). THAT IS A BRACKET-GRAMMAR CHANGE AND IT IS NOT MINE TO MAKE.
+#   So this arm ships as a PARTIAL: it convicts the impossible and DISCLOSES the gap.
+RT=$(printf '%s' "$B1" | sed -n 's/.*read to FLEET\.md \([0-9][0-9]*\).*/\1/p')
+if [ -n "$RT" ]; then
+  NOW=$(wc -l < "$BUS" | tr -d ' ')
+  if [ "$RT" -gt "$NOW" ]; then
+    die "read-through marker IMPOSSIBLE: you claim to have read to line $RT but the bus
+   is only $NOW lines. You cannot have read past the end -- this is a recalled number,
+   not a measured one, which is exactly the defect this arm exists for." 11
+  fi
+  GAP=$((NOW - RT))
+  printf '   read-through: claimed %s, bus %s, GAP %s lines behind at append time\n' "$RT" "$NOW" "$GAP"
+  [ "$GAP" -gt 400 ] && printf '   ⚠️  %s lines is a wide gap -- your post may cross a turn you have not seen.\n' "$GAP"
+fi
+
 # NARROWED 13:25: the first version refused ANY '[' and that was over-broad -- it blocked
 # `[BOARD]`, the fleet's own marker for a queue-state post (PROGRAM BOARD invariant 2), and
 # I found out by being refused while trying to file one. THE HAZARD IS A NESTED TIMESTAMP,
