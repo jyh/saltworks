@@ -91,3 +91,48 @@ the fraction reaching a SPECIFIC class rather than falling to the `OTHER` residu
 ⇒ ***I am not treating that as settled. If the sitting means something else, the number changes,
 and I would rather be told now than publish a figure whose unit I chose myself*** — which is
 exactly the defect I helped diagnose in the `~3 seat-days` figure four hours ago.
+
+---
+
+## 6 · ⛔ AMENDMENT, BEFORE THE FIRST ROW IS SCORED: I HAVE ALREADY SPENT THIS CALIBRATION SET
+
+**I read the codebook's rulings in order to extract them. So for these 21 rows I now know the
+answers, and my adjudication of them CANNOT be an independent test of my judgement.**
+
+*My own banked rule says it plainly — a blind checker must never be handed the prior answer, and
+the announcement spends them. **Extracting the key spent it in the same motion.***
+
+### 6.1 · What the 21 rows CAN still test, stated exactly
+
+⇒ ***DERIVABILITY, NOT INDEPENDENCE.*** *The honest question they answer is: "applying the rule
+as I now understand it, do I REACH the codebook's ruling, and can I name the clause that gets me
+there?" That is a real test — it catches a rule I have misread, which is precisely the failure
+that sank B-1 — but it is NOT evidence that my unaided judgement matches the sitting's.*
+
+**So the 21 rows are re-labelled: a DERIVATION CHECK, not a blind calibration.** *Any figure I
+publish from them will carry that label, because "I agreed with the codebook 21/21" would read as
+independent agreement and it would not be.*
+
+### 6.2 · THE BLIND SET, PRE-REGISTERED NOW AND NOT YET DRAWN
+
+**For an actual test of independent class judgement I need rows the codebook does NOT name.**
+```
+disputed population ...................... 278
+named by the codebook (key, spent) ........  21
+⇒ ELIGIBLE FOR A BLIND DRAW .............. 257
+```
+📌 **Pre-registered before drawing, so the draw cannot be shopped:**
+1. **I score the blind sample from the ROW and the RULE only** — never from the pass-1/pass-2
+   reason pair, which is also what count (d) requires.
+2. **I publish those verdicts BEFORE checking them against anything**, including before checking
+   whether any later-found codebook text names them.
+3. **If the codebook turns out to name a drawn row, that row is DISCARDED from the blind set and
+   reported as discarded** — not quietly re-labelled a hit. *(This is the trap I walked into
+   tonight from the other side: finding the answer after publishing.)*
+4. **The sample size and the draw rule are fixed here, before the draw: k = 20, taken by sorting
+   the 257 eligible ids ascending and selecting index ⌊i × 257 / 20⌋ for i = 0 … 19.**
+   *Deterministic, parameter-free, reproducible by any hand.*
+
+⚠️ **AND THE COST OF THAT CHOICE, NAMED: a deterministic draw is checkable but not unpredictable,
+so it proves reproducibility rather than independence-from-me.** *I take that trade knowingly —
+the fleet has an executor-independence precedent for when the stronger property is needed.*
