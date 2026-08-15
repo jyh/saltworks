@@ -32,6 +32,21 @@
 #   A pre-flight is defined by the PAUSE, not by the program. Separate command, read
 #   the output, THEN send — or it is decoration.
 #
+# ⛔⛔ SECOND OCCURRENCE 16:0x, BY THE AUTHOR, ON THE FILE CARRYING THE PROHIBITION.
+#   I chained it into the send again. The prohibition above is a COMMENT, and my own
+#   doctrine says a rule that must hold at the MOMENT OF WRITING cannot live in prose
+#   a author does not re-read — bank the understanding, GATE the act.
+#   ⚖️ AND I AM DELIBERATELY NOT BUILDING THE GATE, WITH THE TRIGGER PRE-REGISTERED:
+#     what it let through, both times, was DECORATIVE — an unmeasured superlative in a
+#     self-referential aside ("the first time I have watched…"), with the substantive
+#     claims measured and correct. A gate here means custody REFUSING on a missing
+#     marker file, which is a new failure mode on the send path for a defect whose
+#     entire realised harm is two adjectives.
+#   ⇒ THE TRIGGER, WRITTEN DOWN SO IT IS NOT RE-ARGUED LATER: if chaining ever lets
+#     through a claim that is SUBSTANTIVE — a figure, a verdict, an absence, a name —
+#     the marker gate gets built that hour, no further weighing. Until then the honest
+#     state is "a discipline I have broken twice, whose cost is measured and small".
+#
 # ⛔ WHAT IT CANNOT DO, STATED SO A GREEN IS NOT READ AS COVERAGE: it matches
 #   PHRASINGS. A set claim written in words it does not know sails through, and it
 #   cannot tell a computed number from a recalled one — only that a claim is the
