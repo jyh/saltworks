@@ -39,8 +39,15 @@ fingerprint() {   # HEAD + the dirty set: the two ways a shared tree moves under
 
 case "${1:-}" in
   --arm)
-    printf '%s %s\n' "$(date '+%s')" "$(git rev-parse --short HEAD)" > "$STATE"
-    printf '✅ landcheck ARMED at HEAD=%s (%s)\n' "$(git rev-parse --short HEAD)" "$(date '+%H:%M:%S')"
+    # ⛔ 2026-08-15 12:0x — THE FIRST VERSION OF THIS LINE RECORDED ONLY `git rev-parse HEAD`,
+    #   AND fingerprint() ABOVE WAS DEAD CODE — defined, documented as "HEAD + the dirty set",
+    #   and never called. So the gate detected a peer's COMMIT and was BLIND TO A PEER'S
+    #   UNCOMMITTED EDIT, which is what `lake build` actually reads, and which is the DOMINANT
+    #   mode in salt (155 dirty lines at 11:52). My four controls moved HEAD three times and
+    #   the dirty set ZERO times: I never drove the case the function was written for.
+    #   ⇒ WORSE THAN MISSING IT: the code DOCUMENTED a capability it did not have.
+    printf '%s %s\n' "$(date '+%s')" "$(fingerprint)" > "$STATE"
+    printf '✅ landcheck ARMED at %s (%s)\n' "$(fingerprint)" "$(date '+%H:%M:%S')"
     printf '   Run --check immediately before `git commit`.\n' ;;
 
   --check)
@@ -49,18 +56,26 @@ case "${1:-}" in
       printf '   (An unarmed check and a clean check print different things ON PURPOSE.)\n'
       exit 3
     fi
-    read -r T0 H0 < "$STATE"
-    H1=$(git rev-parse --short HEAD)
+    read -r T0 F0 < "$STATE"
+    F1=$(fingerprint)
     AGE=$(( $(date '+%s') - T0 ))
-    if [ "$H0" != "$H1" ]; then
-      printf '⛔ HEAD MOVED SINCE YOUR BUILD: armed at %s, now %s (%ss ago).\n' "$H0" "$H1" "$AGE"
-      printf '   A peer landed between your build and this commit. Your EXIT=0 certifies a\n'
-      printf '   tree that no longer exists. REBUILD before committing -- do not reason about\n'
-      printf '   whether their change "could" affect yours; that reasoning is the defect.\n'
-      git log --oneline "$H0..$H1" | sed 's/^/     landed: /'
+    if [ "$F0" != "$F1" ]; then
+      H0=${F0%%|*}; D0=${F0##*|}
+      H1=${F1%%|*}; D1=${F1##*|}
+      printf '⛔ THE TREE MOVED SINCE YOUR BUILD (%ss ago). Your EXIT=0 certifies a tree that\n' "$AGE"
+      printf '   no longer exists. REBUILD before committing -- do NOT reason about whether the\n'
+      printf '   change "could" affect yours; that reasoning IS the defect.\n'
+      if [ "$H0" != "$H1" ]; then
+        printf '   • HEAD MOVED %s -> %s. A peer LANDED:\n' "$H0" "$H1"
+        git log --oneline "$H0..$H1" 2>/dev/null | sed 's/^/       /'
+      fi
+      if [ "$D0" != "$D1" ]; then
+        printf '   • WORKING TREE CHANGED (dirty-set %s -> %s) — an UNCOMMITTED edit by any\n' "$D0" "$D1"
+        printf '     seat, which is exactly what `lake build` reads. No commit needed to break you.\n'
+      fi
       exit 1
     fi
-    printf '✅ landcheck CLEAR: HEAD=%s unmoved across a %ss build->commit window.\n' "$H1" "$AGE"
+    printf '✅ landcheck CLEAR: HEAD=%s and the working tree both unmoved across a %ss\n   build->commit window.\n' "${F1%%|*}" "$AGE"
     # ⛔ THIS LINE WAS `[ "$AGE" -gt 900 ] && printf ...` AND IT INVERTED THE GATE.
     #   A narrow window made the test FALSE, the && short-circuited, and the branch's
     #   status became 1 -- so the CLEAN verdict exited NONZERO while the WIDE-WINDOW
