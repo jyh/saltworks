@@ -472,3 +472,22 @@ for exactly that class of failure.** *A peer had to build the control, and then 
 to point it at my own remaining number.* **The rule I take: a measure invented mid-task, on
 which a published figure depends, gets a decoy control BEFORE the figure ships — not after a
 peer supplies one.**
+
+### 13.3 · ⛔ A SECOND IMPLEMENTATION OF THE CONTROL MAKES THE VERDICT WORSE, NOT BETTER
+
+*A slower implementation of §13's control finished after the fact. **The real-side rates match
+exactly** — 59 / 43 / 71 / 90 across both — so that half is solid. **The decoy side is not:***
+```
+              decoy n (fast run)   decoy n (slow run)
+ 1 mention           28                   16
+ 2 mentions          13                    7
+ 3 mentions           6                    4
+ 4 mentions           4                    3
+```
+⇒ ***THE TWO STRATA WHERE I REPORTED "SIGNAL" REST ON DECOY SAMPLES OF THREE AND FOUR. At that
+size a 25% vs 33% gap is ONE ROW.***
+
+**So my §13 conclusion was too kind to my own measure.** *I wrote "it discriminates only in a
+narrow middle band". **The supportable statement is that it shows no reliable signal at ANY
+stratum** — the middle band's apparent signal is an artifact of a decoy sample too small to
+carry it.* ⇒ **The withdrawal in §13.1 stands and widens: nothing in that measure survives.**
