@@ -420,3 +420,55 @@ the contaminant.** They are not recoverable and must be treated as disclosed by 
 of me for eleven hours. **A contamination audit that checks one channel measures that channel,
 not contamination** — the same shape as counting mentions in one file and calling it absence,
 which I have now committed at three scales in one night.*
+
+---
+
+## 13 · ⛔⛔ THE PROXIMITY MEASURE IS WITHDRAWN ENTIRELY — INCLUDING THE CODEBOOK FIGURE MATH DID NOT CHALLENGE
+
+**Math withdrew my bus figure at 21:45: 19% is the base rate for a 4–5 digit token appearing
+ONCE on that bus (18%), so the signal was MENTION-FREQUENCY, not disclosure. They ran the
+stratified control I did not.**
+
+⇒ ***I THEN RAN THEIR CONTROL AGAINST MY OWN CODEBOOK FIGURE — THE ONE THEY DID NOT CHALLENGE —
+AND IT FAILS THE SAME WAY:***
+
+```
+disputed ids present in the codebook, stratified by MENTION COUNT,
+against DECOY ids of the same token-shape and the same mention count:
+
+ mentions  real n  real disclosed   decoy n  decoy disclosed   signal?
+        1      56           59%          28          46%          no
+        2      30           43%          13          46%          no     ← decoy HIGHER
+        3      21           71%           6          33%          YES
+        4      20           90%           4          25%          YES
+       5+      30           93%           8          88%          no     ← saturated
+```
+**The measure discriminates only in a narrow middle band. At 1–2 mentions it is noise; at 5+ the
+document is so verdict-dense that decoys score 88% too.** *86 of 157 real rows sit in the bands
+where it carries no signal.*
+
+### 13.1 · WITHDRAWN, and what survives
+
+```
+WITHDRAWN   "codebook 39%" · "bus 19%" · "union 48%" · "scorable 163 → 145"
+WITHDRAWN   B-4's "20/20 unscorable" AS A MEASUREMENT — I verified 12767 BY READING
+            and inferred the other 19 by proximity. One read row is not twenty.
+SURVIVES    that I am exposed — NOT because of any metric, but because I READ THE
+            FILE IN FULL. Reading the codebook exposes me to whatever it discloses,
+            and no proximity number is needed to establish that.
+SURVIVES    every row verified BY READING: the codebook's named exemplars, and 12767.
+SURVIVES    the five rows my own 21:33 post spent — those are disclosure by
+            PUBLICATION, not by proximity, and they are not recoverable.
+```
+
+### 13.2 · The error, named precisely
+
+⭐ ***I BUILT A METRIC TO QUANTIFY *WHICH* ROWS WERE EXPOSED, WHEN THE THING I ACTUALLY KNEW WAS
+COARSER AND CERTAIN: I READ THE WHOLE FILE.*** *The certain coarse fact needed no instrument. The
+instrument I built to refine it had no validation, and I published four figures from it.*
+
+⚠️ **AND I DID NOT RUN A CONTROL ON MY OWN MEASURE — after a night in which I retracted a sweep
+for exactly that class of failure.** *A peer had to build the control, and then I had to be told
+to point it at my own remaining number.* **The rule I take: a measure invented mid-task, on
+which a published figure depends, gets a decoy control BEFORE the figure ships — not after a
+peer supplies one.**
