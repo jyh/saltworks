@@ -1009,8 +1009,19 @@ OPEN ITEMS:
   rows ②-proper by the plan's own assignment: (1) M3's CONTROLS — the
   E-4 analogue with LW (task-B [LW rd=1 addr] on the overlap register,
   §1:343-346) and the SW writesWithin regression, ABSENT from
-  ExecutiveX1.lean (grep -F "Instr.LW" zero corpus-wide outside the two
-  arms); (2) M5 ENTIRE (§1:369-377) — the honesty fence itself is
+  ExecutiveX1.lean — VERDICT RE-TESTED AND HOLDS 12:4x, EVIDENCE REPLACED:
+  this row cited `grep -F "Instr.LW"` returning zero corpus-wide, which is an
+  ARTIFACT OF THE SPELLING — nobody ever writes the qualified form; `\.LW`
+  returns 30. A true claim on an instrument that cannot match anything, and
+  the first seat to re-run it would reasonably have concluded the CLAIM was
+  broken. Re-tested with a matching pattern: BOTH NAMED CONTROLS STILL ABSENT.
+  Context that belongs beside the verdict, since "absent" reads wider than it
+  is: the E-4 control FAMILY EXISTS (e4_writesWithin_pos + e4_writesWithin_neg,
+  ExecutiveX1.lean:243-250, both with #print axioms) but is built from LW-FREE
+  programs — ExecutiveX1 carries ONE `.LW`, inside `writesInstr`; and LW/SW are
+  NOT unverified — Certs/MemTrapResponse.lean proves four trap-response
+  theorems (lw/sw × misaligned/out-of-range), a DIFFERENT family from the
+  frame/partition controls this row is about; (2) M5 ENTIRE (§1:369-377) — the honesty fence itself is
   DISCHARGED: corrected and built at 697740b 06:43 (ISA.lean:1038,1051-1052
   now read "seven-instruction subset", 16,875,520 = 0.3929 %, undecodable
   99.6071 %; saltbuild EXIT=0, build arm).
