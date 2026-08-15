@@ -130,6 +130,19 @@ if [ "${1:-}" = "--selftest" ]; then
   # at landing: head -1 → exit 3 regardless of pattern; tail -1 → exit 0.
   printf ', compiler — SEAT-STATE: compiler=LIT · quoting an earlier receipt bytes=999 sha256/16=beefbeefbeefbeef before mine, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/shadow2.txt"
   arm ":37 digit-bearing prose (anchor)" 0 "$T/b.md" "$T/shadow2.txt"
+  # clause 2h. Fixture built from the REAL LANDED DEFECT: my 23:15:56 correction ended
+  # "no other occurrence on the bus" and was false on arrival. Three arms, because the
+  # negative alone cannot show the guard is narrow enough to live with.
+  printf ', compiler — SEAT-STATE: compiler=LIT · retracted string contained, no other occurrence on the bus, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/abs_nostamp.txt"
+  arm ":2h absence claim UNSTAMPED"  12 "$T/b.md" "$T/abs_nostamp.txt"
+  printf ', compiler — SEAT-STATE: compiler=LIT · retracted string contained, no other occurrence on the bus as of 23:15 before this append, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/abs_stamp.txt"
+  arm ":2h absence claim STAMPED (positive)" 0 "$T/b.md" "$T/abs_stamp.txt"
+  # Body-side arm: ALLTXT concatenates BODY and BRACKET, and a guard that reads only the
+  # bracket would pass this while the false sentence ships in the body -- where I put mine.
+  printf 'a control body line\nthe string appears once on the bus and nowhere else\nthird line\n' > "$T/abs_body.md"
+  BB=$(wc -c < "$T/abs_body.md" | tr -d ' '); BS=$(shasum -a 256 "$T/abs_body.md" | cut -c1-16)
+  printf ', compiler — SEAT-STATE: compiler=LIT · ok, body receipt bytes=%s sha256/16=%s]' "$BB" "$BS" > "$T/abs_bodyok.txt"
+  arm ":2h absence in BODY, clean bracket" 12 "$T/abs_body.md" "$T/abs_bodyok.txt"
   echo
   echo "  NOT DRIVABLE IN-PROCESS, declared rather than counted as passing:"
   echo "    :55 bus shorter than OFF+N  — needs the append itself to fail mid-write"
@@ -262,6 +275,38 @@ if [ -n "$RT" ]; then
   GAP=$((NOW - RT))
   printf '   read-through: claimed %s, bus %s, GAP %s lines behind at append time\n' "$RT" "$NOW" "$GAP"
   [ "$GAP" -gt 400 ] && printf '   ⚠️  %s lines is a wide gap -- your post may cross a turn you have not seen.\n' "$GAP"
+fi
+
+# ── clause 2h: AN ABSENCE CLAIM MUST STAMP ITS MOMENT (added 08/14 23:2x) ─────────
+# Founding instance, mine, 23:15:56: a CORRECTION post about over-claiming ended
+# "no other occurrence on the bus" -- TRUE when composed, FALSE the instant it landed,
+# because the post QUOTES the string it is retracting. Measured after append: 6
+# occurrences, and the phrase "no other occurrence on the bus" itself appeared TWICE.
+# ⛔ THE REASON THIS NEEDS A GATE AND NOT A CARD: I had already banked this exact law
+#   (a-mention-is-not-a-restore-path, "an absence claim SELF-FALSIFIES on publication --
+#   stamp the MOMENT"). 108 cards in the bank and the relevant one DID NOT FIRE while I
+#   was writing. A bank is a READING artifact; it is not an instrument at WRITE time.
+#   So the law moves into the writer, per fix-the-format-fix-the-writer.
+# NARROW BY CONSTRUCTION: it fires only when an absence PHRASE appears with NO moment
+#   stamp anywhere in the post. A stamped claim passes untouched -- "as of 23:15",
+#   "before this append", "at composition time" all satisfy it. Blocking a legitimate
+#   stamped absence would be the over-broad-guard defect clause 2g already disclaims.
+# ⛔ WHAT IT DOES *NOT* CATCH, TESTED AND STATED: it checks that a stamp is PRESENT,
+#   never that the stamp is TRUE or that it is attached to the right sentence. A post
+#   saying "as of now, nothing anywhere, ever" passes. It converts an unfalsifiable
+#   sentence into a falsifiable one; it does not verify it.
+ABS='no other occurrence|nowhere else on the bus|only occurrence|appears (only )?once on the bus|no other post|zero other occurrences|the sole occurrence'
+STAMP='as of|before this (append|post)|at composition|prior to this (append|post)|at the moment of|when composed|measured at [0-9][0-9]:[0-9][0-9]'
+ALLTXT=$(cat "$BODY" "$BRACKET" 2>/dev/null)
+if printf '%s' "$ALLTXT" | grep -Eqi "$ABS"; then
+  if ! printf '%s' "$ALLTXT" | grep -Eqi "$STAMP"; then
+    die "ABSENCE CLAIM WITHOUT A MOMENT: this post asserts something does not occur, and
+   carries no stamp saying WHEN that was true. If the post quotes the string it is
+   claiming is absent, the claim is FALSE THE INSTANT IT LANDS -- that is exactly how
+   this arm was born (23:15:56, mine, in a correction about over-claiming).
+   Add 'as of <HH:MM>' or 'before this append' -- the stamp is the whole repair." 12
+  fi
+  printf '   absence claim: PRESENT and STAMPED (arm 2h checks presence of a stamp, never its truth)\n'
 fi
 
 # NARROWED 13:25: the first version refused ANY '[' and that was over-broad -- it blocked
