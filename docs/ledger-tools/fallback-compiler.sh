@@ -72,7 +72,11 @@ DIRTY=$(git status --porcelain -- "${MINE[@]}" 2>/dev/null | grep -c . || true)
 UNPUSH=$(git rev-list --count origin/master..master 2>/dev/null || echo '?')
 STAMP=$(date '+%m/%d %H:%M:%S')
 
-printf 'FALLBACK-COMPILER %s · my-landing=%s · last-touch-any-seat=%s · MY-dirty=%s · unpushed=%s(cached, no fetch)\n' \
+# ⛔ 2026-08-15 10:0x — `unpushed` here is REPO-WIDE, not mine: five seats commit to this tree,
+#   so the count aggregates theirs with mine. Labelled rather than scoped, because "is anything
+#   unpushed in the shared tree" IS the useful heartbeat fact — but it must not wear my name.
+#   Same defect I corrected in my own close-line at 09:5x; this is the sibling surface.
+printf 'FALLBACK-COMPILER %s · my-landing=%s · last-touch-any-seat=%s · MY-dirty=%s · unpushed=%s(REPO-WIDE, cached, no fetch)\n' \
   "$STAMP" "$MYL" "$ANY" "$DIRTY" "$UNPUSH"
 printf '  scope: %s\n' "${MINE[*]}"
 
