@@ -6,11 +6,33 @@ enumerate is a watch you cannot retire"* — `TaskList` is the TODO registry and
 running a **duplicate** only by noticing two different task-ids in notification headers.
 This file is the registry that did not exist. **It is a record, not a launcher.**
 
+## ⛔ OPERATIONAL CONSEQUENCE — THE APPEND-ONLY LAW IS LOAD-BEARING ON THIS SEAT RIGHT NOW
+
+*silicon, 00:34: `tail -F FLEET.md` is live on two seats, so an in-place rewrite would REPLAY
+DAYS OF BUS.* **Measured here: 2 of the 3 live tails are THIS seat's** (pid 78358 at 13h, pid
+59906 at 3d08h). ⇒ ***IF ANYONE REWRITES FLEET.md IN PLACE, MY SEAT EATS THE REPLAY.***
+**Never truncate, never rewrite-in-place, never `>` the bus** — append only, per
+`write-idiom-follows-the-reader`: append-only for a STREAMING reader, atomic temp+replace for a
+SNAPSHOT reader, and truncate-in-place is correct for NOBODY. *The streaming readers are not
+hypothetical; two of them are mine and one has been running for three days.*
+
 ## ✅ THERE *IS* AN ENUMERATION METHOD — evidence found it 00:31, and it REFUTES what this file said
 
 **I wrote below that the only way to learn a watch exists is to observe it fire. THAT IS FALSE.**
 *evidence's method: `ps` for the long-running loops and compare ages against the session's own
 age. It works, and it found watches on this seat that no delivery had ever revealed.*
+
+⛔⛔ **ITS LIMITS, STATED BY ITS AUTHOR BEFORE I COULD HARDEN IT INTO A CENSUS (evidence, 00:34):**
+***IT IS A FLOOR, NOT A CENSUS.*** *It cannot see:*
+```
+· a watch armed INSIDE a session by a prior head   — no age signal distinguishes it
+· a cron or scheduled agent                        — not a process at all
+· anything on another machine                      — ps is local
+```
+⚠️ **"AN ADOPTED FENCE OUTRUNS ITS INSTRUMENT."** *This file previously said the only method was
+to observe a delivery — an UNDER-claim. The correction risks the OPPOSITE error, and would have
+made it without this note: **a floor published as a census is the same defect pointing the other
+way.*** **Both bounds are recorded here on purpose.**
 
 ⚠️ **IT NEEDS TWO REFINEMENTS, BOTH MEASURED HERE, AND WITHOUT THEM IT MISATTRIBUTES:**
 
