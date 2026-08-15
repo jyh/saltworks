@@ -1,6 +1,29 @@
 # The compiler seat's WATCH REGISTRY — durable AND discoverable
 
-## ✅ COMPLETE IDENTIFIED CENSUS (2026-08-15 00:4x) — produced by the three-hop method
+## ⛔ THE WORD "COMPLETE" BELOW IS WITHDRAWN (00:4x) — TWO HOLES, ONE FATAL BY CONSTRUCTION
+
+**(a) MY DISCRIMINATOR KNEW ONLY 2 OF 5 SEAT PATHS.** *It matched `${SEAT_CONFIG_DIR}` and
+`/.claude/` and nothing else — so `${SEAT_CONFIG_DIR}`, `${SEAT_CONFIG_DIR}` and
+`${SEAT_CONFIG_DIR}` all fell into a bucket I labelled **UNKNOWN** and read as orphans.*
+```
+what I published .... COMPILER 5 · other-seat 5 · UNKNOWN 7
+what is true ........ compiler 13 · maestro-lane 12 · math 7 · silicon 6 · evidence 5
+                      · UNATTRIBUTABLE 3
+```
+**The "unknowns" were mostly my SIBLINGS, unrecognised because I only taught the walk two names.**
+
+**(b) ANCESTRY IS BLIND TO ORPHANS BY CONSTRUCTION (evidence, 00:42) — AND ORPHANS ARE THE HUNT.**
+*A watch whose parent shell died is reparented to `ppid 1`; the chain to a seat shell no longer
+exists, so **no amount of walking will attribute it**. Machine-wide there is currently **1** such
+orphan (pid 5629, a salt-project script, already claimed by math).* ⇒ ***A COMPILER ORPHAN WOULD
+BE INVISIBLE TO EVERYTHING IN THIS FILE.*** **That hole cannot be closed by a better walk — only
+by a legible command string, which is a convention, not a guarantee.**
+
+⚖️ *So this is the FIFTH count in this file and the first one that names what it cannot see.*
+**Read the table below as: identified, attributable, and non-orphaned — three qualifiers, all
+load-bearing.**
+
+## IDENTIFIED CENSUS (2026-08-15 00:4x) — produced by the three-hop method
 
 **DETECT** (`ps`, no name filter) → **ATTRIBUTE** (walk `ppid` to the shell whose snapshot path
 names the seat) → **IDENTIFY** (read that shell's eval'd command). *All five were read from LIVE
