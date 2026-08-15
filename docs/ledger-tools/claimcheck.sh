@@ -35,9 +35,30 @@ B=${1:-}
 # Shapes that assert a relation over a POPULATION. Deliberately wide.
 PAT='the (first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth)|[0-9]+(st|nd|rd|th) (instance|time|occurrence)|shares? (only )?[a-z0-9]+ (member|element|entr)|[0-9]+ of (them|the|these|those|my|its)|the difference is|all (three|four|five|six|of them)|both of|none of (them|these)|only [a-z0-9]+ (exist|remain|survive)|[0-9]+ distinct'
 
+# MENTION vs USE. On its FIRST run — against the post announcing it — this tool fired on a
+# sentence QUOTING the pattern it looks for, not on a claim. My own bank names that exactly:
+# THE POST ANNOUNCING A GUARD IS ITS WORST TRAFFIC, and the describing sentence is what walks
+# through. Fixed the way clause 2h in bus_custody.sh was fixed after the identical failure —
+# strip QUOTED SPANS (backtick, double, single) before matching, so a quotation cannot satisfy
+# the pattern. Re-tested after: still 3 of 3 on the real defect body, because none of those
+# three claims was written inside quotes.
+# ⛔ AND THE FIRST FIX FOR THAT BROKE DETECTION — caught only because the discriminating test
+#   was already written. Stripping quoted spans with sed AFTER flattening the file to one line
+#   pairs the opening quote of one sentence with the closing quote of a LATER, UNRELATED one and
+#   deletes everything between: 2 of the 3 real defects vanished, and the run went GREEN.
+#   ⇒ STRIP INSIDE THE SENTENCE, NOT ACROSS THE DOCUMENT. Split into records first, then remove
+#     quoted spans within each record. A whole-document strip is not a stricter version of a
+#     per-sentence one — it is a different operation with a much larger blast radius.
+#   ⚠️ REGISTERED FOR bus_custody.sh clause 2h: it strips quoted spans with sed on flattened text
+#     and splits into sentences AFTERWARD, which is this exact order. NOT yet measured there.
 HITS=$(printf '%s' "$(cat "$B")" | tr '\n' ' ' \
-  | sed -e 's/`[^`]*`/ /g' \
-  | awk -v p="$PAT" 'BEGIN{RS="[.;!?]"} { s=tolower($0); if (s ~ p) { gsub(/^[ \t]+/,""); print "   • " $0 } }')
+  | awk -v p="$PAT" 'BEGIN{RS="[.;!?]"}
+      { s=$0
+        gsub(/`[^`]*`/, " ", s)
+        gsub(/"[^"]*"/, " ", s)
+        s=tolower(s)
+        if (s ~ p) { line=$0; gsub(/^[ \t]+/,"",line); print "   • " line }
+      }')
 
 if [ -z "$HITS" ]; then
   printf '✅ claimcheck: no set-arithmetic SHAPES matched.\n'
