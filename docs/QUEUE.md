@@ -1001,6 +1001,24 @@ OPEN ITEMS:
   TONIGHT is the named target; the fabbed-is-verified law governs
   the SUBMISSION, not the first measurement run — V1-V3/V9/V10
   land behind the layout, before any tapeout word.**
+- **⭐ ② RE-STATED AT THE MORNING ROLL-CALL (8/15 06:4x, the helm; the
+  full walk of memory-design-v1.md §1 against the landed tree, existence
+  at the bytes): ② is COMPLETE-WITH-NAMED-RESIDUE, not EXECUTED-whole as
+  the entry below said — the below named only M0/M1+M1a/M2/M4, and the
+  omission is exactly how the residue went unrecorded. THE RESIDUE, both
+  rows ②-proper by the plan's own assignment: (1) M3's CONTROLS — the
+  E-4 analogue with LW (task-B [LW rd=1 addr] on the overlap register,
+  §1:343-346) and the SW writesWithin regression, ABSENT from
+  ExecutiveX1.lean (grep -F "Instr.LW" zero corpus-wide outside the two
+  arms); (2) M5 ENTIRE (§1:369-377) — and its five-site numeric
+  recompute is a PUBLISHED-FACING HONESTY FENCE now false of record:
+  ISA.lean:1038-1052 says "five-instruction subset"/0.1976% while decode
+  accepts SEVEN at 0.3929%, quoted onward at RegWrite.lean:36,
+  hdl-c4-composition-check-0807.md:227, riscv-core-campaign-v0.md:96,100,
+  EVIDENCE-campaign.md:2047. The residue is kernel-lane work
+  (math+compiler shared per the plan); ③'s own doors and gates are
+  unchanged by it. Door 2 of ③ noted LANDED since (fb3842a,
+  Decoder.lean:333). Full roll-call table in the session record.**
 - **⭐⭐ P2 RECONCILED — THE REGISTER WAS THREE DAYS STALE AND THE
   STALENESS MANUFACTURED A DEBT (8/14 17:5x, the evening helm, Fable
   hand): tonight three seats reconstructed "① maestro-owed TONIGHT"
