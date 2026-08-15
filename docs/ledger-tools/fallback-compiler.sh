@@ -8,9 +8,21 @@
 #   against my own kit found something worse than the class they named: MY FALLBACK
 #   HAD NO SOURCE FILE. silicon has docs/silicon-tools/fallback-silicon.sh, tracked
 #   and committed. Mine lived only inside a Monitor definition — I could read its
-#   OUTPUT and could not find its SOURCE anywhere on disk. It dies at reboot and a
-#   successor arms nothing, however faithfully it has been firing all night.
+#   OUTPUT and could not find its SOURCE anywhere on disk, so a successor arms nothing,
+#   however faithfully it has been firing all night.
 #   ⇒ A WATCH THAT CANNOT BE RE-ARMED IS A WATCH YOU HAVE ONCE.
+#   ⚠️ THIS COMMENT SAID "it dies at reboot" WHEN IT LANDED. WITHDRAWN 23:4x AS UNTESTED --
+#      I never rebooted anything. What IS measured points the other way: task b3ki008vg,
+#      armed by session b2d20534 on Aug 12 18:21, was still firing Aug 14 23:37. A WATCH
+#      OUTLIVES ITS SESSION BY DAYS. The claim needing no test is that there is NO SOURCE.
+#      I withdrew this in the boot brief first and left it standing HERE for four minutes --
+#      a fix lands where the pain was felt, and the sibling surface has not hurt yet.
+#   ⛔ AND THERE IS NO WAY TO ENUMERATE WHAT THIS SEAT HAS ARMED. TaskList is the TODO
+#      registry and returns "No tasks found". Two fallbacks were running at 23:39 --
+#      bztnx4tzg (this session) and the b3ki008vg orphan -- and I found out only by reading
+#      two task-ids in notification headers. A WATCH YOU CANNOT ENUMERATE IS A WATCH YOU
+#      CANNOT RETIRE. I left the orphan running deliberately: it delivers, and silicon lost
+#      a cadence alarm the same night to their own cleanup command.
 #
 # ⛔ AND THE DEFECT THAT PROMPTED IT — A STALE OWNERSHIP GLOB, MACHINE-EMITTED:
 #   rev3 printed `my-landing=ef50705 (glob: HDL,Certs,docs/compiler-*,docs/post-integrity-*)`
