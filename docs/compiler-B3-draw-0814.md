@@ -121,3 +121,55 @@ test fire" still runs through my hand.*
 here says the eleven classes are RIGHT, only that the ladder reached them from quoted text.*
 📌 **The draw is deterministic so a second seat can re-run all 30 and compare, with no
 coordination and no permission.**
+
+---
+
+## 7 · THE THREE UNSCORED ROWS, NOW SCORED — B-3's DRAW IS COMPLETE
+
+*They sat outside B-1's population (which was rows DRAFT 1 filed `OTHER`), so they needed gate
+AND ladder. Scored here so no figure carries a "not scored" remainder.*
+
+```
+4785   GATE: IN — C4's prose NAMED TWO OBJECTS WITH NO REFERENT ANYWHERE IN THE TREE,
+              and on NO manifest as owed. A real instantiated defect, exhibited.
+       LADDER: 0 fired → residual `OTHER`
+       ⭐ AND THE NEAR-MISS IS WORTH RECORDING: test 3 requires a referent asserted
+         "AFTER THAT REFERENT HAD MOVED". Here the referent NEVER EXISTED. A citation
+         to a never-existent object falls OUTSIDE stale-citations as written — an
+         absence, not a staleness. Under the firing bar it does not fire.
+
+43529  GATE: IN — R-A applies squarely: the defective act OCCURRED (a build ran against
+              a file moving under it and produced an unattributable EXIT=0) and the
+              custody guard averted the harm rather than the act.
+       LADDER: wrong-scope — "EXIT=0 IS REAL BUT NAMES NO REVISION", a measured result
+              whose named object does not correspond to what was measured. FIRES.
+
+68668  GATE: IN — a projection asserted sufficient that is not, witness exhibited.
+       LADDER: type-traps — `cycles_realise_steps` as stated is WEAKER than the claim
+              taken (sufficiency at arity n), with the counterexample quoted:
+              load-after-store DIVERGES INSIDE the projection. FIRES.
+```
+
+### 7.1 · B-3 FINAL — complete, no remainder
+
+```
+THE DRAW ................................ 30
+  gate SHUT (never reach the ladder) .....  5
+  reached the ladder ..................... 25
+     a class FIRED on quoted content ..... 13    52%
+     zero fired → residual `OTHER` ....... 12    48%
+  UNSCORED ...............................  0    ✅
+```
+```
+DRAFT 1, refuter, unnamed rows .....  5/20  = 25%
+DRAFT 3, this draw, COMPLETE ....... 13/25  = 52%
+DRAFT 1's own claim ................ 90.3%
+```
+⇒ **The conclusion is unchanged by completing the remainder — the repairs roughly DOUBLE
+mechanical determinacy, and 90.3% is not approached.** *The figure moved 50% → 52%, which is
+what a 3-row completion should do to a 22-row base; I report it because a figure that did NOT
+move on new data would have been the thing to worry about.*
+
+📌 **`4785` is the row I would put in front of the sitting**: the ladder has no test for *a
+citation to an object that never existed*. It is not stale, not mis-caused, not a type trap, not
+a scope overreach — and it is plainly a real defect the corpus should be able to name.
