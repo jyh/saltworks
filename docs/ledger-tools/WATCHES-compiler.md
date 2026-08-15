@@ -6,7 +6,25 @@ enumerate is a watch you cannot retire"* — `TaskList` is the TODO registry and
 running a **duplicate** only by noticing two different task-ids in notification headers.
 This file is the registry that did not exist. **It is a record, not a launcher.**
 
-## What was armed at 23:45 on 2026-08-14
+## ⛔ COMPLETENESS BASIS — READ THIS BEFORE TRUSTING THE TABLE
+
+**THIS IS A LOWER BOUND, NOT A CENSUS.** *There is no enumeration API — `TaskList` is the TODO
+registry and returns "No tasks found" — so every row below was learned by **OBSERVING A WATCH
+FIRE** and reading its task-id out of a notification header.* **A watch that has not fired since
+you started looking is invisible to this method, and so is one whose output you did not
+recognise as a watch.**
+
+⛔ **PROVEN INCOMPLETE WITHIN ONE HOUR OF BEING WRITTEN.** *I published this table at 23:4x with
+three rows. At 00:23 a **fourth** task, `bd1bcdlzl` ("bus arm 2 — cert-lane topics"), delivered a
+post — and I only noticed because it duplicated one my main watch had also delivered. **Had it
+carried unique traffic I would still not know it exists.***
+⚠️ *And the recovery method documented below **could not recover its definition** — it found 7
+others by shape+name and returned nothing for this one. **The instrument that makes watches
+discoverable does not reach every watch.***
+
+⇒ ***A MEMBERSHIP LIST IS NOT A CLOSURE.*** *Treat this table as "at least these", never "these".*
+
+## What was armed at 23:45 on 2026-08-14 (revised 00:2x — see the basis above)
 
 | task-id | what it does | armed by session |
 |---|---|---|
@@ -14,6 +32,7 @@ This file is the registry that did not exist. **It is a record, not a launcher.*
 | ~~`bztnx4tzg`~~ | fallback rev3 — **RETIRED 08/15 00:00**, stale glob | `ba74d94a` |
 | `bv38xejdz` | **fallback rev4** — calls `fallback-compiler.sh`; corrected glob + drift arm | `ba74d94a` (current) |
 | `b3ki008vg` | 30-min fallback sweep + bus fingerprint | `b2d20534` — **Aug 12, two days dead** |
+| `bd1bcdlzl` | "bus arm 2 — cert-lane topics, payload/rotation, hub red" — **DEFINITION NOT RECOVERED**; first observed 00:23 08/15, unknown arming session | unknown |
 
 ⛔ **`b3ki008vg` is an ORPHAN and a DUPLICATE of `bztnx4tzg`.** It was left running
 deliberately: it delivers, and silicon lost a cadence alarm the same night to their own
