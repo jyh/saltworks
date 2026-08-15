@@ -143,6 +143,13 @@ if [ "${1:-}" = "--selftest" ]; then
   BB=$(wc -c < "$T/abs_body.md" | tr -d ' '); BS=$(shasum -a 256 "$T/abs_body.md" | cut -c1-16)
   printf ', compiler — SEAT-STATE: compiler=LIT · ok, body receipt bytes=%s sha256/16=%s]' "$BB" "$BS" > "$T/abs_bodyok.txt"
   arm ":2h absence in BODY, clean bracket" 12 "$T/abs_body.md" "$T/abs_bodyok.txt"
+  # THE EXPLOIT ARM, and it is not hypothetical: this is my own 23:18:45 post reduced.
+  # A stamp exists in the post but in ANOTHER SENTENCE -- there, inside the example
+  # illustrating what 2h cannot catch. v1 passed this. Co-located v2 must refuse it.
+  printf 'a control body line.\nno other occurrence on the bus.\nan illustration of a useless stamp is as of now nothing anywhere ever.\n' > "$T/abs_far.md"
+  FB=$(wc -c < "$T/abs_far.md" | tr -d ' '); FS=$(shasum -a 256 "$T/abs_far.md" | cut -c1-16)
+  printf ', compiler — SEAT-STATE: compiler=LIT · ok, body receipt bytes=%s sha256/16=%s]' "$FB" "$FS" > "$T/abs_farok.txt"
+  arm ":2h stamp in ANOTHER sentence"  12 "$T/abs_far.md" "$T/abs_farok.txt"
   echo
   echo "  NOT DRIVABLE IN-PROCESS, declared rather than counted as passing:"
   echo "    :55 bus shorter than OFF+N  — needs the append itself to fail mid-write"
@@ -287,26 +294,37 @@ fi
 #   stamp the MOMENT"). 108 cards in the bank and the relevant one DID NOT FIRE while I
 #   was writing. A bank is a READING artifact; it is not an instrument at WRITE time.
 #   So the law moves into the writer, per fix-the-format-fix-the-writer.
-# NARROW BY CONSTRUCTION: it fires only when an absence PHRASE appears with NO moment
-#   stamp anywhere in the post. A stamped claim passes untouched -- "as of 23:15",
-#   "before this append", "at composition time" all satisfy it. Blocking a legitimate
-#   stamped absence would be the over-broad-guard defect clause 2g already disclaims.
-# ⛔ WHAT IT DOES *NOT* CATCH, TESTED AND STATED: it checks that a stamp is PRESENT,
-#   never that the stamp is TRUE or that it is attached to the right sentence. A post
-#   saying "as of now, nothing anywhere, ever" passes. It converts an unfalsifiable
-#   sentence into a falsifiable one; it does not verify it.
+# NARROW BY CONSTRUCTION: it fires only on an absence PHRASE whose OWN SENTENCE carries
+#   no moment stamp. A stamped claim passes untouched -- "no other occurrence as of
+#   23:15", "nowhere else on the bus before this append". Blocking a legitimate stamped
+#   absence would be the over-broad-guard defect clause 2g already disclaims.
+# ⛔ WHAT IT DOES *NOT* CATCH, TESTED AND STATED: it checks that a stamp is PRESENT and
+#   CO-LOCATED, never that it is TRUE. "no other occurrence as of now" passes, and so
+#   does a stamp that names the wrong time. It converts an unfalsifiable sentence into a
+#   falsifiable one; it does not verify it.
 ABS='no other occurrence|nowhere else on the bus|only occurrence|appears (only )?once on the bus|no other post|zero other occurrences|the sole occurrence'
 STAMP='as of|before this (append|post)|at composition|prior to this (append|post)|at the moment of|when composed|measured at [0-9][0-9]:[0-9][0-9]'
 ALLTXT=$(cat "$BODY" "$BRACKET" 2>/dev/null)
-if printf '%s' "$ALLTXT" | grep -Eqi "$ABS"; then
-  if ! printf '%s' "$ALLTXT" | grep -Eqi "$STAMP"; then
-    die "ABSENCE CLAIM WITHOUT A MOMENT: this post asserts something does not occur, and
-   carries no stamp saying WHEN that was true. If the post quotes the string it is
+# ⛔ TIGHTENED 23:2x, ONE POST AFTER 2h LANDED, AND THE HOLE WAS EXPLOITED BY MY OWN
+#   DISCLOSURE. v1 asked only whether a stamp existed ANYWHERE in the post. The post
+#   announcing 2h quoted `"as of now, nothing anywhere, ever"` as an ILLUSTRATION of what
+#   2h cannot catch -- and that quotation was the ONLY stamp token in the whole post, so
+#   it satisfied v1 and my real absence claims shipped unstamped. Measured, not guessed:
+#   grep -Eoi over the sent bytes returned exactly 2 hits, both inside that example.
+# ⇒ A GUARD'S OWN STATEMENT OF ITS WEAKNESS WAS THE THING THAT WALKED THROUGH IT.
+#   The repair is SCOPE: the stamp must sit in the SAME SENTENCE as the claim it dates.
+BAD=$(printf '%s' "$ALLTXT" | tr '\n' ' ' | awk -v abs="$ABS" -v st="$STAMP" '
+  BEGIN{RS="[.;]"} { s=tolower($0); if (s ~ abs && s !~ st) c++ } END{print c+0}')
+if [ "${BAD:-0}" -gt 0 ]; then
+  die "ABSENCE CLAIM WITHOUT A MOMENT: $BAD sentence(s) assert something does not occur
+   and carry no stamp saying WHEN that was true. If the post quotes the string it is
    claiming is absent, the claim is FALSE THE INSTANT IT LANDS -- that is exactly how
    this arm was born (23:15:56, mine, in a correction about over-claiming).
-   Add 'as of <HH:MM>' or 'before this append' -- the stamp is the whole repair." 12
-  fi
-  printf '   absence claim: PRESENT and STAMPED (arm 2h checks presence of a stamp, never its truth)\n'
+   A stamp ELSEWHERE in the post does NOT count: v1 accepted one and was defeated by
+   its own disclaimer quoted as an example. Put 'as of <HH:MM>' or 'before this append'
+   IN THE SAME SENTENCE as the claim -- co-location is the whole repair." 12
+elif printf '%s' "$ALLTXT" | grep -Eqi "$ABS"; then
+  printf '   absence claim: PRESENT and CO-LOCATED with a stamp (2h checks position, never truth)\n'
 fi
 
 # NARROWED 13:25: the first version refused ANY '[' and that was over-broad -- it blocked
