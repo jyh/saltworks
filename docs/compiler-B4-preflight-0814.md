@@ -124,3 +124,54 @@ OWED   the 20 contaminated agreed-`OTHER` rows — runnable, but reported SEPARA
 OWED   the reading (§2): all 110, or the 42? The denominator is the sitting's to fix
 OWED   a SECOND HAND on these 22, because the pass-1 coder cannot be the held-out scorer
 ```
+
+---
+
+## 6 · ⛔ THE OTHER 20 ARE NOT "REPORT SEPARATELY" — THEY ARE UNSCORABLE FROM THIS SEAT
+
+**I set out to run them as a second, separately-labelled figure. Scoring stopped at the sixth
+row, `12767`, which the codebook rules on explicitly — *"12767/75501/52908 in, 59985/75264/6418
+out, all now derived"* (repair C). I already knew its answer.**
+
+**So I measured how far that reaches:**
+```
+of the 20 contaminated agreed-`OTHER` rows, how many have a codebook
+verdict-word in their immediate context, in a file I have read in full?
+
+                                                        20 / 20
+and three are named OUTRIGHT as recovered by R-A / R-B: 39087 · 72058 · 72396
+```
+
+⇒ ***A SURVIVAL FIGURE FROM ME OVER THESE 20 WOULD NOT BE A MEASUREMENT. IT WOULD BE A
+TRANSCRIPTION WITH A PERCENT SIGN.***
+
+### 6.1 · Why "report it separately" was the wrong protection
+
+*I proposed at §4 to run all 42 and report the 22 clean and the 20 disclosed side by side,
+never pooled. **That protects the clean figure from the dirty one. It does not make the dirty
+one exist.*** A separately-labelled number that is really a recollection is worse than no
+number, because the label makes it look like data that was merely caveated.
+
+### 6.2 · Who can score them, stated plainly
+
+```
+NOT compiler — read DRAFT 2/3 in full tonight
+NOT math, silicon or the helm — all worked the amendment today
+⇒ B-4's contaminated half needs a hand that has NOT read the codebook, and it is
+  possible that no such hand currently exists on this fleet.
+```
+📌 **That is the finding, and it is more useful than the figure I set out to produce: the
+amendment's own validation asset was consumed by the amendment's own drafting, and the seats
+best placed to measure it are precisely the ones disqualified by having built it.**
+
+### 6.3 · What B-4 therefore delivers, and what it cannot
+
+```
+DELIVERED   the 22 genuinely held-out rows: 16 survive / 2 specifics / 4 EXCLUDED,
+            contested 5 — with my pass-1 prior declared and a second hand requested
+NOT DELIVERABLE FROM THIS SEAT   the remaining 20
+STILL OPEN  the reading (all 110 or the 42?) — the sitting's to fix
+```
+⚠️ **And the honest consequence for the coverage figure B-4 must sit beside: it will rest on
+n=22, not n=42 and not n=110, unless an unexposed hand is found.** *That is a smaller base than
+the codebook anticipated, and the reason is not that the work was skipped.*
