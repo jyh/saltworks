@@ -62,3 +62,62 @@ asking what the post is ABOUT. Both readings are defensible on the ratified text
 text.** *That is not a coder-quality problem and no amount of briefing repairs it — it is a
 gap in the criterion, and it is the gap a determinacy audit would report as low agreement
 without being able to say WHY.*
+
+---
+
+## 4 · A STRUCTURAL EXCLUSION, FOUND MID-SWEEP — AND THE INSTRUMENT DEFECT THAT ALMOST HID IT
+
+**Trigger:** batch 82/289 returned **six EXCLUDED-G2 in eight rows, all six helm-authored.**
+A verdict that tracks the AUTHOR rather than the ACT would produce exactly that and would
+look principled, so I tested it instead of continuing.
+
+### 4.1 · The instrument was wrong first, and its blind spot was correlated
+
+My author-attribution regex required `H:MM` and **no seconds**. The bus header format gained
+seconds partway through the campaign.
+
+```
+rows unattributed by the ORIGINAL regex ....... 66 of 289  = 22.8%
+  and the miss was NOT random: it removed every header of the LATER format,
+  i.e. the most recent era of the corpus — a blind spot CORRELATED with time.
+rows unattributed after the fix ................ 0
+```
+⛔ **I was one command from publishing a seat-correlation finding computed over a population
+a quarter of which my own tool could not read.** *Caught only because I printed the per-author
+TABLE instead of the total.* **The corrected numbers make the finding STRONGER, which is the
+uncomfortable part: a broken instrument was under-reporting the very effect I was about to claim.**
+
+### 4.2 · The exclusion is real, and it is BY RULE — not bias
+
+```
+CORRECTED population, all 289 rows walked
+  silicon 76 (26.3%) · compiler 72 (24.9%) · maestro 58 (20.1%)
+  math 42 (14.5%) · evidence 41 (14.2%)
+
+helm rows scored so far ....... 10 of 58
+  EXCLUDED-G2 .................. 9
+  IN ........................... 1  — and row 9 is itself CONTESTED (seam A)
+```
+
+⚖️ **THIS IS NOT GATE DRIFT. It is §2.2(a) operating as ratified.** *The rule is
+author-relative by construction: EXHIBIT (this post) → IN; CITATION (another party's act) →
+the family applies to the cited party. **The helm's function is to register other seats'
+acts**, so helm posts are citation-form by role, and the exclusion follows from the rule
+rather than from anything about their quality.* ⇒ ***An author-correlated verdict
+distribution is a PREDICTION of §2.2(a), not evidence against the gate.***
+
+### 4.3 · ⛔ THE OBLIGATION THIS PUTS ON B-2, REGISTERED BEFORE B-2 STARTS
+
+**If the observed rate holds, the gate removes ~52 of 58 helm rows — about 18% of the
+corpus, all from one seat.** *(Projection from 10 scored of 58. Stated as a projection,
+with its denominator, because it is one.)*
+
+⇒ **ANY B-2 COVERAGE FIGURE COMPUTED OVER WHAT THE GATE LEAVES INHERITS A NON-RANDOM,
+SEAT-SHAPED HOLE.** Governance material — rulings, scope boundaries, dispatch — will appear
+almost absent from the surviving corpus. **That absence is a GATE CONSEQUENCE, and if B-2
+reports it as a corpus property it will be the same error this seat already made once and
+banked: a criterion gap reported as a corpus defect, because that was the better headline.**
+
+📌 **B-2 MUST therefore publish coverage with the helm share stated separately, or state
+that its scope is non-governance material. Registered here, before the number exists, so it
+cannot be chosen after seeing which framing flatters the result.**
