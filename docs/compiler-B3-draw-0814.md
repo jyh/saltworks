@@ -58,3 +58,66 @@ plausibility is not enough."* **A test I can argue for but not quote does not fi
   determinacy figure is not immune to it.*
 - ⇒ **A second hand re-running this draw is worth more than any number I produce from it, and
   the draw is deterministic precisely so that another seat can.**
+
+---
+
+## 6 · THE RESULT — DETERMINACY MEASURED, WITH EVERY DENOMINATOR NAMED
+
+**Firing bar applied throughout: the codebook's own — *"each test must actually FIRE on quoted
+content — plausibility is not enough."* A test I could argue for but not quote did not fire.**
+
+```
+THE DRAW ................................... 30
+  gate SHUT in B-1 (never reach the ladder)   5   33588 35783 37249 47070 57941
+  UNSWEPT — gate and ladder both owed .....   3   4785 43529 68668   ⚠️ NOT SCORED
+  reached the ladder ......................  22
+
+OF THE 22 THAT REACHED THE LADDER
+  a class FIRED on quoted content .........  11    50%
+  zero tests fired → residual `OTHER` .....  11    50%
+```
+
+### 6.1 · The eleven that decided, and the test that fired
+
+```
+wrong-scope   1577  "the check that matters is NARROWER than unaudited"
+              38363 "four date formats" vs SIX prefix STRINGS / THREE format SHAPES
+              53458 a disclaimer contradicting the measurement it accompanies
+              61392 "IT FINDS WATCHERS BUT CANNOT SAY WHOSE" — 13 counted, none attributed
+              66155 main.tex:242, a flat ABSENCE claim about four theorems
+              69485 a gate claimed per-LANE that holds per-TARGET, 3 of 5, exceptions named
+              77393 a set whose coverage excludes decoder_correct, the hub every file cites
+type-traps    41243 a predicate satisfied by a program that still does not fit
+              71730 a card lemma FALSE without 1 ≤ E, counterexample = the EMPTY SET
+              81502 "identity except X" with X enumerated ONE FIELD SHORT
+stale-cites   74994 All.lean's OWED list vs the anchor table's OPEN rows — a stale ABSENCE
+```
+
+### 6.2 · Against the figure B-3 exists to re-measure
+
+> *"The refuter measured DRAFT 1 at **5/20 mechanically decided** on unnamed rows against its
+> own claimed **90.3%** — that gap is what must be re-measured."*
+
+```
+DRAFT 1, refuter, unnamed rows ......  5/20  = 25%
+DRAFT 3, this draw, unnamed rows .... 11/22  = 50%
+DRAFT 1's own claim ................. 90.3%
+```
+⇒ ***THE REPAIRS ROUGHLY DOUBLE MECHANICAL DETERMINACY — AND IT REMAINS NOWHERE NEAR 90.3%.***
+*The claimed figure is not approached by the ratified ladder on rows the file has not fitted.*
+
+⚠️ **DENOMINATORS, STATED BECAUSE TONIGHT TAUGHT ME WHAT AN UNSTATED ONE COSTS:** *50% is
+**class-fired over rows that reached the ladder** (11/22). It is NOT 11/30 (37%), which would
+count gate-shut rows as undecided when the gate did decide them; and it is NOT 16/27 (59%),
+which would count `EXCLUDED` as a class. **Three rows are unscored and are excluded from every
+figure above rather than silently absorbed.***
+
+### 6.3 · What this does NOT establish
+
+⛔ **I hold a pass-1 class on all 30 rows.** *A determinacy figure is less exposed to that than a
+survival figure — determinacy asks whether the RULE decides, not whether I agree — but "did a
+test fire" still runs through my hand.*
+⛔ **50% is a determinacy rate, NOT an accuracy rate.** *No key exists for these rows; nothing
+here says the eleven classes are RIGHT, only that the ladder reached them from quoted text.*
+📌 **The draw is deterministic so a second seat can re-run all 30 and compare, with no
+coordination and no permission.**
