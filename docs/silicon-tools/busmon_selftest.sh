@@ -106,5 +106,26 @@ chk "seconds header after OWN post"   'SWALLOW-MARKER'             1
 #     is how this file got four disagreeing copies of the pattern.
 chk "alnum minute still survives"     'ALNUMMIN-MARKER'            1
 
+# 16. ⛔ THE YEARWRAP ARM, CONTROLLED FOR THE FIRST TIME 2026-08-15. The arm was
+#     REPAIRED (a Dec->Jan minute-key drop of ~535,674 is a ROLLOVER, accepted;
+#     jitter is <2000, rejected) and then NEVER TESTED -- it had only ever run on
+#     input that could not exercise it. A criterion never shown to fail has not
+#     been shown to discriminate, and this one guards a WHOLE-YEAR outage that
+#     starts silently at midnight. Negative control: set YEARWRAP small and this
+#     NEGATIVE CONTROL, and MIND THE DIRECTION:
+#         AWKPROG=<copy with YEARWRAP = 9999999> sh busmon_selftest.sh
+#       -> "year rollover" FAILS got=0, "old-year post" still PASSES.
+#     ⛔ TWO WRONG CONTROLS BEFORE THIS ONE, both green, both worthless:
+#      (1) fixture used ADJACENT HEADERS, so hdrcomplete=1 short-circuited the arm
+#          before it was ever consulted -- busmon.awk:126 had ALREADY recorded that
+#          exact fixture error from an earlier rev and I re-committed it unread;
+#      (2) I mutated YEARWRAP *DOWN* to 10. That makes the arm MORE permissive
+#          (535674 > 10 is true), so it CANNOT fail. A mutation must move the knob
+#          toward REFUSING, and "I changed the value" is not "I changed the verdict".
+#     I also wrote "verified failing" into this file BEFORE running it. It was
+#     false when typed. The run is the verification; the sentence is not.
+chk "year rollover NOT read as jitter" 'YEARWRAPMARK'             1
+chk "old-year post still emitted"      'YEARWRAPPRE'              1
+
 [ "$rc" = 0 ] && echo "ALL PASS" || echo "FAILURES PRESENT — do not arm"
 exit $rc

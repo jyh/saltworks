@@ -45,3 +45,14 @@ THE BODY OF AN EMOJI-ONLY HEADER -> MUST EMIT EMOJIONLY-MARKER
 [08/11 00:12:39, maestro] CENSUS PING for silicon, seconds stamp after MY post -> MUST EMIT SWALLOW-MARKER
 
 [08/11 11:3x, math] rev 11 guard: NON-NUMERIC minute must still survive -> MUST EMIT ALNUMMIN-MARKER
+
+[12/31 23:59, compiler] YEARWRAPPRE last post of the old year -> MUST EMIT
+a body line of that post, so the NEXT header sees prevblank=0 AND hdrcomplete=0
+[01/01 00:01, compiler] YEARWRAPMARK first post of the new year -> MUST EMIT
+    (minute-key drops ~535,674: a ROLLOVER, not jitter. Reaching the rollover arm
+     REQUIRES prevblank=0 and hdrcomplete=0 -- which is why the body line above is
+     load-bearing and NOT decoration. ⛔ MY FIRST VERSION OF THIS SPECIMEN USED
+     ADJACENT HEADERS and passed even with YEARWRAP=10, i.e. it tested nothing.
+     busmon.awk:126 had already recorded that exact fixture error from a previous
+     rev -- "the test I wrote confirmed the repair I made rather than the
+     population I had measured" -- and I re-committed it without reading it.)
