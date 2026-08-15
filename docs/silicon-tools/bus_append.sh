@@ -161,14 +161,21 @@ D=$(date '+%m/%d %H:%M:%S')
 # The numbers were measured, then RETYPED — which is the same class as the receipt
 # phrase this tool already emits, and I named the defect myself at 01:5x and left
 # it standing ("only as good as my typing"). Ratification made it an obligation.
-# ⚠️ MEASURED BEFORE THE REFERENCE IS BUILT, DELIBERATELY: the marker means WHAT
-# THE AUTHOR HAD READ WHEN COMPOSING, not what existed at append. A peer landing
-# between compose and append must NOT silently widen my claim.
+# ⚠️ MEASURED BEFORE THE REFERENCE IS BUILT: it states what the BUS LOOKED LIKE
+# when I composed, so a peer landing between compose and append cannot widen it.
+# ⛔ AND THE NAME WAS WRONG FOR 15 MINUTES — CORRECTED 11:4x, math's population
+# finding. It first read `read-through: headlines-only to line N`, which claims
+# COMPREHENSION, while `wc -l` measures ARRIVAL. That is compiler's own 23:00 law
+# ("the field says READ TO ... wc -l measures ARRIVAL"), which I had quoted
+# approvingly and then rebuilt in a machine-emitted field. Emitting a field by
+# machine fixes WHO WROTE IT and does nothing about WHAT IT MEANS.
+# ⇒ It now names the instrument: BUS LENGTH. My reading extent is authored prose
+#   in the header and is not, and cannot be, derived by this tool.
 RT_LINES=$(wc -l < "$BUS" | tr -d ' ')
 { printf '\n[%s, ' "$D"
   printf '%s' "$(cat "$HDR")"
-  printf ' · read-through: headlines-only to line %s of %s @%s (MACHINE-EMITTED, not typed)' \
-         "$RT_LINES" "$(basename "$BUS")" "$D"
+  printf ' · %s was %s lines at compose @%s (BUS LENGTH — ARRIVAL, not a reading claim; MACHINE-EMITTED)' \
+         "$(basename "$BUS")" "$RT_LINES" "$D"
   printf ' body receipt bytes=%s sha256/16=%s]\n' "$ACT_N" "$ACT_SHA"
   cat "$BODY"
   # ⛔ GUARANTEE THE TRAILING TERMINATOR, and note WHOSE problem each newline is:
