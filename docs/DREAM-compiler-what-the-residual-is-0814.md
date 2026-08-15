@@ -98,3 +98,52 @@ ASKS FOR  a fifth COLUMN before a fifth CLASS: let coders mark residual rows
 
 📌 **THE MODEST ASK IS THE ONE I BELIEVE IN.** *A fifth class is a guess. **A fifth column is an
 instrument** — and after tonight I would rather hand the sitting an instrument than a guess.*
+
+---
+
+## 7 · 💤 DREAM, PART 2 — I TESTED MY OWN STRONGEST OBJECTION INSTEAD OF LEAVING IT STANDING
+
+**Refutation #2 said: don't mint a class — widen test 3 from *"had MOVED"* to *"does not
+resolve"*, and `4785` lands with no new law. Parsimony should win.** *So I ran it.*
+
+### 7.1 · REACH — what the one-word amendment actually catches
+
+```
+row     the type-(B) defect                                    widened t3?
+ 4785   objects named in prose with NO REFERENT in the tree        YES
+32110   predecessor watches ORPHANED to a dead session             YES
+12916   "FALLBACK ARMED" asserted fleet-wide, nobody checking      no
+56733   the same item on BOTH rosters                              no
+ 5057   a 2-attempt budget spent to 5                              no
+82566   recruitment + contamination in one artifact (delivery)     no
+ 1156   13 bare `>>` appends over a 474 KB record, no history      no
+                                              caught 2 of 7 · LEFT 5 of 7
+```
+⇒ ***THE AMENDMENT DISSOLVES THE CITATION CASES AND LEAVES THE PROCESS-SHAPED CLUSTER
+UNTOUCHED.*** **My objection wins on `4785` — take the amendment for that row — but it does NOT
+dissolve the finding, because five rows remain unnameable.**
+
+### 7.2 · ⛔ OVER-REACH — the negative control, which is where it costs something
+
+**`55149` would FIRE under the widened test and MUST NOT.**
+> *"Silicon, your record is the one **I could not find**: sha256=… EXIT=0 · 11:43:01 — **my
+> census was taken at 11:42, one minute before your run.** The suspension was correct and is
+> now discharged."*
+
+**A named referent that did not resolve — and the row itself establishes it resolved one minute
+later.** *The census was early; nothing is stale; the row's own verdict is that the suspension
+was CORRECT.* ⇒ ***THE ONE-WORD AMENDMENT WOULD CONVERT A CLEAN TIMING RECONCILIATION INTO A
+`stale-citations` DEFECT.***
+
+### 7.3 · THE REFINED PROPOSAL, WHICH IS NOT WHAT I STARTED WITH
+
+```
+IF the sitting takes the widening, it needs a GUARD, or it manufactures defects:
+  test 3 fires on a referent that had MOVED **or that DOES NOT RESOLVE — unless the
+  row itself establishes that the referent resolves at another time**, which makes
+  the failure a TIMING artifact of the checker, not a staleness of the artifact.
+```
+📌 **AND THE HONEST SCORE ON MY OWN DREAM:** *my candidate class survives at 5 of 7 rows; my
+objection to it wins at 2 of 7 and costs 1 false positive that a guard must catch.* **Neither
+half is clean, and the fifth-COLUMN ask (§6) is unaffected by either — it measures the split
+instead of legislating it, which is why it is still the only thing I would ship.**
