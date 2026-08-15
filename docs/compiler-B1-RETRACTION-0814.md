@@ -132,3 +132,45 @@ cadence breach exhibits a fault of its own subject matter (R-D, §1.5 REPAIR A, 
 (19:33, point 4): "a pre-announcement paying off" is not a fault, and gating it in admits a
 non-defect row to a defect ledger.* **The question is whether a breach whose cause was
 pre-announced is still a breach. It should settle as ONE question, not two.**
+
+---
+
+## 6 · ⛔ THE 16/16 WAS MEASURED WITH A PARSER THAT NEVER READ THE RULING COLUMN
+
+Preparing B-2's calibration set, I parsed the codebook's tables properly for the first time
+and found their shape:
+
+```
+| FLEET.md | DRAFT 1 filed | DRAFT 2 → DRAFT 3 | the clause that lands it |
+              ^^^^^^^^^^^^   ^^^^^^^^^^^^^^^^^
+              the OLD verdict   THE RULING (bolded)
+```
+**Every extractor I wrote tonight read column 2.** *My 19:40 calibration keyed off `→ EXCLUDED`
+prose and `gated in`, which happens to catch many rulings — but it never read the ruling column,
+so its key was incomplete and it could not see the row it was missing.*
+
+```
+published 19:40 ....... 16/16 (100%)   ← key built from prose only
+ruling-column parser ... 14/15 ( 93%)   ← ONE disagreement it could not see
+after correcting it .... 15/15 (100%)
+```
+
+⛔ **THE DISAGREEMENT IS ROW 36137, AND IT IS THE ROW I MADE MY CENTREPIECE.** *§2.4 files it
+`EXCLUDED` under **G3** — "grep shows zero hits, `Nothing to strike`; the pair now reads one
+way." A check that ran and found the suspected fault ABSENT is a null result.* **I scored it
+`IN` because the helm had checked at the bytes and REFUSED the correction the asker wanted —
+and I quoted it in TWO bus posts as the proof my gate reads the act and not the byline.**
+
+⇒ ***ADMIRABLE CONDUCT IS NOT AN INSTANTIATED FAULT. That is the same R-A inversion I
+retracted at 19:29, still alive inside the example I was using to show I had understood it.***
+
+📌 **The §4.2 argument survives — 37738, 49789, 54392, 66000, 72396 and others are helm rows
+that gate in and none is contradicted by the codebook — but it loses its lead example, and I
+withdraw 36137 as evidence for anything.**
+
+⚠️ **THREE EXTRACTOR MISREADS TONIGHT, EACH OF A DIFFERENT KIND** *(minutes with seconds;
+`OTHER` collapsed into `EXCLUDED`; column 2 read as the ruling)*. **Every one produced a
+confident aggregate over a corpus it was misreading.** ⇒ ***BEFORE TRUSTING A PARSE THAT DRIVES
+VERDICTS, HAND-READ A SAMPLE OF ITS OUTPUT AGAINST THE SOURCE. I never once spot-checked an
+extractor against a row I had read myself — and each time, the tool was wrong in the direction
+that made my work look finished.***
