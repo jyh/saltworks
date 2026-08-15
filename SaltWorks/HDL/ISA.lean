@@ -1066,27 +1066,35 @@ not transcribed.
 10, and "not yet corrected" was false by then.** Walked repo-wide over `git ls-files`
 at 12:2x — not over any inherited list:*
 
+⛔⛔ **AND THE WALK I PUT HERE AT 12:2x WAS ITSELF WRONG — RETRACTED 12:3x, refuted by the
+math seat.** *It reported "21 occurrences · 7 files · 3 stale-only" and accused the 08/07
+citation list of naming files that never carried the figure.* ***Both wrong, and from one
+cause: THE FENCE HAS TWO DOWNSTREAM FORMS AND I SEARCHED ONE.***
 ```
- 2  corrected alongside  SaltWorks/HDL/ISA.lean          (this file)
- 1  corrected alongside  docs/QUEUE.md
- 4  corrected alongside  docs/memory-design-v1.md
- 7  corrected alongside  docs/s0-r2-memory-census-0807.md
- 3  STALE-ONLY           docs/EVIDENCE-campaign.md
- 3  STALE-ONLY           docs/hdl-c4-composition-check-0807.md
- 1  STALE-ONLY           docs/LEDGER.md          <- found ONLY by the walk
-21 occurrences · 7 files · 3 stale-only
+I searched ....... 0.1976 · 8,486,912 · 99.8024
+they say ......... "99.80% of the word space is undecodable"
+  RegWrite.lean:36,116          carry it
+  riscv-core-campaign-v0.md:96,100  carry it — AT THE LINES I CALLED INVENTED
+⇒ `git log -S "0.1976"` returning nothing was TRUE AND IRRELEVANT.
+  "No commit added that string" is not "this file never carried the claim".
 ```
-⚠️ *The three stale-only files are a dated 08/07 check doc, another lane's campaign
-file, and a dated LEDGER entry. **Recorded, not rewritten** — correcting a dated record
-falsifies it.*
+⚠️ ***THE 08/07 LEDGER LIST WAS CORRECT AND MY ACCUSATION AGAINST IT IS WITHDRAWN IN FULL.***
 
-📌 ***THE CITATION LIST THAT NAMED THIS FENCE'S DOWNSTREAM SITES WAS WRONG AT ITS SOURCE
-AND PROPAGATED FOR EIGHT DAYS.*** *`docs/LEDGER.md:825-829` (08/07) states "four documents
-carry the old number" and names `RegWrite.lean:35–36` and `riscv-core-campaign-v0.md §C4`.
-**Neither file has EVER contained the string** — `git log -S "0.1976" --all` returns no
-commit that added or removed it in either. That list was copied into
-`s0-r2-memory-census-0807.md:647` and then into my own QUEUE row, gaining apparent
-authority at every hop, and nobody re-derived it — including me, twice.*
+✅ **RE-MEASURED — numeric forms only, `git ls-files`, hand-checked for false positives**
+*(`five instruction` dropped: it matches a comparator's size in `SortDemo.lean`, and the
+CORRECT "five-instruction Slice A subset" — Slice A **is** five; `decode` accepts seven):*
+```
+STALE-ONLY (7)  PcNext.lean · RegWrite.lean · Stack/Program.lean
+                docs/EVIDENCE-campaign.md · docs/LEDGER.md
+                docs/hdl-c4-composition-check-0807.md · docs/riscv-core-campaign-v0.md
+corrected (4)   ISA.lean · QUEUE.md · memory-design-v1.md · s0-r2-memory-census-0807.md
+11 files · 37 occurrences · SEVEN stale-only
+```
+📌 ***THE LESSON, and it is not the one I published: I BUILT A POPULATION WALK TO ESCAPE AN
+INHERITED LIST, THEN RAN THE WALK WITH A PATTERN THAT COULD NOT SEE THE THING.*** *A walk
+with the wrong pattern is an inherited list with better manners.* **And the wrong story was
+the dramatic and self-flattering one — everyone else the defect, me the auditor. That is the
+finding that needed the most testing and got the least.**
 
 ⚠️ **Why not the alternatives, per the pricing in
 `docs/hdl-c4-composition-check-0807.md`:** a hypothesis restricting inputs to

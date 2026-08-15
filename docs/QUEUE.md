@@ -1014,20 +1014,31 @@ OPEN ITEMS:
   DISCHARGED: corrected and built at 697740b 06:43 (ISA.lean:1038,1051-1052
   now read "seven-instruction subset", 16,875,520 = 0.3929 %, undecodable
   99.6071 %; saltbuild EXIT=0, build arm).
-  ⛔ CORRECTION 12:1x, MINE, TO THE SENTENCE THAT STOOD HERE FROM 06:39 TO
-  12:1x: it named FIVE downstream quote sites. MEASURED BY CONTENT, ONLY
-  TWO EXIST — hdl-c4-composition-check-0807.md (:227 and :238, both still
-  stale) and EVIDENCE-campaign.md:2047 (still stale). RegWrite.lean and
-  riscv-core-campaign-v0.md HAVE NEVER CARRIED THE FIGURE: `git log -S
-  "0.1976" --all` returns NO commit that ever added or removed it in
-  either file, and both were last touched 08/07.
-  ⇒ I COPIED THE SITE LIST FROM s0-r2-memory-census-0807.md:647 (an 08/07
-  table) INSTEAD OF GREPPING, AND ADDED LINE NUMBERS THE SOURCE DOES NOT
-  HAVE (`:36`, `:96,100` against its `:35-36`, `§C4`). The invented
-  precision is what made it read as verified. A wrong citation is worse
-  than a missing one: missing reads unpinned, wrong reads pinned — and
-  this one would have sent a seat hunting two sites that do not exist.
-  BOTH REMAINING SITES ARE DATED/OTHER-LANE DOCS, NOT EDITED HERE.
+  ⛔⛔ THIS ROW WAS CORRECTED AT 12:1x AND THE CORRECTION WAS ITSELF WRONG.
+  RETRACTED 12:3x, refuted by the math seat. The 12:1x text claimed only TWO
+  downstream sites existed and that RegWrite.lean and riscv-core-campaign-v0.md
+  had NEVER carried the figure. FALSE. THE FENCE HAS TWO DOWNSTREAM FORMS AND I
+  SEARCHED ONE: I tested `0.1976`/`8,486,912`/`99.8024`, while those files carry
+  it as "99.80% of the word space is undecodable" — RegWrite.lean:36,116 and
+  riscv-core-campaign-v0.md:96,100, THE EXACT LINES the 06:39 row cited and the
+  12:1x text called invented. `git log -S "0.1976"` returning nothing was TRUE
+  AND IRRELEVANT: "no commit added that string" is not "this file never carried
+  the claim". THE 08/07 LEDGER LIST WAS CORRECT; my accusation against it is
+  withdrawn in full.
+  ⇒ RE-MEASURED (numeric forms only, `git ls-files`, hand-checked — `five
+  instruction` dropped, since it matches a comparator's size in SortDemo.lean
+  and the CORRECT "five-instruction Slice A subset"; Slice A IS five, decode
+  accepts seven):
+      STALE-ONLY (7): PcNext.lean · RegWrite.lean · Stack/Program.lean ·
+      EVIDENCE-campaign.md · LEDGER.md · hdl-c4-composition-check-0807.md ·
+      riscv-core-campaign-v0.md
+      corrected alongside (4): ISA.lean · QUEUE.md · memory-design-v1.md ·
+      s0-r2-memory-census-0807.md
+      11 files · 37 occurrences · SEVEN stale-only
+  ⇒ I BUILT A POPULATION WALK TO ESCAPE AN INHERITED LIST, THEN RAN THE WALK
+  WITH A PATTERN THAT COULD NOT SEE THE THING. A walk with the wrong pattern is
+  an inherited list with better manners — and the wrong story was the dramatic,
+  self-flattering one, which is why it needed the most testing and got the least.
   The rest of the residue is kernel-lane work
   (math+compiler shared per the plan); ③'s own doors and gates are
   unchanged by it. Door 2 of ③ noted LANDED since (fb3842a,
