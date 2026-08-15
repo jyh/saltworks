@@ -68,6 +68,18 @@ measured zero. A sub-cone import is legitimate — this DECLARES the scope
 rather than refusing it, so a reader can see what the datum leaves out. -/
 def ceCNL_outs_omitted : List String := []
 
+/-- DESIGN input NAMES, positionally aligned with the primary input
+indices: input i is the port named at position i, for every i < this
+list's length. Lets a proof cite a RECORDED name rather than trusting the
+caller's --inputs order. ⚠️ CROSS-CHECK AVAILABILITY IS CLASS-DEPENDENT:
+`_ndesign_in` is emitted ONLY for datums carrying state, so a stateful
+datum can check this list's length against it and a combinational one
+cannot. That asymmetry is the very defect this file's ndesign_out comment
+forbids — an anchor that is a property of the datum's CLASS — and it is
+reported to the helm rather than fixed here, because the ruling asked for
+NAME TABLES and changing another field's emission is scope I was not given. -/
+def ceCNL_in_names : List String := ["i0", "i1", "i2", "i3", "i4", "i5", "i6"]
+
 
 /-- Number of DESIGN outputs. `ceCNL_outs` entries from here on are
 next-state bits then cut roots, paired by position with the state inputs;

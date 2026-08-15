@@ -106,6 +106,18 @@ measured zero. A sub-cone import is legitimate — this DECLARES the scope
 rather than refusing it, so a reader can see what the datum leaves out. -/
 def dmemAddr8NL_outs_omitted : List String := []
 
+/-- DESIGN input NAMES, positionally aligned with the primary input
+indices: input i is the port named at position i, for every i < this
+list's length. Lets a proof cite a RECORDED name rather than trusting the
+caller's --inputs order. ⚠️ CROSS-CHECK AVAILABILITY IS CLASS-DEPENDENT:
+`_ndesign_in` is emitted ONLY for datums carrying state, so a stateful
+datum can check this list's length against it and a combinational one
+cannot. That asymmetry is the very defect this file's ndesign_out comment
+forbids — an anchor that is a property of the datum's CLASS — and it is
+reported to the helm rather than fixed here, because the ruling asked for
+NAME TABLES and changing another field's emission is scope I was not given. -/
+def dmemAddr8NL_in_names : List String := ["byte_addr[0]", "byte_addr[1]", "byte_addr[2]", "byte_addr[3]", "byte_addr[4]", "byte_addr[5]", "byte_addr[6]", "byte_addr[7]", "byte_addr[8]", "byte_addr[9]", "byte_addr[10]", "byte_addr[11]", "byte_addr[12]", "byte_addr[13]", "byte_addr[14]", "byte_addr[15]", "byte_addr[16]", "byte_addr[17]", "byte_addr[18]", "byte_addr[19]", "byte_addr[20]", "byte_addr[21]", "byte_addr[22]", "byte_addr[23]", "byte_addr[24]", "byte_addr[25]", "byte_addr[26]", "byte_addr[27]", "byte_addr[28]", "byte_addr[29]", "byte_addr[30]", "byte_addr[31]", "req", "we_in"]
+
 
 /-- Number of DESIGN outputs. `dmemAddr8NL_outs` entries from here on are
 next-state bits then cut roots, paired by position with the state inputs;
