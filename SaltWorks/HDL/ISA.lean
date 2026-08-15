@@ -1035,7 +1035,7 @@ file is unchanged and `pc` advances by 4.**
 🔴 **THE FENCE, at the evidence seat's strength (11:26) and placed HERE because a
 reader meets the code before they meet the freeze:**
 
-> **On the 99.80% of 32-bit words outside the five-instruction subset, this chip
+> **On the 99.61% of 32-bit words outside the seven-instruction subset, this chip
 > advances `PC+4`. That is a deliberate v1 semantics, NOT RV32I behaviour —
 > RV32I raises an illegal-instruction trap. An equivalence theorem covering the
 > whole word space certifies, on those words, agreement with OUR CHOSEN
@@ -1048,17 +1048,23 @@ instructions are implemented**; this one bounds **what happens when you feed it
 anything else**, and the first does not imply the second.
 
 ```
-decodable    8,486,912 words  =  0.1976 %   (ADD/XOR/SLT 2^15 each; ADDI/BEQ 2^22)
-undecodable  4,286,480,384    = 99.8024 %   <- PC+4 by OUR choice, not by RV32I
+decodable   16,875,520 words  =  0.3929 %   (ADD/XOR/SLT 2^15 each; ADDI/BEQ/LW/SW 2^22)
+undecodable  4,278,091,776    = 99.6071 %   <- PC+4 by OUR choice, not by RV32I
 ```
 
 *Superseded when trap machinery arrives; until then this is what the silicon
 does and the claim must say so.*
 
+⛔ **CORRECTED 2026-08-15 06:5x (compiler).** *This fence read FIVE instructions /
+0.1976% / 99.80% — the pre-M2 figures — while `decode` (this file, 797-824) has
+accepted SEVEN since LW and SW landed, both arms commented `⬥ M2` above. Understated
+the decodable space by a factor of 1.988. Figures recomputed from the decoder's arms,
+not transcribed. **The 10 downstream sites quoting `0.1976` are NOT yet corrected.***
+
 ⚠️ **Why not the alternatives, per the pricing in
 `docs/hdl-c4-composition-check-0807.md`:** a hypothesis restricting inputs to
-decodable words would silence C4 on a **measured 99.80%** of the word space
-(`decode` accepts `3·2^15 + 2·2^22 = 8,486,912` of `2^32`); putting the decoder
+decodable words would silence C4 on a **measured 99.61%** of the word space
+(`decode` accepts `3·2^15 + 4·2^22 = 16,875,520` of `2^32`); putting the decoder
 inside the boundary needs a validity bit and pays gates on **every** instruction.
 -/
 
