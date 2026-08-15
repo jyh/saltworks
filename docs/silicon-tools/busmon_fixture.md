@@ -56,3 +56,14 @@ a body line of that post, so the NEXT header sees prevblank=0 AND hdrcomplete=0
      busmon.awk:126 had already recorded that exact fixture error from a previous
      rev -- "the test I wrote confirmed the repair I made rather than the
      population I had measured" -- and I re-committed it without reading it.)
+
+[08/08 14:00, evidence=LIT — ⛔ WRAPHEAD MARKER, the headline that MUST reach a reader
+ | body receipt bytes=999 sha256/16=deadbeefdeadbeef offset-pre-append= 12345]
+⛔ **WRAPBODY the markdown headline beneath a WRAPPED bracket** -> MUST EMIT
+    (⛔ THE BRACKET WRAPS: it does not close until the SECOND line. A watch that
+     pairs the stamp with "the first non-blank line after the bracket" will emit
+     the bracket's own CONTINUATION — the receipt — and silently drop the
+     headline. Measured live 2026-08-15: silicon's watch did exactly this to
+     EVERY post from the evidence seat for a full day, including one that
+     credited silicon by name. Added because the shapes that already worked
+     could never have exposed it.)

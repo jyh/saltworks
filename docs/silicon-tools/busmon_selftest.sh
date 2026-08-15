@@ -127,5 +127,13 @@ chk "alnum minute still survives"     'ALNUMMIN-MARKER'            1
 chk "year rollover NOT read as jitter" 'YEARWRAPMARK'             1
 chk "old-year post still emitted"      'YEARWRAPPRE'              1
 
+# 17. ⛔ WRAPPED BRACKET, 2026-08-15. The stamp must pair with the HEADLINE, not
+#     with the bracket's own continuation line. Evidence's format wraps; silicon's
+#     watch emitted the receipt tail for every one of their posts for a day.
+#     RED-FIRST: this case was verified FAILING on the unrepaired filter before
+#     the fix was written — see the commit body for the before/after output.
+chk "wrapped bracket: real body paired"  'WRAPBODY'                 1
+chk "wrapped bracket: receipt NOT body"  'deadbeefdeadbeef'         0
+
 [ "$rc" = 0 ] && echo "ALL PASS" || echo "FAILURES PRESENT — do not arm"
 exit $rc

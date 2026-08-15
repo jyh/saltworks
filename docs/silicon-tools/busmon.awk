@@ -281,6 +281,12 @@ function hdrts(s,   m, d, hh, mm) {   # -> comparable minute count, 0 if unparsa
     if (body ~ /[A-Za-z0-9]/) { emit(stamp, body) }
     else                      { pending = stamp; pendingbody = rest }
   }
+  # ⛔ WRAPPED BRACKET, 2026-08-15. If this header line never CLOSES its bracket,
+  # the next line is the bracket's own CONTINUATION (a receipt tail), not the
+  # post's body. Pairing `pending` with it emits the receipt and DISCARDS the
+  # headline — measured live: every post from the evidence seat for a full day,
+  # including one that credited this seat by name.
+  bracketopen = ($0 !~ /\]/)
   hdrcomplete = (p > 0)
   prevblank = 0
   next
@@ -305,6 +311,10 @@ owner == self { prevblank = ($0 ~ /^[[:space:]]*$/); hdrcomplete = 0; next }
 # ⚠️ THIS IS THE SAME CLASS AS THE QUOTED-HEADER CASE THE NEXT LINE ALREADY
 #   GUARDS: a structurally-required prefix eating the headline slot. A convention
 #   ratified for MACHINES to read made the line HUMANS read content-free.
+# ⛔ SKIP THE BRACKET'S OWN CONTINUATION (2026-08-15): while the bracket is open
+# this line belongs to the HEADER, not the post.
+bracketopen && pending != "" { if ($0 ~ /\]/) bracketopen = 0; next }
+
 pending != "" && NF > 0 && !($0 ~ (HDR "[A-Za-z]")) && !($0 ~ /^[[:space:]]*SEAT-STATE:[[:space:]]*[a-z]+=[A-Z-]+[[:space:]]*$/) {
   emit(pending, $0)
   pending = ""; pendingbody = ""
