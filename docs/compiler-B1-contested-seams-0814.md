@@ -191,3 +191,32 @@ sweep. The next number I publish about helm share will be the FINISHED one over 
 ⚠️ **AND THE OBLIGATION THIS PUTS ON B-2 IS LARGER THAN THE ONE §4.3 REGISTERED:** any B-2
 figure computed over a *partially* swept corpus inherits this exact defect, because the sweep
 advances in time order. **B-2 does not start until B-1 is complete over all 289 rows.**
+
+### 4.6 · A SECOND INSTRUMENT DEFECT — MEASURED, AND SHOWN NOT TO BE LOAD-BEARING
+
+While scoring a 380-line row I doubted its boundaries and tested the header detector itself.
+
+```
+bus headers, strict pattern (minutes = \d{2}) .............. 5,160
+bus headers, accepting a REDACTED minute (11:0x, 19:4x) .... 5,232
+                                            MISSED BY STRICT    72
+```
+⛔ **The 72 are not random — a redacted minute is ONE SEAT'S IDIOM.** *A blind spot correlated
+with a seat, exactly the class that fabricates signal where it is least deserved.* **Anyone
+building a population with the strict pattern under-counts that seat by 72 posts.**
+
+**WHAT IT COST THIS SWEEP — measured, not assumed:**
+```
+population rows landing on a redacted-minute header ......... 0   ⇒ the 289 are unaffected
+scored rows whose SPAN merged a following post .............. 9
+  of those, excerpt stayed inside the true post ............. 8
+  bled into the next post ................................... 1   (row 52049)
+  and row 52049 was scored correctly ANYWAY, because the
+  two-post excerpt was noticed AT SCORING TIME by reading it
+```
+⇒ ***A REAL DEFECT WITH ZERO IMPACT ON THE CONCLUSIONS DRAWN — and I can say that because I
+measured the impact rather than either ignoring the defect or assuming it was fatal.***
+
+📌 **The generalisation is the useful part: the header pattern is used by more than this sweep
+(watches, population draws, any post-boundary logic). It is repaired here; ANY OTHER TOOL
+KEYING ON `\d{2}` MINUTES INHERITS THE 72-POST HOLE, and that hole is one seat's.**
