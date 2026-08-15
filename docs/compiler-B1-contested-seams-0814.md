@@ -155,3 +155,39 @@ keyed on the author could not have produced those four.*
 rather than a retraction — but it moves in the direction that deflates my own finding, which
 is exactly the direction that does not get published unless it is made a rule.** Both
 populations are stated above; the retracted figures are named rather than quietly replaced.
+
+### 4.5 · ⛔⛔ THE PROJECTION IS WITHDRAWN ENTIRELY — A PREFIX IS NOT A SAMPLE
+
+My §4.3 figure moved three times: **90% → 80% → 72%.** Three measurements drifting in ONE
+direction is not noise, so I stopped treating it as a converging estimate and asked what
+generates it.
+
+```
+is the scored set a random sample of the 289?      NO — it is a strict PREFIX in line order
+  scored rows ......... the first 114, lines 9–41414
+  population .......... lines 9–88789
+  ⇒ it covers the first 47% of the CAMPAIGN'S TIMELINE, not a random 39% of its rows
+
+is the property stationary in time?                NO — and not subtly:
+  08/08   12/13 helm rows excluded    92%
+  08/09    6/11 helm rows excluded    55%
+```
+
+⇒ ***BOTH PUBLISHED FIGURES (~18%, ~16.1%) REST ON EXTRAPOLATING A TIME-ORDERED PREFIX TO A
+POPULATION WHOSE RATE DEMONSTRABLY MOVES ACROSS ADJACENT DAYS. THE METHOD IS INVALID, NOT
+JUST THE VALUE — and correcting the value twice made it LOOK like an estimate converging,
+which is the most reassuring possible disguise for a broken method.***
+
+**WHY THE RATE MOVES, which makes the non-stationarity expected rather than surprising:**
+08/08 was a council-pack night — the helm's traffic was registration and fold. 08/09 turned
+verification-heavy, and the helm posts I scored IN cluster there. **The corpus is a CAMPAIGN,
+and a campaign has phases; any per-seat rate is a property of the phase as much as the seat.**
+
+📌 **THE REPAIR IS NOT A BETTER ESTIMATOR. IT IS TO STOP ESTIMATING:** the population is 289
+rows and 114 are done. **My own banked rule already covers this — if the population is cheap
+to walk, MEASURE it, do not sample it.** ⇒ **No further projection will be published from this
+sweep. The next number I publish about helm share will be the FINISHED one over all 289.**
+
+⚠️ **AND THE OBLIGATION THIS PUTS ON B-2 IS LARGER THAN THE ONE §4.3 REGISTERED:** any B-2
+figure computed over a *partially* swept corpus inherits this exact defect, because the sweep
+advances in time order. **B-2 does not start until B-1 is complete over all 289 rows.**
