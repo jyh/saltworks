@@ -175,3 +175,46 @@ the strongest form this check can take: the ladder decides them the same way twi
 ⚠️ **WHAT THIS DOES NOT SHOW:** *that I would have reached those twelve unaided. I knew the
 answers. **21/21 is a derivation result and will never be quoted as agreement.*** The blind set
 of §6.2 remains undrawn and is the only thing that can test the other question.
+
+---
+
+## 8 · ⛔ SECOND AMENDMENT, STILL BEFORE THE DRAW: I FIXED A DRAW RULE WITHOUT FIXING WHAT IT IS COMPARED AGAINST
+
+**§6.2 pre-registers a 20-row blind draw over the 257 unnamed rows. Re-reading it before
+executing: it never says what the drawn verdicts are checked AGAINST — and for rows the
+codebook does not name, THERE IS NO KEY.** *A blind test with no ground truth measures nothing;
+I would have drawn, scored, published, and then had to invent a comparison after the fact,
+which is the exact shape of the defect this whole file exists to prevent.*
+
+### 8.1 · What is and is not measurable on unnamed rows
+
+```
+ACCURACY ....... NOT MEASURABLE. No ruling exists for these rows. Anything I called
+                 "accuracy" would be agreement with a coder pass, and count (c) STRUCK
+                 side-agreement as the wrong measurement.
+DETERMINACY .... MEASURABLE, and it needs no key: does the ladder, run on the row's own
+                 text, yield EXACTLY ONE class — or zero (→ residual) or more than one
+                 (→ a precedence question the ladder must settle)?
+COVERAGE ....... MEASURABLE, and it IS B-2's figure: the fraction reaching a SPECIFIC
+                 class rather than falling to `OTHER`.
+```
+
+⇒ ***THE BLIND SET MEASURES DETERMINACY AND FEEDS COVERAGE. IT CANNOT MEASURE WHETHER I AM
+RIGHT, AND I WILL NOT REPORT IT AS IF IT COULD.***
+
+### 8.2 · What the draw is therefore FOR, restated
+
+1. **Per row: which tests fire, from the row's own text alone** — recorded as `n` fired, and
+   which. *Zero fired → residual. Two or more → the precedence clause that resolves it, named.*
+2. **The number that matters is how often the ladder DECIDES**, not how often I agree with
+   anyone. *That is the honest input to a coverage figure and it is what count (c) asks for.*
+3. **The pass-1/pass-2 reason pair is NOT read while scoring** — required independently by
+   count (d), which forbids filing from reasons where they quote no text.
+
+### 8.3 · ⚠️ AND THE RELATIONSHIP TO B-3, STATED SO NOBODY BANKS THIS AS THAT
+
+**B-3 is the class-determinacy audit and its bar is `N ≥ 30` on rows unnamed in the file.**
+*My k=20 is BELOW that bar and this draw is NOT B-3.* ⇒ **If the sitting wants B-3, the draw
+must be re-run at N ≥ 30 with B-3's own conditions; this one informs B-2's coverage input and
+nothing else.** *Stated now because a 20-row determinacy number sitting in the record is exactly
+the kind of figure that gets quoted as the 30-row audit later.*
