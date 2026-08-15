@@ -61,7 +61,10 @@ plausibility is not enough."* **A test I can argue for but not quote does not fi
 
 ---
 
-## 6 · THE RESULT — DETERMINACY MEASURED, WITH EVERY DENOMINATOR NAMED
+## 6 · THE RESULT (PARTIAL) — ⚠️ SUPERSEDED BY §7: THE FINAL FIGURE IS **13/25 = 52%**
+
+> *The 11/22 = 50% below was measured before the last 3 rows were scored. §7 completes the
+> draw with zero unscored. Superseded, not retracted — but a reader must not stop here.*
 
 **Firing bar applied throughout: the codebook's own — *"each test must actually FIRE on quoted
 content — plausibility is not enough."* A test I could argue for but not quote did not fire.**

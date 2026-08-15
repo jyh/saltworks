@@ -79,7 +79,12 @@ if my re-run still disagrees with a named exemplar, the re-run is wrong, not the
 
 ---
 
-## 5 · RE-RUN COMPLETE — AND IT VERIFIES 16/16 AGAINST THE EXTERNAL KEY
+## 5 · RE-RUN COMPLETE — ⛔ ITS "16/16" IS **SUPERSEDED BY §6 BELOW**, READ THAT FIRST
+
+> ⛔ **THE 16/16 IN THIS SECTION WAS MEASURED WITH A PARSER THAT NEVER READ THE CODEBOOK'S
+> RULING COLUMN. The true figure is 14/15, and 15/15 after correcting row 36137. §6 has the
+> whole account. This heading is amended in place because a correction 56 lines below a
+> heading does not reach a reader who scans headings.**
 
 **76 rows re-adjudicated against the ratified text** (45 G2 on the second prong, 23 IN on
 R-A's act-performed condition, 8 codebook-named corrections).
