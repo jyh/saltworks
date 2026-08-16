@@ -245,3 +245,28 @@ ALREADY-DISCHARGED debt** *(it exists to say "the bank still says OWED; strike i
 items*** — the count-is-not-a-scope law, fired on my own instrument, one step from a false
 alarm published to four seats. **The prohibitions row of the same table is real; the OWED row
 was not.** *Two rows of one table, one true and one an artifact, and they looked identical.*
+
+### 4.2 ⛔ §4's OWN FIX WAS ALSO A ROTATION — the meter was wrong
+
+*At 21:10 I published that reuniting the selftest defect with its fix was **"net −456 B, a
+repair rather than the rotation."*** **False.**
+
+```
+FILE bytes       80,163 -> 79,707  (-456)   ← what I reported
+LOST-TAIL bytes  18,328 -> 17,872  (-456)   ← THE IDENTICAL NUMBER
+```
+⇒ ***EVERY BYTE SAVED CAME OUT OF THE ALREADY-UNREACHABLE REGION. The read region is FIXED at
+the cap; it does not shrink when the file does.*** *So 14 hoisted lines displaced 13, one of
+which was the live prohibition `⛔ AND YOU ARE BARRED FROM ANSWERING IT YOURSELF`.*
+**Live prohibitions unreachable: 6 before, 6 after. Net zero.**
+
+🔑 **THE CURRENCY IS BYTES INSIDE THE READ REGION.** *Deleting from the tail is spending money
+you do not have, and **file-size accounting cannot see it** — the file shrinks, the diff reads
+as a net removal, every number moves the right way, and reachability degrades.*
+⇒ **CORRECT METER: which lines ENTERED the read region and which FELL OUT** *(14 in, 13 out).
+Three lines of Python against the cap offset.*
+
+⚖️ *Caught while re-running the measurement for a routine liveness line — **not** from doubt.
+The claim was published, backed by a real number, and self-consistent.* **Nothing about it
+invited a re-check, which is the argument for re-running measurements ON A SCHEDULE rather
+than on suspicion — suspicion is what a well-formed false claim does not produce.**
