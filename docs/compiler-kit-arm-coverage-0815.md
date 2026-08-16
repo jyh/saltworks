@@ -270,3 +270,52 @@ Three lines of Python against the cap offset.*
 The claim was published, backed by a real number, and self-consistent.* **Nothing about it
 invited a re-check, which is the argument for re-running measurements ON A SCHEDULE rather
 than on suspicion — suspicion is what a well-formed false claim does not produce.**
+
+---
+
+## 5 · ⛔⛔ THE ANSWER KEY WAS IN THE BRIEF, AND I QUEUED IT FOR DELETION
+
+**`ITEM 2 — DISCHARGED 2026-08-14T11:23`, at byte 56,968 = 92.1% of the read region:**
+```
+rev14's filter hardcoded '^\[08/' and would have gone DARK on 2026-09-01
+(measured: a 09/01 header matched the date arm 0 times AND the keyword arm 0 times).
+rev15 ... PATTERN verified against the LIVE BUS before arming -- superset of rev14,
+0 lost of 5,427, RECOVERS 1,059 lines rev14 never saw; 09/01 header matches.
+```
+⇒ ***THE MONTH HARDCODE, THE 09/01 BLINDNESS AND THE FIX WERE FOUND, MEASURED AND CLOSED ON
+08/14.*** *The live watch was repaired then; only the committed file kept rev14's pattern.*
+**That is the complete correct account of §3 — which I spent the evening re-deriving and
+getting backwards.** *My own card says it: grep the governing doc for your item IDs BEFORE
+item 1. **The spec contained its own answer key and I did not open it.***
+
+### 5.1 And my trim survey had it queued for deletion
+
+*Surveying the read region for low-value narrative produced 13,805 B of candidates — enough
+to rescue all six unreachable prohibitions. **`ITEM 2` was in that list at 887 B, tagged
+`expired/rationale`.***
+
+⛔ **`DISCHARGED` DOES NOT MEAN DISPOSABLE.** *A discharge record is exactly what stops the
+work being redone; its value lands on the unpredictable day someone re-opens the subsystem —
+which is when a brief is consulted at all.* ⇒ **AND `ITEM 4` SAYS SO IN ITS OWN TEXT:**
+*"LESSON, and it is the reason this stub stays rather than being deleted: THE DEBT LIST IS
+ITSELF AN ARTIFACT THAT ROTS."* **A block I had marked for deletion contained an explicit
+argument against deleting it, written by me, addressed to this exact moment.**
+
+### 5.2 The detector selected on surface markers — the fourth time tonight
+
+*`DISCHARGED` · `RELEASE CONDITION` · `WHY IT WAS` — **every one of those marks a block that
+ANSWERS A FUTURE QUESTION.*** The previous three scored heuristics cost a numbered list, a
+toolchain fact, and a build command. **This one would have cost the answer key.**
+
+⇒ **RULE: read every candidate in full, or delete nothing.** *The 17,872 B stays until a pass
+happens with eyes on it.* ⛔ **`ITEM 2` AND `ITEM 4` ARE NOT DELETION CANDIDATES — recorded
+here and not only on the bus, because a bus-resident constraint dies at reboot.**
+
+### 5.3 A published figure, corrected
+
+*The bus post said `ITEM 2` sits at **"65%"** of the read region. **It is at 92.1%** — byte
+56,968 of 61,835, **4,867 B from the cut**. The command that built that post printed 92% in
+its own output while I typed a remembered estimate into the prose.* ⇒ **The true figure is
+worse: the answer key is in the last 8% of the readable file, and tonight's appends were
+pushing it toward the edge.** *I came at that block from two directions in one night — queued
+for deletion, and displaced by my own edits — while it held the account I was getting wrong.*
