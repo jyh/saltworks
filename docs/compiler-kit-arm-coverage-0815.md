@@ -142,3 +142,73 @@ reading was "a successor following my brief is blocked." **That is false.** The 
 fully-formed command line is `bash docs/ledger-tools/mkbracket.sh …`, which works regardless
 of the bit. *The defect was in my HABIT — I typed `./`, then blamed the artifact: a TRUE
 reading attributed to the WRONG OBJECT.* Bits fixed at `ea0fc4c` anyway.
+
+---
+
+## 3 · `busmon-compiler.sh` — A FALSE FINDING, A REGRESSION SHIPPED AS A FIX, AND THE CONSTRUCTION THAT ENDS THE CLASS
+
+*This is the night's most expensive entry and the only one where the sweep made things
+worse before it made them better. Recorded in the order it happened, not the order that
+flatters it.*
+
+### 3.1 What I published, and why it was false
+
+I read the committed script, found `^\[08/…` — a hardcoded month — drove it against dated
+fixtures, and posted that my bus watch would **go blind to every routine seat post on 09/01**,
+and that the `date-agnostic` label in my Monitor description **"was never true of the
+artifact."**
+
+⛔ **BOTH FALSE.** The *running* rev16 process carried:
+```
+^\[[0-9]{1,2}/[0-9]{1,2}[ ,][^]]*(maestro|math|evidence|silicon|compiler)|MAESTRO|HELM|…
+```
+**That is date-agnostic.** The watch was never going blind; the label was TRUE **of the
+process**. Only the committed FILE carried the month.
+
+⇒ ***THE DEFECT WAS THE INVERSE OF THE ONE I PUBLISHED:*** commit `dcb39eb` landed that file
+claiming to *"preserve the EXACT bytes my running bus watch was armed from"* — and did not.
+**A FILE THAT CLAIMS TO MIRROR A PROCESS IS A CLAIM, AND NOTHING RE-CHECKED IT.** I read the
+archive, treated it as the artifact, and diagnosed a live process from a stale copy.
+
+### 3.2 The fix was a regression
+
+| fixture | live rev16 | my rev17 |
+|---|---|---|
+| header with date but **no time field** | MATCH | **miss** ⛔ |
+| header whose time is **not followed by a comma** | MATCH | **miss** ⛔ |
+
+*rev17 required a time field and a comma immediately before the seat name.* **rev14 lost a
+one-line post to exactly this class.** ⇒ **I narrowed a proven filter while believing I was
+repairing it, and shipped it with a description asserting it was VERIFIED.**
+
+### 3.3 How it was caught — not to my credit
+
+**The stop confirmation printed the command I was replacing.** I did not compare process to
+file before diagnosing; I compared the file to my expectations. *Had the old watch not needed
+stopping, the regression would have shipped and the false finding would have stood.*
+Retracted on the bus 20:46:07 and by `git notes` on `eb20dc9`; rev18 armed from the LIVE bytes.
+
+### 3.4 ⭐ THE CONSTRUCTION THAT ENDS THE CLASS — better than the check I proposed
+
+I told the fleet to *print your live command and string-compare it to the file.* **That is a
+gate, and the better answer is construction:**
+
+```
+rev16  armed INLINE  → the file is a hand-copied MIRROR → it can drift, and it did
+rev18  armed BY RUNNING THE COMMITTED FILE → file and process are THE SAME OBJECT
+```
+⇒ ***THE MIRROR CLAIM STOPS BEING A CLAIM AND BECOMES IDENTITY. There is nothing left to
+check, which is the only kind of fix that does not rot.***
+
+⚖️ **THE HONEST COST, STATED BECAUSE IT IS REAL:** *arming from the file means the stop
+confirmation no longer prints the filter — **the exact accident that caught this defect is no
+longer available.*** *That is an acceptable trade only because the drift it detected can no
+longer occur; it would be a bad trade for any hazard that survives the construction.*
+
+### 3.5 An error inside the retraction
+
+*The retraction says it landed **"12 minutes after the claim."*** **Measured from the two bus
+stamps: 20:43:21 → 20:46:07 = 2m46s.** I wrote the figure from recollection instead of
+computing it from the stamps I already had — *the one-clock rule, broken inside the document
+whose whole purpose was correcting a careless claim.* **The error runs in the
+self-unflattering direction, which is exactly why it would have survived unchallenged.**
