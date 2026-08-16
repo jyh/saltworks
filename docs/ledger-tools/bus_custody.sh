@@ -111,14 +111,18 @@ if [ "${1:-}" = "--selftest" ]; then
   # clause 2j -- a hand-typed clock in the BODY vs the actual send time.
   # Each fixture carries its OWN receipt: a mismatched one dies at the receipt check instead,
   # which would report the WRONG die site and score this arm green for the wrong reason.
-  printf 'a body line.\nanother line.\ncompiler=LIT, %s. next post soon.\n' "$(date '+%H:%M')" > "$T/clk_ok.md"
+  printf 'a body line.\nanother line.\n⚓ compiler=LIT, %s. next post soon.\n' "$(date '+%H:%M')" > "$T/clk_ok.md"
   CB=$(wc -c < "$T/clk_ok.md" | tr -d ' '); CS=$(shasum -a 256 "$T/clk_ok.md" | cut -c1-16)
   printf ', compiler — SEAT-STATE: compiler=LIT · clock matches, body receipt bytes=%s sha256/16=%s]' "$CB" "$CS" > "$T/clk_ok.txt"
   arm ":2j body clock MATCHES send"   0 "$T/clk_ok.md" "$T/clk_ok.txt"
-  printf 'a body line.\nanother line.\ncompiler=LIT, %s. next post soon.\n' "$(date -v+13M '+%H:%M' 2>/dev/null || date -d '+13 min' '+%H:%M')" > "$T/clk_ahead.md"
+  printf 'a body line.\nanother line.\n⚓ compiler=LIT, %s. next post soon.\n' "$(date -v+13M '+%H:%M' 2>/dev/null || date -d '+13 min' '+%H:%M')" > "$T/clk_ahead.md"
   DB=$(wc -c < "$T/clk_ahead.md" | tr -d ' '); DS=$(shasum -a 256 "$T/clk_ahead.md" | cut -c1-16)
   printf ', compiler — SEAT-STATE: compiler=LIT · clock ahead, body receipt bytes=%s sha256/16=%s]' "$DB" "$DS" > "$T/clk_ahead.txt"
   arm ":2j body clock 13 min AHEAD REFUSED" 13 "$T/clk_ahead.md" "$T/clk_ahead.txt"
+  printf 'discussing a defect.\nthe bad anchor read "compiler=LIT, 10:31" and was 13 min ahead.\nno anchor here.\n' > "$T/clk_quoted.md"
+  QB=$(wc -c < "$T/clk_quoted.md" | tr -d ' '); QS=$(shasum -a 256 "$T/clk_quoted.md" | cut -c1-16)
+  printf ', compiler — SEAT-STATE: compiler=LIT · quoted clock in prose, body receipt bytes=%s sha256/16=%s]' "$QB" "$QS" > "$T/clk_quoted.txt"
+  arm ":2j QUOTED clock in prose ACCEPTED" 0 "$T/clk_quoted.md" "$T/clk_quoted.txt"
   printf ', compiler — SEAT-STATE: compiler=LIT · no receipt fields at all]' > "$T/norx.txt"
   arm ":37 clause-3 fields absent"   3 "$T/b.md" "$T/norx.txt"
   printf ', compiler — SEAT-STATE: compiler=LIT · lie, body receipt bytes=%s sha256/16=%s]' "$((B+9))" "$S" > "$T/badb.txt"
@@ -596,7 +600,16 @@ PUB_S=$(grep -o 'body receipt bytes=[0-9][0-9]* sha256/16=[0-9a-f][0-9a-f]*' "$B
 #   ⚠️ DOMAIN: it only sees the form `compiler=<STATE>` followed by HH:MM within ~40 chars.
 #   Another phrasing is INVISIBLE to it, and 28 earlier posts of mine used other forms and are
 #   UNMEASURED, not clean. Measurement, not immunity.
-CLK=$(LC_ALL=C grep -oE 'compiler=(LIT|RESTING)[^0-9]{0,40}[0-9]{2}:[0-9]{2}' "$BODY" 2>/dev/null \
+#   ⛔ SCOPE, AND IT COST ONE REFUSAL TO LEARN: the FIRST version matched anywhere in the body
+#   and REFUSED THE POST ANNOUNCING IT -- the body quoted the defective anchor `compiler=LIT,
+#   10:31` as its own evidence, and a matcher cannot tell a CLAIM from a QUOTATION. That is my
+#   banked meta-discussion-satisfies-a-guard card firing on the guard's own announcement.
+#   ⇒ THE CLAIM IS THE ANCHOR LINE. Only lines carrying the anchor marker are examined; a clock
+#   discussed, quoted or tabulated anywhere else is DISCUSSION, not a state claim.
+#   ⚠️ Consequence to state rather than hide: an anchor written WITHOUT the marker is invisible
+#   to this arm. It cannot false-positive on prose; it can miss.
+CLK=$(LC_ALL=C grep '⚓' "$BODY" 2>/dev/null \
+      | LC_ALL=C grep -oE 'compiler=(LIT|RESTING)[^0-9]{0,40}[0-9]{2}:[0-9]{2}' \
       | LC_ALL=C grep -oE '[0-9]{2}:[0-9]{2}$' | head -1)
 if [ -n "$CLK" ]; then
   NOWM=$(date '+%H %M' | awk '{print $1*60+$2}')
