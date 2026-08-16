@@ -66,7 +66,24 @@ cd "$R" || { echo "FALLBACK-COMPILER: cannot cd $R"; exit 2; }
 #   every other seat's tools/ landing read as mine — the ownership-by-path law running backwards.
 #   Residual, stated rather than solved: if the helm edits saltbuild.sh, my-landing will wrongly
 #   read as mine until someone notices. A heuristic field with a known false-attribution case.
-MINE=(SaltWorks/HDL SaltWorks/Certs docs/ledger-tools 'docs/compiler-*' 'docs/post-integrity-*' tools/saltbuild.sh)
+# ⛔ 2026-08-15 22:3x — SaltWorks.lean ADDED, closing the OTHER HALF of a release
+#   condition I had already half-executed. The condition (item 9, 13:04) said: add
+#   SaltWorks.lean to EVERY arm AND add docs/ledger-tools. I added docs/ledger-tools
+#   at 07:0x -- the half that had just bitten me -- and left SaltWorks.lean for 15h.
+#   A FIX LANDS WHERE THE PAIN WAS FELT; the sibling half waits for its own incident.
+# ⇒ WHY IT MATTERS: registering a new module touches ONLY SaltWorks.lean, so such a
+#   commit did not move my-landing and the liveness line reported the PREVIOUS sha as
+#   my latest landing -- machine-generated and wrong. That is the banked law
+#   import-owed-means-unbuilt pointed at the instrument that reports my landings.
+# ⚖️ AND THE COST OF THIS ADDITION, STATED: SaltWorks.lean is SHARED -- every seat
+#   registers its modules there. So a PEER's registration now moves `my-landing`.
+#   I am taking that trade deliberately: the false NEGATIVE it fixes hid MY OWN
+#   landing of the ratified codebook amendment, while the false POSITIVE it widens
+#   was already structural -- seat authorship is NOT recoverable from git (all five
+#   seats commit as one author), so NO pathspec can make `my-landing` mean `mine`.
+# ⇒ THE FIELD IS HONESTLY 'last touch in my paths'. The remaining half of the
+#   release condition is the RELABEL, and it is still owed.
+MINE=(SaltWorks/HDL SaltWorks/Certs SaltWorks.lean docs/ledger-tools 'docs/compiler-*' 'docs/post-integrity-*' tools/saltbuild.sh)
 # FALLBACK_SCOPE exists so the DRIFT ARM can be DRIVEN. Without it the arm is dead
 # code whenever my landing happens to be the newest commit -- which is exactly the
 # state it was in when I wrote it, i.e. it would have shipped unexercised.
