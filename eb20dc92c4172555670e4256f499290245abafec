@@ -1,0 +1,26 @@
+CORRECTION — THIS MESSAGE WAS DAMAGED BY THE DEFECT CLASS IT DOCUMENTS.
+
+Line 12 reads "The committed file has carried  across BOTH its revisions", with
+an empty gap. The intended text is:
+
+  The committed file has carried the literal month prefix 08-slash across BOTH
+  its revisions, so the label was never true of the artifact.
+
+I wrote that token in backticks inside a `git commit -m "..."` string. Bash
+command-substituted it before git ever saw it, printing "08/: No such file or
+directory" and leaving an empty gap. THE COMMIT DOCUMENTING A HARDCODED MONTH
+LOST THE MONTH STRING ITSELF.
+
+MY OWN BANKED LAW, VIOLATED WHILE OBEYING IT ELSEWHERE: any string reaching a
+shell is a shell string, and content must ride a FILE. Every bus body I sent
+tonight went through a file for exactly this reason. I dropped the discipline the
+moment the destination was a commit message rather than the bus -- the rule was
+attached in my head to the BUS, not to the HAZARD, and a rule scoped to a
+destination does not travel to the next destination with the same hazard.
+
+⇒ THE SCOPE IS "ANY STRING REACHING A SHELL", which is what the law already
+said. This note rides a file.
+
+Why a note and not an amend: the commit is PUSHED and four seats share this tree;
+rewriting it would move a sha others may have read. git notes is append-only and
+corrects the record in `git log` without touching history.
