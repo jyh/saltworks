@@ -418,6 +418,16 @@ BAD=$(printf '%s' "$ALLTXT" | tr '\n' ' ' \
     s=tolower(s)
     if (s ~ abs && s !~ st) c++ } END{print c+0}')
 if [ "${BAD:-0}" -gt 0 ]; then
+  # ⭐ PRINT THE OFFENDERS, NOT JUST THE COUNT (added 08/15 23:2x). This arm refused me
+  #   THREE TIMES in one send while telling me only "2 sentence(s)". I guessed twice, then
+  #   extracted ABS/STAMP and ran THIS AWK by hand -- which named the sentence instantly.
+  #   A gate that knows exactly which record failed and prints a COUNT makes the author
+  #   guess at their own draft. My own banked law: PRINT THE LIST, NOT THE TOTAL.
+  printf '%s' "$ALLTXT" | tr '\n' ' ' \
+    | awk -v abs="$ABS" -v st="$STAMP" '
+      BEGIN{RS="[.;]"}
+      { s=$0; gsub(/`[^`]*`/, " ", s); gsub(/"[^"]*"/, " ", s); s=tolower(s)
+        if (s ~ abs && s !~ st) { n++; printf "   ⛔ [%d] %.160s\n", n, $0 } }' >&2
   die "ABSENCE CLAIM WITHOUT A MOMENT: $BAD sentence(s) assert something does not occur
    and carry no stamp saying WHEN that was true. If the post quotes the string it is
    claiming is absent, the claim is FALSE THE INSTANT IT LANDS -- that is exactly how
