@@ -48,6 +48,17 @@ if [ "${1:-}" = "--selftest" ]; then
   arm ":24 bracket unterminated"     6 "$T/b.md" "$T/x.txt"
   printf 'body\n```\nunclosed fence\n' > "$T/odd.md"
   arm ":25 odd fence count"          6 "$T/odd.md" "$T/ok.txt"
+  # CLAUSE 2i -- shell-executable text in the bracket. POSITIVE AND NEGATIVE, both driven,
+  # because the clause was added from a PEER's corruption and I have no scar to make me
+  # re-check it: an arm nobody drives rots silently and reads exactly like a clean pass.
+  # The backtick is written via printf %s so this harness does not commit the very defect
+  # it is testing for.
+  printf ', compiler — SEAT-STATE: compiler=LIT · a %s token %s, body receipt bytes=%s sha256/16=%s]' \
+    '`backtick`' 'here' "$B" "$S" > "$T/tick.txt"
+  arm ":2i backtick REFUSED"        13 "$T/b.md" "$T/tick.txt"
+  printf ', compiler — SEAT-STATE: compiler=LIT · a %s token here, body receipt bytes=%s sha256/16=%s]' \
+    '$(date)' "$B" "$S" > "$T/subst.txt"
+  arm ":2i command-subst REFUSED"   13 "$T/b.md" "$T/subst.txt"
   # CLAUSE 2b -- the closed vocabulary. Positive AND negative, both driven.
   for w in LIT RESTING; do
     printf ', compiler — SEAT-STATE: compiler=%s · ok, body receipt bytes=%s sha256/16=%s]' "$w" "$B" "$S" > "$T/v.txt"
@@ -463,6 +474,33 @@ case "$OWNER" in
    'compiler=STATE'). Measured on 5149 corpus headers: the slot carries a BARE SEAT NAME.
    Yours would post under another seat's name or under no seat at all -- and a well-formed
    WRONG owner is unfindable forever, where a malformed one merely fails loud." 10 ;;
+esac
+
+# ---- CLAUSE 2i: NO SHELL-EXECUTABLE TEXT IN THE BRACKET ----------------------------------
+# ADDED 2026-08-15 17:5x, PROMPTED BY A PEER'S LIVE CORRUPTION, NOT BY MY OWN PAIN.
+#   The silicon seat posted via an UNQUOTED heredoc, the shell executed their backticks, the
+#   substantive block was DELETED IN FLIGHT -- and the transport receipt certified it GREEN,
+#   because a receipt covers the bytes SENT, never the bytes INTENDED.
+# ⛔ I HAVE THE SAME EXPOSURE AND IT IS STRUCTURAL: my BODY rides a file, but my BRACKET is
+#   built with an UNQUOTED heredoc because it interpolates the stamp, byte count and sha.
+#   Anything the shell can expand -- backtick, $(...), ${...} -- is expanded before the bracket
+#   ever reaches this gate.
+# ⚖️ MEASURED BEFORE BUILDING, so this is a calibrated guard and not a fear: across 108 of my
+#   brackets today, backticks = 0 and $( / ${ = 0. THE FALSE-POSITIVE RATE ON REAL TRAFFIC IS
+#   ZERO, and the true-positive I am guarding against has already happened to a peer.
+#   ⇒ SO THE CLEANLINESS WAS LUCK, NOT METHOD: I use backticks constantly in BODIES, and the
+#     first one that reaches a bracket would be executed and then certified green.
+# ✅ THE SAFE FORM, if a bracket ever needs a literal backtick: build it with `printf` and %s
+#   ARGUMENTS -- a single-quoted format string is never expanded and the values are never
+#   re-parsed. That is the same discipline the fleet adopted when the substitution stage was
+#   retired, and the same one saltbuild's log line uses.
+case "$B1" in
+  *'`'*|*'$('*|*'${'*)
+    die "bracket carries SHELL-EXECUTABLE text (a backtick, \$( or \${). Your bracket is built
+   with an UNQUOTED heredoc, so this was EXPANDED BY THE SHELL before it reached this gate --
+   and the transport receipt would have certified the corrupted result GREEN, because a receipt
+   covers the bytes SENT and not the bytes you INTENDED. A peer lost a substantive block to
+   exactly this at 17:49. Build the bracket with printf '%s' ARGUMENTS, or drop the character." 13 ;;
 esac
 
 # ---- CLAUSE 2e: NO DECOY OWNER LATER IN THE LINE -----------------------------------------
