@@ -1054,6 +1054,23 @@ OPEN ITEMS:
   (math+compiler shared per the plan); ③'s own doors and gates are
   unchanged by it. Door 2 of ③ noted LANDED since (fb3842a,
   Decoder.lean:333). Full roll-call table in the session record.**
+- **⭐⭐⭐ THE 08/16 RE-TIER (12:2x, the Captain at the desk sitting, his
+  words: "we want to finish these P1s. Next, I would recommend we move
+  LW/SW in silicon to P1, then all P3s (incl GNN compiler) move to P2."):**
+  **P1 = FINISH-FIRST**: the standing P1 remainder (the 8/14 sweep's five
+  open items below — F4 bridge · input-side naming hole · D1a dfrtp ·
+  D2 silicon-half confirmation · sw_* docstring gap — plus any census
+  finds) **AND the LW/SW SILICON INTEGRATION (stage ③: dmem8+memif+layout,
+  update-window 2026-09-07) PROMOTED from P2 to P1.**
+  **P2 = the former P3 rosters unchanged in content and order** (compiler
+  V9 → A1 → L5 → batcher_c/SER → L6 · math L3-half → X3 → 47-row → A3 ·
+  silicon cocotb → 1x2/BB → DRV → tile-fit → sim harness · evidence
+  GraphCast citation) **PLUS the GNN COMPILER — a NEW campaign, joining P2,
+  design-block-first per the standing law (no seat consumes it before its
+  refuter-passed block exists).** **P3: empty.** Same mechanics as always
+  (clean-boundary switching · a lower tier never gates a higher · one pen
+  per seat), strict P1 > P2. A rung-by-rung P1 census fired at the ruling
+  (nine readers; brief lands at ${SEAT_DIR}/briefs/p1-census-0816.md).
 - **⭐⭐ P2 RECONCILED — THE REGISTER WAS THREE DAYS STALE AND THE
   STALENESS MANUFACTURED A DEBT (8/14 17:5x, the evening helm, Fable
   hand): tonight three seats reconstructed "① maestro-owed TONIGHT"
