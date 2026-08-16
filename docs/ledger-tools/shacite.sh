@@ -95,6 +95,18 @@ if [ -n "$BAD" ]; then
   printf '   An invented sha reads as PINNED. Fix or delete it before sending.\n'
   exit 4
 fi
+DROPPED=$(LC_ALL=C tr '\n' ' ' < "$B" | LC_ALL=C sed 's/\([.;·]\)/\1\n/g' \
+          | LC_ALL=C grep -iE "$DISOWN" | LC_ALL=C grep -oE '[0-9a-f]{7,10}' | sort -u)
+if [ -n "$DROPPED" ]; then
+  printf '⚠️  shacite: %d sha(s) sit in a DISOWNING sentence and were NOT CHECKED:\n' \
+         "$(printf '%s\n' "$DROPPED" | wc -l | tr -d ' ')"
+  printf '%s\n' "$DROPPED" | sed 's/^/     ? /'
+  printf '   A disowning word ANYWHERE in the segment drops the whole segment, so a REAL\n'
+  printf '   citation can be swallowed by an unrelated clause. VERIFY THESE BY HAND.\n'
+  printf '   ⇒ THIS VERDICT IS SCOPED, NOT CLEAN: %d checked, %d unexamined.\n' "$OK" \
+         "$(printf '%s\n' "$DROPPED" | wc -l | tr -d ' ')"
+  exit 0
+fi
 printf '✅ shacite: %d citation(s) resolve; 0 unresolved.\n' "$OK"
 printf '   ⚠️  DOMAIN: 7-10 hex not preceded by "=". A 40-char sha is NOT checked.\n'
 exit 0
