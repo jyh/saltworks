@@ -120,6 +120,11 @@ STAMP=$(date '+%m/%d %H:%M:%S')
 #   untracked BY DEFAULT. Proven by probe: dropping one untracked file into docs/ledger-tools
 #   moved the count 1 -> 2. THE LABEL MUST BE VERIFIED AGAINST THE COMMAND, NEVER AGAINST
 #   THE DOCUMENTATION OF THE COMMAND -- which is how the original wrong label got there.
+# ⇒ CLOCK-TRIGGERED INWARD CHECK (08/15 23:3x): selfstale.sh re-measures the figures my
+#   own brief asserts ABOUT ITSELF. Called from here because this script is already
+#   clock-driven -- SUBJECT = my own output, TRIGGER = a clock and not a colleague,
+#   which is the pair the 08/15 tally showed I was missing. No new watch to enumerate.
+SS=$(bash "$(dirname "$0")/selfstale.sh" 2>/dev/null); [ -n "$SS" ] && printf '%s\n' "$SS"
 printf 'FALLBACK-COMPILER %s · my-landing=%s(my-paths,ANY-seat) · last-touch-any-seat=%s · MY-dirty=%s(my-paths,incl-untracked) · unpushed=%s(REPO-WIDE, cached, no fetch)\n' \
   "$STAMP" "$MYL" "$ANY" "$DIRTY" "$UNPUSH"
 printf '  scope: %s\n' "${MINE[*]}"
