@@ -4989,7 +4989,7 @@ theorem pcField_is_pcAdd_add (s : St) (rd x y : Fin 32) :
   rw [set_pc]
 
 /-- ⭐ **INCLUDING THE UNDECODABLE WORDS** — `stepT`'s NOP-advance path, the
-measured 99.80%. -/
+measured 99.61%. -/
 theorem pcField_is_pcAdd_undecodable (s : St) (w : Word) (h : decode w = none) :
     (stepT s w).pc
       = wordOf (fun k => (sem pcAdd (pcAddEnv s.pc 0 0 0 false)).getD k false) := by
@@ -5064,7 +5064,7 @@ def pcAddPairs : List (Word × Word) := [(0, 0), (1, 1), (0, 1), (0x80000000, 0)
 def pcAddOffs : List Word := [0, 8, 0x40]
 
 /-- The NOT-TAKEN suite — `pcNext_not_beq_adds_four`'s coverage, lifted to the
-composite: the ratified behaviour on **99.80%** of the word space. -/
+composite: the ratified behaviour on **99.61%** of the word space. -/
 def pcAddOKCut : Bool :=
   pcAddPcs.all fun p => pcAddPairs.all fun q => pcAddOffs.all fun o =>
     sem pcAddCut (pcAddEnv p q.1 q.2 o false)
@@ -5072,7 +5072,7 @@ def pcAddOKCut : Bool :=
 
 /-- ⛔ **36 DRIVEN POINTS, AND THE MUTANT PASSES ALL OF THEM** — the carry-in it
 reads is `false` on every non-branch, so the wire is invisible on the path the
-core spends 99.80% of its life on. -/
+core spends 99.61% of its life on. -/
 theorem pcAddCut_passes_the_certificate : pcAddOKCut = true := by decide +kernel
 
 /-- ⭐ **AND `sem_pcAdd` REFUSES IT** at one taken branch: `0x1000 + 0x40` comes

@@ -154,7 +154,7 @@ def pcOK : Bool :=
 theorem pcNext_correct_on_sample : pcOK = true := by decide +kernel
 
 /-- **A NON-`BEQ` INSTRUCTION ALWAYS ADDS 4** — including the NOP-advance path,
-which is the ratified behaviour on 99.80% of words. -/
+which is the ratified behaviour on 99.61% of words. -/
 theorem pcNext_not_beq_adds_four :
     (pcCases.all fun p => pcOffs.all fun o =>
       pcRun p.1 p.2 o false == (List.range 32).map (4 : BitVec 32).getLsbD ++ [false])

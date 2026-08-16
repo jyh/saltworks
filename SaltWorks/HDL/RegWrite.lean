@@ -33,7 +33,7 @@ ratified **NOP-advance**: the register file must be untouched, and that is
 enforced here rather than downstream.
 
 ⚠️ **`valid` is doing real work and is not defensive.** Under the ratified
-option-1 semantics **99.80% of the word space is undecodable**, so the `¬valid`
+option-1 semantics **99.61% of the word space is undecodable**, so the `¬valid`
 path is not an edge case — *it is the overwhelmingly common input*, and a
 missing `valid` term would corrupt the register file on almost every word a
 fuzzer could hand it.
@@ -113,7 +113,7 @@ theorem regWrite_x0_never_enabled :
       (weOf rd v b).getD 0 false == false) = true := by decide +kernel
 
 /-- **The NOP-advance path touches no register** — the ratified semantics, in
-gates, on the 99.80% of words that are undecodable. -/
+gates, on the 99.61% of words that are undecodable. -/
 theorem regWrite_invalid_writes_nothing :
     ((List.range 32).all fun rd => [false, true].all fun b =>
       (weOf rd false b).all (· == false)) = true := by decide +kernel
