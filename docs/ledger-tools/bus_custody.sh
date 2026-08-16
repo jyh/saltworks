@@ -107,6 +107,18 @@ if [ "${1:-}" = "--selftest" ]; then
   arm ":33 SEAT-STATE absent (NOT-about-state)" 7 "$T/b.md" "$T/tok_missing.txt"
   printf ', compiler — SEAT-STATE: helm=LIT · wrong seat bound, body receipt bytes=%s sha256/16=%s]' "$B" "$S" > "$T/tok_wrongseat.txt"
   arm ":33 SEAT-STATE bound to WRONG seat" 7 "$T/b.md" "$T/tok_wrongseat.txt"
+
+  # clause 2j -- a hand-typed clock in the BODY vs the actual send time.
+  # Each fixture carries its OWN receipt: a mismatched one dies at the receipt check instead,
+  # which would report the WRONG die site and score this arm green for the wrong reason.
+  printf 'a body line.\nanother line.\ncompiler=LIT, %s. next post soon.\n' "$(date '+%H:%M')" > "$T/clk_ok.md"
+  CB=$(wc -c < "$T/clk_ok.md" | tr -d ' '); CS=$(shasum -a 256 "$T/clk_ok.md" | cut -c1-16)
+  printf ', compiler — SEAT-STATE: compiler=LIT · clock matches, body receipt bytes=%s sha256/16=%s]' "$CB" "$CS" > "$T/clk_ok.txt"
+  arm ":2j body clock MATCHES send"   0 "$T/clk_ok.md" "$T/clk_ok.txt"
+  printf 'a body line.\nanother line.\ncompiler=LIT, %s. next post soon.\n' "$(date -v+13M '+%H:%M' 2>/dev/null || date -d '+13 min' '+%H:%M')" > "$T/clk_ahead.md"
+  DB=$(wc -c < "$T/clk_ahead.md" | tr -d ' '); DS=$(shasum -a 256 "$T/clk_ahead.md" | cut -c1-16)
+  printf ', compiler — SEAT-STATE: compiler=LIT · clock ahead, body receipt bytes=%s sha256/16=%s]' "$DB" "$DS" > "$T/clk_ahead.txt"
+  arm ":2j body clock 13 min AHEAD REFUSED" 13 "$T/clk_ahead.md" "$T/clk_ahead.txt"
   printf ', compiler — SEAT-STATE: compiler=LIT · no receipt fields at all]' > "$T/norx.txt"
   arm ":37 clause-3 fields absent"   3 "$T/b.md" "$T/norx.txt"
   printf ', compiler — SEAT-STATE: compiler=LIT · lie, body receipt bytes=%s sha256/16=%s]' "$((B+9))" "$S" > "$T/badb.txt"
@@ -575,6 +587,30 @@ PUB_S=$(grep -o 'body receipt bytes=[0-9][0-9]* sha256/16=[0-9a-f][0-9a-f]*' "$B
 [ "$PUB_S" = "$ACT_S" ] || die "PUBLISHED sha=$PUB_S but body is $ACT_S — a false receipt" 3
 
 # ---- CLAUSE 1: expectation DERIVED from bytes. REF materialized ONCE, never re-read ------
+# ── clause 2j: A HAND-TYPED CLOCK IN THE BODY MUST MATCH THE SEND (added 08/16) ────
+#   MEASURED on my own traffic before writing this: 5 posts carried a hand-typed anchor time
+#   and the drift ran 0, +1, +1, +5, +13 minutes -- ALWAYS AHEAD, never behind, and growing.
+#   I compose the anchor while drafting, ESTIMATE when it will land, then never re-measure.
+#   The send time is a figure THIS TOOL ALREADY EMITS (stamp=...), so a hand-typed one is a
+#   SECOND COPY of a machine figure -- don't write a figure twice, POINT at it.
+#   ⚠️ DOMAIN: it only sees the form `compiler=<STATE>` followed by HH:MM within ~40 chars.
+#   Another phrasing is INVISIBLE to it, and 28 earlier posts of mine used other forms and are
+#   UNMEASURED, not clean. Measurement, not immunity.
+CLK=$(LC_ALL=C grep -oE 'compiler=(LIT|RESTING)[^0-9]{0,40}[0-9]{2}:[0-9]{2}' "$BODY" 2>/dev/null \
+      | LC_ALL=C grep -oE '[0-9]{2}:[0-9]{2}$' | head -1)
+if [ -n "$CLK" ]; then
+  NOWM=$(date '+%H %M' | awk '{print $1*60+$2}')
+  CLKM=$(printf '%s
+' "$CLK" | awk -F: '{print ($1*60)+$2}')
+  DRIFT=$(( CLKM - NOWM )); ABS=${DRIFT#-}
+  if [ "$ABS" -gt 2 ]; then
+    die "clause 2j: the body's hand-typed clock says ${CLK} but the send is $(date '+%H:%M') (drift ${DRIFT} min).
+   A hand-typed send time is a SECOND COPY of the stamp this tool emits. Measured drift on my own
+   traffic ran 0/+1/+1/+5/+13, always AHEAD -- an estimate made while drafting and never re-measured.
+   FIX: drop the clock from the anchor line and let the receipt carry it, or re-measure at send." 13
+  fi
+fi
+
 STAMP=$(date '+%m/%d %H:%M:%S')
 REF=$(mktemp)
 # SILICON'S CRITERION (19:13, 2026-08-13): "a caveat living only in the source never reaches
