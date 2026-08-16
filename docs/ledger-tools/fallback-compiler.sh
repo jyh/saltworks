@@ -105,7 +105,22 @@ STAMP=$(date '+%m/%d %H:%M:%S')
 #   so the count aggregates theirs with mine. Labelled rather than scoped, because "is anything
 #   unpushed in the shared tree" IS the useful heartbeat fact — but it must not wear my name.
 #   Same defect I corrected in my own close-line at 09:5x; this is the sibling surface.
-printf 'FALLBACK-COMPILER %s · my-landing=%s · last-touch-any-seat=%s · MY-dirty=%s · unpushed=%s(REPO-WIDE, cached, no fetch)\n' \
+# ⚖️ THE LABELS CARRY THEIR SCOPE INLINE, and the NAMES were deliberately NOT changed:
+#   `my-landing` and `MY-dirty` are referenced 9 times in the boot brief and in
+#   docs/compiler-liveness-arm-scope-0814.md. Renaming the identifier would falsify
+#   every one of those mentions silently -- a format change is an edit to everything
+#   that described the old format. So the IDENTIFIER stays and the CLAIM is narrowed
+#   where it is read. Nothing parses these labels (checked); only this printf emits them.
+# ⇒ WHAT THE SCOPES ACTUALLY ARE: seat authorship is NOT recoverable from git (all five
+#   seats commit as one author), so `my-landing` can never mean `mine` -- it is the last
+#   commit touching MY PATHSPEC, by ANY seat. Same for MY-dirty.
+# ⛔ AND I NEARLY SHIPPED A FALSE LABEL WHILE FIXING LABELS: I first wrote MY-dirty as
+#   `tracked-only`, from the boot brief's account of this arm. THE COMMAND AT LINE 94 IS
+#   `git status --porcelain -- <paths>` WITH NO --untracked-files=no, and porcelain shows
+#   untracked BY DEFAULT. Proven by probe: dropping one untracked file into docs/ledger-tools
+#   moved the count 1 -> 2. THE LABEL MUST BE VERIFIED AGAINST THE COMMAND, NEVER AGAINST
+#   THE DOCUMENTATION OF THE COMMAND -- which is how the original wrong label got there.
+printf 'FALLBACK-COMPILER %s · my-landing=%s(my-paths,ANY-seat) · last-touch-any-seat=%s · MY-dirty=%s(my-paths,incl-untracked) · unpushed=%s(REPO-WIDE, cached, no fetch)\n' \
   "$STAMP" "$MYL" "$ANY" "$DIRTY" "$UNPUSH"
 printf '  scope: %s\n' "${MINE[*]}"
 
