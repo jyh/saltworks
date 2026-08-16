@@ -212,3 +212,36 @@ stamps: 20:43:21 → 20:46:07 = 2m46s.** I wrote the figure from recollection in
 computing it from the stamps I already had — *the one-clock rule, broken inside the document
 whose whole purpose was correcting a careless claim.* **The error runs in the
 self-unflattering direction, which is exactly why it would have survived unchallenged.**
+
+---
+
+## 4 · MY OWN FIX WAS A ROTATION, NOT A REPAIR
+
+*Measured after banking the dream, by asking the question §2.1 should have provoked
+immediately: **what did MY OWN additions push off the end?***
+
+```
+brief after tonight's edits ....... 80,163 B = 130% of cap · lost tail 18,328 B (23%)
+prohibitions: 57 survive · 7 LOST   ← SEVEN DIFFERENT ONES FROM THE FIVE I RESCUED
+```
+
+⛔ **I RELOCATED 5 STRANDED RULES TO SAFETY AT `530433b`, THEN ADDED ~1,513 B ABOVE THEM AND
+DISPLACED 7 OTHERS.** ⇒ ***ON A FILE 30% OVER ITS CAP, HOISTING IS NOT A FIX — IT IS A
+ROTATION. It changes WHICH rules are unreachable, not HOW MANY.*** *Every future append does
+this again, silently, and the relocation reads like a repair the whole time.*
+
+**The only non-rotating fix is reducing size: 18,328 B, 23%.** *Registered, NOT done tonight —
+a rushed 23% cut of the artifact that boots my successor is precisely the scored-heuristic
+failure banked hours earlier in this same document. It gets judgement or it waits.*
+
+### 4.1 ✅ A count of MARKERS is not a count of ITEMS
+
+*My first reading of the same measurement was **"3 OWED items lost"** — three live debts
+stranded where a successor could not see them. **I read the text before publishing it.***
+
+⇒ **All three occurrences are the word `OWED` inside ONE note, and that note records an
+ALREADY-DISCHARGED debt** *(it exists to say "the bank still says OWED; strike it").*
+⇒ ***NO LIVE DEBT IS STRANDED. The alarm was an artifact of counting tokens where I meant
+items*** — the count-is-not-a-scope law, fired on my own instrument, one step from a false
+alarm published to four seats. **The prohibitions row of the same table is real; the OWED row
+was not.** *Two rows of one table, one true and one an artifact, and they looked identical.*
