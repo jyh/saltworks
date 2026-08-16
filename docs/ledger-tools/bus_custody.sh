@@ -48,11 +48,14 @@ if [ "${1:-}" = "--selftest" ]; then
   arm ":24 bracket unterminated"     6 "$T/b.md" "$T/x.txt"
   printf 'body\n```\nunclosed fence\n' > "$T/odd.md"
   arm ":25 odd fence count"          6 "$T/odd.md" "$T/ok.txt"
-  # CLAUSE 2i -- shell-executable text in the bracket. POSITIVE AND NEGATIVE, both driven,
-  # because the clause was added from a PEER's corruption and I have no scar to make me
-  # re-check it: an arm nobody drives rots silently and reads exactly like a clean pass.
-  # The backtick is written via printf %s so this harness does not commit the very defect
-  # it is testing for.
+  # CLAUSE 2i -- ⚠️ THESE TWO ARMS DRIVE THE *SURVIVING* CASE ONLY, AND THAT IS THE WEAK ONE.
+  # The dangerous case -- a backtick TYPED LITERALLY into an unquoted heredoc -- is EXECUTED IN
+  # THE CALLER'S SHELL before this script is ever invoked, leaving no backtick in the file. It
+  # is UNTESTABLE FROM HERE BY CONSTRUCTION, and these arms cannot and do not cover it.
+  # ⛔ I ORIGINALLY WROTE, AS IF IT WERE A VIRTUE: "the backtick is written via printf %s so this
+  #   harness does not commit the very defect it is testing for." THAT SENTENCE WAS THE DEFECT --
+  #   a fixture built to be safe from the mutant cannot feel the mutant. Kept here as the record.
+  # ✅ The real protection is the printf construction described at the clause, not these arms.
   printf ', compiler — SEAT-STATE: compiler=LIT · a %s token %s, body receipt bytes=%s sha256/16=%s]' \
     '`backtick`' 'here' "$B" "$S" > "$T/tick.txt"
   arm ":2i backtick REFUSED"        13 "$T/b.md" "$T/tick.txt"
@@ -485,11 +488,28 @@ esac
 #   built with an UNQUOTED heredoc because it interpolates the stamp, byte count and sha.
 #   Anything the shell can expand -- backtick, $(...), ${...} -- is expanded before the bracket
 #   ever reaches this gate.
-# ⚖️ MEASURED BEFORE BUILDING, so this is a calibrated guard and not a fear: across 108 of my
-#   brackets today, backticks = 0 and $( / ${ = 0. THE FALSE-POSITIVE RATE ON REAL TRAFFIC IS
-#   ZERO, and the true-positive I am guarding against has already happened to a peer.
-#   ⇒ SO THE CLEANLINESS WAS LUCK, NOT METHOD: I use backticks constantly in BODIES, and the
-#     first one that reaches a bracket would be executed and then certified green.
+# ⛔⛔ AND THE CLAUSE BELOW CANNOT SEE THE DEFECT IT WAS BUILT FOR. MEASURED 18:1x, RETRACTED
+#   ON THE BUS THE SAME MINUTE. THIS ARM IS A REGRESSION DETECTOR, NOT A GUARD:
+#     heredoc source  ... before `echo MIDDLE` after
+#     landed bracket  ... before MIDDLE after        <- executed
+#     backticks left in the file ..... 0
+#     this clause fired .............. NO
+#   ⇒ IT INSPECTS THE BRACKET FILE, WHICH IS POST-EXPANSION. A backtick that EXECUTED leaves no
+#     backtick behind. The only ones it can ever see are those that SURVIVED — i.e. the HARMLESS
+#     ones. It detects the safe case and is blind to the dangerous one.
+#   ⇒ AND IT IS UNTESTABLE FROM INSIDE THIS GATE BY CONSTRUCTION: the expansion happens in the
+#     caller's shell, before this script is invoked. No selftest arm here can ever drive it.
+#     The two :2i arms below drive the SURVIVING case ONLY, and are labelled so.
+# ✅ THE REAL PROTECTION IS A CONSTRUCTION, NOT THIS CLAUSE (evidence's, tested by them with a
+#   live payload, adopted here): build the bracket with `printf` — SINGLE-QUOTED format, every
+#   value a %s ARGUMENT. A literal format is never expanded; a %s argument is never re-scanned
+#   nor format-processed. The hazard stops existing rather than being detected.
+# ⚖️ EXPOSURE, CORRECTED SMALLER THAN FIRST PUBLISHED: bash does NOT re-scan the result of a
+#   variable or command substitution, so interpolated fields ($L, $D, bytes, sha) were never at
+#   risk. The surface is only a backtick TYPED LITERALLY into the bracket text.
+# ⚖️ Measured before building: across 108 of my brackets that day, backticks = 0 and $( / ${ = 0,
+#   so the false-positive rate on real traffic is zero — which is why this stays in as a cheap
+#   regression detector even though it cannot catch the live case.
 # ✅ THE SAFE FORM, if a bracket ever needs a literal backtick: build it with `printf` and %s
 #   ARGUMENTS -- a single-quoted format string is never expanded and the values are never
 #   re-parsed. That is the same discipline the fleet adopted when the substitution stage was
