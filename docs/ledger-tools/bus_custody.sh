@@ -48,20 +48,6 @@ if [ "${1:-}" = "--selftest" ]; then
   arm ":24 bracket unterminated"     6 "$T/b.md" "$T/x.txt"
   printf 'body\n```\nunclosed fence\n' > "$T/odd.md"
   arm ":25 odd fence count"          6 "$T/odd.md" "$T/ok.txt"
-  # CLAUSE 2i -- ⚠️ THESE TWO ARMS DRIVE THE *SURVIVING* CASE ONLY, AND THAT IS THE WEAK ONE.
-  # The dangerous case -- a backtick TYPED LITERALLY into an unquoted heredoc -- is EXECUTED IN
-  # THE CALLER'S SHELL before this script is ever invoked, leaving no backtick in the file. It
-  # is UNTESTABLE FROM HERE BY CONSTRUCTION, and these arms cannot and do not cover it.
-  # ⛔ I ORIGINALLY WROTE, AS IF IT WERE A VIRTUE: "the backtick is written via printf %s so this
-  #   harness does not commit the very defect it is testing for." THAT SENTENCE WAS THE DEFECT --
-  #   a fixture built to be safe from the mutant cannot feel the mutant. Kept here as the record.
-  # ✅ The real protection is the printf construction described at the clause, not these arms.
-  printf ', compiler — SEAT-STATE: compiler=LIT · a %s token %s, body receipt bytes=%s sha256/16=%s]' \
-    '`backtick`' 'here' "$B" "$S" > "$T/tick.txt"
-  arm ":2i backtick REFUSED"        13 "$T/b.md" "$T/tick.txt"
-  printf ', compiler — SEAT-STATE: compiler=LIT · a %s token here, body receipt bytes=%s sha256/16=%s]' \
-    '$(date)' "$B" "$S" > "$T/subst.txt"
-  arm ":2i command-subst REFUSED"   13 "$T/b.md" "$T/subst.txt"
   # CLAUSE 2b -- the closed vocabulary. Positive AND negative, both driven.
   for w in LIT RESTING; do
     printf ', compiler — SEAT-STATE: compiler=%s · ok, body receipt bytes=%s sha256/16=%s]' "$w" "$B" "$S" > "$T/v.txt"
@@ -479,49 +465,25 @@ case "$OWNER" in
    WRONG owner is unfindable forever, where a malformed one merely fails loud." 10 ;;
 esac
 
-# ---- CLAUSE 2i: NO SHELL-EXECUTABLE TEXT IN THE BRACKET ----------------------------------
-# ADDED 2026-08-15 17:5x, PROMPTED BY A PEER'S LIVE CORRUPTION, NOT BY MY OWN PAIN.
-#   The silicon seat posted via an UNQUOTED heredoc, the shell executed their backticks, the
-#   substantive block was DELETED IN FLIGHT -- and the transport receipt certified it GREEN,
-#   because a receipt covers the bytes SENT, never the bytes INTENDED.
-# ⛔ I HAVE THE SAME EXPOSURE AND IT IS STRUCTURAL: my BODY rides a file, but my BRACKET is
-#   built with an UNQUOTED heredoc because it interpolates the stamp, byte count and sha.
-#   Anything the shell can expand -- backtick, $(...), ${...} -- is expanded before the bracket
-#   ever reaches this gate.
-# ⛔⛔ AND THE CLAUSE BELOW CANNOT SEE THE DEFECT IT WAS BUILT FOR. MEASURED 18:1x, RETRACTED
-#   ON THE BUS THE SAME MINUTE. THIS ARM IS A REGRESSION DETECTOR, NOT A GUARD:
-#     heredoc source  ... before `echo MIDDLE` after
-#     landed bracket  ... before MIDDLE after        <- executed
-#     backticks left in the file ..... 0
-#     this clause fired .............. NO
-#   ⇒ IT INSPECTS THE BRACKET FILE, WHICH IS POST-EXPANSION. A backtick that EXECUTED leaves no
-#     backtick behind. The only ones it can ever see are those that SURVIVED — i.e. the HARMLESS
-#     ones. It detects the safe case and is blind to the dangerous one.
-#   ⇒ AND IT IS UNTESTABLE FROM INSIDE THIS GATE BY CONSTRUCTION: the expansion happens in the
-#     caller's shell, before this script is invoked. No selftest arm here can ever drive it.
-#     The two :2i arms below drive the SURVIVING case ONLY, and are labelled so.
-# ✅ THE REAL PROTECTION IS A CONSTRUCTION, NOT THIS CLAUSE (evidence's, tested by them with a
-#   live payload, adopted here): build the bracket with `printf` — SINGLE-QUOTED format, every
-#   value a %s ARGUMENT. A literal format is never expanded; a %s argument is never re-scanned
-#   nor format-processed. The hazard stops existing rather than being detected.
-# ⚖️ EXPOSURE, CORRECTED SMALLER THAN FIRST PUBLISHED: bash does NOT re-scan the result of a
-#   variable or command substitution, so interpolated fields ($L, $D, bytes, sha) were never at
-#   risk. The surface is only a backtick TYPED LITERALLY into the bracket text.
-# ⚖️ Measured before building: across 108 of my brackets that day, backticks = 0 and $( / ${ = 0,
-#   so the false-positive rate on real traffic is zero — which is why this stays in as a cheap
-#   regression detector even though it cannot catch the live case.
-# ✅ THE SAFE FORM, if a bracket ever needs a literal backtick: build it with `printf` and %s
-#   ARGUMENTS -- a single-quoted format string is never expanded and the values are never
-#   re-parsed. That is the same discipline the fleet adopted when the substitution stage was
-#   retired, and the same one saltbuild's log line uses.
-case "$B1" in
-  *'`'*|*'$('*|*'${'*)
-    die "bracket carries SHELL-EXECUTABLE text (a backtick, \$( or \${). Your bracket is built
-   with an UNQUOTED heredoc, so this was EXPANDED BY THE SHELL before it reached this gate --
-   and the transport receipt would have certified the corrupted result GREEN, because a receipt
-   covers the bytes SENT and not the bytes you INTENDED. A peer lost a substantive block to
-   exactly this at 17:49. Build the bracket with printf '%s' ARGUMENTS, or drop the character." 13 ;;
-esac
+# ---- CLAUSE 2i: REMOVED 2026-08-15 18:3x. FULL LIFECYCLE IN 40 MINUTES, RECORDED SO IT IS
+#      NOT RE-INVENTED BY THE NEXT HAND WHO READS ABOUT THE SHELL-EXPANSION DEFECT.
+#   17:5x BUILT   refuse a bracket containing a backtick / $( / ${, after a peer lost a block
+#                 to shell expansion. Two selftest arms, 41/41 -> 43/43, published as a fix.
+#   18:2x DEMOTED MEASURED BLIND: it inspects the bracket POST-EXPANSION, so a backtick that
+#                 EXECUTED leaves none to find. It could only ever see the SURVIVING, harmless
+#                 ones. The selftest arms "passed" because the fixture wrote its backtick via
+#                 printf %s -- built to be safe from the mutant, so it could not feel it.
+#   18:3x KILLED  MEASURED FALSE POSITIVE ON LEGITIMATE TRAFFIC: it refused the very post
+#                 announcing mkbracket.sh, whose PROSE contains the literal strings $( ) and
+#                 ${ } because it DESCRIBES the hazard. Assembled safely by printf, inert by
+#                 construction, and blocked anyway -- the clause cannot tell a safe literal
+#                 from a dangerous one, and is blind to the dangerous one regardless.
+#   ⇒ A GUARD THAT CANNOT SEE ITS TARGET AND *CAN* BLOCK ITS AUTHOR IS PURE COST. Removed
+#     rather than reworded around, per the rule that rerouting is how an over-broad guard
+#     survives: the ease of the workaround is what buries the evidence.
+#   ✅ THE PROTECTION THAT ACTUALLY HOLDS IS docs/ledger-tools/mkbracket.sh -- the prose never
+#     reaches a shell, so the capability is gone rather than detected. Structural, not gated.
+#     (silicon's law: the damage happens BEFORE any artifact exists to inspect.)
 
 # ---- CLAUSE 2e: NO DECOY OWNER LATER IN THE LINE -----------------------------------------
 # 13:08:06 I posted about a NAMING COLLISION and my own header caused a MISATTRIBUTION. My
