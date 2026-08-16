@@ -42,6 +42,17 @@
 # ✅ PRE-REGISTERED BAR (published 21:58, BEFORE the tool existed) IS MET, driven on real
 #   published bodies: a pure ASSERTION of da41b7d REFUSES (4); a pure RETRACTION of the
 #   same sha PASSES (0). Sentence scope is what separates them.
+#
+# ⛔⛔ THE LIMIT THAT MATTERS, MEASURED 22:1x ON MY OWN TRAFFIC: THIS TOOL IS
+#   STRUCTURALLY BLIND TO A DESTROYED CITATION. I built a body with an UNQUOTED
+#   heredoc; the shell ate every backtick and the sha itself before the file existed.
+#   shacite then read the wreckage and returned EXIT 0, "0 citation(s) resolve; 0
+#   unresolved" -- a clean green over a body whose citation had been deleted.
+# ⇒ IT ANSWERS "does every sha I can SEE resolve?" AND NEVER "did every sha I
+#   INTENDED arrive?". Its green is conditional on the body being what you wrote.
+# ⇒ THE ONLY FIX IS CONSTRUCTION, not this gate: prose in a file, QUOTED heredoc,
+#   no interpolation, type the literal. A post-hoc reader of a corrupted artifact
+#   sees a clean artifact -- silicon's law, and no amount of checking repeals it.
 set -u
 B=${1:?usage: shacite.sh <body.md> [<repo>...]}
 [ -r "$B" ] || { printf '⛔ shacite: cannot read %s\n' "$B"; exit 2; }
