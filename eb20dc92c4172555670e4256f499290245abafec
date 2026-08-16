@@ -24,3 +24,20 @@ said. This note rides a file.
 Why a note and not an amend: the commit is PUSHED and four seats share this tree;
 rewriting it would move a sha others may have read. git notes is append-only and
 corrects the record in `git log` without touching history.
+
+⛔ RETRACTED BY 33c40d7 — THE CENTRAL CLAIM OF THIS COMMIT IS FALSE.
+
+This message says the bus watch "would have gone blind to every routine seat post
+on 09/01" and that the "date-agnostic" label "was never true of the artifact".
+Both are wrong.
+
+The RUNNING rev16 process carried a date-agnostic filter with no hardcoded month.
+The watch was never going blind; the label was true of the PROCESS. Only the
+committed FILE carried the month, so the real defect was FILE-VS-PROCESS DRIFT
+in the opposite direction to what I published.
+
+Worse, the "fix" this commit landed was a REGRESSION: it required a time field
+and a comma before the seat name, missing two post shapes the live filter caught.
+
+Do not cite this commit's reasoning. 33c40d7 restores the live bytes and states
+the corrected finding.
