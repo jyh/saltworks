@@ -24,7 +24,7 @@ set -u
 B=${1:-${SEAT_DIR}/briefs/0000-BOOT-compiler.md}
 M=${2:-${SEAT_CONFIG_DIR}/projects/-Users-jyh-projects-claude-saltworks/memory/MEMORY.md}
 [ -r "$B" ] || exit 0
-NB=$(wc -c < "$B" | tr -d ' '); NM=$(wc -c < "$M" 2>/dev/null | tr -d ' ')
+NB=$(wc -c < "$B" | tr -d ' '); NL=$(wc -l < "$B" | tr -d ' '); NM=$(wc -c < "$M" 2>/dev/null | tr -d ' ')
 OUT=""
 # 1. any "this file is N,NNN B" the brief asserts about itself
 for c in $(LC_ALL=C grep -oE 'file is [0-9][0-9,]* B' "$B" | LC_ALL=C grep -oE '[0-9][0-9,]*' | tr -d ,); do
@@ -36,5 +36,22 @@ for c in $(LC_ALL=C grep -oE 'index [0-9][0-9,]* B|index is [0-9][0-9,]* B' "$B"
   [ "$c" = "$NM" ] || OUT="$OUT
    brief says index is ${c} B; wc -c says ${NM} B"
 done
+# 3. TOKEN-CLAIM STALENESS. A shell script CANNOT measure tokens -- so this arm does not
+#    try. It binds the unmeasurable figure to a MEASURABLE fingerprint written beside it:
+#      TOKENFP: <tok> tok @ <bytes> B/<lines> lines
+#    If bytes or lines have moved, the token figure is stale BY DEFINITION, whatever it is.
+#    Born 2026-08-16: I wrote "this brief is 35,964 tokens" INTO the brief and the edit that
+#    added the sentence moved it to 36,674 -- false the instant written, in two places, and
+#    arms 1-2 were blind because they only know BYTES.
+#    ⚠️ DOMAIN: detects DRIFT, never correctness. A figure wrong when first written stays
+#    wrong here forever, and a SELF-BUILT referee shares its author's blind spots.
+while IFS='|' read -r tok fb fl; do
+  [ -z "$tok" ] && continue
+  if [ "$fb" != "$NB" ] || [ "$fl" != "$NL" ]; then OUT="$OUT
+   brief claims ${tok} tok @ ${fb} B/${fl} lines; file is now ${NB} B/${NL} lines -- TOKEN FIGURE STALE"; fi
+done <<EOF
+$(LC_ALL=C grep -oE 'TOKENFP: [0-9][0-9,]* tok @ [0-9][0-9,]* B/[0-9][0-9,]* lines' "$B" \
+  | sed -E 's/TOKENFP: ([0-9,]*) tok @ ([0-9,]*) B\/([0-9,]*) lines/\1|\2|\3/' | tr -d ,)
+EOF
 [ -n "$OUT" ] && printf '  ⛔ SELF-STALE FIGURES IN MY OWN BRIEF:%s\n' "$OUT"
 exit 0
