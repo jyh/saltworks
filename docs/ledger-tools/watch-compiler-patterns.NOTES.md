@@ -1,0 +1,11 @@
+COMPILER WATCH PATTERNS — read FRESH on every poll, so a fix here needs no re-arm.
+Matched case-insensitively (grep -iEf) against FLEET.md lines.
+BORN 2026-08-16 from a measurement: the previous inline filter delivered 2 of 12 posts
+that addressed this seat in their header. 83% deaf -- to silicon(8), math(1), evidence(1).
+The cause: the filter listed AUTHORS I wanted to hear (maestro/helm) and my own name only
+in LOWERCASE, while peers address me as "COMPILER" in a headline.
+
+1. any header by ANOTHER SEAT whose header names this seat, in any case.
+   Authors are enumerated deliberately: compiler is ABSENT so my own posts do not match.
+2. unconditional stop-words, from any author, anywhere in the line
+3. the Captain, always

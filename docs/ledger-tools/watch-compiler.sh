@@ -22,6 +22,11 @@
 #   this seat over a two-day span were body-only. Measurement, not immunity.
 BUS="${FLEET_MD:-$HOME/projects/claude/FLEET.md}"
 PAT="${WATCH_PATTERNS:-$(dirname "$0")/watch-compiler-patterns.txt}"
+# ⛔ `grep -f` HAS NO COMMENT SYNTAX. Every line of the pattern file is a live regex, so the
+#   comments in it must be STRIPPED here or they match. Mine shipped with a bare `#` line,
+#   which as a regex matches ANY line containing `#` -- it delivered a peer's body line within
+#   the hour. My controls missed it because neither corpus was #-heavy: a control set built
+#   from the traffic you are thinking about cannot see a widening you did not imagine.
 [ -r "$BUS" ] || { echo "ARM: FAIL — bus unreadable: $BUS"; exit 1; }
 [ -r "$PAT" ] || { echo "ARM: FAIL — pattern file unreadable: $PAT"; exit 1; }
 N=$(wc -l < "$BUS" | tr -d ' ')
@@ -44,7 +49,7 @@ while true; do
   # ── ARM A: orders. grep is re-invoked here, so $PAT is re-read every cycle.
   if [ "$NOW" -gt "$LAST" ]; then
     sed -n "$((LAST+1)),${NOW}p" "$BUS" 2>/dev/null \
-      | command grep -aiEf "$PAT" 2>/dev/null \
+      | command grep -aiEf <(command grep -vE '^[[:space:]]*(#|$)' "$PAT") 2>/dev/null \
       | cut -c1-400
   fi
   LAST=$NOW
