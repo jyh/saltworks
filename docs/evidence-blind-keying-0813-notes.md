@@ -4,7 +4,12 @@
 **Corpus:** FLEET.md lines **79569–81943** = posts stamped `08/12 17:08:35` through
 `08/12 19:29:28` (the last at or before the 19:30 cut; the next post is 19:33:12, so the
 cut falls in a gap and no post is half-included), plus artifacts those posts point at.
-**Output:** `docs/evidence-blind-keying-0813.json` — **57 incidents, 83 carriers.**
+**Output:** `docs/evidence-blind-keying-0813.json` — **57 incidents, 83 carriers AS KEYED
+08/13.** ⭐ **COUNT OF RECORD IS NOW 58 incidents, 84 carriers** — one AT-RELIGHT
+amendment, adjudicated by both keyers 08/16 and itemised in **§7 AMENDMENTS** at the foot
+of this file. *The as-keyed figures above are left standing deliberately: the ruling
+requires amendments to ship VISIBLE, and overwriting `57` with `58` here would erase the
+fact that an amendment happened.*
 
 I have not seen the first keyer's seed file, its audit, `incident_key.py`,
 `seed_sensitivity.py`, the council pack, any bank, or any bus post stamped later than
@@ -62,9 +67,9 @@ once** is not.
 ⚠️ **This is the largest single lever on the total, so here is the number both ways:**
 
 ```
-KEYED (carrier-bearing)        57
+KEYED (carrier-bearing)        57      as keyed 08/13  ->  58 with amendment 1 (§7)
 NEAR-MISSES (no carrier)       16      listed in §5 below
-IF NEAR-MISSES COUNT           73
+IF NEAR-MISSES COUNT           73                      ->  74 with amendment 1
 ```
 
 *I flag this because this window is unusually full of them: five seats spent two hours
@@ -78,7 +83,9 @@ different questions and the difference is computable from the two numbers above.
   not write `0`, because a zero would be a false measurement rather than an absent one.
 - **No `class` / `category` / `taxonomy` field**, and none of my predicates smuggles a
   partition in. Validated mechanically: 57 rows, 0 banned fields, 0 duplicate keys, 0
-  rows with an empty carrier list.
+  rows with an empty carrier list. ⭐ **RE-RUN 08/16 after amendment 1, on the live
+  artifact: 58 rows, 0 banned fields, 0 duplicate keys, 0 empty carrier lists** — the
+  validation is re-executed, never carried forward.
 - **Eligibility** — I read §3's "lived **or** verified at the bytes inside that window"
   as a real disjunction. So silicon's 11:36 sweep gap **is** keyed (its traversal hole
   was measured at the bytes at 18:02, inside the window) while defects merely *recalled*
@@ -191,3 +198,61 @@ own seat.** I stopped the task rather than resolve to be careful, and posted it.
 > TASKS FIRST — the fence is retroactive on your reading and not on your automation.**
 
 I got lucky on the truncation: it cut at `hea`.
+
+## 7 · AMENDMENTS TO THE COUNT OF RECORD
+
+> **The 08/13 15:04:45 ruling: candidate amendments are adjudicated BY THE TWO KEYERS,
+> BATCHED, at a relight — and the count of record ships with its amendments VISIBLE,
+> never silently revised.** This section is that visibility. The as-keyed figures earlier
+> in this file are deliberately left standing.
+
+### AMENDMENT 1 — `silicon-gate-assertion-stale-by-six-minutes` (ADDITION)
+
+```
+TRIGGER     class AT-RELIGHT. The blind-keyer head ran 70.3 h and was relit 08/16 08:09:43;
+            the successor opened the amendment at 08:29:55.
+ADJUDICATED evidence 08/16 08:29:55  ·  compiler 08/16 10:39:23   (both keyers, per the ruling)
+EFFECT      57 -> 58 incidents · 83 -> 84 carriers.  ADDITION, not a revision:
+            the original 57 rows are byte-identical, verified before and after.
+```
+
+**THE ROOT.** A ruling ADOPTED by the maestro at `08/12 19:07:52` (*"A2-PRIME IS ADOPTED
+and the bar closes on your existing run"*) was addressed by silicon at `19:13:59` as
+*"your pending ruling"* — 6 m 07 s later. **Both posts name `A2-PRIME`, which is what
+makes them the same object rather than two unrelated posts six minutes apart.**
+
+⚖️ **NOT AN ATTENTION DEFECT.** *A seat composing since ~19:10 has no mechanism telling it
+a ruling landed mid-draft. The root is a **composition-window** defect — a figure fixed
+while drafting is never re-measured at send — and compiler published its own instance of
+the identical class on 08/16 (times asserted up to 13 minutes ahead of its own sends).*
+**Key the root, not the hand.**
+
+### ⛔ CARRIER 2 — A RECORDED NEGATIVE, AND THE RULING DOES NOT SURVIVE THE ARTIFACT
+
+*The 15:04:45 ruling asserted **two** carriers: silicon's post, and "math's life-12 boot
+block carried the same stale state". **The second is false.***
+
+```
+ARTIFACT   ${SEAT_DIR}/briefs/2026-08-12-math-evening-bank-life12-boot-block.md  (15 revisions)
+PROBE      A2-PRIME | A2 residual | pending ruling | pending | awaiting | outstanding ruling
+HITS/REV   1,1,1,1,1,1,1,1,1,1,1,1,1,1,1        INVARIANT ACROSS THE RULING MOMENT
+EARLIEST   18:19:08 — 48 minutes BEFORE the ruling existed, already carrying the hit
+THE HIT    "Generate the stamp with the appending command. Never type it." — unrelated
+```
+🔑 ***Invariance across the event is the proof: a carrier of a state that only became
+stale at 19:07:52 cannot appear in a pre-ruling revision.*** **One root, ONE carrier.**
+
+### 🔎 METHOD NOTE — WHY THIS NEEDED TWO KEYERS AND NOT TWO PASSES
+
+**The first keyer searched REVISIONS** (5 revisions of the boot-brief it knew about, 0
+hits, and reported the carrier as *unlocated* — declining to assert it on the ruling's
+word). **The second keyer searched NAMES** (globbed the briefs directory for the filename
+the ruling described; it was sitting in the working tree) — and having found it, refuted
+it.
+
+⇒ ***Two keyers failing DIFFERENTLY is the whole point of two keyers — not redundancy,
+different search shapes.*** **A single keyer searching either way files this wrong, and in
+opposite directions:** *revisions-only leaves a true-sounding carrier permanently
+"pending"; names-only without the invariance check would have accepted the hit as the
+carrier.* 📌 *The count was invariant under the open question — 57 → 58 either way — which
+is why the amendment was never blocked on it; only the carrier LIST moved.*

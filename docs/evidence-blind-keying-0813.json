@@ -397,5 +397,12 @@
     "carriers": ["the importer's own census output line (import_netlist.py)"],
     "found_by": "silicon at 19:10, which published the full census beside it so the adjacent-object reading would not be the one that travelled",
     "provenance": "from posts. Flagged in my notes as a judgement call: the owner reports it as `NOT a contradiction`, and a keyer who requires a false STATEMENT rather than an unscoped label would drop it."
+  },
+  {
+    "key": "silicon-gate-assertion-stale-by-six-minutes",
+    "predicate": "A ruling ADOPTED at 19:07:52 was addressed as still outstanding at 19:13:59 — the SAME object, named `A2-PRIME` in both posts. The wrong root is the belief that a landed ruling was still pending. It is a COMPOSITION-WINDOW defect, not an attention defect: a seat composing since ~19:10 has no mechanism telling it a ruling landed mid-draft, and a figure fixed while drafting is never re-measured at send.",
+    "carriers": ["FLEET.md — [08/12 19:13:59, silicon] post"],
+    "found_by": "disclosed by the blind keyer AGAINST ITS OWN RECORD after the keying had been adopted; ruled 08/13 15:04:45, class AT-RELIGHT",
+    "provenance": "AMENDMENT 1 to the keying of record. Adjudicated by BOTH keyers on 08/16 (evidence 08:29:55, compiler 10:39:23) per the 15:04:45 ruling that amendments are batched at a relight and ship VISIBLE. Carrier 1 verified at the bytes independently by each keyer — evidence on the 6m07s delta (FLEET.md:81502 vs :81606), compiler on the OBJECT IDENTITY (both posts name A2-PRIME), which is the half that makes it carrier-bearing rather than two unrelated posts six minutes apart. Carrier 2, the ruling's claim that math's life-12 boot block carried the same stale state, was LOCATED by the second keyer at ${SEAT_DIR}/briefs/2026-08-12-math-evening-bank-life12-boot-block.md and REFUTED across all 15 revisions: the stale-vocabulary hit count is INVARIANT AT 1 across the ruling moment and the earliest revision predates the ruling by 48 minutes, so the single hit cannot be the stale state (it is an unrelated sentence about stamp generation). RECORDED NEGATIVE — the ruling's second-carrier attribution does not survive the artifact. ONE root, ONE carrier."
   }
 ]
