@@ -148,6 +148,15 @@ try:
 except Exception as ex:
     print("** ACCOUNT READ FAILED: %s **" % ex)' "$acctf" 2>&1)
   fi
+  # ⛔ '±512B' WITHDRAWN 2026-08-15 21:0x. That precision was never earned: the
+  # only hard datum was ONE witnessed cut (29 KB, 12 entries lost on 8/11), which
+  # bounds the cap without locating it. I published the withdrawal to the bus and
+  # this line still said ±512B for eleven minutes — a correction on the bus does
+  # not reach the instrument that prints the claim.
+  # ⭐ AND THE FIGURE IS NOW CORROBORATED, not merely derived: compiler's tooling
+  # stated '24.4KB read limit' unprompted for this file class (21:10), agreeing
+  # with the derived 24,986 to within 2%. Two independent paths; still no measured
+  # precision, so the label claims corroboration and NOT a tolerance.
   # ⭐ ADDED 2026-08-11 19:2x — THE MEMORY INDEX OVERFLOWS ITS LOAD LIMIT SILENTLY,
   # IN BOTH DIRECTIONS. Measured tonight: mine reached 29,040 B against a ~24,400 B
   # read limit and the CUT FELL AT LINE 44 OF 56 — the last 12 entries had not
@@ -201,7 +210,7 @@ except Exception as ex:
     ipct=$(( (ib * 200 + IDXLIM) / (2 * IDXLIM) ))
     if   [ "$ib" -ge "$IDXLIM" ]; then idx="$ib/$IDXLIM (${ipct}%) ** OVER — TAIL ENTRIES ARE NOT LOADING **"
     elif [ "$ipct" -ge 85 ];     then idx="$ib/$IDXLIM (${ipct}%) ** APPROACHING THE CUT — compact now **"
-    else                              idx="$ib/~${IDXLIM} (${ipct}%, limit DERIVED ±512B)"
+    else                              idx="$ib/~${IDXLIM} (${ipct}%, limit CORROBORATED, precision unknown)"
     fi
   fi
   # ⭐⭐ ADDED 2026-08-13 23:47 — THE TWO FIELDS WHOSE ABSENCE COST 115 MINUTES.
