@@ -1089,6 +1089,20 @@ OPEN ITEMS:
   and still named: RefComparator (hand-written) · Fabric · FabricCut (CI
   artifact).
   ⚖️ **THE BAR MET IS THE AMENDED BAR.** Not "C3 passed".
+- **⭐ THE PROOF AIM'S CRITICAL PATH SHRANK — silicon correcting its
+  own figure IN THE CHEAP DIRECTION (12:5x):** the "43 cell models /
+  ~54% enlargement of EXPAND" that the helm relayed into the Sept-7
+  plan is WRONG. **39 of the 43 already carry proved `_liberty`
+  theorems in `Cells/Sky130.lean`; only FOUR are genuinely new**
+  (`a311o_1 a32oi_1 o311a_1 o32ai_1`) — the 39 need a TABLE ENTRY,
+  not a proof. Silicon's census measured `EXPAND` (the importer's
+  WIRING table) and was reported as if it measured MODEL COVERAGE —
+  the instrument/question mismatch again, third instance today.
+  ⇒ **the 08-17→27 rung is NOT the largest mechanical cost on the
+  aim**, and the plan re-prices accordingly at silicon's hand.
+  🔑 A CORRECTION THAT MAKES THE WORK CHEAPER IS THE ONE NOBODY
+  AUDITS — publishing it is the discipline, and silicon published it
+  unprompted against its own earlier claim.
 - **⛔ THE HELM'S OWN DERIVED NUMBER WAS TYPED, NOT READ — CORRECTED
   FORWARD (12:4x, found by the helm sweeping its own morning entries
   for the very defect they recorded):** the 11:4x entry below says
