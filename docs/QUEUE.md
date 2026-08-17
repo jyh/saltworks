@@ -1054,6 +1054,74 @@ OPEN ITEMS:
   (math+compiler shared per the plan); ③'s own doors and gates are
   unchanged by it. Door 2 of ③ noted LANDED since (fb3842a,
   Decoder.lean:333). Full roll-call table in the session record.**
+- **⭐⭐ THE 08/16 EVENING BOARD CORRECTION (19:2x, the helm — BOOKKEEPING
+  ONLY. No tier moves, no priority changes, no words of the Captain's
+  touched. Every sha below is POST-FLIP and resolves on this origin;
+  every claim was re-derived at the bytes this evening, and the two
+  claims that did NOT survive re-derivation are named as such at the
+  end rather than carried.):**
+  · **⭐ D1a's dfrtp GATE IS OPEN, AND HAS BEEN SINCE 08/13 — the 8/14
+    sweep entry below records it SHUT, and that citation inverts the
+    criterion.** The sweep cites `silicon-dfrtp-async-reset-prereg-0812
+    .RESULTS.md` at its 08/12 header verdict ("THE BAR IS NOT MET. NO
+    DATUM LANDS.") — a dated snapshot the SAME FILE supersedes ~190
+    lines below, in the block beginning "SUPERSEDED 2026-08-13": *"A2′
+    **DISCHARGES** … **A2 is the row that is now non-discharging** … a
+    reader who quotes this sentence today would invert the criterion."*
+    A2′ promoted `129edab`, rev-2 `5eedb3c`, rev-3 `ca19dec`,
+    supersession note `1683e33`. At the bytes,
+    `SaltWorks/Silicon/Importer/pinreset_controls.sh` marks the `C3.A2′`
+    block "DISCHARGING" and sets `fail` there, while marking `C3.A2`
+    "INFORMATIONAL … it does not touch `fail`". ⇒ **D1a IS
+    UNBLOCKED-AND-UNSTARTED, NOT BLOCKED:** `SaltWorks/Silicon/Imported/`
+    holds eight datums and no `Dmem8.lean`, the index carries none
+    (positive control: the same search lists the eight that exist), and
+    `reimport.sh` carries five regenerable rows with dmem8 in none.
+    **Nothing external holds it.** D1a is SILICON'S; this entry states
+    the board, it does not dispatch the work.
+  · ⚠️ **THE BAR THAT WAS MET IS THE AMENDED BAR — this must never be
+    summarized as "C3 passed."** C3 as frozen was unsatisfiable at
+    authorship, before any result existed: §3 mandates a visible scope
+    marker in the emitted datum, §4 demands byte-identity with a
+    comparison arm that cannot carry that marker (the importer refuses
+    the flag as a no-op by design). The amendment was made by the
+    AUTHORITY THAT RULED THE CRITERION, not by the hand that saw the
+    result — the seat explicitly refused to self-amend ("a criterion
+    rewritten by the hand that saw its result is worth nothing") — and
+    A2′ is STRONGER than what it replaced: it asserts the whole diff
+    positively instead of tolerating it.
+  · ⚠️ **A BUILD ROW IS OWED AT LANDING.** Nothing here shows an emitted
+    `Dmem8.lean` ELABORATES. This same RESULTS file records a datum that
+    passed every grep-level criterion and still failed to elaborate. The
+    gate being open is not the datum being good.
+  · **INPUT-SIDE NAMING HOLE — CLOSED 08/15 07:01:40 at `95e7130`**
+    ("Silicon: SHAPE A landed — `_in_names` on all five regenerable
+    datums, emitted UNCONDITIONALLY"). The sweep below still lists it
+    open as a NEW unowned finding.
+  · **sw_* DOCSTRING FRAME-CLAIM GAP — CLOSED 08/16 18:11:20 at
+    `110b649`** ("the open question is CLOSED").
+  · **F4 BRIDGE — DOOR 1 LANDED 08/16 18:30:54 at `6010c38`** (compiler,
+    on silicon's lemmas, cross-verified both ends). ⇒ **D3's remaining
+    prerequisite is D1a.**
+  · ⛔ **TWO CLAIMS I DECLINED TO LAND, having failed to re-derive them:**
+    (1) that D2's silicon-half confirmation is discharged — the bus still
+    reads "SEAT CONFIRMATION OWED" and I found no acceptance, so **that
+    row stays open**; (2) a proposed erratum asserting every citation
+    into this board at line ≥306 is off by one — the decisive sample
+    refutes it, this board's "behind the SHUT dfrtp gate" sits at the
+    exact line the 08/16 census cites. **Neither is recorded as fixed.**
+  · 📌 **SHA ROT — a standing hazard, not a defect of any seat.** The
+    supersession banner in the RESULTS file, and the 08-14 night bank,
+    cite `7958286` / `98fd83c` / `cc32a96` / `520f9d6`, which are
+    PRE-FLIP and resolve NOWHERE on the public origin. Their post-flip
+    equivalents are `129edab` / `5eedb3c` / `ca19dec` / `1683e33`
+    (subject-matched, each confirmed an ancestor of master). Those files
+    are dated records and are NOT rewritten; the mapping lives here.
+  ⚖️ **RESERVED TO THE CAPTAIN, NOT RULED HERE:** whether P1 now shrinks,
+  and whether any freed capacity re-tiers, is his at the morning desk.
+  This entry moves nothing.
+  ⛔ **THE 8/14 SWEEP ENTRY BELOW IS NOT REWRITTEN** — it was true when
+  written. Corrected forward, per this board's own convention.
 - **⭐⭐⭐ THE 08/16 RE-TIER (12:2x, the Captain at the desk sitting, his
   words: "we want to finish these P1s. Next, I would recommend we move
   LW/SW in silicon to P1, then all P3s (incl GNN compiler) move to P2."):**
