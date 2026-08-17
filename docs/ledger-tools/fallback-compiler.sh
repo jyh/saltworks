@@ -83,7 +83,7 @@ cd "$R" || { echo "FALLBACK-COMPILER: cannot cd $R"; exit 2; }
 #   seats commit as one author), so NO pathspec can make `my-landing` mean `mine`.
 # ⇒ THE FIELD IS HONESTLY 'last touch in my paths'. The remaining half of the
 #   release condition is the RELABEL, and it is still owed.
-MINE=(SaltWorks/HDL SaltWorks/Certs SaltWorks.lean docs/ledger-tools 'docs/compiler-*' 'docs/post-integrity-*' tools/saltbuild.sh)
+MINE=(SaltWorks/HDL SaltWorks/Certs SaltWorks.lean docs/ledger-tools 'docs/compiler-*' 'docs/post-integrity-*' 'docs/hdl-*' 'docs/hdl-tools/*' tools/saltbuild.sh)
 # FALLBACK_SCOPE exists so the DRIFT ARM can be DRIVEN. Without it the arm is dead
 # code whenever my landing happens to be the newest commit -- which is exactly the
 # state it was in when I wrote it, i.e. it would have shipped unexercised.
