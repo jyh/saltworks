@@ -52,8 +52,18 @@ CAND=$(
     LC_ALL=C command grep -oE '`[^`]{6,90}`' "$BODY" | tr -d '`'
     LC_ALL=C command grep -oE '\b[A-Z][A-Z0-9]*(-[A-Z0-9]+)+\b|\b[A-Z]{8,}\b' "$BODY"
   } | sed 's/^[[:space:]]*//; s/[[:space:]]*$//' \
-    | LC_ALL=C tr '[:upper:]' '[:lower:]' | sort -u | command grep -vE '^.{0,5}$'
+    | LC_ALL=C tr '[:upper:]' '[:lower:]' | sort -u | command grep -vE '^.{0,5}$' \
+    | LC_ALL=C awk 'index($0," ")>0 || (length($0)>=8 && $0 ~ /[-_.\/]/)'
 )
+# ⛔ SPECIFICITY FILTER, ADDED AFTER THE FIRST RUN ON REAL TRAFFIC. A candidate must be
+# MULTI-WORD, or >=8 chars containing -_./ (identifier-shaped). Rationale, measured: on
+# three of my own LANDED docs the unfiltered extractor produced 7 flags and ZERO were
+# true. Every one was a single common word my house style had capitalised for emphasis
+# ("DEFENSIBLE", "VALIDATION", "CLASSIFICATION"), which then matched incidentally on any
+# source line that happened to carry a status verb. A single common word is not a
+# quotation. I had only ever tested this on SHORT DRAFTS, where the effect is invisible.
+# ⚠️ A referee at that false-positive rate is one a reader routes around within a day,
+# which is the exact failure this script's own header warns about for gates.
 NC=$(printf '%s\n' "$CAND" | command grep -c . || true)
 echo "quotecheck: $NC candidate fragments extracted"
 
@@ -96,7 +106,19 @@ while IFS= read -r frag; do
 done <<< "$CAND"
 
 echo
-echo "quotecheck: $FOUND source line(s) shown. Read the FULL column, not the quoted one."
-echo "quotecheck: a ⛔ row means the source line states a STATE your draft omits --"
-echo "            it is a question, not a verdict. Legitimate trim exists."
+if [ "$FOUND" = 0 ]; then
+  # ⛔ VACUITY, SAID LOUDLY. Zero flags out of zero traversed lines is NOT a clean
+  # draft -- it means none of this draft's quotable fragments occur in the sources
+  # you named, i.e. YOU PROBABLY NAMED THE WRONG SOURCES. Printing that in the same
+  # tone as a real pass is how an instrument with no domain gets read as a verdict.
+  echo "⚠️ quotecheck: 0 source lines traversed from $NC candidates."
+  echo "   THIS IS NOT A CLEAN RESULT -- it is NO RESULT. None of this draft's"
+  echo "   quotable fragments appear in the sources given, which usually means the"
+  echo "   SOURCES ARE WRONG, not that the draft is sound. Name the artifacts this"
+  echo "   draft actually quotes and run it again."
+else
+  echo "quotecheck: $FOUND source line(s) shown. Read the FULL column, not the quoted one."
+  echo "quotecheck: a ⛔ row means the source line states a STATE your draft omits --"
+  echo "            it is a question, not a verdict. Legitimate trim exists."
+fi
 exit 0
