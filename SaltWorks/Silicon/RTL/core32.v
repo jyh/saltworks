@@ -35,7 +35,31 @@ module core32(clk, rst_n, instr, dmem_rdata, dmem_addr, dmem_wdata, dmem_be,
     wire is_store=(opcode==7'b0100011), is_immop=(opcode==7'b0010011);
     wire is_regop=(opcode==7'b0110011);
 
-    wire reg_we = is_lui|is_auipc|is_jal|is_jalr|is_load|is_immop|is_regop;
+    // ⭐ THE FUNCT3 GATE (③ seam ruling, Captain 08/17 "yes take recommendation
+    // a+b"). `is_load`/`is_store` above test OPCODE ONLY, but the kernel's ISA is
+    // WORD-ONLY: `Decoder.lean:31-33` has isLW = opcode ∧ funct3=010, isSW likewise,
+    // and req = isLW ∨ isSW. Wiring the memory plane from the opcode-only strobes
+    // would make `DriveMap` (Certs/DmemKernelBridge.lean:50-52) FALSE, which does
+    // not break F4 door 1 — it makes it SILENT about the fabricated part.
+    //
+    // These two wires ARE the kernel's isLW and isSW, bit for bit, so the plane's
+    // `req` ← is_load_w|is_store_w and `we_in` ← is_store_w discharge DriveMap by
+    // construction rather than by assumption.
+    //
+    // ⚠️ CLAIM LANGUAGE IS BINDING (same ruling): the excluded encodings
+    // (LB/LH/LBU/LHU/SB/SH) are MEMORY-INERT. They are NOT "refused" — nothing
+    // traps, nothing signals; they simply cannot reach memory or the regfile.
+    wire is_word    = (funct3 == 3'b010);
+    wire is_load_w  = is_load  & is_word;
+    wire is_store_w = is_store & is_word;
+
+    // `is_load_w`, NOT `is_load` — the check the helm put inside this wave. Gating
+    // only the MEMORY strobes would leave an excluded load still writing the
+    // regfile from `ld_out`, which is not inert in any sense worth the word.
+    wire reg_we = is_lui|is_auipc|is_jal|is_jalr|is_load_w|is_immop|is_regop;
+    // alu_src stays OPCODE-ONLY on purpose: an excluded load still computes an
+    // address into `dmem_addr`, and that is harmless because no strobe accompanies
+    // it. Narrowing it would touch the ALU path for no architectural gain.
     wire alu_src = is_immop|is_load|is_store|is_jalr;
     wire [3:0] alu_op = is_regop ? {f7,funct3} : is_immop ? {1'b0,funct3} : 4'd0;
 
@@ -79,20 +103,24 @@ module core32(clk, rst_n, instr, dmem_rdata, dmem_addr, dmem_wdata, dmem_be,
     assign pc_next = is_jalr ? ((rf1 + imm) & ~32'd1) :
                      (is_jal | br_taken) ? pc_plus_imm : pc_plus_4;
 
-    // memory interface
+    // memory interface — WORD-ONLY. What stood here until 08/17 was `RTL/memif.v`
+    // inlined: byte/half replication, lane enables, and extract-with-extend for
+    // LB/LH/LBU/LHU/SB/SH. The 08/12 word-only ruling foreclosed the standalone
+    // memif MODULE and left this COPY, so the logic shipped anyway and the silicon
+    // executed six instructions `ISA.lean:126-135` excludes.
+    //
+    // Removed under the ③ seam ruling (a). Measured on the mirrored synth harness,
+    // baseline arm reproducing the committed figure to the digit:
+    //     core32 committed  5,054 cells  57,606.4992 µm²
+    //     core32 word-only  4,434 cells  56,462.9024 µm²   −620 cells, −1,143.6 µm²
+    // (−12.3% of CELLS but −2.0% of AREA — the removed cells are small ones, and
+    // the cell percentage is the wrong figure to quote for an area argument.)
     assign dmem_addr  = alu_y;
-    assign dmem_wdata = (funct3==3'b000) ? {4{rf2[7:0]}} :
-                        (funct3==3'b001) ? {2{rf2[15:0]}} : rf2;
-    assign dmem_be = ~is_store ? 4'b0000 :
-                     (funct3==3'b000) ? (4'b0001 << alu_y[1:0]) :
-                     (funct3==3'b001) ? (alu_y[1] ? 4'b1100 : 4'b0011) : 4'b1111;
-    wire [7:0]  lb = (alu_y[1:0]==2'd0) ? dmem_rdata[7:0] : (alu_y[1:0]==2'd1) ? dmem_rdata[15:8] :
-                     (alu_y[1:0]==2'd2) ? dmem_rdata[23:16] : dmem_rdata[31:24];
-    wire [15:0] lh = alu_y[1] ? dmem_rdata[31:16] : dmem_rdata[15:0];
-    assign ld_out = (funct3==3'b000) ? {{24{lb[7]}}, lb} : (funct3==3'b100) ? {24'b0, lb} :
-                    (funct3==3'b001) ? {{16{lh[15]}}, lh} : (funct3==3'b101) ? {16'b0, lh} : dmem_rdata;
+    assign dmem_wdata = rf2;
+    assign dmem_be    = {4{is_store_w}};
+    assign ld_out     = dmem_rdata;
 
     // writeback select
-    assign wb_val = is_load ? ld_out : (is_jal|is_jalr) ? pc_plus_4 :
+    assign wb_val = is_load_w ? ld_out : (is_jal|is_jalr) ? pc_plus_4 :
                     is_lui ? imm : is_auipc ? pc_plus_imm : alu_y;
 endmodule

@@ -147,3 +147,56 @@ NOT fix the seam, because opcode-only strobes stay opcode-only.
   restriction. A proof obligation ("no reachable trace presents funct3 ∉ {010} with
   a load/store opcode") is exactly what the RTL cannot currently supply, since its
   own decode does not test funct3 — which is §1 again, from the other side.
+
+---
+
+# ⚖️ RULED AND LANDED — 08/17, the Captain: "yes take recommendation a+b"
+
+**(a) AND (b) BOTH TAKEN.** Trap and document-only DECLINED. **Claim language is
+binding: the excluded encodings are MEMORY-INERT, never "refused"** — nothing traps,
+nothing signals; they cannot reach memory or the regfile.
+
+## ⛔ THE RECORD IN §4 MEASURED (a) ALONE. THE LANDED CHANGE IS (a)+(b), AND IT SAVES LESS.
+
+The ruling wrote my "−620 cells / −2.0% area" in as *the record*. That figure is the
+word-only reduction **without** the funct3 gate. (b) adds logic back, so the true
+landed delta is smaller, and the difference is the price of the certificate:
+
+```
+                    cells        area µm²        vs committed
+committed           5,054        57,606.4992     —
+(a) alone  [§4]     4,434        56,462.9024     −620 cells, −1,143.5968  (−1.98%)
+(a)+(b) LANDED      4,468        56,716.8960     −586 cells,   −889.6032  (−1.54%)
+                                                 ↑ the gate costs +34 cells / +254 µm²
+```
+
+⇒ ***MAKING F4's CERTIFICATE TRUE OF THE BUILT PART COSTS 254 µm². That is the whole
+price, and it is worth naming rather than folding into a rounder number.*** Same
+harness, same pinned PDK, baseline arm still reproducing the committed figure to the
+digit.
+
+## WHAT LANDED
+
+```
+core32.v  is_word / is_load_w / is_store_w   funct3-gated; these ARE isLW and isSW
+          dmem_wdata ← rf2                   memif copy removed
+          dmem_be    ← {4{is_store_w}}
+          ld_out     ← dmem_rdata
+          reg_we uses is_load_w              ← the helm's in-wave check
+          wb_val uses is_load_w
+          alu_src left OPCODE-ONLY on purpose (an excluded load still computes an
+          address that no strobe accompanies; narrowing it buys nothing)
+```
+✅ `Sim/wordonly/tb_memory_inert.v` — 14 arms, ALL PASS, every negative paired with a
+positive, **and shown to FAIL on the pre-ruling RTL** (the two inert arms fail, both
+positive controls still pass).
+✅ F4 chain against the new RTL: `saltbuild EXIT=0`, 8595 jobs.
+
+## 📌 A CITATION THIS INVALIDATES, FLAGGED BECAUSE IT IS NOT MINE
+
+`914f85c` (08/17 08:12) landed `opcode_only_wiring_violates_DriveMap` under the title
+*"F4 door 1: its hypothesis is FALSIFIED by the only wiring the RTL can supply"*.
+**The theorem stays true — opcode-only wiring does violate `DriveMap`.** What has
+gone stale is the *premise of the title*: as of this change the RTL supplies
+funct3-gated strobes, so opcode-only is no longer *the only wiring it can supply*.
+The theorem is now a statement about a wiring the tree no longer forces.
