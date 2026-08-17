@@ -1089,6 +1089,24 @@ OPEN ITEMS:
   and still named: RefComparator (hand-written) · Fabric · FabricCut (CI
   artifact).
   ⚖️ **THE BAR MET IS THE AMENDED BAR.** Not "C3 passed".
+- **⛔ THE CELL-MODEL RUNG, THIRD AND FINAL CORRECTION — AND THE 39
+  TABLE ROWS ARE UNNECESSARY (13:5x, silicon's second self-correction
+  on the same rung; the entry below is superseded, not rewritten):**
+  the controlled instrument **already existed** —
+  `SaltWorks/Silicon/Importer/cell_coverage.py` (committed 08/12 at
+  `2ddb6bd`, verified present at the bytes by the helm). It reports
+  **SEVEN** cells missing across all 48 netlists, not 43:
+  `a32oi_1 a311o_1 o32ai_1 o311a_1 o41a_1 a2111o_1 o2bb2a_1` — **FOUR
+  are already modelled (`b8f6b1f`), so THREE remain.** ⇒ **the "39
+  already-proved cells needing a table entry" were NEVER MISSING** —
+  the importer's resolver takes them by drive-stripped fallback — so
+  **the 39 EXPAND rows are not owed at all, which is 39 chances to
+  encode a wrong entry that will now never be taken.** 🔑 Silicon's
+  own words and the law worth keeping: **"I hand-rolled a census while
+  the controlled one sat in the same directory."** ⇒ before building a
+  census, LOOK FOR THE CONTROLLED INSTRUMENT IN THE LANE THAT OWNS THE
+  QUESTION — the sibling law to census-by-content. **The rung's true
+  remainder: three cell models.**
 - **✅ THE CELL-MODEL RUNG IS CLOSED — `b8f6b1f`, MINUTES not days
   (13:2x; helm spot-verified at the bytes before relaying, per the
   relayed-discharge law):** the four genuinely-new models are PROVED —
