@@ -1089,6 +1089,23 @@ OPEN ITEMS:
   and still named: RefComparator (hand-written) · Fabric · FabricCut (CI
   artifact).
   ⚖️ **THE BAR MET IS THE AMENDED BAR.** Not "C3 passed".
+- **⭐⭐⭐ THE PIN FORK DISSOLVES AT THE CAPTAIN'S OWN ARCHITECTURE —
+  OPTION (d) RULED (11:4x, his words: "The pins we have in the current
+  chip are: 8 address pins, 8 data pins, 2 fabrics pins (I/O), and
+  control pins, does that still fit? adress and data re 32 bits, but we
+  have to multiplex them, it is slow, but fine"):** verified at the
+  manifest's FROZEN D6 map — `uo[7:0]` = addr_byte (PC bytes, 4
+  phases), `ui[7:0]` = instr_byte (the CPU memory bus), `uio` = the
+  fabric's 2 data pins + control; his model matches pin-for-pin, and
+  the fabric port list carries a STUBBED CPU-client port and a spare.
+  ⇒ **The offboard interface needs NO new pins: it EXTENDS THE FROZEN
+  BUS'S PROTOCOL** — transaction types (fetch/load/store), address
+  phases on `uo` as today, read data in on `ui`, store data multiplexed
+  out on `uo` after the address phases. Pin ASSIGNMENTS untouched; only
+  D6's semantic text amends. Silicon's (a)/(b)/(c) fork is CLOSED
+  UNPICKED. The design consequence lands in the stall contract: FETCH
+  vs DATA ARBITRATION on the shared bus — slow, and at his word, fine.
+  The claim-ladder sentence remains the one open ratification.
 - **⭐⭐ ITEMS 3 + 4 RULED AND EXECUTED (11:3x, the Captain):**
   **(3) THE ARCHIVE POLICY, his word with his reasoning: "always push
   the archive but never rewrite history on the archive."** The archive
