@@ -135,3 +135,112 @@ true for a reason unrelated to the change.
   invites exactly the "one covers the other" reading that §0 warns about.
 - **The refuter pass.** Gates the wave, per the ruling. This block is its target, and
   §1's four "available lie" paragraphs are written to give it something to bite.
+
+---
+
+# ROUND 2 — AFTER THE REFUTER PASS. §1's RECOMMENDATION IS WITHDRAWN.
+
+**Verdict was HOLD, five fatals. I confirmed every one at the bytes before accepting.
+§1(4) above is left standing because dated records are not rewritten — but it is
+WRONG and this section supersedes it.**
+
+## §7 · WHAT I GOT WRONG, AND THE SHAPE OF IT
+
+```
+CLAIMED (§1.4)   "the antidote is ALREADY BUILT … --cut REGEX already exists in
+                 import_netlist.py for exactly this"
+MEASURED         FabricCut.lean carries ZERO name tables (DmemAddr8 has 2), so a
+                 cut net is UNNAMED BY DESIGN and D3 is unsatisfiable by --cut
+                 `--cut` help: "ALSO cut at every net matching REGEX" — it adds
+                 boundaries inside a FULL import and never shrinks one
+                 run on my own regex: REFUSED, "matched no DRIVEN net"
+CLAIMED (§1.4)   the cone from `instr` to the strobes discharges DriveMap
+MEASURED         `DriveMap`'s `ins` indexes the dmemAddr8 DATUM's inputs
+                 (`dmemAddr8_env ins = runP ins [] dmemAddr8NL`). My cone ended at
+                 core32's outputs — THE WRONG END OF THE SEAM
+```
+🔑 ***I wrote "already built" about a mechanism I never ran, inside the one document
+whose purpose was to name the lie each option makes available. The lie §1(4) made
+available is the lie I took, and no amount of naming it protected me from it.***
+
+## §8 · THE SEAM HAS TWO ENDS AND NEEDS BOTH — this is the corrected §0
+
+`DriveMap` is discharged only if BOTH hold:
+
+```
+(i)  SEMANTIC   the core's named output `dmem_req` = ctrlSpec[7]!, `dmem_we` =
+                ctrlSpec[6]!, for every instruction word
+(ii) STRUCTURAL those very outputs are what arrive at dmemAddr8's `ins 32` / `ins 33`
+```
+⚠️ **(i) WITHOUT (ii) PROVES A CORE NOBODY WIRED. (ii) WITHOUT (i) IS THE PORTS-ONLY
+LIE FROM §1(3) — it moves the assumption one module upstream.** *Route (A) below
+addresses (i). **(ii) HAS NO INSTRUMENT TODAY** and I am not going to imply otherwise;
+naming it as an open sub-problem is the honest state.*
+
+## §9 · ROUTE (A) — MEASURED, NOT RECOMMENDED-THEN-DISCOVERED
+
+The refuter's road: `dmem_req`/`dmem_we` are DECLARED OUTPUT PORTS of `core32` as of
+`a76b647`, so synthesize with them in `--outputs` and the importer's own name table
+binds them — the true `DmemAddr8Suppress`-class move, and the other end already has
+`we_in` at index 33.
+
+**I ran it before writing it down. It does not work out of the box, and here is the
+price:**
+
+```
+1. import core32_nl.v        REFUSED — "assign uses a RANGE 'imem_addr[31:2]'"
+2. SYNTH_SPLITNETS=1         ✅ clears it. Area IDENTICAL — 4,441 cells /
+                             56,536.7232 µm² either way, so the treatment does not
+                             perturb the mapping (this is the same call (4) option
+                             (b) cure dmem_addr8 already carries)
+3. import again              REFUSED — "no expansion for cell 'o32ai_1'"
+4. CENSUS BY CONTENT         43 of core32's 64 cell types have NO model.
+                             EXPAND holds 80 entries today ⇒ a ~54% ENLARGEMENT
+                             of the trusted table, each entry also owing a Liberty
+                             proof in Sky130.lean
+```
+⇒ ***THAT is the price of (A), and it was invisible until someone ran it. It is not a
+reason to reject (A) — it is the number (A) must be chosen WITH.***
+
+## §10 · CRITERIA, ROUND 2
+
+`D1` `D2` `D5` `D6` stand as written. Replacing `D3`, redesigning `D4`, adding two.
+
+```
+D3′  boundary nets bound by DECLARED PORT NAME from the datum's own recorded table.
+     NO CUT NETS — cut entries are unnamed by design, so any architecture requiring
+     a named cut is excluded a priori rather than attempted and patched.
+
+D4′  THE NEGATIVE CONTROL MUST FAIL AS A FALSE THEOREM, NEVER AS A TOOLING REFUSAL.
+     ⛔ My round-1 D4 said "run it against the pre-ruling opcode-only core" — that
+     core has NO dmem_req/dmem_we ports, so the import REFUSES and I would have
+     scored a compile error as a negative control. That is the precise mistake I
+     published a law about at 08:19 and repeated at 10:2x.
+     ⇒ THE CONTROL IS A PORT-COMPATIBLE MUTANT: keep the ports, drive them
+       opcode-only (`dmem_req = is_load|is_store`). It imports identically and the
+       theorem must then be REJECTED BY THE KERNEL. A control that cannot be
+       elaborated has not been shown to discriminate.
+
+D7   CELL-MODEL COVERAGE IS CENSUSED BY CONTENT AND THE CENSUS CARRIES CONTROLS.
+     The count is 43/64 today. ⚠️ It took FOUR instrument attempts to get that
+     number, and every wrong one was caught by a control rather than by reading:
+     three runs printed a plausible "45" while reporting dfxtp_1 as unmodelled —
+     which cannot be true, since dmem8 imported 256 flops. The gate is three-sided:
+     dfxtp_1 modelled · and2_1 modelled · o32ai_1 NOT modelled.
+
+D8   EVERY THEOREM INHERITS `Restricted_rst_n_eq_1` AND SAYS SO. dmem8's datum is
+     imported under a pinned reset; anything quoting it is restricted to traces with
+     rst_n ≡ 1 and is silent about the deassertion seam. A certificate that restates
+     such a theorem must carry the restriction with it.
+```
+*(The round-1 D7 — cut-identity and cut-completeness — is DROPPED, not renumbered
+away: D3′ excludes cuts, so no cut survives to need it.)*
+
+## §11 · WHAT ROUND 2 STILL DOES NOT ANSWER
+
+- **(ii), the structural half, has no instrument.** Route (A) does not touch it.
+- **Whether the 43 cell models are worth it** — that is a wave-sizing question for
+  whoever prices the wave, not a design question I can settle.
+- **Whether (A) should be paired with a structural argument, and of what kind.** The
+  refuter called ports-only refused from compiler's lane; I record the pairing as
+  OPEN rather than assuming §8(ii) will be someone else's problem.
