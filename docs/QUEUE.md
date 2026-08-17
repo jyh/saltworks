@@ -1054,6 +1054,30 @@ OPEN ITEMS:
   (math+compiler shared per the plan); ③'s own doors and gates are
   unchanged by it. Door 2 of ③ noted LANDED since (fb3842a,
   Decoder.lean:333). Full roll-call table in the session record.**
+- **⭐⭐⭐ THE 08/17 COUNCIL RULING — P1 SHRINKS TO D1a + ③, AND ③'s SCOPE
+  GROWS BY F4's HYPOTHESIS-DISCHARGE (07:5x, the Captain at the named
+  council, his words: "yes to all four, wake silicon"):**
+  **(a) P1 = D1a + ③ RATIFIED.** Of the 08/16 re-tier's P1 roster, three
+  items discharged at named bytes (F4 door 1 `6010c38` · input-side
+  naming hole `95e7130` · sw_* docstrings `110b649`) and D2's
+  silicon-half is REFUTED as unfounded (the entry below); the remainder
+  is D1a + ③.
+  **(b) ③'s ROW NOW NAMES WHAT IT CARRIES: F4's `DriveMap`
+  hypothesis-discharge.** Compiler's finding, helm-verified at the bytes
+  with a positive control: nothing instantiates `dmem_addr8` anywhere in
+  RTL or Flow; `dmem_wdata[31:0] ← req` and `dmem_be[3:0] ← we_in` have
+  NO SOURCE — the plane DriveMap describes has no realization until ③'s
+  integration builds it. Anyone pricing ③ without this, or commissioning
+  a "just discharge DriveMap" wave first, prices the wrong object. The
+  2026-09-07 update window governs.
+  **(c) NO RE-TIER.** Standing mechanics serve: P2 pulls at P1-idle
+  (compiler may pull V9 today); no rows move.
+  **(d) SILICON WOKEN on the narrow channel** (`SILICON ORDER:`,
+  receipt-proven 07:30:13) to resume D1a at its own pace; its blindness
+  for the (C) adjudication stays reserved — the bus stays off. D1a's
+  permanent caveats restated: the bar met is the AMENDED bar, never
+  "C3 passed"; a BUILD ROW is owed at landing (an emitted `Dmem8.lean`
+  ELABORATES). The 08/16 entries below are NOT rewritten.
 - **⭐ D2's SILICON-HALF — THE ROW'S CITED BASIS IS REFUTED BY ITS OWN EVIDENCE
   (20:2x, the helm, on silicon's derivation; re-derived at the bytes before
   landing). Bookkeeping only; no tier moves.** The 8/14 sweep records "D2's
