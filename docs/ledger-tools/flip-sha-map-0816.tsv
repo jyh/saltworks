@@ -1,5 +1,7 @@
 # pre-flip -> post-flip sha map, saltworks
-# derived by docs/ledger-tools/flipmap.sh from refs/pre-flip/master (2b9dd57) -> HEAD (19c59a1)
+# derived by saltworks/docs/ledger-tools/flipmap.sh
+# pre-flip refs (union): refs/pre-flip/dreams/compiler-residual-taxonomy refs/pre-flip/dreams/evidence-stale-site refs/pre-flip/master 
+# post-flip refs (union): refs/remotes/origin/dreams/compiler-residual-taxonomy refs/remotes/origin/dreams/evidence-stale-site refs/remotes/origin/master 
 # validated 5/5 against the helm citation-law pairs of 08/16 19:20
 # columns: pre<TAB>post<TAB>key-strength   -- date-only rows rest on WEAKER evidence
 0001855	b716baf	date+subject
@@ -416,6 +418,7 @@
 361e606	3a68802	date+subject
 362e95e	5f71e4f	date+subject
 3630236	fb389ca	date+subject
+3644401	f7395f8	date+subject
 364c918	3cfcf64	date+subject
 3666c51	45649d3	date+subject
 36a37a5	0a744a4	date+subject
@@ -470,6 +473,7 @@
 3def980	4a03f63	date+subject
 3df9119	bbf1e3f	date+subject
 3e41d10	0f7a6f5	date+subject
+3e4836c	65ffd2d	date+subject
 3e5f386	c5044da	date+subject
 3e748e4	fd25c7d	date+subject
 3ec4a73	05ed5be	date-only(UNIQUE-SECOND)
@@ -581,6 +585,7 @@
 50731cd	e9619e1	date+subject
 507a86e	98accca	date+subject
 507e497	78ce2c9	date+subject
+507ff18	5586122	date+subject
 5085392	dea8247	date+subject
 508a76b	63aa305	date+subject
 508d289	91d6cdd	date+subject
@@ -709,6 +714,7 @@
 607f956	5c99919	date+subject
 608925c	8c075f2	date+subject
 60c6cde	9cd9906	date+subject
+60d7c77	0739aad	date+subject
 60e2712	e5d6bf3	date+subject
 60f04b7	dc141c8	date+subject
 60f6d2f	7c1850c	date+subject
@@ -929,6 +935,7 @@
 83bf20b	32c259a	date+subject
 8431da2	39ba913	date+subject
 84690c0	f2aac3a	date+subject
+84c0f96	9fcda4a	date+subject
 853977f	6e5cc6f	date+subject
 8559327	d7f8420	date+subject
 8569932	eb4f868	date+subject
@@ -1134,6 +1141,7 @@ a3d4471	946cff8	date+subject
 a41ed3a	86894f7	date+subject
 a48c5c1	b7c507c	date+subject
 a4a6a2b	7adec6d	date+subject
+a4ccb28	a664ecf	date+subject
 a4d84d2	7869f40	date+subject
 a4e13e1	6add177	date+subject
 a513489	bc4fa09	date+subject
@@ -1179,6 +1187,7 @@ aa7aeed	81d485a	date+subject
 aabcd81	56924e5	date+subject
 aadea6c	1e72d0e	date+subject
 ab0a99a	b2c2a12	date+subject
+ab3c2b4	bac40b6	date+subject
 ab47557	f2dc01f	date+subject
 ab5f357	8e49569	date+subject
 ab90c74	4ed0b3c	date+subject
@@ -1259,6 +1268,7 @@ b41e060	7436269	date+subject
 b4217a3	85ba8de	date+subject
 b4343af	4b57c97	date+subject
 b494a67	70966e0	date+subject
+b4a32d3	651e4b0	date+subject
 b4a353b	808eb6a	date+subject
 b4b723e	905c89c	date+subject
 b4ba3bd	ddd530b	date+subject
@@ -1407,6 +1417,7 @@ c85ac11	4f87a92	date+subject
 c88d29a	28c0c60	date+subject
 c8a5bf9	69255eb	date+subject
 c8e1011	6060897	date+subject
+c8e77b4	0550a5d	date+subject
 c8f0209	8ac78e3	date+subject
 c91faf3	f2a6f5b	date+subject
 c939abe	afe94c0	date+subject
@@ -1701,6 +1712,7 @@ f4a7078	200eef3	date+subject
 f4ebd20	cb3a0f7	date+subject
 f4f9b48	a4b699d	date+subject
 f521de7	dff4a7d	date+subject
+f58f61f	c26c9b6	date+subject
 f5b6e83	3e91858	date+subject
 f5e43a8	8db6ece	date+subject
 f61f023	76fd505	date+subject
