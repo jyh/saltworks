@@ -1089,6 +1089,24 @@ OPEN ITEMS:
   and still named: RefComparator (hand-written) · Fabric · FabricCut (CI
   artifact).
   ⚖️ **THE BAR MET IS THE AMENDED BAR.** Not "C3 passed".
+- **⭐⭐⭐ THE FLAGSHIP RESTATEMENT PRINCIPLE RULED — the afternoon
+  council's item 3 (15:1x, the Captain: "yes, accept recommendation"):**
+  **THE PRINCIPLE: the flagship's bound is stated IN THE UNITS THE
+  MACHINE HONORS** — the step bound stays a step bound; any cycle
+  guard is DERIVED from the stall semantics and CARRIES ITS
+  DERIVATION; **no bare literal survives whose meaning depends on the
+  retired cycle=step identity.** The concrete theorem text returns to
+  HIM at the freeze, by the same road as the offboard claim ladder
+  (design block → refuter pass → statement text at his desk). ⇒
+  **COMPILER'S ARCHITECTURE CHOICE IS UNBLOCKED** — the narrowed
+  question (HOW the stall arm is stated) composes with any restatement
+  form. **SCHEDULE POSTURE RULED WITH IT: the Sept-7 aim STANDS**; the
+  two undated rungs — the `C4Spec` witness for the composed core, and
+  the restatement itself — enter the plan-to-prove WITH DATES owed by
+  silicon+compiler; revision reaches his desk ONLY if the dates break
+  the window, never silently. With this, all three of the afternoon
+  council's items are closed: the IARC filing his (annex ready), M2
+  authorized with FD-first-then-twin, and this principle.
 - **⭐ ROUTE (A)'s PREREQUISITE DEMONSTRATED — the import RUNS and the
   strobes BIND BY NAME (14:2x, silicon; recorded with the verb the day
   earned):** core32 imports cleanly at 4,441 instances → 18,439 gates,
