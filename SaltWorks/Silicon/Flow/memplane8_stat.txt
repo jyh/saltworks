@@ -1,0 +1,93 @@
+
+10. Printing statistics.
+
+=== memplane8 ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+     3791        - wires
+     5403        - wire bits
+       59        - public wires
+     1671        - public wire bits
+        8        - ports
+      101        - port bits
+     5302 6.64E+04 cells
+        1    8.758   sky130_fd_sc_hd__a2111oi_0
+        3   26.275   sky130_fd_sc_hd__a211o_1
+       42  315.302   sky130_fd_sc_hd__a211oi_1
+       11   82.579   sky130_fd_sc_hd__a21boi_0
+       41  307.795   sky130_fd_sc_hd__a21o_1
+      391 1.96E+03   sky130_fd_sc_hd__a21oi_1
+       22  220.211   sky130_fd_sc_hd__a221o_1
+       85  744.464   sky130_fd_sc_hd__a221oi_1
+      128 1.28E+03   sky130_fd_sc_hd__a222oi_1
+       69   604.33   sky130_fd_sc_hd__a22o_1
+      245 1.84E+03   sky130_fd_sc_hd__a22oi_1
+        3   26.275   sky130_fd_sc_hd__a2bb2oi_1
+        2   20.019   sky130_fd_sc_hd__a311o_1
+       11   96.342   sky130_fd_sc_hd__a311oi_1
+        5   43.792   sky130_fd_sc_hd__a31o_1
+       64  400.384   sky130_fd_sc_hd__a31oi_1
+        1    10.01   sky130_fd_sc_hd__a32o_1
+        2   17.517   sky130_fd_sc_hd__a32oi_1
+        2   20.019   sky130_fd_sc_hd__a41o_1
+        4   35.034   sky130_fd_sc_hd__a41oi_1
+       81  506.736   sky130_fd_sc_hd__and2_0
+       16  100.096   sky130_fd_sc_hd__and3_1
+        2   17.517   sky130_fd_sc_hd__and3b_1
+        1    8.758   sky130_fd_sc_hd__and4_1
+        2   20.019   sky130_fd_sc_hd__and4b_1
+      129  484.214   sky130_fd_sc_hd__clkinv_1
+      256 6.41E+03   sky130_fd_sc_hd__dfrtp_1
+       32  640.614   sky130_fd_sc_hd__dfxtp_1
+      992 2.98E+04   sky130_fd_sc_hd__edfxtp_1
+       36  225.216   sky130_fd_sc_hd__lpflow_inputiso1p_1
+       61  381.616   sky130_fd_sc_hd__lpflow_isobufsrc_1
+       17  170.163   sky130_fd_sc_hd__maj3_1
+      302  3.4E+03   sky130_fd_sc_hd__mux2_1
+       62  620.595   sky130_fd_sc_hd__mux2i_1
+      253  5.7E+03   sky130_fd_sc_hd__mux4_2
+      433 1.63E+03   sky130_fd_sc_hd__nand2_1
+       28  175.168   sky130_fd_sc_hd__nand2b_1
+      121  605.581   sky130_fd_sc_hd__nand3_1
+        5   37.536   sky130_fd_sc_hd__nand3b_1
+       13   81.328   sky130_fd_sc_hd__nand4_1
+        2   17.517   sky130_fd_sc_hd__nand4b_1
+        2   22.522   sky130_fd_sc_hd__nand4bb_1
+      421 1.58E+03   sky130_fd_sc_hd__nor2_1
+       10    62.56   sky130_fd_sc_hd__nor2b_1
+       49  245.235   sky130_fd_sc_hd__nor3_1
+        5   37.536   sky130_fd_sc_hd__nor3b_1
+        6   37.536   sky130_fd_sc_hd__nor4_1
+        1    8.758   sky130_fd_sc_hd__nor4b_1
+        1    10.01   sky130_fd_sc_hd__nor4bb_1
+        1    8.758   sky130_fd_sc_hd__o2111ai_1
+        3   30.029   sky130_fd_sc_hd__o211a_1
+       37  277.766   sky130_fd_sc_hd__o211ai_1
+       23  172.666   sky130_fd_sc_hd__o21a_1
+      466 2.33E+03   sky130_fd_sc_hd__o21ai_0
+        3   22.522   sky130_fd_sc_hd__o21bai_1
+        3   33.782   sky130_fd_sc_hd__o221a_1
+       16  140.134   sky130_fd_sc_hd__o221ai_1
+        6    52.55   sky130_fd_sc_hd__o22a_1
+       43  269.008   sky130_fd_sc_hd__o22ai_1
+        1    10.01   sky130_fd_sc_hd__o2bb2a_1
+        9   78.826   sky130_fd_sc_hd__o2bb2ai_1
+        4   40.038   sky130_fd_sc_hd__o311a_1
+       17  148.893   sky130_fd_sc_hd__o311ai_0
+        4   35.034   sky130_fd_sc_hd__o31a_1
+       15  112.608   sky130_fd_sc_hd__o31ai_1
+        1    10.01   sky130_fd_sc_hd__o32a_1
+        2   17.517   sky130_fd_sc_hd__o32ai_1
+        1   11.261   sky130_fd_sc_hd__o41a_1
+        1    8.758   sky130_fd_sc_hd__o41ai_1
+       16  100.096   sky130_fd_sc_hd__or3_1
+        6   45.043   sky130_fd_sc_hd__or4_1
+        1    10.01   sky130_fd_sc_hd__or4b_1
+      111  972.182   sky130_fd_sc_hd__xnor2_1
+       41  359.094   sky130_fd_sc_hd__xor2_1
+
+   Chip area for module '\memplane8': 66371.155200
+     of which used for sequential elements: 36835.328000 (55.50%)
+

@@ -43,7 +43,19 @@ while [ "$changed" = 1 ]; do
     b="$(basename "$f")"; m="${b%.v}"
     case " $SRCS " in *" $b "*) continue ;; esac
     for s in $SRCS; do
-      if grep -qE "^[[:space:]]*$m[[:space:]]+[A-Za-z_]" "$RTL/$s"; then
+      # ⛔ THE `#(...)` ARM IS NOT COSMETIC — WITHOUT IT THIS CLOSURE MISSES
+      # PARAMETERIZED INSTANTIATIONS, and the NDF top uses exactly that form:
+      #     banyan_fabric #(.PAYLOAD(8)) fab (
+      # Measured 08/17: `tt_um_saltworks_ndf` read 4 of its 5 dependencies and
+      # yosys died with "Module `\banyan_fabric' … is not part of the design" —
+      # the SAME error this closure was written to prevent, arriving through the
+      # one instantiation shape the pattern could not see. Two-sided control:
+      # the plain form `bitserial_switch sw0 (` matched before and still does.
+      # ⚠️ RESIDUAL, STATED: a `#(` whose parameter list WRAPS ACROSS LINES is
+      # still invisible here. Not fixed because no such instantiation exists in
+      # this tree today, and a grammar I cannot test is a grammar I should not
+      # ship — but a wrapped param list will reproduce this failure exactly.
+      if grep -qE "^[[:space:]]*$m[[:space:]]+(#\(.*\)[[:space:]]*)?[A-Za-z_]" "$RTL/$s"; then
         SRCS="$SRCS $b"; changed=1; break
       fi
     done
