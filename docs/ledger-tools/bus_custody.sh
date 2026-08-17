@@ -543,7 +543,7 @@ fi
 # and always exits 0 on its own account. It also FAILS OPEN if the mirror is absent: a
 # detector that breaks the pipeline is a guard wearing the wrong label.
 MIRROR="${SEAT_DIR}/memory-seats/compiler"
-LIVEBANK="${CLAUDE_MEMORY_DIR:-${SEAT_CONFIG_DIR}/projects/-Users-jyh-projects-claude-saltworks/memory}"
+LIVEBANK="${CLAUDE_MEMORY_DIR:?CLAUDE_MEMORY_DIR must be set: the live memory bank is machine-local and has no public default}"
 if LC_ALL=C grep -qi 'owed[[:space:]]*[:=]\?[[:space:]]*\(0\|ZERO\|none\)' <<<"$B1" 2>/dev/null; then
   if [ -d "$MIRROR" ] && [ -d "$LIVEBANK" ]; then
     STALE=0

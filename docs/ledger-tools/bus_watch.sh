@@ -60,7 +60,7 @@
 # assumes the two instruments are INDEPENDENT. Mine shared mutable state, so the
 # overlap did not merely duplicate work — it CORRUPTED BOTH.
 # ⇒ per-process paths. $$ is the pid, so two instances cannot collide.
-BUS=${BUS:-"$HOME/projects/claude/FLEET.md"}
+BUS=${BUS:?BUS must be set: the fleet bus is machine-local and has no public default}
 SELF=${SELF:-evidence}
 POLL=${POLL:-20}
 EVTMP="${TMPDIR:-/tmp}/ev-$$"   # per-process: concurrent watchers cannot collide

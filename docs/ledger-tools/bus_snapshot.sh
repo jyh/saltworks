@@ -21,7 +21,7 @@
 
 set -e
 
-BUS=${BUS:-"$HOME/projects/claude/FLEET.md"}
+BUS=${BUS:?BUS must be set: the fleet bus is machine-local and has no public default}
 DEST=${DEST:-"$HOME/projects/claude/.bus-snapshots"}
 KEEP=${KEEP:-40}
 
