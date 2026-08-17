@@ -1,0 +1,61 @@
+# B-2 · OPTION (B) POOL — THE NEW PRE-REGISTRATION
+# compiler · 2026-08-16 · produced under the helm ruling of 22:36
+#
+# ⛔ THE 08-14 DRAW IS VOID AND IS DISCARDED EXPLICITLY, NOT SUPERSEDED QUIETLY.
+#    compiler-B2-PREREG-0814.md 6.2 fixed k=20 over 257 eligible rows by the rule
+#    floor(i * 257 / 20). That pool does not exist: the hand-extracted 21 it rested
+#    on is below the mechanical lower bound of 59 codebook-named rows. Every index
+#    that rule would produce is void. NO ROW WAS EVER SCORED against it -- zero.
+#
+# ⛔ NO DRAW IS COMPUTED IN THIS FILE. The pool and its derivation are published
+#    FIRST, per the ruling. The draw rule is fixed BELOW, before any index exists.
+#
+# THE NEW DRAW RULE, PRE-REGISTERED HERE AND NOT YET EXECUTED:
+#    k = 20, taken by sorting the pool ids ascending and selecting
+#    index floor(i * N / 20) for i = 0..19, where N = 125 (the pool size below).
+#    Deterministic, parameter-free, reproducible by any hand from this file alone.
+#
+# THE POOL IS PINNED BY HASH. Any re-run that disagrees with the sha below has
+# either different inputs or a different script, and one of the two is wrong.
+#
+b2_pool_B: INPUTS, pinned by content hash
+    compiler-doublecode-PASS1-compiler.json                65577 B  sha256/16=8a7cfdb88958fe00
+    compiler-doublecode-PASS2-coder2.json                 110605 B  sha256/16=b7cb07e3051377b8
+    helm-doublecode-codebook-amendment-DRAFT2-0813.md     102381 B  sha256/16=37290fe0a76826b6
+    compiler-doublecode-sample-0813.txt                     2732 B  sha256/16=0c2b6859c38efaf1
+
+b2_pool_B: pass1 rows 388 · pass2 rows 388
+b2_pool_B: rows in BOTH passes 388 · agree 110 · DISPUTED 278
+b2_pool_B: distinct >=4-digit integers in the codebook 175
+
+b2_pool_B: ===================== THE POOL =====================
+    disputed population .............................. 278
+      of those, ids <=3 digits (ambiguous, KEPT) ..... 8
+      of those, appearing in the codebook (REMOVED) .. 153
+    ⇒ ELIGIBLE POOL (option B) ....................... 125
+
+    for comparison, the figure quoted on the bus:
+      sample rows (all 388, NOT the disputed set) ..... 388
+      of those appearing in the codebook .............. 171
+      naive '278 - 171' would have given ............... 107
+      ⇒ DIFFERENCE from the correct intersection ...... 18
+
+b2_pool_B: ⚠️ LIMITATION, stated with the result: the appearance test OVER-REJECTS.
+           A row is removed if its id occurs ANYWHERE in the codebook, including
+           prose that merely discusses it. Those rows are DISCARDED, not adjudicated.
+           (C) -- a fresh unexposed hand ruling discussed-vs-decided -- is the better
+           answer and remains available; this is the defensible result available NOW.
+
+b2_pool_B: ⚙️ THE ONE FREE PARAMETER, SWEPT (short-id handling):
+    KEEP  <=3-digit ids in the pool (as computed) .... 125   <- PUBLISHED POOL
+    DROP  <=3-digit ids as presumed-named ............ 117
+    the 8 rows at issue: 80 166 275 344 427 538 846 968
+    KEEP is the larger, LESS conservative pool. It is chosen because 'appears in
+    the codebook' is UNDECIDABLE for these ids, and a mechanism must not silently
+    resolve an undecidable case -- but a hand ruling (C) should revisit exactly these.
+
+b2_pool_B: POOL IDS (ascending), the object any re-run must reproduce:
+    80 166 275 344 427 538 846 968 1360 1577 3998 4141 4465 4785 5205 6055 6760 6964 7483 7848 8869 9839 10759 10987 11449 12098 12530 13926 29685 30695 31857 32309 32907 33588 34390 34657 35574 35783 35928 36665 37023 37249 37583 37738 38216 38363 39175 39254 40973 41243 41414 42055 42611 43529 44228 44795 44942 45091 45710 46187 46464 47070 47364 47634 47789 49178 49449 50033 50808 51092 52049 52323 53139 53458 53750 54678 54918 55149 55532 57511 57709 57941 59349 59770 60178 61392 61817 62354 62588 62764 64409 64680 64884 66155 67300 67830 67972 68668 68837 69075 69278 69485 70753 70912 71191 71730 72515 73876 74088 74994 76096 76254 76830 77393 78108 78471 79798 81502 81744 81979 82239 82566 83966 86063 87122
+
+b2_pool_B: pool sha256/16 = c534b50db41c7f4b
+b2_pool_B: NO DRAW COMPUTED. The ruling requires this pool published FIRST.
