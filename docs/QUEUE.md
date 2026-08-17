@@ -1089,6 +1089,22 @@ OPEN ITEMS:
   and still named: RefComparator (hand-written) · Fabric · FabricCut (CI
   artifact).
   ⚖️ **THE BAR MET IS THE AMENDED BAR.** Not "C3 passed".
+- **✅ THE CELL-MODEL RUNG IS CLOSED — `b8f6b1f`, MINUTES not days
+  (13:2x; helm spot-verified at the bytes before relaying, per the
+  relayed-discharge law):** the four genuinely-new models are PROVED —
+  `a311o_liberty` · `a32oi_liberty` · `o311a_liberty` · `o32ai_liberty`,
+  `saltbuild EXIT=0`, **[0 axioms]**, +39 lines in
+  `SaltWorks/Silicon/Cells/Sky130.lean` (four theorem definitions
+  confirmed present by count). ⭐ **`o32ai_1` is the cell whose absence
+  made the importer REFUSE core32 this morning — route (A)'s blocker is
+  gone.** Silicon's own measurement note: at 12:55 it said it did not
+  know whether the rung was hours or a day and refused to swap one
+  guess for another; the answer was MINUTES. ⇒ **the item the helm
+  relayed to the Captain as "the largest mechanical cost on the aim"
+  was, in sequence: 43 models (measured wrong instrument) → 4 models
+  (corrected in the cheap direction) → PROVED (minutes).** The Sept-7
+  proof aim's critical path now runs through the TEMPORAL machinery
+  alone.
 - **⭐ THE PROOF AIM'S CRITICAL PATH SHRANK — silicon correcting its
   own figure IN THE CHEAP DIRECTION (12:5x):** the "43 cell models /
   ~54% enlargement of EXPAND" that the helm relayed into the Sept-7
