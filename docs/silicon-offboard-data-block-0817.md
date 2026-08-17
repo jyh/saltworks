@@ -135,3 +135,87 @@ RTL freezes.** *The discharge's cost is dominated by cell-model coverage, which 
 insensitive to which core32 it runs on — so deferring costs almost nothing, while
 running it early risks paying twice.* **The helm asked for collisions at seams; this
 is the seam.**
+
+---
+
+# REVISION 1 — THE PIN FORK WAS CLOSED UNPICKED. §1 IS WITHDRAWN.
+
+**Captain's ruling 11:39:29, option (d) — one I did not enumerate. §1 above is left
+standing because dated records are not rewritten; it is WRONG and this supersedes it.**
+
+## §6 · WHAT I MISREAD, AND IT IS A READING ERROR NOT AN ARITHMETIC ONE
+
+```
+§1 SAID     all 24 pins are allocated, so there is nowhere to put an offboard link;
+            the ways out are re-freeze / multiplex / drop a function
+THE TRUTH   THOSE PINS ALREADY ARE A BUS. uo[7:0] is addr_byte in FOUR PHASES,
+            ui[7:0] is the returned word assembling low-byte-first, uio[1:0] is the
+            phase strobe SO THE HOST CAN ALIGN. slicea16bma.v:10-17 says so in its
+            own header.
+```
+🔑 ***I READ THE PIN ASSIGNMENTS AND NEVER THE PROTOCOL THEY CARRY. "ui_in → .instr_byte"
+told me the pins were CONSUMED; it should have told me there was a MEMORY BUS already
+on them, with a host on the other end and a phase strobe published for it.*** A count
+of allocated pins was the wrong instrument for a question about protocol capacity.
+
+✅ **THE RULED ARCHITECTURE — pin assignments UNTOUCHED, only D6's semantic text
+amends:** *the bus protocol EXTENDS with transaction types (fetch / load / store);
+address phases on `uo` exactly as today; read data returns on `ui`; **store data is
+multiplexed out on `uo` after the address phases**. The Captain's cost acceptance,
+verbatim: **"we have to multiplex them, it is slow, but fine"**.*
+
+## §7 · (iii) REVISED — FETCH-vs-DATA ARBITRATION AND WORST-CASE CPI
+
+**`uo` is now contended: it carries fetch addresses, load/store addresses, AND store
+data. A load or store STEALS BUS CYCLES FROM FETCH.** That is the arbitration
+question, and it is the core32 stall contract's real content.
+
+**ARBITRATION, stated as a rule rather than described:**
+> ***FETCH YIELDS TO DATA. A memory instruction that has committed at phase 3 owns
+> `uo` for its entire transaction; the next fetch begins only when the data
+> transaction retires.*** *The alternative — fetch priority — would require the data
+> transaction to be interruptible and re-issued, which needs a resumable memory
+> protocol nobody is buying at this window.*
+
+**PHASE ACCOUNTING. One phase = one clock.**
+```
+                    uo carries              ui carries          phases
+FETCH               PC[7:0]…PC[31:24]       instr bytes  ⇐      4
+LOAD  address       EA[7:0]…EA[31:24]       read data    ⇐      4
+STORE address       EA[7:0]…EA[31:24]       (idle)              4
+STORE data          wdata[7:0]…[31:24]      (idle)              4
+```
+⚠️ **THE LOAD ROW ASSUMES READ DATA RETURNS ON `ui` DURING THE ADDRESS PHASES, exactly
+as the instruction does during a fetch. That is an assumption about THE HOST, not
+about this design** — and `slicea16bma.v:27` already flags the same open question
+(*"whether the instruction for phase 0 arrives at phase 3 or a loop later … is a
+DESIGN question this artifact does not settle"*). **If the host cannot turn a read
+around in-phase, every LOAD row below gains 4.**
+
+```
+WORST-CASE CPI, under FETCH-YIELDS-TO-DATA and in-phase read turnaround:
+  non-memory instruction     4          fetch only
+  LW                         4 + 4  =  8
+  SW                         4 + 4 + 4 = 12      ← THE WORST CASE
+if the host CANNOT turn a read around in-phase:
+  LW                         4 + 8  = 12
+  SW                        12 (unchanged — a store never waits on ui)
+```
+⇒ ***WORST-CASE CPI IS 12, AND IT IS A STORE. A store costs 3× a non-memory
+instruction because `uo` must carry an address AND a datum it cannot overlap.***
+
+📌 **WHAT THIS DOES NOT SETTLE, kept explicit:** *no wait-state / not-ready signalling
+is specified here — the phase strobe tells the host WHERE the bus is, not whether the
+core is ready. A host slower than the phase counter needs a stall input, and there is
+no pin for one under (d). **That is the next hard question and I am naming it now
+rather than discovering it in RTL.***
+
+## §8 · UNCHANGED BY THIS REVISION
+
+- **§2** (the address-map split moves a theorem) stands.
+- **§5** (the collision: the discharge wave proves about RTL this campaign changes)
+  stands, and the ruling strengthens it — `core32` now gains a stall contract too.
+- **§4's claim sentence is NOT RATIFIED.** The helm was explicit. It remains my
+  proposal and must not be quoted as ruled.
+- The fabric's stubbed CPU-client port and spare stay untouched; **this block does not
+  argue for them.**
