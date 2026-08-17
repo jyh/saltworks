@@ -80,10 +80,19 @@ theorem dmem_drive_is_consistent_with_decoder
   rw [hmap.we] at hwe
   exact ctrlSpec_we_implies_req w hwe
 
-/-! ## ⛔ THE HYPOTHESIS IS FALSIFIED BY THE ONLY WIRING THE RTL CAN SUPPLY
+/-! ## ⛔ AN OPCODE-ONLY STROBE ON INPUT 33 FALSIFIES THIS HYPOTHESIS — AND THAT WIRING HAS SINCE BEEN REPLACED
 
 **Found by silicon 2026-08-17 07:56 (`5d161ce`), before any integration RTL was written,
 and confirmed here at the kernel by the hand that wrote the hypothesis.**
+
+✅ **AND REPAIRED AT `fc5ed0e` (08:18) — funct3-gated strobes landed, and the new plane
+discharges `DriveMap` by construction, so door 1 is NO LONGER SILENT.** The witnesses
+below remain true and are kept deliberately: they are true OF THE OPCODE-ONLY WIRING,
+which is a permanent fact about a wiring rather than a claim about what the core exposes
+today. **An earlier heading here said "the only wiring the RTL can supply". That was true
+for twenty-two minutes.** It is exactly why this section now names the WIRING and not the
+inventory — a headline that asserts a file's current state is a headline with an expiry
+date, and mine expired while the ink was wet.
 
 `DriveMap` asks for FUNCT3-GATED strobes: `isSW` is `opcode = 0100011 ∧ funct3 = 010`
 (anchor: `isSW    opcode = 0100011 ∧ funct3 = 010`). The core's `is_store` is computed
