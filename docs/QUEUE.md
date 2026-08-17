@@ -1089,6 +1089,33 @@ OPEN ITEMS:
   and still named: RefComparator (hand-written) · Fabric · FabricCut (CI
   artifact).
   ⚖️ **THE BAR MET IS THE AMENDED BAR.** Not "C3 passed".
+- **⭐⭐⭐ ITEM 1 CLOSED WHOLE — AND OFFBOARD DATA IS RULED IN-WINDOW
+  (11:3x, the Captain at the council, his words: "We should do offboard
+  data this window. I think it is unlikely I'll do a second run in the
+  near future, so we should have it this time as a 'complete' product.
+  I know silicon will have to scramble for it. With that we can close
+  item 1"):** the closure — (A) submission top = the COMPOSED design
+  (BB fabric + 4 neurons + CPU + load/store + mem), measured 112,962
+  µm² = 48.6% of the 6×2 (`b1463de`, two self-caught flow defects on
+  the way, both controlled); (B) DISSOLVED at the artifact of record
+  (the 6×2 is held); (C) the outward push to
+  `tt-neural-dataflow-fabric` remains HIS or explicitly delegated.
+  **(D) NEW SCOPE AT HIS WORD: the OFFBOARD DATA INTERFACE ships in
+  THIS window** — the complete-product ruling; the scramble is
+  KNOWINGLY ACCEPTED and recorded so the pace is read as ordered, not
+  drifted. Execution law unchanged: **DESIGN-BLOCK-FIRST** — silicon
+  authors the offboard block covering (i) the address-map split in
+  `dmem_addr8` (trap-on-out-of-range becomes route-or-trap), (ii) the
+  serialized data interface over the TT `uio` pins, (iii) the core32
+  stall/fixed-latency contract — a change to the verified core, not a
+  wrapper, and (iv) **the CLAIM LADDER: what is PROVEN at tape-out vs
+  what lands after — statement-tier lines go to the Captain at the
+  block's freeze.** Refuter pass gates the wave. Cross-lane: the
+  kernel-side model change (multi-cycle memory) touches compiler's
+  bridge — coordinate, never assume. 21 days to 2026-09-07. The
+  discharge wave and the offboard campaign now share the ③ lane:
+  silicon sequences its own pen, the helm arbitrates collisions at
+  seams.
 - **⭐⭐⭐ THE TILE PREMISE WAS STALE — CORRECTED AT THE ARTIFACT OF RECORD,
   AND THE PURCHASE QUESTION DISSOLVES (11:2x, the Captain at the council:
   "we have drifted, because we already purchased the 6x2, that's
