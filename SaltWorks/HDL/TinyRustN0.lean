@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Jason Hickey. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Jason Hickey, Claude
+-/
 /-!
 # N0 — the tiny-Rust typing judgment, as data, with its three pre-registered controls
 
