@@ -36,10 +36,22 @@
 #
 # Usage:  b2_headline_fence.sh [--strict] BRACKETFILE [BODYFILE]
 
+# ⭐ FAIL-CLOSED, FLIPPED 22:5x. STRICT IS NOW THE DEFAULT and --loose must be asked
+# for. Reason, from the third reader who measured their own arm: a union gate HAS NO
+# DENOMINATOR -- its silence about an UNENUMERATED reader is indistinguishable from
+# that reader being safe. Three predicates are on the record and nobody knows whether
+# that is three of three or three of four. "Probably not a reader" is exactly the kind
+# of word a gate cannot act on.
+# So the sound mode must be what you get by FORGETTING to choose, and the unsound one
+# must cost a flag and a printed warning. A safety gate whose correct mode is opt-in is
+# fail-OPEN, and every hand that forgets the flag gets the hole.
 set -u
-STRICT=0
-if [ "${1:-}" = "--strict" ]; then STRICT=1; shift; fi
-[ $# -ge 1 ] || { echo "usage: b2_headline_fence.sh [--strict] BRACKETFILE [BODYFILE]" >&2; exit 2; }
+STRICT=1
+case "${1:-}" in
+  --strict) shift ;;                      # accepted, now redundant: it is the default
+  --loose)  STRICT=0; shift ;;
+esac
+[ $# -ge 1 ] || { echo "usage: b2_headline_fence.sh [--loose] BRACKETFILE [BODYFILE]" >&2; exit 2; }
 BR="$1"; BODY="${2:-}"
 [ -f "$BR" ] || { echo "b2_headline_fence: bracket not found: $BR" >&2; exit 2; }
 
@@ -65,7 +77,9 @@ if [ -n "$BODY" ] && [ -f "$BODY" ]; then
   else
     LC_ALL=C command grep -aE "$MARKERS" "$BODY" >> "$SURF" || true
     NM=$(LC_ALL=C command grep -acE "$MARKERS" "$BODY" || true)
-    echo "b2_headline_fence: surface = bracket + ${NM} pushed body line(s) (models 2 named watches; NOT receiver-independent)"
+    echo "⚠️ b2_headline_fence: --loose · surface = bracket + ${NM} pushed body line(s)" >&2
+    echo "   THIS MODE MODELS A FIXED SET OF READERS AND HAS NO DENOMINATOR. A reader whose" >&2
+    echo "   predicate is not in the union passes unnoticed, and the gate cannot tell you so." >&2
   fi
 fi
 
