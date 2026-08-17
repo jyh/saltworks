@@ -395,3 +395,66 @@ demonstration that their check CAN reject.*
 - **This file is committed on every edit.** An untracked artifact in a shared tree has no
   custody and no recovery — which is not a lesson from a manual, it is what happened here.
 <!-- TEMPORAL-OWNERSHIP-TABLE v1 · END -->
+
+---
+
+# REVISION 3 — TWO RUNGS DATED, AND THE AIM HAS TWO UNSATISFIED HYPOTHESES, NOT ONE
+
+**Helm 15:15:03: two dated rungs are owed into the plan — the C4Spec witness for the
+composed core, and the flagship restatement. Dated below. Also: the held core32 datum
+question is resolved — the discharge block's round 2 owns it, sequenced after the
+offboard RTL freeze. KEEP HOLDING. Nothing is lost.**
+
+## §13 · THE STRUCTURAL FINDING BEHIND RUNG (1), VERIFIED BEFORE DATING IT
+
+I checked the premise rather than taking it on report:
+
+```
+C4Spec (HDL/C4.lean:76) is a Prop over a Circ.
+Every occurrence in the tree takes it as a HYPOTHESIS:
+   C4.lean:84                spec : C4Spec c          (a field, assumed)
+   C4.lean:115               (h : C4Spec c) → …       (consumes it)
+   Stack/Program.lean:2306   cycleRealisesStep_of_C4Spec (h : C4Spec …)
+NOTHING INHABITS IT FOR A REAL CIRCUIT.
+```
+
+⭐ **SO THE AIM NOW HAS TWO UNSATISFIED HYPOTHESES, AND THEY ARE THE SAME SHAPE:**
+```
+DriveMap   the gate↔decoder seam    assumed in DmemKernelBridge, satisfied nowhere
+C4Spec     the core-conformance seam assumed in C4/Program,      satisfied nowhere
+```
+⇒ ***Both are "true of the hardware, assumed in the proof" — the exact state §8 named
+for DriveMap, arriving a second time at a different seam. "Complete proof" is not true
+while either stands, and until today the fleet was tracking one of them.***
+
+## §14 · THE TWO RUNGS, DATED
+
+```
+DATE        RUNG                                          NOTE
+09-01→09-04 R9 · C4Spec WITNESS for the composed core     needs the FROZEN RTL and
+            — inhabit C4Spec for the real circuit,        the core32 datum, so it
+            not merely consume it                          cannot start before the
+                                                           08-27 freeze
+09-04→09-06 R10 · FLAGSHIP RESTATEMENT — bound stated in  JOINT per the ownership
+            the units the machine honors; no bare literal  table; T8 is routed to
+            surviving the retired cycle=step identity      the Captain, so silicon
+                                                           dates only its own half
+```
+⚠️ **AND I AM MARKING R9's DURATION AS UNMEASURED, DELIBERATELY.** *I have guessed a
+cost three times today and been wrong three times — 43 cells that were 7, "hours or a
+day" that was minutes, a pin count that was a protocol.* ***I have never inhabited a
+`C4Spec`, so 09-01→09-04 is a PLACEHOLDER WITH A DATE, not an estimate.*** **What would
+make it measurable: attempt the witness for the SMALLEST conforming circuit in the
+tree first, and report the real cost before the composed core is attempted.** *That
+probe is cheap and I will take it at the first idle seam.*
+
+## §15 · WHAT CLOSED EARLY, AND WHAT IT FREES
+
+**The cell-model rung (`08-17→27`) CLOSED ON 08-17** — ten days early, at `b3be185`:
+48 of 48 netlists import-clean, seven models proved `[0 axioms]`. *§11's
+break-condition 3 is retired, not merely void.* ⇒ **The freed capacity goes to R9's
+probe, which is the rung whose cost I actually do not know.**
+
+📌 *The held core32 datum (394 KB, 6.4× my read cap) stays held under the helm's
+15:15 ruling. My §1(1) argument against monoliths applies to it, and the discharge
+block's round 2 owns the resolution — after the offboard RTL freezes, not before.*
