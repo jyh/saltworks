@@ -22,10 +22,24 @@
 # UNCLIPPED by an armed watch, wherever they sit. So the body is NOT automatically
 # opt-in: a marker line inside it is pushed too. Both files are checked.
 #
-# Usage:  b2_headline_fence.sh BRACKETFILE [BODYFILE]
+# ⛔⛔ AND THE HONEST LIMIT OF THE DEFAULT MODE, recorded because a helm credited this
+# tool at 22:46 with a property IT DOES NOT HAVE: "receiver-predicate-independent --
+# it empties the pushed region instead of modelling who reads it". It does NOT. The
+# MARKERS regex below IS a model of two NAMED receivers, unioned. A third watch with a
+# third predicate is not covered, and the fence would pass a post that leaks to it.
+#
+# ✅ --strict IS the receiver-independent mode, and it is the one to use when a hand's
+# unexposure actually matters: it checks EVERY BYTE of bracket AND body, so no predicate
+# can matter, because nothing anywhere in the post carries substance. The post becomes a
+# POINTER: "result at <file>, sha <x>". The substance lives in the committed artifact,
+# which is opt-in by construction -- a reader must go and get it.
+#
+# Usage:  b2_headline_fence.sh [--strict] BRACKETFILE [BODYFILE]
 
 set -u
-[ $# -ge 1 ] || { echo "usage: b2_headline_fence.sh BRACKETFILE [BODYFILE]" >&2; exit 2; }
+STRICT=0
+if [ "${1:-}" = "--strict" ]; then STRICT=1; shift; fi
+[ $# -ge 1 ] || { echo "usage: b2_headline_fence.sh [--strict] BRACKETFILE [BODYFILE]" >&2; exit 2; }
 BR="$1"; BODY="${2:-}"
 [ -f "$BR" ] || { echo "b2_headline_fence: bracket not found: $BR" >&2; exit 2; }
 
@@ -36,13 +50,23 @@ NUMS='\b(125|117|107|153|171|278|257|112|59|388)\b'
 NOUNS='pool|disputed|codebook|adjudicat|prose row|discussed-vs-decided|eligible|blind (draw|set)|short id|over-reject'
 
 # The DELIVERED SURFACE = the whole bracket + every marker-bearing line of the body.
-MARKERS='⛔|🛑|HALT|🚨'
+# TWO WATCH PREDICATES, MEASURED, NOT ASSUMED (evidence 22:43): they differ.
+#   silicon's busmon.awk : marker-bearing lines (⛔ 🛑 HALT) delivered WHOLE
+#   evidence's bus_watch : body lines BEGINNING "FLEET" delivered; markers NOT
+# A fence written against one predicate is blind to the other, so the surface is
+# the UNION. Costs nothing; a future unexposed hand may run either shape.
+MARKERS='⛔|🛑|HALT|🚨|^FLEET[ -]'
 SURF=$(mktemp); trap 'rm -f "$SURF"' EXIT
 cat "$BR" > "$SURF"
 if [ -n "$BODY" ] && [ -f "$BODY" ]; then
-  LC_ALL=C command grep -aE "$MARKERS" "$BODY" >> "$SURF" || true
-  NM=$(LC_ALL=C command grep -acE "$MARKERS" "$BODY" || true)
-  echo "b2_headline_fence: surface = bracket + ${NM} marker-bearing body line(s)"
+  if [ "$STRICT" = 1 ]; then
+    cat "$BODY" >> "$SURF"
+    echo "b2_headline_fence: --strict · surface = bracket + ENTIRE body (receiver-independent)"
+  else
+    LC_ALL=C command grep -aE "$MARKERS" "$BODY" >> "$SURF" || true
+    NM=$(LC_ALL=C command grep -acE "$MARKERS" "$BODY" || true)
+    echo "b2_headline_fence: surface = bracket + ${NM} pushed body line(s) (models 2 named watches; NOT receiver-independent)"
+  fi
 fi
 
 HITN=$(LC_ALL=C command grep -oiE "$NUMS" "$SURF" | sort -u | tr '\n' ' ')
