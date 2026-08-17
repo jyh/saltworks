@@ -53,5 +53,34 @@ done <<EOF
 $(LC_ALL=C grep -oE 'TOKENFP: [0-9][0-9,]* tok @ [0-9][0-9,]* B/[0-9][0-9,]* lines' "$B" \
   | sed -E 's/TOKENFP: ([0-9,]*) tok @ ([0-9,]*) B\/([0-9,]*) lines/\1|\2|\3/' | tr -d ,)
 EOF
+# 4. THE SIBLING SURFACE. Arm 3 was built for the brief, and then I SPLIT the brief and
+#    gave the new half a TOKENFP of its own -- checked by nothing. A fingerprint nobody
+#    verifies is a figure that rots silently, which is the exact defect arm 3 exists to
+#    catch, reproduced one file over. Found 08/16 21:5x by running my own tool for the
+#    first time that night and asking what it does NOT cover.
+#    The half is discovered from the brief's own REFERENCE-HALF: line, not hardcoded --
+#    a hardcoded path goes stale the same way the figures do.
+RH=$(LC_ALL=C grep -oE 'REFERENCE-HALF: [^ ]+\.md' "$B" | head -1 | sed 's/REFERENCE-HALF: //')
+if [ -n "$RH" ]; then
+  RP=""
+  for cand in "$RH" "$(dirname "$B")/$(basename "$RH")" "${SEAT_DIR:-}/$RH"; do
+    [ -n "$cand" ] && [ -r "$cand" ] && { RP="$cand"; break; }
+  done
+  if [ -z "$RP" ]; then
+    OUT="$OUT
+   brief names REFERENCE-HALF ${RH} -- NOT READABLE from here. A pointer to a file that
+   does not resolve is worse than none: a booting head is sent nowhere, silently."
+  else
+    RB=$(wc -c < "$RP" | tr -d ' '); RL=$(wc -l < "$RP" | tr -d ' ')
+    while IFS='|' read -r tok fb fl; do
+      [ -z "$tok" ] && continue
+      if [ "$fb" != "$RB" ] || [ "$fl" != "$RL" ]; then OUT="$OUT
+   REFERENCE-HALF claims ${tok} tok @ ${fb} B/${fl} lines; file is now ${RB} B/${RL} lines -- TOKEN FIGURE STALE"; fi
+    done <<EOF
+$(LC_ALL=C grep -oE 'TOKENFP: [0-9][0-9,]* tok @ [0-9][0-9,]* B/[0-9][0-9,]* lines' "$RP" \
+  | sed -E 's/TOKENFP: ([0-9,]*) tok @ ([0-9,]*) B\/([0-9,]*) lines/\1|\2|\3/' | tr -d ,)
+EOF
+  fi
+fi
 [ -n "$OUT" ] && printf '  ⛔ SELF-STALE FIGURES IN MY OWN BRIEF:%s\n' "$OUT"
 exit 0
