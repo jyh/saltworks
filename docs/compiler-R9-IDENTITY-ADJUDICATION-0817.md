@@ -10,12 +10,51 @@ this file existed, which `git log` shows and I do not ask anyone to take on trus
 
 ---
 
-## THE VERDICT
+## ⛔ CORRECTED 16:3x — THE VERDICT BELOW WAS STATED WITHOUT A DATE. READ THIS FIRST.
+
+**Silicon attacked the premise I flagged (16:28:23) and refuted it for TODAY'S CORE.**
+*I verified their definitional half with my own instrument before accepting it:*
+`cycOfCirc c nextW pad = cycOfBits (SaltWorks.HDL.sem c) nextW pad` **(Program.lean:2294-2296)**,
+whose docstring calls it the D→Q transfer — **one clock**. The RTL half (single-cycle
+today; CPI 4/8/12 after the 08-27 freeze) is **their** instrument and I take it as such.
+
+⛔ **WITHDRAWN AS STATED, quoted inside its own withdrawal so it cannot walk again:**
+> *"R9 is not 'unbuilt'. Against today's sentence, for a stalling core, it is
+> UNBUILDABLE"* — **FALSE OF THE CORE THAT EXISTS.** Today core32 is single-cycle, no
+> stall exists in the RTL, every cycle realises a step, and `C4Spec` is inhabitable.
+
+```
+TODAY          every cycle realises a step ⇒ the transport does NOT bite
+               ⇒ C4Spec inhabitable · B INDEPENDENT of A · datable IN PARALLEL
+POST-08-27     CPI 4/8/12 ⇒ cycle ≠ step ⇒ the transport BITES
+               ⇒ B BLOCKED on A · dated IN SEQUENCE
+```
+
+🔑 ***THE ERROR NAMED: "the real composed core" HAS TWO REFERENTS SEPARATED BY A SCHEDULED
+DATE, and I bound the claim to the wrong one. It was true of the ADJACENT object — the core
+we are building — and I attached it to the core that exists.*** *In a campaign whose whole
+point is that the RTL changes on 08-27, a premise about "the core" carrying no date is not
+one claim, it is two claims sharing a noun.*
+
+✅ **WHAT SURVIVES UNCONDITIONALLY** — it is a theorem, so it needs no date: the kernel
+join `C4Spec c → CycleRealisesStepProj (cycOfCirc c …)` and its contrapositive. **The
+transport is always valid; what is date-dependent is whether its ANTECEDENT is triggered.**
+
+⭐ **AND THE "WASTED WITNESS" WORRY HAS A KERNEL ANSWER.** *`stallArm_reduces` closes by
+`Iff.rfl` — **the reduction is DEFINITIONAL**.* ⇒ **a witness proved TODAY against the
+single-cycle core IS the empty-stall instance of the restated predicate: not waste, the
+BASE CASE, surviving the restatement by definitional unfolding.** *Whether it is WORTH
+building before the freeze is a helm/Captain call and I do not make it here.*
+
+---
+
+## THE VERDICT (as drafted 16:18 — read the correction above first)
 
 ***TWO obligations, not one — but JOINED AT THE KERNEL, and the join is DIRECTIONAL:
-A must land before B can be built.***
+A must land before B can be built.*** ⚠️ *the directional half holds POST-FREEZE only.*
 
-**Count: 2 rungs. Dated in SEQUENCE, never in parallel.**
+**Count: 2 rungs.** ⚠️ *"Dated in SEQUENCE, never in parallel" — **true post-freeze, FALSE
+today**, where the two are independent.*
 
 ---
 
@@ -83,7 +122,14 @@ can still be wrong** — by dating the two rungs **CONCURRENTLY**, which is neit
 nor zero counting. *That plan looks correct on its face and cannot execute.* ⇒ **the
 kill-check should read: is the count right AND is the ORDER right.**
 
-## 🔑 WHAT WOULD FLIP THIS VERDICT — and I have NOT checked it
+## 🔑 WHAT WOULD FLIP THIS VERDICT — ✅ **IT FIRED. Named 16:18, refuted 16:28.**
+
+> ⭐ **KEPT VERBATIM RATHER THAN REWRITTEN, because the record is the point: the falsifier
+> below was published BEFORE the check, it named the exact fact and the exact instrument,
+> and TEN MINUTES LATER the holder of that instrument fired it.** *A pre-registered
+> falsifier that actually flips the verdict is the strongest evidence available that the
+> adjudication was honest rather than lucky — and it only reads that way if I leave it
+> standing instead of quietly editing it into agreement with the outcome.*
 
 **The verdict rests on ONE PREMISE I HAVE NOT VERIFIED: that the real composed core's
 INDUCED cycle map — `cycOfCirc c nextW pad` — is one that stalls.**
