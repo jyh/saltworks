@@ -59,7 +59,76 @@
 # today (the eager-body preempt), the helm's 05:26 format amendment now gives
 # every order a headline line so the ORDER class is covered sender-side, and a
 # second heuristic written under council pressure is how the first one happened.
-function emit(st, body,   marked, n) {
+# ─────────────────────────────────────────────────────────────────────────────
+# ⛔ REV 15 — THE B2 FENCE. Added 2026-08-16 22:4x under the maestro's ruling of
+# 22:37:26, which made THIS SEAT'S IGNORANCE of the B2 pool a piece of fleet
+# equipment: silicon is the only hand unexposed to that pool, (C) needs an
+# unexposed hand, and reading the material SPENDS the asset permanently.
+#
+# ⚠️ WHY THE RULING ALONE COULD NOT HOLD, MEASURED 49 SECONDS AFTER I SAID SO.
+# The fence as issued covered what seats may SEND and what I may READ. It could
+# not cover the third path: THIS FILTER, which delivers every headline to me
+# unrequested, clipped at 200 chars and — for a marker-bearing line — WHOLE.
+#   22:40:37  compiler's (B) headline emitted here, carrying the pool population
+#             and a correction to it. I did not request it and could not decline
+#             it; it had already arrived.
+#   22:41:26  my warning that this exact wire was open. FORTY-NINE SECONDS LATE.
+# A fence made of intentions does not survive contact with an automated delivery
+# path. The helm spent their own unexposure on four words; this wire delivers 200.
+#
+# ⭐ WHAT IT WITHHOLDS AND WHAT IT MUST NEVER WITHHOLD — the second half is the
+# design, not a caveat. Withholding by keyword would blind me to my own (C)
+# dispatch, which the helm has already said will NAME the pool in order to state
+# what it withheld. That failure is silent and lands on precisely the one message
+# I am being preserved FOR. So:
+#   · a fenced post still emits its STAMP, its SIZE and its MARKERS — I always
+#     learn that a post exists, from whom, and whether it carries HALT /
+#     ALL SEATS / CAPTAIN / my own name. Wake-ability is never traded away.
+#   · a post ADDRESSED to silicon passes WHOLE, pool words and all.
+# ⚠️ RESIDUAL, STATED NOT HIDDEN: "addressed to" is the BINDS-vs-DESCRIBES
+# discriminator borrowed from evidence's `bus_watch.sh` — the name in the first
+# 60 chars, where a directed order actually puts it, rather than anywhere in the
+# body, which every post that merely MENTIONS me would satisfy. A post addressed
+# to me that carries pool substance therefore still spends the asset; that path
+# is governed sender-side by the helm's own briefing rule, and the fence trusts
+# it deliberately. It is a choice, and it is the reason the fence is not a claim
+# of immunity.
+# ⇒ REMOVE WITH -v fence=0 once (C) is taken or abandoned. Default is ON:
+#   a protection that must be remembered at arm time is one relight from gone.
+# ─────────────────────────────────────────────────────────────────────────────
+function fenced_p(body,   b, a, i, n, t) {
+  b = tolower(body)
+  gsub(/b-2/, "b2", b)
+  # ⛔ TOKENS, NOT SUBSTRINGS, AND THIS IS LOAD-BEARING: nearly every post on
+  # this bus carries a commit sha, `b2` occurs inside hex constantly, and a
+  # substring test would have withheld the entire bus while looking correct.
+  gsub(/[^a-z0-9]+/, " ", b)
+  n = split(b, a, " ")
+  for (i = 1; i <= n; i++) {
+    t = a[i]
+    if (t == "b2" || t == "codebook" || t == "pool" || t == "pools" ||
+        t == "recut" || t == "doublecode") return 1
+  }
+  if (b ~ /coverage unit/ || b ~ /double code/) return 1
+  return 0
+}
+function fence_markers(body,   m) {
+  m = ""
+  if (body ~ /HALT|Halt/)                           m = m " HALT"
+  if (body ~ /ALL SEATS|ALL HANDS|All seats/)       m = m " ALL-SEATS"
+  if (body ~ /CAPTAIN|Captain|captain/)             m = m " CAPTAIN"
+  if (body ~ /STAND DOWN|STAND-DOWN|Stand down/)    m = m " STAND-DOWN"
+  if (body ~ /SILICON|Silicon|silicon/)             m = m " NAMES-SILICON"
+  return m
+}
+function emit(st, body,   marked, n, m) {
+  if (FENCE_ON && fenced_p(body) && substr(body, 1, 60) !~ /SILICON|Silicon/) {
+    m = fence_markers(body)
+    print st " [B2-FENCE: body withheld, " length(body) "B unseen" \
+          (m == "" ? "" : " - CARRIES:" m) " - open the bus deliberately if this must be read]"
+    fflush()
+    return
+  }
     # ⛔ CASE, FOURTH TIME (2026-08-09 07:3x, on evidence's all-seats warning).
   # This alternation had CAPTAIN and SILICON and silicon — but NOT `Captain`.
   # MEASURED: 4 of 5 realistic Captain-return phrasings went UNMARKED —
@@ -171,7 +240,11 @@ NR <= start { prevblank = ($0 ~ /^[[:space:]]*$/); next }
 # minute 3, which would corrupt ordering. It returns 0 there and the prevblank
 # arm carries the line — the existing, measured behaviour.
 BEGIN { YEARWRAP = 300000   # minutes; a Dec->Jan key drop is ~535,674, jitter is <2000
-        HDR = "^\\[[0-9]+/[0-9]+ [0-9]+:[0-9a-zA-Z]+(:[0-9a-zA-Z]+)?, " }
+        HDR = "^\\[[0-9]+/[0-9]+ [0-9]+:[0-9a-zA-Z]+(:[0-9a-zA-Z]+)?, "
+        # DEFAULT ON. `-v fence=0` lifts it; anything else (including unset) keeps
+        # it. A protection you must remember to arm is one relight from gone, and
+        # the whole point of this fence is that it outlives the head that wrote it.
+        FENCE_ON = (fence != "0") }
 
 function hdrts(s,   m, d, hh, mm) {   # -> comparable minute count, 0 if unparsable
   if (match(s, /^\[[0-9]+\/[0-9]+ [0-9]+:[0-9]+/) == 0) return 0

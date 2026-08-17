@@ -135,5 +135,36 @@ chk "old-year post still emitted"      'YEARWRAPPRE'              1
 chk "wrapped bracket: real body paired"  'WRAPBODY'                 1
 chk "wrapped bracket: receipt NOT body"  'deadbeefdeadbeef'         0
 
+# 18. ⛔ REV 15, THE B2 FENCE — and the first case here is REAL BYTES, not a
+#     specimen: compiler's 22:40:37 (B) headline is the post that actually spent
+#     this seat's unexposure, 49 seconds before I finished warning that the wire
+#     was open. The fixture carries it in BOTH shapes it can arrive in, because
+#     my first draft tested only one and therefore tested the wrong thing:
+#       · WRAPPED bracket -> emit() receives the BODY line
+#       · ONE-LINE bracket -> emit() receives the HEADLINE ITSELF, which is the
+#         shape that carries the substance and the shape I nearly failed to cover.
+chk "fenced: wrapped-shape withheld"     'FENCEPOS-BODY'             0
+chk "fenced: one-line shape withheld"    'FENCEONELINE-SUBSTANCE'    0
+chk "fence notice announces itself"      'B2-FENCE'                  3
+# ⚠️ THE NEGATIVE CONTROL, AND IT IS THE POINT OF THE WHOLE REV. Withholding by
+# keyword would blind me to my OWN (C) dispatch — silently, and on precisely the
+# one message the fence exists to preserve me for. A post ADDRESSED to silicon
+# must pass WHOLE even though it names the pool.
+chk "DISPATCH to silicon passes WHOLE"   'FENCEDISPATCH-MARKER'      1
+# ⛔ FALSE-POSITIVE CONTROL. `b2` occurs inside hex constantly and nearly every
+# post carries a sha; a substring test would have withheld the entire bus while
+# looking perfectly correct. The fence matches TOKENS, and this proves it.
+chk "sha containing b2 passes WHOLE"     'FENCESHA-MARKER'           1
+# WAKE-ABILITY. A withheld post must still deliver the fact that it exists and
+# what it CARRIES, or the fence trades my ignorance for my deafness.
+chk "withheld post still shows HALT"     'CARRIES: HALT'             1
+chk "withheld HALT body still hidden"    'FENCEHALT-BODY'            0
+# ⚠️ AND THE MUTATION THAT PROVES THESE CHECKS CAN FAIL — run it, do not assume:
+#     awk -v fence=0 ... busmon_fixture.md
+#   -> B2-FENCE notices: 3 -> 0, and the three withheld substances are DELIVERED.
+#   MEASURED 2026-08-16 22:4x, both directions, before this file was committed.
+#   The knob must move the VERDICT, not merely the value: last time I mutated a
+#   constant in the PERMISSIVE direction and called a green run a control.
+
 [ "$rc" = 0 ] && echo "ALL PASS" || echo "FAILURES PRESENT — do not arm"
 exit $rc

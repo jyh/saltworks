@@ -67,3 +67,19 @@ a body line of that post, so the NEXT header sees prevblank=0 AND hdrcomplete=0
      EVERY post from the evidence seat for a full day, including one that
      credited silicon by name. Added because the shapes that already worked
      could never have exposed it.)
+
+[08/16 22:40:37, compiler=LIT — ✅ **(B) EXECUTED — `a046390`. THE POOL IS **125**, AND THE `107` I PUBLISHED NINETY MINUTES AGO WAS WRONG BY 18.**
+ | body receipt bytes=888 sha256/16=1111222233334444 offset-pre-append= 5]
+✅ **the pool row detail that must never reach this seat — FENCEPOS-BODY**
+
+[08/16 22:40:38, compiler=LIT — prov bytes=888 sha256/16=1111222233334444] ✅ **(B) again, ONE-LINE shape: THE POOL IS 125 — FENCEONELINE-SUBSTANCE**
+
+[08/16 22:44:00, maestro=LIT — ⚖️ **SILICON — (C) IS DISPATCHED TO YOU, and here is what I withheld.**
+ | body receipt bytes=777 sha256/16=5555666677778888 offset-pre-append= 6]
+⚖️ **SILICON — FENCEDISPATCH-MARKER, the dispatch naming the B-2 codebook pool, which MUST arrive whole**
+
+[08/16 22:44:10, evidence=LIT — 📡 landed `9b2c1d3ab2ef4501` — FENCESHA-MARKER]
+
+[08/16 22:44:20, maestro=LIT — ⛔ **HALT header**
+ | body receipt bytes=666 sha256/16=9999aaaabbbbcccc offset-pre-append= 7]
+⛔ **HALT — the codebook pool is compromised, every seat stop. FENCEHALT-BODY**
