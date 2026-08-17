@@ -80,10 +80,52 @@ theorem dmem_drive_is_consistent_with_decoder
   rw [hmap.we] at hwe
   exact ctrlSpec_we_implies_req w hwe
 
+/-! ## ⛔ THE HYPOTHESIS IS FALSIFIED BY THE ONLY WIRING THE RTL CAN SUPPLY
+
+**Found by silicon 2026-08-17 07:56 (`5d161ce`), before any integration RTL was written,
+and confirmed here at the kernel by the hand that wrote the hypothesis.**
+
+`DriveMap` asks for FUNCT3-GATED strobes: `isSW` is `opcode = 0100011 ∧ funct3 = 010`
+(`Decoder.lean:32`). `core32.v:35` computes `is_store` from the OPCODE ALONE. Those are
+the only strobes the core exposes, so wiring `we_in ← is_store` — the obvious integration
+— makes `DriveMap` FALSE.
+
+⚠️ **AND A FALSE HYPOTHESIS DOES NOT MAKE THE THEOREM WRONG. IT MAKES IT SILENT.**
+`dmem_we_out_implies_decoded_touchesMem` stays green, stays citable, and says nothing
+whatever about a machine wired that way. This file warned about that in its own opening
+words — *"certification of the wrong wire is exactly what an assumed port map buys you"* —
+and then did not instantiate the hypothesis to find out. The warning was written; the
+check was not run. That is the whole distance between a caveat and a control.
+
+The witness below is that check, and it is machine-checked rather than argued. -/
+
+/-- SB with `funct3 = 000`: opcode `0100011`, every other field zero. -/
+def wSB : BitVec 32 := 0x00000023
+
+/-- The kernel's verdict on that word: NOT a store, NO access strobe, and it does not
+decode at all. `core32`'s opcode-only `is_store` asserts on exactly this encoding. -/
+theorem wSB_kernel_says_not_a_store :
+    (ctrlSpec wSB)[6]! = false ∧ (ctrlSpec wSB)[7]! = false ∧ decode wSB = none := by
+  refine ⟨by decide, by decide, by decide⟩
+
+/-- ⛔ **THE FALSIFICATION.** Any plane driving input 33 high on this word — which is what
+wiring it from an opcode-only strobe does — makes `DriveMap` false, and therefore makes
+door 1 vacuous rather than false. -/
+theorem opcode_only_wiring_violates_DriveMap
+    (ins : Nat → Bool) (h : ins 33 = true) : ¬ DriveMap wSB ins := by
+  intro hd
+  have hw := hd.we
+  rw [h] at hw
+  have hf : (ctrlSpec wSB)[6]! = false := by decide
+  rw [hf] at hw
+  exact Bool.noConfusion hw
+
 end SaltWorks.Certs
 
 section Audit
 open Salt.Tactic
 #audit_axioms SaltWorks.Certs.dmem_we_out_implies_decoded_touchesMem
   SaltWorks.Certs.dmem_drive_is_consistent_with_decoder
+  SaltWorks.Certs.wSB_kernel_says_not_a_store
+  SaltWorks.Certs.opcode_only_wiring_violates_DriveMap
 end Audit
