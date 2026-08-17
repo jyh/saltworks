@@ -6,6 +6,11 @@
 # dropped the verb, telling the fleet an item was blocked that was ready to run.
 # Both clauses were in the same sentence, in my own tool output, on my own screen.
 #
+# ⚠️ `98fd83c` above is PRE-FLIP and resolves nowhere on the public origin; its
+# post-flip address is `5eedb3c` (saltworks/docs/ledger-tools/flip-sha-map-0816.tsv).
+# The quotation is left VERBATIM and annotated rather than silently corrected —
+# editing a quote to fix it is this same defect one level up.
+#
 # ⛔ THIS IS NOT A PASS/FAIL GATE AND MUST NOT BECOME ONE. It cannot know which
 # omissions are legitimate trim — only a reader can. It is an INSTRUMENT: it finds
 # fragments in a draft that also occur in a cited source, and prints the SOURCE'S
