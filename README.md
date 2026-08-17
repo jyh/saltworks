@@ -17,7 +17,7 @@ meter, and an error ledger, constituted from the campaign's append-only logs.
 |---|---|---|
 | Application | [`SaltWorks/Stack/`](SaltWorks/Stack/) | application programs and their specifications, with the bridge theorems connecting them to the layers below |
 | Compiler | [`SaltWorks/HDL/`](SaltWorks/HDL/) | the verified compiler: expressions, straight-line code, and loops, down through the circuit DSL to Verilog, with the ISA semantics |
-| Executive | [`SaltWorks/Stack/`](SaltWorks/Stack/) | the executive's isolation theorems, in the same spec-and-proof lane as the applications it schedules |
+| Executive | [`SaltWorks/HDL/`](SaltWorks/HDL/) | the executive's isolation theorems (`Executive*.lean`), with the certificate restatement in [`SaltWorks/Certs/`](SaltWorks/Certs/) |
 | CPU / silicon | [`SaltWorks/Silicon/`](SaltWorks/Silicon/) | the flow, the netlist importer, and SAT-checked equivalence at the silicon boundary |
 | The switch | [`SaltWorks/Banyan/`](SaltWorks/Banyan/) | the Batcher–banyan self-routing switch, sort-then-route closed end to end |
 | Certificates | [`SaltWorks/Certs/`](SaltWorks/Certs/) | the comprehensibility layer: headline theorems restated in primitive vocabulary, the restatement kernel-proved equivalent |
@@ -137,3 +137,13 @@ methodology and its numbers of record are described in the paper.
 ## License
 
 Apache License 2.0 — see `LICENSE`.
+
+## Data availability
+
+The complete formal development — all Lean sources, proofs, certificate
+restatements, and build configuration — is available at
+https://github.com/jyh/saltworks (tag `nature-2026-08`). The tagged
+snapshot is the submission record; the repository's live branch continues
+beyond it. Every theorem can be re-verified from source with a single
+build command; the certificate layer restates the headline results in
+primitive vocabulary, with the restatements themselves kernel-checked.
