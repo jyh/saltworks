@@ -87,9 +87,20 @@ HITN=$(LC_ALL=C command grep -oiE "$NUMS" "$SURF" | sort -u | tr '\n' ' ')
 HITW=$(LC_ALL=C command grep -oiE "$NOUNS" "$SURF" | sort -u | tr '\n' ' ')
 
 if [ -n "$HITN" ] || [ -n "$HITW" ]; then
-  echo "⛔ b2_headline_fence: REFUSING — this bracket carries B-2 SUBSTANCE." >&2
-  [ -n "$HITN" ] && echo "   population figures : $HITN" >&2
-  [ -n "$HITW" ] && echo "   substantive nouns  : $HITW" >&2
+  # ⛔ THE REFUSAL NAMES WHERE AND HOW MANY, NEVER WHAT. Until 08/17 07:1x this
+  #    printed the matched tokens -- so the message announcing a leak CARRIED the
+  #    leak, and arm 45 pipes this text straight to the operator's terminal on every
+  #    refusal. Anyone shown a refusal received the thing it caught.
+  #    Adopted from silicon's fencecheck.sh (9ae7b41), which had the property from
+  #    the start: line numbers, counts, and never the matched text. A guard that
+  #    quotes the contraband is a guard with its own channel.
+  NHIT=$(printf '%s %s' "$HITN" "$HITW" | wc -w | tr -d ' ')
+  LINES=$(LC_ALL=C command grep -niE "$NUMS|$NOUNS" "$SURF" | cut -d: -f1 | sort -un | tr '\n' ' ')
+  echo "⛔ b2_headline_fence: REFUSING — the checked surface carries withheld material." >&2
+  echo "   distinct matches : $NHIT" >&2
+  echo "   at surface lines : ${LINES:-?}" >&2
+  echo "   the matched text is NOT printed, by design: a refusal that quotes what it" >&2
+  echo "   caught is a second copy of it. Open the file at those lines yourself." >&2
   cat >&2 <<'MSG'
    The bracket is DELIVERED WITHOUT CONSENT to the fleet's only unexposed hand.
    Put the substance in the BODY (opt-in) and leave the bracket a pointer:
