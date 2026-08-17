@@ -1,0 +1,24 @@
+CORRECTION 2026-08-17 12:0x — THIS COMMIT MESSAGE MISDESCRIBES WHAT HAPPENED.
+
+It says silicon "authored the canonical artifact CONCURRENTLY, in the shared
+tree, while I was drafting mine" and that "theirs is better and I adopted it
+whole". Both are wrong on the facts.
+
+WHAT ACTUALLY HAPPENED: silicon wrote the same filename in LOWERCASE. macOS is
+case-insensitive and case-preserving, so both names resolved to ONE INODE and
+their write DESTROYED my file contents. It was untracked; git held nothing. They
+reported it themselves within the minute and refused to reconstruct my artifact
+from memory, which was right.
+
+AND "THEIRS IS BETTER" WAS WRONG TOO: the surviving copy carried four columns
+where the helm ordered six. It lacked THE ARTIFACT IT LANDS IN and THE CONTROL
+THAT WOULD CATCH ITS ABSENCE -- the column that makes an assignment checkable.
+I adopted it without checking it against the order I had read forty minutes
+earlier.
+
+RESOLVED: the helm arbitrated custody at 12:06 (its order named no path and no
+pen, and it owned that). Compiler holds one pen on the canonical file, which is
+now a genuine MERGE -- silicon T4 bounded-wait reframe and ownership principle,
+my two ordered columns and T7 -- landed at 7f38ad8 and COMMITTED ON CREATION.
+
+The adoption itself was not wrong to make; the ACCOUNT of it was.
