@@ -22,7 +22,7 @@ Compiler holds the pen on this file; silicon's block embeds its bytes verbatim.*
 | T3 | bus-protocol **FSM proof** | **silicon** | compiler | silicon's offboard block | a trace where the FSM deadlocks mid-transaction and every current check stays green |
 | T4 | arbitration **fairness**, restated as **BOUNDED WAIT** | **silicon** | compiler | silicon's offboard block | a fetch waiting longer than the stated phase bound, with no gate that counts |
 | T5 | **store-path timing** — `dmem_we` rising vs the beat leaving the pins | **silicon** | compiler | silicon's block + the seam statement | `we` on beat *n*, data on beat *n+k*, and the seam theorem still elaborates |
-| T6 | **`ISA.step` / `runWords` extension** | **compiler** | silicon | `Stack/Program.lean` | `runWords_succ` still closing by `rfl` afterwards — if it does, no stall entered the object |
+| T6 | **`ISA.step` / `runWords` extension** | **compiler** | silicon | `Stack/Program.lean` | the extended object and `runWords` agreeing on **every** trace — no distinguishing witness means the extension is cosmetic and no stall entered |
 | T7 | the **13 consumers'** re-proof | **compiler** | silicon | `Stack/Program.lean` | any consumer whose statement changed while its proof did not |
 | T8 | the **K/N unit re-cut** (UK1) | ⛔ **the Captain, via the helm** | both | routed, not designed here | a guard passing at a fraction of the intended instructions — green and wrong |
 
@@ -44,6 +44,24 @@ obligation nobody could discharge became an arithmetic one.***
 ⚠️ *And the structural reason starvation cannot arise: a data transaction exists only
 because an instruction was already fetched. **There is no source of data traffic
 independent of fetch.***
+
+## ⛔ T6's CONTROL WAS A FALSE NEGATIVE, AND THIS TABLE FROZE IT INTO THREE FILES
+
+*Repaired 2026-08-17 14:0x. The original read: "`runWords_succ` still closing by `rfl`
+afterwards — if it does, no stall entered."* **`runWords_succ` is `rfl` BY THE SHAPE OF THE
+RECURSION** *(`Program.lean:1413-1414`)*; *it survives any word-stream encoding, so it
+would have reported "no stall entered" **while a stall had entered**.*
+
+🔑 ***AND THE TELL IS STRUCTURAL, VISIBLE BY READING THE COLUMN DOWN: every other control
+names a FAILURE STATE — something green-and-wrong that can occur while the obligation is
+undischarged. T6 alone named a PASS CONDITION.*** *A control that describes success cannot
+discriminate; it can only agree with you.*
+
+⚠️ **THE INTERFACE ARTIFACT'S FIRST REAL LESSON, AND IT CUTS BOTH WAYS.** *Byte-identity
+did exactly what it was built to do and **propagated a defective row to three files at
+once**. A shared interface makes agreement cheap and makes a defect in the interface
+maximally expensive. **The cmp check proves the copies match; it cannot prove the original
+is right** — and nothing in the mechanism ever will.
 
 ## THE COLUMN THAT DOES THE WORK IS THE LAST ONE
 
