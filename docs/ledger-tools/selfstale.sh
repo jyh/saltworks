@@ -82,5 +82,48 @@ $(LC_ALL=C grep -oE 'TOKENFP: [0-9][0-9,]* tok @ [0-9][0-9,]* B/[0-9][0-9,]* lin
 EOF
   fi
 fi
+# 5. THE BANK. Same law, third surface. A peer measured their own bank going
+#    38% -> 50% -> 80.5% of the Read cap IN ONE DAY, and mine was already OVER cap
+#    tonight without anyone noticing -- the boot ordered an impossible read. A one-time
+#    split does not fix that; only a recurring check does. Resolved from the brief's own
+#    BANK: line, never hardcoded.
+#    ⚠️ DOMAIN, STATED: this detects DRIFT from a MEASURED figure. It cannot measure
+#    tokens itself -- no shell can -- so a bank whose TOKENFP was wrong when written
+#    stays wrong here. Re-measure with the padding probe, never by ratio: a ratio taken
+#    from one seat's prose ran 20% low on another's (0.43 vs 0.54 tok/B, measured).
+BK=$(LC_ALL=C grep -m1 -oE '^BANK: .*\.md' "$B" | sed 's/^BANK: //')
+if [ -n "$BK" ]; then
+  # ⛔ RESOLVED ONLY BESIDE THE BRIEF. A SEAT_DIR fallback was here and it MASKED a dead
+  #    pointer: with the bank deleted next to a brief copy, the fallback found the REAL
+  #    bank elsewhere and reported GREEN -- a check true about the wrong object, which is
+  #    the defect class this whole tool exists for. It also made the absence control
+  #    UNDRIVABLE, and an arm whose control cannot be driven is an arm nobody has shown
+  #    to fire. The default brief lives in $SEAT_DIR/briefs, so dirname covers it.
+  BP=""
+  cand="$(dirname "$B")/$BK"
+  [ -r "$cand" ] && BP="$cand"
+  if [ -z "$BP" ]; then
+    OUT="$OUT
+   brief names BANK ${BK} -- NOT READABLE. Boot resolves fail-closed on this; a booting
+   head would halt. Fix the pointer before the next relight."
+  else
+    KB=$(wc -c < "$BP" | tr -d ' '); KL=$(wc -l < "$BP" | tr -d ' ')
+    HASFP=$(LC_ALL=C grep -c 'TOKENFP:' "$BP" || true)
+    if [ "$HASFP" = 0 ]; then
+      OUT="$OUT
+   BANK carries NO TOKENFP (${KB} B/${KL} lines) -- its size is unchecked, and a bank that
+   crosses the 25,000-tok Read cap makes 'read the bank IN FULL' impossible to obey."
+    else
+      while IFS='|' read -r tok fb fl; do
+        [ -z "$tok" ] && continue
+        if [ "$fb" != "$KB" ] || [ "$fl" != "$KL" ]; then OUT="$OUT
+   BANK claims ${tok} tok @ ${fb} B/${fl} lines; file is now ${KB} B/${KL} lines -- RE-MEASURE (padding probe, free)"; fi
+      done <<EOF
+$(LC_ALL=C grep -oE 'TOKENFP: [0-9][0-9,]* tok @ [0-9][0-9,]* B/[0-9][0-9,]* lines' "$BP" \
+  | sed -E 's/TOKENFP: ([0-9,]*) tok @ ([0-9,]*) B\/([0-9,]*) lines/\1|\2|\3/' | tr -d ,)
+EOF
+    fi
+  fi
+fi
 [ -n "$OUT" ] && printf '  ⛔ SELF-STALE FIGURES IN MY OWN BRIEF:%s\n' "$OUT"
 exit 0
