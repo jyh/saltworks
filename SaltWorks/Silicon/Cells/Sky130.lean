@@ -693,7 +693,46 @@ def or4b (A B C D_N : Bool) : Bool := A || B || C || !D_N
 theorem or4b_liberty (A B C D_N : Bool) :
     or4b A B C D_N = (A || B || C || !D_N) := by decide +kernel +revert
 
+/-! ## The four cells `core32`'s mix needs that this file did not carry
+
+Added 2026-08-17 for the ③ / offboard campaign. `core32` instantiates 64 distinct cell
+types; 39 of the ones the importer could not expand were ALREADY PROVED HERE and
+merely lacked an `EXPAND` row. **These four were genuinely absent.**
+
+⭐ **THE RIGHT-HAND SIDES ARE TRANSCRIBED FROM THE VENDOR LIBERTY, NOT DERIVED BY
+HAND** — `docs/silicon-cellfuncs-core32-0817.txt`, extracted from
+`sky130_fd_sc_hd__tt_025C_1v80.lib` at the pinned PDK. A hand-derived right-hand side
+would make `_liberty` a theorem about my own algebra rather than about the vendor's
+cell, which is the one thing these theorems exist to rule out. -/
+
+/-- `a311o_1` — Liberty: `(A1&A2&A3) | (B1) | (C1)`. -/
+def a311o (A1 A2 A3 B1 C1 : Bool) : Bool := (A1 && A2 && A3) || B1 || C1
+theorem a311o_liberty (A1 A2 A3 B1 C1 : Bool) :
+    a311o A1 A2 A3 B1 C1 = ((A1 && A2 && A3) || (B1) || (C1)) := by decide +kernel +revert
+
+/-- `a32oi_1` — Liberty: `(!A1&!B1) | (!A1&!B2) | (!A2&!B1) | (!A3&!B1) | (!A2&!B2) | (!A3&!B2)`.
+The vendor writes it as a sum over negated pairs; it is the NOT of `(A1&A2&A3)|(B1&B2)`,
+and the theorem is stated in the VENDOR'S form so the check is against their text. -/
+def a32oi (A1 A2 A3 B1 B2 : Bool) : Bool := !((A1 && A2 && A3) || (B1 && B2))
+theorem a32oi_liberty (A1 A2 A3 B1 B2 : Bool) :
+    a32oi A1 A2 A3 B1 B2 =
+      ((!A1 && !B1) || (!A1 && !B2) || (!A2 && !B1) || (!A3 && !B1) ||
+       (!A2 && !B2) || (!A3 && !B2)) := by decide +kernel +revert
+
+/-- `o311a_1` — Liberty: `(A1&B1&C1) | (A2&B1&C1) | (A3&B1&C1)`. -/
+def o311a (A1 A2 A3 B1 C1 : Bool) : Bool := (A1 || A2 || A3) && B1 && C1
+theorem o311a_liberty (A1 A2 A3 B1 C1 : Bool) :
+    o311a A1 A2 A3 B1 C1 =
+      ((A1 && B1 && C1) || (A2 && B1 && C1) || (A3 && B1 && C1)) := by decide +kernel +revert
+
+/-- `o32ai_1` — Liberty: `(!A1&!A2&!A3) | (!B1&!B2)`. This is the cell whose absence
+made the importer refuse `core32` outright on 08/17. -/
+def o32ai (A1 A2 A3 B1 B2 : Bool) : Bool := !((A1 || A2 || A3) && (B1 || B2))
+theorem o32ai_liberty (A1 A2 A3 B1 B2 : Bool) :
+    o32ai A1 A2 A3 B1 B2 = ((!A1 && !A2 && !A3) || (!B1 && !B2)) := by decide +kernel +revert
+
 #audit_axioms a221o_liberty a22o_liberty nor2b_liberty o21bai_liberty
 #audit_axioms o31a_liberty o31ai_liberty o41ai_liberty or3_liberty or4b_liberty
+#audit_axioms a311o_liberty a32oi_liberty o311a_liberty o32ai_liberty
 
 end SaltWorks.Silicon.Cells
