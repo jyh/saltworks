@@ -36,7 +36,7 @@
 # header logic silently took its MISSING branch forever, and a fallback that
 # always says MISSING is a fallback nobody reads.
 HERE="$(cd "$(dirname "$0")" && pwd)"
-BUS=${BUS:-${BUS}}
+BUS=${BUS:?BUS must be set: the fleet bus is machine-local and has no public default}
 MAIN=${MAIN:-busmon-silicon.sh}
 PERIOD=${PERIOD:-1800}
 WIDTH=${WIDTH:-200}

@@ -33,7 +33,7 @@
 # at arm time. Sampling asserts "everything above is handled", false on a boot by
 # exactly the width of the boot, which is when the unread backlog is at maximum.
 
-BUS=${BUS:-${BUS}}
+BUS=${BUS:?BUS must be set: the fleet bus is machine-local and has no public default}
 SELF=${SELF:-silicon}
 
 # NOTE: no roster-collision assertion here, deliberately. The owner extraction in

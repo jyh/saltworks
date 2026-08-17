@@ -120,7 +120,7 @@ esac
 # substring and would have cost nothing: this is
 # `docs/ledger-tools/bus_snapshot.sh`, and the pattern is the line below.
 if [ "${ARCHIVE:-0}" = "1" ]; then
-  SEAT=${SEAT:-"${SEAT_DIR}"}
+  SEAT=${SEAT:?SEAT must be set: the private archive path has no public default}
   REL=${REL:-"fleet/BUS-triple-campaign.md"}
 
   if [ ! -d "$SEAT/.git" ]; then

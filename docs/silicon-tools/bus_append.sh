@@ -43,7 +43,7 @@ HDR="${1:?usage: bus_append.sh <header> <body> <bytes> <sha16> [<bus>]}"
 BODY="${2:?missing body}"
 CLAIM_N="${3:?missing claimed bytes}"
 CLAIM_SHA="${4:?missing claimed sha16}"
-BUS="${5:-${BUS}}"
+BUS="${5:-${BUS:?BUS must be set when not passed as arg 5 (no public default)}}"
 # 📌 WHEN TO PASS AN ANCHOR — usage, because I got this wrong on every post for
 # an hour. The arm measures READ-to-SEND. It is meaningful ONLY when this post
 # ANSWERS something you read.

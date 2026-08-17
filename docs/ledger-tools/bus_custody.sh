@@ -212,7 +212,7 @@ fi
 ARMLINE=$(cat "$STAMPF" 2>/dev/null || echo "ARMS=selftest-child")
 
 BODY=${1:?body.md}; BRACKET=${2:?bracket.txt}
-BUS=${3:-${BUS}}
+BUS=${3:-${BUS:?BUS must be set when not passed as arg 3 (no public default)}}
 die() { echo "⛔ $1"; exit "$2"; }
 
 # ---- STRUCTURE, each gate refusing in the expression that computes it --------------------
