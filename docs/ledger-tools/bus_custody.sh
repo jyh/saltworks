@@ -212,6 +212,32 @@ fi
 ARMLINE=$(cat "$STAMPF" 2>/dev/null || echo "ARMS=selftest-child")
 
 BODY=${1:?body.md}; BRACKET=${2:?bracket.txt}
+
+# ── ⛔ ARM 45 — THE FENCE, WIRED IN SO IT CANNOT BE SKIPPED (08/17 07:1x).
+# I built b2_headline_fence.sh as a SEPARATE command and invoked it by hand before each
+# send. At 07:10:18 it REFUSED and I sent anyway: my line printed its exit code and never
+# TESTED it. The post landed carrying what the fence had just caught.
+#
+# THAT IS THE SECOND TIME IN ONE DAY. At 19:xx the decoy-owner pre-check printed a match
+# and I sent through it, and I "fixed" that by adding `&& exit 1` TO THE CALLING LINE --
+# i.e. by promising to type the check correctly next time. A guard whose enforcement lives
+# in the caller is a guard the caller forgets, and I proved it on my own fix.
+#
+# ⇒ THE GUARD MOVES INSIDE THE THING IT GUARDS. Every send is now checked whether or not
+#   the sender remembers to ask. Set B2_FENCE_OFF=1 to bypass, which is deliberately
+#   awkward and leaves a trace in the command that did it.
+if [ -z "${B2_FENCE_OFF:-}" ]; then
+  _FENCE="$(dirname "$0")/b2_headline_fence.sh"
+  if [ -x "$_FENCE" ] || [ -f "$_FENCE" ]; then
+    if ! bash "$_FENCE" "$BRACKET" "$BODY" >/tmp/_fence.$$ 2>&1; then
+      echo "⛔ SEND REFUSED BY THE FENCE (arm 45) — it is wired in, not optional:"
+      sed 's/^/    /' /tmp/_fence.$$ >&2
+      rm -f /tmp/_fence.$$
+      exit 45
+    fi
+    rm -f /tmp/_fence.$$
+  fi
+fi
 BUS=${3:-${BUS:?BUS must be set when not passed as arg 3 (no public default)}}
 die() { echo "⛔ $1"; exit "$2"; }
 
