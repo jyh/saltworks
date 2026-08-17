@@ -85,8 +85,24 @@ theorem dmem_drive_is_consistent_with_decoder
 **Found by silicon 2026-08-17 07:56 (`5d161ce`), before any integration RTL was written,
 and confirmed here at the kernel by the hand that wrote the hypothesis.**
 
-✅ **AND REPAIRED AT `fc5ed0e` (08:18) — funct3-gated strobes landed, and the new plane
-discharges `DriveMap` by construction, so door 1 is NO LONGER SILENT.** The witnesses
+✅ **AND REPAIRED IN TWO STEPS, NINE MINUTES APART, WHICH ARE NOT THE SAME STEP:**
+```
+fc5ed0e 08:18  funct3-gated strobes land in the core.
+               ⇒ DriveMap becomes SATISFIABLE. No plane existed yet.
+a76b647 08:27  memplane8 is built: core32 exports dmem_req / dmem_we -- the
+               kernel's `req` and `isSW` -- carried to the mask BY DIRECT WIRE.
+               ⇒ DriveMap holds BY CONSTRUCTION. Door 1 is NO LONGER SILENT.
+```
+⚠️ **BUT IT IS STILL AN ASSUMPTION IN THIS FILE, AND A READER MUST NOT TAKE IT FOR A
+DISCHARGE.** `DriveMap` is satisfied *by construction in the RTL*; it is NOT proved in the
+kernel, because no Lean datum for `memplane8` exists to prove it against. The theorem below
+still says *if the plane is wired thus* — what changed is that a plane wired thus now
+exists and was measured end to end, not that the hypothesis became a lemma. **Discharging
+it here needs an imported datum for the plane, and that does not exist yet.**
+
+📌 *An earlier version of this note credited the whole repair to `fc5ed0e` and called it
+"the new plane". There was no plane at `fc5ed0e` — I checked the commit and it adds none.
+Two commits nine minutes apart, and I collapsed them into one because both were "the fix".* The witnesses
 below remain true and are kept deliberately: they are true OF THE OPCODE-ONLY WIRING,
 which is a permanent fact about a wiring rather than a claim about what the core exposes
 today. **An earlier heading here said "the only wiring the RTL can supply". That was true
