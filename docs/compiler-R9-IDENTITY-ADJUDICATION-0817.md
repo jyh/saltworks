@@ -42,9 +42,26 @@ transport is always valid; what is date-dependent is whether its ANTECEDENT is t
 
 ⭐ **AND THE "WASTED WITNESS" WORRY HAS A KERNEL ANSWER.** *`stallArm_reduces` closes by
 `Iff.rfl` — **the reduction is DEFINITIONAL**.* ⇒ **a witness proved TODAY against the
-single-cycle core IS the empty-stall instance of the restated predicate: not waste, the
-BASE CASE, surviving the restatement by definitional unfolding.** *Whether it is WORTH
-building before the freeze is a helm/Captain call and I do not make it here.*
+single-cycle core IS the empty-stall instance of the restated predicate.**
+
+> ⛔ **NARROWED 16:56 — BY ME, UNPROMPTED, AND THE NARROWING IS THE POINT.** *I first wrote
+> that clause with "**not waste, the BASE CASE**" attached. **The clause is TRUE; the
+> attachment does not follow**, and I made it within an hour of being corrected for a claim
+> about "the core" carrying no date — **this is the same defect in the next noun: a claim
+> about "the witness" carrying no CIRCUIT INDEX.***
+> ```
+> TRUE          a today-witness IS the empty-stall instance of the restated
+>               predicate — FOR THE CIRCUIT c_today
+> NOT IMPLIED   that it contributes to the POST-FREEZE flagship.
+>               sem c_new ≠ sem c_today ⇒ different term, DIFFERENT THEOREM.
+> ```
+> ⚠️ ***"Base case" reads as "foundation you build ON". The post-freeze work does not
+> EXTEND a today-witness — IT REPLACES THE CIRCUIT.*** *What genuinely survives is (1)
+> PREDICATE COMPATIBILITY — the 20-decl cone, by `Iff.rfl` — and (2) METHOD: proof that the
+> construction route works end-to-end. **The witness itself does not transfer.***
+> ⇒ **So parallel-DATABILITY (real, silicon measured it) and parallel-USEFULNESS toward
+> Sept-7 come apart exactly at "which core ships" — which is a helm/Captain question, and I
+> will not answer it inside a technical claim.**
 
 ---
 
