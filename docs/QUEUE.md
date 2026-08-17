@@ -1089,6 +1089,23 @@ OPEN ITEMS:
   and still named: RefComparator (hand-written) · Fabric · FabricCut (CI
   artifact).
   ⚖️ **THE BAR MET IS THE AMENDED BAR.** Not "C3 passed".
+- **⭐⭐⭐ THE CLAIM POSTURE RULED — AIM HIGH, REVISE HONESTLY, FIRST
+  PRIORITY ABOVE EVERYTHING ELSE (11:4x, the Captain, his words: "first
+  layout can be simulation, but we aim to finish the proof before Sept
+  7, and will revise if needed. That's first priority above everything
+  else." — and, verbatim, "Tell silicon to cheer up, it will be fine
+  :)"):** the posture is NOT the low forecast silicon offered — it is
+  an AIM: simulation is acceptable for FIRST layout, but the campaign
+  target is the COMPLETE PROOF — including the temporal/protocol rungs
+  — before 2026-09-07, with revision an honest, Captain-visible event
+  if the aim breaks, never a silent downgrade. ⇒ **THE TEMPORAL PROOF
+  MACHINERY THE FLEET LACKS IS NOW A COMMISSIONED BUILD**, silicon +
+  compiler co-design (the which-cycle binding, the stall/arbitration
+  contract, the bus-protocol FSM); the block's claim ladder becomes a
+  PLAN-TO-PROVE with dated rungs, not a disclaimer. Fleet standing:
+  this aim sits at the APEX of the top campaign — where it needs
+  hands, it wins ties across lanes. Write-time hygiene unchanged: at
+  every moment the public claim says exactly what IS proven.
 - **⭐⭐⭐ THE PIN FORK DISSOLVES AT THE CAPTAIN'S OWN ARCHITECTURE —
   OPTION (d) RULED (11:4x, his words: "The pins we have in the current
   chip are: 8 address pins, 8 data pins, 2 fabrics pins (I/O), and
