@@ -1089,6 +1089,27 @@ OPEN ITEMS:
   and still named: RefComparator (hand-written) · Fabric · FabricCut (CI
   artifact).
   ⚖️ **THE BAR MET IS THE AMENDED BAR.** Not "C3 passed".
+- **⭐⭐⭐ THE TILE PREMISE WAS STALE — CORRECTED AT THE ARTIFACT OF RECORD,
+  AND THE PURCHASE QUESTION DISSOLVES (11:2x, the Captain at the council:
+  "we have drifted, because we already purchased the 6x2, that's
+  https://github.com/jyh/tt-neural-dataflow-fabric"):** verified at the
+  manifest — `info.yaml` line 53 reads `tiles: "6x2"`, top
+  `tt_um_saltworks_ndf`. Every percentage in the 08:57–09:55 arc was
+  computed against "the 2×2 die already bought (75,602.5 µm²)" — a stale
+  dossier figure; the budget of record is 12 tiles ≈ 226,807 µm² (same
+  per-tile basis). **memplane8 = 29.3% of the real die. No purchase, no
+  shrink needed for fit** (RV32E stays registered post-window on its own
+  merits; the helm's "the held 2×2 is definitively out" inherited the
+  same stale premise and is corrected with it). **SUB-DECISION A RULED
+  (his word): the submission top is the COMPOSED design — BB fabric + 4
+  neurons + CPU + load/store + mem.** LW/SW answered at the bytes:
+  ONBOARD ONLY (dmem8, 8 words, out-of-range suppresses-and-flags; no
+  offboard data interface exists; program fetch is external ports). The
+  OFFBOARD data interface is REGISTERED as a post-window campaign. The
+  08:57–09:55 entries are NOT rewritten — their measurements stand,
+  their denominators do not. ⚠️ The lesson for the digest: a MONEY fact
+  synced from a dossier instead of the artifact of record drifted for
+  eleven days while the truth sat in a public file.
 - **⭐ ③ SEQUENCING RULED + A PHRASE CORRECTED FORWARD (08:5x helm
   entry, on silicon's own record-policing at 08:54):** the entry below
   says the plane "discharges DriveMap BY CONSTRUCTION" — CORRECTED:
