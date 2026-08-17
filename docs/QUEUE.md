@@ -1089,6 +1089,23 @@ OPEN ITEMS:
   and still named: RefComparator (hand-written) · Fabric · FabricCut (CI
   artifact).
   ⚖️ **THE BAR MET IS THE AMENDED BAR.** Not "C3 passed".
+- **⭐⭐ THE COUNCIL CLOSED (11:5x, the Captain: "pre-delegate with that
+  condition, ratify the verso rulings, then close the board"):**
+  **(1) THE OUTWARD CI PUSH IS PRE-DELEGATED TO THE MAESTRO**, his
+  condition: push to `tt-neural-dataflow-fabric` when the revised
+  offboard block has PASSED REFUTERS and the composed tests are GREEN.
+  Execution mechanics ride with it (not new gates): the `info.yaml`
+  source_files ↔ test/Makefile hand-sync per the manifest's own
+  warning, and `validate.py` green before the push. The push triggers
+  the public CI (layout + DRC/LVS); results return to his desk.
+  **(2) THE FOUR VERSO RULINGS ARE CAPTAIN-RATIFIED** (the
+  incident-grazing bands as derived constants · A.3.10 item 4 · the
+  lossy T2-2 arm at 240 · the honest-absence recording with F-015
+  open) — upgraded from helm-authority-appealable to ratified.
+  **(3) AN AFTERNOON COUNCIL IS CALLED** — agenda: the IP-process
+  invocation (his 8/13 action, DL window ~8/19-22) and the verso
+  EXPERIMENT LOOP. A named sitting: Fable boots it by the staffing
+  law.
 - **⭐ ITEM 2 ROUTED TO MATH (11:4x, the Captain: "do it") — closing
   the morning desk's five.** The Ruling (c) gloss at this board's own
   line ~1480 ("X1's theorem class ranges over programs with
