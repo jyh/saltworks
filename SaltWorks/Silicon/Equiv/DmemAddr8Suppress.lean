@@ -1,4 +1,9 @@
 /-
+Copyright (c) 2026 Jason Hickey. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Jason Hickey, Claude
+-/
+/-
 DmemAddr8Suppress — THE STATEMENT LAYER FOR THE LW/SW FRONT'S WRITE STROBE.
 
 `dmem_addr8.v:59-65` states the load-bearing property of this module IN PROSE
