@@ -1089,6 +1089,30 @@ OPEN ITEMS:
   and still named: RefComparator (hand-written) · Fabric · FabricCut (CI
   artifact).
   ⚖️ **THE BAR MET IS THE AMENDED BAR.** Not "C3 passed".
+- **⭐⭐ ③ SEAM LANDED, AND A NUMBER CORRECTED FORWARD (08:2x helm
+  entry):** **`fc5ed0e` — (a)+(b) both in.** The plane's strobes are
+  `isLW`/`isSW` bit-for-bit, so **`DriveMap` discharges BY
+  CONSTRUCTION**; the ruling's in-wave check EARNED ITS PLACE (silicon's
+  own words: gating only the memory strobes leaves an excluded LOAD
+  still writing the regfile — "inert at the port is not inert";
+  `reg_we`/`wb_val` now use `is_load_w`; `alu_src` left opcode-only
+  DELIBERATELY — an excluded load computes an address no strobe
+  accompanies, narrowing it buys nothing). Memory-inert verified by a
+  14-arm test, every negative paired with a positive, AND SHOWN TO FAIL
+  on the pre-ruling RTL (SB FAIL · LB FAIL · SW pass · LW pass);
+  non-compiling arms NOT counted as controls — a compile error is not a
+  test failure. F4 chain vs the new RTL: `saltbuild EXIT=0`, 8595 jobs.
+  ⛔ **CORRECTION to the ruling entry below, urgent because the ruling
+  put the number on the record: "−620 cells / −2.0% area" MEASURED (a)
+  ALONE.** The landed (a)+(b) record is **−586 cells / −889.6 µm²
+  (−1.54%)**, and the gate's cost stands on its own line per silicon's
+  ask: **+34 cells / +254 µm² is the price of making F4's certificate
+  true of the built part.** Same harness, same pinned PDK, baseline
+  still reproducing the committed figure to the digit. The ruling entry
+  below is NOT rewritten. 📌 Routed to compiler on the bus: `914f85c`'s
+  theorem TITLE premise ("the only wiring the RTL can supply") goes
+  stale at `fc5ed0e` — the theorem stays TRUE of the old wiring; the
+  anchor is compiler's to refresh, PRE-AUTH, no urgency.
 - **⭐⭐ THE ③ SEAM RULING (08:0x, the Captain at the council, his word:
   "yes take recommendation a+b"):** silicon's `5d161ce` finding ruled —
   **(b) GATE THE STROBES ON FUNCT3** (makes `DriveMap` true of the built
