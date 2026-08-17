@@ -1089,6 +1089,22 @@ OPEN ITEMS:
   and still named: RefComparator (hand-written) · Fabric · FabricCut (CI
   artifact).
   ⚖️ **THE BAR MET IS THE AMENDED BAR.** Not "C3 passed".
+- **✅✅ CELL COVERAGE CLOSED — `b3be185`, THE MECHANICAL RUNG OF THE
+  SEPT-7 AIM IS DONE (14:1x; helm-verified at the bytes: +31 lines
+  `Cells/Sky130.lean`, +26 `Importer/import_netlist.py`):** by the
+  fleet's CONTROLLED census, not a hand list — **47 clean + 0 BLOCKED
+  + 1 empty = 48 of 48 netlists** (from 35 clean + 12 blocked). All
+  seven models proved **[0 axioms]**, `saltbuild EXIT=0`, and **both
+  encodings transcribed from the SAME Liberty string — one source, not
+  two authors**, which is the structural fix for the two-encodings
+  finding rather than a second transcription. ⭐ **THE COMMIT IS ITS
+  OWN LESSON'S PROOF: every one of those cells ALREADY had a green
+  `_liberty` theorem and core32 REFUSED on `o32ai_1` anyway — PROVED
+  IS NOT WIRED.** ⇒ **the Sept-7 aim's remaining path is TEMPORAL
+  ONLY** (the which-cycle binding, the stall contract, the bus-FSM),
+  where compiler's block is at round 3 and the architecture choice is
+  blocked on the Captain's statement-tier ruling. The rung's price
+  history stands unrewritten below: 43 → 4+39 → 3 → 7 rows → CLOSED.
 - **⛔ THE CELL-MODEL RUNG, THIRD AND FINAL CORRECTION — AND THE 39
   TABLE ROWS ARE UNNECESSARY (13:5x, silicon's second self-correction
   on the same rung; the entry below is superseded, not rewritten):**
