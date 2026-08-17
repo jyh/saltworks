@@ -1089,6 +1089,37 @@ OPEN ITEMS:
   and still named: RefComparator (hand-written) · Fabric · FabricCut (CI
   artifact).
   ⚖️ **THE BAR MET IS THE AMENDED BAR.** Not "C3 passed".
+- **⭐⭐⭐ 08/17 MORNING, TWO EVENTS ON THE COUNCIL FLOOR (08:0x helm entry;
+  both verified at the bytes before writing):**
+  **(1) D1a IS DISCHARGED — `cf7e6fd`, order-to-landing FIVE MINUTES on the
+  narrow channel.** BUILD ROW in the caveat's demanded form: `saltbuild
+  EXIT=0` · `✔ [4/4] Built SaltWorks.Silicon.Imported.Dmem8 (4.7s)` —
+  BUILT, not `Replayed`, with the discriminator in the SAME output
+  (BitSliced on that run reports `Replayed`). Datum: 673 cells → 1984
+  gates · 256 dfrtp flops cut under `--pin-reset`, namespaced
+  `Restricted_rst_n_eq_1` (says NOTHING about the deassertion seam, never
+  cite it as covering reset/bring-up); readback vs vendor Liberty 32×288
+  agrees; reimport 6/6 byte-for-byte including the five pre-change rows;
+  1984/256 REPRODUCES the figure banked at `1f9d2c0` from an independent
+  regeneration. THE BAR MET IS THE AMENDED BAR (never "C3 passed"). Helm
+  spot-check: commit on master, `Imported/Dmem8.lean` present, bus receipt
+  sha matches. The importer REFUSED its author's first invocation
+  (`rst_n` in `--inputs`) — the gate enforced the restriction against the
+  hand that built it. ⇒ **P1 = ③ ALONE.**
+  **(2) THE CAPTAIN RATIFIED THE FLEET'S FIRST CAMPAIGN PRECEDENCE (his
+  words at the council: "I think I'd put saltworks first, inverting 1 and
+  2, ratified with that change. The reason is that I don't want a crunch
+  time, let's get the final silicon taped-out, so we can rest eays on that
+  campaign."):** **1. saltworks — ③ to tape-out (the NO-CRUNCH doctrine;
+  the 2026-09-07 window governs) · 2. twin primes (wins ties for the
+  Captain's attention and the Fable budget) · 3. verso (wins the nights;
+  helm rulings batch at the bells, HALT excepted) · 4. jas (its ~Aug-19
+  pilot slot, timeboxed) · 5. ventris (gated on verso's referee maturing) ·
+  6. lineage/SaltBench (dry time only).** Above all of it when they fire:
+  the DL window (~8/19–22) and the IP-process invocation — the Captain's
+  personal calendar, costing him and not the fleet. Precedence resolves
+  COLLISIONS (attention · helm cycles · seat-time); it does not idle the
+  lower campaigns.
 - **⭐⭐⭐ THE 08/17 COUNCIL RULING — P1 SHRINKS TO D1a + ③, AND ③'s SCOPE
   GROWS BY F4's HYPOTHESIS-DISCHARGE (07:5x, the Captain at the named
   council, his words: "yes to all four, wake silicon"):**
