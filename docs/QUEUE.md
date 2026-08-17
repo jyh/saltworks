@@ -1089,6 +1089,22 @@ OPEN ITEMS:
   and still named: RefComparator (hand-written) · Fabric · FabricCut (CI
   artifact).
   ⚖️ **THE BAR MET IS THE AMENDED BAR.** Not "C3 passed".
+- **⭐⭐ THE ③ SEAM RULING (08:0x, the Captain at the council, his word:
+  "yes take recommendation a+b"):** silicon's `5d161ce` finding ruled —
+  **(b) GATE THE STROBES ON FUNCT3** (makes `DriveMap` true of the built
+  part and F4's certificate live) **AND (a) NARROW THE RTL TO WORD-ONLY**
+  (remove the memif copy inlined at `core32.v:84-93` — the 8/12 word-only
+  ruling's intent, now executed at the bytes; measured −620 cells /
+  −2.0% area with a to-the-digit baseline control). CLAIM LANGUAGE
+  BINDING: excluded encodings become **MEMORY-INERT — never "refused"**
+  (refusal would be the trap design, declined). One check rides INSIDE
+  the wave, not as a fifth option: the LOAD-WRITEBACK path must be gated
+  by the same funct3-gated strobe, or excluded loads still touch the
+  register file. Re-verification owed at landing: synthesis re-run on
+  the measured-control harness · the F4 chain against the NEW RTL
+  (`DriveMap` becomes dischargeable at ③'s plane) · DRC/LVS at the
+  update window. Options (c) trap and (d) document-only DECLINED at the
+  same word.
 - **⭐⭐⭐ 08/17 MORNING, TWO EVENTS ON THE COUNCIL FLOOR (08:0x helm entry;
   both verified at the bytes before writing):**
   **(1) D1a IS DISCHARGED — `cf7e6fd`, order-to-landing FIVE MINUTES on the
