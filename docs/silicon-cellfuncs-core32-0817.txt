@@ -1,0 +1,82 @@
+# CELL FUNCTIONS FOR core32's MIX — EXTRACTED FROM VENDOR LIBERTY, NOT TYPED
+#
+# silicon 2026-08-17, plan-to-prove rung "cell-model coverage 08-17→27".
+# Source: sky130_fd_sc_hd__tt_025C_1v80.lib @ PDK c6d73a35f524070e85faff4a6a9eef49553ebc2b
+#
+# WHY DERIVED AND NOT HAND-WRITTEN: 43 boolean functions typed by hand is 43 chances
+# to invert a term, and a wrong EXPAND entry does not fail loudly — it produces a
+# datum that elaborates and proves something about a DIFFERENT circuit.
+#
+# ⛔ THE EXTRACTOR TOOK FIVE ATTEMPTS AND EVERY FAILURE WAS CAUGHT BY A CONTROL:
+#   1-2  window too small / spilled past the cell boundary into other cells
+#   3    matched `power_down_function :` because the pattern was not anchored —
+#        the same substring trap as `grep -f` matching `pgrep -f`, third time today
+#   4    parser correct, LOOKUP KEY wrong (full name vs stripped) -> resolved 0
+#   5    controls valid, 62 resolved, 0 unresolved
+# CONTROL HELD AT LANDING: a21oi_1 Y == "(!A1&!B1) | (!A2&!B1)", read from the block
+# at liberty line 11100, and no power_down_function string appears in any value.
+#
+# NOT YET A CELL MODEL. This is the SPEC each EXPAND entry must implement, and each
+# still owes its Liberty proof in SaltWorks.Silicon.Cells.Sky130.
+  a2111oi_0    (!A1&!B1&!C1&!D1) | (!A2&!B1&!C1&!D1)
+  a211o_1      (A1&A2) | (B1) | (C1)
+  a211oi_1     (!A1&!B1&!C1) | (!A2&!B1&!C1)
+  a21boi_0     (!A1&B1_N) | (!A2&B1_N)
+  a21o_1       (A1&A2) | (B1)
+  a21oi_1      (!A1&!B1) | (!A2&!B1)
+  a221o_1      (B1&B2) | (A1&A2) | (C1)
+  a221oi_1     (!A1&!B1&!C1) | (!A1&!B2&!C1) | (!A2&!B1&!C1) | (!A2&!B2&!C1)
+  a222oi_1     (!A1&!B1&!C1) | (!A1&!B1&!C2) | (!A1&!B2&!C1) | (!A2&!B1&!C1) | (!A1&!B2&!C2) | (!A2&!B1&!C2) | (!A2&!B2&!C1) | (!A2&!B2&!C2)
+  a22o_1       (B1&B2) | (A1&A2)
+  a22oi_1      (!A1&!B1) | (!A1&!B2) | (!A2&!B1) | (!A2&!B2)
+  a311o_1      (A1&A2&A3) | (B1) | (C1)
+  a311oi_1     (!A1&!B1&!C1) | (!A2&!B1&!C1) | (!A3&!B1&!C1)
+  a31o_1       (A1&A2&A3) | (B1)
+  a31oi_1      (!A1&!B1) | (!A2&!B1) | (!A3&!B1)
+  a32oi_1      (!A1&!B1) | (!A1&!B2) | (!A2&!B1) | (!A3&!B1) | (!A2&!B2) | (!A3&!B2)
+  a41o_1       (A1&A2&A3&A4) | (B1)
+  and2_0       (A&B)
+  and3_1       (A&B&C)
+  and3b_1      (!A_N&B&C)
+  and4b_1      (!A_N&B&C&D)
+  clkinv_1     (!A)
+  lpflow_inputiso1p_1 (A) | (SLEEP)
+  lpflow_isobufsrc_1 (A&!SLEEP)
+  maj3_1       (A&B) | (A&C) | (B&C)
+  mux2_1       (A0&!S) | (A1&S)
+  mux2i_1      (!A0&!S) | (!A1&S)
+  mux4_2       (A0&!S0&!S1) | (A1&S0&!S1) | (A2&!S0&S1) | (A3&S0&S1)
+  nand2_1      (!A) | (!B)
+  nand2b_1     (A_N) | (!B)
+  nand3_1      (!A) | (!B) | (!C)
+  nand3b_1     (A_N) | (!B) | (!C)
+  nand4_1      (!A) | (!B) | (!C) | (!D)
+  nand4b_1     (A_N) | (!B) | (!C) | (!D)
+  nand4bb_1    (A_N) | (B_N) | (!C) | (!D)
+  nor2_1       (!A&!B)
+  nor2b_1      (!A&B_N)
+  nor3_1       (!A&!B&!C)
+  nor3b_1      (!A&!B&C_N)
+  nor4_1       (!A&!B&!C&!D)
+  nor4bb_1     (!A&!B&C_N&D_N)
+  o211a_1      (A1&B1&C1) | (A2&B1&C1)
+  o211ai_1     (!A1&!A2) | (!B1) | (!C1)
+  o21a_1       (A1&B1) | (A2&B1)
+  o21ai_0      (!A1&!A2) | (!B1)
+  o21bai_1     (!A1&!A2) | (B1_N)
+  o221a_1      (A1&B1&C1) | (A2&B1&C1) | (A1&B2&C1) | (A2&B2&C1)
+  o221ai_1     (!B1&!B2) | (!A1&!A2) | (!C1)
+  o22a_1       (A1&B1) | (A2&B1) | (A1&B2) | (A2&B2)
+  o22ai_1      (!B1&!B2) | (!A1&!A2)
+  o2bb2ai_1    (!B1&!B2) | (A1_N&A2_N)
+  o311a_1      (A1&B1&C1) | (A2&B1&C1) | (A3&B1&C1)
+  o311ai_0     (!A1&!A2&!A3) | (!B1) | (!C1)
+  o31a_1       (A1&B1) | (A2&B1) | (A3&B1)
+  o31ai_1      (!A1&!A2&!A3) | (!B1)
+  o32a_1       (A1&B1) | (A1&B2) | (A2&B1) | (A3&B1) | (A2&B2) | (A3&B2)
+  o32ai_1      (!A1&!A2&!A3) | (!B1&!B2)
+  or3_1        (A) | (B) | (C)
+  or3b_1       (A) | (B) | (!C_N)
+  or4_1        (A) | (B) | (C) | (D)
+  xnor2_1      (!A&!B) | (A&B)
+  xor2_1       (A&!B) | (!A&B)
