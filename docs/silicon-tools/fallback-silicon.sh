@@ -278,10 +278,17 @@ except Exception: print(-1)' "$mine" 2>/dev/null)
     #   human-readable cadence assumes you can act at an arbitrary moment; an
     #   event-driven actor must price its own wake interval into the test.
     nxt=$(( am + PERIOD / 60 ))
+    # ⛔ REMAINING ADDED 2026-08-16, on evidence's 14:50 finding: the projection rule
+    #   above fixes WHICH WAKE prompts, and says NOTHING about how much runway is
+    #   left when it does. Quoting only the age and the projection makes the reader
+    #   do the subtraction, and "a quantity that lives only in the reader's
+    #   arithmetic is not carried by the output" (silicon 19:13). At the prompting
+    #   wake this is ~10 min — adequate, and it was never STATED.
+    rem=$(( 40 - am ))
     if   [ -z "$am" ] || [ "$am" -lt 0 ]; then age="$mine ** AGE UNCOMPUTABLE — CHECK DID NOT RUN **"
-    elif [ "$am" -ge 40 ];  then age="$mine (+${am}min ** ALREADY OVERDUE, CADENCE ~40 — POST NOW **)"
-    elif [ "$nxt" -ge 40 ]; then age="$mine (+${am}min ** POST AT THIS WAKE — next sweep lands at +${nxt}, past ~40 **)"
-    else                         age="$mine (+${am}min, next sweep +${nxt} — still inside)"; fi
+    elif [ "$am" -ge 40 ];  then age="$mine (+${am}min ** ALREADY OVERDUE by $(( am - 40 ))min, CADENCE ~40 — POST NOW **)"
+    elif [ "$nxt" -ge 40 ]; then age="$mine (+${am}min ** POST AT THIS WAKE — ${rem}min LEFT; next sweep lands at +${nxt}, past ~40 **)"
+    else                         age="$mine (+${am}min, ${rem}min left, next sweep +${nxt} — still inside)"; fi
   fi
   printf 'FALLBACK %s | mylast=%s | bus=%s | main watch procs=%s (PRESENCE, not delivery) | account=%s | index=%s | last header: %s\n' \
     "$(date '+%H:%M')" "$age" "$busf" "$main" "$km" "$idx" "$hdr"
