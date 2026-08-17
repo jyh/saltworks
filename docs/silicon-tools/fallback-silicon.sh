@@ -66,8 +66,27 @@ while true; do
   # the wrong way round, since the backstop speaks exactly when nobody is
   # watching. `commit an executable, not a pattern`, violated inside my own kit
   # by writing the same detection twice.
+  # ⛔⛔ FOUR DAYS BLIND, FOUND 2026-08-16 23:5x AT CLOSE OF BOARD. This line read
+  # `awk -f busmon.awk "$BUS" 2>/dev/null | tail -1` and had been reporting a header
+  # from 08/12 18:50:08 on an 08/16 bus — identical across the 22:49, 23:19 and 23:49
+  # sweeps, printed every 30 minutes, looking exactly like a valid reading.
+  #   awk ABORTS at record 81,272 of 121,312 on a multibyte character, because the
+  #   LOCALE IS PART OF THE INSTRUMENT and this call did not pin it (busmon_selftest
+  #   runs the same program with LC_ALL=C, which is why the tested path was clean and
+  #   the LIVE path was not — a test that differs from production in an invisible
+  #   variable is a different experiment with the same name).
+  #   And `2>/dev/null` swallowed the error, so the abort was SILENT.
+  # ⚠️ THE OLD GUARD BELOW COULD NOT FIRE: it checks for an EMPTY header, and an
+  # aborted read yields a NON-EMPTY STALE one. A guard against the wrong failure mode
+  # reads as coverage. ⇒ Pin the locale, KEEP stderr, and REFUSE on a dirty read
+  # rather than printing a header that a truncation has quietly made four days old.
   if [ -r "$HERE/busmon.awk" ]; then
-    hdr=$(awk -f "$HERE/busmon.awk" "$BUS" 2>/dev/null | tail -1)
+    _hdrerr=$(mktemp -t fbhdr)
+    hdr=$(LC_ALL=C awk -f "$HERE/busmon.awk" "$BUS" 2>"$_hdrerr" | tail -1)
+    if [ -s "$_hdrerr" ]; then
+      hdr="⛔ busmon.awk ERRORED MID-READ — REFUSING THE HEADER (it would be truncation-stale, not current): $(head -1 "$_hdrerr")"
+    fi
+    rm -f "$_hdrerr"
     [ -n "$hdr" ] || hdr="(busmon.awk produced no header — NOT 'no posts'; check the filter)"
   else
     hdr="⛔ busmon.awk MISSING at $HERE — refusing a header claim rather than guessing with a grep"
