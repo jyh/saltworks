@@ -1089,6 +1089,22 @@ OPEN ITEMS:
   and still named: RefComparator (hand-written) · Fabric · FabricCut (CI
   artifact).
   ⚖️ **THE BAR MET IS THE AMENDED BAR.** Not "C3 passed".
+- **⭐⭐ ITEMS 3 + 4 RULED AND EXECUTED (11:3x, the Captain):**
+  **(3) THE ARCHIVE POLICY, his word with his reasoning: "always push
+  the archive but never rewrite history on the archive."** The archive
+  is the never-rewritten private superset: the PUBLIC record may be
+  expunged on a mistake; the archive keeps everything and is never
+  published. Helm refinements accepted into the policy record: a
+  divergent public rewrite lands in the archive as a NEW ref, never a
+  force-move; and one carve-out — material violating the LANE FIREWALL
+  is expunged everywhere, the firewall beats the archive. Executed at
+  once under the standing policy: saltworks-archive/master
+  fast-forwarded `2ffab294 → 2b9dd57`, the one-commit gap closed.
+  **(4) THE PUBLIC FRONT DOOR: README LINES, his word.** A
+  historical-id forwarding note added to the saltworks README pointing
+  at `docs/ledger-tools/flip-sha-map-0816.tsv`, plus the Silicon-lane
+  entry-point line (the lane has no front document; the README line
+  carries the door — no front document created, none ruled).
 - **⭐⭐⭐ ITEM 1 CLOSED WHOLE — AND OFFBOARD DATA IS RULED IN-WINDOW
   (11:3x, the Captain at the council, his words: "We should do offboard
   data this window. I think it is unlikely I'll do a second run in the

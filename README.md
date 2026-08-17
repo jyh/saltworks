@@ -22,6 +22,13 @@ meter, and an error ledger, constituted from the campaign's append-only logs.
 | The switch | [`SaltWorks/Banyan/`](SaltWorks/Banyan/) | the Batcher–banyan self-routing switch, sort-then-route closed end to end |
 | Certificates | [`SaltWorks/Certs/`](SaltWorks/Certs/) | the comprehensibility layer: headline theorems restated in primitive vocabulary, the restatement kernel-proved equivalent |
 
+**A note on historical commit ids.** Documents written during the campaign cite
+commit ids from the pre-consolidation history; those ids do not resolve in this
+repository. The mapping from historical to current ids is
+[`docs/ledger-tools/flip-sha-map-0816.tsv`](docs/ledger-tools/flip-sha-map-0816.tsv).
+Silicon-lane readers can start at the `silicon-*` documents under
+[`docs/`](docs/), which are that lane's working set.
+
 ## What is here
 
 - [`SaltWorks/`](SaltWorks/) — a Lean 4 library: the machine-checked artifacts
