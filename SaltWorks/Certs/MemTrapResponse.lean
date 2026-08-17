@@ -1,4 +1,9 @@
 /-
+Copyright (c) 2026 Jason Hickey. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Jason Hickey, Claude
+-/
+/-
 # THE MEMORY-TRAP RESPONSE — LW BESIDE SW, IN ONE MODULE
 
 Helm order 2026-08-13 16:47:36 (the LW/SW front) and 16:53:14 (landing site as
