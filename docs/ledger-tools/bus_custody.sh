@@ -542,7 +542,7 @@ fi
 # GLANCE. The mirror is legitimately behind mid-work, so refusing would be wrong -- it warns
 # and always exits 0 on its own account. It also FAILS OPEN if the mirror is absent: a
 # detector that breaks the pipeline is a guard wearing the wrong label.
-MIRROR="${SEAT_DIR}/memory-seats/compiler"
+MIRROR="${SEAT_DIR:?SEAT_DIR must be set: the seat repo is machine-local and has no public default}/memory-seats/compiler"
 LIVEBANK="${CLAUDE_MEMORY_DIR:?CLAUDE_MEMORY_DIR must be set: the live memory bank is machine-local and has no public default}"
 if LC_ALL=C grep -qi 'owed[[:space:]]*[:=]\?[[:space:]]*\(0\|ZERO\|none\)' <<<"$B1" 2>/dev/null; then
   if [ -d "$MIRROR" ] && [ -d "$LIVEBANK" ]; then
