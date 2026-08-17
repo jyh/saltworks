@@ -57,7 +57,46 @@ while true; do
   # ── ARM C: heartbeat. Reads the tail even if ARM A never fires, so silence is never
   #    mistaken for liveness.
   if [ $(( $(date +%s) - HB )) -ge 1800 ]; then
-    H=$(command grep -a '^\[' "$BUS" 2>/dev/null | tail -1 | cut -c1-100)
+    # ⛔ HARDENED 08/17 00:1x after a peer's backstop was found FOUR DAYS BLIND while
+    #    printing a well-formed reading every 30 minutes. Their awk aborted mid-file on a
+    #    multibyte char, `2>/dev/null` ate the error, and the guard below it tested for
+    #    EMPTY when the real failure was STALE. MEASURED HERE FIRST: this grep traverses
+    #    the whole bus (6,276 headers, identical to LC_ALL=C awk), so the defect does NOT
+    #    reproduce -- but two of its three halves were in this line, so they are closed.
+    #    (1) LOCALE PINNED: the locale is part of the instrument. Their tested path ran
+    #        under LC_ALL=C and their live path did not, which is why the selftest was
+    #        clean while the live sweep was blind.
+    #    (2) STDERR KEPT: a swallowed error is how a partial read becomes a valid-looking
+    #        answer.
+    #    (3) STALENESS ASSERTED, NOT EMPTINESS: a truncated traversal yields an OLD header
+    #        via `tail -1`, which is well-formed and wrong. Emptiness is the failure that
+    #        does not happen; staleness is the one that does.
+    HERR=$(mktemp)
+    H=$(LC_ALL=C command grep -a '^\[' "$BUS" 2>"$HERR" | tail -1 | cut -c1-100)
+    if [ -s "$HERR" ]; then
+      printf '⛔ WATCH: header read wrote to stderr -- the reading below may be PARTIAL: %s\n' "$(head -c 200 "$HERR")"
+    fi
+    rm -f "$HERR"
+    # ⚠️ BOTH SIDES NORMALIZED, and this is not fussiness: the bus carries BOTH
+    #    `[08/16 ...]` (zero-padded) and `[8/6 ...]` (not), while `date +%-m/%-d` emits
+    #    the unpadded form. Comparing them raw makes "08/17" != "8/17" and the arm cries
+    #    wolf EVERY CYCLE from the moment it is armed -- a guard whose first act is a
+    #    false alarm is a guard that gets commented out by tomorrow.
+    norm_date() { printf '%s' "$1" | LC_ALL=C sed 's|^0*||; s|/0*|/|'; }
+    HDATE=$(norm_date "$(printf '%s' "$H" | LC_ALL=C sed -n 's/^\[\([0-9]\{1,2\}\/[0-9]\{1,2\}\).*/\1/p')")
+    TODAY=$(norm_date "$(date +%m/%d)")
+    # ⛔ AND TODAY-OR-YESTERDAY, NOT TODAY. Caught by testing against the LIVE bus
+    #    instead of synthetic probes: at 00:2x the newest post was 23:5x THE PREVIOUS
+    #    DAY -- twenty-six minutes old and a different calendar date. A date-equality
+    #    arm false-alarms on every quiet board that crosses midnight, which is the
+    #    cries-wolf failure the comment above this one warns about, committed while
+    #    writing it. STALENESS IS A TIME PROPERTY AND THE DATE IS ONLY A PROXY.
+    #    Yesterday is tolerated; the failure this arm exists for was FOUR DAYS wide.
+    YDAY=$(norm_date "$(date -v-1d +%m/%d 2>/dev/null || date -d yesterday +%m/%d)")
+    if [ -n "$HDATE" ] && [ "$HDATE" != "$TODAY" ] && [ "$HDATE" != "$YDAY" ]; then
+      printf '⛔⛔ WATCH: last header is dated %s but today is %s -- THIS READING IS STALE.\n' "$HDATE" "$TODAY"
+      printf '    A stale header is well-formed and looks valid. Do not trust the sweep until this is explained.\n'
+    fi
     echo "HEARTBEAT $(date '+%H:%M:%S'): bus=${NOW} lines (+$((NOW-BASE)) since arm) · last header: ${H:-NONE}"
     HB=$(date +%s)
   fi
