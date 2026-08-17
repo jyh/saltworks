@@ -181,24 +181,86 @@ row below verified present before listing.)*
 ⇒ **No stalled-cycle notion enters `runWords` without moving `runWords_succ` off `rfl` and
 making `runWords_add` conditional. Visibly, not silently — but not free.**
 
-## 6 · THE BOUNDARY WITH SILICON — one named owner per obligation
+## 6 · THE BOUNDARY WITH SILICON — THE JOINT TABLE, AUTHORED BY SILICON, ADOPTED HERE
 
-*R3's fatal: an unowned obligation falls between two halves. Proposed, not imposed:*
+*Ordered 12:02. **Silicon authored the canonical artifact concurrently and theirs is the
+interface** — their T4 reframe (fairness ⇒ BOUNDED WAIT, a safety property provable by the
+same accounting that gave worst-case CPI) is better than the version I was drafting, and I
+adopted it whole rather than merging two tables. **The bytes below are theirs, verbatim.**
+`docs/ledger-tools/table_identical.sh` cmp's this region against their canonical file and
+REFUSES on divergence — byte-identity is a reading here, not a promise.*
 
-| obligation | proposed owner |
-|---|---|
-| stall/arbitration **contract** (which cycles are NOT-cycles) | **silicon** |
-| bus-protocol **FSM proof** | **UNASSIGNED — must be named before the wave** |
-| arbitration **fairness** claim | **UNASSIGNED — must be named before the wave** |
-| **store-path timing**: `dmem_we` rising vs the beat data leaves the pins | **UNASSIGNED** |
-| which-cycle **statement shape** + the trace predicate | **compiler** |
-| the **K/N unit re-cut** (below) | **statement-tier ⇒ the Captain, via the helm** |
+<!-- TEMPORAL-OWNERSHIP-TABLE v1 · BEGIN -->
+# TEMPORAL OBLIGATION OWNERSHIP — ONE ARTIFACT, TWO PLACES, cmp-VERIFIED
 
-⛔ **UK1 — THE UNIT COLLAPSE, ROUTED AND NOT ABSORBED.** `sorts_of_C4` carries a literal
-cycle count that is commensurable with retired instructions **only through the identity a
-stall destroys**. At a CPI of 4–12 the guard passes at roughly a quarter of the intended
-instructions — **green and wrong**. Round 1 never mentioned K, N or the constant. **This is
-a statement-tier re-cut and I am not absorbing it into a design block.**
+**Ordered by the helm 2026-08-17 12:02:57: every temporal obligation gets EXACTLY ONE
+owner and ONE cross-verifier from the other seat. Compiler's round 2 (`837ff1b`) left
+three UNASSIGNED, and an obligation between two halves is an obligation nobody proves.**
+
+> **THIS FILE IS THE INTERFACE.** It lands byte-identical in silicon's offboard block
+> and compiler's which-cycle block. Do not edit a copy — edit this file, republish its
+> hash, and let the other seat `cmp`. **A divergent copy is the defect this exists to
+> prevent, so the hash is the only thing that certifies agreement.**
+
+---
+
+## THE TABLE
+
+| # | obligation | OWNER | CROSS-VERIFIER |
+|---|---|---|---|
+| T1 | stall / arbitration **contract** — which cycles are NOT-cycles | **silicon** | compiler |
+| T2 | which-cycle **statement shape** + the trace predicate | **compiler** | silicon |
+| T3 | bus-protocol **FSM proof** | **silicon** | compiler |
+| T4 | arbitration **fairness**, restated as BOUNDED WAIT | **silicon** | compiler |
+| T5 | **store-path timing** — `dmem_we` rising vs the beat leaving the pins | **silicon** | compiler |
+| T6 | the **K/N unit re-cut** (UK1) | **the Captain, via the helm** | — |
+
+## WHY THE THREE ORPHANS ALL LAND ON SILICON, STATED SO IT IS NOT MISTAKEN FOR LAND-GRABBING
+
+**Each is a property of an artifact silicon writes.** Ownership follows the artifact,
+not the difficulty.
+
+```
+T3  the FSM is RTL. Its proof may need compiler's statement shape, but the OBJECT
+    is mine, and an owner who does not hold the object cannot fix a failed proof.
+T4  "fetch yields to data" is MY arbitration rule (offboard block §7). A fairness
+    question about my rule is mine.
+T5  the ordering of `dmem_we` against the data beat is RTL sequencing, and it is
+    the same seam DriveMap already names.
+```
+
+⭐ **T4 CHANGES SHAPE ON INSPECTION, AND THAT IS THE USEFUL PART.** *"Fairness" invites
+a LIVENESS proof — "fetch is not starved forever" — and this fleet has no liveness
+machinery in silicon.* **But under `FETCH YIELDS TO DATA` a data transaction is
+BOUNDED: at most 8 phases (address 4 + store data 4, offboard block §7).** ⇒ ***So
+fairness reduces to BOUNDED WAIT — fetch waits at most 8 phases — which is a SAFETY
+property provable by the same accounting that produced worst-case CPI 12. A liveness
+obligation nobody could discharge becomes an arithmetic one.***
+⚠️ *And the structural reason starvation cannot arise at all: a data transaction
+EXISTS only because an instruction was already fetched. There is no source of data
+traffic independent of fetch.* **That argument is T4's content; the bound is its
+statement.**
+
+## WHAT CROSS-VERIFIER MEANS HERE — a role, not a courtesy
+
+```
+the OWNER      writes the artifact, states the obligation, and lands the proof
+the VERIFIER   must be able to say NO. Concretely: re-derive the claim from the
+               other seat's own instruments, and REFUSE if it does not reproduce.
+```
+⛔ **A cross-verifier who only reads is decoration.** *This fleet's measured standard
+is that a check never shown to fail has not been shown to discriminate — so each
+verifier owes at least one demonstration that their check CAN reject.*
+
+## STANDING CONDITIONS ON THIS TABLE
+
+- **No option is chosen and no wave runs** until this table exists in both blocks and
+  both revised blocks pass their refuter rounds. *(helm, 12:02:57)*
+- **T6 is routed, not absorbed.** Neither seat designs the K/N re-cut without the
+  Captain's word; compiler refused to absorb it and was right to.
+- **An obligation discovered later gets an owner BEFORE it gets work.** The three
+  orphans above existed because the boundary was described before it was divided.
+<!-- TEMPORAL-OWNERSHIP-TABLE v1 · END -->
 
 ## 3 · PRE-REGISTERED CRITERIA — six, published before any option is chosen
 
