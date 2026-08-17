@@ -86,9 +86,19 @@ theorem dmem_drive_is_consistent_with_decoder
 and confirmed here at the kernel by the hand that wrote the hypothesis.**
 
 `DriveMap` asks for FUNCT3-GATED strobes: `isSW` is `opcode = 0100011 ∧ funct3 = 010`
-(`Decoder.lean:32`). `core32.v:35` computes `is_store` from the OPCODE ALONE. Those are
-the only strobes the core exposes, so wiring `we_in ← is_store` — the obvious integration
-— makes `DriveMap` FALSE.
+(anchor: `isSW    opcode = 0100011 ∧ funct3 = 010`). The core's `is_store` is computed
+from the OPCODE ALONE (anchor: `wire is_store=(opcode==7'b0100011)`), so wiring
+`we_in ← is_store` makes `DriveMap` FALSE.
+
+⚠️ **THE THEOREM BELOW IS ABOUT THE WIRING, NOT ABOUT WHAT THE CORE HAPPENS TO EXPOSE
+TODAY, and that distinction is deliberate.** An earlier draft of this note said those were
+"the only strobes the core exposes". That is a claim about a FILE AT A MOMENT: silicon was
+already drafting funct3-gated strobes as I wrote it, and the sentence would have built
+green forever while being false. **What is permanent is the implication** — an opcode-only
+strobe on input 33 falsifies `DriveMap`, whatever else the core grows. If a funct3-gated
+strobe lands and is wired here instead, `DriveMap` becomes satisfiable and door 1 stops
+being silent; that is a repair to celebrate, and it does not touch the theorem below.
+Cited by ANCHOR rather than line number for the same reason.
 
 ⚠️ **AND A FALSE HYPOTHESIS DOES NOT MAKE THE THEOREM WRONG. IT MAKES IT SILENT.**
 `dmem_we_out_implies_decoded_touchesMem` stays green, stays citable, and says nothing
