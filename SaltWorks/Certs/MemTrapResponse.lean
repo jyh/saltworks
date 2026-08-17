@@ -25,12 +25,23 @@ comparison can fail). One copy is therefore safe, and math's "exact companions"
 claim holds at the bytes: the `lw_*` proofs discharge against the same lemma
 bodies the `sw_*` proofs do.
 
-⛔ **ONE FINDING CARRIED FORWARD RATHER THAN SILENTLY FIXED.** The `sw_*`
-docstrings below claim the trapped step "leaves memory and registers alone",
-citing M4's frame fact — but these theorems prove only `.trapped = true`. Math's
-`lw_*` docstrings correctly omit that claim. The asymmetry is preserved here
-because a transplant whose bytes changed cannot be verified at the bytes; whether
-M4's frame fact exists and covers BOTH ops is open and is not assumed either way.
+✅ **THAT FINDING IS NOW CLOSED, AND IT CLOSED THE OTHER WAY ROUND.** Carried open from
+2026-08-13: one `sw_*` docstring claims the trapped step "leaves memory and registers
+alone" citing M4's frame fact, while the theorem proves only `.trapped = true`, and
+whether M4's fact existed and covered BOTH ops was left open rather than assumed.
+
+**MEASURED 2026-08-16 — it exists and covers both:** `step_LW_trapped_changes_no_memory_
+and_no_register` (`Stack/Program.lean:1768`) and `step_SW_...` (`:1783`), each proving
+`mem = s.mem ∧ (∀ r, get r = s.get r) ∧ trapped ∧ pc = s.pc + 4`; and this module already
+imports `SaltWorks.Stack.Program`, so the cited fact is IN SCOPE, not merely extant.
+
+⇒ **The claim is TRUE and nothing needed deleting. The ASYMMETRY INVERTS: math's `lw_*`
+docstrings are UNDER-claiming**, not `sw_*` over-claiming — "correctly omit" was correct on
+08/13, when nobody had checked whether the LW half existed. It does.
+
+📌 **AND A PRECISION CORRECTION TO THIS NOTE ITSELF: it said "the `sw_*` docstringS",
+plural. Exactly ONE of the two carries the claim** — `sw_misaligned_response` does;
+`sw_out_of_range_response` carries no frame claim at all.
 
 ⚠️ **REFEREE STATUS, STATED BECAUSE IT IS NOT UNIFORM.** The `sw_*` pair was read
 by math's refuter pass (2026-08-13). The `lw_*` pair was written by math and, at
@@ -81,8 +92,14 @@ same `dif_neg` on the same classifier, the same `else { s with trapped := true
 }.next`. That identity is why the pair below is provable by the same proof — and
 why the omission of the `LW` half went unnoticed for a day. -/
 
-/-- **THE JOIN, MISALIGNED ARM.** A misaligned store traps, and by M4's frame
-fact it leaves memory and registers alone — reached WITHOUT a range hypothesis. -/
+/-- **THE JOIN, MISALIGNED ARM.** A misaligned store traps, and it leaves memory and
+registers alone by
+`SaltWorks.Stack.step_SW_trapped_changes_no_memory_and_no_register`
+— reached WITHOUT a range hypothesis.
+
+*Cited by NAME rather than as "M4's frame fact": a description cannot be grepped and
+survives a rename in silence, which is how a docstring builds green forever after the
+theorem under it moves.* -/
 theorem sw_misaligned_response (s : St) (a b : Fin 32) (imm : BitVec 12)
     (h : (s.get a + imm.signExtend 32).toNat % 4 ≠ 0) :
     (step s (.SW a b imm)).trapped = true := by
