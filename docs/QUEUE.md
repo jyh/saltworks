@@ -1089,6 +1089,18 @@ OPEN ITEMS:
   and still named: RefComparator (hand-written) · Fabric · FabricCut (CI
   artifact).
   ⚖️ **THE BAR MET IS THE AMENDED BAR.** Not "C3 passed".
+- **⭐ ITEM 2 ROUTED TO MATH (11:4x, the Captain: "do it") — closing
+  the morning desk's five.** The Ruling (c) gloss at this board's own
+  line ~1480 ("X1's theorem class ranges over programs with
+  `poolDemand ≤ 7`") goes to MATH for adjudication at the bytes:
+  `poolDemand` has zero hits in `ExecutiveX1.lean` (positive control:
+  `TinyRustN0.lean` defines and consumes it). Outcome is either a
+  verified cross-reference (the gloss is a fair paraphrase through
+  X1's actual binder) or an append-only forward correction of the
+  descriptive sentence plus the property X1 does range over. His
+  "sure N=2" is UNTOUCHED in both branches. Queued on the salt board
+  (math's pull surface) as P1 item 4a; math consumes at wake with the
+  E4a repairs and the fork-2 ruling.
 - **⭐⭐⭐ THE CLAIM POSTURE RULED — AIM HIGH, REVISE HONESTLY, FIRST
   PRIORITY ABOVE EVERYTHING ELSE (11:4x, the Captain, his words: "first
   layout can be simulation, but we aim to finish the proof before Sept
