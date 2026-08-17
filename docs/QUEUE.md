@@ -1089,6 +1089,25 @@ OPEN ITEMS:
   and still named: RefComparator (hand-written) · Fabric · FabricCut (CI
   artifact).
   ⚖️ **THE BAR MET IS THE AMENDED BAR.** Not "C3 passed".
+- **⛔ THE HELM'S OWN DERIVED NUMBER WAS TYPED, NOT READ — CORRECTED
+  FORWARD (12:4x, found by the helm sweeping its own morning entries
+  for the very defect they recorded):** the 11:4x entry below says
+  "the budget of record is 12 tiles ≈ 226,807 µm² (same per-tile
+  basis)" and "memplane8 = 29.3%". **Both are WRONG.** 226,807 was
+  LINEAR SCALING of the 2×2 figure (75,602.5 ÷ 4 × 12) — a derivation
+  I typed while the artifact of record carries the row itself:
+  `docs/tinytapeout-dossier.md`'s tile table, **`6x2` = 1030.40 ×
+  225.76 = 232,623.1 µm²** (TT dies grow in WIDTH only, +173.88 µm per
+  tile column; the height is 225.76 at every 2-row size — which is why
+  linear scaling of an AREA is wrong in principle, not just in
+  arithmetic). ⇒ **CORRECT FIGURES: memplane8 66,371.2 = 28.5% · the
+  composed top 112,962 = 48.6%.** ✅ **SILICON'S 48.6% WAS RIGHT AND
+  WAS READ FROM THE TABLE** — only the helm's derived denominator was
+  typed. The conclusion is UNCHANGED and slightly improved (more die
+  than claimed). 🔑 The lesson is the sharper one: **the entry that
+  corrected an eleven-day drift committed the same class of error in
+  its own repair line** — a correction is not exempt from the law it
+  restores.
 - **⭐⭐ THE COUNCIL CLOSED (11:5x, the Captain: "pre-delegate with that
   condition, ratify the verso rulings, then close the board"):**
   **(1) THE OUTWARD CI PUSH IS PRE-DELEGATED TO THE MAESTRO**, his
