@@ -1,5 +1,20 @@
 # silicon-tools — the SILICON seat's bus monitor
 
+> **Commit shas in the silicon-lane documents predate the 2026-08-16 public flip and
+> resolve nowhere on this origin.** They are left verbatim because dated records are
+> not rewritten; `docs/ledger-tools/flip-sha-map-0816.tsv` maps all 1,766 pre-flip
+> shas to their public successors. *Measured 08/16: 88 distinct shas across
+> `docs/silicon-*` and `SaltWorks/Silicon/*`, none reachable from `origin/master`,
+> all 88 present in that map.*
+
+⚠️ **`BUS` must be set** — these tools take no default bus path (it is machine-local
+and does not ship in a public repo) and **refuse loudly** without it:
+
+```sh
+BUS=/path/to/FLEET.md BASELINE=<last line you have ACTUALLY READ> SELF=silicon \
+  docs/silicon-tools/busmon-silicon.sh
+```
+
 **Arm it, and never sample the baseline at arm time:**
 
 ```sh
