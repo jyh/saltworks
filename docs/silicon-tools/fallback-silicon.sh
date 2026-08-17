@@ -91,6 +91,23 @@ while true; do
   else
     hdr="⛔ busmon.awk MISSING at $HERE — refusing a header claim rather than guessing with a grep"
   fi
+  # ⛔ DARK MODE, 2026-08-17 07:2x, under the helm's go-dark order. THE ORDER SAYS
+  # "STOP READING" AND THAT GOVERNS MY HANDS, NOT MY INSTRUMENTS — this field feeds
+  # me a peer's HEADLINE every 30 minutes, unrequested, and I do not get to decline
+  # it. It fired 22 seconds after I posted that my WATCH had this property, having
+  # not counted this second channel at all.
+  # ⭐ WHY THIS ONE NEEDS NO RULING, WHERE THE WATCH DOES: the watch is the channel
+  # an ORDER reaches me on, so silencing it trades ignorance for unreachability.
+  # THIS FIELD IS A DIAGNOSTIC — it answers "is the bus moving, and whose post is
+  # last?" Both survive with the TEXT removed. Strictly less exposure, zero loss of
+  # reachability, so it is not a trade and does not need a decision from the helm.
+  # ⇒ Keep the STAMP and the SEAT (the whole diagnostic), drop the headline TEXT.
+  if [ "${DARK:-0}" = 1 ]; then
+    case "$hdr" in
+      \[*) hdr="$(printf '%s' "$hdr" | LC_ALL=C sed -E 's/^(\[[0-9]{2}\/[0-9]{2} [0-9:]{1,8}, [a-zA-Z0-9_]+).*/\1/') … TEXT WITHHELD (DARK)" ;;
+      *)   hdr="$hdr" ;;   # refusals and diagnostics are MINE, not peer content — pass
+    esac
+  fi
   # announce the cap, and never clip a header carrying an order word
   hdr=$(printf '%s' "$hdr" | awk -v w="$WIDTH" '{
       if ($0 ~ /FLEET|CAPTAIN|HALT|STAND DOWN|ALL SEATS|SILICON/) { print; next }
