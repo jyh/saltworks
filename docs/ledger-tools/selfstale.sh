@@ -21,8 +21,8 @@
 #   prose claims, and a figure phrased differently is invisible to it. MEASUREMENT,
 #   NOT IMMUNITY.
 set -u
-B=${1:-${SEAT_DIR}/briefs/0000-BOOT-compiler.md}
-M=${2:-${SEAT_CONFIG_DIR}/projects/-Users-jyh-projects-claude-saltworks/memory/MEMORY.md}
+B=${1:-${SEAT_DIR:?SEAT_DIR must be set when no brief path is passed (machine-local, no public default)}/briefs/0000-BOOT-compiler.md}
+M=${2:-${CLAUDE_MEMORY_DIR:?CLAUDE_MEMORY_DIR must be set when no memory path is passed (machine-local, no public default)}/MEMORY.md}
 [ -r "$B" ] || exit 0
 NB=$(wc -c < "$B" | tr -d ' '); NL=$(wc -l < "$B" | tr -d ' '); NM=$(wc -c < "$M" 2>/dev/null | tr -d ' ')
 OUT=""
