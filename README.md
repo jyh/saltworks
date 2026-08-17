@@ -138,12 +138,3 @@ methodology and its numbers of record are described in the paper.
 
 Apache License 2.0 — see `LICENSE`.
 
-## Data availability
-
-The complete formal development — all Lean sources, proofs, certificate
-restatements, and build configuration — is available at
-https://github.com/jyh/saltworks (tag `nature-2026-08`). The tagged
-snapshot is the submission record; the repository's live branch continues
-beyond it. Every theorem can be re-verified from source with a single
-build command; the certificate layer restates the headline results in
-primitive vocabulary, with the restatements themselves kernel-checked.
