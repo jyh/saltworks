@@ -125,5 +125,25 @@ EOF
     fi
   fi
 fi
+# 6. ⛔ AN UNPARSEABLE TOKENFP IS A DISABLED CHECK, NOT A PENDING ONE.
+#    Found 08/17 16:0x BY MUTANT, not by reading. I had written "TOKENFP: RE-MEASURE tok @
+#    <B>/<lines>" as an honest placeholder and told the fleet this tool "will refuse until
+#    I re-measure". IT DOES THE OPPOSITE. Every arm above matches `TOKENFP: [0-9]...`;
+#    RE-MEASURE is not digits, so the line matches NOTHING, the while-body never runs, and
+#    the file reports EXACTLY as clean as a correct one -- the M2 mutant was byte-identical
+#    in verdict to the untouched control. Arm 5 above already catches a MISSING TOKENFP
+#    (HASFP=0); the gap is the line that is PRESENT and UNREADABLE, which passes that guard.
+#    ⇒ THE LAW, already written into table_identical.sh and broken here one tool over:
+#      A MISSING MEASUREMENT AND A PASSING MEASUREMENT MUST NOT LOOK THE SAME.
+#    ⚠️ A placeholder that reads as "unknown, will be caught" while silently removing the
+#      check is worse than no placeholder: it buys the feeling of an obligation registered.
+for f in "$B" "${RP:-}" "${BP:-}"; do
+  [ -n "$f" ] && [ -r "$f" ] || continue
+  ALL=$(LC_ALL=C grep -c 'TOKENFP:' "$f" 2>/dev/null || true)
+  OK=$(LC_ALL=C grep -cE 'TOKENFP: [0-9][0-9,]* tok @ [0-9][0-9,]* B/[0-9][0-9,]* lines' "$f" 2>/dev/null || true)
+  if [ "${ALL:-0}" -gt "${OK:-0}" ]; then OUT="$OUT
+   $(basename "$f"): $((ALL-OK)) of $ALL TOKENFP line(s) UNPARSEABLE -- matched by NO arm
+   above, therefore UNCHECKED rather than pending. Write digits, or delete the line."; fi
+done
 [ -n "$OUT" ] && printf '  ⛔ SELF-STALE FIGURES IN MY OWN BRIEF:%s\n' "$OUT"
 exit 0

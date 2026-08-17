@@ -124,7 +124,21 @@ STAMP=$(date '+%m/%d %H:%M:%S')
 #   own brief asserts ABOUT ITSELF. Called from here because this script is already
 #   clock-driven -- SUBJECT = my own output, TRIGGER = a clock and not a colleague,
 #   which is the pair the 08/15 tally showed I was missing. No new watch to enumerate.
-SS=$(bash "$(dirname "$0")/selfstale.sh" 2>/dev/null); [ -n "$SS" ] && printf '%s\n' "$SS"
+#   ⛔ 08/17 16:0x — THIS LINE USED TO READ `selfstale.sh 2>/dev/null` AND THAT MADE THE
+#   INWARD CHECK VANISH SILENTLY. selfstale resolves its brief from SEAT_DIR and REFUSES
+#   (stderr, exit 1) when it is unset -- a refusal I built on purpose. Swallowing stderr
+#   turned that refusal into an EMPTY $SS, and the `[ -n "$SS" ]` test then printed
+#   nothing, which is the exact rendering of "no staleness found". MEASURED, not reasoned:
+#   with a REAL falsified figure on disk, SEAT_DIR set -> 1 SELF-STALE line; SEAT_DIR unset
+#   -> 0 lines. The clock-triggered arm was one unset variable away from being decorative,
+#   and nothing in its output would ever have said so.
+SSERR=$(mktemp); SS=$(bash "$(dirname "$0")/selfstale.sh" 2>"$SSERR"); SSRC=$?
+[ -n "$SS" ] && printf '%s\n' "$SS"
+if [ "$SSRC" != 0 ] || [ -s "$SSERR" ]; then
+  printf '  ⛔ INWARD CHECK DID NOT RUN (exit %s): %s\n' "$SSRC" "$(head -1 "$SSERR")"
+  printf '     A check that did not run must NOT look like a check that passed. Set SEAT_DIR + CLAUDE_MEMORY_DIR.\n'
+fi
+rm -f "$SSERR"
 printf 'FALLBACK-COMPILER %s · my-landing=%s(my-paths,ANY-seat) · last-touch-any-seat=%s · MY-dirty=%s(my-paths,incl-untracked) · unpushed=%s(REPO-WIDE, cached, no fetch)\n' \
   "$STAMP" "$MYL" "$ANY" "$DIRTY" "$UNPUSH"
 printf '  scope: %s\n' "${MINE[*]}"
