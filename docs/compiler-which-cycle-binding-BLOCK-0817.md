@@ -43,7 +43,7 @@ CycleRealisesStepProj              Program.lean:1484   ∀ ins, …  — NO CYCL
 refuted under a stall, ALREADY KERNEL-LANDED:
   not_cycleRealisesStep_stalledBits :2404  ¬ CycleRealisesStepProj (cycOfBits
                                             stalledBits …), by decide +kernel
-  stalledBits                       :2389  "a core whose outputs re-present the
+  stalledBits                       :2386  "a core whose outputs re-present the
                                             state it was given: THE STALL"
 ```
 🔑 ***SO UNDER A STALLING `cyc` THE FLAGSHIP IS NOT MISINDEXED — ITS HYPOTHESIS IS
@@ -141,8 +141,10 @@ does today.
 - ⛔ **the lie**: the conditional agreement gets cited without its condition. This is the
   fleet's most-measured failure mode and it has an antidote already built — the condition
   is a hypothesis, so a citation that drops it does not typecheck.
-- ⭐ its lie is one the kernel refuses (a dropped condition will not typecheck) — **but so
-  is (E)'s, and (E) does not carry (C) inside it.**
+- ⭐ its lie is one the kernel refuses (a dropped condition will not typecheck).
+- ⛔ **ROUND 3 WITHDRAWS "(E) does not carry (C) inside it".** *Refuted: a bounded-stall
+  predicate must relate cycles to steps to state its bound at all, which is σ. **(E) carries
+  (C) too**, and my §2 comparison rested on that line.
 
 ### (E) TRACE PREDICATE AS A WHOLE-RUN HYPOTHESIS — **the shape the fleet actually used for stalls**
 Not invented here. `NeverStalls` (`HDL/ExecutiveX2.lean:106`) is a per-step trace predicate
@@ -152,34 +154,66 @@ carried as a hypothesis of the whole-run theorem, consumed by `fair` (:115-121),
   discharged per run, and runs that stall are outside every theorem that assumes it.
 - ✅ **it repairs the unindexed `∀`** — a hypothesis, not an index, which is the only
   thing that can constrain `CycleRealisesStepProj`.
-- ✅ **its discriminating control for THIS SEAM IS ALREADY LANDED** at Program.lean:2404.
-  C2 is met before the option is chosen.
+- ⛔ **ROUND 3 WITHDRAWS "C2 IS MET".** *It rested on the REFUTING half alone. The pair
+  discipline transfers; **the PRECEDENT does not.*** `NeverStalls`' stall is a
+  **software-scheduler** stall in another lane, and its satisfying witness
+  (`loop_neverStalls`) holds because a loop never runs out of instructions — a reason with
+  no analogue here. **The SATISFYING half for a stalling core DOES NOT EXIST**, and
+  `cycleRealisesStepProj_cycOf` (:1893) is the surface where it would have to be built.
+- ⛔ **AND `NeverStalls` AS LITERALLY WRITTEN IS VACUOUS ON THIS MACHINE**: it is
+  `∀ m, execAt …` — "at every step, execute" — while `FETCH YIELDS TO DATA` manufactures
+  steps where fetch does not. **A no-stalls hypothesis on a machine whose stalls are
+  designed in is an empty antecedent.** What survives is the SHAPE with a **BOUNDED-STALL**
+  predicate (silicon's T4 bound), which the machine satisfies by construction.
 - ⛔ **the lie**: a whole-run hypothesis that is never shown SATISFIABLE is a vacuity
   generator — precisely today's defect. The antidote is the pair the precedent already
   carries: a satisfiable witness AND a refuting mutant, both landed.
 
-## 5 · CONSUMER LEDGER — the 13 sites a change to `runWords` touches
+## 5 · WHAT EACH OPTION ACTUALLY TOUCHES — round 3, re-aimed
 
-*(iron rule 1. `grep -F runWords` over the tree returns `Stack/Program.lean` ONLY; every
-row below verified present before listing.)*
+⛔ **ROUND 2's LEDGER PRICED A CHANGE NO OPTION PROPOSES.** *It enumerated the consumers of
+a `runWords` mutation. **Not one of (A)–(E) mutates `runWords`**: (A) changes nothing,
+(B) indexes `DriveMap`, (C) puts σ outside the fold, (D) keeps `runWords` untouched by
+construction, (E) adds a hypothesis. I priced a change I had not proposed, and then — at
+13:47, unprompted — conceded that ledger was *incomplete*, **grading the wrong artifact
+against the wrong question.***
 
-| site | breakage mode under a stall-aware step object |
-|---|---|
-| `runWords_succ` :1413 | **`rfl` DIES** — the definitional equation is the change |
-| `runWords_add` :1419 | becomes **CONDITIONAL**; constant shift no longer sound |
-| `cycles_realise_steps_of_memFree` :1683 | mem-free premise is what a stall violates |
-| `runWords_eq_runFor` :1942 | ∀k stream=encode(fetch) — violated by definition |
-| `runWords_get_of_undecodable` :1958 | recovers only on undecodable; a held word decodes |
-| `FeedsProgram` :1978 | def; first conjunct binds cycle k to `runFor k` |
-| `runWords_get_eq_runFor` :1986 | rewrites with `runWords_add` at :1990 |
-| `runFor_halts_where_runWords_runs_on` :2003 | divergence witness assumes forever-split |
-| `feedsProgram_addi` :2056 · `feedsProgram_addi_runs` :2069 | instances of the above |
-| `noisy_tail_overwrites` :2078 | **the landed proof that a re-presented decodable word corrupts** |
-| `cycles_sort` :2132 | consumes `CycleRealisesStepProj` |
-| `sorts_of_C4` :2352 | ⭐ end-to-end; **vacuous under a stalling cyc** |
+✅ **AND TWO OF ITS BREAKAGE MODES WERE OVERSTATED, verified at the source:**
+- `runWords_succ` (:1413) is `rfl` **by the shape of the recursion**; it survives any
+  word-stream encoding. It does not "die".
+- `runWords_add` (:1419) proves by `induction n` + `rw [runWords_succ, ih]` — **it never
+  inspects a word.** It stays UNCONDITIONAL.
+⇒ ***MY "(D) CONTAINS (C)" RESTED ON A CONSTANT-vs-CUMULATIVE SHIFT ARGUMENT THAT THESE TWO
+FACTS DISSOLVE. I do not currently have a replacement reason, and I am not inventing one to
+keep the conclusion.***
 
-⇒ **No stalled-cycle notion enters `runWords` without moving `runWords_succ` off `rfl` and
-making `runWords_add` conditional. Visibly, not silently — but not free.**
+### 5.1 · THE POPULATION THAT ACTUALLY MATTERS — the `CycleRealisesStepProj` cone
+
+*Round 2 named 4 of these. There are **20**, enumerated mechanically, every one verified
+present:*
+
+```
+CycleRealisesStepProj · cycleRealisesStepProj_cycOf · cycleRealisesStepProj_of_bits
+cycleRealisesStep_of_C4 · cycleRealisesStep_of_C4Spec · cycleRealisesStep_of_fieldwise
+cycleRealisesStep_idealBits · c4Spec_of_fieldwise · cycles_realise_steps_of_memFree
+cycles_sort · sorts_of_C4 · decQ_cyc_eq_of_memFree · decQ_trapped · DeliversProgram
+exists_halting_count · immBCirc_ne_immBshiftedCirc · seenWord_cycOfCirc · seenWord_envWith
+not_cycleRealisesStep_id · not_cycleRealisesStep_stalledBits · not_cycleRealisesStep_wordOf
+```
+📌 **Two of these are the ones round 2 most needed and never named:**
+`cycleRealisesStepProj_cycOf` (:1893) is **the SATISFIABILITY witness — the vacuity control
+surface**, and the `not_cycleRealisesStep_*` trio are the **landed refuting controls**.
+
+### 5.2 · ⛔ ONE ROW WAS WRONG IN THE DANGEROUS DIRECTION, AND IT WAS MINE
+
+*Round 2's `cycles_realise_steps_of_memFree` (:1683) row said **"the mem-free premise is
+what a stall violates."* **False, and false in the direction that invites a green build.**
+`MemFree` is a property of the **WORD**. Under the ruled FETCH=4 a pure-ADDI stream is
+`MemFree` at **every cycle while stalling 3-in-4.***
+
+⇒ ***MY ROW INVITED "KEEP THE STREAM MEMORY-FREE AND THIS THEOREM SURVIVES" — GREEN AND
+WRONG, IN A LEDGER WHOSE ENTIRE PURPOSE WAS TO CATCH EXACTLY THAT.*** *What a stall refutes
+there is the `CycleRealisesStepProj` premise, already kernel-refuted at :2404.*
 
 ## 6 · THE BOUNDARY WITH SILICON — THE JOINT TABLE, AUTHORED BY SILICON, ADOPTED HERE
 
@@ -305,7 +339,13 @@ is how a statement gets shaped to fit a wish.
 ⛔ **I have not started.** The commission is design-block-first and the refuter gates the
 wave. This block is its target.
 
-📌 **What I need is two lines from the contract, unchanged since 11:29**: whether there are
+⛔ **ROUND 3 — §4 WAS STALE AGAINST §6 IN MY OWN FILE.** *It left option (A) alive after my
+own 12:40 measurement had killed it: silicon's `FETCH YIELDS TO DATA` manufactures
+not-cycles by design, so a same-cycle guarantee is unavailable. **(A) is ELIMINATED**, and
+the questions below are ANSWERED — `dmem_addr8` stays combinational (their §4), so door 1's
+premise is untouched and the stall reaches it through the PAIRING only.*
+
+📌 **The questions as originally posed, now answered and kept for the record**: whether there are
 cycles where the core presents an input and memory does not advance, and whether
 `dmem_addr8` keeps zero state under the address-map split. **(B), (C) and (D) all price
 differently depending on the answers, and (A) survives only if the first answer is "no".**
