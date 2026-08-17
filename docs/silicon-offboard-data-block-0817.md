@@ -219,3 +219,90 @@ rather than discovering it in RTL.***
   proposal and must not be quoted as ruled.
 - The fabric's stubbed CPU-client port and spare stay untouched; **this block does not
   argue for them.**
+
+---
+
+# REVISION 2 — THE CLAIM LADDER BECOMES A PLAN-TO-PROVE. AIM RULED HIGH.
+
+**Captain, 11:42:48: *"first layout can be simulation, but we aim to finish the proof
+before Sept 7, and will revise if needed. That's first priority above everything
+else."* §4's low forecast is SUPERSEDED AS A TARGET — not as a statement of what is
+proven today.**
+
+## §9 · AIM AND CLAIM ARE DIFFERENT OBJECTS, AND THE RULING KEEPS THEM APART
+
+```
+THE AIM    the complete proof, temporal and protocol rungs included, before 09-07
+THE CLAIM  at any moment, exactly what IS proven — write-time hygiene UNCHANGED
+```
+🔑 ***These do not conflict and it matters that they cannot. An aim is a commitment
+about EFFORT; a claim is a report about STATE. My §4 forecast was a claim and stays
+true as one; it was never licence to stop reaching.*** **And the ruling names the
+failure mode explicitly: if the aim breaks, revision is an HONEST, CAPTAIN-VISIBLE
+EVENT, never a silent downgrade.** *A silent downgrade is the only way this goes
+wrong.*
+
+## §10 · THE SCHEDULING INSIGHT THAT CHANGES THE ORDER OF WORK
+
+**§5 said: defer the discharge wave until the offboard RTL freezes, because its
+subject is moving. That stands for the THEOREMS. It is WRONG for the CELL MODELS.**
+
+```
+the 43 missing cell models are a property of the sky130 LIBRARY and the cell mix,
+NOT of which core32 they are used on. They are RTL-INDEPENDENT.
+⇒ START THEM NOW, IN PARALLEL WITH RTL THAT IS STILL MOVING.
+```
+⭐ ***That is the one piece of the critical path that does not wait for anything, and
+under a 21-day aim it is the difference between a queue and a pipeline.*** *It is also
+the largest single mechanical cost in the plan (a ~54% enlargement of `EXPAND`, each
+entry owing a Liberty proof), so it is exactly the work that must not sit behind a
+freeze.*
+
+## §11 · PLAN-TO-PROVE, DATED. 21 DAYS.
+
+```
+DATE     RUNG / DELIVERABLE                                  GATE
+08-17→19 TEMPORAL CO-DESIGN BLOCK with compiler:             refuter pass
+         which-cycle binding · stall/arbitration contract
+         · bus-protocol FSM. COMMISSIONED BUILD, co-design,
+         and I do not own the kernel half.
+08-17→27 CELL-MODEL COVERAGE, 43 entries + Liberty proofs.   census with its
+         RUNS IN PARALLEL — RTL-independent (§10).           three-sided control
+08-20→23 ADDRESS-MAP SPLIT: route-or-trap in dmem_addr8,     the rfl tripwire
+         re-derive the suppression lemmas at the gates.      MUST fire and be
+         Target: PROVEN AT THE GATES, TOTAL.                 re-derived, not
+                                                             worked around
+08-23→27 BUS-PROTOCOL FSM + core32 STALL CONTRACT in RTL.    tb + arbitration
+         Simulation-gated.                                   sim; CPI measured
+                                                             against §7's 12
+08-27    ⇒ FIRST LAYOUT. Simulation gates it, by ruling.     DRC / LVS / antenna
+08-28→09-03 TEMPORAL PROOFS: protocol FSM and which-cycle    refuter pass
+         binding land against the FROZEN RTL.
+09-03→06 DriveMap DISCHARGE against frozen RTL, on the       the six criteria,
+         cell models finished 08-27.                         D4′ mutant included
+09-07    WINDOW.
+```
+⚠️ **THE THREE PLACES THIS PLAN BREAKS, NAMED NOW SO A BREAK IS RECOGNISED RATHER
+THAN ABSORBED:**
+```
+1  the temporal co-design (08-17→19) is CROSS-LANE. If the kernel half is not
+   agreed by 08-19, everything after 08-28 slips and the discharge is the first
+   casualty. THIS IS THE CRITICAL PATH, not the RTL.
+2  the address-map split re-synthesises dmem_addr8, so the suppression lemmas
+   must be RE-DERIVED. If re-derivation is harder than expected, 08-23 slips into
+   the FSM window and the first layout date moves.
+3  the 43 cell models are mechanical but each owes a Liberty proof. If the rate is
+   worse than ~4/day the 08-27 completion fails and the 09-03 discharge cannot
+   start.
+```
+📌 **EACH OF THOSE IS A CAPTAIN-VISIBLE REVISION EVENT IF IT FIRES. I will report a
+slip on the day it becomes likely, not on the day it becomes certain** — *a schedule
+whose slips arrive only at the deadline is a schedule that lied for three weeks.*
+
+## §12 · WHAT I STILL DO NOT OWN
+
+- **The kernel half of the temporal machinery.** Co-design means compiler and I agree
+  the which-cycle binding; it does not mean I write `ISA.step`'s successor alone.
+- **The outward push.** Still the Captain's.
+- **§4's claim SENTENCE.** Superseded as a target by this revision; the *hygiene* rule
+  it served is untouched and I will keep quoting only what is proven at the time.
