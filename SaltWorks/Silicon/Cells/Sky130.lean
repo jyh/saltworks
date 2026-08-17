@@ -731,8 +731,39 @@ def o32ai (A1 A2 A3 B1 B2 : Bool) : Bool := !((A1 || A2 || A3) && (B1 || B2))
 theorem o32ai_liberty (A1 A2 A3 B1 B2 : Bool) :
     o32ai A1 A2 A3 B1 B2 = ((!A1 && !A2 && !A3) || (!B1 && !B2)) := by decide +kernel +revert
 
+/-! ### The remaining three, from `cell_coverage.py`'s authoritative priced list
+
+`Importer/cell_coverage.py` — the fleet's controlled census, which calls the
+importer's OWN resolver instead of restating its rule — names SEVEN cells missing
+across all 48 netlists, not the 43 my hand-rolled matcher reported. Four are above;
+these are the last three, and with them the greedy cover frees every blocked netlist.
+
+RHS transcribed from vendor Liberty, same discipline as the four above. -/
+
+/-- `o41a_1` — Liberty: `(A1&B1) | (A2&B1) | (A3&B1) | (A4&B1)`. -/
+def o41a (A1 A2 A3 A4 B1 : Bool) : Bool := (A1 || A2 || A3 || A4) && B1
+theorem o41a_liberty (A1 A2 A3 A4 B1 : Bool) :
+    o41a A1 A2 A3 A4 B1 =
+      ((A1 && B1) || (A2 && B1) || (A3 && B1) || (A4 && B1)) := by decide +kernel +revert
+
+/-- `a2111o_1` — Liberty: `(A1&A2) | (B1) | (C1) | (D1)`. -/
+def a2111o (A1 A2 B1 C1 D1 : Bool) : Bool := (A1 && A2) || B1 || C1 || D1
+theorem a2111o_liberty (A1 A2 B1 C1 D1 : Bool) :
+    a2111o A1 A2 B1 C1 D1 = ((A1 && A2) || (B1) || (C1) || (D1)) := by decide +kernel +revert
+
+/-- `o2bb2a_1` — Liberty: `(!A1_N&B1) | (!A2_N&B1) | (!A1_N&B2) | (!A2_N&B2)`.
+⚠️ The `_N` pins are ACTIVE-LOW in the vendor's own naming, and the theorem keeps
+their polarity exactly as Liberty writes it — inverting them here would be a silent
+re-specification of the cell. -/
+def o2bb2a (A1_N A2_N B1 B2 : Bool) : Bool := (!A1_N || !A2_N) && (B1 || B2)
+theorem o2bb2a_liberty (A1_N A2_N B1 B2 : Bool) :
+    o2bb2a A1_N A2_N B1 B2 =
+      ((!A1_N && B1) || (!A2_N && B1) || (!A1_N && B2) || (!A2_N && B2)) := by
+  decide +kernel +revert
+
 #audit_axioms a221o_liberty a22o_liberty nor2b_liberty o21bai_liberty
 #audit_axioms o31a_liberty o31ai_liberty o41ai_liberty or3_liberty or4b_liberty
 #audit_axioms a311o_liberty a32oi_liberty o311a_liberty o32ai_liberty
+#audit_axioms o41a_liberty a2111o_liberty o2bb2a_liberty
 
 end SaltWorks.Silicon.Cells

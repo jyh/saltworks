@@ -277,6 +277,32 @@ EXPAND = {
     "o41ai":   ([('a','or','A1','A2'),('b','or','a','A3'),('c','or','b','A4'),
                  ('d','and','c','B1'),('t','not','d',None)], ('Y','t')),
     "or3":     ([('a','or','A','B'),('t','or','a','C')], ('X','t')),
+    # ── THE SEVEN cell_coverage.py NAMES AS MISSING ACROSS ALL 48 NETLISTS ──────
+    # Added 2026-08-17. Each has a PROVED `_liberty` theorem in Cells/Sky130.lean,
+    # and the proof does NOT give the importer a row: EXPAND and Sky130.lean are two
+    # ENCODINGS of one cell, and `core32` kept refusing on `o32ai_1` while its model
+    # sat green. Every expansion below is transcribed from the same vendor Liberty
+    # string the theorem is stated against, so the two encodings have ONE source.
+    # ⛔ THE HAND-ROLLED CENSUS THAT PRECEDED THIS SAID 43. The controlled tool says
+    # 7, because the resolver falls back to the DRIVE-STRIPPED base name and my
+    # matcher did not implement that rule. 39 of my "missing" cells resolve already.
+    "a311o_1": ([('a','and','A1','A2'),('b','and','a','A3'),('c','or','b','B1'),
+                 ('t','or','c','C1')], ('X','t')),
+    "a32oi_1": ([('a','and','A1','A2'),('b','and','a','A3'),('c','and','B1','B2'),
+                 ('d','or','b','c'),('t','not','d',None)], ('Y','t')),
+    "o311a_1": ([('a','or','A1','A2'),('b','or','a','A3'),('c','and','b','B1'),
+                 ('t','and','c','C1')], ('X','t')),
+    "o32ai_1": ([('a','or','A1','A2'),('b','or','a','A3'),('c','or','B1','B2'),
+                 ('d','and','b','c'),('t','not','d',None)], ('Y','t')),
+    "o41a_1":  ([('a','or','A1','A2'),('b','or','a','A3'),('c','or','b','A4'),
+                 ('t','and','c','B1')], ('X','t')),
+    "a2111o_1":([('a','and','A1','A2'),('b','or','a','B1'),('c','or','b','C1'),
+                 ('t','or','c','D1')], ('X','t')),
+    # `_N` pins are ACTIVE-LOW in the vendor's naming; the inverters below are the
+    # cell's own, not a re-specification of its polarity.
+    "o2bb2a_1":([('n1','not','A1_N',None),('n2','not','A2_N',None),
+                 ('a','or','n1','n2'),('b','or','B1','B2'),
+                 ('t','and','a','b')], ('X','t')),
     "or4b":    ([('a','or','A','B'),('b','or','a','C'),('n','not','D_N',None),
                  ('t','or','b','n')], ('X','t')),
 
