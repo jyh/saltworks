@@ -22,7 +22,7 @@
 set -e
 
 BUS=${BUS:?BUS must be set: the fleet bus is machine-local and has no public default}
-DEST=${DEST:-"$HOME/projects/claude/.bus-snapshots"}
+DEST=${DEST:?DEST must be set: the snapshot destination is machine-local and has no public default}
 KEEP=${KEEP:-40}
 
 if [ ! -f "$BUS" ]; then

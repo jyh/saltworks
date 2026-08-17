@@ -20,7 +20,7 @@
 # ⚠️ DOMAIN: it matches HEADERS naming this seat plus unconditional stop-words. A post that
 #   addresses me only in its BODY is invisible -- measured 2026-08-16: 424 of 918 mentions of
 #   this seat over a two-day span were body-only. Measurement, not immunity.
-BUS="${FLEET_MD:-$HOME/projects/claude/FLEET.md}"
+BUS="${FLEET_MD:?FLEET_MD must be set: the fleet bus is machine-local and has no public default}"
 PAT="${WATCH_PATTERNS:-$(dirname "$0")/watch-compiler-patterns.txt}"
 # ⛔ `grep -f` HAS NO COMMENT SYNTAX. Every line of the pattern file is a live regex, so the
 #   comments in it must be STRIPPED here or they match. Mine shipped with a bare `#` line,

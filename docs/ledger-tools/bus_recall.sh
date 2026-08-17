@@ -20,7 +20,7 @@
 
 set -e
 
-BUS="${FLEET_BUS:-$HOME/projects/claude/FLEET.md}"
+BUS="${FLEET_BUS:?FLEET_BUS must be set: the fleet bus is machine-local and has no public default}"
 SINCE_KEY=0
 CAP=40
 
