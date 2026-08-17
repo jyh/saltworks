@@ -1089,6 +1089,25 @@ OPEN ITEMS:
   and still named: RefComparator (hand-written) · Fabric · FabricCut (CI
   artifact).
   ⚖️ **THE BAR MET IS THE AMENDED BAR.** Not "C3 passed".
+- **⭐ ③ SEQUENCING RULED + A PHRASE CORRECTED FORWARD (08:5x helm
+  entry, on silicon's own record-policing at 08:54):** the entry below
+  says the plane "discharges DriveMap BY CONSTRUCTION" — CORRECTED:
+  the plane makes `DriveMap` **TRUE IN RTL** by construction
+  (`fc5ed0e` + `a76b647`, round trip closed, x3=42); **NOTHING YET
+  TIES THE RTL PLANE TO THE LEAN STRUCTURE — `DmemKernelBridge` still
+  takes `DriveMap` as a HYPOTHESIS, and no row may say ③ discharged
+  it.** Silicon sized the closing import at ~18k lines (ORDER-of, not
+  banked — its own caveat) and asked the helm for scope. RULED (helm,
+  sequencing inside the Captain's ruled scope): **the discharge STAYS
+  IN ③** (his morning ruling put it there); **the hardware deliverable
+  runs FIRST** (layout + DRC/LVS toward the 09-07 window — the
+  discharge is kernel-side and blocks nothing physical); **the
+  Lean-side discharge is its own wave, DESIGN-BLOCK-FIRST** — the
+  architecture choice (monolithic import / chunked / ports-only /
+  sub-cone) has "a different lie available to each option" (silicon's
+  words) and that is precisely what a refuter-passed block exists to
+  pick. The Captain reviews at the 9am bell; his word re-cuts any of
+  it.
 - **⭐⭐ ③ SEAM LANDED, AND A NUMBER CORRECTED FORWARD (08:2x helm
   entry):** **`fc5ed0e` — (a)+(b) both in.** The plane's strobes are
   `isLW`/`isSW` bit-for-bit, so **`DriveMap` discharges BY
