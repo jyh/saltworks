@@ -1,0 +1,13 @@
+b2_draw_B: pre-registration says k=20 · N=125 · pool sha256/16=c534b50db41c7f4b
+b2_draw_B: re-derived pool · N=125 · sha256/16=c534b50db41c7f4b
+b2_draw_B: ✅ population matches the pre-registration EXACTLY (size and hash)
+
+b2_draw_B: DRAW EXECUTED · k=20 · rule floor(i*N/20) over the ascending pool
+b2_draw_B: indices  : 0 6 12 18 25 31 37 43 50 56 62 68 75 81 87 93 100 106 112 118
+b2_draw_B: DRAWN IDS: 80 846 4465 7483 12098 32309 35783 37738 41414 44942 47364 50808 54678 57941 62354 66155 69278 72515 76830 81744
+b2_draw_B: draw sha256/16 = 828aa5758085b01c
+
+b2_draw_B: ⚠️ THESE ROWS ARE NOT YET SCORED. Per the pre-registration's own
+           clauses: score from the ROW AND THE RULE ONLY, publish the verdicts
+           BEFORE checking them against anything, and DISCARD-and-report any
+           drawn row later found named by the codebook rather than re-labelling it.
