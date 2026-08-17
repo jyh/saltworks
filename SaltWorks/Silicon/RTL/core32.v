@@ -6,12 +6,23 @@
 // Blocks: fetch (PC + next-PC), decode/control + immgen, register file,
 // ALU, memory interface, writeback select.
 module core32(clk, rst_n, instr, dmem_rdata, dmem_addr, dmem_wdata, dmem_be,
-              imem_addr);
+              dmem_req, dmem_we, imem_addr);
     input         clk, rst_n;
     input  [31:0] instr;
     input  [31:0] dmem_rdata;
     output [31:0] dmem_addr, dmem_wdata;
     output [3:0]  dmem_be;
+    // ⭐ THE MEMORY PORT ③ NEEDS, and the reason it is TWO WIRES rather than a
+    // decode the plane repeats. `dmem_addr8` consumes `req` and `we_in`; the only
+    // strobes core32 used to expose were opcode-only, so a plane wiring them would
+    // falsify `DriveMap` (docs/silicon-stage3-drivemap-gap-0817.md).
+    //
+    // These two ARE the kernel's `req` and `isSW`: dmem_req = isLW ∨ isSW and
+    // dmem_we = isSW, both funct3-gated. Exporting them — rather than letting the
+    // plane re-derive them from `dmem_be` or an opcode compare — is what makes
+    // `DriveMap` hold BY CONSTRUCTION and, more importantly, READABLE: the
+    // hypothesis names two ports, and two ports is exactly what crosses.
+    output        dmem_req, dmem_we;
     output [31:0] imem_addr;
 
     // ---- the survey's named boundaries -----------------------------------
@@ -119,6 +130,11 @@ module core32(clk, rst_n, instr, dmem_rdata, dmem_addr, dmem_wdata, dmem_be,
     assign dmem_wdata = rf2;
     assign dmem_be    = {4{is_store_w}};
     assign ld_out     = dmem_rdata;
+    // The seam, exported. `dmem_req` is the kernel's `req` (isLW ∨ isSW) and
+    // `dmem_we` is `isSW` — see the port comment above for why the plane must NOT
+    // re-derive these.
+    assign dmem_req   = is_load_w | is_store_w;
+    assign dmem_we    = is_store_w;
 
     // writeback select
     assign wb_val = is_load_w ? ld_out : (is_jal|is_jalr) ? pc_plus_4 :
