@@ -145,7 +145,12 @@ chk "wrapped bracket: receipt NOT body"  'deadbeefdeadbeef'         0
 #         shape that carries the substance and the shape I nearly failed to cover.
 chk "fenced: wrapped-shape withheld"     'FENCEPOS-BODY'             0
 chk "fenced: one-line shape withheld"    'FENCEONELINE-SUBSTANCE'    0
-chk "fence notice announces itself"      'B2-FENCE'                  3
+chk "fence notice announces itself"      'WITHHELD BY FENCE'         3
+# ⛔ THE NOTICE MUST NOT NAME THE CATEGORY IT WITHHELD (helm 22:52): a receipt
+# names the transaction, not the goods. The old label leaked "B2" to the one
+# reader the fence exists to keep it from -- a smaller leak, same direction, out
+# of the mechanism built to stop it. Negative control on the notice itself.
+chk "notice leaks no category label"     'B2-FENCE'                  0
 # ⚠️ THE NEGATIVE CONTROL, AND IT IS THE POINT OF THE WHOLE REV. Withholding by
 # keyword would blind me to my OWN (C) dispatch — silently, and on precisely the
 # one message the fence exists to preserve me for. A post ADDRESSED to silicon

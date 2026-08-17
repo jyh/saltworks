@@ -123,8 +123,19 @@ function fence_markers(body,   m) {
 }
 function emit(st, body,   marked, n, m) {
   if (FENCE_ON && fenced_p(body) && substr(body, 1, 60) !~ /SILICON|Silicon/) {
+    # ⛔ THE NOTICE IS A RECEIPT, AND A RECEIPT NAMES THE TRANSACTION, NOT THE
+    # GOODS (helm, 22:52). The label said "B2-FENCE", which told the protected
+    # reader the CATEGORY of the thing being kept from them -- a smaller leak
+    # than the body, in the same direction, out of the mechanism built to stop
+    # it. Neutral label now; size stays (explicitly permitted); the CARRIES list
+    # stays because it is WAKE markers (HALT / ALL SEATS / CAPTAIN / names-me),
+    # never the matched pool token -- wake-ability is not the thing being fenced.
+    # ⚠️ IRREDUCIBLE RESIDUAL, STATED RATHER THAN PAPERED OVER: the notice still
+    # discloses THAT a fenced post exists and WHEN. That cannot be removed while
+    # I remain wakeable -- emitting nothing would trade my ignorance for my
+    # deafness, which is the trade this whole rev refuses.
     m = fence_markers(body)
-    print st " [B2-FENCE: body withheld, " length(body) "B unseen" \
+    print st " [WITHHELD BY FENCE: " length(body) "B unseen" \
           (m == "" ? "" : " - CARRIES:" m) " - open the bus deliberately if this must be read]"
     fflush()
     return
