@@ -35,11 +35,17 @@ fail=0; n=0
 
 seq8() { python3 -c "print(','.join(f'$1[{i}]' for i in range(8)))"; }
 
-run() {  # run <name> <lean-basename> <netlist> <top> <inputs> <outputs>
+run() {  # run <name> <lean-basename> <netlist> <top> <inputs> <outputs> [extra-flags]
+  # $7 (optional, word-split ON PURPOSE) carries importer flags a row needs, e.g.
+  # `--pin-reset rst_n`. Added 8/17 for dmem8, whose 256 dfrtp flops REFUSE to
+  # import without it. The default is empty, so every pre-existing row is
+  # byte-identical to before — and that is not an assertion, it is what the
+  # check mode below MEASURES on all five of them.
   local name=$1 base=$2 nl=$3 top=$4 ins=$5 outs=$6
   n=$((n+1))
+  # shellcheck disable=SC2086
   python3 "$IMP" "$nl" --top "$top" --out "$TMP/$base" --name "$name" \
-      --inputs "$ins" --outputs "$outs" >"$TMP/$base.log" 2>&1
+      --inputs "$ins" --outputs "$outs" ${7:-} >"$TMP/$base.log" 2>&1
   if [ $? -ne 0 ]; then
     echo "  ✗ $base — importer FAILED"; sed 's/^/      /' "$TMP/$base.log"; fail=1; return
   fi
@@ -101,6 +107,27 @@ run ceCNL CompareExchangeC.lean SaltWorks/Silicon/Flow/ce_c_nl.v ce_c \
 run dmemAddr8NL DmemAddr8.lean SaltWorks/Silicon/Flow/dmem_addr8_nl.v dmem_addr8 \
     "$(python3 -c "print(','.join(f'byte_addr[{i}]' for i in range(32)))"),req,we_in" \
     "misaligned,out_of_range,trap,we_out,word_index[0],word_index[1],word_index[2]"
+
+# --- dmem8: THE 8×32 DATA MEMORY. 673 cells, 256 dfrtp flops, 1984 gates. -----
+# ADDED 8/17 with the datum (D1a), same discipline as dmem_addr8 above: a datum
+# lands WITH its reproduction row, never before one.
+#
+# ⚠️ THE ONLY ROW HERE THAT CARRIES AN IMPORTER FLAG, and the flag is the whole
+# reason D1a is a job rather than a `cp`: dmem8's 256 flops are `dfrtp` (async
+# reset), which the importer REFUSES outright without `--pin-reset`. Under the
+# flag `rst_n` is held at the INACTIVE value the CELL MODEL declares (1) — never
+# a value the caller picks — and the emitted datum is namespaced
+# `Restricted_rst_n_eq_1` so no theorem can quote it without the restriction.
+#
+# ⭐ rst_n IS DELIBERATELY ABSENT FROM --inputs, and the importer enforces that
+# rather than trusting me: it refused my first invocation because a pinned net
+# left in --inputs would let a theorem DRIVE the very net the restriction fixes.
+# So the port arithmetic is 70 port bits = 37 design inputs + 32 outputs + the
+# 1 pinned reset, and the missing bit is the restriction itself.
+run dmem8NL Dmem8.lean SaltWorks/Silicon/Flow/dmem8_nl.v dmem8 \
+    "clk,we,$(python3 -c "print(','.join(f'addr[{i}]' for i in range(3)))"),$(python3 -c "print(','.join(f'wdata[{i}]' for i in range(32)))")" \
+    "$(python3 -c "print(','.join(f'rdata[{i}]' for i in range(32)))")" \
+    "--pin-reset rst_n"
 
 # NOTE: RefComparator.lean is NOT listed — it is hand-written on purpose, a
 # structurally different reference design so that agreeing with the imported

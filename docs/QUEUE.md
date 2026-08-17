@@ -1054,6 +1054,41 @@ OPEN ITEMS:
   (math+compiler shared per the plan); ③'s own doors and gates are
   unchanged by it. Door 2 of ③ noted LANDED since (fb3842a,
   Decoder.lean:333). Full roll-call table in the session record.**
+- **⭐⭐⭐ D1a DISCHARGED — `Dmem8.lean` EMITTED, INDEXED, REPRODUCIBLE AND
+  ELABORATING (silicon, 08/17, on the narrow channel; the 08/17 ruling below
+  is NOT rewritten).**
+  **BUILD ROW, which the caveat makes owed and which is the point of the
+  row:** `saltbuild EXIT=0` · `✔ [4/4] Built SaltWorks.Silicon.Imported.Dmem8
+  (4.7s)`. ⚠️ **BUILT, not `Replayed`** — the sibling `BitSliced` on the same
+  run says `Replayed`, so the distinction is visible in the same output: a
+  replayed module proves the cache, this one ran the elaborator.
+  **THE DATUM:** 673 cells (417 logic / 256 sequential) → 1984 gates, 256
+  flops cut, 293 inputs (37 design + 256 state), 288 outputs (32 design +
+  256 next-state). Readback vs vendor Liberty: 32 vectors × 288 outputs,
+  agrees. Conservation: text-scan 256 = parsed 256 = cut 256.
+  ⭐ **1984 gates / 256 flops REPRODUCES the dmem8-scale figure banked at
+  `1f9d2c0` (08/12) from an independent regeneration** — that figure was
+  carried as a claim about a green that was never re-derived; it now is.
+  ⛔ **THE RESTRICTION IS THE WHOLE JOB, and it is why D1a was work rather
+  than a copy: dmem8's 256 flops are `dfrtp` (async reset) and the importer
+  REFUSES them outright without `--pin-reset`.** Under it `rst_n` is held at
+  the inactive value the CELL MODEL declares, never one the caller picks; the
+  datum is namespaced `Restricted_rst_n_eq_1` so no theorem can quote it
+  without carrying the restriction. **It says NOTHING about the deassertion
+  seam and must never be cited as covering reset or bring-up.**
+  ✅ **AND THE IMPORTER ENFORCED THE RESTRICTION AGAINST ME rather than
+  trusting me:** my first invocation listed `rst_n` in `--inputs` and was
+  REFUSED — a pinned net left in the input list would let a theorem drive the
+  very net the restriction fixes. ⇒ Port arithmetic: 70 port bits = 37 design
+  inputs + 32 outputs + **1 pinned reset**, and the missing bit IS the
+  restriction.
+  📌 `reimport.sh` carries the row (`run()` gained an optional 7th arg for
+  importer flags): **6 of 6 regenerable datums reproduce byte-for-byte**, the
+  five pre-existing rows included — which is the control that the `run()`
+  change is inert, measured rather than asserted. Registered debt unchanged
+  and still named: RefComparator (hand-written) · Fabric · FabricCut (CI
+  artifact).
+  ⚖️ **THE BAR MET IS THE AMENDED BAR.** Not "C3 passed".
 - **⭐⭐⭐ THE 08/17 COUNCIL RULING — P1 SHRINKS TO D1a + ③, AND ③'s SCOPE
   GROWS BY F4's HYPOTHESIS-DISCHARGE (07:5x, the Captain at the named
   council, his words: "yes to all four, wake silicon"):**

@@ -62,6 +62,7 @@ import SaltWorks.Silicon.Imported.Switch
 import SaltWorks.Silicon.Imported.Fabric
 import SaltWorks.Silicon.Imported.FabricCut
 import SaltWorks.Silicon.Imported.DmemAddr8
+import SaltWorks.Silicon.Imported.Dmem8
 import SaltWorks.Silicon.Equiv.ComparatorEquiv
 import SaltWorks.Silicon.Equiv.Columns
 import SaltWorks.Silicon.Equiv.BitSliced
