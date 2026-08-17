@@ -1,4 +1,9 @@
 /-
+Copyright (c) 2026 Jason Hickey. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Jason Hickey, Claude
+-/
+/-
 ⚠️ NON-LIBRARY METAPROGRAM — NOT part of `SaltWorks`, NOT reachable from the hub,
 and it never should be.  It is a TOOL that imports the library in order to walk
 its environment; counting it as a module the hub "fails to reach" is a category
