@@ -54,6 +54,22 @@ theorem dmemAddr8_trap_is_index_2 :
     dmemAddr8NL_out_names.getD 2 "" = "trap"
     ∧ dmemAddr8NL_outs.getD 2 0 = 72 := by decide
 
+/-- `ins 33` IS the port the RTL declares as `we_in`, and `ins 32` IS `req` — read
+from the datum's own recorded INPUT name table rather than rested on positional
+convention. `dmemAddr8_we_out_implies_store_requested` below indexes 33 and 32;
+these two lemmas are what tie those numerals to the declared ports.
+
+The INPUT form is deliberately NOT a copy of the output form above. The output side
+carries two lists — `dmemAddr8NL_outs : List Nat` (net numbers) and
+`dmemAddr8NL_out_names` — so its lemmas need two conjuncts to tie name → position →
+net. The input side carries one list, because `ins 33` IS the position: there is no
+net number to bind, and a second conjunct would cite a list that does not exist. -/
+theorem dmemAddr8_we_in_is_index_33 :
+    dmemAddr8NL_in_names.getD 33 "" = "we_in" := by decide
+
+theorem dmemAddr8_req_is_index_32 :
+    dmemAddr8NL_in_names.getD 32 "" = "req" := by decide
+
 /-- The datum's port coverage is TOTAL: it omits no declared output, so no
 guarantee below is quietly scoped to a sub-cone. -/
 theorem dmemAddr8_no_omitted_outputs :
@@ -142,6 +158,8 @@ section Audit
 open Salt.Tactic
 #audit_axioms SaltWorks.Silicon.Imported.dmemAddr8_we_out_is_index_3
   SaltWorks.Silicon.Imported.dmemAddr8_trap_is_index_2
+  SaltWorks.Silicon.Imported.dmemAddr8_we_in_is_index_33
+  SaltWorks.Silicon.Imported.dmemAddr8_req_is_index_32
   SaltWorks.Silicon.Imported.dmemAddr8_no_omitted_outputs
   SaltWorks.Silicon.Imported.dmemAddr8_bool_suppress
   SaltWorks.Silicon.Imported.dmemAddr8_net78_eq
