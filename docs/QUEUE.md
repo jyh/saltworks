@@ -1089,6 +1089,22 @@ OPEN ITEMS:
   and still named: RefComparator (hand-written) · Fabric · FabricCut (CI
   artifact).
   ⚖️ **THE BAR MET IS THE AMENDED BAR.** Not "C3 passed".
+- **⭐ ROUTE (A)'s PREREQUISITE DEMONSTRATED — the import RUNS and the
+  strobes BIND BY NAME (14:2x, silicon; recorded with the verb the day
+  earned):** core32 imports cleanly at 4,441 instances → 18,439 gates,
+  1,024 flops cut with conservation 1024=1024=1024, readback agreeing
+  with vendor Liberty on 32 vectors × 1,124 outputs, and
+  **`dmem_req`/`dmem_we` bound BY DECLARED NAME at indices 68/69** —
+  which is exactly the antidote the discharge-block refuters said does
+  NOT exist for `--cut` boundaries and DOES exist for declared ports.
+  The two constant bits `imem_addr[1:0]` are omitted and the datum
+  RECORDS the omission (`core32NL_outs_omitted`), so it is
+  machine-visible rather than silent. ⛔ **STATED PRECISELY: this is a
+  DEMONSTRATION, not a landing — helm checked at 14:2x and
+  `SaltWorks/Silicon/Imported/Core32.lean` is NOT in the tree yet.**
+  The discharge wave stays sequenced AFTER the offboard RTL freeze;
+  this only proves its road is open. Track-early applies to the datum
+  when silicon lands it.
 - **✅✅ CELL COVERAGE CLOSED — `b3be185`, THE MECHANICAL RUNG OF THE
   SEPT-7 AIM IS DONE (14:1x; helm-verified at the bytes: +31 lines
   `Cells/Sky130.lean`, +26 `Importer/import_netlist.py`):** by the
