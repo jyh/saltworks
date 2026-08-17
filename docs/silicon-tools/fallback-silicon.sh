@@ -140,13 +140,18 @@ while true; do
   elif ! command -v python3 >/dev/null 2>&1; then
     km="** python3 ABSENT -- ACCOUNT CHECK DID NOT RUN **"
   else
-    km=$(python3 -c 'import json,sys
-try:
-    a = {}  # [REDACTED: account-object read]
-    e = a.get("emailAddress")
-    print(e if e else "** NO emailAddress FIELD **")
-except Exception as ex:
-    print("** ACCOUNT READ FAILED: %s **" % ex)' "$acctf" 2>&1)
+    # ⛔ THE ACCOUNT READ WAS REDACTED AT THE 2026-08-16 PUBLIC FLIP, and the field
+    #   then printed "** NO emailAddress FIELD **" — which READS AS A MEASUREMENT of
+    #   the account file and is not one. The file still HAS the field; only the read
+    #   was removed. A disabled check that reports like a negative reading is worse
+    #   than an absent one, so the field now says WHY it is silent.
+    #   ⚠️ THE CHECK ITSELF IS NOT RESTORED HERE. `boot-checks-read-the-machine`
+    #   makes it a real signal ("mismatch ⇒ post and STOP"), so its absence is a
+    #   STANDING GAP, reported to the helm 18:19 and not self-authorised: a public
+    #   tool doing account introspection is a disclosure question, not an
+    #   executor's. The repair belongs in the seat's own private boot procedure, or
+    #   behind an env var with a loud refusal — the shape the flip adopted for BUS.
+    km="** ACCOUNT CHECK DISABLED — read redacted at the public flip; this is NOT a reading **"
   fi
   # ⛔ '±512B' WITHDRAWN 2026-08-15 21:0x. That precision was never earned: the
   # only hard datum was ONE witnessed cut (29 KB, 12 entries lost on 8/11), which
