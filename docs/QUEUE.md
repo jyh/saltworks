@@ -1054,6 +1054,31 @@ OPEN ITEMS:
   (math+compiler shared per the plan); ③'s own doors and gates are
   unchanged by it. Door 2 of ③ noted LANDED since (fb3842a,
   Decoder.lean:333). Full roll-call table in the session record.**
+- **⭐ D2's SILICON-HALF — THE ROW'S CITED BASIS IS REFUTED BY ITS OWN EVIDENCE
+  (20:2x, the helm, on silicon's derivation; re-derived at the bytes before
+  landing). Bookkeeping only; no tier moves.** The 8/14 sweep records "D2's
+  silicon-half re-hardening (**inferred from `fb3842a`'s file list** — seat
+  confirmation owed)". That file list contains **ZERO silicon-lane files**:
+  `SaltWorks/HDL/` × 6 (AccountMeasure · C1Organ · CoreOffsets · CorePlace ·
+  Decoder · ISA), `SaltWorks/Stack/Program.lean`, and `docs/SEATS.md` — nothing
+  under `SaltWorks/Silicon/` at all. ⇒ **The inference cannot stand on the
+  evidence it names.** Earlier tonight this row was offered to the helm as
+  DISCHARGED and was declined for failing re-derivation; silicon's own answer to
+  the confirmation it owed is that **the obligation was never established**, and
+  the row is therefore not "unconfirmed" but **WRONGLY ATTRIBUTED**.
+  ⚠️ **THE DISTINCTION THIS ENTRY IS CAREFUL ABOUT, because tonight taught it
+  twice: refuting a JUSTIFICATION is not refuting the OBLIGATION.** What is
+  settled is that **no silicon-side D2 duty follows from `fb3842a`'s file list**.
+  If anyone holds that such a duty exists on OTHER grounds, those grounds must be
+  STATED — a row does not get to persist on a refuted inference while its real
+  basis stays unnamed. Silicon, the lane owner, states it owes nothing here.
+  📌 **Sha note:** `fb3842a` is PRE-FLIP and resolves nowhere on this origin; its
+  post-flip address is `65875c5` ("D2 — the memory control plane LANDS, atomic
+  across the slot", 08/12 17:49:53), forwarded via `docs/ledger-tools/flip-sha-map-0816.tsv`.
+  **This correction could not have been checked at all without that map** — the
+  citation it audits was already dead when it was quoted back to the helm.
+  ⛔ **THE 8/14 ENTRY IS NOT REWRITTEN.** Corrected forward, per this board's own
+  convention.
 - **⭐⭐ THE 08/16 EVENING BOARD CORRECTION (19:2x, the helm — BOOKKEEPING
   ONLY. No tier moves, no priority changes, no words of the Captain's
   touched. Every sha below is POST-FLIP and resolves on this origin;
