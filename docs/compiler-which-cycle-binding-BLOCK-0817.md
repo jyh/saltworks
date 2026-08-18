@@ -491,6 +491,39 @@ RTL  the byte-phase bus adapter     busadapt8 (silicon, f0a1e18) — rung zero
 
 ### 7.5.1 · CROSS-VERIFICATION OF `busadapt8` (f0a1e18) — first pass, as its cross-verifier
 
+> ⛔⛔ **CORRECTED 20:1x — MY FIRST PASS BELOW PASSED THIS SITE, AND IT SHOULD HAVE FLAGGED
+> IT EMPTY. Silicon then MEASURED the defect.** *They put the real core in the loop and got
+> **98 consecutive STORE loops with ZERO separators** — the adapter never fetches again once
+> a store is latched, **because there is NO INSTRUCTION-RETIRE SIGNAL IN THE RTL.***
+>
+> **WHERE MY READING WENT WRONG, precisely:** *I argued the stall set is expressible because
+> the free-running **phase counter** is internal state and therefore lives in `Env`. True,
+> and **irrelevant** — the phase counter answers **"which phase of the loop am I in"**, and
+> my `stalls` asks **"did this cycle retire an instruction"**. **THOSE ARE DIFFERENT
+> PREDICATES**, and they coincide only if exactly one phase per loop retires, which is
+> precisely what the missing signal fails to establish.*
+>
+> ⇒ ***CRITERION (c)'s THIRD LANDING SITE IS EMPTY. There is no RTL object for the Lean
+> stall set to BE THE SAME AS.*** **Whatever retire mechanism is added must BE this
+> predicate in hardware, or the `:2306` bridge cannot be re-landed at all.** *That is
+> CO-DESIGN — neither seat owns it — and it goes on the council pack.*
+>
+> 🔑 **AND THE PART THAT IS MINE TO SIT WITH: §7.5.2 BELOW SPECIFIES EXACTLY THE TEST THAT
+> WOULD HAVE CAUGHT THIS** *(a word-derived stall set vs a phase-derived one, disagreeing on
+> a trace)* **— and I wrote it as a DEBT instead of building it. The defect it was designed
+> to catch was found four hours later by someone else's measurement.** *`a-declared-limit-
+> may-be-fixable`: an honest caveat feels discharged and changes nothing. **A cross-verifier
+> whose reject-demo is unbuilt is exactly the decoration the table's verifier clause names.***
+>
+> ✅ **THE DEMO IS NOW BUILT — `SaltWorks/HDL/ScratchRejectDemo.lean`, EXIT=0, no `sorryAx`:**
+> `criterion_c_is_a_real_check` — *the SAME machine (`mixCyc`, `seenWord`) **SATISFIES** the
+> arm at `mixStalls` and is **REFUTED** at the all-stall set.* ⇒ **the predicate is NOT
+> invariant under the stall set, so "same object" is a CHECK THAT CAN FAIL rather than a
+> courtesy — naming the wrong object is refutable IN THE KERNEL.** *Which is the exact
+> hazard the empty RTL site creates: get the object wrong and the sentence is FALSE, not
+> merely unproved.*
+
+
 ✅ **THE ADAPTER'S STALL SET IS EXPRESSIBLE AS `stalls : Env → Bool`, AND THAT IS NOT
 AUTOMATIC.** *Its decision 3 free-runs the phase counter and makes a transaction occupy
 whole 4-phase loops — so which cycles retire an instruction is determined by **the phase
@@ -506,7 +539,7 @@ OBJECT criterion (c) quantifies over, and (c) must be RE-RUN — it does not sur
 change for free.*** **I am flagging it now, while the adapter is a draft and re-shaping is
 cheap, rather than at the freeze.**
 
-### 7.5.2 · ⚠️ MY REJECT-DEMONSTRATION IS OWED, AND HERE IS ITS EXACT SHAPE
+### 7.5.2 · ✅ MY REJECT-DEMONSTRATION — SPECIFIED HERE AT 19:4x, BUILT AT 20:1x (see 7.5.1)
 
 *The table's verifier clause says a cross-verifier who only reads is decoration, and owes
 one demonstration that the check CAN reject. **I have not built mine.** Specified so it is
