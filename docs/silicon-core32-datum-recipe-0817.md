@@ -1,6 +1,6 @@
 # THE core32 DATUM — RECIPE, NOT ARTIFACT. A decision taken under act-and-account.
 
-## ⛔⛔ THIS RECIPE NO LONGER RUNS — MEASURED 2026-08-18, AND THE GOOD NEWS IS *WHY*
+## ✅ REPAIRED 2026-08-18 14:3x — THE RECIPE RUNS AGAIN, AND WHAT FOLLOWS IS KEPT AS THE RECORD OF WHY IT DID NOT
 
 ***`en` LANDED AT `5f25f53` AFTER THIS RECIPE WAS WRITTEN, AND A NEW INPUT PORT IS A
 BREAKING CHANGE TO EVERY CONSUMER — INCLUDING A RECIPE THAT NAMES AN `--inputs`
@@ -25,12 +25,41 @@ reason this block is a NOTICE and not an incident.* ⚠️ *The refusal is the i
 not mine; I did not build this protection and am not taking credit for it. I found it
 by running the recipe instead of reading it.*
 
-⛔ **WHAT I AM DELIBERATELY *NOT* DOING: REGENERATING ANYTHING.** *How `en` should
-appear in the datum — a 67th input, or tied, or excluded with a stated reason — is a
-question about `en`'s SHAPE, and `en`'s shape is **item 10, TWO-SIGNATURE, on the
-Captain's desk**. Regenerating would settle by keystroke what is reserved for two
-signatures. **The recipe stays broken and LOUDLY SO until that rules.** Restoring the
-snapshots after the test above was verified by `git status` returning clean.*
+⚖️ **RULED, AND THEN REPAIRED. Captain 2026-08-18 14:3x: "Yes, also settle en's place."**
+*Until that ruling I deliberately regenerated NOTHING — how `en` appears in the datum is
+a question about `en`, and regenerating would have settled by keystroke what was
+reserved for two signatures.*
+
+✅ **THE CHOICE: `en` IS AN INPUT OF THE DATUM, APPENDED LAST (index 66).** *Reasons,
+strongest first:*
+- **IT IS TRUE.** *`en` is an input of `core32` today; a datum omitting it describes a
+  module that does not exist.*
+- **IT IS REPRESENTATION ONLY.** ***A FREE INPUT ASSERTS NOTHING ABOUT WHAT DRIVES
+  IT***, so naming it does NOT adopt `en = retire`. **The enable remains a MARKED
+  VALIDATION ARTIFACT** — that is the settled/not-ratified boundary and it is why this
+  choice fits inside the ruling rather than exceeding it.
+- **APPENDED, NOT INSERTED.** *Indices 0..65 are unchanged.* ⚠️ *Precondition VERIFIED,
+  not assumed: `grep -rn core32NL --include=*.lean` returns **ZERO** citers, while the
+  same probe finds `ins 32`/`ins 33` in `Certs/DmemKernelBridge.lean` — so the probe CAN
+  see positional indexing and simply does not find any here. Those indices belong to
+  `dmemAddr8`'s table, a DIFFERENT datum.*
+- ⛔ **TIED was REJECTED:** *it bakes in a mechanism the ruling does not ratify and
+  collapses 992 enable flops.*
+- ⛔ **EXCLUDED was REJECTED:** *it needs the importer to accept an undriven, unlisted
+  port — i.e. to SOFTEN the refusal that is the only reason this surfaced as a finding
+  instead of a silent wrong datum.* ***THE REFUSAL STAYS EXACTLY AS STRICT AS IT IS. A
+  chain that halts on a stale recipe is the property, not the friction.***
+
+✅ **DRIVEN BOTH WAYS ON THE REAL OBJECTS, not asserted:**
+```
+POSITIVE  --inputs WITH en (as the recipe now reads)   EXIT 0, datum written,
+          conservation text-scan 1024 = parsed 1024 = cut 1024, and a 32-vector
+          readback over 1,124 outputs AGREES WITH VENDOR LIBERTY
+NEGATIVE  --inputs WITHOUT en (the old list)           EXIT 1, and the message is
+          byte-identical: "importer: net 'en' has no driver and is not an input"
+```
+⇒ **The refusal SURVIVED the repair. That was the thing to protect, and it is checked
+rather than promised.***
 
 📌 **AND THE COMMITTED `Flow/core32_stat.txt` IS STALE THE SAME WAY** (168 vs 169;
 its ports == port bits, which is itself the tell that it was produced in SPLITNETS
@@ -74,7 +103,7 @@ cd SaltWorks/Silicon/Flow && SYNTH_SPLITNETS=1 ./synth.sh core32
 
 # 2. import, omitting the two CONSTANT bits (imem_addr = {pc_q[31:2], 2'b00}, so after
 #    splitnets the low two bits have no driver and the importer refuses to invent one)
-INS=$(python3 -c "print('clk,rst_n,'+','.join(f'instr[{i}]' for i in range(32))+','+','.join(f'dmem_rdata[{i}]' for i in range(32)))")
+INS=$(python3 -c "print('clk,rst_n,'+','.join(f'instr[{i}]' for i in range(32))+','+','.join(f'dmem_rdata[{i}]' for i in range(32))+',en')")
 OUTS=$(python3 -c "print(','.join(f'dmem_addr[{i}]' for i in range(32))+','+','.join(f'dmem_wdata[{i}]' for i in range(32))+','+','.join(f'dmem_be[{i}]' for i in range(4))+',dmem_req,dmem_we,'+','.join(f'imem_addr[{i}]' for i in range(2,32)))")
 python3 SaltWorks/Silicon/Importer/import_netlist.py \
     SaltWorks/Silicon/Flow/core32_nl.v --top core32 --out Core32.lean \
@@ -84,12 +113,21 @@ python3 SaltWorks/Silicon/Importer/import_netlist.py \
 **WHAT IT PRODUCES, measured 08/17 (recorded so a regeneration can be CHECKED, not
 trusted):**
 ```
+⛔ THE 08/17 FIGURES, SUPERSEDED — kept because a regeneration is CHECKED against
+   what it replaced, not against nothing:
 4,441 instances (3,417 logic / 1,024 sequential) → 18,439 gates
 1,090 inputs (66 design + 1,024 state) · 1,124 outputs (100 design + 1,024 next-state)
-conservation  text-scan 1024 = parsed 1024 = cut 1024
-readback      32 vectors × 1,124 outputs — agrees with VENDOR LIBERTY
-core32NL_out_names   dmem_req → index 68 · dmem_we → index 69
-core32NL_outs_omitted = ["imem_addr[0]", "imem_addr[1]"]
+
+✅ RE-MEASURED 2026-08-18 14:3x, WITH `en` APPENDED AND SHAPE A LANDED:
+4,444 instances (3,420 logic / 1,024 sequential) → 18,559 gates
+1,091 inputs (67 DESIGN + 1,024 state) · 1,124 outputs (100 design + 1,024 next-state)
+conservation  text-scan 1024 = parsed 1024 = cut 1024                          OK
+readback      32 vectors × 1,124 outputs — agrees with VENDOR LIBERTY          OK
+datum         396,098 B / 19,776 lines  (still ~6.4× the read cap — STILL a recipe,
+              NOT an artifact; nothing here reverses that decision)
+⇒ THE DELTA IS EXACTLY WHAT WAS EXPECTED AND THAT IS THE CHECK: +1 DESIGN INPUT
+  (66 → 67) is `en`; +3 instances / +120 gates is shape A's combinational cost;
+  SEQUENTIAL IS UNCHANGED AT 1,024 — no new state, as the retire design demanded.
 ```
 ⚠️ **THOSE FIGURES ARE FOR THE 08/17 RTL AND WILL MOVE THE MOMENT THE ADAPTER LANDS.
 That is the point: a recipe re-derives, an artifact rots.**
