@@ -77,8 +77,20 @@ of `C4Spec c`**. It is a CONSTRUCTION task, not a restatement task.
 
 **Current status in the tree:** `C4Spec` is **consumed everywhere and inhabited nowhere**,
 and the build is green — the helm's 15:58:02 ruling names this as *"the green-and-wrong
-state"*. The nearest candidate is **refuted**: `not_C4Spec_coreShaped` (:2859), and see
-also `not_both_coreShaped_C4Spec` (:2472).
+state"*. The nearest candidate is **refuted**: `not_C4Spec_coreShaped`
+(**`SaltWorks/Stack/Program.lean`:2859**), and see also `not_both_coreShaped_C4Spec`
+(**`SaltWorks/Stack/Program.lean`:2472**).
+
+> ⛔ **CORRECTED 17:1x, AND THE BLIND ARM FOUND IT — the defect this packet warned about,
+> committed by the packet.** *As first written, both were bare `:2859` / `:2472` inside an
+> Object B section headed by `SaltWorks/HDL/C4.lean:76` — so **the file attribution came
+> from PLACEMENT, and placement said C4.lean, which is 178 lines long.*** The line numbers
+> were right; **both declarations live in `Program.lean`.** ⚠️ *Also corrected: the
+> `stepT_undecodable` pin (ISA.lean:1128) sits **one line inside** its declaration, whose
+> keyword line is 1127.* 🔑 ***I verified 7/7 declaration citations mechanically and still
+> shipped two wrong attributions, because what I checked was `name → line` and what a
+> reader resolves is `name → FILE:line`. **A bare line number inherits its file from the
+> nearest heading, and inheritance is not citation.***
 
 ---
 
