@@ -46,7 +46,18 @@ open SaltWorks.Silicon.Imported
 
 /-- **THE PORT MAP, NAMED.** The plane drives the datum's `we_in` (input 33) from the
 decoder's `isSW` bit and its `req` (input 32) from the decoder's access strobe. This is a
-fact about the wiring; it is assumed here and proved nowhere, deliberately. -/
+fact about the wiring; it is assumed here and proved nowhere, deliberately.
+
+⚠️ **`w` IS A PARAMETER, AND AFTER THE INSTR-BYPASS REPAIR THAT MATTERS.** *This structure
+never says WHICH word — only that nets 32/33 agree with the `ctrlSpec` of the `w` you
+instantiate it at. So the STATEMENT needed nothing when the source of the decode changed;
+what needed re-wording is the SATISFACTION argument below.*
+⛔ ***INSTANTIATE `w` AT A PURE DECODE OF THE **CURRENT** `c_instr`, NEVER AT "whatever is in
+`instr_r`".*** *Since the instruction-bypass repair (silicon, ratified 08/18 16:5x)
+`c_instr` is a **MUX**: `instr_r` on most cycles and the word BEING ASSEMBLED for the single
+deciding cycle of a fetch loop. **A consumer that silently fixed `w := instr_r`'s contents is
+wrong for one cycle per fetch loop — and that is exactly the cycle the repair exists to
+change, so it is not a corner.*** -/
 structure DriveMap (w : BitVec 32) (ins : Nat → Bool) : Prop where
   we  : ins 33 = (ctrlSpec w)[6]!
   req : ins 32 = (ctrlSpec w)[7]!
@@ -92,6 +103,16 @@ fc5ed0e 08:18  funct3-gated strobes land in the core.
 a76b647 08:27  memplane8 is built: core32 exports dmem_req / dmem_we -- the
                kernel's `req` and `isSW` -- carried to the mask BY DIRECT WIRE.
                ⇒ DriveMap holds BY CONSTRUCTION. Door 1 is NO LONGER SILENT.
+2c3694f 08/18  ⛔ THE DIRECT WIRE BECOMES A MUX. The instr-bypass repair feeds the
+               decode from the word BEING ASSEMBLED for the deciding cycle of a
+               fetch loop, and from `instr_r` otherwise.
+               ⇒ DriveMap STILL HOLDS -- `w` is a parameter -- but it must be read
+                 as "of the CURRENT c_instr". The one-wire phrasing above is no
+                 longer the whole truth and is kept only as the dated record.
+               ⚠️ THIS IS THE SECOND TIME A WIRING SENTENCE IN THIS FILE WENT STALE
+                 UNDER A LANDING (see the twenty-two-minute note below). A wiring
+                 claim is a MEASUREMENT WITH A DATE, and this file is now explicit
+                 that it re-dates rather than corrects.
 ```
 ⚠️ **BUT IT IS STILL AN ASSUMPTION IN THIS FILE, AND A READER MUST NOT TAKE IT FOR A
 DISCHARGE.** `DriveMap` is satisfied *by construction in the RTL*; it is NOT proved in the
