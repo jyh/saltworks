@@ -145,5 +145,30 @@ for f in "$B" "${RP:-}" "${BP:-}"; do
    $(basename "$f"): $((ALL-OK)) of $ALL TOKENFP line(s) UNPARSEABLE -- matched by NO arm
    above, therefore UNCHECKED rather than pending. Write digits, or delete the line."; fi
 done
+# 7. ⛔ THE UNNAMED HALF — arms 3/4/5 check exactly THREE files: this brief, the file named
+#    by REFERENCE-HALF:, and the file named by BANK:. That is a HARDCODED POPULATION, and a
+#    bank that crosses the Read cap gets SPLIT, and the split half is named by whatever the
+#    author happened to type. If they do not wire it into one of those three pointers, its
+#    fingerprint is checked BY NOTHING -- which is the very defect arm 4 was born from
+#    (08/16 21:5x), and it will recur every time anyone splits.
+#    ⇒ SO STOP LISTING AND ENUMERATE. Any *.md beside the brief that carries a TOKENFP is
+#      making a claim about its own size; verify it, named or not.
+#    ⚠️ Files already covered above are skipped so nothing double-reports. Files belonging
+#      to OTHER seats are reported too -- that is a READ, not a write, and a peer whose
+#      figures have drifted wants to know. Ownership governs WRITES, not READS.
+for f in "$(dirname "$B")"/*.md; do
+  [ -r "$f" ] || continue
+  case "$f" in "$B"|"${RP:-}"|"${BP:-}") continue;; esac
+  LC_ALL=C grep -q 'TOKENFP:' "$f" || continue
+  XB=$(wc -c < "$f" | tr -d ' '); XL=$(wc -l < "$f" | tr -d ' ')
+  while IFS='|' read -r tok fb fl; do
+    [ -z "$tok" ] && continue
+    if [ "$fb" != "$XB" ] || [ "$fl" != "$XL" ]; then OUT="$OUT
+   $(basename "$f") (UNPOINTED half — checked by no other arm): claims ${tok} tok @ ${fb} B/${fl} lines; file is now ${XB} B/${XL} lines -- STALE"; fi
+  done <<EOF
+$(LC_ALL=C grep -oE 'TOKENFP: [0-9][0-9,]* tok @ [0-9][0-9,]* B/[0-9][0-9,]* lines' "$f" \
+  | sed -E 's/TOKENFP: ([0-9,]*) tok @ ([0-9,]*) B\/([0-9,]*) lines/\1|\2|\3/' | tr -d ,)
+EOF
+done
 [ -n "$OUT" ] && printf '  ⛔ SELF-STALE FIGURES IN MY OWN BRIEF:%s\n' "$OUT"
 exit 0
