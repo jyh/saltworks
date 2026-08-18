@@ -5,9 +5,14 @@
 //
 // Blocks: fetch (PC + next-PC), decode/control + immgen, register file,
 // ALU, memory interface, writeback select.
-module core32(clk, rst_n, instr, dmem_rdata, dmem_addr, dmem_wdata, dmem_be,
+module core32(clk, rst_n, en, instr, dmem_rdata, dmem_addr, dmem_wdata, dmem_be,
               dmem_req, dmem_we, imem_addr);
     input         clk, rst_n;
+    // ⚠️ ENABLE LANDED FOR VALIDATION — SHAPE AWAITING COMPILER SEAM CHECK.
+    // `en` is the adapter's `retire`. Architectural state advances ONLY when it is
+    // high; every other cycle is a STALL cycle by definition (design §1: stall ≡
+    // ¬retire, one object). Tie high for the single-cycle configuration.
+    input         en;
     input  [31:0] instr;
     input  [31:0] dmem_rdata;
     output [31:0] dmem_addr, dmem_wdata;
@@ -31,7 +36,7 @@ module core32(clk, rst_n, instr, dmem_rdata, dmem_addr, dmem_wdata, dmem_be,
     (* keep *) wire        br_taken, alu_zero;
 
     reg [31:0] pc_r;
-    always @(posedge clk) if (!rst_n) pc_r <= 32'h0; else pc_r <= pc_next;
+    always @(posedge clk) if (!rst_n) pc_r <= 32'h0; else if (en) pc_r <= pc_next;
     assign pc_q = pc_r;
     assign imem_addr = {pc_q[31:2], 2'b00};
 
@@ -85,7 +90,7 @@ module core32(clk, rst_n, instr, dmem_rdata, dmem_addr, dmem_wdata, dmem_be,
 
     // register file (31 x 32, 2 read ports)
     reg [31:0] regs [1:31];
-    always @(posedge clk) if (reg_we && rd != 5'd0) regs[rd] <= wb_val;
+    always @(posedge clk) if (en && reg_we && rd != 5'd0) regs[rd] <= wb_val;
     assign rf1 = (rs1 == 5'd0) ? 32'b0 : regs[rs1];
     assign rf2 = (rs2 == 5'd0) ? 32'b0 : regs[rs2];
 

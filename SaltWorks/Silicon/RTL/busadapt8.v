@@ -45,7 +45,7 @@
 module busadapt8(clk, rst_n, sof,
                  c_imem_addr, c_dmem_addr, c_dmem_wdata, c_dmem_req, c_dmem_we,
                  c_instr, c_dmem_rdata,
-                 pin_in, pin_out, phase_pins);
+                 pin_in, pin_out, phase_pins, retire);
     input         clk, rst_n, sof;
     // from the 32-bit-parallel core
     input  [31:0] c_imem_addr, c_dmem_addr, c_dmem_wdata;
@@ -56,6 +56,12 @@ module busadapt8(clk, rst_n, sof,
     input  [7:0]  pin_in;      // ui_in  — returned byte, low byte first
     output [7:0]  pin_out;     // uo_out — address byte, then store-data byte
     output [1:0]  phase_pins;  // uio_out[1:0] — TYPE at phase 0, PHASE at 1..3
+    // ⚠️ ENABLE LANDED FOR VALIDATION — SHAPE AWAITING COMPILER SEAM CHECK.
+    // `retire` is ONE WIRE and the stall predicate is its complement (design §1).
+    // Landed under the helm's raised ceiling to CLOSE THE LOOP AND MEASURE; its
+    // shape where it meets compiler's predicate is NOT settled here and must not
+    // be read as ratified. Two signatures are owed before that.
+    output        retire;
 
     // ---- decision 3: the phase counter free-runs, sof realigns it -------------
     reg [1:0] phase;
@@ -97,6 +103,11 @@ module busadapt8(clk, rst_n, sof,
                 kind <= c_dmem_req ? (c_dmem_we ? T_STORE : T_LOAD) : T_FETCH;
             end
         end
+
+    // §2's derivation, verbatim: a DECODE of the frame, introducing no new state.
+    assign retire = loop_end && ( (kind == T_FETCH) ? ~c_dmem_req
+                                : (kind == T_LOAD)  ? 1'b1
+                                : (kind == T_STORE) ? store_beat : 1'b1 );
 
     // ---- decision 1: TYPE at phase 0, PHASE at 1..3 --------------------------
     assign phase_pins = (phase == 2'd0) ? kind : phase;
