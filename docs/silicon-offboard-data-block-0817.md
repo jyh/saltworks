@@ -311,7 +311,8 @@ whose slips arrive only at the deadline is a schedule that lied for three weeks.
 
 # THE TEMPORAL OWNERSHIP TABLE, EMBEDDED BYTE-IDENTICAL
 
-**Canonical: `docs/temporal-ownership-TABLE-0817.md`, compiler's pen, committed at `7f38ad8`.
+**Canonical: `docs/temporal-ownership-TABLE-0817.md`, compiler's pen. RE-EMBEDDED 08/17 19:0x at `f3957c3` — the 7f38ad8 copy went
+STALE and my 12:24 EXIT=0 receipt kept asserting an equality that had stopped holding.
 Embedded here under the helm's 12:02 order; verified by `docs/ledger-tools/table_identical.sh`,
 which is compiler's instrument and not mine — a copy checked by its own author's tool is not checked.**
 
@@ -344,7 +345,7 @@ Compiler holds the pen on this file; silicon's block embeds its bytes verbatim.*
 | T3 | bus-protocol **FSM proof** | **silicon** | compiler | silicon's offboard block | a trace where the FSM deadlocks mid-transaction and every current check stays green |
 | T4 | arbitration **fairness**, restated as **BOUNDED WAIT** | **silicon** | compiler | silicon's offboard block | a fetch waiting longer than the stated phase bound, with no gate that counts |
 | T5 | **store-path timing** — `dmem_we` rising vs the beat leaving the pins | **silicon** | compiler | silicon's block + the seam statement | `we` on beat *n*, data on beat *n+k*, and the seam theorem still elaborates |
-| T6 | **`ISA.step` / `runWords` extension** | **compiler** | silicon | `Stack/Program.lean` | `runWords_succ` still closing by `rfl` afterwards — if it does, no stall entered the object |
+| T6 | **`ISA.step` / `runWords` extension** | **compiler** | silicon | `Stack/Program.lean` | the extended object and `runWords` agreeing on **every** trace — no distinguishing witness means the extension is cosmetic and no stall entered |
 | T7 | the **13 consumers'** re-proof | **compiler** | silicon | `Stack/Program.lean` | any consumer whose statement changed while its proof did not |
 | T8 | the **K/N unit re-cut** (UK1) | ⛔ **the Captain, via the helm** | both | routed, not designed here | a guard passing at a fraction of the intended instructions — green and wrong |
 
@@ -366,6 +367,24 @@ obligation nobody could discharge became an arithmetic one.***
 ⚠️ *And the structural reason starvation cannot arise: a data transaction exists only
 because an instruction was already fetched. **There is no source of data traffic
 independent of fetch.***
+
+## ⛔ T6's CONTROL WAS A FALSE NEGATIVE, AND THIS TABLE FROZE IT INTO THREE FILES
+
+*Repaired 2026-08-17 14:0x. The original read: "`runWords_succ` still closing by `rfl`
+afterwards — if it does, no stall entered."* **`runWords_succ` is `rfl` BY THE SHAPE OF THE
+RECURSION** *(`Program.lean:1413-1414`)*; *it survives any word-stream encoding, so it
+would have reported "no stall entered" **while a stall had entered**.*
+
+🔑 ***AND THE TELL IS STRUCTURAL, VISIBLE BY READING THE COLUMN DOWN: every other control
+names a FAILURE STATE — something green-and-wrong that can occur while the obligation is
+undischarged. T6 alone named a PASS CONDITION.*** *A control that describes success cannot
+discriminate; it can only agree with you.*
+
+⚠️ **THE INTERFACE ARTIFACT'S FIRST REAL LESSON, AND IT CUTS BOTH WAYS.** *Byte-identity
+did exactly what it was built to do and **propagated a defective row to three files at
+once**. A shared interface makes agreement cheap and makes a defect in the interface
+maximally expensive. **The cmp check proves the copies match; it cannot prove the original
+is right** — and nothing in the mechanism ever will.
 
 ## THE COLUMN THAT DOES THE WORK IS THE LAST ONE
 
@@ -458,3 +477,97 @@ probe, which is the rung whose cost I actually do not know.**
 📌 *The held core32 datum (394 KB, 6.4× my read cap) stays held under the helm's
 15:15 ruling. My §1(1) argument against monoliths applies to it, and the discharge
 block's round 2 owns the resolution — after the offboard RTL freezes, not before.*
+
+---
+
+# REVISION 4 — RUNG ZERO AT THE HEAD; THE R9 ROWS STRUCK; A LYING RECEIPT REPAIRED
+
+**Under the Captain's ACT-AND-ACCOUNT law (ratified 19:1x): where I would have stood
+down, I proceed and account. Absorbing refuter verdicts `seat 7eb6658` (5/5 HOLD, 12
+FATAL) and the recon `seat f54d74e`. Rung zero is assigned: OWNER SILICON,
+CROSS-VERIFIER COMPILER.**
+
+## §16 · THE FATAL THAT WAS LIVE IN THE TREE — REPAIRED FIRST, BEFORE ACCOUNTING
+
+```
+canonical moved   7f38ad8 (5,043 B) → f3957c3 (6,249 B)
+my embed          stayed at 5,043 B; table_identical EXIT=1 at char 2103
+my 12:24 receipt  EXIT=0 — TRUE WHEN PUBLISHED, and asserting it ever since
+REPAIRED          re-embedded at f3957c3; both 6,249 B / 18f990b87a9c6356; EXIT=0
+```
+⛔ **A RECEIPT THAT WAS TRUE WHEN WRITTEN IS NOT A RECEIPT THAT IS TRUE.** *The rotted
+sha READ AS CONFIRMING — which is the precise failure my own citation law names, landing
+on the one artifact I built to be checkable.* ⇒ ***The embed now cites `f3957c3` and
+says why the previous one rotted. A copy must carry the version it copied, or the cmp
+is a ritual.***
+
+⚠️ **AND THE SUBSTANCE UNDER IT: the canonical repaired T6's control as a FALSE
+NEGATIVE** — `runWords_succ` closes by `rfl` from the shape of the recursion, so the
+control would report *"no stall entered"* **while a stall had entered.** ***I am T6's
+cross-verifier. Frozen at the old bytes, I would have read a broken control out of my
+own document and passed it. The table's requirement that a verifier be able to say NO
+was defeated by my copy being stale, not by my judgement.***
+
+## §17 · §14's R9 ROWS ARE STRUCK, NOT AMENDED
+
+**Ownership moved to COMPILER at 15:58. §14 dated a rung that is not mine and my own
+prose promised to work it.**
+```
+STRUCK  "R9 · C4Spec WITNESS … 09-01→09-04"          — not silicon's to date
+STRUCK  §14's "attempt the witness … at the first idle seam"
+STRUCK  §15's routing of freed capacity to the R9 probe
+```
+⛔ ***THOSE SENTENCES WOULD HAVE PUT A SECOND PEN ON COMPILER'S RUNG — against the
+one-pen custody clause I helped write six hours after destroying a file for want of
+it.*** **Silicon's R9 duty is CROSS-VERIFICATION and nothing else, and the block
+scheduled no such duty — that omission is itself corrected here: my cross-verification
+of R9 is dated with compiler's rung, not before it.**
+
+## §18 · THE CLAIM LADDER'S VERB IS CORRECTED, AND ITS MISSING ROW ADDED
+
+```
+STRUCK   RUNG 2 "DriveMap PROVED in RTL"
+         false at three levels: the discharge HELD with five fatals; the RTL makes
+         DriveMap TRUE OF THE HARDWARE, which is not a proof; and no Lean object
+         inhabits it
+CORRECT  RUNG 2 = "TRUE OF THE HARDWARE BY CONSTRUCTION, ASSUMED IN LEAN"
+ADDED    a C4Spec row at the same rung — the ladder had NO ROW FOR IT AT ALL, so the
+         statement-tier object routed to the Captain UNDER-REPORTED the proof debt
+         by exactly the seam rev 3 was written to add
+```
+
+## §19 · §7 IS THE FSM's SPECIFICATION, AND IT HAS FATALS — WHICH DECIDES TONIGHT'S ORDER
+
+The refuters found §7 under-specified **at the pins**:
+```
+· the four transaction types are INDISTINGUISHABLE at the interface — the host must
+  drive `ui` for FETCH and LOAD but not STORE, and NO chip→host signal says which
+· the `sof` framing the design assumes HAS NO PORT ON THE CORE
+· the gate-level bench asserts `phase_o` increments mod 4 EVERY cycle, which my own
+  arbitration rule breaks the moment a data transaction owns the bus
+```
+⇒ ***§7 IS THE FSM's SPEC. Drafting the FSM tonight against a spec with three fatals
+would produce a draft whose retraction is guaranteed rather than cheap.*** **The
+alternative measured: repair §7 first — that repair IS the specification — and the FSM
+draft becomes a transcription instead of a guess.**
+
+## §11′ · THE PLAN, RE-DERIVED WITH RUNG ZERO AT ITS HEAD
+
+```
+RUNG ZERO  build and measure the COMPOSITION — owner SILICON, x-verifier COMPILER
+           (1) composed top: LW/SW plane + fabric/neuron complex in the 24-pin
+               wrapper, via the byte-phase adapter §7 specifies
+           (2) synth + layout receipts NAMED BY FILE (stat, DRC/LVS, real PDN)
+           (3) the TTNDF manifest brought true; scaffold header retired
+           (4) a bench driving at least one LW and one SW through the pins
+           CONTROL: any composed-area claim must cite a COMMITTED stat file whose
+           netlist greps positive for BOTH a core/plane instance AND banyan_fabric.
+           NO FILE, NO CLAIM.
+⇒ everything above re-derives behind it. The 08-27 freeze is load-bearing on rung
+  zero ALONE. NOT DATED TONIGHT — dating it is the fourth cost-guess I have refused
+  today, and it is refused until §7's fatals are repaired.
+```
+⛔ **AND MY 112,962 µm² / 48.6% IS RETIRED BY MY OWN HAND** *(struck on the bus 18:57)*:
+it was measured on `tt_um_saltworks_ndf_composed.v`, a **scratchpad file that has never
+existed in this tree**. It is precisely the green-and-wrong state rung zero's control
+row names, and it was mine.
