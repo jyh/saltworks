@@ -299,6 +299,36 @@ while true; do
       # and the window drops under the measured ceiling so both survive.
       # ⚠️ 487 is MEASURED, not documented; treat it as an observation that can
       # move, which is why the window leaves headroom rather than sitting on it.
+      # 2026-08-17 -- THE ADDRESSEE TRAVELS IN THE FIELD THIS PASS DISCARDS.
+      # The attribution shortening at :288-301 is CORRECT and stays: a 123-char
+      # provenance note must not crowd out an order. But the fleet convention puts the
+      # ADDRESSEE in that same discarded region, so the reader is handed an order with
+      # no way to tell whose it is. MEASURED 08/17: six consecutive orders reached this
+      # seat looking possibly-mine. One was a CHANNEL RECEIPT TEST for a DARK seat,
+      # where an ack from the wrong seat would have CERTIFIED A WAKE CHANNEL THAT HAD
+      # NEVER REACHED ITS SEAT. What saved it was a body duplicate written by the
+      # sender, not this filter.
+      # => Keep the seat token, nothing else. VERIFIED over the FULL object before
+      #   landing: all 53 maestro headers of 08/17 -> SILICON ORDER 16, COMPILER 9,
+      #   EVIDENCE 4, SILICON 1, VERSO 1, none 22; and the 4 EVIDENCE hits are EXACTLY
+      #   the four posts addressed to this seat that day. Zero misses, zero false hits.
+      # NOTE it is a HINT, not a gate. A wrong hint costs a check; NO hint cost a
+      # near-false-ACK on a peer receipt test.
+      # TWO TRAPS THIS PATCH FELL INTO AND A SUCCESSOR SHOULD NOT:
+      #   1. NO APOSTROPHES HERE. The awk program is inside a single-quoted shell
+      #      string; one apostrophe ends the quote and the rest becomes shell.
+      #      Caught by bash -n.
+      #   2. bash -n PASSES ON BROKEN AWK. The first working draft put the new
+      #      assignment on the same line as the ternary and awk refused at runtime
+      #      while the shell parsed fine. Caught ONLY by running the real script
+      #      against a real bus. Never land an edit here on a static check alone.
+      function addressee(h,   rest) {
+        rest = h
+        sub(/^\[[^,]*, [A-Za-z0-9_-]+/, "", rest)
+        if (match(rest, /(EVIDENCE|SILICON|COMPILER|MATH|VERSO)( ORDER)?/))
+          return " <to:" substr(rest, RSTART, RLENGTH) ">"
+        return ""
+      }
       function emit(s, b,   n, out, pre) {
         n = length(b)
         pre = (n > 430) ? "[+" (n - 430) "B BELOW CEILING — read the bus] " : ""
@@ -330,6 +360,7 @@ while true; do
         ism = (tolower(owner) == "maestro")
         stamp = (match($0, /^\[[0-9]+\/[0-9]+ [0-9:x]+, [A-Za-z0-9_-]+/) \
                  ? substr($0, RSTART, RLENGTH) "]" : "[?]")
+        stamp = stamp addressee($0)
         body = $0
         sub(/^\[[^]]*\][[:space:]]*/, "", body)
         pend = 0
