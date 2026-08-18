@@ -7,7 +7,7 @@ module tb;
   wire [31:0] imem_a, dmem_a, dmem_wd; wire dmem_rq, dmem_we_w;
   wire [31:0] instr, rdata; wire [7:0] pin_out; wire [1:0] ph;
   reg  [7:0]  pin_in=8'h13;
-  core32 core(.clk(clk),.rst_n(rst_n),.instr(instr),.dmem_rdata(rdata),
+  core32 core(.clk(clk),.rst_n(rst_n),.en(1'b1),.instr(instr),.dmem_rdata(rdata),
     .dmem_addr(dmem_a),.dmem_wdata(dmem_wd),.dmem_be(),
     .dmem_req(dmem_rq),.dmem_we(dmem_we_w),.imem_addr(imem_a));
   busadapt8 ad(.clk(clk),.rst_n(rst_n),.sof(sof),

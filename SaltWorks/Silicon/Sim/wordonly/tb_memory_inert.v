@@ -39,7 +39,7 @@ module tb;
   wire [31:0] dmem_addr, dmem_wdata, imem_addr;
   wire [3:0]  dmem_be;
 
-  core32 dut(.clk(clk), .rst_n(rst_n), .instr(instr), .dmem_rdata(dmem_rdata),
+  core32 dut(.clk(clk), .rst_n(rst_n), .en(1'b1), .instr(instr), .dmem_rdata(dmem_rdata),
              .dmem_addr(dmem_addr), .dmem_wdata(dmem_wdata), .dmem_be(dmem_be),
              .imem_addr(imem_addr));
 

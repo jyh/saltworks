@@ -54,7 +54,9 @@ module memplane8(clk, rst_n, instr, imem_addr,
     wire [2:0]  a_word_index;
 
     core32 u_core(
-        .clk(clk), .rst_n(rst_n), .instr(instr),
+        // en TIED HIGH: memplane8 is the SINGLE-CYCLE configuration. Left floating
+        // since 5f25f53 this silently froze the core — found by the executor, 08/18.
+        .clk(clk), .rst_n(rst_n), .en(1'b1), .instr(instr),
         .dmem_rdata(m_rdata),
         .dmem_addr(c_dmem_addr), .dmem_wdata(c_dmem_wdata), .dmem_be(c_dmem_be),
         .dmem_req(c_dmem_req), .dmem_we(c_dmem_we),
