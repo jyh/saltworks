@@ -87,6 +87,48 @@ module busadapt8(clk, rst_n, sof,
     // FIXED HERE rather than pushed into the spec: `sof` now reframes the TRANSACTION
     // as well as the counter. A host that realigns gets a clean loop boundary, which
     // is what realigning is FOR.
+    // ⭐⭐ SHAPE A — `kind` CONSULTS `retire`. RATIFIED by the Captain 2026-08-18
+    // 14:2x ("yes, ratify shape A") after compiler showed shapes A and B
+    // EQUIVALENT for its object, which put the choice here alone.
+    //
+    // ── WHAT WAS WRONG, AND IT IS NOT WHAT §3 OF THE DESIGN SAYS ────────────────
+    // The 08/18 ruling: `retire` appeared NOWHERE in this arbitration, and what
+    // actually released the fetch was `instr_r` committing UNGATED. THE TWO
+    // DEFECTS CANCELLED. Concretely, the old `else` arm re-derived `kind` from
+    // `c_dmem_req` at every loop boundary — including after a LOAD or a completed
+    // STORE. But `c_dmem_req` is a PURE DECODE of the instruction still held in
+    // `instr_r`, so it CANNOT FALL until a new instruction is fetched: the old
+    // code asked "is there a memory request?" of a signal that answers YES for as
+    // long as the same instruction is loaded. It only ever escaped because
+    // `instr_r` updated behind its back.
+    //
+    // ── WHY SHAPE A AND NOT SHAPE B ("the request clears on retire") ────────────
+    // `SaltWorks/Certs/DmemKernelBridge.lean` declares
+    //     req : ins 32 = (ctrlSpec w)[7]!
+    // i.e. `dmem_req` is a PURE FUNCTION OF THE INSTRUCTION WORD, and its
+    // docstring says it is "assumed here and proved nowhere, deliberately".
+    // Making it clear on retire turns it into a function of CYCLE STATE, so
+    // `DriveMap` becomes FALSE at that port — and being an ASSUMED hypothesis,
+    // NOTHING WOULD CATCH IT: F4 door 1 would rest on a false premise with a
+    // green build. It also reaches a composition nobody was changing, because
+    // `memplane8` discharges `DriveMap` BY DIRECT WIRE.
+    // ⇒ So the sequencing lives HERE, where no proof binds, and `c_dmem_we`
+    //   below is read as a PURE DECODE only (DriveMap-safe).
+    //
+    // ⛔ THE SCOPE OF THE RULING, IN THE RULING'S OWN TERMS — do not let a green
+    // here be read as any of these:
+    //   · it REPAIRS the arbitration.
+    //   · it does NOT close criterion (c). Compiler's `Env` question is open:
+    //     `stalls : Env → Bool` and `retire` is not a function of `Env`.
+    //   · it does NOT ratify the enable. `en = retire` remains a MARKED
+    //     VALIDATION ARTIFACT and `plane32bus` carries that marking forward.
+    //
+    // ⚠️ AND ONE THING I DO NOT KNOW, LEFT VISIBLE RATHER THAN SMOOTHED: `instr_r`
+    // is written on the phase-3 edge and `kind`/`store_beat` update on that SAME
+    // edge, so this decision reads a `c_dmem_req` derived from the PREVIOUS
+    // instruction. Whether that is off-by-one or exactly right I have not proved;
+    // the design's §3 was already wrong about its own mechanism once, so a
+    // plausible story is not good enough here. The bench is what speaks.
     always @(posedge clk)
         if (!rst_n) begin kind <= T_FETCH; store_beat <= 1'b0; end
         else if (sof) begin
@@ -94,13 +136,23 @@ module busadapt8(clk, rst_n, sof,
             kind <= c_dmem_req ? (c_dmem_we ? T_STORE : T_LOAD) : T_FETCH;
         end
         else if (loop_end) begin
-            if (kind == T_STORE && !store_beat) begin
-                // a store owns a SECOND loop for its data; the type code stays
-                // T_STORE so the host knows the datum is coming.
-                store_beat <= 1'b1;
-            end else begin
+            if (retire) begin
+                // the instruction is DONE — by the frame's own decode, not by a
+                // request that cannot fall. Next loop fetches the next one.
+                kind       <= T_FETCH;
                 store_beat <= 1'b0;
-                kind <= c_dmem_req ? (c_dmem_we ? T_STORE : T_LOAD) : T_FETCH;
+            end else if (kind == T_FETCH) begin
+                // a committed memory instruction: its ADDRESS loop is next.
+                // `c_dmem_we` is isSW, a pure decode — no DriveMap exposure.
+                kind       <= c_dmem_we ? T_STORE : T_LOAD;
+                store_beat <= 1'b0;
+            end else begin
+                // reachable ONLY as "a store that has sent its address": for
+                // T_LOAD retire is 1 at loop_end, and for T_STORE with
+                // store_beat=1 retire is 1, so both take the first arm. `kind`
+                // is deliberately NOT reassigned — the type code stays T_STORE so
+                // the host knows the datum is coming.
+                store_beat <= 1'b1;
             end
         end
 
