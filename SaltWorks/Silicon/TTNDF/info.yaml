@@ -1,5 +1,25 @@
 # TinyTapeout manifest — NDF (neural dataflow fabric). TTSKY26c.
 #
+# ⭐⭐ 2026-08-18 -- THE SCAFFOLD NOTICE BELOW HAS COME TRUE IN PART AND IS SUPERSEDED,
+# NOT DELETED. It is kept verbatim because it asked to be: it warns that a red
+# validator with no explanation is how a scaffold gets "fixed" by deleting the lines
+# waiting to become true. **Its own condition is now MET, so the notice had turned
+# from protecting a PENDING claim into protecting a STALE one -- which is the same
+# sentence doing the opposite job.**
+#   WHAT IS TRUE NOW   tt_um_saltworks_ndf.v EXISTS, is committed, regenerates
+#                      byte-identically from gen_ndf_wrapper.py, and carries the
+#                      2-2-1 sequencer. `source_files` below is the real 6-file
+#                      transitive closure, DERIVED and GATED by
+#                      docs/silicon-tools/manifest_check.sh (driven both ways: it
+#                      FAILED on this file before the repair, PASSES after).
+#   ⛔ WHAT IS STILL   `src/` holds NO .v files at all, only config.json -- the RTL
+#      NOT TRUE, AND    lives in ../RTL/ and reaches a submission tree only through
+#      DO NOT READ      assemble.sh · there is NO test/ directory, so there is no
+#      THE ✅ AS        PROJECT_SOURCES to agree with · no docs/info.md · no README.
+#      COVERING IT      **THIS IS STILL NOT A SUBMITTABLE TREE.** "Manifest brought
+#                       true" is a cross-file agreement receipt and nothing more.
+#   📌 WHICH TOP SHIPS is the Captain's ladder call and is NOT decided here.
+#
 # ⚠️ THIS IS A SCAFFOLD, PRE-RTL. Created 2026-08-10 01:1x on the maestro's explicit
 # word during the R8 night wave. `validate.py` WILL FAIL against it until compiler's
 # fire-plan item 4 (tt_um_saltworks_ndf + the 2-2-1 sequencer) lands the source files
@@ -54,10 +74,34 @@ project:
 
   top_module: "tt_um_saltworks_ndf"
 
-  # PENDING compiler's fire-plan item 4. Listed so the manifest states its intent;
-  # keep in sync BY HAND with test/Makefile's PROJECT_SOURCES.
+  # ✅ BROUGHT TRUE 2026-08-18. This is the TRANSITIVE CLOSURE of the top declared
+  # above, DERIVED by docs/silicon-tools/manifest_check.sh and not typed: that tool
+  # recomputes this set from the RTL and REFUSES on any disagreement, so the "nothing
+  # checks that they agree" note below is no longer true of THIS field.
+  #
+  # ⛔ THIS IS NOT A LADDER DECISION AND MUST NOT BE READ AS ONE. Which top ships is
+  # the Captain's call. All this does is make source_files agree with the top_module
+  # ALREADY DECLARED one line above; if that ruling names tt_um_saltworks_ndf_c32
+  # instead, change top_module and manifest_check.sh will REFUSE until this list
+  # follows (that closure is 8 files: plane32bus.v + core32.v + busadapt8.v in,
+  # slicea16bma.v out).
+  #
+  # ⚠️ STILL BY HAND, STILL UNCHECKED: agreement with PROJECT_SOURCES in a
+  # test/Makefile. TTNDF HAS NO test/ DIRECTORY AT ALL, so there is nothing to agree
+  # with yet — the gap is not closed, it is EMPTY. Do not read the ✅ above as
+  # covering it.
+  #
+  # 📌 sky130_fd_sc_hd__* standard cells are NOT listed and MUST NOT BE:
+  # mac_cell_signed_shell and ser_organ are kernel-emitted GATE-LEVEL netlists that
+  # instantiate library cells, which the PDK supplies. A reader recomputing this
+  # closure will meet those names and should stop there.
   source_files:
     - "tt_um_saltworks_ndf.v"
+    - "banyan_fabric.v"
+    - "bitserial_switch.v"
+    - "mac_cell_signed_shell.v"
+    - "ser_organ.v"
+    - "slicea16bma.v"
 
 # PIN MAP — bit-exact, transcribed from the FROZEN D6 map
 # (docs/ndf-top-module-design-v1.md:278), amendment CONFIRMED by the Captain at R5
