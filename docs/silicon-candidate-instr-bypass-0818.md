@@ -94,6 +94,53 @@ original was never edited):
 - **The fit work stands** — area unaffected by anything in this document, 34.27% at
   `ab54ce7`.
 
+## ⚖️ RATIFIED 2026-08-18 16:5x — AND HELD, BECAUSE CONDITION (1) IS NOT YET SATISFIABLE
+
+**The Captain ratified on these receipts plus compiler's structural read. TWO
+CONDITIONS came with it, and I am recording both here BEFORE landing, because a
+condition recorded after the fact is not a condition.**
+
+### CONDITION (1) — cite compiler's F4 door-1 re-wording BY SHA in the landing commit
+⛔ **NOT SATISFIABLE AS OF 16:5x, MEASURED NOT ASSUMED.** *`git fetch` then
+`git log origin/master -- SaltWorks/Certs/DmemKernelBridge.lean` returns four commits
+and **all four are dated 08/17** (`037dbb3` 08:40 · `bb5e248` 08:21 · `5c1b46d` 08:15
+· `914f85c` 08:12). Origin's newest commit overall is my own `2c3694f`.* **THE
+RE-WORDING HAS NOT LANDED, SO THERE IS NO SHA TO CITE.**
+⇒ ***I AM HOLDING THE LANDING. A ratification condition is not satisfied by
+proceeding without it, and a sha I guessed or omitted would be worse than a delay of
+minutes.*** *Nothing else blocks me: the patch, the six criteria, the mutation
+control and the regressions are all done and recorded above.*
+📌 **FOR COMPILER, SO THE WAIT IS SHORT AND AIMED: the text I am waiting to cite is
+the door-1 SATISFACTION claim at `DmemKernelBridge.lean`, currently reading**
+`a76b647 08:27 memplane8 is built … ⇒ DriveMap holds BY CONSTRUCTION. Door 1 is NO
+LONGER SILENT.` *That sentence is about the WIRING and my defect is not a wiring
+defect — which is exactly why it needs the qualification your 15:13 line names:
+satisfying `DriveMap` does not mean the store carried the right operand, because
+`decQ` covers regs and pc only. Ping the sha and I land inside a minute.*
+
+### CONDITION (2) — TT's CI is the pre-agreed TIMING REFEREE
+✅ **PRE-REGISTERED HERE AND NOW, WHICH IS THE ONLY TIME IT CAN MEAN ANYTHING:**
+```
+THE REFEREE   TT's CI, at CLOCK_PERIOD 55 ns.
+THE RULE      A 55 ns timing failure REVERTS THIS PATCH. It is reported as a
+              FINDING, not as a problem to be argued down.
+NO            renegotiation, no "it is close enough", no re-scoping of the
+              criterion after the number arrives.
+```
+🔑 ***A REVERT RULE AGREED AFTER A FAILURE IS A RENEGOTIATION; AGREED BEFORE, IT IS A
+REFEREE.*** *This is the timing risk I named in "WHAT I HAVE NOT MEASURED" above —
+the new combinational path on the deciding edge — and it is now bound to a verdict I
+cannot move afterwards.*
+⚠️ *And the referee cannot rule yet for a reason that is not mine: TT CI needs a repo
+created from the TT template and made PUBLIC (checklist §C.4), which is the Captain's
+hand. So the patch may land RATIFIED and TIMING-UNJUDGED for a while. That interval
+is a known, named state — not a green light.*
+
+### The semantic change is SIGNED
+*The `retire`-timing change I flagged (a non-memory instruction retiring at the end
+of its own fetch) is ratified as decQ-visible on compiler's read. Recorded so that
+nobody later treats it as having slipped in under a green suite.*
+
 ## THE ASK
 
 Two signatures, as item 10 got. If it is ratified I land the one-line change, re-synth
