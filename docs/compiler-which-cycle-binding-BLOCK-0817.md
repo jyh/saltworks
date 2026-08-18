@@ -493,10 +493,13 @@ RTL  the byte-phase bus adapter     busadapt8 (silicon, f0a1e18) — rung zero
 
 > ⛔⛔ **CORRECTED 20:1x — MY FIRST PASS BELOW PASSED THIS SITE, AND IT SHOULD HAVE FLAGGED
 > IT EMPTY. Silicon then MEASURED the defect.** *They put the real core in the loop and got
-> **98 consecutive STORE loops with ZERO separators** — the adapter never fetches again once
-> a store is latched, **because there is NO INSTRUCTION-RETIRE SIGNAL IN THE RTL.***
->
-> **WHERE MY READING WENT WRONG, precisely:** *I argued the stall set is expressible because
+> **98 consecutive STORE loops with ZERO separators** in the transaction-type stream.
+> ⛔ **ATTRIBUTION CORRECTED 20:4x — I WROTE "MEASURED" AND THAT IS WRONG.** *What was
+> OBSERVED is the 98/0 trace. What is **ARGUED FROM RTL STRUCTURE** — a sound code reading,
+> not a measurement — is that the machine does not advance: **the type stream provably
+> cannot discriminate a hung machine from a store-only program.** Silicon caught that
+> themselves and the helm corrected the council pack on the record. My finding below rests
+> on a READING, and it is worth no more and no less than that.*> **WHERE MY READING WENT WRONG, precisely:** *I argued the stall set is expressible because
 > the free-running **phase counter** is internal state and therefore lives in `Env`. True,
 > and **irrelevant** — the phase counter answers **"which phase of the loop am I in"**, and
 > my `stalls` asks **"did this cycle retire an instruction"**. **THOSE ARE DIFFERENT
