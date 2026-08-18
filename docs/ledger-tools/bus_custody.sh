@@ -568,10 +568,29 @@ fi
 # GLANCE. The mirror is legitimately behind mid-work, so refusing would be wrong -- it warns
 # and always exits 0 on its own account. It also FAILS OPEN if the mirror is absent: a
 # detector that breaks the pipeline is a guard wearing the wrong label.
-MIRROR="${SEAT_DIR:?SEAT_DIR must be set: the seat repo is machine-local and has no public default}/memory-seats/compiler"
-LIVEBANK="${CLAUDE_MEMORY_DIR:?CLAUDE_MEMORY_DIR must be set: the live memory bank is machine-local and has no public default}"
+# ⛔⛔ 2026-08-17 20:0x — THIS DETECTOR WAS A GUARD WEARING THE WRONG LABEL, AND ITS OWN
+# COMMENT SIX LINES UP FORBADE EXACTLY THAT ("it also FAILS OPEN if the mirror is absent:
+# a detector that breaks the pipeline is a guard wearing the wrong label").
+#   `${SEAT_DIR:?…}` is an UNCONDITIONAL HARD FAIL, evaluated BEFORE the `owed 0` test --
+#   so with SEAT_DIR unset the whole tool died on EVERY post, whether or not it claimed
+#   "owed 0". MEASURED CONSEQUENCE, a four-link chain from one parameter expansion:
+#     unset var -> --selftest's children die (they do not inherit it) -> two arms report
+#     exit 1 under the label ":2h …", which is NOT where they died -> no passing selftest
+#     stamp -> every normal run refuses with exit 5 -> THE AUTHOR REROUTES TO RAW printf
+#     -> 15 posts on 08/17 landed HEADER-ONLY, body empty, invisible to body-keyed readers.
+#   ⇒ THE OVER-BROAD-GUARD LAW, ON MY OWN KIT: a false positive is SILENT because the
+#     author routes around it. I routed around it for a whole day and reported the SYMPTOM
+#     (one-line posts) at 17:5x without ever running --selftest to find the CAUSE.
+# FIX: evaluate INSIDE the branch, default-empty rather than hard-fail, and SAY SO when the
+# check cannot run -- a check that did not run must never look like a check that passed.
 if LC_ALL=C grep -qi 'owed[[:space:]]*[:=]\?[[:space:]]*\(0\|ZERO\|none\)' <<<"$B1" 2>/dev/null; then
-  if [ -d "$MIRROR" ] && [ -d "$LIVEBANK" ]; then
+  MIRROR="${SEAT_DIR:-}/memory-seats/compiler"
+  LIVEBANK="${CLAUDE_MEMORY_DIR:-}"
+  if [ -z "${SEAT_DIR:-}" ] || [ -z "${CLAUDE_MEMORY_DIR:-}" ]; then
+    printf '⚠️  MIRROR DETECTOR INERT: SEAT_DIR/CLAUDE_MEMORY_DIR unset, so your "owed 0"
+   was NOT checked against the memory mirror. This is a WARNING, not a refusal -- but do
+   not read this post as having passed the two-artifact check.\n' >&2
+  elif [ -d "$MIRROR" ] && [ -d "$LIVEBANK" ]; then
     STALE=0
     for lf in "$LIVEBANK"/*.md; do
       [ -e "$lf" ] || continue
