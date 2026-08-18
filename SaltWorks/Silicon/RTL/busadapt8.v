@@ -190,6 +190,30 @@ module busadapt8(clk, rst_n, sof,
             endcase
         end
 
-    assign c_instr      = instr_r;
+    // ⭐⭐ THE INSTRUCTION BYPASS — RATIFIED 2026-08-18 16:5x on the receipts in
+    // docs/silicon-candidate-instr-bypass-0818.md, under two conditions recorded there.
+    //
+    // THE DEFECT IT REPAIRS, measured by Sim/wordonly/tb_plane32bus_lwsw.v: the
+    // arbitration at a fetch's phase-3 edge reads `c_dmem_req`/`c_dmem_we`, which
+    // core32 decodes from `instr` — and at that instant `instr_r` still held the
+    // PREVIOUS instruction. So the transaction following fetch-of-N served N-1 while
+    // the core already saw N. At a store commit: dmem_addr=0x40 with
+    // dmem_wdata=0x00000000, instr_r=0000a183 (the `lw`, rs2=x0), regs[1]=0x40.
+    // ⚠️ THE STORE ADDRESS LOOKED CORRECT ONLY BY COINCIDENCE — both instructions use
+    //   x1 as base, so the DATA was the only quantity that could expose it.
+    //
+    // ⛔ AND `c_instr` IS NOW A MUX, WHICH IS A FACT A CONSUMER MUST READ. compiler
+    // re-worded F4 door 1's satisfaction argument for exactly this at `a212073`:
+    // DriveMap STILL HOLDS because `w` is a PARAMETER, but it must be instantiated at
+    // a pure decode of the CURRENT `c_instr` and never at "whatever is in instr_r" —
+    // a consumer that silently fixes the latter is wrong for one cycle per fetch loop,
+    // and that is precisely the cycle this repair exists to change.
+    //
+    // ⚠️ IT ALSO CHANGES `retire`'s TIMING SEMANTICS, SIGNED as decQ-visible: at a
+    // fetch's phase 3 retire is computed from the NEW instruction, so a non-memory
+    // instruction retires at the end of ITS OWN fetch. Not a pure bugfix; ratified.
+    assign c_instr      = (kind == T_FETCH && phase == 2'd3)
+                            ? {pin_in, in_acc[23:0]}
+                            : instr_r;
     assign c_dmem_rdata = rdata_r;
 endmodule

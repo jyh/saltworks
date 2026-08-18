@@ -6,86 +6,84 @@
         +----------Local Count, excluding submodules.
         |        +-Local Area, excluding submodules.
         |        | 
-     5644        - wires
-     7058        - wire bits
-     1581        - public wires
-     2987        - public wire bits
+     6433        - wires
+     7839        - wire bits
+     1580        - public wires
+     2986        - public wire bits
         8        - ports
        43        - port bits
-     6996 7.97E+04 cells
-        1    8.758   sky130_fd_sc_hd__a2111oi_0
-        8   70.067   sky130_fd_sc_hd__a211o_1
-       28  210.202   sky130_fd_sc_hd__a211oi_1
-        5   37.536   sky130_fd_sc_hd__a21boi_0
-       29  217.709   sky130_fd_sc_hd__a21o_1
-      455 2.28E+03   sky130_fd_sc_hd__a21oi_1
-        3   30.029   sky130_fd_sc_hd__a221o_1
-       21  183.926   sky130_fd_sc_hd__a221oi_1
-        2   20.019   sky130_fd_sc_hd__a222oi_1
-        7   61.309   sky130_fd_sc_hd__a22o_1
-       25   187.68   sky130_fd_sc_hd__a22oi_1
-        4   35.034   sky130_fd_sc_hd__a2bb2oi_1
-        4   40.038   sky130_fd_sc_hd__a311o_1
-       37  324.061   sky130_fd_sc_hd__a311oi_1
-        6    52.55   sky130_fd_sc_hd__a31o_1
-       60   375.36   sky130_fd_sc_hd__a31oi_1
-        4   40.038   sky130_fd_sc_hd__a32o_1
-        4   35.034   sky130_fd_sc_hd__a32oi_1
-        1    8.758   sky130_fd_sc_hd__a41oi_1
-       48  300.288   sky130_fd_sc_hd__and2_0
+     7779 7.79E+04 cells
+        1   11.261   sky130_fd_sc_hd__a2111o_1
+        4   35.034   sky130_fd_sc_hd__a2111oi_0
+        3   26.275   sky130_fd_sc_hd__a211o_1
+       44  330.317   sky130_fd_sc_hd__a211oi_1
+       15  112.608   sky130_fd_sc_hd__a21boi_0
+       41  307.795   sky130_fd_sc_hd__a21o_1
+      612 3.06E+03   sky130_fd_sc_hd__a21oi_1
+       14  140.134   sky130_fd_sc_hd__a221o_1
+       92  805.773   sky130_fd_sc_hd__a221oi_1
+       42  420.403   sky130_fd_sc_hd__a222oi_1
+       24  210.202   sky130_fd_sc_hd__a22o_1
+      167 1.25E+03   sky130_fd_sc_hd__a22oi_1
+        1    8.758   sky130_fd_sc_hd__a2bb2oi_1
+        5   50.048   sky130_fd_sc_hd__a311o_1
+       12  105.101   sky130_fd_sc_hd__a311oi_1
+        8   70.067   sky130_fd_sc_hd__a31o_1
+       48  300.288   sky130_fd_sc_hd__a31oi_1
+        8   70.067   sky130_fd_sc_hd__a32oi_1
+        3   26.275   sky130_fd_sc_hd__a41oi_1
+       74  462.944   sky130_fd_sc_hd__and2_0
       480  3002.88   sky130_fd_sc_hd__and2_1
-       21  131.376   sky130_fd_sc_hd__and3_1
-        1    10.01   sky130_fd_sc_hd__and4b_1
-      189   709.43   sky130_fd_sc_hd__clkinv_1
-      195  3.9E+03   sky130_fd_sc_hd__dfxtp_1
+       17  106.352   sky130_fd_sc_hd__and3_1
+        2   20.019   sky130_fd_sc_hd__and4b_1
+      136   510.49   sky130_fd_sc_hd__clkinv_1
+      185  3.7E+03   sky130_fd_sc_hd__dfxtp_1
       288 6.13E+03   sky130_fd_sc_hd__dfxtp_2
       995 2.99E+04   sky130_fd_sc_hd__edfxtp_1
         6   22.522   sky130_fd_sc_hd__inv_1
-       47  294.032   sky130_fd_sc_hd__lpflow_inputiso1p_1
-       52  325.312   sky130_fd_sc_hd__lpflow_isobufsrc_1
-       12  120.115   sky130_fd_sc_hd__maj3_1
-      294 3.31E+03   sky130_fd_sc_hd__mux2_1
-      131 1.31E+03   sky130_fd_sc_hd__mux2i_1
-      407 9.17E+03   sky130_fd_sc_hd__mux4_2
-      531 1.99E+03   sky130_fd_sc_hd__nand2_1
-       43  269.008   sky130_fd_sc_hd__nand2b_1
-       68  340.326   sky130_fd_sc_hd__nand3_1
-        4   30.029   sky130_fd_sc_hd__nand3b_1
+       44  275.264   sky130_fd_sc_hd__lpflow_inputiso1p_1
+       63  394.128   sky130_fd_sc_hd__lpflow_isobufsrc_1
+       20  200.192   sky130_fd_sc_hd__maj3_1
+      306 3.45E+03   sky130_fd_sc_hd__mux2_1
+       64  640.614   sky130_fd_sc_hd__mux2i_1
+       70 1.58E+03   sky130_fd_sc_hd__mux4_2
+      570 2.14E+03   sky130_fd_sc_hd__nand2_1
+       29  181.424   sky130_fd_sc_hd__nand2b_1
+       95  475.456   sky130_fd_sc_hd__nand3_1
+        3   22.522   sky130_fd_sc_hd__nand3b_1
        11   68.816   sky130_fd_sc_hd__nand4_1
         1    8.758   sky130_fd_sc_hd__nand4b_1
-        1   11.261   sky130_fd_sc_hd__nand4bb_1
-      817 3.07E+03   sky130_fd_sc_hd__nor2_1
-       12   75.072   sky130_fd_sc_hd__nor2b_1
-       53  265.254   sky130_fd_sc_hd__nor3_1
-        3   22.522   sky130_fd_sc_hd__nor3b_1
-        4   25.024   sky130_fd_sc_hd__nor4_1
+     1063 3.99E+03   sky130_fd_sc_hd__nor2_1
+       10    62.56   sky130_fd_sc_hd__nor2b_1
+       95  475.456   sky130_fd_sc_hd__nor3_1
+        2   15.014   sky130_fd_sc_hd__nor3b_1
+        9   56.304   sky130_fd_sc_hd__nor4_1
         1    8.758   sky130_fd_sc_hd__nor4b_1
-        1    8.758   sky130_fd_sc_hd__o2111ai_1
-       11  110.106   sky130_fd_sc_hd__o211a_1
-       74  555.533   sky130_fd_sc_hd__o211ai_1
-       14  105.101   sky130_fd_sc_hd__o21a_1
-      655 3.28E+03   sky130_fd_sc_hd__o21ai_0
-        3   30.029   sky130_fd_sc_hd__o21ba_1
-        4   30.029   sky130_fd_sc_hd__o21bai_1
-        3   33.782   sky130_fd_sc_hd__o221a_1
-       84  735.706   sky130_fd_sc_hd__o221ai_1
-        9   78.826   sky130_fd_sc_hd__o22a_1
-       96  600.576   sky130_fd_sc_hd__o22ai_1
-        6    52.55   sky130_fd_sc_hd__o2bb2ai_1
-        6   60.058   sky130_fd_sc_hd__o311a_1
-       17  148.893   sky130_fd_sc_hd__o311ai_0
-        4   35.034   sky130_fd_sc_hd__o31a_1
-       25   187.68   sky130_fd_sc_hd__o31ai_1
-        2   20.019   sky130_fd_sc_hd__o32a_1
-       11   96.342   sky130_fd_sc_hd__o32ai_1
-        5   43.792   sky130_fd_sc_hd__o41ai_1
+        1   11.261   sky130_fd_sc_hd__o2111a_1
+        2   20.019   sky130_fd_sc_hd__o211a_1
+       56  420.403   sky130_fd_sc_hd__o211ai_1
+       19  142.637   sky130_fd_sc_hd__o21a_1
+      986 4.93E+03   sky130_fd_sc_hd__o21ai_0
+        1    10.01   sky130_fd_sc_hd__o21ba_1
+       11   82.579   sky130_fd_sc_hd__o21bai_1
+        2   22.522   sky130_fd_sc_hd__o221a_1
+       54  472.954   sky130_fd_sc_hd__o221ai_1
+        3   26.275   sky130_fd_sc_hd__o22a_1
+      264 1.65E+03   sky130_fd_sc_hd__o22ai_1
+        2   17.517   sky130_fd_sc_hd__o2bb2ai_1
+        5   50.048   sky130_fd_sc_hd__o311a_1
+       25   218.96   sky130_fd_sc_hd__o311ai_0
+        2   17.517   sky130_fd_sc_hd__o31a_1
+       20  150.144   sky130_fd_sc_hd__o31ai_1
+        3   30.029   sky130_fd_sc_hd__o32a_1
+        9   78.826   sky130_fd_sc_hd__o32ai_1
+        2   17.517   sky130_fd_sc_hd__o41ai_1
        93  581.808   sky130_fd_sc_hd__or2_1
-       20   125.12   sky130_fd_sc_hd__or3_1
-        1    8.758   sky130_fd_sc_hd__or3b_1
-        1    7.507   sky130_fd_sc_hd__or4_1
-       93  814.531   sky130_fd_sc_hd__xnor2_1
-      339 2.97E+03   sky130_fd_sc_hd__xor2_1
+       15    93.84   sky130_fd_sc_hd__or3_1
+        5   37.536   sky130_fd_sc_hd__or4_1
+       75   656.88   sky130_fd_sc_hd__xnor2_1
+      341 2.99E+03   sky130_fd_sc_hd__xor2_1
 
-   Chip area for module '\tt_um_saltworks_ndf_c32': 79730.217600
-     of which used for sequential elements: 39908.275200 (50.05%)
+   Chip area for module '\tt_um_saltworks_ndf_c32': 77949.760000
+     of which used for sequential elements: 39708.083200 (50.94%)
 
