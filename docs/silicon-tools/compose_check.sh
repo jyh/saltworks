@@ -57,7 +57,20 @@ while [ "$changed" = 1 ]; do
     b="$(basename "$f")"; m="${b%.v}"
     case " $SRCS " in *" $b "*) continue ;; esac
     for s in $SRCS; do
-      if grep -qE "(^|[^A-Za-z0-9_])$m([[:space:]]+#\(|[[:space:]]+[A-Za-z_])" "$RTL/$s" 2>/dev/null; then
+            # ⛔⛔ ANCHORED AT LINE START, AND THIS LINE WAS WRONG UNTIL 2026-08-18 14:4x.
+      # It used to match the module name ANYWHERE in the line, so a HEADER COMMENT
+      # naming another module counted as an instantiation: plane32bus.v's comment
+      # says "It is NOT memplane8. memplane8 terminates the data path ON-CHIP
+      # (core32 + dmem_addr8 + dmem8 ...)" and the closure for tt_um_saltworks_ndf_c32
+      # came back with FIFTEEN files instead of EIGHT — pulling in memplane8,
+      # dmem_addr8, dmem8, dmem_addr16 and memif, none of which the design uses.
+      # ⚠️ AND MY OWN HEADER CLAIMED "Same rule as Flow/synth.sh". IT WAS NOT THE SAME
+      #   RULE. I derived it from memory of the sibling instead of reading the sibling
+      #   — [[derive-from-the-spec-not-the-sibling]], on a rule I cited by name.
+      # ⇒ This is now synth.sh's regex VERBATIM. Residual carried with it: a `#(`
+      #   whose parameter list WRAPS ACROSS LINES is still invisible; no such
+      #   instantiation exists in this tree today.
+if grep -qE "^[[:space:]]*$m[[:space:]]+(#\(.*\)[[:space:]]*)?[A-Za-z_]" "$RTL/$s" 2>/dev/null; then
         SRCS="$SRCS $b"; changed=1; break
       fi
     done

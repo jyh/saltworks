@@ -72,19 +72,23 @@ project:
   # setting either in config.json is SILENTLY DISCARDED (dossier:409-419).
   tiles: "6x2"
 
-  top_module: "tt_um_saltworks_ndf"
+  top_module: "tt_um_saltworks_ndf_c32"
 
   # ✅ BROUGHT TRUE 2026-08-18. This is the TRANSITIVE CLOSURE of the top declared
   # above, DERIVED by docs/silicon-tools/manifest_check.sh and not typed: that tool
   # recomputes this set from the RTL and REFUSES on any disagreement, so the "nothing
   # checks that they agree" note below is no longer true of THIS field.
   #
-  # ⛔ THIS IS NOT A LADDER DECISION AND MUST NOT BE READ AS ONE. Which top ships is
-  # the Captain's call. All this does is make source_files agree with the top_module
-  # ALREADY DECLARED one line above; if that ruling names tt_um_saltworks_ndf_c32
-  # instead, change top_module and manifest_check.sh will REFUSE until this list
-  # follows (that closure is 8 files: plane32bus.v + core32.v + busadapt8.v in,
-  # slicea16bma.v out).
+  # ⚖️ THE LADDER IS RULED. Captain 2026-08-18 14:5x: "Yes, ratified. I believe at
+  # 70-88% it will fit. Let's show it." tt_um_saltworks_ndf_c32 IS THE SHIPPING TOP.
+  # This is its 8-file closure: plane32bus + core32 + busadapt8 IN, slicea16bma OUT.
+  # DERIVED by manifest_check.sh and never typed — and that gate REFUSED on the
+  # 6-file list the moment top_module changed, which is exactly what it is for.
+  # ⛔ 70-88% IS THE CAPTAIN'S BELIEF AND A DERIVED BAND, NOT A CLAIM. The claim is
+  # TT's CI verdict and nothing else; if CI says it does not fit, that is a RESULT and
+  # the 16-bit top is the priced fallback. Nobody is asked to make a prediction true.
+  # ⛔ AND SHIPPING IS NOT SEMANTICS: `en = retire` remains a MARKED VALIDATION
+  # ARTIFACT and criterion (c) stays open. Neither rides on this ruling.
   #
   # ⚠️ STILL BY HAND, STILL UNCHECKED: agreement with PROJECT_SOURCES in a
   # test/Makefile. TTNDF HAS NO test/ DIRECTORY AT ALL, so there is nothing to agree
@@ -96,12 +100,14 @@ project:
   # instantiate library cells, which the PDK supplies. A reader recomputing this
   # closure will meet those names and should stop there.
   source_files:
-    - "tt_um_saltworks_ndf.v"
+    - "tt_um_saltworks_ndf_c32.v"
     - "banyan_fabric.v"
     - "bitserial_switch.v"
+    - "busadapt8.v"
+    - "core32.v"
     - "mac_cell_signed_shell.v"
+    - "plane32bus.v"
     - "ser_organ.v"
-    - "slicea16bma.v"
 
 # PIN MAP — bit-exact, transcribed from the FROZEN D6 map
 # (docs/ndf-top-module-design-v1.md:278), amendment CONFIRMED by the Captain at R5

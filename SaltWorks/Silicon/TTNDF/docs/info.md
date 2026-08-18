@@ -3,9 +3,10 @@
 `validate.py:check_docs` fails the file otherwise, and the title/author/description
 come from info.yaml above this slot.
 
-⛔ ONE PARAGRAPH HERE IS NOT TOP-AGNOSTIC AND IS MARKED IN PLACE: "The processor
-beside it". Which top ships is the Captain's ladder call. Everything else describes
-the fabric/neuron complex, which both candidate tops carry unchanged.
+✅ THE LADDER IS RULED (Captain, 2026-08-18 14:5x): tt_um_saltworks_ndf_c32 ships.
+"The processor beside it" was the one ladder-dependent paragraph and it now follows
+the ruled top. Everything else describes the fabric/neuron complex, which both
+candidate tops carried unchanged.
 -->
 
 ## How it works
@@ -31,11 +32,19 @@ clocked but idle, present so the array is uniform. Each cell accumulates a signe
 product bit-serially, with the sign handled on the final cycle of the frame. Three
 serialiser organs read the accumulators back out onto the fabric.
 
-**The processor beside it.** *(⛔ This is the one paragraph the ladder call touches.)*
-The current top carries a **16-bit byte-phase core**: it drives an address byte per
-cycle on `uo_out`, takes an instruction byte back on `ui_in`, and reports where it
-is in the 4-phase loop on `uio_out[1:0]`. A 32-bit variant of this socket exists and
-is measured but is not what this manifest declares.
+**The processor beside it.** *(This paragraph was ladder-dependent and the ladder is
+now ruled: the 32-bit plane ships.)* The top carries a **32-bit RV32I-subset core
+reaching memory off-chip through a byte-phase bus adapter**. Every transaction is a
+whole 4-phase loop: the adapter drives one address byte per cycle on `uo_out`, takes
+one returned byte back on `ui_in`, and reports the transaction TYPE on
+`uio_out[1:0]` at phase 0 and the PHASE NUMBER at phases 1-3 — so the host learns
+what kind of transaction it is in the same sample it uses to stay aligned, at zero
+pin cost. A load costs two loops, a store three: address then data.
+**The 32-bit plane occupies the same three pin groups the earlier 16-bit core used**
+(`ui_in`, `uo_out`, `uio_out[1:0]`), which is why it needed no new pins.
+⚠️ *The core advances only when a transaction retires. That enable wire is a marked
+validation artifact rather than a ratified design decision, and this datasheet does
+not claim otherwise.*
 
 **What is proved and what is not — stated precisely, because the distinction is the
 point of the project.** Each MAC cell is *generated from a Lean model proved correct
@@ -66,12 +75,13 @@ and `clock_hz` in the manifest are separate fields in separate files and nothing
 either tool checks that they agree — they are kept equal by hand and by review.
 
 ⛔ **THERE IS NO COCOTB BENCH IN THIS PROJECT YET, AND THIS SECTION DOES NOT PRETEND
-OTHERWISE.** The bench is genuinely blocked rather than merely unwritten: a
-testbench binds `PROJECT_SOURCES`, which must agree with `source_files`, which
-follows `top_module` — and which top ships is not yet ruled. A bench written against
-the wrong top is wasted twice. The manifest's own source list is machine-checked
-against the RTL closure by `docs/silicon-tools/manifest_check.sh`, and
-`assemble.sh` refuses to build a submission tree while `test/` is missing.
+OTHERWISE — but it is no longer BLOCKED, only unwritten.** It was blocked while the
+top was unruled: a testbench binds `PROJECT_SOURCES`, which must agree with
+`source_files`, which follows `top_module`, so a bench written against the wrong top
+is wasted twice. **The ladder is now ruled, so the target is named and the bench is
+buildable.** The manifest's source list is machine-checked against the RTL closure by
+`docs/silicon-tools/manifest_check.sh`, and `assemble.sh` REFUSES to build a
+submission tree while `test/` is missing — so this gap cannot ship unnoticed.
 
 ## Known limitation — one result per frame, and it is a design decision not a bug
 
