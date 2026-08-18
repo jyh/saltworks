@@ -1,106 +1,4 @@
-#!/usr/bin/env python3
-"""gen_ndf_wrapper.py — PRINT the NDF top module. R8 item (4).
-
-    python3 docs/hdl-tools/gen_ndf_wrapper.py > SaltWorks/Silicon/RTL/tt_um_saltworks_ndf.v
-
-PRINTS, NEVER WRITES — the .v lives in silicon's slot.
-
-⚠️ PROVENANCE, because the composed top module is the one file that becomes the DIE:
-this generator is PURE PYTHON — no Lean, no fleet lock, no PDK — so the .v is
-REPRODUCIBLE ON DEMAND from tracked bytes. Evidence verified that at 01:40 by
-regenerating and diffing byte-identically, which also proves NO HAND-EDIT: the
-file on disk is exactly what this script emits and nobody touched it after.
-⇒ If the emitted .v is NOT committed, that is a deliberate generated-on-demand
-  posture and this line is the record of it. Regenerate with the command above
-  before any flow run rather than trusting a file that a `git clean -fd` can
-  remove. (The ORGANS it instantiates are tracked separately by silicon.)
-
-WHY A GENERATOR AND NOT A HAND-EDIT: emitSeq emits SCALAR ports (o0..o31), so the
-composition needs 4 cells x 32 + 3 SERs x 32 = 224 scalar connections. Hand-wiring
-those is the defect class this fleet has paid for twice (instOK certified the wrong
-wire; a bound was placed at an occupied net). Generated, they are regenerable and
-diffable; typed, they are a lottery.
-
-⛔ THIS FILE IS HAND RTL BY RULING, NOT KERNEL EMISSION — D2(b)'s named exemption
-list: the tt_um_ pin wrapper, the sequencer FSM, and the fabric. The CELLS and the
-SER organ inside it ARE kernel-emitted (emitSeqShell / emitSeqMux). Any sentence
-about this module must say which layer it means.
-
-SPEC SOURCES (all frozen): pin map v1.1 D6 (Captain-confirmed, R5) · frame sync
-D4(h) · the 2-2-1 timetable in docs/ndf-council-example-221.md · shell ports R6.
-
-DERIVED FROM THE MAESTRO'S 01:2x DRAFT (docs/drafts/), adopted under the
-author-anywhere / land-at-owner rule. Corrections made at adoption, all four
-measured against the emitted artifacts rather than assumed:
-  1. module name  mac_cell_signed_seq -> mac_cell_signed_shell  (L2 is ratified)
-  2. shell ports  clear_acc/en_wsh/en_acc -> clr/en_acc/en_wsh  (L2's real names)
-  3. scalar port expansion, o0..o31 per cell                    (mechanical, generated)
-  4. the SER-SEAM's three idle stubs replaced by real ser_organ instances
-Also dropped: a dead `reg [23:0] ext;` superseded by ext0/ext1/ext2 in the draft.
-
-⛔ KNOWN GAP, MINE, REGISTERED NOT HIDDEN (draft v2 found it): ser_organ has NO
-shift-enable - it shifts on every load-low cycle. So a 32-bit edge emission
-spread over 4 frames would lose 24 bits into the header windows. Tonight's
-artifact therefore emits ONE int8 frame per result (v2's decision, adopted).
-The full-width emission needs a shift-enable port on serSeq (+32 selects, 99
--> 131 cells) or per-frame reloads; priced and OWED as a v1.1 item. The layout
-this feeds measures area/timing/DRC/LVS/antenna, which that choice does not move.
-"""
-
-CELLS = 3          # cells 0-2 carry the 2-2-1 demo; cell 3 is clocked-but-idle
-NBITS = 32
-
-# ── RUNG-ZERO VARIANT, ADDED 2026-08-18 ────────────────────────────────────────
-# `--core32` emits a SECOND top that swaps the 16-bit slicea16bma for the 32-bit
-# LW/SW plane (core32 + busadapt8) at the SAME byte-phase socket. It exists so
-# rung zero can MEASURE the composition; it does NOT touch the submission top.
-#
-# ⭐ THE SOCKET AGREES ALREADY, WHICH IS WHY THIS IS A SWAP AND NOT A REDESIGN:
-#     slicea16bma  .instr_byte(ui_in) .addr_byte(uo_out) .phase_o(phase_o)
-#     plane32bus   .instr_byte(ui_in) .addr_byte(uo_out) .phase_o(phase_o)
-# busadapt8's pin ports were built to §7's byte-phase shape and the wrapper was
-# already sockets-first. NO NEW PINS.
-#
-# ⛔ DEFAULT PATH IS UNCHANGED AND THAT IS CHECKED, NOT ASSERTED: running this
-# generator with no arguments must still reproduce the committed
-# tt_um_saltworks_ndf.v BYTE-FOR-BYTE. If it does not, the variant work has
-# silently edited the file that becomes the die.
-import sys
-_V = "--core32" in sys.argv
-TOPNAME = "tt_um_saltworks_ndf_c32" if _V else "tt_um_saltworks_ndf"
-CORE_BLOCK = ("""  // ---- RUNG-ZERO VARIANT: the 32-bit LW/SW plane on the byte-phase bus.
-  //      Same socket as slicea16bma; `sof` is the one added connection and the
-  //      pin it rides (uio_in[6]) is already declared above for the fabric.
-  //      ⚠️ core32.en is wired to busadapt8.retire INSIDE plane32bus — a MARKED
-  //      validation shape, not a ratified design. See plane32bus.v's header.
-  plane32bus core (
-    .clk(clk), .rst_n(rst_n), .sof(sof),
-    .instr_byte(ui_in), .addr_byte(uo_out), .phase_o(phase_o), .retire(retire_o)
-  );
-  wire retire_o;"""
-    if _V else
-"""  slicea16bma core (
-    .clk(clk), .rst_n(rst_n),
-    .instr_byte(ui_in), .addr_byte(uo_out), .phase_o(phase_o)
-  );""")
-_UNUSED_EXTRA = ", retire_o" if _V else ""
-
-def cell_inst(k, x, ld, sg, enw, ena):
-    ports = [".clk(clk)", ".clr(clr)", f".en_wsh({enw})", f".en_acc({ena})",
-             f".i0({x})", f".i1({ld})", f".i2({sg})"]
-    ports += [f".o{b}(acc{k}[{b}])" for b in range(NBITS)]
-    body = ",\n    ".join(ports)
-    return f"  mac_cell_signed_shell cell{k} (\n    {body}\n  );"
-
-def ser_inst(k, load):
-    # serSeq: i0 = load (parallel), i1..i32 = the word, o0 = serial out
-    ports = [".clk(clk)", f".i0({load})"]
-    ports += [f".i{b+1}(acc{k}[{b}])" for b in range(NBITS)]
-    ports += [f".o0(ser{k}_out)"]
-    body = ",\n    ".join(ports)
-    return f"  ser_organ ser{k} (\n    {body}\n  );"
-
-print(f'''// {TOPNAME} — the NDF top module.
+// tt_um_saltworks_ndf_c32 — the NDF top module.
 //
 // HAND RTL BY RULING (D2(b) exemption list: pin wrapper + sequencer + fabric).
 // The four MAC cells and the three SER organs instantiated below are KERNEL
@@ -116,7 +14,7 @@ print(f'''// {TOPNAME} — the NDF top module.
 
 `default_nettype none
 
-module {TOPNAME} (
+module tt_um_saltworks_ndf_c32 (
     input  wire [7:0] ui_in,
     output wire [7:0] uo_out,
     input  wire [7:0] uio_in,
@@ -133,11 +31,20 @@ module {TOPNAME} (
   wire [1:0] phase_o;
   wire       edge_out_dat, edge_out_vld, valid;
   assign uio_oe  = 8'b1011_0011;
-  assign uio_out = {{valid, 1'b0, edge_out_vld, edge_out_dat,
-                    1'b0, 1'b0, phase_o[1], phase_o[0]}};
+  assign uio_out = {valid, 1'b0, edge_out_vld, edge_out_dat,
+                    1'b0, 1'b0, phase_o[1], phase_o[0]};
 
   // ---- the core, as-is (R4: demonstrates on its own bus) ----
-{CORE_BLOCK}
+  // ---- RUNG-ZERO VARIANT: the 32-bit LW/SW plane on the byte-phase bus.
+  //      Same socket as slicea16bma; `sof` is the one added connection and the
+  //      pin it rides (uio_in[6]) is already declared above for the fabric.
+  //      ⚠️ core32.en is wired to busadapt8.retire INSIDE plane32bus — a MARKED
+  //      validation shape, not a ratified design. See plane32bus.v's header.
+  plane32bus core (
+    .clk(clk), .rst_n(rst_n), .sof(sof),
+    .instr_byte(ui_in), .addr_byte(uo_out), .phase_o(phase_o), .retire(retire_o)
+  );
+  wire retire_o;
 
   // ---- the fabric. Port indices FROZEN (D6): 0-3 cells, 4 edge-in,
   //      5 edge-out, 6 CPU-stub, 7 spare ----
@@ -236,12 +143,172 @@ module {TOPNAME} (
   wire ser0_out, ser1_out, ser2_out;
 
   // ---- the cells: KERNEL-EMITTED (emitSeqShell, L2) ----
-{cell_inst(0,'x0','load0','sgn0','en_w0','en_a0')}
-{cell_inst(1,'x1','load1','sgn1','en_w1','en_a1')}
-{cell_inst(2,'x2','load2','sgn2','en_w2','en_a2')}
+  mac_cell_signed_shell cell0 (
+    .clk(clk),
+    .clr(clr),
+    .en_wsh(en_w0),
+    .en_acc(en_a0),
+    .i0(x0),
+    .i1(load0),
+    .i2(sgn0),
+    .o0(acc0[0]),
+    .o1(acc0[1]),
+    .o2(acc0[2]),
+    .o3(acc0[3]),
+    .o4(acc0[4]),
+    .o5(acc0[5]),
+    .o6(acc0[6]),
+    .o7(acc0[7]),
+    .o8(acc0[8]),
+    .o9(acc0[9]),
+    .o10(acc0[10]),
+    .o11(acc0[11]),
+    .o12(acc0[12]),
+    .o13(acc0[13]),
+    .o14(acc0[14]),
+    .o15(acc0[15]),
+    .o16(acc0[16]),
+    .o17(acc0[17]),
+    .o18(acc0[18]),
+    .o19(acc0[19]),
+    .o20(acc0[20]),
+    .o21(acc0[21]),
+    .o22(acc0[22]),
+    .o23(acc0[23]),
+    .o24(acc0[24]),
+    .o25(acc0[25]),
+    .o26(acc0[26]),
+    .o27(acc0[27]),
+    .o28(acc0[28]),
+    .o29(acc0[29]),
+    .o30(acc0[30]),
+    .o31(acc0[31])
+  );
+  mac_cell_signed_shell cell1 (
+    .clk(clk),
+    .clr(clr),
+    .en_wsh(en_w1),
+    .en_acc(en_a1),
+    .i0(x1),
+    .i1(load1),
+    .i2(sgn1),
+    .o0(acc1[0]),
+    .o1(acc1[1]),
+    .o2(acc1[2]),
+    .o3(acc1[3]),
+    .o4(acc1[4]),
+    .o5(acc1[5]),
+    .o6(acc1[6]),
+    .o7(acc1[7]),
+    .o8(acc1[8]),
+    .o9(acc1[9]),
+    .o10(acc1[10]),
+    .o11(acc1[11]),
+    .o12(acc1[12]),
+    .o13(acc1[13]),
+    .o14(acc1[14]),
+    .o15(acc1[15]),
+    .o16(acc1[16]),
+    .o17(acc1[17]),
+    .o18(acc1[18]),
+    .o19(acc1[19]),
+    .o20(acc1[20]),
+    .o21(acc1[21]),
+    .o22(acc1[22]),
+    .o23(acc1[23]),
+    .o24(acc1[24]),
+    .o25(acc1[25]),
+    .o26(acc1[26]),
+    .o27(acc1[27]),
+    .o28(acc1[28]),
+    .o29(acc1[29]),
+    .o30(acc1[30]),
+    .o31(acc1[31])
+  );
+  mac_cell_signed_shell cell2 (
+    .clk(clk),
+    .clr(clr),
+    .en_wsh(en_w2),
+    .en_acc(en_a2),
+    .i0(x2),
+    .i1(load2),
+    .i2(sgn2),
+    .o0(acc2[0]),
+    .o1(acc2[1]),
+    .o2(acc2[2]),
+    .o3(acc2[3]),
+    .o4(acc2[4]),
+    .o5(acc2[5]),
+    .o6(acc2[6]),
+    .o7(acc2[7]),
+    .o8(acc2[8]),
+    .o9(acc2[9]),
+    .o10(acc2[10]),
+    .o11(acc2[11]),
+    .o12(acc2[12]),
+    .o13(acc2[13]),
+    .o14(acc2[14]),
+    .o15(acc2[15]),
+    .o16(acc2[16]),
+    .o17(acc2[17]),
+    .o18(acc2[18]),
+    .o19(acc2[19]),
+    .o20(acc2[20]),
+    .o21(acc2[21]),
+    .o22(acc2[22]),
+    .o23(acc2[23]),
+    .o24(acc2[24]),
+    .o25(acc2[25]),
+    .o26(acc2[26]),
+    .o27(acc2[27]),
+    .o28(acc2[28]),
+    .o29(acc2[29]),
+    .o30(acc2[30]),
+    .o31(acc2[31])
+  );
   // cell 3: k=4 is forced by fabric ports; idle in the 2-2-1 demo —
   // clocked and cleared, never enabled. Real state, zero schedule.
-{cell_inst(3,"1'b0","1'b0","1'b0","1'b0","1'b0")}
+  mac_cell_signed_shell cell3 (
+    .clk(clk),
+    .clr(clr),
+    .en_wsh(1'b0),
+    .en_acc(1'b0),
+    .i0(1'b0),
+    .i1(1'b0),
+    .i2(1'b0),
+    .o0(acc3[0]),
+    .o1(acc3[1]),
+    .o2(acc3[2]),
+    .o3(acc3[3]),
+    .o4(acc3[4]),
+    .o5(acc3[5]),
+    .o6(acc3[6]),
+    .o7(acc3[7]),
+    .o8(acc3[8]),
+    .o9(acc3[9]),
+    .o10(acc3[10]),
+    .o11(acc3[11]),
+    .o12(acc3[12]),
+    .o13(acc3[13]),
+    .o14(acc3[14]),
+    .o15(acc3[15]),
+    .o16(acc3[16]),
+    .o17(acc3[17]),
+    .o18(acc3[18]),
+    .o19(acc3[19]),
+    .o20(acc3[20]),
+    .o21(acc3[21]),
+    .o22(acc3[22]),
+    .o23(acc3[23]),
+    .o24(acc3[24]),
+    .o25(acc3[25]),
+    .o26(acc3[26]),
+    .o27(acc3[27]),
+    .o28(acc3[28]),
+    .o29(acc3[29]),
+    .o30(acc3[30]),
+    .o31(acc3[31])
+  );
 
   // ---- the SER/activation organs: KERNEL-EMITTED (emitSeqMux) ----
   // NOTE vs draft v2: v2 placed the activation as a BEHAVIOURAL CE-vs-0 mux in
@@ -249,9 +316,117 @@ module {TOPNAME} (
   // (act_k = and2(d_k, inv(d31))), so the accumulator feeds the organ directly
   // and THE ACTIVATION STAYS INSIDE THE KERNEL EMISSION rather than joining the
   // D2(b) hand-RTL exemption list. That is a boundary win, not a style choice.
-{ser_inst(0,'act0')}
-{ser_inst(1,'act1')}
-{ser_inst(2,'act2')}
+  ser_organ ser0 (
+    .clk(clk),
+    .i0(act0),
+    .i1(acc0[0]),
+    .i2(acc0[1]),
+    .i3(acc0[2]),
+    .i4(acc0[3]),
+    .i5(acc0[4]),
+    .i6(acc0[5]),
+    .i7(acc0[6]),
+    .i8(acc0[7]),
+    .i9(acc0[8]),
+    .i10(acc0[9]),
+    .i11(acc0[10]),
+    .i12(acc0[11]),
+    .i13(acc0[12]),
+    .i14(acc0[13]),
+    .i15(acc0[14]),
+    .i16(acc0[15]),
+    .i17(acc0[16]),
+    .i18(acc0[17]),
+    .i19(acc0[18]),
+    .i20(acc0[19]),
+    .i21(acc0[20]),
+    .i22(acc0[21]),
+    .i23(acc0[22]),
+    .i24(acc0[23]),
+    .i25(acc0[24]),
+    .i26(acc0[25]),
+    .i27(acc0[26]),
+    .i28(acc0[27]),
+    .i29(acc0[28]),
+    .i30(acc0[29]),
+    .i31(acc0[30]),
+    .i32(acc0[31]),
+    .o0(ser0_out)
+  );
+  ser_organ ser1 (
+    .clk(clk),
+    .i0(act1),
+    .i1(acc1[0]),
+    .i2(acc1[1]),
+    .i3(acc1[2]),
+    .i4(acc1[3]),
+    .i5(acc1[4]),
+    .i6(acc1[5]),
+    .i7(acc1[6]),
+    .i8(acc1[7]),
+    .i9(acc1[8]),
+    .i10(acc1[9]),
+    .i11(acc1[10]),
+    .i12(acc1[11]),
+    .i13(acc1[12]),
+    .i14(acc1[13]),
+    .i15(acc1[14]),
+    .i16(acc1[15]),
+    .i17(acc1[16]),
+    .i18(acc1[17]),
+    .i19(acc1[18]),
+    .i20(acc1[19]),
+    .i21(acc1[20]),
+    .i22(acc1[21]),
+    .i23(acc1[22]),
+    .i24(acc1[23]),
+    .i25(acc1[24]),
+    .i26(acc1[25]),
+    .i27(acc1[26]),
+    .i28(acc1[27]),
+    .i29(acc1[28]),
+    .i30(acc1[29]),
+    .i31(acc1[30]),
+    .i32(acc1[31]),
+    .o0(ser1_out)
+  );
+  ser_organ ser2 (
+    .clk(clk),
+    .i0(act2),
+    .i1(acc2[0]),
+    .i2(acc2[1]),
+    .i3(acc2[2]),
+    .i4(acc2[3]),
+    .i5(acc2[4]),
+    .i6(acc2[5]),
+    .i7(acc2[6]),
+    .i8(acc2[7]),
+    .i9(acc2[8]),
+    .i10(acc2[9]),
+    .i11(acc2[10]),
+    .i12(acc2[11]),
+    .i13(acc2[12]),
+    .i14(acc2[13]),
+    .i15(acc2[14]),
+    .i16(acc2[15]),
+    .i17(acc2[16]),
+    .i18(acc2[17]),
+    .i19(acc2[18]),
+    .i20(acc2[19]),
+    .i21(acc2[20]),
+    .i22(acc2[21]),
+    .i23(acc2[22]),
+    .i24(acc2[23]),
+    .i25(acc2[24]),
+    .i26(acc2[25]),
+    .i27(acc2[26]),
+    .i28(acc2[27]),
+    .i29(acc2[28]),
+    .i30(acc2[29]),
+    .i31(acc2[30]),
+    .i32(acc2[31]),
+    .o0(ser2_out)
+  );
 
   // ---- emit-frame headers (adopted from draft v2, port-organ inlined) ----
   // Frame = [ACT,a2,ACT,a1,ACT,a0] in cycles 0..5, then payload 6..13.
@@ -268,10 +443,10 @@ module {TOPNAME} (
   assign fab_in[2] = em_f2 ? (payload ? ser2_out : hdr_bit(3'd5, cyc)) : 1'b0;
   assign fab_in[3] = 1'b0;   // cell 3 idle
 
-  wire _unused = &{{ena, uio_in[7], uio_in[5:4], uio_in[1:0],
+  wire _unused = &{ena, uio_in[7], uio_in[5:4], uio_in[1:0],
                    edge_in_vld, fab_out[6], fab_out[7], cnt_o,
-                   acc3, 1'b0{_UNUSED_EXTRA}}};
+                   acc3, 1'b0, retire_o};
 
 endmodule
 
-`default_nettype wire''')
+`default_nettype wire
