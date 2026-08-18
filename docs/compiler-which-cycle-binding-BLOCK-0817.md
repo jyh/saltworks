@@ -349,3 +349,203 @@ premise is untouched and the stall reaches it through the PAIRING only.*
 cycles where the core presents an input and memory does not advance, and whether
 `dmem_addr8` keeps zero state under the address-map split. **(B), (C) and (D) all price
 differently depending on the answers, and (A) survives only if the first answer is "no".**
+
+---
+
+# 7 · ROUND 4 — THE SHAPE IS BUILT, AND THE OLD LEMMA IS NOW A COROLLARY OF ITS REPLACEMENT
+
+*Written 2026-08-17 19:4x under the ACT-AND-ACCOUNT law (Captain-ratified 19:16:03).
+**I chose to write this tonight rather than wait for the round to be scheduled.** Refuters
+gate the CLAIM at the round; they do not gate the pen. Everything below is kernel-checked
+in `SaltWorks/HDL/ScratchStallArm.lean` — **14 declarations, all ✓, EXIT=0, zero `sorryAx`** —
+or is explicitly marked NOT PROVED.*
+
+## 7.1 · THE DECISION, AND WHY THE OPTION FIGHT WAS THE WRONG FIGHT
+
+§2 priced (A)–(E) by the lie each makes available. **(C), (D) and (E) all require the same
+object: a predicate that admits a declared stall.** So the block spent three rounds
+choosing among options whose *common core* nobody had built. **Round 4 builds the core.**
+Once it exists, the residual choice among (C)/(D)/(E) is about where the stall SET comes
+from — which is silicon's T1 contract, not this block's — and it is deliberately left open
+here rather than pre-empted.
+
+## 7.2 · THE SHAPE
+
+```lean
+def CycleRealisesStepOrStalls (cyc : Env → Env) (wordAt : Env → Word)
+    (stalls : Env → Bool) : Prop :=
+  ∀ ins, if stalls ins
+         then (decQ (cyc ins)).regs = (decQ ins).regs ∧ (decQ (cyc ins)).pc = (decQ ins).pc
+         else (decQ (cyc ins)).regs = (stepT (decQ ins) (wordAt ins)).regs
+            ∧ (decQ (cyc ins)).pc   = (stepT (decQ ins) (wordAt ins)).pc
+```
+
+⭐ **THE STALL SET IS A PARAMETER, NOT A CONSTANT.** *The predicate says what a stall
+MEANS; **silicon's T1 contract says which cycles ARE stalls.** That split is deliberate: it
+is what lets one object serve all three landing sites (§7.5), and it is why this block does
+not need to know the arbitration rule to state the sentence.*
+
+**Two properties, both proved:**
+
+| | property | status |
+|---|---|---|
+| (a) | `stallArm_reduces : … (fun _ => false) ↔ CycleRealisesStepProj cyc wordAt` | ✓ **closes by `Iff.rfl` — DEFINITIONAL** |
+| (b) | `stallArm_strictly_extends` — `cycOfBits stalledBits` is ADMITTED by the arm and REFUTED by today's predicate | ✓ so the arm is **non-empty** and the restatement is a real weakening, not a rename |
+
+## 7.3 · THE RESTATEMENT — AND IT INTRODUCES NO LITERAL AT ALL
+
+**The Captain's 15:15 principle, QUOTED WHOLE — five clauses, and I first drafted this
+section carrying only the middle three:**
+
+> *"the flagship's bound is stated **IN THE UNITS THE MACHINE HONORS**; the step bound stays
+> a step bound; any cycle guard is DERIVED from the stall semantics and carries its
+> derivation; NO BARE LITERAL survives whose meaning depends on the retired cycle=step
+> identity; **the concrete theorem text returns to the Captain at the freeze via design
+> block + refuter pass, the offboard claim ladder's road.**"*
+
+> ⛔ **THE TWO BOLD CLAUSES ARE THE ONES I DROPPED, AND MY OWN `quotecheck.sh` CAUGHT IT ON
+> THIS DRAFT BEFORE IT LANDED** *(it flags a source line carrying a status verb the draft
+> omits).* **The trailing clause is not colour — it is a LIVE OBLIGATION ON THIS VERY
+> BLOCK:** *the concrete theorem text returns to the Captain **at the freeze**, by the
+> design-block + refuter-pass road. **This block is that road, and I had quoted the
+> principle while omitting the sentence that says so.*** ⇒ *registered here as an
+> obligation, not a courtesy: §7 does not discharge itself by existing; its theorem text
+> goes to him at the freeze.* ⚠️ *And the leading clause is the principle's whole point —
+> **UNITS THE MACHINE HONORS** — which is exactly why `stepsIn` counts what the machine
+> retires rather than what the clock does.*
+
+**The bare literal is `120`, in `cycles_sort` (Program.lean:2136).** The identity it rests
+on is not an assumption anyone could grep — it is a *proved equation*,
+`cycles_realise_steps_of_memFree` (`:1683`), whose statement puts **the same `n` on both
+sides**: `cycles cyc n` (clocks) on the left, `runWords … n` (steps) on the right.
+
+```
+K ≤ 120          UNTOUCHED — K is a halting count IN STEPS and always was
+guard  K ≤ N  →  K ≤ stepsIn stalls cyc ins N        (DERIVED from the stall set)
+
+def stepsIn (stalls) (cyc) (ins) : Nat → Nat
+  | 0     => 0
+  | n + 1 => stepsIn stalls cyc ins n + (if stalls (cycles cyc n ins) then 0 else 1)
+```
+
+🔑 ***THE CLOCK SIDE IS BOUNDED BY A PREDICATE, NOT BY A NUMBER. There is no 1440 and no
+new constant — so there is NOTHING THERE TO GO STALE AT THE FREEZE.*** *The principle's
+"carries its derivation" is satisfied structurally rather than by a comment.*
+
+Proved: `stepsIn_empty` (`= n` at the empty stall set) · `guard_reduces` (`↔ K ≤ N`) ·
+**`stepsIn_le` — NO FREE STEPS**, *the soundness direction: a stall arm must never let the
+machine claim more progress than it has clocks for, or the restatement buys its own bound.*
+
+## 7.4 · ⭐⭐⭐ THE COMPATIBILITY CLAIM, AT ITS STRONGEST AVAILABLE FORM
+
+`cycles_realise_steps_of_stalls` re-proves `:1683` under stalls: **`n` clocks realise
+`stepsIn stalls cyc ins n` steps.** On a stall cycle no word is consumed, so the ISA side
+must be driven by the *subsequence* of words at non-stall cycles.
+
+⚠️ **I DID NOT CONSTRUCT THAT SUBSEQUENCE, AND THE REASON IS AN AUDIT-SURFACE ARGUMENT, not
+a difficulty argument.** *Constructing it needs an inverse — "the j-th non-stall cycle" — an
+unbounded search, and it would place a NEW DEFINITION ON THE FLAGSHIP'S PATH that every
+future refuter must audit.* **Instead the realignment is a HYPOTHESIS on the word stream:**
+
+```lean
+(halign : ∀ k, stalls (cycles cyc k ins) = false →
+    ws (stepsIn stalls cyc ins k) = wordAt (cycles cyc k ins))
+```
+
+⇒ **`cycles_sort` ALREADY takes `FeedsProgram`, which is exactly this shape, so the
+flagship acquires NO NEW KIND of assumption.**
+
+> ⭐⭐⭐ **AND THEN THE COMPATIBILITY CLAIM STOPS BEING A PROMISE:**
+> **`cycles_realise_steps_of_memFree_rederived` — THE LANDED `:1683`, RE-DERIVED FROM THE
+> STALL-ARMED VERSION by instantiating `stalls := ∅`.** *Not an `Iff` between predicates;
+> not "the cone probably survives". **The actual theorem `cycles_sort` rewrites with,
+> falling out as a COROLLARY of its own replacement.*** ⇒ *the 20-declaration cone cannot
+> break, and that is now kernel fact rather than design intention.*
+
+⚖️ **THE COST, STATED RATHER THAN HIDDEN: I MOVED WORK, I DID NOT DELETE IT.** *The caller
+must discharge `halign`. At the empty stall set that is `rfl`. At the real machine it
+becomes a `FeedsProgram`-shaped obligation at the call site — **and that obligation belongs
+to whoever supplies the word stream, which is the fetch path, not this predicate.***
+
+## 7.5 · ⛔ CRITERION (c) — PROPOSED, AND IT NOW HAS THREE LANDING SITES
+
+**Endorsed to this round by the helm (17:14:54) in my words:**
+
+> *"the stall set used in the restated C4 sentence is THE SAME OBJECT as A's, and the
+> re-landed bridge is the proof of it."*
+
+**WHY IT IS NEEDED, and this is the part that was VERIFIED rather than argued:**
+`SaltWorks/HDL/C4.lean` contains **ZERO** occurrences of `CycleRealisesStepProj` and **does
+not import** `Program.lean`. ⇒ ***`C4Spec` is UPSTREAM of the cone, so acceptance criterion
+(a) — "the cone survives" — STRUCTURALLY CANNOT REACH IT.*** *Criterion (c) exists because
+an import list was checked, at exactly the place a plausible criterion would have silently
+not applied.*
+
+**THE THREE SITES, as of the 18:56:37 rung-zero order:**
+
+```
+A    the cycle predicate            CycleRealisesStepOrStalls's `stalls`  (this block)
+B1   the restated C4 sentence       R9, at compiler's seam
+RTL  the byte-phase bus adapter     busadapt8 (silicon, f0a1e18) — rung zero
+```
+
+### 7.5.1 · CROSS-VERIFICATION OF `busadapt8` (f0a1e18) — first pass, as its cross-verifier
+
+✅ **THE ADAPTER'S STALL SET IS EXPRESSIBLE AS `stalls : Env → Bool`, AND THAT IS NOT
+AUTOMATIC.** *Its decision 3 free-runs the phase counter and makes a transaction occupy
+whole 4-phase loops — so which cycles retire an instruction is determined by **the phase
+counter, which is internal STATE and therefore lives in `Env`.** A stall set readable off
+the wire state is exactly what criterion (c) needs; had the adapter stalled on a condition
+not present in `Env`, the criterion could not have been stated, let alone met.*
+
+⛔ **AND THE FINDING I OWE THEM, WHICH IS NOT A PERFORMANCE NOTE:** *their own header leaves
+open that **there is still NO NOT-READY SIGNAL** — a host slower than the free-running
+counter cannot stall this core.* ***If that item is ever closed, the stall set stops being
+a function of INTERNAL state and becomes a function of EXTERNAL pins. That CHANGES THE
+OBJECT criterion (c) quantifies over, and (c) must be RE-RUN — it does not survive the
+change for free.*** **I am flagging it now, while the adapter is a draft and re-shaping is
+cheap, rather than at the freeze.**
+
+### 7.5.2 · ⚠️ MY REJECT-DEMONSTRATION IS OWED, AND HERE IS ITS EXACT SHAPE
+
+*The table's verifier clause says a cross-verifier who only reads is decoration, and owes
+one demonstration that the check CAN reject. **I have not built mine.** Specified so it is
+a debt with a shape rather than an intention:*
+
+```
+REJECTING PAIR:  let stalls_lean  := derived from the WORD  (e.g. "stall iff load/store")
+                 let stalls_rtl   := derived from the PHASE COUNTER (busadapt8's actual rule)
+these are DIFFERENT OBJECTS, and they disagree on any trace where a NON-MEMORY instruction
+occupies a data loop — which busadapt8's free-running counter makes reachable.
+⇒ criterion (c) must REFUSE that pair. If it does not, (c) is decoration and I will say so.
+```
+
+## 7.6 · WHAT IS PROVED, WHAT IS NOT — stated separately on purpose
+
+```
+PROVED (kernel, 14 decls, zero sorryAx)
+  the shape · reduction (Iff.rfl) · strict extension · stepsIn + its three laws ·
+  the :1683 re-proof under stalls · the OLD :1683 re-derived from it ·
+  non-vacuity at a NON-EMPTY stall set (all-stall)
+⛔ NOT PROVED, AND DO NOT READ THE ABOVE AS COVERING IT
+  a MIXED instance — some cycles stall, some step. My non-vacuity witness is ALL-STALL,
+  a corner where stepsIn ≡ 0. A corner cannot control an arm that must admit BOTH kinds.
+  → dispatched as an executor brief at 19:3x; a NEGATIVE result there is load-bearing,
+    because it would mean this arm admits only corners — a defect in MY design.
+  the reject-demonstration of §7.5.2
+  the discharge of `halign` for any real fetch path
+```
+
+## 7.7 · THE REFUTERS' KILL-CHECKS FOR THIS ROUND — pre-registered, before the round runs
+
+1. **Is `stallArm_reduces` really definitional, or did I write an `Iff` that merely holds?**
+   *Check the proof term is `Iff.rfl`, not a tactic block that happens to close.*
+2. **Does the re-derivation actually reconstruct `:1683`'s STATEMENT, or a lookalike?**
+   *Diff the statement of `cycles_realise_steps_of_memFree_rederived` against
+   `Program.lean:1683` field by field — a truth-preserving restatement is still a breaking
+   change, and a POINTWISE one would drop the length.*
+3. **Is the arm vacuous on real traffic?** *§7.6 concedes the corner. Attack there first.*
+4. **Does `stepsIn_le` actually bite?** *Try to prove a trace realising MORE steps than
+   clocks; if it goes through, the restatement bought its own bound.*
+5. **Count AND order** (the helm's amended check): *neither double- nor zero-counted, and
+   is the ORDER right — A before B1, with the shared object decided once.*
