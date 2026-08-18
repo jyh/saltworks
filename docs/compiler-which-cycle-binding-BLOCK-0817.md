@@ -244,6 +244,7 @@ Compiler holds the pen on this file; silicon's block embeds its bytes verbatim.*
 
 | # | obligation | OWNER | CROSS-VERIFIER | ARTIFACT IT LANDS IN | CONTROL THAT WOULD CATCH ITS ABSENCE |
 |---|---|---|---|---|---|
+| T0 | **RUNG ZERO — build and measure the COMPOSITION** *(Captain-ruled 08/17 19:0x; built and receipted 08/18 08:5x)* | **silicon** | compiler | the composed top `tt_um_saltworks_ndf_c32` + its COMMITTED stat files | ⭐ **TWO ARTIFACTS, BECAUSE ONE CANNOT ANSWER BOTH QUESTIONS.** *WHAT IS IN IT* — an **UNFLATTENED** elaboration, where module names survive; ⛔ *and a PARAMETERIZED instance is specialised by yosys to `$paramod\<name>\...`, so a grep for the bare name reports ABSENT — in the FLATTERING direction.* *HOW BIG IS IT* — the **FLATTENED** synth, which is what the layout tool actually sees. **No committed stat, no claim.** |
 | T1 | stall / arbitration **contract** — which cycles are NOT-cycles | **silicon** | compiler | silicon's offboard block | a NOT-cycle the contract does not name, and no gate refuses the trace |
 | T2 | which-cycle **statement shape** + the trace predicate | **compiler** | silicon | compiler's block → `Certs/` | a stalling trace under which the hypothesis is **still satisfiable** ⇒ vacuous, green, silent |
 | T3 | bus-protocol **FSM proof** | **silicon** | compiler | silicon's offboard block | a trace where the FSM deadlocks mid-transaction and every current check stays green |
@@ -252,6 +253,29 @@ Compiler holds the pen on this file; silicon's block embeds its bytes verbatim.*
 | T6 | **`ISA.step` / `runWords` extension** | **compiler** | silicon | `Stack/Program.lean` | the extended object and `runWords` agreeing on **every** trace — no distinguishing witness means the extension is cosmetic and no stall entered |
 | T7 | the **13 consumers'** re-proof | **compiler** | silicon | `Stack/Program.lean` | any consumer whose statement changed while its proof did not |
 | T8 | the **K/N unit re-cut** (UK1) | ⛔ **the Captain, via the helm** | both | routed, not designed here | a guard passing at a fraction of the intended instructions — green and wrong |
+
+## ⛔ T0's CONTROL WAS REPAIRED BEFORE IT EVER RAN — "A CHECK NEVER SHOWN TO PASS"
+
+*The helm's original row read: "any composed-area claim must cite a COMMITTED stat file whose
+netlist greps positive for BOTH a core/plane instance AND `banyan_fabric`."* **It could never
+have passed.** *The flattened synth that gives the AREA is exactly the artifact in which the
+module names have been dissolved — so the membership half and the size half were being asked
+of one file that cannot hold both answers.*
+
+🔑 ***THIS IS THE RARER HALF OF A LAW THIS FLEET HAS BANKED ALL WEEK. We have repeatedly
+caught "A CHECK NEVER SHOWN TO FAIL". This is "A CHECK NEVER SHOWN TO PASS" — and it is
+worse in one way: a check that cannot fail at least emits a verdict, while a check that
+cannot pass BLOCKS THE WORK IT GUARDS and looks like rigour while doing it.***
+
+⚠️ **AND THE FIRST REPAIR WAS ALSO WRONG, IN THE FLATTERING DIRECTION** — it reported
+`banyan_fabric` ABSENT from the very top that instantiates it, because the instantiation is
+PARAMETERIZED and yosys specialises the name. *Silicon found both, by running the check the
+helm asked for rather than by reading it.* **Carried into the row above so the next hand
+inherits the repair and not the original.**
+
+⚖️ *Landed by compiler's pen under the table's custody law (one pen, commit on every edit).
+Silicon's embedded copy is now STALE BY DESIGN until they re-embed; `table_identical.sh`
+will say so, which is the mechanism working.*
 
 ## WHY THE THREE ORPHANS LAND ON SILICON — silicon's principle, adopted
 
