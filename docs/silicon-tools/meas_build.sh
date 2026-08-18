@@ -98,7 +98,26 @@ for target in "$@"; do
   # green either way. ⇒ Read HEAD before, re-read after, and REFUSE to report a
   # clean verdict if it moved. [[read-tools-inherit-the-shared-tree]]
   head_before=$(git rev-parse --short HEAD 2>/dev/null || echo '?')
-  dirty=$(git status --porcelain -- "$target" 2>/dev/null | wc -l | tr -d ' ')
+  # ⛔⛔ REPAIRED 2026-08-18, AND THE DEFECT WAS DEMONSTRATED BEFORE IT WAS FIXED.
+  # This line read:
+  #     dirty=$(git status --porcelain -- "$target" 2>/dev/null | wc -l | tr -d ' ')
+  # DRIVEN in /tmp: git exits 128 ("not a git repository"), `2>/dev/null` eats the
+  # message, `wc -l` counts zero lines, and the result is **BYTE-IDENTICAL TO A
+  # CLEAN TREE**. A SAFETY CLAIM FAILING IN THE REASSURING DIRECTION -- the verdict
+  # at the bottom of this file would omit its "UNCOMMITTED local changes" warning
+  # precisely when it could not tell.
+  # ⚠️ AND THE LINE DIRECTLY ABOVE ALREADY HAD THE CURE (`|| echo '?'`). The same
+  #   hand guarded one git call and left the next bare, one line apart.
+  # ⛔ THE SENTINEL MUST BE NUMERIC: `dirty` is consumed as `[ "$dirty" -gt 0 ]`,
+  #   so a '?' would make that test ERROR and, under `&&`, evaluate FALSE -- which
+  #   suppresses the warning exactly as the original bug did. A repair that fails
+  #   in the same direction as the defect is not a repair.
+  dirty_out=$(git status --porcelain -- "$target" 2>&1); dirty_rc=$?
+  if [ "$dirty_rc" -ne 0 ]; then
+    dirty=-1
+  else
+    dirty=$(printf '%s' "$dirty_out" | grep -c . | tr -d ' ')
+  fi
 
   # ⭐⭐ THE GATE. This is the whole point of the file: the false sentence must be
   # UNREACHABLE, not merely unlikely. A dotted module name cannot be built
@@ -240,8 +259,16 @@ for target in "$@"; do
     if [ "${peers:-0}" -gt 0 ]; then contnote=" ⚠️UNDER CONTENTION (${peers} peer lean/lake at start) — WALL IS NOT AN ELABORATION COST"; else contnote=""; fi
     printf '✅ %s — KERNEL-CHECKED under this hand · %ss wall%s · EXIT=0 @ sha %s%s\n' "$target" "$wall" "$contnote" "$h1" "$capnote"
     if [ "$head_before" = "$head_after" ]; then
+      # ⛔ THREE ARMS, NOT TWO. The -1 arm exists because "I could not tell" and
+      # "it is clean" were the SAME OUTPUT until 2026-08-18, and the silent one was
+      # the reassuring one. An unknown must be LOUDER than a known-bad, never quieter.
+      case "$dirty" in
+        -1) dirtynote=' ⛔ DIRTY-CHECK FAILED (git returned nonzero) — THIS VERDICT CANNOT SAY WHETHER THE TARGET HAD UNCOMMITTED CHANGES. Treat it as UNPINNED.' ;;
+        0)  dirtynote='' ;;
+        *)  dirtynote=' ⚠️ target has UNCOMMITTED local changes — the verdict is on the WORKING COPY, not on that commit' ;;
+      esac
       printf '   tree PINNED at %s (re-read after elaboration, unchanged)%s\n' \
-        "$head_before" "$([ "$dirty" -gt 0 ] && echo ' ⚠️ target has UNCOMMITTED local changes — the verdict is on the WORKING COPY, not on that commit')"
+        "$head_before" "$dirtynote"
     else
       printf '   ⛔⛔ THE TREE MOVED MID-RUN: %s -> %s. This verdict names a commit it did NOT elaborate.\n' "$head_before" "$head_after"
       printf '      A peer committed into the shared checkout while the kernel ran. RE-RUN before quoting this.\n'
