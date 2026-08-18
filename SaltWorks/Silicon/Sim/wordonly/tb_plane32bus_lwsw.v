@@ -130,16 +130,44 @@ module tb;
   integer run=0, maxrun=0, retires=0, pc_adv=0, couple_viol=0;
   integer nfetch=0, strides_bad=0, fails=0;
   reg [31:0] pc_prev, pc_now, fa;
+  reg        retire_prev;
+  reg        seen_pc;
   reg        seen_fetch = 0;
 
   always @(negedge clk) if (rst_n) begin
     pc_now = dut.u_bus.c_imem_addr;
     if (retire_w) retires = retires + 1;
-    if (pc_now !== pc_prev) begin
+    // ⛔⛔ L4's IMPLEMENTATION WAS A CHECK THAT COULD NOT PASS, AND THAT IS MY OWN
+    // BANKED DEFECT SITTING IN A TRACKED BENCH. First version asked whether
+    // `retire_w` was high IN THE SAME SAMPLE as the PC change — but `retire`
+    // asserts at loop_end (phase 3) and the PC updates on the FOLLOWING edge, so
+    // the change is always observed one sample AFTER retire has gone low. It
+    // flagged 87 of 87 advances: the signature of an unsatisfiable criterion, not
+    // of a machine that never couples.
+    // ⚠️ THE CRITERION IS UNCHANGED — "no PC advance without a retire". Only the
+    //   SAMPLING is fixed, against `retire_prev`, exactly as the 08/17 executor
+    //   bench does (it declares that register for this reason and I did not read it
+    //   closely enough). WEAKENING a criterion on the day it fires would make it
+    //   untrustworthy; making an unsatisfiable one TESTABLE is the opposite act.
+    // 📌 And leaving it permanently red had its own cost: an alarm that always
+    //   sounds is an alarm nobody hears, which is this kit's own law.
+    // ⛔ AND THE FIRST OBSERVATION IS NOT AN ADVANCE. With pc_prev seeded to a
+    // sentinel, sample 1 compared ffffffff against the real PC of 0 and counted it —
+    // one violation out of 87, entirely mine. `seen_pc` gates it. Confirmed by
+    // PRINTING the violation rather than assuming it was the reset edge.
+    if (pc_now !== pc_prev && seen_pc) begin
       pc_adv = pc_adv + 1;
-      if (!retire_w) couple_viol = couple_viol + 1;   // advanced without retiring
+`ifdef MUT_BREAK_COUPLE
+      if (1'b1) begin      // MUTATION CONTROL: force the arm, L4 must go RED
+`else
+      if (!retire_prev) begin
+`endif
+        couple_viol = couple_viol + 1;
+        $display("    COUPLE-VIOL #%0d @%0t  pc %h -> %h  (retire_prev=%b)", couple_viol, $time, pc_prev, pc_now, retire_prev);
+      end
     end
-    pc_prev = pc_now;
+    retire_prev = retire_w;
+    pc_prev = pc_now; seen_pc = 1;
 
     if (dut.u_bus.phase == 2'd0) begin
       case (ph)
@@ -166,7 +194,7 @@ module tb;
 
   initial begin
     for (i=0; i<256; i=i+1) hmem[i] = 8'h00;
-    st_addr = 0; st_data = 0; st_addr_valid = 0; pc_prev = 32'hFFFFFFFF;
+    st_addr = 0; st_data = 0; st_addr_valid = 0; pc_prev = 32'hFFFFFFFF; retire_prev = 0; seen_pc = 0;
     $display("=== tb_plane32bus_lwsw — ONE LW AND ONE SW THROUGH THE PINS ===");
     @(negedge clk); rst_n = 1;
     repeat (600) @(posedge clk);
