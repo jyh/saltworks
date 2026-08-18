@@ -73,10 +73,12 @@ SRCS="$(awk '
 ' "$INFO")"
 [ -n "$SRCS" ] || { echo "assemble: extracted no source_files — refusing"; exit 1; }
 
-mkdir -p "$TARGET/src"
+mkdir -p "$TARGET/src" "$TARGET/docs"
 
 cp "$INFO"                  "$TARGET/info.yaml"
 cp "$HERE/src/config.json"  "$TARGET/src/config.json"
+[ -r "$HERE/docs/info.md" ] && cp "$HERE/docs/info.md" "$TARGET/docs/info.md"
+[ -r "$HERE/README.md" ]    && cp "$HERE/README.md"    "$TARGET/README.md"
 
 N=0
 for f in $SRCS; do
@@ -91,12 +93,20 @@ echo "assemble: copied $N derived source files from RTL/ into $TARGET/src/"
 # list and `for m in $MISS` word-split every parenthetical into its own bullet, so one
 # missing directory printed as nine findings. A report that inflates its own count is
 # the same class as a count with no scope: the reader acts on the number.
+# ⛔⛔ THIS CHECKS "$TARGET", NOT "$HERE", AND THE FIRST VERSION CHECKED "$HERE".
+# That version PASSED while never copying docs/info.md or README.md at all: it
+# verified THE SOURCE EXISTED and called that a complete tree. **A check on the
+# wrong side of a copy is not a check on the copy.** Caught the minute the two docs
+# were written, by reading the assembled directory instead of the report — which is
+# this seat's own banked law (`verify the treatment applied`) broken inside the hour
+# of writing the tool that broke it. The tell was that the missing-list shrank
+# exactly as predicted while the target directory had not changed.
 MISS=""
 NL='
 '
-[ -d "$HERE/test" ]         || MISS="${MISS}test/ (Makefile, tb.v, test.py — no PROJECT_SOURCES exists to agree with yet)${NL}"
-[ -r "$HERE/docs/info.md" ] || MISS="${MISS}docs/info.md${NL}"
-[ -r "$HERE/README.md" ]    || MISS="${MISS}README.md${NL}"
+[ -d "$TARGET/test" ]         || MISS="${MISS}test/ (Makefile, tb.v, test.py — no PROJECT_SOURCES exists to agree with yet)${NL}"
+[ -r "$TARGET/docs/info.md" ] || MISS="${MISS}docs/info.md${NL}"
+[ -r "$TARGET/README.md" ]    || MISS="${MISS}README.md${NL}"
 if [ -n "$MISS" ]; then
   echo "assemble: ⚠️ TREE IS INCOMPLETE — NOT SUBMITTABLE. Missing, and each is a real"
   echo "assemble:    deliverable rather than a fault of this script:"
