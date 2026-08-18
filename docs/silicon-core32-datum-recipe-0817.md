@@ -1,5 +1,46 @@
 # THE core32 DATUM — RECIPE, NOT ARTIFACT. A decision taken under act-and-account.
 
+## ⛔⛔ THIS RECIPE NO LONGER RUNS — MEASURED 2026-08-18, AND THE GOOD NEWS IS *WHY*
+
+***`en` LANDED AT `5f25f53` AFTER THIS RECIPE WAS WRITTEN, AND A NEW INPUT PORT IS A
+BREAKING CHANGE TO EVERY CONSUMER — INCLUDING A RECIPE THAT NAMES AN `--inputs`
+LIST.*** *Same law as `00ebe93` (`en` floating in four consumers), one level up: there
+the consumers were instantiations, here the consumer is a PROCEDURE.*
+
+**RUN AS WRITTEN, TODAY, both steps verbatim:**
+```
+STEP 1  SYNTH_SPLITNETS=1 ./synth.sh core32     EXIT 0
+        -> module core32(clk, rst_n, en, ...)   169 port bits
+        -> and it DIFFERS from the committed Flow/core32_nl.v, which has NO `en`
+           port and 168 port bits. THE COMMITTED NETLIST NO LONGER REPRODUCES
+           FROM ITS OWN RECIPE.
+STEP 2  import_netlist.py ... --inputs "$INS"   EXIT 1
+        -> "importer: net 'en' has no driver and is not an input"
+```
+✅ ***THE CHAIN IS SELF-PROTECTING, AND THAT IS THE FINDING WORTH KEEPING: the
+importer REFUSES rather than inventing a driver or silently dropping the port. A
+stale recipe that HALTS is in a different class from one that quietly emits a wrong
+datum*** — *this is [[a-check-never-shown-to-fail]]'s good direction, and it is the
+reason this block is a NOTICE and not an incident.* ⚠️ *The refusal is the importer's,
+not mine; I did not build this protection and am not taking credit for it. I found it
+by running the recipe instead of reading it.*
+
+⛔ **WHAT I AM DELIBERATELY *NOT* DOING: REGENERATING ANYTHING.** *How `en` should
+appear in the datum — a 67th input, or tied, or excluded with a stated reason — is a
+question about `en`'s SHAPE, and `en`'s shape is **item 10, TWO-SIGNATURE, on the
+Captain's desk**. Regenerating would settle by keystroke what is reserved for two
+signatures. **The recipe stays broken and LOUDLY SO until that rules.** Restoring the
+snapshots after the test above was verified by `git status` returning clean.*
+
+📌 **AND THE COMMITTED `Flow/core32_stat.txt` IS STALE THE SAME WAY** (168 vs 169;
+its ports == port bits, which is itself the tell that it was produced in SPLITNETS
+mode). *Do not cite it for a flop or area claim. `docs/silicon-tools/seqstat.sh` now
+REFUSES on exactly this condition — the currency check that rung zero's control row
+asked for and did not contain, because "committed" and "still true" are different
+properties and only one of them was in the bar.* *(Collateral finding from the
+flop-delta executor, `d628532`; I re-derived the port counts independently before
+acting on it.)*
+
 **The helm's 15:15 HOLD converted to my judgment (Sancho's relay, 19:2x). I am not
 committing the datum, not splitting it, and not holding it as a pending question. I am
 replacing it with the thing that regenerates it.**
