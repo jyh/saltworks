@@ -72,8 +72,21 @@ module busadapt8(clk, rst_n, sof,
     reg       store_beat; // 0 = address loop, 1 = the store's data loop
     wire      loop_end = (phase == 2'd3);
 
+    // ⛔ MID-LOOP `sof` TRUNCATION — the executor's residual (1), and it was REAL.
+    // `sof` forced `phase` to 0 at ANY cycle while `kind`/`store_beat` only updated at
+    // loop_end, so a mid-loop realign left the FRAME restarted and the TRANSACTION
+    // mid-flight: 2 mis-locks over 56 join points, bounded to 2 wrong cycles by a
+    // re-arming decoder. My own bench never caught it because it pulses `sof` when
+    // phase is ALREADY 0 (tb:45) — a test of the case that cannot fail.
+    // FIXED HERE rather than pushed into the spec: `sof` now reframes the TRANSACTION
+    // as well as the counter. A host that realigns gets a clean loop boundary, which
+    // is what realigning is FOR.
     always @(posedge clk)
         if (!rst_n) begin kind <= T_FETCH; store_beat <= 1'b0; end
+        else if (sof) begin
+            store_beat <= 1'b0;
+            kind <= c_dmem_req ? (c_dmem_we ? T_STORE : T_LOAD) : T_FETCH;
+        end
         else if (loop_end) begin
             if (kind == T_STORE && !store_beat) begin
                 // a store owns a SECOND loop for its data; the type code stays
