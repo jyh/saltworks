@@ -2115,3 +2115,68 @@ compiler R1 + silicon R1 ─────────┼──► ③ waves: L0/L
 salt probe GO + maestro word ─────► salt W5(S2)#1 (math W2)
 PARKED (Captain): B5 · the ③+④ design session · the endorsement clock
 ```
+
+## ⭐ X1 GLOSS ADJUDICATION — RULED AT THE BYTES (math, 2026-08-18 12:4x)
+
+**P1 item 4a (salt `9f425167`, Captain-routed "do it"). VERDICT: BRANCH (b) —
+the descriptive sentence is FALSE and is corrected FORWARD here, append-only.
+The original sentence above is left untouched by design.**
+
+**THE GLOSS** (RULING (c), same sitting): *"X1's theorem class ranges over
+programs with `poolDemand ≤ 7`."*
+
+**WHAT X1'S BINDER ACTUALLY IS**, read at `SaltWorks/HDL/ExecutiveX1.lean:214`:
+
+```lean
+theorem execStep_frame_disjoint {N : Nat} (codes : Vector (List Instr) N)
+    (Pcur Pother : Partition) (hdisj : Disjoint Pcur Pother) (sys : SysSt N)
+    (h : writesWithin codes[sys.cur.val] Pcur) {r : Fin 32} (hr : r ∈ Pother) :
+    (execStep codes sys).getReg r = sys.getReg r
+```
+
+**THREE WAYS THE GLOSS IS WRONG, each measured:**
+
+1. **WRONG ARTIFACT.** `poolDemand : Stmt → Nat` is defined at
+   `SaltWorks/HDL/TinyRustN0.lean:342` and lives only there — **1 file
+   corpus-wide, 0 occurrences in `ExecutiveX1.lean`** (positive control: it is
+   defined AND consumed in `TinyRustN0.lean` at `:347/:438/:457/:459/:469/:482`,
+   so the search discriminates). X1 ranges over `List Instr` — machine code —
+   not over `Stmt` programs.
+2. **WRONG KIND OF PROPERTY.** X1's side condition is `writesWithin code P`, a
+   **containment predicate on the write-set** (`code.all` … `rd ∈ P`), together
+   with `Disjoint Pcur Pother`. `poolDemand` is a **demand count**. A containment
+   predicate and a cardinality are not the same kind of thing.
+3. **WRONG QUANTITY, AND THERE IS NO BOUND AT ALL.** `Partition := Finset (Fin 32)`
+   carries **no cardinality hypothesis anywhere in the module** — the token `≤`
+   occurs **zero times in the entire file**. (The 4 `card` matches are the word
+   "dis*card*ed" in prose; the single literal `7` is the label "**B7.**". Both
+   read, not counted.) And **`N` is universally quantified** — `{N : Nat}` — not
+   fixed at 2; `N = 2` appears only in the E-4 witnesses at `:235-237`.
+
+**⭐ THE SHARPEST FORM, and it is the module's own words.** `ExecutiveX1.lean:31`
+states: *"**B7.** This lands against HAND-PARTITIONED programs. The theorem is
+about code, not about who produced it, **so the rung is not hostage to an
+allocator rung.**"* `poolDemand` is precisely an **allocator** notion — the
+register-pool sizing of `TinyRustN0`. ⇒ **The gloss does not merely cite the
+wrong identifier; it makes X1 hostage to exactly the rung B7 was written to free
+it from.**
+
+**⛔ THE CAPTAIN'S "sure N=2" RULING IS UNTOUCHED — and the correction leaves it
+BETTER supported, not worse.** `N = 2` is a **deployment instantiation**; X1's
+theorem is `∀ N`, so the ruling sits strictly inside the theorem's range rather
+than at its edge. The defect was never in the ruling; it was in the descriptive
+sentence attached to it. Likewise "two task partitions of ~7 registers" is a
+sound **deployment** description — it is only the words "X1's theorem class
+ranges over" that overreach, by attributing a deployment size to a theorem that
+has no size hypothesis.
+
+**⇒ THE PROPERTY X1 DOES RANGE OVER, stated for the register:** *for any task
+count `N`, any register partitions `Pcur`, `Pother` that are disjoint, and any
+code vector whose running task writes only within `Pcur`, an execution step
+leaves every register of `Pother` unchanged.* No pool, no allocator, no
+cardinality bound, no fixed `N`.
+
+**⚠️ CARRIED, NOT ACTED ON (maestro's call per the root-import law, reported
+never added):** `ExecutiveX1.lean` records its own *"IMPORT OWED — this module is
+not in the hub closure."* That is unchanged by this adjudication and is not
+math's to fix.
