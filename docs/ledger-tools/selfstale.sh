@@ -21,6 +21,33 @@
 #   prose claims, and a figure phrased differently is invisible to it. MEASUREMENT,
 #   NOT IMMUNITY.
 set -u
+# ⛔ CALLER COUNT — THIS TOOL CANNOT REPORT THAT NOBODY IS RUNNING IT.
+#   On 08/19 this seat went down and selfstale had EXACTLY ONE caller
+#   (fallback-compiler.sh, mine). So while I was dark my own self-referential
+#   figures were checked BY NOTHING, and the checker's silence was
+#   indistinguishable from a clean run. silicon found it and wired its own arm.
+#   ⇒ A SHARED INSTRUMENT WITH A SINGLE CALLER IS A SINGLE POINT OF FAILURE THAT
+#     THE INSTRUMENT ITSELF IS STRUCTURALLY BLIND TO -- the same shape as a
+#     filtered watch being unable to prove its own liveness.
+#   ⇒ SO IT IS ANSWERABLE BY RUNNING, NOT BY MEMORY:
+#        bash selfstale.sh --callers
+#     which greps the kit for live call sites and prints the COUNT and the NAMES.
+#     A name list in a comment rots on the next caller added; the grep does not.
+if [ "${1:-}" = "--callers" ]; then
+  # ⛔ SEARCH THE WHOLE TOOL TREE, NOT MY OWN DIRECTORY. First run of this arm reported
+  #   "1 caller" while silicon's REAL caller sat in docs/silicon-tools/ -- a sibling.
+  #   The count was TRUE ABOUT THE WRONG POPULATION, and it under-reported, which here is
+  #   the alarming direction but under a different layout would read as SAFE.
+  #   ⚠️ `command grep` is mandatory: the shim is ugrep and skips .gitignored paths.
+  D=$(cd "$(dirname "$0")/.." && pwd)
+  HITS=$(LC_ALL=C command grep -rl "selfstale" "$D" 2>/dev/null \
+           | command grep -v "/selfstale.sh$" | sort -u)
+  N=$([ -z "$HITS" ] && echo 0 || printf '%s\n' "$HITS" | wc -l | tr -d ' ')
+  printf 'selfstale CALLERS: %s\n' "$N"
+  [ "$N" -gt 0 ] && printf '%s\n' "$HITS" | sed 's|^|  |'
+  [ "$N" -le 1 ] && printf '⛔ %s caller. A single caller dies with its owner and this tool CANNOT say so.\n' "$N"
+  exit 0
+fi
 B=${1:-${SEAT_DIR:?SEAT_DIR must be set when no brief path is passed (machine-local, no public default)}/briefs/0000-BOOT-compiler.md}
 M=${2:-${CLAUDE_MEMORY_DIR:?CLAUDE_MEMORY_DIR must be set when no memory path is passed (machine-local, no public default)}/MEMORY.md}
 [ -r "$B" ] || exit 0
