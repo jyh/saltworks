@@ -110,6 +110,7 @@ import SaltWorks.HDL.Wire5
 import SaltWorks.HDL.PcBridges
 import SaltWorks.HDL.Bridge3
 import SaltWorks.HDL.Bridge4
+import SaltWorks.HDL.PcFieldClosed
 import SaltWorks.HDL.SingleLevel
 import SaltWorks.HDL.SubFragment
 import SaltWorks.HDL.MacInduction
