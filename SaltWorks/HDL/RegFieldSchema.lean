@@ -89,4 +89,56 @@ theorem regWrite_has_no_retire_input : regWrite.nIn = 7 := by decide +kernel
 
 #audit_axioms regWrite_has_no_retire_input
 
+/-! ### The core's primary inputs are stable — closing the executor's LIMIT 2 -/
+
+/-- **Every gate in `core` writes a net at or above `coreInWidth`** — sixteen blocks, each
+bounded below by its own offset, and every offset at or above `offTie = coreInWidth`. -/
+theorem core_gate_out_ge : ∀ g ∈ core.gates, coreInWidth ≤ g.out := by
+  have key : ∀ (c : Circ) (σ : Net → Net) (off : Nat), c.ssa = true → coreInWidth ≤ off →
+      ∀ g ∈ instGates c σ off, coreInWidth ≤ g.out :=
+    fun c σ off hssa hoff g hg =>
+      Nat.le_trans hoff (instGates_out_range c σ off hssa g hg).1
+  intro g hg
+  -- ⚠️ TWO shape traps, both silent until they aren't. `simp only [core]` unfolds PAST the
+  -- append into concrete gate terms; and `++` is LEFT-associated, so `mem_append` peels the
+  -- LAST organ first, not the first. Hence: one definitional peel for `regNext`, then flatten
+  -- the remaining fifteen with `or_assoc` to get a right-nested disjunction `rcases` can read.
+  rcases List.mem_append.mp hg with hg | h
+  · simp only [List.mem_append, or_assoc] at hg
+    rcases hg with h|h|h|h|h|h|h|h|h|h|h|h|h|h|h
+    · exact key _ _ _ tieCells_ssa (by first | (simp only [offRegNext, offPc, offRw, offEnc, offSel, offSlt, offSub, offAdd, offOb, off5, off4, off3, off2, off1, off0, offTie, instNext]; omega) | exact Nat.le_refl _) g h
+    · exact key _ _ _ decoder_ssa (by first | (simp only [offRegNext, offPc, offRw, offEnc, offSel, offSlt, offSub, offAdd, offOb, off5, off4, off3, off2, off1, off0, offTie, instNext]; omega) | exact Nat.le_refl _) g h
+    · exact key _ _ _ (by decide +kernel) (by first | (simp only [offRegNext, offPc, offRw, offEnc, offSel, offSlt, offSub, offAdd, offOb, off5, off4, off3, off2, off1, off0, offTie, instNext]; omega) | exact Nat.le_refl _) g h
+    · exact key _ _ _ readTree_ssa (by first | (simp only [offRegNext, offPc, offRw, offEnc, offSel, offSlt, offSub, offAdd, offOb, off5, off4, off3, off2, off1, off0, offTie, instNext]; omega) | exact Nat.le_refl _) g h
+    · exact key _ _ _ readTree_ssa (by first | (simp only [offRegNext, offPc, offRw, offEnc, offSel, offSlt, offSub, offAdd, offOb, off5, off4, off3, off2, off1, off0, offTie, instNext]; omega) | exact Nat.le_refl _) g h
+    · exact key _ _ _ bitXor32_ssa (by first | (simp only [offRegNext, offPc, offRw, offEnc, offSel, offSlt, offSub, offAdd, offOb, off5, off4, off3, off2, off1, off0, offTie, instNext]; omega) | exact Nat.le_refl _) g h
+    · exact key _ _ _ (by decide +kernel) (by first | (simp only [offRegNext, offPc, offRw, offEnc, offSel, offSlt, offSub, offAdd, offOb, off5, off4, off3, off2, off1, off0, offTie, instNext]; omega) | exact Nat.le_refl _) g h
+    · exact key _ _ _ (by decide +kernel) (by first | (simp only [offRegNext, offPc, offRw, offEnc, offSel, offSlt, offSub, offAdd, offOb, off5, off4, off3, off2, off1, off0, offTie, instNext]; omega) | exact Nat.le_refl _) g h
+    · exact key _ _ _ adder32_ssa (by first | (simp only [offRegNext, offPc, offRw, offEnc, offSel, offSlt, offSub, offAdd, offOb, off5, off4, off3, off2, off1, off0, offTie, instNext]; omega) | exact Nat.le_refl _) g h
+    · exact key _ _ _ adder32_ssa (by first | (simp only [offRegNext, offPc, offRw, offEnc, offSel, offSlt, offSub, offAdd, offOb, off5, off4, off3, off2, off1, off0, offTie, instNext]; omega) | exact Nat.le_refl _) g h
+    · exact key _ _ _ sltCirc_ssa (by first | (simp only [offRegNext, offPc, offRw, offEnc, offSel, offSlt, offSub, offAdd, offOb, off5, off4, off3, off2, off1, off0, offTie, instNext]; omega) | exact Nat.le_refl _) g h
+    · exact key _ _ _ (by decide +kernel) (by first | (simp only [offRegNext, offPc, offRw, offEnc, offSel, offSlt, offSub, offAdd, offOb, off5, off4, off3, off2, off1, off0, offTie, instNext]; omega) | exact Nat.le_refl _) g h
+    · exact key _ _ _ (by decide +kernel) (by first | (simp only [offRegNext, offPc, offRw, offEnc, offSel, offSlt, offSub, offAdd, offOb, off5, off4, off3, off2, off1, off0, offTie, instNext]; omega) | exact Nat.le_refl _) g h
+    · exact key _ _ _ regWrite_ssa (by first | (simp only [offRegNext, offPc, offRw, offEnc, offSel, offSlt, offSub, offAdd, offOb, off5, off4, off3, off2, off1, off0, offTie, instNext]; omega) | exact Nat.le_refl _) g h
+    · exact key _ _ _ SaltWorks.Stack.Program.pcAdd_ssa (by first | (simp only [offRegNext, offPc, offRw, offEnc, offSel, offSlt, offSub, offAdd, offOb, off5, off4, off3, off2, off1, off0, offTie, instNext]; omega) | exact Nat.le_refl _) g h
+  · exact key _ _ _ regNext_ssa (by first | (simp only [offRegNext, offPc, offRw, offEnc, offSel, offSlt, offSub, offAdd, offOb, off5, off4, off3, off2, off1, off0, offTie, instNext]; omega) | exact Nat.le_refl _) g h
+
+/-- ⭐⭐ **A PRIMARY INPUT READS THE SAME IN `core` AS IN THE INPUT VALUATION.** This is the
+executor's declared LIMIT 2 on `ScratchRegNextUniform.lean`, discharged: it reported that
+reducing `run ins core.gates (32r+k)` to `ins (32r+k)` *"needs a gate-out-range lemma over
+all sixteen blocks WHICH DOES NOT EXIST YET."* It exists now. -/
+theorem core_input_stable (ins : Env) (n : Net) (hn : n < coreInWidth) :
+    run ins core.gates n = ins n :=
+  run_of_unwritten ins _ n (fun g hg hEq =>
+    absurd (hEq ▸ core_gate_out_ge g hg) (Nat.not_le.mpr hn))
+
+/-- **The register state bits, specifically** — `32r + k ≤ 1023 < 1088 = coreInWidth`. -/
+theorem core_state_bit_stable (ins : Env) (r k : Nat) (hr : r < 32) (hk : k < 32) :
+    run ins core.gates (32 * r + k) = ins (32 * r + k) := by
+  refine core_input_stable ins _ ?_
+  simp only [coreInWidth, stWidth, Net]
+  omega
+
+#audit_axioms core_gate_out_ge core_input_stable core_state_bit_stable
+
 end SaltWorks.HDL.CorePlace
