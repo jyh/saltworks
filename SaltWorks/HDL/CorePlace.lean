@@ -363,6 +363,44 @@ def decOut (k : Nat) : Net := (instOuts decoder decoderSig off0).getD k 0
 /-- Bits `7…11` of the instruction: the `rd` index (`ISA.wR`: `funct7 rs2 rs1 funct3 rd opcode`). -/
 def rdBit (j : Nat) : Net := instrNet (7 + j)
 
+/-! ### THE `writesReg` ORGAN — the SECOND enable defect's repair, built before it is wired
+
+⛔⛔ **WHY THIS EXISTS. `valid` (`decOut 8`) MEANS "DECODES", NOT "WRITES A REGISTER".** It is
+`true` for every decodable word — **stores included** — and `regWrite`'s enable is
+`valid && !isBEQ && (rd==k) && k≠0`, so `isBEQ` disqualifies branches BY HAND and **nothing
+disqualifies stores**. A store's bits 7…11 are `imm[4:0]`, not an `rd`, so every store with a
+nonzero low immediate write-enabled the register those bits happened to name.
+`SaltWorks.HDL.C4Refuted` turns that into `¬ C4Spec core` with the witness `SW x1, x2, 4`.
+
+⛔ **AND NO DECODER OUTPUT ALREADY IS THIS SIGNAL** — checked, not assumed: `valid` = decodes,
+`req` = `isLW ∨ isSW`, and the seven `is*` outputs are singletons. So this repair cannot be a
+re-aiming of `regWriteSig` the way the FIRST defect's was; it must ADD LOGIC. This organ is
+that logic and nothing else: the disjunction the enable always meant.
+
+⭐ **IT WILL BE PLACED LATE — between `ruledEnc` and `regWrite` — DELIBERATELY.** `instNext c
+off = off + c.gates.length`, so every organ after an insertion moves. Inserting there moves
+only `offRw`, `offPc` and `offRegNext`; the decoder, immediate, read trees, ALU, `sltCirc`,
+`sliceASelect` and `ruledEnc` offsets are untouched, and so is `selOut`. Widening the decoder
+to expose the signal would have been more principled and would have moved EVERYTHING. -/
+def writesRegCirc : Circ :=
+  { nIn   := 5
+  , gates := [⟨5, .or 0 1⟩, ⟨6, .or 5 2⟩, ⟨7, .or 6 3⟩, ⟨8, .or 7 4⟩]
+  , outs  := [8] }
+
+theorem writesRegCirc_ssa : writesRegCirc.ssa = true := by decide +kernel
+theorem writesRegCirc_wf  : writesRegCirc.wf  = true := by decide +kernel
+
+/-- Exhaustive over all `2^5 = 32` input combinations: the organ IS the disjunction. -/
+def wrOK : Bool :=
+  [false, true].all fun a => [false, true].all fun b => [false, true].all fun c =>
+  [false, true].all fun d => [false, true].all fun e =>
+    sem writesRegCirc (fun i => [a, b, c, d, e].getD i false) == [a || b || c || d || e]
+
+/-- ⭐ **THE ORGAN'S CERTIFICATE**, in the same exhaustive style as `regWrite_correct`. -/
+theorem writesRegCirc_correct : wrOK = true := by decide +kernel
+
+#audit_axioms writesRegCirc_ssa writesRegCirc_wf writesRegCirc_correct
+
 /-- `regWrite`'s σ: `rd` from the instruction, `valid` from decoder output **8**, `isBEQ` from
 decoder output 4.
 
