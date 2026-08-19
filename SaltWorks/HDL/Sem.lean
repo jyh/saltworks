@@ -213,4 +213,86 @@ theorem halfAdder_correct :
 #audit_axioms run_congr_on sem_congr_on reads_hypothesis_is_load_bearing
 #audit_axioms halfAdder_correct
 
+/-! ## THE PACKED EVALUATOR — the same meaning, at a cost the kernel can pay
+
+⛔⛔ **WHY THIS EXISTS, MEASURED TWICE ON 2026-08-19.** `Env = Net → Bool` and `run` threads it
+as a NESTED `upd` CLOSURE CHAIN, so every lookup walks the chain. Under `decide +kernel` that
+is quadratic in the gate count AND the cached whnf pairs are the memory. Two independent
+blowups in one day, both `lean::memory_exception`, exit 134:
+
+* `run ins core.gates <net>` directly — died at 190 s with RSS past 23 GB against `-M 24000`;
+* `regWrite`'s exhaustive certificate at 32 × 2⁶ = 2048 points — died at 75 s against
+  `-M 20000`, and again after flattening six nested `List.all` closures into one range, which
+  rules out closure depth as the cause.
+
+⭐ **THE CURE IS THE ENVIRONMENT REPRESENTATION, NOT THE CIRCUIT.** Pack the whole net
+valuation into ONE `Nat`, because `Nat.land / lor / xor / pow / testBit` are GMP-accelerated
+in the kernel. The first blowup fell to this immediately: three full 10394-gate kernel
+evaluations of `core` in **25 s**.
+
+⚠️ **THIS BUYS SPEED, NOT TRUST.** `runB_eq` and `semB_eq` below are what make it sound —
+they prove the packed evaluator IS `run` and IS `sem`, by induction, so a proof routed through
+`semB` is a proof about `sem`. Never use `runB`/`semB` in a STATEMENT you intend someone to
+read as being about the circuit; state it with `sem`/`run` and discharge it with these. -/
+
+/-- Write bit `n` of `s` to `v`. -/
+def bset (s n : Nat) (v : Bool) : Nat :=
+  (s ^^^ (s &&& 2 ^ n)) ||| (if v then 2 ^ n else 0)
+
+theorem testBit_bset (s n : Nat) (v : Bool) (j : Nat) :
+    (bset s n v).testBit j = if j = n then v else s.testBit j := by
+  by_cases h : j = n
+  · subst h
+    simp only [bset, Nat.testBit_or, Nat.testBit_xor, Nat.testBit_and, Nat.testBit_two_pow]
+    cases v <;> cases hs : s.testBit j <;> simp
+  · have h' : ¬ (n = j) := fun hh => h hh.symm
+    simp only [bset, Nat.testBit_or, Nat.testBit_xor, Nat.testBit_and, Nat.testBit_two_pow,
+      if_neg h, decide_eq_false h']
+    cases v <;> cases hs : s.testBit j <;> simp [h']
+
+/-- One operation, read out of the packed state. -/
+def opEvalN (s : Nat) : Op → Bool
+  | .const b => b
+  | .not a   => !(s.testBit a)
+  | .and a b => s.testBit a && s.testBit b
+  | .or  a b => s.testBit a || s.testBit b
+  | .xor a b => s.testBit a ^^ s.testBit b
+
+theorem opEvalN_eq (s : Nat) (o : Op) : opEvalN s o = o.eval (fun n => s.testBit n) := by
+  cases o <;> rfl
+
+/-- `run`, with the valuation packed into a `Nat`. -/
+def runB (s : Nat) : List Gate → Nat
+  | []      => s
+  | g :: gs => runB (bset s g.out (opEvalN s g.op)) gs
+
+/-- ⭐ **SOUNDNESS: the packed evaluator IS `run`.** -/
+theorem runB_eq (gs : List Gate) : ∀ (s : Nat) (j : Nat),
+    (runB s gs).testBit j = run (fun n => s.testBit n) gs j := by
+  induction gs with
+  | nil => intro s j; rfl
+  | cons g gs ih =>
+    intro s j
+    have hfun : (fun n => (bset s g.out (opEvalN s g.op)).testBit n)
+        = upd (fun n => s.testBit n) g.out (g.op.eval (fun n => s.testBit n)) := by
+      funext n
+      rw [testBit_bset, opEvalN_eq]
+      simp only [upd]
+    show (runB (bset s g.out (opEvalN s g.op)) gs).testBit j
+        = run (upd (fun n => s.testBit n) g.out (g.op.eval (fun n => s.testBit n))) gs j
+    rw [ih, hfun]
+
+/-- `sem`, evaluated through the packed representation. -/
+def semB (c : Circ) (s : Nat) : List Bool :=
+  c.outs.map (fun o => (runB s c.gates).testBit o)
+
+/-- ⭐⭐ **SOUNDNESS: the packed meaning IS `sem`.** An exhaustive organ certificate may
+therefore be stated over `sem` and DISCHARGED over `semB`. -/
+theorem semB_eq (c : Circ) (s : Nat) : semB c s = sem c (fun n => s.testBit n) := by
+  simp only [semB, sem, List.map_inj_left]
+  intro o _
+  exact runB_eq c.gates s o
+
+#audit_axioms testBit_bset opEvalN_eq runB_eq semB_eq
+
 end SaltWorks.HDL
