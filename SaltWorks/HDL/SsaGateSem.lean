@@ -14,11 +14,19 @@ already split as `(pre ++ [g]) ++ suf`.
 **This file does the splitting once, positionally, so any organ gets per-gate semantics
 from its `ssa` certificate alone.**
 
-⚠️ **WHY THIS FILE EXISTS AT ALL — a measurement, not a preference.** Every 32×32 fact in
-`RegNext.lean` is a SAMPLE (`rnBit 0 true false` and two siblings); the exhaustive
-certificates stop at 4×4 and 8×8. The generator is visibly uniform in `r` and `k`, and
-that uniformity is asserted in a docstring and nowhere in the kernel. `run_ssa_gate` is
-the first tool with which the uniform statement can be *proved* rather than sampled.
+⛔ **A CORRECTION TO THIS FILE'S OWN ORIGINAL CLAIM, LEFT IN PLACE RATHER THAN QUIETLY
+DELETED.** The header shipped at `71d877f` said the uniform 32×32 statement was *"asserted
+in a docstring and nowhere in the kernel"* and that `run_ssa_gate` was *"the first tool with
+which it can be proved"*. ***BOTH ARE FALSE.*** `SaltWorks.Stack.Program.run_regNextN`
+(`Program.lean:7476`) proves exactly that statement — landed, audited, and reached by a
+bespoke development (`rnArr`, `run_rnArr`, `run_pointwise`, plus a parallel re-definition
+`rnInN`/`rnBaseN`/`rnPOp`/`rnQOp`). **I read `RegNext.lean`, found only samples there, and
+reported an absence about the CORPUS from a search of one FILE.**
+
+*What survives the correction, stated positively:* `run_pointwise` is general only for FLAT
+map-generated blocks, so the non-flat gap it left was real; and nothing in the tree states a
+gate's value as its op applied to the **final** environment, which is what `run_gate_val`
+below adds. **The tool is new; the `RegNext` fact that motivated it was not.**
 -/
 import SaltWorks.HDL.Compose
 
@@ -82,5 +90,82 @@ theorem run_ssa_gate (E : Env) (gs : List Gate) (base i : Nat)
 
 #audit_axioms ssaFrom_tail1 ssaFrom_drop
 #audit_axioms run_ssa_gate
+
+/-- A net below the base is untouched by an SSA block — or by any PREFIX of it. -/
+theorem run_take_below_base (E : Env) (gs : List Gate) (base m n : Nat)
+    (hssa : ssaFrom base gs = true) (hn : n < base) :
+    run E (gs.take m) n = E n := by
+  refine run_of_unwritten E _ n (fun g hg hEq => ?_)
+  have hge := ssaFrom_out_ge gs base hssa g (List.mem_of_mem_take hg)
+  rw [hEq] at hge
+  exact absurd hge (Nat.not_le.mpr hn)
+
+/-- A prefix long enough to have DEFINED net `n` already gives `n` its final value. -/
+theorem run_take_stable (E : Env) (gs : List Gate) (base m n : Nat)
+    (hssa : ssaFrom base gs = true) (hn : n < base + m) :
+    run E (gs.take m) n = run E gs n := by
+  conv_rhs => rw [← List.take_append_drop m gs]
+  rw [run_append]
+  refine (run_of_unwritten _ _ n (fun g hg hEq => ?_)).symm
+  have hge := ssaFrom_out_ge (gs.drop m) (base + m) (ssaFrom_drop m gs base hssa) g hg
+  rw [hEq] at hge
+  exact absurd hge (Nat.not_le.mpr hn)
+
+/-- ⭐ **`run_ssa_gate` BY MEMBERSHIP** — no positional index. This is what lets a
+`flatMap`-generated block be read without a `flatMap` indexing lemma. -/
+theorem run_ssa_gate_mem (E : Env) (gs : List Gate) (base : Nat)
+    (hssa : ssaFrom base gs = true) {g : Gate} (hg : g ∈ gs) :
+    run E gs g.out = g.op.eval (run E (gs.take (g.out - base))) := by
+  obtain ⟨i, hi, hgi⟩ := List.mem_iff_getElem.mp hg
+  have hd : gs.getD i default = g := by rw [List.getD_eq_getElem _ _ hi, hgi]
+  have hout : g.out = base + i := by rw [← hd]; exact ssaFrom_out gs base i hssa hi
+  have hsub : g.out - base = i := by rw [hout]; exact Nat.add_sub_cancel_left base i
+  rw [hsub, ← hd]
+  exact run_ssa_gate E gs base i hssa hi
+
+/-- Every gate reads only nets strictly below its OWN output net. This is what `ssaFrom`'s
+second conjunct says, pulled out by membership rather than by position. -/
+theorem ssaFrom_fanin_lt : ∀ (gs : List Gate) (base : Nat), ssaFrom base gs = true →
+    ∀ g ∈ gs, ∀ n ∈ g.op.fanin, n < g.out := by
+  intro gs
+  induction gs with
+  | nil => intro base _ g hg; simp at hg
+  | cons g' gs ih =>
+    intro base hssa x hx n hn
+    simp only [ssaFrom, Bool.and_eq_true, beq_iff_eq] at hssa
+    obtain ⟨⟨hout, hfan⟩, hrest⟩ := hssa
+    rcases List.mem_cons.mp hx with rfl | h
+    · rw [hout]
+      exact of_decide_eq_true (List.all_eq_true.mp hfan n hn)
+    · exact ih (base + 1) hrest x h n hn
+
+/-- ⭐⭐⭐ **THE NETLIST COMPUTES WHAT IT SAYS.** In any SSA gate list, a gate's output net
+holds its operation applied to the **final** environment — no prefix, no position, no
+flatness. Every hypothesis is discharged from the `ssa` certificate the block already carries.
+
+*This is the shape all organ-level reasoning wants: it makes a gate list readable as a set
+of simultaneous equations rather than as a sequence.* -/
+theorem run_gate_val (E : Env) (gs : List Gate) (base : Nat)
+    (hssa : ssaFrom base gs = true) {g : Gate} (hg : g ∈ gs) :
+    run E gs g.out = g.op.eval (run E gs) := by
+  have hge := ssaFrom_out_ge gs base hssa g hg
+  rw [run_ssa_gate_mem E gs base hssa hg]
+  refine Op.eval_congr g.op (fun n hn => ?_)
+  refine run_take_stable E gs base _ n hssa ?_
+  have hlt : n < g.out := ssaFrom_fanin_lt gs base hssa g hg n hn
+  have harith : base + (g.out - base) = g.out := Nat.add_sub_cancel' hge
+  rw [harith]
+  exact hlt
+
+/-- A primary input keeps its value through the whole block. -/
+theorem run_below_base (E : Env) (gs : List Gate) (base n : Nat)
+    (hssa : ssaFrom base gs = true) (hn : n < base) : run E gs n = E n := by
+  refine run_of_unwritten E _ n (fun g hg hEq => ?_)
+  have hge := ssaFrom_out_ge gs base hssa g hg
+  rw [hEq] at hge
+  exact absurd hge (Nat.not_le.mpr hn)
+
+#audit_axioms run_take_below_base run_take_stable run_ssa_gate_mem
+#audit_axioms ssaFrom_fanin_lt run_gate_val run_below_base
 
 end SaltWorks.HDL
