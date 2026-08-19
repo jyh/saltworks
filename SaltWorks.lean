@@ -107,6 +107,7 @@ import SaltWorks.HDL.Rs1Close
 import SaltWorks.HDL.Rs2Close
 import SaltWorks.HDL.Wire4
 import SaltWorks.HDL.Wire5
+import SaltWorks.HDL.PcBridges
 import SaltWorks.HDL.SingleLevel
 import SaltWorks.HDL.SubFragment
 import SaltWorks.HDL.MacInduction
