@@ -6,6 +6,20 @@
 ### replaced any number of times before the deadline, so there is no cost to
 ### submitting early and every cost to submitting late.
 
+> ⛔⛔ **SCOPE AND STALENESS BANNER — ADDED 2026-08-19, READ BEFORE ACTING ON ANY ROW.**
+> **THIS DOCUMENT'S SUBJECT IS `jyh/tt-verified-banyan-switch`** (named in §C.4) — the
+> BANYAN submission. **It is NOT the `_c32` neural-dataflow submission**, which lives in a
+> SEPARATE public repo, `jyh/tt-neural-dataflow-fabric`, with its own project entry.
+> ⛔ **§C.4's "the repo must go public" blocker WAS DISCHARGED FOR THE NDF REPO ON 08-10**
+> — it was public, and fully green, for nine days while briefs still quoted this row as a
+> live blocker. **A seat lost four hours on 08-19 obeying it.** The row is not wrong; it is
+> *dated*, and it is *about the other repo*.
+> ⇒ ***A CHECKLIST IS A PLAN, NOT A STATE.*** Every row here asserts a status as of the date
+> in its header. Before acting on one, **re-derive it from the machine** — `gh repo view`,
+> `gh run list` — and treat this file as the record of what was *intended*, never of what
+> *is*. The rows that stop work (blockers) are the ones to re-derive first, because a false
+> blocker produces no activity to inspect and so is never noticed.
+
 ## A. Prepared by the fleet — no account, no card
 
 | # | Item | State |
@@ -17,7 +31,7 @@
 | P5 | `src/config.json` — `CLOCK_PERIOD` 20 ns, `PL_TARGET_DENSITY_PCT` 60, and nothing that `user_config.json` would silently override | ✅ |
 | P6 | Apache-2.0 headers in every file we authored | ✅ (the `LICENSE` file itself comes from the template) |
 | P7 | **Dry run: LibreLane 3.0.5 + precheck** | ✅ **DONE IN TT's OWN CI, which is better than local:** the design hardens, **Precheck PASSES**, and **GL test PASSES against the powered post-layout netlist** |
-| P8 | **Pin `tools-ref` to a SHA** in `.github/workflows/gds.yaml` | ⛔ **OWED — see C.1.** Two runs four minutes apart came out identical (`pdk.json` byte-identical, `resolved.json` zero differing keys), which is luck, not pinning |
+| P8 | **Pin `tools-ref` to a SHA** in `.github/workflows/gds.yaml` | ✅ **SATISFIED-BY-RECORDING — helm ruling 2026-08-19 12:10:14, superseding the ⛔ OWED below.** **DO NOT PIN.** *Reason, in the helm's terms: the shuttle hardens with TT's own server-side action version regardless, so a local sha pin **cannot bind the referee** and buys only template divergence — and `.github/` shipping byte-verbatim is itself a submission property. The reproducibility instrument is a **per-run receipt of the RESOLVED sha**, not a pin.* **Standing duty this creates: resolve and record `ttsky26c` immediately before each submission act** (`gh api repos/TinyTapeout/tt-gds-action/git/ref/tags/ttsky26c --jq .object.sha`) — it is a **movable tag** and Actions resolves it at run time, so a stale flow would otherwise arrive silently. Recorded 2026-08-19: `651ea05e19e86a9c26d00307e8081ceb53d328d3`, **re-checked and UNMOVED** since first pinned. *Reversible at a word if TT's flow proves otherwise.* — *original entry, kept because its observation is still true and is the reason a pin looked necessary:* ⛔ OWED — see C.1. Two runs four minutes apart came out identical (`pdk.json` byte-identical, `resolved.json` zero differing keys), which is luck, not pinning |
 
 ## B. The human's clicks — JYH only, in order
 
