@@ -32,11 +32,16 @@ port addresses is the register `decode` NAMES. Bridge 3 gave the address as a nu
 `decode` gives it as a `Fin 32` through `toReg`; the two are joined by `Fin.ext` on
 `toReg b = ⟨b.toNat, _⟩`. *Everything else composes.*
 
-⛔ **WHAT THIS IS NOT.** It is one of thirty-four. `RegDatapathOK` — the other object, and
-the one carrying the whole ALU/decode/select path — **remains FALSE at today's wiring**
-(`a10f980`: `regWriteSig` feeds `regWrite`'s `valid` port from `decOut 5` = `isLW`, where
-`valid` is index 8). **So `C4Spec core` does not follow, and is still false rather than
-unproved.** Not C4, not a witness, does not close R9/B2, criterion (c) open.
+⛔ **WHAT THIS IS NOT.** It is one of thirty-four. `RegDatapathOK` — the other object, and the
+one carrying the whole ALU/decode/select path — **is still UNPROVED**, so `C4Spec core` does
+not follow. Not C4, not a witness, does not close R9/B2, criterion (c) open.
+
+⚠️ **UPDATED 08-19 (repair): this paragraph used to say `RegDatapathOK` was FALSE rather than
+unproved**, because `regWriteSig` fed `valid` from `decOut 5` = `isLW` (`a10f980`). **That
+wiring is REPAIRED** — `regWriteSig 5 ↦ decOut 8`, and `DecoderTransport` now proves the core
+DOES write on `ADD`/`ADDI`/`XOR`/`SLT` where it previously proved it never did. *The status
+moved from FALSE to merely UNPROVED, which is the whole difference between a broken machine
+and an unfinished proof.*
 -/
 import SaltWorks.HDL.Bridge4
 

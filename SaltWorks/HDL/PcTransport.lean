@@ -20,9 +20,11 @@ c4Spec_core_of_two_datapaths : RegDatapathOK → PcDatapathOK → C4Spec core
 ⚠️ **WHY THIS WAS DONE NOW, AND IT IS A REVERSAL WORTH STATING.** At 22:15 this seat argued
 *against* taking `PcField` first, on the ground that it reads a different organ and buys
 nothing about the 32. **That argument was about ORDERING while the shared register work was
-available.** It no longer is: `a10f980` proved `core`'s write-enable is wired to `decOut 5`
-(`isLW`) instead of `decOut 8` (`valid`), so `RegDatapathOK` is false until an owner outside
-this seat repairs `CorePlace`. **`PcField` is the only unblocked object left, and `pcAddSig`
+available.** It no longer was, at the time: `a10f980` proved `core`'s
+write-enable was wired to `decOut 5` (`isLW`) instead of `decOut 8` (`valid`), so
+`RegDatapathOK` was FALSE. ⚠️ **That wiring was REPAIRED on 08-19 by this seat, which owns
+`SaltWorks/HDL/**` — so this paragraph's premise is HISTORY.** The ordering judgement it
+records still stands on its own merits. **`PcField` is the only unblocked object left, and `pcAddSig`
 reads `decOut 4` = `isBEQ`, verified correct in the blast-radius sweep.** *The reason changed;
 the judgement did not.*
 
@@ -100,7 +102,8 @@ and `C4Spec` is discharged**: placement, transport, output map, field split, sch
 pc half.
 
 ⛔ **STILL A REDUCTION, NOT A PAYMENT.** `RegDatapathOK` contains the ALU/decode/select path
-and is **currently FALSE** at the mis-wired `valid` port (`a10f980`); `PcDatapathOK` contains
+and was **FALSE** at the mis-wired `valid` port (`a10f980`) until the 08-19 repair, after
+which it is merely UNPROVED; `PcDatapathOK` contains
 the pc/branch path and is untouched. *Neither is proved here.* -/
 theorem c4Spec_core_of_two_datapaths (h1 : RegDatapathOK) (h2 : PcDatapathOK) :
     SaltWorks.HDL.C4Spec core :=

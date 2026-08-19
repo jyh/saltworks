@@ -41,7 +41,7 @@ def rdOf (ins : Env) : Nat :=
   + (if ins (instrNet 9) then 4 else 0) + (if ins (instrNet 10) then 8 else 0)
   + (if ins (instrNet 11) then 16 else 0)
 
-def validOf (ins : Env) : Bool := run ins coreThru13 (decOut 5)
+def validOf (ins : Env) : Bool := run ins coreThru13 (decOut 8)
 def isBEQOf (ins : Env) : Bool := run ins coreThru13 (decOut 4)
 
 theorem rdOf_lt (ins : Env) : rdOf ins < 32 := by
@@ -77,7 +77,7 @@ theorem envRW_agrees (ins : Env) (i : Nat) (hi : i < regWrite.nIn) :
     simp [rdOf_testBit ins 3 (by omega)]
   · rw [show regWriteSig 4 = rdBit 4 from rfl, core_rd_is_the_instruction ins 4 (by omega)]
     simp [rdOf_testBit ins 4 (by omega)]
-  · simp [validOf, show regWriteSig 5 = decOut 5 from rfl]
+  · simp [validOf, show regWriteSig 5 = decOut 8 from rfl]
   · simp [isBEQOf, show regWriteSig 6 = decOut 4 from rfl]
 
 theorem regWrite_out_bound (k : Nat) (hk : k < 32) :

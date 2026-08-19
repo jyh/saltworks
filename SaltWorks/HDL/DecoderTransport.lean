@@ -143,40 +143,79 @@ theorem core_decOut_spec (ins : Env) (j : Nat) (hj : j < 9) :
   rw [show decoderSig a = instrNet a from rfl, tie_input_stable ins _ (instrNet_lt a ha),
       seenWord, wordOf_getLsbD _ _ ha]
 
-theorem validOf_spec (ins : Env) : validOf ins = (ctrlSpec (seenWord ins)).getD 5 false :=
-  core_decOut_spec ins 5 (by omega)
+theorem validOf_spec (ins : Env) : validOf ins = (ctrlSpec (seenWord ins)).getD 8 false :=
+  core_decOut_spec ins 8 (by omega)
 
 theorem isBEQOf_spec (ins : Env) : isBEQOf ins = (ctrlSpec (seenWord ins)).getD 4 false :=
   core_decOut_spec ins 4 (by omega)
 
-/-! ### ⛔⛔ WHAT THE TRANSPORT REVEALS -/
+/-! ### ✅ WHAT THE TRANSPORT REVEALED, AND THE REPAIR THAT ANSWERED IT
 
-/-- ⛔⛔⛔ **`core` NEVER WRITES A REGISTER ON `ADD`.** `regWriteSig` feeds `regWrite`'s
-`valid` port from `decOut 5`. `sem_decoder_eq_ctrlSpec` pins `decOut j` to `ctrlSpec` index
-`j`, and index 5 is **`isLW`** — `valid` is index **8**. So the assembled core write-enables
-on "this is a load", not on "this instruction writes a register". -/
-theorem core_never_writes_on_ADD (ins : Env) (k : Nat) (hk : k < 32)
-    (rd a b : Fin 32) (h : decode (seenWord ins) = some (.ADD rd a b)) :
-    run ins core.gates (rwOut k) = false := by
-  rw [core_rwOut_spec ins k hk, validOf_spec ins]
+⛔ **HISTORY, KEPT BECAUSE THE MECHANISM OUTLIVES THE BUG.** Until 08-19 this section held
+`core_never_writes_on_ADD` / `_XOR` / `_ADDI`, which **PROVED** that the assembled core never
+wrote a register on any arithmetic instruction: `regWriteSig` fed `regWrite`'s `valid` port
+from `decOut 5`, and `decOut j` is `ctrlSpec` index `j`, where **index 5 is `isLW`** and
+`valid` is **8**. The core write-enabled on *"this is a load"*.
+
+***THOSE THREE THEOREMS NO LONGER COMPILE, AND THAT IS THE RECEIPT FOR THE FIX.*** They were
+provable before the repair and are FALSE after it — a differential nobody has to take on
+trust. The wiring was corrected at `CorePlace.regWriteSig` on 08-19 by this seat, which owns
+`SaltWorks/HDL/**` (`docs/SEATS.md:8`; helm ruling 08/17 *"R9 OWNER = COMPILER"*). -/
+
+/-- ⭐ **THE DEFECT AND ITS REPAIR, EXHIBITED IN ONE KERNEL STATEMENT.** On an `ADD` word the
+OLD index reads FALSE and the NEW index reads TRUE — *same word, two indices, opposite
+values.* This is why the mis-wiring silenced every arithmetic write, and it is cheap enough
+that no successor need reconstruct it. -/
+theorem the_repair_is_observable (w : BitVec 32) (rd a b : Fin 32)
+    (h : decode w = some (.ADD rd a b)) :
+    (ctrlSpec w).getD 5 false = false ∧ (ctrlSpec w).getD 8 false = true := by
   simp [ctrlSpec, h]
 
-/-- …and the same for `XOR`, `SLT`, `ADDI` — every arithmetic instruction in Slice A. -/
-theorem core_never_writes_on_XOR (ins : Env) (k : Nat) (hk : k < 32)
-    (rd a b : Fin 32) (h : decode (seenWord ins) = some (.XOR rd a b)) :
+/-- ⭐⭐ **`core` NOW WRITES THE REGISTER `ADD` NAMES.** The positive form of the theorem this
+section used to carry in the negative. -/
+theorem core_writes_on_ADD (ins : Env) (rd a b : Fin 32)
+    (h : decode (seenWord ins) = some (.ADD rd a b)) (hne : ¬ (rdOf ins = 0)) :
+    run ins core.gates (rwOut (rdOf ins)) = true := by
+  rw [core_rwOut_spec ins (rdOf ins) (rdOf_lt ins), validOf_spec ins, isBEQOf_spec ins]
+  simp [ctrlSpec, h, hne]
+
+theorem core_writes_on_XOR (ins : Env) (rd a b : Fin 32)
+    (h : decode (seenWord ins) = some (.XOR rd a b)) (hne : ¬ (rdOf ins = 0)) :
+    run ins core.gates (rwOut (rdOf ins)) = true := by
+  rw [core_rwOut_spec ins (rdOf ins) (rdOf_lt ins), validOf_spec ins, isBEQOf_spec ins]
+  simp [ctrlSpec, h, hne]
+
+theorem core_writes_on_SLT (ins : Env) (rd a b : Fin 32)
+    (h : decode (seenWord ins) = some (.SLT rd a b)) (hne : ¬ (rdOf ins = 0)) :
+    run ins core.gates (rwOut (rdOf ins)) = true := by
+  rw [core_rwOut_spec ins (rdOf ins) (rdOf_lt ins), validOf_spec ins, isBEQOf_spec ins]
+  simp [ctrlSpec, h, hne]
+
+theorem core_writes_on_ADDI (ins : Env) (rd a : Fin 32) (imm : BitVec 12)
+    (h : decode (seenWord ins) = some (.ADDI rd a imm)) (hne : ¬ (rdOf ins = 0)) :
+    run ins core.gates (rwOut (rdOf ins)) = true := by
+  rw [core_rwOut_spec ins (rdOf ins) (rdOf_lt ins), validOf_spec ins, isBEQOf_spec ins]
+  simp [ctrlSpec, h, hne]
+
+/-- **AND THE NEGATIVE THAT MUST SURVIVE THE REPAIR: `BEQ` STILL WRITES NOTHING.** It is the
+one Slice A instruction with no destination, so a repair that turned every enable on would be
+a different defect wearing the fix's clothes. Every register, not just `rd`. -/
+theorem core_writes_nothing_on_BEQ (ins : Env) (k : Nat) (hk : k < 32)
+    (a b : Fin 32) (imm : BitVec 12)
+    (h : decode (seenWord ins) = some (.BEQ a b imm)) :
     run ins core.gates (rwOut k) = false := by
-  rw [core_rwOut_spec ins k hk, validOf_spec ins]
+  rw [core_rwOut_spec ins k hk, validOf_spec ins, isBEQOf_spec ins]
   simp [ctrlSpec, h]
 
-theorem core_never_writes_on_ADDI (ins : Env) (k : Nat) (hk : k < 32)
-    (rd a : Fin 32) (imm : BitVec 12) (h : decode (seenWord ins) = some (.ADDI rd a imm)) :
+/-- **AND AN UNDECODABLE WORD STILL WRITES NOTHING** — the v1 NOP-advance, in gates. -/
+theorem core_writes_nothing_on_garbage (ins : Env) (k : Nat) (hk : k < 32)
+    (h : decode (seenWord ins) = none) :
     run ins core.gates (rwOut k) = false := by
-  rw [core_rwOut_spec ins k hk, validOf_spec ins]
+  rw [core_rwOut_spec ins k hk, validOf_spec ins, isBEQOf_spec ins]
   simp [ctrlSpec, h]
 
-/-- **NON-VACUITY — the wire is LIVE, it is aimed at the wrong bit.** On a load the enable
-does come up, which is exactly what `isLW` would do. *A dead enable would be a different
-(and more visible) defect; this one passes every organ certificate.* -/
+/-- **`LW` writes its destination** — unchanged by the repair, and it is the arm that proved
+the wire was LIVE rather than dead back when it was aimed at `isLW`. -/
 theorem core_does_write_on_LW (ins : Env) (rd a : Fin 32) (imm : BitVec 12)
     (h : decode (seenWord ins) = some (.LW rd a imm))
     (hne : ¬ (rdOf ins = 0)) :
@@ -184,9 +223,19 @@ theorem core_does_write_on_LW (ins : Env) (rd a : Fin 32) (imm : BitVec 12)
   rw [core_rwOut_spec ins (rdOf ins) (rdOf_lt ins), validOf_spec ins, isBEQOf_spec ins]
   simp [ctrlSpec, h, hne]
 
+/-- ⭐⭐⭐ **THE IDENTIFICATION CONTROL THAT DID NOT EXIST — `decOut 8` IS `valid`, PROVED
+SEMANTICALLY.** `CorePlace.valid_and_isBEQ_are_distinct_and_ordered` pins the σ to an INDEX
+and can only catch a swap; this pins the index to its MEANING through
+`sem_decoder_eq_ctrlSpec`. *This is the control whose absence let the original defect live,
+and it is stated here because `ctrlSpec` is not in scope where the σ is written.* -/
+theorem valid_is_decoder_output_8 (ins : Env) :
+    run ins coreThru13 (decOut 8) = (ctrlSpec (seenWord ins)).getD 8 false :=
+  core_decOut_spec ins 8 (by omega)
+
 #audit_axioms coreThru13_split coreRest11_out_ge
 #audit_axioms core_decOut_spec validOf_spec isBEQOf_spec
-#audit_axioms core_never_writes_on_ADD core_never_writes_on_XOR core_never_writes_on_ADDI
-#audit_axioms core_does_write_on_LW
+#audit_axioms the_repair_is_observable valid_is_decoder_output_8
+#audit_axioms core_writes_on_ADD core_writes_on_XOR core_writes_on_SLT core_writes_on_ADDI
+#audit_axioms core_writes_nothing_on_BEQ core_writes_nothing_on_garbage core_does_write_on_LW
 
 end SaltWorks.HDL.RegNextUniform

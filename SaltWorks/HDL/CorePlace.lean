@@ -349,7 +349,8 @@ whole reason the assembly order exists.
 * **`valid` and `isBEQ` are the DECODER'S OUTPUTS** — gate nets, and therefore *above* `off0`.
 
 `instMap c σ off n = if n < c.nIn then σ n else off + (n - c.nIn)`, so the decoder's six outputs
-land at `[1135, 1151, 1167, 1176, 1185, 1189]` — `isBEQ` at index 4, `valid` at index 5, both
+land at `[1135, 1151, 1167, 1176, 1185, 1189]` — `isBEQ` at index 4 (⚠️ and `valid` is index
+**8**, NOT 5; this sentence said 5 until 08-19 and that error is what `a10f980` found), both
 inside `off0 … off1 - 1`. ⇒ ***`regWrite` is placeable from `off1` onward and NOT at `off0`:
 the ordering constraint is now load-bearing rather than a formality.***
 -/
@@ -362,10 +363,21 @@ def decOut (k : Nat) : Net := (instOuts decoder decoderSig off0).getD k 0
 /-- Bits `7…11` of the instruction: the `rd` index (`ISA.wR`: `funct7 rs2 rs1 funct3 rd opcode`). -/
 def rdBit (j : Nat) : Net := instrNet (7 + j)
 
-/-- `regWrite`'s σ: `rd` from the instruction, `valid` from decoder output 5, `isBEQ` from
-decoder output 4. -/
+/-- `regWrite`'s σ: `rd` from the instruction, `valid` from decoder output **8**, `isBEQ` from
+decoder output 4.
+
+⛔⛔ **REPAIRED 2026-08-19. THIS READ `decOut 5` AND THAT WAS A DEFECT, kernel-proved at
+`a10f980` before it was fixed here.** `decOut j` is `ctrlSpec` index `j`, and the row is
+`isADD isXOR isSLT isADDI isBEQ isLW isSW req valid` — **index 5 is `isLW`; `valid` is 8.**
+So the assembled core write-enabled on *"this is a load"* and **never wrote a register on
+`ADD`, `ADDI`, `XOR` or `SLT`.**
+⚠️ **HOW IT GOT HERE, because the mechanism outlives the bug:** `valid` MOVED from index 5
+to index 8 when D2 grew the decoder (`outs := outs ++ [req, v]`, so `valid` keeps the tail).
+This σ and four prose sites were written against the old layout and never re-dated —
+`green-build-does-not-date-its-prose`, firing on the file that caused the defect it
+describes. -/
 def regWriteSig (j : Net) : Net :=
-  if j < 5 then rdBit j else if j = 5 then decOut 5 else decOut 4
+  if j < 5 then rdBit j else if j = 5 then decOut 8 else decOut 4
 
 /-- ⭐ **PLACEMENT #5 — `regWrite` at `off1`, `instOK` DISCHARGED, and the first placement whose
 σ reaches into another organ's gates.** -/
@@ -392,10 +404,20 @@ theorem regWrite_is_NOT_placeable_at_off0 : ¬ (regWriteSig 5 < off0) := by
   decide +kernel
 
 /-- **CONTROL: the two decoder-driven wires are DISTINCT and correctly ordered.** `valid` is
-output 5 and `isBEQ` is output 4; swapping them would place a well-typed core that write-enables
-on the wrong predicate. Both facts asserted, because the σ picks them by INDEX. -/
+output **8** and `isBEQ` is output 4; swapping them would place a well-typed core that
+write-enables on the wrong predicate. Both facts asserted, because the σ picks them by INDEX.
+
+⛔⛔ **THIS CONTROL WAS NAMED FOR THE DEFECT IT COULD NOT SEE, AND THAT IS THE LESSON.** Until
+08-19 its docstring said *"`valid` is output 5"* and its STATEMENT proved only
+`regWriteSig 5 = decOut 5`, `regWriteSig 6 = decOut 4`, and `decOut 4 ≠ decOut 5` —
+**the WIRING and the DISTINCTNESS, never the IDENTIFICATION.** It therefore *could not fail*
+when 5 was the wrong bit: it can only catch a SWAP, and the defect was not a swap.
+⇒ ***ASK OF ANY SUCH CONTROL: WHICH WRONG WIRING DOES THIS REJECT?*** If the honest answer is
+only "the two being equal", it is nearly vacuous. **The identification is proved separately
+and semantically in `DecoderTransport.valid_is_decoder_output_8`, through
+`sem_decoder_eq_ctrlSpec` — here the indices are only syntax.** -/
 theorem valid_and_isBEQ_are_distinct_and_ordered :
-    regWriteSig 5 = decOut 5 ∧ regWriteSig 6 = decOut 4 ∧ decOut 4 ≠ decOut 5 := by
+    regWriteSig 5 = decOut 8 ∧ regWriteSig 6 = decOut 4 ∧ decOut 4 ≠ decOut 8 := by
   refine ⟨by simp [regWriteSig], by simp [regWriteSig], ?_⟩
   simp only [decOut, decoderSig, off0, instNext, tieCells, offTie, coreInWidth, stWidth]
   decide +kernel
@@ -1051,7 +1073,7 @@ theorem pcAddSig_follows_the_port_map :
   refine ⟨rfl, rfl, rfl, rfl, rfl, rfl, rfl, rfl, rfl⟩
 
 /-- **CONTROL: `isBEQ` is decoder output 4, the SAME net `regWrite` reads at row 5 — and it is not
-`valid` (output 5).** Two organs now depend on that index; if it were wrong, `regWrite` would
+`valid` (output **8** — this said 5 until the 08-19 repair).** Two organs now depend on that index; if it were wrong, `regWrite` would
 write-enable on the branch predicate and `pcAdd` would branch on validity. -/
 theorem isBEQ_agrees_with_regWrite :
     pcAddSig 128 = regWriteSig 6 ∧ pcAddSig 128 ≠ regWriteSig 5 := by
