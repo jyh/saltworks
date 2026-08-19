@@ -134,4 +134,5 @@ import SaltWorks.HDL.BlockCalc
 import SaltWorks.HDL.IteScheme
 import SaltWorks.HDL.WhileScheme
 import SaltWorks.HDL.WhileSim
+import SaltWorks.HDL.C4Refuted
 import SaltWorks.Tactic.AuditAxioms
