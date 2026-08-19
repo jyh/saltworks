@@ -136,7 +136,19 @@ inspected.
 literal sits unevaluated. `simp only` with a restricted set keeps the powers symbolic long
 enough for the lemma to fire. *That, and not the mathematics, is what made this lemma hard.*
 ⚠️ `hhi` uses CORE lemmas: `Nat.testBit_eq_false_of_lt` is Mathlib and `norm_num` is not in
-this file's closure, so either would grow an import on a file the whole HDL tree depends on. -/
+this file's closure, so either would grow an import on a file the whole HDL tree depends on.
+
+⭐ **THE SIMP LIST IS MINIMAL, AND IT WAS CHECKED RATHER THAN TRIMMED FOR TIDINESS.** It first
+carried `if_false`, `Bool.or_false` and `Bool.false_or`, which Lean reported as UNUSED — and
+*"unused simp argument" is the only signal Lean gives that a `simp` fired nothing*, so in a
+freshly-repaired file it is the one warning class that deserves a look before dismissal (the
+math seat flagged it the beat this landed). **The three were surplus, not masking:** the
+remaining arguments all fire, and the proof stands without them.
+⛔ **AND THE LEMMA IS NOT VACUOUS, which is the question the warning really asks.** It is the
+bridge in `EnableSpec.core_rwOut_eq_weOf`, so the whole enable chain routes through it — and
+that chain yields OPPOSITE verdicts on the same machinery: `core_writes_on_ADD` proves `true`
+while `core_writes_nothing_on_SW` proves `false`. **A lemma that fired nothing could not
+separate those two.** -/
 theorem rwPack_testBit (rd : Nat) (hrd : rd < 32) (a b c d e f : Bool) (i : Nat) (hi : i < 11) :
     (rwPack rd a b c d e f).testBit i
       = (if i < 5 then rd.testBit i
@@ -149,8 +161,8 @@ theorem rwPack_testBit (rd : Nat) (hrd : rd < 32) (a b c d e f : Bool) (i : Nat)
     have hlt : rd < 2 ^ j := Nat.lt_of_lt_of_le hrd hp
     simp [Nat.testBit, Nat.shiftRight_eq_div_pow, Nat.div_eq_of_lt hlt]
   interval_cases i <;> cases a <;> cases b <;> cases c <;> cases d <;> cases e <;> cases f <;>
-    simp only [rwPack, hm, Nat.testBit_or, Nat.testBit_two_pow, if_true, if_false,
-               Nat.testBit_zero, Bool.or_false, Bool.false_or] <;>
+    simp only [rwPack, hm, Nat.testBit_or, Nat.testBit_two_pow, if_true,
+               Nat.testBit_zero] <;>
     simp +decide [hhi]
 
 /-- The circuit's answer, read through the PACKED evaluator.
