@@ -331,6 +331,31 @@ except Exception: print(-1)' "$mine" 2>/dev/null)
     elif [ "$nxt" -ge 40 ]; then age="$mine (+${am}min ** POST AT THIS WAKE — ${rem}min LEFT; next sweep lands at +${nxt}, past ~40 **)"
     else                         age="$mine (+${am}min, ${rem}min left, next sweep +${nxt} — still inside)"; fi
   fi
+  # ── ARM 7 (INWARD, CLOCK-TRIGGERED) — added 08/19. selfstale.sh re-measures the
+  #    self-referential figures my own brief asserts ABOUT ITSELF.
+  # ⛔ WHY IT IS HERE AT ALL: until today this seat had NO caller for it. The only live
+  #    one was fallback-compiler.sh, and compiler went down ~08:4x (kathy decommission),
+  #    so my fingerprint checking had ZERO coverage and NOTHING ANNOUNCED IT. A
+  #    dependency I did not choose, failing in the silent direction.
+  # ⛔ THE PATHS ARE PASSED EXPLICITLY AND THAT IS LOAD-BEARING: selfstale.sh defaults its
+  #    brief to 0000-BOOT-compiler.md. Called bare from here it would report a TRUE
+  #    reading of the WRONG OBJECT and print nothing — adjacent-object, and silent.
+  # ⛔ AND STDERR IS NOT SWALLOWED: `2>/dev/null` on this very arm once turned a
+  #    deliberate refusal into an empty result, which renders exactly like "no drift".
+  # ⛔ NO MACHINE-LOCAL DEFAULT: this repo is publication-facing, so an unset env REFUSES
+  #    LOUDLY rather than guessing a path (same law as BUS).
+  if [ -n "${SEAT_DIR:-}" ] && [ -n "${CLAUDE_MEMORY_DIR:-}" ]; then
+    SSERR=$(mktemp)
+    SS=$(bash "$(dirname "$0")/../ledger-tools/selfstale.sh" \
+           "$SEAT_DIR/briefs/0000-BOOT-silicon.md" "$CLAUDE_MEMORY_DIR/MEMORY.md" 2>"$SSERR"); SSRC=$?
+    [ -n "$SS" ] && printf '%s\n' "$SS"
+    if [ "$SSRC" != 0 ] || [ -s "$SSERR" ]; then
+      printf '  ⛔ INWARD CHECK DID NOT RUN (exit %s): %s\n' "$SSRC" "$(head -1 "$SSERR")"
+    fi
+    rm -f "$SSERR"
+  else
+    printf '  ⛔ INWARD CHECK NOT ARMED: set SEAT_DIR and CLAUDE_MEMORY_DIR (machine-local, no public default). A check that did not run must NOT look like one that passed.\n'
+  fi
   printf 'FALLBACK %s | mylast=%s | bus=%s | main watch procs=%s (PRESENCE, not delivery) | account=%s | index=%s | last header: %s\n' \
     "$(date '+%H:%M')" "$age" "$busf" "$main" "$km" "$idx" "$hdr"
   sleep "$PERIOD"
