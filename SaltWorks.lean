@@ -47,6 +47,7 @@ import SaltWorks.HDL.StateCodec
 import SaltWorks.HDL.Immediate
 import SaltWorks.HDL.RegNext
 import SaltWorks.HDL.Compose
+import SaltWorks.HDL.SsaGateSem
 import SaltWorks.Stack.Bridge
 import SaltWorks.HDL.Vectors
 import SaltWorks.HDL.SpikeVectors
