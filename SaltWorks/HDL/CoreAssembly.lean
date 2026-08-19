@@ -26,6 +26,10 @@ circuit, each independent, each about thirty-two bits.*
 -/
 import SaltWorks.HDL.CorePlace
 
+-- ⚠️ FILE-LEVEL, not `set_option … in` after a docstring: C4.lean:95-98 records that Lean
+-- rejects the latter ("wants the docstring on a declaration"). Its note saved the rediscovery.
+set_option maxHeartbeats 4000000
+
 namespace SaltWorks.HDL.CorePlace
 open SaltWorks.HDL
 
@@ -63,6 +67,40 @@ theorem core_outs_length : core.outs.length = stWidth := by
   simp only [core, instOuts, List.length_append, List.length_map]
   decide +kernel
 
+/-! ## THE OUTPUT MAP — what all 33 remaining obligations read positionally
+
+`RegField c r` is about output bits `32r … 32r+31`; `PcField` about `1024 … 1055`. Both
+read `core.outs` BY POSITION. ⛔ An off-by-one here would not fail loudly — it would make
+all 32 `RegField`s false about the registers they NAME while each stayed a well-formed
+statement, and the first symptom would be 32 unprovable goals with no sign which end was
+wrong. So it is proved before any field is attempted. -/
+
+/-- The register half of `core.outs` is exactly `regNext`'s outputs, embedded. -/
+theorem core_outs_reg_half :
+    (core.outs.take 1024) = instOuts regNext regNextSig offRegNext := by
+  have hlen : (instOuts regNext regNextSig offRegNext).length = 1024 := by
+    simp only [instOuts, List.length_map]; decide +kernel
+  simp only [core, List.take_left' hlen]
+
+/-- The pc half is exactly `pcAdd`'s outputs, embedded. -/
+theorem core_outs_pc_half :
+    (core.outs.drop 1024) = instOuts SaltWorks.Stack.Program.pcAdd pcAddSig offPc := by
+  have hlen : (instOuts regNext regNextSig offRegNext).length = 1024 := by
+    simp only [instOuts, List.length_map]; decide +kernel
+  simp only [core, List.drop_left' hlen]
+
+/-- ⭐⭐ **THE PER-REGISTER INDEX — register `r`'s bit `k` is at position `32r + k`.**
+*This is what makes `RegField r` a statement about `rnOut 32 32 r k` rather than about an
+opaque list position, and it is where a TRANSPOSED bank would show up.*
+
+⚠️ *Proved by exhaustion over the 1,024 (r,k) pairs rather than by a `flatMap` indexing
+lemma — `List.flatMap_eq_join_map` is not in this mathlib and the bounded shape makes the
+brute route available. It is a decision procedure over a closed finite set, not a sample.* -/
+theorem regNext_outs_index : ∀ r, r < 32 → ∀ k, k < 32 →
+    regNext.outs.getD (32 * r + k) 0 = rnOut 32 32 r k := by
+  decide +kernel
+
 #audit_axioms core core_gate_count core_outs_length
+#audit_axioms core_outs_reg_half core_outs_pc_half regNext_outs_index
 
 end SaltWorks.HDL.CorePlace
