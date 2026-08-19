@@ -52,13 +52,35 @@ in the kernel. `runB_eq` proves the packed evaluator IS `run`, by induction, in 
 
 ## HONEST LIMITS
 
+- ⚠️ **THE IDENTITY ARGUMENT NEEDED MORE THAN `pp.fullNames`.** `command grep` finds TWO
+  `def RegDatapathOK` — `C4Reduction.lean:39` (the flagship) and `ScratchC4Reduction.lean:12`
+  — **both in namespace `SaltWorks.HDL.RegNextUniform`**, so they print IDENTICALLY and the
+  machine-printed statement could not have told them apart. What actually pins it: nothing
+  imports `ScratchC4Reduction` (RC=1), and `control_same_proposition` feeds the refuted
+  proposition into `C4Reduction`'s own `c4Spec_core_of_datapath_and_pc`. The conclusion
+  stands; the argument I first gave for it was insufficient.
+
 - This refutes the sentence **as written**. `RegDatapathOK` quantifies over all `Env` with no
   well-formedness side condition, so any total environment is admissible — and nothing about
   `ins0` is exotic (a set register bit and a legal store word).
 - ⭐ **IT IS DATED, AND THAT IS THE POINT.** `¬ C4Spec core` is about `core` **as it stands
   today**. The repair — a disqualifier for stores in the enable — is expected to FLIP this
-  file, together with `core_writes_on_SW` and `sel_ins0`. **These are DIFFERENTIAL receipts:
-  a repair that leaves them compiling has not been made.** Do not delete them; watch them die.
+  file. **These are DIFFERENTIAL receipts.** Do not delete them; watch them die.
+- ⛔⛔ **BUT THIS FILE'S OWN RECEIPT IS INERT TODAY, AND I ADVERTISED OTHERWISE.** I wrote
+  "a repair that leaves them compiling has not been made" — **THIS MODULE IS NOT IN THE BUILD
+  GRAPH.** `SaltWorks.lean` does not import it (RC=1) and no module does (RC=1), against
+  `DecoderTransport`'s 8 importers as a positive control. So a default `lake build` NEVER
+  ELABORATES THIS FILE, and after the repair it would stay green while every theorem here
+  silently went false. **The watchdog was wired to nothing.**
+  ⇒ **import owed: `SaltWorks.HDL.C4Refuted` — one line in `SaltWorks.lean`, which is
+    MAESTRO-ONLY (`docs/SEATS.md`), so I cannot land it.** Until it lands, the receipt is
+    PROCEDURAL, not automatic: **whoever makes the repair MUST run**
+      `../saltbuild.sh SaltWorks.HDL.C4Refuted`   # MUST FAIL after a correct repair
+    and a green there means the repair is incomplete. A procedural guard is weaker than a
+    build-graph one and is stated as weaker on purpose.
+  ⚠️ **`core_writes_on_SW` (in `DecoderTransport`) IS live** — that module IS imported, so
+    that one differential fires automatically. Of the receipts I named on the bus, one was
+    load-bearing and the two in this file were not. Do not conflate them.
 - Not a defect in the silicon. `SaltWorks/Silicon/RTL/core32.v:75` omits stores from `reg_we`
   entirely, so the taped-out RTL carries neither of the two Lean enable defects. Both are
   model-side, and no claimed correspondence between `core` and `core32.v` exists in any case.
