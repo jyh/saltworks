@@ -93,6 +93,7 @@ import SaltWorks.HDL.CoreOffsets
 import SaltWorks.HDL.CorePlace
 import SaltWorks.HDL.CoreAssembly
 import SaltWorks.HDL.RegFieldSchema
+import SaltWorks.HDL.RegNextUniform
 import SaltWorks.HDL.SingleLevel
 import SaltWorks.HDL.SubFragment
 import SaltWorks.HDL.MacInduction
