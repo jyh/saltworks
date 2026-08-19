@@ -7275,8 +7275,19 @@ nowhere else**. So:
 ## ⛔ THE DEBT THIS DOES NOT PAY
 
 **No `C4Spec` field is closed.** A register-field claim is about a whole `core`'s
-output bits and no `core` exists. What lands is the block theorem, the ISA
-bridge, and the shape a `core` assembly applies. *The debt is `core`.*
+output bits. What lands here is the block theorem, the ISA bridge, and the shape
+a `core` assembly applies.
+
+⚠️ **UPDATED 08-18, AND THE UPDATE IS ONLY TO THE SECOND SENTENCE.** It used to
+read *"…and no `core` exists"*, closing *"the debt is `core`."* **That debt is
+paid:** `core : Circ` landed in `SaltWorks/HDL/CoreAssembly.lean` (`7607649`,
+`f83fed7`), and this block theorem's transport onto it is `core_reg_bit` /
+`core_outBit_reg`, which consume `run_regNextN` below through `inst_sem`.
+
+⛔ **THE FIRST SENTENCE IS UNCHANGED AND STILL TRUE: no `C4Spec` field is closed.**
+*The two sentences aged at different rates, which is the whole hazard — a reader
+who took the paragraph as one unit would have concluded either that both were
+stale or that neither was.*
 -/
 
 section RegNextSemantics
