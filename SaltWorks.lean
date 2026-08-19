@@ -104,6 +104,7 @@ import SaltWorks.HDL.PcTransport
 import SaltWorks.HDL.PcReads
 import SaltWorks.HDL.RtTransport
 import SaltWorks.HDL.Rs1Close
+import SaltWorks.HDL.Rs2Close
 import SaltWorks.HDL.SingleLevel
 import SaltWorks.HDL.SubFragment
 import SaltWorks.HDL.MacInduction
