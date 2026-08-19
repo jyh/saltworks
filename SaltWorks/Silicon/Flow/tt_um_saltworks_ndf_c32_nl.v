@@ -33103,10 +33103,10 @@ module tt_um_saltworks_ndf_c32(ui_in, uo_out, uio_in, uio_out, uio_oe, ena, clk,
   sky130_fd_sc_hd__lpflow_isobufsrc_1 _09370_ (
     .A(_04460_),
     .SLEEP(_04462_),
-    .X(_00000_)
+    .X(_00002_)
   );
   sky130_fd_sc_hd__clkinv_1 _09371_ (
-    .A(_00000_),
+    .A(_00002_),
     .Y(_04463_)
   );
   sky130_fd_sc_hd__lpflow_isobufsrc_1 _09372_ (
@@ -33129,10 +33129,10 @@ module tt_um_saltworks_ndf_c32(ui_in, uo_out, uio_in, uio_out, uio_oe, ena, clk,
   sky130_fd_sc_hd__lpflow_isobufsrc_1 _09375_ (
     .A(_04466_),
     .SLEEP(_04462_),
-    .X(_00001_)
+    .X(_00000_)
   );
   sky130_fd_sc_hd__clkinv_1 _09376_ (
-    .A(_00001_),
+    .A(_00000_),
     .Y(_04467_)
   );
   sky130_fd_sc_hd__nand2b_1 _09377_ (
@@ -33152,10 +33152,10 @@ module tt_um_saltworks_ndf_c32(ui_in, uo_out, uio_in, uio_out, uio_oe, ena, clk,
     .B1(_04469_),
     .C1(_04462_),
     .D1(frm[4]),
-    .Y(_00002_)
+    .Y(_00001_)
   );
   sky130_fd_sc_hd__clkinv_1 _09380_ (
-    .A(_00002_),
+    .A(_00001_),
     .Y(_04470_)
   );
   sky130_fd_sc_hd__nand2_1 _09381_ (
@@ -35194,7 +35194,7 @@ module tt_um_saltworks_ndf_c32(ui_in, uo_out, uio_in, uio_out, uio_oe, ena, clk,
     .X(_04697_)
   );
   sky130_fd_sc_hd__or3_1 _09755_ (
-    .A(_00000_),
+    .A(_00002_),
     .B(_04566_),
     .C(_04687_),
     .X(_04698_)
@@ -35217,7 +35217,7 @@ module tt_um_saltworks_ndf_c32(ui_in, uo_out, uio_in, uio_out, uio_oe, ena, clk,
   sky130_fd_sc_hd__a21oi_1 _09759_ (
     .A1(ext0[3]),
     .A2(_04564_),
-    .B1(_00000_),
+    .B1(_00002_),
     .Y(_04700_)
   );
   sky130_fd_sc_hd__a21oi_1 _09760_ (
@@ -35232,7 +35232,7 @@ module tt_um_saltworks_ndf_c32(ui_in, uo_out, uio_in, uio_out, uio_oe, ena, clk,
     .X(_04701_)
   );
   sky130_fd_sc_hd__or3_1 _09762_ (
-    .A(_00001_),
+    .A(_00000_),
     .B(_04562_),
     .C(_04687_),
     .X(_04702_)
@@ -35255,7 +35255,7 @@ module tt_um_saltworks_ndf_c32(ui_in, uo_out, uio_in, uio_out, uio_oe, ena, clk,
   sky130_fd_sc_hd__a21oi_1 _09766_ (
     .A1(ext1[3]),
     .A2(_04560_),
-    .B1(_00001_),
+    .B1(_00000_),
     .Y(_04704_)
   );
   sky130_fd_sc_hd__a21oi_1 _09767_ (
@@ -35293,7 +35293,7 @@ module tt_um_saltworks_ndf_c32(ui_in, uo_out, uio_in, uio_out, uio_oe, ena, clk,
   sky130_fd_sc_hd__a21oi_1 _09773_ (
     .A1(ext2[3]),
     .A2(_04555_),
-    .B1(_00002_),
+    .B1(_00001_),
     .Y(_04708_)
   );
   sky130_fd_sc_hd__a21oi_1 _09774_ (
@@ -43469,19 +43469,19 @@ module tt_um_saltworks_ndf_c32(ui_in, uo_out, uio_in, uio_out, uio_oe, ena, clk,
   sky130_fd_sc_hd__edfxtp_1 _11181_ (
     .CLK(clk),
     .D(\fab.e21.out0 ),
-    .DE(_00002_),
+    .DE(_00001_),
     .Q(sh2)
   );
   sky130_fd_sc_hd__edfxtp_1 _11182_ (
     .CLK(clk),
     .D(\fab.e20.out1 ),
-    .DE(_00001_),
+    .DE(_00000_),
     .Q(sh1)
   );
   sky130_fd_sc_hd__edfxtp_1 _11183_ (
     .CLK(clk),
     .D(\fab.e20.out0 ),
-    .DE(_00000_),
+    .DE(_00002_),
     .Q(sh0)
   );
   sky130_fd_sc_hd__dfxtp_1 _11184_ (

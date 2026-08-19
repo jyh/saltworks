@@ -40,11 +40,20 @@ module tt_um_saltworks_ndf_c32 (
   //      pin it rides (uio_in[6]) is already declared above for the fabric.
   //      ⚠️ core32.en is wired to busadapt8.retire INSIDE plane32bus — a MARKED
   //      validation shape, not a ratified design. See plane32bus.v's header.
+  // ⛔ `retire_o` IS DECLARED BEFORE THE INSTANTIATION AND THAT IS NOT COSMETIC.
+  //    The first version declared it AFTER, which yosys accepts and IVERILOG
+  //    REJECTS: "Net retire_o is not defined in this context ... A symbol with that
+  //    name was declared here. Check for declaration after use."
+  //    ⇒ The top SYNTHESIZED CLEAN and would have FAILED TT's RTL test AND its
+  //      gate-level test, because both run iverilog through cocotb. A SYNTHESIS PASS
+  //      IS NOT AN ELABORATION PASS, and the tool CI uses is the stricter one.
+  //    Found 2026-08-18 18:4x by elaborating test/tb.v against the assembled src/ —
+  //    i.e. by writing the bench I had been holding.
+  wire retire_o;
   plane32bus core (
     .clk(clk), .rst_n(rst_n), .sof(sof),
     .instr_byte(ui_in), .addr_byte(uo_out), .phase_o(phase_o), .retire(retire_o)
   );
-  wire retire_o;
 
   // ---- the fabric. Port indices FROZEN (D6): 0-3 cells, 4 edge-in,
   //      5 edge-out, 6 CPU-stub, 7 spare ----

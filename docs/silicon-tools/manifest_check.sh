@@ -123,5 +123,36 @@ if [ "$RC" -ne 0 ]; then
   echo "manifest_check: ⛔ MANIFEST AND CLOSURE DISAGREE."
   exit 1
 fi
+# ---- THE THIRD SURFACE: test/Makefile's PROJECT_SOURCES ---------------------------
+# ⛔ info.yaml says, twice, that PROJECT_SOURCES must be kept in sync BY HAND and that
+# NOTHING CHECKS IT. Until 2026-08-18 18:4x there was no test/ at all, so I called
+# that gap EMPTY rather than closed — and an empty gap becomes a real one the moment
+# somebody writes the file. It was written; so this arm exists in the same commit.
+# ⚠️ ABSENCE IS NOT FAILURE HERE: no test/Makefile means nothing to disagree with, and
+#   this arm says so rather than refusing. But a PRESENT file that disagrees REFUSES.
+MK="$(dirname "$INFO")/test/Makefile"
+if [ ! -r "$MK" ]; then
+  echo "manifest_check: (no test/Makefile — PROJECT_SOURCES arm has nothing to compare)"
+else
+  PSRC="$(sed -n 's/^[[:space:]]*PROJECT_SOURCES[[:space:]]*=[[:space:]]*//p' "$MK" | head -1 | tr ' ' '\n' | sed '/^$/d' | sort -u)"
+  NPS="$(printf '%s\n' "$PSRC" | grep -c . || true)"
+  if [ "${NPS:-0}" -lt 1 ]; then
+    echo "manifest_check: ⛔ test/Makefile has a PROJECT_SOURCES line that extracted to NOTHING"
+    echo "manifest_check:    — a broken parser, not an empty list. REFUSING."
+    exit 1
+  fi
+  PMISS="$(comm -13 <(printf '%s\n' "$PSRC") <(printf '%s\n' "$DERV"))"
+  PEXTRA="$(comm -23 <(printf '%s\n' "$PSRC") <(printf '%s\n' "$DERV"))"
+  if [ -n "$PMISS" ] || [ -n "$PEXTRA" ]; then
+    echo "  ⛔ PROJECT_SOURCES (test/Makefile) DISAGREES WITH THE CLOSURE:"
+    [ -n "$PMISS" ]  && { echo "     in the closure, not in PROJECT_SOURCES:"; printf '%s\n' "$PMISS"  | sed 's/^/       /'; }
+    [ -n "$PEXTRA" ] && { echo "     in PROJECT_SOURCES, not in the closure:";  printf '%s\n' "$PEXTRA" | sed 's/^/       /'; }
+    echo "manifest_check: ⛔ THE THIRD SURFACE DISAGREES. Nothing used to check this."
+    exit 1
+  fi
+  echo "manifest_check: ✅ PROJECT_SOURCES agrees too ($NPS files) — the 'nothing checks"
+  echo "manifest_check:    that they agree' comment in info.yaml is no longer true."
+fi
+
 echo "manifest_check: ✅ the manifest names exactly the $NDERV files the top needs."
 exit 0

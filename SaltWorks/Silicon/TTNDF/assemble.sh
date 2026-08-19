@@ -24,10 +24,14 @@
 # one derives the list from the manifest it just gated, so the manifest is the single
 # authority and this script cannot disagree with it.
 #
-# ⚠️⚠️ WHAT THIS PRODUCES IS **NOT A SUBMITTABLE TREE**, AND IT SAYS SO AT THE END
-# RATHER THAN LETTING A GREEN "assembled ->" IMPLY OTHERWISE. TTNDF has no test/,
-# no docs/info.md and no README.md of its own. Those are REAL missing deliverables,
-# not oversights of this script. It reports every one it could not supply.
+# ⚠️ IT REPORTS WHAT IT COULD NOT SUPPLY AND EXITS NONZERO WHEN THE TREE IS
+# INCOMPLETE, rather than letting a green "assembled ->" imply otherwise.
+# ✅ AS OF 2026-08-18 18:5x THE TREE IS COMPLETE for the first time: info.yaml,
+# README.md, docs/info.md, src/config.json + 8 derived .v, and test/{Makefile,tb.v,
+# test.py,requirements.txt}. ⛔ COMPLETE IS NOT SUBMITTED: the workflows, devcontainer
+# and LICENSE still come from TT's template, the repo still has to be created and made
+# PUBLIC (§C.4, the Captain's hand), and test/ is MARKED UNRUN with TT CI as its
+# declared referee.
 #
 # ⛔ `.github/workflows/`, `.devcontainer/`, `.vscode/` and `LICENSE` come from
 # TinyTapeout's template repo verbatim and must not be hand-written — create the repo
@@ -79,6 +83,15 @@ cp "$INFO"                  "$TARGET/info.yaml"
 cp "$HERE/src/config.json"  "$TARGET/src/config.json"
 [ -r "$HERE/docs/info.md" ] && cp "$HERE/docs/info.md" "$TARGET/docs/info.md"
 [ -r "$HERE/README.md" ]    && cp "$HERE/README.md"    "$TARGET/README.md"
+# ⛔ AND test/ IS COPIED, WHICH IT WAS NOT UNTIL 2026-08-18 18:5x. The completeness
+# check below already tested "$TARGET/test" correctly, so once test/ was written the
+# tool reported it MISSING FROM THE TARGET — and it was, because nothing copied it.
+# SECOND INSTANCE TODAY of the same shape in this one script: a check on the right
+# side of the copy, with no copy behind it. The first was docs/ and README.
+if [ -d "$HERE/test" ]; then
+  mkdir -p "$TARGET/test"
+  for f in "$HERE/test"/*; do [ -f "$f" ] && cp "$f" "$TARGET/test/$(basename "$f")"; done
+fi
 
 N=0
 for f in $SRCS; do
