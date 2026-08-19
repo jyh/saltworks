@@ -29,6 +29,7 @@ gate's value as its op applied to the **final** environment, which is what `run_
 below adds. **The tool is new; the `RegNext` fact that motivated it was not.**
 -/
 import SaltWorks.HDL.Compose
+import SaltWorks.HDL.GenSelectCount
 
 namespace SaltWorks.HDL
 
@@ -167,5 +168,70 @@ theorem run_below_base (E : Env) (gs : List Gate) (base n : Nat)
 
 #audit_axioms run_take_below_base run_take_stable run_ssa_gate_mem
 #audit_axioms ssaFrom_fanin_lt run_gate_val run_below_base
+
+
+/-! ### Placement-level: a placed block carries its own dense-SSA certificate -/
+
+/-- ⭐⭐ **A PLACED BLOCK IS DENSE SSA FROM ITS OWN OFFSET.** Everything comes from the
+`instOK` the placement already carries: `c`'s own dense SSA gives the positional outputs,
+and `σ`'s below-offset bound gives the input fanins. -/
+theorem instGates_ssaFrom (c : Circ) (σ : Net → Net) (off : Nat) (hok : instOK c σ off) :
+    ssaFrom off (instGates c σ off) = true := by
+  obtain ⟨hssa, _hwf, hσ⟩ := hok
+  have hgs : ssaFrom c.nIn c.gates = true := by
+    rw [Circ.ssa, Bool.and_eq_true] at hssa; exact hssa.1
+  have hlen : (instGates c σ off).length = c.gates.length := by
+    simp [instGates]
+  have hmapD : ∀ i, i < c.gates.length →
+      (instGates c σ off).getD i default
+        = (⟨instMap c σ off (c.gates.getD i default).out,
+            Op.rename (instMap c σ off) (c.gates.getD i default).op⟩ : Gate) := by
+    intro i hi
+    have h1 : i < (instGates c σ off).length := by rw [hlen]; exact hi
+    rw [List.getD_eq_getElem _ _ h1, List.getD_eq_getElem _ _ hi]
+    simp only [instGates, List.getElem_map]
+  have hout : ∀ i, i < c.gates.length → (c.gates.getD i default).out = c.nIn + i :=
+    fun i hi => ssaFrom_out c.gates c.nIn i hgs hi
+  refine ssaFrom_of_pos (instGates c σ off) off ?_ ?_
+  · intro i hi
+    rw [hlen] at hi
+    rw [hmapD i hi]
+    show instMap c σ off (c.gates.getD i default).out = off + i
+    rw [hout i hi, instMap_internal c σ off (c.nIn + i)
+      (Nat.not_lt.mpr (Nat.le_add_right _ _))]
+    exact congrArg (off + ·) (Nat.add_sub_cancel_left c.nIn i)
+  · intro i hi a ha
+    rw [hlen] at hi
+    rw [hmapD i hi] at ha
+    simp only [Op.rename_fanin, List.mem_map] at ha
+    obtain ⟨b, hb, rfl⟩ := ha
+    have hmem : (c.gates.getD i default) ∈ c.gates := by
+      rw [List.getD_eq_getElem _ _ hi]; exact List.getElem_mem hi
+    have hblt : b < c.nIn + i := by
+      have h := ssaFrom_fanin_lt c.gates c.nIn hgs _ hmem b hb
+      rw [hout i hi] at h; exact h
+    by_cases hbin : b < c.nIn
+    · rw [instMap, if_pos hbin]
+      exact Nat.lt_of_lt_of_le (hσ b hbin) (Nat.le_add_right _ _)
+    · rw [instMap, if_neg hbin]
+      -- ⚠️ omega drops both of these: the `<` was born at `Net`. Restate at `Nat` as fresh
+      -- hypotheses, and close the goal with a Nat TERM rather than a second omega call.
+      -- ⚠️ RESTATING AT `Nat` IS NOT ENOUGH — omega still refuses, because the hypothesis's
+      -- ORIGIN fixes the instance, not its current shape (Compose.lean:745 records this).
+      -- The whole step has to be built from Nat TERMS.
+      have hle : c.nIn ≤ b := Nat.not_lt.mp hbin
+      have h2 : c.nIn + (b - c.nIn) < c.nIn + i := by
+        rw [Nat.add_sub_cancel' hle]; exact hblt
+      exact Nat.add_lt_add_left (Nat.lt_of_add_lt_add_left h2) off
+
+/-- **`instOK` is monotone in the offset** — a block placeable at `off` is placeable
+anywhere above it. *Several organs' `instOK` certificates in `CorePlace` are stated at an
+earlier offset than the one `core` actually uses; this is what lets them be consumed at the
+real placement without re-proving the σ bound.* -/
+theorem instOK_mono {c : Circ} {σ : Net → Net} {off off' : Nat}
+    (h : instOK c σ off) (hle : off ≤ off') : instOK c σ off' :=
+  ⟨h.1, h.2.1, fun i hi => Nat.lt_of_lt_of_le (h.2.2 i hi) hle⟩
+
+#audit_axioms instGates_ssaFrom instOK_mono
 
 end SaltWorks.HDL
