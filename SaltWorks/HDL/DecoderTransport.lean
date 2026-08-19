@@ -48,10 +48,15 @@ not exist: it pins the INDEX to its MEANING, not to another index.
 recorded after two placements fed `rs2` where `ADDI` needed the immediate. This was the third
 instance, found the same way: by transporting an organ theorem and reading what came out.*
 
-⛔ **STATUS AFTER THE REPAIR, stated precisely because the pre-repair text said the
-opposite:** `RegDatapathOK` is **UNPROVED, not false** — no counterexample stands against
-`core` as now assembled, and it is the campaign's one open row. `C4Spec core` is likewise
-open, not refuted. The structural reduction in `C4Reduction` was never affected, and neither
+⛔ **STATUS — AND A SECOND DEFECT OF THE SAME FAMILY, FOUND 11:3x THE SAME DAY.**
+`RegDatapathOK` is still **UNPROVED rather than refuted** (no value witness stands against
+it yet), but ***one of its two remaining halves is now FALSE IN THE KERNEL***: the circuit's
+enable does NOT agree with the ISA's write decision, because **`SW` write-enables a
+register**. `valid` (index 8) is true for EVERY decodable instruction, `SW` included, and
+the enable term set is `valid && !isBEQ && (rdOf == k) && k≠0` — **`isBEQ` disqualifies
+branches and NOTHING disqualifies stores.** A store's bits 7…11 are `imm[4:0]`, not an `rd`,
+so any store with a nonzero low immediate writes the register those bits happen to name.
+See `core_writes_on_SW` and `sw_forces_selOut_to_equal_held` below. The structural reduction in `C4Reduction` was never affected, and neither
 was `RegField core 0` (x0 never writes under either wiring).
 
 ⚠️ **AND THE ELEVEN-HOUR LESSON, kept because it is not derivable from the code:** the
@@ -242,6 +247,59 @@ theorem core_does_write_on_LW (ins : Env) (rd a : Fin 32) (imm : BitVec 12)
   rw [core_rwOut_spec ins (rdOf ins) (rdOf_lt ins), validOf_spec ins, isBEQOf_spec ins]
   simp [ctrlSpec, h, hne]
 
+/-- ⛔⛔ **THE NEGATIVE CONTROL THAT WAS MISSING, AND IT FAILS: `SW` WRITE-ENABLES A
+REGISTER.** `core_writes_nothing_on_BEQ` and `_on_garbage` are the two negatives this file
+carried; the third case that writes no register — the STORE — was never asked. It does not
+hold, and this theorem is the proof, in the POSITIVE form the defect actually takes.
+
+`ctrlSpec`'s `valid` (index 8) is `true` for every decodable instruction, stores included;
+only `none` clears it. So the enable reduces on a `SW` word to `rdOf ins == k && k ≠ 0`. But
+a store has no `rd`: bits 7…11 are `imm[4:0]`. ⇒ ***every store whose low immediate is
+nonzero write-enables the register those immediate bits happen to name.***
+
+⚠️ **THIS IS THE `valid` MIS-WIRING'S SIBLING, NOT ITS RECURRENCE.** That defect aimed the
+enable at the wrong decoder output; this one aims it at the right output and finds the
+output's MEANING is "decodes", not "writes a register". `isBEQ` was subtracted by hand and
+`isSW` — which exists, at index 6, and already drives the memory port — was not.
+
+⛔ **DO NOT DELETE THIS WHEN IT IS REPAIRED.** Like `core_never_writes_on_ADD` before it, it
+is a DIFFERENTIAL receipt: it is provable NOW and must become FALSE the moment the enable
+gains its `!isSW` term. A repair that leaves this compiling has not been made. -/
+theorem core_writes_on_SW (ins : Env) (a b : Fin 32) (imm : BitVec 12)
+    (h : decode (seenWord ins) = some (.SW a b imm)) (hne : ¬ (rdOf ins = 0)) :
+    run ins core.gates (rwOut (rdOf ins)) = true := by
+  rw [core_rwOut_spec ins (rdOf ins) (rdOf_lt ins), validOf_spec ins, isBEQOf_spec ins]
+  simp [ctrlSpec, h, hne]
+
+/-- **AND THE ISA WRITES NOTHING ON A STORE** — `rfl`, so the disagreement is not a matter
+of interpretation. Paired with `core_writes_on_SW` this is the enable-agreement half of
+`RegDatapathOK`, refuted. -/
+theorem isa_writes_nothing_on_SW (a b : Fin 32) (imm : BitVec 12) :
+    writesReg (.SW a b imm) = none := rfl
+
+/-- ⭐⭐⭐ **WHAT `RegDatapathOK` WOULD FORCE, IF IT HELD.** This does not refute it — no
+value witness is landed yet — but it prices it. On any store with a nonzero low immediate
+the enable is high, so the schema's `if` takes its WRITE branch, while `stepT` holds the
+register (`writesReg (.SW …) = none`). The two sides can only agree if the write-data path
+ALREADY equals the register named by the store's own immediate bits, at every bit, in every
+environment. **`RegDatapathOK` is therefore not merely open — it is open with a sentence
+like this hanging off it, and the next unit of work is a `selOut` witness that kills it.** -/
+theorem sw_forces_selOut_to_equal_held (hOK : RegDatapathOK)
+    (ins : Env) (a b : Fin 32) (imm : BitVec 12)
+    (hd : decode (seenWord ins) = some (.SW a b imm)) (hne : ¬ (rdOf ins = 0))
+    (k : Nat) (hk : k < 32) :
+    run ins core.gates (selOut k) = ins (32 * rdOf ins + k) := by
+  have hlt := rdOf_lt ins
+  set r : Fin 32 := ⟨rdOf ins, hlt⟩ with hr
+  have hon : run ins core.gates (rwOut r.val) = true :=
+    core_writes_on_SW ins a b imm hd hne
+  have hnw : ∀ i, decode (seenWord ins) = some i → writesReg i ≠ some r := by
+    intro i hi; rw [hd] at hi; cases hi; simp [writesReg]
+  have h := hOK ins r k hk
+  rw [hon, if_pos rfl, stepT_regs_of_ne (decQ ins) (seenWord ins) r hnw,
+      decQ_reg_bit ins r k hk] at h
+  exact h
+
 /-- ⭐⭐⭐ **THE IDENTIFICATION CONTROL THAT DID NOT EXIST — `decOut 8` IS `valid`, PROVED
 SEMANTICALLY.** `CorePlace.valid_and_isBEQ_are_distinct_and_ordered` pins the σ to an INDEX
 and can only catch a swap; this pins the index to its MEANING through
@@ -256,5 +314,7 @@ theorem valid_is_decoder_output_8 (ins : Env) :
 #audit_axioms the_repair_is_observable valid_is_decoder_output_8
 #audit_axioms core_writes_on_ADD core_writes_on_XOR core_writes_on_SLT core_writes_on_ADDI
 #audit_axioms core_writes_nothing_on_BEQ core_writes_nothing_on_garbage core_does_write_on_LW
+#audit_axioms core_writes_on_SW isa_writes_nothing_on_SW
+#audit_axioms sw_forces_selOut_to_equal_held
 
 end SaltWorks.HDL.RegNextUniform
