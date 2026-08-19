@@ -101,6 +101,7 @@ import SaltWorks.HDL.EnableArm
 import SaltWorks.HDL.EnableSpec
 import SaltWorks.HDL.DecoderTransport
 import SaltWorks.HDL.PcTransport
+import SaltWorks.HDL.PcReads
 import SaltWorks.HDL.SingleLevel
 import SaltWorks.HDL.SubFragment
 import SaltWorks.HDL.MacInduction
