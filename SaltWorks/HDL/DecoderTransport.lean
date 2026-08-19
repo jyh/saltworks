@@ -3,15 +3,19 @@ Copyright (c) 2026 Jason Hickey. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: compiler seat
 
-# The decoder transport — and the defect it exposes
+
+# The decoder transport — the defect it exposed, and the repair that closed it
 
 This file lifts the decoder's landed correctness (`sem_decoder_eq_ctrlSpec`) onto the
 placement, so `core`'s control reads become `ctrlSpec` bits of the instruction word. It was
-written to CLOSE the enable arm. It closed it, and the closed form is wrong.
+written to close the enable arm; what it actually did first was expose a mis-wiring. Both
+halves are recorded here because **the discharge record is what stops the work being
+redone** — and because the identification control at the foot of this file exists only
+because the defect got past everything else.
 
-## ⛔⛔⛔ `core` NEVER WRITES A REGISTER ON `ADD`, `ADDI`, `XOR` OR `SLT`
+## ✅ REPAIRED 2026-08-19 (`2813add`) — the history, in past tense
 
-`CorePlace.regWriteSig` feeds `regWrite`'s **`valid`** port from **`decOut 5`**.
+`CorePlace.regWriteSig` used to feed `regWrite`'s **`valid`** port from **`decOut 5`**.
 `sem_decoder_eq_ctrlSpec` pins `decOut j` to `ctrlSpec` index `j`, and `ctrlSpec`'s row is
 
 ```
@@ -19,10 +23,13 @@ index    0      1      2      3      4      5      6     7     8
        isADD  isXOR  isSLT  isADDI isBEQ  isLW   isSW  req  valid
 ```
 
-⇒ ***the assembled core write-enables on "this is a LOAD", not on "this instruction writes
-a register".*** `core_never_writes_on_ADD` / `_XOR` / `_ADDI` prove it in the kernel, and
-`core_does_write_on_LW` proves the wire is **live and aimed at the wrong bit** rather than
-dead — which is why every organ certificate passes.
+⇒ ***the assembled core write-enabled on "this is a LOAD", not on "this instruction writes
+a register"*** — so it never wrote a register on `ADD`, `ADDI`, `XOR` or `SLT`. The port now
+reads `decOut 8`. **The receipt is a DIFFERENTIAL, not a re-assertion:**
+`core_never_writes_on_ADD` / `_XOR` / `_ADDI` were provable BEFORE the repair and are FALSE
+after it; they are replaced below by `core_writes_on_ADD` / `_XOR` / `_SLT` / `_ADDI`, plus
+two negatives that a correct repair must LEAVE STANDING (`core_writes_nothing_on_BEQ`,
+`_on_garbage`) so that a fix which merely turned every enable on would fail here.
 
 ## ⚠️ WHY NOTHING CAUGHT IT, and the answer is uncomfortable
 
@@ -34,17 +41,29 @@ right net. And `CorePlace`'s own control, `valid_and_isBEQ_are_distinct_and_orde
 output 4"* — but its STATEMENT proves only `regWriteSig 5 = decOut 5`, `regWriteSig 6 =
 decOut 4`, and `decOut 4 ≠ decOut 5`: **the wiring and the distinctness, never the
 identification.** A control whose docstring names the defect and whose statement cannot
-express it.
+express it. ⇒ `valid_is_decoder_output_8` at the foot of this file is the control that did
+not exist: it pins the INDEX to its MEANING, not to another index.
 
 *This seat's ledger already carries the shape — `instOK-certifies-in-time-not-right-wire`,
-recorded after two placements fed `rs2` where `ADDI` needed the immediate. This is the third
+recorded after two placements fed `rs2` where `ADDI` needed the immediate. This was the third
 instance, found the same way: by transporting an organ theorem and reading what came out.*
 
-⛔ **CONSEQUENCE, stated plainly: `RegDatapathOK` is FALSE for `core` as assembled, and
-therefore `C4Spec core` is false — not unproved, FALSE.** The structural reduction in
-`C4Reduction` is unaffected and so is `RegField core 0` (x0 never writes under either
-wiring). The repair is one index in `CorePlace.regWriteSig`; this file does not make it,
-because `CorePlace` is not this seat's to edit unilaterally.
+⛔ **STATUS AFTER THE REPAIR, stated precisely because the pre-repair text said the
+opposite:** `RegDatapathOK` is **UNPROVED, not false** — no counterexample stands against
+`core` as now assembled, and it is the campaign's one open row. `C4Spec core` is likewise
+open, not refuted. The structural reduction in `C4Reduction` was never affected, and neither
+was `RegField core 0` (x0 never writes under either wiring).
+
+⚠️ **AND THE ELEVEN-HOUR LESSON, kept because it is not derivable from the code:** the
+pre-repair text of this file ended *"this file does not make it, because `CorePlace` is not
+this seat's to edit unilaterally"* — and on that belief this seat asked another seat to make
+the fix thirteen times. **It was ours the whole time** (`docs/SEATS.md:8` —
+`SaltWorks/HDL/** : COMPILER seat`; helm ruling 08/17 *"R9 OWNER = COMPILER, ownership
+follows the ARTIFACT"*). The silence was correct and there was nothing for anyone to do.
+⇒ **BEFORE DIAGNOSING A DELIVERY FAILURE, READ `docs/SEATS.md` AND ASK WHETHER THE SILENCE
+IS CORRECT.**
+
+*Not C4, not a witness, does not close R9/B2. No new `RegField` is discharged here.*
 -/
 import SaltWorks.HDL.EnableSpec
 
