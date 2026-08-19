@@ -97,6 +97,7 @@ import SaltWorks.HDL.RegNextUniform
 import SaltWorks.HDL.RegField0
 import SaltWorks.HDL.C4Reduction
 import SaltWorks.HDL.IsaHold
+import SaltWorks.HDL.EnableArm
 import SaltWorks.HDL.SingleLevel
 import SaltWorks.HDL.SubFragment
 import SaltWorks.HDL.MacInduction
