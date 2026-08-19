@@ -167,6 +167,17 @@ theorem core_decOut_spec (ins : Env) (j : Nat) (hj : j < 9) :
   rw [show decoderSig a = instrNet a from rfl, tie_input_stable ins _ (instrNet_lt a ha),
       seenWord, wordOf_getLsbD _ _ ha]
 
+theorem isADDOf_spec  (ins : Env) : isADDOf ins  = (ctrlSpec (seenWord ins)).getD 0 false :=
+  core_decOut_spec ins 0 (by omega)
+theorem isXOROf_spec  (ins : Env) : isXOROf ins  = (ctrlSpec (seenWord ins)).getD 1 false :=
+  core_decOut_spec ins 1 (by omega)
+theorem isSLTOf_spec  (ins : Env) : isSLTOf ins  = (ctrlSpec (seenWord ins)).getD 2 false :=
+  core_decOut_spec ins 2 (by omega)
+theorem isADDIOf_spec (ins : Env) : isADDIOf ins = (ctrlSpec (seenWord ins)).getD 3 false :=
+  core_decOut_spec ins 3 (by omega)
+theorem isLWOf_spec   (ins : Env) : isLWOf ins   = (ctrlSpec (seenWord ins)).getD 5 false :=
+  core_decOut_spec ins 5 (by omega)
+
 theorem validOf_spec (ins : Env) : validOf ins = (ctrlSpec (seenWord ins)).getD 8 false :=
   core_decOut_spec ins 8 (by omega)
 
@@ -200,25 +211,29 @@ section used to carry in the negative. -/
 theorem core_writes_on_ADD (ins : Env) (rd a b : Fin 32)
     (h : decode (seenWord ins) = some (.ADD rd a b)) (hne : ¬ (rdOf ins = 0)) :
     run ins core.gates (rwOut (rdOf ins)) = true := by
-  rw [core_rwOut_spec ins (rdOf ins) (rdOf_lt ins), validOf_spec ins, isBEQOf_spec ins]
+  rw [core_rwOut_spec ins (rdOf ins) (rdOf_lt ins), writesRegOf, isADDOf_spec ins,
+      isXOROf_spec ins, isSLTOf_spec ins, isADDIOf_spec ins, isLWOf_spec ins, isBEQOf_spec ins]
   simp [ctrlSpec, h, hne]
 
 theorem core_writes_on_XOR (ins : Env) (rd a b : Fin 32)
     (h : decode (seenWord ins) = some (.XOR rd a b)) (hne : ¬ (rdOf ins = 0)) :
     run ins core.gates (rwOut (rdOf ins)) = true := by
-  rw [core_rwOut_spec ins (rdOf ins) (rdOf_lt ins), validOf_spec ins, isBEQOf_spec ins]
+  rw [core_rwOut_spec ins (rdOf ins) (rdOf_lt ins), writesRegOf, isADDOf_spec ins,
+      isXOROf_spec ins, isSLTOf_spec ins, isADDIOf_spec ins, isLWOf_spec ins, isBEQOf_spec ins]
   simp [ctrlSpec, h, hne]
 
 theorem core_writes_on_SLT (ins : Env) (rd a b : Fin 32)
     (h : decode (seenWord ins) = some (.SLT rd a b)) (hne : ¬ (rdOf ins = 0)) :
     run ins core.gates (rwOut (rdOf ins)) = true := by
-  rw [core_rwOut_spec ins (rdOf ins) (rdOf_lt ins), validOf_spec ins, isBEQOf_spec ins]
+  rw [core_rwOut_spec ins (rdOf ins) (rdOf_lt ins), writesRegOf, isADDOf_spec ins,
+      isXOROf_spec ins, isSLTOf_spec ins, isADDIOf_spec ins, isLWOf_spec ins, isBEQOf_spec ins]
   simp [ctrlSpec, h, hne]
 
 theorem core_writes_on_ADDI (ins : Env) (rd a : Fin 32) (imm : BitVec 12)
     (h : decode (seenWord ins) = some (.ADDI rd a imm)) (hne : ¬ (rdOf ins = 0)) :
     run ins core.gates (rwOut (rdOf ins)) = true := by
-  rw [core_rwOut_spec ins (rdOf ins) (rdOf_lt ins), validOf_spec ins, isBEQOf_spec ins]
+  rw [core_rwOut_spec ins (rdOf ins) (rdOf_lt ins), writesRegOf, isADDOf_spec ins,
+      isXOROf_spec ins, isSLTOf_spec ins, isADDIOf_spec ins, isLWOf_spec ins, isBEQOf_spec ins]
   simp [ctrlSpec, h, hne]
 
 /-- **AND THE NEGATIVE THAT MUST SURVIVE THE REPAIR: `BEQ` STILL WRITES NOTHING.** It is the
@@ -228,14 +243,16 @@ theorem core_writes_nothing_on_BEQ (ins : Env) (k : Nat) (hk : k < 32)
     (a b : Fin 32) (imm : BitVec 12)
     (h : decode (seenWord ins) = some (.BEQ a b imm)) :
     run ins core.gates (rwOut k) = false := by
-  rw [core_rwOut_spec ins k hk, validOf_spec ins, isBEQOf_spec ins]
+  rw [core_rwOut_spec ins k hk, writesRegOf, isADDOf_spec ins, isXOROf_spec ins,
+      isSLTOf_spec ins, isADDIOf_spec ins, isLWOf_spec ins, isBEQOf_spec ins]
   simp [ctrlSpec, h]
 
 /-- **AND AN UNDECODABLE WORD STILL WRITES NOTHING** — the v1 NOP-advance, in gates. -/
 theorem core_writes_nothing_on_garbage (ins : Env) (k : Nat) (hk : k < 32)
     (h : decode (seenWord ins) = none) :
     run ins core.gates (rwOut k) = false := by
-  rw [core_rwOut_spec ins k hk, validOf_spec ins, isBEQOf_spec ins]
+  rw [core_rwOut_spec ins k hk, writesRegOf, isADDOf_spec ins, isXOROf_spec ins,
+      isSLTOf_spec ins, isADDIOf_spec ins, isLWOf_spec ins, isBEQOf_spec ins]
   simp [ctrlSpec, h]
 
 /-- **`LW` writes its destination** — unchanged by the repair, and it is the arm that proved
@@ -244,61 +261,39 @@ theorem core_does_write_on_LW (ins : Env) (rd a : Fin 32) (imm : BitVec 12)
     (h : decode (seenWord ins) = some (.LW rd a imm))
     (hne : ¬ (rdOf ins = 0)) :
     run ins core.gates (rwOut (rdOf ins)) = true := by
-  rw [core_rwOut_spec ins (rdOf ins) (rdOf_lt ins), validOf_spec ins, isBEQOf_spec ins]
+  rw [core_rwOut_spec ins (rdOf ins) (rdOf_lt ins), writesRegOf, isADDOf_spec ins,
+      isXOROf_spec ins, isSLTOf_spec ins, isADDIOf_spec ins, isLWOf_spec ins, isBEQOf_spec ins]
   simp [ctrlSpec, h, hne]
 
-/-- ⛔⛔ **THE NEGATIVE CONTROL THAT WAS MISSING, AND IT FAILS: `SW` WRITE-ENABLES A
-REGISTER.** `core_writes_nothing_on_BEQ` and `_on_garbage` are the two negatives this file
-carried; the third case that writes no register — the STORE — was never asked. It does not
-hold, and this theorem is the proof, in the POSITIVE form the defect actually takes.
+/-- ⭐⭐⭐ **THE REPAIR'S RECEIPT, AND IT IS A DIFFERENTIAL: `SW` NOW WRITES NOTHING.**
 
-`ctrlSpec`'s `valid` (index 8) is `true` for every decodable instruction, stores included;
-only `none` clears it. So the enable reduces on a `SW` word to `rdOf ins == k && k ≠ 0`. But
-a store has no `rd`: bits 7…11 are `imm[4:0]`. ⇒ ***every store whose low immediate is
-nonzero write-enables the register those immediate bits happen to name.***
+⛔ **THIS THEOREM REPLACES `core_writes_on_SW`, WHICH WAS PROVABLE HERE UNTIL THE REPAIR AND IS
+FALSE AFTER IT.** That inversion is the receipt — nobody has to take the repair on trust:
+```
+  BEFORE  core_writes_on_SW      : run ins core.gates (rwOut (rdOf ins)) = true    -- PROVED
+  AFTER   core_writes_nothing_on_SW : ... = false                                  -- PROVED
+```
+The old theorem's own docstring said *"a repair that leaves this compiling has not been made."*
+It no longer compiles, and this is what took its place.
 
-⚠️ **THIS IS THE `valid` MIS-WIRING'S SIBLING, NOT ITS RECURRENCE.** That defect aimed the
-enable at the wrong decoder output; this one aims it at the right output and finds the
-output's MEANING is "decodes", not "writes a register". `isBEQ` was subtracted by hand and
-`isSW` — which exists, at index 6, and already drives the memory port — was not.
-
-⛔ **DO NOT DELETE THIS WHEN IT IS REPAIRED.** Like `core_never_writes_on_ADD` before it, it
-is a DIFFERENTIAL receipt: it is provable NOW and must become FALSE the moment the enable
-gains its `!isSW` term. A repair that leaves this compiling has not been made. -/
-theorem core_writes_on_SW (ins : Env) (a b : Fin 32) (imm : BitVec 12)
-    (h : decode (seenWord ins) = some (.SW a b imm)) (hne : ¬ (rdOf ins = 0)) :
-    run ins core.gates (rwOut (rdOf ins)) = true := by
-  rw [core_rwOut_spec ins (rdOf ins) (rdOf_lt ins), validOf_spec ins, isBEQOf_spec ins]
-  simp [ctrlSpec, h, hne]
+**WHY IT NOW HOLDS:** the enable reads `writesReg = isADD ∨ isXOR ∨ isSLT ∨ isADDI ∨ isLW`, and
+`ctrlSpec`'s `SW` row raises NONE of those five. Previously it read `valid`, which `SW` raises
+like every decodable word — so the store's `imm[4:0]`, sitting in bits 7…11 where the enable
+looks for an `rd`, selected a register to clobber. **Every register, not just the one the
+immediate names.** -/
+theorem core_writes_nothing_on_SW (ins : Env) (k : Nat) (hk : k < 32)
+    (a b : Fin 32) (imm : BitVec 12)
+    (h : decode (seenWord ins) = some (.SW a b imm)) :
+    run ins core.gates (rwOut k) = false := by
+  rw [core_rwOut_spec ins k hk, writesRegOf, isADDOf_spec ins, isXOROf_spec ins,
+      isSLTOf_spec ins, isADDIOf_spec ins, isLWOf_spec ins, isBEQOf_spec ins]
+  simp [ctrlSpec, h]
 
 /-- **AND THE ISA WRITES NOTHING ON A STORE** — `rfl`, so the disagreement is not a matter
 of interpretation. Paired with `core_writes_on_SW` this is the enable-agreement half of
 `RegDatapathOK`, refuted. -/
 theorem isa_writes_nothing_on_SW (a b : Fin 32) (imm : BitVec 12) :
     writesReg (.SW a b imm) = none := rfl
-
-/-- ⭐⭐⭐ **WHAT `RegDatapathOK` WOULD FORCE, IF IT HELD.** This does not refute it — no
-value witness is landed yet — but it prices it. On any store with a nonzero low immediate
-the enable is high, so the schema's `if` takes its WRITE branch, while `stepT` holds the
-register (`writesReg (.SW …) = none`). The two sides can only agree if the write-data path
-ALREADY equals the register named by the store's own immediate bits, at every bit, in every
-environment. **`RegDatapathOK` is therefore not merely open — it is open with a sentence
-like this hanging off it, and the next unit of work is a `selOut` witness that kills it.** -/
-theorem sw_forces_selOut_to_equal_held (hOK : RegDatapathOK)
-    (ins : Env) (a b : Fin 32) (imm : BitVec 12)
-    (hd : decode (seenWord ins) = some (.SW a b imm)) (hne : ¬ (rdOf ins = 0))
-    (k : Nat) (hk : k < 32) :
-    run ins core.gates (selOut k) = ins (32 * rdOf ins + k) := by
-  have hlt := rdOf_lt ins
-  set r : Fin 32 := ⟨rdOf ins, hlt⟩ with hr
-  have hon : run ins core.gates (rwOut r.val) = true :=
-    core_writes_on_SW ins a b imm hd hne
-  have hnw : ∀ i, decode (seenWord ins) = some i → writesReg i ≠ some r := by
-    intro i hi; rw [hd] at hi; cases hi; simp [writesReg]
-  have h := hOK ins r k hk
-  rw [hon, if_pos rfl, stepT_regs_of_ne (decQ ins) (seenWord ins) r hnw,
-      decQ_reg_bit ins r k hk] at h
-  exact h
 
 /-- ⭐⭐⭐ **THE IDENTIFICATION CONTROL THAT DID NOT EXIST — `decOut 8` IS `valid`, PROVED
 SEMANTICALLY.** `CorePlace.valid_and_isBEQ_are_distinct_and_ordered` pins the σ to an INDEX
@@ -314,7 +309,7 @@ theorem valid_is_decoder_output_8 (ins : Env) :
 #audit_axioms the_repair_is_observable valid_is_decoder_output_8
 #audit_axioms core_writes_on_ADD core_writes_on_XOR core_writes_on_SLT core_writes_on_ADDI
 #audit_axioms core_writes_nothing_on_BEQ core_writes_nothing_on_garbage core_does_write_on_LW
-#audit_axioms core_writes_on_SW isa_writes_nothing_on_SW
-#audit_axioms sw_forces_selOut_to_equal_held
+#audit_axioms core_writes_nothing_on_SW isa_writes_nothing_on_SW
+#audit_axioms isADDOf_spec isXOROf_spec isSLTOf_spec isADDIOf_spec isLWOf_spec
 
 end SaltWorks.HDL.RegNextUniform

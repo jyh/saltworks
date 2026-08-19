@@ -84,8 +84,16 @@ schema above, the consequence is sharp and worth the Captain's attention:
   one) is **untouched** by the retire change and can be proved now;
 * the **per-register** half (`rwOut r`, the cheap one) is **exactly where retire must enter**,
   so a `RegField` proved against today's `regWrite` is DATED — the `R9IdentityBridge` lesson
-  about undated claims, arriving a second time at a different file. -/
-theorem regWrite_has_no_retire_input : regWrite.nIn = 7 := by decide +kernel
+  about undated claims, arriving a second time at a different file.
+
+⛔⛔ **THE INTERFACE HAS NOW WIDENED — FOR A DIFFERENT REASON (2026-08-19) — WHICH CHANGES THIS
+ARGUMENT'S BASELINE, NOT ITS CONCLUSION.** The `SW` enable repair took `regWrite.nIn` from 7 to
+11: port 5 became `isADD` and 7…10 carry `isXOR/isSLT/isADDI/isLW`, because `valid` meant
+*decodes* and let every store write a register. **None of the eleven is a retire net** — five
+`rd` bits, six decode flags — so *"a retire-gated write must WIDEN this interface"* still holds,
+and the widening it predicted has now happened once for someone else's reason. *A retire change
+no longer gets to treat the widening itself as the hard part.* -/
+theorem regWrite_has_no_retire_input : regWrite.nIn = 11 := by decide +kernel
 
 #audit_axioms regWrite_has_no_retire_input
 

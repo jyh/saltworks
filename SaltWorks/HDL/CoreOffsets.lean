@@ -176,7 +176,7 @@ theorem row_sltCirc      : sltCirc.gates.length      = 5    := by decide +kernel
 theorem row_sliceASelect : SelectCut32.sliceASelect.gates.length = 291 := by decide +kernel
 theorem row_ruledEnc     : EncoderE1.ruledEnc.gates.length       = 0   := by decide +kernel
 theorem row_obMux        : OperandB.obMux.gates.length            = 97  := by decide +kernel
-theorem row_regWrite     : regWrite.gates.length     = 163  := by decide +kernel
+theorem row_regWrite     : regWrite.gates.length     = 167  := by decide +kernel
 theorem row_pcAdd        : SaltWorks.Stack.Program.pcAdd.gates.length = 260 := by decide +kernel
 theorem row_regNext      : regNext.gates.length      = 3104 := by decide +kernel
 
@@ -190,12 +190,20 @@ theorem total_reconciles_against_artifacts :
       + SelectCut32.sliceASelect.gates.length + EncoderE1.ruledEnc.gates.length
       + OperandB.obMux.gates.length + regWrite.gates.length
       + SaltWorks.Stack.Program.pcAdd.gates.length + regNext.gates.length
-    = 10392 := by decide +kernel
+    = 10396 := by decide +kernel
 
 /-- **AND THE TWO ROWS SILICON MEASURED INDEPENDENTLY, pinned here** — their silicon-side
-readings and this corpus's `Circ`s agree, so the agreement is now in the kernel too. -/
+readings and this corpus's `Circ`s agree, so the agreement is now in the kernel too.
+
+⛔⛔ **`regWrite`'s ROW MOVED ON 2026-08-19 AND SILICON'S READING IS OF THE PRE-REPAIR ORGAN.**
+The `SW` enable repair widened it from `nIn = 7 / 163 gates` to `nIn = 11 / 167` (four OR gates
+folding `isADD ∨ isXOR ∨ isSLT ∨ isADDI ∨ isLW`, five new control ports). **I updated the
+numbers because the kernel demands it; I cannot update SILICON'S MEASUREMENT, and this
+theorem's whole value was that two independent hands agreed.** Until they re-measure it records
+MY count twice, not two. Flagged on the bus at 14:45 before landing — a silent edit here would
+have destroyed exactly the property the theorem exists for. -/
 theorem silicon_confirmed_rows :
-    (regWrite.gates.length = 163 ∧ regWrite.nIn = 7 ∧ regWrite.outs.length = 32)
+    (regWrite.gates.length = 167 ∧ regWrite.nIn = 11 ∧ regWrite.outs.length = 32)
   ∧ (regNext.gates.length = 3104 ∧ regNext.nIn = 1088 ∧ regNext.outs.length = 1024) := by
   refine ⟨⟨by decide +kernel, by decide +kernel, by decide +kernel⟩,
           ⟨by decide +kernel, by decide +kernel, by decide +kernel⟩⟩

@@ -41,8 +41,22 @@ def rdOf (ins : Env) : Nat :=
   + (if ins (instrNet 9) then 4 else 0) + (if ins (instrNet 10) then 8 else 0)
   + (if ins (instrNet 11) then 16 else 0)
 
+/-- ⛔ `validOf` READS `decOut 8`, WHICH MEANS "DECODES" — true on every decodable word,
+STORES INCLUDED. **It no longer drives the enable.** Kept because `DecoderTransport` states its
+`ctrlSpec` bridge over it and that bridge is still true and still useful. -/
 def validOf (ins : Env) : Bool := run ins coreThru13 (decOut 8)
 def isBEQOf (ins : Env) : Bool := run ins coreThru13 (decOut 4)
+
+/-! ### The five WRITE flags — what the enable reads after the 2026-08-19 repair. -/
+def isADDOf  (ins : Env) : Bool := run ins coreThru13 (decOut 0)
+def isXOROf  (ins : Env) : Bool := run ins coreThru13 (decOut 1)
+def isSLTOf  (ins : Env) : Bool := run ins coreThru13 (decOut 2)
+def isADDIOf (ins : Env) : Bool := run ins coreThru13 (decOut 3)
+def isLWOf   (ins : Env) : Bool := run ins coreThru13 (decOut 5)
+
+/-- **The disjunction the enable now computes**: "this instruction writes a register". -/
+def writesRegOf (ins : Env) : Bool :=
+  isADDOf ins || isXOROf ins || isSLTOf ins || isADDIOf ins || isLWOf ins
 
 theorem rdOf_lt (ins : Env) : rdOf ins < 32 := by
   cases h7 : ins (instrNet 7) <;> cases h8 : ins (instrNet 8) <;> cases h9 : ins (instrNet 9) <;>
@@ -63,8 +77,12 @@ theorem rdOf_testBit (ins : Env) (j : Nat) (hj : j < 5) :
 theorem envRW_agrees (ins : Env) (i : Nat) (hi : i < regWrite.nIn) :
     run ins coreThru13 (regWriteSig i)
       = (fun n => if n < 5 then (rdOf ins).testBit n
-                  else if n == 5 then validOf ins else isBEQOf ins) i := by
-  have h7 : regWrite.nIn = 7 := by decide +kernel
+                  else if n == 5 then isADDOf ins
+                  else if n == 6 then isBEQOf ins
+                  else if n == 7 then isXOROf ins
+                  else if n == 8 then isSLTOf ins
+                  else if n == 9 then isADDIOf ins else isLWOf ins) i := by
+  have h7 : regWrite.nIn = 11 := by decide +kernel
   rw [h7] at hi
   interval_cases i
   · rw [show regWriteSig 0 = rdBit 0 from rfl, core_rd_is_the_instruction ins 0 (by omega)]
@@ -77,8 +95,12 @@ theorem envRW_agrees (ins : Env) (i : Nat) (hi : i < regWrite.nIn) :
     simp [rdOf_testBit ins 3 (by omega)]
   · rw [show regWriteSig 4 = rdBit 4 from rfl, core_rd_is_the_instruction ins 4 (by omega)]
     simp [rdOf_testBit ins 4 (by omega)]
-  · simp [validOf, show regWriteSig 5 = decOut 8 from rfl]
-  · simp [isBEQOf, show regWriteSig 6 = decOut 4 from rfl]
+  · simp [isADDOf,  show regWriteSig 5  = decOut 0 from rfl]
+  · simp [isBEQOf,  show regWriteSig 6  = decOut 4 from rfl]
+  · simp [isXOROf,  show regWriteSig 7  = decOut 1 from rfl]
+  · simp [isSLTOf,  show regWriteSig 8  = decOut 2 from rfl]
+  · simp [isADDIOf, show regWriteSig 9  = decOut 3 from rfl]
+  · simp [isLWOf,   show regWriteSig 10 = decOut 5 from rfl]
 
 theorem regWrite_out_bound (k : Nat) (hk : k < 32) :
     regWrite.outs.getD k 0 < regWrite.nIn + regWrite.gates.length := by
@@ -87,34 +109,47 @@ theorem regWrite_out_bound (k : Nat) (hk : k < 32) :
 /-- ⭐⭐ **THE ENABLE, AS `weOf`.** -/
 theorem core_rwOut_eq_weOf (ins : Env) (k : Nat) (hk : k < 32) :
     run ins core.gates (rwOut k)
-      = (weOf (rdOf ins) (validOf ins) (isBEQOf ins)).getD k false := by
-  rw [core_rwOut_transport ins k hk, weOf, sem]
+      = (weOf (rdOf ins) (isADDOf ins) (isBEQOf ins) (isXOROf ins) (isSLTOf ins)
+              (isADDIOf ins) (isLWOf ins)).getD k false := by
+  -- ⚠️ `weOf` is stated over the PACKED evaluator now, so `semB_eq` carries it back to `sem`
+  -- before the output map can be unfolded.
+  rw [core_rwOut_transport ins k hk, weOf, semB_eq, sem]
   rw [getD_map_lt _ _ _ (by rw [regWrite_outs_len]; exact hk) 0 false]
-  exact run_agree_of_inputs_circ regWrite regWrite_ssa _ _
-    (fun a ha => envRW_agrees ins a ha) _ (regWrite_out_bound k hk)
+  refine run_agree_of_inputs_circ regWrite regWrite_ssa _ _ (fun a ha => ?_) _
+    (regWrite_out_bound k hk)
+  have hn : regWrite.nIn = 11 := by decide +kernel
+  rw [hn] at ha
+  rw [envRW_agrees ins a (by rw [hn]; exact ha),
+      rwPack_testBit (rdOf ins) (rdOf_lt ins) _ _ _ _ _ _ a ha]
 
 /-- `regWrite_correct`'s exhaustive 128-case check, unpacked into a usable equation. -/
-theorem weOf_eq_weSpec (rd : Nat) (hrd : rd < 32) (v b : Bool) :
-    weOf rd v b = weSpec rd v b := by
+theorem weOf_eq_weSpec (rd : Nat) (hrd : rd < 32) (a b c d e f : Bool) :
+    weOf rd a b c d e f = weSpec rd a b c d e f := by
   have h := regWrite_correct
   rw [weOK] at h
   have h1 := List.all_eq_true.mp h rd (List.mem_range.mpr hrd)
-  have h2 := List.all_eq_true.mp h1 v (by cases v <;> simp)
+  have h2 := List.all_eq_true.mp h1 a (by cases a <;> simp)
   have h3 := List.all_eq_true.mp h2 b (by cases b <;> simp)
-  exact eq_of_beq h3
+  have h4 := List.all_eq_true.mp h3 c (by cases c <;> simp)
+  have h5 := List.all_eq_true.mp h4 d (by cases d <;> simp)
+  have h6 := List.all_eq_true.mp h5 e (by cases e <;> simp)
+  have h7 := List.all_eq_true.mp h6 f (by cases f <;> simp)
+  exact eq_of_beq h7
 
 /-- ⭐⭐⭐ **THE ENABLE ARM'S CIRCUIT HALF, CLOSED FORM.** `core`'s write enable for register
 `k` is exactly the ISA's write predicate over three reads — and `rd` is the instruction
 word's own bits 7…11, with no decoder between them. -/
 theorem core_rwOut_spec (ins : Env) (k : Nat) (hk : k < 32) :
     run ins core.gates (rwOut k)
-      = (validOf ins && !(isBEQOf ins) && (rdOf ins == k) && !(k == 0)) := by
-  rw [core_rwOut_eq_weOf ins k hk, weOf_eq_weSpec _ (rdOf_lt ins) _ _, weSpec,
+      = (writesRegOf ins && !(isBEQOf ins) && (rdOf ins == k) && !(k == 0)) := by
+  rw [core_rwOut_eq_weOf ins k hk,
+      weOf_eq_weSpec _ (rdOf_lt ins) _ _ _ _ _ _, weSpec, writesRegOf,
       getD_map_lt _ _ _ (by simpa using hk) 0 false]
   -- the `weSpec` row index is a `List.range` lookup; `hk` is what lets it reduce to `k`.
   simp [hk]
 
 #audit_axioms rdOf_lt rdOf_testBit envRW_agrees core_rwOut_eq_weOf
+#audit_axioms isADDOf isXOROf isSLTOf isADDIOf isLWOf writesRegOf
 #audit_axioms weOf_eq_weSpec core_rwOut_spec
 
 end SaltWorks.HDL.RegNextUniform

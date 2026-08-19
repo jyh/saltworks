@@ -415,20 +415,27 @@ This σ and four prose sites were written against the old layout and never re-da
 `green-build-does-not-date-its-prose`, firing on the file that caused the defect it
 describes. -/
 def regWriteSig (j : Net) : Net :=
-  if j < 5 then rdBit j else if j = 5 then decOut 8 else decOut 4
+  if j < 5 then rdBit j
+  else if j = 5 then decOut 0        -- isADD  (WAS `decOut 8` = valid — the SW defect)
+  else if j = 6 then decOut 4        -- isBEQ  (unchanged)
+  else if j = 7 then decOut 1        -- isXOR
+  else if j = 8 then decOut 2        -- isSLT
+  else if j = 9 then decOut 3        -- isADDI
+  else decOut 5                      -- isLW
 
 /-- ⭐ **PLACEMENT #5 — `regWrite` at `off1`, `instOK` DISCHARGED, and the first placement whose
 σ reaches into another organ's gates.** -/
 theorem regWrite_placeable_from_off1 : instOK regWrite regWriteSig off1 := by
   refine ⟨regWrite_ssa, regWrite_wf, ?_⟩
   intro j hj
-  have hnn : regWrite.nIn = 7 := by decide +kernel
+  have hnn : regWrite.nIn = 11 := by decide +kernel
   rw [hnn] at hj
-  simp only [regWriteSig, rdBit, instrNet, instrBase, decOut, decoderSig, off1, off0,
-             instNext, tieCells, offTie, coreInWidth, stWidth, Net]
-  split
-  · omega
-  · split <;> decide +kernel
+  -- ⚠️ `split` twice covered a 2-branch σ; with seven control ports the branches must be
+  -- enumerated, and `decide +kernel` cannot run under a free `j`.
+  interval_cases j <;>
+    simp only [regWriteSig, rdBit, instrNet, instrBase, decOut, decoderSig, off1, off0,
+               instNext, tieCells, offTie, coreInWidth, stWidth, Net] <;>
+    decide +kernel
 
 /-- ⛔ **WHY `instOK_mono` CANNOT LIFT THIS ONE — the theorem that makes the ordering real.**
 
@@ -454,9 +461,12 @@ when 5 was the wrong bit: it can only catch a SWAP, and the defect was not a swa
 only "the two being equal", it is nearly vacuous. **The identification is proved separately
 and semantically in `DecoderTransport.valid_is_decoder_output_8`, through
 `sem_decoder_eq_ctrlSpec` — here the indices are only syntax.** -/
-theorem valid_and_isBEQ_are_distinct_and_ordered :
-    regWriteSig 5 = decOut 8 ∧ regWriteSig 6 = decOut 4 ∧ decOut 4 ≠ decOut 8 := by
-  refine ⟨by simp [regWriteSig], by simp [regWriteSig], ?_⟩
+theorem writeFlags_are_the_right_outputs :
+    regWriteSig 5 = decOut 0 ∧ regWriteSig 6 = decOut 4 ∧ regWriteSig 7 = decOut 1
+    ∧ regWriteSig 8 = decOut 2 ∧ regWriteSig 9 = decOut 3 ∧ regWriteSig 10 = decOut 5
+    ∧ decOut 4 ≠ decOut 0 := by
+  refine ⟨by simp [regWriteSig], by simp [regWriteSig], by simp [regWriteSig],
+          by simp [regWriteSig], by simp [regWriteSig], by simp [regWriteSig], ?_⟩
   simp only [decOut, decoderSig, off0, instNext, tieCells, offTie, coreInWidth, stWidth]
   decide +kernel
 
@@ -1420,7 +1430,7 @@ list at the first failure, so everything after a failing name silently reads as 
 #audit_axioms obMux_precedes_the_adder
 #audit_axioms subSig_b_bank_is_unchanged
 #audit_axioms regWrite_is_NOT_placeable_at_off0
-#audit_axioms valid_and_isBEQ_are_distinct_and_ordered
+#audit_axioms writeFlags_are_the_right_outputs
 #audit_axioms encoder_select_seam_closed
 
 #audit_axioms regNext_instOK

@@ -51,12 +51,12 @@ rows legitimately share a starting net — the distinction from the `regWrite` c
 `5f1abb7`, which is one word wide and is why both appear in this conjunction.* -/
 theorem offsets_pinned :
     offTie = 1088 ∧ offOb = 7242 ∧ offEnc = 7955 ∧ offRw = 7955
-      ∧ offPc = 8118 ∧ offRegNext = 8378 := by
+      ∧ offPc = 8122 ∧ offRegNext = 8382 := by
   refine ⟨by decide +kernel, by decide +kernel, by decide +kernel, by decide +kernel,
           by decide +kernel, by decide +kernel⟩
 
 /-- **The chain's end — §1.2's "total nets".** -/
-theorem chain_end_is_11482 : instNext regNext offRegNext = 11482 := by decide +kernel
+theorem chain_end_is_11482 : instNext regNext offRegNext = 11486 := by decide +kernel
 
 /-- ⭐⭐ **THE CROSS-INSTRUMENT RECONCILIATION — the reason §1's figures are two-witness.**
 
@@ -72,12 +72,12 @@ from a 2-short one. As a theorem the truncation cannot hide: the equation is eit
 after it shifts by the same amount. *The pair was `11459 / 11461` before D2 and is `11480 / 11482`
 now; the RECONCILIATION is what did not move, which is the property this theorem exists to state.* -/
 theorem chain_reconciles_with_CoreOffsets :
-    instNext regNext offRegNext = 11480 + tieCells.gates.length := by decide +kernel
+    instNext regNext offRegNext = 11484 + tieCells.gates.length := by decide +kernel
 
 /-- **CONTROL: the reconciliation is not vacuous.** Both sides are pinned independently, so a reader
 can see the two instruments agreeing rather than an identity that holds by construction. -/
 theorem reconciliation_is_not_vacuous :
-    instNext regNext offRegNext = 11482 ∧ 11480 + tieCells.gates.length = 11482 := by
+    instNext regNext offRegNext = 11486 ∧ 11484 + tieCells.gates.length = 11486 := by
   refine ⟨chain_end_is_11482, by decide +kernel⟩
 
 #audit_axioms offsets_pinned

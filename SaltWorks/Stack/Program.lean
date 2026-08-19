@@ -7671,8 +7671,9 @@ def rnWeOf (rd : Nat) : Nat → Bool := fun r => decide (rd = r) && !decide (r =
 /-- **These ARE `regWrite`'s outputs** — the spec `regWrite_correct` certifies
 exhaustively, read at the array's enable ports. -/
 theorem rnWeOf_is_weSpec (rd r : Nat) (hr : r < 32) :
-    (weSpec rd true false).getD r false = rnWeOf rd r := by
-  show ((List.range 32).map (fun r => true && !false && (rd == r) && !(r == 0))).getD r false = _
+    (weSpec rd true false false false false false).getD r false = rnWeOf rd r := by
+  show ((List.range 32).map
+      (fun r => (true || false || false || false || false) && !false && (rd == r) && !(r == 0))).getD r false = _
   rw [getD_map_range_gen 32 _ r hr]
   by_cases h : rd = r <;> by_cases h2 : r = 0 <;> simp [rnWeOf, h, h2]
 
