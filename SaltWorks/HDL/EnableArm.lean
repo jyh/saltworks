@@ -19,6 +19,11 @@ core_rwOut_transport :  run ins core.gates (rwOut k)
 answer was known before the transport ran, so that proof never had to say what the other
 thirty-one enables were. This one does, for every `k < 32`.
 
+⭐ **AND THE ARM SPLITS FURTHER THAN EXPECTED, WHICH IS THE USEFUL PART.** `regWriteSig`
+routes `rd` straight from `instrNet` — bits 7…11 of the instruction word, **primary inputs,
+with no decoder between them** (`core_rd_is_the_instruction`). So the enable arm's ADDRESS
+half needs no decoder correctness whatsoever; only its `valid`/`isBEQ` half does.
+
 ⛔ **WHAT IT DOES NOT DO.** It does not connect `regWrite`'s output to `decode w`. The next
 step is to feed `regWrite_correct` (exhaustive, 128 control combinations, landed) through
 `run_agree_of_inputs_circ` — which needs the environment the thirteen organs produce to be
@@ -77,5 +82,37 @@ theorem core_rwOut_transport (ins : Env) (k : Nat) (hk : k < 32) :
       (regWrite.outs.getD k 0) (Or.inr (rwOut_mem k hk))
 
 #audit_axioms getD_map_lt rwOut_eq core_rwOut_transport
+
+/-! ### Where `rd` actually comes from -/
+
+theorem core_gates_from13 :
+    core.gates = coreThru13 ++ (instGates regWrite regWriteSig offRw
+      ++ instGates SaltWorks.Stack.Program.pcAdd pcAddSig offPc
+      ++ instGates regNext regNextSig offRegNext) := by
+  simp only [core, coreThru13, List.append_assoc]
+
+theorem coreThru13_sub : coreThru13 ⊆ core.gates := by
+  rw [core_gates_from13]; exact List.subset_append_left _ _
+
+/-- **A primary input reads the same through the first thirteen organs as in the valuation.**
+`core_input_stable` at a prefix — the gates are a subset, so the same bound applies. -/
+theorem coreThru13_input_stable (ins : Env) (n : Net) (hn : n < coreInWidth) :
+    run ins coreThru13 n = ins n :=
+  run_of_unwritten ins _ n (fun g hg hEq =>
+    absurd (hEq ▸ core_gate_out_ge g (coreThru13_sub hg)) (Nat.not_le.mpr hn))
+
+theorem rdBit_lt (j : Nat) (hj : j < 5) : rdBit j < coreInWidth := by
+  revert j; decide +kernel
+
+/-- ⭐⭐ **THE `rd` INDEX THE REGISTER FILE USES IS THE INSTRUCTION WORD'S OWN BITS 7…11,
+read directly** — no decoder sits between them. *`regWriteSig` routes `rd` straight from
+`instrNet`, so the enable arm's address half needs no decoder correctness at all; only its
+`valid`/`isBEQ` half does.* -/
+theorem core_rd_is_the_instruction (ins : Env) (j : Nat) (hj : j < 5) :
+    run ins coreThru13 (rdBit j) = ins (instrNet (7 + j)) := by
+  rw [coreThru13_input_stable ins (rdBit j) (rdBit_lt j hj)]
+  rfl
+
+#audit_axioms core_gates_from13 coreThru13_input_stable core_rd_is_the_instruction
 
 end SaltWorks.HDL.RegNextUniform
