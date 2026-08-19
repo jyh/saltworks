@@ -356,7 +356,33 @@ except Exception: print(-1)' "$mine" 2>/dev/null)
   else
     printf '  ⛔ INWARD CHECK NOT ARMED: set SEAT_DIR and CLAUDE_MEMORY_DIR (machine-local, no public default). A check that did not run must NOT look like one that passed.\n'
   fi
-  printf 'FALLBACK %s | mylast=%s | bus=%s | main watch procs=%s (PRESENCE, not delivery) | account=%s | index=%s | last header: %s\n' \
-    "$(date '+%H:%M')" "$age" "$busf" "$main" "$km" "$idx" "$hdr"
+  # ── ARM 8 (MIRROR STALENESS, CLOCK-TRIGGERED) — added 08/19 after a MEASURED five-hour
+  #    window in which this seat's entire memory yield for the sitting existed ONLY in the
+  #    live bank: four amended cards and a rewritten index, none of them mirrored.
+  # ⛔ THE LIVE BANK IS IN NO GIT REPO. There is no dirty flag, no ahead-count, no prompt —
+  #    a mirror's staleness is INVISIBLE FROM THE LIVE SIDE, which is the side you work on.
+  #    The close-of-board sync is EVENT-anchored and an event-anchored duty fails OPEN.
+  # ⛔ AND A COUNT IS NOT ENOUGH: 67 live / 67 mirrored matched the whole time while FIVE
+  #    files differed by CONTENT. A census answers "any missing", never "any stale".
+  # ⭐ WHY THIS PRINTS A FIELD EVERY SWEEP INSTEAD OF STAYING SILENT WHEN CLEAN: arm 7's
+  #    clean state IS silence, and on 08/19 I read that silence as a dead arm and spent four
+  #    minutes disproving it. A field that is ALWAYS present has no ambiguous state.
+  if [ -z "${MIRROR_DIR:-}" ] || [ -z "${CLAUDE_MEMORY_DIR:-}" ]; then
+    mir="UNSET(needs MIRROR_DIR+CLAUDE_MEMORY_DIR)"
+  elif [ ! -d "$MIRROR_DIR" ]; then
+    mir="NO-MIRROR-DIR"
+  else
+    md=0; mo=0
+    for lf in "$CLAUDE_MEMORY_DIR"/*.md; do
+      [ -f "$lf" ] || continue
+      lb=$(basename "$lf")
+      if [ ! -f "$MIRROR_DIR/$lb" ]; then mo=$((mo+1))
+      elif ! cmp -s "$lf" "$MIRROR_DIR/$lb"; then md=$((md+1)); fi
+    done
+    if [ "$md" = 0 ] && [ "$mo" = 0 ]; then mir="OK"
+    else mir="$md STALE/$mo UNMIRRORED ** run seat/tools/mirror-sync.sh **"; fi
+  fi
+  printf 'FALLBACK %s | mylast=%s | bus=%s | main watch procs=%s (PRESENCE, not delivery) | account=%s | index=%s | mirror=%s | last header: %s\n' \
+    "$(date '+%H:%M')" "$age" "$busf" "$main" "$km" "$idx" "$mir" "$hdr"
   sleep "$PERIOD"
 done
