@@ -55,8 +55,20 @@ theorem offsets_pinned :
   refine ⟨by decide +kernel, by decide +kernel, by decide +kernel, by decide +kernel,
           by decide +kernel, by decide +kernel⟩
 
-/-- **The chain's end — §1.2's "total nets".** -/
-theorem chain_end_is_11482 : instNext regNext offRegNext = 11486 := by decide +kernel
+/-- **The chain's end — §1.2's "total nets".**
+
+⛔ **RENAMED 2026-08-20: this was `chain_end_is_11482` while PROVING `= 11486`.** The name
+asserted a figure its own statement contradicts, by four, and a name is checked by nothing —
+it built green from the day it landed. *I cited the wrong name twice on 08-20 as evidence that
+the ADDI repair moved no offset; the citation was sound and the FIGURE I propagated was not.*
+⇒ **Grep a headline's numerals in the STATEMENT before landing it.**
+
+⚠️ **REGISTERED BEFORE HORN D LANDS, because D MOVES THIS NUMBER:** extending `encD` to the
+8-word memory and the trap flag takes the state 1056 → 1313 bits, and `instrBase := stWidth`
+definitionally, so every instruction net and every gate offset shifts by **+257** — this end
+becomes **11743**. When that lands, this declaration must be renamed AGAIN. A name carrying a
+literal is a maintenance obligation, not a description. -/
+theorem chain_end_is_11486 : instNext regNext offRegNext = 11486 := by decide +kernel
 
 /-- ⭐⭐ **THE CROSS-INSTRUMENT RECONCILIATION — the reason §1's figures are two-witness.**
 
@@ -78,10 +90,10 @@ theorem chain_reconciles_with_CoreOffsets :
 can see the two instruments agreeing rather than an identity that holds by construction. -/
 theorem reconciliation_is_not_vacuous :
     instNext regNext offRegNext = 11486 ∧ 11484 + tieCells.gates.length = 11486 := by
-  refine ⟨chain_end_is_11482, by decide +kernel⟩
+  refine ⟨chain_end_is_11486, by decide +kernel⟩
 
 #audit_axioms offsets_pinned
-#audit_axioms chain_end_is_11482
+#audit_axioms chain_end_is_11486
 #audit_axioms chain_reconciles_with_CoreOffsets
 #audit_axioms reconciliation_is_not_vacuous
 
