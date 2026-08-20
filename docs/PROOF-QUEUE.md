@@ -59,7 +59,12 @@ cross-lane grant** (bus 15:2x). Until then the swap does not proceed. ✅ **PRE-
 RUNNING (both arms driven; it correctly refuses today). The gate is a TRIGGER, not a verdict — arm 2
 is an isolated-worktree dry run, because "math changed the file" and "the swap elaborates" are
 different claims. Additive so far: `offsets_pinned` and `chain_end_is_11486` still prove. `1313 = 1024+32+256+1` confirmed independently. `instrBase := stWidth` is DEFINITIONAL and `offTie = 1088` anchors the chain above the INPUT region, so every instruction net and gate offset shifts by the added state width; chain end `11486`→`11743`. Radius: `stWidth` 162/22 files, `instrNet` 192/22, `decQ` 261/30, literal `1056` ×68 — **that radius is the MECHANICAL half** | codec balloons past ~1.5× the M1a price ⇒ STOP, re-price at the seat, report |
-| **Q4** ∥ | **selOut value schema wave** — the uniform value lemma over `RegFieldSchema`, then the 31 field instantiations; the no-`encode` route (`stepT_compat` → `decQ_reg_bit`); **non-memory fields only until Q6 lands** | B | executor-dispatchable NOW (parallelizable in field batches) | ✅ **LANDED `b64722e`** — all four non-memory classes, seat-verified by FRESH elaboration (first pass read `Replayed`, a cache). `SelValueADD/ADDI/SLT/XOR`, 58 audited ticks. ⚠️ SLT is scoped **bits 1–31**, `k=0` named separately by its author rather than allowed to read as all-32 | a field that resists the schema ⇒ skip, name it, continue the batch; resisters collect into their own item |
+| **Q4** ∥ | **selOut value schema wave** — the uniform value lemma over `RegFieldSchema`, then the 31 field instantiations; the no-`encode` route (`stepT_compat` → `decQ_reg_bit`); **non-memory fields only until Q6 lands** | B | executor-dispatchable NOW (parallelizable in field batches) | ✅ **LANDED `b64722e`** — all four non-memory classes, seat-verified by FRESH elaboration (first pass read `Replayed`, a cache). `SelValueADD/ADDI/SLT/XOR`, 58 audited ticks. ✅ **RESIDUE CLOSED `a31057e`** — `SelValueSLTBit0` proves bit 0 and the headline
+`core_selOut_eq_isa_slt` is now **UNSCOPED** (no `hk0`), with `regDatapath_SLT` discharging the
+enable for the `r = rd` row. Retirement made SAFE FIRST via derive-back rows, so `SelValueSLT`'s
+scoped statements remain true as instances and were NOT edited. ⭐ New control worth the fleet's
+attention: `sign_and_carry_differ_in_value` — had `sltSig 2` been `subOut 32`, the value would have
+been wrong **with every placement certificate still green** | a field that resists the schema ⇒ skip, name it, continue the batch; resisters collect into their own item |
 | **Q5** | **Horn D, part 2: the memory organ** — placement + placement proofs on the extended state; `core32.v`'s dmem path is the reference shape | C | executor-dispatchable after Q3; seat lands | ⚙️ **ORGAN MEASURED AND LANDED `ed3c9bc`** — `memOrgan_gate_count = 1475`, block-decomposed, `Op` sufficient (no sequential constructor needed); cross-checked against abc's 256 `mux2_1`. ⛔ The over-budget VERDICT is NOT carried: its denominator is confirmed only at component level and is referred to silicon. Still blocked on the Q3 swap | — |
 | **Q6** | **LW differential redesign + repair** — the exhibits (`lw_forces_false…`, `no_enable_repairs_the_load`) quantify over the OLD `decQ`; the must-break set is redesigned against the real memory FIRST, then the enable/datapath repair | C | **seat-only** (compiler) — the subtle part, ruled not executor-safe | blocked on Q3+Q5 | — |
 | **Q7** ∥ | **Enable-half sweep of the remaining fields** — the SW/valid repairs proved the pattern; confirm enable agreement per field alongside Q4's value work | A/B | executor-dispatchable NOW | ✅ **LANDED `b64722e`** — `EnableWriters` (72 ticks across the three). ⭐⭐ **`EnableX0` REDUCES THE WHOLE OBLIGATION**: `regDatapath_off_target` (every input, every `r ≠ rdOf ins`) + `regDatapath_rd_zero` + `regDatapathOK_of_on_target` ⇒ 31/32 registers and the entire x0-destination case discharged UNIVERSALLY | — |
@@ -67,6 +72,19 @@ different claims. Additive so far: `offsets_pinned` and `chain_end_is_11486` sti
 | **Q9** | **`C4Spec core` assembly** — `c4Spec_core_of_datapath_and_pc` with `PcField` (landed) + Q8; the C4Refuted differentials MUST fire and be consumed in the same commit | B | seat | blocked on Q8 | — |
 | **Q10** | ⚖️ **R9/B1: the restated C4 sentence** — statement-tier (Captain/Fable pen; compiler drafts, silicon cross-verifies per the 08/17 adjudication; criterion (c)'s one-stall-semantics-object proposal rides) | C | **⚖️ Captain/Fable — NOT on this queue's authority** | after Q9 | — |
 | **Q11** | **R9/B2: the witness construction** against the ratified B1 sentence | B/C | compiler + silicon cross-verify | blocked on Q10 | — |
+
+> **📌 NAMED DEBT, PROVEN AND SCHEDULED (not lost, not silently shipped).** The parallel fan-out
+> minted **11 duplicated helpers** across the seven Q4/Q7 modules. A shared module proving each
+> ONCE is **built and seat-verified** (`Built=1 Replayed=0`, 13 ticks) — with the replacement claim
+> *machine-checked*: 24 `CallsiteCheck` rows restate each original copy and prove it by the shared
+> lemma, so a lemma serving only one caller would have failed to elaborate. 9 of 11 are
+> byte-identical; 2 differ in PROOF only, not statement.
+> ⛔ **It is deliberately NOT landed yet: landing `Shared` unwired would create a THIRD copy of each
+> helper and make the debt worse.** The deliverable is the REWIRING, and per §0 ("a seat never
+> grinds tired to keep the queue moving — it dispatches instead") it is dispatched rather than
+> hand-done late in a long sitting. `coreThruRw_split5` is excluded on its author's own advice: it
+> is the one row with real integration cost, and the better fix is to drop both copies and call
+> `Rs2Close.coreThruRw_split2` directly.
 
 **The critical path is Q1→Q2 and Q3→Q5→Q6 converging on Q8; Q4/Q7 fill every idle hour from
 tonight onward.** Projected at measured velocity ×1.5–2: Q8 ~Aug 29, Q9 ~Aug 31, Q10/Q11
