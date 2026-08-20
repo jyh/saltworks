@@ -74,3 +74,47 @@ It fixes the VERDICTS, not the repair. It does not authorise weakening any state
 row land on its required side: **a row that will not reach its pre-registered verdict is a WALL,
 reported as one.** And it says nothing about Q10 — the restated C4 sentence is ⚖️ Captain/Fable
 and no differential here touches it.
+
+---
+
+## ⛔ AMENDMENT 2026-08-20T13:50:43-0700 — **I ENUMERATED THE POPULATION FROM A FILE, AND THE FILE WAS THE WRONG SET**
+
+The table above was built by listing the exhibits **in `C4Refuted.lean`**. That is a FILE, not the
+set the pre-registration is about. The set is **every declaration whose truth depends on the
+model's memory being all-zero**, wherever it lives — and the Q4/Q7 wave produced new members
+within the hour, outside that file.
+
+**Measured on the seven returned candidates** (seeds: `decQ_mem`, `stepT_lw_writes_zero`,
+`lw_forces_false_whatever_the_enable_does`, `regDatapathOK_is_false_on_LW_either_way`,
+`no_enable_repairs_the_load`, `datapath_forces_zero_select_on_LW`):
+
+```
+ScratchQ4ADDEx  ScratchQ4ADDIEx  ScratchQ4SLTEx  ScratchQ4XOREx  ScratchQ7writersEx   independent
+ScratchQ7x0Ex          DEPENDS ON regDatapathOK_is_false_on_LW_either_way
+ScratchQ7nonwritersEx  DEPENDS ON regDatapathOK_is_false_on_LW_either_way
+```
+
+### New registered members — verdict **MUST BREAK** when Horn D lands
+
+- **`Q7x0.on_target_case_is_false`** — proved as
+  `fun h => C4Refuted.regDatapathOK_is_false_on_LW_either_way (regDatapathOK_of_on_target h)`.
+  It is **not a new defect**: it is the known LW refutation transported into the reduced form, so
+  it inherits the all-zero-memory dependency exactly.
+  ⚠️ **Its companion `Q7x0.regDatapathOK_of_on_target` is DURABLE and must SURVIVE** — the
+  reduction says nothing about memory. *Landing the pair without distinguishing them is how a
+  perishable exhibit gets mistaken for a permanent result.*
+- **the corresponding row in `ScratchQ7nonwritersEx`**, same seed, same verdict.
+
+### THE RULE, replacing the file listing
+
+> **Membership is the DEPENDENCY CLOSURE of the seeds, re-computed at each landing — never a
+> file listing, and never a set enumerated once.** Any new declaration reaching a seed joins the
+> must-break set in the same commit that lands it.
+
+⚠️ **AND HOW NOT TO COMPUTE IT.** My first attempt built a textual reference graph over all 5327
+declarations and returned a closure of **4468 — 84% of the tree**. The cause: once `C4Refuted`
+members entered, their SHORT witness names (`r1`, `s0`, `insL`, `wI`) matched every declaration
+mentioning those tokens anywhere, and it cascaded. **A token-reference graph answers "who typed
+this string", never "who depends on this theorem."** The narrow per-candidate check quoted above
+is the reliable instrument; the whole-tree closure as written is not, and its 84% must not be
+quoted as a dependency figure.
