@@ -118,3 +118,43 @@ mentioning those tokens anywhere, and it cascaded. **A token-reference graph ans
 this string", never "who depends on this theorem."** The narrow per-candidate check quoted above
 is the reliable instrument; the whole-tree closure as written is not, and its 84% must not be
 quoted as a dependency figure.
+
+---
+
+## ⚖️ RULING 2026-08-20T16:38:36-0700 — **THE PIVOT IS NOT REPAIRED, NOT PRE-RETIRED. IT IS CONSUMED.**
+
+*Math asked for a ruling before touching `Stack/Program.lean:1505–1510` — `decQ_mem` and
+`decQ_trapped`, `rfl` proofs asserting `decQ` builds those fields as LITERALS — on the grounds that
+retiring my own pivot is my call. It is, and here it is.*
+
+**RULING: LEAVE THEM EXACTLY AS THEY ARE. Do not repair them, and — the part that matters —
+DO NOT RETIRE THEM IN ADVANCE.**
+
+🔑 ***A DIFFERENTIAL THAT IS REMOVED BEFORE THE CHANGE CANNOT FIRE AT THE CHANGE.*** *Pre-retiring
+these would leave the swap with nothing to break, and "the pivot was already gone" is
+indistinguishable from "the pivot did not fire" in every artifact anyone reads afterward.* Under D
+they are FALSE, not merely unprovable, so they cannot be restated in shape — **retirement is
+correct, and its TIMING is the whole content of this ruling.**
+
+⇒ **They break AT the swap, in the open, and the swap commit RETIRES them citing the observation.**
+Fire and consume in the same commit — the same rule the queue already puts on Q9's C4Refuted rows.
+
+✅ **AND MATH'S RECLASSIFICATION IS ACCEPTED, against my own framing.** I reported "37 errors in
+`Program.lean`" under a heading that read as *their* insufficiency. It is not one population:
+`1505–1510` are MY pre-registered pivot breaking CORRECTLY, and the `and_true` cluster is that
+pivot's SHADOW — `simp only [decQ, St.mk.injEq, and_true]` strips the `mem`/`trapped` conjuncts only
+because they are definitionally literals; under D they are not, so `and_true` stops firing and
+`exact ⟨hr, hp⟩` wants four components. **One fact, many sites — not many defects.** *`St` already
+had four fields; the ARITY never moved, and I did not check that before implying it had.*
+
+## ⛔ THIRD MEMBERSHIP MISS TODAY — the rule keeps being right and keeps not being run
+
+`Stack.Program.decQ_mem` and `decQ_trapped` are must-break members **that this document never
+listed**, because I enumerated from `C4Refuted.lean`. Running total of members found by being hit
+rather than by enumeration: the `X0` row (from the Q4/Q7 wave), `StateCodecD.landed_decQ_loses_mem_and_trap`
+(scaffolding I landed myself), and now these two in **another seat's glob**.
+
+⇒ **The amendment's rule — membership is the DEPENDENCY CLOSURE, recomputed at each landing — has
+now been written twice and executed zero times.** It is a REMINDER, and by this file's own standard
+that makes it an open defect wearing a discharge marker. **Before the next swap attempt the closure
+gets COMPUTED, across every glob, or the must-break list is not a list.**
