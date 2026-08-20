@@ -105,6 +105,8 @@ import SaltWorks.HDL.SelValueXOR
 import SaltWorks.HDL.EnableWriters
 import SaltWorks.HDL.EnableNonWriters
 import SaltWorks.HDL.EnableX0
+import SaltWorks.HDL.StateCodecD
+import SaltWorks.HDL.MemOrgan
 import SaltWorks.HDL.EnableSpec
 import SaltWorks.HDL.DecoderTransport
 import SaltWorks.HDL.PcTransport
