@@ -25,10 +25,22 @@ survives here is the same witness, evaluated the same way, reporting the opposit
 `witness_no_longer_enables` below. *A refutation that dies to a repair is the only kind worth
 landing, and it is kept rather than deleted so the next reader can see BOTH halves.*
 
-⛔ **WHAT THIS DOES NOT SAY.** `C4Spec core` is **not** proved — it is merely no longer refuted
-by this witness. The 31 `RegField` rows still need `selOut`'s VALUE against the ISA result, the
-expensive half, untouched by the enable repair. **Do not read a green tree here as the flagship
-recovered.**
+⛔⛔⛔ **AND `C4Spec core` IS REFUTED AGAIN — TWICE OVER, BY TWO DISJOINT MECHANISMS THAT HAVE
+NOTHING TO DO WITH STORES.** The `SW` repair closed one row; it did not close the obligation.
+Both new refutations live at the foot of this file:
+
+* **`ADDI` — `core` HAS NO I-TYPE IMMEDIATE.** `CorePlace.obSig` feeds the ALU's operand-B
+  *"immediate"* bank from `immOut`, and `immOut` is `immBCirc` — the **B-type BRANCH
+  DISPLACEMENT**. `immICirc` exists and is certified (`Immediate.immI_correct`) and is **placed
+  nowhere**. ⇒ `regDatapathOK_is_false_on_ADDI`, and it escalates to `c4Spec_core_is_false`.
+* **`LW` — the enable fires and `core` HAS NO MEMORY.** `decQ` builds
+  `mem := Vector.replicate 8 0`, so the ISA writes the CONSTANT `0` on a non-trapping load.
+  ⇒ `regDatapathOK_is_false_on_LW_either_way`, proved by CASE-SPLITTING on the enable rather
+  than evaluating it — **no write-enable choice repairs a load.**
+
+⇒ **`C4Spec core` IS FALSE, NOT OPEN.** The 31 `RegField` rows also still need `selOut`'s VALUE
+against the ISA result — but that campaign is downstream of two decisions that have not been
+made, and pricing it first would be pricing a proof of a false sentence.
 
 ⚠️ The packed evaluator this file introduced now lives in `Sem.lean` (`runB`/`semB` with
 `runB_eq`/`semB_eq`), lifted there so every organ certificate can use it. The local copies are
@@ -95,6 +107,206 @@ was never in doubt. Both sides now agree, which is what `RegDatapathOK` asks for
 register. -/
 theorem isa_writes_nothing_on_SW (a b : Fin 32) (imm : BitVec 12) :
     writesReg (.SW a b imm) = none := rfl
+
+/-! ## ⛔⛔ TWO FURTHER REFUTATIONS — NEITHER IS ABOUT STORES
+
+Found 2026-08-19 ~18:2x while scouting the `selOut` VALUE campaign, i.e. by asking what would
+BREAK the campaign before spending on it. Both were handed to skeptics instructed to refute
+them; neither was refuted. **They are independent of each other and of the `SW` repair.** -/
+
+def r1 : Fin 32 := ⟨1, by decide⟩
+
+/-! ## IDENTITY — the `RegDatapathOK` refuted below is the one the flagship rests on. -/
+
+theorem identity_it_is_the_flagship :
+    RegDatapathOK → SaltWorks.Stack.Program.PcField core → SaltWorks.HDL.C4Spec core :=
+  c4Spec_core_of_datapath_and_pc
+
+/-! ## NEGATIVE CONTROL — the instrument can report AGREEMENT.
+`ADD x1, x2, x0` with `x2 = 1` (net 64). -/
+
+def wC : BitVec 32 := encode (Instr.ADD 1 2 0)
+def sC : Nat := 2 ^ 64 ||| (wC.toNat * 2 ^ 1056)
+def insC : Env := fun n => sC.testBit n
+
+theorem ctl_enable : run insC core.gates (rwOut r1.val) = true :=
+  (runB_eq core.gates sC (rwOut r1.val)).symm.trans (by decide +kernel)
+
+theorem ctl_sel0 : run insC core.gates (selOut 0) = true :=
+  (runB_eq core.gates sC (selOut 0)).symm.trans (by decide +kernel)
+
+theorem ctl_isa : ((stepT (decQ insC) (seenWord insC)).regs[r1.val]).getLsbD 0 = true := by
+  decide +kernel
+
+/-- ✅ THE CONTROL: at this witness the two sides of `RegDatapathOK` AGREE. -/
+theorem control_sides_agree :
+    (if run insC core.gates (rwOut r1.val) then run insC core.gates (selOut 0)
+     else insC (32 * r1.val + 0))
+      = ((stepT (decQ insC) (seenWord insC)).regs[r1.val]).getLsbD 0 := by
+  rw [ctl_enable, if_pos rfl, ctl_sel0, ctl_isa]
+
+/-! ## DEFECT 1 — ADDI.  `ADDI x1, x0, 1` on an ALL-ZERO register file and pc. -/
+
+def wI : BitVec 32 := encode (Instr.ADDI 1 0 1)
+def sI : Nat := wI.toNat * 2 ^ 1056
+def insI : Env := fun n => sI.testBit n
+
+theorem seen_insI : seenWord insI = wI := by decide +kernel
+
+theorem dec_insI : decode (seenWord insI) = some (Instr.ADDI 1 0 1) := by
+  rw [seen_insI]; exact decode_encode _
+
+/-- The witness carries NO state: every register and the pc are zero. -/
+theorem insI_state_is_zero : ∀ n, n < 1056 → insI n = false := by decide +kernel
+
+theorem enable_insI : run insI core.gates (rwOut r1.val) = true :=
+  (runB_eq core.gates sI (rwOut r1.val)).symm.trans (by decide +kernel)
+
+/-- `useImm = isADDI` is HIGH, so `sem_obMux` says the bank delivered IS the immediate bank —
+the disagreement cannot be blamed on `rs2` or on mux polarity. -/
+theorem useImm_high_insI : run insI core.gates (decOut 3) = true :=
+  (runB_eq core.gates sI (decOut 3)).symm.trans (by decide +kernel)
+
+/-- ⛔ The core writes bit 0 = `false`: the B-displacement's bit 0 is a STRUCTURAL ZERO, so
+`core` can never write an ODD value with `ADDI`, for any immediate. -/
+theorem sel0_insI : run insI core.gates (selOut 0) = false :=
+  (runB_eq core.gates sI (selOut 0)).symm.trans (by decide +kernel)
+
+/-- …while the ISA writes `0 + 1 = 1`, whose bit 0 is `true`. -/
+theorem isa_insI : ((stepT (decQ insI) (seenWord insI)).regs[r1.val]).getLsbD 0 = true := by
+  decide +kernel
+
+/-- ⛔⛔⛔ **`RegDatapathOK` IS FALSE — by an `ADDI` on an all-zero machine.** -/
+theorem regDatapathOK_is_false_on_ADDI : ¬ RegDatapathOK := by
+  intro h
+  have hx := h insI r1 0 (by decide)
+  rw [enable_insI, if_pos rfl, sel0_insI, isa_insI] at hx
+  exact absurd hx (by decide)
+
+/-! ### Escalation — the same witness kills `RegField core 1` and `C4Spec core`. -/
+
+theorem isa_insI_prog :
+    ((stepT (decQ insI) (SaltWorks.Stack.Program.seenWord insI)).regs[r1.val]).getLsbD 0
+      = true := isa_insI
+
+theorem regField_core_one_is_false : ¬ SaltWorks.Stack.Program.RegField core r1 := by
+  intro h
+  have hb := (SaltWorks.Stack.Program.regField_iff_bits core r1).mp h insI 0 (by decide)
+  rw [core_outBit_reg_reduced insI r1.val 0 (by decide) (by decide), enable_insI, if_pos rfl,
+      sel0_insI, isa_insI_prog] at hb
+  exact absurd hb (by decide)
+
+/-- ⛔⛔⛔ **THE FLAGSHIP IS REFUTED.** -/
+theorem c4Spec_core_is_false : ¬ SaltWorks.HDL.C4Spec core := fun h =>
+  regField_core_one_is_false
+    (((SaltWorks.Stack.Program.c4Spec_iff_fieldwise core).mp h).2.1 r1)
+
+/-! ## DEFECT 2 — LW.  THE GENERAL REASON, NO WITNESS, NO EVALUATION. -/
+
+theorem decQ_mem (ins : Env) : (decQ ins).mem = Vector.replicate 8 0 := rfl
+
+/-- A non-trapping `LW` out of an all-zero memory writes the CONSTANT `0`. -/
+theorem step_lw_writes_zero (s : St) (rd a : Fin 32) (imm : BitVec 12) (hrd : rd ≠ 0)
+    (hmem : s.mem = Vector.replicate 8 0)
+    (hok : addrClass (s.get a + imm.signExtend 32) = .ok) :
+    (step s (.LW rd a imm)).regs[rd.val] = 0 := by
+  simp [step, hok, St.next, St.set, hrd, hmem]
+
+/-- A TRAPPING `LW` writes NOTHING — the register holds. -/
+theorem step_lw_trap_holds (s : St) (rd a : Fin 32) (imm : BitVec 12)
+    (hbad : ¬ (addrClass (s.get a + imm.signExtend 32) = .ok)) :
+    (step s (.LW rd a imm)).regs[rd.val] = s.regs[rd.val] := by
+  simp [step, hbad, St.next]
+
+theorem stepT_lw_writes_zero (ins : Env) (rd a : Fin 32) (imm : BitVec 12) (hrd : rd ≠ 0)
+    (h : decode (seenWord ins) = some (.LW rd a imm))
+    (hok : addrClass ((decQ ins).get a + imm.signExtend 32) = .ok) :
+    (stepT (decQ ins) (seenWord ins)).regs[rd.val] = 0 := by
+  rw [stepT_compat (decQ ins) (seenWord ins) (step (decQ ins) (.LW rd a imm))
+        (by simp [stepW, h])]
+  exact step_lw_writes_zero _ rd a imm hrd (decQ_mem ins) hok
+
+/-- ⭐⭐⭐ **THE LW DILEMMA, HORN 1 — THE ENABLE IS NOT A FREE PARAMETER.**
+If `RegDatapathOK` held, then on EVERY decodable non-trapping `LW` with `rd ≠ 0` the bit the
+obligation observes must be `false` — **whichever branch of the write-enable is taken.**
+So the enable choice cannot rescue the load: the `then` branch demands a constant-zero result
+datapath, and the `else` branch demands that the destination register already held zero. -/
+theorem lw_forces_false_whatever_the_enable_does (h : RegDatapathOK) (ins : Env)
+    (rd a : Fin 32) (imm : BitVec 12) (hrd : rd ≠ 0)
+    (hdec : decode (seenWord ins) = some (.LW rd a imm))
+    (hok : addrClass ((decQ ins).get a + imm.signExtend 32) = .ok)
+    (k : Nat) (hk : k < 32) :
+    (if run ins core.gates (rwOut rd.val) then run ins core.gates (selOut k)
+     else ins (32 * rd.val + k)) = false := by
+  rw [h ins rd k hk, stepT_lw_writes_zero ins rd a imm hrd hdec hok]
+  simp
+
+/-! ### HORN 2 — a concrete load where BOTH candidate left-hand sides are wrong.
+`LW x1, x2, 4` with `x2 = 4` (net 66) AND `x1` already holding bit 2 (net 34). -/
+
+def wL : BitVec 32 := encode (.LW 1 2 4)
+def sL : Nat := 2 ^ 66 ||| 2 ^ 34 ||| (wL.toNat * 2 ^ 1056)
+def insL : Env := fun n => sL.testBit n
+
+theorem seen_insL : seenWord insL = wL := by decide +kernel
+
+theorem dec_insL : decode (seenWord insL) = some (Instr.LW 1 2 4) := by
+  rw [seen_insL]; exact decode_encode _
+
+/-- The circuit's select bank says `true` (the adder returns `x2 + x4 = 4`). -/
+theorem sel2_insL : run insL core.gates (selOut 2) = true :=
+  (runB_eq core.gates sL (selOut 2)).symm.trans (by decide +kernel)
+
+/-- The HELD state bit — what the `else` branch returns — is ALSO `true`. -/
+theorem held_insL : insL (32 * r1.val + 2) = true := by decide +kernel
+
+/-- The ISA demands `false`: the load's source is `decQ`'s all-zero memory. -/
+theorem isa_insL : ((stepT (decQ insL) (seenWord insL)).regs[r1.val]).getLsbD 2 = false := by
+  decide +kernel
+
+/-- ⭐⭐⭐ **HORN 2, PACKAGED: NO WRITE-ENABLE REPAIRS THE LOAD.**
+Deleting `isLW` from `writesRegOf` leaves the HELD value on the left — and that is `true` here
+too, while the ISA demands `false`. -/
+theorem no_enable_repairs_the_load :
+    ∃ ins : Env, ∃ rd : Fin 32, ∃ k : Nat, k < 32
+      ∧ decode (seenWord ins) = some (Instr.LW 1 2 4)
+      ∧ run ins core.gates (selOut k) = true
+      ∧ ins (32 * rd.val + k) = true
+      ∧ ((stepT (decQ ins) (seenWord ins)).regs[rd.val]).getLsbD k = false :=
+  ⟨insL, r1, 2, by decide, dec_insL, sel2_insL, held_insL, isa_insL⟩
+
+/-- ⛔⛔⛔ **`RegDatapathOK` IS FALSE ON A LOAD, WHATEVER THE ENABLE DOES.** The proof
+case-splits on the enable and never evaluates it. -/
+theorem regDatapathOK_is_false_on_LW_either_way : ¬ RegDatapathOK := by
+  intro h
+  have hx := h insL r1 2 (by decide)
+  rw [isa_insL] at hx
+  cases he : run insL core.gates (rwOut r1.val)
+  · rw [he] at hx; simp [held_insL] at hx
+  · rw [he] at hx; simp [sel2_insL] at hx
+
+/-- ⭐ THE ACCEPTANCE TEST for the "make the core write zero on loads" route: it says exactly
+what a repaired core must satisfy, with no witness in it. -/
+theorem datapath_forces_zero_select_on_LW (h : RegDatapathOK) (ins : Env)
+    (rd a : Fin 32) (imm : BitVec 12) (hrd : rd ≠ 0)
+    (hdec : decode (seenWord ins) = some (.LW rd a imm))
+    (hok : addrClass ((decQ ins).get a + imm.signExtend 32) = .ok)
+    (hen : run ins core.gates (rwOut rd.val) = true) (k : Nat) (hk : k < 32) :
+    run ins core.gates (selOut k) = false := by
+  have hx := h ins rd k hk
+  rw [hen, stepT_lw_writes_zero ins rd a imm hrd hdec hok] at hx
+  simpa using hx
+
+#audit_axioms r1 identity_it_is_the_flagship
+#audit_axioms wC sC insC ctl_enable ctl_sel0 ctl_isa control_sides_agree
+#audit_axioms wI sI insI seen_insI dec_insI insI_state_is_zero enable_insI
+#audit_axioms useImm_high_insI sel0_insI isa_insI regDatapathOK_is_false_on_ADDI
+#audit_axioms isa_insI_prog regField_core_one_is_false c4Spec_core_is_false
+#audit_axioms decQ_mem step_lw_writes_zero step_lw_trap_holds stepT_lw_writes_zero
+#audit_axioms lw_forces_false_whatever_the_enable_does
+#audit_axioms wL sL insL seen_insL dec_insL sel2_insL held_insL isa_insL
+#audit_axioms no_enable_repairs_the_load regDatapathOK_is_false_on_LW_either_way
+#audit_axioms datapath_forces_zero_select_on_LW
 
 #audit_axioms wSW s0 ins0 seen_ins0 rd_ins0 held_ins0
 #audit_axioms dec_ins0 rdOf_ins0_ne_zero isa_writes_nothing_on_SW
