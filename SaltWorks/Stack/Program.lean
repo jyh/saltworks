@@ -1538,11 +1538,11 @@ theorem decQ_congr {a b : SaltWorks.HDL.Env}
     (hab : ∀ j, j < SaltWorks.HDL.stWidth → a j = b j) :
     SaltWorks.HDL.decQ a = SaltWorks.HDL.decQ b := by
   simp only [SaltWorks.HDL.decQ, St.mk.injEq, and_true]
-  refine ⟨?_, wordOf_congr (fun k hk => hab (1024 + k) (by show 1024 + k < 1056; omega))⟩
+  refine ⟨?_, wordOf_congr (fun k hk => hab (1024 + k) (by unfold SaltWorks.HDL.stWidth; omega))⟩
   apply Vector.ext
   intro i hi
   rw [Vector.getElem_ofFn, Vector.getElem_ofFn]
-  exact wordOf_congr (fun k hk => hab (32 * i + k) (by show 32 * i + k < 1056; omega))
+  exact wordOf_congr (fun k hk => hab (32 * i + k) (by unfold SaltWorks.HDL.stWidth; omega))
 
 /-- ⬥ **M1a — THE HUB, RESTATED.** `decQ (envWith s w) = s` is a whole-`St`
 equality and goes FALSE once `St` carries `mem`/`trapped`: `envWith` presents
@@ -1859,9 +1859,9 @@ theorem seenWord_envWith (s : St) (w : Word) : seenWord (envWith s w) = w := by
         else w.getLsbD (SaltWorks.HDL.instrNet k - SaltWorks.HDL.instrBase))
       = w.getLsbD k
   have hsub : SaltWorks.HDL.instrNet k - SaltWorks.HDL.instrBase = k := by
-    show 1056 + k - 1056 = k
+    unfold SaltWorks.HDL.instrNet SaltWorks.HDL.instrBase SaltWorks.HDL.stWidth SaltWorks.HDL.Net
     omega
-  rw [if_neg (by show ¬ (1056 + k < 1056); omega), hsub]
+  rw [if_neg (by unfold SaltWorks.HDL.instrNet SaltWorks.HDL.instrBase SaltWorks.HDL.stWidth SaltWorks.HDL.Net; omega), hsub]
 
 /-- **A one-cycle machine**: decode the Q-leaves, read the instruction nets,
 step, and present the new state together with whatever word comes next.
@@ -2260,9 +2260,9 @@ theorem seenWord_envOfBits (bs : List Bool) (pad : SaltWorks.HDL.Env) (w : Word)
         else w.getLsbD (SaltWorks.HDL.instrNet k - SaltWorks.HDL.instrBase))
       = w.getLsbD k
   have hsub : SaltWorks.HDL.instrNet k - SaltWorks.HDL.instrBase = k := by
-    show 1056 + k - 1056 = k
+    unfold SaltWorks.HDL.instrNet SaltWorks.HDL.instrBase SaltWorks.HDL.stWidth SaltWorks.HDL.Net
     omega
-  rw [if_neg (by show ¬ (1056 + k < 1056); omega), hsub]
+  rw [if_neg (by unfold SaltWorks.HDL.instrNet SaltWorks.HDL.instrBase SaltWorks.HDL.stWidth SaltWorks.HDL.Net; omega), hsub]
 
 /-- **The cycle map an output-bit function induces**, with the instruction-net
 policy left as an arbitrary `nextW : Env → Word`. *Arbitrary on purpose: a ROM
@@ -2662,15 +2662,16 @@ theorem c4Spec_iff_fieldwise (c : SaltWorks.HDL.Circ) :
       rw [regField_iff_bits]
       intro ins k hk
       have hr := r.isLt
-      rw [hbits ins (32 * r.val + k) (by show 32 * r.val + k < 1056; omega),
+      rw [hbits ins (32 * r.val + k) (by unfold SaltWorks.HDL.stWidth; omega),
         stBit_reg _ r k hk]
     · rw [pcField_iff_bits]
       intro ins k hk
-      rw [hbits ins (1024 + k) (by show 1024 + k < 1056; omega), stBit_pc _ k hk]
+      rw [hbits ins (1024 + k) (by unfold SaltWorks.HDL.stWidth; omega), stBit_pc _ k hk]
   · rintro ⟨hlen, hregs, hpc⟩
     refine ⟨hlen, ?_⟩
     intro ins j hj
-    have hj56 : j < 1056 := hj
+    have hj56 : j < SaltWorks.HDL.stWidth := hj
+    unfold SaltWorks.HDL.stWidth at hj56
     by_cases h1 : j < 1024
     · have hlt : j / 32 < 32 := by omega
       have hk : j % 32 < 32 := by omega
@@ -2769,7 +2770,7 @@ theorem outReg_coreShaped (ins : SaltWorks.HDL.Env) (r : Fin 32) :
   have h1 : outReg SaltWorks.HDL.coreShaped ins r
       = SaltWorks.HDL.wordOf (fun k => ins (32 * r.val + k)) :=
     wordOf_congr (fun k hk =>
-      outBit_coreShaped ins _ (by show 32 * r.val + k < 1056; omega))
+      outBit_coreShaped ins _ (by unfold SaltWorks.HDL.stWidth; omega))
   have h2 : (SaltWorks.HDL.decQ ins).regs[r.val]
       = SaltWorks.HDL.wordOf (fun k => ins (32 * r.val + k)) := by
     show (Vector.ofFn (fun r : Fin 32 =>
@@ -2779,7 +2780,7 @@ theorem outReg_coreShaped (ins : SaltWorks.HDL.Env) (r : Fin 32) :
 
 theorem outPc_coreShaped (ins : SaltWorks.HDL.Env) :
     outPc SaltWorks.HDL.coreShaped ins = (SaltWorks.HDL.decQ ins).pc :=
-  wordOf_congr (fun k hk => outBit_coreShaped ins _ (by show 1024 + k < 1056; omega))
+  wordOf_congr (fun k hk => outBit_coreShaped ins _ (by unfold SaltWorks.HDL.stWidth; omega))
 
 /-! #### `x0` never changes — the fact that makes field 0 satisfiable today -/
 
@@ -2878,7 +2879,7 @@ theorem outBit_coreShapedT (ins : SaltWorks.HDL.Env) (j : Nat)
 
 theorem outPc_coreShapedT (ins : SaltWorks.HDL.Env) :
     outPc SaltWorks.HDL.coreShapedT ins = SaltWorks.HDL.wordOf (fun _ => true) :=
-  wordOf_congr (fun k hk => outBit_coreShapedT ins _ (by show 1024 + k < 1056; omega))
+  wordOf_congr (fun k hk => outBit_coreShapedT ins _ (by unfold SaltWorks.HDL.stWidth; omega))
 
 theorem not_pcField_coreShapedT : ¬ PcField SaltWorks.HDL.coreShapedT := by
   intro h
@@ -2955,13 +2956,13 @@ theorem length_conjunct_is_necessary (c : SaltWorks.HDL.Circ) (m : SaltWorks.HDL
     have hr := r.isLt
     have he : outReg (extendOut c m) ins r = outReg c ins r :=
       wordOf_congr (fun k hk => outBit_extendOut c m ins (32 * r.val + k)
-        (by rw [hlen]; show 32 * r.val + k < 1056; omega))
+        (by rw [hlen]; unfold SaltWorks.HDL.stWidth; omega))
     rw [he]
     exact h ins
   · intro h ins
     have he : outPc (extendOut c m) ins = outPc c ins :=
       wordOf_congr (fun k hk => outBit_extendOut c m ins (1024 + k)
-        (by rw [hlen]; show 1024 + k < 1056; omega))
+        (by rw [hlen]; unfold SaltWorks.HDL.stWidth; omega))
     rw [he]
     exact h ins
   · intro hc
