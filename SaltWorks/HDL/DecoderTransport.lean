@@ -71,6 +71,7 @@ IS CORRECT.**
 *Not C4, not a witness, does not close R9/B2. No new `RegField` is discharged here.*
 -/
 import SaltWorks.HDL.EnableSpec
+import SaltWorks.HDL.C1Organ
 
 namespace SaltWorks.HDL.RegNextUniform
 open SaltWorks.HDL SaltWorks.ISA
@@ -309,6 +310,74 @@ theorem valid_is_decoder_output_8 (ins : Env) :
 #audit_axioms the_repair_is_observable valid_is_decoder_output_8
 #audit_axioms core_writes_on_ADD core_writes_on_XOR core_writes_on_SLT core_writes_on_ADDI
 #audit_axioms core_writes_nothing_on_BEQ core_writes_nothing_on_garbage core_does_write_on_LW
+
+/-! ## ⭐ THE SELECT NETS — the second brick of the VALUE half
+
+`core_selOut_transport` (EnableArm) said WHERE `selOut k` comes from. This says what the two
+SELECT nets carry, which is what decides WHICH BANK the mux delivers. Together they reduce the
+value half to the three banks themselves.
+
+⚠️ **STATED OVER `ctrlSpec`, NOT OVER `ctrlOf`, AND THAT IS A DELIBERATE CHOICE.**
+`SelectCut32`/`C1Organ`'s big unused certificate `sliceASelect_of_gate_decoder` takes its
+hypotheses as `(ctrlOf w)[1]!` / `[2]!`, and firing it would need `ctrlOf = ctrlSpec` for an
+ARBITRARY `BitVec 32`. ⛔ **That agreement is NOT landed in that form:** `dcPlaneOK` and
+`dcFunct7OK` are exhaustive over `dcWord`-GENERATED words only, and `Executive.lean:33` names a
+`decoder_correct` — *"∀ w, ctrlOf w = ctrlSpec w, unconditional, over `BitVec 32`"* — **which
+does not exist under that name anywhere in the tree.** Routing through `ctrlSpec` needs no
+projection argument at all, because `core_decOut_spec` already bridges the PLACED decoder to
+`ctrlSpec` for an arbitrary environment. -/
+
+theorem decOut_lt_offSel (j : Nat) (hj : j < 9) : decOut j < offSel := by
+  revert j; decide +kernel
+
+theorem decOut_lt_offEnc (j : Nat) (hj : j < 9) : decOut j < offEnc := by
+  revert j; decide +kernel
+
+/-- The decoder's outputs are settled by organ 11; rows 12 and 13 write above them. -/
+theorem decOut_thru11 (ins : Env) (j : Nat) (hj : j < 9) :
+    run ins coreThru13 (decOut j) = run ins coreThru11 (decOut j) := by
+  rw [coreThru13_sel_split, run_append, run_append]
+  rw [run_of_unwritten _ _ _ (fun g hg hEq => by
+    have hge := (instGates_out_range EncoderE1.ruledEnc encSig offEnc
+      EncoderE1.ruled_ssa g hg).1
+    rw [hEq] at hge
+    exact absurd hge (Nat.not_le.mpr (decOut_lt_offEnc j hj)))]
+  rw [run_of_unwritten _ _ _ (fun g hg hEq => by
+    have hge := (instGates_out_range SelectCut32.sliceASelect selSig offSel
+      SelectCut32.sliceASelect_ssa g hg).1
+    rw [hEq] at hge
+    exact absurd hge (Nat.not_le.mpr (decOut_lt_offSel j hj)))]
+
+/-! ### The two select nets, wired and named. -/
+
+theorem gsSel0_is_96 : gsSel rsOps rsSelBits 0 = 96 := by decide +kernel
+theorem gsSel1_is_97 : gsSel rsOps rsSelBits 1 = 97 := by decide +kernel
+
+theorem selSig_96 : selSig 96 = decOut 1 := by simp [selSig]
+theorem selSig_97 : selSig 97 = decOut 2 := by simp [selSig]
+
+/-- ⭐⭐ **THE SELECT NETS CARRY `isXOR` AND `isSLT` AS `ctrlSpec` DEFINES THEM.**
+
+⚠️ Stated over `ctrlSpec`, NOT over `ctrlOf`, and that is a deliberate choice with a reason:
+`core_decOut_spec` bridges the placed decoder to `ctrlSpec` for an ARBITRARY environment, while
+the `ctrlOf = ctrlSpec` agreement is landed only as `dcPlaneOK`/`dcFunct7OK` — exhaustive over
+`dcWord`-GENERATED words, not over all of `BitVec 32`. Routing through `ctrlSpec` needs no such
+projection argument. -/
+theorem sel_nets_agree (ins : Env) :
+    (fun a => run ins coreThru11 (selSig a)) (gsSel rsOps rsSelBits 0)
+        = (ctrlSpec (seenWord ins)).getD 1 false
+      ∧ (fun a => run ins coreThru11 (selSig a)) (gsSel rsOps rsSelBits 1)
+        = (ctrlSpec (seenWord ins)).getD 2 false := by
+  constructor
+  · show run ins coreThru11 (selSig (gsSel rsOps rsSelBits 0)) = _
+    rw [gsSel0_is_96, selSig_96, ← decOut_thru11 ins 1 (by omega)]
+    exact core_decOut_spec ins 1 (by omega)
+  · show run ins coreThru11 (selSig (gsSel rsOps rsSelBits 1)) = _
+    rw [gsSel1_is_97, selSig_97, ← decOut_thru11 ins 2 (by omega)]
+    exact core_decOut_spec ins 2 (by omega)
+
+#audit_axioms decOut_lt_offSel decOut_lt_offEnc decOut_thru11
+#audit_axioms gsSel0_is_96 gsSel1_is_97 selSig_96 selSig_97 sel_nets_agree
 #audit_axioms core_writes_nothing_on_SW isa_writes_nothing_on_SW
 #audit_axioms isADDOf_spec isXOROf_spec isSLTOf_spec isADDIOf_spec isLWOf_spec
 
