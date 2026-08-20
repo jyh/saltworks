@@ -54,7 +54,15 @@ bound at `stWidth` symbolically but discharges it through a literal that only wo
 delta-reduction. **Proved by a two-arm controlled experiment** — same proof text, old width
 compiles, D width fails `'show' tactic failed`. Scope for math: 12 such sites, 40 `stWidth`
 references. **Asked math to make them width-agnostic in their own file rather than requesting a
-cross-lane grant** (bus 15:2x). Until then the swap does not proceed. ✅ **PRE-STAGED per the helm's order (`2f1fa3a`):**
+cross-lane grant** (bus 15:2x). **ATTEMPTED AND BACKED OUT 08/20 16:3x** on the helm's order once math's `0e6a5cc` landed. ⭐ THE
+CODEC HALF WORKS: with the full round trip ported in and both pre-D statements DERIVED BACK,
+`StateCodec.lean` elaborates CLEAN. ⛔ But the swap leaves **27 broken declarations in
+`Stack/Program.lean`** — math's glob, their pen — including `c4Spec_iff_fieldwise` itself. Tree
+restored green (EXIT=0, 0 errors, 0 `sorryAx`); the only dirty path is silicon's Makefile, as before.
+✅ **The must-break closure is now COMPUTED (`2d7dd49`) — 33 kernel-enumerated names, 6 mine
+(StateCodecD scaffolding: RETIRE, do not repair) and 27 math's — recorded as a LOWER BOUND, since a
+failing module masks its dependents.** Until Program.lean elaborates under the new width the swap
+does not proceed. ✅ **PRE-STAGED per the helm's order (`2f1fa3a`):**
 `docs/Q3-SWAP-RUNBOOK.md` + `docs/ledger-tools/swap_ready.sh`, which pins the blob and answers BY
 RUNNING (both arms driven; it correctly refuses today). The gate is a TRIGGER, not a verdict — arm 2
 is an isolated-worktree dry run, because "math changed the file" and "the swap elaborates" are
