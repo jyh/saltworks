@@ -442,6 +442,70 @@ theorem envWith_decQ_instr (ins : Env) (i : Nat) (hi : i < 32) :
   rw [hcancel, wordOf_getLsbD _ _ hi]
 
 #audit_axioms stBit_decQ envWith_decQ_state envWith_decQ_instr
+
+/-! ## ⭐ THE `ADDI` TRANSPORT ARGUMENT — owed BEFORE the repair, per helm's ruling
+
+`C4Refuted` proves `core` has no I-type immediate: `obSig`'s operand-B "immediate" bank is
+`immBCirc`, the B-type BRANCH displacement. The repair re-points that σ at
+`instrNet (immI ·)`. An arm proved the re-pointed σ **PLACES** (`obSigFixed_instOK`) — and
+**PLACING IS NOT CORRECTNESS.** Because it wires straight to the instruction nets and BYPASSES
+`immICirc`, the landed certificate `sem_immICirc_of_decode` does NOT transfer for free.
+
+**This is the argument that replaces it**, and it lands FIRST because helm ruled the order:
+transport argument, then repair, differentials before both.
+
+⚠️ **CARRY THE CERTIFICATE'S NARROWNESS:** `immI_correct` is exhaustive over the 12-bit
+immediate FIELD at a FIXED choice of the other fields — a real certificate, not a
+`_on_sample`, but "for all words" is not what it says. What is used here instead is
+`sem_immICirc_of_decode`, which IS stated for any word the decoder reads as `ADDI`. -/
+
+/-- `immI k` is always an instruction-word bit index. -/
+theorem immI_lt_32 (k : Nat) : immI k < 32 := by
+  -- ⚠️ `abbrev Net := Nat` is NOT transparent to omega's preprocessing: it DROPS a goal whose
+  -- `<` sits at `Net` and then tries to derive False from the context, so its "counterexample"
+  -- is made purely of your own hypotheses. That is exactly what it printed here. The cure,
+  -- documented at CorePlace.lean:1144 and in this seat's own card: PROVE THE BOUND AT `Nat`
+  -- AND SUPPLY IT AS A TERM.
+  unfold immI
+  split_ifs with h
+  · have hlt : 20 + k < 32 := by omega
+    exact hlt
+  · have hlt : (31 : Nat) < 32 := by omega
+    exact hlt
+
+/-- The instruction nets present the seen word, bit for bit. -/
+theorem ins_instrNet (ins : Env) (i : Nat) (hi : i < 32) :
+    ins (instrNet i) = (SaltWorks.Stack.Program.seenWord ins).getLsbD i := by
+  rw [SaltWorks.Stack.Program.seenWord, wordOf_getLsbD _ _ hi]
+
+/-- ⭐ **THE POINTWISE FORM OF `sem_immICirc_of_decode`.** The landed certificate is a LIST
+equality; the σ consumes it one net at a time. `immICirc` has ZERO gates, so its `sem` IS the
+σ read — which is why the re-pointed wire and the certificate compute the same thing. -/
+theorem immI_bit_of_decode {w : BitVec 32} {rd a : Fin 32} {imm : BitVec 12}
+    (h : decode w = some (.ADDI rd a imm)) (k : Nat) (hk : k < 32) :
+    w.getLsbD (immI k) = (imm.signExtend 32).getLsbD k := by
+  have hs := SaltWorks.Stack.Program.sem_immICirc_of_decode h
+  have hsem : sem immICirc (fun i => w.getLsbD i)
+      = (List.range 32).map (fun k => w.getLsbD (immI k)) := by
+    simp only [sem, immICirc, run_nil, List.map_map]
+    rfl
+  rw [hsem] at hs
+  have hcong := congrArg (fun l => l.getD k false) hs
+  simp only [List.getD_eq_getElem?_getD, List.getElem?_map, List.getElem?_range hk] at hcong
+  simpa using hcong
+
+/-- ⭐⭐ **THE TRANSPORT ARGUMENT — operand B's immediate bank IS `sext(imm)` on the RE-POINTED
+σ.** `obSigFixed` wires straight to `instrNet (immI ·)` and BYPASSES `immICirc`, so the landed
+certificate does not transfer for free; this is the argument that replaces it.
+⚠️ It is about the WIRE, not about a placement: `obSigFixed_instOK` says the σ PLACES, and
+placing is not correctness. -/
+theorem obB_is_sext_imm (ins : Env) (rd a : Fin 32) (imm : BitVec 12) (k : Nat) (hk : k < 32)
+    (h : decode (SaltWorks.Stack.Program.seenWord ins) = some (.ADDI rd a imm)) :
+    ins (instrNet (immI k)) = (imm.signExtend 32).getLsbD k := by
+  rw [ins_instrNet ins (immI k) (immI_lt_32 k)]
+  exact immI_bit_of_decode h k hk
+
+#audit_axioms immI_lt_32 ins_instrNet immI_bit_of_decode obB_is_sext_imm
 #audit_axioms core_writes_nothing_on_SW isa_writes_nothing_on_SW
 #audit_axioms isADDOf_spec isXOROf_spec isSLTOf_spec isADDIOf_spec isLWOf_spec
 
