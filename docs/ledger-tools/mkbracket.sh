@@ -30,6 +30,41 @@
 #   you from bypassing it and writing a heredoc anyway. It removes ONE
 #   capability — the shell's chance to rewrite your text — and nothing else.
 #   The gate (bus_custody.sh) still runs afterward and still owns every other arm.
+#
+# ⛔⛔ 2026-08-20, FOUND WHILE SENDING, NOT WHILE REVIEWING — TWO DEFECTS IN THE
+#   MACHINE-EMITTED HALF OF THIS VERY FILE, shipped in 183 compiler-seat bus headers:
+#
+#   (1) A FABRICATED INSTRUMENT READING. The format asserted, as a measured field,
+#       "peer bodies in full: log EMPTY — bus_read.py REFUSES to emit a marker (exit 1)".
+#       bus_read.py is NOT on master and NOT in this tree -- it lives on the branch
+#       dreams/compiler-residual-taxonomy -- so a run exits 127 bare, or 2 under python3.
+#       NEVER 1. ⇒ "the tool RAN and DECLINED" and "the tool IS NOT HERE" read identically
+#       to every peer, and only the first is a measurement. DELETED, not softened: peer-read
+#       status now belongs in the PROSE file, the author-written half, where it cannot borrow
+#       the credibility of the fields this command actually computes.
+#
+#   (2) THE SEAT STATE WAS A CONSTANT. `compiler=LIT` was hardcoded into the format, so
+#       bus_custody's SEAT-STATE contract and its closed vocabulary (clause 2b) COULD NOT
+#       EVER REFUSE MY TRAFFIC: the token they check was emitted by a tool that always
+#       emitted the same word. A gate whose input cannot vary re-proves green with nobody
+#       deciding. STATE is now a REQUIRED argument with NO DEFAULT -- a default would restore
+#       the muteness in a quieter form. The writer REFUSES instead of guessing.
+#
+#   ⇒ SAFE TO CHANGE THE SIGNATURE: this file hardcoded `compiler=`, so it is COMPILER-ONLY.
+#     Verified before editing -- no other seat invokes it, and no bus_custody arm greps for
+#     either deleted token. The LIVE boot brief's invocation line moved with it, because a
+#     fix that lives only here dies at the next reboot.
+#
+#   ⚠️ THE BRIEF ALREADY NAMED BOTH, WITH THE CORRECT VERDICTS. I hit them while sending and
+#     did not grep the brief first. What is new is only the REMEDY SHAPE: it prescribed a
+#     PER-POST MANUAL EDIT -- willpower -- for the very tool whose purpose, stated above, is
+#     to replace willpower with a property. DOCUMENTED IS NOT DEFENDED.
+#
+#   ⚠️⚠️ AND THIS NOTE WAS ITSELF DROPPED ON FIRST LANDING (022dfe9). The edit script asserted
+#     its other three anchors and NOT this one, so `replace()` silently matched nothing and
+#     the commit carried the behaviour change with no rationale -- while the new guard's
+#     message pointed at "the 08/20 note above", which did not exist. Caught by reading the
+#     DIFFSTAT (5 insertions, not ~30). ⇒ ASSERT EVERY ANCHOR; a no-op replace is invisible.
 # ============================================================================
 set -uo pipefail
 PROSE=${1:-}; BODY=${2:-}; BUS=${3:-}; NEXT=${4:-}; STATE=${5:-}
