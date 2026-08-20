@@ -32,9 +32,10 @@
 #   The gate (bus_custody.sh) still runs afterward and still owns every other arm.
 # ============================================================================
 set -uo pipefail
-PROSE=${1:-}; BODY=${2:-}; BUS=${3:-}; NEXT=${4:-}
+PROSE=${1:-}; BODY=${2:-}; BUS=${3:-}; NEXT=${4:-}; STATE=${5:-}
 [ -f "$PROSE" ] && [ -f "$BODY" ] && [ -f "$BUS" ] && [ -n "$NEXT" ] || {
-  echo "usage: mkbracket.sh <prose-file> <body-file> <bus-file> <next-hhmm>" >&2; exit 2; }
+  echo "usage: mkbracket.sh <prose-file> <body-file> <bus-file> <next-hhmm> <seat-state>" >&2; exit 2; }
+[ -n "$STATE" ] || { echo "mkbracket: <seat-state> is REQUIRED and has no default -- see the 08/20 note above." >&2; exit 2; }
 
 # ONE clock, captured in this command, used for every derived field — the law
 # that protects the stamp must also protect what is COMPUTED from the stamp.
@@ -47,5 +48,5 @@ PROSE_TEXT=$(cat "$PROSE")
 # The format is SINGLE-QUOTED and literal. Every variable is a %s ARGUMENT.
 # Nothing here can be re-parsed, including PROSE_TEXT, which is why the author
 # may write anything at all in the prose file.
-printf ', compiler — SEAT-STATE: compiler=LIT · peer bodies in full: log EMPTY — bus_read.py REFUSES to emit a marker (exit 1); own posts THIS SESSION EXCLUDED as authored-not-read; headlines-only to FLEET.md %s / %s · %s · owed 0; next line before ~%s; body receipt bytes=%s sha256/16=%s; one date in this append]\n' \
-  "$LINES" "$STAMP" "$PROSE_TEXT" "$NEXT" "$BYTES" "$SHA"
+printf ', compiler — SEAT-STATE: compiler=%s · FLEET.md %s / %s · %s · owed 0; next line before ~%s; body receipt bytes=%s sha256/16=%s; one date in this append]\n' \
+  "$STATE" "$LINES" "$STAMP" "$PROSE_TEXT" "$NEXT" "$BYTES" "$SHA"
