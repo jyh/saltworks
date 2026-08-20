@@ -3,7 +3,14 @@ Copyright (c) 2026 Jason Hickey. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: compiler seat
 
-# The ENABLE arm's transport
+# The ARM TRANSPORTS — enable, and (since 2026-08-19) value
+
+⚠️ **THE FILE IS NAMED FOR THE ENABLE AND NOW CARRIES BOTH.** `core_selOut_transport` was added
+at the foot rather than in a `SelectArm.lean` of its own, for one reason: **this file is in the
+build graph and a new module would not have been.** That is not a style preference — this seat
+landed a refutation module outside the graph the same morning and advertised a differential
+receipt that could not fire. **Architecture second, reachability first**, and the mismatch is
+named here so a later reader sees a decision rather than an accident.
 
 `IsaHold` closed `RegDatapathOK`'s hold arm and left two: **the circuit's enable agrees with
 the ISA's write decision**, and the written value is right. This file does the *placement*
@@ -114,5 +121,101 @@ theorem core_rd_is_the_instruction (ins : Env) (j : Nat) (hj : j < 5) :
   rfl
 
 #audit_axioms core_gates_from13 coreThru13_input_stable core_rd_is_the_instruction
+
+/-! ## ⭐ THE VALUE ARM'S TRANSPORT — the counterpart, and the first brick of the open half
+
+`RegDatapathOK`'s hold arm is closed and its enable arm's circuit half is closed. What remains
+is the VALUE: when the enable is high, `selOut k` must equal the ISA's written bit. This is the
+placement half of that — it says what `selOut k` IS when read inside `core`, exactly as
+`core_rwOut_transport` does for the enable.
+
+⛔ **IT PROVES A PLACEMENT, NOT A VALUE.** Nothing here says what `sliceASelect` COMPUTES; the
+banks (`adder32`, `bitXor32`, `sltCirc` through `obMux`) are all still owed. This is the brick
+the rest stands on, and it is the cheap one — said plainly because this seat has three times
+today mistaken a structural step for progress on the expensive half.
+
+⚠️ AND IT IS UPSTREAM OF TWO UNDECIDED QUESTIONS: `C4Refuted` proves `C4Spec core` FALSE by an
+`ADDI` witness (the operand-B "immediate" bank is the B-type BRANCH displacement) and by an
+`LW` witness (the enable fires and `core` has no memory). **This transport is true regardless
+and is needed by every repair, which is why it lands before either is settled.** -/
+
+/-- The eleven organ blocks before `sliceASelect`. -/
+def coreThru11 : List Gate :=
+  instGates tieCells id offTie
+    ++ instGates decoder decoderSig off0
+    ++ instGates immBCirc immBSig off1
+    ++ instGates readTree readTreeRs1Sig off2
+    ++ instGates readTree readTreeRs2Sig off3
+    ++ instGates bitXor32 bitXor32Sig off4
+    ++ instGates bitNot32 bitNot32Sig off5
+    ++ instGates OperandB.obMux obSig offOb
+    ++ instGates adder32 addSig offAdd
+    ++ instGates adder32 subSig offSub
+    ++ instGates sltCirc sltSig offSlt
+
+theorem coreThru13_sel_split :
+    coreThru13 = coreThru11 ++ instGates SelectCut32.sliceASelect selSig offSel
+                   ++ instGates EncoderE1.ruledEnc encSig offEnc := by
+  simp only [coreThru13, coreThru11, List.append_assoc]
+
+/-! ### `selOut`'s position, the analogue of `rwOut_eq` / `rwOut_lt_*` / `rwOut_mem`. -/
+
+theorem sliceASelect_outs_len : SelectCut32.sliceASelect.outs.length = 32 := by decide +kernel
+
+theorem selOut_eq (k : Nat) (hk : k < 32) :
+    selOut k = instMap SelectCut32.sliceASelect selSig offSel
+                 (SelectCut32.sliceASelect.outs.getD k 0) := by
+  rw [selOut, instOuts]
+  exact getD_map_lt _ _ _ (by rw [sliceASelect_outs_len]; exact hk) 0 0
+
+theorem selOut_lt_offEnc (k : Nat) (hk : k < 32) : selOut k < offEnc := by
+  revert k; decide +kernel
+
+theorem selOut_lt_offRw (k : Nat) (hk : k < 32) : selOut k < offRw := by
+  revert k; decide +kernel
+
+theorem selOut_lt_offPc (k : Nat) (hk : k < 32) : selOut k < offPc := by
+  revert k; decide +kernel
+
+theorem selOut_lt_offRegNext (k : Nat) (hk : k < 32) : selOut k < offRegNext := by
+  revert k; decide +kernel
+
+theorem selOut_mem (k : Nat) (hk : k < 32) :
+    (SelectCut32.sliceASelect.gates.map Gate.out).contains
+      (SelectCut32.sliceASelect.outs.getD k 0) = true := by
+  revert k; decide +kernel
+
+/-- ⭐⭐ **THE VALUE ARM'S TRANSPORT — `selOut k` read inside `core` IS `sliceASelect`'s own
+output `k`, evaluated on the environment the first ELEVEN organs produce.** The exact
+counterpart of `core_rwOut_transport`, and the first brick of the VALUE half. -/
+theorem core_selOut_transport (ins : Env) (k : Nat) (hk : k < 32) :
+    run ins core.gates (selOut k)
+      = run (fun a => run ins coreThru11 (selSig a)) SelectCut32.sliceASelect.gates
+          (SelectCut32.sliceASelect.outs.getD k 0) := by
+  rw [core_frame_below ins (selOut k) (selOut_lt_offRegNext k hk), corePre_split, run_append]
+  rw [run_of_unwritten _ _ _ (fun g hg hEq => by
+    have hge := (instGates_out_range SaltWorks.Stack.Program.pcAdd pcAddSig offPc
+      SaltWorks.Stack.Program.pcAdd_ssa g hg).1
+    rw [hEq] at hge
+    exact absurd hge (Nat.not_le.mpr (selOut_lt_offPc k hk)))]
+  rw [coreThruRw, run_append]
+  rw [run_of_unwritten _ _ _ (fun g hg hEq => by
+    have hge := (instGates_out_range regWrite regWriteSig offRw regWrite_ssa g hg).1
+    rw [hEq] at hge
+    exact absurd hge (Nat.not_le.mpr (selOut_lt_offRw k hk)))]
+  rw [coreThru13_sel_split, run_append, run_append]
+  rw [run_of_unwritten _ _ _ (fun g hg hEq => by
+    have hge := (instGates_out_range EncoderE1.ruledEnc encSig offEnc
+      EncoderE1.ruled_ssa g hg).1
+    rw [hEq] at hge
+    exact absurd hge (Nat.not_le.mpr (selOut_lt_offEnc k hk)))]
+  rw [selOut_eq k hk]
+  exact inst_sem SelectCut32.sliceASelect selSig offSel (run ins coreThru11)
+      (fun a => run ins coreThru11 (selSig a)) sel_instOK (fun _ _ => rfl)
+      (SelectCut32.sliceASelect.outs.getD k 0) (Or.inr (selOut_mem k hk))
+
+#audit_axioms coreThru13_sel_split sliceASelect_outs_len selOut_eq
+#audit_axioms selOut_lt_offEnc selOut_lt_offRw selOut_lt_offPc selOut_lt_offRegNext
+#audit_axioms selOut_mem core_selOut_transport
 
 end SaltWorks.HDL.RegNextUniform
