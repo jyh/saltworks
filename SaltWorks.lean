@@ -98,6 +98,13 @@ import SaltWorks.HDL.RegField0
 import SaltWorks.HDL.C4Reduction
 import SaltWorks.HDL.IsaHold
 import SaltWorks.HDL.EnableArm
+import SaltWorks.HDL.SelValueADD
+import SaltWorks.HDL.SelValueADDI
+import SaltWorks.HDL.SelValueSLT
+import SaltWorks.HDL.SelValueXOR
+import SaltWorks.HDL.EnableWriters
+import SaltWorks.HDL.EnableNonWriters
+import SaltWorks.HDL.EnableX0
 import SaltWorks.HDL.EnableSpec
 import SaltWorks.HDL.DecoderTransport
 import SaltWorks.HDL.PcTransport
