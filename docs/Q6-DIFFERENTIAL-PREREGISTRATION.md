@@ -158,3 +158,75 @@ rather than by enumeration: the `X0` row (from the Q4/Q7 wave), `StateCodecD.lan
 now been written twice and executed zero times.** It is a REMINDER, and by this file's own standard
 that makes it an open defect wearing a discharge marker. **Before the next swap attempt the closure
 gets COMPUTED, across every glob, or the must-break list is not a list.**
+
+---
+
+## ✅ 2026-08-20T16:44:32-0700 — **THE CLOSURE, COMPUTED. The rule is now RUN, not written a third time.**
+
+*I said the closure gets computed before the next swap attempt. Here it is — and the instrument is
+the one that was already available: **the swap dry run itself.** The set of declarations that break
+under D is not something to approximate from a reference graph; **the kernel enumerates it.** My
+earlier textual attempt returned 84% of the tree and was worthless. This is 33 names.*
+
+### MINE — `SaltWorks/HDL/**` (6), all in the swap's own scaffolding
+```
+SaltWorks.HDL.StateCodecD.encDD_getD_low
+SaltWorks.HDL.StateCodecD.encDD_prefix
+SaltWorks.HDL.StateCodecD.extension_costs_257_bits
+SaltWorks.HDL.StateCodecD.landed_decQ_loses_mem_and_trap
+SaltWorks.HDL.StateCodecD.renumbering_offsets
+SaltWorks.HDL.StateCodecD.stBitD_agrees
+```
+⇒ **`StateCodecD` is scaffolding whose job ends AT the swap.** `landed_decQ_loses_mem_and_trap` is
+Horn D exhibited as a theorem and MUST go false; `extension_costs_257_bits` and
+`renumbering_offsets` become `0` because the two widths have merged; `stBitD_agrees` /
+`encDD_getD_low` / `encDD_prefix` compare a codec to itself. **RETIRE the module in the swap commit
+— do not repair it.** Repairing it would manufacture a comparison between two things that are now
+the same object.
+
+### MATH'S — `SaltWorks/Stack/**` (27), their pen, listed so they have it
+```
+SaltWorks.Stack.Program.addend_as_pc_is_wrong_unless_pc_zero
+SaltWorks.Stack.Program.addField_is_adder32
+SaltWorks.Stack.Program.aluField_is_aluSelect_add
+SaltWorks.Stack.Program.bitAnd32_fails_the_xorField
+SaltWorks.Stack.Program.c4Spec_iff_fieldwise
+SaltWorks.Stack.Program.c4Spec_of_fieldwise
+SaltWorks.Stack.Program.cycleRealisesStep_idealBits
+SaltWorks.Stack.Program.cycleRealisesStep_of_C4Spec
+SaltWorks.Stack.Program.cycleRealisesStepProj_of_bits
+SaltWorks.Stack.Program.cycles_realise_steps_of_memFree
+SaltWorks.Stack.Program.cycles_sort
+SaltWorks.Stack.Program.decQ_congr
+SaltWorks.Stack.Program.decQ_cycOf_proj
+SaltWorks.Stack.Program.decQ_cycOfBits_stalled
+SaltWorks.Stack.Program.decQ_envWith_of_clean
+SaltWorks.Stack.Program.decQ_mem
+SaltWorks.Stack.Program.not_C4Spec_of_not_regField
+SaltWorks.Stack.Program.not_cycleRealisesStep_id
+SaltWorks.Stack.Program.not_pcField_coreShaped
+SaltWorks.Stack.Program.not_pcField_coreShapedT
+SaltWorks.Stack.Program.not_regField_one_coreShaped
+SaltWorks.Stack.Program.pcField_is_pcAdd_beq
+SaltWorks.Stack.Program.pcField_is_pcNext_beq
+SaltWorks.Stack.Program.sltField_is_sltCirc
+SaltWorks.Stack.Program.sorts_of_C4
+SaltWorks.Stack.Program.stBit_pc
+SaltWorks.Stack.Program.xorField_is_bitXor32
+```
+⛔ **`c4Spec_iff_fieldwise` AND `c4Spec_of_fieldwise` ARE IN THAT LIST.** That is the flagship's own
+decomposition, and it is the **34 → 43 obligation growth I flagged to the pen this morning, now
+arriving as a concrete break rather than a prediction.** The `not_*` rows
+(`not_regField_one_coreShaped`, `not_pcField_coreShaped(T)`, `not_cycleRealisesStep_id`) are
+refutation rows and need the same fire-or-survive judgement as the LW set — **they are not
+"failures to fix".**
+
+### ⚠️ THIS IS A LOWER BOUND AND MUST BE READ AS ONE
+
+**A failing module masks every consumer downstream**, so anything that would break *because*
+`Program.lean` broke never got the chance to. The honest statement: **at least these 33;
+the true closure is discovered only on a run where the earlier failures are already repaired.**
+⇒ Re-run this extraction at every swap attempt. *The list is an output of the build, not an
+artifact I maintain — which is the whole point, and why the rule failed the first two times I wrote
+it as something to remember.*
+
