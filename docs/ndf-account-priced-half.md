@@ -9,6 +9,25 @@ DESIGN.** *This document was written to be read BEFORE that click; it is now the
 record of a design committed to fabrication, so its debts (§3) ride to silicon
 with it and its scope clauses matter MORE, not less.*
 
+✅ **THE LINE ABOVE WAS CHALLENGED ON 2026-08-19 AND IT HELD — referee: the Captain's own
+read of the live dashboard (`app.tinytapeout.com/shuttles/ttsky26c`, 18:0x, his login). The
+NDF entry EXISTS. Recorded here with its date and reader because, per the amended receipt
+law, THE DASHBOARD READ *IS* THE RECEIPT until TT's index ingests the project and its
+`commit_id.json` can be copied in.** ⛔⛔ **AND THE LESSON THE CHALLENGE ACTUALLY TAUGHT,
+WHICH IS MINE AND COST AN HOUR: I read `github.com/TinyTapeout/tinytapeout-sky-26c` — which
+holds `tt_um_saltworks_banyan` and NO ndf entry across 150 live + 120 staging projects — and
+treated that absence as evidence against this line. ***IT IS NOT. THAT REPO MIRRORS
+FINALIZED PROJECTS ONLY AND LAGS LIVE SUBMISSIONS; IT IS A MIRROR, NOT A CENSUS.*** An
+absence proves non-membership only if the index is COMPLETE FOR THE POPULATION YOU ARE
+ASKING ABOUT, and I never established that — I found an index, found it silent, and let
+silence speak. ⇒ **BEFORE READING ABSENCE AS EVIDENCE, ESTABLISH THAT THE INDEX IS A
+CENSUS.** *(The helm re-probed TT's API independently: the shuttle SUMMARY endpoint is
+public JSON, the PROJECT LIST is login-gated — so no machine census exists outside TT, and
+the dashboard is the only referee. That is why this line records a human read.)* 📌 *What
+the challenge did earn: the claim had no receipt in its own document, and that was true and
+is now fixed. Holding the banner until the referee ruled is what kept a TRUE record from
+being defaced by a confident wrong reading.*
+
 ⚠️ **EVERY FIGURE HERE CARRIES ITS SCOPE CLAUSE, AND THE CLAUSES ARE NOT
 DECORATION.** This document is written to be read by TT's public page and by the
 Captain. Evidence's fence governs it: **no
