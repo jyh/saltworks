@@ -46,13 +46,13 @@ discussed at the same sitting.
 
 | # | item | class | owner | state 08/20 | pre-ruled branches |
 |---|---|---|---|---|---|
-| **Q1** | **ADDI transport argument** — the re-pointed σ (`obSig` middle band → `instrNet (immI ·)`) carries `sem_immICirc_of_decode`'s certificate; a fresh transport proof, not a free transfer | B/C | compiler (in flight) | OPEN | wall on the transport ⇒ land the groundwork + the wall report; Q2 blocks, Q4∥Q7 proceed |
-| **Q2** | **ADDI σ repair + differentials** — repair `obSig`; the differential set first (`core` can now produce an odd ADDI value; the addend no longer tracks `rd`); positives + must-survive negatives per the SW pattern | B | executor-dispatchable after Q1 | blocked on Q1 | if a differential will not fire, the repair does not land — report, do not weaken |
-| **Q3** | **Horn D, part 1: the state codec** — `encD`/`decQ` carry the 8-word memory; M1a budget reopens 1056→1313 exactly as priced; type-atomicity law observed | B/C | executor-dispatchable; **seat prices first** (the 3-low-misprices rule) | chartered (his ⑤ ruling) | codec balloons past ~1.5× the M1a price ⇒ STOP, re-price at the seat, report |
-| **Q4** ∥ | **selOut value schema wave** — the uniform value lemma over `RegFieldSchema`, then the 31 field instantiations; the no-`encode` route (`stepT_compat` → `decQ_reg_bit`); **non-memory fields only until Q6 lands** | B | executor-dispatchable NOW (parallelizable in field batches) | OPEN | a field that resists the schema ⇒ skip, name it, continue the batch; resisters collect into their own item |
+| **Q1** | **ADDI transport argument** — the re-pointed σ (`obSig` middle band → `instrNet (immI ·)`) carries `sem_immICirc_of_decode`'s certificate; a fresh transport proof, not a free transfer | B/C | compiler | ✅ **LANDED `dae12f6`** (`obB_is_sext_imm`: the re-pointed wire DELIVERS `sext(imm)`) | discharged — no branch taken |
+| **Q2** | **ADDI σ repair + differentials** — repair `obSig`; the differential set first (`core` can now produce an odd ADDI value; the addend no longer tracks `rd`); positives + must-survive negatives per the SW pattern | B | compiler | ✅ **LANDED `6b77d87`** — differentials designed first and FIRED: `sel0_insI` flipped `false`→`true` at the UNCHANGED witness; must-survive negative `regDatapathOK_is_false_on_LW_either_way` survived; `c4Spec_core_is_false` RE-ROUTED through the LOAD so the flagship stays refuted rather than silently un-refuted by its own repair | discharged — nothing weakened |
+| **Q3** | **Horn D, part 1: the state codec** — `encD`/`decQ` carry the 8-word memory; M1a budget reopens 1056→1313 exactly as priced; type-atomicity law observed | B/C | executor-dispatchable; seat price **DELIVERED** (bank `b6243843`) | ✅ **PRICED — DISPATCH-READY.** `1313 = 1024+32+256+1` confirmed independently. `instrBase := stWidth` is DEFINITIONAL and `offTie = 1088` anchors the chain above the INPUT region, so every instruction net and gate offset shifts by the added state width; chain end `11486`→`11743`. Radius: `stWidth` 162/22 files, `instrNet` 192/22, `decQ` 261/30, literal `1056` ×68 — **that radius is the MECHANICAL half** | codec balloons past ~1.5× the M1a price ⇒ STOP, re-price at the seat, report |
+| **Q4** ∥ | **selOut value schema wave** — the uniform value lemma over `RegFieldSchema`, then the 31 field instantiations; the no-`encode` route (`stepT_compat` → `decQ_reg_bit`); **non-memory fields only until Q6 lands** | B | executor-dispatchable NOW (parallelizable in field batches) | 🔥 **BATCH 1 DISPATCHED 08/20 12:2x** — 4 executors, one per non-memory class (ADD via `obMux`→`adder32`, XOR via `bitXor32`'s universal cert, SLT via `sltCirc`, ADDI on `obB_is_sext_imm`); §1 verbatim in every brief | a field that resists the schema ⇒ skip, name it, continue the batch; resisters collect into their own item |
 | **Q5** | **Horn D, part 2: the memory organ** — placement + placement proofs on the extended state; `core32.v`'s dmem path is the reference shape | C | executor-dispatchable after Q3; seat lands | blocked on Q3 | — |
 | **Q6** | **LW differential redesign + repair** — the exhibits (`lw_forces_false…`, `no_enable_repairs_the_load`) quantify over the OLD `decQ`; the must-break set is redesigned against the real memory FIRST, then the enable/datapath repair | C | **seat-only** (compiler) — the subtle part, ruled not executor-safe | blocked on Q3+Q5 | — |
-| **Q7** ∥ | **Enable-half sweep of the remaining fields** — the SW/valid repairs proved the pattern; confirm enable agreement per field alongside Q4's value work | A/B | executor-dispatchable NOW | OPEN | — |
+| **Q7** ∥ | **Enable-half sweep of the remaining fields** — the SW/valid repairs proved the pattern; confirm enable agreement per field alongside Q4's value work | A/B | executor-dispatchable NOW | 🔥 **DISPATCHED 08/20 12:2x** — 3 executors: writers (positive), non-writers (BEQ/SW negative arm), and the x0 case | — |
 | **Q8** | **`RegDatapathOK` assembly** — value + enable halves compose through `regFields_of_datapath` | B | seat | blocked on Q2,Q4,Q6,Q7 | — |
 | **Q9** | **`C4Spec core` assembly** — `c4Spec_core_of_datapath_and_pc` with `PcField` (landed) + Q8; the C4Refuted differentials MUST fire and be consumed in the same commit | B | seat | blocked on Q8 | — |
 | **Q10** | ⚖️ **R9/B1: the restated C4 sentence** — statement-tier (Captain/Fable pen; compiler drafts, silicon cross-verifies per the 08/17 adjudication; criterion (c)'s one-stall-semantics-object proposal rides) | C | **⚖️ Captain/Fable — NOT on this queue's authority** | after Q9 | — |
@@ -61,6 +61,25 @@ discussed at the same sitting.
 **The critical path is Q1→Q2 and Q3→Q5→Q6 converging on Q8; Q4/Q7 fill every idle hour from
 tonight onward.** Projected at measured velocity ×1.5–2: Q8 ~Aug 29, Q9 ~Aug 31, Q10/Q11
 Sept 1–4. Margin to Sept 7: 2–4 days.
+
+> ### ⚠️ SEAT FINDING FOR THE GOVERNANCE PEN — surfaced by Q3's price, 08/20
+>
+> **Horn D does not merely renumber the tree. It ENLARGES THE FLAGSHIP'S OBLIGATION SET, and
+> the projection above is computed against the smaller one.** `C4Spec c := ∀ ins, sem c ins =
+> encD (stepT (decQ ins) (seenWord ins))` — *both sides have length `stWidth`*. So taking the
+> state to 1313 takes the core's OUTPUT list to 1313, and `c4Spec_iff_fieldwise`'s **34
+> obligations become 43**: the output count re-discharged at the new width, 32 `RegField`s,
+> `PcField`, **plus 8 `MemField`s and a `TrapField`**.
+>
+> 🔑 ***33-of-34 discharged becomes 33-of-43 — nine obligations that have never been proved,
+> landing squarely on Q8 and Q9, which are the two items the Sept 7 margin rests on.***
+>
+> ⛔ I am flagging this rather than re-projecting the dates myself: **status and dates are the
+> owning seat's volatile fields, but a re-projection off a SCOPE discovery is the helm's pen.**
+> The item is not a Q3 balloon — the codec is still exactly 1313 bits, so Q3's pre-ruled
+> "past ~1.5× the M1a price ⇒ STOP" branch does NOT fire and Q3 stays dispatch-ready. The
+> growth lands downstream. *What I can say without the pen: the 2–4 day margin was computed
+> against 34.*
 
 ## §3. Continuous operation
 
