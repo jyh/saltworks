@@ -32,7 +32,9 @@ Both new refutations live at the foot of this file:
 * **`ADDI` — `core` HAS NO I-TYPE IMMEDIATE.** `CorePlace.obSig` feeds the ALU's operand-B
   *"immediate"* bank from `immOut`, and `immOut` is `immBCirc` — the **B-type BRANCH
   DISPLACEMENT**. `immICirc` exists and is certified (`Immediate.immI_correct`) and is **placed
-  nowhere**. ⇒ `regDatapathOK_is_false_on_ADDI`, and it escalates to `c4Spec_core_is_false`.
+  nowhere**. ✅ **REPAIRED 2026-08-20** — the σ now reads `instrNet (immI ·)`; `sel0_insI`
+  flipped from `false` to `true` at the unchanged witness, and `addi_sides_agree` replaced the
+  refutation. ⚠️ **`c4Spec_core_is_false` was RE-ROUTED through the LOAD, not deleted.**
 * **`LW` — the enable fires and `core` HAS NO MEMORY.** `decQ` builds
   `mem := Vector.replicate 8 0`, so the ISA writes the CONSTANT `0` on a non-trapping load.
   ⇒ `regDatapathOK_is_false_on_LW_either_way`, proved by CASE-SPLITTING on the enable rather
@@ -167,39 +169,39 @@ the disagreement cannot be blamed on `rs2` or on mux polarity. -/
 theorem useImm_high_insI : run insI core.gates (decOut 3) = true :=
   (runB_eq core.gates sI (decOut 3)).symm.trans (by decide +kernel)
 
-/-- ⛔ The core writes bit 0 = `false`: the B-displacement's bit 0 is a STRUCTURAL ZERO, so
-`core` can never write an ODD value with `ADDI`, for any immediate. -/
-theorem sel0_insI : run insI core.gates (selOut 0) = false :=
+/-- ⭐⭐⭐ **THE `ADDI` REPAIR'S RECEIPT — SAME WITNESS, OPPOSITE ANSWER.**
+
+⛔ **THIS THEOREM READ `= false` UNTIL 2026-08-20 and that was the defect:** `obSig`'s operand-B
+"immediate" bank was `immBCirc`, the B-type BRANCH displacement, whose bit 0 is a STRUCTURAL
+ZERO — so `core` could never write an ODD value with `ADDI`, for any immediate. The σ now reads
+`instrNet (immI ·)`, and on `ADDI x1, x0, 1` the core writes `0 + 1 = 1`, whose bit 0 is `true`.
+
+**Nothing about the witness changed. The environment, the gate list and the packed evaluator
+are the ones that proved `false` an hour ago.** -/
+theorem sel0_insI : run insI core.gates (selOut 0) = true :=
   (runB_eq core.gates sI (selOut 0)).symm.trans (by decide +kernel)
 
 /-- …while the ISA writes `0 + 1 = 1`, whose bit 0 is `true`. -/
 theorem isa_insI : ((stepT (decQ insI) (seenWord insI)).regs[r1.val]).getLsbD 0 = true := by
   decide +kernel
 
-/-- ⛔⛔⛔ **`RegDatapathOK` IS FALSE — by an `ADDI` on an all-zero machine.** -/
-theorem regDatapathOK_is_false_on_ADDI : ¬ RegDatapathOK := by
-  intro h
-  have hx := h insI r1 0 (by decide)
-  rw [enable_insI, if_pos rfl, sel0_insI, isa_insI] at hx
-  exact absurd hx (by decide)
+/-- ⭐⭐ **AND THE TWO SIDES NOW AGREE AT THIS WITNESS.** `regDatapathOK_is_false_on_ADDI` stood
+here and is GONE: it was provable before the repair and is false after it. This is what replaced
+it — the same instance of `RegDatapathOK`, now an equality rather than a contradiction.
+⛔ **DO NOT READ THIS AS THE OBLIGATION HOLDING.** It is ONE point of a `∀`. `RegDatapathOK` is
+still refuted, by the LOAD, below. -/
+theorem addi_sides_agree :
+    (if run insI core.gates (rwOut r1.val) then run insI core.gates (selOut 0)
+     else insI (32 * r1.val + 0))
+      = ((stepT (decQ insI) (seenWord insI)).regs[r1.val]).getLsbD 0 := by
+  rw [enable_insI, if_pos rfl, sel0_insI, isa_insI]
 
-/-! ### Escalation — the same witness kills `RegField core 1` and `C4Spec core`. -/
+/-! ### Escalation — now carried by the LOAD, which the ADDI repair does not touch. -/
 
 theorem isa_insI_prog :
     ((stepT (decQ insI) (SaltWorks.Stack.Program.seenWord insI)).regs[r1.val]).getLsbD 0
       = true := isa_insI
 
-theorem regField_core_one_is_false : ¬ SaltWorks.Stack.Program.RegField core r1 := by
-  intro h
-  have hb := (SaltWorks.Stack.Program.regField_iff_bits core r1).mp h insI 0 (by decide)
-  rw [core_outBit_reg_reduced insI r1.val 0 (by decide) (by decide), enable_insI, if_pos rfl,
-      sel0_insI, isa_insI_prog] at hb
-  exact absurd hb (by decide)
-
-/-- ⛔⛔⛔ **THE FLAGSHIP IS REFUTED.** -/
-theorem c4Spec_core_is_false : ¬ SaltWorks.HDL.C4Spec core := fun h =>
-  regField_core_one_is_false
-    (((SaltWorks.Stack.Program.c4Spec_iff_fieldwise core).mp h).2.1 r1)
 
 /-! ## DEFECT 2 — LW.  THE GENERAL REASON, NO WITNESS, NO EVALUATION. -/
 
@@ -264,6 +266,33 @@ theorem held_insL : insL (32 * r1.val + 2) = true := by decide +kernel
 theorem isa_insL : ((stepT (decQ insL) (seenWord insL)).regs[r1.val]).getLsbD 2 = false := by
   decide +kernel
 
+
+/-- ⛔⛔⛔ **`RegField core 1` IS FALSE — BY THE LOAD, NOT BY THE IMMEDIATE.**
+
+⚠️ **THIS PROOF WAS RE-ROUTED ON 2026-08-20 AND THAT RE-ROUTING IS THE POINT.** It ran through
+the `ADDI` witness, which the σ repair correctly killed. **Had I let the repair simply delete
+this theorem, `C4Spec core` would have become UNREFUTED — and it is still FALSE.** The load
+witness carries it, and the load is the Captain's open fork.
+
+The proof case-splits on the enable and never evaluates it, exactly as
+`regDatapathOK_is_false_on_LW_either_way` does: on a non-trapping load BOTH arms of the `if` are
+wrong, so no write-enable choice repairs it. -/
+theorem isa_insL_prog :
+    ((stepT (decQ insL) (SaltWorks.Stack.Program.seenWord insL)).regs[r1.val]).getLsbD 2
+      = false := isa_insL
+
+theorem regField_core_one_is_false : ¬ SaltWorks.Stack.Program.RegField core r1 := by
+  intro h
+  have hb := (SaltWorks.Stack.Program.regField_iff_bits core r1).mp h insL 2 (by decide)
+  rw [core_outBit_reg_reduced insL r1.val 2 (by decide) (by decide), isa_insL_prog] at hb
+  cases he : run insL core.gates (rwOut r1.val)
+  · rw [he] at hb; simp [held_insL] at hb
+  · rw [he] at hb; simp [sel2_insL] at hb
+
+/-- ⛔⛔⛔ **THE FLAGSHIP IS REFUTED.** -/
+theorem c4Spec_core_is_false : ¬ SaltWorks.HDL.C4Spec core := fun h =>
+  regField_core_one_is_false
+    (((SaltWorks.Stack.Program.c4Spec_iff_fieldwise core).mp h).2.1 r1)
 /-- ⭐⭐⭐ **HORN 2, PACKAGED: NO WRITE-ENABLE REPAIRS THE LOAD.**
 Deleting `isLW` from `writesRegOf` leaves the HELD value on the left — and that is `true` here
 too, while the ISA demands `false`. -/
@@ -300,7 +329,7 @@ theorem datapath_forces_zero_select_on_LW (h : RegDatapathOK) (ins : Env)
 #audit_axioms r1 identity_it_is_the_flagship
 #audit_axioms wC sC insC ctl_enable ctl_sel0 ctl_isa control_sides_agree
 #audit_axioms wI sI insI seen_insI dec_insI insI_state_is_zero enable_insI
-#audit_axioms useImm_high_insI sel0_insI isa_insI regDatapathOK_is_false_on_ADDI
+#audit_axioms useImm_high_insI sel0_insI isa_insI addi_sides_agree
 #audit_axioms isa_insI_prog regField_core_one_is_false c4Spec_core_is_false
 #audit_axioms decQ_mem step_lw_writes_zero step_lw_trap_holds stepT_lw_writes_zero
 #audit_axioms lw_forces_false_whatever_the_enable_does

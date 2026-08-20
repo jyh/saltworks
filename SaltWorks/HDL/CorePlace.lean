@@ -638,10 +638,27 @@ def offOb : Nat := instNext bitNot32 off5
 /-- `immBCirc`'s output `k` — the immediate bank. -/
 def immOut (k : Nat) : Net := (instOuts immBCirc immBSig off1).getD k 0
 
-/-- `obMux`'s σ: `rs2` on 0…31, the IMMEDIATE on 32…63, `useImm` (= `isADDI`, decoder output 3)
-on 64. -/
+/-- `obMux`'s σ: `rs2` on 0…31, the I-TYPE IMMEDIATE on 32…63, `useImm` (= `isADDI`, decoder
+output 3) on 64.
+
+⛔⛔ **REPAIRED 2026-08-20. THE MIDDLE BAND READ `immOut`, WHICH IS `immBCirc` — THE B-TYPE
+BRANCH DISPLACEMENT.** The docstring said *"the IMMEDIATE"* and the wire was the branch offset:
+meaning-drift-under-a-stable-name, the same shape as the `valid` and `SW` enable defects, and
+the first found in the OPERAND path rather than the enable. `immICirc` existed, was certified
+(`Immediate.immI_correct`) and was placed NOWHERE.
+⇒ **CONSEQUENCES, kernel-proved before the repair:** the B displacement's bit 0 is a STRUCTURAL
+ZERO, so `core` could never write an ODD value with `ADDI`, for any immediate; and its low bits
+read instruction bits 7/8 — which on an I-type word are **`rd`** — so the ALU's addend tracked
+the DESTINATION REGISTER NUMBER.
+⭐ **WHY THIS COSTS NO OFFSET: `immICirc` has ZERO gates and `immI` targets are INPUT nets**, so
+the σ routes straight through, nothing is placed, and no net renumbers. That is what makes a
+defect this deep repairable by one line.
+⚠️ **AND THE ARGUMENT THAT MADE IT LEGITIMATE LANDED FIRST, per helm's ruling:**
+`RegNextUniform.obB_is_sext_imm` proves the re-pointed wire DELIVERS `sext(imm)`. The placement
+lemma below proves only that the σ PLACES — **placing is not correctness**, and this σ bypasses
+`immICirc` so its certificate does not transfer for free. -/
 def obSig (j : Net) : Net :=
-  if j < 32 then rs2Out j else if j < 64 then immOut (j - 32) else decOut 3
+  if j < 32 then rs2Out j else if j < 64 then instrNet (immI (j - 32)) else decOut 3
 
 /-- ⭐ **PLACEMENT #13 — `obMux` at row 7, `instOK` DISCHARGED.** -/
 theorem ob_instOK : instOK OperandB.obMux obSig offOb := by
