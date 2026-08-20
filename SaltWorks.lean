@@ -98,6 +98,7 @@ import SaltWorks.HDL.RegField0
 import SaltWorks.HDL.C4Reduction
 import SaltWorks.HDL.IsaHold
 import SaltWorks.HDL.EnableArm
+import SaltWorks.HDL.SelValueShared
 import SaltWorks.HDL.SelValueADD
 import SaltWorks.HDL.SelValueADDI
 import SaltWorks.HDL.SelValueSLT

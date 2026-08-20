@@ -1,4 +1,27 @@
 /-
+⚙️ REWIRED SCRATCH COPY of `SaltWorks/HDL/SelValueADD.lean` — executor deliverable, NOTHING TRACKED IS TOUCHED.
+
+The 10 local helper copies listed below were DELETED and every use repointed at
+`SaltWorks.HDL.RegNextUniform.Shared` (proved once in `ScratchQ4RDedupEx`):
+  · addOut_eq
+  · addOut_lt_offSub
+  · adder32_out_mem
+  · adder32_outs_len
+  · obMux_out_mem
+  · obMux_outs_len
+  · obOut_eq
+  · tieFalse_lt_off0
+  · rdOf_is_decode_field
+  · decode_add_rd
+
+⛔ `coreThruRw_split5` is DELIBERATELY UNTOUCHED (its removal has real integration
+cost — a local prefix `def` name — and is out of this brief's scope).
+
+⚠️ This file declares the SAME fully-qualified names as `SaltWorks/HDL/SelValueADD.lean`; the two must
+never enter one import graph.  Checked: nothing in this file's transitive closure
+imports it (`SelValueSLTBit0` does, and is absent).
+-/
+/-
 Copyright (c) 2026 Jason Hickey. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: compiler seat (Opus executor, queue item Q4 — ADD class)
@@ -37,19 +60,21 @@ core_writes_on_ADD             the enable                 DecoderTransport
    over all thirty-two `r`; the rows `r ≠ rd` need the enable proved FALSE there, which is the
    non-writers half and is NOT done here.
 
-⚠️ **A NEW BRIDGE LANDS IN THIS FILE — `rdOf_is_decode_field`.** `Bridge3` closed `rs1` and
-`rs2` and never the DESTINATION field, because the pc path did not need it. This is Bridge3's
-proof at `15 ↦ 7` against `rdOf_testBit`; the seat may prefer to re-home it into `Bridge3`.
+⚠️ **THE `rd` BRIDGE NO LONGER LIVES HERE.** `Bridge3` closed `rs1` and `rs2` and never the
+DESTINATION field. That bridge is now `Shared.rdOf_is_decode_field`, proved once in
+`ScratchQ4RDedupEx` and used from here.
 
 ⚠️ **NAME-COLLISION WARNING FOR THE SEAT.** Four concurrent Q4 executors write into
 `SaltWorks.HDL.RegNextUniform`. This file nests everything in `ScratchQ4ADDEx`;
-`ScratchQ4ADDIEx` does NOT nest, and declares `obMux_outs_len`, `obOut_eq`, `addOut_eq`,
-`adder32_outs_len`, `addOut_lt_offSub` and more at names this file also uses. **Landing both
-unnested would be a duplicate-qualified-name clash, which is invisible to a name grep.**
+That collision class is what the `Shared` namespace retires: `obMux_outs_len`, `obOut_eq`,
+`addOut_eq`, `adder32_outs_len`, `addOut_lt_offSub` and the rest are declared in NEITHER class
+leaf now — they are `Shared.…` and there is one copy. **A duplicate qualified name is invisible
+to a name grep, so the cure is to stop minting the second one.**
 
 *Not C4, not a witness, does not close R9/B2.*
 -/
 import SaltWorks.HDL.PcFieldClosed
+import SaltWorks.HDL.SelValueShared
 
 set_option maxRecDepth 100000
 
@@ -144,11 +169,6 @@ theorem off_le_sub_slt : offSub ≤ offSlt := by simp only [offSlt, instNext]; o
 
 theorem decOut_lt_offOb (j : Nat) (hj : j < 9) : decOut j < offOb := by
   revert j; decide +kernel
-
-theorem addOut_lt_offSub (k : Nat) (hk : k < 32) : CorePlace.addOut k < offSub := by
-  revert k; decide +kernel
-
-theorem tieFalse_lt_off0 : tieFalse < off0 := by decide +kernel
 
 /-! ### the tails, block by block -/
 
@@ -286,21 +306,10 @@ theorem tie_block_false (ins : Env) :
   simp [upd, Op.eval]
 
 theorem tieFalse_at_cT8 (ins : Env) : run ins cT8 tieFalse = false := by
-  rw [cT8_split_tie, run_drop ins _ _ off0 tieFalse tieFalse_lt_off0 tail_after_tie]
+  rw [cT8_split_tie, run_drop ins _ _ off0 tieFalse Shared.tieFalse_lt_off0 tail_after_tie]
   exact tie_block_false ins
 
 /-! ## 4 · `obMux` DELIVERS `rs2` WHEN `isADDI` IS LOW -/
-
-theorem obMux_outs_len : OperandB.obMux.outs.length = 32 := by decide +kernel
-
-theorem obMux_out_mem (m : Nat) (hm : m < 32) :
-    (OperandB.obMux.gates.map Gate.out).contains (OperandB.obMux.outs.getD m 0) = true := by
-  revert m; decide +kernel
-
-theorem obOut_eq (m : Nat) (hm : m < 32) :
-    CorePlace.obOut m = instMap OperandB.obMux obSig offOb (OperandB.obMux.outs.getD m 0) := by
-  rw [CorePlace.obOut, instOuts]
-  exact getD_map_lt _ _ _ (by rw [obMux_outs_len]; exact hm) 0 0
 
 /-- ⭐⭐ **OPERAND B IS `rs2` ON EVERY NON-`ADDI` WORD.** The `sel` input of `obMux` is
 `decOut 3` = `isADDI`; low, and the mux delivers its `a` bank, which `obSig` wires to the
@@ -311,14 +320,14 @@ theorem ob_is_rs2 (ins : Env) (m : Nat) (hm : m < 32)
   have hstep : run ins cT8 (CorePlace.obOut m)
       = run (fun a => run ins cT7 (obSig a)) OperandB.obMux.gates
           (OperandB.obMux.outs.getD m 0) := by
-    rw [cT8_eq, obOut_eq m hm, run_append]
+    rw [cT8_eq, Shared.obOut_eq m hm, run_append]
     exact inst_sem OperandB.obMux obSig offOb (run ins cT7)
       (fun a => run ins cT7 (obSig a)) ob_instOK (fun _ _ => rfl)
-      (OperandB.obMux.outs.getD m 0) (Or.inr (obMux_out_mem m hm))
+      (OperandB.obMux.outs.getD m 0) (Or.inr (Shared.obMux_out_mem m hm))
   have h := OperandB.out_sem_obMux (fun a => run ins cT7 (obSig a)) m hm
   simp only [sem] at h
   rw [getD_map_lt (run (fun a => run ins cT7 (obSig a)) OperandB.obMux.gates)
-        OperandB.obMux.outs m (by rw [obMux_outs_len]; exact hm) 0 false] at h
+        OperandB.obMux.outs m (by rw [Shared.obMux_outs_len]; exact hm) 0 false] at h
   rw [hstep, h]
   have h64 : obSig 64 = decOut 3 := by simp [obSig]
   have hmm : obSig m = rs2Out m := by simp [obSig, hm]
@@ -328,16 +337,6 @@ theorem ob_is_rs2 (ins : Env) (m : Nat) (hm : m < 32)
 /-! ## 5 · THE ADDER ADDS, IN PLACE -/
 
 theorem adder32_nIn : adder32.nIn = 65 := by decide +kernel
-theorem adder32_outs_len : adder32.outs.length = 33 := by decide +kernel
-
-theorem adder32_out_mem (k : Nat) (hk : k < 32) :
-    (adder32.gates.map Gate.out).contains (adder32.outs.getD k 0) = true := by
-  revert k; decide +kernel
-
-theorem addOut_eq (k : Nat) (hk : k < 32) :
-    CorePlace.addOut k = instMap adder32 addSig offAdd (adder32.outs.getD k 0) := by
-  rw [CorePlace.addOut, instOuts]
-  exact getD_map_lt _ _ _ (by rw [adder32_outs_len]; omega) 0 0
 
 /-- The ADD adder's 65 input wires, read at its own prefix, ARE `adEnv A B false`. -/
 theorem add_env_agrees (ins : Env) (A B : BitVec 32)
@@ -371,17 +370,17 @@ theorem add_bit (ins : Env) (A B : BitVec 32) (k : Nat) (hk : k < 32)
     (hA : ∀ j, j < 32 → run ins cT8 (rs1Out j) = A.getLsbD j)
     (hB : ∀ j, j < 32 → run ins cT8 (CorePlace.obOut j) = B.getLsbD j) :
     run ins coreThru11 (CorePlace.addOut k) = (A + B).getLsbD k := by
-  rw [run_thru11_to_add ins _ (addOut_lt_offSub k hk), addOut_eq k hk, run_append,
+  rw [run_thru11_to_add ins _ (Shared.addOut_lt_offSub k hk), Shared.addOut_eq k hk, run_append,
       inst_sem adder32 addSig offAdd (run ins cT8) (adEnv A B false) add_instOK
         (add_env_agrees ins A B hA hB) (adder32.outs.getD k 0)
-        (Or.inr (adder32_out_mem k hk))]
+        (Or.inr (Shared.adder32_out_mem k hk))]
   have h : (sem adder32 (adEnv A B false)).getD k false
       = (A + B + BitVec.setWidth 32 (BitVec.ofBool false)).getLsbD k := by
     rw [sem_adder32_gen]
     exact getD_of_range_append _ _ k hk
   simp only [sem] at h
   rw [getD_map_lt (run (adEnv A B false) adder32.gates) adder32.outs k
-        (by rw [adder32_outs_len]; omega) 0 false] at h
+        (by rw [Shared.adder32_outs_len]; omega) 0 false] at h
   rw [h, setWidth_ofBool_false]
   simp
 
@@ -550,34 +549,9 @@ did not need it. The enable arm does: `core_writes_on_ADD` is stated at `rdOf in
 obligation is stated at `rd.val`. **One more bridge of exactly `Bridge3`'s shape joins them,
 and then BOTH arms of `RegDatapathOK`'s `ADD` row are discharged rather than assumed.** -/
 
-/-- ⭐ **BRIDGE (rd): the index the write port uses IS `decode`'s `rd` field.**
-*`Bridge3`'s proof at `15 ↦ 7`, against `rdOf_testBit` instead of `rs1AddrOf_testBit`.* -/
-theorem rdOf_is_decode_field (ins : Env) :
-    ((seenWord ins).extractLsb' 7 5).toNat = rdOf ins := by
-  have hb : ∀ j, j < 5 → ((seenWord ins).extractLsb' 7 5).getLsbD j = (rdOf ins).testBit j := by
-    intro j hj
-    rw [BitVec.getLsbD_extractLsb', seenWord_bit ins (7 + j) (by omega), rdOf_testBit ins j hj]
-    simp [hj]
-  refine Nat.eq_of_testBit_eq (fun j => ?_)
-  by_cases hj : j < 5
-  · exact hb j hj
-  · have h1 : ((seenWord ins).extractLsb' 7 5).toNat < 32 := by
-      have := ((seenWord ins).extractLsb' 7 5).isLt
-      simpa using this
-    have h2 : rdOf ins < 32 := rdOf_lt ins
-    have hp : (32 : Nat) ≤ 2 ^ j := by
-      calc (32 : Nat) = 2 ^ 5 := by norm_num
-        _ ≤ 2 ^ j := Nat.pow_le_pow_right (by norm_num) (by omega)
-    rw [Nat.testBit_eq_false_of_lt (by omega), Nat.testBit_eq_false_of_lt (by omega)]
-
-theorem decode_add_rd (w : BitVec 32) (rd a b : Fin 32) (h : decode w = some (.ADD rd a b)) :
-    rd = toReg (w.extractLsb' 7 5) := by
-  simp only [decode, Bool.and_eq_true, decide_eq_true_eq] at h
-  split_ifs at h <;> simp_all
-
 theorem rdOf_is_rd_ADD (ins : Env) (rd a b : Fin 32)
     (h : decode (seenWord ins) = some (.ADD rd a b)) : rdOf ins = rd.val := by
-  rw [← rdOf_is_decode_field ins, decode_add_rd _ rd a b h]
+  rw [← Shared.rdOf_is_decode_field ins, Shared.decode_add_rd _ rd a b h]
   rfl
 
 /-- ⭐⭐⭐ **THE `ADD` ROW OF `RegDatapathOK`, IN ITS OWN SHAPE, WITH THE ENABLE DISCHARGED.**
@@ -605,8 +579,8 @@ theorem regDatapath_ADD (ins : Env) (rd a b : Fin 32) (k : Nat) (hk : k < 32) (h
   rw [hen, if_pos (by simp)]
   exact selOut_is_isa_written_bit_ADD ins rd a b k hk hrd h
 
-#audit_axioms rdOf_is_decode_field
-#audit_axioms decode_add_rd
+#audit_axioms Shared.rdOf_is_decode_field
+#audit_axioms Shared.decode_add_rd
 #audit_axioms rdOf_is_rd_ADD
 #audit_axioms regDatapath_ADD
 

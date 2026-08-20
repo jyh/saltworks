@@ -229,7 +229,7 @@ theorem tieTrue_at_cT9 (ins : Env) : run ins cT9 tieTrue = true := by
 theorem subOut_eq (k : Nat) (hk : k < 33) :
     CorePlace.subOut k = instMap adder32 subSig offSub (adder32.outs.getD k 0) := by
   rw [CorePlace.subOut, instOuts]
-  exact getD_map_lt _ _ _ (by rw [ADD.adder32_outs_len]; exact hk) 0 0
+  exact getD_map_lt _ _ _ (by rw [Shared.adder32_outs_len]; exact hk) 0 0
 
 theorem subOut_lt_offSlt (k : Nat) (hk : k < 33) : CorePlace.subOut k < offSlt := by
   revert hk; revert k; decide +kernel
@@ -267,7 +267,7 @@ theorem sub_bit (ins : Env) (k : Nat) (hk : k < 33) :
         sub_instOK (sub_env_agrees ins) (adder32.outs.getD k 0) (Or.inr hmem)]
   show _ = (sem adder32 _).getD k false
   simp only [sem]
-  exact (getD_map_lt _ _ _ (by rw [ADD.adder32_outs_len]; exact hk) 0 false).symm
+  exact (getD_map_lt _ _ _ (by rw [Shared.adder32_outs_len]; exact hk) 0 false).symm
 
 
 /-! ## 8 · ⭐⭐⭐ THE THREE DRIVE NETS, DISCHARGED — and BIT 0 CLOSED -/
@@ -384,7 +384,7 @@ theorem decode_slt_rd (w : BitVec 32) (rd a b : Fin 32) (h : decode w = some (.S
 
 theorem rdOf_is_rd_SLT (ins : Env) (rd a b : Fin 32)
     (h : decode (seenWord ins) = some (.SLT rd a b)) : rdOf ins = rd.val := by
-  rw [← ADD.rdOf_is_decode_field ins, decode_slt_rd _ rd a b h]
+  rw [← Shared.rdOf_is_decode_field ins, decode_slt_rd _ rd a b h]
   rfl
 
 /-- ⭐⭐⭐ **THE `SLT` ROW OF `RegDatapathOK`, AT `r = rd`, BOTH ARMS DISCHARGED AND ALL

@@ -1,4 +1,25 @@
 /-
+⚙️ REWIRED SCRATCH COPY of `SaltWorks/HDL/SelValueADDI.lean` — executor deliverable, NOTHING TRACKED IS TOUCHED.
+
+The 8 local helper copies listed below were DELETED and every use repointed at
+`SaltWorks.HDL.RegNextUniform.Shared` (proved once in `ScratchQ4RDedupEx`):
+  · addOut_eq
+  · addOut_lt_offSub
+  · adder32_out_mem
+  · adder32_outs_len
+  · obMux_out_mem
+  · obMux_outs_len
+  · obOut_eq
+  · tieFalse_lt_off0
+
+⛔ `coreThruRw_split5` is DELIBERATELY UNTOUCHED (its removal has real integration
+cost — a local prefix `def` name — and is out of this brief's scope).
+
+⚠️ This file declares the SAME fully-qualified names as `SaltWorks/HDL/SelValueADDI.lean`; the two must
+never enter one import graph.  Checked: nothing in this file's transitive closure
+imports it (`SelValueSLTBit0` does, and is absent).
+-/
+/-
 Copyright (c) 2026 Jason Hickey. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: compiler seat (Opus executor, queue item Q4 — ADDI)
@@ -12,17 +33,18 @@ are out of scope (Horn D).
 import SaltWorks.HDL.DecoderTransport
 import SaltWorks.HDL.Rs2Close
 import SaltWorks.HDL.Bridge4
+import SaltWorks.HDL.SelValueShared
 
 namespace SaltWorks.HDL.RegNextUniform
 open SaltWorks.HDL SaltWorks.ISA
 open SaltWorks.HDL.CorePlace
 open SaltWorks.Stack.Program
 
-/-! ⚠️ **NESTED DELIBERATELY.** Four concurrent Q4 executors write into
+/-! ⚠️ **THE COLLISION IS GONE, NOT RENAMED.** Four concurrent Q4 executors wrote into
 `SaltWorks.HDL.RegNextUniform`; the ADD executor's file flagged that this one declared
 `obMux_outs_len`, `obOut_eq`, `addOut_eq`, `adder32_outs_len`, `addOut_lt_offSub` and more at
-names it also uses.  Nesting makes landing both a rename rather than a duplicate-qualified-name
-clash — which a name grep cannot see. -/
+names it also used.  This copy declares NONE of them: they are `Shared.…`, one copy, and the
+duplicate-qualified-name clash a name grep cannot see no longer exists. -/
 
 namespace ADDI
 
@@ -161,14 +183,9 @@ theorem tieFalse_lt_off1 : tieFalse < off1 := by
   rw [tie_nets_are_the_first_two.1, off1_value]; decide
 theorem tieFalse_lt_offOb : tieFalse < offOb :=
   Nat.lt_of_lt_of_le tieFalse_lt_off1 off1_le_offOb
-theorem tieFalse_lt_off0 : tieFalse < off0 := by
-  rw [tie_nets_are_the_first_two.1, off0_value]; decide
 
 theorem rs1Out_lt_offAdd (j : Nat) (hj : j < 32) : rs1Out j < offAdd :=
   Nat.lt_of_lt_of_le (rs1Out_lt_off3 j hj) off3_le_offAdd
-
-theorem addOut_lt_offSub (k : Nat) (hk : k < 32) : CorePlace.addOut k < offSub := by
-  revert k; decide +kernel
 
 /-! ## 4 · the tie cell's value -/
 
@@ -184,7 +201,7 @@ theorem tieFalse_thru8 (ins : Env) : run ins coreThru8 tieFalse = false := by
   rw [run_thru8_to7 ins tieFalse tieFalse_lt_offOb,
       run_thru7_to2 ins tieFalse tieFalse_lt_off1,
       coreThru2,
-      run_frame_of_ge ins (instGates tieCells id offTie) _ tieFalse off0 tieFalse_lt_off0
+      run_frame_of_ge ins (instGates tieCells id offTie) _ tieFalse off0 Shared.tieFalse_lt_off0
         (blk_out_ge decoder decoderSig off0 decoder_ssa off0 (Nat.le_refl _))]
   exact tie_run_false ins
 
@@ -203,17 +220,6 @@ theorem instr_thru7 (ins : Env) (i : Nat) (hi : i < 32) :
 
 /-! ## 6 · operand B — the mux, and the immediate it delivers on `ADDI` -/
 
-theorem obMux_outs_len : OperandB.obMux.outs.length = 32 := by decide +kernel
-
-theorem obMux_out_mem (m : Nat) (hm : m < 32) :
-    (OperandB.obMux.gates.map Gate.out).contains (OperandB.obMux.outs.getD m 0) = true := by
-  revert m; decide +kernel
-
-theorem obOut_eq (m : Nat) (hm : m < 32) :
-    CorePlace.obOut m = instMap OperandB.obMux obSig offOb (OperandB.obMux.outs.getD m 0) := by
-  rw [CorePlace.obOut, instOuts]
-  exact getD_map_lt _ _ _ (by rw [obMux_outs_len]; exact hm) 0 0
-
 theorem obSig_64 : obSig 64 = decOut 3 := rfl
 
 theorem obSig_imm (m : Nat) (hm : m < 32) : obSig (32 + m) = instrNet (immI m) := by
@@ -227,14 +233,14 @@ theorem ob_thru8_mux (ins : Env) (m : Nat) (hm : m < 32) :
     run ins coreThru8 (CorePlace.obOut m)
       = (if run ins coreThru7 (obSig 64) then run ins coreThru7 (obSig (32 + m))
          else run ins coreThru7 (obSig m)) := by
-  rw [coreThru8, run_append, obOut_eq m hm,
+  rw [coreThru8, run_append, Shared.obOut_eq m hm,
       inst_sem OperandB.obMux obSig offOb (run ins coreThru7)
         (fun a => run ins coreThru7 (obSig a)) ob_instOK (fun _ _ => rfl)
-        (OperandB.obMux.outs.getD m 0) (Or.inr (obMux_out_mem m hm)),
+        (OperandB.obMux.outs.getD m 0) (Or.inr (Shared.obMux_out_mem m hm)),
       show run (fun a => run ins coreThru7 (obSig a)) OperandB.obMux.gates
              (OperandB.obMux.outs.getD m 0)
            = (sem OperandB.obMux (fun a => run ins coreThru7 (obSig a))).getD m false from
-        (getD_map_lt _ _ _ (by rw [obMux_outs_len]; exact hm) 0 false).symm]
+        (getD_map_lt _ _ _ (by rw [Shared.obMux_outs_len]; exact hm) 0 false).symm]
   exact OperandB.out_sem_obMux _ m hm
 
 /-- ⭐⭐ **ON AN `ADDI` WORD THE ALU'S OPERAND B IS `sext(imm)`.** `useImm = isADDI` is high, so
@@ -258,21 +264,10 @@ theorem rs1_thru8 (ins : Env) (j : Nat) (hj : j < 32) :
 
 /-! ## 8 · the adder, read inside the core -/
 
-theorem adder32_outs_len : adder32.outs.length = 33 := by decide +kernel
-
-theorem adder32_out_mem (k : Nat) (hk : k < 32) :
-    (adder32.gates.map Gate.out).contains (adder32.outs.getD k 0) = true := by
-  revert k; decide +kernel
-
 theorem adder32_outs_adS (k : Nat) (hk : k < 32) : adder32.outs.getD k 0 = adS k := by
   revert k; decide +kernel
 
 theorem adder32_nIn_65 : adder32.nIn = 65 := by decide +kernel
-
-theorem addOut_eq (k : Nat) (hk : k < 32) :
-    CorePlace.addOut k = instMap adder32 addSig offAdd (adder32.outs.getD k 0) := by
-  rw [CorePlace.addOut, instOuts]
-  exact getD_map_lt _ _ _ (by rw [adder32_outs_len]; omega) 0 0
 
 /-- ⭐⭐ **THE ADD BANK ADDS THE TWO WIRES IT IS FED.** Placement plus `adder_run_is_sum_bit`:
 no arithmetic is re-proved here, only transported. -/
@@ -290,10 +285,10 @@ theorem addOut_thru9 (ins : Env) (A B : BitVec 32) (k : Nat) (hk : k < 32)
       by_cases h2 : j < 64
       · rw [if_pos h2, if_pos h2]; exact hB (j - 32) (by omega)
       · rw [if_neg h2, if_neg h2]; exact hC
-  rw [coreThru9, run_append, addOut_eq k hk,
+  rw [coreThru9, run_append, Shared.addOut_eq k hk,
       inst_sem adder32 addSig offAdd (run ins coreThru8) (adEnv A B false) add_instOK
         (fun a ha => hin a (by rw [adder32_nIn_65] at ha; exact ha))
-        (adder32.outs.getD k 0) (Or.inr (adder32_out_mem k hk)),
+        (adder32.outs.getD k 0) (Or.inr (Shared.adder32_out_mem k hk)),
       adder32_outs_adS k hk, adder_run_is_sum_bit A B false k hk]
   simp
 
@@ -380,7 +375,7 @@ theorem core_selOut_value_ADDI (ins : Env) (rd a : Fin 32) (imm : BitVec 12) (k 
     rw [← decOut_thru11 ins 2 (by omega), core_decOut_spec ins 2 (by omega)]
     simp [ctrlSpec, h]
   rw [selOut_bank0 ins k hk hx hs,
-      run_thru11_to9 ins (CorePlace.addOut k) (addOut_lt_offSub k hk),
+      run_thru11_to9 ins (CorePlace.addOut k) (Shared.addOut_lt_offSub k hk),
       addOut_thru9 ins (rs1Of ins) (imm.signExtend 32) k hk
         (fun j hj => rs1_thru8 ins j hj)
         (fun j hj => obOut_is_sext_imm ins rd a imm j hj h)

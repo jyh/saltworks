@@ -1,4 +1,19 @@
 /-
+⚙️ REWIRED SCRATCH COPY of `SaltWorks/HDL/EnableWriters.lean` — executor deliverable, NOTHING TRACKED IS TOUCHED.
+
+The 2 local helper copies listed below were DELETED and every use repointed at
+`SaltWorks.HDL.RegNextUniform.Shared` (proved once in `ScratchQ4RDedupEx`):
+  · rdOf_is_decode_field
+  · decode_add_rd
+
+⛔ `coreThruRw_split5` is DELIBERATELY UNTOUCHED (its removal has real integration
+cost — a local prefix `def` name — and is out of this brief's scope).
+
+⚠️ This file declares the SAME fully-qualified names as `SaltWorks/HDL/EnableWriters.lean`; the two must
+never enter one import graph.  Checked: nothing in this file's transitive closure
+imports it (`SelValueSLTBit0` does, and is absent).
+-/
+/-
 Q7 — THE ENABLE HALF, POSITIVE ARM (scratch; compiler seat's proof queue).
 
 # What is new here: the enable is HIGH exactly where the ISA writes
@@ -12,8 +27,8 @@ core_rwOut_eq_isa_write :  decode (seenWord ins) = some i  ->  touchesMem i = fa
 ```
 
 **over ALL THIRTY-TWO registers, with `r` free and the destination taken from `decode`,
-not from the circuit.** The bridge that makes the two sides meet is `rdOf_is_decode_field`
-— `Bridge3`'s script at offset 7.
+not from the circuit.** The bridge that makes the two sides meet is
+`Shared.rdOf_is_decode_field` (`ScratchQ4RDedupEx`) — `Bridge3`'s script at offset 7.
 
 ⛔ **SCOPE FENCE, HONOURED IN THE STATEMENT.** `touchesMem i = false` excludes `LW` and `SW`
 outright, so nothing here reads `mem` and Horn D is untouched. It also keeps `writesReg` —
@@ -36,6 +51,7 @@ the enable is TRUE at the ISA's destination, which the off-target arm does not s
 -/
 import SaltWorks.HDL.DecoderTransport
 import SaltWorks.HDL.PcFieldClosed
+import SaltWorks.HDL.SelValueShared
 
 namespace SaltWorks.HDL.RegNextUniform.Writers
 open SaltWorks.HDL SaltWorks.ISA
@@ -44,29 +60,9 @@ open SaltWorks.Stack.Program
 
 /-! ### Step 1 — BRIDGE 3 FOR `rd`: the enable's address IS `decode`'s `rd` field. -/
 
-theorem rdOf_is_decode_field (ins : Env) :
-    ((seenWord ins).extractLsb' 7 5).toNat = rdOf ins := by
-  have hb : ∀ j, j < 5 → ((seenWord ins).extractLsb' 7 5).getLsbD j
-      = (rdOf ins).testBit j := by
-    intro j hj
-    rw [BitVec.getLsbD_extractLsb', seenWord_bit ins (7 + j) (by omega),
-        rdOf_testBit ins j hj]
-    simp [hj]
-  refine Nat.eq_of_testBit_eq (fun j => ?_)
-  by_cases hj : j < 5
-  · exact hb j hj
-  · have h1 : ((seenWord ins).extractLsb' 7 5).toNat < 32 := by
-      have := ((seenWord ins).extractLsb' 7 5).isLt
-      simpa using this
-    have h2 : rdOf ins < 32 := rdOf_lt ins
-    have hp : (32 : Nat) ≤ 2 ^ j := by
-      calc (32 : Nat) = 2 ^ 5 := by norm_num
-        _ ≤ 2 ^ j := Nat.pow_le_pow_right (by norm_num) (by omega)
-    rw [Nat.testBit_eq_false_of_lt (by omega), Nat.testBit_eq_false_of_lt (by omega)]
-
 theorem rdOf_eq_toReg (ins : Env) :
     rdOf ins = (toReg ((seenWord ins).extractLsb' 7 5)).val := by
-  rw [← rdOf_is_decode_field ins]
+  rw [← Shared.rdOf_is_decode_field ins]
   rfl
 
 theorem rdOf_eq_of_rd (ins : Env) (rd : Fin 32)
@@ -74,11 +70,6 @@ theorem rdOf_eq_of_rd (ins : Env) (rd : Fin 32)
   rw [rdOf_eq_toReg ins, h]
 
 /-! ### Step 2 — `decode`'s four register-writing NON-MEMORY arms name the same field. -/
-
-theorem decode_add_rd (w : BitVec 32) (rd a b : Fin 32) (h : decode w = some (.ADD rd a b)) :
-    rd = toReg (w.extractLsb' 7 5) := by
-  simp only [decode, Bool.and_eq_true, decide_eq_true_eq] at h
-  split_ifs at h <;> simp_all
 
 theorem decode_xor_rd (w : BitVec 32) (rd a b : Fin 32) (h : decode w = some (.XOR rd a b)) :
     rd = toReg (w.extractLsb' 7 5) := by
@@ -102,7 +93,7 @@ theorem core_rwOut_sweep_ADD (ins : Env) (rd a b : Fin 32) (r : Nat) (hr : r < 3
     run ins core.gates (rwOut r) = (rd.val == r && !(r == 0)) := by
   rw [core_rwOut_spec ins r hr, writesRegOf, isADDOf_spec ins, isXOROf_spec ins,
       isSLTOf_spec ins, isADDIOf_spec ins, isLWOf_spec ins, isBEQOf_spec ins,
-      rdOf_eq_of_rd ins rd (decode_add_rd _ rd a b h)]
+      rdOf_eq_of_rd ins rd (Shared.decode_add_rd _ rd a b h)]
   simp [ctrlSpec, h]
 
 theorem core_rwOut_sweep_XOR (ins : Env) (rd a b : Fin 32) (r : Nat) (hr : r < 32)
@@ -269,10 +260,10 @@ theorem sweep_discriminates_on_a_real_ADD :
 #audit_axioms dec_insADD
 #audit_axioms sweep_discriminates_on_a_real_ADD
 
-#audit_axioms rdOf_is_decode_field
+#audit_axioms Shared.rdOf_is_decode_field
 #audit_axioms rdOf_eq_toReg
 #audit_axioms rdOf_eq_of_rd
-#audit_axioms decode_add_rd
+#audit_axioms Shared.decode_add_rd
 #audit_axioms decode_xor_rd
 #audit_axioms decode_slt_rd
 #audit_axioms decode_addi_rd
