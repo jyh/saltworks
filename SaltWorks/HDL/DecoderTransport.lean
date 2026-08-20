@@ -378,6 +378,70 @@ theorem sel_nets_agree (ins : Env) :
 
 #audit_axioms decOut_lt_offSel decOut_lt_offEnc decOut_thru11
 #audit_axioms gsSel0_is_96 gsSel1_is_97 selSig_96 selSig_97 sel_nets_agree
+
+/-! ## ⭐ THE RECONSTRUCTION — the third brick, and it un-strands the landed ISA field bridges
+
+Four already-landed bridges (`iImm_of_decode`, `bImm_of_decode`, `sem_immICirc_of_decode`,
+`sem_immBCirc_of_decode` in `Stack/Program.lean`) are stated over `envWith s w` — the CANONICAL
+presentation of a state and a word. `core`'s obligations are stated over an ARBITRARY `ins`.
+These two lemmas are the bridge between them: **an arbitrary valuation IS the canonical
+presentation of what it decodes to, on every net the core reads.**
+
+⚠️ **THE INSTRUCTION HALF IS INDEXED FORWARD (`instrNet i`) AND NOT BY A BARE `j` IN RANGE.**
+The bare form forces `j - instrBase` into the goal, and `omega` treats that as an ATOM while
+`instrBase` is a definition — the subtraction becomes invisible and a purely arithmetic bound
+looks unprovable. Eight rounds of unfold-then-`omega` did not converge; indexed forward the
+cancellation is definitional and no arithmetic is needed. **Consumers ask "what is
+`ins (instrNet i)`" anyway — the bare form was solving a problem nobody had.** -/
+
+/-- `decQ` reads the state layout back bit for bit. The register half is exactly
+`RegNextUniform.decQ_reg_bit` at `r = j / 32`, `k = j % 32`. -/
+theorem stBit_decQ (ins : Env) (j : Nat) (hj : j < stWidth) :
+    stBit (decQ ins) j = ins j := by
+  rw [stBit]
+  by_cases h : j < 1024
+  · rw [if_pos h]
+    have hr : j / 32 < 32 := by omega
+    have hk : j % 32 < 32 := Nat.mod_lt _ (by omega)
+    have hget : (decQ ins).regs[j / 32]! = (decQ ins).regs[(⟨j / 32, hr⟩ : Fin 32).val] := by
+      simp [hr]
+    rw [hget, SaltWorks.HDL.RegNextUniform.decQ_reg_bit ins ⟨j / 32, hr⟩ (j % 32) hk]
+    have harg : 32 * (⟨j / 32, hr⟩ : Fin 32).val + j % 32 = j := by
+      simp only []; omega
+    rw [harg]
+  · rw [if_neg h]
+    have hpc : (decQ ins).pc = wordOf (fun k => ins (1024 + k)) := by simp [decQ]
+    have hlt : j - 1024 < 32 := by simp only [stWidth] at hj; omega
+    rw [hpc, wordOf_getLsbD _ _ hlt]
+    have harg : 1024 + (j - 1024) = j := by omega
+    rw [harg]
+
+/-- ⭐ **THE STATE HALF** — on the state nets, the canonical presentation IS the valuation. -/
+theorem envWith_decQ_state (ins : Env) (j : Nat) (hj : j < stWidth) :
+    SaltWorks.Stack.Program.envWith (decQ ins) (SaltWorks.Stack.Program.seenWord ins) j
+      = ins j := by
+  rw [SaltWorks.Stack.Program.envWith, if_pos hj, encD_getD _ _ hj, stBit_decQ ins j hj]
+
+/-- ⭐⭐ **THE INSTRUCTION HALF, INDEXED FORWARD.**
+
+⚠️ **STATED AT `instrNet i` RATHER THAN AT A BARE `j` IN RANGE, DELIBERATELY.** The bare form
+forces `j - instrBase` into the goal, which `omega` treats as an ATOM while `instrBase` is a
+definition — the subtraction becomes invisible and a purely arithmetic bound looks unprovable.
+Indexed forward, `instrBase + i - instrBase` cancels definitionally and no arithmetic is
+needed at all. **Consumers ask "what is `ins (instrNet i)`" anyway; the bare form was solving a
+problem nobody had.** -/
+theorem envWith_decQ_instr (ins : Env) (i : Nat) (hi : i < 32) :
+    SaltWorks.Stack.Program.envWith (decQ ins) (SaltWorks.Stack.Program.seenWord ins)
+        (instrNet i) = ins (instrNet i) := by
+  -- ⚠️ TERM PROOFS, NOT `omega`: `instrNet i = instrBase + i` and `instrBase = stWidth` are
+  -- both `rfl`, so these are `le_add_right` and `add_sub_cancel_left` directly. Eight rounds
+  -- of unfold-then-omega did not converge on facts that need no arithmetic at all.
+  have hnot : ¬ (instrNet i < stWidth) := Nat.not_lt.mpr (Nat.le_add_right stWidth i)
+  rw [SaltWorks.Stack.Program.envWith, if_neg hnot, SaltWorks.Stack.Program.seenWord]
+  have hcancel : instrNet i - instrBase = i := by simp [instrNet]
+  rw [hcancel, wordOf_getLsbD _ _ hi]
+
+#audit_axioms stBit_decQ envWith_decQ_state envWith_decQ_instr
 #audit_axioms core_writes_nothing_on_SW isa_writes_nothing_on_SW
 #audit_axioms isADDOf_spec isXOROf_spec isSLTOf_spec isADDIOf_spec isLWOf_spec
 
