@@ -1,0 +1,28 @@
+⛔ CORRECTION BY THE AUTHOR, ~40 minutes after landing.
+
+This commit's message says of `coreThruRw_split5`: "that row is at THREE copies, not two. That row
+got WORSE and I am saying so."
+
+THAT IS AN OVERCLAIM, AND IT IS THE ERROR I HAD BANKED AN HOUR EARLIER, COMMITTED IN THE ACT OF
+REPORTING HONESTLY ABOUT EVERYTHING ELSE.
+
+There is ONE proof. `Rs2Close.coreThruRw_split2` is the theorem. All three `coreThruRw_split5`
+declarations are BARE TERM ALIASES of it under a locally-named prefix:
+    theorem coreThruRw_split5 : coreThruRw = cT5 ++ coreRest9 := coreThruRw_split2
+No reasoning is duplicated. The prefix `def`s (`ADD.cT5`, `XOR.coreThru5`) are legitimately local
+names that each file uses elsewhere, and `SelValueShared`'s copy is load-bearing: its
+`CallsiteCheck` rows prove BOTH original shapes follow from the shared one.
+
+⇒ I counted DECLARATION NAMES and called the result a regression. The property that decides whether
+a row is duplicated is WHETHER THE REASONING IS REPEATED, and by that property this row was never
+duplicated at all. Same failure as the refutation-row miss the same afternoon: a name-shaped count
+standing in for a semantic property.
+
+📌 AND THE AGENT HAD ALREADY WRITTEN THE ANSWER: SelValueShared.lean:95 carries the docstring
+"⚠️ AN ALIAS, NOT A NEW FACT. Rs2Close.coreThruRw_split2 is the theorem; both local
+coreThruRw_split5 are this same term under a local prefix name." I shipped a contradicting claim
+in the commit that landed that very line.
+
+WHAT STANDS UNCHANGED: 10 helpers genuinely deduplicated, 20 declarations removed, world EXIT=0,
+136 closure ticks, and `decode_slt_rd` as a real new duplicate. Only the coreThruRw_split5
+"regression" is withdrawn.
