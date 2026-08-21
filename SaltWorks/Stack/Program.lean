@@ -1537,12 +1537,24 @@ right pin. -/
 theorem decQ_congr {a b : SaltWorks.HDL.Env}
     (hab : ∀ j, j < SaltWorks.HDL.stWidth → a j = b j) :
     SaltWorks.HDL.decQ a = SaltWorks.HDL.decQ b := by
+  -- ARITY-ROBUST. `St.mk.injEq` yields one conjunct per `St` field and `St` has
+  -- four; under Q the mem/trapped pair is constant-vs-constant and `and_true`
+  -- clears it, under D both are live. `and_intros` splits whatever arrives and
+  -- each goal is closed by shape, so nothing here counts the fields.
+  -- NOTE: no `rfl` in the alternation. `first` pays a branch's FULL cost before
+  -- falling through, and `rfl` on a `Vector.ofFn` equality exhausts the whnf
+  -- heartbeat budget (measured: 200000, Program.lean:1547).
+  -- No discharger is pre-added for D's `trapped` conjunct: under Q no goal of
+  -- that shape exists, so the branch would be statically dead code and the
+  -- linter says so. D's extra obligation belongs in the swap dry run, where it
+  -- fails by name, not here as a guess.
   simp only [SaltWorks.HDL.decQ, St.mk.injEq, and_true]
-  refine ⟨?_, wordOf_congr (fun k hk => hab (1024 + k) (by unfold SaltWorks.HDL.stWidth; omega))⟩
-  apply Vector.ext
-  intro i hi
-  rw [Vector.getElem_ofFn, Vector.getElem_ofFn]
-  exact wordOf_congr (fun k hk => hab (32 * i + k) (by unfold SaltWorks.HDL.stWidth; omega))
+  and_intros <;> first
+    | (apply Vector.ext
+       intro i hi
+       rw [Vector.getElem_ofFn, Vector.getElem_ofFn]
+       exact wordOf_congr (fun k hk => hab _ (by unfold SaltWorks.HDL.stWidth; omega)))
+    | exact wordOf_congr (fun k hk => hab _ (by unfold SaltWorks.HDL.stWidth; omega))
 
 /-- ⬥ **M1a — THE HUB, RESTATED.** `decQ (envWith s w) = s` is a whole-`St`
 equality and goes FALSE once `St` carries `mem`/`trapped`: `envWith` presents
