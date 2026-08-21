@@ -19,11 +19,11 @@ BUS=${1:?bus path}; ME=${2:?my seat name}; TOK=${3:?token}; START=${4:-1}
 [ -r "$BUS" ] || { echo "peerpickup: cannot read $BUS" >&2; exit 0; }
 awk -v me="$ME" -v tok="$TOK" -v start="$START" '
   NR < start { next }
-  /^\[[0-9][0-9]\/[0-9][0-9] [0-9][0-9]:[0-9][0-9]:[0-9][0-9], / {
+  /^\[[0-9]+\/[0-9]+ [0-9:x]+, / {
     hdr = $0
     seat = hdr
     sub(/^\[[^,]*, */, "", seat)
-    sub(/[ ,=→].*$/, "", seat)
+    sub(/[] ,=→].*$/, "", seat)
     mine = (seat == me)
     hline = NR
   }
