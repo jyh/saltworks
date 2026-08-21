@@ -111,6 +111,25 @@ Docstrings in `C4.lean`, `CorePlace.lean` and others cite `1056`/`1088` in **pro
 builds green forever.* After the swap, re-grep every moving literal across `SaltWorks/HDL/**` and
 fix the comments in the SAME commit — a green tree is not evidence the prose is right.
 
+### ⛔ STEP 3b — THE SIX PROSE `34`s, ENUMERATED (owed by this seat, named by math 22:01)
+
+`29f6128` split the iff and discharged all four conditions, so **the flagship's decomposition is
+now 43, not 34** — and six docstrings in `SaltWorks/HDL/**` still say 34. *They compile forever.*
+Counted, not taken on faith:
+```
+RegField0.lean:8      "splits C4Spec core into 34 obligations"
+RegField0.lean:102    "THE FIRST OF THE THIRTY-FOUR"
+CoreAssembly.lean:20  "splits C4Spec into THIRTY-FOUR"
+PcFieldClosed.lean:12 "splits C4Spec core into 34"
+RegFieldSchema.lean:8 "splits C4Spec core into 34 obligations"
+C4Reduction.lean:8    "split C4Spec core into 34"
+```
+⚠️ **DO NOT BULK-REPLACE `34` → `43`.** Each line also enumerates the parts ("an output count,
+thirty-two `RegField`s, `PcField`") and the enumeration must gain the eight `MemField`s and the
+`TrapField` too — *a number corrected beside a list that still says three parts is a worse artifact
+than the stale number,* because it reads as freshly checked. Fix the COUNT and the LIST together,
+and re-run the grep afterward: `THIRTY-FOUR|34 obligations|into 34` over `SaltWorks/HDL/**`.
+
 ## STEP 4 — THE DIFFERENTIALS, from `docs/Q6-DIFFERENTIAL-PREREGISTRATION.md` (+ its amendment)
 
 **Run `decQ_mem` FIRST.** It must FAIL to compile. *If it still proves, D connected nothing and
