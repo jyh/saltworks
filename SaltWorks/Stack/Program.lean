@@ -1549,12 +1549,22 @@ theorem decQ_congr {a b : SaltWorks.HDL.Env}
   -- linter says so. D's extra obligation belongs in the swap dry run, where it
   -- fails by name, not here as a guess.
   simp only [SaltWorks.HDL.decQ, St.mk.injEq, and_true]
+  -- ⭐ MEASURED AT THE D WIDTH (dry run, 08/20): `hab _ (by … omega)` elaborates its
+  -- side goal WHILE THE INDEX IS STILL A METAVARIABLE. D reports
+  --   `omega could not prove the goal … d ≥ 1313 … where d := ↑(?m.110 k)`
+  -- — an UNDETERMINED INDEX, not a bound failure. `apply hab` FIRST makes
+  -- unification determine the index, and only then does `omega` bound it.
+  -- ⛔ NO discharger for D's `trapped` conjunct is carried here, in EITHER position.
+  -- Measured 08/20: leading it does NOT rescue it — Q has no goal of that shape, so
+  -- the linter reports 'apply hab tactic does nothing' + 'never executed' (5 warnings)
+  -- wherever it sits. ORDERING DOES NOT MAKE A DEAD BRANCH LIVE. That conjunct is
+  -- D-only and belongs in the swap, where it fails by name.
   and_intros <;> first
     | (apply Vector.ext
        intro i hi
        rw [Vector.getElem_ofFn, Vector.getElem_ofFn]
-       exact wordOf_congr (fun k hk => hab _ (by unfold SaltWorks.HDL.stWidth; omega)))
-    | exact wordOf_congr (fun k hk => hab _ (by unfold SaltWorks.HDL.stWidth; omega))
+       exact wordOf_congr (fun k hk => by apply hab; unfold SaltWorks.HDL.stWidth; omega))
+    | exact wordOf_congr (fun k hk => by apply hab; unfold SaltWorks.HDL.stWidth; omega)
 
 /-- ⬥ **M1a — THE HUB, RESTATED.** `decQ (envWith s w) = s` is a whole-`St`
 equality and goes FALSE once `St` carries `mem`/`trapped`: `envWith` presents
