@@ -9,6 +9,17 @@ DESIGN.** *This document was written to be read BEFORE that click; it is now the
 record of a design committed to fabrication, so its debts (§3) ride to silicon
 with it and its scope clauses matter MORE, not less.*
 
+🧾 **MACHINE RECEIPT, COPIED IN 2026-08-21 PER THE AMENDED RECEIPT LAW — TT's index has now INGESTED the project and the claim above is `cmp`-checkable rather than prose.** Verbatim from `TinyTapeout/tinytapeout-sky-26c :: projects/tt_um_saltworks_ndf_c32/commit_id.json`, read by silicon 2026-08-21 08:3x:
+
+```json
+{ "app": "Tiny Tapeout main 8bca34af",
+  "repo": "https://github.com/jyh/tt-neural-dataflow-fabric",
+  "commit": "7d2b2756c0ddb7b5d0b2107dca2a6f8f960e45ba",
+  "workflow_url": "https://github.com/jyh/tt-neural-dataflow-fabric/actions/runs/32284710003",
+  "project_id": 5500, "sort_id": 1786124512759 }
+```
+**The commit is EXACTLY the phase-2 push (`7d2b275`, gds.yaml restored byte-verbatim) and the workflow run is EXACTLY the six-green `gds` run this seat watched.** Ingested by TT's overnight batch — PR #211 merged 2026-08-21T09:43:24Z. ⛔⛔ **AND THE RECEIPT CORRECTS MY OWN 08/19 READING IN A WAY WORTH KEEPING: `project_id 5500` AND `sort_id 1786124512759` ARE THE *SAME VALUES* I RECORDED THAT DAY UNDER `projects/tt_um_saltworks_banyan/`, WHOSE DIRECTORY IS NOW A 404.** ⇒ ***THIS WAS NEVER TWO PROJECTS. IT IS ONE SLOT, RE-POINTED — the banyan revision replaced by the 6×2 NDF revision in place. The shuttle's directory name is derived from `top_module`, so a re-pointed project CHANGES DIRECTORIES in the mirror, and searching for the new name in a not-yet-ingested mirror finds nothing while the old name still sits there looking like a rival submission.*** *That is why my 08/19–08/20 polls read as "the banyan is submitted and the NDF is not": both halves were true readings of a mirror that had not yet re-ingested slot 5500, and the identity that would have linked them — the `project_id` — was the one field I recorded and did not compare.* 📌 *Four zero-movement polls (08/19 20:28, 22:00 · 08/20 05:59, 22:00) were TRUE readings; the batch ran at 02:43 PDT on 08/21, after the last of them.*
+
 ✅ **THE LINE ABOVE WAS CHALLENGED ON 2026-08-19 AND IT HELD — referee: the Captain's own
 read of the live dashboard (`app.tinytapeout.com/shuttles/ttsky26c`, 18:0x, his login). The
 NDF entry EXISTS. Recorded here with its date and reader because, per the amended receipt
