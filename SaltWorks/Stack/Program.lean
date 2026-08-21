@@ -1566,6 +1566,18 @@ theorem decQ_congr {a b : SaltWorks.HDL.Env}
        exact wordOf_congr (fun k hk => by apply hab; unfold SaltWorks.HDL.stWidth; omega))
     | exact wordOf_congr (fun k hk => by apply hab; unfold SaltWorks.HDL.stWidth; omega)
 
+/-- ⭐ **THE WIDTH-AGNOSTIC CORE** (helm ruling 2026-08-20 20:58). The two
+projections are TRUE AT BOTH WIDTHS: `envWith` presents `encD s`, and the decoder
+recovers `regs` and `pc` from it whatever else the layout carries. Everything
+regime-specific lives in the corollary below, so no consumer of the projections
+depends on how many fields `St` has. -/
+theorem decQ_envWith_proj (s : St) (w : Word) :
+    (SaltWorks.HDL.decQ (envWith s w)).regs = s.regs ∧
+      (SaltWorks.HDL.decQ (envWith s w)).pc = s.pc := by
+  rw [decQ_congr (b := fun j => (SaltWorks.HDL.encD s).getD j false)
+        (fun j hj => by simp only [envWith, if_pos hj])]
+  exact SaltWorks.HDL.decQ_encD_proj s
+
 /-- ⬥ **M1a — THE HUB, RESTATED.** `decQ (envWith s w) = s` is a whole-`St`
 equality and goes FALSE once `St` carries `mem`/`trapped`: `envWith` presents
 1056 encoded bits, so the decoder rebuilds the new fields at their defaults. The
@@ -1575,9 +1587,13 @@ arbitrary `s` and so have no cleanliness hypothesis to discharge. -/
 theorem decQ_envWith_eq (s : St) (w : Word) :
     SaltWorks.HDL.decQ (envWith s w)
       = { s with mem := Vector.replicate 8 0, trapped := false } := by
-  rw [decQ_congr (b := fun j => (SaltWorks.HDL.encD s).getD j false)
-        (fun j hj => by simp only [envWith, if_pos hj])]
-  obtain ⟨hr, hp⟩ := SaltWorks.HDL.decQ_encD_proj s
+  -- ⛔ Q REGIME. Under Horn D this exact text is FALSE for a dirty `s` (measured,
+  -- D dry run 2026-08-20): D's `encD` encodes the REAL mem/trapped, so the goal
+  -- grows `… ∧ (Vector.ofFn …(1056+32*w+k)…) = Vector.replicate 8 0 ∧
+  -- (encD s).getD 1312 false = false`. The D form is the EXACT round trip
+  -- `decQ (envWith s w) = s` — D does not break this theorem, it makes it true in
+  -- a STRONGER form, and this text is the pre-D compromise. Kept, not deleted.
+  obtain ⟨hr, hp⟩ := decQ_envWith_proj s w
   simp only [SaltWorks.HDL.decQ, St.mk.injEq, and_true] at hr hp ⊢
   exact ⟨hr, hp⟩
 
@@ -9195,7 +9211,7 @@ open Salt.Tactic
 #audit_axioms cycles cycles_succ cycles_add
 #audit_axioms seenWord CycleRealisesStepProj cycles_realise_steps_of_memFree
 #audit_axioms MemFree St_eq_of_fields decQ_mem decQ_trapped decQ_cyc_eq_of_memFree
-#audit_axioms envWith wordOf_congr decQ_congr decQ_envWith_eq seenWord_envWith
+#audit_axioms envWith wordOf_congr decQ_congr decQ_envWith_proj decQ_envWith_eq seenWord_envWith
 #audit_axioms decQ_envWith_of_clean step_regs_of_with_of_not_touchesMem step_pc_of_with
 #audit_axioms step_mem_frame_of_not_touchesMem step_trapped_frame_of_not_touchesMem
 #audit_axioms stepT_mem_frame_of_not_touchesMem stepT_trapped_frame_of_not_touchesMem
