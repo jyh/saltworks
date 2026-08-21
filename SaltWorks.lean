@@ -108,6 +108,7 @@ import SaltWorks.HDL.EnableNonWriters
 import SaltWorks.HDL.EnableX0
 import SaltWorks.HDL.StateCodecD
 import SaltWorks.HDL.LwWitnessD
+import SaltWorks.HDL.LwDifferentialD
 import SaltWorks.HDL.MemOrgan
 import SaltWorks.HDL.SelValueSLTBit0
 import SaltWorks.HDL.EnableSpec
