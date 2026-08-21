@@ -2573,8 +2573,14 @@ theorem stBit_reg (s : St) (r : Fin 32) (k : Nat) (hk : k < 32) :
 /-- The pc's bit `k` of the encoded state. -/
 theorem stBit_pc (s : St) (k : Nat) (hk : k < 32) :
     SaltWorks.HDL.stBit s (1024 + k) = s.pc.getLsbD k := by
-  have hsub : 1024 + k - 1024 = k := by omega
-  rw [SaltWorks.HDL.stBit, if_neg (by omega), hsub]
+  -- WIDTH-AGNOSTIC: `split_ifs` takes however many branches the live layout has
+  -- (Q: regs/pc; D: regs/pc/mem/trapped). Every branch but the pc one contradicts
+  -- `hk : k < 32` arithmetically, so `omega` closes it without this proof knowing
+  -- how many branches exist.
+  unfold SaltWorks.HDL.stBit
+  split_ifs <;> first
+    | omega
+    | (congr 1; omega)
 
 /-- **A register field IS 32 independent bit obligations** — the sentence that
 makes "each field is checkable on its own" concrete rather than rhetorical. -/
