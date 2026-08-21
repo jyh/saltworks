@@ -120,6 +120,24 @@ def stBit (s : St) (j : Nat) : Bool :=
   if j < 1024 then (s.regs[j / 32]!).getLsbD (j % 32)
   else s.pc.getLsbD (j - 1024)
 
+/-- **The pc field's bit, named once so the branch walk lives in ONE place.**
+
+⭐ **THIS IS A BLAST-RADIUS REDUCTION, NOT A REPAIR — and the distinction is the whole point.**
+`stBit`'s `if`-chain grows from two branches to four under Horn D, and any proof that walks it with
+`rw [stBit, if_neg …]` is pinned to the branch COUNT. Concentrating the walk here means the swap
+changes ONE declaration instead of each caller. **It does NOT make the proof width-agnostic** —
+measured, both arms: at Q the tree is green; under the widened `stBit` the ONLY branch-class failure
+left is THIS theorem, and the call site is clean.
+
+⚠️ **Mathlib's `split_ifs` WOULD be width-agnostic and is not available here**: this module imports
+only `HDL.ISA` and `HDL.Sem`, which is why math's `Program.lean` template does not transfer
+(measured 08/20, three attempts, walled). ⛔ And do NOT reach for `congr 1` in the proof below —
+it blows the recursion-depth limit on the `getLsbD` unification. The explicit rewrite is deliberate. -/
+theorem stBit_pc (s : St) (k : Nat) (hk : k < 32) : stBit s (1024 + k) = s.pc.getLsbD k := by
+  rw [stBit, if_neg (by omega)]
+  have h1024 : 1024 + k - 1024 = k := by omega
+  rw [h1024]
+
 /-- **`encD` — the state encoding**, the D-root order C4 compares against. -/
 def encD (s : St) : List Bool := (List.range stWidth).map (stBit s)
 
@@ -155,10 +173,7 @@ theorem decQ_encD_proj (s : St) :
   have hpc : wordOf (fun k => (encD ⟨regs, pc, mem, tr⟩).getD (1024 + k) false) = pc := by
     apply BitVec.eq_of_getLsbD_eq
     intro k hk
-    rw [wordOf_getLsbD _ _ hk, encD_getD _ _ (by simp [stWidth]; omega), stBit,
-        if_neg (by omega)]
-    have h1024 : 1024 + k - 1024 = k := by omega
-    rw [h1024]
+    rw [wordOf_getLsbD _ _ hk, encD_getD _ _ (by simp [stWidth]; omega), stBit_pc _ _ hk]
   have hreg : ∀ (i : Nat) (hi : i < 32),
       wordOf (fun k => (encD ⟨regs, pc, mem, tr⟩).getD (32 * i + k) false) = regs[i] := by
     intro i hi
