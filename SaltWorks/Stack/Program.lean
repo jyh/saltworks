@@ -2688,6 +2688,44 @@ theorem c4Spec_iff_bitwise (c : SaltWorks.HDL.Circ) :
       rw [hL, hR]
       exact hbits ins i hi
 
+/-- ⭐⭐ **THE WIDTH-AGNOSTIC CORE — the `→` half alone** (helm ruling 2026-08-20
+19:38, the iff split). **TRUE AT BOTH WIDTHS.** `C4Spec` pins EVERY output bit
+below `stWidth`; the register and pc bits are among them at any layout, so
+isolating them cannot depend on how many fields the state carries — widening the
+codec only adds bits this conclusion does not mention.
+
+⭐ **This is the direction the out-of-glob consumer takes.** `C4Refuted.lean:295`
+uses `(c4Spec_iff_fieldwise core).mp`, and it survives the split untouched.
+*Re-measured in this commit: of 7 uses under `SaltWorks/HDL/`, SIX are prose and
+exactly ONE is code — and that one is `.mp`.*
+
+⛔ **THE `←` HALF IS Q-REGIME ONLY, AND UNDER HORN D IT IS FALSE — not merely
+unprovable.** At the D layout `C4Spec` ranges over 1313 bits, of which 1056–1311
+are `mem` and 1312 is `trapped`; `RegField` and `PcField` say NOTHING about those,
+so the three conjuncts can hold while the circuit disagrees on a mem bit.
+*Measured in the D dry run 2026-08-20*: the `←` proof's `else` branch derives
+`j - 1024 < 32` from `j < stWidth`, which at D yields only `j - 1024 < 289`.
+⇒ The D-regime statement needs `MemField` and `TrappedField` conjuncts —
+**1 + 32 + 1 + 8 + 1 = 43 obligations, grown from 34.** The iff is KEPT and named
+as the Q regime rather than deleted (exhibit-don't-delete). -/
+theorem c4Spec_fieldwise_of_c4Spec (c : SaltWorks.HDL.Circ)
+    (h : SaltWorks.HDL.C4Spec c) :
+    c.outs.length = SaltWorks.HDL.stWidth
+      ∧ (∀ r : Fin 32, RegField c r)
+      ∧ PcField c := by
+  rw [c4Spec_iff_bitwise] at h
+  obtain ⟨hlen, hbits⟩ := h
+  refine ⟨hlen, ?_, ?_⟩
+  · intro r
+    rw [regField_iff_bits]
+    intro ins k hk
+    have hr := r.isLt
+    rw [hbits ins (32 * r.val + k) (by unfold SaltWorks.HDL.stWidth; omega),
+      stBit_reg _ r k hk]
+  · rw [pcField_iff_bits]
+    intro ins k hk
+    rw [hbits ins (1024 + k) (by unfold SaltWorks.HDL.stWidth; omega), stBit_pc _ k hk]
+
 /-- ⭐⭐ **THE DECOMPOSITION — `C4Spec` IS A FIELDWISE CONJUNCTION.** One 1056-bit
 equation about a ~3,000-gate circuit becomes **33 obligations of 32 bits each**,
 plus the output count. *This is what makes a core-sized C4 tractable at all: each
@@ -9243,7 +9281,7 @@ open Salt.Tactic
 #audit_axioms not_both_coreShaped_C4Spec
 #audit_axioms outBit outReg outPc RegField PcField
 #audit_axioms stBit_reg stBit_pc regField_iff_bits pcField_iff_bits
-#audit_axioms c4Spec_iff_bitwise c4Spec_iff_fieldwise
+#audit_axioms c4Spec_iff_bitwise c4Spec_fieldwise_of_c4Spec c4Spec_iff_fieldwise
 #audit_axioms c4Spec_of_fieldwise cycleRealisesStep_of_fieldwise sorts_of_fieldwise
 #audit_axioms not_C4Spec_of_not_regField not_C4Spec_of_not_pcField
 #audit_axioms sem_coreShaped outBit_coreShaped outReg_coreShaped outPc_coreShaped
