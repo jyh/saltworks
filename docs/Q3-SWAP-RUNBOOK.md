@@ -67,6 +67,44 @@ the new values WILL BE, not a list of edits to type. Do not hand-edit a derived 
 *Grep for hardcoded twins before assuming any value updates itself; `CoreOffsets.off0` is the one
 that proves the habit is worth keeping.*
 
+### ⭐ STEP 2b — `StateCodec` ITSELF BREAKS FIRST, AND THE FIX IS MEASURED, NOT SKETCHED
+
+**The first module the swap breaks is `StateCodec.lean` — four errors — and they are the two defect
+classes math named in their own glob, verbatim:** the `stBit` two-branch walk, and the `and_true`
+arity. *I hit them in the 16:3x attempt and again in the 19:4x isolated dry run, and in BOTH runs
+the fix below made `StateCodec` elaborate CLEAN, moving every remaining failure downstream where it
+is informative.*
+
+⛔ **RECORDED HERE BECAUSE I NEARLY LOST IT.** Both times this fix existed only inside a scratch
+worktree I then tore down. *Work that is not a durable artifact is not delivered* — and a peer was
+about to re-derive it in my own glob because they could not see it.
+
+**① `stBit`'s walk gains two branches, so every `rw [stBit, if_neg …]` needs its full chain:**
+```
+  regs :  if_pos (by omega)
+  pc   :  if_neg (by omega), if_pos (by omega)
+  mem  :  if_neg (by omega), if_neg (by omega), if_pos (by omega)
+  trap :  rw [stBit]; simp
+```
+**② `and_true` stops firing and the anonymous constructor's ARITY changes.** `St.mk.injEq` yields
+FOUR conjuncts under D, not two. So `simp only [decQ, St.mk.injEq, and_true]` + `refine ⟨?_, hpc⟩`
+becomes `simp only [decQ, St.mk.injEq]` + `refine ⟨?_, hpc, ?_, htr⟩`. **Drop `and_true` from the
+simp set** — under D it is an unused argument and the linter says so.
+
+**③ AND THE STRUCTURAL MOVE THAT MAKES IT ALL LAND: prove the FULL round trip, then DERIVE THE TWO
+PRE-D STATEMENTS BACK FROM IT.**
+```
+theorem decQ_encD (s : St) : decQ (fun j => (encD s).getD j false) = s
+  -- port StateCodecD.decQD_encDD verbatim, renaming stWidthD/encDD/decQD/stBitD
+theorem decQ_encD_proj … := by rw [decQ_encD s]; exact ⟨rfl, rfl⟩
+theorem decQ_encD_of_clean (s) (_hm) (_ht) … := decQ_encD s   -- hypotheses now DEAD, kept so
+                                                              -- no caller breaks
+```
+⚠️ **`decQtransposed` (the non-vacuity control) MUST KEEP its all-zero memory** — it tests the
+REGISTER layout, and giving it real memory would silently retune the control. Its `mem :=
+Vector.replicate 8 0` is NOT one of the anchors to change; the `decQ` one is distinguished by the
+M1a comment directly above it.
+
 ## STEP 3 — THE SILENT CLASS: PROSE
 
 Docstrings in `C4.lean`, `CorePlace.lean` and others cite `1056`/`1088` in **prose**. *Stale prose
