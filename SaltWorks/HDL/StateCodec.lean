@@ -122,21 +122,30 @@ def stBit (s : St) (j : Nat) : Bool :=
 
 /-- **The pc field's bit, named once so the branch walk lives in ONE place.**
 
-⭐ **THIS IS A BLAST-RADIUS REDUCTION, NOT A REPAIR — and the distinction is the whole point.**
+⭐ **REPAIRED 08/21: THIS IS NOW WIDTH-AGNOSTIC, WITH NO MATHLIB.**
 `stBit`'s `if`-chain grows from two branches to four under Horn D, and any proof that walks it with
-`rw [stBit, if_neg …]` is pinned to the branch COUNT. Concentrating the walk here means the swap
-changes ONE declaration instead of each caller. **It does NOT make the proof width-agnostic** —
-measured, both arms: at Q the tree is green; under the widened `stBit` the ONLY branch-class failure
-left is THIS theorem, and the call site is clean.
+`rw [stBit, if_neg …]` is pinned to the branch COUNT — and the fix was to carry the MECHANISM
+rather than import the vocabulary. `split_ifs` is Mathlib and this module has none (only `HDL.ISA`
+and `HDL.Sem`), which walled the cross-glob template on 08/20. But the mechanism `split_ifs`
+provides is only *"handle however many branches exist"*, and **`simp only` already provides it: it
+does not fail on a lemma that finds no pattern, where `rw` does.** Name every condition the layout
+could have; the ones that are not there simply do not fire.
 
-⚠️ **Mathlib's `split_ifs` WOULD be width-agnostic and is not available here**: this module imports
-only `HDL.ISA` and `HDL.Sem`, which is why math's `Program.lean` template does not transfer
-(measured 08/20, three attempts, walled). ⛔ And do NOT reach for `congr 1` in the proof below —
-it blows the recursion-depth limit on the `getLsbD` unification. The explicit rewrite is deliberate. -/
+**Both arms, measured:** Q — full tree `EXIT=0`. D (`stWidth`+`stBit` widened) — **this theorem
+PASSES and `decQ_encD_proj` with it**; the only residue is the two class-2 literals below, which are
+the swap itself and not repairs.
+
+⛔ Do NOT reach for `congr 1` here — it blows the recursion-depth limit on the `getLsbD`
+unification, which is what broke a shared tree on 08/20. -/
 theorem stBit_pc (s : St) (k : Nat) (hk : k < 32) : stBit s (1024 + k) = s.pc.getLsbD k := by
-  rw [stBit, if_neg (by omega)]
-  have h1024 : 1024 + k - 1024 = k := by omega
-  rw [h1024]
+  -- WIDTH-AGNOSTIC WITHOUT MATHLIB. The MECHANISM `split_ifs` provides is "handle however
+  -- many branches exist"; the vocabulary is unavailable here. `simp only` supplies it: unlike
+  -- `rw`, IT DOES NOT FAIL ON A LEMMA THAT FINDS NO PATTERN. So name every branch condition the
+  -- layout could have; at Q the later ones simply do not fire, at D they do.
+  have hnot : ¬(1024 + k < 1024) := by omega
+  have hpc  : 1024 + k < 1056 := by omega
+  have hidx : 1024 + k - 1024 = k := by omega
+  simp only [stBit, if_neg hnot, if_pos hpc, hidx]
 
 /-- **`encD` — the state encoding**, the D-root order C4 compares against. -/
 def encD (s : St) : List Bool := (List.range stWidth).map (stBit s)
