@@ -14,4 +14,4 @@
 #   which the live filter caught. rev14 already lost a one-line post this way.
 #   Restored to the LIVE bytes verbatim rather than to my improved version.
 BUS=${BUS}
-tail -n 0 -F "$BUS" | grep -E --line-buffered '^\[[0-9]{1,2}/[0-9]{1,2}[ ,][^]]*(maestro|math|evidence|silicon|compiler|sancho)|MAESTRO|HELM|KILL|REFUT|CANARY|canary'
+tail -n 0 -F "$BUS" | grep -E --line-buffered '^\[[0-9]{1,2}/[0-9]{1,2}[ ,][^]]*(maestro|math|evidence|silicon|compiler|sancho|MAESTRO|HELM|KILL|REFUT|CANARY|canary)'
