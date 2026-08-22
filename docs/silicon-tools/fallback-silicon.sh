@@ -382,7 +382,35 @@ except Exception: print(-1)' "$mine" 2>/dev/null)
     if [ "$md" = 0 ] && [ "$mo" = 0 ]; then mir="OK"
     else mir="$md STALE/$mo UNMIRRORED ** run seat/tools/mirror-sync.sh **"; fi
   fi
-  printf 'FALLBACK %s | mylast=%s | bus=%s | main watch procs=%s (PRESENCE, not delivery) | account=%s | index=%s | mirror=%s | last header: %s\n' \
-    "$(date '+%H:%M')" "$age" "$busf" "$main" "$km" "$idx" "$mir" "$hdr"
+  # ── ARM 9 (QUEUE PULL, CLOCK-TRIGGERED) — added 08/22 after the defect it exists
+  #    for was found BY A PEER, not by me: my beats reported "nothing owed" every
+  #    30 minutes for ~22 hours while docs/QUEUE.md carried an OPEN pre-authorised
+  #    write item (W1). That statement was TRUE OF MY INBOX AND FALSE OF MY QUEUE.
+  # ⛔ THE SHAPE, which is why a watch is the right cure: the wake channel and the
+  #    helm's dispatches are PUSH. The queue's own semantics are PULL — seats take
+  #    work from it at seams. An instrument that only watches PUSH can never see a
+  #    PULL duty, and its silence is indistinguishable from an empty queue.
+  # ⭐ PRINTS A FIELD EVERY SWEEP, never silence-means-clean — same reason as arm 8.
+  #    Decidable by construction: an item is OPEN unless its text carries a
+  #    disposition token. No judgement, no undecidable "is this really mine".
+  QF="$(dirname "$0")/../QUEUE.md"
+  if [ ! -r "$QF" ]; then
+    q="NO-QUEUE($QF)"
+  else
+    q=$(awk '
+      /^##[[:space:]]+SILICON/ {inq=1; next}
+      /^##[[:space:]]/         {inq=0}
+      inq && /^- / {
+        line=$0
+        if (line ~ /DISCHARGED|SUPERSEDED|STANDING|~~/) next
+        n++
+        if (n<=3) { match(line, /^- [^ ]+/); tag=substr(line, RSTART+2, RLENGTH-2); tags=tags (tags==""?"":",") tag }
+      }
+      END { if (n==0) print "OK"; else printf "%d OPEN(%s%s)", n, tags, (n>3?",…":"") }
+    ' "$QF")
+    [ -n "$q" ] || q="UNPARSED"
+  fi
+  printf 'FALLBACK %s | mylast=%s | bus=%s | main watch procs=%s (PRESENCE, not delivery) | account=%s | index=%s | mirror=%s | queue=%s | last header: %s\n' \
+    "$(date '+%H:%M')" "$age" "$busf" "$main" "$km" "$idx" "$mir" "$q" "$hdr"
   sleep "$PERIOD"
 done
