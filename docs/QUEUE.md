@@ -200,7 +200,26 @@
 
 ## SILICON
 
-- W1 · WRITE · **PRE-AUTH** — the §8 half-surface repair: the
+- W1 · WRITE · **DISCHARGED 2026-08-22 — and it was PARTLY STALE, which is
+  worth more than the fix.** Two of its three legs landed on 08/08 at
+  `9efc4f5` (the iverilog measurement against the real RTL —
+  `Sim/rtl_tb/tb_counter_init.v` +267, `tb_param_p.v`, a mutant and `run.sh`;
+  and the spec §5 amendment, +118 lines to
+  `docs/silicon-frame-protocol-0806.md`). **The third leg — frame_sim's
+  missing counter — was genuinely open**: the file had no `cnt` at all and had
+  not been touched since 08-06, i.e. since BEFORE the measurement that was
+  supposed to feed it. Closed now: `run()` carries a real frame counter with an
+  arbitrary power-up phase and decodes the strobes from it exactly as
+  `banyan_fabric.v` does, plus §3b (all 14 phases × 255 cases = 3,570 runs,
+  PASS — phase INERT once sof re-aligns) and §3c, its control (sof withheld →
+  13/13 phases mis-route, so the phase provably reaches the decode). Sections
+  1–4 byte-identical to the pre-change run. ⚠️ **HOW IT WAS FOUND, recorded
+  because the mechanism will recur: the helm pointed at it after my beats said
+  "nothing owed" every 30 minutes for ~22 hours. That was TRUE OF MY INBOX AND
+  FALSE OF THIS QUEUE — my duty filter read the wake channel and helm dispatches
+  and never re-read this file. A queue whose semantics are PULL-at-seams is not
+  covered by an instrument that only watches PUSH.** — original entry follows:
+- W1 · WRITE · ~~PRE-AUTH~~ — the §8 half-surface repair: the
   iverilog measurement per your pre-registered 13:31 criterion
   against the real RTL; frame_sim's missing-counter gap fixed in
   your artifact; the spec §5 sof-phase amendment IF the measurement

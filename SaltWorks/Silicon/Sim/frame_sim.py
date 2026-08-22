@@ -55,8 +55,25 @@ def make_frame(act, dest, payload):
     return bits + list(payload)
 
 
-def run(packets, init_random=None):
-    """packets[i] = None (idle) or (dest, payload-bits). Returns per-line output."""
+def run(packets, init_random=None, init_phase=0, sof=True):
+    """packets[i] = None (idle) or (dest, payload-bits). Returns per-line output.
+
+    THE FRAME COUNTER — added 2026-08-22, closing spec §8's half init surface.
+    Until now this simulator derived the per-stage strobes from the loop index
+    (`act_stb = (t == 2*s)`), which silently ASSUMES the counter powers up
+    frame-aligned at 0. The RTL does not: banyan_fabric.v holds a real counter
+    whose only zeroing paths are rst_n, sof and the natural wrap, and the
+    strobes are a PURE DECODE of it (`act_stb[s] = (cnt == 2*s)`). So §3's
+    "arbitrary power-up state" census randomised the ELEMENT state and left the
+    COUNTER perfectly initialised — half the surface, which is exactly what the
+    8/8 13:31 probe registered as its open successor.
+
+      init_phase : power-up value of cnt (TT power-gates; any 0..FRAME-1)
+      sof        : whether the frame's start strobe zeroes the counter
+
+    Defaults reproduce the previous behaviour BIT-FOR-BIT (phase 0 + sof means
+    cnt == t for the whole frame), so sections 1/2/3/4 are untouched by this.
+    """
     elems = {}
     for s in range(K):
         for (lo, hi) in pairs(s):
@@ -77,12 +94,18 @@ def run(packets, init_random=None):
             streams.append(make_frame(1, d, pay))
 
     captured = [[] for _ in range(N)]
+    cnt = init_phase % FRAME
     for t in range(FRAME):
+        # banyan_fabric.v: sof zeroes the counter at the frame's first cycle;
+        # otherwise it free-runs and wraps at FRAME-1. The strobes below are a
+        # decode of THIS value, never of t.
+        if sof and t == 0:
+            cnt = 0
         wire = [streams[i][t] for i in range(N)]
         latch_jobs = []
         for s in range(K):
-            act_stb = (t == 2 * s)
-            sel_stb = (t == 2 * s + 1)
+            act_stb = (cnt == 2 * s)
+            sel_stb = (cnt == 2 * s + 1)
             nxt = list(wire)
             for (lo, hi) in pairs(s):
                 e = elems[(s, lo)]
@@ -94,6 +117,7 @@ def run(packets, init_random=None):
             e.latch(a, b, ast, sst)
         for i in range(N):
             captured[i].append(wire[i])
+        cnt = 0 if cnt == FRAME - 1 else cnt + 1
     return captured
 
 
@@ -179,6 +203,48 @@ for seed in range(200):
         fails += 1
 print(f"3. 200 ARBITRARY power-up states, one frame  : "
       f"{'PASS' if fails == 0 else f'{fails} FAIL'}")
+
+# 3b. THE OTHER HALF OF THE INIT SURFACE: the frame COUNTER's power-up phase.
+#     Section 3 randomises element state with the counter pinned at 0. The RTL
+#     counter free-runs from whatever the power-gate left behind, so the real
+#     census must sweep its phase too. Every phase, every sorted+concentrated
+#     case, sof asserted -- this is the "conservative + inert" claim.
+fails = 0
+checked = 0
+for phase in range(FRAME):
+    for n in range(1, N + 1):
+        for dests in itertools.combinations(range(N), n):
+            pk = [None] * N
+            for i in range(n):
+                pk[i] = (dests[i], payload_of(i + 1))
+            checked += 1
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf):
+                ok = check(pk, run(pk, init_phase=phase), f"phase {phase}")
+            if not ok:
+                fails += 1
+print(f"3b. ALL {FRAME} counter power-up phases x {checked // FRAME} cases : "
+      f"{'PASS' if fails == 0 else f'{fails} FAIL'}  "
+      f"({checked} runs — sof re-aligns, so phase is INERT)")
+
+# 3c. CONTROL for 3b — without sof the counter never re-aligns, so a non-zero
+#     power-up phase MUST mis-decode the strobes. If this does not fail, 3b is
+#     passing because the phase never reached the decode, not because the design
+#     is robust: the arm would be testing nothing.
+mis = 0
+tried = 0
+for phase in range(1, FRAME):
+    pk = [None] * N
+    for i in range(N):
+        pk[i] = (i, payload_of(i + 1))
+    tried += 1
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        if not check(pk, run(pk, init_phase=phase, sof=False), f"noSOF {phase}"):
+            mis += 1
+print(f"3c. CONTROL — same, sof WITHHELD               : "
+      f"{mis}/{tried} phases mis-route  "
+      f"({'phase reaches the decode' if mis else '⚠ 3b IS BLIND'})")
 
 # 4. the control: does this suite actually catch the bug that was fixed?
 class OldElem(Elem):
