@@ -158,6 +158,48 @@ this right; that is precisely what makes it worth migrating rather than re-deriv
 warning stands): it is the REGISTER-layout control, and the memory control is a *separate* pair.
 Two controls, two fixtures, and the swap must end with BOTH live in a module that builds.
 
+### ⚖️ STEP 2d — THE `decQ_mem` / `decQ_trapped` LANDING CONDITIONS (helm ruling 08/22 22:06)
+
+Under D `decQ` READS `mem`/`trapped` from the env instead of manufacturing defaults, so three
+`:= rfl` theorems become **FALSE for a general env — not unproven, FALSE**:
+
+| site | glob | status |
+|---|---|---|
+| `Stack/Program.lean:1506` `decQ_mem` | MATH | measured false under the patch |
+| `Stack/Program.lean:1509` `decQ_trapped` | MATH | measured false under the patch |
+| `HDL/C4Refuted.lean:208` `decQ_mem` (a SECOND declaration) | **COMPILER — MINE** | **PREDICTED, NOT MEASURED** |
+
+⛔ **THE RULING IS SEAT-TIER, NOT THE CAPTAIN'S**, and its precedent is this very swap (helm 08/20,
+`c4Spec_iff_fieldwise`): **weakening a TRUE statement so a proof goes through is forbidden** (iron
+rule 1 — it is how a false theorem lands under a true-sounding name), **but removing a direction
+that is FALSE in the new setting is REQUIRED HONESTY.** A claim that has become false does not stay
+in the corpus because it was once provable.
+
+⛔ **FOUR CONDITIONS, MANDATORY, EXPLICITLY NOT RELAXED — plus one specific to this case:**
+1. **EXHIBIT the falsity IN-TREE. Never delete silently** — a direction that dies silently gets
+   re-derived by the next reader.
+2. **RE-CENSUS the consumers IN THE LANDING COMMIT**, not from an earlier measurement. The tree
+   moves; a census taken the night before is a claim, not a measurement.
+3. **DEMONSTRATE the dependent refutation STILL FIRES, with a differential.** *"Should survive" is
+   a prediction, not a result.*
+4. **PUSH the changed arithmetic into the claim ladder** — every brief quoting the old shape is
+   stale the moment this lands. ⭐ *That includes THIS runbook and the boot brief.*
+5. **EXHIBIT BOTH FALSITIES SEPARATELY, and state whether any consumer depends on their
+   CONJUNCTION.** ✅ **ANSWERED, by two seats independently: YES —
+   `Stack/Program.lean:1693` `decQ_cyc_eq_of_memFree` rewrites with BOTH, as the two bullets of one
+   proof.** That is the seam where a consumer quietly loses both halves and no build reports the
+   join. Plan it first.
+
+⚠️ **AND AN ORDERING CONSTRAINT THAT IS NOT NEGOTIABLE, MEASURED 08/22: MY THIRD SITE CANNOT BE
+EXHIBITED UNTIL MATH'S REPAIRS LAND.** `C4Refuted`'s transitive import closure is **53 modules and
+reaches `Stack.Program`**, so it cannot build while Program fails — a build of it dies at
+`✖ Building SaltWorks.Stack.Program` and **never reaches C4Refuted at all** (0 `Built` jobs, no
+verdict line). *A failing hub masks every dependent, and the absence of errors from a module that
+never ran reads exactly like a pass.* `DecoderTransport.stBit_decQ` is masked by the same hub.
+⇒ **SEQUENCE: math's nine clear → `Stack.Program` builds → my two masked items become measurable in
+ONE run → exhibit → joint landing.** Do not attempt condition 1 for `C4Refuted:208` before that;
+it is not skipped, it is unreachable.
+
 ## STEP 3 — THE SILENT CLASS: PROSE
 
 Docstrings in `C4.lean`, `CorePlace.lean` and others cite `1056`/`1088` in **prose**. *Stale prose
