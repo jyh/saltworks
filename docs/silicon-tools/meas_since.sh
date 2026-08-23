@@ -102,6 +102,26 @@ echo "  ⇒ COVERING BUILD OWED TO THE MAESTRO for the landing(s) above."
 echo "    A MEAS verdict is a KERNEL witness on ONE FILE at a time; it does NOT"
 echo "    seal a landing and never has. Do not read a green below as a seal."
 
+# ── HUB REACHABILITY, computed ONCE ────────────────────────────────────────────
+# Transitive closure of `import` from SaltWorks.lean. Built once per sweep rather
+# than per module: it is the same graph every time, and re-deriving it 95 times
+# would be the cost that tempts someone back to the cheap wrong test.
+HUBCLOSURE=$(mktemp) || { echo "meas_since: mktemp failed"; exit 2; }
+: > "$HUBCLOSURE"
+frontier=$(grep -E '^import [A-Za-z0-9_.]+$' SaltWorks.lean 2>/dev/null | sed 's/^import //')
+while [ -n "$frontier" ]; do
+  next=""
+  for m in $frontier; do
+    grep -qxF "$m" "$HUBCLOSURE" && continue
+    printf '%s\n' "$m" >> "$HUBCLOSURE"
+    mp="$(printf '%s' "$m" | sed 's|\.|/|g').lean"
+    [ -f "$mp" ] && next="$next $(grep -E '^import [A-Za-z0-9_.]+$' "$mp" 2>/dev/null | sed 's/^import //')"
+  done
+  frontier="$next"
+done
+echo "  hub transitive closure: $(wc -l < "$HUBCLOSURE" | tr -d ' ') modules"
+reach_hub() { grep -qxF "$1" "$HUBCLOSURE" && echo yes || echo no; }
+
 rc=0
 for f in $changed; do
   if [ ! -f "$f" ]; then
@@ -123,6 +143,25 @@ for f in $changed; do
   # Now derives the FULL module name from the path, so it works for any namespace.
   mod=$(printf '%s' "$f" | sed 's|/|.|g; s|\.lean$||')
   root=$(grep -n "^import $mod\$" SaltWorks.lean 2>/dev/null | head -1)
+  # ⛔⛔ REACHABILITY, NOT DIRECT MEMBERSHIP — FIXED 2026-08-23, AND THIS IS THE
+  # SECOND HALF OF THE 08-11 REPAIR TWELVE LINES ABOVE. That fix widened the
+  # NAMESPACE derivation and left the test itself a bare `grep ^import <mod>` of
+  # SaltWorks.lean — i.e. DIRECT membership — while the message it prints makes a
+  # COVERAGE claim ("a full build does not cover it"). Those are different facts
+  # the moment an AGGREGATOR exists: the hub imports `SaltWorks.Certs.All` and
+  # that file imports the eight cert modules, so a full build DOES cover them and
+  # this gate said it did not.
+  # MEASURED on the 08-23 sweep, 95 modules: 10 flagged "not in hub graph",
+  # hub transitive closure = 179 modules, GENUINELY unreachable = 1.
+  #   ⇒ NINE OF TEN WARNINGS WERE FALSE — 90%.
+  # ⚠️ And the harm is the one THIS FILE ALREADY NAMES at the 08-11 comment:
+  # "a permanent FALSE 'not in hub graph' trains a reader to ignore the line —
+  # which is how a real unrooted module would have walked past everyone."
+  # The single TRUE positive today (docs/hdl-tools/reach_census.lean, 0 importers)
+  # was sitting in a list of nine false ones, exactly as predicted.
+  # ⇒ A FIX THAT REACHES THE INPUT OF A TEST AND NOT ITS PREDICATE LEAVES THE
+  #   ORIGINAL DEFECT LIVE UNDER A NEW SPELLING.
+  reach=$(reach_hub "$mod")
   # ⛔⛔ THIS LINE IS AN OBSERVATION, NOT A VERDICT — and the demotion is MEASURED.
   # It used to print "⚠️ UNROOTED — invisible to `lake build`", i.e. it called every
   # unrooted module a defect. On 2026-08-09 13:46 that framing cost a peer their
@@ -134,10 +173,14 @@ for f in $changed; do
   #   a PROPERTY and calls it one. Whether "not in the hub graph" is wrong is the
   #   AUTHOR's call — this script reports the fact and takes no position.
   if [ -n "$root" ]; then
-    echo "     in hub graph: SaltWorks.lean:${root%%:*}"
+    echo "     in hub graph: SaltWorks.lean:${root%%:*} (imported DIRECTLY)"
+  elif [ "$reach" = "yes" ]; then
+    echo "     in hub graph TRANSITIVELY — reached from SaltWorks.lean through an"
+    echo "     aggregator, so a full build DOES cover it. Not a direct import."
   else
-    echo "     not in hub graph (a full build does not cover it; whether that is"
-    echo "     intended is the module author's call — this gate takes no position)"
+    echo "     ⚠️ NOT REACHABLE from SaltWorks.lean — a full build does not cover it;"
+    echo "     whether that is intended is the module author's call and this gate"
+    echo "     takes no position (AccountMeasure was unrooted ON PURPOSE)."
   fi
 done
 exit $rc
