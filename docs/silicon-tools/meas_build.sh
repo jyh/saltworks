@@ -230,6 +230,21 @@ for target in "$@"; do
     continue
   fi
 
+  # ⛔⛔ HOISTED 2026-08-23 — THIS GATE COULD ONLY REPORT SUCCESS.
+  # `contnote` was assigned INSIDE the green branch and referenced in the RED one,
+  # so with `set -u` any module that actually failed killed the reporter at the
+  # exact line that would have named the defect:
+  #     meas_build.sh: line 280: contnote: unbound variable   EXIT=1
+  # ⇒ ***A GATE WHOSE FAILURE PATH IS UNTESTED IS A GATE THAT CANNOT FAIL, AND A
+  #   CHECK THAT CANNOT FAIL WAS NEVER A CHECK.*** Every MEAS verdict this tool has
+  # ever published was, necessarily, a GREEN one — not because the modules were
+  # clean but because a red one could not finish printing. Found 08/23 on the FIRST
+  # module of the backlog sweep, i.e. by USE, which is the way this seat keeps
+  # promising itself it will not find things.
+  # The contention sample is a property of the RUN, not of its outcome, so it
+  # belongs above the split. Both branches now read an assigned value.
+  peers=$peers_pre
+  if [ "${peers:-0}" -gt 0 ]; then contnote=" ⚠️UNDER CONTENTION (${peers} peer lean/lake at start) — WALL IS NOT AN ELABORATION COST"; else contnote=""; fi
   if [ "$code" = "0" ]; then
     head_after=$(git rev-parse --short HEAD 2>/dev/null || echo '?')
     # ⛔ CONTENTION LABEL, added 2026-08-11 02:5x AFTER I PUBLISHED A CONTENDED
@@ -255,8 +270,6 @@ for target in "$@"; do
     #   v1 sampled at PRINT time — the peer had already exited
     #   v2 sampled pre-work but kept a >2 threshold calibrated for post-work
     # Both were caught by a DELIBERATE two-elaboration control, never by use.
-    peers=$peers_pre
-    if [ "${peers:-0}" -gt 0 ]; then contnote=" ⚠️UNDER CONTENTION (${peers} peer lean/lake at start) — WALL IS NOT AN ELABORATION COST"; else contnote=""; fi
     printf '✅ %s — KERNEL-CHECKED under this hand · %ss wall%s · EXIT=0 @ sha %s%s\n' "$target" "$wall" "$contnote" "$h1" "$capnote"
     if [ "$head_before" = "$head_after" ]; then
       # ⛔ THREE ARMS, NOT TWO. The -1 arm exists because "I could not tell" and
