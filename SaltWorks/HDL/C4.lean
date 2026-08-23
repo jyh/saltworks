@@ -25,7 +25,7 @@ whoever happens to finish the construction.*
 
 ## ⛔ THE OBLIGATION THAT IS INVISIBLE TO THE TYPE SYSTEM
 
-**Both sides of C4 are `List Bool` AT ANY LENGTH.** ⇒ ***A 1055-output core
+**Both sides of C4 are `List Bool` AT ANY LENGTH.** ⇒ ***A core one output short
 yields a well-typed, FALSE theorem, and nothing in the elaborator notices.***
 *Math flagged this at 14:17 and it is the reason `CoreConforms` exists as a
 separate, checkable predicate rather than as a comment: the layout was pinned by
@@ -122,10 +122,22 @@ theorem outs_length_of_C4Spec {c : Circ} (h : C4Spec c) : c.outs.length = stWidt
 The risk is that it is vacuous or unfalsifiable, so each conjunct gets a witness
 that violates exactly it.* -/
 
-/-- A circuit of the right shape in every respect except that it emits **1055**
-outputs instead of 1056. -/
+/-- A circuit of the right shape in every respect except that it emits **one output
+too few** — `stWidth - 1` instead of `stWidth`.
+
+⛔ **THE WITNESS IS DERIVED FROM `stWidth`, AND THAT IS THE WHOLE POINT.** It was
+hardcoded at `1055`, the off-by-one against a 1056-bit state. **A hardcoded witness
+stops being an off-by-one the moment the width moves — while `coreShort_is_rejected`
+below KEEPS PROVING, because a wrong count is still wrong.** *A control that keeps
+passing for a NEW REASON is worse than one that breaks, because nothing announces it.*
+At the width this landed on (1056) it reduced to `List.range 1055`, byte-for-byte the
+old witness — **proved, not asserted: `stWidth - 1 = 1055` by `decide +kernel`** — so
+the change was a NO-OP at landing and the difference appears only when `stWidth` moves.
+*Phrased as history on purpose: a sentence saying "today" goes stale on the day it
+describes, and this one is about a control whose entire defect was going stale.* Its sibling `coreNarrow` was already
+derived; this row now matches it. -/
 def coreShort : Circ :=
-  { nIn := coreInWidth, gates := [], outs := List.range 1055 }
+  { nIn := coreInWidth, gates := [], outs := List.range (stWidth - 1) }
 
 /-- A circuit with the right output count and the wrong input width. -/
 def coreNarrow : Circ :=
@@ -133,7 +145,10 @@ def coreNarrow : Circ :=
 
 /-- ⛔ **THE OFF-BY-ONE CORE IS REJECTED — and it is rejected by `CoreConforms`
 alone, since nothing in C4's type distinguishes it.** *This is math's 14:17
-hazard as a decided fact: 1055 against 1056, well-typed either way.* -/
+hazard as a decided fact: `stWidth - 1` against `stWidth`, well-typed either way.
+⭐ Stated in the DERIVED form deliberately — the witness above is derived, and a
+docstring that re-pins it to literals would go stale at the width the definition
+was just made to survive.* -/
 theorem coreShort_is_rejected : ¬ CoreConforms coreShort := by decide +kernel
 
 /-- ⛔ And the narrow core is rejected on the input width. -/
