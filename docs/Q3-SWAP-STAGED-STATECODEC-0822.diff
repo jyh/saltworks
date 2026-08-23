@@ -14,6 +14,15 @@
 #                 St.mk.injEq under D demands FOUR, with `and_true` flagged as an unused simp arg.
 #   PASSES-AFTER  EXIT=0, zero errors, every #audit_axioms tick green, BOTH non-vacuity controls
 #                 (transposed_layout_breaks, correct_layout_recovers) still passing.
+#   ⭐ AND THE GREEN ITSELF WAS MUTATION-TESTED 08-22 22:2x, against helm's law that A GREEN EXIT
+#     SAYS SOMETHING RAN, NOT THAT ANYTHING LOOKED. I had proved the audit arm DETERMINISTIC (same
+#     file, byte-identical output, twice) -- but a CACHED REPLAY is deterministic too, so
+#     determinism does not establish elaboration. Driven: inserting an unprovable `have : False`
+#     into the ALREADY-AUDITED file makes the audit FAIL (EXIT=1, 4 errors). ⇒ the audit arm
+#     RE-ELABORATES; the PASSES-AFTER green is a real green, not a replay. Restored byte-identical
+#     afterwards, worktree re-verified equal to this patch, re-audited EXIT=0, zero mutant residue.
+#     ⚠️ Scope: this establishes ELABORATION, nothing more. The proofs' correctness is what the
+#     #audit_axioms ticks already carry.
 #   DOWNSTREAM    full worktree build, 8741 jobs: failures confined to TWO modules --
 #                 StateCodecD.lean (the scaffold; see runbook STEP 2c) and Stack/Program.lean
 #                 (math's glob, 9 error sites). Everything else re-derives green.
