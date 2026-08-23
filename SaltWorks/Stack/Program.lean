@@ -2655,6 +2655,52 @@ def TrappedFieldD (c : SaltWorks.HDL.Circ) : Prop :=
   ∀ ins, outTrap c ins
     = (stepT (SaltWorks.HDL.StateCodecD.decQD ins) (seenWord ins)).trapped
 
+/-! ### The D-regime bitwise bridge — step 5's foundation -/
+
+/-- `encDD` has exactly `stWidthD` bits.  Mirrors `encD_length`. -/
+theorem encDD_length (s : St) :
+    (SaltWorks.HDL.StateCodecD.encDD s).length = SaltWorks.HDL.StateCodecD.stWidthD := by
+  rw [SaltWorks.HDL.StateCodecD.encDD, List.length_map, List.length_range]
+
+/-- **The output count is forced by `C4SpecD`**, exactly as `stWidth` is by `C4Spec`.
+⛔ *This is the conjunct that makes `C4SpecD core` REFUTABLE: `core_outs_length` pins
+`core.outs.length = stWidth = 1056`, and this forces `1313`.* -/
+theorem outs_length_of_C4SpecD {c : SaltWorks.HDL.Circ} (h : C4SpecD c) :
+    c.outs.length = SaltWorks.HDL.StateCodecD.stWidthD := by
+  have hh := congrArg List.length (h (fun _ => false))
+  rwa [SaltWorks.HDL.sem, List.length_map, encDD_length] at hh
+
+/-- ⭐⭐ **`C4SpecD` IS A BIT-BY-BIT STATEMENT.**  The D analogue of
+`c4Spec_iff_bitwise`: the spec holds exactly when the output count is `stWidthD`
+and every output bit below it reads the corresponding `stBitD`. -/
+theorem c4SpecD_iff_bitwise (c : SaltWorks.HDL.Circ) :
+    C4SpecD c ↔
+      c.outs.length = SaltWorks.HDL.StateCodecD.stWidthD ∧
+        ∀ ins, ∀ j < SaltWorks.HDL.StateCodecD.stWidthD,
+          outBit c ins j
+            = SaltWorks.HDL.StateCodecD.stBitD
+                (stepT (SaltWorks.HDL.StateCodecD.decQD ins) (seenWord ins)) j := by
+  constructor
+  · intro h
+    refine ⟨outs_length_of_C4SpecD h, ?_⟩
+    intro ins j hj
+    rw [outBit, h ins, SaltWorks.HDL.StateCodecD.encDD_getD _ _ hj]
+  · rintro ⟨hlen, hbits⟩ ins
+    apply List.ext_getElem
+    · rw [SaltWorks.HDL.sem, List.length_map, hlen, encDD_length]
+    · intro i h1 h2
+      have hi : i < SaltWorks.HDL.StateCodecD.stWidthD := by rwa [encDD_length] at h2
+      have hL : (SaltWorks.HDL.sem c ins)[i]'h1 = outBit c ins i := by
+        rw [outBit, List.getD_eq_getElem _ _ h1]
+      have hR : (SaltWorks.HDL.StateCodecD.encDD
+            (stepT (SaltWorks.HDL.StateCodecD.decQD ins) (seenWord ins)))[i]'h2
+          = SaltWorks.HDL.StateCodecD.stBitD
+            (stepT (SaltWorks.HDL.StateCodecD.decQD ins) (seenWord ins)) i := by
+        rw [← List.getD_eq_getElem _ false h2,
+          SaltWorks.HDL.StateCodecD.encDD_getD _ _ hi]
+      rw [hL, hR]
+      exact hbits ins i hi
+
 /-! ### The layout arithmetic, once
 
 `stBit` is `StateCodec`'s bit-level reader; these two lemmas are the only places
