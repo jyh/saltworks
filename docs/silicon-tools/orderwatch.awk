@@ -32,27 +32,81 @@
 # here on purpose: it exists to protect owner-TRACKING across a multi-line parse,
 # and this filter has no state to corrupt — it is one line, one test, no memory.
 
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# REV 2 — 2026-08-23, AND IT IS A REPAIR OF A MEASURED MISS, NOT A TIDY-UP.
+#
+# ⛔ THE EVENT. At 12:03:27 this seat's watches died; at 12:42:46 the helm posted
+# `CRASH CHECK-INS DISPATCHED TO ALL SIX SEATS`, an order that named silicon's
+# specific ask in its BODY and imposed a bus-report obligation. Rev 1 would not
+# have delivered it EVEN IF ARMED: no `SILICON ORDER:` token. Measured, not
+# supposed — the header carries ZERO occurrences of the token.
+#
+# ⛔⛔ AND MY FIRST DIAGNOSIS WAS WRONG, WHICH IS THE PART WORTH KEEPING. I posted
+# to the fleet, banked in a memory card, and wrote into my boot brief that the fix
+# was to widen to "a maestro header NAMING THIS SEAT". Then I tested that proposal
+# against the actual missed line: `grep -c 'silicon'` on the 12:42:46 header
+# returns **0**. The order was a BROADCAST — the seat name lived only in the body.
+# ⇒ ***MY PROPOSED FIX WOULD HAVE MISSED THE VERY EVENT THAT MOTIVATED IT.***
+# A repair aimed at a remembered event rather than a re-read one inherits the
+# error's shape. TEST THE FIX AGAINST THE ARTIFACT, never against the story.
+#
+# ⭐ WHAT REV 2 DELIVERS — three clauses, TAGGED, volumes MEASURED over the whole
+# 160k-line bus (1,245 maestro headers) rather than guessed:
+#     TOKEN                37   the contract path, rev 1's only clause
+#     NAMED-no-token      317   header names silicon; 71 of these carry
+#                               order/ruling language (measured by awk, not grep)
+#     BROADCAST-no-token   32   header addresses all/each/every seat
+#   386 delivered of 1,245 = 31%, ~27/day over the bus's life.
+# The file's own asymmetry doctrine (above) licenses this: a false wake costs one
+# header line and a look; a missed wake costs the fleet a hand.
+#
+# ⚖️ THE TAG IS LOAD-BEARING AND IS NOT COSMETIC. Rev 1's safety argument is that
+# the contract is MUTUAL: if the helm omits the token the failure is LOUD on their
+# side because I do not answer. Silently widening would DESTROY that property —
+# every future format breach would be absorbed invisibly by my filter. So a
+# no-token delivery is delivered AND LABELLED, and a run of `*-no-token` lines is
+# itself the signal that the sender half of the contract has drifted.
+#
+# ⛔⛔ THE LIMIT, ASSERTED IN THE SELFTEST RATHER THAN HIDDEN. Bus line 15594 is
+# `🛑 HOLD HEAVY WORK` — a real fleet-wide order from the helm that carries NO
+# token, does NOT say "silicon", and does NOT say "all/each/every seat". REV 2
+# STILL MISSES IT, and `orderwatch_selftest.sh` ARM 6 asserts that miss on purpose.
+# ⇒ ***NO SYNTACTIC PREDICATE OVER HEADERS DECIDES "IS THIS AN ORDER THAT BINDS
+# ME". The completeness guarantee is NOT this filter — it is the 30-minute
+# fallback sweep, which lists EVERY header since my own last post.*** This channel
+# buys LATENCY on the shapes we can name; the sweep buys COVERAGE. On 08/23 both
+# died at 12:03:27, and THAT is why the order was missed — the narrow predicate
+# was the second cause, not the first. Naming the wrong single cause is how a
+# repair ends up aimed at the wrong component.
+# ⛔ A keyword clause for HOLD/STOP/STAND-DOWN was CONSIDERED AND REJECTED:
+# busmon's own history records that keyword gates failed here at 14:02 because a
+# marker can sit in any position. A gate that must enumerate the imperative moods
+# of English is not a gate.
+# ═══════════════════════════════════════════════════════════════════════════════
+
 BEGIN { }
 
 # Never re-deliver what the runner has already accounted for. The runner passes
 # start=<lines already seen>; without this every poll would replay the whole bus.
 NR <= start { next }
 
-# THE WAKE SHAPE, and every clause is load-bearing:
-#   ^\[            a real header begins at column zero with a bracket
-#   MM/DD HH:MM    the stamp grammar this bus actually uses (seconds optional --
-#                  the 3-field stamp cost me a swallowed order on 08/11, so the
-#                  seconds are OPTIONAL here rather than assumed absent)
-#   , maestro      the poster field. `maestro=LIT` and `maestro ` both match,
-#                  because the field carries a state suffix in practice.
-#   SILICON ORDER: the contract token, matched as a LITERAL via index() so no
-#                  regex metacharacter can widen or narrow it by accident.
+# THE WAKE SHAPE. The header grammar is rev 1's, unchanged and still load-bearing;
+# only the DECISION inside it is widened. tolower() once into `h`, so the two
+# widened clauses are case-insensitive while the contract token stays an exact
+# literal via index() — no regex metacharacter can widen or narrow it by accident.
 /^\[[0-9][0-9]\/[0-9][0-9] [0-9][0-9]?:[0-9a-zA-Z]+(:[0-9a-zA-Z]+)?, maestro/ {
-  if (index($0, "SILICON ORDER:") > 0) { print; fflush() }
+  h = tolower($0)
+  if (index($0, "SILICON ORDER:") > 0)                    tag = "TOKEN"
+  else if (index(h, "silicon") > 0)                       tag = "NAMED-no-token"
+  else if (h ~ /(all|each|every)[a-z0-9 ,'"-]{0,30}seat/) tag = "BROADCAST-no-token"
+  else next
+  print tag "\t" $0; fflush()
   next
 }
 
-# Everything else is dropped UNDELIVERED — no body lines, ever. There is
-# deliberately no clip, no summary, and no "N posts suppressed" counter: a count of
-# what I am not reading is itself a trickle from the channel, and the fallback
-# sweep already tells me the bus is moving.
+# Everything else is dropped UNDELIVERED — no body lines, ever, and no peer
+# headers even when they name me. There is deliberately no clip, no summary, and
+# no "N posts suppressed" counter: a count of what I am not reading is itself a
+# trickle from the channel, and the fallback sweep already tells me the bus is
+# moving.
