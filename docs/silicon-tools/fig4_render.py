@@ -54,11 +54,22 @@ from collections import defaultdict
 #
 # Colour follows the FAMILY, shade follows the member: one hue per legend group
 # so the eye reads five divisions, not twelve classes.
+# ⛔ PALETTE REVISED 2026-08-23 AFTER THE CAPTAIN READ THE FIRST CANDIDATE AS
+# "3 mac serializers + the rest is black and red". Two causes, both fixed here:
+#   (1) `fabric_sequential` at 0x5f read NEAR-BLACK where the right half is dense;
+#       the grey ramp now bottoms out at 0x7d and spans a narrower, lighter range.
+#   (2) the clock/timing family was RED (0xa51122 + 0xef6f7d), and red against
+#       grey at review scale IS "black and red". It is now a VIOLET family — still
+#       one family in two shades, as ratified, but no longer competing with the
+#       greys for the same read.
+# The constraint from the order was that the five families separate AT A GLANCE
+# and the palette stays honest; hue now carries the family and shade the member,
+# so nothing is distinguished by brightness alone.
 COLORS = {
-    # ① fabric — one grey family, three shades
-    "fabric_combinational":   (0xbd, 0xbd, 0xbd),
-    "fabric_mux":             (0x8d, 0x8d, 0x8d),
-    "fabric_sequential":      (0x5f, 0x5f, 0x5f),
+    # ① fabric — one grey family, three shades, none near black
+    "fabric_combinational":   (0xd6, 0xd6, 0xd6),
+    "fabric_mux":             (0xab, 0xab, 0xab),
+    "fabric_sequential":      (0x7d, 0x7d, 0x7d),
     # ② mac — one blue family, three islands
     "mac_island_cell0":       (0x1f, 0x77, 0xb4),
     "mac_island_cell1":       (0x3d, 0x8f, 0xc6),
@@ -67,13 +78,87 @@ COLORS = {
     "serializer_ser0":        (0xff, 0x7f, 0x0e),
     "serializer_ser1":        (0xff, 0x9a, 0x3d),
     "serializer_ser2":        (0xff, 0xb5, 0x6b),
-    # ④ clock & timing — ONE family, TWO shades, per the ratified grouping
-    "clock_tree":             (0xa5, 0x11, 0x22),
-    "hold_fanout_buffering":  (0xef, 0x6f, 0x7d),
-    # ⑤ everything else
-    "drive_strengthening":    (0xc4, 0xa4, 0x84),
-    "tie":                    (0x8c, 0x56, 0x4b),
+    # ④ clock & timing — ONE violet family, TWO shades, per the ratified grouping
+    "clock_tree":             (0x5e, 0x2d, 0x91),
+    "hold_fanout_buffering":  (0xc0, 0xa6, 0xdb),
+    # ⑤ everything else — warm, and distinct from all four families above
+    "drive_strengthening":    (0x8c, 0x56, 0x4b),
+    "tie":                    (0x2c, 0xa0, 0x2c),
 }
+
+# ── a 5x7 bitmap font, because the PNG must carry its own legend ─────────────
+# ⛔ WHY THIS IS IN HERE AT ALL: the first candidate put the legend ONLY in the
+# SVG, on my reasoning that a journal figure carries its key in the caption. The
+# Captain reviewed the PNG standalone and could not decode it — "3 mac
+# serializers + the rest is black and red". THE DELIVERABLE IS READ AS THE
+# ARTIFACT THAT IS SENT, not as the artifact plus its intended context.
+# No font library exists here, so the glyphs are data. Uppercase + digits +
+# the punctuation the labels need; labels are upper-cased at draw time.
+_F = {
+ 'A':"01110100011000111111100011000110001",
+ 'B':"11110100011000111110100011000111110",
+ 'C':"01110100011000010000100001000101110",
+ 'D':"11110100011000110001100011000111110",
+ 'E':"11111100001000011110100001000011111",
+ 'F':"11111100001000011110100001000010000",
+ 'G':"01110100011000010111100011000101111",
+ 'H':"10001100011000111111100011000110001",
+ 'I':"01110001000010000100001000010001110",
+ 'J':"00111000100001000010000101001001100",
+ 'K':"10001100101010011000101001001010001",
+ 'L':"10000100001000010000100001000011111",
+ 'M':"10001110111010110101100011000110001",
+ 'N':"10001110011010110011100011000110001",
+ 'O':"01110100011000110001100011000101110",
+ 'P':"11110100011000111110100001000010000",
+ 'Q':"01110100011000110001101011001001101",
+ 'R':"11110100011000111110101001001010001",
+ 'S':"01111100001000001110000010000111110",
+ 'T':"11111001000010000100001000010000100",
+ 'U':"10001100011000110001100011000101110",
+ 'V':"10001100011000110001100010101000100",
+ 'W':"10001100011000110101101011101110001",
+ 'X':"10001100010101000100010101000110001",
+ 'Y':"10001100010101000100001000010000100",
+ 'Z':"11111000010001000100010001000011111",
+ '0':"01110100011001110101110011000101110",
+ '1':"00100011000010000100001000010001110",
+ '2':"01110100010000100110010001000011111",
+ '3':"11111000100010000010000011000101110",
+ '4':"00010001100101010010111110001000010",
+ '5':"11111100001111000001000011000101110",
+ '6':"00110010001000011110100011000101110",
+ '7':"11111000010001000100010000100001000",
+ '8':"01110100011000101110100011000101110",
+ '9':"01110100011000101111000010001001100",
+ ' ':"00000000000000000000000000000000000",
+ '(':"00010001000100001000010000010000010",
+ ')':"01000001000001000010000100010001000",
+ '&':"01100100101001001100101011001001101",
+ ',':"00000000000000000000000000010001000",
+ '-':"00000000000000001110000000000000000",
+ '.':"00000000000000000000000000011000110",
+ '/':"00001000100001000100010000100010000",
+ '%':"11001110100001000100010000101110011",
+ ':':"00000001100011000000001100011000000",
+}
+def draw_text(px, PW, PH, x, y, text, col=(0, 0, 0), scale=2):
+    """Blit `text` at (x,y) top-left. Deterministic and dependency-free."""
+    for ch in text.upper():
+        g = _F.get(ch)
+        if g is None:
+            x += 6 * scale; continue
+        for r in range(7):
+            for c in range(5):
+                if g[r * 5 + c] == '1':
+                    for dy in range(scale):
+                        for dx in range(scale):
+                            X, Y = x + c * scale + dx, y + r * scale + dy
+                            if 0 <= X < PW and 0 <= Y < PH:
+                                o = (Y * PW + X) * 3
+                                px[o], px[o + 1], px[o + 2] = col
+        x += 6 * scale
+    return x
 # (group label, [member classes]) — counts are SUMMED over members, because a
 # legend that names the CLASS while the palette splits the INSTANCES would
 # understate MAC by two thirds.
@@ -231,18 +316,41 @@ def main():
                     f'font-size="11" fill="#000">{label} ({n:,})</text>\n')
         f.write("</svg>\n")
 
-    # ── PNG ──
-    PW = 1600
-    PH = max(1, int(PW * dh / dw))
+    # ── PNG: die band on top, EMBEDDED LEGEND beneath ──
+    PW = 2400                      # wider than the first candidate: at 1600 the
+                                   # dense right half merged into one mass
+    DIE_H = max(1, int(PW * dh / dw))
+    MARG, LEGH = 16, 132
+    PH = DIE_H + LEGH + MARG * 2
     px = bytearray(b"\xff" * (PW * PH * 3))
+    TOP = MARG
     for (x, y, w, h, col) in rects:
         px0 = int((x - x0) / dw * PW); px1 = max(px0 + 1, int((x - x0 + w) / dw * PW))
-        py0 = int((dh - (y - y0) - h) / dh * PH); py1 = max(py0 + 1, int((dh - (y - y0)) / dh * PH))
+        py0 = TOP + int((dh - (y - y0) - h) / dh * DIE_H)
+        py1 = max(py0 + 1, TOP + int((dh - (y - y0)) / dh * DIE_H))
         for yy in range(max(0, py0), min(PH, py1)):
-            base = (yy * PW + max(0, px0)) * 3
             for xx in range(max(0, px0), min(PW, px1)):
                 o = (yy * PW + xx) * 3
                 px[o], px[o+1], px[o+2] = col
+
+    # legend: seven groups, summed counts. Counts are SUMMED over the members of
+    # a family because a legend naming the CLASS beside one member's count would
+    # understate MAC by two thirds.
+    lx, ly = MARG, TOP + DIE_H + 26
+    col_w = (PW - 2 * MARG) // 4
+    for i, (label, members) in enumerate(LEGEND_GROUPS):
+        cx = lx + (i % 4) * col_w
+        cy = ly + (i // 4) * 34
+        n = sum(drawn.get(m, 0) for m in members)
+        for j, m in enumerate(members):          # one swatch per shade
+            c = COLORS[m]
+            for yy in range(cy, cy + 14):
+                for xx in range(cx + j * 16, cx + j * 16 + 15):
+                    if 0 <= xx < PW and 0 <= yy < PH:
+                        o = (yy * PW + xx) * 3
+                        px[o], px[o+1], px[o+2] = c
+        draw_text(px, PW, PH, cx + len(members) * 16 + 6, cy + 1,
+                  f"{label} ({n:,})", (0, 0, 0), 2)
     # DIE OUTLINE — the caption's own claim is that the placed logic is seen
     # against the TRUE DIE EDGE, so a PNG without the frame drops the very thing
     # that makes the white space meaningful (it is fill/decap, not empty die).
@@ -254,7 +362,8 @@ def main():
         if 0 <= x < PW:
             for yy in range(max(0, y0p), min(PH, y1p)):
                 o = (yy * PW + x) * 3; px[o], px[o+1], px[o+2] = col
-    hline(0, 0, PW); hline(PH - 1, 0, PW); vline(0, 0, PH); vline(PW - 1, 0, PH)
+    hline(TOP, 0, PW); hline(TOP + DIE_H - 1, 0, PW)
+    vline(0, TOP, TOP + DIE_H); vline(PW - 1, TOP, TOP + DIE_H)
     write_png(out + ".png", PW, PH, px)
 
     fb = sum(1 for _, ctype, _, _ in comps if ctype not in widths)
