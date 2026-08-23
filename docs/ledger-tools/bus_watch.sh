@@ -628,7 +628,37 @@ while true; do
     #   them, but the READER now can, because attribution and context arrive with
     #   the alert. A GUARD YOU MUST REMEMBER IS A HABIT; A GUARD IN THE EXECUTABLE
     #   IS A GUARD. [[a-guard-in-the-executable]]
-prov "(^|[^A-Za-z-])(HALT|STAND DOWN|STAND-DOWN|ALL SEATS STOP|FLEET STOP)" < "$EVTMP/orders.txt" \
+    # ⚖️⛔ THE SENDER-SIDE TOKEN — adopted 2026-08-23 16:1x, helm countersign.
+    # The helm closed from the SENDER side the gap my bank proved unclosable from the
+    # RECEIVER side: fleet-wide BINDING orders now lead with the literal "FLEET ORDER:".
+    # My §3.7 measured the old word-arm at 4 firings / 8 h, 4/4 on posts REFUTING a
+    # fabricated order — a refutation must contain the word to refute it. A token the
+    # helm CHOOSES TO EMIT has no such forced population.
+    #
+    # ⛔ I MEASURED THE CARRIER POPULATION BEFORE ARMING, AND IT IS NOT EMPTY ON DAY ONE:
+    #   2 occurrences of "FLEET ORDER:" on the bus, BOTH DESCRIPTIONS — the helm's own
+    #   announcement (which quotes the token) and a compiler test fixture from 8/6.
+    #   ZERO real orders. ⇒ THE ANNOUNCEMENT OF A TOKEN IS THAT TOKEN'S FIRST CARRIER,
+    #   every time. [[description-becomes-a-carrier]]
+    #
+    # 🔑 POSITION CLASSIFIES; IT NEVER SUPPRESSES. The helm's own countersign gives the
+    #   reason: "a keyword gate would trade countable false-wakes for SILENT MISSES, the
+    #   wrong failure direction." A false wake on a description costs ONE READ; a missed
+    #   binding order costs OBEDIENCE. ⇒ fire on EVERY occurrence and LABEL it.
+    #   ⚠️ My first position regex was already wrong: `^\[.*maestro.*FLEET ORDER:` matched
+    #     the announcement's HEADER, because the token sat later in that same line. A
+    #     position anchor that admits "anywhere on the header line" is not a position
+    #     anchor — which is exactly why this arm only labels.
+    #
+    # The owner gate is inherited from orders.txt (maestro-owned lines only), so a peer
+    # quoting the token cannot reach this arm — the one safe filter here, because it keys
+    # on AUTHORSHIP rather than on wording.
+    awk '/FLEET ORDER:/ {
+           where = ($0 ~ /^\[[0-9]+\/[0-9]+ [0-9:x]+, [A-Za-z]/) ? "ON A POST HEADER" : "in a body line"
+           printf "\xe2\x9a\x96\xef\xb8\x8f\xe2\x9b\x94 FLEET ORDER TOKEN (%s) \xe2\x87\xa2 %s\n", where, $0
+         }' "$EVTMP/orders.txt" | widen | cap3 "FLEET ORDER TOKEN"
+
+    prov "(^|[^A-Za-z-])(HALT|STAND DOWN|STAND-DOWN|ALL SEATS STOP|FLEET STOP)" < "$EVTMP/orders.txt" \
       | sed 's/^/⛔ MAESTRO ORDER WORD: /' | cap3 "MAESTRO ORDER WORD"
     # ⛔ THE FLEET GATE -- ADDED 2026-08-08 13:5x ON THE MAESTRO RULING THAT CLOSED
     # A GAP THIS SEAT NAMED AGAINST ITSELF AT 13:44. The order-owned view above is
