@@ -197,5 +197,31 @@ $(LC_ALL=C grep -oE 'TOKENFP: [0-9][0-9,]* tok @ [0-9][0-9,]* B/[0-9][0-9,]* lin
   | sed -E 's/TOKENFP: ([0-9,]*) tok @ ([0-9,]*) B\/([0-9,]*) lines/\1|\2|\3/' | tr -d ,)
 EOF
 done
+# 8. ⛔ THE SET ANCHOR — added 08-22 after this tool ran EXIT=0 AND SILENT while the brief's
+#    SET was SEVENTEEN HOURS STALE. Arms 1-7 all match FIXED PHRASINGS about SIZE; nothing
+#    looked at the boot anchor at all, so a green here meant "no size figure moved", never
+#    "nothing is stale" -- and the tool is NAMED for the second.
+#    ⚠️ SCOPED ON PURPOSE, AND THE SCOPE IS MEASURED: the fleet has FOUR briefs with a SET:
+#    line and THREE CONVENTIONS for it -- compiler carries `(= <sha>` (the bank's last CONTENT
+#    commit), evidence and silicon carry a bare timestamp, math's is explicitly the bank MTIME.
+#    This arm fires ONLY when a `(= <sha>` is present, because that is the only convention it
+#    can verify. Driven against all four briefs before landing: it matches exactly one, so it
+#    cannot raise a false STALE inside a peer's fallback output. A shared field with three
+#    meanings cannot have one checker, and guessing would put my convention in their watch.
+SETSHA=$(LC_ALL=C grep -m1 '^SET:' "$B" 2>/dev/null | LC_ALL=C grep -oE '\(= *[0-9a-f]{7,}' | LC_ALL=C grep -oE '[0-9a-f]{7,}')
+BANKF=$(LC_ALL=C grep -m1 '^BANK:' "$B" 2>/dev/null | sed -E 's/^BANK: *([^ ]+\.md).*/\1/')
+if [ -n "$SETSHA" ] && [ -n "$BANKF" ]; then
+  BANKP="$(dirname "$B")/$BANKF"
+  if [ ! -f "$BANKP" ]; then
+    OUT="$OUT
+   SET arm: BANK names $BANKF but $(basename "$BANKP") IS NOT THERE -- pointer is dead"
+  else
+    REALSHA=$(git -C "$(dirname "$B")" log -1 --format='%h' -- "$BANKF" 2>/dev/null)
+    if [ -n "$REALSHA" ] && [ "${REALSHA#"${SETSHA:0:7}"}" = "$REALSHA" ]; then
+      OUT="$OUT
+   SET arm: SET says ${SETSHA:0:7} but $BANKF's last CONTENT commit is $REALSHA -- ANCHOR STALE"
+    fi
+  fi
+fi
 [ -n "$OUT" ] && printf '  ⛔ SELF-STALE FIGURES IN MY OWN BRIEF:%s\n' "$OUT"
 exit 0
