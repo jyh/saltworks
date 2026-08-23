@@ -1,0 +1,93 @@
+# THE WARNING GATE FOR saltbuild.sh — COMMISSIONED BY MAESTRO 08/22 20:34, FULLY DRIVEN, STAGED
+#
+# ⛔ NOT APPLIED. It edits the SHARED fleet build wrapper and maestro called it a daylight patch;
+#    landing a tee on every seat's build path at 21:00 puts the cost of any misbehaviour on
+#    whoever builds at 02:00. Apply in daylight with the owner awake:  git apply <this file>
+#
+# THE ASK: "scan the captured log for the warning glyph / `warning:` lines and either exit
+# non-zero on a NEW one or print one discriminating line ... please drive BOTH arms, because a
+# warning check that cannot fail is the thing it is replacing."
+#
+# ⭐ WHAT THE SPEC COULD NOT KNOW, EACH FOUND BY DRIVING IT:
+#  1. THERE IS NO CAPTURED LOG. The wrapper writes straight to stdout; capture had to be added,
+#     and the obvious `cmd | tee` makes $? TEE'S — destroying the exact exit-code propagation
+#     maestro had just verified at the source. Fixed with PIPESTATUS[0].
+#  2. "EXIT NON-ZERO ON A NEW WARNING" IS NOT IMPLEMENTABLE ON THE BUILD ARM. lake reports
+#     diagnostics only for the jobs it emits, so the same tree gives different counts on
+#     different cache states. (My own brief claims a ~450 baseline; tonight's full build printed
+#     4. Two measurements, three days apart, 100x apart, unexplained.) The AUDIT arm IS
+#     deterministic — same file, byte-identical output, driven twice — so the gate lives there
+#     and the build arm gets a caveated report that says in its own text not to gate on it.
+#  3. INTENTIONAL WARNINGS EXIST. StateCodec.lean:148 emits "unused simp argument" as the
+#     DELIBERATE, DOCUMENTED mechanism of the width-agnostic stBit_pc repair. A gate that fails
+#     on any warning would convict a technique this campaign depends on. Hence opt-in
+#     SALTBUILD_MAX_WARNINGS rather than a hardcoded zero.
+#  4. THE REPORT LINE MUST GO TO STDERR. docs/ledger-tools/emit_cell.sh:75 captures the
+#     wrapper's STDOUT AS PURE RTL DATA and strips only `^saltbuild EXIT=` and `^info:`.
+#     Driven: a stdout version of the line SURVIVED that filter and landed in generated RTL;
+#     the original leaks nothing. Lean writes warnings to stdout (stderr measured empty), so
+#     no `2>&1` is needed either — dropping it removes the pollution entirely.
+#
+# ARMS DRIVEN — six, plus a control:
+#   A clean file + gate 0                -> EXIT=0, WARNINGS=0
+#   B warning file + gate 0              -> EXIT=9          (fails where a clean one passes)
+#   C MUTANT: clean file + gate -1       -> EXIT=9          (proves the compare RUNS on clean
+#                                                            files; an earlier version passed
+#                                                            arm A for the WRONG REASON --
+#                                                            `grep -c || echo 0` yields "0\n0"
+#                                                            and the integer test errored,
+#                                                            leaving the gate SILENTLY INERT)
+#   D no gate set                        -> EXIT=0, reports only
+#   E genuine build failure              -> EXIT=1          (tee did not swallow the status)
+#   F emit_cell's exact sed on the output-> 0 leaks into pure-RTL stdout
+#   CONTROL: build-arm stdout differs run-to-run in the ORIGINAL wrapper too (job-counter
+#   denominator, 778 vs 760), so the patched-vs-original difference is that same variance and
+#   NOT a tee rendering change. Without this control I would have reported a false regression
+#   against my own patch. All three runs 348 lines.
+#
+--- a/tools/saltbuild.sh	2026-08-15 15:11:53
++++ b/tools/saltbuild.sh	2026-08-22 20:41:26
+@@ -52,13 +52,40 @@
+ PRE_HEAD=$(git rev-parse --short HEAD 2>/dev/null || echo n/a)
+ PRE_DIRTY=$(git status --porcelain 2>/dev/null | command grep -c . || echo '?')
+ START=$(date '+%H:%M:%S' 2>/dev/null || echo n/a)
++# ⛔ CAPTURE STDOUT ONLY, VIA tee + PIPESTATUS. THREE THINGS THIS DELIBERATELY DOES NOT DO,
++#   each because DRIVING it showed a break (08-22):
++#   (1) NO `2>&1`. Lean writes warnings to STDOUT (measured: audit arm stdout=16 lines with the
++#       warning, stderr=0). Merging is unnecessary AND would push lake's stderr into the stdout
++#       that docs/ledger-tools/emit_cell.sh:75 captures as PURE RTL DATA.
++#   (2) NO BARE PIPE for the status: `cmd | tee` makes $? TEE'S. PIPESTATUS[0] is lake's.
++#   (3) THE REPORT LINE GOES TO STDERR, not stdout — emit_cell strips only `^saltbuild EXIT=`
++#       and `^info:`, so a new stdout line SURVIVES its filter and corrupts generated RTL.
++#       Driven: the stdout version appeared in emit_cell's output; the original leaks nothing.
++BUILDLOG=$(mktemp -t saltbuild.XXXXXX)
+ case "$1" in
+   *.lean) MODE=audit
+           [ -f "$1" ] && PRESHA=$(shasum -a 256 "$1" 2>/dev/null | cut -c1-12)
+-          ~/.elan/bin/lake env lean -M "$CAP" "$@" ;;
+-  *)      MODE=build; ~/.elan/bin/lake build "$@" ;;
++          ~/.elan/bin/lake env lean -M "$CAP" "$@" | tee "$BUILDLOG"
++          EXIT=${PIPESTATUS[0]} ;;
++  *)      MODE=build
++          ~/.elan/bin/lake build "$@" | tee "$BUILDLOG"
++          EXIT=${PIPESTATUS[0]} ;;
+ esac
+-EXIT=$?
++# ⛔ NOT `grep -c ... || echo 0`: grep -c PRINTS 0 and EXITS 1 on no-match, so `||` fires too and
++#   $WARNS becomes "0\n0"; `[ "$WARNS" -gt N ]` then errors with exit 2 and THE GATE IS SILENTLY
++#   INERT ON EXACTLY THE CLEAN FILES IT MUST PASS. Driven — it passed for the wrong reason once.
++WARNS=$(command grep -c 'warning:' "$BUILDLOG" 2>/dev/null); WARNS=${WARNS:-0}
++if [ "$MODE" = audit ]; then
++  echo "saltbuild WARNINGS=$WARNS (audit arm — deterministic: same file, same count, driven twice)" >&2
++  if [ -n "${SALTBUILD_MAX_WARNINGS:-}" ] && [ "$WARNS" -gt "$SALTBUILD_MAX_WARNINGS" ]; then
++    echo "saltbuild EXIT=9 (WARNING GATE: $WARNS > SALTBUILD_MAX_WARNINGS=$SALTBUILD_MAX_WARNINGS)" >&2
++    rm -f "$BUILDLOG"; exit 9
++  fi
++else
++  echo "saltbuild WARNINGS=$WARNS ⚠ BUILD ARM — NOT A BASELINE: lake emits diagnostics only for the" >&2
++  echo "  jobs it reports, so this is NOT comparable between runs. Do not gate on it." >&2
++fi
++rm -f "$BUILDLOG"
+ { SHA=""
+   if [ "$MODE" = audit ] && [ -f "$1" ]; then
+     POSTSHA=$(shasum -a 256 "$1" 2>/dev/null | cut -c1-12)
