@@ -1,0 +1,223 @@
+# HORN D SWAP — THE PROVEN `StateCodec.lean` HALF, PRE-STAGED AS A PATCH
+#
+# Driven 2026-08-22 in an ISOLATED worktree against tree HEAD 1637aa3. NOT applied to the shared
+# tree: the swap must not fire until `SaltWorks/Stack/Program.lean` (MATH'S GLOB) is repaired.
+#
+# WHY THIS FILE EXISTS AT ALL. Q3-SWAP-RUNBOOK.md STEP 2b records that this same fix was derived
+# TWICE and LOST TWICE, because it existed only inside a scratch worktree that was then torn down
+# -- "work that is not a durable artifact is not delivered". This is the third derivation and it is
+# not going to be the third loss.
+#
+# RECEIPTS, both arms driven, not just the flattering one:
+#   FAILS-BEFORE  D-widened stWidth/stBit/decQ carrying the PRE-D proofs taken VERBATIM from HEAD:
+#                 EXIT=1, and the error is the arity site -- <hr, hp> offers TWO conjuncts where
+#                 St.mk.injEq under D demands FOUR, with `and_true` flagged as an unused simp arg.
+#   PASSES-AFTER  EXIT=0, zero errors, every #audit_axioms tick green, BOTH non-vacuity controls
+#                 (transposed_layout_breaks, correct_layout_recovers) still passing.
+#   DOWNSTREAM    full worktree build, 8741 jobs: failures confined to TWO modules --
+#                 StateCodecD.lean (the scaffold; see runbook STEP 2c) and Stack/Program.lean
+#                 (math's glob, 9 error sites). Everything else re-derives green.
+#
+# THE STRUCTURAL MOVE, and it is NOT a tactic swap: prove the FULL round trip `decQ_encD` first
+# (unconditional, all four fields), then DERIVE `decQ_encD_proj` and `decQ_encD_of_clean` back from
+# it. Repairing `_of_clean`'s arity in place is the route that blows the whnf heartbeat unifying
+# `exact hr` against a `Vector.ofFn` goal.
+#
+# `_of_clean`'s two cleanliness hypotheses are DEAD under D and are KEPT as `_hm`/`_ht`: its three
+# callers (Stack/Program.lean:1257, :1278, :1290) all pass `_ rfl rfl` and all three are in math's
+# glob. Deleting the arguments would convert a swap inside my own glob into a cross-glob edit.
+#
+# Apply with:  git apply docs/Q3-SWAP-STAGED-STATECODEC-0822.diff
+#
+diff --git a/SaltWorks/HDL/StateCodec.lean b/SaltWorks/HDL/StateCodec.lean
+index 1bcf3c9..835cd0b 100644
+--- a/SaltWorks/HDL/StateCodec.lean
++++ b/SaltWorks/HDL/StateCodec.lean
+@@ -39,9 +39,11 @@ expensive to change after `core` exists.**
+ 
+ ```
+ index          contents
+-0 … 1023       register r, bit k, at  32 * r + k       (r,k < 32)
++0 … 1023       register r, bit k, at  32 * r + k              (r,k < 32)
+ 1024 … 1055    pc, bit k, at  1024 + k
+-               1056 bits total = 32 regs × 32 + 32
++1056 … 1311    memory word w, bit k, at  1056 + 32 * w + k    (w < 8, k < 32)
++1312           the trap flag
++               1313 bits total = 32 regs × 32 + 32 + 8 × 32 + 1
+ ```
+ 
+ **`x0` occupies indices 0…31 and is part of the layout even though it is not
+@@ -56,8 +58,9 @@ namespace SaltWorks.HDL
+ 
+ open SaltWorks.ISA
+ 
+-/-- Number of state bits: 32 registers × 32 bits, plus the pc. -/
+-def stWidth : Nat := 32 * 32 + 32
++/-- Number of state bits: 32 registers × 32 bits, the pc, the eight memory words,
++and the trap flag. -/
++def stWidth : Nat := 32 * 32 + 32 + 8 * 32 + 1
+ 
+ /-! ### The instruction word's input nets — pinned here on math's C4STMT finding
+ 
+@@ -87,8 +90,8 @@ def instrNet (k : Nat) : Net := instrBase + k
+ /-- Total input width of a core that takes the state and one instruction. -/
+ def coreInWidth : Nat := stWidth + 32
+ 
+-theorem instrBase_is_above_the_state : instrBase = 1056 := by decide +kernel
+-theorem coreInWidth_value : coreInWidth = 1088 := by decide +kernel
++theorem instrBase_is_above_the_state : instrBase = 1313 := by decide +kernel
++theorem coreInWidth_value : coreInWidth = 1345 := by decide +kernel
+ 
+ /-- **The instruction nets are disjoint from every state net** — the property
+ that makes `wordOf (fun k => ins (instrNet k))` the right reading and
+@@ -118,7 +121,9 @@ theorem wordOf_getLsbD (f : Nat → Bool) (k : Nat) (h : k < 32) :
+ /-- Bit `j` of the state, under the layout above. -/
+ def stBit (s : St) (j : Nat) : Bool :=
+   if j < 1024 then (s.regs[j / 32]!).getLsbD (j % 32)
+-  else s.pc.getLsbD (j - 1024)
++  else if j < 1056 then s.pc.getLsbD (j - 1024)
++  else if j < 1312 then (s.mem[(j - 1056) / 32]!).getLsbD ((j - 1056) % 32)
++  else s.trapped
+ 
+ /-- **The pc field's bit, named once so the branch walk lives in ONE place.**
+ 
+@@ -154,11 +159,11 @@ def encD (s : St) : List Bool := (List.range stWidth).map (stBit s)
+ def decQ (ins : Env) : St :=
+   { regs    := Vector.ofFn (fun r : Fin 32 => wordOf (fun k => ins (32 * r.val + k)))
+     pc      := wordOf (fun k => ins (1024 + k))
+-    -- ⬥ M1a: `encD` encodes 1056 bits — regs and pc ONLY. The decoder therefore
+-    -- constructs the new fields at their defaults; it cannot read what was never
+-    -- written, and extending `encD` to 1313 bits would reopen the flop budget.
+-    mem     := Vector.replicate 8 0
+-    trapped := false }
++    -- ⬥ HORN D: `encD` now encodes all 1313 bits, so the decoder READS the memory
++    -- and the trap flag rather than manufacturing them at their defaults. That is
++    -- what makes `decQ_encD` below unconditional.
++    mem     := Vector.ofFn (fun w : Fin 8 => wordOf (fun k => ins (1056 + 32 * w.val + k)))
++    trapped := ins 1312 }
+ 
+ /-- Reading `encD`'s list back at an index in range is `stBit`. -/
+ theorem encD_getD (s : St) (j : Nat) (h : j < stWidth) :
+@@ -167,50 +172,83 @@ theorem encD_getD (s : St) (j : Nat) (h : j < stWidth) :
+   simp [stWidth] at h ⊢
+   simp [h]
+ 
+-/-- **THE ROUND TRIP, AS A PROJECTION** (⬥M1a). *The property that makes the pair
+-a codec rather than two unrelated functions, and the one a layout mistake breaks.*
++/-- **THE FULL ROUND TRIP — ALL FOUR FIELDS, NO HYPOTHESIS ON `s`.**
+ 
+-⚠️ **The whole-`St` form is FALSE once `St` carries `mem`/`trapped`**: `encD`
+-encodes 1056 bits, so the decoder rebuilds the new fields at their defaults and
+-cannot agree with a state that has non-default ones. The codec's content is
+-exactly the two encoded fields, and that is what this states. The whole-state
+-equality survives *conditionally*, immediately below. -/
+-theorem decQ_encD_proj (s : St) :
+-    (decQ (fun j => (encD s).getD j false)).regs = s.regs ∧
+-    (decQ (fun j => (encD s).getD j false)).pc = s.pc := by
++⭐ **HORN D MADE THIS UNCONDITIONAL, AND THAT IS THE POINT OF THE SWAP.** Before the widening
++`encD` carried 1056 bits — regs and pc only — so `decQ` had to MANUFACTURE `mem` and `trapped`
++at their defaults, and the whole-`St` equality was FALSE except on states that happened to be
++clean. Now every field is encoded, so the codec inverts on every state, dirty memory and set trap
++flag included.
++
++⚠️ **THE TWO PRE-D STATEMENTS ARE DERIVED BACK FROM THIS ONE, NOT REPAIRED IN PLACE.** That
++ordering is deliberate and was chosen after the in-place repair failed: patching
++`decQ_encD_of_clean`'s conjunct arity directly means unifying `exact hr` against a `Vector.ofFn`
++goal, which blows the `whnf` heartbeat. Proving the strong form FIRST and specialising is both
++cheaper and the only version that keeps the callers' statements byte-identical. -/
++theorem decQ_encD (s : St) : decQ (fun j => (encD s).getD j false) = s := by
+   obtain ⟨regs, pc, mem, tr⟩ := s
+-  have hpc : wordOf (fun k => (encD ⟨regs, pc, mem, tr⟩).getD (1024 + k) false) = pc := by
+-    apply BitVec.eq_of_getLsbD_eq
+-    intro k hk
+-    rw [wordOf_getLsbD _ _ hk, encD_getD _ _ (by simp [stWidth]; omega), stBit_pc _ _ hk]
+   have hreg : ∀ (i : Nat) (hi : i < 32),
+       wordOf (fun k => (encD ⟨regs, pc, mem, tr⟩).getD (32 * i + k) false) = regs[i] := by
+     intro i hi
+     apply BitVec.eq_of_getLsbD_eq
+     intro k hk
+-    rw [wordOf_getLsbD _ _ hk, encD_getD _ _ (by simp [stWidth]; omega), stBit,
++    rw [wordOf_getLsbD _ _ hk, encD_getD _ _ (by simp only [stWidth]; omega), stBit,
+         if_pos (by omega)]
+     have hdiv : (32 * i + k) / 32 = i := by omega
+     have hmod : (32 * i + k) % 32 = k := by omega
+     rw [hdiv, hmod, getElem!_pos regs i hi]
+-  refine ⟨?_, hpc⟩
+-  simp only [decQ]
+-  apply Vector.ext
+-  intro i hi
+-  rw [Vector.getElem_ofFn]
+-  exact hreg i hi
++  have hpc : wordOf (fun k => (encD ⟨regs, pc, mem, tr⟩).getD (1024 + k) false) = pc := by
++    apply BitVec.eq_of_getLsbD_eq
++    intro k hk
++    rw [wordOf_getLsbD _ _ hk, encD_getD _ _ (by simp only [stWidth]; omega), stBit_pc _ _ hk]
++  have hmem : ∀ (w : Nat) (hw : w < 8),
++      wordOf (fun k => (encD ⟨regs, pc, mem, tr⟩).getD (1056 + 32 * w + k) false)
++        = mem[w] := by
++    intro w hw
++    apply BitVec.eq_of_getLsbD_eq
++    intro k hk
++    rw [wordOf_getLsbD _ _ hk, encD_getD _ _ (by simp only [stWidth]; omega), stBit,
++        if_neg (by omega), if_neg (by omega), if_pos (by omega)]
++    have hdiv : (1056 + 32 * w + k - 1056) / 32 = w := by omega
++    have hmod : (1056 + 32 * w + k - 1056) % 32 = k := by omega
++    rw [hdiv, hmod, getElem!_pos mem w hw]
++  have htr : (encD ⟨regs, pc, mem, tr⟩).getD 1312 false = tr := by
++    rw [encD_getD _ _ (by simp only [stWidth]; omega), stBit]
++    simp
++  simp only [decQ, St.mk.injEq]
++  refine ⟨?_, hpc, ?_, htr⟩
++  · apply Vector.ext
++    intro i hi
++    rw [Vector.getElem_ofFn]
++    exact hreg i hi
++  · apply Vector.ext
++    intro i hi
++    rw [Vector.getElem_ofFn]
++    exact hmem i hi
++
++/-- **THE ROUND TRIP, AS A PROJECTION** (⬥M1a). *The property that makes the pair
++a codec rather than two unrelated functions, and the one a layout mistake breaks.*
++
++⚠️ **KEPT AT ITS PRE-D STATEMENT ON PURPOSE.** It is now a strict weakening of `decQ_encD`
++and could be deleted — but its SHAPE is an interface: consumers destructure it as a pair, and a
++truth-preserving restatement is still a breaking change. Derived, not restated. -/
++theorem decQ_encD_proj (s : St) :
++    (decQ (fun j => (encD s).getD j false)).regs = s.regs ∧
++    (decQ (fun j => (encD s).getD j false)).pc = s.pc := by
++  rw [decQ_encD s]
++  exact ⟨rfl, rfl⟩
+ 
+ /-- **THE CONDITIONAL WHOLE-`St` ROUND TRIP** (⬥M1a, the form the `run`-shaped
+-consumers need). On a state whose new fields are at their defaults — which is
+-every state the codec is fed, since `St.init` and `decQ` build them that way and
+-no slice-A instruction can dirty them — the codec still inverts exactly. -/
+-theorem decQ_encD_of_clean (s : St) (hm : s.mem = Vector.replicate 8 0)
+-    (ht : s.trapped = false) : decQ (fun j => (encD s).getD j false) = s := by
+-  obtain ⟨hr, hp⟩ := decQ_encD_proj s
+-  obtain ⟨regs, pc, mem, tr⟩ := s
+-  subst hm; subst ht
+-  simp only [decQ, St.mk.injEq, and_true]
+-  exact ⟨hr, hp⟩
++consumers need).
++
++⚠️ **ITS TWO HYPOTHESES ARE NOW DEAD, AND THEY ARE KEPT DELIBERATELY.** Under Horn D the
++round trip holds on every state, so cleanliness is no longer needed. The arguments stay so that
++no caller breaks — several pass `rfl` for them — and because retiring them is a statement change
++that belongs in its own commit, with its own differential, not smuggled into a width swap.
++*A caller that still supplies them is not wrong; it is merely proving more than it needs.* -/
++theorem decQ_encD_of_clean (s : St) (_hm : s.mem = Vector.replicate 8 0)
++    (_ht : s.trapped = false) : decQ (fun j => (encD s).getD j false) = s :=
++  decQ_encD s
+ 
+ 
+ /-! ### NON-VACUITY — a WRONG layout must break the round trip
+@@ -257,6 +295,7 @@ theorem correct_layout_recovers :
+ #audit_axioms encD
+ #audit_axioms decQ
+ #audit_axioms encD_getD
++#audit_axioms decQ_encD
+ #audit_axioms decQ_encD_proj
+ #audit_axioms decQ_encD_of_clean
+ #audit_axioms decQtransposed

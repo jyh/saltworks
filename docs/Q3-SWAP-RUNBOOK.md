@@ -69,9 +69,20 @@ that proves the habit is worth keeping.*
 
 ### ⭐ STEP 2b — `StateCodec` ITSELF BREAKS FIRST, AND THE FIX IS MEASURED, NOT SKETCHED
 
-**The first module the swap breaks is `StateCodec.lean` — four errors — and they are the two defect
-classes math named in their own glob, verbatim:** the `stBit` two-branch walk, and the `and_true`
-arity. *I hit them in the 16:3x attempt and again in the 19:4x isolated dry run, and in BOTH runs
+**The first module the swap breaks is `StateCodec.lean`** — and the count below is CORRECTED.
+
+⛔ **MEASURED 08/22, DRIVEN: IT IS *TWO* ERRORS, NOT FOUR, AND ONLY THE ARITY CLASS SURVIVES.**
+The two defect classes named here were the `stBit` two-branch walk AND the `and_true` arity.
+**The branch-walk half was closed on 08/21 by the width-agnostic `stBit_pc` repair (`e8a2686`)** —
+the one that carried the MECHANISM (`simp only` does not fail on a non-matching lemma) instead of
+importing `split_ifs`'s vocabulary. It was landed for exactly this moment and it paid:
+`decQ_encD_proj`'s register and pc walks came through the widening untouched.
+⚠️ **The four was true when written on 08/20 and this file had no instrument aimed at it. The
+`stBit_pc` docstring in `StateCodec.lean` already said the branch walk survived, and I believed
+this COUNT over that OBJECT.** ⇒ *a count in a runbook is a measurement with an expiry date;
+re-drive it before quoting it.*
+
+The original two classes, kept because the FIX for both is still what you want: *I hit them in the 16:3x attempt and again in the 19:4x isolated dry run, and in BOTH runs
 the fix below made `StateCodec` elaborate CLEAN, moving every remaining failure downstream where it
 is informative.*
 
@@ -104,6 +115,48 @@ theorem decQ_encD_of_clean (s) (_hm) (_ht) … := decQ_encD s   -- hypotheses no
 REGISTER layout, and giving it real memory would silently retune the control. Its `mem :=
 Vector.replicate 8 0` is NOT one of the anchors to change; the `decQ` one is distinguished by the
 M1a comment directly above it.
+
+### ⛔⛔ STEP 2c — RETIRE THE SCAFFOLD. **THIS STEP WAS MISSING AND IT IS THE FILE THE SWAP WAS STAGED IN.**
+
+⚠️ **ADDED 08/22 after the first full downstream dry run.** STEP 2 above says of `StateCodecD.lean`
+*"Do not re-derive it — it already carries it PROVED, and the port is mechanical."* That treats the
+file purely as a SOURCE **and never says what becomes of the source after the port.** The answer is
+not "leave it": the swap takes the module DOWN, and it is one of only two that fail.
+
+**MEASURED, decl by decl, over all 28 declarations in the file:**
+
+| n | class | disposition |
+|---|---|---|
+| **6** | migration arithmetic + conservative-extension half — the extension-cost theorem and `renumbering_offsets` go **FALSE** (`decide` says so); `stBitD_agrees` / `encDD_getD_low` / `encDD_prefix` go **VACUOUS** | **RETIRE.** They are *right* to be false: the delta between the layouts IS zero once Q **is** D, and *"D extends Q"* has no content when they are the same function — the goal reduces to `X = X` and the transport script has nothing left to do. |
+| **9** | now DUPLICATES of what STEP 2 ports into `StateCodec` (`stWidthD`, `stBitD`, `encDD`, `decQD`, `decQD_encDD`, `encDD_getD`, `instrBaseD`, `stWidthD_value`, `instrD_nets_disjoint_from_state`) | **RETIRE**, after confirming the port carries each one. |
+| **13** | **LIVE CONTENT WITH NO HOME** | **MIGRATE INTO `StateCodec.lean`.** |
+
+⭐ **AND ONE OF THE SIX IS THE RECEIPT, NOT A CASUALTY:** `landed_decQ_loses_mem_and_trap` — *the
+1056-bit codec cannot carry a dirty memory or a set trap flag* — was the exhibit of Horn D's whole
+motivation. **The swap refutes it.** A differential that fires is how a repair is known to have done
+something, and this one fires on the exact sentence that justified the work. Record it as spent;
+do not "fix" it.
+
+⛔ **THE 13 ARE THE REASON THIS STEP EXISTS**, and they are not scaffolding:
+  · the layout-injectivity machinery — `Cell` / `Cell.ok` / `Cell.place` / `cellOf` / `cellOf_place` /
+    `layout_injective` / `layout_surjective_on` / `place_lt_stWidthD` / `cellBit` / `stBitD_at_place`.
+    **This is the only proof that the layout wastes no bit and that no two fields collide**, and
+    `stBitD_at_place` is what stops it being a parallel fiction.
+  · **the MEMORY-LAYOUT non-vacuity controls** — `decQDmemT` (word/bit strides SWAPPED), the fixture
+    `sTestD` (**eight DISTINCT memory words and `trapped := true`**), and both arms
+    `memT_layout_breaks` / `correct_layout_recovers_mem`.
+
+⚠️ **DO NOT READ THE SECOND BULLET AS "THE MEMORY LAYOUT IS UNGUARDED AFTER THE SWAP" — I DRAFTED
+EXACTLY THAT AND IT IS FALSE.** The control is built, is non-degenerate, and passes. **The hazard is
+that the swap STRANDS it in a module that no longer compiles, and a control in a module that does
+not build is a control that does not run.** *And note why the naive fix would have failed: the
+register-side fixture `sTest = St.init.set 1 3` has ALL-ZERO memory, so a memory control built on it
+would be DEGENERATE — every layout permutation of an all-zero region agrees. `sTestD` already gets
+this right; that is precisely what makes it worth migrating rather than re-deriving.*
+
+⚠️ **AND `decQtransposed` IN `StateCodec.lean` MUST STILL KEEP ITS ALL-ZERO MEMORY** (STEP 2b's
+warning stands): it is the REGISTER-layout control, and the memory control is a *separate* pair.
+Two controls, two fixtures, and the swap must end with BOTH live in a module that builds.
 
 ## STEP 3 — THE SILENT CLASS: PROSE
 
