@@ -7,6 +7,7 @@ import SaltWorks.Stack.Spec
 import SaltWorks.Stack.Perm
 import SaltWorks.Stack.ZeroOne
 import SaltWorks.HDL.StateCodec
+import SaltWorks.HDL.StateCodecD
 import SaltWorks.HDL.C4
 import SaltWorks.HDL.Bitwise
 import SaltWorks.HDL.PcNext
@@ -2594,6 +2595,65 @@ def RegField (c : SaltWorks.HDL.Circ) (r : Fin 32) : Prop :=
 /-- ⭐ **THE 33RD OBLIGATION** — the program counter. -/
 def PcField (c : SaltWorks.HDL.Circ) : Prop :=
   ∀ ins, outPc c ins = (stepT (SaltWorks.HDL.decQ ins) (seenWord ins)).pc
+
+/-! ### ⭐⭐⭐ THE D REGIME — the 43-obligation decomposition (Captain's ruling, 2026-08-23)
+
+⛔ **SUPERSESSION IS EXPLICIT AND RUNS IN BOTH DIRECTIONS (Rider ①).**  The `…D` forms
+below are NEW NAMES.  They inherit NOTHING from the C-width forms above: no proof of a
+34-form obligation discharges a 43-form one.  Equally, the C-width forms keep everything
+they earned — `C4Spec`, `RegField`, `PcField` remain landed as the **Q-regime / C-width**
+objects and are not deleted.
+
+📐 **THE LEDGER GROWS 34 → 43, AND THE GROWTH IS THE POINT:** `1` output count + `32`
+registers + `1` pc (the C-width 34) **+ `8` memory words + `1` trap flag** = `43`.  The
+same growth at bit level is `stWidthD - stWidth = 257` (`8*32 + 1`), which
+`StateCodecD.extension_costs_257_bits` already carries in the kernel.
+
+⛔ **WHY EVERY D FORM RIDES `decQD` AND NOT `decQ`:** `StateCodec.decQ` constructs
+`mem := Vector.replicate 8 0` and `trapped := false` — its own comment says `encD`
+encodes "regs and pc ONLY" and the decoder "cannot read what was never written".  A
+memory obligation stated against `decQ` would constrain the circuit only on the step of
+an all-zero-memory state.  Mixing decoders in one conjunction would specify registers
+against a zero-mem input and memory against the real one. -/
+
+/-- **The memory-word-`w` output field** — the 32 output bits the D layout assigns to
+memory word `w`.  `StateCodecD.Cell.place` puts them at `1056 + 32*w + k`. -/
+def outMem (c : SaltWorks.HDL.Circ) (ins : SaltWorks.HDL.Env) (w : Fin 8) : Word :=
+  SaltWorks.HDL.wordOf (fun k => outBit c ins (1056 + 32 * w.val + k))
+
+/-- **The trapped output bit** — the one output bit the D layout assigns to the sticky
+trap flag, at `StateCodecD.Cell.place .trap = 1312`. -/
+def outTrap (c : SaltWorks.HDL.Circ) (ins : SaltWorks.HDL.Env) : Bool :=
+  outBit c ins 1312
+
+/-- ⭐⭐⭐ **`C4SpecD` — THE D-REGIME CONFORMANCE SPEC.**  `C4Spec` with the extended
+codec on BOTH sides: `encDD` (1313 bits) and `decQD`, which READS the eight memory words
+and the trap flag instead of defaulting them. -/
+def C4SpecD (c : SaltWorks.HDL.Circ) : Prop :=
+  ∀ ins : SaltWorks.HDL.Env,
+    SaltWorks.HDL.sem c ins
+      = SaltWorks.HDL.StateCodecD.encDD
+          (stepT (SaltWorks.HDL.StateCodecD.decQD ins) (seenWord ins))
+
+/-- **One of the 32 register obligations, D regime.** -/
+def RegFieldD (c : SaltWorks.HDL.Circ) (r : Fin 32) : Prop :=
+  ∀ ins, outReg c ins r
+    = (stepT (SaltWorks.HDL.StateCodecD.decQD ins) (seenWord ins)).regs[r.val]
+
+/-- **The pc obligation, D regime.** -/
+def PcFieldD (c : SaltWorks.HDL.Circ) : Prop :=
+  ∀ ins, outPc c ins
+    = (stepT (SaltWorks.HDL.StateCodecD.decQD ins) (seenWord ins)).pc
+
+/-- ⭐ **One of the EIGHT memory obligations** — new at D, no C-width counterpart. -/
+def MemFieldD (c : SaltWorks.HDL.Circ) (w : Fin 8) : Prop :=
+  ∀ ins, outMem c ins w
+    = (stepT (SaltWorks.HDL.StateCodecD.decQD ins) (seenWord ins)).mem[w.val]
+
+/-- ⭐ **THE 43RD OBLIGATION** — the sticky trap flag.  New at D. -/
+def TrappedFieldD (c : SaltWorks.HDL.Circ) : Prop :=
+  ∀ ins, outTrap c ins
+    = (stepT (SaltWorks.HDL.StateCodecD.decQD ins) (seenWord ins)).trapped
 
 /-! ### The layout arithmetic, once
 
