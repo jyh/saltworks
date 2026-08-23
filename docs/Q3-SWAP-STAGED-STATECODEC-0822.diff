@@ -30,7 +30,7 @@
 # Apply with:  git apply docs/Q3-SWAP-STAGED-STATECODEC-0822.diff
 #
 diff --git a/SaltWorks/HDL/StateCodec.lean b/SaltWorks/HDL/StateCodec.lean
-index 1bcf3c9..835cd0b 100644
+index 1bcf3c9..998773f 100644
 --- a/SaltWorks/HDL/StateCodec.lean
 +++ b/SaltWorks/HDL/StateCodec.lean
 @@ -39,9 +39,11 @@ expensive to change after `core` exists.**
@@ -213,6 +213,15 @@ index 1bcf3c9..835cd0b 100644
  
  
  /-! ### NON-VACUITY — a WRONG layout must break the round trip
+@@ -231,7 +269,7 @@ def decQtransposed (ins : Env) : St :=
+ def sTest : St := St.init.set 1 3
+ 
+ /-- **THE CONTROL: the transposed decoder does NOT recover `x1`.** *Kernel-checked
+-on the register the layouts disagree about, rather than on the whole 1056-bit
++on the register the layouts disagree about, rather than on the whole 1313-bit
+ state, because the witness is what matters and it is cheaper.* -/
+ theorem transposed_layout_breaks :
+     (decQtransposed (fun j => (encD sTest).getD j false)).get 1 ≠ sTest.get 1 := by
 @@ -257,6 +295,7 @@ theorem correct_layout_recovers :
  #audit_axioms encD
  #audit_axioms decQ
