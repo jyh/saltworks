@@ -81,6 +81,21 @@ echo "BASELINE ARM — start= must suppress everything at or below it:"
 B=$(line_at 159497 | LC_ALL=C awk -v start=1 -f "$AWKPROG" | LC_ALL=C awk -F'\t' 'NR==1{print $1}')
 arm "ARM8 start=1 suppresses line 1 of the stream"   ""                   "$B"
 
+echo "REV-3 CLAUSE — the helm's FLEET ORDER: adoption (16:12:53 countersign):"
+# ⚠️ THESE TWO ARE SYNTHETIC, AND THAT IS DECLARED RATHER THAN GLOSSED. Every other
+# fixture here is a REAL bus line addressed by number and verified by a content
+# stamp; no real `FLEET ORDER:` header exists yet, because the adoption is minutes
+# old. They test the PREDICATE, which is an exact index() literal — the same class
+# as SILICON ORDER: — and they convert to real stamped fixtures the moment the
+# first one lands. A synthetic fixture silently mixed in with real ones would be
+# the "convenient artifact instead of the authoritative one" defect this seat
+# banked earlier today.
+SYN_Y='[08/23 16:20:00, maestro=LIT — FLEET ORDER: all hands, synthetic fixture]'
+SYN_N='[08/23 16:20:00, maestro=LIT — all hands, synthetic fixture, no token]'
+syn() { printf '%s\n' "$1" | LC_ALL=C awk -v start=0 -f "$AWKPROG" | LC_ALL=C awk -F'\t' 'NR==1{print $1}'; }
+arm "ARM9  SYNTHETIC FLEET ORDER: delivers as FLEET-TOKEN" "FLEET-TOKEN" "$(syn "$SYN_Y")"
+arm "ARM10 SYNTHETIC same line, token removed -> dropped"  ""            "$(syn "$SYN_N")"
+
 echo "orderwatch_selftest: PASS=$PASS FAIL=$FAIL"
 [ "$FAIL" -eq 0 ] || exit 1
 exit 0

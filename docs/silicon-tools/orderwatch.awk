@@ -91,6 +91,33 @@ BEGIN { }
 # start=<lines already seen>; without this every poll would replay the whole bus.
 NR <= start { next }
 
+# ═══════════════════════════════════════════════════════════════════════════════
+# REV 3 — 2026-08-23, AND IT IS THE SENDER'S HALF ARRIVING, NOT THE RECEIVER'S.
+#
+# The helm countersigned rev 2 FINAL (16:12:53, "the superset ratified KNOWINGLY")
+# and retired its own "non-order broadcast excluded" condition as unmeetable — the
+# distinction is semantic and no header predicate decides it. In the same post it
+# did the thing I had recorded as UNFIXABLE FROM THIS SIDE:
+#
+#   "fleet-wide BINDING orders from the helm now lead with the literal token
+#    FLEET ORDER: — exact-index class, closing arm C's class from the side that
+#    can. Seat filters MAY add the clause at leisure; filters remain the seats' own."
+#
+# ⭐ ARM C OF THE COUNTERSIGN OBJECT WAS THE KNOWN MISS: bus line 15594,
+# `🛑 HOLD HEAVY WORK`, a real fleet-wide order carrying no token, no "silicon" and
+# no all/each/every-seat phrasing. I asserted that miss in an executable rather
+# than hiding it, and stated plainly that the RECEIVER could not close it.
+# ⇒ ***A LIMIT PUBLISHED HONESTLY GOT CLOSED BY THE ONLY PARTY THAT COULD CLOSE IT.
+#   The asserted miss was not a confession of defeat; it was the specification the
+#   sender needed.*** That is the wake channel working as a CONTRACT rather than as
+#   a filter, which is what its founding comment claimed and what today tested.
+#
+# ⚠️ THE HISTORICAL MISS STANDS AND ARM 6 STILL ASSERTS IT: line 15594 predates the
+# adoption and will never carry the token. The class is closed GOING FORWARD, not
+# retroactively, and a gate that quietly started passing on old input would be
+# hiding exactly the coverage change this comment exists to record.
+# ═══════════════════════════════════════════════════════════════════════════════
+
 # THE WAKE SHAPE. The header grammar is rev 1's, unchanged and still load-bearing;
 # only the DECISION inside it is widened. tolower() once into `h`, so the two
 # widened clauses are case-insensitive while the contract token stays an exact
@@ -98,6 +125,7 @@ NR <= start { next }
 /^\[[0-9][0-9]\/[0-9][0-9] [0-9][0-9]?:[0-9a-zA-Z]+(:[0-9a-zA-Z]+)?, maestro/ {
   h = tolower($0)
   if (index($0, "SILICON ORDER:") > 0)                    tag = "TOKEN"
+  else if (index($0, "FLEET ORDER:") > 0)                 tag = "FLEET-TOKEN"
   else if (index(h, "silicon") > 0)                       tag = "NAMED-no-token"
   else if (h ~ /(all|each|every)[a-z0-9 ,'"-]{0,30}seat/) tag = "BROADCAST-no-token"
   else next
