@@ -64,7 +64,18 @@ if ! mkdir "$LOCK" 2>/dev/null; then
   mkdir "$LOCK" 2>/dev/null || { echo "ARM: FAIL — cannot take the watch lock: $LOCK"; exit 9; }
 fi
 echo $$ > "$LOCK/pid"
-trap 'rm -rf "$LOCK"' EXIT INT TERM
+# ⛔⛔ THE TRAP MUST `exit`, AND THE FIRST VERSION OF THIS GUARD DID NOT — MEASURED, NOT REASONED.
+#   Installing a TERM handler OVERRIDES bash's default die-on-TERM. With a bare
+#   `trap 'rm -rf "$LOCK"' TERM` the handler ran, removed the lock, AND THE LOOP CONTINUED.
+#   Driven end to end: `kill -TERM` returned 0, the process was still looping at t=28s, the
+#   lock was RELEASED at the sleep boundary, and a SECOND instance then armed successfully.
+#   ⇒ THAT GUARD WAS WORSE THAN NO GUARD: it turned a clean retire into an invisible,
+#   unlocked duplicate — the exact accidental double-arm it was written to prevent.
+#   ⚠️ The retire is bounded, not instant: bash defers a trap until the running `sleep`
+#   returns, so death takes up to one poll interval. That window is SAFE — the lock is still
+#   held by a live holder, so a competing arm is refused throughout it.
+trap 'rm -rf "$LOCK"' EXIT
+trap 'rm -rf "$LOCK"; exit 143' INT TERM
 
 N=$(wc -l < "$BUS" | tr -d ' ')
 echo "ARM: compiler watch up. bus=$N lines, patterns=$(command grep -vc '^#' "$PAT") active, re-read each poll. Arms A(orders) B(shrinkage) C(30m)."
