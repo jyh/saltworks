@@ -27,6 +27,15 @@
 # callers (Stack/Program.lean:1257, :1278, :1290) all pass `_ rfl rfl` and all three are in math's
 # glob. Deleting the arguments would convert a swap inside my own glob into a cross-glob edit.
 #
+# ⛔ THE WORKTREE THAT PRODUCED THIS PATCH IS NOT THIS PATCH. Measured 08-22: hours after the
+#   patch was committed, the scratch worktree had drifted -- it still held a SUPERSEDED DRAFT of a
+#   C4.lean change whose refined final form had since landed on master. Its `git diff` therefore
+#   no longer matched this file, and a successor who found the worktree and applied ITS diff would
+#   have REGRESSED prose that was already fixed. Reverted, and the two now agree byte-for-byte.
+#   ⇒ THIS FILE IS THE AUTHORITY. If you want the worktree, RE-CREATE IT FROM CURRENT HEAD
+#     (`git worktree add <path> HEAD` + a CoW clone of .lake, ~18s) and apply this patch to it.
+#     A staging worktree accumulates drafts; the committed artifact does not.
+#
 # Apply with:  git apply docs/Q3-SWAP-STAGED-STATECODEC-0822.diff
 #
 diff --git a/SaltWorks/HDL/StateCodec.lean b/SaltWorks/HDL/StateCodec.lean
