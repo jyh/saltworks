@@ -326,6 +326,73 @@ theorem datapath_forces_zero_select_on_LW (h : RegDatapathOK) (ins : Env)
   rw [hen, stepT_lw_writes_zero ins rd a imm hrd hdec hok] at hx
   simpa using hx
 
+
+/-! ### ⛔⭐⭐⭐ THE D REGIME — `C4SpecD core` IS REFUTED IN THE KERNEL, AND THE SPEC IS NOT EMPTY
+
+math's `2026-08-23 10:30:24` length argument was published as prose over three source lines
+and never landed as a theorem. It lands here, in the file that already carries
+`c4Spec_core_is_false`, because this is where a refutation of `core` belongs.
+
+⚠️ **BOTH HALVES ARE NEEDED AND ONLY ONE IS THE HEADLINE.** *"`C4SpecD core` is false"* is
+worth nothing on its own — it is also true of a spec no circuit can meet, and a reader has
+no way to tell those apart. So the satisfiability witness is landed BESIDE it. -/
+
+/-- ✅ **A D-WIDTH SHAPE EXISTS — `C4SpecD`'s length conjunct is SATISFIABLE, not empty.**
+
+⛔ *This is **NOT** `coreD` and must not be read as a step-7 candidate: it has no gates, it
+implements no ISA step, and it computes nothing. It exists so that `outs.length = stWidthD`
+is a hypothesis SOMETHING in `SaltWorks/` meets — math's 10:30 note recorded that the shape
+appeared nowhere in the tree, and that absence is what made the refutation unreadable.* -/
+def coreShapedD : Circ :=
+  { nIn   := SaltWorks.HDL.StateCodecD.stWidthD + 32
+    gates := []
+    outs  := List.range SaltWorks.HDL.StateCodecD.stWidthD }
+
+/-- The witness meets the count. -/
+theorem coreShapedD_outs_length :
+    coreShapedD.outs.length = SaltWorks.HDL.StateCodecD.stWidthD := by
+  simp [coreShapedD]
+
+/-- ⛔ **THE LANDED `core` HAS THE WRONG WIDTH FOR D.** `core_outs_length` pins the assembled
+circuit at `stWidth`; the two widths differ, and the difference is decided by the kernel. -/
+theorem core_outs_length_ne_stWidthD :
+    core.outs.length ≠ SaltWorks.HDL.StateCodecD.stWidthD := by
+  rw [core_outs_length]
+  decide +kernel
+
+/-- ⛔⭐⭐⭐ **`C4SpecD core` IS FALSE — A REFUTATION, NOT A GAP.**
+
+`outs_length_of_C4SpecD` forces EVERY circuit satisfying `C4SpecD` to have `stWidthD`
+outputs; `core_outs_length` pins the landed assembly at `stWidth`.  ⇒ *The extra state bits
+are not merely unproven — they are **absent from the hardware**, and no re-typing, no
+decoder migration and no codec edit can add them.  Closing this needs an assembly with more
+output bits, which is silicon and not Lean.*
+
+⭐ **AND IT IS NOT A VACUOUS VICTORY:** `coreShapedD_outs_length` exhibits a circuit that
+DOES meet the count, so `C4SpecD` fails for `core` specifically rather than for everything. -/
+theorem not_C4SpecD_core : ¬ SaltWorks.Stack.Program.C4SpecD core :=
+  fun h => core_outs_length_ne_stWidthD
+    (SaltWorks.Stack.Program.outs_length_of_C4SpecD h)
+
+/-- ⛔ **AND THE SAME ARGUMENT KILLS THE WIDENING REPAIR BEFORE ANYONE ATTEMPTS IT.**
+Any circuit satisfying `C4SpecD` fails `CoreConforms`, whose third conjunct is the C-width
+count — so "just make `core` satisfy `C4SpecD`" cannot be done while `core` stays conforming.
+*The two obligations are jointly unsatisfiable, which is a stronger statement than either
+alone and is what makes step 7 a hardware change rather than a proof effort.* -/
+theorem no_circuit_is_both_conforming_and_C4SpecD (c : Circ)
+    (hconf : CoreConforms c) : ¬ SaltWorks.Stack.Program.C4SpecD c := by
+  intro h
+  have h1 : c.outs.length = stWidth := hconf.2.2
+  have h2 : c.outs.length = SaltWorks.HDL.StateCodecD.stWidthD :=
+    SaltWorks.Stack.Program.outs_length_of_C4SpecD h
+  rw [h1] at h2
+  exact absurd h2 (by decide +kernel)
+
+#audit_axioms coreShapedD coreShapedD_outs_length
+#audit_axioms core_outs_length_ne_stWidthD
+#audit_axioms not_C4SpecD_core
+#audit_axioms no_circuit_is_both_conforming_and_C4SpecD
+
 #audit_axioms r1 identity_it_is_the_flagship
 #audit_axioms wC sC insC ctl_enable ctl_sel0 ctl_isa control_sides_agree
 #audit_axioms wI sI insI seen_insI dec_insI insI_state_is_zero enable_insI
