@@ -2701,6 +2701,261 @@ theorem c4SpecD_iff_bitwise (c : SaltWorks.HDL.Circ) :
       rw [hL, hR]
       exact hbits ins i hi
 
+/-! ### ⭐ THE D-REGIME LAYOUT ARITHMETIC — TRANSPORTED, NOT RE-DERIVED
+
+⚠️ **SCOPE NOTE, because the C header immediately below says these are "the only places
+the index arithmetic is done":** that sentence is scoped to `stBit`, the C-width reader,
+and it stays true of it. The D arithmetic is done ONCE, in `StateCodecD` — `Cell.place`,
+`cellOf_place`, `stBitD_at_place` — the layout tie-down landed there. The four lemmas
+below only TRANSPORT that tie-down into the index forms the D field predicates use; not
+one of them re-derives a division or a modulus, which is why the D regime still does its
+index arithmetic in exactly one place. -/
+
+/-- Register `r`'s bit `k` under the D layout — `stBitD_at_place` at `Cell.reg r k`. -/
+theorem stBitD_reg (s : St) (r : Fin 32) (k : Nat) (hk : k < 32) :
+    SaltWorks.HDL.StateCodecD.stBitD s (32 * r.val + k) = (s.regs[r.val]).getLsbD k := by
+  have hr := r.isLt
+  have h := SaltWorks.HDL.StateCodecD.stBitD_at_place s
+    (SaltWorks.HDL.StateCodecD.Cell.reg r.val k) ⟨hr, hk⟩
+  simp only [SaltWorks.HDL.StateCodecD.Cell.place,
+    SaltWorks.HDL.StateCodecD.cellBit] at h
+  rwa [getElem!_pos s.regs r.val hr] at h
+
+/-- The pc's bit `k` under the D layout. -/
+theorem stBitD_pc (s : St) (k : Nat) (hk : k < 32) :
+    SaltWorks.HDL.StateCodecD.stBitD s (1024 + k) = s.pc.getLsbD k := by
+  have h := SaltWorks.HDL.StateCodecD.stBitD_at_place s
+    (SaltWorks.HDL.StateCodecD.Cell.pc k) hk
+  simpa only [SaltWorks.HDL.StateCodecD.Cell.place,
+    SaltWorks.HDL.StateCodecD.cellBit] using h
+
+/-- ⭐ Memory word `w`'s bit `k` — **new at D**, and the only layout lemma carrying TWO
+field indices. -/
+theorem stBitD_mem (s : St) (w : Fin 8) (k : Nat) (hk : k < 32) :
+    SaltWorks.HDL.StateCodecD.stBitD s (1056 + 32 * w.val + k)
+      = (s.mem[w.val]).getLsbD k := by
+  have hw := w.isLt
+  have h := SaltWorks.HDL.StateCodecD.stBitD_at_place s
+    (SaltWorks.HDL.StateCodecD.Cell.mem w.val k) ⟨hw, hk⟩
+  simp only [SaltWorks.HDL.StateCodecD.Cell.place,
+    SaltWorks.HDL.StateCodecD.cellBit] at h
+  rwa [getElem!_pos s.mem w.val hw] at h
+
+/-- ⭐ The sticky trap flag — the 43rd obligation's bit, at `Cell.place .trap`. -/
+theorem stBitD_trap (s : St) :
+    SaltWorks.HDL.StateCodecD.stBitD s 1312 = s.trapped := by
+  have h := SaltWorks.HDL.StateCodecD.stBitD_at_place s
+    SaltWorks.HDL.StateCodecD.Cell.trap trivial
+  simpa only [SaltWorks.HDL.StateCodecD.Cell.place,
+    SaltWorks.HDL.StateCodecD.cellBit] using h
+
+/-! ### The D field bridges — each obligation as its own bit equations -/
+
+/-- **A D register field IS 32 independent bit obligations.**  D twin of
+`regField_iff_bits`, on `decQD`. -/
+theorem regFieldD_iff_bits (c : SaltWorks.HDL.Circ) (r : Fin 32) :
+    RegFieldD c r ↔ ∀ ins, ∀ k < 32,
+      outBit c ins (32 * r.val + k)
+        = ((stepT (SaltWorks.HDL.StateCodecD.decQD ins)
+              (seenWord ins)).regs[r.val]).getLsbD k := by
+  constructor
+  · intro h ins k hk
+    have hh : (outReg c ins r).getLsbD k
+        = ((stepT (SaltWorks.HDL.StateCodecD.decQD ins)
+              (seenWord ins)).regs[r.val]).getLsbD k := by
+      rw [h ins]
+    rwa [outReg, SaltWorks.HDL.wordOf_getLsbD _ _ hk] at hh
+  · intro h ins
+    apply BitVec.eq_of_getLsbD_eq
+    intro k hk
+    rw [outReg, SaltWorks.HDL.wordOf_getLsbD _ _ hk]
+    exact h ins k hk
+
+/-- The D pc field, likewise. -/
+theorem pcFieldD_iff_bits (c : SaltWorks.HDL.Circ) :
+    PcFieldD c ↔ ∀ ins, ∀ k < 32,
+      outBit c ins (1024 + k)
+        = ((stepT (SaltWorks.HDL.StateCodecD.decQD ins) (seenWord ins)).pc).getLsbD k := by
+  constructor
+  · intro h ins k hk
+    have hh : (outPc c ins).getLsbD k
+        = ((stepT (SaltWorks.HDL.StateCodecD.decQD ins) (seenWord ins)).pc).getLsbD k := by
+      rw [h ins]
+    rwa [outPc, SaltWorks.HDL.wordOf_getLsbD _ _ hk] at hh
+  · intro h ins
+    apply BitVec.eq_of_getLsbD_eq
+    intro k hk
+    rw [outPc, SaltWorks.HDL.wordOf_getLsbD _ _ hk]
+    exact h ins k hk
+
+/-- ⭐ **A memory-word field is 32 bit obligations** — no C-width counterpart exists,
+and this is where the C template genuinely generalises: `w` is a second field index. -/
+theorem memFieldD_iff_bits (c : SaltWorks.HDL.Circ) (w : Fin 8) :
+    MemFieldD c w ↔ ∀ ins, ∀ k < 32,
+      outBit c ins (1056 + 32 * w.val + k)
+        = ((stepT (SaltWorks.HDL.StateCodecD.decQD ins)
+              (seenWord ins)).mem[w.val]).getLsbD k := by
+  constructor
+  · intro h ins k hk
+    have hh : (outMem c ins w).getLsbD k
+        = ((stepT (SaltWorks.HDL.StateCodecD.decQD ins)
+              (seenWord ins)).mem[w.val]).getLsbD k := by
+      rw [h ins]
+    rwa [outMem, SaltWorks.HDL.wordOf_getLsbD _ _ hk] at hh
+  · intro h ins
+    apply BitVec.eq_of_getLsbD_eq
+    intro k hk
+    rw [outMem, SaltWorks.HDL.wordOf_getLsbD _ _ hk]
+    exact h ins k hk
+
+/-- ⭐⭐ **THE 43RD OBLIGATION IS NOT AN INSTANTIATION OF THE OTHER 42.**  `outReg` /
+`outPc` / `outMem` are each `wordOf` over 32 bits, so their bridges run through
+`wordOf_getLsbD` and `BitVec.eq_of_getLsbD_eq`.  `outTrap` is a SINGLE `outBit` — no
+word, no `getLsbD` — so its bridge is definitional and needs no proof at all. -/
+theorem trappedFieldD_iff_bits (c : SaltWorks.HDL.Circ) :
+    TrappedFieldD c ↔ ∀ ins,
+      outBit c ins 1312
+        = (stepT (SaltWorks.HDL.StateCodecD.decQD ins) (seenWord ins)).trapped :=
+  Iff.rfl
+
+/-- ⭐⭐⭐ **THE DECOMPOSITION AT D — `C4SpecD` IS A 43-WAY FIELDWISE CONJUNCTION.**
+The D analogue of `c4Spec_iff_fieldwise`: one 1313-bit equation becomes an output count
+plus `32 + 1 + 8 + 1 = 42` field obligations, `1 + 42 = 43` with the count.
+
+⭐ **THIS THEOREM IS ABOUT A GENERAL CIRCUIT `c` AND NEVER MENTIONS `core`** — which is
+exactly why it is provable today while the cascade to `core` is not.  The output count
+sits on the RIGHT as a HYPOTHESIS about `c`; nothing here asserts that any particular
+circuit meets it, and `core_outs_length` refutes it for the landed `core`. -/
+theorem c4SpecD_iff_fieldwise (c : SaltWorks.HDL.Circ) :
+    C4SpecD c ↔
+      c.outs.length = SaltWorks.HDL.StateCodecD.stWidthD
+        ∧ (∀ r : Fin 32, RegFieldD c r)
+        ∧ PcFieldD c
+        ∧ (∀ w : Fin 8, MemFieldD c w)
+        ∧ TrappedFieldD c := by
+  rw [c4SpecD_iff_bitwise]
+  constructor
+  · rintro ⟨hlen, hbits⟩
+    refine ⟨hlen, ?_, ?_, ?_, ?_⟩
+    · intro r
+      rw [regFieldD_iff_bits]
+      intro ins k hk
+      have hr := r.isLt
+      rw [hbits ins (32 * r.val + k)
+          (by unfold SaltWorks.HDL.StateCodecD.stWidthD; omega),
+        stBitD_reg _ r k hk]
+    · rw [pcFieldD_iff_bits]
+      intro ins k hk
+      rw [hbits ins (1024 + k)
+          (by unfold SaltWorks.HDL.StateCodecD.stWidthD; omega),
+        stBitD_pc _ k hk]
+    · intro w
+      rw [memFieldD_iff_bits]
+      intro ins k hk
+      have hw := w.isLt
+      rw [hbits ins (1056 + 32 * w.val + k)
+          (by unfold SaltWorks.HDL.StateCodecD.stWidthD; omega),
+        stBitD_mem _ w k hk]
+    · rw [trappedFieldD_iff_bits]
+      intro ins
+      rw [hbits ins 1312
+          (by unfold SaltWorks.HDL.StateCodecD.stWidthD; omega),
+        stBitD_trap]
+  · rintro ⟨hlen, hregs, hpc, hmem, htr⟩
+    refine ⟨hlen, ?_⟩
+    intro ins j hj
+    have hjD : j < SaltWorks.HDL.StateCodecD.stWidthD := hj
+    unfold SaltWorks.HDL.StateCodecD.stWidthD at hjD
+    by_cases h1 : j < 1024
+    · have hlt : j / 32 < 32 := by omega
+      have hk : j % 32 < 32 := by omega
+      have hd : 32 * (⟨j / 32, hlt⟩ : Fin 32).val + j % 32 = j := by
+        show 32 * (j / 32) + j % 32 = j
+        omega
+      have hs := stBitD_reg (stepT (SaltWorks.HDL.StateCodecD.decQD ins) (seenWord ins))
+        ⟨j / 32, hlt⟩ (j % 32) hk
+      have hb := (regFieldD_iff_bits c ⟨j / 32, hlt⟩).mp (hregs _) ins (j % 32) hk
+      rw [hd] at hs hb
+      exact hb.trans hs.symm
+    · by_cases h2 : j < 1056
+      · have hk : j - 1024 < 32 := by omega
+        have hd : 1024 + (j - 1024) = j := by omega
+        have hs := stBitD_pc (stepT (SaltWorks.HDL.StateCodecD.decQD ins) (seenWord ins))
+          (j - 1024) hk
+        have hb := (pcFieldD_iff_bits c).mp hpc ins (j - 1024) hk
+        rw [hd] at hs hb
+        exact hb.trans hs.symm
+      · by_cases h3 : j < 1312
+        · have hlt : (j - 1056) / 32 < 8 := by omega
+          have hk : (j - 1056) % 32 < 32 := by omega
+          have hd : 1056 + 32 * (⟨(j - 1056) / 32, hlt⟩ : Fin 8).val + (j - 1056) % 32 = j := by
+            show 1056 + 32 * ((j - 1056) / 32) + (j - 1056) % 32 = j
+            omega
+          have hs := stBitD_mem (stepT (SaltWorks.HDL.StateCodecD.decQD ins) (seenWord ins))
+            ⟨(j - 1056) / 32, hlt⟩ ((j - 1056) % 32) hk
+          have hb := (memFieldD_iff_bits c ⟨(j - 1056) / 32, hlt⟩).mp (hmem _) ins
+            ((j - 1056) % 32) hk
+          rw [hd] at hs hb
+          exact hb.trans hs.symm
+        · have hd : j = 1312 := by omega
+          subst hd
+          have hs := stBitD_trap (stepT (SaltWorks.HDL.StateCodecD.decQD ins) (seenWord ins))
+          have hb := (trappedFieldD_iff_bits c).mp htr ins
+          exact hb.trans hs.symm
+
+/-- ⭐⭐ **43 FIELD OBLIGATIONS AND AN OUTPUT COUNT GIVE `C4SpecD`.**  The D twin of
+`c4Spec_of_fieldwise` — the assembly direction, for whatever D-width circuit eventually
+carries the count.  ⛔ *It is not `core`: `core_outs_length` pins the landed assembly at
+`stWidth`, which refutes the first hypothesis.* -/
+theorem c4SpecD_of_fieldwise {c : SaltWorks.HDL.Circ}
+    (hlen : c.outs.length = SaltWorks.HDL.StateCodecD.stWidthD)
+    (hregs : ∀ r : Fin 32, RegFieldD c r) (hpc : PcFieldD c)
+    (hmem : ∀ w : Fin 8, MemFieldD c w) (htr : TrappedFieldD c) : C4SpecD c :=
+  (c4SpecD_iff_fieldwise c).mpr ⟨hlen, hregs, hpc, hmem, htr⟩
+
+/-! ### ⭐ THE D ISOLATION DIRECTION — a failing D core fails a NAMED field -/
+
+/-- A failing D register field refutes `C4SpecD` on its own. -/
+theorem not_C4SpecD_of_not_regFieldD {c : SaltWorks.HDL.Circ} {r : Fin 32}
+    (h : ¬ RegFieldD c r) : ¬ C4SpecD c :=
+  fun hc => h (((c4SpecD_iff_fieldwise c).mp hc).2.1 r)
+
+/-- A failing D pc field refutes `C4SpecD` on its own. -/
+theorem not_C4SpecD_of_not_pcFieldD {c : SaltWorks.HDL.Circ}
+    (h : ¬ PcFieldD c) : ¬ C4SpecD c :=
+  fun hc => h (((c4SpecD_iff_fieldwise c).mp hc).2.2.1)
+
+/-- ⭐ A failing memory word refutes `C4SpecD` on its own — new at D. -/
+theorem not_C4SpecD_of_not_memFieldD {c : SaltWorks.HDL.Circ} {w : Fin 8}
+    (h : ¬ MemFieldD c w) : ¬ C4SpecD c :=
+  fun hc => h (((c4SpecD_iff_fieldwise c).mp hc).2.2.2.1 w)
+
+/-- ⭐ A failing trap flag refutes `C4SpecD` on its own — the 43rd. -/
+theorem not_C4SpecD_of_not_trappedFieldD {c : SaltWorks.HDL.Circ}
+    (h : ¬ TrappedFieldD c) : ¬ C4SpecD c :=
+  fun hc => h (((c4SpecD_iff_fieldwise c).mp hc).2.2.2.2)
+
+/-! ### ⭐ AXIOM HYGIENE FOR THE WHOLE D REGIME
+
+⛔ **Neither the step-5 foundation nor this block carried an `#audit_axioms` before now** —
+`saltbuild EXIT=0` was the only evidence either of us had, and an exit code is not an audit.
+
+⚠️ **SPLIT ACROSS CALLS DELIBERATELY:** a multi-name `#audit_axioms` ABORTS at its first
+failure, and every name after the abort prints NOTHING — which is indistinguishable from a
+pass. One line per group keeps a failure from masking its successors. -/
+#audit_axioms encDD_length outs_length_of_C4SpecD
+#audit_axioms c4SpecD_iff_bitwise
+#audit_axioms stBitD_reg stBitD_pc
+#audit_axioms stBitD_mem stBitD_trap
+#audit_axioms regFieldD_iff_bits pcFieldD_iff_bits
+#audit_axioms memFieldD_iff_bits trappedFieldD_iff_bits
+#audit_axioms c4SpecD_iff_fieldwise
+#audit_axioms c4SpecD_of_fieldwise
+#audit_axioms not_C4SpecD_of_not_regFieldD not_C4SpecD_of_not_pcFieldD
+#audit_axioms not_C4SpecD_of_not_memFieldD not_C4SpecD_of_not_trappedFieldD
+
+
+
 /-! ### The layout arithmetic, once
 
 `stBit` is `StateCodec`'s bit-level reader; these two lemmas are the only places
