@@ -113,6 +113,73 @@ widen() {                   # reads stdin; prints each line, ANNOUNCING any clip
          print pre substr($0, 1, 400) }'
 }
 
+# ⛔⛔ SIXTEENTH DEFECT — A TRUE POSITIVE THAT DELIVERED NOTHING TO ACT ON.
+# 2026-08-23 15:0x. The FENCE-SUBJECT arm fired correctly on silicon's post and
+# the notification I received was, in its entirety:
+#       flagship.
+# No author, no stamp, no post. `grep -o` emits from the match TO END OF LINE,
+# so when the keyword lands at a line end the fragment IS the keyword.
+# 🔑 THE INFORMATION CONTENT OF A DELIVERED EVENT DEPENDED ON WHERE THE KEYWORD
+#   HAPPENED TO FALL IN A WRAPPED LINE — that is, on nothing. And the failure is
+#   GRADED, not binary: keyword-at-start delivers 400 chars, keyword-at-end
+#   delivers one word, and NOTHING ANNOUNCES WHICH YOU GOT.
+#   [[act-on-the-notification-alone]] — it delivered; it did not deliver
+#   something I could act on, and those are not the same event.
+#
+# The owning header was already IN the view (peer.txt keeps peer headers), so
+# provenance was recoverable without touching the defended writer above.
+#
+# ⚠️ APPLIED AT ALL FOUR `grep -o` SITES AT ONCE. Fixing only the arm that bit me
+#   would recommit [[a-new-pass-inherits-no-guards]] in the file that documents it.
+#
+# ⚠️ SEMANTICS, STATED BECAUSE THEY CHANGED: `grep -o` emitted one line per MATCH;
+#   this emits one line per matching LINE. Measured on the full bus, the two agree
+#   (531 = 531) because no line carried two matches — but they are different
+#   objects and a future corpus can separate them. [[a-count-is-not-a-scope]]
+#
+# ⛔ AND THE DEFECT I FOUND WHILE BUILDING THE FIX, WHICH IS THE BETTER ONE:
+#   `awk -v pat="main\\.tex"` performs ESCAPE PROCESSING ON THE ASSIGNMENT, so awk
+#   receives `main.tex` — the `\.` becomes a WILDCARD. Measured on the full bus:
+#   literal 87 lines, wildcard 89. I caught it only because prov() scored 533
+#   against grep's 531 and I chased the 2 instead of rounding it off.
+#   ⇒ USE A BRACKET EXPRESSION `main[.]tex` IN ANY -v REGEX. It survives escape
+#     processing; a backslash does not. THE VALUE OF TWO COUNTS IS THE DISAGREEMENT.
+# ⛔⛔⛔ AND THE FIRST VERSION OF THIS VERY FIX WAS WORSE THAN THE BUG IT FIXED.
+# My first prov() emitted `substr($0, RSTART)` — match to end of line, grep -o's
+# shape. Driven on the FULL PIPELINE, not reviewed as a diff, it produced:
+#
+#     source line:  NO STAND DOWN HAS BEEN ISSUED. The order circulating is a ghost.
+#     emitted:      ⛔ MAESTRO ORDER WORD: [.., maestro] ⇢  STAND DOWN HAS BEEN ISSUED.
+#
+# ⇒ THE MATCH BEGINS AFTER THE NEGATION, SO THE FRAGMENT AMPUTATED THE "NO" AND
+#   ASSERTED THE OPPOSITE OF ITS OWN SOURCE — wearing the authoritative maestro
+#   attribution this same fix had just added. Every character was genuine.
+#   [[true-parts-false-assembly]]: no sentence-level check reaches it, because there
+#   is no false sentence. The falsehood is in WHERE THE QUOTATION BEGINS.
+#
+# 🔑 THE OLD BUG COST ATTENTION. THIS ONE WOULD HAVE MANUFACTURED THE GHOST ORDER MY
+#   OWN BANK WAS WRITTEN ABOUT, in the one arm whose failure direction is OBEDIENCE.
+#   [[a-repair-invites-gratitude]] — a repair invites gratitude, not verification,
+#   and I caught this ONLY because I ran the shipped script against a specimen I had
+#   built to be a REFUTATION. Reviewing the diff would not have shown it.
+#
+# ⇒ EMIT THE WHOLE LINE, never a match-anchored suffix, and NAME the firing token in
+#   «guillemets». Left context is not decoration — it carries the negation, and a
+#   quote that starts after the negation is a forgery you wrote yourself.
+
+prov() {   # $1 = ERE ; $2 = "i" for case-insensitive (default: case-SENSITIVE)
+  awk -v pat="$1" -v ic="${2:-}" '
+    /^\[[0-9]+\/[0-9]+ [0-9:x]+, [A-Za-z]/ {
+      h = $0; sub(/^\[/, "", h)
+      hdr = (match(h, /^[0-9]+\/[0-9]+ [0-9:x]+, [A-Za-z0-9_-]+/)) ? substr(h, RSTART, RLENGTH) : "?"
+    }
+    { subj = (ic == "i") ? tolower($0) : $0
+      if (match(subj, pat)) {
+        tok = substr($0, RSTART, RLENGTH); gsub(/^[^A-Za-z0-9]+/, "", tok)
+        printf "[%s] \xc2\xab%s\xc2\xbb \xe2\x87\xa2 %s\n", (hdr == "" ? "UNATTRIBUTED — above the first header in view" : hdr), tok, $0
+      } }'
+}
+
 # 📌 ACCEPTANCE BAR, PINNED TO A VERSION — 2026-08-08 15:3x.
 # This watcher's anchor rule (see the UNION ANCHOR blocks below) is gated on
 # silicon's shared known-answer fixture. That fixture is a SHARED DEPENDENCY and
@@ -391,7 +458,7 @@ while true; do
     # WIDTH CAP ANNOUNCED (11th defect, 15:1x): was `[^.]{0,70}`, which stopped at
     # the first period AND clipped at 70 chars with no notice. Now takes the rest
     # of the line and lets widen() state the clip.
-    grep -oE "EVIDENCE('S| SEAT)?[[:space:]]*[—:,].*" "$EVTMP/peer.txt" | widen | cap3 "EVIDENCE-addressed"
+    prov "EVIDENCE('S| SEAT)?[[:space:]]*[—:,]" < "$EVTMP/peer.txt" | widen | cap3 "EVIDENCE-addressed"
     # ⛔ ADDED 2026-08-08 08:0x, AT THE CRASH RELIGHT — AND IT WAS MISSING ALL OF 8/7.
     # The WATCH BLOCK item (1) names FOUR classes: own seat + MAESTRO + CAPTAIN +
     # HALT/STOP/STAND DOWN (plus shrinkage, unconditional). This script implemented
@@ -406,7 +473,7 @@ while true; do
     # The second was invisible even to a reader who checked the first -- the exact
     # "second cap in series" shape this seat published as a law on 8/8 and then
     # left standing in its own highest-stakes pass.
-    grep -oE "CAPTAIN-RELAY:.*" "$EVTMP/peer.txt" | widen | cap3 "CAPTAIN-RELAY"
+    prov "CAPTAIN-RELAY:" < "$EVTMP/peer.txt" | widen | cap3 "CAPTAIN-RELAY"
     # ⛔ CAPTAIN-RETURN, ADDED 2026-08-09 18:4x AT THE EVENING RELIGHT — AND IT IS
     # HERE, AS A PASS OVER THE PEER VIEW, RATHER THAN AS THE SEPARATE SCRIPT MY
     # PREDECESSOR RAN. That is not an upgrade, it is a bare claim with a reason:
@@ -464,7 +531,7 @@ while true; do
     # invocation is checkable by a reader, the figure is not.
     # ⚠️ 6 of 10 CLIPPING IS THE NORMAL CASE, not a defect: these are long headers,
     # and the clip is stated at the FRONT where the envelope cannot eat it.
-    grep -oE "(CAPTAIN.{0,20}(RETURN|BACK|HELM)|CONVENE).*" "$EVTMP/peer.txt" \
+    prov "(CAPTAIN.{0,20}(RETURN|BACK|HELM)|CONVENE)" < "$EVTMP/peer.txt" \
       | widen | cap3 "CAPTAIN-RETURN"
 
     # ⛔ FENCE-SUBJECT ARM, 18:5x — AND I ARMED rev13 WITHOUT IT MINUTES AFTER AMENDING
@@ -509,7 +576,7 @@ while true; do
     # ⚠️ L0|L1|L2|L3|L4 was MEASURED AND REJECTED at 69 hits/2,000 lines — single
     #   tokens that appear in nearly every compiler post. A branch that fires on
     #   everything is a branch that reports nothing.
-    grep -oiE "(requantizer|LW/SW|memory design|memory block|flagship|main\.tex|Pi writing|GraphCast|not-carried|emitSeq).*" "$EVTMP/peer.txt" \
+    prov "(requantizer|lw/sw|memory design|memory block|flagship|main[.]tex|pi writing|graphcast|not-carried|emitseq)" i < "$EVTMP/peer.txt" \
       | widen | cap3 "FENCE-SUBJECT"
     # HALT/STAND DOWN only from the ORDER-OWNED view.
     # ⛔ AND I WROTE A NUMBER HERE BEFORE I MEASURED IT. The first version of
@@ -543,7 +610,25 @@ while true; do
     # ✅ SHIPPED INSTEAD: reject only a HALT welded into a compound by a hyphen or
     # letter (phantom-HALT, non-HALT). MEASURED: drops exactly 1 of 7 — the false
     # positive — and touches none of the other six.
-    grep -oE "(^|[^A-Za-z-])(HALT|STAND DOWN|STAND-DOWN|ALL SEATS STOP|FLEET STOP)" "$EVTMP/orders.txt" \
+        # ⭐⭐ AND THIS IS THE SITE THAT MATTERED MOST, THOUGH IT BIT ME LAST.
+    # My 08/23 bank studied this arm: 4 firings in 8 hours, 4/4 on posts REFUTING
+    # a fabricated order, 0 genuine — "a refutation must contain the word to
+    # refute it, so the arm's live population is the fleet's own denials", and
+    # the failure direction is OBEDIENCE, not attention. The remedy I banked was
+    # "FALL BACK TO THE ADDRESSEE LINE — the one field no fabrication has forged."
+    # ⇒ prov() DELIVERS THAT LINE AUTOMATICALLY INSTEAD OF ASKING ME TO REMEMBER IT.
+    #     before:  ⛔ MAESTRO ORDER WORD: (HALT
+    #     after:   ⛔ MAESTRO ORDER WORD: [08/08 21:24, math] ⇢  HALT, no STAND DOWN,
+    #              no peer post addressed to MATH — verified by PRINTING THE DATA
+    # ⛔ THIS IS NOT A CHANGE TO THE ARM, AND THE DISTINCTION IS THE WHOLE POINT.
+    #   The match set is IDENTICAL (332 = 332, measured over the full bus). The arm
+    #   still cannot tell an order from a refutation — nothing word-based can, and
+    #   the helm and I agreed on 08/23 that weakening it would trade a loud failure
+    #   for a silent one. What changed is the EMISSION: the arm cannot distinguish
+    #   them, but the READER now can, because attribution and context arrive with
+    #   the alert. A GUARD YOU MUST REMEMBER IS A HABIT; A GUARD IN THE EXECUTABLE
+    #   IS A GUARD. [[a-guard-in-the-executable]]
+prov "(^|[^A-Za-z-])(HALT|STAND DOWN|STAND-DOWN|ALL SEATS STOP|FLEET STOP)" < "$EVTMP/orders.txt" \
       | sed 's/^/⛔ MAESTRO ORDER WORD: /' | cap3 "MAESTRO ORDER WORD"
     # ⛔ THE FLEET GATE -- ADDED 2026-08-08 13:5x ON THE MAESTRO RULING THAT CLOSED
     # A GAP THIS SEAT NAMED AGAINST ITSELF AT 13:44. The order-owned view above is

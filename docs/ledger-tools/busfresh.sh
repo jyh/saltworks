@@ -49,7 +49,16 @@
 # EXIT: 0 fresh · 1 appended-since · 2 shrank · 3 REWRITTEN IN PLACE · 4 misuse
 #
 set -u
-BUS=${BUS:?BUS must be set: the fleet bus is machine-local and has no public default}
+# ⛔ MISUSE MUST NOT WEAR THE REFUSAL'S EXIT CODE. `${BUS:?}` exits 1 under set -u —
+# the SAME code as "stale read" — so a caller running `busfresh.sh "$OFF" || exit 1`
+# cannot tell a MISCONFIGURED GATE from a GENUINE REFUSAL. Found 2026-08-23 by my own
+# test harness forgetting to export BUS: all three arms returned 1 and I read it as a
+# regression. The harness was wrong and the exit code was ambiguous; only one of those
+# is mine to keep. Misuse has its own code and this path now uses it.
+if [ -z "${BUS:-}" ]; then
+  echo "⛔ MISUSE: BUS must be set: the fleet bus is machine-local and has no public default." >&2
+  exit 4
+fi
 
 prefix_sha() {  # $1 = byte count
   head -c "$1" "$BUS" | shasum -a 256 | cut -d' ' -f1
