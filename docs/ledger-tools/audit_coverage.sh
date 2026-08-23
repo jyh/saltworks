@@ -62,7 +62,14 @@ done
 
 TMP="${TMPDIR:-/tmp}/audit_coverage.$$"
 mkdir -p "$TMP" || exit 2
-trap 'rm -rf "$TMP"' EXIT INT TERM
+# ⛔ TRAP MUST EXIT ON INT/TERM — measured 2026-08-22, not reasoned. A handler REPLACES
+#   bash's die-on-TERM default, so the bare `trap ... EXIT INT TERM` form does NOT make
+#   cleanup safe: the process SURVIVES the signal, runs its remaining work with $TMP
+#   ALREADY DELETED underneath it, and EXITS 0. In an audit tool that is a FALSE GREEN.
+#   (In a `while true` loop the same idiom is worse still: it runs forever, unlocked and
+#   invisible. That is how this was found -- watch-compiler.sh, bdb9d40.)
+trap 'rm -rf "$TMP"' EXIT
+trap 'rm -rf "$TMP"; exit 143' INT TERM
 
 # ── the variadic-command parser ────────────────────────────────────────────
 # Written to a file via a QUOTED heredoc: Lean identifiers carry primes

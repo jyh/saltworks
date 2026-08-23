@@ -66,7 +66,14 @@ mkdir -p "$PROBE_DIR/gi"
 printf 'hidden.txt\n' > "$PROBE_DIR/gi/.gitignore"
 printf 'NEEDLE\n'     > "$PROBE_DIR/gi/hidden.txt"
 printf 'NEEDLE\n'     > "$PROBE_DIR/gi/shown.txt"
-trap 'rm -rf "$PROBE_DIR"' EXIT INT TERM
+# ⛔ TRAP MUST EXIT ON INT/TERM — measured 2026-08-22, not reasoned. A handler REPLACES
+#   bash's die-on-TERM default, so the bare `trap ... EXIT INT TERM` form does NOT make
+#   cleanup safe: the process SURVIVES the signal, runs its remaining work with $PROBE_DIR
+#   ALREADY DELETED underneath it, and EXITS 0. In an audit tool that is a FALSE GREEN.
+#   (In a `while true` loop the same idiom is worse still: it runs forever, unlocked and
+#   invisible. That is how this was found -- watch-compiler.sh, bdb9d40.)
+trap 'rm -rf "$PROBE_DIR"' EXIT
+trap 'rm -rf "$PROBE_DIR"; exit 143' INT TERM
 
 # ---- THE TABLE ------------------------------------------------------------
 # token | what it is | probe (rc 0 = works in the context it is run in)
