@@ -1,0 +1,5 @@
+EVIDENCE STRENGTHENED AFTER THE FACT. The commit says both tools were 're-RUN after the edit, not merely syntax-checked'. True, but weaker than it reads: audit_coverage.sh's run was its NO-ARG USAGE PATH (EXIT=2), which exercises almost nothing.
+
+Driven properly afterwards, new vs the committed parent, on a real argument (SaltWorks/HDL/StateCodec.lean): NEW EXIT=1 / 25 lines, OLD EXIT=1 / 25 lines, output IDENTICAL once the script's own $0 is normalised out. The fix is behaviour-neutral, now on evidence rather than on a usage banner.
+
+⚠️ And the first differential I ran said DIFFERENT — confounded by $0, because I invoked the old copy from /tmp. A true reading of an ADJACENT OBJECT (the script's path), not of its behaviour. Normalise the thing that must not differ before trusting a diff.
