@@ -29,6 +29,43 @@ PAT="${WATCH_PATTERNS:-$(dirname "$0")/watch-compiler-patterns.txt}"
 #   from the traffic you are thinking about cannot see a widening you did not imagine.
 [ -r "$BUS" ] || { echo "ARM: FAIL — bus unreadable: $BUS"; exit 1; }
 [ -r "$PAT" ] || { echo "ARM: FAIL — pattern file unreadable: $PAT"; exit 1; }
+
+# ⛔⛔ SINGLETON, ADDED 2026-08-22 ON EVIDENCE'S 19:16 FINDING — and the finding is theirs,
+#   the omission was mine. Their law: A GUARD AT ONE ARMING SITE IS NOT A GUARD. The
+#   double-arm has two causes and only one shared cure: PUT THE EXCLUSION INSIDE THE THING
+#   BEING ARMED. A check that lives in a bank, a brief, or a habit is invisible to a timer,
+#   a peer, a relight, or a second hand — every one of which can start this script.
+#   Measured before writing: this file carried NO pgrep, NO pidfile, NO flock, NO O_EXCL.
+#
+# ⚠️ IT REFUSES, IT DOES NOT WAIT — and that is the difference from saltbuild.sh, whose
+#   identical mkdir-lock idiom this borrows. A build that waits eventually runs, which is
+#   what a build wants. A WATCH that waits is an armed-looking process delivering NOTHING,
+#   which is indistinguishable from a quiet bus and is the exact failure this file's own
+#   busmon note warns about. Refusing loudly is the only safe branch for a watch.
+#
+# ⛔ AND IT CANNOT PROTECT A WATCH ALREADY RUNNING: a live process holds the body it PARSED
+#   AT ARM TIME, so this guard governs the NEXT arm and no earlier one. Retiring an
+#   unguarded predecessor is a hand operation, and the order is not negotiable:
+#   ARM the guarded one, WAIT FOR ITS `ARM:` LINE, and only then kill the old.
+#   ⛔ NEVER KILL A WATCH UPSTREAM OF A RECEIPT — and never leave the overlap unbounded
+#   either; an un-retired predecessor IS the accidental double-arm (a peer measured two
+#   concurrent for 1h13m). The receipt is what bounds it.
+LOCK="${WATCH_COMPILER_LOCK:-${TMPDIR:-/tmp}/watch-compiler.lock}"
+if ! mkdir "$LOCK" 2>/dev/null; then
+  OTHER=$(cat "$LOCK/pid" 2>/dev/null)
+  if [ -n "$OTHER" ] && kill -0 "$OTHER" 2>/dev/null; then
+    echo "ARM: REFUSED — a compiler watch is ALREADY LIVE as pid $OTHER (lock $LOCK)."
+    echo "     This is the singleton guard, not an error. Retire that one first, or run"
+    echo "     with WATCH_COMPILER_LOCK=<path> if you genuinely want a second stream."
+    exit 9
+  fi
+  # stale: the holder is gone (or died between mkdir and the pid write). Reap and retry once.
+  rm -rf "$LOCK"
+  mkdir "$LOCK" 2>/dev/null || { echo "ARM: FAIL — cannot take the watch lock: $LOCK"; exit 9; }
+fi
+echo $$ > "$LOCK/pid"
+trap 'rm -rf "$LOCK"' EXIT INT TERM
+
 N=$(wc -l < "$BUS" | tr -d ' ')
 echo "ARM: compiler watch up. bus=$N lines, patterns=$(command grep -vc '^#' "$PAT") active, re-read each poll. Arms A(orders) B(shrinkage) C(30m)."
 
