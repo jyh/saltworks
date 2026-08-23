@@ -40,32 +40,51 @@ WHAT THIS IS NOT
 import sys, re, zlib, struct, hashlib
 from collections import defaultdict
 
-# ── palette: function classes ────────────────────────────────────────────────
-# CLASS NAME RATIFIED AT COUNCIL 2026-08-23 — "hold & fanout buffering".
-# Ordered darkest-to-lightest by narrative weight, not by count.
+# ── palette ──────────────────────────────────────────────────────────────────
+# LEGEND STRUCTURE RATIFIED AT COUNCIL 2026-08-23, and it is the CAPTAIN'S READER
+# MODEL rather than the classifier's convenience: "the highest level divisions:
+# fabric, mac, cpu, clock/timing related, everything else."
+# Both class names ratified the same morning: "fabric" and "hold & fanout
+# buffering".
+# ⛔ CPU IS DELIBERATELY ABSENT. The Captain wants it as a division and it DOES
+# NOT EXIST IN THE SHIPPED NETLIST BY NAME — alu32/branch32/regfile are fused
+# into the flat mass by synthesis. Inventing a boundary here would manufacture
+# precision the die does not carry. A net-cone split is priced separately for
+# arXiv v2, NOT drawn today.
+#
+# Colour follows the FAMILY, shade follows the member: one hue per legend group
+# so the eye reads five divisions, not twelve classes.
 COLORS = {
+    # ① fabric — one grey family, three shades
+    "fabric_combinational":   (0xbd, 0xbd, 0xbd),
+    "fabric_mux":             (0x8d, 0x8d, 0x8d),
+    "fabric_sequential":      (0x5f, 0x5f, 0x5f),
+    # ② mac — one blue family, three islands
     "mac_island_cell0":       (0x1f, 0x77, 0xb4),
-    "mac_island_cell1":       (0x2e, 0x8b, 0xc8),
-    "mac_island_cell2":       (0x4f, 0xa3, 0xd9),
+    "mac_island_cell1":       (0x3d, 0x8f, 0xc6),
+    "mac_island_cell2":       (0x5b, 0xa7, 0xd8),
+    # ③ serializer — one orange family, three
     "serializer_ser0":        (0xff, 0x7f, 0x0e),
-    "serializer_ser1":        (0xff, 0x95, 0x3a),
-    "serializer_ser2":        (0xff, 0xab, 0x66),
-    "core_combinational":     (0x9e, 0x9e, 0x9e),
-    "core_mux":               (0x6d, 0x6d, 0x6d),
-    "core_sequential":        (0x2c, 0xa0, 0x2c),
-    "clock_tree":             (0xd6, 0x27, 0x28),
-    "hold_fanout_buffering":  (0x94, 0x67, 0xbd),
+    "serializer_ser1":        (0xff, 0x9a, 0x3d),
+    "serializer_ser2":        (0xff, 0xb5, 0x6b),
+    # ④ clock & timing — ONE family, TWO shades, per the ratified grouping
+    "clock_tree":             (0xa5, 0x11, 0x22),
+    "hold_fanout_buffering":  (0xef, 0x6f, 0x7d),
+    # ⑤ everything else
+    "drive_strengthening":    (0xc4, 0xa4, 0x84),
     "tie":                    (0x8c, 0x56, 0x4b),
 }
-LEGEND = [
-    ("mac_island_cell0", "MAC island (kernel-emitted)"),
-    ("serializer_ser0",  "serializer (kernel-emitted)"),
-    ("core_combinational", "core combinational"),
-    ("core_mux",         "core mux"),
-    ("core_sequential",  "core sequential"),
-    ("clock_tree",       "clock tree"),
-    ("hold_fanout_buffering", "hold & fanout buffering"),
-    ("tie",              "tie"),
+# (group label, [member classes]) — counts are SUMMED over members, because a
+# legend that names the CLASS while the palette splits the INSTANCES would
+# understate MAC by two thirds.
+LEGEND_GROUPS = [
+    ("fabric",                  ["fabric_combinational", "fabric_mux", "fabric_sequential"]),
+    ("MAC islands (x3)",        ["mac_island_cell0", "mac_island_cell1", "mac_island_cell2"]),
+    ("serializers (x3)",        ["serializer_ser0", "serializer_ser1", "serializer_ser2"]),
+    ("clock distribution",      ["clock_tree"]),
+    ("hold & fanout buffering", ["hold_fanout_buffering"]),
+    ("drive-strengthening",     ["drive_strengthening"]),
+    ("ties",                    ["tie"]),
 ]
 
 def sha256(path):
@@ -198,22 +217,18 @@ def main():
             f.write(f'<rect x="{X:.2f}" y="{Y:.2f}" width="{max(w*sx,0.35):.2f}" '
                     f'height="{max(h*sy,0.6):.2f}" fill="rgb{col}"/>\n')
         ly = pad + dh * sy + 28
-        # Legend counts: the three MAC islands and three serializers are summed,
-        # because the legend names the CLASS while the palette distinguishes the
-        # instances — showing one island's count beside a label that reads
-        # "MAC island" would understate it by two thirds.
-        def legend_count(key):
-            if key.startswith("mac_island"):
-                return sum(v for k, v in drawn.items() if k.startswith("mac_island"))
-            if key.startswith("serializer"):
-                return sum(v for k, v in drawn.items() if k.startswith("serializer"))
-            return drawn.get(key, 0)
-        for i, (k, label) in enumerate(LEGEND):
+        for i, (label, members) in enumerate(LEGEND_GROUPS):
             cx = pad + (i % 4) * ((W - 2 * pad) / 4)
-            cy = ly + (i // 4) * 22
-            f.write(f'<rect x="{cx}" y="{cy-9}" width="12" height="12" fill="rgb{COLORS[k]}"/>\n')
-            f.write(f'<text x="{cx+18}" y="{cy+1}" font-family="Helvetica,Arial" '
-                    f'font-size="11" fill="#000">{label} ({legend_count(k):,})</text>\n')
+            cy = ly + (i // 4) * 24
+            n = sum(drawn.get(m, 0) for m in members)
+            # one swatch per member, side by side, so a multi-shade family reads
+            # as ONE entry rather than three competing ones
+            for j, m in enumerate(members):
+                f.write(f'<rect x="{cx + j*13}" y="{cy-9}" width="12" height="12" '
+                        f'fill="rgb{COLORS[m]}"/>\n')
+            tx = cx + len(members) * 13 + 6
+            f.write(f'<text x="{tx}" y="{cy+1}" font-family="Helvetica,Arial" '
+                    f'font-size="11" fill="#000">{label} ({n:,})</text>\n')
         f.write("</svg>\n")
 
     # ── PNG ──

@@ -70,15 +70,16 @@ grep '^ *sky130_fd_sc_hd__' "$NL" | awk '
   else if (clocktyped && onclock)  { fc = "clock_tree";           pc = "tool_inserted_cts" }
   else if (clocktyped)             { fc = "hold_fanout_buffering";pc = "tool_inserted_timing_repair" }
   else if (type ~ /^(s?e?df[a-z]|s?e?dl[rx][a-z]|lpflow_inputisolatch)/)
-                                   { fc = "core_sequential";      pc = "agent_written" }
-  else if (type ~ /^mux/)          { fc = "core_mux";             pc = "agent_written" }
+                                   { fc = "fabric_sequential";    pc = "agent_written" }
+  else if (type ~ /^mux/)          { fc = "fabric_mux";           pc = "agent_written" }
   else if (type ~ /^conb/)         { fc = "tie";                  pc = "agent_written" }
-  else {
-    fc = "core_combinational"
-    # non-clock-typed repair buffers are still TOOL-inserted, not agent-written
-    pc = (name ~ /^(load_slew|wire|max_cap|fanout|hold|input)/) ? "tool_inserted_timing_repair" \
-                                                                : "agent_written"
-  }
+  # NON-clock-typed repair buffers: inserted by the resizer for slew/cap/wire/
+  # fanout, so they are TOOL-authored and belong in legend class (5), not in the
+  # fabric mass they are physically mixed into.
+  else if (name ~ /^(load_slew|wire|max_cap|input)/)
+                                   { fc = "drive_strengthening";  pc = "tool_inserted_timing_repair" }
+  else if (name ~ /^(hold|fanout)/){ fc = "drive_strengthening";  pc = "tool_inserted_timing_repair" }
+  else                             { fc = "fabric_combinational"; pc = "agent_written" }
 
   printf "%s\t%s\t%s\t%s\t%s\n", name, type, group, fc, pc
 }'
