@@ -66,25 +66,37 @@ from collections import defaultdict
 # and the palette stays honest; hue now carries the family and shade the member,
 # so nothing is distinguished by brightness alone.
 COLORS = {
-    # ① fabric — one grey family, three shades, none near black
-    "fabric_combinational":   (0xd6, 0xd6, 0xd6),
-    "fabric_mux":             (0xab, 0xab, 0xab),
-    "fabric_sequential":      (0x7d, 0x7d, 0x7d),
-    # ② mac — one blue family, three islands
+    # ① fabric — GREEN, three shades, LIGHT-to-MID by the Captain's revision:
+    #   "the fabric is in gray, which implies other". The design's heart gets a
+    #   real colour; grey is freed to mean what he intuited it means.
+    "fabric_combinational":   (0xd9, 0xf0, 0xd3),
+    "fabric_mux":             (0x9e, 0xd9, 0x9a),
+    "fabric_sequential":      (0x52, 0xa8, 0x60),
+    # ② mac — UNCHANGED (recognized at the sitting and not questioned)
     "mac_island_cell0":       (0x1f, 0x77, 0xb4),
     "mac_island_cell1":       (0x3d, 0x8f, 0xc6),
     "mac_island_cell2":       (0x5b, 0xa7, 0xd8),
-    # ③ serializer — one orange family, three
+    # ③ serializer — UNCHANGED
     "serializer_ser0":        (0xff, 0x7f, 0x0e),
     "serializer_ser1":        (0xff, 0x9a, 0x3d),
     "serializer_ser2":        (0xff, 0xb5, 0x6b),
-    # ④ clock & timing — ONE violet family, TWO shades, per the ratified grouping
-    "clock_tree":             (0x5e, 0x2d, 0x91),
-    "hold_fanout_buffering":  (0xc0, 0xa6, 0xdb),
-    # ⑤ everything else — warm, and distinct from all four families above
-    "drive_strengthening":    (0x8c, 0x56, 0x4b),
-    "tie":                    (0x2c, 0xa0, 0x2c),
+    # ④ clock & timing — RED and PURPLE per the revision. ⚠️ RED-ON-GREEN IS THE
+    #   CLASSIC CVD COLLISION and the fix is LUMINANCE, not hue: this red is very
+    #   dark (L*~30) against greens held light-to-mid (L*~144-228), a gap no
+    #   common colour-vision deficiency closes. A MID red here would fail.
+    "clock_tree":             (0x8b, 0x00, 0x00),
+    "hold_fanout_buffering":  (0x6a, 0x3d, 0x9a),
+    # ⑤ everything else — GREY NOW MEANS "OTHER", which is the Captain's own
+    #   reading of grey, finally true once the fabric stopped using it.
+    "drive_strengthening":    (0x70, 0x70, 0x70),
+    "tie":                    (0x00, 0x00, 0x00),
 }
+
+def _lum(c):
+    """Relative luminance (Rec.709). Used to PROVE the red/green separation
+    rather than assert it — the CVD constraint is about luminance, so it gets a
+    number, not a colour opinion."""
+    return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]
 
 # ── a 5x7 bitmap font, because the PNG must carry its own legend ─────────────
 # ⛔ WHY THIS IS IN HERE AT ALL: the first candidate put the legend ONLY in the
