@@ -45,9 +45,23 @@
 #   NOT a tee rendering change. Without this control I would have reported a false regression
 #   against my own patch. All three runs 348 lines.
 #
+# ⭐⭐ REVISED 08/22 21:0x ON MATH'S SPECIMEN — THE VACUOUS ZERO, WHICH IS WORSE THAN A VARYING
+#    COUNT. They found one of their own builds reporting `warnings=0` FOR A MODULE IT NEVER
+#    COMPILED: the job was cached, so the zero meant NOTHING LOOKED, and it is byte-identical to
+#    "compiled and clean". The build arm now qualifies every zero:
+#      G cached build, warnings present -> "compiled=0 replayed=15"     (split reported)
+#      H a REAL compile                 -> "compiled=1 replayed=15"     (not vacuous)
+#      I cached build, ZERO warnings    -> "⛔ VACUOUS — 0 jobs COMPILED, 1 replayed.
+#                                            NOTHING LOOKED."           (math's exact case)
+#    ⛔ AND THE FIRST DETECTOR WAS WRONG: I counted ` Building `, which lake prints only on a
+#      FAILED job — taken from the one failure line I happened to have. Measured: a successful
+#      compile prints "✔ [n/m] Built <module> (3.2s)". The wrong marker reported compiled=0 for
+#      a brand-new module that had just compiled, i.e. it would have called a real compile
+#      vacuous. A detector built from a failure line cannot see success.
+#
 --- a/tools/saltbuild.sh	2026-08-15 15:11:53
-+++ b/tools/saltbuild.sh	2026-08-22 20:41:26
-@@ -52,13 +52,40 @@
++++ b/tools/saltbuild.sh	2026-08-22 20:48:46
+@@ -52,13 +52,54 @@
  PRE_HEAD=$(git rev-parse --short HEAD 2>/dev/null || echo n/a)
  PRE_DIRTY=$(git status --porcelain 2>/dev/null | command grep -c . || echo '?')
  START=$(date '+%H:%M:%S' 2>/dev/null || echo n/a)
@@ -84,8 +98,22 @@
 +    rm -f "$BUILDLOG"; exit 9
 +  fi
 +else
-+  echo "saltbuild WARNINGS=$WARNS ⚠ BUILD ARM — NOT A BASELINE: lake emits diagnostics only for the" >&2
-+  echo "  jobs it reports, so this is NOT comparable between runs. Do not gate on it." >&2
++  # ⛔⛔ A ZERO HERE CAN BE VACUOUS, AND THAT IS WORSE THAN A VARYING COUNT. A peer's build
++  #   reported warnings=0 for a module it NEVER COMPILED — the job was cached, so the zero meant
++  #   NOTHING LOOKED, and it is byte-identical to "compiled and clean". Qualify it or it lies.
++  # ⛔ THE MARKER IS `Built`, NOT `Building`. Measured: a successful compile prints
++  #   "✔ [n/m] Built <module> (3.2s)"; `Building` appears only on a FAILED job, which is where
++  #   I first took it from — and a detector built on the failure line reported compiled=0 for a
++  #   brand-new module that had just compiled.
++  COMPILED=$(command grep -c '] Built ' "$BUILDLOG" 2>/dev/null); COMPILED=${COMPILED:-0}
++  REPLAYED=$(command grep -c ' Replayed ' "$BUILDLOG" 2>/dev/null); REPLAYED=${REPLAYED:-0}
++  if [ "$WARNS" -eq 0 ] && [ "$COMPILED" -eq 0 ] && [ "$REPLAYED" -gt 0 ]; then
++    echo "saltbuild WARNINGS=0 ⛔ VACUOUS — 0 jobs COMPILED, $REPLAYED replayed. NOTHING LOOKED." >&2
++    echo "  This zero is byte-identical to 'compiled and clean' and means the opposite." >&2
++  else
++    echo "saltbuild WARNINGS=$WARNS (build arm: compiled=$COMPILED replayed=$REPLAYED) ⚠ NOT A" >&2
++    echo "  BASELINE — lake emits diagnostics only for the jobs it reports. Do not gate on it." >&2
++  fi
 +fi
 +rm -f "$BUILDLOG"
  { SHA=""
