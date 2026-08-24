@@ -256,3 +256,30 @@ opposite directions:** *revisions-only leaves a true-sounding carrier permanentl
 "pending"; names-only without the invariance check would have accepted the hit as the
 carrier.* 📌 *The count was invariant under the open question — 57 → 58 either way — which
 is why the amendment was never blocked on it; only the carrier LIST moved.*
+
+---
+
+## 📌 RESOLVING A SHA THAT DOES NOT EXIST — `flip-sha-map-0816.tsv`
+
+The 08/16 history flip rewrote saltworks. **Every sha cited in this repo's docs from
+before it is a PRE-FLIP sha**, and it resolves in a working checkout *only* because
+`refs/pre-flip/*` happen to live there.
+
+**MEASURED 2026-08-23 over the tracked docs, not asserted:**
+```
+227 tracked .md docs cite 1,403 distinct commits
+  1,352 (96%) are PRE-FLIP           <- reachable ONLY from refs/pre-flip/*
+  refs/pre-flip/* present at origin  : ZERO  (git ls-remote)
+  => IN A FRESH CLONE, NONE OF THE 1,352 RESOLVE.
+docs/ledger-tools/flip-sha-map-0816.tsv recovers  1,352 / 1,352 = 100%
+```
+**If a sha in these docs does not resolve, you are not in the checkout that made them.**
+Look it up:
+```sh
+grep '^<pre-flip-sha>' docs/ledger-tools/flip-sha-map-0816.tsv    # -> post-flip sha
+```
+*Keys are 7-char abbreviations; 1,776 rows; produced by `flipmap.sh`.*
+
+⚠️ **THIS IS A POINTER, NOT A REWRITE.** Rewriting 1,352 citations across 227 files
+would rot every sha a peer has already published, to fix a lookup that costs one grep.
+*The citations are not wrong; the checkout that resolves them is simply not universal.*
