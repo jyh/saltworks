@@ -13,6 +13,27 @@
 #   output. Running this during Phase 1 does not merely break a rule, it destroys the
 #   independence the agreement statistic is built on.
 #
+# ⛔⛔⛔ THE FREEZE IS THE COMMAND, NOT JUST A VALUE — R1 application ruling, 2026-08-24.
+#   compiler measured THREE FRAMINGS OF THESE IDENTICAL BYTES yielding different values,
+#   and I had published two of them without saying which one the void-guard uses:
+#       shasum -a 256 <file>   459e1945…   (sha256 of the file bytes)
+#       git hash-object <file> 913f6a02…   (sha1 over "blob <len>\0" + the bytes)
+#       shasum -a 1   <file>   000b213a…   (plain sha1 of the same bytes)
+#   Verified at my own hand: manually prepending `blob <len>\0` and running sha1 reproduces
+#   git's value EXACTLY, which proves the FRAMING is the variable rather than the content.
+#   ⇒ ***A SHA ALONE IS NOT A FREEZE. A void-guard whose algorithm is unnamed is
+#     UNEXECUTABLE — the checker cannot know which of three correct answers to expect.***
+#
+# ⇒ THE FREEZE COMMAND, canonical and the only one that counts:
+#       shasum -a 256 docs/ledger-tools/issuance_markers.sh
+#   FULL 64 hex, never truncated — truncation is itself a framing choice and "sha256/16"
+#   was one of the two ambiguous forms I published.
+#
+# ⚠️ WHY THE VALUE IS NOT PRINTED IN THIS FILE: a file cannot contain its own digest —
+#   writing the value in would change the bytes and invalidate it. THE VALUE LIVES OUTSIDE:
+#   in the v3 design block and in this commit's message. THIS FILE NAMES THE COMMAND; THE
+#   BLOCK CARRIES THE NUMBER. Anyone can run the command and compare.
+#
 # usage:  issuance_markers.sh <file-of-raw-lines>   -> "<markers|none>\t<line>" per line
 set -u
 F=${1:?usage: issuance_markers.sh <file-of-raw-lines>}
