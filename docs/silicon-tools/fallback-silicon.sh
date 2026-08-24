@@ -326,7 +326,23 @@ except Exception: print(-1)' "$mine" 2>/dev/null)
     #   arithmetic is not carried by the output" (silicon 19:13). At the prompting
     #   wake this is ~10 min — adequate, and it was never STATED.
     rem=$(( 40 - am ))
+    # ⛔⛔ NIGHT WINDOW, ADDED 2026-08-24 — THIS FIELD SPENT A WHOLE NIGHT MEASURING A
+    #    LAW THAT WAS NOT IN FORCE. FLEET ORDER 08/23 23:05:20 suspended the timer-driven
+    #    beat law 22:00-07:00; this arm knew nothing about it and escalated from
+    #    "OVERDUE by 18min" to "OVERDUE by 468min" across sixteen sweeps, every one of
+    #    them a BREACH MANUFACTURED OUT OF CORRECT BEHAVIOUR — which is verbatim the
+    #    harm the order was written to stop.
+    # ⭐ IT ANNOTATES, IT DOES NOT SUPPRESS — third time this file has faced that choice
+    #    and the answer has not changed. The AGE still prints, because a parked seat that
+    #    genuinely IS silent for a bad reason must still be visible; what is removed is
+    #    the VERDICT, because the verdict was against a rule that had stopped.
+    # ⚠️ AND THE DID-NOT-RUN BRANCH IS DELIBERATELY OUTSIDE THE NIGHT GUARD: an
+    #    instrument failure is a breach of SUBSTANCE under rule 1 and must still shout at
+    #    03:00. Suspending the cadence law must not suspend the check on the checker.
+    _hh=${SILICON_TEST_HOUR:-$(date +%H)}      # test seam; unset in normal operation
     if   [ -z "$am" ] || [ "$am" -lt 0 ]; then age="$mine ** AGE UNCOMPUTABLE — CHECK DID NOT RUN **"
+    elif [ "${_hh#0}" -ge 22 ] || [ "${_hh#0}" -lt 7 ]; then
+      age="$mine (+${am}min · 🌙 NIGHT 22:00-07:00 — TIMER LAW SUSPENDED per FLEET ORDER 08/23 23:05:20; EVENT-ONLY, this is NOT a breach)"
     elif [ "$am" -ge 40 ];  then age="$mine (+${am}min ** ALREADY OVERDUE by $(( am - 40 ))min, CADENCE ~40 — POST NOW **)"
     elif [ "$nxt" -ge 40 ]; then age="$mine (+${am}min ** POST AT THIS WAKE — ${rem}min LEFT; next sweep lands at +${nxt}, past ~40 **)"
     else                         age="$mine (+${am}min, ${rem}min left, next sweep +${nxt} — still inside)"; fi
