@@ -1,41 +1,107 @@
 #!/bin/sh
-# lanepush.sh — REFUSE a saltworks push that would publish another seat's commit.
+# lanepush.sh — REFUSE a push that would change another seat's paths at the remote.
 #
-# WHY (evidence, 2026-08-23 18:5x, against myself): my standing rule is "no push while
-# a NON-AUTHORED commit sits ahead". I ran `git rev-list --count`, printed "(mine)"
-# beside the number, and pushed — publishing silicon's edf7d4c. THE LABEL WAS A
-# HARDCODED EXPECTATION AND THE ACTION WAS TAKEN ON THE LABEL.
-#   ⛔ It was the FIFTH instance that day of "a conclusion printed beside a number that
-#     did not produce it", and the FIRST with a consequence rather than a near-miss —
-#     because the other four had a separate verification step that could fail, and this
-#     one put the label INSIDE the action, where nothing audits it.
-#   ⇒ A GUARD IN A DOCUMENT PROTECTS THE READER; A GUARD IN THE EXECUTABLE PROTECTS THE JOB.
+# ⚠️ FRAME, STATED FIRST: THIS IS A GUARD AGAINST MY OWN OPERATOR ERROR, NOT A SECURITY
+# BOUNDARY. Anyone who can set GIT_CONFIG_* in this shell can simply run `git push`.
+# It refuses the environments it cannot vouch for rather than pretending to defeat them.
 #
-# ⚠️ IT KEYS ON PATHS, NOT AUTHORSHIP, AND THAT IS DELIBERATE: every commit in this repo
-# is authored "Jason Hickey" — git CANNOT discriminate seats here. silicon said it first:
-# "checked by PATH since authorship cannot discriminate."
+# ── HISTORY, BECAUSE BOTH PRIOR VERSIONS FAILED OPEN ────────────────────────────────
+# v1 (d028600): I ran `rev-list --count`, printed "(mine)" beside it, pushed on the
+#   LABEL, and published silicon's edf7d4c. Then the helm DROVE v1 in a clone whose
+#   origin was a local path: `ls-remote origin master` returned 3 refs, R became
+#   multi-line, the range query failed, the count came back EMPTY, and it printed
+#       ✅ all  commit(s) ahead ... safe to push        EXIT=0
+#   THE ERROR PATH WAS A PASS.  (the double space WAS the empty count)
 #
-# usage: sh docs/ledger-tools/lanepush.sh [remote] [branch]     exit 0 = safe to push
+# v2: hardened every measurement — one 40-hex sha or abort, checked exit status,
+#   numeric count, count/list agreement. Eight adversarial drivers then broke it 8/8:
+#   ⛔ "THE ERROR PATH IS NO LONGER A PASS; THE SUCCESS PATH IS NOW POINTED AT THE
+#      WRONG OBJECT." Three classes, none of them an unmeasurable state:
+#     A WRONG LOCAL REF — $BRANCH steered the remote side while the local side was
+#       hardcoded HEAD. On any other branch, a detached HEAD, or a second worktree,
+#       it audited one object while `git push origin master` moved another. NO
+#       ADVERSARY REQUIRED — its own usage line invited it.
+#     B WRONG DESTINATION — `ls-remote` reads the FETCH url; `git push` uses pushurl.
+#       Plus push.default=matching and remote.*.push refspecs send refs never audited.
+#     C EMPTY FILE LIST READ AS INNOCENCE — `git show --name-only` prints the COMBINED
+#       diff for a merge, so `git merge -s ours origin/master` carries a foreign-path
+#       change whose file list is EMPTY while the other parent's commits are excluded
+#       from the range. And rename detection reports only the DESTINATION, so deleting
+#       a peer's files and re-adding them in my lane looked lane-clean.
+#       ⇒ v1 printed an empty COUNT as a verdict; v2 printed an empty FILE LIST as one.
+#
+# ── WHAT CHANGED IN v3, AND IT IS A SIMPLIFICATION ──────────────────────────────────
+# Class C is not patchable per-commit: I was inferring "what will this push publish?"
+# from a WALK OF COMMITS. That is the wrong object. The question a push answers is a
+# TREE DIFF: which paths differ at the remote once the push lands.
+#     git diff --no-renames --name-only $R $L
+# One command. Immune by construction to merges (no combined-diff subtlety), to
+# renames (--no-renames shows delete AND add, so removing a peer's file is visible),
+# to empty commits, and to add-then-remove churn. THE CORRECT MEASUREMENT IS SMALLER
+# THAN THE WRONG ONE.
+#
+# ⚠️ PATHS, NOT AUTHORSHIP: every commit here is authored "Jason Hickey" — git cannot
+# discriminate seats. silicon: "checked by PATH since authorship cannot discriminate."
+#
+# usage: sh docs/ledger-tools/lanepush.sh [remote] [branch]
+# exit 0 = this push changes only this seat's lane · 1 = REFUSE, foreign paths
+# exit 2 = COULD NOT MEASURE, or an environment I will not vouch for — REFUSE
 set -u
 REMOTE=${1:-origin}; BRANCH=${2:-master}
 MINE='^(docs/ledger-tools/|docs/EVIDENCE|docs/evidence-)'
-R=$(git ls-remote "$REMOTE" "$BRANCH" | cut -f1)
-[ -n "$R" ] || { echo "⛔ cannot read $REMOTE/$BRANCH"; exit 2; }
-AHEAD=$(git rev-list --count "$R..HEAD")
-[ "$AHEAD" = "0" ] && { echo "✅ 0 ahead — nothing to push"; exit 0; }
-bad=0
-for c in $(git rev-list "$R..HEAD"); do
-  out=$(git show --stat --format='' --name-only "$c" | grep -vE "$MINE" | grep -v '^$' || true)
-  if [ -n "$out" ]; then
-    bad=$((bad+1))
-    echo "⛔ $(git log -1 --format='%h %s' "$c" | cut -c1-70)"
-    echo "$out" | sed 's/^/     outside my lane: /'
-  fi
+die() { printf '⛔ CANNOT MEASURE — REFUSING: %s\n' "$1" >&2; exit 2; }
+
+# (0) an environment that redirects what git reads
+for v in GIT_DIR GIT_WORK_TREE GIT_CONFIG_COUNT GIT_CONFIG_GLOBAL GIT_CONFIG_SYSTEM GIT_OBJECT_DIRECTORY GIT_COMMON_DIR; do
+  eval "vv=\${$v:-}"; [ -n "$vv" ] && die "$v is set — it redirects what this gate measures"
 done
-if [ "$bad" != 0 ]; then
-  echo "⛔ REFUSING: $bad of $AHEAD commit(s) ahead touch paths outside this seat's lane."
-  echo "   Pushing publishes another seat's work. POST AND ASK instead."
+
+# (1) the DESTINATION must be the one a push uses
+git remote | grep -qx -- "$REMOTE" || die "'$REMOTE' is not a configured remote"
+FU=$(git remote get-url -- "$REMOTE" 2>/dev/null)        || die "cannot read fetch url for $REMOTE"
+PU=$(git remote get-url --push -- "$REMOTE" 2>/dev/null) || die "cannot read push url for $REMOTE"
+[ "$FU" = "$PU" ] || die "push url != fetch url ($PU vs $FU) — I would audit the wrong destination"
+[ -z "$(git config --get-all "remote.$REMOTE.push" 2>/dev/null)" ] \
+  || die "remote.$REMOTE.push refspecs are configured — the refs sent are not the refs audited"
+PD=$(git config --get push.default 2>/dev/null) || PD=simple
+case "$PD" in simple|current|upstream|nothing) : ;; *) die "push.default=$PD can send refs this gate did not audit" ;; esac
+
+# (2) the LOCAL side must be the ref the push actually moves
+HEADREF=$(git symbolic-ref -q HEAD) || die "detached HEAD — cannot know which branch a push would move"
+[ "$HEADREF" = "refs/heads/$BRANCH" ] || die "checked out $HEADREF but asked about refs/heads/$BRANCH"
+L=$(git rev-parse --verify --quiet "refs/heads/$BRANCH") || die "no local refs/heads/$BRANCH"
+
+# (3) the REMOTE side: exactly one ref, named exactly, 40 hex, present locally
+RAW=$(git ls-remote "$REMOTE" "refs/heads/$BRANCH" 2>/dev/null) || die "ls-remote failed"
+NREF=$(printf '%s\n' "$RAW" | grep -c '^[0-9a-f]') || NREF=0
+[ "$NREF" -eq 1 ] || die "ls-remote returned $NREF refs for refs/heads/$BRANCH (need exactly 1)"
+R=$(printf '%s\n' "$RAW"  | head -1 | cut -f1)
+RN=$(printf '%s\n' "$RAW" | head -1 | cut -f2)
+[ "$RN" = "refs/heads/$BRANCH" ] || die "ls-remote matched '$RN', not refs/heads/$BRANCH"
+case "$R" in ''|*[!0-9a-f]*) die "remote sha is not pure hex: [$R]" ;; esac
+[ "${#R}" -eq 40 ] || die "remote sha is ${#R} chars, expected 40"
+git cat-file -e "$R^{commit}" 2>/dev/null || die "remote head $R not present locally — fetch first"
+
+# (4) refuse to reason about a non-fast-forward push at all
+[ "$R" = "$L" ] && { printf '✅ 0 ahead — nothing to push  [%s]\n' "$(git rev-parse --show-toplevel)"; exit 0; }
+git merge-base --is-ancestor "$R" "$L" 2>/dev/null \
+  || die "refs/heads/$BRANCH is not a fast-forward of $REMOTE — a force-push is not mine to audit"
+
+# (5) THE MEASUREMENT — what this push CHANGES AT THE REMOTE
+DIFF=$(git diff --no-renames --name-only "$R" "$L" 2>/dev/null) || die "tree diff $R..$L failed"
+NPATH=$(printf '%s\n' "$DIFF" | grep -c '[^[:space:]]') || NPATH=0
+AHEAD=$(git rev-list --count "$R..$L" 2>/dev/null) || die "rev-list --count failed"
+case "$AHEAD" in ''|*[!0-9]*) die "ahead count is not a number: [$AHEAD]" ;; esac
+[ "$NPATH" -eq 0 ] && { printf '✅ %s commit(s) ahead, 0 paths changed at the remote  [%s]\n' "$AHEAD" "$(git rev-parse --show-toplevel)"; exit 0; }
+
+OUT=$(printf '%s\n' "$DIFF" | grep '[^[:space:]]' | grep -vE "$MINE" || true)
+if [ -n "$OUT" ]; then
+  NBAD=$(printf '%s\n' "$OUT" | grep -c '[^[:space:]]')
+  printf '⛔ REFUSING: this push changes %s path(s) outside this seat'"'"'s lane:\n' "$NBAD"
+  printf '%s\n' "$OUT" | sed 's/^/     /'
+  echo "   Pushing publishes or alters another seat's work. POST AND ASK instead."
   exit 1
 fi
-echo "✅ all $AHEAD commit(s) ahead touch only this seat's lane — safe to push"
+printf '✅ %s commit(s) ahead, %s path(s) changed, all in this seat'"'"'s lane — safe to push  [%s]\n' \
+  "$AHEAD" "$NPATH" "$(git rev-parse --show-toplevel)"
 exit 0
