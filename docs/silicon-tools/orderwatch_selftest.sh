@@ -81,20 +81,22 @@ echo "BASELINE ARM — start= must suppress everything at or below it:"
 B=$(line_at 159497 | LC_ALL=C awk -v start=1 -f "$AWKPROG" | LC_ALL=C awk -F'\t' 'NR==1{print $1}')
 arm "ARM8 start=1 suppresses line 1 of the stream"   ""                   "$B"
 
-echo "REV-3 CLAUSE — the helm's FLEET ORDER: adoption (16:12:53 countersign):"
-# ⚠️ THESE TWO ARE SYNTHETIC, AND THAT IS DECLARED RATHER THAN GLOSSED. Every other
-# fixture here is a REAL bus line addressed by number and verified by a content
-# stamp; no real `FLEET ORDER:` header exists yet, because the adoption is minutes
-# old. They test the PREDICATE, which is an exact index() literal — the same class
-# as SILICON ORDER: — and they convert to real stamped fixtures the moment the
-# first one lands. A synthetic fixture silently mixed in with real ones would be
-# the "convenient artifact instead of the authoritative one" defect this seat
-# banked earlier today.
-SYN_Y='[08/23 16:20:00, maestro=LIT — FLEET ORDER: all hands, synthetic fixture]'
-SYN_N='[08/23 16:20:00, maestro=LIT — all hands, synthetic fixture, no token]'
-syn() { printf '%s\n' "$1" | LC_ALL=C awk -v start=0 -f "$AWKPROG" | LC_ALL=C awk -F'\t' 'NR==1{print $1}'; }
-arm "ARM9  SYNTHETIC FLEET ORDER: delivers as FLEET-TOKEN" "FLEET-TOKEN" "$(syn "$SYN_Y")"
-arm "ARM10 SYNTHETIC same line, token removed -> dropped"  ""            "$(syn "$SYN_N")"
+echo "REV-3 CLAUSE — the helm's FLEET ORDER: token, ON A REAL HEADER:"
+# ⭐ CONVERTED 2026-08-24 07:0x — THESE WERE SYNTHETIC AND ARE NOT ANY MORE, WHICH IS
+# THE PROMISE THIS FILE MADE TO ITSELF ON 08/23: "no real FLEET ORDER: header exists
+# yet ... they convert to real stamped fixtures the moment the first one lands."
+# The first one landed at 23:05:20 (NIGHT CADENCE), bus line 164523, delivered by the
+# live watch as FLEET-TOKEN 7 hours after the clause was added. So the synthetic pair
+# is retired and replaced by the real line, addressed and STAMPED like every other
+# fixture here — and ARM10 is now a MUTATION CONTROL ON A REAL HEADER rather than on
+# a sentence I wrote to be convenient.
+# ⛔ A synthetic fixture is a placeholder with an expiry, and leaving one in place once
+# the real thing exists is the "convenient artifact instead of the authoritative one"
+# defect this seat banked the same day it wrote them.
+check_stamp 164523 "FLEET ORDER: NIGHT CADENCE" "ARM9-fleet-token-REAL"
+arm "ARM9  REAL FLEET ORDER: header -> FLEET-TOKEN" "FLEET-TOKEN" "$(tag_of 164523)"
+MUT9=$(line_at 164523 | LC_ALL=C sed 's/FLEET ORDER: //' | LC_ALL=C awk -v start=0 -f "$AWKPROG" | LC_ALL=C awk -F'\t' 'NR==1{print $1}')
+arm "ARM10 same REAL line, token removed -> dropped" ""            "$MUT9"
 
 echo "orderwatch_selftest: PASS=$PASS FAIL=$FAIL"
 [ "$FAIL" -eq 0 ] || exit 1
