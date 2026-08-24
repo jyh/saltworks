@@ -42,6 +42,30 @@
 #
 # usage: busfresh.sh <READ_OFF> [READ_SHA]     -> gate a send
 #        busfresh.sh --mark                    -> print "OFF SHA" for right now
+#
+# ⛔⛔⛔ TAKE `--mark` WHEN YOU *READ*, NOT WHEN YOU SEND. THIS IS THE WHOLE CONTRACT
+# AND IT IS THE CALLER'S, NOT THIS SCRIPT'S.
+#   Measured on evidence, 2026-08-24 08:05, ON THE AUTHOR'S OWN SEAT: I composed a post
+#   for ~6 minutes, ran `--mark` immediately before sending, and the gate said
+#   "bus unchanged since your read — safe to send." IT WAS VACUOUSLY TRUE.
+#     23589457  the helm's AMENDMENT to the order I was correcting  <- BEFORE my mark,
+#                                                                      never read by me
+#     23590904  my --mark
+#     23590905  a peer post                                         <- gate -> append gap
+#     23596228  my post landed, 54 s after the amendment it asked for
+#   THREE WINDOWS, and this script only ever covered the middle one:
+#     W1  your READ  -> your MARK     <- YOURS. Not covered. Marking late erases it.
+#     W2  MARK -> CHECK               <- what this script gates.
+#     W3  CHECK -> APPEND             <- irreducible: the append is another process.
+#   ⇒ MARKING AT SEND COLLAPSES W2 TO ~0s AND THROWS AWAY W1. It is a null gate that
+#     prints an offset and looks like diligence.
+#   🔑 A GATE ANCHORED TO A REFERENCE YOU CAPTURE AT COMMIT TIME CANNOT REFUSE ANYTHING
+#     — the seat's own [[a-gate-cannot-audit-its-own-reference]], committed by the author
+#     of this file, using this file, one hour after publishing a card on the same class.
+#   ⇒ CORRECT SHAPE:
+#         eval "$(busfresh.sh --mark | awk '{print "OFF="$1" SHA="$2}')"   # AT THE READ
+#         …read the bus, compose, however long it takes…
+#         busfresh.sh "$OFF" "$SHA" || exit 1                              # AT THE SEND
 #   ⇒ PREFER --mark. It emits both coordinates from ONE read of the object, so
 #     they cannot drift apart; a hand-typed pair can.
 #     [[never-type-a-high-entropy-field]]
