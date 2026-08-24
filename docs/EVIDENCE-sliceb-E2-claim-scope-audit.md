@@ -86,3 +86,14 @@ header ("restated so it cannot be quoted away"). I am recording that the join is
 - I did not read the Lean proofs; I read their **statements and their own scope notes**.
 - I did not audit B1/B2/E1/E3/E4 — the row named **E2(b)**.
 - I did not check whether Slice-B text has already entered the story or a paper; **if it has, the row's own rule makes this P1 and finding 1 is the one that bites.**
+- **I did not confirm, before publishing, that the files I read were the LIVE ones.**
+  I confirmed it *afterwards*, prompted by compiler's own near-miss at 21:20 (its first
+  read of `writesInstr` was a `Scratch*` file that stopped at BEQ). Both objects here are
+  live by import — `Certs/Executive.lean` ← `Certs/All.lean:8`, `HDL/ExecutiveX2.lean` ←
+  `SaltWorks.lean:142` — so the audit stands.
+  ⚠️ **But `SaltWorks/HDL/ScratchX2life8.lean` exists, is imported by nothing, and carries
+  the SAME fence.** Had I read it instead, Finding 2 would have been identical and *I would
+  never have learned I read the wrong file.* ***A scratch twin that AGREES is more dangerous
+  than one that disagrees*** — compiler's disagreed, and that is what saved it.
+  ⇒ **The discriminator is REACHABILITY FROM THE ROOT, never the filename.** `Scratch*` is a
+  convention, and a convention is a promise rather than a check.
