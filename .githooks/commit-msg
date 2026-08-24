@@ -1,12 +1,15 @@
 #!/bin/sh
-# Session-URL gate (2026-08-23, helm; implements the 08/16 purge's ratified scope):
-# public repo — Claude-Session trailers are BANNED here; Co-Authored-By is allowed
-# (the purge stripped 685 of the former and deliberately left the latter).
-# A default in conflict with a ban produces drift; this hook is the enforcement
-# point the ban never had. Shared checkout: one hook covers every seat.
-if grep -q 'Claude-Session:' "$1"; then
-  echo "commit-msg HOOK: Claude-Session trailer REFUSED in this PUBLIC repo (08/16 purge scope; helm gate 08/23)." >&2
-  echo "Remove the trailer line and retry. Co-Authored-By is fine." >&2
+# Session-URL gate v2 (2026-08-23; implements the 08/16 purge's ratified scope).
+# PUBLIC repo: commit messages must carry neither the Claude-Session: trailer
+# NOR a bare claude.ai session URL (compiler arm-3, 17:05: the harm is the URL,
+# not the key — PR bodies carry bare URLs and squash-merges copy them in).
+# Co-Authored-By is allowed (the purge deliberately kept it). Prose that merely
+# names "Claude-Session" without colon-key or URL still passes (the cb0d722
+# audit-record shape).
+# Fresh clone: git config core.hooksPath .githooks  (fleet-up asserts it too).
+if grep -qE 'Claude-Session:|claude\.ai/code/session_' "$1"; then
+  echo "commit-msg HOOK v2: session trailer/URL REFUSED in this PUBLIC repo (08/16 purge scope)." >&2
+  echo "Remove the Claude-Session: line and any claude.ai/code/session_ URL. Co-Authored-By is fine." >&2
   exit 1
 fi
 exit 0
