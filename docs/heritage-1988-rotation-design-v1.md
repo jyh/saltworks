@@ -77,6 +77,61 @@ Lineage note: the fleet's shipped convention-C fabric
 (frame-counter-DECODED per-stage strobes) is the strobe-timed
 descendant; cell88 is the self-timed cousin; the 1988
 pipelined-strobe cell is the original.**
+
+**✅ SILICON READ — MIG-2 DISCHARGED 2026-08-24 (silicon seat). The 25
+lines above, checked against the primary sources. ⛔ PROSE ONLY: this
+doc's own FIREWALL (head, lines 7-9) is WORDS-ONLY, never the figures,
+standing 8/7 ruling — so nothing below rests on artwork.**
+
+1. **DURATION-CONTROL — CONFIRMED, IN THE PAPER'S OWN SENTENCE.** ISSCC
+   WPM 2.4 (p.32): iSOP "is not only edge-specific but is duration-specific
+   as well; the duration providing information on how much each cell should
+   rotate the packet addresses." ⇒ the block's central claim — no internal
+   count; the rotation carried in a strobe's WIDTH — is stated, not inferred.
+2. ⭐ **THE CAPTAIN'S "first (or is it second?) bit" — ANSWERED FROM PROSE,
+   AND BOTH MEMORIES ARE RIGHT.** ISS90 §3.2: "Each element routes on the
+   first bit of the address, rotates the first bit to the end of the address,
+   and moves the rest of the address up." It is the first bit **OF THE
+   ADDRESS** — and the ACTIVITY bit precedes the address in the header, so
+   that same bit is the **second bit of the transmitted cell**. The
+   uncertainty is a counting-origin ambiguity, not a faulty memory.
+   ⛔ **⇒ THE PARENTHETICAL ABOVE ("checkable against Figure 7's S2 trace")
+   IS STRUCK AS A METHOD: it is unnecessary — prose settles it — and it
+   instructs exactly what this doc's firewall forbids. An audited block
+   should not carry an instruction its own header rules out.**
+3. **O(1) CELL STATE AT ANY ADDRESS LENGTH — CONFIRMED.** ISS90 §3.2 gives
+   the rotation's purpose: "every banyan element becomes identical and
+   requires a fixed amount of delay." Device counts corroborate independence
+   from address length — 111 transistors (first version) → 114 (second).
+4. **k = 8 / THE 256×256 FABRIC — CONFIRMED, AND THE 4+4 IS NOW EXACT.**
+   ISS90 §3, rule 1: "Every chip has 32 inputs and 32 outputs... For the
+   256x256 switch, the components function as parallel 16x16 elements, and
+   can be treated as two devices in one package." A 16×16 element consumes 4
+   address bits; two consume 8. ⚠️ **WORDING FIX OWED ABOVE: "the first
+   banyan chip rotated 4 bits, the second the other 4" should say ELEMENT or
+   DEVICE, not CHIP — the two 16×16 devices may share ONE package.**
+5. ⚠️ **"BUILT PRACTICE in 1990" — TRUE OF THE COMPONENTS, OVER-CLAIMED FOR
+   THE MACHINE.** What was assembled and run was 64×64: ISS90 §4, "we settled
+   on a 64 input x 64 output switch requiring five stages of switching. The
+   first three stages are a Batcher sort, requiring 20 chips, and the last two
+   are a banyan route, requiring 12 chips," at 100 Mbit/sec per port. The
+   256×256 appears as the target of the construction rules, not as a built
+   machine. ⇒ **the address-consumption recursion WAS embodied in fabricated
+   parts; a 256×256 switch is not claimed by either paper to have existed.**
+6. ❓ **"generated per column" — UNSUPPORTED, AND IN TENSION WITH THE STATED
+   PURPOSE. OPEN, NOT REFUTED.** ISS90 §3.2 names per-column difference as the
+   PROBLEM the rotation removes: "each column of elements must act on a
+   different address bit... By doing this, every banyan element becomes
+   identical." A per-column strobe WIDTH would reintroduce what the design
+   deleted. Against that, the ISSCC sentence says "how much EACH CELL should
+   rotate," which admits a per-cell reading. **Two readings, one source each;
+   the Captain's recall is the tie-breaker and is not mine to call.**
+7. 📌 **CITATION HYGIENE.** ISSCC 1990 WPM 2.4 is **Marcus, Hickey**; ISS90
+   (Session C1, Paper #3, pp.75-80) is **Hickey, Marcus** — the order flips
+   between the two papers. Both Bellcore. Also: both papers are **1990**; the
+   "1988" dating above is design-era, not publication-era, and ISS90's
+   assembly citations ([DW87][DW88]) are consistent with it.
+
 THE PAPER STATES THE THEOREM ITSELF (§3.2, math's ④ find — the
 doc's "reinsertion" inference is the paper's own word): "Each
 element routes on the first bit of the address, rotates the first
