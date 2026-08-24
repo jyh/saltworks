@@ -36,10 +36,16 @@ if [ "$b" != "$t" ]; then PASS=$((PASS+1)); say "OK  " "ARM8 bytes and tokens gi
 else FAIL=$((FAIL+1)); say "FAIL" "ARM8 --unit changed nothing — it is decoration"; fi
 
 # ARM 9 — the byte path must claim NO estimate; the token path MUST claim one.
+# ⛔ TIGHTENED 13:4x: this arm used to accept the substring "ESTIMATE", which the
+#   word "ESTIMATED" satisfied — so it kept passing after I changed the wording to
+#   say the opposite, and the tool printed "ESTIMATED" and "not an estimate" in two
+#   consecutive lines while the arm called it green. The arm must now check BOTH
+#   halves: the token path claims a BOUND, and it must NOT claim a measurement.
 case "$b" in *"MEASURED DIRECTLY"*) ok1=1 ;; *) ok1=0 ;; esac
-case "$t" in *"ESTIMATE"*)          ok2=1 ;; *) ok2=0 ;; esac
-if [ "$ok1$ok2" = "11" ]; then PASS=$((PASS+1)); say "OK  " "ARM9 byte path claims measurement, token path claims ESTIMATE"
-else FAIL=$((FAIL+1)); say "FAIL" "ARM9 a path mislabels its own certainty (ok1=$ok1 ok2=$ok2)"; fi
+case "$t" in *"UPPER-BOUND"*)       ok2=1 ;; *) ok2=0 ;; esac
+case "$t" in *"MEASURED DIRECTLY"*) ok3=0 ;; *) ok3=1 ;; esac
+if [ "$ok1$ok2$ok3" = "111" ]; then PASS=$((PASS+1)); say "OK  " "ARM9 byte path claims measurement, token path claims BOUND and not measurement"
+else FAIL=$((FAIL+1)); say "FAIL" "ARM9 a path mislabels its own certainty (ok1=$ok1 ok2=$ok2 ok3=$ok3)"; fi
 
 # ARM 10 — NEGATIVE CONTROL ON THE HARNESS: drive ck wrong in a subshell and
 #          require FAIL to appear, or every OK above proves nothing.

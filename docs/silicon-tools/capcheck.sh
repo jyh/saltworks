@@ -9,18 +9,38 @@
 #     Same shape as the deferral hookedit closed. A gate covering one door is the
 #     seat's most repeated defect, so this one is FILE-AGNOSTIC by construction.
 #
-# ⚠️⚠️ THIS PRINTS AN ESTIMATE AND SAYS SO IN EVERY LINE IT EMITS.
-#   The divisor is MEASURED, not assumed: three seat briefs probed 2026-08-24 gave
-#   2.123, 2.131 and 2.178 B/tok across a 15x size range. Default 2.15 sits in that
-#   band. THE PRIOR CONVENTION WAS bytes/4, WHICH UNDERSTATED A REAL FILE BY 84%
-#   AND ALWAYS TOWARD "PLENTY OF ROOM" — the one direction a cap-guard must not err.
-#   ⛔ THE BAND IS CALIBRATED FOR SEAT-AUTHORED MARKDOWN (heavy emoji, heavy
-#     markup). For .lean, logs, or extracted PDF text it is worth nothing.
-#   ⭐ NEAR THE CAP, DO NOT ESTIMATE AT ALL: the two-point padding probe is FREE
-#     there, because both reads REFUSE and a refusal costs no tokens.
-#       cp F P1; append N1 pad lines;  cp F P2; append N2 pad lines
-#       Read(P1, limit=$(wc -l < P1))  ->  refusal names the exact token count
-#       p = (T2-T1)/(N2-N1);  tokens(F) = T1 - N1*p   [both points must AGREE]
+# ⚠️⚠️ THE TOKEN PATH PRINTS A DELIBERATELY CONSERVATIVE BOUND, NOT AN ESTIMATE OF
+#   TRUTH, AND THAT DISTINCTION IS THE POINT.
+#   ⛔ CORRECTED 2026-08-24 13:3x. This header used to say the divisor 2.15 was
+#     MEASURED and twice-validated. IT WAS NOT. Both "validations" came from my own
+#     two-point padding probe, which was uncontrolled (see below), and both were run
+#     on files I wrote in one style. Two numbers, one mechanism, one confound.
+#   📏 THE OBSERVED RANGE IS WIDE AND CONTENT-DEPENDENT:
+#       seat markdown (emoji/markup heavy)   ~2.12 - 2.18 B/tok
+#       the compiler seat's brief            ~4.06 B/tok
+#       plain repeated ASCII                 ~4.00 B/tok
+#   ⇒ THERE IS NO SINGLE TRUE DIVISOR. So this guard takes the SMALL end on
+#     purpose: a small divisor yields a LARGE token figure, which makes the gate
+#     fire EARLY. A cap guard must err toward "you are closer than you think",
+#     because the opposite error is the one that lets a file cross a silent cut.
+#     ⇒ 2.15 IS A BOUND CHOSEN FOR ITS DIRECTION, NOT A FACT ABOUT YOUR FILE.
+#
+# ⛔⛔ AND DO NOT USE THE TWO-POINT PADDING PROBE THIS FILE USED TO RECOMMEND.
+#   It solved for TWO unknowns (base, p) from TWO points, then reported that "both
+#   points agree" as its control. THAT AGREEMENT IS AN ALGEBRAIC IDENTITY — it can
+#   never fail, for any file, any tokenizer, even random numbers. I published seven
+#   such figures before noticing.
+#   ✅ THE SOUND FORM NEEDS A THIRD POINT: pad the file to N >= 3 sizes, fit base
+#     and p, and REQUIRE THE SURPLUS POINTS TO AGREE. With 3 points and 2
+#     parameters there is one degree of freedom left over, so the check CAN refuse.
+#   ⛔ AND NEVER IMPORT p FROM ANOTHER FILE. p is the MARGINAL cost of a pad line
+#     IN THE CONTEXT IT FOLLOWS: 18.5/pad appended to nothing, 22.0/pad appended to
+#     my brief. Measuring p on pure pad and subtracting it from a mixed file is the
+#     adjacent-object error, and it made me retract correct figures at 13:06.
+#   ⚠️ ONE FILE STILL DEFEATS ALL OF THIS: the compiler brief read 29,787 / 47,677 /
+#     37,187 tokens at 1000 / 1200 / 1400 pads — NON-MONOTONIC on byte-verified
+#     inputs, deterministic on re-read. No fit exists. When the three points do not
+#     lie on a line, THERE IS NO NUMBER; say so instead of picking one.
 set -u
 # ⛔⛔ --unit IS REQUIRED AND HAS NO DEFAULT. THE FIRST VERSION OF THIS SCRIPT
 #   ASSUMED EVERY CAP WAS A TOKEN CAP AND WAS WRONG ON ITS FIRST REAL RUN:
@@ -60,8 +80,8 @@ else
   CAP=${CAP:-25000}
   VAL=$(python3 -c "print(int($B/$DIV))" 2>/dev/null) || { echo "capcheck: python3 needed" >&2; exit 2; }
   PCT=$(python3 -c "print(round($VAL/$CAP*100,1))")
-  echo "capcheck:   ${B}B / ${DIV} = ~${VAL} tok ESTIMATED  (cap ${CAP}, ~${PCT}%)"
-  echo "capcheck:   ⚠️ ESTIMATE, not a measurement — divisor measured on seat markdown (2.12-2.18 B/tok)"
+  echo "capcheck:   ${B}B / ${DIV} = ~${VAL} tok UPPER-BOUND  (cap ${CAP}, ~${PCT}%)"
+  echo "capcheck:   ⚠️ CONSERVATIVE BOUND, not an estimate — divisor 2.15 chosen at the SMALL end of an observed 2.12-4.06 range so this gate fires EARLY"
 fi
 OVER=$(python3 -c "print(1 if $PCT >= $REF else 0)")
 NEAR=$(python3 -c "print(1 if $PCT >= $WARN else 0)")
