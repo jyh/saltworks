@@ -1,0 +1,53 @@
+name: Scrub
+
+# PORTED FROM jyh/jas (scripts/check_commit_trailers.py + scrub.yml), scheduled
+# by the Captain 2026-08-23 ("schedule the ci immediately"). The gate and its
+# fail-closed doctrine are jas's, debugged in production there; only the RANGE
+# differs, and the difference is a ruling, not a soft choice:
+#
+#   THIS repo's history carries session URLs ACCEPTED by the Captain's
+#   2026-08-23 ruling ("the published URLs stay" — no rewrite). A full-history
+#   scan would therefore be permanently red, which is the exact
+#   red-sweep-gets-abandoned failure jas's own header documents. So this
+#   workflow scans THE PUSH DELTA: the rule it enforces is "no NEW session
+#   trailer or URL enters history", which is the whole enforceable content of
+#   the ruling. DECLARED COVERAGE LIMIT: on a brand-new branch (before-sha is
+#   zeros) it falls back to the last 100 commits — imperfect, stated here
+#   rather than hidden.
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: scrub-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  commit-trailers:
+    name: no NEW session trailer enters history
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # The gate proves it can fail before it is allowed to pass.
+      - run: python scripts/check_commit_trailers.py --self-test
+      - name: scan the pushed delta
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: |
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            RANGE="HEAD~100..HEAD"
+            git rev-parse HEAD~100 >/dev/null 2>&1 || RANGE="HEAD"
+            echo "new branch: falling back to $RANGE (declared limit)"
+          else
+            RANGE="$BEFORE..HEAD"
+          fi
+          echo "scanning $RANGE"
+          python scripts/check_commit_trailers.py --range "$RANGE"
