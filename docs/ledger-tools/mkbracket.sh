@@ -65,6 +65,25 @@
 #     the commit carried the behaviour change with no rationale -- while the new guard's
 #     message pointed at "the 08/20 note above", which did not exist. Caught by reading the
 #     DIFFSTAT (5 insertions, not ~30). ⇒ ASSERT EVERY ANCHOR; a no-op replace is invisible.
+#
+#   ⛔⛔ 2026-08-24, THE THIRD MINTED CLAIM, AND IT WAS INVISIBLE BECAUSE IT WAS OFF-LANGUAGE:
+#     the format carried `FLEET.md %s`, N = `wc -l` of the bus. The brief called this "lenient"
+#     -- it said clause 2g "prints GAP 0 and CERTIFIES you". MEASURED: 2g never looks. It
+#     matches `(read|headlines-only|bodies-in-full) to FLEET\.md [0-9]+` and this file emitted a
+#     BARE `FLEET.md <N>`. THE SHAPES DO NOT MEET, so the arm announced itself INERT on every
+#     compiler post -- an unchecked read-through claim, minted by the tool, in the author's name.
+#     ⭐ HISTORY SAYS IT DRIFTED: bus 108642 (08/15) carries `headlines-only to FLEET.md 108640`
+#       -- the VERB form, hand-written in the PROSE. Absorbing it into the computed format is
+#       what dropped the verb and took it out of 2g's language.
+#     ⇒ DELETED, not reworded, on the SAME PRECEDENT as the bus_read.py clause above: a field
+#       the tool cannot know is a field the tool must not mint. `wc -l` measures the BUS'S
+#       LENGTH; it is not evidence that anybody read anything. The read-through marker now
+#       belongs in the PROSE file, the author-written half, IN THE VERB FORM -- e.g.
+#       `headlines-only to FLEET.md <N> (swept from <M>)` -- where it ARMS clause 2g instead of
+#       bypassing it. Driven 08-24 12:31: with the verb form present the gate printed
+#       "read-through: claimed 166943, bus 166943, GAP 0". A silent arm became a live one.
+#     ⚠️ 2g now goes INERT unless the author writes the marker. That is HONEST inertness --
+#       it announces itself -- and it is strictly better than a tool-minted claim it cannot see.
 # ============================================================================
 set -uo pipefail
 PROSE=${1:-}; BODY=${2:-}; BUS=${3:-}; NEXT=${4:-}; STATE=${5:-}
@@ -77,11 +96,10 @@ PROSE=${1:-}; BODY=${2:-}; BUS=${3:-}; NEXT=${4:-}; STATE=${5:-}
 STAMP=$(date '+%H:%M')
 BYTES=$(wc -c < "$BODY" | tr -d ' ')
 SHA=$(shasum -a 256 "$BODY" | cut -c1-16)
-LINES=$(wc -l < "$BUS" | tr -d ' ')
 PROSE_TEXT=$(cat "$PROSE")
 
 # The format is SINGLE-QUOTED and literal. Every variable is a %s ARGUMENT.
 # Nothing here can be re-parsed, including PROSE_TEXT, which is why the author
 # may write anything at all in the prose file.
-printf ', compiler — SEAT-STATE: compiler=%s · FLEET.md %s / %s · %s · owed 0; next line before ~%s; body receipt bytes=%s sha256/16=%s; one date in this append]\n' \
-  "$STATE" "$LINES" "$STAMP" "$PROSE_TEXT" "$NEXT" "$BYTES" "$SHA"
+printf ', compiler — SEAT-STATE: compiler=%s · %s · %s · owed 0; next line before ~%s; body receipt bytes=%s sha256/16=%s; one date in this append]\n' \
+  "$STATE" "$STAMP" "$PROSE_TEXT" "$NEXT" "$BYTES" "$SHA"
