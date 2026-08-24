@@ -57,16 +57,58 @@ import json
 import os
 import sys
 import glob
+import datetime as _dt
 import re
 from collections import defaultdict
 
-SEATS = {
-    "compiler": "${SEAT_CONFIG_DIR}",
-    "evidence": "${SEAT_CONFIG_DIR}",
-    "math": "${SEAT_CONFIG_DIR}",
-    "silicon": "${SEAT_CONFIG_DIR}",
-    "maestro": "~/.claude",
-}
+# ⛔⛔ THE SEAT MAP WAS A HARDCODED ENUMERATION AND IT READ 1 SEAT OF 8.
+# Measured 2026-08-23 (bank item 3, open since 08/16):
+#   "compiler"/"evidence"/"math"/"silicon" all mapped to the LITERAL string
+#   "${SEAT_CONFIG_DIR}" — and the consumer calls os.path.expanduser(), which does
+#   NOT expand variables (that is expandvars). So the path never resolved, the dir
+#   never existed, and four seats scored NOT SCANNED. maestro was the only seat read.
+#     5 names → 2 distinct paths → 1 scannable directory.
+# 🔑 AND THE TWO FAILURE MODES ARE NOT THE SAME:
+#     compiler/evidence/math/silicon  → in the map, unresolvable → NOT SCANNED (LOUD)
+#     horatio / jas / verso           → NOT IN THE MAP AT ALL    → INVISIBLE (SILENT)
+#   [[an-instrument-must-disclose-its-frame]]: a MISS is printed, an EXCLUSION is not.
+#   The loud four were survivable; the silent three were the real defect, and no
+#   amount of staring at the output would have revealed them.
+# ⇒ DISCOVER the homes; do not enumerate them. [[a-count-is-not-a-scope]] — every hand
+#   enumeration is a sampler, and this one sampled 1 of 8 while looking like 5 of 5.
+# Root is env-overridable so the selftest can drive OTHER fixtures through the SAME
+# function — a selftest inherits the scope of its fixtures.
+SEAT_HOME_ROOT = os.path.expanduser(os.environ.get("SEAT_HOME_ROOT", "~"))
+
+def discover_seats(root=None):
+    """Seat name -> config home, by DISCOVERY. maestro is ~/.claude; every other
+    seat is ~/.claude-seat-<name>. Returns {} if the root holds none, which the
+    caller must report LOUDLY rather than treat as 'no seats'."""
+    base = root if root is not None else SEAT_HOME_ROOT
+    found = {}
+    m = os.path.join(base, ".claude")
+    if os.path.isdir(m):
+        found["maestro"] = m
+    for path in sorted(glob.glob(os.path.join(base, ".claude-seat-*"))):
+        if os.path.isdir(path):
+            found[os.path.basename(path)[len(".claude-seat-"):]] = path
+    return found
+
+SEATS = discover_seats()
+
+# ⛔ AN ENUMERATION THAT RETURNS ZERO MUST FAIL LOUD, NOT QUIETLY.
+# The predecessor's failure was survivable only because it printed NOT SCANNED per
+# seat. Discovery has no such per-seat row to print when it finds NOTHING — an empty
+# map would walk zero directories and report "no watches", which is exactly what a
+# healthy-and-quiet fleet looks like. A broken instrument must not be able to imitate
+# a calm one. [[watch-transport-not-shape]]: silence is the universal symptom.
+if not SEATS:
+    sys.stderr.write(
+        "⛔ watch_transport_census: DISCOVERED ZERO SEAT HOMES under "
+        + SEAT_HOME_ROOT
+        + " — refusing to report. This is an instrument failure, NOT an empty fleet.\n"
+    )
+    sys.exit(2)
 
 # An "unbounded" command cannot terminate on its own.
 #
@@ -127,7 +169,20 @@ def loop_kind(cmd):
             return kind_of(body), "script:" + os.path.basename(path)
     return "NO-LOOP", "command"
 
-DAY = "2026-08-08"
+# ⛔⛔ THIS WAS A LITERAL: DAY = "2026-08-08". It sat here for 15 days and the census
+# went on filtering every seat's arms to a fortnight-old date, printing that date in
+# its own header where I read past it. My own provenance rule, on my own tool:
+#     COPIED OUT OF THE OBJECT you are reading  → cannot go stale.  SAFE
+#     TYPED FROM YOUR MODEL OF "NOW"            → stale the moment now moves.  DEFECT
+# ⚠️ AND IT NEARLY SURVIVED ITS OWN REPAIR: I fixed the SEAT MAP first (1 seat → 8) and
+#   the output became MORE AUTHORITATIVE WITHOUT BECOMING MORE CORRECT — eight seats
+#   confidently tabulated against the wrong day. seats showing all-zero read as "no
+#   arms" when they meant "no arms ON 08/08".
+#   ⇒ A PARTIAL REPAIR THAT RAISES APPARENT CREDIBILITY IS WORSE THAN NO REPAIR, because
+#     the remaining defect now travels inside a result people trust.
+# Default = today, DERIVED. Pinnable via CENSUS_DAY for reproducing a past census —
+# which is the only legitimate reason a date should ever be a constant here.
+DAY = os.environ.get("CENSUS_DAY") or _dt.datetime.now().astimezone().strftime("%Y-%m-%d")
 
 
 def records(path):
