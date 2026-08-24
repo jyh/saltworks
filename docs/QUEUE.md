@@ -170,6 +170,27 @@
 - **MIG-11 · EVIDENCE · P2** — slice-b E2(b): claim-scope audit of the post-v1.1 "OS"
   wording. (E2(a) awaits a Captain word — register, not queue.)
 
+**RETIRED UNDER RULING #7 (Captain's word at the 2026-08-23 evening sitting: "yes retire") —
+4 rows / 6 debts on the paths ruling #7 (2026-08-09) passed over when it chose the
+bit-serial Design-B direction. Each names its successor or says none exists:**
+- **RET-1 · SILICON · sketch §5 (3 debts)** — Design-A neuron-tile cost, per-family
+  scaling table, RTL reverse-flow for gradient packets. Successors: the priced Design-B
+  bit-serial cell (`neural-fabric-poc-design-v1.md:26`, ~500 cells) for the cost rows.
+  ⛔ **THE REVERSE-FLOW SUB-ITEM HAS NO SUCCESSOR — stated per the tombstone law: none
+  exists.** If gradient transport ever returns to the fabric's scope, it returns as NEW
+  design work, not as this row.
+- **RET-2 · SILICON · sketch §6 (1 debt)** — tropical-vs-weighted element cost. Retired
+  by the row's own offered alternative, which no document had said until now: **ruling
+  #7's bit-serial path retires the comparison.**
+- **RET-3 · MATH · sketch §6 (1 debt)** — max-plus / subgradient statement forms. Its
+  second half is discharged the hard way at the kernel (sorter certificates as
+  nonlinearity lemmas: `Stack/Perm.lean:74`, `HDL/SortDemo.lean:50,52`; unsigned-order
+  defect recorded `SortDemo.lean:63-65`, repaired `SerOrgan.lean:23`) — that discharge
+  stands independent of the retirement.
+- **RET-4 · COMPILER · slice-b E3 (1 debt)** — executive-as-program feasibility, split
+  from MIG-4. Successor: none needed — the executive ships as the cooperative
+  non-OS the doc itself describes; feasibility-as-program was Design-A-era scope.
+
 **CONDITIONED (ruled 2026-08-23, tier P3 stays empty by the 08/16 re-tier):**
 - **MIG-C1 · MATH** — GNN sketch F7-A/adjoint row: INVITED TO WITHDRAW (its own
   cheapest legitimate discharge; F7-A is referenced nowhere else in either repo).
