@@ -339,7 +339,7 @@ bit-serial Design-B direction. Each names its successor or says none exists:**
   not the bank's example `1bb4038`; true backlog 6 landings/7
   modules — DISCHARGED 18:19, 6/6 kernel-checked NO DEFECT
   (CompileE·X0·X1·X2·RegMap·SeamCSorted; A0Routes221 excluded as
-  same-hand). MEAS CURRENT at `2d4e218`. Read-work discipline:
+  same-hand). MEAS CURRENT at `b93cbb5` (96 modules kernel-green, 0 red — 95 at pin `3f71585` + `C4Refuted.lean`; ancestry-verified; field repaired 08/23 20:3x after the helm consumed the handoff TWICE, 15:03 and 16:22, without applying it — silicon's boot brief carries the same value as backstop). Read-work discipline:
   parkable, never gates P1; every verdict posts its
   sha.** — conveyor refutation on every compiler
   landing; CELLS pricing on request. C5 re-baseline: **DISCHARGED
