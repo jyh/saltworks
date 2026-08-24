@@ -28,8 +28,13 @@ T=$(mktemp) || exit 1
 # does not flag this fixture as a real leak (the gate's own self-exemption
 # trick, check_commit_trailers.py:117). The RUNTIME string is unchanged —
 # the arm this fixture drives still receives the full forbidden shape.
-K1='Claude-'; K2='Session:'; SCHEME='https://'; H='claude'; HT='.ai/code/'; U2='session_PROBE'
-printf 'probe\n\n%s%s %s%s%s%s\n' "$K1" "$K2" "$SCHEME" "$H" "$HT" "$U2" > "$T"
+# ⛔⛔ `H` WAS REASSIGNED HERE AND `H` IS THE HOOK PATH (set at the top of this
+# block). The next line ran "$H" "$T" — i.e. `claude <tmpfile>` — which does not
+# fail open OR closed: IT HANGS, blocking any `amigated && git push` chain
+# indefinitely. Renamed to HST. The patch's byte-identity proof was of the OUTPUT
+# STRING and was correct; what it never did was RUN THE TOOL.
+K1='Claude-'; K2='Session:'; SCHEME='https://'; HST='claude'; HT='.ai/code/'; U2='session_PROBE'
+printf 'probe\n\n%s%s %s%s%s%s\n' "$K1" "$K2" "$SCHEME" "$HST" "$HT" "$U2" > "$T"
 if "$H" "$T" >/dev/null 2>&1; then
   rm -f "$T"; echo "⛔ UNGATED — hook at $H exists but ACCEPTS the trailer"; exit 1
 fi

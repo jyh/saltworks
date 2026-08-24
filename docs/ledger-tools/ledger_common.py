@@ -66,7 +66,17 @@ PROJECTS_ROOT = Path.home() / ".claude" / "projects"
 # SAY where it looked, because an unstated scope is how this survived at all.
 def _project_roots() -> list[Path]:
     roots = [PROJECTS_ROOT]
-    for d in sorted(Path.home().glob("${SEAT_CONFIG_DIR}")):
+    # ⛔⛔ THIS WAS THE LITERAL STRING "${SEAT_CONFIG_DIR}" — never expanded, so the
+    # glob matched NOTHING, the loop body never ran, and PROJECTS_ROOTS was
+    # ~/.claude/projects ALONE. Every total this library produced covered ONE home
+    # of eight. The union documented three lines below in discover_personal_projects
+    # ("⛔ UNIONS ALL ROOTS") WAS NEVER PERFORMED — prose beside code is a second
+    # implementation nobody tests, and this is the second tool today carrying this
+    # exact unexpanded literal (watch_transport_census.py had it too).
+    # Caught 2026-08-23 by READING THE METER'S OWN SCOPE DISCLOSURE — "2 personal-lane
+    # projects" against a fleet of eight seat homes. The disclosure was honest; I had
+    # simply never read it. [[an-instrument-must-disclose-its-frame]]
+    for d in sorted(Path.home().glob(".claude-seat-*")):
         p = d / "projects"
         if p.is_dir():
             roots.append(p)
