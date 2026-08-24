@@ -109,6 +109,48 @@ ROW A (correctness): for p with wellFormed p (the judgment, v1.4) and
   deterministic; F5), and the frame clause (registers outside the
   pool untouched) is IN the statement (F3 — today's L4 proved the
   ∀-w clause is the asset, not the risk).
+⛔⛔ **MIG-3 REFUTATION FOLDED IN (compiler, 2026-08-24) — ROW A AS RULED
+ABOVE IS VACUOUS, AND THE CORPUS ALREADY CARRIES THE REPAIR.** Three
+debts, one filing; each claim checked at the bytes or in the kernel.
+
+(a) **F2 IS UNSATISFIABLE, SO ROW A IS VACUOUS RATHER THAN UNPROVED.**
+  `State` is `Nat → BitVec 32` (infinite); `St` is four finite fields —
+  32 registers, a `pc`, eight memory words, a flag. No function from an
+  infinite type to a finite one is injective, so `Function.Injective
+  encode` is REFUTABLE for *any* candidate `encode`. An implication with
+  an unsatisfiable hypothesis is trivially true: a proof of Row A in the
+  form above would certify NOTHING about the compiler. **Kernel exhibit:
+  `SaltWorks.HDL.MIG3.no_injective_state_encoding`** (3 axioms, no
+  `sorryAx`). ⭐ The *machine-state* half was already landed and is NOT
+  re-minted here — `SaltWorks.CompileS.the_final_state_is_not_an_encoding`
+  reads back a dirty scratch register and a live `pc` that no `encode σ'`
+  mentions. ✅ **THE LANDED SHAPE IS THE CORRECT ONE**: `encodeOK` is a
+  RELATION scoped to the pool's live levels, and `regState` falls back to
+  `σ` above `poolSize` because the machine cannot hold the rest. §2's
+  ruled text is what never caught up. 📌 Separately, the NAME `encode` is
+  already taken by `SaltWorks.ISA.encode : Instr → BitVec 32`, the
+  INSTRUCTION encoder; §2 applies it to a STATE.
+
+(b) **N0.5 "VERIFIED INLINING" HAS NO AST CONSTRUCTOR TO INLINE.** The
+  compiled AST is `TinyRustN0.Stmt` = `{skip, letmut, assign, seq, ite,
+  while}` — there is no call, function or procedure form anywhere in the
+  language `compileS` consumes. N0.5 is not hard, it is UNSTATED: it
+  presupposes a construct v1 never introduced.
+
+(c) **N3 IS HALF-LANDED AND N5 IS BLOCKED BEHIND IT — EXHIBITED, NOT
+  ASSERTED.** `while` compiles; `ite` is refused. Kernel exhibits:
+  `SaltWorks.CompileS.cause_outside_the_fragment_is_now_ite_only` (seq
+  compiles ∧ **ite = none** ∧ while compiles) and
+  `SaltWorks.CompileS.fragment_now_includes_while`. N5 (recompile Batcher
+  FROM SOURCE) cannot run while a conditional cannot be lowered.
+
+⚠️ **ESCALATION TRIGGER MEASURED, NOT ASSUMED**: the row rises to P1 *if
+any paper quotes Row A*. Four `.tex` sources exist across the fleet
+(`jas/article`, `salt/papers/witness`, `salt/papers/flagship` ×2); NONE
+quotes Row A. **Stays P2** — re-measure before treating that as durable.
+📌 The BEQ/offset sub-item was ALREADY satisfied by
+`backOffByOne_diverges_on_a_stale_guard` — do not re-commission it.
+
 ROW B (completeness; F1 — without it Row A is satisfied by
   `compile := fun _ => none`):
   ∀ p, wellFormed p → liveMax p ≤ poolSize →
