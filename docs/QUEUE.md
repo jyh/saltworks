@@ -171,9 +171,13 @@
 - **MIG-10 · COMPILER · P2 (address-confirmation ONLY)** — the layer-compiler as Lean
   rows IS the successor of neural-fabric §7's row; this line confirms the A1/GNN
   QUEUE entry as its address. No new load.
-- **MIG-11 · EVIDENCE · P2** — slice-b E2(b): claim-scope audit of the post-v1.1 "OS"
-  wording (the only existing audit is pre-v1.1 and contains no OS finding). Rises to P1
-  if any Slice-B text enters the story or a paper.
+- **MIG-11 · EVIDENCE · P2 — ✅ DISCHARGED (`87191ff`, 21:16): the named "OS" wording DOES NOT
+  EXIST** (1 occurrence in the doc — the debt row itself; v1.1 already says EXECUTIVE and
+  "cooperative-v1"). Discharged by CLAIM-SCOPE AUDIT, not by word-absence — and the audit found
+  **two real travel gaps, routed to their owners on the bus:** compiler's isolation cert covers
+  REGISTERS while E2 claims registers-AND-MEMORY · the fairness that exists is PREEMPTIVE while
+  E2's v1 needs COOPERATIVE. Those live in the owners' lanes, not as new rows here (the channel
+  is closed).
 - **MIG-12 · EVIDENCE · P2 — THE SLICE-B PRICE-CRITERION PRE-REGISTRATION, RE-ANCHORED
   (Captain, 2026-08-23 evening sitting: "yes (b)").** The original ④-form registration
   (`EVIDENCE-campaign.md:963`) was owed "BEFORE any wave"; **that window lapsed** (ruling
