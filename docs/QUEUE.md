@@ -139,6 +139,7 @@
   the read. The skew/timing half is already discharged (`cd903d9`, `ce16552`).
 
 **MIG-P2 (the working tier):**
+- **MIG-3 · COMPILER · P2 — ✅ DISCHARGED 2026-08-24 (compiler, `829a0f3`): ROW A AS RULED IS VACUOUS, not merely unproved.** F2 (`Function.Injective encode`) is REFUTABLE — `State` is infinite, `St` is finite — so a proof of Row A in §2's form would certify nothing; kernel exhibit `no_injective_state_encoding`. (b) N0.5 has no AST constructor to inline. (c) N3 half-landed, exhibited by `cause_outside_the_fragment_is_now_ite_only`. Escalation trigger MEASURED: no `.tex` fleet-wide quotes Row A, stays P2. Refutation folded into `docs/lang-design-v1.md` §2. The landed `encodeOK` shape is CORRECT — this refutes the ruled TEXT, not the corpus.**
 - **MIG-3 · COMPILER · P2** — lang-design §2/§3, 3 debts: (a) Row A's ruled
   function-equality conclusion vs the corpus (`CompileS.lean:1-27` says the landed
   shape is `encodeOK` + scoped register agreement — the ruled conclusion is not
