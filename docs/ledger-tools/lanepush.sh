@@ -58,8 +58,27 @@ REMOTE=${1:-origin}; BRANCH=${2:-master}
 # and docs/EVIDENCE_stolen.v — a foreign path wearing my lane's first eight letters.
 # All 35 live lane files are docs/EVIDENCE-*, so a delimiter class is free. Do NOT put
 # `_` in it: that re-admits the second path (driven).
-MINE='^(docs/ledger-tools/|docs/EVIDENCE([-./]|$)|docs/evidence-)'
 die() { printf '⛔ CANNOT MEASURE — REFUSING: %s\n' "$1" >&2; exit 2; }
+
+# ── THE LANE IS PER-SEAT. IT IS NOT A CONSTANT. ────────────────────────────────────
+# The helm offered (08/23 19:5x) to route its pushes through this gate. Driven before
+# accepting: my lane REFUSES the helm's own `docs/QUEUE.md` edit — adopted as-is this
+# blocks everything it does, and the tempting cure (widening the pattern) SILENTLY STOPS
+# IT PROTECTING ME. [[an-adopted-fence-outruns-its-instrument]]: a CRITERION is portable,
+# an INSTRUMENT is not.
+# ⇒ SEAT names the lane; the map is tracked beside this file; an UNKNOWN SEAT IS REFUSED.
+#   I do not guess other seats' lanes — a lane row is a claim about what a seat owns and
+#   only that seat can make it.
+LANEMAP=${LANEPUSH_MAP:-$(dirname "$0")/seat-lanes.tsv}
+if [ -n "${LANEPUSH_LANE:-}" ]; then
+  MINE=$LANEPUSH_LANE
+else
+  [ -n "${SEAT:-}" ] || die "SEAT is not set — I will not guess whose lane to enforce"
+  [ -f "$LANEMAP" ] || die "no lane map at $LANEMAP"
+  MINE=$(awk -F'\t' -v s="$SEAT" '$1==s{print $2; found=1} END{exit !found}' "$LANEMAP") \
+    || die "seat '$SEAT' has no row in $LANEMAP — add YOUR OWN lane; do not widen another seat's"
+  [ -n "$MINE" ] || die "seat '$SEAT' has an empty lane in $LANEMAP"
+fi
 
 # ⛔ replace-refs rewrite what git SHOWS while the push sends the REAL object.
 # `git filter-repo` (salt's documented purge plan) creates them. Live repo has 0 today.
