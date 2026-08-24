@@ -69,15 +69,42 @@ die() { printf '⛔ CANNOT MEASURE — REFUSING: %s\n' "$1" >&2; exit 2; }
 # ⇒ SEAT names the lane; the map is tracked beside this file; an UNKNOWN SEAT IS REFUSED.
 #   I do not guess other seats' lanes — a lane row is a claim about what a seat owns and
 #   only that seat can make it.
-LANEMAP=${LANEPUSH_MAP:-$(dirname "$0")/seat-lanes.tsv}
+# ── WHERE A LANE IS DECLARED, AND WHY IT IS NOT HERE ───────────────────────────────
+# `docs/lanes/<seat>.lane` — one line, an ERE, matched against the paths a push CHANGES.
+#
+# ⛔ THE MAP USED TO LIVE IN docs/ledger-tools/ — THE EVIDENCE LANE — so the helm's first
+# act under adoption was to have this gate REFUSE ITS OWN ADOPTION COMMIT: declaring your
+# lane meant editing a file in my territory. That routes every seat's declaration through
+# one seat and makes that seat a de facto authority over what the others claim to own.
+# The gate was right; the architecture was mine and it was wrong.
+#
+# ⭐ AND THE MOVE HAD A LEFTOVER THE GATE ALSO CAUGHT: I put a README in docs/lanes/ and
+# my own push was refused, because a shared explanatory file belongs to NOBODY. So the
+# explanation lives HERE, in the tool I own, and docs/lanes/ contains nothing but
+# per-seat declarations — every file in it owned by exactly one seat.
+#
+# TO JOIN: write one line into docs/lanes/<yourseat>.lane and push it. The carve-out below
+# permits that even though you have no lane yet; until you do, this gate refuses you,
+# which is the honest state of "I do not know what you own".
+#
+# ⚠️ A LANE FILE IS A DECLARATION, NOT A PERMISSION SYSTEM. A seat can widen its own lane.
+# This guards OPERATOR ERROR, not a seat that has decided to take someone's work. The
+# declaration is in git, dated and attributable; that is the only integrity it claims.
+LANEDIR=${LANEPUSH_LANEDIR:-$(cd "$(dirname "$0")/.." && pwd)/lanes}
 if [ -n "${LANEPUSH_LANE:-}" ]; then
-  MINE=$LANEPUSH_LANE
+  MINE=$LANEPUSH_LANE; SELFDECL=""
 else
   [ -n "${SEAT:-}" ] || die "SEAT is not set — I will not guess whose lane to enforce"
-  [ -f "$LANEMAP" ] || die "no lane map at $LANEMAP"
-  MINE=$(awk -F'\t' -v s="$SEAT" '$1==s{print $2; found=1} END{exit !found}' "$LANEMAP") \
-    || die "seat '$SEAT' has no row in $LANEMAP — add YOUR OWN lane; do not widen another seat's"
-  [ -n "$MINE" ] || die "seat '$SEAT' has an empty lane in $LANEMAP"
+  LF="$LANEDIR/$SEAT.lane"
+  [ -f "$LF" ] || die "no lane declared at ${LF#$(git rev-parse --show-toplevel 2>/dev/null)/} — write one line and push it; the gate permits that even now"
+  MINE=$(head -1 "$LF" | tr -d '\n')
+  [ -n "$MINE" ] || die "$SEAT's lane file is empty"
+  # ⭐ THE SELF-DECLARATION CARVE-OUT. A seat may ALWAYS change its OWN lane file,
+  # whatever its lane says — otherwise declaring a lane requires already having one,
+  # and the first adopter's commit is refused by the gate it is adopting. Exactly what
+  # happened to the helm at 20:0x. It can never reach another seat's file: the path is
+  # built from $SEAT, so it is one specific file, not a pattern.
+  SELFDECL="docs/lanes/$SEAT.lane"
 fi
 
 # ⛔ replace-refs rewrite what git SHOWS while the push sends the REAL object.
@@ -132,7 +159,9 @@ case "$AHEAD" in ''|*[!0-9]*) die "ahead count is not a number: [$AHEAD]" ;; esa
 # COMMITTED INSIDE THE GATE: a malformed $MINE makes grep exit 2 with an error printed
 # ONE LINE ABOVE the verdict, `OUT` empty, and the pass printed anyway. grep exits 0 on
 # match, 1 on no-match, >1 on ERROR — only the first two are answers.
-OUT=$(printf '%s\n' "$DIFF" | grep '[^[:space:]]' | grep -vE "$MINE"); rc=$?
+FILT=$(printf '%s\n' "$DIFF" | grep '[^[:space:]]')
+[ -n "$SELFDECL" ] && FILT=$(printf '%s\n' "$FILT" | grep -vxF "$SELFDECL" || true)
+OUT=$(printf '%s\n' "$FILT" | grep '[^[:space:]]' | grep -vE "$MINE"); rc=$?
 [ "$rc" -le 1 ] || die "lane filter failed (grep rc=$rc) — the pattern, not the push, is the problem"
 if [ -n "$OUT" ]; then
   NBAD=$(printf '%s\n' "$OUT" | grep -c '[^[:space:]]')

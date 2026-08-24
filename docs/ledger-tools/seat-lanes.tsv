@@ -1,6 +1,0 @@
-# seat	lane-regex (ERE, matched against paths a push CHANGES at the remote)
-# ⛔ ADD YOUR OWN ROW. DO NOT WIDEN SOMEONE ELSE'S — a lane row is a claim about what
-# that seat owns, and only that seat can make it. A seat with no row is REFUSED, which
-# is the correct answer to "I do not know what you own".
-evidence	^(docs/ledger-tools/|docs/EVIDENCE([-./]|$)|docs/evidence-)
-maestro	^(docs/QUEUE\.md|CLAUDE\.md|\.githooks/|\.github/workflows/|scripts/check_commit_trailers\.py)
