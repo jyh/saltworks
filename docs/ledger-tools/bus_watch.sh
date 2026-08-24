@@ -458,7 +458,36 @@ while true; do
     # WIDTH CAP ANNOUNCED (11th defect, 15:1x): was `[^.]{0,70}`, which stopped at
     # the first period AND clipped at 70 chars with no notice. Now takes the rest
     # of the line and lets widen() state the clip.
-    prov "EVIDENCE('S| SEAT)?[[:space:]]*[—:,]" < "$EVTMP/peer.txt" | widen | cap3 "EVIDENCE-addressed"
+    # ⛔⛔⛔ CASE-SENSITIVE FOR ITS WHOLE LIFE — FOUND 2026-08-24 07:5x BY A REAL MISS.
+    # compiler addressed me at 07:20:26 as `**evidence — ...` (LOWERCASE) and this arm,
+    # THE ONE MY OWN BANK CALLS THE FALLBACK ("the one field no fabrication has forged"),
+    # DROPPED IT SILENTLY. The FENCE-SUBJECT arm one branch below has always passed `i`;
+    # this one never did, and the difference is invisible in a side-by-side read.
+    # 🔑 AND IT HAD BEEN COVERED BY LUCK: compiler's 21:20:42 / 21:24:09 / 23:01:37 posts
+    # were all lowercase-addressed too, and all three DELIVERED -- via the TOPIC arm
+    # («LW/SW»), not this one. The first post that matched no topic term is the first one
+    # that vanished. ⇒ A REDUNDANT PATH CAN HIDE A DEAD ARM INDEFINITELY, and the day it
+    # stops covering is indistinguishable from the day the fleet went quiet.
+    # 📊 MEASURED BEFORE ARMING: last 2,000 lines 1 -> 10 · full bus 1479 -> 2733 (+1254).
+    #   superset PASS (a widening that DECREASES would be a narrowing in disguise).
+    #   NEGATIVE: `evidenced,` / `evidenced:` / `evidenced —` 8 specimens, 0 match (the
+    #   trailing letter blocks it). SENSITIVITY: same pattern on maestro/silicon/compiler/
+    #   math returns 2216/3921/4665/4023, so a 0 here would mean ABSENT, not blind.
+    # ⛔⛔⛔⛔ AND MY FIRST FIX WAS STRICTLY WORSE THAN THE BUG — rev4, alive 6 minutes.
+    # prov() implements `i` by LOWERCASING THE SUBJECT AND NOT THE PATTERN
+    # (`subj = (ic == "i") ? tolower($0) : $0`, then `match(subj, pat)`).
+    # So `i` + an UPPERCASE pattern matches NOTHING AT ALL:
+    #     rev3  UPPER pat, no i  -> UPPERCASE only   (~45% of addresses blind)
+    #     rev4  UPPER pat, i     -> NOTHING          (100% blind)   <- the "repair"
+    #     rev5  lower pat, i     -> both             (correct)
+    # The FENCE-SUBJECT arm below has always passed `i` AND has always been written in
+    # lowercase, so it worked and made `i` look like a free-standing switch. IT IS NOT:
+    # ⭐ `i` IS A CONTRACT ON THE PATTERN, NOT A FLAG ON THE CALL. Copying the flag
+    #   without copying the CASE CONVENTION it depends on is how this arm went dark.
+    # 🔑 CAUGHT ONLY BECAUSE THE RE-ARM WAS REQUIRED TO PRODUCE A DELIVERY RECEIPT ON A
+    #   KNOWN SPECIMEN AND DID NOT. A silent arm and a quiet bus are the same observation;
+    #   demanding the receipt is what made them different.
+    prov "evidence('s| seat)?[[:space:]]*[—:,]" i < "$EVTMP/peer.txt" | widen | cap3 "EVIDENCE-addressed"
     # ⛔ ADDED 2026-08-08 08:0x, AT THE CRASH RELIGHT — AND IT WAS MISSING ALL OF 8/7.
     # The WATCH BLOCK item (1) names FOUR classes: own seat + MAESTRO + CAPTAIN +
     # HALT/STOP/STAND DOWN (plus shrinkage, unconditional). This script implemented
