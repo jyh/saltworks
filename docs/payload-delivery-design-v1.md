@@ -280,6 +280,40 @@ Riders:
   line numbers — three of this block's line-cites rotted inside one
   spec amendment (:270→:361, :191→:221, :202→:232, :174→:175;
   recorded so no reader chases stale lines).
+  ⛔⛔ **MIG-8 RE-READ, 2026-08-24 (silicon): ALL FOUR OF THOSE "REPAIRED"
+  TARGETS HAVE NOW ROTTED TOO — and they were recorded as BARE LINE NUMBERS in
+  the very sentence that adopts "SECTION + QUOTED SENTENCE, never bare line
+  numbers." THE REPAIR INHERITED THE SHAPE OF THE ERROR IT REPAIRED.**
+  Measured against the current spec (`55831de`; blob-identical to HEAD, zero
+  commits since, so the pin itself is sound):
+  - `:361` → unrelated bench prose. The P-placeholder now lives in **spec §9
+    OPEN**: *"`P` (payload length). 8 is a placeholder chosen to make a 14-cycle
+    frame."* — it changed SECTION, which no line number can express.
+  - `:221` → *"unsourced in both nodes."*, the tail of §5's consumer warning.
+  - `:232` → **an empty line.**
+  - `:175` → the power-gate/`l_ena` sentence; §5's reset material starts `:176`.
+  - the free-run prose this block cites as `:191/:202` is now in **spec §6**:
+    *"cnt : 0 … (2k+P−1), free-running, reset by rst_n and re-aligned by sof"*.
+  ⇒ **USE THE QUOTED SENTENCES ABOVE. Do not re-record these as line numbers —
+  that is the move that has now failed twice in this same bullet.**
+
+- ✅ **MIG-8 DISCHARGED 2026-08-24 (silicon) — THE SPEC FACTS THEMSELVES ARE
+  CLEAN.** Re-read of §1/§2's spec-derived claims against the current spec, the
+  question being "does any spec fact misquote the protocol?" **No misquote
+  found.** Verified at section + sentence: frame `2k+P` = 14 MSB-first (**§2**)
+  · stage `s` consumes bit `k−1−s` at cycle `2s+1` (**§2**, verbatim) · data path
+  combinational end to end (**§4**) · fabric outputs defined from cycle `2k`
+  (**§4**) · payload window `(2k …)` = validity window (**§4**), with this
+  block's CLOSED upper bound `2k+P` still correctly attributed to itself and not
+  to the spec · `P = 8` a placeholder (**§9**).
+  ⭐ **THE HIGHEST-RISK ITEM IS THE ONE THAT IS CLEANEST.** Spec §5 carries an
+  explicit warning to consumers that anything citing the second-`act_stb` clause
+  as the SOURCE of well-phasedness "attributes the premise to a clause that
+  cannot produce it." **This block does not: it carries the amended sof-anchored
+  form and names the old attribution as REFUTED in the same breath.** Its quoted
+  counts check out against **spec §8 rows 6 and 7** exactly — `188/200` and
+  `192/200`. Rows 5–11 all present; row 5 `0/200` and row 10 `0/255` with mutant
+  controls at rows 9 and 11.
 
 - **PROBE CLOSED (8/8 13:3x — answered INDEPENDENTLY by silicon
   13:31 and math 13:33, same bytes, same verdict)**: the counter
