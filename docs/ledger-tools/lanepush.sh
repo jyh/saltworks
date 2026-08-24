@@ -43,13 +43,28 @@
 # ⚠️ PATHS, NOT AUTHORSHIP: every commit here is authored "Jason Hickey" — git cannot
 # discriminate seats. silicon: "checked by PATH since authorship cannot discriminate."
 #
+# ⚠️ KNOWN, SAFE-DIRECTION LIMITATION (driven, not guessed): --name-only C-QUOTES a
+# non-ASCII path, so an IN-LANE file like docs/evidence-café.md is refused with the
+# wrong reason. That is a WRONG REFUSAL, never a wrong pass, and the quoting is exactly
+# what makes a newline-in-path fail closed. Cure if it ever bites: -z with NUL-split
+# matching the RAW bytes. Not taken: it trades a safe failure for a subtle one.
+#
 # usage: sh docs/ledger-tools/lanepush.sh [remote] [branch]
 # exit 0 = this push changes only this seat's lane · 1 = REFUSE, foreign paths
 # exit 2 = COULD NOT MEASURE, or an environment I will not vouch for — REFUSE
 set -u
 REMOTE=${1:-origin}; BRANCH=${2:-master}
-MINE='^(docs/ledger-tools/|docs/EVIDENCE|docs/evidence-)'
+# ⛔ THE PREFIX MUST BE BOUNDED. `^docs/EVIDENCE` admitted docs/EVIDENCEFAKE/rtl/silicon.v
+# and docs/EVIDENCE_stolen.v — a foreign path wearing my lane's first eight letters.
+# All 35 live lane files are docs/EVIDENCE-*, so a delimiter class is free. Do NOT put
+# `_` in it: that re-admits the second path (driven).
+MINE='^(docs/ledger-tools/|docs/EVIDENCE([-./]|$)|docs/evidence-)'
 die() { printf '⛔ CANNOT MEASURE — REFUSING: %s\n' "$1" >&2; exit 2; }
+
+# ⛔ replace-refs rewrite what git SHOWS while the push sends the REAL object.
+# `git filter-repo` (salt's documented purge plan) creates them. Live repo has 0 today.
+GIT_NO_REPLACE_OBJECTS=1; export GIT_NO_REPLACE_OBJECTS
+[ -z "$(git for-each-ref refs/replace 2>/dev/null)" ] || die "refs/replace exist — git would show me a different object than the push sends"
 
 # (0) an environment that redirects what git reads
 for v in GIT_DIR GIT_WORK_TREE GIT_CONFIG_COUNT GIT_CONFIG_GLOBAL GIT_CONFIG_SYSTEM GIT_OBJECT_DIRECTORY GIT_COMMON_DIR; do
@@ -94,7 +109,12 @@ AHEAD=$(git rev-list --count "$R..$L" 2>/dev/null) || die "rev-list --count fail
 case "$AHEAD" in ''|*[!0-9]*) die "ahead count is not a number: [$AHEAD]" ;; esac
 [ "$NPATH" -eq 0 ] && { printf '✅ %s commit(s) ahead, 0 paths changed at the remote  [%s]\n' "$AHEAD" "$(git rev-parse --show-toplevel)"; exit 0; }
 
-OUT=$(printf '%s\n' "$DIFF" | grep '[^[:space:]]' | grep -vE "$MINE" || true)
+# ⛔⛔ `|| true` HERE WAS THE LAST FAIL-OPEN, AND IT WAS THE GATE'S OWN HEADER LAW
+# COMMITTED INSIDE THE GATE: a malformed $MINE makes grep exit 2 with an error printed
+# ONE LINE ABOVE the verdict, `OUT` empty, and the pass printed anyway. grep exits 0 on
+# match, 1 on no-match, >1 on ERROR — only the first two are answers.
+OUT=$(printf '%s\n' "$DIFF" | grep '[^[:space:]]' | grep -vE "$MINE"); rc=$?
+[ "$rc" -le 1 ] || die "lane filter failed (grep rc=$rc) — the pattern, not the push, is the problem"
 if [ -n "$OUT" ]; then
   NBAD=$(printf '%s\n' "$OUT" | grep -c '[^[:space:]]')
   printf '⛔ REFUSING: this push changes %s path(s) outside this seat'"'"'s lane:\n' "$NBAD"
