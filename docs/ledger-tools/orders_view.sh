@@ -68,6 +68,25 @@ STOPCLASS='(^|[^A-Za-z-])(HALT|STAND DOWN|STAND-DOWN|ALL SEATS STOP|FLEET STOP)'
 case "$MODE" in
   --count)   view | wc -l | tr -d ' ' ;;
   --stopclass)
+    # ⛔⛔⛔ MATCHER SELF-CHECK — REFUSE RATHER THAN REPORT. Added 2026-08-24 after ugrep
+    # 7.8.4 (the `grep` on this box) returned ZERO on a specimen that plainly matches:
+    #     ugrep  '(^|[^A-Za-z-])(HALT|STAND DOWN|STAND-DOWN)'                 -> 0   WRONG
+    #     ugrep  '(^|[^A-Za-z-])(HALT|STAND DOWN|STAND-DOWN|ALL SEATS STOP|…)' -> 2   right
+    #     BSD    both forms                                                   -> 2   right
+    # ⇒ REMOVING alternatives from an alternation took the count 26 -> 0. The engine is
+    #   wrong on the SHORTER pattern, so a one-term edit to STOPCLASS below can silently
+    #   zero this figure, and a zero reads exactly like "the population is empty".
+    # 🔑 THE CURRENT FILTER HAPPENS NOT TO TRIGGER IT (verified 26 across ugrep, BSD grep
+    #   and python). THAT IS LUCK, NOT SAFETY — so the luck is now GATED:
+    #   the filter is run against a known-positive specimen and this mode REFUSES if the
+    #   matcher does not find it. "If this value were the bad one, what would STOP?" -> this.
+    _probe=$(printf 'x HALT y\nz STAND-DOWN w\n' | grep -cE "$STOPCLASS")
+    if [ "${_probe:-0}" -lt 2 ]; then
+      printf '⛔ MATCHER SELF-CHECK FAILED: the filter found %s of 2 known-positive lines.\n' "${_probe:-0}" >&2
+      printf '   The regex engine is not matching this pattern correctly (see the ugrep note\n' >&2
+      printf '   above). REFUSING to print a count that would read as a real population.\n' >&2
+      exit 4
+    fi
     # THE canonical figure. Prints BOTH denominators, because "26" alone does not say which.
     printf 'bus            %s\n' "$BUSF"
     printf 'filter         %s\n' "$STOPCLASS"
