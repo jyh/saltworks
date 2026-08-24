@@ -168,7 +168,15 @@
   rows IS the successor of neural-fabric §7's row; this line confirms the A1/GNN
   QUEUE entry as its address. No new load.
 - **MIG-11 · EVIDENCE · P2** — slice-b E2(b): claim-scope audit of the post-v1.1 "OS"
-  wording. (E2(a) awaits a Captain word — register, not queue.)
+  wording (the only existing audit is pre-v1.1 and contains no OS finding). Rises to P1
+  if any Slice-B text enters the story or a paper.
+- **MIG-12 · EVIDENCE · P2 — THE SLICE-B PRICE-CRITERION PRE-REGISTRATION, RE-ANCHORED
+  (Captain, 2026-08-23 evening sitting: "yes (b)").** The original ④-form registration
+  (`EVIDENCE-campaign.md:963`) was owed "BEFORE any wave"; **that window lapsed** (ruling
+  #3, the LW/SW landing) — stated here so the re-anchor is honest, not a silent slide.
+  **NEW FREEZE EVENT: the LW/SW silicon integration's 2026-09-07 update window.**
+  DISCHARGE: evidence files the pre-registration against the new anchor BEFORE that
+  window opens; until filed, Slice-B pricing claims carry no fence and must say so.
 
 **RETIRED UNDER RULING #7 (Captain's word at the 2026-08-23 evening sitting: "yes retire") —
 4 rows / 6 debts on the paths ruling #7 (2026-08-09) passed over when it chose the
