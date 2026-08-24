@@ -51,8 +51,29 @@ view() {
   ' "$BUSF"
 }
 
+# ⛔⛔ THE CANONICAL STOP-CLASS SET LIVES HERE, NOT IN A BUS POST.
+# WHY (2026-08-24, R1-partial): I published this program and a number, and the reviewer ran
+# the program and got a DIFFERENT number. The program was not the variable — THE INVOCATION
+# WAS. My filter carried `STAND-DOWN` (HYPHENATED); the reviewer's carried `STAND DOWN`
+# (spaced) and not the hyphen form. Five widenings on their side never found it, because
+# they were adding NEW WORDS (MAYDAY, ALL HANDS, SHUT DOWN) while the gap was a PUNCTUATION
+# VARIANT OF A WORD ALREADY IN THE SET.
+# 🔑 ⇒ `publish-the-program-not-the-number` IS NECESSARY AND INSUFFICIENT. A PROGRAM PLUS
+#   UNSTATED ARGUMENTS IS STILL AN UNREPRODUCIBLE NUMBER. The fix is not a better bus post:
+#   it is to make the invocation part of the TOOL, where it cannot be retyped differently.
+# ⚠️ A widening search that enumerates SYNONYMS will not find a variant of a term already
+#   listed. Vary the PUNCTUATION and SPACING of every term you already have, first.
+STOPCLASS='(^|[^A-Za-z-])(HALT|STAND DOWN|STAND-DOWN|ALL SEATS STOP|FLEET STOP)'
+
 case "$MODE" in
   --count)   view | wc -l | tr -d ' ' ;;
+  --stopclass)
+    # THE canonical figure. Prints BOTH denominators, because "26" alone does not say which.
+    printf 'bus            %s\n' "$BUSF"
+    printf 'filter         %s\n' "$STOPCLASS"
+    printf 'view lines     %s\n' "$(view | wc -l | tr -d ' ')"
+    printf 'matching LINES %s\n' "$(view | grep -cE "$STOPCLASS")"
+    printf 'OCCURRENCES    %s\n' "$(view | grep -oE "$STOPCLASS" | wc -l | tr -d ' ')" ;;
   --conform)
     LIVE=${3:?--conform needs the live orders.txt path}
     # The live view starts at the arm's BASELINE, so compare the TAIL of ours to all of theirs.
