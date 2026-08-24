@@ -348,7 +348,36 @@ except Exception: print(-1)' "$mine" 2>/dev/null)
     SSERR=$(mktemp)
     SS=$(bash "$(dirname "$0")/../ledger-tools/selfstale.sh" \
            "$SEAT_DIR/briefs/0000-BOOT-silicon.md" "$CLAUDE_MEMORY_DIR/MEMORY.md" 2>"$SSERR"); SSRC=$?
-    [ -n "$SS" ] && printf '%s\n' "$SS"
+    # ⛔⛔ EDGE-ANNOTATE, ADDED 08/23 — THIS ARM WAS LEVEL-TRIGGERED AND RE-REPORTED AN
+    #    UNCHANGED CONDITION EVERY 30 MINUTES. Measured: the same maestro-brief drift
+    #    (171 B, 0.33%) fired identically at 17:19, 17:49 and 18:19 with nothing having
+    #    changed between them — the file had been quiet since 17:26.
+    # ⇒ ***AN ALARM THAT REPEATS AN UNCHANGED CONDITION TRAINS ITS READER TO IGNORE IT***,
+    #    which is the harm my own orderwatch comment names about permanent false warnings
+    #    and the law bus_append.sh states outright: an alarm that always sounds is an alarm
+    #    nobody hears. A second forwarding of a datum a peer already has is pure noise.
+    # ⭐ IT ANNOTATES, IT DOES NOT SUPPRESS — and that choice is the load-bearing one.
+    #    Suppressing a still-live condition would recreate the failure this whole file
+    #    exists to prevent: a check that goes quiet is indistinguishable from a check that
+    #    passes. So the finding is printed EVERY time and carries its own age, which is what
+    #    makes it triageable at a glance instead of re-litigable.
+    if [ -n "$SS" ]; then
+      SSH=$(printf '%s' "$SS" | shasum | cut -c1-12)
+      SSF="${TMPDIR:-/tmp}/silicon-arm7-$(id -u).state"
+      PREVH=""; PREVT=""; PREVN=0
+      [ -f "$SSF" ] && { PREVH=$(cut -d' ' -f1 "$SSF"); PREVT=$(cut -d' ' -f2 "$SSF"); PREVN=$(cut -d' ' -f3 "$SSF"); }
+      if [ "$SSH" = "$PREVH" ]; then
+        PREVN=$((PREVN + 1))
+        printf '%s\n' "$SS"
+        printf '  ⟲ UNCHANGED since %s (sweep #%s) — NOT a new event; do not re-forward.\n' "$PREVT" "$PREVN"
+        printf '%s %s %s\n' "$SSH" "$PREVT" "$PREVN" > "$SSF"
+      else
+        NOW=$(date '+%H:%M')
+        printf '%s\n' "$SS"
+        [ -n "$PREVH" ] && printf '  ⭐ CHANGED since the last sweep — this IS a new event.\n'
+        printf '%s %s 1\n' "$SSH" "$NOW" > "$SSF"
+      fi
+    fi
     if [ "$SSRC" != 0 ] || [ -s "$SSERR" ]; then
       printf '  ⛔ INWARD CHECK DID NOT RUN (exit %s): %s\n' "$SSRC" "$(head -1 "$SSERR")"
     fi
