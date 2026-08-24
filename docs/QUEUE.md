@@ -192,9 +192,9 @@ bit-serial Design-B direction. Each names its successor or says none exists:**
   non-OS the doc itself describes; feasibility-as-program was Design-A-era scope.
 
 **CONDITIONED (ruled 2026-08-23, tier P3 stays empty by the 08/16 re-tier):**
-- **MIG-C1 · MATH** — GNN sketch F7-A/adjoint row: INVITED TO WITHDRAW (its own
-  cheapest legitimate discharge; F7-A is referenced nowhere else in either repo).
-  If math declines withdrawal, the row returns for tiering on the merits.
+- **MIG-C1 · MATH — ✅ DISCHARGED BY WITHDRAWAL (math, 2026-08-23 19:24, verified not
+  merely accepted: the layer-level adjoint row carries the semantics; F7-A referenced
+  nowhere else in either repo).** Bus receipt at offset ~23.36M.
 - **MIG-C2 · COMPILER — ripens-when rider on A1/layer-compiler:** when the
   layer-compiler EXISTS, compiler owes the source-to-source tangent/adjoint
   feasibility page (nothing can consume it earlier). The trigger lives here, on the
