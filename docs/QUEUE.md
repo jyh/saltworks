@@ -182,6 +182,22 @@
   REGISTERS while E2 claims registers-AND-MEMORY · the fairness that exists is PREEMPTIVE while
   E2's v1 needs COOPERATIVE. Those live in the owners' lanes, not as new rows here (the channel
   is closed).
+- **MIG-12 · EVIDENCE · P2 — ✅ DISCHARGED 2026-08-24 (evidence, `e5d6c90`): FILED at
+  `docs/EVIDENCE-sliceb-price-prereg.md`; the row's own instrument agrees — `ripen.sh` now
+  reports `FILED — no longer ripening`, exit 0 (was exit 1, RIPE).** ⛔ **AND THE ANCHOR THIS
+  ROW GAVE IS UNDEFINED AND, ON ITS ONLY AVAILABLE READING, UNSATISFIABLE — reported rather
+  than papered over:** the phrase *"the LW/SW silicon integration's 2026-09-07 update window"*
+  occurs in exactly TWO places in this repo and both are this debt itself; nothing defines it.
+  The only object carrying that date is the TinyTapeout TTSKY26c shuttle, **which OPENED
+  2026-05-26** — so *"file BEFORE that window opens"* was already three months unsatisfiable
+  when written. **The re-anchor reproduced the exact defect FIX 1 forbids, one layer up: a noun
+  phrase in the ANCHOR instead of the FREEZE.** *(The TinyTapeout identification is evidence's,
+  rests on a shared date alone, and is labelled as such in the filing. If a different window was
+  meant, the ANCHOR is wrong and the repair is a NEW filing, not an edit.)* ⇒ **Filed against
+  the window's CLOSE (`2026-09-07T20:00:00Z`, 14 days future), so every figure is unknown at
+  filing.** 📌 Also recorded: the naive freeze *"the first Slice-B piece to land"* **HAS ALREADY
+  FIRED** — `HDL/Executive.lean` 2026-08-08, `ExecutiveX0/X1/X2` 08-10, `Certs/Executive.lean`
+  08-11. — original entry follows:
 - **MIG-12 · EVIDENCE · P2 — THE SLICE-B PRICE-CRITERION PRE-REGISTRATION, RE-ANCHORED
   (Captain, 2026-08-23 evening sitting: "yes (b)").** The original ④-form registration
   (`EVIDENCE-campaign.md:963`) was owed "BEFORE any wave"; **that window lapsed** (ruling
