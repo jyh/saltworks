@@ -426,16 +426,36 @@ except Exception: print(-1)' "$mine" 2>/dev/null)
   if [ ! -r "$QF" ]; then
     q="NO-QUEUE($QF)"
   else
+    # ⛔⛔ FIXED 08/23 — THIS ARM COULD ONLY EVER PRINT "OK", AND IT IS THE DEFECT IT
+    #    WAS BUILT TO PREVENT, WEARING THE OTHER MASK. The skip list treated STANDING
+    #    as a disposition token. IT IS NOT: a STANDING item is PERPETUALLY LIVE.
+    #    Measured on the live file: all 5 SILICON items carry one of the four tokens,
+    #    so `OK` was the ONLY REACHABLE VALUE for this section — a check that cannot fail.
+    # ⇒ MEAS is STANDING and carried a 95-MODULE BACKLOG all afternoon while this field
+    #    printed `queue=OK`. The arm exists because my beats said "nothing owed" for ~22h
+    #    while W1 sat open; today it said "queue=OK" while MEAS sat 95 deep.
+    #    ***A REPAIR INHERITED THE ERROR'S SHAPE: it cured the PUSH-vs-PULL blindness and
+    #    introduced a TOKEN blindness at the same spot.***
+    # ⭐ AND THE CURE IS ARM 7'S, NOT SUPPRESSION: STANDING is COUNTED and REPORTED in its
+    #    own category, so a perpetual duty is visible without reading as new work. It was
+    #    presumably skipped to avoid announcing it every sweep — that is the same trade
+    #    arm 7 got wrong, and the same answer: ANNOTATE, DO NOT SUPPRESS.
     q=$(awk '
       /^##[[:space:]]+SILICON/ {inq=1; next}
       /^##[[:space:]]/         {inq=0}
       inq && /^- / {
         line=$0
-        if (line ~ /DISCHARGED|SUPERSEDED|STANDING|~~/) next
+        if (line ~ /DISCHARGED|SUPERSEDED|~~/) next
+        match(line, /^- [^ ]+/); tag=substr(line, RSTART+2, RLENGTH-2)
+        if (line ~ /STANDING/) { st++; stags=stags (stags==""?"":",") tag; next }
         n++
-        if (n<=3) { match(line, /^- [^ ]+/); tag=substr(line, RSTART+2, RLENGTH-2); tags=tags (tags==""?"":",") tag }
+        if (n<=3) { tags=tags (tags==""?"":",") tag }
       }
-      END { if (n==0) print "OK"; else printf "%d OPEN(%s%s)", n, tags, (n>3?",…":"") }
+      END {
+        if (n==0 && st==0) { print "OK" }
+        else if (n==0)     { printf "OK·%d STANDING(%s)", st, stags }
+        else               { printf "%d OPEN(%s%s)%s", n, tags, (n>3?",…":""), (st>0 ? sprintf("·%d STANDING(%s)", st, stags) : "") }
+      }
     ' "$QF")
     [ -n "$q" ] || q="UNPARSED"
   fi
