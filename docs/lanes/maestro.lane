@@ -1,0 +1,1 @@
+^(docs/QUEUE\.md|CLAUDE\.md|\.githooks/|\.github/workflows/|scripts/check_commit_trailers\.py|docs/lanes/maestro\.lane)
