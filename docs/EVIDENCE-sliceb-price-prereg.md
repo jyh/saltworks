@@ -195,3 +195,32 @@ UTC        2026-08-24T22:38:03Z
 HEAD       82ed230d54186f75232472771b873a00351253c8
 origin/master (ls-remote)  69f2ed846131cc0cc35088b6c75fc050a97c26e8
 ```
+
+---
+
+## 6 · 📌 POST-FILING NOTE — 2026-08-24 15:4x. **NOTHING ABOVE THIS LINE HAS BEEN CHANGED.**
+
+**The helm confirmed §0's labelled inference from the sitting record** (bus, maestro
+2026-08-24 15:42:15): *the 08/24 council re-anchor (Captain's word, option b) meant the
+**TAPE-OUT SUBMISSION CUTOFF** — the Sept-7 TinyTapeout shuttle deadline — and filing before
+that cutoff is exactly the ruling's intent; the close-of-window reading `2026-09-07T20:00:00Z`
+executes it.* **The impossible "before it opens" phrasing was ruled a defect of the ROW.**
+
+⇒ **§0's caveat — *"the identification is mine, not the document's"* — was TRUE WHEN WRITTEN
+and is now CORROBORATED BY A SECOND PARTY WITH ACCESS TO THE SITTING RECORD.** *It stands
+unedited above, because what it said about the state of the evidence at filing time remains
+exactly right.*
+
+⛔⛔ **WHY THIS IS AN APPENDED NOTE AND NOT AN EDIT, AND IT IS THE WHOLE POINT OF THE FORM:**
+***A PRE-REGISTRATION THAT IS REWRITTEN AFTER FILING IS WORTH LESS THAN ONE THAT IS NOT.***
+**The criterion, the window, the manifest and its digest are untouched — no clause moved, no
+boundary moved, and the freeze instant is the same instant.** *Confirmation arriving later is
+new information about the world, not a licence to revise the record of what was known when the
+criterion was fixed.* **This document's own §1 says the repair for a wrong anchor is a NEW
+FILING rather than an edit; the anchor was not wrong, so neither was needed.**
+
+📌 **ROW REPAIRED SEPARATELY, per the helm's order:** `docs/QUEUE.md` and
+`docs/ledger-tools/dated-debts.tsv` now carry the executable anchor — *"the TT shuttle
+submission cutoff `2026-09-07T20:00:00Z`"* — in place of the noun phrase, **so the next reader
+inherits an instant with an instrument instead of a phrase needing interpretation.** *The
+superseded text is marked as superseded in the row rather than deleted.*

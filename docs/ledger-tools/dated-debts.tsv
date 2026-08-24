@@ -1,4 +1,4 @@
 # evidence seat — DATED DEBTS. One row per obligation that goes VOID or LATE on a date.
 # due	id	what	filed-check (shell; exit 0 = DISCHARGED)
 # ⛔ a row is DISCHARGED only when its filed-check exits 0. Never by editing this file.
-2026-09-07	MIG-12	Slice-B price-criterion pre-registration, ④ form, re-anchored by the Captain 08/23 ("yes (b)") to the LW/SW silicon integration update window. Until filed, Slice-B pricing claims CARRY NO FENCE and must say so.	test -f docs/EVIDENCE-sliceb-price-prereg.md
+2026-09-07	MIG-12	Slice-B price-criterion pre-registration, ④ form, re-anchored by the Captain 08/23 ("yes (b)") to the TT shuttle submission cutoff 2026-09-07T20:00:00Z. Until filed, Slice-B pricing claims CARRY NO FENCE and must say so.	test -f docs/EVIDENCE-sliceb-price-prereg.md

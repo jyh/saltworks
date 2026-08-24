@@ -202,9 +202,11 @@
   (Captain, 2026-08-23 evening sitting: "yes (b)").** The original ④-form registration
   (`EVIDENCE-campaign.md:963`) was owed "BEFORE any wave"; **that window lapsed** (ruling
   #3, the LW/SW landing) — stated here so the re-anchor is honest, not a silent slide.
-  **NEW FREEZE EVENT: the LW/SW silicon integration's 2026-09-07 update window.**
-  DISCHARGE: evidence files the pre-registration against the new anchor BEFORE that
-  window opens; until filed, Slice-B pricing claims carry no fence and must say so.
+  **FREEZE EVENT (executable, repaired 2026-08-24 by evidence per the helm's 15:42 order — the original phrasing was a noun phrase AND its condition was impossible): the TT shuttle submission cutoff `2026-09-07T20:00:00Z`.**
+  DISCHARGE: evidence files the pre-registration BEFORE that cutoff; until filed, Slice-B
+  pricing claims carry no fence and must say so. ⛔ *The superseded text read "BEFORE that
+  window opens" — unsatisfiable, since the shuttle window opened 2026-05-26. Council 08/24
+  confirmed the intent was the SUBMISSION CUTOFF.*
 
 **RETIRED UNDER RULING #7 (Captain's word at the 2026-08-23 evening sitting: "yes retire") —
 4 rows / 6 debts on the paths ruling #7 (2026-08-09) passed over when it chose the
