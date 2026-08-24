@@ -98,19 +98,22 @@ arm "ARM9  REAL FLEET ORDER: header -> FLEET-TOKEN" "FLEET-TOKEN" "$(tag_of 1645
 MUT9=$(line_at 164523 | LC_ALL=C sed 's/FLEET ORDER: //' | LC_ALL=C awk -v start=0 -f "$AWKPROG" | LC_ALL=C awk -F'\t' 'NR==1{print $1}')
 arm "ARM10 same REAL line, token removed -> dropped" ""            "$MUT9"
 
-echo "CASE CONTRACT — rev 4, per FLEET ORDER: CASE-CONTRACT AUDIT (08/24 07:59:40):"
-# ⚠️ SYNTHETIC AND DECLARED, for the same reason ARM9/10 were until this morning: NO
-# mixed-case ORDER TOKEN has ever appeared on this bus, so there is no real line to
-# stamp. They convert the moment one lands. (Mixed-case ADDRESSING is real and is
-# proven by delivery through the RUNNER, separately — see the 08:2x receipt.)
-# ⛔ WHAT THEY GUARD: rev 3's tokens were exact-case `index($0,"SILICON ORDER:")`.
-#   "Silicon Order:" delivered as NAMED-no-token — a REDUNDANT PATH HIDING A DEAD ARM,
-#   the tag reporting "no token" when the helm had used one.
-#   "Fleet Order:" with no other hook was DROPPED ENTIRELY — no redundant path at all,
-#   on the one clause that exists for headers naming no seat.
+echo "CASE CONTRACT — rev 5, per the 08:04:11 AMENDMENT (tokens stay case-SENSITIVE):"
+# ⛔ REV 4 WIDENED THESE AND THE AMENDMENT REVERSED IT: case-widening is for
+# NATURAL-LANGUAGE ADDRESS arms only; a PROTOCOL TOKEN keeps its case, because
+# uppercase is how an order word is marked as an ORDER rather than talk about one.
+# So mixed-case is NOT a token here, and these arms assert that.
 syn() { printf '%s\n' "$1" | LC_ALL=C awk -v start=0 -f "$AWKPROG" | LC_ALL=C awk -F'\t' 'NR==1{print $1}'; }
-arm "ARM11 mixed-case Silicon Order: -> TOKEN"      "TOKEN"       "$(syn '[08/24 08:00:00, maestro=LIT — Silicon Order: do the thing]')"
-arm "ARM12 mixed-case Fleet Order:, NO other hook"  "FLEET-TOKEN" "$(syn '[08/24 08:00:00, maestro=LIT — Fleet Order: a general instruction to the board]')"
+arm "ARM11 mixed-case 'Silicon Order:' is NOT a token" "NAMED-no-token" "$(syn '[08/24 09:00:00, maestro=LIT — Silicon Order: do the thing]')"
+arm "ARM12 mixed-case 'Fleet Order:' alone -> dropped" ""               "$(syn '[08/24 09:00:00, maestro=LIT — Fleet Order: a general instruction]')"
+
+echo "AMENDMENT SHAPE — rev 5, the miss that cost me an hour:"
+# ⛔⛔ THE TOKEN MATCH REQUIRED THE COLON ADJACENT, so "FLEET ORDER AMENDMENT:" did
+# not match "FLEET ORDER:" and my channel DROPPED THE AMENDMENT to an order it had
+# delivered. A REAL line, stamped, because this one exists on the bus.
+check_stamp 165081 "FLEET ORDER AMENDMENT" "ARM13-amendment-REAL"
+arm "ARM13 REAL 'FLEET ORDER AMENDMENT:' -> FLEET-TOKEN" "FLEET-TOKEN" "$(tag_of 165081)"
+arm "ARM14 same line, token word removed -> dropped"     ""            "$(line_at 165081 | LC_ALL=C sed 's/FLEET ORDER //' | LC_ALL=C awk -v start=0 -f "$AWKPROG" | LC_ALL=C awk -F'\t' 'NR==1{print $1}')"
 
 echo "orderwatch_selftest: PASS=$PASS FAIL=$FAIL"
 [ "$FAIL" -eq 0 ] || exit 1

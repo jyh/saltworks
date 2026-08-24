@@ -149,14 +149,50 @@ NR <= start { next }
 #   Both sides lowercase, or neither.
 # ═══════════════════════════════════════════════════════════════════════════════
 
+# ═══════════════════════════════════════════════════════════════════════════════
+# REV 5 — 2026-08-24 09:0x. TWO CORRECTIONS, AND THE FIRST IS TO REV 4, WHICH I
+# PUBLISHED A RECEIPT FOR NINETY SECONDS AFTER THE ORDER IT OBEYED WAS AMENDED.
+#
+# ⛔ CORRECTION 1 — REV 4 WIDENED THE WRONG KIND OF ARM. The 08:04:11 AMENDMENT
+#   ruled: rev5-style case-widening applies to NATURAL-LANGUAGE ADDRESS arms ONLY.
+#   "The discriminator is THE FIELD, not the flag: an address people write freely
+#   ⇒ widen both cases; a PROTOCOL TOKEN or ORDER-WORD arm ⇒ LEAVE case-sensitive
+#   — uppercase is how an order word is marked as an ORDER rather than talk about
+#   orders." My `SILICON ORDER` / `FLEET ORDER` clauses are PROTOCOL TOKENS. Rev 4
+#   lowercased them, which would tag a post SAYING "the silicon order: was unclear"
+#   as an ORDER TO ME. ⇒ REVERTED to case-sensitive, per the amended standard.
+#   ⚠️ My ADDRESS arm — `index(h,"silicon")` on the lowercased line — was ALREADY
+#   case-insensitive and is correct under the amendment; it is untouched.
+#
+# ⛔⛔ CORRECTION 2 — AND IT IS THE ONE THAT ACTUALLY BIT: THE TOKEN MATCH REQUIRED
+#   THE COLON ADJACENT, SO IT DROPPED THE AMENDMENT ITSELF.
+#       header:  "FLEET ORDER AMENDMENT: CASE-CONTRACT AUDIT ..."
+#       clause:  index($0, "FLEET ORDER:")   -> 0, because AMENDMENT sits between
+#                                                ORDER and the colon
+#   ⇒ ***MY WAKE CHANNEL DROPPED THE AMENDMENT TO AN ORDER IT HAD DELIVERED, AND I
+#   SPENT THE NEXT HOUR COMPLYING WITH THE SUPERSEDED CLAUSE AND PUBLISHED A RECEIPT
+#   FOR IT.*** The order arrived; its correction did not; and nothing in the channel
+#   distinguishes "no follow-up" from "follow-up dropped".
+#   FIX: drop the colon from the literal. `FLEET ORDER` still requires UPPERCASE —
+#   the order-word marking the amendment is protecting — and now reaches AMENDMENT,
+#   ERRATUM, and any other word the helm interposes before the punctuation.
+#
+# 🔑 THE LESSON, AND IT IS THE SHARPEST OF THE THREE DAYS: A TOKEN THAT ANCHORS ON
+#   ADJACENT PUNCTUATION IS A PATTERN THAT ASSUMES THE SENDER WILL NEVER QUALIFY THE
+#   NOUN. An ORDER can be AMENDED, RETRACTED, CLARIFIED — and every one of those is
+#   a word between the token and its colon. ***THE CORRECTION TO A MESSAGE TRAVELS IN
+#   A DIFFERENT SHAPE FROM THE MESSAGE, AND A FILTER TUNED TO THE MESSAGE LOSES
+#   EXACTLY THE CORRECTIONS.***
+# ═══════════════════════════════════════════════════════════════════════════════
+
 # THE WAKE SHAPE. The header grammar is rev 1's, unchanged and still load-bearing;
 # only the DECISION inside it is widened. tolower() once into `h`, so the two
 # widened clauses are case-insensitive while the contract token stays an exact
 # literal via index() — no regex metacharacter can widen or narrow it by accident.
 /^\[[0-9][0-9]\/[0-9][0-9] [0-9][0-9]?:[0-9a-zA-Z]+(:[0-9a-zA-Z]+)?, maestro/ {
   h = tolower($0)
-  if (index(h, "silicon order:") > 0)                      tag = "TOKEN"
-  else if (index(h, "fleet order:") > 0)                  tag = "FLEET-TOKEN"
+  if (index($0, "SILICON ORDER") > 0)                     tag = "TOKEN"
+  else if (index($0, "FLEET ORDER") > 0)                  tag = "FLEET-TOKEN"
   else if (index(h, "silicon") > 0)                       tag = "NAMED-no-token"
   else if (h ~ /(all|each|every)[a-z0-9 ,'"-]{0,30}seat/) tag = "BROADCAST-no-token"
   else next
