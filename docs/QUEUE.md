@@ -123,10 +123,14 @@
 ### Source rows stay in their docs as HISTORY (three ruling-#7 probes quote them).
 
 **MIG-P1 (finish-first, public-hygiene):**
-- **MIG-1 · EVIDENCE · P1** — the story numbers: `midnight-to-silicon-story.md:93-97`
-  still reads `~20M` tokens / `~$500 (TT)` while the NDF is SUBMITTED AND PRICED
-  (`ndf-account-priced-half.md:6,:334` — €840 stands). The doc's own fence (`:99-100`)
-  bars unmeasured numbers from public telling, and this repo is public. DISCHARGE:
+- **MIG-1 · EVIDENCE · P1 — ✅ DISCHARGED (`e8975d7`, 19:47): the story numbers are ACTUALISED**
+  (61,716,448 output tokens over the true 8-home union; the price actualised to the REGISTERED
+  €840 with "receipt outstanding" stated — not laundered into an invoice). ⛔ Citation in the
+  original row CORRECTED: the €840 lives at `ndf-top-module-design-v1.md:334`, NOT
+  `ndf-account-priced-half.md:334` — a different file at the same line number; "a citation is
+  not a reading" (evidence, 19:48). (original text:) the story numbers: `midnight-to-silicon-story.md:93-97`
+  still read `~20M` tokens / `~$500 (TT)` while the NDF was SUBMITTED AND PRICED. The doc's own
+  fence (`:99-100`) bars unmeasured numbers from public telling, and this repo is public. DISCHARGE:
   actualised rows in the story doc. Cheapest P1 here: the invoice is known.
 - **MIG-2 · SILICON · P1** — heritage §0: the 25 lines added 08/10 (`fc09811`,
   Captain-recalled 1988-cell architecture) have never had a silicon read against
