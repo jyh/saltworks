@@ -90,11 +90,22 @@ one fleet. That simultaneity is the demonstration.
 > cost to bring it all the way from that unconscious dream to PoC
 > silicon, **verified every step of the way**?"*
 
-| item | placeholder | actual (evidence-fenced, TBD) |
+| item | placeholder (2026-08-09) | ACTUALISED 2026-08-23, and by what |
 |---|---|---|
-| design | ~2 days | log running; dream 08-09 03:00 → package same morning |
-| tokens | ~20M | evidence seat owns the measured figure at each gate |
-| fabrication | ~$500 (TT) | actual invoice when submitted |
+| design | ~2 days | dream **08-09 03:00** → package the same morning; submitted **08-10 17:5x**. From the dated entries below. |
+| tokens | ~20M | **61,716,448 OUTPUT tokens** · 75,569 requests · window 08-09 00:00 → 08-23 19:41, 7 personal-lane projects, subagent transcripts included. Cache is **separate and never in the headline**: 266,385,084 created / 31,718,749,967 read. Measured by `docs/ledger-tools/token_meter.py` per the frozen charter in `docs/measurement-preregistration.md` §1. |
+| fabrication | ~$500 (TT) | **€840 — the REGISTERED PRICE of the submitted shape** (6x2, 12 tiles; `ndf-top-module-design-v1.md:334`, corroborated `EVIDENCE-ledger-latest.md:1794`). TinyTapeout Sept-7 shuttle, "8 additional tiles paid for" (`ndf-account-priced-half.md:7`). ⚠️ **NOT a receipt — no invoice artifact exists in this repo, and the fence below asks for dollars from receipts. The row is actualised to a registered price and says so.** |
+
+> ⛔ **TWO THINGS THIS TABLE WILL NOT DO, recorded so the fence stays honest.**
+> **(1) "~20M tokens" NAMED NO OBJECT** — the records carry five quantities, and the
+> placeholder matched none of them. The actualised row names OUTPUT and keeps cache in
+> its own column, because a headline that blends them is off by three orders of magnitude.
+> **(2) THE INSTRUMENT WAS WRONG WHEN THIS ROW CAME DUE.** `token_meter.py` read
+> **one** seat home of eight — `ledger_common.py`'s root glob was the unexpanded literal
+> `"${SEAT_CONFIG_DIR}"` — and reported **14,468,194** output tokens, a **4.3× undercount**
+> that would have looked measured. Fixed and re-run before this row was written; the
+> union across 8 roots was verified free of double-counting **by session-id identity**,
+> 0 of 123 shared.
 
 **Rule for this table (evidence seat's fence):** no number leaves this
 doc for any public telling until it is measured — tokens from the
