@@ -16,6 +16,10 @@
 
 ## 0. WHAT B4 DID AND DID NOT CERTIFY
 
+> ⚖️ **2026-08-23 — the `- SEAT:` refutation rows in this doc are CLOSED** (council ruling 5).
+> Live obligations migrated to `docs/QUEUE.md` §MIGRATED by object-liveness audit; rows below
+> are HISTORY (ruling-#7 probes quote them verbatim — do not delete or edit them).
+
 `composed_switch_of_bnC_driven` (SeamJoinB.lean, 33a3c86) certifies
 **destination-header delivery**: under the driven-trace hypotheses,
 every header reaches the output it names. Verified at the source 8/8

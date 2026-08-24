@@ -29,6 +29,10 @@
 
 ## B-ISA — the datapath extension
 
+> ⚖️ **2026-08-23 — the `- SEAT:` refutation rows in this doc are CLOSED** (council ruling 5).
+> Live obligations migrated to `docs/QUEUE.md` §MIGRATED by object-liveness audit; rows below
+> are HISTORY (ruling-#7 probes quote them verbatim — do not delete or edit them).
+
 B1. SCOPE: five new ops — LW, SW (the FIRST memory; PRICED by
    silicon 20:56/6707c3b: it does NOT fit the select saving at any
    size — dmem8 is 1.50× the 1,154-gate budget BY AREA (µm² the only

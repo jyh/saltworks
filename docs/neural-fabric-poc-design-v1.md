@@ -7,6 +7,10 @@
 ### §0–§6b) and `packet-io-demo-sketch.md` (the port substrate). The
 ### personal story is documented separately: `midnight-to-silicon-story.md`.
 
+> ⚖️ **2026-08-23 — the `- SEAT:` refutation rows in this doc are CLOSED** (council ruling 5).
+> Live obligations migrated to `docs/QUEUE.md` §MIGRATED by object-liveness audit; rows below
+> are HISTORY (ruling-#7 probes quote them verbatim — do not delete or edit them).
+
 **The one-sentence architecture:** a packet-routed dataflow machine —
 bit-serial neuron cells at the leaves of the certified banyan fabric,
 weights streaming from the edge in lockstep with values (traffic, not

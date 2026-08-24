@@ -9,6 +9,10 @@
 
 ## 0. THE CAPTAIN'S WORDS (verbatim, 03:0x, the pull itself)
 
+> ⚖️ **2026-08-23 — the `- SEAT:` refutation rows in this doc are CLOSED** (council ruling 5).
+> Live obligations migrated to `docs/QUEUE.md` §MIGRATED by object-liveness audit; rows below
+> are HISTORY (ruling-#7 probes quote them verbatim — do not delete or edit them).
+
 > "the one that seems to pull: the cpu as smart 'neuron', a small
 > amount of storage is fine (both inst and data), we would need
 > differentiability. so a graph network, dynamic, configurable,

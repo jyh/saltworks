@@ -28,6 +28,10 @@
 
 ## 0. THE DESIGN, AS THE PAPER STATES IT
 
+> ⚖️ **2026-08-23 — the `- SEAT:` refutation rows in this doc are CLOSED** (council ruling 5).
+> Live obligations migrated to `docs/QUEUE.md` §MIGRATED by object-liveness audit; rows below
+> are HISTORY (ruling-#7 probes quote them verbatim — do not delete or edit them).
+
 The 1990 chipset (1.2μm CMOS, 32 bit-serial channels at 170 Mb/s,
 113/114 transistors per cell) runs the packet layout
 `[validity][address MSB-first][payload]` — the three-field frame is

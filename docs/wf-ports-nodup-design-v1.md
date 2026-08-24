@@ -4,6 +4,10 @@
 
 ## 0. THE HOLE, AS MEASURED (compiler, 8/8 morning; two fixtures)
 
+> ⚖️ **2026-08-23 — the `- SEAT:` refutation rows in this doc are CLOSED** (council ruling 5).
+> Live obligations migrated to `docs/QUEUE.md` §MIGRATED by object-liveness audit; rows below
+> are HISTORY (ruling-#7 probes quote them verbatim — do not delete or edit them).
+
 `Circ.wf` applies its nodup check to `c.gates.map Gate.out` — THE
 GATES — and never to `c.outs` — THE PORT LIST. Kernel-verified: a
 circuit may name the same net twice in its ports and pass `wf` AND

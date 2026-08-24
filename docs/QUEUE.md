@@ -114,6 +114,71 @@
   remains good practice on its own merits. Caps do not move without
   a maestro ruling.
 
+## MIGRATED — THE REFUTATION CHANNEL (closed by council ruling 5, 2026-08-23; destination ratified same day)
+
+### The 7 design docs' `- SEAT:` rows are CLOSED to new obligations. Live rows
+### migrated here by object-liveness audit (29 rows -> 16 live / 29 debts; every
+### DISCHARGED verdict adversarially re-checked, 5 of 15 overturned). Each row
+### below names its DISCHARGING OBJECT — the row retires when that object exists.
+### Source rows stay in their docs as HISTORY (three ruling-#7 probes quote them).
+
+**MIG-P1 (finish-first, public-hygiene):**
+- **MIG-1 · EVIDENCE · P1** — the story numbers: `midnight-to-silicon-story.md:93-97`
+  still reads `~20M` tokens / `~$500 (TT)` while the NDF is SUBMITTED AND PRICED
+  (`ndf-account-priced-half.md:6,:334` — €840 stands). The doc's own fence (`:99-100`)
+  bars unmeasured numbers from public telling, and this repo is public. DISCHARGE:
+  actualised rows in the story doc. Cheapest P1 here: the invoice is known.
+- **MIG-2 · SILICON · P1** — heritage §0: the 25 lines added 08/10 (`fc09811`,
+  Captain-recalled 1988-cell architecture) have never had a silicon read against
+  Marcus & Hickey ISSCC 1990 WPM 2.4. DISCHARGE: a folded commit on the doc citing
+  the read. The skew/timing half is already discharged (`cd903d9`, `ce16552`).
+
+**MIG-P2 (the working tier):**
+- **MIG-3 · COMPILER · P2** — lang-design §2/§3, 3 debts: (a) Row A's ruled
+  function-equality conclusion vs the corpus (`CompileS.lean:1-27` says the landed
+  shape is `encodeOK` + scoped register agreement — the ruled conclusion is not
+  supplied and the file says it cannot be) — **rises to P1 if any paper quotes
+  Row A**; (b) N0.5 "verified inlining" has no AST constructor; (c) N3 half-landed
+  (`while` yes, `ite` refused at `CompileS.lean:306`) blocking N5. DISCHARGE: a
+  written refutation folded into the doc. BEQ/offset sub-item ALREADY satisfied
+  (`backOffByOne_diverges_on_a_stale_guard`) — do not re-commission.
+- **MIG-4 · COMPILER · P2** — slice-b B1/B3: memory-organ cost in the emitted path ·
+  BNE vs the landed compare organ · encoder extension vs the c1 organ. DISCHARGE: one
+  filing covering the three. (E3 executive-as-program: see the register — conditioned,
+  not queued.) Silicon's half already discharged.
+- **MIG-5 · COMPILER · P2** — wf-ports clause ①⁵, 3 debts: composition with ①″/①‴ in
+  `OperandBMux.lean:27-55` · decide-cost-at-scale for nodup certs · retrofit list.
+  Note ①⁵ occurs exactly twice in the repo, both in the audited doc — never adopted.
+  Carry-forward: unlanded `Circ.portsNodup` work is §2 DESIGN owned by its adopter
+  (maestro), NOT math's debt; math's half discharged at the kernel (bus 08/08 13:42).
+- **MIG-6 · MATH · P2** — lang-design §1/§2: fold back the confirmed YES (08/09) on
+  the c2-shaped/vacuously-true question — answered, never folded. DISCHARGE: v1.2 of
+  §1/§2 or an explicit note carrying the finding.
+- **MIG-7 · MATH · P2** — payload-delivery §2 H2: the c2-shape check on H2 (σ half
+  genuinely closed). DISCHARGE: a math finding folded into §2. COMMISSION THE CHECK —
+  a prior refuter said it "produces a finding" but the reason did not survive
+  transmission; do not book an unheld finding.
+- **MIG-8 · SILICON · P2** — payload-delivery §1/§2: re-read "does any spec fact
+  misquote the protocol?" against the CURRENT spec (`55831de`) and current §8 rows
+  5-11 — the prior discharge was taken against a doc version that no longer exists
+  (moved seven times since). Don't-care-window half genuinely closed.
+- **MIG-9 · COMPILER · P2** — GNN sketch §6: the verdict "do Rows A/B extend to layer
+  configs?" — rides with A1 (already in the compiler roster).
+- **MIG-10 · COMPILER · P2 (address-confirmation ONLY)** — the layer-compiler as Lean
+  rows IS the successor of neural-fabric §7's row; this line confirms the A1/GNN
+  QUEUE entry as its address. No new load.
+- **MIG-11 · EVIDENCE · P2** — slice-b E2(b): claim-scope audit of the post-v1.1 "OS"
+  wording. (E2(a) awaits a Captain word — register, not queue.)
+
+**CONDITIONED (ruled 2026-08-23, tier P3 stays empty by the 08/16 re-tier):**
+- **MIG-C1 · MATH** — GNN sketch F7-A/adjoint row: INVITED TO WITHDRAW (its own
+  cheapest legitimate discharge; F7-A is referenced nowhere else in either repo).
+  If math declines withdrawal, the row returns for tiering on the merits.
+- **MIG-C2 · COMPILER — ripens-when rider on A1/layer-compiler:** when the
+  layer-compiler EXISTS, compiler owes the source-to-source tangent/adjoint
+  feasibility page (nothing can consume it earlier). The trigger lives here, on the
+  item whose landing fires it.
+
 ## COMPILER
 
 - W1 · WRITE · **CLOSED 15:40 (d85e13a)** — phase 3 complete: census

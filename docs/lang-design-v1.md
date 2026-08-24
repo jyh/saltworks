@@ -16,6 +16,10 @@
 
 ## 0. THE CLAIM THIS BLOCK BUYS
 
+> ⚖️ **2026-08-23 — the `- SEAT:` refutation rows in this doc are CLOSED** (council ruling 5).
+> Live obligations migrated to `docs/QUEUE.md` §MIGRATED by object-liveness audit; rows below
+> are HISTORY (ruling-#7 probes quote them verbatim — do not delete or edit them).
+
 A verified compiler: source semantics → 5-op machine semantics, the
 correctness theorem in the kernel, so that "the program does what the
 source says" CAN COMPOSE with "the core does what the ISA says" —
