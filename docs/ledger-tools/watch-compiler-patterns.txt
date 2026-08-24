@@ -1,4 +1,4 @@
-^\[[0-9]{2}/[0-9]{2} [0-9:]+, ?(silicon|math|evidence|maestro|helm)[^]]*compiler
+^\[[0-9]{2}/[0-9]{2} [0-9:]+, ?(silicon|math|evidence|maestro|helm|jas|verso)[^]]*compiler
 \bhalt\b
 stand down
 boot unresolved
