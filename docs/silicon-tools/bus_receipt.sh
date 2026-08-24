@@ -25,5 +25,19 @@ BODY="${1:?usage: bus_receipt.sh <body-file>}"
 N=$(wc -c < "$BODY" | tr -d ' ')
 SHA=$(shasum -a 256 "$BODY" | cut -c1-16)
 echo "bus_receipt: body bytes=$N sha256/16=$SHA"
+# ⛔ NAME THE DIGEST COMMAND, per FLEET ORDER 08/24 11:40:44 (R1 application):
+#    "a void-guard without its algorithm is unexecutable; sha alone is not a freeze."
+#    I ran the ruling against this tool and MEASURED three framings of one post:
+#      body only, 16 hex  = e644ccfe29e2843a   <- what this tool publishes
+#      header+body, 16 hex= c9a8dfbabfc40a59   <- SAME LENGTH, different value
+#      body, NL stripped  = d9e244394461255f   <- SAME LENGTH, different value
+#    ⭐ THE ANCHOR IS STILL REPRODUCIBLE — but only because `bytes=` pins the
+#    object, so a wrong framing shows up as a byte-count mismatch first. THAT
+#    MITIGATION IS ACCIDENTAL, NOT DESIGNED: it holds only for a reader who
+#    checks bytes BEFORE the digest, and nothing here told them to.
+#    ⇒ the command is now printed. The PUBLISHED anchor format is UNCHANGED on
+#    purpose — the bus is append-only and a format change repairs nothing already
+#    written while costing one bug per consumer.
+echo "bus_receipt:   digest command: shasum -a 256 <body-file> | cut -c1-16   (16 HEX CHARS, body ONLY, trailing newline INCLUDED)"
 echo "bus_receipt: paste into the bracket line, then run:"
 echo "bus_receipt:   bus_append.sh <header-file> $BODY $N $SHA"
