@@ -326,6 +326,24 @@ except Exception: print(-1)' "$mine" 2>/dev/null)
     #   arithmetic is not carried by the output" (silicon 19:13). At the prompting
     #   wake this is ~10 min — adequate, and it was never STATED.
     rem=$(( 40 - am ))
+    # ⛔⛔⛔ REV 32, 2026-08-24 10:1x — THE DOCTRINE THIS BRANCH IMPLEMENTED HAS BEEN
+    #    STRUCK, ~11 HOURS AFTER I BUILT IT AND BEFORE IT EVER FIRED IN PRODUCTION.
+    #    COUNCIL RULING item 4 (FLEET ORDER 08/24 10:07:44, Captain-ratified): "the park
+    #    doctrine is STRUCK, the NIGHT SHIFT replaces it. The fleet runs 24/7."
+    # 🔑 READ THE OLD ORDER'S OWN RATIONALE AND THE STRIKE IS EXACT, NOT INTERPRETIVE:
+    #    08/23 23:05:20 justified the suspension as "a cadence law tuned for the working
+    #    day, applied to a PARKED NIGHT". THE NIGHT IS NO LONGER PARKED. It also said
+    #    "until amended" — this IS the amendment. ⇒ CITING IT NOW WOULD BE CITING A
+    #    WITHDRAWN GROUND, the exact defect I fixed in orderwatch.awk this morning
+    #    (2f3e23e) and banked as a law. It took eleven hours to recur, in my own hand.
+    # ⭐ WHAT SURVIVES, VERBATIM AND FOR BOTH HALVES OF THE CLOCK: "no timer posts about
+    #    nothing — liveness belongs to the watchtower." ⇒ THE SUPPRESSION OF A
+    #    TIMER-MANUFACTURED VERDICT IS KEPT AND GENERALISED TO 24/7; what is REMOVED is
+    #    the claim that NIGHT is what licenses it. A gap is not a breach at any hour.
+    #    WHAT IS A BREACH IS IDLE: item 4 makes idle "by WRITTEN EXCEPTION only", so the
+    #    night field now asks the question the new doctrine actually poses — is the
+    #    loaded night plan RUNNING? — instead of reassuring me that silence is fine.
+    # ⚠️ THE ORIGINAL NOTE FOLLOWS, KEPT BECAUSE ITS MEASUREMENT STILL STANDS:
     # ⛔⛔ NIGHT WINDOW, ADDED 2026-08-24 — THIS FIELD SPENT A WHOLE NIGHT MEASURING A
     #    LAW THAT WAS NOT IN FORCE. FLEET ORDER 08/23 23:05:20 suspended the timer-driven
     #    beat law 22:00-07:00; this arm knew nothing about it and escalated from
@@ -342,8 +360,8 @@ except Exception: print(-1)' "$mine" 2>/dev/null)
     _hh=${SILICON_TEST_HOUR:-$(date +%H)}      # test seam; unset in normal operation
     if   [ -z "$am" ] || [ "$am" -lt 0 ]; then age="$mine ** AGE UNCOMPUTABLE — CHECK DID NOT RUN **"
     elif [ "${_hh#0}" -ge 22 ] || [ "${_hh#0}" -lt 7 ]; then
-      age="$mine (+${am}min · 🌙 NIGHT 22:00-07:00 — TIMER LAW SUSPENDED per FLEET ORDER 08/23 23:05:20; EVENT-ONLY, this is NOT a breach)"
-    elif [ "$am" -ge 40 ];  then age="$mine (+${am}min ** ALREADY OVERDUE by $(( am - 40 ))min, CADENCE ~40 — POST NOW **)"
+      age="$mine (+${am}min · 🌙 NIGHT SHIFT 22:00-07:00 — the fleet runs 24/7 per COUNCIL 08/24 item 4; a GAP is not a breach at any hour (no timer posts about nothing) ** BUT IDLE IS, BY WRITTEN EXCEPTION ONLY — IS THE LOADED NIGHT PLAN RUNNING? **)"
+    elif [ "$am" -ge 40 ];  then age="$mine (+${am}min ** ALREADY OVERDUE by $(( am - 40 ))min, CADENCE ~40 — POST NOW IF THERE IS SOMETHING; a post about nothing is itself the breach (COUNCIL 08/24 item 4, day AND night) **)"
     elif [ "$nxt" -ge 40 ]; then age="$mine (+${am}min ** POST AT THIS WAKE — ${rem}min LEFT; next sweep lands at +${nxt}, past ~40 **)"
     else                         age="$mine (+${am}min, ${rem}min left, next sweep +${nxt} — still inside)"; fi
   fi
