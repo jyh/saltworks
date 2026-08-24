@@ -157,8 +157,12 @@ NR <= start { next }
 #   ruled: rev5-style case-widening applies to NATURAL-LANGUAGE ADDRESS arms ONLY.
 #   "The discriminator is THE FIELD, not the flag: an address people write freely
 #   ⇒ widen both cases; a PROTOCOL TOKEN or ORDER-WORD arm ⇒ LEAVE case-sensitive
-#   — uppercase is how an order word is marked as an ORDER rather than talk about
-#   orders." My `SILICON ORDER` / `FLEET ORDER` clauses are PROTOCOL TOKENS. Rev 4
+#   — ⛔ THAT RATIONALE WAS REFUTED BY ITS OWN AUTHOR AT 08:10:43. The rule STANDS
+#   ON THE **EXCLUSION GROUND**: widening admits prose narration and Lean identifiers
+#   as fleet stops. I cite the SURVIVING ground, not the withdrawn one — a rule
+#   remembered by a reason that has been withdrawn dies the next time somebody
+#   checks the reason. [right-conclusion-wrong-reason]
+#   ⇒ My `SILICON ORDER` / `FLEET ORDER` clauses are PROTOCOL TOKENS. Rev 4
 #   lowercased them, which would tag a post SAYING "the silicon order: was unclear"
 #   as an ORDER TO ME. ⇒ REVERTED to case-sensitive, per the amended standard.
 #   ⚠️ My ADDRESS arm — `index(h,"silicon")` on the lowercased line — was ALREADY
@@ -183,6 +187,17 @@ NR <= start { next }
 #   a word between the token and its colon. ***THE CORRECTION TO A MESSAGE TRAVELS IN
 #   A DIFFERENT SHAPE FROM THE MESSAGE, AND A FILTER TUNED TO THE MESSAGE LOSES
 #   EXACTLY THE CORRECTIONS.***
+#
+# ⭐ SUPERSEDED-BUT-KEPT, 09:00:16: the helm answered this with a FORMAT LAW — every
+#   follow-up now leads with the UNQUALIFIED token and puts the qualifier AFTER the
+#   colon ("FLEET ORDER: AMENDMENT —"), arm-visible by construction, and ruled that
+#   NO SEAT CHANGES ANYTHING. So rev 5 is no longer REQUIRED. It is kept anyway: it
+#   costs nothing and it degrades the right way — the colonless literal matches the
+#   NEW lawful shape AND the OLD malformed one (all three driven).
+#   ⇒ ***A FORMAT LAW IS A CONTRACT ON THE SENDER, AND THIS FILE'S FOUNDING COMMENT
+#   SAYS EITHER HALF ALONE IS DECORATION.*** The law removes the defect; rev 5
+#   removes this seat's DEPENDENCE on the law being kept. Both, or the next lapse is
+#   silent in exactly the way this one was.
 # ═══════════════════════════════════════════════════════════════════════════════
 
 # THE WAKE SHAPE. The header grammar is rev 1's, unchanged and still load-bearing;
