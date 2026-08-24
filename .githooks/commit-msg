@@ -1,0 +1,12 @@
+#!/bin/sh
+# Session-URL gate (2026-08-23, helm; implements the 08/16 purge's ratified scope):
+# public repo — Claude-Session trailers are BANNED here; Co-Authored-By is allowed
+# (the purge stripped 685 of the former and deliberately left the latter).
+# A default in conflict with a ban produces drift; this hook is the enforcement
+# point the ban never had. Shared checkout: one hook covers every seat.
+if grep -q 'Claude-Session:' "$1"; then
+  echo "commit-msg HOOK: Claude-Session trailer REFUSED in this PUBLIC repo (08/16 purge scope; helm gate 08/23)." >&2
+  echo "Remove the trailer line and retry. Co-Authored-By is fine." >&2
+  exit 1
+fi
+exit 0
