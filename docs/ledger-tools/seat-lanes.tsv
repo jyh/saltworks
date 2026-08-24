@@ -3,3 +3,4 @@
 # that seat owns, and only that seat can make it. A seat with no row is REFUSED, which
 # is the correct answer to "I do not know what you own".
 evidence	^(docs/ledger-tools/|docs/EVIDENCE([-./]|$)|docs/evidence-)
+maestro	^(docs/QUEUE\.md|CLAUDE\.md|\.githooks/|\.github/workflows/|scripts/check_commit_trailers\.py)
