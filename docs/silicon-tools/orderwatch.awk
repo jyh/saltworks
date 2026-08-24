@@ -118,14 +118,45 @@ NR <= start { next }
 # hiding exactly the coverage change this comment exists to record.
 # ═══════════════════════════════════════════════════════════════════════════════
 
+# ═══════════════════════════════════════════════════════════════════════════════
+# REV 4 — 2026-08-24, THE CASE CONTRACT. Ordered by FLEET ORDER: CASE-CONTRACT
+# AUDIT (07:59:40), off evidence's finding that its addressee arm was
+# case-sensitive for its entire life and ~45% blind, masked by a redundant path.
+#
+# ⛔ MY TWO TOKEN CLAUSES WERE EXACT-CASE `index($0, "SILICON ORDER:")`. DRIVEN:
+#   "Silicon Order:"  -> NAMED-no-token   DELIVERS, but the TAG LIES. It records
+#                        "the helm did not use the contract token" when the helm
+#                        DID use it, differently cased. ***A REDUNDANT PATH HIDING
+#                        A DEAD ARM*** — the order's exact phrasing, in my file.
+#   "Fleet Order:"    -> ⛔ DROPPED ENTIRELY when the header carries no other hook.
+#                        NO redundant path. A total blind spot on FLEET-WIDE
+#                        BINDING ORDERS — the token adopted yesterday precisely to
+#                        close arm C's class, implemented case-fragile with no net.
+#
+# ⇒ THE SECOND ONE IS THE DANGEROUS SHAPE AND IT IS NEW: rev 3 added `FLEET ORDER:`
+#   to catch fleet orders that name no seat. A fleet order that names no seat is
+#   exactly the header with nothing else for a clause to grab — so the one class
+#   the clause exists for is the one class its case-fragility loses whole.
+#
+# ⭐ FIX: match the tokens against `h` (already tolower'd) instead of `$0`. Still
+#   `index()`, still an exact literal, so no regex metacharacter can widen or
+#   narrow it — the property rev 1 chose index() for is untouched. Only the case
+#   contract changes, and it changes in the direction the fleet just ruled.
+# 📌 THE LESSON, WHICH IS evidence's AND I AM ADOPTING IT: the `i` is a CONTRACT ON
+#   THE PATTERN, not a flag on the call. Lowercasing the SUBJECT and leaving an
+#   uppercase PATTERN matches NOTHING — my `index(h, "SILICON ORDER:")` would have
+#   been 100% blind, which is the first-repair failure evidence published at 07:58.
+#   Both sides lowercase, or neither.
+# ═══════════════════════════════════════════════════════════════════════════════
+
 # THE WAKE SHAPE. The header grammar is rev 1's, unchanged and still load-bearing;
 # only the DECISION inside it is widened. tolower() once into `h`, so the two
 # widened clauses are case-insensitive while the contract token stays an exact
 # literal via index() — no regex metacharacter can widen or narrow it by accident.
 /^\[[0-9][0-9]\/[0-9][0-9] [0-9][0-9]?:[0-9a-zA-Z]+(:[0-9a-zA-Z]+)?, maestro/ {
   h = tolower($0)
-  if (index($0, "SILICON ORDER:") > 0)                    tag = "TOKEN"
-  else if (index($0, "FLEET ORDER:") > 0)                 tag = "FLEET-TOKEN"
+  if (index(h, "silicon order:") > 0)                      tag = "TOKEN"
+  else if (index(h, "fleet order:") > 0)                  tag = "FLEET-TOKEN"
   else if (index(h, "silicon") > 0)                       tag = "NAMED-no-token"
   else if (h ~ /(all|each|every)[a-z0-9 ,'"-]{0,30}seat/) tag = "BROADCAST-no-token"
   else next
