@@ -44,6 +44,26 @@ git rev-parse --verify "$BASE^{commit}" >/dev/null 2>&1 || {
   exit 2
 }
 
+# ⛔⛔ RESOLVABILITY IS NOT MEMBERSHIP, AND THE CHECK ABOVE ONLY TESTS THE FIRST.
+#    MEASURED 2026-08-24 19:0x, the night of the saltworks message-only history rewrite:
+#    the pre-purge MEAS baseline b93cbb5 still RESOLVES (its object survives on the
+#    orphaned lineage) but is NOT an ancestor of the new master. This tool ran on it,
+#    EXITED 0, and printed a range that differed from the truth — it reported an extra
+#    LANDING (b1b51ac) that is not in the real history at all.
+#    ⇒ A DANGLING BASELINE DOES NOT ERROR. `git rev-list <dangling>..HEAD` is a perfectly
+#      well-defined set; it is just the wrong one, and it OVER-reports, so the failure
+#      arrives as extra work rather than as an alarm.
+#    ⭐ THE WHOLE FLEET WAS TOLD TO TRANSLATE OLD SHAS VIA THE PURGE MAP. Any seat that
+#      pastes an untranslated sha into a RANGE tool gets a confident wrong answer, and
+#      this guard is the only thing between that and a mis-scoped duty.
+git merge-base --is-ancestor "$BASE" HEAD 2>/dev/null || {
+  echo "⛔ meas_since: '$BASE' RESOLVES but is NOT AN ANCESTOR of HEAD — refusing."
+  echo "   A baseline outside this branch defines a range on a lineage that is not ours."
+  echo "   If saltworks history was rewritten, translate it:"
+  echo "     grep -i '^$BASE' seat/fleet/purge-shamap-2026-08-24.tsv   # old<TAB>new"
+  exit 3
+}
+
 HEAD_SHA=$(git rev-parse --short HEAD)
 echo "MEAS range ${BASE}..${HEAD_SHA}   (baseline = last MEAS verdict, NOT last commit)"
 
