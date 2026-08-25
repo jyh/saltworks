@@ -144,6 +144,7 @@ import SaltWorks.HDL.AccountMeasure
 import SaltWorks.HDL.CompileE
 import SaltWorks.HDL.CompileS
 import SaltWorks.HDL.LangRowARefuted
+import SaltWorks.HDL.WfPortsNodupRefuted
 import SaltWorks.HDL.BlockCalc
 import SaltWorks.HDL.IteScheme
 import SaltWorks.HDL.WhileScheme

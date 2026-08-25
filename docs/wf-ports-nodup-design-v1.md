@@ -66,6 +66,57 @@ def Circ.portsNodup (c : Circ) : Prop := c.outs.Nodup
   lists are one `decide` each); NOT a blocking wave. The corpus gap
   closes monotonically; the bar stops it growing.
 
+⛔⛔ **MIG-5 REFUTATION FOLDED IN (compiler, 2026-08-24) — ①⁵ AS
+WRITTEN IS UNSOUND, NOT MERELY UNLANDED. IT REJECTS SIGN-EXTENSION
+AND ZERO-EXTENSION.** A net legitimately fans out to many output
+ports: an N-bit field widened to 32 drives the SAME net at every
+position above N. Measured on LANDED, CERTIFIED blocks:
+
+```
+  block             |outs|  distinct   why the duplicates are CORRECT
+  sltCirc              32       2      1-bit compare, ZERO-extended to 32
+  sltuCirc             32       2      same
+  immICirc             32      12      12-bit I-type immediate, SIGN-extended
+  immBCirc             32      13      13-bit B-type displacement, SIGN-extended
+  immBshiftedCirc      32      12      same
+```
+**Kernel exhibits** (`SaltWorks/HDL/WfPortsNodupRefuted.lean`,
+`sltCirc_fails_clause5` · `immICirc_fails_clause5` · … ) — **they
+depend on NO axioms**, and a POSITIVE CONTROL `bitAnd32_passes_clause5`
+shows the bar is not vacuously failing everything.
+
+⚠️ **THE b = 0 NOTE ABOVE ANTICIPATED THE WRONG FAILURE.** It found
+`¬ (genSelect 10 0).outs.Nodup` and classified it *"a boundary defect,
+not a broken definition"* — a control at the DEGENERATE case. The
+failures above are **non-degenerate and correct by design**, so the
+definition is what is broken. A degenerate-case control cannot
+validate a bar whose real counterexamples are ordinary hardware.
+
+✅ **COST IS NOT THE BINDING CONSTRAINT** (the `decide costs at scale?`
+debt, answered): `Nodup` on a 32-element list is ~1024 comparisons,
+trivial. **The bar fails on CORRECTNESS long before cost** — pricing it
+first would have measured the wrong thing and returned a comfortable
+number.
+
+📌 **COMPOSITION WITH ①″/①‴ (the third debt, answered):** ①⁵ is
+INDEPENDENT of ①″ — pinning `outs.length = 32` does not give
+distinctness, and a block may pin length while repeating a net — and it
+is IMMUNE to ①‴'s axis hazard, because it names `c.outs` structurally
+rather than through a certificate's list shape, so no cycle-axis cert
+can satisfy it vacuously. **①⁵ composes cleanly; it is simply wrong.**
+
+📌 **RETROFIT LIST:** 84 `Circ`-valued blocks in the corpus (return
+type `Circ`, `Scratch*` excluded), across 40 files. **15 measured, 5
+FAIL.** ⚠️ The 15 were chosen by import convenience, NOT sampled — the
+remaining 69 are UNMEASURED and the 5/15 rate must not be extrapolated.
+
+⇒ **WHAT THE BAR APPEARS TO WANT** is that no two ports are
+*accidentally* aliased. `outs.Nodup` cannot express that: it cannot
+distinguish a deliberate fan-out from a copy-paste slip, because both
+produce the same list. **A repair must name the INTENT, not the shape**
+— and that is a §2 DESIGN decision owned by its adopter, not this
+refutation's to make.
+
 ## 3. POSITIVE CONTROLS (mutation-control law: FALSE, not unreachable)
 
 `adder32Dup.portsNodup` and `halfAdderLong.portsNodup` must be
