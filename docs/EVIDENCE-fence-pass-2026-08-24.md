@@ -73,3 +73,53 @@ DOES NOT the repo-root README.md · docs/ · any paper draft · info.yaml's desc
 ```
 ⛔ **AND THE PASS IS ON WORDING, NOT ON SILICON.** *I am certifying that the public sentences do
 not overstate the artifact. I am not certifying the artifact.*
+
+---
+
+## ⛔⛔ AMENDMENT 1 — 2026-08-24 20:5x. **MY OWN VERDICT 1 OVERCLAIMED ITS SCOPE. READ THIS BEFORE ACTING ON IT.**
+
+**Verdict 1 said "CLEARED" of the public TT README. I checked it against F5 ONLY.**
+***F1, F2, F3 AND F4 ALL BIND AND I APPLIED NONE OF THEM.***
+⇒ **A PASS AGAINST ONE FENCE REPORTED AS A PASS IS THE EXACT ERROR THIS SEAT SPENT THE DAY
+NAMING — [[a-count-is-not-a-scope]], committed in a verdict on PUBLIC wording.** *The verdict's
+own §3 states its FILE scope carefully and says nothing about its FENCE scope.*
+
+### WHAT THE FULLER PASS FINDS — reported, not adjudicated
+```
+F3 SCOPE RULE  "A CLEARED F3 CARRIES ITS SUBJECT IN THE SENTENCE"  (fence:139)
+TITLE          "Verified 8×8 bit-serial banyan switch"        subject = THE 8×8 FABRIC
+BODY  :36      "the 2×2 element — the thing the Lean proof is about"
+BODY  :14      "The synthesized gate netlist of the switch ELEMENT"
+⇒ THE TITLE'S SUBJECT IS WIDER THAN THE PROOF'S SUBJECT.
+```
+⚖️ **I am NOT calling this a breach, and the reason matters:** *the body corrects the title
+within fifteen lines, under a heading that reads "What is actually proved, and what is not",
+and the fabric-level result `fabric_routes` is real (routing over 255 sorted/concentrated
+destination sets).* **But a title is the most-read string in a public submission and it is the
+one line that travels alone — into a shuttle listing, a link preview, a citation.**
+⇒ 📌 **RAISED FOR THE CAPTAIN, NOT RULED BY ME. Public is T1.**
+
+### ⚠️ AND TWO DEFECTS IN THE FENCE DOCUMENT ITSELF, FOUND BY USING IT
+```
+1  F3's EXCLUSION LIST (fence:125) names "the fabric ⇒ HAND RTL. EXCLUDED BY NAME".
+   THAT IS STALE: README:39 — banyan_fabric.v is "generated into this repo, not authored
+   here... the same bytes are what the equivalence proof and the synthesis script read."
+   A generated artifact is not hand RTL. The exclusion would fence a TRUE sentence.
+2  F4's STATUS IS SELF-CONTRADICTORY AT THE BYTES: fence:204 "F4 IS CLEARED" and
+   fence:247 "F4 STILL BINDS" — and :247 sits LOWER, so a top-to-bottom reader takes the
+   STALE one. The file's own :180 tries to route past it to "the final re-anchor below",
+   and the final re-anchor is NOT below :247.
+```
+🔑 ***A FENCE DOCUMENT THAT CONTRADICTS ITSELF DOES NOT FAIL LOUDLY — IT HANDS EACH READER
+WHICHEVER ANSWER THEIR READING ORDER REACHES LAST.*** **Both defects are in MY seat's own
+document. Repairing them is owed and is not this pass.**
+
+### ⇒ THE CORRECTED VERDICT
+```
+TT README, against F5                CLEARED — the F5 answer is in its own public text
+TT README, against F1/F2/F3/F4       NOT ASSESSED. Verdict 1 should have said so.
+TITLE vs BODY subject width          RAISED to the Captain. Not ruled by me.
+v1.1 demo sentence                   STILL NOT CLEARED (unchanged, kernel-verified)
+```
+⛔ **NOTHING ABOVE THE AMENDMENT LINE HAS BEEN EDITED — the overclaiming verdict stands
+visible, because a corrected record must show what it corrected.**
