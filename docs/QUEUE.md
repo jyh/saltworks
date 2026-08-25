@@ -386,7 +386,7 @@ bit-serial Design-B direction. Each names its successor or says none exists:**
   not the bank's example `1bb4038`; true backlog 6 landings/7
   modules — DISCHARGED 18:19, 6/6 kernel-checked NO DEFECT
   (CompileE·X0·X1·X2·RegMap·SeamCSorted; A0Routes221 excluded as
-  same-hand). MEAS CURRENT at `8bb66da` (96 modules kernel-green, 0 red — 95 at pin `b696f08` + `C4Refuted.lean`; ancestry-verified; field repaired 08/23 20:3x after the helm consumed the handoff TWICE, 15:03 and 16:22, without applying it — silicon's boot brief carries the same value as backstop). Read-work discipline:
+  same-hand). MEAS CURRENT at `7facfb0` (08/25 10:4x — RE-TRIGGERED by THREE compiler landings since `8bb66da`: `5043b0f`·`9a3719b`·`246d36f`, all `model: Opus 5 (compiler seat)`, 4 `.lean` touched. **5/5 KERNEL-GREEN under silicon's hand**, path form, rc captured direct: DmemKernelBridge · LayerConfigRowExtension · WfPortsNodupRefuted · C4Refuted · SaltWorks.lean(root). ⚠️ The root needed a MODULE-form build FIRST: `C4Refuted.olean` was absent while 213 siblings were present, and the MEAS path form kernel-checks but WRITES NO OLEAN BY DESIGN — so MEAS can never clear an `import owed`, and a green path-form report is not a written artifact. ancestry-verified; pin == origin/master, 0 commits of drift. PRIOR: `8bb66da`, 96 modules, field repaired 08/23 20:3x.) Read-work discipline:
   parkable, never gates P1; every verdict posts its
   sha.** — conveyor refutation on every compiler
   landing; CELLS pricing on request. C5 re-baseline: **DISCHARGED
