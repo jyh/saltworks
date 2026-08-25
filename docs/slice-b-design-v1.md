@@ -158,10 +158,19 @@ campaign, two files, per §B1.
   generalise to gates, so B1's verdict survives a third axis it was
   never measured on.** ⚠️ `memOrgan` is also NOT PLACED in the core.
 
-  **(2) BNE IS NOT "NEAR-FREE" — IT IS FREE, AND CHEAPER THAN BEQ.**
-  `zeroTree` is a 31-gate OR-reduction whose raw output is TRUE when
-  the word is NONZERO — **measured in the kernel, not read off its
-  docstring**. That IS BNE's condition; BEQ pays one further inverter.
+  **(2) BNE IS NOT "NEAR-FREE" — CONDITIONAL ON A PLACED COMPARE, IT IS
+  FREE AND CHEAPER THAN BEQ.** `zeroTree` is a 31-gate OR-reduction
+  whose raw output is TRUE when the word is NONZERO — **measured in the
+  kernel, not read off its docstring**. That IS BNE's condition, and
+  BEQ would need one further inversion.
+  ⚠️ **THE COMPARISON IS COUNTERFACTUAL, NOT OBSERVED, AND MY FIRST
+  WORDING HID THAT IN THE PRESENT TENSE.** What is MEASURED is the
+  ORGAN's polarity. "BEQ pays the inverter" is what WOULD hold for any
+  compare that reduces a difference word through `zeroTree` — **today
+  neither BEQ nor BNE has a datapath at all**, so no inverter is being
+  paid by anyone. The corrected headline carries the condition, because
+  a caveat one line below a present-tense claim does not travel with
+  the quote.
   ⛔ **BUT THE SAVING IS UNPRICED AT CORE LEVEL: `zeroTree`/`zrOut`
   occur ZERO times in `CorePlace.lean` and `CoreAssembly.lean`.** The
   compare is landed, certified, and in NO datapath — so adding BNE

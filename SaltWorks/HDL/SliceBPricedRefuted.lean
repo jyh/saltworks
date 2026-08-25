@@ -19,11 +19,14 @@ cell COUNT it "falsely looks 42% under"**. The gate axis is a third instrument a
 with AREA, not with cell count. ⇒ **The flattering reading is specific to cell-count; it does
 not generalise to gates, so B1's verdict survives a third axis it was not measured on.**
 
-## 2. BNE is not "near-free" — it is FREE, and CHEAPER than BEQ
+## 2. BNE, conditional on a placed compare, is FREE and cheaper than BEQ
 
 `zeroTree` is an **OR-reduction** (31 gates) whose raw output is TRUE when the word is
-NONZERO — measured, not read off the docstring. **That is exactly BNE's condition.** BEQ needs
-one further inversion on top. So BNE taps the tree's native polarity and BEQ pays the inverter.
+NONZERO — measured, not read off the docstring. **That is exactly BNE's condition**, and BEQ would need
+one further inversion on top. ⚠️ **THE COMPARISON IS COUNTERFACTUAL: what is MEASURED here is
+the ORGAN's polarity. Today neither BEQ nor BNE has a datapath, so no inverter is being paid by
+anyone** — the saving is what WOULD hold for any compare reducing a difference word through
+`zeroTree`.
 
 ⛔ **BUT THE SAVING IS UNPRICED AT CORE LEVEL, BECAUSE THE COMPARE IS NOT PLACED.** `zeroTree`
 and `zrOut` occur **ZERO** times in `CorePlace.lean` and `CoreAssembly.lean`. The organ is landed
