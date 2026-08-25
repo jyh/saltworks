@@ -50,7 +50,11 @@ PRESHA=""
 # ⛔ BEST-EFFORT, PER THIS FILE'S CHARTER (:10-11): every command below is guarded and
 # runs BEFORE `lake`, so it cannot touch $? and cannot change the exit code.
 PRE_HEAD=$(git rev-parse --short HEAD 2>/dev/null || echo n/a)
-PRE_DIRTY=$(git status --porcelain 2>/dev/null | command grep -c . || echo '?')
+# ⛔ NO `|| echo '?'` HERE. On a CLEAN tree `grep -c .` prints `0` AND exits 1, so the
+# fallback fires IN ADDITION and the capture becomes the TWO-LINE value $'0\n?', which
+# splits the audit record and breaks its one-line invariant. The fallback is supplied
+# AFTER capture, at the use site, via ${PRE_DIRTY:-?} (math's find, 2026-08-25).
+PRE_DIRTY=$(git status --porcelain 2>/dev/null | command grep -c .)
 START=$(date '+%H:%M:%S' 2>/dev/null || echo n/a)
 case "$1" in
   *.lean) MODE=audit
@@ -69,12 +73,16 @@ EXIT=$?
   # reader keeps working: the one known consumer (docs/ledger-tools/audit_coverage.sh:220)
   # matches the SUBSTRING "sha256=<sha>", not a field position or a line end — checked
   # before this change rather than assumed.
+  # SAME DEFECT, SECOND SITE — and it fires INDEPENDENTLY of the first: a tree that is
+  # DIRTY before and CLEAN after spills only here, leaving a LONE `?` line (measured:
+  # audit log line 3038, 2026-08-23, record `dirty=7->0`). Fixing only site 1 leaves it.
+  POST_DIRTY=$(git status --porcelain 2>/dev/null | command grep -c .)
   printf '%s | %s | %s | args=%s |%s HEAD=%s | cap=%s | EXIT=%s | start=%s | pre_head=%s | dirty=%s->%s\n' \
     "$(date '+%Y-%m-%d %H:%M:%S')" "$MODE" "$(pwd)" "$*" "$SHA" \
     "$(git rev-parse --short HEAD 2>/dev/null || echo n/a)" \
     "$([ "$MODE" = audit ] && echo "$CAP" || echo lakefile)" "$EXIT" \
     "${START:-n/a}" "${PRE_HEAD:-n/a}" "${PRE_DIRTY:-?}" \
-    "$(git status --porcelain 2>/dev/null | command grep -c . || echo '?')" >> "$AUDITLOG"
+    "${POST_DIRTY:-?}" >> "$AUDITLOG"
 } 2>/dev/null || true
 echo "saltbuild EXIT=$EXIT"
 exit $EXIT
