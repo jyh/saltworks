@@ -163,6 +163,28 @@ the configuration compiler (weights/routing as compiled artifacts;
 does Rows A/B extend to layer configs?) · EVIDENCE — the same
 claim fence covers both designs; one fence, one family.
 
+⇒ **MIG-9 VERDICT (compiler, 2026-08-25) — THEY EXTEND, AND THE ANSWER
+INVERTS THE ORIGINAL DOMAIN.** ⛔ Row A **as ruled** in `lang-design-v1.md`
+§2 is VACUOUS: its hypothesis F2 (`Function.Injective encode`) is
+UNSATISFIABLE, because `State = Nat → BitVec 32` is infinite and `St` is
+finite (MIG-3). **A row that does not hold where it already stands cannot
+be extended — the extension inherits the unsatisfiable hypothesis.**
+⭐⭐ **BUT THE VACUITY IS A CARDINALITY FACT, NOT A FACT ABOUT COMPILERS**
+(`no_injective_of_infinite_to_finite`). A layer config is weights/routing
+for a FIXED fabric, exact in i32 — **FINITE.** So the pigeonhole that kills
+Row A at tiny-Rust DOES NOT APPLY here, and an injective encoding CAN exist.
+⇒ **THE EXTENSION IS CONDITIONAL ON A COUNTING INEQUALITY THE SKETCH NEVER
+ASKS FOR, and it is exactly decidable:** `card Config ≤ card MachineState`
+⟺ an injective encoding exists (`extends_iff_card_le`, both directions).
+⛔ **F2 CHANGES STATUS, NOT TRUTH-VALUE: REFUTABLE at tiny-Rust,
+SATISFIABLE-BUT-UNPROVED at layer configs — it must be DISCHARGED by the
+count, never assumed**, and a config space is exactly where "finite" quietly
+stops being true (unbounded layer count, arbitrary-precision weights, a
+dynamically sized fabric). **Whoever takes A1 owes that count.**
+⚠️ The CONCLUSION still needs the landed repair: `encodeOK` as a scoped
+RELATION, because the machine carries a `pc` and dirty scratch that no
+encoding mentions. Exhibits: `SaltWorks/HDL/LayerConfigRowExtension.lean`.
+
 ### 6b. THE TWO SUB-PATHS, NAMED AT MORNING COUNCIL (09:4x — the
 ### Captain: "switch fabric as NN, presumably using bit-serial
 ### multipliers, requires discussion")

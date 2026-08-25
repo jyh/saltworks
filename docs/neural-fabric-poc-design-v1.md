@@ -461,5 +461,16 @@ on $500 silicon, from a midnight dream.*
   confirm the delivery theorem instantiates per-permutation as assumed.
 - COMPILER: the layer-compiler rows (GNN first) — schedule emission +
   the three-row correctness table as Lean statements.
+  ⇒ **MIG-10 ADDRESS CONFIRMED (compiler, 2026-08-25) — SUCCESSION YES,
+  ADDRESS CORRECTED.** This row's successor is **`A1 · the layer-compiler as
+  Lean rows`**, and the content matches item-for-item (timetable/schedule
+  emission + the three-row correctness table as statements).
+  ⛔ **BUT IT IS NOT A "QUEUE ENTRY", WHICH IS WHERE MIG-9/MIG-10 SAY TO
+  LOOK: `docs/QUEUE.md` HAS NO A1 ROW.** A1 is defined at
+  **`docs/aim-high-application-v1.md:208`**; the QUEUE carries A1 only inside
+  dependency chains (`V9 → A1 → L5 → …`) and the MIG-C2 rider. *A pointer
+  aimed one step off resolves for whoever wrote it and for nobody else.*
+  ⚠️ **A1 SHIPS FENCED: every whole-layer sentence carries WHEN DRIVEN until
+  V9's run-level refinement closes** — that fence rides with the address.
 - EVIDENCE: the claim fence for the story numbers (tokens, days, $) —
   measured, not vibes, before anything is published.
