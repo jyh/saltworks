@@ -61,13 +61,18 @@ grep '^ *sky130_fd_sc_hd__' "$NL" | awk '
   if (name ~ /^(cell|ser)[0-9]\./) { group = name; sub(/\..*$/, "", group) }
 
   clocktyped = (type ~ /^(dlygate|clkdlybuf|clkbuf|clkinv)/)
+  # ⛔ TWO PREDICATES, NOT ONE WIDER ONE. clocktyped gates BOTH the clock branch and
+  #    the timing-repair fall-through; widening it in place moves 381 off-clock buf/inv
+  #    cells into hold_fanout_buffering (2,397 -> 2,778). clockcap is WIDE and is used
+  #    ONLY with onclock; clocktyped stays NARROW for the repair branch.
+  clockcap   = (type ~ /^(dlygate|clkdlybuf|clkbuf|clkinv|buf|inv)/)
   # STRUCTURAL: on the clock tree iff driven by a clock net, PLUS the root, which
   # is driven by the primary clock port instead.
   onclock = (net ~ /^clknet_/) || (name ~ /^clkbuf_0_/)
 
   if      (group ~ /^cell/)        { fc = "mac_island_" group;    pc = "kernel_emitted" }
   else if (group ~ /^ser/)         { fc = "serializer_" group;    pc = "kernel_emitted" }
-  else if (clocktyped && onclock)  { fc = "clock_tree";           pc = "tool_inserted_cts" }
+  else if (clockcap && onclock)    { fc = "clock_tree";           pc = "tool_inserted_cts" }
   else if (clocktyped)             { fc = "hold_fanout_buffering";pc = "tool_inserted_timing_repair" }
   else if (type ~ /^(s?e?df[a-z]|s?e?dl[rx][a-z]|lpflow_inputisolatch)/)
                                    { fc = "fabric_sequential";    pc = "agent_written" }
