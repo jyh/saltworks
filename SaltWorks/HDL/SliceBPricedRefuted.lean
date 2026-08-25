@@ -11,13 +11,20 @@ import SaltWorks.HDL.Immediate
 
 The three things the block asked this seat to price, measured on the LANDED artifacts.
 
-## 1. The memory organ in the EMITTED PATH — a THIRD instrument, same direction
+## 1. The memory organ — ⛔ ALREADY DISCHARGED BY THE CORPUS, and my filing missed that
 
-`memOrgan` is **1475 gates** against the **−1,154 gates banked AT THE SELECT**: `1.28×` over.
-⭐ B1 rules µm² "the only honest axis" and reports `1.50×` over by area, while noting that **by
-cell COUNT it "falsely looks 42% under"**. The gate axis is a third instrument and it agrees
-with AREA, not with cell count. ⇒ **The flattering reading is specific to cell-count; it does
-not generalise to gates, so B1's verdict survives a third axis it was not measured on.**
+⛔ **THIS DEBT WAS ALREADY PAID BEFORE I PULLED IT.** `MemOrgan.lean` carries, kernel-proved:
+`memOrgan_gate_count` (1475), the `nIn = 292 ∧ outs.length = 288` pin, and
+**`memOrgan_exceeds_banked_budget : 1154 < memOrgan.gates.length`** — the exact comparison I
+filed as a finding. Its docstring even settles the unit question I thought I was contributing:
+*"in the budget's own pre-abc unit … both sides are gates."*
+
+⇒ **MY FIRST FILING CALLED THIS A "THIRD INSTRUMENT" CORROBORATING AREA. IT IS NOT A THIRD
+AXIS — it is THE axis, already reconciled in the corpus, and I re-derived it and presented the
+re-derivation as a measurement.** The honest finding for this debt is therefore: *nothing owed,
+the work is landed, go read `MemOrgan.lean`.*
+⚠️ Cause, recorded because it is cheap to avoid: I grepped the NAME and never the CONCLUSION
+SHAPE. A name grep cannot see a theorem you are about to duplicate.
 
 ## 2. BNE, conditional on a placed compare, is FREE and cheaper than BEQ
 
@@ -50,10 +57,11 @@ above is what can be answered without guessing which `C1` was meant.
 namespace SaltWorks.HDL.MIG4
 open SaltWorks.HDL
 
-/-- The memory organ's emitted-path size. `1475 > 1154`, i.e. 1.28× the banked select saving. -/
-theorem memOrgan_emitted_size :
-    memOrgan.gates.length = 1475 ∧ memOrgan.outs.length = 288 := by
-  refine ⟨by decide +kernel, by decide +kernel⟩
+-- ⛔ NO THEOREM HERE. My first cut minted `memOrgan_emitted_size` and it was a DUPLICATE:
+-- `MemOrgan.lean` already carries `memOrgan_gate_count` (= 1475), the `nIn = 292 ∧
+-- outs.length = 288` pin, AND `memOrgan_exceeds_banked_budget : 1154 < memOrgan.gates.length`.
+-- I grepped the NAME (free) and never the CONCLUSION SHAPE, which is the one check that finds
+-- a landed theorem you are about to re-mint. Cited by name instead.
 
 /-- ⭐ **THE COMPARE TREE'S POLARITY IS BNE's, NOT BEQ's** — measured in the kernel: the raw
 output is `false` on an all-zero word and `true` as soon as any bit is set. -/
@@ -73,6 +81,5 @@ theorem immediate_encoders_are_free :
 
 end SaltWorks.HDL.MIG4
 
-#print axioms SaltWorks.HDL.MIG4.memOrgan_emitted_size
 #print axioms SaltWorks.HDL.MIG4.zeroTree_is_nonzero_polarity
 #print axioms SaltWorks.HDL.MIG4.immediate_encoders_are_free

@@ -150,13 +150,17 @@ campaign, two files, per §B1.
   measured on the LANDED artifacts. Kernel exhibits:
   `SaltWorks/HDL/SliceBPricedRefuted.lean`.**
 
-  **(1) MEMORY ORGAN, EMITTED PATH — a THIRD instrument, same
-  direction as area.** `memOrgan` is **1475 gates** vs the **−1,154**
-  banked at the select: **1.28× over**. B1 rules µm² the only honest
-  axis (1.50× over) and notes cell COUNT "falsely looks 42% under".
-  ⇒ **The flattering reading is specific to CELL-COUNT — it does not
-  generalise to gates, so B1's verdict survives a third axis it was
-  never measured on.** ⚠️ `memOrgan` is also NOT PLACED in the core.
+  **(1) MEMORY ORGAN — ⛔ ALREADY DISCHARGED BY THE CORPUS; MY FIRST
+  FILING MISSED THAT AND RE-DERIVED IT.** `MemOrgan.lean` already
+  carries, kernel-proved: `memOrgan_gate_count` (1475), the
+  `nIn = 292 ∧ outs.length = 288` pin, and
+  **`memOrgan_exceeds_banked_budget : 1154 < memOrgan.gates.length`** —
+  the exact comparison I filed as a finding. Its docstring even settles
+  the unit question: *"in the budget's own pre-abc unit … both sides are
+  gates."* ⇒ **This is not a "third axis corroborating area" — it is THE
+  axis, already reconciled. Nothing is owed on this debt; the answer is
+  `MemOrgan.lean`.** ⚠️ Cause: I grepped the NAME and never the
+  CONCLUSION SHAPE. ⚠️ `memOrgan` is also NOT PLACED in the core.
 
   **(2) BNE IS NOT "NEAR-FREE" — CONDITIONAL ON A PLACED COMPARE, IT IS
   FREE AND CHEAPER THAN BEQ.** `zeroTree` is a 31-gate OR-reduction
