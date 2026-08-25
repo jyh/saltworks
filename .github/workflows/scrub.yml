@@ -51,3 +51,41 @@ jobs:
           fi
           echo "scanning $RANGE"
           python scripts/check_commit_trailers.py --range "$RANGE"
+
+  private-paths:
+    name: no NEW path into the private record enters a public repo
+    runs-on: ubuntu-latest
+    # Council 2026-08-25 ruled the firewall line at PATHS and booked this gate
+    # as construction. Booked is not built: measured over the 9 commits that
+    # landed at or after that stamp, THREE carried a path into the private
+    # record -- the first 1m41s after the ruling. A rule with no instrument is
+    # obeyed for as long as it is remembered.
+    #
+    # RANGE: the pushed delta, same doctrine as the job above and for a sharper
+    # reason. Measured before this shipped, this history already carries 14 of
+    # these shapes, all predating the ruling and protected by the commencement
+    # clause. A full scan would be permanently red.
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # BOTH ARMS DRIVEN BEFORE TRUST: a planted path must fail it, a
+      # role-worded message must pass it, and the fixtures are the real
+      # post-ruling instances rather than invented shapes.
+      - run: python scripts/check_private_paths.py --self-test
+      - name: scan the pushed delta
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: |
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            RANGE="HEAD~100..HEAD"
+            git rev-parse HEAD~100 >/dev/null 2>&1 || RANGE="HEAD~1..HEAD"
+            echo "new branch: falling back to $RANGE (declared limit)"
+          else
+            RANGE="$BEFORE..HEAD"
+          fi
+          echo "scanning $RANGE"
+          python scripts/check_private_paths.py --range "$RANGE"
