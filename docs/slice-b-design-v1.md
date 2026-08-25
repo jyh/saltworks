@@ -145,6 +145,43 @@ campaign, two files, per §B1.
   the emitted path; BNE against the landed compare; the encoder
   extension against the c1 organ); E3's executive-as-program
   feasibility at Slice-B's op budget.
+
+  ⛔⛔ **MIG-4 FILED (compiler, 2026-08-24) — one filing, three debts,
+  measured on the LANDED artifacts. Kernel exhibits:
+  `SaltWorks/HDL/SliceBPricedRefuted.lean`.**
+
+  **(1) MEMORY ORGAN, EMITTED PATH — a THIRD instrument, same
+  direction as area.** `memOrgan` is **1475 gates** vs the **−1,154**
+  banked at the select: **1.28× over**. B1 rules µm² the only honest
+  axis (1.50× over) and notes cell COUNT "falsely looks 42% under".
+  ⇒ **The flattering reading is specific to CELL-COUNT — it does not
+  generalise to gates, so B1's verdict survives a third axis it was
+  never measured on.** ⚠️ `memOrgan` is also NOT PLACED in the core.
+
+  **(2) BNE IS NOT "NEAR-FREE" — IT IS FREE, AND CHEAPER THAN BEQ.**
+  `zeroTree` is a 31-gate OR-reduction whose raw output is TRUE when
+  the word is NONZERO — **measured in the kernel, not read off its
+  docstring**. That IS BNE's condition; BEQ pays one further inverter.
+  ⛔ **BUT THE SAVING IS UNPRICED AT CORE LEVEL: `zeroTree`/`zrOut`
+  occur ZERO times in `CorePlace.lean` and `CoreAssembly.lean`.** The
+  compare is landed, certified, and in NO datapath — so adding BNE
+  first requires PLACING a compare, a cost B1's number does not carry.
+  ⚠️ Same structural class as the flagship's `immICirc`: certified,
+  placed nowhere.
+
+  **(3) THE ENCODER EXTENSION IS FREE IN SILICON; ITS COST IS
+  PROOF-SIDE.** `immICirc` = **0 gates**, `immBCirc` = **1 gate** —
+  rewirings onto input nets, not logic. B3's "one theorem each" prices
+  out as ~0 gates and N theorems: a PROOF obligation wearing a
+  datapath's name.
+  ⛔ **ITS COMPARAND IS UNDEFINED.** "the c1 organ" occurs in exactly
+  two places — this assignment line and the QUEUE row copying it — and
+  is defined NOWHERE, while several unrelated `C1`s exist in other
+  docs. **That is worse than none: it invites a reader to pick one and
+  believe they matched the referent.** Answered without guessing.
+
+  📌 E3's executive-as-program feasibility is NOT in this filing: the
+  QUEUE records it as *conditioned, not queued*.
 - SILICON: B1's memory pricing IN CELLS vs the 1,154 banked AT THE
   SELECT (whole-core net unverified — your one-line answer owed); the
   tile question interaction (does Slice B still fit co-tenant?);
