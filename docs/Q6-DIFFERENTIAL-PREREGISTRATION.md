@@ -433,3 +433,34 @@ roll-call behind turns a retirement into `unknown identifier`. Plus two prose bl
 FALSE at the swap (*"`instrBase := stWidth` … is untouched and still reads 1056"*), rewritten in
 the same commit, because **a docstring that outlives its declarations builds green forever while
 saying something false.**
+
+### ⛔⭐ CORRECTION, SAME DAY: **"A RETIREMENT HAS THREE SURFACES" IS WRONG. IT HAS FIVE, AND THE FIFTH IS INVISIBLE TO EVERY BUILD.**
+
+*I wrote "three surfaces" as a sentence, not as a measurement. `claimcheck.sh` flagged it as a
+relation over a population and asked whether a COMMAND produced the number. It had not. Computed:*
+```
+  1  the declaration            10 `theorem` lines removed
+  2  its docstring               9 `/--` lines removed
+  3  its #audit_axioms line      6 roll-call lines removed   <- leave it => unknown identifier
+  4  the section header          2 `/-!` removed, 1 rewritten <- whole sections retired with them
+  5  CROSS-FILE PROSE POINTERS   1 live one, and NO BUILD CAN SEE IT
+```
+⛔ **SURFACE 5, NAMED AND REGISTERED BEFORE IT ROTS — `SaltWorks/Stack/Program.lean:2610`** (math's
+glob, granted to this seat), inside a docstring:
+
+> *"The same growth at bit level is `stWidthD - stWidth = 257` (`8*32 + 1`), which
+> `StateCodecD.extension_costs_257_bits` already carries in the kernel."*
+
+**It is CORRECT TODAY and becomes DOUBLY FALSE the moment the swap lands:** it cites a theorem that
+will no longer exist, AND states a quantity that becomes `0` because the two widths merge.
+⇒ ***THIS IS THE ONE SURFACE THE KERNEL CANNOT DEFEND. The declaration, the docstring, the audit
+line and the section header all fail loudly; a prose pointer in another file BUILDS GREEN FOREVER
+while naming a retired theorem.*** **Registered NOW, before the rename lands, because that is the
+only moment at which it is cheap** — after the landing it is a true sentence about a vanished
+object and nothing anywhere will complain. `docs/ledger-tools/prose_rot.py` exists and is the
+instrument for exactly this class.
+
+⚠️ **AND THE SURFACE-4 CHECK WAS ONLY EMPTY BY LUCK OF SCOPE:** all six retired names also appear
+in `SaltWorks/HDL/ScratchQ3CodecEx.lean`, which is UNTRACKED and not a root target, so it never
+built and could not have reported anything. *An empty result from an instrument that never ran is
+not an empty surface.*
