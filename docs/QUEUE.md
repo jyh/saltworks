@@ -166,10 +166,10 @@
   misquote the protocol?" against the CURRENT spec (`55831de`) and current §8 rows
   5-11 — the prior discharge was taken against a doc version that no longer exists
   (moved seven times since). Don't-care-window half genuinely closed.
-- **MIG-9 · COMPILER · P2 — ⛔ GATED: CAPTAIN — the GNN sketch fires nothing without the Captain's word: §4 is titled "explore at council, nothing fires tonight" and §6 is the Captain's second-dream dual, pulled at his word (§0). Unlocks on that word at a sitting; until then this row is NOT a debt and must not be started.**
+- **MIG-9 · COMPILER · P2 — ✅ **OPENED-08/24** (Captain's word, maestro FLEET ORDER 18:41:50 ruling 2; bus line 168808) — GATE AS IT STOOD, KEPT VERBATIM BECAUSE A MARKER IS HISTORY: the GNN sketch fires nothing without the Captain's word: §4 is titled "explore at council, nothing fires tonight" and §6 is the Captain's second-dream dual, pulled at his word (§0). Unlocks on that word at a sitting; until then this row is NOT a debt and must not be started.**
 - **MIG-9 · COMPILER · P2** — GNN sketch §6: the verdict "do Rows A/B extend to layer
   configs?" — rides with A1 (already in the compiler roster).
-- **MIG-10 · COMPILER · P2 — ⛔ GATED: CAPTAIN — its subject is `neural-fabric-poc-design-v1.md` §7, whose own heading is "OPEN QUESTIONS FOR THE SEAT REVIEW (fire on the Captain's word)". Unlocks when that review fires; until then this row is NOT a debt and must not be started, address-confirmation included.**
+- **MIG-10 · COMPILER · P2 — ✅ **OPENED-08/24** (Captain's word, maestro FLEET ORDER 18:41:50 ruling 2; bus line 168808) — GATE AS IT STOOD, KEPT VERBATIM BECAUSE A MARKER IS HISTORY: its subject is `neural-fabric-poc-design-v1.md` §7, whose own heading is "OPEN QUESTIONS FOR THE SEAT REVIEW (fire on the Captain's word)". Unlocks when that review fires; until then this row is NOT a debt and must not be started, address-confirmation included.**
 - **MIG-10 · COMPILER · P2 (address-confirmation ONLY)** — the layer-compiler as Lean
   rows IS the successor of neural-fabric §7's row; this line confirms the A1/GNN
   QUEUE entry as its address. No new load.
