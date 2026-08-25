@@ -1,3 +1,8 @@
+⛔⛔ PARTIAL — DO NOT APPLY ALONE. USE docs/Q3-SWAP-COMPLETE-0825.diff.
+Applying this half by itself yields: A FALSE THEOREM IN A GREEN TREE (silent, dangerous)
+Layer 2's decQ_envWith_eq (= s) is TRUE under D and FALSE under Q, because today's
+decQ_mem forces mem definitionally. Coupling found by the math seat, 08-25 15:50.
+
 diff --git a/SaltWorks/Stack/Program.lean b/SaltWorks/Stack/Program.lean
 index 0e22501..4c822e8 100644
 --- a/SaltWorks/Stack/Program.lean

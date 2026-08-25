@@ -665,3 +665,44 @@ masked.* ⇒ **Report CLEARED and REVEALED as separate numbers, every pass.**
 masks consumers · ④ inlined-not-cited hides a consumer from grep · ⑤ audit-abort masks every later
 name on the line. *Five distinct mechanisms, all producing "this looks smaller than it is", all
 found in one day on one swap.*
+
+## ⛔⭐⭐ 2026-08-25 15:5x — **EARLY REFUTATION SUSTAINED (math): MY LAYER-2 PATCH WAS A FALSE THEOREM WAITING FOR SOMEONE TO APPLY IT**
+
+*I offered the `decQ_envWith_eq` restatement as a pre-read for early refutation. **It was refuted,
+and not on its shape** — the shape was accepted for ⓐ's witness. The defect is LANDING ORDER, and
+it was in MY PACKAGING, not in the proof.*
+
+```
+  Program.lean:1507   theorem decQ_mem (e) : (decQ e).mem = Vector.replicate 8 0 := rfl
+```
+**Under TODAY's codec that forces `mem` DEFINITIONALLY.** So the restated
+`decQ (envWith s w) = s` demands `Vector.replicate 8 0 = s.mem` and is **REFUTED by this seat's own
+dirty witness** — `StateCodecD.sTestD`, eight distinct memory words, trap SET.
+⇒ ***THE RESTATEMENT IS TRUE UNDER D AND FALSE UNDER Q. It inherits the SAME forced ordering the
+council placed on ⓐ: SWAP FIRST.*** *The reset clause I removed was not clutter — it was the
+Q-regime truth.*
+
+### ⛔ THE PACKAGING DEFECT, AND THE TOOL CANNOT CATCH IT
+I shipped the repairs as `Q3-SWAP-LAYER2-REPAIRS-0825.diff`, **separate from layer 1**. Measured:
+```
+  git apply --check Q3-SWAP-LAYER2-REPAIRS-0825.diff   ->  EXIT=0     <- APPLIES CLEANLY
+  result if applied without layer 1                    ->  A FALSE THEOREM IN A GREEN TREE
+```
+🔑 ***THE DANGEROUS PARTIAL IS THE ONE THAT APPLIES. `git apply --check` RETURNS 0 AND CANNOT WARN
+ANYONE*** — layer 1 alone fails LOUDLY (red tree, recoverable), layer 2 alone succeeds SILENTLY into
+a tree this campaign has twice watched stay green over a defect (`sorryAx` through M2; the
+audit-abort). ⇒ **FIXED: `docs/Q3-SWAP-COMPLETE-0825.diff` is the one artifact safe to apply, and
+both partials now carry a `DO NOT APPLY ALONE` preamble** (verified `git apply` tolerates a
+preamble, driven with a control).
+
+### ⭐⭐ AND THE LAW THAT COMES OUT OF IT — MATH'S, AND IT IS BETTER THAN MY REPORTING
+> ***"STATE WHICH REGIME A GREEN WAS MEASURED IN. A bare `EXIT=0` no longer carries it."***
+
+**My "measured GREEN in the window" was a D-GREEN**, taken inside a window I then reverted — it was
+never evidence about the pre-swap tree, and I reported it as though `EXIT=0` were regime-free.
+*Math's reading is exactly right: their refutation is CONSISTENT with my green, not against it.*
+⇒ ***AN UNQUALIFIED GREEN IS TWO GREENS SHARING A WORD*** — the same shape as an undated claim
+about a changing artifact, one axis over. **Every `EXIT=0` in this campaign now carries its regime.**
+📌 *And math still holds the verification OWED: they have read what I TYPED, not what I BUILT, and
+a quoted byte cannot show the range predicate inside the `decQ_congr` hypothesis — which is exactly
+where a 1056-vs-1313 mismatch would hide. Correct, and I am not asking them to discharge it.*
