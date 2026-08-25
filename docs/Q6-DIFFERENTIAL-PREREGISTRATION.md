@@ -464,3 +464,62 @@ instrument for exactly this class.
 in `SaltWorks/HDL/ScratchQ3CodecEx.lean`, which is UNTRACKED and not a root target, so it never
 built and could not have reported anything. *An empty result from an instrument that never ran is
 not an empty surface.*
+
+## ⛔⛔⭐⭐ 2026-08-25 — **A THIRD MASKING VARIANT: A BROKEN-BUT-PRESENT DECLARATION MASKS ITS CONSUMERS, SO THE LAYER-2 ENUMERATION UNDERCOUNTS THE RETIREMENT BY CONSTRUCTION**
+
+*Found by a commissioned adversarial pass over the six layer-2 sites (5 analysts, 5 refuters,
+`0` refutations sustained), and then verified AT THIS HAND rather than taken on the write-up.*
+
+### THE MECHANISM
+`Program.lean:1700-1701`, inside `decQ_cyc_eq_of_memFree`, is two bullets that `rw` with the
+pivot pair:
+```
+  1700|   · rw [decQ_mem, stepT_mem_frame_of_not_touchesMem _ _ hmf, decQ_mem]
+  1701|   · rw [decQ_trapped, stepT_trapped_frame_of_not_touchesMem _ _ hmf, decQ_trapped]
+```
+**In the layer-2 build these lines produced ZERO errors — verified, `0` hits at `169x/170x`.**
+⇒ ***BECAUSE A FAILED TACTIC ERRORS AND STILL FILLS THE HOLE.*** `decQ_mem` remained a
+declaration OF THE RIGHT TYPE, backed by `sorryAx`, so every consumer elaborated exactly as
+before. **Delete the name and those bullets become `unknown identifier` — a NEW error class the
+layer-2 enumeration COULD NOT HAVE SHOWN, because that run kept the broken declarations present.**
+
+🔑 ***THE THIRD VARIANT, AND THE FAMILY IS NOW COMPLETE:***
+```
+  1  A FAILING HUB masks its DEPENDENTS          (found 08-25 am; 56 modules, depth 15)
+  2  MASKED is not MUST-BREAK                     (found 08-25 pm; cost P4 and P5)
+  3  A BROKEN-BUT-PRESENT DECL masks its CONSUMERS  <- THIS. sorryAx is well-typed.
+```
+⚠️ **VARIANT 3 IS THE WORST OF THE THREE FOR THIS CAMPAIGN, because it is the only one whose
+error count GROWS AT THE MOMENT OF REPAIR.** *Variants 1 and 2 mis-state work that already
+exists; variant 3 means **the enumeration is an under-estimate of the RETIREMENT specifically,
+and no build can correct it until the retirement is performed.*** ⇒ **Re-enumerate AFTER each
+retirement, not only after each swap.**
+
+### ⛔ AND CHECK 2 IS UNSATISFIED FOR `decQ_mem` — THE ROW-6 DEFECT, A SECOND TIME, MISSED BY ME
+```
+  1506:0  maximum recursion depth has been reached      <- decQ_mem   RESOURCE failure
+  1508:57 Type mismatch
+  1510:0  Not a definitional equality: the LHS …        <- decQ_trapped  A REAL VERDICT
+  1511:46 Type mismatch
+```
+**`decQ_trapped` carries a verdict. `decQ_mem` carries a `maxRecDepth` — the SAME class this
+document ruled insufficient for row 6 four hours ago, and I read that exact error text at layer 2
+and did not apply my own ruling to it.** *Check 1 (must fail to compile) IS satisfied, which is
+what P3 claimed and P3 stands; **check 2 (each failure must be READ) is NOT**, and the two are
+easy to conflate because both render as a red row.*
+⇒ **OWED, and it is the row-6 remedy exactly: establish `decQ_mem`'s verdict separately, with the
+budget raised, as a POSITIVE arm.** *A universally-quantified statement with an explicit
+counterexample — `e := fun j => decide (j = 1056)` makes `(decQ e).mem[0]` non-zero under D — is
+FALSE, not merely unprovable, and that is the fact the retirement must cite.*
+
+### 📌 SURFACES THIS PASS ADDED TO THE FIVE — the register is not closed
+- **PROSE THAT GOES FALSE, in-file:** `Program.lean:1473-1477` (the stated justification for the
+  M2 projection cut: *"`decQ` CONSTRUCTS `mem := replicate 8 0` … so the left side is clean for
+  every `cyc`, always"* — under D the whole-`St` form becomes SATISFIABLE, inverting the argument)
+  and `:1534` (*"`decQ` reads only the state nets — `0 … 1055`"*).
+- **CROSS-FILE POINTERS, out of the root build so no build sees them:**
+  `HDL/LwDifferentialD.lean:6` and `HDL/ScratchQ6Diff.lean:6`.
+- ⛔ **A NAME COLLISION THAT DEFEATS GREP-BY-NAME:** `HDL/C4Refuted.lean:208` declares a **SECOND**
+  `theorem decQ_mem` (this seat's own glob, its own must-break row). **`rw [decQ_mem]` resolves by
+  NAMESPACE, and a name-grep cannot tell the two apart** — resolve per file, never by grep.
+  *Sibling of `a-name-grep-cannot-see-a-duplicate-theorem`, arriving as a live hazard.*
