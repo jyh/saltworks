@@ -934,6 +934,16 @@ while true; do
     # ⇒ Owner extracted here the same way the peer pass does it, and self-owned
     # posts are skipped before any marker test.
     LC_ALL=C awk -v start="$last" -v self="$SELF" '
+      # ⛔ inner() EXISTS BECAUSE marked() IS KEYED TO A BODY, AND A ONE-LINE POST HAS NONE.
+      # marked() reads the first 40 chars and asks whether the post OPENS by addressing the
+      # FLEET. On a two-part post that string is the body line. On a one-liner the text lives
+      # inside the bracket, so the first 40 chars are the STAMP AND THE SEAT NAME and marked()
+      # can never match. ⇒ MY FIRST FLUSH FOR THIS ARM PASSED THE RAW HEADER AND WAS THEREFORE
+      # STRUCTURALLY INERT: it recovered 238 -> 238, a result identical to having no fix, and I
+      # only caught it because I refused to accept a null delta without a positive control.
+      # 🔑 A NULL RESULT HAS TWO READINGS -- the hole is empty, or the probe is blind -- and
+      #   they are the same number. Never publish one without a control that separates them.
+      function inner(s,   t) { t = s; sub(/^\[[^,]*, [A-Za-z0-9_-]+/, "", t); return t }
       function marked(s,   h) {
         h = substr(s, 1, 40)
         gsub(/[^A-Za-z -]/, "", h)
@@ -976,6 +986,21 @@ while true; do
         if (_k > lastkey) lastkey = _k
       }
       hdrok && /^\[[0-9]+\/[0-9]+ [0-9:x]+, [A-Za-z]/ {
+        # ⛔⛔ THE NINETEENTH DEFECT HAS A TWIN, AND I FOUND IT BY GREPPING FOR MY OWN FIX
+        # THIRTY SECONDS AFTER COMMITTING IT. The MAESTRO pass above deferred a one-line
+        # post and let the next header discard it; THIS pass does the identical thing, and
+        # my first commit repaired only the arm whose failure I had watched.
+        # 🔑 [[a-new-pass-inherits-no-guards]] -- A FIX IS NOT A SWEEP -- committed inside
+        #   the file that documents that law, for at least the fourth time. The tell was
+        #   not insight: it was running `grep -n "pend"` over my own file BECAUSE the law
+        #   says to, and finding a second hit at a line I had never read.
+        # 📊 MEASURED: 80 peer one-line posts are deferred and dropped by THIS arm, so they
+        #   never reach the marked() test at all -- the fleet-binding question is never
+        #   asked of them. Same flush, same reason: the header line IS the post.
+        if (pend) { if (marked(inner(ptext))) print "🚧 FLEET-BINDING POST " pstamp " " \
+                                               ((length(ptext) > 400) ? "[+" (length(ptext)-400) "B BELOW CEILING] " : "") \
+                                               substr(ptext, 1, 400)
+                    pend = 0 }
         hdr = $0; pend = 0
         owner = $0
         sub(/^\[[0-9]+\/[0-9]+ [0-9:x]+, /, "", owner)
@@ -994,18 +1019,21 @@ while true; do
             if (marked(body)) print "🚧 FLEET-BINDING POST " stamp " " \
                               ((length(body) > 400) ? "[+" (length(body)-400) "B BELOW CEILING] " : "") \
                               substr(body, 1, 400)
-          } else pend = 1
+          } else { pend = 1; pstamp = stamp; ptext = $0 }
         }
         prevblank = 0
         next
       }
       pend && $0 != "" {
-        if (marked($0)) print "🚧 FLEET-BINDING POST " stamp " " \
+        if (marked($0)) print "🚧 FLEET-BINDING POST " pstamp " " \
                         ((length($0) > 400) ? "[+" (length($0)-400) "B BELOW CEILING] " : "") \
                         substr($0, 1, 400)
         pend = 0
       }
       { prevblank = ($0 == "") }
+      END { if (pend && marked(inner(ptext))) print "🚧 FLEET-BINDING POST " pstamp " " \
+                                       ((length(ptext) > 400) ? "[+" (length(ptext)-400) "B BELOW CEILING] " : "") \
+                                       substr(ptext, 1, 400) }
     ' "$BUS"
     last=$n
   fi
