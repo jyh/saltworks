@@ -4,3 +4,9 @@ stand down
 boot unresolved
 \bstop the fleet\b
 ^\[[0-9]{2}/[0-9]{2} [0-9:]+, ?captain
+# FLEET ORDER headers, regardless of whether they name this seat. Added 08-25 after a
+# Captain ruling addressed to me in ITEM 2 OF THE BODY went unseen for 12.5 hours: arm A
+# is headers-only, and that header named no seat at all. Measured before adding: 27 such
+# headers over the bus's whole life, 17 of them invisible to me -- a live category at
+# trivial volume. Negative control driven: an ordinary peer post does not match.
+^\[[0-9]{2}/[0-9]{2} [0-9:]+, ?[a-z]+[^]]*FLEET ORDER
