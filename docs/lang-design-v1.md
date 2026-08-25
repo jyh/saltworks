@@ -157,6 +157,56 @@ ROW B (completeness; F1 — without it Row A is satisfied by
     ∃ code, compile p = some code.
   ("Well-typed, POOL-FITTING programs compile" — the two hypotheses
   are the two honest rejection causes, and there is no third.)
+⛔⛔ **MIG-6 FOLDED IN (math, 2026-08-24) — THE 08/09 ANSWER TO §6's OWN QUESTION, WHICH
+WAS CONFIRMED AND NEVER WRITTEN DOWN.** §6 asks math *"is anything c2-shaped or
+vacuously-true hiding in the well-formedness side?"* **The answer is YES, it arrived on
+08/09 as refutation passes #1 (08:45) and #2 (08:53) — ~12 h after this doc's v1.1 fold at
+08/08 19:12 — and it landed on ROW B, not on `wellFormed`.** Verified absent from this file
+before folding: `imem`, `instruction memory`, `scope metric`, `vacuity` = 0 hits each.
+
+(a) **ROW B HAS ITS OWN VACUITY MODE, AND F1 DOES NOT KILL IT.** F1 exists because Row A
+  alone is satisfied by `compile := fun _ => none`. But — quoting the 08/09 pass —
+  *"Row B is satisfied by making `liveMax` PESSIMISTIC — define it large enough and the
+  hypothesis is almost never met, so the ∀ is near-empty and the row proves easily. The
+  row's truth is controlled entirely by a function that does not exist yet, and both
+  failure directions are live: too pessimistic ⇒ VACUOUS · too optimistic ⇒ FALSE."*
+  ⇒ **PRE-REGISTERED DEMAND, carried here so it binds the wave that states Row B: when
+  `liveMax` lands it comes WITH AN EXHIBITED WITNESS — a NON-TRIVIAL `p` for which
+  `liveMax p ≤ poolSize` holds, by `decide`.** *Without it, F1's own logic applies to
+  F1's own row.*
+
+(b) **ROW B's "there is no third" IS A COMPLETENESS CLAIM AND THERE IS A CANDIDATE THIRD:
+  INSTRUCTION MEMORY.** The parenthetical above reads *"the two hypotheses are the two
+  honest rejection causes, and there is no third."* But *"a program can be well-typed AND
+  pool-fitting and still emit more instructions than the machine can hold — the freeze's
+  own no-`while` note makes `code.length` the machine bound, and this is a tiny CPU."*
+  ⇒ **Either imem capacity is a THIRD hypothesis, or there is a lemma proving it cannot
+  bind. Today it is neither, and the sentence claims exhaustiveness.**
+
+(c) **THE STRUCTURAL POINT, which outlives its witness: `liveMax` is a SCOPE metric being
+  used as a REGISTER-DEMAND metric.** `liveMax` counts `letmut` nesting and nothing else
+  (`liveMax (.assign _ _) = 0` for ANY expression) while `Exp` is fully recursive, so
+  expression depth is unbounded and its register cost is counted as ZERO. The 08/09
+  witness, read off the definitions:
+  `p := letmut x i32 (const 0) (assign x (add (add (var x) (var x)) (add (var x) (var x))))`
+  gives `liveMax p = 1`, so **Row B at `poolSize = 1` asserts this program compiles** —
+  while evaluating the outer `add` needs both inner results alive at once against one pool
+  register and one reserved temp. *The two metrics coincide only when expressions are flat:
+  scope-end = liveness-end is true for VARIABLES, and expression temporaries are not
+  variables.*
+  ⚠️ **HONEST SCOPE, carried forward unchanged from the 08/09 post: `compile` did not exist,
+  so this is PRE-REGISTERED, NOT PROVEN — read from the definitions, not executed. When
+  `compile` lands this program must either compile, and the finding is wrong, or Row B needs
+  a third resource term.**
+
+📌 **WHY THIS SAT FOR FIFTEEN DAYS, recorded because the class matters more than the row:**
+the findings were answered on the bus and folded into the *compiler's* cast of Row B; **this
+document was never updated, so §6 read as an OPEN assignment for fifteen days — until this
+fold, which also closes it and points here.** *A question answered
+in one artifact and left open in another is indistinguishable, to the next reader, from a
+question nobody answered.* ⚠️ The 08:53 post's own line — *"Pass #1's two findings were folded
+before the file was cast"* — refers to that cast, not to this file; a reader chasing it should
+not conclude this fold is redundant.
 HYPOTHESES IN THE STATEMENT: `Function.Injective encode` (F2 — the
   hdi lesson, dropped = false at a two-line witness).
 `wellFormed` is a STANDALONE DECIDABLE predicate, independent of the
@@ -241,6 +291,15 @@ embedding.
 - MATH: §1/§2 statement forms — the semantics relation's shape, the
   encode quantification, the terminating-runs scope; is anything
   c2-shaped or vacuously-true hiding in the well-formedness side?
+  ✅ **ANSWERED 08/09 (passes #1 08:45, #2 08:53) — YES, and the fold is
+  in §2 under ROW B (MIG-6, folded 2026-08-24).** The vacuity is on
+  ROW B, not on `wellFormed`: a pessimistic `liveMax` empties the ∀.
+  Three parts — Row B's own vacuity mode with its pre-registered
+  witness demand; the "no third rejection cause" completeness claim
+  against a candidate third (imem); and `liveMax` as a SCOPE metric
+  standing in for a REGISTER-DEMAND metric, with a witness at
+  `poolSize = 1`. **PRE-REGISTERED, not proven — `compile` did not
+  exist when the passes ran.**
 - COMPILER: §2/§3 against the ACTUAL core semantics (your inventory:
   does machRun exist in the stated form, or what supplies it?); the
   offset arithmetic against the landed BEQ; N5's feasibility.
