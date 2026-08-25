@@ -192,13 +192,36 @@ that the boundary had been moved to suit them.*
 **STATE AT FILING** — captured in ONE invocation, per [[one-clock-per-post]] applied to git:
 ```
 UTC        2026-08-24T22:38:03Z
-HEAD       6e66afe921367602abeaa0c6e5ec6f53fc3d1945
-origin/master (ls-remote)  8512bd3dc3bb0fc81030e71c77cdd2fca12c246c
+AS OBSERVED AT FILING (pre-purge shas — these are what the commands RETURNED):
+  HEAD                       82ed230d54186f75232472771b873a00351253c8
+  origin/master (ls-remote)  69f2ed846131cc0cc35088b6c75fc050a97c26e8
+POST-PURGE EQUIVALENTS (same trees; via seat/fleet/purge-shamap-2026-08-24.tsv):
+  HEAD                       6e66afe921367602abeaa0c6e5ec6f53fc3d1945
+  origin/master              8512bd3dc3bb0fc81030e71c77cdd2fca12c246c
 ```
+⛔⛔ **RESTORED 2026-08-24 18:5x BY THE AUTHOR. The 08-24 purge sweep REWROTE THIS BLOCK
+in place, replacing the observed shas with their post-purge equivalents.** *The translation
+was correct; applying it HERE was not.*
+🔑 ***A CITATION AND A RECORD OF AN OBSERVATION ARE DIFFERENT OBJECTS AND LOOK IDENTICAL —
+BOTH ARE 40 HEX CHARACTERS IN A DOCUMENT.***
+```
+§1 ANCHOR shas          CITATIONS  -> SHOULD follow their content. Sweep CORRECT. Kept.
+"STATE AT FILING" shas  OBSERVATION -> MUST NOT change: rewriting them makes this document
+                                       assert a repository state THAT DID NOT EXIST when it
+                                       was written. 6e66afe9 had not been created yet.
+```
+⚠️ **This block was captured in ONE invocation on purpose, so it would be a faithful record of
+a single instant. Re-pointing it destroyed exactly the property it was built to have.** *Both
+forms are now carried: what was observed, and what it maps to.*
 
 ---
 
-## 6 · 📌 POST-FILING NOTE — 2026-08-24 15:4x. **NOTHING ABOVE THIS LINE HAS BEEN CHANGED.**
+## 6 · 📌 POST-FILING NOTE — 2026-08-24 15:4x.
+⚠️ **THIS HEADING ORIGINALLY READ "NOTHING ABOVE THIS LINE HAS BEEN CHANGED." THAT WENT FALSE
+AT 18:4x AND IS CORRECTED HERE RATHER THAN LEFT STANDING** — the purge sweep re-pointed four
+shas above it (two ANCHOR citations, correctly; two STATE-AT-FILING observations, incorrectly,
+now restored — see §5's restored block). **The criterion, the window, the manifest, its digest
+and the freeze instant were NOT touched by the sweep or by me.**
 
 **The helm confirmed §0's labelled inference from the sitting record** (bus, maestro
 2026-08-24 15:42:15): *the 08/24 council re-anchor (Captain's word, option b) meant the
