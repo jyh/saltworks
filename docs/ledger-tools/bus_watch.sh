@@ -78,11 +78,27 @@ trap 'rm -rf "$EVTMP"' EXIT
 # 🔑 This seat published "no silent caps: log what was dropped" as a rule and
 # then shipped three of them in its own watcher. A rule you wrote is not a rule
 # you applied.
+# ⛔⛔⛔ EIGHTEENTH DEFECT — A LOUD NON-FAILURE, WHICH IS THE INVERSE OF EVERY OTHER
+# DEFECT IN THIS FILE AND COSTS THE SAME THING. Found 2026-08-24 night, in the DELIVERED
+# OUTPUT of a large-backlog re-arm, twice in one poll:
+#     docs/ledger-tools/bus_watch.sh: line 85: printf: write error: Broken pipe
+# `head -3` EXITS AFTER THREE LINES, so on a long input the upstream `printf` is handed
+# EPIPE and the shell reports a write error -- ON A RUN THAT WORKED PERFECTLY. The three
+# lines and the suppression notice were both correct and complete.
+# 🔑 IT NEVER FIRES IN STEADY STATE (a poll carries a few lines, never thousands), so it
+#   appears ONLY at a relight with a deep backlog -- which is precisely the moment a
+#   successor is deciding whether their newly-armed instrument is healthy. An instrument
+#   that cries `write error` while working correctly teaches its reader to discount its
+#   error lines, and that is how a REAL one gets waved through. A silent failure and a
+#   false alarm are the same disease read from opposite ends.
+# ⇒ `awk NR<=3` consumes the whole stream and emits three lines: same output, no EPIPE.
+#   Applied in cap3, which serves ALL FIVE capped arms, so no arm keeps the old shape --
+#   [[a-new-pass-inherits-no-guards]] says a fix is not a fix until it is a sweep.
 cap3() {                    # reads stdin; prints <=3 lines, then NAMES the drop
   _t=$(cat)
   [ -z "$_t" ] && return 0
   _n=$(printf '%s\n' "$_t" | wc -l | tr -d ' ')
-  printf '%s\n' "$_t" | head -3
+  printf '%s\n' "$_t" | awk 'NR<=3'
   if [ "$_n" -gt 3 ]; then
     echo "⚠️ $((_n - 3)) MORE ${1:-match(es)} SUPPRESSED by the 3-line cap — read "$EVTMP/peer.txt" for the rest"
   fi
@@ -178,6 +194,67 @@ prov() {   # $1 = ERE ; $2 = "i" for case-insensitive (default: case-SENSITIVE)
         tok = substr($0, RSTART, RLENGTH); gsub(/^[^A-Za-z0-9]+/, "", tok)
         printf "[%s] \xc2\xab%s\xc2\xbb \xe2\x87\xa2 %s\n", (hdr == "" ? "UNATTRIBUTED — above the first header in view" : hdr), tok, $0
       } }'
+}
+
+# ⭐⭐ provshape() — THE SENTENCE-SHAPE PREDICATE, 2026-08-24 night. prov() asks whether a
+# pattern OCCURS; this asks whether the line ASSERTS something. Three things prov() cannot do:
+#
+#   (1) A QUOTED ASSERTION IS A SPECIMEN, NOT AN ANNOUNCEMENT. The gate counts quote marks
+#       BEFORE the match: an odd count means the match begins inside a quoted span. This is
+#       the one place a pattern CAN reach the quoted-vs-issued problem that compiler proved
+#       unreachable for the order-word arm -- not by inspecting the token, which is
+#       identical by design ("fidelity and false positive are the same act"), but by reading
+#       the QUOTATION MARKS the quoter themselves supplied. The bytes that defeat a token
+#       matcher are the bytes that give a shape matcher its answer.
+#       MEASURED: it removes 5 of the 6 surviving false fires and costs ZERO of 21 events.
+#   ⛔  AND IT IS ANNOUNCED, NEVER SILENT. A gate that drops matches without saying so is a
+#       silent cap wearing a nobler hat -- this file has shipped four of those. The END rule
+#       prints the tally. A reader who suspects a miss can see there was something to miss.
+#
+#   (2) IT DECLARES ITS OWN EVIDENCE, ONE-SIDED, AND SAYS THAT IT IS ONE-SIDED.
+#       The helm banked the law on 08/17 after asserting the Captain was up from a rhythm
+#       card eight times in one night: PRESENCE IS PROVEN BY DELIVERY, NEVER BY SCHEDULE.
+#       So each firing carries (ev:yes) when the line quotes him or names a delivery, and
+#       (ev:unknown) otherwise. MEASURED, and the asymmetry is the whole point:
+#           schedule-sourced claims carrying delivered evidence   0 of 8   <- perfect
+#           genuine events carrying delivered evidence           11 of 21  <- NOT perfect
+#       ⇒ (ev:yes) MEANS NOT-FROM-A-SCHEDULE. (ev:unknown) MEANS NOTHING AT ALL, and is
+#         named "unknown" rather than "schedule" for exactly that reason -- ten real
+#         returns sit in it. This is the SAME SHAPE as the case-contract finding this arm
+#         came out of: a filter that is a specificity test on ONE SIDE ONLY, whose rule
+#         survives while its natural rationale does not. A seat that reads the absence of
+#         this marker as a verdict has recommitted the error the marker exists to record.
+#       ⛔ IT NEVER GATES. An unevidenced announcement still wakes me; it must, because the
+#         first word of a real return usually arrives before anyone can quote it.
+#
+#   (3) The pattern is LOWERCASE because the subject is lowercased -- rev5-s law, and the
+#       reason rev4 was strictly worse than the bug it fixed: `i` is a contract on the
+#       PATTERN, not a flag on the call. There is no case switch here; the contract is
+#       unconditional, so it cannot be half-applied.
+#
+# ⚠️ WHAT THIS STILL CANNOT DO, stated so it is not discovered as a surprise: it scores the
+#   SHAPE OF A CLAIM, never its TRUTH. All eight of the helm-s rhythm-card assertions fire,
+#   correctly, because they are assertions. No predicate over one line can know he was
+#   asleep. That is what the (ev:) marker is for and it is why it is not a filter.
+provshape() {   # $1 = ERE, LOWERCASE (the subject is lowercased; see (3) above)
+  awk -v pat="$1" '
+    function quoted(line, st,   i, n) {
+      n = 0
+      for (i = 1; i < st; i++) if (substr(line, i, 1) == "\"") n++
+      return (n % 2 == 1)
+    }
+    /^\[[0-9]+\/[0-9]+ [0-9:x]+, [A-Za-z]/ {
+      h = $0; sub(/^\[/, "", h)
+      hdr = (match(h, /^[0-9]+\/[0-9]+ [0-9:x]+, [A-Za-z0-9_-]+/)) ? substr(h, RSTART, RLENGTH) : "?"
+    }
+    { subj = tolower($0)
+      if (match(subj, pat)) {
+        if (quoted($0, RSTART)) { gated++; next }
+        tok = substr($0, RSTART, RLENGTH); gsub(/^[^A-Za-z0-9]+/, "", tok)
+        ev = (subj ~ /"|verbatim|his (first )?words?|he (said|says|wrote)|message|clock:|pdt|good morning/) ? "ev:yes" : "ev:unknown"
+        printf "[%s] (%s) \xc2\xab%s\xc2\xbb \xe2\x87\xa2 %s\n", (hdr == "" ? "UNATTRIBUTED — above the first header in view" : hdr), ev, tok, $0
+      } }
+    END { if (gated > 0) printf "\xe2\x9a\xa0\xef\xb8\x8f %d CAPTAIN-RETURN match(es) SHAPE-GATED as QUOTED SPECIMENS (a quoted assertion is a specimen, not an announcement) \xe2\x80\x94 announced, never silent\n", gated > "/dev/stderr" }'
 }
 
 # 📌 ACCEPTANCE BAR, PINNED TO A VERSION — 2026-08-08 15:3x.
@@ -560,8 +637,63 @@ while true; do
     # invocation is checkable by a reader, the figure is not.
     # ⚠️ 6 of 10 CLIPPING IS THE NORMAL CASE, not a defect: these are long headers,
     # and the clip is stated at the FRONT where the envelope cannot eat it.
-    prov "(CAPTAIN.{0,20}(RETURN|BACK|HELM)|CONVENE)" < "$EVTMP/peer.txt" \
-      | widen | cap3 "CAPTAIN-RETURN"
+    # ⛔⛔⛔⛔ SEVENTEENTH DEFECT — AND IT IS THE ONE ARM THE FLEET FORMALLY LEFT OPEN.
+    # The helm ruled at 2026-08-24 08:04:11: five arms CLOSED on the case-contract audit,
+    # "the CAPTAIN-RETURN arm is ACCEPTED AS OPEN — it needs a sentence-shape predicate,
+    # a measured + delivery-proven design change". Discharged here, 08/24 night.
+    #
+    # 📊 WHAT THE OLD ARM ACTUALLY DID, MEASURED OVER THE FULL PEER VIEW OF THE WHOLE BUS
+    #   (144,827 lines; ground truth = 21 genuine Captain presence/arrival announcements
+    #   hand-classified from THREE differently-shaped recall nets, so the truth set is not
+    #   just the shadow of one pattern):
+    #       old  prov "(CAPTAIN.{0,20}(RETURN|BACK|HELM)|CONVENE)"   6 of 21   22 firings
+    #       new  provshape, below                                   21 of 21   36 firings
+    #   ⇒ THE ARM THAT EXISTS TO WAKE THIS SEAT WHEN THE CAPTAIN COMES BACK WAS MISSING
+    #     THREE OF EVERY FOUR RETURNS, AND HAD BEEN SINCE 2026-08-09.
+    #   ⛔ The single miss the helm named -- "the Captain is back at the terminal" -- was
+    #     not the defect, it was ONE INSTANCE of it. A named miss reads like a bug report;
+    #     it was a census. I measured before repairing and found fourteen more.
+    #
+    # ⭐ WHY A TOKEN PREDICATE CANNOT REACH THIS AND A SENTENCE SHAPE CAN.
+    #   The old arm asked "do CAPTAIN and RETURN/BACK/HELM co-occur within 20 characters".
+    #   That question has no opinion about who is asserting what, so it caught
+    #   possessives ("the Captain-s helm"), conditionals ("IF THE CAPTAIN RETURNS"),
+    #   addressee lists ("CAPTAIN, HELM —"), departures ("the Captain returns to dream
+    #   time" -- a DEPARTURE wearing the word RETURN), and the arm talking about itself.
+    #   The new one asks a grammatical question: IS THE CAPTAIN THE SUBJECT OF AN ASSERTED
+    #   PRESENCE PREDICATE? Tense does most of the work and does it for free:
+    #       "THE CAPTAIN HAS RETURNED"   asserts      -> fires
+    #       "IF THE CAPTAIN RETURNS"     hypothesises -> silent
+    #       "the Captain returns to dream time"       -> silent (present, and a departure)
+    #
+    # ⚠️ EVERY DROP RELATIVE TO THE OLD ARM WAS AUDITED, NOT ASSUMED: 15 lines the old arm
+    #   caught are not caught here. 8 of the 15 are MAESTRO-OWNED and were already being
+    #   delivered by the MAESTRO pass above -- verified by membership in the orders view,
+    #   not by reading the header off the line. The other 7 are filter self-description,
+    #   conditionals, addressee lists and domain usage ("a batch that never convened").
+    #   ⇒ ZERO COVERAGE LOST. This arm exists for a return greeted by a PEER, which is
+    #     precisely the case the MAESTRO pass cannot cover.
+    #
+    # ⛔ THE COST MATRIX IS ASYMMETRIC AND THE DESIGN IS TUNED TO IT, deliberately, in the
+    #   direction that costs reads rather than mornings (my predecessor, 08/09 07:4x):
+    #   "a watch that misses the Captain-s return costs the morning; a watch that fires on
+    #   a post discussing the Captain costs one read." So recall is bought first and
+    #   precision second. One known false fire survives across 18 days -- an inference
+    #   CORRECTION ("math read the 13:06 pushes as the Captain at the terminal. THEY WERE
+    #   THE HELM-S") -- and it is left firing ON PURPOSE: it is a true statement about
+    #   where he is not, which is the same question this arm exists to answer.
+    provshape "(the )?captain[^a-z'\`]{0,3}(is |has |had )?(back|returned|up[^a-z]|on deck|at the (terminal|helm|desk|keyboard|wheel)|in session since|in the chair)|(the )?(sitting|council) (is |has been |was )?convened" \
+      < "$EVTMP/peer.txt" 2> "$EVTMP/crgate.txt" | widen | cap3 "CAPTAIN-RETURN"
+    # ⛔⛔ THE GATE TALLY LEAVES THE CAPPED STREAM, AND I LEARNED THAT BY DRIVING IT.
+    # My first cut printed the tally from the awk END rule straight into the pipe, so it
+    # arrived as the LAST of 33 lines and `cap3` head -3 ATE IT. That is the NINTH DEFECT
+    # of this file exactly -- a silent cap on the notice whose entire job is to announce a
+    # cap -- recommitted by the seat that wrote the fix, in the patch that added a gate.
+    # ⇒ The announcement now travels on stderr and is emitted BELOW cap3, where no cap of
+    #   this file can reach it. `bash -n` was green on the broken version; only running the
+    #   real script against the real bus showed the line was missing. A MISSING LINE IS THE
+    #   HARDEST OUTPUT DEFECT TO SEE, because nothing appears in the place you are not looking.
+    [ -s "$EVTMP/crgate.txt" ] && cat "$EVTMP/crgate.txt"
 
     # ⛔ FENCE-SUBJECT ARM, 18:5x — AND I ARMED rev13 WITHOUT IT MINUTES AFTER AMENDING
     # THE MEMORY THAT NAMES THIS EXACT GAP. My duty tonight fires on COMPILERs landing
