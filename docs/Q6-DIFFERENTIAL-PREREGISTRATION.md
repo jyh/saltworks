@@ -577,3 +577,39 @@ as a considered decision, and only the consumer's conclusion silently becomes fa
 *The grant is for a mechanical renumbering pass; **choosing which of three spec shapes the memory
 obligation takes is not renumbering**, and the owner deferred it deliberately with a written
 reason. Reported, not resolved.*
+
+### ✅ 2026-08-25 15:1x — **CHECK 2 DISCHARGED FOR `decQ_mem`, AND THE PROBE CAUGHT A STALE-OLEAN TRAP FIRST**
+
+*Short announced window, scratch probe only, tree reverted and rebuilt to green (`EXIT=0`, `8745`
+jobs). The row's layer-2 failure was `1506:0 maximum recursion depth` — a RESOURCE failure — so
+check 2 was unsatisfied for it while its sibling `decQ_trapped` had a real verdict.*
+```
+  ✓ decQ_reads_memory_bit        [2 axioms]   POSITIVE ARM — D's decoder READS memory
+  ✓ decQ_mem_is_false_under_D    [2 axioms]   the retired row is FALSE, not unprovable
+  ✓ control_zero_env_still_clean [2 axioms]   CONTROL — on a zero env the field is still clean
+```
+⭐ **The control is what makes the witness mean anything:** without it, `mem[0] ≠ 0` supports
+*"`decQ` is broken"* exactly as well as *"`decQ` now READS"*. **Both readings had to be separated
+before the verdict could be cited in a retirement.**
+
+### ⛔⛔ **THE TRAP, AND IT IS ONE OF THIS SEAT'S OWN BANKED CARDS FIRING ON ITS AUTHOR**
+**My first run of that probe REFUTED ITS OWN POSITIVE ARM** — `decide` proved
+`(decQ eWit).mem[0]!.getLsbD 0 = true` **false**, and a diagnostic showed EVERY field reading
+zero, `trapped` included, against source that plainly reads them.
+```
+  CAUSE   `saltbuild <file>.lean` is the AUDIT ARM: it runs `lake env lean`, which links the
+          COMPILED OLEANS of the imports. I patched the SOURCE and never rebuilt, and the last
+          full build was the POST-REVERT green one — so the probe measured the PRE-SWAP CODEC.
+  CURE    build the patched module FIRST (`saltbuild SaltWorks.HDL.StateCodec`), THEN probe.
+          Re-run: mem = [1,0,0,0,0,0,0,0], trap reads net 1312. Witness was right all along.
+```
+🔑 ***A PROBE AGAINST A STALE OLEAN DOES NOT ERROR — IT ANSWERS ABOUT YESTERDAY'S CODE, IN A
+FORM INDISTINGUISHABLE FROM A REAL VERDICT.*** **Believed, it would have read as "the swap does
+nothing", which is the most damaging possible false conclusion for this campaign** — and it
+arrives wearing a kernel `decide` refutation, the most authoritative shape available.
+
+⛔⭐ **AND THE REVERSE DIRECTION IS WORSE, WHICH IS THE HALF THE CARD DID NOT CARRY: reverting
+the SOURCE without rebuilding leaves PATCHED OLEANS against REVERTED SOURCE.** *That state is
+invisible in `git status`, survives the window's close, and hands the identical trap to the NEXT
+seat who audit-arms anything importing this codec.* ⇒ **A REBUILD IS PART OF THE REVERT, NOT A
+COURTESY AFTER IT.** *Performed here: `EXIT=0`, `8745` jobs, cache consistent with the source.*
