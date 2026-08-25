@@ -523,3 +523,57 @@ FALSE, not merely unprovable, and that is the fact the retirement must cite.*
   `theorem decQ_mem` (this seat's own glob, its own must-break row). **`rw [decQ_mem]` resolves by
   NAMESPACE, and a name-grep cannot tell the two apart** — resolve per file, never by grep.
   *Sibling of `a-name-grep-cannot-see-a-duplicate-theorem`, arriving as a live hazard.*
+
+## 🧱 2026-08-25 — **LAYER 2 CONTAINS A WALL, AND IT IS A DEFERRED OBLIGATION COMING DUE — NOT A PROOF THAT GOT HARDER**
+
+*Reported as a wall, per this document's own rule: "a row that will not reach its pre-registered
+verdict is a WALL, reported as one." Verified at this hand, not relayed.*
+
+### THE ARITHMETIC OF THE GAP
+```
+  St has FOUR fields          regs · pc · mem · trapped          (HDL/ISA.lean:85-92)
+  CycleRealisesStepProj
+    constrains TWO            regs · pc ONLY                     (Program.lean:1487-1490)
+  decQ_cyc_eq_of_memFree
+    concludes ALL FOUR        decQ (cyc ins) = stepT …           (Program.lean:1697)
+```
+**Today the two-field gap closes for free: `decQ` builds `mem` and `trapped` as LITERALS, so the
+remaining goals are discharged by `rw [decQ_mem]` / `rw [decQ_trapped]` (`:1700-1701`).**
+⇒ ***UNDER D THOSE FIELDS BECOME FUNCTIONS OF THE ENV, AND NOTHING IN THE HYPOTHESIS CONSTRAINS
+`cyc`'s MEMORY NETS.*** A cycle map that realises steps on `regs`/`pc` while scrambling any net in
+`1056…1312` **satisfies `CycleRealisesStepProj` and refutes the conclusion.**
+⛔ **SO `decQ_cyc_eq_of_memFree` IS FALSE UNDER D, AND NO TACTIC REPAIRS IT — THE HYPOTHESIS IS
+TOO WEAK.** *It is not in the 26-name convicted list, and it is not in Q6's 27, because it never
+failed: `sorryAx` kept it green (variant 3, one section up).*
+
+### ⭐⭐ AND THE OWNER ALREADY WROTE DOWN WHY — THE SWAP FALSIFIES THE DEFERRAL'S OWN PREMISE
+`Program.lean:1480-1484`, math's docstring on the predicate:
+
+> ***"THE PROJECTION IS NOT A WEAKENING, IT IS THE CODEC'S ACTUAL COVERAGE."*** *§0.2 of the memory
+> block always priced this: the core codec covers **(regs, pc) ONLY**; `mem` lives in the `dmem8`
+> organ across the F4 bridge, deliberately not mirrored. Memory realisation is **stage ③'s
+> commissioned obligation** at that bridge — this predicate now says what it can honestly say, and
+> no more.*
+
+🔑 ***THE PREMISE OF THE DEFERRAL IS "THE CORE CODEC COVERS (regs, pc) ONLY", AND THAT IS EXACTLY
+THE SENTENCE HORN D FALSIFIES.*** **The obligation was not forgotten and the predicate is not a
+defect — it was honestly scoped to a codec that no longer exists after the swap.** *A deliberately
+deferred obligation comes due at the precise change that removes the reason for deferring it, and
+nothing anywhere fires when that happens: the predicate still compiles, the docstring still reads
+as a considered decision, and only the consumer's conclusion silently becomes false.*
+
+### ⇒ WHAT IS OWED, AND BY WHOM — THIS IS A SPEC DECISION IN MATH'S LANE, NOT PROOF WORK IN MINE
+```
+  OPTION A  strengthen CycleRealisesStepProj with mem/trapped clauses
+            -> every producer of that predicate must now realise memory. That is
+               stage ③'s obligation, arriving.
+  OPTION B  weaken decQ_cyc_eq_of_memFree to a PROJECTION equality (regs/pc only)
+            -> ⛔ this document forbids weakening a statement to make a row land;
+               it would also break the n-cycle deliverable that consumes the whole-St form.
+  OPTION C  carry a memory-frame hypothesis on `cyc` at the call sites
+            -> pushes the obligation to the consumers rather than discharging it.
+```
+⚠️ **I HOLD THE PEN ON THIS FILE UNDER MATH'S GRANT, AND I AM NOT TAKING THIS DECISION ON IT.**
+*The grant is for a mechanical renumbering pass; **choosing which of three spec shapes the memory
+obligation takes is not renumbering**, and the owner deferred it deliberately with a written
+reason. Reported, not resolved.*
