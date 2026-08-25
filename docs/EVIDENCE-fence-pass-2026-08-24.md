@@ -123,3 +123,71 @@ v1.1 demo sentence                   STILL NOT CLEARED (unchanged, kernel-verifi
 ```
 ⛔ **NOTHING ABOVE THE AMENDMENT LINE HAS BEEN EDITED — the overclaiming verdict stands
 visible, because a corrected record must show what it corrected.**
+
+---
+
+## ⛔⭐ AMENDMENT 2 — 2026-08-24 night (evidence). ONE OF MY TWO FENCE-DOC DEFECTS IS REFUTED, AND IT IS THE ONE WHOSE REPAIR WOULD HAVE DELETED A TRUE FENCE.
+
+**I went to repair the two defects above and checked them at the artifact first. Defect 2
+HELD. Defect 1 DOES NOT.**
+
+```
+1  F3's fabric exclusion       ⛔ REFUTED — the exclusion is CORRECT and STANDS.
+2  F4 self-contradiction       ✅ HELD — repaired in the fence document.
+```
+
+### ⛔ DEFECT 1, REFUTED: I EQUIVOCATED ON "GENERATED"
+
+The TT README sentence is about **DISTRIBUTION**, not **PROVENANCE**, and it says so in the
+same breath — *"What you see in `src/` is that copy, **made by a script**."* Measured:
+
+- `SaltWorks/Silicon/TT/assemble.sh` **is** that script, and the whole mechanism is
+  `cp "$RTL/banyan_fabric.v" "$TARGET/src/banyan_fabric.v"`. A copy.
+- The upstream file it copies, `SaltWorks/Silicon/RTL/banyan_fabric.v`, describes itself as
+  the frame-protocol document *"in Verilog"*. Nothing emits it.
+- **The kernel emission path exists and names its outputs** — `emit_cell.sh` produces
+  `mac_acc.v`, `mac_wshift.v`, `mac_cell.v`. **The fabric is not among them.**
+- The fence document's own measurement already said it: *"352 of 902 flops (39.0%)
+  kernel-emitted · 550 (61.0%) HAND RTL ... NOT PROVED ... fabric"*.
+- ⚠️ **AND ONE TEST I RAN IS BLIND, STATED SO IT IS NOT REUSED AS EVIDENCE:** a
+  generated-banner sweep (`DO NOT EDIT` / `auto-generated` / `emitted by`) over every `.v`
+  in the tree returns **zero for all of them** — so it separates nothing. A zero without a
+  sensitivity check is not a finding.
+
+🔑 **THE FAILURE DIRECTION IS THE WHOLE POINT.** My verdict recommended striking the fabric
+from an exclusion list. Had it been executed, this fence would have stopped fencing a
+**fabbed-is-verified** sentence about the fabric — on a **public** surface. *A fence defect
+that costs a reader one extra check is cheap. A fence defect that DELETES a fence is the
+expensive one, and it arrives wearing the words "this exclusion is stale."*
+
+📌 **A guard against exactly this misread now lives IN the fence document**, beside the
+exclusion list, headed *"DO NOT STRIKE THE FABRIC FROM THAT LIST ON THE STRENGTH OF THE WORD
+'GENERATED'"* — in the executable place rather than in a bank, because the next reader will
+be holding the fence, not this pass.
+
+### ✅ DEFECT 2, HELD AND REPAIRED
+
+The three F4 verdicts were real. The pre-15:47 paragraph is now marked **SUPERSEDED IN
+PLACE** — left visible, with the two sentences of its own file that refute it quoted beside
+it — and the routing pointer above now names the block it routes to *and* warns that the
+stale verdict survives at that block's foot. The current status is stated once, in one place:
+**F4 CLEARED under its amended condition; F1–F3 untouched and still binding.**
+
+### ⚠️ THE LINE NUMBERS ABOVE ARE OBSERVATIONS, AND THEY HAVE NOT BEEN RE-POINTED
+
+`fence:125`, `:180`, `:204`, `:247` were true when this pass was filed. The repair moved that
+file by ~58 lines, so **they no longer locate what they name** — and they are still not
+edited, because a record of an observation must not change. Find them by their sentences
+instead: *"⇒ HAND RTL. EXCLUDED BY NAME"*, *"SUPERSEDED 15:4x"*, *"THE JOIN IS STATED. F4 IS
+CLEARED"*, *"⇒ F4 STILL BINDS"*. **This is the same defect MIG-8 found in a repair that
+"inherited the shape of the error it repaired" — bare line numbers rotting twice. It is not
+repeated here.**
+
+### ⛔ AND THE CLASS, WHICH IS WHY THIS AMENDMENT EXISTS AT ALL
+
+**MY BANK CARRIED DEFECT 1 AS "MINE, OWED, NOT DONE" — an instruction to a successor,
+stated with no hedge, to strike a true fence.** A fresh head that trusted its own bank and
+worked the item would have executed it in minutes; nothing downstream would have objected,
+because the sentence it unfenced is the sentence everyone wants to be true.
+⇒ ***A BANK IS NOT A SOURCE. Check an owed repair at the artifact BEFORE performing it —
+the owed-work list is exactly where an unchecked inference is most likely to be obeyed.***

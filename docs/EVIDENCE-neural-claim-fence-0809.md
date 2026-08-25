@@ -125,6 +125,36 @@ FALSIFIED IF any ONE of these is observed:
           the pin wrapper, the sequencer FSM, the fabric
               ⇒ HAND RTL. EXCLUDED BY NAME from any fabbed-is-verified sentence.
 ```
+
+      ⛔⛔⭐ DO NOT STRIKE THE FABRIC FROM THAT LIST ON THE STRENGTH OF THE WORD
+        "GENERATED" — 2026-08-24 (evidence), recorded because THIS SEAT MADE THE
+        MISREAD AND BANKED IT AS AN OWED REPAIR.
+        The TT submission README says of `banyan_fabric.v` and `bitserial_switch.v`:
+        **"generated into this repo, not authored here... the same bytes are what
+        the equivalence proof and the synthesis script read."** That was read as
+        provenance — *"a generated artifact is not hand RTL, so this exclusion
+        fences a TRUE sentence"* — and the repair it implies is to DELETE the
+        fabric from the exclusion list.
+        ⇒ **MEASURED AT THE ARTIFACT, AND IT IS THE OPPOSITE.** "Generated into
+        this repo" is a DISTRIBUTION fact, not an authorship one:
+          · `SaltWorks/Silicon/TT/assemble.sh` is the whole mechanism, and its
+            two relevant lines are `cp "$RTL/banyan_fabric.v" ...` — a COPY, made
+            so the submission tree is "derived rather than asserted" (its words).
+          · The upstream file it copies, `SaltWorks/Silicon/RTL/banyan_fabric.v`,
+            describes itself as the frame-protocol document "in Verilog". Nothing
+            emits it.
+          · The kernel emission path EXISTS and NAMES ITS OUTPUTS — `emit_cell.sh`
+            produces `mac_acc.v`, `mac_wshift.v`, `mac_cell.v`. THE FABRIC IS NOT
+            AMONG THEM. (A generated-banner sweep over every `.v` in the tree
+            returns zero for ALL of them, so that test is BLIND, not a discriminator
+            — stated because a zero without sensitivity proves nothing.)
+          · And this file's own measurement already said so: "352 of 902 flops
+            (39.0%) kernel-emitted · 550 (61.0%) HAND RTL ... NOT PROVED ... fabric".
+        🔑 THE FAILURE DIRECTION IS WHAT MAKES THIS WORTH THE INK. Acting on the
+        misread would have STRUCK A TRUE FENCE and licensed a fabbed-is-verified
+        sentence about the fabric on a PUBLIC surface. A fence defect that costs
+        you a check is cheap; a fence defect that DELETES a fence is the expensive
+        one, and it arrives wearing the words "this exclusion is stale".
       🔑 ***AND THE SHARPEST FORM OF IT IS COMPILER'S, ABOUT MY OWN INSTRUMENT:
         the thing my simulator was silently supplying — holding 64 bits and
         driving load/sign — IS PRECISELY THE THING THAT DOES NOT EXIST IN
@@ -177,8 +207,13 @@ FALSIFIED IF any ONE of these is observed:
           ARITHMETIC READING (b + W·psum) ℤ-only, reaches the cell at rung 4,
                              carrying the chain's ONLY hypothesis
                              (¬saddOverflow, discharged by demoBound) ⛔ OPEN
-      ⛔ SUPERSEDED 15:4x — SEE THE FINAL RE-ANCHOR BELOW. F4 NO LONGER BINDS
+      ⛔ SUPERSEDED 15:4x — see the block headed "FINAL RE-ANCHOR, 2026-08-09
+        15:4x — THE CELL WAVE COMPLETED" immediately below. F4 NO LONGER BINDS
         on the decomposition, and the headline is now the STALE half.
+        ⚠️ READ THAT BLOCK TO ITS END: a pre-15:47 paragraph beginning "⇒ F4
+        STILL BINDS" survives at its foot, marked SUPERSEDED IN PLACE. This
+        pointer used to say only "below", which routes a reader past the
+        clearance and into the stale verdict it was written to route around.
 
       ═══ FINAL RE-ANCHOR, 2026-08-09 15:4x — THE CELL WAVE COMPLETED ═══
       row 2 now reads, IN THE PACKAGE ITSELF:
@@ -244,6 +279,29 @@ FALSIFIED IF any ONE of these is observed:
         cell adds what it is fed" from "the fed sequence MEANS b + W·x" is
         doing the fence's job upstream of the fence — which is the only place
         it is cheap.
+      ⛔⛔ SUPERSEDED IN PLACE, 2026-08-24 (evidence) — LEFT VISIBLE, NOT DELETED,
+        because a corrected record has to show what it corrected. THE PARAGRAPH
+        BELOW IS THE PRE-15:47 VERDICT AND IT IS THE LAST F4 VERDICT A
+        TOP-TO-BOTTOM READER MEETS. Two sentences of this same file refute it,
+        and neither needs an external check:
+          · "THE JOIN IS STATED. F4 IS CLEARED — no row unlanded, no join
+            unstated." — the 15:47 clearance, verified at the artifact
+            (`c732aaa`, `cell_computes_signed_mac`), not at a status line.
+          · "The headline now UNDERSTATES its own table." — which is the direct
+            contradiction of "two landed in the headline remains correct" below.
+        Its "rung 3 of 4" is likewise pre-re-anchor: this block's own row 2
+        records the arithmetic reading THROUGH RUNG 4 under ¬saddOverflow with
+        demoBound discharging it.
+      ⇒ **F4's CURRENT STATUS IS CLEARED, under the AMENDED condition stated
+        above** ("asserted while any row is unlanded, OR WHILE THE COMPOSING
+        JOIN IS UNSTATED"). **F1–F3 are untouched by that clearance and STILL
+        BIND** — a cleared F4 clears the DECOMPOSITION, not the phrase.
+      🔑 HOW IT GOT HERE, because the shape outlives the instance: the
+        re-anchor was written ABOVE an existing conclusion instead of replacing
+        it, so the file acquired a NEWER verdict and an OLDER one with the older
+        one LAST. Nothing was ever false when written. A reader who stops
+        reading at the first "⇒ F4" gets one answer and a reader who reads to
+        the end gets the opposite.
       ⇒ F4 STILL BINDS. A row landed through rung 3 of 4 is NOT a landed row,
         and "two landed" in the headline remains correct.
       ⚠️ DELIBERATELY NOT UPGRADED. A fixed understatement is the moment most
