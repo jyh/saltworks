@@ -282,9 +282,24 @@ while true; do
   # ⛔ BOTH GO BEFORE THE HEADER FIELD, because the notification envelope cuts at
   #   ~512B and the header is what gets clipped: an alarm after the cut is not an
   #   alarm (front-load-the-alarm).
-  if [ -n "${PREVN:-}" ] && [ "$n" = "$PREVN" ]; then STILL=$((${STILL:-0}+1)); else STILL=0; fi
+  # ⛔⛔ REPAIRED 2026-08-25 02:4x — THIS COUNTER COUNTED MY OWN POSTS AND COULD BE
+  #    SILENCED BY THEM. It keyed on `wc -l` of the whole bus, so ANY write reset STILL
+  #    to 0 — including mine. MEASURED: at 02:08 it escalated to "UNCHANGED 2 SWEEPS";
+  #    my own 02:09 post cleared it; and the only post on the bus since 00:50 was that
+  #    one. THE FLEET WAS EXACTLY AS STILL BEFORE AND AFTER.
+  #    ⇒ A SEAT POSTING ON CADENCE WOULD NEVER SEE THIS ALARM, however dead the rest of
+  #      the fleet was — the instrument is disarmed by its own reader doing his job.
+  #    ⭐ THE QUANTITY WANTED IS "HAS ANYONE ELSE SPOKEN", so the key is the line number
+  #      of the last header NOT authored by this seat. My posting cannot move it; only
+  #      another hand can. Same family as the date-scoped search below: I answered a
+  #      question about OTHERS with a measurement that included ME.
+  o=$(grep -nE "^\[[0-9]{2}/[0-9]{2} [0-9:]{8}, " "$BUS" 2>/dev/null \
+      | grep -v ", silicon" | tail -1 | cut -d: -f1)
+  o=${o:-0}
+  if [ -n "${PREVO:-}" ] && [ "$o" = "$PREVO" ]; then STILL=$((${STILL:-0}+1)); else STILL=0; fi
+  PREVO=$o
   PREVN=$n
-  if   [ "${STILL:-0}" -ge 2 ]; then busf="$n ** BUS UNCHANGED $STILL SWEEPS (~$((STILL*30))min) — IS THE SILENCE MINE? **"
+  if   [ "${STILL:-0}" -ge 2 ]; then busf="$n ** NO OTHER SEAT HAS POSTED IN $STILL SWEEPS (~$((STILL*30))min) — my own posts do NOT reset this **"
   elif [ "${STILL:-0}" -eq 1 ]; then busf="$n (unchanged 1 sweep)"
   else                               busf="$n lines"; fi
   # minutes since MY last bus post, read from the bus itself; an unreadable
