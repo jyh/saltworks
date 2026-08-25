@@ -230,3 +230,51 @@ the true closure is discovered only on a run where the earlier failures are alre
 artifact I maintain — which is the whole point, and why the rule failed the first two times I wrote
 it as something to remember.*
 
+
+---
+
+## 2026-08-25 — THE BASELINE, CAPTURED BEFORE THE REPAIR (compiler)
+
+The council ruled **HORN D STANDS UNAMENDED** this sitting (`seat/briefs/2026-08-19-maestro-night-bank.md:1288`,
+Captain verbatim *"I think we should do D alone"*; priced at `seat/briefs/2026-08-19-compiler-c4spec-refuted.md:500`).
+W5-asm's second half proceeds as **THE REPAIR**, and this table is its BEFORE-STATE.
+
+⛔ **A DIFFERENTIAL WITHOUT A RECORDED BEFORE-STATE IS NOT A DIFFERENTIAL.** Every declaration
+below **PROVES TODAY**. Verdicts lifted from ONE full build-arm run (`EXIT=0`, `8744` jobs, `0`
+errors) — the arm that WRITES oleans, not the path form that elaborates and discards.
+
+```
+  decQ_mem                                  ✓ SaltWorks.Stack.Program.decQ_mem      [2 axioms]  MUST BREAK
+  stepT_lw_writes_zero                      ✓ C4Refuted.stepT_lw_writes_zero        [2 axioms]  MUST BREAK
+  lw_forces_false_whatever_the_enable_does  ✓ C4Refuted.lw_forces_…enable_does       [3 axioms]  MUST BREAK
+  datapath_forces_zero_select_on_LW         ✓ C4Refuted.datapath_forces_zero_…       [3 axioms]  MUST BREAK
+  no_enable_repairs_the_load                ✓ C4Refuted.no_enable_repairs_the_load   [3 axioms]  MUST BREAK
+  regDatapathOK_is_false_on_LW_either_way   ✓ C4Refuted.regDatapathOK_is_false_…     [3 axioms]  MUST BREAK
+  c4Spec_core_is_false                      ✓ C4Refuted.c4Spec_core_is_false         [3 axioms]  MUST BREAK
+                                                                                                 (only AFTER the load is repaired)
+  step_lw_writes_zero                       ✓ C4Refuted.step_lw_writes_zero          [2 axioms]  MUST SURVIVE, TEXT UNCHANGED
+  step_lw_trap_holds                        ✓ C4Refuted.step_lw_trap_holds           [2 axioms]  MUST SURVIVE, TEXT UNCHANGED
+```
+
+⭐ **THE BASELINE COST NOTHING EXTRA — it was extracted from a build run for a DIFFERENT reason**
+(confirming a peer's red on the root). A build log already carries a verdict for every
+declaration; the only thing that makes it a baseline is READING IT BEFORE you change anything.
+
+### The swap's measured shape, from the isolated dry run (same day)
+```
+  staged patch    docs/Q3-SWAP-STAGED-STATECODEC-0822.diff, StateCodec.lean ONLY
+                  git apply --check against HEAD: EXIT=0 — it still applies
+  patched file    elaborates in isolation: EXIT=0, 0 errors, all 22 declarations audited
+  stWidth         1056 -> 1313   (delta = 8*32 memory bits + 1 trap bit)
+                  that delta equals StateCodecD's extension_costs_<n>_bits EXACTLY,
+                  which cross-confirms this patch IS the D swap
+  adds            exactly one declaration, decQ_encD
+```
+⇒ **`stWidth` is the numeral every organ offset is stated against, so the downstream breakage is
+a RENUMBERING** — the pre-registered member `renumbering_offsets`.
+
+⛔ **STILL OWED, AND NOT FAKED: the FULL closure.** It needs the dependents built against the
+patched codec; a fresh worktree has no `.lake`, so that is a cold build, and the cheap route
+(symlinking the SHARED mathlib packages) risks a cache five seats depend on. **The textual route
+is barred by this document's own §115: it returned 4468 names, 84% of the tree, and is called
+worthless here.** The kernel enumerates that set or nobody does.
