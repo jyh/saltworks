@@ -706,3 +706,44 @@ about a changing artifact, one axis over. **Every `EXIT=0` in this campaign now 
 📌 *And math still holds the verification OWED: they have read what I TYPED, not what I BUILT, and
 a quoted byte cannot show the range predicate inside the `decQ_congr` hypothesis — which is exactly
 where a 1056-vs-1313 mismatch would hide. Correct, and I am not asking them to discharge it.*
+
+## 📐 2026-08-25 16:1x — **`c4Spec_iff_fieldwise` PRICED POSITIVELY, NOT STARTED — AND THE PRICE IS NOT THE PROOF**
+
+*The last genuine layer-2 site. Priced rather than begun, because the dominant cost is not where a
+reader would look, and `an-estimate-from-absences` says price the dominant cost POSITIVELY.*
+```
+  1  THREE new declarations, none of which exist   MemField · TrappedField · stBit_mem
+     ⚠️ my first grep said MemField/TrappedField EXISTED. It matched `MemFieldD`/
+        `TrappedFieldD` — the D-side twins. Prefix match, wrong object. Exact-name
+        re-check: 0 defs each. The proposal was right and my reading was not.
+  2  the proof restatement                          ~81 lines, template LANDED and green
+                                                    (`c4SpecD_iff_fieldwise`, :2829-2909)
+  3  PROSE SAYING "34" / "THIRTY-FOUR"               8 sites across 7 FILES
+  4  a POSITIONAL PROJECTION in another glob         C4Refuted.lean:295
+```
+### ⛔⛔ THE HAZARD THAT IS NOT IN `Program.lean` AT ALL
+`C4Refuted.lean:295` reads `(((…c4Spec_iff_fieldwise core).mp h).2.1 r1)` — **it projects
+POSITIONALLY into the conjunction.** The `34 → 43` growth changes that conjunction's SHAPE.
+Worked through (right-associated `∧`):
+```
+  current    len ∧ RegFieldAll ∧ PcField                        .2.1 = RegFieldAll
+  APPENDED   len ∧ RegFieldAll ∧ PcField ∧ MemFieldAll ∧ Trap   .2.1 = RegFieldAll   SAFE
+  INSERTED   len ∧ MemFieldAll ∧ RegFieldAll ∧ PcField ∧ Trap   .2.1 = MemFieldAll   RE-AIMED
+```
+🔑 ***APPENDING IS SAFE AND INSERTING SILENTLY RE-AIMS A CONSUMER IN A DIFFERENT FILE — and the
+re-aimed version may still TYPECHECK, because `.2.1` is well-formed either way.*** **Nothing in the
+tree enforces the append-only constraint; it is an accident of ordering that happens to hold.**
+⇒ **WHOEVER TAKES THIS: append the memory/trap conjuncts at the END, and say so in the docstring,
+because the reason lives in another glob and no build will remind you.**
+
+### 📌 AND THE PROSE SURFACE IS SEVEN FILES WIDE
+`RegField0.lean` (×2) · `CoreAssembly.lean` · `PcFieldClosed.lean` · `RegFieldSchema.lean` ·
+`C4Reduction.lean` · `ScratchC4Reduction.lean` · `ScratchRegField0.lean` — every one asserts the
+split is **34**, and every one **builds green forever at 43.** *Surface 5 of the retirement rule
+(cross-file prose), now at seven-file scale on a single restatement.*
+
+⚖️ **NOT STARTED, AND THE REASON IS NOT SIZE: the work crosses globs** (`C4Refuted.lean` is mine,
+but `RegField0`/`RegFieldSchema`/`PcFieldClosed`/`C4Reduction` prose and a positional projection are
+a wider blast radius than a renumbering grant covers) **and five commits cannot currently push, so
+nothing landed here could be read by the seat that would need to check it.** *Priced, published,
+and left for a window that can actually close.*
