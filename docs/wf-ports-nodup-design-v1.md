@@ -80,6 +80,14 @@ position above N. Measured on LANDED, CERTIFIED blocks:
   immBCirc             32      13      13-bit B-type displacement, SIGN-extended
   immBshiftedCirc      32      12      same
 ```
+⭐⭐ **AND THE JUSTIFICATION IS NOW KERNEL-CHECKED, NOT INFERRED FROM
+THE COUNTS.** `sltCirc.outs = 6 :: List.replicate 31 7`, and net `7`'s
+gate is `Op.const false` — **a hardwired zero, so bits 1..31 are
+zero-extension BY CONSTRUCTION.** `immICirc.outs.drop 11` de-dups to a
+single net — **the sign bit, fanned out.** *I had asserted "these
+duplicates are correct" from the distinct-counts alone; a round story
+that fits the numbers is not a measurement, so it is a theorem now.*
+
 **Kernel exhibits** (`SaltWorks/HDL/WfPortsNodupRefuted.lean`,
 `sltCirc_fails_clause5` · `immICirc_fails_clause5` · … ) — **they
 depend on NO axioms**, and a POSITIVE CONTROL `bitAnd32_passes_clause5`

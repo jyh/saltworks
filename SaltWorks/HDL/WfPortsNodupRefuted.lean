@@ -66,6 +66,20 @@ theorem immBCirc_fails_clause5 :
     immBCirc.outs.eraseDups.length = 13 ∧ portsNodupB immBCirc = false := by
   refine ⟨by decide +kernel, by decide +kernel⟩
 
+/-- ⭐⭐ **THE DUPLICATION IS A HARDWIRED ZERO — the justification, kernel-checked rather than
+inferred from a count.** `sltCirc` puts the compare result in bit 0 and drives bits 1..31 from
+ONE net whose gate is `const false`. That is zero-extension by construction, not an accident
+that happens to fit the numbers. -/
+theorem sltCirc_duplication_is_a_hardwired_zero :
+    sltCirc.outs = 6 :: List.replicate 31 7
+  ∧ (sltCirc.gates.filter (fun g => g.out == 7)).map (fun g => g.op) = [Op.const false] := by
+  refine ⟨by decide +kernel, by decide +kernel⟩
+
+/-- ⭐⭐ **AND THE IMMEDIATE'S DUPLICATION IS THE SIGN BIT.** From bit 11 upward `immICirc`'s port
+list is ONE net repeated — the sign, fanned out. Sign-extension by construction. -/
+theorem immICirc_duplication_is_the_sign_bit :
+    (immICirc.outs.drop 11).eraseDups = [31] := by decide +kernel
+
 /-- ✅ THE POSITIVE CONTROL — the bar is not vacuously failing everything. `bitAnd32` has 32
 distinct ports and PASSES ①⁵, so the failures above discriminate. -/
 theorem bitAnd32_passes_clause5 :
