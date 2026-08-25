@@ -61,8 +61,8 @@ ANCHOR   the Captain's re-anchor of MIG-12, evening sitting 2026-08-23 — his w
          recorded verbatim at docs/QUEUE.md:186-191 and docs/ledger-tools/dated-debts.tsv:4
          "THE SLICE-B PRICE-CRITERION PRE-REGISTRATION, RE-ANCHORED (Captain, 2026-08-23
           evening sitting: 'yes (b)')"
-         content-addressed: dated-debts.tsv at 0ec5bb7ab3a889e5dfbd511ecac51700737eaffc
-                            QUEUE.md         at 761dc7945c4363ff39b0d1310b2d7d2a02b74bab
+         content-addressed: dated-debts.tsv at 0ba804d7e3df353b5ca272f52d50481b41451d3c
+                            QUEUE.md         at c2368dfdd760cdf23fd8e5e55fad9666a8faefbb
 
 FREEZE   THE INSTANT 2026-09-07T20:00:00Z PASSES.
          INSTRUMENT: `date -u +%Y-%m-%dT%H:%M:%SZ` compared against that literal, whose
@@ -192,8 +192,8 @@ that the boundary had been moved to suit them.*
 **STATE AT FILING** — captured in ONE invocation, per [[one-clock-per-post]] applied to git:
 ```
 UTC        2026-08-24T22:38:03Z
-HEAD       82ed230d54186f75232472771b873a00351253c8
-origin/master (ls-remote)  69f2ed846131cc0cc35088b6c75fc050a97c26e8
+HEAD       6e66afe921367602abeaa0c6e5ec6f53fc3d1945
+origin/master (ls-remote)  8512bd3dc3bb0fc81030e71c77cdd2fca12c246c
 ```
 
 ---

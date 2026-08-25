@@ -1,6 +1,6 @@
 # THE Q3 SWAP'S ERROR TEXT UNDER THE STAGED `StateCodec` PATCH — MEASURED, PINNED, RE-DERIVABLE
 
-⛔ **ANCHOR: measured on `02b72ae`, with `docs/Q3-SWAP-STAGED-STATECODEC-0822.diff` applied and the
+⛔ **ANCHOR: measured on `5f5fe11`, with `docs/Q3-SWAP-STAGED-STATECODEC-0822.diff` applied and the
 working diff verified BYTE-IDENTICAL to that patch first.** `SaltWorks/Stack/Program.lean` was
 unchanged between that commit and the measurement, so the line numbers are the tree's, not just
 mine. ⚠️ **THEY EXPIRE ON THE FIRST EDIT TO `Program.lean` — INCLUDING THE PREPARER'S OWN.**

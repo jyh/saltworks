@@ -123,7 +123,7 @@
 ### Source rows stay in their docs as HISTORY (three ruling-#7 probes quote them).
 
 **MIG-P1 (finish-first, public-hygiene):**
-- **MIG-1 · EVIDENCE · P1 — ✅ DISCHARGED (`e8975d7`, 19:47): the story numbers are ACTUALISED**
+- **MIG-1 · EVIDENCE · P1 — ✅ DISCHARGED (`b816275`, 19:47): the story numbers are ACTUALISED**
   (61,716,448 output tokens over the true 8-home union; the price actualised to the REGISTERED
   €840 with "receipt outstanding" stated — not laundered into an invoice). ⛔ Citation in the
   original row CORRECTED: the €840 lives at `ndf-top-module-design-v1.md:334`, NOT
@@ -132,14 +132,14 @@
   still read `~20M` tokens / `~$500 (TT)` while the NDF was SUBMITTED AND PRICED. The doc's own
   fence (`:99-100`) bars unmeasured numbers from public telling, and this repo is public. DISCHARGE:
   actualised rows in the story doc. Cheapest P1 here: the invoice is known.
-- **MIG-2 · SILICON · P1 — ✅ DISCHARGED 2026-08-24 (silicon, `748f379`): the read is folded into the doc, PROSE ONLY.** Duration-control CONFIRMED in the ISSCC sentence itself; O(1) cell state CONFIRMED (ISS90 §3.2, "every banyan element becomes identical"); k=8/256×256 CONFIRMED with the 4+4 made exact ("the components function as parallel 16x16 elements... two devices in one package"). ⭐ **THE CAPTAIN'S "first (or is it second?) bit" IS ANSWERED AND BOTH MEMORIES ARE RIGHT** — it is the first bit OF THE ADDRESS, which is the SECOND bit of the transmitted cell because the activity bit precedes it; a counting-origin ambiguity, not a faulty recall. ⚠️ **THREE CORRECTIONS OWED IN THE BLOCK** (maestro's doc, flagged not edited): "chip"→ELEMENT/DEVICE in the 4+4 sentence · "BUILT PRACTICE in 1990" over-claims the MACHINE (what was assembled was 64×64, ISS90 §4) · "generated per column" UNSUPPORTED and left OPEN. ⛔ **AND A FIREWALL DEFECT IN THE AUDITED BLOCK ITSELF: it instructs a check against "Figure 7's S2 trace" while this doc's own head is WORDS-ONLY-never-figures (standing 8/7 ruling). Struck as a method; prose settled the question without it.** — original entry follows:
+- **MIG-2 · SILICON · P1 — ✅ DISCHARGED 2026-08-24 (silicon, `777aec9`): the read is folded into the doc, PROSE ONLY.** Duration-control CONFIRMED in the ISSCC sentence itself; O(1) cell state CONFIRMED (ISS90 §3.2, "every banyan element becomes identical"); k=8/256×256 CONFIRMED with the 4+4 made exact ("the components function as parallel 16x16 elements... two devices in one package"). ⭐ **THE CAPTAIN'S "first (or is it second?) bit" IS ANSWERED AND BOTH MEMORIES ARE RIGHT** — it is the first bit OF THE ADDRESS, which is the SECOND bit of the transmitted cell because the activity bit precedes it; a counting-origin ambiguity, not a faulty recall. ⚠️ **THREE CORRECTIONS OWED IN THE BLOCK** (maestro's doc, flagged not edited): "chip"→ELEMENT/DEVICE in the 4+4 sentence · "BUILT PRACTICE in 1990" over-claims the MACHINE (what was assembled was 64×64, ISS90 §4) · "generated per column" UNSUPPORTED and left OPEN. ⛔ **AND A FIREWALL DEFECT IN THE AUDITED BLOCK ITSELF: it instructs a check against "Figure 7's S2 trace" while this doc's own head is WORDS-ONLY-never-figures (standing 8/7 ruling). Struck as a method; prose settled the question without it.** — original entry follows:
 - **MIG-2 · SILICON · P1** — heritage §0: the 25 lines added 08/10 (`fc09811`,
   Captain-recalled 1988-cell architecture) have never had a silicon read against
   Marcus & Hickey ISSCC 1990 WPM 2.4. DISCHARGE: a folded commit on the doc citing
   the read. The skew/timing half is already discharged (`cd903d9`, `ce16552`).
 
 **MIG-P2 (the working tier):**
-- **MIG-3 · COMPILER · P2 — ✅ DISCHARGED 2026-08-24 (compiler, `829a0f3`): ROW A AS RULED IS VACUOUS, not merely unproved.** F2 (`Function.Injective encode`) is REFUTABLE — `State` is infinite, `St` is finite — so a proof of Row A in §2's form would certify nothing; kernel exhibit `no_injective_state_encoding`. (b) N0.5 has no AST constructor to inline. (c) N3 half-landed, exhibited by `cause_outside_the_fragment_is_now_ite_only`. Escalation trigger MEASURED: no `.tex` fleet-wide quotes Row A, stays P2. Refutation folded into `docs/lang-design-v1.md` §2. The landed `encodeOK` shape is CORRECT — this refutes the ruled TEXT, not the corpus.**
+- **MIG-3 · COMPILER · P2 — ✅ DISCHARGED 2026-08-24 (compiler, `3adb4ab`): ROW A AS RULED IS VACUOUS, not merely unproved.** F2 (`Function.Injective encode`) is REFUTABLE — `State` is infinite, `St` is finite — so a proof of Row A in §2's form would certify nothing; kernel exhibit `no_injective_state_encoding`. (b) N0.5 has no AST constructor to inline. (c) N3 half-landed, exhibited by `cause_outside_the_fragment_is_now_ite_only`. Escalation trigger MEASURED: no `.tex` fleet-wide quotes Row A, stays P2. Refutation folded into `docs/lang-design-v1.md` §2. The landed `encodeOK` shape is CORRECT — this refutes the ruled TEXT, not the corpus.**
 - **MIG-3 · COMPILER · P2** — lang-design §2/§3, 3 debts: (a) Row A's ruled
   function-equality conclusion vs the corpus (`CompileS.lean:1-27` says the landed
   shape is `encodeOK` + scoped register agreement — the ruled conclusion is not
@@ -148,12 +148,12 @@
   (`while` yes, `ite` refused at `CompileS.lean:306`) blocking N5. DISCHARGE: a
   written refutation folded into the doc. BEQ/offset sub-item ALREADY satisfied
   (`backOffByOne_diverges_on_a_stale_guard`) — do not re-commission.
-- **MIG-4 · COMPILER · P2 — ✅ DISCHARGED 2026-08-24 (compiler, `fadbaf8`): one filing, three debts, measured.** (1) ⛔ **NOTHING OWED — ALREADY DISCHARGED BY THE CORPUS**: `MemOrgan.lean` carries `memOrgan_gate_count`, the nIn/outs pin, and `memOrgan_exceeds_banked_budget` (the very comparison), with the unit settled in its docstring. My first filing re-derived it and called it a third axis; CORRECTED — it is THE axis, already reconciled. (2) **BNE is FREE and CHEAPER than BEQ**: `zeroTree`'s raw polarity is NONZERO (kernel-measured) = BNE's condition; BEQ pays the inverter — ⛔ but the compare occurs ZERO times in `CorePlace`/`CoreAssembly`, so the saving is UNPRICED at core level and placing a compare is a cost B1 does not carry. (3) Encoder extension = **0/1 gates** — free in silicon, cost is PROOF-side; ⛔ and *"the c1 organ"* is UNDEFINED (2 occurrences, both assignment lines). Exhibits: `SliceBPricedRefuted.lean`. E3 excluded — conditioned, not queued.**
+- **MIG-4 · COMPILER · P2 — ✅ DISCHARGED 2026-08-24 (compiler, `c7d5547`): one filing, three debts, measured.** (1) ⛔ **NOTHING OWED — ALREADY DISCHARGED BY THE CORPUS**: `MemOrgan.lean` carries `memOrgan_gate_count`, the nIn/outs pin, and `memOrgan_exceeds_banked_budget` (the very comparison), with the unit settled in its docstring. My first filing re-derived it and called it a third axis; CORRECTED — it is THE axis, already reconciled. (2) **BNE is FREE and CHEAPER than BEQ**: `zeroTree`'s raw polarity is NONZERO (kernel-measured) = BNE's condition; BEQ pays the inverter — ⛔ but the compare occurs ZERO times in `CorePlace`/`CoreAssembly`, so the saving is UNPRICED at core level and placing a compare is a cost B1 does not carry. (3) Encoder extension = **0/1 gates** — free in silicon, cost is PROOF-side; ⛔ and *"the c1 organ"* is UNDEFINED (2 occurrences, both assignment lines). Exhibits: `SliceBPricedRefuted.lean`. E3 excluded — conditioned, not queued.**
 - **MIG-4 · COMPILER · P2** — slice-b B1/B3: memory-organ cost in the emitted path ·
   BNE vs the landed compare organ · encoder extension vs the c1 organ. DISCHARGE: one
   filing covering the three. (E3 executive-as-program: see the register — conditioned,
   not queued.) Silicon's half already discharged.
-- **MIG-5 · COMPILER · P2 — ✅ DISCHARGED 2026-08-24 (compiler, `0a3eb7c`): ①⁵ IS UNSOUND, not merely unlanded — IT REJECTS SIGN- AND ZERO-EXTENSION.** 5 landed certified blocks fail it (`sltCirc`/`sltuCirc` 2 distinct of 32 — zero-extended compare; `immICirc`/`immBCirc`/`immBshiftedCirc` 12–13 of 32 — sign-extended immediates); kernel exhibits in `WfPortsNodupRefuted.lean`, NO axioms, with a positive control. The doc's `b = 0` note was a DEGENERATE-case control and anticipated the wrong failure. Cost is trivial and not the binding constraint; ①⁵ composes cleanly with ①″/①‴ and is simply wrong. RETROFIT: 84 `Circ`-valued blocks corpus-wide, 15 measured (by import convenience, NOT sampled — 69 unmeasured, do not extrapolate). Repair left to §2's adopter: the intent is *accidental* aliasing, which `outs.Nodup` cannot express.**
+- **MIG-5 · COMPILER · P2 — ✅ DISCHARGED 2026-08-24 (compiler, `717cc2d`): ①⁵ IS UNSOUND, not merely unlanded — IT REJECTS SIGN- AND ZERO-EXTENSION.** 5 landed certified blocks fail it (`sltCirc`/`sltuCirc` 2 distinct of 32 — zero-extended compare; `immICirc`/`immBCirc`/`immBshiftedCirc` 12–13 of 32 — sign-extended immediates); kernel exhibits in `WfPortsNodupRefuted.lean`, NO axioms, with a positive control. The doc's `b = 0` note was a DEGENERATE-case control and anticipated the wrong failure. Cost is trivial and not the binding constraint; ①⁵ composes cleanly with ①″/①‴ and is simply wrong. RETROFIT: 84 `Circ`-valued blocks corpus-wide, 15 measured (by import convenience, NOT sampled — 69 unmeasured, do not extrapolate). Repair left to §2's adopter: the intent is *accidental* aliasing, which `outs.Nodup` cannot express.**
 - **MIG-5 · COMPILER · P2** — wf-ports clause ①⁵, 3 debts: composition with ①″/①‴ in
   `OperandBMux.lean:27-55` · decide-cost-at-scale for nodup certs · retrofit list.
   Note ①⁵ occurs exactly twice in the repo, both in the audited doc — never adopted.
@@ -166,7 +166,7 @@
   genuinely closed). DISCHARGE: a math finding folded into §2. COMMISSION THE CHECK —
   a prior refuter said it "produces a finding" but the reason did not survive
   transmission; do not book an unheld finding.
-- **MIG-8 · SILICON · P2 — ✅ DISCHARGED 2026-08-24 (silicon, `c878ee9`): NO MISQUOTE FOUND.** Every spec-derived claim in §1/§2 verified at SECTION + QUOTED SENTENCE against the current spec — and the pin was tested first: `55831de` is an ancestor, its spec blob is byte-identical to HEAD's, zero commits since. ⭐ **The highest-risk item is the cleanest: spec §5 warns consumers against citing the second-`act_stb` clause as the SOURCE of well-phasedness, and this block carries the amended sof-anchored form and names the old attribution REFUTED.** Quoted counts match spec §8 rows 6/7 exactly (`188/200`, `192/200`); rows 5–11 all present, mutant controls at 9 and 11. ⛔ **WHAT IS BROKEN IS THE CITATION LAYER, AND IT IS THE BLOCK'S OWN LAW: §5 adopts "SECTION + QUOTED SENTENCE, never bare line numbers" and records the repair AS BARE LINE NUMBERS — all four (`:361 :221 :232 :175`) have now rotted a SECOND time, `:232` onto an empty line, and the P-placeholder changed SECTION (→ §9), which no line number can express. The repair inherited the shape of the error it repaired.** Replaced with quoted sentences. — original entry follows:
+- **MIG-8 · SILICON · P2 — ✅ DISCHARGED 2026-08-24 (silicon, `9e01627`): NO MISQUOTE FOUND.** Every spec-derived claim in §1/§2 verified at SECTION + QUOTED SENTENCE against the current spec — and the pin was tested first: `55831de` is an ancestor, its spec blob is byte-identical to HEAD's, zero commits since. ⭐ **The highest-risk item is the cleanest: spec §5 warns consumers against citing the second-`act_stb` clause as the SOURCE of well-phasedness, and this block carries the amended sof-anchored form and names the old attribution REFUTED.** Quoted counts match spec §8 rows 6/7 exactly (`188/200`, `192/200`); rows 5–11 all present, mutant controls at 9 and 11. ⛔ **WHAT IS BROKEN IS THE CITATION LAYER, AND IT IS THE BLOCK'S OWN LAW: §5 adopts "SECTION + QUOTED SENTENCE, never bare line numbers" and records the repair AS BARE LINE NUMBERS — all four (`:361 :221 :232 :175`) have now rotted a SECOND time, `:232` onto an empty line, and the P-placeholder changed SECTION (→ §9), which no line number can express. The repair inherited the shape of the error it repaired.** Replaced with quoted sentences. — original entry follows:
 - **MIG-8 · SILICON · P2** — payload-delivery §1/§2: re-read "does any spec fact
   misquote the protocol?" against the CURRENT spec (`55831de`) and current §8 rows
   5-11 — the prior discharge was taken against a doc version that no longer exists
@@ -178,14 +178,14 @@
 - **MIG-10 · COMPILER · P2 (address-confirmation ONLY)** — the layer-compiler as Lean
   rows IS the successor of neural-fabric §7's row; this line confirms the A1/GNN
   QUEUE entry as its address. No new load.
-- **MIG-11 · EVIDENCE · P2 — ✅ DISCHARGED (`87191ff`, 21:16): the named "OS" wording DOES NOT
+- **MIG-11 · EVIDENCE · P2 — ✅ DISCHARGED (`bc491d9`, 21:16): the named "OS" wording DOES NOT
   EXIST** (1 occurrence in the doc — the debt row itself; v1.1 already says EXECUTIVE and
   "cooperative-v1"). Discharged by CLAIM-SCOPE AUDIT, not by word-absence — and the audit found
   **two real travel gaps, routed to their owners on the bus:** compiler's isolation cert covers
   REGISTERS while E2 claims registers-AND-MEMORY · the fairness that exists is PREEMPTIVE while
   E2's v1 needs COOPERATIVE. Those live in the owners' lanes, not as new rows here (the channel
   is closed).
-- **MIG-12 · EVIDENCE · P2 — ✅ DISCHARGED 2026-08-24 (evidence, `e5d6c90`): FILED at
+- **MIG-12 · EVIDENCE · P2 — ✅ DISCHARGED 2026-08-24 (evidence, `f98b17b`): FILED at
   `docs/EVIDENCE-sliceb-price-prereg.md`; the row's own instrument agrees — `ripen.sh` now
   reports `FILED — no longer ripening`, exit 0 (was exit 1, RIPE).** ⛔ **AND THE ANCHOR THIS
   ROW GAVE IS UNDEFINED AND, ON ITS ONLY AVAILABLE READING, UNSATISFIABLE — reported rather
@@ -368,7 +368,7 @@ bit-serial Design-B direction. Each names its successor or says none exists:**
   not the bank's example `1bb4038`; true backlog 6 landings/7
   modules — DISCHARGED 18:19, 6/6 kernel-checked NO DEFECT
   (CompileE·X0·X1·X2·RegMap·SeamCSorted; A0Routes221 excluded as
-  same-hand). MEAS CURRENT at `b93cbb5` (96 modules kernel-green, 0 red — 95 at pin `3f71585` + `C4Refuted.lean`; ancestry-verified; field repaired 08/23 20:3x after the helm consumed the handoff TWICE, 15:03 and 16:22, without applying it — silicon's boot brief carries the same value as backstop). Read-work discipline:
+  same-hand). MEAS CURRENT at `ef96b7a` (96 modules kernel-green, 0 red — 95 at pin `b696f08` + `C4Refuted.lean`; ancestry-verified; field repaired 08/23 20:3x after the helm consumed the handoff TWICE, 15:03 and 16:22, without applying it — silicon's boot brief carries the same value as backstop). Read-work discipline:
   parkable, never gates P1; every verdict posts its
   sha.** — conveyor refutation on every compiler
   landing; CELLS pricing on request. C5 re-baseline: **DISCHARGED
