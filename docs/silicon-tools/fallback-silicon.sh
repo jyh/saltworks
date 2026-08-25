@@ -250,7 +250,21 @@ while true; do
     # file, two minutes apart — in a post about a 1% measurement discrepancy.
     ipct=$(( (ib * 200 + IDXLIM) / (2 * IDXLIM) ))
     if   [ "$ib" -ge "$IDXLIM" ]; then idx="$ib/$IDXLIM (${ipct}%) ** OVER — TAIL ENTRIES ARE NOT LOADING **"
-    elif [ "$ipct" -ge 85 ];     then idx="$ib/$IDXLIM (${ipct}%) ** APPROACHING THE CUT — compact now **"
+    # ⛔ MESSAGE CORRECTED 2026-08-24 21:3x — THE THRESHOLD IS DELIBERATELY UNTOUCHED.
+    #    It said "compact now", which names an action that does not exist here: measured
+    #    the same night, only 2 of 70 hooks carry >=2 dated clauses and they hold 6% of
+    #    the bytes. THE INDEX IS NOT BLOATED — it is 70 hooks each carrying one real law,
+    #    so a compaction campaign cuts law, not fat.
+    #    ⇒ AN ALARM THAT NAMES AN UNAVAILABLE ACTION TRAINS ITS READER TO WAVE PAST IT.
+    #      This one now reports the HEADROOM (bytes and hooks-worth) and names the ONE
+    #      move that actually shrinks a hook: rewrite it when you are already amending it
+    #      — that shrank 3 of 4 index edits on 8/24 WHILE THEY GAINED CONTENT.
+    #    ⚠️ I OWN THIS THRESHOLD AND DID NOT MOVE IT. Retuning an instrument until it
+    #      stops disagreeing is the same defect as a check that cannot fail, approached
+    #      from the other side. The level stays at 85 until someone else rules on it.
+    elif [ "$ipct" -ge 85 ];     then
+      _rem=$(( IDXLIM - ib )); _hk=$(( _rem / 280 ))
+      idx="$ib/$IDXLIM (${ipct}%) ** APPROACHING THE CUT — ${_rem}B ≈ ${_hk} hooks left. NO CHEAP COMPACTION (2 of 70 hooks accreted, 6% of bytes): shrink ONLY by REWRITING a hook you are already amending **"
     else                              idx="$ib/~${IDXLIM} (${ipct}%, limit CORROBORATED, precision unknown)"
     fi
   fi
