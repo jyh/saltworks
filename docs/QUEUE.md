@@ -266,6 +266,14 @@ bit-serial Design-B direction. Each names its successor or says none exists:**
   lifted by rewrite with zero re-execution, the undecodable-word
   boundary shown with witnesses. One name-vs-statement defect caught
   by its own author pre-landing, recorded in-file.
+  ⚠️ **LIVENESS MEASURED 2026-08-25 (compiler) — NOT CLOSED BY ME.** **W5-asm's FIRST HALF IS
+  DONE AND ITS PRIZE IS KERNEL-REFUTED.** `core` exists (`CoreAssembly.lean:38`), so the organs
+  ARE assembled. But this row's objective — *"prove the single-cycle refinement"* — is REFUTED in
+  the ROOTED build at BOTH widths: `C4Refuted.lean:293` `c4Spec_core_is_false` and `:373`
+  `not_C4SpecD_core`. **The row asks for a proof of a sentence the corpus proves FALSE.**
+  ⇒ The repair is blocked on the **LW fork (4 horns, Captain-gated)**, for which I find no ruling
+  on the bus — though D-work is landing in practice, which is an OBSERVATION, not a ruling.
+  ⇒ **NOT WORKABLE AS WRITTEN: it needs re-scoping to the REPAIR, not the proof.**
 - W5-asm (the core assembly — track-suffixed per math's 8/9 collision
   catch: bare "W5" also names salt wave-5 nodes and a Weil-track label;
   Captain-facing text carries the suffix) · WRITE · **OPEN — COUNCIL
@@ -286,6 +294,17 @@ bit-serial Design-B direction. Each names its successor or says none exists:**
   at compiler's seam with tiny-Rust N-waves and B-ISA (one write
   track, compiler's sequencing judgment); issues FEED BACK to the
   design docs immediately, per the Captain's rationale.
+  ⚠️ **LIVENESS MEASURED 2026-08-25 (compiler) — NOT CLOSED BY ME; THIS QUEUE IS MAESTRO'S.**
+  **W6 LOOKS OVERTAKEN BY EVENTS.** Its output was to *"feed the morning cap ruling"*, and that
+  ruling was TAKEN: `tools/saltbuild.sh:34` records *"default 24000 MB, RAISED FROM 12000 at the
+  Captain 8/9 ruling"*. Its named premise no longer reproduces either — I ran the named module at
+  the current default: **`SaltWorks/HDL/Immediate.lean` EXITS 0 in 91s**, where this row records
+  `EXIT=134`. ⇒ **the row asks for a census to inform a decision already made, and the condition
+  it would measure was dissolved BY that decision.**
+  ⛔ **I DID NOT RUN THE CENSUS.** It is heavy (`decide +kernel` over large ranges) and holds the
+  MACHINE-WIDE build lock while other seats are mid-campaign. Spending that on a row whose ruling
+  landed 16 days ago is the stale-debt failure, paid with the fleet's build capacity. One bounded
+  probe answered the liveness question instead. ⇒ **maestro: close, re-scope, or re-approve.**
 - W6 · MEAS · **APPROVED 20:18 (maestro), compiler's slot** — the
   TARGETED COLD-COST CENSUS: path-form elaboration at the DEFAULT cap
   of plausibly-over-cap modules (decide +kernel over large ranges),
