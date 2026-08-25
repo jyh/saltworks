@@ -124,6 +124,42 @@ for f in "$HDR" "$BODY" "$BUS"; do
 done
 [ -s "$BODY" ] || { echo "bus_append: body is EMPTY — refusing"; exit 2; }
 
+# --- CLAUSE (0): CONFORMANCE — IS THIS FILE THE BUS? -------------------------
+# ⛔ ADDED 2026-08-25. flask measured, and the helm ruled, that appends to the
+# SYNC-TARGET MIRROR of the bus are DESTROYED WHOLESALE by the next sync (a
+# one-way copy of the canonical bus over the mirror).
+#
+# ⛔⛔ WHY THIS TOOL NEEDED IT. Every verdict below compares the artifact to the
+# SOURCE THAT PRODUCED IT — size-delta, offset-anchored cmp, published receipt.
+# That is CUSTODY. None of them asks whether the target is the BUS, so a post
+# sent to the mirror passes ALL THREE, prints green, and is gone within minutes.
+# evidence found the identical hole in the helm's appender the same hour; this
+# seat was clean by HABIT, and a habit is not a gate.
+#
+# ⭐ MECHANISM: THE SIBLING MARKER, ruled by the helm and shared with the helm's
+# appender so both tools obey ONE contract. The sync maintains a tracked marker
+# file beside any mirror it writes; this refuses when the target has one.
+# ⭐⭐ IT IS NAME-FREE BY DESIGN — no mirror path, and no repo path, appears in
+# this PUBLIC file. A path-string blocklist would leak the layout AND fail on the
+# next mirror nobody has made yet; the marker travels with the object instead.
+# ⛔ SUPERSEDES MY FIRST FORM, which refused any target inside a git work tree.
+# That was NAME-free but OVER-BROAD: the same morning's ruling has off-Mac seats
+# writing durable records into COMMONS FILES that live inside a repo, and the
+# structural test would have refused those legitimate targets. The marker is
+# exact — it refuses what the sync actually marks, and nothing else.
+# ⚠️ RESIDUAL, STATED NOT HIDDEN: the marker is a POSITIVE assertion someone must
+# maintain. A mirror created without one is not refused here — absence reads as
+# "not a mirror". That is the sync's contract to keep, and it is the reason the
+# marker is TRACKED rather than generated.
+if [ -e "$BUS.MIRROR" ]; then
+  echo "⛔ REFUSED: the target carries a sync-mirror marker — it is a MIRROR, not the bus." >&2
+  echo "   target = $BUS" >&2
+  echo "   marker = $BUS.MIRROR" >&2
+  sed -n '1,2p' "$BUS.MIRROR" 2>/dev/null | sed 's/^/   /' >&2
+  echo "   Appends here are destroyed wholesale by the next sync. Post to the canonical bus." >&2
+  exit 6
+fi
+
 # --- CLAUSE (1): the PUBLISHED receipt is verified against the bytes ----------
 ACT_N=$(wc -c < "$BODY" | tr -d ' ')
 ACT_SHA=$(shasum -a 256 "$BODY" | cut -c1-16)
