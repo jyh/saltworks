@@ -9,4 +9,13 @@ boot unresolved
 # is headers-only, and that header named no seat at all. Measured before adding: 27 such
 # headers over the bus's whole life, 17 of them invisible to me -- a live category at
 # trivial volume. Negative control driven: an ordinary peer post does not match.
-^\[[0-9]{2}/[0-9]{2} [0-9:]+, ?[a-z]+[^]]*FLEET ORDER
+# ⛔ TIGHTENED WITHIN THE HOUR, BY ITS OWN FIRST LIVE TRAFFIC. The first form allowed
+# FLEET ORDER anywhere in the header and my OWN boot post -- which QUOTED the phrase while
+# reporting the fix -- matched it. Measured on the whole bus: 28 matches, 11 of them
+# QUOTATIONS = 39% false positive. `meta-discussion-satisfies-a-guard`: the post announcing
+# a guard is its worst traffic, and a matcher cannot tell a CLAIM from a QUOTATION.
+# CURE = POSITION: the order word must sit immediately after the author and dash, which is
+# where an ISSUED order carries it and where a quoted one never does. 16 genuine orders
+# match; my quoting post does not. ⚠️ A future order formatted differently would be missed
+# -- residual risk, stated rather than discovered: all 16 to date carry this shape.
+^\[[0-9]{2}/[0-9]{2} [0-9:]+, ?[a-z]+=?[A-Z]* ?— FLEET ORDER
