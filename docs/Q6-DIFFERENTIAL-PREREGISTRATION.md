@@ -352,3 +352,84 @@ ONLY; deleting the file would red the shared root for five seats on a file this 
 that sentence false, and a false docstring builds green forever.** It is rewritten in the same
 commit as the declarations it describes — a retirement is a docstring-boundary edit.
 
+
+## 2026-08-25 — THE SECOND FIRING: LAYER 1 REPAIRED, LAYER 2 ENUMERATED, PREDICTIONS SCORED 3/5
+
+*Fired 13:38–13:50 under the helm's word. Tree reverted to green (`saltbuild EXIT=0`, `8745`
+jobs, `0` errors) and the whole layer-1 state preserved re-appliable at
+`docs/Q3-SWAP-LAYER1-COMPLETE-0825.diff` (`git apply --check` = 0 against the reverted tree).*
+
+### THE SCORE — and the two losses are worth more than the three wins
+```
+  P1  14 errors, all StateCodecD, exactly the six      ✅ CONFIRMED, exact
+  P2  next errors at depth 1, nothing deeper visible   ✅ CONFIRMED, all 35 in Stack.Program
+  P3  decQ_mem fails to compile                        ✅ CONFIRMED (sorryAx) — check 1 satisfied
+  P4  MORE than 27 declarations convicted              ❌ REFUTED — 26. Fewer, not more.
+  P5  LwWitnessD breaks                                ❌ REFUTED — built GREEN, 3 decls ticked
+```
+
+### ⛔⭐⭐ ONE ROOT ERROR CAUSED BOTH REFUTATIONS: **I USED A MASKING CLOSURE TO PREDICT BREAKAGE**
+
+**They are different sets and I conflated them.** Depth-1 membership says a module becomes
+*VISIBLE* when the hub clears. **It says nothing whatever about whether that module then FAILS.**
+
+⭐ **`LwWitnessD` is the proof:** it imports ONLY `StateCodecD` and touches the non-D codec
+(`decQ`/`encD`/`stWidth`/`stBit`) **zero times — measured**. It consumes the D-side exclusively,
+which is exactly what the swap makes canonical, **so being masked behind the hub never made it
+fragile. It was swap-proof the entire time.** P4 failed the same way: this file's "the closure is a
+LOWER BOUND" is a statement about MASKING, and I read it as licence to over-estimate BREAKAGE.
+
+🔑 ***THE MASKED SET AND THE MUST-BREAK SET ARE INDEPENDENT. A hub hides its dependents whether or
+not the change touches them, so `masked` bounds what you can SEE and predicts nothing about what
+will FAIL.*** ⚠️ *This is the MIRROR IMAGE of the 08-25 morning error recorded above: that pass
+UNDER-counted what was hidden; this one OVER-counted what would break. **Same conflation, opposite
+sign** — which is the tell that the two sets were never distinguished in the first place.*
+
+### ⛔ AND A DEFECT IN THIS FILE'S OWN 27-NAME LIST, IN THE SAFE DIRECTION
+```
+  Q6 predicted                     27
+  actually convicted               26
+  predicted but did NOT break       1   ->  stBit_pc   ✓ GREEN at [2 axioms]
+  broke but NOT predicted           0
+```
+⇒ **the list is a near-exact SUPERSET: one false positive, ZERO false negatives.** *Recorded
+because a list that errs only toward over-prediction is a materially different instrument from one
+that can miss, and the difference is invisible unless someone diffs it against a run.*
+
+### LAYER 2, ENUMERATED — 26 convicted, but only **9 REAL FAILURES AT ~6 SITES**
+```
+  1506-1511  the pre-registered pivot firing exactly as designed (decQ_mem / decQ_trapped):
+             maxRecDepth · Type mismatch · Not a definitional equality · Type mismatch
+  1568:82    omega could not prove the goal
+  1599:13    Application type mismatch
+  2436:5 / 2436:36   unsolved goals (x2)
+  3129:36    omega could not prove the goal
+```
+**The other 26 errors are the `#audit_axioms` roll-call reporting `sorryAx` downstream of these.**
+⇒ *A failed tactic errors AND fills its hole, so the roll-call multiplies one defect across every
+consumer. Counting audit errors as work items over-prices this repair by roughly 4x.*
+
+### ⛔ ROW 6 WAS NOT DISCHARGED BY THE BUILD, AND THAT WAS INVISIBLE WITHOUT READING IT
+`landed_decQ_loses_mem_and_trap` failed with **maximum recursion depth in PRETTY-PRINTING** — a
+RESOURCE failure, not a verdict. **Check 2 says a row failing for an unrelated reason has not
+discharged its obligation, and retiring it on that evidence would have looked identical, in every
+artifact anyone reads afterward, to the five rows that fired correctly.**
+⇒ Verdict established separately, `EXIT=0`, clean audit, `maxRecDepth 40000`:
+```
+  round_trip_now_holds : decQ (fun j => (encD sTestD).getD j false) = sTestD   ✓ [2 axioms]
+  retired_row_is_now_false : ¬(decQ … ≠ sTestD)                                ✓ [2 axioms]
+```
+⭐ **Stated as the POSITIVE arm — what the swap ACHIEVED — rather than as the old row's absence:
+the 1313-bit codec ROUND-TRIPS a state with eight distinct memory words and the trap flag SET.**
+*That is Horn D exhibited, and it is also most of check 3: the witness's memory content is a
+theorem rather than a literal a reader must decode.*
+
+### THE RETIREMENT AS PERFORMED — SIX DECLARATIONS, NOT THE MODULE
+The kernel settled the departure recorded above: **22 declarations ticked green and exactly the 6
+convicted had no tick.** Retiring the MODULE would have destroyed 22 working declarations, 7 of
+them consumed by three importers. ⛔ **A retirement has THREE surfaces, and the third is the one
+that bites: the declaration, its docstring, AND its `#audit_axioms` roll-call line** — leaving the
+roll-call behind turns a retirement into `unknown identifier`. Plus two prose blocks that went
+FALSE at the swap (*"`instrBase := stWidth` … is untouched and still reads 1056"*), rewritten in
+the same commit, because **a docstring that outlives its declarations builds green forever while
+saying something false.**
