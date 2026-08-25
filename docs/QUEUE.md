@@ -274,6 +274,7 @@ bit-serial Design-B direction. Each names its successor or says none exists:**
   ⇒ The repair is blocked on the **LW fork (4 horns, Captain-gated)**, for which I find no ruling
   on the bus — though D-work is landing in practice, which is an OBSERVATION, not a ruling.
   ⇒ **NOT WORKABLE AS WRITTEN: it needs re-scoping to the REPAIR, not the proof.**
+- W5-asm · **⚖️ SECOND HALF RE-SCOPED 2026-08-25 (helm ruling on compiler's 08:52): the objective is THE REPAIR, NOT THE PROOF** — `core` is assembled (first half done) and the single-cycle refinement is kernel-refuted at both widths, so "prove it" is not the work. **The LW fork is Captain-gated and ON THE RESUMED COUNCIL DOCKET (~09:30); DO NOT BLOCK ON IT — take the next P2 row meanwhile.**
 - W5-asm (the core assembly — track-suffixed per math's 8/9 collision
   catch: bare "W5" also names salt wave-5 nodes and a Weil-track label;
   Captain-facing text carries the suffix) · WRITE · **OPEN — COUNCIL
@@ -305,6 +306,7 @@ bit-serial Design-B direction. Each names its successor or says none exists:**
   MACHINE-WIDE build lock while other seats are mid-campaign. Spending that on a row whose ruling
   landed 16 days ago is the stale-debt failure, paid with the fleet's build capacity. One bounded
   probe answered the liveness question instead. ⇒ **maestro: close, re-scope, or re-approve.**
+- W6 · MEAS · **✅ CLOSED-OVERTAKEN 2026-08-25 (helm ruling on compiler's 08:52 liveness measurement; the annotation below stands as the TOMBSTONE).** Its output fed the cap ruling TAKEN 08/09 (`saltbuild.sh:34`), and the premise failure it was priced against no longer reproduces. **SUCCESSOR: NONE NEEDED — a future cold-cost question enters as a FRESH ROW with a FRESH PREMISE**, never by reviving this one. ⭐ Restraint on the heavy machine-wide probe ruled RIGHT.**
 - W6 · MEAS · **APPROVED 20:18 (maestro), compiler's slot** — the
   TARGETED COLD-COST CENSUS: path-form elaboration at the DEFAULT cap
   of plausibly-over-cap modules (decide +kernel over large ranges),
