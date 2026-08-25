@@ -271,10 +271,17 @@ bit-serial Design-B direction. Each names its successor or says none exists:**
   ARE assembled. But this row's objective — *"prove the single-cycle refinement"* — is REFUTED in
   the ROOTED build at BOTH widths: `C4Refuted.lean:293` `c4Spec_core_is_false` and `:373`
   `not_C4SpecD_core`. **The row asks for a proof of a sentence the corpus proves FALSE.**
-  ⇒ The repair is blocked on the **LW fork (4 horns, Captain-gated)**, for which I find no ruling
-  on the bus — though D-work is landing in practice, which is an OBSERVATION, not a ruling.
+  ⇒ ⚖️ **RULED, NOT GATED — CORRECTED 2026-08-25 (council, Captain).** **HORN D STANDS UNAMENDED.**
+  Citations, both VERIFIED at their sources before being written here:
+  · `seat/briefs/2026-08-19-maestro-night-bank.md:1288` — the Captain verbatim:
+    *"I think we should do D alone."*
+  · `seat/briefs/2026-08-19-compiler-c4spec-refuted.md:500` — **THIS SEAT'S OWN BANK**,
+    *"HORN D, PRICED BEFORE BUILDING (Captain's ruling: Horn D alone)"*.
+  ⛔ **MY EARLIER LINE SAID "I FIND NO RULING ON THE BUS". THAT WAS TRUE AND IT WAS THE WRONG
+  SEARCH SPACE — THE RULING NEVER LIVED ON THE BUS, AND MY OWN BANK HELD IT.** A ruling can be
+  real and bus-absent; grep the BANK and the BUS, which my own card says and I did not do.
   ⇒ **NOT WORKABLE AS WRITTEN: it needs re-scoping to the REPAIR, not the proof.**
-- W5-asm · **⚖️ SECOND HALF RE-SCOPED 2026-08-25 (helm ruling on compiler's 08:52): the objective is THE REPAIR, NOT THE PROOF** — `core` is assembled (first half done) and the single-cycle refinement is kernel-refuted at both widths, so "prove it" is not the work. **The LW fork is Captain-gated and ON THE RESUMED COUNCIL DOCKET (~09:30); DO NOT BLOCK ON IT — take the next P2 row meanwhile.**
+- W5-asm · **⚖️ PROCEEDS AS THE REPAIR UNDER THE D CHARTER (council 2026-08-25): HORN D STANDS UNAMENDED — the LW repair sits on top of REAL LOAD SEMANTICS, with the must-break differentials as designed. The fork is RULED, not gated; citations on the MIG-9 row above. The Q3 swap dry run already IS this work.** ⚖️ **SECOND HALF RE-SCOPED 2026-08-25 (helm ruling on compiler's 08:52): the objective is THE REPAIR, NOT THE PROOF** — `core` is assembled (first half done) and the single-cycle refinement is kernel-refuted at both widths, so "prove it" is not the work. **The LW fork is Captain-gated and ON THE RESUMED COUNCIL DOCKET (~09:30); DO NOT BLOCK ON IT — take the next P2 row meanwhile.**
 - W5-asm (the core assembly — track-suffixed per math's 8/9 collision
   catch: bare "W5" also names salt wave-5 nodes and a Weil-track label;
   Captain-facing text carries the suffix) · WRITE · **OPEN — COUNCIL
