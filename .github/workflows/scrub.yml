@@ -80,12 +80,33 @@ jobs:
         env:
           BEFORE: ${{ github.event.before }}
         run: |
-          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
-            RANGE="HEAD~100..HEAD"
-            git rev-parse HEAD~100 >/dev/null 2>&1 || RANGE="HEAD~1..HEAD"
-            echo "new branch: falling back to $RANGE (declared limit)"
-          else
+          # ⛔ THE FALLBACK IS A CONTROL PATH AND THE FIRST ONE WAS NEVER DRIVEN.
+          # Its original form was HEAD~100..HEAD, which on any new branch reaches
+          # ~100 commits of PRE-RULING history -- so every new branch redded
+          # permanently, on findings the commencement clause protects. That is
+          # precisely the red-sweep-gets-abandoned failure this workflow's own
+          # header names, reintroduced in the one code path that had both arms
+          # reasoned and neither driven. Found by the jas seat's meta-gate.
+          #
+          # MERGE-BASE is the correct fallback: it scans what THIS BRANCH ADDS
+          # relative to the mainline, which is the same question the before-sha
+          # answers on an existing branch. Both paths are now driven as controls
+          # before shipping, clean AND dirty.
+          DEF="${{ github.event.repository.default_branch }}"
+          if [ -n "$BEFORE" ] && [ "$BEFORE" != "0000000000000000000000000000000000000000" ] \
+             && git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
             RANGE="$BEFORE..HEAD"
+            echo "push delta: $RANGE"
+          elif MB=$(git merge-base "origin/$DEF" HEAD 2>/dev/null) && [ -n "$MB" ]; then
+            RANGE="$MB..HEAD"
+            echo "new branch: merge-base with origin/$DEF -> $RANGE"
+          else
+            # No before-sha and no merge-base: we cannot bound "new" at all.
+            # FAIL CLOSED and say why -- a gate that cannot determine its own
+            # scope must not report success. Never silently widen to history.
+            echo "FAIL: cannot determine a delta range (no before-sha, no merge-base"
+            echo "      against origin/$DEF). Refusing to guess a range."
+            exit 1
           fi
           echo "scanning $RANGE"
           python scripts/check_private_paths.py --range "$RANGE"

@@ -117,7 +117,8 @@ _SEAT = "se" + "at"                    # the commons/memory-mirror repo
 _EMPLOYER = ["lo" + "ca", "ho" + "ll", "pcc-" + "bios"]
 _PRIVATE_PROJ = ["si" + "la", "mor" + "pho"]
 _CFGDIR = r"\.claude-" + _SEAT + r"-[A-Za-z0-9_-]+"
-_KIT = "Documents/" + _SEAT
+_KIT_RE = "Documents" + r"[/" + chr(92)*2 + r"]+" + _SEAT   # separator-agnostic
+_KIT = "Documents/" + _SEAT                                      # display form only
 _BUS = "FLEET" + r"\.md"
 
 _ROOTS = [_SEAT] + _EMPLOYER + _PRIVATE_PROJ
@@ -136,14 +137,27 @@ _ROOT_ALT = "|".join(_ROOTS)
 # not by reading. Plural and suffixed forms are excluded by the RIGHT side
 # instead: a public clone path has another letter after the root, never a
 # separator, so it cannot match.
-_INTO = rf"(?<![A-Za-z0-9_-])(?:{_ROOT_ALT})/[A-Za-z0-9_.-]+"
+# ⛔ SEPARATOR CLASS, NOT A LITERAL SLASH -- ADDED AFTER A MEASUREMENT, 08/25.
+# The first shipped version required a forward slash. Driven against six path
+# shapes, FOUR WERE BLIND: a backslash-separated path, a half-normalised mixed
+# path, a UNC double-backslash form, and a drive-letter absolute path. This
+# fleet has a Windows seat, so those are authored shapes, not exotica.
+#
+# ⚠️ AND THE FIX IS IN THE PATTERN, NOT IN THE CI MATRIX. Wiring this gate onto
+# a Windows runner does NOT make it see a backslash: both arms read git OBJECT
+# bytes (measured -- no CR in either arm's output, and diff path headers are
+# forward-slash on every platform), so the same regex over the same objects
+# returns the same verdict wherever it executes. A lane changes WHERE a gate
+# runs; only the pattern changes WHAT it can match.
+_SEP = r"[/\\]+"
+_INTO = rf"(?<![A-Za-z0-9_-])(?:{_ROOT_ALT}){_SEP}[A-Za-z0-9_.-]+"
 
 FORBIDDEN = [
     (re.compile(_INTO),
      "a path into a private-record repo"),
     (re.compile(_CFGDIR),
      "a per-" + _SEAT + " runtime config directory"),
-    (re.compile(rf"(?<![A-Za-z0-9_-]){_KIT}(?:/|\b)"),
+    (re.compile(rf"(?<![A-Za-z0-9_-]){_KIT_RE}(?:{_SEP}|\b)"),
      "the kit run surface"),
     (re.compile(rf"{_BUS}:\d+"),
      "a line-anchored citation into the fleet bus"),
@@ -282,6 +296,15 @@ def self_test() -> int:
         ("p-priv", "see " + _PRIVATE_PROJ[1] + "/design/y.md"),
         ("p-cfg", "config lives in ~/.claude-" + _SEAT + "-evidence/settings.json"),
         ("p-bus", "as minuted at " + _BUS.replace(chr(92), "") + ":171311"),
+        # THE FOUR SHAPES THAT WERE BLIND UNTIL 08/25. Assembled, never spelled.
+        ("p-bslash", "see " + _SEAT + chr(92) + "briefs" + chr(92) + "x.md"),
+        ("p-mixed", "see " + _SEAT + chr(92) + "briefs/x.md"),
+        ("p-unc", "see " + chr(92)*2 + "host" + chr(92) + _SEAT + chr(92) + "briefs"),
+        ("p-drive", "see C:" + chr(92) + "Users" + chr(92) + "j" + chr(92)
+                    + _SEAT + chr(92) + "briefs" + chr(92) + "x.md"),
+        # CRLF was already caught; kept as a control so a future edit cannot
+        # silently lose it.
+        ("p-crlf", "see " + _SEAT + "/briefs/x.md" + chr(13)),
     ]
     for ident, text in planted:
         if not scan([(ident, text)]):
@@ -297,6 +320,8 @@ def self_test() -> int:
         ("c-pubabs", "/Users/x/projects/claude/saltworks/docs/QUEUE.md is public"),
         ("c-clone", "the clone at " + _SEAT + "s/evidence/saltworks is a PUBLIC path"),
         ("c-word", "the evidence " + _SEAT + " and the silicon " + _SEAT + " agree"),
+        ("c-winpub", "C:" + chr(92) + "src" + chr(92) + "saltworks" + chr(92) + "docs"),
+        ("c-plural-bs", "the clone at " + _SEAT + "s" + chr(92) + "evidence"),
         ("c-meta", "this gate forbids paths into the private record"),
     ]
     for ident, text in clean:
