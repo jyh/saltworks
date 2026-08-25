@@ -394,7 +394,7 @@ except Exception: print(-1)' "$mine" 2>/dev/null)
   #    LOUDLY rather than guessing a path (same law as BUS).
   if [ -n "${SEAT_DIR:-}" ] && [ -n "${CLAUDE_MEMORY_DIR:-}" ]; then
     SSERR=$(mktemp)
-    SS=$(bash "$(dirname "$0")/../ledger-tools/selfstale.sh" \
+    SS=$(bash "${SELFSTALE:-$(dirname "$0")/../ledger-tools/selfstale.sh}" \
            "$SEAT_DIR/briefs/0000-BOOT-silicon.md" "$CLAUDE_MEMORY_DIR/MEMORY.md" 2>"$SSERR"); SSRC=$?
     # ⛔⛔ EDGE-ANNOTATE, ADDED 08/23 — THIS ARM WAS LEVEL-TRIGGERED AND RE-REPORTED AN
     #    UNCHANGED CONDITION EVERY 30 MINUTES. Measured: the same maestro-brief drift
@@ -470,7 +470,13 @@ except Exception: print(-1)' "$mine" 2>/dev/null)
   # ⭐ PRINTS A FIELD EVERY SWEEP, never silence-means-clean — same reason as arm 8.
   #    Decidable by construction: an item is OPEN unless its text carries a
   #    disposition token. No judgement, no undecidable "is this really mine".
-  QF="$(dirname "$0")/../QUEUE.md"
+  # ⛔ RUN-SURFACE CONVENTION, FLEET ORDER 08/24 23:34: long-lived watchers execute the
+  #    KIT copy (~/Documents/seat/watch, outside every git tree) so a rebase can never
+  #    move a script under a running process. But this arm and arm 7 read REPO DATA by a
+  #    path RELATIVE TO THE SCRIPT — which silently relocates the moment the script does.
+  #    ⇒ both are now env-overridable, defaulting to the old relative path so a repo-run
+  #      is byte-identical in behaviour. THE RUN SURFACE MOVES; THE DATA IT READS MUST NOT.
+  QF="${QUEUEFILE:-$(dirname "$0")/../QUEUE.md}"
   if [ ! -r "$QF" ]; then
     q="NO-QUEUE($QF)"
   else
