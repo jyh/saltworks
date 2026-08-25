@@ -1,4 +1,4 @@
-# Verified 8×8 bit-serial banyan switch — TinyTapeout TTSKY26c
+# Verified 2×2 element in the 8×8 fabric of a bit-serial Batcher–banyan switch — TinyTapeout TTSKY26c
 
 A self-routing 8×8 packet switch fabric whose **gate netlist is proved
 equivalent to its specification inside the Lean kernel**. It recreates the
