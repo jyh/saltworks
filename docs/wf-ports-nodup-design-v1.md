@@ -85,6 +85,19 @@ position above N. Measured on LANDED, CERTIFIED blocks:
 depend on NO axioms**, and a POSITIVE CONTROL `bitAnd32_passes_clause5`
 shows the bar is not vacuously failing everything.
 
+⛔⛔ **THE BRIDGE MY FIRST FOLD LEFT IMPLICIT, AND IT IS THE WHOLE
+FORCE OF THE ARGUMENT: ①⁵ BINDS *NEW* BLOCKS, AND EVERY COUNTEREXAMPLE
+ABOVE IS A *LANDED* ONE.** Read alone they refute nothing — the RETROFIT
+clause already says the existing gap closes opportunistically. The
+refutation is PROSPECTIVE:
+**Slice-B's five new ops are `LW, SW, JAL, JALR, BNE`, and LW/SW/JAL/JALR
+all carry SIGN-EXTENDED immediates. The organ pattern they reuse is
+`immICirc`/`immBCirc` — which fail ①⁵ by 20 and 19 duplicates.**
+⇒ **①⁵ WOULD REJECT THE NEXT BLOCKS THIS BLOCK ITSELF PLANS TO LAND,
+ON ARRIVAL — not retroactively.** A bar whose first act is to convict
+its own roadmap is unsound at the point of adoption, not merely
+awkward about legacy.
+
 ⚠️ **THE b = 0 NOTE ABOVE ANTICIPATED THE WRONG FAILURE.** It found
 `¬ (genSelect 10 0).outs.Nodup` and classified it *"a boundary defect,
 not a broken definition"* — a control at the DEGENERATE case. The
