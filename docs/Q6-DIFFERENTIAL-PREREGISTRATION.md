@@ -278,3 +278,77 @@ patched codec; a fresh worktree has no `.lake`, so that is a cold build, and the
 (symlinking the SHARED mathlib packages) risks a cache five seats depend on. **The textual route
 is barred by this document's own §115: it returned 4468 names, 84% of the tree, and is called
 worthless here.** The kernel enumerates that set or nobody does.
+
+## 2026-08-25 — LAYER-2 PRE-REGISTRATION: THE MASKING CLOSURE, COMPUTED BEFORE THE SECOND FIRING (compiler)
+
+*Fired under the helm's word resuming this lane in full. Written and landed BEFORE the build that
+tests it, because a prediction recorded after the output is not a prediction.*
+
+### ⛔ THE UNDER-COUNT WAS MINE, AND THIS FILE'S OWN WARNING CAUGHT IT
+
+The 08-25 dry run named **6** never-reached modules (`CorePlace`, `CoreAssembly`, `CoreOffsets`,
+`AccountMeasure`, `C4Refuted`, `Stack.Program`) and warned that *"the under-count looks like an
+encouragingly small blast radius."* **That warning applied to its own number.** Reverse-import
+closure over `StateCodecD`, computed rather than read off one build log:
+
+```
+  masked, ALL .lean on disk        143   max depth 16   (87 are Scratch*)
+  masked AND IN THE ROOT BUILD      56   max depth 15   <- THE OPERATIVE NUMBER
+  root build total modules         163   => 34% of the root build sits behind this one module
+  named by the dry run               6   => the dry run saw 11% of what it masks
+```
+⇒ **`Stack/Program.lean` and `HDL/LwWitnessD.lean` are the ONLY depth-1 members.** Everything
+else — `CorePlace`, `CoreOffsets`, all four `Certs.*`, the whole `SelValue*`/`Wire*`/`Bridge*`
+chain out to depth 15 — is masked THROUGH `Program.lean`, not directly.
+
+⚠️ **DEPTH IS NOT PASSES, AND READING IT AS PASSES WOULD BE A FALSE ALARM IN THE SCARY
+DIRECTION.** Lake reveals every module whose dependencies succeeded, so one build clears an
+arbitrary number of depths that carry no break. **Passes required = the number of depths at which
+something ACTUALLY BREAKS**, bounded above by 15 and possibly as low as 2. The depth figure bounds
+the worst case; it does not predict the work.
+
+### THE PREDICTIONS — falsifiable, and each names what would refute it
+
+```
+  P1  re-firing the patch reproduces EXIT=1, 14 errors, ALL in StateCodecD,
+      convicting exactly the 6 pre-registered scaffolding declarations.
+      REFUTED BY: any different count, or an error outside StateCodecD.
+  P2  after the 6 retire, the next build's errors land at DEPTH 1 — Stack.Program
+      and/or LwWitnessD — and nothing deeper is yet visible.
+      REFUTED BY: errors appearing at depth >= 2 in the same build.
+  P3  decQ_mem FAILS TO COMPILE. (Check 1 of this file. A green decQ_mem means STOP;
+      nothing downstream is informative.)
+  P4  the 27 Program.lean names listed above are a LOWER BOUND: I predict the actual
+      count EXCEEDS 27. REFUTED BY: exactly 27 or fewer.
+  P5  ⭐ LwWitnessD BREAKS, AND THIS FILE NEVER LISTED IT. It consumes decQD six times
+      and sits at depth 1, so it was MASKED in the run that produced the closure and
+      could not have appeared. REFUTED BY: LwWitnessD building clean.
+```
+⇒ **P5 is a FOURTH membership miss, and the first one found BY ENUMERATION rather than by being
+hit.** The three prior misses (`X0`, `landed_decQ_loses_mem_and_trap`, `decQ_mem`/`decQ_trapped`)
+were all discovered by a build hitting them. *A kernel closure can only enumerate what was not
+masked, so it under-reports by construction on exactly the modules this document cares about.*
+
+### ⚖️ THE RETIREMENT, AND WHERE I DEPART FROM THE LITERAL RULING — STATED, NOT SLIPPED
+
+The 08-20 ruling says **"RETIRE the module in the swap commit — do not repair it."** Its stated
+reasons cover only the SIX comparison declarations: `landed_decQ_loses_mem_and_trap` must go false,
+`extension_costs_257_bits`/`renumbering_offsets` collapse to `0`, and
+`stBitD_agrees`/`encDD_getD_low`/`encDD_prefix` compare a codec to itself.
+
+⛔ **BUT THE MODULE IS NOT ONLY SCAFFOLDING, AND THAT IS MEASURED:** `stWidthD`, `stBitD`, `encDD`,
+`decQD`, `Cell.place`, `cellOf_place` and `stBitD_at_place` are consumed by three importers —
+`Stack/Program.lean` (7 symbols), `LwWitnessD.lean` and `ScratchQ6Witness.lean` (`decQD` x6 each).
+**Retiring the MODULE reds those; retiring the SIX is what the reasons license.** Also
+`instrBaseD` and `instrD_nets_disjoint_from_state` sit INSIDE the priced section and are NOT
+convicted — they must survive the cut.
+
+⇒ **I RETIRE THE SIX CONVICTED DECLARATIONS, NOT THE FILE**, and the module's definitional half
+stays until its consumers are migrated. *`SaltWorks.lean` imports `StateCodecD` and is MAESTRO
+ONLY; deleting the file would red the shared root for five seats on a file this seat may not edit.*
+
+⛔ **AND THE PROSE MOVES WITH THEM.** The section header *"THE PRICE OF THE SWAP"* asserts
+*"`instrBase := stWidth` in `StateCodec.lean` is untouched and still reads 1056."* **The swap makes
+that sentence false, and a false docstring builds green forever.** It is rewritten in the same
+commit as the declarations it describes — a retirement is a docstring-boundary edit.
+
