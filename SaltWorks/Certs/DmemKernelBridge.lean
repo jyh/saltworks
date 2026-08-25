@@ -164,9 +164,22 @@ theorem wSB_kernel_says_not_a_store :
     (ctrlSpec wSB)[6]! = false ∧ (ctrlSpec wSB)[7]! = false ∧ decode wSB = none := by
   refine ⟨by decide, by decide, by decide⟩
 
-/-- ⛔ **THE FALSIFICATION.** Any plane driving input 33 high on this word — which is what
-wiring it from an opcode-only strobe does — makes `DriveMap` false, and therefore makes
-door 1 vacuous rather than false. -/
+/-- ⛔ **THE FALSIFICATION — AND ITS PREMISE IS DATED. READ THE ANCHOR BELOW BEFORE CITING IT.**
+Any plane driving input 33 high on this word — which is what wiring it from an opcode-only
+strobe does — makes `DriveMap` false, and therefore makes door 1 vacuous rather than false.
+
+⚠️ **ANCHOR REFRESHED 2026-08-25 (compiler, PRE-AUTH per QUEUE).** This theorem landed at
+`914f85c` under the title *"its hypothesis is FALSIFIED by **the only wiring the RTL can
+supply**"*. **THAT PREMISE EXPIRED AT `fc5ed0e`** (③ seam, ruling a+b), which added
+`wire is_word = (funct3 == 3'b010)` to `core32.v` and moved the memory strobes to
+`is_load_w`/`is_store_w`. ⇒ **THE RTL NO LONGER SUPPLIES OPCODE-ONLY WIRING**: on `wSB`
+(`funct3 = 000`) `is_word` is low, so the store strobe does not fire and input 33 stays low.
+
+⛔ **THE THEOREM IS UNCHANGED AND STILL TRUE — it is a conditional on `ins 33 = true`, and a
+conditional does not rot.** What rotted is the sentence around it. ⇒ **IT IS NO LONGER A LIVE
+FALSIFICATION OF DOOR 1 BY THE BUILT PART; IT IS THE RECORD OF WHY THE GATING EXISTS**, and
+citing it as a current refutation of the shipped wiring would be wrong. Its companion below
+proves the repaired signature satisfies `DriveMap` on exactly this word. -/
 theorem opcode_only_wiring_violates_DriveMap
     (ins : Nat → Bool) (h : ins 33 = true) : ¬ DriveMap wSB ins := by
   intro hd
@@ -175,6 +188,20 @@ theorem opcode_only_wiring_violates_DriveMap
   have hf : (ctrlSpec wSB)[6]! = false := by decide
   rw [hf] at hw
   exact Bool.noConfusion hw
+
+/-- ✅ **THE CONVERSE, AND IT IS WHAT THE ③ SEAM BOUGHT.** A plane holding BOTH memory strobes
+low on this word satisfies `DriveMap` — so the falsification above is not a fact about `wSB`,
+it is a fact about OPCODE-ONLY WIRING.
+
+⚠️ **SCOPE, STATED SO IT IS NOT OVER-READ: this is a theorem about a PLANE SIGNATURE, not a
+theorem about the Verilog.** That `core32.v` after `fc5ed0e` produces exactly this signature on
+`wSB` is a BYTE-LEVEL READING of the RTL (`is_word = (funct3 == 3'b010)`, strobes moved to
+`is_load_w`/`is_store_w`), recorded here as a reading and not as a machine-checked fact. The
+RTL↔Lean link is silicon's surface, not this file's. -/
+theorem word_gated_wiring_satisfies_DriveMap
+    (ins : Nat → Bool) (h33 : ins 33 = false) (h32 : ins 32 = false) : DriveMap wSB ins where
+  we := by rw [h33]; decide
+  req := by rw [h32]; decide
 
 end SaltWorks.Certs
 
@@ -185,3 +212,6 @@ open Salt.Tactic
   SaltWorks.Certs.wSB_kernel_says_not_a_store
   SaltWorks.Certs.opcode_only_wiring_violates_DriveMap
 end Audit
+
+#print axioms SaltWorks.Certs.word_gated_wiring_satisfies_DriveMap
+#print axioms SaltWorks.Certs.opcode_only_wiring_violates_DriveMap
