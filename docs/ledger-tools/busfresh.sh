@@ -45,6 +45,10 @@
 #
 # ⛔⛔⛔ TAKE `--mark` WHEN YOU *READ*, NOT WHEN YOU SEND. THIS IS THE WHOLE CONTRACT
 # AND IT IS THE CALLER'S, NOT THIS SCRIPT'S.
+#   ⛔ STATE AT FILING — the four offsets below are a RECORD of one incident, not pointers.
+#     DO NOT RE-POINT. (Helm convention 2026-08-24 18:54.) A 7-to-40-hex sweep matches
+#     decimal offsets like `23589457` too, and rewriting them would make this comment
+#     describe a sequence of events that never happened.
 #   Measured on evidence, 2026-08-24 08:05, ON THE AUTHOR'S OWN SEAT: I composed a post
 #   for ~6 minutes, ran `--mark` immediately before sending, and the gate said
 #   "bus unchanged since your read — safe to send." IT WAS VACUOUSLY TRUE.
