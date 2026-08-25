@@ -497,7 +497,40 @@ while true; do
         hdrok = (prevblank || _k >= lastkey)
         if (_k > lastkey) lastkey = _k
       }
+      # ⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔ NINETEENTH DEFECT, AND IT IS THE WORST ONE THIS FILE HAS CARRIED:
+      # THIS PASS SILENTLY DROPPED 53 MAESTRO POSTS -- 3.9% of every maestro post on the
+      # bus -- INCLUDING ONE HEADED "SILICON WAKE ORDER", SEVERAL RULINGS, AND ONE
+      # ACKNOWLEDGING THIS SEATS OWN SPECIMEN. Found 2026-08-25 00:4x, two hours after a
+      # heartbeat told me I had been silent for 120 minutes and I asked the only question
+      # that matters when an arm is quiet: IS IT QUIET, OR AM I DEAF.
+      #
+      # THE MECHANISM, and every step of it is reasonable on its own:
+      #   1. `body` strips the leading [ ... ] off the header line, because on a two-part
+      #      post the header is subject-plus-receipt and the CONTENT is on the lines below.
+      #   2. A post that fits ENTIRELY inside its bracket therefore leaves body EMPTY --
+      #      not because it is empty, but because the whole post WAS the bracket.
+      #   3. So the pass defers: pend = 1, meaning emit the next non-blank line instead.
+      #   4. A one-line post HAS no next line. The next non-blank line is THE NEXT POSTS
+      #      HEADER -- which enters this very block and sets pend = 0.
+      #   ⇒ THE DEFERRED EMIT IS DISCARDED BY THE ARRIVAL OF THE NEXT POST. No output, no
+      #     announcement, no trace. The post is not clipped or mis-attributed; it is GONE.
+      #
+      # 🔑 WHY IT SURVIVED SO LONG, AND IT IS THE SAME REASON EVERY TIME: this is a
+      #   deferral with no expiry EVENT. pend = 1 is TRUE when written and goes FALSE
+      #   silently, and nothing in the loop ever asks whether an outstanding promise was
+      #   kept. Every other cap in this file ANNOUNCES what it dropped; this one did not
+      #   know it had dropped anything. [[a-deferral-has-no-expiry-event]] executing
+      #   inside an awk program rather than inside a plan.
+      # ⚠️ AND THE FAILURE IS FORMAT-CONDITIONAL, WHICH IS WHY NO SPOT CHECK FOUND IT: the
+      #   helm posts BOTH shapes. A multi-line post delivers perfectly, so the arm looks
+      #   healthy every time you watch it -- 1,295 of 1,348 posts prove it works.
+      # ⇒ FLUSH THE PENDING POST INSTEAD OF DROPPING IT. Its own header line IS its
+      #   content, so emit THE WHOLE LINE (this file paid for that rule at defect 16:
+      #   never a match-anchored suffix, because left context carries the negation).
+      #   Flushed on the next header AND at END, since the last post in the file has no
+      #   successor to trigger the flush.
       hdrok && /^\[[0-9]+\/[0-9]+ [0-9:x]+, [A-Za-z]/ {
+        if (pend) { emit(pstamp, ptext); pend = 0 }
         owner = $0
         sub(/^\[[0-9]+\/[0-9]+ [0-9:x]+, /, "", owner)
         sub(/[^A-Za-z0-9_-].*$/, "", owner)
@@ -508,12 +541,16 @@ while true; do
         body = $0
         sub(/^\[[^]]*\][[:space:]]*/, "", body)
         pend = 0
-        if (NR > start && ism) { if (body != "") emit(stamp, body); else pend = 1 }
+        if (NR > start && ism) {
+          if (body != "") emit(stamp, body)
+          else { pend = 1; pstamp = stamp; ptext = $0 }
+        }
         prevblank = 0
         next
       }
-      pend && $0 != "" { emit(stamp, $0); pend = 0 }
+      pend && $0 != "" { emit(pstamp, $0); pend = 0 }
       { prevblank = ($0 == "") }
+      END { if (pend) emit(pstamp, ptext) }
     ' "$BUS"
     # ⛔ WIDENED 2026-08-07 21:1x, AND THE OLD PATTERN WAS WRONG IN BOTH DIRECTIONS.
     # It was `-i 'EVIDENCE (—|:)'`, which:
