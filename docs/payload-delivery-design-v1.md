@@ -128,6 +128,59 @@ Riders:
   datapath (§4) means no per-path offset bookkeeping. The 1988 chipset
   needed per-stage skew accounting; convention C does not — record the
   contrast in the heritage block, not here.
+- ⛔ **MIG-7 DISCHARGED 2026-08-24 (math) — H2 IS c2-SHAPED, AND THE
+  HIDDEN LEMMA IS THE COUNTER'S WHOLE-FRAME INVARIANT.** H2 states
+  well-phasedness as a ONE-CYCLE coincidence — "cycle 0 coincident with
+  cnt==0" — and nothing downstream consumes a one-cycle fact. The strobe
+  decode is `act_stb[s] = (cnt == 2*s)` / `sel_stb[s] = (cnt == 2*s+1)`
+  (`banyan_fabric.v`, the strobe `generate` block); §3's L0 leans on H2 to
+  "quantify the counter away" for the whole frame; and the one Lean object
+  that models the banyan's schedule — `runFrame` (`FabricRoutes.lean`,
+  `let cnt := 14 - (n + 1)`) — IDENTIFIES `cnt` with the cycle index for
+  all fourteen cycles and carries no `sof` port at all. Every consumer
+  needs `cnt == t` on `[0, 2k+P)`; H2 supplies `t = 0`. **The step between
+  them is a lemma this block never writes, and its premise set is
+  incomplete.** The block holds the free-run fact and states it
+  CONDITIONALLY — §5: "the only zeroing paths are rst_n, sof, and the
+  natural wrap" — H3 gives one of those paths its mid-frame discipline
+  ("one pulse at cycle 0, none after") and **`sof` never gets the
+  sentence H3 is the template for.** Witnessable, not stylistic: a trace
+  satisfying H1∧H2∧H3∧H4 verbatim with a second `sof` at cycle 6 re-zeroes
+  `cnt` at cycle 7, re-fires `act_stb[0]`/`sel_stb[0]` at cycles 7/8, and
+  `bitserial_switch` reloads `act0/act1/sel0/sel1` UNCONDITIONALLY from
+  what is on the wires — payload bits — replacing stage 0's routing for
+  the rest of the window `[2k, 2k+P)`.
+  ⭐ **AND THE MEASUREMENT SUPPLIES WHAT THE STATEMENT DOES NOT**: the
+  0/200 arm's `drive_frame` drives `sof = 1'b0` on EVERY cycle of the
+  frame (`tb_counter_init.v`), so the quoted counts were taken under an
+  `sof` discipline H2 does not carry, and no arm can fail on this axis.
+  (The same class, realized and fixed, is recorded in a sibling module's
+  own comment — mid-loop `sof` truncation, missed by a bench that pulses
+  `sof` only where phase is already 0. That module is `busadapt8` and the
+  file is UNTRACKED scratch: precedent for the class, not evidence about
+  this fabric.)
+  **REPAIR — it belongs in H2, not in a node**: state well-phasedness
+  WHOLE-FRAME (`cnt == t` for every `t ∈ [0, 2k+P)`), and give `sof` the
+  quiescence sentence `rst_n` already has.
+  ⛔ **NOT FOUND, AND LOOKED FOR — two clauses cleared.** (a) "from ANY
+  initial register state" is NOT c2-shaped: it is the ABSENCE of a
+  hypothesis, a ∀ that STRENGTHENS the theorem, and the burden it creates
+  lands conclusion-side on §3's L0 and on spec §5's unconditional-reload
+  bullets — both WRITTEN. The banyan half's Lean coverage is a disclosed
+  LANDING gap (`PayloadRefutations.lean`: "discharged for the sorter …
+  and NOT discharged for the banyan"), not a hidden lemma. (b) The σ half
+  stays CLOSED and the strike's verdict is confirmed: B4 concludes three
+  Prop conjuncts over `Banyan.line`/`bnCOutKey` — no permutation object —
+  and the CLAIM names `dest` and needs no σ binder. The rider's stated
+  GROUND is loose (the stage-3 identity is `bnCOutKey`-phrased, hence
+  payload-blind by this block's own L3), but what it gestures at is
+  priced BY NAME as the unlanded L4: loosely worded, not c2.
+  **BLAME**: math, adjudicating three commissioned checkers 2026-08-24;
+  the finding is the third checker's clean bill on the phase half,
+  overturned. If it is wrong, it is wrong because "well-phased FRAME" was
+  always meant whole-frame and the one-cycle gloss is an abbreviation —
+  in which case the repair is STILL owed, because that abbreviation is
+  exactly what H3 spells out for `rst_n` and what `runFrame` bakes in.
 
 ## 3. THE DECOMPOSITION — five nodes (L0 added at math's ③ pass;
 ## L1/L2/L3 revised and L4 named at compiler's A/B pass, 12:28)
@@ -345,3 +398,11 @@ Riders:
   clause against your acceptance-bar revision.
 - MATH: the statement form (H1/H2/claim) — is anything c2-shaped
   hiding in H2? Is the σ dependency stated or smuggled?
+  ✅ **ANSWERED 2026-08-24 (MIG-7, commissioned three-checker pass) —
+  YES on H2, NO on σ.** H2 is c2-shaped: it states a ONE-CYCLE
+  coincidence while every consumer needs the whole-frame invariant
+  `cnt == t`, and the step between is an unwritten lemma whose premise
+  set is incomplete (`sof` never gets the mid-frame quiescence sentence
+  H3 gives `rst_n`). The σ dependency is **stated, not smuggled** — the
+  strike's verdict is confirmed; only the rider's stated ground is
+  loose. Discharge rider in §2, after the Zero-latency bullet.
