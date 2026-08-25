@@ -613,3 +613,55 @@ the SOURCE without rebuilding leaves PATCHED OLEANS against REVERTED SOURCE.** *
 invisible in `git status`, survives the window's close, and hands the identical trap to the NEXT
 seat who audit-arms anything importing this codec.* ⇒ **A REBUILD IS PART OF THE REVERT, NOT A
 COURTESY AFTER IT.** *Performed here: `EXIT=0`, `8745` jobs, cache consistent with the source.*
+
+## ✅⭐⭐ 2026-08-25 15:3x — **LAYER-2 REPAIRS: 19 OF 26 CLEARED — AND FIXING ERRORS *REVEALED* TWO MORE**
+
+*Announced window, my lane only. Tree reverted and rebuilt green (`EXIT=0`, `8745` jobs). Repairs
+preserved re-appliable at `docs/Q3-SWAP-LAYER2-REPAIRS-0825.diff`.*
+
+```
+  decQ_congr             bound-repair   ✓ GREEN   `apply hab` LEADS; `and_true` dropped
+  decQ_envWith_eq        strengthen     ✓ GREEN   restated to the EXACT round trip `= s`
+  decQ_cycOfBits_stalled cleanliness    ✓ GREEN   now `exact decQ_envWith_eq _ _`
+  decQ_envWith_of_clean  SUBSUMED       ✓ GREEN   both hypotheses now UNUSED (`_hm`,`_ht`)
+
+  errors 37 -> 16 · real proof failures 9 -> 5, of which FOUR are the pivot pair
+  (retired at the swap BY DESIGN). ONE genuine site remains: c4Spec_iff_fieldwise.
+```
+⚠️ **`decQ_envWith_of_clean` WAS NOT IN ANY PREDICTED LIST — it broke because MY restatement of
+`decQ_envWith_eq` made its proof close early (`No goals to be solved`).** *A truth-preserving
+restatement is still a breaking change; `statement-shape-is-an-interface`, arriving from my own
+hand. **Kept rather than deleted** — removing it would break every consumer in the swap commit,
+and an unmeasured retirement blast radius is what this campaign has spent the day paying for.*
+
+## ⛔⛔⭐⭐ **MASKING VARIANTS 4 AND 5 — AND VARIANT 5 MEANS THE ERROR COUNT DOES NOT MONOTONICALLY FALL**
+
+**④ INLINED-NOT-CITED.** `decQ_cycOfBits_stalled` discharged its two cleanliness goals with
+`(by simp [SaltWorks.HDL.decQ]) (by simp [SaltWorks.HDL.decQ])`. ***Those ARE `decQ_mem` and
+`decQ_trapped` — inlined rather than cited.*** **A name-grep for the retired pivot cannot see this
+site.** *A retirement's blast radius is not bounded by its own identifier.*
+
+**⑤ `#audit_axioms` ABORTS ITS LIST, SO FIXING A NAME EXPOSES THE NAMES BEHIND IT.** Measured:
+```
+  9660  #audit_axioms not_pcField_coreShaped  coreShaped_isolation  not_C4Spec_coreShaped
+  9662  #audit_axioms not_pcField_coreShapedT neither_coreShape_C4Spec
+```
+Both LEADING names were convicted at layer 2, so both calls aborted at name 1 and everything after
+**read as clean — no tick AND no conviction.** Repairing the leaders let the audit walk on and
+convict `not_C4Spec_coreShaped` and `neither_coreShape_C4Spec`; `coreShaped_isolation` went
+NOT-REACHED → ✓ green. **THE EXPOSURE, COUNTED:**
+```
+  roll-call lines in Program.lean          251
+  multi-name lines                         227
+  names NOT FIRST on their line            534   <- every one MASKABLE by an earlier failure
+```
+🔑 ***SO AN AUDIT-BASED ENUMERATION OF THIS FILE UNDER-REPORTS BY UP TO `534` NAMES, INVISIBLY,
+BECAUSE AN ABSENCE READS AS CLEAN.*** ⚠️ **AND THE CONSEQUENCE FOR PROJECT MANAGEMENT: `26 → 9`
+is NOT `17` fixed. It is `19` cleared and `2` NEWLY EXPOSED.** *A falling error count is not
+progress measured; it is progress NET of revelation, and the two are only equal when nothing was
+masked.* ⇒ **Report CLEARED and REVEALED as separate numbers, every pass.**
+
+📌 **THE FAMILY, FIVE DEEP:** ① hub masks dependents · ② masked ≠ must-break · ③ broken-but-present
+masks consumers · ④ inlined-not-cited hides a consumer from grep · ⑤ audit-abort masks every later
+name on the line. *Five distinct mechanisms, all producing "this looks smaller than it is", all
+found in one day on one swap.*

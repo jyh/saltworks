@@ -1,0 +1,127 @@
+diff --git a/SaltWorks/Stack/Program.lean b/SaltWorks/Stack/Program.lean
+index 0e22501..4c822e8 100644
+--- a/SaltWorks/Stack/Program.lean
++++ b/SaltWorks/Stack/Program.lean
+@@ -1545,22 +1545,23 @@ theorem decQ_congr {a b : SaltWorks.HDL.Env}
+   -- NOTE: no `rfl` in the alternation. `first` pays a branch's FULL cost before
+   -- falling through, and `rfl` on a `Vector.ofFn` equality exhausts the whnf
+   -- heartbeat budget (measured: 200000, Program.lean:1547).
+-  -- No discharger is pre-added for D's `trapped` conjunct: under Q no goal of
+-  -- that shape exists, so the branch would be statically dead code and the
+-  -- linter says so. D's extra obligation belongs in the swap dry run, where it
+-  -- fails by name, not here as a guess.
+-  simp only [SaltWorks.HDL.decQ, St.mk.injEq, and_true]
++  -- ⬥ D: the `trapped` discharger IS now carried, because the swap landed and the
++  -- goal it services EXISTS. Until then it would have been statically dead code and
++  -- the linter said so. `and_true` is also gone from the `simp only`: under D
++  -- `trapped` is `ins 1312`, not a literal, so that lemma no longer fires.
++  simp only [SaltWorks.HDL.decQ, St.mk.injEq]
+   -- ⭐ MEASURED AT THE D WIDTH (dry run, 08/20): `hab _ (by … omega)` elaborates its
+   -- side goal WHILE THE INDEX IS STILL A METAVARIABLE. D reports
+   --   `omega could not prove the goal … d ≥ 1313 … where d := ↑(?m.110 k)`
+   -- — an UNDETERMINED INDEX, not a bound failure. `apply hab` FIRST makes
+   -- unification determine the index, and only then does `omega` bound it.
+-  -- ⛔ NO discharger for D's `trapped` conjunct is carried here, in EITHER position.
+-  -- Measured 08/20: leading it does NOT rescue it — Q has no goal of that shape, so
+-  -- the linter reports 'apply hab tactic does nothing' + 'never executed' (5 warnings)
+-  -- wherever it sits. ORDERING DOES NOT MAKE A DEAD BRANCH LIVE. That conjunct is
+-  -- D-only and belongs in the swap, where it fails by name.
++  -- ⭐ THE NEW ALTERNATIVE MUST LEAD. `apply hab` on `a 1312 = b 1312` lets unification
++  -- fix the index, leaving the determinate `1312 < stWidth` for `unfold; omega`
++  -- (1313 > 1312) — the same "apply first, bound second" discipline this block's own
++  -- 08/20 note prescribes. On the other goals `apply hab` fails instantly on the TYPE
++  -- (Bool vs Vector/BitVec) and, carrying no term-level `by`, cannot sorry-poison them.
+   and_intros <;> first
++    | (apply hab; unfold SaltWorks.HDL.stWidth; omega)
+     | (apply Vector.ext
+        intro i hi
+        rw [Vector.getElem_ofFn, Vector.getElem_ofFn]
+@@ -1579,24 +1580,23 @@ theorem decQ_envWith_proj (s : St) (w : Word) :
+         (fun j hj => by simp only [envWith, if_pos hj])]
+   exact SaltWorks.HDL.decQ_encD_proj s
+ 
+-/-- ⬥ **M1a — THE HUB, RESTATED.** `decQ (envWith s w) = s` is a whole-`St`
+-equality and goes FALSE once `St` carries `mem`/`trapped`: `envWith` presents
+-1056 encoded bits, so the decoder rebuilds the new fields at their defaults. The
+-honest unconditional form names exactly that state — `s` with the defaults
+-installed — and it serves every consumer, including the ten that quantify over an
+-arbitrary `s` and so have no cleanliness hypothesis to discharge. -/
++/-- ⬥ **M1a — THE HUB, AND HORN D MADE IT THE EXACT ROUND TRIP.** `envWith` presents
++all `stWidth` encoded bits and `decQ` reads only nets `< stWidth`, so the decoder now
++returns the state it was handed — **memory and trap flag included.**
++
++⛔ **RESTATED UPWARD AT THE SWAP, NOT REPAIRED AND NOT DELETED.** Until Horn D this read
++`= { s with mem := Vector.replicate 8 0, trapped := false }` — the LOSSY ARTIFACT of a
++1056-bit codec that could not carry those fields. That text is FALSE under D for a dirty
++`s` (`StateCodecD.sTestD` refutes it: eight distinct memory words, trap set). ⭐ **The
++pre-D note in this very block predicted the shape five days early — *"D does not break
++this theorem, it makes it true in a STRONGER form"* — so this is that prediction
++discharged, not a new claim.** *The consumers that had no cleanliness hypothesis to
++discharge now need none, because there is nothing left to be clean about.* -/
+ theorem decQ_envWith_eq (s : St) (w : Word) :
+-    SaltWorks.HDL.decQ (envWith s w)
+-      = { s with mem := Vector.replicate 8 0, trapped := false } := by
+-  -- ⛔ Q REGIME. Under Horn D this exact text is FALSE for a dirty `s` (measured,
+-  -- D dry run 2026-08-20): D's `encD` encodes the REAL mem/trapped, so the goal
+-  -- grows `… ∧ (Vector.ofFn …(1056+32*w+k)…) = Vector.replicate 8 0 ∧
+-  -- (encD s).getD 1312 false = false`. The D form is the EXACT round trip
+-  -- `decQ (envWith s w) = s` — D does not break this theorem, it makes it true in
+-  -- a STRONGER form, and this text is the pre-D compromise. Kept, not deleted.
+-  obtain ⟨hr, hp⟩ := decQ_envWith_proj s w
+-  simp only [SaltWorks.HDL.decQ, St.mk.injEq, and_true] at hr hp ⊢
+-  exact ⟨hr, hp⟩
++    SaltWorks.HDL.decQ (envWith s w) = s := by
++  rw [decQ_congr (b := fun j => (SaltWorks.HDL.encD s).getD j false)
++        (fun j hj => by simp only [envWith, if_pos hj])]
++  exact SaltWorks.HDL.decQ_encD s
+ 
+ /-- ⬥ **M1a — THE (A)-FORM, per the 18:53 ruling: per-constructor projection
+ facts, no predicate.** Every slice-A arm is built from `.set` / `.next` / `.get`
+@@ -1878,14 +1878,19 @@ theorem out_of_range_mutant_passes_spuriously :
+       = (SaltWorks.ISA.step SaltWorks.ISA.m2Witness (.SW 0 1 32)).mem := by
+   decide +kernel
+ 
+-/-- The `= s` form survives exactly on clean states — which is every state the
+-codec is fed. -/
++/-- ⬥ **SUBSUMED AT THE HORN D SWAP — BOTH HYPOTHESES ARE NOW UNUSED.** This said the
++`= s` form *"survives exactly on clean states"*; under D it survives on **every** state,
++because `decQ_envWith_eq` is the exact round trip. The cleanliness arguments are retained
++so the ~existing call sites keep compiling, and they are prefixed `_` to say plainly that
++nothing reads them — the convention `StateCodec.decQ_encD_of_clean` already uses for this
++same collapse one layer down.
++⛔ **NOT DELETED, DELIBERATELY: removing it would break every consumer in the same commit
++as the swap, and a retirement whose blast radius is unmeasured is what this campaign has
++been paying for all day.** *New call sites should cite `decQ_envWith_eq` directly.* -/
+ theorem decQ_envWith_of_clean (s : St) (w : Word)
+-    (hm : s.mem = Vector.replicate 8 0) (ht : s.trapped = false) :
+-    SaltWorks.HDL.decQ (envWith s w) = s := by
+-  rw [decQ_envWith_eq]
+-  obtain ⟨regs, pc, mem, tr⟩ := s
+-  subst hm; subst ht; rfl
++    (_hm : s.mem = Vector.replicate 8 0) (_ht : s.trapped = false) :
++    SaltWorks.HDL.decQ (envWith s w) = s :=
++  decQ_envWith_eq s w
+ 
+ theorem seenWord_envWith (s : St) (w : Word) : seenWord (envWith s w) = w := by
+   apply BitVec.eq_of_getLsbD_eq
+@@ -2429,11 +2434,15 @@ theorem decQ_cycOfBits_stalled (nextW : SaltWorks.HDL.Env → Word) (pad : SaltW
+     (ins : SaltWorks.HDL.Env) :
+     SaltWorks.HDL.decQ (cycOfBits stalledBits nextW pad ins) = SaltWorks.HDL.decQ ins := by
+   rw [cycOfBits, stalledBits, envOfBits_encD]
+-  -- ⬥ M2: cleanliness here comes from `decQ`'s own construction, NOT from
+-  -- `stepT` — `stalledBits` never steps. The retired `stepT_mem_eq` was a
+-  -- gratuitous simp argument, which is why this theorem survives untouched.
+-  exact decQ_envWith_of_clean _ _
+-    (by simp [SaltWorks.HDL.decQ]) (by simp [SaltWorks.HDL.decQ])
++  -- ⬥ D: `stalledBits` re-encodes the state the decoder just read, so this IS the codec
++  -- round trip at `s := decQ ins` and owes NO cleanliness discharge — the 1313-bit
++  -- encoding carries `mem`/`trapped` and `decQ_envWith_eq` is now exact.
++  -- ⛔⭐ THE TWO ARGUMENTS THIS REPLACES WERE THE PIVOT PAIR **INLINED RATHER THAN
++  -- CITED**: `(by simp [decQ]) (by simp [decQ])` discharged `mem`/`trapped` cleanliness
++  -- by unfolding `decQ` to its literals — exactly what `decQ_mem`/`decQ_trapped` say.
++  -- A name-grep for the retired pivot CANNOT SEE THIS SITE. It is the reason a
++  -- retirement's blast radius is not bounded by its own identifier.
++  exact decQ_envWith_eq _ _
+ 
+ /-- ⛔ **CONTROL 1 — THE STALLED CORE FAILS THROUGH THE BRIDGE.** `cycOfBits` is
+ not a construction that makes anything realise a step: at `St.init` with
