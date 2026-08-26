@@ -94,6 +94,7 @@ import SaltWorks.HDL.CorePlace
 import SaltWorks.HDL.CoreAssembly
 import SaltWorks.HDL.CoreAssemblyD
 import SaltWorks.HDL.NetlistBridge
+import SaltWorks.HDL.TrapOrgan
 import SaltWorks.HDL.RegFieldSchema
 import SaltWorks.HDL.RegNextUniform
 import SaltWorks.HDL.RegField0
