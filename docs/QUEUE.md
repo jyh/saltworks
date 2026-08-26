@@ -629,7 +629,12 @@ OPEN ITEMS:
   law, owned in full). WHAT SURVIVES: the gitignored-52 defect
   (independently confirmed) and the PARTITION SHAPE by owner; the
   per-owner NUMBERS re-derive after compiler's tool fix (which
-  now answers TWO defects: gitignore class + name normalization).
+  ~~now answers TWO defects: gitignore class + name normalization~~
+  **answers ONE — the gitignore class, fixed 08/10 in `f1d0bb63`. The "name
+  normalization" defect is STRUCK above: the tool normalises at line 84.
+  Corrected HERE TOO because a strike that leaves the claim alive in the row's
+  own SUMMARY has not struck anything — the summary is what a hand in a hurry
+  reads, and this row's summary is the half that travels.**).
   No figure from this entry travels to the Captain except
   138-provisional-on-the-tool-fix.**
 
