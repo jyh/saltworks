@@ -96,7 +96,49 @@ shutdown, and it opens **on every SIGTERM**. Tonight produced an `EXIT=143`.
 ⇒ **The defect is not rare-and-severe. It is reachable on any signalled build**, and the
 reap race I filed is the *narrower* of the two paths, not the main one.
 
-⚠️ **STILL NOT MEASURED: whether it has ever actually fired.** No claim is made.
+## ⛔⛔ IT FIRED. IN PRODUCTION. THE SAME NIGHT THIS WAS FILED.
+
+**This file originally said "still not measured: whether it has ever actually fired. No claim is
+made." THAT SENTENCE IS NOW FALSE**, and the correction is the silicon seat's, in their own words in
+`tools/saltbuild.sh`:
+
+> *"MEASURED THE HARD WAY 2026-08-26 00:30: an earlier cut of this file took the flock, `rm -rf`-ed
+> the marker directory, and ran a build while math's 41-minute build was live — deleting their lock
+> on the way in. Restored by hand."*
+
+**A live 41-minute, 43 GB build had its lock deleted by another seat's wrapper, roughly four hours
+after this defect was filed as "low probability, never observed".** *It was restored by hand and no
+two heavy builds collided — but the exposure was real and the mechanism is the one described above.*
+
+⇒ ***A "MECHANISM PROVEN, PROBABILITY UNMEASURED" FINDING IS NOT A HYPOTHETICAL. Mine fired inside
+the same night, and the interval between filing it and it happening was shorter than the time I
+spent estimating how unlikely it was.***
+
+## ⛔ AND MY OBJECTION TO THE ATOMIC FIX IS DEFEATED — by a design I did not think of
+
+This file argues, above, that reaping by `rename(2)` cannot work because *"the loser's `mv` succeeds
+against a lock the winner has already recreated."* **That is true of the NAIVE atomic form and false
+of silicon's:**
+
+```
+rename the corpse away        <- atomic: EXACTLY ONE reaper can hold it
+re-read the pid INSIDE the claim you now exclusively own
+if it turns out LIVE          -> PUT IT BACK
+```
+🔑 ***THE RESTORE IS WHAT DEFEATS MY OBJECTION.*** The naive version renames a live lock away and
+never gives it back; this one can discover its mistake while holding the only copy, and undo it.
+**I had the right refutation of the wrong version of the idea, and stopped there.**
+
+## ⇒ CURRENT AUTHORITY: NOT THIS FILE
+
+Silicon has replaced the reaper entirely with `flock(2)` — kernel-held, released by the kernel even
+on SIGKILL, **so there is no such thing as a stale flock, therefore no reaper, therefore no
+check-then-act, therefore the whole defect class is gone rather than narrowed.** The marker
+directory is kept deliberately so existing `[ -d ... ]` probes keep working, and the two mechanisms
+must both be held during the migration window because *a new mechanism does not replace an old one
+until every peer runs the new one.*
+
+**Read `tools/saltbuild.sh` in silicon's clone. This file is now history, not guidance.**
 
 ## ⛔ OPEN QUESTION — DO THE TWO GUARDS COVER EACH OTHER? UNVERIFIED.
 
