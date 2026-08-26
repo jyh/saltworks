@@ -12,46 +12,97 @@
 # audit RAN on given bytes — green-exit-≠-verification's paper trail.
 LOCK=/tmp/salt-fleet-build.lock
 AUDITLOG=/Users/jyh/projects/claude/.saltbuild-audit.log
-WAITED=0; MAXWAIT=5400
-while ! mkdir "$LOCK" 2>/dev/null; do
-  if [ -f "$LOCK/pid" ]; then
-    # ⛔ REAP RACE (evidence, docs/EVIDENCE-saltbuild-reap-race-2026-08-25.md): the pid is
-    # READ, JUDGED dead, and only THEN acted on. Between judging and acting another waiter
-    # can reap the same corpse and ACQUIRE — and this rm -rf then deletes a LIVE lock.
-    # RE-VERIFY WHAT YOU JUDGED. The atomic fix (reap by rename) does NOT work: the loser's
-    # mv succeeds because the winner has already RECREATED the lock, so it renames away a
-    # live one. Atomicity protects two acts on ONE object; it does nothing when the object
-    # was REPLACED between your decision and your act.
-    DEAD="$(cat "$LOCK/pid" 2>/dev/null)"
-    if ! kill -0 "$DEAD" 2>/dev/null; then
-      [ "$(cat "$LOCK/pid" 2>/dev/null)" = "$DEAD" ] && rm -rf "$LOCK"
-      continue
+MAXWAIT=5400
+# ══ THE LOCK: KERNEL-HELD, SO THERE IS NO CHECK-THEN-ACT WINDOW ANYWHERE ══════════
+# ⛔ WHAT THIS REPLACES AND WHY. The previous design was `mkdir` + a REAPER that deleted
+# a lock whose pid failed `kill -0`. Every version of that reaper is check-then-act: you
+# READ the pid, JUDGE it dead, and only THEN remove — and the directory can be REPLACED
+# in between. Measured 2026-08-25 over 150 trials each:
+#     unguarded            6/150 clobbered a LIVE holder
+#     re-verify guarded    1/150            <- a MITIGATION, not a fix
+# Re-verification only moves the window from judge->act to reverify->act. It cannot close
+# it, because "check the pid" and "remove the dir" are two acts. ONE surviving clobber is
+# an existence proof and needs no statistics.
+#
+# ⭐ THE FIX IS NOT A BETTER CHECK — IT IS A PRIMITIVE THAT NEEDS NO CHECK.
+# `flock(2)` is held by the KERNEL against an open file descriptor. Measured on this
+# machine: a holder killed with SIGKILL — no trap, no cleanup, no code of ours able to
+# run — had its lock released by the kernel and the next acquirer proceeded immediately.
+#   ⇒ THERE IS NO SUCH THING AS A STALE flock. No stale lock ⇒ NO REAPER ⇒ no
+#     check-then-act ⇒ the entire defect class is gone rather than narrowed.
+# This also strictly improves the old failure mode: under the reaper, a SIGKILLed holder
+# left a lock that survived until somebody judged it dead. Here it never exists.
+#
+# ⚠️ THE DIRECTORY STAYS, AND THAT IS DELIBERATE. Peers, and this seat's own probes, ask
+# `[ -d /tmp/salt-fleet-build.lock ]` to see whether a build is running. Moving the lock
+# to a file would leave every one of those probes reporting FREE forever — silently, and
+# fleet-wide. So the DIRECTORY IS NOW A MARKER and the flock is the AUTHORITY.
+#   ⇒ The marker is best-effort and its staleness is HARMLESS: it cannot cause a double
+#     build, because the kernel decides. `rm -rf` on it below is safe precisely because
+#     we already hold the flock, so no other builder can be in this region at all.
+LOCKFILE="${LOCK}.flk"
+FLOCK="$(command -v flock 2>/dev/null || true)"
+if [ -z "$FLOCK" ]; then
+  # ⛔ REFUSE, never fall back. A fallback here would silently reinstate the exact
+  # check-then-act reaper this design exists to delete, and it would do it on the one
+  # box where nobody is looking. Loud beats subtly-unsafe.
+  echo "saltbuild EXIT=76 (NO flock(1) ON PATH: the fleet lock cannot be held safely; refusing to fall back to the reaper form)" >&2
+  exit 76
+fi
+exec 9>"$LOCKFILE" || { echo "saltbuild EXIT=76 (cannot open $LOCKFILE)" >&2; exit 76; }
+if ! "$FLOCK" -w "$MAXWAIT" 9; then
+  echo "saltbuild EXIT=75 (LOCK-WAIT ABORT: the build NEVER STARTED - this is NOT a build failure; RETRY the same command)"
+  exit 75
+fi
+# ⛔⛔ WE NOW HOLD THE FLOCK, WHICH EXCLUDES EVERY *NEW* WRAPPER — AND NOTHING ELSE.
+# A wrapper that has not been pulled yet acquires by `mkdir "$LOCK"` and has never heard
+# of the flock. The two mechanisms DO NOT EXCLUDE EACH OTHER, so during the migration
+# window a new wrapper must hold BOTH or it will build straight through a live old one.
+# ⇒ MEASURED THE HARD WAY 2026-08-26 00:30: an earlier cut of this file took the flock,
+#   `rm -rf`-ed the marker directory, and ran a build while math's 41-minute build was
+#   live — deleting their lock on the way in. Restored by hand. THE `rm -rf` IS GONE.
+#   A NEW MECHANISM DOES NOT REPLACE AN OLD ONE UNTIL EVERY PEER RUNS THE NEW ONE; until
+#   then it is an ADDITIONAL mechanism, and interop is the feature, not an afterthought.
+# No deadlock: an old wrapper never waits on the flock, so it always makes progress and
+# always releases the directory; a new wrapper waits for the directory while holding the
+# flock, and other new wrappers wait on the flock behind it.
+WAITED=0
+until mkdir "$LOCK" 2>/dev/null; do
+  # A directory left by a CRASHED holder must still be reapable, or one dead old wrapper
+  # wedges the fleet. This reap is by ATOMIC CLAIM, not re-verification: `rename(2)` is
+  # atomic, so exactly one reaper can ever hold the corpse; the pid is then re-read INSIDE
+  # the claim we exclusively own, and a directory that turns out LIVE is PUT BACK. That
+  # restore is what defeats the objection to the atomic form in the evidence filing — the
+  # naive version renames away a live lock and never gives it back.
+  claim_reap() {
+    local pid claim
+    pid="$(cat "$LOCK/pid" 2>/dev/null)"
+    # A live holder is refused outright: we never move a live lock in the common case.
+    if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then return 1; fi
+    claim="$LOCK.reaping.$$"
+    rm -rf "$claim" 2>/dev/null
+    mv "$LOCK" "$claim" 2>/dev/null || return 1
+    pid="$(cat "$claim/pid" 2>/dev/null)"
+    if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
+      mv "$claim" "$LOCK" 2>/dev/null || rm -rf "$claim"
+      return 1
     fi
-  elif [ -d "$LOCK" ] && [ $(( $(date +%s) - $(stat -f %m "$LOCK" 2>/dev/null || date +%s) )) -ge 60 ]; then
-    # ⚠️ THIRD SITE, SAME CLASS — found while patching the two in the filing, not in it.
-    # Same check-then-act shape: we judge "pid-less and >=60s old", and between judging and
-    # acting another waiter can reap, acquire, and WRITE ITS PID — and this rm -rf then eats
-    # a live lock. The precondition (a holder dying inside the microsecond mkdir->echo gap)
-    # is rare, but when it does occur EVERY waiter sees it at once, which is the same
-    # two-waiter shape as the pid branch. Re-verify the property we judged: still pid-less.
-    [ ! -f "$LOCK/pid" ] && rm -rf "$LOCK"
-    continue
+    rm -rf "$claim"
+    echo "saltbuild: reaped a marker whose holder (pid ${pid:-none}) is dead"
+    return 0
+  }
+  claim_reap && continue
+  if [ $WAITED -ge $MAXWAIT ]; then
+    echo "saltbuild EXIT=75 (LOCK-WAIT ABORT on the interop marker, holder pid $(cat "$LOCK/pid" 2>/dev/null || echo '?'): the build NEVER STARTED - RETRY the same command)"
+    exit 75
   fi
-  [ $WAITED -ge $MAXWAIT ] && { echo "saltbuild EXIT=75 (LOCK-WAIT ABORT: the build NEVER STARTED — this is NOT a build failure; RETRY the same command)"; exit 75; }
-  sleep 15; WAITED=$((WAITED+15))
+  sleep 5; WAITED=$((WAITED+5))
   [ $((WAITED % 300)) -eq 0 ] && echo "saltbuild: waiting on the fleet lock (${WAITED}s)"
 done
 echo $$ > "$LOCK/pid"
-# ⛔ DOUBLE-FIRE (compiler's measurement, same filing): `trap ... EXIT INT TERM` runs at
-# SIGNAL-DELIVERY time, not at the exit line — and on a signal it runs AGAIN at exit. It
-# fires TWICE, and between the fires this process is still shutting down and appending its
-# audit line, so the window is the WHOLE SHUTDOWN and it opens on EVERY SIGTERM. An
-# unguarded `rm -rf "$LOCK"` on the second fire deletes whatever is at that path NOW —
-# which can be a NEW holder that acquired during the window.
-# ⇒ RELEASE ONLY WHAT YOU OWN. The pid file still naming us is the ownership proof; if the
-# first fire already released, the file is gone and the compare fails, which is correct.
-# Returns 0 unconditionally so the release can never alter the wrapper's exit status
-# (this file's charter: logging and cleanup are best-effort and never change EXIT).
+# The trap releases only the MARKER. The flock needs no trap: the kernel drops it when
+# this process and every descendant holding fd 9 is gone. Ownership-guarded because a trap
+# fires at signal-delivery AND again at exit (6/6 ate a new holder's marker unguarded).
 release() { [ "$(cat "$LOCK/pid" 2>/dev/null)" = "$$" ] && rm -rf "$LOCK"; return 0; }
 trap release EXIT INT TERM
 export LEAN_NUM_THREADS=4
