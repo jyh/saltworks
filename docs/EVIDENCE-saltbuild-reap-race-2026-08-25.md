@@ -51,7 +51,7 @@ UNGUARDED (as written)     B CLOBBERED while holding — pid file [36296], I am 
 GUARDED (one line added)   B held cleanly · C held cleanly
 ```
 
-## THE FIX
+## THE MITIGATION — ⛔ NOT A FIX, AND I FILED IT AS ONE
 
 ```sh
 DEAD="$(cat "$LOCK/pid" 2>/dev/null)"
@@ -60,6 +60,18 @@ if ! kill -0 "$DEAD" 2>/dev/null; then
     continue
 fi
 ```
+
+⛔⛔ **DRIVEN BY THE SILICON SEAT AT 150 TRIALS PER ARM: `6/150` FAILURES BECOMES `1/150`.
+THE GUARD NARROWS THE WINDOW AND CANNOT CLOSE IT** — the re-verify still has a gap between
+the second read and the `rm -rf`. **Ruled at the helm: cite it as MITIGATED, NEVER as
+closed.** Silicon insisted the surviving 1 is the result and not noise, and they are right.
+
+⛔ **AND THIS CONVICTS THE ONE RESULT IN THIS FILE I SAID I STOOD BEHIND.** My differential
+ran **ONE trial per arm** and printed *"GUARDED: B held cleanly · C held cleanly"*, which I
+read as the race being closed. ***A SINGLE TRIAL OF A RACE CANNOT DISTINGUISH "NARROWED"
+FROM "CLOSED" — and the narrower the window, the more confidently a single clean run lies.***
+The differential was real evidence that the guard HELPS and no evidence at all about
+whether it SUFFICES. **150 trials say it does not.**
 
 ⚠️ **The obvious atomic fix does NOT work, and it is the first thing to reach for.**
 Reaping by rename — only one racer wins a `rename(2)` — fails here: the loser's `mv`
