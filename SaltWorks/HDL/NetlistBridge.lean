@@ -281,4 +281,47 @@ The two `getD` lemmas below are landed and are what those branches consume.**
 
 #audit_axioms getD_append_lt getD_append_eq
 
+/-! ### THE INDUCTION-CARRYING FORM OF THE `.inp` CONDITION
+
+⛔ `inpNumberedFrom` STOPS RECURSING at the first non-`.inp` gate — correct for `bridgeable`
+(which only cares about the leading run) and USELESS as an induction hypothesis, because after
+one ordinary gate it says nothing about the tail. The induction needs the condition at EVERY
+position, so it gets its own predicate. *Found by trying to carry the wrong one.* -/
+
+def inpAtPos : Nat → List SaltWorks.Silicon.Gate → Bool
+  | _, []            => true
+  | k, .inp i :: gs  => (i == k) && inpAtPos (k+1) gs
+  | k, _ :: gs       => inpAtPos (k+1) gs
+
+theorem dmemAddr8_inpAtPos : inpAtPos 0 dmemAddr8NL = true := by decide +kernel
+theorem demo_inpAtPos : inpAtPos 0 demoNL = true := by decide +kernel
+
+/-! ### ⛔ THIRD ATTEMPT, 2026-08-26 16:5x — CLOSER, STILL NOT THROUGH
+
+**13 errors → 8. `step_eq`'s content is essentially written; the plumbing is not.** Two
+obstacles remain, both named here so the next hand does not rediscover them:
+
+**① `simp` NORMALISES `getD` OUT FROM UNDER THE HYPOTHESIS.** In the operand branches the goal
+becomes `senv[a]?.getD false = henv a` while `h2` is stated with `List.getD`, so it no longer
+matches syntactically. **Cure: `show` the reduced form and `rw [h2 …]`; never `simp` with `h2`
+in the set.** That fixed four of the five branches.
+
+**② `simp` HITS MAXIMUM RECURSION DEPTH unfolding `runP` and `bridgeGatesFrom`** in the two
+step cases. Both are recursive on the netlist, and handing them to `simp` as unfolding lemmas
+diverges. **Cure is `simp only` with the specific equation lemmas, or a `show` of the
+one-step-reduced form — not a bigger `maxRecDepth`.**
+
+**③ A `subst` TRAP, and it is the one that cost the most.** With `h1 : senv.length = k`,
+rewriting `← h1` to reach `getD_append_eq` turns *every* `k` into `senv.length`, including the
+one `h3` is stated about — so `h3 m` stops applying with a type mismatch that names
+`ins senv.length`. **Cure: rewrite inside a `have` whose statement is already about `m`, and
+leave the ambient goal's `k` alone.**
+
+⇒ **What is landed below is the induction-carrying `.inp` predicate and its discharge on the
+real netlist — the piece the second attempt lacked.** The remaining work is `step_eq` (five
+branches, four of them already in the shape above) and the two step cases of `bridge_agrees`.
+-/
+
+#audit_axioms inpAtPos dmemAddr8_inpAtPos demo_inpAtPos
+
 end SaltWorks.HDL.NetlistBridge
