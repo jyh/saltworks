@@ -222,4 +222,63 @@ theorem acyclic_rejects_forward_reference :
 #audit_axioms opndsLt acyclicFrom dmemAddr8_acyclic demo_acyclic
 #audit_axioms acyclic_rejects_forward_reference
 
+/-! ## ⭐⭐ SEMANTIC AGREEMENT — THE GENERAL THEOREM
+
+**THE INVARIANT, WRITTEN DOWN BESIDE THE CODE SO IT IS INHERITED RATHER THAN RE-DERIVED.**
+The induction carries four clauses, relating Silicon's `List Bool` env to HDL's `Net → Bool`:
+```
+① senv.length = k                        the list env is exactly the written prefix
+② ∀ j < k,  senv.getD j false = henv j   the written region agrees
+③ ∀ j ≥ k,  henv j = ins j               THE CLAUSE THAT IS EASY TO MISS: `.inp` emits NO
+                                         HDL gate, so the input region must still read
+                                         through the HDL env to `ins`
+④ acyclicFrom k nl                       or ② is unusable at the operand indices
+```
+*③ exists only because the two representations disagree about whether an input IS a gate —
+Silicon spends a net slot on it, HDL does not. Every other clause is bookkeeping.* -/
+
+/-- Appending past a position does not disturb it. -/
+theorem getD_append_lt {α} [Inhabited α] (l : List α) (x : α) (d : α) {j : Nat}
+    (h : j < l.length) : (l ++ [x]).getD j d = l.getD j d := by
+  simp [List.getD_eq_getElem?_getD, List.getElem?_append_left h]
+
+/-- And the appended slot is the one at the old length. -/
+theorem getD_append_eq {α} [Inhabited α] (l : List α) (x : α) (d : α) :
+    (l ++ [x]).getD l.length d = x := by
+  simp [List.getD_eq_getElem?_getD]
+
+/-! ### ⛔ THE REMAINING OBLIGATION — attempted 2026-08-26 16:4x, DID NOT GO
+
+**`bridge_agrees` is NOT here, and this block is the record of why rather than a silence.**
+
+```
+theorem bridge_agrees (ins : Env) :
+  ∀ nl k senv henv,
+    senv.length = k →
+    (∀ j, j < k → senv.getD j false = henv j) →
+    (∀ j, k ≤ j → henv j = ins j) →
+    inpNumberedFrom k nl = true →
+    acyclicFrom k nl = true →
+    ∀ j, j < k + nl.length →
+      (Silicon.runP ins senv nl).getD j false = run henv (bridgeGatesFrom k nl) j
+```
+**WHAT WENT THROUGH:** the `nil` case, and the `.inp` case whole — including the step that
+needs ③, where the appended slot `senv.getD k` must equal `henv k` and the only route is
+`henv k = ins k` because HDL emitted no gate there.
+⛔ **WHERE IT BROKE:** the FIVE remaining constructors. `cases g` needs each alternative
+supplied — a `| _ =>` catch-all is rejected — and each one carries the real content, not
+bookkeeping: for `.not a` one must show `!(senv.getD a false) = !(henv a)`, which needs `a < k`
+out of `acyclicFrom` and then ②, and `.and/.or/.xor` need it twice. Then the step case must
+re-establish ② and ③ across `upd henv k v`, where ② splits at `j < k` (via `upd_of_ne`) and
+`j = k` (via `upd_self`).
+📌 **AND MY FIRST ATTEMPT WAS WRONG IN A WAY WORTH RECORDING:** I discharged those five
+branches with `exact absurd hacy …`, as though a non-`.inp` gate contradicted acyclicity. **It
+does not — those branches ARE the theorem.** *A placeholder that type-checks in the author's
+head is how a proof of nothing gets written; it failed to elaborate, which is the good ending.*
+⇒ **The work is five constructor branches over `getD_append_lt`, `upd_of_ne` and `upd_self`.
+The two `getD` lemmas below are landed and are what those branches consume.**
+-/
+
+#audit_axioms getD_append_lt getD_append_eq
+
 end SaltWorks.HDL.NetlistBridge
