@@ -15,16 +15,45 @@ AUDITLOG=/Users/jyh/projects/claude/.saltbuild-audit.log
 WAITED=0; MAXWAIT=5400
 while ! mkdir "$LOCK" 2>/dev/null; do
   if [ -f "$LOCK/pid" ]; then
-    if ! kill -0 "$(cat "$LOCK/pid" 2>/dev/null)" 2>/dev/null; then rm -rf "$LOCK"; continue; fi
+    # ⛔ REAP RACE (evidence, docs/EVIDENCE-saltbuild-reap-race-2026-08-25.md): the pid is
+    # READ, JUDGED dead, and only THEN acted on. Between judging and acting another waiter
+    # can reap the same corpse and ACQUIRE — and this rm -rf then deletes a LIVE lock.
+    # RE-VERIFY WHAT YOU JUDGED. The atomic fix (reap by rename) does NOT work: the loser's
+    # mv succeeds because the winner has already RECREATED the lock, so it renames away a
+    # live one. Atomicity protects two acts on ONE object; it does nothing when the object
+    # was REPLACED between your decision and your act.
+    DEAD="$(cat "$LOCK/pid" 2>/dev/null)"
+    if ! kill -0 "$DEAD" 2>/dev/null; then
+      [ "$(cat "$LOCK/pid" 2>/dev/null)" = "$DEAD" ] && rm -rf "$LOCK"
+      continue
+    fi
   elif [ -d "$LOCK" ] && [ $(( $(date +%s) - $(stat -f %m "$LOCK" 2>/dev/null || date +%s) )) -ge 60 ]; then
-    rm -rf "$LOCK"; continue   # pid-less lock >60s old: the mkdir->echo window died; reap it
+    # ⚠️ THIRD SITE, SAME CLASS — found while patching the two in the filing, not in it.
+    # Same check-then-act shape: we judge "pid-less and >=60s old", and between judging and
+    # acting another waiter can reap, acquire, and WRITE ITS PID — and this rm -rf then eats
+    # a live lock. The precondition (a holder dying inside the microsecond mkdir->echo gap)
+    # is rare, but when it does occur EVERY waiter sees it at once, which is the same
+    # two-waiter shape as the pid branch. Re-verify the property we judged: still pid-less.
+    [ ! -f "$LOCK/pid" ] && rm -rf "$LOCK"
+    continue
   fi
   [ $WAITED -ge $MAXWAIT ] && { echo "saltbuild EXIT=75 (LOCK-WAIT ABORT: the build NEVER STARTED — this is NOT a build failure; RETRY the same command)"; exit 75; }
   sleep 15; WAITED=$((WAITED+15))
   [ $((WAITED % 300)) -eq 0 ] && echo "saltbuild: waiting on the fleet lock (${WAITED}s)"
 done
 echo $$ > "$LOCK/pid"
-trap 'rm -rf "$LOCK"' EXIT INT TERM
+# ⛔ DOUBLE-FIRE (compiler's measurement, same filing): `trap ... EXIT INT TERM` runs at
+# SIGNAL-DELIVERY time, not at the exit line — and on a signal it runs AGAIN at exit. It
+# fires TWICE, and between the fires this process is still shutting down and appending its
+# audit line, so the window is the WHOLE SHUTDOWN and it opens on EVERY SIGTERM. An
+# unguarded `rm -rf "$LOCK"` on the second fire deletes whatever is at that path NOW —
+# which can be a NEW holder that acquired during the window.
+# ⇒ RELEASE ONLY WHAT YOU OWN. The pid file still naming us is the ownership proof; if the
+# first fire already released, the file is gone and the compare fails, which is correct.
+# Returns 0 unconditionally so the release can never alter the wrapper's exit status
+# (this file's charter: logging and cleanup are best-effort and never change EXIT).
+release() { [ "$(cat "$LOCK/pid" 2>/dev/null)" = "$$" ] && rm -rf "$LOCK"; return 0; }
+trap release EXIT INT TERM
 export LEAN_NUM_THREADS=4
 CAP=24000
 if [ "$1" = "--cap" ]; then CAP="$2"; shift 2; fi
