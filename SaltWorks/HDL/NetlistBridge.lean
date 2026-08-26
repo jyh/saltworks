@@ -183,4 +183,43 @@ theorem demo_wrong_bridge_disagrees :
 #audit_axioms insOf demoNL demoOuts demo_bridgeable demo_sem_agrees
 #audit_axioms demoBridgeWrong demo_wrong_bridge_disagrees
 
+/-! ## THE GENERAL THEOREM'S PRECONDITION — landed, so the theorem applies when it arrives
+
+The general agreement theorem needs more than `bridgeable`. Silicon's `runP` reads
+`env.getD a false` where `env` has length = the CURRENT position, so a gate reading a net at
+or above its own index gets `false`; HDL's `run` reads `henv a`, which is the input value
+there. **The two semantics diverge on a forward reference**, and nothing in `bridgeable`
+forbids one. So the precondition is acyclicity, and it is stated and MEASURED here rather
+than discovered mid-proof. -/
+
+/-- Every operand of the gate at position `k` refers to a strictly earlier net. -/
+def opndsLt (k : Nat) : SaltWorks.Silicon.Gate → Bool
+  | .inp _   => true
+  | .const _ => true
+  | .not a   => a < k
+  | .and a b => a < k && b < k
+  | .or  a b => a < k && b < k
+  | .xor a b => a < k && b < k
+
+def acyclicFrom : Nat → List SaltWorks.Silicon.Gate → Bool
+  | _, []      => true
+  | k, g :: gs => opndsLt k g && acyclicFrom (k+1) gs
+
+/-- ⭐ **THE REAL NETLIST MEETS IT.** So when the general theorem lands it applies to
+`dmemAddr8NL` without a further obligation. -/
+theorem dmemAddr8_acyclic : acyclicFrom 0 dmemAddr8NL = true := by decide +kernel
+
+/-- And the demo witness above meets it too — the witness is not exercising a shape the
+general theorem would exclude. -/
+theorem demo_acyclic : acyclicFrom 0 demoNL = true := by decide +kernel
+
+/-- ⛔ **ACYCLICITY CAN FAIL, AND THE DIVERGENCE IT GUARDS IS REAL.** A forward reference is
+rejected — and it must be, because on such a netlist `runP` reads `false` where `run` reads
+the input, so the two semantics genuinely disagree. -/
+theorem acyclic_rejects_forward_reference :
+    acyclicFrom 0 [.inp 0, .and 0 5, .const true] = false := by decide +kernel
+
+#audit_axioms opndsLt acyclicFrom dmemAddr8_acyclic demo_acyclic
+#audit_axioms acyclic_rejects_forward_reference
+
 end SaltWorks.HDL.NetlistBridge
