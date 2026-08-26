@@ -2913,27 +2913,60 @@ theorem c4SpecD_of_fieldwise {c : SaltWorks.HDL.Circ}
     (hmem : ∀ w : Fin 8, MemFieldD c w) (htr : TrappedFieldD c) : C4SpecD c :=
   (c4SpecD_iff_fieldwise c).mpr ⟨hlen, hregs, hpc, hmem, htr⟩
 
+/-! ### ⭐⭐ NAMED ACCESSORS AT D — the conjuncts WITHOUT counting positions
+
+⛔ **WHY THESE EXIST, and the reason lives in another seat's file.** Consumers reached
+these conjuncts by positional projection (`.2.1`, `.2.2.1`, `.2.2.2.1`, `.2.2.2.2`).
+Positions COUNT, so any future conjunct re-aims every one of them, and a consumer that
+merely passes the value along re-aims in SILENCE rather than failing to elaborate.
+
+⭐ **The contrast that settled the policy is inside this same file.** `decQ_congr`'s bound
+is a SYMBOL, not a literal — *"nothing here counts the fields"* — and it survived the D
+swap untouched, having cost its author nothing. The positional projections did not.
+⇒ ***PREFER ARITY-ROBUSTNESS, A PROPERTY, OVER AN APPEND CONVENTION, WHICH IS WILLPOWER AT
+EVERY FUTURE CALL SITE.*** With these accessors in place, growing the conjunction touches
+the accessor bodies and NOTHING ELSE. -/
+
+/-- Named accessor: the D register conjunct. -/
+theorem regFieldD_of_C4SpecD {c : SaltWorks.HDL.Circ} (h : C4SpecD c) (r : Fin 32) :
+    RegFieldD c r :=
+  ((c4SpecD_iff_fieldwise c).mp h).2.1 r
+
+/-- Named accessor: the D pc conjunct. -/
+theorem pcFieldD_of_C4SpecD {c : SaltWorks.HDL.Circ} (h : C4SpecD c) : PcFieldD c :=
+  ((c4SpecD_iff_fieldwise c).mp h).2.2.1
+
+/-- Named accessor: the D memory conjunct — new at D. -/
+theorem memFieldD_of_C4SpecD {c : SaltWorks.HDL.Circ} (h : C4SpecD c) (w : Fin 8) :
+    MemFieldD c w :=
+  ((c4SpecD_iff_fieldwise c).mp h).2.2.2.1 w
+
+/-- Named accessor: the D trap conjunct — the 43rd. -/
+theorem trappedFieldD_of_C4SpecD {c : SaltWorks.HDL.Circ} (h : C4SpecD c) :
+    TrappedFieldD c :=
+  ((c4SpecD_iff_fieldwise c).mp h).2.2.2.2
+
 /-! ### ⭐ THE D ISOLATION DIRECTION — a failing D core fails a NAMED field -/
 
 /-- A failing D register field refutes `C4SpecD` on its own. -/
 theorem not_C4SpecD_of_not_regFieldD {c : SaltWorks.HDL.Circ} {r : Fin 32}
     (h : ¬ RegFieldD c r) : ¬ C4SpecD c :=
-  fun hc => h (((c4SpecD_iff_fieldwise c).mp hc).2.1 r)
+  fun hc => h (regFieldD_of_C4SpecD hc r)
 
 /-- A failing D pc field refutes `C4SpecD` on its own. -/
 theorem not_C4SpecD_of_not_pcFieldD {c : SaltWorks.HDL.Circ}
     (h : ¬ PcFieldD c) : ¬ C4SpecD c :=
-  fun hc => h (((c4SpecD_iff_fieldwise c).mp hc).2.2.1)
+  fun hc => h (pcFieldD_of_C4SpecD hc)
 
 /-- ⭐ A failing memory word refutes `C4SpecD` on its own — new at D. -/
 theorem not_C4SpecD_of_not_memFieldD {c : SaltWorks.HDL.Circ} {w : Fin 8}
     (h : ¬ MemFieldD c w) : ¬ C4SpecD c :=
-  fun hc => h (((c4SpecD_iff_fieldwise c).mp hc).2.2.2.1 w)
+  fun hc => h (memFieldD_of_C4SpecD hc w)
 
 /-- ⭐ A failing trap flag refutes `C4SpecD` on its own — the 43rd. -/
 theorem not_C4SpecD_of_not_trappedFieldD {c : SaltWorks.HDL.Circ}
     (h : ¬ TrappedFieldD c) : ¬ C4SpecD c :=
-  fun hc => h (((c4SpecD_iff_fieldwise c).mp hc).2.2.2.2)
+  fun hc => h (trappedFieldD_of_C4SpecD hc)
 
 /-! ### ⭐ AXIOM HYGIENE FOR THE WHOLE D REGIME
 
@@ -3171,17 +3204,34 @@ theorem sorts_of_fieldwise {c : SaltWorks.HDL.Circ} (hconf : SaltWorks.HDL.CoreC
         (dataRegs.map (SaltWorks.HDL.decQ (cycles (cycOfCirc c nextW pad) N ins)).get) :=
   sorts_of_C4 ⟨hconf, c4Spec_of_fieldwise hconf.2.2 hregs hpc⟩ nextW pad hentry hmf
 
+/-! ### ⭐⭐ NAMED ACCESSORS AT C — the same repair, on the live regime
+
+*Identical in purpose to the D block above: a consumer names the field it wants and never
+counts a position, so a future conjunct cannot re-aim it. `C4Refuted.lean` holds the one
+positional site outside this file and can switch to `regField_of_C4Spec` whenever its owner
+chooses — that call is theirs, not mine.* -/
+
+/-- Named accessor: the register conjunct. -/
+theorem regField_of_C4Spec {c : SaltWorks.HDL.Circ} (h : SaltWorks.HDL.C4Spec c)
+    (r : Fin 32) : RegField c r :=
+  ((c4Spec_iff_fieldwise c).mp h).2.1 r
+
+/-- Named accessor: the pc conjunct. -/
+theorem pcField_of_C4Spec {c : SaltWorks.HDL.Circ} (h : SaltWorks.HDL.C4Spec c) :
+    PcField c :=
+  ((c4Spec_iff_fieldwise c).mp h).2.2
+
 /-! ### ⭐ THE ISOLATION DIRECTION — a failing core fails a NAMED field -/
 
 /-- A failing register field refutes C4 on its own. -/
 theorem not_C4Spec_of_not_regField {c : SaltWorks.HDL.Circ} {r : Fin 32}
     (h : ¬ RegField c r) : ¬ SaltWorks.HDL.C4Spec c :=
-  fun hc => h (((c4Spec_iff_fieldwise c).mp hc).2.1 r)
+  fun hc => h (regField_of_C4Spec hc r)
 
 /-- A failing pc field refutes C4 on its own. -/
 theorem not_C4Spec_of_not_pcField {c : SaltWorks.HDL.Circ}
     (h : ¬ PcField c) : ¬ SaltWorks.HDL.C4Spec c :=
-  fun hc => h (((c4Spec_iff_fieldwise c).mp hc).2.2)
+  fun hc => h (pcField_of_C4Spec hc)
 
 /-! ## ⛔ NON-VACUITY — a circuit that meets SOME fields and not others
 
@@ -9645,6 +9695,9 @@ open Salt.Tactic
 #audit_axioms c4Spec_iff_bitwise c4Spec_fieldwise_of_c4Spec c4Spec_iff_fieldwise
 #audit_axioms c4Spec_of_fieldwise cycleRealisesStep_of_fieldwise sorts_of_fieldwise
 #audit_axioms not_C4Spec_of_not_regField not_C4Spec_of_not_pcField
+#audit_axioms regField_of_C4Spec pcField_of_C4Spec
+#audit_axioms regFieldD_of_C4SpecD pcFieldD_of_C4SpecD
+#audit_axioms memFieldD_of_C4SpecD trappedFieldD_of_C4SpecD
 #audit_axioms sem_coreShaped outBit_coreShaped outReg_coreShaped outPc_coreShaped
 #audit_axioms set_regs_zero step_regs_zero stepT_regs_zero
 #audit_axioms regField_zero_coreShaped not_regField_one_coreShaped
