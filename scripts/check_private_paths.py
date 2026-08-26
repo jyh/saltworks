@@ -72,22 +72,31 @@ WHAT IS DELIBERATELY *NOT* FORBIDDEN
 
 THE FRAME THIS INSTRUMENT MEASURES (it travels; it must say)
 ------------------------------------------------------------
-This file is byte-identical in salt, saltworks and jas. Every number in it was
-measured in **saltworks**, the repo where it was written, on 2026-08-25. A
-travelling tool that quotes one repo's anchor as if it were universal is a
-shape this fleet has already paid for, so the other two were measured at the
-same hour and are recorded here rather than assumed:
+This file is byte-identical in salt and saltworks. Every number below was
+measured by this gate, and each row NAMES ITS REF.
 
-    repo        commits   tracked   full-history findings (message arm)
-    saltworks      2127       847   14
-    salt           2142      1425    0   <- clean history; the delta rule still
-                                          applies, so it stays clean
-    jas            3191      2114    5   <- all genuine, all one shape: a path
-                                          into the commons repo, in a message
+⛔ THE FIRST VERSION OF THIS BLOCK SAID "salt · 2142 commits · 0 findings" AND
+THAT WAS MEASURED ON THE DEFAULT BRANCH ALONE. A long-lived branch of the same
+repo carried ELEVEN. I NAMED A REPO WHERE I HAD MEASURED A REF -- not false,
+but under-scoped, which is worse: it reads as a repo-level clean bill, and it
+was quoted as a frame disclosure for four hours. A REPO DOES NOT HAVE A FINDING
+COUNT; A REF DOES.
 
-None of the three contains a directory whose top-level name collides with a
-private-record root, checked in all three before this shipped -- a repo that
-did would red on every ordinary reference to its own tree.
+    ref                        commits  tracked  message-arm findings
+    saltworks  master             2138      850  14
+    salt       main               2145     1426   0
+    salt       math/w1-e3-port    2579     1463   0   <- was 11; a Captain-ruled
+                                                         purge cleared them
+    jas        main               3192     2115   5   <- genuine, all one shape,
+                                                         all predating the ruling
+
+These are SNAPSHOTS taken 2026-08-25, not properties. A branch that forked
+before this gate landed has never been scanned end to end; if you own a
+long-lived branch, one full-range run is cheap and yours to own.
+
+No repo contains a directory whose top-level name collides with a private-record
+root, checked in all three before this shipped -- a repo that did would red on
+every ordinary reference to its own tree.
 
 WHY THE SCAN IS A DELTA, NOT ALL OF HISTORY
 -------------------------------------------
@@ -104,9 +113,32 @@ the pushed delta's commit messages, and the delta's added/modified file lines.
 from __future__ import annotations
 
 import argparse
+import hashlib
+import pathlib
 import re
 import subprocess
 import sys
+
+def self_id() -> str:
+    """This file's own content hash, printed in every verdict.
+
+    WHY. A ruling made this gate's verdict a required receipt, and the criterion
+    was "the MECHANISM'S verdict". Four copies of it existed across two repos and
+    two refs at that moment; had any differed, the receipt would have named four
+    objects and nobody would have noticed. I checked them by hand and they
+    matched -- but a receipt whose instrument must be identified BY HAND is one
+    unverified step from meaningless.
+
+    AN INSTRUMENT THAT DOES NOT NAME ITSELF MAKES EVERY RECEIPT ABOUT IT
+    UNFALSIFIABLE. Now every line this tool prints carries the bytes that printed
+    it, and a reader can reproduce or refute the number without trusting the run.
+    """
+    try:
+        return hashlib.sha256(
+            pathlib.Path(__file__).read_bytes()).hexdigest()[:16]
+    except OSError:
+        return "unreadable"
+
 
 # ---------------------------------------------------------------------------
 # THE PRIVATE-RECORD ROOTS. Assembled from parts so this file's own prose above
@@ -392,7 +424,8 @@ def self_test() -> int:
         print(f"SELF-TEST FAIL: {f}")
     if failures:
         return 1
-    print(f"check_private_paths SELF-TEST: OK (empty scan fatal proven FIRST; "
+    print(f"check_private_paths SELF-TEST [gate {self_id()}]: OK "
+          f"(empty scan fatal proven FIRST; "
           f"{len(real)} real post-ruling instances caught; {len(planted)} planted "
           f"shapes caught; {len(clean)} compliant forms passed; own source clean)")
     return 0
@@ -436,7 +469,8 @@ def main() -> int:
 
     bad = scan(msgs) + scan(lines)
     if bad:
-        print(f"FAIL: {len(bad)} private-record path(s) entering a PUBLIC repo.\n")
+        print(f"FAIL [gate {self_id()}]: {len(bad)} private-record path(s) "
+              f"entering a PUBLIC repo.\n")
         print("Council 2026-08-25 ruled the firewall line at PATHS: paths into")
         print("the private record are forbidden on public repos. Bare filenames")
         print("are softened; role-wording is the standard. Rewrite the reference")
@@ -460,7 +494,7 @@ def main() -> int:
         arm2 = ("FILE ARM NOT RUN -- '" + args.range + "' is not a two-dot "
                 "range, so `git diff` would compare the working tree, not the "
                 "delta. This is a DECLARED GAP, not a clean result")
-    print(f"check_private_paths: OK ({len(msgs)} commit messages scanned and "
+    print(f"check_private_paths [gate {self_id()}]: OK ({len(msgs)} commit messages scanned and "
           f"{arm2}, for '{args.range}'; 0 paths into the private record). "
           f"Not scanned, by ruling: {'; '.join(PRESERVED)}.\n"
           f"  WATCHING {len(FORBIDDEN)} shapes: "
