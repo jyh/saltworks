@@ -232,6 +232,124 @@ PRESERVED = [
 ]
 
 
+# ---------------------------------------------------------------------------
+# THE PRESERVED-RECORD EXEMPTION — Captain's ruling, 2026-08-25 21:1x.
+#
+# Five sites on one long-lived branch cite the private record and are PRESERVED
+# BY RULING: they are records of observations, and a record of an observation
+# must not change. The purge that cleared that branch's commit messages was
+# message-only and correctly did not touch them.
+#
+# ⛔ WHAT WAS GRANTED IS NOT A MUTE. The ruling's words: green while each is
+# preserved EXACTLY, RED THE MOMENT ONE DRIFTS -- "an exemption that just mutes
+# them is not what was granted". So each site is pinned by the SHA-256 of its
+# exact line, and drift-sensitivity falls out in both directions:
+#
+#   line EDITED   -> the new text hashes differently -> matches no pin
+#                    -> it is an ORDINARY FINDING and the gate REDS. Automatic.
+#   line GONE     -> the pin stops resolving at its ref -> the PIN AUDIT REDS.
+#                    A delta scan alone is blind to this; that is why the audit
+#                    exists as a second arm rather than a nicety.
+#
+# ⚠️ SCOPED BY REPO **AND** REF, and that is not caution -- it is measured. This
+# file ships byte-identical to three public repos, and `docs/QUEUE.md` EXISTS IN
+# TWO OF THEM AS COMPLETELY DIFFERENT FILES. A path-scoped exemption would mute
+# a finding in the wrong repository, which is the adjacent-object trap wearing a
+# ruling's authority. An exemption is granted for SITES, never for STRINGS.
+EXEMPT = [
+    {"repo": "salt", "ref": "math/w1-e3-port",
+     "file": "docs/QUEUE.md",
+     "sha": "3953079dbac0d60e"},
+    {"repo": "salt", "ref": "math/w1-e3-port",
+     "file": "docs/QUEUE.md",
+     "sha": "8cf038855c616f6b"},
+    {"repo": "salt", "ref": "math/w1-e3-port",
+     "file": "docs/blueprints/arc.md",
+     "sha": "429bb871b876cbe4"},
+    {"repo": "salt", "ref": "math/w1-e3-port",
+     "file": "docs/exploration/wf3-waveb-design.md",
+     "sha": "4a6445edfc087eab"},
+    {"repo": "salt", "ref": "math/w1-e3-port",
+     "file": "docs/exploration/wf3-waveb-design.md",
+     "sha": "dace3b578b8b23f8"},
+]
+
+
+def repo_slug() -> str:
+    """This repo's name from its origin URL. EXACT match, never a substring --
+    two of the three repos this file ships to differ by a suffix."""
+    out = subprocess.run(["git", "config", "--get", "remote.origin.url"],
+                         capture_output=True, text=True, encoding="utf-8")
+    url = out.stdout.strip()
+    if not url:
+        return ""
+    return url.rstrip("/").rsplit("/", 1)[-1].removesuffix(".git")
+
+
+def active_exemptions() -> list:
+    """Only the pins granted for THIS repo. Elsewhere the list is empty and the
+    gate behaves as though no exemption exists -- which is correct: the ruling
+    exempted five sites in one repository, not five strings everywhere."""
+    slug = repo_slug()
+    return [e for e in EXEMPT if e["repo"] == slug]
+
+
+def line_sha(text: str) -> str:
+    return hashlib.sha256(text.strip().encode("utf-8")).hexdigest()[:16]
+
+
+def partition(findings, exempt):
+    """Split findings into (violations, exempted) by BYTE-EXACT line hash.
+
+    A finding is exempted only when its file AND the sha of its exact line both
+    match a pin. One changed character produces a different sha and the finding
+    survives as a violation -- which is the whole mechanism, not a side effect.
+    """
+    pins = {(e["file"], e["sha"]) for e in exempt}
+    viol, exm = [], []
+    for f in findings:
+        ident, what, line = f
+        (exm if (ident, line_sha(line)) in pins else viol).append(f)
+    return viol, exm
+
+
+def audit_pins(exempt, ref="HEAD"):
+    """(intact, drifted, unresolvable) -- does each pin still match at its ref?
+
+    THE ARM A DELTA SCAN CANNOT HAVE. If a preserved line is deleted or edited,
+    a delta of the same push may show nothing at all; the pin stops resolving,
+    and only a look at the tree can say so. A pin whose ref is not present in
+    this checkout is UNRESOLVABLE, never 'intact' -- reported, never assumed.
+    """
+    intact, drifted, unresolvable = [], [], []
+    for e in exempt:
+        # ⛔ THE REF AND THE FILE ARE SEPARATE QUESTIONS, AND CONFLATING THEM
+        # FAILS OPEN. First draft treated "git show ref:file failed" as
+        # UNRESOLVABLE, which is right when the REF is absent (this checkout
+        # simply does not have that branch) and WRONG when the ref is present
+        # and the FILE was deleted -- that is the preserved record being
+        # destroyed, reported as "not applicable". Found by driving the arm.
+        ref = None
+        for cand in (e["ref"], f'origin/{e["ref"]}'):
+            if subprocess.run(["git", "rev-parse", "--verify", "--quiet", cand],
+                              capture_output=True).returncode == 0:
+                ref = cand
+                break
+        if ref is None:
+            unresolvable.append(e)          # the branch is not in this checkout
+            continue
+        blob = subprocess.run(["git", "show", f'{ref}:{e["file"]}'],
+                              capture_output=True, text=True, encoding="utf-8")
+        if blob.returncode != 0:
+            drifted.append(e)               # ref IS here and the FILE is gone
+            continue
+        if any(line_sha(l) == e["sha"] for l in blob.stdout.splitlines()):
+            intact.append(e)
+        else:
+            drifted.append(e)
+    return intact, drifted, unresolvable
+
+
 def commit_messages(rev_range: str) -> list[tuple[str, str]]:
     """(sha, message) for every commit in `rev_range`, newest first."""
     sep = "@@PATHCOMMIT@@"
@@ -402,6 +520,39 @@ def self_test() -> int:
         if got:
             failures.append(f"compliant form {ident} must PASS, got {got[0][1]}")
 
+    # 4c. THE PRESERVED-RECORD EXEMPTION. Byte-exactness is the whole grant,
+    #     so the arm that matters is the ONE-CHARACTER change.
+    if len(EXEMPT) != 5:
+        failures.append(f"expected 5 pins, found {len(EXEMPT)}")
+    # A line that hashes to a REAL pin cannot be constructed here, so the arms
+    # are driven on a SYNTHETIC pin over a line this test controls. The real
+    # pins are driven against the live branch separately, and that receipt is
+    # in the commit message.
+    S = "se" + "at"
+    site = "see " + S + "/briefs/preserved-record-fixture.md for the verdict"
+    fake = [{"repo": repo_slug() or "x", "ref": "r", "file": "docs/F.md",
+             "sha": line_sha(site)}]
+    found = scan([("docs/F.md", site)])
+    if not found:
+        failures.append("the exemption fixture must be a finding before it is exempt")
+    viol, exm = partition(found, fake)
+    if viol or len(exm) != 1:
+        failures.append(f"an exact-match site must be EXEMPTED, got {len(viol)} viol")
+    # ...and ONE CHARACTER of drift must survive as a violation.
+    drift = scan([("docs/F.md", site + ".")])
+    viol2, exm2 = partition(drift, fake)
+    if exm2 or len(viol2) != 1:
+        failures.append("a one-character drift must NOT be exempted")
+    # ...and the SAME line in a DIFFERENT file must not be exempted.
+    other = scan([("docs/OTHER.md", site)])
+    viol3, exm3 = partition(other, fake)
+    if exm3 or len(viol3) != 1:
+        failures.append("an exemption is per-SITE, not per-STRING")
+    # ...and with no active exemptions, nothing is muted.
+    viol4, exm4 = partition(found, [])
+    if exm4 or len(viol4) != 1:
+        failures.append("with no active exemptions nothing may be exempted")
+
     # 5. THE ARM-COVERAGE DECLARATION. A range the file arm cannot scan must be
     #    reported as a gap, never silently as a zero.
     if range_is_two_dot("HEAD"):
@@ -467,7 +618,23 @@ def main() -> int:
               f"not a clean scan — this gate refuses to report success on it.")
         return 1
 
-    bad = scan(msgs) + scan(lines)
+    exempt = active_exemptions()
+    bad, exempted = partition(scan(msgs) + scan(lines), exempt)
+
+    # THE PIN AUDIT — the arm a delta scan cannot have. Run before the verdict,
+    # because a drifted pin is a failure even on a push that touches nothing.
+    intact, drifted, unresolvable = audit_pins(exempt, args.range.split("..")[-1])
+    if drifted:
+        print(f"FAIL [gate {self_id()}]: {len(drifted)} PRESERVED-RECORD PIN(S) "
+              f"HAVE DRIFTED.\n")
+        print("The 2026-08-25 ruling preserved these sites EXACTLY. A pin that no")
+        print("longer matches means the preserved record changed -- which the")
+        print("exemption does not cover and was never intended to hide.\n")
+        for e in drifted:
+            print(f'  {e["file"]}  @{e["ref"]}  pin {e["sha"]} no longer matches')
+        print("\nEither restore the line byte-for-byte, or take a new ruling.")
+        return 1
+
     if bad:
         print(f"FAIL [gate {self_id()}]: {len(bad)} private-record path(s) "
               f"entering a PUBLIC repo.\n")
@@ -488,6 +655,24 @@ def main() -> int:
         print("force-push; fix it BEFORE the push, which is why this runs here.")
         return 1
 
+    if exempted:
+        print(f"NOTE [gate {self_id()}]: {len(exempted)} finding(s) EXEMPTED BY "
+              f"RULING (2026-08-25) -- preserved-record sites, pinned byte-exact.")
+        print("      THIS IS NOT A CLEAN RESULT. These lines DO cite the private")
+        print("      record; they are preserved deliberately and are green only")
+        print("      while they match their pins exactly.")
+        for e in exempted:
+            print(f"        {e[0]}  {e[1]}")
+    if exempt:
+        print(f"  PIN AUDIT: {len(intact)} intact, {len(drifted)} drifted, "
+              f"{len(unresolvable)} unresolvable"
+              + (" (ref not in this checkout -- NOT counted as intact)"
+                 if unresolvable else ""))
+    else:
+        print(f"  PIN AUDIT: not applicable in '{repo_slug() or 'unknown repo'}'"
+              f" -- {len(EXEMPT)} pin(s) exist and none are scoped here."
+              f" Stated rather than silently skipped.")
+
     if file_arm:
         arm2 = f"{len(lines)} added lines scanned"
     else:
@@ -495,7 +680,7 @@ def main() -> int:
                 "range, so `git diff` would compare the working tree, not the "
                 "delta. This is a DECLARED GAP, not a clean result")
     print(f"check_private_paths [gate {self_id()}]: OK ({len(msgs)} commit messages scanned and "
-          f"{arm2}, for '{args.range}'; 0 paths into the private record). "
+          f"{arm2}, for '{args.range}'; " + ("0 paths into the private record" if not exempted else f"0 UNEXEMPTED paths, {len(exempted)} EXEMPTED BY RULING -- see the NOTE above; this line is NOT a clean bill") + "). "
           f"Not scanned, by ruling: {'; '.join(PRESERVED)}.\n"
           f"  WATCHING {len(FORBIDDEN)} shapes: "
           + "; ".join(w for _, w in FORBIDDEN) + ".\n"
