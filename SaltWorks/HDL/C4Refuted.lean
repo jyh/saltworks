@@ -292,7 +292,7 @@ theorem regField_core_one_is_false : ¬ SaltWorks.Stack.Program.RegField core r1
 /-- ⛔⛔⛔ **THE FLAGSHIP IS REFUTED.** -/
 theorem c4Spec_core_is_false : ¬ SaltWorks.HDL.C4Spec core := fun h =>
   regField_core_one_is_false
-    (((SaltWorks.Stack.Program.c4Spec_iff_fieldwise core).mp h).2.1 r1)
+    (SaltWorks.Stack.Program.regField_of_C4Spec h r1)
 /-- ⭐⭐⭐ **HORN 2, PACKAGED: NO WRITE-ENABLE REPAIRS THE LOAD.**
 Deleting `isLW` from `writesRegOf` leaves the HELD value on the left — and that is `true` here
 too, while the ISA demands `false`. -/
