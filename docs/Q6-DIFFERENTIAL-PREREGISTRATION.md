@@ -736,6 +736,22 @@ tree enforces the append-only constraint; it is an accident of ordering that hap
 ⇒ **WHOEVER TAKES THIS: append the memory/trap conjuncts at the END, and say so in the docstring,
 because the reason lives in another glob and no build will remind you.**
 
+⭐⭐ **AND THE BETTER FIX, WHICH IS A REPAIR RATHER THAN A WORKAROUND (math, 08-25 17:16).** Append
+avoids the hazard; **ARITY-ROBUSTNESS REMOVES IT.** The contrast is inside this one swap:
+```
+  decQ_congr   (hab : ∀ j, j < stWidth → a j = b j)      SURVIVED the swap untouched
+               its bound is a SYMBOL, not a literal — "there is no number to get wrong",
+               and its docstring says so on purpose: "ARITY-ROBUST … nothing here counts
+               the fields." The width mismatch anyone would fear CANNOT ARISE.
+  .2.1 / .1    positional projections                     FRAGILE — count positions, and
+               re-aim silently when the arity grows
+```
+🔑 ***SAME SWAP, SAME DAY: ONE OBJECT HARDENED AGAINST ARITY AND ANOTHER COUNTING POSITIONS — and
+only the second needed a rule.*** *`decQ_congr` cost its author nothing extra and paid for itself
+five days later against a change they did not know was coming.* ⇒ **When growing this conjunction,
+prefer giving consumers a NAMED accessor over asking them to append correctly: an append convention
+is willpower at every future call site, and arity-robustness is a property.**
+
 ### 📌 AND THE PROSE SURFACE IS SEVEN FILES WIDE
 `RegField0.lean` (×2) · `CoreAssembly.lean` · `PcFieldClosed.lean` · `RegFieldSchema.lean` ·
 `C4Reduction.lean` · `ScratchC4Reduction.lean` · `ScratchRegField0.lean` — every one asserts the
