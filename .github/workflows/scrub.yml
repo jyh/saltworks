@@ -42,12 +42,46 @@ jobs:
         env:
           BEFORE: ${{ github.event.before }}
         run: |
-          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
-            RANGE="HEAD~100..HEAD"
-            git rev-parse HEAD~100 >/dev/null 2>&1 || RANGE="HEAD"
-            echo "new branch: falling back to $RANGE (declared limit)"
-          else
+          # ⛔ CARRIED FROM THE SIBLING JOB AFTER A REAL FORCE-PUSH KILLED THIS ONE.
+          # 2026-08-25: a Captain-ruled history rewrite landed, and the next push
+          # carried a before-sha naming commits that no longer exist. This step
+          # ran `<dead-sha>..HEAD`, git exited 128, and the job RED with
+          # "could not read history" -- a spurious failure on clean content.
+          #
+          # THE SIBLING JOB SURVIVED THE SAME PUSH, because it had been given
+          # this guard days earlier. Same push, same repo, two jobs, opposite
+          # outcomes: THE FIX LANDED WHERE THE ALARM WENT OFF AND WAS NEVER
+          # CARRIED ACROSS. That is the whole defect; the code below is small.
+          #
+          # A before-sha must be REACHABLE, not merely non-empty. Rewritten-away
+          # history is neither the "new branch" case nor the ordinary case, and
+          # the old two-branch test had nowhere to put it.
+          DEF="${{ github.event.repository.default_branch }}"
+          if [ -n "$BEFORE" ] && [ "$BEFORE" != "0000000000000000000000000000000000000000" ] \
+             && git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
             RANGE="$BEFORE..HEAD"
+            echo "push delta: $RANGE"
+          elif MB=$(git merge-base "origin/$DEF" HEAD 2>/dev/null) && [ -n "$MB" ] \
+               && [ "$MB" != "$(git rev-parse HEAD)" ]; then
+            RANGE="$MB..HEAD"
+            echo "before-sha absent or unreachable: merge-base with origin/$DEF -> $RANGE"
+          elif git rev-parse HEAD~1 >/dev/null 2>&1; then
+            # ⛔ THE MERGE-BASE FALLBACK DEGENERATES ON THE DEFAULT BRANCH, and
+            # driving it is the only way I found that out. Force-push to the
+            # default branch itself: the before-sha is unreachable AND
+            # merge-base(origin/DEF, HEAD) IS HEAD, so the range is EMPTY and
+            # the gate's own fail-closed fires -- the SAME spurious red, moved
+            # one branch over. Reasoning about this arm produced a clean bill;
+            # running it produced the bug.
+            RANGE="HEAD~1..HEAD"
+            echo "DECLARED PARTIAL COVERAGE: the default branch was rewritten, so"
+            echo "  'new' cannot be bounded -- the delta against $DEF is empty by"
+            echo "  construction. Scanning the tip commit ONLY. This is a stated"
+            echo "  limit, not a clean scan; the next ordinary push scans in full."
+          else
+            echo "FAIL: cannot determine a delta range (no reachable before-sha,"
+            echo "      no usable merge-base, no parent commit). Refusing to guess."
+            exit 1
           fi
           echo "scanning $RANGE"
           python scripts/check_commit_trailers.py --range "$RANGE"
@@ -97,15 +131,28 @@ jobs:
              && git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
             RANGE="$BEFORE..HEAD"
             echo "push delta: $RANGE"
-          elif MB=$(git merge-base "origin/$DEF" HEAD 2>/dev/null) && [ -n "$MB" ]; then
+          elif MB=$(git merge-base "origin/$DEF" HEAD 2>/dev/null) && [ -n "$MB" ] \
+               && [ "$MB" != "$(git rev-parse HEAD)" ]; then
             RANGE="$MB..HEAD"
             echo "new branch: merge-base with origin/$DEF -> $RANGE"
+          elif git rev-parse HEAD~1 >/dev/null 2>&1; then
+            # ⛔ SAME DEGENERATE CASE AS THE SIBLING JOB, AND I ALMOST LEFT IT
+            # HERE. I repaired the trailer job's version of this, looked at the
+            # diff, and saw that the fix had landed on exactly one of the two
+            # jobs -- the one whose failure I had been handed. That is the
+            # defect this whole day keeps producing: A FIX LANDS WHERE THE ALARM
+            # WENT OFF. Carried deliberately, and driven on both jobs.
+            #
+            # Force-push to the DEFAULT BRANCH: before-sha unreachable AND
+            # merge-base(origin/DEF, HEAD) IS HEAD, so the range is empty and
+            # the fail-closed below fires on clean content.
+            RANGE="HEAD~1..HEAD"
+            echo "DECLARED PARTIAL COVERAGE: the default branch was rewritten, so"
+            echo "  'new' cannot be bounded. Scanning the tip commit ONLY -- a"
+            echo "  stated limit, not a clean scan."
           else
-            # No before-sha and no merge-base: we cannot bound "new" at all.
-            # FAIL CLOSED and say why -- a gate that cannot determine its own
-            # scope must not report success. Never silently widen to history.
-            echo "FAIL: cannot determine a delta range (no before-sha, no merge-base"
-            echo "      against origin/$DEF). Refusing to guess a range."
+            echo "FAIL: cannot determine a delta range (no reachable before-sha,"
+            echo "      no usable merge-base, no parent commit). Refusing to guess."
             exit 1
           fi
           echo "scanning $RANGE"
