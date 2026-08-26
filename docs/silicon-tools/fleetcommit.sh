@@ -1,76 +1,47 @@
 #!/bin/sh
-# FLEETCOMMIT — the commit critical section, held by a lock instead of by memory.
+# ⛔⛔ RETIRED 2026-08-25 — THIS IS A TOMBSTONE. IT DOES NOT RUN.
 #
-# ⛔ WHY: over ONE shared checkout NO commit form is race-free. Both earlier fleet laws
-#   have DRIVEN failures — the pathspec form raced the WORKING TREE (761dc79: my
-#   uncommitted hunk shipped inside compiler's commit), the index form raced the SHARED
-#   INDEX (ecd8fbc2: compiler's staged work landed in jas's commit).
-#   ⇒ `git diff --cached` IS NOT A RECEIPT: the index is shared and mutable between the
-#     read and the commit. FLEET ORDER 2026-08-24 19:03 replaces both with a mkdir lock.
+# ── SUCCESSOR (the retirement law: name the successor tool, or say none exists)
+#    A tool of the same name, `fleetcommit.sh`, maintained in the fleet's private
+#    tool bank. It is NOT in this repository, and its location is deliberately not
+#    written here: council 2026-08-25 ruled that paths into the private record do
+#    not appear on public repos, bare filenames are softened, and role-wording is
+#    the standard. Ask the helm for it.
 #
-# ⭐ WHY mkdir AND NOT A LOCKFILE: mkdir is ATOMIC and fails when the directory exists.
-#   `[ -e lock ] || touch lock` is two operations with a window between them — the exact
-#   shape of bug this lock exists to close. Do not "improve" it into a test-then-create.
+# ── WHY THIS ONE WAS RETIRED. Measured against the 2026-08-25 commit-lock spec it
+#    scored 2 of 6:
+#      OK   acquire by mkdir (atomic; correct, and the successor keeps it)
+#      OK   bounded wait, refuses rather than breaking a lock
+#      BAD  writes NO pid inside the lock — so the lock directory is EMPTY, and a
+#           foreign bare `rmdir` on it SUCCEEDS. A live lock could be taken silently.
+#      BAD  NEVER reaps a dead holder — a seat that dies inside its commit section
+#           wedges every other seat permanently, with no recovery but a human.
+#      BAD  never verifies its release — it could fail to release and say nothing.
+#      BAD  the trap IS the mechanism rather than a backstop. A cleanup you cannot
+#           observe firing is not a mechanism: a working release and a lucky one
+#           are indistinguishable, and the trap fires TWICE on a signal path.
+#    It also carried `git rebase` against the upstream branch, found hazardous on
+#    2026-08-24 at 23:33 — a rebase rewrites the working tree underneath any
+#    long-lived script executing out of that tree.
 #
-# ⛔ THE RELEASE IS THE DANGEROUS HALF. A lock you can forget to release deadlocks every
-#   other seat, so the release is a TRAP set in the same breath as the acquire, firing on
-#   EXIT/INT/TERM. A lock held by a dead shell is worse than no lock at all.
+# ── WHY A REFUSING STUB AND NOT A DELETION. An ABSENT tool prompts someone to
+#    build one. A BAD tool believed good prompts NOTHING — this file was recorded
+#    as "mechanised" and trusted for 28 hours while scoring 2 of 6. Deleting it
+#    yields "command not found", which names no successor and teaches nobody.
+#    Refusing loudly, and naming the successor, is the only form that turns a
+#    silent wrong into a loud right.
 #
-# usage: fleetcommit.sh <repo-dir> <commit-msg-file> [--push] [path ...]
-#        with no paths, stages nothing itself — stage first, then call.
-set -u
-REPO=${1:?"usage: fleetcommit.sh <repo-dir> <msg-file> [--push] [path ...]"}
-MSG=${2:?"usage: fleetcommit.sh <repo-dir> <msg-file> [--push] [path ...]"}
-shift 2
-PUSH=0
-[ "${1:-}" = "--push" ] && { PUSH=1; shift; }
-
-[ -d "$REPO/.git" ] || { echo "fleetcommit: $REPO is not a git checkout" >&2; exit 2; }
-[ -f "$MSG" ]       || { echo "fleetcommit: no message file at $MSG" >&2; exit 2; }
-LOCK="$REPO/.git/fleet-commit.lock.d"
-
-# ── ACQUIRE, with a bounded wait. A lock that never times out turns one stuck seat
-#    into a stuck fleet; a lock that force-breaks turns a slow seat into a corrupt one.
-#    So: WAIT, then REFUSE and say who to ask. Never break the lock.
-tries=0
-until mkdir "$LOCK" 2>/dev/null; do
-  tries=$((tries+1))
-  if [ "$tries" -ge 30 ]; then
-    echo "⛔ fleetcommit: lock HELD after ${tries} tries ($LOCK)" >&2
-    echo "   Another seat is inside its commit section. NOT breaking the lock." >&2
-    echo "   If it is stale (no seat committing), the owner removes it: rmdir '$LOCK'" >&2
-    exit 4
-  fi
-  sleep 2
-done
-trap 'rmdir "$LOCK" 2>/dev/null' EXIT INT TERM   # ⛔ same breath as the acquire
-
-cd "$REPO" || exit 2
-echo "fleetcommit: lock ACQUIRED after $tries wait(s)"
-
-[ $# -gt 0 ] && git add -- "$@"
-
-# ── THE READ IS STILL WORTH DOING, BUT ITS MEANING CHANGED. Inside the lock it is a
-#    receipt; outside it never was. Print it either way so a wrong staging is visible.
-staged=$(git diff --cached --name-only)
-if [ -z "$staged" ]; then
-  echo "⛔ fleetcommit: NOTHING STAGED — refusing to make an empty commit by accident." >&2
-  echo "   (an intentional empty commit is git commit --allow-empty, done deliberately)" >&2
-  exit 5
-fi
-echo "fleetcommit: staged set, read INSIDE the lock —"
-printf '    %s\n' $staged
-
-git commit -q -F "$MSG" || { echo "fleetcommit: commit FAILED" >&2; exit 6; }
-NEW=$(git rev-parse --short HEAD)
-echo "fleetcommit: committed $NEW"
-
-if [ "$PUSH" = "1" ]; then
-  git fetch -q origin
-  if [ "$(git rev-list --count HEAD..origin/master)" -gt 0 ]; then
-    git rebase -q origin/master || { echo "fleetcommit: rebase FAILED — resolve by hand" >&2; exit 7; }
-  fi
-  git push -q origin master || { echo "fleetcommit: push FAILED" >&2; exit 8; }
-  git fetch -q origin
-  echo "fleetcommit: pushed · ahead $(git rev-list --count origin/master..HEAD)"
-fi
+# ── PER-CLONE PROPAGATION, AND IT APPLIES TO THIS VERY FIX. This retirement
+#    reaches a clone ONLY when that clone pulls. Sibling clones still hold the
+#    runnable original until each one does. A fix that has not reached the
+#    executing copy is a fix nobody is running.
+echo "⛔ fleetcommit.sh (this copy) is RETIRED and will not run." >&2
+echo "   It scored 2 of 6 against the 2026-08-25 commit-lock spec: no pid inside" >&2
+echo "   the lock, never reaps a dead holder, release never verified, trap used as" >&2
+echo "   the mechanism instead of a backstop. It also rebases, which rewrites the" >&2
+echo "   working tree under anything executing out of it." >&2
+echo "   Running it can lose another seat's work." >&2
+echo "" >&2
+echo "   SUCCESSOR: a tool of the same name, maintained in the fleet's private" >&2
+echo "   tool bank. It is not in this repository. Ask the helm for it." >&2
+exit 64
