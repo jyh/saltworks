@@ -124,6 +124,29 @@ _BUS = "FLEET" + r"\.md"
 _ROOTS = [_SEAT] + _EMPLOYER + _PRIVATE_PROJ
 _ROOT_ALT = "|".join(_ROOTS)
 
+# ⛔ THE DURABLE LOCAL TIER (born 2026-08-25) IS A PRIVATE ROOT WHOSE NAME IS AN
+# ORDINARY WORD, so it CANNOT join _ROOTS. Measured before deciding: a bare
+# root of that name matches EIGHT existing occurrences in one sibling repo --
+# every one of them the standard system prefix under a slash, in a CI workflow
+# and two docs. Adding it unqualified would red that repo on ordinary content,
+# which is how a gate earns the reputation that gets it deleted.
+#
+# So it is matched ONLY in the two forms that actually identify the private
+# tier rather than any directory of that name: prefixed by the fleet parent, or
+# as a bare-repository name. Both assembled from parts.
+# DECLARED CONSEQUENCE: an unqualified reference to a directory of that name is
+# NOT caught. That is a real hole, chosen with its measurement in hand.
+_LOCALWORD = "lo" + "cal"
+_BS = chr(92)
+_SEPCLASS = "[/" + _BS + _BS + "]+"
+_FLEETPARENT = "projects" + _SEPCLASS + "claude"
+_LOCAL_QUALIFIED = (_FLEETPARENT + _SEPCLASS + _LOCALWORD
+                    + "(?:[/" + _BS + _BS + "]|" + _BS + "b)")
+_LOCAL_BAREREPO = _LOCALWORD + _BS + ".git"
+# The backup volume that holds it is itself a private-record location.
+_BACKUPVOL = ("Volumes" + _SEPCLASS + "Content[ _]HD" + _SEPCLASS
+              + "Salt" + "works")
+
 # A path REACHES INTO a root when the root name is followed by a separator and
 # at least one more component. A bare root name in prose is not a path; the root
 # plus a separator plus a component is.
@@ -161,6 +184,12 @@ FORBIDDEN = [
      "the kit run surface"),
     (re.compile(rf"{_BUS}:\d+"),
      "a line-anchored citation into the fleet bus"),
+    (re.compile(_LOCAL_QUALIFIED),
+     "a path into the durable local tier"),
+    (re.compile(_LOCAL_BAREREPO),
+     "the durable local tier's bare repository"),
+    (re.compile(_BACKUPVOL),
+     "the backup volume holding the private record"),
 ]
 
 # Named so a future reader does not "tidy" these into the forbidden list.
@@ -305,6 +334,13 @@ def self_test() -> int:
         # CRLF was already caught; kept as a control so a future edit cannot
         # silently lose it.
         ("p-crlf", "see " + _SEAT + "/briefs/x.md" + chr(13)),
+        # THE DURABLE LOCAL TIER (root born 08/25). Only the QUALIFIED forms;
+        # the bare word is the declared hole and is controlled for below.
+        ("l-qual", "see projects/claude/" + _LOCALWORD + "/x.md"),
+        ("l-qual-bs", "see projects" + chr(92) + "claude" + chr(92)
+                      + _LOCALWORD + chr(92) + "x.md"),
+        ("l-repo", "the bare repo " + _LOCALWORD + ".git"),
+        ("l-vol", "/Volumes/Content HD/" + "Salt" + "works/archives"),
     ]
     for ident, text in planted:
         if not scan([(ident, text)]):
@@ -322,6 +358,11 @@ def self_test() -> int:
         ("c-word", "the evidence " + _SEAT + " and the silicon " + _SEAT + " agree"),
         ("c-winpub", "C:" + chr(92) + "src" + chr(92) + "saltworks" + chr(92) + "docs"),
         ("c-plural-bs", "the clone at " + _SEAT + "s" + chr(92) + "evidence"),
+        # THE DECLARED HOLE, KEPT AS A CONTROL: the ordinary word must never
+        # fire, or one sibling repo reds on eight pre-existing occurrences.
+        ("c-usr", "installed to /usr/" + _LOCALWORD + "/bin"),
+        ("c-usrlib", "on the path /usr/" + _LOCALWORD + "/lib/python3.12"),
+        ("c-localprose", _LOCALWORD + "/remote divergence was the cause"),
         ("c-meta", "this gate forbids paths into the private record"),
     ]
     for ident, text in clean:
@@ -403,6 +444,12 @@ def main() -> int:
         for ident, what, line in bad:
             print(f"  {ident[:40]}  {what}")
             print(f"      {line[:110]}")
+        print("\nIF YOU ARE DEMONSTRATING A FORBIDDEN FORM rather than citing one:")
+        print("assemble it from parts or describe it in words. A literal example")
+        print("is still an instance -- this gate tripped ITSELF three times that")
+        print("way on its first run, and the paragraph explaining how to avoid it")
+        print("sits in this script, which is the one file nobody opens while")
+        print("fixing a commit the tool just refused. (compiler seat, 08/25.)")
         print("\nA commit message already pushed cannot be edited without a")
         print("force-push; fix it BEFORE the push, which is why this runs here.")
         return 1
@@ -415,7 +462,12 @@ def main() -> int:
                 "delta. This is a DECLARED GAP, not a clean result")
     print(f"check_private_paths: OK ({len(msgs)} commit messages scanned and "
           f"{arm2}, for '{args.range}'; 0 paths into the private record). "
-          f"Not scanned, by ruling: {'; '.join(PRESERVED)}.")
+          f"Not scanned, by ruling: {'; '.join(PRESERVED)}.\n"
+          f"  WATCHING {len(FORBIDDEN)} shapes: "
+          + "; ".join(w for _, w in FORBIDDEN) + ".\n"
+          f"  ROOTS ARE A HAND-COPIED SNAPSHOT of a fleet map that lives OUTSIDE"
+          f" these repos and MOVES. Last reconciled 2026-08-25. A private root"
+          f" born after that date is NOT watched until this list is edited.")
     return 0
 
 
