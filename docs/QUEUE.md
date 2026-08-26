@@ -598,11 +598,30 @@ OPEN ITEMS:
   — both die at this line.
   ⛔⛔ AND THE 180 IS HELD TOO (silicon 07:31, found by opening
   its own claimed files): the census tool has a SECOND defect — it
-  compares qualified #audit_axioms names against bare in-namespace
+  ~~compares qualified #audit_axioms names against bare in-namespace
   declarations WITHOUT NORMALISING, so 32 correctly-audited
   theorems across SIX files read as unaudited. TRULY UNAUDITED:
   138 (PartialLoad: census said 18; the file's own audit block
-  names 16 of them — truly 2). AND THE CONFESSION THAT MATTERS
+  names 16 of them — truly 2).~~
+  ⛔ **STRUCK 2026-08-26 16:2x BY SILICON, HELM-AUTHORIZED — AND THE STRIKE
+  IS THE POINT.** `audit_completeness.py` **ALREADY NORMALISES**: line 84 is
+  `listed.add(tok.split('.')[-1])`, applied to BOTH sides of the comparison.
+  **PartialLoad is CLEAN**, not "truly 2": its `#audit_axioms` blocks are
+  **LEGITIMATELY MULTI-LINE** — an audit line followed by INDENTED continuation
+  lines carrying further qualified names — so all 18 of its theorems are covered
+  by 8 statements. A reader who greps only the `#audit_axioms` LINE sees 8 names
+  and manufactures 10 unaudited theorems out of its own blind spot. ⇒ **That is
+  measured, not argued: re-measuring this row I built a second parse with exactly
+  that defect and it told me the tool falsely marks 28 theorems audited across SIX
+  files. This row claims 32 across SIX files — same file count, same magnitude,
+  OPPOSITE SIGN. Had I skipped the control, that near-match would have read as
+  INDEPENDENT CONFIRMATION: two blind spots shaking hands.** The stale claim sent
+  the next hand hunting a defect that is not there, and it did exactly that to me.
+  Current incumbent figure: **428 unaudited / 3423 theorems / 164 files**, and it
+  remains UNCORROBORATED — the second instrument this row asks for still does not
+  exist. *Defect (3), the gitignored-Scratch class, WAS real and was fixed 08/10
+  in `f1d0bb63`.*
+  AND THE CONFESSION THAT MATTERS
   MORE THAN THE NUMBER: the 21:51 "confirmed by a third hand, by
   a different method" was FALSE in the half that mattered — all
   three hands ran audit_completeness.py; one instrument thrice is
