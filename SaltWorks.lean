@@ -92,6 +92,7 @@ import SaltWorks.HDL.TinyRustN0
 import SaltWorks.HDL.CoreOffsets
 import SaltWorks.HDL.CorePlace
 import SaltWorks.HDL.CoreAssembly
+import SaltWorks.HDL.CoreAssemblyD
 import SaltWorks.HDL.RegFieldSchema
 import SaltWorks.HDL.RegNextUniform
 import SaltWorks.HDL.RegField0
