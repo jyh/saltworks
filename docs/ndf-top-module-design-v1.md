@@ -254,14 +254,60 @@ account's size.** The kernel ISA has five constructors and no
 store/IO (byte-verified); `slicea16bma.v` has no packet port. NO
 ON-DIE path from software to the sequencer exists today; the paths
 that DO exist run through the RP2040 — outside the verified surface.
-THE DEMO SENTENCE (FENCE-PENDING — routed to evidence before the
-sitting, so the Captain ratifies a cleared sentence): "a processor
-whose every organ and wire is kernel-certified — its end-to-end
-refinement one named theorem away, its fabbed twin scheduled for
-replacement — beside a dataflow fabric whose netlist is
-kernel-checked against its Lean model on the schedule class we run,
-on one die, driven by a compiler-emitted schedule." Nothing stronger
-survives core-account.md's own authorization.
+THE DEMO SENTENCE — ⛔ **FENCE PASS RUN 2026-08-25 by the evidence
+seat: NOT CLEARED, THREE FINDINGS.** The original is left visible
+below because a corrected record has to show what it corrected.
+
+ORIGINAL (fence-pending since the sitting): "a processor whose every
+organ and wire is kernel-certified — its end-to-end refinement one
+named theorem away, its fabbed twin scheduled for replacement —
+beside a dataflow fabric whose netlist is kernel-checked against its
+Lean model on the schedule class we run, on one die, driven by a
+compiler-emitted schedule." Nothing stronger survives
+core-account.md's own authorization.
+
+**(1) ⛔ THE TRAVEL CONDITION IS BREACHED, AND THIS SEAT SET IT.**
+`core-account.md` §4.3′ — the evidence pass of 2026-08-09 — rules
+that *"every organ and every wire is kernel-certified"* is defensible
+**only with §1.4's gloss**: `ruledEnc` has no `sem_*` certificate, it
+is a zero-gate rewiring whose stand-in is `encoder_select_seam_closed`,
+so every organ carries A kernel-checked theorem but not all of the
+same kind. That pass says in terms: *"the sentence must not travel
+without that disclosure, because 'kernel-certified' will be read as
+'has a semantic certificate'."* MEASURED IN THIS FILE: `ruledEnc` 0
+hits, `encoder_select_seam_closed` 0, `sem_` 0. **The sentence
+travelled and the disclosure did not.**
+⇒ A TRAVEL CONDITION ATTACHED TO A SENTENCE HAS NOTHING ENFORCING IT.
+The condition lived in the authorizing document; the sentence moved to
+this one and arrived bare. Sixteen days, no alarm.
+
+**(2) ⛔ "ON THE SCHEDULE CLASS WE RUN" IS REFUTED 130 LINES ABOVE, IN
+THIS FILE.** §"WHAT IS CERTIFIED TODAY" states in bold that
+`fabric_routes` covers ONLY prefix-concentrated actives with
+destination-monotone assignments, and that **ZERO rounds of the §4
+worked example are in that set**; per-round fixtures are V10, status
+NEW. The certified class and the demo's class are disjoint.
+CHEAPEST TRUE FORM, free and gate-less: **"on prefix-concentrated
+destination-monotone traffic."**
+
+**(3) ⚠️ AND THE ASSEMBLY CLAIMS MORE THAN EITHER CLAUSE.** The
+processor half is capped by core-account §3's authorized sentence
+(§4.5′: *"that sentence is the ceiling"*); the fabric half rides a
+different lane with its own fence. Both can be true and the SENTENCE
+still implies a single end-to-end certified system on one die, which
+neither account authorizes. Two true parts, one false assembly — and
+no sentence-level check sees it, because no sentence is false.
+
+**PROPOSED CLEARED FORM — the Captain ratifies, this seat does not:**
+"a processor whose every organ and every wire carries a kernel-checked
+theorem — though not all of the same kind: `ruledEnc` carries a
+seam-closure, not a semantic certificate (§1.4) — its composed
+end-to-end semantics one named theorem away and NOT yet stated, its
+fabbed twin scheduled for replacement; and, separately certified on
+the same die, a dataflow fabric whose netlist is kernel-checked
+against its Lean model on prefix-concentrated destination-monotone
+traffic, driven by a compiler-emitted schedule."
+📌 "separately certified" is load-bearing: it is what stops finding (3).
 
 **Fetch protocol — the contract the RTL actually demands (refuter
 correction adopted; v1's same-window proposal was arithmetically
