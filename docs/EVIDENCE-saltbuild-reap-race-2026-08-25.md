@@ -68,13 +68,42 @@ one. **Atomicity protects two simultaneous acts on ONE object; it does nothing w
 object has been REPLACED between your decision and your act.** Re-verify what you judged;
 do not make the judging atomic.
 
-## SEVERITY, STATED HONESTLY
+## SEVERITY — ⛔ MY FIRST ESTIMATE WAS WRONG AND IS CORRECTED HERE
 
-Mechanism proven; **probability not measured**. The harness starts both waiters together
-and widens the gap deliberately. In the wrapper the waiters sleep 15 s and the real gap is
-microseconds, so two seats must arrive at the reap branch nearly together, which needs the
-holder to die while two others wait. **Low probability, severe consequence, one-line fix.**
-No claim is made that it has ever fired.
+**Originally filed as:** *mechanism proven, probability not measured, low probability because
+two waiters must reach the reap branch nearly together.* **That understated it, and the
+correction is the compiler seat's, on their measurement rather than mine.**
+
+⛔ **THERE IS A SECOND, FAR MORE REACHABLE PATH TO THE SAME OUTCOME.**
+`trap … EXIT INT TERM` **runs at SIGNAL-DELIVERY, not at the exit line — and on a signal it
+runs AGAIN at exit. It fires TWICE.** The second fire is an unguarded `rm -rf "$LOCK"` that
+deletes **whatever is at the path now**. Between the two fires the process is still shutting
+down and appending its audit line, so the window is not microseconds — it is the whole
+shutdown, and it opens **on every SIGTERM**. Tonight produced an `EXIT=143`.
+
+⇒ **The defect is not rare-and-severe. It is reachable on any signalled build**, and the
+reap race I filed is the *narrower* of the two paths, not the main one.
+
+⚠️ **STILL NOT MEASURED: whether it has ever actually fired.** No claim is made.
+
+## ⛔ OPEN QUESTION — DO THE TWO GUARDS COVER EACH OTHER? UNVERIFIED.
+
+There are two candidate one-line fixes and they sit in **different places**:
+
+* **trap-side** (compiler's): release only what you own — guard the trap on the pid file
+  still naming you. Aimed at the double-fire.
+* **reap-side** (this file's): reap only the corpse you judged — re-verify before `rm -rf`.
+  Aimed at the check-then-act race.
+
+**I believe both are needed and neither subsumes the other. I could not demonstrate it.**
+My composition harness produced *contradictory output* — one arm printed both "clobbered"
+and "no clobber" — so I am recording the question as OPEN rather than publishing a
+conclusion from an instrument I no longer trust.
+
+🔑 **THREE OF MY HARNESSES FOR THIS DEFECT HAVE BEEN WRONG IN ONE EVENING:** two "reproduced"
+it with a criterion that could not fail, and the third contradicted itself. **The single
+differential in the section above is the only result here I stand behind** — same harness,
+same timings, one line changed. *Treat everything else as a lead.*
 
 ## ⛔ THE ORDERING CONSTRAINT, AND IT HAS NO DETECTOR
 
