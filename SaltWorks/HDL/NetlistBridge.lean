@@ -134,4 +134,53 @@ theorem bridgeable_rejects_late_inp :
 #audit_axioms dmemAddr8_indices_preserved bridgeable_rejects_misnumbered
 #audit_axioms bridgeable_rejects_late_inp
 
+/-! ## ⭐ SEMANTIC AGREEMENT — a WITNESS now, the general theorem still owed
+
+⛔ **THE GENERAL THEOREM IS NOT PROVED HERE AND THIS SECTION IS NOT IT.** What follows is a
+NON-VACUITY WITNESS: on a concrete bridgeable netlist, over EVERY input configuration, the
+bridged `Circ`'s `sem` agrees with the netlist's own `runP` at the declared outputs. That
+rules out the cheapest way for the construction to be wrong — a translation that type-checks
+and computes something else entirely — and it does NOT establish the general case. -/
+
+/-- Read an input function off a `List Bool`, so a finite sweep can quantify over inputs. -/
+def insOf (bs : List Bool) : Env := fun i => bs.getD i false
+
+/-- A small bridgeable netlist that exercises every surviving constructor. -/
+def demoNL : List SaltWorks.Silicon.Gate :=
+  [.inp 0, .inp 1, .and 0 1, .not 2, .xor 0 3, .or 2 4, .const true, .and 5 6]
+
+def demoOuts : List Net := [2, 3, 4, 5, 7]
+
+theorem demo_bridgeable : bridgeable demoNL = true := by decide +kernel
+
+/-- ⭐⭐ **THE WITNESS: over all 4 input configurations, the bridged circuit's outputs equal
+the netlist's own values at the same net indices.** *Both sides are computed — neither is
+copied from the other — so this can fail.* -/
+theorem demo_sem_agrees :
+    (List.range 4).all (fun m =>
+      let bs := [m % 2 == 1, m / 2 == 1]
+      sem (bridge demoNL demoOuts) (insOf bs)
+        == demoOuts.map (fun k => (SaltWorks.Silicon.runP (insOf bs) [] demoNL).getD k false))
+      = true := by
+  decide +kernel
+
+/-- ⛔ **AND THE WITNESS CAN FAIL — the control.** The same comparison against a DELIBERATELY
+WRONG bridge (net numbering restarted from 0 instead of preserved) must NOT agree. *Without
+this the theorem above is compatible with a comparison that is true by construction.* -/
+def demoBridgeWrong : Circ :=
+  { nIn := inpPrefix demoNL
+  , gates := (bridgeGatesFrom 0 demoNL).map (fun g => ⟨g.out - inpPrefix demoNL, g.op⟩)
+  , outs := demoOuts }
+
+theorem demo_wrong_bridge_disagrees :
+    (List.range 4).all (fun m =>
+      let bs := [m % 2 == 1, m / 2 == 1]
+      sem demoBridgeWrong (insOf bs)
+        == demoOuts.map (fun k => (SaltWorks.Silicon.runP (insOf bs) [] demoNL).getD k false))
+      = false := by
+  decide +kernel
+
+#audit_axioms insOf demoNL demoOuts demo_bridgeable demo_sem_agrees
+#audit_axioms demoBridgeWrong demo_wrong_bridge_disagrees
+
 end SaltWorks.HDL.NetlistBridge
