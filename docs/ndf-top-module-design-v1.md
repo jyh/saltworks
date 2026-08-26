@@ -298,7 +298,9 @@ still implies a single end-to-end certified system on one die, which
 neither account authorizes. Two true parts, one false assembly — and
 no sentence-level check sees it, because no sentence is false.
 
-**PROPOSED CLEARED FORM — the Captain ratifies, this seat does not:**
+**✅ RATIFIED FORM — the Captain, 2026-08-25 21:1x, verbatim as proposed.**
+*This is now THE demo sentence. The original above is left visible under the
+corrected-record rule; it is superseded, not deleted.*
 "a processor whose every organ and every wire carries a kernel-checked
 theorem — though not all of the same kind: `ruledEnc` carries a
 seam-closure, not a semantic certificate (§1.4) — its composed
@@ -308,6 +310,15 @@ the same die, a dataflow fabric whose netlist is kernel-checked
 against its Lean model on prefix-concentrated destination-monotone
 traffic, driven by a compiler-emitted schedule."
 📌 "separately certified" is load-bearing: it is what stops finding (3).
+📌 The `ruledEnc` clause is load-bearing too, and for a different reason: it is
+the §4.3′ travel condition, which this sentence broke for sixteen days by moving
+into this file without it. **It travels with the sentence from here on — that is
+what "ratified verbatim" bought.**
+⚖️ RATIFICATION: the Captain, 2026-08-25 21:1x, on the evidence seat's fence
+pass of the same evening (three findings, `saltworks 6096b30`). Authority for
+the processor clauses remains `core-account.md` §3, whose authorized sentence is
+the ceiling (§4.5′); authority for the fabric clause is this file's own
+"WHAT IS CERTIFIED TODAY".
 
 **Fetch protocol — the contract the RTL actually demands (refuter
 correction adopted; v1's same-window proposal was arithmetically
