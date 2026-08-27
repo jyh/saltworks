@@ -1,10 +1,10 @@
 #!/bin/bash
-# NDF 6x2 HARDEN — one arm per invocation.  usage: ndf-run.sh <ndf-base|ndf-1d>
+# NDF 6x2 HARDEN — one arm per invocation.  usage: harden_run.sh <tag>  — tag matches a config in docs/silicon-runs-0827/ (config-<tag>.json)
 # Ordered by the helm 11:5x: the clicked artifact is the paid 6x2 NDF, so the ①d knobs
 # must be measured against the NDF's OWN baseline on a NAMED DIGEST — deltas against a
 # provable toolchain only. Top module tt_um_saltworks_ndf_c32, per info.yaml at 7d2b275.
 set -u
-TAG="${1:?usage: ndf-run.sh <ndf-base|ndf-1d>}"
+TAG="${1:?usage: harden_run.sh <tag>  — tag matches a config in docs/silicon-runs-0827/ (config-<tag>.json)}"
 LOCK=/tmp/salt-fleet-build.lock
 IMG=ghcr.io/librelane/librelane:3.0.5
 WANT_DIGEST=sha256:ecabd075d0ddf6a2bd1cd4a32109c7dbb861ec007f7e4e423a9a081f8d23b8e2
