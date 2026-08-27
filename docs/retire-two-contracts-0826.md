@@ -182,7 +182,51 @@ fetch_with_request_holds              a fetch with a request in flight does NOT 
 ⛔ **AND THE RESIDUE, NAMED RATHER THAN IMPLIED: `BusFSM` models the adapter's state, NOT the word
 presented to the core.** So T2's final link — *while the adapter is not ready the word presented is
 the bubble encoding* — **is NOT decided by this file and is not claimed by it.** What is decided is
-the anchor that link hangs on. ⇒ **ONE WIRE QUESTION REMAINS, AND IT IS SILICON'S.**
+the anchor that link hangs on. ⇒ **ONE WIRE QUESTION REMAINS, AND IT IS SILICON'S** — and as
+of §5.2 it is a question about the FETCH STATE, not about the correspondence at large.
+
+## 5.2 ⭐⭐ THE `req` OBLIGATION, CONFINED TO ONE STATE — `SaltWorks/HDL/ReqWordSource.lean`
+
+`StallsAtWidened` names an obligation it cannot see, in its own header:
+
+> *"If it is off by one, the equation below still holds — it is stated over whatever `reqAt`
+> returns — but the FUNCTION would be reading the wrong word, and no theorem here would notice."*
+
+⛔ **WHY NO THEOREM THERE NOTICES IS STRUCTURAL, NOT AN OVERSIGHT.** `stallsAt_eq_not_retire` reads
+`stallsAt e = !(retire s (reqAt e))` — with `reqAt e` **on both sides**. It is an IDENTITY in the
+`req` argument, so it holds for *every* word source, including one reading uninitialised memory.
+***A THEOREM THAT MENTIONS THE SUSPECT QUANTITY ON BOTH SIDES OF ITS OWN EQUATION IS NOT EVIDENCE
+ABOUT THAT QUANTITY.***
+
+The cure is this seat's own technique — **parameterise the part the other lane owns** — applied to
+the word source itself, `stallsFrom (word : Env → BitVec 32)`, with `stallsAt = stallsFrom
+seenWordFull` definitionally. Three results the identity could not give:
+```
+stallsFrom_agrees_off_fetch        CONFINEMENT — `retire` consults `req` in the `fetch` state and
+                                   NOWHERE ELSE, so two word sources can disagree about `stalls`
+                                   ONLY where the adapter is fetching. Every load, store and idle
+                                   state is IMMUNE to the off-by-one.
+word_source_decides_at_fetch       SENSITIVITY — in the fetch state the word source DECIDES,
+                                   witnessed on two real RV32I words (a LW and an ADD): opposite
+                                   stall decisions. ⇒ THE OBLIGATION IS REAL, NOT COSMETIC.
+off_by_one_confined_to_fetch       THE BOUNDED SIDE CONDITION — if the presented word and the
+                                   word actually held agree on `req` WHENEVER THE ADAPTER IS
+                                   FETCHING, they define the SAME stall function everywhere.
+control_confinement_needs_its_hypothesis   drops the fetch hypothesis; conclusion FALSE
+control_retire_is_not_req_blind            `retire` does depend on `req` somewhere, so the
+                                           confinement result is not vacuous
+                                   11 audited names, 0 sorryAx, saltbuild EXIT=0
+```
+⇒ **WHAT CHANGES FOR SILICON'S SUCCESSOR.** They do **not** have to prove that `instr_r` presents
+the current instruction in general. They have to settle it **on the fetch state only** — and
+`off_by_one_confined_to_fetch` is what turns that reduction from a plausible argument into a
+checked one. The surface shrinks from *"the `req` correspondence"* to *"the `req` correspondence in
+the fetch state"*.
+
+⛔ **THIS PROVES NOTHING ABOUT `busadapt8.v`, AND IS NOT A DISCHARGE.** Which word the RTL presents
+is silicon's lane and remains unproved; `busadapt8.v:126-131` is unchanged and still says so in its
+author's own words. **The item stays OPEN on the pair.** What changed is that the Lean side can now
+SEE the difference, and the open item now has a stated blast radius instead of an unbounded one.
 
 ## 6. SIGNATURES — AGAINST THE PAIR, NEVER AGAINST ONE
 
