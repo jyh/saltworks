@@ -212,7 +212,33 @@ while true; do
   #   so it goes in the line that already runs, not in a habit.
   # ⚠️ FOLLOWS THE SEAT via CLAUDE_CONFIG_DIR, so a copy of this script in another
   #   seat measures ITS OWN index rather than silently reporting mine.
-  IDX=${IDX:-${CLAUDE_CONFIG_DIR:-$HOME/.claude}/projects/-Users-jyh-projects-claude-saltworks/memory/MEMORY.md}
+  # ⛔⛔ 2026-08-26 18:3x — THE SLUG WENT STALE AND NOTHING RANG. THE LINE BELOW USED
+  # TO HARDCODE `-Users-jyh-projects-claude-saltworks`. When this seat moved to
+  # `~/projects/claude/seats/silicon/saltworks` the harness began writing a NEW bank
+  # under `-Users-jyh-projects-claude-seats-silicon-saltworks` — and THE OLD DIRECTORY
+  # STILL EXISTS AND IS STILL READABLE, so the `[ ! -r "$IDX" ]` refusal below never
+  # fired. The 18:36 sweep reported `21879/24986 (88%) — 11 hooks left` off a bank last
+  # written 08/25 14:14, while the LIVE index was 23,923 B = 96%, ~3 hooks left.
+  # ⇒ RESOLVABILITY IS NOT MEMBERSHIP, AT THE FILESYSTEM LAYER: a dead twin reads
+  #   perfectly, and it answers in the REASSURING direction — 8 points of headroom
+  #   that do not exist. An alarm about a cut cannot be measured on the wrong file.
+  # ⚠️ AND THE COMMENT SIX LINES UP ALREADY GUARDED THE OTHER AXIS — "follows the seat
+  #   via CLAUDE_CONFIG_DIR, so a copy in another seat measures ITS OWN index". The SEAT
+  #   coordinate was parameterised and the PROJECT-SLUG coordinate was left a literal.
+  #   ***A FIX THAT REACHES ONE COORDINATE OF A PATH AND NOT THE OTHER LEAVES THE
+  #   ORIGINAL DEFECT LIVE UNDER A NEW SPELLING*** — this file already says that
+  #   sentence about `meas_since.sh`'s namespace/hub pair. Third time, third axis.
+  # ✅ CURE, in the order the caller should expect: an explicit IDX wins; then
+  #   CLAUDE_MEMORY_DIR if the arm sets it; then a slug DERIVED FROM THIS SCRIPT'S OWN
+  #   REPO, so the path re-derives at every move instead of being remembered.
+  # ✅ AND THE TWIN IS REPORTED, NOT SILENTLY PREFERRED: while the legacy directory is
+  #   still on disk a wrong reading is one env-var away, so the sweep names it.
+  _idxcfg=${CLAUDE_CONFIG_DIR:-$HOME/.claude}
+  _idxrepo=$(cd "$(dirname "$0")/../.." 2>/dev/null && pwd)
+  _idxslug=$(printf '%s' "$_idxrepo" | sed 's|/|-|g')
+  IDX=${IDX:-${CLAUDE_MEMORY_DIR:+$CLAUDE_MEMORY_DIR/MEMORY.md}}
+  IDX=${IDX:-$_idxcfg/projects/$_idxslug/memory/MEMORY.md}
+  _idxlegacy=$_idxcfg/projects/-Users-jyh-projects-claude-saltworks/memory/MEMORY.md
   # ⛔ THE DENOMINATOR, AND ITS DERIVATION, BANKED TOGETHER — because I shipped
   # 24400 first and four seats divided by it within six minutes. The figure came
   # from a hook message reading "over its 24.4KB read limit", and I rendered KB
@@ -266,6 +292,12 @@ while true; do
       _rem=$(( IDXLIM - ib )); _hk=$(( _rem / 280 ))
       idx="$ib/$IDXLIM (${ipct}%) ** APPROACHING THE CUT — ${_rem}B ≈ ${_hk} hooks left. NO CHEAP COMPACTION (2 of 70 hooks accreted, 6% of bytes): shrink ONLY by REWRITING a hook you are already amending **"
     else                              idx="$ib/~${IDXLIM} (${ipct}%, limit CORROBORATED, precision unknown)"
+    fi
+    # THE TWIN GUARD. Only speaks when a SECOND readable index exists and DISAGREES —
+    # silence here means there is nothing to confuse, not that the check was skipped.
+    if [ "$IDX" != "$_idxlegacy" ] && [ -r "$_idxlegacy" ]; then
+      _lb=$(wc -c < "$_idxlegacy" | tr -d ' ')
+      [ "$_lb" != "$ib" ] && idx="$idx ** LEGACY TWIN STILL ON DISK ($_lb B) AND IT IS NOT THIS FILE — measured $IDX **"
     fi
   fi
   # ⭐⭐ ADDED 2026-08-13 23:47 — THE TWO FIELDS WHOSE ABSENCE COST 115 MINUTES.
