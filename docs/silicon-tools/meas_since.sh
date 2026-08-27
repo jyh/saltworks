@@ -241,6 +241,17 @@ for f in $changed; do
     continue
   fi
   # ── PRE-FLIGHT: supply in-range oleans BEFORE spending the kernel ────────────
+  # ✅ REACHABILITY MEASURED 08/27 01:1x, SO NOBODY DELETES THIS AS DEAD CODE: after the
+  # freshness step above became UNCONDITIONAL, the only way an import olean can still be
+  # missing is a module OUTSIDE the hub closure — and that population is NOT empty.
+  #   hub closure (SaltWorks modules) : 176
+  #   SaltWorks .lean on disk         : 320
+  #   OUTSIDE the closure             : 144   (Scratch* and friends, all MEAS-censusable)
+  # A change to any of those 144 enters the census, is NOT covered by `saltbuild SaltWorks`,
+  # and lands here. ***THIS GUARD HAS A REAL POPULATION; it is not made redundant by the hub
+  # build.*** [[a-check-never-shown-to-fail]] — I checked whether my own new guard could still
+  # fire rather than assuming it, because a guard that cannot fire reads exactly like one that
+  # is simply quiet.
   # ⚠️ SCOPE, CORRECTED 08/26 23:5x AND NARROWED BY MEASUREMENT — DO NOT READ THIS
   # BLOCK AS COVERING BUILD STATE GENERALLY. It refuses the ABSENT olean only.
   # It reported NOTHING on nine STALE-olean reds the same night. The freshness step
