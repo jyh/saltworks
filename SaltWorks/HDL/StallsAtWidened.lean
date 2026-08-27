@@ -23,10 +23,20 @@ and the instruction word at             instrBaseFull = stWidthFull
 ## ⛔⛔ WHAT THIS FILE DOES **NOT** DO — read this before quoting it
 
 ***IT DOES NOT PLACE THE THREE BITS.*** Nothing here says the emitted circuit DRIVES those nets
-with the adapter's state; `core.outs` does not carry them yet, and that placement waits on the
-`Netlist → Circ` bridge. **What is proved is that a `stalls : Env → Bool` EXISTS at the widened
-layout and equals `¬retire` for the state its nets encode.** The remaining obligation is the
-placement, and it is named rather than assumed.
+with the adapter's state; `core.outs` does not carry them yet. **What is proved is that a
+`stalls : Env → Bool` EXISTS at the widened layout and equals `¬retire` for the state its nets
+encode.** The remaining obligation is the placement, and it is named rather than assumed.
+
+⛔⛔ **CORRECTED 2026-08-26 21:1x — THIS SENTENCE SAID THE PLACEMENT "WAITS ON THE
+`Netlist → Circ` BRIDGE". IT DOES NOT, AND IT NEVER DID.** silicon measured it and this seat
+confirmed at its own hand with a control: **`NetlistBridge` is imported by ZERO modules** (the
+same query returns 2 for `AdapterStateOrgan`, so it can return non-zero). `core` is assembled
+from Lean-defined organs through `instGates`; nothing on the placement path calls `bridge`.
+**What actually blocks the placement is named in `CoreAssemblyD`'s own header: memOrgan's
+292-input σ, `instOK memOrgan _ _`, and the trap bit, which has no gate-level producer in any
+landed module.** The bridge is what the netlist ↔ Lean CORRESPONDENCE needs — a different
+obligation, on a different object. *Two things wore one noun, and the wrong one got blamed for
+nine days.*
 
 ⇒ **So this discharges "exhibit the function and prove the equation" and NOTHING ELSE.** A reader
 who takes it as "T2 is satisfied" has read one step further than the file goes.
@@ -55,8 +65,11 @@ changed after it, and neither is visible from inside this module:
 newly assembled word at exactly `kind == T_FETCH && phase == 2'd3`, and `loop_end` IS phase 3, so
 the decode at the decision edge reads the CURRENT instruction. Driven both ways by a committed
 runner: as shipped 6/6 PASS, bypass defeated RED at 2/6 reproducing the recorded 08/18 signature.
-⛔ *This settles the RTL side only. The netlist ↔ Lean correspondence is unproved and is the same
-bridge the placement waits on.*
+⛔ *This settles the RTL side only. The netlist ↔ Lean correspondence is unproved, and THAT is
+what the bridge is for — not the placement.* ⚠️ **This very sentence carried the false claim
+forward: I wrote it at 20:3x while correcting the paragraph above it, and re-asserted the
+adjacent error in the same edit. A CORRECTION PASS IS EXACTLY WHERE A NEIGHBOURING FALSEHOOD GETS
+RE-CERTIFIED, because the sentence next to the one you are fixing reads as already checked.**
 
 **2. "NO THEOREM HERE WOULD NOTICE" WAS TRUE, AND THE REASON IS STRUCTURAL** —
 `stallsAt_eq_not_retire` carries `reqAt e` on BOTH sides, so it is an IDENTITY in `req` and holds

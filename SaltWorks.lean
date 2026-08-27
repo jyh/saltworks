@@ -161,4 +161,6 @@ import SaltWorks.HDL.StallShape
 import SaltWorks.HDL.T2T5Consistency
 import SaltWorks.HDL.StallsAtWidened
 import SaltWorks.HDL.ReqWordSource
+import SaltWorks.HDL.AdapterPlacement
+import SaltWorks.HDL.MemOrganPlacement
 import SaltWorks.Tactic.AuditAxioms
