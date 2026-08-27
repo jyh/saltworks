@@ -114,3 +114,63 @@ remaining question — against **111 leaves at fanout 12–15**, not the 3×2's 
 ## 8 · ⛔ WHAT IS NOT MINE
 The resubmission click is the Captain's (public + money). This seat has produced a measured,
 audited pair on the artifact that ships and reports it. **Nothing has been submitted.**
+
+---
+# Part 3 · ② ON THE PAID CHIP — 117 → 1, AND NEITHER ARM REACHES ZERO
+`ndf-2a` (`CTS_SINK_CLUSTERING_SIZE=10`) 12:50–12:58 · `ndf-2b` (`=8`) 12:59–13:07. Both hold ①d's
+knobs; one axis each. Bar pre-registered at `silicon-cts-prereg-0827.md` §8 BEFORE either ran.
+
+## 9 · THE FOUR-RUN TABLE — all on one image digest and TT's own PDK
+```
+metric          base (= paid chip)      ①d        ②a (=10)     ②b (=8)
+max_fanout                    117       111            1            2
+max_slew                    3,317       857          825          797
+max_cap                        27         5            5            5
+setup WS                 +5.66802  +7.88681     +7.85898     +7.79852
+hold WS                  +0.11053  +0.19383     +0.19768     +0.19105
+stdcell area              127,056   131,537      131,856      132,373
+timing_repair_buffer        2,611     3,402        3,404        3,408
+clock_buffer                  200       205          202          233
+flops                       1,468     1,468        1,468        1,468
+DRC · LVS · antenna         0/0/0     0/0/0        0/0/0        0/0/0
+```
+
+## 10 · ⛔ NEITHER ARM CLOSES — BY THE BAR PUBLISHED BEFORE THE RUNS
+```
+②a   max_fanout 1, bar is 0   ⛔        every other clause ✅
+②b   max_fanout 2, bar is 0   ⛔  AND   hold 0.19105 < 0.19383 ⛔  (it REGRESSES hold vs ①d)
+```
+⇒ **②a IS STRICTLY BETTER THAN ②b** — fewer violators and hold *above* the ①d baseline rather than
+below it. **A smaller clustering size is not monotonically better**, which is the kind of thing a
+one-arm experiment would have got wrong.
+
+## 11 · ⭐ THE ARMS ANSWER THE QUESTION THEY WERE RE-PURPOSED FOR: THE RESIDUAL IS PLACEMENT, NOT STRUCTURE
+```
+①d      0 datapath violators
+②a      1  —  wire695/X @11        (a buf_8: 0 in synthesis, 1 in final ⇒ RESIZER-inserted)
+②b      2  —  _05547_/X @12 · _11038_/X @11
+```
+***THE RESIDUAL SET IS DIFFERENT EVERY TIME, AND IN ALL THREE RUNS IT IS ZERO CLOCK-LEAF.*** Both
+CTS arms **completely eliminate the 111 clock-leaf violators**; what remains is a small, *varying*
+datapath remainder at fanout 11–12 that moves with placement. `_11038_` appears in `ndf-base` and
+`ndf-2b` but not in `①d` or `②a` — it recurs, it does not persist.
+⇒ **CTS KNOBS CANNOT REACH ZERO HERE, AND NOT BECAUSE THEY ARE SET WRONG: THE REMAINDER IS NOT A
+CLOCK OBJECT.** Chasing it is a resizer/repair question, and **two clusterings producing two
+different residual sets is evidence AGAINST convergence**, not merely absence of evidence for it.
+
+## 12 · ⇒ WHAT GOES TO THE CAPTAIN, WITH THE COST OF THE ALTERNATIVE ATTACHED
+**RECOMMENDED CONFIGURATION: ①d + ②a.** Against the chip that is currently on the shuttle:
+```
+max_fanout   117 -> 1     (-99.1%)      hold WS   +0.1105 -> +0.1977   (+79%, nearly DOUBLE)
+max_slew   3,317 -> 825   (-75.1%)      setup WS  +5.6680 -> +7.8590   (+2.19 ns)
+max_cap       27 -> 5     (-81.5%)      DRC · LVS · antenna   0/0/0 throughout
+COST: stdcell 127,056 -> 131,856 = +3.8%; die and fit UNCHANGED (fill absorbs it); flops IDENTICAL
+```
+⛔ **THE ONE REMAINING VIOLATION IS A DATAPATH NET AT FANOUT 11 AGAINST A LIMIT OF 10.** Accepting
+it is a **SPEC-ACCEPTANCE ACT AND IT IS THE CAPTAIN'S.** The cost of the alternative, measured:
+**②b is the only other knob setting tried and it is WORSE on both counts** (2 violators, and hold
+regresses below ①d); no CTS setting reaches zero because the residual is not in the clock tree.
+📌 *Context for the judgement, offered and not decided: `max_fanout` is a PROXY constraint. Its
+physical consequences — slew and cap — are measured separately and are down 75% and 81%. A fanout-11
+net is a rule-report violation; whether that matters for this mask is his call, not a measurement.*
+⛔ **THE RESUBMISSION CLICK REMAINS THE CAPTAIN'S. Nothing has been submitted from this seat.**
