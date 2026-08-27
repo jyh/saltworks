@@ -118,6 +118,89 @@ theorem off_by_one_confined_to_fetch (w₁ w₂ : Env → BitVec 32)
   · simp only [stallsFrom, h e hk]
   · exact stallsFrom_agrees_off_fetch w₁ w₂ e hk
 
+/-! ## §4.2 — THE EXACT CHARACTERISATION: not just WHERE it can differ, but WHEN -/
+
+/-- ⭐ **AT A FETCH, `stalls` IS EXACTLY `req`.** `retire` is `!req` there and `stalls` is
+`!retire`, so the two negations cancel. This is what makes the off-by-one legible: at a fetch the
+stall decision IS the memory-ness of whichever word is read, nothing more. -/
+theorem stallsFrom_at_fetch (w : Env → BitVec 32) (e : Env)
+    (hk : (adapterAt e).kind = Kind.fetch) :
+    stallsFrom w e = reqOfWord (w e) := by
+  simp only [stallsFrom, retire, hk]
+  cases reqOfWord (w e) <;> rfl
+
+/-- ⭐⭐⭐ **THE DISCRIMINATING SET, EXACTLY — AN IFF, NOT A CONTAINMENT.** Two word sources
+give different stall decisions **precisely** when the adapter is fetching AND the two words
+disagree on memory-ness. Confinement gives one direction, sensitivity the other; together they
+pin the set rather than bound it.
+
+⇒ **this is the form silicon's successor can act on with a waveform instead of a proof:** the
+cycles to examine are the FETCH cycles at which the presented word and the held word differ in
+being a `LW`/`SW`. Everywhere else the two readings are provably indistinguishable, so a
+disagreement there cannot exist to be found. -/
+theorem stalls_differ_iff_fetch_and_memness_differs (w₁ w₂ : Env → BitVec 32) (e : Env) :
+    (stallsFrom w₁ e ≠ stallsFrom w₂ e)
+      ↔ ((adapterAt e).kind = Kind.fetch ∧ reqOfWord (w₁ e) ≠ reqOfWord (w₂ e)) := by
+  constructor
+  · intro hne
+    by_cases hk : (adapterAt e).kind = Kind.fetch
+    · refine ⟨hk, fun heq => hne ?_⟩
+      simp only [stallsFrom, heq]
+    · exact absurd (stallsFrom_agrees_off_fetch w₁ w₂ e hk) hne
+  · rintro ⟨hk, hr⟩
+    rw [stallsFrom_at_fetch w₁ e hk, stallsFrom_at_fetch w₂ e hk]
+    exact hr
+
+/-- ⛔ **CONTROL FOR §4.2.** The right-hand side is not always true, so the iff is not a
+disguised tautology: at a STORE state the condition fails no matter what the words are. -/
+theorem control_discriminating_set_is_not_everything (pad : Env) (w₁ w₂ : Env → BitVec 32) :
+    ¬ ((adapterAt (envWithAdapter ⟨Kind.store, false⟩ pad)).kind = Kind.fetch
+        ∧ reqOfWord (w₁ (envWithAdapter ⟨Kind.store, false⟩ pad))
+            ≠ reqOfWord (w₂ (envWithAdapter ⟨Kind.store, false⟩ pad))) := by
+  rintro ⟨hk, -⟩
+  rw [envWithAdapter_reads_back] at hk
+  exact absurd hk (by decide)
+
+/-! ## §4.1 — WHERE THE LANDED NON-VACUITY WITNESS DOES NOT REACH
+
+Found by an identity audit of this seat's own T2/T5 surface, criterion pre-registered before
+the probes were built: *generalise the suspect quantity and see whether the theorem still
+proves.* `stallsAt_eq_not_retire` flagged, as expected — it is the defect this file exists for.
+**`stallsAt_is_middle` flagged too, and that one was not expected.**
+-/
+
+/-- ⛔⛔ **THE LANDED MIDDLE WITNESS DOES NOT CONSTRAIN THE WORD, AND HERE IS THE PROOF.**
+`stallsAt_is_middle` exhibits its middle at two **store** states — and by
+`stallsFrom_agrees_off_fetch`, `retire` ignores `req` there. So the very same pair of equations
+holds for **every word source whatsoever**, including a constant one.
+
+⇒ *the file's own non-vacuity evidence lives entirely inside the region its header flags as
+unsettled being irrelevant to.* The witness is real and the stall set is a genuine middle; what
+it cannot do is bear any weight about the word.
+
+**Stated as a theorem rather than a remark so that the limitation is machine-checked and cannot
+rot into a comment nobody re-derives.** -/
+theorem landed_middle_holds_for_every_word_source (pad : Env) (w : Env → BitVec 32) :
+    stallsFrom w (envWithAdapter ⟨Kind.store, false⟩ pad) = true
+      ∧ stallsFrom w (envWithAdapter ⟨Kind.store, true⟩ pad) = false := by
+  constructor
+  · rw [stallsFrom, envWithAdapter_reads_back]; rfl
+  · rw [stallsFrom, envWithAdapter_reads_back]; rfl
+
+/-- ⭐⭐ **THE MIDDLE AT THE FETCH STATE — THE ARM THAT WAS MISSING, AND THE WORD IS WHAT MOVES
+IT.** At one fixed adapter state, a load word stalls the core and an ALU word does not. This is
+the non-vacuity witness the landed one could not be: it is FALSIFIABLE BY THE WORD.
+
+⇒ **the two middles have different mechanisms, which is why one cannot substitute for the other:**
+at a store the middle is a function of the BEAT, at a fetch it is a function of the WORD, and only
+the second touches the quantity `busadapt8.v:126-131` leaves open. -/
+theorem stalls_is_middle_at_fetch (pad : Env) :
+    stallsFrom (fun _ => loadWord) (envWithAdapter ⟨Kind.fetch, false⟩ pad) = true
+      ∧ stallsFrom (fun _ => aluWord) (envWithAdapter ⟨Kind.fetch, false⟩ pad) = false := by
+  constructor
+  · rw [stallsFrom, envWithAdapter_reads_back, reqOfWord_loadWord]; rfl
+  · rw [stallsFrom, envWithAdapter_reads_back, reqOfWord_aluWord]; rfl
+
 /-! ## §5 — CONTROLS: each theorem above must be able to fail -/
 
 /-- ⛔ **CONTROL FOR §4.** Drop the fetch-state hypothesis and the conclusion is FALSE — witnessed
@@ -141,6 +224,9 @@ theorem control_retire_is_not_req_blind :
 #audit_axioms retire_req_irrelevant_off_fetch stallsFrom_agrees_off_fetch
 #audit_axioms retire_fetch_separates reqOfWord_loadWord reqOfWord_aluWord
 #audit_axioms word_source_decides_at_fetch off_by_one_confined_to_fetch
+#audit_axioms landed_middle_holds_for_every_word_source stalls_is_middle_at_fetch
+#audit_axioms stallsFrom_at_fetch stalls_differ_iff_fetch_and_memness_differs
+#audit_axioms control_discriminating_set_is_not_everything
 #audit_axioms control_confinement_needs_its_hypothesis control_retire_is_not_req_blind
 
 end SaltWorks.HDL.ReqWordSource
