@@ -23,3 +23,23 @@ missing olean, or if it goes green, or if StallsAtWidened reds on build state.
 DETECTOR CONTROL (run before the prediction, both branches reachable):
   MemOrganPlacement.lean -> names SaltWorks.HDL.AdapterPlacement  (positive)
   DecoderLines.lean      -> empty                                  (negative)
+
+---
+REGISTERED FOLLOW-UP (not built — meas_since.sh is EXECUTING as I write this, and editing a
+running `sh` script is its own hazard; this is registered, not reactively patched):
+
+The pre-flight builds each missing olean with a SEPARATE `saltbuild.sh <module>` call, and each
+call acquires the machine-wide fleet flock independently. For MemWiring the missing set was
+{AdapterPlacement, DecoderLines, MemOrganPlacement} = THREE lock acquisitions, each queueing
+behind every other seat. Building the TARGET's module form once resolves all deps transitively
+in ONE acquisition.
+  Correctness note, checked before proposing it: populating the target's olean via the MODULE
+  form does NOT weaken the witness, because the PATH form that follows elaborates the target
+  regardless (meas_build's own table). This is exactly the manual two-step my bank prescribed.
+  It is an EFFICIENCY change under contention, NOT a correctness fix — stated that way so a
+  successor does not price it as the latter.
+
+MEASURED CONTEXT, 08/26 23:37: a peer held the flock 35 minutes on Salt.MR.All (verified
+PROGRESSING, not wedged: ~200% CPU across two samples, 1 lean proc, 6.7 GB resident vs the
+43 GB hazard). Under that kind of hold, 3 acquisitions vs 1 is the difference between one wait
+and three.
