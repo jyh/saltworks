@@ -441,7 +441,14 @@ OPEN ITEMS:
   CAP=12000 in the wrapper; compiler's 01:34 recommendation, its
   own interest declared — registered ≠ endorsed, a maestro ruling
   at council decides) · (b) import owed: SubFragment, SingleLevel
-  (line-57 records the CONVENTION, not these two specific debts) ·
+  (line-57 records the CONVENTION, not these two specific debts) —
+  ✅ **DISCHARGED-BY-MEASUREMENT 2026-08-26 22:3x (compiler, at the object):
+  BOTH ARE ROOT-IMPORTED AND HAVE BEEN SINCE `bc425ce`, 2026-08-09 10:11 —
+  SEVENTEEN DAYS BEFORE THIS ROW WAS WRITTEN.** `SaltWorks.lean:132-133`.
+  Control: a module that is NOT root-imported returns 0 to the same query, so
+  it could have come back empty. **The row was never a debt; it was a stale
+  label, and a stale DEBT gets EXECUTED where a stale FINDING gets disputed.**
+  Original text kept verbatim above per the marker law. ·
   (c) ImmediateScope retirement via the aiming rider (already noted
   below, compiler's slot). Re-raise clock: council.**
 - **RE-RAISE CLOCKS ON GATED ITEMS (silicon 07:5x, `a standing order
