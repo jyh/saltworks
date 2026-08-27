@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Jason Hickey, Claude
 -/
 import SaltWorks.HDL.MemOrganPlacement
+import SaltWorks.HDL.DecoderLines
 
 /-!
 # The thirty-six datapath wires — memOrgan's placement with NO free parameters left
@@ -53,6 +54,7 @@ set_option maxHeartbeats 4000000
 namespace SaltWorks.HDL.MemWiring
 
 open SaltWorks.HDL SaltWorks.HDL.CorePlace SaltWorks.HDL.MemOrganPlacement
+open SaltWorks.HDL.DecoderLines
 
 /-! ## §1 — THE THIRTY-SIX, FROM ORGANS ALREADY IN THE CHAIN -/
 
@@ -60,7 +62,13 @@ open SaltWorks.HDL SaltWorks.HDL.CorePlace SaltWorks.HDL.MemOrganPlacement
 def memAddrNet (j : Nat) : Net := CorePlace.addOut (j + 2)
 
 /-- The store strobe: the decoder's `isSW` line, index 6. -/
-def memWeNet : Net := decOut 6
+def memWeNet : Net := decOut isSWLine
+
+/-- ⭐ The name is not decoration: `isSWLine` is pinned to the match table's SW row in
+`DecoderLines`, and the adjacent `isLWLine` is pinned beside it with a control proving the two
+patterns differ. **The bare `6` that stood here is what cost this tree a landed defect on
+08-19.** -/
+theorem memWeNet_is_the_named_line : memWeNet = decOut isSWLine := rfl
 
 /-- Write data bit `k`: `readTree`'s rs2 port at its chain position. -/
 def memWDataNet (k : Nat) : Net := rs2Out k
@@ -110,6 +118,7 @@ not yet computed and `instOK` fails — so §3 is not true for any offset whatso
 theorem control_offset_matters : ¬ (memAddrNet 0 < offAdd) := by decide +kernel
 
 #audit_axioms memAddrNet memWeNet memWDataNet offMem memPlacementSigma
+#audit_axioms memWeNet_is_the_named_line
 #audit_axioms addr_below we_below wdata_below mem_instOK_placed
 #audit_axioms control_we_is_not_isLW control_addr_is_not_byte_indexed
 #audit_axioms control_addr_bits_distinct control_offset_matters

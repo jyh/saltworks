@@ -163,5 +163,6 @@ import SaltWorks.HDL.StallsAtWidened
 import SaltWorks.HDL.ReqWordSource
 import SaltWorks.HDL.AdapterPlacement
 import SaltWorks.HDL.MemOrganPlacement
+import SaltWorks.HDL.DecoderLines
 import SaltWorks.HDL.MemWiring
 import SaltWorks.Tactic.AuditAxioms
