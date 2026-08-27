@@ -20,7 +20,14 @@ say(){ printf '%s %s\n' "$(date +%H:%M:%S)" "$*"; }
 # when the build queue was integrated, and this consumer's sibling-relative lookup broke
 # silently. Derive it from the repo root so a future move breaks LOUDLY at the git level.
 SQ="$(cd -P "$(dirname "$0")/../.." && pwd)/tools/saltqueue.sh"
-if [ -r "$SQ" ]; then . "$SQ"; q_take P1 silicon; trap 'q_release' EXIT INT TERM; q_wait
+# ⛔ THE CLASS BELONGS IN THE CALL, NOT IN THE TOOL — helm amendment 16:5x to ruling ③.
+#   TAKING a ticket stays non-negotiable (an unticketed marker-holder makes the census a
+#   lie). The CLASS does not ride along: P1 is for TAPE-OUT CAMPAIGN work, and this runner
+#   is also used for self-checks, which are not that.
+#   ⇒ ***A PRIORITY BAKED INTO A TOOL IS CLAIMED BY EVERY USE OF THE TOOL, INCLUDING THE
+#      USES THAT DO NOT DESERVE IT.*** Measured 16:4x: a hardcoded P1 self-check outranked a
+#      peer's helm-requested measurement for 36 minutes. Default P2; type PRIO=P1 for campaign runs.
+if [ -r "$SQ" ]; then . "$SQ"; q_take "${PRIO:-P2}" "${SEAT:-${SELF:-silicon}}"; trap 'q_release' EXIT INT TERM; q_wait
 else
   # ⛔ NAME THE PATH. Without it, "absent" and "resolved to the wrong place" are the SAME
   #   observable — which is how this runner ran unticketed after saltqueue.sh moved.
