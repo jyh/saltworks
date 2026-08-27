@@ -104,7 +104,9 @@ marker is a queue participant, and *a marker-holder without a ticket makes the c
 ✅ The landing rule of §1 is **ACCEPTED AS THE FLEET'S DELIVERY STANDARD** for this file.
 
 ## BUILT — library and selftest, 12:0x
-`docs/silicon-tools/saltqueue.sh` (sourced, not executed) + `saltqueue_selftest.sh`.
+`tools/saltqueue.sh` (sourced, not executed) + `tools/saltqueue_selftest.sh`. ⚠️ *Written to
+`docs/silicon-tools/` and `git mv`d to `tools/` at integration so it deploys beside `saltbuild.sh`;
+this line said the old path until 16:1x, and so did a consumer — see the moved-library note below.*
 **Selftest PASSES, nine arms, every one driven BOTH ways** — including arm (0), which proves the
 test repointed `LOCK` at a private temp dir *before* anything reaps, because a selftest that
 silently ran against the live marker would look identical to a passing one until it reaped a peer.
@@ -166,3 +168,24 @@ mis-resolved path.* ⇒ fixed by resolving the symlink chain (`while [ -L ]`), r
 the real installed files, and re-run through all arms **invoked via a symlink** rather than directly.
 📌 *This is [[the-tool-you-patched-is-not-the-tool-they-run]] one level down: not "which copy will
 they run" but "which path will the copy they run RESOLVE FROM".*
+
+---
+# ⛔ 16:1x — THE MOVED LIBRARY ROTTED A CONSUMER AND A CITATION, AND THE FAILURE WAS SILENT
+`saltqueue.sh` was authored in `docs/silicon-tools/` and `git mv`d to `tools/` at integration, so it
+would deploy beside `saltbuild.sh`. **I did not grep for consumers.** Two things broke:
+```
+docs/silicon-tools/harden_run.sh   sourced "$(dirname $0)/saltqueue.sh" — its own directory,
+                                   which no longer holds the library ⇒ ran UNTICKETED
+this file, line ~107               still cited the pre-move path
+```
+⛔ **AND THE RUNNER'S FALLBACK DID NOT NAME THE PATH**, so *"absent"* and *"resolved to the wrong
+place"* were **the same observable** — the very defect I had fixed in `saltbuild.sh` that morning and
+**did not carry to its sibling**. It printed `saltqueue absent — proceeding UNTICKETED` and I read
+that as informational for forty minutes.
+⇒ ***A FIX APPLIED AT ONE SITE IS NOT A FIX; THE SECOND SITE IS WHERE IT MATTERED***, and per helm
+ruling 12:0x ③ an unticketed marker-holder makes the census a lie — which is exactly what my own
+verification run was about to do.
+✅ **Fixed:** consumer now derives the library from the REPO ROOT (`$(dirname $0)/../..` + `tools/`),
+so a future move breaks at the git level rather than silently; the fallback NAMES `${SQ}` and says
+the census will not show the run. 📌 **[[my-amendment-rots-their-citations]] is about DOCS and this
+was CODE — same law: `git mv` is an amendment, and its citers need the grep in the same act.**

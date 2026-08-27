@@ -16,9 +16,17 @@ say(){ printf '%s %s\n' "$(date +%H:%M:%S)" "$*"; }
 [ -f "$W/tt_block_6x2_pg.def" ] || { say "ABORT: 6x2 power-grid DEF absent — this would silently be an ORDINARY run"; exit 2; }
 [ -d "$HOME/.volare/volare/sky130/versions/$PDKV" ] || { say "ABORT: PDK $PDKV absent — this is TT's PDK for the submitted chip and the reproduction claim depends on it"; exit 2; }
 
-SQ="$(cd -P "$(dirname "$0")" && pwd)/saltqueue.sh"
+# saltqueue lives in the repo's tools/ dir, NOT beside this script — it was `git mv`d there
+# when the build queue was integrated, and this consumer's sibling-relative lookup broke
+# silently. Derive it from the repo root so a future move breaks LOUDLY at the git level.
+SQ="$(cd -P "$(dirname "$0")/../.." && pwd)/tools/saltqueue.sh"
 if [ -r "$SQ" ]; then . "$SQ"; q_take P1 silicon; trap 'q_release' EXIT INT TERM; q_wait
-else say "saltqueue absent — proceeding UNTICKETED (marker still excludes)"; fi
+else
+  # ⛔ NAME THE PATH. Without it, "absent" and "resolved to the wrong place" are the SAME
+  #   observable — which is how this runner ran unticketed after saltqueue.sh moved.
+  say "saltqueue.sh NOT FOUND at ${SQ} — proceeding UNTICKETED (marker still excludes;
+       the census will not show this run — helm ruling 12:0x ③)"
+fi
 
 WAITED=0
 until mkdir "$LOCK" 2>/dev/null; do
