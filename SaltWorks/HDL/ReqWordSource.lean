@@ -193,13 +193,43 @@ the non-vacuity witness the landed one could not be: it is FALSIFIABLE BY THE WO
 
 ⇒ **the two middles have different mechanisms, which is why one cannot substitute for the other:**
 at a store the middle is a function of the BEAT, at a fetch it is a function of the WORD, and only
-the second touches the quantity `busadapt8.v:126-131` leaves open. -/
+the second touches the quantity `busadapt8.v:130-136` leaves open — struck 08/26 19:4x and
+answered at `:137` onward; the strike header sits at `:126-129`, where this file's older citation
+pointed. -/
 theorem stalls_is_middle_at_fetch (pad : Env) :
     stallsFrom (fun _ => loadWord) (envWithAdapter ⟨Kind.fetch, false⟩ pad) = true
       ∧ stallsFrom (fun _ => aluWord) (envWithAdapter ⟨Kind.fetch, false⟩ pad) = false := by
   constructor
   · rw [stallsFrom, envWithAdapter_reads_back, reqOfWord_loadWord]; rfl
   · rw [stallsFrom, envWithAdapter_reads_back, reqOfWord_aluWord]; rfl
+
+/-! ## §4.3 — A CROSS-LANE CONSISTENCY CHECK, AND EXACTLY WHAT IT IS WORTH -/
+
+/-- The instruction word carried by the failure signature silicon's `45c9c56` reproduced on
+ARM B, with the instruction bypass deliberately defeated: `st_data=00000000, instr=0000a183,
+rs2=0`, matching the signature recorded on 08/18. -/
+def armBSignatureWord : BitVec 32 := 0x0000a183#32
+
+/-- ⭐⭐ **THE LEAN SIDE PREDICTED THE SHAPE OF THAT FAILURE BEFORE READING IT.** §4.2 says, from
+the model alone, that two word sources can differ **only** at a fetch where the words disagree on
+memory-ness. So for a bench failure caused by reading the wrong word to exist at all, the
+CURRENT and PREVIOUS words must differ in memory-ness — **at least one of the pair is a memory
+instruction, and a pair of ALU words could not produce a failure at all.** silicon's ARM B
+signature carries `0000a183`, and this seat's decoder says it is a load. -/
+theorem armB_signature_is_a_memory_instruction : reqOfWord armBSignatureWord = true := by
+  decide +kernel
+
+/-- ⛔ **THE CONTROL — the prediction was falsifiable.** Not every word is in the discriminating
+set: an ALU word is outside it, so had ARM B's signature carried one, this check would have failed
+and §4.2 would have been in trouble. -/
+theorem armB_check_could_have_failed : reqOfWord aluWord = false := reqOfWord_aluWord
+
+/-! ⛔⛔ **WHAT §4.3 IS NOT.** Two independently-derived facts agreeing is EVIDENCE OF AGREEMENT,
+not a proof of correspondence. This does not establish `sem (bridge nl outs) = runP`; that bridge
+induction is routed off this seat and remains the blocker it was. A matching signature would also
+be produced by two models that are wrong in the same way — **what it rules out is the cheap
+failure where the Lean side's discriminating set and the RTL's actual failure mode are simply
+about different things.** That is worth stating and worth no more than that. -/
 
 /-! ## §5 — CONTROLS: each theorem above must be able to fail -/
 
@@ -227,6 +257,7 @@ theorem control_retire_is_not_req_blind :
 #audit_axioms landed_middle_holds_for_every_word_source stalls_is_middle_at_fetch
 #audit_axioms stallsFrom_at_fetch stalls_differ_iff_fetch_and_memness_differs
 #audit_axioms control_discriminating_set_is_not_everything
+#audit_axioms armB_signature_is_a_memory_instruction armB_check_could_have_failed
 #audit_axioms control_confinement_needs_its_hypothesis control_retire_is_not_req_blind
 
 end SaltWorks.HDL.ReqWordSource

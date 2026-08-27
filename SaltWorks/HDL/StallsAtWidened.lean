@@ -45,6 +45,36 @@ The RTL's `c_dmem_req` is *"a PURE DECODE of the instruction still held in `inst
 equation below still holds — it is stated over whatever `reqAt` returns — but the FUNCTION would
 be reading the wrong word, and no theorem here would notice. **That is a second obligation, it is
 silicon's, and it sits beside the placement rather than inside it.**
+
+## ⭐ AMENDED 2026-08-26 20:3x — BOTH HALVES OF THE PARAGRAPH ABOVE HAVE MOVED
+
+The text above is kept as written, because it is the record of what this file knew. Two things
+changed after it, and neither is visible from inside this module:
+
+**1. THE RTL SIDE IS MEASURED** (silicon `45c9c56`, 19:46:52). The instruction bypass presents the
+newly assembled word at exactly `kind == T_FETCH && phase == 2'd3`, and `loop_end` IS phase 3, so
+the decode at the decision edge reads the CURRENT instruction. Driven both ways by a committed
+runner: as shipped 6/6 PASS, bypass defeated RED at 2/6 reproducing the recorded 08/18 signature.
+⛔ *This settles the RTL side only. The netlist ↔ Lean correspondence is unproved and is the same
+bridge the placement waits on.*
+
+**2. "NO THEOREM HERE WOULD NOTICE" WAS TRUE, AND THE REASON IS STRUCTURAL** —
+`stallsAt_eq_not_retire` carries `reqAt e` on BOTH sides, so it is an IDENTITY in `req` and holds
+for every word source whatsoever. ***A THEOREM THAT MENTIONS THE SUSPECT QUANTITY ON BOTH SIDES OF
+ITS OWN EQUATION IS NOT EVIDENCE ABOUT THAT QUANTITY.*** `SaltWorks/HDL/ReqWordSource.lean` supplies
+the theorems that DO notice: confinement to the fetch state, sensitivity at it, and an IFF naming
+the discriminating set exactly.
+
+⛔ **AND ONE OF THIS FILE'S OWN WITNESSES WAS CAUGHT BY THAT AUDIT.** `stallsAt_is_middle` below
+exhibits its middle at two STORE states, where `retire` provably ignores `req` — so those two
+equations hold for EVERY word source, and the witness cannot bear weight about the word. It is left
+exactly as it stands (it is true, and the stall set is a genuine middle); the missing FETCH-state
+arm lives in `ReqWordSource` as `stalls_is_middle_at_fetch`.
+
+📌 CITATION DRIFT, since this file names line numbers in another lane's live file: the struck
+paragraph quoted above is now `busadapt8.v:130-136`, and the answer runs from `:137`. `:99-100` is
+unmoved. silicon placed the strike header at `:126-129` — exactly where this file's citation
+pointed — for the stated reason that compiler cites those lines.
 -/
 
 namespace SaltWorks.HDL.StallsAtWidened

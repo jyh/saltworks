@@ -224,9 +224,84 @@ checked one. The surface shrinks from *"the `req` correspondence"* to *"the `req
 the fetch state"*.
 
 ⛔ **THIS PROVES NOTHING ABOUT `busadapt8.v`, AND IS NOT A DISCHARGE.** Which word the RTL presents
-is silicon's lane and remains unproved; `busadapt8.v:126-131` is unchanged and still says so in its
-author's own words. **The item stays OPEN on the pair.** What changed is that the Lean side can now
-SEE the difference, and the open item now has a stated blast radius instead of an unbounded one.
+is silicon's lane. **The item stays OPEN on the pair.** What changed here is that the Lean side can
+now SEE the difference, and the open item has a stated blast radius instead of an unbounded one.
+
+⚠️ **THIS SUBSECTION WAS WRITTEN AT 19:2x AND ITS RTL CLAUSE WENT STALE AT 19:46:52** — it said
+`busadapt8.v:126-131` was *"unchanged and still says so in its author's own words"*, and silicon
+changed exactly those lines two and a half hours later. ⭐ **The citation itself moved and LANDS
+SAFELY ANYWAY: the quoted paragraph is now `:130-136`, and silicon put the strike header at
+`:126-129` — exactly where this document's pointer aimed — with the stated reason "compiler cites
+these lines". A stale pointer that arrives at the notice that its target was answered is a pointer
+someone maintained on my behalf across a lane boundary.** **The sentence was true when written, and
+an undated claim about another lane's live file is a claim with an expiry nobody can see.** The
+current state is §5.3; this paragraph is corrected in place rather than rewritten, because §5.2's
+argument does not depend on it and the correction is the more useful record.
+
+## 5.3 ⭐⭐ THE RTL SIDE, MEASURED — AND WHAT STILL STANDS BETWEEN THIS AND A SIGNATURE
+
+**silicon `45c9c56`, 2026-08-26 19:46:52.** The open `req`-timing item's own file already held the
+answer, about ninety lines below the paragraph that declared it open.
+
+```
+THE MECHANISM   the instruction bypass presents the newly assembled word at exactly
+                `kind == T_FETCH && phase == 2'd3`, and `loop_end` IS `phase == 2'd3`
+                ⇒ at the decision edge the decode reads the CURRENT instruction
+ARM A   as shipped .............. 6/6 PASS
+ARM B   bypass defeated ......... RED, 2/6 FAIL, reproducing the recorded 08/18 signature
+                                  exactly: st_data=00000000, instr=0000a183, rs2=0
+THE RUNNER REFUSES if ARM B ever goes green, so ARM A's green is EVIDENCE, not a replay.
+                Committed rather than typed — a receipt whose producer lives in a terminal
+                dies with the terminal.
+WHY THE 08/18 PARAGRAPH WAS WRONG: it was written at 14:2x and the bypass it did not know
+                about was ratified at 16:5x THE SAME DAY, for exactly this defect. It is
+                struck in place and kept verbatim, because this document cites those lines.
+```
+
+### How the two lanes met, having not aimed at each other
+
+silicon's commit states it plainly: **compiler's `off_by_one_confined_to_fetch` is what makes the
+RTL fact SUFFICIENT rather than merely encouraging — without the confinement, a green bench is only
+a green bench.** And the bypass fires at `T_FETCH`, which is the state the confinement had already
+isolated as the only one where `req` is consulted.
+
+⇒ ***THE TWO RESULTS MET BECAUSE EACH WAS STATED IN TERMS THE OTHER LANE COULD CHECK, NOT BECAUSE
+EITHER WAS WRITTEN FOR THE OTHER.*** Neither seat asked the other for this shape.
+
+### The Lean side's half, as it now stands (`SaltWorks/HDL/ReqWordSource.lean`)
+
+```
+§2   CONFINEMENT      `retire` consults `req` at the FETCH state and nowhere else
+§3   SENSITIVITY      at a fetch the word DECIDES — two real RV32I words, opposite answers
+§4   THE SIDE CONDITION  agreement on `req` at fetch ⇒ the same stall function everywhere
+§4.1 THE AUDIT        `stallsAt_is_middle` exhibits its middle at two STORE states, where
+                      `req` is provably ignored ⇒ the landed non-vacuity witness holds for
+                      EVERY word source. Flagged by a pre-registered identity audit, and
+                      the missing FETCH-state arm is now supplied.
+§4.2 THE EXACT SET    an IFF, not a containment: two readings differ PRECISELY at a fetch
+                      where the words disagree on memory-ness. At a fetch, `stalls` IS `req`.
+§4.3 CROSS-CHECK      §4.2 predicts such a failure needs the pair to differ in memory-ness,
+                      so at least one is a LW/SW. ARM B's `0000a183` decodes as a load, and
+                      an ALU control returns false — the prediction had a way to lose.
+```
+
+## ⛔⛔ 5.3.1 — WHAT REMAINS, AND WHY THIS IS STILL NOT A SIGNATURE
+
+```
+req timing   RTL side MEASURED, both arms, driven negative control, committed runner.
+             Lean side CONFINED, CHARACTERISED and CROSS-CHECKED.
+             ⛔ UNPROVED: the netlist ↔ Lean correspondence, `sem (bridge nl outs) = runP`.
+placement    the three adapter bits into `core.outs` — SAME BRIDGE. Not started.
+```
+⇒ **BOTH REMAINING ITEMS REDUCE TO ONE OBJECT: the bridge induction, already routed off both
+seats.** That is a known blocker, not a new one, and it is the reason a measured bench and a
+kernel-checked model still do not compose into a signature.
+
+⚠️ **AND THE HONEST STATEMENT OF §4.3'S WORTH:** two independently-derived facts agreeing is
+EVIDENCE OF AGREEMENT, not proof of correspondence. **Two models wrong in the same way would agree
+too.** What the cross-check rules out is the cheap failure — where the Lean side's discriminating
+set and the RTL's actual failure mode are simply about different things. That is worth stating and
+worth no more than that.
 
 ## 6. SIGNATURES — AGAINST THE PAIR, NEVER AGAINST ONE
 
