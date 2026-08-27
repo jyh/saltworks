@@ -262,7 +262,28 @@ while true; do
   # a grep hit without reading the lines attached to it, WHILE CHECKING FOR
   # EXACTLY THAT DEFECT. The real fault was never the number; it was that the
   # output dropped the caveat the source carries.
-  IDXLIM=${IDXLIM:-24986}
+  # ⛔⛔ ONE SOURCE FOR THE CAP, 2026-08-27 01:5x. This held IDXLIM=24986 while
+  # memreach.py holds LOADER_CAP_CHARS=24985 — TWO CONSTANTS FOR ONE QUANTITY, and
+  # this one gates a SILENT-TRUNCATION alarm. Read the owner's value instead.
+  # ⚠️ AND THE OBVIOUS IDIOM IS A TRAP. `meas_build.sh` reads saltbuild's cap with
+  #   awk -F= '{gsub(/[^0-9]/,"",$2); print $2}'
+  # which is correct ONLY because `CAP=24000` carries no comment. On memreach's
+  #   LOADER_CAP_CHARS = 24985      # 24.4 KiB, ... 2026-08-26
+  # it smears the comment's digits into the value and yields 2498524420260826 —
+  # ***A CAP SO LARGE THE TRUNCATION ALARM COULD NEVER FIRE AGAIN, SILENTLY.***
+  # Measured both ways before adopting it; the comment must be stripped FIRST.
+  # ⇒ AND THE GUARD IS A RANGE, NOT `-ne 0`: a digit-smear passes every "is it a
+  #   number" test there is. That is the same shape as this file's own index-unit
+  #   bug — a value that satisfies the sanity check and is the wrong quantity.
+  _mrp="${SEAT_DIR:-}/tools/memreach.py"
+  _cap=$(awk -F= '/^LOADER_CAP_CHARS/{sub(/#.*/,"",$2); gsub(/[^0-9]/,"",$2); print $2; exit}' "$_mrp" 2>/dev/null)
+  case "$_cap" in ''|*[!0-9]*) _cap=0 ;; esac
+  if [ "$_cap" -ge 10000 ] && [ "$_cap" -le 100000 ]; then
+    IDXLIM=$_cap; IDXSRC="memreach.py"
+  else
+    IDXLIM=${IDXLIM:-24986}
+    IDXSRC="** LOCAL FALLBACK CONSTANT — could not read memreach.py; this is a SECOND COPY AND IT CAN DRIFT **"
+  fi
   if [ ! -r "$IDX" ]; then
     idx="** INDEX UNREADABLE at $IDX — CHECK DID NOT RUN **"
   else
@@ -284,7 +305,7 @@ while true; do
     # Found because my own post said 64% while this line said 63% for the same
     # file, two minutes apart — in a post about a 1% measurement discrepancy.
     ipct=$(( (ib * 200 + IDXLIM) / (2 * IDXLIM) ))
-    if   [ "$ib" -ge "$IDXLIM" ]; then idx="$ib chars (${ibb}B)/$IDXLIM (${ipct}%) ** OVER — TAIL ENTRIES ARE NOT LOADING **"
+    if   [ "$ib" -ge "$IDXLIM" ]; then idx="$ib chars (${ibb}B)/$IDXLIM[$IDXSRC] (${ipct}%) ** OVER — TAIL ENTRIES ARE NOT LOADING **"
     # ⛔ MESSAGE CORRECTED 2026-08-24 21:3x — THE THRESHOLD IS DELIBERATELY UNTOUCHED.
     #    It said "compact now", which names an action that does not exist here: measured
     #    the same night, only 2 of 70 hooks carry >=2 dated clauses and they hold 6% of
@@ -299,8 +320,8 @@ while true; do
     #      from the other side. The level stays at 85 until someone else rules on it.
     elif [ "$ipct" -ge 85 ];     then
       _rem=$(( IDXLIM - ib )); _hk=$(( _rem / 280 ))
-      idx="$ib chars (${ibb}B)/$IDXLIM (${ipct}%) ** APPROACHING THE CUT — ${_rem} chars ≈ ${_hk} hooks left. NO CHEAP COMPACTION (2 of 70 hooks accreted, 6% of bytes): shrink ONLY by REWRITING a hook you are already amending **"
-    else                              idx="$ib chars (${ibb}B)/~${IDXLIM} (${ipct}%, limit CORROBORATED, precision unknown)"
+      idx="$ib chars (${ibb}B)/$IDXLIM[$IDXSRC] (${ipct}%) ** APPROACHING THE CUT — ${_rem} chars ≈ ${_hk} hooks left. NO CHEAP COMPACTION (2 of 70 hooks accreted, 6% of bytes): shrink ONLY by REWRITING a hook you are already amending **"
+    else                              idx="$ib chars (${ibb}B)/~${IDXLIM}[$IDXSRC] (${ipct}%, limit CORROBORATED, precision unknown)"
     fi
     # THE TWIN GUARD. Only speaks when a SECOND readable index exists and DISAGREES —
     # silence here means there is nothing to confuse, not that the check was skipped.
