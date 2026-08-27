@@ -1,0 +1,55 @@
+{
+  "CLOCK_PERIOD": 55,
+  "CLOCK_PORT": "clk",
+  "PL_TARGET_DENSITY_PCT": 60,
+  "PL_RESIZER_HOLD_SLACK_MARGIN": 0.45,
+  "GRT_RESIZER_HOLD_SLACK_MARGIN": 0.3,
+  "RUN_LINTER": 1,
+  "LINTER_INCLUDE_PDK_MODELS": 1,
+  "RUN_KLAYOUT_XOR": 0,
+  "RUN_KLAYOUT_DRC": 0,
+  "DESIGN_REPAIR_BUFFER_OUTPUT_PORTS": 0,
+  "TOP_MARGIN_MULT": 1,
+  "BOTTOM_MARGIN_MULT": 1,
+  "LEFT_MARGIN_MULT": 6,
+  "RIGHT_MARGIN_MULT": 6,
+  "FP_SIZING": "absolute",
+  "GRT_ALLOW_CONGESTION": 1,
+  "RUN_CTS": 1,
+  "MAGIC_DEF_LABELS": 0,
+  "MAGIC_WRITE_LEF_PINONLY": 1,
+  "DESIGN_NAME": "tt_um_saltworks_ndf_c32",
+  "VERILOG_FILES": [
+    "dir::ndf_rtl/tt_um_saltworks_ndf_c32.v",
+    "dir::ndf_rtl/banyan_fabric.v",
+    "dir::ndf_rtl/bitserial_switch.v",
+    "dir::ndf_rtl/busadapt8.v",
+    "dir::ndf_rtl/core32.v",
+    "dir::ndf_rtl/mac_cell_signed_shell.v",
+    "dir::ndf_rtl/plane32bus.v",
+    "dir::ndf_rtl/ser_organ.v"
+  ],
+  "DIE_AREA": [
+    0,
+    0,
+    1030.4,
+    225.76
+  ],
+  "FP_DEF_TEMPLATE": "/work/tt_block_6x2_pg.def",
+  "PDK": "sky130A",
+  "pdk::sky130A": {
+    "MAX_FANOUT_CONSTRAINT": 10
+  },
+  "RSZ_CORNERS": [
+    "nom_tt_025C_1v80",
+    "max_ss_100C_1v60",
+    "nom_ss_100C_1v60",
+    "min_ss_100C_1v60"
+  ],
+  "IO_PIN_H_LENGTH": 2,
+  "IO_PIN_V_LENGTH": 2,
+  "PDN_MULTILAYER": false,
+  "PDN_VPITCH": 38.87,
+  "RT_MAX_LAYER": "met4",
+  "CTS_SINK_CLUSTERING_SIZE": 10
+}

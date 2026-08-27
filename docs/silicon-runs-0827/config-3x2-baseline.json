@@ -1,0 +1,14 @@
+{
+  "DESIGN_NAME": "slicea16bma",
+  "VERILOG_FILES": ["dir::rtl/slicea16bma.v"],
+  "CLOCK_PORT": "clk",
+  "CLOCK_PERIOD": 40,
+  "FP_SIZING": "absolute",
+  "DIE_AREA": [0, 0, 508.76, 225.76],
+  "PL_TARGET_DENSITY_PCT": 80,
+  "RUN_KLAYOUT_XOR": false,
+  "RUN_KLAYOUT_DRC": false,
+  "GRT_ALLOW_CONGESTION": 1,
+  "PDK": "sky130A",
+  "pdk::sky130A": { "MAX_FANOUT_CONSTRAINT": 10 }
+}
