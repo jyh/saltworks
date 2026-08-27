@@ -40,12 +40,12 @@ point the 1316 receipt reads like progress on the thing it does not close. So th
 named here as debts with an owner, per the helm's 21:1x ruling.
 
 ```
-memOrgan's σ        ⛔ OWED · COMPILER (THIS SEAT). 292 inputs — 3 address, 1 write-enable,
-                    32 write-data, 256 Q-leaves. CoreAssemblyD calls it "a datapath design
-                    question", and it is the ONE thing still standing between this file and a
-                    placed assembly.
-instOK memOrgan σ o ⛔ OWED · COMPILER (THIS SEAT). Follows from the σ above together with
-                    memOrgan's own ssa/wf, exactly as `adapter_instOK` does here.
+memOrgan's σ        ✅ DISCHARGED — `SaltWorks/HDL/MemOrganPlacement.lean`. It was never a
+                    292-input design question: 256 of the 292 are the memory field of the state
+                    layout read back, one affine map `i ↦ i + 1020`. THE FREE PART IS 36 WIRES,
+                    and they are the datapath's, exactly as `req`/`we` are here.
+instOK memOrgan σ o ✅ DISCHARGED down to those 36 — `mem_instOK`, same shape as
+                    `adapter_instOK`, since memOrgan is already ssa and wf.
 the trap producer   ✅ DISCHARGED 2026-08-26 16:45, `a6dc687` — `SaltWorks/HDL/TrapOrgan.lean`.
                     One OR gate; `trapOrgan_sem` proved over every input, plus stickiness, clear,
                     wf, ssa, and `trap_closes_the_width` kernel-checked.
@@ -58,6 +58,11 @@ evening, all ~2h: the RTL's `req` paragraph, this seat's own §5.2, and this row
 
 ⇒ **OWNERSHIP, DERIVED NOT GUESSED: `docs/SEATS.md` gives `SaltWorks/HDL/**` to the COMPILER seat.
 MemOrgan, CoreAssemblyD and TrapOrgan are all under it. There is no other lane to route to.**
+
+⭐ **UPDATE — ALL THREE ROWS ARE NOW CLOSED, AND THE REMAINING INPUT IS THE DATAPATH'S 36 WIRES.**
+`MemOrganPlacement` also removes the `memPlaced.length = 256` hypothesis from `widenedOuts_length`
+outright, by PLACING the organ instead of assuming a list of the right size — so the 1316 receipt
+below no longer rests on a promise.
 
 ## 📐 AND THESE ARE NOT T2'S THIRD ITEM
 
