@@ -35,7 +35,22 @@ in the domain, and `decode 0 = none` makes the bubble `MemFree` by construction.
 
 That sentence is what makes the predicate faithful rather than convenient. It is an RTL
 property and it is NOT signed here. If the RTL cannot supply it, the fallback is widening the
-state layout — expensive, because `stWidth` is pinned by `C4Spec`'s list equality.
+state layout to carry the adapter's bits.
+
+⚖️ **AND THE FALLBACK IS NOW PRICED, BY MEASUREMENT RATHER THAN BY MY ADJECTIVE.** I called it
+"expensive"; silicon measured it (`saltworks 5baf27ae`) and the adjective was aimed at the wrong
+thing:
+
+* the three adapter bits are **ELEVEN GATES** (`adapterNext`, 5 in / 3 out, checked against
+  `BusFSM.next` over all 32 inputs) — against `memOrgan`'s 1475. **The bits are not the cost.**
+* the cost is a **SEQUENCING TRAP IN THE NUMBER**: step 7 moves `stWidth` 1056 → 1313 (+257) and
+  the adapter makes it 1316 (+3). `two_widenings_land_short` states it as a theorem —
+  `257 + 3 = 260 ∧ 1313 ≠ 1316` — so **each widening is correct on its own and the pair is
+  wrong**: every offset derived against 1313 is short by exactly 3 once the adapter lands.
+
+⇒ *So the fallback is not dear in gates and not blocked by the `C4Spec` pin; it is dangerous in
+its ARITHMETIC, and only if the two widenings are sequenced separately.* **Whoever takes it takes
+them as ONE act, or inherits offsets that are individually right and jointly short.**
 
 ⚠️ **AND IT IS A SECOND JOB FOR A PIN THAT ALREADY HAS ONE.** silicon's T5 proves
 `retire_is_the_only_separator`: on a store, `retire` is low on the address beat and high on
