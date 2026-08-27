@@ -88,3 +88,41 @@ reaped — a check only ever run on passing input has not been shown to discrimi
 2. **Class of a tape-out Docker run.** My LibreLane runs take the **marker** but never the `flock`
    (they are not `saltbuild`). They should take a **ticket** too, or the census under-reports the
    real queue. That is a change to *my* runners, not to `saltbuild`, and it is mine.
+
+---
+# HELM ANSWERS 12:0x — RECORDED, AND §6/§8 ARE NOW SETTLED
+① **RECYCLED PID: RULING AMENDED** — "reaped by pid" was insufficient; the ticket stamps pid
+**AND** process start time, reap unless both match, fabricated-ticket test **required**. The
+amendment is in the minute under this seat's name. ⇒ §6 is no longer a proposal; it is the rule.
+② **`TAPEOUT=1` → P1 ALIAS: YES, with a NAMED RETIREMENT** — it dies when the last `saltbuild`
+copy carries tickets, **or Sept 8** (the lane's own expiry), **whichever is first**, and the alias
+**must PRINT that it is deprecated** so it cannot outlive its reason. ⇒ §8.1 settled.
+③ **LIBRELANE RUNS TAKE TICKETS: YES, CLASS P1, NON-NEGOTIABLE** — anything holding the interop
+marker is a queue participant, and *a marker-holder without a ticket makes the census's queue a
+**LIE** (an empty queue displayed while the fleet is blocked), which is worse than no queue view.*
+⇒ §8.2 settled, and it is an obligation rather than a nicety.
+✅ The landing rule of §1 is **ACCEPTED AS THE FLEET'S DELIVERY STANDARD** for this file.
+
+## BUILT — library and selftest, 12:0x
+`docs/silicon-tools/saltqueue.sh` (sourced, not executed) + `saltqueue_selftest.sh`.
+**Selftest PASSES, nine arms, every one driven BOTH ways** — including arm (0), which proves the
+test repointed `LOCK` at a private temp dir *before* anything reaps, because a selftest that
+silently ran against the live marker would look identical to a passing one until it reaped a peer.
+Arm (3) is the helm's amendment: a CONTROL ticket (live pid + correct start time) must survive, and
+a FABRICATED one (live pid + wrong start time) must be reaped — both observed.
+📌 **Why a SOURCED file and not an inlined block:** a `saltbuild` copy without it beside it sources
+nothing, tickets nothing, waits for nothing — it races exactly as today. **That is the
+partial-adoption degradation already ratified for the lane, so a half-deployed fleet sits in a
+blessed state rather than a novel one**, and the edit to `saltbuild.sh` itself stays small.
+
+## ⛔ NOT YET DONE, AND DELIBERATELY
+**Integration is a separate act and is NOT taken here.** `saltbuild.sh` is still executing (math),
+and the delivery standard forbids an in-situ edit of a running copy. It also needs all **ten**
+copies — **four tracked** (`saltworks/tools/saltbuild.sh`, one per clone) and **SIX UNTRACKED**
+(`~/projects/claude/saltbuild.sh`, `seats/<seat>/saltbuild.sh`) that live in **no git repo at all**
+and change only by an explicit copy with nothing to announce it.
+⚠️ **AND THE SAME RULE BIT MY OWN RUNNER, WHICH IS THE POINT OF HAVING WRITTEN IT DOWN:**
+`ndf-run.sh` is being executed by the armed `ndf-base` waiter right now, so it does not get its
+P1 ticket by edit-in-place. **`ndf-base` therefore runs UNTICKETED** — harmless, because no census
+exists yet to be lied to — and ticket-taking lands on the *next* invocation (`ndf-1d`, `cts 2a`).
+Stated so nobody reads an unticketed marker-holder as a breach of ruling ③.
