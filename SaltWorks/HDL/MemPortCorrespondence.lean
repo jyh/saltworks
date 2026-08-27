@@ -43,6 +43,7 @@ import SaltWorks.HDL.EnableArm
 import SaltWorks.HDL.DecoderTransport
 import SaltWorks.HDL.Rs2Close
 import SaltWorks.HDL.PcReads
+import SaltWorks.HDL.Immediate
 
 namespace SaltWorks.HDL
 open SaltWorks.HDL CorePlace RegNextUniform
@@ -182,5 +183,32 @@ theorem mem_port_correspondence_partial (ins : Env) :
 
 #audit_axioms addrLink1 addrLink2 addrLink3 addrLink4 addrLink5 addrLink6
 #audit_axioms mem_port_correspondence_partial
+
+/-! ## §4 — DOES `LW` SHARE LEG ①'s SHAPE? MEASURED: YES, BUT NOT IDENTICALLY
+
+I named this unchecked when I scoped leg ①. It is a measurement, so here it is.
+
+**`LW` shares the SELECTOR half.** `addrLink5` pins the operand-B select to `decOut isADDILine`
+alone, and `LW` is not `ADDI`, so a load does not divert to the immediate either: its address would
+also be `rs1 + rs2`.
+
+⭐ **BUT THE TWO ARE NOT THE SAME DEFECT, AND THE DIFFERENCE DECIDES WHAT A FIX MUST DO.**
+`LW` is I-type, and the datum already sitting at the mux's b-input IS the I-type immediate
+(`addrLink4`). ***So widening the select would fix `LW` outright.*** `SW` is S-type: its immediate
+is a different extraction — `imm[11:5]` from bits 31:25 and `imm[4:0]` from bits 11:7 — and the
+theorems below show the wired datum is the I-type position, not the S-type one. ⇒ ***WIDENING THE
+SELECT ALONE WOULD FIX `LW` AND WOULD LEAVE `SW` STILL WRONG.***
+-/
+
+theorem lw_does_not_select : decOut isADDILine ≠ decOut isLWLine := by decide +kernel
+
+/-- Immediate bit 0 is wired to instruction bit 20 — the I-type position. -/
+theorem immBit0_is_Itype : immI 0 = 20 := by decide +kernel
+
+/-- ⛔ **AND NOT THE S-TYPE POSITION.** S-type's `imm[4:0]` lives in bits 11:7, so its bit 0 is
+instruction bit 7. The wired datum is 20. *This is why `SW` needs more than a wider select.* -/
+theorem immBit0_is_not_Stype : immI 0 ≠ 7 := by decide +kernel
+
+#audit_axioms lw_does_not_select immBit0_is_Itype immBit0_is_not_Stype
 
 end SaltWorks.HDL
