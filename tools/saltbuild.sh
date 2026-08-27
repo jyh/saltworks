@@ -40,6 +40,70 @@ MAXWAIT=5400
 #   ⇒ The marker is best-effort and its staleness is HARMLESS: it cannot cause a double
 #     build, because the kernel decides. `rm -rf` on it below is safe precisely because
 #     we already hold the flock, so no other builder can be in this region at all.
+# ╔══ PRIORITY LANE — COUNCIL 2026-08-27 (item: PRIORITY LANE, mechanical) ═══════
+# RULED: until Sept 7, tape-out-campaign builds SKIP THE QUEUE (acquire next).
+#        ⛔ NO PREEMPTION — a holder always finishes.
+#        Hold semantics and ACQUISITION PRIMITIVES UNTOUCHED.
+#        EXPIRES Sept 8 BY ITS OWN TEXT; pure FIFO returns.
+#
+# HOW THIS OBEYS "PRIMITIVES UNTOUCHED": it adds NO lock, changes NO flock/mkdir call,
+# and touches neither release() nor the hold. It is a PRE-ACQUISITION YIELD: a normal
+# build waits, BEFORE it begins acquiring, while a live tape-out build is waiting. The
+# acquisition sequence below is byte-identical to what it was.
+#
+# ⚠️⚠️ SCOPE OF WHAT THIS BUYS, STATED BECAUSE THE RULING SAYS "ACQUIRE NEXT" AND THIS
+# DELIVERS SOMETHING WEAKER: a normal build ALREADY BLOCKED INSIDE `flock -w` cannot see
+# the marker — flock blocks in the kernel — so it is not displaced and may take the next
+# slot. This lane biases the queue AT ENTRY; it does not guarantee "next" against a
+# builder already in line. ***THE STRICT GUARANTEE REQUIRES CHANGING THE ACQUISITION CALL
+# (a polling flock), WHICH THE RULING FORBIDS.*** Registered, not built: if the helm wants
+# strict "acquire next", that is the one-line change and it needs their word.
+#
+# ⚠️ AND THE BASELINE IS NOT FIFO. The ruling says "everything else remains FIFO behind
+# the lane"; measured at the object, this lock is a RACE, not a queue — flock(2) wakes
+# waiters in unspecified order and the interop-marker loop is a 5 s poll. Nothing here
+# makes it worse, and nothing here makes it FIFO. Naming it so the word is not inherited.
+#
+# ⚠️ PARTIAL ADOPTION IS SAFE BY CONSTRUCTION: a copy that has not pulled this simply does
+# not yield — it races as before. Priority degrades; exclusion and the 43 GB law do not.
+LANE_EXPIRES=20260908                 # first day the lane is OFF, per the ruling's own text
+LANE_ACTIVE=0
+[ "$(date +%Y%m%d)" -lt "$LANE_EXPIRES" ] && LANE_ACTIVE=1
+PRIO_GLOB="${LOCK}.prio"
+prio_clear() { rm -f "${PRIO_GLOB}.$$" 2>/dev/null; return 0; }
+# A live tape-out waiter = a prio file whose pid is alive. Dead ones are reaped, so a
+# crashed tape-out build cannot hold the fleet hostage.
+prio_live() {
+  local f pid found=1
+  for f in "${PRIO_GLOB}".*; do
+    [ -e "$f" ] || continue
+    pid="${f##*.}"
+    if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then found=0
+    else rm -f "$f" 2>/dev/null; fi
+  done
+  return $found
+}
+
+if [ "${TAPEOUT:-0}" = "1" ] && [ "$LANE_ACTIVE" = "1" ]; then
+  : > "${PRIO_GLOB}.$$" 2>/dev/null
+  trap prio_clear EXIT INT TERM
+  echo "saltbuild: PRIORITY LANE — tape-out build, normal builds will yield at entry (lane expires $LANE_EXPIRES)"
+elif [ "${TAPEOUT:-0}" = "1" ]; then
+  echo "saltbuild: PRIORITY LANE EXPIRED ($(date +%Y%m%d) >= $LANE_EXPIRES) — running as an ordinary build, pure FIFO"
+elif [ "$LANE_ACTIVE" = "1" ]; then
+  YIELDED=0
+  while prio_live; do
+    if [ "$YIELDED" -ge "$MAXWAIT" ]; then
+      echo "saltbuild: yielded ${YIELDED}s to the priority lane and STOPPED YIELDING (MAXWAIT) — acquiring normally."
+      break
+    fi
+    [ "$YIELDED" = 0 ] && echo "saltbuild: YIELDING at entry — a tape-out build is waiting (priority lane, council 08/27)"
+    sleep 5; YIELDED=$((YIELDED+5))
+    [ $((YIELDED % 300)) -eq 0 ] && echo "saltbuild: still yielding to the priority lane (${YIELDED}s)"
+  done
+fi
+# ╚══ END PRIORITY LANE — the acquisition below is UNCHANGED ═════════════════════
+
 LOCKFILE="${LOCK}.flk"
 FLOCK="$(command -v flock 2>/dev/null || true)"
 if [ -z "$FLOCK" ]; then
@@ -100,6 +164,7 @@ until mkdir "$LOCK" 2>/dev/null; do
   [ $((WAITED % 300)) -eq 0 ] && echo "saltbuild: waiting on the fleet lock (${WAITED}s)"
 done
 echo $$ > "$LOCK/pid"
+prio_clear   # we hold; drop our lane marker before the release trap takes over
 # The trap releases only the MARKER. The flock needs no trap: the kernel drops it when
 # this process and every descendant holding fd 9 is gone. Ownership-guarded because a trap
 # fires at signal-delivery AND again at exit (6/6 ate a new holder's marker unguarded).
