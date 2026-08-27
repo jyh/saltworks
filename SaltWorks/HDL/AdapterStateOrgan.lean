@@ -139,4 +139,70 @@ theorem adapter_closes_the_widened_width :
 #audit_axioms stWidthA stWidthA_value combined_renumbering two_widenings_land_short
 #audit_axioms adapter_closes_the_widened_width
 
+/-! ## THE WIDENED LAYOUT'S ARITHMETIC — landed as ONE act at 1316, with the intermediate FENCED
+
+⛔⛔ **THE 1313 INTERMEDIATE IS ALREADY IN THE TREE.** `StateCodecD.lean:319-326` lands
+`instrBaseD := stWidthD` (= 1313) and `renumbering_offsets`, which pins `coreInWidth` at
+1088 → 1345 and the shift at 257. **Those constants are correct for step 7 ALONE and WRONG by
+exactly 3 if the adapter bits are adopted** — and nothing in the tree says so, because each is
+internally consistent. This section says it, in the kernel.
+
+⭐ **THIS FILE ADDS NO OFFSETS AT 1313.** The A constants are derived from `stWidthA` directly.
+*Defining a gate anchor against `instrBaseD` and then "adjusting" it is exactly the two-step the
+helm fenced, and it is avoidable by never writing the intermediate down as a base.* -/
+
+/-- Where the instruction word sits under the widened layout. -/
+def instrBaseA : Nat := stWidthA
+
+/-- The gate-chain anchor under the widened layout. -/
+def coreInWidthA : Nat := stWidthA + 32
+
+theorem widened_anchors : instrBaseA = 1316 ∧ coreInWidthA = 1348 := by decide +kernel
+
+/-- ⭐ **THE FIELD DECOMPOSITION AT 1316** — registers, pc, memory, trap, and the three adapter
+bits, each accounted once. -/
+theorem widened_fields : 1024 + 32 + 256 + 1 + 3 = stWidthA := by decide +kernel
+
+/-- The three adapter bits occupy the top of the layout, above the trap flag. -/
+def kindHiNet : Nat := 1313
+def kindLoNet : Nat := 1314
+def beatNet   : Nat := 1315
+
+theorem adapter_bits_are_the_top_three :
+    kindHiNet = SaltWorks.HDL.StateCodecD.stWidthD
+    ∧ beatNet + 1 = stWidthA
+    ∧ kindHiNet < kindLoNet ∧ kindLoNet < beatNet := by
+  decide +kernel
+
+/-- ⭐ **THE COMBINED SHIFT IS 260**, and the instruction nets stay disjoint from the state at
+the new base — the same property `instrD_nets_disjoint_from_state` states for the D layout,
+re-established here rather than assumed to survive a second widening. -/
+theorem widened_shift_and_disjointness :
+    instrBaseA - instrBase = 260
+    ∧ coreInWidthA - coreInWidth = 260
+    ∧ ((List.range 32).all fun k => instrBaseA + k ≥ stWidthA) = true := by
+  decide +kernel
+
+/-- ⛔⛔ **THE FENCE. The landed D constants are SHORT BY EXACTLY THREE under this layout.**
+*Both are internally consistent, so no build refuses the intermediate; this theorem is the only
+thing in the tree that does.* -/
+theorem D_constants_are_short_by_three :
+    instrBaseA - SaltWorks.HDL.StateCodecD.instrBaseD = 3
+    ∧ coreInWidthA - (SaltWorks.HDL.StateCodecD.instrBaseD + 32) = 3
+    ∧ SaltWorks.HDL.StateCodecD.instrBaseD ≠ instrBaseA := by
+  decide +kernel
+
+/-- ⛔ **AND THE TRAP STATED AS THE SUM IT IS:** doing step 7's widening and the adapter's
+widening as two acts gives 257 then 3; the layout that results is only correct if EVERY offset
+was computed against 1316, never against 1313. -/
+theorem one_act_or_none :
+    (SaltWorks.HDL.StateCodecD.stWidthD - stWidth) = 257
+    ∧ (stWidthA - SaltWorks.HDL.StateCodecD.stWidthD) = 3
+    ∧ (stWidthA - stWidth) = 260 := by
+  decide +kernel
+
+#audit_axioms instrBaseA coreInWidthA widened_anchors widened_fields
+#audit_axioms kindHiNet kindLoNet beatNet adapter_bits_are_the_top_three
+#audit_axioms widened_shift_and_disjointness D_constants_are_short_by_three one_act_or_none
+
 end SaltWorks.HDL.AdapterStateOrgan
