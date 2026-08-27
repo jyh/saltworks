@@ -159,4 +159,5 @@ import SaltWorks.HDL.WhileSim
 import SaltWorks.HDL.C4Refuted
 import SaltWorks.HDL.StallShape
 import SaltWorks.HDL.T2T5Consistency
+import SaltWorks.HDL.StallsAtWidened
 import SaltWorks.Tactic.AuditAxioms
