@@ -329,7 +329,7 @@ value, because each layout is internally consistent. **Deleting the name forces 
 be re-read at the new base instead of silently inheriting a number.** *A loud break is the
 purchase; a silent three-bit skew is what it buys us out of.*
 📌 *The record of WHY — that the superseded pair was short by exactly 3 — is kept as
-`AdapterStateOrgan.D_constants_are_short_by_three`, for the future hand who finds 257 in the
+`AdapterStateOrgan.superseded_D_base_was_short_by_three`, for the future hand who finds 257 in the
 history and wonders whether the 3 was ever considered.* -/
 
 /-- The adapter state the fallback brings into the domain: `kind` (2) + `storeBeat` (1). -/
