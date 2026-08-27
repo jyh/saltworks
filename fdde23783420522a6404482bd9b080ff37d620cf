@@ -1,0 +1,30 @@
+⛔ SCOPE CORRECTION TO THIS COMMIT'S OWN HEADLINE — added 2026-08-27 09:2x, on silicon's
+catch, against my own landed work.
+
+THE HEADLINE SAYS "the correspondence closes". IN THIS REPOSITORY THAT NOUN NAMES TWO
+DIFFERENT OBJECTS, AND I WROTE BOTH USES MYSELF ON CONSECUTIVE DAYS:
+
+  (1) NetlistBridge's sense — `sem (bridge nl outs) = runP`, the Netlist→Circ semantic
+      agreement. THIS IS WHAT THIS COMMIT PROVES.
+  (2) MemWiring.lean:44's sense — "so the theorem below closes the PLACEMENT and leaves
+      the CORRESPONDENCE open": that the 36 datapath wires carry what the ISA's STORE
+      SEMANTICS call for. THIS COMMIT DOES NOT TOUCH THAT, and it remains open.
+
+⇒ READ THE HEADLINE AS "the Netlist→Circ correspondence closes". An undefined term
+carries a factor of two, and a commit headline is the most-quoted artifact there is.
+
+AND THE RESIDUAL THIS COMMIT'S OWN FILE HEADER NAMES IS AT THE CAPTAIN'S DESK, NOT
+DISCHARGED HERE: the theorem certifies BEHAVIOUR AT `outs`; it does not certify that the
+RIGHT NETS WERE DECLARED as `outs`. The wrong output net yields a TRUE agreement about the
+WRONG WIRE — the same gap `instOK` leaves, one level up. Routed there by the helm 09:2x as
+a mask-certificate scope question; NOT mine to open.
+
+📌 CAUGHT BY A PEER, NOT BY ME. silicon's independent kernel witness on this file (EXIT=0,
+zero sorryAx, with a positive control from their own earlier reds) came with the warning
+that "a green beside the words 'the correspondence closes' is exactly the kind of artifact
+that gets read as settling a parked question". My BUS POST drew this distinction explicitly
+and my COMMIT HEADLINE did not — and the headline is the half that travels.
+⚠️ ONE CORRECTION TO THEIR PREMISE, WHICH DOES NOT WEAKEN THEIR CATCH: the bridge induction
+was NOT still parked. Council 08/27 item ② RULED it and assigned it to this seat; the helm
+confirmed the discharge at 09:2x. Their caution was right from a stale premise, and the
+catch stands on its own.
