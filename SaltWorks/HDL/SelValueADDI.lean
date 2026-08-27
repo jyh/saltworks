@@ -208,9 +208,9 @@ theorem tieFalse_thru8 (ins : Env) : run ins coreThru8 tieFalse = false := by
 /-! ## 5 · the decoder and the instruction nets, read at row 7 -/
 
 theorem decOut3_thru7 (ins : Env) :
-    run ins coreThru7 (decOut 3) = (ctrlSpec (seenWord ins)).getD 3 false := by
-  rw [run_thru7_to2 ins (decOut 3) (decOut_lt_off1 3 (by omega)),
-      ← run_thru13_to2 ins (decOut 3) (decOut_lt_off1 3 (by omega))]
+    run ins coreThru7 (decOut isADDILine) = (ctrlSpec (seenWord ins)).getD 3 false := by
+  rw [run_thru7_to2 ins (decOut isADDILine) (decOut_lt_off1 isADDILine (by decide +kernel)),
+      ← run_thru13_to2 ins (decOut isADDILine) (decOut_lt_off1 isADDILine (by decide +kernel))]
   exact core_decOut_spec ins 3 (by omega)
 
 theorem instr_thru7 (ins : Env) (i : Nat) (hi : i < 32) :
@@ -220,7 +220,7 @@ theorem instr_thru7 (ins : Env) (i : Nat) (hi : i < 32) :
 
 /-! ## 6 · operand B — the mux, and the immediate it delivers on `ADDI` -/
 
-theorem obSig_64 : obSig 64 = decOut 3 := rfl
+theorem obSig_64 : obSig 64 = decOut isADDILine := rfl
 
 theorem obSig_imm (m : Nat) (hm : m < 32) : obSig (32 + m) = instrNet (immI m) := by
   have h1 : ¬ ((32 : Nat) + m < 32) := by omega
@@ -321,8 +321,8 @@ theorem selOut_sliceABit (ins : Env) (k : Nat) (hk : k < 32) :
 
 /-- ⭐ Both class lines low ⇒ the select delivers bank 0, the ADD adder. -/
 theorem selOut_bank0 (ins : Env) (k : Nat) (hk : k < 32)
-    (h1 : run ins coreThru11 (decOut 1) = false)
-    (h2 : run ins coreThru11 (decOut 2) = false) :
+    (h1 : run ins coreThru11 (decOut isXORLine) = false)
+    (h2 : run ins coreThru11 (decOut isSLTLine) = false) :
     run ins core.gates (selOut k) = run ins coreThru11 (CorePlace.addOut k) := by
   rw [selOut_sliceABit ins k hk]
   simp [SelectCut32.sliceABit, gsSel_1, gsSel_0, gsRes_bank0, selSig_97, selSig_96,
@@ -368,12 +368,12 @@ theorem core_selOut_value_ADDI (ins : Env) (rd a : Fin 32) (imm : BitVec 12) (k 
     (hk : k < 32) (h : decode (seenWord ins) = some (.ADDI rd a imm)) :
     run ins core.gates (selOut k)
       = ((decQ ins).get a + imm.signExtend 32).getLsbD k := by
-  have hx : run ins coreThru11 (decOut 1) = false := by
-    rw [← decOut_thru11 ins 1 (by omega), core_decOut_spec ins 1 (by omega)]
-    simp [ctrlSpec, h]
-  have hs : run ins coreThru11 (decOut 2) = false := by
-    rw [← decOut_thru11 ins 2 (by omega), core_decOut_spec ins 2 (by omega)]
-    simp [ctrlSpec, h]
+  have hx : run ins coreThru11 (decOut isXORLine) = false := by
+    rw [← decOut_thru11 ins isXORLine (by decide +kernel), core_decOut_spec ins isXORLine (by decide +kernel)]
+    simp [ctrlSpec, h, isXORLine]
+  have hs : run ins coreThru11 (decOut isSLTLine) = false := by
+    rw [← decOut_thru11 ins isSLTLine (by decide +kernel), core_decOut_spec ins isSLTLine (by decide +kernel)]
+    simp [ctrlSpec, h, isSLTLine]
   rw [selOut_bank0 ins k hk hx hs,
       run_thru11_to9 ins (CorePlace.addOut k) (Shared.addOut_lt_offSub k hk),
       addOut_thru9 ins (rs1Of ins) (imm.signExtend 32) k hk

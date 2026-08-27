@@ -4,7 +4,6 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Jason Hickey, Claude
 -/
 import SaltWorks.HDL.MemOrganPlacement
-import SaltWorks.HDL.DecoderLines
 
 /-!
 # The thirty-six datapath wires — memOrgan's placement with NO free parameters left
@@ -57,7 +56,6 @@ set_option maxHeartbeats 4000000
 namespace SaltWorks.HDL.MemWiring
 
 open SaltWorks.HDL SaltWorks.HDL.CorePlace SaltWorks.HDL.MemOrganPlacement
-open SaltWorks.HDL.DecoderLines
 
 /-! ## §1 — THE THIRTY-SIX, FROM ORGANS ALREADY IN THE CHAIN -/
 
@@ -105,7 +103,7 @@ theorem mem_instOK_placed : instOK memOrgan memPlacementSigma offMem :=
 
 /-- ⛔ **THE WRITE-ENABLE IS NOT `isLW`.** The neighbouring index is a different net, so the
 08-19 defect's shape would be visible rather than silent. -/
-theorem control_we_is_not_isLW : memWeNet ≠ decOut 5 := by decide +kernel
+theorem control_we_is_not_isLW : memWeNet ≠ decOut isLWLine := by decide +kernel
 
 /-- ⛔ **THE ADDRESS IS NOT BYTE-INDEXED.** Bits [4:2] and bits [2:0] are different nets, so the
 aliasing choice is a real fork and not a restatement. -/

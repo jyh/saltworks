@@ -315,7 +315,7 @@ theorem tieFalse_at_cT8 (ins : Env) : run ins cT8 tieFalse = false := by
 `decOut 3` = `isADDI`; low, and the mux delivers its `a` bank, which `obSig` wires to the
 `rs2` read port. *No fact about the immediate bank is used or needed.* -/
 theorem ob_is_rs2 (ins : Env) (m : Nat) (hm : m < 32)
-    (h3 : run ins cT7 (decOut 3) = false) :
+    (h3 : run ins cT7 (decOut isADDILine) = false) :
     run ins cT8 (CorePlace.obOut m) = run ins cT7 (rs2Out m) := by
   have hstep : run ins cT8 (CorePlace.obOut m)
       = run (fun a => run ins cT7 (obSig a)) OperandB.obMux.gates
@@ -329,7 +329,7 @@ theorem ob_is_rs2 (ins : Env) (m : Nat) (hm : m < 32)
   rw [getD_map_lt (run (fun a => run ins cT7 (obSig a)) OperandB.obMux.gates)
         OperandB.obMux.outs m (by rw [Shared.obMux_outs_len]; exact hm) 0 false] at h
   rw [hstep, h]
-  have h64 : obSig 64 = decOut 3 := by simp [obSig]
+  have h64 : obSig 64 = decOut isADDILine := by simp [obSig]
   have hmm : obSig m = rs2Out m := by simp [obSig, hm]
   simp only [h64, hmm, h3]
   simp
@@ -396,8 +396,8 @@ theorem selSig_low (k : Nat) (hk : k < 32) : selSig k = CorePlace.addOut k := by
 /-- ⭐⭐ **THE OUTPUT SELECT DELIVERS THE ADD ADDER'S BANK.** Both class lines low ⇒
 `gsSelOf = 0` ⇒ `sliceASelect_selects` names source 0, which `selSig` wires to `addOut`. -/
 theorem sel_is_add_bank (ins : Env) (k : Nat) (hk : k < 32)
-    (h1 : run ins coreThru11 (decOut 1) = false)
-    (h2 : run ins coreThru11 (decOut 2) = false) :
+    (h1 : run ins coreThru11 (decOut isXORLine) = false)
+    (h2 : run ins coreThru11 (decOut isSLTLine) = false) :
     run ins core.gates (selOut k) = run ins coreThru11 (CorePlace.addOut k) := by
   have hE0 : run ins coreThru11 (selSig (gsSel 3 2 0)) = false := by
     rw [gsSel_3_2_0, selSig_96]; exact h1
@@ -460,13 +460,13 @@ theorem selOut_value_ADD (ins : Env) (rd a b : Fin 32) (k : Nat) (hk : k < 32)
     run ins core.gates (selOut k)
       = ((decQ ins).get a + (decQ ins).get b).getLsbD k := by
   have hc := ctrlSpec_add (seenWord ins) rd a b h
-  have hd1 : run ins cT7 (decOut 1) = false := by rw [decOut_cT7 ins 1 (by omega), hc]; rfl
-  have hd2 : run ins cT7 (decOut 2) = false := by rw [decOut_cT7 ins 2 (by omega), hc]; rfl
-  have hd3 : run ins cT7 (decOut 3) = false := by rw [decOut_cT7 ins 3 (by omega), hc]; rfl
-  have hd1' : run ins coreThru11 (decOut 1) = false := by
-    rw [run_thru11_to_cT7 ins _ (decOut_lt_offOb 1 (by omega))]; exact hd1
-  have hd2' : run ins coreThru11 (decOut 2) = false := by
-    rw [run_thru11_to_cT7 ins _ (decOut_lt_offOb 2 (by omega))]; exact hd2
+  have hd1 : run ins cT7 (decOut isXORLine) = false := by rw [decOut_cT7 ins isXORLine (by decide +kernel), hc]; rfl
+  have hd2 : run ins cT7 (decOut isSLTLine) = false := by rw [decOut_cT7 ins isSLTLine (by decide +kernel), hc]; rfl
+  have hd3 : run ins cT7 (decOut isADDILine) = false := by rw [decOut_cT7 ins isADDILine (by decide +kernel), hc]; rfl
+  have hd1' : run ins coreThru11 (decOut isXORLine) = false := by
+    rw [run_thru11_to_cT7 ins _ (decOut_lt_offOb isXORLine (by decide +kernel))]; exact hd1
+  have hd2' : run ins coreThru11 (decOut isSLTLine) = false := by
+    rw [run_thru11_to_cT7 ins _ (decOut_lt_offOb isSLTLine (by decide +kernel))]; exact hd2
   have hB : ∀ j, j < 32 → run ins cT8 (CorePlace.obOut j) = (rs2Of ins).getLsbD j := by
     intro j hj
     rw [ob_is_rs2 ins j hj hd3, rs2_at_cT7 ins j hj]

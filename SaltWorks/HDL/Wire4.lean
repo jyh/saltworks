@@ -49,7 +49,7 @@ theorem coreThruRw_decOut (ins : Env) (j : Nat) (hj : j < 9) :
 /-- ⭐⭐ **WIRE 4: the branch control the pc adder sees IS `ctrlSpec`'s `isBEQ` bit.** -/
 theorem isBEQOf'_spec (ins : Env) :
     isBEQOf' ins = (ctrlSpec (seenWord ins)).getD 4 false := by
-  rw [isBEQOf', coreThruRw_decOut ins 4 (by omega)]
+  rw [isBEQOf', coreThruRw_decOut ins isBEQLine (by decide +kernel)]
   exact core_decOut_spec ins 4 (by omega)
 
 /-! ### Groundwork for wire 5 — the immediate block -/

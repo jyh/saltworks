@@ -6,6 +6,7 @@ Authors: Jason Hickey, Claude
 import SaltWorks.HDL.Compose
 import SaltWorks.HDL.StateCodec
 import SaltWorks.HDL.Decoder
+import SaltWorks.HDL.DecoderLines
 import SaltWorks.HDL.Immediate
 import SaltWorks.HDL.ReadTree
 import SaltWorks.HDL.RegWrite
@@ -416,12 +417,12 @@ This σ and four prose sites were written against the old layout and never re-da
 describes. -/
 def regWriteSig (j : Net) : Net :=
   if j < 5 then rdBit j
-  else if j = 5 then decOut 0        -- isADD  (WAS `decOut 8` = valid — the SW defect)
-  else if j = 6 then decOut 4        -- isBEQ  (unchanged)
-  else if j = 7 then decOut 1        -- isXOR
-  else if j = 8 then decOut 2        -- isSLT
-  else if j = 9 then decOut 3        -- isADDI
-  else decOut 5                      -- isLW
+  else if j = 5 then decOut isADDLine        -- isADD  (WAS `decOut 8` = valid — the SW defect)
+  else if j = 6 then decOut isBEQLine        -- isBEQ  (unchanged)
+  else if j = 7 then decOut isXORLine        -- isXOR
+  else if j = 8 then decOut isSLTLine        -- isSLT
+  else if j = 9 then decOut isADDILine        -- isADDI
+  else decOut isLWLine                      -- isLW
 
 /-- ⭐ **PLACEMENT #5 — `regWrite` at `off1`, `instOK` DISCHARGED, and the first placement whose
 σ reaches into another organ's gates.** -/
@@ -462,9 +463,9 @@ only "the two being equal", it is nearly vacuous. **The identification is proved
 and semantically in `DecoderTransport.valid_is_decoder_output_8`, through
 `sem_decoder_eq_ctrlSpec` — here the indices are only syntax.** -/
 theorem writeFlags_are_the_right_outputs :
-    regWriteSig 5 = decOut 0 ∧ regWriteSig 6 = decOut 4 ∧ regWriteSig 7 = decOut 1
-    ∧ regWriteSig 8 = decOut 2 ∧ regWriteSig 9 = decOut 3 ∧ regWriteSig 10 = decOut 5
-    ∧ decOut 4 ≠ decOut 0 := by
+    regWriteSig 5 = decOut isADDLine ∧ regWriteSig 6 = decOut isBEQLine ∧ regWriteSig 7 = decOut isXORLine
+    ∧ regWriteSig 8 = decOut isSLTLine ∧ regWriteSig 9 = decOut isADDILine ∧ regWriteSig 10 = decOut isLWLine
+    ∧ decOut isBEQLine ≠ decOut isADDLine := by
   refine ⟨by simp [regWriteSig], by simp [regWriteSig], by simp [regWriteSig],
           by simp [regWriteSig], by simp [regWriteSig], by simp [regWriteSig], ?_⟩
   simp only [decOut, decoderSig, off0, instNext, tieCells, offTie, coreInWidth, stWidth]
@@ -658,7 +659,7 @@ defect this deep repairable by one line.
 lemma below proves only that the σ PLACES — **placing is not correctness**, and this σ bypasses
 `immICirc` so its certificate does not transfer for free. -/
 def obSig (j : Net) : Net :=
-  if j < 32 then rs2Out j else if j < 64 then instrNet (immI (j - 32)) else decOut 3
+  if j < 32 then rs2Out j else if j < 64 then instrNet (immI (j - 32)) else decOut isADDILine
 
 /-- ⭐ **PLACEMENT #13 — `obMux` at row 7, `instOK` DISCHARGED.** -/
 theorem ob_instOK : instOK OperandB.obMux obSig offOb := by
@@ -897,8 +898,8 @@ def selSig (j : Net) : Net :=
   if j < 32 then addOut j
   else if j < 64 then xorOut (j - 32)
   else if j < 96 then sltOut (j - 64)
-  else if j = 96 then decOut 1
-  else decOut 2
+  else if j = 96 then decOut isXORLine
+  else decOut isSLTLine
 
 /-- ⭐ **PLACEMENT #11 — `sliceASelect` at row 10, `instOK` DISCHARGED.** Eleven of sixteen rows. -/
 theorem sel_instOK : instOK SelectCut32.sliceASelect selSig offSel := by
@@ -941,7 +942,7 @@ theorem select_banks_are_disjoint :
 (`decOut 1`) and bit 1 is `isSLT` (`decOut 2`), per `C1Organ:149-150`. Swapping them would make
 `opIndex` name bank 1 for SLT and bank 2 for XOR — a well-typed core computing the wrong op. -/
 theorem select_bits_are_decoder_driven_in_order :
-    selSig 96 = decOut 1 ∧ selSig 97 = decOut 2 ∧ decOut 1 ≠ decOut 2 := by
+    selSig 96 = decOut isXORLine ∧ selSig 97 = decOut isSLTLine ∧ decOut isXORLine ≠ decOut isSLTLine := by
   refine ⟨rfl, rfl, ?_⟩
   simp only [decOut, decoderSig, off0, instNext, tieCells, offTie, coreInWidth, stWidth]
   decide +kernel
@@ -969,7 +970,7 @@ def offEnc : Nat := instNext SelectCut32.sliceASelect offSel
 
 /-- `ruledEnc`'s σ: the decoder's three one-hot class lines. -/
 def encSig (j : Net) : Net :=
-  if j = 0 then decOut 0 else if j = 1 then decOut 1 else decOut 2
+  if j = 0 then decOut isADDLine else if j = 1 then decOut isXORLine else decOut isSLTLine
 
 /-- ⭐ **PLACEMENT #12 — `ruledEnc` at row 11, `instOK` DISCHARGED.** Twelve of sixteen rows. -/
 theorem enc_instOK : instOK EncoderE1.ruledEnc encSig offEnc := by
@@ -1089,7 +1090,7 @@ def pcAddSig (i : Net) : Net :=
   else if i < 64 then rs1Out (i - 32)
   else if i < 96 then rs2Out (i - 64)
   else if i < 128 then immOut (i - 96)
-  else decOut 4
+  else decOut isBEQLine
 
 /-- ⭐ **PLACEMENT #14 — `Program.pcAdd` at row 14, `instOK` DISCHARGED.** Fourteen of fifteen organ
 rows. *`ssa` and `wf` are consumed as math's landed certificates, never re-proved.* -/
@@ -1134,7 +1135,7 @@ theorem pcAddSig_follows_the_port_map :
   ∧ pcAddSig 32 = rs1Out 0 ∧ pcAddSig 63 = rs1Out 31
   ∧ pcAddSig 64 = rs2Out 0 ∧ pcAddSig 95 = rs2Out 31
   ∧ pcAddSig 96 = immOut 0 ∧ pcAddSig 127 = immOut 31
-  ∧ pcAddSig 128 = decOut 4 := by
+  ∧ pcAddSig 128 = decOut isBEQLine := by
   refine ⟨rfl, rfl, rfl, rfl, rfl, rfl, rfl, rfl, rfl⟩
 
 /-- **CONTROL: `isBEQ` is decoder output 4, the SAME net `regWrite` reads at row 5 — and it is not
@@ -1183,8 +1184,8 @@ theorem enc_row_does_not_advance (off : Nat) : instNext EncoderE1.ruledEnc off =
 publishes two; input 0 (`isADD`) is consumed and deliberately not forwarded, because code 0 is the
 default arm. If it were forwarded, the select would have three select bits for a `(3,2)` block. -/
 theorem lineADD_is_consumed_not_forwarded :
-    encSig 0 = decOut 0
-  ∧ decOut 0 ≠ selSig 96 ∧ decOut 0 ≠ selSig 97 := by
+    encSig 0 = decOut isADDLine
+  ∧ decOut isADDLine ≠ selSig 96 ∧ decOut isADDLine ≠ selSig 97 := by
   -- stated as two concrete inequalities rather than `∉`: the published list has exactly two
   -- known elements, and deciding MEMBERSHIP with everything unfolded times out at `whnf`
   -- (200,000 heartbeats). Same content, and it names WHICH nets differ rather than that one

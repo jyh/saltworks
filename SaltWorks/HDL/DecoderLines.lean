@@ -3,13 +3,23 @@ Copyright (c) 2026 Jason Hickey. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Jason Hickey, Claude
 -/
-import SaltWorks.HDL.CorePlace
+import SaltWorks.HDL.Decoder
 
 /-!
 # Names for the decoder's nine output lines — because the bare index has already cost this tree once
 
-`decOut` is indexed by a bare integer at **126 call sites in `SaltWorks/HDL/`**, and the nine
-lines are named NOWHERE. `CorePlace.lean:409` records the order in a comment:
+`decOut` is indexed by a bare integer, and the nine lines are named NOWHERE. **The surface,
+scoped — because "126 call sites" was my own first figure and it named the wrong object:**
+```
+126  lines matching `decOut <n>` on disk in SaltWorks/HDL/   ← includes gitignored Scratch*
+ 82  the same, restricted to GIT-TRACKED files
+148  total occurrences on disk (some lines carry two)
+ 67  TRACKED CODE occurrences — THE ACTUAL RENAME SURFACE
+ 40  tracked occurrences in PROSE — several QUOTE the 08-19 defect verbatim and
+     MUST NOT be renamed: rewriting them would erase the record the repair left
+```
+*Five true numbers about five different objects. The one a migration is priced on is 67, and my
+first published figure was 126 — a factor of two, from a count with no scope attached.* `CorePlace.lean:409` records the order in a comment:
 
 ```
 isADD  isXOR  isSLT  isADDI  isBEQ  isLW  isSW  req  valid
@@ -56,9 +66,7 @@ CITED    that `decoder.outs` position i corresponds to `dcMatches` position i.
 ```
 -/
 
-namespace SaltWorks.HDL.DecoderLines
-
-open SaltWorks.HDL SaltWorks.HDL.CorePlace
+namespace SaltWorks.HDL
 
 /-! ## §1 — THE NINE NAMES -/
 
@@ -71,6 +79,40 @@ def isLWLine   : Nat := 5
 def isSWLine   : Nat := 6
 def reqLine    : Nat := 7
 def validLine  : Nat := 8
+
+/-! ## §1.1 — ⛔⛔ OMEGA DOES NOT SEE THROUGH THESE NAMES — READ BEFORE RENAMING A SITE
+
+A `def` is opaque to omega's preprocessing, so a side-goal that was `(by omega)` proving `1 < 9`
+becomes `isXORLine < 9` and FAILS, reporting `a := ↑isXORLine` as an atom. **That is the same tell
+as `abbrev Net := Nat`'s omega-blindness, and it is the third variant this seat hit in one night.**
+
+⇒ **CURE AT THE CALL SITE, BY TACTIC — four distinct variants surfaced renaming sixty-seven
+sites, and they did NOT surface together:**
+```
+rw    a lemma stated over a NUMERAL stops matching a goal carrying a NAME
+      ⇒ pass the NAME to the lemma too.  (`abbrev` does NOT fix this: rw matches
+        syntactically, not up to reducible transparency — I tried it and the kernel said no.)
+omega an index side-goal `isXORLine < 9` reports the name as an ATOM
+      ⇒ `by decide +kernel`, which unfolds.
+simp  `[false, false, …][isXORLine]?` cannot be evaluated
+      ⇒ put the NAME IN THE SIMP SET.
+exact unaffected — it works up to defeq, and so does `decide`.
+```
+⭐ ***THE COST OF NAMING A LITERAL IS PAID BY EVERY TACTIC THAT INSPECTS THE LITERAL
+SYNTACTICALLY, and those tactics do not announce themselves in advance.*** Twelve proof repairs
+across four files for sixty-seven renames.
+
+⛔⛔ **AND THE TWELVE ARE NOT A COST OF THE RENAME — READ THEM THE OTHER WAY ROUND (helm, 08/26
+22:5x).** They are twelve places where **the proof depended on the LITERAL rather than on the
+MEANING**: `rw` matching a lemma stated over a numeral, `omega` treating the index as an atom,
+`simp` indexing a list with it. ***That fragility was there all along and was INVISIBLE while the
+numerals were. THE RENAME DID NOT CREATE THAT DEBT, IT DISCOVERED IT.***
+
+⇒ **so the number to ask for before authorising a restatement is the PROOF-SURFACE cost, not the
+site count — and the two are not correlated in any way that can be guessed.** 126 sites narrowed
+to 67 code occurrences and predicted nothing about twelve proof repairs. *A site count measures
+how much text moves; a proof-surface count measures how much of the argument was resting on the
+text.* -/
 
 /-! ## §2 — WHAT THE KERNEL CAN SAY ABOUT THEM -/
 
@@ -115,4 +157,4 @@ theorem control_nine_is_out_of_range : ¬ (9 < decoder.outs.length) := by
 #audit_axioms control_LW_and_SW_patterns_differ lines_are_distinct
 #audit_axioms lines_are_in_range control_nine_is_out_of_range
 
-end SaltWorks.HDL.DecoderLines
+end SaltWorks.HDL
