@@ -597,6 +597,45 @@ except Exception: print(-1)' "$mine" 2>/dev/null)
       }
     ' "$QF")
     [ -n "$q" ] || q="UNPARSED"
+    # ⛔⛔ SCOPE STATED 2026-08-27 00:2x — THIS ARM READS ONE SECTION AND ITS SILENCE
+    #    WAS READING AS "NOTHING OWED". Measured tonight: `## SILICON` spans ~52 lines
+    #    of a 2,331-line file, and a PRE-AUTH item IN SILICON'S SLOT (council ruling #1,
+    #    "hardening fires NOW (silicon's slot, PRE-AUTH under this ruling)") sits at line
+    #    1060, inside THE CAPTAIN'S REGISTER — a 1,896-line section this arm never opens.
+    #    Nine work-assigning silicon mentions live outside the section against one inside
+    #    (control: the same query matches inside, so the outside count is not an artifact).
+    # 🔑 THIS IS THIS ARM'S OWN DEFECT, ONE LEVEL OUT. It was built because a PULL duty was
+    #    invisible to a PUSH instrument; it was then fixed for TOKEN blindness; and it kept
+    #    a SCOPE blindness the whole time. ***A REPAIR INHERITS THE ERROR'S SHAPE.***
+    # ✅ CURE IS THIS CARD'S OWN PRESCRIPTION, NOT A WIDER GREP: "if 'nothing found' and
+    #    'I could not look' are the same output, make it STATE ITS POPULATION."
+    #    Deliberately NOT widening the item parser into the Register: that section is prose
+    #    ("Tell silicon to cheer up"), so a widened matcher would fire constantly and this
+    #    file's own law is that an alarm which always sounds is one nobody hears. A stated
+    #    scope is checkable; a guessed verdict over prose is not.
+    # ⛔ BRACE THE VAR BEFORE A MULTIBYTE SEPARATOR. `q="$q·..."` SILENTLY DESTROYS $q:
+    #   the shell takes `·`'s LEAD BYTE (0xC2) as part of the NAME, expands the undefined
+    #   `q\xC2` to empty, and leaves the orphaned 0xB7 as a replacement char. Driven pair:
+    #     $q·scope=X   -> [\xEF\xBF\xBDscope=X]        (whole value GONE)
+    #     ${q}·scope=X -> [OK·1 STANDING(MEAS)·scope=X]
+    #   ***THE DEFECT IS THE ADJACENCY, NOT THE CHARACTER*** — this file prints `·` safely
+    #   all over, but only ever from awk printf, never after a bare $var in shell.
+    #   Found because the field rendered as one bad byte; a shorter value would have
+    #   looked merely terse. All three sites fixed together, not just the one that bit.
+    _qtot=$(wc -l < "$QF" | tr -d ' ')
+    _qs=$(awk '/^##[[:space:]]+SILICON/{print NR; exit}' "$QF")
+    _qe=$(awk -v s="${_qs:-0}" 'NR>s && /^## /{print NR; exit}' "$QF")
+    if [ -n "$_qs" ] && [ -n "$_qe" ]; then
+      _qspan=$(( _qe - _qs ))
+      # advisory only: silicon-addressed lines OUTSIDE the section not marked discharged
+      _qout=$(grep -nE "silicon's slot|SILICON ·" "$QF" 2>/dev/null \
+              | awk -F: -v a="$_qs" -v b="$_qe" '$1<a || $1>b' \
+              | grep -vcE 'DISCHARGED|SUPERSEDED|~~|RET-[0-9]' )
+      q="${q}·scope=##SILICON ONLY ($_qspan of $_qtot lines)"
+      [ "${_qout:-0}" -gt 0 ] && q="${q}·⚠️ $_qout silicon-addressed line(s) OUTSIDE that scope — ADVISORY, read them"
+    else
+      q="${q}·⚠️ SCOPE UNKNOWN — could not locate the ## SILICON section"
+    fi
   fi
   # ── ARM 10 (BRIEF GROWTH, CLOCK-TRIGGERED) — added 08/26 19:3x, and it exists because
   #    THE GATE WAS ALREADY BUILT AND WIRED TO NOTHING. `capcheck.sh` was written 08/24
