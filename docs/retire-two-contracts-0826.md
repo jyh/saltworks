@@ -42,18 +42,62 @@ at that file and line, and its proof is `decide +kernel` (§5).
 
 ## 2. CONTRACT B — `retire` DECLARES THE CORE'S STALLS  *(compiler's)*
 
-**`retire` DECLARES THE CORE'S STALLS: it is exactly "not presenting a bubble".** That is what
-makes `stalls : Env → Bool` **faithful rather than convenient.**
+**`retire` DECLARES THE CORE'S STALLS.** The kernel's `Env` is `Net → Bool`, and the modelled
+domain is `stWidth = 32*32 + 32 = 1056` state nets plus one 32-bit instruction word
+(`coreInWidth = stWidth + 32`) — **architectural state and one instruction, and nothing else.**
+`Circ` is purely combinational; there is no flop node in the kernel at all. ⇒ **an adapter FSM
+output cannot be a function of that domain.** That is criterion (c), and it is why this contract
+had to be written down at all.
 
-The kernel's `Env` is `Net → Bool`, and the modelled domain is `stWidth = 32*32 + 32 = 1056` state
-nets plus one 32-bit instruction word (`coreInWidth = stWidth + 32`) — **architectural state and
-one instruction, and nothing else.** `Circ` is purely combinational; there is no flop node in the
-kernel at all. ⇒ **an adapter FSM output cannot be a function of that domain**, and the resolution
-is not to widen the domain but to stop needing it: **a stall is declared by the WORD presented to
-the core.** `decode 0 = none`, so a bubble is `MemFree` by construction.
+**THE INSTANTIATION IS `stalls := ¬retire`, AND IT BECOMES AVAILABLE THROUGH THE RATIFIED
+WIDENING.** silicon measured the domain: `retire = f(kind, storeBeat, req)`, where `kind` (2 bits,
+`busadapt8.v:77`) and `storeBeat` (1 bit, `:78`) are ADAPTER REGISTERS and only `req` is in `Env`.
+Once the widening puts those three bits in the state, `retire` is a function of `Env` and the
+parameter can be supplied. ⇒ ***T2's BLOCKER AND STEP 7's RENUMBERING ARE THE SAME ITEM*** — the
+act the Captain ratified for the assembly is the act that makes this contract instantiable.
 
-⇒ **THE RTL MUST SUPPLY:** *while the adapter is not ready, the word presented on the core's
-instruction nets is the bubble encoding; and `retire` is exactly "not presenting a bubble".*
+### 2.1 ⛔ WHAT §2 SAID BEFORE, AND WHY IT IS STRUCK — WRITTEN IN, NOT REPLACED
+
+> *"…the resolution is not to widen the domain but to stop needing it: **a stall is declared by
+> the WORD presented to the core**. `decode 0 = none`, so a bubble is `MemFree` by construction."*
+> *"**THE RTL MUST SUPPLY:** while the adapter is not ready, the word presented on the core's
+> instruction nets is the bubble encoding."*
+
+***REFUTED BY THE WIRE, 2026-08-26, by compiler reading the RTL rather than waiting to be
+checked:***
+```
+busadapt8.v:215   assign c_instr = (kind == T_FETCH && phase == 2'd3)
+                                     ? {pin_in, in_acc[23:0]} : instr_r;   ⇐ THE HELD PREVIOUS
+                                                                              INSTRUCTION
+grep bubble|nop over SaltWorks/Silicon/RTL/*.v                             ⇐ NOTHING
+plane32bus.v:73   .en(retire)                                              ⇐ STALLED BY ENABLE
+```
+⇒ **THE MACHINE DOES NOT PRESENT A BUBBLE WHILE THE ADAPTER IS BUSY. It holds the previous
+instruction and freezes the core with `en`.** The struck text asked the RTL for a sentence the RTL
+does the opposite of — which would have been a DESIGN CHANGE presented as a description.
+⚠️ ***AND NOTE THE DIRECTION OF THE ERROR: it made the campaign's critical path look CHEAPER and
+UNBLOCKED.*** A wrong answer that removes a dependency is the one nobody checks. It was found only
+because the ratification carried an explicit condition to hunt for INCONSISTENCY rather than
+confirmation.
+
+### 2.2 ⭐⭐ WHAT SAVED THE DEFINITION: PARAMETERISATION — A TECHNIQUE, NOT TODAY'S LUCK
+
+`CycleRealisesStepOrStalls` takes `stalls : Env → Bool` **as a parameter**. The predicate says what
+a stall MEANS; which cycles ARE stalls is supplied from outside.
+```
+had `stalls` been a CONSTANT baked to the bubble reading:
+    the refutation above falsifies THE DEFINITION, the witness, and every theorem over it
+because `stalls` is a PARAMETER:
+    only the INSTANTIATION died. Shape, witness, reduction and strict-extension all stand.
+```
+🔑 ***PARAMETERISE THE PART THE OTHER LANE OWNS.*** The kernel owns what a stall MEANS; the RTL
+owns which cycles ARE stalls. Writing that boundary into the TYPE — rather than into a comment —
+is what let two lanes work independently and still meet, and it is what bounded a wrong reading of
+the wire to one line of instantiation instead of a campaign.
+📌 **silicon named the parameterisation as the load-bearing half in its check (§2.1 of
+`docs/silicon-T5-contract-and-T2-check-0826.md`) BEFORE the refutation was found.** *It was
+identified as the thing carrying the weight before anything fell on it, which is the only kind of
+evidence that a design technique works.*
 
 ## 3. WHY ONE DOCUMENT — THE HAZARD THIS CLOSES
 
@@ -99,6 +143,28 @@ CONTROL      a name that must NOT exist returned 0 matches, so the check could f
 ⚠️ **A citation is a measurement**, and a document citing a renamed theorem reads correct forever.
 Every name above was resolved against the tree at authoring time, with a negative control.
 
+## 5.1 ⭐⭐ THE CONSISTENCY CHECK — RUN AGAINST silicon's OWN MODEL, TRYING TO BREAK THE PAIR
+
+The helm's condition on this ratification: *"if the two contracts turn out NOT to be consistent,
+that stops the ratification and outranks the document."* **`SaltWorks/HDL/T2T5Consistency.lean`
+is the attempt to break it, and it failed to.**
+```
+retire_iff_frame_ends                 retire is EXACTLY the frame-end — exhaustive over all 8
+                                      states x req x we. Had this failed in one cell, T2 would
+                                      put the core's advance on a beat the frame is still running.
+control_mutant_breaks_the_anchor      THE NEGATIVE CONTROL: the same check against a MUTATED
+                                      retire evaluates to FALSE, so the exhaustive test CAN fail
+store_retires_on_the_second_beat_only T5's low-on-address / high-on-data and T2's bubble-then-
+                                      instruction name THE SAME BEAT — one instruction, one retire
+fetch_with_request_holds              a fetch with a request in flight does NOT retire, so the
+                                      core is held exactly while memory is being reached
+                                      all four: [0 axioms], saltbuild EXIT=0
+```
+⛔ **AND THE RESIDUE, NAMED RATHER THAN IMPLIED: `BusFSM` models the adapter's state, NOT the word
+presented to the core.** So T2's final link — *while the adapter is not ready the word presented is
+the bubble encoding* — **is NOT decided by this file and is not claimed by it.** What is decided is
+the anchor that link hangs on. ⇒ **ONE WIRE QUESTION REMAINS, AND IT IS SILICON'S.**
+
 ## 6. SIGNATURES — AGAINST THE PAIR, NEVER AGAINST ONE
 
 ### 6.1 compiler — SIGNED 2026-08-26, and here is exactly what I am attesting
@@ -111,8 +177,9 @@ Every name above was resolved against the tree at authoring time, with a negativ
 **I do NOT attest:**
 - **that Contract A's RTL behaves as §1 says** — I did not verify the RTL; I verified that the
   theorem exists and how it is proved. **That half is silicon's to stand behind.**
-- **that the two contracts are jointly satisfiable in the built hardware.** §3's consistency is my
-  reading, not a proof, and it is labelled as such.
+- **that the two contracts are jointly satisfiable in the built hardware.** §5.1 raises §3 from a
+  reading to a machine-checked result **over silicon's model** — with a control proving the check
+  could fail — but a model is not the wire, and the one link it cannot see is named there.
 
 ### 6.2 the Captain — RATIFICATION OF THE PAIR
 

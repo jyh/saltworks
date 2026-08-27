@@ -23,18 +23,30 @@ function of `Env`. **It is not, and the reason is measured rather than argued:**
 * `stWidth = 32*32 + 32 = 1056` and `coreInWidth = stWidth + 32` (`StateCodec.lean`) — so the
   modelled domain is **architectural state plus one instruction word, and nothing else.**
 
-⇒ An adapter FSM output cannot be a function of that domain. **The resolution is not to widen
-the domain but to stop needing it**: a stall is declared by the WORD presented to the core.
-`stalls e = (seenWord e = bubble)` is a genuine predicate on `Env`, because words are already
-in the domain, and `decode 0 = none` makes the bubble `MemFree` by construction.
+⇒ An adapter FSM output cannot be a function of that domain. That is criterion (c).
 
-## ⇒ THE OBLIGATION THIS TRANSFERS TO THE RTL, IN ONE SENTENCE
+## ⛔⛔ THE BUBBLE ROUTE IS STRUCK — REFUTED BY THE WIRE, 2026-08-26
 
-> **While the adapter is not ready, the word presented on the core's instruction nets is the
-> bubble encoding; and `retire` is exactly "not presenting a bubble".**
+This header used to say the resolution was *"not to widen the domain but to stop needing it"*,
+with `stalls e = (seenWord e = bubble)` and an RTL obligation to present a bubble while the
+adapter is busy. **THE MACHINE DOES THE OPPOSITE:**
+```
+busadapt8.v:215   c_instr = (kind==T_FETCH && phase==2'd3) ? {pin_in,in_acc[23:0]} : instr_r
+                                                             ⇐ THE HELD PREVIOUS INSTRUCTION
+grep bubble|nop over SaltWorks/Silicon/RTL/*.v               ⇐ NOTHING; no bubble mechanism
+plane32bus.v:73   .en(retire)                                ⇐ the core is stalled by an ENABLE
+```
+⇒ **the instantiation is `stalls := ¬retire`**, which needs `retire`'s three adapter bits
+(`kind`, `storeBeat`) inside `Env` — supplied by the state widening the Captain ratified on
+2026-08-26. **T2's blocker and step 7's renumbering are the same item.**
 
-That sentence is what makes the predicate faithful rather than convenient. It is an RTL
-property and it is NOT signed here. If the RTL cannot supply it, the fallback is widening the
+⭐⭐ **AND WHAT SAVED THIS FILE IS THE PARAMETER.** `stalls` is an ARGUMENT of
+`CycleRealisesStepOrStalls`, not a constant baked into it — so a wrong reading of the wire killed
+one INSTANTIATION and left the shape, the witness, the reduction and the strict extension all
+standing. ***PARAMETERISE THE PART THE OTHER LANE OWNS:*** the kernel owns what a stall MEANS, the
+RTL owns which cycles ARE stalls, and writing that boundary into the TYPE rather than a comment is
+what bounded the damage. *silicon named the parameterisation as load-bearing BEFORE the refutation
+was found.* Full record: `docs/retire-two-contracts-0826.md` §2.1–§2.2. If the RTL cannot supply it, the fallback is widening the
 state layout to carry the adapter's bits.
 
 ⚖️ **AND THE FALLBACK IS NOW PRICED, BY MEASUREMENT RATHER THAN BY MY ADJECTIVE.** I called it
