@@ -90,3 +90,60 @@ clock without a manifest change, and that is not this seat's act.**
 ⛔ **NOT MINE EITHER WAY: the resubmission click (public + money). This seat produces the measured
 pair and the report.** If ①d's knobs do not dominate `ndf-base`, that is a REPORT, not a failure —
 the paid NDF stands and (B) ships at the declared clock.
+
+---
+# ⛔ RUN 1 OF `ndf-base` FAILED ITS OWN PRE-REGISTERED BAR — AND THE BAR WAS RIGHT
+Appended 12:2x, not rewritten. **The criterion in §5 did exactly the job it exists for: it
+refused a result I would otherwise have called a reproduction.**
+
+## What came back (12:10–12:19, 9 min, digest `ecabd075…`, PDK `8afc8346…`)
+```
+metric                     TT signoff     ndf-base run 1      delta        §5 STRONG bar
+max_slew                        3,317              3,250     -2.0%         ±5%   ✅
+max_cap                            27                 27      0.0%         ±5%   ✅
+max_fanout                        117                112     -4.3%         ±5%   ✅
+hold WS                     +0.11053           +0.10653     -0.004 ns     ±0.20  ✅
+setup WS                    +5.66802           +7.80022     +2.132 ns     ±0.20  ⛔
+inst area / die area      225,802 / 232,623   IDENTICAL      —
+DRC · LVS · antenna              0/0/0              0/0/0     —
+```
+**STRONG: FAILED** on setup (+37.6%). **SIGNATURE-ONLY: ALSO FAILED**, on one clause — my run
+put **2 max_cap violations at `max_tt_025C_1v80`** where the submitted chip has **zero at every
+tt and ff corner**. Fanout was flat across nine corners ✅ and the slew ss/tt ratio was 5.09 ✅.
+⇒ By §5(a) the verdict is **FAIL ⇒ DO NOT RUN `ndf-1d`**. Not run.
+
+## ⛔ THE CAUSE, AND IT IS MINE: "ABSENT FROM WHAT RAN" DID NOT MEAN "NOT A VARIABLE"
+§4 dropped four keys present in the submitted `config.json` but absent from its 411-key
+`resolved.json`, reasoning that matching what RAN beats matching what was WRITTEN. **The
+principle was right and I applied it by DELETING instead of TRANSLATING. They were RENAMED.**
+```
+submitted config.json      LibreLane 3.0.5 name      TT        my run 1
+FP_IO_HLENGTH         ->   IO_PIN_H_LENGTH           2         None
+FP_IO_VLENGTH         ->   IO_PIN_V_LENGTH           2         None
+FP_PDN_MULTILAYER     ->   PDN_MULTILAYER            False     True
+FP_PDN_VPITCH         ->   PDN_VPITCH                38.87     153.6
+(never set at all)         RT_MAX_LAYER              met4      met5
+```
+⛔ **`RT_MAX_LAYER` IS THE WORST OF THE FIVE AND THE REPO TOLD ME.** `ndf_6x2_config.json`'s own
+comment lists **seven** fields TT injects from `tiles:` — *DESIGN_NAME, VERILOG_FILES, DIE_AREA,
+FP_DEF_TEMPLATE, **VDD_PIN, GND_PIN and RT_MAX_LAYER***. I supplied four. `VDD_PIN`/`GND_PIN`
+defaulted correctly by luck; `RT_MAX_LAYER` did not, so **my run routed on met5 where the shuttle
+routes on met4** — TinyTapeout reserves met5 for the harness.
+⭐ ***EVERY ONE OF THE FIVE MAKES ROUTING EASIER: an extra metal layer, a 4× sparser power grid,
+no multilayer PDN. The run came back with 2.13 ns MORE setup slack than the chip it claimed to
+reproduce — the FLATTERING direction, which is the one that gets believed.*** Had the bar been
+"within 5% on the DRV counts" alone, this passes on three of three and ships a false baseline.
+
+## ✅ THE REPLACEMENT CRITERION IS STRICTLY STRONGER, AND IT IS A TOOL, NOT A JUDGEMENT
+`docs/silicon-tools/resolved_diff.py` (selftested, four arms, driven both ways). It compares two
+`resolved.json` files and **requires the NON-PATH difference set to be EMPTY**; path-valued entries
+encode the host, not the design, and are ignored.
+⇒ ***A CONFIG YOU WROTE IS A HYPOTHESIS; THE `resolved.json` IS WHAT RAN.*** Metric proximity is a
+weak proxy for configuration identity — run 1 was within 5% on three of five metric axes while the
+routing layer, the power-grid pitch and the IO pin geometry were all different.
+**§5(a) is amended: `ndf-base` reproduces iff `resolved_diff.py` returns EMPTY against the submitted
+`resolved.json`.** The metric table stays, as a *report*, not as the gate. §5(b) is unchanged —
+`ndf-1d` is still judged against `ndf-base`, never against the signoff.
+📌 Run 2 fired 12:2x with all five corrected **read from TT's `resolved.json`, not typed from this
+page**, the gate wired into the runner, and — per helm ruling ③ — a **P1 ticket** taken before the
+marker, since a marker-holder without a ticket makes the census a lie.
