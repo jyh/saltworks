@@ -560,7 +560,37 @@ except Exception: print(-1)' "$mine" 2>/dev/null)
     ' "$QF")
     [ -n "$q" ] || q="UNPARSED"
   fi
-  printf 'FALLBACK %s | mylast=%s | bus=%s | main watch procs=%s (PRESENCE, not delivery) | account=%s | index=%s | mirror=%s | queue=%s | last header: %s\n' \
-    "$(date '+%H:%M')" "$age" "$busf" "$main" "$km" "$idx" "$mir" "$q" "$hdr"
+  # ── ARM 10 (BRIEF GROWTH, CLOCK-TRIGGERED) — added 08/26 19:3x, and it exists because
+  #    THE GATE WAS ALREADY BUILT AND WIRED TO NOTHING. `capcheck.sh` was written 08/24
+  #    precisely because this seat grew its OWN BOOT BRIEF 17,677 -> 20,091 tok in a day
+  #    with no gate. It passes its selftest 10/10 including a DISCRIMINATING harness.
+  #    It had ZERO CALLERS. Control: the same query returns 3 call sites for selfstale.
+  # ⛔ SO TONIGHT THE BRIEF WENT 18,893 -> 22,176 tok (+3,283, past capcheck's 80% WARN
+  #    line at 87.9% of cap) AND NOTHING FIRED — the gate existed, worked, and watched
+  #    nothing. ***A BUILT GATE THAT IS IN NO PATH IS INDISTINGUISHABLE FROM AN ABSENT
+  #    ONE, EXCEPT THAT ITS EXISTENCE STOPS ANYONE BUILDING IT.*** (helm F-255, 08/26.)
+  # ⭐ PRINTS A FIELD EVERY SWEEP, never silence-means-clean — the arm-8/9 convention.
+  BRIEFF="${BRIEFFILE:-${SEAT_DIR:+$SEAT_DIR/briefs/0000-BOOT-silicon.md}}"
+  if [ -z "$BRIEFF" ] || [ ! -r "$BRIEFF" ]; then
+    cap="UNSET(needs SEAT_DIR or BRIEFFILE)"
+  else
+    # ⛔ CONSUME THE EXIT STATUS, DO NOT SCRAPE THE SYMBOLS. My first version set
+    #    "REFUSE" by grepping for ⛔ — but capcheck prints ⛔ in EXPLANATORY lines too,
+    #    so a wording change would have manufactured a false REFUSE. capcheck exits 5
+    #    to refuse; that is the gate. ***A CHECK WHOSE STATUS NOTHING CONSUMES IS A
+    #    PRINTOUT*** (this seat's own `printed-is-not-gated`).
+    # ⛔ AND NOT THROUGH A PIPE: `$?` after a pipe is the LAST stage's status, which
+    #    fails in the reassuring direction (`exit-code-dies-in-a-pipe`).
+    _cc=$("${CAPCHECK:-$(dirname "$0")/capcheck.sh}" "$BRIEFF" --unit tokens --cap 25000 2>&1); _rc=$?
+    cap=$(printf '%s\n' "$_cc" | awk '/UPPER-BOUND/{for(i=1;i<=NF;i++){ if($i ~ /%\)$/){gsub(/[()~]/,"",$i); p=$i} if($i ~ /tok$/) t=$(i-1) }} END{ if(t=="") print "UNPARSED"; else printf "%s tok %s", t, p }')
+    case "$_rc" in
+      5) cap="$cap ** REFUSE (capcheck rc=5) — TRIM BEFORE APPENDING **" ;;
+      0) case "$_cc" in *WARN*) cap="$cap ** WARN: plan a trim **" ;; esac ;;
+      *) cap="$cap ** capcheck rc=$_rc — arm did not run cleanly **" ;;
+    esac
+    [ -n "$cap" ] || cap="UNPARSED"
+  fi
+  printf 'FALLBACK %s | mylast=%s | bus=%s | main watch procs=%s (PRESENCE, not delivery) | account=%s | index=%s | mirror=%s | queue=%s | brief=%s | last header: %s\n' \
+    "$(date '+%H:%M')" "$age" "$busf" "$main" "$km" "$idx" "$mir" "$q" "$cap" "$hdr"
   sleep "$PERIOD"
 done
