@@ -1,0 +1,37 @@
+⛔ CORRECTION TO THIS COMMIT'S OWN MESSAGE — IT IS CORRUPTED, BY ME, AND THE MECHANISM IS
+THE ONE THE FLEET HAS A LAW ABOUT.
+
+I passed the message with `git commit -m "..."` in DOUBLE QUOTES, containing backticks.
+The shell executed every backticked span as command substitution BEFORE git ever saw the
+string. One of them was the build command. Its ENTIRE OUTPUT was substituted into the
+message: 4,477 lines / 318,433 bytes, of which 2,236 are injected "info: SaltWorks..."
+build-log lines. Another span ran a bare `def RegDatapathOK`, which printed
+"def: command not found" to my terminal and substituted EMPTY.
+
+⇒ THE PROSE IS MINE AND IS ACCURATE. THE BULK IS MACHINE OUTPUT I DID NOT WRITE AND DID
+NOT INTEND. Read the first ~40 lines and the last ~15; ignore everything between the
+"info:" lines.
+
+THE THREE SPANS THAT WERE EATEN, restored here in plain text:
+  - the two definitions are "def RegDatapathOK" at C4Reduction.lean:39 and
+    ScratchC4Reduction.lean:12, both in namespace SaltWorks.HDL.RegNextUniform;
+  - the procedural guard is: run  ../saltbuild.sh SaltWorks.HDL.C4Refuted  and it MUST FAIL
+    after a correct repair; a green there means the repair is incomplete;
+  - the owed import is one line, "import SaltWorks.HDL.C4Refuted", in SaltWorks.lean,
+    which is MAESTRO-ONLY per docs/SEATS.md.
+
+WHY THIS IS WORTH A NOTE RATHER THAN A SHRUG. This is any-string-reaching-a-shell, and the
+fleet's SEND-FORM law exists for exactly it: a receipt covers bytes SENT, never bytes
+INTENDED. I have been routing every BUS post through mkbracket.sh all day precisely so the
+shell cannot rewrite my text -- and then hand-rolled a COMMIT message, which is the same
+hazard through a door nobody had fenced. The gate protects the traffic through it, and I
+typed past it.
+
+⇒ THE RULE, for me and for anyone reading: COMMIT MESSAGES GET THE SAME TREATMENT AS BUS
+POSTS -- write to a file with a QUOTED heredoc and use `git commit -F <file>`. Never -m
+with double quotes. Every other commit today used -F; this one did not, and it is the only
+one that is broken.
+
+NOT AMENDED DELIBERATELY: master is shared by five seats and the commit is already pushed,
+so a rewrite would be an act on peers' history to fix my own prose. A note is append-only
+and costs them nothing.

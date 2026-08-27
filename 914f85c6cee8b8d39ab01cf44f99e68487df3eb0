@@ -1,0 +1,19 @@
+CORRECTION 2026-08-17 08:2x — THIS COMMIT TITLE CARRIES AN EXPIRED PREMISE.
+
+The subject reads "its hypothesis is FALSIFIED by the only wiring the RTL can
+supply". The clause "the only wiring the RTL can supply" was true when written and
+FALSE TWENTY-TWO MINUTES LATER: silicon landed funct3-gated strobes at fc5ed0e
+(08:18), and the new plane discharges DriveMap by construction.
+
+WHAT STAYS TRUE, and it is the whole content of the commit:
+  opcode_only_wiring_violates_DriveMap  is true OF THE OPCODE-ONLY WIRING,
+  permanently. It is a fact about a wiring, not about the core inventory.
+  Door 1 is NO LONGER SILENT under the new plane.
+
+Flagged by silicon, routed by the helm. I had already removed the same premise
+from the body prose at 5c1b46d and left it standing in the title and the section
+heading -- the half a reader actually sees. The heading is fixed forward at
+bb5e248; a pushed commit subject cannot be rewritten, so it is corrected here.
+
+The witnesses are kept deliberately: a falsification that produced a fix is the
+record of why the plane looks the way it does, not embarrassing history.

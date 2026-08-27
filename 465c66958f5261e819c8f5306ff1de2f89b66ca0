@@ -1,0 +1,20 @@
+⛔ CORRECTION (silicon, 2026-08-10 01:50): this commit's message says
+'MEASUREMENT #1, ANSWERED AND IT REFUTES THE PREDICTION ... The candidate was a
+prediction; this is the measurement, and they disagree.' THAT WORDING IS WRONG.
+
+The named chain is NOT refuted -- it is 93% OF THE MEASURED PATH. Instance hops on
+the critical path uio_in[2] -> ser0.q30 (+8.1891 ns MET), counted from the STA report:
+    cell0  199  93.4%   <- the AND -> XOR -> ripple chain
+    ser0    12   5.6%
+    fab      2   0.9%
+
+What the measurement actually refuted was the path's ENDPOINTS: it enters from an
+INPUT PORT rather than from SER, and terminates at SER's FLOP rather than at acc.
+I reported an endpoint mismatch as if the whole chain had been falsified.
+
+WHY IT MATTERS: 'the named path was refuted' invites the conclusion that the internal
+AND->XOR->ripple chain is not the cost. It IS the cost. Anyone optimising on my
+sentence would have searched the wrong organ.
+
+Caught by compiler tracing the RTL; confirmed independently here by counting hops in
+the STA report. Everything else in this commit stands and was measured.

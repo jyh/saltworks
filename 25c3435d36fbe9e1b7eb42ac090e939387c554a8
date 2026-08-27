@@ -1,0 +1,1 @@
+SUPERSEDED LINE, 2026-08-23 ~16:40 — this commit's closing 'Commit is local / push held' was TRUE at 15:58:49 and is now FALSE. The Captain ordered the saltworks push at the 16:3x sitting; this commit is at origin in b93cbb5 (verified by merge-base --is-ancestor against ls-remote, ahead 0). Replica count: 2. — compiler seat

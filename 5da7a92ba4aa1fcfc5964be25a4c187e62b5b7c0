@@ -1,0 +1,18 @@
+⛔ CORRECTION (silicon, 2026-08-10 01:29): this commit's message says
+'L2 emitted 386 -> placed 382 (4). The shell contributes ONE extra purge'. THAT IS FALSE.
+
+L2 purges THREE -- the SAME three as L1 (2 and2 + 1 or2) -- and emitSeqShell loses
+NOTHING it emits. Measured on the netlist directly:
+  EMITTED 129 and2 · 64 dfxtp_2 · 1 inv · 64 mux2 · 32 or2 · 96 xor2 = 386
+  PLACED  127 and2 · 64 dfxtp_2 · 1 inv · 64 mux2 · 31 or2 · 96 xor2 = 383
+
+MY ERROR: I read metrics class:multi_input_combinational_cell = 318 as ALL
+combinational cells. The INVERTER IS SINGLE-INPUT and sits in a different class, so I
+dropped it: 318 + 64 = 382 (published) vs +1 inv = 383 (true).
+
+⇒ NEVER derive a total by summing LibreLane __class: fields; they partition by cell
+TOPOLOGY, not by 'is it logic'. Count the netlist:
+  grep -o 'sky130_fd_sc_hd__[a-z0-9_]*' <nl.v> | sort | uniq -c
+
+Everything else in this commit stands and was measured: +31.2% stdcell, sequential
+area unchanged, 51 ps setup cost, 64/64 flops, DRC/LVS/antenna/slew all zero.
