@@ -40,69 +40,61 @@ MAXWAIT=5400
 #   ⇒ The marker is best-effort and its staleness is HARMLESS: it cannot cause a double
 #     build, because the kernel decides. `rm -rf` on it below is safe precisely because
 #     we already hold the flock, so no other builder can be in this region at all.
-# ╔══ PRIORITY LANE — COUNCIL 2026-08-27 (item: PRIORITY LANE, mechanical) ═══════
-# RULED: until Sept 7, tape-out-campaign builds SKIP THE QUEUE (acquire next).
-#        ⛔ NO PREEMPTION — a holder always finishes.
-#        Hold semantics and ACQUISITION PRIMITIVES UNTOUCHED.
-#        EXPIRES Sept 8 BY ITS OWN TEXT; pure FIFO returns.
+# ╔══ PRIORITY-AWARE BUILD QUEUE — COUNCIL 2026-08-27, minute bc381f78 ═══════════
+# SUPERSEDES the TAPEOUT=1 priority lane that stood here. Two classes (P1 · P2/P3), a
+# TICKET LAYER above the UNTOUCHED flock+mkdir, NO preemption, within-class FIFO by
+# ticket timestamp, dead tickets reaped by pid AND process start time, NO wait-timeout,
+# NO aging. Not one acquisition primitive below is changed.
 #
-# HOW THIS OBEYS "PRIMITIVES UNTOUCHED": it adds NO lock, changes NO flock/mkdir call,
-# and touches neither release() nor the hold. It is a PRE-ACQUISITION YIELD: a normal
-# build waits, BEFORE it begins acquiring, while a live tape-out build is waiting. The
-# acquisition sequence below is byte-identical to what it was.
+# ⭐ THE HEAD-OF-QUEUE TEST IS CHECK-THEN-ACT AND THAT IS FINE, BECAUSE CORRECTNESS NEVER
+#   DEPENDS ON TICKET ORDER. flock still provides exclusion and the 43 GB memory law; the
+#   tickets buy only FAIRNESS. A lost race costs ONE out-of-order acquisition, never two
+#   concurrent builds. Do NOT "harden" this into a lock.
 #
-# ⚠️⚠️ SCOPE OF WHAT THIS BUYS, STATED BECAUSE THE RULING SAYS "ACQUIRE NEXT" AND THIS
-# DELIVERS SOMETHING WEAKER: a normal build ALREADY BLOCKED INSIDE `flock -w` cannot see
-# the marker — flock blocks in the kernel — so it is not displaced and may take the next
-# slot. This lane biases the queue AT ENTRY; it does not guarantee "next" against a
-# builder already in line. ***THE STRICT GUARANTEE REQUIRES CHANGING THE ACQUISITION CALL
-# (a polling flock), WHICH THE RULING FORBIDS.*** Registered, not built: if the helm wants
-# strict "acquire next", that is the one-line change and it needs their word.
-#
-# ⚠️ AND THE BASELINE IS NOT FIFO. The ruling says "everything else remains FIFO behind
-# the lane"; measured at the object, this lock is a RACE, not a queue — flock(2) wakes
-# waiters in unspecified order and the interop-marker loop is a 5 s poll. Nothing here
-# makes it worse, and nothing here makes it FIFO. Naming it so the word is not inherited.
-#
-# ⚠️ PARTIAL ADOPTION IS SAFE BY CONSTRUCTION: a copy that has not pulled this simply does
-# not yield — it races as before. Priority degrades; exclusion and the 43 GB law do not.
-LANE_EXPIRES=20260908                 # first day the lane is OFF, per the ruling's own text
-LANE_ACTIVE=0
-[ "$(date +%Y%m%d)" -lt "$LANE_EXPIRES" ] && LANE_ACTIVE=1
-PRIO_GLOB="${LOCK}.prio"
-prio_clear() { rm -f "${PRIO_GLOB}.$$" 2>/dev/null; return 0; }
-# A live tape-out waiter = a prio file whose pid is alive. Dead ones are reaped, so a
-# crashed tape-out build cannot hold the fleet hostage.
-prio_live() {
-  local f pid found=1
-  for f in "${PRIO_GLOB}".*; do
-    [ -e "$f" ] || continue
-    pid="${f##*.}"
-    if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then found=0
-    else rm -f "$f" 2>/dev/null; fi
-  done
-  return $found
-}
-
-if [ "${TAPEOUT:-0}" = "1" ] && [ "$LANE_ACTIVE" = "1" ]; then
-  : > "${PRIO_GLOB}.$$" 2>/dev/null
-  trap prio_clear EXIT INT TERM
-  echo "saltbuild: PRIORITY LANE — tape-out build, normal builds will yield at entry (lane expires $LANE_EXPIRES)"
-elif [ "${TAPEOUT:-0}" = "1" ]; then
-  echo "saltbuild: PRIORITY LANE EXPIRED ($(date +%Y%m%d) >= $LANE_EXPIRES) — running as an ordinary build, pure FIFO"
-elif [ "$LANE_ACTIVE" = "1" ]; then
-  YIELDED=0
-  while prio_live; do
-    if [ "$YIELDED" -ge "$MAXWAIT" ]; then
-      echo "saltbuild: yielded ${YIELDED}s to the priority lane and STOPPED YIELDING (MAXWAIT) — acquiring normally."
-      break
-    fi
-    [ "$YIELDED" = 0 ] && echo "saltbuild: YIELDING at entry — a tape-out build is waiting (priority lane, council 08/27)"
-    sleep 5; YIELDED=$((YIELDED+5))
-    [ $((YIELDED % 300)) -eq 0 ] && echo "saltbuild: still yielding to the priority lane (${YIELDED}s)"
-  done
+# ⚠️ PARTIAL ADOPTION IS SAFE BY CONSTRUCTION, and it is why the layer is SOURCED:
+#   a copy without saltqueue.sh beside it defines no-ops, tickets nothing and waits for
+#   nothing — it races exactly as it did before. FAIRNESS degrades; exclusion and the
+#   memory law do not. That is the degradation already ratified for the 08/27 lane.
+# ⛔ RESOLVE THE SYMLINK CHAIN FIRST. Every seat invokes this as `../saltbuild.sh`, which is
+#   a SYMLINK into that seat's clone — and `dirname "$0"` yields the SYMLINK's directory, not
+#   the target's. Driven both ways before this line was written: direct invocation FINDS
+#   saltqueue.sh, symlink invocation does NOT, and the miss is SILENT because the absent-file
+#   branch below is a graceful no-op. The queue would have looked installed, passed every
+#   selftest, and done NOTHING in production on all five seats.
+SB_SELF="$0"
+while [ -L "$SB_SELF" ]; do
+  SB_DIR="$(cd -P "$(dirname "$SB_SELF")" && pwd)"
+  SB_SELF="$(readlink "$SB_SELF")"
+  case "$SB_SELF" in /*) ;; *) SB_SELF="$SB_DIR/$SB_SELF" ;; esac
+done
+SQ="$(cd -P "$(dirname "$SB_SELF")" && pwd)/saltqueue.sh"
+if [ -r "$SQ" ]; then
+  . "$SQ"
+else
+  q_take(){ :; }; q_wait(){ :; }; q_release(){ :; }
+  q_census(){ echo "  (saltqueue.sh not installed beside this copy — unqueued)"; }
 fi
-# ╚══ END PRIORITY LANE — the acquisition below is UNCHANGED ═════════════════════
+
+# CLASS: default P2; P1 typed per build via PRIO=P1.
+PRIO_CLASS="${PRIO:-P2}"
+# ⏰ TAPEOUT=1 → P1 ALIAS, MIGRATION ONLY (helm ruling 12:0x ②). NAMED RETIREMENT: it dies
+#   when the last saltbuild copy carries tickets, OR 2026-09-08 (the lane's own expiry),
+#   WHICHEVER IS FIRST. It PRINTS its own deprecation so it cannot outlive its reason.
+LANE_EXPIRES=20260908
+if [ "${TAPEOUT:-0}" = "1" ]; then
+  if [ "$(date +%Y%m%d)" -lt "$LANE_EXPIRES" ]; then
+    PRIO_CLASS=P1
+    echo "saltbuild: ⚠️ TAPEOUT=1 is DEPRECATED — treated as PRIO=P1 for migration only."
+    echo "saltbuild:    It retires when every saltbuild copy carries tickets, or ${LANE_EXPIRES}, whichever is first. Use PRIO=P1."
+  else
+    echo "saltbuild: ⚠️ TAPEOUT=1 IGNORED — the alias expired ${LANE_EXPIRES}. Use PRIO=P1."
+  fi
+fi
+
+q_take "$PRIO_CLASS" "${SEAT:-${SELF:-unknown}}"
+trap q_release EXIT INT TERM
+q_wait
+# ╚══ END QUEUE — the acquisition below is UNCHANGED ═════════════════════════════
 
 LOCKFILE="${LOCK}.flk"
 FLOCK="$(command -v flock 2>/dev/null || true)"
@@ -164,7 +156,7 @@ until mkdir "$LOCK" 2>/dev/null; do
   [ $((WAITED % 300)) -eq 0 ] && echo "saltbuild: waiting on the fleet lock (${WAITED}s)"
 done
 echo $$ > "$LOCK/pid"
-prio_clear   # we hold; drop our lane marker before the release trap takes over
+q_release    # we hold; drop our TICKET before the release trap takes over
 # The trap releases only the MARKER. The flock needs no trap: the kernel drops it when
 # this process and every descendant holding fd 9 is gone. Ownership-guarded because a trap
 # fires at signal-delivery AND again at exit (6/6 ate a new holder's marker unguarded).

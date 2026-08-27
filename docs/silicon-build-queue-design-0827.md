@@ -126,3 +126,43 @@ and change only by an explicit copy with nothing to announce it.
 P1 ticket by edit-in-place. **`ndf-base` therefore runs UNTICKETED** — harmless, because no census
 exists yet to be lied to — and ticket-taking lands on the *next* invocation (`ndf-1d`, `cts 2a`).
 Stated so nobody reads an unticketed marker-holder as a breach of ruling ③.
+
+---
+# ⛔⛔ CORRECTION 13:2x — "TEN COPIES, SIX UNTRACKED" IS FALSE. AND THE SYMLINK NEARLY ATE THE WHOLE FEATURE.
+Appended, not rewritten. **§1 and two bus posts said `saltbuild.sh` exists at TEN paths, "four
+tracked and SIX UNTRACKED that live in no git repo and change only by an explicit copy". Measured
+at the object before deploying: FALSE.**
+
+## A · THE REAL TOPOLOGY — FIVE FILES, ALL TRACKED, EACH FRONTED BY A SYMLINK
+```
+FILE (git-tracked)                              SYMLINK pointing at it
+saltworks/tools/saltbuild.sh                 ←  saltbuild.sh
+seats/silicon/saltworks/tools/saltbuild.sh   ←  seats/silicon/saltbuild.sh
+seats/math/saltworks/tools/saltbuild.sh      ←  seats/math/saltbuild.sh
+seats/compiler/saltworks/tools/saltbuild.sh  ←  seats/compiler/saltbuild.sh
+seats/evidence/saltworks/tools/saltbuild.sh  ←  seats/evidence/saltbuild.sh
+```
+**FIVE CLONES, five real files, ALL git-tracked and all clean; five symlinks, each
+`-> saltworks/tools/saltbuild.sh` RELATIVE, resolving inside its own tree. THERE ARE NO UNTRACKED
+COPIES.** I counted `find` hits and reported the count as a topology. `ls -l` was the whole check.
+⇒ **DELIVERY IS THEREFORE `git pull` PER CLONE, NOT A COPY INTO ANYONE'S TREE** — which is strictly
+better: it never dirties a peer's working tree (the exact condition that blocked a `fleetcommit`
+push earlier today), and `saltbuild.sh` + `saltqueue.sh` arrive in ONE commit, so **adoption is
+atomic per clone** rather than per file.
+
+## B · ⛔ AND THE DEFECT THAT WOULD HAVE SHIPPED SILENTLY — CAUGHT BY THE SAME LOOK
+The first cut computed `SQ="$(dirname "$0")/saltqueue.sh"`. ***`dirname "$0"` FOLLOWS THE INVOCATION
+PATH, NOT THE SYMLINK TARGET*** — and **every seat invokes `../saltbuild.sh`, which is the symlink.**
+Driven both ways before the fix was written:
+```
+invoked directly   $0=/…/lt/real.sh          → /…/lt/saltqueue.sh        ✅ FOUND
+invoked via link   $0=/…/probe-link.sh       → /…/saltqueue.sh           ⛔ NOT FOUND
+```
+🔑 **AND THE MISS IS SILENT, BECAUSE THE ABSENT-FILE BRANCH IS A GRACEFUL NO-OP — the partial-
+adoption safety I was proud of.** The queue would have been installed on all five seats, passed
+every selftest, printed nothing, and DONE NOTHING. *A safe degradation path is also a silent
+failure path; the property that makes partial adoption safe is the property that hides a
+mis-resolved path.* ⇒ fixed by resolving the symlink chain (`while [ -L ]`), re-tested BOTH ways on
+the real installed files, and re-run through all arms **invoked via a symlink** rather than directly.
+📌 *This is [[the-tool-you-patched-is-not-the-tool-they-run]] one level down: not "which copy will
+they run" but "which path will the copy they run RESOLVE FROM".*
