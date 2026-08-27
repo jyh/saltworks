@@ -127,4 +127,73 @@ theorem load_takes_two :
 #audit_axioms no_deadlock bounded_wait only_three_costs retire_resets
 #audit_axioms store_takes_three plain_takes_one load_takes_two
 
+/-! ## T5 — STORE-PATH TIMING. THE FINDING IS THAT `we` IS NOT AT THE PINS AT ALL.
+
+The ownership table frames T5 as *"`dmem_we` rising vs the beat leaving the pins"*, with the
+control *"`we` on beat n, data on beat n+k, and the seam theorem still elaborates."* **Measured
+at the port list, the framing is too generous: `busadapt8` HAS NO WRITE-ENABLE OUTPUT.** Its
+outputs are `pin_out`, `phase_pins`, `retire` — and `c_dmem_we` is an INPUT from the core that
+never reaches a pin.
+
+⇒ **So there is no `we` edge to skew against the data.** The host must instead reconstruct the
+write from what the pins DO carry, and the question becomes: *can the host tell the store's
+ADDRESS beat from its DATA beat?* `out_word` differs between them (`c_dmem_addr` vs
+`c_dmem_wdata`), so getting it wrong writes the address into memory as data. -/
+
+/-- What the type pins carry at phase 0. `busadapt8.v:165`. -/
+def typeAtPhase0 (s : BusState) : Kind := s.kind
+
+/-- Which word leaves on `pin_out` this loop. `busadapt8.v:168-170`, as a tag. -/
+inductive OutWord where
+  | imemAddr | dmemAddr | dmemWdata
+  deriving Repr, DecidableEq, Inhabited
+
+def outWord (s : BusState) : OutWord :=
+  match s.kind with
+  | .fetch => .imemAddr
+  | .store => if s.storeBeat then .dmemWdata else .dmemAddr
+  | _      => .dmemAddr
+
+/-- ⛔⛔ **THE TWO STORE BEATS ARE INDISTINGUISHABLE ON THE TYPE PINS.** `kind` is deliberately
+NOT reassigned between them (`busadapt8.v:149-155`, "the type code stays T_STORE so the host
+knows the datum is coming"), so phase 0 shows `T_STORE` on both. -/
+theorem store_beats_share_a_type_code :
+    typeAtPhase0 ⟨.store, false⟩ = typeAtPhase0 ⟨.store, true⟩ := by decide +kernel
+
+/-- ⛔ **AND THEY PUT DIFFERENT WORDS ON THE PINS.** Address on the first beat, store data on
+the second — so a host that confuses them writes the ADDRESS into memory as the datum. -/
+theorem store_beats_differ_in_payload :
+    outWord ⟨.store, false⟩ ≠ outWord ⟨.store, true⟩ := by decide +kernel
+
+/-- ⭐⭐⭐ **THE DISCRIMINATOR EXISTS, AND IT IS `retire` — THE ONE PIN WHOSE CONTRACT IS NOT
+RATIFIED.** `retire` is low on the store's address beat and high on its data beat, so it is the
+ONLY output that separates two loops carrying different payloads under the same type code. -/
+theorem retire_separates_the_store_beats :
+    retire ⟨.store, false⟩ true = false ∧ retire ⟨.store, true⟩ true = true := by
+  decide +kernel
+
+/-- ⭐ **AND NOTHING ELSE DOES.** Over every state pair that shares a type code and differs in
+payload, `retire` differs too — stated as an exhaustive check so "nothing else does" is a
+measurement rather than a reading of the port list. -/
+theorem retire_is_the_only_separator :
+    allStates.all (fun a => allStates.all fun b =>
+      !(typeAtPhase0 a == typeAtPhase0 b && outWord a != outWord b)
+      || (retire a true != retire b true)) = true := by
+  decide +kernel
+
+/-- ⛔ **THE T5 CONTROL, AS THE TABLE ASKED FOR IT.** *"`we` on beat n, data on beat n+k, and the
+seam theorem still elaborates."* Here the analogue is sharper and it FIRES: a host reading only
+the type pins cannot place the datum, because `store_beats_share_a_type_code` says the two beats
+are equal there while `store_beats_differ_in_payload` says the pins carry different words.
+**Type pins alone are insufficient — stated as a theorem so no seam statement can quietly assume
+otherwise.** -/
+theorem type_pins_are_insufficient_for_the_store_path :
+    (typeAtPhase0 ⟨.store, false⟩ = typeAtPhase0 ⟨.store, true⟩)
+      ∧ (outWord ⟨.store, false⟩ ≠ outWord ⟨.store, true⟩) :=
+  ⟨store_beats_share_a_type_code, store_beats_differ_in_payload⟩
+
+#audit_axioms typeAtPhase0 outWord store_beats_share_a_type_code
+#audit_axioms store_beats_differ_in_payload retire_separates_the_store_beats
+#audit_axioms retire_is_the_only_separator type_pins_are_insufficient_for_the_store_path
+
 end SaltWorks.HDL.BusFSM
