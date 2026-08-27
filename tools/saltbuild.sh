@@ -96,7 +96,23 @@ if [ "${TAPEOUT:-0}" = "1" ]; then
   fi
 fi
 
-q_take "$PRIO_CLASS" "${SEAT:-${SELF:-unknown}}"
+# SEAT — DERIVED FROM THE RESOLVED PATH, not left to the caller. compiler's catch 13:2x: a
+# caller who does not know to export SEAT logged `seat=unknown`, which is EXACTLY the column
+# `q_census` prints to answer "who is queued". A queue view that cannot name the holder is the
+# same defect class as a marker-holder with no ticket: the census renders, and it is a LIE.
+# An explicit SEAT/SELF still wins; the path is the fallback, and "unknown" is now the last
+# resort rather than the default.
+SB_SEAT="${SEAT:-${SELF:-}}"
+if [ -z "$SB_SEAT" ]; then
+  case "$SB_SELF" in
+    */seats/*/saltworks/tools/saltbuild.sh)
+      SB_SEAT="${SB_SELF#*/seats/}"; SB_SEAT="${SB_SEAT%%/*}" ;;
+    */saltworks/tools/saltbuild.sh)
+      SB_SEAT="root" ;;
+    *) SB_SEAT="unknown" ;;
+  esac
+fi
+q_take "$PRIO_CLASS" "$SB_SEAT"
 trap q_release EXIT INT TERM
 q_wait
 # ╚══ END QUEUE — the acquisition below is UNCHANGED ═════════════════════════════
