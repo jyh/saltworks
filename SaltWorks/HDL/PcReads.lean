@@ -55,7 +55,7 @@ def pcOf    (ins : Env) : BitVec 32 := wordOf (fun k => ins (pcNet k))
 def rs1Of   (ins : Env) : BitVec 32 := wordOf (fun k => run ins coreThruRw (rs1Out k))
 def rs2Of   (ins : Env) : BitVec 32 := wordOf (fun k => run ins coreThruRw (rs2Out k))
 def immOf   (ins : Env) : BitVec 32 := wordOf (fun k => run ins coreThruRw (immOut k))
-def isBEQOf' (ins : Env) : Bool := run ins coreThruRw (decOut 4)
+def isBEQOf' (ins : Env) : Bool := run ins coreThruRw (decOut isBEQLine)
 
 theorem pcAdd_nIn_129 : SaltWorks.Stack.Program.pcAdd.nIn = 129 := by decide +kernel
 
@@ -88,7 +88,7 @@ theorem pcEnv_agrees (ins : Env) (i : Nat) (hi : i < SaltWorks.Stack.Program.pcA
         by_cases h3 : i < 128
         · rw [if_pos h3, show pcAddSig i = immOut (i - 96) from by simp [pcAddSig, h0, h1, h2, h3],
               immOf, wordOf_getLsbD _ _ (by omega)]
-        · rw [if_neg h3, show pcAddSig i = decOut 4 from by simp [pcAddSig, h0, h1, h2, h3],
+        · rw [if_neg h3, show pcAddSig i = decOut isBEQLine from by simp [pcAddSig, h0, h1, h2, h3],
               isBEQOf']
 
 theorem pcAdd_out_bound (k : Nat) (hk : k < 32) :

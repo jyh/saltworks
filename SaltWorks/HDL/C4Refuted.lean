@@ -166,8 +166,8 @@ theorem enable_insI : run insI core.gates (rwOut r1.val) = true :=
 
 /-- `useImm = isADDI` is HIGH, so `sem_obMux` says the bank delivered IS the immediate bank —
 the disagreement cannot be blamed on `rs2` or on mux polarity. -/
-theorem useImm_high_insI : run insI core.gates (decOut 3) = true :=
-  (runB_eq core.gates sI (decOut 3)).symm.trans (by decide +kernel)
+theorem useImm_high_insI : run insI core.gates (decOut isADDILine) = true :=
+  (runB_eq core.gates sI (decOut isADDILine)).symm.trans (by decide +kernel)
 
 /-- ⭐⭐⭐ **THE `ADDI` REPAIR'S RECEIPT — SAME WITNESS, OPPOSITE ANSWER.**
 

@@ -302,7 +302,7 @@ and can only catch a swap; this pins the index to its MEANING through
 `sem_decoder_eq_ctrlSpec`. *This is the control whose absence let the original defect live,
 and it is stated here because `ctrlSpec` is not in scope where the σ is written.* -/
 theorem valid_is_decoder_output_8 (ins : Env) :
-    run ins coreThru13 (decOut 8) = (ctrlSpec (seenWord ins)).getD 8 false :=
+    run ins coreThru13 (decOut validLine) = (ctrlSpec (seenWord ins)).getD 8 false :=
   core_decOut_spec ins 8 (by omega)
 
 #audit_axioms coreThru13_split coreRest11_out_ge
@@ -353,8 +353,8 @@ theorem decOut_thru11 (ins : Env) (j : Nat) (hj : j < 9) :
 theorem gsSel0_is_96 : gsSel rsOps rsSelBits 0 = 96 := by decide +kernel
 theorem gsSel1_is_97 : gsSel rsOps rsSelBits 1 = 97 := by decide +kernel
 
-theorem selSig_96 : selSig 96 = decOut 1 := by simp [selSig]
-theorem selSig_97 : selSig 97 = decOut 2 := by simp [selSig]
+theorem selSig_96 : selSig 96 = decOut isXORLine := by simp [selSig]
+theorem selSig_97 : selSig 97 = decOut isSLTLine := by simp [selSig]
 
 /-- ⭐⭐ **THE SELECT NETS CARRY `isXOR` AND `isSLT` AS `ctrlSpec` DEFINES THEM.**
 
@@ -370,10 +370,10 @@ theorem sel_nets_agree (ins : Env) :
         = (ctrlSpec (seenWord ins)).getD 2 false := by
   constructor
   · show run ins coreThru11 (selSig (gsSel rsOps rsSelBits 0)) = _
-    rw [gsSel0_is_96, selSig_96, ← decOut_thru11 ins 1 (by omega)]
+    rw [gsSel0_is_96, selSig_96, ← decOut_thru11 ins isXORLine (by decide +kernel)]
     exact core_decOut_spec ins 1 (by omega)
   · show run ins coreThru11 (selSig (gsSel rsOps rsSelBits 1)) = _
-    rw [gsSel1_is_97, selSig_97, ← decOut_thru11 ins 2 (by omega)]
+    rw [gsSel1_is_97, selSig_97, ← decOut_thru11 ins isSLTLine (by decide +kernel)]
     exact core_decOut_spec ins 2 (by omega)
 
 #audit_axioms decOut_lt_offSel decOut_lt_offEnc decOut_thru11

@@ -44,15 +44,15 @@ def rdOf (ins : Env) : Nat :=
 /-- ⛔ `validOf` READS `decOut 8`, WHICH MEANS "DECODES" — true on every decodable word,
 STORES INCLUDED. **It no longer drives the enable.** Kept because `DecoderTransport` states its
 `ctrlSpec` bridge over it and that bridge is still true and still useful. -/
-def validOf (ins : Env) : Bool := run ins coreThru13 (decOut 8)
-def isBEQOf (ins : Env) : Bool := run ins coreThru13 (decOut 4)
+def validOf (ins : Env) : Bool := run ins coreThru13 (decOut validLine)
+def isBEQOf (ins : Env) : Bool := run ins coreThru13 (decOut isBEQLine)
 
 /-! ### The five WRITE flags — what the enable reads after the 2026-08-19 repair. -/
-def isADDOf  (ins : Env) : Bool := run ins coreThru13 (decOut 0)
-def isXOROf  (ins : Env) : Bool := run ins coreThru13 (decOut 1)
-def isSLTOf  (ins : Env) : Bool := run ins coreThru13 (decOut 2)
-def isADDIOf (ins : Env) : Bool := run ins coreThru13 (decOut 3)
-def isLWOf   (ins : Env) : Bool := run ins coreThru13 (decOut 5)
+def isADDOf  (ins : Env) : Bool := run ins coreThru13 (decOut isADDLine)
+def isXOROf  (ins : Env) : Bool := run ins coreThru13 (decOut isXORLine)
+def isSLTOf  (ins : Env) : Bool := run ins coreThru13 (decOut isSLTLine)
+def isADDIOf (ins : Env) : Bool := run ins coreThru13 (decOut isADDILine)
+def isLWOf   (ins : Env) : Bool := run ins coreThru13 (decOut isLWLine)
 
 /-- **The disjunction the enable now computes**: "this instruction writes a register". -/
 def writesRegOf (ins : Env) : Bool :=
@@ -95,12 +95,12 @@ theorem envRW_agrees (ins : Env) (i : Nat) (hi : i < regWrite.nIn) :
     simp [rdOf_testBit ins 3 (by omega)]
   · rw [show regWriteSig 4 = rdBit 4 from rfl, core_rd_is_the_instruction ins 4 (by omega)]
     simp [rdOf_testBit ins 4 (by omega)]
-  · simp [isADDOf,  show regWriteSig 5  = decOut 0 from rfl]
-  · simp [isBEQOf,  show regWriteSig 6  = decOut 4 from rfl]
-  · simp [isXOROf,  show regWriteSig 7  = decOut 1 from rfl]
-  · simp [isSLTOf,  show regWriteSig 8  = decOut 2 from rfl]
-  · simp [isADDIOf, show regWriteSig 9  = decOut 3 from rfl]
-  · simp [isLWOf,   show regWriteSig 10 = decOut 5 from rfl]
+  · simp [isADDOf,  show regWriteSig 5  = decOut isADDLine from rfl]
+  · simp [isBEQOf,  show regWriteSig 6  = decOut isBEQLine from rfl]
+  · simp [isXOROf,  show regWriteSig 7  = decOut isXORLine from rfl]
+  · simp [isSLTOf,  show regWriteSig 8  = decOut isSLTLine from rfl]
+  · simp [isADDIOf, show regWriteSig 9  = decOut isADDILine from rfl]
+  · simp [isLWOf,   show regWriteSig 10 = decOut isLWLine from rfl]
 
 theorem regWrite_out_bound (k : Nat) (hk : k < 32) :
     regWrite.outs.getD k 0 < regWrite.nIn + regWrite.gates.length := by
