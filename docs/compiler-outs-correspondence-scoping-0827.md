@@ -68,12 +68,49 @@ Compose with the **landed** organ theorem `OperandBMux.out_sem_obMux`:
 BITS [4:2] OF `rs1 + rs2`. THE ISA CALLS FOR `rs1 + sext(imm_S)`.*** They coincide only when
 `rs2 = sext(imm_S)` — accidentally.
 
-⚠️ **THIS IS A SCOPE FACT, NOT AN ACCUSATION, AND THE DISTINCTION IS THE DESIGN OWNER'S TO MAKE.**
-`obMux` selects the immediate on `isADDI` alone; the S-type immediate is **not placed anywhere in
-the datapath**. Whether that is a DEFECT or an UNBUILT ROADMAP ITEM is not mine to rule —
-`docs/QUEUE.md:156` records Slice-B's `LW/SW/JAL/JALR` as carrying sign-extended immediates on
-*arrival*, which reads as roadmap. **Either way leg ① cannot be proved for `SW` until an S-type
-immediate reaches operand B.**
+### ⛔⛔ CORRECTED SAME DAY, 13:1x — I NAMED THE WRONG OBJECT, AND THE RTL IS RIGHT
+
+**This section first read: *"the S-type immediate is not placed anywhere in the datapath."* That is
+true of the LEAN datapath. IT IS FALSE OF THE RTL, and I wrote it as though about THE DESIGN.**
+
+```verilog
+core32.v:79   wire alu_src = is_immop|is_load|is_store|is_jalr;   ← A STORE SELECTS THE IMMEDIATE
+core32.v:88   assign imm = is_store ? imm_s : is_br ? imm_b : ...
+core32.v:98   wire [31:0] b_op = alu_src ? imm : rf2;
+core32.v:134  assign dmem_addr = alu_y;
+ctrl32.v:40   assign imm_s = {{20{instr[31]}}, instr[31:25], instr[11:7]};
+```
+⇒ **IN THE RTL A STORE COMPUTES `rf1 + imm_s`, WHICH IS THE ISA.** The S-type immediate is built,
+sign-extended and selected, in two independent modules.
+
+⭐ ***SO THE DIVERGENCE IS LEAN-MODEL-vs-RTL, AND THE LEAN MODEL IS THE NARROWER ARTIFACT:*** its
+operand-B select is `decOut isADDILine` alone where the RTL's is a four-way
+`is_immop | is_load | is_store | is_jalr`. **Not a silicon defect and not an absent feature — a Lean
+`obMux` modelling one case of a four-case select.**
+
+**AND `memOrgan` IS NOT IN `core.gates` AT ALL** (0 occurrences in `CoreAssembly.lean`; `core` is
+sixteen blocks and the organ is not among them). `mem_instOK_placed` proves a placement would be
+LEGAL at `offMem`; **it does not place it.** So nothing in the Lean core acts on that address either.
+
+📌 **THE §3 CHAIN IS UNAFFECTED — all six links are statements about Lean nets and all six still
+hold.** What was wrong was the sentence around them, which named the design when it had measured the
+model. ⚠️ **NOT MEASURED BY ME, and it is the half that decides chip risk: which RTL top was
+fabricated, and whether the netlist imported into Lean corresponds to `core32.v`. That is silicon's
+to answer.** Do not carry *"the chip is fine"* from this file — carry *"the RTL in this tree computes
+the store address correctly, and the Lean model does not."*
+
+⚠️ **WHAT THE ITEM IS NOW:** a VERIFICATION-GAP item, post-tape-out, no mask implication — moved
+there from *"a fabricated chip may compute a silent wrong store address"*. **And it makes this work
+more valuable, not less: the divergence is exactly what an ISA-level `outs` theorem exists to catch,
+and it was invisible to `instOK`, to four negative controls, and to me until I read the Verilog.**
+
+*(Original wording preserved below, struck, because a correction that erases its subject leaves the
+next reader unable to check it.)*
+> ~~`obMux` selects the immediate on `isADDI` alone; the S-type immediate is **not placed anywhere in
+> the datapath**. Whether that is a DEFECT or an UNBUILT ROADMAP ITEM is not mine to rule —
+> `docs/QUEUE.md:156` records Slice-B's `LW/SW/JAL/JALR` as carrying sign-extended immediates on
+> *arrival*, which reads as roadmap.~~ **Leg ① still cannot be PROVED for `SW` in Lean until the
+> model's operand-B select covers the store case.**
 
 📌 **NOT THE SAME AS TWO NEARBY RECORDED FINDINGS, checked before claiming novelty:**
 `C4Refuted.lean:113` states its two further refutations are *"NEITHER ABOUT STORES"*, and its `SW`
