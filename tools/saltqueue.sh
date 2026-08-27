@@ -129,12 +129,29 @@ q__key() {
   printf '%s|%019d|%010d' "$rank" "$ns" "$pid"
 }
 
+# ⛔ AHEAD-OF-ME, not ALL-LIVE. `q_census_count` counts every live ticket INCLUDING THE
+# CALLER'S OWN, so the queue message read "QUEUED behind 2 ticket(s)" with exactly ONE
+# waiter ahead — measured 2026-08-27 13:47 in the run that first demonstrated ordering.
+# The sentence says "behind N", so N must exclude self and everything sorting after me.
+q__ahead_count() {
+  local f n=0
+  [ -n "$Q_TICKET" ] || { echo 0; return 0; }
+  local mine; mine="$(q__key "$Q_TICKET")"
+  for f in "${Q_TKT_GLOB}".*; do
+    [ -e "$f" ] || continue
+    [ "$f" = "$Q_TICKET" ] && continue
+    q__live "$f" || continue
+    [ "$(printf '%s\n%s\n' "$mine" "$(q__key "$f")" | sort | head -1)" = "$(q__key "$f")" ] && n=$((n+1))
+  done
+  echo "$n"
+}
+
 q_wait() {
   local waited=0
   [ -n "$Q_TICKET" ] || return 0
   q__reap
   while q__ahead; do
-    [ "$waited" = 0 ] && echo "saltqueue: QUEUED behind $(q_census_count) ticket(s) — waiting (no timeout, by ruling)"
+    [ "$waited" = 0 ] && echo "saltqueue: QUEUED behind $(q__ahead_count) ticket(s) — waiting (no timeout, by ruling)"
     sleep 5; waited=$((waited+5))
     [ $((waited % 300)) -eq 0 ] && { echo "saltqueue: still queued (${waited}s) —"; q_census; }
   done
