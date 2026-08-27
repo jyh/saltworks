@@ -72,10 +72,28 @@ SALTBUILD=/Users/jyh/projects/claude/saltbuild.sh
 # 🔑 A CONSTANT THAT TRACKS SOMEONE ELSE'S CONSTANT IS A DEFECT WAITING FOR THEM
 #   TO EDIT IT. Read the value, do not mirror it — and REFUSE if the relationship
 #   the test depends on has stopped holding.
-DEFCAP=$(awk -F= '/^CAP=/{gsub(/[^0-9]/,"",$2); print $2; exit}' "$SALTBUILD" 2>/dev/null)
+# ⛔⛔ HARDENED 2026-08-27 02:3x — THE EXTRACTION ABOVE WAS COMMENT-FRAGILE AND THE
+# GUARD BELOW IT COULD NOT CATCH THE RESULT. `gsub(/[^0-9]/,"",$2)` is correct ONLY
+# because `CAP=24000` carries no trailing comment. Measured on a commented sibling
+# the same night (memreach.py's `LOADER_CAP_CHARS = 24985  # 24.4 KiB … 2026-08-26`)
+# the identical idiom returned **2498524420260826** — the comment's digits smeared
+# into the value.
+# ⇒ AND THE OLD `-eq 0` GUARD WOULD HAVE WAVED THAT THROUGH: a smear is non-empty and
+#   all-digits, so it passes every "is it a number" test, `HICAP=DEFCAP*2` stays ABOVE
+#   DEFCAP so the second guard passes too — and a NONSENSE RETRY CAP reaches `lean -M`,
+#   i.e. the number standing between a build and the 43 GB fleet ceiling.
+# ***A VALUE THAT SATISFIES EVERY SANITY CHECK AND IS THE WRONG QUANTITY IS THIS SEAT'S
+# DOMINANT FAILURE SHAPE.*** The cure is to strip the comment FIRST and BOUND THE RANGE.
+# 📌 Fixed here because the sibling was fixed an hour earlier: A FIX THAT REACHES ONE ARM
+# OF A TOOL AND NOT ITS SIBLING LEAVES THE DEFECT LIVE UNDER A NEW SPELLING — this file
+# says so itself at its 08-11 comment. saltbuild's line is bare TODAY; this is a guard
+# against the edit that makes it not bare, which is precisely what the block above warns of.
+DEFCAP=$(awk -F= '/^CAP=/{sub(/#.*/,"",$2); gsub(/[^0-9]/,"",$2); print $2; exit}' "$SALTBUILD" 2>/dev/null)
 case "$DEFCAP" in ''|*[!0-9]*) DEFCAP=0 ;; esac
-if [ "$DEFCAP" -eq 0 ]; then
-  echo "⛔ meas_build: cannot read CAP= from $SALTBUILD — refusing to guess the retry cap"
+if [ "$DEFCAP" -lt 1000 ] || [ "$DEFCAP" -gt 200000 ]; then
+  echo "⛔ meas_build: CAP= read from $SALTBUILD is $DEFCAP — outside the plausible range"
+  echo "   [1000,200000]. Refusing to derive a retry cap from it. If saltbuild's CAP line"
+  echo "   grew a trailing comment, the digits may have smeared; read the line by hand."
   exit 2
 fi
 HICAP=${HICAP:-$(( DEFCAP * 2 ))}
