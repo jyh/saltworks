@@ -67,7 +67,15 @@ while [ -L "$SB_SELF" ]; do
   SB_SELF="$(readlink "$SB_SELF")"
   case "$SB_SELF" in /*) ;; *) SB_SELF="$SB_DIR/$SB_SELF" ;; esac
 done
-SQ="$(cd -P "$(dirname "$SB_SELF")" && pwd)/saltqueue.sh"
+# ⛔ ABSOLUTISE UNCONDITIONALLY. The loop above only runs when $0 IS a symlink, so a plain
+#   relative invocation (`bash ./tools/saltbuild.sh`) left SB_SELF relative and the seat
+#   `case` below could not match — it reported `seat=unknown`. compiler's catch 13:4x, and
+#   the sharp half of it: via `../saltbuild.sh` the derivation LOOKED correct only because
+#   that path happens to be a symlink and the readlink loop absolutised it as a side effect.
+#   ⇒ ***A CRITERION THAT YOUR OWN INVOCATION SATISFIES BY ACCIDENT CANNOT CHECK ANYONE ELSE.***
+#   Driven both ways before and after: relative `./tools/…` said `unknown`, now says the seat.
+SB_SELF="$(cd -P "$(dirname "$SB_SELF")" && pwd)/$(basename "$SB_SELF")"
+SQ="$(dirname "$SB_SELF")/saltqueue.sh"
 if [ -r "$SQ" ]; then
   . "$SQ"
 else
