@@ -198,6 +198,42 @@ missing_import_oleans() {
 MEAS_NOBUILD="${MEAS_NOBUILD:-0}"
 buildstate=0
 
+# ── FRESHNESS: ASK LAKE ONCE, BEFORE ANY WITNESS ──────────────────────────────
+# ⛔⛔ ADDED 08/26 23:5x AFTER NINE REDS THAT WERE ALL BUILD STATE — and after the
+# fix I landed three hours earlier reported NOTHING on any of them.
+#
+# That fix asks "does the olean EXIST". After a rename landing the oleans EXIST and
+# are STALE (measured: sources 23:45, oleans 17:45-22:09), so it was blind to the
+# entire class. ***EXISTENCE IS NOT CURRENCY*** — this seat's own banked law,
+# arriving inside the fix built that same night to honour it.
+#
+# ⛔⛔ AND THE HEURISTIC I HAD BANKED IS REFUTED, WHICH MATTERS MORE THAN THE HOLE:
+# "read the WALL TIME — 1s is an import failing to resolve, 84s is an elaboration"
+# HOLDS ONLY FOR AN ABSENT OLEAN. A STALE one elaborates for 44s / 34s / 7s and
+# fails with rich, specific, wholly convincing errors: `has already been declared`,
+# `Type mismatch`, `unsolved goals`, `depends on sorryAx`. Nine of them, against a
+# peer's landing. ***TRUSTING WALL TIME WOULD HAVE PUBLISHED NINE FALSE
+# ACCUSATIONS.*** The only thing that discriminated was asking lake:
+#     ../saltbuild.sh SaltWorks.HDL.CorePlace -> EXIT=0, 8,617 jobs, theorems tick.
+#
+# ⇒ SO STOP RE-IMPLEMENTING FRESHNESS. lake owns trace hashes; an mtime comparison
+#   beside it is A SECOND IMPLEMENTATION OF A CHECK THAT ALREADY EXISTS, and this
+#   fleet's rule tonight is ONE CONSUMER, NOT A SECOND IMPLEMENTATION.
+#   ⚠️ Deliberately UNCONDITIONAL: no "only if it looks stale" guard, because such a
+#   guard would be exactly the second implementation, and a heuristic that MISSES
+#   staleness puts the manufactured reds straight back. It is ONE lock acquisition
+#   and a no-op when the tree is current.
+echo "  ── FRESHNESS: module form on the hub root, so every witness below runs against"
+echo "     CURRENT oleans. lake decides what is stale; this gate does not guess."
+"$SALTBUILD_SH" SaltWorks > /dev/null 2>&1
+_fresh=$?
+echo "     saltbuild SaltWorks EXIT=$_fresh"
+if [ "$_fresh" -ne 0 ]; then
+  echo "  ⛔ THE COVERING BUILD FAILED — every verdict below would be against an unknown"
+  echo "     tree state. That is a BUILD-STATE result, NOT a defect in anyone's landing."
+  echo "     Fix the tree first; do not read the reds below as findings."
+fi
+
 rc=0
 for f in $changed; do
   if [ ! -f "$f" ]; then
@@ -205,9 +241,14 @@ for f in $changed; do
     continue
   fi
   # ── PRE-FLIGHT: supply in-range oleans BEFORE spending the kernel ────────────
-  # Reading the WALL TIME was the old advice ("1s is an import failing to
-  # resolve, 84s is an elaboration"). That is a diagnosis offered to a human
-  # AFTER the fact; this refuses the condition instead.
+  # ⚠️ SCOPE, CORRECTED 08/26 23:5x AND NARROWED BY MEASUREMENT — DO NOT READ THIS
+  # BLOCK AS COVERING BUILD STATE GENERALLY. It refuses the ABSENT olean only.
+  # It reported NOTHING on nine STALE-olean reds the same night. The freshness step
+  # above is what covers those; this remains for its explanatory naming of the
+  # in-range self-hole (a file this sweep certified green, whose olean it declined
+  # to write) and as a second net if the hub build is skipped.
+  # *The sentence here used to read "this refuses the condition instead", which
+  # over-claimed the scope of a real fix by exactly one failure class.*
   miss=$(missing_import_oleans "$f")
   if [ -n "$miss" ]; then
     echo "  ⓘ BUILD STATE for $f — import olean(s) absent BEFORE the kernel ran:"
