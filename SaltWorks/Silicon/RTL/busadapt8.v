@@ -123,12 +123,36 @@ module busadapt8(clk, rst_n, sof,
     //   · it does NOT ratify the enable. `en = retire` remains a MARKED
     //     VALIDATION ARTIFACT and `plane32bus` carries that marking forward.
     //
-    // ⚠️ AND ONE THING I DO NOT KNOW, LEFT VISIBLE RATHER THAN SMOOTHED: `instr_r`
-    // is written on the phase-3 edge and `kind`/`store_beat` update on that SAME
-    // edge, so this decision reads a `c_dmem_req` derived from the PREVIOUS
-    // instruction. Whether that is off-by-one or exactly right I have not proved;
-    // the design's §3 was already wrong about its own mechanism once, so a
-    // plausible story is not good enough here. The bench is what speaks.
+    // ⛔⛔ THE PARAGRAPH BELOW IS ANSWERED — AND IT WAS ANSWERED 2.5 HOURS AFTER IT
+    // WAS WRITTEN, IN THIS FILE, ~90 LINES DOWN. It is kept verbatim (struck, not
+    // deleted) because compiler cites these lines and because the record matters.
+    // ── STRUCK 2026-08-26 19:4x, silicon ──────────────────────────────────────
+    //   > ⚠️ AND ONE THING I DO NOT KNOW, LEFT VISIBLE RATHER THAN SMOOTHED:
+    //   > `instr_r` is written on the phase-3 edge and `kind`/`store_beat` update
+    //   > on that SAME edge, so this decision reads a `c_dmem_req` derived from the
+    //   > PREVIOUS instruction. Whether that is off-by-one or exactly right I have
+    //   > not proved; the design's §3 was already wrong about its own mechanism
+    //   > once, so a plausible story is not good enough here. The bench is what
+    //   > speaks.
+    // ── THE ANSWER, AND THE BENCH DID SPEAK ───────────────────────────────────
+    // THE INSTRUCTION BYPASS (this file, `assign c_instr = …`, ratified 08/18
+    // 16:5x — i.e. AFTER the struck paragraph, which was written at 14:2x) makes
+    // `c_instr` present the NEWLY ASSEMBLED word at exactly `kind == T_FETCH &&
+    // phase == 2'd3`. `loop_end` IS `phase == 2'd3`. So at the decision edge the
+    // decode reads the CURRENT instruction, not the previous one.
+    // ✅ MEASURED 2026-08-26, BOTH ARMS, by `Sim/wordonly/run_lwsw_bypass_control.sh`:
+    //     ARM A  as shipped      → 6/6 PASS
+    //     ARM B  bypass defeated → RED, 2/6 FAIL, and it reproduces the recorded
+    //            08/18 signature EXACTLY: st_data=00000000, instr=0000a183, rs2=0
+    //   ⇒ the bench DISCRIMINATES on this quantity; ARM A's green is evidence and
+    //     not a replay. The runner REFUSES if ARM B ever goes green.
+    // ⚠️ SCOPE, BECAUSE THIS IS NOT A DISCHARGE OF THE PAIR ITEM: this settles the
+    //   RTL side only. compiler's `off_by_one_confined_to_fetch` (`ab6bc2b`) proves
+    //   `retire` consults `req` in the FETCH state and NOWHERE ELSE, which is what
+    //   makes this RTL fact SUFFICIENT rather than merely encouraging. What remains
+    //   unproved is the NETLIST↔Lean correspondence (`sem (bridge nl outs) ≡ runP`),
+    //   and that is the bridge induction already routed off this seat — a KNOWN
+    //   blocker, not a new one.
     always @(posedge clk)
         if (!rst_n) begin kind <= T_FETCH; store_beat <= 1'b0; end
         else if (sof) begin
