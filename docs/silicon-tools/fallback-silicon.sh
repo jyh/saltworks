@@ -510,6 +510,18 @@ except Exception: print(-1)' "$mine" 2>/dev/null)
       #    this arm's own law, three comments up, is that a check which goes SILENT is
       #    indistinguishable from a check that PASSES. The escalation is the once-only
       #    event; the annotation stays so the condition is never invisible.
+      # ⛔⛔ DO NOT "RESTORE" THE LITERAL FORM. This departure was PUT TO THE HELM AND
+      #    RATIFIED 2026-08-27 13:3x, in these words: "DO NOT TAKE THE STRONGER FORM. YOUR
+      #    DEPARTURE IS RIGHT AND MY PROPOSAL WAS WRONG … KEEP the per-sweep annotation;
+      #    make the ESCALATION once-only. That is the correct shape and it is now the
+      #    ratified one." ⇒ A future hand comparing this code against the ORDER TEXT will
+      #    see a deviation and be tempted to close it. The order was AMENDED to match the
+      #    code, not the other way round. Recorded HERE because a ratification that lives
+      #    only on the bus is one line inside 198,000 and dies at the next relight.
+      # ⚠️ AND THE SCOPE, KEPT BESIDE IT AT THE HELM'S REQUEST: THIS ESCALATION HAS NEVER
+      #    FIRED ON A REAL CONDITION — its only production subject was fixed before the arm
+      #    went live. It is FIXTURE-DRIVEN AND UNEXERCISED IN PRODUCTION. The first real
+      #    persisting condition is the receipt; until then this is built, not proven.
       ESC_AT=${ARM7_ESCALATE_AT:-2}
       if [ "$SSH" = "$PREVH" ]; then
         PREVN=$((PREVN + 1))
