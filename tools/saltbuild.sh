@@ -71,6 +71,11 @@ SQ="$(cd -P "$(dirname "$SB_SELF")" && pwd)/saltqueue.sh"
 if [ -r "$SQ" ]; then
   . "$SQ"
 else
+  # ⛔ SAY SO. A silent no-op here is indistinguishable from a MIS-RESOLVED PATH — which is
+  #   exactly how this feature nearly shipped inert on all five seats (dirname "$0" followed
+  #   the symlink's directory, not the target's). Printing the RESOLVED path is what makes the
+  #   difference diagnosable. Never let the good branch and the broken branch look identical.
+  echo "saltbuild: saltqueue.sh NOT FOUND at ${SQ} — running UNQUEUED (exclusion and the 43GB law are unaffected)"
   q_take(){ :; }; q_wait(){ :; }; q_release(){ :; }
   q_census(){ echo "  (saltqueue.sh not installed beside this copy — unqueued)"; }
 fi
