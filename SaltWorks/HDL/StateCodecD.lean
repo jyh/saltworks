@@ -314,23 +314,52 @@ renumbering would cost. -/
 more flops and 257 more D-roots than the landed 1056. -/
 theorem extension_costs_257_bits : stWidthD - stWidth = 257 := by decide +kernel
 
-/-- Where the instruction word would sit under the D layout — the definitional consequence
-of `instrBase := stWidth` once `stWidth` becomes 1313. -/
-def instrBaseD : Nat := stWidthD
+/-! ### ⛔⛔ `instrBaseD` AND `renumbering_offsets` ARE SUPERSEDED — RATIFIED 2026-08-26
 
-/-- **THE RENUMBERING, AS TWO NUMBERS.** `instrBase` moves 1056 → 1313 and the gate-chain
-anchor `coreInWidth` (`offTie`) moves 1088 → 1345: every instruction net and every gate
-offset above the input region shifts by exactly 257. -/
-theorem renumbering_offsets :
-    instrBaseD = 1313 ∧ instrBaseD + 32 = 1345 ∧
-    instrBaseD - instrBase = 257 ∧ (instrBaseD + 32) - coreInWidth = 257 := by
+**They were correct, and they are gone rather than adjusted.** They pinned the instruction base
+at **1313** and the shift at **257**, which is right for the memory+trap widening ALONE. The
+Captain ratified the adapter-state widening on 2026-08-26 (*"Yes, renumber"*), so the state also
+carries `kind` (2 bits) and `storeBeat` (1) — and the true base is **1316**, the true shift
+**260**.
+
+🔑 ***SUPERSEDED, NOT ADJUSTED, AND THE DISTINCTION IS THE WHOLE POINT.*** An `instrBaseD`
+edited from 1313 to 1316 is **indistinguishable at every check this tree runs** from one that was
+always right: `stWidthD_value`, the codec round trip and the disjointness arm all hold at either
+value, because each layout is internally consistent. **Deleting the name forces every consumer to
+be re-read at the new base instead of silently inheriting a number.** *A loud break is the
+purchase; a silent three-bit skew is what it buys us out of.*
+📌 *The record of WHY — that the superseded pair was short by exactly 3 — is kept as
+`AdapterStateOrgan.D_constants_are_short_by_three`, for the future hand who finds 257 in the
+history and wonders whether the 3 was ever considered.* -/
+
+/-- The adapter state the fallback brings into the domain: `kind` (2) + `storeBeat` (1). -/
+def stWidthAdapter : Nat := 3
+
+/-- ⭐ **THE RATIFIED STATE WIDTH.** Registers, pc, memory, trap, and the adapter's three bits. -/
+def stWidthFull : Nat := stWidthD + stWidthAdapter
+
+/-- Where the instruction word sits under the ratified layout. -/
+def instrBaseFull : Nat := stWidthFull
+
+/-- The gate-chain anchor (`offTie`) under the ratified layout. -/
+def coreInWidthFull : Nat := stWidthFull + 32
+
+theorem stWidthFull_value : stWidthFull = 1316 := by decide +kernel
+
+/-- ⭐⭐ **THE RENUMBERING, AS ONE ACT.** `instrBase` moves 1056 → 1316 and the gate-chain anchor
+moves 1088 → 1348: every instruction net and every gate offset above the input region shifts by
+exactly **260**. *Never 257 and then 3 — an offset computed against the intermediate is short by
+three and nothing in the tree would refuse it.* -/
+theorem renumbering_offsets_full :
+    instrBaseFull = 1316 ∧ coreInWidthFull = 1348 ∧
+    instrBaseFull - instrBase = 260 ∧ coreInWidthFull - coreInWidth = 260 := by
   decide +kernel
 
-/-- The D-layout instruction nets stay disjoint from the state — the same property
-`instr_nets_disjoint_from_state` states for the landed layout, re-established at the new
-base rather than assumed to survive. -/
-theorem instrD_nets_disjoint_from_state :
-    ((List.range 32).all fun k => instrBaseD + k ≥ stWidthD) = true := by decide +kernel
+/-- The full layout's instruction nets stay disjoint from the state — the same property
+`instr_nets_disjoint_from_state` states for the landed layout, re-established at the ratified
+base rather than assumed to survive either widening. -/
+theorem instrFull_nets_disjoint_from_state :
+    ((List.range 32).all fun k => instrBaseFull + k ≥ stWidthFull) = true := by decide +kernel
 
 /-! ### NON-VACUITY — a WRONG memory layout must BREAK the round trip
 
@@ -388,9 +417,9 @@ theorem landed_decQ_loses_mem_and_trap :
 #audit_axioms encDD_getD_low
 #audit_axioms encDD_prefix
 #audit_axioms extension_costs_257_bits
-#audit_axioms instrBaseD
-#audit_axioms renumbering_offsets
-#audit_axioms instrD_nets_disjoint_from_state
+#audit_axioms stWidthAdapter stWidthFull instrBaseFull coreInWidthFull
+#audit_axioms stWidthFull_value renumbering_offsets_full
+#audit_axioms instrFull_nets_disjoint_from_state
 #audit_axioms decQDmemT
 #audit_axioms sTestD
 #audit_axioms memT_layout_breaks

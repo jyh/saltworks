@@ -105,8 +105,11 @@ theorem adapterNextWrong_disagrees :
 
 /-! ## ⛔⛔ THE COMBINED RENUMBERING — ONE ACT, NOT TWO -/
 
-/-- The widened state width: the D layout plus the three adapter bits. -/
-def stWidthA : Nat := SaltWorks.HDL.StateCodecD.stWidthD + 3
+/-- ⛔ **NO SECOND NAME FOR THE RATIFIED WIDTH.** `stWidthA` used to be defined here as
+`stWidthD + 3`. It is gone: `StateCodecD.stWidthFull` is the single authority, and two names for
+one number is the same trap as two widenings for one shift — each correct, and the pair a place
+for a skew to hide. This abbreviation resolves to it, it does not restate it. -/
+abbrev stWidthA : Nat := SaltWorks.HDL.StateCodecD.stWidthFull
 
 theorem stWidthA_value : stWidthA = 1316 := by decide +kernel
 
@@ -136,7 +139,7 @@ theorem adapter_closes_the_widened_width :
 #audit_axioms encKind adapterNext adapterNext_gate_count adapterNext_ports
 #audit_axioms adapterNext_wf adapterNext_ssa insOf adapterNext_correct
 #audit_axioms adapterNextWrong adapterNextWrong_disagrees
-#audit_axioms stWidthA stWidthA_value combined_renumbering two_widenings_land_short
+#audit_axioms stWidthA_value combined_renumbering two_widenings_land_short
 #audit_axioms adapter_closes_the_widened_width
 
 /-! ## THE WIDENED LAYOUT'S ARITHMETIC — landed as ONE act at 1316, with the intermediate FENCED
@@ -152,10 +155,10 @@ internally consistent. This section says it, in the kernel.
 helm fenced, and it is avoidable by never writing the intermediate down as a base.* -/
 
 /-- Where the instruction word sits under the widened layout. -/
-def instrBaseA : Nat := stWidthA
+abbrev instrBaseA : Nat := SaltWorks.HDL.StateCodecD.instrBaseFull
 
 /-- The gate-chain anchor under the widened layout. -/
-def coreInWidthA : Nat := stWidthA + 32
+abbrev coreInWidthA : Nat := SaltWorks.HDL.StateCodecD.coreInWidthFull
 
 theorem widened_anchors : instrBaseA = 1316 ∧ coreInWidthA = 1348 := by decide +kernel
 
@@ -183,13 +186,20 @@ theorem widened_shift_and_disjointness :
     ∧ ((List.range 32).all fun k => instrBaseA + k ≥ stWidthA) = true := by
   decide +kernel
 
-/-- ⛔⛔ **THE FENCE. The landed D constants are SHORT BY EXACTLY THREE under this layout.**
-*Both are internally consistent, so no build refuses the intermediate; this theorem is the only
-thing in the tree that does.* -/
-theorem D_constants_are_short_by_three :
-    instrBaseA - SaltWorks.HDL.StateCodecD.instrBaseD = 3
-    ∧ coreInWidthA - (SaltWorks.HDL.StateCodecD.instrBaseD + 32) = 3
-    ∧ SaltWorks.HDL.StateCodecD.instrBaseD ≠ instrBaseA := by
+/-- ⛔⛔ **THE RECORD OF WHY — it was a fence, and superseding turned it into history.**
+
+Until 2026-08-26 this theorem was the ONLY object in the tree that refused the 1313 intermediate.
+`StateCodecD.instrBaseD` and `renumbering_offsets` have now been SUPERSEDED (the Captain: *"Yes,
+renumber"*), so there is no longer a name to fence — **and the numbers are kept here deliberately,
+against the LITERAL rather than a live definition.**
+
+🔑 ***THIS IS FOR THE HAND WHO FINDS 257 IN THE HISTORY AND WONDERS WHETHER THE 3 WAS EVER
+CONSIDERED.*** It was. The superseded base was **1313** with shift **257**, correct for the
+memory+trap widening alone and short by exactly **3** once the adapter's `kind` and `storeBeat`
+joined the state. *Nothing refused it at the time because every check the tree runs holds at
+either width — which is why it was superseded rather than adjusted.* -/
+theorem superseded_D_base_was_short_by_three :
+    instrBaseA - 1313 = 3 ∧ coreInWidthA - (1313 + 32) = 3 ∧ (1313 : Nat) ≠ instrBaseA := by
   decide +kernel
 
 /-- ⛔ **AND THE TRAP STATED AS THE SUM IT IS:** doing step 7's widening and the adapter's
@@ -201,8 +211,8 @@ theorem one_act_or_none :
     ∧ (stWidthA - stWidth) = 260 := by
   decide +kernel
 
-#audit_axioms instrBaseA coreInWidthA widened_anchors widened_fields
+#audit_axioms widened_anchors widened_fields
 #audit_axioms kindHiNet kindLoNet beatNet adapter_bits_are_the_top_three
-#audit_axioms widened_shift_and_disjointness D_constants_are_short_by_three one_act_or_none
+#audit_axioms widened_shift_and_disjointness superseded_D_base_was_short_by_three one_act_or_none
 
 end SaltWorks.HDL.AdapterStateOrgan
