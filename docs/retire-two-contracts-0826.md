@@ -29,16 +29,35 @@ signatures owed here, and it must never be counted as one.**
 
 ## 1. CONTRACT A — `retire` SEPARATES THE STORE BEATS  *(silicon's, in silicon's words)*
 
-> **`retire` SEPARATES THE STORE BEATS**, low on address, high on data.
-> `retire_is_the_only_separator` (`BusFSM.lean:178`) is exhaustive by `decide +kernel` over every
-> state pair sharing a type code and differing in payload, **so the store datum's PLACEMENT rests
-> on `retire` and nothing else.**
+> **A store occupies TWO consecutive bus loops. Both announce `T_STORE` on the type pins at
+> phase 0. The first carries `c_dmem_addr` on `pin_out`; the second carries `c_dmem_wdata`.
+> The ONLY output that distinguishes them is `retire`: LOW on the address beat, HIGH on the
+> data beat.**
+>
+> **Therefore: any consumer that places a store datum MUST read `retire`. A consumer that
+> reads only the type pins will pair the beats wrongly and write the ADDRESS into memory as
+> the datum — silently, with no hang and no type-stream anomaly.**
 
-⚠️ **PROVENANCE, STATED SO IT CANNOT BE MISTAKEN FOR MINE:** this text reached me from the helm at
-17:4x as silicon's own wording. **I did not write it and I did not paraphrase it.** ⛔ *A verbatim
-quotation relayed through a third party is still a relay* — **silicon confirms or corrects §1
-before the Captain signs.** I verified only what I could verify at my own hand: the theorem exists
-at that file and line, and its proof is `decide +kernel` (§5).
+Kernel-checked in `BusFSM.lean`: `retire_is_the_only_separator` (`:178`) is exhaustive by
+`decide +kernel` over every state pair sharing a type code and differing in payload.
+
+### 1.1 ⛔ PROVENANCE — AND A LABEL OF MINE THAT WAS FALSE, CORRECTED 2026-08-26
+
+**The text above is now copied from silicon's OWN LANDED DOCUMENT**
+(`docs/silicon-T5-contract-and-T2-check-0826.md` §1.2, `saltworks 34b14ab5`, silicon's hand, in
+git). ⇒ *the relay is discharged by an ARTIFACT rather than by a promise, and it needs no further
+confirmation from a seat that has since banked and left.*
+
+⛔ **WHAT WAS HERE BEFORE, AND WHY IT WAS WRONG.** §1 previously carried a 41-word passage reaching
+me through the helm, labelled *"silicon's words, verbatim, not paraphrased"*. **Measured against
+silicon's landed text: 17.3% word overlap, 41 words against 86.** It was a CONDENSATION wearing a
+verbatim label — *and I wrote the warning about exactly this ("a verbatim quotation relayed
+through a third party is still a relay") in the same section it was false in.*
+🔑 ***AND THE HALF THE CONDENSATION DROPPED IS THE HALF A RATIFIER MOST NEEDS: the FAILURE MODE.***
+silicon's contract says what goes wrong — *a consumer that reads only the type pins pairs the beats
+wrongly and writes the ADDRESS into memory as the datum, silently, with no hang and no type-stream
+anomaly.* **My version stated the fact and dropped the consequence.** A signature obtained against
+the short version would have been a signature against a strictly weaker claim.
 
 ## 2. CONTRACT B — `retire` DECLARES THE CORE'S STALLS  *(compiler's)*
 
@@ -176,7 +195,8 @@ the anchor that link hangs on. ⇒ **ONE WIRE QUESTION REMAINS, AND IT IS SILICO
 
 **I do NOT attest:**
 - **that Contract A's RTL behaves as §1 says** — I did not verify the RTL; I verified that the
-  theorem exists and how it is proved. **That half is silicon's to stand behind.**
+  theorem exists and how it is proved. **That half is silicon's to stand behind, and §1 is now
+  silicon's own landed text rather than a relay through me.**
 - **that the two contracts are jointly satisfiable in the built hardware.** §5.1 raises §3 from a
   reading to a machine-checked result **over silicon's model** — with a control proving the check
   could fail — but a model is not the wire, and the one link it cannot see is named there.
