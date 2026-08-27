@@ -27,14 +27,45 @@
 #   typing. Bank the understanding, GATE the act.
 # ============================================================================
 set -uo pipefail
-R=${R:-/Users/jyh/projects/claude/saltworks}
+# ⛔⛔ 2026-08-27 — THE THIRD INSTANCE OF THIS FILE'S OWN DEFECT SHAPE, AND THE WORST.
+#   `R` DEFAULTED TO A HARD-CODED PATH. The 08-25 night migration moved every working
+#   seat OUT of that path and left a readable DEAD TWIN behind, carrying its own
+#   00-THIS-TREE-IS-A-DEAD-TWIN marker. So an unset `R` made this tool `cd` into a
+#   repository the caller is not working in, and fingerprint a tree nobody is
+#   committing. MEASURED at the compiler seat 09:10:48 — same command, one env var:
+#       default   ARMED at 444458a|474c81c1ce19     <- the dead twin
+#       R=$(pwd)  ARMED at fdde237|e3b0c44298fc     <- the tree being committed
+#   ⚠️ AND THE READING LOOKED RIGHT: both trees had pulled the same commit that
+#   morning, so the HEAD field MATCHED BY COINCIDENCE. A wrong object reported a
+#   true value. ⇒ DERIVE THE REPO FROM THE CALLER'S CWD, and REFUSE when there is
+#   none — a wrong-repo check and an unarmed check must not look alike.
+R=${R:-$(git rev-parse --show-toplevel 2>/dev/null)}
+[ -n "$R" ] || {
+  echo "landcheck: no R given and the cwd is not inside a git repository — REFUSING."
+  echo "  (This used to default to a fixed path and silently measure a different tree.)"
+  exit 2; }
 cd "$R" || { echo "landcheck: cannot cd $R"; exit 2; }
 STATE="${TMPDIR:-/tmp}/landcheck-$(printf '%s' "$R" | shasum -a 256 | cut -c1-12)"
 
-fingerprint() {   # HEAD + the dirty set: the two ways a shared tree moves under you
-  printf '%s|%s' \
+# ⛔ 2026-08-27 — AND THE DIRTY *SET* IS NOT THE DIRTY *CONTENT*. `git status --porcelain`
+#   prints ` M path`; editing that same path again leaves the string BYTE-IDENTICAL, so the
+#   commonest real sequence — build, tweak the file you are about to commit, commit — was
+#   certified CLEAR. DRIVEN, both arms, with exit codes read OUTSIDE a pipe:
+#       clean file -> dirty        exit 1  ⛔ MOVED      (the gate works)
+#       new untracked path appears exit 1  ⛔ MOVED      (the gate works)
+#       CONTENT edit to an already-dirty tracked file    exit 0  ✅ CLEAR   <- THE FALSE GREEN
+#   ⇒ the fingerprint gains a CONTENT field. Note the shape: v1 recorded only HEAD, v2 added
+#   the dirty SET, v3 adds the dirty CONTENT. Each fix went exactly one level and stopped at
+#   the level the author had just been bitten at.
+#   ⚠️ DECLARED STOP: `git diff HEAD` covers TRACKED content, staged and unstaged. The CONTENT
+#   of a GITIGNORED file (`Scratch*.lean`) is still invisible — such files never appear in
+#   `git status --porcelain` at all — so an audit-arm build whose subject is a Scratch file is
+#   NOT covered by this gate. Named rather than quietly folded into "the working tree".
+fingerprint() {   # HEAD + the dirty set + the dirty CONTENT
+  printf '%s|%s|%s' \
     "$(git rev-parse --short HEAD 2>/dev/null)" \
-    "$(git status --porcelain 2>/dev/null | shasum -a 256 | cut -c1-12)"
+    "$(git status --porcelain 2>/dev/null | shasum -a 256 | cut -c1-12)" \
+    "$(git diff HEAD 2>/dev/null | shasum -a 256 | cut -c1-12)"
 }
 
 case "${1:-}" in
@@ -60,8 +91,8 @@ case "${1:-}" in
     F1=$(fingerprint)
     AGE=$(( $(date '+%s') - T0 ))
     if [ "$F0" != "$F1" ]; then
-      H0=${F0%%|*}; D0=${F0##*|}
-      H1=${F1%%|*}; D1=${F1##*|}
+      H0=${F0%%|*}; T0R=${F0#*|}; D0=${T0R%%|*}; C0=${T0R##*|}
+      H1=${F1%%|*}; T1R=${F1#*|}; D1=${T1R%%|*}; C1=${T1R##*|}
       printf '⛔ THE TREE MOVED SINCE YOUR BUILD (%ss ago). Your EXIT=0 certifies a tree that\n' "$AGE"
       printf '   no longer exists. REBUILD before committing -- do NOT reason about whether the\n'
       printf '   change "could" affect yours; that reasoning IS the defect.\n'
@@ -72,6 +103,11 @@ case "${1:-}" in
       if [ "$D0" != "$D1" ]; then
         printf '   • WORKING TREE CHANGED (dirty-set %s -> %s) — an UNCOMMITTED edit by any\n' "$D0" "$D1"
         printf '     seat, which is exactly what `lake build` reads. No commit needed to break you.\n'
+      fi
+      if [ "$C0" != "$C1" ]; then
+        printf '   • TRACKED CONTENT CHANGED (%s -> %s) — the SAME files, DIFFERENT bytes. This\n' "$C0" "$C1"
+        printf '     is the arm the dirty-set alone could not see, and it is the commonest case:\n'
+        printf '     you edited the very file you are about to commit, after the build read it.\n'
       fi
       exit 1
     fi
