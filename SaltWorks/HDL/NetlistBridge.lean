@@ -26,12 +26,18 @@ translation when the netlist's `.inp` gates are exactly the first `n` entries, i
 circuit reads the wrong wires — silently, since both sides stay well-formed. So the condition
 is a decidable predicate the bridge can REFUSE on, not a comment.
 
-⚠️ **WHAT THIS FILE DOES AND DOES NOT CLAIM.** It builds the map and pins the concrete facts
-for `dmemAddr8NL` by `decide +kernel`. **It does NOT yet prove semantic agreement**
-(`sem (bridge nl outs) ≡ runP`). Until that theorem exists a bridged circuit's behaviour is
-asserted by construction, and `instOK` would pass while the wired thing might compute
-something else — the same shape `coreShapedD` is fenced for. **The bridge is therefore NOT
-yet fit to place into the assembly, and this file says so rather than leaving it implied.**
+⭐⭐ **SEMANTIC AGREEMENT IS PROVED — 2026-08-27, `bridge_sem_eq_of_bridgeable` at the foot of
+this file.** For every netlist passing the two DECIDABLE gates the code already checks
+(`bridgeable` and `acyclicFrom 0`), and every input valuation, the bridged `Circ`'s `sem` equals
+the netlist's own `runP` at the declared outputs. `dmemAddr8_sem_eq` instantiates it on the real
+landed netlist. ***The bridge is therefore fit to place into the assembly.***
+
+⚠️ **WHAT THAT THEOREM DOES NOT SAY, stated because a headline is quoted and a scope is not.** It
+is about BEHAVIOUR AT `outs`. `sem` never reads `nIn`, so the bridged circuit's PORT COUNT is not
+certified by it — `dmemAddr8_bridge_ports` certifies that separately, and the two must both be
+cited to claim the bridged object is right. And it says nothing about whether the RIGHT NETS were
+declared as `outs`: choosing the wrong output net yields a true agreement about the wrong wire.
+*That is the same gap `instOK` leaves, and naming it here is cheaper than rediscovering it.*
 -/
 import SaltWorks.HDL.Sem
 import SaltWorks.Silicon.Imported.DmemAddr8
@@ -129,7 +135,7 @@ theorem bridgeable_rejects_misnumbered :
 theorem bridgeable_rejects_late_inp :
     bridgeable [.inp 0, .and 0 0, .inp 1] = false := by decide +kernel
 
-#audit_axioms opOf bridgeGatesFrom inpPrefix bridgeable bridge
+#audit_axioms opOf bridgeGatesFrom inpPrefix inpNumberedFrom noLateInp bridgeable bridge
 #audit_axioms dmemAddr8_bridgeable dmemAddr8_shape dmemAddr8_bridge_ports
 #audit_axioms dmemAddr8_indices_preserved bridgeable_rejects_misnumbered
 #audit_axioms bridgeable_rejects_late_inp
@@ -247,36 +253,25 @@ theorem getD_append_eq {α} [Inhabited α] (l : List α) (x : α) (d : α) :
     (l ++ [x]).getD l.length d = x := by
   simp [List.getD_eq_getElem?_getD]
 
-/-! ### ⛔ THE REMAINING OBLIGATION — attempted 2026-08-26 16:4x, DID NOT GO
+/-! ### 📜 THE ROUTE — and what three failed attempts bought, kept because it is why the
+fourth went through on its first build
 
-**`bridge_agrees` is NOT here, and this block is the record of why rather than a silence.**
+**HISTORY, 2026-08-26. `bridge_agrees` IS NOW LANDED at the foot of this file; this block is the
+record of how, not an open item.** ⛔ *It previously carried the theorem's statement inside this
+very comment, where it read like a declaration to a grep, to `#audit_axioms`, and to a reader —
+and a docstring quoting a theorem builds green forever.* **That is why the record now names the
+theorem rather than restating it.**
 
 ```
-theorem bridge_agrees (ins : Env) :
-  ∀ nl k senv henv,
-    senv.length = k →
-    (∀ j, j < k → senv.getD j false = henv j) →
-    (∀ j, k ≤ j → henv j = ins j) →
-    inpNumberedFrom k nl = true →
-    acyclicFrom k nl = true →
-    ∀ j, j < k + nl.length →
-      (Silicon.runP ins senv nl).getD j false = run henv (bridgeGatesFrom k nl) j
+attempt 1   the five non-`.inp` branches discharged with `exact absurd hacy …`, as though a
+            non-`.inp` gate contradicted acyclicity. IT DOES NOT — those branches ARE the
+            theorem. It failed to elaborate, which is the good ending.
+attempt 2   `inpNumberedFrom` carried as the induction hypothesis. It STOPS RECURSING at the
+            first non-`.inp` gate, so after one ordinary gate it says nothing about the tail.
+            ⇒ `inpAtPos` below exists because of this.
+attempt 3   13 errors → 8. The content was right; the plumbing was not. Its three cures are
+            recorded below and all three were paid exactly once.
 ```
-**WHAT WENT THROUGH:** the `nil` case, and the `.inp` case whole — including the step that
-needs ③, where the appended slot `senv.getD k` must equal `henv k` and the only route is
-`henv k = ins k` because HDL emitted no gate there.
-⛔ **WHERE IT BROKE:** the FIVE remaining constructors. `cases g` needs each alternative
-supplied — a `| _ =>` catch-all is rejected — and each one carries the real content, not
-bookkeeping: for `.not a` one must show `!(senv.getD a false) = !(henv a)`, which needs `a < k`
-out of `acyclicFrom` and then ②, and `.and/.or/.xor` need it twice. Then the step case must
-re-establish ② and ③ across `upd henv k v`, where ② splits at `j < k` (via `upd_of_ne`) and
-`j = k` (via `upd_self`).
-📌 **AND MY FIRST ATTEMPT WAS WRONG IN A WAY WORTH RECORDING:** I discharged those five
-branches with `exact absurd hacy …`, as though a non-`.inp` gate contradicted acyclicity. **It
-does not — those branches ARE the theorem.** *A placeholder that type-checks in the author's
-head is how a proof of nothing gets written; it failed to elaborate, which is the good ending.*
-⇒ **The work is five constructor branches over `getD_append_lt`, `upd_of_ne` and `upd_self`.
-The two `getD` lemmas below are landed and are what those branches consume.**
 -/
 
 #audit_axioms getD_append_lt getD_append_eq
@@ -296,32 +291,265 @@ def inpAtPos : Nat → List SaltWorks.Silicon.Gate → Bool
 theorem dmemAddr8_inpAtPos : inpAtPos 0 dmemAddr8NL = true := by decide +kernel
 theorem demo_inpAtPos : inpAtPos 0 demoNL = true := by decide +kernel
 
-/-! ### ⛔ THIRD ATTEMPT, 2026-08-26 16:5x — CLOSER, STILL NOT THROUGH
+/-! ### 🔑 THE THREE CURES, PAID ONCE EACH — the plumbing findings from attempt 3
 
-**13 errors → 8. `step_eq`'s content is essentially written; the plumbing is not.** Two
-obstacles remain, both named here so the next hand does not rediscover them:
+**Recorded as findings, not as scar tissue: each one is a general fact about proving over two
+list-indexed semantics, and the landed proof below uses all three.**
 
 **① `simp` NORMALISES `getD` OUT FROM UNDER THE HYPOTHESIS.** In the operand branches the goal
-becomes `senv[a]?.getD false = henv a` while `h2` is stated with `List.getD`, so it no longer
-matches syntactically. **Cure: `show` the reduced form and `rw [h2 …]`; never `simp` with `h2`
-in the set.** That fixed four of the five branches.
+becomes `senv[a]?.getD false` while `h2` is stated with `List.getD`, so it no longer matches
+syntactically. **Cure: `show` the reduced form and `rw [h2 …]`; never `simp` with `h2` in the set.**
 
-**② `simp` HITS MAXIMUM RECURSION DEPTH unfolding `runP` and `bridgeGatesFrom`** in the two
-step cases. Both are recursive on the netlist, and handing them to `simp` as unfolding lemmas
-diverges. **Cure is `simp only` with the specific equation lemmas, or a `show` of the
-one-step-reduced form — not a bigger `maxRecDepth`.**
+**② `simp` HITS MAXIMUM RECURSION DEPTH unfolding `runP` and `bridgeGatesFrom`.** Both are
+recursive on the netlist, and handing them to `simp` as unfolding lemmas diverges. **Cure: a
+`show` of the one-step-reduced form — not a bigger `maxRecDepth`.** *The landed proof contains no
+`simp` over either definition; every step case is a `show`.*
 
-**③ A `subst` TRAP, and it is the one that cost the most.** With `h1 : senv.length = k`,
-rewriting `← h1` to reach `getD_append_eq` turns *every* `k` into `senv.length`, including the
-one `h3` is stated about — so `h3 m` stops applying with a type mismatch that names
-`ins senv.length`. **Cure: rewrite inside a `have` whose statement is already about `m`, and
-leave the ambient goal's `k` alone.**
+**③ A `subst` TRAP.** With `h1 : senv.length = k`, rewriting `← h1` to reach `getD_append_eq`
+turns *every* `k` into `senv.length`, including the one another hypothesis is stated about.
+**Cure: rewrite inside a `have` whose statement is already about the index in hand.** *In the
+landed proof this is confined to `step2`, which is the only place the appended slot is read.*
 
-⇒ **What is landed below is the induction-carrying `.inp` predicate and its discharge on the
-real netlist — the piece the second attempt lacked.** The remaining work is `step_eq` (five
-branches, four of them already in the shape above) and the two step cases of `bridge_agrees`.
+⭐ **AND A FOURTH, FOUND IN THE LANDING RATHER THAN INHERITED: an `rw` whose side condition is
+`by omega` elaborates that `omega` BEFORE the rewrite has fixed the index metavariable.** Cure:
+bind the side condition to a named `have` first. *Cheap, invisible, and it costs a whole build.*
 -/
 
 #audit_axioms inpAtPos dmemAddr8_inpAtPos demo_inpAtPos
+
+/-! ## ⭐⭐⭐ THE INDUCTION — LANDED 2026-08-27
+
+Everything above this line was scaffolding for the theorem below. -/
+
+/-- Clause ②, re-established across one appended slot. The appended value is the SAME on
+both sides, which is what lets all six constructors share this step. -/
+private theorem step2 {k : Nat} {senv : List Bool} {henv : Env} (v : Bool)
+    (h1 : senv.length = k)
+    (h2 : ∀ j, j < k → senv.getD j false = henv j) :
+    ∀ j, j < k + 1 → (senv ++ [v]).getD j false = upd henv k v j := by
+  intro j hj
+  rcases Nat.lt_or_ge j k with h | h
+  · have hlt : j < senv.length := by omega
+    have hne : j ≠ k := by omega
+    rw [getD_append_lt senv v false hlt, h2 j h, upd_of_ne v hne]
+  · have hjk : j = k := by omega
+    rw [hjk, upd_self, ← h1]
+    exact getD_append_eq senv v false
+
+/-- Clause ③, re-established across the update at `k`. -/
+private theorem step3 {ins : Env} {k : Nat} {henv : Env} (v : Bool)
+    (h3 : ∀ j, k ≤ j → henv j = ins j) :
+    ∀ j, k + 1 ≤ j → upd henv k v j = ins j := by
+  intro j hj
+  have hne : j ≠ k := by omega
+  rw [upd_of_ne v hne]
+  exact h3 j (by omega)
+
+/-- ⭐⭐ **THE BRIDGE INDUCTION.** -/
+theorem bridge_agrees (ins : Env) :
+    ∀ (nl : List SaltWorks.Silicon.Gate) (k : Nat) (senv : List Bool) (henv : Env),
+      senv.length = k →
+      (∀ j, j < k → senv.getD j false = henv j) →
+      (∀ j, k ≤ j → henv j = ins j) →
+      inpAtPos k nl = true →
+      acyclicFrom k nl = true →
+      ∀ j, j < k + nl.length →
+        (SaltWorks.Silicon.runP ins senv nl).getD j false
+          = run henv (bridgeGatesFrom k nl) j := by
+  intro nl
+  induction nl with
+  | nil =>
+    intro k senv henv _ h2 _ _ _ j hj
+    show senv.getD j false = henv j
+    exact h2 j (by simpa using hj)
+  | cons g gs ih =>
+    intro k senv henv h1 h2 h3 hinp hacy j hj
+    have hjlen : j < (k + 1) + gs.length := by
+      simp only [List.length_cons] at hj; omega
+    cases g with
+    | inp i =>
+      have hinp2 : ((i == k) && inpAtPos (k + 1) gs) = true := hinp
+      rw [Bool.and_eq_true, beq_iff_eq] at hinp2
+      have hacy' : acyclicFrom (k + 1) gs = true := hacy
+      have hstep := ih (k + 1) (senv ++ [ins i]) (upd henv k (ins i))
+        (by simp [h1]) (step2 (ins i) h1 h2) (step3 (ins i) h3) hinp2.2 hacy' j hjlen
+      have hcongr : ∀ n, upd henv k (ins i) n = henv n := by
+        intro n
+        by_cases hn : n = k
+        · rw [hn, upd_self, hinp2.1]
+          exact (h3 k (Nat.le_refl k)).symm
+        · exact upd_of_ne _ hn
+      show (SaltWorks.Silicon.runP ins (senv ++ [ins i]) gs).getD j false
+          = run henv (bridgeGatesFrom (k + 1) gs) j
+      rw [hstep]
+      exact run_congr _ hcongr j
+    | const b =>
+      have hinp' : inpAtPos (k + 1) gs = true := hinp
+      have hacy' : acyclicFrom (k + 1) gs = true := hacy
+      show (SaltWorks.Silicon.runP ins (senv ++ [b]) gs).getD j false
+          = run (upd henv k b) (bridgeGatesFrom (k + 1) gs) j
+      exact ih (k + 1) (senv ++ [b]) (upd henv k b)
+        (by simp [h1]) (step2 b h1 h2) (step3 b h3) hinp' hacy' j hjlen
+    | not a =>
+      have hinp' : inpAtPos (k + 1) gs = true := hinp
+      have hacy2 : (opndsLt k (SaltWorks.Silicon.Gate.not a) && acyclicFrom (k + 1) gs) = true :=
+        hacy
+      rw [Bool.and_eq_true] at hacy2
+      have ha : a < k := by simpa [opndsLt] using hacy2.1
+      show (SaltWorks.Silicon.runP ins (senv ++ [!(senv.getD a false)]) gs).getD j false
+          = run (upd henv k (!(henv a))) (bridgeGatesFrom (k + 1) gs) j
+      rw [h2 a ha]
+      exact ih (k + 1) (senv ++ [!(henv a)]) (upd henv k (!(henv a)))
+        (by simp [h1]) (step2 _ h1 h2) (step3 _ h3) hinp' hacy2.2 j hjlen
+    | and a b =>
+      have hinp' : inpAtPos (k + 1) gs = true := hinp
+      have hacy2 : (opndsLt k (SaltWorks.Silicon.Gate.and a b) && acyclicFrom (k + 1) gs) = true :=
+        hacy
+      rw [Bool.and_eq_true] at hacy2
+      have hab : a < k ∧ b < k := by simpa [opndsLt] using hacy2.1
+      show (SaltWorks.Silicon.runP ins
+              (senv ++ [(senv.getD a false) && (senv.getD b false)]) gs).getD j false
+          = run (upd henv k ((henv a) && (henv b))) (bridgeGatesFrom (k + 1) gs) j
+      rw [h2 a hab.1, h2 b hab.2]
+      exact ih (k + 1) (senv ++ [(henv a) && (henv b)]) (upd henv k ((henv a) && (henv b)))
+        (by simp [h1]) (step2 _ h1 h2) (step3 _ h3) hinp' hacy2.2 j hjlen
+    | or a b =>
+      have hinp' : inpAtPos (k + 1) gs = true := hinp
+      have hacy2 : (opndsLt k (SaltWorks.Silicon.Gate.or a b) && acyclicFrom (k + 1) gs) = true :=
+        hacy
+      rw [Bool.and_eq_true] at hacy2
+      have hab : a < k ∧ b < k := by simpa [opndsLt] using hacy2.1
+      show (SaltWorks.Silicon.runP ins
+              (senv ++ [(senv.getD a false) || (senv.getD b false)]) gs).getD j false
+          = run (upd henv k ((henv a) || (henv b))) (bridgeGatesFrom (k + 1) gs) j
+      rw [h2 a hab.1, h2 b hab.2]
+      exact ih (k + 1) (senv ++ [(henv a) || (henv b)]) (upd henv k ((henv a) || (henv b)))
+        (by simp [h1]) (step2 _ h1 h2) (step3 _ h3) hinp' hacy2.2 j hjlen
+    | xor a b =>
+      have hinp' : inpAtPos (k + 1) gs = true := hinp
+      have hacy2 : (opndsLt k (SaltWorks.Silicon.Gate.xor a b) && acyclicFrom (k + 1) gs) = true :=
+        hacy
+      rw [Bool.and_eq_true] at hacy2
+      have hab : a < k ∧ b < k := by simpa [opndsLt] using hacy2.1
+      show (SaltWorks.Silicon.runP ins
+              (senv ++ [(senv.getD a false) ^^ (senv.getD b false)]) gs).getD j false
+          = run (upd henv k ((henv a) ^^ (henv b))) (bridgeGatesFrom (k + 1) gs) j
+      rw [h2 a hab.1, h2 b hab.2]
+      exact ih (k + 1) (senv ++ [(henv a) ^^ (henv b)]) (upd henv k ((henv a) ^^ (henv b)))
+        (by simp [h1]) (step2 _ h1 h2) (step3 _ h3) hinp' hacy2.2 j hjlen
+
+/-- ⭐⭐⭐ **THE COMMISSION: `sem (bridge nl outs) = runP`.** -/
+theorem bridge_sem_eq (nl : List SaltWorks.Silicon.Gate) (outs : List Net) (ins : Env)
+    (hinp : inpAtPos 0 nl = true) (hacy : acyclicFrom 0 nl = true)
+    (ho : ∀ k ∈ outs, k < nl.length) :
+    sem (bridge nl outs) ins
+      = outs.map (fun k => (SaltWorks.Silicon.runP ins [] nl).getD k false) := by
+  show outs.map (run ins (bridgeGatesFrom 0 nl)) = outs.map _
+  refine List.map_congr_left (fun k hk => ?_)
+  exact (bridge_agrees ins nl 0 [] ins rfl
+    (fun j hj => absurd hj (Nat.not_lt_zero j)) (fun _ _ => rfl) hinp hacy k
+    (by simpa using ho k hk)).symm
+
+/-! ## ⛔ CLOSING THE GATE-vs-PRECONDITION GAP
+
+`bridge` REFUSES on `bridgeable`. The theorem above DEMANDS `inpAtPos`. Those are different
+predicates, and until they are joined a caller can satisfy the gate the code checks and NOT the
+hypothesis the correctness theorem needs — a dangling interface INSIDE one file. -/
+
+/-- A gate list with no `.inp` at all is `inpAtPos` at every offset. -/
+private theorem inpAtPos_of_noInp :
+    ∀ (gs : List SaltWorks.Silicon.Gate) (k : Nat),
+      (gs.all fun g => match g with | .inp _ => false | _ => true) = true →
+      inpAtPos k gs = true := by
+  intro gs
+  induction gs with
+  | nil => intro k _; rfl
+  | cons g gs ih =>
+    intro k h
+    rw [List.all_cons, Bool.and_eq_true] at h
+    cases g with
+    | inp i => simp at h
+    | const b => exact ih (k + 1) h.2
+    | not a => exact ih (k + 1) h.2
+    | and a b => exact ih (k + 1) h.2
+    | or a b => exact ih (k + 1) h.2
+    | xor a b => exact ih (k + 1) h.2
+
+private theorem inpNumbered_noLate_inpAtPos :
+    ∀ (nl : List SaltWorks.Silicon.Gate) (k : Nat),
+      inpNumberedFrom k nl = true → noLateInp nl = true → inpAtPos k nl = true := by
+  intro nl
+  induction nl with
+  | nil => intro k _ _; rfl
+  | cons g gs ih =>
+    intro k h1 h2
+    cases g with
+    | inp i =>
+      have h1' : ((i == k) && inpNumberedFrom (k + 1) gs) = true := h1
+      rw [Bool.and_eq_true] at h1'
+      show ((i == k) && inpAtPos (k + 1) gs) = true
+      rw [Bool.and_eq_true]
+      exact ⟨h1'.1, ih (k + 1) h1'.2 h2⟩
+    | const b => exact inpAtPos_of_noInp gs (k + 1) h2
+    | not a => exact inpAtPos_of_noInp gs (k + 1) h2
+    | and a b => exact inpAtPos_of_noInp gs (k + 1) h2
+    | or a b => exact inpAtPos_of_noInp gs (k + 1) h2
+    | xor a b => exact inpAtPos_of_noInp gs (k + 1) h2
+
+/-- ⭐ **THE GATE IMPLIES THE PRECONDITION.** -/
+theorem bridgeable_inpAtPos {nl : List SaltWorks.Silicon.Gate} (h : bridgeable nl = true) :
+    inpAtPos 0 nl = true := by
+  simp only [bridgeable, Bool.and_eq_true] at h
+  exact inpNumbered_noLate_inpAtPos nl 0 h.1 h.2
+
+/-- ⭐⭐⭐ **THE COMMISSION, STATED OVER THE TWO PREDICATES THE CODE ACTUALLY CHECKS.** -/
+theorem bridge_sem_eq_of_bridgeable (nl : List SaltWorks.Silicon.Gate) (outs : List Net) (ins : Env)
+    (hb : bridgeable nl = true) (hacy : acyclicFrom 0 nl = true)
+    (ho : ∀ k ∈ outs, k < nl.length) :
+    sem (bridge nl outs) ins
+      = outs.map (fun k => (SaltWorks.Silicon.runP ins [] nl).getD k false) :=
+  bridge_sem_eq nl outs ins (bridgeable_inpAtPos hb) hacy ho
+
+/-! ## ⭐ THE GENERAL THEOREM RE-DERIVES THE LANDED WITNESS — and strictly beats it
+
+`demo_sem_agrees` quantifies over FOUR input configurations by `decide +kernel`. This derives the
+same agreement for EVERY `Env`, from the general theorem, consuming only the two decidable facts
+already landed. *A general theorem that cannot reproduce the witness it was built beside has
+proved something else.* -/
+theorem demo_sem_agrees_general (ins : Env) :
+    sem (bridge demoNL demoOuts) ins
+      = demoOuts.map (fun k => (SaltWorks.Silicon.runP ins [] demoNL).getD k false) :=
+  bridge_sem_eq_of_bridgeable _ _ ins demo_bridgeable demo_acyclic (by decide +kernel)
+
+/-- ⭐⭐ **THE CUSTOMER: the landed D1b address checker.** -/
+theorem dmemAddr8_sem_eq (ins : Env) :
+    sem (bridge dmemAddr8NL dmemAddr8NL_outs) ins
+      = dmemAddr8NL_outs.map
+          (fun k => (SaltWorks.Silicon.runP ins [] dmemAddr8NL).getD k false) :=
+  bridge_sem_eq_of_bridgeable _ _ ins dmemAddr8_bridgeable dmemAddr8_acyclic (by decide +kernel)
+
+/-! ## ⛔ THE CONTROL — acyclicity is load-bearing IN THIS THEOREM, not merely discriminating
+
+The file already shows `acyclicFrom` REFUSES a forward reference. That proves the PREDICATE
+discriminates; it does NOT prove my theorem needs it. **A hypothesis can be true, scoped, and
+decorative.** So: a netlist that PASSES `bridgeable` and FAILS `acyclicFrom`, on which the
+conclusion is FALSE. If this ever becomes provable, `bridge_sem_eq` is unsound. -/
+
+def fwdNL : List SaltWorks.Silicon.Gate := [.inp 0, .and 0 2, .const true]
+
+theorem fwdNL_bridgeable : bridgeable fwdNL = true := by decide +kernel
+theorem fwdNL_not_acyclic : acyclicFrom 0 fwdNL = false := by decide +kernel
+
+/-- ⛔ **DROP ACYCLICITY AND THE CONCLUSION IS FALSE.** `runP` reads net 2 before it exists and
+gets `false`; `run` reads it out of the total input env and gets `true`. -/
+theorem fwd_disagrees :
+    sem (bridge fwdNL [1]) (fun _ => true)
+      ≠ [1].map (fun k => (SaltWorks.Silicon.runP (fun _ => true) [] fwdNL).getD k false) := by
+  decide +kernel
+
+#audit_axioms fwdNL fwdNL_bridgeable fwdNL_not_acyclic fwd_disagrees
+#audit_axioms step2 step3 bridge_agrees bridge_sem_eq
+#audit_axioms inpAtPos_of_noInp inpNumbered_noLate_inpAtPos bridgeable_inpAtPos
+#audit_axioms bridge_sem_eq_of_bridgeable demo_sem_agrees_general dmemAddr8_sem_eq
 
 end SaltWorks.HDL.NetlistBridge
