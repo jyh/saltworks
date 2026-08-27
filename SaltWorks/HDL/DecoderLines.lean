@@ -16,11 +16,27 @@ isADD  isXOR  isSLT  isADDI  isBEQ  isLW  isSW  req  valid
   0      1      2      3       4      5     6     7     8
 ```
 
-⛔⛔ **READING `decOut 5` WHERE `6` WAS MEANT WAS A REAL LANDED DEFECT HERE, kernel-proved and
-repaired 2026-08-19.** `isLW` and `isSW` are adjacent, both are memory ops, and **the wrong one
-builds green**: the nets are well-formed, the placement's `instOK` is TRUE, the audit is clean.
-Nothing in the toolchain says a word. *This seat's own receipt on the same shape: two placements
-once fed `rs2` where `ADDI` needs the immediate, and every `instOK` was TRUE.*
+⛔⛔ **A BARE INDEX HERE WAS A REAL LANDED DEFECT, kernel-proved at `a10f980` and repaired
+2026-08-19** — `CorePlace.regWriteSig` fed `regWrite`'s **`valid`** port from **`decOut 5`**, which
+is `isLW`. ***The assembled core write-enabled on "this is a LOAD" and never wrote a register on
+`ADD`, `ADDI`, `XOR` or `SLT`.*** The port should have read `decOut 8`.
+
+⚠️ **AND THE MECHANISM IS WORSE THAN A TYPO, which is the real argument for names:
+`valid` MOVED from index 5 when the table grew.** The bare `5` was CORRECT when it was written and
+went wrong underneath the author. *A literal index is a claim about a table's shape at the moment
+of writing, and it is re-evaluated silently at every later read.*
+
+**The wrong line builds green**: the nets are well-formed, the placement's `instOK` is TRUE, the
+audit is clean, and nothing in the toolchain says a word. `regWrite_correct` is exhaustive over
+128 combinations *of regWrite's own ports* and cannot see what they are connected to;
+`decoder_correct` is about the decoder alone. *This seat's own receipt on the same shape: two
+placements once fed `rs2` where `ADDI` needs the immediate, and every `instOK` was TRUE.*
+
+⛔ **CORRECTED 2026-08-26 22:4x.** This header first said the defect was *"`decOut 5` where `6`
+was meant"* — I read `CorePlace.lean:409`'s *"index 5 is `isLW`"* and supplied `isSW` as the
+intended line because SW was what I was working on. **The record names `valid` two clauses later.
+The LAW was sound and the INCIDENT was mine to get right; I substituted my own context for the
+record's.**
 
 ⇒ **the cure is a NAME, so the off-by-one becomes an unknown identifier instead of a wrong wire.**
 

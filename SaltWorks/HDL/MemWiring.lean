@@ -29,7 +29,10 @@ bits 2,3,4. Taking `addOut 0,1,2` would index by byte and alias every fourth wor
 **WRITE-ENABLE — `decOut 6`, and this seat has already been bitten by the neighbouring index.**
 `CorePlace.lean:409` records the decoder's output order verbatim —
 `isADD isXOR isSLT isADDI isBEQ isLW isSW req valid` — **so `isSW` is 6 and `isLW` is 5.** Reading
-`decOut 5` where `6` was meant was a real landed defect, kernel-proved and repaired 2026-08-19.
+a bare index here was a real landed defect, kernel-proved at `a10f980` and repaired
+2026-08-19: `regWriteSig` fed `regWrite`'s `valid` port from `decOut 5` (`isLW`) when `decOut 8`
+was meant, and `valid` had MOVED from index 5 when the table grew — the literal was right when
+written and went wrong underneath its author.
 The same off-by-one is available here and it is the reason this paragraph exists.
 
 ## ⛔⛔ WHAT `instOK` DOES AND DOES NOT CERTIFY — READ BEFORE QUOTING THE RESULT
