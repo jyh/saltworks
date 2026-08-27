@@ -52,6 +52,11 @@ thing:
 its ARITHMETIC, and only if the two widenings are sequenced separately.* **Whoever takes it takes
 them as ONE act, or inherits offsets that are individually right and jointly short.**
 
+📌 **THE PAIR IS NOW ONE DOCUMENT: `docs/retire-two-contracts-0826.md`.** Captain's ruling (a),
+2026-08-26. **A signature on that document is a signature on BOTH of `retire`'s contracts**; the
+earlier *"Yes, renumber"* was the width fallback only and is not one of them. Read it before
+changing anything about `retire`'s timing.
+
 ⚠️ **AND IT IS A SECOND JOB FOR A PIN THAT ALREADY HAS ONE.** silicon's T5 proves
 `retire_is_the_only_separator`: on a store, `retire` is low on the address beat and high on
 the data beat, and *nothing else* distinguishes them — exhaustive over the state pairs. So the
