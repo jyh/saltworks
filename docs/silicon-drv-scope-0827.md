@@ -103,3 +103,48 @@ carrying 60-160 loads — and it is present in BOTH variants.** It is not an -ma
 diffuse, and not a routing accident. It is the instruction/immediate registers fanning across the
 datapath on `dfxtp_1`, and the repair that fits that shape is drive-strength/buffer-tree work on
 a named handful of nets. That is a LibreLane resizer job and this box cannot run it (section 2).
+
+---
+
+# ⛔⛔ CORRECTION, 00:5x — TWO OF MY OWN CLAIMS ABOVE ARE WRONG. AMENDED, NOT REWRITTEN.
+
+## C1. "not one DRV/resizer variable — it ran on defaults" IS FALSE
+`MAX_FANOUT_CONSTRAINT: 10` **is** in the live 3×2 config — inside the nested `"pdk::sky130A"`
+object. **I counted TOP-LEVEL KEYS (12) and reported that as a fact about the whole config.**
+A shallow query, published as a deep fact, in a commit and on the bus.
+
+⭐ **AND THE CORRECTED FACT IS A BETTER DIAGNOSIS THAN THE WRONG ONE WAS:**
+
+    constraint set        MAX_FANOUT_CONSTRAINT = 10
+    intrinsic (netlist)   98 nets at fanout >= 10
+    residual (3x2 run)    39 max_fanout violations
+
+=> **THE RESIZER RAN, AND IT CLOSED ROUGHLY 60% (98 -> 39). It could not close the largest nets.**
+So the repair is NOT "set a fanout constraint" — the constraint was already set and enforced.
+It is: give the resizer what it needs to close 60-160-load nets at 80% target density, or accept
+higher-drive flops on those six-to-eight register outputs. *"It ran on defaults" would have sent
+the next hand to add a knob that has been there since 08/09.*
+
+## C2. "the flow cannot be re-run from this seat" OVERSTATES A TRUE MEASUREMENT
+Natively absent — TRUE, and re-measured. **But the recorded venue was never a native install:**
+
+    docker run --rm -v /tmp/tilefit3x2:/work -v /tmp/silicon_pdk:/pdkroot \
+      ghcr.io/librelane/librelane:3.0.5 librelane --pdk-root .../c6d73a35... /work/config.json
+
+    docker binary                      PRESENT  /usr/local/bin/docker
+    docker daemon                      DOWN
+    pinned image :3.0.5                UNKNOWN (cannot query, daemon down)
+    PDK, pinned sha c6d73a35...        PRESENT  ~/.volare/volare/sky130/versions/  (8.4 GB)
+    /tmp/silicon_pdk, /tmp/tilefit3x2  ABSENT (tmp cleared; both are re-creatable mounts)
+
+=> ***A TRUE CONSTRAINT MANUFACTURED A FALSE LIMITATION BECAUSE I CONSIDERED ONE VENUE.*** I
+tested for `librelane|openlane|nix` on PATH, found nothing, and wrote "not executable here" —
+while the repo's own banked invocation says DOCKER, and the 8.4 GB PDK sits on disk at the exact
+pinned sha. **The blocker is a stopped daemon and an unverified image, not an absent toolchain.**
+
+⚠️ **AND I AM STILL NOT FIRING IT UNILATERALLY, FOR A REASON THAT IS NOT THE ONE I GAVE:**
+a LibreLane run in Docker **does NOT take saltbuild's fleet lock**, so it would run CONCURRENTLY
+with peers' Lean builds. That lock is a MEMORY-SAFETY law here (measured peak 43 GB across four
+lean processes). Starting an unlocked multi-GB flow overnight, beside seats that are building, is
+a fleet-wide hazard I should not take alone. **THAT is the real gate on execution — a resource
+protocol, not a missing tool — and it is a decision, not a measurement.**
