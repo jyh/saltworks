@@ -18,8 +18,14 @@ which is what makes step 7 separable rather than one indivisible lump.
 * It does **not** wire `memOrgan`. The σ for its 292 inputs — 3 address, 1 write-enable, 32
   write-data, 256 Q-leaves — is a datapath design question and is not answered here.
 * It does **not** discharge `instOK memOrgan _ _`. No placement is claimed.
-* It does **not** produce the trap bit. There is no gate-level trap next-state producer in any
-  landed module; that is the one-bit residual on the block register, and this file's central
+* It does **not** produce the trap bit. ⛔ **CORRECTED 2026-08-26 21:1x — THE SECOND SENTENCE OF
+  THIS BULLET WENT STALE IN TWO HOURS AND FOUR MINUTES.** It read *"there is no gate-level trap
+  next-state producer in any landed module"*; this file landed at 14:41 and `TrapOrgan.lean`
+  landed at 16:45 the same day (`a6dc687`), with `trapOrgan_sem` proved over every input and
+  `trap_closes_the_width` kernel-checked. **The producer exists.** What is still true is the
+  narrow half: THIS FILE does not produce it. *A "what this does not do" list is a dated claim
+  about the rest of the tree, and it decays fastest precisely because it names live work.*
+  That is the one-bit residual on the block register, and this file's central
   theorem is the arithmetic statement OF that residual rather than a repair of it.
 * `coreShapedD` (C4Refuted) remains what its own docstring says: a zero-gate width witness that
   must never be read as a step-7 candidate. Nothing here changes that.
