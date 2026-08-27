@@ -69,3 +69,37 @@ designs alike is a FLOW CONSTANT, not a defect signal. Do not chase it.
 `slicea16bma_3x2_config.json` has 12 keys and not one DRV/resizer variable — it ran on
 defaults. Naming specific repair settings without being able to run them would be speculation,
 so none are proposed here; the measurement above is what a repair run should be aimed at.
+
+## 6. IS THE ADDRESS-MUX PATH THE CAUSE? NO — AND THE FIRST ANSWER WAS WRONG
+Comparing `-b` (no address mux) against `-ma` (multiplexed address):
+
+    design              cells   nets  fo>=10  fo>=40  max fo   sum of fo>=10 load
+    slicea16b_nl.v       2706   2718     105      13     527                3,192
+    slicea16bma_nl.v     2547   2549      98      10     545                2,722
+
+=> **-ma HAS LESS HIGH-FANOUT LOAD THAN -b, NOT MORE.** The address path is NOT what drives the
+DRV bill. This is consistent with the standing note that "the 4.9% headroom predates the address
+path" — and it means DRV repair effort must not be charged to the -ma decision.
+
+⛔ **AND THE FIRST READING SAID THE OPPOSITE, WHICH IS THE PART WORTH BANKING.** Looking up -ma's
+top nets inside -b gave:
+
+    imm_i[1]   -ma=131  -b=5      instr[15]  -ma=110  -b=4      imm_i[0]  -ma=98  -b=5
+
+which reads as "the address mux exploded the fanout 20-30x". **IT IS A NAMING ARTIFACT.** The
+control — listing **-b's OWN top nets**, which the first query structurally could not see —
+returns `_0000_[0..3]` and `_0001_[0..3]` at fanout 61-159, every one driven by the same
+`sky130_fd_sc_hd__dfxtp_1`. *Yosys named the same registers anonymously in one netlist and
+`imm_i`/`instr` in the other.*
+
+=> ***PER-NET NAME COMPARISON ACROSS TWO SEPARATELY-SYNTHESISED NETLISTS IS MEANINGLESS.*** Only
+the AGGREGATE profile is comparable. A question shaped "where are MY top nets in the other file?"
+makes every row that is not one of mine invisible — the same shape as the adjacent-object figures
+in section 1, twice in one sitting on the same task.
+
+## 7. WHAT THIS ADDS UP TO
+The DRV load is **intrinsic to Slice A's register structure — six to eight minimum-drive flops
+carrying 60-160 loads — and it is present in BOTH variants.** It is not an -ma regression, not
+diffuse, and not a routing accident. It is the instruction/immediate registers fanning across the
+datapath on `dfxtp_1`, and the repair that fits that shape is drive-strength/buffer-tree work on
+a named handful of nets. That is a LibreLane resizer job and this box cannot run it (section 2).
