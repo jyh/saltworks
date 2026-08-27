@@ -497,17 +497,39 @@ except Exception: print(-1)' "$mine" 2>/dev/null)
       SSH=$(printf '%s' "$SS" | shasum | cut -c1-12)
       SSF="${TMPDIR:-/tmp}/silicon-arm7-$(id -u).state"
       PREVH=""; PREVT=""; PREVN=0
-      [ -f "$SSF" ] && { PREVH=$(cut -d' ' -f1 "$SSF"); PREVT=$(cut -d' ' -f2 "$SSF"); PREVN=$(cut -d' ' -f3 "$SSF"); }
+      PREVE=0
+      [ -f "$SSF" ] && { PREVH=$(cut -d' ' -f1 "$SSF"); PREVT=$(cut -d' ' -f2 "$SSF"); PREVN=$(cut -d' ' -f3 "$SSF"); PREVE=$(cut -d' ' -f4 "$SSF"); }
+      [ -n "$PREVE" ] || PREVE=0   # 3-field state from the previous revision reads as NOT escalated
+      # ⭐⭐ ESCALATE ON AGE — FLEET ORDER 13:3x, after a condition sat UNOWNED for FIVE
+      #    sweeps while this arm suppressed it CORRECTLY every single time.
+      # ⇒ ***A CORRECT DE-DUP RULE AND AN UNOWNED DEFECT LOOK IDENTICAL FROM INSIDE THE
+      #    INSTRUMENT SUPPRESSING THEM. "Do not re-forward" is not "do not report."***
+      #    So persistence now has its OWN event, fired ONCE at $ESC_AT sweeps and addressed
+      #    to the OWNER, after which the arm returns to quiet annotation.
+      # ⚠️ THE ⟲ LINE IS DELIBERATELY KEPT, against a literal reading of "then go quiet":
+      #    this arm's own law, three comments up, is that a check which goes SILENT is
+      #    indistinguishable from a check that PASSES. The escalation is the once-only
+      #    event; the annotation stays so the condition is never invisible.
+      ESC_AT=${ARM7_ESCALATE_AT:-2}
       if [ "$SSH" = "$PREVH" ]; then
         PREVN=$((PREVN + 1))
         printf '%s\n' "$SS"
         printf '  ⟲ UNCHANGED since %s (sweep #%s) — NOT a new event; do not re-forward.\n' "$PREVT" "$PREVN"
-        printf '%s %s %s\n' "$SSH" "$PREVT" "$PREVN" > "$SSF"
+        if [ "$PREVE" != "1" ] && [ "$PREVN" -ge "$ESC_AT" ]; then
+          # OWNER derived from the finding itself, not guessed: 0000-BOOT-<seat>.md names its seat.
+          OWNER=$(printf '%s' "$SS" | sed -n 's/.*0000-BOOT-\([a-z][a-z0-9]*\)\.md.*/\1/p' | head -1)
+          [ -n "$OWNER" ] || OWNER="the file's owner"
+          printf '  ⛔ ESCALATION (ONCE): this condition has persisted %s sweeps and is UNOWNED HERE.\n' "$PREVN"
+          printf '     OWNER: %s — it is THEIR file and THEIR duty; this seat does not touch it.\n' "$OWNER"
+          printf '     Reported once by AGE, not by cadence. The arm goes back to quiet annotation now.\n'
+          PREVE=1
+        fi
+        printf '%s %s %s %s\n' "$SSH" "$PREVT" "$PREVN" "$PREVE" > "$SSF"
       else
         NOW=$(date '+%H:%M')
         printf '%s\n' "$SS"
         [ -n "$PREVH" ] && printf '  ⭐ CHANGED since the last sweep — this IS a new event.\n'
-        printf '%s %s 1\n' "$SSH" "$NOW" > "$SSF"
+        printf '%s %s 1 0\n' "$SSH" "$NOW" > "$SSF"   # a changed condition RE-ARMS escalation
       fi
     fi
     if [ "$SSRC" != 0 ] || [ -s "$SSERR" ]; then
