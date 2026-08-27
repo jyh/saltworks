@@ -649,9 +649,26 @@ except Exception: print(-1)' "$mine" 2>/dev/null)
     if [ -n "$_qs" ] && [ -n "$_qe" ]; then
       _qspan=$(( _qe - _qs ))
       # advisory only: silicon-addressed lines OUTSIDE the section not marked discharged
-      _qout=$(grep -nE "silicon's slot|SILICON ·" "$QF" 2>/dev/null \
-              | awk -F: -v a="$_qs" -v b="$_qe" '$1<a || $1>b' \
-              | grep -vcE 'DISCHARGED|SUPERSEDED|~~|RET-[0-9]' )
+      # ⛔ EXCLUDE RETAINED ORIGINALS, 2026-08-27 03:5x. This advisory counted 3 and
+      # TWO WERE PERMANENT FALSE POSITIVES: `QUEUE.md` keeps a discharged row's
+      # original text beneath it under the convention "— original entry follows:",
+      # and that retained bullet carries no disposition token of its own, so it
+      # reads as open FOREVER. ⇒ 67% false on a line that fires every sweep, which
+      # is precisely the alarm-fatigue this file legislates against elsewhere.
+      # DISCRIMINATOR MEASURED, not guessed: both retained originals are immediately
+      # preceded by "original entry follows"; the one REAL item (council ruling #1's
+      # PRE-AUTH) is not; the convention occurs 4x in the file, so it is a convention
+      # and not a coincidence of two. Verified 3 -> 1 before installing.
+      # ⚠️ I INTRODUCED THIS NOISE MYSELF TONIGHT when I added the advisory. Fixing it
+      # now rather than banking it for a reboot, because a successor would inherit a
+      # two-thirds-false line and learn to skip it — and a skipped advisory is worse
+      # than no advisory.
+      _qout=$(awk -F: -v a="$_qs" -v b="$_qe" '
+                { if (NR>1 && prev ~ /original entry follows/) retained=1; else retained=0 }
+                (NR<a || NR>b) && /silicon'"'"'s slot|SILICON ·/ &&
+                  $0 !~ /DISCHARGED|SUPERSEDED|~~|RET-[0-9]/ && !retained { n++ }
+                { prev=$0 }
+                END { print n+0 }' "$QF" 2>/dev/null)
       q="${q}·scope=##SILICON ONLY ($_qspan of $_qtot lines)"
       [ "${_qout:-0}" -gt 0 ] && q="${q}·⚠️ $_qout silicon-addressed line(s) OUTSIDE that scope — ADVISORY, read them"
     else
