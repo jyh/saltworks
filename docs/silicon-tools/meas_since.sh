@@ -38,6 +38,8 @@ BASE="${1:?usage: meas_since.sh <baseline-sha — the sha of your LAST MEAS VERD
 HERE="$(cd "$(dirname "$0")" && pwd)"
 REPO="$(cd "$HERE/../.." && pwd)"
 cd "$REPO" || exit 2
+SALTBUILD_SH=/Users/jyh/projects/claude/saltbuild.sh
+[ -x "$SALTBUILD_SH" ] || { echo "⛔ meas_since: $SALTBUILD_SH not executable"; exit 2; }
 
 git rev-parse --verify "$BASE^{commit}" >/dev/null 2>&1 || {
   echo "⛔ meas_since: '$BASE' is not a commit in this repo — refusing to guess a baseline"
@@ -142,11 +144,94 @@ done
 echo "  hub transitive closure: $(wc -l < "$HUBCLOSURE" | tr -d ' ') modules"
 reach_hub() { grep -qxF "$1" "$HUBCLOSURE" && echo yes || echo no; }
 
+# ── IN-RANGE IMPORT OLEANS — THE HOLE THIS SWEEP DIGS FOR ITSELF ───────────────
+# ⛔⛔ ADDED 2026-08-26 23:0x, AFTER THE THIRD OCCURRENCE IN THREE CONSECUTIVE
+# RANGES (ReqWordSource · MemOrganPlacement · MemWiring). The first two were
+# banked as "a landing newer than your last build", which is a story about
+# HISTORY — and it is the WRONG MECHANISM. The measurement that refuted it:
+#
+#   DecoderLines.lean was KERNEL-CHECKED GREEN BY THIS VERY SWEEP (4s, EXIT=0)
+#   and its olean DOES NOT EXIST. MemWiring, later in the SAME range, imports it.
+#
+# ⇒ meas_build's PATH form kernel-checks a target and WRITES NO OLEAN BY DESIGN
+#   (its own table says so). A MEAS range is ordered by GIT HISTORY, never by
+#   IMPORT DEPENDENCY. So whenever file B in the range imports file A also in the
+#   range, A is checked green, no olean is written, and B REDS ON BUILD STATE.
+#   ***THE SWEEP MANUFACTURES ITS OWN RED, AND NO AMOUNT OF PRIOR BUILDING
+#   PREVENTS IT — the hole is dug DURING the sweep, after any build you ran.***
+#
+# 🔑 WHY THE OLD FRAMING SURVIVED TWO ROUNDS: "it landed after my last build" is
+#   TRUE of the first two instances. A true-but-incidental cause explains the
+#   data and predicts the wrong cure (rebuild the world, earlier). The cure that
+#   follows from the RIGHT mechanism is local: supply the missing olean, in-loop.
+#
+# ⚠️ CLASSIFICATION, NOT ABSOLUTION: a build-state red is NOT a discharged
+#   obligation. It is reported as its own state and it still fails the sweep —
+#   what changes is that it can no longer be read as A PEER'S DEFECT, which is a
+#   false accusation this seat came within one post of publishing.
+#
+# Keyed on a MEASURABLE PROPERTY (does the olean file EXIST) rather than on a
+# CATEGORY of the commit ("is it new") — the night's standing form.
+missing_import_oleans() {
+  _t="$1"; _seen=$(mktemp) || return 0; _out=$(mktemp) || return 0
+  : > "$_seen"; : > "$_out"
+  _frontier=$(grep -E '^import [A-Za-z0-9_.]+$' "$_t" 2>/dev/null | sed 's/^import //')
+  while [ -n "$_frontier" ]; do
+    _next=""
+    for _m in $_frontier; do
+      grep -qxF "$_m" "$_seen" && continue
+      printf '%s\n' "$_m" >> "$_seen"
+      # Only SaltWorks modules are ours to build; mathlib/std oleans come from the
+      # toolchain and a missing one is a DIFFERENT problem this gate must not claim.
+      case "$_m" in SaltWorks*) ;; *) continue ;; esac
+      _ol=".lake/build/lib/lean/$(printf '%s' "$_m" | sed 's|\.|/|g').olean"
+      [ -f "$_ol" ] || printf '%s\n' "$_m" >> "$_out"
+      _mp="$(printf '%s' "$_m" | sed 's|\.|/|g').lean"
+      [ -f "$_mp" ] && _next="$_next $(grep -E '^import [A-Za-z0-9_.]+$' "$_mp" 2>/dev/null | sed 's/^import //')"
+    done
+    _frontier="$_next"
+  done
+  sort -u "$_out"; rm -f "$_seen" "$_out"
+}
+
+# Default ON. Set MEAS_NOBUILD=1 to classify-and-skip without building.
+MEAS_NOBUILD="${MEAS_NOBUILD:-0}"
+buildstate=0
+
 rc=0
 for f in $changed; do
   if [ ! -f "$f" ]; then
     echo "  ⓘ RETIRED (deleted, not a gate obligation): $f"
     continue
+  fi
+  # ── PRE-FLIGHT: supply in-range oleans BEFORE spending the kernel ────────────
+  # Reading the WALL TIME was the old advice ("1s is an import failing to
+  # resolve, 84s is an elaboration"). That is a diagnosis offered to a human
+  # AFTER the fact; this refuses the condition instead.
+  miss=$(missing_import_oleans "$f")
+  if [ -n "$miss" ]; then
+    echo "  ⓘ BUILD STATE for $f — import olean(s) absent BEFORE the kernel ran:"
+    for m in $miss; do echo "      · $m"; done
+    if [ "$MEAS_NOBUILD" = "1" ]; then
+      echo "    MEAS_NOBUILD=1 — not building. This file is NOT discharged."
+      buildstate=1
+      continue
+    fi
+    for m in $miss; do
+      echo "    ⚙ MODULE form (writes the olean; runs no kernel): $m"
+      # ⛔ NEVER PIPE saltbuild.sh — $? after a pipe is the tail's status.
+      "$SALTBUILD_SH" "$m" > /dev/null 2>&1
+      echo "      saltbuild EXIT=$?"
+    done
+    miss2=$(missing_import_oleans "$f")
+    if [ -n "$miss2" ]; then
+      echo "    ⛔ STILL ABSENT after the module form — NOT a kernel verdict and"
+      echo "       NOT a peer's defect. This file is UNDISCHARGED build state:"
+      for m in $miss2; do echo "        · $m"; done
+      buildstate=1
+      continue
+    fi
+    echo "    ✅ oleans supplied — proceeding to the kernel witness."
   fi
   sh "$HERE/meas_build.sh" "$f" || rc=1
   b=$(basename "$f" .lean)
@@ -203,4 +288,15 @@ for f in $changed; do
     echo "     takes no position (AccountMeasure was unrooted ON PURPOSE)."
   fi
 done
-exit $rc
+
+# ⛔ EXIT STATUS IS THREE-VALUED ON PURPOSE. A build-state failure and a kernel
+# red are both NOT-GREEN and they are NOT THE SAME FACT: one is my tree, one is
+# the code. Collapsing them is what let a build-state red read as a peer's
+# defect. rc=1 outranks rc=3 — a real red is never masked by a build-state one.
+if [ "$rc" -ne 0 ]; then
+  exit "$rc"
+elif [ "$buildstate" -ne 0 ]; then
+  echo "⛔ SWEEP NOT COMPLETE — build state unresolved (exit 3). No kernel red found."
+  exit 3
+fi
+exit 0

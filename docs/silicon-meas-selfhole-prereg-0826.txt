@@ -1,0 +1,25 @@
+PRE-REGISTERED PREDICTION — silicon, 2026-08-26T23:01:05-0700
+Subject: meas_since.sh manufactures its OWN reds inside a single sweep.
+
+MECHANISM CLAIMED (sharper than the banked "landed after my last build"):
+  meas_build.sh's PATH form kernel-checks a target and WRITES NO OLEAN BY DESIGN.
+  A MEAS range is ordered by git history, NOT by import dependency. So when file B
+  in the range imports file A also in the range, A is checked GREEN, no olean is
+  written, and B then REDS for want of A's olean. The sweep digs its own hole.
+
+DISCRIMINATING EVIDENCE ALREADY IN HAND (range d3190e8f..c19d12f0):
+  DecoderLines.lean was KERNEL-CHECKED GREEN by THIS sweep (4s, EXIT=0)
+  and .lake/build/lib/lean/SaltWorks/HDL/DecoderLines.olean DOES NOT EXIST.
+  The banked history-based story cannot explain that; the path-form story does.
+
+PREDICTION, MADE BEFORE THE SWEEP REACHED THESE FILES:
+  MemWiring.lean       -> RED, and the error names a MISSING OLEAN (build state),
+                          for one of: AdapterPlacement / DecoderLines / MemOrganPlacement
+  StallsAtWidened.lean -> reaches the kernel (no missing import olean)
+
+BAR: the prediction is REFUTED if MemWiring reds for any reason OTHER than a
+missing olean, or if it goes green, or if StallsAtWidened reds on build state.
+
+DETECTOR CONTROL (run before the prediction, both branches reachable):
+  MemOrganPlacement.lean -> names SaltWorks.HDL.AdapterPlacement  (positive)
+  DecoderLines.lean      -> empty                                  (negative)

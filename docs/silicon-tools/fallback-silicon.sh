@@ -266,7 +266,16 @@ while true; do
   if [ ! -r "$IDX" ]; then
     idx="** INDEX UNREADABLE at $IDX — CHECK DID NOT RUN **"
   else
-    ib=$(wc -c < "$IDX" | tr -d ' ')
+    # ⛔ FIXED 08/26 23:2x — THE CAP IS IN CHARS AND THIS MEASURED BYTES.
+    # memreach.py's LOADER_CAP_CHARS = 24985; this compared `wc -c`. UTF-8 bytes >=
+    # chars, so it was SAFE BY CONSTRUCTION (it always alarmed early) and it was the
+    # WRONG QUANTITY — and on an emoji-dense index the two diverge by hundreds.
+    # ⚠️ Accuracy is the right call even though it makes the alarm fire LATER: a
+    # warning that is permanently pessimistic is a warning its reader learns to wave
+    # past, which is this file's own banked law. BOTH are printed so the conservative
+    # reading stays AVAILABLE rather than being silently traded away.
+    ib=$(wc -m < "$IDX" | tr -d ' ')
+    ibb=$(wc -c < "$IDX" | tr -d ' ')
     # ⛔ ROUND, DO NOT TRUNCATE. Shell integer division always rounds DOWN, so
     # this meter under-reported headroom use by up to a full point — and it does
     # so at the ONE place it matters: the >=85 "approaching the cut" arm could
@@ -275,7 +284,7 @@ while true; do
     # Found because my own post said 64% while this line said 63% for the same
     # file, two minutes apart — in a post about a 1% measurement discrepancy.
     ipct=$(( (ib * 200 + IDXLIM) / (2 * IDXLIM) ))
-    if   [ "$ib" -ge "$IDXLIM" ]; then idx="$ib/$IDXLIM (${ipct}%) ** OVER — TAIL ENTRIES ARE NOT LOADING **"
+    if   [ "$ib" -ge "$IDXLIM" ]; then idx="$ib chars (${ibb}B)/$IDXLIM (${ipct}%) ** OVER — TAIL ENTRIES ARE NOT LOADING **"
     # ⛔ MESSAGE CORRECTED 2026-08-24 21:3x — THE THRESHOLD IS DELIBERATELY UNTOUCHED.
     #    It said "compact now", which names an action that does not exist here: measured
     #    the same night, only 2 of 70 hooks carry >=2 dated clauses and they hold 6% of
@@ -290,13 +299,20 @@ while true; do
     #      from the other side. The level stays at 85 until someone else rules on it.
     elif [ "$ipct" -ge 85 ];     then
       _rem=$(( IDXLIM - ib )); _hk=$(( _rem / 280 ))
-      idx="$ib/$IDXLIM (${ipct}%) ** APPROACHING THE CUT — ${_rem}B ≈ ${_hk} hooks left. NO CHEAP COMPACTION (2 of 70 hooks accreted, 6% of bytes): shrink ONLY by REWRITING a hook you are already amending **"
-    else                              idx="$ib/~${IDXLIM} (${ipct}%, limit CORROBORATED, precision unknown)"
+      idx="$ib chars (${ibb}B)/$IDXLIM (${ipct}%) ** APPROACHING THE CUT — ${_rem} chars ≈ ${_hk} hooks left. NO CHEAP COMPACTION (2 of 70 hooks accreted, 6% of bytes): shrink ONLY by REWRITING a hook you are already amending **"
+    else                              idx="$ib chars (${ibb}B)/~${IDXLIM} (${ipct}%, limit CORROBORATED, precision unknown)"
     fi
     # THE TWIN GUARD. Only speaks when a SECOND readable index exists and DISAGREES —
     # silence here means there is nothing to confuse, not that the check was skipped.
     if [ "$IDX" != "$_idxlegacy" ] && [ -r "$_idxlegacy" ]; then
-      _lb=$(wc -c < "$_idxlegacy" | tr -d ' ')
+      # ⛔ UNIT-MATCHED 08/26 23:2x IN THE SAME EDIT THAT CHANGED `ib` TO CHARS.
+      # This read BYTES while `ib` became CHARS; on an emoji-dense index the two
+      # differ by hundreds, so the guard would have declared a LEGACY TWIN on every
+      # sweep even when the twin was byte-identical to this file. ***A FIX THAT
+      # REACHES ONE ARM OF A TOOL AND NOT ITS SIBLING LEAVES THE ORIGINAL DEFECT
+      # LIVE UNDER A NEW SPELLING*** — this file already says that at the 08-11
+      # comment, and I nearly re-committed it while fixing a unit bug.
+      _lb=$(wc -m < "$_idxlegacy" | tr -d ' ')
       [ "$_lb" != "$ib" ] && idx="$idx ** LEGACY TWIN STILL ON DISK ($_lb B) AND IT IS NOT THIS FILE — measured $IDX **"
     fi
   fi
@@ -503,7 +519,29 @@ except Exception: print(-1)' "$mine" 2>/dev/null)
       if [ ! -f "$MIRROR_DIR/$lb" ]; then mo=$((mo+1))
       elif ! cmp -s "$lf" "$MIRROR_DIR/$lb"; then md=$((md+1)); fi
     done
-    if [ "$md" = 0 ] && [ "$mo" = 0 ]; then mir="OK"
+    # ⛔⛔ ADDED 08/26 23:2x — `mirror=OK` MEANT *MIRRORED*, NEVER *BANKED*, and the
+    # gap it could not see is the one that harms OTHER PEOPLE. The loop above cmp's
+    # live-bank <-> mirror WORKING TREE and contains no `git` call at all, so it
+    # reported OK all evening while my uncommitted mirror files REFUSED A PEER'S PULL.
+    # ⇒ THREE SURFACES (live · mirror worktree · mirror COMMITTED), TWO GAPS, and the
+    #   arm watched only the first gap — ***THE WATCHED GAP HARMS ONLY ME, THE
+    #   UNWATCHED ONE HARMS EVERYONE ELSE.*** That is the predictable failure mode of
+    #   building an instrument out of your own scar tissue: you cover the failure you
+    #   personally experienced, not the CLASS it belongs to.
+    # Registered 21:1x and deliberately NOT built then (reactive tool edits at the end
+    # of a session are this seat's own banked defect); built rested, helm-approved.
+    mdirty=""
+    if [ -d "$MIRROR_DIR/.git" ] || git -C "$MIRROR_DIR" rev-parse --git-dir >/dev/null 2>&1; then
+      mdirty=$(git -C "$MIRROR_DIR" status --porcelain -- . 2>/dev/null | wc -l | tr -d ' ')
+    else
+      mdirty="NOGIT"
+    fi
+    if [ "$md" = 0 ] && [ "$mo" = 0 ]; then
+      case "$mdirty" in
+        0)      mir="OK (mirrored AND committed)" ;;
+        NOGIT)  mir="MIRRORED but ** MIRROR IS IN NO GIT REPO — cannot be banked **" ;;
+        *)      mir="MIRRORED but ** $mdirty UNCOMMITTED IN THE MIRROR — A PEER'S PULL REFUSES; commit them **" ;;
+      esac
     else mir="$md STALE/$mo UNMIRRORED ** run seat/tools/mirror-sync.sh **"; fi
   fi
   # ── ARM 9 (QUEUE PULL, CLOCK-TRIGGERED) — added 08/22 after the defect it exists
