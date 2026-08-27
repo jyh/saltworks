@@ -74,3 +74,44 @@ hold responds ~linearly to the margin; slew barely moves. They looked coupled on
 my FIRST experiment changed the CORNER SET, which moves both at once.
 => A TRADE-OFF OBSERVED ON A COMPOUND KNOB IS NOT EVIDENCE OF A REAL TRADE-OFF.
 It spent SETUP (16.87 -> 15.67, exactly the +2.05 gained), not area.
+
+---
+# ⛔⛔ CORRECTION 12:4x — "AREA IDENTICAL" IS A NON-MEASUREMENT. APPENDED, NOT REWRITTEN.
+**This document, this seat's bank, and the headline a fresh head inherits all say ①d leaves area
+IDENTICAL, and one of them adds "It spent SETUP …, NOT AREA". The second half of that sentence is
+FALSE.** Found 12:4x while scoring the NDF arm against its pre-registered bar.
+
+`design__instance__area` **equals `design__core__area` exactly** — 101,535 in all five (A) runs and
+225,802 in both NDF runs. On an `FP_SIZING: absolute` run it is **PINNED BY THE DIE** and cannot
+move. It was never a design measurement, so "identical" was true and empty.
+
+**THE REAL COST, from `__stdcell` and the class breakdown:**
+```
+3x2  (A) runs           baseline   ss+tt    all9      ①c      ①d      ①d vs baseline
+  stdcell area           45,337   41,447  45,755  46,382  46,797   +1,460 um2  = +3.2%
+  timing_repair_buffer    1,023      789   1,134   1,279   1,322   +299 buffers = +29.2%
+  fill area              56,198   60,088  55,780  55,153  54,738   -1,460 um2  ← absorbs it EXACTLY
+  sequential (flops)        552      552     552     552     552   IDENTICAL (this one is real)
+
+NDF 6x2                 ndf-base            ndf-1d           delta
+  stdcell area           127,056            131,537   +4,481 um2 = +3.5%
+  timing_repair_buffer     2,611              3,402   +791 buffers = +30.3%
+  hold_buffer              1,267              1,486   +219
+  fill area               98,746             94,264   -4,482 um2  ← absorbs it EXACTLY
+  sequential (flops)       1,468              1,468   IDENTICAL
+```
+⇒ ***①d BUYS ITS SLEW, CAP AND HOLD WITH ~30% MORE TIMING-REPAIR BUFFERS AND ~3% MORE STANDARD-CELL
+AREA. THE FILL ABSORBS IT TO THE MICRON, SO THE DIE IS UNCHANGED AND THE FIT IS UNAFFECTED — but
+"area identical" was the fill doing the work, not the repair being free.***
+
+🔑 **THE INSTRUMENT LESSON, WHICH IS THE PART THAT GENERALISES: A METRIC THAT EQUALS A CONSTRAINT
+IS NOT A MEASUREMENT.** `design__instance__area == design__core__area` on every run of both
+designs; a check keyed on it **could not fail**, and mine (`area <= base × 1.03`, §5(b) of the NDF
+pre-registration) therefore tested nothing and reported ✅. Keyed on `__stdcell` it reads
+131,537/127,056 = **1.0353 — it would have FAILED, marginally.** *I wrote the bar, I scored it, and
+it passed for the wrong reason; only asking "could this check ever say NO?" exposed it.*
+[[a-check-never-shown-to-fail]]
+📌 **WHAT STILL STANDS, SCOPED:** every other axis is unaffected — the slew/cap/fanout/setup/hold
+figures and DRC/LVS/antenna 0/0/0 are all real, and the **flop counts (552 · 1,468, synthesis and
+final alike) are a genuine invariant**, not a die artifact. ①d still dominates its baseline on every
+metric that measures the design. **What changes is the price tag: it is ~3% of stdcell area, not zero.**

@@ -51,3 +51,66 @@ Run 1 sat inside ±5% on all three DRV counts while the routing layer (met5 vs m
 pitch (153.6 vs 38.87) and the IO pin geometry were all wrong. **Metric proximity would have
 certified it.** `resolved_diff.py` returns a set, not a similarity, and an empty set is the only
 passing value — which is why the second run's agreement is worth something.
+
+---
+# Part 2 · ①d ON THE PAID CHIP — IT DOMINATES, AND THE PRICE IS ~3% STDCELL, NOT ZERO
+`ndf-1d`, 12:30:06–12:38:52 (8.8 min), same image and PDK as the baseline.
+
+## 4 · TREATMENT VERIFIED APPLIED — AND ONLY THE TREATMENT
+```
+resolved_diff vs the SUBMITTED chip:  EXACTLY 3 non-path differences
+   RSZ_CORNERS                     ref=None   me=[nom_tt, max_ss, nom_ss, min_ss]
+   PL_RESIZER_HOLD_SLACK_MARGIN    ref=0.1    me=0.45
+   GRT_RESIZER_HOLD_SLACK_MARGIN   ref=0.05   me=0.30
+```
+⭐ **THREE, AND EXACTLY THE THREE I SET.** The same gate that returned EMPTY for the baseline
+returns precisely the treatment for the arm — so the treatment applied *and* nothing else drifted.
+That is a stronger statement than "the config file says 0.45".
+
+## 5 · THE RESULT — against a baseline BIT-EXACT to the submitted signoff
+```
+metric              base (= paid chip)     ndf-1d        delta
+max_slew                        3,317         857     -74.2%   ✅
+max_cap                            27           5     -81.5%   ✅
+max_fanout                        117         111      -5.1%   ✅
+setup WS                    +5.66802    +7.88681    +2.219 ns  ✅ IMPROVED
+hold WS                     +0.11053    +0.19383     +75.4%    ✅ IMPROVED
+DRC · LVS · antenna             0/0/0       0/0/0                ✅
+die area                      232,623     232,623   unchanged
+stdcell area                  127,056     131,537     +3.5%    ⛔ THE COST
+timing_repair_buffer            2,611       3,402     +30.3%   ⛔ THE MECHANISM
+sequential (flops)              1,468       1,468   IDENTICAL  ✅ state conserved
+```
+**All seven §5(b) bars PASS ⇒ the arm CLOSES.** ⛔ **But one passed for a bad reason and it is
+recorded rather than banked: `area <= base × 1.03` keyed on `design__instance__area`, which EQUALS
+`design__core__area` on an absolute-die run and CANNOT MOVE.** Keyed on `__stdcell` it is 1.0353 and
+**would have failed, marginally.** See the correction appended to `silicon-drv-A-results-0827.md`;
+the same non-measurement is in this seat's bank and in the inherited headline.
+
+## 6 · ⭐ THE FANOUT RESULT IS MECHANISTIC, AND IT WAS PREDICTED BEFORE IT WAS MEASURED
+```
+                  clock-leaf   datapath   total
+ndf-base                 111          6     117
+ndf-1d                   111          0     111
+```
+***①d CLOSED EXACTLY THE SIX DATAPATH VIOLATORS AND LEFT THE CLOCK TREE UNTOUCHED.*** Four of the
+six were resizer-inserted `fanout*` buffers (verified: **0 occurrences in the synthesis netlist,
+874 in the final** — control: `dfxtp` is 1,468 in both, so the zero is a measurement); two were
+yosys datapath nets. **The resizer fixed what the resizer owns; CTS owns the remainder.**
+⚠️ *This number was first parsed with an unterminated `awk` section that ran past the fanout table
+into the next one and returned 112 with a bogus row. The tell was the count disagreeing with
+`design__max_fanout_violation__count` (111). Re-parsed with a bounded section; both runs now agree
+with their own metric. A section-scanner without a terminator is a silent over-count.*
+
+## 7 · ⇒ WHAT ② BECOMES
+**②'s pre-registered premise was refuted and is now RESTORED, at a different number and only after
+①d.** On the 3×2 every violator was a clock leaf. On the paid chip's *baseline* that was FALSE —
+6 of 117 were datapath, so CTS knobs alone could never have reached zero. **After ①d the residual is
+111 of 111 clock-leaf, ZERO datapath**, so `CTS_SINK_CLUSTERING_SIZE` is once again the whole
+remaining question — against **111 leaves at fanout 12–15**, not the 3×2's 37 at 11–12.
+📌 ② should therefore run **on the NDF, after ①d**, not on the 3×2. Its arms (10, then 8) still fit:
+552 flops over ≤10 sinks needed ≥56 leaves on the 3×2; **1,468 flops need ≥147 leaves here.**
+
+## 8 · ⛔ WHAT IS NOT MINE
+The resubmission click is the Captain's (public + money). This seat has produced a measured,
+audited pair on the artifact that ships and reports it. **Nothing has been submitted.**
