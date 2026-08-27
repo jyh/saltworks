@@ -117,3 +117,25 @@ the 3×2 to the NDF is MINE, from measurement, and is not yet ruled on.** I am r
 helm's own ruling made the NDF the artifact of record, so running §1's 3×2 arm would knowingly
 measure the diagnosis object. **A measurement is not a commitment — if the helm prefers the 3×2 arm,
 this costs 8 minutes and I run that instead.**
+
+## 10 · ②a RESULT AND WHY ②b STILL RUNS — recorded BEFORE ②b, 13:0x
+`ndf-2a` (`CTS_SINK_CLUSTERING_SIZE=10`): **fanout 111 → 1.** All **111 clock-leaf violators
+closed**; the single residual is **`wire695/X` at fanout 11**, and it is **DATAPATH, not a clock
+leaf**. ⇒ **BY THE §8 BAR (`max_fanout == 0` at all nine corners) THE ARM DOES NOT CLOSE.** Every
+other clause passes: slew 857→825 · cap 5→5 · hold 0.19383→0.19768 · setup 7.8868→7.8590 ·
+stdcell 131,537→131,856 (+0.24%) · flops 1,468 · DRC/LVS/antenna 0/0/0.
+
+⛔ **②b IS MIS-AIMED AT THIS RESIDUAL AND I AM SAYING SO BEFORE RUNNING IT.** `wire695` is a
+`sky130_fd_sc_hd__buf_8` — **0 occurrences in the synthesis netlist, 1 in the final** (control:
+`dfxtp` 1,468 in both), present in `ndf-1d` and ABSENT from `ndf-base`, i.e. **a RESIZER repair
+buffer that ①d created.** Smaller sink clustering acts on the CLOCK TREE, and **there are zero
+clock-leaf violators left for it to fix.**
+✅ **IT RUNS ANYWAY, FOR A DIFFERENT AND STATED REASON: to discriminate STRUCTURAL from PLACEMENT
+NOISE.** A different clustering perturbs placement and load distribution. If `wire695` lands at 11
+again under `=8`, the residual is a real structural feature of the repaired datapath; if it moves or
+disappears, it is placement noise and the "1" is not a stable property of the design. **That is
+worth 8 minutes and it is not the same claim as "②b will fix it" — if it closes, that is
+INCIDENTAL and will be reported as incidental.**
+📌 The §8 bar is UNCHANGED for ②b. If neither arm reaches 0, the live question becomes whether
+**117 → 1** is accepted, and that is a SPEC-ACCEPTANCE act belonging to the CAPTAIN, arriving with
+the cost of the alternative attached — which is what these two arms measure.
