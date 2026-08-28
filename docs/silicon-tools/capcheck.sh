@@ -16,14 +16,30 @@
 #     two-point padding probe, which was uncontrolled (see below), and both were run
 #     on files I wrote in one style. Two numbers, one mechanism, one confound.
 #   📏 THE OBSERVED RANGE IS WIDE AND CONTENT-DEPENDENT:
-#       seat markdown (emoji/markup heavy)   ~2.12 - 2.18 B/tok
+#       seat markdown (emoji/markup heavy)   ~2.11 - 2.18 B/tok
 #       the compiler seat's brief            ~4.06 B/tok
 #       plain repeated ASCII                 ~4.00 B/tok
+#   ⛔⛔ DIVISOR LOWERED 2.15 -> 2.10 ON 2026-08-28 08:5x, AND THE REASON IS A DRIVEN
+#     COUNTEREXAMPLE, NOT A MARGIN OF TASTE: this gate's OWN SUBJECT — silicon's
+#     0000-BOOT brief — measured 2.113 B/tok by a THREE-POINT probe (48,789 B /
+#     23,085 tok). That is BELOW the 2.15 divisor, so the printed figure was ~22,692
+#     tok / 90.8% against a TRUE 23,085 / 92.3%.
+#     ⇒ THE GATE UNDER-REPORTED BY 1.5 POINTS ON THE ONE FILE IT EXISTS TO GUARD,
+#       while its own header promised it "fires EARLY". A bound chosen for its
+#       DIRECTION only has that direction while density >= divisor, and this file
+#       walked out of the calibrated range.
+#     ⚠️ FIGURES PRINTED BEFORE THIS CHANGE USED 2.15 AND ARE NOT COMPARABLE WITH
+#       ONES PRINTED AFTER IT. That is survivable ONLY because the divisor is echoed
+#       inside every output line ("<bytes> / <div> = ~<tok>"), so a number always
+#       carries the parameter that produced it. Do not remove that echo.
 #   ⇒ THERE IS NO SINGLE TRUE DIVISOR. So this guard takes the SMALL end on
 #     purpose: a small divisor yields a LARGE token figure, which makes the gate
 #     fire EARLY. A cap guard must err toward "you are closer than you think",
 #     because the opposite error is the one that lets a file cross a silent cut.
-#     ⇒ 2.15 IS A BOUND CHOSEN FOR ITS DIRECTION, NOT A FACT ABOUT YOUR FILE.
+#     ⇒ THE DIVISOR IS A BOUND CHOSEN FOR ITS DIRECTION, NOT A FACT ABOUT YOUR FILE.
+#       (It read 2.15 until 08/28; see the driven counterexample above. The VALUE is
+#       echoed in every output line on purpose — never state a percentage from this
+#       tool without the divisor that produced it.)
 #
 # ⛔⛔ AND DO NOT USE THE TWO-POINT PADDING PROBE THIS FILE USED TO RECOMMEND.
 #   It solved for TWO unknowns (base, p) from TWO points, then reported that "both
@@ -52,7 +68,7 @@ set -u
 #     unit is now something the caller must SAY, not something this script infers.
 usage='usage: capcheck.sh <file> --unit bytes|tokens [--cap N] [--divisor D] [--warn PCT] [--refuse PCT]'
 F=${1:?"$usage"}; shift
-CAP=""; DIV=2.15; WARN=80; REF=90; UNIT=""
+CAP=""; DIV=2.10; WARN=80; REF=90; UNIT=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --unit) shift; UNIT=${1:?} ;;
@@ -81,13 +97,15 @@ else
   VAL=$(python3 -c "print(int($B/$DIV))" 2>/dev/null) || { echo "capcheck: python3 needed" >&2; exit 2; }
   PCT=$(python3 -c "print(round($VAL/$CAP*100,1))")
   echo "capcheck:   ${B}B / ${DIV} = ~${VAL} tok UPPER-BOUND  (cap ${CAP}, ~${PCT}%)"
-  echo "capcheck:   ⚠️ CONSERVATIVE BOUND, not an estimate — divisor 2.15 chosen at the SMALL end of an observed 2.12-4.06 range so this gate fires EARLY"
+  echo "capcheck:   ⚠️ CONSERVATIVE BOUND, not an estimate — divisor ${DIV} is chosen BELOW the smallest density yet observed (2.11 B/tok, silicon's own boot brief, 3-point probe) so this gate errs toward 'closer than you think'. It has that direction ONLY while the file's density >= ${DIV}, which no shell can check."
 fi
 OVER=$(python3 -c "print(1 if $PCT >= $REF else 0)")
 NEAR=$(python3 -c "print(1 if $PCT >= $WARN else 0)")
 if [ "$OVER" = "1" ]; then
   echo "capcheck: ⛔ REFUSED — ~${PCT}% is at or past the ${REF}% line." >&2
-  echo "capcheck:   MEASURE IT with the two-point probe before trusting this number," >&2
+  echo "capcheck:   MEASURE IT with the THREE-POINT probe before trusting this number" >&2
+  echo "capcheck:   (two points fit two unknowns and AGREE BY CONSTRUCTION — that is an" >&2
+  echo "capcheck:    algebraic identity, not a control; the surplus point is what can refuse)," >&2
   echo "capcheck:   then TRIM. The cap is a CUT: what is past it goes SILENTLY invisible." >&2
   exit 5
 fi
