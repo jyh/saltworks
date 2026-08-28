@@ -58,6 +58,40 @@ set -u
 [ $# -ge 1 ] || { echo "usage: meas_build.sh <path/to/Module.lean> [...]"; exit 2; }
 
 SALTBUILD=/Users/jyh/projects/claude/saltbuild.sh
+
+# ── SEAT, FOR THE BUILD QUEUE'S CENSUS COLUMN ────────────────────────────────
+# ⛔ MEASURED 2026-08-27 19:5x IN THE LIVE CENSUS, not reasoned: my MEAS sweep and a
+#   peer's build sat side by side as `math` and `root`. saltbuild derives the seat
+#   from ITS OWN resolved path, and $SALTBUILD above is the FLEET-ROOT symlink, which
+#   resolves OUTSIDE seats/ — so EVERY seat's MEAS run logs `seat=root`. The council
+#   commissioned that column as "the legible build schedule"; a value identical for
+#   all three seats is accurate about the invocation and useless about the owner.
+# ✅ saltbuild HONOURS AN EXPLICIT SEAT (its path derivation is only the fallback),
+#   so the fix belongs in the CALLER and needs no change to the queue or the lock.
+# ⛔ RESOLVE THE SYMLINK CHAIN FIRST — this file may itself be reached through one,
+#   and `dirname $0` unresolved names the INVOCATION path, not this file's home.
+#   That exact defect shipped inert on five seats once already.
+if [ -z "${SEAT:-}${SELF:-}" ]; then
+  _mb_self=$0
+  case $_mb_self in */*) ;; *) _mb_self=./$_mb_self ;; esac
+  while [ -L "$_mb_self" ]; do
+    _mb_link=$(readlink "$_mb_self")
+    case $_mb_link in
+      /*) _mb_self=$_mb_link ;;
+       *) _mb_self=$(dirname "$_mb_self")/$_mb_link ;;
+    esac
+  done
+  _mb_self=$(cd "$(dirname "$_mb_self")" 2>/dev/null && pwd)/$(basename "$_mb_self")
+  case $_mb_self in
+    */seats/*/saltworks/*)
+      SEAT=${_mb_self#*/seats/}; SEAT=${SEAT%%/*}; export SEAT ;;
+    *)
+      # ⭐ A SAFE DEGRADATION PATH IS ALSO A SILENT FAILURE PATH: NAME what was looked
+      #   at, so a mis-resolved path and a genuinely seatless one are not one observable.
+      echo "⚠️ seat NOT derivable from $_mb_self — the queue census will read 'root'" >&2 ;;
+  esac
+fi
+
 [ -x "$SALTBUILD" ] || { echo "⛔ meas_build: $SALTBUILD not executable"; exit 2; }
 # The retry cap for the differential test below, DERIVED FROM saltbuild's OWN
 # DEFAULT rather than hardcoded.
