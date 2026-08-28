@@ -122,7 +122,22 @@ function fence_markers(body,   m) {
   return m
 }
 function emit(st, body,   marked, n, m) {
-  if (FENCE_ON && fenced_p(body) && substr(body, 1, 60) !~ /SILICON|Silicon/) {
+  # ⛔⛔ REV 17, 2026-08-27 22:3x — THE BYPASS WAS CASE-SENSITIVE AND THE HELM WRITES
+  #   LOWERCASE. `→ silicon: ...` is the fleet's ACTUAL addressing style, so a post
+  #   ADDRESSED TO ME that carried a pool word was WITHHELD — and that is exactly the
+  #   (C) dispatch this file's own header says it must never withhold ("would blind me
+  #   to my own (C) dispatch, which the helm has already said will NAME the pool in
+  #   order to state what it withheld"). Driven both ways before the fix:
+  #     "→ silicon: your (C) dispatch — the codebook pool ..."  shipped: WITHHELD
+  #     "→ Silicon: ...same..."                                 shipped: delivered
+  #   ⚠️ AND THE INCONSISTENCY WAS INSIDE ONE FILE, TWO LINES APART: fence_markers()
+  #   already matched /SILICON|Silicon|silicon/, so the marker said NAMES-SILICON on
+  #   a post the bypass then refused to deliver.
+  # ⭐ THIS WIDENS THE *BYPASS*, NEVER THE PREDICATE. fenced_p() is untouched — the
+  #   standing ruling forbids a receiver quietly relaxing what it treats as pool
+  #   material, and this does the opposite: it repairs the addressed-to exemption the
+  #   design already specifies.
+  if (FENCE_ON && fenced_p(body) && substr(body, 1, 60) !~ /SILICON|Silicon|silicon/) {
     # ⛔ THE NOTICE IS A RECEIPT, AND A RECEIPT NAMES THE TRANSACTION, NOT THE
     # GOODS (helm, 22:52). The label said "B2-FENCE", which told the protected
     # reader the CATEGORY of the thing being kept from them -- a smaller leak
