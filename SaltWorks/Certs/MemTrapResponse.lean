@@ -148,4 +148,7 @@ theorem lw_out_of_range_response (s : St) (rd a : Fin 32) (imm : BitVec 12)
 #audit_axioms lw_misaligned_response
 #audit_axioms lw_out_of_range_response
 
+
+-- completeness sweep 2026-08-28 (compiler): these carried no build-failing axiom gate.
+#audit_axioms SaltWorks.Certs.MemTrapResponse.addrClass_ne_ok_of_misaligned SaltWorks.Certs.MemTrapResponse.addrClass_ne_ok_of_outOfRange
 end SaltWorks.Certs.MemTrapResponse

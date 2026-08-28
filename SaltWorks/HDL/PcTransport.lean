@@ -112,4 +112,8 @@ theorem c4Spec_core_of_two_datapaths (h1 : RegDatapathOK) (h2 : PcDatapathOK) :
 #audit_axioms getD_drop core_outs_pc_index core_outBit_pc
 #audit_axioms pcField_of_datapath c4Spec_core_of_two_datapaths
 
+
+-- completeness sweep 2026-08-28 (compiler): these carried no build-failing axiom gate.
+#audit_axioms SaltWorks.HDL.RegNextUniform.pcAdd_out_mem SaltWorks.HDL.RegNextUniform.pcAdd_outs_len
+#audit_axioms SaltWorks.HDL.RegNextUniform.pcOut_lt_offRegNext
 end SaltWorks.HDL.RegNextUniform

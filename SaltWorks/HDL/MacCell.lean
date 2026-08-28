@@ -1358,4 +1358,7 @@ the first failure, so everything after a failure reads as clean. -/
 #audit_axioms scellSeq_sign_cycle_witness
 #audit_axioms scellSeq_mutant_sign_bit_matters
 
+
+-- completeness sweep 2026-08-28 (compiler): these carried no build-failing axiom gate.
+#audit_axioms SaltWorks.HDL.MacCell.bitsOf_length
 end SaltWorks.HDL.MacCell

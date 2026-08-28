@@ -286,3 +286,16 @@ end SaltWorks.HDL.RegNextUniform
   printing the shared lemma's true type against the mutated one.  ⇒ the twenty-four passing rows
   are evidence, not decoration.
 -/
+
+-- completeness sweep 2026-08-28 (compiler): these carried no build-failing axiom gate.
+#audit_axioms SaltWorks.HDL.RegNextUniform.CallsiteCheck.add_addOut_eq SaltWorks.HDL.RegNextUniform.CallsiteCheck.add_addOut_lt_offSub
+#audit_axioms SaltWorks.HDL.RegNextUniform.CallsiteCheck.add_adder32_out_mem SaltWorks.HDL.RegNextUniform.CallsiteCheck.add_adder32_outs_len
+#audit_axioms SaltWorks.HDL.RegNextUniform.CallsiteCheck.add_decode_add_rd SaltWorks.HDL.RegNextUniform.CallsiteCheck.add_obMux_out_mem
+#audit_axioms SaltWorks.HDL.RegNextUniform.CallsiteCheck.add_obMux_outs_len SaltWorks.HDL.RegNextUniform.CallsiteCheck.add_obOut_eq
+#audit_axioms SaltWorks.HDL.RegNextUniform.CallsiteCheck.add_rdOf_is_decode_field SaltWorks.HDL.RegNextUniform.CallsiteCheck.add_tieFalse_lt_off0
+#audit_axioms SaltWorks.HDL.RegNextUniform.CallsiteCheck.addi_addOut_eq SaltWorks.HDL.RegNextUniform.CallsiteCheck.addi_addOut_lt_offSub
+#audit_axioms SaltWorks.HDL.RegNextUniform.CallsiteCheck.addi_adder32_out_mem SaltWorks.HDL.RegNextUniform.CallsiteCheck.addi_adder32_outs_len
+#audit_axioms SaltWorks.HDL.RegNextUniform.CallsiteCheck.addi_obMux_out_mem SaltWorks.HDL.RegNextUniform.CallsiteCheck.addi_obMux_outs_len
+#audit_axioms SaltWorks.HDL.RegNextUniform.CallsiteCheck.addi_obOut_eq SaltWorks.HDL.RegNextUniform.CallsiteCheck.addi_tieFalse_lt_off0
+#audit_axioms SaltWorks.HDL.RegNextUniform.CallsiteCheck.writers_decode_add_rd SaltWorks.HDL.RegNextUniform.CallsiteCheck.writers_rdOf_is_decode_field
+#audit_axioms SaltWorks.HDL.RegNextUniform.CallsiteCheck.x0_rdField_toNat

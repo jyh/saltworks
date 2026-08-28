@@ -264,4 +264,7 @@ theorem correct_layout_recovers :
 #audit_axioms transposed_layout_breaks
 #audit_axioms correct_layout_recovers
 
+
+-- completeness sweep 2026-08-28 (compiler): these carried no build-failing axiom gate.
+#audit_axioms SaltWorks.HDL.stBit_pc
 end SaltWorks.HDL

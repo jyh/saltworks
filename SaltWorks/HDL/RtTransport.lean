@@ -115,4 +115,8 @@ theorem rs1Env_agrees (ins : Env) (j : Nat) (hj : j < readTree.nIn) :
 
 #audit_axioms coreThru3_input_stable rs1AddrOf_testBit rs1Env_agrees
 
+
+-- completeness sweep 2026-08-28 (compiler): these carried no build-failing axiom gate.
+#audit_axioms SaltWorks.HDL.RegNextUniform.coreThru3_sub SaltWorks.HDL.RegNextUniform.readTree_nIn_997
+#audit_axioms SaltWorks.HDL.RegNextUniform.rs1AddrOf_lt SaltWorks.HDL.RegNextUniform.rs1Bit_lt
 end SaltWorks.HDL.RegNextUniform

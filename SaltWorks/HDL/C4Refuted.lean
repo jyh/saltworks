@@ -411,4 +411,8 @@ theorem no_circuit_is_both_conforming_and_C4SpecD (c : Circ)
 set_option pp.fullNames true in
 #check @witness_no_longer_enables
 
+
+-- completeness sweep 2026-08-28 (compiler): these carried no build-failing axiom gate.
+#audit_axioms SaltWorks.HDL.C4Refuted.bFull SaltWorks.HDL.C4Refuted.isa_insL_prog
+#audit_axioms SaltWorks.HDL.C4Refuted.selOut0_net
 end SaltWorks.HDL.C4Refuted

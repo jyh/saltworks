@@ -503,4 +503,7 @@ theorem bnC_output_keys_partial (st : List Bool) (tr : List (List Bool)) (n L : 
 #audit_axioms ceCPort_partial_out0
 #audit_axioms ceCPort_partial_out1
 
+
+-- completeness sweep 2026-08-28 (compiler): these carried no build-failing axiom gate.
+#audit_axioms SaltWorks.HDL.PartialLift.ceC_state_is_four_bits SaltWorks.HDL.PartialLift.frameLE_eq
 end SaltWorks.HDL.PartialLift

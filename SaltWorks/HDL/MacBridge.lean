@@ -1142,4 +1142,22 @@ adopted here. -/
 #audit_axioms scellSeq_signed_runTrace_state
 #audit_axioms scellSeq_computes_signed_mac
 
+
+-- completeness sweep 2026-08-28 (compiler): these carried no build-failing axiom gate.
+#audit_axioms SaltWorks.HDL.MacBridge.addendTrace_toInt_sum SaltWorks.HDL.MacBridge.cell_carry_cycle
+#audit_axioms SaltWorks.HDL.MacBridge.cell_computes_signed_mac SaltWorks.HDL.MacBridge.cell_full_mac
+#audit_axioms SaltWorks.HDL.MacBridge.cell_sign_cycle SaltWorks.HDL.MacBridge.cell_sign_cycle_witness
+#audit_axioms SaltWorks.HDL.MacBridge.cell_state_toInt_eq_macAfter SaltWorks.HDL.MacBridge.cell_sum_bit
+#audit_axioms SaltWorks.HDL.MacBridge.cell_sum_bit_witness SaltWorks.HDL.MacBridge.demoTrace_sum_is_demoBound
+#audit_axioms SaltWorks.HDL.MacBridge.demo_noOverflowFrom SaltWorks.HDL.MacBridge.demo_reading
+#audit_axioms SaltWorks.HDL.MacBridge.macSeq_cycle_bits SaltWorks.HDL.MacBridge.macSeq_runTrace_state
+#audit_axioms SaltWorks.HDL.MacBridge.macSeq_step_word SaltWorks.HDL.MacBridge.mutant_4a_dropped_hypothesis
+#audit_axioms SaltWorks.HDL.MacBridge.mutant_carry_high_differs SaltWorks.HDL.MacBridge.mutant_false_bound_decides_false
+#audit_axioms SaltWorks.HDL.MacBridge.mutant_false_bound_gate_is_false SaltWorks.HDL.MacBridge.mutant_sign_cycle_without_carry_is_off_by_one
+#audit_axioms SaltWorks.HDL.MacBridge.mutant_total_only_conclusion_is_false SaltWorks.HDL.MacBridge.mutant_total_only_hypothesis_holds
+#audit_axioms SaltWorks.HDL.MacBridge.mutant_witness_overflows SaltWorks.HDL.MacBridge.not_saddOverflow_of_abs_le
+#audit_axioms SaltWorks.HDL.MacBridge.not_saddOverflow_of_demoBound SaltWorks.HDL.MacBridge.runTrace_mutant_dropped_addend
+#audit_axioms SaltWorks.HDL.MacBridge.runTrace_witness SaltWorks.HDL.MacBridge.step_toInt_of_not_saddOverflow
+#audit_axioms SaltWorks.HDL.MacBridge.sum_toInt_of_noOverflowFrom SaltWorks.HDL.MacBridge.wshift_runTrace_state
+#audit_axioms SaltWorks.HDL.MacBridge.wshift_step_word
 end SaltWorks.HDL.MacBridge

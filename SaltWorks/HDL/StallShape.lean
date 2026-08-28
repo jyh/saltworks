@@ -477,4 +477,7 @@ theorem mix_run_moves_the_state (pad : SaltWorks.HDL.Env) :
 #audit_axioms mix_realises stepsIn_mix_two mix_both_kinds
 #audit_axioms mix_stepsIn_pos mix_stepsIn_lt mixed_stall_witness
 
+
+-- completeness sweep 2026-08-28 (compiler): these carried no build-failing axiom gate.
+#audit_axioms SaltWorks.HDL.StallShape.mixStalls_mixIns SaltWorks.HDL.StallShape.seenWord_mixCyc
 end SaltWorks.HDL.StallShape

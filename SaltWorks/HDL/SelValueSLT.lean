@@ -266,4 +266,7 @@ reader checks the INTERFACE rather than the name. -/
 #check @slt_bit0_is_not_constant
 
 end SLT
+
+-- completeness sweep 2026-08-28 (compiler): these carried no build-failing axiom gate.
+#audit_axioms SaltWorks.HDL.RegNextUniform.SLT.instMap_slt_seven SaltWorks.HDL.RegNextUniform.SLT.sltCirc_outs_len'
 end SaltWorks.HDL.RegNextUniform

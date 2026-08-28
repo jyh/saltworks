@@ -137,4 +137,9 @@ theorem regField_core_zero : SaltWorks.Stack.Program.RegField core 0 := by
 #audit_axioms regWrite_out0_false core_rwOut0_false
 #audit_axioms decQ_reg0_bit regField_core_zero
 
+
+-- completeness sweep 2026-08-28 (compiler): these carried no build-failing axiom gate.
+#audit_axioms SaltWorks.HDL.RegNextUniform.corePre_split SaltWorks.HDL.RegNextUniform.regWrite_out0_gate_mem
+#audit_axioms SaltWorks.HDL.RegNextUniform.regWrite_ssaFrom SaltWorks.HDL.RegNextUniform.rwOut0_eq
+#audit_axioms SaltWorks.HDL.RegNextUniform.rwOut0_lt_offPc SaltWorks.HDL.RegNextUniform.rwOut0_lt_offRegNext
 end SaltWorks.HDL.RegNextUniform

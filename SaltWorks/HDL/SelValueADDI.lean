@@ -435,4 +435,26 @@ theorem selOut0_insADDI : run insADDI core.gates (selOut 0) = true := by
 #audit_axioms selOut0_insADDI
 
 end ADDI
+
+-- completeness sweep 2026-08-28 (compiler): these carried no build-failing axiom gate.
+#audit_axioms SaltWorks.HDL.RegNextUniform.ADDI.adder32_nIn_65 SaltWorks.HDL.RegNextUniform.ADDI.adder32_outs_adS
+#audit_axioms SaltWorks.HDL.RegNextUniform.ADDI.blk_out_ge SaltWorks.HDL.RegNextUniform.ADDI.coreMid5_out_ge
+#audit_axioms SaltWorks.HDL.RegNextUniform.ADDI.coreRest6_out_ge SaltWorks.HDL.RegNextUniform.ADDI.coreThru11_split9
+#audit_axioms SaltWorks.HDL.RegNextUniform.ADDI.coreThru7_split SaltWorks.HDL.RegNextUniform.ADDI.coreThruRw_split8
+#audit_axioms SaltWorks.HDL.RegNextUniform.ADDI.decOut3_thru7 SaltWorks.HDL.RegNextUniform.ADDI.dec_insADDI
+#audit_axioms SaltWorks.HDL.RegNextUniform.ADDI.gsRes_bank0 SaltWorks.HDL.RegNextUniform.ADDI.gsSel_0
+#audit_axioms SaltWorks.HDL.RegNextUniform.ADDI.gsSel_1 SaltWorks.HDL.RegNextUniform.ADDI.iRd_of_decode
+#audit_axioms SaltWorks.HDL.RegNextUniform.ADDI.iRs1_of_decode SaltWorks.HDL.RegNextUniform.ADDI.instr_thru7
+#audit_axioms SaltWorks.HDL.RegNextUniform.ADDI.obSig_64 SaltWorks.HDL.RegNextUniform.ADDI.obSig_imm
+#audit_axioms SaltWorks.HDL.RegNextUniform.ADDI.ob_thru8_mux SaltWorks.HDL.RegNextUniform.ADDI.off1_le_offOb
+#audit_axioms SaltWorks.HDL.RegNextUniform.ADDI.off3_le_offAdd SaltWorks.HDL.RegNextUniform.ADDI.offTie_le_off1
+#audit_axioms SaltWorks.HDL.RegNextUniform.ADDI.rs1Out_lt_offAdd SaltWorks.HDL.RegNextUniform.ADDI.rs1_thru8
+#audit_axioms SaltWorks.HDL.RegNextUniform.ADDI.run_frame_of_ge SaltWorks.HDL.RegNextUniform.ADDI.run_thru11_to9
+#audit_axioms SaltWorks.HDL.RegNextUniform.ADDI.run_thru13_to2 SaltWorks.HDL.RegNextUniform.ADDI.run_thru2_input
+#audit_axioms SaltWorks.HDL.RegNextUniform.ADDI.run_thru7_to2 SaltWorks.HDL.RegNextUniform.ADDI.run_thru8_to7
+#audit_axioms SaltWorks.HDL.RegNextUniform.ADDI.run_thruRw_to8 SaltWorks.HDL.RegNextUniform.ADDI.seen_insADDI
+#audit_axioms SaltWorks.HDL.RegNextUniform.ADDI.selOut_sliceABit SaltWorks.HDL.RegNextUniform.ADDI.selSig_lt32
+#audit_axioms SaltWorks.HDL.RegNextUniform.ADDI.sliceASpec_getD SaltWorks.HDL.RegNextUniform.ADDI.tieFalse_lt_off1
+#audit_axioms SaltWorks.HDL.RegNextUniform.ADDI.tieFalse_lt_offOb SaltWorks.HDL.RegNextUniform.ADDI.tieFalse_thru8
+#audit_axioms SaltWorks.HDL.RegNextUniform.ADDI.tie_run_false
 end SaltWorks.HDL.RegNextUniform

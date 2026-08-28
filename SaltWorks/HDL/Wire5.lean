@@ -100,4 +100,8 @@ theorem immOf_bits (ins : Env) (k : Nat) (hk : k < 32) :
 
 #audit_axioms immBCirc_out_k immB_block_eq coreThruRw_immOut immOf_bits
 
+
+-- completeness sweep 2026-08-28 (compiler): these carried no build-failing axiom gate.
+#audit_axioms SaltWorks.HDL.RegNextUniform.coreThruRw_split3' SaltWorks.HDL.RegNextUniform.immBCirc_outs_len
+#audit_axioms SaltWorks.HDL.RegNextUniform.immB_lt_coreInWidth SaltWorks.HDL.RegNextUniform.immOut_eq
 end SaltWorks.HDL.RegNextUniform

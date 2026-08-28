@@ -218,4 +218,9 @@ theorem core_selOut_transport (ins : Env) (k : Nat) (hk : k < 32) :
 #audit_axioms selOut_lt_offEnc selOut_lt_offRw selOut_lt_offPc selOut_lt_offRegNext
 #audit_axioms selOut_mem core_selOut_transport
 
+
+-- completeness sweep 2026-08-28 (compiler): these carried no build-failing axiom gate.
+#audit_axioms SaltWorks.HDL.RegNextUniform.coreThru13_sub SaltWorks.HDL.RegNextUniform.rdBit_lt
+#audit_axioms SaltWorks.HDL.RegNextUniform.regWrite_outs_len SaltWorks.HDL.RegNextUniform.rwOut_lt_offPc
+#audit_axioms SaltWorks.HDL.RegNextUniform.rwOut_lt_offRegNext SaltWorks.HDL.RegNextUniform.rwOut_mem
 end SaltWorks.HDL.RegNextUniform

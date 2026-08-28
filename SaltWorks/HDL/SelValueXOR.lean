@@ -289,4 +289,15 @@ theorem bank0_ne_bank1 (k : Nat) (hk : k < 32) : selSig (gsRes 0 k) ≠ selSig (
 #audit_axioms core_selOut_on_ADD_takes_bank0
 #audit_axioms bank0_ne_bank1
 
+
+-- completeness sweep 2026-08-28 (compiler): these carried no build-failing axiom gate.
+#audit_axioms SaltWorks.HDL.RegNextUniform.XOR.bitXor32_out_mem SaltWorks.HDL.RegNextUniform.XOR.bitXor32_outs_len
+#audit_axioms SaltWorks.HDL.RegNextUniform.XOR.coreRest5_out_ge SaltWorks.HDL.RegNextUniform.XOR.coreThru11_xor_split
+#audit_axioms SaltWorks.HDL.RegNextUniform.XOR.coreThruRw_split5 SaltWorks.HDL.RegNextUniform.XOR.decode_xor_regs
+#audit_axioms SaltWorks.HDL.RegNextUniform.XOR.gsSel0_three_two SaltWorks.HDL.RegNextUniform.XOR.gsSel1_three_two
+#audit_axioms SaltWorks.HDL.RegNextUniform.XOR.rs1Of_is_get_a_XOR SaltWorks.HDL.RegNextUniform.XOR.rs1Out_lt_off4
+#audit_axioms SaltWorks.HDL.RegNextUniform.XOR.rs2Of_is_get_b_XOR SaltWorks.HDL.RegNextUniform.XOR.selSig_bank1
+#audit_axioms SaltWorks.HDL.RegNextUniform.XOR.sel_net0_ctrl SaltWorks.HDL.RegNextUniform.XOR.sel_net1_ctrl
+#audit_axioms SaltWorks.HDL.RegNextUniform.XOR.thru5_eq_thruRw SaltWorks.HDL.RegNextUniform.XOR.xorOut_eq
+#audit_axioms SaltWorks.HDL.RegNextUniform.XOR.xorOut_lt_off5
 end SaltWorks.HDL.RegNextUniform.XOR

@@ -108,4 +108,9 @@ theorem rs1Of_is_St_get (ins : Env) :
 
 #audit_axioms coreRest10_out_ge rs1Of_is_St_get
 
+
+-- completeness sweep 2026-08-28 (compiler): these carried no build-failing axiom gate.
+#audit_axioms SaltWorks.HDL.RegNextUniform.coreThruRw_split SaltWorks.HDL.RegNextUniform.readTree_out_bound
+#audit_axioms SaltWorks.HDL.RegNextUniform.readTree_out_mem SaltWorks.HDL.RegNextUniform.readTree_outs_len
+#audit_axioms SaltWorks.HDL.RegNextUniform.rs1Out_eq SaltWorks.HDL.RegNextUniform.rs1Out_lt_off3
 end SaltWorks.HDL.RegNextUniform

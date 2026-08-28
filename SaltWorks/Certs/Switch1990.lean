@@ -392,4 +392,8 @@ theorem cert_payload_delivery_recovers_the_landed_statement (d0 d1 : ℕ) (hd0 :
 #print axioms cert_stage_reads_original_bit
 #print axioms cert_payload_delivery
 
+
+-- completeness sweep 2026-08-28 (compiler): these carried no build-failing axiom gate.
+#audit_axioms SaltWorks.Certs.addressBits_eq_addr88 SaltWorks.Certs.afterStages_eq_iterate
+#audit_axioms SaltWorks.Certs.moveHeadToTail_eq_rotStage
 end SaltWorks.Certs

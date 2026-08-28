@@ -502,4 +502,23 @@ theorem slt_hypothesis_is_reachable :
 #check @not_bit
 
 end SLTBit0
+
+-- completeness sweep 2026-08-28 (compiler): these carried no build-failing axiom gate.
+#audit_axioms SaltWorks.HDL.RegNextUniform.SLTBit0.bitNot32_nIn SaltWorks.HDL.RegNextUniform.SLTBit0.bitNot32_out_index
+#audit_axioms SaltWorks.HDL.RegNextUniform.SLTBit0.bitNot32_out_mem SaltWorks.HDL.RegNextUniform.SLTBit0.bitNot32_outs_len'
+#audit_axioms SaltWorks.HDL.RegNextUniform.SLTBit0.cT6_split5 SaltWorks.HDL.RegNextUniform.SLTBit0.cT9_split4
+#audit_axioms SaltWorks.HDL.RegNextUniform.SLTBit0.cT9_split5 SaltWorks.HDL.RegNextUniform.SLTBit0.cT9_split_add
+#audit_axioms SaltWorks.HDL.RegNextUniform.SLTBit0.cT9_split_not SaltWorks.HDL.RegNextUniform.SLTBit0.decode_slt_rd
+#audit_axioms SaltWorks.HDL.RegNextUniform.SLTBit0.notOut_eq SaltWorks.HDL.RegNextUniform.SLTBit0.notOut_lt_offOb
+#audit_axioms SaltWorks.HDL.RegNextUniform.SLTBit0.rs1_at_cT9 SaltWorks.HDL.RegNextUniform.SLTBit0.rs2_at_cT6
+#audit_axioms SaltWorks.HDL.RegNextUniform.SLTBit0.rs2_at_cT9 SaltWorks.HDL.RegNextUniform.SLTBit0.run_cT6_to_cT5
+#audit_axioms SaltWorks.HDL.RegNextUniform.SLTBit0.run_cT9_to_cT5 SaltWorks.HDL.RegNextUniform.SLTBit0.run_cT9_to_cT8
+#audit_axioms SaltWorks.HDL.RegNextUniform.SLTBit0.run_cT9_to_notblk SaltWorks.HDL.RegNextUniform.SLTBit0.run_cT9_to_thru4
+#audit_axioms SaltWorks.HDL.RegNextUniform.SLTBit0.run_thru10_to_cT9 SaltWorks.HDL.RegNextUniform.SLTBit0.sltSig_0
+#audit_axioms SaltWorks.HDL.RegNextUniform.SLTBit0.sltSig_1 SaltWorks.HDL.RegNextUniform.SLTBit0.sltSig_2
+#audit_axioms SaltWorks.HDL.RegNextUniform.SLTBit0.subOut_eq SaltWorks.HDL.RegNextUniform.SLTBit0.subOut_lt_offSlt
+#audit_axioms SaltWorks.HDL.RegNextUniform.SLTBit0.tail4_9 SaltWorks.HDL.RegNextUniform.SLTBit0.tail5_9
+#audit_axioms SaltWorks.HDL.RegNextUniform.SLTBit0.tail_ob_add SaltWorks.HDL.RegNextUniform.SLTBit0.tail_xor
+#audit_axioms SaltWorks.HDL.RegNextUniform.SLTBit0.thru10_split_sub SaltWorks.HDL.RegNextUniform.SLTBit0.tieTrue_lt_off0
+#audit_axioms SaltWorks.HDL.RegNextUniform.SLTBit0.tie_block_true
 end SaltWorks.HDL.RegNextUniform

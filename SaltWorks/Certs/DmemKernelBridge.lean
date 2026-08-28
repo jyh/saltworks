@@ -215,3 +215,6 @@ end Audit
 
 #print axioms SaltWorks.Certs.word_gated_wiring_satisfies_DriveMap
 #print axioms SaltWorks.Certs.opcode_only_wiring_violates_DriveMap
+
+-- completeness sweep 2026-08-28 (compiler): these carried no build-failing axiom gate.
+#audit_axioms SaltWorks.Certs.word_gated_wiring_satisfies_DriveMap

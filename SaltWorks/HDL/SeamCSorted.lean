@@ -261,3 +261,13 @@ end SaltWorks.HDL
 #print axioms SaltWorks.HDL.runNet_keyEnc_cKey
 #print axioms SaltWorks.HDL.not_monotone_keyEnc
 #print axioms SaltWorks.HDL.bnC_output_keys_are_cSorted_of_frames
+
+-- completeness sweep 2026-08-28 (compiler): these carried no build-failing axiom gate.
+#audit_axioms SaltWorks.Stack.applyComp_comp_monotoneOn SaltWorks.Stack.applyComp_mem
+#audit_axioms SaltWorks.HDL.bnC_output_keys_are_cSorted SaltWorks.HDL.bnC_output_keys_are_cSorted_of_frames
+#audit_axioms SaltWorks.Stack.map_max_of_monotoneOn SaltWorks.Stack.map_min_of_monotoneOn
+#audit_axioms SaltWorks.Stack.max_mem_of_mem SaltWorks.Stack.min_mem_of_mem
+#audit_axioms SaltWorks.HDL.monotoneOn_keyEnc SaltWorks.HDL.natKey_eq_keyEnc
+#audit_axioms SaltWorks.HDL.not_monotone_keyEnc SaltWorks.Stack.runNet_comp_monotoneOn
+#audit_axioms SaltWorks.Stack.runNet_comp_monotone_of_monotoneOn SaltWorks.HDL.runNet_keyEnc
+#audit_axioms SaltWorks.HDL.runNet_keyEnc_cKey SaltWorks.Stack.runNet_mem

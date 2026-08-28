@@ -509,4 +509,10 @@ theorem obB_is_sext_imm (ins : Env) (rd a : Fin 32) (imm : BitVec 12) (k : Nat) 
 #audit_axioms core_writes_nothing_on_SW isa_writes_nothing_on_SW
 #audit_axioms isADDOf_spec isXOROf_spec isSLTOf_spec isADDIOf_spec isLWOf_spec
 
+
+-- completeness sweep 2026-08-28 (compiler): these carried no build-failing axiom gate.
+#audit_axioms SaltWorks.HDL.RegNextUniform.decOut_lt_off1 SaltWorks.HDL.RegNextUniform.decoder_nIn_32
+#audit_axioms SaltWorks.HDL.RegNextUniform.decoder_out_bound SaltWorks.HDL.RegNextUniform.decoder_out_mem
+#audit_axioms SaltWorks.HDL.RegNextUniform.decoder_outs_len SaltWorks.HDL.RegNextUniform.instrNet_lt
+#audit_axioms SaltWorks.HDL.RegNextUniform.tie_input_stable
 end SaltWorks.HDL.RegNextUniform

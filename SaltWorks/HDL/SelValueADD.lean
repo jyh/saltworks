@@ -586,4 +586,25 @@ theorem regDatapath_ADD (ins : Env) (rd a b : Fin 32) (k : Nat) (hk : k < 32) (h
 
 
 end ADD
+
+-- completeness sweep 2026-08-28 (compiler): these carried no build-failing axiom gate.
+#audit_axioms SaltWorks.HDL.RegNextUniform.ADD.adder32_nIn SaltWorks.HDL.RegNextUniform.ADD.blk_ge
+#audit_axioms SaltWorks.HDL.RegNextUniform.ADD.cT7_split5 SaltWorks.HDL.RegNextUniform.ADD.cT8_eq
+#audit_axioms SaltWorks.HDL.RegNextUniform.ADD.cT8_split4 SaltWorks.HDL.RegNextUniform.ADD.cT8_split_tie
+#audit_axioms SaltWorks.HDL.RegNextUniform.ADD.coreThru11_split7 SaltWorks.HDL.RegNextUniform.ADD.coreThru11_split_add
+#audit_axioms SaltWorks.HDL.RegNextUniform.ADD.coreThruRw_split4 SaltWorks.HDL.RegNextUniform.ADD.coreThruRw_split5
+#audit_axioms SaltWorks.HDL.RegNextUniform.ADD.decOut_lt_offOb SaltWorks.HDL.RegNextUniform.ADD.gsRes_0
+#audit_axioms SaltWorks.HDL.RegNextUniform.ADD.gsSel_3_2_0 SaltWorks.HDL.RegNextUniform.ADD.gsSel_3_2_1
+#audit_axioms SaltWorks.HDL.RegNextUniform.ADD.off_le_0_1 SaltWorks.HDL.RegNextUniform.ADD.off_le_1_2
+#audit_axioms SaltWorks.HDL.RegNextUniform.ADD.off_le_2_3 SaltWorks.HDL.RegNextUniform.ADD.off_le_3_4
+#audit_axioms SaltWorks.HDL.RegNextUniform.ADD.off_le_4_5 SaltWorks.HDL.RegNextUniform.ADD.off_le_5_ob
+#audit_axioms SaltWorks.HDL.RegNextUniform.ADD.off_le_add_sub SaltWorks.HDL.RegNextUniform.ADD.off_le_ob_add
+#audit_axioms SaltWorks.HDL.RegNextUniform.ADD.off_le_sub_slt SaltWorks.HDL.RegNextUniform.ADD.run_cT7_to_cT5
+#audit_axioms SaltWorks.HDL.RegNextUniform.ADD.run_cT8_to_thru4 SaltWorks.HDL.RegNextUniform.ADD.run_rw_to_cT5
+#audit_axioms SaltWorks.HDL.RegNextUniform.ADD.run_rw_to_thru4 SaltWorks.HDL.RegNextUniform.ADD.run_thru11_to_add
+#audit_axioms SaltWorks.HDL.RegNextUniform.ADD.run_thru11_to_cT7 SaltWorks.HDL.RegNextUniform.ADD.selSig_low
+#audit_axioms SaltWorks.HDL.RegNextUniform.ADD.setWidth_ofBool_false SaltWorks.HDL.RegNextUniform.ADD.tail_after_add
+#audit_axioms SaltWorks.HDL.RegNextUniform.ADD.tail_after_cT5 SaltWorks.HDL.RegNextUniform.ADD.tail_after_cT7
+#audit_axioms SaltWorks.HDL.RegNextUniform.ADD.tail_after_thru4 SaltWorks.HDL.RegNextUniform.ADD.tail_after_tie
+#audit_axioms SaltWorks.HDL.RegNextUniform.ADD.tie_block_false
 end SaltWorks.HDL.RegNextUniform

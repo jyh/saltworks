@@ -280,4 +280,7 @@ the first failure, so a batched list can hide everything after the first entry. 
 #audit_axioms gsSelOf_of_gate_decoder
 
 end C1Organ
+
+-- completeness sweep 2026-08-28 (compiler): these carried no build-failing axiom gate.
+#audit_axioms SaltWorks.HDL.C1Organ.ctrlOf_index1_is_isXOR SaltWorks.HDL.C1Organ.ctrlOf_index2_is_isSLT
 end SaltWorks.HDL

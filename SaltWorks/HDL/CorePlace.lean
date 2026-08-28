@@ -1460,4 +1460,25 @@ list at the first failure, so everything after a failing name silently reads as 
 #audit_axioms we_and_res_banks_are_not_swapped
 #audit_axioms regNext_follows_its_producers
 
+
+-- completeness sweep 2026-08-28 (compiler): these carried no build-failing axiom gate.
+#audit_axioms SaltWorks.HDL.CorePlace.adder_offsets SaltWorks.HDL.CorePlace.address_bits_are_in_the_instruction
+#audit_axioms SaltWorks.HDL.CorePlace.bitNot32_inverts_rs2_not_rs1 SaltWorks.HDL.CorePlace.bitXor32_is_NOT_placeable_at_off3
+#audit_axioms SaltWorks.HDL.CorePlace.carry_ins_come_from_row_zero SaltWorks.HDL.CorePlace.chain_offsets_derived
+#audit_axioms SaltWorks.HDL.CorePlace.chain_step_advanced SaltWorks.HDL.CorePlace.decoder_reads_only_the_instruction
+#audit_axioms SaltWorks.HDL.CorePlace.enc_row_does_not_advance SaltWorks.HDL.CorePlace.instOK_mono
+#audit_axioms SaltWorks.HDL.CorePlace.lineADD_is_consumed_not_forwarded SaltWorks.HDL.CorePlace.off0_value
+#audit_axioms SaltWorks.HDL.CorePlace.off1_value SaltWorks.HDL.CorePlace.off5_value
+#audit_axioms SaltWorks.HDL.CorePlace.offSel_value SaltWorks.HDL.CorePlace.offSlt_value
+#audit_axioms SaltWorks.HDL.CorePlace.operand_banks_are_disjoint SaltWorks.HDL.CorePlace.operand_banks_are_fully_populated
+#audit_axioms SaltWorks.HDL.CorePlace.order_invariant_at_slt SaltWorks.HDL.CorePlace.order_invariant_is_falsifiable_here
+#audit_axioms SaltWorks.HDL.CorePlace.placement_is_not_vacuous SaltWorks.HDL.CorePlace.placement_margin_is_exactly_tight
+#audit_axioms SaltWorks.HDL.CorePlace.placements_do_not_collide SaltWorks.HDL.CorePlace.rd_bits_are_in_the_instruction
+#audit_axioms SaltWorks.HDL.CorePlace.register_shift_is_exact SaltWorks.HDL.CorePlace.rs1_and_rs2_differ_only_in_the_address
+#audit_axioms SaltWorks.HDL.CorePlace.select_banks_are_disjoint SaltWorks.HDL.CorePlace.select_bits_are_decoder_driven_in_order
+#audit_axioms SaltWorks.HDL.CorePlace.slt_bank_broadcasts SaltWorks.HDL.CorePlace.slt_chain_is_closed
+#audit_axioms SaltWorks.HDL.CorePlace.slt_operand_signs_are_distinct SaltWorks.HDL.CorePlace.slt_reads_sign_not_carry
+#audit_axioms SaltWorks.HDL.CorePlace.subtraction_is_a_plus_not_b_plus_one SaltWorks.HDL.CorePlace.tieCells_ssa
+#audit_axioms SaltWorks.HDL.CorePlace.tieCells_wf SaltWorks.HDL.CorePlace.tie_nets_are_distinct
+#audit_axioms SaltWorks.HDL.CorePlace.tie_nets_are_the_first_two
 end SaltWorks.HDL.CorePlace

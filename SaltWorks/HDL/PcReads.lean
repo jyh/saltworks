@@ -125,4 +125,7 @@ theorem pcDatapath_of_reads
 #audit_axioms coreThruRw_input_stable pcEnv_agrees
 #audit_axioms pcAdd_out_bound pcDatapath_of_reads
 
+
+-- completeness sweep 2026-08-28 (compiler): these carried no build-failing axiom gate.
+#audit_axioms SaltWorks.HDL.RegNextUniform.coreThruRw_sub SaltWorks.HDL.RegNextUniform.pcAdd_nIn_129
 end SaltWorks.HDL.RegNextUniform

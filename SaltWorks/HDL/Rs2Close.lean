@@ -169,4 +169,10 @@ theorem pcOf_is_decQ_pc (ins : Env) : pcOf ins = (decQ ins).pc := rfl
 
 #audit_axioms coreRest9_out_ge rs2Env_agrees rs2Of_is_St_get pcOf_is_decQ_pc
 
+
+-- completeness sweep 2026-08-28 (compiler): these carried no build-failing axiom gate.
+#audit_axioms SaltWorks.HDL.RegNextUniform.coreThru4_input_stable SaltWorks.HDL.RegNextUniform.coreThru4_sub
+#audit_axioms SaltWorks.HDL.RegNextUniform.coreThruRw_split2 SaltWorks.HDL.RegNextUniform.rs2AddrOf_lt
+#audit_axioms SaltWorks.HDL.RegNextUniform.rs2AddrOf_testBit SaltWorks.HDL.RegNextUniform.rs2Bit_lt
+#audit_axioms SaltWorks.HDL.RegNextUniform.rs2Out_eq SaltWorks.HDL.RegNextUniform.rs2Out_lt_off4
 end SaltWorks.HDL.RegNextUniform

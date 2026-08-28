@@ -152,4 +152,7 @@ theorem core_rwOut_spec (ins : Env) (k : Nat) (hk : k < 32) :
 #audit_axioms isADDOf isXOROf isSLTOf isADDIOf isLWOf writesRegOf
 #audit_axioms weOf_eq_weSpec core_rwOut_spec
 
+
+-- completeness sweep 2026-08-28 (compiler): these carried no build-failing axiom gate.
+#audit_axioms SaltWorks.HDL.RegNextUniform.regWrite_out_bound
 end SaltWorks.HDL.RegNextUniform

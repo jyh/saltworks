@@ -97,4 +97,7 @@ theorem stepT_pc_not_beq (s : St) (w : BitVec 32)
 #audit_axioms ctrlSpec_isBEQ_true ctrlSpec_isBEQ_false_of_not_beq
 #audit_axioms stepT_pc_beq stepT_pc_not_beq
 
+
+-- completeness sweep 2026-08-28 (compiler): these carried no build-failing axiom gate.
+#audit_axioms SaltWorks.HDL.RegNextUniform.St_next_pc SaltWorks.HDL.RegNextUniform.St_set_pc
 end SaltWorks.HDL.RegNextUniform

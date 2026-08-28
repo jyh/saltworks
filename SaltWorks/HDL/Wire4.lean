@@ -110,4 +110,7 @@ theorem immBCirc_is_one_gate : immBCirc.gates.length = 1 := by decide +kernel
 #audit_axioms decOut_lt_offRw coreThruRw_decOut isBEQOf'_spec
 #audit_axioms coreRest11b_out_ge immOut_lt_off2 immBCirc_is_one_gate
 
+
+-- completeness sweep 2026-08-28 (compiler): these carried no build-failing axiom gate.
+#audit_axioms SaltWorks.HDL.RegNextUniform.coreThruRw_split3
 end SaltWorks.HDL.RegNextUniform
