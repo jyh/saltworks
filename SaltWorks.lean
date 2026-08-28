@@ -166,4 +166,5 @@ import SaltWorks.HDL.MemOrganPlacement
 import SaltWorks.HDL.DecoderLines
 import SaltWorks.HDL.MemWiring
 import SaltWorks.HDL.MemPortCorrespondence
+import SaltWorks.HDL.OperandBWidening
 import SaltWorks.Tactic.AuditAxioms
