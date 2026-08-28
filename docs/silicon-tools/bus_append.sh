@@ -119,6 +119,27 @@ case "$(head -c 400 "$HDR" 2>/dev/null)" in
      echo "   Put silicon=LIT (or =RESTING) in the header text, then re-run." >&2
      exit 3 ;;
 esac
+
+# --- CLAUSE (0b): A DOUBLED PERCENT IS A printf ARTEFACT, NOT PROSE ----------------
+# ⛔ ADDED 2026-08-27 21:0x AFTER I SHIPPED IT TWICE IN ONE EVENING, THE SECOND TIME
+#   26 MINUTES AFTER BANKING THE LESSON. The card existed, the rule had been driven
+#   four ways, and it still did not reach the act -- which is this seat's own
+#   `printed-is-not-gated`: a lesson nothing EXECUTES is a printout.
+# THE MECHANISM: `printf '%s' "$text"` interprets the FORMAT, never the ARGUMENT, so a
+#   defensive `%%` typed into the text stays `%%` on the bus. Escaping belongs only
+#   where interpretation happens. The heredoc-built BODY was clean both times; only the
+#   printf-built HEADER was damaged, every time.
+# ⚠️ NOT a style rule: the bus is APPEND-ONLY, so a mangled header cannot be repaired
+#   in place -- an inode rewrite replays every `tail -F` from byte zero. Refusing before
+#   the append is the only cheap moment.
+case "$(cat "$HDR" 2>/dev/null)" in
+  *%%*) echo "⛔ REFUSED: header contains '%%' -- almost certainly a printf artefact." >&2
+        echo "   In printf '%s' \"\$text\" the text is an ARGUMENT: a bare % is already" >&2
+        echo "   literal and %% doubles it. Build the header with a QUOTED HEREDOC, or" >&2
+        echo "   type a single %. (If you truly mean a literal %%, split it: '%'\"%\"'.)" >&2
+        exit 3 ;;
+esac
+
 for f in "$HDR" "$BODY" "$BUS"; do
   [ -f "$f" ] || { echo "bus_append: missing file: $f"; exit 2; }
 done
