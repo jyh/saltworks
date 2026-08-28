@@ -4337,6 +4337,8 @@ theorem sem_adder32_off_the_sample :
       ∧ BitVec.carry 32 (0xF0F0F0F0 : Word) 0xF0F0F0F0 false = true :=
   ⟨by decide +kernel, by decide +kernel, sem_adder32 _ _, by decide +kernel⟩
 
+#audit_axioms adder_run_is_sum_bit
+
 end AdderSemantics
 
 /-! ## ⭐⭐ THE ORGANS — `pcNext`, AND THE THREE POINTWISE BLOCKS
@@ -9307,6 +9309,21 @@ no memory. *Recorded because a downstream node that plans to re-use a landed
 #audit_axioms decoder_correct_implies_reachability
 #audit_axioms andChain_empty_arm_is_word_bit_zero dcMatches_are_all_long
 #audit_axioms decoder_out_length valid_is_false_on_every_undecodable_word
+#audit_axioms dcOut6
+#audit_axioms dcOut7
+#audit_axioms dcOutR
+#audit_axioms dcL6_lt
+#audit_axioms dcL7_lt
+#audit_axioms dcL6_ne
+#audit_axioms dcL7_ne
+#audit_axioms dcG6_frame
+#audit_axioms dcG7_frame
+#audit_axioms dcGR_frame
+#audit_axioms dcG6_val
+#audit_axioms dcG7_val
+#audit_axioms dcGR_val
+#audit_axioms dcL6_all
+#audit_axioms dcL7_all
 
 end DecoderSemantics
 

@@ -345,6 +345,8 @@ open Salt.Tactic
 #audit_axioms batcher8_sorts batcher8_sorts' batcher4_sorts
 #audit_axioms batcher8_eraseIdx_20_not_sorts batcher8_eraseIdx_12_not_sorts
 #audit_axioms empty_not_sorts
+#audit_axioms batcher8_length
+#audit_axioms batcher4_length
 
 end Audit
 
