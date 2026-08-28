@@ -185,11 +185,25 @@ until mkdir "$LOCK" 2>/dev/null; do
   [ $((WAITED % 300)) -eq 0 ] && echo "saltbuild: waiting on the fleet lock (${WAITED}s)"
 done
 echo $$ > "$LOCK/pid"
-q_release    # we hold; drop our TICKET before the release trap takes over
+# ⭐ HOLDER KEEPS ITS TICKET — ruled 16:5x, and MEASURED before adopting rather than argued.
+# The old line dropped it here, which made the HOLDER INVISIBLE to the queue. Consequence,
+# driven twice per variant with a private LOCK:
+#   holder DROPS  → 0 "QUEUED behind" events; the FIRST waiter sees an empty queue, leaves
+#                   q_wait, and blocks in flock WHERE ORDERING CANNOT REACH IT. A P1 arriving
+#                   after a P2 finished LAST, both times. ⇒ THE PRIORITY CLASS WAS INERT for
+#                   the common case (one holder, two waiters).
+#   holder KEEPS  → the first waiter IS ordered ("QUEUED behind 1"), and the P1 finished
+#                   SECOND despite arriving LAST. Both times.
+# ⇒ the ticket now lives for the WHOLE run and `release()` below drops it with the marker.
 # The trap releases only the MARKER. The flock needs no trap: the kernel drops it when
 # this process and every descendant holding fd 9 is gone. Ownership-guarded because a trap
 # fires at signal-delivery AND again at exit (6/6 ate a new holder's marker unguarded).
-release() { [ "$(cat "$LOCK/pid" 2>/dev/null)" = "$$" ] && rm -rf "$LOCK"; return 0; }
+# ⛔ q_release HERE IS LOAD-BEARING: this trap REPLACES the earlier `trap q_release`, so
+#   without it the held ticket LEAKS at exit. Measured: the naive change (drop the line
+#   above and nothing else) left 1 orphan ticket per run — real, though self-healing via
+#   pid+start-time reaping. The benefit and the implementation are SEPARATE questions and
+#   my first experiment only tested the benefit.
+release() { [ "$(cat "$LOCK/pid" 2>/dev/null)" = "$$" ] && rm -rf "$LOCK"; q_release; return 0; }
 trap release EXIT INT TERM
 export LEAN_NUM_THREADS=4
 CAP=24000
