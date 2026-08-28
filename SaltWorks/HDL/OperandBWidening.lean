@@ -28,6 +28,7 @@ Nothing in this file depends on that choice.
 import SaltWorks.HDL.Decoder
 import SaltWorks.HDL.DecoderLines
 import SaltWorks.HDL.Immediate
+import SaltWorks.HDL.OperandBMux
 
 namespace SaltWorks.HDL
 open SaltWorks.HDL SaltWorks.ISA
@@ -77,5 +78,41 @@ theorem immS_ne_immI : immS 0 ≠ immI 0 := by decide +kernel
 
 #audit_axioms req_is_lw_or_sw usesImm_is_addi_or_req req_is_not_isADDI
 #audit_axioms immS immS_table immS_ne_immI
+
+/-! ## The widened select, as a placeable organ
+
+The organ is freeze-independent: only WHERE it is placed depends on the placement ruling.
+⭐ Its partner needs no new circuit at all — choosing `immI` vs `immS` is a 32-bit 2:1 mux
+with one select, which IS `OperandB.obMux`, already certified by `out_sem_obMux`. -/
+
+/-- **THE WIDENED SELECT, AS A CIRCUIT.** Two inputs, one OR gate, one output — the whole
+widening `core32.v`'s four-way `alu_src` needs in this ISA, because `isADDI ∨ req` is already
+the three-way condition (`OperandBWidening.usesImm_is_addi_or_req`). -/
+def selOr : Circ := { nIn := 2, gates := [⟨2, .or 0 1⟩], outs := [2] }
+
+theorem selOr_ssa : selOr.ssa = true := by decide +kernel
+theorem selOr_wf : selOr.wf = true := by decide +kernel
+theorem selOr_gate_count : selOr.gates.length = 1 := by decide +kernel
+theorem selOr_ports : selOr.nIn = 2 ∧ selOr.outs.length = 1 := by decide +kernel
+
+/-- ⭐ **ITS MEANING, EXHAUSTIVELY — all four input configurations.** -/
+theorem selOr_sem_is_or :
+    (List.range 4).all (fun m =>
+      sem selOr (fun i => if i = 0 then m % 2 == 1 else m / 2 == 1)
+        == [(m % 2 == 1) || (m / 2 == 1)]) = true := by
+  decide +kernel
+
+/-- ⛔ **AND THE CONTROL: an AND organ in the same shape does NOT satisfy it**, so the witness
+above discriminates rather than passing on anything shaped like a gate. -/
+def selAndMutant : Circ := { selOr with gates := [⟨2, .and 0 1⟩] }
+
+theorem selOr_control :
+    (List.range 4).all (fun m =>
+      sem selAndMutant (fun i => if i = 0 then m % 2 == 1 else m / 2 == 1)
+        == [(m % 2 == 1) || (m / 2 == 1)]) = false := by
+  decide +kernel
+
+#audit_axioms selOr selOr_ssa selOr_wf selOr_gate_count selOr_ports
+#audit_axioms selOr_sem_is_or selAndMutant selOr_control
 
 end SaltWorks.HDL
