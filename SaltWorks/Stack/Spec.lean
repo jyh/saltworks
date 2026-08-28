@@ -387,5 +387,11 @@ theorem SortsRegs.unique {rs : List (Fin 32)} {s s' s'' : St}
 #audit_axioms SortsRegs
 #audit_axioms sortsRegs_singleton
 #audit_axioms SortsRegs.unique
+-- the three `private theorem`s of this file, gated 2026-08-28 (math).
+-- They were invisible to the completeness sweep, whose declaration regex is `^theorem`:
+-- a private theorem is never SEEN as a declaration, so it is never REPORTED unaudited.
+#audit_axioms next_get
+#audit_axioms ite_slt_eq_one_iff
+#audit_axioms ite_slt_eq_zero_iff
 
 end SaltWorks.Stack
