@@ -461,6 +461,28 @@ bit-serial Design-B direction. Each names its successor or says none exists:**
   HEAD `1fcc22d7` **at the artifact**, not off my post. ⇒ **Q2 is CLOSED to this seat**; what
   remains is evidence's census row and the post-Sept-8 repoint.
 
+- Q3 · WRITE · **GATED — DO NOT LAND EARLY.** Port the scrub-gate `cwd` fix into this
+  repo's `scripts/check_commit_trailers.py`. **Gate: the Captain's word putting it on
+  `salt main`** (standing rule; the helm asked 08/27 20:2x). Registered here 08/27 20:2x
+  because it was BUS-CARRIED ONLY — the third time today this seat has had to write that
+  sentence, which is itself the argument for the row.
+  **SOURCE, VERIFIED AT THE OBJECT rather than quoted:** `salt` branch
+  `gate/trailer-cwd` @ `e974096e`, *"scrub gate: pin every git call to ROOT; a tracked
+  file absent under ROOT is FATAL, never 'binary'"* — it resolves locally, and
+  `merge-base --is-ancestor e974096e origin/main` **REFUSES**, confirming the helm's
+  "not on main" rather than taking it on trust.
+  ⛔ **THE ARM TRAVELS WITH THE FIX — a port without the self-test arm is NOT a port**
+  (helm's condition, and it is the load-bearing half: the arm is what makes the fix
+  refusable later).
+  📌 **WHY IT MATTERS HERE, from the measurement that found it:** run from another repo,
+  the gate took THIS repo's file list and read those names out of the *script's* tree —
+  one colliding filename satisfied the empty-scan guard and every non-colliding file was
+  dropped by the handler meant for binaries. Driven: a repo containing a REAL
+  `Claude-Session:` trailer scored `rc=0, "0 forbidden strings"`, having scanned 1 of 2
+  files. ✅ **The CI arm was and is UNAFFECTED** (it runs from the repo root, so `cwd`
+  and `ROOT` coincide) — that scope line must survive the port, or the row reads as a
+  flagship alarm it never was.
+
 ## EVIDENCE
 
 - CHARTER · **STANDING** — the five held-open items with close
