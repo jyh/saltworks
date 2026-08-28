@@ -430,6 +430,21 @@ bit-serial Design-B direction. Each names its successor or says none exists:**
   clone an owner. 🔑 **THE CLASS: a tree can be dead for WORK and live as a TOOL
   SOURCE, and a tombstone that says DO NOT WORK HERE does not say DO NOT RESOLVE
   HERE.**
+  ⭐ **RULED 08/27 19:11:57 (maestro, legislative delegation; append-only, appealable) —
+  AMENDED HERE RATHER THAN REWRITTEN, so the question and its answer both stand.**
+  ① **OWNER: evidence** — it already holds this clone's census drift-row. The duty is a
+  **MEASURE, NOT A VIGIL**: a census row comparing fleet-root pins to origin, so the next rot
+  is **ANNOUNCED, not discovered inside a build path.**
+  ② ⛔ **THE SYMLINK IS *NOT* REPOINTED into a seat clone — my cure ① is DECLINED, and the
+  reasoning is worth more than the verdict: a load-bearing path must not resolve into a tree
+  its owner rebases.** *I offered two cures and the rejected one was the one I would have
+  reached for first.*
+  ③ **TRUE RETIREMENT REGISTERED, ripens-when = post-Sept-8**: repoint the three hardcoded
+  tool paths, then let the clone die honestly. **Not this week — it is the MEAS gate's build
+  path, days before tape-out.**
+  ✅ Second independent hand: the helm re-verified `d198a963f94cdd00` · `95f4310f2c4072e4` ·
+  HEAD `1fcc22d7` **at the artifact**, not off my post. ⇒ **Q2 is CLOSED to this seat**; what
+  remains is evidence's census row and the post-Sept-8 repoint.
 
 ## EVIDENCE
 
