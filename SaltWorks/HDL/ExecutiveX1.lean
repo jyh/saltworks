@@ -6,6 +6,7 @@ Authors: Jason Hickey, Claude
 import SaltWorks.HDL.ExecutiveX0
 import Mathlib.Data.Finset.Basic
 import Mathlib.Data.Fintype.Basic
+import SaltWorks.Tactic.AuditAxioms
 
 /-!
 # X1 — WRITE-ISOLATION AGAINST HAND-PARTITIONED PROGRAMS (block ② §5, per §A)
@@ -279,3 +280,12 @@ end SaltWorks.HDL.Exec
 #print axioms SaltWorks.HDL.Exec.e4_disjoint_control
 #print axioms SaltWorks.HDL.Exec.e4_writesWithin_pos
 #print axioms SaltWorks.HDL.Exec.e4_writesWithin_neg
+
+-- completeness sweep 2026-08-28 (compiler): these carried no build-failing axiom gate.
+#audit_axioms SaltWorks.HDL.Exec.St.get_set_ne SaltWorks.HDL.Exec.SysSt.getReg_task
+#audit_axioms SaltWorks.HDL.Exec.e4_disjoint_control SaltWorks.HDL.Exec.e4_overlap_refutes
+#audit_axioms SaltWorks.HDL.Exec.e4_writesWithin_neg SaltWorks.HDL.Exec.e4_writesWithin_pos
+#audit_axioms SaltWorks.HDL.Exec.execStep_frame SaltWorks.HDL.Exec.execStep_frame_disjoint
+#audit_axioms SaltWorks.HDL.Exec.fetch_mem SaltWorks.HDL.Exec.runFor_frame
+#audit_axioms SaltWorks.HDL.Exec.step_frame SaltWorks.HDL.Exec.step_frame_instr
+#audit_axioms SaltWorks.HDL.Exec.writesWithin_mem

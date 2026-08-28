@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Jason Hickey, Claude
 -/
 import SaltWorks.HDL.ExecutiveX0
+import SaltWorks.Tactic.AuditAxioms
 
 /-!
 # X2 — ROUND-ROBIN + FAIRNESS (block ② §5, per §A's B4)
@@ -155,3 +156,9 @@ end SaltWorks.HDL.Exec
 #print axioms SaltWorks.HDL.Exec.fair
 #print axioms SaltWorks.HDL.Exec.halt_mutant_not_neverStalls
 #print axioms SaltWorks.HDL.Exec.fair_loop
+
+-- completeness sweep 2026-08-28 (compiler): these carried no build-failing axiom gate.
+#audit_axioms SaltWorks.HDL.Exec.cur_runSys SaltWorks.HDL.Exec.execStep_cur
+#audit_axioms SaltWorks.HDL.Exec.exists_turn SaltWorks.HDL.Exec.fair
+#audit_axioms SaltWorks.HDL.Exec.fair_loop SaltWorks.HDL.Exec.fair_of_exec_forever
+#audit_axioms SaltWorks.HDL.Exec.halt_mutant_not_neverStalls SaltWorks.HDL.Exec.loop_neverStalls

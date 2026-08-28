@@ -5,6 +5,7 @@ Authors: Jason Hickey, Claude
 -/
 import SaltWorks.HDL.Bitwise
 import SaltWorks.HDL.Immediate
+import SaltWorks.Tactic.AuditAxioms
 
 /-! # Clause ①⁵ (`portsNodup`) is UNSOUND as an acceptance bar — MIG-5
 
@@ -92,3 +93,9 @@ end SaltWorks.HDL.MIG5
 #print axioms SaltWorks.HDL.MIG5.sltCirc_fails_clause5
 #print axioms SaltWorks.HDL.MIG5.immICirc_fails_clause5
 #print axioms SaltWorks.HDL.MIG5.bitAnd32_passes_clause5
+
+-- completeness sweep 2026-08-28 (compiler): these carried no build-failing axiom gate.
+#audit_axioms SaltWorks.HDL.MIG5.bitAnd32_passes_clause5 SaltWorks.HDL.MIG5.immBCirc_fails_clause5
+#audit_axioms SaltWorks.HDL.MIG5.immICirc_duplication_is_the_sign_bit SaltWorks.HDL.MIG5.immICirc_fails_clause5
+#audit_axioms SaltWorks.HDL.MIG5.sltCirc_duplication_is_a_hardwired_zero SaltWorks.HDL.MIG5.sltCirc_fails_clause5
+#audit_axioms SaltWorks.HDL.MIG5.sltuCirc_fails_clause5

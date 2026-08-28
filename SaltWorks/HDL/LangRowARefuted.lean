@@ -6,6 +6,7 @@ Authors: Jason Hickey, Claude
 import SaltWorks.HDL.CompileS
 import Mathlib.Data.Fintype.Pigeonhole
 import Mathlib.Data.Finite.Prod
+import SaltWorks.Tactic.AuditAxioms
 
 /-! # Row A's hypothesis F2 is FALSE for the landed types — MIG-3(a)
 
@@ -81,4 +82,7 @@ theorem no_injective_state_encoding (f : State → St) : ¬ Function.Injective f
   obtain ⟨a, b, hne, heq⟩ := Finite.exists_ne_map_eq_of_infinite f
   exact hne (hinj heq)
 
+
+-- completeness sweep 2026-08-28 (compiler): these carried no build-failing axiom gate.
+#audit_axioms SaltWorks.HDL.MIG3.no_injective_state_encoding
 end SaltWorks.HDL.MIG3

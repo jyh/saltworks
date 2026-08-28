@@ -3,6 +3,9 @@ Copyright (c) 2026 Jason Hickey. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Jason Hickey, Claude
 -/
+
+import SaltWorks.Tactic.AuditAxioms
+
 /-!
 # N0 — the tiny-Rust typing judgment, as data, with its three pre-registered controls
 
@@ -492,4 +495,18 @@ theorem real_pool_binds :
   refine ⟨by decide, by decide⟩
 
 
+
+-- completeness sweep 2026-08-28 (compiler): these carried no build-failing axiom gate.
+#audit_axioms SaltWorks.HDL.TinyRustN0.both_fit_the_real_pool SaltWorks.HDL.TinyRustN0.evalE_bool_is_01
+#audit_axioms SaltWorks.HDL.TinyRustN0.expCostNoSwap_exceeds_classic_SU SaltWorks.HDL.TinyRustN0.f6_bigStep_inhabited
+#audit_axioms SaltWorks.HDL.TinyRustN0.f6_bigStep_while_inhabited SaltWorks.HDL.TinyRustN0.f6_bigStep_while_iterates
+#audit_axioms SaltWorks.HDL.TinyRustN0.liveMax_binds_both_ways SaltWorks.HDL.TinyRustN0.liveMax_witness_nontrivial
+#audit_axioms SaltWorks.HDL.TinyRustN0.lookLvl_lt SaltWorks.HDL.TinyRustN0.math_pass2_measured
+#audit_axioms SaltWorks.HDL.TinyRustN0.no_aliasing SaltWorks.HDL.TinyRustN0.poolDemand_acceptProg
+#audit_axioms SaltWorks.HDL.TinyRustN0.poolDemand_mathP SaltWorks.HDL.TinyRustN0.pool_is_separate
+#audit_axioms SaltWorks.HDL.TinyRustN0.real_pool_binds SaltWorks.HDL.TinyRustN0.shadowing_witness_now_preserves
+#audit_axioms SaltWorks.HDL.TinyRustN0.single_pool_is_strictly_tighter SaltWorks.HDL.TinyRustN0.t2_accept
+#audit_axioms SaltWorks.HDL.TinyRustN0.t2_reject SaltWorks.HDL.TinyRustN0.t2_reject_is_load_bearing
+#audit_axioms SaltWorks.HDL.TinyRustN0.t2_slt_condition_accepted SaltWorks.HDL.TinyRustN0.the_two_costs_are_independent
+#audit_axioms SaltWorks.HDL.TinyRustN0.typing_is_pool_independent
 end SaltWorks.HDL.TinyRustN0

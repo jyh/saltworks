@@ -5,6 +5,7 @@ Authors: Jason Hickey, Claude
 -/
 import SaltWorks.HDL.LangRowARefuted
 import Mathlib.Data.Fintype.EquivFin
+import SaltWorks.Tactic.AuditAxioms
 
 /-! # MIG-9: do Rows A/B extend to layer configs? — the verdict, and it INVERTS
 
@@ -72,3 +73,6 @@ end SaltWorks.HDL.MIG9
 
 #print axioms SaltWorks.HDL.MIG9.no_injective_of_infinite_to_finite
 #print axioms SaltWorks.HDL.MIG9.extends_iff_card_le
+
+-- completeness sweep 2026-08-28 (compiler): these carried no build-failing axiom gate.
+#audit_axioms SaltWorks.HDL.MIG9.extends_iff_card_le SaltWorks.HDL.MIG9.no_injective_of_infinite_to_finite

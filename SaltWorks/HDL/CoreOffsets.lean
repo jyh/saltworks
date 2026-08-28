@@ -14,6 +14,7 @@ import SaltWorks.HDL.OperandBMux
 import SaltWorks.HDL.RegWrite
 import SaltWorks.HDL.RegNext
 import SaltWorks.Stack.Program
+import SaltWorks.Tactic.AuditAxioms
 
 set_option maxRecDepth 100000
 
@@ -227,4 +228,18 @@ theorem doubled_organs_are_one_circ_each :
   refine ⟨by decide +kernel, by decide +kernel, by decide +kernel, by decide +kernel⟩
 
 
+
+-- completeness sweep 2026-08-28 (compiler): these carried no build-failing axiom gate.
+#audit_axioms SaltWorks.HDL.CoreOffsets.chain_advances_almost_everywhere SaltWorks.HDL.CoreOffsets.chain_closes
+#audit_axioms SaltWorks.HDL.CoreOffsets.chain_last SaltWorks.HDL.CoreOffsets.chain_monotone
+#audit_axioms SaltWorks.HDL.CoreOffsets.doubled_organs_are_one_circ_each SaltWorks.HDL.CoreOffsets.order_has_fifteen_placements
+#audit_axioms SaltWorks.HDL.CoreOffsets.row_adder32 SaltWorks.HDL.CoreOffsets.row_bitNot32
+#audit_axioms SaltWorks.HDL.CoreOffsets.row_bitXor32 SaltWorks.HDL.CoreOffsets.row_decoder
+#audit_axioms SaltWorks.HDL.CoreOffsets.row_immBCirc SaltWorks.HDL.CoreOffsets.row_obMux
+#audit_axioms SaltWorks.HDL.CoreOffsets.row_pcAdd SaltWorks.HDL.CoreOffsets.row_readTree
+#audit_axioms SaltWorks.HDL.CoreOffsets.row_regNext SaltWorks.HDL.CoreOffsets.row_regWrite
+#audit_axioms SaltWorks.HDL.CoreOffsets.row_ruledEnc SaltWorks.HDL.CoreOffsets.row_sliceASelect
+#audit_axioms SaltWorks.HDL.CoreOffsets.row_sltCirc SaltWorks.HDL.CoreOffsets.silicon_confirmed_rows
+#audit_axioms SaltWorks.HDL.CoreOffsets.total_reconciles SaltWorks.HDL.CoreOffsets.total_reconciles_against_artifacts
+#audit_axioms SaltWorks.HDL.CoreOffsets.zero_gate_organ_does_not_advance
 end SaltWorks.HDL.CoreOffsets

@@ -5,6 +5,7 @@ Authors: Jason Hickey, Claude
 -/
 import SaltWorks.HDL.ISA
 import Mathlib.Tactic.FinCases
+import SaltWorks.Tactic.AuditAxioms
 
 /-!
 # X0 — THE EXECUTIVE DRIVER + INHABITANCE (block ② §5, as amended by §A)
@@ -271,3 +272,12 @@ end SaltWorks.HDL.Exec
 #print axioms SaltWorks.HDL.Exec.stepsAt_current
 #print axioms SaltWorks.HDL.Exec.halt_mutant_stalls
 #print axioms SaltWorks.HDL.Exec.halt_mutant_runs_first
+
+-- completeness sweep 2026-08-28 (compiler): these carried no build-failing axiom gate.
+#audit_axioms SaltWorks.HDL.Exec.IsRun.eq_runSys SaltWorks.HDL.Exec.St.set_pc
+#audit_axioms SaltWorks.HDL.Exec.SysSt.pos SaltWorks.HDL.Exec.addi_pc
+#audit_axioms SaltWorks.HDL.Exec.beq00_pc SaltWorks.HDL.Exec.codes2_at
+#audit_axioms SaltWorks.HDL.Exec.exec_forever SaltWorks.HDL.Exec.halt_mutant_runs_first
+#audit_axioms SaltWorks.HDL.Exec.halt_mutant_stalls SaltWorks.HDL.Exec.loop_step
+#audit_axioms SaltWorks.HDL.Exec.pcOK_init SaltWorks.HDL.Exec.pcOK_step
+#audit_axioms SaltWorks.HDL.Exec.runSys_isRun SaltWorks.HDL.Exec.stepsAt_current

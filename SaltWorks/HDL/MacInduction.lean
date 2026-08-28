@@ -5,6 +5,7 @@ Authors: Jason Hickey, Claude
 -/
 import Mathlib.Tactic.NormNum
 import Mathlib.Data.BitVec
+import SaltWorks.Tactic.AuditAxioms
 
 /-!
 # THE BIT-SERIAL MAC INDUCTION — the arithmetic core
@@ -184,4 +185,12 @@ theorem mutant_dropped_sign_cycle_is_false :
 above discriminate, rather than both arms failing for an unrelated reason. -/
 theorem witness_positive_control : macFinal 1 0 wsign 8 = 0 + 1 * sval wsign 8 := by decide
 
+
+-- completeness sweep 2026-08-28 (compiler): these carried no build-failing axiom gate.
+#audit_axioms SaltWorks.HDL.Mac.demoBound_eq SaltWorks.HDL.Mac.demoBound_lt_two_pow_31
+#audit_axioms SaltWorks.HDL.Mac.mac_correct SaltWorks.HDL.Mac.mac_partial
+#audit_axioms SaltWorks.HDL.Mac.mac_sign_cycle SaltWorks.HDL.Mac.mutant_dropped_sign_cycle_is_false
+#audit_axioms SaltWorks.HDL.Mac.mutant_wrong_weight_is_false SaltWorks.HDL.Mac.psum_scale
+#audit_axioms SaltWorks.HDL.Mac.signExtend_toInt SaltWorks.HDL.Mac.sval_eq_toInt
+#audit_axioms SaltWorks.HDL.Mac.witness_positive_control SaltWorks.HDL.Mac.wsign_sval
 end SaltWorks.HDL.Mac

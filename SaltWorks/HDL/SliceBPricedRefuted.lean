@@ -6,6 +6,7 @@ Authors: Jason Hickey, Claude
 import SaltWorks.HDL.AluSelect
 import SaltWorks.HDL.MemOrgan
 import SaltWorks.HDL.Immediate
+import SaltWorks.Tactic.AuditAxioms
 
 /-! # Slice-B B1/B3 against the corpus — MIG-4, the emitted-path measurements
 
@@ -83,3 +84,7 @@ end SaltWorks.HDL.MIG4
 
 #print axioms SaltWorks.HDL.MIG4.zeroTree_is_nonzero_polarity
 #print axioms SaltWorks.HDL.MIG4.immediate_encoders_are_free
+
+-- completeness sweep 2026-08-28 (compiler): these carried no build-failing axiom gate.
+#audit_axioms SaltWorks.HDL.MIG4.immediate_encoders_are_free SaltWorks.HDL.MIG4.zeroTree_cone_size
+#audit_axioms SaltWorks.HDL.MIG4.zeroTree_is_nonzero_polarity
