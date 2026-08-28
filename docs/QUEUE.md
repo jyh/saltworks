@@ -402,6 +402,35 @@ bit-serial Design-B direction. Each names its successor or says none exists:**
   (Gate history: muster 10:02 item 3; gated on the flip so the
   measurement named the live artifact.)
 
+- Q1 · READ · **OPEN, MINE** — **the holder-ticket `q_census` check at my next
+  REAL build.** Registered here 08/27 19:1x because it was BUS-CARRIED ONLY, which
+  is this seat's own `bus-resident-fixes-die-at-reboot` defect and I had repeated
+  it. ⛔ **NOT discharged by the 19:0x observation**, and the distinction is the
+  whole row: I measured the lock HELD by math (pid 97007, `Salt.MR.All`, 30m29s)
+  while `q_census` printed `(queue empty)` — but that holder runs
+  `2575f08ed44d4c4d`, **PRE-`1fcc22d7`**, the version whose holder DROPS its ticket
+  at acquire. So the reading is CONSISTENT with the fix working and proves nothing
+  about it. **The check wants a holder running the NEW saltbuild.** ⚠️ Attribution
+  above is a CODE READING, not a driven measurement.
+- Q2 · SURFACED, NOT MINE TO DECIDE — **the fleet-root clone is ownerless, carries
+  two DEAD-TWIN tombstones, and is still the RESOLVE TARGET of a path three live
+  tools hardcode** (`docs/silicon-tools/meas_build.sh:60`,
+  `docs/silicon-tools/meas_since.sh:41`,
+  `docs/ledger-tools/wrapper_link_guard.sh:29` — in this clone and compiler's
+  alike; `~/projects/claude/saltbuild.sh` is a RELATIVE symlink, so it resolves
+  INTO that clone). Pulled to `1fcc22d7` 08/27 19:0x, so the path is currently
+  sound. ⛔ **IT WILL ROT AGAIN, and the measured cost of the last rot is the
+  reason this row exists:** the pre-pull blob, recovered from git rather than
+  described (`git cat-file -p 444458a:tools/saltbuild.sh` → `6942473aaacd32f7`,
+  exact, 233 lines), carries **ZERO** queue references against 9 in the current
+  file (nonsense-token control 0 on the same file). ⇒ **every MEAS run took the
+  fleet lock WITHOUT A TICKET and was invisible to the census** — the
+  kernel-witness gate was the fleet's one unticketed build path. Two cures,
+  neither a seat's to choose: repoint the symlink at a live clone, or give that
+  clone an owner. 🔑 **THE CLASS: a tree can be dead for WORK and live as a TOOL
+  SOURCE, and a tombstone that says DO NOT WORK HERE does not say DO NOT RESOLVE
+  HERE.**
+
 ## EVIDENCE
 
 - CHARTER · **STANDING** — the five held-open items with close
