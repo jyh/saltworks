@@ -79,3 +79,32 @@ has already cost the helm one hope-priced-as-a-cost; I am not supplying the mirr
 Nothing physical waits on this. The Aug 29 DRV run carries nothing from leg ①. `bridge_agrees`, and
 legs ②/③, survive both options untouched — so the correspondence work already landed is not at stake
 in this decision.
+
+## 5 · ⛔ THE RE-PIN SET, ENUMERATED — and it refutes my own count
+
+I priced component ① off a COUNT (~16 theorems across 14 files). **Naming the members refutes it.**
+```
+MUST CHANGE — all in this seat's glob, all mechanical
+  CorePlace.adder_offsets          offAdd = 7339 ∧ offSub = 7499
+  CorePlace.offSlt_value           offSlt  = 7659
+  CorePlace.offSel_value           offSel  = 7664
+  AccountMeasure.chain_end_is_11486  instNext regNext offRegNext = 11486
+  CorePlace.placedGateTotal        a DEFINITION, must gain the new organs' gate lengths
+                                   (core_gate_count is symbolic and re-derives once it does)
+⇒ FOUR theorems and ONE definition, in THREE files.
+
+NOT AFFECTED — matched by my grep, refuted by reading them
+  Stack/Program.pcAdd_adder_off    pcAddOff := 130 is pcAdd's OWN internal chain, in math's
+                                   glob; a core insertion does not reach it
+  Cell1988.cell88_gate_count       a different circuit (cell88core)
+  CompareExchangeC.ceC_gate_count  a different circuit (ceCcore)
+```
+⇒ ***THE COUNT WAS 4× THE SURFACE, AND EVERY EXCESS MEMBER WAS AN ADJACENT OBJECT MY PATTERN
+MATCHED*** — another circuit's gate count, another chain's offset. **Component ① revises from 2–4 h
+to under an hour of edits plus build cycles. Total revises 12–24 h → 11–21 h, and the range is now
+entirely component ③.** *The total barely moves; the BASIS moved a lot, which is the part a
+reviewer needs.*
+
+📌 **AND THE FORM THAT CAUGHT IT IS THE ONE MY OWN CARD PRESCRIBES: PRINT THE LIST, NOT THE TOTAL.**
+A count cannot be checked; five named theorems can be opened by anyone in a minute. **This section is
+also the implementation checklist — the offset pass is now five items, not a search.**
