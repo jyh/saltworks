@@ -765,5 +765,6 @@ theorem o2bb2a_liberty (A1_N A2_N B1 B2 : Bool) :
 #audit_axioms o31a_liberty o31ai_liberty o41ai_liberty or3_liberty or4b_liberty
 #audit_axioms a311o_liberty a32oi_liberty o311a_liberty o32ai_liberty
 #audit_axioms o41a_liberty a2111o_liberty o2bb2a_liberty
+#audit_axioms conb_HI_liberty conb_LO_liberty
 
 end SaltWorks.Silicon.Cells

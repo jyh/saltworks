@@ -6,6 +6,7 @@ Authors: Jason Hickey, Claude
 import Mathlib
 
 import SaltWorks.Silicon.Equiv.FabricRoutes
+import SaltWorks.Tactic.AuditAxioms
 
 /-!
 # `allScenarios` COMPLETENESS — the HARDWARE bridge for BB-1
@@ -92,5 +93,7 @@ is above it.
 critical path at all:** the **abstract** lane (`banyan_selfrouting_of_sorts_bool`)
 does **not** need this. The **hardware** lane does, because `fabric_routes` is the
 only theorem that speaks about the imported gate netlist. -/
+
+#audit_axioms testBit_maskOf maskOf_lt
 
 end SaltWorks.Silicon.Imported

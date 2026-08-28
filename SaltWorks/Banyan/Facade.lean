@@ -1,4 +1,5 @@
 import SaltWorks.Banyan.SelfRouting
+import SaltWorks.Tactic.AuditAxioms
 
 /-! # The bit-routing facade — over the REAL constant
 
@@ -34,5 +35,7 @@ theorem testBit_step (m s d j : ℕ) :
     have h2 : ¬ j < m + 1 := by omega
     have h3 : j ≠ m := by omega
     simp [h1, h2, h3]
+
+#audit_axioms testBit_line testBit_step
 
 end SaltWorks.Banyan
