@@ -402,7 +402,7 @@ bit-serial Design-B direction. Each names its successor or says none exists:**
   (Gate history: muster 10:02 item 3; gated on the flip so the
   measurement named the live artifact.)
 
-- Q1 · READ · **OPEN, MINE** — **the holder-ticket `q_census` check at my next
+- Q1 · READ · **✅ DISCHARGED 08/27 19:55 — the row below was OPEN, MINE** — **the holder-ticket `q_census` check at my next
   REAL build.** Registered here 08/27 19:1x because it was BUS-CARRIED ONLY, which
   is this seat's own `bus-resident-fixes-die-at-reboot` defect and I had repeated
   it. ⛔ **NOT discharged by the 19:0x observation**, and the distinction is the
@@ -412,6 +412,21 @@ bit-serial Design-B direction. Each names its successor or says none exists:**
   at acquire. So the reading is CONSISTENT with the fix working and proves nothing
   about it. **The check wants a holder running the NEW saltbuild.** ⚠️ Attribution
   above is a CODE READING, not a driven measurement.
+  ✅ **DISCHARGED 08/27 19:55:32 — AND BY A BUILD THIS SEAT DID NOT STAGE.** math's
+  `Salt.MR.All` supplied the holder twenty minutes after I declined to manufacture one:
+```
+  lock holder pid   62078
+  ticket            .tkt.2.<ns>.62078          ← PRESENT while holding (class P2)
+  q_census          P2   117s   math   62078   ← holder VISIBLE, pid MATCHES the lock
+  holder executes   seats/math/saltworks/tools/saltbuild.sh   (pulled 19:15 → d198a963f94cdd00)
+```
+  ⭐ **AND IT IS A CONTROLLED PAIR BY ACCIDENT OF TIMING, which is worth more than the
+  check: SAME SEAT, SAME COMMAND (`Salt.MR.All`), SAME QUERY — `(queue empty)` at 19:0x,
+  correctly populated at 19:55. The single variable is math's pull.** *A staged build
+  could not have produced this pair; only the fleet's own timing could.*
+  📌 **WHY THE ROW SAID "AT MY NEXT REAL BUILD" AND NOT "RUN ONE": a check closed by a
+  build staged to close it is a check that was never asked a question.** The discipline
+  that kept this open for 45 minutes is what makes the discharge mean anything.
 - Q2 · SURFACED, NOT MINE TO DECIDE — **the fleet-root clone is ownerless, carries
   two DEAD-TWIN tombstones, and is still the RESOLVE TARGET of a path three live
   tools hardcode** (`docs/silicon-tools/meas_build.sh:60`,
