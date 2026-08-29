@@ -14,6 +14,7 @@ import SaltWorks.HDL.SelectCut32
 import SaltWorks.HDL.AluSelect
 import SaltWorks.HDL.EncoderE1
 import SaltWorks.HDL.OperandBMux
+import SaltWorks.HDL.OperandBWidening
 import SaltWorks.HDL.Bitwise
 import SaltWorks.HDL.RegNext
 -- Row 14's organ is math's: `SaltWorks.Stack.Program.pcAdd`. `CoreOffsets` already carries this
@@ -632,6 +633,66 @@ that it is **the right wire**.
 
 *Refused alternative (keep the order, reach σ upward) — it breaks `instOK`'s inputs-strictly-below
 invariant, the same reason preamble shape (b) was refused.* -/
+
+/-! ### ⚙️ LEG ① STAGE 1 — the widened operand-B organs, PLACED BUT NOT YET WIRED IN
+
+⛔ **THESE ARE INERT ON PURPOSE.** `core.gates` does not contain them and `obSig` does not read
+them, so nothing downstream moves and every landed theorem is untouched. What this stage buys is
+the part a staged retry needs first: **proof that both organs PLACE LEGALLY at the offsets they
+will occupy**, checked by the kernel before the invasive wiring pass that consumes it.
+
+*Stage 2 wires them in — `obSig` routes through `immMuxOut`/`selOrOut`, `core` gains two blocks,
+and every decomposition definition and block case-split gains two arms. That pass reverted once at
+72 errors; this stage exists so it does not also have to discover whether the placement is sound.*
+
+⚠️ `offSelOr` is DEFINITIONALLY the net `offOb` occupies today, so defining it moves nothing. -/
+
+/-- Where the widened select will sit — immediately after the inverted bank. -/
+def offSelOr : Nat := instNext bitNot32 off5
+
+/-- `selOr`'s two inputs: the decoder lines whose OR is "addresses with an immediate"
+(`OperandBWidening.usesImm_is_addi_or_req`). -/
+def selOrSig (j : Net) : Net := if j = 0 then decOut isADDILine else decOut reqLine
+
+/-- ⭐ **THE WIDENED SELECT PLACES LEGALLY.** -/
+theorem selOr_instOK : instOK selOr selOrSig offSelOr := by
+  refine ⟨by decide +kernel, by decide +kernel, ?_⟩
+  intro j hj
+  have hnn : selOr.nIn = 2 := by decide +kernel
+  rw [hnn] at hj
+  revert hj; revert j
+  decide +kernel
+
+/-- Where the immediate mux will sit — after the select. -/
+def offImmMux : Nat := instNext selOr offSelOr
+
+/-- Its inputs: `immI` on the a-bank, `immS` on the b-bank, `isSW` on the select. -/
+def immMuxSig (j : Net) : Net :=
+  if j < 32 then instrNet (immI j)
+  else if j < 64 then instrNet (immS (j - 32))
+  else decOut isSWLine
+
+/-- ⭐⭐ **THE IMMEDIATE MUX PLACES LEGALLY — and it is the SAME certified circuit as `obMux`,
+a second instance rather than a new organ.** -/
+theorem immMux_instOK : instOK OperandB.obMux immMuxSig offImmMux := by
+  refine ⟨by decide +kernel, by decide +kernel, ?_⟩
+  intro j hj
+  have hnn : OperandB.obMux.nIn = 65 := by decide +kernel
+  rw [hnn] at hj
+  revert hj; revert j
+  decide +kernel
+
+/-- ⛔ **CONTROL: the placement is not vacuously legal.** Swapping the two banks — `immS` on the
+a-side — is a DIFFERENT σ, so a proof that ignored σ would pass both. -/
+def immMuxSigSwapped (j : Net) : Net :=
+  if j < 32 then instrNet (immS j)
+  else if j < 64 then instrNet (immI (j - 32))
+  else decOut isSWLine
+
+theorem immMuxSig_is_not_swapped : immMuxSig 0 ≠ immMuxSigSwapped 0 := by decide +kernel
+
+#audit_axioms offSelOr selOrSig selOr_instOK offImmMux immMuxSig immMux_instOK
+#audit_axioms immMuxSigSwapped immMuxSig_is_not_swapped
 
 /-- Row 7 — `obMux`, now BEFORE the adders. -/
 def offOb : Nat := instNext bitNot32 off5
