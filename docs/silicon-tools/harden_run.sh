@@ -81,7 +81,26 @@ PY
   say "--- REPRODUCTION GATE: my resolved.json vs the SUBMITTED chip's ---"
   python3 "$(cd -P "$(dirname "$0")" && pwd)/resolved_diff.py" \
     "${TTREF:?TTREF must be set: path to the submitted run resolved.json}" "$R/resolved.json"
-  say "resolved_diff rc=$?  (0 = configured exactly like the submitted run)"
+  say "resolved_diff rc=$?  (0 = configured exactly like the submitted run — EXPECTED NON-ZERO on a treatment arm)"
+
+  # ⛔ AND THE GATE A TREATMENT ARM CAN ACTUALLY PASS. resolved_diff requires the difference
+  #   to be EMPTY, which is right for a reproduction arm and structurally wrong for an arm
+  #   that differs ON PURPOSE — so its status was printed and never consumed. A check that
+  #   cannot pass gets demoted to a printout. treatcheck asks the answerable question:
+  #   does what RAN differ from the reference in EXACTLY the keys this arm DECLARES?
+  #   EXTRA ⇒ contamination (the met5-vs-met4 defect, which flatters). MISSING ⇒ the
+  #   treatment never happened and the arm is the baseline wearing its name.
+  BASECFG="${BASECFG:-$W/config-ndf-base.json}"
+  if [ -f "$BASECFG" ]; then
+    say "--- TREATMENT GATE: declared knobs vs what actually resolved (base: $(basename "$BASECFG")) ---"
+    python3 "$(cd -P "$(dirname "$0")" && pwd)/treatcheck.py" \
+      "$BASECFG" "$W/config-$TAG.json" "$TTREF" "$R/resolved.json"
+    TREAT_RC=$?
+  else
+    TREAT_RC=2
+    say "TREATMENT GATE NOT RUN — no base config at $BASECFG. Set BASECFG. ⛔ NOT A PASS."
+  fi
+  say "treatcheck rc=$TREAT_RC  (0 = exactly the declared treatment · 1 = REFUSED · 2 = not measured)"
   python3 - "$W/$TAG-metrics.json" <<'PY'
 import json, sys
 d = json.load(open(sys.argv[1]))
@@ -117,5 +136,10 @@ done
 sleep 5
 say "residual docker RSS: $(ps -Ao rss,comm | grep -iE 'docker|vmnetd' | awk '{s+=$1} END {printf "%.0f MB", s/1024}')"
 say "ARM $TAG DONE"
-# The arm's exit status IS the DRV verdict — a runner that always exits 0 is a printout too.
-exit "${DRV_RC:-2}"
+# The arm's exit status IS the verdict — a runner that always exits 0 is a printout too.
+# WORST of the two gates: "could not measure" must never render as "passed".
+D=${DRV_RC:-2}; T=${TREAT_RC:-2}
+say "VERDICT drv=$D treatment=$T"
+[ "$D" = 0 ] && [ "$T" = 0 ] && exit 0
+[ "$D" = 1 ] || [ "$T" = 1 ] && exit 1
+exit 2

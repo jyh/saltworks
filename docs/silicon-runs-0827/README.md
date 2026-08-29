@@ -16,6 +16,23 @@ config-ndf-*.json    tt_um_saltworks_ndf_c32, 6x2 die 1030.40x225.76, CLOCK_PERI
 reach for it.** Its filename is still true (it names the TILE, which did not change), which is
 exactly why it is dangerous.
 
+## ⚖️ THESE CONFIGS ARE NOW A GATE, NOT ONLY A RECORD (2026-08-28 17:4x)
+
+`docs/silicon-tools/treatcheck.py` reads the pair `config-ndf-base.json` + `config-<arm>.json` as
+the arm's **DECLARED TREATMENT**, and requires the *resolved* difference against the submitted
+chip's `resolved.json` to be **EXACTLY that key set** — refusing on **EXTRA** (contamination: a key
+that differs in what RAN and was never declared — the met5-vs-met4 defect `resolved_diff.py`
+records, which came back with 2.13 ns MORE slack than the chip it claimed to reproduce) and on
+**MISSING** (the treatment never happened, and the arm is the baseline wearing its name).
+⇒ ***`resolved_diff.py` ASKS "ANY DIFFERENCE?" AND A TREATMENT ARM CAN NEVER PASS IT, WHICH IS HOW
+ITS STATUS ENDED UP PRINTED AND NEVER CONSUMED. `treatcheck.py` ASKS "EXACTLY THE DECLARED
+DIFFERENCE?", AND THAT QUESTION HAS A REACHABLE YES.*** `harden_run.sh` now exits with the worse of
+{DRV gate, treatment gate}, and "could not measure" never renders as "passed".
+📌 **Driven on these very files (`--selftest`, 10/10):** ①d · ②a · ②b each pass against their own
+declaration on 411-key resolved sets, and the two failure arms are REAL runs mismatched on purpose
+— **2a's declaration against 1d's actual run** is what a silently-unapplied CTS treatment looks
+like here, and 1d's declaration against 2a's run is what contamination looks like.
+
 ## The runs
 ```
 config-3x2-baseline  reproduces the 08/09 figures exactly: fanout 39 · slew 2019 · cap 51
