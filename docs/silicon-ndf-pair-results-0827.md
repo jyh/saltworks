@@ -173,6 +173,24 @@ stable exactly where synthesis invents the name.*
 📌 **CHECK AT SUBMISSION: zero clock-leaf violators, and ≤1 datapath violator at fanout ≤12. If the
 count rises or a clock-leaf appears, the waiver does NOT cover it and the row re-opens.**
 
+⭐ **AND THAT CHECK IS NOW AN EXECUTABLE REFUSAL, NOT THIS SENTENCE — `docs/silicon-tools/drvgate.sh`
+(2026-08-28 17:3x).** Until then the criterion above was prose, `harden_run.sh` PRINTED
+`design__max_fanout_violation__count` inside a loop and consumed nothing, and the hand reading that
+printout on 09-07 was mine, in a hurry. ⇒ ***A CORRECT CRITERION WHOSE EXIT STATUS NOTHING CONSUMES
+IS A PRINTOUT.*** `harden_run.sh` now EXITS with the gate's status.
+⛔ **AND THE METRIC CANNOT DECIDE IT — the gate reads the per-net STA tables, not the count.**
+`design__max_fanout_violation__count` is a TOTAL, and the two populations need OPPOSITE verdicts:
+measured on the archived runs, `①d` scores **111 and every one is a clock-tree leaf (REFUSE)** while
+`②a` scores **1 and it is datapath (ACCEPT)**. A gate keyed on the total gives one number one verdict.
+📌 **DRIVEN 13/13 (`drvgate_selftest.sh`): each limb — clock-leaf, count, fanout>12 — fires ALONE in
+some arm; the PASS verdict is reachable; a blank, a missing summary line, and a parse that disagrees
+with the report's own count all REFUSE rather than pass.** The four archived runs are production arms:
+base ⛔ (111 clk + 6 dp, worst 14) · ①d ⛔ (111 clk, 0 dp) · **②a ✅** · ②b ⛔ (2 dp).
+⚠️ **A TAPE-OUT MECHANIC THAT FALLS OUT OF THIS, and it decides WHEN the check can run: the submitted
+bundle `tt_submission/` carries NO STA corner reports and its `metrics.csv` has NO fanout column at
+all — the evidence does not travel with the artifact.** ⇒ **the gate must run on the LOCAL run
+directory before the submission is cut; there is no re-checking it afterwards from what was shipped.**
+
 ⇒ **CTS KNOBS CANNOT REACH ZERO HERE, AND NOT BECAUSE THEY ARE SET WRONG: THE REMAINDER IS NOT A
 CLOCK OBJECT.** Chasing it is a resizer/repair question, and **two clusterings producing two
 different residual sets is evidence AGAINST convergence**, not merely absence of evidence for it.

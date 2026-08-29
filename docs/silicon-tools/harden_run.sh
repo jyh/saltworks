@@ -96,6 +96,18 @@ else
   say "NO metrics.json — A NULL IS A FINDING. inspect $W/$TAG-flow.log"
 fi
 
+# ⛔ THE DRV WAIVER IS A GATE, NOT A PRINTOUT. Council item 3 (2026-08-28) waived ONE
+#   datapath net at fanout 11-12 with ZERO clock-leaf, and §11a of
+#   docs/silicon-ndf-pair-results-0827.md says "CHECK AT SUBMISSION" — which until 17:3x
+#   was a sentence, while the block above PRINTED design__max_fanout_violation__count and
+#   consumed nothing. The metric cannot decide it either: it is a TOTAL, and ndf-1d's 111
+#   (all clock-leaf, REFUSE) and ndf-2a's 1 (datapath, ACCEPT) need opposite verdicts.
+#   ⇒ this runner now EXITS with the gate's status.
+say "--- DRV GATE: the council fanout waiver, as an executable refusal ---"
+sh "$(cd -P "$(dirname "$0")" && pwd)/drvgate.sh" "$R"
+DRV_RC=$?
+say "drvgate rc=$DRV_RC  (0 = meets the waived object · 1 = REFUSED · 2 = could not measure)"
+
 say "--- daemon down + RSS check ('daemon down' is not 'memory returned' — 774MB lesson) ---"
 osascript -e 'tell application "Docker Desktop" to quit' 2>/dev/null
 n=0; until ! docker info >/dev/null 2>&1 || [ $n -ge 90 ]; do sleep 3; n=$((n+3)); done
@@ -105,3 +117,5 @@ done
 sleep 5
 say "residual docker RSS: $(ps -Ao rss,comm | grep -iE 'docker|vmnetd' | awk '{s+=$1} END {printf "%.0f MB", s/1024}')"
 say "ARM $TAG DONE"
+# The arm's exit status IS the DRV verdict — a runner that always exits 0 is a printout too.
+exit "${DRV_RC:-2}"
