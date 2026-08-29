@@ -461,7 +461,8 @@ bit-serial Design-B direction. Each names its successor or says none exists:**
   HEAD `1fcc22d7` **at the artifact**, not off my post. ⇒ **Q2 is CLOSED to this seat**; what
   remains is evidence's census row and the post-Sept-8 repoint.
 
-- Q3 · WRITE · **GATED — DO NOT LAND EARLY.** Port the scrub-gate `cwd` fix into this
+- Q3 · WRITE · **DISCHARGED 2026-08-28 18:5x — the gate OPENED at council item 18 today (Captain "approved"; I merged it myself to `salt main`) AND I DID NOT NOTICE FOR FIVE HOURS, posting "owed 0" in every beat. ARM 9 was reporting `open=2[Q2,Q3]` the whole time — the arm built for exactly this, firing on its author. Ported BYTE-EXACT from `salt origin/main fbad5d1a` (no re-typing: 3× `cwd=ROOT`, tracked-but-absent is now FATAL rather than skipped as "binary", and self-test arm 5 drives cwd-independence in a throwaway repo). `--self-test` OK incl. `cwd-independent`; run as CI runs it over `origin/master~5..origin/master`: rc=0, 5 messages / 909 tracked files, attribution untouched.** — original entry follows:
+- Q3 · WRITE · ~~GATED — DO NOT LAND EARLY.~~ Port the scrub-gate `cwd` fix into this
   repo's `scripts/check_commit_trailers.py`. **Gate: the Captain's word putting it on
   `salt main`** (standing rule; the helm asked 08/27 20:2x). Registered here 08/27 20:2x
   because it was BUS-CARRIED ONLY — the third time today this seat has had to write that
