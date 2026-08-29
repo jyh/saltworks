@@ -233,7 +233,30 @@ while true; do
   #   REPO, so the path re-derives at every move instead of being remembered.
   # ✅ AND THE TWIN IS REPORTED, NOT SILENTLY PREFERRED: while the legacy directory is
   #   still on disk a wrong reading is one env-var away, so the sweep names it.
-  _idxcfg=${CLAUDE_CONFIG_DIR:-$HOME/.claude}
+  # ⛔ THE DEFAULT HERE WAS THE WHOLE DEFECT, AND IT IS EVIDENCE'S 18:35 FINDING ARRIVING
+  #   AT MY OWN TOOL. The fleet moved to ACCOUNT config dirs; `compactwatch` kept walking
+  #   `~/.claude:~/.claude-seat-*` and printed healthy PASS lines for five seats for two
+  #   days. Measured here 18:3x: MY OWN LIVE WATCH CARRIES NO `CLAUDE_CONFIG_DIR` AT ALL
+  #   (pid 3826, count 0), so this line resolved to `$HOME/.claude/projects/…`, WHICH DOES
+  #   NOT EXIST. What saved me was branch 2 — a value CAPTURED INTO THE ENV AT ARM TIME —
+  #   and, failing that, a LOUD refusal ("CHECK DID NOT RUN"), not a correct fallback.
+  #   ⇒ ***AN ADDRESS THAT REACHES IS NOT AN ADDRESS THAT WAS DERIVED. A CAPTURED ENV VAR
+  #     AND A RE-DERIVED PATH ROT ON DIFFERENT CLOCKS*** — the capture rots at the next
+  #     fleet move and stays invisible until the arm is next armed, which is precisely
+  #     when nobody is looking for it.
+  # ✅ SO DERIVE IT FROM THE RUNNING FLEET, then fall back, and SAY WHICH: a config dir
+  #   read off a live process is a fact about this machine now; `$HOME/.claude` is a guess
+  #   that was true in July.
+  _idxcfg=${CLAUDE_CONFIG_DIR:-}
+  _idxcfgsrc=env
+  if [ -z "$_idxcfg" ]; then
+    _idxcfg=$(ps -Ao command 2>/dev/null | tr ' ' '\n' | sed -n 's/^CLAUDE_CONFIG_DIR=//p' | sort -u | head -1)
+    _idxcfgsrc=derived-from-live-process
+  fi
+  if [ -z "$_idxcfg" ]; then
+    _idxcfg=$HOME/.claude
+    _idxcfgsrc="** DEFAULTED to \$HOME/.claude — NOT derived; if the fleet has moved this is the frozen old tree **"
+  fi
   _idxrepo=$(cd "$(dirname "$0")/../.." 2>/dev/null && pwd)
   _idxslug=$(printf '%s' "$_idxrepo" | sed 's|/|-|g')
   IDX=${IDX:-${CLAUDE_MEMORY_DIR:+$CLAUDE_MEMORY_DIR/MEMORY.md}}
