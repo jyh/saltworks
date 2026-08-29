@@ -249,6 +249,18 @@ memory) · every non-LW value/enable row landed at `b64722e`.
 `c4Spec_core_is_false`: MUST BREAK **only after the load is repaired**. Breaking it earlier means a
 refutation lost without a proof gained.
 
+⛔⛔ **2026-08-29 — THIS EXACT THING HAPPENED, AND NOT BECAUSE OF D.** `c4Spec_core_is_false` broke
+at `79c6f04` when leg ① wired the operand-B immediate path, **with the load still wrong**, and it
+is RETIRED by council ruling (f)/③ (bus `28710859`). *A refutation lost, no proof gained* — the
+bar above is left verbatim because it called the outcome correctly before the evidence existed.
+⇒ **THE MUST-BREAK SET ABOVE IS NO LONGER A VALID D DIFFERENTIAL AS WRITTEN:**
+`regDatapathOK_is_false_on_LW_either_way`, `no_enable_repairs_the_load` and
+`RegNextUniform.X0.on_target_case_is_false` are **RETIRED — their subjects no longer exist**, so
+they cannot break under D and their absence must not be read as a pass. `decQ_mem`,
+`stepT_lw_writes_zero`, `lw_forces_false_whatever_the_enable_does` and
+`datapath_forces_zero_select_on_LW` are UNAFFECTED and still live.
+See `docs/Q6-DIFFERENTIAL-PREREGISTRATION.md`, the 2026-08-29 amendment, for the measurement.
+
 ⛔ **AND THE BAR THAT VOIDS EVERYTHING ELSE:** any post-D verdict on an LW exhibit computed against
 a witness whose loaded word is not **provably non-zero** is VOID. `sL`'s construction idiom is
 structurally incapable of populating memory (measured: top bit 1087 for every `wL : BitVec 32`), so

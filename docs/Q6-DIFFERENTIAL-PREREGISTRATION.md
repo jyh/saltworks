@@ -4,6 +4,14 @@
 below cannot be fitted to what D turns out to produce. Q6 is ruled seat-only; this is its first
 deliverable, and it is deliberately NOT code.
 
+⛔⛔ **READ THE 2026-08-29 AMENDMENT AT THE FOOT OF THIS FILE BEFORE USING ANY VERDICT HERE.**
+Five of the exhibits below **no longer prove**, and they broke for a reason that is NOT Horn D:
+leg ① of the CorePlace campaign repaired the operand-B immediate path. `c4Spec_core_is_false`
+broke **while the load is still wrong**, which is the case this file pre-registered as *"a
+refutation lost without a proof being gained."* ⚠️ **NOTHING ABOVE OR BELOW THIS LINE HAS BEEN
+EDITED TO MATCH THE OUTCOME** — a pre-registration that is rewritten after the fact is worth
+nothing, so the bar stands exactly as it was written and the amendment is additive.
+
 ## Why a pre-registration is required here rather than merely useful
 
 The LW exhibits **quantify over the CURRENT `decQ`**. Their statements do not mention memory, so
@@ -763,3 +771,74 @@ but `RegField0`/`RegFieldSchema`/`PcFieldClosed`/`C4Reduction` prose and a posit
 a wider blast radius than a renumbering grant covers) **and five commits cannot currently push, so
 nothing landed here could be read by the seat that would need to check it.** *Priced, published,
 and left for a window that can actually close.*
+
+---
+
+## ⛔⛔ 2026-08-29 — AMENDMENT: FIVE EXHIBITS ARE DEAD, AND HORN D DID NOT KILL THEM
+
+**Council 08/29, item (f), option ③ — bus offset `28710859`.** Written as an APPENDIX, with every
+verdict above left verbatim, because *the value of a pre-registration is that it cannot be edited
+to match what happened.*
+
+### What broke, and where the before/after was measured
+```
+tree 38729e9  (leg (1) stage 2a -- organs PLACED, nothing wired)   ALL FIVE KERNEL-CLEAN, 0 errors
+tree 79c6f04  (leg (1) stage 2b -- obSig WIRED through immMuxOut)  FIVE carry sorryAx
+```
+⚠️ **Both readings are from the BUILD arm** (`lake build`, the arm that writes oleans). The
+path-form arm (`lake env lean <file>`) reported the branch GREEN — it elaborated `C4Refuted`
+against **`CorePlace`'s stale olean from master**, so it was answering a question about the
+previous core. *A verdict on a changed dependency needs the arm that rebuilds it.*
+
+### The five, and the abort that hid two of them
+```
+sel2_insL                                  the seed -- `selOut 2` flipped `true` -> `false`
+regField_core_one_is_false                 reported by the build
+no_enable_repairs_the_load                 reported by the build
+c4Spec_core_is_false                       ⛔ NEVER CHECKED -- concealed by the audit abort
+regDatapathOK_is_false_on_LW_either_way    ⛔ NEVER CHECKED -- concealed by the audit abort
+```
+**`#audit_axioms` aborts at its first failure, so the build named THREE and the truth was FIVE**
+— and the two it concealed were the two that mattered. Recovered with the seat's audit-recovery tool (`auditreach.py`),
+which also surfaced `held_insL` and `isa_insL` as *never checked* (they are clean; the log simply
+could not say so). ⇒ **`C4Refuted.lean`'s audit calls are now ONE NAME PER CALL.** *Read ticks,
+not absences.*
+
+### ⛔ THE PRE-REGISTERED BAR FIRED IN ITS WARNING ARM, AND THIS IS THE ENTRY THAT SAYS SO
+The row for `c4Spec_core_is_false` reads *MUST BREAK — but ONLY AFTER the load is repaired*, with
+the warning *"if it breaks while the load is still wrong, **a refutation was lost without a proof
+being gained**."*
+
+**The load is still wrong.** `decQ` still writes `mem := Vector.replicate 8 0`; `decQ_mem` still
+proves by `rfl`; Horn D has not run. The break came from the operand-B repair instead. ⇒ *This is
+the warned outcome, named by this file before the evidence existed, and it is recorded here as a
+DEBIT rather than as a milestone.* The compensation the ruling names is that the C4Spec proof
+attempt (Sept 4–5) **is** the search — the council ruled out hunting a replacement witness, so
+none was sought and no one should read the silence as evidence that none exists.
+
+### ⚠️ WHAT THIS DOES TO THE REST OF THE FILE — READ BEFORE THE D SWAP
+- The **2026-08-25 BASELINE table** below says *"Every declaration below PROVES TODAY."* **That
+  sentence is now FALSE for five of its rows** at any tree from `79c6f04` on. It is left standing
+  because it was true when stamped and it is the before-state of a DIFFERENT differential. ⛔ **Do
+  not lift a verdict out of it without re-running the extraction; the file's own rule says the
+  list is an output of the build, not an artifact anyone maintains.**
+- The **MUST BREAK** rows for the surviving LW chain (`decQ_mem`, `stepT_lw_writes_zero`,
+  `lw_forces_false_whatever_the_enable_does`, `datapath_forces_zero_select_on_LW`) are
+  **UNAFFECTED and still live** — those declarations still prove and still must break under D.
+- The rows for `no_enable_repairs_the_load`, `regDatapathOK_is_false_on_LW_either_way` and
+  `c4Spec_core_is_false` are **VOID AS D DIFFERENTIALS**: their subjects no longer exist. D can no
+  longer be measured by them, and *a differential whose subject was retired for an unrelated
+  reason reads as a pass.* **The D campaign needs a fresh pre-registration against the post-leg-①
+  core before it starts.**
+- The `insL` group row (*"MUST BE RE-CHOSEN, NOT RE-PROVED"*) still stands, and its reason is
+  unchanged: `sL`'s construction cannot populate memory.
+
+### The sixth declaration — outside this file's reach, and outside the ruling's list of four
+`EnableX0.on_target_case_is_false` consumed `regDatapathOK_is_false_on_LW_either_way` and died
+with it. It was not on the ruling's list because that list was drawn by reading `C4Refuted.lean`,
+and **a same-file count cannot see a consumer in a second module.** Retired in the same commit,
+replaced by `counterexample_is_on_target`, which carries the surviving content (the residue is
+`regDatapath_off_target` contraposed and never needed a witness).
+
+⇒ **STATUS AFTER THIS AMENDMENT: `C4Spec core` is OPEN. `RegDatapathOK` is OPEN.** Neither is
+proved; neither is refuted. **A dead witness is not a proof that the spec is true.**

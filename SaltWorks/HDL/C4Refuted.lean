@@ -29,6 +29,10 @@ landing, and it is kept rather than deleted so the next reader can see BOTH halv
 NOTHING TO DO WITH STORES.** The `SW` repair closed one row; it did not close the obligation.
 Both new refutations live at the foot of this file:
 
+⛔⛔⛔ ***↑ THAT PARAGRAPH IS RETIRED. BOTH OF THOSE REFUTATIONS ARE DEAD — read the 2026-08-29
+block below before you use anything in the two bullets.*** It is kept verbatim because it was
+true when written and it is the before-state of the differential this file exists to carry.
+
 * **`ADDI` — `core` HAS NO I-TYPE IMMEDIATE.** `CorePlace.obSig` feeds the ALU's operand-B
   *"immediate"* bank from `immOut`, and `immOut` is `immBCirc` — the **B-type BRANCH
   DISPLACEMENT**. `immICirc` exists and is certified (`Immediate.immI_correct`) and is **placed
@@ -39,10 +43,39 @@ Both new refutations live at the foot of this file:
   `mem := Vector.replicate 8 0`, so the ISA writes the CONSTANT `0` on a non-trapping load.
   ⇒ `regDatapathOK_is_false_on_LW_either_way`, proved by CASE-SPLITTING on the enable rather
   than evaluating it — **no write-enable choice repairs a load.**
+  ⛔ **RETIRED 2026-08-29 — that theorem no longer exists.** The enable still fires, but the
+  select bank now delivers what the ISA demands, so the case split has no contradiction to find.
+  ⚠️ *The reason is NOT that the load was repaired: `decQ` still has no memory.* See below.
 
-⇒ **`C4Spec core` IS FALSE, NOT OPEN.** The 31 `RegField` rows also still need `selOut`'s VALUE
-against the ISA result — but that campaign is downstream of two decisions that have not been
-made, and pricing it first would be pricing a proof of a false sentence.
+⛔⛔⛔ **RETIRED 2026-08-29 — BOTH REFUTATIONS ABOVE ARE DEAD, AND THE SECOND ONE DIED IN THIS
+COMMIT.** Council 08/29, item (f), option ③ (bus offset `28710859`). The ruled sentence, verbatim:
+
+> **the Lean model moved to match the die; the RTL was right throughout**
+
+Leg ① wired `CorePlace.obSig`'s operand-B immediate bank through the PLACED immediate mux
+(stage 2a `38729e9` placed the organs, stage 2b `79c6f04` wired them). At the unchanged `LW`
+witness `insL` the select bank flipped from `true` to `false` — **and `false` is what the ISA
+demands.** `sel2_insL` below is the same measurement, restated to the answer it now gives, and
+the five declarations that stood on its `true` are retired at the point where they stood.
+
+⛔⛔ **A DEAD WITNESS IS NOT A PROOF THAT `C4Spec core` IS TRUE.** This file no longer refutes the
+flagship; it does not assert it either, and nothing here should be read as evidence for it. The
+spec's status is **OPEN**, and the C4Spec proof attempt (Sept 4–5) *is* the search — the council
+ruled out a replacement-witness hunt explicitly, so no one went looking for one.
+
+⚠️ **AND THE PRE-REGISTRATION FIRED IN ITS WARNING ARM, WHICH IS WHY THIS IS RECORDED AND NOT
+TIDIED.** `docs/Q6-DIFFERENTIAL-PREREGISTRATION.md` fixed the verdict for
+`c4Spec_core_is_false` before the evidence existed: *MUST BREAK — but ONLY AFTER the load is
+repaired*, because *"if it breaks while the load is still wrong, a refutation was lost without a
+proof being gained."* **The load is still wrong** — `decQ`'s memory is still the all-zero vector
+and the D swap has not happened. So this is exactly the warned case, named by its own bar: a
+refutation lost, no proof gained. That is a real debit and it is written here rather than in a
+commit message nobody re-reads.
+
+📌 What survives untouched, and it is the load half: `lw_forces_false_whatever_the_enable_does`
+and `datapath_forces_zero_select_on_LW` never carried a witness — they say what a CORRECT core
+must satisfy on a load, and they still say it. The 31 `RegField` rows still need `selOut`'s VALUE
+against the ISA result.
 
 ⚠️ The packed evaluator this file introduced now lives in `Sem.lean` (`runB`/`semB` with
 `runB_eq`/`semB_eq`), lifted there so every organ certificate can use it. The local copies are
@@ -246,7 +279,9 @@ theorem lw_forces_false_whatever_the_enable_does (h : RegDatapathOK) (ins : Env)
   rw [h ins rd k hk, stepT_lw_writes_zero ins rd a imm hrd hdec hok]
   simp
 
-/-! ### HORN 2 — a concrete load where BOTH candidate left-hand sides are wrong.
+/-! ### HORN 2 — ⛔ **RETIRED 2026-08-29.** It read *"a concrete load where BOTH candidate
+left-hand sides are wrong"*, and that is no longer so: the `then` side now agrees with the ISA.
+The environment is UNCHANGED and kept — it is the fixture the differential is read on.
 `LW x1, x2, 4` with `x2 = 4` (net 66) AND `x1` already holding bit 2 (net 34). -/
 
 def wL : BitVec 32 := encode (.LW 1 2 4)
@@ -258,11 +293,35 @@ theorem seen_insL : seenWord insL = wL := by decide +kernel
 theorem dec_insL : decode (seenWord insL) = some (Instr.LW 1 2 4) := by
   rw [seen_insL]; exact decode_encode _
 
-/-- The circuit's select bank says `true` (the adder returns `x2 + x4 = 4`). -/
-theorem sel2_insL : run insL core.gates (selOut 2) = true :=
+/-- ⭐⭐⭐ **THE DIFFERENTIAL, IN ONE LINE — SAME WITNESS, OPPOSITE ANSWER.**
+
+⛔ **THIS THEOREM READ `= true` UNTIL 2026-08-29**, and everything the file proved about the load
+stood on that `true`. The docstring then said *"the circuit's select bank says `true` (the adder
+returns `x2 + x4 = 4`)"*. Leg ① wired the operand-B immediate bank through the placed immediate
+mux; the same environment, the same gate list and the same packed evaluator now answer `false`.
+
+**Nothing about the witness changed.** `sL`, `insL`, `wL` are byte-for-byte the ones that proved
+`true`. It is RESTATED rather than deleted, because a deleted control leaves no trace and this
+one is the whole receipt.
+
+📌 **THE FLIP IS DATED TO STAGE 2b, MEASURED AT BOTH ENDS.** At `38729e9` (stage 2a: organs
+PLACED, nothing wired) the `= true` form was **kernel-clean, 0 errors** — the refutation was
+still alive there, so retiring it on that commit would have retired a TRUE theorem. At `79c6f04`
+(stage 2b: `obSig` wired through `immMuxOut`/`selOrOut`) it carries `sorryAx`. *Stage 2a moved
+nets and no values; stage 2b moved the value.* -/
+theorem sel2_insL : run insL core.gates (selOut 2) = false :=
   (runB_eq core.gates sL (selOut 2)).symm.trans (by decide +kernel)
 
-/-- The HELD state bit — what the `else` branch returns — is ALSO `true`. -/
+/-- ⛔ **AND THE ENABLE FIRES** — so the `then` branch is the LIVE one and `sel2_insL` is the
+value the obligation actually observes here. Without this, "the sides agree" would be a claim
+about a branch nothing takes. -/
+theorem rw_insL : run insL core.gates (rwOut r1.val) = true :=
+  (runB_eq core.gates sL (rwOut r1.val)).symm.trans (by decide +kernel)
+
+/-- The HELD state bit — what the `else` branch WOULD return — is `true`.
+⚠️ **The word "ALSO" stood here until 2026-08-29 and pointed at `sel2_insL`'s `true`, which is
+gone.** The `else` branch is not the live one: `rw_insL` shows the enable FIRES, so this bit is
+not what the obligation observes at this fixture. -/
 theorem held_insL : insL (32 * r1.val + 2) = true := by decide +kernel
 
 /-- The ISA demands `false`: the load's source is `decQ`'s all-zero memory. -/
@@ -270,52 +329,68 @@ theorem isa_insL : ((stepT (decQ insL) (seenWord insL)).regs[r1.val]).getLsbD 2 
   decide +kernel
 
 
-/-- ⛔⛔⛔ **`RegField core 1` IS FALSE — BY THE LOAD, NOT BY THE IMMEDIATE.**
-
-⚠️ **THIS PROOF WAS RE-ROUTED ON 2026-08-20 AND THAT RE-ROUTING IS THE POINT.** It ran through
-the `ADDI` witness, which the σ repair correctly killed. **Had I let the repair simply delete
-this theorem, `C4Spec core` would have become UNREFUTED — and it is still FALSE.** The load
-witness carries it, and the load is the Captain's open fork.
-
-The proof case-splits on the enable and never evaluates it, exactly as
-`regDatapathOK_is_false_on_LW_either_way` does: on a non-trapping load BOTH arms of the `if` are
-wrong, so no write-enable choice repairs it. -/
 theorem isa_insL_prog :
     ((stepT (decQ insL) (SaltWorks.Stack.Program.seenWord insL)).regs[r1.val]).getLsbD 2
       = false := isa_insL
 
-theorem regField_core_one_is_false : ¬ SaltWorks.Stack.Program.RegField core r1 := by
-  intro h
-  have hb := (SaltWorks.Stack.Program.regField_iff_bits core r1).mp h insL 2 (by decide)
-  rw [core_outBit_reg_reduced insL r1.val 2 (by decide) (by decide), isa_insL_prog] at hb
-  cases he : run insL core.gates (rwOut r1.val)
-  · rw [he] at hb; simp [held_insL] at hb
-  · rw [he] at hb; simp [sel2_insL] at hb
+/-! ### ⛔⛔⛔ THE RETIREMENT — FOUR DECLARATIONS STOOD HERE AND THEY ARE GONE, BY RULING
 
-/-- ⛔⛔⛔ **THE FLAGSHIP IS REFUTED.** -/
-theorem c4Spec_core_is_false : ¬ SaltWorks.HDL.C4Spec core := fun h =>
-  regField_core_one_is_false
-    (SaltWorks.Stack.Program.regField_of_C4Spec h r1)
-/-- ⭐⭐⭐ **HORN 2, PACKAGED: NO WRITE-ENABLE REPAIRS THE LOAD.**
-Deleting `isLW` from `writesRegOf` leaves the HELD value on the left — and that is `true` here
-too, while the ISA demands `false`. -/
-theorem no_enable_repairs_the_load :
-    ∃ ins : Env, ∃ rd : Fin 32, ∃ k : Nat, k < 32
-      ∧ decode (seenWord ins) = some (Instr.LW 1 2 4)
-      ∧ run ins core.gates (selOut k) = true
-      ∧ ins (32 * rd.val + k) = true
-      ∧ ((stepT (decQ ins) (seenWord ins)).regs[rd.val]).getLsbD k = false :=
-  ⟨insL, r1, 2, by decide, dec_insL, sel2_insL, held_insL, isa_insL⟩
+**Council 2026-08-29, item (f), option ③, bus offset `28710859`.** Retired at the point where
+they stood, LOUDLY, with the date, the shas and the reason — *not* deleted quietly, because this
+file's own opening warns that deleting a dead witness is how `C4Spec core` becomes **silently
+unrefuted**, and a silent un-refutation is indistinguishable from a proof nobody wrote.
 
-/-- ⛔⛔⛔ **`RegDatapathOK` IS FALSE ON A LOAD, WHATEVER THE ENABLE DOES.** The proof
-case-splits on the enable and never evaluates it. -/
-theorem regDatapathOK_is_false_on_LW_either_way : ¬ RegDatapathOK := by
-  intro h
-  have hx := h insL r1 2 (by decide)
-  rw [isa_insL] at hx
-  cases he : run insL core.gates (rwOut r1.val)
-  · rw [he] at hx; simp [held_insL] at hx
-  · rw [he] at hx; simp [sel2_insL] at hx
+```
+regField_core_one_is_false                ¬ RegField core r1          RETIRED 2026-08-29
+c4Spec_core_is_false                      ¬ C4Spec core               RETIRED 2026-08-29  ⛔ THE FLAGSHIP
+no_enable_repairs_the_load                ∃ … selOut k = true …       RETIRED 2026-08-29
+regDatapathOK_is_false_on_LW_either_way   ¬ RegDatapathOK             RETIRED 2026-08-29
+```
+
+**WHY, IN ONE SENTENCE — the ruled wording, verbatim:**
+
+> **the Lean model moved to match the die; the RTL was right throughout**
+
+All four rested on `sel2_insL`'s `true`. Leg ① (`38729e9` placed the organs, `79c6f04` wired
+them) routed operand B's immediate bank through the placed immediate mux, and at the UNCHANGED
+witness the select bank now reads `false` — which is what the ISA demands. `lw_sides_agree_at_insL`
+below is that agreement as a theorem, so the retirement leaves a STATEMENT and not an absence.
+
+⛔⛔ **AND THE SENTENCE THAT MUST TRAVEL WITH IT: A DEAD WITNESS IS NOT A PROOF THAT `C4Spec core`
+IS TRUE.** Nothing was proved here. `C4Spec core` is **OPEN**, not true and no longer refuted.
+The Sept 4–5 proof attempt IS the search for its answer; the council ruled out hunting a
+replacement witness, so nobody looked for one and this file makes no claim that none exists.
+
+⚠️ **`docs/Q6-DIFFERENTIAL-PREREGISTRATION.md` PRE-REGISTERED THIS EXACT CASE AND CALLED IT A
+LOSS:** `c4Spec_core_is_false` was to break *"ONLY AFTER the load is repaired"*, since breaking
+it earlier means **"a refutation was lost without a proof being gained."** The load is NOT
+repaired — `decQ`'s memory is still all-zero, the D swap has not run. ⇒ *This retirement lands on
+the warned side of a bar this seat wrote before the evidence existed, and it is recorded as a
+debit rather than as an achievement.*
+
+📌 **A FIFTH DECLARATION DIES WITH THEM, IN ANOTHER FILE:** `EnableX0.on_target_case_is_false`
+consumed `regDatapathOK_is_false_on_LW_either_way` and is retired in the same commit. It was not
+on the ruling's list of four because the list was scoped to THIS file; a consumer in a second
+module is invisible to a same-file count. -/
+
+/-- ⭐⭐⭐ **THE POSITIVE TWIN — AT THE WITNESS THAT USED TO REFUTE, THE TWO SIDES NOW AGREE.**
+
+This is `regDatapathOK_is_false_on_LW_either_way`'s replacement, in the idiom this file already
+uses for a repaired row (`control_sides_agree`, `addi_sides_agree`): the same instance of
+`RegDatapathOK`, now an equality rather than a contradiction.
+
+⛔ **DO NOT READ THIS AS `RegDatapathOK` HOLDING.** It is ONE point of a `∀`, on ONE bit, at ONE
+witness. It is a receipt that the old counterexample is gone, and nothing more. -/
+theorem lw_sides_agree_at_insL :
+    (if run insL core.gates (rwOut r1.val) then run insL core.gates (selOut 2)
+     else insL (32 * r1.val + 2))
+      = ((stepT (decQ insL) (seenWord insL)).regs[r1.val]).getLsbD 2 := by
+  rw [rw_insL, if_pos rfl, sel2_insL, isa_insL]
+
+/-- ⭐ **AND THE ACCEPTANCE TEST IS SATISFIED HERE.** `datapath_forces_zero_select_on_LW` (below,
+UNTOUCHED and witness-free) says a correct core must drive `selOut k = false` on a non-trapping
+load. At `insL` it now does. *The acceptance test did not move; the circuit moved onto it.* -/
+theorem acceptance_test_holds_at_insL : run insL core.gates (selOut 2) = false := sel2_insL
 
 /-- ⭐ THE ACCEPTANCE TEST for the "make the core write zero on loads" route: it says exactly
 what a repaired core must satisfy, with no witness in it. -/
@@ -400,11 +475,30 @@ theorem no_circuit_is_both_conforming_and_C4SpecD (c : Circ)
 #audit_axioms wC sC insC ctl_enable ctl_sel0 ctl_isa control_sides_agree
 #audit_axioms wI sI insI seen_insI dec_insI insI_state_is_zero enable_insI
 #audit_axioms useImm_high_insI sel0_insI isa_insI addi_sides_agree
-#audit_axioms isa_insI_prog regField_core_one_is_false c4Spec_core_is_false
-#audit_axioms decQ_mem step_lw_writes_zero step_lw_trap_holds stepT_lw_writes_zero
+-- ⛔⛔ ONE NAME PER CALL, DELIBERATELY, FROM 2026-08-29. `#audit_axioms` ABORTS AT ITS FIRST
+-- FAILURE, so every name after a failing one is NEVER CHECKED and its silence reads as a pass.
+-- On 08-28 this file's multi-name calls reported THREE damaged declarations when the truth was
+-- FIVE -- and the two they concealed were `c4Spec_core_is_false` itself and its LW dependent,
+-- i.e. the abort hid exactly the two that mattered most. Splitting the calls costs nothing and
+-- removes the concealment permanently. (the seat's audit-recovery tool, `auditreach.py`, recovers names from a log
+-- when a multi-name call has already aborted; this makes that recovery unnecessary here.)
+#audit_axioms isa_insI_prog
+#audit_axioms decQ_mem
+#audit_axioms step_lw_writes_zero
+#audit_axioms step_lw_trap_holds
+#audit_axioms stepT_lw_writes_zero
 #audit_axioms lw_forces_false_whatever_the_enable_does
-#audit_axioms wL sL insL seen_insL dec_insL sel2_insL held_insL isa_insL
-#audit_axioms no_enable_repairs_the_load regDatapathOK_is_false_on_LW_either_way
+#audit_axioms wL
+#audit_axioms sL
+#audit_axioms insL
+#audit_axioms seen_insL
+#audit_axioms dec_insL
+#audit_axioms sel2_insL
+#audit_axioms rw_insL
+#audit_axioms held_insL
+#audit_axioms isa_insL
+#audit_axioms lw_sides_agree_at_insL
+#audit_axioms acceptance_test_holds_at_insL
 #audit_axioms datapath_forces_zero_select_on_LW
 
 #audit_axioms wSW s0 ins0 seen_ins0 rd_ins0 held_ins0

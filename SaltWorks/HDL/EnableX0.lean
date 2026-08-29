@@ -27,8 +27,13 @@ isa_off_target                ISA:     no register but rd is written
 regDatapath_off_target   ⇒ THE OBLIGATION HOLDS AT EVERY NON-TARGET REGISTER
 regDatapath_rd_zero      ⇒ rd = x0 ⇒ it holds at ALL THIRTY-TWO
 regDatapathOK_of_on_target  ⇒ RegDatapathOK now rests on ONE REGISTER PER INPUT
-on_target_case_is_false  ⇒ …and so does its known REFUTATION: the load witness is on target
+counterexample_is_on_target ⇒ …and so does every counterexample, present or future
 ```
+⛔ **`on_target_case_is_false` STOOD IN THAT LIST AND IS RETIRED (2026-08-29).** It instantiated
+the residue with `C4Refuted`'s LW refutation, and that refutation was retired by council ruling
+(f)/③ when leg ① repaired the operand-B path. **The residue claim itself did NOT depend on the
+refutation** — it is `regDatapath_off_target` contraposed — so it is restated below as
+`counterexample_is_on_target`, which needs no witness at all.
 
 ⛔ **WHAT THIS IS NOT.** It proves no value. `selOut` is never evaluated here — the `if` is
 killed on the false side every time — so the ALU, the immediate, the select and the encoder are
@@ -238,29 +243,57 @@ theorem regDatapathOK_of_on_target
 
 #audit_axioms regDatapathOK_of_on_target
 
-/-- ⛔⛔ **AND THEREFORE THE RESIDUE IS WHERE THE REFUTATION LIVES.** `RegDatapathOK` is already
-FALSE — `C4Refuted.regDatapathOK_is_false_on_LW_either_way`, the load witness. Contraposing the
-theorem above, its hypothesis must be false too, so **every counterexample to `RegDatapathOK`,
-present or future, sits at `r.val = rdOf ins`.** The off-target thirty-one cannot host one.
+/-! ### ⛔⛔ RETIRED 2026-08-29 — `on_target_case_is_false`
+
+It read:
+
+```
+theorem on_target_case_is_false : ¬ (∀ ins r k, k < 32 → r.val = rdOf ins → … )
+  := fun h => C4Refuted.regDatapathOK_is_false_on_LW_either_way (regDatapathOK_of_on_target h)
+```
+
+**Its ONLY content beyond the reduction was the word `is_false`, and that came entirely from
+`C4Refuted`'s LW refutation** — retired by council ruling 08/29 item (f), option ③, when leg ①
+wired the operand-B immediate bank (`38729e9` placed, `79c6f04` wired) and the witness's select
+bit flipped to the value the ISA demands. *The Lean model moved to match the die; the RTL was
+right throughout.*
+
+⛔ **THIS IS A CROSS-MODULE DEPENDENT AND IT WAS NOT ON THE RULING'S LIST OF FOUR.** The list was
+drawn by reading `C4Refuted.lean`; a consumer living in a second file is invisible to a same-file
+count. It is retired here, in the same commit, rather than left to fail the build later.
+
+⛔ **AND NOTE WHAT DID *NOT* DIE.** The residue claim — *every counterexample to `RegDatapathOK`,
+present or future, sits at `r.val = rdOf ins`* — never rested on the refutation. It is
+`regDatapath_off_target` contraposed, and it is restated below as a theorem that mentions no
+witness. `RegDatapathOK` is now **OPEN**: not proved, and no longer refuted. -/
+
+/-- ⭐⭐⭐ **THE RESIDUE, WITH NO WITNESS IN IT — the surviving half of the retired theorem.**
+If the obligation fails anywhere, it fails at the register the instruction names. The off-target
+thirty-one cannot host a counterexample, whether or not one exists.
 
 ⭐ *This is the honest reading of §4–§6.* Not *"97% done"* — the fraction is meaningless, since
-the residue is exactly the case that needs the value half. What it says is that **the whole
-defect is confined to the register the instruction names**, which is a statement about WHERE to
-look, and it is the only thing §4–§6 buy. -/
-theorem on_target_case_is_false :
-    ¬ (∀ (ins : Env) (r : Fin 32) (k : Nat), k < 32 → r.val = rdOf ins →
-      (if run ins core.gates (rwOut r.val) then run ins core.gates (selOut k)
-       else ins (32 * r.val + k))
-        = ((SaltWorks.ISA.stepT (decQ ins) (seenWord ins)).regs[r.val]).getLsbD k) :=
-  fun h => SaltWorks.HDL.C4Refuted.regDatapathOK_is_false_on_LW_either_way
-    (regDatapathOK_of_on_target h)
+the residue is exactly the case that needs the value half. What it says is that **any defect is
+confined to the register the instruction names**, which is a statement about WHERE to look, and
+it is the only thing §4–§6 buy. -/
+theorem counterexample_is_on_target (ins : Env) (r : Fin 32) (k : Nat) (hk : k < 32)
+    (hne : (if run ins core.gates (rwOut r.val) then run ins core.gates (selOut k)
+            else ins (32 * r.val + k))
+             ≠ ((SaltWorks.ISA.stepT (decQ ins) (seenWord ins)).regs[r.val]).getLsbD k) :
+    r.val = rdOf ins := by
+  by_contra hr
+  exact hne (regDatapath_off_target ins r k hk hr)
 
-#audit_axioms on_target_case_is_false
+#audit_axioms counterexample_is_on_target
 
-/-- **AND THE LANDED WITNESS OBEYS IT** — stated as a theorem rather than as prose, because a
-citation is a measurement. `C4Refuted`'s `LW` refutation names register `x1`, and `x1` is the
-`rd` field of the word its environment presents: the witness is ON TARGET, inside the residue,
-exactly where `on_target_case_is_false` predicts it must be. -/
+/-- **AND THE LANDED FIXTURE OBEYS IT** — stated as a theorem rather than as prose, because a
+citation is a measurement. `C4Refuted`'s `LW` fixture names register `x1`, and `x1` is the `rd`
+field of the word its environment presents: the fixture is ON TARGET, inside the residue,
+exactly where `counterexample_is_on_target` says any defect must sit.
+
+⚠️ **`insL` IS NOW A FIXTURE, NOT A COUNTEREXAMPLE (2026-08-29).** It refuted `RegDatapathOK`
+until leg ① wired operand B; the environment is byte-for-byte unchanged and the two sides now
+AGREE at it (`C4Refuted.lw_sides_agree_at_insL`). This theorem is about the fixture's ADDRESS,
+which the repair did not move, so it holds exactly as before. -/
 theorem c4refuted_lw_witness_is_on_target :
     rdOf SaltWorks.HDL.C4Refuted.insL = SaltWorks.HDL.C4Refuted.r1.val := by decide +kernel
 

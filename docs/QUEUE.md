@@ -271,6 +271,13 @@ bit-serial Design-B direction. Each names its successor or says none exists:**
   ARE assembled. But this row's objective — *"prove the single-cycle refinement"* — is REFUTED in
   the ROOTED build at BOTH widths: `C4Refuted.lean:293` `c4Spec_core_is_false` and `:373`
   `not_C4SpecD_core`. **The row asks for a proof of a sentence the corpus proves FALSE.**
+  ⛔⛔ **HALF OF THAT MEASUREMENT EXPIRED 2026-08-29 — `c4Spec_core_is_false` IS RETIRED** (council
+  item (f), option ③, bus `28710859`): leg ① repaired the operand-B immediate path and the witness
+  died, so **`C4Spec core` is OPEN — not proved and no longer refuted.** ⚠️ *A dead witness is not
+  a proof that the spec is true, so this row is no longer "a proof of a sentence the corpus proves
+  FALSE" — it is unpriced again, and the Sept 4–5 C4Spec attempt IS the search.* **THE `C4SpecD`
+  HALF STANDS UNCHANGED:** `not_C4SpecD_core` still proves, on a width argument that touches no
+  witness. *(The `:293` pointer was already one step off before this note; cite the NAME.)*
   ⇒ ⚖️ **RULED, NOT GATED — CORRECTED 2026-08-25 (council, Captain).** **HORN D STANDS UNAMENDED.**
   Citations, both VERIFIED at their sources before being written here:
   · `seat/briefs/2026-08-19-maestro-night-bank.md:1288` — the Captain verbatim:
