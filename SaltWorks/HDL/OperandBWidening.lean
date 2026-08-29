@@ -115,4 +115,51 @@ theorem selOr_control :
 #audit_axioms selOr selOr_ssa selOr_wf selOr_gate_count selOr_ports
 #audit_axioms selOr_sem_is_or selAndMutant selOr_control
 
+/-! ## Is the widening CONSERVATIVE? — pre-registered before the placement edit
+
+The placement pass changes `obSig`, which every landed operand-B value theorem depends on.
+⭐ **These four are the risk check, proved BEFORE the edit rather than hoped through it:** the
+select changes on EXACTLY `LW` and `SW`, it genuinely changes them, and `ADD`/`ADDI` are
+untouched at the concrete words the landed value theorems use. -/
+
+/-- ⭐⭐ **THE WIDENING CHANGES THE SELECT ON EXACTLY `LW` AND `SW`, AND NOWHERE ELSE.**
+Old select = `isADDI`. New select = `isADDI ∨ req`. On any word that is neither a load nor a
+store they are EQUAL — so every landed value theorem for ADD/XOR/SLT/ADDI/BEQ, and the
+non-decoding case, sees an unchanged operand-B path. -/
+theorem widening_conservative_off_mem (w : BitVec 32)
+    (hlw : (ctrlSpec w).getD isLWLine false = false)
+    (hsw : (ctrlSpec w).getD isSWLine false = false) :
+    ((ctrlSpec w).getD isADDILine false || (ctrlSpec w).getD reqLine false)
+      = (ctrlSpec w).getD isADDILine false := by
+  rw [req_is_lw_or_sw, hlw, hsw]
+  simp
+
+/-- ⛔ **AND IT DOES CHANGE THEM — the other half, or "conservative" would be vacuous.**
+On a store the new select is HIGH where the old was LOW. -/
+theorem widening_changes_sw :
+    ((ctrlSpec (encode (Instr.SW 1 2 0))).getD isADDILine false
+      || (ctrlSpec (encode (Instr.SW 1 2 0))).getD reqLine false) = true
+    ∧ (ctrlSpec (encode (Instr.SW 1 2 0))).getD isADDILine false = false := by
+  decide +kernel
+
+/-- And on a load likewise — this is why a wider select alone fixes `LW`. -/
+theorem widening_changes_lw :
+    ((ctrlSpec (encode (Instr.LW 1 2 0))).getD isADDILine false
+      || (ctrlSpec (encode (Instr.LW 1 2 0))).getD reqLine false) = true
+    ∧ (ctrlSpec (encode (Instr.LW 1 2 0))).getD isADDILine false = false := by
+  decide +kernel
+
+/-- ⭐ **ADD AND ADDI ARE UNTOUCHED, AT THE CONCRETE WORDS THE LANDED VALUE THEOREMS USE.** -/
+theorem widening_preserves_add_addi :
+    (((ctrlSpec (encode (Instr.ADD 1 2 3))).getD isADDILine false
+       || (ctrlSpec (encode (Instr.ADD 1 2 3))).getD reqLine false)
+      = (ctrlSpec (encode (Instr.ADD 1 2 3))).getD isADDILine false)
+    ∧ (((ctrlSpec (encode (Instr.ADDI 1 2 7))).getD isADDILine false
+       || (ctrlSpec (encode (Instr.ADDI 1 2 7))).getD reqLine false)
+      = (ctrlSpec (encode (Instr.ADDI 1 2 7))).getD isADDILine false) := by
+  decide +kernel
+
+#audit_axioms widening_conservative_off_mem widening_changes_sw widening_changes_lw
+#audit_axioms widening_preserves_add_addi
+
 end SaltWorks.HDL
