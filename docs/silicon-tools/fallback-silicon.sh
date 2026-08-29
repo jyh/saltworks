@@ -559,10 +559,24 @@ except Exception: print(-1)' "$mine" 2>/dev/null)
       #    see a deviation and be tempted to close it. The order was AMENDED to match the
       #    code, not the other way round. Recorded HERE because a ratification that lives
       #    only on the bus is one line inside 198,000 and dies at the next relight.
-      # ⚠️ AND THE SCOPE, KEPT BESIDE IT AT THE HELM'S REQUEST: THIS ESCALATION HAS NEVER
-      #    FIRED ON A REAL CONDITION — its only production subject was fixed before the arm
-      #    went live. It is FIXTURE-DRIVEN AND UNEXERCISED IN PRODUCTION. The first real
-      #    persisting condition is the receipt; until then this is built, not proven.
+      # ✅ THE RECEIPT ARRIVED 2026-08-28 21:16, AND THIS BLOCK IS AMENDED RATHER THAN
+      #    REPLACED SO THE STANDARD IT WAS HELD TO STAYS VISIBLE. Superseded text, kept
+      #    verbatim: "THIS ESCALATION HAS NEVER FIRED ON A REAL CONDITION — its only
+      #    production subject was fixed before the arm went live. It is FIXTURE-DRIVEN AND
+      #    UNEXERCISED IN PRODUCTION. The first real persisting condition is the receipt;
+      #    until then this is built, not proven."
+      #    ⇒ FIRED, ON THE CONDITION, AFTER EIGHT SEAMS: bench's `0000-BOOT-bench.md` went
+      #    stale at its own 20:36 bank commit (165 lines/15,952 B against a stamp of
+      #    134/12,229), annotated quietly 20:46, UNCHANGED at 21:16, escalated ONCE by AGE,
+      #    owner DERIVED from the filename, not touched, back to quiet. Helm RULED the row
+      #    CLOSED 21:18 on a premise THEY re-measured at origin rather than inherited.
+      # ⭐ THE HALF WORTH KEEPING FOR WHOEVER EDITS THIS ARM NEXT: I flagged as a WEAKNESS
+      #    that the condition arose in a PEER's file rather than in my own state. The helm
+      #    ruled it cuts the other way — ***AN ARM THAT CAN ONLY BE EXERCISED BY CONDITIONS
+      #    ITS AUTHOR CANNOT MANUFACTURE IS EXACTLY THE ARM WHOSE FIRST REAL FIRING IS THE
+      #    STRONGEST EVIDENCE IT CAN GET.*** A synthetic trigger measures the MECHANISM; only
+      #    an unmanufactured one measures the CONDITION (evidence, 11:20, refusing to let
+      #    their own green close this row).
       ESC_AT=${ARM7_ESCALATE_AT:-2}
       if [ "$SSH" = "$PREVH" ]; then
         PREVN=$((PREVN + 1))
