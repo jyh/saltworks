@@ -113,6 +113,7 @@ the pushed delta's commit messages, and the delta's added/modified file lines.
 from __future__ import annotations
 
 import argparse
+import os
 import hashlib
 import pathlib
 import re
@@ -582,12 +583,121 @@ def self_test() -> int:
     return 0
 
 
+# ---------------------------------------------------------------------------
+# THE TREE RATCHET — added 2026-08-29 by the helm on the council's row m.
+#
+# WHY A SECOND ARM. The delta gate fired on FIVE consecutive pushes for one file
+# (08/29 00:19-01:16 UTC) and nobody repaired it; the sixth push touched other
+# files, its delta was clean, and the run went GREEN with the violation still
+# in the tree. A delta gate charges the commit that ADDS a path; it cannot
+# charge the tree for KEEPING one. That is the stale-known-hole shape: a fired
+# gate that is not acted on is laundered by the next green.
+#
+# WHY NOT A WHOLE-TREE GATE. The tree carried 67 findings in 27 files on the
+# day this was written, most of them line-anchored bus citations in 08/13-08/16
+# ledgers that are RECORDS and were never in the ruling's scope to rewrite. A
+# gate that reds on all of them would be routed around inside a day.
+#
+# SO: A RATCHET. `private_paths_baseline.tsv` lists the ACCEPTED residue as
+# (file, line-sha16). `--tree` scans every tracked text file and REDS on any
+# finding NOT in the baseline -- new residue, or residue that moved (a moved
+# line hashes the same but its file changed; an edited line hashes anew).
+# Baseline entries no longer present are reported as debt paid, never as a
+# failure. The baseline shrinks by `--write-baseline` after a real repair; it
+# grows only by the same explicit act, which is a reviewed diff, not a silent
+# pass. The gate's own source is excluded (it assembles the shapes from parts
+# and is self-tested for that separately).
+# ---------------------------------------------------------------------------
+BASELINE = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                        "private_paths_baseline.tsv")
+
+
+def tree_rows(exclude_self: bool = True) -> list[tuple[str, str]]:
+    """(path, line) for every line of every tracked text file."""
+    out = subprocess.run(["git", "ls-files", "-z"], capture_output=True,
+                         check=True).stdout.decode("utf-8", "replace")
+    rows: list[tuple[str, str]] = []
+    own = os.path.relpath(os.path.abspath(__file__), os.getcwd())
+    for path in out.split("\0"):
+        if not path or (exclude_self and path == own):
+            continue
+        try:
+            with open(path, "rb") as fh:
+                blob = fh.read()
+        except (IsADirectoryError, FileNotFoundError):
+            continue
+        if b"\0" in blob[:8192]:
+            continue  # binary
+        for line in blob.decode("utf-8", "replace").splitlines():
+            rows.append((path, line))
+    return rows
+
+
+def load_baseline() -> set[tuple[str, str]]:
+    try:
+        with open(BASELINE, encoding="utf-8") as fh:
+            return {tuple(l.rstrip("\n").split("\t")[:2])
+                    for l in fh if l.strip() and not l.startswith("#")}
+    except FileNotFoundError:
+        return set()
+
+
+def tree_findings() -> list[tuple[str, str, str]]:
+    return scan(tree_rows())
+
+
+def tree_mode(write: bool) -> int:
+    found = tree_findings()
+    keys = {(f, line_sha(line)) for f, _, line in found}
+    if write:
+        with open(BASELINE, "w", encoding="utf-8") as fh:
+            fh.write("# private_paths_baseline.tsv -- ACCEPTED residue for the tree ratchet "
+                     "(check_private_paths.py --tree).\n# file<TAB>line-sha16<TAB>what. "
+                     "Shrink it after a repair with --tree --write-baseline; a growth is a "
+                     "reviewed diff.\n")
+            for f, what, line in sorted(found):
+                fh.write(f"{f}\t{line_sha(line)}\t{what}\n")
+        print(f"check_private_paths --write-baseline: {len(found)} accepted residue "
+              f"line(s) in {len({f for f,_,_ in found})} file(s) written to {os.path.basename(BASELINE)}")
+        return 0
+    base = load_baseline()
+    if not base and found:
+        print(f"FAIL [gate {self_id()}]: --tree has NO BASELINE and the tree carries "
+              f"{len(found)} finding(s). Write one deliberately with --tree --write-baseline.")
+        return 1
+    new = [f for f in found if (f[0], line_sha(f[2])) not in base]
+    paid = base - keys
+    if new:
+        print(f"FAIL [gate {self_id()}] TREE RATCHET: {len(new)} private-record path(s) "
+              f"in the tree that the baseline does not accept.\n")
+        print("A delta gate fired on these (or would have) and the tree still carries")
+        print("them. Rewrite as ROLE wording or a bare filename; do not add to the")
+        print("baseline unless the council preserved the site.\n")
+        for f, what, line in new:
+            print(f"  {f}  {what}")
+            print(f"      {line[:110]}")
+        return 1
+    print(f"check_private_paths --tree [gate {self_id()}]: OK ({len(found)} accepted residue "
+          f"line(s) in {len({f for f,_,_ in found})} file(s), all in the baseline; "
+          f"{len(paid)} baseline entr{'y' if len(paid)==1 else 'ies'} no longer present"
+          + (" -- debt paid; shrink the baseline with --tree --write-baseline" if paid else "")
+          + "). 0 NEW residue.")
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="council 5b firewall gate")
     ap.add_argument("--range", default=None,
                     help="git revision range to scan (messages + added lines)")
     ap.add_argument("--self-test", action="store_true")
+    ap.add_argument("--tree", action="store_true",
+                    help="ratchet: whole-tree residue vs the committed baseline")
+    ap.add_argument("--write-baseline", action="store_true",
+                    help="with --tree: (re)write the accepted-residue baseline")
     args = ap.parse_args()
+
+    if args.tree:
+        return tree_mode(args.write_baseline)
 
     if args.self_test:
         return self_test()

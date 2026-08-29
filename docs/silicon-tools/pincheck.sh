@@ -49,7 +49,8 @@ else
 fi
 
 # --- PIN 2: the PDK, from the SUBMITTED artifact --------------------------------------
-PDKJ="${1:-/Volumes/Content HD/Saltworks/archives/silicon-ndf-drv-0827/inputs/tt-submitted-reference/tt_submission/pdk.json}"
+# Default lives in the PRIVATE archive; export SALTWORKS_ARCHIVE_ROOT (its `archives` dir) or pass the path.
+PDKJ="${1:-${SALTWORKS_ARCHIVE_ROOT:-/nonexistent-set-SALTWORKS_ARCHIVE_ROOT}/silicon-ndf-drv-0827/inputs/tt-submitted-reference/tt_submission/pdk.json}"
 if [ -r "$PDKJ" ]; then
   GOT=$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1])).get("PDK_VERSION",""))' "$PDKJ" 2>/dev/null)
   if [ -z "$GOT" ]; then

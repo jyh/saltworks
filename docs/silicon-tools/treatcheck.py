@@ -86,7 +86,10 @@ def selftest():
     # a path-only difference must not register as either
     arm_case("path-only noise",     {"A": 1, "B": 9, "P": "/somewhere/else"}, 0)
 
-    ARCH = "/Volumes/Content HD/Saltworks/archives/silicon-ndf-drv-0827"
+    # The archived runs live in the PRIVATE archive; its path is never written in a public tree.
+    ARCH = os.path.join(os.environ.get("SALTWORKS_ARCHIVE_ROOT", "/nonexistent-set-SALTWORKS_ARCHIVE_ROOT"), "silicon-ndf-drv-0827")
+    if "SALTWORKS_ARCHIVE_ROOT" not in os.environ:
+        print("PRODUCTION ARMS SKIPPED: SALTWORKS_ARCHIVE_ROOT is unset (the archive path is private; export it to run them)")
     CFG = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "silicon-runs-0827")
     if os.path.isdir(ARCH):
         print("PRODUCTION ARMS (411-key resolved sets from the archived DRV runs):")

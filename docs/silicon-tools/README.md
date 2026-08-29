@@ -26,7 +26,7 @@ cannot measure — "could not measure" is never "fine".)*
    --selftest 10/10
 ```
 ⛔ **1 AND 2 READ THE SUBMITTED ARTIFACT, WHICH LIVES ONLY ON THE ARCHIVE VOLUME**
-(`/Volumes/Content HD/Saltworks/archives/silicon-ndf-drv-0827/inputs/tt-submitted-reference/`).
+(the private archive's `silicon-ndf-drv-0827/inputs/tt-submitted-reference/` tree; export `SALTWORKS_ARCHIVE_ROOT` to that archive's `archives` directory to run them — the volume path itself is a path into the private record and is not written here, per the 08/25 firewall-at-paths ruling).
 Unmounted, they return 2. **They do not return 0.**
 📌 **AND THE MECHANIC THAT DECIDES WHEN 4 CAN RUN AT ALL: the submitted bundle carries NO STA corner
 reports and its `metrics.csv` has NO fanout column — the evidence does not travel with the artifact.
