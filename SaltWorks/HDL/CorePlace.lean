@@ -735,26 +735,26 @@ defect this deep repairable by one line.
 lemma below proves only that the σ PLACES — **placing is not correctness**, and this σ bypasses
 `immICirc` so its certificate does not transfer for free. -/
 def obSig (j : Net) : Net :=
-  if j < 32 then rs2Out j else if j < 64 then instrNet (immI (j - 32)) else decOut isADDILine
+  if j < 32 then rs2Out j else if j < 64 then immMuxOut (j - 32) else selOrOut 0
 
-/-- ⛔⛔ **THE CONTROL FOR STAGE 2a — "PLACED, NOT WIRED", AS A THEOREM RATHER THAN A CLAIM.**
-Both widened organs are now IN the chain, so the placement half is real. This says the OTHER
-half is equally real: **`obMux`'s σ reads NEITHER new organ's output net, at any input.**
+/-- ⭐⭐ **THE STAGE-2a TRIPWIRE, RETIRED BY REPLACEMENT — leg ① stage 2b.**
+Stage 2a landed `stage2a_organs_are_placed_but_unread`: `obMux`'s σ read NEITHER new organ's
+output net. **That theorem was planted to become false here, and it did.** It is replaced by its
+POSITIVE TWIN rather than deleted, so the retirement is a statement and not an absence.
 
-⚠️ **THIS IS A TRIPWIRE AND IT IS MEANT TO FAIL.** Stage 2b routes `obSig` through
-`immMuxOut`/`selOrOut` — the moment it does, this theorem is FALSE and the build says so.
-*Retire it in the same commit that wires them; do not weaken it to keep a build green.*
+⛔ **A DELETED CONTROL LEAVES NO TRACE. THIS ONE LEAVES A THEOREM.** The old one said the wire
+was absent; this one says WHERE IT GOES — the select is the widened OR, and the immediate bank
+is the mux's output, at exactly the inputs `obMux` reads them at. -/
+theorem stage2b_organs_are_wired :
+    obSig 64 = selOrOut 0 ∧ (∀ m, m < 32 → obSig (32 + m) = immMuxOut m) := by
+  refine ⟨by decide +kernel, ?_⟩
+  intro m hm; revert hm; revert m; decide +kernel
 
-📌 It is not a restatement of `obSig`'s definition: it compares NET NUMBERS the definition never
-mentions, so it discriminates a real wiring from a cosmetic one. -/
-theorem stage2a_organs_are_placed_but_unread :
-    (∀ j, j < 65 → obSig j ≠ selOrOut 0) ∧
-    (∀ j, j < 65 → ∀ k, k < 32 → obSig j ≠ immMuxOut k) := by
-  refine ⟨?_, ?_⟩
-  · intro j hj; revert hj; revert j; decide +kernel
-  · intro j hj; revert hj; revert j; decide +kernel
+/-- ⛔ **AND THE `rs2` BANK IS UNCHANGED — the widening must not have moved operand B's a-side.** -/
+theorem stage2b_rs2_bank_untouched : ∀ j, j < 32 → obSig j = rs2Out j := by
+  intro j hj; revert hj; revert j; decide +kernel
 
-#audit_axioms stage2a_organs_are_placed_but_unread
+#audit_axioms stage2b_organs_are_wired stage2b_rs2_bank_untouched
 
 /-- ⭐ **PLACEMENT #13 — `obMux` at row 7, `instOK` DISCHARGED.** -/
 theorem ob_instOK : instOK OperandB.obMux obSig offOb := by

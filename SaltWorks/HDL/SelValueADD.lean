@@ -113,6 +113,57 @@ def cT7 : List Gate :=
     ++ instGates selOr selOrSig offSelOr
     ++ instGates OperandB.obMux immMuxSig offImmMux
 
+/-- ⭐ **THE SEVEN BLOCKS BEFORE LEG ①'s ORGANS** — `cT7` without the widened select and the
+immediate mux. The two new organs read their inputs here. -/
+def cT7pre : List Gate :=
+  instGates tieCells id offTie
+    ++ instGates decoder decoderSig off0
+    ++ instGates immBCirc immBSig off1
+    ++ instGates readTree readTreeRs1Sig off2
+    ++ instGates readTree readTreeRs2Sig off3
+    ++ instGates bitXor32 bitXor32Sig off4
+    ++ instGates bitNot32 bitNot32Sig off5
+
+def cT7sel : List Gate := cT7pre ++ instGates selOr selOrSig offSelOr
+
+theorem cT7_split_sel : cT7 = cT7sel ++ instGates OperandB.obMux immMuxSig offImmMux := by
+  simp only [cT7, cT7sel, cT7pre, List.append_assoc]
+
+theorem cT7sel_split : cT7sel = cT7pre ++ instGates selOr selOrSig offSelOr := rfl
+
+/-- ⭐ Nothing below `offSelOr` can see the two new organs — the value-layer's free pass. -/
+theorem run_cT7_to_pre (ins : Env) (n : Net) (hn : n < offSelOr) :
+    run ins cT7 n = run ins cT7pre n := by
+  rw [cT7_split_sel,
+      run_drop ins cT7sel (instGates OperandB.obMux immMuxSig offImmMux) offImmMux n
+        (Nat.lt_of_lt_of_le hn Shared.offSelOr_le_offImmMux)
+        (blk_ge OperandB.obMux immMuxSig offImmMux OperandB.ssa_obMux offImmMux
+          (Nat.le_refl _)),
+      cT7sel_split,
+      run_drop ins cT7pre (instGates selOr selOrSig offSelOr) offSelOr n hn
+        (blk_ge selOr selOrSig offSelOr selOr_ssa offSelOr (Nat.le_refl _))]
+
+/-- ⭐⭐ **THE WIDENED SELECT, READ AT `cT7`, IN THE FORM ITS CONSUMER WANTS.** Both disjuncts are
+stated at `cT7` rather than at the prefix, so a caller that already has `decOut_cT7` can use it
+without knowing the prefix exists. -/
+theorem selOr_cT7 (ins : Env) :
+    run ins cT7 (CorePlace.selOrOut 0)
+      = (run ins cT7 (decOut isADDILine) || run ins cT7 (decOut reqLine)) := by
+  rw [run_cT7_to_pre ins (decOut isADDILine) (Shared.decOut_lt_offSelOr _ (by decide +kernel)),
+      run_cT7_to_pre ins (decOut reqLine) (Shared.decOut_lt_offSelOr _ (by decide +kernel)),
+      cT7_split_sel,
+      run_drop ins cT7sel (instGates OperandB.obMux immMuxSig offImmMux) offImmMux
+        (CorePlace.selOrOut 0) Shared.selOrOut_lt_offImmMux
+        (blk_ge OperandB.obMux immMuxSig offImmMux OperandB.ssa_obMux offImmMux
+          (Nat.le_refl _)),
+      cT7sel_split, Shared.selOrOut_eq, run_append,
+      inst_sem selOr selOrSig offSelOr (run ins cT7pre)
+        (fun a => run ins cT7pre (selOrSig a)) selOr_instOK (fun _ _ => rfl)
+        (selOr.outs.getD 0 0) (Or.inr Shared.selOr_out_mem)]
+  rfl
+
+#audit_axioms cT7pre cT7sel cT7_split_sel cT7sel_split run_cT7_to_pre selOr_cT7
+
 /-- …and those nine with `obMux` appended: the environment the ADD adder reads. -/
 def cT8 : List Gate := cT7 ++ instGates OperandB.obMux obSig offOb
 
@@ -334,11 +385,17 @@ theorem tieFalse_at_cT8 (ins : Env) : run ins cT8 tieFalse = false := by
 
 /-! ## 4 · `obMux` DELIVERS `rs2` WHEN `isADDI` IS LOW -/
 
-/-- ⭐⭐ **OPERAND B IS `rs2` ON EVERY NON-`ADDI` WORD.** The `sel` input of `obMux` is
-`decOut 3` = `isADDI`; low, and the mux delivers its `a` bank, which `obSig` wires to the
-`rs2` read port. *No fact about the immediate bank is used or needed.* -/
+/-- ⭐⭐ **OPERAND B IS `rs2` WHEN THE WIDENED SELECT IS LOW.**
+⛔⛔ **THE STATEMENT CHANGED WITH LEG ① STAGE 2b, AND THAT IS THE HONEST OUTCOME.** It used to
+read "on every non-`ADDI` word", because `obMux`'s select WAS `decOut 3` = `isADDI` alone. It is
+now `isADDI ∨ req`.
+Operand B is `rs2` only when the select is LOW, and the select is now `isADDI ∨ req`. One
+hypothesis is no longer enough: a LOAD or STORE word has `isADDI = false` and would have
+satisfied the old statement while taking the immediate. **`h7` is what the widening costs, and
+refusing to add it would have been the way to keep a false theorem alive.** -/
 theorem ob_is_rs2 (ins : Env) (m : Nat) (hm : m < 32)
-    (h3 : run ins cT7 (decOut isADDILine) = false) :
+    (h3 : run ins cT7 (decOut isADDILine) = false)
+    (h7 : run ins cT7 (decOut reqLine) = false) :
     run ins cT8 (CorePlace.obOut m) = run ins cT7 (rs2Out m) := by
   have hstep : run ins cT8 (CorePlace.obOut m)
       = run (fun a => run ins cT7 (obSig a)) OperandB.obMux.gates
@@ -352,9 +409,11 @@ theorem ob_is_rs2 (ins : Env) (m : Nat) (hm : m < 32)
   rw [getD_map_lt (run (fun a => run ins cT7 (obSig a)) OperandB.obMux.gates)
         OperandB.obMux.outs m (by rw [Shared.obMux_outs_len]; exact hm) 0 false] at h
   rw [hstep, h]
-  have h64 : obSig 64 = decOut isADDILine := by simp [obSig]
+  have h64 : run ins cT7 (obSig 64) = false := by
+    show run ins cT7 (CorePlace.selOrOut 0) = false
+    rw [selOr_cT7 ins, h3, h7]; rfl
   have hmm : obSig m = rs2Out m := by simp [obSig, hm]
-  simp only [h64, hmm, h3]
+  rw [h64, hmm]
   simp
 
 /-! ## 5 · THE ADDER ADDS, IN PLACE -/
@@ -486,13 +545,14 @@ theorem selOut_value_ADD (ins : Env) (rd a b : Fin 32) (k : Nat) (hk : k < 32)
   have hd1 : run ins cT7 (decOut isXORLine) = false := by rw [decOut_cT7 ins isXORLine (by decide +kernel), hc]; rfl
   have hd2 : run ins cT7 (decOut isSLTLine) = false := by rw [decOut_cT7 ins isSLTLine (by decide +kernel), hc]; rfl
   have hd3 : run ins cT7 (decOut isADDILine) = false := by rw [decOut_cT7 ins isADDILine (by decide +kernel), hc]; rfl
+  have hd7 : run ins cT7 (decOut reqLine) = false := by rw [decOut_cT7 ins reqLine (by decide +kernel), hc]; rfl
   have hd1' : run ins coreThru11 (decOut isXORLine) = false := by
     rw [run_thru11_to_cT7 ins _ (decOut_lt_offOb isXORLine (by decide +kernel))]; exact hd1
   have hd2' : run ins coreThru11 (decOut isSLTLine) = false := by
     rw [run_thru11_to_cT7 ins _ (decOut_lt_offOb isSLTLine (by decide +kernel))]; exact hd2
   have hB : ∀ j, j < 32 → run ins cT8 (CorePlace.obOut j) = (rs2Of ins).getLsbD j := by
     intro j hj
-    rw [ob_is_rs2 ins j hj hd3, rs2_at_cT7 ins j hj]
+    rw [ob_is_rs2 ins j hj hd3 hd7, rs2_at_cT7 ins j hj]
   rw [sel_is_add_bank ins k hk hd1' hd2',
       add_bit ins (rs1Of ins) (rs2Of ins) k hk (rs1_at_cT8 ins) hB,
       rs1Of_is_get_a_ADD ins rd a b h, rs2Of_is_get_b_ADD ins rd a b h]

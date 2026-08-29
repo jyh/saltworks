@@ -75,6 +75,29 @@ def coreThru7 : List Gate :=
     ++ instGates selOr selOrSig offSelOr
     ++ instGates OperandB.obMux immMuxSig offImmMux
 
+/-- ⭐ **THE SEVEN BLOCKS BEFORE LEG ①'s ORGANS** — `coreThru7` with the widened select and the
+immediate mux removed. This is the environment those two organs' INPUTS are read in, so every
+statement about what they compute has to be written against it. *Stage 2a put them inside
+`coreThru7`; this is the prefix that makes that placement usable.* -/
+def coreThru7pre : List Gate :=
+  instGates tieCells id offTie
+    ++ instGates decoder decoderSig off0
+    ++ instGates immBCirc immBSig off1
+    ++ instGates readTree readTreeRs1Sig off2
+    ++ instGates readTree readTreeRs2Sig off3
+    ++ instGates bitXor32 bitXor32Sig off4
+    ++ instGates bitNot32 bitNot32Sig off5
+
+/-- …and with the widened select, which is what the immediate mux reads its inputs in. -/
+def coreThru7sel : List Gate := coreThru7pre ++ instGates selOr selOrSig offSelOr
+
+theorem coreThru7_split_sel :
+    coreThru7 = coreThru7sel ++ instGates OperandB.obMux immMuxSig offImmMux := by
+  simp only [coreThru7, coreThru7sel, coreThru7pre, List.append_assoc]
+
+theorem coreThru7sel_split :
+    coreThru7sel = coreThru7pre ++ instGates selOr selOrSig offSelOr := rfl
+
 /-- …with `obMux`. -/
 def coreThru8 : List Gate := coreThru7 ++ instGates OperandB.obMux obSig offOb
 
@@ -228,11 +251,104 @@ theorem instr_thru7 (ins : Env) (i : Nat) (hi : i < 32) :
   rw [run_thru7_to2 ins (instrNet i) (Nat.lt_of_lt_of_le (instrNet_lt i hi) offTie_le_off1),
       run_thru2_input ins (instrNet i) (instrNet_lt i hi)]
 
+/-! ## 5b · ⭐⭐ LEG ① STAGE 2b — WHAT THE TWO WIDENED ORGANS COMPUTE, READ INSIDE THE PREFIX
+
+⛔ **THESE TWO LEMMAS ARE THE WHOLE OF STAGE 2b'S NEW MATHEMATICS.** Stage 2a proved the organs
+PLACE and put them in `coreThru7`; nothing there said what they DELIVER. `obSig` now reads their
+output nets, so every operand-B value theorem routes through exactly these two facts. -/
+
+/-- ⭐ **THE WIDENED SELECT, READ INSIDE `coreThru7`: it is the OR of the two decoder lines.**
+This is the fact `obSig 64` now names, and it did not exist before stage 2b. -/
+theorem selOr_thru7 (ins : Env) :
+    run ins coreThru7 (CorePlace.selOrOut 0)
+      = (run ins coreThru7pre (decOut isADDILine) || run ins coreThru7pre (decOut reqLine)) := by
+  rw [coreThru7_split_sel,
+      run_frame_of_ge ins coreThru7sel (instGates OperandB.obMux immMuxSig offImmMux)
+        (CorePlace.selOrOut 0) offImmMux Shared.selOrOut_lt_offImmMux
+        (blk_out_ge OperandB.obMux immMuxSig offImmMux OperandB.ssa_obMux offImmMux
+          (Nat.le_refl _)),
+      coreThru7sel_split, Shared.selOrOut_eq, run_append,
+      inst_sem selOr selOrSig offSelOr (run ins coreThru7pre)
+        (fun a => run ins coreThru7pre (selOrSig a)) selOr_instOK (fun _ _ => rfl)
+        (selOr.outs.getD 0 0) (Or.inr Shared.selOr_out_mem)]
+  rfl
+
+/-- ⭐⭐ **THE IMMEDIATE MUX, READ INSIDE `coreThru7`.** Same shape as `ob_thru8_mux` because it
+is the SAME CERTIFIED CIRCUIT — a second instance of `obMux`, selecting `immS` on an `SW` word
+and `immI` otherwise. Its inputs are read in `coreThru7sel`, i.e. AFTER the widened select,
+which is where stage 2a placed it. -/
+theorem immMux_thru7 (ins : Env) (m : Nat) (hm : m < 32) :
+    run ins coreThru7 (CorePlace.immMuxOut m)
+      = (if run ins coreThru7sel (immMuxSig 64) then run ins coreThru7sel (immMuxSig (32 + m))
+         else run ins coreThru7sel (immMuxSig m)) := by
+  rw [coreThru7_split_sel, Shared.immMuxOut_eq m hm, run_append,
+      inst_sem OperandB.obMux immMuxSig offImmMux (run ins coreThru7sel)
+        (fun a => run ins coreThru7sel (immMuxSig a)) immMux_instOK (fun _ _ => rfl)
+        (OperandB.obMux.outs.getD m 0) (Or.inr (Shared.obMux_out_mem m hm)),
+      show run (fun a => run ins coreThru7sel (immMuxSig a)) OperandB.obMux.gates
+             (OperandB.obMux.outs.getD m 0)
+           = (sem OperandB.obMux (fun a => run ins coreThru7sel (immMuxSig a))).getD m false from
+        (getD_map_lt _ _ _ (by rw [Shared.obMux_outs_len]; exact hm) 0 false).symm]
+  exact OperandB.out_sem_obMux _ m hm
+
+/-- ⭐ **NOTHING BELOW `offSelOr` CAN SEE THE TWO NEW ORGANS.** Both blocks write nets at or
+above `offSelOr`, so every net the OLD proofs read is evaluated identically in `coreThru7pre`.
+*This is what makes stage 2a's placement free at the value layer, expressed as a theorem rather
+than as an argument.* -/
+theorem run_thru7_to_pre (ins : Env) (n : Net) (hn : n < offSelOr) :
+    run ins coreThru7 n = run ins coreThru7pre n := by
+  have hsi : offSelOr ≤ offImmMux := by simp only [offImmMux, instNext]; omega
+  rw [coreThru7_split_sel,
+      run_frame_of_ge ins coreThru7sel (instGates OperandB.obMux immMuxSig offImmMux) n
+        offImmMux (Nat.lt_of_lt_of_le hn hsi)
+        (blk_out_ge OperandB.obMux immMuxSig offImmMux OperandB.ssa_obMux offImmMux
+          (Nat.le_refl _)),
+      coreThru7sel_split,
+      run_frame_of_ge ins coreThru7pre (instGates selOr selOrSig offSelOr) n offSelOr hn
+        (blk_out_ge selOr selOrSig offSelOr selOr_ssa offSelOr (Nat.le_refl _))]
+
+/-- The decoder line `k`, read in the prefix the two new organs' inputs live in. -/
+theorem decOut_thru7pre (ins : Env) (k : Nat) (hk : k < 9) :
+    run ins coreThru7pre (decOut k) = (ctrlSpec (seenWord ins)).getD k false := by
+  rw [← run_thru7_to_pre ins (decOut k) (Shared.decOut_lt_offSelOr k hk),
+      run_thru7_to2 ins (decOut k) (decOut_lt_off1 k hk),
+      ← run_thru13_to2 ins (decOut k) (decOut_lt_off1 k hk)]
+  exact core_decOut_spec ins k (by omega)
+
+/-- The instruction word bit `i`, read in the prefix — the immediate mux's a/b banks. -/
+theorem instr_thru7sel (ins : Env) (i : Nat) (hi : i < 32) :
+    run ins coreThru7sel (instrNet i) = ins (instrNet i) := by
+  have h : instrNet i < offSelOr := Shared.instrNet_lt_offSelOr i hi
+  rw [coreThru7sel_split,
+      run_frame_of_ge ins coreThru7pre (instGates selOr selOrSig offSelOr) (instrNet i)
+        offSelOr h (blk_out_ge selOr selOrSig offSelOr selOr_ssa offSelOr (Nat.le_refl _)),
+      ← run_thru7_to_pre ins (instrNet i) h]
+  exact instr_thru7 ins i hi
+
+/-- The decoder line `k`, read where the immediate mux reads its SELECT. -/
+theorem decOut_thru7sel (ins : Env) (k : Nat) (hk : k < 9) :
+    run ins coreThru7sel (decOut k) = (ctrlSpec (seenWord ins)).getD k false := by
+  rw [coreThru7sel_split,
+      run_frame_of_ge ins coreThru7pre (instGates selOr selOrSig offSelOr) (decOut k)
+        offSelOr (Shared.decOut_lt_offSelOr k hk)
+        (blk_out_ge selOr selOrSig offSelOr selOr_ssa offSelOr (Nat.le_refl _))]
+  exact decOut_thru7pre ins k hk
+
+#audit_axioms selOr_thru7
+#audit_axioms immMux_thru7 run_thru7_to_pre
+#audit_axioms decOut_thru7pre instr_thru7sel decOut_thru7sel
+
 /-! ## 6 · operand B — the mux, and the immediate it delivers on `ADDI` -/
 
-theorem obSig_64 : obSig 64 = decOut isADDILine := rfl
+/-- ⛔⛔ **RE-POINTED BY LEG ① STAGE 2b, AND THE OLD STATEMENT WAS FALSE, NOT MERELY UNPROVED.**
+It read `obSig 64 = decOut isADDILine` and was `rfl`. The select is now the WIDENED one, so the
+old equation names a wire that is no longer there. *This is bank §4's law at its sharpest: the
+value on the select is unchanged on every non-load/store word, and the equation still died,
+because it named the WIRE.* -/
+theorem obSig_64 : obSig 64 = CorePlace.selOrOut 0 := rfl
 
-theorem obSig_imm (m : Nat) (hm : m < 32) : obSig (32 + m) = instrNet (immI m) := by
+/-- Likewise re-pointed: the immediate bank is the MUX's output now, not the raw `immI` net. -/
+theorem obSig_imm (m : Nat) (hm : m < 32) : obSig (32 + m) = CorePlace.immMuxOut m := by
   have h1 : ¬ ((32 : Nat) + m < 32) := by omega
   have h2 : (32 : Nat) + m < 64 := by omega
   have h3 : (32 : Nat) + m - 32 = m := by omega
@@ -260,9 +376,14 @@ theorem obOut_is_sext_imm (ins : Env) (rd a : Fin 32) (imm : BitVec 12) (m : Nat
     (h : decode (seenWord ins) = some (.ADDI rd a imm)) :
     run ins coreThru8 (CorePlace.obOut m) = (imm.signExtend 32).getLsbD m := by
   have hsel : run ins coreThru7 (obSig 64) = true := by
-    rw [obSig_64, decOut3_thru7 ins]; simp [ctrlSpec, h]
+    rw [obSig_64, selOr_thru7 ins, decOut_thru7pre ins isADDILine (by decide +kernel)]
+    simp [ctrlSpec, h, isADDILine]
+  have hsw : run ins coreThru7sel (immMuxSig 64) = false := by
+    rw [Shared.immMuxSig_64, decOut_thru7sel ins isSWLine (by decide +kernel)]
+    simp [ctrlSpec, h, isSWLine]
   rw [ob_thru8_mux ins m hm, hsel, if_pos rfl, obSig_imm m hm,
-      instr_thru7 ins (immI m) (immI_lt_32 m)]
+      immMux_thru7 ins m hm, hsw, if_neg (by simp), Shared.immMuxSig_lo m hm,
+      instr_thru7sel ins (immI m) (immI_lt_32 m)]
   exact obB_is_sext_imm ins rd a imm m hm h
 
 /-! ## 7 · operand A — the `rs1` read port, at row 7 -/

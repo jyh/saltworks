@@ -156,6 +156,52 @@ theorem decode_add_rd (w : BitVec 32) (rd a b : Fin 32) (h : decode w = some (.A
   simp only [decode, Bool.and_eq_true, decide_eq_true_eq] at h
   split_ifs at h <;> simp_all
 
+/-! ## 5 · ⭐⭐ LEG ① STAGE 2b — the widened organs' PORT facts, shared by every value file
+
+⛔ **THESE LIVE HERE ON PURPOSE.** `SelValueADD` and `SelValueADDI` both need them and neither
+imports the other; minting a second copy in each is exactly the duplicate-lemma failure this
+file exists to prevent. What stays in the value files is the PREFIX-SPECIFIC half — the split
+and the `run … prefix` lemmas — because each file names its own prefix. -/
+
+theorem selOr_outs_len : selOr.outs.length = 1 := by decide +kernel
+
+theorem selOr_out_mem :
+    (selOr.gates.map Gate.out).contains (selOr.outs.getD 0 0) = true := by decide +kernel
+
+theorem selOrOut_eq :
+    CorePlace.selOrOut 0 = instMap selOr selOrSig offSelOr (selOr.outs.getD 0 0) := by
+  rw [CorePlace.selOrOut, instOuts]
+  exact getD_map_lt _ _ _ (by rw [selOr_outs_len]; exact Nat.zero_lt_one) 0 0
+
+theorem selOrOut_lt_offImmMux : CorePlace.selOrOut 0 < offImmMux := by decide +kernel
+
+theorem offSelOr_le_offImmMux : offSelOr ≤ offImmMux := by
+  simp only [offImmMux, instNext]; omega
+
+theorem immMuxOut_eq (m : Nat) (hm : m < 32) :
+    CorePlace.immMuxOut m
+      = instMap OperandB.obMux immMuxSig offImmMux (OperandB.obMux.outs.getD m 0) := by
+  rw [CorePlace.immMuxOut, instOuts]
+  exact getD_map_lt _ _ _ (by rw [obMux_outs_len]; exact hm) 0 0
+
+/-- The immediate mux's a-bank at input `m`: the I-type immediate's net. -/
+theorem immMuxSig_lo (m : Nat) (hm : m < 32) : immMuxSig m = instrNet (immI m) := by
+  simp only [immMuxSig, if_pos hm]
+
+/-- Its select input: the `SW` decoder line. -/
+theorem immMuxSig_64 : immMuxSig 64 = decOut isSWLine := rfl
+
+/-- ⭐ Every decoder line sits BELOW the widened select, so no old proof can see the new organs. -/
+theorem decOut_lt_offSelOr (k : Nat) (hk : k < 9) : decOut k < offSelOr := by
+  revert hk; revert k; decide +kernel
+
+theorem instrNet_lt_offSelOr (i : Nat) (hi : i < 32) : instrNet i < offSelOr := by
+  revert hi; revert i; decide +kernel
+
+#audit_axioms selOr_outs_len selOr_out_mem selOrOut_eq selOrOut_lt_offImmMux
+#audit_axioms offSelOr_le_offImmMux immMuxOut_eq immMuxSig_lo immMuxSig_64
+#audit_axioms decOut_lt_offSelOr instrNet_lt_offSelOr
+
 end Shared
 
 /-! # CALL-SITE RECEIPTS — the criterion, pre-registered and machine-checked
