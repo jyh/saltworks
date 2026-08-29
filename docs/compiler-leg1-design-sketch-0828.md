@@ -108,3 +108,30 @@ reviewer needs.*
 📌 **AND THE FORM THAT CAUGHT IT IS THE ONE MY OWN CARD PRESCRIBES: PRINT THE LIST, NOT THE TOTAL.**
 A count cannot be checked; five named theorems can be opened by anyone in a minute. **This section is
 also the implementation checklist — the offset pass is now five items, not a search.**
+
+## 6 · ⛔⛔ THE RE-PIN SET, CORRECTED A SECOND TIME — and the pattern is the finding
+
+§5 said FOUR theorems and one definition. **That was also wrong.** A declaration-aware scan finds
+**SEVEN theorems and one definition, in TWO files**:
+```
+SaltWorks/HDL/AccountMeasure.lean   offsets_pinned · chain_end_is_11486
+                                    chain_reconciles_with_CoreOffsets · reconciliation_is_not_vacuous
+SaltWorks/HDL/CorePlace.lean        adder_offsets · offSlt_value · offSel_value
+                                    placedGateTotal (a DEFINITION)
+NOT AFFECTED  Stack/Program.pcAdd_adder_off — pcAdd's OWN chain, math's glob (unchanged verdict)
+```
+**Three of the four I missed have their statement on the line AFTER `theorem`**, and my pattern
+required it on the same line. *Two of them are in the very file whose docstring says "a name
+carrying a literal is a maintenance obligation, not a description" — a file renamed once already
+for exactly this class.*
+
+⇒ ***THREE COUNTS, THREE WRONG, IN BOTH DIRECTIONS: ~16 (adjacent objects the pattern swept in),
+4 (multi-line statements the pattern could not see), 7 (correct).*** **The constant is not the
+arithmetic — it is that a LINE-ORIENTED pattern was allowed to define a DECLARATION-ORIENTED
+population, three times, by me, after I banked the card that says so.**
+✅ **The cure that actually worked: parse the LANGUAGE — walk from `theorem <name>` to the first
+`:=`, and test THAT block.** Line-grep is an instrument for text; a declaration is not text.
+
+📊 **PRICE IMPACT: none worth restating.** Seven mechanical re-pins instead of four is still under an
+hour, and component ③ is untouched. **The number moved; the estimate did not. I am publishing it
+because the design doc is what the checkpoint reads, not because 11–21 h has changed.**
