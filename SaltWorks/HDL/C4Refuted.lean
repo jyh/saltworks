@@ -408,8 +408,15 @@ theorem datapath_forces_zero_select_on_LW (h : RegDatapathOK) (ins : Env)
 /-! ### ⛔⭐⭐⭐ THE D REGIME — `C4SpecD core` IS REFUTED IN THE KERNEL, AND THE SPEC IS NOT EMPTY
 
 math's `2026-08-23 10:30:24` length argument was published as prose over three source lines
-and never landed as a theorem. It lands here, in the file that already carries
-`c4Spec_core_is_false`, because this is where a refutation of `core` belongs.
+and never landed as a theorem. It lands here because this is where a refutation of `core`
+belongs.
+⛔ **CORRECTED 2026-08-29.** This paragraph read *"in the file that already carries
+`c4Spec_core_is_false`"*. **It no longer does — that theorem was retired the same day** (council
+(f)/③, `d7bb56a`). ⭐ **THE D REFUTATION IS UNAFFECTED AND THAT IS THE POINT OF SAYING SO HERE:**
+it is a WIDTH argument. `core.outs.length = stWidth`, `C4SpecD` forces `stWidthD`, and the two
+differ by `decide +kernel` — no environment, no evaluator, no witness, nothing leg ① touched.
+*Leg ① changed `core.gates`; `core.outs` it did not touch.* ⇒ **`C4SpecD core` IS STILL FALSE**
+while `C4Spec core` is now OPEN, and the two must not be retired by association.
 
 ⚠️ **BOTH HALVES ARE NEEDED AND ONLY ONE IS THE HEADLINE.** *"`C4SpecD core` is false"* is
 worth nothing on its own — it is also true of a spec no circuit can meet, and a reader has

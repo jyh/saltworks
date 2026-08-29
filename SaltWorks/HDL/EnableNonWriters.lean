@@ -19,7 +19,16 @@ regDatapath_on_BEQ / _on_SW / _on_garbage    the three instances, named
 ⛔ **SCOPE.** `LW` and `SW` values are out of scope (Horn D — `decQ`'s memory is all-zero).
 Nothing here needs a load or a store to COMPUTE anything: `SW` appears only as a class that
 writes NO register, so its obligation is discharged by the HOLD arm, which is memory-free.
-`LW` is NOT covered — it is a writer, and `regDatapathOK_is_false_on_LW_either_way` stands.
+`LW` is NOT covered — it is a writer, and its VALUE is what Horn D exists for.
+⛔ **CORRECTED 2026-08-29.** This line read *"and `regDatapathOK_is_false_on_LW_either_way`
+stands"*. **THAT THEOREM WAS RETIRED THE SAME DAY** (council item (f), option ③, bus `28710859`,
+commit `d7bb56a`): leg ① wired operand B through the placed immediate mux and the LW witness's
+select bit flipped to the value the ISA demands. ⇒ **`RegDatapathOK` is OPEN — not proved and no
+longer refuted** — so `LW` is uncovered by ABSENCE OF A PROOF, which is a weaker reason than the
+one this line used to give, and the difference is what the next reader needs.
+⚠️ *This sentence was missed by the retirement's own corpus sweep: the sweep grepped the FLAGSHIP
+name and `C4Spec core`, and this line names only the LW dependent. A retraction reaches the
+strings you thought to grep for.*
 
 ## ⚠️ THE FAILURE MODE THIS FILE IS BUILT AGAINST
 
