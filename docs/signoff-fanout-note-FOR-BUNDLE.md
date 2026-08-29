@@ -39,7 +39,23 @@ risk rather than one slow path. That asymmetry, not the count, is why the two ar
 **all 111** clock-leaf violators, while the datapath remainder is resizer-inserted and moves with
 placement — a different set on every run.
 
-## ⛔ THE SCOPE QUESTION THIS NOTE WILL NOT DECIDE
+## ⚖️ RULED 2026-08-28 19:0x — THIS NOTE IS HELD, WRITTEN AND UNSHIPPED
+
+**Captain's rule, verbatim: *"the paper documents everything AT THE TIME; the tape-out can change
+and be updated, but IT MUST BE SELF-CONSISTENT."*** ⇒ the standard is **SELF-CONSISTENCY, not
+"always include the evidence": the artifact and its evidence must describe THE SAME THING AT THE
+SAME TIME.**
+
+1. **The CURRENT bundle documents `ndf-base`, so the `wire695` note does NOT go into it.**
+2. **This note ships WITH the `ndf-2a` RESUBMISSION, AS ONE ACT, at the Sep 4–5 click** — config and
+   evidence together, never bolted onto a bundle describing another chip.
+3. **Until then: HELD. Written, committed, unshipped.** Trigger registered in `docs/QUEUE.md` (Q4)
+   so it is surfaced by an instrument every sweep rather than remembered.
+
+*The helm recorded the half that was theirs: the order assumed the accepted configuration WAS the
+submitted one. They differ in 4 of 411 keys, and that had not been measured.*
+
+## ⛔ THE SCOPE QUESTION — MEASURED, AND IT IS WHY THE ABOVE READS AS IT DOES
 
 The council's 2026-08-28 waiver (item 3) accepts *"at most one datapath violator at fanout 11–12,
 zero clock-leaf"* and its headline named **`wire695`**. That residual belongs to configuration
@@ -52,5 +68,13 @@ reviewer that the fabricated design has one datapath violator at 11 and zero clo
 and 111.
 
 **The waiver is a criterion for a configuration we recommend for a FUTURE revision. This bundle
-documents the design that was FABRICATED. Both are true; only one belongs here, and which one is
-the Captain's to say.**
+documents the design that was FABRICATED. Both are true; only one belongs here — RULED 19:0x: it
+belongs with the RESUBMISSION, shipped in the same act as the config it describes.**
+
+📎 **THE DOCTRINE THIS APPLIES, so a later reader sees it is not a one-off judgement:** *a record
+that asserts the PRESENT gets corrected; a record that asserts WHAT WAS KNOWN AT A TIME gets
+annotated, never amended* (helm, ruled 2026-08-28 17:20). A fabrication bundle is history; a waiver
+is a live criterion. ⇒ ***AND THE FAILURE MODE OF COMPLYING CARELESSLY: EVIDENCE THAT TRAVELS WITH
+THE WRONG ARTIFACT IS WORSE THAN EVIDENCE THAT DOES NOT TRAVEL, BECAUSE IT ARRIVES WEARING THE
+ARTIFACT'S AUTHORITY*** — a true sentence acquires the authority of the document it is placed in,
+and no 2027 reviewer re-derives which configuration it described.

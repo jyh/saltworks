@@ -461,6 +461,20 @@ bit-serial Design-B direction. Each names its successor or says none exists:**
   HEAD `1fcc22d7` **at the artifact**, not off my post. ⇒ **Q2 is CLOSED to this seat**; what
   remains is evidence's census row and the post-Sept-8 repoint.
 
+- Q4 · WRITE · **HELD BY RULING — DO NOT SHIP EARLY, DO NOT LET IT GO QUIET.** Ship
+  `docs/signoff-fanout-note-FOR-BUNDLE.md` **WITH the `ndf-2a` RESUBMISSION, AS ONE ACT**
+  (config + evidence together). **TRIGGER: the Sep 4–5 resubmission click. HARD DEADLINE:
+  2026-09-07 13:00 PDT — after it nothing can be added to any bundle, ever.**
+  Ruled 2026-08-28 19:0x, Captain: *"the paper documents everything AT THE TIME; the tape-out
+  can change and be updated, but IT MUST BE SELF-CONSISTENT."* ⇒ the standard is
+  SELF-CONSISTENCY, not "always include the evidence": artifact and evidence must describe THE
+  SAME THING AT THE SAME TIME. ⛔ **The note must NOT go into the CURRENT bundle: that bundle
+  documents `ndf-base`, and `wire695` appears in ZERO of its nine corner reports** (the accepted
+  config `1d+2a` differs from the submitted run in 4 of 411 resolved keys — measured, and the
+  helm recorded that their order had assumed otherwise). ⚠️ **IF THE RESUBMISSION DOES NOT
+  HAPPEN, THIS ROW DIES WITH IT — it is not owed on its own; it is owed only as the second half
+  of that act.** Registered HERE rather than in a bank because a bank is replaced every seam and
+  arm 9 reads this file every sweep.
 - Q3 · WRITE · **DISCHARGED 2026-08-28 18:5x — the gate OPENED at council item 18 today (Captain "approved"; I merged it myself to `salt main`) AND I DID NOT NOTICE FOR FIVE HOURS, posting "owed 0" in every beat. ARM 9 was reporting `open=2[Q2,Q3]` the whole time — the arm built for exactly this, firing on its author. Ported BYTE-EXACT from `salt origin/main fbad5d1a` (no re-typing: 3× `cwd=ROOT`, tracked-but-absent is now FATAL rather than skipped as "binary", and self-test arm 5 drives cwd-independence in a throwaway repo). `--self-test` OK incl. `cwd-independent`; run as CI runs it over `origin/master~5..origin/master`: rc=0, 5 messages / 909 tracked files, attribution untouched.** — original entry follows:
 - Q3 · WRITE · ~~GATED — DO NOT LAND EARLY.~~ Port the scrub-gate `cwd` fix into this
   repo's `scripts/check_commit_trailers.py`. **Gate: the Captain's word putting it on
