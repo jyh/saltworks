@@ -360,6 +360,24 @@ while true; do
       [ "$_lb" != "$ib" ] && idx="$idx ** LEGACY TWIN STILL ON DISK ($_lb B) AND IT IS NOT THIS FILE — measured $IDX **"
     fi
   fi
+  # ⛔⛔ PROVENANCE OF THE ADDRESS, NOT ONLY ITS REACH — evidence's amendment to my own
+  #   18:3x law, and they are right that my fix stopped one step short. `COVERAGE-OK`
+  #   proves an address REACHES; it does not prove it was DERIVED rather than REMEMBERED.
+  #   ⇒ ***AND THE TELL IS INVISIBLE BY CONSTRUCTION: branch 2 (a value captured into the
+  #     env at ARM TIME) answers first, so branch 3 resolving to a path that does not exist
+  #     is never observed. A FALLBACK THAT SILENTLY SUCCEEDS CONVERTS A BROKEN ADDRESS INTO
+  #     A WORKING ONE AND DESTROYS THE EVIDENCE THAT IT BROKE.*** "I fell back" IS THE DATUM.
+  # ✅ So the derivation is computed EVEN WHEN IT IS NOT USED, and disagreement is reported.
+  # ⚠️ AS A FIELD IN THIS LINE, NOT AS A NEW ONE: a per-pass line nobody can skip is another
+  #   silence (evidence's transition rule, adopted here the same evening it was written).
+  _idxderived=$_idxcfg/projects/$_idxslug/memory/MEMORY.md
+  if [ -n "${CLAUDE_MEMORY_DIR:-}" ] && [ "$IDX" = "$CLAUDE_MEMORY_DIR/MEMORY.md" ]; then _addr=env-captured
+  elif [ "$IDX" = "$_idxderived" ]; then _addr=derived
+  else _addr=explicit; fi
+  if [ "$IDX" = "$_idxderived" ]; then _prov="addr=$_addr/deriv-AGREES[$_idxcfgsrc]"
+  elif [ ! -r "$_idxderived" ]; then _prov="addr=$_addr/** deriv-DEAD ** (the derivation resolves to a path that does not exist; unset that env var and this arm REFUSES rather than finds the bank — remembered, not derived)"
+  else _prov="addr=$_addr/** deriv-DISAGREES ** ($_idxderived EXISTS and is NOT the file measured — TWO LIVE CANDIDATES)"; fi
+  idx="$idx | $_prov"
   # ⭐⭐ ADDED 2026-08-13 23:47 — THE TWO FIELDS WHOSE ABSENCE COST 115 MINUTES.
   # Tonight this watch fired at 22:01, 22:31, 23:01 and 23:31 printing
   # `bus=91313 lines` FOUR TIMES — the exact signature of a dark bus — and I read
