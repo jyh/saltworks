@@ -448,6 +448,82 @@ while either stands, and until today the fleet was tracking one of them.***
 
 ## §14 · THE TWO RUNGS, DATED
 
+⚖️⚖️ **LIVE TABLE — HELM RULING 2026-08-29 14:3x, ENTERED BY COMPILER THE SAME HOUR. THIS IS THE
+BLOCK `QUEUE.md` CITES; everything below it in this section is HISTORY.**
+```
+DATE         RUNG                                        OWNER · NOTE
+08-29→09-03  R9 · C4Spec WITNESS for the composed core   COMPILER (ownership moved 08/17 15:58,
+             — inhabit C4Spec for the real circuit,      §17). Silicon's R9 duty is CROSS-
+             not merely consume it                       VERIFICATION only, dated WITH this rung,
+                                                         never before it.
+09-04→09-06  R10 · FLAGSHIP RESTATEMENT — bound stated   JOINT per the ownership table; T8 is
+             in the units the machine honors; no bare    routed to the Captain, so silicon dates
+             literal surviving the retired cycle=step    only its own half. UNCHANGED by this
+             identity                                    ruling — carried up verbatim.
+09-07        THE WINDOW. Sept-7 STANDS.
+```
+⛔ **IF R9 SLIPS PAST 09-03, THE CAPTAIN HEARS IT AS A REVISION WITH THE NEW DATES ATTACHED —
+NEVER SILENTLY** (08/26 ruling, restated in the 08-29 order). *The rung is dated from TODAY and is
+being worked from today; there is no idle prefix to spend.*
+
+#### ⛔ THE ORDER IS RIGHT AND THE REASON RECORDED FOR IT IS NOT — SAID BEFORE IT HARDENS HERE
+The order was recorded as resting on my own *"B blocked on A, sequence required."* **Read at its
+source, that phrase argues for the OPPOSITE order** — and I wrote it, so I am the one who has to
+say so. The letters are bound in bus `124081`: *"A before B; the witness is unbuildable against
+today's sentence and **waits for the restatement**"* ⇒ **A = R10 (the restatement), B = R9 (the
+witness)**. So *"B blocked on A"* reads **R10 before R9**, the reverse of what is now scheduled.
+⚠️ **WHY THAT CLAUSE STILL LOOKED LIVE:** its verdict's operative half was RETRACTED thirteen minutes
+later (bus `124139`: *"R9 is UNBUILDABLE against today's sentence. **That is FALSE OF TODAY'S
+CORE.** Withdrawn as stated."*). **The retraction was contained to one line — and the contained
+string is the half that got quoted forward.** *Containment protects the fleet from the error while
+preserving the sentence that caused it.*
+
+✅ **THE ORDER STANDS ANYWAY, ON A STRONGER FACT THAT IS LANDED IN THE TREE — kernel-checked at this
+hand on 2026-08-29, `saltbuild EXIT=0`, BUILT not Replayed:**
+```
+SaltWorks/HDL/StallShape.lean:133
+  stallArm_reduces : CycleRealisesStepOrStalls cyc wordAt (fun _ => false)
+                       ↔ CycleRealisesStepProj cyc wordAt := Iff.rfl
+  #print axioms  ->  [propext, Quot.sound]          NO sorryAx, NO Classical.choice
+SaltWorks/HDL/StallShape.lean:156
+  stallArm_strictly_extends : ADMITTED by the stall arm ∧ REFUTED by today's predicate
+  #print axioms  ->  [propext, Classical.choice, Quot.sound]
+```
+⇒ **the reduction is DEFINITIONAL (`Iff.rfl`), so a witness proved against today's core IS the
+empty-stall instance of the restated predicate.** R9's product is not waste awaiting R10 — **it is
+R10's BASE CASE, and it survives the restatement by definitional unfolding.** And
+`stallArm_strictly_extends` proves the restatement is a real WEAKENING, not a rename, so R10 keeps
+its content. ⇒ **R9-BEFORE-R10 IS NOT MERELY PERMITTED; IT IS THE ORDER THE KERNEL PREFERS.**
+🔑 **Recorded because a reason nobody needs is a reason nobody checks — it propagates, and fixing it
+later can flip the conclusion.** *The dates are the helm's and I am not touching them; the* because
+*was mine and it was wrong.*
+
+#### ⚠️ R9's OWN NOTE NAMES A PRECONDITION THAT IS UNMET — SCOPE DECLARED, NOT ASSUMED
+The original R9 row below says the rung *"needs the FROZEN RTL and the core32 datum."* Measured
+2026-08-29:
+```
+FROZEN RTL     ✅ satisfied — 08-29 is past the 08-27 freeze.
+core32 datum   ⛔ NOT IN THE TREE. `SaltWorks/Silicon/Imported/Core32.lean` does not exist, and
+                  ZERO `.lean` files in this repo mention `Core32`. Silicon DEMONSTRATED the
+                  import (4,441 instances → 18,439 gates) and the helm recorded AT THE TIME that
+                  this was a demonstration, NOT a landing. It is still not landed.
+```
+⇒ **"R9" NAMES TWO SCOPES AND THEY NEED DIFFERENT INPUTS.** Declared here so the date means one
+thing and a successor cannot read it as the other:
+```
+R9 AS DATED (MINE)    the witness for the LEAN composed core — `CorePlace.core`
+                      (CoreAssembly.lean:38) against `C4Spec` (C4.lean:76). BOTH EXIST TODAY and
+                      it needs NO import. This is what council (f)/③ means by "the C4Spec proof
+                      IS the search", and it is startable on the dated day.
+R9 AT THE NETLIST     the witness for the IMPORTED core32 netlist. BLOCKED on silicon landing
+(NOT DATED HERE)      Core32.lean. NOT MINE, NOT scheduled by this entry, and NOT counted in the
+                      08-29→09-03 window.
+```
+
+### ⬇️ THE ORIGINAL 08/17 ROWS, RETAINED VERBATIM AS HISTORY — SUPERSEDED, NEVER DELETED
+*R9's row here was STRUCK by §17 the same afternoon (not silicon's to date); R10's row stands and
+is carried into the live table above unchanged.*
+
 ```
 DATE        RUNG                                          NOTE
 09-01→09-04 R9 · C4Spec WITNESS for the composed core     needs the FROZEN RTL and
@@ -509,6 +585,12 @@ own document and passed it. The table's requirement that a verifier be able to s
 was defeated by my copy being stale, not by my judgement.***
 
 ## §17 · §14's R9 ROWS ARE STRUCK, NOT AMENDED
+
+✅ **RESOLVED-2026-08-29 — THE STRIKE DID ITS JOB AND IS NOW DISCHARGED. Kept verbatim below,
+because a marker is history:** the rung this section struck was re-dated by the helm on 08-29 to
+`08-29→09-03` and entered in §14's LIVE table above, **owned by COMPILER exactly as this section
+required.** Silicon's cross-verification duty — which §17 correctly noted the block scheduled
+nowhere — is dated WITH that rung. *Nothing below is amended.*
 
 **Ownership moved to COMPILER at 15:58. §14 dated a rung that is not mine and my own
 prose promised to work it.**
