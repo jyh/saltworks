@@ -114,6 +114,25 @@ correct if someone looks again.* **If TinyTapeout moves `ttsky26c` to fix
 something the shuttle requires, a pinned repo silently keeps the old flow and can
 fail the shuttle's own re-run of `precheck.py` on the submitted `.oas`.** ⇒
 **Compare, then re-pin deliberately. Do not drift, and do not freeze blindly.**
+
+> ### ⛔ ANNOTATED FORWARD 2026-08-28 18:1x — NOT REWRITTEN, per the fleet law ruled at 17:27
+> *(a record that asserts the PRESENT gets corrected; one that asserts WHAT WAS KNOWN AT A TIME gets
+> annotated. The obligation above is live and stands; the mechanism it describes is not ours.)*
+>
+> **THE OBLIGATION HAD NO INSTRUMENT FOR 21 DAYS. IT HAS ONE NOW:
+> `docs/silicon-tools/pincheck.sh` (+ `pins.conf`, `pincheck_selftest.sh` 6/6).**
+> **MEASURED 18:0x: both pins as recorded — `ttsky26c` still points at `651ea05e…`, and the
+> submitted artifact's `pdk.json` still reads `8afc8346…`.**
+>
+> ⛔ **AND THE PARAGRAPH ABOVE DESCRIBES THE OPPOSITE RISK FROM THE ONE WE CARRY.** It warns that
+> *"a pinned repo silently keeps the old flow"*. **Measured at the object: our submitted workflow
+> does NOT pin a sha — it references the TAG**, four times in `.github/workflows/gds.yaml` at commit
+> `7d2b2756` (`TinyTapeout/tt-gds-action@ttsky26c`). ⇒ **we do not silently keep the OLD flow; we
+> silently take the NEW one.** The sha recorded in §THE TWO PINS is therefore **a dated observation
+> of where a movable tag pointed, not an enforcement.**
+> ⇒ ***A RECORDED PIN AND AN ENFORCED PIN READ IDENTICALLY IN A DOCUMENT AND BEHAVE OPPOSITELY IN A
+> RE-RUN*** — which is exactly why the obligation needed a command rather than a sentence.
+
 The same warning is in `.github/workflows/gds.yaml` itself, where the next
 person to touch it will see it.
 
