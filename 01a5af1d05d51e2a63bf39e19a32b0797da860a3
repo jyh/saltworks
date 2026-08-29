@@ -1,0 +1,27 @@
+⛔ THIS COMMIT MESSAGE IS DAMAGED, AND BY THE AUTHOR'S OWN SHELL. Added minutes later.
+
+The paragraph beginning "Cure that worked" reads:
+
+    parse the language — walk from  to the first  and test THAT block.
+
+Two gaps. It should read:
+
+    parse the language — walk from `theorem <name>` to the first `:=` and test THAT block.
+
+WHAT HAPPENED: I used `git commit -m "…"` with a DOUBLE-QUOTED string containing backticks.
+Bash performed COMMAND SUBSTITUTION on them before git ever saw the text — it tried to run
+`theorem <name>` and `:=` as commands, printed "command not found" to my terminal, and
+substituted EMPTY STRINGS into the message. The commit succeeded; the message did not.
+
+⇒ THE DAMAGE LANDED EXACTLY ON THE CURE — the one sentence a future reader would want, deleted
+by the mechanism the sentence is about.
+
+⭐ THE RULE, TIGHTENED: every commit message goes through `git commit -F -` with a QUOTED
+heredoc (<<'EOF'), never `-m`. My own card says a string reaching a shell must never be
+interpolated; I had been obeying it by habit with heredocs and deviated for one "short" message.
+The safe form is not a preference, it is the only form — and the tell that I had left it is that
+bash printed errors DURING A SUCCESSFUL COMMIT, which is a combination I should read as
+corruption rather than noise.
+
+📌 A RECEIPT COVERS BYTES SENT, NEVER BYTES INTENDED. `git commit` exited 0 and pushed clean; the
+verification that mattered was reading the message back, which is what found this.
