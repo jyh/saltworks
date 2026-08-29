@@ -61,8 +61,12 @@ mkdir -p "$T/a8"                                                          ; arm 
 mkdir -p "$T/a9/55-openroad-stapostpnr"                                   ; arm "step present, 0 corners"        2 "$T/a9"
 
 echo
-ARCH="/Volumes/Content HD/Saltworks/archives/silicon-ndf-drv-0827/ndf"
-if [ -d "$ARCH" ]; then
+# The archived DRV runs live in the PRIVATE archive; its path is never written in a public tree
+# (08/25 firewall-at-paths ruling). Export SALTWORKS_ARCHIVE_ROOT to the archive's `archives` dir.
+ARCH="${SALTWORKS_ARCHIVE_ROOT:-}/silicon-ndf-drv-0827/ndf"
+if [ -z "${SALTWORKS_ARCHIVE_ROOT:-}" ]; then
+  echo "PRODUCTION ARMS SKIPPED: SALTWORKS_ARCHIVE_ROOT is unset (the archive path is private; export it to run them)"
+elif [ -d "$ARCH" ]; then
   echo "PRODUCTION ARMS (the four archived DRV runs, 9 STA corners each)"
   arm "ndf-base  111 clk + 6 dp, worst 14" 1 "$ARCH/ndf-base"
   arm "ndf-1d    111 clk + 0 dp"           1 "$ARCH/ndf-1d"

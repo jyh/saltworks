@@ -10,7 +10,7 @@ HERE="$(cd -P "$(dirname "$0")" && pwd)"
 T="${TMPDIR:-/tmp}/pincheck-selftest.$$"; mkdir -p "$T" || exit 2
 trap 'rm -rf "$T"' EXIT INT TERM
 CONF="$HERE/pins.conf"
-PDKJ="${PDKJ:-/Volumes/Content HD/Saltworks/archives/silicon-ndf-drv-0827/inputs/tt-submitted-reference/tt_submission/pdk.json}"
+PDKJ="${PDKJ:-${SALTWORKS_ARCHIVE_ROOT:-/nonexistent-set-SALTWORKS_ARCHIVE_ROOT}/silicon-ndf-drv-0827/inputs/tt-submitted-reference/tt_submission/pdk.json}"
 PASS=0; FAIL=0; SKIP=0
 
 sed 's/^FLOW_SHA=.*/FLOW_SHA=deadbeefdeadbeefdeadbeefdeadbeefdeadbeef/' "$CONF" > "$T/tagmoved.conf"

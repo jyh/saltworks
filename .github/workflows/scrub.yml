@@ -157,3 +157,10 @@ jobs:
           fi
           echo "scanning $RANGE"
           python scripts/check_private_paths.py --range "$RANGE"
+      - name: tree ratchet -- residue the delta gate already fired on must not survive the next green
+        run: |
+          # The delta arm charges the commit that ADDS a private path; it cannot charge
+          # the tree for KEEPING one (08/29: five red pushes, then a green that changed
+          # nothing about them). This arm reds on any finding NOT in the committed
+          # baseline (scripts/private_paths_baseline.tsv). Council row m, 2026-08-29.
+          python scripts/check_private_paths.py --tree
