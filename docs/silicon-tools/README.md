@@ -7,6 +7,31 @@
 > `docs/silicon-*` and `SaltWorks/Silicon/*`, none reachable from `origin/master`,
 > all 88 present in that map.*
 
+## ⚖️ BEFORE A REVISION IS CUT — the four gates, in order, and what each CANNOT say
+*(added 2026-08-28 18:2x. The TT freeze is **2026-09-07 13:00 PDT**: a revision can be replaced any
+number of times before it and never after. Every gate below REFUSES rather than passes when it
+cannot measure — "could not measure" is never "fine".)*
+
+```
+1  pincheck.sh                    is the flow tag still where we recorded it, and the PDK too?
+   pincheck_selftest.sh 6/6       ⛔ the workflow references a TAG, not a sha: we take the NEW
+                                     flow silently, we do not keep the old one
+2  rtlmatch.py <sub-src> <rtl>    is the repo still the design on the chip?  (comment-blind)
+   --selftest 6/6                 ⛔ TEXT only — it re-runs no synthesis and compares no GDS
+3  harden_run.sh <tag>            the run itself; it now EXITS with the worse of 4 and 5
+4  drvgate.sh <run-dir>           zero clock-leaf, <=1 datapath at fanout <=12 (council item 3)
+   drvgate_selftest.sh 13/13      ⛔ FANOUT only — slew, cap, antenna, DRC and LVS are elsewhere
+5  treatcheck.py <base> <arm>     did the run apply EXACTLY its declared treatment, nothing more?
+   <ref-resolved> <arm-resolved>  ⛔ configuration only — it says nothing about the EFFECT
+   --selftest 10/10
+```
+⛔ **1 AND 2 READ THE SUBMITTED ARTIFACT, WHICH LIVES ONLY ON THE ARCHIVE VOLUME**
+(`/Volumes/Content HD/Saltworks/archives/silicon-ndf-drv-0827/inputs/tt-submitted-reference/`).
+Unmounted, they return 2. **They do not return 0.**
+📌 **AND THE MECHANIC THAT DECIDES WHEN 4 CAN RUN AT ALL: the submitted bundle carries NO STA corner
+reports and its `metrics.csv` has NO fanout column — the evidence does not travel with the artifact.
+The DRV gate runs on the LOCAL run directory before the submission is cut, or it does not run.**
+
 ⚠️ **`BUS` must be set** — these tools take no default bus path (it is machine-local
 and does not ship in a public repo) and **refuse loudly** without it:
 
