@@ -33,6 +33,23 @@ declaration on 411-key resolved sets, and the two failure arms are REAL runs mis
 — **2a's declaration against 1d's actual run** is what a silently-unapplied CTS treatment looks
 like here, and 1d's declaration against 2a's run is what contamination looks like.
 
+### 📐 AND THE THIRD GATE, WHICH IS ABOUT THE CHIP AND NOT ABOUT A RUN (2026-08-28 17:5x)
+
+`docs/silicon-tools/rtlmatch.py <submitted-src> <repo-rtl>` answers **"is what we would submit today
+the same design as what is on the shuttle?"** — a question that is answerable until **2026-09-07
+13:00 PDT** and unanswerable after it, because a revision can be replaced any number of times before
+the deadline and never after. **MEASURED 17:5x: 10/10 code-identical.** Nine are byte-identical and
+`busadapt8.v` differs ONLY in a struck-and-answered comment block (08/26) ⇒ **no revision is owed on
+this account, which is a finding and not an absence of one.**
+⛔ **The risk in that tool is its comment stripper — one that eats too much reports IDENTICAL for
+free, in the flattering direction — so the mutation control is built IN, per file, and the gate
+returns "cannot measure" rather than a verdict if a planted code change ever survives stripping
+unseen.** ⚠️ *My first control was itself defective and caught me: the mutation landed on `assign
+c_instr`, whose first occurrence in that file is inside a COMMENT QUOTING THE CODE, so the stripper
+removed the mutation and the check reported identical for a file I had just changed.* ⇒ ***A
+MUTATION CONTROL IS ONLY A CONTROL IF THE MUTATION SURVIVES THE PIPELINE — assert that it CHANGED
+THE COMPARED TEXT, not merely that you applied it.***
+
 ## The runs
 ```
 config-3x2-baseline  reproduces the 08/09 figures exactly: fanout 39 · slew 2019 · cap 51
