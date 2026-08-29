@@ -83,7 +83,7 @@ theorem core_decOut_spec_full (ins : Env) (j : Nat) (hj : j < 9) :
       have hlt : decOut j < off1 := decOut_lt_off1 j hj
       have hle : off1 ≤ offRw := by
         simp only [offRegNext, offPc, offRw, offEnc, offSel, offSlt, offSub, offAdd,
-          offOb, off5, off4, off3, off2, off1, off0, offTie, instNext]; omega
+          offOb, offImmMux, offSelOr, off5, off4, off3, off2, off1, off0, offTie, instNext]; omega
       -- ⛔ NOT `omega` HERE: the `<` sits at `Net`, so omega drops `hlt` and reports a
       -- counterexample made only of the OTHER hypotheses — this seat's own card, firing.
       exact absurd hge (Nat.not_le.mpr (Nat.lt_of_lt_of_le hlt hle)))]
@@ -127,7 +127,7 @@ theorem core_rs2Out_eq (ins : Env) (k : Nat) (hk : k < 32) :
       rw [hEq] at hge
       have hlt : rs2Out k < off4 := rs2Out_lt_off4 k hk
       have hle : off4 ≤ offPc := by
-        simp only [offPc, offRw, offEnc, offSel, offSlt, offSub, offAdd, offOb,
+        simp only [offPc, offRw, offEnc, offSel, offSlt, offSub, offAdd, offOb, offImmMux, offSelOr,
           off5, off4, instNext]; omega
       exact absurd hge (Nat.not_le.mpr (Nat.lt_of_lt_of_le hlt hle)))
 

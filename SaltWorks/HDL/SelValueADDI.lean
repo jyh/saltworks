@@ -62,7 +62,8 @@ theorem blk_out_ge (c : Circ) (σ : Net → Net) (off : Nat) (hssa : c.ssa = tru
 
 /-! ## 1 · the organ prefixes this file needs -/
 
-/-- The seven organ blocks before `obMux`. -/
+/-- The nine organ blocks before `obMux` — seven, plus leg ①'s widened select and
+immediate mux. -/
 def coreThru7 : List Gate :=
   instGates tieCells id offTie
     ++ instGates decoder decoderSig off0
@@ -71,6 +72,8 @@ def coreThru7 : List Gate :=
     ++ instGates readTree readTreeRs2Sig off3
     ++ instGates bitXor32 bitXor32Sig off4
     ++ instGates bitNot32 bitNot32Sig off5
+    ++ instGates selOr selOrSig offSelOr
+    ++ instGates OperandB.obMux immMuxSig offImmMux
 
 /-- …with `obMux`. -/
 def coreThru8 : List Gate := coreThru7 ++ instGates OperandB.obMux obSig offOb
@@ -78,13 +81,16 @@ def coreThru8 : List Gate := coreThru7 ++ instGates OperandB.obMux obSig offOb
 /-- …with the ADD adder. -/
 def coreThru9 : List Gate := coreThru8 ++ instGates adder32 addSig offAdd
 
-/-- The five organs between the decoder and `obMux`. -/
+/-- The seven organs between the decoder and `obMux` — five, plus leg ①'s widened select
+and immediate mux. -/
 def coreMid5 : List Gate :=
   instGates immBCirc immBSig off1
     ++ instGates readTree readTreeRs1Sig off2
     ++ instGates readTree readTreeRs2Sig off3
     ++ instGates bitXor32 bitXor32Sig off4
     ++ instGates bitNot32 bitNot32Sig off5
+    ++ instGates selOr selOrSig offSelOr
+    ++ instGates OperandB.obMux immMuxSig offImmMux
 
 /-- The six organs from the ADD adder through `regWrite`. -/
 def coreRest6 : List Gate :=
@@ -109,7 +115,7 @@ theorem coreThruRw_split8 : coreThruRw = coreThru8 ++ coreRest6 := by
 theorem coreMid5_out_ge : ∀ g ∈ coreMid5, off1 ≤ g.out := by
   intro g hg
   simp only [coreMid5, List.mem_append, or_assoc] at hg
-  rcases hg with h|h|h|h|h
+  rcases hg with h|h|h|h|h|h|h
   · exact blk_out_ge _ _ _ (by decide +kernel) off1 (Nat.le_refl _) g h
   · exact blk_out_ge _ _ _ readTree_ssa off1
       (by simp only [off2, instNext]; omega) g h
@@ -119,6 +125,10 @@ theorem coreMid5_out_ge : ∀ g ∈ coreMid5, off1 ≤ g.out := by
       (by simp only [off4, off3, off2, instNext]; omega) g h
   · exact blk_out_ge _ _ _ (by decide +kernel) off1
       (by simp only [off5, off4, off3, off2, instNext]; omega) g h
+  · exact blk_out_ge _ _ _ (by decide +kernel) off1
+      (by simp only [offSelOr, off5, off4, off3, off2, instNext]; omega) g h
+  · exact blk_out_ge _ _ _ (by decide +kernel) off1
+      (by simp only [offImmMux, offSelOr, off5, off4, off3, off2, instNext]; omega) g h
 
 theorem coreRest6_out_ge : ∀ g ∈ coreRest6, offAdd ≤ g.out := by
   intro g hg
@@ -175,9 +185,9 @@ theorem run_thru2_input (ins : Env) (n : Net) (hn : n < offTie) :
 
 theorem offTie_le_off1 : offTie ≤ off1 := by simp only [off1, off0, instNext]; omega
 theorem off1_le_offOb : off1 ≤ offOb := by
-  simp only [offOb, off5, off4, off3, off2, instNext]; omega
+  simp only [offOb, offImmMux, offSelOr, off5, off4, off3, off2, instNext]; omega
 theorem off3_le_offAdd : off3 ≤ offAdd := by
-  simp only [offAdd, offOb, off5, off4, instNext]; omega
+  simp only [offAdd, offOb, offImmMux, offSelOr, off5, off4, instNext]; omega
 
 theorem tieFalse_lt_off1 : tieFalse < off1 := by
   rw [tie_nets_are_the_first_two.1, off1_value]; decide

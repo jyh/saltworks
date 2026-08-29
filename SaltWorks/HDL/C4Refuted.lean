@@ -71,12 +71,15 @@ theorem seen_ins0 : seenWord ins0 = wSW := by decide +kernel
 theorem rd_ins0 : rdOf ins0 = 4 := by decide +kernel
 theorem held_ins0 : ins0 (32 * rdOf ins0 + 0) = true := by rw [rd_ins0]; decide +kernel
 
-/-! ## The packed evaluation (STRICT: the kernel forces every one of the 10394 gates). -/
+/-! ## The packed evaluation (STRICT: the kernel forces every one of the 10496 gates). -/
 
-/-- ⭐ **THE PACKED WITNESS** — every one of `core`'s 10394 gates evaluated by the kernel. -/
-theorem bFull : (runB s0 core.gates).testBit 7675 = false := by decide +kernel
+/-- ⭐ **THE PACKED WITNESS** — every one of `core`'s 10496 gates evaluated by the kernel.
+⚠️ **Both the count and the net moved with leg ① stage 2a (2026-08-28): two organs entered
+the chain, so every net from `offOb` on shifted by 98. Read off the artifact, not computed:
+`core.gates.length = placedGateTotal = 10496`, kernel-checked, and `selOut 0 = 7773`.** -/
+theorem bFull : (runB s0 core.gates).testBit 7773 = false := by decide +kernel
 
-theorem selOut0_net : selOut 0 = 7675 := by decide +kernel
+theorem selOut0_net : selOut 0 = 7773 := by decide +kernel
 
 theorem dec_ins0 : decode (seenWord ins0) = some (.SW 1 2 4) := by
   rw [seen_ins0]; exact decode_encode _

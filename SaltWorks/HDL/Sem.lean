@@ -228,7 +228,9 @@ blowups in one day, both `lean::memory_exception`, exit 134:
 ⭐ **THE CURE IS THE ENVIRONMENT REPRESENTATION, NOT THE CIRCUIT.** Pack the whole net
 valuation into ONE `Nat`, because `Nat.land / lor / xor / pow / testBit` are GMP-accelerated
 in the kernel. The first blowup fell to this immediately: three full 10394-gate kernel
-evaluations of `core` in **25 s**.
+evaluations of `core` in **25 s**. *(That gate count is the reading AT THAT TIME and is left
+as history; `core` grew to 10496 with leg ① stage 2a, 2026-08-28. A dated measurement is not
+a stale claim — an UNDATED one is.)*
 
 ⚠️ **THIS BUYS SPEED, NOT TRUST.** `runB_eq` and `semB_eq` below are what make it sound —
 they prove the packed evaluator IS `run` and IS `sem`, by induction, so a proof routed through

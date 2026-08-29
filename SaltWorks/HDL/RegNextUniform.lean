@@ -123,7 +123,7 @@ theorem rnOut_mem_gate_outs (R W r k : Nat) (hr : r < R) (hk : k < W) :
 `regNext`'s block LAST.  Naming the fifteen-block prefix once turns the whole
 composition into a single `run_append`. -/
 
-/-- The fifteen organ blocks that precede `regNext` in `core`. -/
+/-- The seventeen organ blocks that precede `regNext` in `core`. -/
 def corePre : List Gate :=
   instGates tieCells id offTie
     ++ instGates decoder decoderSig off0
@@ -132,6 +132,8 @@ def corePre : List Gate :=
     ++ instGates readTree readTreeRs2Sig off3
     ++ instGates bitXor32 bitXor32Sig off4
     ++ instGates bitNot32 bitNot32Sig off5
+    ++ instGates selOr selOrSig offSelOr
+    ++ instGates OperandB.obMux immMuxSig offImmMux
     ++ instGates OperandB.obMux obSig offOb
     ++ instGates adder32 addSig offAdd
     ++ instGates adder32 subSig offSub

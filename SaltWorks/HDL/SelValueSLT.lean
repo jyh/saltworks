@@ -28,6 +28,8 @@ def coreThru10 : List Gate :=
     ++ instGates readTree readTreeRs2Sig off3
     ++ instGates bitXor32 bitXor32Sig off4
     ++ instGates bitNot32 bitNot32Sig off5
+    ++ instGates selOr selOrSig offSelOr
+    ++ instGates OperandB.obMux immMuxSig offImmMux
     ++ instGates OperandB.obMux obSig offOb
     ++ instGates adder32 addSig offAdd
     ++ instGates adder32 subSig offSub

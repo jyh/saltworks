@@ -50,8 +50,8 @@ in `CorePlace` and cited above rather than repeated here.
 rows legitimately share a starting net — the distinction from the `regWrite` collision repaired at
 `5f1abb7`, which is one word wide and is why both appear in this conjunction.* -/
 theorem offsets_pinned :
-    offTie = 1088 ∧ offOb = 7242 ∧ offEnc = 7955 ∧ offRw = 7955
-      ∧ offPc = 8122 ∧ offRegNext = 8382 := by
+    offTie = 1088 ∧ offOb = 7340 ∧ offEnc = 8053 ∧ offRw = 8053
+      ∧ offPc = 8220 ∧ offRegNext = 8480 := by
   refine ⟨by decide +kernel, by decide +kernel, by decide +kernel, by decide +kernel,
           by decide +kernel, by decide +kernel⟩
 
@@ -68,7 +68,7 @@ the ADDI repair moved no offset; the citation was sound and the FIGURE I propaga
 definitionally, so every instruction net and every gate offset shifts by **+257** — this end
 becomes **11743**. When that lands, this declaration must be renamed AGAIN. A name carrying a
 literal is a maintenance obligation, not a description. -/
-theorem chain_end_is_11486 : instNext regNext offRegNext = 11486 := by decide +kernel
+theorem chain_end_is_11584 : instNext regNext offRegNext = 11584 := by decide +kernel
 
 /-- ⭐⭐ **THE CROSS-INSTRUMENT RECONCILIATION — the reason §1's figures are two-witness.**
 
@@ -84,16 +84,16 @@ from a 2-short one. As a theorem the truncation cannot hide: the equation is eit
 after it shifts by the same amount. *The pair was `11459 / 11461` before D2 and is `11480 / 11482`
 now; the RECONCILIATION is what did not move, which is the property this theorem exists to state.* -/
 theorem chain_reconciles_with_CoreOffsets :
-    instNext regNext offRegNext = 11484 + tieCells.gates.length := by decide +kernel
+    instNext regNext offRegNext = 11582 + tieCells.gates.length := by decide +kernel
 
 /-- **CONTROL: the reconciliation is not vacuous.** Both sides are pinned independently, so a reader
 can see the two instruments agreeing rather than an identity that holds by construction. -/
 theorem reconciliation_is_not_vacuous :
-    instNext regNext offRegNext = 11486 ∧ 11484 + tieCells.gates.length = 11486 := by
-  refine ⟨chain_end_is_11486, by decide +kernel⟩
+    instNext regNext offRegNext = 11584 ∧ 11582 + tieCells.gates.length = 11584 := by
+  refine ⟨chain_end_is_11584, by decide +kernel⟩
 
 #audit_axioms offsets_pinned
-#audit_axioms chain_end_is_11486
+#audit_axioms chain_end_is_11584
 #audit_axioms chain_reconciles_with_CoreOffsets
 #audit_axioms reconciliation_is_not_vacuous
 

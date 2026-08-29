@@ -212,7 +212,7 @@ theorem held4 : C4Refuted.ins0 (32 * r4.val + 0) = true := by
   exact h
 
 /-- The select bank delivers `false` at bit 0 on this word — the landed packed evaluation
-(`C4Refuted.bFull`, every one of `core`'s 10394 gates forced by the kernel). -/
+(`C4Refuted.bFull`, every one of `core`'s 10496 gates forced by the kernel). -/
 theorem sel0_ins0 : run C4Refuted.ins0 core.gates (selOut 0) = false :=
   (runB_eq core.gates C4Refuted.s0 (selOut 0)).symm.trans
     (by rw [C4Refuted.selOut0_net]; exact C4Refuted.bFull)

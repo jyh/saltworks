@@ -100,7 +100,8 @@ theorem blk_ge (c : Circ) (σ : Net → Net) (off : Nat) (hssa : c.ssa = true)
 
 /-! ## 1 · the prefixes this proof reads at -/
 
-/-- The seven organ blocks before `obMux`. -/
+/-- The nine organ blocks before `obMux` — seven, plus leg ①'s widened select and
+immediate mux. -/
 def cT7 : List Gate :=
   instGates tieCells id offTie
     ++ instGates decoder decoderSig off0
@@ -109,8 +110,10 @@ def cT7 : List Gate :=
     ++ instGates readTree readTreeRs2Sig off3
     ++ instGates bitXor32 bitXor32Sig off4
     ++ instGates bitNot32 bitNot32Sig off5
+    ++ instGates selOr selOrSig offSelOr
+    ++ instGates OperandB.obMux immMuxSig offImmMux
 
-/-- …and those seven with `obMux` appended: the environment the ADD adder reads. -/
+/-- …and those nine with `obMux` appended: the environment the ADD adder reads. -/
 def cT8 : List Gate := cT7 ++ instGates OperandB.obMux obSig offOb
 
 /-- The five blocks through the rs2 read port. -/
@@ -123,13 +126,17 @@ theorem coreThruRw_split4 : coreThruRw = coreThru4 ++ coreRest10 := coreThruRw_s
 theorem coreThruRw_split5 : coreThruRw = cT5 ++ coreRest9 := coreThruRw_split2
 
 theorem cT7_split5 : cT7 = cT5
-    ++ (instGates bitXor32 bitXor32Sig off4 ++ instGates bitNot32 bitNot32Sig off5) := by
+    ++ (instGates bitXor32 bitXor32Sig off4 ++ instGates bitNot32 bitNot32Sig off5
+        ++ instGates selOr selOrSig offSelOr
+        ++ instGates OperandB.obMux immMuxSig offImmMux) := by
   simp only [cT7, cT5, coreThru4, coreThru3, List.append_assoc]
 
 theorem cT8_split4 : cT8 = coreThru4
     ++ (instGates readTree readTreeRs2Sig off3
         ++ instGates bitXor32 bitXor32Sig off4
         ++ instGates bitNot32 bitNot32Sig off5
+        ++ instGates selOr selOrSig offSelOr
+        ++ instGates OperandB.obMux immMuxSig offImmMux
         ++ instGates OperandB.obMux obSig offOb) := by
   simp only [cT8, cT7, coreThru4, coreThru3, List.append_assoc]
 
@@ -140,6 +147,8 @@ theorem cT8_split_tie : cT8 = instGates tieCells id offTie
         ++ instGates readTree readTreeRs2Sig off3
         ++ instGates bitXor32 bitXor32Sig off4
         ++ instGates bitNot32 bitNot32Sig off5
+        ++ instGates selOr selOrSig offSelOr
+        ++ instGates OperandB.obMux immMuxSig offImmMux
         ++ instGates OperandB.obMux obSig offOb) := by
   simp only [cT8, cT7, List.append_assoc]
 
@@ -162,7 +171,7 @@ theorem off_le_1_2 : off1 ≤ off2 := by simp only [off2, instNext]; omega
 theorem off_le_2_3 : off2 ≤ off3 := by simp only [off3, instNext]; omega
 theorem off_le_3_4 : off3 ≤ off4 := by simp only [off4, instNext]; omega
 theorem off_le_4_5 : off4 ≤ off5 := by simp only [off5, instNext]; omega
-theorem off_le_5_ob : off5 ≤ offOb := by simp only [offOb, instNext]; omega
+theorem off_le_5_ob : off5 ≤ offOb := by simp only [offOb, offImmMux, offSelOr, instNext]; omega
 theorem off_le_ob_add : offOb ≤ offAdd := by simp only [offAdd, instNext]; omega
 theorem off_le_add_sub : offAdd ≤ offSub := by simp only [offSub, instNext]; omega
 theorem off_le_sub_slt : offSub ≤ offSlt := by simp only [offSlt, instNext]; omega
@@ -175,23 +184,31 @@ theorem decOut_lt_offOb (j : Nat) (hj : j < 9) : decOut j < offOb := by
 theorem tail_after_thru4 : ∀ g ∈ (instGates readTree readTreeRs2Sig off3
     ++ instGates bitXor32 bitXor32Sig off4
     ++ instGates bitNot32 bitNot32Sig off5
+    ++ instGates selOr selOrSig offSelOr
+    ++ instGates OperandB.obMux immMuxSig offImmMux
     ++ instGates OperandB.obMux obSig offOb), off3 ≤ g.out := by
   intro g hg
   simp only [List.mem_append, or_assoc] at hg
-  rcases hg with h|h|h|h
+  rcases hg with h|h|h|h|h|h
   · exact blk_ge _ _ _ readTree_ssa off3 (Nat.le_refl _) g h
   · exact blk_ge _ _ _ bitXor32_ssa off3 off_le_3_4 g h
   · exact blk_ge _ _ _ bitNot32_ssa off3 (le_trans off_le_3_4 off_le_4_5) g h
+  · exact blk_ge _ _ _ (by decide +kernel) off3 (by simp only [offSelOr, off5, off4, off3, off2, off1, instNext]; omega) g h
+  · exact blk_ge _ _ _ OperandB.ssa_obMux off3 (by simp only [offImmMux, offSelOr, off5, off4, off3, off2, off1, instNext]; omega) g h
   · exact blk_ge _ _ _ OperandB.ssa_obMux off3
       (le_trans off_le_3_4 (le_trans off_le_4_5 off_le_5_ob)) g h
 
 theorem tail_after_cT5 : ∀ g ∈ (instGates bitXor32 bitXor32Sig off4
-    ++ instGates bitNot32 bitNot32Sig off5), off4 ≤ g.out := by
+    ++ instGates bitNot32 bitNot32Sig off5
+    ++ instGates selOr selOrSig offSelOr
+    ++ instGates OperandB.obMux immMuxSig offImmMux), off4 ≤ g.out := by
   intro g hg
-  simp only [List.mem_append] at hg
-  rcases hg with h|h
+  simp only [List.mem_append, or_assoc] at hg
+  rcases hg with h|h|h|h
   · exact blk_ge _ _ _ bitXor32_ssa off4 (Nat.le_refl _) g h
   · exact blk_ge _ _ _ bitNot32_ssa off4 off_le_4_5 g h
+  · exact blk_ge _ _ _ (by decide +kernel) off4 (by simp only [offSelOr, off5, off4, off3, off2, off1, instNext]; omega) g h
+  · exact blk_ge _ _ _ OperandB.ssa_obMux off4 (by simp only [offImmMux, offSelOr, off5, off4, off3, off2, off1, instNext]; omega) g h
 
 theorem tail_after_cT7 : ∀ g ∈ (instGates OperandB.obMux obSig offOb
     ++ instGates adder32 addSig offAdd
@@ -220,6 +237,8 @@ theorem tail_after_tie : ∀ g ∈ (instGates decoder decoderSig off0
     ++ instGates readTree readTreeRs2Sig off3
     ++ instGates bitXor32 bitXor32Sig off4
     ++ instGates bitNot32 bitNot32Sig off5
+    ++ instGates selOr selOrSig offSelOr
+    ++ instGates OperandB.obMux immMuxSig offImmMux
     ++ instGates OperandB.obMux obSig offOb), off0 ≤ g.out := by
   intro g hg
   simp only [List.mem_append, or_assoc] at hg
@@ -229,13 +248,17 @@ theorem tail_after_tie : ∀ g ∈ (instGates decoder decoderSig off0
   have h04 : off0 ≤ off4 := le_trans h03 off_le_3_4
   have h05 : off0 ≤ off5 := le_trans h04 off_le_4_5
   have h0ob : off0 ≤ offOb := le_trans h05 off_le_5_ob
-  rcases hg with h|h|h|h|h|h|h
+  rcases hg with h|h|h|h|h|h|h|h|h
   · exact blk_ge _ _ _ decoder_ssa off0 (Nat.le_refl _) g h
   · exact blk_ge _ _ _ immBCirc_ssa off0 h01 g h
   · exact blk_ge _ _ _ readTree_ssa off0 h02 g h
   · exact blk_ge _ _ _ readTree_ssa off0 h03 g h
   · exact blk_ge _ _ _ bitXor32_ssa off0 h04 g h
   · exact blk_ge _ _ _ bitNot32_ssa off0 h05 g h
+  · exact blk_ge _ _ _ (by decide +kernel) off0
+      (by simp only [offSelOr, off5, off4, off3, off2, off1, off0, instNext]; omega) g h
+  · exact blk_ge _ _ _ OperandB.ssa_obMux off0
+      (by simp only [offImmMux, offSelOr, off5, off4, off3, off2, off1, off0, instNext]; omega) g h
   · exact blk_ge _ _ _ OperandB.ssa_obMux off0 h0ob g h
 
 

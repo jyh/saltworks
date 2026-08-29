@@ -634,20 +634,27 @@ that it is **the right wire**.
 *Refused alternative (keep the order, reach σ upward) — it breaks `instOK`'s inputs-strictly-below
 invariant, the same reason preamble shape (b) was refused.* -/
 
-/-! ### ⚙️ LEG ① STAGE 1 — the widened operand-B organs, PLACED BUT NOT YET WIRED IN
+/-! ### ⚙️ LEG ① — the widened operand-B organs
 
-⛔ **THESE ARE INERT ON PURPOSE.** `core.gates` does not contain them and `obSig` does not read
-them, so nothing downstream moves and every landed theorem is untouched. What this stage buys is
-the part a staged retry needs first: **proof that both organs PLACE LEGALLY at the offsets they
-will occupy**, checked by the kernel before the invasive wiring pass that consumes it.
+`core32.v` selects operand B on `is_immop|is_load|is_store|is_jalr`; the model selected on
+`isADDI` ALONE, so a modelled store addressed `rs1 + rs2`. Two organs go in HERE, before
+`obMux`, so the model mirrors the die's shape: a ONE-GATE OR for the widened select, and a
+SECOND `obMux` INSTANCE choosing `immI` vs `immS`.
 
-*Stage 2 wires them in — `obSig` routes through `immMuxOut`/`selOrOut`, `core` gains two blocks,
-and every decomposition definition and block case-split gains two arms. That pass reverted once at
-72 errors; this stage exists so it does not also have to discover whether the placement is sound.*
+**STAGE 1 (`58ee69d`) proved both PLACE LEGALLY while they were still inert.**
+⚙️ **STAGE 2a — THIS STAGE — PLACES THEM: they are now in `core.gates` and in every
+decomposition definition, `offOb` follows `offImmMux`, and `placedGateTotal` accounts for
+them.** ⛔ **THEY ARE STILL NOT WIRED: `obSig` reads neither `selOrOut` nor `immMuxOut`, so
+operand B is bit-for-bit what it was and every value-layer theorem is untouched.**
 
-⚠️ `offSelOr` is DEFINITIONALLY the net `offOb` occupies today, so defining it moves nothing. -/
+*Stage 2b wires them — `obSig` routes through `immMuxOut`/`selOrOut` — and that is the pass
+that moves values. Splitting PLACE from WIRE is not a preference: `chain_accounts_for_every_
+placed_organ` makes "re-pin without placing" FALSE, so the re-pin and the placement must land
+together, and the wiring is the only thing left that can be deferred.*
 
-/-- Where the widened select will sit — immediately after the inverted bank. -/
+⭐ Conservative by `OperandBWidening.widening_conservative_off_mem`: nothing but `LW`/`SW` moves. -/
+
+/-- Where the widened select sits — immediately after the inverted bank. -/
 def offSelOr : Nat := instNext bitNot32 off5
 
 /-- `selOr`'s two inputs: the decoder lines whose OR is "addresses with an immediate"
@@ -662,6 +669,10 @@ theorem selOr_instOK : instOK selOr selOrSig offSelOr := by
   rw [hnn] at hj
   revert hj; revert j
   decide +kernel
+
+/-- The widened select's output net — `true` exactly when operand B must come from an
+immediate: `isADDI ∨ req` (`OperandBWidening.usesImm_is_addi_or_req`). -/
+def selOrOut (k : Nat) : Net := (instOuts selOr selOrSig offSelOr).getD k 0
 
 /-- Where the immediate mux will sit — after the select. -/
 def offImmMux : Nat := instNext selOr offSelOr
@@ -691,11 +702,15 @@ def immMuxSigSwapped (j : Net) : Net :=
 
 theorem immMuxSig_is_not_swapped : immMuxSig 0 ≠ immMuxSigSwapped 0 := by decide +kernel
 
-#audit_axioms offSelOr selOrSig selOr_instOK offImmMux immMuxSig immMux_instOK
-#audit_axioms immMuxSigSwapped immMuxSig_is_not_swapped
+/-- The selected immediate's output net — `immS` on an `SW` word, `immI` otherwise. -/
+def immMuxOut (k : Nat) : Net := (instOuts OperandB.obMux immMuxSig offImmMux).getD k 0
 
-/-- Row 7 — `obMux`, now BEFORE the adders. -/
-def offOb : Nat := instNext bitNot32 off5
+#audit_axioms offSelOr selOrSig selOr_instOK selOrOut offImmMux immMuxSig immMux_instOK
+#audit_axioms immMuxSigSwapped immMuxSig_is_not_swapped immMuxOut
+
+/-- Row 7 — `obMux`, now BEFORE the adders; **its offset now FOLLOWS the immediate mux** (leg ①
+stage 2a: the two widened organs occupy the nets `obMux` used to start at). -/
+def offOb : Nat := instNext OperandB.obMux offImmMux
 
 /-- `immBCirc`'s output `k` — the immediate bank. -/
 def immOut (k : Nat) : Net := (instOuts immBCirc immBSig off1).getD k 0
@@ -722,6 +737,25 @@ lemma below proves only that the σ PLACES — **placing is not correctness**, a
 def obSig (j : Net) : Net :=
   if j < 32 then rs2Out j else if j < 64 then instrNet (immI (j - 32)) else decOut isADDILine
 
+/-- ⛔⛔ **THE CONTROL FOR STAGE 2a — "PLACED, NOT WIRED", AS A THEOREM RATHER THAN A CLAIM.**
+Both widened organs are now IN the chain, so the placement half is real. This says the OTHER
+half is equally real: **`obMux`'s σ reads NEITHER new organ's output net, at any input.**
+
+⚠️ **THIS IS A TRIPWIRE AND IT IS MEANT TO FAIL.** Stage 2b routes `obSig` through
+`immMuxOut`/`selOrOut` — the moment it does, this theorem is FALSE and the build says so.
+*Retire it in the same commit that wires them; do not weaken it to keep a build green.*
+
+📌 It is not a restatement of `obSig`'s definition: it compares NET NUMBERS the definition never
+mentions, so it discriminates a real wiring from a cosmetic one. -/
+theorem stage2a_organs_are_placed_but_unread :
+    (∀ j, j < 65 → obSig j ≠ selOrOut 0) ∧
+    (∀ j, j < 65 → ∀ k, k < 32 → obSig j ≠ immMuxOut k) := by
+  refine ⟨?_, ?_⟩
+  · intro j hj; revert hj; revert j; decide +kernel
+  · intro j hj; revert hj; revert j; decide +kernel
+
+#audit_axioms stage2a_organs_are_placed_but_unread
+
 /-- ⭐ **PLACEMENT #13 — `obMux` at row 7, `instOK` DISCHARGED.** -/
 theorem ob_instOK : instOK OperandB.obMux obSig offOb := by
   refine ⟨by decide +kernel, by decide +kernel, ?_⟩
@@ -739,9 +773,9 @@ def offAdd : Nat := instNext OperandB.obMux offOb
 /-- Row 8's offset — after the first adder. -/
 def offSub : Nat := instNext adder32 offAdd
 
-theorem adder_offsets : offAdd = 7339 ∧ offSub = 7499 := by
+theorem adder_offsets : offAdd = 7437 ∧ offSub = 7597 := by
   refine ⟨?_, ?_⟩ <;>
-    simp only [offSub, offAdd, offOb, off5, off4, off3, off2, off1, off0, instNext, tieCells,
+    simp only [offSub, offAdd, offOb, offImmMux, offSelOr, off5, off4, off3, off2, off1, off0, instNext, tieCells,
                offTie, coreInWidth, stWidth] <;> decide +kernel
 
 /-- `bitNot32`'s output `k` at its chain position — the `~b` bank. -/
@@ -818,8 +852,8 @@ alone gives a 3-input block with no indication where its inputs come from.
 /-- Row 9's offset — after the subtracting adder. -/
 def offSlt : Nat := instNext adder32 offSub
 
-theorem offSlt_value : offSlt = 7659 := by
-  simp only [offSlt, offSub, offAdd, offOb, off5, off4, off3, off2, off1, off0, instNext,
+theorem offSlt_value : offSlt = 7757 := by
+  simp only [offSlt, offSub, offAdd, offOb, offImmMux, offSelOr, off5, off4, off3, off2, off1, off0, instNext,
              tieCells, offTie, coreInWidth, stWidth]
   decide +kernel
 
@@ -849,7 +883,7 @@ theorem slt_chain_is_closed :
   ∧ subSig 64 = tieTrue
   ∧ subOut 31 ≠ (instOuts adder32 addSig offAdd).getD 31 0 := by
   refine ⟨rfl, rfl, rfl, ?_⟩
-  simp only [subOut, instOuts, instMap, subSig, addSig, offSub, offAdd, offOb, off5, off4, off3,
+  simp only [subOut, instOuts, instMap, subSig, addSig, offSub, offAdd, offOb, offImmMux, offSelOr, off5, off4, off3,
              off2, off1, off0, instNext, tieCells, offTie, coreInWidth, stWidth]
   decide +kernel
 
@@ -861,7 +895,7 @@ activation function: *the certified thing computes an order and nobody wrote dow
 theorem slt_reads_sign_not_carry :
     sltSig 2 = subOut 31 ∧ subOut 31 ≠ subOut 32 := by
   refine ⟨rfl, ?_⟩
-  simp only [subOut, instOuts, instMap, subSig, offSub, offAdd, offOb, off5, off4, off3, off2,
+  simp only [subOut, instOuts, instMap, subSig, offSub, offAdd, offOb, offImmMux, offSelOr, off5, off4, off3, off2,
              off1, off0, instNext, tieCells, offTie, coreInWidth, stWidth]
   decide +kernel
 
@@ -942,8 +976,8 @@ sel 0   decOut 1 = isXOR      sel 1   decOut 2 = isSLT
 /-- Row 10's offset — after `sltCirc`. -/
 def offSel : Nat := instNext sltCirc offSlt
 
-theorem offSel_value : offSel = 7664 := by
-  simp only [offSel, offSlt, offSub, offAdd, offOb, off5, off4, off3, off2, off1, off0, instNext,
+theorem offSel_value : offSel = 7762 := by
+  simp only [offSel, offSlt, offSub, offAdd, offOb, offImmMux, offSelOr, off5, off4, off3, off2, off1, off0, instNext,
              tieCells, offTie, coreInWidth, stWidth]
   decide +kernel
 
@@ -984,7 +1018,7 @@ building 31 gates that cannot differ.** -/
 theorem slt_bank_broadcasts :
     sltOut 0 ≠ sltOut 1 ∧ sltOut 1 = sltOut 31 := by
   refine ⟨?_, ?_⟩ <;>
-    simp only [sltOut, instOuts, instMap, sltSig, offSlt, offSub, offAdd, offOb, off5, off4, off3,
+    simp only [sltOut, instOuts, instMap, sltSig, offSlt, offSub, offAdd, offOb, offImmMux, offSelOr, off5, off4, off3,
                off2, off1, off0, instNext, tieCells, offTie, coreInWidth, stWidth] <;>
     decide +kernel
 
@@ -1089,7 +1123,7 @@ def offRw : Nat := instNext EncoderE1.ruledEnc offEnc
 
 /-- `off1 ≤ offRw` — structurally, so no offset is ever forced to a numeral. -/
 theorem off1_le_offRw : off1 ≤ offRw := by
-  simp only [offRw, offEnc, offSel, offSlt, offSub, offAdd, offOb, off5, off4, off3, off2, instNext]
+  simp only [offRw, offEnc, offSel, offSlt, offSub, offAdd, offOb, offImmMux, offSelOr, off5, off4, off3, off2, instNext]
   omega
 
 /-- ⭐ **PLACEMENT #5, REPAIRED — `regWrite` at its ruled row 13, `instOK` DISCHARGED.** Lifted from
@@ -1103,7 +1137,7 @@ theorem regWrite_instOK : instOK regWrite regWriteSig offRw :=
 before `regWrite`'s first gate.** Two placements sharing a net is invisible to every `instOK` in
 this file, so it has to be said separately. -/
 theorem immB_and_regWrite_do_not_overlap : instNext immBCirc off1 ≤ offRw := by
-  simp only [offRw, offEnc, offSel, offSlt, offSub, offAdd, offOb, off5, off4, off3, off2, instNext]
+  simp only [offRw, offEnc, offSel, offSlt, offSub, offAdd, offOb, offImmMux, offSelOr, off5, off4, off3, off2, instNext]
   omega
 
 /-- Row 14's offset — now after `regWrite`, per `CoreOffsets`' ruled order. -/
@@ -1285,7 +1319,7 @@ change rather than a rename. -/
 theorem addSig_b_bank_is_obMux_not_rs2 :
     addSig 32 = obOut 0 ∧ addSig 32 ≠ rs2Out 0 := by
   refine ⟨rfl, ?_⟩
-  simp only [addSig, obOut, rs2Out, instOuts, instMap, obSig, OperandB.obMux, offOb, off5, off4,
+  simp only [addSig, obOut, rs2Out, instOuts, instMap, obSig, OperandB.obMux, offOb, offImmMux, offSelOr, off5, off4,
              off3, off2, off1, off0, instNext, tieCells, offTie, coreInWidth, stWidth]
   decide +kernel
 
@@ -1305,7 +1339,7 @@ theorem subSig_b_bank_is_unchanged :
     subSig 32 = notOut 0 ∧ subSig 32 ≠ obOut 0 := by
   refine ⟨rfl, ?_⟩
   simp only [subSig, notOut, obOut, instOuts, instMap, bitNot32Sig, obSig, OperandB.obMux,
-             offOb, off5, off4, off3, off2, off1, off0, instNext, tieCells, offTie,
+             offOb, offImmMux, offSelOr, off5, off4, off3, off2, off1, off0, instNext, tieCells, offTie,
              coreInWidth, stWidth]
   decide +kernel
 
@@ -1351,7 +1385,7 @@ theorem offTie_le_offRegNext : offTie ≤ offRegNext := by
   -- ⚠️ `offRw` is a NEW LINK in the chain and this list had to learn it: without it the unfolding
   -- stops at `offRw` as an opaque atom and omega cannot relate `offTie` to the far end. Inserting a
   -- row means auditing every simp list that WALKS the chain, not just the offsets themselves.
-  simp only [offRegNext, offPc, offRw, offEnc, offSel, offSlt, offSub, offAdd, offOb, off5, off4,
+  simp only [offRegNext, offPc, offRw, offEnc, offSel, offSlt, offSub, offAdd, offOb, offImmMux, offSelOr, off5, off4,
              off3, off2, off1, off0, instNext]
   omega
 
@@ -1421,7 +1455,7 @@ theorem we_and_res_banks_are_not_swapped :
   ∧ regNextSig 0 ≠ selOut 0 ∧ regNextSig 32 ≠ rwOut 0 := by
   refine ⟨rfl, rfl, ?_, ?_⟩ <;>
     simp only [regNextSig, rwOut, selOut, regWriteSig, selSig, instOuts, instMap, offSel, offSlt,
-               offSub, offAdd, offOb, off5, off4, off3, off2, off1, off0, instNext, tieCells,
+               offSub, offAdd, offOb, offImmMux, offSelOr, off5, off4, off3, off2, off1, off0, instNext, tieCells,
                offTie, coreInWidth, stWidth] <;>
     decide +kernel
 
@@ -1429,7 +1463,7 @@ theorem we_and_res_banks_are_not_swapped :
 offsets so no numeral is ever forced. -/
 theorem regNext_follows_its_producers : offRw < offRegNext ∧ offSel < offRegNext := by
   constructor <;>
-    simp only [offRegNext, offPc, offRw, offEnc, offSel, offSlt, offSub, offAdd, offOb, off5, off4,
+    simp only [offRegNext, offPc, offRw, offEnc, offSel, offSlt, offSub, offAdd, offOb, offImmMux, offSelOr, off5, off4,
                off3, off2, off1, instNext] <;>
     · have h : 0 < SaltWorks.Stack.Program.pcAdd.gates.length := by decide +kernel
       omega
@@ -1446,7 +1480,8 @@ placed organ's gates, exactly once.** -/
 def placedGateTotal : Nat :=
   tieCells.gates.length + decoder.gates.length + immBCirc.gates.length
     + readTree.gates.length + readTree.gates.length + bitXor32.gates.length
-    + bitNot32.gates.length + OperandB.obMux.gates.length + adder32.gates.length
+    + bitNot32.gates.length + selOr.gates.length + OperandB.obMux.gates.length
+    + OperandB.obMux.gates.length + adder32.gates.length
     + adder32.gates.length + sltCirc.gates.length + SelectCut32.sliceASelect.gates.length
     + EncoderE1.ruledEnc.gates.length + regWrite.gates.length
     + SaltWorks.Stack.Program.pcAdd.gates.length + regNext.gates.length
@@ -1461,7 +1496,7 @@ matches them without evaluating a single gate list.* -/
 theorem chain_accounts_for_every_placed_organ :
     instNext regNext offRegNext = offTie + placedGateTotal := by
   simp only [placedGateTotal, offRegNext, offPc, offRw, offEnc, offSel, offSlt, offSub, offAdd,
-             offOb, off5, off4, off3, off2, off1, off0, instNext]
+             offOb, offImmMux, offSelOr, off5, off4, off3, off2, off1, off0, instNext]
   omega
 
 /-! ## 16. THE AXIOM AUDIT — closing a gap this file had carried since placement #1

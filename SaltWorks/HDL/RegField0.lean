@@ -38,7 +38,7 @@ namespace SaltWorks.HDL.RegNextUniform
 open SaltWorks.HDL
 open SaltWorks.HDL.CorePlace
 
-/-- The thirteen organ blocks before `regWrite`. -/
+/-- The fifteen organ blocks before `regWrite`. -/
 def coreThru13 : List Gate :=
   instGates tieCells id offTie
     ++ instGates decoder decoderSig off0
@@ -47,6 +47,8 @@ def coreThru13 : List Gate :=
     ++ instGates readTree readTreeRs2Sig off3
     ++ instGates bitXor32 bitXor32Sig off4
     ++ instGates bitNot32 bitNot32Sig off5
+    ++ instGates selOr selOrSig offSelOr
+    ++ instGates OperandB.obMux immMuxSig offImmMux
     ++ instGates OperandB.obMux obSig offOb
     ++ instGates adder32 addSig offAdd
     ++ instGates adder32 subSig offSub

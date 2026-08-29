@@ -46,9 +46,11 @@ theorem core_selOut_arms (ins : Env) (k : Nat) (hk : k < 32) :
 
 /-! ## ② The XOR bank, transported: `xorOut k` inside the eleven organs -/
 
-/-- The five organ blocks placed after `bitXor32` and before the select. -/
+/-- The seven organ blocks placed after `bitXor32` and before the select. -/
 def coreRest5 : List Gate :=
   instGates bitNot32 bitNot32Sig off5
+    ++ instGates selOr selOrSig offSelOr
+    ++ instGates OperandB.obMux immMuxSig offImmMux
     ++ instGates OperandB.obMux obSig offOb
     ++ instGates adder32 addSig offAdd
     ++ instGates adder32 subSig offSub
@@ -68,12 +70,14 @@ theorem coreRest5_out_ge : ∀ g ∈ coreRest5, off5 ≤ g.out := by
       Nat.le_trans hoff (instGates_out_range c σ off hssa g hg).1
   intro g hg
   simp only [coreRest5, List.mem_append, or_assoc] at hg
-  rcases hg with h|h|h|h|h
+  rcases hg with h|h|h|h|h|h|h
   · exact key _ _ _ (by decide +kernel) (Nat.le_refl _) g h
-  · exact key _ _ _ (by decide +kernel) (by simp only [offOb, instNext]; omega) g h
-  · exact key _ _ _ adder32_ssa (by simp only [offAdd, offOb, instNext]; omega) g h
-  · exact key _ _ _ adder32_ssa (by simp only [offSub, offAdd, offOb, instNext]; omega) g h
-  · exact key _ _ _ sltCirc_ssa (by simp only [offSlt, offSub, offAdd, offOb, instNext]; omega) g h
+  · exact key _ _ _ (by decide +kernel) (by first | (simp only [offRegNext, offPc, offRw, offEnc, offSel, offSlt, offSub, offAdd, offOb, offImmMux, offSelOr, off5, off4, off3, off2, off1, off0, offTie, instNext]; omega) | exact Nat.le_refl _) g h
+  · exact key _ _ _ (by decide +kernel) (by first | (simp only [offRegNext, offPc, offRw, offEnc, offSel, offSlt, offSub, offAdd, offOb, offImmMux, offSelOr, off5, off4, off3, off2, off1, off0, offTie, instNext]; omega) | exact Nat.le_refl _) g h
+  · exact key _ _ _ (by decide +kernel) (by simp only [offOb, offImmMux, offSelOr, instNext]; omega) g h
+  · exact key _ _ _ adder32_ssa (by simp only [offAdd, offOb, offImmMux, offSelOr, instNext]; omega) g h
+  · exact key _ _ _ adder32_ssa (by simp only [offSub, offAdd, offOb, offImmMux, offSelOr, instNext]; omega) g h
+  · exact key _ _ _ sltCirc_ssa (by simp only [offSlt, offSub, offAdd, offOb, offImmMux, offSelOr, instNext]; omega) g h
 
 theorem bitXor32_outs_len : bitXor32.outs.length = 32 := by decide +kernel
 

@@ -139,7 +139,7 @@ today mistaken a structural step for progress on the expensive half.
 `LW` witness (the enable fires and `core` has no memory). **This transport is true regardless
 and is needed by every repair, which is why it lands before either is settled.** -/
 
-/-- The eleven organ blocks before `sliceASelect`. -/
+/-- The thirteen organ blocks before `sliceASelect`. -/
 def coreThru11 : List Gate :=
   instGates tieCells id offTie
     ++ instGates decoder decoderSig off0
@@ -148,6 +148,8 @@ def coreThru11 : List Gate :=
     ++ instGates readTree readTreeRs2Sig off3
     ++ instGates bitXor32 bitXor32Sig off4
     ++ instGates bitNot32 bitNot32Sig off5
+    ++ instGates selOr selOrSig offSelOr
+    ++ instGates OperandB.obMux immMuxSig offImmMux
     ++ instGates OperandB.obMux obSig offOb
     ++ instGates adder32 addSig offAdd
     ++ instGates adder32 subSig offSub

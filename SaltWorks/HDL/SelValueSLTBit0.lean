@@ -36,6 +36,8 @@ theorem cT9_split4 : cT9 = coreThru4
     ++ (instGates readTree readTreeRs2Sig off3
         ++ instGates bitXor32 bitXor32Sig off4
         ++ instGates bitNot32 bitNot32Sig off5
+        ++ instGates selOr selOrSig offSelOr
+        ++ instGates OperandB.obMux immMuxSig offImmMux
         ++ instGates OperandB.obMux obSig offOb
         ++ instGates adder32 addSig offAdd) := by
   simp only [cT9, ADD.cT8, ADD.cT7, coreThru4, coreThru3, List.append_assoc]
@@ -43,12 +45,16 @@ theorem cT9_split4 : cT9 = coreThru4
 theorem cT9_split5 : cT9 = ADD.cT5
     ++ (instGates bitXor32 bitXor32Sig off4
         ++ instGates bitNot32 bitNot32Sig off5
+        ++ instGates selOr selOrSig offSelOr
+        ++ instGates OperandB.obMux immMuxSig offImmMux
         ++ instGates OperandB.obMux obSig offOb
         ++ instGates adder32 addSig offAdd) := by
   simp only [cT9, ADD.cT8, ADD.cT7, ADD.cT5, coreThru4, coreThru3, List.append_assoc]
 
 theorem cT9_split_not : cT9 = (cT6 ++ instGates bitNot32 bitNot32Sig off5)
-    ++ (instGates OperandB.obMux obSig offOb ++ instGates adder32 addSig offAdd) := by
+    ++ (instGates selOr selOrSig offSelOr
+        ++ instGates OperandB.obMux immMuxSig offImmMux
+        ++ instGates OperandB.obMux obSig offOb ++ instGates adder32 addSig offAdd) := by
   simp only [cT9, cT6, ADD.cT8, ADD.cT7, ADD.cT5, coreThru4, coreThru3, List.append_assoc]
 
 theorem thru10_split_sub :
@@ -60,6 +66,8 @@ theorem thru10_split_sub :
 theorem tail4_9 : ∀ g ∈ (instGates readTree readTreeRs2Sig off3
     ++ instGates bitXor32 bitXor32Sig off4
     ++ instGates bitNot32 bitNot32Sig off5
+    ++ instGates selOr selOrSig offSelOr
+    ++ instGates OperandB.obMux immMuxSig offImmMux
     ++ instGates OperandB.obMux obSig offOb
     ++ instGates adder32 addSig offAdd), off3 ≤ g.out := by
   intro g hg
@@ -68,23 +76,29 @@ theorem tail4_9 : ∀ g ∈ (instGates readTree readTreeRs2Sig off3
   have h35 : off3 ≤ off5 := le_trans h34 ADD.off_le_4_5
   have h3ob : off3 ≤ offOb := le_trans h35 ADD.off_le_5_ob
   have h3add : off3 ≤ offAdd := le_trans h3ob ADD.off_le_ob_add
-  rcases hg with h|h|h|h|h
+  rcases hg with h|h|h|h|h|h|h
   · exact ADD.blk_ge _ _ _ readTree_ssa off3 (Nat.le_refl _) g h
   · exact ADD.blk_ge _ _ _ bitXor32_ssa off3 h34 g h
   · exact ADD.blk_ge _ _ _ bitNot32_ssa off3 h35 g h
+  · exact ADD.blk_ge _ _ _ (by decide +kernel) off3 (by simp only [offSelOr, off5, off4, off3, off2, off1, off0, instNext]; omega) g h
+  · exact ADD.blk_ge _ _ _ OperandB.ssa_obMux off3 (by simp only [offImmMux, offSelOr, off5, off4, off3, off2, off1, off0, instNext]; omega) g h
   · exact ADD.blk_ge _ _ _ OperandB.ssa_obMux off3 h3ob g h
   · exact ADD.blk_ge _ _ _ adder32_ssa off3 h3add g h
 
 theorem tail5_9 : ∀ g ∈ (instGates bitXor32 bitXor32Sig off4
     ++ instGates bitNot32 bitNot32Sig off5
+    ++ instGates selOr selOrSig offSelOr
+    ++ instGates OperandB.obMux immMuxSig offImmMux
     ++ instGates OperandB.obMux obSig offOb
     ++ instGates adder32 addSig offAdd), off4 ≤ g.out := by
   intro g hg
   simp only [List.mem_append, or_assoc] at hg
   have h4ob : off4 ≤ offOb := le_trans ADD.off_le_4_5 ADD.off_le_5_ob
-  rcases hg with h|h|h|h
+  rcases hg with h|h|h|h|h|h
   · exact ADD.blk_ge _ _ _ bitXor32_ssa off4 (Nat.le_refl _) g h
   · exact ADD.blk_ge _ _ _ bitNot32_ssa off4 ADD.off_le_4_5 g h
+  · exact ADD.blk_ge _ _ _ (by decide +kernel) off4 (by simp only [offSelOr, off5, off4, off3, off2, off1, off0, instNext]; omega) g h
+  · exact ADD.blk_ge _ _ _ OperandB.ssa_obMux off4 (by simp only [offImmMux, offSelOr, off5, off4, off3, off2, off1, off0, instNext]; omega) g h
   · exact ADD.blk_ge _ _ _ OperandB.ssa_obMux off4 h4ob g h
   · exact ADD.blk_ge _ _ _ adder32_ssa off4 (le_trans h4ob ADD.off_le_ob_add) g h
 
@@ -95,6 +109,25 @@ theorem tail_ob_add : ∀ g ∈ (instGates OperandB.obMux obSig offOb
   rcases hg with h|h
   · exact ADD.blk_ge _ _ _ OperandB.ssa_obMux offOb (Nat.le_refl _) g h
   · exact ADD.blk_ge _ _ _ adder32_ssa offOb ADD.off_le_ob_add g h
+
+/-- ⚠️ **THE BOUND HERE IS `offSelOr`, NOT `offOb`, AND THAT IS THE POINT.** Leg ① stage 2a put
+two organs BELOW `obMux`, so they write nets strictly under `offOb`; `offOb ≤ g.out` is FALSE
+for them. A tail lemma that kept the old bound would be unprovable, not merely unproved. -/
+theorem tail_selOr_add : ∀ g ∈ (instGates selOr selOrSig offSelOr
+    ++ instGates OperandB.obMux immMuxSig offImmMux
+    ++ instGates OperandB.obMux obSig offOb
+    ++ instGates adder32 addSig offAdd), offSelOr ≤ g.out := by
+  intro g hg
+  simp only [List.mem_append, or_assoc] at hg
+  have hsi : offSelOr ≤ offImmMux := by
+    simp only [offImmMux, instNext]; omega
+  have hso : offSelOr ≤ offOb := by
+    simp only [offOb, offImmMux, instNext]; omega
+  rcases hg with h|h|h|h
+  · exact ADD.blk_ge _ _ _ (by decide +kernel) offSelOr (Nat.le_refl _) g h
+  · exact ADD.blk_ge _ _ _ OperandB.ssa_obMux offSelOr hsi g h
+  · exact ADD.blk_ge _ _ _ OperandB.ssa_obMux offSelOr hso g h
+  · exact ADD.blk_ge _ _ _ adder32_ssa offSelOr (le_trans hso ADD.off_le_ob_add) g h
 
 theorem tail_xor : ∀ g ∈ instGates bitXor32 bitXor32Sig off4, off4 ≤ g.out :=
   ADD.blk_ge _ _ _ bitXor32_ssa off4 (Nat.le_refl _)
@@ -115,10 +148,10 @@ theorem run_cT9_to_cT5 (ins : Env) (n : Net) (hn : n < off4) :
     run ins cT9 n = run ins ADD.cT5 n := by
   rw [cT9_split5]; exact ADD.run_drop ins ADD.cT5 _ off4 n hn tail5_9
 
-theorem run_cT9_to_notblk (ins : Env) (n : Net) (hn : n < offOb) :
+theorem run_cT9_to_notblk (ins : Env) (n : Net) (hn : n < offSelOr) :
     run ins cT9 n = run ins (cT6 ++ instGates bitNot32 bitNot32Sig off5) n := by
   rw [cT9_split_not]
-  exact ADD.run_drop ins _ _ offOb n hn tail_ob_add
+  exact ADD.run_drop ins _ _ offSelOr n hn tail_selOr_add
 
 theorem run_cT6_to_cT5 (ins : Env) (n : Net) (hn : n < off4) :
     run ins cT6 n = run ins ADD.cT5 n := by
@@ -174,11 +207,16 @@ theorem notOut_eq (m : Nat) (hm : m < 32) :
 theorem notOut_lt_offOb (m : Nat) (hm : m < 32) : CorePlace.notOut m < offOb := by
   revert hm; revert m; decide +kernel
 
+/-- The inverted bank sits below the widened organs too — the bound `run_cT9_to_notblk`
+needs after leg ① stage 2a. -/
+theorem notOut_lt_offSelOr (m : Nat) (hm : m < 32) : CorePlace.notOut m < offSelOr := by
+  revert hm; revert m; decide +kernel
+
 /-- ⭐⭐ **THE SUBTRACTOR'S `b` BANK IS `¬ rs2`, READ INSIDE `core`.** `sem_bitNot32` is
 math's landed organ certificate; this is it transported onto placement #7. -/
 theorem not_bit (ins : Env) (m : Nat) (hm : m < 32) :
     run ins cT9 (CorePlace.notOut m) = !((rs2Of ins).getLsbD m) := by
-  rw [run_cT9_to_notblk ins _ (notOut_lt_offOb m hm), notOut_eq m hm, run_append,
+  rw [run_cT9_to_notblk ins _ (notOut_lt_offSelOr m hm), notOut_eq m hm, run_append,
       inst_sem bitNot32 bitNot32Sig off5 (run ins cT6)
         (fun j => run ins cT6 (bitNot32Sig j)) bitNot32_instOK (fun _ _ => rfl)
         (bitNot32.outs.getD m 0) (Or.inr (bitNot32_out_mem m hm))]
@@ -510,6 +548,7 @@ end SLTBit0
 #audit_axioms SaltWorks.HDL.RegNextUniform.SLTBit0.cT9_split5 SaltWorks.HDL.RegNextUniform.SLTBit0.cT9_split_add
 #audit_axioms SaltWorks.HDL.RegNextUniform.SLTBit0.cT9_split_not SaltWorks.HDL.RegNextUniform.SLTBit0.decode_slt_rd
 #audit_axioms SaltWorks.HDL.RegNextUniform.SLTBit0.notOut_eq SaltWorks.HDL.RegNextUniform.SLTBit0.notOut_lt_offOb
+#audit_axioms SaltWorks.HDL.RegNextUniform.SLTBit0.notOut_lt_offSelOr SaltWorks.HDL.RegNextUniform.SLTBit0.tail_selOr_add
 #audit_axioms SaltWorks.HDL.RegNextUniform.SLTBit0.rs1_at_cT9 SaltWorks.HDL.RegNextUniform.SLTBit0.rs2_at_cT6
 #audit_axioms SaltWorks.HDL.RegNextUniform.SLTBit0.rs2_at_cT9 SaltWorks.HDL.RegNextUniform.SLTBit0.run_cT6_to_cT5
 #audit_axioms SaltWorks.HDL.RegNextUniform.SLTBit0.run_cT9_to_cT5 SaltWorks.HDL.RegNextUniform.SLTBit0.run_cT9_to_cT8
