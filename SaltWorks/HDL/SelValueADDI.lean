@@ -34,6 +34,7 @@ import SaltWorks.HDL.DecoderTransport
 import SaltWorks.HDL.Rs2Close
 import SaltWorks.HDL.Bridge4
 import SaltWorks.HDL.SelValueShared
+import SaltWorks.HDL.EnableWriters
 
 namespace SaltWorks.HDL.RegNextUniform
 open SaltWorks.HDL SaltWorks.ISA
@@ -557,6 +558,51 @@ theorem selOut0_insADDI : run insADDI core.gates (selOut 0) = true := by
   decide +kernel
 
 #audit_axioms core_selOut_value_ADDI
+/-! ## ⭐⭐⭐ THE `ADDI` ROW OF `RegDatapathOK` — ADDED 2026-08-29
+
+**Only the `rdOf` bridge was missing.** `core_selOut_is_isa_ADDI` above is the value half and
+`core_writes_on_ADDI` (DecoderTransport) is the enable half; both were already landed and green.
+
+⚠️ **THIS ROW WAS FOUND BY GREPPING THE CONCLUSION SHAPE, NOT THE IDENTIFIER — and that is the only
+reason it was found today.** Hours earlier an R9 census grepped `regDatapath_${op}` and reported
+`XOR` and `ADDI` as owed in full; both were two-thirds built. **This corpus spells one role four
+ways:**
+```
+ADD    ADD.selOut_is_isa_written_bit_ADD
+SLT    SLTBit0.core_selOut_eq_isa_slt
+XOR    XOR.core_selOut_is_isa_write_on_XOR
+ADDI   ADDI.core_selOut_is_isa_ADDI              <- FOURTH SPELLING, SAME ROLE
+```
+🔑 ***A NAME GREP ANSWERS "IS THIS IDENTIFIER TAKEN", NEVER "IS THIS STATEMENT PROVED."*** The
+conclusion shape is the invariant: `run ins core.gates (selOut k) = ((stepT …).regs[rd.val]).getLsbD k`.
+📌 *With this row, `RegDatapathOK`'s remaining branch is `LW` alone.* -/
+
+/-- The `rdOf` bridge for `ADDI`. -/
+theorem rdOf_is_rd_ADDI (ins : Env) (rd a : Fin 32) (imm : BitVec 12)
+    (h : decode (seenWord ins) = some (.ADDI rd a imm)) : rdOf ins = rd.val := by
+  rw [← Shared.rdOf_is_decode_field ins, Writers.decode_addi_rd _ rd a imm h]
+  rfl
+
+/-- ⭐⭐⭐ **THE `ADDI` ROW OF `RegDatapathOK`, AT `r = rd`, BOTH ARMS DISCHARGED.**
+⛔ **ONE ROW (`r = rd`), NOT `RegDatapathOK`** — `X0.regDatapathOK_of_on_target` reduces the
+obligation to the on-target register, and this closes its `ADDI` branch. -/
+theorem regDatapath_ADDI (ins : Env) (rd a : Fin 32) (imm : BitVec 12) (k : Nat) (hk : k < 32)
+    (hrd : rd ≠ 0) (h : decode (seenWord ins) = some (.ADDI rd a imm)) :
+    (if run ins core.gates (rwOut rd.val) then run ins core.gates (selOut k)
+     else ins (32 * rd.val + k))
+      = ((SaltWorks.ISA.stepT (decQ ins) (seenWord ins)).regs[rd.val]).getLsbD k := by
+  have hrdv : rdOf ins = rd.val := rdOf_is_rd_ADDI ins rd a imm h
+  have hne : ¬ (rdOf ins = 0) := by
+    rw [hrdv]; intro hz; exact hrd (Fin.ext (by simpa using hz))
+  have hen : run ins core.gates (rwOut rd.val) = true := by
+    rw [← hrdv]; exact core_writes_on_ADDI ins rd a imm h hne
+  rw [hen, if_pos (by simp)]
+  exact core_selOut_is_isa_ADDI ins rd a imm k hk hrd h
+
+-- ONE NAME PER CALL, per the 2026-08-29 fix: a multi-name call ABORTS at the first failure.
+#audit_axioms rdOf_is_rd_ADDI
+#audit_axioms regDatapath_ADDI
+
 #audit_axioms core_selOut_is_isa_ADDI
 #audit_axioms obOut_is_sext_imm
 #audit_axioms addOut_thru9
