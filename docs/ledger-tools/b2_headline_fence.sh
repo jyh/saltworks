@@ -5,7 +5,9 @@
 # held down by helm order to adjudicate B-2 option (C) later. Their watch emits every
 # post's HEADLINE to them UNREQUESTED -- 200 chars clipped, marker-bearing lines whole
 # -- and they cannot decline what has already arrived. My 22:40:37 bracket opened with
-# "THE POOL IS 125 ... the 107 ... WRONG BY 18" and their warning landed at 22:41:26.
+# THE SUBSTANCE ITSELF -- and it stayed QUOTED VERBATIM IN THIS COMMENT for fourteen
+# days, so the gate's own header was a second copy of the leak it documents. REDACTED
+# 2026-08-30 (desk row A). Their warning landed at 22:41:26.
 # FORTY-NINE SECONDS LATE. The leak is mine and it is already in their context.
 #
 # ⛔ THIS IS A GATE, NOT A REPORTER -- exit 1 refuses the send. That is deliberate and
@@ -47,6 +49,37 @@
 # fail-OPEN, and every hand that forgets the flag gets the hole.
 set -u
 
+# ⭐⭐ THE CLOSED SET LIVES OFF-REPO — DESK ROW A, repair-forward RULED by the helm.
+# ⛔ WHAT USED TO SIT IN THIS FILE: the literal figures and nouns this fence exists to
+#    WITHHOLD, in cleartext, in a PUBLIC repo, from 2026-08-16 22:43 to 2026-08-30 —
+#    FOURTEEN DAYS. The narrow channel (a bus headline) was gated; the wide one (a public
+#    git remote) was never in any scan's population.
+#    ⇒ ***A GATE'S OWN SOURCE IS A DISCLOSURE SURFACE, AND IT IS THE ONE NOBODY SCANS.***
+# ⛔ NO HISTORY REWRITE — 14 days, a public remote, live clones; the same disposition the
+#    helm took on row u. The set is removed FORWARD and the old blobs stay reachable:
+#    a KNOWN, ACCEPTED, RECORDED residue, not an oversight.
+# ✅ Populate $B2SET (default $HOME/.config/saltworks/b2-closed-set.conf, mode 600) with
+#    two POSIX-ERE lines, NUMS= and NOUNS=. No absolute path appears here on purpose —
+#    a literal user path in a public repo is the very class the tree ratchet scans for.
+load_closed_set() {
+  B2SET="${B2SET:-$HOME/.config/saltworks/b2-closed-set.conf}"
+  if [ ! -r "$B2SET" ]; then
+    echo "b2_headline_fence: CANNOT RUN - the closed set is machine-local, NOT in this repo." >&2
+    echo "   looked in : \$B2SET  (default \$HOME/.config/saltworks/b2-closed-set.conf)" >&2
+    echo "   populate two lines: NUMS=<ere> and NOUNS=<ere>, then chmod 600." >&2
+    echo "   THIS IS A REFUSAL, NOT A PASS - fail-closed is the point: a fence that" >&2
+    echo "   quietly checked nothing would be worse than no fence at all." >&2
+    exit 3
+  fi
+  NUMS=$(sed -n 's/^NUMS=//p'  "$B2SET" | head -1)
+  NOUNS=$(sed -n 's/^NOUNS=//p' "$B2SET" | head -1)
+  if [ -z "$NUMS" ] || [ -z "$NOUNS" ]; then
+    echo "b2_headline_fence: \$B2SET present but INCOMPLETE - NUMS and/or NOUNS empty." >&2
+    echo "   An incomplete set would silently narrow the gate. REFUSING." >&2
+    exit 3
+  fi
+}
+
 # ⭐ SELF-TEST — DESK ROW t. ⛔ THE ROW'S REC SAID *"the fence's own selftest must
 # gain BOTH arms"*, AND THE FENCE HAD NO SELFTEST AT ALL: `selftest.py` beside it
 # is the LEDGER-TOOLS harness (transcript record filtering, 1,048 lines) and
@@ -69,24 +102,37 @@ run_self_test() {
     else printf '  ⛔ arm %s: %s — EXPECTED rc=%s, GOT rc=%s\n' "$_n" "$1" "$2" "$_rc"; _fail=1; fi
   }
   echo "b2_headline_fence --self-test"
-  # ── the arm that must keep working: a REAL headline population figure ────────
-  _arm "TRUE CATCH: bare population figure is REFUSED" 1 \
-       "silicon=LIT — the pool population is 125 after the adjudication"
-  # ── ROW t's NEW ARM: an ordinary source citation must PASS ───────────────────
+  # ⛔⛔ THE PROBES ARE DERIVED FROM $B2SET, NEVER TYPED HERE — DESK ROW A.
+  #    An earlier version of this selftest hard-coded one figure and one noun as
+  #    literals. That would have re-published, in the SAME public file, two members of
+  #    the set the row was removing from it.
+  #    ⇒ ***A TEST FOR A WITHHOLDING GATE MUST NOT CARRY THE WITHHELD THING. The fixture
+  #      is a disclosure surface exactly like the gate's own source was.***
+  load_closed_set
+  _N1=$(printf '%s' "$NUMS"  | grep -oE '[0-9]+' | head -1)
+  _W1=$(printf '%s' "$NOUNS" | cut -d'|' -f1)
+  if [ -z "$_N1" ] || [ -z "$_W1" ]; then
+    echo "  ⛔ cannot derive probes from \$B2SET — REFUSING to report a pass" >&2; exit 3; fi
+  # ── the arm that must keep working: a bare figure from the set ───────────────
+  _arm "TRUE CATCH: a bare set figure is REFUSED" 1 \
+       "silicon=LIT — the count reached $_N1 this morning"
+  # ── ROW t's ARM: an ordinary source citation must PASS ───────────────────────
   _arm "ROW t: file.ext:NNN citation is PASSED" 0 \
-       "silicon=LIT — the enable is at CorePlace.lean:112 and the flop at core32.v:59"
-  # ── the noun arm is untouched by the anchor and must still catch ─────────────
-  _arm "TRUE CATCH: substantive noun is REFUSED" 1 \
-       "silicon=LIT — the codebook row is settled"
-  # ── ordinary clean traffic ───────────────────────────────────────────────────
+       "silicon=LIT — the enable is at CorePlace.lean:$_N1 and the flop at core32.v:$_N1"
+  # ── the noun arm, untouched by row t's anchor, must still catch ──────────────
+  _arm "TRUE CATCH: a set noun is REFUSED" 1 \
+       "silicon=LIT — the $_W1 row is settled"
+  # ── ordinary clean traffic ──────────────────────────────────────────────────
   _arm "CLEAN: ordinary headline is PASSED" 0 \
        "silicon=LIT — MEAS sweep green, marker advanced"
-  # ── ⚠️ THE RESIDUAL, ASSERTED SO IT IS EXECUTABLE RATHER THAN PROSE ──────────
-  #    Substance disguised AS a citation is no longer caught by the NUMS arm.
-  #    This arm PASSES BY DESIGN and documents the exact width of the narrowing;
-  #    if a successor closes the hole, THIS ARM GOES RED AND SHOULD BE UPDATED.
-  _arm "RESIDUAL (known, by design): number disguised as a citation is NOT caught" 0 \
-       "silicon=LIT — see x.lean:125"
+  # ── ⚠️ THE RESIDUAL. ***THIS IS THE SAME PREDICATE AS ARM 2, AND I AM SAYING SO
+  #    RATHER THAN COUNTING IT AS INDEPENDENT COVERAGE:*** row t's fix and row t's
+  #    hole are ONE FACT wearing two names — a set figure in citation position is
+  #    not matched. Arm 2 calls that the cure; this arm calls it the cost. It PASSES
+  #    BY DESIGN; if a successor closes the hole, THIS ARM GOES RED and is the place
+  #    to record the new width. The noun arm still guards the disguised case.
+  _arm "RESIDUAL (by design, = arm 2's predicate): set figure in citation position NOT caught" 0 \
+       "silicon=LIT — see x.lean:$_N1"
   rm -rf "$_d"
   if [ "$_fail" = 0 ]; then echo "✅ b2_headline_fence: $_n/$_n arms as specified"; exit 0
   else echo "⛔ b2_headline_fence: SELF-TEST FAILED" >&2; exit 1; fi
@@ -102,11 +148,7 @@ if [ "${SELFTEST:-0}" = 1 ]; then run_self_test; fi
 BR="$1"; BODY="${2:-}"
 [ -f "$BR" ] || { echo "b2_headline_fence: bracket not found: $BR" >&2; exit 2; }
 
-# THE CLOSED SET. Population figures and the substantive nouns of the adjudication.
-# Deliberately NOT including "B-2" itself: naming the item is not substance, and a
-# fence that forbade the name would stop me reporting that a fence exists.
-NUMS='\b(125|117|107|153|171|278|257|112|59|388)\b'
-NOUNS='pool|disputed|codebook|adjudicat|prose row|discussed-vs-decided|eligible|blind (draw|set)|short id|over-reject'
+load_closed_set
 
 # The DELIVERED SURFACE = the whole bracket + every marker-bearing line of the body.
 # TWO WATCH PREDICATES, MEASURED, NOT ASSUMED (evidence 22:43): they differ.
@@ -132,7 +174,7 @@ fi
 
 # ⭐⭐ THE CITATION ANCHOR — DESK ROW t (deadline 2026-08-31, owner silicon).
 # ⛔ THE DEFECT, REPRODUCED BEFORE IT WAS FIXED: `NUMS` is a list of BARE
-#    integers, so an ordinary source citation `CorePlace.lean:112` matched it and
+#    integers, so an ordinary source citation `CorePlace.lean:4242` matched it and
 #    the fence REFUSED a bracket carrying no B-2 substance whatever. compiler hit
 #    it at 17:1x and — the part that names the class — IT REFUSED THE PARAGRAPH
 #    REPORTING THE COLLISION, on the very line describing it.
@@ -148,7 +190,7 @@ fi
 #    that copy. The substitution is line-for-line, so reported line numbers still
 #    index the ORIGINAL surface. Every non-citation occurrence still matches.
 # ⚠️ THE RESIDUAL, NAMED RATHER THAN HIDDEN: substance disguised AS a citation
-#    (`x.lean:125`) is no longer caught by the NUMS arm. It is a narrowing of
+#    (a set figure in citation position) is no longer caught by the NUMS arm. A narrowing of
 #    exactly one shape, the NOUNS arm is untouched and still guards it, and the
 #    alternative — keeping a gate nobody can leave armed — is worse. Stated so a
 #    successor evaluates it rather than rediscovering it.
