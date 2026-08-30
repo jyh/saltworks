@@ -6,6 +6,10 @@ Authors: compiler seat
 # The `SW` witness — a refutation, and the repair that retired it
 
 ⭐⭐⭐ **THIS FILE ONCE PROVED `¬ C4Spec core`. IT NO LONGER CAN, AND THAT IS THE POINT.**
+⛔⛔⛔ **STATUS 2026-08-30: `¬ C4Spec core` IS BACK IN THE KERNEL — in `SaltWorks.HDL.LwTrapRefuted`,
+not here.** The Captain's one authorized witness (row v) found a TRAPPING `LW`, and the same pass
+found that THIS FILE'S OWN `insL` refutes one bit over. Read the 08-30 block at the retirement
+before treating anything below as the live status.
 On 2026-08-19 it carried, in the kernel:
 
 ```
@@ -380,7 +384,13 @@ uses for a repaired row (`control_sides_agree`, `addi_sides_agree`): the same in
 `RegDatapathOK`, now an equality rather than a contradiction.
 
 ⛔ **DO NOT READ THIS AS `RegDatapathOK` HOLDING.** It is ONE point of a `∀`, on ONE bit, at ONE
-witness. It is a receipt that the old counterexample is gone, and nothing more. -/
+witness.
+⛔⛔ **AND THE SENTENCE THAT STOOD HERE WAS FALSE. It read: *"a receipt that the old
+counterexample is gone"*. THE COUNTEREXAMPLE WAS NEVER GONE.** `regDatapathOK_is_false_at_the_LANDED_witness`
+(`LwTrapRefuted`, 2026-08-30) refutes `RegDatapathOK` **at this very witness `insL`, byte-unchanged,
+at bit 3** — `selOut 3 = true` where the ISA demands `false`. This theorem is TRUE and stays true;
+what was false is the inference drawn from it. ⇒ ***AGREEMENT AT ONE BIT OF ONE WITNESS IS NOT THE
+DEATH OF A COUNTEREXAMPLE, AND FIVE DECLARATIONS WERE RETIRED ON THAT READING.*** -/
 theorem lw_sides_agree_at_insL :
     (if run insL core.gates (rwOut r1.val) then run insL core.gates (selOut 2)
      else insL (32 * r1.val + 2))
