@@ -49,6 +49,20 @@ recorded after two placements fed `rs2` where `ADDI` needed the immediate. This 
 instance, found the same way: by transporting an organ theorem and reading what came out.*
 
 ⛔ **STATUS — AND A SECOND DEFECT OF THE SAME FAMILY, FOUND 11:3x THE SAME DAY.**
+
+⛔⛔ **↑↑ THE BLOCK BELOW IS SUPERSEDED AND IS KEPT VERBATIM AS THE BEFORE-STATE. Annotated
+2026-08-29 17:0x by the R9 owner while censusing this very obligation.** Its present-tense
+claim — *"one of its two remaining halves is now FALSE IN THE KERNEL"*, because `SW`
+write-enables a register — **WAS TRUE WHEN WRITTEN AND IS FALSE NOW.** The enable was repaired
+to `writesReg = isADD ∨ isXOR ∨ isSLT ∨ isADDI ∨ isLW`, which no `SW` row raises; the receipt
+is `core_writes_nothing_on_SW` below, with its own before/after differential.
+⛔ **AND ITS FORWARD POINTER IS DEAD: `core_writes_on_SW` and `sw_forces_selOut_to_equal_held`
+have ZERO declarations corpus-wide** (measured 2026-08-29 17:06:04, controls both ways:
+`core_writes_nothing_on_SW` → 1, a nonsense name → 0). *`core_writes_on_SW` survives only as
+history inside the receipt's own docstring, which is the correct place for it.*
+✅ **THE LIVE STATUS, AS OF THIS ANNOTATION: `RegDatapathOK` IS UNPROVED AND UNREFUTED. NO HALF
+OF IT IS FALSE IN THE KERNEL.** *The enable-agreement half is discharged for `SW`, `BEQ` and
+undecodable words by the three `core_writes_nothing_on_*` theorems in this file.*
 `RegDatapathOK` is still **UNPROVED rather than refuted** (no value witness stands against
 it yet), but ***one of its two remaining halves is now FALSE IN THE KERNEL***: the circuit's
 enable does NOT agree with the ISA's write decision, because **`SW` write-enables a
@@ -295,8 +309,20 @@ theorem core_writes_nothing_on_SW (ins : Env) (k : Nat) (hk : k < 32)
   simp [ctrlSpec, h]
 
 /-- **AND THE ISA WRITES NOTHING ON A STORE** — `rfl`, so the disagreement is not a matter
-of interpretation. Paired with `core_writes_on_SW` this is the enable-agreement half of
-`RegDatapathOK`, refuted. -/
+of interpretation.
+
+⛔⛔ **THE SENTENCE THAT STOOD HERE UNTIL 2026-08-29 17:0x IS RETRACTED, AND IT IS KEPT SO THE
+DEFECT IS LEGIBLE:** *"Paired with `core_writes_on_SW` this is the enable-agreement half of
+`RegDatapathOK`, refuted."* **`core_writes_on_SW` HAS NOT EXISTED SINCE THE ENABLE REPAIR** (0
+declarations corpus-wide, measured with controls), **and `RegDatapathOK` IS NOT REFUTED —
+it is UNPROVED AND UNREFUTED.** This docstring sat on a theorem that PROVES, asserting the
+opposite of the live status, and it would have mispriced the R9 rung for its next reader.
+✅ **WHAT IS TRUE: paired with `core_writes_nothing_on_SW` immediately above, this is the
+enable-agreement half of `RegDatapathOK` DISCHARGED for stores** — both sides write nothing.
+🔑 *Found while censusing R9, not by a sweep: the repair 20 lines above wrote an excellent
+retirement record and did not reach this docstring or the STATUS block 240 lines up.
+**A RETIREMENT CAN BE THOROUGH LOCALLY AND STALE GLOBALLY** — cf. the same shape at the 08-29
+flagship retirement, different file, different repair, same radius. -/
 theorem isa_writes_nothing_on_SW (a b : Fin 32) (imm : BitVec 12) :
     writesReg (.SW a b imm) = none := rfl
 
