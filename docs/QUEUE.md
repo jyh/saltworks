@@ -1168,6 +1168,19 @@ OPEN ITEMS:
   submission-config checklist (CLOCK_PERIOD=40 reconciliation, the
   registered trap) · pin map finalization (18/24) · fetch-protocol
   design question runs in parallel, does not gate the hardening.**
+
+  > ⚠️ **SUPERSEDED IN SUBSTANCE 2026-08-29 (helm, council row r; the ruling itself is
+  > PRESERVED, not deleted — an authorisation that is removed leaves no trace that it was
+  > given).** This pre-authorisation is TWENTY DAYS OLD and its campaign has been overtaken by
+  > the banyan / ndf / _c32 line: the 3×2 hardening it authorised is no longer the work in
+  > front of the silicon lane, and the tape-out path now runs through the ndf-2a resubmission
+  > (Sept 4–5 click, hard deadline Sept 7). ⇒ **DO NOT START WORK ON THIS PRE-AUTH.** It stands
+  > as the record of a ruling that was given and acted on, not as a live licence. A fresh
+  > authorisation is the Captain's to give.
+  >
+  > 📌 *Why it was still readable as live:* nothing marks an authorisation as spent. A stale STOP
+  > is caught by the next build; **a stale GO is caught by nobody** — it simply waits for a seat
+  > with capacity to read it as permission. Found by silicon while banking (08/29 15:1x).
 - **TILE DECISION — THE CAPTAIN'S CONDITIONAL WORD IS GIVEN (21:2x,
   at the helm, verbatim on the bus): byte-wide feed + 32-BIT
   ADDRESSES multiplexed onto the 8 address pins (4 byte-phases, like
