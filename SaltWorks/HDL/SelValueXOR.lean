@@ -17,6 +17,8 @@ import SaltWorks.HDL.DecoderTransport
 import SaltWorks.HDL.Rs2Close
 import SaltWorks.HDL.Bridge3
 import SaltWorks.HDL.SingleLevel
+import SaltWorks.HDL.SelValueShared
+import SaltWorks.HDL.EnableWriters
 
 namespace SaltWorks.HDL.RegNextUniform.XOR
 open SaltWorks.HDL SaltWorks.ISA
@@ -280,6 +282,65 @@ theorem core_selOut_on_ADD_takes_bank0 (ins : Env) (rd a b : Fin 32) (k : Nat) (
 and not two names for one wire. -/
 theorem bank0_ne_bank1 (k : Nat) (hk : k < 32) : selSig (gsRes 0 k) ≠ selSig (gsRes 1 k) := by
   revert k; decide +kernel
+
+/-! ## ⑨ ⭐⭐⭐ THE `XOR` ROW OF `RegDatapathOK` — ADDED 2026-08-29, AND THE REASON IT WAS LATE
+
+**Everything this row needs was ALREADY IN THIS FILE except three lines.** `core_selOut_is_isa_write_on_XOR`
+above is the value half; `core_writes_on_XOR` (DecoderTransport) is the enable half. Only the
+`rdOf` bridge was missing, and with it the row itself.
+
+⛔⛔ **WHY THE R9 CENSUS PRICED THIS ROW AS UNBUILT — READ THIS BEFORE TRUSTING A CENSUS OF THE
+OTHER ROWS.** On 2026-08-29 this seat censused `RegDatapathOK` row by row and reported **XOR as
+owed in full**. It was two-thirds built and green. The census grepped for the identifier
+`regDatapath_XOR`, by analogy with the landed `ADD` and `SLT` rows — but **THE TWO CONVENTIONS IN
+THIS CORPUS DO NOT MATCH:**
+```
+ADD's value half   ADD.selOut_is_isa_written_bit_ADD
+SLT's value half   SLTBit0.core_selOut_eq_isa_slt
+XOR's value half   XOR.core_selOut_is_isa_write_on_XOR      <- SAME ROLE, THIRD SPELLING
+```
+🔑 ***A NAME GREP ANSWERS "IS THIS IDENTIFIER TAKEN", NEVER "IS THIS STATEMENT PROVED." GREP THE
+CONCLUSION SHAPE*** — here, `run ins core.gates (selOut k) = ((stepT …).regs[rd.val]).getLsbD k`.
+*The identifier grep is the one that is easy to write, and it returned a clean, confident, wrong
+table.* ⚠️ **`ADDI` AND `LW` HAVE NOT BEEN RE-CHECKED THIS WAY. Do that before pricing them.**
+
+⛔ **AND THE SAME HABIT MINTED A DUPLICATE TWENTY MINUTES LATER:** while building this row I proved
+an ISA-side lemma from scratch before noticing **`stepT_regs_on_XOR`, twelve lines above, is the
+same statement.** It is not duplicated here — the landed one is used. *Two instances of one defect
+in one sitting, both from grepping a name instead of a conclusion.*
+
+📌 *`ScratchQ4XOREx.lean` is a gitignored STALE DUPLICATE of this file and is BROKEN against the
+post-leg-① core — its failures are `omega` on OFFSET BOUNDS, i.e. invalidated by stage 2a's
+RE-PLACEMENT, not by any change of meaning. **This file supersedes it; do not repair the scratch.***
+-/
+
+/-- The `rdOf` bridge for `XOR` — the transport of `ADD.rdOf_is_rd_ADD`. -/
+theorem rdOf_is_rd_XOR (ins : Env) (rd a b : Fin 32)
+    (h : decode (seenWord ins) = some (.XOR rd a b)) : rdOf ins = rd.val := by
+  rw [← Shared.rdOf_is_decode_field ins, Writers.decode_xor_rd _ rd a b h]
+  rfl
+
+/-- ⭐⭐⭐ **THE `XOR` ROW OF `RegDatapathOK`, AT `r = rd`, BOTH ARMS DISCHARGED.**
+⛔ **THIS IS ONE ROW (`r = rd`), NOT `RegDatapathOK`.** The obligation quantifies over all
+registers; `X0.regDatapathOK_of_on_target` reduces it to the on-target one, and this closes the
+`XOR` branch of that. With `ADD` and `SLT` landed, the remaining branches are `ADDI` and `LW`. -/
+theorem regDatapath_XOR (ins : Env) (rd a b : Fin 32) (k : Nat) (hk : k < 32) (hrd : rd ≠ 0)
+    (h : decode (seenWord ins) = some (.XOR rd a b)) :
+    (if run ins core.gates (rwOut rd.val) then run ins core.gates (selOut k)
+     else ins (32 * rd.val + k))
+      = ((SaltWorks.ISA.stepT (decQ ins) (seenWord ins)).regs[rd.val]).getLsbD k := by
+  have hrdv : rdOf ins = rd.val := rdOf_is_rd_XOR ins rd a b h
+  have hne : ¬ (rdOf ins = 0) := by
+    rw [hrdv]; intro hz; exact hrd (Fin.ext (by simpa using hz))
+  have hen : run ins core.gates (rwOut rd.val) = true := by
+    rw [← hrdv]; exact core_writes_on_XOR ins rd a b h hne
+  rw [hen, if_pos (by simp)]
+  exact core_selOut_is_isa_write_on_XOR ins rd a b k hk h hrd
+
+-- ONE NAME PER CALL, per the 2026-08-29 fix: a multi-name `#audit_axioms` ABORTS at the first
+-- failure and the names after it read as clean. The block below still carries the old form.
+#audit_axioms rdOf_is_rd_XOR
+#audit_axioms regDatapath_XOR
 
 #audit_axioms core_selOut_arms
 #audit_axioms core_xor_bank
