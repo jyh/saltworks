@@ -164,3 +164,13 @@ jobs:
           # nothing about them). This arm reds on any finding NOT in the committed
           # baseline (scripts/private_paths_baseline.tsv). Council row m, 2026-08-29.
           python scripts/check_private_paths.py --tree
+      - name: message ratchet -- a violating message must not launder into the next scan's base
+        run: |
+          # The delta arm charges the push that carries a violating MESSAGE; it cannot
+          # charge history for keeping one, so a fired-and-unrepaired message falls
+          # into the next scan's BASE and every later push is green over it. Ruled
+          # 2026-08-30 (council row u): ACCEPT + record, NO history rewrite, then
+          # close the laundering. This arm scans EVERY message reachable from HEAD
+          # against scripts/private_paths_message_baseline.tsv (sha + shape only --
+          # never the line, which would trip the tree ratchet). Anything NEW reds.
+          python scripts/check_private_paths.py --messages

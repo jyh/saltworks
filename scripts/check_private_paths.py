@@ -572,6 +572,29 @@ def self_test() -> int:
     except OSError:
         failures.append("could not read own source for the self-match check")
 
+    # 7. THE MESSAGE RATCHET'S VERDICT, both arms on ONE fixture set. The
+    #    function is pure so this drives the real decision, not a description
+    #    of it. Good and bad arms must DIFFER on the same input.
+    accepted = "a" * 40
+    novel = "b" * 40
+    new1, abs1 = msg_ratchet_verdict([accepted], {accepted})
+    if new1:
+        failures.append("a baselined sha must not be NEW")
+    new2, abs2 = msg_ratchet_verdict([accepted, novel], {accepted})
+    if new2 != [novel]:
+        failures.append(f"a novel violating sha must be NEW, got {new2}")
+    new3, abs3 = msg_ratchet_verdict([], {accepted})
+    if new3 or abs3 != [accepted]:
+        failures.append("an unreachable baseline entry is ABSENT, never a failure")
+    # The missing-baseline distinction: None is not the empty set, and only
+    # None-with-findings is the unarmed state.
+    if not _msg_unarmed_fatal(None, 1):
+        failures.append("a MISSING baseline with findings must be fatal-unarmed")
+    if _msg_unarmed_fatal(set(), 1):
+        failures.append("an EMPTY baseline is armed; its findings red as NEW, not as unarmed")
+    if _msg_unarmed_fatal(None, 0):
+        failures.append("a missing baseline over a clean history is not fatal")
+
     for f in failures:
         print(f"SELF-TEST FAIL: {f}")
     if failures:
@@ -579,7 +602,8 @@ def self_test() -> int:
     print(f"check_private_paths SELF-TEST [gate {self_id()}]: OK "
           f"(empty scan fatal proven FIRST; "
           f"{len(real)} real post-ruling instances caught; {len(planted)} planted "
-          f"shapes caught; {len(clean)} compliant forms passed; own source clean)")
+          f"shapes caught; {len(clean)} compliant forms passed; own source clean; "
+          f"message-ratchet verdict driven on both arms)")
     return 0
 
 
@@ -689,6 +713,128 @@ def tree_mode(write: bool) -> int:
     return 0
 
 
+# ---------------------------------------------------------------------------
+# THE MESSAGE RATCHET — added 2026-08-30 by the helm on the council's row u.
+#
+# WHY A THIRD ARM. The delta gate charges the PUSH that carries a violating
+# message; it cannot charge history for KEEPING one. Measured on the flagship
+# repo: a merge push landed four branch commits whose messages cite the
+# private record, the delta gate fired ON THAT RUN — and every later push was
+# green, because the four had fallen into the next scan's BASE. Same
+# laundering the tree ratchet closed for FILES, in the arm that had no
+# ratchet. And a message is WORSE than a file here: a tracked file can be
+# repaired, a pushed message cannot be edited without a force-push, which the
+# council ruled out (08/30: ACCEPT + record, NO history rewrite).
+#
+# SO: A RATCHET, keyed on the one immutable identity a message has — its
+# commit sha. `private_paths_message_baseline.tsv` lists the ACCEPTED
+# historical commits. `--messages` scans EVERY message reachable from HEAD and
+# REDS on any violating commit NOT in the baseline. Baseline entries absent
+# from the scanned history are reported, never failed: a branch rooted before
+# them legitimately lacks them, and after a rewrite membership—not
+# existence—is the only claim the sha can carry.
+#
+# ⛔ THE BASELINE STORES sha + shape ONLY, NEVER THE OFFENDING LINE: a quoted
+# excerpt would put the private path INTO the tree, where the tree ratchet
+# (correctly) reds on it. The explanation of a rule is a carrier of the rule.
+# ---------------------------------------------------------------------------
+MSG_BASELINE = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                            "private_paths_message_baseline.tsv")
+
+
+def load_msg_baseline():
+    """set of accepted shas, or None when no baseline file exists.
+
+    None and empty are DIFFERENT verdicts: a missing file plus findings means
+    the ratchet was never armed here (fatal, arm it deliberately); an empty
+    file plus findings means the repo was measured clean and something NEW
+    arrived (fatal, and the finding is the point)."""
+    try:
+        with open(MSG_BASELINE, encoding="utf-8") as fh:
+            return {l.split("\t")[0].strip() for l in fh
+                    if l.strip() and not l.startswith("#")}
+    except FileNotFoundError:
+        return None
+
+
+def msg_ratchet_verdict(found_shas, baseline):
+    """(new, absent) — pure, so the self-test can drive both arms without git."""
+    new = [s for s in found_shas if s not in baseline]
+    absent = sorted(baseline - set(found_shas))
+    return new, absent
+
+
+def _msg_unarmed_fatal(baseline, finding_count: int) -> bool:
+    """None is not the empty set: a MISSING baseline plus findings means the
+    ratchet was never armed here (arm it deliberately); an EMPTY one plus
+    findings falls through to the verdict, where the finding reds as NEW."""
+    return baseline is None and finding_count > 0
+
+
+def messages_mode(write: bool) -> int:
+    if is_shallow():
+        print("FAIL: this is a SHALLOW clone. A full-history ratchet on a "
+              "truncated history scans the truncation, not the history.\n"
+              "      CI must check out with `fetch-depth: 0` for this job.")
+        return 1
+    try:
+        rows = commit_messages("HEAD")
+    except subprocess.CalledProcessError as e:
+        print(f"FAIL: could not read history from HEAD: {e}")
+        return 1
+    if _is_empty_scan_fatal(rows):
+        print("FAIL: scanned ZERO commits from HEAD. An empty scan is not a "
+              "clean scan — this gate refuses to report success on it.")
+        return 1
+    found = scan(rows)
+    per_sha: dict = {}
+    for sha, what, line in found:
+        per_sha.setdefault(sha, (what, line))
+    if write:
+        # newline="" for the same reason as the tree baseline: a file shipped
+        # byte-identical to three repos must satisfy the STRICTEST repo's
+        # encoding gate (jas), not the source's.
+        with open(MSG_BASELINE, "w", encoding="utf-8", newline="") as fh:
+            fh.write("# private_paths_message_baseline.tsv -- ACCEPTED historical commits whose "
+                     "MESSAGES carry a private-record path (check_private_paths.py --messages).\n"
+                     "# sha<TAB>what. NEVER the line itself: an excerpt would put the path into "
+                     "the tree, where the tree ratchet reds on it.\n"
+                     "# A pushed message cannot be repaired without a force-push (ruled out "
+                     "08/30), so this list does not shrink; a growth is a reviewed diff that "
+                     "should be nearly impossible to justify.\n")
+            for sha in sorted(per_sha):
+                fh.write(f"{sha}\t{per_sha[sha][0]}\n")
+        print(f"check_private_paths --messages --write-baseline: {len(per_sha)} accepted "
+              f"commit(s) written to {os.path.basename(MSG_BASELINE)}")
+        return 0
+    base = load_msg_baseline()
+    if _msg_unarmed_fatal(base, len(per_sha)):
+        print(f"FAIL [gate {self_id()}]: --messages has NO BASELINE and history carries "
+              f"{len(per_sha)} violating message(s). Arm it deliberately with "
+              f"--messages --write-baseline (a reviewed act, not a fix).")
+        return 1
+    new, absent = msg_ratchet_verdict(list(per_sha), base or set())
+    if new:
+        print(f"FAIL [gate {self_id()}] MESSAGE RATCHET: {len(new)} commit message(s) "
+              f"citing the private record that the baseline does not accept.\n")
+        print("The delta gate charges a push once; this arm makes sure a fired-and-")
+        print("unrepaired message cannot launder into the next scan's base. A pushed")
+        print("message cannot be edited without a force-push — which is why the ONLY")
+        print("acceptable fix is catching it BEFORE the push, and why growing the")
+        print("baseline needs a council word, not a green build.\n")
+        for sha in new:
+            what, line = per_sha[sha]
+            print(f"  {sha[:40]}  {what}")
+            print(f"      {line[:110]}")
+        return 1
+    print(f"check_private_paths --messages [gate {self_id()}]: OK ({len(rows)} messages "
+          f"scanned from HEAD; {len(per_sha)} accepted historical commit(s), all in the "
+          f"baseline; {len(absent)} baseline entr{'y' if len(absent)==1 else 'ies'} not in "
+          f"this history (a branch may predate them — membership, never existence). "
+          f"0 NEW violating messages.")
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="council 5b firewall gate")
     ap.add_argument("--range", default=None,
@@ -696,12 +842,22 @@ def main() -> int:
     ap.add_argument("--self-test", action="store_true")
     ap.add_argument("--tree", action="store_true",
                     help="ratchet: whole-tree residue vs the committed baseline")
+    ap.add_argument("--messages", action="store_true",
+                    help="ratchet: every message reachable from HEAD vs the committed baseline")
     ap.add_argument("--write-baseline", action="store_true",
-                    help="with --tree: (re)write the accepted-residue baseline")
+                    help="with --tree/--messages: (re)write that accepted-residue baseline")
     args = ap.parse_args()
+
+    if args.tree and args.messages:
+        print("FAIL: --tree and --messages are separate ratchets with separate "
+              "baselines; run them as separate steps so a red names its arm.")
+        return 1
 
     if args.tree:
         return tree_mode(args.write_baseline)
+
+    if args.messages:
+        return messages_mode(args.write_baseline)
 
     if args.self_test:
         return self_test()

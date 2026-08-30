@@ -1,0 +1,16 @@
+# private_paths_message_baseline.tsv -- ACCEPTED historical commits whose MESSAGES carry a private-record path (check_private_paths.py --messages).
+# sha<TAB>what. NEVER the line itself: an excerpt would put the path into the tree, where the tree ratchet reds on it.
+# A pushed message cannot be repaired without a force-push (ruled out 08/30), so this list does not shrink; a growth is a reviewed diff that should be nearly impossible to justify.
+2e944e516c4e4765019b081f3a3f6233255c6da9	the backup volume holding the private record
+2f8a78c068c5aca488d1213a2f2a492fe48f0ee4	a line-anchored citation into the fleet bus
+4787935b321800ff3df145371c366e5a91c1cb55	a path into a private-record repo
+509de382ae19c1ab4ce611fb8bac7a92c0cde5a7	a line-anchored citation into the fleet bus
+5466ad9aa29f0cccd45e6d54ed27fa67af404184	a path into a private-record repo
+7197e97034099279517139ec9711baa8a398acb3	a line-anchored citation into the fleet bus
+7319f28c3c64b72344d9eea6b8419d175049bce1	a path into a private-record repo
+73c1e2255f29091eed9ed91bf757ea00de47cb36	a path into a private-record repo
+9115649e312ff3ae4bea1fd9cc48e984563e2194	a line-anchored citation into the fleet bus
+9f2ce39072d707a849b02f1e1868fb19e3a156dc	a line-anchored citation into the fleet bus
+b135c5f7ec90447862d73d39eb2a5be63fa43401	a path into a private-record repo
+b31955aec360439cd97cd49036c4eecd37c81e4d	a line-anchored citation into the fleet bus
+c9d3b500bb299a0e9a0d6f11e16d38dc75a947dd	a path into a private-record repo
