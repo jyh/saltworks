@@ -794,7 +794,32 @@ except Exception: print(-1)' "$mine" 2>/dev/null)
     esac
     [ -n "$cap" ] || cap="UNPARSED"
   fi
-  printf 'FALLBACK %s | mylast=%s | bus=%s | main watch procs=%s (PRESENCE, not delivery) | account=%s | index=%s | mirror=%s | queue=%s | brief=%s | last header: %s\n' \
-    "$(date '+%H:%M')" "$age" "$busf" "$main" "$km" "$idx" "$mir" "$q" "$cap" "$hdr"
+  # ⭐⭐ FIELD ORDER IS LOAD-BEARING — arms 9 and 8 come FIRST, ahead of every
+  # variable-width field. Helm-lifted fence + adopted correction, 2026-08-30.
+  # ⛔ THE DEFECT: the notification envelope cuts at ~512 B. Measured on a live sweep,
+  #    `mirror=` sat at byte 524 and `queue=` at 561 — BOTH PAST THE CUT, so arms 8
+  #    and 9 were invisible in EVERY notification this seat received. Arm 9 is the arm
+  #    that exists because this seat once posted "nothing owed" for ~22 h while the
+  #    queue held an open pre-authorised item: a wake channel is PUSH, a queue is PULL,
+  #    and a PUSH instrument cannot see a PULL duty. THE ARM BUILT TO CATCH THAT WAS
+  #    THE ARM THE ENVELOPE ATE.
+  # ⛔⛔ AND THE FIX IS ORDERING, NEVER A BYTE TARGET. The bank prescribed "move them
+  #    above byte 525/591"; today the same fields measured 524/561. THE OFFSETS DRIFTED
+  #    BETWEEN TWO READINGS OF THE SAME LINE, because every field upstream is
+  #    variable-width — `bus=` grows with the file, and `account=`/`index=` carry LONG
+  #    CONDITIONAL ALARM STRINGS that appear only when the alarm is live.
+  #    ⇒ ***A BYTE OFFSET INTO A VARIABLE-CONTENT LINE IS NOT A CONSTANT, AND A REPAIR
+  #      AIMED AT ONE IS RE-MEASURED INTO STALENESS BY THE NEXT SWEEP.***
+  #    [[supersede-never-adjust-a-layout-constant]] — the repair wants a STRUCTURAL
+  #    POSITION, not a number. There is no offset in this fix and there must never be.
+  # 📌 `mylast=` stays first: it is the cadence anchor, it is bounded in width, and a
+  #    late-post alarm the reader cannot see is the same class of defect as this one.
+  # 📌 SHORTEST-FIRST WITHIN THE PAIR, and it is not cosmetic: `mirror=` is ~34 B and
+  #    fixed-ish; `queue=` is ~158 B and CARRIES A MESSAGE THAT CAN GROW. Emitting the
+  #    growable one first would let it push its partner back across the cut — the very
+  #    defect being repaired, reintroduced from inside the repair. Ordered mirror→queue,
+  #    `queue=` then has ~380 B of room to grow before anything is at risk.
+  printf 'FALLBACK %s | mylast=%s | mirror=%s | queue=%s | bus=%s | main watch procs=%s (PRESENCE, not delivery) | account=%s | index=%s | brief=%s | last header: %s\n' \
+    "$(date '+%H:%M')" "$age" "$mir" "$q" "$busf" "$main" "$km" "$idx" "$cap" "$hdr"
   sleep "$PERIOD"
 done
