@@ -174,3 +174,33 @@ jobs:
           # against scripts/private_paths_message_baseline.tsv (sha + shape only --
           # never the line, which would trip the tree ratchet). Anything NEW reds.
           python scripts/check_private_paths.py --messages
+
+  pr-descriptions:
+    name: no private-record path in PR titles/bodies (the forge-side prose)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+      checks: read
+    # Desk row I(a): a PR's TITLE and BODY are not git objects, so the four
+    # git-object arms above cannot see them -- the most-read public prose
+    # surface on the repo page had no gate, and one body in this fleet carried
+    # a private-record path for five days while every push stayed green. And
+    # the FOURTH DOOR (same audit, item (f)): a push to the BASE fires no run
+    # for the PRs targeting it, so a PR sits green and MERGEABLE while its
+    # verdicts describe a base that no longer exists. So this job runs from
+    # the PUSH workflow, re-reads EVERY open PR each time anything lands, and
+    # reports REF-vs-RUN -- which object each verdict is about -- instead of
+    # trusting status. The event payload is deliberately never read: a guard
+    # is scoped by its event set, and this workflow has two trigger kinds.
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # The gate proves it can fail before it is allowed to pass.
+      - run: python scripts/check_pr_descriptions.py --self-test
+      - name: scan every open PR's title and body via the forge API
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python scripts/check_pr_descriptions.py --open
