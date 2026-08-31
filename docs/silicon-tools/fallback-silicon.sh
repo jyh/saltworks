@@ -752,12 +752,46 @@ except Exception: print(-1)' "$mine" 2>/dev/null)
       # now rather than banking it for a reboot, because a successor would inherit a
       # two-thirds-false line and learn to skip it — and a skipped advisory is worse
       # than no advisory.
-      _qout=$(awk -F: -v a="$_qs" -v b="$_qe" '
-                { if (NR>1 && prev ~ /original entry follows/) retained=1; else retained=0 }
-                (NR<a || NR>b) && /silicon'"'"'s slot|SILICON ·/ &&
-                  $0 !~ /DISCHARGED|SUPERSEDED|~~|RET-[0-9]/ && !retained { n++ }
-                { prev=$0 }
-                END { print n+0 }' "$QF" 2>/dev/null)
+      # ⛔⛔ AMENDED 2026-08-31 09:4x — THE SAME ALARM WENT PERMANENTLY FALSE AGAIN, BY A
+      # SECOND MECHANISM, AND BOTH HALVES WERE MINE. The comment above says the one REAL
+      # item is "council ruling #1's PRE-AUTH". That was TRUE when installed (08/27) and
+      # I SUPERSEDED THAT VERY RULING TWO DAYS LATER (08/29 15:1x, council row r) — so
+      # from 08/29 this advisory fired every sweep on an item my own note had already
+      # killed. ⇒ ***THE DISPOSITION AND THE CLAIM LIVE ON DIFFERENT LINES OF ONE BULLET,
+      # AND A LINE-SCOPED EXCLUSION IS STRUCTURALLY BLIND TO THAT.*** `QUEUE.md`'s
+      # convention PRESERVES a superseded ruling's text verbatim and records the
+      # supersession in a `>` blockquote BENEATH it — deliberately, because "an
+      # authorisation that is removed leaves no trace that it was given". So the line
+      # can never carry its own disposition token, and testing the line can never work.
+      # ✅ THE SCOPE IS NOW THE BULLET: scan forward to the next top-level bullet and
+      # honour a disposition found anywhere in that block. This is a SCOPE CORRECTION on
+      # an ADVISORY, not a widened wake predicate — the receiver-relaxation ban is about
+      # order-delivery filters, and nothing here changes what gets delivered.
+      # 📐 DRIVEN BEFORE SHIPPING, 5 arms, and arm B is the one that matters because a
+      # detector that cannot say YES is worthless: (A) real file -> 0, old line-scoped
+      # detector on the same bytes -> 1, so the change is load-bearing · (B) planted live
+      # row at a STRUCTURALLY-chosen site -> 1, and it NAMES the line · (C) retained
+      # "original entry follows" original -> still 0 · (D) planted row superseded inside
+      # its block -> 0 · (E) supersession beyond the next bullet does NOT rescue -> 1,
+      # so the block boundary is real and not a whole-file grep in disguise.
+      # Mutation control asserted PRESENT in the compared text (1 vs 0) before believing B.
+      _qout=$(awk -v a="$_qs" -v b="$_qe" '
+                { L[NR]=$0 }
+                END {
+                  for (i=1; i<=NR; i++) {
+                    if (i>=a && i<=b) continue
+                    if (L[i] !~ /silicon'"'"'s slot|SILICON ·/) continue
+                    if (L[i] ~ /DISCHARGED|SUPERSEDED|~~|RET-[0-9]/) continue
+                    if (i>1 && L[i-1] ~ /original entry follows/) continue
+                    dead=0
+                    for (j=i+1; j<=NR; j++) {
+                      if (L[j] ~ /^- \*\*/) break
+                      if (L[j] ~ /SUPERSEDED|DO NOT START WORK/) { dead=1; break }
+                    }
+                    if (!dead) n++
+                  }
+                  print n+0
+                }' "$QF" 2>/dev/null)
       q="${q}·scope=##SILICON ONLY ($_qspan of $_qtot lines)"
       [ "${_qout:-0}" -gt 0 ] && q="${q}·⚠️ $_qout silicon-addressed line(s) OUTSIDE that scope — ADVISORY, read them"
     else
