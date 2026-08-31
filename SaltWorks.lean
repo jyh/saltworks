@@ -90,6 +90,7 @@ import SaltWorks.HDL.Rotation
 import SaltWorks.HDL.Executive
 import SaltWorks.HDL.TinyRustN0
 import SaltWorks.HDL.CoreOffsets
+import SaltWorks.HDL.LwTrapGate
 import SaltWorks.HDL.CorePlace
 import SaltWorks.HDL.CoreAssembly
 import SaltWorks.HDL.CoreAssemblyD

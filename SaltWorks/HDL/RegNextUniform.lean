@@ -123,7 +123,7 @@ theorem rnOut_mem_gate_outs (R W r k : Nat) (hr : r < R) (hk : k < W) :
 `regNext`'s block LAST.  Naming the fifteen-block prefix once turns the whole
 composition into a single `run_append`. -/
 
-/-- The seventeen organ blocks that precede `regNext` in `core`. -/
+/-- The eighteen organ blocks that precede `regNext` in `core` (the trap gate entered at R9a). -/
 def corePre : List Gate :=
   instGates tieCells id offTie
     ++ instGates decoder decoderSig off0
@@ -140,6 +140,7 @@ def corePre : List Gate :=
     ++ instGates sltCirc sltSig offSlt
     ++ instGates SelectCut32.sliceASelect selSig offSel
     ++ instGates EncoderE1.ruledEnc encSig offEnc
+    ++ instGates lwWrCirc lwWrSig offLwWr
     ++ instGates regWrite regWriteSig offRw
     ++ instGates SaltWorks.Stack.Program.pcAdd pcAddSig offPc
 

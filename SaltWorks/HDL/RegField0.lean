@@ -56,12 +56,27 @@ def coreThru13 : List Gate :=
     ++ instGates SelectCut32.sliceASelect selSig offSel
     ++ instGates EncoderE1.ruledEnc encSig offEnc
 
-/-- …and those thirteen with `regWrite` appended. -/
+/-- …with the TRAP GATE appended (R9a, ruling z 2026-08-31) — the prefix `regWrite`'s σ is
+evaluated over, since its port 10 reads the gate's output. -/
+def coreThruLw : List Gate :=
+  coreThru13 ++ instGates lwWrCirc lwWrSig offLwWr
+
+/-- …and with `regWrite` appended after that. -/
 def coreThruRw : List Gate :=
-  coreThru13 ++ instGates regWrite regWriteSig offRw
+  coreThruLw ++ instGates regWrite regWriteSig offRw
 
 theorem corePre_split : corePre = coreThruRw ++ instGates SaltWorks.Stack.Program.pcAdd pcAddSig offPc := by
-  simp only [corePre, coreThruRw, coreThru13, List.append_assoc]
+  simp only [corePre, coreThruRw, coreThruLw, coreThru13, List.append_assoc]
+
+/-- Nets below `offLwWr` read the same through `coreThruLw` as through `coreThru13` — the
+trap gate writes only at or above its own offset. -/
+theorem coreThruLw_agrees_below (ins : Env) (n : Net) (hn : n < offLwWr) :
+    run ins coreThruLw n = run ins coreThru13 n := by
+  rw [coreThruLw, run_append]
+  exact run_of_unwritten _ _ _ (fun g hg hEq => by
+    have hge := (instGates_out_range lwWrCirc lwWrSig offLwWr lwWrCirc_ssa g hg).1
+    rw [hEq] at hge
+    exact absurd hge (Nat.not_le.mpr hn))
 
 /-! ### x0's enable is a hardwired constant -/
 
@@ -96,8 +111,8 @@ theorem core_rwOut0_false (ins : Env) : run ins core.gates (rwOut 0) = false := 
     rw [hEq] at hge
     exact absurd hge (Nat.not_le.mpr rwOut0_lt_offPc))]
   rw [coreThruRw, run_append, rwOut0_eq]
-  rw [inst_sem regWrite regWriteSig offRw (run ins coreThru13)
-      (fun a => run ins coreThru13 (regWriteSig a)) regWrite_instOK (fun _ _ => rfl)
+  rw [inst_sem regWrite regWriteSig offRw (run ins coreThruLw)
+      (fun a => run ins coreThruLw (regWriteSig a)) regWrite_instOK (fun _ _ => rfl)
       (regWrite.outs.getD 0 0) (Or.inr (by decide +kernel))]
   exact regWrite_out0_false _
 

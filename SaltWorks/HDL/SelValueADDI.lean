@@ -116,13 +116,14 @@ def coreMid5 : List Gate :=
     ++ instGates selOr selOrSig offSelOr
     ++ instGates OperandB.obMux immMuxSig offImmMux
 
-/-- The six organs from the ADD adder through `regWrite`. -/
+/-- The organs from the ADD adder through `regWrite` (the trap gate entered at R9a). -/
 def coreRest6 : List Gate :=
   instGates adder32 addSig offAdd
     ++ instGates adder32 subSig offSub
     ++ instGates sltCirc sltSig offSlt
     ++ instGates SelectCut32.sliceASelect selSig offSel
     ++ instGates EncoderE1.ruledEnc encSig offEnc
+    ++ instGates lwWrCirc lwWrSig offLwWr
     ++ instGates regWrite regWriteSig offRw
 
 theorem coreThru7_split : coreThru7 = coreThru2 ++ coreMid5 := by
@@ -134,7 +135,7 @@ theorem coreThru11_split9 :
   simp only [coreThru11, coreThru9, coreThru8, coreThru7, List.append_assoc]
 
 theorem coreThruRw_split8 : coreThruRw = coreThru8 ++ coreRest6 := by
-  simp only [coreThruRw, coreThru13, coreThru8, coreThru7, coreRest6, List.append_assoc]
+  simp only [coreThruRw, coreThruLw, coreThru13, coreThru8, coreThru7, coreRest6, List.append_assoc]
 
 theorem coreMid5_out_ge : ∀ g ∈ coreMid5, off1 ≤ g.out := by
   intro g hg
@@ -157,7 +158,7 @@ theorem coreMid5_out_ge : ∀ g ∈ coreMid5, off1 ≤ g.out := by
 theorem coreRest6_out_ge : ∀ g ∈ coreRest6, offAdd ≤ g.out := by
   intro g hg
   simp only [coreRest6, List.mem_append, or_assoc] at hg
-  rcases hg with h|h|h|h|h|h
+  rcases hg with h|h|h|h|h|h|h
   · exact blk_out_ge _ _ _ adder32_ssa offAdd (Nat.le_refl _) g h
   · exact blk_out_ge _ _ _ adder32_ssa offAdd
       (by simp only [offSub, instNext]; omega) g h
@@ -167,8 +168,10 @@ theorem coreRest6_out_ge : ∀ g ∈ coreRest6, offAdd ≤ g.out := by
       (by simp only [offSel, offSlt, offSub, instNext]; omega) g h
   · exact blk_out_ge _ _ _ EncoderE1.ruled_ssa offAdd
       (by simp only [offEnc, offSel, offSlt, offSub, instNext]; omega) g h
+  · exact blk_out_ge _ _ _ lwWrCirc_ssa offAdd
+      (by simp only [offLwWr, offEnc, offSel, offSlt, offSub, instNext]; omega) g h
   · exact blk_out_ge _ _ _ regWrite_ssa offAdd
-      (by simp only [offRw, offEnc, offSel, offSlt, offSub, instNext]; omega) g h
+      (by simp only [offRw, offLwWr, offEnc, offSel, offSlt, offSub, instNext]; omega) g h
 
 /-! ## 2 · the four frames -/
 

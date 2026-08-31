@@ -91,7 +91,7 @@ theorem decode_addi_rd (w : BitVec 32) (rd a : Fin 32) (imm : BitVec 12)
 theorem core_rwOut_sweep_ADD (ins : Env) (rd a b : Fin 32) (r : Nat) (hr : r < 32)
     (h : decode (seenWord ins) = some (.ADD rd a b)) :
     run ins core.gates (rwOut r) = (rd.val == r && !(r == 0)) := by
-  rw [core_rwOut_spec ins r hr, writesRegOf, isADDOf_spec ins, isXOROf_spec ins,
+  rw [core_rwOut_spec ins r hr, writesRegGatedOf, lwWrOf_spec ins, isADDOf_spec ins, isXOROf_spec ins,
       isSLTOf_spec ins, isADDIOf_spec ins, isLWOf_spec ins, isBEQOf_spec ins,
       rdOf_eq_of_rd ins rd (Shared.decode_add_rd _ rd a b h)]
   simp [ctrlSpec, h]
@@ -99,7 +99,7 @@ theorem core_rwOut_sweep_ADD (ins : Env) (rd a b : Fin 32) (r : Nat) (hr : r < 3
 theorem core_rwOut_sweep_XOR (ins : Env) (rd a b : Fin 32) (r : Nat) (hr : r < 32)
     (h : decode (seenWord ins) = some (.XOR rd a b)) :
     run ins core.gates (rwOut r) = (rd.val == r && !(r == 0)) := by
-  rw [core_rwOut_spec ins r hr, writesRegOf, isADDOf_spec ins, isXOROf_spec ins,
+  rw [core_rwOut_spec ins r hr, writesRegGatedOf, lwWrOf_spec ins, isADDOf_spec ins, isXOROf_spec ins,
       isSLTOf_spec ins, isADDIOf_spec ins, isLWOf_spec ins, isBEQOf_spec ins,
       rdOf_eq_of_rd ins rd (decode_xor_rd _ rd a b h)]
   simp [ctrlSpec, h]
@@ -107,7 +107,7 @@ theorem core_rwOut_sweep_XOR (ins : Env) (rd a b : Fin 32) (r : Nat) (hr : r < 3
 theorem core_rwOut_sweep_SLT (ins : Env) (rd a b : Fin 32) (r : Nat) (hr : r < 32)
     (h : decode (seenWord ins) = some (.SLT rd a b)) :
     run ins core.gates (rwOut r) = (rd.val == r && !(r == 0)) := by
-  rw [core_rwOut_spec ins r hr, writesRegOf, isADDOf_spec ins, isXOROf_spec ins,
+  rw [core_rwOut_spec ins r hr, writesRegGatedOf, lwWrOf_spec ins, isADDOf_spec ins, isXOROf_spec ins,
       isSLTOf_spec ins, isADDIOf_spec ins, isLWOf_spec ins, isBEQOf_spec ins,
       rdOf_eq_of_rd ins rd (decode_slt_rd _ rd a b h)]
   simp [ctrlSpec, h]
@@ -115,7 +115,7 @@ theorem core_rwOut_sweep_SLT (ins : Env) (rd a b : Fin 32) (r : Nat) (hr : r < 3
 theorem core_rwOut_sweep_ADDI (ins : Env) (rd a : Fin 32) (imm : BitVec 12) (r : Nat)
     (hr : r < 32) (h : decode (seenWord ins) = some (.ADDI rd a imm)) :
     run ins core.gates (rwOut r) = (rd.val == r && !(r == 0)) := by
-  rw [core_rwOut_spec ins r hr, writesRegOf, isADDOf_spec ins, isXOROf_spec ins,
+  rw [core_rwOut_spec ins r hr, writesRegGatedOf, lwWrOf_spec ins, isADDOf_spec ins, isXOROf_spec ins,
       isSLTOf_spec ins, isADDIOf_spec ins, isLWOf_spec ins, isBEQOf_spec ins,
       rdOf_eq_of_rd ins rd (decode_addi_rd _ rd a imm h)]
   simp [ctrlSpec, h]

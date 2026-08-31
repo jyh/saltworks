@@ -7,6 +7,13 @@ unpredicted there.
 
 FIXTURE: `insT` is `insL`'s trapping sibling, changed in ONE field — the immediate, 4 -> 1.
   x2 = 4 (net 66), x1 = 4 (net 34).  addr = x2 + sext(1) = 5: in range, MISALIGNED => TRAP.
+
+⛔⛔ 2026-08-31 (ruling z / R9a): THE TRAPPING-LEG REFUTATION THIS FILE PROVED IS RETIRED IN
+PLACE — the trap gate landed (`LwTrapGate`, placed in `CorePlace`, `regWrite` port 10 re-aimed)
+and `rw_insT` flipped true → false, killing that proof's path. The file now carries BOTH
+halves of the pre-registered differential: the D2 sweep at `insT` (bits 0–3 agree, not one
+cell) and the LANDED non-trapping witness (`insL`, bit 3), which is byte-unchanged and STILL
+REFUTES `RegDatapathOK` — the trap repair pays the trapping leg only.
 -/
 import SaltWorks.HDL.C4Refuted
 
@@ -40,8 +47,15 @@ theorem not_ok_insT :
     ¬ (addrClass ((decQ insT).get 2 + (1 : BitVec 12).signExtend 32) = AddrClass.ok) := by
   rw [trapping_insT]; decide
 
-/-! ### P3 — THE ENABLE FIRES ON A TRAPPING LOAD -/
-theorem rw_insT : run insT core.gates (rwOut r1.val) = true :=
+/-! ### P3 — THE ENABLE, AT THE TRAPPING LOAD.
+
+⛔⛔ **RESTATED 2026-08-31 (ruling z / R9a): this read `= true` and that TRUE reading was the
+refutation's seed** — the enable fired on a trapping load while the ISA's trap arm holds `rd`.
+The trap gate (`lwWrCirc`, placed at `offLwWr`, `regWrite` port 10 re-aimed through it) now
+holds the enable LOW here. The pre-R9a value is quoted in the retirement note below; the
+restatement is the D1 arm of the pre-registered differential: **the old `= true` statement no
+longer elaborates against the gated core, which is exactly what the bar demanded.** -/
+theorem rw_insT : run insT core.gates (rwOut r1.val) = false :=
   (runB_eq core.gates sT (rwOut r1.val)).symm.trans (by decide +kernel)
 
 /-! ### P4 — the ISA HOLDS x1 = 4, so its bit 0 is clear and its bit 2 is set -/
@@ -58,12 +72,38 @@ theorem sel0_insT : run insT core.gates (selOut 0) = true :=
 theorem sel2_insT : run insT core.gates (selOut 2) = true :=
   (runB_eq core.gates sT (selOut 2)).symm.trans (by decide +kernel)
 
-/-! ### THE VERDICT -/
-theorem regDatapathOK_is_false_on_trapping_LW : ¬ RegDatapathOK := by
-  intro h
-  have hx := h insT r1 0 (by decide)
-  rw [rw_insT, if_pos rfl, sel0_insT, isa0_insT] at hx
-  exact Bool.noConfusion hx
+/-! ### ⚰️ THE VERDICT, RETIRED ON THE RECORD — 2026-08-31, ruling z / R9a.
+
+`regDatapathOK_is_false_on_trapping_LW : ¬ RegDatapathOK` stood here, PROVED, from 08-30
+11:1x to the trap gate's landing. Its proof read the four cells `rw_insT (true) → sel0_insT
+(true) → isa0_insT (false)` and exhibited the disagreement at `insT`, bit 0. **The R9a repair
+killed that proof's path: `rw_insT` is now `false`, the write bank is never consulted on a
+trapping load, and the D2 sweep below shows the sides AGREEING at `insT` across bits 0–3** —
+not the one repaired cell, per [[a-refutation-expires-when-its-defect-is-fixed]].
+⛔ **A DEAD WITNESS IS NOT A TRUE SPEC**: `RegDatapathOK` is STILL FALSE — by the LANDED
+non-trapping witness `insL` at bit 3 (`regDatapathOK_is_false_at_the_LANDED_witness`, below,
+which survives this repair byte-unchanged). Only the TRAPPING leg is repaired. -/
+
+/-! ### D2 — THE SWEEP AT `insT`, POST-REPAIR: four cells, not one. The write is suppressed,
+so each side is the HELD bit vs the ISA's held bit — and they agree at every swept cell,
+including bit 0, the exact cell that refuted. -/
+theorem sides_agree_at_bit_zero_insT :
+    (if run insT core.gates (rwOut r1.val) then run insT core.gates (selOut 0)
+     else insT (32 * r1.val + 0))
+      = ((stepT (decQ insT) (seenWord insT)).regs[r1.val]).getLsbD 0 := by
+  rw [rw_insT]; decide +kernel
+
+theorem sides_agree_at_bit_one_insT :
+    (if run insT core.gates (rwOut r1.val) then run insT core.gates (selOut 1)
+     else insT (32 * r1.val + 1))
+      = ((stepT (decQ insT) (seenWord insT)).regs[r1.val]).getLsbD 1 := by
+  rw [rw_insT]; decide +kernel
+
+theorem sides_agree_at_bit_three_insT :
+    (if run insT core.gates (rwOut r1.val) then run insT core.gates (selOut 3)
+     else insT (32 * r1.val + 3))
+      = ((stepT (decQ insT) (seenWord insT)).regs[r1.val]).getLsbD 3 := by
+  rw [rw_insT]; decide +kernel
 
 /-! ### THE NEGATIVE CONTROL — the same four cells at the LANDED NON-TRAPPING `insL`,
 where the sides are known to AGREE. If this reports a refutation the harness is broken. -/
@@ -77,7 +117,9 @@ theorem control_sides_agree_insL :
       = ((stepT (decQ insL) (seenWord insL)).regs[r1.val]).getLsbD 2 :=
   lw_sides_agree_at_insL
 
-#audit_axioms regDatapathOK_is_false_on_trapping_LW control_sides_agree_insL
+#audit_axioms rw_insT control_sides_agree_insL
+#audit_axioms sides_agree_at_bit_zero_insT sides_agree_at_bit_one_insT
+#audit_axioms sides_agree_at_bit_three_insT
 
 end SaltWorks.HDL.LwTrapRefuted
 
@@ -96,7 +138,9 @@ theorem sides_agree_at_bit_two_insT :
     (if run insT core.gates (rwOut r1.val) then run insT core.gates (selOut 2)
      else insT (32 * r1.val + 2))
       = ((stepT (decQ insT) (seenWord insT)).regs[r1.val]).getLsbD 2 := by
-  rw [rw_insT, if_pos rfl, sel2_insT, isa2_insT]
+  -- Pre-R9a this agreed through the WRITE branch (`if_pos`, sel2 = isa2 = true); post-R9a it
+  -- agrees through the HOLD branch. Same statement, different mechanism — kept as CONTROL 2.
+  rw [rw_insT]; decide +kernel
 
 /-! ### MECHANISM — WHAT is the core putting on the write bank on a load?
 addr = 5 = 0b101.  If the select bank carries the ALU sum, bit 1 is CLEAR. -/
@@ -134,11 +178,13 @@ theorem not_c4Spec_core_of_not_regDatapathOK (hn : ¬ RegDatapathOK) :
   exact hn (regDatapathOK_of_regFields
     ((SaltWorks.Stack.Program.c4Spec_iff_fieldwise core).mp hc).2.1)
 
-theorem not_c4Spec_core_on_trapping_LW : ¬ SaltWorks.HDL.C4Spec core :=
-  not_c4Spec_core_of_not_regDatapathOK regDatapathOK_is_false_on_trapping_LW
+/-- ⚰️ `not_c4Spec_core_on_trapping_LW` RETIRED WITH ITS SEED (R9a) — the conclusion
+`¬ C4Spec core` STANDS, re-anchored through the witness the repair does not touch. -/
+theorem not_c4Spec_core_at_the_landed_witness : ¬ SaltWorks.HDL.C4Spec core :=
+  not_c4Spec_core_of_not_regDatapathOK regDatapathOK_is_false_at_the_LANDED_witness
 
 #audit_axioms sides_agree_at_bit_two_insT sel1_insT
 #audit_axioms regDatapathOK_is_false_at_the_LANDED_witness
-#audit_axioms regDatapathOK_of_regFields not_c4Spec_core_on_trapping_LW
+#audit_axioms regDatapathOK_of_regFields not_c4Spec_core_at_the_landed_witness
 
 end SaltWorks.HDL.LwTrapRefuted.Addenda

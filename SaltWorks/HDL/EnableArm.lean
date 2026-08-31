@@ -75,7 +75,7 @@ output `k`, evaluated on the environment the first thirteen organs produce.** *T
 every register rather than the one whose answer was already known.* -/
 theorem core_rwOut_transport (ins : Env) (k : Nat) (hk : k < 32) :
     run ins core.gates (rwOut k)
-      = run (fun a => run ins coreThru13 (regWriteSig a)) regWrite.gates
+      = run (fun a => run ins coreThruLw (regWriteSig a)) regWrite.gates
           (regWrite.outs.getD k 0) := by
   rw [core_frame_below ins (rwOut k) (rwOut_lt_offRegNext k hk), corePre_split, run_append]
   rw [run_of_unwritten _ _ _ (fun g hg hEq => by
@@ -84,8 +84,8 @@ theorem core_rwOut_transport (ins : Env) (k : Nat) (hk : k < 32) :
     rw [hEq] at hge
     exact absurd hge (Nat.not_le.mpr (rwOut_lt_offPc k hk)))]
   rw [coreThruRw, run_append, rwOut_eq k hk]
-  exact inst_sem regWrite regWriteSig offRw (run ins coreThru13)
-      (fun a => run ins coreThru13 (regWriteSig a)) regWrite_instOK (fun _ _ => rfl)
+  exact inst_sem regWrite regWriteSig offRw (run ins coreThruLw)
+      (fun a => run ins coreThruLw (regWriteSig a)) regWrite_instOK (fun _ _ => rfl)
       (regWrite.outs.getD k 0) (Or.inr (rwOut_mem k hk))
 
 #audit_axioms getD_map_lt rwOut_eq core_rwOut_transport
@@ -93,7 +93,8 @@ theorem core_rwOut_transport (ins : Env) (k : Nat) (hk : k < 32) :
 /-! ### Where `rd` actually comes from -/
 
 theorem core_gates_from13 :
-    core.gates = coreThru13 ++ (instGates regWrite regWriteSig offRw
+    core.gates = coreThru13 ++ (instGates lwWrCirc lwWrSig offLwWr
+      ++ instGates regWrite regWriteSig offRw
       ++ instGates SaltWorks.Stack.Program.pcAdd pcAddSig offPc
       ++ instGates regNext regNextSig offRegNext) := by
   simp only [core, coreThru13, List.append_assoc]
@@ -173,6 +174,9 @@ theorem selOut_eq (k : Nat) (hk : k < 32) :
 theorem selOut_lt_offEnc (k : Nat) (hk : k < 32) : selOut k < offEnc := by
   revert k; decide +kernel
 
+theorem selOut_lt_offLwWr (k : Nat) (hk : k < 32) : selOut k < offLwWr := by
+  revert k; decide +kernel
+
 theorem selOut_lt_offRw (k : Nat) (hk : k < 32) : selOut k < offRw := by
   revert k; decide +kernel
 
@@ -205,6 +209,11 @@ theorem core_selOut_transport (ins : Env) (k : Nat) (hk : k < 32) :
     have hge := (instGates_out_range regWrite regWriteSig offRw regWrite_ssa g hg).1
     rw [hEq] at hge
     exact absurd hge (Nat.not_le.mpr (selOut_lt_offRw k hk)))]
+  rw [coreThruLw, run_append]
+  rw [run_of_unwritten _ _ _ (fun g hg hEq => by
+    have hge := (instGates_out_range lwWrCirc lwWrSig offLwWr lwWrCirc_ssa g hg).1
+    rw [hEq] at hge
+    exact absurd hge (Nat.not_le.mpr (selOut_lt_offLwWr k hk)))]
   rw [coreThru13_sel_split, run_append, run_append]
   rw [run_of_unwritten _ _ _ (fun g hg hEq => by
     have hge := (instGates_out_range EncoderE1.ruledEnc encSig offEnc
@@ -217,7 +226,7 @@ theorem core_selOut_transport (ins : Env) (k : Nat) (hk : k < 32) :
       (SelectCut32.sliceASelect.outs.getD k 0) (Or.inr (selOut_mem k hk))
 
 #audit_axioms coreThru13_sel_split sliceASelect_outs_len selOut_eq
-#audit_axioms selOut_lt_offEnc selOut_lt_offRw selOut_lt_offPc selOut_lt_offRegNext
+#audit_axioms selOut_lt_offEnc selOut_lt_offLwWr selOut_lt_offRw selOut_lt_offPc selOut_lt_offRegNext
 #audit_axioms selOut_mem core_selOut_transport
 
 

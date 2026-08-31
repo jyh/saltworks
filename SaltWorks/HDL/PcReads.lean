@@ -40,9 +40,14 @@ open SaltWorks.Stack.Program
 theorem coreThruRw_sub : coreThruRw ⊆ core.gates := by
   intro g hg
   rw [core_gates_from13]
+  rw [coreThruRw, coreThruLw] at hg
   rcases List.mem_append.mp hg with h | h
-  · exact List.mem_append_left _ h
-  · exact List.mem_append_right _ (List.mem_append_left _ (List.mem_append_left _ h))
+  · rcases List.mem_append.mp h with h13 | hlw
+    · exact List.mem_append_left _ h13
+    · exact List.mem_append_right _
+        (List.mem_append_left _ (List.mem_append_left _ (List.mem_append_left _ hlw)))
+  · exact List.mem_append_right _
+      (List.mem_append_left _ (List.mem_append_left _ (List.mem_append_right _ h)))
 
 theorem coreThruRw_input_stable (ins : Env) (n : Net) (hn : n < coreInWidth) :
     run ins coreThruRw n = ins n :=

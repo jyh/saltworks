@@ -234,28 +234,28 @@ section used to carry in the negative. -/
 theorem core_writes_on_ADD (ins : Env) (rd a b : Fin 32)
     (h : decode (seenWord ins) = some (.ADD rd a b)) (hne : ¬ (rdOf ins = 0)) :
     run ins core.gates (rwOut (rdOf ins)) = true := by
-  rw [core_rwOut_spec ins (rdOf ins) (rdOf_lt ins), writesRegOf, isADDOf_spec ins,
+  rw [core_rwOut_spec ins (rdOf ins) (rdOf_lt ins), writesRegGatedOf, lwWrOf_spec ins, isADDOf_spec ins,
       isXOROf_spec ins, isSLTOf_spec ins, isADDIOf_spec ins, isLWOf_spec ins, isBEQOf_spec ins]
   simp [ctrlSpec, h, hne]
 
 theorem core_writes_on_XOR (ins : Env) (rd a b : Fin 32)
     (h : decode (seenWord ins) = some (.XOR rd a b)) (hne : ¬ (rdOf ins = 0)) :
     run ins core.gates (rwOut (rdOf ins)) = true := by
-  rw [core_rwOut_spec ins (rdOf ins) (rdOf_lt ins), writesRegOf, isADDOf_spec ins,
+  rw [core_rwOut_spec ins (rdOf ins) (rdOf_lt ins), writesRegGatedOf, lwWrOf_spec ins, isADDOf_spec ins,
       isXOROf_spec ins, isSLTOf_spec ins, isADDIOf_spec ins, isLWOf_spec ins, isBEQOf_spec ins]
   simp [ctrlSpec, h, hne]
 
 theorem core_writes_on_SLT (ins : Env) (rd a b : Fin 32)
     (h : decode (seenWord ins) = some (.SLT rd a b)) (hne : ¬ (rdOf ins = 0)) :
     run ins core.gates (rwOut (rdOf ins)) = true := by
-  rw [core_rwOut_spec ins (rdOf ins) (rdOf_lt ins), writesRegOf, isADDOf_spec ins,
+  rw [core_rwOut_spec ins (rdOf ins) (rdOf_lt ins), writesRegGatedOf, lwWrOf_spec ins, isADDOf_spec ins,
       isXOROf_spec ins, isSLTOf_spec ins, isADDIOf_spec ins, isLWOf_spec ins, isBEQOf_spec ins]
   simp [ctrlSpec, h, hne]
 
 theorem core_writes_on_ADDI (ins : Env) (rd a : Fin 32) (imm : BitVec 12)
     (h : decode (seenWord ins) = some (.ADDI rd a imm)) (hne : ¬ (rdOf ins = 0)) :
     run ins core.gates (rwOut (rdOf ins)) = true := by
-  rw [core_rwOut_spec ins (rdOf ins) (rdOf_lt ins), writesRegOf, isADDOf_spec ins,
+  rw [core_rwOut_spec ins (rdOf ins) (rdOf_lt ins), writesRegGatedOf, lwWrOf_spec ins, isADDOf_spec ins,
       isXOROf_spec ins, isSLTOf_spec ins, isADDIOf_spec ins, isLWOf_spec ins, isBEQOf_spec ins]
   simp [ctrlSpec, h, hne]
 
@@ -266,7 +266,7 @@ theorem core_writes_nothing_on_BEQ (ins : Env) (k : Nat) (hk : k < 32)
     (a b : Fin 32) (imm : BitVec 12)
     (h : decode (seenWord ins) = some (.BEQ a b imm)) :
     run ins core.gates (rwOut k) = false := by
-  rw [core_rwOut_spec ins k hk, writesRegOf, isADDOf_spec ins, isXOROf_spec ins,
+  rw [core_rwOut_spec ins k hk, writesRegGatedOf, lwWrOf_spec ins, isADDOf_spec ins, isXOROf_spec ins,
       isSLTOf_spec ins, isADDIOf_spec ins, isLWOf_spec ins, isBEQOf_spec ins]
   simp [ctrlSpec, h]
 
@@ -274,19 +274,37 @@ theorem core_writes_nothing_on_BEQ (ins : Env) (k : Nat) (hk : k < 32)
 theorem core_writes_nothing_on_garbage (ins : Env) (k : Nat) (hk : k < 32)
     (h : decode (seenWord ins) = none) :
     run ins core.gates (rwOut k) = false := by
-  rw [core_rwOut_spec ins k hk, writesRegOf, isADDOf_spec ins, isXOROf_spec ins,
+  rw [core_rwOut_spec ins k hk, writesRegGatedOf, lwWrOf_spec ins, isADDOf_spec ins, isXOROf_spec ins,
       isSLTOf_spec ins, isADDIOf_spec ins, isLWOf_spec ins, isBEQOf_spec ins]
   simp [ctrlSpec, h]
 
-/-- **`LW` writes its destination** — unchanged by the repair, and it is the arm that proved
-the wire was LIVE rather than dead back when it was aimed at `isLW`. -/
+/-- **`LW` writes its destination — WHEN THE ADDRESS DOES NOT TRAP.**
+
+⛔⛔ **RESTATED 2026-08-31 (ruling z / R9a). The unconditional form that stood here carried NO
+`addrClass` hypothesis** — this seat's own 08-29 reading flagged exactly that — **and it became
+FALSE the moment the trap gate landed**: on a trapping load the enable is now held low, which
+is the repair. The `lwTrapOf ins = false` hypothesis is the circuit-side address condition;
+its differential partner is `core_writes_nothing_on_trapping_LW` directly below. -/
 theorem core_does_write_on_LW (ins : Env) (rd a : Fin 32) (imm : BitVec 12)
     (h : decode (seenWord ins) = some (.LW rd a imm))
-    (hne : ¬ (rdOf ins = 0)) :
+    (hne : ¬ (rdOf ins = 0)) (hok : lwTrapOf ins = false) :
     run ins core.gates (rwOut (rdOf ins)) = true := by
-  rw [core_rwOut_spec ins (rdOf ins) (rdOf_lt ins), writesRegOf, isADDOf_spec ins,
+  rw [core_rwOut_spec ins (rdOf ins) (rdOf_lt ins), writesRegGatedOf, lwWrOf_spec ins, isADDOf_spec ins,
       isXOROf_spec ins, isSLTOf_spec ins, isADDIOf_spec ins, isLWOf_spec ins, isBEQOf_spec ins]
-  simp [ctrlSpec, h, hne]
+  simp [ctrlSpec, h, hne, hok]
+
+/-- ⭐⭐⭐ **THE R9a RECEIPT, AS A ROW: A TRAPPING `LW` WRITES NOTHING — every register, every
+input.** The exact mirror of the SW differential below: `regDatapathOK_is_false_on_trapping_LW`
+was PROVED against the pre-R9a core, this theorem is UNPROVABLE there (the witness `insT`
+refutes it), and after the gate it holds universally. -/
+theorem core_writes_nothing_on_trapping_LW (ins : Env) (k : Nat) (hk : k < 32)
+    (rd a : Fin 32) (imm : BitVec 12)
+    (h : decode (seenWord ins) = some (.LW rd a imm))
+    (htrap : lwTrapOf ins = true) :
+    run ins core.gates (rwOut k) = false := by
+  rw [core_rwOut_spec ins k hk, writesRegGatedOf, lwWrOf_spec ins, isADDOf_spec ins,
+      isXOROf_spec ins, isSLTOf_spec ins, isADDIOf_spec ins, isLWOf_spec ins, isBEQOf_spec ins]
+  simp [ctrlSpec, h, htrap]
 
 /-- ⭐⭐⭐ **THE REPAIR'S RECEIPT, AND IT IS A DIFFERENTIAL: `SW` NOW WRITES NOTHING.**
 
@@ -308,7 +326,7 @@ theorem core_writes_nothing_on_SW (ins : Env) (k : Nat) (hk : k < 32)
     (a b : Fin 32) (imm : BitVec 12)
     (h : decode (seenWord ins) = some (.SW a b imm)) :
     run ins core.gates (rwOut k) = false := by
-  rw [core_rwOut_spec ins k hk, writesRegOf, isADDOf_spec ins, isXOROf_spec ins,
+  rw [core_rwOut_spec ins k hk, writesRegGatedOf, lwWrOf_spec ins, isADDOf_spec ins, isXOROf_spec ins,
       isSLTOf_spec ins, isADDIOf_spec ins, isLWOf_spec ins, isBEQOf_spec ins]
   simp [ctrlSpec, h]
 
@@ -344,6 +362,7 @@ theorem valid_is_decoder_output_8 (ins : Env) :
 #audit_axioms the_repair_is_observable valid_is_decoder_output_8
 #audit_axioms core_writes_on_ADD core_writes_on_XOR core_writes_on_SLT core_writes_on_ADDI
 #audit_axioms core_writes_nothing_on_BEQ core_writes_nothing_on_garbage core_does_write_on_LW
+#audit_axioms core_writes_nothing_on_trapping_LW
 
 /-! ## ⭐ THE SELECT NETS — the second brick of the VALUE half
 

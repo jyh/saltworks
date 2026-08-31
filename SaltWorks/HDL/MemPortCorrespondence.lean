@@ -72,34 +72,38 @@ theorem run_core_eq_prefix (ins : Env) (n : Net) (pre tail : List Gate)
     run ins core.gates n = run ins pre n := by
   rw [hsplit, run_append, run_of_unwritten _ _ _ hunw]
 
-/-- Every gate after the first thirteen organs writes at or above `offRw`. -/
-theorem coreTail3_out_ge :
-    ∀ g ∈ (instGates regWrite regWriteSig offRw
+/-- Every gate after the first fifteen organ blocks writes at or above `offLwWr` — since R9a
+the trap gate leads the tail (was `coreTail3_out_ge`, bounded at `offRw`). -/
+theorem coreTail4_out_ge :
+    ∀ g ∈ (instGates lwWrCirc lwWrSig offLwWr
+            ++ instGates regWrite regWriteSig offRw
             ++ instGates SaltWorks.Stack.Program.pcAdd pcAddSig offPc
-            ++ instGates regNext regNextSig offRegNext), offRw ≤ g.out := by
-  have key : ∀ (c : Circ) (σ : Net → Net) (off : Nat), c.ssa = true → offRw ≤ off →
-      ∀ g ∈ instGates c σ off, offRw ≤ g.out :=
+            ++ instGates regNext regNextSig offRegNext), offLwWr ≤ g.out := by
+  have key : ∀ (c : Circ) (σ : Net → Net) (off : Nat), c.ssa = true → offLwWr ≤ off →
+      ∀ g ∈ instGates c σ off, offLwWr ≤ g.out :=
     fun c σ off hssa hoff g hg =>
       Nat.le_trans hoff (instGates_out_range c σ off hssa g hg).1
   intro g hg
   simp only [List.mem_append, or_assoc] at hg
-  rcases hg with h|h|h
-  · exact key _ _ _ (by decide +kernel) (Nat.le_refl _) g h
+  rcases hg with h|h|h|h
+  · exact key _ _ _ lwWrCirc_ssa (Nat.le_refl _) g h
   · exact key _ _ _ (by decide +kernel)
-      (by simp only [offPc, offRw, instNext]; omega) g h
+      (by simp only [offRw, offLwWr, instNext]; omega) g h
   · exact key _ _ _ (by decide +kernel)
-      (by simp only [offRegNext, offPc, offRw, instNext]; omega) g h
+      (by simp only [offPc, offRw, offLwWr, instNext]; omega) g h
+  · exact key _ _ _ (by decide +kernel)
+      (by simp only [offRegNext, offPc, offRw, offLwWr, instNext]; omega) g h
 
 /-- ⭐⭐ **LEG ② — THE DECODER'S LINES, THROUGH THE WHOLE CORE.** -/
 theorem core_decOut_spec_full (ins : Env) (j : Nat) (hj : j < 9) :
     run ins core.gates (decOut j) = (ctrlSpec (seenWord ins)).getD j false := by
   rw [run_core_eq_prefix ins (decOut j) coreThru13 _ core_gates_from13
     (fun g hg hEq => by
-      have hge := coreTail3_out_ge g hg
+      have hge := coreTail4_out_ge g hg
       rw [hEq] at hge
       have hlt : decOut j < off1 := decOut_lt_off1 j hj
-      have hle : off1 ≤ offRw := by
-        simp only [offRegNext, offPc, offRw, offEnc, offSel, offSlt, offSub, offAdd,
+      have hle : off1 ≤ offLwWr := by
+        simp only [offRegNext, offPc, offRw, offLwWr, offEnc, offSel, offSlt, offSub, offAdd,
           offOb, offImmMux, offSelOr, off5, off4, off3, off2, off1, off0, offTie, instNext]; omega
       -- ⛔ NOT `omega` HERE: the `<` sits at `Net`, so omega drops `hlt` and reports a
       -- counterexample made only of the OTHER hypotheses — this seat's own card, firing.
@@ -112,7 +116,7 @@ theorem memWe_is_isSW (ins : Env) :
       = (ctrlSpec (seenWord ins)).getD isSWLine false :=
   core_decOut_spec_full ins isSWLine (by decide)
 
-#audit_axioms run_core_eq_prefix coreTail3_out_ge core_decOut_spec_full memWe_is_isSW
+#audit_axioms run_core_eq_prefix coreTail4_out_ge core_decOut_spec_full memWe_is_isSW
 
 
 /-! ## LEG ③ — THE WRITE DATA -/
@@ -120,7 +124,7 @@ theorem memWe_is_isSW (ins : Env) :
 theorem core_gates_from_rw :
     core.gates = coreThruRw ++ (instGates SaltWorks.Stack.Program.pcAdd pcAddSig offPc
       ++ instGates regNext regNextSig offRegNext) := by
-  simp only [core, coreThruRw, coreThru13, List.append_assoc]
+  simp only [core, coreThruRw, coreThruLw, coreThru13, List.append_assoc]
 
 theorem coreTail2_out_ge :
     ∀ g ∈ (instGates SaltWorks.Stack.Program.pcAdd pcAddSig offPc
@@ -144,7 +148,7 @@ theorem core_rs2Out_eq (ins : Env) (k : Nat) (hk : k < 32) :
       rw [hEq] at hge
       have hlt : rs2Out k < off4 := rs2Out_lt_off4 k hk
       have hle : off4 ≤ offPc := by
-        simp only [offPc, offRw, offEnc, offSel, offSlt, offSub, offAdd, offOb, offImmMux, offSelOr,
+        simp only [offPc, offRw, offLwWr, offEnc, offSel, offSlt, offSub, offAdd, offOb, offImmMux, offSelOr,
           off5, off4, instNext]; omega
       exact absurd hge (Nat.not_le.mpr (Nat.lt_of_lt_of_le hlt hle)))
 

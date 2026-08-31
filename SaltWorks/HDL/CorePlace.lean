@@ -17,6 +17,7 @@ import SaltWorks.HDL.OperandBMux
 import SaltWorks.HDL.OperandBWidening
 import SaltWorks.HDL.Bitwise
 import SaltWorks.HDL.RegNext
+import SaltWorks.HDL.LwTrapGate
 -- Row 14's organ is math's: `SaltWorks.Stack.Program.pcAdd`. `CoreOffsets` already carries this
 -- dependency (its `row_pcAdd` cites the same artifact), so the seam is not new to my slot.
 import SaltWorks.Stack.Program
@@ -403,83 +404,12 @@ theorem writesRegCirc_correct : wrOK = true := by decide +kernel
 
 #audit_axioms writesRegCirc_ssa writesRegCirc_wf writesRegCirc_correct
 
-/-- `regWrite`'s σ: `rd` from the instruction, `valid` from decoder output **8**, `isBEQ` from
-decoder output 4.
-
-⛔⛔ **REPAIRED 2026-08-19. THIS READ `decOut 5` AND THAT WAS A DEFECT, kernel-proved at
-`a10f980` before it was fixed here.** `decOut j` is `ctrlSpec` index `j`, and the row is
-`isADD isXOR isSLT isADDI isBEQ isLW isSW req valid` — **index 5 is `isLW`; `valid` is 8.**
-So the assembled core write-enabled on *"this is a load"* and **never wrote a register on
-`ADD`, `ADDI`, `XOR` or `SLT`.**
-⚠️ **HOW IT GOT HERE, because the mechanism outlives the bug:** `valid` MOVED from index 5
-to index 8 when D2 grew the decoder (`outs := outs ++ [req, v]`, so `valid` keeps the tail).
-This σ and four prose sites were written against the old layout and never re-dated —
-`green-build-does-not-date-its-prose`, firing on the file that caused the defect it
-describes. -/
-def regWriteSig (j : Net) : Net :=
-  if j < 5 then rdBit j
-  else if j = 5 then decOut isADDLine        -- isADD  (WAS `decOut 8` = valid — the SW defect)
-  else if j = 6 then decOut isBEQLine        -- isBEQ  (unchanged)
-  else if j = 7 then decOut isXORLine        -- isXOR
-  else if j = 8 then decOut isSLTLine        -- isSLT
-  else if j = 9 then decOut isADDILine        -- isADDI
-  else decOut isLWLine                      -- isLW
-
-/-- ⭐ **PLACEMENT #5 — `regWrite` at `off1`, `instOK` DISCHARGED, and the first placement whose
-σ reaches into another organ's gates.** -/
-theorem regWrite_placeable_from_off1 : instOK regWrite regWriteSig off1 := by
-  refine ⟨regWrite_ssa, regWrite_wf, ?_⟩
-  intro j hj
-  have hnn : regWrite.nIn = 11 := by decide +kernel
-  rw [hnn] at hj
-  -- ⚠️ `split` twice covered a 2-branch σ; with seven control ports the branches must be
-  -- enumerated, and `decide +kernel` cannot run under a free `j`.
-  interval_cases j <;>
-    simp only [regWriteSig, rdBit, instrNet, instrBase, decOut, decoderSig, off1, off0,
-               instNext, tieCells, offTie, coreInWidth, stWidth, Net] <;>
-    decide +kernel
-
-/-- ⛔ **WHY `instOK_mono` CANNOT LIFT THIS ONE — the theorem that makes the ordering real.**
-
-The decoder's outputs sit ABOVE `off0`, so `regWrite`'s σ does *not* land below `off0` and the
-monotone lemma has no premise to work from. Placements #1–#4 were order-independent; this one is
-not, and the difference is exhibited rather than asserted. *Anyone extending this file who assumes
-`instOK_mono` covers every organ will produce a placement that type-checks against the wrong
-offset.* -/
-theorem regWrite_is_NOT_placeable_at_off0 : ¬ (regWriteSig 5 < off0) := by
-  simp only [regWriteSig, decOut, decoderSig, off0, instNext, tieCells, offTie, coreInWidth, stWidth, Net]
-  decide +kernel
-
-/-- **CONTROL: the two decoder-driven wires are DISTINCT and correctly ordered.** `valid` is
-output **8** and `isBEQ` is output 4; swapping them would place a well-typed core that
-write-enables on the wrong predicate. Both facts asserted, because the σ picks them by INDEX.
-
-⛔⛔ **THIS CONTROL WAS NAMED FOR THE DEFECT IT COULD NOT SEE, AND THAT IS THE LESSON.** Until
-08-19 its docstring said *"`valid` is output 5"* and its STATEMENT proved only
-`regWriteSig 5 = decOut 5`, `regWriteSig 6 = decOut 4`, and `decOut 4 ≠ decOut 5` —
-**the WIRING and the DISTINCTNESS, never the IDENTIFICATION.** It therefore *could not fail*
-when 5 was the wrong bit: it can only catch a SWAP, and the defect was not a swap.
-⇒ ***ASK OF ANY SUCH CONTROL: WHICH WRONG WIRING DOES THIS REJECT?*** If the honest answer is
-only "the two being equal", it is nearly vacuous. **The identification is proved separately
-and semantically in `DecoderTransport.valid_is_decoder_output_8`, through
-`sem_decoder_eq_ctrlSpec` — here the indices are only syntax.** -/
-theorem writeFlags_are_the_right_outputs :
-    regWriteSig 5 = decOut isADDLine ∧ regWriteSig 6 = decOut isBEQLine ∧ regWriteSig 7 = decOut isXORLine
-    ∧ regWriteSig 8 = decOut isSLTLine ∧ regWriteSig 9 = decOut isADDILine ∧ regWriteSig 10 = decOut isLWLine
-    ∧ decOut isBEQLine ≠ decOut isADDLine := by
-  refine ⟨by simp [regWriteSig], by simp [regWriteSig], by simp [regWriteSig],
-          by simp [regWriteSig], by simp [regWriteSig], by simp [regWriteSig], ?_⟩
-  simp only [decOut, decoderSig, off0, instNext, tieCells, offTie, coreInWidth, stWidth]
-  decide +kernel
-
-/-- **CONTROL: `rd` lands in the instruction, not in the state and not in the decoder's gates.**
-Three regions now exist below `off1` and σ must hit the right one for each input. -/
-theorem rd_bits_are_in_the_instruction (j : Nat) (hj : j < 5) :
-    stWidth ≤ regWriteSig j ∧ regWriteSig j < off0 := by
-  simp only [regWriteSig, rdBit, instrNet, instrBase, off0, instNext, tieCells, offTie, coreInWidth, stWidth, Net]
-  split
-  · omega
-  · omega
+/- ⛔ `regWriteSig` AND ITS CONTROLS MOVED (2026-08-31, ruling z / R9a). Port 10 now reads the
+trap gate's output, a net defined only after `offLwWr` — so the σ and its four theorems live
+beside the trap gate's placement, just above `offRw`. The 08-19 repair history moved with the
+block, verbatim. `regWrite_placeable_from_off1` did NOT survive the move: its statement is
+FALSE of the new σ (port 10 sits far above `off1`), and `regWrite_instOK` is now proved
+DIRECTLY at `offRw` — see the relocated block. -/
 
 
 /-! ## 6. INCREMENT 2e — BINDING THE CHAIN: a σ that depends on where its producers SIT
@@ -1111,33 +1041,173 @@ So the four producers are written down as a citable table — `pcAddPortMap` —
 table, and `pcAddSig_follows_the_port_map` proves the σ is exactly that table read back. A reviewer
 checks a five-row list against `Program.lean:4184` instead of re-deriving five `if` branches. -/
 
-/-- ⭐ **ROW 13 — `regWrite`'s REAL offset.** `ruledEnc` has zero gates, so this equals `offEnc`;
-the point is that the chain now STEPS OVER `regWrite`, which it previously did not.
+/-! ## 12b. R9a — THE TRAP GATE'S PLACEMENT (ruling z, 2026-08-31)
+
+Late insertion between `ruledEnc` and `regWrite` — the slot this file's own `writesReg` note
+names as the cheap one: only `offRw`, `offPc` and `offRegNext` move; every offset at or below
+`offEnc` — and with them `decOut`, `addOut`, `selOut` — is untouched. The organ and its
+semantics live in `LwTrapGate.lean`; this section is WHERE it sits and WHAT drives it. -/
+
+/-- The trap gate's offset — after `ruledEnc` (zero gates, so numerically `offEnc`). -/
+def offLwWr : Nat := instNext EncoderE1.ruledEnc offEnc
+
+/-- Port `j`'s ADDRESS BIT, for `j < 29`: the trap-relevant bits in ascending order
+`0,1,5,6,…,31`. Bits 2…4 are the in-range word index — `ISA.addrClass` never reads them. -/
+def lwTrapBitIdx (j : Nat) : Nat := if j < 2 then j else j + 3
+
+/-- `lwWrCirc`'s σ: ports `0…28` read the ALU sum — the LW address — at `addOut`;
+port `29` reads the decoder's `isLW`. -/
+def lwWrSig (j : Net) : Net :=
+  if j = 29 then decOut isLWLine else addOut (lwTrapBitIdx j)
+
+/-- ⭐ **PLACEMENT #19 — the trap gate at its slot, `instOK` DISCHARGED.** Its inputs are the
+adder's outputs (at `offAdd`, four rows down-chain) and one decoder line — all below `offLwWr`. -/
+theorem lwWr_instOK : instOK lwWrCirc lwWrSig offLwWr := by
+  refine ⟨lwWrCirc_ssa, lwWrCirc_wf, ?_⟩
+  intro j hj
+  have hnn : lwWrCirc.nIn = 30 := by decide +kernel
+  rw [hnn] at hj
+  revert hj; revert j
+  decide +kernel
+
+/-- The trap gate's single output, read from `instOuts` — a literal would stop tracking the
+organ and its placement both. -/
+def lwWrOutNet : Net := (instOuts lwWrCirc lwWrSig offLwWr).getD 0 0
+
+/-- ⭐ **THE PORT LIST IS THE TRAP SET, AS DATA**: `(range 29).map lwTrapBitIdx` is exactly
+`addrClass`'s read set — bits 0,1 (alignment) and 5…31 (range) — and port 29 is `isLW`.
+*A σ read off a formula can drift; a list the kernel checks cannot.* -/
+theorem lwWrSig_reads_the_trap_set :
+    (List.range 29).map lwTrapBitIdx
+      = [0, 1, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
+         23, 24, 25, 26, 27, 28, 29, 30, 31]
+    ∧ lwWrSig 29 = decOut isLWLine := by
+  exact ⟨by decide +kernel, rfl⟩
+
+/-! ### `regWrite`'s σ — RELOCATED HERE 2026-08-31 (ruling z / R9a): port 10 now reads the
+trap gate's output, so the σ must be defined after `offLwWr`. The 08-19 repair history is
+kept verbatim below; the R9a change is ONE moved wire. -/
+
+/-- `regWrite`'s σ: `rd` from the instruction, five opcode flags from the decoder — and, since
+R9a, the LW contribution through the TRAP GATE rather than raw `isLW`.
+
+⛔⛔ **REPAIRED 2026-08-19. THIS READ `decOut 5` AND THAT WAS A DEFECT, kernel-proved at
+`a10f980` before it was fixed here.** `decOut j` is `ctrlSpec` index `j`, and the row is
+`isADD isXOR isSLT isADDI isBEQ isLW isSW req valid` — **index 5 is `isLW`; `valid` is 8.**
+So the assembled core write-enabled on *"this is a load"* and **never wrote a register on
+`ADD`, `ADDI`, `XOR` or `SLT`.**
+⚠️ **HOW IT GOT HERE, because the mechanism outlives the bug:** `valid` MOVED from index 5
+to index 8 when D2 grew the decoder (`outs := outs ++ [req, v]`, so `valid` keeps the tail).
+This σ and four prose sites were written against the old layout and never re-dated —
+`green-build-does-not-date-its-prose`, firing on the file that caused the defect it
+describes.
+
+⛔⛔ **RE-AIMED 2026-08-31 (ruling z / R9a): port 10 WAS `decOut isLWLine` and that made a
+TRAPPING load write its computed address to `rd`** — kernel-proved at `insT`
+(`LwTrapRefuted`), while the ISA's trap arm holds `rd`. Port 10 now reads
+`lwWrOutNet = isLW ∧ ¬trap`. On every non-LW opcode the two wires agree
+(`lwWrCirc_off_when_not_LW` + the OR's other four arms); on a clean LW they agree
+(`lwWrCirc_passes_clean` lifted at `insL`); on a trapping LW they differ, which is the repair. -/
+def regWriteSig (j : Net) : Net :=
+  if j < 5 then rdBit j
+  else if j = 5 then decOut isADDLine        -- isADD  (WAS `decOut 8` = valid — the SW defect)
+  else if j = 6 then decOut isBEQLine        -- isBEQ  (unchanged)
+  else if j = 7 then decOut isXORLine        -- isXOR
+  else if j = 8 then decOut isSLTLine        -- isSLT
+  else if j = 9 then decOut isADDILine        -- isADDI
+  else lwWrOutNet                            -- isLW ∧ ¬trap  (WAS `decOut isLWLine` — R9a)
+
+/-- ⛔ **WHY `instOK_mono` CANNOT LIFT THIS ONE — the theorem that makes the ordering real.**
+
+The decoder's outputs sit ABOVE `off0`, so `regWrite`'s σ does *not* land below `off0` and the
+monotone lemma has no premise to work from. Placements #1–#4 were order-independent; this one is
+not, and the difference is exhibited rather than asserted. *Anyone extending this file who assumes
+`instOK_mono` covers every organ will produce a placement that type-checks against the wrong
+offset.*
+
+📜 **HISTORY (2026-08-31):** until R9a this sat beside `regWrite_placeable_from_off1`, which
+proved the σ placeable from `off1`. That theorem is RETIRED — FALSE of the new σ, whose port 10
+reads a net just below `offRw` — and `regWrite_instOK` below is now proved DIRECTLY. -/
+theorem regWrite_is_NOT_placeable_at_off0 : ¬ (regWriteSig 5 < off0) := by
+  simp only [regWriteSig, decOut, decoderSig, off0, instNext, tieCells, offTie, coreInWidth, stWidth, Net]
+  decide +kernel
+
+/-- **CONTROL: the two decoder-driven wires are DISTINCT and correctly ordered.** `valid` is
+output **8** and `isBEQ` is output 4; swapping them would place a well-typed core that
+write-enables on the wrong predicate. Both facts asserted, because the σ picks them by INDEX.
+
+⛔⛔ **THIS CONTROL WAS NAMED FOR THE DEFECT IT COULD NOT SEE, AND THAT IS THE LESSON.** Until
+08-19 its docstring said *"`valid` is output 5"* and its STATEMENT proved only
+`regWriteSig 5 = decOut 5`, `regWriteSig 6 = decOut 4`, and `decOut 4 ≠ decOut 5` —
+**the WIRING and the DISTINCTNESS, never the IDENTIFICATION.** It therefore *could not fail*
+when 5 was the wrong bit: it can only catch a SWAP, and the defect was not a swap.
+⇒ ***ASK OF ANY SUCH CONTROL: WHICH WRONG WIRING DOES THIS REJECT?*** If the honest answer is
+only "the two being equal", it is nearly vacuous. **The identification is proved separately
+and semantically in `DecoderTransport.valid_is_decoder_output_8`, through
+`sem_decoder_eq_ctrlSpec` — here the indices are only syntax.**
+
+⭐ **R9a ADDS THE CONJUNCT THAT PROVES THE WIRE ACTUALLY MOVED**: port 10 is the trap gate's
+output and NOT the raw `isLW` line — without it, a silent revert of the re-aim would leave
+every other conjunct green. -/
+theorem writeFlags_are_the_right_outputs :
+    regWriteSig 5 = decOut isADDLine ∧ regWriteSig 6 = decOut isBEQLine ∧ regWriteSig 7 = decOut isXORLine
+    ∧ regWriteSig 8 = decOut isSLTLine ∧ regWriteSig 9 = decOut isADDILine ∧ regWriteSig 10 = lwWrOutNet
+    ∧ decOut isBEQLine ≠ decOut isADDLine
+    ∧ lwWrOutNet ≠ decOut isLWLine := by
+  refine ⟨by simp [regWriteSig], by simp [regWriteSig], by simp [regWriteSig],
+          by simp [regWriteSig], by simp [regWriteSig], by simp [regWriteSig], ?_, ?_⟩
+  · simp only [decOut, decoderSig, off0, instNext, tieCells, offTie, coreInWidth, stWidth]
+    decide +kernel
+  · simp only [lwWrOutNet, decOut, decoderSig, instOuts, instMap, lwWrCirc, lwWrSig, offLwWr,
+               offEnc, offSel, offSlt, offSub, offAdd, offOb, offImmMux, offSelOr, off5, off4,
+               off3, off2, off1, off0, instNext, tieCells, offTie, coreInWidth, stWidth, Net]
+    decide +kernel
+
+/-- **CONTROL: `rd` lands in the instruction, not in the state and not in the decoder's gates.**
+Three regions now exist below `off1` and σ must hit the right one for each input. -/
+theorem rd_bits_are_in_the_instruction (j : Nat) (hj : j < 5) :
+    stWidth ≤ regWriteSig j ∧ regWriteSig j < off0 := by
+  simp only [regWriteSig, rdBit, instrNet, instrBase, off0, instNext, tieCells, offTie, coreInWidth, stWidth, Net]
+  split
+  · omega
+  · omega
+
+/-- ⭐ **ROW 13 — `regWrite`'s REAL offset.** Since R9a it follows the TRAP GATE (30 gates), so
+it no longer equals `offEnc`; the chain still STEPS OVER `regWrite`, which is this def's point.
 
 ⛔ **THIS DEF IS THE REPAIR OF A LANDED DEFECT.** `regWrite` was placed at `off1` — the offset
 `immBCirc` already occupies — because §5's docstring concluded it was *"placeable from `off1`
 onward"* and the placement collapsed that half-open interval to its left endpoint. Measured before
 the repair: `immBCirc` out-nets `[1192]`, `regWrite` out-nets `[1192, 1193, …]`, **overlap `[1192]`**,
 and `regWrite`'s 163 gates appeared in no downstream offset. *A BOUND IS NOT A POSITION.* -/
-def offRw : Nat := instNext EncoderE1.ruledEnc offEnc
+def offRw : Nat := instNext lwWrCirc offLwWr
 
 /-- `off1 ≤ offRw` — structurally, so no offset is ever forced to a numeral. -/
 theorem off1_le_offRw : off1 ≤ offRw := by
-  simp only [offRw, offEnc, offSel, offSlt, offSub, offAdd, offOb, offImmMux, offSelOr, off5, off4, off3, off2, instNext]
+  simp only [offRw, offLwWr, offEnc, offSel, offSlt, offSub, offAdd, offOb, offImmMux, offSelOr, off5, off4, off3, off2, instNext]
   omega
 
-/-- ⭐ **PLACEMENT #5, REPAIRED — `regWrite` at its ruled row 13, `instOK` DISCHARGED.** Lifted from
-the `off1` bound by `instOK_mono`: `regWrite`'s inputs are the `rd` field and two decoder outputs,
-all of them below `off1`, so the certificate rides up the chain unchanged. *The bound was always
-true; it was never the address.* -/
-theorem regWrite_instOK : instOK regWrite regWriteSig offRw :=
-  instOK_mono regWrite_placeable_from_off1 off1_le_offRw
+/-- ⭐ **PLACEMENT #5, RE-PROVED DIRECTLY AT `offRw` (R9a).** The `instOK_mono` lift from `off1`
+died with the re-aim — port 10 now reads the trap gate's output, which sits just below `offRw`
+and far above `off1` — so the certificate is discharged the way `regWrite_placeable_from_off1`
+originally was: per port, by enumeration. -/
+theorem regWrite_instOK : instOK regWrite regWriteSig offRw := by
+  refine ⟨regWrite_ssa, regWrite_wf, ?_⟩
+  intro j hj
+  have hnn : regWrite.nIn = 11 := by decide +kernel
+  rw [hnn] at hj
+  interval_cases j <;>
+    simp only [regWriteSig, rdBit, instrNet, instrBase, decOut, decoderSig, lwWrOutNet,
+               instOuts, instMap, lwWrCirc, lwWrSig, offRw, offLwWr, offEnc, offSel, offSlt,
+               offSub, offAdd, offOb, offImmMux, offSelOr, off5, off4, off3, off2, off1, off0,
+               instNext, tieCells, offTie, coreInWidth, stWidth, Net] <;>
+    decide +kernel
 
 /-- ⛔⛔ **THE DEFECT, NOW A THEOREM THAT WOULD BREAK IF IT RETURNED: `immBCirc`'s gates end at or
 before `regWrite`'s first gate.** Two placements sharing a net is invisible to every `instOK` in
 this file, so it has to be said separately. -/
 theorem immB_and_regWrite_do_not_overlap : instNext immBCirc off1 ≤ offRw := by
-  simp only [offRw, offEnc, offSel, offSlt, offSub, offAdd, offOb, offImmMux, offSelOr, off5, off4, off3, off2, instNext]
+  simp only [offRw, offLwWr, offEnc, offSel, offSlt, offSub, offAdd, offOb, offImmMux, offSelOr, off5, off4, off3, off2, instNext]
   omega
 
 /-- Row 14's offset — now after `regWrite`, per `CoreOffsets`' ruled order. -/
@@ -1197,11 +1267,16 @@ theorem pcAdd_instOK : instOK SaltWorks.Stack.Program.pcAdd pcAddSig offPc := by
   revert hi; revert i
   decide +kernel
 
-/-- **The zero-gate row: `pcAdd` starts where `ruledEnc` started.** Stated over the offsets rather
-than over a numeral, so the whole chain is never evaluated. -/
-theorem rw_row_does_not_shift : offRw = offEnc := by
+/-- **The zero-gate row, RESTATED FOR R9a: it is the TRAP GATE that starts where `ruledEnc`
+started** (`ruledEnc` has zero gates), **and `regWrite` starts a trap gate further on.** The
+pre-R9a statement `offRw = offEnc` was true of the 18-organ chain and is FALSE of the 19-organ
+one — its falsity is the insertion, exactly as `pc_row_is_a_regWrite_past_the_encoder`'s
+predecessor's falsity was `regWrite`'s. Stated over the offsets rather than over a numeral, so
+the whole chain is never evaluated. -/
+theorem rw_row_does_not_shift : offLwWr = offEnc ∧ offRw = offEnc + lwWrCirc.gates.length := by
   have h : EncoderE1.ruledEnc.gates.length = 0 := by decide +kernel
-  simp only [offRw, instNext, h, Nat.add_zero]
+  exact ⟨by simp only [offLwWr, instNext, h, Nat.add_zero],
+         by simp only [offRw, offLwWr, instNext, h, Nat.add_zero]⟩
 
 /-- ⛔ **AND ITS PREDECESSOR WAS A TRUE THEOREM ABOUT A BROKEN CHAIN.** `pc_row_does_not_shift`
 asserted `offPc = offEnc`, which held *only because `regWrite` was missing from the chain*. It is
@@ -1385,7 +1460,7 @@ theorem offTie_le_offRegNext : offTie ≤ offRegNext := by
   -- ⚠️ `offRw` is a NEW LINK in the chain and this list had to learn it: without it the unfolding
   -- stops at `offRw` as an opaque atom and omega cannot relate `offTie` to the far end. Inserting a
   -- row means auditing every simp list that WALKS the chain, not just the offsets themselves.
-  simp only [offRegNext, offPc, offRw, offEnc, offSel, offSlt, offSub, offAdd, offOb, offImmMux, offSelOr, off5, off4,
+  simp only [offRegNext, offPc, offRw, offLwWr, offEnc, offSel, offSlt, offSub, offAdd, offOb, offImmMux, offSelOr, off5, off4,
              off3, off2, off1, off0, instNext]
   omega
 
@@ -1463,7 +1538,7 @@ theorem we_and_res_banks_are_not_swapped :
 offsets so no numeral is ever forced. -/
 theorem regNext_follows_its_producers : offRw < offRegNext ∧ offSel < offRegNext := by
   constructor <;>
-    simp only [offRegNext, offPc, offRw, offEnc, offSel, offSlt, offSub, offAdd, offOb, offImmMux, offSelOr, off5, off4,
+    simp only [offRegNext, offPc, offRw, offLwWr, offEnc, offSel, offSlt, offSub, offAdd, offOb, offImmMux, offSelOr, off5, off4,
                off3, off2, off1, instNext] <;>
     · have h : 0 < SaltWorks.Stack.Program.pcAdd.gates.length := by decide +kernel
       omega
@@ -1483,7 +1558,7 @@ def placedGateTotal : Nat :=
     + bitNot32.gates.length + selOr.gates.length + OperandB.obMux.gates.length
     + OperandB.obMux.gates.length + adder32.gates.length
     + adder32.gates.length + sltCirc.gates.length + SelectCut32.sliceASelect.gates.length
-    + EncoderE1.ruledEnc.gates.length + regWrite.gates.length
+    + EncoderE1.ruledEnc.gates.length + lwWrCirc.gates.length + regWrite.gates.length
     + SaltWorks.Stack.Program.pcAdd.gates.length + regNext.gates.length
 
 /-- ⭐⭐ **THE COVERAGE INVARIANT — and it is FALSE of the chain as it stood one commit ago.** The
@@ -1495,7 +1570,7 @@ occupied net makes the left side smaller. Either way THIS BREAKS.
 matches them without evaluating a single gate list.* -/
 theorem chain_accounts_for_every_placed_organ :
     instNext regNext offRegNext = offTie + placedGateTotal := by
-  simp only [placedGateTotal, offRegNext, offPc, offRw, offEnc, offSel, offSlt, offSub, offAdd,
+  simp only [placedGateTotal, offRegNext, offPc, offRw, offLwWr, offEnc, offSel, offSlt, offSub, offAdd,
              offOb, offImmMux, offSelOr, off5, off4, off3, off2, off1, off0, instNext]
   omega
 
@@ -1534,7 +1609,10 @@ list at the first failure, so everything after a failing name silently reads as 
 #audit_axioms pc_bits_are_core_inputs
 #audit_axioms rw_row_does_not_shift
 #audit_axioms pc_row_is_a_regWrite_past_the_encoder
-#audit_axioms regWrite_placeable_from_off1
+-- `regWrite_placeable_from_off1` RETIRED 2026-08-31 (R9a): false of the re-aimed σ.
+#audit_axioms lwWr_instOK
+#audit_axioms lwWrSig_reads_the_trap_set
+#audit_axioms lwWrOutNet
 #audit_axioms off1_le_offRw
 #audit_axioms immB_and_regWrite_do_not_overlap
 #audit_axioms chain_accounts_for_every_placed_organ

@@ -46,14 +46,15 @@ open SaltWorks.HDL SaltWorks.HDL.CorePlace SaltWorks.Stack.Program
 /-- ⭐ **THE SIX OFFSETS §1.1 REPORTS THAT NOTHING PREVIOUSLY CERTIFIED.** The other ten are pinned
 in `CorePlace` and cited above rather than repeated here.
 
-*`offEnc = offRw` is the zero-gate row (`ruledEnc` has no gates) and it is the ONE case where two
-rows legitimately share a starting net — the distinction from the `regWrite` collision repaired at
-`5f1abb7`, which is one word wide and is why both appear in this conjunction.* -/
+*Until R9a, `offEnc = offRw` was the zero-gate row (`ruledEnc` has no gates) — the ONE case
+where two rows legitimately shared a starting net. Since R9a it is `offEnc = offLwWr` that
+shares (the trap gate starts where `ruledEnc` started), and `offRw` sits a 30-gate trap gate
+further on: 8053 + 30 = 8083, with `offPc`/`offRegNext` shifted by the same 30.* -/
 theorem offsets_pinned :
-    offTie = 1088 ∧ offOb = 7340 ∧ offEnc = 8053 ∧ offRw = 8053
-      ∧ offPc = 8220 ∧ offRegNext = 8480 := by
+    offTie = 1088 ∧ offOb = 7340 ∧ offEnc = 8053 ∧ offLwWr = 8053 ∧ offRw = 8083
+      ∧ offPc = 8250 ∧ offRegNext = 8510 := by
   refine ⟨by decide +kernel, by decide +kernel, by decide +kernel, by decide +kernel,
-          by decide +kernel, by decide +kernel⟩
+          by decide +kernel, by decide +kernel, by decide +kernel⟩
 
 /-- **The chain's end — §1.2's "total nets".**
 
@@ -66,9 +67,12 @@ the ADDI repair moved no offset; the citation was sound and the FIGURE I propaga
 ⚠️ **REGISTERED BEFORE HORN D LANDS, because D MOVES THIS NUMBER:** extending `encD` to the
 8-word memory and the trap flag takes the state 1056 → 1313 bits, and `instrBase := stWidth`
 definitionally, so every instruction net and every gate offset shifts by **+257** — this end
-becomes **11743**. When that lands, this declaration must be renamed AGAIN. A name carrying a
-literal is a maintenance obligation, not a description. -/
-theorem chain_end_is_11584 : instNext regNext offRegNext = 11584 := by decide +kernel
+becomes **11743 + 30** once the widening also carries the trap gate. When that lands, this
+declaration must be renamed AGAIN. A name carrying a literal is a maintenance obligation, not a
+description. **RENAMED 2026-08-31 (R9a): was `chain_end_is_11584`; the trap gate's 30 gates
+moved the end to 11614 — renamed the same commit the figure moved, per this docstring's own
+law.** -/
+theorem chain_end_is_11614 : instNext regNext offRegNext = 11614 := by decide +kernel
 
 /-- ⭐⭐ **THE CROSS-INSTRUMENT RECONCILIATION — the reason §1's figures are two-witness.**
 
@@ -84,16 +88,16 @@ from a 2-short one. As a theorem the truncation cannot hide: the equation is eit
 after it shifts by the same amount. *The pair was `11459 / 11461` before D2 and is `11480 / 11482`
 now; the RECONCILIATION is what did not move, which is the property this theorem exists to state.* -/
 theorem chain_reconciles_with_CoreOffsets :
-    instNext regNext offRegNext = 11582 + tieCells.gates.length := by decide +kernel
+    instNext regNext offRegNext = 11612 + tieCells.gates.length := by decide +kernel
 
 /-- **CONTROL: the reconciliation is not vacuous.** Both sides are pinned independently, so a reader
 can see the two instruments agreeing rather than an identity that holds by construction. -/
 theorem reconciliation_is_not_vacuous :
-    instNext regNext offRegNext = 11584 ∧ 11582 + tieCells.gates.length = 11584 := by
-  refine ⟨chain_end_is_11584, by decide +kernel⟩
+    instNext regNext offRegNext = 11614 ∧ 11612 + tieCells.gates.length = 11614 := by
+  refine ⟨chain_end_is_11614, by decide +kernel⟩
 
 #audit_axioms offsets_pinned
-#audit_axioms chain_end_is_11584
+#audit_axioms chain_end_is_11614
 #audit_axioms chain_reconciles_with_CoreOffsets
 #audit_axioms reconciliation_is_not_vacuous
 

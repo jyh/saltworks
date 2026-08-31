@@ -33,7 +33,8 @@ set_option maxHeartbeats 4000000
 namespace SaltWorks.HDL.CorePlace
 open SaltWorks.HDL
 
-/-- ⭐⭐⭐ **THE COMPOSED CORE.** Eighteen organs, in the chain order `placedGateTotal`
+/-- ⭐⭐⭐ **THE COMPOSED CORE.** Nineteen organs since R9a (the trap gate entered between
+`ruledEnc` and `regWrite`, ruling z 2026-08-31), in the chain order `placedGateTotal`
 enumerates, each embedded by `instGates` at the offset `CorePlace` proved it placeable at. -/
 def core : Circ :=
   { nIn   := coreInWidth
@@ -52,6 +53,7 @@ def core : Circ :=
           ++ instGates sltCirc sltSig offSlt
           ++ instGates SelectCut32.sliceASelect selSig offSel
           ++ instGates EncoderE1.ruledEnc encSig offEnc
+          ++ instGates lwWrCirc lwWrSig offLwWr
           ++ instGates regWrite regWriteSig offRw
           ++ instGates SaltWorks.Stack.Program.pcAdd pcAddSig offPc
           ++ instGates regNext regNextSig offRegNext

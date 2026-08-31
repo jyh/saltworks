@@ -54,9 +54,55 @@ def isSLTOf  (ins : Env) : Bool := run ins coreThru13 (decOut isSLTLine)
 def isADDIOf (ins : Env) : Bool := run ins coreThru13 (decOut isADDILine)
 def isLWOf   (ins : Env) : Bool := run ins coreThru13 (decOut isLWLine)
 
-/-- **The disjunction the enable now computes**: "this instruction writes a register". -/
+/-- **The disjunction the enable computed 2026-08-19 → 08-31**: "this instruction writes a
+register", with LW contributing RAW. Kept as a named function because theorems about the
+PRE-R9a core are stated over it; the LIVE enable is `writesRegGatedOf` below. -/
 def writesRegOf (ins : Env) : Bool :=
   isADDOf ins || isXOROf ins || isSLTOf ins || isADDIOf ins || isLWOf ins
+
+/-! ### R9a (ruling z, 2026-08-31): the LW contribution rides through the TRAP GATE. -/
+
+/-- The trap gate's output as the core computes it — `regWrite` port 10's actual driver. -/
+def lwWrOf (ins : Env) : Bool := run ins coreThruLw lwWrOutNet
+
+/-- The trap condition as the core computes it: the OR of the 29 trap-relevant address bits
+of the ALU sum — `ISA.addrClass`'s read set, evaluated at the nets the trap gate reads. -/
+def lwTrapOf (ins : Env) : Bool :=
+  lwTrapFold (fun j => run ins coreThru13 (lwWrSig j))
+
+/-- **The disjunction the enable computes SINCE R9a**: LW contributes only through the gate. -/
+def writesRegGatedOf (ins : Env) : Bool :=
+  isADDOf ins || isXOROf ins || isSLTOf ins || isADDIOf ins || lwWrOf ins
+
+theorem lwWrCirc_outs_len : lwWrCirc.outs.length = 1 := by decide +kernel
+
+theorem lwWrOutNet_eq :
+    lwWrOutNet = instMap lwWrCirc lwWrSig offLwWr (lwWrCirc.outs.getD 0 0) := by
+  rw [lwWrOutNet, instOuts]
+  exact getD_map_lt _ _ _ (by rw [lwWrCirc_outs_len]; omega) 0 0
+
+theorem lwWrOut_mem :
+    (lwWrCirc.gates.map Gate.out).contains (lwWrCirc.outs.getD 0 0) = true := by
+  decide +kernel
+
+/-- ⭐⭐ **THE GATE'S OUTPUT, IN CLOSED FORM: `isLW ∧ ¬trap`, for every input** — the organ's
+symbolic semantics (`lwWrCirc_sem`) lifted onto the placement, exactly as `core_decOut_spec`
+lifts the decoder's. This is what makes the R9a enable a theorem rather than a wiring hope. -/
+theorem lwWrOf_spec (ins : Env) : lwWrOf ins = (isLWOf ins && !(lwTrapOf ins)) := by
+  rw [lwWrOf, coreThruLw, run_append, lwWrOutNet_eq,
+      inst_sem lwWrCirc lwWrSig offLwWr (run ins coreThru13)
+        (fun a => run ins coreThru13 (lwWrSig a)) lwWr_instOK (fun _ _ => rfl)
+        (lwWrCirc.outs.getD 0 0) (Or.inr lwWrOut_mem)]
+  have hsem := lwWrCirc_sem (fun a => run ins coreThru13 (lwWrSig a))
+  rw [sem] at hsem
+  have h0 : (lwWrCirc.outs.map (run (fun a => run ins coreThru13 (lwWrSig a)) lwWrCirc.gates)).getD 0 false
+      = run (fun a => run ins coreThru13 (lwWrSig a)) lwWrCirc.gates (lwWrCirc.outs.getD 0 0) :=
+    getD_map_lt _ _ _ (by rw [lwWrCirc_outs_len]; omega) 0 false
+  rw [hsem] at h0
+  rw [← h0]
+  rfl
+
+#audit_axioms lwWrOf lwTrapOf writesRegGatedOf lwWrOutNet_eq lwWrOf_spec
 
 theorem rdOf_lt (ins : Env) : rdOf ins < 32 := by
   cases h7 : ins (instrNet 7) <;> cases h8 : ins (instrNet 8) <;> cases h9 : ins (instrNet 9) <;>
@@ -73,44 +119,66 @@ theorem rdOf_testBit (ins : Env) (j : Nat) (hj : j < 5) :
     -- the literal addition in the INDEX has to be reduced first. `norm_num` does both.
     norm_num [rdOf, hb7, hb8, hb9, hb10, hb11] <;> decide
 
-/-- The environment `regWrite` sees inside `core` IS the canonical one `weOf` is stated over. -/
+/-- Every net `regWrite`'s σ reads at ports 0…9 sits below the trap gate's offset, so those
+reads pass through `coreThruLw` unchanged. Port 10 is exactly the net the gate writes. -/
+theorem regWriteSig_below_lwWr (i : Nat) (hi : i < 10) : regWriteSig i < offLwWr := by
+  revert i; decide +kernel
+
+/-- The environment `regWrite` sees inside `core` IS the canonical one `weOf` is stated over.
+Since R9a that environment is produced by `coreThruLw` (the trap gate included), and the
+LW slot carries `lwWrOf` — the gated contribution — rather than raw `isLWOf`. -/
 theorem envRW_agrees (ins : Env) (i : Nat) (hi : i < regWrite.nIn) :
-    run ins coreThru13 (regWriteSig i)
+    run ins coreThruLw (regWriteSig i)
       = (fun n => if n < 5 then (rdOf ins).testBit n
                   else if n == 5 then isADDOf ins
                   else if n == 6 then isBEQOf ins
                   else if n == 7 then isXOROf ins
                   else if n == 8 then isSLTOf ins
-                  else if n == 9 then isADDIOf ins else isLWOf ins) i := by
+                  else if n == 9 then isADDIOf ins else lwWrOf ins) i := by
   have h7 : regWrite.nIn = 11 := by decide +kernel
   rw [h7] at hi
   interval_cases i
-  · rw [show regWriteSig 0 = rdBit 0 from rfl, core_rd_is_the_instruction ins 0 (by omega)]
+  · rw [coreThruLw_agrees_below ins _ (regWriteSig_below_lwWr 0 (by omega)),
+        show regWriteSig 0 = rdBit 0 from rfl,
+        core_rd_is_the_instruction ins 0 (by omega)]
     simp [rdOf_testBit ins 0 (by omega)]
-  · rw [show regWriteSig 1 = rdBit 1 from rfl, core_rd_is_the_instruction ins 1 (by omega)]
+  · rw [coreThruLw_agrees_below ins _ (regWriteSig_below_lwWr 1 (by omega)),
+        show regWriteSig 1 = rdBit 1 from rfl,
+        core_rd_is_the_instruction ins 1 (by omega)]
     simp [rdOf_testBit ins 1 (by omega)]
-  · rw [show regWriteSig 2 = rdBit 2 from rfl, core_rd_is_the_instruction ins 2 (by omega)]
+  · rw [coreThruLw_agrees_below ins _ (regWriteSig_below_lwWr 2 (by omega)),
+        show regWriteSig 2 = rdBit 2 from rfl,
+        core_rd_is_the_instruction ins 2 (by omega)]
     simp [rdOf_testBit ins 2 (by omega)]
-  · rw [show regWriteSig 3 = rdBit 3 from rfl, core_rd_is_the_instruction ins 3 (by omega)]
+  · rw [coreThruLw_agrees_below ins _ (regWriteSig_below_lwWr 3 (by omega)),
+        show regWriteSig 3 = rdBit 3 from rfl,
+        core_rd_is_the_instruction ins 3 (by omega)]
     simp [rdOf_testBit ins 3 (by omega)]
-  · rw [show regWriteSig 4 = rdBit 4 from rfl, core_rd_is_the_instruction ins 4 (by omega)]
+  · rw [coreThruLw_agrees_below ins _ (regWriteSig_below_lwWr 4 (by omega)),
+        show regWriteSig 4 = rdBit 4 from rfl,
+        core_rd_is_the_instruction ins 4 (by omega)]
     simp [rdOf_testBit ins 4 (by omega)]
-  · simp [isADDOf,  show regWriteSig 5  = decOut isADDLine from rfl]
-  · simp [isBEQOf,  show regWriteSig 6  = decOut isBEQLine from rfl]
-  · simp [isXOROf,  show regWriteSig 7  = decOut isXORLine from rfl]
-  · simp [isSLTOf,  show regWriteSig 8  = decOut isSLTLine from rfl]
-  · simp [isADDIOf, show regWriteSig 9  = decOut isADDILine from rfl]
-  · simp [isLWOf,   show regWriteSig 10 = decOut isLWLine from rfl]
+  · rw [coreThruLw_agrees_below ins _ (regWriteSig_below_lwWr 5 (by omega))]
+    simp [isADDOf,  show regWriteSig 5  = decOut isADDLine from rfl]
+  · rw [coreThruLw_agrees_below ins _ (regWriteSig_below_lwWr 6 (by omega))]
+    simp [isBEQOf,  show regWriteSig 6  = decOut isBEQLine from rfl]
+  · rw [coreThruLw_agrees_below ins _ (regWriteSig_below_lwWr 7 (by omega))]
+    simp [isXOROf,  show regWriteSig 7  = decOut isXORLine from rfl]
+  · rw [coreThruLw_agrees_below ins _ (regWriteSig_below_lwWr 8 (by omega))]
+    simp [isSLTOf,  show regWriteSig 8  = decOut isSLTLine from rfl]
+  · rw [coreThruLw_agrees_below ins _ (regWriteSig_below_lwWr 9 (by omega))]
+    simp [isADDIOf, show regWriteSig 9  = decOut isADDILine from rfl]
+  · simp [lwWrOf,   show regWriteSig 10 = lwWrOutNet from rfl]
 
 theorem regWrite_out_bound (k : Nat) (hk : k < 32) :
     regWrite.outs.getD k 0 < regWrite.nIn + regWrite.gates.length := by
   revert k; decide +kernel
 
-/-- ⭐⭐ **THE ENABLE, AS `weOf`.** -/
+/-- ⭐⭐ **THE ENABLE, AS `weOf` — the LW slot carries the GATED contribution since R9a.** -/
 theorem core_rwOut_eq_weOf (ins : Env) (k : Nat) (hk : k < 32) :
     run ins core.gates (rwOut k)
       = (weOf (rdOf ins) (isADDOf ins) (isBEQOf ins) (isXOROf ins) (isSLTOf ins)
-              (isADDIOf ins) (isLWOf ins)).getD k false := by
+              (isADDIOf ins) (lwWrOf ins)).getD k false := by
   -- ⚠️ `weOf` is stated over the PACKED evaluator now, so `semB_eq` carries it back to `sem`
   -- before the output map can be unfolded.
   rw [core_rwOut_transport ins k hk, weOf, semB_eq, sem]
@@ -136,19 +204,20 @@ theorem weOf_eq_weSpec (rd : Nat) (hrd : rd < 32) (a b c d e f : Bool) :
   have h7 := List.all_eq_true.mp h6 f (by cases f <;> simp)
   exact eq_of_beq h7
 
-/-- ⭐⭐⭐ **THE ENABLE ARM'S CIRCUIT HALF, CLOSED FORM.** `core`'s write enable for register
-`k` is exactly the ISA's write predicate over three reads — and `rd` is the instruction
-word's own bits 7…11, with no decoder between them. -/
+/-- ⭐⭐⭐ **THE ENABLE ARM'S CIRCUIT HALF, CLOSED FORM — R9a shape.** `core`'s write enable
+for register `k` is the write predicate over the flag reads, with LW's contribution GATED on
+the address not trapping (`lwWrOf`, closed-form `isLW ∧ ¬trap` by `lwWrOf_spec`) — and `rd`
+is the instruction word's own bits 7…11, with no decoder between them. -/
 theorem core_rwOut_spec (ins : Env) (k : Nat) (hk : k < 32) :
     run ins core.gates (rwOut k)
-      = (writesRegOf ins && !(isBEQOf ins) && (rdOf ins == k) && !(k == 0)) := by
+      = (writesRegGatedOf ins && !(isBEQOf ins) && (rdOf ins == k) && !(k == 0)) := by
   rw [core_rwOut_eq_weOf ins k hk,
-      weOf_eq_weSpec _ (rdOf_lt ins) _ _ _ _ _ _, weSpec, writesRegOf,
+      weOf_eq_weSpec _ (rdOf_lt ins) _ _ _ _ _ _, weSpec, writesRegGatedOf,
       getD_map_lt _ _ _ (by simpa using hk) 0 false]
   -- the `weSpec` row index is a `List.range` lookup; `hk` is what lets it reduce to `k`.
   simp [hk]
 
-#audit_axioms rdOf_lt rdOf_testBit envRW_agrees core_rwOut_eq_weOf
+#audit_axioms rdOf_lt rdOf_testBit regWriteSig_below_lwWr envRW_agrees core_rwOut_eq_weOf
 #audit_axioms isADDOf isXOROf isSLTOf isADDIOf isLWOf writesRegOf
 #audit_axioms weOf_eq_weSpec core_rwOut_spec
 

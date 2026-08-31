@@ -41,7 +41,7 @@ open SaltWorks.HDL.CorePlace
 open SaltWorks.Stack.Program
 
 theorem coreThruRw_split3' : coreThruRw = coreThru3 ++ coreRest11b := by
-  simp only [coreThruRw, coreThru13, coreThru3, coreRest11b, List.append_assoc]
+  simp only [coreThruRw, coreThruLw, coreThru13, coreThru3, coreRest11b, List.append_assoc]
 
 theorem immBCirc_out_k (k : Nat) (hk : k < 32) : immBCirc.outs.getD k 0 = immB k := by
   show ((List.range 32).map immB).getD k 0 = immB k

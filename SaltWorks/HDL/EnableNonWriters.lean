@@ -135,7 +135,8 @@ theorem core_enable_false_on_SW_via_organ (ins : Env) (k : Nat) (hk : k < 32)
     (h : decode (seenWord ins) = some (.SW a b imm)) :
     run ins core.gates (rwOut k) = false := by
   obtain ⟨hA, hX, hS, hI, hL⟩ := sw_flags_low ins a b imm h
-  rw [core_rwOut_eq_weOf ins k hk, hA, hX, hS, hI, hL]
+  rw [core_rwOut_eq_weOf ins k hk, lwWrOf_spec ins, hA, hX, hS, hI, hL]
+  simp only [Bool.false_and]
   have hall := regWrite_store_writes_nothing
   have h1 := List.all_eq_true.mp hall (rdOf ins) (List.mem_range.mpr (rdOf_lt ins))
   have h2 := List.all_eq_true.mp h1 (isBEQOf ins) (by cases isBEQOf ins <;> simp)
