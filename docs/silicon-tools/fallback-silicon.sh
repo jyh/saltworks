@@ -712,6 +712,14 @@ except Exception: print(-1)' "$mine" 2>/dev/null)
     #    of a 2,331-line file, and a PRE-AUTH item IN SILICON'S SLOT (council ruling #1,
     #    "hardening fires NOW (silicon's slot, PRE-AUTH under this ruling)") sits at line
     #    1060, inside THE CAPTAIN'S REGISTER — a 1,896-line section this arm never opens.
+    # ⛔ THAT EXAMPLE IS DEAD, TWICE OVER — MARKED HERE 08/31 AND NOT ONLY IN THE AMENDMENT
+    #    BELOW, because a disposition written 35 lines further down is exactly what this
+    #    file has now been bitten by twice. (i) THE ITEM IS SUPERSEDED (council row r,
+    #    08/29 — my own note; "DO NOT START WORK ON THIS PRE-AUTH"). (ii) THE LINE NUMBER
+    #    MOVED, 1060 -> 1163, which is this seat's own cite-by-anchor law failing inside a
+    #    comment about scope blindness. The SCOPE REASONING here is still correct and is
+    #    why the arm reads the whole file; only its EXAMPLE has rotted. See the block at
+    #    "AMENDED 2026-08-31" below for the fix this rot produced.
     #    Nine work-assigning silicon mentions live outside the section against one inside
     #    (control: the same query matches inside, so the outside count is not an artifact).
     # 🔑 THIS IS THIS ARM'S OWN DEFECT, ONE LEVEL OUT. It was built because a PULL duty was
