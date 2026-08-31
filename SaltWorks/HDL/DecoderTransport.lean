@@ -60,7 +60,11 @@ is `core_writes_nothing_on_SW` below, with its own before/after differential.
 have ZERO declarations corpus-wide** (measured 2026-08-29 17:06:04, controls both ways:
 `core_writes_nothing_on_SW` → 1, a nonsense name → 0). *`core_writes_on_SW` survives only as
 history inside the receipt's own docstring, which is the correct place for it.*
-✅ **THE LIVE STATUS, AS OF THIS ANNOTATION: `RegDatapathOK` IS UNPROVED AND UNREFUTED. NO HALF
+⛔⛔ **SUPERSEDED 2026-08-30 — `RegDatapathOK` IS REFUTED IN THE KERNEL** by
+`SaltWorks.HDL.LwTrapRefuted` (two independent witnesses: a trapping `LW`, and `C4Refuted`'s
+own `insL` at bit 3 — NOT this file's; `insL` is declared in `C4Refuted`). The paragraph below was TRUE WHEN WRITTEN on 08-29 and is kept for
+the differential; **it is not the live status and must not be quoted as one.**
+✅ **THE STATUS AS OF 2026-08-29: `RegDatapathOK` IS UNPROVED AND UNREFUTED. NO HALF
 OF IT IS FALSE IN THE KERNEL.** *The enable-agreement half is discharged for `SW`, `BEQ` and
 undecodable words by the three `core_writes_nothing_on_*` theorems in this file.*
 `RegDatapathOK` is still **UNPROVED rather than refuted** (no value witness stands against
