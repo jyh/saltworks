@@ -538,8 +538,14 @@ def self_test() -> int:
         # FILE arm -- 7 minutes after the ruling, and INVISIBLE to a
         # message-only census. This fixture exists because the hand census
         # missed it and the gate did not.
+        # ⛔ LINE ANCHOR BLINDED 08/31 (row I(e), a sibling seat's audit): the
+        # real instance carried a real line number, and this file published it
+        # -- assembled parts dodge the SCANNER, not the READER, and a line
+        # anchor is a pointer INTO the record's contents (this file's own
+        # doctrine, above). The matched span (the path) is byte-identical, so
+        # the fixture drives the same shape; only the anchor is synthetic.
         ("ee5a84a", "the council ruled this sitting (`" + _SEAT
-                    + "/briefs/2026-08-19-maestro-night-bank.md:1288`)"),
+                    + "/briefs/2026-08-19-maestro-night-bank.md:9999`)"),
         # historical, kept as the only specimen of the kit-surface shape
         ("c9d3b50", "the kit copy at ~/" + _KIT + "/bus_watch.sh"),
     ]
@@ -558,7 +564,9 @@ def self_test() -> int:
         ("p-emp", "see " + _EMPLOYER[0] + "/notes/x.md"),
         ("p-priv", "see " + _PRIVATE_PROJ[1] + "/design/y.md"),
         ("p-cfg", "config lives in ~/.claude-" + _SEAT + "-evidence/settings.json"),
-        ("p-bus", "as minuted at " + _BUS.replace(chr(92), "") + ":171311"),
+        # The bus-citation arm needs A line number, never THAT line number --
+        # the anchor below is synthetic for the same reason as ee5a84a's.
+        ("p-bus", "as minuted at " + _BUS.replace(chr(92), "") + ":99999"),
         # THE FOUR SHAPES THAT WERE BLIND UNTIL 08/25. Assembled, never spelled.
         ("p-bslash", "see " + _SEAT + chr(92) + "briefs" + chr(92) + "x.md"),
         ("p-mixed", "see " + _SEAT + chr(92) + _ROOTLESS[0] + "/x.md"),
