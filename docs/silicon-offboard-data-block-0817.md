@@ -448,7 +448,73 @@ while either stands, and until today the fleet was tracking one of them.***
 
 ## §14 · THE TWO RUNGS, DATED
 
-⚖️⚖️ **LIVE TABLE — HELM RULING 2026-08-29 14:3x, ENTERED BY COMPILER THE SAME HOUR. THIS IS THE
+⚖️⚖️ **LIVE TABLE — COUNCIL RULING z, 2026-08-31 (the 08-31 minute: "accept"; sitting-close
+routing 09:30:39), ENTERED BY COMPILER THE SAME HOUR. The revised dates are DERIVED from the
+branch receipts — merged to master at `235834e`, `saltbuild EXIT=0`, 4648 audit ticks — not
+asserted at the sitting; the derivation is printed under the table. Everything below this
+block in this section is HISTORY.**
+```
+DATE         RUNG                                        OWNER · NOTE
+08-31→09-02  R9a · THE CORE REPAIR, leg 1 — place+wire   COMPILER, on the leg-1 release word
+             the trap gate (the write enable suppressed  (the build was OFFERED 08-30 and is
+             on isLW ∧ trapping) + the differential in   still unreleased). The differential is
+             the SAME act: the trapping-LW refutation    MANDATORY: regDatapathOK_is_false_on_
+             goes PROVED → UNPROVABLE at its own         trapping_LW must DIE at insT, and
+             witness, and the LANDED insL witness MUST   regDatapathOK_is_false_at_the_LANDED_
+             STILL PROVE — leg 2 survives any trap       witness must STILL PROVE — the 08-29
+             repair, which is the one-bit lesson         one-cell retirement, mechanized so it
+             mechanized                                  cannot repeat.
+09-04→09-06  R10 · FLAGSHIP RESTATEMENT — bound stated   JOINT per the ownership table; T8 is
+             in the units the machine honors; no bare    routed to the Captain. Dates UNCHANGED —
+             literal surviving the retired cycle=step    carried up verbatim. ⛔ NOW LOAD-BEARING
+             identity — AND the LW row's honest          FOR R9b: the runbook's own law makes
+             disposition rides with it                   removing a direction FALSE in the new
+                                                         setting REQUIRED HONESTY, and LW is now
+                                                         kernel-proved to be such a direction.
+09-06        R9b · THE C4Spec WITNESS proper, against    COMPILER; silicon cross-verifies, dated
+             the ratified sentence — inhabit it for      WITH this rung, never before it (duty
+             the real circuit, not merely consume it     unchanged from the 08/17 table).
+09-07        THE WINDOW. Sept-7 HOLDS WITH ~1 DAY OF MARGIN, on the two contingencies below.
+```
+
+#### THE DERIVATION — ruling z's own words: *"the revised date derives from compiler's receipts, not asserted at the sitting"*
+**KERNEL GROUND** (`SaltWorks/HDL/LwTrapRefuted.lean`, master `235834e`):
+`regDatapathOK_is_false_on_trapping_LW` + `not_c4Spec_core_on_trapping_LW` (leg 1, expressible
+in 1056) and `regDatapathOK_is_false_at_the_LANDED_witness` (leg 2, `insL` at bit 3 — survives
+any trap repair). ⇒ **The 08-29 row was not LATE, it was UNMEETABLE: it dated a proof of a
+proposition the kernel now refutes.** A date revision alone cannot cure falseness, so the rung
+changed shape — that is the split into R9a/R9b.
+⇒ **The 08-29 order argument died with it.** R9-before-R10 rested on `stallArm_reduces` (a
+witness against today's core IS the restated predicate's base case) — sound only while today's
+predicate is TRUE of the core. Refuted, there is no witness to carry forward, and the LW row's
+truth arrives only with R10's disposition. **R9b therefore dates WITH R10's close — the swap
+§14's earlier text weighed and rejected is now forced by the kernel, not chosen by a seat.**
+**MEASURED COMPARABLES** (git, this repo):
+```
+leg-① repair arc   cdd63ab 08-28 14:00 → 79c6f04 08-29 00:28 — sketch, conservative proof,
+                   place, wire: ONE WORKING DAY. Nearest analog to R9a's gate; R9a gets that
+                   day plus one for the differential and drift.
+four value rows    one session, 08-29 12:32 → 18:33 (≈1.5 h/row) — prices R9b's assembly.
+the row-v reading  pre-registration → discharge, 11:03 → 11:29 (26 min) — prices the witness
+                   run itself.
+leg 2 as REAL LW   needs the ratified 1056→1316 widening AND a memory-data input the core
+                   does not have (silicon's synthesis, on the record 08-30): 3–5 days elapsed,
+                   mostly not this seat's — INFERRED 08/29 and still unlanded. NOT inside this
+                   window; it is the road PAST it.
+```
+**TWO NAMED CONTINGENCIES — said now, never silently (the 08/26 rule):**
+1. R9a starts on the leg-1 release word. Each day of silence past 08-31 moves R9a and R9b
+   day-for-day.
+2. R9b holds only if R10 holds 09-04→09-06 and disposes the LW row. If R10 slips, R9b slips
+   past the window, and the Captain hears it as a revision with the new dates attached.
+
+### ⬇️ THE 08-29 TABLE, RETAINED VERBATIM AS HISTORY — SUPERSEDED BY RULING z ABOVE, NEVER DELETED
+*Its dates were entered under the helm's 08-29 ruling; ruling v (08-30) pre-ruled that a refuting
+witness returns as a date revision, the witness ran 08-30 and REFUTED, and ruling z (08-31)
+accepted the revision. The text below is unedited except its first line, which carries a
+"(was: LIVE TABLE)" marker so a hurried reader cannot take the old dates as standing.*
+
+⚖️⚖️ **HISTORY (was: LIVE TABLE) — HELM RULING 2026-08-29 14:3x, ENTERED BY COMPILER THE SAME HOUR. THIS IS THE
 BLOCK `QUEUE.md` CITES; everything below it in this section is HISTORY.**
 ```
 DATE         RUNG                                        OWNER · NOTE
