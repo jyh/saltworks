@@ -689,18 +689,50 @@ except Exception: print(-1)' "$mine" 2>/dev/null)
     #    own category, so a perpetual duty is visible without reading as new work. It was
     #    presumably skipped to avoid announcing it every sweep — that is the same trade
     #    arm 7 got wrong, and the same answer: ANNOTATE, DO NOT SUPPRESS.
+    # ⛔⛔ AMENDED 2026-08-31 12:3x — THE *COUNTER* WAS STILL LINE-SCOPED AFTER I
+    #    BLOCK-SCOPED THE ADVISORY THIS MORNING. Same bullet, same mechanism, one field
+    #    over: `queue=2 OPEN(Q2,Q4)` every sweep while Q2's own text, 31 lines down in
+    #    the SAME bullet, reads "⇒ **Q2 is CLOSED to this seat**". ⇒ ***FIXING ONE FIELD
+    #    OF AN ARM DOES NOT FIX THE ARM — a scope defect lives in every test that shares
+    #    the scope, and the one you repaired is the one you stop re-reading.***
+    # ⛔ AND THE VOCABULARY WAS WRONG TOO: `CLOSED` was in no token set, so widening the
+    #    scope alone would still have counted Q2. Two defects, and adding `CLOSED` to a
+    #    LINE-scoped test would have been a mitigation wearing a fix heading.
+    # ⚠️ THE DISPOSITION MUST *NAME ITS OWN ROW*, and that is not fastidiousness — it is
+    #    a REGRESSION I DROVE INTO AND THE CONTROL CAUGHT: a bare block scan for
+    #    DISCHARGED silently DELETED `STANDING(MEAS)`, because MEAS's bullet quotes the
+    #    dispositions of historical sub-rows. That is the arm's original 08/23 defect
+    #    returning by the back door, and in the FALSE-CLEAN direction. So: STANDING is
+    #    decided on the bullet's OWN first line and is never disposable; every other row
+    #    needs TAG + disposition on one line inside its own block.
+    # 📐 DRIVEN BEFORE SHIPPING, 6 arms, mutation control asserting the planted text is
+    #    present in the compared input first:
+    #      real  old -> `2 OPEN(Q2,Q4)·1 STANDING(MEAS)` · new -> `1 OPEN(Q4)·1 STANDING(MEAS)`
+    #      (B) planted live row            -> COUNTED   (the detector can say YES)
+    #      (C) planted row closed, self-named, in-block -> dropped
+    #      (D) disposition BEYOND the next bullet       -> does NOT rescue (boundary real)
+    #      (G) bare DISCHARGED not naming the row       -> does NOT kill  (MEAS guard)
+    #      (E) Q4 KEPT and MEAS KEPT on the real file   -> no live row lost
     q=$(awk '
-      /^##[[:space:]]+SILICON/ {inq=1; next}
-      /^##[[:space:]]/         {inq=0}
-      inq && /^- / {
-        line=$0
-        if (line ~ /DISCHARGED|SUPERSEDED|~~/) next
-        match(line, /^- [^ ]+/); tag=substr(line, RSTART+2, RLENGTH-2)
-        if (line ~ /STANDING/) { st++; stags=stags (stags==""?"":",") tag; next }
-        n++
-        if (n<=3) { tags=tags (tags==""?"":",") tag }
-      }
+      { L[NR]=$0 }
       END {
+        for (i=1; i<=NR; i++) if (L[i] ~ /^##[[:space:]]+SILICON/) { a=i; break }
+        for (i=a+1; i<=NR; i++) if (L[i] ~ /^##[[:space:]]/) { b=i; break }
+        if (!b) b=NR+1
+        for (i=a+1; i<b; i++) {
+          if (L[i] !~ /^- /) continue
+          if (L[i] ~ /DISCHARGED|SUPERSEDED|~~/) continue
+          match(L[i], /^- [^ ]+/); tag=substr(L[i], RSTART+2, RLENGTH-2)
+          if (L[i] ~ /STANDING/) { st++; stags=stags (stags==""?"":",") tag; continue }
+          dead=0
+          for (j=i+1; j<b; j++) {
+            if (L[j] ~ /^- /) break
+            if (L[j] ~ tag "[^A-Za-z0-9]" && L[j] ~ /CLOSED to this seat|DISCHARGED|SUPERSEDED/) { dead=1; break }
+          }
+          if (dead) continue
+          n++
+          if (n<=3) { tags=tags (tags==""?"":",") tag }
+        }
         if (n==0 && st==0) { print "OK" }
         else if (n==0)     { printf "OK·%d STANDING(%s)", st, stags }
         else               { printf "%d OPEN(%s%s)%s", n, tags, (n>3?",…":""), (st>0 ? sprintf("·%d STANDING(%s)", st, stags) : "") }
