@@ -117,8 +117,10 @@ import os
 import hashlib
 import pathlib
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
 
 def self_id() -> str:
     """This file's own content hash, printed in every verdict.
@@ -180,6 +182,27 @@ _LOCAL_BAREREPO = _LOCALWORD + _BS + ".git"
 _BACKUPVOL = ("Volumes" + _SEPCLASS + "Content[ _]HD" + _SEPCLASS
               + "Salt" + "works")
 
+# ⛔ ROOTLESS SHAPES — helm codebook-law 2026-08-30 (desk row J, ruled on the
+# Captain's question). A path can identify the private record with NO root in
+# front of it: the record's own top-level directory names, followed by a
+# separator and a component, point into it from anywhere. The live specimen is
+# a public commit message that transcribed two such shapes IN THE ACT of
+# listing them as the defect (accepted into the message baseline by the same
+# ruling). Ruled INSIDE the gate going forward; existing residue and history
+# are BASELINED by the two ratchets — accepted, never rewritten — and bare
+# FILENAMES stay softened exactly as the 08/25 ruling stands.
+# DECLARED CONSEQUENCE: only WORD-START shapes are caught. The left guard also
+# excludes '.', '/' and the backslash — unlike _INTO's, deliberately: the
+# rooted forms are already _INTO's to catch, and a mid-path component of these
+# ordinary names inside some public tree must not red on ordinary content.
+# Checked in all three repos before this shipped: current-tree hits at the
+# time of writing were 4 (salt), 3 (saltworks), 0 (jas), all pre-ruling
+# residue, all baselined in the same act that landed the shape.
+_ROOTLESS = ["bri" + "efs", "fle" + "et"]
+_ROOTLESS_ALT = "|".join(_ROOTLESS)
+_ROOTLESS_INTO = ("(?<![A-Za-z0-9_./" + _BS + _BS + "-])(?:"
+                  + _ROOTLESS_ALT + ")" + _SEPCLASS + "[A-Za-z0-9_.-]+")
+
 # A path REACHES INTO a root when the root name is followed by a separator and
 # at least one more component. A bare root name in prose is not a path; the root
 # plus a separator plus a component is.
@@ -223,6 +246,9 @@ FORBIDDEN = [
      "the durable local tier's bare repository"),
     (re.compile(_BACKUPVOL),
      "the backup volume holding the private record"),
+    (re.compile(_ROOTLESS_INTO),
+     "a rootless path into the private record ("
+     + _ROOTLESS[0] + "-/" + _ROOTLESS[1] + "-shape)"),
 ]
 
 # Named so a future reader does not "tidy" these into the forbidden list.
@@ -287,12 +313,19 @@ def repo_slug() -> str:
     return url.rstrip("/").rsplit("/", 1)[-1].removesuffix(".git")
 
 
+def pins_for(slug: str, pins: list) -> list:
+    """EXACT repo match, never a substring — two of the three repos this file
+    ships to differ by a suffix, so a substring selector hands one repo's
+    grant to another. Parameterised so the self-test drives the SELECTOR, not
+    the data."""
+    return [e for e in pins if e["repo"] == slug]
+
+
 def active_exemptions() -> list:
     """Only the pins granted for THIS repo. Elsewhere the list is empty and the
     gate behaves as though no exemption exists -- which is correct: the ruling
     exempted five sites in one repository, not five strings everywhere."""
-    slug = repo_slug()
-    return [e for e in EXEMPT if e["repo"] == slug]
+    return pins_for(repo_slug(), EXEMPT)
 
 
 def line_sha(text: str) -> str:
@@ -314,15 +347,36 @@ def partition(findings, exempt):
     return viol, exm
 
 
-def audit_pins(exempt, ref="HEAD"):
-    """(intact, drifted, unresolvable) -- does each pin still match at its ref?
+def audit_pins(exempt):
+    """(intact, drifted, unresolvable, local_only) -- does each pin still match?
+
+    ⛔ RESTORED 2026-08-31 (desk row I(b)): the port that made this file
+    byte-identical across the three repos took the SIBLING'S older version,
+    and both documented repairs below returned as live regressions — the dead
+    `ref` knob (with main() again paying it tribute) and local-ref-first
+    resolution. A port inherits the destination's repairs, or it deletes
+    them; the fixture arms in the self-test are what make this stick.
 
     THE ARM A DELTA SCAN CANNOT HAVE. If a preserved line is deleted or edited,
     a delta of the same push may show nothing at all; the pin stops resolving,
     and only a look at the tree can say so. A pin whose ref is not present in
     this checkout is UNRESOLVABLE, never 'intact' -- reported, never assumed.
+
+    ⛔ THERE IS DELIBERATELY NO `ref` PARAMETER, AND THAT IS A REPAIR. This
+    function shipped as `audit_pins(exempt, ref="HEAD")`, and `main()` dutifully
+    passed it the scanned range's endpoint -- while the first statement of the
+    loop below rebound that same name to None. The argument was discarded before
+    it was ever read: driven with 'HEAD', a garbage ref, '' and None, all four
+    returned the identical verdict. Behaviour was right (each pin is audited at
+    ITS OWN ref, which is what the ruling scopes), but the signature advertised a
+    scoping knob that did not exist and the call site paid it tribute, so a
+    reader of `main()` came away believing this audit was bounded by the push.
+    AN INTERFACE THAT ADVERTISES A CAPABILITY IT DOES NOT HAVE IS A DEAD ARM
+    WEARING A DRIVEN ARM'S SIGNATURE -- the shape this file names 'decoy' three
+    times, found in the second arm written to be the independent one. The
+    loop-local is `found_ref` now so the shadow cannot silently return.
     """
-    intact, drifted, unresolvable = [], [], []
+    intact, drifted, unresolvable, local_only = [], [], [], []
     for e in exempt:
         # ⛔ THE REF AND THE FILE ARE SEPARATE QUESTIONS, AND CONFLATING THEM
         # FAILS OPEN. First draft treated "git show ref:file failed" as
@@ -330,16 +384,29 @@ def audit_pins(exempt, ref="HEAD"):
         # simply does not have that branch) and WRONG when the ref is present
         # and the FILE was deleted -- that is the preserved record being
         # destroyed, reported as "not applicable". Found by driving the arm.
-        ref = None
-        for cand in (e["ref"], f'origin/{e["ref"]}'):
+        # ⛔ THE PUBLISHED REF FIRST, AND THE ORDER IS THE WHOLE POINT. The
+        # ruling preserved sites on a PUBLISHED branch, so origin/<ref> is the
+        # object it scoped; a bare local branch of the same name is a DIFFERENT
+        # OBJECT. This resolved the bare ref first until 08/26, and both
+        # directions were wrong -- measured, not reasoned: with the published
+        # line DESTROYED and a stale local checkout still holding it, the gate
+        # returned INTACT. A false green on a firewall gate, produced by the
+        # adjacent-object trap inside the function written to defend against it.
+        found_ref, from_local = None, False
+        for cand, is_local in ((f'origin/{e["ref"]}', False), (e["ref"], True)):
             if subprocess.run(["git", "rev-parse", "--verify", "--quiet", cand],
                               capture_output=True).returncode == 0:
-                ref = cand
+                found_ref, from_local = cand, is_local
                 break
-        if ref is None:
+        if found_ref is None:
             unresolvable.append(e)          # the branch is not in this checkout
             continue
-        blob = subprocess.run(["git", "show", f'{ref}:{e["file"]}'],
+        if from_local:
+            # Resolved, but NOT from the published record. Reported so a
+            # local-only verdict cannot read as a statement about what is
+            # published -- naming the object the answer is about.
+            local_only.append(e)
+        blob = subprocess.run(["git", "show", f'{found_ref}:{e["file"]}'],
                               capture_output=True, text=True, encoding="utf-8")
         if blob.returncode != 0:
             drifted.append(e)               # ref IS here and the FILE is gone
@@ -348,7 +415,23 @@ def audit_pins(exempt, ref="HEAD"):
             intact.append(e)
         else:
             drifted.append(e)
-    return intact, drifted, unresolvable
+    return intact, drifted, unresolvable, local_only
+
+
+def finding_lines(rows) -> list[str]:
+    """(ident, what, line) -> the printable report, one entry per finding.
+
+    SHARED BY EVERY FAIL PATH — armed and unarmed — so no path can regress
+    into a bare count. Row I(c), 08/31: both unarmed-FAIL paths printed
+    'carries N finding(s)' and N was the entire report — the reader was sent
+    to arm a baseline over findings nobody had named. A count is not a scope;
+    the verdict carries its scope or it carries nothing."""
+    out = []
+    for ident, what, line in rows:
+        out.append(f"  {str(ident)[:40]}  {what}")
+        if line:
+            out.append(f"      {line[:110]}")
+    return out
 
 
 def commit_messages(rev_range: str) -> list[tuple[str, str]]:
@@ -478,7 +561,7 @@ def self_test() -> int:
         ("p-bus", "as minuted at " + _BUS.replace(chr(92), "") + ":171311"),
         # THE FOUR SHAPES THAT WERE BLIND UNTIL 08/25. Assembled, never spelled.
         ("p-bslash", "see " + _SEAT + chr(92) + "briefs" + chr(92) + "x.md"),
-        ("p-mixed", "see " + _SEAT + chr(92) + "briefs/x.md"),
+        ("p-mixed", "see " + _SEAT + chr(92) + _ROOTLESS[0] + "/x.md"),
         ("p-unc", "see " + chr(92)*2 + "host" + chr(92) + _SEAT + chr(92) + "briefs"),
         ("p-drive", "see C:" + chr(92) + "Users" + chr(92) + "j" + chr(92)
                     + _SEAT + chr(92) + "briefs" + chr(92) + "x.md"),
@@ -492,6 +575,10 @@ def self_test() -> int:
                       + _LOCALWORD + chr(92) + "x.md"),
         ("l-repo", "the bare repo " + _LOCALWORD + ".git"),
         ("l-vol", "/Volumes/Content HD/" + "Salt" + "works/archives"),
+        # ROOTLESS SHAPES (row J, 08/31). Assembled, never spelled.
+        ("r-rl-b", "ruled in " + _ROOTLESS[0] + "/2026-08-30-x.md"),
+        ("r-rl-f", "the row in " + _ROOTLESS[1] + "/RULING-x.md"),
+        ("r-rl-bs", "see " + _ROOTLESS[1] + chr(92) + "DESK.tsv"),
     ]
     for ident, text in planted:
         if not scan([(ident, text)]):
@@ -515,6 +602,12 @@ def self_test() -> int:
         ("c-usrlib", "on the path /usr/" + _LOCALWORD + "/lib/python3.12"),
         ("c-localprose", _LOCALWORD + "/remote divergence was the cause"),
         ("c-meta", "this gate forbids paths into the private record"),
+        # ROOTLESS guards: a bare name stays softened by the ruling; a MID-PATH
+        # component of the same ordinary word is the declared consequence of
+        # the left guard; the plain English word must never fire.
+        ("c-rl-bare", "the " + _ROOTLESS[0] + " directory holds the record"),
+        ("c-rl-mid", "docs/" + _ROOTLESS[0] + "/x.md nests a PUBLIC dir"),
+        ("c-rl-word", "a " + _ROOTLESS[1] + " of seats sailed at dawn"),
     ]
     for ident, text in clean:
         got = scan([(ident, text)])
@@ -553,6 +646,167 @@ def self_test() -> int:
     viol4, exm4 = partition(found, [])
     if exm4 or len(viol4) != 1:
         failures.append("with no active exemptions nothing may be exempted")
+
+    # 4d. THE REPO SCOPE, WHICH HAD NO ARM AT ALL. `pins_for` promises EXACT
+    #     match because two of the three repos this file ships to DIFFER BY A
+    #     SUFFIX -- so a substring implementation hands one repo's grant to
+    #     another, which is the adjacent-object trap wearing a ruling's
+    #     authority. Driven on a FIXTURE set, so the arm does not break when
+    #     the real grant changes: it is testing the selector, not the data.
+    scope_pins = [{"repo": "salt", "ref": "r", "file": "f", "sha": "0" * 16},
+                  {"repo": "saltworks", "ref": "r", "file": "f", "sha": "1" * 16}]
+    for slug, want in (("salt", 1), ("saltworks", 1), ("jas", 0),
+                       ("sal", 0), ("saltwork", 0), ("saltworks2", 0), ("", 0)):
+        got = len(pins_for(slug, scope_pins))
+        if got != want:
+            failures.append(f"pins_for({slug!r}) must select {want}, got {got}")
+    # ...and the real grant must be scoped to ONE repo, or the note printed at
+    # the landing ("none are scoped here") is describing a different object.
+    if len({e["repo"] for e in EXEMPT}) != 1:
+        failures.append("the grant spans more than one repo; the scope note lies")
+
+    # 4e. ⛔ audit_pins() -- THE SECOND, INDEPENDENT ARM, AND IT HAD NO TEST.
+    #     Its trichotomy was driven ONCE, BY HAND, and the receipt was written
+    #     into a commit message. A receipt in a commit message is not a check:
+    #     it cannot fail, it does not run again, and it certifies the code as
+    #     it was that afternoon. In particular the FAIL-OPEN the author found by
+    #     driving it (ref PRESENT + file DELETED reported as "not applicable"
+    #     instead of drift) had nothing holding it down. It does now.
+    #     Driven against a REAL throwaway repository, through the SAME call
+    #     shape production uses -- audit_pins(pins) with no ref argument, cwd
+    #     being the repo -- so nothing here is a fixture of the test's own.
+    tmp = tempfile.mkdtemp(prefix="ppgate-selftest-")
+    here = os.getcwd()
+    try:
+        repo = os.path.join(tmp, "r")
+        subprocess.run(["git", "init", "-q", "-b", "trunk", repo], capture_output=True)
+
+        def g(*a):
+            return subprocess.run(["git", "-C", repo, *a], capture_output=True,
+                                  text=True, encoding="utf-8")
+
+        g("config", "user.email", "selftest@example.invalid")
+        g("config", "user.name", "selftest")
+        g("config", "commit.gpgsign", "false")
+        os.makedirs(os.path.join(repo, "docs"))
+        # A PLAIN line: audit_pins HASHES, it never scans, so this fixture needs
+        # no forbidden shape -- and therefore cannot make this file an instance.
+        keep = "a preserved observation, recorded 2026-08-25"
+        doc = os.path.join(repo, "docs", "R.md")
+
+        def write(text):
+            # newline="" is not lint-appeasement: without it this arm writes
+            # CRLF on the Windows lane, and an arm whose BYTES depend on the
+            # platform is not driving the same fixture everywhere.
+            with open(doc, "w", encoding="utf-8", newline="") as fh:
+                fh.write("preface\n" + text + "\ntrailer\n")
+
+        write(keep)
+        g("add", "-A"); g("commit", "-qm", "fixture")
+        g("branch", "pres/fix")
+        pin = {"repo": "x", "ref": "pres/fix", "file": "docs/R.md",
+               "sha": line_sha(keep)}
+        os.chdir(repo)
+
+        def buckets(pins):
+            i, d, u = audit_pins(pins)[:3]
+            return len(i), len(d), len(u)
+
+        # the detector first: an intact pin must land intact, or every red below
+        # is unreadable.
+        if buckets([pin]) != (1, 0, 0):
+            failures.append(f"an INTACT pin must audit intact, got {buckets([pin])}")
+        # a pin nobody granted must not be conjured out of the tree
+        if buckets([]) != (0, 0, 0):
+            failures.append("an empty grant must audit to three empty buckets")
+        # ONE CHARACTER of drift on the preserved line
+        write(keep + ".")
+        g("add", "-A"); g("commit", "-qm", "drift"); g("branch", "-f", "pres/fix", "HEAD")
+        if buckets([pin]) != (0, 1, 0):
+            failures.append(f"a DRIFTED line must audit drifted, got {buckets([pin])}")
+        # ⛔ THE FAIL-OPEN: the ref is PRESENT and the FILE IS GONE. That is the
+        #    preserved record being destroyed; reporting it "unresolvable" reads
+        #    as not-applicable and is green.
+        os.remove(doc)
+        g("add", "-A"); g("commit", "-qm", "delete"); g("branch", "-f", "pres/fix", "HEAD")
+        if buckets([pin]) != (0, 1, 0):
+            failures.append("a DELETED preserved file must be DRIFT, never "
+                            f"unresolvable, got {buckets([pin])}")
+        # a ref this checkout does not have is UNRESOLVABLE -- and never intact
+        gone = dict(pin, ref="no/such/branch")
+        if buckets([gone]) != (0, 0, 1):
+            failures.append(f"an ABSENT ref must be unresolvable, got {buckets([gone])}")
+        # ...and the origin/<ref> fallback must actually resolve
+        head = g("rev-parse", "HEAD").stdout.strip()
+        g("update-ref", "refs/remotes/origin/only-remote", head)
+        write(keep)
+        g("add", "-A"); g("commit", "-qm", "restore")
+        g("update-ref", "refs/remotes/origin/only-remote", g("rev-parse", "HEAD").stdout.strip())
+        remote_only = dict(pin, ref="only-remote")
+        if buckets([remote_only]) != (1, 0, 0):
+            failures.append("a pin whose ref exists only as origin/<ref> must "
+                            f"resolve, got {buckets([remote_only])}")
+        # 4f. ⛔ WHICH OBJECT IS THE PIN ABOUT? The ruling preserved sites on a
+        #     PUBLISHED branch, so the authoritative instance of `ref` is the
+        #     REMOTE one. A bare local branch of the same name is a DIFFERENT
+        #     OBJECT -- the adjacent-object trap, inside the function written to
+        #     defend against it -- and consulting it first produces a FALSE
+        #     GREEN in the exact case that matters: the published line is
+        #     destroyed, a stale local checkout still has it, the gate says
+        #     intact. Driven in BOTH directions, because a precedence rule that
+        #     is only tested one way is half a rule.
+        div = os.path.join(tmp, "div")
+        for label, local_text, origin_text, want in (
+                ("published intact, local stale", keep + ".", keep, "intact"),
+                ("published DESTROYED, local stale", keep, keep + ".", "drifted")):
+            shutil.rmtree(div, ignore_errors=True)
+            subprocess.run(["git", "init", "-q", "-b", "trunk", div], capture_output=True)
+
+            def d(*a):
+                return subprocess.run(["git", "-C", div, *a], capture_output=True,
+                                      text=True, encoding="utf-8")
+
+            d("config", "user.email", "selftest@example.invalid")
+            d("config", "user.name", "selftest")
+            d("config", "commit.gpgsign", "false")
+            os.makedirs(os.path.join(div, "docs"))
+            dpath = os.path.join(div, "docs", "R.md")
+
+            def dwrite(text):
+                with open(dpath, "w", encoding="utf-8", newline="") as fh:
+                    fh.write("preface\n" + text + "\ntrailer\n")
+
+            dwrite(origin_text)
+            d("add", "-A"); d("commit", "-qm", "published")
+            d("update-ref", "refs/remotes/origin/pres/fix",
+              d("rev-parse", "HEAD").stdout.strip())
+            d("checkout", "-q", "-b", "pres/fix")
+            dwrite(local_text)
+            d("add", "-A"); d("commit", "-qm", "local divergence")
+            d("checkout", "-q", "trunk")
+            dpin = {"repo": "x", "ref": "pres/fix", "file": "docs/R.md",
+                    "sha": line_sha(keep)}
+            os.chdir(div)
+            i2, d2, u2 = audit_pins([dpin])[:3]
+            got = "intact" if i2 else "drifted" if d2 else "unresolvable"
+            os.chdir(repo)
+            if got != want:
+                failures.append(f"{label}: the PUBLISHED ref governs -- want "
+                                f"{want}, got {got}")
+        shutil.rmtree(div, ignore_errors=True)
+
+        # ...and when there IS no published ref, the local one answers and the
+        # gate must SAY SO rather than let a local-only verdict read as a
+        # statement about the published record.
+        local_only = audit_pins([pin])[3]
+        if len(local_only) != 1:
+            failures.append("a pin resolved from a LOCAL ref only must be "
+                            f"reported as such, got {len(local_only)}")
+        if audit_pins([remote_only])[3]:
+            failures.append("a pin resolved from origin/<ref> is NOT local-only")
+    finally:
+        os.chdir(here)
+        shutil.rmtree(tmp, ignore_errors=True)
 
     # 5. THE ARM-COVERAGE DECLARATION. A range the file arm cannot scan must be
     #    reported as a gap, never silently as a zero.
@@ -595,6 +849,20 @@ def self_test() -> int:
     if _msg_unarmed_fatal(None, 0):
         failures.append("a missing baseline over a clean history is not fatal")
 
+    # 8. EVERY FAIL PATH NAMES ITS FINDINGS (row I(c)). The formatter is shared
+    #    by construction — armed and unarmed paths all print finding_lines() —
+    #    so the arm asserts the FINDING STRING the reader will see, not an exit
+    #    code: identity, shape, and excerpt must each survive into the report.
+    named = finding_lines([("cafe" * 10, "some shape", "the offending excerpt")])
+    if not any("cafecafe" in l for l in named):
+        failures.append("finding_lines must carry the finding's identity")
+    if not any("some shape" in l for l in named):
+        failures.append("finding_lines must carry the finding's shape")
+    if not any("offending excerpt" in l for l in named):
+        failures.append("finding_lines must carry the line excerpt")
+    if len(finding_lines([("x", "w", "")])) != 1:
+        failures.append("an empty excerpt prints identity+shape alone, never a blank")
+
     for f in failures:
         print(f"SELF-TEST FAIL: {f}")
     if failures:
@@ -603,7 +871,9 @@ def self_test() -> int:
           f"(empty scan fatal proven FIRST; "
           f"{len(real)} real post-ruling instances caught; {len(planted)} planted "
           f"shapes caught; {len(clean)} compliant forms passed; own source clean; "
-          f"message-ratchet verdict driven on both arms)")
+          f"message-ratchet verdict driven on both arms; pin audit driven on a "
+          f"real scratch repo — trichotomy, published-ref precedence in BOTH "
+          f"directions, local-only disclosure; every FAIL path NAMES findings)")
     return 0
 
 
@@ -691,7 +961,9 @@ def tree_mode(write: bool) -> int:
     base = load_baseline()
     if not base and found:
         print(f"FAIL [gate {self_id()}]: --tree has NO BASELINE and the tree carries "
-              f"{len(found)} finding(s). Write one deliberately with --tree --write-baseline.")
+              f"{len(found)} finding(s), NAMED below. Write the baseline deliberately "
+              f"with --tree --write-baseline (a reviewed act, not a fix).\n")
+        print("\n".join(finding_lines(found)))
         return 1
     new = [f for f in found if (f[0], line_sha(f[2])) not in base]
     paid = base - keys
@@ -701,9 +973,7 @@ def tree_mode(write: bool) -> int:
         print("A delta gate fired on these (or would have) and the tree still carries")
         print("them. Rewrite as ROLE wording or a bare filename; do not add to the")
         print("baseline unless the council preserved the site.\n")
-        for f, what, line in new:
-            print(f"  {f}  {what}")
-            print(f"      {line[:110]}")
+        print("\n".join(finding_lines(new)))
         return 1
     print(f"check_private_paths --tree [gate {self_id()}]: OK ({len(found)} accepted residue "
           f"line(s) in {len({f for f,_,_ in found})} file(s), all in the baseline; "
@@ -810,8 +1080,10 @@ def messages_mode(write: bool) -> int:
     base = load_msg_baseline()
     if _msg_unarmed_fatal(base, len(per_sha)):
         print(f"FAIL [gate {self_id()}]: --messages has NO BASELINE and history carries "
-              f"{len(per_sha)} violating message(s). Arm it deliberately with "
-              f"--messages --write-baseline (a reviewed act, not a fix).")
+              f"{len(per_sha)} violating message(s), NAMED below. Arm it deliberately "
+              f"with --messages --write-baseline (a reviewed act, not a fix).\n")
+        print("\n".join(finding_lines(
+            [(sha, per_sha[sha][0], per_sha[sha][1]) for sha in sorted(per_sha)])))
         return 1
     new, absent = msg_ratchet_verdict(list(per_sha), base or set())
     if new:
@@ -822,10 +1094,8 @@ def messages_mode(write: bool) -> int:
         print("message cannot be edited without a force-push — which is why the ONLY")
         print("acceptable fix is catching it BEFORE the push, and why growing the")
         print("baseline needs a council word, not a green build.\n")
-        for sha in new:
-            what, line = per_sha[sha]
-            print(f"  {sha[:40]}  {what}")
-            print(f"      {line[:110]}")
+        print("\n".join(finding_lines(
+            [(sha, per_sha[sha][0], per_sha[sha][1]) for sha in new])))
         return 1
     print(f"check_private_paths --messages [gate {self_id()}]: OK ({len(rows)} messages "
           f"scanned from HEAD; {len(per_sha)} accepted historical commit(s), all in the "
@@ -893,7 +1163,7 @@ def main() -> int:
 
     # THE PIN AUDIT — the arm a delta scan cannot have. Run before the verdict,
     # because a drifted pin is a failure even on a push that touches nothing.
-    intact, drifted, unresolvable = audit_pins(exempt, args.range.split("..")[-1])
+    intact, drifted, unresolvable, local_only = audit_pins(exempt)
     if drifted:
         print(f"FAIL [gate {self_id()}]: {len(drifted)} PRESERVED-RECORD PIN(S) "
               f"HAVE DRIFTED.\n")
@@ -912,9 +1182,7 @@ def main() -> int:
         print("the private record are forbidden on public repos. Bare filenames")
         print("are softened; role-wording is the standard. Rewrite the reference")
         print("as a ROLE ('the helm's brief') or a bare filename, not a path.\n")
-        for ident, what, line in bad:
-            print(f"  {ident[:40]}  {what}")
-            print(f"      {line[:110]}")
+        print("\n".join(finding_lines(bad)))
         print("\nIF YOU ARE DEMONSTRATING A FORBIDDEN FORM rather than citing one:")
         print("assemble it from parts or describe it in words. A literal example")
         print("is still an instance -- this gate tripped ITSELF three times that")
@@ -937,7 +1205,10 @@ def main() -> int:
         print(f"  PIN AUDIT: {len(intact)} intact, {len(drifted)} drifted, "
               f"{len(unresolvable)} unresolvable"
               + (" (ref not in this checkout -- NOT counted as intact)"
-                 if unresolvable else ""))
+                 if unresolvable else "")
+              + (f"; {len(local_only)} resolved from a LOCAL ref only -- a "
+                 f"verdict about this checkout, not the published record"
+                 if local_only else ""))
     else:
         print(f"  PIN AUDIT: not applicable in '{repo_slug() or 'unknown repo'}'"
               f" -- {len(EXEMPT)} pin(s) exist and none are scoped here."
