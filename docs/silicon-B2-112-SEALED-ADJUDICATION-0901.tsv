@@ -1,0 +1,135 @@
+# SEALED ADJUDICATION OF THE 112 — silicon, council 2026-09-01 ruling 4(ii); the helm's commission brief for this sitting, held in the private seat record at commit f817f6db
+# SEAL RECEIPT — the sitting's inputs, pinned BY SHA before anything was opened; emitted by docs/silicon-tools/sealgate.py (saltworks 80c6ff9b), re-roll refused under control
+# SEAL label=112-input-population-93f55671 sha256=435e7e08d3566f8932ddac1c1a9fb1a723dbec0931e6295b3d0a8007eaa073d2 bytes=7303 at=2026-09-01T22:53:49Z
+# SEAL label=112-input-criterion-9ba1fca9 sha256=37290fe0a76826b65443e9472d0a65d36379661bcd3c5118e3abda50d8446efa bytes=102381 at=2026-09-01T22:53:49Z
+#   population = the docs/ file touched by saltworks 93f55671, section 5, lines 119-233 (EOF); ancestor-verified at origin, control refused
+#   criterion  = the docs/ amendment file ratified at saltworks 9ba1fca9, section 2.2 and 2.2(a); ancestor-verified at origin, control refused
+#   clock at seal 2026-09-01T22:53:49Z. Nothing else was opened for the sitting's duration: no bus tail, no minute, no desk, no memory bank, no peer file.
+#
+# DECISION RULE — PRE-REGISTERED IN THIS HEADER, applied to every row in the same form. Criterion 2.2(a): RUN THE CHECK AGAINST THE ARTIFACT THE ROW IS ABOUT.
+#   Ordered, first match wins:
+#   1 DECIDED   — the criterion document, at a cited line, states a DISPOSITION OF THIS ROW under its own pipeline (a class, a gate outcome, or a test outcome). EXHIBIT.
+#   2 STOP      — no such disposition is stated AND the document explicitly declares this row's disposition undetermined (or gives two it does not reconcile).
+#   3 DISCUSSED — no such disposition and no such declaration: the row appears only as draw membership, an aggregate, a near-miss, a shape-analogue, a pointer, or an identity check. CITATION.
+# The rule is mechanical on stated content. No row was adjudicated by judgment; where the rule did not reach, the row is STOPPED, never resolved.
+#
+# CITED BY LOCATION, NEVER BY VERDICT (population document, section 0). The clause field names WHERE the document acts, never WHAT any row was ruled.
+# Section ids are written 3.1(4), 2.2(a) etc. without the section sign, so this sheet is pure ASCII and cannot be mangled by a codec.
+#
+# row-id	verdict	clause-or-STOP-reason
+1460	DECIDED	disposition at L571-572 (3.1(4)); resolved-list L945 (6)
+1905	DECIDED	disposition at L490 (2.5 round-2 outcome set)
+2008	DECIDED	disposition at L614 (3.2(i)) and L634 (3.2 ladder list)
+2415	DECIDED	disposition at L667-668 (3.3 temporal); L945, L1034, L1165
+3453	DISCUSSED	L262/L1030/L1172 near-miss cite for repair B; L913 draw-membership; no per-row disposition
+3860	DECIDED	disposition at L668 (3.3 temporal); L945, L1034, L1165
+4274	DECIDED	disposition at L634 (3.2 ladder list)
+4635	DECIDED	disposition at L469 (2.5 round-1 re-run)
+5510	DECIDED	disposition at L634 (3.2 ladder list)
+5695	DECIDED	disposition at L614 (3.2(i)), L637 (3.2 ladder list), L947 (1.5 unit)
+6418	DECIDED	disposition at L733 (3.4(1) as repaired by C); L1173
+7148	DECIDED	disposition at L634 (3.2 ladder list)
+7679	DECIDED	disposition at L637 (3.2 ladder list; ladder result, gate sweep B-1 not yet run)
+8206	DECIDED	disposition at L777 (3.4(6))
+8636	DECIDED	disposition at L862 (4.2(b)); L941 (6 never-open)
+9584	DECIDED	disposition at L637 (3.2 ladder list; ladder result, B-1 not yet run)
+10082	DECIDED	disposition at L634 (3.2 ladder list)
+10282	STOP	L921 (5-R2) declares this row AMBIGUOUS, gap (A); L213/L1171 repair A closes the GAP and states no per-row disposition; L913 draw-membership only
+11227	DECIDED	disposition at L634 (3.2 ladder list)
+11629	DECIDED	disposition at L490 (2.5 round-2 outcome set)
+12767	DECIDED	disposition at L469 (2.5) and L726 (3.4(1) as repaired by C); L1173
+13158	DECIDED	disposition at L634 (3.2 ladder list)
+14294	DECIDED	disposition at L576 (3.1(5)); L1020 thin list
+15082	DECIDED	disposition at L677 (3.3 mixed-content priority); L1163
+28544	DECIDED	disposition at L860 (4.2(a)); L942 (6 never-open)
+28760	STOP	L921 (5-R2) declares this row AMBIGUOUS, gap (A); L213/L1171 repair A closes the GAP and states no per-row disposition; L913 draw-membership only
+29328	DECIDED	disposition at L637 (3.2 ladder list; ladder result, B-1 not yet run)
+30003	DECIDED	disposition at L490 (2.5 round-2 outcome set)
+31597	DECIDED	disposition at L554 (3.1(1))
+32527	DECIDED	disposition at L677 (3.3 mixed-content priority); L1163
+32713	DECIDED	disposition at L634 (3.2 ladder list); L1048 prior-pass identity cite
+33135	DECIDED	disposition at L534 (3.1 rationale)
+33368	DISCUSSED	L262/L1030/L1172 near-miss cite for repair B; L913 draw-membership; L930 aggregate-only (class not named); no per-row disposition
+34206	DECIDED	disposition at L637 (3.2 ladder list; ladder result, B-1 not yet run)
+35075	DECIDED	disposition at L698 and L776 (3.4(6))
+35323	DECIDED	disposition at L634 (3.2 ladder list)
+36345	STOP	L921 (5-R2) declares this row AMBIGUOUS, gap (A); L213/L1171 repair A closes the GAP and states no per-row disposition; L913 draw-membership only
+36832	DECIDED	disposition at L470 (2.5); L1159 (2.3 instantiation clause)
+37171	DECIDED	disposition at L634 (3.2 ladder list)
+39342	DECIDED	disposition at L535 (3.1 rationale)
+39614	DECIDED	disposition at L535 (3.1 rationale)
+39882	DECIDED	disposition at L634 (3.2 ladder list)
+40119	DECIDED	disposition at L634 (3.2 ladder list)
+40261	DECIDED	disposition at L572 (3.1(4))
+40552	STOP	L921 (5-R2) declares this row AMBIGUOUS, gap (A); L213/L1171 repair A closes the GAP and states no per-row disposition; L914 draw-membership only
+41094	DECIDED	disposition at L470 (2.5); L1159 (2.3 instantiation clause)
+41943	DECIDED	disposition at L637 (3.2 ladder list; ladder result, B-1 not yet run)
+42252	DECIDED	disposition at L409 (2.3), L750/L758/L764 (3.4(4)); L946, L953
+42447	STOP	L921 (5-R2) declares this row AMBIGUOUS, gap (A); L213/L1171 repair A closes the GAP and states no per-row disposition; L914 draw-membership only
+42898	DECIDED	disposition at L772 (3.4(5)); L1164
+43759	DECIDED	disposition at L572 (3.1(4))
+44094	DECIDED	disposition at L741 (3.4(3)); L946, L953, L1164
+44562	DISCUSSED	L914 draw-membership only; no per-row disposition
+46063	DECIDED	disposition at L402-403 (2.3); L944, L1159
+46326	DISCUSSED	L478 draw-membership only; the 2.5 round-2 outcome set is stated as an aggregate that does not name this row
+46788	DECIDED	disposition at L620 (3.2 hedged refutations) and L640 (duplicate resolved); L635/L637 lists, L947, L1055
+47222	STOP	L922 (5-R2) declares this row AMBIGUOUS, gap (B); L261/L1172 cite it as what the untested prong turned on; repair B rules a DIFFERENT row and states no per-row disposition here; L914 draw-membership
+48510	DECIDED	disposition at L635 (3.2 ladder list)
+52599	DECIDED	disposition at L468 (2.5 round-1 re-run)
+52908	DECIDED	disposition at L729 (3.4(1) as repaired by C) and L792 (3.4(7)); L102, L783, L914, L923
+54104	DECIDED	disposition at L638 (3.2 ladder list; ladder result, B-1 not yet run)
+54392	DISCUSSED	L478 draw-membership only; the 2.5 round-2 outcome set is stated as an aggregate that does not name this row
+55731	DECIDED	disposition at L678 (3.3 mixed-content priority); L1163
+56338	DECIDED	disposition at L575 (3.1(5)); L1020 thin list
+56531	DECIDED	disposition at L535 (3.1 rationale)
+56887	STOP	L922 (5-R2) declares this row AMBIGUOUS, gap (B); L261/L1172 cite it as what the untested prong turned on; repair B rules a DIFFERENT row and states no per-row disposition here; L914 draw-membership
+57101	DECIDED	disposition at L774 (3.4(5)); L947, L1164
+58956	DECIDED	disposition at L430 (2.4) and L812 (3.4 base-rate caveat); L808, L1158
+60524	DECIDED	disposition at L638 (3.2 ladder list; ladder result, B-1 not yet run)
+60871	DECIDED	disposition at L584 (3.1(6) repair E); L102, L914, L924, L955, L1175
+61993	DECIDED	disposition at L576 (3.1(5)); L1020 thin list
+62993	DECIDED	disposition at L638 (3.2 ladder list; ladder result, B-1 not yet run)
+63200	DECIDED	disposition at L678 (3.3 mixed-content priority); L1163
+63730	DECIDED	disposition at L534 (3.1 rationale)
+63874	DISCUSSED	L536 shape-analogue cite to a different row; no per-row disposition
+64022	DECIDED	disposition at L638 (3.2 ladder list; ladder result, B-1 not yet run)
+64155	DISCUSSED	L914 draw-membership only; no per-row disposition
+65312	DECIDED	disposition at L575 (3.1(5)); L1020 thin list
+65484	DECIDED	disposition at L653 (3.3 rationale, the positive test's condition asserted of this row); L1047 identity-check cite
+65641	DECIDED	disposition at L470 (2.5 round-1 re-run)
+65828	DECIDED	disposition at L681 (3.3 mixed-content priority); L946, L1163
+66314	DECIDED	disposition at L614 (3.2(i)) and L635 (3.2 ladder list)
+66811	DECIDED	disposition at L552 (3.1(1)); L945
+66953	DECIDED	disposition at L638 (3.2 ladder list; ladder result, B-1 not yet run)
+67127	DISCUSSED	L914 draw-membership only; no per-row disposition
+68158	DECIDED	disposition at L555 (3.1(1)); L1018 thin list
+69687	DECIDED	disposition at L225 (1.5 R-D), L414 (2.3 R-A), L429 (2.4), L706 (3.4); L417, L758
+70354	DECIDED	disposition at L638 (3.2 ladder list; ladder result, B-1 not yet run)
+70564	DISCUSSED	L914 draw-membership only; no per-row disposition
+71554	DECIDED	disposition at L678 and L685 (3.3 self-note decay); L946, L1023, L1163
+73298	DECIDED	disposition at L470 (2.5 round-1 re-run)
+73683	DECIDED	disposition at L571-572 (3.1(4)); L945
+74305	DECIDED	disposition at L565 and L568 (3.1(3)); L945
+75264	DECIDED	disposition at L732 (3.4(1) as repaired by C); L719, L1173; L923 names the gap that repair C closes WITH a per-row disposition stated
+76636	DECIDED	disposition at L614 (3.2(i)) and L635 (3.2 ladder list)
+77131	DECIDED	disposition at L534 (3.1 rationale)
+77740	DECIDED	disposition at L614 (3.2(i)) and L635 (3.2 ladder list)
+78949	DECIDED	disposition at L499 (2.5); L102, L478, L495
+79169	DISCUSSED	L537 shape-analogue cite to a different row; no per-row disposition
+80307	DECIDED	disposition at L225 (1.5 R-D), L428 (2.4), L635 (3.2 ladder list); L609, L1158
+80866	DISCUSSED	L915 draw-membership; L930 aggregate-only (class not named); no per-row disposition
+81151	DECIDED	disposition at L565 (3.1(3))
+83370	DECIDED	disposition at L468 (2.5 round-1 re-run)
+84685	DECIDED	disposition at L534 (3.1 rationale)
+85212	DECIDED	disposition at L565 (3.1(3))
+85595	DECIDED	disposition at L585 (3.1(6) repair E) and L735 (3.4(1)); L102, L915, L924, L956
+85826	DECIDED	disposition at L681 (3.3 mixed-content priority); L1163
+86382	DECIDED	disposition at L565 (3.1(3))
+86832	DECIDED	disposition at L621 (3.2 hedged refutations) and L635 (3.2 ladder list); L947
+87900	DECIDED	disposition at L469 (2.5 round-1 re-run)
+88517	DECIDED	disposition at L565 (3.1(3))
+88789	DECIDED	disposition at L575 (3.1(5)); L1020 thin list
+#
+# COUNTS — D(ECIDED) 94 / d(ISCUSSED) 11 / S(TOP) 7 ; total 112 ; population size 112, all rows present, none duplicated (checked by set equality against the sealed population, both directions)
+# ATTESTATION — no row was re-read before publish: the two sealed inputs were each read once, the rule above was fixed before the first verdict line was written, and no verdict was compared against any prior read, any peer file, or any source outside the seal. This sheet is committed and pushed BEFORE any checking arm runs.
+# THE THREE STANDING CLAUSES (the compiler night bank of 2026-08-12, its ledger-and-citecheck half, lines 570-573; private seat record): (1) the pass-1/pass-2 reason pair was NEVER consulted - that file was not opened at this hand; (2) publish before checking - discharged by the push that carries this file; (3) the discard-and-report clause is written for the 20-row blind draw and no row here is a drawn row, so it is carried and not triggered.

@@ -1,0 +1,9 @@
+SEAL label=112-input-population-93f55671 sha256=435e7e08d3566f8932ddac1c1a9fb1a723dbec0931e6295b3d0a8007eaa073d2 bytes=7303 at=2026-09-01T22:53:49Z
+SEAL label=112-input-criterion-9ba1fca9 sha256=37290fe0a76826b65443e9472d0a65d36379661bcd3c5118e3abda50d8446efa bytes=102381 at=2026-09-01T22:53:49Z
+SEAL label=112-sheet-0901 sha256=50281bb186c6938f4821adbab2e03272c72b409d2876e7448528d63b41420c43 bytes=11728 at=2026-09-01T23:02:14Z
+# NOTE (silicon, 2026-09-01): label 112-sheet-0901 below is SUPERSEDED and is kept, not deleted.
+# The sheet's bytes changed BEFORE publication and BEFORE any reference was opened: the repo's
+# private-paths gate refused two citation forms in the header and they were rewritten as role
+# wording. That is a pre-publish gate refusal, not a peek, but the tool's rule is not negotiated
+# per-occasion -- there is no re-roll, so the new bytes take a NEW LABEL and the record shows both.
+SEAL label=112-sheet-0901-b sha256=fb321cd017a4b18a7d0e51fefcd1716c641889c5dedd38d13cb6f7723cbd8f1e bytes=11765 at=2026-09-01T23:03:20Z
