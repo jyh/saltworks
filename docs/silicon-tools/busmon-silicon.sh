@@ -44,6 +44,15 @@ SELF=${SELF:-silicon}
 # ARM TO A PREFIX MATCH, THE ASSERTION BECOMES NECESSARY: assert that no seat
 # name prefixes another, mechanically, and exit rather than comment.
 POLL=${POLL:-20}
+# FENCE — the reader-side withholding filter in busmon.awk. DEFAULT 0 (OFF) SINCE
+# 2026-09-01: the standing withholding order it served RETIRED BY COMPLETION
+# (council 09/01 ruling 4; the sealed sheet is at saltworks 2612d33e) and its
+# removal clause names this seat's half: "run the watch with -v fence=0". The awk
+# keeps its own default ON for any OTHER reader that arms it directly (row CC's
+# blind-sheet head); THIS wrapper passes the variable EXPLICITLY on every call so
+# the awk default never decides for this seat. A withheld-by-default filter that
+# outlives its order fails SILENT, by hiding real traffic. FENCE=1 re-arms it.
+FENCE=${FENCE:-0}
 AWKPROG=${AWKPROG:-$(dirname "$0")/busmon.awk}
 prev=${BASELINE:?hand in the last line actually READ; never sample at arm time}
 
@@ -55,7 +64,7 @@ while true; do
     echo "SHRINKAGE ALARM: bus went $prev -> $now lines (a clobbering '>' looks exactly like this)"
     prev=$now
   elif [ "$now" -gt "$prev" ]; then
-    LC_ALL=C awk -v start="$prev" -v self="$SELF" -f "$AWKPROG" "$BUS"
+    LC_ALL=C awk -v start="$prev" -v self="$SELF" -v fence="$FENCE" -f "$AWKPROG" "$BUS"
     prev=$now
   fi
   sleep "$POLL"
