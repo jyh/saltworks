@@ -24,14 +24,29 @@
 # Usage: mirror_sync_guarded.sh <src-memory-dir> <dst-mirror-dir> [seat-repo]
 
 set -u
-SRC=${1:?usage: mirror_sync_guarded.sh <src> <dst> [seat-repo]}
+SRC=${1:?usage: mirror_sync_guarded.sh <src> <dst> [seat-repo] [--commit] [--shrink]}
 DST=${2:?missing dst}
-REPO=${3:-${SEAT_DIR:-/Users/jyh/projects/claude/seat}}
+shift 2
+# ⛔ FIXED 2026-09-01 (silicon, at its own hand): this wrapper used to read arg 3 as the
+#   seat-repo ONLY, so a `--shrink` or `--commit` meant for mirror-sync was SWALLOWED as a
+#   path and the run died on `⛔ ... /--shrink/tools/mirror-sync.sh not executable` — an
+#   error naming a file, for a defect that was about an ARGUMENT. The failure was loud and
+#   pointed at the wrong object, which is the expensive kind. Flags now pass THROUGH and a
+#   bare positional is still the seat-repo, so every existing call keeps its meaning.
+REPO=""; PASS=""
+for a in "$@"; do
+  case "$a" in
+    --*) PASS="$PASS $a" ;;
+    *)   [ -n "$REPO" ] && { echo "⛔ mirror_sync_guarded: two seat-repos given: $REPO and $a"; exit 2; }
+         REPO="$a" ;;
+  esac
+done
+REPO=${REPO:-${SEAT_DIR:-/Users/jyh/projects/claude/seat}}
 SYNC=${MIRROR_SYNC:-$REPO/tools/mirror-sync.sh}
 
 [ -x "$SYNC" ] || { echo "⛔ mirror_sync_guarded: $SYNC not executable"; exit 2; }
 
-bash "$SYNC" "$SRC" "$DST"; rc=$?
+bash "$SYNC" "$SRC" "$DST" $PASS; rc=$?
 if [ "$rc" -ne 0 ]; then
   echo "⛔ mirror_sync_guarded: sync itself EXIT=$rc — not evaluating tree state"
   exit "$rc"
