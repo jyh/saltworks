@@ -38,6 +38,13 @@ jobs:
           python-version: "3.12"
       # The gate proves it can fail before it is allowed to pass.
       - run: python scripts/check_commit_trailers.py --self-test
+      # THE SECOND PLATFORM FAMILY for the verdict-encoding class. It forces
+      # cp1252 on a child, so ubuntu can adjudicate it in full -- and it MUST
+      # run here, not only on the Windows lane: a gate watched on one family
+      # goes dark the day that runner is unavailable, which is the very shape
+      # (a gate that never runs reads as green) this row exists to close.
+      - run: python scripts/check_verdict_encoding.py --self-test
+      - run: python scripts/check_verdict_encoding.py
       - name: scan the pushed delta
         env:
           BEFORE: ${{ github.event.before }}
@@ -204,3 +211,130 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: python scripts/check_pr_descriptions.py --open
+
+  # ===================================================================
+  # THE WINDOWS LANE. Desk row X, 2026-08-31.
+  #
+  # WHY THIS EXISTS. Every job above this one runs on `ubuntu-latest`, and
+  # until this lane landed that was the whole of Scrub. A gate that never runs
+  # on a platform reads as GREEN there -- not as unknown, as PASSING -- and
+  # this repository's Scrub therefore made a claim about Windows that no run
+  # had ever tested. The sibling repo `jyh/jas` proved the class real on its
+  # own lane (PR #63): the forge-prose gate had landed ubuntu-only and its
+  # FAIL paths printed through a non-UTF-8 stdout that no job watched.
+  #
+  # AND THE CLASS WAS ALREADY LIVE HERE, measured before this lane was written
+  # (kenai, Windows 11, Python 3.12.10, stdout redirected as in every CI step):
+  # `check_private_paths.py --self-test` printed `... a real scratch repo <?>
+  # trichotomy ...` where `<?>` is U+FFFD. The gate's own em-dash collapsed to
+  # the cp1252 byte 0x97, the stream stopped being valid UTF-8, and it exited
+  # 0. On the SUCCESS path -- so on every green run. See
+  # `scripts/check_verdict_encoding.py` for the full measurement and for the
+  # second, opposite mode (a character outside cp1252 kills the process
+  # mid-print and exits 1, which is also this repo's "finding found" code).
+  #
+  # ⛔ AND ROW X's PREMISE WAS WRONG IN BOTH DIRECTIONS, stated here because the
+  # row will be read after it is ruled. The row records "cp1252 stdout degrades
+  # soft (U+FFFD)". Measured, it does neither thing softly:
+  #   - a character IN cp1252 does NOT become U+FFFD at write time. It becomes
+  #     a valid cp1252 byte. U+FFFD appears only later, in the UTF-8 READER --
+  #     so the producing job is green and the corruption is downstream.
+  #   - a character NOT in cp1252 does not degrade at all: UnicodeEncodeError,
+  #     empty stdout, exit 1.
+  # The soft/loud distinction matters because a repair aimed at the soft mode
+  # alone leaves the loud one, and they fail in opposite directions.
+  #
+  # BLOCKING, not `continue-on-error`. A Windows lane that cannot fail the
+  # build reports "Windows is covered" while rotting, which is a claim wider
+  # than its evidence.
+  #
+  # ⛔ DO NOT SET PYTHONUTF8, PYTHONIOENCODING OR PYTHONLEGACYWINDOWSSTDIO IN
+  # THIS JOB. Any of them repairs the encoding half without touching a line of
+  # source, which would make this lane pass straight over the class it exists
+  # to catch. The repair belongs in the gate (`scripts/utf8_stdout.py`), where
+  # it also protects a developer's shell, a hook and a scheduled task -- none
+  # of which read this file.
+  #
+  # EVERY JUDGING STEP CARRIES `if: ${{ !cancelled() }}`, so the lane reports
+  # its WHOLE surface in one run. GitHub gives every step an implicit
+  # `if: success()`, which makes a step list a CHAIN: the first red aborts the
+  # rest, they report `skipped`, and a run page renders that as *not
+  # applicable* rather than *not checked*. Setup steps stay fail-fast on
+  # purpose -- checkout and setup-python judge nothing, and running a gate
+  # after a failed checkout produces noise, not coverage.
+  windows-gates:
+    name: Windows lane (the platform that can see the locale codec)
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    permissions:
+      contents: read
+      pull-requests: read
+      checks: read
+    steps:
+      # fetch-depth: 0 because the history gates below scan a RANGE; on a
+      # depth-1 checkout they would scan one commit and report green.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # ⭐ THE ARM THE FORCED-CODEC GATE CANNOT PROVIDE, and it runs FIRST
+      # because it is also this lane's premise check. `--native` runs every
+      # gate under whatever THIS runner's default stdout codec actually is,
+      # nothing forced, and judges the raw bytes; it opens by printing the
+      # codec a fresh CHILD gets, so the log records what the hosted image
+      # really does rather than what anyone assumed.
+      #
+      # ⛔ THE HOSTED IMAGE'S CODEC HAS NEVER BEEN MEASURED. The class was found
+      # on kenai (`stdout.encoding='cp1252' errors='surrogateescape'`), and
+      # whether `windows-latest` matches it is exactly what this step reports.
+      # If the image turns out to be UTF-8 the step passes trivially and SAYS
+      # SO in its first line -- which is the honest outcome, not a hidden one.
+      # The forced-codec gate below holds either way, which is why both run.
+      - name: Native-locale sweep -- every gate's real bytes on this runner
+        if: ${{ !cancelled() }}
+        run: |
+          python scripts/check_verdict_encoding.py --self-test
+          python scripts/check_verdict_encoding.py --native
+
+      # THE PORTABLE GATE, run here as well as on ubuntu. It forces cp1252 on a
+      # child, so it does not need this platform to be true -- but running it
+      # where the codec is native is what proves the forcing matches reality
+      # rather than a guess about it.
+      - name: Verdict encoding -- a gate's receipt survives a forced cp1252
+        if: ${{ !cancelled() }}
+        run: python scripts/check_verdict_encoding.py
+
+      # THE HISTORY GATES, on this platform. Their scan runs over git output,
+      # which no separator can touch -- but their FAIL paths print findings,
+      # and a finding is exactly where arbitrary prose meets this lane's stdout.
+      - name: Commit-trailer gate
+        if: ${{ !cancelled() }}
+        run: python scripts/check_commit_trailers.py --self-test
+
+      - name: Private-path gate, including the whole-tree and message ratchets
+        if: ${{ !cancelled() }}
+        run: |
+          python scripts/check_private_paths.py --self-test
+          python scripts/check_private_paths.py --tree
+          python scripts/check_private_paths.py --messages
+
+      # THE FORGE-PROSE GATE, and BOTH ARMS DRIVEN ON THIS PLATFORM. The middle
+      # command drives an unreadable forge (a repo path no forge resolves) and
+      # asserts the gate REDS: a lane where a gate cannot be SEEN to fail is
+      # not a lane that watches it. `gh` is preinstalled on the hosted runner.
+      - name: PR titles/bodies gate -- self-test, driven FAIL, sweep
+        if: ${{ !cancelled() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python scripts/check_pr_descriptions.py --self-test
+          if python scripts/check_pr_descriptions.py --open --repo this/does/not/resolve; then
+            echo "the unreadable-forge arm must exit nonzero on this platform" >&2
+            exit 1
+          fi
+          python scripts/check_pr_descriptions.py --open

@@ -4,3 +4,4 @@ Scratch*.lean
 
 __pycache__/
 *.pyc
+scripts/__pycache__/
