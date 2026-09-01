@@ -24,7 +24,16 @@ being valid UTF-8, and the process **exits 0**. A character outside cp1252 is
 worse: `UnicodeEncodeError`, empty output, exit **1** — the same code these
 gates use for *finding found*.
 
-⇒ **None of that can reach CI, which is Linux-only and UTF-8.** It is a
-property of running the gates on a Windows box by hand. If that ever becomes
-a supported workflow, the branch `flask/windows-scrub-lane` is retained at
-origin and carries both the lane and a one-call-per-gate repair.
+⇒ **None of that can reach CI, which is Linux-only and UTF-8**, and the Linux
+job blocks the push, so a Windows-specific defect in these three scripts cannot
+leak into public history. The only live Windows surface would be a `commit-msg`
+hook on a Windows checkout of this repository, and none exists. A Windows job in
+the merge gate would be a perpetual cost — a flaky runner blocks a merge — for a
+class that cannot leak.
+
+**A working lane exists on branch `flask/windows-scrub-lane`, retained at origin.
+Reopen it the day a Windows contributor or a Windows checkout of this repository
+appears.** That branch also carries two platform-neutral pieces that stand on
+their own and can be cherry-picked without the lane: a UTF-8 stdout shim with the
+three gate scripts hardened to use it, and `check_verdict_encoding.py`, which
+adjudicates the whole class from Linux by forcing the codec on a child.
