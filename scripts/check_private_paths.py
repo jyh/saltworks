@@ -122,6 +122,9 @@ import subprocess
 import sys
 import tempfile
 
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+from utf8_stdout import ensure_utf8_stdout  # noqa: E402
+
 def self_id() -> str:
     """This file's own content hash, printed in every verdict.
 
@@ -1114,6 +1117,13 @@ def messages_mode(write: bool) -> int:
 
 
 def main() -> int:
+    # A gate's verdict is a RECEIPT, and on a cp1252 stdout (real Windows,
+    # every redirected CI step, hosted windows-latest included) an em-dash
+    # silently becomes byte 0x97 while a character outside the table kills
+    # the process mid-print. Both measured on this repository's own gates,
+    # 2026-08-31. FIRST statement in main, before argument parsing:
+    # argparse prints usage and errors too.
+    ensure_utf8_stdout()
     ap = argparse.ArgumentParser(description="council 5b firewall gate")
     ap.add_argument("--range", default=None,
                     help="git revision range to scan (messages + added lines)")

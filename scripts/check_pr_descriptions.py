@@ -46,6 +46,8 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import check_private_paths as gate  # noqa: E402  (the pattern owner)
 
+from utf8_stdout import ensure_utf8_stdout  # noqa: E402
+
 
 def self_id() -> str:
     try:
@@ -181,6 +183,13 @@ def self_test() -> int:
 
 
 def main() -> int:
+    # A gate's verdict is a RECEIPT, and on a cp1252 stdout (real Windows,
+    # every redirected CI step, hosted windows-latest included) an em-dash
+    # silently becomes byte 0x97 while a character outside the table kills
+    # the process mid-print. Both measured on this repository's own gates,
+    # 2026-08-31. FIRST statement in main, before argument parsing:
+    # argparse prints usage and errors too.
+    ensure_utf8_stdout()
     ap = argparse.ArgumentParser(description="forge-side prose gate (row I(a))")
     ap.add_argument("--self-test", action="store_true")
     ap.add_argument("--open", action="store_true",
