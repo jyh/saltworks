@@ -112,9 +112,11 @@ stall.**
 > `scope := fun _ => true` the definition is defeq to `CycleRealisesStepOrStalls` and `stallArm_reduces`
 > still closes by `Iff.rfl` — the property the twenty-declaration cone rests on.** *(compiler 07:12: the
 > Prop-valued spelling `scope ins → …` would leave `∀ ins, True → P ins`, a function type, and lose the
-> `Iff.rfl`; ARGUED, NOT BUILT — compiler is driving both spellings as a differential now, and this clause
-> is adopted CONDITIONALLY on that receipt. If the kernel refutes the prediction, the Bool form is still
-> the one to ratify; only the proof of reduction changes.)*
+> `Iff.rfl`. **CONFIRMED BY THE KERNEL 07:17, saltworks `86f7efd7`, `HDL/ScopeShapeDifferential.lean`:**
+> `scopedB_reduces` closes by `Iff.rfl`; the Prop form's `Iff.rfl` is a TYPE MISMATCH pinned as a
+> `#guard_msgs` arm, and `scopedP_reduces_propositionally` shows P loses the DEFEQ, not the reduction;
+> `control_scope_actually_excludes` shows the scope argument is not decoration. `saltbuild EXIT=0`, 4685
+> audit ticks (+3 = that module), 0 sorryAx. ⇒ this clause is adopted UNCONDITIONALLY in the Bool form.)*
 > **Why this is honest and not a dodge:** `witness_is_not_memFree` (kernel-checked) puts `insL` OUTSIDE
 > the scope, so the scoped sentence is not refuted by the landed witness and its positive half (R9b,
 > compiler) becomes inhabitable; and the sentence NAMES what it excludes — **memory-touching words are not
@@ -155,7 +157,7 @@ false" from the one to the other.
 
 ### B.3 WHAT THE SITTING IS ASKED TO DO WITH (B)
 Adopt R10-1..R10-4 as the statement text at the desk (or correct them there); ratify the `…On` definition
-in its Bool form, conditional on compiler's differential receipt; give the T8 word; settle R10-2's one bit
+in its Bool form (kernel-confirmed at `86f7efd7`); give the T8 word; settle R10-2's one bit
 (retire/`en` net OUT of the layout — draft). R9b then dates with this close.
 
 ---
@@ -189,4 +191,4 @@ stated as one.
 - **Row 5's side-item**: the trap-gate fidelity harness (`tb_lwtrap.v`, `core32_gated.v`, stat files) was
   scratchpad-resident on 08/30 and is NOT in this repo (`git log --all -- '*lwtrap*'` empty at this hand);
   the measurement stands on the record (minute 09/01 item 7); the harness is owed as a file, silicon's.
-- **compiler's differential** on the Bool/Prop scope spelling — receipt pending; R10-3 adopted conditionally.
+- ~~compiler's differential on the Bool/Prop scope spelling~~ — LANDED `86f7efd7` 07:17; R10-3 adopted unconditionally.
