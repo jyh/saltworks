@@ -132,3 +132,37 @@ Green ⇒ land on master and post the reduction as the sitting's input. Red ⇒ 
 negative, which under the standing law is an equally acceptable outcome — and in this file's case
 a MORE useful one, because a bridge that cannot be scoped would be a defect in R10-3's shape
 found BEFORE ratification rather than after.
+
+---
+
+# ⭐ OUTCOME — APPENDED 2026-09-02 07:4x. §1–§6 ABOVE ARE UNEDITED.
+
+*Appended, never rewritten: a pre-registration that gets adjusted after the result is a
+report. The text above is exactly what was committed at `76cdaf3` before any Lean existed.*
+
+**ALL FOUR CLAIMS MET, ALL THREE CONTROLS FIRE.** `SaltWorks/HDL/R9BPositiveReduction.lean`,
+ten declarations, `saltbuild EXIT=0`, zero `sorryAx`.
+
+⭐⭐ **AND CONTROL C3 FIRED — THE ONE THAT SAID A SILENT DISCHARGE WOULD BE A RESULT I OWE
+IMMEDIATELY. `PcField core` IS ALREADY LANDED, UNSCOPED, OVER EVERY ENVIRONMENT**
+(`pcField_core`, `HDL/PcFieldClosed.lean:137` — the 33rd of the 34 obligations, discharged
+2026-08-2x). **So the pc side of the positive half needs no scope and no work, and §3.3's
+"two scoped obligations" is WRONG BY ONE:**
+
+> **R9b's positive half is `RegDatapathOK` restricted to the memory-free scope. ONE
+> obligation. Nothing else stands between it and the kernel.**
+
+*I pre-registered two and the tree already held one of them. That is the pre-registration
+paying for itself in the direction it is supposed to: I would not have gone looking.*
+
+**AND THE OBLIGATION IS NOT KNOWN FALSE — stated as a walked population, not an impression.**
+Every `¬ RegField core` / `¬ RegDatapathOK` / `¬ C4Spec core` in the tracked tree, enumerated
+by grep at this hand: **three live, and all three run through `insL`, a memory-touching
+witness that the scope excludes** (`regDatapathOK_is_false_at_the_LANDED_witness` ·
+`not_c4Spec_core_at_the_landed_witness` · `not_c4Spec_core_via_the_stall_arm`). The rest are
+dated RETIRED in `C4Refuted.lean`'s own table. ⛔ **THAT IS AN ABSENCE CLAIM AND IT EXPIRES:
+it is true of the tracked tree at `8def1ce` and of nothing else. Re-walk it before citing it.**
+
+⛔ **WHAT IS STILL NOT DONE, in the same words as §5: `RegDatapathOKOn` IS NOT PROVED.** It is
+the ALU/decode/select chain over the five memory-free instruction classes and the
+NOP-advance path, and it is the substance of the rung. **A reduction is not an inhabitation.**
