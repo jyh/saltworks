@@ -110,11 +110,16 @@ stall.**
 > with `scope ins := memFreeB (wordAt ins)`, the Bool twin of `MemFree` (`decode w = some i →
 > touchesMem i = false`, `Stack/Program.lean:1495`). ⛔ **`memFreeB` DID NOT EXIST when this draft was
 > written (compiler 07:21, grepped the tree: `MemFree` is a Prop with no Bool twin and no decidability
-> instance) — I named a constant I had not looked up. compiler is landing, before the sitting, in their
-> lane: `memFreeB` with `memFreeB w = true ↔ MemFree w` · `CycleRealisesStepOrStallsOn` in the Bool
-> spelling with its `Iff.rfl` reduction · `memFreeB (seenWord insL) = false`. THE SITTING RATIFIES ON
-> THOSE LANDED OBJECTS, never on this text; until they land, R10-3 is a sentence naming an obligation.
-> NONE of that is R9b's positive half (compiler's own limit, stated before the build).** **Bool-valued, `if … then … else True`, so that at
+> instance) — I named a constant I had not looked up. ✅ LANDED BY COMPILER 07:25, saltworks `50cbae2c`,
+> `SaltWorks/HDL/MemFreeScope.lean`, Scrub SUCCESS on that sha, 4691 audit ticks (+6 = that module), 0
+> sorryAx: `memFreeB` + `memFreeB_iff` (both directions to `MemFree`) · `CycleRealisesStepOrStallsOn` in
+> the Bool spelling, `scopedOn_reduces` by `Iff.rfl` and `scopedOn_reduces_all_the_way` down to
+> `CycleRealisesStepProj` · `memFreeB_seenWord_insL_false` (the landed witness is OUTSIDE the scope) ·
+> `memFreeB_seenWord_insI_true` + `scope_discriminates` (a control: something is INSIDE — a scope that
+> excluded everything would make the sentence vacuously true while passing every check). THE SITTING
+> RATIFIES ON THOSE OBJECTS, not on this text. The definition sits in its OWN module; moving it into
+> `StallShape` is what ADOPTION looks like and is the sitting's word. NONE of it is R9b's positive half:
+> nothing landed today quantifies over the in-scope environments (compiler's own limit).** **Bool-valued, `if … then … else True`, so that at
 > `scope := fun _ => true` the definition is defeq to `CycleRealisesStepOrStalls` and `stallArm_reduces`
 > still closes by `Iff.rfl` — the property the twenty-declaration cone rests on.** *(compiler 07:12: the
 > Prop-valued spelling `scope ins → …` would leave `∀ ins, True → P ins`, a function type, and lose the
@@ -198,4 +203,4 @@ stated as one.
   scratchpad-resident on 08/30 and is NOT in this repo (`git log --all -- '*lwtrap*'` empty at this hand);
   the measurement stands on the record (minute 09/01 item 7); the harness is owed as a file, silicon's.
 - ~~compiler's differential on the Bool/Prop scope spelling~~ — LANDED `86f7efd7` 07:17; R10-3 adopted unconditionally.
-- **R10-3's three named objects** (`memFreeB` + iff · `…On` · `memFreeB (seenWord insL) = false`) — compiler building 07:2x; the clause is ratifiable when they are at origin.
+- ~~R10-3's three named objects~~ — LANDED `50cbae2c` 07:25 (six declarations, two controls); R10-3 is ratifiable on objects. Adoption (moving `…On` into `StallShape`) is the sitting's word.
