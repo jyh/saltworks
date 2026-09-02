@@ -1,0 +1,72 @@
+# private_paths_baseline.tsv -- ACCEPTED residue for the tree ratchet (check_private_paths.py --tree).
+# file<TAB>line-sha16<TAB>what. Shrink it after a repair with --tree --write-baseline; a growth is a reviewed diff.
+docs/EVIDENCE-cert-quote-criterion-0811.md	2f586b02d5589e52	a line-anchored citation into the fleet bus
+docs/EVIDENCE-metatime-design.md	b4bacfc76d29184c	a line-anchored citation into the fleet bus
+docs/EVIDENCE-sliceb-price-prereg.md	88eb75ef9ad46197	a path into a private-record repo
+docs/Q6-DIFFERENTIAL-PREREGISTRATION.md	600b46655118f848	a path into a private-record repo
+docs/Q6-DIFFERENTIAL-PREREGISTRATION.md	983a9f555305924c	a path into a private-record repo
+docs/QUEUE.md	29bb0337ee5fc7cd	a path into a private-record repo
+docs/QUEUE.md	726fe879cf7fac5a	a path into a private-record repo
+docs/compiler-B1-gate-sweep-scores-0814.tsv	6ac972766bd82bc1	a line-anchored citation into the fleet bus
+docs/compiler-B1-gate-sweep-scores-0814.tsv	c3877ce4400552fe	a line-anchored citation into the fleet bus
+docs/compiler-B1-gate-sweep-scores-0814.tsv	5133de3049e9c433	a line-anchored citation into the fleet bus
+docs/compiler-B1-gate-sweep-scores-0814.tsv	f25a0df53dc87893	a line-anchored citation into the fleet bus
+docs/compiler-B1-gate-sweep-scores-0814.tsv	74ed8240624d3ccb	a line-anchored citation into the fleet bus
+docs/compiler-B1-gate-sweep-scores-0814.tsv	b4800d5176b5e718	a line-anchored citation into the fleet bus
+docs/compiler-B1-gate-sweep-scores-0814.tsv	94fba9557921104f	a line-anchored citation into the fleet bus
+docs/compiler-B1-gate-sweep-scores-0814.tsv	52a55bba39e7091f	a line-anchored citation into the fleet bus
+docs/compiler-B1-gate-sweep-scores-0814.tsv	ecb5ce72afa53e1c	a line-anchored citation into the fleet bus
+docs/compiler-B1-gate-sweep-scores-0814.tsv	f01c26a11540fb4e	a line-anchored citation into the fleet bus
+docs/compiler-B1-gate-sweep-scores-0814.tsv	736f055f71215c72	a line-anchored citation into the fleet bus
+docs/compiler-B1-gate-sweep-scores-0814.tsv	e804b0937c187338	a line-anchored citation into the fleet bus
+docs/compiler-B1-gate-sweep-scores-0814.tsv	1d9fdad193defb15	a line-anchored citation into the fleet bus
+docs/compiler-B1-undercount-ledger-0814.md	a63658cfe28439f4	a line-anchored citation into the fleet bus
+docs/compiler-B1-undercount-ledger-0814.md	1e84980467e0dbc1	a line-anchored citation into the fleet bus
+docs/compiler-B1-undercount-ledger-0814.md	25c69f465fd282ed	a line-anchored citation into the fleet bus
+docs/compiler-B1-undercount-ledger-0814.md	e0c323d5f62b1461	a line-anchored citation into the fleet bus
+docs/compiler-B1-undercount-ledger-0814.md	02877ff5e10d0fad	a line-anchored citation into the fleet bus
+docs/compiler-B1-undercount-ledger-0814.md	32a3a4e56b8dc9bc	a line-anchored citation into the fleet bus
+docs/compiler-B1-undercount-ledger-0814.md	e22ea74a94efadda	a line-anchored citation into the fleet bus
+docs/compiler-B1-undercount-ledger-0814.md	0695d7e4d6379ebb	a line-anchored citation into the fleet bus
+docs/compiler-B1-undercount-ledger-0814.md	247b4f9926b30ce7	a line-anchored citation into the fleet bus
+docs/compiler-B1-undercount-ledger-0814.md	522050a1084d5fa7	a line-anchored citation into the fleet bus
+docs/compiler-B1-undercount-ledger-0814.md	1d15c360c972b858	a line-anchored citation into the fleet bus
+docs/compiler-B1-undercount-ledger-0814.md	b65e6fc661831295	a line-anchored citation into the fleet bus
+docs/compiler-B2-BLIND-SHEET-0816.txt	4eaf81959e3d4da9	a path into a private-record repo
+docs/compiler-B2-BLIND-SHEET-0816.txt	ce7b391d7292c312	a path into a private-record repo
+docs/compiler-v3-repair-checklist.md	2782db0ccbbd9108	a line-anchored citation into the fleet bus
+docs/evidence-blind-keying-0813.json	76fef0f14fc71169	a line-anchored citation into the fleet bus
+docs/helm-doublecode-codebook-amendment-DRAFT2-0813.md	fe41e6572afb67da	a line-anchored citation into the fleet bus
+docs/ledger-tools/bus_snapshot.sh	fdf7c539894d9381	a rootless path into the private record (briefs-/fleet-shape)
+docs/ledger-tools/citecheck.py	83013944785105fa	a rootless path into the private record (briefs-/fleet-shape)
+docs/ledger-tools/slate3_price.py	a636c08a4d61f9a8	a line-anchored citation into the fleet bus
+docs/ledger-tools/watch-compiler-patterns.txt	aa5168384b97771b	a rootless path into the private record (briefs-/fleet-shape)
+docs/ndf-account-priced-half.md	b0b04a77ad966d23	the backup volume holding the private record
+docs/pi-cold-verdicts-0813.json	2941c5bced33f9b5	a line-anchored citation into the fleet bus
+docs/pi-cold-verdicts-0813.json	e726dc7d042403c3	a line-anchored citation into the fleet bus
+docs/pi-cold-verdicts-0813.json	142988a0eabbbcde	a line-anchored citation into the fleet bus
+docs/pi-cold-verdicts-0813.json	0e8cc1732d2eb3fd	a line-anchored citation into the fleet bus
+docs/pi-cold-verdicts-0813.json	9d916506142811da	a line-anchored citation into the fleet bus
+docs/pi-cold-verdicts-0813.json	54fd9574b7aa3108	a line-anchored citation into the fleet bus
+docs/pi-cold-verdicts-0813.json	7a8e6ccc01cf3b54	a line-anchored citation into the fleet bus
+docs/pi-cold-verdicts-0813.json	35b76768d0527d86	a line-anchored citation into the fleet bus
+docs/pi-cold-verdicts-0813.json	a6cbb01d43eab9da	a line-anchored citation into the fleet bus
+docs/pi-cold-verdicts-0813.json	75311746318d5021	a line-anchored citation into the fleet bus
+docs/pi2-cold-verdicts-0813.json	954da0f1bdd661be	a line-anchored citation into the fleet bus
+docs/pi2-cold-verdicts-0813.json	c4e483cc381e3fa8	a line-anchored citation into the fleet bus
+docs/pi2-cold-verdicts-0813.json	7f2cfd2f8c63492a	a line-anchored citation into the fleet bus
+docs/silicon-dfrtp-async-reset-prereg-0812.RESULTS.md	7573f41b437ca167	a line-anchored citation into the fleet bus
+docs/silicon-refute-imm-uncond-0807.md	57947a684af13a70	a line-anchored citation into the fleet bus
+docs/silicon-refute-imm-uncond-0807.md	cacc85d3f2e84bb2	a line-anchored citation into the fleet bus
+docs/silicon-tools/README.md	f6c6160a684f6335	the backup volume holding the private record
+docs/silicon-tools/busmon.awk	7c47c4d16656a6ea	a path into a private-record repo
+docs/silicon-tools/drvgate_selftest.sh	7c71847c2bb793d3	the backup volume holding the private record
+docs/silicon-tools/fallback-silicon.sh	02c0ab295d3d1270	a path into a private-record repo
+docs/silicon-tools/fallback-silicon.sh	fe374074001d5860	a path into a private-record repo
+docs/silicon-tools/fallback-silicon.sh	02c0ab295d3d1270	the kit run surface
+docs/silicon-tools/meas_build.sh	8dad5c66452d4427	a path into a private-record repo
+docs/silicon-tools/meas_since.sh	4a0bd0cf6a83bf25	a path into a private-record repo
+docs/silicon-tools/orderwatch_selftest.sh	c098add3768261af	a path into a private-record repo
+docs/silicon-tools/pincheck.sh	eec507533e071abe	the backup volume holding the private record
+docs/silicon-tools/pincheck_selftest.sh	d219c40ac1cdd257	the backup volume holding the private record
+docs/silicon-tools/treatcheck.py	5d6ede61fdaa279c	the backup volume holding the private record
