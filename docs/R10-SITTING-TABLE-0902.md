@@ -36,8 +36,9 @@ cap 5 · setup ws +7.85897591471 · hold ws +0.19767699148203566 · TNS 0/0 · D
 43,396) · `wire695/X limit 10 fanout 11` the sole violator in all nine corners of both runs, clock-leaf 0 ·
 **`main` fast-forwarded to `4226396f`** (ls-remote). The runner reproduced the local measurement bit-exactly
 twice, so determinism across machines now has three points (ndf-base 08/27, run 1, run 2). **The click is
-the Captain's: TinyTapeout project 5500, re-submit from `main`.** *(The push to `main` starts one more gds
-run of the same bytes; it will be green before the sitting and is the run the click takes.)*
+the Captain's: TinyTapeout project 5500, re-submit from `main`.** ✅ **08:2x: THE RUN THE CLICK TAKES, `33644567364` on `main` `4226396f`, is GREEN on every job and verified by
+the same script — treatcheck exact, 132/132 metrics identical, `wire695/X` @11 the sole violator — the FOURTH determinism
+point.** Nothing stands between `main` and the click.
 
 **The criterion as pre-stated at 07:4x, kept so the verdict above can be read against it:**
 1. Run `33640897082` green on every job (`gds` · `precheck` · `gl_test` · `viewer` · `docs` · `test`).
@@ -189,6 +190,10 @@ RUNG 2.5  PROVEN IN LEAN OVER THE COMPOSED   THE RESTATED FLAGSHIP, SCOPED — c
                                              fabricated, and NO theorem relates them. Stays
                                              2.5 at compiler's own word; "over the composed
                                              model" is now understated, not wrong.
+                                             (08:05 ef91df4: sorts_of_C4 FIRED for the first
+                                             time — the composed core's registers hold the
+                                             SORTED input on a memory-free trajectory; THE
+                                             MODEL sorts, THE DIE IS NOT PROVED TO — same fence.)
 RUNG 2  TRUE OF THE HARDWARE BY CONSTRUCTION, DriveMap                                   unchanged
         ASSUMED IN LEAN
 RUNG 1  SIMULATED, NOT PROVED                memory-touching words · trap-class loads   named, not claimed
