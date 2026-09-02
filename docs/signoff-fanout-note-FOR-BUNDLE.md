@@ -1,5 +1,14 @@
 # Max-fanout DRV at signoff — `tt_um_saltworks_ndf_c32`
 
+> ⚖️ **2026-09-02 07:4x — THE HOLD BELOW IS SUPERSEDED (the Captain, council 09/02 07:2x: "we don't wait to
+> ship, we should ship as early as possible"). This note is RE-CUT for the `ndf-2a` configuration and folded
+> into the resubmission bundle itself: `jyh/tt-neural-dataflow-fabric` branch `ndf-2a`, `docs/info.md`
+> §"Signoff — max-fanout DRV at the configuration this bundle submits" (commit `4226396f`, on top of the
+> four-key config commit `119d9705`). The bundle's copy describes ndf-2a's numbers (1 violator, `wire695/X`
+> @11, zero clock-leaf); THIS file keeps describing the fabricated `ndf-base` (117; 111 + 6) — both are true
+> of their own object, which is the whole point of §"THE SCOPE QUESTION" below. State of the resubmission:
+> `docs/R10-SITTING-TABLE-0902.md` §(A). The text below is unchanged.**
+
 *Prepared 2026-08-28 for addition to the submitted bundle (TT commit `7d2b2756`, run
 `32284710003`). **NOT YET ADDED — see the scope question at the foot.***
 

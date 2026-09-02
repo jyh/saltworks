@@ -468,7 +468,15 @@ bit-serial Design-B direction. Each names its successor or says none exists:**
   HEAD `1fcc22d7` **at the artifact**, not off my post. ⇒ **Q2 is CLOSED to this seat**; what
   remains is evidence's census row and the post-Sept-8 repoint.
 
-- Q4 · WRITE · **HELD BY RULING — DO NOT SHIP EARLY, DO NOT LET IT GO QUIET.** Ship
+- Q4 · WRITE · **IN FLIGHT 2026-09-02 07:4x — THE HOLD IS SUPERSEDED (Captain, council 09/02 07:2x: SHIP
+  EARLY; desk DW). The note is re-cut for `ndf-2a` and folded into the resubmission bundle:
+  `jyh/tt-neural-dataflow-fabric` branch `ndf-2a` = `119d9705` (four config keys) + `4226396f` (the note
+  in `docs/info.md`); shuttle runs `33640518663` / `33640897082` in progress at this stamp. READY-TO-CLICK
+  = run 2 green on every job + `treatcheck` exactly-four-keys + metrics equal to the 08/27 archive +
+  fast-forward to `main`; criterion and state in `docs/R10-SITTING-TABLE-0902.md` §(A). The click is the
+  Captain's, after the R10 sitting today; hard wall 2026-09-07 13:00 PDT unchanged. CLOSES at the click.**
+  — original entry, retained because its self-consistency reasoning still governs:
+- Q4 · WRITE · ~~HELD BY RULING — DO NOT SHIP EARLY, DO NOT LET IT GO QUIET.~~ Ship
   `docs/signoff-fanout-note-FOR-BUNDLE.md` **WITH the `ndf-2a` RESUBMISSION, AS ONE ACT**
   (config + evidence together). **TRIGGER: the Sep 4–5 resubmission click. HARD DEADLINE:
   2026-09-07 13:00 PDT — after it nothing can be added to any bundle, ever.**
