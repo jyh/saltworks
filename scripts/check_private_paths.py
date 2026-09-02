@@ -149,7 +149,7 @@ def self_id() -> str:
 # otherwise pass vacuously by excluding the one file that matters.
 # ---------------------------------------------------------------------------
 _SEAT = "se" + "at"                    # the commons/memory-mirror repo
-_EMPLOYER = ["lo" + "ca", "ho" + "ll", "pcc-" + "bios"]
+_EMPLOYER = ["lo" + "ca", "ho" + "ll", "pcc-" + "bios", "safe_" + "dav1d", "safe_" + "gif"]
 _PRIVATE_PROJ = ["si" + "la", "mor" + "pho"]
 _CFGDIR = r"\.claude-" + _SEAT + r"-[A-Za-z0-9_-]+"
 _KIT_RE = "Documents" + r"[/" + chr(92)*2 + r"]+" + _SEAT   # separator-agnostic
