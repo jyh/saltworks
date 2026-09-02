@@ -3515,3 +3515,68 @@ closure. **706 lines added** — 86 prose, 604 proof, 16 audit; 65 declarations.
 * **`rnCurPat`'s per-register (not per-bit) pseudo-randomness is a live sampling
   weakness**, quantified above at exactly one cell. Any future certificate that
   pins `cur` should vary it per bit as well as per register.
+
+---
+
+## R10ADOPT — the R10 sitting's compiler acts: the scope adopted, the unit re-cut
+**2026-09-02 · compiler seat · `95310c0` (adoption) + `bb4cf5d` (T8) · statement text at `docs/compiler-R10-FLAGSHIP-STATEMENT-0902.md`**
+
+### What landed
+
+The R10 sitting ratified R10-1..R10-4 and ruled T8. Two acts of the minute's compiler row
+landed in the tree; the third — the statement text — is the doc named above; the fourth (the
+retire/`en` bit OUT) and fifth (R9b dates) are recorded in its §1 and §4.
+
+* **R10-3 ADOPTED, and adoption IS THE MOVE.** `memFreeB`, `memFreeB_iff`,
+  `CycleRealisesStepOrStallsOn`, `scopedOn_reduces` and `scopedOn_reduces_all_the_way` moved
+  from `HDL/MemFreeScope.lean` into `HDL/StallShape.lean` §0.2 — the tracked home of the
+  flagship's shape. Nothing was copied. `MemFreeScope`'s header had held them out of that
+  file *"IF AND ONLY IF the sitting adopts it"*, so that adoption would be an act somebody
+  performs rather than a fact somebody inherits; the header is rewritten because a
+  conditional left standing after its condition is discharged reads as an OPEN question.
+* **The two non-vacuity controls STAYED**, and it is a dependency fact: they name
+  `HDL.C4Refuted`, downstream of `StallShape`. `MemFreeScope` is now the scope's EVIDENCE
+  module, not its home, and §0.2 names it.
+* **T8 APPLIED.** `cycles_sort_scoped` and `core_sorts` now bound `stepsIn`, never `N`;
+  `cycles_sort_scoped_clocks` and `core_sorts_clocks` are the clock forms, DERIVED.
+* **`stepsIn_empty`, `guard_reduces`, `stepsIn_le` LANDED** into `HDL/StallShape.lean` §0.0a.
+
+### FOUND vs PROVED
+
+* **PROVED:** nothing new. This is the honest half and it belongs at the top of the entry.
+  At `stalls := fun _ => false` — this core's own declaration under R10-2 — `guard_reduces`
+  makes the steps guard IFF the clock guard, so the unit change gains no strength. What it
+  buys is that the clock reading is a CONSEQUENCE of the stall declaration, and that an
+  arbitrating core changes only the `stalls` ARGUMENT while the statement shape survives.
+  `stepsIn_le` closes the other direction: a clock realises at most one step, so the
+  restatement cannot buy its own bound.
+* **FOUND — and it is the fourth instance of one pattern.** `stepsIn_empty`, `guard_reduces`
+  and `stepsIn_le` had been proved on 2026-08-26 into `HDL/ScratchStallArm.lean`, which is
+  GITIGNORED. They built, they audited clean, and `git` had never seen a line of them — so
+  R10-1's own *"derivation theorem beside it"* existed on exactly one disk while the sitting
+  ratified the clause that names it. No gate at this seat could see that: every gate reads
+  the tree or the build, and both were green. Prior instances: the four value rows under four
+  different names · `CoreConforms` · the reject-demo, proved 08/17 and delivered nowhere for
+  sixteen days. ⇒ **THE GAP AT THIS SEAT IS ASSEMBLY, NOT PROOF.**
+* **FOUND — a single-target build cannot see a namespace move.** `lake build
+  SaltWorks.HDL.CoreSorts` was green while the tree was red: `CoreConformsClosed` also uses
+  `memFreeB` and is not in `CoreSorts`' cone. Its failure then printed TWO errors —
+  `Unknown identifier memFreeB` and `#audit_axioms … depends on sorryAx` — from ONE defect,
+  because a failed elaboration fills the hole. Read as two problems it sends a reader hunting
+  a proof gap that does not exist.
+
+### Left undetermined
+
+* **Math's `cycles_sort` and `sorts_of_C4` are NOT restated.** The minute names them; they
+  live in `SaltWorks/Stack/Program.lean`, math's slot, read-only here with no live grant —
+  and `stepsIn` lives in `HDL/StallShape.lean`, which IMPORTS `Program.lean`, so a steps-form
+  statement is not *expressible* there unless `stepsIn` moves into math's file. The
+  dependency picks the venue. Raised on the bus, recommendation that `stepsIn` not move;
+  what landed is the restatement of this seat's scoped descendants.
+* **The RTL correspondence.** Rung 2.5 stands: the object is `CorePlace.core`, the
+  Lean-composed circuit, NOT `core32.v`, and no theorem in this tree relates them.
+* **`C4Spec core` unscoped is still FALSE; `C4SpecD core` is refuted under every scope.**
+  Neither is touched by adoption.
+* **The sitting table's B.2 limit (1)** still reads "R10-3 AS DRAFTED, not as ratified",
+  which the adoption falsifies. That table is silicon's; the amendment is routed to its
+  owner, not taken here.
