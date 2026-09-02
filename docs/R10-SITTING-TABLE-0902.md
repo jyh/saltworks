@@ -160,20 +160,32 @@ stall.**
 
 ```
 RUNG 4  PROVEN AT THE GATES, TOTAL           dmem_addr8                                 unchanged
-RUNG 3  PROVEN AT THE GATES, RESTRICTED      dmem8 (rst_n ≡ 1); and THE RESTATED        ← R10 puts it HERE, as of
-                                             FLAGSHIP, SCOPED: compiler 07:44,           07:44 — was RUNG 2 in this
-                                             saltworks 3882c49, Scrub SUCCESS, 4712       table's first cut. FOUR
-                                             ticks (+7), 0 sorryAx — the core realises   LIMITS ride with it: (1) it
-                                             the ISA step, regs AND pc, at every         inhabits R10-3 AS DRAFTED,
-                                             memory-free word, every nextW, every pad    not as ratified — restate
-                                             (R9b's positive half, 1ae3dde reduction +    it and the instance dies,
-                                             3882c49 inhabitation). Every decode arm was   the reduction survives;
-                                             ALREADY LANDED; it needed assembly + scope   (2) stall set EMPTY (the
-RUNG 2  TRUE OF THE HARDWARE BY CONSTRUCTION, DriveMap                                   core's own declaration; an
-        ASSUMED IN LEAN                                                                  arbitrating core falsifies
-                                                                                         the instance); (3) C4Spec
-                                                                                         core STILL FALSE unscoped;
-                                                                                         (4) C4SpecD refuted always
+RUNG 3  PROVEN AT THE GATES, RESTRICTED      dmem8 (rst_n ≡ 1) — an IMPORTED NETLIST      unchanged. ⛔ NOT the
+                                             (Imported/Dmem8.lean, "source: dmem8_nl.v")   scoped flagship: see 2.5
+RUNG 2.5  PROVEN IN LEAN OVER THE COMPOSED   THE RESTATED FLAGSHIP, SCOPED — compiler      ← STATED RUNG, ADDED 07:5x
+        MODEL, RESTRICTED — RTL              07:44, saltworks 3882c49, Scrub SUCCESS,       on compiler's own contest
+        CORRESPONDENCE OPEN                  4712 ticks (+7), 0 sorryAx: the core realises  of their promotion (this
+                                             the ISA step, regs AND pc, at every memory-    table's 07:4x cut said
+                                             free word, every nextW, every pad (R9b's       RUNG 3 and was WRONG by the
+                                             positive half: 1ae3dde reduction + 3882c49     ladder's own definitions —
+                                             inhabitation). Every decode arm was ALREADY    rung 3's occupants are
+                                             LANDED; it needed assembly + scope.            imported netlists; rung 2
+                                             FIVE LIMITS ride with it: (1) it inhabits      is "proved in RTL, assumed
+                                             R10-3 AS DRAFTED, not as ratified — restate    in Lean" and this object is
+                                             it and the instance dies, the reduction        the MIRROR IMAGE: proved in
+                                             survives; (2) stall set EMPTY (the core's own  Lean, RTL correspondence
+                                             declaration; an arbitrating core falsifies     open). A reader takes a
+                                             the instance); (3) C4Spec core STILL FALSE     rung from its neighbours;
+                                             unscoped; (4) C4SpecD refuted under every      at 3 it would have borrowed
+                                             scope; (5) ⛔ THE OBJECT IS THE LEAN-COMPOSED   dmem8's die-level standing.
+                                             `CorePlace.core` (19 organs by instGates),
+                                             NOT an imported netlist: no Imported/Core*.lean
+                                             exists; core.wf / core.ssa are UNPROVED so
+                                             emitPipeline'_sem does not yet apply; NO kernel
+                                             theorem relates `core` to core32.v (LEDGER.md:
+                                             "CoreConforms is still owed").
+RUNG 2  TRUE OF THE HARDWARE BY CONSTRUCTION, DriveMap                                   unchanged
+        ASSUMED IN LEAN
 RUNG 1  SIMULATED, NOT PROVED                memory-touching words · trap-class loads   named, not claimed
                                              (row 5's harness) · the offboard protocol
 RUNG 0  MEASURED ONLY                        area · DRC/LVS · timing = THIS BUNDLE's     dated by the click
