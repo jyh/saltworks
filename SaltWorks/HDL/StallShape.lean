@@ -126,6 +126,54 @@ def stepsIn (stalls : SaltWorks.HDL.Env → Bool)
   | 0 => 0
   | n + 1 => stepsIn stalls cyc ins n + (if stalls (cycles cyc n ins) then 0 else 1)
 
+/-! ### §0.0a — T8's UNIT, AND THE TWO LEMMAS THAT MAKE IT SAFE TO USE.
+
+The R10 sitting of 2026-09-02 ruled T8: **the unit is STEPS REALISED**, so a bound is on
+`stepsIn stalls cyc ins N` and never on `N`, and *no clock numeral stands without its
+derivation* (R10-1). These three are that derivation, and `guard_reduces` is the named
+"derivation theorem beside it" the ruling asks for.
+
+⛔ THEY WERE PROVED ON 2026-08-26 AND LANDED NOWHERE. They lived only in
+`HDL/ScratchStallArm.lean`, which is GITIGNORED: it built, it audited clean, and `git` had
+never seen a line of them — the same shape as the reject-demo that sat undelivered for
+sixteen days, and the FOURTH time at this seat that the answer to "what does this cost?"
+was *already proved, never assembled*. A theorem a ruling depends on cannot live on one
+disk. They are reproduced here verbatim in statement and proof.
+-/
+
+/-- **REDUCTION at the lemma level: an empty stall set gives back `n`.** *So the restated
+guard `K ≤ stepsIn …` IS today's `K ≤ N`, and the existing flagship is the empty-stall
+instance rather than a casualty.* -/
+theorem stepsIn_empty (cyc : SaltWorks.HDL.Env → SaltWorks.HDL.Env)
+    (ins : SaltWorks.HDL.Env) (n : Nat) :
+    stepsIn (fun _ => false) cyc ins n = n := by
+  induction n with
+  | zero => rfl
+  | succ m ih => simp [stepsIn, ih]
+
+/-- ⭐ **THE FLAGSHIP GUARD REDUCES — R10-1's "derivation theorem beside it", by name.**
+*The clock reading is DERIVED from the stall declaration; it is not an independent claim,
+and it is not an assumption.* -/
+theorem guard_reduces (cyc : SaltWorks.HDL.Env → SaltWorks.HDL.Env)
+    (ins : SaltWorks.HDL.Env) (K N : Nat) :
+    K ≤ stepsIn (fun _ => false) cyc ins N ↔ K ≤ N := by
+  rw [stepsIn_empty]
+
+/-- ⛔ **NO FREE STEPS — a clock realises AT MOST one step.** *The direction that matters
+for soundness: a stall arm must never let the machine claim MORE progress than it has
+clocks for. Without this the restatement could buy its own bound, and a unit change that
+can buy a bound is not a unit change.* -/
+theorem stepsIn_le (stalls : SaltWorks.HDL.Env → Bool)
+    (cyc : SaltWorks.HDL.Env → SaltWorks.HDL.Env) (ins : SaltWorks.HDL.Env) (n : Nat) :
+    stepsIn stalls cyc ins n ≤ n := by
+  induction n with
+  | zero => exact Nat.le_refl 0
+  | succ m ih =>
+      rw [stepsIn]
+      split
+      · exact Nat.le_succ_of_le ih
+      · exact Nat.succ_le_succ ih
+
 /-! ## §0.1 — THE THREE PROPERTIES A RATIFICATION RESTS ON -/
 
 /-- **(a) REDUCTION — an empty stall set gives back today's predicate, EXACTLY.**
@@ -552,6 +600,7 @@ theorem mix_run_moves_the_state (pad : SaltWorks.HDL.Env) :
 #audit_axioms mix_run mix_two_clocks_one_step mix_run_moves_the_state
 
 #audit_axioms CycleRealisesStepOrStalls stepsIn
+#audit_axioms stepsIn_empty guard_reduces stepsIn_le
 #audit_axioms stallArm_reduces stallArm_admits_stalledBits stallArm_strictly_extends
 -- R10-3 ADOPTED, sitting 2026-09-02: moved here from HDL/MemFreeScope.lean.
 #audit_axioms memFreeB memFreeB_iff
