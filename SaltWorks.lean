@@ -160,6 +160,7 @@ import SaltWorks.HDL.WhileSim
 import SaltWorks.HDL.C4Refuted
 import SaltWorks.HDL.LwTrapRefuted
 import SaltWorks.HDL.LwNotStallShaped
+import SaltWorks.HDL.ScopeShapeDifferential
 import SaltWorks.HDL.StallShape
 import SaltWorks.HDL.T2T5Consistency
 import SaltWorks.HDL.StallsAtWidened
