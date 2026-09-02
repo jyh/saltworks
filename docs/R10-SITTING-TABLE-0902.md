@@ -180,10 +180,15 @@ RUNG 2.5  PROVEN IN LEAN OVER THE COMPOSED   THE RESTATED FLAGSHIP, SCOPED — c
                                              scope; (5) ⛔ THE OBJECT IS THE LEAN-COMPOSED   dmem8's die-level standing.
                                              `CorePlace.core` (19 organs by instGates),
                                              NOT an imported netlist: no Imported/Core*.lean
-                                             exists; core.wf / core.ssa are UNPROVED so
-                                             emitPipeline'_sem does not yet apply; NO kernel
-                                             theorem relates `core` to core32.v (LEDGER.md:
-                                             "CoreConforms is still owed").
+                                             exists. (08:01 ce36f0e, compiler: CoreConforms
+                                             core IS DISCHARGED — core.ssa/wf/nIn proved, so
+                                             emitPipeline'_sem now applies and the EMITTED
+                                             netlist realises the step at memory-free words.)
+                                             ⛔ THE FENCE THAT KEEPS IT AT 2.5: that emitted
+                                             netlist is NOT core32.v, the RTL that was
+                                             fabricated, and NO theorem relates them. Stays
+                                             2.5 at compiler's own word; "over the composed
+                                             model" is now understated, not wrong.
 RUNG 2  TRUE OF THE HARDWARE BY CONSTRUCTION, DriveMap                                   unchanged
         ASSUMED IN LEAN
 RUNG 1  SIMULATED, NOT PROVED                memory-touching words · trap-class loads   named, not claimed
