@@ -166,6 +166,7 @@ import SaltWorks.HDL.CriterionCReject
 import SaltWorks.HDL.R9BPositiveReduction
 import SaltWorks.HDL.R9BPositiveHalf
 import SaltWorks.HDL.R9BNStep
+import SaltWorks.HDL.CoreConformsClosed
 import SaltWorks.HDL.StallShape
 import SaltWorks.HDL.T2T5Consistency
 import SaltWorks.HDL.StallsAtWidened

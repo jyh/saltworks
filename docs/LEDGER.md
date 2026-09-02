@@ -1870,6 +1870,12 @@ owed — `ssa` feeds `Circ.wf_of_ssa` and the emission layer, `nIn = coreInWidth
 is the input-map obligation — but **neither of those is a debt of the round
 trip.** ⛔ Nothing in `C4.lean` was touched, weakened or restated.
 
+⛔ **AMENDED 2026-09-02: `CoreConforms core` IS DISCHARGED** —
+`SaltWorks/HDL/CoreConformsClosed.lean`, all three conjuncts, `core.wf` with it. The
+sentence above is kept because it is an accurate account of what the round trip owes and
+does not owe; only its *status* moved. **The debt it names is paid, and a reader must not
+inherit it as open.**
+
 ### The undriven-wire model, and why `envOfBits` carries a `pad`
 
 A core with too few outputs leaves the remaining state flops **undriven**, and
@@ -1981,6 +1987,13 @@ import. ⛔ No file under `HDL/` was edited; `SaltWorks.lean` was not touched.
   `nIn = coreInWidth` to the input map. Neither is discharged and neither is
   used here; they are listed so nobody reads `sorts_of_C4`'s use of the `C4`
   structure as having consumed them.
+  ⛔ **AMENDED 2026-09-02 — "neither is discharged" IS NOW FALSE, and this is exactly the
+  line that would have gone stale silently.** Both are discharged in
+  `SaltWorks/HDL/CoreConformsClosed.lean` (`core_ssa` by walking the nineteen-block
+  append chain, `core_nIn` by `rfl`), and `core.wf` follows by `Circ.wf_of_ssa`. **The
+  point of the original sentence stands whole — this file still does not USE them, and a
+  reader still must not read `sorts_of_C4` as having consumed them.** What changed is only
+  that they are no longer OWED.
 * **Whether `pad` should exist at all in the final tile model.** It is the honest
   model of an undriven flop and it costs one universally-quantified argument, but
   a real tile will have a definite reset/hold behaviour, and when that is pinned
