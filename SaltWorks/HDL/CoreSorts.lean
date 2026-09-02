@@ -29,7 +29,7 @@ import SaltWorks.HDL.R9BNStep
 namespace SaltWorks.HDL.CoreSorts
 
 open SaltWorks.ISA SaltWorks.Stack SaltWorks.Stack.Program
-open SaltWorks.HDL.MemFreeScope SaltWorks.HDL.R9BPositiveReduction
+open SaltWorks.HDL.StallShape SaltWorks.HDL.MemFreeScope SaltWorks.HDL.R9BPositiveReduction
 open SaltWorks.HDL.R9BPositiveHalf SaltWorks.HDL.R9BNStep
 open SaltWorks.HDL.CorePlace
 

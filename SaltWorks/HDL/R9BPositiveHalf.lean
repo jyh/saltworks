@@ -7,11 +7,19 @@
   ⛔⛔ READ THE FOUR LIMITS BEFORE THE HEADLINE. Each is a real restriction, and each is
   stated here rather than left for a reader to discover in the statement:
 
-  1. THE OBJECT IS A DRAFT. `CycleRealisesStepOrStallsOn` and the memory-free scope are
-     R10-3 AS DRAFTED (`docs/R10-SITTING-TABLE-0902.md` §B.1), not as ratified. The sitting
-     may state the flagship differently; then this inhabits a different sentence from the
-     one that ships, and the reduction (`R9BPositiveReduction`, quantified over `scope`)
-     is what survives, not this instance.
+  1. THE OBJECT IS RATIFIED, AND RATIFIED IS NOT THE SAME AS CLOSED. The R10 sitting of
+     2026-09-02 (helm minute, bare filename `2026-09-02-R10-SITTING-minute.md`, private
+     record) ADOPTED R10-3 as drafted at `docs/R10-SITTING-TABLE-0902.md` §B.1, and the
+     adoption IS the move of `CycleRealisesStepOrStallsOn` and `memFreeB` into
+     `HDL/StallShape.lean` §0.2. So this file no longer inhabits a draft sentence. ⛔ WHAT
+     THAT DOES **NOT** BUY: the object is `CorePlace.core`, the LEAN-COMPOSED circuit — not
+     `core32.v`, the hand-written RTL that was fabricated — and no theorem in this tree
+     relates the two. Rung 2.5; RTL correspondence OPEN. *Ratification moved the modal
+     status of this instance and moved nothing about its object.*
+     📜 HISTORY: until the sitting sat this limit read "THE OBJECT IS A DRAFT … not as
+     ratified", and warned that a restatement would kill the instance and leave
+     `R9BPositiveReduction` (quantified over `scope`) as the survivor. The restatement did
+     not come. That reduction is still the general result and this is still the instance.
   2. THE STALL SET IS EMPTY, and that is the core's own declaration, not a convenience:
      `core` is single-cycle, every cycle retires, so R10-2's `stalls := ¬ retire` is empty
      here. A LATER CORE WITH ARBITRATION MAKES THIS INSTANCE FALSE while leaving every
@@ -43,7 +51,7 @@ import SaltWorks.HDL.LwNotStallShaped
 namespace SaltWorks.HDL.R9BPositiveHalf
 
 open SaltWorks.ISA SaltWorks.Stack SaltWorks.Stack.Program
-open SaltWorks.HDL.MemFreeScope SaltWorks.HDL.R9BPositiveReduction
+open SaltWorks.HDL.StallShape SaltWorks.HDL.MemFreeScope SaltWorks.HDL.R9BPositiveReduction
 open SaltWorks.HDL.CorePlace SaltWorks.HDL.RegNextUniform
 open SaltWorks.HDL.RegNextUniform.Writers SaltWorks.HDL.RegNextUniform.NonWriters
 open SaltWorks.HDL.RegNextUniform.XOR

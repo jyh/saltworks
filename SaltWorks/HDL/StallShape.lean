@@ -159,6 +159,87 @@ theorem stallArm_strictly_extends (nextW : SaltWorks.HDL.Env → Word)
       ∧ ¬ CycleRealisesStepProj (cycOfBits stalledBits nextW pad) Program.seenWord :=
   ⟨stallArm_admits_stalledBits nextW pad, not_cycleRealisesStep_stalledBits nextW pad⟩
 
+/-! ## §0.2 — ⭐⭐ R10-3, ADOPTED. THE SCOPED SHAPE, AND THE SCOPE THE SITTING RATIFIED.
+
+**These five declarations arrived here by the R10 sitting's ruling of 2026-09-02**
+(bare filename `2026-09-02-R10-SITTING-minute.md`, private record; item R10-3: *"the LW row disposed BY SCOPE
+ON THE PREDICATE: `CycleRealisesStepOrStallsOn` in its Bool form (`memFreeB`) — RATIFIED.
+ADOPTION = the definition moves into `HDL/StallShape.lean`"*). They were built in
+`HDL/MemFreeScope.lean` and deliberately kept OUT of this file until the sitting decided,
+so that adoption would be an ACT somebody performs rather than a fact somebody inherits
+from a landing. **The move IS the adoption; there is no other artifact of it.**
+
+⛔ WHAT ADOPTION DOES NOT MEAN — the one drift the whole R10 fence exists to stop. The
+object is `CorePlace.core`, the LEAN-COMPOSED circuit. It is **not** `core32.v`, the
+hand-written RTL that was fabricated, and no theorem in this tree relates the two. Rung
+**2.5** — proven in Lean over the composed model, RESTRICTED; RTL correspondence OPEN.
+*Ratifying a scope changes the modal status of the results under it, not their object.*
+
+⛔ THE TWO CONTROLS THAT MAKE THIS SCOPE NON-VACUOUS DO NOT LIVE HERE, and that is a
+dependency fact rather than a preference: they name `HDL.C4Refuted`, and this file sits
+upstream of it. They stay in `HDL/MemFreeScope.lean` — `memFreeB_seenWord_insL_false` (the
+LW witness is OUTSIDE the scope) and `memFreeB_seenWord_insI_true` (the ADDI witness is
+INSIDE it), paired as `scope_discriminates`. That module is now the scope's EVIDENCE, and
+no longer its home. **A scope adopted without its non-vacuity control is a sentence that
+claims nothing while reading exactly like one that claims something, so this pointer is
+part of the adoption and not a footnote to it.**
+-/
+
+/-- **The decidable Bool of `MemFree`.** An undecodable word is memory-free — it is a
+NOP-advance, exactly as `MemFree`'s own docstring says. -/
+def memFreeB (w : Word) : Bool :=
+  match SaltWorks.ISA.decode w with
+  | some i => !(SaltWorks.ISA.touchesMem i)
+  | none   => true
+
+/-- ⭐ **THE PIN. `memFreeB` IS `MemFree`, both directions, kernel-checked.** Without this
+the Bool in R10-3's scope and the Prop in the frame lemmas are two objects sharing a name. -/
+theorem memFreeB_iff (w : Word) : memFreeB w = true ↔ MemFree w := by
+  constructor
+  · intro hb i hi
+    unfold memFreeB at hb
+    rw [hi] at hb
+    simpa using hb
+  · intro hp
+    unfold memFreeB
+    cases hd : SaltWorks.ISA.decode w with
+    | none => rfl
+    | some i => simpa using hp i hd
+
+/-- **R10-3's definition, verbatim in shape.** Bool-valued scope, `if … then … else True`,
+which is the spelling `ScopeShapeDifferential` measured: it keeps the reduction DEFEQ. -/
+def CycleRealisesStepOrStallsOn (scope : SaltWorks.HDL.Env → Bool)
+    (cyc : SaltWorks.HDL.Env → SaltWorks.HDL.Env)
+    (wordAt : SaltWorks.HDL.Env → Word) (stalls : SaltWorks.HDL.Env → Bool) : Prop :=
+  ∀ ins,
+    if scope ins then
+      (if stalls ins then
+        (SaltWorks.HDL.decQ (cyc ins)).regs = (SaltWorks.HDL.decQ ins).regs
+          ∧ (SaltWorks.HDL.decQ (cyc ins)).pc = (SaltWorks.HDL.decQ ins).pc
+      else
+        (SaltWorks.HDL.decQ (cyc ins)).regs
+            = (stepT (SaltWorks.HDL.decQ ins) (wordAt ins)).regs
+          ∧ (SaltWorks.HDL.decQ (cyc ins)).pc
+            = (stepT (SaltWorks.HDL.decQ ins) (wordAt ins)).pc)
+    else True
+
+/-- ⭐ **THE PROPERTY THE TWENTY-DECLARATION CONE RESTS ON, PRESERVED.** At the everywhere-
+true scope the scoped definition is DEFEQ to the landed one, so `stallArm_reduces` still
+composes and no consumer that leaned on `Iff.rfl` has to be re-read. -/
+theorem scopedOn_reduces (cyc : SaltWorks.HDL.Env → SaltWorks.HDL.Env)
+    (wordAt : SaltWorks.HDL.Env → Word) (stalls : SaltWorks.HDL.Env → Bool) :
+    CycleRealisesStepOrStallsOn (fun _ => true) cyc wordAt stalls
+      ↔ CycleRealisesStepOrStalls cyc wordAt stalls :=
+  Iff.rfl
+
+/-- **And the whole way down to today's predicate, in one statement.** The scoped form at
+the everywhere-true scope and the EMPTY stall set gives back `CycleRealisesStepProj`. -/
+theorem scopedOn_reduces_all_the_way (cyc : SaltWorks.HDL.Env → SaltWorks.HDL.Env)
+    (wordAt : SaltWorks.HDL.Env → Word) :
+    CycleRealisesStepOrStallsOn (fun _ => true) cyc wordAt (fun _ => false)
+      ↔ CycleRealisesStepProj cyc wordAt :=
+  Iff.rfl
+
 /-! ## §1 — THE MIXED MACHINE
 
 The stall set is read off the INSTRUCTION NETS: a cycle stalls exactly when the
@@ -472,6 +553,10 @@ theorem mix_run_moves_the_state (pad : SaltWorks.HDL.Env) :
 
 #audit_axioms CycleRealisesStepOrStalls stepsIn
 #audit_axioms stallArm_reduces stallArm_admits_stalledBits stallArm_strictly_extends
+-- R10-3 ADOPTED, sitting 2026-09-02: moved here from HDL/MemFreeScope.lean.
+#audit_axioms memFreeB memFreeB_iff
+#audit_axioms CycleRealisesStepOrStallsOn
+#audit_axioms scopedOn_reduces scopedOn_reduces_all_the_way
 #audit_axioms mixStalls mixNextW mixBits mixCyc mixIns
 #audit_axioms mixWordGo_ne_hold mixStalls_mixCyc mixStalls_is_middle
 #audit_axioms mix_realises stepsIn_mix_two mix_both_kinds

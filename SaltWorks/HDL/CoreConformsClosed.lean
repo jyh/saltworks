@@ -173,7 +173,7 @@ theorem in this tree relates the two. What moves here is the object — from the
 `Circ` to an actual `Silicon.Netlist` — and nothing else. The RTL correspondence stays OPEN
 and stays exactly where the sitting table's fifth limit puts it. -/
 
-open SaltWorks.Stack.Program SaltWorks.HDL.MemFreeScope in
+open SaltWorks.Stack.Program SaltWorks.HDL.StallShape SaltWorks.HDL.MemFreeScope in
 open SaltWorks.HDL.R9BPositiveReduction SaltWorks.HDL.R9BPositiveHalf in
 theorem emitted_core_realises_the_step (ins : Env)
     (hs : memFreeB (SaltWorks.Stack.Program.seenWord ins) = true) :
