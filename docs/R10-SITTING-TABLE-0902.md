@@ -28,7 +28,18 @@ run `32284710003`, project 5500).** Two commits, both at origin:
 33640897082  4226396f  config + note      started 07:15 PDT   ← the READY candidate
 ```
 
-**READY-TO-CLICK means ALL of these, and I post READY only when all four hold:**
+✅ **READY-TO-CLICK — ALL FOUR HELD AT 07:5x, RE-DERIVED FROM THE RUNS' OWN LOGS (`GDS_logs` artifacts):**
+run 1 `33640518663` and run 2 `33640897082` BOTH: every job SUCCESS (`gds` · `precheck` · `gl_test` · `viewer`;
+`docs` and `test` workflows green on both commits) · `treatcheck` ✅ EXACTLY the four declared keys, 411-key
+resolved sets · **all 132 shared non-time metrics IDENTICAL to the 08/27 archive** (max_fanout 1 · slew 825 ·
+cap 5 · setup ws +7.85897591471 · hold ws +0.19767699148203566 · TNS 0/0 · DRC/LVS/antenna 0/0/0 · instances
+43,396) · `wire695/X limit 10 fanout 11` the sole violator in all nine corners of both runs, clock-leaf 0 ·
+**`main` fast-forwarded to `4226396f`** (ls-remote). The runner reproduced the local measurement bit-exactly
+twice, so determinism across machines now has three points (ndf-base 08/27, run 1, run 2). **The click is
+the Captain's: TinyTapeout project 5500, re-submit from `main`.** *(The push to `main` starts one more gds
+run of the same bytes; it will be green before the sitting and is the run the click takes.)*
+
+**The criterion as pre-stated at 07:4x, kept so the verdict above can be read against it:**
 1. Run `33640897082` green on every job (`gds` · `precheck` · `gl_test` · `viewer` · `docs` · `test`).
 2. `treatcheck.py` over the run's `resolved.json` against the 08-19 signoff's: **exactly** the four keys
    differ (refuses on EXTRA = contamination, on MISSING = treatment not applied).

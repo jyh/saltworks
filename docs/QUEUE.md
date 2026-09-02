@@ -468,7 +468,7 @@ bit-serial Design-B direction. Each names its successor or says none exists:**
   HEAD `1fcc22d7` **at the artifact**, not off my post. ⇒ **Q2 is CLOSED to this seat**; what
   remains is evidence's census row and the post-Sept-8 repoint.
 
-- Q4 · WRITE · **IN FLIGHT 2026-09-02 07:4x — THE HOLD IS SUPERSEDED (Captain, council 09/02 07:2x: SHIP
+- Q4 · WRITE · **READY-TO-CLICK 2026-09-02 07:5x — TT `main` = `4226396f`, both shuttle runs green, treatcheck exactly four keys, 132/132 metrics identical to the 08/27 archive; the click is the Captain's (project 5500). CLOSES at the click.** — 07:4x entry: **IN FLIGHT — THE HOLD IS SUPERSEDED (Captain, council 09/02 07:2x: SHIP
   EARLY; desk DW). The note is re-cut for `ndf-2a` and folded into the resubmission bundle:
   `jyh/tt-neural-dataflow-fabric` branch `ndf-2a` = `119d9705` (four config keys) + `4226396f` (the note
   in `docs/info.md`); shuttle runs `33640518663` / `33640897082` in progress at this stamp. READY-TO-CLICK
