@@ -323,7 +323,14 @@ worth no more than that.
 ### 6.2 the Captain — RATIFICATION OF THE PAIR
 
 ```
-    signed: ______________________   date: __________
+    signed: THE CAPTAIN — at the R10 sitting, 2026-09-02 12:4x–12:56 PDT ("accept rec")
+    date:   2026-09-02
+    record: seat/briefs/2026-09-02-R10-SITTING-minute.md @ bf813512, §(C)  <- THE MINUTE IS THE SIGNATURE;
+            this block is silicon's CITATION of it (recorded 13:0x), not a signature in its own right.
+    with §5.3.1 READ INTO THE MINUTE: the netlist<->Lean correspondence (sem (bridge nl outs) = runP) and
+            the three-bit placement both reduce to the bridge induction, routed off both seats — the pair
+            is MEASURED on RTL and KERNEL-CHECKED on the model, NOT COMPOSED. The signature ratifies a
+            STATEMENT of the pin's two contracts; it certifies no hardware.
     ⇒ ratifies §1 AND §2 together, per §0. Not the width; the width was ruled separately.
 ```
 

@@ -1,5 +1,8 @@
 # R10 SITTING TABLE — silicon's three items, for the Captain's sitting of 2026-09-02
 
+> ⚖️ **SAT AND CLOSED 2026-09-02 12:4x–12:56 PDT.** R10-1..R10-4 ADOPTED as drafted at `64580a1a` · T8 RULED (the unit is steps realised) · BP §6.2 SIGNED with §5.3.1 read into the minute · THE CLICK DONE (project 5500 re-submitted from `main` `4226396f`, run `33644567364`) · RUNG 0 DATES 2026-09-02. **The minute is the record:** `seat/briefs/2026-09-02-R10-SITTING-minute.md` @ `bf813512`. Everything below is the table AS READ; the adoption edits are marked in place and dated.
+
+
 *silicon, 2026-09-02 07:4x. Desk row DW (SHIP EARLY, the Captain, council 09/02 07:2x). Three items,
 in the order DW names them: (A) the `ndf-2a` bundle READY-TO-CLICK · (B) the DRAFT R10 STATEMENT TEXT ·
 (C) BP's one paragraph. Everything measured here is re-derivable from the artifacts named; nothing is
@@ -64,7 +67,7 @@ bundle stays as it is, without it.)*
 
 **Rung zero's date (compiler's item 3): the click.** Rung 0 of the claim ladder is MEASURED ONLY — area,
 DRC/LVS, timing — and its datum for the tape-out is this bundle's signoff. Its date is the day the
-Captain clicks; if today, 2026-09-02.
+Captain clicks; if today, 2026-09-02. **DATED 2026-09-02 — the Captain clicked at ~12:56 PDT (minute `seat/briefs/2026-09-02-R10-SITTING-minute.md` @ `bf813512`, his word "clicked"). AT THE OBJECT, read 13:0x by silicon: `TinyTapeout/tinytapeout-sky-26c` PR #282 "Update project tt_um_saltworks_ndf_c32 (jyh/tt-neural-dataflow-fabric)", opened by `TinyTapeoutBot` 2026-09-02T19:55:30Z from branch `projects/tt_um_saltworks_ndf_c32-33644567364`; `commit_id.json` moves `commit` 7d2b2756… → `4226396f0dee52f1ccfbe44b175d42957870aeda` and `workflow_url` run 32284710003 → `33644567364`, `project_id` 5500 and `sort_id` 1786124512759 UNCHANGED (one slot re-pointed, as on 08/21); the folded §Signoff note rides in the PR's `docs/info.md` diff. State at the read: OPEN — "Check user project submission" SUCCESS, "Run precheck" IN_PROGRESS. ⛔ SUBMITTED ≠ INGESTED: ingestion is the MERGE, which on 08/21 (PR #211) came ~33 h after open. The merge is the second receipt and is owed to this table when it lands.**
 
 ---
 
@@ -198,7 +201,8 @@ RUNG 2  TRUE OF THE HARDWARE BY CONSTRUCTION, DriveMap                          
         ASSUMED IN LEAN
 RUNG 1  SIMULATED, NOT PROVED                memory-touching words · trap-class loads   named, not claimed
                                              (row 5's harness) · the offboard protocol
-RUNG 0  MEASURED ONLY                        area · DRC/LVS · timing = THIS BUNDLE's     dated by the click
+RUNG 0  MEASURED ONLY                        area · DRC/LVS · timing = THIS BUNDLE's     DATED 2026-09-02 (the click;
+                                                                                        index PR #282, see §(A))
                                              signoff (ndf-2a)
 ```
 **What R10 does NOT claim, said now:** nothing about memory realisation (stage ③'s obligation at the F4

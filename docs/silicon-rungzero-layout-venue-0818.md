@@ -108,3 +108,5 @@ without it a reader will take it for a statement about the shipped bytes.
 ```
 **RUNG ZERO STAYS UNDATED.** *Dating it would be the fifth cost-guess this seat has
 refused, and the four refusals have all been right.*
+
+⭐ **AMENDED 2026-09-02 13:0x — RUNG ZERO IS DATED, BY THE EVENT AND NOT BY A GUESS: 2026-09-02, the Captain's click re-submitting project 5500 from `main` `4226396f` (run `33644567364`), receipted at the object as `TinyTapeout/tinytapeout-sky-26c` PR #282. The sentence above stood fifteen days and was right on every one of them; it is kept because the refusal it records is the reason the date is an event and not a forecast. Register: `docs/R10-SITTING-TABLE-0902.md` §(A) and B.2.**

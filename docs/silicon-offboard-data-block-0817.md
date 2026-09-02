@@ -106,6 +106,7 @@ RUNG 2  PROVED IN RTL, ASSUMED IN LEAN      — DriveMap TODAY: true of the hard
 RUNG 1  SIMULATED, NOT PROVED               — tb_memplane8's round trip; the offboard
                                               PROTOCOL will land here at the freeze
 RUNG 0  MEASURED ONLY                       — area, DRC/LVS, timing
+                                              DATED 2026-09-02 — the click (§20)
 ```
 ⭐ **MY HONEST FORECAST FOR SEPT-7, AND I WOULD RATHER BE HELD TO A LOW ONE:** *the
 address-map split can reach RUNG 4 (it is combinational and the existing tautology
@@ -719,3 +720,36 @@ RUNG ZERO  build and measure the COMPOSITION — owner SILICON, x-verifier COMPI
 it was measured on `tt_um_saltworks_ndf_composed.v`, a **scratchpad file that has never
 existed in this tree**. It is precisely the green-and-wrong state rung zero's control
 row names, and it was mine.
+
+# REVISION 5 — R10 ADOPTED AT THE SITTING; RUNG ZERO DATED; THE CAPTION LANDS HERE VERBATIM
+
+## §20 · 2026-09-02 12:4x–12:56 PDT — THE R10 SITTING SAT, AND THE CAPTAIN CLICKED
+
+**The minute is the record:** `seat/briefs/2026-09-02-R10-SITTING-minute.md` @ `bf813512`. The table read was
+`docs/R10-SITTING-TABLE-0902.md` at `64580a1a`. R10-1..R10-4 ADOPTED as drafted; T8 RULED (the unit is steps
+realised); BP §6.2 SIGNED with §5.3.1 read into the minute (`docs/retire-two-contracts-0826.md` §6.2 carries the
+citation); the scoped flagship at a STATED RUNG 2.5 with its five limits. The R10 statement text itself lands in the
+docs by compiler's hand (the minute's execution list); this section is silicon's half — the rung-0 date and the caption.
+
+**RUNG 0 IS DATED 2026-09-02**, by the event and not by a forecast: the Captain re-submitted TinyTapeout project 5500
+from `jyh/tt-neural-dataflow-fabric` `main` = `4226396f` (run `33644567364`, green on every job; treatcheck exactly the
+four keys; 132/132 metrics identical to the 08/27 archive). Receipt at the object: `TinyTapeout/tinytapeout-sky-26c`
+PR #282, opened by `TinyTapeoutBot` 2026-09-02T19:55:30Z, `commit_id.json` → `4226396f` / run `33644567364`,
+`project_id` 5500, `sort_id` unchanged. ⛔ SUBMITTED ≠ INGESTED — ingestion is that PR's merge, pending at the write
+(08/21 precedent ~33 h); it is owed to the sitting table §(A) when it lands. The §4 ladder above is amended in place.
+`docs/silicon-rungzero-layout-venue-0818.md`'s "STAYS UNDATED" is amended beneath itself, kept because it was right.
+
+### §20.1 · R10-4 — THE CAPTION, VERBATIM AS ADOPTED (row 5, ruled (a), council 09/01 item 7; inside the statement text, zero hardware cost)
+
+> *The fabricated core does not hold `rd` on a trapping load: the die writes `dmem_rdata` to `rd` and
+> continues; the model holds `rd`. Measured by simulation with both controls firing. Conforming programs —
+> those issuing no trap-class loads — are identical on die and model; divergence is confined to trap-class
+> loads, and it is exactly one wire (`regWriteSig` port 10, R9a; `reqSig` untouched). A corrective gate is
+> priced at 11 cells / 70.07 µm² for the gate's own logic (`docs/silicon-lwtrap-0902/`, 09/02; the 08/31 +40 / +160.15 µm² / +0.282% figure is not reproduced) and not taken.* **The restated flagship therefore claims
+> nothing about trap-class loads; they lie outside `scope` (a trapping LW touches memory) and are stated
+> here as measured residue of the submitted part.**
+
+*Anchor for citation: the phrase `does not hold `rd` on a trapping load`. The measurement behind it is
+`docs/silicon-lwtrap-0902/` (`85791af0`): the die WRITES rd on misaligned / boundary-32 / far-64 loads, the gated
+twin HOLDS, both controls fire, the mutation control refuses, `dmem_req` unchanged; the gate's own logic is 11 cells /
+70.07 µm² standalone, and the 08/31 whole-core figure is NOT reproduced (its recipe died with a scratchpad).*
