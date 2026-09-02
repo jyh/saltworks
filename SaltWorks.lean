@@ -164,6 +164,7 @@ import SaltWorks.HDL.ScopeShapeDifferential
 import SaltWorks.HDL.MemFreeScope
 import SaltWorks.HDL.CriterionCReject
 import SaltWorks.HDL.R9BPositiveReduction
+import SaltWorks.HDL.R9BPositiveHalf
 import SaltWorks.HDL.StallShape
 import SaltWorks.HDL.T2T5Consistency
 import SaltWorks.HDL.StallsAtWidened
