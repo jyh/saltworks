@@ -152,7 +152,7 @@ stall.**
 > continues; the model holds `rd`. Measured by simulation with both controls firing. Conforming programs —
 > those issuing no trap-class loads — are identical on die and model; divergence is confined to trap-class
 > loads, and it is exactly one wire (`regWriteSig` port 10, R9a; `reqSig` untouched). A corrective gate is
-> priced at +40 cells / +160.15 µm² / +0.282% and not taken.* **The restated flagship therefore claims
+> priced at 11 cells / 70.07 µm² for the gate's own logic (`docs/silicon-lwtrap-0902/`, 09/02; the 08/31 +40 / +160.15 µm² / +0.282% figure is not reproduced) and not taken.* **The restated flagship therefore claims
 > nothing about trap-class loads; they lie outside `scope` (a trapping LW touches memory) and are stated
 > here as measured residue of the submitted part.**
 
@@ -230,8 +230,11 @@ stated as one.
 
 ## OPEN, NAMED, NOT MINE TO CLOSE HERE
 - **T8** (K/N unit re-cut): the Captain's word at the window's open.
-- **Row 5's side-item**: the trap-gate fidelity harness (`tb_lwtrap.v`, `core32_gated.v`, stat files) was
-  scratchpad-resident on 08/30 and is NOT in this repo (`git log --all -- '*lwtrap*'` empty at this hand);
-  the measurement stands on the record (minute 09/01 item 7); the harness is owed as a file, silicon's.
+- ~~Row 5's side-item: the trap-gate harness owed as a file~~ — **LANDED 08:0x as `docs/silicon-lwtrap-0902/`**
+  (bench + gated twin + runner + RESULTS): the finding re-derived (die WRITES rd on misaligned / boundary-32 /
+  far-64 loads; gated twin HOLDS; both controls; mutation control refused; `dmem_req` unchanged). ⛔ The 08/31
+  price (+40 cells / +160.15 µm² / +0.282%) is NOT reproduced — its recipe died with the scratchpad; the gate's
+  own logic prices at **11 cells / 70.07 µm²** standalone, and the whole-core delta is restructuring noise.
+  R10-4's caption should quote the standalone figure, not the 08/31 one.
 - ~~compiler's differential on the Bool/Prop scope spelling~~ — LANDED `86f7efd7` 07:17; R10-3 adopted unconditionally.
 - ~~R10-3's three named objects~~ — LANDED `50cbae2c` 07:25 (six declarations, two controls); R10-3 is ratifiable on objects. Adoption (moving `…On` into `StallShape`) is the sitting's word.
