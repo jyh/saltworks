@@ -149,12 +149,20 @@ stall.**
 
 ```
 RUNG 4  PROVEN AT THE GATES, TOTAL           dmem_addr8                                 unchanged
-RUNG 3  PROVEN AT THE GATES, RESTRICTED      dmem8 (rst_n ≡ 1)                          unchanged
-RUNG 2  TRUE OF THE HARDWARE BY CONSTRUCTION, DriveMap; and THE RESTATED FLAGSHIP       ← R10 puts it HERE:
-        ASSUMED IN LEAN                      (scoped, stall-armed) until R9b inhabits     the sentence exists and
-                                             it — the kernel holds its NEGATIVE half     is stated honestly; its
-                                             (no stall arm rescues the core) and the     positive half is compiler's
-                                             scope theorem (insL is outside)             R9b, dated WITH R10's close
+RUNG 3  PROVEN AT THE GATES, RESTRICTED      dmem8 (rst_n ≡ 1); and THE RESTATED        ← R10 puts it HERE, as of
+                                             FLAGSHIP, SCOPED: compiler 07:44,           07:44 — was RUNG 2 in this
+                                             saltworks 3882c49, Scrub SUCCESS, 4712       table's first cut. FOUR
+                                             ticks (+7), 0 sorryAx — the core realises   LIMITS ride with it: (1) it
+                                             the ISA step, regs AND pc, at every         inhabits R10-3 AS DRAFTED,
+                                             memory-free word, every nextW, every pad    not as ratified — restate
+                                             (R9b's positive half, 1ae3dde reduction +    it and the instance dies,
+                                             3882c49 inhabitation). Every decode arm was   the reduction survives;
+                                             ALREADY LANDED; it needed assembly + scope   (2) stall set EMPTY (the
+RUNG 2  TRUE OF THE HARDWARE BY CONSTRUCTION, DriveMap                                   core's own declaration; an
+        ASSUMED IN LEAN                                                                  arbitrating core falsifies
+                                                                                         the instance); (3) C4Spec
+                                                                                         core STILL FALSE unscoped;
+                                                                                         (4) C4SpecD refuted always
 RUNG 1  SIMULATED, NOT PROVED                memory-touching words · trap-class loads   named, not claimed
                                              (row 5's harness) · the offboard protocol
 RUNG 0  MEASURED ONLY                        area · DRC/LVS · timing = THIS BUNDLE's     dated by the click
