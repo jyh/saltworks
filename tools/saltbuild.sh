@@ -10,9 +10,58 @@
 # (file mode), repo HEAD, EXIT. Logging is best-effort and can never
 # change the exit code. The log is the replayable record that a given
 # audit RAN on given bytes — green-exit-≠-verification's paper trail.
-LOCK=/tmp/salt-fleet-build.lock
+# ⛔⛔ THE SEAM IS WRITTEN IN THE REFUSING FORM, AND THAT IS NOT STYLE. Until now LOCK and
+#   MAXWAIT were hardcoded, so the lock path could not be driven by a fixture at all — which
+#   is half of why contention was unmeasurable. The obvious seam, `${SALTBUILD_LOCK:-<fleet>}`,
+#   is THE fleet's most-paid-for defect: `:-` replaces an EMPTY value with the default, so a
+#   fixture whose variable failed to expand would silently TAKE THE REAL FLEET LOCK and could
+#   wedge every seat. This uses `${VAR-default}` (no colon), which HONOURS an empty value, and
+#   then REFUSES it. ⇒ A FALLBACK MUST NOT TARGET THE LIVE SYSTEM: an unset variable means
+#   "no override"; an EMPTY one means the caller tried to override and failed, and those two
+#   must not resolve to the same place — least of all to production.
+LOCK="${SALTBUILD_LOCK-/tmp/salt-fleet-build.lock}"
+if [ -z "$LOCK" ]; then
+  echo "saltbuild EXIT=76 (SALTBUILD_LOCK is SET BUT EMPTY — refusing rather than falling back to the FLEET lock)" >&2
+  exit 76
+fi
 AUDITLOG=/Users/jyh/projects/claude/.saltbuild-audit.log
-MAXWAIT=5400
+# ══ ROW CK — THE LOCK LOG. CONTENTION WAS INVISIBLE ══════════════════════════════
+# The FIFO lock kept no record, so waiting was unmeasurable: the 24.5-minute stall that
+# put this row on the desk WAS SEEN ONLY BY LUCK, because somebody happened to be
+# watching a terminal. Every build either got the lock or did not, and neither outcome
+# left a trace.
+# ⛔⛔ THE ABORT PATHS ARE LOGGED TOO, AND THAT IS THE POINT OF THE DESIGN. A log of
+#   acquire/release alone records only the builds THAT WON — pure survivorship bias, and
+#   it omits precisely the events this row exists to see: the ones that waited a long
+#   time and then gave up. A contention log that only contains successes will show a
+#   healthy fleet on the day the fleet is wedged.
+# ⛔ THE LOAD-BEARING FIELD IS `waited`, NOT the acquisition. Contention is a DURATION;
+#   "I got the lock" is not news, "I got it after 1470s" is.
+# ⛔ LOGGING IS NEVER FATAL AND NEVER BLOCKS. A build must not fail, stall or change its
+#   exit status because a log file is unwritable — an instrument that can break its
+#   subject is worse than no instrument. Hence `2>/dev/null || true` on every write, and
+#   no lock of its own: ONE short line, opened O_APPEND, which the kernel appends
+#   atomically well under PIPE_BUF, so concurrent builders interleave lines and never
+#   characters.
+LOCKLOG="${SALTBUILD_LOCKLOG:-/Users/jyh/projects/claude/.saltbuild-lock.log}"
+# ⛔ EVERY key=value IS ITS OWN TAB FIELD. The first cut joined the trailing pairs with
+#   spaces into ONE column, so a WAIT-ABORT line read `stage=marker waited=2s holder=91`
+#   as a single value and any TSV reader — including my own test's field extractor, which
+#   is how I found it — got `stage=...` when it asked for `waited`. A log exists to be
+#   PARSED; a variable last column is a log that is read by eye and therefore not read.
+lock_log() { # lock_log <EVENT> <key=value>...
+  local _ev="$1" _line _f
+  shift
+  _line=$(printf '%s\t%s\tpid=%s\tseat=%s' \
+          "$(date '+%Y-%m-%dT%H:%M:%S%z')" "$_ev" "$$" "${SB_SEAT:-unknown}")
+  for _f in "$@"; do _line=$(printf '%s\t%s' "$_line" "$_f"); done
+  printf '%s\n' "$_line" >> "$LOCKLOG" 2>/dev/null || true
+  return 0
+}
+MAXWAIT="${SALTBUILD_MAXWAIT-5400}"
+case "$MAXWAIT" in
+  ''|*[!0-9]*) echo "saltbuild EXIT=76 (SALTBUILD_MAXWAIT must be a whole number of seconds; got '$MAXWAIT')" >&2; exit 76 ;;
+esac
 # ══ THE LOCK: KERNEL-HELD, SO THERE IS NO CHECK-THEN-ACT WINDOW ANYWHERE ══════════
 # ⛔ WHAT THIS REPLACES AND WHY. The previous design was `mkdir` + a REAPER that deleted
 # a lock whose pid failed `kill -0`. Every version of that reaper is check-then-act: you
@@ -135,7 +184,11 @@ if [ -z "$FLOCK" ]; then
   exit 76
 fi
 exec 9>"$LOCKFILE" || { echo "saltbuild EXIT=76 (cannot open $LOCKFILE)" >&2; exit 76; }
+# The clock starts BEFORE the flock, not after it: the flock wait is part of the wait.
+LOCK_T0=$(date +%s)
+lock_log WAIT-START stage=flock
 if ! "$FLOCK" -w "$MAXWAIT" 9; then
+  lock_log WAIT-ABORT stage=flock "waited=$(( $(date +%s) - LOCK_T0 ))s" "maxwait=${MAXWAIT}s"
   echo "saltbuild EXIT=75 (LOCK-WAIT ABORT: the build NEVER STARTED - this is NOT a build failure; RETRY the same command)"
   exit 75
 fi
@@ -178,6 +231,8 @@ until mkdir "$LOCK" 2>/dev/null; do
   }
   claim_reap && continue
   if [ $WAITED -ge $MAXWAIT ]; then
+    lock_log WAIT-ABORT stage=marker "waited=$(( $(date +%s) - LOCK_T0 ))s" \
+      "holder=$(cat "$LOCK/pid" 2>/dev/null || echo '?')"
     echo "saltbuild EXIT=75 (LOCK-WAIT ABORT on the interop marker, holder pid $(cat "$LOCK/pid" 2>/dev/null || echo '?'): the build NEVER STARTED - RETRY the same command)"
     exit 75
   fi
@@ -185,6 +240,11 @@ until mkdir "$LOCK" 2>/dev/null; do
   [ $((WAITED % 300)) -eq 0 ] && echo "saltbuild: waiting on the fleet lock (${WAITED}s)"
 done
 echo $$ > "$LOCK/pid"
+# ACQUIRED means BOTH mechanisms are held — the flock AND the interop marker. Logging it
+# after the flock alone would have named a moment at which another (old) wrapper could
+# still be building.
+LOCK_HELD_FROM=$(date +%s)
+lock_log ACQUIRED "waited=$(( LOCK_HELD_FROM - LOCK_T0 ))s"
 # ⭐ HOLDER KEEPS ITS TICKET — ruled 16:5x, and MEASURED before adopting rather than argued.
 # The old line dropped it here, which made the HOLDER INVISIBLE to the queue. Consequence,
 # driven twice per variant with a private LOCK:
@@ -203,7 +263,23 @@ echo $$ > "$LOCK/pid"
 #   above and nothing else) left 1 orphan ticket per run — real, though self-healing via
 #   pid+start-time reaping. The benefit and the implementation are SEPARATE questions and
 #   my first experiment only tested the benefit.
-release() { [ "$(cat "$LOCK/pid" 2>/dev/null)" = "$$" ] && rm -rf "$LOCK"; q_release; return 0; }
+# ⛔ THE LOG LINE GOES INSIDE THE OWNERSHIP GUARD'S SCOPE BUT NOT INSIDE ITS TEST: a
+#   RELEASED line must be written by the process that actually held the marker, and the
+#   trap fires at signal-delivery AND again at exit, so `released` is latched to keep the
+#   log one-line-per-run. `return 0` is preserved exactly — this trap must never change
+#   the exit status.
+_lock_released=0
+release() {
+  if [ "$(cat "$LOCK/pid" 2>/dev/null)" = "$$" ]; then
+    rm -rf "$LOCK"
+    if [ "$_lock_released" = 0 ]; then
+      _lock_released=1
+      lock_log RELEASED "held=$(( $(date +%s) - ${LOCK_HELD_FROM:-$(date +%s)} ))s"
+    fi
+  fi
+  q_release
+  return 0
+}
 trap release EXIT INT TERM
 export LEAN_NUM_THREADS=4
 CAP=24000
