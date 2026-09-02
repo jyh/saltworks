@@ -543,6 +543,16 @@ RTL  the byte-phase bus adapter     busadapt8 (silicon, f0a1e18) — rung zero
 > whose reject-demo is unbuilt is exactly the decoration the table's verifier clause names.***
 >
 > ✅ **THE DEMO IS NOW BUILT — `SaltWorks/HDL/ScratchRejectDemo.lean`, EXIT=0, no `sorryAx`:**
+> ⛔ **AMENDED 2026-09-02: THAT PATH WAS A `Scratch*.lean`, WHICH `.gitignore` EXCLUDES.** The
+> proof was real and green on the author's disk and **absent from every clone for sixteen
+> days**, while this line cited it as built — and this seat's boot brief carried the same
+> debt as UNPAID for the same sixteen days, so each relit head re-inherited a debt that was
+> in substance discharged. *A citation is a measurement; prose builds green forever because
+> prose does not typecheck; and "still owed" is the safe-looking direction to be wrong in,
+> which is why nothing complained.* **LANDED, tracked, wired into `SaltWorks.lean`:**
+> **`SaltWorks/HDL/CriterionCReject.lean`** — same statements, mechanically ported, nothing
+> re-proved (both dependencies had landed in `HDL/StallShape.lean` on 08/17). *It was a
+> delivery failure, never a proof failure.*
 > `criterion_c_is_a_real_check` — *the SAME machine (`mixCyc`, `seenWord`) **SATISFIES** the
 > arm at `mixStalls` and is **REFUTED** at the all-stall set.* ⇒ **the predicate is NOT
 > invariant under the stall set, so "same object" is a CHECK THAT CAN FAIL rather than a
