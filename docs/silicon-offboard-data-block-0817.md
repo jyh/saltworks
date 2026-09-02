@@ -725,7 +725,7 @@ row names, and it was mine.
 
 ## §20 · 2026-09-02 12:4x–12:56 PDT — THE R10 SITTING SAT, AND THE CAPTAIN CLICKED
 
-**The minute is the record:** `seat/briefs/2026-09-02-R10-SITTING-minute.md` @ `bf813512`. The table read was
+**The minute is the record:** the helm's R10 sitting minute (bare filename `2026-09-02-R10-SITTING-minute.md`, private record) @ `bf813512`. The table read was
 `docs/R10-SITTING-TABLE-0902.md` at `64580a1a`. R10-1..R10-4 ADOPTED as drafted; T8 RULED (the unit is steps
 realised); BP §6.2 SIGNED with §5.3.1 read into the minute (`docs/retire-two-contracts-0826.md` §6.2 carries the
 citation); the scoped flagship at a STATED RUNG 2.5 with its five limits. The R10 statement text itself lands in the

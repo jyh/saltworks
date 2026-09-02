@@ -325,7 +325,7 @@ worth no more than that.
 ```
     signed: THE CAPTAIN — at the R10 sitting, 2026-09-02 12:4x–12:56 PDT ("accept rec")
     date:   2026-09-02
-    record: seat/briefs/2026-09-02-R10-SITTING-minute.md @ bf813512, §(C)  <- THE MINUTE IS THE SIGNATURE;
+    record: the helm's R10 sitting minute (bare filename 2026-09-02-R10-SITTING-minute.md, private record) @ bf813512, §(C)  <- THE MINUTE IS THE SIGNATURE;
             this block is silicon's CITATION of it (recorded 13:0x), not a signature in its own right.
     with §5.3.1 READ INTO THE MINUTE: the netlist<->Lean correspondence (sem (bridge nl outs) = runP) and
             the three-bit placement both reduce to the bridge induction, routed off both seats — the pair
