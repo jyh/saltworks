@@ -204,3 +204,65 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: python scripts/check_pr_descriptions.py --open
+
+  pre-push-proof:
+    name: the pre-push hook refuses what the jobs above can only report
+    runs-on: ubuntu-latest
+    # ⛔ EVERY GATE ABOVE IS ON THE WRONG SIDE OF THE WIRE, AND THAT IS NOT A
+    # CRITICISM OF THEM -- it is the reason this job exists. They run AFTER the
+    # objects reach the public remote. On 2026-09-03 a push in this fleet carried
+    # two private-record paths to a public remote; the gate went red, correctly,
+    # and the bytes were already served by sha and stay served by sha until the
+    # forge collects them on its own schedule. A report is not a repair.
+    #
+    # `.githooks/pre-push` asks the same two questions one step earlier, where
+    # the answer is still free. But a hook is LOCAL configuration: CI's own clone
+    # never runs it and cannot. What CI *can* do is prove the hook still works --
+    # that its red arms are red and its green arm is green -- so that a hook
+    # broken by an edit fails HERE rather than the next time it matters.
+    #
+    # The prover drives a real `git push` into a scratch bare remote in a temp
+    # dir, never the repository under test, and carries a MUTATION CONTROL: the
+    # same refused push must succeed with --no-verify, or its refusals prove
+    # nothing.
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # ⛔ THE INTERPRETER ARM, MASKED. A prover that names `python` by hand
+      # reports `ok` WITHOUT THE GATE EVER RUNNING wherever `python` is absent --
+      # measured in this fleet on 08/26, on a prover that had rotted exactly that
+      # way. The arm only discriminates where `python` is missing, so it is made
+      # missing here.
+      - name: mask `python`, leaving only python3
+        run: |
+          mkdir -p "$RUNNER_TEMP/mask"
+          printf '#!/bin/sh\necho "python: not found" >&2\nexit 127\n' > "$RUNNER_TEMP/mask/python"
+          chmod +x "$RUNNER_TEMP/mask/python"
+      - name: the mask must actually mask, and python3 must survive it
+        run: |
+          if PATH="$RUNNER_TEMP/mask:$PATH" python -c "" 2>/dev/null; then
+            echo "MASK FAILED: \`python\` still runs -- the arm below would be vacuous."; exit 1
+          fi
+          PATH="$RUNNER_TEMP/mask:$PATH" python3 -c "" || { echo "python3 must still work"; exit 1; }
+          echo "mask OK: python refuses, python3 runs"
+      - name: the proof must hold with `python` masked
+        run: PATH="$RUNNER_TEMP/mask:$PATH" sh .githooks/prove_pre_push.sh
+      # ...and in an ordinary environment, so the mask cannot become the only
+      # configuration the proof is ever exercised in.
+      - name: and in an ordinary environment
+        run: sh .githooks/prove_pre_push.sh
+      - name: the hook is committed 100755, or it is INERT on macOS/Linux
+        # `core.filemode` is false on Windows, so a chmod there never reaches the
+        # index: a hook authored on that platform is committed 100644, runs on
+        # the box that wrote it, and does nothing at all for everyone else.
+        run: |
+          for f in .githooks/pre-push .githooks/prove_pre_push.sh; do
+            mode=$(git ls-files -s "$f" | awk '{print $1}')
+            if [ "$mode" != "100755" ]; then
+              echo "FAIL $f is ${mode:-<untracked>} -- fix: git update-index --chmod=+x $f"
+              exit 1
+            fi
+            echo "OK   $f is $mode"
+          done
