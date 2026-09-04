@@ -224,4 +224,12 @@ theorem core_rwOut_spec (ins : Env) (k : Nat) (hk : k < 32) :
 
 -- completeness sweep 2026-08-28 (compiler): these carried no build-failing axiom gate.
 #audit_axioms SaltWorks.HDL.RegNextUniform.regWrite_out_bound
+
+-- completeness sweep 2026-09-03 (compiler): the last theorems in this file with
+-- no #audit_axioms statement naming them. Each was ticked individually first
+-- (probe receipt in the landing commit); ONE NAME PER LINE, deliberately --
+-- a multi-name call throwErrors at the first offender and every name after it
+-- is NOT REACHED, and not-reached reads as clean.
+#audit_axioms SaltWorks.HDL.RegNextUniform.lwWrCirc_outs_len
+#audit_axioms SaltWorks.HDL.RegNextUniform.lwWrOut_mem
 end SaltWorks.HDL.RegNextUniform

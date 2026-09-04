@@ -159,4 +159,11 @@ theorem regField_core_zero : SaltWorks.Stack.Program.RegField core 0 := by
 #audit_axioms SaltWorks.HDL.RegNextUniform.corePre_split SaltWorks.HDL.RegNextUniform.regWrite_out0_gate_mem
 #audit_axioms SaltWorks.HDL.RegNextUniform.regWrite_ssaFrom SaltWorks.HDL.RegNextUniform.rwOut0_eq
 #audit_axioms SaltWorks.HDL.RegNextUniform.rwOut0_lt_offPc SaltWorks.HDL.RegNextUniform.rwOut0_lt_offRegNext
+
+-- completeness sweep 2026-09-03 (compiler): the last theorems in this file with
+-- no #audit_axioms statement naming them. Each was ticked individually first
+-- (probe receipt in the landing commit); ONE NAME PER LINE, deliberately --
+-- a multi-name call throwErrors at the first offender and every name after it
+-- is NOT REACHED, and not-reached reads as clean.
+#audit_axioms SaltWorks.HDL.RegNextUniform.coreThruLw_agrees_below
 end SaltWorks.HDL.RegNextUniform

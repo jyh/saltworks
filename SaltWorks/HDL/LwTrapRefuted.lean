@@ -121,6 +121,22 @@ theorem control_sides_agree_insL :
 #audit_axioms sides_agree_at_bit_zero_insT sides_agree_at_bit_one_insT
 #audit_axioms sides_agree_at_bit_three_insT
 
+
+-- completeness sweep 2026-09-03 (compiler): the last theorems in this file with
+-- no #audit_axioms statement naming them. Each was ticked individually first
+-- (probe receipt in the landing commit); ONE NAME PER LINE, deliberately --
+-- a multi-name call throwErrors at the first offender and every name after it
+-- is NOT REACHED, and not-reached reads as clean.
+#audit_axioms SaltWorks.HDL.LwTrapRefuted.control_ok_insL
+#audit_axioms SaltWorks.HDL.LwTrapRefuted.dec_insT
+#audit_axioms SaltWorks.HDL.LwTrapRefuted.isa0_insT
+#audit_axioms SaltWorks.HDL.LwTrapRefuted.isa2_insT
+#audit_axioms SaltWorks.HDL.LwTrapRefuted.not_ok_insT
+#audit_axioms SaltWorks.HDL.LwTrapRefuted.seen_insT
+#audit_axioms SaltWorks.HDL.LwTrapRefuted.sel0_insT
+#audit_axioms SaltWorks.HDL.LwTrapRefuted.sel2_insT
+#audit_axioms SaltWorks.HDL.LwTrapRefuted.trapping_insT
+#audit_axioms SaltWorks.HDL.LwTrapRefuted.x2_insT
 end SaltWorks.HDL.LwTrapRefuted
 
 /-! ## ADDENDA — written AFTER the verdict, each one a hostile check of it. -/
@@ -187,4 +203,13 @@ theorem not_c4Spec_core_at_the_landed_witness : ¬ SaltWorks.HDL.C4Spec core :=
 #audit_axioms regDatapathOK_is_false_at_the_LANDED_witness
 #audit_axioms regDatapathOK_of_regFields not_c4Spec_core_at_the_landed_witness
 
+
+-- completeness sweep 2026-09-03 (compiler): the last theorems in this file with
+-- no #audit_axioms statement naming them. Each was ticked individually first
+-- (probe receipt in the landing commit); ONE NAME PER LINE, deliberately --
+-- a multi-name call throwErrors at the first offender and every name after it
+-- is NOT REACHED, and not-reached reads as clean.
+#audit_axioms SaltWorks.HDL.LwTrapRefuted.Addenda.isa3_insL
+#audit_axioms SaltWorks.HDL.LwTrapRefuted.Addenda.not_c4Spec_core_of_not_regDatapathOK
+#audit_axioms SaltWorks.HDL.LwTrapRefuted.Addenda.sel3_insL
 end SaltWorks.HDL.LwTrapRefuted.Addenda

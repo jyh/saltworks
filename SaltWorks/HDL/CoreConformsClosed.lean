@@ -188,4 +188,12 @@ theorem emitted_core_realises_the_step (ins : Env)
 #audit_axioms core_gates_length_eq outs_bound_of_block
 #audit_axioms chain_bound_regNext chain_bound_pcAdd core_outs_ok core_ssa
 
+
+-- completeness sweep 2026-09-03 (compiler): the last theorems in this file with
+-- no #audit_axioms statement naming them. Each was ticked individually first
+-- (probe receipt in the landing commit); ONE NAME PER LINE, deliberately --
+-- a multi-name call throwErrors at the first offender and every name after it
+-- is NOT REACHED, and not-reached reads as clean.
+#audit_axioms SaltWorks.HDL.CoreConformsClosed.off0_le_off2
+#audit_axioms SaltWorks.HDL.CoreConformsClosed.off0_le_off3
 end SaltWorks.HDL.CoreConformsClosed

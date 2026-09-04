@@ -637,4 +637,12 @@ end ADDI
 #audit_axioms SaltWorks.HDL.RegNextUniform.ADDI.sliceASpec_getD SaltWorks.HDL.RegNextUniform.ADDI.tieFalse_lt_off1
 #audit_axioms SaltWorks.HDL.RegNextUniform.ADDI.tieFalse_lt_offOb SaltWorks.HDL.RegNextUniform.ADDI.tieFalse_thru8
 #audit_axioms SaltWorks.HDL.RegNextUniform.ADDI.tie_run_false
+
+-- completeness sweep 2026-09-03 (compiler): the last theorems in this file with
+-- no #audit_axioms statement naming them. Each was ticked individually first
+-- (probe receipt in the landing commit); ONE NAME PER LINE, deliberately --
+-- a multi-name call throwErrors at the first offender and every name after it
+-- is NOT REACHED, and not-reached reads as clean.
+#audit_axioms SaltWorks.HDL.RegNextUniform.ADDI.coreThru7_split_sel
+#audit_axioms SaltWorks.HDL.RegNextUniform.ADDI.coreThru7sel_split
 end SaltWorks.HDL.RegNextUniform

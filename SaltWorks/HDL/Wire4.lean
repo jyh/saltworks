@@ -122,4 +122,11 @@ theorem immBCirc_is_one_gate : immBCirc.gates.length = 1 := by decide +kernel
 
 -- completeness sweep 2026-08-28 (compiler): these carried no build-failing axiom gate.
 #audit_axioms SaltWorks.HDL.RegNextUniform.coreThruRw_split3
+
+-- completeness sweep 2026-09-03 (compiler): the last theorems in this file with
+-- no #audit_axioms statement naming them. Each was ticked individually first
+-- (probe receipt in the landing commit); ONE NAME PER LINE, deliberately --
+-- a multi-name call throwErrors at the first offender and every name after it
+-- is NOT REACHED, and not-reached reads as clean.
+#audit_axioms SaltWorks.HDL.RegNextUniform.decOut_lt_offLwWr
 end SaltWorks.HDL.RegNextUniform
