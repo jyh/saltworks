@@ -68,6 +68,14 @@ bundle stays as it is, without it.)*
 **Rung zero's date (compiler's item 3): the click.** Rung 0 of the claim ladder is MEASURED ONLY — area,
 DRC/LVS, timing — and its datum for the tape-out is this bundle's signoff. Its date is the day the
 Captain clicks; if today, 2026-09-02. **DATED 2026-09-02 — the Captain clicked at ~12:56 PDT (minute the helm's R10 sitting minute (bare filename `2026-09-02-R10-SITTING-minute.md`, private record) @ `bf813512`, his word "clicked"). AT THE OBJECT, read 13:0x by silicon: `TinyTapeout/tinytapeout-sky-26c` PR #282 "Update project tt_um_saltworks_ndf_c32 (jyh/tt-neural-dataflow-fabric)", opened by `TinyTapeoutBot` 2026-09-02T19:55:30Z from branch `projects/tt_um_saltworks_ndf_c32-33644567364`; `commit_id.json` moves `commit` 7d2b2756… → `4226396f0dee52f1ccfbe44b175d42957870aeda` and `workflow_url` run 32284710003 → `33644567364`, `project_id` 5500 and `sort_id` 1786124512759 UNCHANGED (one slot re-pointed, as on 08/21); the folded §Signoff note rides in the PR's `docs/info.md` diff. State at the read: OPEN — "Check user project submission" SUCCESS, "Run precheck" IN_PROGRESS. ⛔ SUBMITTED ≠ INGESTED: ingestion is the MERGE, which on 08/21 (PR #211) came ~33 h after open. The merge is the second receipt and is owed to this table when it lands.**
+✅ **INGESTED — THE SECOND RECEIPT LANDED. PR #282 MERGED `2026-09-03T09:38:07Z`** (read at the
+object by silicon 2026-09-03 17:0x: `state=MERGED`, `mergedAt=2026-09-03T09:38:07Z`, the diff
+confirming `commit_id.json` `commit` → `4226396f0dee52f1ccfbe44b175d42957870aeda`,
+`workflow_url` → run `33644567364`, `project_id` 5500 and `sort_id` 1786124512759 UNCHANGED).
+Open→merge = **13 h 43 min**, against the 08/21 precedent's ~33 h — **the precedent OVERSTATED
+this wait by 2.4×**, which is the direction that costs a seat a relight it did not need. *A
+precedent of ONE is a sample of one, and it was carried here as a duration.* ⇒ The R10 click is
+now INGESTED, not merely submitted; §(A) is closed on both receipts.
 
 ---
 

@@ -468,7 +468,7 @@ bit-serial Design-B direction. Each names its successor or says none exists:**
   HEAD `1fcc22d7` **at the artifact**, not off my post. ⇒ **Q2 is CLOSED to this seat**; what
   remains is evidence's census row and the post-Sept-8 repoint.
 
-- Q4 · WRITE · ✅ **CLOSED 2026-09-02 12:5x AT THE CLICK** — the Captain re-submitted project 5500 from TT `main` `4226396f` (run `33644567364`) at the R10 sitting (minute the helm's R10 sitting minute (bare filename `2026-09-02-R10-SITTING-minute.md`, private record) @ `bf813512`); receipt at the object = `TinyTapeout/tinytapeout-sky-26c` PR #282 (TinyTapeoutBot, 19:55:30Z, `commit_id.json` → `4226396f` / run `33644567364`, `project_id` 5500, `sort_id` unchanged). ⏳ INGESTION = the PR's MERGE, pending at 13:0x (08/21 precedent: ~33 h); the merge receipt is owed to `docs/R10-SITTING-TABLE-0902.md` §(A) when it lands, and does not re-open this row. Rung 0 dates 2026-09-02. — 07:5x entry: **READY-TO-CLICK 2026-09-02 07:5x — TT `main` = `4226396f`, both shuttle runs green, treatcheck exactly four keys, 132/132 metrics identical to the 08/27 archive; the click is the Captain's (project 5500). CLOSES at the click.** — 07:4x entry: **IN FLIGHT — THE HOLD IS SUPERSEDED (Captain, council 09/02 07:2x: SHIP
+- Q4 · WRITE · ✅ **CLOSED 2026-09-02 12:5x AT THE CLICK** — the Captain re-submitted project 5500 from TT `main` `4226396f` (run `33644567364`) at the R10 sitting (minute the helm's R10 sitting minute (bare filename `2026-09-02-R10-SITTING-minute.md`, private record) @ `bf813512`); receipt at the object = `TinyTapeout/tinytapeout-sky-26c` PR #282 (TinyTapeoutBot, 19:55:30Z, `commit_id.json` → `4226396f` / run `33644567364`, `project_id` 5500, `sort_id` unchanged). ✅ INGESTION = the PR's MERGE, **LANDED: PR #282 MERGED `2026-09-03T09:38:07Z`** (silicon, at the object 09/03 17:0x; `project_id` 5500 and `sort_id` unchanged). Open→merge **13 h 43 min**, not the ~33 h the 08/21 precedent predicted — a precedent of ONE carried as a duration, overstating by 2.4×. Receipt written into `docs/R10-SITTING-TABLE-0902.md` §(A); this row stays CLOSED. Rung 0 dates 2026-09-02. — 07:5x entry: **READY-TO-CLICK 2026-09-02 07:5x — TT `main` = `4226396f`, both shuttle runs green, treatcheck exactly four keys, 132/132 metrics identical to the 08/27 archive; the click is the Captain's (project 5500). CLOSES at the click.** — 07:4x entry: **IN FLIGHT — THE HOLD IS SUPERSEDED (Captain, council 09/02 07:2x: SHIP
   EARLY; desk DW). The note is re-cut for `ndf-2a` and folded into the resubmission bundle:
   `jyh/tt-neural-dataflow-fabric` branch `ndf-2a` = `119d9705` (four config keys) + `4226396f` (the note
   in `docs/info.md`); shuttle runs `33640518663` / `33640897082` in progress at this stamp. READY-TO-CLICK
@@ -1040,8 +1040,18 @@ OPEN ITEMS:
   words were spoken. WHAT SURVIVES UNCHANGED: a one-shuttle slip
   (~2 weeks past ~Sept 7) is ACCEPTABLE. Full throttle unchanged —
   the target stands, the deadline is soft by his word.
-  THE EUR-280 QUESTION (silicon 11:55, pending measurement —
-  auto-resolves inside the timing ruling's window): 4x2/EUR 560
+  ⛔ THE EUR-280 QUESTION IS RETIRED BY THE PURCHASE, NOT ANSWERED
+  BY IT (silicon 09/03 17:0x). It asked whether 4x2 / EUR 560 would
+  hold the minimal demo and save EUR 280. TWELVE TILES ARE BOUGHT
+  AND PAID (08/06 + 08/11): there is no EUR 280 left to save, so
+  the settling hardening run below no longer DECIDES anything. It
+  may still be worth firing as a UTILIZATION DATUM in the
+  52.7-58.9% unmeasured band — that band is a hole in this seat's
+  instrument and will be asked again — but it is a measurement now,
+  not a gate, and nothing waits on it. *Recorded rather than
+  deleted: a question that dies because its decision was already
+  made looks exactly like one still open, and its instrument keeps
+  reading as a blocker.* — the original, for the band it names: 4x2/EUR 560
   would hold the minimal demo at 52.7-56.2% utilization — the
   UNMEASURED band (clean points 44.65/48.77%; the 63% datum was
   free-floorplan, does not transfer). Settling instrument: one
