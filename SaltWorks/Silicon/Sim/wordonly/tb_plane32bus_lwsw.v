@@ -35,6 +35,9 @@
 //   L4  every retire coincides with a PC advance, and no PC advance without one
 //   L5  the store owns exactly TWO consecutive loops (address, then data) — §7
 //   L6  the fetch address stride is 4 on every fetch frame
+//   ⛔ L3 WAS PASSING BY COINCIDENCE UNTIL 2026-09-04 — the host was address-
+//       incoherent and the memory was all zeroes. Both repaired; see the block at
+//       the host, and the 0xAA background is now a permanent control.
 //   L7  NO STORE TRANSACTION COMPLETES WITHOUT A SW FETCH TO ACCOUNT FOR IT
 //       (added 2026-09-03 on the helm's desk-FF word, red-first — see the block
 //        at its implementation. L2 and L5 CANNOT see a duplicated store.)
@@ -78,7 +81,25 @@ module tb;
 
   // ---- the COMBINATIONAL host: serve fetch from the program, load from memory --
   wire [31:0] fetch_word = progword(dut.u_bus.c_imem_addr);
-  wire [7:0]  la = pin_out;        // during a LOAD loop phase 0 this IS addr[7:0]
+  // ⛔⛔ REPAIRED 2026-09-04 — THIS HOST WAS ADDRESS-INCOHERENT AND L3 HAD BEEN
+  //   PASSING BY COINCIDENCE SINCE THIS BENCH WAS WRITTEN.
+  // The old line was `wire [7:0] la = pin_out;` — and `pin_out` is a DIFFERENT
+  // ADDRESS BYTE IN EVERY PHASE. So at phase 1 the host looked its word up at base
+  // `addr[15:8]`, at phase 2 at base `addr[23:16]`, and served byte 1 / byte 2 of a
+  // word read from the WRONG PLACE. It scored green only because this program's
+  // address is 0x40 (upper bytes 0), the datum is 64 (upper bytes 0), and the
+  // memory was filled with 0x00 — three zeroes covering for each other.
+  // ✅ DRIVEN, ONE VARIABLE, NOTHING BUT THE FILL PATTERN CHANGED: with a 0xAA
+  //   background the LW returned **x3 = 0xaaaaaa40** and L3 went RED. The same
+  //   perturbation against Sim/reghost/tb_plane32bus_reghost.v — whose host LATCHES
+  //   the address across the loop — stayed 6/6 GREEN, so the perturbation is sound
+  //   and the defect was here.
+  // ⇒ 🔑 A HOST MUST LATCH THE ADDRESS ACROSS THE LOOP. A bus that hands over one
+  //   byte per phase does not have an address until the loop is over, and reading
+  //   `pin_out` as "the address" is reading a byte as a word.
+  reg  [7:0]  la_r;
+  always @(negedge clk) if (rst_n && dut.u_bus.phase == 2'd0) la_r <= pin_out;
+  wire [7:0]  la = (dut.u_bus.phase == 2'd0) ? pin_out : la_r;
   reg  [31:0] load_word;
   always @(*) load_word = {hmem[la+3], hmem[la+2], hmem[la+1], hmem[la]};
 
@@ -251,7 +272,12 @@ module tb;
   end
 
   initial begin
-    for (i=0; i<256; i=i+1) hmem[i] = 8'h00;
+    // ⛔ THE BACKGROUND IS NON-ZERO ON PURPOSE, AND IT IS A PERMANENT CONTROL, NOT
+    //   DECORATION: an all-zero memory is exactly what let the address-incoherent
+    //   host above score green for its whole life. Anyone who reintroduces that
+    //   defect gets an immediate L3 RED instead of a coincidence.
+    for (i=0; i<256; i=i+1) hmem[i] = 8'hAA;
+    hmem[64]=8'h00; hmem[65]=8'h00; hmem[66]=8'h00; hmem[67]=8'h00;
     st_addr = 0; st_data = 0; st_addr_valid = 0; pc_prev = 32'hFFFFFFFF; retire_prev = 0; seen_pc = 0;
     $display("=== tb_plane32bus_lwsw — ONE LW AND ONE SW THROUGH THE PINS ===");
     @(negedge clk); rst_n = 1;
