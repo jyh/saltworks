@@ -1210,6 +1210,22 @@ OPEN ITEMS:
   `docs/silicon-ndf-option2-plus4-results-0904.md` · producers
   `SaltWorks/Silicon/Sim/reghost/run_reghost_plus4.sh` and
   `SaltWorks/Silicon/Firmware/rp2040/run_firmware_replay.sh`.**
+  ⭐⭐ **ARM (A) IS MEASURED, 2026-09-04 10:5x — I HAD PRICED IT BY ARITHMETIC AND NEVER DRIVEN
+  IT, AND A FORECAST IS THE ONE KIND OF CLAIM NOBODY RUNS A CONTROL ON.** ⛔ **STILL FACT-FINDING,
+  STILL UNRATIFIED, STILL TWO SIGNATURES — a seat does not rule this.** Producer
+  `SaltWorks/Silicon/Sim/reghost/run_armA_factfinding.sh`, with a control: **arm (A) under a FULLY
+  registered host (no combinational concession anywhere) scores 6/6 — `x3=00000040`, store correct,
+  100 retires, 0 couple violations — while the SHIPPED RTL under THE SAME HOST scores 4/6 RED with
+  `mem[64..67]=00000000` and no store ever completing.** ⇒ **(A) CLOSES THE FETCH-ROW GAP.**
+  📐 **COST, AND WHICH HALF IS MEASURED: per-instruction MEASURED from the loop census (1,200 cyc →
+  `F200·L50·S50`, `fetch_loops == 2×retires` exactly) = non-mem **8** · LW **16** · SW **16**, against
+  option (2)'s 4·12·12. Applied to compiler's measured `28/14/14` histogram — ARITHMETIC, same status
+  as the 448 I signed, and named as such — `392 → 448 → 672`, **+50% on (2), +71.4% on pre-(2)**.**
+  ⛔ **NO DEAD TWIN: there is deliberately NO patched copy of `busadapt8.v` in this tree; the runner
+  DERIVES the variant into a temp dir and deletes it, and `armA_patch.py` REFUSES unless each of its 8
+  edits matches exactly once — a variant built from a patch that did not apply IS the shipped design
+  and would score green.** ⇒ **THE FORK IS NOW DECIDABLE ON MEASUREMENT RATHER THAN ON ESTIMATE:
+  (A) buys a free-running clock at +50%; (B) is free but holds only where the host owns the clock.**
 
 - **COUNCIL RULING #8 — THE WIDTH RULING (11:3x, the Captain,
   verbatim: "Yes, the word width is not important for the PoC,
