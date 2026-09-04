@@ -137,3 +137,40 @@ loop — so that path stays correct if (A) ever lands.
 Simulation and replay against the RTL. **No timing claim about real PIO.** The harness
 is test equipment — the trust class of a logic analyzer — exactly as the queue row says.
 Nothing here touches the verified surface.
+
+## 8 · ⛔⛔ A SEPARATE FINDING, FOUND BY READING THE TRACKED BENCH RATHER THAN RUNNING IT
+### `tb_plane32bus_lwsw.v`'s L3 HAD BEEN PASSING BY COINCIDENCE SINCE THE BENCH WAS WRITTEN
+
+The combinational host computed its load base as `wire [7:0] la = pin_out;` —
+**and `pin_out` is a different address byte in every phase.** So at phase 1 it looked
+the word up at base `addr[15:8]`, at phase 2 at base `addr[23:16]`, and served bytes 1
+and 2 of a word read from the wrong place.
+
+**It scored green because three zeroes covered for each other:** the program's address
+is `0x40` (upper bytes 0), the datum is 64 (upper bytes 0), and the memory was filled
+with `0x00`.
+
+✅ **DRIVEN, ONE VARIABLE — NOTHING BUT THE FILL PATTERN CHANGED:**
+
+| bench | host | result under a `0xAA` background |
+|---|---|---|
+| `tb_plane32bus_lwsw` (old host) | reads `pin_out` as the address | **L3 RED, `x3 = 0xaaaaaa40`** |
+| `tb_plane32bus_reghost` | **latches** the address across the loop | **6/6 GREEN, `x3 = 0x00000040`** |
+
+The second row is what makes this a finding about the host and not about the
+perturbation: the same fill against a correctly-latching host changes nothing.
+
+🔑 ***A HOST MUST LATCH THE ADDRESS ACROSS THE LOOP. A bus that hands over one byte per
+phase does not have an address until the loop is over, and reading `pin_out` as "the
+address" is reading a byte as a word.***
+
+✅ **REPAIRED, AND THE FIXTURE IS NOW THE GUARD:** the host latches at phase 0 and
+serves from that base; **both benches now initialise memory to `0xAA`**, so anyone who
+reintroduces the defect gets an immediate L3 red instead of a coincidence. *A permanent
+control in the fixture beats a measurement in a document.* `BYPASS_CONTROL=PASS`
+retained (ARM A 7/7, ARM B 2/7 with the recorded 08/18 signature).
+
+⚠️ **WHAT THIS DOES AND DOES NOT CHANGE.** It does not touch option (2), the RTL, or any
+verdict in §§1–7 — `run_reghost_plus4.sh` and `run_firmware_replay.sh` are green before
+and after. What it changes is **how much L3 was ever worth**: the LW data path was
+end-to-end checked only for words whose upper three bytes were zero.

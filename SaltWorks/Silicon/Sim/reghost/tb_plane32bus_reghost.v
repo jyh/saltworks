@@ -199,7 +199,13 @@ module tb;
   endtask
 
   initial begin
-    for (i=0; i<256; i=i+1) hmem[i] = 8'h00;
+    // ⛔ NON-ZERO BACKGROUND, AND IT IS A PERMANENT CONTROL. An all-zero memory is
+    //   what let the TRACKED bench's address-incoherent host score green for its
+    //   whole life (repaired 2026-09-04; `x3=0xaaaaaa40` under exactly this fill).
+    //   This host LATCHES the address across the loop and is green under it — the
+    //   fill is kept so that property is GUARDED and not merely once-measured.
+    for (i=0; i<256; i=i+1) hmem[i] = 8'hAA;
+    hmem[64]=8'h00; hmem[65]=8'h00; hmem[66]=8'h00; hmem[67]=8'h00;
     st_addr = 0; st_data = 0; pc_prev = 32'hFFFFFFFF; retire_prev = 0; seen_pc = 0;
     $display("=== tb_plane32bus_reghost — A REGISTERED HOST ON THE BYTE-PHASE BUS ===");
     @(negedge clk); rst_n = 1;
