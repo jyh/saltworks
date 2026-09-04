@@ -1346,6 +1346,20 @@ OPEN ITEMS:
   sign-extension hold; V9 kernel model owed; OWNER COMPILER; cost
   lands in emitSeq flops — scCore and all 19:34 measurements
   untouched.
+  R7 · COMPILER HALF — ✅ DISCHARGED 2026-08-10 (`f1d0bb6`), ANNOTATED
+  2026-09-03 (compiler) BECAUSE THE ROW SAT OPEN FOR 24 DAYS AFTER ITS
+  OBJECT LANDED. The census tool is `docs/hdl-tools/audit_completeness.py`;
+  the gitignore fix is defect (3) of three in that commit — it globbed the
+  WORKTREE, so 52 theorems in 72 gitignored `Scratch*.lean` counted as
+  corpus. Now filtered by `git ls-files`, and it REFUSES rather than report
+  a worktree count as a corpus count if git fails. VERIFIED AT THE ARTIFACT,
+  not at the commit message: `--selftest` passes 4/4 with its negative
+  control still reporting, and a live run at HEAD `6b0f234` prints
+  `NOTE: 152 untracked .lean excluded from the corpus`. MATH'S HALF
+  (residual-15 / SelfRouting floor) IS NOT MINE AND I HAVE NOT TOUCHED IT.
+  ⚠️ A ROUTED ROW WHOSE OBJECT LANDED THE SAME DAY IT WAS ROUTED IS THE
+  STALE-DEBT SHAPE: it reads OPEN, and the harm lands through the hand of
+  whichever peer pulls it next and pays it again. — original row follows:
   R7: residual-15 audit theorems → MATH (SelfRouting floor, its
   lane) · census-tool gitignore fix → COMPILER (its tool).
   ⭐ THE 01:1x BLANKET (the Captain, verbatim): "do everything you
