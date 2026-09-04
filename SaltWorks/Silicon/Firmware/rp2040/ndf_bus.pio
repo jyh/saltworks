@@ -1,0 +1,53 @@
+; ndf_bus.pio — THE BYTE-PHASE BUS ENGINE FOR AN RP2040 MEMORY SERVER.
+;
+; ⭐ ONE ITERATION = ONE DUT CLOCK = ONE BUS PHASE, AND THE SM STALLS INSIDE IT.
+;
+; The state machine blocks at `pull` with the project clock held LOW. THAT STALL
+; IS THE WAIT STATE the design does not have a pin for. busadapt8.v says so in
+; its own words — *"there is still NO NOT-READY SIGNAL. A host slower than the
+; free-running counter cannot stall this core, because under (d) there is no pin
+; for one"* — and the way out is not a pin, it is that on this platform THE HOST
+; OWNS THE CLOCK: docs/tinytapeout-dossier.md §2.1 records the demo board
+; generating the project clock from the RP2040 PWM/PIO, 1 Hz - 66.5 MHz, with
+; `tt.clock_project_PWM(0)` STOPPING it outright.
+;
+; ⛔ SO THE PER-PHASE BUDGET HERE IS UNBOUNDED, AND THAT IS A PROPERTY OF THE
+;    DEMO BOARD, NOT OF THE DESIGN. Under a free-running clock this program is
+;    wrong and the server needs option (2)'s second LOAD loop for the load path
+;    (which it implements) plus an unlanded answer for the FETCH row (which is a
+;    separate two-signature row). Do not read a working bring-up as closing that.
+;
+; SIDE-SET pin 0 : clk  (the project clock)
+; OUT pins  [8]  : ui_in[7:0]   (the byte this host returns)
+; uo_out[7:0] and uio_out[1:0] are read by the CPU with the clock stopped — see
+; ndf_pico_main.c. They deliberately do NOT come back through a FIFO: the CPU
+; must read them BEFORE it decides the byte for the SAME phase (the fetch is
+; in-phase), and a FIFO round-trip would put the decision a phase too late.
+
+.program ndf_bus
+.side_set 1
+
+.wrap_target
+    pull block          side 0      ; STALL, clk LOW — the wait state
+    out  pins, 8        side 0 [3]  ; drive ui_in for this phase; let it settle
+    nop                 side 1 [7]  ; RISING EDGE — the DUT latches ui_in, phase++
+    nop                 side 0 [7]  ; falling edge; round again to the stall
+.wrap
+
+% c-sdk {
+static inline void ndf_bus_program_init(PIO pio, uint sm, uint offset,
+                                        uint ui_in_base, uint clk_pin) {
+    pio_sm_config c = ndf_bus_program_get_default_config(offset);
+    sm_config_set_out_pins(&c, ui_in_base, 8);
+    sm_config_set_sideset_pins(&c, clk_pin);
+    sm_config_set_out_shift(&c, true /* shift right */, false /* no autopull */, 32);
+
+    for (uint i = 0; i < 8; i++) pio_gpio_init(pio, ui_in_base + i);
+    pio_gpio_init(pio, clk_pin);
+    pio_sm_set_consecutive_pindirs(pio, sm, ui_in_base, 8, true);
+    pio_sm_set_consecutive_pindirs(pio, sm, clk_pin,    1, true);
+
+    pio_sm_init(pio, sm, offset, &c);
+    pio_sm_set_enabled(pio, sm, true);
+}
+%}

@@ -76,6 +76,7 @@ module busadapt8(clk, rst_n, sof,
     localparam T_IDLE = 2'b00, T_FETCH = 2'b01, T_LOAD = 2'b10, T_STORE = 2'b11;
     reg [1:0] kind;      // what THIS loop is doing
     reg       store_beat; // 0 = address loop, 1 = the store's data loop
+    reg       load_beat;  // 0 = address loop, 1 = the LOAD's data loop  (option (2))
     wire      loop_end = (phase == 2'd3);
 
     // ⛔ MID-LOOP `sof` TRUNCATION — the executor's residual (1), and it was REAL.
@@ -153,10 +154,45 @@ module busadapt8(clk, rst_n, sof,
     //   unproved is the NETLIST↔Lean correspondence (`sem (bridge nl outs) ≡ runP`),
     //   and that is the bridge induction already routed off this seat — a KNOWN
     //   blocker, not a new one.
+    // ⭐⭐ OPTION (2) — §7's "+4" SECOND LOAD LOOP. RATIFIED: council 09/04
+    // ruling (7), *"FF RATIFIED — NDF option (2) on the double signature"*, on
+    // silicon's signature 09/03 18:34:07 and compiler's 18:27.
+    //
+    // ── WHAT IT CHANGES, IN ONE SENTENCE ────────────────────────────────────────
+    // A `T_LOAD` now owns TWO loops instead of one — an ADDRESS loop and a DATA
+    // loop — exactly as a `T_STORE` always has. `load_beat` mirrors `store_beat`.
+    // ⇒ EVERY MEMORY TRANSACTION IS NOW EXACTLY TWO LOOPS. §7's CPI table is the
+    //   price and already carries it: LW 8 -> 12, SW 12 unchanged, non-memory 4.
+    //
+    // ── WHY, AND THE MEASUREMENT THAT FORCED IT ────────────────────────────────
+    // §7: *"THE LOAD ROW ASSUMES READ DATA RETURNS ON `ui` DURING THE ADDRESS
+    // PHASES ... If the host cannot turn a read around in-phase, every LOAD row
+    // below gains 4."* The RP2040 as a PIO memory server CANNOT: it samples a pin
+    // on one clock edge and can drive a response only on a later one.
+    // ✅ MEASURED, RED-FIRST, by Sim/reghost/tb_plane32bus_reghost.v, whose host
+    //    drives `pin_in` from a FLOP: against the ONE-loop LOAD the loaded word
+    //    never reaches a register (`x3=00000000`, G3 and G4 RED, 2/6) while the
+    //    store path — which needs no turnaround — stays green. That green control
+    //    is what makes the red a finding about the LOAD row and not about the bench.
+    //
+    // ⛔ COMPILER'S AMENDMENT 1, HONOURED. My 09/03 sentence *"needs no change to
+    //    the ratified arbitration"* was true of the ARBITRATION RULE and let the
+    //    reader carry it to THE MODULE, which is false: this DOES change `retire`
+    //    for `T_LOAD`, and therefore compiler's kernel model. Cheap and bounded is
+    //    not free, and the bill is named here rather than discovered downstream.
+    //
+    // ⛔⛔ COMPILER'S AMENDMENT 2 IS **NOT** DISCHARGED BY THIS EDIT AND MUST NOT
+    //    BE READ AS DISCHARGED. The `sof` arm still does not consult `retire` —
+    //    the latent asymmetry measured 09/03 (a one-cycle `sof` at a retiring
+    //    phase-3 edge re-issues a completed transaction). That is a SEPARATE
+    //    two-signature row. The `sof` arm below clears `load_beat` for exactly the
+    //    reason it already clears `store_beat` — a realign reframes the
+    //    transaction — and that is the SAME TREATMENT, NOT THE REPAIR.
     always @(posedge clk)
-        if (!rst_n) begin kind <= T_FETCH; store_beat <= 1'b0; end
+        if (!rst_n) begin kind <= T_FETCH; store_beat <= 1'b0; load_beat <= 1'b0; end
         else if (sof) begin
             store_beat <= 1'b0;
+            load_beat  <= 1'b0;
             kind <= c_dmem_req ? (c_dmem_we ? T_STORE : T_LOAD) : T_FETCH;
         end
         else if (loop_end) begin
@@ -165,24 +201,31 @@ module busadapt8(clk, rst_n, sof,
                 // request that cannot fall. Next loop fetches the next one.
                 kind       <= T_FETCH;
                 store_beat <= 1'b0;
+                load_beat  <= 1'b0;
             end else if (kind == T_FETCH) begin
                 // a committed memory instruction: its ADDRESS loop is next.
                 // `c_dmem_we` is isSW, a pure decode — no DriveMap exposure.
                 kind       <= c_dmem_we ? T_STORE : T_LOAD;
                 store_beat <= 1'b0;
+                load_beat  <= 1'b0;
             end else begin
-                // reachable ONLY as "a store that has sent its address": for
-                // T_LOAD retire is 1 at loop_end, and for T_STORE with
-                // store_beat=1 retire is 1, so both take the first arm. `kind`
-                // is deliberately NOT reassigned — the type code stays T_STORE so
-                // the host knows the datum is coming.
-                store_beat <= 1'b1;
+                // reachable ONLY as "a memory transaction that has sent its
+                // ADDRESS": under option (2) that is a T_STORE with store_beat=0
+                // OR a T_LOAD with load_beat=0 — for both, `retire` is 0 at this
+                // loop_end, so both fall here. `kind` is deliberately NOT
+                // reassigned: the type code stays put so the host knows the second
+                // loop belongs to the same transaction.
+                if (kind == T_STORE) store_beat <= 1'b1;
+                else                 load_beat  <= 1'b1;
             end
         end
 
     // §2's derivation, verbatim: a DECODE of the frame, introducing no new state.
+    // ⭐ THE ONE-LINE HEART OF OPTION (2): `T_LOAD`'s arm was `1'b1` — retire on the
+    //   address loop, giving the host no turnaround at all. It is now `load_beat`,
+    //   which is the exact mirror of the store's arm one line below it.
     assign retire = loop_end && ( (kind == T_FETCH) ? ~c_dmem_req
-                                : (kind == T_LOAD)  ? 1'b1
+                                : (kind == T_LOAD)  ? load_beat
                                 : (kind == T_STORE) ? store_beat : 1'b1 );
 
     // ---- decision 1: TYPE at phase 0, PHASE at 1..3 --------------------------
@@ -209,7 +252,12 @@ module busadapt8(clk, rst_n, sof,
                 2'd3: begin
                     // commit the assembled word to whichever consumer this loop served
                     if (kind == T_FETCH) instr_r <= {pin_in, in_acc[23:0]};
-                    if (kind == T_LOAD)  rdata_r <= {pin_in, in_acc[23:0]};
+                    // ⭐ OPTION (2): a LOAD's read data arrives in its SECOND loop.
+                    // Gating on `load_beat` is not decoration — without it the
+                    // ADDRESS loop would commit whatever the host happened to be
+                    // driving while it was still being told the address, and the
+                    // data loop's correct word would then be overwritten by nothing.
+                    if (kind == T_LOAD && load_beat) rdata_r <= {pin_in, in_acc[23:0]};
                 end
             endcase
         end
