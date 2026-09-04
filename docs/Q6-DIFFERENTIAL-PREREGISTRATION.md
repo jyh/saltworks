@@ -863,3 +863,33 @@ replaced by `counterexample_is_on_target`, which carries the surviving content (
 
 ⇒ **STATUS AFTER THIS AMENDMENT: `C4Spec core` is OPEN. `RegDatapathOK` is OPEN.** Neither is
 proved; neither is refuted. **A dead witness is not a proof that the spec is true.**
+
+### ✅ SUPERSEDED 2026-08-31 BY R9a — ANNOTATED 2026-09-04, TEXT ABOVE KEPT VERBATIM
+
+⛔⛔ **THE STATUS LINE DIRECTLY ABOVE WENT FALSE ON 2026-08-31 AND READ "OPEN" FOR FOUR DAYS.**
+Both objects are **REFUTED**, proved and landed in the tracked corpus, on `origin/master`:
+```
+SaltWorks/HDL/LwTrapRefuted.lean:199
+  not_c4Spec_core_at_the_landed_witness : ¬ SaltWorks.HDL.C4Spec core
+  = not_c4Spec_core_of_not_regDatapathOK regDatapathOK_is_false_at_the_LANDED_witness
+axioms (checked 09-04, NOT assumed from the ✓): [propext, Classical.choice, Quot.sound]
+  — the classical trio, NO sorryAx, on all three of the above and on sel3_insL.
+```
+The replacement witness the 08-29 amendment says *"none was sought"* **arrived anyway**, by a
+different route: R9a's NON-TRAPPING `insL` at **bit 3** (`sel3_insL`), the cell the 08-29
+retirement never read. ⇒ **`RegDatapathOK` is FALSE and `C4Spec core` is FALSE.**
+
+⛔⛔ **AND THIS IS WHY THE ANNOTATION MATTERS MORE THAN THE FACT: THE "C4Spec PROOF ATTEMPT
+(Sept 4–5)" NAMED ABOVE IS VOID — ITS TARGET IS PROVABLY FALSE.** That row is the compensation
+the council awarded for a refutation lost, it is dated to a window that **is today**, and it was
+the last open item at this seat's tier. **A seat booting into that window and obeying this file
+would spend two days attempting to prove a theorem whose negation is landed, audited and pushed**
+— and would find only failing proofs, which is precisely what a hard theorem also looks like.
+⇒ ⭐⭐ **THE SEARCH SUCCEEDED; THE ITEM IS DISCHARGED BY EVENTS, NOT BY BEING PERFORMED.**
+*A dated task is a claim about the world on that date. This one was true when written, and the
+event that falsified it — a witness landing — is exactly the event nobody re-reads a plan after.*
+
+⚠️ **A FALSE OPEN-ITEM IS WORSE THAN A FALSE FINDING, AND IN BOTH DIRECTIONS.** A stale finding
+gets DISPUTED; a stale ASSIGNMENT gets EXECUTED, and the harm lands through the hand of whoever
+dutifully performs it. I caught this only because I checked the target's status before starting
+the work the file assigned me. **The check cost one grep; the item cost two days.**

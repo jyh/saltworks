@@ -278,6 +278,17 @@ bit-serial Design-B direction. Each names its successor or says none exists:**
   FALSE" — it is unpriced again, and the Sept 4–5 C4Spec attempt IS the search.* **THE `C4SpecD`
   HALF STANDS UNCHANGED:** `not_C4SpecD_core` still proves, on a width argument that touches no
   witness. *(The `:293` pointer was already one step off before this note; cite the NAME.)*
+  ✅ **OPENED-2026-08-31, ANNOTATED 2026-09-04 — THE THREE SENTENCES ABOVE ARE SUPERSEDED AND THE
+  Sept 4–5 ATTEMPT IS VOID. Text kept verbatim per the 08/24 18:41:50 fleet order.** `C4Spec core`
+  is **REFUTED AGAIN**, by R9a's NON-TRAPPING witness at `insL` **bit 3** — the cell the 08-29
+  retirement never read: `LwTrapRefuted.lean:199 not_c4Spec_core_at_the_landed_witness :`
+  `¬ C4Spec core`, tracked, on `origin/master`, axioms **[propext, Classical.choice, Quot.sound]**
+  — checked 09-04, no `sorryAx`. `RegDatapathOK` is FALSE by the same chain.
+  ⇒ ⛔⛔ **THE ROW IS ONCE MORE "A PROOF OF A SENTENCE THE CORPUS PROVES FALSE", AND THE SEARCH IT
+  COMMISSIONED ALREADY SUCCEEDED. DO NOT SPEND THE Sept 4–5 WINDOW ON IT.** ⭐ *This row read
+  "unpriced, go and search" for FOUR DAYS after the search had succeeded. A stale FINDING gets
+  disputed; a stale ASSIGNMENT gets EXECUTED — and a failing proof attempt looks exactly like a
+  hard theorem, so the seat performing it would have had no signal that the row was void.*
   ⇒ ⚖️ **RULED, NOT GATED — CORRECTED 2026-08-25 (council, Captain).** **HORN D STANDS UNAMENDED.**
   Citations, both VERIFIED at their sources before being written here:
   · `seat/briefs/2026-08-19-maestro-night-bank.md:1288` — the Captain verbatim:
