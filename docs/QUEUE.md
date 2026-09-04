@@ -1146,6 +1146,53 @@ OPEN ITEMS:
   `SaltWorks/Silicon/Sim/reghost/run_sof_wait_state.sh` (three arms, one variable) ·
   the refuted stretch attempt kept as a runnable null at
   `SaltWorks/Silicon/Sim/reghost/tb_reghost_REFUTED_sof_stretch.v`.**
+  ⭐⭐ **RE-PRICED ON THE MEASUREMENT, 2026-09-04 10:4x — OPTION (2) IS RATIFIED (council
+  09/04 ruling (7), double signature silicon 09/03 18:34:07 + compiler 18:27), IMPLEMENTED,
+  AND THE FIRMWARE IS WRITTEN AND HAS A RECEIPT.** ⛔ **CORRECTING THE (2) PRICING ONE
+  PARAGRAPH ABOVE, FORWARD AND NOT BY REWRITE (compiler's amendment 1, which I accept):
+  *"needs no change to the ratified arbitration"* WAS TRUE OF THE ARBITRATION RULE AND
+  FALSE OF THE MODULE** — (2) changes `busadapt8`'s `retire` for `T_LOAD`, and therefore
+  compiler's kernel model. *Cheap and bounded is not free.* ✅ **LANDED:** `load_beat`
+  mirrors `store_beat`; `retire`'s `T_LOAD` arm `1'b1` → `load_beat`; read-data capture
+  gated on the DATA loop. **Every memory transaction is now exactly two loops.**
+  ✅ **RED-FIRST, PRE-REGISTERED BEFORE THE RTL WAS TOUCHED:** new tracked bench
+  `Sim/reghost/tb_plane32bus_reghost.v`, host drives `pin_in` FROM A FLOP — ARM RED
+  (one-loop LOAD) **2/6, G3+G4 fail, `x3=00000000`** · ARM GREEN **6/6** · **G2 (the
+  store path, needing no turnaround) passes on BOTH arms**, which is what makes the red a
+  finding about the LOAD row and not about the bench. Gate `run_reghost_plus4.sh` (rc 0)
+  asserts the mutation APPLIED and COMPILES. **Regression bar met: `tb_plane32bus_lwsw`
+  7/7 before AND after, `BYPASS_CONTROL=PASS`.** 📐 **CPI MEASURED, NOT FORWARDED:**
+  600-cycle census `F86·L21·S43` → `F75·L37·S38` (150 loops both) ⇒ **LW 8 → 12, SW 12,
+  non-mem 4 — §7's own table**; on compiler's `28/14/14` histogram **392 → 448, +14.29%**.
+  ✅ **FIRMWARE: `SaltWorks/Silicon/Firmware/rp2040/`** — the protocol core is PURE C with
+  no SDK, so it is checkable: `run_firmware_replay.sh` replays it against the 6/6 bench's
+  own PIN TRACE — **900 cycles, 564 consumed phases compared, 0 mismatches, 0 desync,
+  server memory `mem[64..67]=00000040`, 6/6**; mutation arm (the +4 lookup defeated) **28
+  mismatches, F2 RED**. ⛔ **NOT RUN AND SAID SO: `ndf_bus.pio` is not assembled and
+  `ndf_pico_main.c` is not compiled — no pico SDK on this box; their TEXT is as unverified
+  as their logic, and the glue's GPIO numbers are MARKED PLACEHOLDERS.**
+  ⛔⛔ **NEW ROW, NOT A DEFECT IN (2) AND NOT PART OF IT — THE FETCH ROW. (2) RELIEVES §7's
+  *LOAD ROW ONLY*, WHILE §7's OWN TEXT SAYS THE LOAD'S ASSUMPTION HOLDS "EXACTLY AS THE
+  INSTRUCTION DOES DURING A FETCH".** Measured, arm `REGHOST_FETCH` (fetch registered too,
+  under (2)): **225 FETCH loops · 0 LOAD · 0 STORE · registers never resolve — the machine
+  executes nothing.** ⇒ ***(2) IS NECESSARY AND NOT SUFFICIENT FOR A FULLY REGISTERED
+  HOST.*** *Pre-registered as a question in prereg §5, so this is a result and not a
+  convenient discovery.* 📊 **FORK PRICED: (A) symmetric "+4" on the FETCH row** — non-mem
+  4→8, LW/SW 12→16, histogram **448 → 672, +50% on top of (2)**; another `retire` change in
+  a ratified module ⇒ **ITS OWN TWO-SIGNATURE ROW, REGISTERED HERE.** **(B) the host owns
+  the clock** — receipt in this repo, `docs/tinytapeout-dossier.md` §2.1: the demo board
+  generates the project clock from the RP2040 PWM/PIO, 1 Hz–66.5 MHz, and
+  `tt.clock_project_PWM(0)` **stops** it; zero RTL, but it holds ONLY where the host owns
+  the clock — **false for any free-running deployment.** **(C) prefetch — refuted**, the
+  host cannot know the next PC across a branch. ⭐ **I PROCEEDED ON (2)+(B) rather than
+  waiting (nothing blocks on the Captain); the LOAD service is written the way a
+  FREE-RUNNING host would have to write it — lookup at the END of the address loop — so it
+  stays correct if (A) ever lands.** ⛔ **compiler's amendment 2 STILL OPEN and NOT counted
+  as handled: the `sof` arm's failure to consult `retire` is its own two-signature row.**
+  📎 prereg `docs/silicon-ndf-option2-plus4-prereg-0904.md` · results
+  `docs/silicon-ndf-option2-plus4-results-0904.md` · producers
+  `SaltWorks/Silicon/Sim/reghost/run_reghost_plus4.sh` and
+  `SaltWorks/Silicon/Firmware/rp2040/run_firmware_replay.sh`.**
 
 - **COUNCIL RULING #8 — THE WIDTH RULING (11:3x, the Captain,
   verbatim: "Yes, the word width is not important for the PoC,
