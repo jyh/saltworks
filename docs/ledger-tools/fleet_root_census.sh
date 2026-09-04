@@ -48,7 +48,7 @@
 # enters the census the day it is committed.
 #
 # ─── SCOPE, STATED INSIDE THE VERDICT ────────────────────────────────────────
-# IN : executable surfaces (*.sh, *.py) tracked at REF that name an absolute path
+# IN : machine-read surfaces (*.sh, *.py, *.tsv, *.json) tracked at REF naming an absolute path
 #      under FLEET_ROOT, where that path resolves into a git tree.
 # OUT: prose occurrences in *.md/*.json/*.tsv (reported as a count, never as a
 #      verdict) · paths that resolve outside any git tree (reported UNKNOWN, loudly)
@@ -107,9 +107,12 @@ population() {
 extract_path() {
   printf '%s\n' "$1" \
     | grep -o -- "$FLEET_ROOT/[A-Za-z0-9_./-]*" \
-    | sed 's/[.,)]*$//' \
-    | head -1
+    | sed 's/[.,)]*$//'
 }
+
+# ⛔ IT USED TO `head -1`. A TSV ROW CARRIES SEVERAL PATHS AND ONLY THE FIRST WAS
+#    RULED ON — an undercount that prints nothing, which is the only kind I keep
+#    making. Now every fleet-root path on the line is a separate subject.
 
 # ── sha, or nothing. ⛔ THE INCANTATION IS LOAD-BEARING. ────────────────────────
 # Bare `git rev-parse <sha>:<path>` on a missing path prints "fatal:" to stderr and
@@ -316,7 +319,7 @@ census_run() {
   say "fleet_root_census: FLEET_ROOT=$FLEET_ROOT  REF=$REF  population-source=$REPO"
   say "  taken $CENSUS_STAMP — each tree's origin tip is measured ONCE for this run,"
   say "  so every row below is a claim about the SAME moment."
-  say "  (scope: executable *.sh/*.py surfaces tracked at REF. Prose is counted, never judged."
+  say "  (scope: MACHINE-READ surfaces tracked at REF — *.sh *.py *.tsv *.json. Prose is counted, never judged."
   say "   Reference is ORIGIN, re-measured by ls-remote each run — never this clone's worktree.)"
 
   _pop=$(population)
@@ -334,30 +337,43 @@ census_run() {
     _rest=${hit#*:}
     _lno=${_rest%%:*}
     _text=${_rest#*:}
+    # ⭐ WIDENED 2026-09-03, ON A MEASURED MISS, NOT ON A HUNCH. The filter was
+    #    *.sh|*.py, and `docs/provenance/REPLAY-MANIFEST.tsv:32` — a row read as
+    #    CONFIG by BOTH selftest.py:670 and provenance_replay.py — was being
+    #    counted as "prose, not judged". A .tsv or .json consumed by a tool is a
+    #    MACHINE-READ SURFACE; the extension says how it is stored, not whether
+    #    anything executes on it. Measured: 3 such files, 6 lines, previously all
+    #    invisible to this census. ⇒ AN EXTENSION IS A GUESS ABOUT A CONSUMER.
     case "$_file" in
-      *.sh|*.py) : ;;
+      *.sh|*.py|*.tsv|*.json) : ;;
       *) _prose=$((_prose+1)); continue ;;
     esac
-    _code=$((_code+1))
     _path=$(extract_path "$_text")
     case "$_path" in
-      "") say "  UNKNOWN  $_file:$_lno"
+      "") _code=$((_code+1))
+          say "  UNKNOWN  $_file:$_lno"
           say "           NO-PATH-EXTRACTED — the line names FLEET_ROOT but no path could be clipped"
           _unk=$((_unk+1)); continue ;;
     esac
-    _v=$(classify_path "$_path")
-    _st=${_v%%	*}
-    _de=${_v#*	}
-    say "  $_st  $_file:$_lno"
-    say "           -> $_path"
-    say "           $_de"
-    case "$_st" in
-      SOUND) _sound=$((_sound+1)) ;;
-      ROT)   _rot=$((_rot+1)) ;;
-      SCOPE) _scope=$((_scope+1)) ;;
-      PIN)   _pin=$((_pin+1)) ;;
-      *)     _unk=$((_unk+1)) ;;
-    esac
+    while IFS= read -r _one; do
+      case "$_one" in "") continue ;; esac
+      _code=$((_code+1))
+      _v=$(classify_path "$_one")
+      _st=${_v%%	*}
+      _de=${_v#*	}
+      say "  $_st  $_file:$_lno"
+      say "           -> $_one"
+      say "           $_de"
+      case "$_st" in
+        SOUND) _sound=$((_sound+1)) ;;
+        ROT)   _rot=$((_rot+1)) ;;
+        SCOPE) _scope=$((_scope+1)) ;;
+        PIN)   _pin=$((_pin+1)) ;;
+        *)     _unk=$((_unk+1)) ;;
+      esac
+    done <<ONE
+$_path
+ONE
   done <<POP
 $_pop
 POP
