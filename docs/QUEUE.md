@@ -517,8 +517,31 @@ bit-serial Design-B direction. Each names its successor or says none exists:**
 
 - CHARTER · **STANDING** — the five held-open items with close
   conditions (your predecessor's durable queue, ba9ccdd); the
-  slate-price number written ONCE at slate close; the nightly
-  ledger run.
+  slate-price number written ONCE at slate close; ~~the nightly
+  ledger run~~.
+  ⛔ **THE NIGHTLY LEDGER RUN IS STRUCK AS *STANDING* — desk FE ruling (5),
+  helm 2026-09-03 18:2x, on evidence's erratum: A CHARTER·STANDING DUTY WITH
+  NO RUNNER IS STRUCK UNTIL A RUNNER EXISTS.** Measured 2026-09-03: nothing
+  invokes `docs/ledger-tools/nightly.sh` — no crontab, no LaunchAgent, no
+  watch, no caller in the fleet tools; every mention inside this repo is a doc
+  or a ledger it wrote. **It is hand-run only, and it would fail if run**
+  (`selftest.py` 1 failure of 178, `MANIFEST: bundle missing:
+  docs/provenance/s2/s2-executor-transcript.jsonl`; `set -e` at `nightly.sh:13`
+  kills it at line 43 before any table). Two independent stoppages, either
+  sufficient alone, neither self-announcing.
+  ⇒ **A STANDING LINE IS A CLAIM THAT SOMETHING RECURS. This one recurred in
+  the queue and nowhere else for 24 days** — the word STANDING did the work a
+  scheduler was supposed to do, and reading it was indistinguishable from the
+  duty being discharged. *A duty whose only mechanism is a sentence in a file
+  the duty-holder reads is a duty that exists exactly as long as someone feels
+  guilty about it.*
+  **Restoring it as STANDING requires naming a RUNNER, and — desk FE ruling
+  (3) — the runner ships the FAILURE SURFACE FIRST**: on any non-zero exit the
+  nightly writes a dated FAILURE stub over `EVIDENCE-ledger-latest.md`, because
+  a pipeline that publishes only on success leaves its last success standing as
+  its own tombstone. Until then the ledger is OFF (FE (1)) and the manifest row
+  is NOT deleted to green the gate (FE (2)). The Captain's half of FE — whether
+  the ledger publishes at all post-flip — is open at the 09/04 08:00 council.
 - R1 · READ · **PRE-AUTH, OPTIONAL** — ③/④ reads at seams (your
   duty-filter design carries no landing-triggered duties; keep it
   light by design).
