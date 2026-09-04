@@ -946,14 +946,23 @@ since 08:23 and a pending queue that exists only in a context is exactly what
 2026-08-08 spent the day proving does not survive.** *If a successor inherits
 this file, it inherits the queue.*
 
+> ⛔ **ALL SIX ITEMS ARE CLOSED — 2026-08-08. This table's status column was not updated when
+> they closed, and for 27 days it was the only surface anyone read.** Items 1 and 3 were marked
+> ✅ in place; item 2 closed at 16:18:06 and items 4 · 5 · 6 at slate close 16:45, each in its own
+> section ~150 lines below — *sections this table never pointed at*. Successor seats' boot briefs
+> and exit censuses inherited the table's reading and carried "CHARTER items 2/4/5/6, gated on an
+> event" as live owed work. **A table that records WHEN an item will close needs a cell recording
+> THAT it closed, or it becomes a phantom open-item generator: the close gets written where it
+> happened, and the summary keeps asking.** Marked in place 2026-09-04.
+
 | # | item | records WHEN | why not now |
 |---|---|---|---|
 | 1 | ✅ **CLOSED** — the category-4 Captain-away window | — | closed 13:27, then **corrected DOWN** to 58 m at 13:29 on a mid-window intervention |
-| 2 | the ③ refutation slate's **price** | the ③ **waves fire** | the figure has moved **three → four → seven passes in 38 minutes**; recording mid-growth yields a wrong measurement with a timestamp |
+| 2 | ✅ **CLOSED** — the ③ refutation slate's **price** | — | **closed 2026-08-08 16:18:06** — freeze `b4b723e` verified at origin, six figures each with its unit, one residual UNCLASSIFIED; see *ITEM 2 CLOSED* below. *Original "why not now": the figure has moved **three → four → seven passes in 38 minutes**; recording mid-growth yields a wrong measurement with a timestamp* |
 | 3 | ✅ **CLOSED** — the **mortality rotation** record | — | closed 13:5x by the successor seat, measured below; **one half of the flagged defect was real and the other half was not** |
-| 4 | **THE INTERFACE LAW** (maestro→evidence, 13:36) | slate close | *a theorem's interface is its statement PLUS the tactic reach its consumers depend on; a truth-preserving re-shape `omega` cannot use is a **breaking change**, so expand-contract applies to THEOREMS as to blocks* |
-| 5 | ⚠️ **AMENDED IN FLIGHT** — **THE TRIPWIRE-ZERO SHAPE** (maestro→evidence, 13:36) | slate close | *the shape as assigned said the collapse to **zero** was the migration completing, **measured**. Compiler STRUCK the proof at 14:05 (silicon's refutation): the collapse theorems are `Nat.sub_self` after a rewrite. **The FACT stands; the MEASUREMENT is withdrawn.** Detail below — carrying the original wording to slate close would record a tautology as a measurement* |
-| 6 | **THE TREATMENT-ASSERTION LAW** (maestro→evidence, 13:49) | slate close | *an experiment must verify its independent variable was APPLIED; a result shaped like a known mechanism (silicon's 1/14) names the mechanism that actually ran* |
+| 4 | ✅ **CLOSED** — **THE INTERFACE LAW** (maestro→evidence, 13:36) | — | **closed 2026-08-08 16:45 at slate close**; see *ITEMS 4 · 5 · 6 CLOSED AT SLATE CLOSE* below. *Original "why not now": *a theorem's interface is its statement PLUS the tactic reach its consumers depend on; a truth-preserving re-shape `omega` cannot use is a **breaking change**, so expand-contract applies to THEOREMS as to blocks** |
+| 5 | ✅ **CLOSED, AMENDED IN FLIGHT** — **THE TRIPWIRE-ZERO SHAPE** (maestro→evidence, 13:36) | — | **closed 2026-08-08 16:45 at slate close**, carrying its amendment; see below. *Original "why not now": *the shape as assigned said the collapse to **zero** was the migration completing, **measured**. Compiler STRUCK the proof at 14:05 (silicon's refutation): the collapse theorems are `Nat.sub_self` after a rewrite. **The FACT stands; the MEASUREMENT is withdrawn.** Detail below — carrying the original wording to slate close would record a tautology as a measurement** |
+| 6 | ✅ **CLOSED** — **THE TREATMENT-ASSERTION LAW** (maestro→evidence, 13:49) | — | **closed 2026-08-08 16:45 at slate close**; see *ITEMS 4 · 5 · 6 CLOSED AT SLATE CLOSE* below. *Original "why not now": *an experiment must verify its independent variable was APPLIED; a result shaped like a known mechanism (silicon's 1/14) names the mechanism that actually ran** |
 
 🔑 ***ITEMS 4 AND 5 WERE ASSIGNED WITH THEIR CLOSE CONDITION ATTACHED — "yours to
 carry at slate close" — which is the helm adopting the same discipline: an
