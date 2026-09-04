@@ -35,6 +35,9 @@
 //   L4  every retire coincides with a PC advance, and no PC advance without one
 //   L5  the store owns exactly TWO consecutive loops (address, then data) — §7
 //   L6  the fetch address stride is 4 on every fetch frame
+//   L7  NO STORE TRANSACTION COMPLETES WITHOUT A SW FETCH TO ACCOUNT FOR IT
+//       (added 2026-09-03 on the helm's desk-FF word, red-first — see the block
+//        at its implementation. L2 and L5 CANNOT see a duplicated store.)
 // ============================================================================
 module tb;
   reg clk = 0, rst_n = 0, sof = 0;
@@ -185,12 +188,67 @@ module tb;
     end
   end
 
-  task chk; input cond; input [8*48:1] name;
+  // ⛔ WIDENED 2026-09-03 FROM [8*48:1]. At 48 chars this SILENTLY TRUNCATED the
+  //   LEFT of any longer label: L2 has been printing as "the SW wrote the right word
+  //   to the right address" — WITHOUT ITS "L2" — since this bench was written, and my
+  //   new L7 label lost its first ten characters. A criterion whose NAME is clipped is
+  //   still checked, so nothing went wrong; but a reader cannot map a red to a row,
+  //   which is the whole job of the label. Found only because L7 was long enough to
+  //   make the clipping obvious.
+  task chk; input cond; input [8*72:1] name;
     begin
       if (cond) $display("  L-pass  %0s", name);
       else begin $display("  L-FAIL  %0s", name); fails = fails + 1; end
     end
   endtask
+
+
+  // ── L7 · A COUNT CRITERION, ADDED 2026-09-03 ON THE HELM'S DESK-FF WORD ──────
+  // ⛔⛔ WHY THIS BENCH NEEDED ONE, AND IT IS A GAP IN THESE CRITERIA AND NOT IN
+  //   THE DESIGN. A one-cycle `sof` at a RETIRING phase-3 edge injects an ENTIRE
+  //   EXTRA STORE TRANSACTION (43 -> 45 loops, measured), and THIS BENCH SCORED
+  //   6/6 GREEN THROUGH IT. Two independent reasons, both about the criteria:
+  //     L2 checks the SW wrote the right word to the right address — but the store
+  //        is IDEMPOTENT, so a second execution writes the same datum to the same
+  //        address and is undetectable by construction.
+  //     L5 requires a store own exactly TWO consecutive loops — and a DUPLICATED
+  //        store is SHAPE-LEGAL: each of the two stores owns exactly two loops.
+  //   ⇒ *** A SHAPE CRITERION CANNOT SEE A COUNT DEFECT, AND AN IDEMPOTENT WRITE
+  //     HIDES ITS OWN DUPLICATION. *** The `regs3` column that first exposed the
+  //     divergence was PRINTED by this bench and CHECKED BY NOTHING.
+  //
+  // THE CRITERION, AND MY FIRST VERSION OF IT WAS TOO LOOSE — REFUTED BY ITS OWN
+  //   RED-FIRST ARM, WHICH IS THE POINT OF HAVING ONE. I first wrote the aggregate
+  //   `n_store_done <= n_sw_fetched`, reasoning that a run ending with a SW fetched
+  //   and its store in flight is healthy and an equality would go red on it. TRUE,
+  //   and it made the criterion USELESS: the control runs 21 <= 22, so the ONE unit
+  //   of slack that tolerates the in-flight store is EXACTLY THE ROOM A DUPLICATE
+  //   HIDES IN. Arm 1 injected a whole extra store and scored 22 <= 22 — GREEN.
+  // ⇒ *** A TOLERANCE SIZED FOR A BENIGN CASE IS A BLIND SPOT SIZED FOR THE DEFECT.
+  //   Account PER INSTRUCTION, never in aggregate. ***
+  //
+  // EXACT FORM: a SW fetch ARMS an obligation; a completed store DISCHARGES it. A
+  // store that completes with nothing armed is a store no instruction asked for.
+  // An obligation still armed at end of run is a store in flight and is HEALTHY, so
+  // this stays immune to the case that pushed me to an inequality in the first place.
+  integer n_sw_fetched = 0, n_store_done = 0, store_unaccounted = 0;
+  reg     sw_pending = 1'b0;
+  always @(posedge clk) if (rst_n) begin
+    // a SW has been FETCHED: at a fetch's phase-3 edge the bypass presents the NEW
+    // instruction, and c_dmem_req/c_dmem_we are a pure decode of it.
+    if (dut.u_bus.kind == 2'b01 && dut.u_bus.phase == 2'd3
+        && dut.u_bus.c_dmem_req && dut.u_bus.c_dmem_we) begin
+      n_sw_fetched = n_sw_fetched + 1;
+      sw_pending <= 1'b1;
+    end
+    // a STORE has COMPLETED: the data beat retiring at loop end.
+    if (dut.u_bus.kind == 2'b11 && dut.u_bus.store_beat
+        && dut.u_bus.phase == 2'd3 && retire_w) begin
+      n_store_done = n_store_done + 1;
+      if (!sw_pending) store_unaccounted = store_unaccounted + 1;
+      sw_pending <= 1'b0;
+    end
+  end
 
   initial begin
     for (i=0; i<256; i=i+1) hmem[i] = 8'h00;
@@ -206,6 +264,8 @@ module tb;
     $display("  stores completed=%0d  mem[64..67]=%h%h%h%h  x1=%h  x3=%h",
              stores_done, hmem[67], hmem[66], hmem[65], hmem[64],
              dut.u_core.regs[1], dut.u_core.regs[3]);
+    $display("  store transactions completed = %0d   SW fetched = %0d   UNACCOUNTED = %0d",
+             n_store_done, n_sw_fetched, store_unaccounted);
     $display("  ---- pre-registered criteria ----");
     chk(load_loops  > 0 && store_loops > 0,             "L1 a LOAD and a STORE both appear on the pins");
     chk({hmem[67],hmem[66],hmem[65],hmem[64]} == 32'd64,"L2 the SW wrote the right word to the right address");
@@ -213,8 +273,9 @@ module tb;
     chk(couple_viol == 0,                               "L4 no PC advance without a retire");
     chk(maxrun == 2,                                    "L5 a store owns exactly TWO consecutive loops");
     chk(strides_bad == 0,                               "L6 fetch stride is 4 on every frame");
-    if (fails == 0) $display("==> ALL PASS (6/6)");
-    else            $display("==> RED: %0d/6 criteria FAILED", fails);
+    chk(store_unaccounted == 0,                         "L7 no store completes without a SW fetch to account for it");
+    if (fails == 0) $display("==> ALL PASS (7/7)");
+    else            $display("==> RED: %0d/7 criteria FAILED", fails);
     $finish;
   end
 endmodule
