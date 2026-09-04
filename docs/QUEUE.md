@@ -1103,6 +1103,49 @@ OPEN ITEMS:
   class as the logic analyzer). The CHIP side of the protocol is
   ALREADY BUILT AND SIGNED OFF (slicea16bma's phase demux, 3x2
   die). Owner: assign at the harness seam (compiler or silicon).**
+  ⛔⛔ **TAKEN BY SILICON 2026-09-03 18:0x, AND RE-PRICED: THIS ROW IS MIS-CLASSIFIED.
+  IT IS NOT ~100 LINES OF FIRMWARE — IT IS BLOCKED ON §7's OPEN QUESTION.** The RP2040
+  memory-server side is a **registered host** (PIO samples on one edge, answers on a
+  later one) and this bus assumes the opposite. `tb_plane32bus_lwsw.v` says so on its
+  own face (*"a green here … SAYS NOTHING ABOUT A REGISTERED HOST"*), §7 of
+  `docs/silicon-offboard-data-block-0817.md` names the gap and the missing pin (*"there
+  is no pin for one under (d). That is the next hard question"*), and ⛔ **the "+4"
+  second LOAD loop §7 offers as the alternative IS NOT IMPLEMENTED** — `busadapt8`'s
+  `T_LOAD` retires at `loop_end` unconditionally, so a late host has no sanctioned way
+  to be late. ⛔ **I TESTED THE OBVIOUS ESCAPE AND IT IS REFUTED, MEASURED NOT
+  REASONED: `sof` CANNOT SERVE AS A WAIT STATE.** (i) `sof` is a flop, so a stall
+  asserted in reaction to phase 0 arrives a cycle late and the frame bounces
+  `0 -> 1 -> 0` forever — traced, the core executes NOTHING. (ii) Structurally, the
+  `sof` arm of the arbitration **does not consult `retire`** while the ratified shape-A
+  `loop_end` arm does, and `c_dmem_req` is a pure decode of `instr_r` that cannot fall
+  until a new instruction is fetched — so `sof` at a retiring phase-3 edge **re-issues
+  a completed transaction**. Driven on the tracked combinational host, one variable:
+  control 21 LOAD / 43 STORE loops; one pulse at a RETIRING edge **20 / 45 (an entire
+  extra store transaction, one load displaced)**; one pulse at a NON-retiring edge
+  21 / 44 with **L5 RED**. ⇒ **BOTH POSITIONS DAMAGE THE STREAM.** ⛔⛔ **AND THE
+  RETIRING-EDGE ARM SCORES 6/6 GREEN ON THE TRACKED BENCH — A CRITERION GAP WORTH MORE
+  THAN THE HARNESS: an IDEMPOTENT store hides its own duplication (`L2` re-checks the
+  same word at the same address) and `L5` requires a store own exactly two consecutive
+  loops, which a DUPLICATED store satisfies. A SHAPE CRITERION CANNOT SEE A COUNT
+  DEFECT. The `regs3` column that exposed it is PRINTED by that bench and CHECKED BY
+  NOTHING.** ⚠️ **NOT a claim that `busadapt8` is broken in service** — `sof`'s
+  specified use is a host-driven REALIGN and the tracked bench pulses it only at phase
+  0, where it is inert; what is live is the **latent asymmetry** (shape A reached one
+  arm and not the other), which becomes a defect the moment anyone repurposes `sof`.
+  📊 **THREE OPTIONS PRICED, RECOMMENDATION (2), NOT MINE TO RULE:** (1) mirror shape A
+  into the `sof` arm — one line, but an RTL change to a ratified module and it does NOT
+  fix the assert-a-cycle-early problem; (2) **implement §7's "+4" second LOAD loop —
+  makes a registered host FIRST-CLASS, costs LW CPI 8 -> 12 which is already in §7's own
+  table, and needs no change to the ratified arbitration**; (3) require an in-phase host
+  — i.e. an async SRAM or CPLD in front of the RP2040, more board not more firmware.
+  ⇒ **A PROTOCOL DECISION: the Captain's hand, or a two-signature seam with compiler
+  (the standing item-10 shape). I did NOT write the PIO firmware — writing it against an
+  unanswered protocol produces code nobody can trust.** 📎 Pre-registration
+  `docs/silicon-ndf-registered-host-prereg-0903.md` (written before the bench existed) ·
+  results `docs/silicon-ndf-registered-host-results-0903.md` · producer
+  `SaltWorks/Silicon/Sim/reghost/run_sof_wait_state.sh` (three arms, one variable) ·
+  the refuted stretch attempt kept as a runnable null at
+  `SaltWorks/Silicon/Sim/reghost/tb_reghost_REFUTED_sof_stretch.v`.**
 
 - **COUNCIL RULING #8 — THE WIDTH RULING (11:3x, the Captain,
   verbatim: "Yes, the word width is not important for the PoC,
