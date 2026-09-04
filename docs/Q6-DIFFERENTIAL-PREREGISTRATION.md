@@ -427,6 +427,10 @@ artifact anyone reads afterward, to the five rows that fired correctly.**
   round_trip_now_holds : decQ (fun j => (encD sTestD).getD j false) = sTestD   ✓ [2 axioms]
   retired_row_is_now_false : ¬(decQ … ≠ sTestD)                                ✓ [2 axioms]
 ```
+
+⛔ **READER'S NOTE ADDED 2026-09-03: `round_trip_now_holds` and `retired_row_is_now_false` ARE NOT
+IN THE REPOSITORY** — gitignored `ScratchQ6Row6Verdict.lean` only. The verdict was real; the
+artifact a reader would open is not there.
 ⭐ **Stated as the POSITIVE arm — what the swap ACHIEVED — rather than as the old row's absence:
 the 1313-bit codec ROUND-TRIPS a state with eight distinct memory words and the trap flag SET.**
 *That is Horn D exhibited, and it is also most of check 3: the witness's memory content is a
@@ -596,6 +600,14 @@ check 2 was unsatisfied for it while its sibling `decQ_trapped` had a real verdi
   ✓ decQ_mem_is_false_under_D    [2 axioms]   the retired row is FALSE, not unprovable
   ✓ control_zero_env_still_clean [2 axioms]   CONTROL — on a zero env the field is still clean
 ```
+
+⛔ **READER'S NOTE ADDED 2026-09-03 — THESE THREE NAMES ARE NOT IN THE REPOSITORY.** They live
+only in the gitignored `ScratchQ6DecQMemVerdict.lean`. The ticks above are REAL OUTPUT of a real
+run, which is exactly the problem: **a machine-shaped receipt is what a reader trusts without
+checking, and the remembered half — that the run was over scratch — does not travel with it.**
+The prose above does say "scratch probe only"; the BLOCK does not, and the block is what gets
+quoted. Found by `docs/ledger-tools/cited_but_unlanded.py`, which exists because no gate here
+could see this class: every gate reads the TREE or the BUILD, and a gitignored file is in neither.
 ⭐ **The control is what makes the witness mean anything:** without it, `mem[0] ≠ 0` supports
 *"`decQ` is broken"* exactly as well as *"`decQ` now READS"*. **Both readings had to be separated
 before the verdict could be cited in a retirement.**
@@ -798,6 +810,15 @@ no_enable_repairs_the_load                 reported by the build
 c4Spec_core_is_false                       ⛔ NEVER CHECKED -- concealed by the audit abort
 regDatapathOK_is_false_on_LW_either_way    ⛔ NEVER CHECKED -- concealed by the audit abort
 ```
+
+⛔ **READER'S NOTE ADDED 2026-09-03 — THIS IS A HISTORICAL BUILD REPORT, AND THREE OF ITS FIVE
+NAMES ARE NOT IN THE TRACKED CORPUS TODAY, FOR TWO DIFFERENT REASONS THAT MUST NOT BE CONFUSED.**
+`c4Spec_core_is_false` was **DELIBERATELY RETIRED** on 2026-08-29 (council item (f), option ③)
+when leg ① repaired the operand-B immediate path and its witness died — **that retirement was
+correct, and it is this CITATION that rotted, not the theorem.** `regField_core_one_is_false` and
+`regDatapathOK_is_false_on_LW_either_way` were never landed and live only in the gitignored
+`ScratchC4AUDITSPLIT.lean`. ⇒ ***"ABSENT FROM THE CORPUS" IS NOT ONE CONDITION: a retired theorem
+and an unlanded one look identical to a grep and mean opposite things.***
 **`#audit_axioms` aborts at its first failure, so the build named THREE and the truth was FIVE**
 — and the two it concealed were the two that mattered. Recovered with the seat's audit-recovery tool (`auditreach.py`),
 which also surfaced `held_insL` and `isa_insL` as *never checked* (they are clean; the log simply
