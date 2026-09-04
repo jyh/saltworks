@@ -515,10 +515,22 @@ bit-serial Design-B direction. Each names its successor or says none exists:**
 
 ## EVIDENCE
 
-- CHARTER · **STANDING** — the five held-open items with close
-  conditions (your predecessor's durable queue, ba9ccdd); the
-  slate-price number written ONCE at slate close; ~~the nightly
-  ledger run~~.
+- CHARTER · ~~**STANDING**~~ **— NOTHING REMAINS OPEN HERE. Struck 2026-09-04.**
+  ⛔ **THE HELD-OPEN ITEMS ALL CLOSED ON 2026-08-08 AND THIS LINE WENT ON ASKING
+  FOR THEM FOR 27 DAYS.** Items 1 and 3 closed 13:2x/13:5x; item 2 — *the
+  slate-price number this line names separately* — closed **16:18:06** at freeze
+  `b4b723e`; items 4 · 5 · 6 closed at **slate close 16:45**. Every close is
+  recorded in full in `docs/EVIDENCE-campaign.md`, each in its own section — and
+  the summary table at the head of that file was not updated either, which is how
+  the phantom survived a re-read. Both surfaces marked in place 2026-09-04.
+  ⇒ **A CLOSE IS WRITTEN WHERE THE WORK HAPPENED; THE SUMMARY THAT SENT YOU THERE
+  IS A DIFFERENT FILE AND A DIFFERENT EDIT, AND ONLY THE SUMMARY TRAVELS.** Two
+  successor seats' boot briefs and exit censuses inherited this as live owed work,
+  including a census that justified an exit. *A phantom open-item misprices a boot
+  exactly as badly as a phantom gate — it invites work that is already done, and it
+  is invisible because re-reading the summary re-confirms it.*
+  📌 What is genuinely left of this bullet: ~~the nightly ledger run~~, struck
+  separately below, for an unrelated reason.
   ⛔ **THE NIGHTLY LEDGER RUN IS STRUCK AS *STANDING* — desk FE ruling (5),
   helm 2026-09-03 18:2x, on evidence's erratum: A CHARTER·STANDING DUTY WITH
   NO RUNNER IS STRUCK UNTIL A RUNNER EXISTS.** Measured 2026-09-03: nothing
@@ -540,8 +552,13 @@ bit-serial Design-B direction. Each names its successor or says none exists:**
   nightly writes a dated FAILURE stub over `EVIDENCE-ledger-latest.md`, because
   a pipeline that publishes only on success leaves its last success standing as
   its own tombstone. Until then the ledger is OFF (FE (1)) and the manifest row
-  is NOT deleted to green the gate (FE (2)). The Captain's half of FE — whether
-  the ledger publishes at all post-flip — is open at the 09/04 08:00 council.
+  is NOT deleted to green the gate (FE (2)).
+  ✅ **RULED 2026-09-04 (council, minute §9 · desk FE): THE DEFAULT STANDS.** The
+  ledger stays **OFF**; evidence merged the dated "PIPELINE DEAD SINCE 2026-08-10"
+  banner over `docs/EVIDENCE-ledger-latest.md` (saltworks `6284374`); `s2` is
+  **neither rebuilt nor deleted**; any revival names a runner and ships the failure
+  surface first. The Captain's half of FE is CLOSED — it is no longer open at a
+  council that has since sat.
 - R1 · READ · **PRE-AUTH, OPTIONAL** — ③/④ reads at seams (your
   duty-filter design carries no landing-triggered duties; keep it
   light by design).
