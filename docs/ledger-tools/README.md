@@ -15,7 +15,21 @@ repos, and they emit markdown.
 > counting, one line and thirty seconds later.** The reflex is not weaker in the
 > person who just named it; only the `ls` is.*
 
-## ⛔⛔ THE TABLE BELOW IS **PARTIAL** — measured 2026-08-11 20:3x: **it has rows for 14 of 35 tools**
+## ⛔⛔ THE TABLE BELOW IS **PARTIAL** — RE-MEASURED 2026-09-03 by the loop below: **it has rows for 15 of 72 tools**
+
+⛔ *The line here read **14 of 35** from 2026-08-11 until today. The LISTED half never moved;
+the POPULATION more than doubled underneath it, so the gap went from 21 to 58 while the
+number sat still (the gap is 57).* ⇒ **A FRACTION GOES STALE IN THE DENOMINATOR, AND THAT IS
+THE HALF NOBODY RE-READS** — the numerator is the part an author touches when they add a row,
+so a count that drifts only in its denominator drifts silently and always toward flattery.
+⛔ *I wrote this sentence and then typed the denominator anyway: my first version of this
+heading said **73**, reasoning that my new row added a file. It did not — the file was already
+in the directory when I counted. The loop says 72.* ⇒ **A NUMBER YOU CAN DERIVE AND TYPE
+INSTEAD IS WRONG IN THE DIRECTION OF YOUR MODEL, and writing the law directly above it buys
+you nothing — [[the-instrument-exhibits-its-own-class]].** Both figures here are now piped
+from the loop, not typed.
+*The banner below predicted this doubling for the 8/7→8/11 window and was right again;
+it did not fail, it was never wired to anything.*
 
 **Regenerate this, never trust the sentence above it:**
 ```sh
@@ -100,6 +114,7 @@ count your tooling actually maintains.**
 > specimen by its shape, never by its text —* [[description-becomes-a-carrier]].
 
 | `pool_drift.sh` | **does the Lean pool constant still match the RTL it MIRRORS?** — `TinyRustN0.slicea16bmaPool` against `rf [1:N]` in `slicea16bma.v`. **Compiler seat's tool, this seat's directory** (added `37e7697` 08/09, edited `97e041f` 08/10) — the same cross-seat arrangement as `import-closure.py`, and the file names its own author and origin at line 4, which is the disclosure that matters. ⛔ **Its PATH is load-bearing: `SaltWorks/HDL/TinyRustN0.lean:443` and `CompileS.lean:230` both cite it by path in prose**, so a rename for tidiness would manufacture exactly the drifted-citation class `pin_check.py` exists to catch. ⚠️ **Measured 2026-08-11 20:0x: nothing INVOKES it** — absent from `nightly.sh`, no caller anywhere in the repo. *(Written first as `08-11` and flagged UNDATED by `prose_rot.py` — a year-less stamp does not register as a date, the same underspecified-timestamp family as a time-only `--date=format` merging two nights into one list.)* It is hand-run only, which makes it a guard whose firing depends on someone remembering it. *Compiler's call whether to wire it; recorded here so the next reader does not mistake "committed" for "running".* |
+| `fleet_root_census.sh` | **do the fleet's HARDCODED ABSOLUTE PATHS still resolve to what ORIGIN says they should?** `fleet_root_census.sh` / `--self-test`. Q2's clause ① (maestro 2026-08-27 19:11:57, owner evidence): a MEASURE, not a vigil, so *the next rot is ANNOUNCED, not discovered inside a build path*. ⛔ **It exists because its sibling `wrapper_link_guard.sh` cannot answer this, and the reason is not a bug but a SHAPE: line 28 takes its REFERENCE from `dirname $0` while line 29's SUBJECT is an absolute path.** Driven 09/03, same object, same minute: from `seats/evidence/saltworks` **EXIT=1 "the symlink points somewhere else"**, from `projects/claude/saltworks` **EXIT=0 OK**. *The verdict tracks where the script lives, not what the object is*, and the false red invites a repoint of the MEAS gate's build path. Its second half is worse and quieter: it compares the resolved bytes to **its own clone's** tracked file, which is **custody, never conformance** — a clone BEHIND ORIGIN carrying a properly committed stale wrapper reads OK, *which is exactly the shape of the rot the ruling was written about*. ⇒ **the reference here is ORIGIN, re-measured by `ls-remote` every run**, and origin's objects are resolved **in a repo this tool owns — it never fetches into a tree it is measuring.** ⭐ **Its population is DISCOVERED, not declared.** The row names "the three hardcoded tool paths"; measured at origin 09/03 that is right for the saltbuild symlink and **wrong for the class — 18 executable surfaces**, two of which EXECUTE code out of that clone. A hand-list is the same defect one level down. ⛔ **`PIN` is announced, never gated:** a working clone behind origin is a seat doing its job, and a census that reds on it is muted within a day — the Q2 exposure is a tree nobody OWNS, which no tool can measure. ⛔ **`sha40()` is load-bearing:** bare `git rev-parse <sha>:<path>` **ECHOES ITS ARGUMENT** on failure, so the capture is a plausible 12-hex prefix and every emptiness check passes — *that defect made this tool's own first live run report ROT on seven sound surfaces.* `--verify --quiet` returns rc 1 and nothing. ✅ `--self-test` **22 arms, 0 red, on REAL git trees** (a third clone is the census repo, so the property is exercised rather than assumed); **mutation-verified** — force the conformance test true and exactly 4 arms fail. Carries the positive control that decides whether anyone reads it: **a clone behind origin, on a file that did not move, is SOUND**. **Three-way exit: 0 sound · 1 rot or unruled · 2 could not census** — and an empty population REFUSES, because *an empty population is indistinguishable from a broken query*. |
 | `nightly.sh` | runs all of it, writes `docs/EVIDENCE-ledger-<date>.md`. |
 
 ## Run it
