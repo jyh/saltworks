@@ -93,6 +93,73 @@ if [ -z "${SEAT:-}${SELF:-}" ]; then
 fi
 
 [ -x "$SALTBUILD" ] || { echo "⛔ meas_build: $SALTBUILD not executable"; exit 2; }
+
+# ── THE PROJECT'S LEAN OPTIONS — DERIVED FROM lakefile.toml, NEVER TYPED ──────
+# ⛔⛔ ADDED 2026-09-03 BECAUSE THIS GATE HAD BEEN MEASURING AN ADJACENT OBJECT FOR
+#   ITS ENTIRE LIFE. saltbuild's path form is `lake env lean -M CAP <file>`, and
+#   `lake env` exports LEAN_PATH AND NOTHING ELSE: the lakefile's [leanOptions] are
+#   applied by lake when it BUILDS A MODULE and never reach a path-form invocation.
+#   So every MEAS verdict ever published elaborated its target under LEAN'S DEFAULTS
+#   rather than under the configuration the project actually builds with.
+#
+# ⛔ BOTH DIRECTIONS WERE DRIVEN, NOT REASONED (saltworks 6b0f234b, 2026-09-03):
+#   FALSE POSITIVE — `pp.unicode.fun = true`. ScopeShapeDifferential.lean guards an
+#     EXPECTED error with `#guard_msgs`. The message pretty-prints `fun x ↦ True`
+#     under the project and `fun x => True` under the defaults. ONE CHARACTER — and
+#     this gate reported a sound peer landing as RED.
+#   FALSE NEGATIVE — `relaxedAutoImplicit = false`. That option is STRICTER than
+#     Lean's default, so the gate was LOOSER THAN THE PROJECT: a file whose unbound
+#     multi-character identifier lake REFUSES elaborated EXIT=0 here. Driven with a
+#     scratch probe: EXIT=0 without the options, EXIT=1 with them. THE PROBE IS
+#     KEPT AS `ScratchOPTPROBE.lean` (gitignored, so it lives only in this clone) —
+#     one line, re-creatable from here, and it MUST be RED under this gate:
+#         theorem optprobe (x : someUnboundTypeName) : x = x := rfl
+#     A multi-character unbound identifier is auto-bound under Lean's default and
+#     REFUSED under the project's. If that file ever goes green, this block is dead.
+#
+# ⇒ ***THE FALSE NEGATIVE IS THE HALF THAT MATTERED AND THE HALF NOBODY COULD SEE.***
+#   A false positive announces itself and gets investigated within the hour; a gate
+#   that is wrongly GREEN produces no symptom at all, so it survives every review.
+#   The red I could have waved past as "build state" is the only reason the silent
+#   half was ever found. [[a-check-never-shown-to-fail]] [[adjacent-object-principle]]
+#
+# ⚠️ DERIVED, NEVER TYPED — copying these flags here would give one number two names,
+#   and the copy would rot the day someone edits the lakefile. Same law, and the same
+#   house form, as DEFCAP below. [[supersede-never-adjust-a-layout-constant]]
+_mb_home=$0
+case $_mb_home in */*) ;; *) _mb_home=./$_mb_home ;; esac
+while [ -L "$_mb_home" ]; do
+  _mb_hl=$(readlink "$_mb_home")
+  case $_mb_hl in
+    /*) _mb_home=$_mb_hl ;;
+     *) _mb_home=$(dirname "$_mb_home")/$_mb_hl ;;
+  esac
+done
+LAKEFILE=$(cd "$(dirname "$_mb_home")/../.." 2>/dev/null && pwd)/lakefile.toml
+[ -f "$LAKEFILE" ] || {
+  echo "⛔ meas_build: no lakefile.toml at $LAKEFILE." >&2
+  echo "   REFUSING: without it this gate cannot know what options the project" >&2
+  echo "   builds with, and elaborating under Lean's defaults is the exact defect" >&2
+  echo "   this block exists to close. Do not fall back to 'no options'." >&2
+  exit 2; }
+LEANOPTS=$(awk -F= '
+  /^[ \t]*\[leanOptions\]/ {f=1; next}
+  /^[ \t]*\[/            {f=0}
+  f && NF>1 {
+    k=$1; v=$2
+    gsub(/^[ \t]+|[ \t]+$/,"",k); gsub(/^[ \t]+|[ \t]+$/,"",v); gsub(/"/,"",v)
+    if (k != "" && v != "" && k !~ /^#/) printf " -D%s=%s", k, v
+  }' "$LAKEFILE")
+# ⛔ AN EMPTY DERIVATION MUST REFUSE, NOT PROCEED. If this silently returned "" the
+#   gate would go straight back to elaborating under Lean's defaults and print
+#   exactly the same greens it printed before the fix — a repair that is invisible
+#   to its own verdict. [[a-control-must-traverse-the-pipeline]]
+case "$LEANOPTS" in
+  '') echo "⛔ meas_build: derived ZERO options from [leanOptions] in $LAKEFILE." >&2
+      echo "   Either the section is gone or its spelling changed. REFUSING rather" >&2
+      echo "   than silently restoring elaboration under Lean's defaults." >&2
+      exit 2 ;;
+esac
 # The retry cap for the differential test below, DERIVED FROM saltbuild's OWN
 # DEFAULT rather than hardcoded.
 #
@@ -215,7 +282,8 @@ for target in "$@"; do
     # FORM does, and the bracket is the form.
     peers_pre=$(ps -Ao command= | grep -cE '(^|/)([l]ean|[l]ake)( |$)')
     start=$(date +%s)
-    "$SALTBUILD" "$target" > "$out" 2>&1
+    # shellcheck disable=SC2086 — $LEANOPTS MUST word-split into separate -D flags.
+    "$SALTBUILD" "$target" $LEANOPTS > "$out" 2>&1
     end=$(date +%s)
     h2=$(shasum -a 256 "$target" | cut -c1-12)
     line=$(grep -E '^saltbuild EXIT=[0-9]+$' "$out" | tail -1)
@@ -259,7 +327,8 @@ for target in "$@"; do
   if [ "$code" != "0" ] && [ "$h1" = "$h2" ]; then
     out2=$(mktemp) || { echo "⛔ meas_build: mktemp failed"; exit 2; }
     g1=$(shasum -a 256 "$target" | cut -c1-12)
-    "$SALTBUILD" --cap "$HICAP" "$target" > "$out2" 2>&1
+    # shellcheck disable=SC2086 — see the note at the first call site.
+    "$SALTBUILD" --cap "$HICAP" "$target" $LEANOPTS > "$out2" 2>&1
     g2=$(shasum -a 256 "$target" | cut -c1-12)
     line2=$(grep -E '^saltbuild EXIT=[0-9]+$' "$out2" | tail -1)
     if [ "$line2" = "saltbuild EXIT=0" ] && [ "$g1" = "$g2" ]; then
