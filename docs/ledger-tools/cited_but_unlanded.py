@@ -5,6 +5,26 @@ not DECLARED in any TRACKED .lean file.
     python3 docs/ledger-tools/cited_but_unlanded.py            # census
     python3 docs/ledger-tools/cited_but_unlanded.py --self-test
 
+⛔⛔ SCOPE, DECLARED 2026-09-04 SO THE GAP IS KNOWN AND NOT MISTAKEN FOR COVERAGE.
+"TRACKED PROSE" HERE MEANS TRACKED `*.md` AND NOTHING ELSE (see `tracked('*.md')` below).
+`.lean` files are read ONLY as a source of DECLARED names, NEVER as a source of citations
+-- so a `.lean` DOCSTRING citing a name that no longer exists is INVISIBLE to this census,
+and the docstrings in this tree are dense with theorem names. The fix landed where the
+pain was felt (documents) and the sibling surface was never covered.
+  I hit this the same day: retiring `load_takes_two` in `HDL/BusFSM.lean` left a citation
+  in that file's own docstring, and this tool reported the count UNCHANGED at 39.
+⛔ AND DO NOT JUST BOLT `.lean` ONTO THE GLOB. Measured 2026-09-04, a naive backticked-
+snake_case matcher over `.lean` comments returns 228 candidates whose FIRST PAGE is
+sky130 CELL names (`a2111o_1`), NET names (`a_0`, `a_31`), and MATHLIB lemmas
+(`add_sub_cancel_left`). NONE of those are theorem citations. The `.md` surface gets away
+with an open vocabulary; the `.lean` surface does NOT, because comments there name cells,
+nets and upstream lemmas in the same backticks. A second surface needs a CLOSED
+vocabulary (or an exclusion corpus), not a wider glob -- and a count published without
+one would be an accusation, mostly against other seats.
+⇒ RETIRING CONDITION: closes when a `.lean`-comment arm exists that (a) excludes the
+mathlib/cell/net vocabularies and (b) ships a self-test with a real landed retirement as
+its fixture. Until then this tool's number is scoped to documents, and says so on stdout.
+
 WHY THIS EXISTS. This seat's standing defect is ASSEMBLY, not proof: work gets proved
 into a gitignored `Scratch*.lean`, cited in a document, and never landed. Four
 instances were known by anecdote (the four value rows · CoreConforms · the reject-demo,
@@ -109,6 +129,12 @@ def main():
     print()
     print("⛔ CLASS B IS NOT A COUNT OF OWED THEOREMS. Adjudicate row by row: never")
     print("   landed · landed-then-retired-with-a-stale-citation · honest scratch ref.")
+    print()
+    print("⛔ SCOPE (09-04): CITATIONS ARE READ FROM TRACKED *.md ONLY. A .lean DOCSTRING")
+    print("   citing a vanished name is INVISIBLE here, so this number is scoped to")
+    print("   DOCUMENTS and is NOT a census of the tree. See the module docstring for why")
+    print("   widening the glob is the wrong fix (cells, nets and mathlib share the")
+    print("   backticks) and for the condition that retires this note.")
     return 1 if unfollowable else 0
 
 def self_test():

@@ -42,8 +42,19 @@ def bN  : Net := 2
 def reqN : Net := 3
 def weN : Net := 4
 
-/-- ⭐ **THE ORGAN.** `k1' = (F∧req) ∨ (S∧¬b)` · `b' = S∧¬b` ·
-`k0' = ¬k1' ∨ (S∧¬b) ∨ (F∧req∧we)`, where `F` is `fetch` and `S` is `store`. -/
+/-- ⭐ **THE ORGAN, REBUILT FOR OPTION (2) (council 09/04, RTL at PR #14).**
+`k1' = (F∧req) ∨ (L∧¬b) ∨ (S∧¬b)` · `b' = (L∧¬b) ∨ (S∧¬b)` ·
+`k0' = ¬k1' ∨ (S∧¬b) ∨ (F∧req∧we)`, where `F` is `fetch`, `L` is `load`, `S` is `store`.
+⛔⛔ **THIS IS A NEW ORGAN, NOT AN EDITED ONE, AND THAT DISTINCTION IS THE WHOLE COST OF THE
+CHANGE.** The previous 11-gate organ was proved equal to the pre-(2) `BusFSM.next` over all 32
+inputs. Option (2) moves `next` at exactly the LOAD address loop
+(`⟨load,false⟩ → ⟨fetch,false⟩` became `⟨load,false⟩ → ⟨load,true⟩`), which is INSIDE that sweep,
+so no edit to the old gate list could have preserved the theorem — the circuit had to be
+re-derived and re-placed. ⭐ **A DEBT PRICED AS "EDIT A DEFINITION" IS CHEAP; THE SAME DEBT IS
+EXPENSIVE THE MOMENT A PLACED CIRCUIT IS PROVED EQUAL TO THAT DEFINITION**, and nothing in the
+debt's own text pointed here. Found by grepping importers before touching a field name.
+⚠️ **AND UNTIL THIS LANDED, `adapterNext_correct` WAS GREEN AT 0 AXIOMS AGAINST A TRANSITION THE
+SHIPPED RTL NO LONGER IMPLEMENTED** — true of the model, and the model was the stale thing. -/
 def adapterNext : Circ :=
   { nIn := 5
   , gates :=
@@ -53,15 +64,24 @@ def adapterNext : Circ :=
       , ⟨8,  .not bN⟩                  -- ¬b
       , ⟨9,  .and 7 8⟩                 -- Sb = S ∧ ¬b        (the store's address beat)
       , ⟨10, .and 6 reqN⟩              -- Fr = F ∧ req       (a committed memory instruction)
-      , ⟨11, .or 10 9⟩                 -- k1' = Fr ∨ Sb      (= ¬retire)
-      , ⟨12, .and 10 weN⟩              -- Frw = Fr ∧ we
-      , ⟨13, .not 11⟩                  -- retire
-      , ⟨14, .or 13 9⟩
-      , ⟨15, .or 14 12⟩ ]              -- k0' = retire ∨ Sb ∨ Frw
-  , outs := [11, 15, 9] }              -- k1', k0', b'
+      , ⟨11, .not k0N⟩                 -- ¬k0
+      , ⟨12, .and k1N 11⟩              -- L = load   = k1 ∧ ¬k0
+      , ⟨13, .and 12 8⟩                -- Lb = L ∧ ¬b        (the LOAD's address beat — option (2))
+      , ⟨14, .or 13 9⟩                 -- b' = Lb ∨ Sb       (either memory loop's data beat)
+      , ⟨15, .or 10 14⟩                -- k1' = Fr ∨ Lb ∨ Sb (= ¬retire)
+      , ⟨16, .and 10 weN⟩              -- Frw = Fr ∧ we
+      , ⟨17, .not 15⟩                  -- retire
+      , ⟨18, .or 17 9⟩
+      , ⟨19, .or 18 16⟩ ]              -- k0' = retire ∨ Sb ∨ Frw
+  , outs := [15, 19, 14] }             -- k1', k0', b'
 
-/-- ⭐⭐ **THE PRICE, MEASURED: ELEVEN GATES.** -/
-theorem adapterNext_gate_count : adapterNext.gates.length = 11 := by decide +kernel
+/-- ⭐⭐ **THE PRICE, MEASURED: FIFTEEN GATES — option (2) cost FOUR** (`¬k0`, `L`, `Lb`, and the
+widened `b'` join). The old figure was ELEVEN; it is kept in this sentence because a gate count
+that silently changes is a benchmark nobody can audit. -/
+theorem adapterNext_gate_count : adapterNext.gates.length = 15 := by decide +kernel
+
+/-- ⛔ **THE DELTA, STATED AS A THEOREM SO THE "+4" CANNOT ROT INTO PROSE.** -/
+theorem adapterNext_cost_of_option_two : adapterNext.gates.length = 11 + 4 := by decide +kernel
 
 theorem adapterNext_ports : adapterNext.nIn = 5 ∧ adapterNext.outs.length = 3 := by decide +kernel
 
@@ -87,10 +107,17 @@ theorem adapterNext_correct :
   decide +kernel
 
 /-- ⛔ **NEGATIVE CONTROL — a mutated organ must NOT match.** Swapping the two `k1'` operands'
-gate for an AND breaks it, so `adapterNext_correct` is not true of any circuit. -/
+gate for an AND breaks it, so `adapterNext_correct` is not true of any circuit.
+⛔⛔ **THE CUT SITE MOVED WITH THE ORGAN, AND THAT IS THE TRAP THIS COMMENT EXISTS FOR.** The
+mutation used to target net `11`, which WAS `k1'`. In the rebuilt organ net `11` is `¬k0` and
+`k1'` is net `15`. Leaving the old site would still have produced a circuit, still have
+type-checked, and still have made this theorem pass — while mutating a DIFFERENT organ than the
+one the docstring names. ⇒ **A MUTANT'S CUT SITE IS AN INDEX INTO AN ARTIFACT THAT CHANGED
+SIZE; "does the control still fail?" CANNOT SEE THIS, because it fails either way.** Re-aimed at
+`15` deliberately, and the trigger for re-checking it is ANY change to the gate list above. -/
 def adapterNextWrong : Circ :=
   { adapterNext with gates := adapterNext.gates.map (fun g =>
-      if g.out = 11 then ⟨11, .and 10 9⟩ else g) }
+      if g.out = 15 then ⟨15, .and 10 14⟩ else g) }
 
 theorem adapterNextWrong_disagrees :
     ([false,true].all fun k1 => [false,true].all fun k0 => [false,true].all fun b =>
@@ -137,6 +164,7 @@ theorem adapter_closes_the_widened_width :
   decide +kernel
 
 #audit_axioms encKind adapterNext adapterNext_gate_count adapterNext_ports
+#audit_axioms adapterNext_cost_of_option_two
 #audit_axioms adapterNext_wf adapterNext_ssa insOf adapterNext_correct
 #audit_axioms adapterNextWrong adapterNextWrong_disagrees
 #audit_axioms stWidthA_value combined_renumbering two_widenings_land_short

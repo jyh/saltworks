@@ -11,22 +11,40 @@ their absence: *"a trace where the FSM deadlocks mid-transaction and every curre
 green."* `busadapt8.v` implements the machine; **nothing modelled it**, so no such trace could
 be refused by anything but simulation.
 
-⭐ **THE MACHINE, READ OFF THE RTL** (`busadapt8.v:132-162`), state `(kind, storeBeat)`:
+⭐ **THE MACHINE, READ OFF THE RTL** (`busadapt8.v:184-186`, re-read 2026-09-04 AFTER option (2)
+landed at PR #14), state `(kind, storeBeat)`:
 ```
-retire  = kind = FETCH → ¬req  |  kind = LOAD → true  |  kind = STORE → storeBeat  |  IDLE → true
+retire  = kind = FETCH → ¬req  |  kind = LOAD → storeBeat  |  kind = STORE → storeBeat  |  IDLE → true
 next    = retire            → (FETCH, false)
           kind = FETCH      → (if we then STORE else LOAD, false)
-          otherwise         → (kind, true)          -- the store's data beat
+          otherwise         → (kind, true)          -- the memory loop's data beat
 ```
-🔑 **AND THIS IS WHY THE MEASURED CPI HISTOGRAM HAS EXACTLY THREE BUCKETS.** One loop is four
-phases, so the loop count per instruction IS the CPI/4:
+⛔ **OPTION (2), RATIFIED BY COUNCIL 09/04 AND LANDED IN THE RTL BEFORE THIS FILE MOVED.** The
+`LOAD` arm was `true` — a load retired on its ADDRESS loop, giving the host no turnaround. It is
+now `load_beat`, mirroring `store_beat` exactly. ⭐⭐ **AND THE GAP IS THE POINT: `busadapt8.v`
+changed and NOT ONE `.lean` FILE DID** (`git diff --name-only 9769fa1..035241f -- '*.lean'` = 0),
+**so the whole verified surface stayed GREEN across a ratified change to the machine.** Nothing
+here is verified against the RTL; it is verified against THIS TRANSCRIPTION, and a transcription
+cannot notice that its source moved. Re-read the source before trusting the block above.
+⚠️ **NAME DEBT, DATED 09-04, WITH ITS TRIGGER:** the field is still called `storeBeat` and it now
+carries the data beat of EITHER memory loop. The RTL keeps two registers (`store_beat`,
+`load_beat`); `kind` already discriminates them, so one field is faithful to `retire` — but the
+NAME is not. **Rename to `beat` when this file is next opened for any other reason** (22 uses
+across 6 files, which is why it is not bundled here). Retire this note by doing that rename.
+
+🔑 **THE CPI HISTOGRAM NOW HAS TWO BUCKETS, NOT THREE.** One loop is four phases, so the loop
+count per instruction IS the CPI/4:
 ```
 FETCH, ¬req                        1 loop  =  4 cycles
-FETCH → LOAD → retire              2 loops =  8 cycles
+FETCH → LOAD → LOAD(beat) → ret    3 loops = 12 cycles   ← was 2 loops / 8 cycles
 FETCH → STORE → STORE(beat) → ret  3 loops = 12 cycles
 ```
-*The arbitration simulation measured `4cyc=28 · 8cyc=14 · 12cyc=14 · other=0`. `other=0` is not
-luck — it is this state graph having no fourth path, and that is what the theorems below say.*
+⛔ **THE `8cyc` BUCKET IS EMPTY UNDER OPTION (2), AND THE OLD SENTENCE HERE CLAIMED THREE.** The
+08/26 arbitration sim measured `4cyc=28 · 8cyc=14 · 12cyc=14 · other=0` on the PRE-option-(2)
+machine; under (2) that trace's shape becomes `4cyc=28 · 12cyc=28`. ⚠️ **THAT SECOND FIGURE IS
+ARITHMETIC ON ONE SIM'S HISTOGRAM, NOT A RE-RUN** — silicon's measurement, forwarded, and it is
+the only measurement any of it rests on. `other=0` remains not luck: it is this state graph
+having no fourth path, and `only_three_costs` below is the reason rather than the evidence.
 
 ⚠️ **CARRIED FORWARD, NOT SMOOTHED — the RTL's own open question** (`busadapt8.v:126-131`):
 `instr_r` is written on the phase-3 edge and `kind`/`storeBeat` update on that SAME edge, so the
@@ -53,7 +71,7 @@ structure BusState where
 def retire (s : BusState) (req : Bool) : Bool :=
   match s.kind with
   | .fetch => !req
-  | .load  => true
+  | .load  => s.storeBeat   -- option (2): the LOAD's data beat, mirroring the store's
   | .store => s.storeBeat
   | .idle  => true
 
@@ -92,13 +110,32 @@ theorem bounded_wait :
       loopsToRetire s req we ≤ 3) = true := by
   decide +kernel
 
-/-- ⭐ **THE THREE BUCKETS ARE EXHAUSTIVE — this is what the simulation's `other=0` means.**
-Every reachable loop count is 1, 2 or 3, so every CPI is 4, 8 or 12 and there is no fourth
-path through the machine. -/
+/-- ⭐ **NO FOURTH PATH — this is what the simulation's `other=0` means.** Every reachable loop
+count is 1, 2 or 3.
+⛔⛔ **THIS DOCSTRING USED TO SAY "so every CPI is 4, 8 or 12", AND IT SURVIVED OPTION (2)
+UNCHANGED AND UNCHALLENGED, BECAUSE THE THEOREM CANNOT SEE IT.** `n = 1 || n = 2 || n = 3` is a
+statement about which counts are ALLOWED, not about which are REACHED — so it stays TRUE when a
+bucket EMPTIES. Under option (2) the count `2` is unreachable from an instruction start and the
+`8`-cycle CPI is gone, and this theorem went on passing at 0 axioms throughout.
+⇒ **A PERMISSIVE BOUND CANNOT DATE ITS OWN PROSE.** `reachable_costs_are_exactly_one_and_three`
+below is the cure: it pins the set from BOTH sides, so the next change to the machine makes it
+RED instead of letting the sentence rot. -/
 theorem only_three_costs :
     allStates.all (fun s => [false, true].all fun req => [false, true].all fun we =>
       let n := loopsToRetire s req we
       n = 1 || n = 2 || n = 3) = true := by
+  decide +kernel
+
+/-- ⭐⭐ **THE SET, PINNED FROM BOTH SIDES — the theorem the file was missing.** From an
+instruction start `(fetch,false)`, the reachable loop counts are EXACTLY `{1, 3}`: 1 and 3 are
+attained, and 2 is attained by NOTHING. Option (2) emptied the 2/`8cyc` bucket, and no theorem
+in this file could previously say so. **Any further change to `retire` moves one of these three
+conjuncts and turns this RED.** -/
+theorem reachable_costs_are_exactly_one_and_three :
+    loopsToRetire ⟨.fetch, false⟩ false false = 1
+  ∧ loopsToRetire ⟨.fetch, false⟩ true  false = 3
+  ∧ ([false, true].all fun req => [false, true].all fun we =>
+       loopsToRetire ⟨.fetch, false⟩ req we != 2) = true := by
   decide +kernel
 
 /-- ⭐ **EVERY RETIRE RETURNS TO `fetch` WITH THE BEAT CLEARED** — the machine cannot carry a
@@ -119,13 +156,40 @@ theorem store_takes_three :
 theorem plain_takes_one :
     loopsToRetire ⟨.fetch, false⟩ false false = 1 := by decide +kernel
 
-/-- A load takes exactly two. -/
-theorem load_takes_two :
-    loopsToRetire ⟨.fetch, false⟩ true false = 2 := by decide +kernel
+/-- ⭐ **A LOAD TAKES EXACTLY THREE UNDER OPTION (2).**
+⚖️ **`load_takes_two` DELIBERATELY RETIRED 2026-09-04** — it said `= 2`, was true of the
+pre-option-(2) machine, and became FALSE when the RTL moved. Replaced rather than joined,
+because keeping it beside its successor would be keeping a false theorem; and RENAMED rather
+than edited in place, so a reader who greps `load_takes_two` finds nothing and comes looking,
+instead of finding a name whose meaning changed underneath them. **The retirement is CORRECT;
+this line exists so the CITATION does not rot** — the standing class-B convention, applied to
+the one instance this commit creates. -/
+theorem load_takes_three :
+    loopsToRetire ⟨.fetch, false⟩ true false = 3 := by decide +kernel
+
+/-- ⛔⛔ **THE CONTROL THAT USED TO DISCRIMINATE, AND NO LONGER DOES — SAID OUT LOUD RATHER THAN
+DELETED.** `store_takes_three` was the negative control proving `bounded_wait` is not vacuous.
+Under option (2) the LOAD path also takes three, so the two controls now agree and neither one
+separates the load path from the store path any more. **A control that stopped discriminating is
+not a control**; the load/store distinction is carried by `retire_resets` and by the T5 block
+below, and this note exists so nobody reads the surviving pair as stronger than it is. -/
+theorem load_and_store_now_cost_the_same :
+    loopsToRetire ⟨.fetch, false⟩ true false = loopsToRetire ⟨.fetch, false⟩ true true := by
+  decide +kernel
+
+/-- ⛔ **AND THE BOUND IS NOW REACHED, NOT APPROACHED.** Option (2) does not move
+`bounded_wait`'s number — it moves the LOAD onto it. Stated so the next reader does not have to
+re-derive that the two facts are compatible. -/
+theorem the_bound_is_attained :
+    loopsToRetire ⟨.fetch, false⟩ true false = 3
+  ∧ (allStates.all (fun s => [false, true].all fun req => [false, true].all fun we =>
+      loopsToRetire s req we ≤ 3) = true) := by decide +kernel
 
 #audit_axioms retire next allStates allStates_card loopsToRetire
 #audit_axioms no_deadlock bounded_wait only_three_costs retire_resets
-#audit_axioms store_takes_three plain_takes_one load_takes_two
+#audit_axioms reachable_costs_are_exactly_one_and_three
+#audit_axioms store_takes_three plain_takes_one load_takes_three
+#audit_axioms load_and_store_now_cost_the_same the_bound_is_attained
 
 /-! ## T5 — STORE-PATH TIMING. THE FINDING IS THAT `we` IS NOT AT THE PINS AT ALL.
 
