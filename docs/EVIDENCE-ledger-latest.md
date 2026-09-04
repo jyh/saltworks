@@ -1,5 +1,26 @@
 # CAMPAIGN LEDGER — 2026-08-10
 
+> ⛔ **PIPELINE DEAD SINCE 2026-08-10 — no ledger has been produced since; see desk FE.**
+> *Banner added 2026-09-03 by evidence under desk row FE (helm ruling 18:2x). This file is
+> the ledger of **2026-08-10** and nothing more recent exists. It carried no such notice for
+> 24 days, and that is the defect this line exists to end: `nightly.sh` writes only on
+> success, so a failed run leaves the previous success in place, correctly named `latest`,
+> looking exactly like a current ledger.*
+> **A pipeline that publishes only on success leaves its last success standing as its own
+> tombstone.**
+> *Two independent stoppages, either sufficient on its own: **(i)** nothing invokes
+> `nightly.sh` — no crontab, no LaunchAgent, no watch, no caller; it is hand-run only. **(ii)**
+> it would fail if run — `selftest.py` reports 1 failure of 178,
+> `MANIFEST: bundle missing: docs/provenance/s2/s2-executor-transcript.jsonl`, and `set -e`
+> (nightly.sh:13) kills the run at line 43 before any table is generated. That file is named by
+> `docs/provenance/REPLAY-MANIFEST.tsv:32` since `fdb2ace` (08-07), is in no commit that ever
+> existed, is on no clone's disk, and is not gitignored.*
+> ⚖️ **The ledger stays OFF — RULED at the 2026-09-04 council (desk FE): the default stands,
+> `s2` is neither rebuilt nor deleted, and any revival must name a runner and ship its failure
+> surface first.** No manifest row has been deleted to green the gate, and nothing here
+> republishes. The figures below remain a true record of 2026-08-10.
+
+
 Nightly, from `docs/ledger-tools/nightly.sh`. Every table below is
 regenerated from the git history and the session transcripts; nothing
 here is typed by hand. The filter that decides what counts as a human
