@@ -188,3 +188,26 @@ ones**, and the trichotomy is what proves it.
 once and piped the census tool once, in the same session, having banked the law.
 The wrapper's own EXIT text caught the first; the second produced two bogus `rc=0`
 readings that briefly looked like a defect in the tool.*
+
+
+---
+
+## ⛔ NAMES CITED IN THIS DOCUMENT THAT ARE NOT IN THE REPOSITORY
+### Added 2026-09-03 (compiler), from `docs/ledger-tools/cited_but_unlanded.py`.
+
+A name below appears in this document's prose and is **not a declared name in any
+tracked `.lean` file**. It was proved into a gitignored `Scratch*.lean` and never
+landed, so **a reader cannot open it.** No gate here could see this class: every gate
+reads the TREE or the BUILD, and a gitignored file is in neither.
+
+⚠️ **This note does not discharge anything.** It makes the citations honest; landing
+or retiring them is separate work.
+
+| name cited here | lives only in |
+|---|---|
+| `aluSelect_nIn` | `SaltWorks/HDL/ScratchSelect32Cut.lean` |
+| `asDrive_eq''` | `ScratchMIGPATCH.lean` |
+| `sem_aluSelect'` | `ScratchMIGPATCH.lean` |
+| `gsSelOf_ten` | `ScratchALUSELPARAM.lean` |
+| `p3c_control_today` | `ScratchP3CUT.lean` |
+| `p3c_nIn_dies` | `ScratchP3CUT.lean` |

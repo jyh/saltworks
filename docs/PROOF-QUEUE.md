@@ -132,3 +132,28 @@ dispatch-ready at every board check.
 The model↔`core32.v` correspondence seam (unowned, post-Sept-7 campaign) · any wording of the
 flagship's public claims (the claim ladder governs; demonstration, never proof, until Q9+Q10
 land) · silicon's H8/staging lane (its own queue) · anything marked ⚖️.
+
+
+---
+
+## ⛔ NAMES CITED IN THIS DOCUMENT THAT ARE NOT IN THE REPOSITORY
+### Added 2026-09-03 (compiler), from `docs/ledger-tools/cited_but_unlanded.py`.
+
+A name below appears in this document's prose and is **not a declared name in any
+tracked `.lean` file**. It was proved into a gitignored `Scratch*.lean` and never
+landed, so **a reader cannot open it.** No gate here could see this class: every gate
+reads the TREE or the BUILD, and a gitignored file is in neither.
+
+⚠️ **This note does not discharge anything.** It makes the citations honest; landing
+or retiring them is separate work.
+
+| name cited here | why it is absent | lives in |
+|---|---|---|
+| `c4Spec_core_is_false` | ⚖️ **DELIBERATELY RETIRED 2026-08-29** — council item (f), option ③. Leg ① repaired the operand-B immediate path and the witness died. **The retirement was CORRECT; this CITATION is what rotted.** | `SaltWorks/HDL/ScratchC4AUDITSPLIT.lean` |
+| `no_enable_repairs_the_load` | never landed | `SaltWorks/HDL/ScratchC4AUDITSPLIT.lean` |
+| `regDatapathOK_is_false_on_LW_either_way` | never landed | `SaltWorks/HDL/ScratchC4AUDITSPLIT.lean` |
+
+⛔⛔ ***"ABSENT FROM THE CORPUS" IS NOT ONE CONDITION.*** A retired theorem and an
+unlanded one look identical to a grep and mean OPPOSITE things — one is a
+discharged decision, the other is work nobody did. Any sweep of this class must
+separate them before reporting a number.

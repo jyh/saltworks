@@ -494,3 +494,21 @@ owed as hypotheses   (compile core).ssa = true            -- checked structurall
                      DeliversProgram                       -- math, 14:07
                      EntryLoaded                           -- math, 13:48
 ```
+
+
+---
+
+## ⛔ NAMES CITED IN THIS DOCUMENT THAT ARE NOT IN THE REPOSITORY
+### Added 2026-09-03 (compiler), from `docs/ledger-tools/cited_but_unlanded.py`.
+
+A name below appears in this document's prose and is **not a declared name in any
+tracked `.lean` file**. It was proved into a gitignored `Scratch*.lean` and never
+landed, so **a reader cannot open it.** No gate here could see this class: every gate
+reads the TREE or the BUILD, and a gitignored file is in neither.
+
+⚠️ **This note does not discharge anything.** It makes the citations honest; landing
+or retiring them is separate work.
+
+| name cited here | lives only in |
+|---|---|
+| `genSelect_ten` | `ScratchALUSELPARAM.lean` |
