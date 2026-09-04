@@ -991,8 +991,33 @@ OPEN ITEMS:
   SCHEDULING BACKS OUT FROM ~SEPT 7 — two weeks tighter than the
   first estimate.**
 
-- **⛔ GATED: CAPTAIN — the purse ruling on the NDF tile spend (6×2 = 12 tiles, EUR 840, two-high). UNLOCKS ON: the Captain naming the spend. Until then this row is NOT pullable — the measurement under it is COMPLETE (silicon, post-layout, 11:46) and only the money is open, which is exactly the shape that reads as workable.**
-- **NDF TILE SHAPE — AWAITING THE CAPTAIN'S PURSE RULING (silicon's
+- **✅ DISCHARGED: THE NDF PURSE — PURCHASED (the Captain, 2026-09-03 16:5x); 6×2 two-high, 12 tiles, EUR 840; the row is PULLABLE.**
+  `purchase:` **TWO** Tiny Tapeout receipts, supplied by the Captain at the same
+  sitting (relayed via desk row FC and the 16:59:33 bus row) —
+  **#1312-5088, paid 2026-08-06 16:27:40, "Tile Cost × 4", EUR 280.00, invoice
+  name "Batcher banyan"** + **#1950-5608, paid 2026-08-11 00:33:46, "Tile Cost
+  × 8", EUR 560.00, invoice name "NDF"** = **12 tiles, EUR 840.00.** *(No card
+  or payment-instrument detail: this repo is public.)*
+  🔑 **AND THE TWO-PURCHASE SHAPE IS WHY THE STOP HELD: the register saw the
+  FIRST receipt and never the SECOND**, so "EUR 840" sat here as ONE unpaid sum
+  when it was two paid ones. A partially-observed purchase renders exactly like
+  an unmade one — the missing half is invisible, and the visible half looks like
+  a down payment on something still open.
+  *(The routing word at 16:56 reserved this line for
+  `[order reference: pending the Captain]`; the reference landed at the desk
+  register and on the bus before this edit was written, so the real one is
+  pinned instead — a placeholder that outlives its answer reads as a value.)*
+  ⛔ **WHY THIS STOP OUTLIVED ITS CONDITION BY DAYS, and it is the lesson, not
+  the apology: the release condition was "the Captain naming the spend" — a
+  HUMAN WORD, re-measurable only at a sitting, and no sitting asked.** The
+  tiles were bought on 08/06 and 08/11; this row went on claiming the money was
+  open for over three weeks. The purchase is an EXTERNAL ACT and nobody wrote it
+  down, so the register had no observable that could ever go green on its own.
+  ⇒ ***A GATE WHOSE RELEASE IS A HUMAN WORD GETS A DESK ROW AT ISSUE*** (minted:
+  the helm's desk register, `DESK.tsv`, row **FC**), so the docket sweep ASKS. A gate keyed on a
+  measurement re-measures itself; a gate keyed on a word waits forever and reads,
+  the whole time, exactly like work that is merely not started.
+- **NDF TILE SHAPE — PURSE RULING IN, SHAPE CONFIRMED BOUGHT (silicon's
   probe answer, 11:46, post-layout measured): minimal demo (k=4 +
   8x8 BB + core) requires 6x2 = 12 TILES, EUR 840, TWO-HIGH
   (unscarce shape; 3x4 = same capacity but burns one of two scarce
@@ -1004,10 +1029,15 @@ OPEN ITEMS:
   the pinout count) — documented max is 8x4=32. Density lever
   50->60% ≈ +20% cells, NOT recommended without a slew run.
   MAESTRO RECOMMENDATION: 6x2 at EUR 840.
-  RESERVATION TIMING RULED (11:5x, the Captain, verbatim: "I'll
-  not reserve the 6x2 until we are close to layout. If we get
-  bumped to the next one (2 weeks later) it is ok"): NO early
-  reservation; reserve at layout-readiness; a one-shuttle slip
+  ⛔ RESERVATION TIMING — THE 11:5x RULING IS OVERTAKEN BY THE
+  PURCHASE, kept because its SLIP clause still governs. It read
+  (11:5x, the Captain, verbatim: "I'll not reserve the 6x2 until
+  we are close to layout. If we get bumped to the next one (2
+  weeks later) it is ok"): NO early reservation; reserve at
+  layout-readiness. THAT HALF IS MOOT — the tiles were already
+  bought (08/06 + 08/11, receipts above), so "do not reserve yet"
+  describes a decision that had gone the other way before the
+  words were spoken. WHAT SURVIVES UNCHANGED: a one-shuttle slip
   (~2 weeks past ~Sept 7) is ACCEPTABLE. Full throttle unchanged —
   the target stands, the deadline is soft by his word.
   THE EUR-280 QUESTION (silicon 11:55, pending measurement —
