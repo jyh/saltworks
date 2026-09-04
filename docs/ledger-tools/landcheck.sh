@@ -61,11 +61,41 @@ STATE="${TMPDIR:-/tmp}/landcheck-$(printf '%s' "$R" | shasum -a 256 | cut -c1-12
 #   of a GITIGNORED file (`Scratch*.lean`) is still invisible — such files never appear in
 #   `git status --porcelain` at all — so an audit-arm build whose subject is a Scratch file is
 #   NOT covered by this gate. Named rather than quietly folded into "the working tree".
-fingerprint() {   # HEAD + the dirty set + the dirty CONTENT
+# ⛔ 2026-09-03 — v4, AND IT IS THE SAME SHAPE AS v2 AND v3: EACH FIX WENT EXACTLY ONE LEVEL
+#   AND STOPPED AT THE LEVEL ITS AUTHOR HAD JUST BEEN BITTEN AT. v3's fields are both
+#   INDEX-SENSITIVE — `git status --porcelain` prints `?? p` before `git add` and `A  p` after,
+#   and an untracked file does not appear in `git diff HEAD` AT ALL until you add it. So
+#   STAGING A NEW FILE, WITH NO EDIT TO ANYTHING, MOVED THE FINGERPRINT. DRIVEN, both arms,
+#   exit codes read OUTSIDE a pipe, in a scratch repo:
+#       arm -> check, no change whatsoever          exit 0  ✅
+#       arm -> `git add` ONE BRAND-NEW file -> check exit 1  ⛔ FALSE MOVED
+#   ⚠️ THIS WAS STRUCTURAL, NOT OCCASIONAL. The fleet's own commit form (FLEET ORDER 08/24
+#   15:35) is `git add` -> `git diff --cached` -> `git commit`, so the STAGE HAPPENS BEFORE
+#   THE CHECK BY LAW: every commit that added a NEW FILE was guaranteed a false MOVED. It fired
+#   on this seat's own ShellRun.lean landing and I committed through it.
+#   ⇒ THE DAMAGE IS NOT THE NOISE. A false positive reroutes an author SILENTLY — the seat
+#   learns to commit through this gate, and then it is inert on the day it is right.
+#   ⇒ v4 READS THE WORKING TREE AND NEVER THE INDEX. The changed SET is the union of
+#   `git diff --name-only HEAD` and `git ls-files -o --exclude-standard`; a path moves BETWEEN
+#   those two lists when you stage it, so the UNION is invariant. The CONTENT is each of those
+#   paths' worktree bytes, hashed — also invariant, and it covers a new file's CONTENT, which
+#   v3 could not see until it was staged.
+#   ⚠️ THE DECLARED STOP IS UNCHANGED AND IS PRESERVED BY `--exclude-standard`: a GITIGNORED
+#   file's content (`Scratch*.lean`) is still invisible, so an audit-arm build whose subject is
+#   a Scratch file is STILL NOT covered by this gate. Named, not quietly folded in.
+fingerprint() {   # HEAD + the changed SET + its worktree CONTENT — all INDEX-INVARIANT
+  local paths
+  paths=$( { git diff --name-only HEAD 2>/dev/null
+             git ls-files -o --exclude-standard 2>/dev/null
+           } | LC_ALL=C sort -u )
   printf '%s|%s|%s' \
     "$(git rev-parse --short HEAD 2>/dev/null)" \
-    "$(git status --porcelain 2>/dev/null | shasum -a 256 | cut -c1-12)" \
-    "$(git diff HEAD 2>/dev/null | shasum -a 256 | cut -c1-12)"
+    "$(printf '%s\n' "$paths" | shasum -a 256 | cut -c1-12)" \
+    "$(printf '%s\n' "$paths" | while IFS= read -r f; do
+          [ -n "$f" ] || continue
+          if [ -f "$f" ]; then printf '%s %s\n' "$f" "$(shasum -a 256 "$f" | cut -d' ' -f1)"
+          else printf '%s ABSENT\n' "$f"; fi
+        done | shasum -a 256 | cut -c1-12)"
 }
 
 case "${1:-}" in
