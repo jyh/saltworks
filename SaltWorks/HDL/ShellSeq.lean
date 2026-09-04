@@ -169,6 +169,20 @@ of the tool I NEEDED — so a missing hypothesis read as a missing theory.** *`a
 one level up: I priced by what the existing lemma could not do instead of by what the new one
 required.*
 
-**STILL OWED, and now genuinely mechanical rather than blocked:** the per-bit refinement
-(`run env shCore.gates (hWd j) = …`) via `run_snoc_frame`, peeling each select from the end. The
-cost is list-splitting per bit, not a new theory. -/
+✅ **PAID 2026-09-03 — `SaltWorks/HDL/ShellRun.lean`.** The per-bit refinement
+(`run env shCore.gates (hWd j) = …`) is proved GENERAL IN `j` for BOTH banks
+(`shell_wsh_run`, `shell_acc_run`), with the clear's run-level dominance
+(`shell_clear_dominates_run`). ⛔ **AND IT NEEDED NEITHER `run_snoc_frame` NOR THE
+SPLITTING THIS NOTE PRICED.** `SsaGateSem.run_gate_val` — built three weeks later for the
+RegNext mux track — gives a gate's value by MEMBERSHIP from the `ssa` certificate alone,
+so no list is split at all.
+
+⭐ **THE LESSON, AND IT IS THIS NOTE'S SECOND TIME MAKING IT.** The paragraph above corrects
+an obstacle priced from the tool I already had. This paragraph corrects a COST priced the
+same way — from `run_snoc_frame`, the tool the first correction left behind. ⇒ **Re-price a
+named debt against the CURRENT corpus before paying it, not against the corpus that named
+it.** A debt's stated cost ages exactly as badly as its stated liveness.
+
+⛔ **WHAT IS STILL NOT HERE**, so the discharge is not read wider than it is: these are
+statements about ONE combinational evaluation of `shCore`. The SEQUENTIAL story across
+cycles for `shSeq`, and any correspondence to the fabricated die, remain open. -/

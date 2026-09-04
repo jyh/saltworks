@@ -137,6 +137,7 @@ import SaltWorks.HDL.MacCell
 import SaltWorks.HDL.MacBridge
 import SaltWorks.HDL.SerOrgan
 import SaltWorks.HDL.ShellSeq
+import SaltWorks.HDL.ShellRun
 import SaltWorks.HDL.PartialLift
 import SaltWorks.HDL.BatcherRun
 import SaltWorks.HDL.PortLengths
