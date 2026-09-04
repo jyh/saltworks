@@ -1365,6 +1365,25 @@ OPEN ITEMS:
   veto spent): sof+valid replace the ruled third packet port;
   frame-phase observability narrows to valid-only; the argument
   is rst_n-destructiveness once the die carries state.
+  R6 · THE "V9 KERNEL MODEL OWED" CLAUSE — ✅ PAID 2026-09-03 (compiler,
+  `aec89ae`, Scrub green). BOTH HALVES, and they landed 24 days apart:
+  the MODEL landed 2026-08-10 (`e85db7e`, `SaltWorks/HDL/ShellSeq.lean`)
+  with its own honest boundary — shape + Boolean logic proved, RUN-LEVEL
+  refinement explicitly NOT there; the RUN-LEVEL half lands today in
+  `SaltWorks/HDL/ShellRun.lean`: `shell_wsh_run` and `shell_acc_run`
+  GENERAL IN `j` for both banks, plus `shell_clear_dominates_run` — the
+  clear dominating in the NETLIST, not merely in the Boolean model.
+  Debt verified LIVE first, by CONCLUSION SHAPE not by name: `run env
+  shCore.gates` occurred exactly ONCE in the tracked corpus and that
+  occurrence was inside the prose of the owed-half note itself.
+  ⛔ SCOPE, so the discharge is not read wider than it is: ONE
+  combinational evaluation of `shCore`, the LEAN-COMPOSED shell. The
+  SEQUENTIAL story across cycles for `shSeq` is OPEN, and nothing here
+  touches the fabricated die. ⚠️ MIG-10's "A1 SHIPS FENCED … until V9's
+  run-level refinement closes" — that fence's CONDITION is met for the
+  combinational half; whoever owns A1 re-reads it, I do not lift a fence
+  on another row. The rest of R6 (cost in emitSeq flops) is untouched.
+  — original row follows:
   R6 THE SHELL RATIFIED: per-cell acc CLEAR + en_wsh + en_acc +
   sign-extension hold; V9 kernel model owed; OWNER COMPILER; cost
   lands in emitSeq flops — scCore and all 19:34 measurements
