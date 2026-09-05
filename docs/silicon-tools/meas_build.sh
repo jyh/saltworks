@@ -252,6 +252,29 @@ for target in "$@"; do
   esac
   [ -f "$target" ] || { echo "⛔ meas_build: no such file: $target"; rc_all=2; continue; }
 
+  # ⭐⭐ THE STALENESS GATE — ADDED 2026-09-05, AFTER THIS TOOL ALMOST MADE ME ACCUSE A PEER.
+  # A PATH-form run elaborates the TARGET fresh and loads its IMPORTS FROM CACHE. After a
+  # `git pull` the sources have moved and the oleans have NOT, so the kernel compares a NEW
+  # target against OLD dependencies — and the verdict is a SUBSTANTIVE RED: on 09/05 it was
+  # `decide` refuting adapterNext_correct over all 32 inputs plus a sorryAx in the axiom
+  # audit, against a BusFSM.olean five days older than its source. The module form then
+  # showed that theorem ✓ at 0 axioms.
+  # ⛔ THIS IS NOT THE BRIEF'S ⑨ HOOK. That one says a red on a MISSING olean is build state
+  #   and keys the reader on `import owed`. A MISSING olean ANNOUNCES ITSELF; A STALE ONE
+  #   PRODUCES A CORRECT-LOOKING REFUTATION OF A TRUE THEOREM and says nothing about why.
+  # ⚠️ And it is MORE credible than a green: the landing commit said it had rebuilt the
+  #   organ because the spec moved, so the stale red fits the story you already have.
+  #   ⇒ CARE CANNOT FIX THIS — only a measurement taken BEFORE the verdict.
+  # This tool already PRINTED the scope ("came from cached oleans — NOT re-checked here")
+  # and shipped the verdict anyway: [[printed-is-not-gated]]. Now it is consumed.
+  _stale_out=$("$(dirname "$0")/olean_staleness.sh" "$target" 2>&1)
+  if [ $? -ne 0 ]; then
+    echo "⛔ $target — VERDICT REFUSED: stale import closure (this is BUILD STATE, NOT a defect)."
+    echo "$_stale_out" | sed 's/^/   /'
+    rc_all=2
+    continue
+  fi
+
   # ⛔ NEVER PIPE saltbuild.sh — `$?` after a pipe is the tail's status and it
   # fails in the reassuring direction. Capture to a file, judge by the TEXT.
   out=$(mktemp) || { echo "⛔ meas_build: mktemp failed"; exit 2; }
