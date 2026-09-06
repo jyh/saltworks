@@ -319,7 +319,7 @@ theorem extension_costs_257_bits : stWidthD - stWidth = 257 := by decide +kernel
 **They were correct, and they are gone rather than adjusted.** They pinned the instruction base
 at **1313** and the shift at **257**, which is right for the memory+trap widening ALONE. The
 Captain ratified the adapter-state widening on 2026-08-26 (*"Yes, renumber"*), so the state also
-carries `kind` (2 bits) and `storeBeat` (1) — and the true base is **1316**, the true shift
+carries `kind` (2 bits) and `beat` (1) — and the true base is **1316**, the true shift
 **260**.
 
 🔑 ***SUPERSEDED, NOT ADJUSTED, AND THE DISTINCTION IS THE WHOLE POINT.*** An `instrBaseD`
@@ -332,7 +332,7 @@ purchase; a silent three-bit skew is what it buys us out of.*
 `AdapterStateOrgan.superseded_D_base_was_short_by_three`, for the future hand who finds 257 in the
 history and wonders whether the 3 was ever considered.* -/
 
-/-- The adapter state the fallback brings into the domain: `kind` (2) + `storeBeat` (1). -/
+/-- The adapter state the fallback brings into the domain: `kind` (2) + `beat` (1). -/
 def stWidthAdapter : Nat := 3
 
 /-- ⭐ **THE RATIFIED STATE WIDTH.** Registers, pc, memory, trap, and the adapter's three bits. -/

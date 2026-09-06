@@ -14,7 +14,7 @@ the ratified widening puts `retire`'s three adapter bits into `Env`. **This file
 function and proves the equation** — the step that converts one into the other.
 
 ```
-retire = f(kind, storeBeat, req)        kind 2 bits, storeBeat 1 — ADAPTER registers
+retire = f(kind, beat, req)        kind 2 bits, beat 1 — ADAPTER registers
 the widening                            stWidthFull = stWidthD + 3 = 1316, RATIFIED 2026-08-26
 so the three bits live at               stWidthD, stWidthD+1, stWidthD+2
 and the instruction word at             instrBaseFull = stWidthFull
@@ -146,7 +146,7 @@ from SATISFIABLE to SATISFIED, modulo the placement named in the header. -/
 theorem stallsAt_eq_not_retire (s : BusState) (e : Env)
     (h1 : e kind1Net = (encKind s.kind).1)
     (h0 : e kind0Net = (encKind s.kind).2)
-    (hb : e beatNet  = s.storeBeat) :
+    (hb : e beatNet  = s.beat) :
     stallsAt e = !(retire s (reqAt e)) := by
   simp only [stallsAt, adapterAt, h1, h0, hb, decKind_encKind]
 
@@ -156,7 +156,7 @@ theorem stallsAt_eq_not_retire (s : BusState) (e : Env)
 def envWithAdapter (s : BusState) (pad : Env) : Env := fun j =>
   if j = kind1Net then (encKind s.kind).1
   else if j = kind0Net then (encKind s.kind).2
-  else if j = beatNet then s.storeBeat
+  else if j = beatNet then s.beat
   else pad j
 
 theorem envWithAdapter_reads_back (s : BusState) (pad : Env) :
@@ -167,7 +167,7 @@ theorem envWithAdapter_reads_back (s : BusState) (pad : Env) :
   have h0 : envWithAdapter s pad kind0Net = (encKind s.kind).2 := by
     show (if kind0Net = kind1Net then _ else if kind0Net = kind0Net then _ else _) = _
     rw [if_neg (by decide), if_pos rfl]
-  have hb : envWithAdapter s pad beatNet = s.storeBeat := by
+  have hb : envWithAdapter s pad beatNet = s.beat := by
     show (if beatNet = kind1Net then _ else if beatNet = kind0Net then _ else
             if beatNet = beatNet then _ else _) = _
     rw [if_neg (by decide), if_neg (by decide), if_pos rfl]

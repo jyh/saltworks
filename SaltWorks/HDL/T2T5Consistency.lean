@@ -33,7 +33,7 @@ line of proof changing. ***What this file never claimed is what died.***
 ## ⛔ WHAT THIS FILE DOES **NOT** SETTLE — the residue, named rather than implied
 
 `BusFSM` decides the FSM's transition; it does not decide what reaches `Env`. So the SUPPLY of
-the parameter — getting `retire`'s three adapter bits (`kind`, `storeBeat`) into `Env` through the
+the parameter — getting `retire`'s three adapter bits (`kind`, `beat`) into `Env` through the
 ratified widening — **is not decidable here and is not claimed here.** What IS established is the
 anchor it hangs on: retire coincides exactly with the frame-end, so `stalls := ¬retire` cannot put
 the core's advance on the wrong beat. ⇒ **THE REMAINING STEP IS THE WIDENING, AND IT IS RATIFIED.**
@@ -56,7 +56,7 @@ def retireMut (s : BusState) (_req : Bool) : Bool :=
   match s.kind with
   | .fetch => true
   | .load  => true
-  | .store => s.storeBeat
+  | .store => s.beat
   | .idle  => true
 
 theorem control_mutant_breaks_the_anchor :

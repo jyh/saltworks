@@ -37,7 +37,7 @@ grep bubble|nop over SaltWorks/Silicon/RTL/*.v               ⇐ NOTHING; no bub
 plane32bus.v:73   .en(retire)                                ⇐ the core is stalled by an ENABLE
 ```
 ⇒ **the instantiation is `stalls := ¬retire`**, which needs `retire`'s three adapter bits
-(`kind`, `storeBeat`) inside `Env` — supplied by the state widening the Captain ratified on
+(`kind`, `beat`) inside `Env` — supplied by the state widening the Captain ratified on
 2026-08-26. **T2's blocker and step 7's renumbering are the same item.**
 
 ⭐⭐ **AND WHAT SAVED THIS FILE IS THE PARAMETER.** `stalls` is an ARGUMENT of

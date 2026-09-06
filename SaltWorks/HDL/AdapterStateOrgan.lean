@@ -5,7 +5,7 @@ Authors: Jason Hickey, Claude
 
 # PRICING THE FALLBACK'S UNMEASURED HALF — the three adapter bits as an assembly obligation
 
-`retire` is not a function of `Env`: it reads `kind` (2 bits) and `storeBeat` (1 bit), which are
+`retire` is not a function of `Env`: it reads `kind` (2 bits) and `beat` (1 bit), which are
 ADAPTER registers. The fallback is to widen the state layout so those three bits are in the
 domain. `StateCodec.lean:134` already measured the CODEC half of that widening and it PASSES.
 **This file measures the half nobody had: `c4Spec_iff_fieldwise`'s first conjunct is
@@ -103,7 +103,7 @@ theorem adapterNext_correct :
                              | true,  false => .load | true,  true  => .store), b⟩
        let t := next s req we
        sem adapterNext (insOf k1 k0 b req we)
-         == [(encKind t.kind).1, (encKind t.kind).2, t.storeBeat]) = true := by
+         == [(encKind t.kind).1, (encKind t.kind).2, t.beat]) = true := by
   decide +kernel
 
 /-- ⛔ **NEGATIVE CONTROL — a mutated organ must NOT match.** Swapping the two `k1'` operands'
@@ -127,7 +127,7 @@ theorem adapterNextWrong_disagrees :
                              | true,  false => .load | true,  true  => .store), b⟩
        let t := next s req we
        sem adapterNextWrong (insOf k1 k0 b req we)
-         == [(encKind t.kind).1, (encKind t.kind).2, t.storeBeat]) = false := by
+         == [(encKind t.kind).1, (encKind t.kind).2, t.beat]) = false := by
   decide +kernel
 
 /-! ## ⛔⛔ THE COMBINED RENUMBERING — ONE ACT, NOT TWO -/
@@ -223,7 +223,7 @@ against the LITERAL rather than a live definition.**
 
 🔑 ***THIS IS FOR THE HAND WHO FINDS 257 IN THE HISTORY AND WONDERS WHETHER THE 3 WAS EVER
 CONSIDERED.*** It was. The superseded base was **1313** with shift **257**, correct for the
-memory+trap widening alone and short by exactly **3** once the adapter's `kind` and `storeBeat`
+memory+trap widening alone and short by exactly **3** once the adapter's `kind` and `beat`
 joined the state. *Nothing refused it at the time because every check the tree runs holds at
 either width — which is why it was superseded rather than adjusted.* -/
 theorem superseded_D_base_was_short_by_three :

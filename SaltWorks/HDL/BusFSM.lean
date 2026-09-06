@@ -12,9 +12,9 @@ green."* `busadapt8.v` implements the machine; **nothing modelled it**, so no su
 be refused by anything but simulation.
 
 ⭐ **THE MACHINE, READ OFF THE RTL** (`busadapt8.v:184-186`, re-read 2026-09-04 AFTER option (2)
-landed at PR #14), state `(kind, storeBeat)`:
+landed at PR #14), state `(kind, beat)`:
 ```
-retire  = kind = FETCH → ¬req  |  kind = LOAD → storeBeat  |  kind = STORE → storeBeat  |  IDLE → true
+retire  = kind = FETCH → ¬req  |  kind = LOAD → beat  |  kind = STORE → beat  |  IDLE → true
 next    = retire            → (FETCH, false)
           kind = FETCH      → (if we then STORE else LOAD, false)
           otherwise         → (kind, true)          -- the memory loop's data beat
@@ -26,11 +26,31 @@ changed and NOT ONE `.lean` FILE DID** (`git diff --name-only 9769fa1..035241f -
 **so the whole verified surface stayed GREEN across a ratified change to the machine.** Nothing
 here is verified against the RTL; it is verified against THIS TRANSCRIPTION, and a transcription
 cannot notice that its source moved. Re-read the source before trusting the block above.
-⚠️ **NAME DEBT, DATED 09-04, WITH ITS TRIGGER:** the field is still called `storeBeat` and it now
-carries the data beat of EITHER memory loop. The RTL keeps two registers (`store_beat`,
-`load_beat`); `kind` already discriminates them, so one field is faithful to `retire` — but the
-NAME is not. **Rename to `beat` when this file is next opened for any other reason** (22 uses
-across 6 files, which is why it is not bundled here). Retire this note by doing that rename.
+✅ **NAME DEBT PAID 2026-09-06 — THE FIELD WAS `storeBeat` AND IS NOW `beat`.** It carries the
+data beat of EITHER memory loop; the RTL keeps two registers (`store_beat`, `load_beat`) and
+`kind` already discriminates them, so one field was always faithful to `retire` while the NAME
+was not. The 09-04 note set the trigger *"rename when this file is next opened for any other
+reason"* and modelling the `sof` arm below is that reason.
+⛔ **THE OLD NAME IS WRITTEN HERE ON PURPOSE, AND IT IS THE ONLY REASON TEN PROSE CITATIONS STILL
+RESOLVE.** `storeBeat` is named in `docs/` — the R10 flagship statement, the R10 sitting table,
+the two 08-26 contract notes — all of them DATED RECORDS, left verbatim because a dated document
+said the name that was true on its date and rewriting it would be forging the record. **No
+`.lean` file DECLARES the old name any more; the only three occurrences left in the tree are the
+ones in this note**, which is exactly what makes a grep land here — the same device
+`load_takes_two` gets below.
+⚠️ **I FIRST WROTE THAT SENTENCE AS "a grep for `storeBeat` now finds nothing in any `.lean`",
+AND WRITING IT INTO A `.lean` MADE IT FALSE** — the build was green, the claim was false, and the
+falsifier was the claim itself. This seat banked *"an absence claim SELF-FALSIFIES on
+publication"* weeks ago and I reproduced it inside the sentence citing the discipline. ⇒ **STATE
+ABSENCE OVER DECLARATIONS, NEVER OVER TEXT** — a mention is not a declaration, and only the
+build log can tell them apart.
+⛔⛔ **AND THE DEBT'S OWN THREE NUMBERS DISAGREED, WHICH IS THE FINDING WORTH MORE THAN THE
+RENAME.** The note said **22 uses**; the lead re-measured **24** at origin/master on 09-06; the
+rename touched **26**. All three are honest and none is a correction of another: 22 was stale,
+24 is LINES CONTAINING the token, 26 is OCCURRENCES — and `BusFSM:17` and `StallsAtWidened:17`
+each carry it twice, which is the whole of the gap. ⇒ **A DEFERRAL AGES IN ITS COUNT AND ITS
+COUNT'S DEFINITION, and "uses" was never defined.** The number a rename must satisfy is
+OCCURRENCES; the number a reviewer naturally greps is LINES; nothing anywhere said which.
 
 🔑 **THE CPI HISTOGRAM NOW HAS TWO BUCKETS, NOT THREE.** One loop is four phases, so the loop
 count per instruction IS the CPI/4:
@@ -47,7 +67,7 @@ the only measurement any of it rests on. `other=0` remains not luck: it is this 
 having no fourth path, and `only_three_costs` below is the reason rather than the evidence.
 
 ⚠️ **CARRIED FORWARD, NOT SMOOTHED — the RTL's own open question** (`busadapt8.v:126-131`):
-`instr_r` is written on the phase-3 edge and `kind`/`storeBeat` update on that SAME edge, so the
+`instr_r` is written on the phase-3 edge and `kind`/`beat` update on that SAME edge, so the
 decision reads a `c_dmem_req` derived from the PREVIOUS instruction. **Whether that is off-by-one
 or exactly right is NOT settled here.** This file models the state graph as written; the
 req-timing question is a different obligation and stays open.
@@ -64,22 +84,22 @@ inductive Kind where
 /-- The FSM's whole state: the loop kind and the store's beat flag. -/
 structure BusState where
   kind      : Kind
-  storeBeat : Bool
+  beat : Bool
   deriving Repr, DecidableEq, Inhabited
 
 /-- `busadapt8.v:160-162`, a decode of the frame introducing no new state. -/
 def retire (s : BusState) (req : Bool) : Bool :=
   match s.kind with
   | .fetch => !req
-  | .load  => s.storeBeat   -- option (2): the LOAD's data beat, mirroring the store's
-  | .store => s.storeBeat
+  | .load  => s.beat   -- option (2): the LOAD's data beat, mirroring the store's
+  | .store => s.beat
   | .idle  => true
 
 /-- `busadapt8.v:138-157`, the loop-end transition. -/
 def next (s : BusState) (req we : Bool) : BusState :=
-  if retire s req then { kind := .fetch, storeBeat := false }
-  else if s.kind = .fetch then { kind := if we then .store else .load, storeBeat := false }
-  else { s with storeBeat := true }
+  if retire s req then { kind := .fetch, beat := false }
+  else if s.kind = .fetch then { kind := if we then .store else .load, beat := false }
+  else { s with beat := true }
 
 /-- The eight states, for exhaustive checking. -/
 def allStates : List BusState :=
@@ -215,7 +235,7 @@ inductive OutWord where
 def outWord (s : BusState) : OutWord :=
   match s.kind with
   | .fetch => .imemAddr
-  | .store => if s.storeBeat then .dmemWdata else .dmemAddr
+  | .store => if s.beat then .dmemWdata else .dmemAddr
   | _      => .dmemAddr
 
 /-- ⛔⛔ **THE TWO STORE BEATS ARE INDISTINGUISHABLE ON THE TYPE PINS.** `kind` is deliberately
@@ -259,5 +279,208 @@ theorem type_pins_are_insufficient_for_the_store_path :
 #audit_axioms typeAtPhase0 outWord store_beats_share_a_type_code
 #audit_axioms store_beats_differ_in_payload retire_separates_the_store_beats
 #audit_axioms retire_is_the_only_separator type_pins_are_insufficient_for_the_store_path
+
+
+/-! ## T3-SCOPE — THE `sof` ARM: THE TRANSITION NO THEOREM ABOVE CAN SEE
+
+⭐⭐ **EVERY THEOREM ABOVE THIS LINE IS ABOUT `next`, AND `next` IS ONE ARM OF A THREE-ARM STATE
+UPDATE.** `busadapt8.v:192-207` is a priority chain:
+
+```
+if (!rst_n)        → (T_FETCH, 0, 0)                                  reset
+else if (sof)      → beats cleared; kind ⟵ c_dmem_req ? … : T_FETCH   REALIGN   ← NOT MODELLED
+else if (loop_end) → the retire / fetch / beat chain                  LOOP END  ← `next`
+                     (no arm)  → hold                                 HOLD
+```
+
+**`BusFSM.next` transcribes the third arm only, and nothing in this file said so.** The
+consequence is not that a theorem here is wrong — every one of them is true of `next`. It is
+that `no_deadlock`, `bounded_wait`, `only_three_costs` and `adapterNext_correct` are all
+*silent* about a transition the shipped machine performs. ⇒ 🔑 **A SILENCE AND A CLEAN BILL OF
+HEALTH ARE THE SAME COLOUR**, and the whole verified surface is the colour of health.
+
+⛔⛔ **THIS IS AMENDMENT 2, AND IT IS NO LONGER A HYPOTHESIS.** This seat exhibited the
+asymmetry in the kernel on 09-04 and stated plainly that it had NOT traced the path to memory.
+silicon traced it on the SHIPPED DUT with nothing mutated (`4d155b79`, 09-06, signed and
+ratified by the lead): one `sof` pulse takes host memory from **19 completed stores to 20
+against 19 SW fetches**, and — the half that raised the severity — **`lw_exec` 18 → 17: an
+instruction is DESTROYED, not merely a transaction repeated.** The PC advances by 4 twice for
+one instruction, so it never jumps and no stride criterion can see it.
+
+⛔ **AND MY OWN 09-04 EXHIBIT NAMED THE WRONG CELL, WHICH IS THE FINDING I WOULD KEEP.** It
+filtered on `retire s req = true` — "a COMPLETED transaction" — and produced the two reachable
+cells below. The measured damage is at `⟨fetch, false⟩` with a STALE decode, where `retire` is
+**false**, so *my exhibit's own filter excludes the cell that actually bit*. The exhibit was
+right that the arm is unsound and right that a second write was the thing to fear; it was wrong
+about where. ⇒ ⭐ **A CORRECT FINDING CAN CARRY AN INCORRECT WITNESS, and the witness is the
+half a reader reuses.** Both cells are stated below, marked for what each one is.
+
+📐 **WHAT THIS MODEL STILL CANNOT SEE, DECLARED RATHER THAN LEFT TO BE DISCOVERED.** `BusState`
+has no PHASE and no INSTRUCTION REGISTER. The measured defect needs both: the window is phases
+0/1/2 of the following fetch loop, and the mechanism is a decode still showing the retired SW
+while `pc_r` has moved on. Phase 3 is clean ONLY because the 08/18 instruction bypass — landed
+for an unrelated defect — happens to put a freshly assembled word in front of the decode. **None
+of that is expressible here**, and a theorem below that looks like it covers the defect covers
+only its loop-level shadow. The cycle-level statement needs a phase counter this file does not
+have; that is a NEW obligation, not a discharged one.
+-/
+
+/-- The REALIGN arm, `busadapt8.v:193-197`. **Note what is absent: `s`.** The arm re-derives
+`kind` from the decode alone and clears the beat, so it cannot consult `retire`, which is a
+function of the state. -/
+def sofNext (req we : Bool) : BusState :=
+  { kind := if req then (if we then .store else .load) else .fetch, beat := false }
+
+/-- Which arm of the priority chain is selected this cycle. `busadapt8.v:192-207`. -/
+structure Ctrl where
+  sof     : Bool
+  loopEnd : Bool
+  deriving Repr, DecidableEq, Inhabited
+
+/-- ⭐ **THE WHOLE STATE UPDATE**, reset aside — the object `next` is one arm of. -/
+def step (s : BusState) (c : Ctrl) (req we : Bool) : BusState :=
+  if c.sof then sofNext req we
+  else if c.loopEnd then next s req we
+  else s
+
+/-- `next` IS the loop-end arm, exactly — so every theorem above is a theorem about `step`
+restricted to `sof = false, loopEnd = true`, and about nothing else. -/
+theorem next_is_the_loop_end_arm (s : BusState) (req we : Bool) :
+    step s ⟨false, true⟩ req we = next s req we := rfl
+
+/-- **THE ARM CANNOT CONSULT `retire`:** under a realign the next state is the same from EVERY
+state, so it is independent of `retire s req` — the shape the 08/18 ruling rejected.
+⛔⛔ **AND THIS THEOREM IS TRUE BY CONSTRUCTION OF `sofNext`, WHICH TAKES NO STATE ARGUMENT — SO
+IT CERTIFIES MY TRANSCRIPTION AND NOT THE MACHINE.** It cannot fail, and a theorem that cannot
+fail re-proves green with nobody deciding. It is kept because it makes the transcription's
+commitment CHECKABLE BY A READER against `busadapt8.v:193-197` — the fidelity of that reading is
+the load-bearing step, and no theorem in this file can carry it. Same caveat, verbatim, for
+`state_is_held_between_loop_ends` below. The contentful theorems in this section are the ones
+that COMPUTE a disagreement: `sof_reissues_exactly_two_reachable_cells` and the two `(A)`
+readings, which return answers I did not put in. -/
+theorem sof_arm_ignores_the_state :
+    allStates.all (fun a => allStates.all fun b =>
+      [false, true].all fun req => [false, true].all fun we =>
+        [false, true].all fun le =>
+          step a ⟨true, le⟩ req we == step b ⟨true, le⟩ req we) = true := by
+  decide +kernel
+
+/-- ⛔⛔ **THE GAP, AS ONE THEOREM: WITHOUT `sof` THE STATE MOVES ONLY AT A LOOP END.** This is
+the invariant every loop-counting theorem above silently assumes. -/
+theorem state_is_held_between_loop_ends :
+    allStates.all (fun s => [false, true].all fun req => [false, true].all fun we =>
+      step s ⟨false, false⟩ req we == s) = true := by
+  decide +kernel
+
+/-- ⛔⛔ **AND `sof` BREAKS IT — A MID-LOOP TRANSITION, WHICH IS THE MEASURED MECHANISM.** At
+`⟨fetch, false⟩` with the decode still showing a store, a realign fired between loop ends moves
+the machine into a fresh STORE transaction while a fetch is in flight. `retire` is FALSE here,
+which is why the 09-04 exhibit's filter could not see it. -/
+theorem sof_moves_the_state_mid_loop :
+    step ⟨.fetch, false⟩ ⟨true, false⟩ true true = ⟨.store, false⟩
+  ∧ step ⟨.fetch, false⟩ ⟨false, false⟩ true true = ⟨.fetch, false⟩
+  ∧ retire ⟨.fetch, false⟩ true = false := by
+  decide +kernel
+
+/-- The six states the machine can actually occupy. `idle` is a modelling artifact: no arm
+produces it and reset does not. -/
+def reachableStates : List BusState :=
+  [ .fetch, .load, .store ].flatMap fun k => [⟨k, false⟩, ⟨k, true⟩]
+
+/-- `idle` is unreachable under BOTH arms, which is what licenses the cut from four to two. -/
+theorem idle_is_unreachable :
+    allStates.all (fun s => [false, true].all fun req => [false, true].all fun we =>
+      ((next s req we).kind != .idle) && ((sofNext req we).kind != .idle)) = true := by
+  decide +kernel
+
+/-- States where the transaction is COMPLETE and the two arms disagree — the 09-04 exhibit,
+now in the model instead of in a bank. -/
+def sofReissues (l : List BusState) (req we : Bool) : List BusState :=
+  l.filter fun s => retire s req && (sofNext req we != next s req we)
+
+/-- ⭐ **THE EXHIBIT, PINNED BY ITS MEMBERS AND NOT BY ITS COUNT.** Raw four over all eight
+states; exactly two once `idle` is cut. Printing the list rather than the length is deliberate —
+a count cannot be checked against the machine, and a membership can. -/
+theorem sof_reissues_exactly_two_reachable_cells :
+    sofReissues allStates true true
+      = [⟨.idle, false⟩, ⟨.idle, true⟩, ⟨.load, true⟩, ⟨.store, true⟩]
+  ∧ sofReissues reachableStates true true = [⟨.load, true⟩, ⟨.store, true⟩]
+  ∧ sofReissues reachableStates true false = [⟨.load, true⟩, ⟨.store, true⟩] := by
+  decide +kernel
+
+/-- ⛔ **THE STORE CELL — RE-ENTRY IS A SECOND WRITE.** The loop-end arm ends the transaction;
+the realign arm puts the machine back at the store's ADDRESS beat, which is a whole second store.
+**MEASURED: stores 19 → 20 against 19 SW fetches** (silicon, `4d155b79`). -/
+theorem sof_re_enters_the_store :
+    retire ⟨.store, true⟩ true = true
+  ∧ next ⟨.store, true⟩ true true = ⟨.fetch, false⟩
+  ∧ sofNext true true = ⟨.store, false⟩
+  ∧ outWord ⟨.store, false⟩ = OutWord.dmemAddr := by
+  decide +kernel
+
+/-- ⛔ **SCOPE, AS A THEOREM RATHER THAN AS PROSE: `loopsToRetire` COUNTS LOOP-END STEPS.** It is
+defined by iterating `next`, so `no_deadlock` and `bounded_wait` bound the number of LOOP ENDS to
+a retire and say nothing about how many CYCLES the machine spends, nor whether a realign resets
+the count. Under a realign every cell below returns to a fresh transaction, so the bound is a
+bound on an interval no `sof` interrupts. -/
+theorem loops_are_counted_through_the_loop_end_arm (s : BusState) (req we : Bool) :
+    loopsToRetire s req we
+      = (if retire s req then 1
+         else if retire (step s ⟨false, true⟩ req we) req then 2
+         else if retire (step (step s ⟨false, true⟩ req we) ⟨false, true⟩ req we) req then 3
+         else 0) := rfl
+
+/-! ### THE REPAIR — TWO SHAPES, AND A QUESTION I AM PUTTING BACK RATHER THAN ANSWERING
+
+silicon recommends shape **(B)**, a "fetch owed" bit, and asks this seat's eye on the DriveMap
+half before anything lands, because (B) puts SEQUENCING in the adapter and that is the exact
+reasoning that chose shape (A) in 08/18.
+
+⛔⛔ **BEFORE THAT RULING CAN BE GIVEN, SHAPE (A) HAS TWO READINGS AND THEY ARE OPPOSITE.**
+*"Gate the arm on `retire`"* can mean SUPPRESS the realign while `retire` is high, or PERMIT it
+only while `retire` is high. Both are natural readings of four words. Modelled below and
+kernel-checked, they do not merely differ in strength — **one of them is inert on the measured
+cell and the other blocks it** — so the ruling silicon wants cannot be given against the phrase.
+This is not a quibble about wording: at the damaging cell `retire` is FALSE, and every reading
+turns on that one bit.
+-/
+
+/-- Shape (A), reading 1: the realign is SUPPRESSED while `retire` is high. -/
+def stepA_suppress (s : BusState) (c : Ctrl) (req we : Bool) : BusState :=
+  if c.sof && !retire s req then sofNext req we
+  else if c.loopEnd then next s req we
+  else s
+
+/-- Shape (A), reading 2: the realign is PERMITTED only while `retire` is high. -/
+def stepA_permit (s : BusState) (c : Ctrl) (req we : Bool) : BusState :=
+  if c.sof && retire s req then sofNext req we
+  else if c.loopEnd then next s req we
+  else s
+
+/-- ⛔⛔ **THE TWO READINGS SPLIT ON THE MEASURED CELL, AND READING 1 IS INERT THERE.** At
+`⟨fetch, false⟩` with a stale store decode — silicon's `TR 0 → TR 1` — `retire` is false, so
+reading 1 still performs the hijack while reading 2 holds the fetch. **A repair named by four
+words is two repairs, one of which does nothing to the defect it was proposed for.** -/
+theorem the_two_readings_of_A_disagree_at_the_measured_cell :
+    stepA_suppress ⟨.fetch, false⟩ ⟨true, false⟩ true true = ⟨.store, false⟩
+  ∧ stepA_permit   ⟨.fetch, false⟩ ⟨true, false⟩ true true = ⟨.fetch, false⟩ := by
+  decide +kernel
+
+/-- ⛔ **AND THEY SPLIT THE OTHER WAY ON MY 09-04 CELLS**, where `retire` IS high: reading 1
+blocks the re-issue and reading 2 performs it. **Neither reading covers both cells**, which is
+the whole content of this block and the reason (A) cannot be ruled on as stated. -/
+theorem neither_reading_of_A_covers_both_cells :
+    stepA_suppress ⟨.store, true⟩ ⟨true, false⟩ true true = ⟨.store, true⟩
+  ∧ stepA_permit   ⟨.store, true⟩ ⟨true, false⟩ true true = ⟨.store, false⟩ := by
+  decide +kernel
+
+#audit_axioms sofNext step next_is_the_loop_end_arm sof_arm_ignores_the_state
+#audit_axioms state_is_held_between_loop_ends sof_moves_the_state_mid_loop
+#audit_axioms reachableStates idle_is_unreachable sofReissues
+#audit_axioms sof_reissues_exactly_two_reachable_cells sof_re_enters_the_store
+#audit_axioms loops_are_counted_through_the_loop_end_arm
+#audit_axioms stepA_suppress stepA_permit
+#audit_axioms the_two_readings_of_A_disagree_at_the_measured_cell
+#audit_axioms neither_reading_of_A_covers_both_cells
 
 end SaltWorks.HDL.BusFSM
