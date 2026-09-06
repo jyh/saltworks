@@ -171,8 +171,24 @@ for M in 0 1; do
         echo "           Then the rule never guarded anything measurable and ARM V is not violating."; rc=1
       fi
     else
-      echo "        ⛔ GATE 1b UNAVAILABLE — the pre-repair fixture is missing or already contains"
-      echo "           the repair ($PRE_FIX). Well-foundedness is UNKNOWN, which is NOT satisfied."; rc=1
+      # ⛔ SAY WHICH DISJUNCT. This message used to read "missing OR already contains the
+      # repair", and a peer diagnosing the CI red off the log picked the second — the more
+      # interesting one, and the false one: the fixture has never contained the repair and did
+      # not exist at two of the reds. It sent a correct, careful diagnosis at a file that needed
+      # no restoring. ⇒ ***AN ERROR MESSAGE OFFERING A DISJUNCTION IS ANSWERED BY THE READER,
+      # AND THEY PICK THE DISJUNCT THAT MAKES THE BETTER STORY.*** The tool knows which; it cost
+      # nothing to say, and the ambiguity cost a peer a diagnosis.
+      if [ ! -f "$PRE_FIX" ] && [ ! -s "$T/pre_busadapt8.v" ]; then
+        echo "        ⛔ GATE 1b UNAVAILABLE — CAUSE: the pre-repair specimen was NOT FOUND."
+        echo "           No fixture at $PRE_FIX AND no reachable git object at $PIN1."
+        echo "           (A shallow clone has no object; a sandbox may not copy fixtures. Both"
+        echo "            can be true at once — that combination is what broke this in CI.)"
+      else
+        echo "        ⛔ GATE 1b UNAVAILABLE — CAUSE: the specimen ALREADY CONTAINS the repair."
+        echo "           $PRE_FIX carries \`fetch_owed\`, so it cannot demonstrate the BEFORE state."
+        echo "           A pre-repair specimen is the one file that must never be improved."
+      fi
+      echo "           Well-foundedness is UNKNOWN, which is NOT satisfied."; rc=1
     fi
   else
     if [ "${v:-1}" -eq 0 ]; then echo "        ✅ GATE 2: the compliant host takes ZERO violations — the rule is satisfiable"
