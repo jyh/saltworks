@@ -11,8 +11,10 @@ over, and could not answer from the state machine alone:
 ## ✅ SIGNED. THE ANSWER IS YES, AND IT IS MEASURED, NOT ARGUED.
 
 One `sof` pulse. Host memory gains a **second completed store transaction** at the same address
-with the same data. `SaltWorks/Silicon/Sim/reghost/run_sof_window_census.sh`, shipped DUT, nothing
-mutated, bench and criteria DERIVED at run time from the tracked `tb_plane32bus_lwsw.v`:
+with the same data. `SaltWorks/Silicon/Sim/reghost/run_sof_window_census.sh`, nothing mutated, bench and criteria
+DERIVED at run time from the tracked `tb_plane32bus_lwsw.v`. ⛔ **The DUT here is saltworks'
+`RTL/busadapt8.v`, NOT the tape-out copy — this line said "shipped DUT" and that was FALSE; see
+the LANDED amendment at the foot of this file, where the tape-out source is measured on its own.**
 
 ```
 ARM  0  no pulse            stores=19  SW fetched=19  UNACCOUNTED=0   lw_exec=18 sw_exec=19   7/7
@@ -104,7 +106,8 @@ and breaks the arbitration wholesale (2/7 red), so store accounting is no longer
 same quantity in the two régimes. **The mutation changed far more than the quantity under test,
 which makes it not a control.** Had I stopped at the first run I would have reported "the bypass is
 not the mechanism" — the opposite of the truth, on a real measurement. The mechanism above is
-established by OBSERVING the decode instead, on the shipped DUT, with nothing mutated.
+established by OBSERVING the decode instead, on the UNMUTATED DUT (saltworks' `RTL/busadapt8.v`
+— again, not the tape-out copy).
 
 ## ⏳ THE REPAIR IS NOT LANDED HERE, AND THAT IS DELIBERATE
 
@@ -184,3 +187,90 @@ document does not pre-empt it.
 - DUT unmodified; bench derived from the tracked `Sim/wordonly/tb_plane32bus_lwsw.v` at run time.
 - Prior art this rests on: `run_sof_wait_state.sh` (silicon, 09/03) established the single-arm
   re-issue and L7. This census establishes the WINDOW, the MECHANISM, and the ARCHITECTURAL cost.
+
+---
+
+## ✅ LANDED 2026-09-06 11:0x — (B) IS IN, AND THREE THINGS THE SIGNING DID NOT KNOW
+
+Shape (B) is implemented (`busadapt8.v`, `fetch_owed`) and verified
+(`Sim/reghost/run_sof_repair_verify.sh`). Recorded here rather than only on the bus, because a
+reader arrives at this file — the same reason the amendment above exists.
+
+### ① ⛔⛔ THE TAPE-OUT SOURCE CARRIES THE HAZARD, AND NOBODY HAD MEASURED IT THERE
+
+Everything above was measured on `SaltWorks/Silicon/RTL/busadapt8.v`. **That is not the file in
+the shuttle.** The tape-out copy is frozen at `5e7d73b` (2026-08-19); saltworks has moved four
+commits since, and the logic divergence is exactly **option (2), the two-loop LOAD (`load_beat`),
+landed at `1916ea0c` AFTER the snapshot.** `core32.v` and `plane32bus.v` are code-identical.
+
+Measured directly on the tape-out source, as its own arm:
+
+```
+DUT = shipped   src/busadapt8.v @ jyh/tt-neural-dataflow-fabric main (4226396)
+  ARM 0   unaccounted=0  lw_exec=21 sw_exec=21   ALL PASS (7/7)
+  ARM 10  unaccounted=1  lw_exec=20 sw_exec=22   RED    phase 0
+  ARM 11  unaccounted=1  lw_exec=20 sw_exec=22   RED    phase 1
+  ARM 12  unaccounted=1  lw_exec=20 sw_exec=22   RED    phase 2
+  ARM 13  unaccounted=0  lw_exec=21 sw_exec=21   ALL PASS   (bypass-protected)
+  ARM 20  unaccounted=0  lw_exec=21 sw_exec=21   ALL PASS   (fairness control)
+```
+
+**Same window, same architectural signature: one store duplicated and one instruction
+destroyed.** The repair is load-bearing for the shuttle, not only for the lab tree.
+
+⛔ **AND THE INSTRUMENT NAMED THE WRONG OBJECT IN ITS OWN HEADER.**
+`run_sof_window_census.sh` said *"The DUT is the SHIPPED busadapt8.v"*. It resolves
+`RTL=$HERE/../../RTL`. I meant *unmutated*; the page says *the one being fabricated*; it has been
+false since 08/19. ⇒ ***"SHIPPED" IS A CLAIM ABOUT WHICH OBJECT, NEVER A SYNONYM FOR
+"UNMODIFIED".*** Every signature above rested on a measurement whose object was mis-named in the
+instrument. The finding survives because the real object agrees — **by luck, not by method.**
+
+### ② ⛔ "LAND SHAPE (B)" HAS TWO READINGS, AND ONE SHIPS A STOWAWAY
+
+Because the two files have diverged, the order *"land shape (B)"* reads either as **port the
+one-bit fix onto the shipped file** or as **sync saltworks' RTL into the shuttle**. The second
+carries **option (2) — an unrelated, never-authorised change to the LOAD protocol — into an
+already-ingested submission under the name of a one-bit repair.**
+
+⇒ 🔑 ***A REPAIR NAMED BY A FILE IS AS LARGE AS THE FILE HAS DRIFTED.*** This is the same shape as
+compiler's finding that a repair named by a PHRASE is as many repairs as the phrase has readings,
+one level up: there, the ambiguity was in the words; here it is in the object the words select.
+
+**(B) ONLY was ported.** Option (2) stays out of the shuttle unless separately authorised.
+
+### ③ 📊 THE PRICE, MEASURED — AND THE CIRCULATING FIGURE IS WRONG IN MAGNITUDE AND SIGN
+
+The figure `+40 cells / +160 µm² / +0.28 %` was attached to (B) in the dispatch and in my gate.
+**It is not (B)'s number.** It is from silicon's post of **08/31 13:31**, pricing the **R9a
+trap-gate fidelity** change (moving `regWriteSig` port 10) — a different file, a different repair.
+Neither my signature nor compiler's was ever an area claim; both are correctness claims.
+
+Pinned sky130A liberty (`tt_025C_1v80`, PDK `c6d73a35`), top = `tt_um_saltworks_ndf_c32`:
+
+| variant | cells | flops | area (µm²) |
+|---|---|---|---|
+| as shipped | 7779 | 473 | 77 949.76 |
+| **shipped + (B) only** | **7915** | **474** | **78 191.24** |
+| shipped + (B) + option (2) | 7778 | 475 | 78 246.29 |
+
+- **(B) alone: +136 cells, +1 flop, +241.48 µm² = +0.310 %.**
+- vs the circulating `+40 / +160 / +0.28 %`: **cells off by 3.4×, area by 1.5× — and the
+  PERCENTAGE nearly lands.** A figure whose headline ratio is right is a figure that gets waved
+  through; that is why this survived in two documents and a dispatch.
+- ✅ **Determinism control: the as-shipped top re-synthesised BYTE-IDENTICAL**, so the delta is the
+  RTL change and not run-to-run variation.
+- ⚠️ **The sign flips with scope, so both are published:** standalone, `busadapt8` gets *smaller* —
+  465 → 456 cells, 3 956.29 → 3 932.52 µm² (**−9 cells, −23.77 µm²**), +1 flop — because forcing
+  `T_FETCH` in the stale window simplifies the `kind` mux by more than the flop costs. Integrated,
+  the top grows. **Both true, different questions; the decision number is the top one.**
+
+⛔ **THE FIT IS NOT CLAIMED HERE.** Utilisation is a LibreLane number, and synthesis-summed cell
+area understated occupancy by **22.8 points** the last time this seat compared them (33.51 % vs a
+true 56.27 %). +0.310 % at synthesis is encouraging; the fit answer comes from the GDS run or from
+nowhere.
+
+### ④ ⚠️ WHAT IS STILL NOT COVERED
+
+The cycle-level obligation from ③ above is **unchanged and open**. `BusState` has no phase and no
+instruction register, so neither the defect nor this repair is expressible in the Lean model.
+**No green kernel run covers `fetch_owed`.** The RTL census is its only witness.
