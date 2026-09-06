@@ -44,6 +44,18 @@ PERIOD=40
 #   longer compliant. The sweep must then FIND violations, and the script INVERTS its verdict:
 #   a clean table becomes the failure. Run both arms; a green positive arm alone proves nothing.
 CONTROL="${SWEEP_NEGATIVE_CONTROL:-0}"
+# ⭐ SHAPE MODE (SWEEP_SHAPES=1). The offset sweep answers "is this host safe at every PHASE".
+#   It does NOT answer "is every compliant host safe", because it varies one host's timing and
+#   never its SHAPE. (b) ships on the second sentence, so the second sentence needs driving.
+#   Shapes shipped, all of them still CONSULTING the rule — that is what makes them compliant:
+#     base   want a launch every 40 cycles, hold the request until granted   (the original)
+#     eager  want a launch EVERY CYCLE — maximal demand against the rule
+#     burst  queue THREE launches at once and drain them
+#   ⛔ The interesting failure is NOT violations (they all defer). It is a shape that gets
+#     STARVED: high demand + a rule that keeps saying no = pulses collapsing toward zero, which
+#     is the deadlock-with-good-manners failure showing up as a SHAPE property rather than a
+#     phase one.
+SHAPES="${SWEEP_SHAPES:-0}"
 
 [ -f "$ARM" ] || { echo "⛔ ABORT: arm not found"; exit 2; }
 [ -d "$SHUTTLE/.git" ] || { echo "⛔ ABORT: shuttle repo not found at $SHUTTLE"; exit 2; }
@@ -64,21 +76,63 @@ for v in plane32bus.v busadapt8.v core32.v; do
 done
 DUT_SHA=$( (sha256sum "$T/RTL/busadapt8.v" 2>/dev/null || shasum -a 256 "$T/RTL/busadapt8.v") | cut -c1-16 )
 echo "DUT      shuttle $REF : src/busadapt8.v  sha256/16=$DUT_SHA   (bench + checker are saltworks')"
-echo "SWEEP    the compliant host's launch offset, cyc % $PERIOD == OFF, for OFF in 0..$((PERIOD-1))"
+if [ "${SWEEP_SHAPES:-0}" = "1" ]; then
+  echo "SWEEP    the compliant host's SHAPE (demand pattern), at a fixed cadence"
+else
+  echo "SWEEP    the compliant host's launch offset, cyc % $PERIOD == OFF, for OFF in 0..$((PERIOD-1))"
+fi
 echo
 
-printf '%-5s %-12s %-12s %s\n' "OFF" "violations" "sof_pulses" "READING"
+if [ "$SHAPES" = "1" ]; then
+  printf '%-8s %-12s %-12s %s\n' "SHAPE" "violations" "sof_pulses" "READING"
+  ITEMS="base eager burst"
+else
+  printf '%-8s %-12s %-12s %s\n' "OFF" "violations" "sof_pulses" "READING"
+  ITEMS=$(seq 0 $((PERIOD-1)))
+fi
 printf '%s\n' "--------------------------------------------------------------"
 viol_bad=0; vacuous=0; rows=0
-for OFF in $(seq 0 $((PERIOD-1))); do
-  python3 - "$ARM" "$T/Sim/reghost/arm.sh" "$OFF" "$CONTROL" <<'PY' || { echo "⛔ ABORT: mutation failed"; exit 2; }
+for OFF in $ITEMS; do
+  python3 - "$ARM" "$T/Sim/reghost/arm.sh" "$OFF" "$CONTROL" "$SHAPES" <<'PY' || { echo "⛔ ABORT: mutation failed"; exit 2; }
 import io,sys
-src,dst,off,control = sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4]
+src,dst,off,control,shapes = sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4],sys.argv[5]
 s = io.open(src,encoding='utf-8').read()
 # ⛔ NO FORMAT STRINGS HERE. The first version wrote "%%" and called .replace("%%","%")
 # BEFORE the % operator ran, so Python formatted a string that already contained a bare "% 40"
 # and died with `unsupported format character`. Plain concatenation cannot have that bug.
 A = "if (cyc " + "%" + " 40 == 0) want = 1;"
+GRANT = "if (want == 1 && permitted && (dut.u_bus.phase == 2'd0 || dut.u_bus.phase == 2'd1))"
+DRAIN = "begin sof <= 1'b1; want = 0; sof_pulses = sof_pulses + 1; end"
+if shapes == "1":
+    # every shape still consults `permitted`; only the DEMAND changes
+    if s.count(A) != 1 or s.count(GRANT) != 1 or s.count(DRAIN) != 1:
+        sys.stderr.write("ABORT: shape anchors moved -- every shape row would be one cell.\n")
+        sys.exit(2)
+    if off == "eager":
+        s = s.replace(A, "want = 1;", 1)
+    elif off == "burst":
+        s = s.replace(A, "if (cyc " + "%" + " 40 == 0) want = 3;", 1)
+        s = s.replace(GRANT, GRANT.replace("want == 1", "want > 0"), 1)
+        s = s.replace(DRAIN, DRAIN.replace("want = 0", "want = want - 1"), 1)
+    elif off != "base":
+        sys.stderr.write("ABORT: unknown shape " + off + "\n"); sys.exit(2)
+    B0 = "for M in 0 1; do"
+    if s.count(B0) != 1:
+        sys.stderr.write("ABORT: mode-loop anchor missing.\n"); sys.exit(2)
+    s = s.replace(B0, "for M in 0; do", 1)
+    # ⛔ THE CONTROL MUST COMPOSE WITH THE SHAPE, and the first version of this branch
+    #   `exit(0)`d before ever reading `control` -- so SWEEP_NEGATIVE_CONTROL was SILENTLY
+    #   IGNORED and the shape table had no negative control at all. A clean table with no
+    #   control is a fact about the instrument. Caught before publishing, not after.
+    if control == "1":
+        G2 = GRANT.replace("want == 1", "want > 0") if off == "burst" else GRANT
+        if s.count(G2) != 1:
+            sys.stderr.write("ABORT: control anchor missing under shape " + off + " -- the "
+                             "negative control would be INERT.\n")
+            sys.exit(2)
+        s = s.replace(G2, G2.split(" && permitted")[0] + ")", 1)
+    io.open(dst,'w',encoding='utf-8').write(s)
+    sys.exit(0)
 if s.count(A) != 1:
     sys.stderr.write("ABORT: cadence anchor found " + str(s.count(A)) + " times, expected 1 -- "
                      "the arm moved under this sweep and every row would be one cell copied.\n")
@@ -128,17 +182,35 @@ done
 echo
 echo "rows=$rows  offsets-with-violations=$viol_bad  offsets-that-did-no-work=$vacuous"
 if [ "$CONTROL" = "1" ]; then
-  # INVERTED: the host here is NOT compliant, so a clean sweep means the sweep cannot see.
-  if [ "$viol_bad" -gt 0 ]; then
-    echo "NEGATIVE_CONTROL=PASS — a non-compliant host was CAUGHT at $viol_bad of $rows offsets."
-    echo "  The sweep can report a violation, so a clean positive arm means something."
+  # INVERTED: the host here is NOT compliant, so a clean row means the control could not see.
+  # ⛔⛔ EVERY row must be caught, not merely SOME. The first version passed as long as ANY row
+  #   was caught, which quietly certified rows whose control was VOID. Measured on the shipped
+  #   DUT: the `eager` shape stays at 0 violations even with `permitted` cut out, because a host
+  #   asserting `sof` constantly REALIGNS THE MACHINE INTO FETCH — the state the rule demands is
+  #   the state its own aggression creates, so the mutant is SELF-DEFEATING. That is a VOID
+  #   CONTROL, and the positive result for that shape is therefore UNCONTROLLED. It must be
+  #   named, not averaged away. ⇒ A CONTROL THAT PASSES ON SOME MEMBERS CERTIFIES ONLY THOSE.
+  if [ "$viol_bad" -eq "$rows" ]; then
+    echo "NEGATIVE_CONTROL=PASS — every one of $rows rows was CAUGHT. All are controlled."
     exit 0
+  fi
+  if [ "$viol_bad" -gt 0 ]; then
+    echo "⛔ NEGATIVE_CONTROL=PARTIAL — caught at $viol_bad of $rows; the REST HAVE NO WORKING"
+    echo "  CONTROL and their positive results are UNCONTROLLED. Name them; do not average."
+    echo "  A row that stays clean under the cut is a VOID control, not a passing one."
+    exit 1
   fi
   echo "⛔⛔ NEGATIVE_CONTROL=FAILED — a host that ignores the rule swept CLEAN at every offset."
   echo "  The sweep cannot detect a violation and its positive result must NOT be quoted."
   exit 1
 fi
 if [ "$viol_bad" -eq 0 ] && [ "$vacuous" -eq 0 ]; then
+  if [ "$SHAPES" = "1" ]; then
+    echo "COMPLIANT_HOST_SHAPES=CLEAN — all $rows host shapes obeyed the rule with zero"
+    echo "  violations AND none was starved. ⛔ Still not the space of hosts: three shapes is a"
+    echo "  SAMPLE, and I chose it. It is a wider sample than one, and that is all it is."
+    exit 0
+  fi
   echo "COMPLIANT_HOST_SWEEP=CLEAN — at every one of $rows launch offsets the rule was obeyed"
   echo "  with zero violations AND the host still did work. The satisfiability claim is no"
   echo "  longer resting on a single cadence."
