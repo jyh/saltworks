@@ -100,6 +100,7 @@ fi
 
 # The subject, IDENTIFIED rather than asserted — so a reader can tell WHICH bytes were judged
 # instead of trusting a row that says "the shipping arm".
+AD=$(cd "$(dirname "$ARM")" && pwd)
 ARM_SHA=$( (sha256sum "$ARM" 2>/dev/null || shasum -a 256 "$ARM") | cut -c1-16 )
 CHK_SHA=$( (sha256sum "$CHK" 2>/dev/null || shasum -a 256 "$CHK") | cut -c1-16 )
 echo "SUBJECT  arm=$ARM_SHA  checker=$CHK_SHA  (anchors verified: M1 M3 M4 each exactly once)"
@@ -143,6 +144,14 @@ build_mirror() { # $1=tag  -> echoes the path of the arm script to run
   mkdir -p "$d/Sim/reghost" "$d/Sim/wordonly" "$d/RTL"
   ln -s "$SRC" "$d/Sim/wordonly/tb_plane32bus_lwsw.v"
   for v in plane32bus.v busadapt8.v core32.v; do ln -s "$RTLD/$v" "$d/RTL/$v"; done
+  # ⛔ THE ARM'S DATA DEPENDENCIES, NOT ONLY ITS CODE. GATE 1b takes its pre-repair DUT from
+  # `$HERE/fixtures/`, and a mirror that reproduces the SCRIPTS but not the FIXTURES leaves the
+  # gate with neither of its two sources: no fixture here, and no git history under a shallow
+  # CI checkout. That intersection is exactly what CI runs — the prover, inside a shallow clone
+  # — and it is the only place both sources vanish at once, so it was invisible in every
+  # harness taken singly. ⇒ A SANDBOX INHERITS THE DEFECTS OF WHATEVER IT DECLINES TO COPY,
+  #   AND THE INTERSECTION OF TWO SURVIVABLE ENVIRONMENTS NEED NOT BE SURVIVABLE.
+  [ -d "$AD/fixtures" ] && ln -s "$AD/fixtures" "$d/Sim/reghost/fixtures"
   case "$1" in
     M4) mutate "$CHK" "$d/Sim/reghost/sof_protocol_check.v" M4 || return 2
         cp "$ARM" "$d/Sim/reghost/arm.sh" ;;
