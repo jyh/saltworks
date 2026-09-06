@@ -82,32 +82,64 @@ for M in 0 1; do
   ps=$(echo "$pr" | sed -n 's/.*sof_pulses=\([0-9]*\).*/\1/p')
   printf '%s  %-52s %s\n' "$L" "$pr" "$vd"
   if [ "$M" = 1 ]; then
-    # ⭐ R1, 2026-09-06 — GATE 1 IS KEYED ON THE CHECKER ALONE. Ruled by evidence (saltworks
-    # lead) 11:19; edit made by compiler under a narrowly lifted fence, silicon's veto intact.
+    # ⭐⭐ GATE 1 = R1 (compiler, landed first, ruled by evidence 11:19) + GATE 1b (silicon).
+    # I am NOT reversing the ruling: R1's gate is kept exactly — the checker must fire — and
+    # nothing it gates is loosened. What is added is the half R1 deliberately PARKED as R2.
     #
-    # It used to require `violations >= 1` AND the bench taking `L-FAIL  L7`. Those were the
-    # same event when it was written, because a protocol violation NECESSARILY destroyed an
-    # instruction. ⛔ SHAPE (B) SEVERS THAT LINK ON PURPOSE: measured on the landed (B), ARM V
-    # still trips the checker (`violations=1`) but the bench now reads ALL PASS 7/7, with
-    # `store_unaccounted` 1 -> 0 and lw/sw moving 17/20 -> 18/19 — silicon's own amendment-2
-    # signature run backwards. The gate was not wrong; A REPAIR LANDED UNDERNEATH ITS WITNESS.
+    # R1 dropped the L7 coupling to an observation because shape (B) had repaired the witness
+    # out from under it, and tracked "can any host still do damage post-(B)?" as R2, owing its
+    # own measurement. ⇒ I OWED THAT MEASUREMENT AND TOOK IT:
+    #     full arrival sweep 40..160 on the COMPLETE (B):        0 corrupt / 0 lost of 121
+    #     the same sweep with the retire-edge term removed:      4 corrupt        of 121
+    # So R2 is VOID — but only because (B) needed a SECOND term. The (B) that existed when R1
+    # was written still left 4 of 121 corrupt: `fetch_owed` is SET BY the memory retire and so
+    # is not yet high AT that edge. The complete repair is `a28eeb95`.
     #
-    # GATE 1's PURPOSE is unchanged and still met: the checker must be shown capable of firing,
-    # or ARM C's clean run proves nothing. That is exactly `violations >= 1`.
-    # ⛔ THE L7 COUPLING IS NOT REPAIRED HERE, DELIBERATELY. Whether any host can still destroy
-    # an instruction through `sof` after (B) is a claim about THE REPAIR'S REACH, not about this
-    # gate — it is tracked as R2 and owes its own measurement. An edit that settled both would
-    # settle the second one without anyone deciding it. So L7 is REPORTED below and gates nothing.
+    # ⛔ AND THAT IS WHY THE WITNESS COMES BACK AS A GATE RATHER THAN STAYING AN OBSERVATION:
+    # "the bench did not take L7 red" was TRUE of the INCOMPLETE (B) too, for a different
+    # reason. An observation that reads identically whether the repair is complete or
+    # three-quarters done carries no information about the repair. Pinned to the pre-repair
+    # RTL it says something only the past can say — and it can FAIL.
+    # ⇒ ASK EACH HALF OF THE WORLD IT IS TRUE IN, AND PIN THE HALF THAT DESCRIBES THE PAST.
     if [ "${v:-0}" -ge 1 ]; then
-      echo "        ✅ GATE 1: the violating host TRIPS the checker (violations=$v) — it can fail"
+      echo "        ✅ GATE 1a: the violating host TRIPS the checker (violations=$v) — it can fail"
       if echo "$out" | grep -q 'L-FAIL  L7'; then
         echo "           observation (NOT a gate): the bench also took L7 red — pre-(B) behaviour"
       else
-        echo "           observation (NOT a gate): the bench did NOT take L7 red. Expected under"
-        echo "           shape (B), which removes the damage. See R2; this does not fail the arm."
+        echo "           observation (NOT a gate): the bench did NOT take L7 red, as (B) intends"
       fi
     else
-      echo "        ⛔ GATE 1 FAILED — the checker did not fire on a known-bad host; it cannot fail, so ARM C proves nothing"; rc=1
+      echo "        ⛔ GATE 1a FAILED — the checker did not fire on a known-bad host; it cannot fail, so ARM C proves nothing"; rc=1
+    fi
+
+    # ---- GATE 1b, WELL-FOUNDEDNESS (historical, pinned) — R1's dropped conjunct, restored --
+    PIN1="${SOF_PROTOCOL_PIN:-afa8a2e7}"
+    # ⛔ RESOLVE THE GIT REPO THROUGH THE SYMLINK, NOT FROM `$RTL`: compiler's prover runs this
+    # arm in a sandbox whose RTL/ holds SYMLINKS, so `$RTL` is not a git repo there and a naive
+    # `cd "$RTL" && git show` fails — reporting 1b UNAVAILABLE for a reason unrelated to the
+    # gate. A CHECK MUST WORK IN THE HARNESS THAT RUNS IT, NOT ONLY WHERE ITS AUTHOR TYPED IT.
+    GITDIR="$RTL"
+    if ! ( cd "$GITDIR" && git rev-parse --git-dir >/dev/null 2>&1 ); then
+      _real=$(readlink "$RTL/busadapt8.v" 2>/dev/null || true)
+      [ -n "$_real" ] && GITDIR=$(cd "$(dirname "$_real")" && pwd)
+    fi
+    if ( cd "$GITDIR" && git merge-base --is-ancestor "$PIN1" HEAD ) 2>/dev/null &&
+       ( cd "$GITDIR" && git show "$PIN1:./busadapt8.v" ) > "$T/pre_busadapt8.v" 2>/dev/null &&
+       ! grep -q 'fetch_owed' "$T/pre_busadapt8.v"; then
+      iverilog -g2005 -Ptb.HOST_MODE=1 -o "$T/pre.vvp" -s tb \
+        "$T/tb.v" "$HERE/sof_protocol_check.v" "$RTL/plane32bus.v" "$T/pre_busadapt8.v" "$RTL/core32.v" 2>/dev/null
+      pout=$(vvp "$T/pre.vvp" 2>&1)
+      ppr=$(echo "$pout" | sed -n 's/^ *PROTO: //p')
+      if echo "$pout" | grep -q 'L-FAIL  L7'; then
+        echo "        ✅ GATE 1b WELL-FOUNDED: on the pre-repair RTL ($PIN1) the SAME host takes L7 red"
+        echo "                                 [$ppr]  ⇒ the rule guards a real hazard; (B) removed it"
+      else
+        echo "        ⛔ GATE 1b FAILED — the violating host does NO harm even on the PRE-REPAIR RTL."
+        echo "           Then the rule never guarded anything measurable and ARM V is not violating."; rc=1
+      fi
+    else
+      echo "        ⛔ GATE 1b UNAVAILABLE — no pre-repair DUT at $PIN1 that lacks the repair."
+      echo "           Well-foundedness is UNKNOWN, which is not the same as satisfied."; rc=1
     fi
   else
     if [ "${v:-1}" -eq 0 ]; then echo "        ✅ GATE 2: the compliant host takes ZERO violations — the rule is satisfiable"

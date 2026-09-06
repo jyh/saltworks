@@ -183,10 +183,18 @@ for m in M1 M3 M4; do
   case $m in
     M1) g="GATE 2"; desc="host stops consulting the rule" ;;
     M3) g="GATE 3"; desc="host never asserts sof (vacuous pass)" ;;
-    M4) g="GATE 1"; desc="checker cannot count (toothless)" ;;
+    M4) g="GATE 1a"; desc="checker cannot count (toothless)" ;;
   esac
   rc=0; run_arm "$m" || rc=$?
-  gate=$(command grep -o '⛔ GATE [0-9] FAILED' "$T/$m.out" | head -1)
+  # ⛔ SUB-GATE LETTER ALLOWED, 2026-09-06 (silicon). GATE 1 was SPLIT BY TENSE into
+  # 1a LIVENESS (checker fires on the current RTL) and 1b WELL-FOUNDEDNESS (the same host
+  # takes L7 red on the PINNED pre-repair RTL), because shape (B) removed the harm that
+  # the old single conjunction used as its witness. This pattern was `[0-9]` and silently
+  # matched NOTHING once the label gained a letter — the mutant was still caught, but the
+  # prover reported `caught by <none>` and failed for a naming reason.
+  # ⇒ A DETECTOR IS A CITER: RENAMING A LABEL BREAKS EVERY TOOL KEYED ON IT, and the
+  #   break is silent in the direction that looks like a real failure.
+  gate=$(command grep -o '⛔ GATE [0-9][a-z]\? FAILED' "$T/$m.out" | head -1)
   if [ "$rc" -ne 0 ]; then
     printf '%-12s %-13s %-46s %s\n' "$m caught" "$g" "$desc" "✅ RED rc=$rc ${gate:-}"
     # The mutant must be caught BY ITS OWN GATE, not by some other one failing incidentally.
