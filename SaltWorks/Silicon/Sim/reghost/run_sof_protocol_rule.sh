@@ -112,20 +112,53 @@ for M in 0 1; do
       echo "        ⛔ GATE 1a FAILED — the checker did not fire on a known-bad host; it cannot fail, so ARM C proves nothing"; rc=1
     fi
 
-    # ---- GATE 1b, WELL-FOUNDEDNESS (historical, pinned) — R1's dropped conjunct, restored --
+    # ---- GATE 1b, WELL-FOUNDEDNESS (historical) — R1's dropped conjunct, restored ----------
+    # ⛔⛔ THE PRE-REPAIR DUT IS A TRACKED FIXTURE, NOT A `git show`. I shipped the git form
+    # first and it went RED IN CI on the next push: the runner checks out SHALLOW, the pinned
+    # sha is not in that clone, and the gate reported 1b UNAVAILABLE — a naming of MY OWN
+    # environment, not of the design. I had written the sentence "a check must work in the
+    # harness that runs it, not only where its author typed it" into this very file, in the
+    # commit that broke it, about a DIFFERENT harness (compiler's symlink sandbox).
+    # ⇒ ***KNOWING THE LAW IS NOT ENUMERATING THE HARNESSES. There were THREE — my shell, the
+    #   prover's sandbox, and a shallow CI clone — and I fixed the one that had already bitten.***
+    # A frozen fixture depends on NO history, NO remote and NO checkout depth. The
+    # well-foundedness claim is about one specific historical artifact, so freezing that
+    # artifact is the honest representation of it rather than a workaround.
+    # ⛔ TWO INDEPENDENT SOURCES, AND IT REFUSES ONLY IF BOTH ARE ABSENT. The fixture covers a
+    # shallow CI clone (no history); the git object covers a sandbox that mirrors the scripts
+    # but not the fixtures directory — which is compiler's prover, the THIRD harness, and it
+    # broke on the fixture-only version within one run of the git-only version breaking on CI.
+    # ⇒ ***I FIXED THIS FILE FOR ONE HARNESS AT A TIME, TWICE, AND EACH FIX WAS COMPLETE FOR
+    #   THE HARNESS THAT HAD JUST BITTEN. Enumerate the runners, then write the check once.***
     PIN1="${SOF_PROTOCOL_PIN:-afa8a2e7}"
-    # ⛔ RESOLVE THE GIT REPO THROUGH THE SYMLINK, NOT FROM `$RTL`: compiler's prover runs this
-    # arm in a sandbox whose RTL/ holds SYMLINKS, so `$RTL` is not a git repo there and a naive
-    # `cd "$RTL" && git show` fails — reporting 1b UNAVAILABLE for a reason unrelated to the
-    # gate. A CHECK MUST WORK IN THE HARNESS THAT RUNS IT, NOT ONLY WHERE ITS AUTHOR TYPED IT.
+    PRE_FIX="$HERE/fixtures/busadapt8_pre_shapeB.v"
+    PRE_SRC="none"
+    if [ -f "$PRE_FIX" ]; then cp "$PRE_FIX" "$T/pre_busadapt8.v"; PRE_SRC="fixture"; fi
+    # WHERE HISTORY *IS* AVAILABLE, PROVE THE FIXTURE IS THE OBJECT IT CLAIMS TO BE. This runs
+    # locally and is skipped in a shallow clone, so the fixture cannot silently drift away from
+    # the sha it is named after without a full-history run noticing.
     GITDIR="$RTL"
     if ! ( cd "$GITDIR" && git rev-parse --git-dir >/dev/null 2>&1 ); then
       _real=$(readlink "$RTL/busadapt8.v" 2>/dev/null || true)
       [ -n "$_real" ] && GITDIR=$(cd "$(dirname "$_real")" && pwd)
     fi
-    if ( cd "$GITDIR" && git merge-base --is-ancestor "$PIN1" HEAD ) 2>/dev/null &&
-       ( cd "$GITDIR" && git show "$PIN1:./busadapt8.v" ) > "$T/pre_busadapt8.v" 2>/dev/null &&
-       ! grep -q 'fetch_owed' "$T/pre_busadapt8.v"; then
+    if ( cd "$GITDIR" && git cat-file -e "$PIN1:./busadapt8.v" ) 2>/dev/null; then
+      if [ "$PRE_SRC" = "fixture" ]; then
+        if ( cd "$GITDIR" && git show "$PIN1:./busadapt8.v" ) | cmp -s - "$T/pre_busadapt8.v"; then
+          echo "        ✅ fixture provenance: byte-identical to $PIN1:busadapt8.v"
+        else
+          echo "        ⛔ FIXTURE DRIFT — fixtures/busadapt8_pre_shapeB.v is NOT $PIN1:busadapt8.v."
+          echo "           The historical witness has been edited; 1b would measure a fiction."; rc=1
+        fi
+      else
+        ( cd "$GITDIR" && git show "$PIN1:./busadapt8.v" ) > "$T/pre_busadapt8.v" 2>/dev/null &&
+          PRE_SRC="git $PIN1"
+        echo "        (no fixture here; pre-repair DUT taken from git object $PIN1)"
+      fi
+    elif [ "$PRE_SRC" = "fixture" ]; then
+      echo "        (fixture provenance unverifiable here — no history; the fixture stands alone)"
+    fi
+    if [ -s "$T/pre_busadapt8.v" ] && ! grep -q 'fetch_owed' "$T/pre_busadapt8.v"; then
       iverilog -g2005 -Ptb.HOST_MODE=1 -o "$T/pre.vvp" -s tb \
         "$T/tb.v" "$HERE/sof_protocol_check.v" "$RTL/plane32bus.v" "$T/pre_busadapt8.v" "$RTL/core32.v" 2>/dev/null
       pout=$(vvp "$T/pre.vvp" 2>&1)
@@ -138,8 +171,8 @@ for M in 0 1; do
         echo "           Then the rule never guarded anything measurable and ARM V is not violating."; rc=1
       fi
     else
-      echo "        ⛔ GATE 1b UNAVAILABLE — no pre-repair DUT at $PIN1 that lacks the repair."
-      echo "           Well-foundedness is UNKNOWN, which is not the same as satisfied."; rc=1
+      echo "        ⛔ GATE 1b UNAVAILABLE — the pre-repair fixture is missing or already contains"
+      echo "           the repair ($PRE_FIX). Well-foundedness is UNKNOWN, which is NOT satisfied."; rc=1
     fi
   else
     if [ "${v:-1}" -eq 0 ]; then echo "        ✅ GATE 2: the compliant host takes ZERO violations — the rule is satisfiable"
