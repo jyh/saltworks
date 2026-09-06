@@ -266,3 +266,54 @@ jobs:
             fi
             echo "OK   $f is $mode"
           done
+
+  sof-protocol-rule:
+    name: the host `sof` rule is binding, satisfiable, and permits work
+    runs-on: ubuntu-latest
+    # Ordered by evidence (saltworks lead) 2026-09-06 11:0x, clause (iv): move the `sof`
+    # host-protocol rule from STAGED to SCHEDULED. The verifier had settled it as STAGED with
+    # a precise finding -- A RED-CAPABLE CONSUMER EXISTS AND NOTHING SCHEDULES IT -- and the
+    # order names the state being left behind: "an arm that can go red but is never asked is
+    # indistinguishable from an arm that passes, and it reports the reassuring direction."
+    #
+    # ⛔ WHY THIS JOB LIVES IN *THIS* WORKFLOW AND NOT IN ONE OF ITS OWN, WHICH WOULD BE
+    #   TIDIER AND WOULD BE THE WRONG ANSWER. The order's real question is not "is it
+    #   scheduled", it is "if the rule were violated, WHO WOULD SEE IT?" In this fleet the
+    #   answer is a measured habit, not a hope: every seat quotes `Scrub ✅` in its bank and
+    #   its bus post at every landing -- this seat's own 09-06 bank does it three times, once
+    #   per commit. That habit names THIS workflow. A new workflow called something else would
+    #   fire, could go red, and would go red IN A CHANNEL NO HABIT READS -- rebuilding the
+    #   defect one level up, which is exactly what the order warns against. A failing job here
+    #   makes the whole run red, so `Scrub ✅` becomes unquotable and the existing, proven
+    #   reading habit covers the new arm for free.
+    #
+    # ⛔ DELIBERATELY UNFILTERED -- no `paths:` guard, same doctrine as the jobs above. The
+    #   arm is sensitive to the adapter state it is fed (`kind`, `phase`, `c_dmem_req`), and a
+    #   path filter narrow enough to look efficient is exactly wide enough to miss the change
+    #   that matters. An over-narrow guard fails SILENTLY and in the reassuring direction.
+    steps:
+      - uses: actions/checkout@v4
+      - name: install iverilog -- fail-closed, because "could not look" must never print green
+        run: |
+          ok=0
+          for i in 1 2 3; do
+            if sudo apt-get update -qq && sudo apt-get install -y -qq iverilog; then ok=1; break; fi
+            echo "iverilog install attempt $i failed; retrying"; sleep 5
+          done
+          if [ "$ok" != 1 ] || ! command -v iverilog >/dev/null 2>&1; then
+            echo "⛔ TOOLCHAIN UNAVAILABLE -- iverilog did not install, so THE ARM DID NOT RUN."
+            echo "   This is RED on purpose and it is NOT a verdict on the rule."
+            echo "   Soft-passing here would rebuild the very defect this job removes: an arm"
+            echo "   that reports the reassuring direction when it could not look at all."
+            exit 1
+          fi
+          iverilog -V | head -1
+      # ⛔ THE PROVER RUNS FIRST, and that ordering is the house doctrine three jobs above:
+      #   "The gate proves it can fail before it is allowed to pass." A scheduled arm that has
+      #   quietly lost its teeth is green, and green is also what success looks like.
+      #   One mutant per gate, each caught by ITS OWN gate -- see the prover's header for the
+      #   mutant it BUILT AND WITHDREW, and why a void control is worse than no control.
+      - name: the arm must still be able to go RED (one mutant per gate)
+        run: sh docs/ledger-tools/prove_sof_protocol_arm.sh
+      - name: THE RULE — bad host caught · good host clean · good host still does work
+        run: sh SaltWorks/Silicon/Sim/reghost/run_sof_protocol_rule.sh
