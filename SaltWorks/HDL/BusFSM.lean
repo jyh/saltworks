@@ -483,4 +483,116 @@ theorem neither_reading_of_A_covers_both_cells :
 #audit_axioms the_two_readings_of_A_disagree_at_the_measured_cell
 #audit_axioms neither_reading_of_A_covers_both_cells
 
+
+/-! ### SHAPE (B), PRICED IN THE KERNEL BEFORE THE RULING — NOT PRE-EMPTING IT
+
+The Captain's decision at the 07:41 sitting is whether to re-submit; shape (B) is what silicon
+recommends and what carries both technical signatures (mine on the `DriveMap` half, silicon's on
+the shape). **Nothing here lands a repair.** It answers, ahead of the ruling, the one question
+that is mine to answer and that a ruling cannot wait on: **does (B) disturb the surface this file
+already proves?**
+
+silicon's rule: *after a memory instruction retires and before the next is assembled the ONLY
+correct `kind` is `fetch` — there is nothing to re-derive from.* So the adapter carries a bit
+saying "a fetch is owed", and the realign arm consults THAT instead of a decode that may still
+describe the retired instruction.
+-/
+
+/-- Shape (B)'s state: the (2) state plus the fetch-owed bit. -/
+structure BusStateB where
+  kind      : Kind
+  beat      : Bool
+  fetchOwed : Bool
+  deriving Repr, DecidableEq, Inhabited
+
+/-- Forget the new bit. This is the map under which (B) must look like the machine I proved. -/
+def proj (s : BusStateB) : BusState := ⟨s.kind, s.beat⟩
+
+def retireB (s : BusStateB) (req : Bool) : Bool := retire (proj s) req
+
+/-- The loop-end arm under (B). The bit is SET when an instruction retires (a fetch is now owed)
+and CLEARED when a fetch loop commits a memory instruction — i.e. when a decode becomes
+trustworthy. -/
+def nextB (s : BusStateB) (req we : Bool) : BusStateB :=
+  if retireB s req then { kind := .fetch, beat := false, fetchOwed := true }
+  else if s.kind = .fetch then
+    { kind := if we then .store else .load, beat := false, fetchOwed := false }
+  else { s with beat := true }
+
+/-- The realign arm under (B): while a fetch is owed, a realign HOLDS the fetch. -/
+def sofNextB (s : BusStateB) (req we : Bool) : BusStateB :=
+  if s.fetchOwed then { kind := .fetch, beat := false, fetchOwed := true }
+  else { kind := if req then (if we then .store else .load) else .fetch
+       , beat := false, fetchOwed := false }
+
+def stepB (s : BusStateB) (c : Ctrl) (req we : Bool) : BusStateB :=
+  if c.sof then sofNextB s req we
+  else if c.loopEnd then nextB s req we
+  else s
+
+/-- The sixteen states of (B). -/
+def allStatesB : List BusStateB :=
+  [ .idle, .fetch, .load, .store ].flatMap fun k =>
+    [ ⟨k, false, false⟩, ⟨k, false, true⟩, ⟨k, true, false⟩, ⟨k, true, true⟩ ]
+
+theorem allStatesB_card : allStatesB.length = 16 := by decide +kernel
+
+/-- ⭐⭐⭐ **THE RESULT THAT MATTERS TO THIS FILE: (B) DOES NOT MOVE THE LOOP-END ARM.** Under the
+projection that forgets `fetchOwed`, `nextB` IS `next` — on all sixteen states and all four
+inputs. **So every theorem above this section survives shape (B) unchanged**: `no_deadlock`,
+`bounded_wait`, `only_three_costs`, `reachable_costs_are_exactly_one_and_three`, `retire_resets`,
+the T5 block, and `adapterNext_correct`'s 32-input sweep all describe `next`, and `next` is what
+(B) still does at a loop end.
+⚖️ **This is the compiler seat's half of the two-signature row, and it is the half that could
+have refused (B):** a repair that changed the loop-end transition would have invalidated the
+verified surface and cost a re-proof, which is a real price on a 30-hour clock. It does not. -/
+theorem shapeB_leaves_the_loop_end_arm_alone :
+    allStatesB.all (fun s => [false, true].all fun req => [false, true].all fun we =>
+      proj (nextB s req we) == next (proj s) req we) = true := by
+  decide +kernel
+
+/-- And `retire` itself is untouched, which is what `DriveMap` cares about: (B) adds no term to
+the decode. -/
+theorem shapeB_does_not_move_retire :
+    allStatesB.all (fun s => [false, true].all fun req =>
+      retireB s req == retire (proj s) req) = true := by
+  decide +kernel
+
+/-- ⭐⭐ **(B) CLOSES THE CELL THAT BIT.** silicon's `TR 0 → TR 1`: a fetch in flight, the decode
+still showing the retired SW, a realign mid-loop. Under (B) the fetch is HELD. Compare
+`sof_moves_the_state_mid_loop` above, where the same cell produced a fresh store. -/
+theorem shapeB_holds_the_fetch_at_the_measured_cell :
+    stepB ⟨.fetch, false, true⟩ ⟨true, false⟩ true true = ⟨.fetch, false, true⟩ := by
+  decide +kernel
+
+/-- ⭐⭐ **AND IT CLOSES MY 09-04 CELLS TOO — the ones `stepA_permit` re-issued.** A completed
+store, then a realign: the machine stays at a fetch instead of re-entering `T_STORE`. **Neither
+reading of (A) covered both; (B) covers both.** -/
+theorem shapeB_closes_both_cells :
+    stepB ⟨.fetch, false, true⟩ ⟨true, false⟩ true true = ⟨.fetch, false, true⟩
+  ∧ (stepB ⟨.store, true, false⟩ ⟨false, true⟩ true true).fetchOwed = true
+  ∧ stepB ⟨.store, true, true⟩ ⟨true, false⟩ true true = ⟨.fetch, false, true⟩ := by
+  decide +kernel
+
+/-- ⛔ **THE NEGATIVE CONTROL, SO THIS IS NOT A REPAIR THAT SIMPLY FREEZES THE MACHINE.** With no
+fetch owed, the realign arm still realigns — (B) restricts the arm, it does not delete it. Without
+this, every theorem above would also hold of a `sof` that did nothing at all. -/
+theorem shapeB_still_realigns_when_no_fetch_is_owed :
+    stepB ⟨.fetch, false, false⟩ ⟨true, false⟩ true true = ⟨.store, false, false⟩
+  ∧ stepB ⟨.fetch, false, false⟩ ⟨true, false⟩ false false = ⟨.fetch, false, false⟩ := by
+  decide +kernel
+
+/-- ⛔ **AND THE BIT IS REACHABLE IN BOTH VALUES FROM A RESET START** — so neither arm of the
+control above is vacuous on the machine as it actually runs. -/
+theorem shapeB_bit_takes_both_values_from_reset :
+    (nextB ⟨.fetch, false, false⟩ false false).fetchOwed = true
+  ∧ (nextB ⟨.fetch, false, false⟩ true true).fetchOwed = false := by
+  decide +kernel
+
+#audit_axioms BusStateB proj retireB nextB sofNextB stepB allStatesB allStatesB_card
+#audit_axioms shapeB_leaves_the_loop_end_arm_alone shapeB_does_not_move_retire
+#audit_axioms shapeB_holds_the_fetch_at_the_measured_cell shapeB_closes_both_cells
+#audit_axioms shapeB_still_realigns_when_no_fetch_is_owed
+#audit_axioms shapeB_bit_takes_both_values_from_reset
+
 end SaltWorks.HDL.BusFSM
