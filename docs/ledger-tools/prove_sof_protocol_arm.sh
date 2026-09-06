@@ -60,6 +60,50 @@ command -v python3  >/dev/null || { echo "⛔ ABORT: python3 absent — the prov
 T=$(mktemp -d) || exit 2
 trap 'rm -rf "$T"' EXIT
 
+# ── PREFLIGHT — ⛔⛔ THIS RUNS BEFORE ANY ROW IS PRINTED, AND THAT ORDERING IS THE WHOLE POINT.
+# 2026-09-06 11:09, measured in production: a branch mutated the arm ITSELF, so the row labelled
+# "P pristine — nothing, the shipping arm" ran a file that had in fact been cut. It printed
+# `GATE 2 FAILED — a rule-following host still violates; the rule is wrong` and only AFTERWARDS
+# aborted with "the subject moved under this prover". The saltworks lead read the first line
+# correctly and had to ask whether the campaign's central mitigation had just been refuted.
+# ⇒ 🔑 A ROW LABEL IS A CLAIM. "pristine" only ever meant "not mutated BY THIS PROVER", and the
+#   label silently upgraded it to "not mutated AT ALL" -- true on master, false on that branch.
+#   A PROVER THAT CANNOT BUILD ITS FIXTURE MUST SAY NOTHING ABOUT THE SUBJECT, rather than
+#   publish a verdict and withdraw it two rows later. The withdrawal never overtakes the verdict.
+# So: every anchor is asserted here, and a mismatch ABORTS with NO verdict at all.
+preflight_fail=0
+for spec in "M1:$ARM" "M3:$ARM" "M4:$CHK"; do
+  tag=${spec%%:*}; file=${spec#*:}
+  python3 - "$file" "$tag" <<'PY' || preflight_fail=1
+import io,sys
+f,tag = sys.argv[1],sys.argv[2]
+A = {
+ "M1": "if (want == 1 && permitted && (dut.u_bus.phase == 2'd0 || dut.u_bus.phase == 2'd1))",
+ "M3": "if (cyc % 40 == 0) want = 1;",
+ "M4": "violations <= violations + 32'd1;",
+}[tag]
+n = io.open(f,encoding='utf-8').read().count(A)
+if n != 1:
+    sys.stderr.write("⛔ PREFLIGHT %s: anchor found %d times in %s, expected exactly 1.\n"
+                     % (tag, n, f))
+    sys.exit(1)
+PY
+done
+if [ "$preflight_fail" -ne 0 ]; then
+  echo "⛔⛔ ABORT — THE SUBJECT IS NOT THE ONE THIS PROVER KNOWS, so it reports NOTHING about it."
+  echo "   No verdict row has been printed, deliberately: an anchor that has moved makes every"
+  echo "   mutant INERT, and an inert mutant is indistinguishable from a caught one."
+  echo "   Either the arm was edited (re-point the anchors here, in the same change), or the"
+  echo "   tree under test is not the tree this prover was written against."
+  exit 2
+fi
+
+# The subject, IDENTIFIED rather than asserted — so a reader can tell WHICH bytes were judged
+# instead of trusting a row that says "the shipping arm".
+ARM_SHA=$( (sha256sum "$ARM" 2>/dev/null || shasum -a 256 "$ARM") | cut -c1-16 )
+CHK_SHA=$( (sha256sum "$CHK" 2>/dev/null || shasum -a 256 "$CHK") | cut -c1-16 )
+echo "SUBJECT  arm=$ARM_SHA  checker=$CHK_SHA  (anchors verified: M1 M3 M4 each exactly once)"
+
 # ⛔ A MUTATION THAT MATCHED NOTHING IS A FIXTURE THAT NEVER BUILT ITS STATE, and it fails in
 #   the direction that looks like success. Every cut asserts its own anchor count and ABORTS.
 mutate() { # $1=src $2=dst $3=tag
@@ -128,9 +172,9 @@ printf '%s\n' "-----------------------------------------------------------------
 rcP=0; run_arm pristine || rcP=$?
 vP=$(sed -n 's/^SOF_PROTOCOL_RULE=//p' "$T/pristine.out" | head -1)
 if [ "$rcP" -eq 0 ] && [ "${vP#PASS}" != "$vP" ]; then
-  printf '%-12s %-13s %-46s %s\n' "P pristine" "(all three)" "nothing — the shipping arm" "✅ PASS as expected"
+  printf '%-12s %-13s %-46s %s\n' "P pristine" "(all three)" "nothing — the tree's arm, sha above" "✅ PASS as expected"
 else
-  printf '%-12s %-13s %-46s %s\n' "P pristine" "(all three)" "nothing — the shipping arm" "⛔ POSITIVE CONTROL FAILED rc=$rcP"
+  printf '%-12s %-13s %-46s %s\n' "P pristine" "(all three)" "nothing — the tree's arm, sha above" "⛔ POSITIVE CONTROL FAILED rc=$rcP"
   sed 's/^/      | /' "$T/pristine.out"
   fail=1
 fi
