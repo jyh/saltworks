@@ -125,6 +125,52 @@ a fix. Two shapes, with my recommendation:
 is entangled with a repair landed for a different reason, and this file's own record says a
 justification nobody needs is a justification nobody checks.
 
+## ⛔⛔ AMENDED 2026-09-06 BY COMPILER'S KERNEL RULING — **(A) IS WORSE THAN I WROTE, AND (B) IS SIGNED**
+
+compiler (`e1b5957`) took the fork above to the kernel and returned two things that change this
+section. Recorded here rather than only on the bus, because a reader arrives at this file.
+
+**① MY DESCRIPTION OF (A) WAS TOO KIND, AND ITS OWN WORDS ARE THE PROBLEM.** I wrote (A) as *"gate
+the `sof` arm on `retire`"* and judged it *right by accident*. compiler kernel-checked BOTH natural
+readings of that phrase — `stepA_suppress` (*suppress the realign while `retire` is high*) and
+`stepA_permit` (*permit it only while `retire` is high*) — and they are **OPPOSITE REPAIRS**:
+
+- at **my measured cell** `⟨fetch, false⟩` (the stale SW decode, `sof` at phase 0–2 of the following
+  fetch loop) **`retire` is FALSE** ⇒ `stepA_suppress` is **INERT — IT STILL PERFORMS THE HIJACK**;
+- on compiler's 09-04 cells, where `retire` IS high, the two split the other way.
+- **NEITHER READING COVERS BOTH CELLS.**
+
+⇒ 🔑 ***A REPAIR NAMED BY A PHRASE IS AS MANY REPAIRS AS THE PHRASE HAS READINGS — and the one bit
+they all turn on is the bit the defect sits on.*** My "right by accident" was itself too generous:
+one reading of (A) is not right at all at the cell that actually bit.
+
+**② (B) IS DriveMap-SAFE, AND compiler SIGNS IT.** `DriveMap` is exactly two fields
+(`Certs/DmemKernelBridge.lean:61-63`) — `we : ins 33` and `req : ins 32` — constraining TWO PORT
+BITS as pure decodes of the instruction word, and saying **nothing about the adapter's internal
+state**. (B)'s `fetchOwed` bit selects `kind` and never touches bits 32/33. The 08/18 ruling's
+*"where no proof binds"* was the REASON to put sequencing in the adapter, not a reason to avoid it;
+what would break `DriveMap` is making `c_dmem_req` fall on retire — the shape 08/18 already
+rejected, and which neither (A) nor (B) does. **The caveat I raised above is answered: it was the
+right question and the answer clears (B).**
+
+**③ AND THE SCOPE compiler DECLARED, WHICH NOBODY SHOULD LET SLIDE:** its `BusState` has **no phase
+and no instruction register**, so the measured 3-cycle window and the stale decode are **NOT
+EXPRESSIBLE IN THE LEAN MODEL**. A theorem there that looks like it covers this defect covers only
+its loop-level shadow. ⇒ **THE CYCLE-LEVEL STATEMENT IS A NEW AND OPEN OBLIGATION** — the RTL
+measurement is currently the only witness at the granularity where the defect lives.
+
+**④ AND compiler'S CORRECTION OF ITS OWN EXHIBIT EXPLAINS WHY THIS TOOK TWO SEATS.** Its 09-04
+exhibit filtered on `retire = true` — *"a COMPLETED transaction"* — so **its own filter excluded the
+cell that actually bit.** Right that the arm is unsound, right to fear a second write, wrong about
+where. ⇒ ***A CORRECT FINDING CAN CARRY AN INCORRECT WITNESS, AND THE WITNESS IS THE HALF A READER
+REUSES.*** I reused it: my first structural prediction inherited its framing and expected the
+damage at the retiring edge, which is exactly where it is NOT.
+
+⏳ **STATUS: (B) now carries both technical signatures — mine (shape) and compiler's (DriveMap).
+IT IS STILL NOT LANDED, and must not be:** landing RTL into an already-ingested submission is the
+Captain's act, at the 07:41 sitting. The mitigation that removes REACHABILITY without touching the
+shuttle is `docs/silicon-sof-host-protocol-rule-0906.md`.
+
 ⛔ **NOT CLAIMED HERE:** that either shape is DriveMap-safe. `c_dmem_req` must remain a pure decode
 of the instruction word (`Certs/DmemKernelBridge.lean`, assumed and proved nowhere) — shape (B)
 adds sequencing in the ADAPTER, where no proof binds, which is the same reasoning that chose Shape A
