@@ -247,13 +247,26 @@ Neither my signature nor compiler's was ever an area claim; both are correctness
 
 Pinned sky130A liberty (`tt_025C_1v80`, PDK `c6d73a35`), top = `tt_um_saltworks_ndf_c32`:
 
+⛔ **CORRECTED 11:3x — THE FIRST TABLE HERE PRICED THE INCOMPLETE (B).** It was measured before
+the retire-edge term (§⑤ below) was found to be necessary, so it priced a repair that still left
+4 of 121 arrival cycles corrupt. **A price for a repair that does not work is not this repair's
+price**, and this is the THIRD number to cross an object boundary in one campaign. Both rows are
+kept, because the superseded one is the one already quoted on the bus.
+
 | variant | cells | flops | area (µm²) |
 |---|---|---|---|
-| as shipped | 7779 | 473 | 77 949.76 |
-| **shipped + (B) only** | **7915** | **474** | **78 191.24** |
-| shipped + (B) + option (2) | 7778 | 475 | 78 246.29 |
+| as shipped (`4226396`) | 7779 | 473 | 77 949.76 |
+| **shipped + COMPLETE (B)** ← ships | **7759** | **474** | **78 143.70** |
+| *superseded:* shipped + incomplete (B) | *7915* | *474* | *78 191.24* |
+| shipped + incomplete (B) + option (2) | 7778 | 475 | 78 246.29 |
 
-- **(B) alone: +136 cells, +1 flop, +241.48 µm² = +0.310 %.**
+- ✅ **COMPLETE (B): −20 cells, +1 flop, +193.94 µm² = +0.249 %.**
+- *superseded (incomplete (B)): +136 cells, +1 flop, +241.48 µm² = +0.310 %.*
+- ⭐ **The COMPLETE repair is CHEAPER than the partial one** — `mem_retire_now` gives the
+  optimiser a cleaner condition and it recovers 156 cells relative to the partial form, landing
+  **20 BELOW the unrepaired baseline** while adding one flop and 194 µm². *A correctness fix
+  making the design smaller is not a paradox: the partial guard left a term the optimiser had to
+  preserve.* ⇒ **DO NOT ASSUME A MORE COMPLETE REPAIR COSTS MORE; MEASURE THE ONE THAT SHIPS.**
 - vs the circulating `+40 / +160 / +0.28 %`: **cells off by 3.4×, area by 1.5× — and the
   PERCENTAGE nearly lands.** A figure whose headline ratio is right is a figure that gets waved
   through; that is why this survived in two documents and a dispatch.
@@ -274,3 +287,32 @@ nowhere.
 The cycle-level obligation from ③ above is **unchanged and open**. `BusState` has no phase and no
 instruction register, so neither the defect nor this repair is expressible in the Lean model.
 **No green kernel run covers `fetch_owed`.** The RTL census is its only witness.
+
+### ⑤ ⛔⛔ (B) NEEDED A SECOND TERM — THE RETIRING EDGE IS INSIDE THE WINDOW
+
+The version above closed three cycles of a four-cycle window. **`fetch_owed` is SET BY the memory
+retire, so it is not yet high AT that edge** — a one-cycle hole in the flag's own timing, at the
+exact cycle that creates the condition the flag names. And `sof` is tested BEFORE `loop_end`, so
+at a retiring edge the `sof` arm WINS and re-derives from the stale decode.
+
+```
+  arrival sweep                       saltworks RTL        tape-out source
+  pre-repair                          16/121  (13.2 %)     20/121  (16.5 %)
+  fetch_owed alone                     4/121  ( 3.3 %)      —
+  + mem_retire_now  (what ships)        0/121                0/121   and 0/260 over the full run
+```
+
+⛔ **MY OWN SIX-ARM CENSUS READ 6/6 CLEAN THROUGH ALL OF IT.** It arms ON `mem_retire` and steps
+the four phases that FOLLOW, so **the retiring edge is not one of its arms.** ⇒ ***THE ARMS ARE A
+SET, NOT A PREFIX; "all four phases" quantifies over the ARMS, not over the HAZARD.*** The
+residual was also the QUIET half — a completed store re-issued with the instruction INTACT — so
+every alarm tuned to the loud symptom had gone silent. **A partial repair that removes the
+loudest symptom is the hardest kind to detect.**
+✅ The regression script now GATES on the exhaustive sweep (0 corrupt / 0 lost), driven both ways.
+
+⚖️ **AND THIS VINDICATES compiler's 09-04 EXHIBIT, WHICH I HAD CALLED THE WRONG CELL.** It
+filtered on `retire = true`. §④ above says its *"own filter excluded the cell that actually bit"*.
+**Both cells bite.** compiler had the retiring edge, I had the following three, and each of us
+took our own cell for THE cell. ⇒ ***WHEN TWO INSTRUMENTS DISAGREE ABOUT WHERE A DEFECT IS,
+"MINE, NOT YOURS" IS THE LEAST LIKELY ANSWER AND THE MOST TEMPTING ONE.*** Neither of us ran the
+union for two days; it took one command and settled it in seconds.
