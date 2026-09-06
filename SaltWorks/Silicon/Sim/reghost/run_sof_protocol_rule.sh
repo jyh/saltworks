@@ -82,8 +82,30 @@ for M in 0 1; do
   ps=$(echo "$pr" | sed -n 's/.*sof_pulses=\([0-9]*\).*/\1/p')
   printf '%s  %-52s %s\n' "$L" "$pr" "$vd"
   if [ "$M" = 1 ]; then
-    if [ "${v:-0}" -ge 1 ] && echo "$out" | grep -q 'L-FAIL  L7'; then
-      echo "        ✅ GATE 1: the violating host TRIPS the checker AND takes L7 red"
+    # ⭐ R1, 2026-09-06 — GATE 1 IS KEYED ON THE CHECKER ALONE. Ruled by evidence (saltworks
+    # lead) 11:19; edit made by compiler under a narrowly lifted fence, silicon's veto intact.
+    #
+    # It used to require `violations >= 1` AND the bench taking `L-FAIL  L7`. Those were the
+    # same event when it was written, because a protocol violation NECESSARILY destroyed an
+    # instruction. ⛔ SHAPE (B) SEVERS THAT LINK ON PURPOSE: measured on the landed (B), ARM V
+    # still trips the checker (`violations=1`) but the bench now reads ALL PASS 7/7, with
+    # `store_unaccounted` 1 -> 0 and lw/sw moving 17/20 -> 18/19 — silicon's own amendment-2
+    # signature run backwards. The gate was not wrong; A REPAIR LANDED UNDERNEATH ITS WITNESS.
+    #
+    # GATE 1's PURPOSE is unchanged and still met: the checker must be shown capable of firing,
+    # or ARM C's clean run proves nothing. That is exactly `violations >= 1`.
+    # ⛔ THE L7 COUPLING IS NOT REPAIRED HERE, DELIBERATELY. Whether any host can still destroy
+    # an instruction through `sof` after (B) is a claim about THE REPAIR'S REACH, not about this
+    # gate — it is tracked as R2 and owes its own measurement. An edit that settled both would
+    # settle the second one without anyone deciding it. So L7 is REPORTED below and gates nothing.
+    if [ "${v:-0}" -ge 1 ]; then
+      echo "        ✅ GATE 1: the violating host TRIPS the checker (violations=$v) — it can fail"
+      if echo "$out" | grep -q 'L-FAIL  L7'; then
+        echo "           observation (NOT a gate): the bench also took L7 red — pre-(B) behaviour"
+      else
+        echo "           observation (NOT a gate): the bench did NOT take L7 red. Expected under"
+        echo "           shape (B), which removes the damage. See R2; this does not fail the arm."
+      fi
     else
       echo "        ⛔ GATE 1 FAILED — the checker did not fire on a known-bad host; it cannot fail, so ARM C proves nothing"; rc=1
     fi
