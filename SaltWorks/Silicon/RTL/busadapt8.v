@@ -117,14 +117,41 @@ module busadapt8(clk, rst_n, sof,
     // model. NO GREEN KERNEL RUN COVERS THIS REPAIR. The RTL census is its only witness.
     reg       fetch_owed;
     wire      instr_avail = (kind == T_FETCH) && (phase == 2'd3);
-    wire      stale_decode = fetch_owed && !instr_avail;
+
+    // ⛔⛔ THE RETIRING EDGE IS INSIDE THE WINDOW, NOT BEFORE IT — AND THE FIRST VERSION
+    // OF THIS REPAIR MISSED IT. `fetch_owed` is SET BY the memory retire, so it is not yet
+    // high AT that edge: a one-cycle hole in the flag's own timing, at the exact cycle that
+    // creates the condition the flag describes.
+    //
+    // It was invisible to the 6-arm census, which arms ON `mem_retire` and counts the FOUR
+    // PHASES THAT FOLLOW. The retiring edge is not one of its arms, so the census read
+    // 6/6 CLEAN while the full 121-cycle sweep still found 4 corrupt arrivals.
+    // ⇒ THE CENSUS'S ARMS ARE A SET, NOT A PREFIX. "All four phases" is not "the whole
+    //   window" when the window opens one cycle earlier than the phase you counted from.
+    //
+    // Measured, sweep over arrival cycles 40..160 (`run_sof_reachability_sweep.sh`):
+    //     pre-repair          16/121 corrupt (13.2%), groups of FOUR consecutive cycles
+    //     fetch_owed only      4/121 corrupt (3.3%),  the FIRST cycle of each group
+    //     + this term          0/121
+    //   The residual had two shapes, alternating: at a STORE's retire edge a store is
+    //   re-issued (sw 19->20, unaccounted=1) with the instruction INTACT; at a LOAD's
+    //   retire edge the load is re-issued (lw 18->19). Neither destroys an instruction —
+    //   that half `fetch_owed` already fixed — which is why the cheaper criteria missed it.
+    //
+    // ⚠️ AND THIS CORRECTS A CLAIM IN docs/silicon-amendment2-signature-0906.md, which I
+    // wrote and signed: "The pulse does not act on the retiring edge at all — the `retire`
+    // arm runs first and correctly sets kind <= T_FETCH." FALSE. `sof` is tested BEFORE
+    // `loop_end` in the chain below, so at a retiring edge the `sof` arm WINS and
+    // re-derives from the stale decode. compiler's 09-04 exhibit filtered on `retire=true`
+    // and I called that the wrong cell. BOTH cells bite; compiler was right about its one.
+    wire      mem_retire_now = loop_end && retire &&
+                               (kind == T_STORE || kind == T_LOAD);
+    wire      stale_decode   = (fetch_owed || mem_retire_now) && !instr_avail;
 
     always @(posedge clk)
         if (!rst_n)                    fetch_owed <= 1'b0;
         else if (instr_avail)          fetch_owed <= 1'b0;
-        else if (loop_end && retire &&
-                 (kind == T_STORE || kind == T_LOAD))
-                                       fetch_owed <= 1'b1;
+        else if (mem_retire_now)       fetch_owed <= 1'b1;
 
     // ⛔ MID-LOOP `sof` TRUNCATION — the executor's residual (1), and it was REAL.
     // `sof` forced `phase` to 0 at ANY cycle while `kind`/`store_beat` only updated at

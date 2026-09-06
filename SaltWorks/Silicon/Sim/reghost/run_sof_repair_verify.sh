@@ -67,8 +67,26 @@ PIN="${SOF_PREFIX_PIN:-afa8a2e7}"
 if grep -q 'fetch_owed' "$T/prefix/busadapt8.v"; then
     echo "⛔ the control at $PIN ALREADY CONTAINS shape (B). It cannot demonstrate the"
     echo "   defect it exists to demonstrate. REFUSING."; exit 2; fi
-[ -f "$TT/busadapt8.v" ] || { echo "⛔ tape-out source not found: $TT/busadapt8.v"; exit 2; }
-cp "$TT/busadapt8.v" "$T/shipped/busadapt8.v"
+# ⛔⛔ THE TAPE-OUT ARM READS `origin/main`, NOT THE WORKING TREE — AND THIS BIT ME.
+# The first version did `cp "$TT/busadapt8.v"`. The moment I checked out a branch in that
+# repo to stage the port, the "shipped" arm started reading MY BRANCH and reported
+# red_on_10/11/12 = 0 — i.e. "the tape-out does not have the hazard", which was a fact
+# about my own uncommitted work wearing the name of the fabricated design.
+# ⇒ THE SAME DEFECT THIS SCRIPT WAS WRITTEN TO CATCH, ONE LEVEL DOWN: a DUT named by a
+#   PATH is named by something that moves. A checkout is a variable. Name the REF.
+# The ref is `origin/main` because that is what the shuttle pins, and it is FETCHED first
+# so the answer is about the remote's state and not a stale local cache.
+TT_REF="${TT_REF:-origin/main}"
+if [ -d "$TT/../.git" ] || [ -f "$TT/../.git" ]; then
+  ( cd "$TT/.." && git fetch -q origin 2>/dev/null || true )
+  ( cd "$TT/.." && git show "$TT_REF:src/busadapt8.v" ) > "$T/shipped/busadapt8.v" 2>/dev/null || {
+      echo "⛔ cannot materialise src/busadapt8.v at $TT_REF in $TT/.."
+      echo "   REFUSING rather than falling back to the working tree, which is a checkout"
+      echo "   and therefore a variable."; exit 2; }
+  SHIPPED_DESC="$TT_REF:src/busadapt8.v  (sha $(cd "$TT/.." && git rev-parse --short "$TT_REF" 2>/dev/null))"
+else
+  echo "⛔ $TT/.. is not a git repository; cannot name the tape-out source by ref."; exit 2
+fi
 
 # The control must actually DIFFER from the treatment, or it is not a control.
 if cmp -s "$T/fixed/busadapt8.v" "$T/prefix/busadapt8.v"; then
@@ -175,7 +193,7 @@ run_dut () {                      # $1 = variant name, $2 = dir holding busadapt
 
 run_dut prefix  "$T/prefix"  "saltworks RTL @ git HEAD (pre-repair)"
 P_REDS=$RES_REDS; P_CLEAN=$RES_CLEAN
-run_dut shipped "$T/shipped" "$TT/busadapt8.v (tape-out, jyh/tt-neural-dataflow-fabric)"
+run_dut shipped "$T/shipped" "$SHIPPED_DESC (tape-out, by REF not by checkout)"
 S_REDS=$RES_REDS; S_CLEAN=$RES_CLEAN
 run_dut fixed   "$T/fixed"   "saltworks RTL working tree (shape (B))"
 F_REDS=$RES_REDS; F_CLEAN=$RES_CLEAN; F_A13=$RES_A13
@@ -206,6 +224,35 @@ else
   echo "⇒ THE TAPE-OUT SOURCE IS PARTIALLY AFFECTED ($S_REDS of 3). Report the number, not a word."
 fi
 
-[ $rc = 0 ] && echo "SOF_REPAIR_VERIFY=PASS (control red, treatment clean, arm 13 still permits work)" \
+# ⛔⛔ THE SIXTH GATE, AND IT EXISTS BECAUSE THE FIVE ABOVE WERE NOT SUFFICIENT.
+# The six arms passed 6/6 on a version of shape (B) that STILL LEFT 4 OF 121 ARRIVAL CYCLES
+# CORRUPT. They arm on `mem_retire` and step through the FOUR PHASES THAT FOLLOW, so the
+# retiring edge ITSELF is not one of them — and that was exactly where the residual lived.
+# ⇒ ***THE ARMS ARE A SET, NOT A PREFIX. "All four phases" is not "the whole window" when
+#   the window opens one cycle before the phase you counted from.*** A hand-chosen set of
+#   stimulus points cannot answer a coverage question; only the exhaustive sweep can.
+# So the regression gate now REQUIRES the full sweep to read zero, and this script is not
+# green until it does.
+echo
+echo "── EXHAUSTIVE ARRIVAL SWEEP (the arms above are a SET; this is the coverage claim) ──"
+SWEEP="$HERE/run_sof_reachability_sweep.sh"
+if [ -x "$SWEEP" ] || [ -f "$SWEEP" ]; then
+  SW_OUT=$(sh "$SWEEP" 2>&1) || true
+  echo "$SW_OUT" | sed -n 's/^/  /p' | grep -E 'SWEPT|CORRUPTED|INSTRUCTION|REACHABILITY' || true
+  SW_BAD=$(echo "$SW_OUT" | sed -n 's/^CORRUPTED (a store unaccounted) *\([0-9]*\).*/\1/p' | head -1)
+  SW_LOST=$(echo "$SW_OUT" | sed -n 's/^INSTRUCTION LOST (lw_exec down) *\([0-9]*\).*/\1/p' | head -1)
+  if [ "${SW_BAD:-x}" = "0" ] && [ "${SW_LOST:-x}" = "0" ]; then
+    echo "  ✅ 0 corrupt arrivals and 0 lost instructions across the swept range."
+  else
+    echo "  ⛔ RESIDUAL: corrupt=${SW_BAD:-?} lost=${SW_LOST:-?}. The six arms can be GREEN while"
+    echo "     this is non-zero — that is the whole reason this gate exists. NOT a pass."
+    rc=1
+  fi
+else
+  echo "  ⛔ sweep not found at $SWEEP — coverage is UNKNOWN, which is not the same as clean."
+  rc=1
+fi
+
+[ $rc = 0 ] && echo "SOF_REPAIR_VERIFY=PASS (control red, treatment clean, arm 13 permits work, sweep 0/0)" \
             || echo "SOF_REPAIR_VERIFY=BROKEN"
 exit $rc
