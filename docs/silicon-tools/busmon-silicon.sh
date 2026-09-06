@@ -33,6 +33,16 @@
 # at arm time. Sampling asserts "everything above is handled", false on a boot by
 # exactly the width of the boot, which is when the unread backlog is at maximum.
 
+# ⛔ set -u — council 09/01 minute r.2, rider iii. SAFE HERE BY AUDIT, NOT BY HOPE:
+# every variable this script reads is guarded at assignment (BUS and BASELINE with
+# `:?`, SELF/POLL/FENCE/AWKPROG with `:-`), so nounset cannot abort a correct arm; it
+# can only catch a NEW unguarded reference added later. Driven both ways before
+# landing: a good arm still emits, and a missing BUS still refuses LOUDLY.
+# 📌 WHY IT WAS MISSING: this file's home is saltworks/docs/silicon-tools, so the seat
+# repo's own lint — whose population is `watch/` and `../tools` BY DESCENT — never had
+# it in scope. A lint that cannot see a file reports CLEAN about it, not UNKNOWN.
+set -u
+
 BUS=${BUS:?BUS must be set: the fleet bus is machine-local and has no public default}
 SELF=${SELF:-silicon}
 
