@@ -141,9 +141,17 @@ PY
 # so the mirror must reproduce that shape or the arm silently measures the wrong tree.
 build_mirror() { # $1=tag  -> echoes the path of the arm script to run
   d="$T/$1"
-  mkdir -p "$d/Sim/reghost" "$d/Sim/wordonly" "$d/RTL"
-  ln -s "$SRC" "$d/Sim/wordonly/tb_plane32bus_lwsw.v"
-  for v in plane32bus.v busadapt8.v core32.v; do ln -s "$RTLD/$v" "$d/RTL/$v"; done
+  mkdir -p "$d/Sim" "$d/RTL"
+  # ⭐ GENERALISED 2026-09-06 11:3x (silicon's targeted fix below already worked; this removes
+  #   the class rather than the instance). The mirror used to NAME its members — three RTL
+  #   files and one bench — and a mirror that names its members is a SET. It stopped being a
+  #   faithful copy the moment the arm gained `fixtures/`, which is the same law silicon
+  #   published this hour one harness along: THE ARMS ARE A SET, NOT A PREFIX. Reflecting the
+  #   DIRECTORIES means the NEXT file added beside the arm arrives without an edit here, and
+  #   there is no next time to forget.
+  cp -R "$AD" "$d/Sim/reghost"
+  cp -R "$(cd "$(dirname "$SRC")" && pwd)" "$d/Sim/wordonly"
+  for v in "$RTLD"/*.v; do ln -sf "$v" "$d/RTL/$(basename "$v")"; done
   # ⛔ THE ARM'S DATA DEPENDENCIES, NOT ONLY ITS CODE. GATE 1b takes its pre-repair DUT from
   # `$HERE/fixtures/`, and a mirror that reproduces the SCRIPTS but not the FIXTURES leaves the
   # gate with neither of its two sources: no fixture here, and no git history under a shallow
@@ -151,12 +159,13 @@ build_mirror() { # $1=tag  -> echoes the path of the arm script to run
   # — and it is the only place both sources vanish at once, so it was invisible in every
   # harness taken singly. ⇒ A SANDBOX INHERITS THE DEFECTS OF WHATEVER IT DECLINES TO COPY,
   #   AND THE INTERSECTION OF TWO SURVIVABLE ENVIRONMENTS NEED NOT BE SURVIVABLE.
-  [ -d "$AD/fixtures" ] && ln -s "$AD/fixtures" "$d/Sim/reghost/fixtures"
+  #   (The targeted `ln -s "$AD/fixtures"` that first fixed this is now redundant: `cp -R`
+  #   above brings fixtures/ and every future sibling. silicon's reasoning is kept because it
+  #   is the part worth inheriting; only its one line is subsumed.)
   case "$1" in
     M4) mutate "$CHK" "$d/Sim/reghost/sof_protocol_check.v" M4 || return 2
         cp "$ARM" "$d/Sim/reghost/arm.sh" ;;
-    *)  ln -s "$CHK" "$d/Sim/reghost/sof_protocol_check.v"
-        mutate "$ARM" "$d/Sim/reghost/arm.sh" "$1" || return 2 ;;
+    *)  mutate "$ARM" "$d/Sim/reghost/arm.sh" "$1" || return 2 ;;
   esac
   chmod +x "$d/Sim/reghost/arm.sh"
   echo "$d/Sim/reghost/arm.sh"
