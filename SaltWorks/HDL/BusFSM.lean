@@ -595,4 +595,71 @@ theorem shapeB_bit_takes_both_values_from_reset :
 #audit_axioms shapeB_still_realigns_when_no_fetch_is_owed
 #audit_axioms shapeB_bit_takes_both_values_from_reset
 
+
+/-! #### WHICH CLAIM CATCHES WHICH WRONG (B) — the controls' scope, measured, not asserted
+
+I first wrote in a landing post that without the realign control *"every theorem above would hold
+just as well of a `sof` arm that did nothing at all"*. **`claimcheck` flagged the sentence, I drove
+the mutants, and it is FALSE.** The two wrong shapes of (B) are caught by different claims, and
+one of them is caught by exactly one. Landed as theorems rather than left in the scratch file that
+produced them, because a measurement in a scratch file protects nothing.
+-/
+
+/-- WRONG (B) #1: the realign arm does nothing — the "freeze" repair. -/
+def sofNextB_noop (s : BusStateB) (_req _we : Bool) : BusStateB := s
+
+/-- WRONG (B) #2: the realign arm ALWAYS holds fetch — over-restriction. This is the dangerous
+one: it repairs the defect and quietly deletes the realign protocol. -/
+def sofNextB_always (s : BusStateB) (_req _we : Bool) : BusStateB :=
+  { kind := .fetch, beat := false, fetchOwed := s.fetchOwed }
+
+def stepB_with (f : BusStateB → Bool → Bool → BusStateB)
+    (s : BusStateB) (c : Ctrl) (req we : Bool) : BusStateB :=
+  if c.sof then f s req we else if c.loopEnd then nextB s req we else s
+
+/-- ⛔⛔ **THE CONTROLS' SCOPE, AS A TABLE THE KERNEL CHECKED.** `true` = the wrong shape SATISFIES
+that claim, i.e. the claim is BLIND to it.
+```
+                            holds_fetch   closes_both(3rd)   still_realigns
+  #1 no-op                     BLIND           catches           catches
+  #2 always-hold-fetch         BLIND            BLIND            catches
+```
+⇒ **`shapeB_still_realigns_when_no_fetch_is_owed` IS THE ONLY CLAIM THAT CATCHES #2**, and #2 is
+the shape a hurried repair actually reaches: it closes the measured cell AND my 09-04 cells and
+passes every positive theorem in this section. **Delete that one control and the over-restricting
+repair ships green.** -/
+theorem which_control_catches_which_wrong_B :
+    -- #1 satisfies the fetch-hold claim, and FAILS the other two
+    (stepB_with sofNextB_noop ⟨.fetch, false, true⟩ ⟨true, false⟩ true true
+       == ⟨.fetch, false, true⟩) = true
+  ∧ (stepB_with sofNextB_noop ⟨.store, true, true⟩ ⟨true, false⟩ true true
+       == ⟨.fetch, false, true⟩) = false
+  ∧ (stepB_with sofNextB_noop ⟨.fetch, false, false⟩ ⟨true, false⟩ true true
+       == ⟨.store, false, false⟩) = false
+    -- #2 satisfies BOTH positive claims, and is caught ONLY by the realign control
+  ∧ (stepB_with sofNextB_always ⟨.fetch, false, true⟩ ⟨true, false⟩ true true
+       == ⟨.fetch, false, true⟩) = true
+  ∧ (stepB_with sofNextB_always ⟨.store, true, true⟩ ⟨true, false⟩ true true
+       == ⟨.fetch, false, true⟩) = true
+  ∧ (stepB_with sofNextB_always ⟨.fetch, false, false⟩ ⟨true, false⟩ true true
+       == ⟨.store, false, false⟩) = false := by
+  decide +kernel
+
+/-- ⛔ **AND THE PROJECTION THEOREM IS BLIND TO BOTH, BY CONSTRUCTION.** Neither wrong shape touches
+`nextB`, so `shapeB_leaves_the_loop_end_arm_alone` holds of both. **It certifies the LOOP-END arm
+and says nothing whatever about the realign arm** — stated here so its strength is not borrowed by
+the claim next to it. The two theorems are about different arms of the same machine. -/
+theorem the_projection_theorem_cannot_see_the_realign_arm :
+    (allStatesB.all fun s => [false, true].all fun req => [false, true].all fun we =>
+      proj (nextB s req we) == next (proj s) req we) = true
+  ∧ (stepB_with sofNextB_noop   ⟨.store, true, true⟩ ⟨true, false⟩ true true
+       == ⟨.fetch, false, true⟩) = false
+  ∧ (stepB_with sofNextB_always ⟨.fetch, false, false⟩ ⟨true, false⟩ true true
+       == ⟨.store, false, false⟩) = false := by
+  decide +kernel
+
+#audit_axioms sofNextB_noop sofNextB_always stepB_with
+#audit_axioms which_control_catches_which_wrong_B
+#audit_axioms the_projection_theorem_cannot_see_the_realign_arm
+
 end SaltWorks.HDL.BusFSM
