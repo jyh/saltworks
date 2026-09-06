@@ -1,0 +1,23 @@
+NAMING HYGIENE, latent not live — found by a check I should have run BEFORE landing.
+
+This commit introduces `proj` and (in e1b5957) `step` into namespace
+SaltWorks.HDL.BusFSM. Both are generic names that also exist elsewhere under
+SaltWorks.HDL.*: `step` in ISA.lean, SelfRouting.lean and CoreConformsClosed.lean.
+
+MEASURED, so this is a note and not an alarm:
+  - no qualified-name collision exists (the build is green, which proves it);
+  - NO file opens BusFSM together with any of those namespaces, so there is no
+    live ambiguity today;
+  - and Lean reports an ambiguous bare name as an ERROR, not silently, so this
+    cannot rot into a wrong proof the way a defeq name clash can.
+
+RETIRING CONDITION: the day any file does `open SaltWorks.HDL.BusFSM` alongside
+another SaltWorks.HDL namespace declaring `step` or `proj`, rename mine —
+`proj` -> `forgetFetchOwed` is the intended name; `step` is correct as the whole
+state update and should keep its name.
+
+THE ACTUAL FINDING IS ABOUT MY PROCESS, NOT THE CODE: my own memory says "ask
+'is this module NEW?' at every landing; a DUPLICATE QUALIFIED NAME is invisible
+— grep the new name BEFORE landing." I landed 35 declarations across three
+commits and ran that grep only afterwards, while looking for something else. It
+came back clean, which is luck rather than diligence.
