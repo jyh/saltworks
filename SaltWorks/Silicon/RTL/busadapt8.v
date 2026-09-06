@@ -79,6 +79,53 @@ module busadapt8(clk, rst_n, sof,
     reg       load_beat;  // 0 = address loop, 1 = the LOAD's data loop  (option (2))
     wire      loop_end = (phase == 2'd3);
 
+    // ⭐⭐ SHAPE (B) — `fetch_owed`: THE WINDOW IN WHICH THERE IS NOTHING TO DECODE.
+    // Landed 2026-09-06 on two technical signatures (silicon: shape; compiler: DriveMap,
+    // `e1b5957`). Write-up: docs/silicon-amendment2-signature-0906.md.
+    //
+    // THE DEFECT, measured by Sim/reghost/run_sof_window_census.sh: the `sof` arm below
+    // re-derives `kind` from a decode of whatever `c_instr` presents. Between a memory
+    // instruction's retire and the assembly of the next instruction word, `c_instr` is
+    // `instr_r` — THE INSTRUCTION THAT JUST RETIRED. Decoding it re-issues a completed
+    // transaction AND destroys the instruction being fetched (lw_exec 18→17, sw_exec
+    // 19→20 on one pulse; the PC never jumps, so no stride criterion can see it).
+    //
+    // `fetch_owed` names that window honestly rather than gating on a proxy: it is high
+    // from a MEMORY retire until the next instruction word is available, and while it is
+    // high the only correct `kind` is T_FETCH — not because a re-derivation would be
+    // unsafe, but because THERE IS NOTHING TO RE-DERIVE FROM YET.
+    //
+    // ⚠️ WHY THE CLEAR IS `instr_avail` AND NOT SIMPLY THE NEXT `loop_end`: the
+    // INSTRUCTION BYPASS (bottom of this file) makes `c_instr` present the newly
+    // assembled word at exactly `kind == T_FETCH && phase == 2'd3`. At that cycle the
+    // decode is CURRENT and re-deriving is CORRECT — it is what makes arm 13 clean today
+    // and it must stay clean. So the guard must cover phases 0..2 and NOT phase 3, which
+    // is precisely `fetch_owed && !instr_avail`. Forcing T_FETCH at phase 3 as well would
+    // suppress a legitimate transaction and turn a protected cycle into a broken one.
+    // ⇒ THE 3-CYCLE WINDOW AND THE 3-CYCLE GUARD ARE THE SAME THREE CYCLES, DERIVED
+    //   INDEPENDENTLY: the window from measurement, the guard from the bypass's own
+    //   condition. That they coincide is the check, not the design.
+    //
+    // ⚠️ NOT A DriveMap CONCERN, and compiler signed this: `DriveMap`
+    // (Certs/DmemKernelBridge.lean:61-63) constrains `we`=ins 33 and `req`=ins 32 as pure
+    // decodes of the instruction word. `fetch_owed` selects `kind` and never touches
+    // bits 32/33. What would break DriveMap is making `c_dmem_req` fall on retire — the
+    // shape 08/18 rejected, and which this is not.
+    //
+    // ⛔ SCOPE, STATED SO IT IS NOT READ AS DISCHARGED: compiler's `BusState` has no phase
+    // and no instruction register, so this 3-cycle window is NOT EXPRESSIBLE in the Lean
+    // model. NO GREEN KERNEL RUN COVERS THIS REPAIR. The RTL census is its only witness.
+    reg       fetch_owed;
+    wire      instr_avail = (kind == T_FETCH) && (phase == 2'd3);
+    wire      stale_decode = fetch_owed && !instr_avail;
+
+    always @(posedge clk)
+        if (!rst_n)                    fetch_owed <= 1'b0;
+        else if (instr_avail)          fetch_owed <= 1'b0;
+        else if (loop_end && retire &&
+                 (kind == T_STORE || kind == T_LOAD))
+                                       fetch_owed <= 1'b1;
+
     // ⛔ MID-LOOP `sof` TRUNCATION — the executor's residual (1), and it was REAL.
     // `sof` forced `phase` to 0 at ANY cycle while `kind`/`store_beat` only updated at
     // loop_end, so a mid-loop realign left the FRAME restarted and the TRANSACTION
@@ -240,7 +287,13 @@ module busadapt8(clk, rst_n, sof,
         else if (sof) begin
             store_beat <= 1'b0;
             load_beat  <= 1'b0;
-            kind <= c_dmem_req ? (c_dmem_we ? T_STORE : T_LOAD) : T_FETCH;
+            // ⭐ SHAPE (B): while a fetch is owed, the decode in front of us belongs to
+            // the instruction that just retired. Re-issuing it is the AMENDMENT 2 defect.
+            // There is nothing to re-derive from, so the answer is T_FETCH by
+            // construction — not by the accident of which cycle the pulse landed on.
+            kind <= (!stale_decode && c_dmem_req)
+                      ? (c_dmem_we ? T_STORE : T_LOAD)
+                      : T_FETCH;
         end
         else if (loop_end) begin
             if (retire) begin
