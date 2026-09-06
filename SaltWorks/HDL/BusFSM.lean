@@ -26,6 +26,20 @@ changed and NOT ONE `.lean` FILE DID** (`git diff --name-only 9769fa1..035241f -
 **so the whole verified surface stayed GREEN across a ratified change to the machine.** Nothing
 here is verified against the RTL; it is verified against THIS TRANSCRIPTION, and a transcription
 cannot notice that its source moved. Re-read the source before trusting the block above.
+✅ **AND SINCE 2026-09-06 THAT SENTENCE IS NO LONGER ONLY A SENTENCE.** A docstring cannot fail,
+which is why the confession above stood for two days while being perfectly true. The check is
+`docs/ledger-tools/rtl_transcription_drift.sh`, and this is the pin it reads:
+
+    RTL-PIN busadapt8.v logic-sha256/16 = 6f020c2b2f1f6514
+
+It hashes `busadapt8.v` with COMMENTS STRIPPED, so a comment-only RTL commit does NOT fire it
+(measured: silicon's `1916ea0..afa8a2e` touched that file with a 47-line raw diff and an EMPTY
+non-comment delta) while a logic commit DOES (measured: `9769fa1..035241f`, 13 non-comment delta
+lines, **0** `.lean` files -- the event this whole paragraph is about).
+⛔ **IF THE PIN AND THE RTL DISAGREE, RE-READ THE SOURCE AND FIX THE TRANSCRIPTION FIRST.
+RE-PINNING IS THE LAST STEP, BECAUSE THE PIN IS THE RECORD THAT A HUMAN LOOKED.**
+⚠️ It certifies only that the SOURCE HAS NOT MOVED. That the transcription was ever CORRECT is
+still the load-bearing reading, and no check in this repo carries it.
 ✅ **NAME DEBT PAID 2026-09-06 — THE FIELD WAS `storeBeat` AND IS NOW `beat`.** It carries the
 data beat of EITHER memory loop; the RTL keeps two registers (`store_beat`, `load_beat`) and
 `kind` already discriminates them, so one field was always faithful to `retire` while the NAME
