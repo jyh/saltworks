@@ -42,6 +42,15 @@
 #   module logic      CHOSEN. Comment-insensitive, boundary-free, and it needs
 #                     no agreement with silicon about markers in its file.
 #
+# ⛔⛔ v1 OF THIS SCRIPT OVER-FIRED ON THAT VERY COMMIT, AND THE KEY WAS NOT THE
+#   DEFECT — THE IMPLEMENTATION WAS. A BSD-sed BRE bug (`\+` read as a literal
+#   plus) meant whitespace was never normalised, so comment-stripped INDENTED
+#   lines survived as whitespace-only lines and moved the hash. The key is
+#   comment-insensitive; v1's extractor was not. evidence caught it by driving
+#   the REAL range within four minutes of the landing, using this script's own
+#   `--pin`. ⇒ A DESIGN CAN BE RIGHT AND ITS ONE-LINE IMPLEMENTATION WRONG, AND
+#   A SELFTEST WRITTEN BY THE SAME HAND CAN AGREE WITH BOTH.
+#
 # ⚠️ THE COST I AM ACCEPTING, STATED SO IT IS NOT DISCOVERED: this over-fires on
 #   a logic change ANYWHERE in busadapt8.v, including parts BusFSM.lean does not
 #   transcribe (the phase counter, the output muxes). That is deliberate. The
@@ -68,13 +77,28 @@ RTL="${RTL_OVERRIDE:-$ROOT/SaltWorks/Silicon/RTL/busadapt8.v}"
 LEAN="${LEAN_OVERRIDE:-$ROOT/SaltWorks/HDL/BusFSM.lean}"
 
 # GATE (iii) THRESHOLDS. An arm must prove it watched a NON-EMPTY region.
-MIN_LINES=200
+# ⛔ RE-CALIBRATED 07:3x: 200 was measured off the BROKEN stripper's 286 lines. The
+#   correct stripper yields 73, so the old floor would now REFUSE EVERYTHING — a
+#   threshold is a fact about the instrument that produced it, and it does not
+#   survive that instrument being fixed.
+MIN_LINES=60
 ANCHORS=('always @(posedge clk)' 'T_FETCH' 'loop_end' 'sof' 'retire')
 
 extract() {
-  # comments out, blanks out, whitespace normalised.
+  # comments out, whitespace normalised, blanks out.
+  # ⛔⛔ `sed -E` IS LOAD-BEARING AND WAS THE FIRST VERSION'S DEFECT. BSD sed's BRE
+  #   treats `\+` as a LITERAL PLUS, so `s/[[:space:]]\+/ /g` matched NOTHING on
+  #   this platform: comment-stripped lines kept their indentation, never emptied,
+  #   never dropped, and 47 of silicon's INDENTED comment lines moved the hash.
+  #   The arm over-fired on a comment-only commit — the exact thing its key exists
+  #   to avoid — and the SELFTEST WAS GREEN, because my fixture appended a comment
+  #   at COLUMN 0, which strips to the empty string. Real RTL comments are indented.
+  #   ⇒ A NEGATIVE CONTROL BUILT FROM A SYNTHETIC FIXTURE CAN BE SATISFIABLE BY A
+  #     FIXTURE THAT CANNOT FEEL THE DEFECT. The (i-control) arm below is now built
+  #     from the REAL commit range instead, which is how evidence caught this.
   sed 's://.*::' "$1" \
-    | sed 's/[[:space:]]\+/ /g; s/^ //; s/ $//' \
+    | sed -E 's/[[:space:]]+/ /g' \
+    | sed -E 's/^ //; s/ $//' \
     | grep -v '^$'
 }
 
@@ -180,17 +204,52 @@ else
 fi
 
 # (i-control) A COMMENT-ONLY CHANGE MUST **NOT** TRIP IT.
-#   This is the arm that separates this key from a whole-file hash, and it is
-#   drawn from a REAL commit: silicon changed busadapt8.v with comments only
-#   on 2026-09-06 and the non-comment delta was empty.
-cp "$RTL" "$TMP/cmt.v"
-printf '\n// a comment-only change, of exactly the kind silicon landed today\n' >> "$TMP/cmt.v"
-if cmp -s "$RTL" "$TMP/cmt.v"; then
-  bad "(i-control) FIXTURE BUILT NO COMMENT CHANGE — arm aborted, not failed"
+#   ⛔⛔ THIS ARM IS BUILT FROM A REAL COMMIT RANGE, AND THE FIRST VERSION WAS NOT.
+#   v1 appended `// a comment...` at COLUMN 0 to the current file. That strips to
+#   the empty string under ANY stripper, so it passed while the shipped stripper
+#   was broken for INDENTED comments — which is every real comment in the RTL.
+#   evidence drove the real range and the arm over-fired. ⇒ BUILD A NEGATIVE
+#   CONTROL FROM A LANDED CHANGE, NEVER FROM A CONVENIENT ONE.
+#   1916ea0 → afa8a2e is silicon's comment-only edit: 47-line raw diff, 0
+#   non-comment delta. The two logic hashes MUST be equal.
+if git -C "$ROOT" cat-file -e 1916ea0:SaltWorks/Silicon/RTL/busadapt8.v 2>/dev/null; then
+  git -C "$ROOT" show 1916ea0:SaltWorks/Silicon/RTL/busadapt8.v > "$TMP/before.v"
+  git -C "$ROOT" show afa8a2e:SaltWorks/Silicon/RTL/busadapt8.v  > "$TMP/after.v"
+  if cmp -s "$TMP/before.v" "$TMP/after.v"; then
+    bad "(i-control) FIXTURE IS DEGENERATE — the two revisions are identical, so the"
+    echo "        control could not distinguish anything. ABORTING that arm."
+  else
+    H1=$(logic_sha "$(extract "$TMP/before.v")")
+    H2=$(logic_sha "$(extract "$TMP/after.v")")
+    if [ "$H1" = "$H2" ]; then
+      ok "✅" "(i-control) REAL comment-only range does NOT move the key ($H1)"
+    else
+      bad "(i-control) REAL comment-only range MOVED the key: $H1 -> $H2 — over-fires"
+    fi
+  fi
 else
-  if RTL_OVERRIDE="$TMP/cmt.v" "$0" >/dev/null 2>&1; then
-    ok "✅" "(i-control) comment-only change does NOT trip it   exit=0"
-  else bad "(i-control) comment-only change TRIPPED it — the key over-fires"; fi
+  bad "(i-control) SKIPPED — revision 1916ea0 unreachable. A control that cannot run"
+  echo "        is NOT a control that passed."
+fi
+
+# (i-real) AND THE MUST-TRIP HALF FROM REAL HISTORY TOO, so BOTH sides of the
+#   discriminating set are landed commits rather than one landed and one synthetic.
+#   9769fa1 → 035241f is option (2): 13 non-comment delta lines in busadapt8.v and
+#   0 .lean files — the silent green this whole arm exists to end.
+if git -C "$ROOT" cat-file -e 9769fa1:SaltWorks/Silicon/RTL/busadapt8.v 2>/dev/null; then
+  git -C "$ROOT" show 9769fa1:SaltWorks/Silicon/RTL/busadapt8.v > "$TMP/opt1.v"
+  git -C "$ROOT" show 035241f:SaltWorks/Silicon/RTL/busadapt8.v > "$TMP/opt2.v"
+  H1=$(logic_sha "$(extract "$TMP/opt1.v")")
+  H2=$(logic_sha "$(extract "$TMP/opt2.v")")
+  if [ "$H1" != "$H2" ]; then
+    ok "✅" "(i-real) REAL logic change MOVES the key   $H1 -> $H2"
+  else
+    bad "(i-real) REAL logic change did NOT move the key — the arm is blind to the"
+    echo "        very event it was built for."
+  fi
+else
+  bad "(i-real) SKIPPED — revision 9769fa1 unreachable. A control that cannot run"
+  echo "        is NOT a control that passed."
 fi
 
 # (iii) A BROKEN EXTRACTOR MUST REFUSE, NOT PASS.
