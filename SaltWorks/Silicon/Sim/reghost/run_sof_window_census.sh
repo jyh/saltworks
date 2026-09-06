@@ -5,10 +5,29 @@
 # completed transaction". This census MEASURES that window and finds it is THREE cycles
 # wide, not one, and that the consequence is architectural, not merely bus traffic.
 #
-# ONE VARIABLE (the cycle at which a single `sof` pulse is presented). The DUT is the
-# SHIPPED busadapt8.v — NOTHING IS MUTATED. The bench and its criteria are DERIVED at run
-# time from the tracked ../wordonly/tb_plane32bus_lwsw.v, so the probe cannot drift out of
-# sync with the criteria it is testing.
+# ⛔⛔ TWO CORRECTIONS, 2026-09-06, AND THE FIRST IS TO A WORD I WROTE MYSELF.
+#
+# (1) THIS HEADER USED TO SAY "The DUT is the SHIPPED busadapt8.v". THAT WAS FALSE.
+#     It resolves `RTL=$HERE/../../RTL` — saltworks' tree — and saltworks' `busadapt8.v`
+#     has been ahead of the tape-out since 2026-08-19 (`5e7d73b`); option (2), the
+#     two-loop LOAD, landed at `1916ea0c` and is NOT in the shuttle. I meant "unmutated";
+#     the page says "the one being fabricated". ⇒ "SHIPPED" IS A CLAIM ABOUT WHICH OBJECT,
+#     NEVER A SYNONYM FOR "UNMODIFIED". The tape-out copy is now tested as its own arm, in
+#     the companion script, and it DOES carry the hazard — measured, not transferred.
+#
+# (2) THIS SCRIPT IS A DEFECT DEMONSTRATOR AND SHAPE (B) HAS NOW LANDED, so run against
+#     the working tree it would report BROKEN forever — a permanently-firing advisory,
+#     which is indistinguishable from a working one and is its own banked defect. It
+#     therefore pins its DUT to the LAST PRE-REPAIR COMMIT and keeps demonstrating what it
+#     was written to demonstrate. The REGRESSION side lives in run_sof_repair_verify.sh.
+#     ⇒ A DEMONSTRATOR AND A REGRESSION TEST WANT OPPOSITE VERDICTS ON THE SAME INPUT.
+#       Neither gate should be weakened to accommodate the other; they are two scripts.
+#
+# ONE VARIABLE (the cycle at which a single `sof` pulse is presented). NOTHING IS MUTATED:
+# the DUT is the tracked `busadapt8.v` as of the pinned pre-repair commit below. The bench
+# and its criteria are DERIVED at run time from the tracked
+# ../wordonly/tb_plane32bus_lwsw.v, so the probe cannot drift out of sync with the
+# criteria it is testing.
 #
 #   ARM  0    no pulse                                        CONTROL — must be 7/7
 #   ARM 10    sof during phase 0 of the fetch loop following a completed MEMORY instr
@@ -35,6 +54,27 @@ HERE=$(cd "$(dirname "$0")" && pwd); RTL="$HERE/../../RTL"
 SRC="$HERE/../wordonly/tb_plane32bus_lwsw.v"
 [ -f "$SRC" ] || { echo "⛔ tracked bench not found: $SRC"; exit 2; }
 T=$(mktemp -d) || exit 2; trap 'rm -rf "$T"' EXIT
+
+# ---- the pinned pre-repair DUT -------------------------------------------------------
+# `afa8a2e7` is the last commit before shape (B). The defect this script demonstrates is
+# present there by construction. ⛔ A PIN IS ONLY A PIN IF ITS ANCESTRY IS CHECKED: a sha
+# that RESOLVES is not a sha that is IN THIS HISTORY (this seat has been bitten by exactly
+# that — `2d4e218` rendered perfectly under `git show` and was not an ancestor of master).
+PIN="${SOF_CENSUS_PIN:-afa8a2e7}"
+DUT="$T/dut"; mkdir -p "$DUT"
+( cd "$RTL" && git merge-base --is-ancestor "$PIN" HEAD ) 2>/dev/null || {
+  echo "⛔ pinned commit $PIN is NOT an ancestor of HEAD in this checkout."
+  echo "   It may still RESOLVE; resolvability is not membership. REFUSING rather than"
+  echo "   measuring an object that is not in this history."; exit 2; }
+( cd "$RTL" && git show "$PIN:./busadapt8.v" ) > "$DUT/busadapt8.v" 2>/dev/null || {
+  echo "⛔ cannot materialise busadapt8.v at $PIN"; exit 2; }
+# The pin must actually PRE-DATE the repair, or this script is silently testing the fix.
+if grep -q 'fetch_owed' "$DUT/busadapt8.v"; then
+  echo "⛔ the pinned DUT at $PIN ALREADY CONTAINS shape (B) (the fetch_owed reg)."
+  echo "   This script demonstrates the defect that (B) removes; pinned to a repaired"
+  echo "   object it would report 'no hazard' and read as a refutation. REFUSING."; exit 2
+fi
+echo "census: DUT = busadapt8.v @ $PIN (pinned pre-repair; ancestry checked, (B) absent)"
 
 sed -e 's/^module tb;/module tb;\n  parameter integer ARM = 0;/' "$SRC" > "$T/tb.v"
 python3 - "$T/tb.v" <<'PY'
@@ -87,7 +127,7 @@ PY
 rc=0; reds=0
 for A in 0 10 11 12 13 20; do
   iverilog -g2005 -Ptb.ARM=$A -o "$T/a$A.vvp" -s tb \
-    "$T/tb.v" "$RTL/plane32bus.v" "$RTL/busadapt8.v" "$RTL/core32.v"
+    "$T/tb.v" "$RTL/plane32bus.v" "$DUT/busadapt8.v" "$RTL/core32.v"
   out=$(vvp "$T/a$A.vvp" 2>&1)
   un=$(echo "$out"  | sed -n 's/.*UNACCOUNTED = \([0-9]*\).*/\1/p' | head -1)
   arch=$(echo "$out"| sed -n 's/^ *ARCH: //p'   | head -1)
