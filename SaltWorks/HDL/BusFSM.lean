@@ -30,7 +30,7 @@ cannot notice that its source moved. Re-read the source before trusting the bloc
 which is why the confession above stood for two days while being perfectly true. The check is
 `docs/ledger-tools/rtl_transcription_drift.sh`, and this is the pin it reads:
 
-    RTL-PIN busadapt8.v logic-sha256/16 = 68c0a0ce98178e58
+    RTL-PIN busadapt8.v logic-sha256/16 = c93b1f1098a34745
 
 It hashes `busadapt8.v` with COMMENTS STRIPPED, so a comment-only RTL commit does NOT fire it
 (measured: silicon's `1916ea0..afa8a2e` touched that file with a 47-line raw diff and an EMPTY
@@ -524,11 +524,27 @@ def proj (s : BusStateB) : BusState := ⟨s.kind, s.beat⟩
 
 def retireB (s : BusStateB) (req : Bool) : Bool := retire (proj s) req
 
-/-- The loop-end arm under (B). The bit is SET when an instruction retires (a fetch is now owed)
-and CLEARED when a fetch loop commits a memory instruction — i.e. when a decode becomes
-trustworthy. -/
+/-- The loop-end arm under (B).
+
+⛔⛔ **CORRECTED 2026-09-06 AGAINST THE LANDED RTL, AND THE CORRECTION IS THE WHOLE VALUE OF THE
+DRIFT ARM.** This read `fetchOwed := true` on ANY retire. `retire` is TRUE for a FETCH loop
+whenever `!req` (:105-110), so the bit was set when a *fetch* loop retired — and the landed
+`busadapt8.v` sets it only on a MEMORY retire:
+
+    else if (loop_end && retire && (kind == T_STORE || kind == T_LOAD))  fetch_owed <= 1'b1;
+
+⇒ **`shapeB_leaves_the_loop_end_arm_alone` STAYED TRUE THROUGHOUT, BECAUSE `proj` FORGETS
+`fetchOwed` — A PROJECTION THEOREM CANNOT SEE THE FIELD IT PROJECTS AWAY.** The bit's semantics
+were wrong and every theorem over the projection was blind to it, by construction. Found only
+because `rtl_transcription_drift.sh` fired on (B) and forced a re-read of the source.
+
+With the guard corrected, all three arms of the RTL register agree at loop level:
+`instr_avail` is `kind == T_FETCH && phase == 2'd3`, and phase 3 IS loop end, so
+CLEAR = loop end with a fetch kind (both branches below give `false`), SET = a memory retire,
+and HOLD is the mid-loop branch, which keeps the field via `{ s with … }`. -/
 def nextB (s : BusStateB) (req we : Bool) : BusStateB :=
-  if retireB s req then { kind := .fetch, beat := false, fetchOwed := true }
+  if retireB s req then
+    { kind := .fetch, beat := false, fetchOwed := (s.kind == .load || s.kind == .store) }
   else if s.kind = .fetch then
     { kind := if we then .store else .load, beat := false, fetchOwed := false }
   else { s with beat := true }
@@ -597,10 +613,23 @@ theorem shapeB_still_realigns_when_no_fetch_is_owed :
   decide +kernel
 
 /-- ⛔ **AND THE BIT IS REACHABLE IN BOTH VALUES FROM A RESET START** — so neither arm of the
-control above is vacuous on the machine as it actually runs. -/
+control above is vacuous on the machine as it actually runs.
+⚠️ **THE `true` WITNESS MOVED 2026-09-06.** It was `nextB ⟨.fetch, false, false⟩ false false`,
+a FETCH-loop retire, which the landed RTL does NOT treat as setting the bit. The witness is now a
+MEMORY retire, which is what the hardware actually keys on. -/
 theorem shapeB_bit_takes_both_values_from_reset :
-    (nextB ⟨.fetch, false, false⟩ false false).fetchOwed = true
+    (nextB ⟨.store, true, false⟩ false false).fetchOwed = true
   ∧ (nextB ⟨.fetch, false, false⟩ true true).fetchOwed = false := by
+  decide +kernel
+
+/-- ⛔⛔ **THE ROW THE OLD MODEL GOT WRONG, PINNED AS A THEOREM SO IT CANNOT SILENTLY COME BACK.**
+The bit is set by a MEMORY retire and by nothing else; a FETCH-loop retire CLEARS it, which is the
+RTL's `instr_avail` arm (`kind == T_FETCH && phase == 2'd3`) seen at loop level. -/
+theorem shapeB_bit_is_set_only_by_a_memory_retire :
+    (nextB ⟨.store, true, false⟩ false false).fetchOwed = true
+  ∧ (nextB ⟨.load,  true, false⟩ false false).fetchOwed = true
+  ∧ (nextB ⟨.fetch, false, false⟩ false false).fetchOwed = false
+  ∧ (nextB ⟨.fetch, false, true⟩  false false).fetchOwed = false := by
   decide +kernel
 
 #audit_axioms BusStateB proj retireB nextB sofNextB stepB allStatesB allStatesB_card
@@ -608,6 +637,7 @@ theorem shapeB_bit_takes_both_values_from_reset :
 #audit_axioms shapeB_holds_the_fetch_at_the_measured_cell shapeB_closes_both_cells
 #audit_axioms shapeB_still_realigns_when_no_fetch_is_owed
 #audit_axioms shapeB_bit_takes_both_values_from_reset
+#audit_axioms shapeB_bit_is_set_only_by_a_memory_retire
 
 
 /-! #### WHICH CLAIM CATCHES WHICH WRONG (B) — the controls' scope, measured, not asserted
