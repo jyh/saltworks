@@ -23,6 +23,42 @@ uio_oe = 8'b1011_0011  ⇒ OUT={7,5,4,1,0}  IN={6,3,2}
                                                   ⇒ all 3 inputs used
 ```
 
+## ⛔⛔ FIRMWARE, READ THIS BEFORE YOU DRIVE `uio_in[6]` — THE `sof` TIMING RULE (2026-09-06)
+
+**`sof` HAS TWO CONSUMERS ON ONE WIRE AND THEY DO NOT SHARE A SCHEDULE.** It resets the neural
+fabric's **22-frame × 14-cycle** sequencer — asserting it is how a host STARTS A FABRIC RUN — and
+the same net reaches the CPU's bus adapter, whose loop is **4 cycles**. There is no handshake
+between them, so a `sof` issued for a perfectly good fabric reason lands wherever the CPU happens
+to be.
+
+> ### THE RULE
+> **Do not assert `sof` while a memory transaction is outstanding.** After serving an instruction
+> word that decodes to `LW` or `SW`, do not assert `sof` until you have served the NEXT
+> instruction fetch. In adapter terms: `sof` is permitted only during a FETCH loop with no memory
+> instruction resident — `violation ⇔ sof && !(kind == T_FETCH && req == 0)`.
+>
+> **Decide one cycle early.** A host that samples at edge *t* drives at *t+1*, so evaluate the
+> permission at **phase 0 or 1** of a qualifying fetch loop; `sof` is then high at phase 1 or 2,
+> where neither `kind` nor the resident decode can have moved.
+
+**WHY IT MATTERS:** breaking it re-issues a COMPLETED memory transaction — the host performs the
+write a SECOND time — and **destroys an instruction**: the next fetch begins, is hijacked mid-loop,
+and the PC advances over an instruction that was never executed. The PC never jumps, so no stride
+or address check can see it. Measured at **13.2% of arrival cycles** on a 50%-memory mix.
+⚠️ *That figure is PROGRAM-MIX DEPENDENT and must not be quoted as a constant; what is not
+mix-dependent is that the rate is not zero and it requires nothing unusual of the host.*
+
+**DEFERRING COSTS YOU NOTHING.** A compliant host that wants a launch every 40 cycles and waits
+for permission gets all 14 of its launches in a 600-cycle run — just later.
+
+✅ **ENFORCED, NOT ASKED:** `SaltWorks/Silicon/Sim/reghost/sof_protocol_check.v` fails a host that
+breaks this; `run_sof_protocol_rule.sh` drives a compliant and a violating host and refuses to
+report a pass unless the violating one is caught AND the compliant one still gets its work done.
+Rationale and full measurements: `docs/silicon-sof-host-protocol-rule-0906.md`.
+
+⚠️ **THIS REMOVES THE REACHABILITY, NOT THE DEFECT** (`busadapt8.v`, AMENDMENT 2 — an open
+two-signature row). A host obeying this rule never reaches the hazard; the hazard is still there.
+
 ⛔ **A SERIALIZED OFFBOARD INTERFACE NEEDS AT MINIMUM: data-in, data-out, a strobe,
 and an acknowledgement. There is nowhere to put them.** The `_unused` line at
 `tt_um_saltworks_ndf.v:440` names `uio_in[7], uio_in[5:4], uio_in[1:0]` — but every

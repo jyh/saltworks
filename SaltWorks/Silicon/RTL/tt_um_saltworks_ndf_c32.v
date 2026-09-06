@@ -25,6 +25,14 @@ module tt_um_saltworks_ndf_c32 (
     input  wire       rst_n
 );
   // ---- D6 pin map (frozen) ----
+  // ⛔⛔ FIRMWARE TIMING RULE ON THIS PIN (2026-09-06) — TWO CONSUMERS, ONE WIRE, NO HANDSHAKE.
+  //   `sof` resets the fabric's 22x14 sequencer (asserting it STARTS A FABRIC RUN) AND reaches
+  //   the CPU adapter's 4-cycle loop. DO NOT ASSERT `sof` WHILE A MEMORY TRANSACTION IS
+  //   OUTSTANDING: after serving an LW/SW word, wait until the next instruction fetch is served.
+  //   Breaking it re-issues a COMPLETED store (the host writes twice) and DESTROYS an
+  //   instruction, with no PC jump for any stride check to catch. 13.2% of arrival cycles on a
+  //   50%-memory mix (mix-dependent; the rate is not zero and needs nothing unusual of a host).
+  //   Enforced by Sim/reghost/sof_protocol_check.v; spec in docs/silicon-offboard-data-block-0817.md.
   wire       sof         = uio_in[6];
   wire       edge_in_dat = uio_in[2];
   wire       edge_in_vld = uio_in[3];
