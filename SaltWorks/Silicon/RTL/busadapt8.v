@@ -188,6 +188,53 @@ module busadapt8(clk, rst_n, sof,
     //    two-signature row. The `sof` arm below clears `load_beat` for exactly the
     //    reason it already clears `store_beat` — a realign reframes the
     //    transaction — and that is the SAME TREATMENT, NOT THE REPAIR.
+    //
+    // ⭐⭐ SILICON'S SECOND SIGNATURE — 2026-09-06, ON THE TRACE evidence ROUTED FOR.
+    //    compiler asked the one question its exhibit could not reach: re-entering
+    //    T_STORE on a COMPLETED store, does the write-enable path assert to memory a
+    //    SECOND time? ✅ MEASURED YES, and the amendment is SIGNED.
+    //    `Sim/reghost/run_sof_window_census.sh`, shipped DUT, nothing mutated:
+    //      ARM  0 no pulse    stores=19 SW=19 UNACCOUNTED=0  lw_exec=18 sw_exec=19  7/7
+    //      ARM 10/11/12       stores=20 SW=19 UNACCOUNTED=1  lw_exec=17 sw_exec=20  L7 RED
+    //      ARM 13 phase 3     stores=19 SW=19 UNACCOUNTED=0  lw_exec=18 sw_exec=19  7/7
+    //      ARM 20 non-mem     stores=19 SW=19 UNACCOUNTED=0  (fairness control, clean)
+    //    There is no write-enable PORT here — `c_dmem_we` is an input. The write path
+    //    IS the TYPE code on `phase_pins` plus the two loops behind it, so a re-issued
+    //    frame IS a second write, and the host performs it.
+    //
+    // ⛔⛔ TWO CORRECTIONS TO THE PARAGRAPH ABOVE, WHICH IS KEPT VERBATIM (struck, not
+    //    rewritten — this file's own law) BECAUSE compiler CITES IT:
+    //    (1) "a ONE-CYCLE sof at a RETIRING phase-3 edge" UNDERSTATES THE WINDOW 3x.
+    //        The pulse does nothing at the retiring edge — the `retire` arm runs first
+    //        and correctly sets T_FETCH. The damage is done in the FOLLOWING FETCH LOOP,
+    //        by ANY of its first THREE cycles. Phase 3 alone is protected, and only
+    //        because THE INSTRUCTION BYPASS (ratified 08/18 for an unrelated defect)
+    //        is the one thing that puts a freshly assembled word in front of the decode:
+    //          phase 0/1/2  c_instr=0010a023 (the STALE SW)  req=1 we=1 => kind:=T_STORE
+    //          phase 3      c_instr=0000a183 (the NEW LW)    req=1 we=0 => kind:=T_LOAD
+    //        ⇒ THE `sof` ARM DECODES WHATEVER `c_instr` PRESENTS, AND FOR 3 OF EVERY 4
+    //          CYCLES OF A FETCH LOOP THAT IS THE PREVIOUS INSTRUCTION.
+    //    (2) "re-issues a completed transaction" UNDERSTATES THE COST. It also DESTROYS
+    //        AN INSTRUCTION: the next fetch STARTS (its address reaches the pins) and is
+    //        hijacked mid-loop, the SW retires a second time, and pc_r walks past an
+    //        instruction that was never fetched. lw_exec 18 -> 17 on ONE pulse. And
+    //        pc_jumps(delta!=4)=0 — the PC never jumps, so the instruction is not
+    //        skipped OVER, it is overwritten IN PLACE, invisibly to any stride check.
+    //
+    // ⛔ AND WHY THE EXISTING BAR DID NOT CATCH IT: L2 is blind (the duplicate store is
+    //    IDEMPOTENT — same address, same data), L5 is blind (a SHAPE criterion; the
+    //    re-issue is a well-formed 2-loop store), L6 is blind (THE HIJACKED FETCH FRAME
+    //    SUPPLIES THE VERY STRIDE POINT THAT WOULD OTHERWISE BE MISSING — the defect
+    //    manufactures the observable that hides it). Only L7, a COUNT criterion, fires.
+    //    ⇒ A CRITERION THAT SAMPLES AN ARTIFACT THE DEFECT ALSO PRODUCES CANNOT REFUTE IT.
+    //
+    // ⏳ THE REPAIR IS NOT LANDED HERE — still a two-signature row; I signed the FINDING.
+    //    Recommended shape (B): after a memory instruction retires and before the next is
+    //    assembled, the ONLY correct `kind` is T_FETCH — there is nothing to re-derive
+    //    from. A "fetch owed" bit makes the arm right BY CONSTRUCTION rather than by which
+    //    cycle the pulse lands on. Shape (A), gating the arm on `retire`, is right only by
+    //    accident of `retire` being high exactly at the protected phase.
+    //    Write-up + the failed mutation control: docs/silicon-amendment2-signature-0906.md
     always @(posedge clk)
         if (!rst_n) begin kind <= T_FETCH; store_beat <= 1'b0; load_beat <= 1'b0; end
         else if (sof) begin
