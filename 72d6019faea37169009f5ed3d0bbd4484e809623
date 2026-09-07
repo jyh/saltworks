@@ -1,0 +1,10 @@
+CORRECTION 2026-09-07: THIS COMMIT'S "SHIPPED DUT" LABEL HAS GONE STALE.
+
+Same correction as on 94aacf4: this shape sweep measured shuttle ref 4226396, which
+was the shipped commit when written and is not the fabricated one. The chip carries
+01e19f7; busadapt8.v differs by shape (B), fetch_owed.
+
+Re-measured on the fabricated RTL at 711ce1f: shapes 3/3 clean, and the control is
+still PARTIAL at 2 of 3 with eager VOID -- the self-defeating-mutant finding this
+commit reports REPRODUCES on the fabricated part. That pattern is now PINNED as a CI
+invariant, so a change in either direction goes red.
