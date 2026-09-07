@@ -1,3 +1,35 @@
+⛔⛔⛔ **SUPERSEDED AS CURRENT STATE 2026-09-07 ~20:1xZ — READ THIS BEFORE THE TITLE BELOW, WHICH IS
+NOW FALSE.** The Captain clicked "Revision submitted" at **17:07Z**, bot PR **#361** merged at
+17:15:30Z, and the shuttle slot `commit_id.json` now reads **`01e19f7`** — measured at the object by
+me with a 404 negative control, and independently by the helm (27th head) over public HTTPS.
+⇒ ***THE CHIP CARRIES (B). IT HAS THE `fetch_owed` REPAIR.*** This document was written in the (b)
+world and every sentence below describing what the silicon LACKS is history, not state.
+
+✅ **§5's FOUR OWED ITEMS ARE ALL CLOSED, AND THREE WERE CLOSED BY THE CLICK RATHER THAN BY AN EDIT:**
+(1) `§Signoff` is now **TRUE** — the bundle it describes *was* submitted. (2) `busadapt8.v`'s fence is
+now **TRUE of the silicon** — `main` *is* the fabricated design, `fetch_owed` ×10. (3) the resync
+erratum is **CLOSED** — the shipped `docs/info.md:27-30` already carries *"truncates whatever frame is
+in flight … and is not a no-op"* (`truncat`=1, control token=0). (4) was always correct as written.
+⇒ **NOTHING IS OWED ON `main`. DO NOT LAND §5.** Landing it would write three falsehoods into `main`
+under the banner of a correction. Mirror-image check also run: `main` grepped for divergence language
+(*"not the fabricated"*, *"does not carry"*, *"divergen"*, *"4226396"*, *"would have shipped"*) — **zero
+hits**, positive control `fetch_owed`=10 proving the grep reaches the files.
+
+⛔ **HOW A FALSE ORDER REACHED A RELIGHT, because the mechanism outlives this instance:**
+`tt-2000z-release-watch.sh` was **armed at 14:00:56Z — three hours BEFORE the click — carrying its
+order inside its own heredoc**, and at 20:00:57Z it **overwrote** the corrected gate the 26th head had
+written after the click. ⇒ 🔑 ***A WATCHER THAT CARRIES ITS ORDER IN A HEREDOC FREEZES THE WORLD AT ARM
+TIME, AND ITS WRITE IS AN OVERWRITE, NOT A MERGE — THE LATER CORRECTION LOSES TO THE EARLIER
+AUTOMATION.*** The relight order was pre-click text wearing a post-click timestamp.
+⇒ **A GATE IS RE-DERIVED, NEVER CARRIED.** This seat has said that since 08/16 about the board; it is
+now also true of the thing that writes the gate. What caught it was not diligence but a
+**contradiction that could not be dismissed** — the gate said (b), the portfolio map said (B), and two
+disagreeing sources are a **STOP, not a casting vote**.
+📌 `4226396` remains correct, frozen, and the record **of the (b) world** — it is simply not the
+submitted commit. An order to protect it protects the wrong sha and leaves the fabricated one open.
+
+---
+
 # (b) FIRED: THE CHIP SHIPS WITHOUT (B), AND THE HAZARD IS IN THE DATASHEET, NOT THE SILICON
 
 **silicon, 2026-09-07.** Written on the helm's instruction (*"stop spending on (a); document the
