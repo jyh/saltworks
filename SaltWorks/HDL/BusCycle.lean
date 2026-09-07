@@ -171,9 +171,12 @@ establish that.** It quantifies over the ENUMERATED state space, which is every 
 the fields — it says nothing about which of those states the machine can actually get into from
 reset. ⇒ **NON-EMPTY IN AN ENUMERATION IS NOT REACHABLE FROM RESET**, and calling it "reached"
 would have been an overclaim sitting in the one place a reader reuses: the name.
-📌 True reachability needs an INPUT MODEL — `prevDec`/`nextDec` come from the instruction
-stream, and `cycNext` holds `nextDec` fixed, so this file cannot generate them. **That is the
-honest remainder of the `d8d3760` control, and it is OWED, not discharged.** -/
+✅ **THAT REMAINDER IS NOW PAID, IN THIS FILE, BY `the_bypass_window_is_reached_from_reset`** —
+a concrete run from reset, with a discriminating control beside it. This paragraph read *"OWED,
+not discharged"* for as long as it took to build that; **it is corrected rather than deleted,
+because a stale OWED misprices a reader exactly as badly as a stale gate.** ⇒ The split is still
+worth keeping: **THIS theorem is about the ENUMERATION, THAT one is about a RUN**, and only the
+second answers "reached". -/
 def bypassCells : List CycState := allCyc.filter (fun s => sofKind s != sofKindNoBypass s)
 
 theorem bypass_cells_are_non_empty_in_the_enumeration : bypassCells.length = 20 := by
@@ -205,9 +208,62 @@ theorem off_the_bypass_the_realign_reads_the_retired_instruction :
     allCyc.all (fun s => !instrAvail s → (sofKind s == rederive s.prevDec)) = true := by
   decide +kernel
 
+/-! ## THE INPUT MODEL, AND CONTROL 1 PAID IN FULL
+
+⛔ The theorem above proves the differing set is NON-EMPTY IN THE ENUMERATION, which is not what
+`d8d3760` asked for. This section pays the rest, and the instrument matters:
+
+⭐⭐ **A REACHABILITY CLAIM WANTS A WITNESS, NOT A CLOSURE.** The obvious move is an input model
+plus a reachable-set computation — and it is the WRONG one here, because an input model that
+lets the bus present anything is an OVER-approximation, so a state "reachable" in it may be
+reachable in no real run. **An over-approximation can only refute reachability, never establish
+it.** A concrete trace from reset is an UNDER-approximation: it exhibits the run. Cheaper, and it
+is the direction the claim needs. -/
+
+/-- One cycle with the instruction stream as an INPUT: `nextDec` is what the bus is presenting.
+`cycNext` is exactly this with the input held at the current value, pinned below. -/
+def cycNextIn (s : CycState) (i : Dec) : CycState :=
+  if s.phase == Phase.p3 then
+    let d := decode s
+    let s' := next (proj s) d.req d.we
+    { kind    := s'.kind
+    , beat    := s'.beat
+    , phase   := Phase.p0
+    , prevDec := if s.kind == Kind.fetch then s.nextDec else s.prevDec
+    , nextDec := i }
+  else
+    { s with phase := s.phase.succ, nextDec := i }
+
+/-- ⛔ **THE TIE, WITHOUT WHICH THE WITNESS BELOW WOULD BE ABOUT A DIFFERENT MACHINE.**
+`cycNext` is `cycNextIn` with the stream holding its current value, on all 512 states. So the
+bridge and the characterisation above describe the same step function this trace runs. -/
+theorem cycNext_is_cycNextIn_held :
+    allCyc.all (fun s => cycNext s == cycNextIn s s.nextDec) = true := by decide +kernel
+
+/-- Reset: a fetch at phase 0, nothing decoded yet. -/
+def resetState : CycState := ⟨Kind.fetch, false, Phase.p0, ⟨false, false⟩, ⟨false, false⟩⟩
+
+def runIn (s : CycState) (ins : List Dec) : CycState := ins.foldl cycNextIn s
+
+/-- ⭐⭐⭐ **CONTROL 1, NOW PAID: THE WINDOW IS REACHED FROM RESET.** Three cycles with a LOAD
+being fetched, and the machine is in a cell where the landed arm and the bypass-defeated arm
+disagree. **This is a run, not a membership.** -/
+theorem the_bypass_window_is_reached_from_reset :
+    (fun s => sofKind s != sofKindNoBypass s)
+      (runIn resetState [⟨true, false⟩, ⟨true, false⟩, ⟨true, false⟩]) = true := by
+  decide +kernel
+
+/-- ⛔ **AND THE CONTROL FOR THE WITNESS — because a witness proves nothing if EVERY trace
+satisfies it.** The same length of run with a fetch-shaped stream reaches a cell where the two
+arms AGREE, so the theorem above is discriminating rather than universally true. -/
+theorem a_fetch_stream_does_not_reach_the_window :
+    (fun s => sofKind s != sofKindNoBypass s)
+      (runIn resetState [⟨false, false⟩, ⟨false, false⟩, ⟨false, false⟩]) = false := by
+  decide +kernel
+
 -- ⛔ AXIOM GATES, ONE CALL PER THEOREM ON PURPOSE. `#audit_axioms` with several names ABORTS
 -- AT THE FIRST FAILURE, and the names it never reached print nothing — which reads exactly
--- like clean. Count the TICKS (8), never the absence of complaints.
+-- like clean. Count the TICKS (11), never the absence of complaints.
 -- ⛔ AND THIS COMMENT IS `--`, NOT `/-- -/`: a DOC comment must attach to a DECLARATION, and
 -- `#audit_axioms` is a COMMAND. The doc form is a parse error that names the next line.
 #audit_axioms allCyc_card
@@ -218,5 +274,8 @@ theorem off_the_bypass_the_realign_reads_the_retired_instruction :
 #audit_axioms a_noop_realign_would_break_the_characterisation
 #audit_axioms the_bridge_is_non_vacuous
 #audit_axioms off_the_bypass_the_realign_reads_the_retired_instruction
+#audit_axioms cycNext_is_cycNextIn_held
+#audit_axioms the_bypass_window_is_reached_from_reset
+#audit_axioms a_fetch_stream_does_not_reach_the_window
 
 end SaltWorks.HDL.BusCycle
