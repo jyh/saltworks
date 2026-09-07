@@ -317,3 +317,49 @@ jobs:
         run: sh docs/ledger-tools/prove_sof_protocol_arm.sh
       - name: THE RULE — bad host caught · good host clean · good host still does work
         run: sh SaltWorks/Silicon/Sim/reghost/run_sof_protocol_rule.sh
+
+      # ⭐⭐ THE TWO COMPLIANT-HOST SWEEPS, CONVERTED FROM MEASUREMENTS INTO ARMS (2026-09-07).
+      #   They were one-shots for exactly one reason: the DUT was read from a SHUTTLE CHECKOUT,
+      #   and CI has none. The fabricated RTL is now VENDORED at
+      #   SaltWorks/Silicon/Fabricated/01e19f7, so the DUT travels with the clone and these can
+      #   be scheduled. Ordered by evidence (saltworks lead), whose word made the vendoring
+      #   legitimate: THE TAPE-OUT FROZE THE SUBJECT, so this fixture cannot rot.
+      - name: the vendored DUT is the FABRICATED DUT (conformance vs the EXTERNAL ref)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # ⛔ FAIL-CLOSED ON ABSTAIN, same doctrine as the iverilog step above. The tool exits 3
+          #   when it cannot reach the authority, and keeps that distinct from PASS on purpose;
+          #   the CI POLICY is what turns "I could not look" into RED. A checker that cannot see
+          #   its subject must never contribute a green tick to a run someone quotes.
+          set +e; bash docs/ledger-tools/check_fabricated_fixture.sh; rc=$?; set -e
+          case "$rc" in
+            0) echo "conformance CONFIRMED against github.com/jyh/tt-neural-dataflow-fabric" ;;
+            3) echo "⛔ ABSTAIN IS RED HERE — the authority was not consulted, so nothing was verified."; exit 1 ;;
+            *) echo "⛔ the vendored bytes are not the fabricated bytes (rc=$rc)"; exit 1 ;;
+          esac
+      - name: compliant host, CADENCE — 40 offsets clean, and the control proves it can say otherwise
+        run: |
+          bash docs/ledger-tools/sweep_compliant_host_cadence.sh
+          SWEEP_NEGATIVE_CONTROL=1 bash docs/ledger-tools/sweep_compliant_host_cadence.sh
+      - name: compliant host, SHAPE — clean, with the VOID control pinned as an invariant
+        run: |
+          set -e
+          SWEEP_SHAPES=1 bash docs/ledger-tools/sweep_compliant_host_cadence.sh
+          # ⛔⛔ THE SHAPE CONTROL IS *PARTIAL* BY A KNOWN MECHANISM AND EXITS 1: a host asserting
+          #   `sof` constantly REALIGNS THE MACHINE INTO FETCH, so the `eager` mutant defeats
+          #   itself and that row is a VOID control, not a passing one. Excluding the control
+          #   would hide that; asserting the EXACT pattern instead turns the limitation into a
+          #   pinned invariant. If `eager` ever becomes controlled, or `base`/`burst` stop being
+          #   caught, THAT IS NEWS and this step goes red.
+          set +e
+          SWEEP_SHAPES=1 SWEEP_NEGATIVE_CONTROL=1 bash docs/ledger-tools/sweep_compliant_host_cadence.sh > ctl.txt 2>&1
+          set -e
+          cat ctl.txt
+          fail=0
+          grep -qE '^base +[1-9][0-9]* ' ctl.txt || { echo "⛔ base is no longer CAUGHT by the cut"; fail=1; }
+          grep -qE '^burst +[1-9][0-9]* ' ctl.txt || { echo "⛔ burst is no longer CAUGHT by the cut"; fail=1; }
+          grep -qE '^eager +0 '          ctl.txt || { echo "⛔ eager is no longer a VOID control — the known self-defeat has CHANGED"; fail=1; }
+          grep -q 'NEGATIVE_CONTROL=PARTIAL' ctl.txt || { echo "⛔ the control verdict is no longer PARTIAL"; fail=1; }
+          [ "$fail" = 0 ] && echo "shape control pattern UNCHANGED: base+burst caught, eager VOID (2 of 3, named not averaged)"
+          exit $fail

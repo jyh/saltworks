@@ -25,7 +25,7 @@
 #   0 violations at EVERY offset, because the host consults `permitted` and defers, and a
 #   deferral is not phase-sensitive. A wrong prediction here is a bigger finding than a right one.
 #
-# USAGE:  sweep_compliant_host_cadence.sh [<git-ref>]     default: the shipped commit 4226396
+# USAGE:  sweep_compliant_host_cadence.sh [<git-ref>]   default: THE VENDORED FABRICATED FIXTURE
 #   The DUT is the SHUTTLE's RTL read from a COMMITTED ref (silicon is live in that tree, so a
 #   working-tree read would not be a stable subject). The bench and checker are saltworks'.
 set -eu
@@ -35,7 +35,16 @@ ARM="$ROOT/SaltWorks/Silicon/Sim/reghost/run_sof_protocol_rule.sh"
 REGHOST="$ROOT/SaltWorks/Silicon/Sim/reghost"
 SRCDIR="$ROOT/SaltWorks/Silicon/Sim/wordonly"
 SHUTTLE="${SHUTTLE_REPO:-/Users/jyh/projects/claude/seats/silicon/tt-neural-dataflow-fabric}"
-REF="${1:-4226396}"
+# ⛔⛔ THE DEFAULT WAS `4226396` AND THAT STOPPED BEING THE CHIP ON 2026-09-07 17:07Z.
+#   `busadapt8.v` DIFFERS between 4226396 and 01e19f7 — the diff IS shape (B), `fetch_owed`,
+#   i.e. exactly the organ this sweep exercises. Two landed sweeps in this repo say "the SHIPPED
+#   DUT 4226396"; that was TRUE when written and went false at the click, with nothing firing.
+#   ⇒ 🔑 A DUT LABEL IS A DATED CLAIM. "The shipped DUT" named one commit yesterday and another
+#     today, and a default carries the stale one forward silently into every future run.
+#   The default is now the VENDORED FABRICATED FIXTURE — a pin that cannot go stale, because the
+#   design behind it has been manufactured. Pass a ref explicitly to read the shuttle clone.
+FIXTURE="${SWEEP_FIXTURE:-$ROOT/SaltWorks/Silicon/Fabricated/01e19f7}"
+REF="${1:-}"
 PERIOD=40
 # ⛔⛔ THE NEGATIVE CONTROL, AND IT IS NOT OPTIONAL DECORATION. A sweep that reports 40/40 CLEAN
 #   is worthless until it is shown capable of reporting anything else — otherwise the table is a
@@ -58,9 +67,15 @@ CONTROL="${SWEEP_NEGATIVE_CONTROL:-0}"
 SHAPES="${SWEEP_SHAPES:-0}"
 
 [ -f "$ARM" ] || { echo "⛔ ABORT: arm not found"; exit 2; }
-[ -d "$SHUTTLE/.git" ] || { echo "⛔ ABORT: shuttle repo not found at $SHUTTLE"; exit 2; }
-git -C "$SHUTTLE" cat-file -e "$REF:src/busadapt8.v" 2>/dev/null \
-  || { echo "⛔ ABORT: $REF:src/busadapt8.v unreachable — the DUT would be a guess"; exit 2; }
+if [ -z "$REF" ]; then
+  # FIXTURE MODE — no shuttle checkout, so this arm is SCHEDULABLE (that is the whole point).
+  [ -d "$FIXTURE/src" ] || { echo "⛔ ABORT: fixture not found at $FIXTURE"; exit 2; }
+  [ -f "$FIXTURE/PIN.psv" ] || { echo "⛔ ABORT: fixture has no PIN.psv — the DUT would be unpinned"; exit 2; }
+else
+  [ -d "$SHUTTLE/.git" ] || { echo "⛔ ABORT: shuttle repo not found at $SHUTTLE"; exit 2; }
+  git -C "$SHUTTLE" cat-file -e "$REF:src/busadapt8.v" 2>/dev/null \
+    || { echo "⛔ ABORT: $REF:src/busadapt8.v unreachable — the DUT would be a guess"; exit 2; }
+fi
 command -v iverilog >/dev/null || { echo "⛔ ABORT: iverilog absent — nothing ran."; exit 2; }
 
 T=$(mktemp -d) || exit 2
@@ -70,12 +85,30 @@ trap 'rm -rf "$T"' EXIT
 mkdir -p "$T/Sim" "$T/RTL"
 cp -R "$REGHOST" "$T/Sim/reghost"
 cp -R "$SRCDIR"  "$T/Sim/wordonly"
-for v in plane32bus.v busadapt8.v core32.v; do
-  git -C "$SHUTTLE" show "$REF:src/$v" > "$T/RTL/$v" \
-    || { echo "⛔ ABORT: could not extract $v at $REF"; exit 2; }
-done
+if [ -z "$REF" ]; then
+  for v in plane32bus.v busadapt8.v core32.v; do
+    cp "$FIXTURE/src/$v" "$T/RTL/$v" || { echo "⛔ ABORT: fixture missing $v"; exit 2; }
+  done
+  # ⛔ CUSTODY BEFORE USE: a corrupted fixture must not silently become the DUT. This is the
+  #   fixture's OWN pin (cheap, offline). CONFORMANCE against the external ref is a separate,
+  #   network-bearing arm: docs/ledger-tools/check_fabricated_fixture.sh.
+  while IFS='|' read -r f _bytes blob _csha; do
+    case "$f" in ''|'#'*|file) continue ;; esac
+    [ "$(git hash-object "$T/RTL/$f")" = "$blob" ] \
+      || { echo "⛔ ABORT: fixture file $f fails its own pin — the DUT would be a guess"; exit 2; }
+  done < "$FIXTURE/PIN.psv"
+  PINREF=$(sed -n 's/^# ref|//p' "$FIXTURE/PIN.psv" | head -1)
+  DUT_SRC="FABRICATED fixture ${PINREF:0:7} (custody verified)"
+else
+  for v in plane32bus.v busadapt8.v core32.v; do
+    git -C "$SHUTTLE" show "$REF:src/$v" > "$T/RTL/$v" \
+      || { echo "⛔ ABORT: could not extract $v at $REF"; exit 2; }
+  done
+  DUT_SRC="shuttle clone $REF"
+fi
 DUT_SHA=$( (sha256sum "$T/RTL/busadapt8.v" 2>/dev/null || shasum -a 256 "$T/RTL/busadapt8.v") | cut -c1-16 )
-echo "DUT      shuttle $REF : src/busadapt8.v  sha256/16=$DUT_SHA   (bench + checker are saltworks')"
+echo "DUT      $DUT_SRC : src/busadapt8.v  sha256/16=$DUT_SHA   (bench + checker are saltworks')"
+echo "DATED    read $(date -u '+%Y-%m-%dT%H:%MZ') — a DUT label is a dated claim, so this line carries its date"
 if [ "${SWEEP_SHAPES:-0}" = "1" ]; then
   echo "SWEEP    the compliant host's SHAPE (demand pattern), at a fixed cadence"
 else

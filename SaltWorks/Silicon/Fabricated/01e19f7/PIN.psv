@@ -1,0 +1,10 @@
+# PIN — THE FABRICATED DESIGN. '|' DELIMITED ON PURPOSE (a TAB is IFS whitespace: runs
+# collapse and empty fields vanish, so a later column lands in an earlier variable).
+# ref|01e19f7ef1d1c68255ea424265251c0a377e4b7e
+# repo|https://github.com/jyh/tt-neural-dataflow-fabric
+# blob_sha is git's object id = EXACTLY what the GitHub contents API returns as .sha,
+# which is why conformance can be checked against the EXTERNAL ref with no clone.
+file|bytes|blob_sha|content_sha256
+plane32bus.v|5798|d13825ee1314230ee2a9a36302bbf7b4ba0c9749|7cd721ae0620711ca1f11d3442944f89c622b2592ddd35457dfb2983c28f7f8c
+busadapt8.v|16209|c06e10a301d3adf61cefea352d4ebd8841cff648|a2b39f631220a83814d79553299b7ae092a42641cbebe7560f91805d67fc8f7d
+core32.v|7948|e8a918015484e542d3d0cee2ded4722add55910a|1dc00a316bbcf414577e4b9089aa23bfbe4cfc98ef33448b01bcabca9327bfb5
