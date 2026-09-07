@@ -1,0 +1,15 @@
+CORRECTION 2026-09-07: THIS COMMIT'S "SHIPPED DUT" LABEL HAS GONE STALE.
+
+It measured shuttle ref 4226396 and called it "the SHIPPED DUT". That was TRUE when
+written. The chip that went to fab carries 01e19f7 (slot commit_id.json, merged
+17:15:30Z 09/07), and busadapt8.v DIFFERS between the two -- the diff IS shape (B),
+fetch_owed, i.e. exactly the organ this sweep exercises.
+
+⇒ A DUT LABEL IS A DATED CLAIM. Nothing fired when the click made it false.
+
+THE RESULT ITSELF SURVIVES: re-measured on the fabricated RTL at 711ce1f -- cadence
+40/40 clean, control 40/40 caught, shape 3/3 clean, shape control PARTIAL at 2 of 3
+with eager still VOID. Only the LABEL was wrong, never the number.
+
+The DUT is now the vendored fixture SaltWorks/Silicon/Fabricated/01e19f7 (711ce1f),
+the stale default is retired, and the sweep prints its own read date.
