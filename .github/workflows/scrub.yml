@@ -357,9 +357,14 @@ jobs:
           set -e
           cat ctl.txt
           fail=0
-          grep -qE '^base +[1-9][0-9]* ' ctl.txt || { echo "⛔ base is no longer CAUGHT by the cut"; fail=1; }
-          grep -qE '^burst +[1-9][0-9]* ' ctl.txt || { echo "⛔ burst is no longer CAUGHT by the cut"; fail=1; }
-          grep -qE '^eager +0 '          ctl.txt || { echo "⛔ eager is no longer a VOID control — the known self-defeat has CHANGED"; fail=1; }
+          # ⛔ THE CAUGHT SET IS A SET, NOT A COUNT. Asserting "4 of 5" would stay green if a
+          #   different member went void while another became controlled -- the total is the
+          #   one thing that CANNOT distinguish those. Each member is named.
+          for s in base burst coprime impatient; do
+            grep -qE "^$s +[1-9][0-9]* " ctl.txt || { echo "⛔ $s is no longer CAUGHT by the cut"; fail=1; }
+          done
+          grep -qE '^eager +0 ' ctl.txt || { echo "⛔ eager is no longer a VOID control — the known self-defeat has CHANGED"; fail=1; }
           grep -q 'NEGATIVE_CONTROL=PARTIAL' ctl.txt || { echo "⛔ the control verdict is no longer PARTIAL"; fail=1; }
-          [ "$fail" = 0 ] && echo "shape control pattern UNCHANGED: base+burst caught, eager VOID (2 of 3, named not averaged)"
+          grep -q 'LOWEST-YIELD SHAPE' ctl.txt >/dev/null 2>&1 || true
+          [ "$fail" = 0 ] && echo "shape control pattern UNCHANGED: base+burst+coprime+impatient CAUGHT, eager VOID (4 of 5, named not averaged)"
           exit $fail

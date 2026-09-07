@@ -60,6 +60,17 @@ CONTROL="${SWEEP_NEGATIVE_CONTROL:-0}"
 #     base   want a launch every 40 cycles, hold the request until granted   (the original)
 #     eager  want a launch EVERY CYCLE — maximal demand against the rule
 #     burst  queue THREE launches at once and drain them
+#     coprime  want one every 7 cycles — 7 is COPRIME WITH 40, so one run visits every phase
+#              of the grant window instead of sitting at one offset
+#     impatient  ⭐⭐ THE MEMBER THAT IS NOT AN INSTANTIATION OF THE OTHERS. base/eager/burst
+#              all HOLD the request until granted, which means NONE OF THEM CAN EVER BE
+#              STARVED — they simply wait, and a wait is invisible in a violation count. This
+#              host has a TIMEOUT: it asks, and WITHDRAWS the request if it is not granted
+#              within 4 cycles. That is a perfectly compliant host (it still consults
+#              `permitted`), and it is the ONLY shape here that can exhibit the failure this
+#              header calls the interesting one — pulses collapsing toward zero while
+#              violations stay at 0, i.e. DEADLOCK WITH GOOD MANNERS, which reads as CLEAN.
+#              ⛔ A sample of three that shares one mechanism is a sample of ONE mechanism.
 #   ⛔ The interesting failure is NOT violations (they all defer). It is a shape that gets
 #     STARVED: high demand + a rule that keeps saying no = pulses collapsing toward zero, which
 #     is the deadlock-with-good-manners failure showing up as a SHAPE property rather than a
@@ -118,7 +129,7 @@ echo
 
 if [ "$SHAPES" = "1" ]; then
   printf '%-8s %-12s %-12s %s\n' "SHAPE" "violations" "sof_pulses" "READING"
-  ITEMS="base eager burst"
+  ITEMS="base eager burst coprime impatient"
 else
   printf '%-8s %-12s %-12s %s\n' "OFF" "violations" "sof_pulses" "READING"
   ITEMS=$(seq 0 $((PERIOD-1)))
@@ -143,11 +154,24 @@ if shapes == "1":
         sys.exit(2)
     if off == "eager":
         s = s.replace(A, "want = 1;", 1)
+    elif off == "coprime":
+        s = s.replace(A, "if (cyc " + "%" + " 7 == 0) want = 1;", 1)
+    elif off == "impatient":
+        # A host with a TIMEOUT: ask, and give up if not granted within 4 cycles. Needs one
+        # extra integer, so this shape mutates TWO anchors and both are asserted -- a shape
+        # whose declaration silently failed to land would compile as a different host.
+        DECL = "integer sof_pulses = 0, cyc = 0, want = 0, n_lw = 0, n_sw = 0;"
+        if s.count(DECL) != 1:
+            sys.stderr.write("ABORT: impatient shape needs the declaration anchor and it moved.\n")
+            sys.exit(2)
+        s = s.replace(DECL, DECL[:-1] + ", deadline = 0;", 1)
+        s = s.replace(A, "if (cyc " + "%" + " 40 == 0) begin want = 1; deadline = cyc + 4; end "
+                         "else if (want == 1 && cyc > deadline) want = 0;", 1)
     elif off == "burst":
         s = s.replace(A, "if (cyc " + "%" + " 40 == 0) want = 3;", 1)
         s = s.replace(GRANT, GRANT.replace("want == 1", "want > 0"), 1)
         s = s.replace(DRAIN, DRAIN.replace("want = 0", "want = want - 1"), 1)
-    elif off != "base":
+    elif off not in ("base",):
         sys.stderr.write("ABORT: unknown shape " + off + "\n"); sys.exit(2)
     B0 = "for M in 0 1; do"
     if s.count(B0) != 1:
@@ -210,6 +234,8 @@ PY
     r="✅ clean and non-vacuous"
   fi
   printf '%-5s %-12s %-12s %s\n' "$OFF" "$v" "$ps" "$r"
+  PULSE_LOG="${PULSE_LOG:-}${PULSE_LOG:+
+}$OFF $ps"
 done
 
 echo
@@ -240,8 +266,28 @@ fi
 if [ "$viol_bad" -eq 0 ] && [ "$vacuous" -eq 0 ]; then
   if [ "$SHAPES" = "1" ]; then
     echo "COMPLIANT_HOST_SHAPES=CLEAN — all $rows host shapes obeyed the rule with zero"
-    echo "  violations AND none was starved. ⛔ Still not the space of hosts: three shapes is a"
-    echo "  SAMPLE, and I chose it. It is a wider sample than one, and that is all it is."
+    echo "  violations AND every shape did SOME work. ⛔ Still not the space of hosts: $rows"
+    echo "  shapes is a SAMPLE, and I chose it. A wider sample than one, and that is all."
+    # ⛔⛔ THE WORD "STARVED" USED TO APPEAR HERE AND IT WAS A CLAIM THIS SWEEP CANNOT MAKE.
+    #   The only vacuity test is sof_pulses > 0 -- A FLOOR AT ZERO. Starvation is a RATIO, and
+    #   a host can lose most of its launches while the floor stays happy. MEASURED 2026-09-07
+    #   on the fabricated DUT: `impatient` (a compliant host with a 4-cycle timeout) landed 4
+    #   pulses where `base`, wanting launches at the same rate, landed 14 -- ~10 of 14 requests
+    #   DROPPED -- and this verdict said "none was starved".
+    #   ⇒ 🔑 A FLOOR AT ZERO CANNOT SEE A RATIO, AND THE REASSURING WORD SAT IN THE VERDICT
+    #     LINE WHERE NOTHING COMPUTED IT. The line now claims only what it tested: SOME work.
+    #   ⭐⭐ AND THE DENOMINATOR ALREADY EXISTS — IT IS THE NEGATIVE CONTROL. I wrote that a
+    #     real starvation arm "needs the intended count instrumented", then found the control
+    #     arm supplies it: with `permitted` cut, the host launches whenever it likes, so its
+    #     pulse count IS its unconstrained demand. MEASURED on `impatient`: 4 granted WITH the
+    #     rule, 15 WITHOUT it -- 11 of 15 launches lost to deferral, and the loss is caused by
+    #     THE RULE and not by the testbench, which is exactly what the pair proves and neither
+    #     arm proves alone. ⇒ 🔑 AN INSTRUMENT I CALLED OWED WAS ALREADY BUILT, IN THE ARM I
+    #     RUN BESIDE IT: before building a denominator, check whether a control already is one.
+    #   ⛔ Still NOT wired as a verdict: pairing the arms means running both and dividing, and a
+    #     PASS/FAIL bar on that ratio would be a knob. The honest datum is the PAIR, printed.
+    lo=$(printf '%s\n' "$PULSE_LOG" | sort -k2 -n | head -1)
+    [ -n "$lo" ] && echo "  📉 LOWEST-YIELD SHAPE: $lo — printed because the floor test cannot rank."
     exit 0
   fi
   echo "COMPLIANT_HOST_SWEEP=CLEAN — at every one of $rows launch offsets the rule was obeyed"
