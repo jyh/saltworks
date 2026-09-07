@@ -97,6 +97,7 @@ import SaltWorks.HDL.CoreAssemblyD
 import SaltWorks.HDL.NetlistBridge
 import SaltWorks.HDL.TrapOrgan
 import SaltWorks.HDL.BusFSM
+import SaltWorks.HDL.BusCycle
 import SaltWorks.HDL.AdapterStateOrgan
 import SaltWorks.HDL.RegFieldSchema
 import SaltWorks.HDL.RegNextUniform
