@@ -19,8 +19,9 @@ cannot measure — "could not measure" is never "fine".)*
 2  rtlmatch.py <sub-src> <rtl>    is the repo still the design on the chip?  (comment-blind)
    --selftest 6/6                 ⛔ TEXT only — it re-runs no synthesis and compares no GDS
 3  harden_run.sh <tag>            the run itself; it now EXITS with the worse of 4 and 5
-4  drvgate.sh <run-dir>           zero clock-leaf, <=1 datapath at fanout <=12 (council item 3)
-   drvgate_selftest.sh 13/13      ⛔ FANOUT only — slew, cap, antenna, DRC and LVS are elsewhere
+4  drvgate.sh <run-dir>           zero clock-leaf, <=3 datapath at fanout <=12 (council item 3,
+                                  count clause AMENDED 1 -> 3 by council 09/07 A2, row GR)
+   drvgate_selftest.sh 16/16      ⛔ FANOUT only — slew, cap, antenna, DRC and LVS are elsewhere
 5  treatcheck.py <base> <arm>     did the run apply EXACTLY its declared treatment, nothing more?
    <ref-resolved> <arm-resolved>  ⛔ configuration only — it says nothing about the EFFECT
    --selftest 10/10

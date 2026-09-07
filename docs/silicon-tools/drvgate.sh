@@ -8,6 +8,21 @@
 #   net at fanout 11, and §11a of docs/silicon-ndf-pair-results-0827.md records the waived
 #   object as a PROPERTY, not a name: "at most one datapath violator at fanout 11-12, zero
 #   clock-leaf". It then says "CHECK AT SUBMISSION" — and the checker was A SENTENCE.
+#
+# ⚖️ AMENDED 2026-09-07 by COUNCIL 09/07 ruling A2 (desk row GR), executed by evidence as
+#   saltworks lead: THE COUNT CLAUSE IS NOW "AT MOST **THREE** DATAPATH VIOLATORS AT FANOUT
+#   11-12". The zero-clock-leaf clause and the 11-12 band are UNCHANGED — the council amended
+#   the count and nothing else, and zero-clock-leaf is the clause §11a calls the serious one.
+#   ⛔ WHY THE GATE HAD TO MOVE WITH THE PROSE, MEASURED BEFORE THE EDIT: the shipped chip
+#   (`01e19f7`, TT slot project 5500, GDS run 34058427540) reports THREE datapath violators —
+#   fanout937/X @11, fanout939/X @12, wire754/X @12, zero clock-leaf — and THIS GATE REFUSED IT
+#   rc=1 on its own nine corner reports. The bundle's prose already recorded the amendment;
+#   the executable refusal still said ONE.
+#   ⇒ ***A RULING LANDS IN THE PROSE AND THE ENFORCER KEEPS THE OLD NUMBER, AND IT IS THE
+#     ENFORCER THAT ANSWERS AT THE NEXT SUBMISSION.*** The prose cannot refuse anything.
+#   📌 AND NOTE WHICH NETS: `wire695` — the name the 08-28 headline used — IS NOT AMONG THEM.
+#     §11a's insistence that the waived object is a PROPERTY AND NOT A NAME is now vindicated
+#     by the shipped run itself: a name-shaped waiver would have gone stale at tape-out.
 #   `harden_run.sh` PRINTS design__max_fanout_violation__count inside a loop and consumes
 #   nothing; the freeze is 2026-09-07 13:00 PDT and the hand reading that printout on the
 #   day is mine, in a hurry.
@@ -85,16 +100,17 @@ print("    worst datapath fanout: %d" % worst)
 
 fail = []
 if clock:            fail.append("%d clock-leaf violator(s) — the waiver covers ZERO" % len(clock))
-if len(data) > 1:    fail.append("%d datapath violators — the waiver covers AT MOST ONE" % len(data))
+if len(data) > 3:    fail.append("%d datapath violators — the amended waiver covers AT MOST THREE" % len(data))
 if worst > 12:       fail.append("datapath fanout %d — the waiver covers 11-12" % worst)
 
 if fail:
     print("⛔ DRV GATE: REFUSED — the council waiver does NOT cover this run.")
     for f_ in fail: print("    " + f_)
-    print("    (council item 3, 2026-08-28; waived object in docs/silicon-ndf-pair-results-0827.md §11a)")
+    print("    (council item 3, 2026-08-28, count clause amended by council 09/07 A2 / row GR;")
+    print("     waived object in docs/silicon-ndf-pair-results-0827.md §11a, amendment in docs/signoff-criterion-amendment-0907.md)")
     sys.exit(1)
 
-print("✅ DRV GATE: MEETS THE WAIVED OBJECT — zero clock-leaf, %d datapath at fanout <=12." % len(data))
+print("✅ DRV GATE: MEETS THE WAIVED OBJECT (as amended 2026-09-07) — zero clock-leaf, %d datapath at fanout <=12 (limit 3)." % len(data))
 print("   ⚠️ This gate reads FANOUT ONLY. Slew, cap, antenna, DRC and LVS are other checks.")
 sys.exit(0)
 PY

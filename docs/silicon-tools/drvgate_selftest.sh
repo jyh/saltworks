@@ -10,6 +10,16 @@
 #   (2) EVERY LIMB FIRES ALONE SOMEWHERE. A gate whose limbs only ever fire together has not
 #       been shown to discriminate — clock-leaf, count and fanout each get an arm where it is
 #       the ONLY reason for the refusal.
+#
+# ⚖️ AMENDED 2026-09-07 with the gate (council 09/07 A2 / row GR, evidence as saltworks lead).
+#   The count clause moved 1 -> 3, so TWO arms INVERT (`a4` fixture, `ndf-2b` production) and
+#   three are ADDED. ⛔ THE POINT OF THE ADDITIONS: moving a threshold without moving the arm
+#   that tests it RETIRES the limb silently — the suite stays green while nothing checks the
+#   count any more. `count ALONE (4 datapath)` re-establishes the limb at its new boundary,
+#   `band ALONE (3 dp, one @13)` proves the band still refuses once the count is satisfied,
+#   and `THE SHIPPED SHAPE` pins the arm to the part that was actually fabricated.
+#   📌 DRIVEN RED FIRST: against the amended gate the OLD suite went 8/1 with `a4` the single
+#   failure — one arm, exactly the limb that moved, which is what says the arm was live.
 set -u
 HERE="$(cd -P "$(dirname "$0")" && pwd)"
 GATE="$HERE/drvgate.sh"
@@ -45,7 +55,24 @@ mkfix "$T/a1" ""                                                          ; arm 
 mkfix "$T/a2" "wire695/X                                10     11        (VIOLATED)"; arm "the WAIVED shape: 1 datapath @11" 0 "$T/a2"
 mkfix "$T/a3" "clkbuf_leaf_2_clk/X                      10     15     -5 (VIOLATED)"; arm "clock-leaf ALONE"     1 "$T/a3"
 mkfix "$T/a4" "wire695/X                                10     11        (VIOLATED)" \
-              "_05547_/X                                10     12        (VIOLATED)"; arm "count ALONE (2 datapath)" 1 "$T/a4"
+              "_05547_/X                                10     12        (VIOLATED)"; arm "2 datapath: INSIDE amended band" 0 "$T/a4"
+# ⚖️ THE SHIPPED CHIP'S OWN DRV SIGNATURE, kept as a permanent arm. These are the three nets
+#   the tape-out actually carries (01e19f7, GDS run 34058427540, read from its nine corner
+#   reports): zero clock-leaf, three datapath at 11, 12, 12. If this arm ever refuses, the
+#   gate has drifted away from the part that was fabricated.
+mkfix "$T/a4b" "fanout937/X                              10     11        (VIOLATED)" \
+               "fanout939/X                              10     12        (VIOLATED)" \
+               "wire754/X                                10     12        (VIOLATED)"; arm "THE SHIPPED SHAPE: 3 dp @11,12,12" 0 "$T/a4b"
+# The count limb must still fire ALONE somewhere, or the amendment has retired the arm rather
+# than moved it (harness rule 2). Its boundary is now FOUR.
+mkfix "$T/a4c" "fanout937/X                              10     11        (VIOLATED)" \
+               "fanout939/X                              10     12        (VIOLATED)" \
+               "wire754/X                                10     12        (VIOLATED)" \
+               "_05547_/X                                10     11        (VIOLATED)"; arm "count ALONE (4 datapath)" 1 "$T/a4c"
+# And the BAND limb must fire alone with the count SATISFIED — three is legal, 13 is not.
+mkfix "$T/a4d" "fanout937/X                              10     11        (VIOLATED)" \
+               "fanout939/X                              10     12        (VIOLATED)" \
+               "wire754/X                                10     13        (VIOLATED)"; arm "band ALONE (3 dp, one @13)" 1 "$T/a4d"
 mkfix "$T/a5" "_09736_/X                                10     14        (VIOLATED)"; arm "fanout ALONE (1 @14)"  1 "$T/a5"
 # NEGATIVE CONTROLS ON THE INSTRUMENT ITSELF
 mkfix "$T/a6" "wire695/X                                10     11        (VIOLATED)"
@@ -71,7 +98,7 @@ elif [ -d "$ARCH" ]; then
   arm "ndf-base  111 clk + 6 dp, worst 14" 1 "$ARCH/ndf-base"
   arm "ndf-1d    111 clk + 0 dp"           1 "$ARCH/ndf-1d"
   arm "ndf-2a    0 clk + 1 dp @11 (WAIVED)" 0 "$ARCH/ndf-2a"
-  arm "ndf-2b    0 clk + 2 dp"             1 "$ARCH/ndf-2b"
+  arm "ndf-2b    0 clk + 2 dp (now WAIVED)" 0 "$ARCH/ndf-2b"
 else
   echo "⚠️ PRODUCTION ARMS SKIPPED — archive not mounted at $ARCH."
   echo "   The fixtures prove the MECHANISM; the archive arms prove it on the REAL reports."

@@ -12,6 +12,12 @@
 *Prepared 2026-08-28 for addition to the submitted bundle (TT commit `7d2b2756`, run
 `32284710003`). **NOT YET ADDED — see the scope question at the foot.***
 
+> ⚖️ **2026-09-07 — THE COUNT CLAUSE THIS NOTE QUOTES HAS BEEN AMENDED (council 09/07 A2, desk row
+> GR): at most **THREE** datapath violators at fanout 11–12, zero clock-leaf unchanged. The chip
+> that went to fab carries three (`fanout937/X` @11, `fanout939/X` @12, `wire754/X` @12) and the
+> enforcer `docs/silicon-tools/drvgate.sh` was moved with the prose in the same act. The record,
+> with all three table numbers re-measured at the shipped run: `docs/signoff-criterion-amendment-0907.md`.**
+
 ## What the fabricated design actually reports
 
 The submitted artifact carries **no STA corner reports and no fanout column in `metrics.csv`**, so
@@ -66,8 +72,11 @@ submitted one. They differ in 4 of 411 keys, and that had not been measured.*
 
 ## ⛔ THE SCOPE QUESTION — MEASURED, AND IT IS WHY THE ABOVE READS AS IT DOES
 
-The council's 2026-08-28 waiver (item 3) accepts *"at most one datapath violator at fanout 11–12,
-zero clock-leaf"* and its headline named **`wire695`**. That residual belongs to configuration
+The council's 2026-08-28 waiver (item 3) accepted *"at most one datapath violator at fanout 11–12,
+zero clock-leaf"* and its headline named **`wire695`**. ⚖️ **The COUNT clause was amended to THREE on
+2026-09-07 (council 09/07 A2, row GR) — see `docs/signoff-criterion-amendment-0907.md`; the
+zero-clock-leaf clause and the 11–12 band are unchanged. The argument below is about SCOPE and is
+unaffected by the count: it is why `wire695` belongs to a different configuration.** That residual belongs to configuration
 **①d + ②a**, whose `resolved.json` differs from the submitted run's in **4 keys**
 (`CTS_SINK_CLUSTERING_SIZE`, two resizer hold margins, `RSZ_CORNERS`).
 

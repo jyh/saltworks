@@ -173,6 +173,16 @@ stable exactly where synthesis invents the name.*
 📌 **CHECK AT SUBMISSION: zero clock-leaf violators, and ≤1 datapath violator at fanout ≤12. If the
 count rises or a clock-leaf appears, the waiver does NOT cover it and the row re-opens.**
 
+> ⚖️ **ANNOTATION 2026-09-07 — THE COUNT ROSE, THE ROW RE-OPENED EXACTLY AS THIS LINE SAYS IT WOULD,
+> AND THE COUNCIL AMENDED THE CLAUSE.** Council 09/07 A2 (row GR): **≤3** datapath violators at
+> fanout 11–12; zero clock-leaf and the 11–12 band UNCHANGED. `drvgate.sh` was moved with it.
+> **This section is left as written**: it records what was measured and ruled on 2026-08-27/28, and
+> a record of what was known at a time gets annotated, never amended. The live criterion and the
+> three re-measured table numbers: `docs/signoff-criterion-amendment-0907.md`.
+> ⭐ **AND THIS PARAGRAPH'S OWN ARGUMENT WAS VINDICATED BY THE TAPE-OUT:** the chip that shipped
+> carries `fanout937/X`, `fanout939/X` and `wire754/X` — **`wire695` is not a net of it.** A
+> name-shaped waiver would have gone stale at the submission it was written to govern.
+
 ⭐ **AND THAT CHECK IS NOW AN EXECUTABLE REFUSAL, NOT THIS SENTENCE — `docs/silicon-tools/drvgate.sh`
 (2026-08-28 17:3x).** Until then the criterion above was prose, `harden_run.sh` PRINTED
 `design__max_fanout_violation__count` inside a loop and consumed nothing, and the hand reading that
