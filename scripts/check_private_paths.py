@@ -70,6 +70,38 @@ WHAT IS DELIBERATELY *NOT* FORBIDDEN
   law harvest condemned ("declare an instrument's blind spot, never quietly
   extend it"). DECLARED, therefore, and left alone.
 
+* **Wiki-style card links.** The fleet's memory cards point at one another with
+  a card slug wrapped in doubled square brackets. That notation names a card in
+  the private record without spelling a path, so the path patterns cannot see it
+  and neither could a message-only census. The class is ruled KEEP (council
+  2026-09-06), so this is a declaration and not a deferral.
+
+      ref                            occurrences  files  distinct
+      saltworks  master   d92a48a        159        60      56
+      salt       main     c36096fc         2         1       2
+      jas        main     6fc16192         1         1       1
+
+  Snapshots taken 2026-09-06, not properties, and each row names its ref for the
+  reason the frame block below gives: a repo does not have a count, a ref does.
+  ⛔ AND THE DISCRIMINATOR, IF ONE IS EVER BUILT, MUST KEY ON THE NOTATION AND
+  NEVER ON WHETHER THE LINK RESOLVES. The mirror lags the live banks and a
+  renamed card stops resolving, so non-resolution is not evidence of
+  non-pointer: a gate testing "does this link resolve?" goes quiet in the
+  DANGEROUS direction. That is a seat's finding, not this file's, and it is
+  recorded here because the next author of this section will reach for the
+  resolve test first.
+  ⛔ AND THE COUNTING RULE, LEARNED BY GETTING IT WRONG WHILE WRITING THIS
+  PARAGRAPH. The same notation spells array-of-array types, build-manifest table
+  headers and proof-assistant literals in ordinary code, so a bare count of the
+  bracket shape is not a count of this class: it reads 36 in salt and 655 in jas,
+  where the true figures are 2 and 1. The criterion is a HYPHENATED lower-case
+  slug. Controlled against a relaxed criterion that also admits single-word
+  names, the extra hits are manifest table headers and one literal -- no card
+  links -- so the strict rule loses nothing at these refs. A NUMBER HERE MUST
+  NAME THE OBJECT IT WAS MEASURED ON; the first draft of this bullet carried
+  three figures that matched no ref of any of these repos.
+  DECLARED, therefore, and left alone.
+
 THE FRAME THIS INSTRUMENT MEASURES (it travels; it must say)
 ------------------------------------------------------------
 This file is byte-identical in salt, saltworks and jas. Every number below was
@@ -256,6 +288,7 @@ PRESERVED = [
     "a bare bus filename (the ruling softens bare filenames)",
     "role-wording: the helm's brief, another " + _SEAT + "'s bank",
     "absolute paths into PUBLIC repos (declared out of scope, not overlooked)",
+    "wiki-style card links (the doubled-bracket card-slug notation, ruled KEEP)",
 ]
 
 
