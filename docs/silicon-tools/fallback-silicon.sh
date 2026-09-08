@@ -176,18 +176,45 @@ while true; do
   elif ! command -v python3 >/dev/null 2>&1; then
     km="** python3 ABSENT -- ACCOUNT CHECK DID NOT RUN **"
   else
-    # ⛔ THE ACCOUNT READ WAS REDACTED AT THE 2026-08-16 PUBLIC FLIP, and the field
-    #   then printed "** NO emailAddress FIELD **" — which READS AS A MEASUREMENT of
-    #   the account file and is not one. The file still HAS the field; only the read
-    #   was removed. A disabled check that reports like a negative reading is worse
-    #   than an absent one, so the field now says WHY it is silent.
-    #   ⚠️ THE CHECK ITSELF IS NOT RESTORED HERE. `boot-checks-read-the-machine`
-    #   makes it a real signal ("mismatch ⇒ post and STOP"), so its absence is a
-    #   STANDING GAP, reported to the helm 18:19 and not self-authorised: a public
-    #   tool doing account introspection is a disclosure question, not an
-    #   executor's. The repair belongs in the seat's own private boot procedure, or
-    #   behind an env var with a loud refusal — the shape the flip adopted for BUS.
-    km="** ACCOUNT CHECK DISABLED — read redacted at the public flip; this is NOT a reading **"
+    # ⭐ RESTORED 2026-09-07 ON THE HELM'S ONE-WORD RULING, after this seat filed it as a
+    #   blocked-on-helm rather than self-authorising it. THE LAW, in the helm's words:
+    #   ***THE PUBLIC ARTEFACT CARRIES A VERDICT, THE PRIVATE TOOL CARRIES THE IDENTITY,
+    #   AND THE ENV VAR IS THE SEAM.*** This file is PUBLIC and prints OK|MISMATCH|UNCHECKED
+    #   and NOTHING ELSE — no account string, no email, no introspected identity.
+    #
+    # ⛔ WHY THE OLD READ IS NOT RESTORED: it read `.claude.json`'s oauthAccount.emailAddress,
+    #   and credgate.py's own header says that field IS NOT EVIDENCE — it is a CACHE THE DIR
+    #   WROTE ABOUT ITSELF. Restoring it would have restored a FALSE instrument. The flip
+    #   redacted something that was already unsound.
+    #
+    # ⛔⛔ WHAT IS COMPARED, AND WHY IT IS *NOT* THE ROSTER: the roster records INTENT and moves
+    #   BEFORE a seat relights — silicon's row read `jyaletheia` at this write while this
+    #   process still ran on `jason`, a deliberate announced transition. A roster comparison
+    #   would print MISMATCH on an ACCEPTED state, which is the defect kent carded today
+    #   (an instrument that cannot represent "this is deliberate" reports every accepted
+    #   state as a defect, and a permanent alarm is discounted).
+    #   ⇒ SO THE CHECK IS SELF-CONTAINED: does the config dir I am ACTUALLY RUNNING ON
+    #   authenticate as the account ITS OWN NAME claims? That is the hazard the fleet paid
+    #   for — "a login into a correctly-named directory authenticated as the WRONG account,
+    #   and a 21-arm preflight passed it, because A DIRECTORY'S NAME IS NOT AN ACCOUNT."
+    cg="${CREDGATE:-}"
+    _dir="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
+    _want=$(basename "$_dir" | sed -n 's/^\.claude-account-//p')
+    if [ -z "$cg" ] || [ ! -r "$cg" ]; then
+      # ⛔ CONDITION (1), THE HELM'S: a MISSING CHECKER IS NOT A PASSING CHECK.
+      km="UNCHECKED (CREDGATE unset or unreadable — a missing checker is not a passing check)"
+    elif [ -z "$_want" ]; then
+      km="UNCHECKED (config dir name encodes no account: $(basename "$_dir"))"
+    else
+      _got=$(python3 "$cg" identity "$_dir" 2>/dev/null | awk -F'\t' 'NR==1 && $1=="OK"{split($2,a,"@"); print a[1]}')
+      if [ -z "$_got" ]; then
+        km="UNCHECKED (credgate returned no OK identity for this dir)"
+      elif [ "$_got" = "$_want" ]; then
+        km="OK (server-read identity matches the dir name; verdict only, no identity printed)"
+      else
+        km="** MISMATCH — this dir does NOT authenticate as the account its NAME claims. POST AND STOP. **"
+      fi
+    fi
   fi
   # ⛔ '±512B' WITHDRAWN 2026-08-15 21:0x. That precision was never earned: the
   # only hard datum was ONE witnessed cut (29 KB, 12 entries lost on 8/11), which
