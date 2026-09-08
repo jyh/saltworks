@@ -38,7 +38,7 @@ WHAT COUNTS AS THE PRIVATE RECORD
 ---------------------------------
 Not a guess — the fleet map is the authority, and these are the roots it names
 as never-public: the seat repo (PRIVATE FOREVER), the employer-lane repos, the
-two private project repos, the per-seat runtime config directories, the kit run
+the private project repos (FOUR since row IB), the per-seat runtime config directories, the kit run
 surface, and the fleet bus. They are assembled from parts below so that this
 file's own source does not match its own patterns. That is not cleverness; a
 detector whose documentation trips it is a shape this fleet has hit repeatedly,
@@ -182,11 +182,30 @@ def self_id() -> str:
 # ---------------------------------------------------------------------------
 _SEAT = "se" + "at"                    # the commons/memory-mirror repo
 _EMPLOYER = ["lo" + "ca", "ho" + "ll", "pcc-" + "bios", "safe_" + "dav1d", "safe_" + "gif"]
-_PRIVATE_PROJ = ["si" + "la", "mor" + "pho"]
+# ⛔⛔ ROW IB — TWO PRIVATE TREES WERE UNWATCHED FOR TWO WEEKS AND THIS FILE SAID SO ON EVERY RUN.
+#   Measured 2026-09-08 by evidence WITH A POSITIVE CONTROL: one synthetic commit carrying four
+#   private roots, one line each. This gate CAUGHT the seat repo and an employer root (so the
+#   instrument and the invocation were both fine) and PASSED CLEAN over the other two.
+#   Both are PRIVATE per the fleet map; one is the tree the map calls NEVER public.
+#   ⇒ 🔑 THE DISCLOSURE BELOW ("ROOTS ARE A HAND-COPIED SNAPSHOT ... Last reconciled") WAS HONEST,
+#     PRINTED ON EVERY SINGLE RUN, AND NOBODY ACTIONED IT FOR TWO WEEKS. A KNOWN HOLE IS ONLY
+#     BETTER THAN AN UNKNOWN ONE IF SOMEBODY IS COUNTING THE DAYS — and nothing was, because the
+#     disclosure had no age, no owner and no re-measure date. It has all three now, below.
+#   ⛔ Assembled from parts like every other root here: this file must not match its own patterns.
+_PRIVATE_PROJ = ["si" + "la", "mor" + "pho", "eman" + "uensis", "ver" + "so"]
 _CFGDIR = r"\.claude-" + _SEAT + r"-[A-Za-z0-9_-]+"
 _KIT_RE = "Documents" + r"[/" + chr(92)*2 + r"]+" + _SEAT   # separator-agnostic
 _KIT = "Documents/" + _SEAT                                      # display form only
 _BUS = "FLEET" + r"\.md"
+
+# ⛔ ROW IB (b): the disclosure now carries an OWNER and a DUE DATE, because "last reconciled"
+#   alone is a fact nobody is accountable for. THE FLEET MAP (~/projects/claude/CLAUDE.md) IS THE
+#   AUTHORITY for this list; when a tree is born or turns private there, it belongs here.
+#   ⇒ EDIT ALL THREE OF THESE TOGETHER WITH THE ROOTS ABOVE. A reconcile that moves the list and
+#     not the date leaves the next reader trusting a stale stamp -- which is this row's own defect.
+ROOTS_RECONCILED = "2026-09-08"
+ROOTS_OWNER = "evidence (PM)"
+ROOTS_REMEASURE_DUE = "2026-10-08"
 
 _ROOTS = [_SEAT] + _EMPLOYER + _PRIVATE_PROJ
 _ROOT_ALT = "|".join(_ROOTS)
@@ -596,6 +615,10 @@ def self_test() -> int:
     planted = [
         ("p-emp", "see " + _EMPLOYER[0] + "/notes/x.md"),
         ("p-priv", "see " + _PRIVATE_PROJ[1] + "/design/y.md"),
+        # ROW IB: the two roots this gate was blind to for 14 days. These rows are the reason
+        # the absence would RED next time instead of passing clean.
+        ("p-priv-ib1", "see " + _PRIVATE_PROJ[2] + "/src/ledger/x.ts"),
+        ("p-priv-ib2", "see " + _PRIVATE_PROJ[3] + "/docs/y.md"),
         ("p-cfg", "config lives in ~/.claude-" + _SEAT + "-evidence/settings.json"),
         # The bus-citation arm needs A line number, never THAT line number --
         # the anchor below is synthetic for the same reason as ee5a84a's.
@@ -1267,8 +1290,10 @@ def main() -> int:
           f"  WATCHING {len(FORBIDDEN)} shapes: "
           + "; ".join(w for _, w in FORBIDDEN) + ".\n"
           f"  ROOTS ARE A HAND-COPIED SNAPSHOT of a fleet map that lives OUTSIDE"
-          f" these repos and MOVES. Last reconciled 2026-08-25. A private root"
-          f" born after that date is NOT watched until this list is edited.")
+          f" these repos and MOVES. Last reconciled {ROOTS_RECONCILED} by {ROOTS_OWNER};"
+          f" NEXT RE-MEASURE DUE {ROOTS_REMEASURE_DUE}. A private root born after the"
+          f" reconcile date is NOT watched until this list is edited, and this line is"
+          f" the only thing that will say so -- it went unactioned for 14 days once.")
     return 0
 
 
