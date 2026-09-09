@@ -664,8 +664,17 @@ mis-attributes, so the restated rung carries its subject in its own text.
   TRAPPING WORD LOAD THE FABRICATED PART WRITES `dmem_rdata` TO `rd` AND CONTINUES.
   MEASURED, not argued (same RESULTS.md, three trapping addresses incl. the kernel's exact
   boundary 32): the fabricated core WRITES on misaligned and on out-of-range, where the gated
-  variant HOLDS.  ⛔ THE ONE-WIRE GATE `core32_gated.v` IS NOT IN THE FABRICATED BUNDLE — that
-  directory holds three files (plane32bus.v, busadapt8.v, core32.v) and no gated variant.
+  variant HOLDS.  ⛔ THE ONE-WIRE GATE `core32_gated.v` IS NOT IN THE FABRICATED PART — measured
+  at the SHIPPED TREE, not at the vendored subset: `git ls-tree -r 01e19f7` in the tape-out
+  repository returns ELEVEN files under `src/` and NO `core32_gated.v`, and the strings `gated`
+  and `trapgate` appear in NO path at that sha.
+  ⚠️ THIS SENTENCE WAS CORRECTED WITHIN THE HOUR OF ITS OWN LANDING, and the correction is the
+  point of the rung it sits in.  It first read "IS NOT IN THE FABRICATED BUNDLE — that directory
+  holds three files".  ***THAT WAS A TRUE READING OF THE WRONG OBJECT***: three files is the
+  VENDORED FIXTURE (a pinned subset), not the fabricated bundle, which carries eleven.  The
+  CONCLUSION was right and the WITNESS named its neighbour — and a witness is the half a reader
+  reuses.  Re-measured at the shipped tree, the conclusion is STRONGER than the sentence that
+  overstated its evidence.
   ✅ CONFORMING PROGRAMS — no trap-class loads — ARE IDENTICAL IN BOTH ARMS.
 ```
 ⇒ 🔑 ***THE LOAD PATH AND THE TRAP CLASS ARE TWO DIFFERENT QUESTIONS, AND A RESTATEMENT THAT
