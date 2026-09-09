@@ -543,6 +543,64 @@ campaign and statement are RESERVED to the Captain under the legislative delegat
 it. It records the measured state so that a reader of §14 stops inheriting three dates that have
 all passed. **The 09-07 WINDOW line below is spent** — the part shipped 09-07 with (B).
 
+#### ⚖️⚖️ AND THE OTHER HALF OF COUNCIL ① — THE STATEMENT WORD, ENTERED BY compiler 2026-09-08
+**The Captain, council 2026-09-08 evening, item ①. His words: *"Choose (i)."*** Minute:
+the helm's council minute for that sitting (bare
+filename `2026-09-08-COUNCIL-minute-evening.md`, private record). ① routed **the date** to the lead (the table
+above) and **the merge and the two ratified sentences** to this seat. This block is that half, and
+the two halves do not overlap: hers dates the rungs, this one records what R9 is now permitted to
+CLAIM. **(i) ratifies the two sentences `cf52660` corrected in place** —
+`SaltWorks/HDL/C4Refuted.lean` (the retirement receipt: *"AGREEMENT AT ONE BIT OF ONE WITNESS IS NOT
+THE DEATH OF A COUNTEREXAMPLE"*) and `SaltWorks/HDL/DecoderTransport.lean` (the superseded
+*"UNPROVED AND UNREFUTED"* status) — **both now stamped AT THE SITE**, because a ratification living
+only in a minute and a bus post dies at the next reboot and these files are what the next head reads.
+
+⛔⛔ **THE WORD DID NOT CAUSE THE MERGE, AND THE ORDER OF THE DATES WILL SAY OTHERWISE TO ANYONE NOT
+TOLD.** Measured by this seat and **independently re-measured by the lead** before either of us
+published: `git merge-base --is-ancestor cf52660 origin/master` → **YES**; `235834e` merged
+**2026-08-31 09:38:23** and `fa7e752` entered a date revision **09:40:33**, 2 min 10 s later, both
+under council ruling z — **eight days before the statement word**. Two of ①'s three clauses were
+paid on 08-31. ⇒ **What ① closes is the one clause eight days of merged history could not: the
+STATEMENT tier**, which the legislative delegation reserves to the Captain — which is why row `z`
+was Captain-owned and stayed open for nine days after its merge landed.
+⇒ 🔑 ***A BLOCK CARRIES TWO CLAIMS — WHO OWES IT, AND WHAT STATE THE OBJECT IS IN — AND ONLY THE
+FIRST ONE AGES BY ITSELF.*** Row `z`'s artifact clause read *"until then `compiler/lw-trap-refutation`
+stays unmerged"*. The 7-day rule aged the row correctly and surfaced it to a council; the sentence
+describing the object had been false for eight of its nine days. The `RE-MEASURE TIMEOUT` field is
+the instrument for the second claim and the row's own text said it was **8 days overdue**.
+
+#### ⚠️ `R10` NAMES TWO OBJECTS IN THIS FILE, THEY CLOSED ON DIFFERENT DAYS, AND BOTH RECORDS ARE REAL
+Recorded here rather than argued on the bus, because §14 is where the contingency lives:
+* **The R10 SITTING closed 09-02, two days BEFORE the window opened.** `docs/LEDGER.md:3521`
+  `R10ADOPT` — *"The R10 sitting ratified R10-1..R10-4 and ruled T8"* — `95310c0` (adoption by MOVE)
+  + `bb4cf5d` (T8) + `01afced` (the statement text, `docs/compiler-R10-FLAGSHIP-STATEMENT-0902.md`,
+  09-02 13:20). All on `master`, verified 2026-09-08.
+* **The R10 ROW above is not the sitting**, and the lead's ⛔ SLIPPED reads it correctly on its own
+  terms: the row's product is the restatement ***"AND the LW row's honest disposition rides with
+  it"***, that clause never landed, and the 09/05 default fired at the 09/06 sitting.
+* ⭐ **AND SILICON'S OWN DOCUMENT SETTLES THE DISTINCTION IN ITS OWN WORDS, landed `8bdf848` on
+  2026-09-08 17:37 — 42 s before this commit and found only by rebasing onto it.**
+  `docs/R10-SITTING-TABLE-0902.md` opens *"SAT AND CLOSED 2026-09-02 12:4x–12:56 PDT. R10-1..R10-4
+  ADOPTED as drafted at `64580a1a` · T8 RULED (the unit is steps realised)"*, and its 09-08 addendum
+  says of the new rung measurement: ⛔ *"It is a MEASUREMENT, not the R10 statement act, **which
+  remains unruled**."* ⇒ **SITTING CLOSED 09-02; STATEMENT ACT UNRULED.** Three hands measured this
+  independently — silicon at its own artifact, evidence at the row, this seat at the LEDGER — and
+  the three agree the moment the noun is split.
+
+⇒ ***EACH READING IS A TRUE READING OF AN ADJACENT OBJECT, AND THE NOUN IS WHAT CARRIES BOTH.***
+Neither party is wrong about a fact. ⛔ **And this changes NOTHING about the R9b refusal above** —
+that argument runs `¬ C4Spec core` is kernel-proved ⇒ R9b is UNMEETABLE rather than LATE, and never
+passes through contingency 2 at all. **A correction to a premise the conclusion does not use must
+say so, or it is read as a dent in the conclusion.** The R10 row stays open on either reading, since
+its new date is the Captain's and T8 is routed to him.
+
+⛔ **ONE SCOPE LINE THAT TRAVELS WITH THE RATIFICATION, so it is not settled by silence.** What is
+inhabited on `master` is the **SCOPED** predicate (`R9BPositiveReduction`, at `stalls := fun _ =>
+false`), at **rung 2.5**, over **`CorePlace.core` — the Lean-composed circuit, NOT `core32.v`, the
+hand-written RTL that was fabricated** — and no theorem in this tree relates the two. **(i) ratifies
+what R9 CLAIMS and changes nothing about its object**; do not let it drift into "the RTL
+correspondence closed."
+
 ⚖️⚖️ **HISTORY (was: LIVE TABLE) — COUNCIL RULING z, 2026-08-31 (the 08-31 minute: "accept"; sitting-close
 routing 09:30:39), ENTERED BY COMPILER THE SAME HOUR. The revised dates are DERIVED from the
 branch receipts — merged to master at `235834e`, `saltbuild EXIT=0`, 4648 audit ticks — not

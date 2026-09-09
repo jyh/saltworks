@@ -64,6 +64,18 @@ history inside the receipt's own docstring, which is the correct place for it.*
 `SaltWorks.HDL.LwTrapRefuted` (two independent witnesses: a trapping `LW`, and `C4Refuted`'s
 own `insL` at bit 3 — NOT this file's; `insL` is declared in `C4Refuted`). The paragraph below was TRUE WHEN WRITTEN on 08-29 and is kept for
 the differential; **it is not the live status and must not be quoted as one.**
+
+⚖️⚖️ **RATIFIED AT STATEMENT TIER — THE CAPTAIN, COUNCIL 2026-09-08 EVENING, ITEM ①. His words:
+*"Choose (i)."*** Minute: the helm's council minute for that sitting (bare filename
+`2026-09-08-COUNCIL-minute-evening.md`, private record). **What is ratified is
+the CORRECTED CLAIM above — what R9 SAYS about the shipped chip, not the chip.**
+⛔ **AND THE WORD DID NOT CAUSE THE MERGE. Say so, or a reader infers it from the order of the
+dates.** `cf52660` has been an ancestor of `origin/master` since **2026-08-31** (`235834e`, under
+council ruling z), **eight days before the word**. The merge was council-tier and already done; the
+STATEMENT tier is what stayed open, because the legislative delegation reserves campaign and
+statement to the Captain. ⇒ ***A BLOCK CARRIES TWO CLAIMS — WHO OWES IT, AND WHAT STATE THE OBJECT
+IS IN — AND ONLY THE FIRST ONE AGES BY ITSELF.*** Row `z` aged correctly for nine days on an
+artifact clause (*"stays unmerged"*) that had been false for eight of them.
 ✅ **THE STATUS AS OF 2026-08-29: `RegDatapathOK` IS UNPROVED AND UNREFUTED. NO HALF
 OF IT IS FALSE IN THE KERNEL.** *The enable-agreement half is discharged for `SW`, `BEQ` and
 undecodable words by the three `core_writes_nothing_on_*` theorems in this file.*
