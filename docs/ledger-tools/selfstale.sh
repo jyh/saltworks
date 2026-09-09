@@ -208,7 +208,17 @@ done
 #    can verify. Driven against all four briefs before landing: it matches exactly one, so it
 #    cannot raise a false STALE inside a peer's fallback output. A shared field with three
 #    meanings cannot have one checker, and guessing would put my convention in their watch.
-SETSHA=$(LC_ALL=C grep -m1 '^SET:' "$B" 2>/dev/null | LC_ALL=C grep -oE '\(= *[0-9a-f]{7,}' | LC_ALL=C grep -oE '[0-9a-f]{7,}')
+# ⛔⛔ 2026-09-09 — THIS ARM HAD BEEN SILENTLY INERT. The matcher required `(= <sha>`; the
+#    brief's SET line has read `(<sha> — derived by ...` for weeks, so SETSHA came back EMPTY
+#    and the whole arm was skipped by its own `[ -n "$SETSHA" ]` guard. It is the defect the
+#    arm exists to catch, wearing the arm's own shape: ⇒ ***A MATCHER WHOSE LANGUAGE THE
+#    ARTIFACT NO LONGER SPEAKS MATCHES NOTHING AND READS AS CLEAN.*** Found on 09-09 by
+#    OPENING the tool to enumerate its arms, NOT by running it — running it printed the same
+#    silence it prints when everything is fine. The `=` is now OPTIONAL and the arm's live
+#    state is REPORTED below, so an inert arm can never again be read as a passing one.
+#    ⚠️ RE-DRIVEN against every peer brief with a SET: line before landing — none matches, so
+#    the scope note above still holds and no peer convention enters this watch.
+SETSHA=$(LC_ALL=C grep -m1 '^SET:' "$B" 2>/dev/null | LC_ALL=C grep -oE '\( *=? *[0-9a-f]{7,}' | LC_ALL=C grep -oE '[0-9a-f]{7,}')
 BANKF=$(LC_ALL=C grep -m1 '^BANK:' "$B" 2>/dev/null | sed -E 's/^BANK: *([^ ]+\.md).*/\1/')
 if [ -n "$SETSHA" ] && [ -n "$BANKF" ]; then
   BANKP="$(dirname "$B")/$BANKF"
@@ -223,5 +233,21 @@ if [ -n "$SETSHA" ] && [ -n "$BANKF" ]; then
     fi
   fi
 fi
-[ -n "$OUT" ] && printf '  ⛔ SELF-STALE FIGURES IN MY OWN BRIEF:%s\n' "$OUT"
+# ⛔⛔ 9. THE RECEIPT — added 09-09, and it is the cure for this tool's OWN documented false
+#    green. Until now a clean run printed NOTHING and exited 0, which is BYTE-IDENTICAL to an
+#    unreadable brief, a bad path, or an arm that silently matched nothing. The brief has said
+#    for weeks "READ ITS STDOUT, NEVER ITS $?" — but there WAS no stdout to read on a pass.
+#    ⇒ ***A TOOL WHOSE PASS IS SILENCE CANNOT BE DISTINGUISHED FROM A TOOL THAT DID NOT RUN.***
+#    Every run now emits one line naming its subject and the SET arm's LIVE state, so absence
+#    of output means "did not run" and nothing else.
+if [ -n "$OUT" ]; then
+  printf '  ⛔ SELF-STALE FIGURES IN MY OWN BRIEF:%s\n' "$OUT"
+else
+  printf '  ✅ selfstale: no stale figure found in %s (%s B/%s lines)\n' "$(basename "$B")" "$NB" "$NL"
+fi
+if [ -n "$SETSHA" ]; then
+  printf '     SET arm: ARMED on %s\n' "${SETSHA:0:7}"
+else
+  printf '     SET arm: ⚠️  INERT — no `(<sha>` parsed from the SET: line. NOT A PASS.\n'
+fi
 exit 0
