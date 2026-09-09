@@ -10,6 +10,18 @@ Authors: compiler seat
 not here.** The Captain's one authorized witness (row v) found a TRAPPING `LW`, and the same pass
 found that THIS FILE'S OWN `insL` refutes one bit over. Read the 08-30 block at the retirement
 before treating anything below as the live status.
+
+⚖️⚖️ **RATIFIED AT STATEMENT TIER — THE CAPTAIN, COUNCIL 2026-09-08 EVENING, ITEM ①. His words:
+*"Choose (i)."*** Minute: the helm's council minute for that sitting (bare filename
+`2026-09-08-COUNCIL-minute-evening.md`, private record). **What is ratified is
+the CORRECTED CLAIM above — what R9 SAYS about the shipped chip, not the chip.**
+⛔ **AND THE WORD DID NOT CAUSE THE MERGE. Say so, or a reader infers it from the order of the
+dates.** `cf52660` has been an ancestor of `origin/master` since **2026-08-31** (`235834e`, under
+council ruling z), **eight days before the word**. The merge was council-tier and already done; the
+STATEMENT tier is what stayed open, because the legislative delegation reserves campaign and
+statement to the Captain. ⇒ ***A BLOCK CARRIES TWO CLAIMS — WHO OWES IT, AND WHAT STATE THE OBJECT
+IS IN — AND ONLY THE FIRST ONE AGES BY ITSELF.*** Row `z` aged correctly for nine days on an
+artifact clause (*"stays unmerged"*) that had been false for eight of them.
 On 2026-08-19 it carried, in the kernel:
 
 ```
@@ -390,7 +402,11 @@ counterexample is gone"*. THE COUNTEREXAMPLE WAS NEVER GONE.** `regDatapathOK_is
 (`LwTrapRefuted`, 2026-08-30) refutes `RegDatapathOK` **at this very witness `insL`, byte-unchanged,
 at bit 3** — `selOut 3 = true` where the ISA demands `false`. This theorem is TRUE and stays true;
 what was false is the inference drawn from it. ⇒ ***AGREEMENT AT ONE BIT OF ONE WITNESS IS NOT THE
-DEATH OF A COUNTEREXAMPLE, AND FIVE DECLARATIONS WERE RETIRED ON THAT READING.*** -/
+DEATH OF A COUNTEREXAMPLE, AND FIVE DECLARATIONS WERE RETIRED ON THAT READING.***
+
+⚖️ **THIS CORRECTED SENTENCE IS ONE OF THE TWO RATIFIED BY THE CAPTAIN AT COUNCIL 2026-09-08
+EVENING, ITEM ① (*"Choose (i)."*).** The file head carries the full stamp and the one caveat
+that travels with it: the word ratifies the CLAIM, and the merge it names had already landed. -/
 theorem lw_sides_agree_at_insL :
     (if run insL core.gates (rwOut r1.val) then run insL core.gates (selOut 2)
      else insL (32 * r1.val + 2))
