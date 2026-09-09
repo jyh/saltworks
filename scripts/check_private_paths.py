@@ -104,8 +104,23 @@ WHAT IS DELIBERATELY *NOT* FORBIDDEN
 
 THE FRAME THIS INSTRUMENT MEASURES (it travels; it must say)
 ------------------------------------------------------------
-This file is byte-identical in salt, saltworks and jas. Every number below was
-measured by this gate, and each row NAMES ITS REF.
+This file is byte-identical in every PUBLIC repo of this fleet that carries the
+firewall: salt, saltworks, jas and tt-neural-dataflow-fabric as of 2026-09-08.
+
+⛔ THAT LIST IS A SNAPSHOT, AND ITS PREVIOUS VERSION WAS WRONG FOR TWO WEEKS IN
+THE ONE DIRECTION A READER CANNOT SEE. It read "salt, saltworks and jas", and
+every word of it was TRUE of the copies that existed -- while a FOURTH public
+repo carried none of the layers and therefore held no copy of this sentence to
+be wrong in. An enumeration of installs, written inside the thing installed,
+CANNOT NAME THE PLACE IT IS ABSENT. It reads as a population and is only ever a
+census of the already-compliant.
+  ⇒ 🔑 SO DO NOT AUDIT COVERAGE FROM THIS LINE. The population is what the
+    forge answers for public visibility (`gh repo list --visibility public`);
+    this line is a claim about BYTE-IDENTITY among the copies, nothing more.
+    Ported to the fourth repo 2026-09-08 by evidence (saltworks lead), desk row
+    HU, after silicon and the helm measured the gap the sentence could not.
+
+Every number below was measured by this gate, and each row NAMES ITS REF.
 
 ⛔ THE FIRST VERSION OF THIS BLOCK SAID "salt · 2142 commits · 0 findings" AND
 THAT WAS MEASURED ON THE DEFAULT BRANCH ALONE. A long-lived branch of the same
@@ -121,6 +136,8 @@ COUNT; A REF DOES.
                                                          purge cleared them
     jas        main               3192     2115   5   <- genuine, all one shape,
                                                          all predating the ruling
+    tt-ndf     main  0e71905        15       32   0   <- measured at the ref the
+                                                         port landed on, 09-08
 
 These are SNAPSHOTS taken 2026-08-25, not properties. A branch that forked
 before this gate landed has never been scanned end to end; if you own a
