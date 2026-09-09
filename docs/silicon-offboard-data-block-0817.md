@@ -509,6 +509,10 @@ UNDATED      R9b · THE C4Spec WITNESS proper — "inhabit  ⛔⛔ NOT LATE — 
              consume it"                                 refusal printed under this table.
                                                          Blocked on the CAPTAIN as
                                                          `r9b-statement-word`, since 08-31.
+                                                         ✅ WORD GIVEN 2026-09-09, ARM (a) —
+                                                         the gate text above is kept VERBATIM
+                                                         as history. The rung is RESTATED in
+                                                         the block printed under this table.
 ```
 
 #### ⛔⛔ THE REFUSAL, AND WHY A DATE WAS THE WRONG INSTRUMENT FOR R9b
@@ -600,6 +604,97 @@ false`), at **rung 2.5**, over **`CorePlace.core` — the Lean-composed circuit,
 hand-written RTL that was fabricated** — and no theorem in this tree relates the two. **(i) ratifies
 what R9 CLAIMS and changes nothing about its object**; do not let it drift into "the RTL
 correspondence closed."
+
+#### ⚖️⚖️ R9b RESTATED — THE CAPTAIN'S WORD, 2026-09-09, ARM (a). ENTERED BY compiler.
+**The Captain, council 2026-09-09 morning, on the fork printed above. His words: *"yes, let's
+choose (a), we want the public record to be honest."*** ⇒ **R9b is restated as the refutation it
+actually produced.** The lead recorded the fork and reserved it; this seat is the hand, named
+before the word existed. **`r9b-statement-word` CLOSES on this block**, and with it the last
+clause of row `z` — the block that had been open since 2026-08-31.
+
+⛔⛔ **AND THE RESTATEMENT IS NOT FINISHED WHEN IT SAYS "REFUTED". IT MUST SAY *OF WHAT*.** This
+rung has three adjacent objects under one noun, and the most interesting of them is a shipped
+chip. **This seat wrote that warning itself on 2026-08-29, in the draft that put this fork in
+front of the Captain:** *"A sentence about `C4Spec core` reads to an outside eye as a sentence
+about the chip."* An honest public record is not served by a true sentence a reader
+mis-attributes, so the restated rung carries its subject in its own text.
+
+**THE RESTATED RUNG, and this wording is the rung:**
+> **R9b · THE `C4Spec` REFUTATION, AND WHAT IT IS ABOUT.** `¬ C4Spec core` is kernel-proved and
+> audited **of `CorePlace.core`, the LEAN-COMPOSED circuit**. It is **NOT** a statement about
+> `core32.v`, the hand-written RTL that was fabricated, and **no theorem in this tree relates the
+> two.** On the load path the two artifacts differ in the model's disfavour: the model's defect
+> is **not shared by the fabricated part**, whose load write-back is correct by RTL read and by
+> simulation. **`C4Spec` is nevertheless UNINHABITED for the fabricated part, for a different
+> reason and on a different class:** the die deviates from this project's kernel ISA on
+> **trapping** word loads. That deviation is **absent from the shipped datasheet.**
+
+#### 📐 THE THREE OBJECTS, EACH WITH THE RECEIPT THAT SEPARATES IT FROM ITS NEIGHBOUR
+```
+1 CorePlace.core — THE LEAN-COMPOSED MODEL              ⛔ REFUTED, kernel-proved, audited.
+  not_c4Spec_core_at_the_landed_witness : ¬ C4Spec core   (LwTrapRefuted.lean:199-200)
+  #audit_axioms at :203-204.  MECHANISM, at the witness `insL` — NON-trapping, addr = 8:
+    sel3_insL   : run insL core.gates (selOut 3) = true    the model's write bank, bit 3 SET
+    isa3_insL   : (...regs[r1]).getLsbD 3        = false   the ISA's demand, bit 3 CLEAR
+  Bit 3 of 8 is the ADDRESS's bit.  The loaded datum is 0 (all-zero memory).  ⇒ THE MODEL PUTS
+  THE ALU SUM — THE ADDRESS — ON THE WRITE BANK WHERE THE ISA DEMANDS THE LOADED DATA.
+  Stated in the tree in those words: LwNotStallShaped.lean, `core_bit_insL` — "The core puts the
+  ADDRESS on the write bank: `x1` bit 3 comes out set."
+
+2 core32.v — THE FABRICATED RTL                         ✅ DOES NOT SHARE THAT DEFECT.
+  Read at the VENDORED FIXTURE, SaltWorks/Silicon/Fabricated/01e19f7/src/core32.v, whose
+  content-sha256 matches this bundle's own PIN manifest, and which is BYTE-IDENTICAL to
+  SaltWorks/Silicon/RTL/core32.v (`diff` clean) — so the simulation below ran on the shipped file.
+    :137  assign ld_out = dmem_rdata;                     the load result IS the memory read data
+    :145  assign wb_val = is_load_w ? ld_out : ...        and it is what write-back selects
+    :93   regs[rd] <= wb_val                              on the clock, under `reg_we`
+  SIMULATION (silicon, 2026-09-02, iverilog; docs/silicon-lwtrap-0902/RESULTS.md, regenerable by
+  its own run.sh): positive control `LW x1,28(x0)`, aligned and in range, WRITES the loaded word
+  in BOTH arms of that experiment.  ⛔ THIS IS AN RTL READ PLUS A SIMULATION, NOT A PROOF, and it
+  is deliberately the weaker claim.  The RTL correspondence is OPEN; the rung is 2.5.
+
+3 THE TRAP CLASS — WHY `C4Spec` STAYS UNINHABITED FOR THE REAL CIRCUIT ANYWAY
+  ⛔ A DIFFERENT QUESTION FROM THE LOAD PATH, and the one the load-path result does not answer.
+  THE ISA, at the site:  ISA.lean:255-257 — on `LW`, `if addrClass addr = .ok then (s.set rd
+  mem[..]).next else { s with trapped := true }.next`.  A trapping load writes NO register, sets
+  `trapped`, advances `pc`.  `addrClass` (:111): outOfRange ↔ byte address ≥ 32, tested FIRST;
+  else misaligned ↔ addr % 4 ≠ 0.
+  THE DIE, at the site:  core32.v:75 — `reg_we = ... | is_load_w | ...`, with NO trap term at
+  all, and the file says so in its own header (:2, "machine mode without CSR/trap").  ⇒ ON A
+  TRAPPING WORD LOAD THE FABRICATED PART WRITES `dmem_rdata` TO `rd` AND CONTINUES.
+  MEASURED, not argued (same RESULTS.md, three trapping addresses incl. the kernel's exact
+  boundary 32): the fabricated core WRITES on misaligned and on out-of-range, where the gated
+  variant HOLDS.  ⛔ THE ONE-WIRE GATE `core32_gated.v` IS NOT IN THE FABRICATED BUNDLE — that
+  directory holds three files (plane32bus.v, busadapt8.v, core32.v) and no gated variant.
+  ✅ CONFORMING PROGRAMS — no trap-class loads — ARE IDENTICAL IN BOTH ARMS.
+```
+⇒ 🔑 ***THE LOAD PATH AND THE TRAP CLASS ARE TWO DIFFERENT QUESTIONS, AND A RESTATEMENT THAT
+ANSWERED ONLY THE FIRST WOULD READ AS AN ACQUITTAL.*** The model's defect is not the die's; the
+die has its own, on a class the model's witness never visits.
+
+#### ⛔ THE PUBLIC-RECORD GAP, NAMED HERE BECAUSE THAT IS WHAT THE RULING IS FOR
+**The shipped datasheet does not mention the trap deviation.** Measured at `docs/info.md` in the
+tape-out repository at the fabricated sha `01e19f7`, with a FIRING control so the absence is not
+an instrument failure:
+```
+  trap 0 · misalign 0 · "out-of-range" 0 · "out of range" 0 · range 0 · "holds rd" 0
+  CONTROL: load 7   ⇒ the page discusses loads seven times and the deviation zero times.
+  ⚠️ The two near-misses were WALKED, not assumed: `align` ×6 is `sof` FRAME realignment, not
+  address alignment; `hold` ×5 is `rst_n` and timing hold-slack.  Neither is about holding `rd`.
+```
+⛔ **THE ERRATUM IS ROUTED, NOT LANDED HERE.** `docs/info.md` is silicon's artifact, frozen at the
+fabricated sha in a separate repository; this seat names the gap and routes the erratum to
+silicon. **Naming it is the honesty the ruling asked for; editing another seat's shipped
+datasheet is not this seat's hand.**
+
+#### ⛔ WHAT THIS RESTATEMENT DOES NOT DO
+It does not retire R9b, does not date it, and does not touch any other rung. It does not close the
+RTL correspondence — **no theorem relates `CorePlace.core` to `core32.v`, and object 2 above is an
+RTL read plus a simulation on purpose.** It does not re-price or re-scope R10, whose new date is
+the Captain's and whose T8 is routed to him, and it does not move the LW fork's four horns, which
+stay Captain-gated. ⭐ **The rung's ORIGINAL wording is preserved in the LIVE TABLE above and in
+the refusal block — "inhabit it for the real circuit, not merely consume it" — because a
+restatement that erases what it restates leaves a reader unable to check the restatement.**
 
 ⚖️⚖️ **HISTORY (was: LIVE TABLE) — COUNCIL RULING z, 2026-08-31 (the 08-31 minute: "accept"; sitting-close
 routing 09:30:39), ENTERED BY COMPILER THE SAME HOUR. The revised dates are DERIVED from the
