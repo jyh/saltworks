@@ -485,7 +485,65 @@ while either stands, and until today the fleet was tracking one of them.***
 
 ## §14 · THE TWO RUNGS, DATED
 
-⚖️⚖️ **LIVE TABLE — COUNCIL RULING z, 2026-08-31 (the 08-31 minute: "accept"; sitting-close
+⚖️⚖️ **LIVE TABLE — THE REVISION §14 ITSELF PRESCRIBED, ENTERED BY evidence (saltworks lead)
+2026-09-08 UNDER COUNCIL 09/08 ①. Contingency 2 below fired: R10 slipped, so R9b slips past the
+window, and the Captain hears it "as a revision with the new dates attached" — this block is that
+hearing. Every reading was taken at `origin/master`, printed under the table. Everything below
+this block in this section is HISTORY.**
+```
+DATE         RUNG                                        STATE · RECEIPT
+08-31→09-02  R9a · THE CORE REPAIR, leg 1 — the trap     ✅ MET, AT THE OBJECT. The mandatory
+             gate + the mandatory differential in the    differential holds BOTH ways:
+             same act                                    `..._on_trapping_LW` DIED at insT
+                                                         (LwTrapRefuted.lean:197, "⚰️ RETIRED
+                                                         WITH ITS SEED (R9a)") and
+                                                         `..._at_the_LANDED_witness` STILL
+                                                         PROVES (:199-200), audited at :203.
+09-04→09-06  R10 · FLAGSHIP RESTATEMENT                  ⛔ SLIPPED. The window closed 09-06
+                                                         without the restatement (the 09/05
+                                                         default fired at the 09/06 sitting).
+                                                         Its new date is not set here: R10 is
+                                                         JOINT and T8 is routed to the Captain.
+UNDATED      R9b · THE C4Spec WITNESS proper — "inhabit  ⛔⛔ NOT LATE — **UNMEETABLE AS
+             it for the real circuit, not merely         WRITTEN**, so it takes NO DATE. See the
+             consume it"                                 refusal printed under this table.
+                                                         Blocked on the CAPTAIN as
+                                                         `r9b-statement-word`, since 08-31.
+```
+
+#### ⛔⛔ THE REFUSAL, AND WHY A DATE WAS THE WRONG INSTRUMENT FOR R9b
+Council ① routed *the date* to this seat. **Two thirds of it were dateable and the third was not.**
+R9b's stated product is to **inhabit** `C4Spec` for the real circuit. At `origin/master`:
+```
+SaltWorks/HDL/LwTrapRefuted.lean
+  :199  theorem not_c4Spec_core_at_the_landed_witness : ¬ SaltWorks.HDL.C4Spec core :=
+  :200    not_c4Spec_core_of_not_regDatapathOK regDatapathOK_is_false_at_the_LANDED_witness
+  :203  #audit_axioms regDatapathOK_of_regFields not_c4Spec_core_at_the_landed_witness
+```
+`¬ C4Spec core` is **kernel-proved and audited**. The circuit R9b must inhabit `C4Spec` for is
+refuted by a landed theorem. **This section's own derivation, written 08-31, governs the case:**
+> *"The 08-29 row was not LATE, it was UNMEETABLE: it dated a proof of a proposition the kernel
+> now refutes. **A date revision alone cannot cure falseness**, so the rung changed shape."*
+
+⭐ **AND THE TAPE-OUT MAKES IT PERMANENT RATHER THAN PREMATURE.** The refutation is built to
+survive the repair — `:197` says the conclusion *"STANDS, re-anchored through the witness the
+repair does not touch"* — and the core it speaks about **is now frozen silicon at fab**. The only
+road past it (the `1056→1316` widening plus a memory-data input the core does not have) is placed
+by this very section **outside the window**: *"3–5 days elapsed … NOT inside this window; it is
+the road PAST it."* ⇒ **R9b cannot be met for the shipped part by any amount of further work.**
+
+**THE FORK IS THE CAPTAIN'S, BOTH ARMS RECORDED:** **(a)** restate R9b as the **refutation** it
+actually produced — what ruling z did to R9 one rung earlier; **(b)** keep the wording and record
+R9b **DEAD AS FRAMED** for the shipped core. **evidence recommends (a)** — this fleet has run the
+move once already on this rung, and the runbook's own law calls removing a direction that is false
+in the new setting **REQUIRED HONESTY, not a weakening**. ⛔ **evidence does not proceed on it:**
+campaign and statement are RESERVED to the Captain under the legislative delegation.
+
+⛔ **WHAT THIS BLOCK DOES NOT DO.** It does not restate R9b, does not retire it, and does not date
+it. It records the measured state so that a reader of §14 stops inheriting three dates that have
+all passed. **The 09-07 WINDOW line below is spent** — the part shipped 09-07 with (B).
+
+⚖️⚖️ **HISTORY (was: LIVE TABLE) — COUNCIL RULING z, 2026-08-31 (the 08-31 minute: "accept"; sitting-close
 routing 09:30:39), ENTERED BY COMPILER THE SAME HOUR. The revised dates are DERIVED from the
 branch receipts — merged to master at `235834e`, `saltbuild EXIT=0`, 4648 audit ticks — not
 asserted at the sitting; the derivation is printed under the table. Everything below this
