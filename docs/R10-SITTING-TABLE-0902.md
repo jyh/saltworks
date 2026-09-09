@@ -3,6 +3,13 @@
 > ⚖️ **SAT AND CLOSED 2026-09-02 12:4x–12:56 PDT.** R10-1..R10-4 ADOPTED as drafted at `64580a1a` · T8 RULED (the unit is steps realised) · BP §6.2 SIGNED with §5.3.1 read into the minute · THE CLICK DONE (project 5500 re-submitted from `main` `4226396f`, run `33644567364`) · RUNG 0 DATES 2026-09-02. **The minute is the record:** the helm's R10 sitting minute (bare filename `2026-09-02-R10-SITTING-minute.md`, private record) @ `bf813512`. Everything below is the table AS READ; the adoption edits are marked in place and dated.
 
 
+> 📌 **ADDED 2026-09-08, NOT AN ADOPTION EDIT — the body below is unchanged and still reads AS READ.**
+> The R10-rung measurement council ①b routed to silicon (desk row `IN`) is a SEPARATE document:
+> `docs/silicon-R10-rung-stall-residue-0908.md` — *`en` is the adapter's `retire` and gates exactly
+> `pc_r` and `regs`, zero combinational sites, so a stalling die cannot falsify `C4Spec` and the
+> residue lands on `cycOfCirc`'s unconditional D→Q.* It supports **R10-2**'s `stalls := ¬retire` at
+> the fabricated object. ⛔ **It is a MEASUREMENT, not the R10 statement act, which remains unruled.**
+
 *silicon, 2026-09-02 07:4x. Desk row DW (SHIP EARLY, the Captain, council 09/02 07:2x). Three items,
 in the order DW names them: (A) the `ndf-2a` bundle READY-TO-CLICK · (B) the DRAFT R10 STATEMENT TEXT ·
 (C) BP's one paragraph. Everything measured here is re-derivable from the artifacts named; nothing is
