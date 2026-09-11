@@ -162,6 +162,8 @@ the pushed delta's commit messages, and the delta's added/modified file lines.
 from __future__ import annotations
 
 import argparse
+import contextlib
+import io
 import os
 import hashlib
 import pathlib
@@ -944,6 +946,202 @@ def self_test() -> int:
     if len(finding_lines([("x", "w", "")])) != 1:
         failures.append("an empty excerpt prints identity+shape alone, never a blank")
 
+    # 9. THE HISTORY RATCHET, DRIVEN ON A REAL THROWAWAY REPOSITORY -- and the
+    #    two arms that matter are DIFFERENTIAL: they assert that the two-dot
+    #    audit form is BLIND to something this arm catches. An arm that only
+    #    showed --history finding things would not show it was needed.
+    #
+    #    ⛔ THE CONTROL COMES FIRST AND IS RE-RUN AFTER EVERY MUTATION. A probe
+    #    that dies between a mutate and a restore poisons every later arm with
+    #    its own corruption, and the only thing that catches that is a control
+    #    on the unmutated state (measured, this seat, 2026-09-09).
+    tmp2 = tempfile.mkdtemp(prefix="pphist-selftest-")
+    here2 = os.getcwd()
+    try:
+        hrepo = os.path.join(tmp2, "h")
+        subprocess.run(["git", "init", "-q", "-b", "trunk", hrepo], capture_output=True)
+
+        def h(*a):
+            return subprocess.run(["git", "-C", hrepo, *a], capture_output=True,
+                                  text=True, encoding="utf-8")
+
+        h("config", "user.email", "selftest@example.invalid")
+        h("config", "user.name", "selftest")
+        h("config", "commit.gpgsign", "false")
+
+        # Every fixture path is ASSEMBLED, never spelled -- this file must not
+        # become an instance of what it detects (the doctrine at the top).
+        BAD_ROOT = "cited at " + _SEAT + "/briefs/root-never-touched.md"
+        BAD_TRANS = "cited at " + _SEAT + "/briefs/added-then-repaired.md"
+        BAD_BRANCH = "cited at " + _SEAT + "/briefs/on-a-branch.md"
+        BAD_EVIL = "cited at " + _SEAT + "/briefs/invented-by-the-merge.md"
+        CLEAN = "cited as the helm's own brief, which is the ruled standard"
+
+        def wf(name, text):
+            with open(os.path.join(hrepo, name), "w", encoding="utf-8", newline="") as fh:
+                fh.write(text + "\n")
+
+        # root: a forbidden line that is NEVER TOUCHED AGAIN (blindness class b)
+        wf("ROOT.md", BAD_ROOT)
+        wf("W.md", CLEAN)
+        h("add", "-A"); h("commit", "-qm", "root")
+        root = h("rev-parse", "HEAD").stdout.strip()
+        # c2 ADDS a forbidden line; c3 REPAIRS it (blindness class a)
+        wf("W.md", BAD_TRANS)
+        h("add", "-A"); h("commit", "-qm", "adds")
+        c2 = h("rev-parse", "HEAD").stdout.strip()
+        wf("W.md", CLEAN)
+        h("add", "-A"); h("commit", "-qm", "repairs")
+        c3 = h("rev-parse", "HEAD").stdout.strip()
+
+        os.chdir(hrepo)
+
+        # --- CONTROL, BEFORE ANY CLAIM: the scanner works in this repo at all.
+        if not scan([("ctl", BAD_ROOT)]):
+            failures.append("history selftest: the scanner does not catch its own fixture")
+
+        # --- ARM (a) THE DIFFERENTIAL. The two-dot form over root..c3 must MISS
+        #     the added-then-repaired line, and --history must CATCH it, charged
+        #     to the commit that added it and not to the one that repaired it.
+        twodot = {ln for _, ln in added_lines(f"{root}..{c3}")}
+        if any(BAD_TRANS in ln for ln in twodot):
+            failures.append("the two-dot arm was expected to be BLIND to an "
+                            "added-then-repaired line; this fixture no longer "
+                            "demonstrates the defect --history exists for")
+        hf = history_findings()
+        charged = {(sha, f) for sha, f, _, _ in hf}
+        if (c2, "W.md") not in charged:
+            failures.append(f"--history must charge the ADDING commit {c2[:8]} for W.md")
+        if (c3, "W.md") in charged:
+            failures.append("--history must not charge the REPAIRING commit")
+
+        # --- ARM (b) THE ROOT COMMIT. The two-dot form cannot see a file that is
+        #     byte-identical at both endpoints; the whole root commit is that.
+        if any(BAD_ROOT in ln for ln in twodot):
+            failures.append("the two-dot arm was expected to be BLIND to the root "
+                            "commit's own untouched content")
+        if (root, "ROOT.md") not in charged:
+            failures.append("--history must charge the ROOT commit for its own content")
+
+        # --- ARM (c) A MERGE MUST NOT BE CHARGED TWICE. The branch commit owns
+        #     the line; the merge that carries it forward introduces nothing.
+        h("checkout", "-q", "-b", "side", root)
+        wf("S.md", BAD_BRANCH)
+        h("add", "-A"); h("commit", "-qm", "branch adds")
+        side = h("rev-parse", "HEAD").stdout.strip()
+        h("checkout", "-q", "trunk")
+        h("merge", "-q", "--no-ff", "-m", "merge side", "side")
+        merge = h("rev-parse", "HEAD").stdout.strip()
+        hf = history_findings()
+        charged = {(sha, f) for sha, f, _, _ in hf}
+        if (side, "S.md") not in charged:
+            failures.append("--history must charge the BRANCH commit that added the line")
+        if (merge, "S.md") in charged:
+            failures.append("--history must NOT charge a merge for a line a parent "
+                            "already carries -- that double-counts the debt")
+
+        # --- ARM (d) AN EVIL MERGE **IS** CHARGED. Content in the merge and in
+        #     NO parent is the merge's own, and the set rule must find it. This
+        #     is why the rule is an intersection and not 'skip merges'.
+        h("checkout", "-q", "-b", "side2", root)
+        wf("E.md", CLEAN)
+        h("add", "-A"); h("commit", "-qm", "side2")
+        h("checkout", "-q", "trunk")
+        h("merge", "-q", "--no-ff", "--no-commit", "side2")
+        wf("E.md", BAD_EVIL)
+        h("add", "-A"); h("commit", "-qm", "evil merge")
+        evil = h("rev-parse", "HEAD").stdout.strip()
+        hf = history_findings()
+        charged = {(sha, f) for sha, f, _, _ in hf}
+        if (evil, "E.md") not in charged:
+            failures.append("--history must charge an EVIL MERGE for content no "
+                            "parent carries")
+
+        # --- ARM (e) THE RATCHET VERDICT ITSELF, on the real findings, using the
+        #     same missing-vs-empty predicate the message arm is held to.
+        allf = history_findings()
+        if not _msg_unarmed_fatal(None, len(allf)):
+            failures.append("a MISSING history baseline with findings must be fatal-unarmed")
+        if _msg_unarmed_fatal(set(), len(allf)):
+            failures.append("an EMPTY history baseline is ARMED; its findings red as NEW")
+        if _msg_unarmed_fatal(None, 0):
+            failures.append("a missing history baseline over a clean history is not fatal")
+        keys = {history_key(sha, f, ln) for sha, f, _, ln in allf}
+        if [x for x in allf if history_key(x[0], x[1], x[3]) not in keys]:
+            failures.append("a baseline holding every finding must leave NOTHING new")
+        one = sorted(keys)[0]
+        if not [x for x in allf if history_key(x[0], x[1], x[3]) not in (keys - {one})]:
+            failures.append("dropping one baseline entry must make exactly that finding NEW")
+
+        # --- ARM (f) THE KEY MUST SEPARATE ALL THREE OF (sha, file, line).
+        #     ⛔⛔ ASSERTED AGAINST LITERAL DISTINCTNESS, NOT BY RE-DERIVING THE
+        #     KEY. The first version of this arm built its expectation with
+        #     history_key() and then compared it with history_key(), so a
+        #     break-probe that dropped the FILE from the key -- and a second that
+        #     dropped the LINE -- both left the self-test GREEN. A function used
+        #     on BOTH sides of a comparison cannot be tested by that comparison;
+        #     it is the derivation-gate shape, and it survived one repair of this
+        #     very arm before the probe caught it a second time.
+        ka = history_key("s1", "a.md", "one line")
+        if history_key("s1", "b.md", "one line") == ka:
+            failures.append("the history key must separate two FILES -- a finding in "
+                            "another file would be absolved by this baseline entry")
+        if history_key("s1", "a.md", "another line") == ka:
+            failures.append("the history key must separate two LINES -- one accepted "
+                            "line would absolve every other line in the same file")
+        if history_key("s2", "a.md", "one line") == ka:
+            failures.append("the history key must separate two COMMITS -- accepting a "
+                            "line in one commit would absolve it in every commit")
+        if len(ka) != 3 or ka[0] != "s1" or ka[1] != "a.md":
+            failures.append(f"the history key must carry (sha, file, line-digest); got {ka}")
+        # --- ARM (g) THE MODE ITSELF, END TO END, ON A REAL BASELINE FILE.
+        #     ⛔ ADDED BECAUSE A PROBE THAT DISABLED THE UNARMED-FATAL BRANCH
+        #     INSIDE history_mode LEFT THE SELF-TEST GREEN. Arms (a)-(f) test the
+        #     walk, the key and the predicate; none of them could run the VERDICT,
+        #     so the verdict was the one part of this arm with no test at all.
+        bfile = os.path.join(tmp2, "hist-baseline.tsv")
+
+        def drive(*a):
+            """Run the mode and keep BOTH halves of its answer. ⛔ The exit code
+            alone is not the answer: UNARMED and REGRESSED both return 1, so a
+            code-only assertion cannot tell them apart -- measured, by a probe
+            that disabled the unarmed branch and stayed GREEN because the ratchet
+            branch returned the same 1 with a different diagnosis. What a
+            refusing gate SAYS is the part a reader acts on."""
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf):
+                rc = history_mode(*a)
+            return rc, buf.getvalue()
+
+        unarmed, unarmed_said = drive(False, bfile)       # no baseline, findings exist
+        drive(True, bfile)                                # record them
+        armed, _ = drive(False, bfile)                    # now accepted
+        wf("N.md", BAD_ROOT)
+        h("add", "-A"); h("commit", "-qm", "a NEW violating commit")
+        regressed, regressed_said = drive(False, bfile)   # new debt must red
+        drive(True, bfile)
+        reaccepted, _ = drive(False, bfile)
+        if unarmed != 1:
+            failures.append("history_mode with NO baseline and findings must FAIL unarmed")
+        if "NO BASELINE" not in unarmed_said:
+            failures.append("the UNARMED refusal must say the baseline is MISSING — it "
+                            "asks for a deliberate write, where the ratchet asks for a "
+                            "repair, and only the wording tells the reader which")
+        if "HISTORY RATCHET" not in regressed_said:
+            failures.append("the REGRESSION refusal must name the ratchet, not read as "
+                            "an unarmed gate")
+        if armed != 0:
+            failures.append("history_mode must PASS once the baseline accepts every finding")
+        if regressed != 1:
+            failures.append("history_mode must FAIL on a NEW violating commit — this is "
+                            "the ratchet, and without it the arm records but never gates")
+        if reaccepted != 0:
+            failures.append("history_mode must PASS again after the new debt is recorded")
+        hist_arms = 7
+    finally:
+        os.chdir(here2)
+        shutil.rmtree(tmp2, ignore_errors=True)
+
     for f in failures:
         print(f"SELF-TEST FAIL: {f}")
     if failures:
@@ -954,7 +1152,10 @@ def self_test() -> int:
           f"shapes caught; {len(clean)} compliant forms passed; own source clean; "
           f"message-ratchet verdict driven on both arms; pin audit driven on a "
           f"real scratch repo — trichotomy, published-ref precedence in BOTH "
-          f"directions, local-only disclosure; every FAIL path NAMES findings)")
+          f"directions, local-only disclosure; every FAIL path NAMES findings; "
+          f"{hist_arms} history-ratchet arms driven on a real scratch repo — "
+          f"TWO of them DIFFERENTIAL against the two-dot form's measured "
+          f"blindness, merge double-charging refused, evil merge charged)")
     return 0
 
 
@@ -1186,6 +1387,188 @@ def messages_mode(write: bool) -> int:
     return 0
 
 
+# ═══════════════════════════════════════════════════════════════════════════
+# ⭐⭐⭐ THE HISTORY ARM — WHAT EACH COMMIT *INTRODUCED*, WHICH NO OTHER ARM READS
+#
+# PORTED FROM x86lean 2026-09-10 ON THE HELM'S RULING (FLEET.md 48491666), after
+# a leak path was DRIVEN that every existing arm passes:
+#
+#   two commits pushed together; commit 1 ADDS a private path, commit 2 REMOVES it
+#     --range BASE..HEAD   rc 0   -- the NET DIFFERENCE has no such file
+#     --tree               rc 0   -- the TREE has no such file
+#     --history            FAIL   -- names the intermediate commit and the blob
+#
+# ⇒ THE BLOB IS PUSHED TO A PUBLIC REMOTE AND EVERY GATE IS GREEN. The path lives
+#   only in an intermediate commit, which is the population this arm reads and the
+#   one nothing else does. A clone receives it.
+#
+# ⛔ THE FLAG WAS NOT MERELY UNRUN HERE, IT WAS ABSENT: `argparse` rejected it, so
+#   this repository's intermediate commits had never been read at all. The helm
+#   measured it across the flagships -- salt, saltbench and saltworks all at zero.
+#
+# ⚠️ A BASELINE HERE IS ACCEPTED HISTORICAL DEBT AND MUST BE **READ, NOT COUNTED**
+#   (ruling item 2). A baseline armed over an unread count converts a real leak
+#   into permanent accepted residue, which is strictly worse than no arm at all.
+#   A tree repair NEVER shrinks it: only a history rewrite does, and that is a
+#   council act.
+# ═══════════════════════════════════════════════════════════════════════════
+HISTORY_BASELINE = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                "private_paths_history_baseline.tsv")
+
+
+def empty_tree_sha() -> str:
+    """Git's empty tree, ASKED FOR rather than hard-coded: the well-known
+    constant is the SHA-1 value and would silently be wrong in a SHA-256
+    repository -- a hard-coded hash is a bet on an object format."""
+    return subprocess.run(["git", "hash-object", "-t", "tree", os.devnull],
+                          capture_output=True, text=True, encoding="utf-8",
+                          check=True).stdout.strip()
+
+
+def _parse_added(diff_text: str) -> list[tuple[str, str]]:
+    """(path, added text) for every `+` line of a unified diff."""
+    rows: list[tuple[str, str]] = []
+    path = "?"
+    for line in diff_text.splitlines():
+        if line.startswith("+++ b/"):
+            path = line[6:]
+        elif line.startswith("+") and not line.startswith("+++"):
+            rows.append((path, line[1:]))
+    return rows
+
+
+def _added_rows_between(base: str, sha: str) -> list[tuple[str, str]]:
+    out = subprocess.run(["git", "diff", "--unified=0", "--no-color", base, sha],
+                         capture_output=True, text=True, encoding="utf-8",
+                         check=True).stdout
+    return _parse_added(out)
+
+
+def commit_introduced(sha: str, parents: list[str], empty: str) -> list[tuple[str, str]]:
+    """Rows this ONE commit introduces to the history.
+
+    Root commit: its whole content -- the case the two-dot audit form drops.
+    Ordinary commit: what it adds to its parent.
+    ⛔ MERGE: the INTERSECTION of the per-parent added sets, which is exactly
+    the content present in the merge and in NO parent. A merge that merely
+    carries a branch's line onto the trunk introduces nothing of its own and
+    must not be charged for it -- charging it would count one line twice and
+    inflate the debt. An 'evil merge' that invents a line IS charged, because
+    no parent carries it. The rule is stated as a set operation rather than as
+    'skip merges' so that the second case cannot be lost.
+    """
+    if not parents:
+        return _added_rows_between(empty, sha)
+    if len(parents) == 1:
+        return _added_rows_between(parents[0], sha)
+    sets = [set(_added_rows_between(p, sha)) for p in parents]
+    return sorted(set.intersection(*sets))
+
+
+def history_findings() -> list[tuple[str, str, str, str]]:
+    """(sha, file, what, line) for every commit reachable from HEAD."""
+    empty = empty_tree_sha()
+    out = subprocess.run(["git", "log", "--format=%H %P", "HEAD"],
+                         capture_output=True, text=True, encoding="utf-8",
+                         check=True).stdout
+    found: list[tuple[str, str, str, str]] = []
+    for entry in out.splitlines():
+        parts = entry.split()
+        if not parts:
+            continue
+        sha, parents = parts[0], parts[1:]
+        for f, what, line in scan(commit_introduced(sha, parents, empty)):
+            found.append((sha, f, what, line))
+    return found
+
+
+def load_history_baseline(path: str | None = None):
+    """set of (sha, file, line-sha16), or None when no baseline file exists.
+
+    ⛔ THE PATH IS AN ARGUMENT SO THIS ARM HAS A CALLABLE SURFACE. A break-probe
+    that disabled the unarmed-fatal branch inside `history_mode` left the
+    self-test GREEN, because every arm tested the PREDICATE and none of them
+    could run the MODE -- the mode's only entry point wrote to a fixed path in
+    this directory, which a test cannot touch. A gate whose verdict cannot be
+    invoked borrows its neighbours' green.
+
+    None is not the empty set, for the same reason the message ratchet says so:
+    an EMPTY baseline is an armed statement that nothing is accepted, and a
+    MISSING one is no statement at all.
+    """
+    try:
+        with open(path or HISTORY_BASELINE, encoding="utf-8") as fh:
+            return {tuple(l.rstrip("\n").split("\t")[:3])
+                    for l in fh if l.strip() and not l.startswith("#")}
+    except FileNotFoundError:
+        return None
+
+
+def history_key(sha: str, f: str, line: str) -> tuple[str, str, str]:
+    """The ratchet's identity for one historical finding.
+
+    ⛔ EXTRACTED SO THE SELF-TEST DRIVES THE PRODUCTION KEY AND NOT A COPY OF
+    IT. Measured 2026-09-09: the first version of arm (f) recomputed this tuple
+    inside the self-test, so a break-probe that dropped the FILE from the key in
+    `history_mode` left the self-test GREEN. An arm that re-derives the rule it
+    is checking asserts nothing -- it is a tautology wearing a test's clothes,
+    and the probe that found it was the only thing between here and shipping it.
+    """
+    return (sha, f, line_sha(line))
+
+
+def _history_lines(found) -> list[str]:
+    """Render for the shared formatter: history findings are keyed by COMMIT,
+    so the identity a reader needs is the sha AND the file, never either alone."""
+    return finding_lines([(f"{sha[:8]} {f}", what, line) for sha, f, what, line in found])
+
+
+def history_mode(write: bool, path: str | None = None) -> int:
+    target = path or HISTORY_BASELINE
+    found = history_findings()
+    keys = {history_key(sha, f, line) for sha, f, _, line in found}
+    ncommits = len({sha for sha, _, _, _ in found})
+    if write:
+        with open(target, "w", encoding="utf-8", newline="") as fh:
+            fh.write("# private_paths_history_baseline.tsv -- ACCEPTED HISTORICAL DEBT: content a\n"
+                     "# commit INTRODUCED, which every clone receives whatever the tree now says.\n"
+                     "# sha<TAB>file<TAB>line-sha16<TAB>what.\n"
+                     "# A TREE REPAIR NEVER SHRINKS THIS FILE. Only a history rewrite does, and\n"
+                     "# that is a council act -- so a shrink here is a diff somebody must have ruled.\n")
+            for sha, f, what, line in sorted(found):
+                fh.write(f"{sha}\t{f}\t{line_sha(line)}\t{what}\n")
+        print(f"check_private_paths --history --write-baseline: {len(found)} accepted "
+              f"historical finding(s) across {ncommits} commit(s) written to "
+              f"{os.path.basename(target)}")
+        return 0
+    base = load_history_baseline(target)
+    if _msg_unarmed_fatal(base, len(found)):
+        print(f"FAIL [gate {self_id()}]: --history has NO BASELINE and the history "
+              f"carries {len(found)} finding(s) across {ncommits} commit(s), NAMED below.\n"
+              f"Write it deliberately with --history --write-baseline (a reviewed act:\n"
+              f"it records debt that CANNOT be repaired in the tree).\n")
+        print("\n".join(_history_lines(found)))
+        return 1
+    if base is None:
+        base = set()
+    new = [x for x in found if history_key(x[0], x[1], x[3]) not in base]
+    absent = sorted(base - keys)
+    if new:
+        print(f"FAIL [gate {self_id()}] HISTORY RATCHET: {len(new)} private-record "
+              f"path(s) introduced by a commit the baseline does not accept.\n")
+        print("⛔ A TREE REPAIR DOES NOT ANSWER THIS ARM. The blob is in the history")
+        print("every clone receives. Either the commit is not yet pushed and should be")
+        print("amended, or the debt is accepted by a ruling and recorded here.\n")
+        print("\n".join(_history_lines(new)))
+        return 1
+    print(f"check_private_paths --history [gate {self_id()}]: OK ({len(found)} accepted "
+          f"historical finding(s) across {ncommits} commit(s), all in the baseline; "
+          f"{len(absent)} baseline entr{'y' if len(absent)==1 else 'ies'} not in this "
+          f"history (a branch may predate them -- membership, never existence)). "
+          f"0 NEW historical findings.")
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="council 5b firewall gate")
     ap.add_argument("--range", default=None,
@@ -1195,11 +1578,14 @@ def main() -> int:
                     help="ratchet: whole-tree residue vs the committed baseline")
     ap.add_argument("--messages", action="store_true",
                     help="ratchet: every message reachable from HEAD vs the committed baseline")
+    ap.add_argument("--history", action="store_true",
+                    help="ratchet: what each commit INTRODUCED (per-commit, not a net diff) "
+                         "vs the committed baseline -- the arm --range cannot be")
     ap.add_argument("--write-baseline", action="store_true",
                     help="with --tree/--messages: (re)write that accepted-residue baseline")
     args = ap.parse_args()
 
-    if args.tree and args.messages:
+    if sum([bool(args.tree), bool(args.messages), bool(args.history)]) > 1:
         print("FAIL: --tree and --messages are separate ratchets with separate "
               "baselines; run them as separate steps so a red names its arm.")
         return 1
@@ -1209,6 +1595,14 @@ def main() -> int:
 
     if args.messages:
         return messages_mode(args.write_baseline)
+
+    if args.history:
+        if is_shallow():
+            print("FAIL: this is a SHALLOW clone. --history walks every commit "
+                  "reachable from HEAD and a truncated walk reports success.\n"
+                  "      CI must check out with `fetch-depth: 0` for this job.")
+            return 1
+        return history_mode(args.write_baseline)
 
     if args.self_test:
         return self_test()
