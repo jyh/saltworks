@@ -175,6 +175,22 @@ jobs:
           # never the line, which would trip the tree ratchet). Anything NEW reds.
           python scripts/check_private_paths.py --messages
 
+      - name: History ratchet (what each commit INTRODUCED -- the arm --range cannot be)
+        run: |
+          # ⭐⭐⭐ PORTED FROM x86lean 2026-09-10 ON THE HELM'S RULING (FLEET.md 48491666).
+          # DRIVEN, not argued: two commits pushed together, commit 1 ADDS a private
+          # path and commit 2 REMOVES it -- `--range BASE..HEAD` rc 0 (the NET
+          # DIFFERENCE has no such file), `--tree` rc 0 (the TREE has no such file),
+          # `--history` FAIL naming the intermediate commit and the blob. The blob
+          # reaches a public remote and every gate is green.
+          # ⛔ THE FLAG WAS ABSENT HERE, NOT MERELY UNRUN: argparse rejected it, so this
+          # repository's intermediate commits had NEVER been read. First cut: 78
+          # findings across 33 commits -- 62 are the tree ratchet's already-accepted
+          # residue and 16 were introduced-then-repaired and had never been seen.
+          # ⚠️ `fetch-depth: 0` is load-bearing -- the arm REFUSES a shallow clone by
+          # name rather than walking a truncated history and reporting success.
+          python scripts/check_private_paths.py --history
+
   pr-descriptions:
     name: no private-record path in PR titles/bodies (the forge-side prose)
     runs-on: ubuntu-latest
