@@ -1,0 +1,18 @@
+# docs/provenance/WITHHELD.tsv — artifacts a manifest BINDS but this PUBLIC repo
+# does not CARRY, each with the fingerprint that lets a holder verify a copy.
+#
+# ⚖️ WHY THIS FILE EXISTS RATHER THAN A DELETED MANIFEST ROW.
+#   Deleting the row would make the gate green by destroying a provenance
+#   binding — the exact trade this directory exists to refuse. A withheld
+#   artifact WITH ITS PUBLISHED HASH is stronger provenance than a silently
+#   missing one: a reader who obtains a copy can prove it is the same bytes.
+#   ⇒ THE GATE GOES GREEN FOR THE RIGHT REASON — A DECLARATION — NEVER BY
+#     FORGETTING THE QUESTION.
+#
+# ⛔ A ROW HERE IS NOT A MUTE BUTTON. `selftest.py` accepts a missing bundle
+#   ONLY against a row that carries a 64-hex sha256 AND a non-empty reason;
+#   a blank or malformed row is a FAILURE, not a silence. Adding a path here
+#   is a reviewed act with a reason a reader can disagree with.
+#
+# kind	path	sha256	reason	declared
+sha256	docs/provenance/s2/s2-executor-transcript.jsonl	eb3cf4e6fb69883232166f0239d4717c1d2697a62b644a549e64739a5bd5fc81	WITHHELD ON LANE GROUNDS, MEASURED NOT JUDGED: the file is a raw executor transcript (136 lines, 558,073 bytes) and it carries TWO live chat-service session URLs. That is a forbidden string class under this repo's own commit-hygiene law, and `scripts/check_commit_trailers.py` FORBIDDEN pattern 2 ("a chat-service session URL") matches it twice — driven 2026-09-11 with both controls (a clean line scores 0, a planted trailer scores 2). Restoring the file would be refused by this repository's own Scrub CI. ⇒ THE 2026-08-16 PURGE'S REMOVAL WAS CORRECT BY THE REPO'S STANDING GATE, independently of whether it was deliberate — which is a stronger basis than reconstructing intent. The bytes exist in local clones and the sha256 above binds them.	2026-09-11

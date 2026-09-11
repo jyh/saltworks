@@ -191,6 +191,44 @@ jobs:
           # name rather than walking a truncated history and reporting success.
           python scripts/check_private_paths.py --history
 
+  ledger-tools-selftest:
+    name: the ledger-tools suite runs at all (desk row KB)
+    runs-on: ubuntu-latest
+    # ⛔⛔ THIS JOB EXISTS BECAUSE A RED SELFTEST NOBODY RUNS IS INDISTINGUISHABLE
+    # FROM A GREEN ONE. `docs/ledger-tools/selftest.py` is a 190-check suite over
+    # the transcript classifier, the dedup rule, the silence math, the lane
+    # firewall and the provenance manifests -- and until 2026-09-11 this workflow
+    # named `ledger-tools` ZERO times, so the suite had never run in CI. It had
+    # been RED on master for weeks (`MANIFEST: bundle missing`) while every visible
+    # check on every push was green.
+    #
+    # ⇒ THE GENERALISABLE HALF IS NOT THE FAILURE, IT IS THE ABSENCE: a suite that
+    #   runs and reports one known red is strictly better than a suite that does
+    #   not run, because only the first one can tell you when a SECOND thing breaks.
+    #
+    # ⚠️ It is deliberately NOT gated on the provenance bundle's `verify.sh`, which
+    #   is a separate script and is STILL red on master for an unrelated and
+    #   pre-existing reason: its `blob` row asserts that the LIVING `Program.lean`
+    #   still hashes to its 2026-08-07 birth value, which stopped being true the
+    #   first time the artifact was legitimately edited (2026-08-28). The birth blob
+    #   is still retrievable from git, so the provenance is intact and only the
+    #   check's framing is wrong. Reported and routed, NOT silenced here -- adding a
+    #   red to this job to look thorough, or re-pointing the blob row to make it
+    #   green, are both worse than naming it.
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: the ledger-tools suite
+        run: python docs/ledger-tools/selftest.py
+      - name: the provenance bundle binds what it names, minus the declared withholding
+        # Reports only. See the note above: this script carries a pre-existing red
+        # that is not this job's to resolve, and a job that FAILS on a known red
+        # teaches everyone to ignore it -- which is how the suite above went unread.
+        continue-on-error: true
+        run: bash docs/provenance/verify.sh
+
   pr-descriptions:
     name: no private-record path in PR titles/bodies (the forge-side prose)
     runs-on: ubuntu-latest

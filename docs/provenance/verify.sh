@@ -39,6 +39,31 @@ while IFS=$'\t' read -r kind path expected; do
             fi ;;
 
     sha256) # content hash of a bundle file -- pins the RECORD
+            # ⚖️ A MISSING FILE IS A FAILURE **UNLESS IT IS DECLARED WITHHELD** in
+            #   docs/provenance/WITHHELD.tsv, with a sha256 that MATCHES this row's.
+            #   Ruled by the saltworks lead 2026-09-11 (desk row KB) for
+            #   s2-executor-transcript.jsonl: removed at the 2026-08-16 public flip and
+            #   un-restorable, because a raw transcript carries live chat-service session
+            #   URLs that this repo's own commit-hygiene gate forbids.
+            # ⛔ THE DECLARATION IS CHECKED, NOT TRUSTED. The hashes must AGREE: a
+            #   withheld row claiming different bytes from the manifest would quietly
+            #   redefine what the bundle binds, which is the one thing a provenance
+            #   file must never let happen. Deleting the manifest row instead would have
+            #   made this script green by destroying the binding -- the trade this
+            #   directory exists to refuse.
+            if [ ! -f "$path" ] && [ -f docs/provenance/WITHHELD.tsv ]; then
+              wsha=$(awk -F'\t' -v p="$path" '$1=="sha256" && $2==p {print $3}' docs/provenance/WITHHELD.tsv)
+              if [ -n "$wsha" ] && [ "$wsha" = "$expected" ]; then
+                note "withheld" "$(basename "$path") -- declared, and its hash matches this row"
+                continue
+              elif [ -n "$wsha" ]; then
+                note FAIL "withheld declaration for $(basename "$path") names DIFFERENT bytes"
+                note "" "  manifest  $expected"
+                note "" "  withheld  $wsha"
+                note "" "  ⇒ a declaration may record an absence; it may not redefine the binding."
+                fail=1; continue
+              fi
+            fi
             [ -f "$path" ] || { note FAIL "missing: $path"; fail=1; continue; }
             got=$(shasum -a 256 "$path" | cut -d' ' -f1)
             if [ "$got" = "$expected" ]; then note ok "sha256 $(basename "$path")"

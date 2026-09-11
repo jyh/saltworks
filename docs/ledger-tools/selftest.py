@@ -709,10 +709,71 @@ if os.path.exists(_man):
     _rows = [l.split("\t") for l in open(_man, encoding="utf-8").read().splitlines()
              if l.strip() and not l.lstrip().startswith("#")]
     check(len(_rows) >= 1, "MANIFEST: no rows — a manifest nobody adds to is not a gate")
+    # ⚖️ A MISSING BUNDLE IS A FAILURE **UNLESS IT IS DECLARED WITHHELD**, and the
+    #   declaration is itself checked. Ruled by the saltworks lead 2026-09-11 on row
+    #   KB: `s2-executor-transcript.jsonl` was removed at the 2026-08-16 public flip
+    #   and cannot come back — it carries two live chat-service session URLs, which
+    #   this repo's own `check_commit_trailers.py` forbids, so restoring it would be
+    #   refused by our own Scrub CI. Driven with both controls before ruling it.
+    #
+    # ⛔ THE DECLARATION IS NOT A MUTE BUTTON, AND THIS IS THE WHOLE DESIGN. Deleting
+    #   the manifest row would have made this green by destroying a provenance
+    #   binding — the trade this directory exists to refuse. So the row STAYS, the
+    #   artifact is declared WITHHELD **with its sha256**, and a reader who obtains a
+    #   copy can still prove it is the same bytes.
+    #   ⇒ THE GATE GOES GREEN FOR A REASON A READER CAN DISAGREE WITH, NEVER BECAUSE
+    #     THE QUESTION WAS FORGOTTEN.
+    #
+    # ⛔ AND A MALFORMED DECLARATION MUST FAIL LOUDER THAN NO DECLARATION. A blank
+    #   reason or a non-sha256 would otherwise be the cheapest way to silence any
+    #   red in this suite — an escape hatch shaped exactly like the defect it is
+    #   supposed to document.
+    _withheld = {}
+    _wpath = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                          "..", "provenance", "WITHHELD.tsv")
+    if os.path.exists(_wpath):
+        for _wl in open(_wpath, encoding="utf-8").read().splitlines():
+            if not _wl.strip() or _wl.lstrip().startswith("#"):
+                continue
+            _wf = _wl.split("\t")
+            check(len(_wf) >= 5,
+                  f"WITHHELD: row has {len(_wf)} fields, needs 5 "
+                  "(kind, path, sha256, reason, declared)")
+            if len(_wf) < 5:
+                continue
+            _ok_sha = len(_wf[2]) == 64 and all(c in "0123456789abcdef" for c in _wf[2])
+            check(_ok_sha, f"WITHHELD: {_wf[1]} carries no 64-hex sha256 — a withheld "
+                           "artifact without a fingerprint is just a missing one")
+            check(len(_wf[3].strip()) >= 40,
+                  f"WITHHELD: {_wf[1]} carries no substantive reason — a declaration "
+                  "a reader cannot disagree with is a mute button")
+            if _ok_sha and len(_wf[3].strip()) >= 40:
+                _withheld[_wf[1]] = _wf[2]
+
+    # ⛔ A PRESENT FILE MUST NOT BE DECLARED WITHHELD — and this sweep is keyed to
+    #   the DECLARATION's rows, not to the manifest's. The first version of this
+    #   guard lived inside the manifest loop, so it only ever saw paths that were
+    #   ALSO replay-manifest rows; a withheld declaration for any other present
+    #   file passed unchecked. Caught by the mutation control that planted exactly
+    #   that, which is the whole reason the control exists.
+    #   ⇒ 🔑 A GUARD IS ONLY AS WIDE AS THE POPULATION IT ITERATES, AND THE
+    #     TEMPTING POPULATION IS WHICHEVER LOOP YOU ARE ALREADY INSIDE.
+    #   The direction that costs something is a stale declaration outliving a
+    #   restored artifact: it would keep asserting an absence a reader can see is
+    #   false, in the one file whose job is to be believed about absences.
+    for _wp in _withheld:
+        check(not os.path.exists(os.path.join(pr.REPO, _wp)),
+              f"WITHHELD: {_wp} is declared withheld but the file is PRESENT — "
+              "one of the two is stale")
+
     for _r in _rows:
         _b = os.path.join(pr.REPO, _r[0])
         if not os.path.exists(_b):
-            check(False, f"MANIFEST: bundle missing: {_r[0]}")
+            if _r[0] in _withheld:
+                check(True, "")   # declared, fingerprinted, and reasoned
+                continue
+            check(False, f"MANIFEST: bundle missing and NOT declared in "
+                         f"provenance/WITHHELD.tsv: {_r[0]}")
             continue
         try:
             _rc = pr.check_one(_b, _r[1], _r[2], None, quiet=True)

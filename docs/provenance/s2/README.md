@@ -22,7 +22,7 @@ have made the promise self-enforcing. Found by the evidence seat.)*
 
 | file | what it is |
 |---|---|
-| `s2-executor-transcript.jsonl` | The executor's **full transcript, verbatim and unredacted** — every prompt, tool call, and result, in the order they happened. **136 lines, 558,073 bytes (545.0 KiB)**. SHA-256 `eb3cf4e6fb69883232166f0239d4717c1d2697a62b644a549e64739a5bd5fc81`. |
+| `s2-executor-transcript.jsonl` | ⛔ **WITHHELD — NOT IN THIS REPOSITORY.** The executor's full transcript, verbatim and unredacted — every prompt, tool call, and result, in the order they happened. **136 lines, 558,073 bytes (545.0 KiB)**, SHA-256 `eb3cf4e6fb69883232166f0239d4717c1d2697a62b644a549e64739a5bd5fc81`. It was removed at the 2026-08-16 public flip and **cannot be restored**: a raw transcript carries two live chat-service session URLs, a class this repository's own commit-hygiene gate forbids, so a restore would be refused by our own CI. The hash is published so a holder of a copy can prove it is these bytes. Declared at `docs/provenance/WITHHELD.tsv`; `selftest.py` checks the declaration rather than accepting the absence. |
 | `s2-final-report.md` | The executor's own final report, including its **authorship record in its own words** — what it wrote by hand, what it derived, and what it got wrong first. |
 | `s2-emitted-program.md` | The **emitted program as data**: all 120 assembled words, complete and untruncated, produced by `#eval` + `IO.println` against the committed module (`saltbuild EXIT=0`). |
 

@@ -2,7 +2,15 @@
 # Regenerate after ANY intentional bundle edit; verify.sh must then pass.
 # kind	path	expected
 blob	SaltWorks/Stack/Program.lean	4abd7975a382f8a125868e16357665d7e4e63fa5
-sha256	docs/provenance/s2/README.md	330978e95c74615e7aa76e5e9fa0d4184bdb96bdae6cde180187adf7d090c4c9
+# ⚖️ 2026-09-11 — s2/README.md's sha256 was REGENERATED, deliberately and not silently.
+#   Its transcript row was amended to say the file is WITHHELD and why (desk row KB,
+#   the saltworks lead's call). This header's standing instruction is "Regenerate after
+#   ANY intentional bundle edit", and row KB requires the choice be stated IN THE BUNDLE'S
+#   README rather than done quietly — so the record had to change and the binding had to
+#   follow. Previous value: 330978e95c74615e7aa76e5e9fa0d4184bdb96bdae6cde180187adf7d090c4c9
+#   ⛔ A REGENERATED HASH IS THE ONE MANIFEST OPERATION THAT CAN LAUNDER A CHANGE, so it is
+#     recorded here with its reason and its old value rather than just overwritten.
+sha256	docs/provenance/s2/README.md	dc448b9d70798520cd61ffbd398c4f3324af3b9a6198ed9883395f9cb48a15df
 sha256	docs/provenance/s2/s2-final-report.md	744ad29ceebfc24ed266b8a4902598142bbade5e5446c61e351b4a0c4662afa8
 sha256	docs/provenance/s2/s2-emitted-program.md	cc374598009886a808ba0fdbaad47930f7d99d385f4fd8770776564eb621224b
 sha256	docs/provenance/s2/s2-executor-transcript.jsonl	eb3cf4e6fb69883232166f0239d4717c1d2697a62b644a549e64739a5bd5fc81
