@@ -132,7 +132,12 @@ for name, rec, label in HUMAN_CASES:
 # --------------------------------------------------------------------------
 
 with tempfile.TemporaryDirectory() as tmp:
-    pdir = Path(tmp) / "-Users-jyh-projects-claude-fixture"
+    # ⛔ THE FIXTURE MUST PASS THE REAL FENCE, NOT A BYPASS. Under deny-by-default
+    #   (ruled 2026-09-11) the old name `-…-claude-fixture` is refused, correctly —
+    #   it is on no allowlist. The repair is to make the fixture a PERSONAL-LANE name
+    #   rather than to give the suite an escape hatch: a control that goes round the
+    #   gate tests a pipeline the production caller never runs.
+    pdir = Path(tmp) / "-Users-jyh-projects-claude-saltworks-fixture"
     (pdir / "sess" / "subagents" / "workflows" / "wf_x").mkdir(parents=True)
     session = pdir / "sess.jsonl"
 
@@ -560,16 +565,42 @@ with tempfile.TemporaryDirectory() as tmp:
 # 3. the firewall
 # --------------------------------------------------------------------------
 
+# ⚖️ DENY BY DEFAULT (ruled 2026-09-11). The belt still holds...
 check(lc.is_employer_lane("-Users-jyh-projects-claude-loca"), "FIREWALL: loca not blocked")
 check(lc.is_employer_lane("-Users-jyh-projects-claude-holl"), "FIREWALL: holl not blocked")
-check(not lc.is_employer_lane("-Users-jyh-projects-claude-salt"), "FIREWALL: salt blocked")
-try:
-    human_touches([Path("/tmp/-Users-jyh-projects-claude-loca")])
-    check(False, "FIREWALL: reading an employer-lane dir did not raise")
-except ValueError:
-    check(True, "")
+check(lc.is_personal_lane("-Users-jyh-projects-claude-salt"), "FIREWALL: salt not on the allowlist")
+
+# ⛔⛔ ...AND THIS IS THE ARM THAT COULD NOT EXIST BEFORE. The old suite asserted
+#   the fence on `loca`, `holl` and `salt` -- THE TWO NAMES IN THE TUPLE and one
+#   that must pass. It was GREEN through four expansions of the employer lane.
+#   ⇒ 🔑 AN ARM KEYED TO A LIST CANNOT DETECT AN ABSENCE FROM THAT LIST. An arm
+#     that cannot fail for the reason you care about is a decoration with a tick.
+#   The subject is a SYNTHETIC name on NO list, and it names no private tree --
+#   which is the whole point: the fence must refuse what nobody thought to name.
+SYNTH = "-Users-jyh-projects-claude-zzz-not-a-real-tree"
+check(lc.lane_refusal(SYNTH) is not None, "FIREWALL: an UNLISTED name was admitted")
+check("allowlist" in (lc.lane_refusal(SYNTH) or ""), "FIREWALL: unlisted refused for the wrong reason")
+check(lc.lane_refusal("-Users-jyh-projects-claude-salt") is None, "FIREWALL: salt refused")
+check("employer" in (lc.lane_refusal("-Users-jyh-projects-claude-loca") or ""),
+      "FIREWALL: loca refused by the generic reason, not the belt")
+
+# all three parameterised readers FAIL CLOSED, on the SYNTHETIC name
+for fn, label in ((lambda: human_touches([Path("/tmp/" + SYNTH)]), "human_touches"),
+                  (lambda: lc.activity_trace([Path("/tmp/" + SYNTH)]), "activity_trace")):
+    try:
+        fn()
+        check(False, f"FIREWALL: {label} admitted an unlisted dir")
+    except ValueError:
+        check(True, "")
+    except Exception as exc:                     # a wrong exception is NOT a pass
+        check(False, f"FIREWALL: {label} raised {type(exc).__name__}, not ValueError")
+
+# the refusal must be RECORDED, not merely raised (the ruling's amendment)
+check("excluded:" in lc.exclusions_report(), "FIREWALL: exclusions_report says nothing")
+check(SYNTH in lc.exclusions_report(), "FIREWALL: an allowlist miss was not NAMED")
+
 for d in lc.discover_personal_projects():
-    check(not lc.is_employer_lane(d.name), f"FIREWALL: discovery returned {d.name}")
+    check(lc.is_personal_lane(d.name), f"FIREWALL: discovery returned {d.name}")
 
 # --------------------------------------------------------------------------
 # 4. provenance_replay — the bundle-binding check

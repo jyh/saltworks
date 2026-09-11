@@ -24,11 +24,26 @@ and printed, so the filter is auditable from the published table.
 
 THE FIREWALL
 ------------
-Employer-lane projects (``loca``, ``holl``) are never read. Not by
-default, not behind a flag -- the denylist is enforced in code, and the
-consequence is stated in the output: silence here means "no human
-direction reached the personal-lane fleet", never "the human was
-asleep".
+DENY BY DEFAULT (ruled 2026-09-11). A project directory is read only if
+it matches the personal-lane ALLOWLIST (``PERSONAL_LANE``); the employer
+denylist is a belt on top, not the gate. Not by default, not behind a
+flag, and not by naming a directory on the command line -- every entry
+point goes through ``lane_refusal`` / ``require_personal_lane``, and the
+three functions that take ``project_dirs`` from a caller all FAIL CLOSED.
+The consequence is stated in the output: silence here means "no human
+direction reached the personal-lane fleet", never "the human was asleep".
+
+⛔ EVERY REFUSAL IS NAMED AND COUNTED (``exclusions_report``). Deny-by-
+default has a failure mode a denylist never had -- a forgotten PERSONAL
+tree vanishes from every measurement and the figure it vanishes from
+looks CLEANER. The quiet failure reads as good news, so it is not quiet.
+
+⚠️ THIS SECTION SAID *"Employer-lane projects (loca, holl) are never read
+... the denylist is enforced in code"*. That was the model this file
+taught for a month, and it was wrong in the direction that matters: the
+denylist knew two trees of six, and what actually held was a filter the
+code called "hints". Corrected here rather than only at the call site,
+because the summary is what a reader trusts.
 """
 
 from __future__ import annotations
@@ -92,15 +107,45 @@ def roots_report() -> str:
                       for r in PROJECTS_ROOTS)
 
 # --- the firewall (portfolio CLAUDE.md, JYH-ratified 2026-07-21) -----------
-# Outside-lane material never enters a personal-lane artifact. These are
-# matched against the project directory name; the check is substring-based
-# and deliberately blunt.
+# Outside-lane material never enters a personal-lane artifact.
+#
+# ⚖️⚖️ DENY BY DEFAULT. Ruled by the helm 2026-09-11 on evidence's measurement
+#   (bus 48835517), ratified in full. THE ALLOWLIST BELOW IS THE FENCE; the
+#   denylist is a belt on top of it. A directory is read ONLY if it matches
+#   ``PERSONAL_LANE``.
+#
+# ⛔⛔ WHY, AND WHY THE OBVIOUS FIX WAS REFUSED — THIS PARAGRAPH EXISTS TO STOP A HAND.
+#   Measured at origin 2026-09-11: ``EMPLOYER_LANE`` named TWO trees while
+#   ``CLAUDE.md`` named SIX, and ``is_employer_lane('-…-claude-pcc-bios')``
+#   returned False. The lane grew four times since 08/24 and this tuple never
+#   moved. A future head WILL read a 2-of-6 denylist as an oversight and reach
+#   for the completion. DO NOT.
+#   ⇒ 🔑 THIS FILE IS IN A **PUBLIC** REPO. ``loca`` and ``holl`` are already
+#     published and cannot be un-published; adding ``pcc-bios``, ``safe_dav1d``,
+#     ``safe_gif`` and ``anubis`` would write FOUR MORE EMPLOYER PROJECT NAMES
+#     INTO PUBLIC SOURCE to enforce a rule whose entire purpose is that employer
+#     material stays private. THE FIX WOULD PERFORM THE LEAK IT PREVENTS.
+#   ⇒ Deny-by-default needs no private name at all: a new employer tree is
+#     excluded BY CONSTRUCTION rather than by somebody remembering to add it.
+#
+# ⛔ WHAT ACTUALLY HELD, AND IT IS THE REASON THE DOCSTRING BELOW WAS REWRITTEN.
+#   Nothing employer-lane was ever in the measured population -- but the gate
+#   that kept it out was this allowlist, which the old text called a set of
+#   "hints", while the docstring of ``discover_personal_projects`` called the
+#   DENYLIST "the only gate, and it is unconditional". Both halves were false.
+#   ⇒ 🔑 WE WERE PROTECTED BY THE GATE THE DOCUMENTATION DID NOT MENTION, FROM A
+#     HOLE IN THE GATE IT CALLED UNCONDITIONAL. A sentence that confident is why
+#     nobody looked for the second gate.
 EMPLOYER_LANE = ("-claude-loca", "-claude-holl")
 
-# Personal-lane repos whose seats can carry human presence. A seat not in
-# this list is still readable if named explicitly on the command line,
-# unless it is employer-lane.
-PERSONAL_LANE_HINTS = (
+# THE ALLOWLIST. This is the fence, not a hint. A tree absent from it is NOT
+# read, however it is named -- on the command line or anywhere else.
+# ⚠️ ADDING A PERSONAL REPO HERE IS THE ONLY WAY IT ENTERS A MEASUREMENT. That
+#   is deliberate, and it has a failure mode the denylist never had: see
+#   ``lane_refusal`` and ``exclusions_report`` -- a refusal is NAMED and COUNTED,
+#   never silent, precisely so a forgotten personal tree surfaces as a line of
+#   output rather than as a smaller number.
+PERSONAL_LANE = (
     "-claude-salt",
     "-claude-saltworks",
     "-claude-jas",
@@ -110,6 +155,9 @@ PERSONAL_LANE_HINTS = (
     "-claude-omake",
     "-claude-jacobian-gist",
 )
+# Back-compatible alias: the old name said "hints" and the value was never a
+# hint. Kept so an out-of-tree caller does not break on the rename.
+PERSONAL_LANE_HINTS = PERSONAL_LANE
 
 # ---------------------------------------------------------------------------
 # provenance classification
@@ -225,14 +273,113 @@ def project_dir_for_repo(repo: str | Path) -> Path:
 
 
 def is_employer_lane(name: str) -> bool:
+    """The BELT. True only for a tree named in ``EMPLOYER_LANE``.
+
+    ⛔ THIS IS NOT THE FENCE AND MUST NOT BE USED AS ONE. It knows two trees of
+    six by design (see the note at ``EMPLOYER_LANE``); ``lane_refusal`` is the
+    gate. Kept because a NAMED refusal is a better error message than a generic
+    one, and because a belt that costs nothing should not be cut.
+    """
     return any(tag in name for tag in EMPLOYER_LANE)
+
+
+def is_personal_lane(name: str) -> bool:
+    """THE FENCE. True only for a tree on the personal allowlist."""
+    return any(tag in name for tag in PERSONAL_LANE)
+
+
+# ⚖️ THE AMENDMENT, AND THE HELM CALLED IT THE LOAD-BEARING HALF OF THE RULING.
+#   Deny-by-default has a failure mode the denylist never had: a NEW PERSONAL
+#   tree, absent from the allowlist, vanishes from every measurement -- and the
+#   figure it vanishes from LOOKS CLEANER. That is the same defect one layer
+#   down, pointed at our own numbers instead of at the lane.
+#   ⇒ 🔑 THE QUIET FAILURE READS AS GOOD NEWS, and a fence that silently shrinks
+#     its population is indistinguishable from a clean corpus.
+#   ⇒ SO NO REFUSAL IS EVER SILENT: every one is recorded here and reported.
+_EXCLUDED: dict[str, str] = {}          # dir name -> reason
+
+
+def lane_refusal(name: str) -> str | None:
+    """None if this directory may be read; otherwise the REASON it may not.
+
+    ⛔ ORDER MATTERS AND IT IS NOT COSMETIC: the employer belt is asked FIRST so
+    a known outside-lane tree is refused with the accurate reason rather than
+    the generic one. Both refuse; only one of them tells a reader what happened.
+    """
+    if is_employer_lane(name):
+        return "employer-lane (denylist)"
+    if not is_personal_lane(name):
+        return "not on the personal-lane allowlist (deny-by-default)"
+    return None
+
+
+def note_exclusion(name: str, reason: str) -> None:
+    _EXCLUDED[name] = reason
+
+
+def require_personal_lane(name: str) -> None:
+    """Raise unless this directory is inside the personal lane. FAIL CLOSED.
+
+    ⚖️ Every function that accepts ``project_dirs`` from a caller uses THIS, and
+    all of them RAISE. Ruled 2026-09-11: ``activity_trace`` used to ``continue``
+    quietly while its two siblings raised -- and the quiet one is the path an
+    operator reaches for to look at a tree BY NAME.
+    ⇒ 🔑 A THIRD PATH THAT CONTINUES QUIETLY WHILE TWO REFUSE LOUDLY IS NOT A GAP
+      IN COVERAGE, IT IS A DEFENCE LAYER REORDERED.
+    """
+    why = lane_refusal(name)
+    if why is not None:
+        note_exclusion(name, why)
+        raise ValueError(f"refusing to read outside-lane transcripts: {name} -- {why}")
+
+
+def exclusions_report() -> str:
+    """What this run REFUSED to read, with a count. Print it beside any total.
+
+    ⚠️ DELIBERATE NARROWING OF THE RULING'S LETTER, FLAGGED FOR THE HELM'S DIFF
+      READ RATHER THAN TAKEN QUIETLY. The ruling says an excluded directory must
+      be NAMED with a count. Allowlist misses are named in full -- they are the
+      risk the amendment exists for, a forgotten PERSONAL tree. Employer-lane
+      refusals are COUNTED but NOT NAMED, because this tool's stdout is the most
+      likely thing a head pastes into a public artifact, and we have just ruled
+      that employer names must not enter public source. Nothing is silent: the
+      policy itself is printed, so a reader sees that a category was withheld
+      and can ask. If the helm wants the names, one line here restores them.
+    """
+    if not _EXCLUDED:
+        return "excluded: none"
+    named = sorted(n for n, r in _EXCLUDED.items() if "allowlist" in r)
+    n_emp = sum(1 for r in _EXCLUDED.values() if "employer" in r)
+    parts = [f"excluded: {len(_EXCLUDED)}"]
+    if named:
+        parts.append("NOT ON THE ALLOWLIST (%d, named — a forgotten personal tree "
+                     "would appear here): %s" % (len(named), " · ".join(named)))
+    if n_emp:
+        parts.append(f"employer-lane: {n_emp} (counted, deliberately unnamed — see "
+                     f"exclusions_report.__doc__)")
+    return "  |  ".join(parts)
 
 
 def discover_personal_projects() -> list[Path]:
     """Every personal-lane project directory that holds a session transcript.
 
-    Outside-lane directories are excluded here and nowhere else -- this is
-    the only gate, and it is unconditional.
+    ⚖️ TWO GATES, IN THIS ORDER, AND THE SECOND ONE IS THE FENCE: the employer
+    belt (``is_employer_lane``) and then DENY-BY-DEFAULT against the personal
+    allowlist (``is_personal_lane``). Both live in ``lane_refusal``.
+
+    ⛔⛔ THIS DOCSTRING USED TO SAY: *"Outside-lane directories are excluded here
+    and nowhere else -- this is the only gate, and it is unconditional."*
+    **BOTH HALVES WERE FALSE.** There were already two gates, and the one it
+    named was the WEAKER: measured 2026-09-11, ``is_employer_lane`` returned
+    False for ``pcc-bios``, and what actually kept the population clean was the
+    allowlist on the next line -- which the old text called a set of "hints".
+    ⇒ 🔑 THE REWRITE IS PART OF THE REPAIR, NOT A TIDY-UP. Leaving a confident
+      wrong sentence beside corrected code is how the next reader inherits the
+      same wrong model, and that confidence is why nobody looked for gate two.
+
+    ⚠️ Every refusal is RECORDED (``note_exclusion``) and reportable
+    (``exclusions_report``). A tree missing from the allowlist must surface as a
+    LINE OF OUTPUT, never as a smaller number.
     """
     # ⛔ UNIONS ALL ROOTS — it must NOT switch to the seat roots. Compiler's
     # in-seat ground truth, 19:5x: its history is SPLIT, not moved —
@@ -245,12 +392,21 @@ def discover_personal_projects() -> list[Path]:
     out = []
     for root in PROJECTS_ROOTS:
         for d in sorted(root.iterdir()):
-            if not d.is_dir() or is_employer_lane(d.name):
+            if not d.is_dir():
                 continue
-            if not any(hint in d.name for hint in PERSONAL_LANE_HINTS):
-                continue
-            # scratchpad mirrors carry no human messages; skip the noise
+            # ⛔ SCRATCHPADS ARE SKIPPED **BEFORE** THE LANE CHECK, AND THE ORDER IS
+            #   DELIBERATE. They carry no human messages, they are numerous, and none
+            #   is on the allowlist — so if the lane check saw them first, every run
+            #   would name a dozen scratchpad dirs as "not on the allowlist" and the
+            #   ONE line that matters — a real personal tree nobody added — would be
+            #   buried in them. The amendment's value is the SIGNAL, not the volume.
+            #   ⇒ A NAMED-EXCLUSION REPORT THAT NAMES THE UNINTERESTING CASES STOPS
+            #     BEING READ, which is the same silence by another road.
             if "scratchpad" in d.name:
+                continue
+            why = lane_refusal(d.name)
+            if why is not None:
+                note_exclusion(d.name, why)     # ⛔ NAMED AND COUNTED, never silent
                 continue
             if not list(d.glob("*.jsonl")):
                 continue
@@ -359,8 +515,7 @@ def human_touches(project_dirs, stats: ParseStats | None = None) -> tuple[list[T
     touches: list[Touch] = []
     for pdir in project_dirs:
         pdir = Path(pdir)
-        if is_employer_lane(pdir.name):
-            raise ValueError(f"refusing to read outside-lane transcripts: {pdir.name}")
+        require_personal_lane(pdir.name)     # FAIL CLOSED: belt, then deny-by-default
         for path in session_files(pdir):
             enqueues: dict[str, list[datetime]] = {}
             pending: list[tuple[Touch, str]] = []
@@ -456,8 +611,7 @@ def usage_events(
     events: list[UsageEvent] = []
     for pdir in project_dirs:
         pdir = Path(pdir)
-        if is_employer_lane(pdir.name):
-            raise ValueError(f"refusing to read outside-lane transcripts: {pdir.name}")
+        require_personal_lane(pdir.name)     # FAIL CLOSED: belt, then deny-by-default
         paths = [(p, False) for p in session_files(pdir)]
         if include_subagents:
             paths += [(p, True) for p in subagent_files(pdir)]
@@ -684,8 +838,12 @@ def activity_trace(project_dirs) -> list[datetime]:
     raw: list[str] = []
     lines_read = 0
     for d in project_dirs:
-        if is_employer_lane(Path(d).name):  # the firewall, restated locally
-            continue
+        # ⚖️ RULED 2026-09-11: this used to `continue` SILENTLY while its two
+        #   siblings raised. It now FAILS CLOSED like them — and this is the path
+        #   an operator uses to look at a tree BY NAME, so it was the one that
+        #   mattered most. "the firewall, restated locally" is exactly what it
+        #   should NOT be: there is ONE fence and it is `require_personal_lane`.
+        require_personal_lane(Path(d).name)
         for f in list(session_files(Path(d))) + list(subagent_files(Path(d))):
             with open(f, "r", errors="replace") as fh:
                 for line in fh:
