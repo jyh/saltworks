@@ -585,7 +585,13 @@ check("employer" in (lc.lane_refusal("-Users-jyh-projects-claude-loca") or ""),
       "FIREWALL: loca refused by the generic reason, not the belt")
 
 # all three parameterised readers FAIL CLOSED, on the SYNTHETIC name
+# ⛔ ALL THREE, AND THE THIRD WAS ADDED AT THE HELM'S DIFF READ. The comment above
+#   this loop said "all three parameterised readers FAIL CLOSED" and the loop drove
+#   TWO — `usage_events` was unarmed. It is the same shape as the defect this whole
+#   PR repairs, one level down: A CLAIM ABOUT A POPULATION, CHECKED OVER A SUBSET.
+#   ⇒ 🔑 WHEN A COMMENT SAYS "ALL N", COUNT THE ARMS.
 for fn, label in ((lambda: human_touches([Path("/tmp/" + SYNTH)]), "human_touches"),
+                  (lambda: usage_events([Path("/tmp/" + SYNTH)]), "usage_events"),
                   (lambda: lc.activity_trace([Path("/tmp/" + SYNTH)]), "activity_trace")):
     try:
         fn()
