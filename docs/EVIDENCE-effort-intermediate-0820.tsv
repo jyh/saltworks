@@ -1,0 +1,120 @@
+# EVIDENCE-effort-intermediate-0820.tsv — THE FROZEN EFFORT INTERMEDIATE
+#
+# Owner: the EVIDENCE seat. Charter: docs/measurement-preregistration.md §1-2
+# (frozen 2026-08-06, Council I). Written 2026-09-11.
+#
+# WHY THIS FILE EXISTS, IN ONE SENTENCE
+# -------------------------------------
+# The effort figures this campaign publishes were measured over session
+# transcripts that the client DELETES on a rolling retention schedule, and
+# 2.4 days of the campaign window are already gone from disk -- so this file
+# is the surviving record of a measurement whose source no longer exists.
+#
+# ⛔⛔ THE COLLECTION STEP IS NOT RE-RUNNABLE, AND THE REASON CHANGED.
+#   It was believed (2026-08-20) to be non-re-runnable because the committed
+#   tool's seat-root glob was a scrubbed placeholder. THAT WAS REPAIRED IN
+#   PUBLIC on 2026-08-23 (ledger_common.py, commit f782ded) and the shipped
+#   code now discovers every root. The figure still does not re-derive -- for
+#   a different and permanent reason: THE TRANSCRIPTS THEMSELVES ARE GONE.
+#   ⇒ A STALE CAUSE SURVIVES A CORRECT VERDICT, AND IT IS THE CAUSE THAT
+#     TELLS THE NEXT READER WHETHER TO REACH FOR A REPAIR.
+#
+# ✅ THE HEADLINE IS NEVERTHELESS CORROBORATED TO 0.01%, FROM TWO PIECES,
+#   ONE OF WHICH WAS ALREADY PUBLIC BEFORE ITS SUBSTRATE PERISHED:
+#     piece A  2026-08-05 22:02 -> 2026-08-10 18:40   docs/EVIDENCE-ledger-latest.md
+#              (generated 2026-08-10 18:40, committed eeec61b -- a snapshot taken
+#              while the data still existed; this is the only witness for the
+#              campaign's first five days, which are the three highest-commit days)
+#     piece B  2026-08-10 18:40 -> 2026-08-20 18:18   re-driven 2026-09-11 and
+#              FROZEN HERE, because it perishes on the same schedule
+#     A + B = 84,177 requests / 66,176,286 output  vs the headline 84,171 /
+#     66,169,968.  Residual +6 req / +6,318 out = +0.007% / +0.010%.
+#
+# ⚠️ THE RESIDUAL IS A SEAM ARTEFACT, AND IT WAS CONTROLLED RATHER THAN
+#   ASSUMED. Moving the A|B boundary one minute either way walks the residual
+#   monotonically through zero:
+#     boundary 18:39  ->  +16 req / +19,237 out
+#     boundary 18:40  ->   +6 req /  +6,318 out     (the rows below)
+#     boundary 18:41  ->   -9 req /  -8,708 out
+#   ⇒ the headline is BRACKETED by [84,162 , 84,187] requests, a 25-request
+#     window 0.03% wide, and 84,171 lies inside it. The overlap is the ~15
+#     requests/minute this campaign was running at that hour, counted twice.
+#
+# ⛔ WHAT A RE-RUN RETURNS TODAY, so nobody reads a shortfall as an overclaim:
+#   the same tool, same declared window, 2026-09-11 -> 64,099 requests and
+#   52,566,927 output: 76.2% and 79.4% of the published figures, beginning
+#   2026-08-08 08:30 against a window that opens 2026-08-05 22:00.
+#   ✅ POSITIVE CONTROL, AND IT IS WHAT MAKES THE DIAGNOSIS SOUND: the `jas`
+#     row re-derives EXACTLY -- 1,862 requests / 345,394 output, to the token --
+#     because that seat's transcripts were all written on 2026-08-20 and none
+#     has yet aged out. ONE ARM UNCHANGED PROVES THE INSTRUMENT; THE OTHERS
+#     MOVING PROVES THE SUBJECT. The tool is not broken; the data is gone.
+#
+# FENCES (docs/measurement-preregistration.md §1, and they travel with the numbers)
+#   · Unit is TOKENS. The records carry NO account, organisation or subscription
+#     identifier, so NO DOLLAR FIGURE AND NO PER-ACCOUNT SPLIT IS DERIVABLE.
+#   · CACHE IS ALWAYS ITS OWN COLUMN and never enters a headline.
+#   · Requests are DEDUPLICATED BY requestId: one API response is written as
+#     several assistant records each repeating the whole usage block; naive
+#     summation inflates ~3x (118,225 duplicate records dropped in piece B).
+#   · Subagent transcripts are INCLUDED.
+#   · Human engaged time is published as a FLOOR: reading and thinking before a
+#     block's first message leave no transcript trace.
+#
+# ⛔ ROOT COUNT ONLY, AND THE OMISSION IS DELIBERATE. The measurement read 9
+#   personal-lane project directories across the fleet's per-seat config homes.
+#   The COUNT is published; the ROOT NAMES ARE NOT, because a per-root row names
+#   a seat home, and this repo is public. The publishable grain is the PROJECT,
+#   and the project decomposition below reconstitutes the headline exactly --
+#   so nothing a reviewer needs is withheld. (Narrowing of the helm's ruling of
+#   2026-09-11, flagged rather than taken quietly.)
+#
+# COLUMNS
+#   piece     HEADLINE | A-committed | B-frozen | CONTROL | REPLAY-0911
+#   grain     total | project | tier | where
+#   key       the row's label within its grain
+#   requests  deduplicated API requests   (n/a = not recoverable at this grain)
+#   input · output · cache_created · cache_read   tokens
+#   status    MEASURED | MEASURED-SUBSTRATE-GONE | CONTROL
+#
+piece	grain	key	requests	input	output	cache_created	cache_read	status
+HEADLINE	total	2026-08-05T22:00..2026-08-20T18:18	84171	528970	66169968	299051240	32986994657	MEASURED-SUBSTRATE-GONE
+HEADLINE	project	-Users-jyh-projects-claude-saltworks	44157	n/a	41685855	n/a	n/a	MEASURED-SUBSTRATE-GONE
+HEADLINE	project	-Users-jyh-projects-claude-salt	38152	n/a	24138719	n/a	n/a	MEASURED-SUBSTRATE-GONE
+HEADLINE	project	-Users-jyh-projects-claude-jas	1862	n/a	345394	n/a	n/a	MEASURED-SUBSTRATE-GONE
+HEADLINE	tier	Opus 5	n/a	n/a	56230975	n/a	n/a	MEASURED-SUBSTRATE-GONE
+HEADLINE	tier	Fable 5	n/a	n/a	9797584	n/a	n/a	MEASURED-SUBSTRATE-GONE
+HEADLINE	tier	Opus 4.8	n/a	n/a	141399	n/a	n/a	MEASURED-SUBSTRATE-GONE
+HEADLINE	tier	Haiku 4.5	n/a	n/a	10	n/a	n/a	MEASURED-SUBSTRATE-GONE
+A-committed	total	2026-08-05T22:02..2026-08-10T18:40	36844	334310	28074763	132259317	13412903941	MEASURED
+A-committed	project	-Users-jyh-projects-claude-saltworks	23050	196073	19088898	69991926	8697900874	MEASURED
+A-committed	project	-Users-jyh-projects-claude-salt	13794	138237	8985865	62267391	4715003067	MEASURED
+A-committed	tier	Opus 5	31984	301777	24210525	109386143	10983088262	MEASURED
+A-committed	tier	Fable 5	4579	10127	3722829	16281998	2280197510	MEASURED
+A-committed	tier	Opus 4.8	275	11079	141399	6524339	149438860	MEASURED
+A-committed	tier	Haiku 4.5	6	11327	10	66837	179309	MEASURED
+B-frozen	total	2026-08-10T18:40..2026-08-20T18:18	47333	194672	38101523	166793764	19577132760	MEASURED
+B-frozen	project	-Users-jyh-projects-claude-saltworks	21110	44291	22600937	60453766	10176714444	MEASURED
+B-frozen	project	-Users-jyh-projects-claude-salt	24361	146657	15155192	101965755	9185418081	MEASURED
+B-frozen	project	-Users-jyh-projects-claude-jas	1862	3724	345394	4374243	215000235	MEASURED
+B-frozen	tier	Opus 5	38456	171568	32025389	138080997	15522076081	MEASURED
+B-frozen	tier	Fable 5	8877	23104	6076134	28712767	4055056679	MEASURED
+B-frozen	where	main loop	35214	74068	37207663	97556749	18456514265	MEASURED
+B-frozen	where	subagents	12119	120604	893860	69237015	1120618495	MEASURED
+CONTROL	total	seam-boundary-18:39	84187	n/a	66189205	n/a	n/a	CONTROL
+CONTROL	total	seam-boundary-18:41	84162	n/a	66161260	n/a	n/a	CONTROL
+REPLAY-0911	total	2026-08-05T22:00..2026-08-20T18:18	64099	388960	52566927	215488513	26531710012	MEASURED
+REPLAY-0911	project	-Users-jyh-projects-claude-saltworks	32062	162129	33166361	88499077	15236018751	MEASURED
+REPLAY-0911	project	-Users-jyh-projects-claude-salt	30175	223107	19055172	122615193	11080691026	MEASURED
+REPLAY-0911	project	-Users-jyh-projects-claude-jas	1862	3724	345394	4374243	215000235	MEASURED
+#
+# HUMAN TIME (docs/measurement-preregistration.md §2). Same substrate, same clock.
+#   ⛔ THE CLAIM FIGURE IS NOT RECOVERABLE AT ALL. All five category-tagged blocks
+#     fell on 2026-08-05/06; those transcripts are gone, and a 2026-09-11 re-run
+#     reports 0h 00m of claim time and prints `9 TAG(S) MATCH NO BLOCK`. The
+#     campaign's dependency-time figure was already fenced as not quotable
+#     (86.4% of blocks untagged); it is now unquotable for a second, harder reason.
+#
+piece	grain	key	blocks	minutes	touches	tagged_blocks	tagged_minutes	status
+HEADLINE	human-time	2026-08-05T22:00..2026-08-20T18:19	138	5794	1751	5	786	MEASURED-SUBSTRATE-GONE
+REPLAY-0911	human-time	2026-08-05T22:00..2026-08-20T18:19	112	3512	n/a	0	0	MEASURED
