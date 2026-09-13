@@ -451,3 +451,9 @@ jobs:
       - name: saltbuild-lock-test
         if: success() || failure()
         run: command -v flock; bash tools/saltbuild-lock-test.sh
+      - name: MEASUREMENT ONLY — the pre-#40 wrapper must go RED on E3 here (the nodir branch discriminates)
+        if: success() || failure()
+        run: |
+          mkdir -p /tmp/old && git show 0910f42:tools/saltbuild.sh > /tmp/old/saltbuild.sh && git show 0910f42:tools/saltqueue.sh > /tmp/old/saltqueue.sh
+          out=$(bash tools/saltbuild-lock-test.sh /tmp/old/saltbuild.sh 2>&1); echo "$out" | grep -E 'E3|E4|I[0-9]|lock-test:'
+          echo "$out" | grep -F 'FAIL E3  empty log path gave rc=' | grep -F '[nodir]'
