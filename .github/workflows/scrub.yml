@@ -432,3 +432,22 @@ jobs:
           grep -q 'LOWEST-YIELD SHAPE' ctl.txt >/dev/null 2>&1 || true
           [ "$fail" = 0 ] && echo "shape control pattern UNCHANGED: base+burst+coprime+impatient CAUGHT, eager VOID (4 of 5, named not averaged)"
           exit $fail
+
+  tool-selftests:
+    name: the saltworks tool selftests run at all (census D, D10)
+    runs-on: ubuntu-latest
+    # MEASUREMENT CUT (2026-09-13): each suite is its own step and every step runs whatever the
+    #   previous one did, so one run reports all four on the real runner.
+    steps:
+      - uses: actions/checkout@v4
+      - name: scratch_twins --selftest
+        run: python3 scripts/scratch_twins.py --selftest
+      - name: env_probe --selftest
+        if: success() || failure()
+        run: sh tools/env_probe.sh --selftest
+      - name: saltqueue_selftest
+        if: success() || failure()
+        run: bash tools/saltqueue_selftest.sh
+      - name: saltbuild-lock-test
+        if: success() || failure()
+        run: command -v flock; bash tools/saltbuild-lock-test.sh
