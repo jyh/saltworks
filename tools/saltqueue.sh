@@ -46,7 +46,13 @@
 #   yielding build gives up after MAXWAIT and acquires; under the queue it waits for the
 #   queue. Named here because it is a behaviour change to a running mechanism.
 
-: "${LOCK:=/tmp/salt-fleet-build.lock}"
+# ⛔ `=`, NOT `:=` (census D, D15, 2026-09-13): an EMPTY LOCK is a caller whose override failed, and `:=` pointed
+#   its tickets at the FLEET queue. saltbuild.sh refuses an empty lock before sourcing this; a direct source must too.
+: "${LOCK=/tmp/salt-fleet-build.lock}"
+if [ -z "$LOCK" ]; then
+  echo "saltqueue: LOCK is SET BUT EMPTY — refusing rather than ticketing into the FLEET queue" >&2
+  return 76
+fi
 Q_TKT_GLOB="${LOCK}.tkt"
 Q_TICKET=""
 
