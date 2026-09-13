@@ -436,8 +436,16 @@ jobs:
   tool-selftests:
     name: the saltworks tool selftests run at all (census D, D10)
     runs-on: ubuntu-latest
-    # MEASUREMENT CUT (2026-09-13): each suite is its own step and every step runs whatever the
-    #   previous one did, so one run reports all four on the real runner.
+    # ⛔ FOUR SHIPPED SELFTESTS HAD NEVER RUN IN CI — the D arm 2 census (2026-09-13) found 0 invoking
+    #   hits for each in .github, selftest.py and nightly.sh. This file's own ledger-tools job states why
+    #   that matters: a red selftest nobody runs is indistinguishable from a green one.
+    # ⭐ MEASURED ON THIS RUNNER BEFORE IT GATED (saltworks #41, draft): all four pass. The lock test's one
+    #   red in the first cut was E3, which refused to run without macOS sandbox-exec. E3 now also runs when
+    #   the fleet log's directory is absent, as it is here, so a fallback write cannot land. The pre-#40
+    #   wrapper was run here too, as a RED-FIRST control: 46/4 (E3 E4 I1 I4), the same four as on macOS.
+    #   The current wrapper is 50/0.
+    # Each suite is its own step, and every step runs whatever the one before it did, so a single run reports
+    #   all four. The job still fails if any one fails.
     steps:
       - uses: actions/checkout@v4
       - name: scratch_twins --selftest
@@ -448,14 +456,6 @@ jobs:
       - name: saltqueue_selftest
         if: success() || failure()
         run: bash tools/saltqueue_selftest.sh
-      - name: saltbuild-lock-test
+      - name: saltbuild lock test (drives the REAL wrapper against a private lock and log)
         if: success() || failure()
-        run: command -v flock; bash tools/saltbuild-lock-test.sh
-      - name: MEASUREMENT ONLY — the pre-#40 wrapper must go RED on E3 here (the nodir branch discriminates)
-        if: success() || failure()
-        run: |
-          git fetch -q --unshallow origin
-          mkdir -p /tmp/old && git show 0910f42:tools/saltbuild.sh > /tmp/old/saltbuild.sh && git show 0910f42:tools/saltqueue.sh > /tmp/old/saltqueue.sh
-          bash tools/saltbuild-lock-test.sh /tmp/old/saltbuild.sh > /tmp/old/out.txt 2>&1 || true
-          grep -E 'E3|E4|I[0-9]|lock-test:' /tmp/old/out.txt || true
-          grep -F 'FAIL E3  empty log path gave rc=' /tmp/old/out.txt | grep -F '[nodir]'
+        run: bash tools/saltbuild-lock-test.sh
