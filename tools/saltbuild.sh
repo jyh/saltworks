@@ -173,7 +173,17 @@ if [ -z "$SB_SEAT" ]; then
   esac
 fi
 q_take "$PRIO_CLASS" "$SB_SEAT"
-trap q_release EXIT INT TERM
+# ⛔ AN INT/TERM HANDLER MUST EXIT (census D #8, measured 2026-09-13). This line was
+#   `trap q_release EXIT INT TERM`, and bash RESUMES after a signal trap that returns. A wrapper
+#   SIGTERM'd while QUEUED deleted its own ticket, left the queue, took the flock when the holder
+#   finished, RAN ITS BUILD and printed EXIT=0 -- a cancelled build that happens anyway, later,
+#   holding the fleet lock (driven on a stub lake, isolated lock). tools/env_probe.sh:69 had
+#   measured the mechanism on 08-22; the doctrine lived one file over.
+#   A signal that lands during a FOREGROUND child (sleep, flock, lake) is deferred until that child
+#   returns; the handler then exits instead of continuing. 130/143 = 128 + SIGINT/SIGTERM.
+trap q_release EXIT
+trap 'q_release; exit 130' INT
+trap 'q_release; exit 143' TERM
 q_wait
 # ╚══ END QUEUE — the acquisition below is UNCHANGED ═════════════════════════════
 
@@ -308,7 +318,10 @@ release() {
   q_release
   return 0
 }
-trap release EXIT INT TERM
+# ⛔ Same rule as the queue trap above: release, then EXIT -- never resume into the build.
+trap release EXIT
+trap 'release; exit 130' INT
+trap 'release; exit 143' TERM
 export LEAN_NUM_THREADS=4
 CAP=24000
 if [ "$1" = "--cap" ]; then CAP="$2"; shift 2; fi

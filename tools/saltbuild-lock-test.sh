@@ -161,6 +161,47 @@ grep -F "	WAIT-ABORT	" "$LOG" | grep -F -q "stage=marker" && [ "$(cat "$LK/pid" 
   && ok "F4  CONTROL: a LIVE holder's marker survives and the abort is stage=marker, not reap-refused" || no "F4  live holder: $(cut -f2,6 "$LOG" | tr '\n' '|')"
 kill "$LIVE" 2>/dev/null; rm -rf "$LK"
 
+echo "== G — A SIGNALLED WRAPPER MUST NOT BUILD LATER (census D #8, 2026-09-13) =="
+# ⛔ MEASURED ON THE UNFIXED WRAPPER: a builder SIGTERM'd while QUEUED ran its trap (which returned),
+#   left the queue, took the flock when the holder finished, BUILT, and exited 0. These arms need a
+#   holder that really holds, so `lake` is a STUB under a private HOME (the wrapper calls
+#   ~/.elan/bin/lake by absolute path); every lock, log and ticket stays under $TD.
+GH="$TD/ghome"; mkdir -p "$GH/.elan/bin"; BUILT="$TD/built.log"
+printf '#!/bin/bash\necho "BUILT seat=$SEAT" >> "%s"\nsleep "${STUB_SLEEP:-12}"\n' "$BUILT" > "$GH/.elan/bin/lake"
+chmod +x "$GH/.elan/bin/lake"
+GRUN(){ # GRUN <seat> <stub-sleep> -> runs the wrapper in the background; pid in $!
+  ( cd "$TD" && HOME="$GH" BASH_ENV= STUB_SLEEP="$2" SALTBUILD_LOCK="$LK" SALTBUILD_LOCKLOG="$LOG" \
+      SALTBUILD_MAXWAIT=60 SEAT="$1" exec bash "$SB" G ) >"$TD/g-$1.out" 2>&1 &
+}
+gwait(){ local i; for i in $(seq 1 75); do grep -q -F "$2" "$1" 2>/dev/null && return 0; sleep 0.2; done; return 1; }
+: > "$LOG"; : > "$BUILT"; rm -rf "$LK" "$LK".tkt.*
+GRUN gholder 12; GHOLD=$!; KEEP="$KEEP $GHOLD"; gwait "$BUILT" "seat=gholder"
+GRUN gwaiter 1;  GWAIT=$!;  KEEP="$KEEP $GWAIT"; gwait "$TD/g-gwaiter.out" "QUEUED"
+sleep 1; kill -TERM "$GWAIT"; T0=$(date +%s); wait "$GWAIT"; grc=$?; gdt=$(( $(date +%s) - T0 ))
+wait "$GHOLD" 2>/dev/null
+[ "$grc" = 143 ] && [ "$gdt" -lt 15 ] && ok "G1  ⭐ a wrapper SIGTERM'd while queued exits 143 within ${gdt}s" \
+  || no "G1  the signalled waiter exited rc=$grc after ${gdt}s (want 143, promptly)"
+grep -F -q "seat=gwaiter" "$BUILT" && no "G2  ⭐ the SIGTERM'd waiter BUILT anyway, after its holder finished" \
+  || ok "G2  ⭐ ...and it NEVER builds (only the holder appears in the stub's build log)"
+# G3 CONTROL: without the signal the same waiter DOES build -- or G2's absence proves nothing.
+: > "$LOG"; : > "$BUILT"; rm -rf "$LK" "$LK".tkt.*
+GRUN gholder 6; GHOLD=$!; KEEP="$KEEP $GHOLD"; gwait "$BUILT" "seat=gholder"
+GRUN gwaiter 1; GWAIT=$!; KEEP="$KEEP $GWAIT"; gwait "$TD/g-gwaiter.out" "QUEUED"
+wait "$GWAIT"; grc=$?; wait "$GHOLD" 2>/dev/null
+grep -F -q "seat=gwaiter" "$BUILT" && [ "$grc" = 0 ] \
+  && ok "G3  CONTROL: the same waiter, NOT signalled, builds after its holder (rc 0)" \
+  || no "G3  CONTROL FAILED: the unsignalled waiter rc=$grc, built=$(grep -c -F seat=gwaiter "$BUILT")"
+# G4: a signal during a HELD build releases the lock, and the next builder gets straight in.
+: > "$LOG"; : > "$BUILT"; rm -rf "$LK" "$LK".tkt.*
+GRUN gheld 4; GHELD=$!; KEEP="$KEEP $GHELD"; gwait "$BUILT" "seat=gheld"
+kill -TERM "$GHELD"; wait "$GHELD"; grc=$?
+lk_left=$([ -e "$LK" ] && echo YES || echo no); tk_left=$(ls "$LK".tkt.* 2>/dev/null | wc -l | tr -d ' ')
+GRUN gnext 0; GNEXT=$!; wait "$GNEXT"
+[ "$grc" = 143 ] && [ "$lk_left" = no ] && [ "$tk_left" = 0 ] && [ "$(field ACQUIRED waited | tail -1)" = "waited=0s" ] \
+  && ok "G4  a wrapper signalled mid-build exits 143, leaves no marker or ticket, and the next builder waits 0s" \
+  || no "G4  rc=$grc marker=$lk_left tickets=$tk_left next=[$(field ACQUIRED waited)]"
+rm -rf "$LK" "$LK".tkt.*
+
 echo
 printf 'saltbuild-lock-test: %d/%d\n' "$pass" "$fail"
 [ "$fail" -eq 0 ]
