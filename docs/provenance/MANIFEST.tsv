@@ -1,7 +1,16 @@
 # docs/provenance/MANIFEST.tsv — what the bundle binds. Checked by verify.sh.
 # Regenerate after ANY intentional bundle edit; verify.sh must then pass.
 # kind	path	expected
-blob	SaltWorks/Stack/Program.lean	4abd7975a382f8a125868e16357665d7e4e63fa5
+# ⚖️ 2026-09-13 (desk row LO) — TWO ROWS FOR THE PROGRAM, BECAUSE THEY ANSWER DIFFERENT QUESTIONS.
+#   born  = the program AS BORN, the blob the bundle was written about (5d62022, STACK-S2), matched
+#           by content. It replaces a birth binding that can no longer run: REPLAY-MANIFEST.tsv's rev
+#           was orphaned by the 08-16 purge and its transcript is withheld.
+#   blob  = the CURRENT artifact, re-pinned per this file's standing instruction. Previous value:
+#           4abd7975a382f8a125868e16357665d7e4e63fa5 (pinned 08-07 14:06, after STACK-LOADER). The program
+#           was legitimately edited from 08-07 to 08-28 while that pin stood, and Scrub reported it with
+#           continue-on-error. Re-pinned only because the born row now carries the birth binding.
+born	SaltWorks/Stack/Program.lean	b2bf183b7b04290a88479cca9859238f803ca383
+blob	SaltWorks/Stack/Program.lean	23bb06e7027ea5ade8b7a50a190b31d37d1ab234
 # ⚖️ 2026-09-11 — s2/README.md's sha256 was REGENERATED, deliberately and not silently.
 #   Its transcript row was amended to say the file is WITHHELD and why (desk row KB,
 #   the saltworks lead's call). This header's standing instruction is "Regenerate after
