@@ -55,7 +55,10 @@ lock_log() { # lock_log <EVENT> <key=value>...
   _line=$(printf '%s\t%s\tpid=%s\tseat=%s' \
           "$(date '+%Y-%m-%dT%H:%M:%S%z')" "$_ev" "$$" "${SB_SEAT:-unknown}")
   for _f in "$@"; do _line=$(printf '%s\t%s' "$_line" "$_f"); done
-  printf '%s\n' "$_line" >> "$LOCKLOG" 2>/dev/null || true
+  # ⛔ The group is load-bearing. Redirections apply left to right, so `>> "$LOCKLOG" 2>/dev/null` reports a
+  #   failed OPEN on the stderr it had before `2>/dev/null` took effect. Seen in a sandbox that denies the log:
+  #   two "Operation not permitted" lines per build from an instrument that promises never to disturb one.
+  { printf '%s\n' "$_line" >> "$LOCKLOG"; } 2>/dev/null || true
   return 0
 }
 MAXWAIT="${SALTBUILD_MAXWAIT-5400}"
@@ -212,14 +215,31 @@ until mkdir "$LOCK" 2>/dev/null; do
   # the claim we exclusively own, and a directory that turns out LIVE is PUT BACK. That
   # restore is what defeats the objection to the atomic form in the evidence filing — the
   # naive version renames away a live lock and never gives it back.
+  # ⛔⛔ ROW LK, 2026-09-12 — A REFUSED CLAIM MUST NOT HOLD THE FLOCK. Measured: a bench cell's build
+  #   ran inside a sandbox that allowed $LOCK and $LOCK.flk but not $LOCK.reaping.*. Its previous
+  #   build had been killed after acquiring (no trap, so a dead pid stayed in the marker). The next
+  #   build took the flock, judged the holder dead, and had its rename REFUSED. This line used to read
+  #   `mv ... 2>/dev/null || return 1`, which is exactly what "the holder released it" returns, so it
+  #   slept and retried for the whole MAXWAIT while holding the flock. Every seat outside that sandbox
+  #   could have reaped the marker in under a second, and every one of them blocked in `flock -w`,
+  #   which prints nothing. The fleet lock was wedged ~60 min and no log saw it.
+  #   Driven: both wrapper versions reap a dead holder in <=1 s outside the sandbox and wedge inside it.
+  # ⇒ Return 2 when the rename is REFUSED and the marker is still there. The loop below then says so,
+  #   logs it, and exits 75, which RELEASES the flock. Waiting cannot help, because the only processes
+  #   able to reap are the ones this flock keeps out. A rename that fails because the marker is GONE
+  #   (its holder released it between our read and our rename) is not a refusal: return 1 and retry.
   claim_reap() {
-    local pid claim
+    local pid claim err
     pid="$(cat "$LOCK/pid" 2>/dev/null)"
     # A live holder is refused outright: we never move a live lock in the common case.
     if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then return 1; fi
     claim="$LOCK.reaping.$$"
     rm -rf "$claim" 2>/dev/null
-    mv "$LOCK" "$claim" 2>/dev/null || return 1
+    if ! err="$(mv "$LOCK" "$claim" 2>&1)"; then
+      [ -d "$LOCK" ] || return 1
+      REAP_REFUSED_PID="${pid:-none}"; REAP_REFUSED_ERR="$err"
+      return 2
+    fi
     pid="$(cat "$claim/pid" 2>/dev/null)"
     if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
       mv "$claim" "$LOCK" 2>/dev/null || rm -rf "$claim"
@@ -229,7 +249,15 @@ until mkdir "$LOCK" 2>/dev/null; do
     echo "saltbuild: reaped a marker whose holder (pid ${pid:-none}) is dead"
     return 0
   }
-  claim_reap && continue
+  claim_reap; _reap=$?
+  [ $_reap = 0 ] && continue
+  if [ $_reap = 2 ]; then
+    lock_log WAIT-ABORT stage=reap-refused "waited=$(( $(date +%s) - LOCK_T0 ))s" "holder=$REAP_REFUSED_PID"
+    echo "saltbuild: ⛔ the interop marker's holder (pid $REAP_REFUSED_PID) is DEAD, and this process may not remove its marker: ${REAP_REFUSED_ERR:-rename refused}"
+    echo "saltbuild:    (a sandbox that allows $LOCK but not $LOCK.reaping.* does this). Releasing the fleet lock so a build that CAN reap takes it."
+    echo "saltbuild EXIT=75 (REAP REFUSED on a dead holder's marker: the build NEVER STARTED - any saltbuild run outside this sandbox reaps it; then RETRY the same command)"
+    exit 75
+  fi
   if [ $WAITED -ge $MAXWAIT ]; then
     lock_log WAIT-ABORT stage=marker "waited=$(( $(date +%s) - LOCK_T0 ))s" \
       "holder=$(cat "$LOCK/pid" 2>/dev/null || echo '?')"
