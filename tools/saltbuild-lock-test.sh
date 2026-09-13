@@ -202,6 +202,43 @@ GRUN gnext 0; GNEXT=$!; wait "$GNEXT"
   || no "G4  rc=$grc marker=$lk_left tickets=$tk_left next=[$(field ACQUIRED waited)]"
 rm -rf "$LK" "$LK".tkt.*
 
+echo "== H — ROW LK (A): ONE RUN CLONE, AND THE SEAT IS STILL THE ONE THAT INVOKED IT =="
+# ⛔ Every seat's ../saltbuild.sh now links into ONE run clone outside seats/, so the RESOLVED path
+#   names no seat and the old derivation labelled every build `root`. The label that matters is the
+#   seat that TYPED the command, which only the INVOKING link still carries. A fixture fleet under $TD
+#   with SEAT and SELF unset; lake is the stub from G, so nothing builds and nothing leaves $TD.
+FT="$TD/fleet"; RC="$FT/.saltbuild-root/saltworks/tools"
+mkdir -p "$RC" "$FT/salt" "$FT/seats/hseat/proj" "$FT/seats/mseat/saltworks/tools" "$FT/seats/cross"
+cp "$SB" "$RC/saltbuild.sh"; cp "$(dirname "$SB")/saltqueue.sh" "$RC/saltqueue.sh" 2>/dev/null
+cp "$SB" "$FT/seats/mseat/saltworks/tools/saltbuild.sh"
+cp "$(dirname "$SB")/saltqueue.sh" "$FT/seats/mseat/saltworks/tools/saltqueue.sh" 2>/dev/null
+ln -s .saltbuild-root/saltworks/tools/saltbuild.sh "$FT/saltbuild.sh"
+ln -s ../../.saltbuild-root/saltworks/tools/saltbuild.sh "$FT/seats/hseat/saltbuild.sh"
+ln -s ../mseat/saltworks/tools/saltbuild.sh "$FT/seats/cross/saltbuild.sh"
+HRUN(){ # HRUN <cwd> <path as typed> [SEAT] — output in $TD/h.out
+  ( cd "$1" && env -u SEAT -u SELF ${3:+SEAT="$3"} HOME="$GH" BASH_ENV= STUB_SLEEP=0 SALTBUILD_LOCK="$LK" \
+      SALTBUILD_LOCKLOG="$LOG" SALTBUILD_MAXWAIT=10 bash "$2" H ) >"$TD/h.out" 2>&1
+  grep -F "	ACQUIRED	" "$LOG" 2>/dev/null | tail -1 | tr '\t' '\n' | grep '^seat=' | tail -1
+}
+rm -rf "$LK" "$LK".tkt.*; : > "$LOG"
+s=$(HRUN "$FT/seats/hseat/proj" ../saltbuild.sh)
+[ "$s" = seat=hseat ] && ok "H1  ⭐ ../saltbuild.sh through a seat link into the shared run clone logs the INVOKING seat" \
+  || no "H1  a seat link into the run clone logged [$s], not seat=hseat"
+grep -F -q "NOT FOUND" "$TD/h.out" && no "H1b the seat link did not find saltqueue.sh beside the run clone: $(grep -F -m1 'NOT FOUND' "$TD/h.out")" \
+  || ok "H1b ...and the queue is sourced from the RUN CLONE (no NOT FOUND line)"
+s=$(HRUN "$TD" "$FT/seats/hseat/saltbuild.sh")
+[ "$s" = seat=hseat ] && ok "H2  ...and the same by the link's ABSOLUTE path" || no "H2  absolute seat link logged [$s]"
+s=$(HRUN "$FT/salt" ../saltbuild.sh)
+[ "$s" = seat=root ] && ok "H3  CONTROL: the fleet-root link into the same clone is still seat=root" || no "H3  root link logged [$s]"
+s=$(HRUN "$FT/seats/mseat/saltworks" ./tools/saltbuild.sh)
+[ "$s" = seat=mseat ] && ok "H4  CONTROL: a seat clone's own copy, run directly and relatively, is still that seat" || no "H4  direct seat-clone run logged [$s]"
+s=$(HRUN "$FT/seats/cross" ./saltbuild.sh)
+[ "$s" = seat=cross ] && ok "H5  ⭐ a seat whose link points into ANOTHER seat's clone logs ITSELF, not the clone's owner" \
+  || no "H5  a cross-seat link logged [$s], not seat=cross (the label named whose clone, not who built)"
+s=$(HRUN "$FT/seats/hseat/proj" ../saltbuild.sh named)
+[ "$s" = seat=named ] && ok "H6  CONTROL: an explicit SEAT still wins over the invoking link" || no "H6  explicit SEAT logged [$s]"
+rm -rf "$LK" "$LK".tkt.*
+
 echo
 printf 'saltbuild-lock-test: %d/%d\n' "$pass" "$fail"
 [ "$fail" -eq 0 ]

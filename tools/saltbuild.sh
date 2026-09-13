@@ -114,6 +114,9 @@ esac
 #   branch below is a graceful no-op. The queue would have looked installed, passed every
 #   selftest, and done NOTHING in production on all five seats.
 SB_SELF="$0"
+# The INVOKING path, absolutised BEFORE the loop below resolves it away. Row LK (A): every seat's
+# ../saltbuild.sh links into one shared run clone, so only this path still says which seat typed it.
+SB_INVOKED="$(cd -P "$(dirname "$0")" 2>/dev/null && pwd)/$(basename "$0")"
 while [ -L "$SB_SELF" ]; do
   SB_DIR="$(cd -P "$(dirname "$SB_SELF")" && pwd)"
   SB_SELF="$(readlink "$SB_SELF")"
@@ -162,7 +165,18 @@ fi
 # same defect class as a marker-holder with no ticket: the census renders, and it is a LIE.
 # An explicit SEAT/SELF still wins; the path is the fallback, and "unknown" is now the last
 # resort rather than the default.
+# ⛔ ROW LK (A), 2026-09-13 — THE INVOKING LINK IS READ FIRST. Every seat's `seats/<seat>/saltbuild.sh`
+#   now links into ONE run clone outside seats/, so the resolved path below says `root` for every seat.
+#   Driven before this arm existed: a seat link into the run clone logged seat=root, and a link into
+#   ANOTHER seat's clone (h2c's shape until 09-12) logged the clone's owner, not the seat that built.
+#   The label is who typed the command; which clone ran it is the census's question, not this column's.
 SB_SEAT="${SEAT:-${SELF:-}}"
+if [ -z "$SB_SEAT" ]; then
+  case "${SB_INVOKED#*/seats/}" in
+    */*/*|"$SB_INVOKED") ;;
+    */saltbuild.sh) SB_SEAT="${SB_INVOKED#*/seats/}"; SB_SEAT="${SB_SEAT%%/*}" ;;
+  esac
+fi
 if [ -z "$SB_SEAT" ]; then
   case "$SB_SELF" in
     */seats/*/saltworks/tools/saltbuild.sh)
