@@ -107,6 +107,29 @@ printf '%s' "$o" | grep -F -q "SET BUT EMPTY" && [ "$rc" = 76 ] \
   || no "E1  empty lock path gave rc=$rc: $o"
 o=$( cd "$TD" && SALTBUILD_MAXWAIT=abc bash "$SB" 2>&1 ); rc=$?
 [ "$rc" = 76 ] && ok "E2  a non-numeric SALTBUILD_MAXWAIT is refused" || no "E2  rc=$rc"
+# E3/E4 — census D (D15), 2026-09-13: the LOG seam and the QUEUE's lock seam used `:-` / `:=`, the form this
+#   file's own E1 refuses for the lock. An empty SALTBUILD_LOCKLOG wrote the fixture's lines into the FLEET's
+#   contention log. ⛔ The arm runs the wrapper under sandbox-exec with writes to the real fleet log DENIED, so a
+#   subject that still falls back cannot contaminate the log it is being tested against; S-style, the log's
+#   size and mtime are compared before and after as well.
+FLEETLOG=/Users/jyh/projects/claude/.saltbuild-lock.log
+GH_E="$TD/ehome"; mkdir -p "$GH_E/.elan/bin"; printf '#!/bin/bash\nexit 0\n' > "$GH_E/.elan/bin/lake"; chmod +x "$GH_E/.elan/bin/lake"
+if command -v sandbox-exec >/dev/null 2>&1; then
+  fl_before=$(stat -f '%z %m' "$FLEETLOG" 2>/dev/null)
+  o=$( cd "$TD" && sandbox-exec -p "(version 1)(allow default)(deny file-write* (literal \"$FLEETLOG\"))" \
+         env HOME="$GH_E" BASH_ENV= SALTBUILD_LOCK="$LK" SALTBUILD_LOCKLOG= SALTBUILD_MAXWAIT=5 SEAT=e3 bash "$SB" 2>&1 ); rc=$?
+  fl_after=$(stat -f '%z %m' "$FLEETLOG" 2>/dev/null)
+  printf '%s' "$o" | grep -F -q "SALTBUILD_LOCKLOG is SET BUT EMPTY" && [ "$rc" = 76 ] \
+    && ok "E3  ⭐ an EMPTY SALTBUILD_LOCKLOG is REFUSED (76), not silently replaced by the FLEET's log" \
+    || no "E3  empty log path gave rc=$rc (want 76): $(printf '%s' "$o" | tail -1)"
+  [ "$fl_before" = "$fl_after" ] && ok "E3b ...and the fleet log is unchanged ($fl_after)" || no "E3b the FLEET LOG CHANGED: [$fl_before] -> [$fl_after]"
+else
+  no "E3  sandbox-exec is absent, so the arm cannot run without risking the fleet log; a control that cannot run has NOT passed"
+fi
+o=$( LOCK= ; . "$(dirname "$SB")/saltqueue.sh" 2>&1; echo "rc=$? LOCK=[$LOCK] GLOB=[${Q_TKT_GLOB:-}]" ); 
+printf '%s' "$o" | grep -F -q "rc=76 LOCK=[] GLOB=[]" \
+  && ok "E4  saltqueue.sh sourced with an EMPTY LOCK refuses (76) and points its tickets at nothing" \
+  || no "E4  saltqueue.sh with LOCK empty: $(printf '%s' "$o" | tail -1)"
 
 echo "== F — ROW LK: A BUILD THAT MAY NOT REAP A DEAD HOLDER MUST RELEASE THE FLOCK, NOT HOLD IT =="
 # ⛔ The row: a sandboxed build could not rename a dead holder's marker, looped for the whole MAXWAIT holding
@@ -237,6 +260,41 @@ s=$(HRUN "$FT/seats/cross" ./saltbuild.sh)
   || no "H5  a cross-seat link logged [$s], not seat=cross (the label named whose clone, not who built)"
 s=$(HRUN "$FT/seats/hseat/proj" ../saltbuild.sh named)
 [ "$s" = seat=named ] && ok "H6  CONTROL: an explicit SEAT still wins over the invoking link" || no "H6  explicit SEAT logged [$s]"
+rm -rf "$LK" "$LK".tkt.*
+
+echo "== I — A RECYCLED PID IS NOT A LIVE HOLDER (census D, D17, 2026-09-13) =="
+# ⛔ claim_reap judged the marker's holder by `kill -0` alone, and saltqueue.sh's own header says why that is wrong:
+#   it succeeds for ANY live process this user owns, so a dead holder whose pid was reused holds the marker until
+#   MAXWAIT (90 min) and then every build aborts. The holder now stamps its START TIME beside its pid, and a stamped
+#   marker is live only if both match. An UNSTAMPED marker (an older wrapper's) is still judged by kill -0 alone.
+sb_st(){ ps -o lstart= -p "$1" 2>/dev/null | tr -s ' ' | sed 's/^ *//;s/ *$//'; }
+sleep 60 & IL=$!; KEEP="$KEEP $IL"; sleep 0.3
+: > "$LOG"; rm -rf "$LK" "$LK".tkt.* "$LK".reaping.*; mkdir -p "$LK"; echo "$IL" > "$LK/pid"; echo "Thu Jan  1 00:00:00 1970" > "$LK/start"
+T0=$(date +%s)
+o=$( cd "$TD" && HOME="$GH" BASH_ENV= STUB_SLEEP=0 SALTBUILD_LOCK="$LK" SALTBUILD_LOCKLOG="$LOG" SALTBUILD_MAXWAIT=10 SEAT=irecyc bash "$SB" I 2>&1 ); rc=$?
+dt=$(( $(date +%s) - T0 ))
+printf '%s' "$o" | grep -F -q "reaped a marker whose holder (pid $IL)" && [ "$(ev ACQUIRED)" -ge 1 ] && [ "$dt" -lt 5 ] \
+  && ok "I1  ⭐ a marker whose pid is ALIVE but whose start time does not match is reaped at once (${dt}s)" \
+  || no "I1  a recycled-pid marker held the lock: rc=$rc after ${dt}s, ACQUIRED=$(ev ACQUIRED) :: $(printf '%s' "$o" | tail -1)"
+kill -0 "$IL" 2>/dev/null && ok "I1b ...and the unrelated live process was not touched" || no "I1b the live process died"
+: > "$LOG"; rm -rf "$LK" "$LK".tkt.*; mkdir -p "$LK"; echo "$IL" > "$LK/pid"; sb_st "$IL" > "$LK/start"
+( cd "$TD" && HOME="$GH" BASH_ENV= STUB_SLEEP=0 SALTBUILD_LOCK="$LK" SALTBUILD_LOCKLOG="$LOG" SALTBUILD_MAXWAIT=4 SEAT=itrue bash "$SB" I >/dev/null 2>&1 )
+grep -F "	WAIT-ABORT	" "$LOG" | grep -F -q "stage=marker" && [ "$(cat "$LK/pid" 2>/dev/null)" = "$IL" ] && [ -s "$LK/start" ] \
+  && ok "I2  CONTROL: the same live pid with its TRUE start time is a live holder: not reaped, abort stage=marker" \
+  || no "I2  a correctly stamped live holder: $(cut -f2,6 "$LOG" | tr '\n' '|') marker=[$(cat "$LK/pid" 2>/dev/null)]"
+: > "$LOG"; rm -rf "$LK" "$LK".tkt.*; mkdir -p "$LK"; echo "$IL" > "$LK/pid"
+( cd "$TD" && HOME="$GH" BASH_ENV= STUB_SLEEP=0 SALTBUILD_LOCK="$LK" SALTBUILD_LOCKLOG="$LOG" SALTBUILD_MAXWAIT=4 SEAT=iold bash "$SB" I >/dev/null 2>&1 )
+grep -F "	WAIT-ABORT	" "$LOG" | grep -F -q "stage=marker" && [ "$(cat "$LK/pid" 2>/dev/null)" = "$IL" ] \
+  && ok "I3  CONTROL: an UNSTAMPED marker (an older wrapper's) with a live pid is still never reaped" \
+  || no "I3  an unstamped live marker: $(cut -f2,6 "$LOG" | tr '\n' '|')"
+kill "$IL" 2>/dev/null; rm -rf "$LK" "$LK".tkt.*
+: > "$LOG"; : > "$BUILT"
+GRUN istamp 4; IS=$!; KEEP="$KEEP $IS"; gwait "$BUILT" "seat=istamp"
+hp=$(cat "$LK/pid" 2>/dev/null); hs=$(cat "$LK/start" 2>/dev/null); want=$(sb_st "$hp")
+wait "$IS" 2>/dev/null
+[ -n "$hp" ] && [ -n "$want" ] && [ "$hs" = "$want" ] \
+  && ok "I4  ⭐ a holder stamps its own start time beside its pid ([$hs])" \
+  || no "I4  holder pid=[$hp] start file=[$hs] ps says=[$want]"
 rm -rf "$LK" "$LK".tkt.*
 
 echo

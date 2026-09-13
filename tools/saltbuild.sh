@@ -43,7 +43,15 @@ AUDITLOG=/Users/jyh/projects/claude/.saltbuild-audit.log
 #   no lock of its own: ONE short line, opened O_APPEND, which the kernel appends
 #   atomically well under PIPE_BUF, so concurrent builders interleave lines and never
 #   characters.
-LOCKLOG="${SALTBUILD_LOCKLOG:-/Users/jyh/projects/claude/.saltbuild-lock.log}"
+# ⛔ `-`, NOT `:-`, AND AN EMPTY VALUE IS REFUSED — the LOCK seam's rule (above), which this line broke for 18
+#   days (census D, D15, 2026-09-13). With `:-`, a fixture whose log variable failed to expand wrote its lines
+#   into the FLEET's contention log, the one record this block exists to keep honest. Refusing is not "logging
+#   made fatal": an UNWRITABLE log is still silent (lock test D1); an EMPTY one is a caller whose override failed.
+LOCKLOG="${SALTBUILD_LOCKLOG-/Users/jyh/projects/claude/.saltbuild-lock.log}"
+if [ -z "$LOCKLOG" ]; then
+  echo "saltbuild EXIT=76 (SALTBUILD_LOCKLOG is SET BUT EMPTY — refusing rather than writing into the FLEET's lock log)" >&2
+  exit 76
+fi
 # ⛔ EVERY key=value IS ITS OWN TAB FIELD. The first cut joined the trailing pairs with
 #   spaces into ONE column, so a WAIT-ABORT line read `stage=marker waited=2s holder=91`
 #   as a single value and any TSV reader — including my own test's field extractor, which
@@ -231,6 +239,8 @@ fi
 # No deadlock: an old wrapper never waits on the flock, so it always makes progress and
 # always releases the directory; a new wrapper waits for the directory while holding the
 # flock, and other new wrappers wait on the flock behind it.
+# The start-time stamp, in saltqueue.sh's exact form (so the two layers agree on what "the same process" means).
+sb_starttime() { ps -o lstart= -p "$1" 2>/dev/null | tr -s ' ' | sed 's/^ *//;s/ *$//'; }
 WAITED=0
 until mkdir "$LOCK" 2>/dev/null; do
   # A directory left by a CRASHED holder must still be reapable, or one dead old wrapper
@@ -252,11 +262,28 @@ until mkdir "$LOCK" 2>/dev/null; do
   #   logs it, and exits 75, which RELEASES the flock. Waiting cannot help, because the only processes
   #   able to reap are the ones this flock keeps out. A rename that fails because the marker is GONE
   #   (its holder released it between our read and our rename) is not a refusal: return 1 and retry.
+  # ⛔ census D (D17), 2026-09-13 — LIVE MEANS PID *AND* START TIME. This read `kill -0 "$pid"` alone, which
+  #   saltqueue.sh's header (the recycled-pid amendment) already calls wrong: it succeeds for ANY live process
+  #   this user owns, so a dead holder whose pid was reused kept the marker until MAXWAIT and every build aborted.
+  #   Driven: a live pid with a wrong stamp waited 11 s to a 10 s MAXWAIT and aborted; now it is reaped at once.
+  #   A holder stamps `start` beside `pid`. A marker with NO stamp is an older wrapper's and keeps the kill -0
+  #   judgement (interop, as the flock/marker pair itself is). A stamp that cannot be compared (ps refused, as
+  #   inside the bench sandbox) judges DEAD, saltqueue's direction: the claim then meets the same sandbox and
+  #   exits 75, and outside a sandbox ps answers.
+  holder_live() { # holder_live <marker-dir>
+    local pid st_then st_now
+    pid="$(cat "$1/pid" 2>/dev/null)"
+    [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null || return 1
+    st_then="$(sed -n '1p' "$1/start" 2>/dev/null)"
+    [ -n "$st_then" ] || return 0
+    st_now="$(sb_starttime "$pid")"
+    [ "$st_then" = "$st_now" ]
+  }
   claim_reap() {
     local pid claim err
     pid="$(cat "$LOCK/pid" 2>/dev/null)"
     # A live holder is refused outright: we never move a live lock in the common case.
-    if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then return 1; fi
+    if holder_live "$LOCK"; then return 1; fi
     claim="$LOCK.reaping.$$"
     rm -rf "$claim" 2>/dev/null
     if ! err="$(mv "$LOCK" "$claim" 2>&1)"; then
@@ -265,7 +292,7 @@ until mkdir "$LOCK" 2>/dev/null; do
       return 2
     fi
     pid="$(cat "$claim/pid" 2>/dev/null)"
-    if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
+    if holder_live "$claim"; then
       mv "$claim" "$LOCK" 2>/dev/null || rm -rf "$claim"
       return 1
     fi
@@ -292,6 +319,8 @@ until mkdir "$LOCK" 2>/dev/null; do
   [ $((WAITED % 300)) -eq 0 ] && echo "saltbuild: waiting on the fleet lock (${WAITED}s)"
 done
 echo $$ > "$LOCK/pid"
+_sb_st="$(sb_starttime $$)"
+[ -n "$_sb_st" ] && { printf '%s\n' "$_sb_st" > "$LOCK/start"; } 2>/dev/null
 # ACQUIRED means BOTH mechanisms are held — the flock AND the interop marker. Logging it
 # after the flock alone would have named a moment at which another (old) wrapper could
 # still be building.
