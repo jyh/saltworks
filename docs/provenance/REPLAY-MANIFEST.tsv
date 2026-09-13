@@ -6,12 +6,12 @@
 #                                         we pinned?"   Pins the CURRENT artifact.
 #   REPLAY-MANIFEST.tsv         (this)  — "do the executor's logged tool calls
 #                                         still REPRODUCE the artifact as born?"
-#                                         Pins the BIRTH commit, forever.
+#                                         Pins the artifact AS BORN, by BLOB CONTENT.
 # Both are wanted. Neither subsumes the other: a file can be byte-identical to a
 # pin that was itself re-pinned after an edit, which is exactly the state S2
 # reached at 14:06 on 2026-08-07.
 #
-# bundle <TAB> target (absolute path AS THE EXECUTOR SAW IT) <TAB> git rev:path <TAB> source (optional)
+# bundle <TAB> target (absolute path AS THE EXECUTOR SAW IT) <TAB> git rev:path OR blob id <TAB> source (optional)
 #
 #   python3 docs/ledger-tools/provenance_replay.py --manifest docs/provenance/REPLAY-MANIFEST.tsv
 #
@@ -28,5 +28,31 @@
 # forever. Drift of HEAD away from birth is normal and is verify.sh's question,
 # not this one.
 #
-# S2 — the bitonic sort. Born bf2de34; bundle a5d2ef7 (the next commit).
-docs/provenance/s2/s2-executor-transcript.jsonl	/Users/jyh/projects/claude/saltworks/SaltWorks/Stack/Program.lean	bf2de34:SaltWorks/Stack/Program.lean	/Users/jyh/.claude/projects/-Users-jyh-projects-claude-salt/9a758ca5-4cb1-42a9-a375-6125180a6db8/subagents/agent-ac01cfad3d5259a4b.jsonl
+# ⛔⛔ RE-KEYED BY CONTENT, 2026-09-13 (desk row LP). THE PARAGRAPH ABOVE IS HISTORY, NOT THE LIVE PIN.
+#   This row's third column read `bf2de34:SaltWorks/Stack/Program.lean` until today. The 2026-08-16
+#   history purge REWROTE every sha, so `bf2de34` names no commit in public history, and a public
+#   clone answers `invalid object name` (exit 2) before the transcript is even opened. The pin was
+#   true when written and was orphaned, not wrong.
+#   It now names the BLOB `b2bf183b`: a hash of the file's bytes, which no rewrite of history can change.
+#   ⇒ Measured before re-keying, by a THIRD source: in two local object stores that predate the purge,
+#     `bf2de34:SaltWorks/Stack/Program.lean` resolves to exactly `b2bf183b7b04290a…`. In public
+#     history that blob is reachable from HEAD at the STACK-S2 commit, and this repository's own purge
+#     map (docs/ledger-tools/flip-sha-map-0816.tsv) names that commit `5d62022` as `bf2de34`'s successor.
+#     It is also the same blob
+#     `verify.sh`'s `born` row (MANIFEST.tsv) matches by content. The two manifests now name ONE birth.
+#   Driven with the private copy of the bundle (sha256 = WITHHELD.tsv's): the old row exits 2
+#   (unresolvable rev); the re-keyed row replays 2 mutations to 24,070 bytes and 515 lines and exits
+#   0 BOUND; the current pin `23bb06e7` in the same column exits 1 MISMATCH.
+#
+# ⛔⛔ A PUBLIC READER CAN NEVER RUN THIS REPLAY, AND THAT IS DECLARED HERE RATHER THAN DISCOVERED.
+#   The bundle is WITHHELD (see WITHHELD.tsv: it carries strings this repository's own Scrub CI
+#   refuses). In any public clone `provenance_replay.py --manifest` on this file exits 2,
+#   COULD NOT CHECK, and says the bundle is declared withheld. **Exit 2 is not a pass, and it is not
+#   a defect either: it is this hole, declared.** The replay is runnable ONLY by a holder of the
+#   private copy, who can first prove the copy is the same bytes via the sha256 in WITHHELD.tsv.
+#   What a public reader CAN run on this binding: `selftest.py` checks that every row here names an
+#   object reachable from HEAD (the check that would have caught the purge), and `verify.sh`'s
+#   `born` row checks the same blob by content.
+#
+# S2 — the bitonic sort. Born bf2de34 (pre-purge sha; blob b2bf183b); bundle a5d2ef7 (the next commit, also pre-purge).
+docs/provenance/s2/s2-executor-transcript.jsonl	/Users/jyh/projects/claude/saltworks/SaltWorks/Stack/Program.lean	b2bf183b7b04290a88479cca9859238f803ca383	/Users/jyh/.claude/projects/-Users-jyh-projects-claude-salt/9a758ca5-4cb1-42a9-a375-6125180a6db8/subagents/agent-ac01cfad3d5259a4b.jsonl
