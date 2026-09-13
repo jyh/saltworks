@@ -432,3 +432,30 @@ jobs:
           grep -q 'LOWEST-YIELD SHAPE' ctl.txt >/dev/null 2>&1 || true
           [ "$fail" = 0 ] && echo "shape control pattern UNCHANGED: base+burst+coprime+impatient CAUGHT, eager VOID (4 of 5, named not averaged)"
           exit $fail
+
+  tool-selftests:
+    name: the saltworks tool selftests run at all (census D, D10)
+    runs-on: ubuntu-latest
+    # ⛔ FOUR SHIPPED SELFTESTS HAD NEVER RUN IN CI — the D arm 2 census (2026-09-13) found 0 invoking
+    #   hits for each in .github, selftest.py and nightly.sh. This file's own ledger-tools job states why
+    #   that matters: a red selftest nobody runs is indistinguishable from a green one.
+    # ⭐ MEASURED ON THIS RUNNER BEFORE IT GATED (saltworks #41, draft): all four pass. The lock test's one
+    #   red in the first cut was E3, which refused to run without macOS sandbox-exec. E3 now also runs when
+    #   the fleet log's directory is absent, as it is here, so a fallback write cannot land. The pre-#40
+    #   wrapper was run here too, as a RED-FIRST control: 46/4 (E3 E4 I1 I4), the same four as on macOS.
+    #   The current wrapper is 50/0.
+    # Each suite is its own step, and every step runs whatever the one before it did, so a single run reports
+    #   all four. The job still fails if any one fails.
+    steps:
+      - uses: actions/checkout@v4
+      - name: scratch_twins --selftest
+        run: python3 scripts/scratch_twins.py --selftest
+      - name: env_probe --selftest
+        if: success() || failure()
+        run: sh tools/env_probe.sh --selftest
+      - name: saltqueue_selftest
+        if: success() || failure()
+        run: bash tools/saltqueue_selftest.sh
+      - name: saltbuild lock test (drives the REAL wrapper against a private lock and log)
+        if: success() || failure()
+        run: bash tools/saltbuild-lock-test.sh

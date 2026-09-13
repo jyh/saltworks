@@ -114,17 +114,31 @@ o=$( cd "$TD" && SALTBUILD_MAXWAIT=abc bash "$SB" 2>&1 ); rc=$?
 #   size and mtime are compared before and after as well.
 FLEETLOG=/Users/jyh/projects/claude/.saltbuild-lock.log
 GH_E="$TD/ehome"; mkdir -p "$GH_E/.elan/bin"; printf '#!/bin/bash\nexit 0\n' > "$GH_E/.elan/bin/lake"; chmod +x "$GH_E/.elan/bin/lake"
-if command -v sandbox-exec >/dev/null 2>&1; then
-  fl_before=$(stat -f '%z %m' "$FLEETLOG" 2>/dev/null)
-  o=$( cd "$TD" && sandbox-exec -p "(version 1)(allow default)(deny file-write* (literal \"$FLEETLOG\"))" \
-         env HOME="$GH_E" BASH_ENV= SALTBUILD_LOCK="$LK" SALTBUILD_LOCKLOG= SALTBUILD_MAXWAIT=5 SEAT=e3 bash "$SB" 2>&1 ); rc=$?
-  fl_after=$(stat -f '%z %m' "$FLEETLOG" 2>/dev/null)
+# ⛔ TWO WAYS TO RUN IT SAFELY, AND A THIRD STATE THAT REFUSES. On macOS, sandbox-exec denies the write. On a
+#   host where the fleet log's DIRECTORY does not exist (the CI runner), a fallback write cannot land anywhere,
+#   and E3b asserts the directory is still absent. Anywhere else the arm FAILS as could-not-run, never passes.
+#   Measured on ubuntu-latest (saltworks #41's first cut): sandbox-exec absent, and E3 was the ONLY red, 48/1.
+e3_run(){ # e3_run <prefix...> -> $o $rc
+  o=$( cd "$TD" && "$@" env HOME="$GH_E" BASH_ENV= SALTBUILD_LOCK="$LK" SALTBUILD_LOCKLOG= SALTBUILD_MAXWAIT=5 SEAT=e3 bash "$SB" 2>&1 ); rc=$?
+}
+e3_mode=""
+if command -v sandbox-exec >/dev/null 2>&1; then e3_mode=sandbox
+elif [ ! -d "$(dirname "$FLEETLOG")" ]; then e3_mode=nodir
+fi
+if [ -n "$e3_mode" ]; then
+  fl_before=$(ls -ln "$FLEETLOG" 2>/dev/null; ls -d "$(dirname "$FLEETLOG")" 2>/dev/null)
+  if [ "$e3_mode" = sandbox ]; then
+    e3_run sandbox-exec -p "(version 1)(allow default)(deny file-write* (literal \"$FLEETLOG\"))"
+  else
+    e3_run
+  fi
+  fl_after=$(ls -ln "$FLEETLOG" 2>/dev/null; ls -d "$(dirname "$FLEETLOG")" 2>/dev/null)
   printf '%s' "$o" | grep -F -q "SALTBUILD_LOCKLOG is SET BUT EMPTY" && [ "$rc" = 76 ] \
-    && ok "E3  ⭐ an EMPTY SALTBUILD_LOCKLOG is REFUSED (76), not silently replaced by the FLEET's log" \
-    || no "E3  empty log path gave rc=$rc (want 76): $(printf '%s' "$o" | tail -1)"
-  [ "$fl_before" = "$fl_after" ] && ok "E3b ...and the fleet log is unchanged ($fl_after)" || no "E3b the FLEET LOG CHANGED: [$fl_before] -> [$fl_after]"
+    && ok "E3  ⭐ an EMPTY SALTBUILD_LOCKLOG is REFUSED (76), not silently replaced by the FLEET's log [$e3_mode]" \
+    || no "E3  empty log path gave rc=$rc (want 76) [$e3_mode]: $(printf '%s' "$o" | tail -1)"
+  [ "$fl_before" = "$fl_after" ] && ok "E3b ...and the fleet log is unchanged [$e3_mode]" || no "E3b the FLEET LOG CHANGED: [$fl_before] -> [$fl_after]"
 else
-  no "E3  sandbox-exec is absent, so the arm cannot run without risking the fleet log; a control that cannot run has NOT passed"
+  no "E3  no sandbox-exec and the fleet log's directory exists: the arm cannot run without risking the fleet log; a control that cannot run has NOT passed"
 fi
 o=$( LOCK= ; . "$(dirname "$SB")/saltqueue.sh" 2>&1; echo "rc=$? LOCK=[$LOCK] GLOB=[${Q_TKT_GLOB:-}]" ); 
 printf '%s' "$o" | grep -F -q "rc=76 LOCK=[] GLOB=[]" \
