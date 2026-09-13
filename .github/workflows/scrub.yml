@@ -17,6 +17,18 @@ name: Scrub
 on:
   push:
   workflow_dispatch:
+  # ⛔ ADDED 2026-09-13 (row D arm 2, finding 4): this workflow runs `check_pr_descriptions.py --open`,
+  #   which enumerates the OPEN PRs AT RUN TIME, and until today it had no pull_request trigger. The run
+  #   fired by a branch's last push finishes before that branch's PR exists, so the PR is not in the
+  #   population while the green prints on the PR's own page. salt measured that twice in production
+  #   (PR #5 91 s early, PR #6 61 s early) and closed it on 2026-08-31 (salt 423c5e59). The census found
+  #   the doctrine there and not here, where the operation is identical.
+  # ⚠️ NOT OVERSOLD: a push to the BASE still fires no run for the PRs targeting it; the arm's
+  #   re-read-every-open-PR design covers that, which is why `push` STAYS.
+  #   The range blocks that read github.event.before are line-identical to salt's, which has run them
+  #   under pull_request since 08-31. The green arm is this change's own PR: its pull_request run
+  #   must carry itself in the population.
+  pull_request:
 
 permissions:
   contents: read
