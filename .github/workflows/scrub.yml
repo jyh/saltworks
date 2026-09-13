@@ -234,12 +234,37 @@ jobs:
           python-version: "3.12"
       - name: the ledger-tools suite
         run: python docs/ledger-tools/selftest.py
-      - name: the provenance bundle binds what it names, minus the declared withholding
-        # Reports only. See the note above: this script carries a pre-existing red
-        # that is not this job's to resolve, and a job that FAILS on a known red
-        # teaches everyone to ignore it -- which is how the suite above went unread.
+      - name: the provenance bundle binds what it names — KNOWN RED, registered as desk row LO
+        id: provenance
+        # ⚖️ A REGISTERED BLOCK, NOT A SILENCED STEP (helm ruling 2026-09-13, desk row D arm 2):
+        #   a KNOWN red may be neutralised ONLY if the step names its row, its release condition and
+        #   its re-measure date, AND emits an annotation. Until today this step carried
+        #   continue-on-error with none of those, so the job printed green and only a reader who
+        #   opened the log saw the red -- the green that names its own scope.
+        #   ROW      desk LO (owner: the saltworks lead)
+        #   RED      the blob row pins the LIVING Program.lean to its 2026-08-07 birth hash
+        #   RELEASE  the blob row is reframed from EQUALITY to REACHABILITY (the birth blob is in the
+        #            file's history), driven red-first; then continue-on-error is DELETED
+        #   DUE      re-measure 2026-09-20 (LO_DUE below; the annotation says OVERDUE after it)
+        #   Re-pointing the manifest to the new hash is REFUSED: it would destroy the birth binding.
         continue-on-error: true
         run: bash docs/provenance/verify.sh
+      - name: the registered red is announced, never read as green (desk row LO)
+        if: ${{ !cancelled() }}
+        env:
+          OUTCOME: ${{ steps.provenance.outcome }}
+          LO_DUE: "2026-09-20"
+        run: |
+          late=""; [ "$(date -u +%F)" \> "$LO_DUE" ] && late="OVERDUE since $LO_DUE -- "
+          case "$OUTCOME" in
+            failure)
+              echo "::warning title=KNOWN RED (desk row LO)::${late}docs/provenance/verify.sh is red on its blob row. Neutralised as a REGISTERED block: release = the blob row reframed from equality to reachability; re-measure due $LO_DUE. This job's green does NOT cover it." ;;
+            success)
+              echo "::notice title=REGISTERED RED CLEARED (desk row LO)::verify.sh is green. Release the block: delete continue-on-error on the step above and close row LO." ;;
+            *)
+              echo "::error title=provenance step did not run (desk row LO)::outcome=$OUTCOME -- a registered red that did not run is not a report"
+              exit 1 ;;
+          esac
 
   pr-descriptions:
     name: no private-record path in PR titles/bodies (the forge-side prose)
