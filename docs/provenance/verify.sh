@@ -4,7 +4,11 @@
 # "The artifact ships with its birth record" was prose. This makes it a re-runnable
 # check. It asserts that the provenance bundle binds WHAT IT NAMES:
 #
-#   (1) the program blob is the one the bundle was written about;
+#   (1) the program blob matches the pin recorded in MANIFEST.tsv -- the CURRENT artifact,
+#       re-pinned (with its reason and old value) whenever the program is legitimately
+#       edited. It is NOT the blob the bundle was written about; that is (0).
+#   (0) the program AS BORN -- the blob the bundle was written about -- is still present in
+#       the program's history reachable from HEAD, matched by BLOB CONTENT;
 #   (2) every bundle file is byte-identical to what was recorded;
 #   (3) the emitted-word file contains exactly as many words as the program has
 #       instructions -- the count is DERIVED from the module's own length theorems
@@ -35,6 +39,28 @@ while IFS=$'\t' read -r kind path expected; do
             else note FAIL "blob $path"; note "" "  expected $expected"
                  note "" "  got      $got"
                  note "" "  ⇒ the program changed; the bundle describes an older artifact."
+                 fail=1
+            fi ;;
+
+    born)   # (0) THE ARTIFACT AS BORN, BY CONTENT (desk row LO, 2026-09-13).
+            # ⛔ WHY CONTENT AND NOT A COMMIT SHA: the birth binding used to be
+            #   REPLAY-MANIFEST.tsv's rev, and the 2026-08-16 history purge REWROTE shas, so
+            #   that rev names no commit in public history (and the transcript it replays is
+            #   withheld). A blob id is a hash of the file's bytes; no rewrite of history can
+            #   change it. Measured when written: this blob is at the STACK-S2 commit.
+            # ⛔ A SHALLOW CLONE CANNOT SEE HISTORY, so it is a FAILURE here, never a pass --
+            #   "not found" and "could not look" are the same empty loop.
+            if [ "$(git rev-parse --is-shallow-repository 2>/dev/null)" != false ]; then
+              note FAIL "born $path -- COULD NOT CHECK: not a full-history git checkout"
+              fail=1; continue
+            fi
+            at=""
+            for c in $(git rev-list HEAD -- "$path" 2>/dev/null); do
+              if [ "$(git rev-parse "$c:$path" 2>/dev/null)" = "$expected" ]; then at=$c; break; fi
+            done
+            if [ -n "$at" ]; then note ok "born $path -- as-born blob present at $(git log -1 --format='%h %ad' --date=short "$at")"
+            else note FAIL "born $path"; note "" "  expected blob $expected somewhere in its history from HEAD"
+                 note "" "  ⇒ the artifact the bundle was written about is no longer in this repo's history."
                  fail=1
             fi ;;
 
