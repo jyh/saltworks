@@ -317,12 +317,14 @@ jobs:
       # configuration the proof is ever exercised in.
       - name: and in an ordinary environment
         run: sh .githooks/prove_pre_push.sh
-      - name: the hook is committed 100755, or it is INERT on macOS/Linux
+      - name: the hooks are committed 100755, or they are INERT on macOS/Linux
+        # census D #7 (2026-09-13): commit-msg was not in this loop, though it is the same kind of file.
+        #   jas mode-checks its commit-msg hook; salt and saltworks did not.
         # `core.filemode` is false on Windows, so a chmod there never reaches the
         # index: a hook authored on that platform is committed 100644, runs on
         # the box that wrote it, and does nothing at all for everyone else.
         run: |
-          for f in .githooks/pre-push .githooks/prove_pre_push.sh; do
+          for f in .githooks/pre-push .githooks/prove_pre_push.sh .githooks/commit-msg; do
             mode=$(git ls-files -s "$f" | awk '{print $1}')
             if [ "$mode" != "100755" ]; then
               echo "FAIL $f is ${mode:-<untracked>} -- fix: git update-index --chmod=+x $f"
