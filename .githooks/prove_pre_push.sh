@@ -8,8 +8,12 @@
 #   GREEN arms  -- a clean push must SUCCEED **and print its receipt**. A silent
 #                  success is not evidence: a hook that never ran passes too.
 #   RED arms    -- a private-record path in a commit MESSAGE, the same path in a
-#                  FILE the commit ADDS, and a session trailer in a message must
-#                  each be REFUSED, and the remote ref must NOT have moved.
+#                  FILE the commit ADDS, each of the FIVE trailer shapes in a
+#                  message, and a path and a URL each ADDED THEN REMOVED inside
+#                  one push must each be REFUSED, and the remote ref must NOT
+#                  have moved. The add-then-remove arms first show the net-diff
+#                  gate alone passing, so they test the population they name.
+#   FAIL CLOSED -- with the scanner missing, a clean push is refused.
 #   DELETE arm  -- deleting a ref pushes no objects and must be ALLOWED.
 #   MUTATION    -- the same refused push must SUCCEED with `--no-verify`. Without
 #     CONTROL      this arm, every red above is equally consistent with "the push
@@ -67,8 +71,27 @@ PYEOF
 
 PRIVATE_PATH=$(read_const "$PATHS_GATE" '_EMPLOYER[0] + "/notes/x.md"') || PRIVATE_PATH=
 TRAILER_KEY=$(read_const "$TRAILER_GATE" '_SESSION_KEY') || TRAILER_KEY=
+TRAILER_HOST=$(read_const "$TRAILER_GATE" '_HOST.replace(chr(92), "")') || TRAILER_HOST=
 [ -n "$PRIVATE_PATH" ] || { note "FAIL: could not read the private-path fixture out of the gate"; exit 2; }
 [ -n "$TRAILER_KEY" ]  || { note "FAIL: could not read the trailer key out of the gate"; exit 2; }
+[ -n "$TRAILER_HOST" ] || { note "FAIL: could not read the trailer host out of the gate"; exit 2; }
+SCAN="$HERE/gate_scan.py"
+[ -f "$SCAN" ] || { note "FAIL: no $SCAN"; exit 2; }
+
+# THE FIVE TRAILER SHAPES (census D #2). Each is assembled from the gate's own
+# constants, and each must be FORBIDDEN BY THE GATE before an arm may use it: a
+# shape the gate lets through would make its RED arm vacuous, not strict.
+LOWER_KEY=$(printf '%s' "$TRAILER_KEY" | tr 'A-Z' 'a-z')
+SHAPE_1="${TRAILER_KEY}: 0123456789abcdef"
+SHAPE_2="see https://${TRAILER_HOST}/code/session_0123456789abcdef"
+SHAPE_3="${LOWER_KEY}: 0123456789abcdef"
+SHAPE_4="${TRAILER_KEY} : 0123456789abcdef"
+SHAPE_5="https://${TRAILER_HOST}/chat/0123456789abcdef"
+for i in 1 2 3 4 5; do
+  eval "shape=\$SHAPE_$i"
+  n=$(MSG="$shape" read_const "$TRAILER_GATE" 'len(scan([("m", __import__("os").environ["MSG"])]))') || n=
+  [ "$n" = "1" ] || { note "FAIL: trailer shape $i is not exactly one gate finding (got '${n}') -- its arm would prove nothing"; exit 2; }
+done
 
 # The fixture must actually be forbidden, or every RED arm below is vacuous.
 if "$PY" "$PATHS_GATE" --self-test >/dev/null 2>&1; then :; else
@@ -104,6 +127,8 @@ git -C "$W" remote add origin "$REMOTE"
 cp "$HOOK" "$W/.githooks/pre-push"
 chmod +x "$W/.githooks/pre-push"
 cp "$PATHS_GATE" "$W/scripts/check_private_paths.py"
+cp "$TRAILER_GATE" "$W/scripts/check_commit_trailers.py"
+cp "$SCAN" "$W/.githooks/gate_scan.py"
 git -C "$W" config core.hooksPath .githooks
 
 commit_file() { # <path> <content> <message>
@@ -139,6 +164,12 @@ expect_out() { # <label> <fixed string>
 }
 
 remote_tip() { git -C "$REMOTE" rev-parse --verify --quiet "refs/heads/$1" 2>/dev/null; }
+
+# A RED ARM THAT LEAKED MUST NOT DECIDE THE NEXT ONE. Measured on the unfixed hook
+# (2026-09-13): trailer shape 3 landed, so every later push to main was a
+# non-fast-forward, and git's OWN rejection (exit 1) scored as a hook refusal.
+# Each red arm therefore puts the remote back where it found it.
+restore_remote() { git -C "$REMOTE" update-ref refs/heads/main "$BEFORE_TIP"; }
 
 note "prove_pre_push: every arm states its expected exit BEFORE it runs"
 note "  sandbox: $SBX (never the repository under test)"
@@ -183,7 +214,7 @@ if [ "$(remote_tip main)" = "$BEFORE_TIP" ]; then
 else
   bad "red-message-path: THE REMOTE REF MOVED -- the refusal did not stop the objects"
 fi
-git -C "$W" reset -q --hard "$GOOD"
+git -C "$W" reset -q --hard "$GOOD"; restore_remote
 
 # ── ARM 5 ── the same path in a FILE the commit ADDS (the arm a message-only
 #             check is structurally blind to).
@@ -196,30 +227,34 @@ if [ "$(remote_tip main)" = "$BEFORE_TIP" ]; then
 else
   bad "red-file-path: THE REMOTE REF MOVED"
 fi
-git -C "$W" reset -q --hard "$GOOD"
+git -C "$W" reset -q --hard "$GOOD"; restore_remote
 
-# ── ARM 6 ── a session trailer in a commit message. Built from the gate's own
-#             key so it cannot drift, and committed --no-verify because the
-#             commit-msg hook is deliberately not installed in the sandbox.
-note "ARM 6  session trailer in a commit message                    expect 1"
-printf 'x\n' > "$W/t6.txt"
-git -C "$W" add -- t6.txt
-git -C "$W" commit -q --no-verify -F - <<EOF
-docs: a commit whose message carries the forbidden trailer
+# ── ARM 6 ── the FIVE trailer shapes in a commit message, one push each. v2 of
+#             this hook caught shapes 1 and 2 and passed 3, 4 and 5 (census D #2).
+#             Committed --no-verify because the commit-msg hook is deliberately
+#             not installed in the sandbox.
+for i in 1 2 3 4 5; do
+  eval "shape=\$SHAPE_$i"
+  note "ARM 6.$i trailer shape $i in a commit message                  expect 1"
+  printf 'x%s\n' "$i" > "$W/t6.txt"
+  git -C "$W" add -- t6.txt
+  git -C "$W" commit -q --no-verify -F - <<EOF
+docs: a commit whose message carries a forbidden shape
 
 Co-Authored-By: somebody <nobody@example.invalid>
-${TRAILER_KEY}: 0123456789abcdef
+${shape}
 EOF
-TRAILER_SHA=$(git -C "$W" rev-parse --short HEAD)
-run_push 1 red-session-trailer origin main
-expect_out red-session-trailer "session trailer/URL in its message"
-expect_out red-session-trailer "$TRAILER_SHA"
-if [ "$(remote_tip main)" = "$BEFORE_TIP" ]; then
-  printf '       +   red-session-trailer: the remote ref did NOT move\n'
-else
-  bad "red-session-trailer: THE REMOTE REF MOVED"
-fi
-git -C "$W" reset -q --hard "$GOOD"
+  TRAILER_SHA=$(git -C "$W" rev-parse HEAD | cut -c1-10)
+  run_push 1 "red-trailer-shape-$i" origin main
+  expect_out "red-trailer-shape-$i" "commit message(s) carry a shape the trailer gate forbids"
+  expect_out "red-trailer-shape-$i" "$TRAILER_SHA"
+  if [ "$(remote_tip main)" = "$BEFORE_TIP" ]; then
+    printf '       +   red-trailer-shape-%s: the remote ref did NOT move\n' "$i"
+  else
+    bad "red-trailer-shape-$i: THE REMOTE REF MOVED"
+  fi
+  git -C "$W" reset -q --hard "$GOOD"; restore_remote
+done
 
 # ── ARM 7 ── deleting a ref sends no objects and must be allowed.
 note "ARM 7  deleting a remote ref (local sha all zeros)            expect 0"
@@ -239,13 +274,69 @@ else
 fi
 git -C "$W" checkout -q main
 
+# ── ARM 9 ── ADD-THEN-REMOVE: a private path added by one commit and removed by
+#             the next. The net diff is empty, so `--range` cannot see it; both
+#             blobs are pushed. CONTROL FIRST: the --range gate alone must PASS on
+#             this range, or the arm is not testing the population it names.
+note "ARM 9  private path added, then removed, inside one push      expect 1"
+commit_file leak9.txt "the record is at $PRIVATE_PATH" "docs: add a note"
+ADDED_SHA=$(git -C "$W" rev-parse HEAD | cut -c1-10)
+git -C "$W" rm -q -- leak9.txt
+git -C "$W" commit -q --no-verify -m "docs: remove the note"
+if ( cd "$W" && "$PY" scripts/check_private_paths.py --range "$GOOD..HEAD" ) >/dev/null 2>&1; then
+  printf '       +   add-then-remove: CONTROL -- the --range gate alone passes this range\n'
+else
+  bad "add-then-remove: the --range gate alone already refuses this range, so the arm tests nothing new"
+fi
+run_push 1 red-add-then-remove origin main
+expect_out red-add-then-remove "INTRODUCED by a commit"
+expect_out red-add-then-remove "$ADDED_SHA leak9.txt"
+if [ "$(remote_tip main)" = "$BEFORE_TIP" ]; then
+  printf '       +   red-add-then-remove: the remote ref did NOT move\n'
+else
+  bad "red-add-then-remove: THE REMOTE REF MOVED"
+fi
+git -C "$W" reset -q --hard "$GOOD"; restore_remote
+
+# ── ARM 10 ── the same population for a session URL in a FILE line. CI's trailer
+#              gate scans the TIP's tracked files, which this range leaves clean.
+note "ARM 10 session URL added to a file, then removed              expect 1"
+commit_file leak10.txt "$SHAPE_2" "docs: add a link"
+ADDED_SHA=$(git -C "$W" rev-parse HEAD | cut -c1-10)
+git -C "$W" rm -q -- leak10.txt
+git -C "$W" commit -q --no-verify -m "docs: remove the link"
+if ( cd "$W" && "$PY" scripts/check_commit_trailers.py --range "$GOOD..HEAD" ) >/dev/null 2>&1; then
+  printf '       +   add-then-remove-url: CONTROL -- the trailer gate alone passes this range\n'
+else
+  bad "add-then-remove-url: the trailer gate alone already refuses this range, so the arm tests nothing new"
+fi
+run_push 1 red-add-then-remove-url origin main
+expect_out red-add-then-remove-url "$ADDED_SHA leak10.txt"
+if [ "$(remote_tip main)" = "$BEFORE_TIP" ]; then
+  printf '       +   red-add-then-remove-url: the remote ref did NOT move\n'
+else
+  bad "red-add-then-remove-url: THE REMOTE REF MOVED"
+fi
+git -C "$W" reset -q --hard "$GOOD"; restore_remote
+
+# ── ARM 11 ── FAIL CLOSED: with gate_scan.py absent the hook cannot read the
+#              gates' patterns, and a CLEAN push must be refused, not waved on.
+note "ARM 11 the scanner is missing: a clean push is refused        expect 1"
+mv "$W/.githooks/gate_scan.py" "$SBX/gate_scan.py.hidden"
+commit_file clean11.txt "nothing wrong with this line" "clean: nothing forbidden here"
+run_push 1 fail-closed-no-scanner origin main
+expect_out fail-closed-no-scanner "gate_scan.py is not in this working tree"
+mv "$SBX/gate_scan.py.hidden" "$W/.githooks/gate_scan.py"
+git -C "$W" reset -q --hard "$GOOD"; restore_remote
+
 note ""
 if [ "$fail" -eq 0 ]; then
   note "prove_pre_push: PASS -- 3 clean pushes each SUCCEED and print a receipt"
-  note "  naming the range; 3 distinct leak shapes (message path, added-line path,"
-  note "  session trailer) are each REFUSED with the remote ref unmoved; a delete"
-  note "  is allowed; and the mutation control lands the same commit with the hook"
-  note "  bypassed, so the refusals are attributable to the hook."
+  note "  naming the range; 9 leak shapes (message path, added-line path, the 5"
+  note "  trailer shapes, and a path and a URL each added then removed inside one"
+  note "  push) are each REFUSED with the remote ref unmoved; a missing scanner"
+  note "  refuses a clean push; a delete is allowed; and the mutation control lands"
+  note "  the same commit with the hook bypassed, so the refusals are the hook's."
   exit 0
 fi
 note "prove_pre_push: FAILED ($fail arm(s))"
