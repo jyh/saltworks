@@ -200,7 +200,8 @@ def self_id() -> str:
 # otherwise pass vacuously by excluding the one file that matters.
 # ---------------------------------------------------------------------------
 _SEAT = "se" + "at"                    # the commons/memory-mirror repo
-_EMPLOYER = ["lo" + "ca", "ho" + "ll", "pcc-" + "bios", "safe_" + "dav1d", "safe_" + "gif"]
+_EMPLOYER = ["lo" + "ca", "ho" + "ll", "pcc-" + "bios", "safe_" + "dav1d", "safe_" + "gif",
+             "anu" + "bis"]   # EMPLOYER lane, commissioned at council 2026-09-09
 # ⛔⛔ ROW IB — TWO PRIVATE TREES WERE UNWATCHED FOR TWO WEEKS AND THIS FILE SAID SO ON EVERY RUN.
 #   Measured 2026-09-08 by evidence WITH A POSITIVE CONTROL: one synthetic commit carrying four
 #   private roots, one line each. This gate CAUGHT the seat repo and an employer root (so the
@@ -222,9 +223,15 @@ _BUS = "FLEET" + r"\.md"
 #   AUTHORITY for this list; when a tree is born or turns private there, it belongs here.
 #   ⇒ EDIT ALL THREE OF THESE TOGETHER WITH THE ROOTS ABOVE. A reconcile that moves the list and
 #     not the date leaves the next reader trusting a stale stamp -- which is this row's own defect.
-ROOTS_RECONCILED = "2026-09-08"
+#   Reconciled 2026-09-13 (row D arm 2): this copy was the ONE of six gated public repos still
+#   missing the 09-09 employer root and the row JC dot guard, so a path into that tree passed every
+#   saltworks layer (driven: the old copy rc 0 on a planted path, this one rc 1). Census against the
+#   map AND the fleet root on disk: 12 private/employer trees, 11 in the lists above, `local` in its
+#   own shape below; bin/ is a symlink into the kit (watched); every other directory is a public
+#   repo or a worktree of one.
+ROOTS_RECONCILED = "2026-09-13"
 ROOTS_OWNER = "evidence (PM)"
-ROOTS_REMEASURE_DUE = "2026-10-08"
+ROOTS_REMEASURE_DUE = "2026-10-13"
 
 _ROOTS = [_SEAT] + _EMPLOYER + _PRIVATE_PROJ
 _ROOT_ALT = "|".join(_ROOTS)
@@ -299,7 +306,13 @@ _ROOTLESS_INTO = ("(?<![A-Za-z0-9_./" + _BS + _BS + "-])(?:"
 # returns the same verdict wherever it executes. A lane changes WHERE a gate
 # runs; only the pattern changes WHAT it can match.
 _SEP = r"[/\\]+"
-_INTO = rf"(?<![A-Za-z0-9_-])(?:{_ROOT_ALT}){_SEP}[A-Za-z0-9_.-]+"
+# ⛔ THE LEFT GUARD EXCLUDES A PRECEDING DOT (2026-09-09, row JC). `_ROOTLESS_INTO` has
+# carried "." in its lookbehind since it was written; this pattern did not, so a DOT-PREFIXED
+# directory whose name is a root matched the root itself. Measured on a live branch: 27
+# findings, 23 of them a cell-local scratch dir. ⇒ A GUARD THAT REFUSES FOR A WRONG REASON IS
+# HOW A GUARD GETS BYPASSED. "/" is deliberately NOT added: an absolute path carries a slash
+# immediately before the root and MUST still be caught.
+_INTO = rf"(?<![A-Za-z0-9_.-])(?:{_ROOT_ALT}){_SEP}[A-Za-z0-9_.-]+"
 
 FORBIDDEN = [
     (re.compile(_INTO),
