@@ -701,6 +701,29 @@ with tempfile.TemporaryDirectory() as _tmp:
         except pr.Unreadable:
             check(True, "")
 
+    # ⛔ desk row LP: a missing bundle that is DECLARED WITHHELD still refuses (exit 2), and its
+    #   refusal must SAY it is declared, or a public reader cannot tell this hole from an
+    #   undeclared one. An undeclared missing bundle must not borrow that wording.
+    _decl_b = os.path.join(_tmp, "declared.jsonl")
+    _decl_w = os.path.join(_tmp, "WITHHELD.tsv")
+    with open(_decl_w, "w", encoding="utf-8") as _fh:
+        _fh.write("# kind\tpath\tsha256\treason\tdeclared\n")
+        _fh.write("sha256\t" + os.path.relpath(_decl_b, pr.REPO) + "\t" + "a" * 64
+                  + "\ta reason long enough to be a reason, for the fixture\t2026-09-13\n")
+    _saved_w = getattr(pr, "WITHHELD", None)
+    pr.WITHHELD = _decl_w
+    try:
+        for _arg, _want in ((_decl_b, True), (_tmp + "/undeclared.jsonl", False)):
+            try:
+                pr.read_ops(_arg, _T)
+                check(False, f"REPLAY: missing bundle {_arg} did not refuse")
+            except pr.Unreadable as _ex:
+                check(("DECLARED WITHHELD" in str(_ex)) == _want,
+                      f"REPLAY: missing bundle {os.path.basename(_arg)} "
+                      f"{'did not say' if _want else 'wrongly said'} it is declared withheld: {_ex}")
+    finally:
+        pr.WITHHELD = _saved_w
+
 # integration: the real S2 manifest must still bind. A red here is a FINDING
 # (the artifact drifted from its birth record), not a broken test.
 _man = os.path.join(os.path.dirname(os.path.abspath(__file__)),
@@ -765,6 +788,38 @@ if os.path.exists(_man):
         check(not os.path.exists(os.path.join(pr.REPO, _wp)),
               f"WITHHELD: {_wp} is declared withheld but the file is PRESENT — "
               "one of the two is stale")
+
+    # ⛔ desk row LP: EVERY ROW MUST NAME AN OBJECT REACHABLE FROM HEAD. This is the one part of a
+    #   withheld row a public clone CAN check, and it is the check that was missing: the S2 row named
+    #   `bf2de34:…` for four weeks after the 08-16 purge had orphaned that sha, and nothing noticed,
+    #   because the bundle was absent and the WITHHELD branch below skips everything else.
+    #   A rev:path must resolve and its rev must be an ancestor of HEAD; a bare blob id must appear
+    #   in HEAD's object walk. A SHALLOW clone cannot answer, and that is a failure, never a pass
+    #   (verify.sh's `born` row takes the same position).
+    import subprocess as _sp
+
+    def _git(*args):
+        return _sp.run(["git", "-C", pr.REPO, *args], capture_output=True, text=True)
+
+    _shallow = _git("rev-parse", "--is-shallow-repository").stdout.strip()
+    _objects = None
+    for _r in _rows:
+        if len(_r) < 3:
+            continue
+        _ag = _r[2]
+        if _shallow != "false":
+            check(False, f"MANIFEST: {_ag} -- COULD NOT CHECK reachability: not a full-history "
+                         f"checkout (is-shallow={_shallow or '?'})")
+            continue
+        if ":" in _ag:
+            _ok = (_git("cat-file", "-e", _ag).returncode == 0
+                   and _git("merge-base", "--is-ancestor", _ag.split(":", 1)[0], "HEAD").returncode == 0)
+        else:
+            if _objects is None:
+                _objects = {l.split(" ", 1)[0] for l in _git("rev-list", "--objects", "HEAD").stdout.splitlines()}
+            _ok = _ag in _objects
+        check(_ok, f"MANIFEST: {_r[0]} names {_ag}, which is NOT reachable from HEAD -- the birth "
+                   "binding is orphaned (re-key it by blob content; see REPLAY-MANIFEST.tsv)")
 
     for _r in _rows:
         _b = os.path.join(pr.REPO, _r[0])

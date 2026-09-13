@@ -53,10 +53,15 @@ FROZEN artifact and WRONG for a LIVE MODULE.
 A gate that reds on expected behaviour is a gate someone switches off, and that
 failure mode loses BOTH checks.
 
+⛔ AND THE BIRTH COMMIT ITSELF WAS ORPHANED (desk row LP, 2026-09-13). The 08-16 history
+purge rewrote every sha, so `bf2de34` names no public commit. `--against` therefore also
+takes a BLOB ID, the hash of the bytes, which no history rewrite can change, and the S2 row
+is re-keyed to the blob that `bf2de34` held. See REPLAY-MANIFEST.tsv's header for the measurement.
+
     python3 docs/ledger-tools/provenance_replay.py \
         --bundle docs/provenance/s2/s2-executor-transcript.jsonl \
         --target /Users/jyh/projects/claude/saltworks/SaltWorks/Stack/Program.lean \
-        --against bf2de34:SaltWorks/Stack/Program.lean
+        --against b2bf183b7b04290a88479cca9859238f803ca383
 
     python3 docs/ledger-tools/provenance_replay.py --manifest docs/provenance/REPLAY-MANIFEST.tsv
 
@@ -64,6 +69,12 @@ EXIT: 0 replay reproduces the blob · 1 MISMATCH (drift, or never bound) ·
 2 could not read/replay -- following `import-closure.py`'s three-way exit
 for the reason that tool learned the hard way: a green from something that
 read nothing is worse than a red.
+
+⛔ IN A PUBLIC CLONE THE S2 ROW ALWAYS EXITS 2, BY DECLARATION. Its bundle is listed in
+`docs/provenance/WITHHELD.tsv`, and a missing bundle that is declared there is REPORTED AS
+DECLARED, with its sha256 and a pointer to the declaration. It still exits 2: a declared hole
+is not a pass, but the reader must be able to tell it from an undeclared one without leaving
+the terminal.
 """
 from __future__ import annotations
 
@@ -94,6 +105,28 @@ def git_blob(rev_path: str) -> bytes:
     return p.stdout
 
 
+WITHHELD = os.path.join(REPO, "docs", "provenance", "WITHHELD.tsv")
+
+
+def withheld_declaration(bundle: str):
+    """(sha256, declared) if `bundle` is declared in WITHHELD.tsv, else None.
+
+    Keyed by the path relative to the repo, which is how WITHHELD.tsv names it. A malformed
+    row declares nothing here: selftest.py is where a malformed declaration FAILS.
+    """
+    rel = os.path.relpath(os.path.abspath(bundle), REPO)
+    if not os.path.exists(WITHHELD):
+        return None
+    with open(WITHHELD, encoding="utf-8") as fh:
+        for line in fh:
+            if not line.strip() or line.lstrip().startswith("#"):
+                continue
+            f = line.rstrip("\n").split("\t")
+            if len(f) >= 5 and f[1] == rel:
+                return f[2], f[4]
+    return None
+
+
 def read_ops(bundle: str, target: str):
     """Every Write/Edit tool call in the transcript aimed at `target`, in order.
 
@@ -102,6 +135,12 @@ def read_ops(bundle: str, target: str):
     a hole silently drops an edit that would have changed the answer.
     """
     if not os.path.exists(bundle):
+        decl = withheld_declaration(bundle)
+        if decl:
+            raise Unreadable(
+                f"no such bundle: {bundle} -- DECLARED WITHHELD in docs/provenance/WITHHELD.tsv "
+                f"(sha256 {decl[0]}, declared {decl[1]}). This replay runs only against the "
+                "private copy; every public clone reads exit 2 here, by declaration.")
         raise Unreadable(f"no such bundle: {bundle}")
     ops, seen_any, bad = [], False, 0
     with open(bundle, encoding="utf-8", errors="strict") as fh:
@@ -224,7 +263,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--bundle", help="the transcript .jsonl")
     ap.add_argument("--target", help="absolute file path AS THE EXECUTOR SAW IT")
-    ap.add_argument("--against", help="git rev:path to compare against")
+    ap.add_argument("--against", help="git rev:path, or a blob id, to compare against")
     ap.add_argument("--source", help="the machine-local original, to verify the copy")
     ap.add_argument("--manifest", help="TSV: bundle<TAB>target<TAB>against[<TAB>source]; "
                                        "'#' comments. Checks every row, worst exit wins.")
