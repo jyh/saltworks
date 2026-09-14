@@ -28,6 +28,15 @@ closes both doors. (The event payload is deliberately never read: a
 schedule-triggered run has none, and a guard scoped wider than its event set
 fails open — measured in this fleet, 08/30.)
 
+THE SESSION ARM (desk MC, 2026-09-14): a chat-session URL reached a public
+PR body and every arm here was green, because this gate read private-record
+PATHS and nothing else. The harness that opens PRs instructs every description
+to END with its session URL, so every seat that opens a PR meets this. The
+commit-trailer gate already owned the session shapes for commit messages; the
+same list now reads PR titles and bodies, and a finding names the PR and the
+surface but NEVER echoes the matched text, because a CI log on a public repo is
+public too.
+
 SHAPES: imported from the sibling gate, never re-typed. A fixture is a
 snapshot of a vocabulary; a copied pattern list is a stale fixture the day
 the sibling moves. One list, one owner, two readers.
@@ -45,6 +54,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import check_private_paths as gate  # noqa: E402  (the pattern owner)
+import check_commit_trailers as trailers  # noqa: E402  (the session-shape owner)
 
 
 def self_id() -> str:
@@ -60,6 +70,20 @@ def scan_description(number, title: str, body: str):
     rows = [(f"PR #{number} TITLE", title or ""),
             (f"PR #{number} BODY", body or "")]
     return gate.scan(rows)
+
+
+def scan_session(number, title: str, body: str):
+    """Chat-session trailers and URLs in one PR's forge-side prose, via the
+    commit-trailer gate's FORBIDDEN list (desk MC). Imported, never re-typed."""
+    rows = [(f"PR #{number} TITLE", title or ""),
+            (f"PR #{number} BODY", body or "")]
+    return trailers.scan(rows)
+
+
+def session_finding_lines(rows) -> list[str]:
+    """Name the PR, the surface and the shape, NEVER the matched text: echoing
+    a session URL into a public CI log would republish it."""
+    return [f"  {where}: {what}" for where, what, _line in rows]
 
 
 def ref_vs_run(head_sha: str, run_sha, run_green, behind_by) -> str:
@@ -99,10 +123,12 @@ def open_mode(repo: str) -> int:
               "      An unreadable forge is not a clean forge.")
         return 1
     bad = []
+    sess = []
     notes = []
     for pr in prs:
         n = pr["number"]
         bad += scan_description(n, pr.get("title"), pr.get("body"))
+        sess += scan_session(n, pr.get("title"), pr.get("body"))
         head = pr["head"]["sha"]
         base_ref = pr["base"]["ref"]
         run_sha = run_green = None
@@ -128,9 +154,17 @@ def open_mode(repo: str) -> int:
         print("\n".join(gate.finding_lines(bad)))
         print("\nA PR description is EDITABLE: rewrite the reference as a ROLE or a")
         print("bare filename directly on the forge. No push required.")
+    if sess:
+        print(f"FAIL [pr-gate {self_id()}]: {len(sess)} chat-session trailer/URL "
+              f"finding(s) in OPEN PR descriptions (matched text withheld: this log "
+              f"is public).\n")
+        print("\n".join(session_finding_lines(sess)))
+        print("\nThe PR-opening harness appends a session URL; this repository is")
+        print("public. Delete that line on the forge. No push required.")
+    if bad or sess:
         return 1
     print(f"check_pr_descriptions --open [pr-gate {self_id()}]: OK — {len(prs)} open "
-          f"PR(s), 0 private-record paths in titles/bodies.")
+          f"PR(s), 0 private-record paths and 0 session trailers/URLs in titles/bodies.")
     if notes:
         print("REF-vs-RUN (which object each verdict is about; never status alone):")
         print("\n".join(notes))
@@ -170,12 +204,34 @@ def self_test() -> int:
     if not any("rootless" in w for _, w, _ in
                scan_description(3, "", "in " + "bri" + "efs" + "/x.md")):
         failures.append("the sibling's newest shape must reach this arm via the import")
+    # ARM 5 — desk MC: a chat-session URL or trailer in forge-side prose is
+    # caught in TITLE and BODY, the finding names its PR and surface, the matched
+    # text is never echoed, and the attribution the scrub KEPT still passes.
+    # Assembled from parts so this file's own source never matches the shapes.
+    url = "https://" + "claude" + ".ai" + "/code/" + "session_" + "PLANTED0000"
+    key = "Claude" + "-Session"
+    if not scan_session(5, "", "Summary\n\n" + url + "\n"):
+        failures.append("a planted session URL in a BODY must be caught")
+    if not scan_session(5, "see " + url, ""):
+        failures.append("a planted session URL in a TITLE must be caught")
+    if not scan_session(5, "", "Summary\n\n" + key + ": abc\n"):
+        failures.append("a planted session trailer in a BODY must be caught")
+    got = scan_session(8, "", "x\n" + url)
+    if not got or "PR #8 BODY" not in got[0][0]:
+        failures.append("a session finding must name its PR number and surface")
+    if any("PLANTED0000" in l for l in session_finding_lines(got)):
+        failures.append("a session finding must NEVER echo the matched text")
+    kept = ("Co-Authored-By: Claude <noreply@anthropic.com>\n\nGenerated with "
+            "[Claude Code](https://" + "claude" + ".com/claude-code)")
+    if scan_session(6, "", kept) or scan_session(6, None, None):
+        failures.append("Co-Authored-By, the product link and a null body must pass")
     for f in failures:
         print(f"SELF-TEST FAIL: {f}")
     if failures:
         return 1
     print(f"check_pr_descriptions SELF-TEST [pr-gate {self_id()}] over "
           f"[gate {gate.self_id()}]: OK (title+body arms both directions; "
+          f"session arm both surfaces, never echoed; "
           f"ref_vs_run all five branches; sibling vocabulary reached via import)")
     return 0
 
