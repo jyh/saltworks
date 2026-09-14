@@ -55,6 +55,7 @@ WHAT THIS DELIBERATELY DOES NOT DO
 from __future__ import annotations
 
 import argparse
+import hashlib
 import re
 import pathlib
 import subprocess
@@ -139,7 +140,7 @@ def tracked_files() -> list[tuple[str, str]]:
             continue
         rows.append((rel, text))
     if missing:
-        print(f"FAIL: {len(missing)} tracked file(s) listed by git but absent under "
+        print(f"FAIL [gate {self_id()}]: {len(missing)} tracked file(s) listed by git but absent under "
               f"{ROOT}: {missing[:3]}{' ...' if len(missing) > 3 else ''}. The file list "
               "and the tree being scanned are not the same repository.")
         raise SystemExit(1)
@@ -157,6 +158,17 @@ def scan(rows: list[tuple[str, str]]) -> list[tuple[str, str, str]]:
                             m.group(0))
                 bad.append((sha, what, line.strip()))
     return bad
+
+
+def self_id() -> str:
+    """This file's own content hash, printed in every verdict (desk ML, row D
+    census #10). The sibling gates name the bytes that printed each verdict;
+    this one did not, so a CI log could not say WHICH copy of it ran."""
+    try:
+        return hashlib.sha256(
+            pathlib.Path(__file__).read_bytes()).hexdigest()[:16]
+    except OSError:
+        return "unreadable"
 
 
 def self_test() -> int:
@@ -227,11 +239,16 @@ def self_test() -> int:
     if any(rel == foreign for rel, _ in from_foreign):
         failures.append("a foreign repo's file list leaked into the scan")
 
+    # THE SELF-ID. A verdict that does not name its instrument cannot be tied
+    # to a copy; the id must be a real content hash, never the fallback.
+    if not re.fullmatch(r"[0-9a-f]{16}", self_id()):
+        failures.append("self_id() must be this file's 16-hex content hash")
+
     for f in failures:
         print(f"SELF-TEST FAIL: {f}")
     if failures:
         return 1
-    print("check_commit_trailers SELF-TEST: OK "
+    print(f"check_commit_trailers SELF-TEST [gate {self_id()}]: OK "
           "(empty scan fatal proven FIRST, both forbidden shapes caught, "
           f"{PRESERVED} preserved, self-describing message safe, cwd-independent)")
     return 0
@@ -267,7 +284,7 @@ def main() -> int:
         return self_test()
 
     if is_shallow():
-        print("FAIL: this is a SHALLOW clone, so history is not all here and a "
+        print(f"FAIL [gate {self_id()}]: this is a SHALLOW clone, so history is not all here and a "
               "clean result would be meaningless.\n"
               "      A history gate on a one-commit checkout scans one commit "
               "and reports success.\n"
@@ -277,18 +294,18 @@ def main() -> int:
     try:
         rows = commit_messages(args.range)
     except subprocess.CalledProcessError as e:
-        print(f"FAIL: could not read history for '{args.range}': {e}")
+        print(f"FAIL [gate {self_id()}]: could not read history for '{args.range}': {e}")
         return 1
 
     # FAIL CLOSED: nothing scanned is not the same as nothing wrong.
     if _is_empty_scan_fatal(rows):
-        print(f"FAIL: scanned ZERO commits for '{args.range}'. An empty scan is "
+        print(f"FAIL [gate {self_id()}]: scanned ZERO commits for '{args.range}'. An empty scan is "
               f"not a clean scan — this gate refuses to report success on it.")
         return 1
 
     bad = scan(rows)
     if bad:
-        print(f"FAIL: {len(bad)} commit message(s) carry a forbidden trailer.\n")
+        print(f"FAIL [gate {self_id()}]: {len(bad)} commit message(s) carry a forbidden trailer.\n")
         print("This repository's public history was rewritten on 2026-07-22 to")
         print("remove exactly this. A commit that reaches a published branch")
         print("cannot be edited without breaking every clone, so this must be")
@@ -309,12 +326,12 @@ def main() -> int:
     # test data, and caught it BY EYE.
     files = tracked_files()
     if not files:
-        print("FAIL: scanned ZERO tracked files. An empty scan is a failure, "
+        print(f"FAIL [gate {self_id()}]: scanned ZERO tracked files. An empty scan is a failure, "
               "not a pass — the ls-files call or the decode filter has drifted.")
         return 1
     bad_files = scan(files)
     if bad_files:
-        print(f"FAIL: {len(bad_files)} tracked file(s) carry a forbidden string.\n")
+        print(f"FAIL [gate {self_id()}]: {len(bad_files)} tracked file(s) carry a forbidden string.\n")
         print("Unlike a commit message this is trivially fixable — edit the file")
         print("— but only BEFORE it is pushed. This repository is public.\n")
         for path, what, line in bad_files:
@@ -322,7 +339,7 @@ def main() -> int:
             print(f"      {line[:100]}")
         return 1
 
-    print(f"check_commit_trailers: OK ({len(rows)} commit messages and "
+    print(f"check_commit_trailers [gate {self_id()}]: OK ({len(rows)} commit messages and "
           f"{len(files)} tracked files scanned, 0 forbidden strings; "
           f"{PRESERVED} attribution untouched)")
     return 0
