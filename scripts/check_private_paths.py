@@ -236,6 +236,31 @@ ROOTS_REMEASURE_DUE = "2026-10-13"
 _ROOTS = [_SEAT] + _EMPLOYER + _PRIVATE_PROJ
 _ROOT_ALT = "|".join(_ROOTS)
 
+# ⛔⛔ ROW MK, 2026-09-14 — THE STAMP IS A CACHE OF A MEASUREMENT AND IT DRIFTED WHILE THE THING IT
+#   CACHES DID NOT MOVE AT ALL. Measured at origin across all six gated public repos: the ROOT SETS
+#   were IDENTICAL -- set-digest 603bc87c77, n=11, every repo -- and only the hand-typed date
+#   differed: salt, x86lean, jas and tt-neural-dataflow-fabric at 2026-09-08, saltworks at
+#   2026-09-13, and saltbench with NO STAMP CONSTANTS AT ALL -- its date inline in the disclosure
+#   at 2026-09-09, with no owner and no re-measure date. The row that minted this read the STAMP
+#   LINE and inferred the lists had diverged; they had not.
+#   ⛔ AN EARLIER DRAFT OF THIS VERY COMMENT SAID saltbench CARRIED "no stamp at all". Measured:
+#     it carries a disclosure, and that disclosure already prints len(_ROOTS) -- a DERIVED
+#     quantity -- with the reason that "the count is printed so a reader can compare it against
+#     the fleet map instead of trusting the date, which is the check the date alone cannot carry."
+#     ⇒ saltbench had ALREADY REASONED ITS WAY TO THIS ROW'S CONCLUSION and was one step short:
+#     a COUNT cannot see a SUBSTITUTION. Driven: swap one root for another and n stays 11 while
+#     the digest moves 603bc87c77 -> 7d672e9b18. The digest strictly dominates the count, and
+#     saltbench's count clause is KEPT rather than replaced -- a byte-identical port would have
+#     deleted the destination's own repair.
+#   ⇒ 🔑 A HAND-TYPED DATE CANNOT DISAGREE WITH THE ROOTS, SO IT CANNOT DETECT A REAL DIVERGENCE
+#     EITHER — it is evidence about a keystroke. ROOTS_DIGEST is DERIVED from _ROOTS at import, so
+#     two repos with the SAME digest are PROVABLY reconciled and two with different digests have
+#     genuinely different lists. The date stays as prose for the re-measure clock and decides nothing.
+#   ⛔ SORTED, so the digest is a property of the SET and not of the order somebody typed it in.
+#   ⛔ AND IT CARRIES NO ROOT: a digest of the list is safe to print and to quote across repos,
+#     which a diff of the list itself would not be.
+ROOTS_DIGEST = hashlib.sha256("|".join(sorted(_ROOTS)).encode()).hexdigest()[:10]
+
 # ⛔ THE DURABLE LOCAL TIER (born 2026-08-25) IS A PRIVATE ROOT WHOSE NAME IS AN
 # ORDINARY WORD, so it CANNOT join _ROOTS. Measured before deciding: a bare
 # root of that name matches EIGHT existing occurrences in one sibling repo --
@@ -1714,7 +1739,9 @@ def main() -> int:
           f"  WATCHING {len(FORBIDDEN)} shapes: "
           + "; ".join(w for _, w in FORBIDDEN) + ".\n"
           f"  ROOTS ARE A HAND-COPIED SNAPSHOT of a fleet map that lives OUTSIDE"
-          f" these repos and MOVES. Last reconciled {ROOTS_RECONCILED} by {ROOTS_OWNER};"
+          f" these repos and MOVES. ROOT-SET DIGEST {ROOTS_DIGEST} -- DERIVED from the list, so"
+          f" two gated repos printing the same digest are PROVABLY reconciled and the date below"
+          f" is prose that decides nothing (row MK). Last reconciled {ROOTS_RECONCILED} by {ROOTS_OWNER};"
           f" NEXT RE-MEASURE DUE {ROOTS_REMEASURE_DUE}. A private root born after the"
           f" reconcile date is NOT watched until this list is edited, and this line is"
           f" the only thing that will say so -- it went unactioned for 14 days once.")
