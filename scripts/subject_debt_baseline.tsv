@@ -1,0 +1,11 @@
+# subject_debt_baseline.tsv -- ACCEPTED DEBT: public commit SUBJECTS that carry
+# an employer-lane or private project name, or a family reference, which the
+# owner ruled on 2026-09-16 to leave in history as declared debt rather than
+# rewrite ("declared debt + gate new subjects", desk rows PS/PZ/QA).
+# sha<TAB>sha256(subject)[:16]. The subject itself is never stored here: a
+# baseline that spelled it would republish it.
+# Read by scripts/check_pr_descriptions.py: --history reds on a subject that
+# is not listed AND on a listed row it can no longer find; --range does not
+# count a listed subject as new. Only the owner adds a row. A row disappears
+# only with a history rewrite, which is a council act.
+163dfa70224589d160507d32912f69bb9add65a5	57f9d6f21401a64d

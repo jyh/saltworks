@@ -26,6 +26,13 @@
 #      pushed: census D #3, the population only CI's --history arm could see.
 #   2. scripts/check_private_paths.py --range -- the ruled firewall line at
 #      PATHS, over the net delta (messages, added lines, and the pin audit).
+#   3. scripts/check_pr_descriptions.py --range -- no lane name or family
+#      reference in a commit SUBJECT, and no lane name in a commit body (desk
+#      QA). A pushed subject cannot be edited without a history rewrite, so
+#      this is the last moment the reword is free. The pushed delta only: the
+#      bodies already public are history this arm does not rule on. The
+#      pushed REF NAME too: a merge subject will quote it, and the forge
+#      writes that subject where no hook runs.
 #
 # ⛔ NO PATTERN IS TYPED IN THIS FILE. Until 2026-09-13 arm 1 was a grep for two
 #   literal shapes, and it was narrower than the gate: a lowercase key, a space
@@ -49,6 +56,7 @@ set -u
 ZERO=0000000000000000000000000000000000000000
 GATE=scripts/check_private_paths.py
 TRAILER_GATE=scripts/check_commit_trailers.py
+SUBJECT_GATE=scripts/check_pr_descriptions.py
 HISTORY_BASELINE=scripts/private_paths_history_baseline.tsv
 SCAN="$(cd "$(dirname "$0")" && pwd)/gate_scan.py"
 
@@ -67,7 +75,7 @@ if [ -z "$PY" ]; then
 fi
 
 ROOT=$(git rev-parse --show-toplevel 2>/dev/null) || ROOT=.
-for need in "$ROOT/$GATE" "$ROOT/$TRAILER_GATE" "$SCAN"; do
+for need in "$ROOT/$GATE" "$ROOT/$TRAILER_GATE" "$ROOT/$SUBJECT_GATE" "$SCAN"; do
   if [ ! -f "$need" ]; then
     echo "pre-push REFUSED: $need is not in this working tree." >&2
     echo "  This hook derives its verdict from the gates and will not guess it." >&2
@@ -194,13 +202,27 @@ while read -r local_ref local_sha remote_ref remote_sha; do
     bad=1
   fi
 
+  # ---- ARM 3: lane names and family references in what the push adds ------
+  if ! ( cd "$ROOT" && "$PY" "$SUBJECT_GATE" --range "$RANGE" ) < /dev/null; then
+    echo "pre-push REFUSED: the subject gate RED on ${RANGE} (${local_ref:-<ref>} -> ${remote_ref:-<ref>})." >&2
+    echo "  The findings above name the commit and the surface, never the word." >&2
+    echo "  Reword the commit now (amend or rebase): a pushed subject stays in" >&2
+    echo "  history for as long as the repository does." >&2
+    bad=1
+  fi
+  if ! ( cd "$ROOT" && "$PY" "$SUBJECT_GATE" --ref "${remote_ref:-}" ) < /dev/null; then
+    echo "pre-push REFUSED: the pushed ref name carries a refused word. Push the" >&2
+    echo "  work under a neutral branch name: a merge subject will quote this one." >&2
+    bad=1
+  fi
+
   if [ "$bad" -ne 0 ]; then
     status=1
     continue
   fi
 
   n=$(git rev-list --count "$RANGE" 2>/dev/null) || n="?"
-  echo "pre-push OK [per-commit trailer+paths + private-paths --range]: ${local_ref:-<ref>} -> ${remote_ref:-<ref>}, range ${RANGE} (${WHY}), ${n} commit(s) scanned."
+  echo "pre-push OK [per-commit trailer+paths + private-paths --range + subject gate --range]: ${local_ref:-<ref>} -> ${remote_ref:-<ref>}, range ${RANGE} (${WHY}), ${n} commit(s) scanned."
 done < "$TMPIN"
 
 if [ "$seen" -eq 0 ]; then
