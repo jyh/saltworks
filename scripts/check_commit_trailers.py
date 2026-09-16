@@ -151,16 +151,22 @@ def tracked_files() -> list[tuple[str, str]]:
     return rows
 
 
-def scan(rows: list[tuple[str, str]]) -> list[tuple[str, str, str]]:
-    """(sha, what, line) for every violation found."""
+def scan(rows: list[tuple[str, str]]) -> list[tuple[str, str, int]]:
+    """(where, what, lineno) for every violation found: the 1-based line on
+    which the match begins.
+
+    NEVER the matched text (desk PX). A CI log on a public repository is
+    public, and a caller that never receives the text cannot republish it.
+    Three fields, because the callers unpack three."""
     bad = []
     for sha, body in rows:
         for pattern, what in FORBIDDEN:
             m = pattern.search(body)
             if m:
-                line = next((l for l in body.splitlines() if m.group(0)[:40] in l),
-                            m.group(0))
-                bad.append((sha, what, line.strip()))
+                # The trailer pattern's `^\s*` can take the line break before
+                # the key with it; the line is the one the key is on.
+                start = m.start() + len(m.group(0)) - len(m.group(0).lstrip())
+                bad.append((sha, what, body.count("\n", 0, start) + 1))
     return bad
 
 
@@ -264,7 +270,8 @@ def self_test() -> int:
         return 1
     print(f"check_commit_trailers SELF-TEST [gate {self_id()}]: OK "
           "(empty scan fatal proven FIRST, both forbidden shapes caught, "
-          f"{PRESERVED} preserved, self-describing message safe, cwd-independent)")
+          f"{PRESERVED} preserved, self-describing message safe, cwd-independent, "
+          "findings give their site and line and never their text)")
     return 0
 
 
@@ -393,9 +400,9 @@ def main() -> int:
         print("remove exactly this. A commit that reaches a published branch")
         print("cannot be edited without breaking every clone, so this must be")
         print("fixed BEFORE the merge, by rewriting the offending messages.\n")
-        for sha, what, line in bad:
-            print(f"  {sha[:12]}  {what}")
-            print(f"      {line[:100]}")
+        # The site and the line, never the text (desk PX).
+        for sha, what, lineno in bad:
+            print(f"  {sha[:12]}  {what}  (line {lineno}; {WITHHELD})")
         print(f"\nTo repair an unpushed range:  git rebase -i --exec "
               f"'git commit --amend --no-edit' <base>")
         print("For a pushed feature branch, rewrite and force-push THAT branch "
@@ -417,9 +424,8 @@ def main() -> int:
         print(f"FAIL [gate {self_id()}]: {len(bad_files)} tracked file(s) carry a forbidden string.\n")
         print("Unlike a commit message this is trivially fixable — edit the file")
         print("— but only BEFORE it is pushed. This repository is public.\n")
-        for path, what, line in bad_files:
-            print(f"  {path}  {what}")
-            print(f"      {line[:100]}")
+        for path, what, lineno in bad_files:
+            print(f"  {path}  {what}  (line {lineno}; {WITHHELD})")
         return 1
 
     print(f"check_commit_trailers [gate {self_id()}]: OK ({len(rows)} commit messages and "
