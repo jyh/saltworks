@@ -64,9 +64,18 @@ import sys
 # A locator: an optional dir-ish prefix, a filename with an extension, then :LINE.
 # Bounded on the left so "…and the count is 352:1" style prose does not match.
 LOCATOR = re.compile(
-    r"(?<![\w/.])((?:[\w.\-]+/)*[\w.\-]+\.(?:lean|v|py|md|sh|mmd|svg|tsv|toml|json))"
+    r"(?<![\w/.])((?:[\w.\-]+/)*[\w.\-]+\.(?:lean|v|py|md|sh|mmd|svg|tsv|toml|json|txt|csv|tex|yml|yaml|rs))"
     r":(\d+)(?!\d)"
 )
+
+# ⛔⛔ A LOCATOR WITH AN EXTENSION THE LIST ABOVE DOES NOT NAME WAS INVISIBLE — NOT OK, NOT MISS,
+#   NOT UNCHECKED — AND THE SUMMARY STILL READ AS COMPLETE. Found 2026-09-16 (evidence) citing a
+#   `.txt` compare file in a draft: four citations added, two counted, "32 OK" printed.
+#   That is the defect this file's header forbids: a tool that silently drops what it cannot
+#   read reports N-1 greens as N. ⇒ `txt` (and five more plain-text forms) joined the list, and
+#   ANY BACKTICKED `name.ext:N` whose extension is still unlisted becomes an UNCHECKED row that
+#   says so. The backtick is the fence: bare prose ("a ratio of 3.5:1") is not a citation.
+ANY_LOCATOR = re.compile(r"`((?:[\w.\-]+/)*[\w\-]+(?:\.[\w\-]+)*\.([A-Za-z][A-Za-z0-9]{0,7})):(\d+)(?!\d)")
 
 # A payload we can actually verify: a QUOTED span, or a bare identifier-ish token
 # (theorem/wire/def names) of reasonable length.
@@ -300,6 +309,13 @@ def check_doc(docpath, roots, window, before, after):
         text = fh.read()
     rows = []
     matches = list(LOCATOR.finditer(text))
+    seen = {(m.start(1), m.group(1)) for m in matches}
+    for m in ANY_LOCATOR.finditer(text):
+        if any(a <= m.start(1) < a + len(c) for a, c in seen):
+            continue
+        rows.append(("UNCHECKED", text[: m.start()].count("\n") + 1, m.group(1), int(m.group(3)),
+                     "extension .%s is outside this tool's locator list — not read, COUNTED"
+                     % m.group(2), ""))
     for idx, m in enumerate(matches):
         next_start = matches[idx + 1].start() if idx + 1 < len(matches) else None
         cited, lineno = m.group(1), int(m.group(2))
