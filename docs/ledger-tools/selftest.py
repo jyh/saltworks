@@ -1190,6 +1190,46 @@ if Path(__file__).with_name("f5_port_test.py").is_file():
                   "F5 INTEGRATION: the carry-in index was not derived from the source")
 
 # --------------------------------------------------------------------------
+# citecheck — A CITATION THE LOCATOR CANNOT SEE MUST BE COUNTED, NOT DROPPED.
+# Found 2026-09-16 by evidence while citing `docs/compiler-doublecode-COMPARE-0813.txt` in a
+# draft: four citations added, two counted. The locator's extension list had no `txt`,
+# so a `.txt` citation produced NO ROW AT ALL — not OK, not MISS, not UNCHECKED — and the
+# summary line ("N citation(s) — N OK") read as complete. That is the defect this tool's own
+# header names: "a tool that silently drops what it cannot read reports N-1 greens as N".
+# The arms below drive a doc with one citation of each kind and assert EVERY one is a row.
+# ⚠️ The wrong-line arm quotes a MULTI-WORD payload on purpose: only a distinctive payload may
+#   convict (`is_strong`), so `(278/388)` at a wrong line is honestly UNCHECKED, not MISS.
+if True:
+    import citecheck as _cc
+    with tempfile.TemporaryDirectory() as _d:
+        _root = Path(_d) / "repo"; _root.mkdir()
+        (_root / "note.md").write_text("line one\nthe strict gate STANDS here\n")
+        (_root / "data.txt").write_text("rows 388\nagreements 110\nrate 0.7165  (278/388)\n")
+        (_root / "thing.xyz").write_text("a distinctive payload sits here\n")
+        _doc = Path(_d) / "doc.md"
+        _doc.write_text(
+            "A control [R: `note.md:2`, `the strict gate STANDS`].\n"
+            "A text file, right line [R: `data.txt:3`, `(278/388)`].\n"
+            "A text file, WRONG line [R: `data.txt:1`, `rate 0.7165`].\n"
+            "An extension no list names [R: `thing.xyz:1`, `a distinctive payload`].\n"
+            "Prose that must not parse: a ratio of 3.5:1, version 1.2:3, the host example.com:8080.\n")
+        _roots = [("repo", str(_root), _cc.build_index(str(_root)))]
+        _rows = _cc.check_doc(str(_doc), _roots, 40, 0, 0)
+        _by = {(r[2], r[3]): r[0] for r in _rows}
+        check(len(_rows) == 4, f"citecheck: expected 4 rows (one per citation), got {len(_rows)}: {_rows}")
+        check(_by.get(("note.md", 2)) == "OK", f"citecheck CONTROL: note.md:2 -> {_by.get(('note.md', 2))}")
+        check(_by.get(("data.txt", 3)) == "OK",
+              f"citecheck: a CORRECT .txt citation must verify OK, got {_by.get(('data.txt', 3))}")
+        check(_by.get(("data.txt", 1)) == "MISS",
+              f"citecheck: a WRONG .txt locator must be CONVICTED (MISS), got {_by.get(('data.txt', 1))}")
+        check(_by.get(("thing.xyz", 1)) == "UNCHECKED",
+              f"citecheck: an unlisted extension must be COUNTED as UNCHECKED, got {_by.get(('thing.xyz', 1))}")
+        _why = next((r[4] for r in _rows if r[2] == "thing.xyz"), "")
+        check("extension" in _why, f"citecheck: the UNCHECKED row must say WHY (the extension): {_why!r}")
+        check(not any(r[2].startswith(("3.", "1.", "example")) for r in _rows),
+              f"citecheck: a prose ratio or version parsed as a citation: {_rows}")
+
+# --------------------------------------------------------------------------
 
 if FAILURES:
     print(f"selftest: {len(FAILURES)} FAILURE(S) out of {CHECKS} checks\n")
