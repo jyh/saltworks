@@ -78,6 +78,10 @@ FORBIDDEN = [
 # not "tidy" it into the forbidden list.
 PRESERVED = "Co-Authored-By"
 
+# What a finding prints in place of the matched text. A CI log on a public
+# repository is public (desk PX).
+WITHHELD = "matched text withheld: this log is public"
+
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
 
@@ -244,6 +248,16 @@ def self_test() -> int:
     if not re.fullmatch(r"[0-9a-f]{16}", self_id()):
         failures.append("self_id() must be this file's 16-hex content hash")
 
+    # 6. A FINDING NAMES ITS SITE AND LINE AND NEVER ITS TEXT (desk PX). A CI
+    #    log on this repository is public. The scan returns a line number in
+    #    place of the text, and main() prints the site, the kind and the line.
+    #    Driven through main(). The arm rebinds ROOT and sys.argv, and their
+    #    restore is ASSERTED, because the pre-push hook imports this module.
+    root_before, argv_before = ROOT, list(sys.argv)
+    failures.extend(_withholds_arm())
+    if ROOT != root_before or sys.argv != argv_before:
+        failures.append("arm 6 did not restore ROOT and sys.argv")
+
     for f in failures:
         print(f"SELF-TEST FAIL: {f}")
     if failures:
@@ -252,6 +266,75 @@ def self_test() -> int:
           "(empty scan fatal proven FIRST, both forbidden shapes caught, "
           f"{PRESERVED} preserved, self-describing message safe, cwd-independent)")
     return 0
+
+
+def _withholds_arm() -> list[str]:
+    """Arm 6. The scan first: its third field is a line number and no field
+    carries the text. Then main() against two scratch repos, one with a session
+    trailer in a commit message and one with a session URL in a tracked file.
+    A planted payload must not reach the output; the sha or path, the kind
+    and the line must.
+
+    The trailer carries a URL, as the harness writes it. The trailer pattern
+    alone matches only the key, so it is the URL beside it that carries the
+    text.
+    """
+    import contextlib
+    import io
+    import tempfile
+    global ROOT
+    found = []
+    secret = "zz_withheld_" + "payload"
+    url = "https://" + _HOST.replace(chr(92), "") + "/code/" + secret
+    trailer = f"subject\n\n{_SESSION_KEY}: {url}\n"
+
+    rows = scan([("w", trailer)])
+    if len(rows) != 2 or any(r[2] != 3 for r in rows):
+        found.append(f"arm 6: scan must return line 3 for both findings, got "
+                     f"{[r[2] if isinstance(r[2], int) else type(r[2]).__name__ for r in rows]}")
+    if any(secret in str(field) for r in rows for field in r):
+        found.append("arm 6: scan returned the matched text")
+
+    cases = [  # (name, files, message, site, line)
+        ("a trailer in a message", {"a.txt": "clean\n"}, trailer, None, 3),
+        ("a URL in a file", {"a.txt": url + "\n"}, "clean", "a.txt", 1),
+    ]
+    saved_root, saved_argv = ROOT, sys.argv
+    try:
+        with tempfile.TemporaryDirectory() as tmp:
+            for i, (name, files, message, site, lineno) in enumerate(cases):
+                repo = pathlib.Path(tmp, str(i))
+                repo.mkdir()
+                subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
+                for rel, text in files.items():
+                    (repo / rel).write_text(text, encoding="utf-8", newline="\n")
+                subprocess.run(["git", "add", "--", *files], cwd=repo, check=True)
+                subprocess.run(["git", "-c", "user.email=self@test", "-c", "user.name=self",
+                                "-c", "commit.gpgsign=false", "commit", "-q", "--no-verify",
+                                "-m", message], cwd=repo, check=True)
+                head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=repo,
+                                      capture_output=True, text=True, encoding="utf-8",
+                                      check=True).stdout.strip()
+                ROOT = repo
+                sys.argv = [saved_argv[0]]
+                said = io.StringIO()
+                with contextlib.redirect_stdout(said):
+                    try:
+                        rc = main()
+                    except SystemExit as e:
+                        rc = e.code
+                out = said.getvalue()
+                if rc != 1:
+                    found.append(f"arm 6, {name}: exit {rc}, want 1")
+                if secret in out:
+                    found.append(f"arm 6, {name}: the matched text reached the output")
+                if f"  {site or head[:12]}  " not in out:
+                    found.append(f"arm 6, {name}: the finding does not name its site")
+                if f"(line {lineno}; {WITHHELD})" not in out:
+                    found.append(f"arm 6, {name}: the finding does not give line {lineno}")
+    finally:
+        ROOT, sys.argv = saved_root, saved_argv
+    return found
 
 
 def _is_empty_scan_fatal(rows) -> bool:
