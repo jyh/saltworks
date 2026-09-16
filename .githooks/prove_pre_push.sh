@@ -163,6 +163,15 @@ expect_out() { # <label> <fixed string>
   fi
 }
 
+expect_no_out() { # <label> <fixed string>
+  if grep -qF -- "$2" "$OUT"; then
+    bad "$1: output carries \"$2\""
+    sed 's/^/         | /' "$OUT"
+  else
+    printf '       +   %s: output does not carry "%s"\n' "$1" "$2"
+  fi
+}
+
 remote_tip() { git -C "$REMOTE" rev-parse --verify --quiet "refs/heads/$1" 2>/dev/null; }
 
 # A RED ARM THAT LEAKED MUST NOT DECIDE THE NEXT ONE. Measured on the unfixed hook
@@ -248,6 +257,11 @@ EOF
   run_push 1 "red-trailer-shape-$i" origin main
   expect_out "red-trailer-shape-$i" "commit message(s) carry a shape the trailer gate forbids"
   expect_out "red-trailer-shape-$i" "$TRAILER_SHA"
+  # A CRASHED scanner also exits 1, and the hook reads 1 as a finding: the
+  # refusal above cannot tell them apart (desk PX, driven). The trailer gate
+  # hands back a LINE NUMBER, never the text, and the scanner prints it.
+  expect_no_out "red-trailer-shape-$i" "Traceback"
+  expect_out "red-trailer-shape-$i" "at line "
   if [ "$(remote_tip main)" = "$BEFORE_TIP" ]; then
     printf '       +   red-trailer-shape-%s: the remote ref did NOT move\n' "$i"
   else
@@ -312,6 +326,8 @@ else
 fi
 run_push 1 red-add-then-remove-url origin main
 expect_out red-add-then-remove-url "$ADDED_SHA leak10.txt"
+expect_no_out red-add-then-remove-url "Traceback"
+expect_out red-add-then-remove-url "at line "
 if [ "$(remote_tip main)" = "$BEFORE_TIP" ]; then
   printf '       +   red-add-then-remove-url: the remote ref did NOT move\n'
 else

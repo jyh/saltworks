@@ -76,7 +76,11 @@ def git(*args: str) -> str:
 def show(rows, verb: str) -> None:
     for ident, what, line in rows:
         print(f"    {ident}  {verb} {what}", file=sys.stderr)
-        if line:
+        # The trailer gate returns a LINE NUMBER in place of the text (desk PX);
+        # the paths gate returns the line, and this output is local.
+        if isinstance(line, int):
+            print(f"        at line {line}", file=sys.stderr)
+        elif line:
             print(f"        {line[:110]}", file=sys.stderr)
 
 
