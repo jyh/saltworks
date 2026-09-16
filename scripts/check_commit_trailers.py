@@ -304,7 +304,9 @@ def _withholds_arm() -> list[str]:
 
     cases = [  # (name, files, message, site, line)
         ("a trailer in a message", {"a.txt": "clean\n"}, trailer, None, 3),
-        ("a URL in a file", {"a.txt": url + "\n"}, "clean", "a.txt", 1),
+        # The path is nested and longer than twelve characters, so a print
+        # that shortened it (to the sha's width, or to its basename) is caught.
+        ("a URL in a file", {"sub/planted-path-longer-than-twelve.txt": url + "\n"}, "clean", "sub/planted-path-longer-than-twelve.txt", 1),
     ]
     saved_root, saved_argv = ROOT, sys.argv
     try:
@@ -314,6 +316,7 @@ def _withholds_arm() -> list[str]:
                 repo.mkdir()
                 subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
                 for rel, text in files.items():
+                    (repo / rel).parent.mkdir(parents=True, exist_ok=True)
                     (repo / rel).write_text(text, encoding="utf-8", newline="\n")
                 subprocess.run(["git", "add", "--", *files], cwd=repo, check=True)
                 subprocess.run(["git", "-c", "user.email=self@test", "-c", "user.name=self",
