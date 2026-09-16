@@ -13,7 +13,12 @@
 #                  one push must each be REFUSED, and the remote ref must NOT
 #                  have moved. The add-then-remove arms first show the net-diff
 #                  gate alone passing, so they test the population they name.
-#   FAIL CLOSED -- with the scanner missing, a clean push is refused.
+#                  A lane name in a SUBJECT only, a family reference in a
+#                  SUBJECT only, and a lane name in a BODY only are each REFUSED
+#                  too (desk QA), each after a control shows the two older arms
+#                  passing that range.
+#   FAIL CLOSED -- with the scanner missing, a clean push is refused; so it is
+#                  with the subject gate missing.
 #   DELETE arm  -- deleting a ref pushes no objects and must be ALLOWED.
 #   MUTATION    -- the same refused push must SUCCEED with `--no-verify`. Without
 #     CONTROL      this arm, every red above is equally consistent with "the push
@@ -39,6 +44,8 @@ REPO=$(cd "$HERE/.." && pwd)
 HOOK="$HERE/pre-push"
 PATHS_GATE="$REPO/scripts/check_private_paths.py"
 TRAILER_GATE="$REPO/scripts/check_commit_trailers.py"
+SUBJECT_GATE="$REPO/scripts/check_pr_descriptions.py"
+SUBJECT_BASELINE="$REPO/scripts/subject_debt_baseline.tsv"
 
 fail=0
 note() { printf '%s\n' "$*"; }
@@ -48,6 +55,8 @@ bad()  { printf 'FAIL %s\n' "$*"; fail=$((fail + 1)); }
 [ -x "$HOOK" ]         || { note "FAIL: $HOOK is not executable -- it would be INERT on this platform"; exit 2; }
 [ -f "$PATHS_GATE" ]   || { note "FAIL: no $PATHS_GATE"; exit 2; }
 [ -f "$TRAILER_GATE" ] || { note "FAIL: no $TRAILER_GATE"; exit 2; }
+[ -f "$SUBJECT_GATE" ] || { note "FAIL: no $SUBJECT_GATE"; exit 2; }
+[ -f "$SUBJECT_BASELINE" ] || { note "FAIL: no $SUBJECT_BASELINE"; exit 2; }
 
 PY=
 for c in python3 python py; do
@@ -93,6 +102,19 @@ for i in 1 2 3 4 5; do
   [ "$n" = "1" ] || { note "FAIL: trailer shape $i is not exactly one gate finding (got '${n}') -- its arm would prove nothing"; exit 2; }
 done
 
+# THE SUBJECT GATE'S WORDS, read out of it: the longest lane word (a short one
+# could hide inside an ordinary word of this prover's own output) and the first
+# family word. Each must be exactly one finding in a subject, or its arm is
+# vacuous. Neither word is ever spelled in this file.
+LANE_WORD=$(read_const "$SUBJECT_GATE" 'sorted(lane_words(), key=len)[-1]') || LANE_WORD=
+KIN_WORD=$(read_const "$SUBJECT_GATE" '_KIN[0]') || KIN_WORD=
+[ -n "$LANE_WORD" ] || { note "FAIL: could not read a lane word out of the subject gate"; exit 2; }
+[ -n "$KIN_WORD" ]  || { note "FAIL: could not read a family word out of the subject gate"; exit 2; }
+for w in "$LANE_WORD" "$KIN_WORD"; do
+  n=$(MSG="tidy the $w notes" read_const "$SUBJECT_GATE" 'len(subject_scan([("s", __import__("os").environ["MSG"], "subject")]))') || n=
+  [ "$n" = "1" ] || { note "FAIL: a subject-gate fixture is not exactly one finding (got '${n}') -- its arm would prove nothing"; exit 2; }
+done
+
 # The fixture must actually be forbidden, or every RED arm below is vacuous.
 if "$PY" "$PATHS_GATE" --self-test >/dev/null 2>&1; then :; else
   note "FAIL: the private-paths gate's own self-test does not pass; nothing here is readable"
@@ -129,6 +151,8 @@ chmod +x "$W/.githooks/pre-push"
 cp "$PATHS_GATE" "$W/scripts/check_private_paths.py"
 cp "$TRAILER_GATE" "$W/scripts/check_commit_trailers.py"
 cp "$SCAN" "$W/.githooks/gate_scan.py"
+cp "$SUBJECT_GATE" "$W/scripts/check_pr_descriptions.py"
+cp "$SUBJECT_BASELINE" "$W/scripts/subject_debt_baseline.tsv"
 git -C "$W" config core.hooksPath .githooks
 
 commit_file() { # <path> <content> <message>
@@ -345,14 +369,93 @@ expect_out fail-closed-no-scanner "gate_scan.py is not in this working tree"
 mv "$SBX/gate_scan.py.hidden" "$W/.githooks/gate_scan.py"
 git -C "$W" reset -q --hard "$GOOD"; restore_remote
 
+# ── ARMS 12-14 ── the subject gate (desk QA). Each commit touches only a clean
+#                 file, and each CONTROL shows the two older arms passing the
+#                 same range, so a refusal here is the new arm's and nobody
+#                 else's. The word must never appear in the output.
+older_arms_pass() { # <range>
+  ( cd "$W" && "$PY" "$SCAN" push --trailers-gate scripts/check_commit_trailers.py \
+      --paths-gate scripts/check_private_paths.py "$1" ) >/dev/null 2>&1 \
+  && ( cd "$W" && "$PY" scripts/check_private_paths.py --range "$1" ) >/dev/null 2>&1
+}
+subject_arm() { # <arm-no> <label> <message>
+  note "ARM $1 $2   expect 1"
+  commit_file "s$1.txt" "nothing wrong with this line" "$3"
+  SUBJ_SHA=$(git -C "$W" rev-parse HEAD | cut -c1-12)
+  if older_arms_pass "$GOOD..HEAD"; then
+    printf '       +   subject-arm-%s: CONTROL -- the per-commit scan and the paths gate pass this range\n' "$1"
+  else
+    bad "subject-arm-$1: an older arm already refuses this range, so the arm tests nothing new"
+  fi
+  run_push 1 "red-subject-arm-$1" origin main
+  expect_out "red-subject-arm-$1" "the subject gate RED"
+  expect_out "red-subject-arm-$1" "commit $SUBJ_SHA"
+  expect_no_out "red-subject-arm-$1" "Traceback"
+  # Never expect_no_out here: its receipt prints the needle, and this output is
+  # a public CI log. Neither branch below prints the word or the output.
+  if grep -qF -- "$LANE_WORD" "$OUT"; then
+    bad "red-subject-arm-$1: the output ECHOES the lane word (output withheld)"
+  else
+    printf '       +   red-subject-arm-%s: output does not echo the lane word\n' "$1"
+  fi
+  if [ "$(remote_tip main)" = "$BEFORE_TIP" ]; then
+    printf '       +   red-subject-arm-%s: the remote ref did NOT move\n' "$1"
+  else
+    bad "red-subject-arm-$1: THE REMOTE REF MOVED"
+  fi
+  git -C "$W" reset -q --hard "$GOOD"; restore_remote
+}
+subject_arm 12 "a lane name in a SUBJECT only      " "tidy the $LANE_WORD notes
+
+a clean body"
+expect_out red-subject-arm-12 "SUBJECT: an employer-lane or private project name"
+subject_arm 13 "a family reference in a SUBJECT only" "ratified: the $KIN_WORD agreed
+
+a clean body"
+expect_out red-subject-arm-13 "SUBJECT: a family reference"
+subject_arm 14 "a lane name in a BODY only         " "docs: a clean subject
+
+see the $LANE_WORD notes"
+expect_out red-subject-arm-14 "BODY: an employer-lane or private project name"
+
+# ── ARM 16 ── a refused word in the pushed BRANCH NAME, with clean commits. The
+#              family word, never a lane word: the push output prints the name.
+note "ARM 16 a family reference in the pushed BRANCH NAME          expect 1"
+git -C "$W" checkout -q -b "tidy-$KIN_WORD"
+commit_file s16.txt "nothing wrong with this line" "docs: a clean subject"
+run_push 1 red-ref-name origin "tidy-$KIN_WORD"
+expect_out red-ref-name "the pushed ref name carries a refused word"
+expect_out red-ref-name "the ref name: a family reference"
+expect_no_out red-ref-name "Traceback"
+if [ -z "$(remote_tip "tidy-$KIN_WORD")" ]; then
+  printf '       +   red-ref-name: the branch did NOT reach the remote\n'
+else
+  bad "red-ref-name: THE BRANCH REACHED THE REMOTE"
+fi
+git -C "$W" checkout -q main
+git -C "$W" branch -q -D "tidy-$KIN_WORD"
+
+# ── ARM 15 ── FAIL CLOSED again: with the subject gate absent, a clean push is
+#              refused rather than waved through on two of three arms.
+note "ARM 15 the subject gate is missing: a clean push is refused   expect 1"
+mv "$W/scripts/check_pr_descriptions.py" "$SBX/check_pr_descriptions.py.hidden"
+commit_file clean15.txt "nothing wrong with this line" "clean: nothing forbidden here"
+run_push 1 fail-closed-no-subject-gate origin main
+expect_out fail-closed-no-subject-gate "check_pr_descriptions.py is not in this working tree"
+mv "$SBX/check_pr_descriptions.py.hidden" "$W/scripts/check_pr_descriptions.py"
+git -C "$W" reset -q --hard "$GOOD"; restore_remote
+
 note ""
 if [ "$fail" -eq 0 ]; then
   note "prove_pre_push: PASS -- 3 clean pushes each SUCCEED and print a receipt"
-  note "  naming the range; 9 leak shapes (message path, added-line path, the 5"
-  note "  trailer shapes, and a path and a URL each added then removed inside one"
-  note "  push) are each REFUSED with the remote ref unmoved; a missing scanner"
-  note "  refuses a clean push; a delete is allowed; and the mutation control lands"
-  note "  the same commit with the hook bypassed, so the refusals are the hook's."
+  note "  naming the range; 12 leak shapes (message path, added-line path, the 5"
+  note "  trailer shapes, a path and a URL each added then removed inside one"
+  note "  push, and a lane name or family reference in a subject or a lane name in"
+  note "  a body) are each REFUSED with the remote ref unmoved, and so is a branch"
+  note "  whose name carries a refused word; a missing scanner"
+  note "  or subject gate refuses a clean push; a delete is allowed; and the"
+  note "  mutation control lands the same commit with the hook bypassed, so the"
+  note "  refusals are the hook's."
   exit 0
 fi
 note "prove_pre_push: FAILED ($fail arm(s))"
