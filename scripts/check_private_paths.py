@@ -213,7 +213,18 @@ _EMPLOYER = ["lo" + "ca", "ho" + "ll", "pcc-" + "bios", "safe_" + "dav1d", "safe
 #     disclosure had no age, no owner and no re-measure date. It has all three now, below.
 #   ⛔ Assembled from parts like every other root here: this file must not match its own patterns.
 _PRIVATE_PROJ = ["si" + "la", "mor" + "pho", "eman" + "uensis", "ver" + "so"]
-_CFGDIR = r"\.claude-" + _SEAT + r"-[A-Za-z0-9_-]+"
+# ⛔⛔ THE SEGMENT SET, NOT ONE SEGMENT — AND IT WAS WRONG FOR THE WHOLE MIGRATION (row UI,
+#   2026-09-20). This read `"\\.claude-" + _SEAT + "-…"` and matched the SUPERSEDED convention
+#   (`.claude-<seat>-*`, the directories deleted 2026-09-15). Measured against the fleet roster's
+#   config column, which is the authority, it matched 0 OF 6 real shapes — in SIX public repos,
+#   while reading green throughout.
+#   ⇒ 🔑 THE GATE WAS RIGHT WHEN WRITTEN AND AGED OUT FROM UNDER ITS SUBJECT.
+#   The live segments are `account` and `acct`; one live seat uses the SHORT one, so a pattern
+#   written from the obvious shape covers five of six and misses a real seat. The superseded
+#   segment is KEPT: history still carries it and a scrub gate must see the past too.
+#   ⛔ Assembled from parts, like every other root here: this file must not match its own patterns.
+_CFG_SEGS = ["acc" + "ount", "ac" + "ct", _SEAT]
+_CFGDIR = r"\.claude-(?:" + "|".join(_CFG_SEGS) + r")-[A-Za-z0-9_-]+"
 _KIT_RE = "Documents" + r"[/" + chr(92)*2 + r"]+" + _SEAT   # separator-agnostic
 _KIT = "Documents/" + _SEAT                                      # display form only
 _BUS = "FLEET" + r"\.md"
@@ -693,7 +704,17 @@ def self_test() -> int:
         # the absence would RED next time instead of passing clean.
         ("p-priv-ib1", "see " + _PRIVATE_PROJ[2] + "/src/ledger/x.ts"),
         ("p-priv-ib2", "see " + _PRIVATE_PROJ[3] + "/docs/y.md"),
-        ("p-cfg", "config lives in ~/.claude-" + _SEAT + "-evidence/settings.json"),
+        # ⛔⛔ THE PLANT MUST NOT SHARE A CONSTANT WITH THE PATTERN. This row read
+        #   `"~/.claude-" + _SEAT + "-evidence/…"` against a pattern built from that SAME `_SEAT`,
+        #   so BOTH SIDES MOVED TOGETHER and the arm matched whatever the pattern happened to be.
+        #   ⇒ 🔑 IT TESTED STRING CONCATENATION, NOT THE PATTERN, AND WOULD HAVE BEEN GREEN FOR
+        #     EVERY FUTURE CONVENTION TOO.
+        #   ⭐ The splits below are deliberately DIFFERENT from `_CFG_SEGS`' splits ("ac"+"count"
+        #     vs "acc"+"ount"), so editing one cannot silently keep the other in step. The names
+        #     are SYNTHETIC — no real config directory is spelled in a public tree.
+        ("p-cfg", "config lives in ~/.claude-" + "ac" + "count" + "-EXAMPLE/settings.json"),
+        ("p-cfg-short", "config lives in ~/.claude-" + "a" + "cct" + "-EXAMPLE/settings.json"),
+        ("p-cfg-old", "config lives in ~/.claude-" + "se" + "at" + "-EXAMPLE/settings.json"),
         # The bus-citation arm needs A line number, never THAT line number --
         # the anchor below is synthetic for the same reason as ee5a84a's.
         ("p-bus", "as minuted at " + _BUS.replace(chr(92), "") + ":99999"),
