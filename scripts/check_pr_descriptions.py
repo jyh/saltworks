@@ -37,6 +37,16 @@ same list now reads PR titles and bodies, and a finding names the PR and the
 surface but NEVER echoes the matched text, because a CI log on a public repo is
 public too.
 
+THE EDITED DOOR (desks SN and WB, 2026-09-21): this check became a REQUIRED
+status check on the default branch, so a red one now BLOCKS the merge. The
+remedy for forge-side prose is an EDIT on the forge, and an edit is not a
+push: `pull_request` defaults to opened/synchronize/reopened, so the fix that
+cleared the finding fired no run and its author sat blocked after doing
+exactly what this gate told them to. The workflow now lists `edited`, and the
+remedy printed below is DERIVED FROM THE WORKFLOW'S BYTES (edited_trigger_armed)
+rather than asserted -- it promises a re-run only where the trigger says so,
+and the self-test reds if this repository's trigger drops it.
+
 SHAPES: imported from the sibling gate, never re-typed. A fixture is a
 snapshot of a vocabulary; a copied pattern list is a stale fixture the day
 the sibling moves. One list, one owner, two readers.
@@ -482,6 +492,81 @@ def _gh(args: list[str]):
     return json.loads(out.stdout)
 
 
+_WORKFLOW = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..",
+                         ".github", "workflows", "scrub.yml")
+
+
+_DEFAULT_TYPES = frozenset({"opened", "synchronize", "reopened"})
+_REQUIRED_TYPES = _DEFAULT_TYPES | {"edited"}
+
+
+def _no_comment(line: str) -> str:
+    """A YAML comment is not configuration. None of the values read here can
+    contain `#`, so everything from the first one is dropped."""
+    return line.split("#", 1)[0]
+
+
+def pull_request_types(path: str = _WORKFLOW):
+    """The Scrub workflow's `pull_request` activity types, as a frozenset: the
+    list it declares, or the Actions DEFAULTS when it declares none -- `types:`
+    REPLACES the defaults, so the SET matters and not only one member. None when
+    no such trigger can be read here: an unreadable workflow is not an unarmed
+    one. READ FROM THE WORKFLOW'S BYTES, never asserted, and comments are
+    dropped first (a non-author read found `# edited ...` reading as armed)."""
+    try:
+        with open(path, encoding="utf-8") as fh:
+            lines = [_no_comment(l) for l in fh.read().splitlines()]
+    except OSError:
+        return None
+    for i, line in enumerate(lines):
+        if line.rstrip() != "  pull_request:":
+            continue
+        types, in_types = None, False
+        for nxt in lines[i + 1:]:
+            s = nxt.strip()
+            if not s:
+                continue
+            if not nxt.startswith("    "):
+                break  # the next trigger or a top-level key
+            if in_types:
+                if s.startswith("- "):
+                    types.add(s[2:].strip().strip("'\""))
+                    continue
+                in_types = False
+            if s.startswith("types:"):
+                inline = s[len("types:"):].strip()
+                types = set(re.findall(r"[a-z_]+", inline))
+                in_types = not inline
+        return frozenset(types) if types is not None else _DEFAULT_TYPES
+    return None
+
+
+def edited_trigger_armed(path: str = _WORKFLOW):
+    """True when a PR title/body edit re-runs this check (the trigger lists
+    `edited`), False when it does not, None when the trigger is unreadable.
+    This is the question the REMEDY needs; the self-test asks the wider one."""
+    types = pull_request_types(path)
+    return None if types is None else "edited" in types
+
+
+def rerun_note_lines(armed) -> list[str]:
+    """What an author does about the RED once the prose is fixed. A title or
+    body edit is not a push, so whether it re-runs this check is a property of
+    the workflow's trigger, passed in as `armed`."""
+    head = ["", "Where this check is REQUIRED for merge, a red one blocks it."]
+    if armed is True:
+        return head + [
+            "Saving the edit on the forge fires a fresh Scrub run by itself (the",
+            "workflow listens for `edited`). If none appears within a minute:",
+            "  gh run rerun <run-id> --failed"]
+    why = ("the workflow's pull_request types do not list `edited`"
+           if armed is False else "the workflow could not be read from here")
+    return head + [
+        f"A title or body edit fires NO run here ({why}).",
+        "After the edit, re-run the failed job:  gh run rerun <run-id> --failed",
+        "Never push an empty commit to re-trigger it."]
+
+
 def open_mode(repo: str) -> int:
     """Scan every OPEN PR's title+body; disclose REF-vs-RUN for each."""
     try:
@@ -539,6 +624,7 @@ def open_mode(repo: str) -> int:
         print("by ROLE. A head ref is not: its merge subject will quote it, so push")
         print("the branch under a neutral name and reopen.")
     if bad or sess or words:
+        print("\n".join(rerun_note_lines(edited_trigger_armed())))
         return 1
     print(f"check_pr_descriptions --open [pr-gate {self_id()}]: OK — {len(prs)} open "
           f"PR(s), 0 private-record paths and 0 session trailers/URLs in titles/bodies, "
@@ -931,6 +1017,75 @@ def self_test() -> int:
             "[Claude Code](https://" + "claude" + ".com/claude-code)")
     if scan_session(6, "", kept) or scan_session(6, None, None):
         failures.append("Co-Authored-By, the product link and a null body must pass")
+    # ARM 6 -- desks SN/WB: the remedy promises a re-run on edit ONLY where the
+    # workflow's bytes say so. Every state planted, both list forms; the note
+    # must not promise what an unarmed trigger cannot deliver; and THIS
+    # repository's own workflow must be armed, so dropping `edited` reds here.
+    d = tempfile.mkdtemp(prefix="pr-gate-selftest-wf-")
+    try:
+        def wf(text):
+            p = os.path.join(d, "w.yml")
+            with open(p, "w", encoding="utf-8") as fh:
+                fh.write(text)
+            return p
+        top = "on:\n  push:\n  pull_request:\n"
+        if edited_trigger_armed(wf(top + "    types: [opened, synchronize, "
+                                   "reopened, edited]\n\njobs:\n")) is not True:
+            failures.append("an inline types list naming `edited` must read armed")
+        if edited_trigger_armed(wf(top + "    # a comment\n    types:\n      - opened"
+                                   "\n      - edited\n\njobs:\n")) is not True:
+            failures.append("a block types list naming `edited` must read armed")
+        if edited_trigger_armed(wf(top + "\npermissions:\n")) is not False:
+            failures.append("a bare pull_request trigger (default types) is NOT armed")
+        if edited_trigger_armed(wf(top + "    types: [opened, synchronize]\n")) is not False:
+            failures.append("a types list without `edited` is NOT armed")
+        if edited_trigger_armed(wf(top + "    types:\n      - opened\n  workflow_dispatch:\n"
+                                   )) is not False:
+            failures.append("a block list that ends without `edited` is NOT armed")
+        # The non-author read's two findings, each planted with its control.
+        # (1) A COMMENT IS NOT CONFIGURATION: `edited` in a trailing comment must
+        # not read armed -- a false ARMED promises a re-run the trigger cannot give.
+        if edited_trigger_armed(wf(top + "    types: [opened, synchronize]  "
+                                   "# edited is deliberately NOT listed\n")) is not False:
+            failures.append("`edited` inside a trailing COMMENT must NOT read armed")
+        if edited_trigger_armed(wf(top + "    types:\n      - opened  # not edited\n"
+                                   "      - edited  # re-run on a body edit\n")) is not True:
+            failures.append("a block item with a trailing comment must still be read")
+        if edited_trigger_armed(wf("on:\n  push:\n  pull_request:  # why\n    types: "
+                                   "[edited]\n")) is not True:
+            failures.append("a trigger line with a trailing comment must still be found")
+        # (2) THE SET, NOT THE MEMBER: `types:` REPLACES the Actions defaults, so
+        # `types: [edited]` is armed for the REMEDY while the gate stops running
+        # on opened/synchronize. The set is readable, and the defaults are named.
+        if pull_request_types(wf(top + "    types: [edited]\n")) != frozenset({"edited"}):
+            failures.append("pull_request_types must return the SET it read")
+        if pull_request_types(wf(top + "\npermissions:\n")) != _DEFAULT_TYPES:
+            failures.append("a bare pull_request trigger means the Actions DEFAULT types")
+        if _REQUIRED_TYPES <= pull_request_types(wf(top + "    types: [edited]\n")):
+            failures.append("`types: [edited]` must FAIL the required-set test: the "
+                            "gate would stop running on opened and synchronize")
+        if edited_trigger_armed(wf("on:\n  push:\n")) is not None:
+            failures.append("no pull_request trigger at all is UNREADABLE, not unarmed")
+        if edited_trigger_armed(os.path.join(d, "absent.yml")) is not None:
+            failures.append("a missing workflow is UNREADABLE, not unarmed")
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+    yes, no, unk = (" ".join(rerun_note_lines(x)) for x in (True, False, None))
+    if "by itself" not in yes or "gh run rerun" not in yes:
+        failures.append("the armed note must promise the re-run AND name the fallback")
+    for label, text in (("unarmed", no), ("unreadable", unk)):
+        if "by itself" in text or "gh run rerun" not in text or "NO run" not in text:
+            failures.append(f"the {label} note must NOT promise a re-run, and must "
+                            "say to re-run the failed job by hand")
+    here = pull_request_types()
+    if here is None or not _REQUIRED_TYPES <= here:
+        read = "unreadable" if here is None else (
+            "not listed" if "edited" not in here else
+            "missing " + ", ".join(sorted(_REQUIRED_TYPES - here)))
+        failures.append("THIS repository's .github/workflows/scrub.yml must list "
+                        "ALL of opened, synchronize, reopened and `edited` in its "
+                        f"pull_request types (read: {read}) -- `types:` REPLACES the "
+                        "defaults, and the remedy this gate prints depends on `edited`")
     failures += _subject_arms()
     for f in failures:
         print(f"SELF-TEST FAIL: {f}")
@@ -940,6 +1095,8 @@ def self_test() -> int:
           f"[gate {gate.self_id()}]: OK (title+body arms both directions; "
           f"session arm both surfaces, never echoed; "
           f"ref_vs_run all five branches; sibling vocabulary reached via import; "
+          f"pull_request types read from the workflow's bytes as a SET, comments "
+          f"dropped, thirteen planted states; "
           f"subject arm: {_vocab_id()}, every word planted in its surfaces, "
           f"rec (4) subject-only plant in a scratch repository, range/history/"
           f"msg-file modes in both directions, --open through a fake forge, "
