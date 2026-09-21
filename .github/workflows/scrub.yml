@@ -28,7 +28,19 @@ on:
   #   The range blocks that read github.event.before are line-identical to salt's, which has run them
   #   under pull_request since 08-31. The green arm is this change's own PR: its pull_request run
   #   must carry itself in the population.
+  # ⛔ AND `edited`, ADDED 2026-09-21 -- THE DAY THE FORGE-PROSE CHECK BECAME A
+  #   *REQUIRED* STATUS CHECK. `pull_request` defaults to opened / synchronize /
+  #   reopened, so the EDIT THAT FIXES A TITLE OR BODY FIRED NO RUN. While a red
+  #   merged anyway that was a stale red; once required, it is a PR that sits
+  #   BLOCKED after its author did exactly what the gate's own message said. With
+  #   `edited`, saving the fix IS the event that re-reads the forge, on the same
+  #   head sha -- and a body edited to BAD after a green no longer waits for the
+  #   next push. `check_pr_descriptions.py` READS THIS LIST to choose the remedy it
+  #   prints, and its self-test reds if `edited` is dropped: one fact, one owner.
+  # The green arm is again this change's own PR: edit its body once and a Scrub
+  #   run appears with event `pull_request`, no push.
   pull_request:
+    types: [opened, synchronize, reopened, edited]
 
 permissions:
   contents: read
