@@ -223,6 +223,13 @@ _EMPLOYER = ["lo" + "ca", "ho" + "ll", "pcc-" + "bios", "safe_" + "dav1d", "safe
 #     map, tested against every gate's own scan()), so a birth no longer waits on this list's date.
 _LOCALONLY = ["ho" + "me", "soc" + "ial"]
 _PRIVATE_PROJ = ["soc" + "ial-run", "si" + "la", "mor" + "pho", "eman" + "uensis", "ver" + "so"]
+# ⛔⛔ ROW XK (2026-09-24) — A PRIVATE TREE THAT IS A *FAMILY*, WATCHED BY PATTERN, NEVER BY LIST. The Captain,
+#   council 2026-09-23, "Yes (a)": the benchmark harness tree and every worktree of it are a PRIVATE RECORD. Its
+#   worktrees are named `<tree>-<suffix>` and the family grew 22 -> 23 -> 26 in two days, so a list of names is
+#   false within a day of being written. The root below matches the tree AND any `-suffix` of it. It never matches
+#   the public benchmark repo, whose name is this root's prefix without the second word.
+_FAMILY = ["saltbench-" + "sys" + "tems"]
+_FAMILY_RE = [f + r"(?:-[A-Za-z0-9_.]+)*" for f in _FAMILY]
 # ⛔⛔ THE SEGMENT SET, NOT ONE SEGMENT — AND IT WAS WRONG FOR THE WHOLE MIGRATION (row UI,
 #   2026-09-20). This read `"\\.claude-" + _SEAT + "-…"` and matched the SUPERSEDED convention
 #   (`.claude-<seat>-*`, the directories deleted 2026-09-15). Measured against the fleet roster's
@@ -250,12 +257,12 @@ _BUS = "FLEET" + r"\.md"
 #   map AND the fleet root on disk: 12 private/employer trees, 11 in the lists above, `local` in its
 #   own shape below; bin/ is a symlink into the kit (watched); every other directory is a public
 #   repo or a worktree of one.
-ROOTS_RECONCILED = "2026-09-22"
+ROOTS_RECONCILED = "2026-09-24"
 ROOTS_OWNER = "evidence (PM)"
-ROOTS_REMEASURE_DUE = "2026-10-22"
+ROOTS_REMEASURE_DUE = "2026-10-24"
 
 _ROOTS = [_SEAT] + _EMPLOYER + _PRIVATE_PROJ
-_ROOT_ALT = "|".join(_ROOTS)
+_ROOT_ALT = "|".join(_ROOTS + _FAMILY_RE)   # ROW XK: the family joins as a PATTERN
 
 # ⛔⛔ ROW MK, 2026-09-14 — THE STAMP IS A CACHE OF A MEASUREMENT AND IT DRIFTED WHILE THE THING IT
 #   CACHES DID NOT MOVE AT ALL. Measured at origin across all six gated public repos: the ROOT SETS
@@ -282,7 +289,9 @@ _ROOT_ALT = "|".join(_ROOTS)
 #     which a diff of the list itself would not be.
 # ROW VD: the ordinary-word trees are PART OF THE SET the digest certifies, or two copies that differ only in
 #   them would print the same digest and read as reconciled. Marked "~" so no bare root can collide.
-ROOTS_DIGEST = hashlib.sha256("|".join(sorted(_ROOTS) + sorted("~" + w for w in _LOCALONLY)).encode()).hexdigest()[:10]
+# ROW XK: the family is part of the certified set too, marked "*" so no literal root can collide.
+ROOTS_DIGEST = hashlib.sha256("|".join(sorted(_ROOTS) + sorted("~" + w for w in _LOCALONLY)
+                                       + sorted("*" + f for f in _FAMILY)).encode()).hexdigest()[:10]
 
 # ⛔ THE DURABLE LOCAL TIER (born 2026-08-25) IS A PRIVATE ROOT WHOSE NAME IS AN
 # ORDINARY WORD, so it CANNOT join _ROOTS. Measured before deciding: a bare
@@ -765,6 +774,12 @@ def self_test() -> int:
         ("vd-home-repo", "the bare repo " + "hom" + "e" + ".git"),
         ("vd-social-repo", "pushed to Saltworks/" + "so" + "cial" + ".git"),
         ("vd-run", "receipts in ~/" + "so" + "cial-run" + "/receipts.tsv"),
+        # ROW XK (2026-09-24): the family, the bare tree and three real worktree shapes. Split differently from
+        #   `_FAMILY` so the plant never shares a constant with the pattern.
+        ("xk-bare", "see projects/claude/" + "saltbench-sys" + "tems" + "/tasks/x.md"),
+        ("xk-wt", "tools from /Users/x/" + "saltbench-sys" + "tems-v3-export-2833621" + "/harness"),
+        ("xk-wt2", "scorer/walk " + "saltbench-sys" + "tems-v3-gemini-abb7829" + "/harness/systems-v3"),
+        ("xk-bs", "at C:" + chr(92) + "saltbench-sys" + "tems-x86r1" + chr(92) + "t.md"),
         # ROOTLESS SHAPES (row J, 08/31). Assembled, never spelled.
         ("r-rl-b", "ruled in " + _ROOTLESS[0] + "/2026-08-30-x.md"),
         ("r-rl-f", "the row in " + _ROOTLESS[1] + "/RULING-x.md"),
@@ -797,6 +812,10 @@ def self_test() -> int:
         ("vd-c-brew", "brew installs under /opt/" + "home" + "brew/bin"),
         ("vd-c-social", "the " + "social" + " cost of a false alarm"),
         ("vd-c-mid", "docs/" + "social" + "/x.md nests a PUBLIC dir"),
+        # ROW XK: the PUBLIC benchmark repo, and the family name in prose, must never fire.
+        ("xk-c-public", "see " + "saltbench" + "/harness/systems-v3/x.md"),
+        ("xk-c-prose", "the " + "saltbench-sys" + "tems" + " harness runs the cells"),
+        ("xk-c-near", "a dir named " + "saltbench-sys" + "temsx" + "/x is not the tree"),
         ("c-meta", "this gate forbids paths into the private record"),
         # ROOTLESS guards: a bare name stays softened by the ruling; a MID-PATH
         # component of the same ordinary word is the declared consequence of
