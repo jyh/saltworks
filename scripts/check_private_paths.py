@@ -221,7 +221,8 @@ _EMPLOYER = ["lo" + "ca", "ho" + "ll", "pcc-" + "bios", "safe_" + "dav1d", "safe
 #   ⇒ WHAT FOUND THIS WAS NOT THE DISCLOSURE: a reader of x86lean #45's output, looking for something else.
 #     The fleet side now DERIVES the population (a census of the private trees on disk, mapped by the fleet
 #     map, tested against every gate's own scan()), so a birth no longer waits on this list's date.
-_LOCALONLY = ["ho" + "me", "soc" + "ial"]
+# content + studio ADDED 2026-09-27 (fleet map bullets, born 2026-09-26; scrub-roots-census UNWATCHED 12 pairs → 0), ordinary words ⇒ qualified forms only, like home and social.
+_LOCALONLY = ["ho" + "me", "soc" + "ial", "con" + "tent", "stu" + "dio"]
 _PRIVATE_PROJ = ["soc" + "ial-run", "si" + "la", "mor" + "pho", "eman" + "uensis", "ver" + "so"]
 # ⛔⛔ ROW XK (2026-09-24) — A PRIVATE TREE THAT IS A *FAMILY*, WATCHED BY PATTERN, NEVER BY LIST. The Captain,
 #   council 2026-09-23, "Yes (a)": the benchmark harness tree and every worktree of it are a PRIVATE RECORD. Its
@@ -257,9 +258,9 @@ _BUS = "FLEET" + r"\.md"
 #   map AND the fleet root on disk: 12 private/employer trees, 11 in the lists above, `local` in its
 #   own shape below; bin/ is a symlink into the kit (watched); every other directory is a public
 #   repo or a worktree of one.
-ROOTS_RECONCILED = "2026-09-24"
+ROOTS_RECONCILED = "2026-09-27"
 ROOTS_OWNER = "evidence (PM)"
-ROOTS_REMEASURE_DUE = "2026-10-24"
+ROOTS_REMEASURE_DUE = "2026-10-27"
 
 _ROOTS = [_SEAT] + _EMPLOYER + _PRIVATE_PROJ
 _ROOT_ALT = "|".join(_ROOTS + _FAMILY_RE)   # ROW XK: the family joins as a PATTERN
@@ -773,6 +774,14 @@ def self_test() -> int:
         ("vd-social-bs", "see projects" + chr(92) + "claude" + chr(92) + "so" + "cial" + chr(92) + "x.md"),
         ("vd-home-repo", "the bare repo " + "hom" + "e" + ".git"),
         ("vd-social-repo", "pushed to Saltworks/" + "so" + "cial" + ".git"),
+        # 2026-09-27: content + studio (born 2026-09-26), qualified forms only. Split differently from `_LOCALONLY`
+        #   ("co"+"ntent" vs "con"+"tent") so the plant never shares a constant with the pattern.
+        ("cs-content", "see projects/claude/" + "co" + "ntent" + "/docs/x.md"),
+        ("cs-content-bs", "see projects" + chr(92) + "claude" + chr(92) + "co" + "ntent" + chr(92) + "x.md"),
+        ("cs-content-repo", "pushed to Saltworks/" + "co" + "ntent" + ".git"),
+        ("cs-studio", "see projects/claude/" + "st" + "udio" + "/src/x.py"),
+        ("cs-studio-bs", "see projects" + chr(92) + "claude" + chr(92) + "st" + "udio" + chr(92) + "x.md"),
+        ("cs-studio-repo", "the bare repo " + "st" + "udio" + ".git"),
         ("vd-run", "receipts in ~/" + "so" + "cial-run" + "/receipts.tsv"),
         # ROW XK (2026-09-24): the family, the bare tree and three real worktree shapes. Split differently from
         #   `_FAMILY` so the plant never shares a constant with the pattern.
@@ -812,6 +821,11 @@ def self_test() -> int:
         ("vd-c-brew", "brew installs under /opt/" + "home" + "brew/bin"),
         ("vd-c-social", "the " + "social" + " cost of a false alarm"),
         ("vd-c-mid", "docs/" + "social" + "/x.md nests a PUBLIC dir"),
+        # 2026-09-27: content + studio are ordinary words and must never fire unqualified.
+        ("cs-c-content", "the " + "content" + " of the file"),
+        ("cs-c-content-dir", "docs/" + "content" + "/x.md nests a PUBLIC dir"),
+        ("cs-c-studio", "a " + "studio" + " apartment"),
+        ("cs-c-studio-dir", "open src/" + "studio" + "/main.rs in Visual " + "Studio"),
         # ROW XK: the PUBLIC benchmark repo, and the family name in prose, must never fire.
         ("xk-c-public", "see " + "saltbench" + "/harness/systems-v3/x.md"),
         ("xk-c-prose", "the " + "saltbench-sys" + "tems" + " harness runs the cells"),
