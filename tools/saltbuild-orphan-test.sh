@@ -42,9 +42,33 @@ drive(){ # drive <signal> <label> — each drive on its OWN lock and queue, so a
   alive "$lp" && no "$2' the stub lake is GONE within 5 s" "pid $lp still running — an orphan build" || ok "$2' the stub lake is GONE within 5 s"
   kill -KILL "$lp" 2>/dev/null
 }
+# O5 — THE GROUP KILL (kent's read of #59 at 4d19cb7, driven): a caller that starts the wrapper in its OWN SESSION and then
+#   kills that whole PROCESS GROUP (bench's target.py: start_new_session=True, escalating to killpg SIGKILL). If lake sits in
+#   a group of its own and the watchdog does NOT, the one kill takes the watchdog and spares lake — which then runs with fd 9
+#   closed: no lock, no watchdog, no bound. The same Python form the caller uses, so the arm meets the real launch shape.
+drive_group(){ # drive_group <label>
+  rm -f -- "${TD:?}/lake.pid"; LK="$TD/lock-$1"; LOG="$TD/lock-$1.log"
+  ( cd "$TD/repo" && HOME="$H" SALTBUILD_LOCK="$LK" SALTBUILD_LOCKLOG="$LOG" SEAT=orphantest exec python3 -c '
+import os, signal, subprocess, sys, time
+p = subprocess.Popen(["bash", sys.argv[1]], start_new_session=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+pid_file = sys.argv[2]
+for _ in range(300):
+    if os.path.exists(pid_file) and open(pid_file).read().strip(): break
+    time.sleep(0.1)
+os.killpg(os.getpgid(p.pid), signal.SIGKILL)
+p.wait()' "$SB" "$TD/lake.pid" ) > "$TD/$1.out" 2>&1
+  local lp; lp=$(cat "$TD/lake.pid" 2>/dev/null); KEEP="$KEEP $lp"
+  [ -n "$lp" ] || { no "$1 fixture" "the stub lake never started: $(tail -2 "$TD/$1.out" | tr '\n' '|')"; return; }
+  local k=0; while alive "$lp" && [ "$k" -lt 50 ]; do sleep 0.1; k=$((k+1)); done
+  alive "$lp" && no "$1 after a SIGKILL to the wrapper's PROCESS GROUP the stub lake is GONE within 5 s" "pid $lp still running — UNLOCKED and UNWATCHED" \
+              || ok "$1 after a SIGKILL to the wrapper's PROCESS GROUP the stub lake is GONE within 5 s"
+  lock_free_within 5 && ok "$1' ...and the lock is FREE" || no "$1' ...and the lock is FREE" "still held"
+  kill -KILL "$lp" 2>/dev/null
+}
 echo "════ saltbuild orphan guard — $SB ════"
 drive KILL O1
 drive TERM O3
+drive_group O5
 LK="$TD/lock-O4"; LOG="$TD/lock-O4.log"
 ( cd "$TD/repo" && HOME="$H" SALTBUILD_LOCK="$LK" SALTBUILD_LOCKLOG="$LOG" SEAT=orphantest STUB_SLEEP=0 STUB_RC=3 exec bash "$SB" ) > "$TD/O4.out" 2>&1 &
 w=$!; KEEP="$KEEP $w"; k=0; while alive "$w" && [ "$k" -lt 200 ]; do sleep 0.1; k=$((k+1)); done   # BOUNDED: a hang is a FAIL

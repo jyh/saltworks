@@ -391,12 +391,15 @@ run_lake(){ # run_lake <argv…> -> lake's own exit code
   set -m
   "$@" 9>&- &
   _lake_pid=$!
-  set +m
+  # ⛔ `set +m` comes AFTER the watchdog, not here (kent's read of 4d19cb7, driven): with it here the watchdog shared the
+  #   wrapper's group while lake had its own, so a caller's killpg on the wrapper (bench's target.py escalates to it) took
+  #   the watchdog and spared lake, leaving a build running with no lock and no watchdog. Both get their own groups now.
   ( exec 9>&- >/dev/null 2>&1 </dev/null
     trap '' INT TERM
     while kill -0 "$sb_pid" 2>/dev/null; do sleep 1; done
     kill -TERM -- "-$_lake_pid" 2>/dev/null; sleep 2; kill -KILL -- "-$_lake_pid" 2>/dev/null ) &
   _watch_pid=$!
+  set +m
   wait "$_lake_pid"; local rc=$?
   kill -KILL "$_watch_pid" 2>/dev/null; wait "$_watch_pid" 2>/dev/null   # KILL: the watchdog ignores INT/TERM by design
   _lake_pid=""; _watch_pid=""
