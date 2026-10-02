@@ -363,8 +363,47 @@ release() {
 }
 # ⛔ Same rule as the queue trap above: release, then EXIT -- never resume into the build.
 trap release EXIT
-trap 'release; exit 130' INT
-trap 'release; exit 143' TERM
+# ══ THE ORPHAN GUARD — kent #311 r2 (K2), routed 2026-10-02; DRAFT for kent's read and the helm's signature ═════════════
+# ⛔⛔ A CALLER THAT TIMES SALTBUILD OUT KILLS ONLY THIS SHELL. lake was a FOREGROUND child holding an inherited fd 9 — the
+#   fleet flock — so the lock stayed held for as long as lake ran, and a proof that never terminates wedged every seat's
+#   build. Two signals, two failures, both driven red on a stub lake (tools/saltbuild-orphan-test.sh):
+#     SIGKILL (Python's subprocess.run(timeout=…) sends it): no trap runs at all; the orphan lake keeps the lock.
+#     SIGTERM: bash DEFERS a trapped signal until the foreground child returns, so the handler waits on a lake that never
+#              returns; same outcome.
+#   ⇒ THREE PARTS, each closing one door:
+#     (1) lake runs with fd 9 CLOSED, so the flock is held by THIS shell alone and the kernel drops it the moment this shell
+#         dies, by any signal;
+#     (2) lake runs in its OWN process group, in the background, and this shell WAITS on it, so INT/TERM reach the trap at
+#         once and the trap kills the whole group;
+#     (3) a WATCHDOG that holds no lock and no output pipe kills lake's group within ~1 s of this shell vanishing — the
+#         SIGKILL case, where no trap can run. Between this shell's death and the watchdog's kill there is a window of up to
+#         ~1 s in which lake runs without the lock; stated, not hidden.
+_lake_pid=""; _watch_pid=""
+lake_group_kill(){
+  if [ -n "$_lake_pid" ]; then
+    kill -TERM -- "-$_lake_pid" 2>/dev/null; sleep 1; kill -KILL -- "-$_lake_pid" 2>/dev/null
+  fi
+  [ -n "$_watch_pid" ] && kill -KILL "$_watch_pid" 2>/dev/null
+  return 0
+}
+run_lake(){ # run_lake <argv…> -> lake's own exit code
+  local sb_pid=$$
+  set -m
+  "$@" 9>&- &
+  _lake_pid=$!
+  set +m
+  ( exec 9>&- >/dev/null 2>&1 </dev/null
+    trap '' INT TERM
+    while kill -0 "$sb_pid" 2>/dev/null; do sleep 1; done
+    kill -TERM -- "-$_lake_pid" 2>/dev/null; sleep 2; kill -KILL -- "-$_lake_pid" 2>/dev/null ) &
+  _watch_pid=$!
+  wait "$_lake_pid"; local rc=$?
+  kill -KILL "$_watch_pid" 2>/dev/null; wait "$_watch_pid" 2>/dev/null   # KILL: the watchdog ignores INT/TERM by design
+  _lake_pid=""; _watch_pid=""
+  return "$rc"
+}
+trap 'lake_group_kill; release; exit 130' INT
+trap 'lake_group_kill; release; exit 143' TERM
 export LEAN_NUM_THREADS=4
 CAP=24000
 if [ "$1" = "--cap" ]; then CAP="$2"; shift 2; fi
@@ -399,8 +438,8 @@ START=$(date '+%H:%M:%S' 2>/dev/null || echo n/a)
 case "$1" in
   *.lean) MODE=audit
           [ -f "$1" ] && PRESHA=$(shasum -a 256 "$1" 2>/dev/null | cut -c1-12)
-          ~/.elan/bin/lake env lean -M "$CAP" "$@" ;;
-  *)      MODE=build; ~/.elan/bin/lake build "$@" ;;
+          run_lake ~/.elan/bin/lake env lean -M "$CAP" "$@" ;;
+  *)      MODE=build; run_lake ~/.elan/bin/lake build "$@" ;;
 esac
 EXIT=$?
 { SHA=""
