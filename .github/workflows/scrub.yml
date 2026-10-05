@@ -87,8 +87,12 @@ jobs:
           #   so `BEFORE..HEAD` is EMPTY and the gate's fail-closed fires on clean
           #   content; a no-op push (BEFORE == HEAD) is the second empty-range case.
           #   Both fell through to a spurious red, never a leak. Driven red-first in a
-          #   scratch repo over ordinary, all-zeros, unreachable, rewind and no-op:
-          #   only rewind and no-op changed, from an empty range to the fallback.
+          #   scratch repo over ordinary, all-zeros, unreachable, rewind, no-op and a
+          #   non-ancestor force push: rewind and no-op changed from an empty range to
+          #   the fallback, and a FORCE PUSH changed from BEFORE..HEAD to the fallback
+          #   (merge-base with the default branch). That is the better behaviour: the
+          #   rewritten branch is scanned against the base it will merge into, not
+          #   against a tip that is no longer its history.
           #   `--is-ancestor` already implies the object exists, so no cat-file is kept.
           if [ -n "$BEFORE" ] && [ "$BEFORE" != "0000000000000000000000000000000000000000" ] \
              && git merge-base --is-ancestor "$BEFORE" HEAD 2>/dev/null \
@@ -179,8 +183,12 @@ jobs:
           #   so `BEFORE..HEAD` is EMPTY and the gate's fail-closed fires on clean
           #   content; a no-op push (BEFORE == HEAD) is the second empty-range case.
           #   Both fell through to a spurious red, never a leak. Driven red-first in a
-          #   scratch repo over ordinary, all-zeros, unreachable, rewind and no-op:
-          #   only rewind and no-op changed, from an empty range to the fallback.
+          #   scratch repo over ordinary, all-zeros, unreachable, rewind, no-op and a
+          #   non-ancestor force push: rewind and no-op changed from an empty range to
+          #   the fallback, and a FORCE PUSH changed from BEFORE..HEAD to the fallback
+          #   (merge-base with the default branch). That is the better behaviour: the
+          #   rewritten branch is scanned against the base it will merge into, not
+          #   against a tip that is no longer its history.
           #   `--is-ancestor` already implies the object exists, so no cat-file is kept.
           if [ -n "$BEFORE" ] && [ "$BEFORE" != "0000000000000000000000000000000000000000" ] \
              && git merge-base --is-ancestor "$BEFORE" HEAD 2>/dev/null \
