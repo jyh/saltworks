@@ -34,6 +34,15 @@ JOB 3  "FROM A MIDNIGHT DREAM TO VERIFIED SILICON" (title)
          verified, against what specification, by what checker.
 ```
 
+> **ANNOTATION, 2026-10-05 (the evidence seat, on its own text; the grading above is left as written).**
+> JOB 1 was wrong for "verified RISC-V core". On 08-09 its referent was a Lean model of the core,
+> and no theorem related that model to any RTL. The phrase belonged in JOB 3: it named no
+> specification and no checker for the processor. Graded "real" here, it reached this repository's
+> README on 08-16 as "a verified RISC-V processor taped out" and stayed there until 2026-10-05, while
+> the core that was fabricated carried three instruction defects that nothing had checked. See
+> [`POSTMORTEM-riscv-core-2026-10.md`](POSTMORTEM-riscv-core-2026-10.md), which names this grading
+> as one of the causes.
+
 ## ✅ WHAT IS ALREADY FENCED CORRECTLY — credited, because a fence that only finds fault teaches nobody
 
 **The design package draws the single most important line itself, twice, without
