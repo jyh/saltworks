@@ -81,8 +81,22 @@ jobs:
           # history is neither the "new branch" case nor the ordinary case, and
           # the old two-branch test had nowhere to put it.
           DEF="${{ github.event.repository.default_branch }}"
+          # ANCESTRY, NOT EXISTENCE (desk ML finding #6; salt's form since #144, saltbench's since #313's base).
+          #   `git cat-file -e BEFORE` asks whether the object EXISTS. The question is
+          #   whether it is an ANCESTOR of HEAD. On a REWIND the old tip still resolves,
+          #   so `BEFORE..HEAD` is EMPTY and the gate's fail-closed fires on clean
+          #   content; a no-op push (BEFORE == HEAD) is the second empty-range case.
+          #   Both fell through to a spurious red, never a leak. Driven red-first in a
+          #   scratch repo over ordinary, all-zeros, unreachable, rewind, no-op and a
+          #   non-ancestor force push: rewind and no-op changed from an empty range to
+          #   the fallback, and a FORCE PUSH changed from BEFORE..HEAD to the fallback
+          #   (merge-base with the default branch). That is the better behaviour: the
+          #   rewritten branch is scanned against the base it will merge into, not
+          #   against a tip that is no longer its history.
+          #   `--is-ancestor` already implies the object exists, so no cat-file is kept.
           if [ -n "$BEFORE" ] && [ "$BEFORE" != "0000000000000000000000000000000000000000" ] \
-             && git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+             && git merge-base --is-ancestor "$BEFORE" HEAD 2>/dev/null \
+             && [ "$BEFORE" != "$(git rev-parse HEAD)" ]; then
             RANGE="$BEFORE..HEAD"
             echo "push delta: $RANGE"
           elif MB=$(git merge-base "origin/$DEF" HEAD 2>/dev/null) && [ -n "$MB" ] \
@@ -109,6 +123,14 @@ jobs:
           fi
           echo "scanning $RANGE"
           python scripts/check_commit_trailers.py --range "$RANGE"
+      # ⛔ desk QF: THE DELTA ABOVE CANNOT SEE A COMMIT WHOSE OWN RUN WAS CANCELLED. A rapid push cancels the run on the
+      #   older tip, and the next run's range `$BEFORE..HEAD` STARTS AT that tip — a `..` range excludes its start — so the
+      #   one commit that lost its scan is exactly the one the next scan begins after, while every consumer reads green
+      #   (salt 2026-09-16, a6ada5c3). So the WHOLE history reachable from HEAD is scanned on every run as well: the
+      #   gate's default range. Measured before this step was added: 2,537 commit messages on master, 0 forbidden
+      #   strings, ~0.3 s — so no baseline is needed, and any future offender reachable from HEAD turns the run red.
+      - name: scan the whole history (desk QF)
+        run: python scripts/check_commit_trailers.py
 
   private-paths:
     name: no NEW path into the private record enters a public repo
@@ -155,8 +177,22 @@ jobs:
           # answers on an existing branch. Both paths are now driven as controls
           # before shipping, clean AND dirty.
           DEF="${{ github.event.repository.default_branch }}"
+          # ANCESTRY, NOT EXISTENCE (desk ML finding #6; salt's form since #144, saltbench's since #313's base).
+          #   `git cat-file -e BEFORE` asks whether the object EXISTS. The question is
+          #   whether it is an ANCESTOR of HEAD. On a REWIND the old tip still resolves,
+          #   so `BEFORE..HEAD` is EMPTY and the gate's fail-closed fires on clean
+          #   content; a no-op push (BEFORE == HEAD) is the second empty-range case.
+          #   Both fell through to a spurious red, never a leak. Driven red-first in a
+          #   scratch repo over ordinary, all-zeros, unreachable, rewind, no-op and a
+          #   non-ancestor force push: rewind and no-op changed from an empty range to
+          #   the fallback, and a FORCE PUSH changed from BEFORE..HEAD to the fallback
+          #   (merge-base with the default branch). That is the better behaviour: the
+          #   rewritten branch is scanned against the base it will merge into, not
+          #   against a tip that is no longer its history.
+          #   `--is-ancestor` already implies the object exists, so no cat-file is kept.
           if [ -n "$BEFORE" ] && [ "$BEFORE" != "0000000000000000000000000000000000000000" ] \
-             && git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+             && git merge-base --is-ancestor "$BEFORE" HEAD 2>/dev/null \
+             && [ "$BEFORE" != "$(git rev-parse HEAD)" ]; then
             RANGE="$BEFORE..HEAD"
             echo "push delta: $RANGE"
           elif MB=$(git merge-base "origin/$DEF" HEAD 2>/dev/null) && [ -n "$MB" ] \
