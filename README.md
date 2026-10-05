@@ -1,15 +1,29 @@
 # SaltWorks
 
-SaltWorks is a demonstration of a machine-verified full-stack implementation from
-application code, through a verified compiler and executive, to a verified RISC-V
-processor taped out on a community silicon shuttle; no proof passed through human
-review, and no RTL was written by a human. The working discipline — the Salt
+SaltWorks is a demonstration of a machine-verified stack from application code,
+through a verified compiler and executive, to a RISC-V processor taped out on a
+community silicon shuttle. The processor itself is the one link that was not
+verified; see the correction below. No proof passed through human review, and no
+RTL was written by a human. The working discipline — the Salt
 method — rests on a proof kernel no hallucinated proof can pass: mathematical
 claims travel between agents as kernel-checked artifacts, and human attention is
 reserved for statements, designs, and rulings. Verification is stated link by
 link, from the Lean 4 kernel to SAT-checked equivalence at the silicon boundary.
 We include the complete accounting: theorem provenance, a pre-registered token
 meter, and an error ledger, constituted from the campaign's append-only logs.
+
+## Correction, 2026-10-05
+
+The RISC-V core on this chip was not verified by the method this repository
+describes. Lean proves a 7-instruction model of the core, but no theorem relates
+that model to the fabricated design, and no instruction-conformance suite was run
+before tapeout. The first conformance run, on 2026-10-04, after submission, found
+3 of 31 in-scope instructions failing on the signed-off netlist: SRA, SRAI and LW.
+
+The measurement, with every table reproducible from hash-verified objects, is
+[`docs/silicon-step0-core32-conformance-1004.md`](docs/silicon-step0-core32-conformance-1004.md).
+The three defects, their causes and measured software workarounds are in
+[`docs/ERRATUM-core32-2026-10-05.md`](docs/ERRATUM-core32-2026-10-05.md).
 
 ## The stack, layer by layer
 
@@ -18,7 +32,7 @@ meter, and an error ledger, constituted from the campaign's append-only logs.
 | Application | [`SaltWorks/Stack/`](SaltWorks/Stack/) | application programs and their specifications, with the bridge theorems connecting them to the layers below |
 | Compiler | [`SaltWorks/HDL/`](SaltWorks/HDL/) | the verified compiler: expressions, straight-line code, and loops, down through the circuit DSL to Verilog, with the ISA semantics |
 | Executive | [`SaltWorks/HDL/`](SaltWorks/HDL/) | the executive's isolation theorems (`Executive*.lean`), with the certificate restatement in [`SaltWorks/Certs/`](SaltWorks/Certs/) |
-| CPU / silicon | [`SaltWorks/Silicon/`](SaltWorks/Silicon/) | the flow, the netlist importer, and SAT-checked equivalence at the silicon boundary |
+| CPU / silicon | [`SaltWorks/Silicon/`](SaltWorks/Silicon/) | the flow, the netlist importer, and SAT-checked equivalence at the silicon boundary; its proofs cover the MAC cells, not the RISC-V core |
 | The switch | [`SaltWorks/Banyan/`](SaltWorks/Banyan/) | the Batcher–banyan self-routing switch, sort-then-route closed end to end |
 | Certificates | [`SaltWorks/Certs/`](SaltWorks/Certs/) | the comprehensibility layer: headline theorems restated in primitive vocabulary, the restatement kernel-proved equivalent |
 

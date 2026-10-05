@@ -464,7 +464,7 @@ def ref_mode(name: str) -> int:
     return 0
 
 
-def ref_vs_run(head_sha: str, run_sha, run_green, behind_by) -> str:
+def ref_vs_run(head_sha: str, run_sha, run_green, behind_by, live_clean=None) -> str:
     """One line saying WHICH OBJECT the PR's verdict is about. Pure, so the
     self-test drives every branch without a forge.
 
@@ -480,6 +480,13 @@ def ref_vs_run(head_sha: str, run_sha, run_green, behind_by) -> str:
                 f"{behind_by} commit(s) since (a base move fires no run): the green "
                 f"is about a base that no longer exists")
     if not run_green:
+        if live_clean is True:
+            # desk SN rec (1), 2026-09-25: the run is pinned to an immutable sha but the prose it
+            # judged is editable; when this gate finds NOTHING on the live forge and the recorded
+            # run is still red, the reader is one re-run from green and the bare status hides it.
+            return ("run on current head NOT green, and THIS GATE'S SURFACES READ CLEAN ON THE LIVE "
+                    "FORGE — if the red is this gate's, it is FIXED ON THE FORGE, RUN STALE: re-run "
+                    "the failed job to clear (the run judged prose that has since been edited)")
         return "run on current head NOT green"
     return "current — run is on this head and the base has not moved"
 
@@ -569,6 +576,12 @@ def rerun_note_lines(armed) -> list[str]:
 
 def open_mode(repo: str) -> int:
     """Scan every OPEN PR's title+body; disclose REF-vs-RUN for each."""
+    # desk SN rec (2), 2026-09-25: a CI check is NAMED after one of its N steps, so a red under a
+    # job called after something else is read as that job's diagnosis. This first line makes the
+    # log self-attributing: which STEP ran, which SURFACE it read, and that the surface is live.
+    print(f"check_pr_descriptions --open [pr-gate {self_id()}]: STEP = this script's open mode · "
+          f"SURFACE = the OPEN PRs' TITLES and BODIES on the forge, read LIVE at this run "
+          f"(editable prose; no git object) · REPO = {repo}")
     try:
         prs = _gh([f"repos/{repo}/pulls?state=open&per_page=100"])
     except RuntimeError as e:
@@ -581,9 +594,11 @@ def open_mode(repo: str) -> int:
     notes = []
     for pr in prs:
         n = pr["number"]
-        bad += scan_description(n, pr.get("title"), pr.get("body"))
-        sess += scan_session(n, pr.get("title"), pr.get("body"))
-        words += subject_scan(pr_rows(pr))
+        pr_bad = scan_description(n, pr.get("title"), pr.get("body"))
+        pr_sess = scan_session(n, pr.get("title"), pr.get("body"))
+        pr_words = subject_scan(pr_rows(pr))
+        bad += pr_bad; sess += pr_sess; words += pr_words
+        live_clean = not (pr_bad or pr_sess or pr_words)   # desk SN rec (1): what this run READ
         head = pr["head"]["sha"]
         base_ref = pr["base"]["ref"]
         run_sha = run_green = None
@@ -602,7 +617,7 @@ def open_mode(repo: str) -> int:
             notes.append(f"  PR #{n}: REF-vs-RUN unreadable ({e}) — reported, not assumed current")
             continue
         notes.append(f"  PR #{n} head {head[:8]} vs base {base_ref}: "
-                     + ref_vs_run(head, run_sha, bool(run_green), behind))
+                     + ref_vs_run(head, run_sha, bool(run_green), behind, live_clean=live_clean))
     if bad:
         print(f"FAIL [pr-gate {self_id()}]: {len(bad)} private-record path(s) in "
               f"OPEN PR descriptions — the forge-side prose, not any git object.\n")
@@ -990,6 +1005,14 @@ def self_test() -> int:
         failures.append("a red run on the current head must say so")
     if "current" not in ref_vs_run(h, h, True, 0):
         failures.append("green on current head over an unmoved base is current")
+    # desk SN rec (1): the THIRD thing this line alone can know — the live surface is clean
+    # while the recorded run is red ⇒ FIXED ON THE FORGE, RUN STALE. Both directions.
+    if "FIXED ON THE FORGE" not in ref_vs_run(h, h, False, 0, live_clean=True):
+        failures.append("a red run on the current head with CLEAN live surfaces must say FIXED ON THE FORGE, RUN STALE")
+    if "FIXED ON THE FORGE" in ref_vs_run(h, h, False, 0, live_clean=False):
+        failures.append("a red run with a LIVE finding must NOT claim it is fixed on the forge")
+    if "FIXED ON THE FORGE" in ref_vs_run(h, h, False, 0):
+        failures.append("with no live reading the line must stay the bare NOT green")
     # ARM 4 — the vocabulary is the SIBLING'S, not a copy: a shape the sibling
     # catches must be caught HERE through the import, so a sibling repair
     # propagates instead of invalidating this file silently.

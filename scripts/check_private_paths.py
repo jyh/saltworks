@@ -212,7 +212,25 @@ _EMPLOYER = ["lo" + "ca", "ho" + "ll", "pcc-" + "bios", "safe_" + "dav1d", "safe
 #     BETTER THAN AN UNKNOWN ONE IF SOMEBODY IS COUNTING THE DAYS — and nothing was, because the
 #     disclosure had no age, no owner and no re-measure date. It has all three now, below.
 #   ⛔ Assembled from parts like every other root here: this file must not match its own patterns.
-_PRIVATE_PROJ = ["si" + "la", "mor" + "pho", "eman" + "uensis", "ver" + "so"]
+# ⛔⛔ ROW VD (2026-09-22) — TWO MORE PRIVATE-FOREVER TREES, BORN AT COUNCIL 2026-09-18, AND NO COPY OF THIS GATE
+#   WATCHED EITHER FOR FOUR DAYS while the disclosure below told every run that a newly born root would not be
+#   watched. Measured before this edit: no path into either had EVER reached a gated public repo (all six trees,
+#   diff history and commit messages, each against a control that fired). Their names are ORDINARY WORDS, so they
+#   take the durable local tier's shape (QUALIFIED forms only, below), never a bare root: one of them is every CI
+#   runner's home directory. The social seat's run directory is a distinctive name and IS a root.
+#   ⇒ WHAT FOUND THIS WAS NOT THE DISCLOSURE: a reader of x86lean #45's output, looking for something else.
+#     The fleet side now DERIVES the population (a census of the private trees on disk, mapped by the fleet
+#     map, tested against every gate's own scan()), so a birth no longer waits on this list's date.
+# content + studio ADDED 2026-09-27 (fleet map bullets, born 2026-09-26; scrub-roots-census UNWATCHED 12 pairs → 0), ordinary words ⇒ qualified forms only, like home and social.
+_LOCALONLY = ["ho" + "me", "soc" + "ial", "con" + "tent", "stu" + "dio"]
+_PRIVATE_PROJ = ["soc" + "ial-run", "si" + "la", "mor" + "pho", "eman" + "uensis", "ver" + "so"]
+# ⛔⛔ ROW XK (2026-09-24) — A PRIVATE TREE THAT IS A *FAMILY*, WATCHED BY PATTERN, NEVER BY LIST. The Captain,
+#   council 2026-09-23, "Yes (a)": the benchmark harness tree and every worktree of it are a PRIVATE RECORD. Its
+#   worktrees are named `<tree>-<suffix>` and the family grew 22 -> 23 -> 26 in two days, so a list of names is
+#   false within a day of being written. The root below matches the tree AND any `-suffix` of it. It never matches
+#   the public benchmark repo, whose name is this root's prefix without the second word.
+_FAMILY = ["saltbench-" + "sys" + "tems"]
+_FAMILY_RE = [f + r"(?:-[A-Za-z0-9_.]+)*" for f in _FAMILY]
 # ⛔⛔ THE SEGMENT SET, NOT ONE SEGMENT — AND IT WAS WRONG FOR THE WHOLE MIGRATION (row UI,
 #   2026-09-20). This read `"\\.claude-" + _SEAT + "-…"` and matched the SUPERSEDED convention
 #   (`.claude-<seat>-*`, the directories deleted 2026-09-15). Measured against the fleet roster's
@@ -240,12 +258,12 @@ _BUS = "FLEET" + r"\.md"
 #   map AND the fleet root on disk: 12 private/employer trees, 11 in the lists above, `local` in its
 #   own shape below; bin/ is a symlink into the kit (watched); every other directory is a public
 #   repo or a worktree of one.
-ROOTS_RECONCILED = "2026-09-13"
+ROOTS_RECONCILED = "2026-09-27"
 ROOTS_OWNER = "evidence (PM)"
-ROOTS_REMEASURE_DUE = "2026-10-13"
+ROOTS_REMEASURE_DUE = "2026-10-27"
 
 _ROOTS = [_SEAT] + _EMPLOYER + _PRIVATE_PROJ
-_ROOT_ALT = "|".join(_ROOTS)
+_ROOT_ALT = "|".join(_ROOTS + _FAMILY_RE)   # ROW XK: the family joins as a PATTERN
 
 # ⛔⛔ ROW MK, 2026-09-14 — THE STAMP IS A CACHE OF A MEASUREMENT AND IT DRIFTED WHILE THE THING IT
 #   CACHES DID NOT MOVE AT ALL. Measured at origin across all six gated public repos: the ROOT SETS
@@ -270,7 +288,11 @@ _ROOT_ALT = "|".join(_ROOTS)
 #   ⛔ SORTED, so the digest is a property of the SET and not of the order somebody typed it in.
 #   ⛔ AND IT CARRIES NO ROOT: a digest of the list is safe to print and to quote across repos,
 #     which a diff of the list itself would not be.
-ROOTS_DIGEST = hashlib.sha256("|".join(sorted(_ROOTS)).encode()).hexdigest()[:10]
+# ROW VD: the ordinary-word trees are PART OF THE SET the digest certifies, or two copies that differ only in
+#   them would print the same digest and read as reconciled. Marked "~" so no bare root can collide.
+# ROW XK: the family is part of the certified set too, marked "*" so no literal root can collide.
+ROOTS_DIGEST = hashlib.sha256("|".join(sorted(_ROOTS) + sorted("~" + w for w in _LOCALONLY)
+                                       + sorted("*" + f for f in _FAMILY)).encode()).hexdigest()[:10]
 
 # ⛔ THE DURABLE LOCAL TIER (born 2026-08-25) IS A PRIVATE ROOT WHOSE NAME IS AN
 # ORDINARY WORD, so it CANNOT join _ROOTS. Measured before deciding: a bare
@@ -291,6 +313,12 @@ _FLEETPARENT = "projects" + _SEPCLASS + "claude"
 _LOCAL_QUALIFIED = (_FLEETPARENT + _SEPCLASS + _LOCALWORD
                     + "(?:[/" + _BS + _BS + "]|" + _BS + "b)")
 _LOCAL_BAREREPO = _LOCALWORD + _BS + ".git"
+# ROW VD: the ordinary-word private trees above, in the two forms that identify them rather than any
+# directory of that name — fleet-qualified, or a bare repository — exactly as the local tier is matched.
+_LOCALONLY_ALT = "|".join(_LOCALONLY)
+_LOCALONLY_QUALIFIED = (_FLEETPARENT + _SEPCLASS + "(?:" + _LOCALONLY_ALT + ")"
+                        + "(?:[/" + _BS + _BS + "]|" + _BS + "b)")
+_LOCALONLY_BAREREPO = "(?<![A-Za-z0-9_.-])(?:" + _LOCALONLY_ALT + ")" + _BS + ".git"
 # The backup volume that holds it is itself a private-record location.
 _BACKUPVOL = ("Volumes" + _SEPCLASS + "Content[ _]HD" + _SEPCLASS
               + "Salt" + "works")
@@ -363,6 +391,10 @@ FORBIDDEN = [
      "a path into the durable local tier"),
     (re.compile(_LOCAL_BAREREPO),
      "the durable local tier's bare repository"),
+    (re.compile(_LOCALONLY_QUALIFIED),
+     "a path into a local-only private tree (row VD)"),
+    (re.compile(_LOCALONLY_BAREREPO),
+     "a local-only private tree's bare repository (row VD)"),
     (re.compile(_BACKUPVOL),
      "the backup volume holding the private record"),
     (re.compile(_ROOTLESS_INTO),
@@ -734,6 +766,29 @@ def self_test() -> int:
                       + _LOCALWORD + chr(92) + "x.md"),
         ("l-repo", "the bare repo " + _LOCALWORD + ".git"),
         ("l-vol", "/Volumes/Content HD/" + "Salt" + "works/archives"),
+        # ⛔⛔ ROW VD (2026-09-22): the two ordinary-word private trees born at council 2026-09-18, and the social
+        #   seat's run directory. Split DIFFERENTLY from `_LOCALONLY` ("hom"+"e" vs "ho"+"me") so that editing one
+        #   cannot silently keep the other in step — the plant must never share a constant with the pattern.
+        ("vd-home", "see projects/claude/" + "hom" + "e" + "/docs/x.md"),
+        ("vd-social", "see projects/claude/" + "so" + "cial" + "/src/x.py"),
+        ("vd-social-bs", "see projects" + chr(92) + "claude" + chr(92) + "so" + "cial" + chr(92) + "x.md"),
+        ("vd-home-repo", "the bare repo " + "hom" + "e" + ".git"),
+        ("vd-social-repo", "pushed to Saltworks/" + "so" + "cial" + ".git"),
+        # 2026-09-27: content + studio (born 2026-09-26), qualified forms only. Split differently from `_LOCALONLY`
+        #   ("co"+"ntent" vs "con"+"tent") so the plant never shares a constant with the pattern.
+        ("cs-content", "see projects/claude/" + "co" + "ntent" + "/docs/x.md"),
+        ("cs-content-bs", "see projects" + chr(92) + "claude" + chr(92) + "co" + "ntent" + chr(92) + "x.md"),
+        ("cs-content-repo", "pushed to Saltworks/" + "co" + "ntent" + ".git"),
+        ("cs-studio", "see projects/claude/" + "st" + "udio" + "/src/x.py"),
+        ("cs-studio-bs", "see projects" + chr(92) + "claude" + chr(92) + "st" + "udio" + chr(92) + "x.md"),
+        ("cs-studio-repo", "the bare repo " + "st" + "udio" + ".git"),
+        ("vd-run", "receipts in ~/" + "so" + "cial-run" + "/receipts.tsv"),
+        # ROW XK (2026-09-24): the family, the bare tree and three real worktree shapes. Split differently from
+        #   `_FAMILY` so the plant never shares a constant with the pattern.
+        ("xk-bare", "see projects/claude/" + "saltbench-sys" + "tems" + "/tasks/x.md"),
+        ("xk-wt", "tools from /Users/x/" + "saltbench-sys" + "tems-v3-export-2833621" + "/harness"),
+        ("xk-wt2", "scorer/walk " + "saltbench-sys" + "tems-v3-gemini-abb7829" + "/harness/systems-v3"),
+        ("xk-bs", "at C:" + chr(92) + "saltbench-sys" + "tems-x86r1" + chr(92) + "t.md"),
         # ROOTLESS SHAPES (row J, 08/31). Assembled, never spelled.
         ("r-rl-b", "ruled in " + _ROOTLESS[0] + "/2026-08-30-x.md"),
         ("r-rl-f", "the row in " + _ROOTLESS[1] + "/RULING-x.md"),
@@ -760,6 +815,21 @@ def self_test() -> int:
         ("c-usr", "installed to /usr/" + _LOCALWORD + "/bin"),
         ("c-usrlib", "on the path /usr/" + _LOCALWORD + "/lib/python3.12"),
         ("c-localprose", _LOCALWORD + "/remote divergence was the cause"),
+        # ROW VD's declared hole, kept as controls: the ordinary words must never fire unqualified.
+        ("vd-c-runner", "the checkout is at /" + "home" + "/runner/work/x"),
+        ("vd-c-homedir", "cd to your " + "home" + " directory and run it"),
+        ("vd-c-brew", "brew installs under /opt/" + "home" + "brew/bin"),
+        ("vd-c-social", "the " + "social" + " cost of a false alarm"),
+        ("vd-c-mid", "docs/" + "social" + "/x.md nests a PUBLIC dir"),
+        # 2026-09-27: content + studio are ordinary words and must never fire unqualified.
+        ("cs-c-content", "the " + "content" + " of the file"),
+        ("cs-c-content-dir", "docs/" + "content" + "/x.md nests a PUBLIC dir"),
+        ("cs-c-studio", "a " + "studio" + " apartment"),
+        ("cs-c-studio-dir", "open src/" + "studio" + "/main.rs in Visual " + "Studio"),
+        # ROW XK: the PUBLIC benchmark repo, and the family name in prose, must never fire.
+        ("xk-c-public", "see " + "saltbench" + "/harness/systems-v3/x.md"),
+        ("xk-c-prose", "the " + "saltbench-sys" + "tems" + " harness runs the cells"),
+        ("xk-c-near", "a dir named " + "saltbench-sys" + "temsx" + "/x is not the tree"),
         ("c-meta", "this gate forbids paths into the private record"),
         # ROOTLESS guards: a bare name stays softened by the ruling; a MID-PATH
         # component of the same ordinary word is the declared consequence of
