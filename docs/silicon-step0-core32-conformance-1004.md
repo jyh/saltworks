@@ -1,8 +1,9 @@
 # STEP 0 — the FABRICATED core32 measured against RV32I
 
 silicon, 2026-10-04 (helm route @75,145,900, the Captain's word 15:1x: *"we've made mistakes here before,
-I'm not that confident we have a SRA/SRAI bug"*). **Status: NOT PUBLIC.** This file lives on a local branch
-of saltworks and in the private seat record; whether any of it reaches a public surface is council's.
+I'm not that confident we have a SRA/SRAI bug"*). **Status: PUBLIC since 2026-10-05**, by council's ruling
+that day, as the receipt for the README's correction; written 2026-10-04, section (D) added 2026-10-05, and
+otherwise unedited. The erratum that draws on it is [`ERRATUM-core32-2026-10-05.md`](ERRATUM-core32-2026-10-05.md).
 
 ## Verdict, with its limits beside it
 
