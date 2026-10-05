@@ -119,6 +119,35 @@ of saltworks and in the private seat record; whether any of it reaches a public 
 | xor | PASS (1804 cyc) | PASS (1804 cyc) | PASS (1804 cyc) | PASS (1804 cyc) |
 | xori | PASS (684 cyc) | PASS (684 cyc) | PASS (684 cyc) | PASS (684 cyc) |
 
+## (D) The erratum's software workarounds — measured 2026-10-05 (desk AAL)
+
+*Added the day after the verdict, for the chip datasheet's erratum. Same bench, same objects, same pins-only reading; `+addrnet` for the address because the program exceeds 256 B. Reproduced by section (D) of `run_step0.sh`.*
+
+- **SRA / SRAI → five instructions, every one of them conforming** (SRLI, SUB, XOR, SRL/SRLI): `srli s,x,31 ; sub s,x0,s ; xor t,x,s ; srl t,t,n ; xor rd,t,s` (SRAI: `srli t,t,k` in the fourth slot). `s` and `t` must be distinct from each other and from `x` and `n`.
+- **LW → issue it twice**, `rd ≠ rs1`, with no other LOAD between the two. By the RTL only a load loop writes `rdata_r` (busadapt8.v :230), so stores and other instructions may sit between them; a store between was MEASURED (row 3), the rest is read from the code.
+- **Controls:** the same program on `ctl_all` (a corrected core) gives byte-identical stores, so the sequences are right on a conforming core too; and a MUTANT probe with the first pair reduced to a single LW stores `00000000` for that row on RTL, so this table can say ❌.
+- **Limit:** simulation samples operands (15 rows); it is not a proof that the sequences hold for every input. The SRA identity itself (`x >>a n == ((x ^ s) >>l n) ^ s`, `s` = the sign mask) is standard and holds for all 32-bit `x` and `n` in 0..31.
+
+### workaround_probe  (+addrnet for the address; every value is a STORE reassembled from uo_out)
+| row | RV32I expects | rtl | gl | ctl_all |
+|---|---|---|---|---|
+| LW×2 dat[0], first load after reset | `11111111` | `11111111` ✅ | `11111111` ✅ | `11111111` ✅ |
+| LW×2 dat[1] | `22222222` | `22222222` ✅ | `22222222` ✅ | `22222222` ✅ |
+| LW×2 dat[2], a store between | `33333333` | `33333333` ✅ | `33333333` ✅ | `33333333` ✅ |
+| LW×2 dat[0] again | `11111111` | `11111111` ✅ | `11111111` ✅ | `11111111` ✅ |
+| SRA_W -16,2 | `fffffffc` | `fffffffc` ✅ | `fffffffc` ✅ | `fffffffc` ✅ |
+| SRA_W -16,31 | `ffffffff` | `ffffffff` ✅ | `ffffffff` ✅ | `ffffffff` ✅ |
+| SRA_W -16,0 | `fffffff0` | `fffffff0` ✅ | `fffffff0` ✅ | `fffffff0` ✅ |
+| SRA_W 0x80000000,4 | `f8000000` | `f8000000` ✅ | `f8000000` ✅ | `f8000000` ✅ |
+| SRA_W 15,1 | `00000007` | `00000007` ✅ | `00000007` ✅ | `00000007` ✅ |
+| SRA_W 0x7fffffff,31 | `00000000` | `00000000` ✅ | `00000000` ✅ | `00000000` ✅ |
+| SRAI_W -16,2 | `fffffffc` | `fffffffc` ✅ | `fffffffc` ✅ | `fffffffc` ✅ |
+| SRAI_W -16,31 | `ffffffff` | `ffffffff` ✅ | `ffffffff` ✅ | `ffffffff` ✅ |
+| SRAI_W 0x80000000,4 | `f8000000` | `f8000000` ✅ | `f8000000` ✅ | `f8000000` ✅ |
+| SRAI_W 0x12345678,8 | `00123456` | `00123456` ✅ | `00123456` ✅ | `00123456` ✅ |
+| SRAI_W 0x87654321,8 | `ff876543` | `ff876543` ✅ | `ff876543` ✅ | `ff876543` ✅ |
+| run | | halted=1 phase_mismatch=0 | halted=1 phase_mismatch=0 | halted=1 phase_mismatch=0 |
+
 ## (C) riscv-formal — the price (not run)
 
 - **Missing pieces:** core32 has no RVFI port; `sby` is ABSENT here (pip/source, minutes); `boolector`/`bitwuzla` ABSENT; `z3` and `yosys-smtbmc` present (z3 is the slow default).

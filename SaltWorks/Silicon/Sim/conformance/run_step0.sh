@@ -96,3 +96,33 @@ for s in "$RVTESTS"/isa/rv32ui/*.S; do
   done
   echo "$row"
 done
+
+# ---- (D) the erratum's SOFTWARE WORKAROUNDS (desk AAL, 2026-10-05), full-address host --------
+# fabricated RTL · signed-off GL · ctl_all (a corrected core: the sequences must hold there too)
+"$HERE/build.sh" "$HERE/progs/workaround_probe.S" "$OUT/wa" 2>/dev/null
+for b in rtl gl ctl_all; do run "$b" "$OUT/wa/workaround_probe" "+addrnet +cycles=40000" > "$OUT/workaround_probe.$b.txt"; done
+python3 - "$OUT" <<'PY'
+import sys
+O=sys.argv[1]; M=0xffffffff
+def sra(x,s): x&=M; return ((x-(1<<32) if x>>31 else x)>>s)&M
+N=-16&M
+# one row per stored result in progs/workaround_probe.S, in order; the in-pair store (sw x0) is dropped by position (below)
+E=[("LW×2 dat[0], first load after reset",0x11111111),("LW×2 dat[1]",0x22222222),("LW×2 dat[2], a store between",0x33333333),
+   ("LW×2 dat[0] again",0x11111111),("SRA_W -16,2",sra(N,2)),("SRA_W -16,31",sra(N,31)),("SRA_W -16,0",sra(N,0)),
+   ("SRA_W 0x80000000,4",sra(0x80000000,4)),("SRA_W 15,1",sra(15,1)),("SRA_W 0x7fffffff,31",sra(0x7fffffff,31)),
+   ("SRAI_W -16,2",sra(N,2)),("SRAI_W -16,31",sra(N,31)),("SRAI_W 0x80000000,4",sra(0x80000000,4)),
+   ("SRAI_W 0x12345678,8",sra(0x12345678,8)),("SRAI_W 0x87654321,8",sra(0x87654321,8))]
+B="rtl gl ctl_all".split()
+def st(b):
+    rows=[l.split() for l in open(f"{O}/workaround_probe.{b}.txt") if l.startswith("ST ")]
+    out=[int(r[2],16) for r in rows]
+    # the program's stores land in order; the 3rd store is the in-pair `sw x0` (r2's mid-pair store) and is dropped
+    return out[:2]+out[3:3+len(E)-2]
+got={b:st(b) for b in B}
+summ={b:[l for l in open(f"{O}/workaround_probe.{b}.txt") if l.startswith("SUMMARY")][0].split() for b in B}
+print("\n### workaround_probe  (+addrnet for the address; every value is a STORE reassembled from uo_out)")
+print("| row | RV32I expects | "+" | ".join(B)+" |"); print("|---|---|"+"---|"*len(B))
+for i,(n,e) in enumerate(E):
+    print(f"| {n} | `{e:08x}` | "+" | ".join(("`%08x`"%got[b][i])+(" ✅" if got[b][i]==e else " ❌") for b in B)+" |")
+print("| run | | "+" | ".join(" ".join(x for x in summ[b] if x.startswith(("halted","phase_mismatch")))for b in B)+" |")
+PY
