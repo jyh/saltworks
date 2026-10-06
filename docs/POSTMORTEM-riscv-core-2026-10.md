@@ -16,7 +16,8 @@ design of record `jyh/tt-neural-dataflow-fabric@01e19f7`, submitted 2026-09-07) 
 three of its 31 in-scope RV32I instructions: **SRA, SRAI and LW**
 ([step 0](silicon-step0-core32-conformance-1004.md), [erratum](ERRATUM-core32-2026-10-05.md)).
 A bus-level riscv-formal run on 2026-10-05 fails on exactly those three instructions; each of its 34
-passes was shown reachable in cover mode, so none is vacuous
+checks that pass (28 instructions + 6 consistency checks) was shown reachable in cover mode, so none
+is vacuous
 ([AAJ](silicon-aaj-bus-formal-1005.md), "Non-vacuity").
 
 **Error 2, in the public record.** From 2026-08-16 to 2026-10-05 this repository's README said the
