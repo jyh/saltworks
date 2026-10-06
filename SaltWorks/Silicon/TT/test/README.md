@@ -41,7 +41,7 @@ at all about hold — see `../docs/submission-checklist.md` §C.3.
   at the build-requirements step. Use 3.12 or 3.13.
 - **cocotb 2.x, not 1.x**: `Clock(dut.clk, 10, unit="us")` (1.x's `units=` will
   not run), and the Makefile variable is `COCOTB_TEST_MODULES`, not `MODULE`.
-- Verified here on Icarus Verilog 13.0 + cocotb 2.0.1 + Python 3.12: **3/3 tests,
+- Verified here (`test.py`) on Icarus Verilog 13.0 + cocotb 2.0.1 + Python 3.12: **3/3 tests,
   255/255 scenarios.**
 
 ## The three tests, and what each is worth

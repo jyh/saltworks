@@ -210,7 +210,7 @@ and is applied anyway.
 
 **One API response = several records.** Claude Code writes one assistant
 record per content block, each repeating the whole `usage` block. Token
-events are deduplicated by `requestId` (usage verified byte-identical within
+events are deduplicated by `requestId` (usage measured byte-identical within
 a group). Summing records would inflate every token figure by **~2.3×** (measured; earlier text said ~3×).
 
 **Subagents are where the REQUESTS are** — in salt, 71,115 subagent requests
