@@ -20,6 +20,8 @@
 #   FAIL CLOSED -- with the scanner missing, a clean push is refused; so it is
 #                  with the subject gate missing.
 #   DELETE arm  -- deleting a ref pushes no objects and must be ALLOWED.
+#   REWIND arm  -- a clean force-push that moves a ref BACKWARDS must be ALLOWED
+#                  (desk ML #6: the range picker tests ancestry, not existence).
 #   MUTATION    -- the same refused push must SUCCEED with `--no-verify`. Without
 #     CONTROL      this arm, every red above is equally consistent with "the push
 #                  would have failed anyway", and the prover would prove nothing.
@@ -233,6 +235,26 @@ commit_file feat.txt "another seat's bank carries the superseded value" "feature
 run_push 0 green-new-branch origin feature
 expect_out green-new-branch "merge-base with origin/"
 git -C "$W" checkout -q main
+
+# ── ARM 3b ── a clean force-push that REWINDS the ref (desk ML finding #6). The old
+# remote tip still EXISTS in this clone, so an existence test picks the range
+# `<old tip>..<new tip>`, which is EMPTY, and the gate refuses clean content.
+# An ancestry test sees the old tip is not an ancestor and falls through.
+note "ARM 3b clean force-push that REWINDS main                    expect 0"
+commit_file rewind.txt "a line pushed and then rewound away" "clean: a commit the next push rewinds"
+run_push 0 green-pre-rewind origin main
+git -C "$W" reset -q --hard "$GOOD"
+run_push 0 green-rewind -f origin main
+expect_out green-rewind "pre-push OK"
+if [ "$(remote_tip main)" = "$GOOD" ]; then
+  printf '       +   green-rewind: the remote ref rewound to the earlier tip\n'
+else
+  bad "green-rewind: the remote ref is not at the earlier tip"
+fi
+# Whatever happened above, the arms below start from the remote at the earlier tip
+# (a refused rewind leaves it AHEAD of this clone, and every later push would be
+# git's own non-fast-forward rejection, read as the hook's).
+git -C "$REMOTE" update-ref refs/heads/main "$GOOD"
 
 # ── ARM 4 ── a private-record path in a COMMIT MESSAGE.
 note "ARM 4  private path in a commit MESSAGE                       expect 1"

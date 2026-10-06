@@ -126,11 +126,15 @@ while read -r local_ref local_sha remote_ref remote_sha; do
   RANGE=
   WHY=
   if [ -n "${remote_sha:-}" ] && [ "$remote_sha" != "$ZERO" ] \
-     && git cat-file -e "${remote_sha}^{commit}" 2>/dev/null; then
-    # A remote sha must be REACHABLE, not merely non-empty: after a history
-    # rewrite the remote tip names commits this clone no longer has, and
-    # `<dead-sha>..HEAD` makes git exit 128 -- a spurious refusal on clean
-    # content. The CI gates learned this the expensive way; it is carried here.
+     && git merge-base --is-ancestor "$remote_sha" "$local_sha" 2>/dev/null \
+     && [ "$remote_sha" != "$local_sha" ]; then
+    # A remote sha must be an ANCESTOR of what is pushed, not merely non-empty:
+    # after a history rewrite the remote tip names commits this clone no longer
+    # has, and `<dead-sha>..HEAD` makes git exit 128 -- a spurious refusal on
+    # clean content. The CI gates learned this the expensive way; it is carried here.
+    # EXISTENCE WAS NOT ENOUGH (desk ML finding #6): on a force-push that REWINDS
+    # the ref, the old tip is still here, `remote..local` is EMPTY, and the gate
+    # refuses "scanned ZERO commits". prove_pre_push.sh ARM 3b drives it.
     RANGE="${remote_sha}..${local_sha}"
     WHY="delta against the remote tip"
   else
