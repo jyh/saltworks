@@ -92,4 +92,12 @@ theorem core32bus_not_refinesRV32I : ¬ RefinesRV32I core32bus := by
     rw [core_x2, hs2] at hx
     exact absurd hx (by decide)
 
+/-- The reset convention is the RTL's: from ANY state, an edge with `rst_n` low (any `sof`, any
+`ui_in`) lands in `core32bus.reset` of whatever the register file then holds. The register file is
+the one flop with no reset, and `RefinesE` quantifies over it. -/
+theorem reset_edge (σ : St) (sof : BitVec 1) (b : BitVec 8) :
+    step σ ⟨0#1, sof, b⟩ = core32bus.reset (step σ ⟨0#1, sof, b⟩).regs := by
+  simp [step, core32bus, n_pc, n_phase, n_kind, n_storeBeat, n_fetchOwed, n_inAcc, n_instrR, n_rdataR,
+    lowRst, rstn, not1, k, Ex.eval, Sig.eval, T_FETCH]
+
 end SaltWorks.Silicon.Refine

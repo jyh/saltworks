@@ -1,9 +1,16 @@
 #!/bin/sh
 # run_link.sh — desk AAU W1: the SAT link from the Lean pin model to the FABRICATED RTL.
-# Emits SaltWorks/Silicon/Refine/Model.lean as Verilog (emit.lean, through saltbuild), then has yosys
-# prove it equivalent to core32.v + busadapt8.v + plane32bus.v at 01e19f7. Every flop and output is
-# matched BY NAME (equiv_make), and equiv_induct proves the matched signals equal. A MUTANT CONTROL
-# follows: the model with SRA/SRAI transcribed as an arithmetic shift must FAIL.
+#
+# WHAT IS PROVED: the Lean model's transition function and pin outputs EQUAL those of
+# core32.v + busadapt8.v + plane32bus.v at jyh/tt-neural-dataflow-fabric@01e19f7. That holds for
+# every value of every flop, every input (rst_n and sof included) and every Verilog `x` in the gold
+# (freed by `setundef -anyseq`, so no fixed choice is made for them). The gold's flops are cut open
+# (`expose -evert-dff`); each alias of a flop's output net is tied to ONE state input, and EVERY
+# alias's next-state output is compared (comb_wrap.py refuses a flop it cannot place). Two
+# machines with equal transition and output functions over the same state, started from the
+# same state, agree in every cycle, so this is the sequential link the Lean theorem needs.
+# ABC `iprove` decides the miter.
+# CONTROL: the model with SRA/SRAI transcribed as an ARITHMETIC shift must be found NOT equivalent.
 # env: OUT (scratch, required) · TTDIR (tape-out clone)
 set -eu
 HERE=$(cd "$(dirname "$0")" && pwd)
@@ -22,43 +29,33 @@ echo "gold: $REF core32 $CORE_BLOB · busadapt8 $BUS_BLOB · plane32bus ${PLANE_
 
 ( cd "$ROOT" && OUT_DIR="$OUT" ../saltbuild.sh SaltWorks/Silicon/Formal/refine_link/emit.lean ) > "$OUT/emit.log" 2>&1 \
   || { echo "⛔ emit failed"; tail -5 "$OUT/emit.log"; exit 2; }
-echo "model: $(git hash-object "$OUT/model.v") ($(wc -l < "$OUT/model.v") lines) · mutant $(git hash-object "$OUT/model_ashr.v")"
+echo "model: model_comb.v $(git hash-object "$OUT/model_comb.v") · mutant $(git hash-object "$OUT/model_comb_ashr.v")"
 
-link() {  # $1 = gate verilog, $2 = tag
-  cat > "$OUT/$2.ys" <<YS
-read_verilog $OUT/fab/core32.v $OUT/fab/busadapt8.v $OUT/fab/plane32bus.v
-hierarchy -top plane32bus; proc; flatten; memory; opt_clean; rename plane32bus gold; design -stash gold
-read_verilog $1
-hierarchy -top plane32bus; proc; opt; rename plane32bus gate; design -stash gate
-design -copy-from gold -as gold gold
-design -copy-from gate -as gate gate
-equiv_make gold gate equiv
-hierarchy -top equiv
-async2sync
-equiv_simple
-equiv_induct
-equiv_status -assert
-YS
-  yosys -l "$OUT/$2.log" "$OUT/$2.ys" > /dev/null 2>&1
+F=$OUT/fab
+yosys -q -p "read_verilog $F/core32.v $F/busadapt8.v $F/plane32bus.v; hierarchy -top plane32bus; proc; flatten; memory; opt_clean; async2sync; dffunmap; expose -evert-dff; opt_clean; rename plane32bus gold_exp; write_verilog -noattr $OUT/gold_exp.v" \
+  || { echo "⛔ gold cut-open failed"; exit 2; }
+python3 "$HERE/comb_wrap.py" "$OUT/gold_exp.v" model_comb > "$OUT/chkbad.v" 2> "$OUT/wrap.log" || { cat "$OUT/wrap.log"; exit 2; }
+echo "wrap: $(cat "$OUT/wrap.log")"
+
+prove() {  # $1 = model verilog, $2 = tag; prints ABC's verdict line
+  yosys -p "read_verilog $OUT/gold_exp.v; read_verilog $1; read_verilog $OUT/chkbad.v; hierarchy -top chkbad; proc; flatten; opt_clean; setundef -anyseq; techmap; opt -fast; aigmap; opt_clean; write_aiger -zinit $OUT/$2.aig" > "$OUT/$2.ys.log" 2>&1 \
+    || { echo "⛔ $2: AIG build failed"; exit 2; }
+  # THE FREED-BIT ACCOUNTING: every bit treated as free must be a primary input of the miter
+  # (the 1,126 flop-state bits and the 10 input bits) or one of the gold's regs[0] read leaves
+  # (2 ports x 32 bits; regs is declared [1:31], so that read is `x` and is muxed away by rs==0).
+  grep -F 'Treating undriven bit' "$OUT/$2.ys.log" | sed -E 's/.*chkbad\.(\\?[^ ]*) \[?[0-9]*\]? ?like.*/\1/' > "$OUT/$2.freed"
+  st=$(grep -c -E '^\\?s_u_(core|bus)_' "$OUT/$2.freed" || true)
+  pi=$(grep -c -E '^\\?(rst_n|sof|instr_byte)$' "$OUT/$2.freed" || true)
+  ot=$(grep -v -c -E '^\\?(s_u_(core|bus)_|rst_n$|sof$|instr_byte$)' "$OUT/$2.freed" || true)
+  echo "freed bits: state $st · inputs $pi · other $ot (expected 1126 · 10 · 64)" >&2
+  [ "$st" = 1126 ] && [ "$pi" = 10 ] && [ "$ot" = 64 ] || { echo "⛔ $2: freed-bit accounting does not close" >&2; exit 6; }
+  yosys-abc -c "read $OUT/$2.aig; strash; print_stats; iprove" > "$OUT/$2.abc" 2>&1
+  grep -E 'SATISFIABLE|UNSATISFIABLE|i/o' "$OUT/$2.abc" | sed 's/\x1b\[[0-9;]*m//g'
 }
-
-# the matched population: every gold flop's Q wire and every output must be an equiv pair
-if link "$OUT/model.v" link; then
-  echo "LINK PROVEN: $(grep -F 'are proven and' "$OUT/link.log" | tail -1 | sed 's/^ *//')"
-else
-  echo "⛔ LINK FAILED"; grep -F -i 'unproven' "$OUT/link.log" | head -20; exit 3
-fi
-missing=0
-for w in u_core.pc_r u_bus.phase u_bus.kind u_bus.store_beat u_bus.fetch_owed u_bus.in_acc u_bus.instr_r u_bus.rdata_r addr_byte phase_o retire; do
-  grep -F -q "\\$w" "$OUT/link.log" || { echo "⛔ not matched: $w"; missing=1; }
-done
-n=$(grep -c -F 'u_core.regs[' "$OUT/link.log" || true)
-[ "$n" -gt 0 ] || { echo "⛔ no regs[] in the matched set"; missing=1; }
-[ "$missing" = 0 ] || exit 4
-
-# the mutant control: SRA/SRAI as ashr must NOT be equivalent
-if link "$OUT/model_ashr.v" mutant; then
-  echo "⛔ MUTANT PROVEN EQUIVALENT — the link cannot see the erratum"; exit 5
-else
-  echo "mutant control: REFUSED ($(grep -F -c 'Unproven' "$OUT/mutant.log" || true) 'Unproven' lines) — the link sees SRA/SRAI"
-fi
+v=$(prove "$OUT/model_comb.v" link)
+echo "$v" | sed 's/^/link: /'
+echo "$v" | grep -q '^UNSATISFIABLE' || { echo "⛔ LINK NOT PROVED"; exit 3; }
+m=$(prove "$OUT/model_comb_ashr.v" mutant)
+echo "$m" | sed 's/^/mutant: /'
+echo "$m" | grep -q '^SATISFIABLE' || { echo "⛔ MUTANT NOT REFUSED — the link cannot see SRA/SRAI"; exit 5; }
+echo "LINK PROVEN; mutant control REFUSED"

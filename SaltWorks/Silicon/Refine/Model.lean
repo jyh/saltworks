@@ -12,11 +12,13 @@ import SaltWorks.Silicon.Refine.Statement
 small width-typed expression language. It is NOT an ISA model written from the spec. Every
 definition below names the RTL wire it transcribes, and keeps the RTL's structure, bugs included.
 
-The link to the fabricated RTL is not this file's prose. `Ex.toVerilog` (in `Emit.lean`) prints the
-same expressions as flat Verilog. Its flops carry the flattened gold names (`u_core.pc_r`,
-`u_bus.phase`, `u_core.regs[i]`, …). `SaltWorks/Silicon/Formal/refine_link/run_link.sh` then has
-yosys prove that Verilog equivalent to the fabricated `core32.v` + `busadapt8.v` + `plane32bus.v`
-(`equiv_make` / `equiv_induct`, every flop and output matched by name), with a mutant control.
+The link to the fabricated RTL is not this file's prose. `Emit.moduleComb` prints the same
+expressions as a combinational Verilog module (every flop's current value an input, its next value
+an output). `SaltWorks/Silicon/Formal/refine_link/run_link.sh` cuts the gold's flops open, ties every
+alias of each flop to one state input, and has ABC prove the transition and output functions EQUAL
+to those of the fabricated `core32.v` + `busadapt8.v` + `plane32bus.v`. The proof covers every value
+of state, inputs and the gold's `x` bits. A mutant control follows, and a freed-bit accounting that
+must close.
 
 **Trusted, and small:** that `Ex.eval` and the printer give each constructor the same meaning (one
 line per constructor, side by side in `Emit.lean`), the yosys SAT run, and the Lean kernel.
@@ -24,7 +26,7 @@ line per constructor, side by side in `Emit.lean`), the yosys SAT run, and the L
 ⚠️ **One transcription choice the SAT link exists to check:** `core32.v`'s ALU chain writes
 `$signed(rf1) >>> b_op[4:0]` inside an UNSIGNED conditional, so Verilog evaluates it as a LOGICAL
 shift. That is erratum E's SRA/SRAI cause. It is transcribed here as `lshr`. Were it transcribed
-as `ashr`, the equivalence run would fail; the mutant control (`ALU_ASHR=1`) shows it does.
+as `ashr`, the equivalence run would fail; the mutant control (`moduleComb true`) shows it does.
 -/
 
 namespace SaltWorks.Silicon.Refine.Model
