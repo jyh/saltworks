@@ -3,8 +3,9 @@
 MAC cells on a self-routing banyan switch, with a small byte-phase processor beside
 them sharing the same 24 pins. Six-by-two tiles.
 
-**Each MAC cell is generated from a Lean model proved correct in the Lean kernel,
-and the generated netlist is then proved equivalent to its arithmetic specification
+**Each MAC cell is generated from a Lean model proved correct in the Lean kernel**
+([`MacCell.lean`](../../HDL/MacCell.lean), [`MacInduction.lean`](../../HDL/MacInduction.lean)),
+**and the generated netlist is then proved equivalent to its arithmetic specification
 over all inputs by SAT.** The signed accumulation is proved for the drive schedule
 the design specifies. **The sequencer that produces that schedule, the pin wrapper
 and the fabric glue are hand-written RTL and are not part of either proof** — the

@@ -1,0 +1,2 @@
+# Frozen records: byte-pinned, so they cannot be edited to cite or waive. <path> TAB <reason>. Printed with every verdict.
+docs/provenance/s2/README.md	byte-pinned by docs/provenance/MANIFEST.tsv (sha256); verify.sh fails on any edit

@@ -534,3 +534,35 @@ jobs:
       - name: saltbuild lock test (drives the REAL wrapper against a private lock and log)
         if: success() || failure()
         run: bash tools/saltbuild-lock-test.sh
+
+  verification-claims:
+    name: a public verification claim names its check
+    runs-on: ubuntu-latest
+    # Council 2026-10-06 ruling 1 (desk AAN): post-mortem recs 1 and 5 (docs/POSTMORTEM-riscv-core-2026-10.md §5).
+    #   rec 1: every "verified" / "proved" / "machine-checked" in a README or paper abstract cites the theorem or
+    #          suite whose subject it is; uncited is refused.
+    #   rec 5: a sentence asserting verification about a FENCED subject (.verification-fences) is refused whatever
+    #          it cites. The specimen, the README as of bac5f84 (2026-08-17 .. 2026-10-05), is refused by BOTH arms
+    #          independently: FENCED with the fence file, UNCITED without it.
+    # The self-test runs first, in its own step, so a vacuous checker cannot print green: 55 arms, each red against
+    #   a planted defect, and three mutants of the checker each turn it red (13, 2 and 15 arms).
+    # The verdict prints its own limits (population, claim words, waivers, what is NOT checked) beside it.
+    steps:
+      - uses: actions/checkout@v4
+      - name: the checker can still go red (self-test)
+        run: python3 scripts/check_verification_claims.py --self-test
+      - name: every verification claim in a README or abstract cites its check
+        if: success() || failure()
+        run: python3 scripts/check_verification_claims.py --verbose
+      - name: the fence that ships is the fence the self-test drives
+        if: success() || failure()
+        run: |
+          python3 - <<'PY'
+          import sys
+          sys.path.insert(0, "scripts")
+          import check_verification_claims as c
+          rows = [l.split("\t") for l in open(".verification-fences", encoding="utf-8") if l.startswith("F-core32\t")]
+          assert len(rows) == 1, f"F-core32 rows: {len(rows)}"
+          assert rows[0][1] == c.WIDE_CORE_FENCE, "the F-core32 subject differs from the self-test's WIDE_CORE_FENCE"
+          print("F-core32 subject == WIDE_CORE_FENCE")
+          PY
