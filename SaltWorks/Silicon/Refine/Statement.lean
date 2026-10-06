@@ -23,7 +23,7 @@ are in scope:
 1. **the pins are equal.** Every `(uo_out, uio_out[1:0])` pair the machine drives in those cycles is
    the pair that `runSpec` predicts. That covers every fetch address, load address, store address
    and store datum.
-2. **the architectural state agrees.** At the cycle where instruction `k` ends, `pc` and `x1..x31`
+2. **the architectural state agrees.** At the cycle where instruction `k` ends, `pc` and `x0..x31`
    equal the specification's.
 
 The specification is `exec true`: RV32I as written in `exec false`, with exactly three changes, each
@@ -95,30 +95,28 @@ def decode (i : W) : Option Dec :=
   else if opc = 0b1101111#7 then mk .jal (immJ i)
   else if opc = 0b1100111#7 then (if f3 = 0#3 then mk .jalr (immI i) else none)
   else if opc = 0b1100011#7 then
-    (match f3.toNat with
-     | 0 => mk .beq (immB i) | 1 => mk .bne (immB i)
-     | 4 => mk .blt (immB i) | 5 => mk .bge (immB i)
-     | 6 => mk .bltu (immB i) | 7 => mk .bgeu (immB i)
-     | _ => none)
+    (if f3 = 0#3 then mk .beq (immB i) else if f3 = 1#3 then mk .bne (immB i)
+     else if f3 = 4#3 then mk .blt (immB i) else if f3 = 5#3 then mk .bge (immB i)
+     else if f3 = 6#3 then mk .bltu (immB i) else if f3 = 7#3 then mk .bgeu (immB i)
+     else none)
   else if opc = 0b0000011#7 then (if f3 = 2#3 then mk .lw (immI i) else none)
   else if opc = 0b0100011#7 then (if f3 = 2#3 then mk .sw (immS i) else none)
   else if opc = 0b0010011#7 then
-    (match f3.toNat with
-     | 0 => mk .addi (immI i) | 2 => mk .slti (immI i) | 3 => mk .sltiu (immI i)
-     | 4 => mk .xori (immI i) | 6 => mk .ori (immI i) | 7 => mk .andi (immI i)
-     | 1 => if f7 = 0#7 then mk .slli (immI i) else none
-     | 5 => if f7 = 0#7 then mk .srli (immI i)
-            else if f7 = 0b0100000#7 then mk .srai (immI i) else none
-     | _ => none)
+    (if f3 = 0#3 then mk .addi (immI i) else if f3 = 2#3 then mk .slti (immI i)
+     else if f3 = 3#3 then mk .sltiu (immI i) else if f3 = 4#3 then mk .xori (immI i)
+     else if f3 = 6#3 then mk .ori (immI i) else if f3 = 7#3 then mk .andi (immI i)
+     else if f3 = 1#3 then (if f7 = 0#7 then mk .slli (immI i) else none)
+     else -- f3 = 5
+       (if f7 = 0#7 then mk .srli (immI i)
+        else if f7 = 0b0100000#7 then mk .srai (immI i) else none))
   else if opc = 0b0110011#7 then
     (if f7 = 0#7 then
-       (match f3.toNat with
-        | 0 => mk .add 0 | 1 => mk .sll 0 | 2 => mk .slt 0 | 3 => mk .sltu 0
-        | 4 => mk .xor 0 | 5 => mk .srl 0 | 6 => mk .or 0 | 7 => mk .and 0
-        | _ => none)
+       (if f3 = 0#3 then mk .add 0 else if f3 = 1#3 then mk .sll 0
+        else if f3 = 2#3 then mk .slt 0 else if f3 = 3#3 then mk .sltu 0
+        else if f3 = 4#3 then mk .xor 0 else if f3 = 5#3 then mk .srl 0
+        else if f3 = 6#3 then mk .or 0 else mk .and 0)
      else if f7 = 0b0100000#7 then
-       (match f3.toNat with
-        | 0 => mk .sub 0 | 5 => mk .sra 0 | _ => none)
+       (if f3 = 0#3 then mk .sub 0 else if f3 = 5#3 then mk .sra 0 else none)
      else none)
   else none
 
