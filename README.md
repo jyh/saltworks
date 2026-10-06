@@ -1,9 +1,9 @@
 # SaltWorks
 
-SaltWorks is a demonstration of a machine-verified stack from application code,
-through a verified compiler and executive, to a RISC-V processor taped out on a
-community silicon shuttle. The processor itself is the one link that was not
-verified; see the correction below. No proof passed through human review, and no
+SaltWorks is a demonstration stack from application code to a RISC-V processor
+taped out on a community silicon shuttle. Its compiler and executive are verified
+in Lean ([`SaltWorks/HDL/`](SaltWorks/HDL/)); the processor itself is the one link
+that was not, and the correction below says what that means. No proof passed through human review, and no
 RTL was written by a human. The working discipline — the Salt
 method — rests on a proof kernel no hallucinated proof can pass: mathematical
 claims travel between agents as kernel-checked artifacts, and human attention is
@@ -20,7 +20,9 @@ that model to the fabricated design, and no instruction-conformance suite was ru
 before tapeout. The first conformance run, on 2026-10-04, after submission, found
 3 of 31 in-scope instructions failing on the signed-off netlist: SRA, SRAI and LW.
 
-The measurement, with every table reproducible from hash-verified objects, is
+The measurement, with every table reproducible from objects whose hashes
+[`docs/ledger-tools/check_fabricated_fixture.sh`](docs/ledger-tools/check_fabricated_fixture.sh)
+checks, is
 [`docs/silicon-step0-core32-conformance-1004.md`](docs/silicon-step0-core32-conformance-1004.md).
 The three defects, their causes and measured software workarounds are in
 [`docs/ERRATUM-core32-2026-10-05.md`](docs/ERRATUM-core32-2026-10-05.md).
@@ -64,6 +66,7 @@ Requires [elan](https://github.com/leanprover/elan); the toolchain is pinned in
 
 ## The Salt method
 
+<!-- claim-check: not-a-claim: states the method's rule, not a claim about an artifact; the artifacts are cited in the table above -->
 The method makes three commitments. Truth is machine-checked only: every claim
 lands in the kernel, and nothing unverified accumulates into the record. Whatever
 the kernel cannot check is checked by structured opposition: designs receive
@@ -82,6 +85,7 @@ exclusively on statements, designs, and rulings.
 | adversarial tests | *T(P)* |
 | comprehensibility certificates *S′* | ⊢ *S* ⇒ *S′* |
 
+<!-- claim-check: not-a-claim: defines a term of the method; no artifact is claimed -->
 The certificates *S′* are easily comprehensible properties that justify the
 specification *S*. A common example of such an *S′* is that the tests are
 formally proved: ⊢ *S* ⇒ *T(P)*, in other words, the system tests are formally
@@ -123,7 +127,7 @@ measured):
   before the artifact exists.
 - **A5** — human interaction is periodic and scheduled; this program held a
   daily council with recorded rulings.
-- **A6** — every landing is verified by a second agent that did not produce it.
+- **A6** — every landing is verified by a second agent that did not produce it. <!-- claim-check: not-a-claim: an invariant of the method, not a claim about an artifact -->
 
 ## Reading the record
 

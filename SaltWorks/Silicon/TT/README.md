@@ -5,7 +5,8 @@ equivalent to its specification inside the Lean kernel**. It recreates the
 banyan half of **US Patent 4,910,730** (1988) — an ATM packet switch built as
 two chips, a Batcher sorter and a banyan router. That two-chip partition is also
 the proof's partition: the sorter is the *hypothesis*, the banyan is the
-*theorem*. **This chip is the proved half.**
+*theorem*. **This chip is the proved half**
+([`SwitchRefinement.lean`](../Equiv/SwitchRefinement.lean)).
 
 Read the datasheet first: [`docs/info.md`](docs/info.md).
 
@@ -14,8 +15,9 @@ Read the datasheet first: [`docs/info.md`](docs/info.md).
 The synthesized gate netlist of the switch element — real sky130 standard cells,
 flip-flops included — computes the same outputs and next state as the Lean
 specification **for every state and every input**, checked by kernel reduction
-and lifted across cycles by induction. No SAT solver is trusted and no
-`native_decide` is used.
+and lifted across cycles by induction
+([`SwitchRefinement.lean`](../Equiv/SwitchRefinement.lean)). No SAT solver is
+trusted and no `native_decide` is used.
 
 **A banyan routes correctly only when the destinations presented to it are
 sorted.** Of all 40,320 full-load permutations, exactly **4,096 (10.16 %)** route
