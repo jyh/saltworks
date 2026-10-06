@@ -49,7 +49,9 @@ PY
 yosys -q -p "$RD; script $OUT/hide.ys; memory; opt_clean; async2sync; dffunmap; write_json $OUT/gold_pre.json; expose -evert-dff; opt_clean; rename tt_um_saltworks_ndf_c32 gold_exp; write_verilog -noattr $OUT/gold_exp.v" || { echo "⛔ gold cut-open failed"; exit 2; }
 python3 "$HERE/cut_netlist.py" "$OUT/gate.v" "$OUT/gate_cut.v" "$OUT/ff_map.tsv" || exit 2
 cut_gate() {  # $1 cut netlist, $2 output
-  yosys -q -p "read_liberty -ignore_miss_func $LIB; read_verilog $1; hierarchy -top tt_um_saltworks_ndf_c32; flatten; opt_clean; rename tt_um_saltworks_ndf_c32 gate_exp; write_verilog -noattr $2"
+  # kent's hardening (#68 read): refuse by FUNCTION, not by name. After the cut no sequential cell of
+  # ANY kind may remain; an uncut one (an edfxtp, a latch) would become a constant under the tied clock.
+  yosys -q -p "read_liberty -ignore_miss_func $LIB; read_verilog $1; hierarchy -top tt_um_saltworks_ndf_c32; flatten; opt_clean; select -assert-none t:\$*dff* t:\$*DFF* t:\$*dlatch* t:\$*DLATCH* t:\$*sr* t:\$*SR_*; rename tt_um_saltworks_ndf_c32 gate_exp; write_verilog -noattr $2"
 }
 cut_gate "$OUT/gate_cut.v" "$OUT/gate_exp.v" || { echo "⛔ gate read failed"; exit 2; }
 python3 "$HERE/w5_wrap.py" "$OUT/gold_exp.v" "$OUT/ff_map.tsv" "$OUT/gold_pre.json" > "$OUT/w5bad.v" 2> "$OUT/wrap.log" || { cat "$OUT/wrap.log"; exit 2; }
