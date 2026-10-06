@@ -1,8 +1,8 @@
 # AAJ — the FABRICATED core32 + busadapt8, checked FORMALLY at the bus level
 
 silicon, 2026-10-05 (desk AAJ; council 2026-10-05, ruling 2 (ii): *"yes, we need to do the formal check —
-after all, the salt method was supposed to prevent failures of this kind"*). **Status: NOT PUBLIC.** This
-file is on a local branch of saltworks. Whether it reaches a public surface is council's (AAK's route).
+after all, the salt method was supposed to prevent failures of this kind"*). Published by council
+2026-10-06, ruling 4 (i) (*"yes to both"*), beside the [erratum](ERRATUM-core32-2026-10-05.md).
 
 ## Verdict, with its limits beside it
 

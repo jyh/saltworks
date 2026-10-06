@@ -15,8 +15,9 @@ Every claim cites a commit, a file and line, or a dated record. Anything inferre
 design of record `jyh/tt-neural-dataflow-fabric@01e19f7`, submitted 2026-09-07) does not implement
 three of its 31 in-scope RV32I instructions: **SRA, SRAI and LW**
 ([step 0](silicon-step0-core32-conformance-1004.md), [erratum](ERRATUM-core32-2026-10-05.md)).
-A bus-level riscv-formal run on 2026-10-05 fails on exactly those three instructions (its passes are
-not yet audited for vacuity and are not quoted here).
+A bus-level riscv-formal run on 2026-10-05 fails on exactly those three instructions; each of its 34
+passes was shown reachable in cover mode, so none is vacuous
+([AAJ](silicon-aaj-bus-formal-1005.md), "Non-vacuity").
 
 **Error 2, in the public record.** From 2026-08-16 to 2026-10-05 this repository's README said the
 stack runs "to a **verified** RISC-V processor taped out on a community silicon shuttle". Nothing
@@ -143,8 +144,9 @@ spoke as if we had.
 
 ## 6. What this does not establish
 
-- That no other defect exists in the core (see the erratum's limits); the formal run's 34 passes are
-  not yet audited.
+- That no other defect exists in the core (see the erratum's limits). The formal run's 34 passes are
+  non-vacuous but BOUNDED (checks at cycle 24 and 48); only LW's failure shape is proved for all
+  trace lengths ([AAJ](silicon-aaj-bus-formal-1005.md)).
 - Who, if anyone, would have caught Error 2 had the 08-20 finding been routed. The record shows the
   route was missing, not that it would have worked.
 - **INFERRED, not shown:** that the depth of the bus-protocol audit at submission was read as "the
