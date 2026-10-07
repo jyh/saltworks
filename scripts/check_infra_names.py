@@ -68,6 +68,7 @@ FORBIDDEN = [
     "ja" + "son" + "h",         # an account
     "jy" + "aletheia",          # an account
     "claude-account-" + "ja" + "son",   # see the note below: the bare stem is NOT gateable
+    "claude-acct-" + "ja" + "son",      # the SAME account's SECOND config-dir spelling (the roster's live row; kent, 2026-10-07): the acct/account glob trap, closed here
     "salt" + "forge",           # an account, added 2026-09-12 on the Captain's order at council
     "kat" + "mai",              # the run box, RENAMED 2026-09-25 from the first stem (which stays: it is an account too)
 ]
@@ -95,16 +96,17 @@ FORBIDDEN = [
 #   The count is printed on every run so a reader can compare it against the fleet map rather than
 #   trusting a date. Reconciled against the fleet roster on the date below -- its box column and its
 #   account column. Adding a box or an account means editing BOTH lines, deliberately.
-DECLARED_NAMES = 9
-DECLARED_RECONCILED = "2026-09-25"
+DECLARED_NAMES = 10
+DECLARED_RECONCILED = "2026-10-07"
 
 # THE RECONCILIATION ITSELF, WRITTEN OUT, so a reader can check COMPLETENESS without re-deriving it.
-# The roster carries 6 ACCOUNTS and 4 BOXES -- 10 entities, covered by the 9 stems above because two
+# The roster carries 6 ACCOUNTS and 4 BOXES -- 10 entities, covered by the 10 stems above because two
 # stems each cover a box and an account that share a word. (Since 2026-09-25 the run box has its own
 # stem; the first stem stays for the account that shares its old word, and for the tree's history.) Entity -> the stem that catches it:
 #
 #     account  jy-aletheia      -> its own stem
 #     account  ja-son           -> the CONFIG-DIR shape only (see the note above: it is also a byline)
+#                                 -- in BOTH its spellings (claude-account- and claude-acct-; the second was missed until 2026-10-07)
 #     account  jy-<the box word>-> the box stem, as a substring
 #     account  ja-son-h         -> its own stem
 #     account  salt-forge       -> its own stem       (added 2026-09-12)
