@@ -160,6 +160,8 @@ jobs:
       # subject is history, so its miss is permanent, unlike a PR body, which is
       # editable. It proves it can fail before it is allowed to pass.
       - run: python scripts/check_pr_descriptions.py --self-test
+      # The infrastructure-name gate (council 2026-10-07 ruling 3, "ratchet only"): proves it can fail first.
+      - run: python scripts/check_infra_names.py --self-test
       - name: scan the pushed delta
         env:
           BEFORE: ${{ github.event.before }}
@@ -229,6 +231,9 @@ jobs:
           # The branch name: a merge subject will quote it, and the forge
           # writes that subject where no hook runs.
           python scripts/check_pr_descriptions.py --ref "${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}"
+          # No NEW host or account name in what this push adds (ratchet: a verbatim move of a baselined
+          # line is accepted; an edited line that keeps a name is new). Council 2026-10-07 ruling 3.
+          python scripts/check_infra_names.py --range "$RANGE"
       - name: tree ratchet -- residue the delta gate already fired on must not survive the next green
         run: |
           # The delta arm charges the commit that ADDS a private path; it cannot charge
@@ -236,6 +241,11 @@ jobs:
           # nothing about them). This arm reds on any finding NOT in the committed
           # baseline (scripts/private_paths_baseline.tsv). Council row m, 2026-08-29.
           python scripts/check_private_paths.py --tree
+      - name: infra-name tree ratchet -- no NEW host or account name survives in the tree (ruling 3, 2026-10-07)
+        run: |
+          # Against scripts/infra_names_baseline.tsv (the 12 lines in 4 files present at the port, by digest,
+          # never by text). Anything NEW reds; a line that drops its name is debt paid, never red.
+          python scripts/check_infra_names.py --tree
       - name: message ratchet -- a violating message must not launder into the next scan's base
         run: |
           # The delta arm charges the push that carries a violating MESSAGE; it cannot
@@ -266,6 +276,9 @@ jobs:
           # ⚠️ `fetch-depth: 0` is load-bearing -- the arm REFUSES a shallow clone by
           # name rather than walking a truncated history and reporting success.
           python scripts/check_private_paths.py --history
+          # The same population for infrastructure names (saltbench's arm, ported with the gate): what each
+          # commit INTRODUCED, against scripts/infra_names_history_baseline.tsv; refuses a shallow clone.
+          python scripts/check_infra_names.py --history
 
   ledger-tools-selftest:
     name: the ledger-tools suite runs at all (desk row KB)

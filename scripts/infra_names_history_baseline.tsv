@@ -1,0 +1,13 @@
+# infra_names_history_baseline.tsv -- ACCEPTED historical commits whose ADDED LINES carry an infrastructure name (check_infra_names.py --history).
+# sha<TAB>file<TAB>count. NEVER the line and NEVER the name: an excerpt would put the name into the tree, where the tree arm correctly reds on it.
+# This list does not shrink without a force-push, which is a Captain-level call on a public repo. A GROWTH is a reviewed diff.
+03df73f1509e	docs/EVIDENCE-campaign.md	1
+3ccb43a6dffa	docs/silicon-tools/fallback-silicon.sh	1
+4a202f45d250	docs/QUEUE.md	1
+59f17ddaac68	docs/EVIDENCE-fuel-state-0808.md	1
+5e43c411dd19	docs/EVIDENCE-campaign.md	1
+797cd3e3b2fb	docs/EVIDENCE-fuel-state-0808.md	1
+aee8c700a14f	docs/EVIDENCE-fuel-state-0808.md	2
+cb0d7225e0d4	docs/EVIDENCE-campaign.md	1
+fc541c5467e9	docs/QUEUE.md	2
+ff37f5282111	docs/EVIDENCE-fuel-state-0808.md	1

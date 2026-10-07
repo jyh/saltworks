@@ -47,6 +47,7 @@ HOOK="$HERE/pre-push"
 PATHS_GATE="$REPO/scripts/check_private_paths.py"
 TRAILER_GATE="$REPO/scripts/check_commit_trailers.py"
 SUBJECT_GATE="$REPO/scripts/check_pr_descriptions.py"
+INFRA_GATE="$REPO/scripts/check_infra_names.py"
 SUBJECT_BASELINE="$REPO/scripts/subject_debt_baseline.tsv"
 
 fail=0
@@ -58,6 +59,7 @@ bad()  { printf 'FAIL %s\n' "$*"; fail=$((fail + 1)); }
 [ -f "$PATHS_GATE" ]   || { note "FAIL: no $PATHS_GATE"; exit 2; }
 [ -f "$TRAILER_GATE" ] || { note "FAIL: no $TRAILER_GATE"; exit 2; }
 [ -f "$SUBJECT_GATE" ] || { note "FAIL: no $SUBJECT_GATE"; exit 2; }
+[ -f "$INFRA_GATE" ] || { note "FAIL: no $INFRA_GATE"; exit 2; }
 [ -f "$SUBJECT_BASELINE" ] || { note "FAIL: no $SUBJECT_BASELINE"; exit 2; }
 
 PY=
@@ -155,6 +157,10 @@ cp "$TRAILER_GATE" "$W/scripts/check_commit_trailers.py"
 cp "$SCAN" "$W/.githooks/gate_scan.py"
 cp "$SUBJECT_GATE" "$W/scripts/check_pr_descriptions.py"
 cp "$SUBJECT_BASELINE" "$W/scripts/subject_debt_baseline.tsv"
+# ARM 4 of the hook (the infrastructure-name ratchet, council 2026-10-07 ruling 3) needs its gate in the
+# fixture, or the hook refuses every push as "not in this working tree". No baseline is copied: in the
+# fixture every added name is NEW, which is exactly the arm under test.
+cp "$INFRA_GATE" "$W/scripts/check_infra_names.py"
 git -C "$W" config core.hooksPath .githooks
 
 commit_file() { # <path> <content> <message>
@@ -380,6 +386,19 @@ else
   bad "red-add-then-remove-url: THE REMOTE REF MOVED"
 fi
 git -C "$W" reset -q --hard "$GOOD"; restore_remote
+
+# ── ARM 10b ── the infrastructure-name arm (ARM 4 of the hook): an added line carrying a host or
+# account name is REFUSED and the refusal names the gate, never the name. The word is READ from the
+# gate's own assembled list, so this prover spells nothing the tree ratchet would catch.
+note "ARM 10b an added line with an infrastructure name (ARM 4)         expect 1"
+INFRA_WORD=$(read_const "$INFRA_GATE" 'FORBIDDEN[1]') || INFRA_WORD=
+[ -n "$INFRA_WORD" ] || { note "FAIL: could not read a forbidden word out of the infrastructure-name gate"; exit 2; }
+PRE_INFRA=$(git -C "$W" rev-parse HEAD)
+commit_file infra.txt "the box $INFRA_WORD ran it" "docs: a clean subject, a doc line"
+run_push 1 red-infra-arm origin main
+expect_out red-infra-arm "the infrastructure-name gate RED"
+if grep -qF -- "$INFRA_WORD" "$OUT"; then bad "red-infra-arm: the refusal LEAKS the name"; fi
+git -C "$W" reset -q --hard "$PRE_INFRA"; restore_remote
 
 # ── ARM 11 ── FAIL CLOSED: with gate_scan.py absent the hook cannot read the
 #              gates' patterns, and a CLEAN push must be refused, not waved on.

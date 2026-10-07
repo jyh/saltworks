@@ -57,6 +57,7 @@ ZERO=0000000000000000000000000000000000000000
 GATE=scripts/check_private_paths.py
 TRAILER_GATE=scripts/check_commit_trailers.py
 SUBJECT_GATE=scripts/check_pr_descriptions.py
+INFRA_GATE=scripts/check_infra_names.py
 HISTORY_BASELINE=scripts/private_paths_history_baseline.tsv
 SCAN="$(cd "$(dirname "$0")" && pwd)/gate_scan.py"
 
@@ -75,7 +76,7 @@ if [ -z "$PY" ]; then
 fi
 
 ROOT=$(git rev-parse --show-toplevel 2>/dev/null) || ROOT=.
-for need in "$ROOT/$GATE" "$ROOT/$TRAILER_GATE" "$ROOT/$SUBJECT_GATE" "$SCAN"; do
+for need in "$ROOT/$GATE" "$ROOT/$TRAILER_GATE" "$ROOT/$SUBJECT_GATE" "$ROOT/$INFRA_GATE" "$SCAN"; do
   if [ ! -f "$need" ]; then
     echo "pre-push REFUSED: $need is not in this working tree." >&2
     echo "  This hook derives its verdict from the gates and will not guess it." >&2
@@ -214,6 +215,15 @@ while read -r local_ref local_sha remote_ref remote_sha; do
     echo "  history for as long as the repository does." >&2
     bad=1
   fi
+  # ---- ARM 4: no NEW host or account name in what the push adds (ruling 3, 2026-10-07) ----
+  # The ratchet form: an added line byte-identical to a baselined line of the same file passes
+  # (a verbatim move); an edited line that keeps a name is NEW. CI runs the same arm.
+  if ! ( cd "$ROOT" && "$PY" "$INFRA_GATE" --range "$RANGE" ) < /dev/null; then
+    echo "pre-push REFUSED: the infrastructure-name gate RED on ${RANGE} (${local_ref:-<ref>} -> ${remote_ref:-<ref>})." >&2
+    echo "  The findings above name file:line, never the name. Drop the name from the" >&2
+    echo "  line (a role word, a pool number); the baseline grows only by a reviewed act." >&2
+    bad=1
+  fi
   if ! ( cd "$ROOT" && "$PY" "$SUBJECT_GATE" --ref "${remote_ref:-}" ) < /dev/null; then
     echo "pre-push REFUSED: the pushed ref name carries a refused word. Push the" >&2
     echo "  work under a neutral branch name: a merge subject will quote this one." >&2
@@ -226,7 +236,7 @@ while read -r local_ref local_sha remote_ref remote_sha; do
   fi
 
   n=$(git rev-list --count "$RANGE" 2>/dev/null) || n="?"
-  echo "pre-push OK [per-commit trailer+paths + private-paths --range + subject gate --range]: ${local_ref:-<ref>} -> ${remote_ref:-<ref>}, range ${RANGE} (${WHY}), ${n} commit(s) scanned."
+  echo "pre-push OK [per-commit trailer+paths + private-paths --range + subject gate --range + infra-names --range]: ${local_ref:-<ref>} -> ${remote_ref:-<ref>}, range ${RANGE} (${WHY}), ${n} commit(s) scanned."
 done < "$TMPIN"
 
 if [ "$seen" -eq 0 ]; then
