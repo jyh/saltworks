@@ -1,0 +1,15 @@
+# infra_names_baseline.tsv -- ACCEPTED residue for the tree ratchet (check_infra_names.py --tree).
+# file<TAB>line-sha16<TAB>what. NEVER the line and NEVER the name. Shrink it after a repair with
+# --tree --write-baseline; a growth is a reviewed diff (council 2026-10-07 ruling 3: ratchet only).
+docs/EVIDENCE-campaign.md	82529d6e8d411614	an infrastructure name (account or host)
+docs/EVIDENCE-campaign.md	9616a1b5b7c58a84	an infrastructure name (account or host)
+docs/EVIDENCE-campaign.md	d1dea02ae5df3a98	an infrastructure name (account or host)
+docs/EVIDENCE-fuel-state-0808.md	0e5e3cfba3b62bb9	an infrastructure name (account or host)
+docs/EVIDENCE-fuel-state-0808.md	229dd6cb67a8a36a	an infrastructure name (account or host)
+docs/EVIDENCE-fuel-state-0808.md	6d8e336345a26193	an infrastructure name (account or host)
+docs/EVIDENCE-fuel-state-0808.md	974594951e0bcd9d	an infrastructure name (account or host)
+docs/EVIDENCE-fuel-state-0808.md	c4795026c49e6156	an infrastructure name (account or host)
+docs/QUEUE.md	6575ecd6bafbc193	an infrastructure name (account or host)
+docs/QUEUE.md	c4c5c59813e5b76a	an infrastructure name (account or host)
+docs/QUEUE.md	fddb81051716e810	an infrastructure name (account or host)
+docs/silicon-tools/fallback-silicon.sh	b725c97a21169fa1	an infrastructure name (account or host)
