@@ -222,7 +222,9 @@ _EMPLOYER = ["lo" + "ca", "ho" + "ll", "pcc-" + "bios", "safe_" + "dav1d", "safe
 #     The fleet side now DERIVES the population (a census of the private trees on disk, mapped by the fleet
 #     map, tested against every gate's own scan()), so a birth no longer waits on this list's date.
 # content + studio ADDED 2026-09-27 (fleet map bullets, born 2026-09-26; scrub-roots-census UNWATCHED 12 pairs → 0), ordinary words ⇒ qualified forms only, like home and social.
-_LOCALONLY = ["ho" + "me", "soc" + "ial", "con" + "tent", "stu" + "dio"]
+# jaguar ADDED 2026-10-09 (the private-lane tree, O63, born 2026-10-02; the Captain at council 2026-10-09, "ABS (a)": its NAME is
+#   watched by the public gates, never its contents; scrub-roots-census UNWATCHED 6 pairs → 0), an ordinary word ⇒ qualified forms only.
+_LOCALONLY = ["ho" + "me", "soc" + "ial", "con" + "tent", "stu" + "dio", "jag" + "uar"]
 _PRIVATE_PROJ = ["soc" + "ial-run", "si" + "la", "mor" + "pho", "eman" + "uensis", "ver" + "so"]
 # ⛔⛔ ROW XK (2026-09-24) — A PRIVATE TREE THAT IS A *FAMILY*, WATCHED BY PATTERN, NEVER BY LIST. The Captain,
 #   council 2026-09-23, "Yes (a)": the benchmark harness tree and every worktree of it are a PRIVATE RECORD. Its
@@ -258,9 +260,9 @@ _BUS = "FLEET" + r"\.md"
 #   map AND the fleet root on disk: 12 private/employer trees, 11 in the lists above, `local` in its
 #   own shape below; bin/ is a symlink into the kit (watched); every other directory is a public
 #   repo or a worktree of one.
-ROOTS_RECONCILED = "2026-09-27"
+ROOTS_RECONCILED = "2026-10-09"
 ROOTS_OWNER = "evidence (PM)"
-ROOTS_REMEASURE_DUE = "2026-10-27"
+ROOTS_REMEASURE_DUE = "2026-11-09"
 
 _ROOTS = [_SEAT] + _EMPLOYER + _PRIVATE_PROJ
 _ROOT_ALT = "|".join(_ROOTS + _FAMILY_RE)   # ROW XK: the family joins as a PATTERN
@@ -782,6 +784,10 @@ def self_test() -> int:
         ("cs-studio", "see projects/claude/" + "st" + "udio" + "/src/x.py"),
         ("cs-studio-bs", "see projects" + chr(92) + "claude" + chr(92) + "st" + "udio" + chr(92) + "x.md"),
         ("cs-studio-repo", "the bare repo " + "st" + "udio" + ".git"),
+        # 2026-10-09: jaguar (the private-lane tree), qualified forms only. Split differently from `_LOCALONLY`.
+        ("ja-jaguar", "see projects/claude/" + "ja" + "guar" + "/notes/x.md"),
+        ("ja-jaguar-bs", "see projects" + chr(92) + "claude" + chr(92) + "ja" + "guar" + chr(92) + "x.md"),
+        ("ja-jaguar-repo", "pushed to Saltworks/" + "ja" + "guar" + ".git"),
         ("vd-run", "receipts in ~/" + "so" + "cial-run" + "/receipts.tsv"),
         # ROW XK (2026-09-24): the family, the bare tree and three real worktree shapes. Split differently from
         #   `_FAMILY` so the plant never shares a constant with the pattern.
@@ -826,6 +832,9 @@ def self_test() -> int:
         ("cs-c-content-dir", "docs/" + "content" + "/x.md nests a PUBLIC dir"),
         ("cs-c-studio", "a " + "studio" + " apartment"),
         ("cs-c-studio-dir", "open src/" + "studio" + "/main.rs in Visual " + "Studio"),
+        # 2026-10-09: jaguar is an ordinary word and must never fire unqualified.
+        ("ja-c-jaguar", "a " + "jaguar" + " in the rainforest"),
+        ("ja-c-jaguar-dir", "docs/" + "jaguar" + "/x.md nests a PUBLIC dir"),
         # ROW XK: the PUBLIC benchmark repo, and the family name in prose, must never fire.
         ("xk-c-public", "see " + "saltbench" + "/harness/systems-v3/x.md"),
         ("xk-c-prose", "the " + "saltbench-sys" + "tems" + " harness runs the cells"),
