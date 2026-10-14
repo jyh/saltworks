@@ -13,7 +13,7 @@
      adoption IS the move of `CycleRealisesStepOrStallsOn` and `memFreeB` into
      `HDL/StallShape.lean` §0.2. So this file no longer inhabits a draft sentence. ⛔ WHAT
      THAT DOES **NOT** BUY: the object is `CorePlace.core`, the LEAN-COMPOSED circuit — not
-     `core32.v`, the hand-written RTL that was fabricated — and no theorem in this tree
+     `core32.v`, the hand-written RTL submitted for fabrication — and no theorem in this tree
      relates the two. Rung 2.5; RTL correspondence OPEN. *Ratification moved the modal
      status of this instance and moved nothing about its object.*
      📜 HISTORY: until the sitting sat this limit read "THE OBJECT IS A DRAFT … not as

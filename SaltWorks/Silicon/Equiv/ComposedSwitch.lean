@@ -78,7 +78,7 @@ fabric's `k = 3` the two hypotheses are not independent knobs: `hlt` puts the
 eight values in `Iio 8` and `hi` makes them distinct, so pigeonhole makes `v` a
 **bijection** onto `Iio 8` — `seam_hyps_force_full_load` below. Reading (ii)
 needs a value `≥ 8`, hence `k ≥ 4`, hence a **16-line banyan** — which is not the
-fabric that was fabricated.
+fabric submitted for fabrication.
 
 ⛔ **And partial load is not merely uncovered: with a shared idle code the
 conclusion is FALSE**, which is the second pair below. That is the tile's real

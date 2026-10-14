@@ -834,7 +834,7 @@ with no activity component in `v`, meant FULL LOAD or an idle encoding.*
 fabric's `k = 3`, `Injective v` and `∀ i, v i < 8` are not two independent knobs:
 **eight distinct values below eight EXHAUST `Iio 8`**, so pigeonhole makes `v` a
 bijection.* ⇒ **An idle sentinel would need a value `≥ 8`, hence `k ≥ 4`, hence a
-SIXTEEN-line banyan — not the fabric that was fabricated.**
+SIXTEEN-line banyan — not the fabric submitted for fabrication.**
 
 ⛔ **AND PARTIAL LOAD IS NOT MERELY UNCOVERED — THE CONCLUSION IS FALSE THERE,
 and silicon proved it rather than reassuring me** (`repeated_code_refutes_no_conflict`):

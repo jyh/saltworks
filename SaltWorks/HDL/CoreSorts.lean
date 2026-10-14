@@ -13,7 +13,7 @@
 
   ⛔⛔ AND THE FENCE IS THE SAME ONE AS EVERYWHERE ELSE TODAY, so nobody may drop it here
   where the sentence is most quotable: the object is `CorePlace.core`, the LEAN-COMPOSED
-  circuit. It is NOT `core32.v`, the hand-written RTL that was fabricated, and no theorem in
+  circuit. It is NOT `core32.v`, the hand-written RTL submitted for fabrication, and no theorem in
   this tree relates the two. **THE DIE IS NOT PROVED TO SORT. THE MODEL IS.**
 
   ⭐ THE SANITY CHECK NOBODY HAD RUN, and it is the one the whole scope idea rests on:
