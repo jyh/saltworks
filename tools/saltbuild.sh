@@ -318,7 +318,32 @@ until mkdir "$LOCK" 2>/dev/null; do
   sleep 5; WAITED=$((WAITED+5))
   [ $((WAITED % 300)) -eq 0 ] && echo "saltbuild: waiting on the fleet lock (${WAITED}s)"
 done
-echo $$ > "$LOCK/pid"
+# ⛔⛔ THE MARKER WRITE IS PART OF THE ACQUIRE, NOT A COURTESY AFTER IT. 2026-10-13 17:27:03, gemini: a fenced build
+#   allowed `/tmp/salt-fleet-build.lock*` by NAME GLOB, so `mkdir "$LOCK"` succeeded and the write of `$LOCK/pid`
+#   INSIDE it was DENIED ("Operation not permitted"). This line used to be a bare `echo $$ > "$LOCK/pid"`: the failed
+#   redirection was swallowed, the build went on as the holder with NO pid marker, and in the same second math's
+#   waiter acquired. Two heavy Lean jobs is the fleet's 08-06 OOM (64 GB + swap). Row LK made a refused RENAME exit
+#   75; the refused marker WRITE still proceeded as held. A marker that cannot be written, or read back as OUR pid,
+#   means THE INTEROP MECHANISM IS NOT HELD, and holding the flock alone is exactly what the interop section above
+#   says is not enough. ⇒ A FAILED ACQUIRE: remove the empty directory WE just created (rmdir, never rm -rf: this is
+#   not a corpse we may reap, and a directory with anything in it that we did not write is left alone), log it, and
+#   exit 75, which RELEASES the flock; the build NEVER STARTED, so the caller's retry is the correct response.
+_mk_why=""
+{ echo $$ > "$LOCK/pid"; } 2>/dev/null || _mk_why=marker-write
+[ -z "$_mk_why" ] && [ "$(cat "$LOCK/pid" 2>/dev/null)" != "$$" ] && _mk_why=marker-readback
+if [ -n "$_mk_why" ]; then
+  # Only OUR files go: an empty or our-own pid is ours; anything else is left (and then rmdir fails harmlessly).
+  _mk_cur="$(cat "$LOCK/pid" 2>/dev/null)"
+  if [ -z "$_mk_cur" ] || [ "$_mk_cur" = "$$" ]; then rm -f -- "${LOCK:?}/pid" "${LOCK:?}/start" 2>/dev/null; fi
+  rmdir "$LOCK" 2>/dev/null
+  _mk_left=""
+  [ -d "$LOCK" ] && _mk_left=" The empty marker directory could NOT be removed (the sandbox refused rmdir too); the next wrapper reaps it."
+  lock_log WAIT-ABORT "stage=$_mk_why" "waited=$(( $(date +%s) - LOCK_T0 ))s" "holder=self"
+  echo "saltbuild: ⛔ the interop marker $LOCK/pid could not be $([ "$_mk_why" = marker-write ] && echo written || echo read back as this process's pid)."
+  echo "saltbuild:    (a sandbox that allows the lock DIRECTORY's name but not its CONTENTS does this). Releasing the fleet lock: a build that cannot publish its marker must not run.${_mk_left}"
+  echo "saltbuild EXIT=75 ($(echo "$_mk_why" | tr a-z A-Z | tr - ' ') REFUSED: the build NEVER STARTED - run it where the lock directory's contents are writable, or RETRY)"
+  exit 75
+fi
 _sb_st="$(sb_starttime $$)"
 [ -n "$_sb_st" ] && { printf '%s\n' "$_sb_st" > "$LOCK/start"; } 2>/dev/null
 # ACQUIRED means BOTH mechanisms are held — the flock AND the interop marker. Logging it

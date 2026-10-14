@@ -311,6 +311,88 @@ wait "$IS" 2>/dev/null
   || no "I4  holder pid=[$hp] start file=[$hs] ps says=[$want]"
 rm -rf "$LK" "$LK".tkt.*
 
+echo "== J — A REFUSED OR UNREADABLE PID-MARKER WRITE IS A FAILED ACQUIRE (gemini 2026-10-13 17:27:03) =="
+# ⛔ THE EVENT: a fenced build allowed `/tmp/salt-fleet-build.lock*` by NAME GLOB. The lock is a DIRECTORY and saltbuild
+#   writes `<lock>/pid` INSIDE it, which the fence DENIED ("line 321: …/pid: Operation not permitted"). `echo $$ > pid`
+#   failed, the script went on, and a build "ACQUIRED" with no pid marker; math's waiter acquired the same second. Two
+#   heavy Lean jobs is the fleet's 08-06 OOM. Row LK made a refused RENAME exit 75; the refused marker WRITE still
+#   proceeded as held. A flock-holder whose marker cannot be written has not acquired the interop mechanism at all.
+# THE MODEL, per process like F's mv shim: a `mkdir` on THAT process's PATH that creates the marker directory and then
+#   makes it refuse (write: the directory takes no file; read: the file lands but cannot be read back). Every other
+#   mkdir is the real one.
+MK="$TD/mkshim"; mkdir -p "$MK"
+cat > "$MK/mkdir" <<'EOS'
+#!/bin/sh
+/bin/mkdir "$@" || exit $?
+if [ "$#" = 1 ] && [ "$1" = "$J_LOCK" ]; then
+  case "$J_MODE" in
+    write) chmod 0500 "$1" ;;
+    read)  : > "$1/pid"; chmod 0200 "$1/pid" ;;
+  esac
+fi
+exit 0
+EOS
+chmod +x "$MK/mkdir"
+JRUN(){ # JRUN <mode>  — one builder whose marker directory refuses
+  ( cd "$TD" && PATH="$MK:$PATH" J_LOCK="$LK" J_MODE="$1" SALTBUILD_LOCK="$LK" SALTBUILD_LOCKLOG="$LOG" \
+      SALTBUILD_MAXWAIT=20 SEAT="jref$1" bash "$SB" 2>&1 )
+}
+unjam(){ chmod -R u+rwx "${LK:?}" 2>/dev/null; rm -rf -- "${LK:?}" "${LK:?}".tkt.* "${LK:?}".reaping.*; }
+# J0 FIXTURE: the shim really does refuse, so no J arm below is a pass for the wrong reason.
+unjam; : > "$LOG"
+J_LOCK="$LK" J_MODE=write PATH="$MK:$PATH" mkdir "$LK"
+{ echo x > "$LK/pid"; } 2>/dev/null \
+  && no "J0  FIXTURE: a write into the shimmed marker dir SUCCEEDED, so no J arm means anything" \
+  || ok "J0  FIXTURE: the shim's marker directory refuses a write into it"
+unjam
+J_LOCK="$LK" J_MODE=read PATH="$MK:$PATH" mkdir "$LK"
+{ echo x > "$LK/pid"; } 2>/dev/null; [ -z "$(cat "$LK/pid" 2>/dev/null)" ] \
+  && ok "J0b FIXTURE: the shim's read-mode marker takes a write and refuses the read-back" \
+  || no "J0b FIXTURE: the read-mode marker was readable"
+unjam
+# J1 (a): the marker write is REFUSED.
+: > "$LOG"; T0=$(date +%s)
+o=$(JRUN write); rc=$?; dt=$(( $(date +%s) - T0 ))
+[ "$rc" = 75 ] && [ "$dt" -lt 10 ] && ok "J1  ⭐ a REFUSED marker write exits 75 at once (${dt}s) — it did not run a build as the holder" \
+  || no "J1  rc=$rc after ${dt}s: $(printf '%s' "$o" | tail -1)"
+[ "$(ev ACQUIRED)" -eq 0 ] && ok "J1b ...and NEVER logged ACQUIRED (a log that says it held the lock is the lie that let two builds run)" \
+  || no "J1b ACQUIRED appeared $(ev ACQUIRED) time(s)"
+grep -F "	WAIT-ABORT	" "$LOG" | grep -F -q "stage=marker-write" && ok "J1c ...and LOGS WAIT-ABORT stage=marker-write" \
+  || no "J1c no stage=marker-write: $(cut -f2,6 "$LOG" | tr '\n' '|')"
+printf '%s' "$o" | grep -F -q "NEVER STARTED" && ok "J1d ...and SAYS the build never started (exit 75 is the retry code)" || no "J1d silent: $(printf '%s' "$o" | tail -2 | tr '\n' '|')"
+[ ! -e "$LK" ] && ok "J1e ...and RELEASED the directory it created (no orphan marker for the next builder to reap or wait on)" \
+  || no "J1e the marker dir is still there: $(ls -la "$LK" 2>&1 | tr '\n' '|')"
+# J2: the flock came back. A normal builder acquires at once.
+: > "$LOG"; T0=$(date +%s)
+( cd "$TD" && SALTBUILD_LOCK="$LK" SALTBUILD_LOCKLOG="$LOG" SALTBUILD_MAXWAIT=10 SEAT=after bash "$SB" >/dev/null 2>&1 ); dt=$(( $(date +%s) - T0 ))
+[ "$(ev ACQUIRED)" -ge 1 ] && [ "$dt" -lt 8 ] && ok "J2  the builder after the refused one acquires in ${dt}s — the flock was RELEASED, not leaked" \
+  || no "J2  the next builder: ACQUIRED=$(ev ACQUIRED) dt=${dt}s :: $(cut -f2,6 "$LOG" | tr '\n' '|')"
+unjam
+# J3 (b): the write lands and the READ-BACK is refused.
+: > "$LOG"
+o=$(JRUN read); rc=$?
+[ "$rc" = 75 ] && [ "$(ev ACQUIRED)" -eq 0 ] && grep -F "	WAIT-ABORT	" "$LOG" | grep -F -q "stage=marker-readback" \
+  && ok "J3  an UNREADABLE marker (written, cannot be read back) is a failed acquire: exit 75, no ACQUIRED, stage=marker-readback" \
+  || no "J3  rc=$rc ACQUIRED=$(ev ACQUIRED) :: $(cut -f2,6 "$LOG" | tr '\n' '|') :: $(printf '%s' "$o" | tail -1)"
+[ ! -e "$LK" ] && ok "J3b ...and the half-made marker (an empty pid file) is gone" || no "J3b leftover: $(ls -la "$LK" 2>&1 | tr '\n' '|')"
+unjam
+# J5 (reader's LOW): if the sandbox ALSO refuses rmdir, the refusal must still exit 75 and SAY the directory was left.
+printf '#!/bin/sh\necho "rmdir: $1: Operation not permitted" >&2\nexit 1\n' > "$MK/rmdir"; chmod +x "$MK/rmdir"
+: > "$LOG"
+o=$(JRUN write); rc=$?
+rm -f -- "${MK:?}/rmdir"
+[ "$rc" = 75 ] && printf '%s' "$o" | grep -F -q "could NOT be removed" && [ "$(ev ACQUIRED)" -eq 0 ] \
+  && ok "J5  an rmdir the sandbox ALSO refuses still exits 75, says the empty marker directory was left, and never logged ACQUIRED" \
+  || no "J5  rc=$rc ACQUIRED=$(ev ACQUIRED) :: $(printf '%s' "$o" | tail -2 | tr '\n' '|')"
+unjam
+# J4 (c) CONTROL: the normal path is unchanged — acquired, released, nothing marker-shaped in the log.
+: > "$LOG"
+( cd "$TD" && SALTBUILD_LOCK="$LK" SALTBUILD_LOCKLOG="$LOG" SALTBUILD_MAXWAIT=10 SEAT=normal bash "$SB" >/dev/null 2>&1 )
+[ "$(ev ACQUIRED)" -eq 1 ] && [ "$(ev RELEASED)" -eq 1 ] && ! grep -F -q "stage=marker-" "$LOG" \
+  && ok "J4  CONTROL: a normal run is ACQUIRED once, RELEASED once, with no marker-write/readback abort" \
+  || no "J4  normal run: $(cut -f2,6 "$LOG" | tr '\n' '|')"
+unjam
+
 echo
 printf 'saltbuild-lock-test: %d/%d\n' "$pass" "$fail"
 [ "$fail" -eq 0 ]
