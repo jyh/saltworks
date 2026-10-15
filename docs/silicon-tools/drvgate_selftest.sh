@@ -59,7 +59,7 @@ mkfix "$T/a4" "wire695/X                                10     11        (VIOLAT
 # ⚖️ THE SHIPPED CHIP'S OWN DRV SIGNATURE, kept as a permanent arm. These are the three nets
 #   the tape-out actually carries (01e19f7, GDS run 34058427540, read from its nine corner
 #   reports): zero clock-leaf, three datapath at 11, 12, 12. If this arm ever refuses, the
-#   gate has drifted away from the part that was fabricated.
+#   gate has drifted away from the design submitted for fabrication.
 mkfix "$T/a4b" "fanout937/X                              10     11        (VIOLATED)" \
                "fanout939/X                              10     12        (VIOLATED)" \
                "wire754/X                                10     12        (VIOLATED)"; arm "THE SHIPPED SHAPE: 3 dp @11,12,12" 0 "$T/a4b"

@@ -45,7 +45,7 @@ What is checked, today:
   each file — provenance that previously existed nowhere.
 
 What remains trusted: the **cell models** themselves, and the claim that **the
-file we imported is the file that was fabricated** — a provenance question, not
+file we imported is the file submitted for fabrication** — a provenance question, not
 a parsing one, answered by pinning `tt_submission/<top>.v` plus the PDK and tool
 SHAs.
 

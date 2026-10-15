@@ -130,7 +130,7 @@ theorem ceC_phase_is_load_bearing :
 
 **Silicon's B4 (`7012d3d`, 13:32) picks C and assigns the sorter's rebuild to this
 seat.** *The ruling is accepted without reservation: `fabric_routes` is proved on
-C against the netlist being fabricated, and moving the banyan instead would
+C against the netlist submitted for fabrication, and moving the banyan instead would
 invalidate a theorem about the shipping artifact to save 128 rows of a truth
 table. That asymmetry is not close.*
 

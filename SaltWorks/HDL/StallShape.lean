@@ -219,7 +219,7 @@ from a landing. **The move IS the adoption; there is no other artifact of it.**
 
 ⛔ WHAT ADOPTION DOES NOT MEAN — the one drift the whole R10 fence exists to stop. The
 object is `CorePlace.core`, the LEAN-COMPOSED circuit. It is **not** `core32.v`, the
-hand-written RTL that was fabricated, and no theorem in this tree relates the two. Rung
+hand-written RTL submitted for fabrication, and no theorem in this tree relates the two. Rung
 **2.5** — proven in Lean over the composed model, RESTRICTED; RTL correspondence OPEN.
 *Ratifying a scope changes the modal status of the results under it, not their object.*
 

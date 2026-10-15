@@ -42,7 +42,7 @@ SHUTTLE="${SHUTTLE_REPO:-/Users/jyh/projects/claude/seats/silicon/tt-neural-data
 #   ⇒ 🔑 A DUT LABEL IS A DATED CLAIM. "The shipped DUT" named one commit yesterday and another
 #     today, and a default carries the stale one forward silently into every future run.
 #   The default is now the VENDORED FABRICATED FIXTURE — a pin that cannot go stale, because the
-#   design behind it has been manufactured. Pass a ref explicitly to read the shuttle clone.
+#   design behind it is the closed shuttle submission. Pass a ref explicitly to read the shuttle clone.
 FIXTURE="${SWEEP_FIXTURE:-$ROOT/SaltWorks/Silicon/Fabricated/01e19f7}"
 REF="${1:-}"
 PERIOD=40

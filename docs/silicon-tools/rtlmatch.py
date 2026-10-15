@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""rtlmatch.py — has the repo's RTL drifted from the bytes that were FABRICATED?
+"""rtlmatch.py — has the repo's RTL drifted from the bytes SUBMITTED FOR FABRICATION?
 
   python3 rtlmatch.py <submitted-src-dir> <repo-rtl-dir>
   python3 rtlmatch.py --selftest

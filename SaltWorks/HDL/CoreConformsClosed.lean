@@ -23,7 +23,7 @@
 
   ⛔⛔ WHAT THIS DOES NOT DO, and it is the same fence as the sitting table's fifth limit:
   `emitPipeline' core` is the netlist THIS TREE EMITS FROM THIS MODEL. It is NOT `core32.v`,
-  the hand-written RTL that was fabricated, and no theorem in this tree relates the two.
+  the hand-written RTL submitted for fabrication, and no theorem in this tree relates the two.
   The object moves from a Lean-composed `Circ` to an actual `Silicon.Netlist`. The RTL
   correspondence stays OPEN.
 -/
@@ -168,7 +168,7 @@ theorem coreConforms_core : SaltWorks.HDL.CoreConforms core :=
 /-! ### ⭐ AND WHAT `core.wf` UNLOCKS: THE EMITTED NETLIST.
 
 ⛔⛔ READ THIS BEFORE THE THEOREM. `emitPipeline' core` is the netlist THIS TREE EMITS FROM
-THIS MODEL. It is **NOT `core32.v`**, the hand-written RTL that was fabricated, and no
+THIS MODEL. It is **NOT `core32.v`**, the hand-written RTL submitted for fabrication, and no
 theorem in this tree relates the two. What moves here is the object — from the Lean-composed
 `Circ` to an actual `Silicon.Netlist` — and nothing else. The RTL correspondence stays OPEN
 and stays exactly where the sitting table's fifth limit puts it. -/
