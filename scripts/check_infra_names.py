@@ -494,11 +494,44 @@ def _fixture_git(cwd, nohooks, *args) -> str:
     """The scratch repositories' git: identity, no signing, no hooks, and a failure is a _FixtureError, never a pass."""
     r = subprocess.run(["git", "-c", "user.name=infra-names self-test", "-c", "user.email=self-test@example.invalid",
                         "-c", "commit.gpgsign=false", "-c", "core.autocrlf=false", "-c", "init.defaultBranch=main",
-                        "-c", "core.hooksPath=" + str(nohooks)] + list(args),
+                        "-c", "core.hooksPath=" + str(nohooks),
+                        # ADH: NO AUTOMATIC PACKING. Control (d) removes ONE loose object by path, so the object must be
+                        # loose; a runner whose gitconfig packs after a commit made that control fail at random (2026-10-15).
+                        "-c", "gc.auto=0", "-c", "maintenance.auto=false", "-c", "receive.autogc=false"] + list(args),
                        cwd=cwd, capture_output=True)
     if r.returncode != 0:
         raise _FixtureError(f"git {args[0]} (rc {r.returncode})")
     return r.stdout.decode("utf-8", "replace").strip()
+
+
+def _ensure_loose(repo, blob):
+    """ADH: make `blob` a LOOSE object in `repo` and return its path, or None with the reason in .why.
+
+    Control (d) removes one object by file path, so the object must be a file under objects/XX/. If it is in a pack
+    (a runner that packs after a commit), the packs are moved aside and re-exploded with `git unpack-objects`: every
+    object in them becomes loose, and the repository is the same repository. A failure is returned, never skipped."""
+    objdir = repo / ".git" / "objects"
+    obj = objdir / blob[:2] / blob[2:]
+    if obj.is_file():
+        return obj, ""
+    stash = repo / ".git" / "adh-packs-aside"
+    stash.mkdir(exist_ok=True)
+    packs = sorted((objdir / "pack").glob("*.pack"))
+    for p in packs:
+        for ext in (".pack", ".idx", ".rev", ".bitmap", ".mtimes", ".keep"):
+            q = p.with_suffix(ext)
+            if q.exists():
+                q.replace(stash / q.name)
+    for p in sorted(stash.glob("*.pack")):
+        r = subprocess.run(["git", "-c", "gc.auto=0", "unpack-objects", "-q"], cwd=repo,
+                           stdin=open(p, "rb"), capture_output=True)
+        if r.returncode != 0:
+            return None, f"git unpack-objects failed on {p.name} (rc {r.returncode})"
+    if obj.is_file():
+        return obj, ""
+    cnt = subprocess.run(["git", "count-objects", "-v"], cwd=repo, capture_output=True).stdout.decode("utf-8", "replace")
+    ver = subprocess.run(["git", "--version"], capture_output=True).stdout.decode("utf-8", "replace").strip()
+    return None, (f"{ver}; {len(packs)} pack(s) moved aside; count-objects: " + " ".join(cnt.split()))
 
 
 def _self_test_git(failures, tmp, p_bad, d_bad, p_ren, d_ren, leaks, contextlib, io) -> None:
@@ -756,9 +789,10 @@ def _self_test_git_rc(failures, tmp, contextlib, io) -> None:
         if drive(label, fn, *a, **kw)[0] != 1:
             failures.append(f"CONTROL (d): intact, the planted line must be SEEN under {label} (exit 1)")
     blob = git("rev-parse", f"{c3}:c.md")
-    obj = repo / ".git" / "objects" / blob[:2] / blob[2:]
-    if not obj.is_file():
-        failures.append("CONTROL (d): the planted blob must be a LOOSE object, or this arm cannot remove it")
+    obj, why = _ensure_loose(repo, blob)
+    if obj is None:
+        failures.append("CONTROL (d): the planted blob must be a LOOSE object, or this arm cannot remove it "
+                        "(it could not be made loose: " + why + ")")
     else:
         os.chmod(obj, 0o644)     # git writes objects read-only, and Windows will not unlink a read-only file
         obj.unlink()
