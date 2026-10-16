@@ -201,7 +201,8 @@ def tag_mode(trailers, paths, subject, infra, tag_sha: str) -> int:
         short = "tag " + sha[:10]
         bad += [(short, what, ln) for _, what, ln in trailers.scan([(short, raw)])]
         bad += [(short, what, ln) for _, what, ln in paths.scan([(short, raw)])]
-        bad += [(short, "an infrastructure name", f"line {ln}") for _, ln, _ in infra.scan([(short, raw)])]
+        if infra is not None:
+            bad += [(short, "an infrastructure name", f"line {ln}") for _, ln, _ in infra.scan([(short, raw)])]
         message = raw.split("\n\n", 1)[1] if "\n\n" in raw else ""
         for where, what in subject.subject_scan(subject.message_rows(message, short + " message")):
             bad.append((where, what, ""))
@@ -210,7 +211,9 @@ def tag_mode(trailers, paths, subject, infra, tag_sha: str) -> int:
         show(bad, "carries")
         return 1
     print(f"gate_scan OK: {len(seen)} tag object(s) -- raw text vs {len(trailers.FORBIDDEN)} trailer shape(s), "
-          f"{len(paths.FORBIDDEN)} path shape(s), the infra-name list; message vs the subject gate.")
+          f"{len(paths.FORBIDDEN)} path shape(s), "
+          + ("the infra-name list" if infra is not None else "NO infra-name gate in this repository")
+          + "; message vs the subject gate.")
     return 0
 
 
@@ -229,7 +232,7 @@ def main(argv) -> int:
     t.add_argument("--trailers-gate", required=True)
     t.add_argument("--paths-gate", required=True)
     t.add_argument("--subject-gate", required=True)
-    t.add_argument("--infra-gate", required=True)
+    t.add_argument("--infra-gate", default=None)
     t.add_argument("tagsha")
     args = ap.parse_args(argv)
 
@@ -246,8 +249,8 @@ def main(argv) -> int:
         return 2
     if args.mode == "tag":
         subject = load_gate(args.subject_gate, ("subject_scan", "message_rows"))
-        infra = load_gate(args.infra_gate, ("scan", "FORBIDDEN"))
-        if subject is None or infra is None:
+        infra = load_gate(args.infra_gate, ("scan", "FORBIDDEN")) if args.infra_gate else None
+        if subject is None or (args.infra_gate and infra is None):
             print("gate_scan: the subject or infra-names gate could not be loaded.", file=sys.stderr)
             return 2
         return tag_mode(trailers, paths, subject, infra, args.tagsha)

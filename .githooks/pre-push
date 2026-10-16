@@ -149,9 +149,13 @@ while read -r local_ref local_sha remote_ref remote_sha; do
           ttype=$(git cat-file -t "$local_sha" 2>/dev/null) || ttype=
           if [ "$ttype" = "tag" ]; then
             trc=0
+            # The infra-name gate is optional: a repository without one scans the rest and says so.
+            TINFRA=
+            [ -n "${INFRA_GATE:-}" ] && [ -f "$ROOT/$INFRA_GATE" ] && TINFRA="--infra-gate $ROOT/$INFRA_GATE"
+            # shellcheck disable=SC2086
             ( cd "$ROOT" && "$PY" "$SCAN" tag --trailers-gate "$ROOT/$TRAILER_GATE" \
                 --paths-gate "$ROOT/$GATE" --subject-gate "$ROOT/$SUBJECT_GATE" \
-                --infra-gate "$ROOT/$INFRA_GATE" "$local_sha" ) < /dev/null || trc=$?
+                $TINFRA "$local_sha" ) < /dev/null || trc=$?
             if [ "$trc" -ne 0 ]; then
               if [ "$trc" -eq 1 ]; then
                 echo "pre-push REFUSED: the tag object ${local_sha} carries a forbidden shape (named above)." >&2
