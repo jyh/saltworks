@@ -33,6 +33,7 @@ removed in the next passes it too. Same population, same fix.
 USAGE (the hooks are the callers; the repo root is the working directory)
     gate_scan.py message --trailers-gate T MSGFILE
     gate_scan.py push --trailers-gate T --paths-gate P [--history-baseline B] RANGE
+    gate_scan.py tag  --trailers-gate T --paths-gate P --subject-gate S --infra-gate I TAGSHA
 exit 0 clean, 1 finding (named on stderr), 2 could not look (refuse).
 
 This file is 100644 on purpose: the hooks invoke it as "$PY" gate_scan.py after
@@ -157,6 +158,65 @@ def push_mode(trailers, paths, baseline_path, rev_range: str) -> int:
     return 0
 
 
+def tag_mode(trailers, paths, subject, infra, tag_sha: str) -> int:
+    """A TAG whose commit origin already has adds no commit to scan; what it adds
+    is the TAG OBJECT, and that carries a message and a tagger line nobody has
+    scanned. Walk the chain (a tag may point at a tag), scan each object's raw
+    text with the trailer, private-paths and infra-names patterns and its message
+    with the subject gate, and name every object scanned. Anything that is not an
+    annotated tag, or a chain that does not end at a commit, is 'could not look'."""
+    seen, obj = [], tag_sha
+    for _ in range(8):
+        try:
+            typ = git("cat-file", "-t", obj).strip()
+        except subprocess.CalledProcessError as e:
+            print(f"gate_scan: cannot read object {obj[:10]}: {e.stderr.strip()}", file=sys.stderr)
+            return 2
+        if typ == "commit":
+            break
+        if typ != "tag":
+            print(f"gate_scan: {obj[:10]} is a {typ}, not an annotated tag chain ending at a commit -- refusing.",
+                  file=sys.stderr)
+            return 2
+        raw = git("cat-file", "tag", obj)
+        if not raw.strip():
+            print(f"gate_scan: tag object {obj[:10]} read EMPTY -- refusing to call that clean.", file=sys.stderr)
+            return 2
+        seen.append((obj, raw))
+        nxt = [l.split(None, 1)[1].strip() for l in raw.splitlines() if l.startswith("object ")]
+        if len(nxt) != 1:
+            print(f"gate_scan: tag object {obj[:10]} has no single 'object' header -- refusing.", file=sys.stderr)
+            return 2
+        obj = nxt[0]
+    else:
+        print("gate_scan: tag chain deeper than 8 -- refusing.", file=sys.stderr)
+        return 2
+    if not seen:
+        print(f"gate_scan: {tag_sha[:10]} is a commit, not a tag object -- nothing for the tag arm to read.",
+              file=sys.stderr)
+        return 2
+
+    bad = []
+    for sha, raw in seen:
+        short = "tag " + sha[:10]
+        bad += [(short, what, ln) for _, what, ln in trailers.scan([(short, raw)])]
+        bad += [(short, what, ln) for _, what, ln in paths.scan([(short, raw)])]
+        if infra is not None:
+            bad += [(short, "an infrastructure name", f"line {ln}") for _, ln, _ in infra.scan([(short, raw)])]
+        message = raw.split("\n\n", 1)[1] if "\n\n" in raw else ""
+        for where, what in subject.subject_scan(subject.message_rows(message, short + " message")):
+            bad.append((where, what, ""))
+    if bad:
+        print(f"REFUSED: {len(bad)} finding(s) in the tag object(s) this push adds:", file=sys.stderr)
+        show(bad, "carries")
+        return 1
+    print(f"gate_scan OK: {len(seen)} tag object(s) -- raw text vs {len(trailers.FORBIDDEN)} trailer shape(s), "
+          f"{len(paths.FORBIDDEN)} path shape(s), "
+          + ("the infra-name list" if infra is not None else "NO infra-name gate in this repository")
+          + "; message vs the subject gate.")
+    return 0
+
+
 def main(argv) -> int:
     ap = argparse.ArgumentParser(description="the hooks' view of the gates")
     sub = ap.add_subparsers(dest="mode", required=True)
@@ -168,6 +228,12 @@ def main(argv) -> int:
     p.add_argument("--paths-gate", required=True)
     p.add_argument("--history-baseline", default=None)
     p.add_argument("range")
+    t = sub.add_parser("tag")
+    t.add_argument("--trailers-gate", required=True)
+    t.add_argument("--paths-gate", required=True)
+    t.add_argument("--subject-gate", required=True)
+    t.add_argument("--infra-gate", default=None)
+    t.add_argument("tagsha")
     args = ap.parse_args(argv)
 
     trailers = load_gate(args.trailers_gate, ("FORBIDDEN", "scan"))
@@ -181,6 +247,13 @@ def main(argv) -> int:
     if paths is None:
         print(f"gate_scan: the private-paths gate could not be loaded from {args.paths_gate}.", file=sys.stderr)
         return 2
+    if args.mode == "tag":
+        subject = load_gate(args.subject_gate, ("subject_scan", "message_rows"))
+        infra = load_gate(args.infra_gate, ("scan", "FORBIDDEN")) if args.infra_gate else None
+        if subject is None or (args.infra_gate and infra is None):
+            print("gate_scan: the subject or infra-names gate could not be loaded.", file=sys.stderr)
+            return 2
+        return tag_mode(trailers, paths, subject, infra, args.tagsha)
     return push_mode(trailers, paths, args.history_baseline, args.range)
 
 

@@ -124,6 +124,65 @@ while read -r local_ref local_sha remote_ref remote_sha; do
       ;;
   esac
 
+  # ---- A NEW TAG WHOSE COMMIT ORIGIN ALREADY HAS (the helm's ask, 2026-10-15) ---
+  # `merge-base <default> <tag-object>` peels to the tagged commit, and the guard
+  # below compares that commit with `rev-parse <tag-object>` -- the TAG OBJECT --
+  # so for an annotated tag on a commit that is already public the range is
+  # <commit>..<tag-object>, which lists ZERO commits, and every arm correctly
+  # refuses "an empty scan is not clean". What such a push ADDS is the tag object,
+  # so that is what is scanned: its raw text and message, by gate_scan.py `tag`.
+  # ONLY this shape is let through: a NEW refs/tags/ ref, peelable to a commit that
+  # is an ancestor of the remote's default branch. A tag on an unpushed commit
+  # falls through to the range arms below and scans that commit; a branch with an
+  # empty range is still refused.
+  case "${remote_ref:-}" in
+    refs/tags/*)
+      if [ -z "${remote_sha:-}" ] || [ "$remote_sha" = "$ZERO" ]; then
+        TGT=$(git rev-parse --verify --quiet "${local_sha}^{commit}" 2>/dev/null) || TGT=
+        TDEF=$(default_remote_branch) || TDEF=
+        if [ -n "$TGT" ] && [ -n "$TDEF" ] && git merge-base --is-ancestor "$TGT" "$TDEF" 2>/dev/null; then
+          tbad=0
+          if ! ( cd "$ROOT" && "$PY" "$SUBJECT_GATE" --ref "${remote_ref:-}" ) < /dev/null; then
+            echo "pre-push REFUSED: the pushed tag name carries a refused word." >&2
+            tbad=1
+          fi
+          ttype=$(git cat-file -t "$local_sha" 2>/dev/null) || ttype=
+          if [ "$ttype" = "tag" ]; then
+            trc=0
+            # The infra-name gate is optional: a repository without one scans the rest and says so.
+            TINFRA=
+            [ -n "${INFRA_GATE:-}" ] && [ -f "$ROOT/$INFRA_GATE" ] && TINFRA="--infra-gate $ROOT/$INFRA_GATE"
+            # shellcheck disable=SC2086
+            ( cd "$ROOT" && "$PY" "$SCAN" tag --trailers-gate "$ROOT/$TRAILER_GATE" \
+                --paths-gate "$ROOT/$GATE" --subject-gate "$ROOT/$SUBJECT_GATE" \
+                $TINFRA "$local_sha" ) < /dev/null || trc=$?
+            if [ "$trc" -ne 0 ]; then
+              if [ "$trc" -eq 1 ]; then
+                echo "pre-push REFUSED: the tag object ${local_sha} carries a forbidden shape (named above)." >&2
+              else
+                echo "pre-push REFUSED: the tag-object scan could NOT RUN on ${local_sha} (exit ${trc})." >&2
+              fi
+              tbad=1
+            fi
+            tnote="annotated tag object scanned"
+          elif [ "$ttype" = "commit" ]; then
+            tnote="LIGHTWEIGHT tag: no tag object, nothing but the ref name is new"
+          else
+            echo "pre-push REFUSED: ${local_sha} is a ${ttype:-<unreadable>}, not a tag or a commit." >&2
+            tbad=1
+            tnote=
+          fi
+          if [ "$tbad" -ne 0 ]; then
+            status=1
+          else
+            echo "pre-push OK [tag: ref name + tag object vs trailer, private-paths, subject, infra-names]: ${local_ref:-<ref>} -> ${remote_ref}, NO commit scanned BECAUSE ${TGT} is already an ancestor of ${TDEF} (public); ${tnote}."
+          fi
+          continue
+        fi
+      fi
+      ;;
+  esac
+
   RANGE=
   WHY=
   if [ -n "${remote_sha:-}" ] && [ "$remote_sha" != "$ZERO" ] \
