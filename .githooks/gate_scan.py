@@ -41,6 +41,7 @@ choosing an interpreter by execution, and the executable bit would invite runnin
 its shebang on a machine where `python3` is a stub.
 """
 import argparse
+import re
 import subprocess
 import sys
 import types
@@ -158,13 +159,27 @@ def push_mode(trailers, paths, baseline_path, rev_range: str) -> int:
     return 0
 
 
+def _identity(header_line: str) -> str:
+    """`tagger Name <e@x> 1700000000 -0700` -> `Name <e@x>` (the date is not identity)."""
+    rest = header_line.split(None, 1)[1] if " " in header_line else ""
+    return re.sub(r"\s+\d+\s+[+-]\d{4}\s*$", "", rest).strip()
+
+
 def tag_mode(trailers, paths, subject, infra, tag_sha: str) -> int:
     """A TAG whose commit origin already has adds no commit to scan; what it adds
     is the TAG OBJECT, and that carries a message and a tagger line nobody has
     scanned. Walk the chain (a tag may point at a tag), scan each object's raw
     text with the trailer, private-paths and infra-names patterns and its message
     with the subject gate, and name every object scanned. Anything that is not an
-    annotated tag, or a chain that does not end at a commit, is 'could not look'."""
+    annotated tag, or a chain that does not end at a commit, is 'could not look'.
+
+    THE TAGGER HEADER IS MEASURED BY WHAT IT ADDS. A tagger identity byte-equal to
+    the author or committer of the tagged commit adds nothing: that commit is
+    already public. It is the identity of every public commit in the repository,
+    and the infra-name list matches it, so scanning it refused EVERY tag the owner
+    makes (found at the first real push, 2026-10-15 18:13). Such a header is left
+    out of the scan and the receipt says so; any OTHER header and the message are
+    scanned as before, and a tagger that the commit does not carry is scanned."""
     seen, obj = [], tag_sha
     for _ in range(8):
         try:
@@ -195,10 +210,26 @@ def tag_mode(trailers, paths, subject, infra, tag_sha: str) -> int:
         print(f"gate_scan: {tag_sha[:10]} is a commit, not a tag object -- nothing for the tag arm to read.",
               file=sys.stderr)
         return 2
+    try:
+        commit_head = git("cat-file", "commit", obj).split("\n\n", 1)[0]
+    except subprocess.CalledProcessError as e:
+        print(f"gate_scan: cannot read the tagged commit {obj[:10]}: {e.stderr.strip()}", file=sys.stderr)
+        return 2
+    public_ids = {_identity(l) for l in commit_head.splitlines() if l.startswith(("author ", "committer "))}
+    public_ids.discard("")
+    skipped = 0
 
     bad = []
     for sha, raw in seen:
         short = "tag " + sha[:10]
+        head, sep, body = raw.partition("\n\n")
+        kept = []
+        for l in head.splitlines():
+            if l.startswith("tagger ") and _identity(l) in public_ids:
+                skipped += 1
+                continue
+            kept.append(l)
+        raw = "\n".join(kept) + sep + body
         bad += [(short, what, ln) for _, what, ln in trailers.scan([(short, raw)])]
         bad += [(short, what, ln) for _, what, ln in paths.scan([(short, raw)])]
         if infra is not None:
@@ -213,7 +244,10 @@ def tag_mode(trailers, paths, subject, infra, tag_sha: str) -> int:
     print(f"gate_scan OK: {len(seen)} tag object(s) -- raw text vs {len(trailers.FORBIDDEN)} trailer shape(s), "
           f"{len(paths.FORBIDDEN)} path shape(s), "
           + ("the infra-name list" if infra is not None else "NO infra-name gate in this repository")
-          + "; message vs the subject gate.")
+          + "; message vs the subject gate"
+          + (f"; {skipped} tagger header(s) equal to the tagged commit's author/committer NOT scanned (already public)"
+             if skipped else "")
+          + ".")
     return 0
 
 

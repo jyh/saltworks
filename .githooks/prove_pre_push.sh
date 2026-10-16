@@ -570,6 +570,38 @@ expect_out green-tag-unpushed "commit(s) scanned"
 expect_no_out green-tag-unpushed "already an ancestor of"
 git -C "$W" reset -q --hard "$GOOD"; restore_remote
 
+# ARM 22 -- THE TAGGER HEADER IS MEASURED BY WHAT IT ADDS (found at the first real
+# push, 2026-10-15): the owner's identity is the author and committer of every public
+# commit, so a listed word in it tripped the infra-name scan of the tag object and
+# the arm refused EVERY tag he makes. ARM 17's fixture carried no listed word and so
+# never drove the property the gate keys on. Here the identity IS a listed word.
+if [ -n "${INFRA_WORD:-}" ]; then
+  note "ARM 22  tagger carries a listed word the tagged commit ALSO carries   expect 0"
+  printf '%s\n' "a line by the named identity" > "$W/ident22.txt"
+  git -C "$W" add -- ident22.txt
+  GIT_AUTHOR_NAME="$INFRA_WORD" GIT_AUTHOR_EMAIL="id@example.invalid" \
+  GIT_COMMITTER_NAME="$INFRA_WORD" GIT_COMMITTER_EMAIL="id@example.invalid" \
+    git -C "$W" commit -q --no-verify -m "docs: a clean subject by a named identity"
+  IDC=$(git -C "$W" rev-parse HEAD)
+  git -C "$W" push -q --no-verify origin main 2>/dev/null
+  GIT_COMMITTER_NAME="$INFRA_WORD" GIT_COMMITTER_EMAIL="id@example.invalid" \
+    git -C "$W" tag -a tag-ident-ok -m "a clean message" "$IDC"
+  run_push 0 green-tag-same-identity origin refs/tags/tag-ident-ok
+  expect_out green-tag-same-identity "NOT scanned (already public)"
+  expect_no_out green-tag-same-identity "$INFRA_WORD"
+
+  note "ARM 22b tagger carries a listed word the tagged commit does NOT   expect 1"
+  GIT_COMMITTER_NAME="$INFRA_WORD" GIT_COMMITTER_EMAIL="id@example.invalid" \
+    git -C "$W" tag -a tag-ident-red -m "a clean message" "$GOOD"
+  run_push 1 red-tag-other-identity origin refs/tags/tag-ident-red
+  expect_out red-tag-other-identity "an infrastructure name"
+  if grep -qF -- "$INFRA_WORD" "$OUT"; then bad "red-tag-other-identity: the refusal LEAKS the name"; fi
+  tag_not_landed red-tag-other-identity tag-ident-red
+  git -C "$W" reset -q --hard "$GOOD"; restore_remote
+else
+  note "ARM 22/22b SKIPPED: this repository has no infrastructure-name gate (not covered)"
+fi
+
 # ARM 20 -- an EMPTY branch range is UNCHANGED by the tag branch. Measured on the
 # hook as it stood (origin/master 553252d): remote tip == local tip does NOT refuse,
 # it exits 0 and prints "adds NO commit that origin does not already have; nothing
