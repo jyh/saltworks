@@ -533,12 +533,18 @@ run_push 1 red-tag-path origin refs/tags/tag-red-path
 expect_out red-tag-path "carries a forbidden shape (named above)"
 tag_not_landed red-tag-path tag-red-path
 
-note "ARM 18c tag MESSAGE carries an infrastructure name             expect 1"
-git -C "$W" tag -a tag-red-infra -m "built on $INFRA_WORD" "$GOOD"
-run_push 1 red-tag-infra origin refs/tags/tag-red-infra
-expect_out red-tag-infra "carries a forbidden shape (named above)"
-if grep -qF -- "$INFRA_WORD" "$OUT"; then bad "red-tag-infra: the refusal LEAKS the name"; fi
-tag_not_landed red-tag-infra tag-red-infra
+# Only a repository that HAS an infrastructure-name gate has this arm: a prover that
+# skipped it silently would read as covered, so the skip is said.
+if [ -n "${INFRA_WORD:-}" ]; then
+  note "ARM 18c tag MESSAGE carries an infrastructure name             expect 1"
+  git -C "$W" tag -a tag-red-infra -m "built on $INFRA_WORD" "$GOOD"
+  run_push 1 red-tag-infra origin refs/tags/tag-red-infra
+  expect_out red-tag-infra "carries a forbidden shape (named above)"
+  if grep -qF -- "$INFRA_WORD" "$OUT"; then bad "red-tag-infra: the refusal LEAKS the name"; fi
+  tag_not_landed red-tag-infra tag-red-infra
+else
+  note "ARM 18c SKIPPED: this repository has no infrastructure-name gate (not covered)"
+fi
 
 note "ARM 18d the tag NAME carries a refused word                    expect 1"
 git -C "$W" tag -a "tidy-$KIN_WORD" -m "a clean message" "$GOOD"
