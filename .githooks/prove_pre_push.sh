@@ -577,18 +577,33 @@ git -C "$W" reset -q --hard "$GOOD"; restore_remote
 # so the tag branch cannot silently turn it into a different verdict. git sends no
 # ref line for an up-to-date ref, so the hook is driven directly with the line
 # git would send.
-note "ARM 20  empty BRANCH range (tip == tip): receipt, unchanged   expect 0"
+# The two verdicts are the two hook generations that exist across the public repos
+# (measured 2026-10-15): the generation that carries the ancestry guard on the remote
+# tip (desk ML finding #6, ARM 3b) prints the receipt and exits 0; the older one
+# refuses "scanned ZERO commits". Which one this repository's hook is, is read from
+# the hook; the tag branch must leave EITHER unchanged.
+if grep -qF 'merge-base --is-ancestor "$remote_sha"' "$HOOK"; then
+  note "ARM 20  empty BRANCH range (tip == tip): receipt, unchanged   expect 0"
+  want20=0
+else
+  note "ARM 20  empty BRANCH range (tip == tip): refused, unchanged   expect 1"
+  want20=1
+fi
 printf 'refs/heads/main %s refs/heads/main %s\n' "$GOOD" "$GOOD" > "$SBX/ref-line.txt"
 ( cd "$W" && sh .githooks/pre-push origin "$REMOTE" < "$SBX/ref-line.txt" ) > "$OUT" 2>&1
 rc=$?
-if [ "$rc" -eq 0 ]; then
-  printf '  ok   %-22s exit=%s (expected 0)\n' empty-branch-range-unchanged "$rc"
+if [ "$rc" -eq "$want20" ]; then
+  printf '  ok   %-22s exit=%s (expected %s)\n' empty-branch-range-unchanged "$rc" "$want20"
 else
-  printf '  FAIL %-22s exit=%s expected=0\n' empty-branch-range-unchanged "$rc"
+  printf '  FAIL %-22s exit=%s expected=%s\n' empty-branch-range-unchanged "$rc" "$want20"
   sed 's/^/         | /' "$OUT"
   fail=$((fail + 1))
 fi
-expect_out empty-branch-range-unchanged "adds NO commit that origin does not already have; nothing to scan"
+if [ "$want20" -eq 0 ]; then
+  expect_out empty-branch-range-unchanged "adds NO commit that origin does not already have; nothing to scan"
+else
+  expect_out empty-branch-range-unchanged "scanned ZERO commits"
+fi
 expect_no_out empty-branch-range-unchanged "already an ancestor of"
 
 # ARM 21 -- MUTATION CONTROL for the tag arms: the refused tag lands with --no-verify,
