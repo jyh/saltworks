@@ -81,3 +81,8 @@ f2ae8fa7b164fe3b98322f33b00290566cf3ce24	docs/compiler-B1-undercount-ledger-0814
 f2f39f0f75bfc0de3009941645d49bc3f2f12e39	docs/pi2-cold-verdicts-0813.json	954da0f1bdd661be	a line-anchored citation into the fleet bus
 f2f39f0f75bfc0de3009941645d49bc3f2f12e39	docs/pi2-cold-verdicts-0813.json	c4e483cc381e3fa8	a line-anchored citation into the fleet bus
 f2f39f0f75bfc0de3009941645d49bc3f2f12e39	docs/pi2-cold-verdicts-0813.json	7f2cfd2f8c63492a	a line-anchored citation into the fleet bus
+# ITEM 11 (systems, 2026-10-16; saltbench #355) — the gate learned a path ending AT a private root. These two commits added a
+#   default naming the seat repo path in docs/silicon-tools/mirror_sync_guarded.sh, already public and clean under the gate of
+#   their day. Accepted residue on the non-author read; APPENDED (the regenerating write mode drops annotations).
+6cff2f81c81516ad5ef62ab148c17ba8070f8726	docs/silicon-tools/mirror_sync_guarded.sh	a058972e55c02698	a path ending AT a private-record root
+fb0368aea45c36dcfeaabc0e060044312bbbc990	docs/silicon-tools/mirror_sync_guarded.sh	bc83f9c738155d78	a path ending AT a private-record root

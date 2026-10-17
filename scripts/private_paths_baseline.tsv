@@ -61,4 +61,5 @@ docs/silicon-tools/fallback-silicon.sh	fe374074001d5860	a path into a private-re
 docs/silicon-tools/fallback-silicon.sh	02c0ab295d3d1270	the kit run surface
 docs/silicon-tools/meas_build.sh	8dad5c66452d4427	a path into a private-record repo
 docs/silicon-tools/meas_since.sh	4a0bd0cf6a83bf25	a path into a private-record repo
+docs/silicon-tools/mirror_sync_guarded.sh	a058972e55c02698	a path ending AT a private-record root
 docs/silicon-tools/orderwatch_selftest.sh	c098add3768261af	a path into a private-record repo

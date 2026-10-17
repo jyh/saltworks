@@ -379,10 +379,33 @@ _SEP = r"[/\\]+"
 # HOW A GUARD GETS BYPASSED. "/" is deliberately NOT added: an absolute path carries a slash
 # immediately before the root and MUST still be caught.
 _INTO = rf"(?<![A-Za-z0-9_.-])(?:{_ROOT_ALT}){_SEP}[A-Za-z0-9_.-]+"
+# ⛔⛔ A PATH THAT ENDS *AT* A ROOT (systems, 2026-10-16, the helm's item 11). Every pattern here wants a CHILD after the
+#   root, so `<host>:~/projects/claude/<tree>-v3-export-0d97b68 (marker…)` — bench's line on saltbench #354 — passed in BOTH
+#   pushes, beside two flagged twins that continued with `/harness/…`. Driven one variable at a time: the `host:` prefix is
+#   irrelevant (with a trailing child the same line is caught); the missing CHILD is the whole cause.
+# ✅ THE FORM: the root as the LAST segment of a path that has a path anchor before it — `~`, `<seg>:`, or at least two
+#   segments — plus the scp form `<host>:<root>`. ⛔ A bare owner/repo COORDINATE (one segment, `jyh/<tree>`) is a NAME, not
+#   a path: it is left alone, as the bare root in prose already is, because frozen amendments carry it and it discloses no
+#   location. MEASURED before adding, across the six gated repos' tracked trees: 4 new lines here (frozen amendments,
+#   accepted residue in the baseline) · 1 in saltworks · 0 in salt, jas, x86lean, tt-neural-dataflow-fabric.
+_PSEG = r"[A-Za-z0-9_.$>-]+"
+# kent's read of saltbench #355 (2026-10-16 23:49:51): `(?![A-Za-z0-9_.-])` read a sentence-final `.` as part of the name,
+#   so `…/<root>.` hid the root; now a `.` ends the name unless a name character follows it. `./` and `../` are anchors: a
+#   RELATIVE sibling-checkout path is a location, not a coordinate.
+_END_NAME = r"(?![A-Za-z0-9_-])(?!\.[A-Za-z0-9_-])"
+# kent's delta read of saltbench #355 (2026-10-17 00:02:08): the anchor took ZERO directories before the root, so
+#   `~/bench-dry/<root>`, `host:~/dir/<root>` and `/srv/<root>` passed. An anchor (`~`, `.`, `..`, `<host>:`) now takes any
+#   number of directories after it, and a LEADING `/` (not preceded by a name character) is an anchor too. `jyh/<root>` and
+#   `dir/<root>` stay names.
+_END_ROOT = (rf"(?:(?:~|\.\.?|{_PSEG}:~?)(?:{_SEP}{_PSEG})*|{_PSEG}{_SEP}{_PSEG}|(?<![A-Za-z0-9_.>~$:-])(?:{_SEP}{_PSEG})+)"
+             rf"{_SEP}(?:{_ROOT_ALT}){_END_NAME}(?!{_SEP}[A-Za-z0-9_.-])"
+             rf"|(?<=[A-Za-z0-9>_-]):(?:{_ROOT_ALT}){_END_NAME}")
 
 FORBIDDEN = [
     (re.compile(_INTO),
      "a path into a private-record repo"),
+    (re.compile(_END_ROOT),
+     "a path ending AT a private-record root"),
     (re.compile(_CFGDIR),
      "a per-" + _SEAT + " runtime config directory"),
     (re.compile(rf"(?<![A-Za-z0-9_-]){_KIT_RE}(?:{_SEP}|\b)"),
@@ -795,6 +818,20 @@ def self_test() -> int:
         ("xk-wt", "tools from /Users/x/" + "saltbench-sys" + "tems-v3-export-2833621" + "/harness"),
         ("xk-wt2", "scorer/walk " + "saltbench-sys" + "tems-v3-gemini-abb7829" + "/harness/systems-v3"),
         ("xk-bs", "at C:" + chr(92) + "saltbench-sys" + "tems-x86r1" + chr(92) + "t.md"),
+        # ⛔ A PATH THAT ENDS *AT* A ROOT (systems, 2026-10-16, the helm's item 11; saltbench #355): saltbench #354 carried this
+        #   exact line unflagged, because every pattern here wants a CHILD after the root. Split differently again.
+        ("end-host", "studio_export: DONE → <the run box>:~/projects/claude/" + "saltbench-sy" + "stems-v3-export-0d97b68" + " (marker)"),
+        ("end-tilde", "dest ~/projects/claude/" + "saltbench-sy" + "stems-v3-export-906775a" + " · 377 files"),
+        ("end-scp", "pushed to host:" + "saltbench-sy" + "stems-v3" + " tonight"),
+        ("end-url", "https://github.com/jyh/" + "se" + "at" + " is the memory mirror"),
+        # kent's read of saltbench #355 (2026-10-16 23:49:51): a SENTENCE-FINAL period hid the root; a RELATIVE sibling path is a location.
+        ("end-period", "the export is ~/projects/claude/" + "saltbench-sy" + "stems" + ". Next sentence"),
+        ("end-dotdot", "cd ../" + "saltbench-sy" + "stems-v3" + " and build"),
+        # kent's delta read of saltbench #355 (2026-10-17 00:02:08): ONE directory between the anchor and the root hid it.
+        ("end-one-tilde", "dest ~/bench-dry/" + "saltbench-sy" + "stems-v3-export-0d97b68" + " (marker)"),
+        ("end-one-tilde2", "dest ~/projects/" + "saltbench-sy" + "stems" + " tonight"),
+        ("end-one-host", "copied to host:~/bench-dry/" + "saltbench-sy" + "stems-v3" + " and built"),
+        ("end-one-abs", "dest /srv/" + "saltbench-sy" + "stems" + " on the box"),
         # ROOTLESS SHAPES (row J, 08/31). Assembled, never spelled.
         ("r-rl-b", "ruled in " + _ROOTLESS[0] + "/2026-08-30-x.md"),
         ("r-rl-f", "the row in " + _ROOTLESS[1] + "/RULING-x.md"),
@@ -839,6 +876,11 @@ def self_test() -> int:
         ("xk-c-public", "see " + "saltbench" + "/harness/systems-v3/x.md"),
         ("xk-c-prose", "the " + "saltbench-sys" + "tems" + " harness runs the cells"),
         ("xk-c-near", "a dir named " + "saltbench-sys" + "temsx" + "/x is not the tree"),
+        # item 11's guard: an owner/repo COORDINATE names a repo, it is not a path, and frozen amendments carry it.
+        ("end-c-coord", "repo: jyh/" + "saltbench-sy" + "stems" + "          not the public repo"),
+        ("end-c-clone", "cd <a clone of jyh/" + "saltbench-sy" + "stems" + ">"),
+        ("end-c-reldir", "the tree dir/" + "saltbench-sy" + "stems" + " has no anchor"),
+        ("end-c-dotgit", "the bare repo ~/x/" + "saltbench-sy" + "stems" + ".git" + "x is a longer name"),
         ("c-meta", "this gate forbids paths into the private record"),
         # ROOTLESS guards: a bare name stays softened by the ruling; a MID-PATH
         # component of the same ordinary word is the declared consequence of
