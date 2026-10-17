@@ -473,6 +473,7 @@ def _self_test_paths(failures: list) -> str:
             # git's exit status FIRST: every arm after it reads git, and a runner that misreads git breaks them all.
             _self_test_git_rc(failures, pathlib.Path(tmp), contextlib, io)
             _self_test_git(failures, pathlib.Path(tmp), p_bad, d_bad, p_ren, d_ren, leaks, contextlib, io)
+            _self_test_write_merge(failures, pathlib.Path(tmp), contextlib, io)
     except _FixtureError as e:
         failures.append(f"the scratch-repo fixture FAILED at {e} -- the path arms did NOT run (never a pass)")
     except Exception as e:  # the type only: a message could carry a fixture path
@@ -671,6 +672,74 @@ def _self_test_git(failures, tmp, p_bad, d_bad, p_ren, d_ren, leaks, contextlib,
         rc, out = drive(fn, *a, **kw)
         if rc != 1 or leaks(out) or path_digest(p_bin) not in out:
             failures.append(f"(i) a BINARY file at a name-bearing path must be refused under {label}, by digest")
+
+
+def _self_test_write_merge(failures, tmp, contextlib, io) -> None:
+    """--write-baseline MUST PRESERVE WHAT A READER WROTE (systems, 2026-10-17, O83 item 13; the sibling of
+    check_private_paths' item 12, saltbench #356). Both writers REGENERATED their file from the scan, so an annotation
+    (a ruling, a desk row's text) was erased by the next write while every gate stayed green. The arms drive the two
+    REAL write modes on a scratch repository against ANNOTATED baselines: every `#` line survives; --history is
+    APPEND-ONLY (the old file is a byte prefix of the new one, a row the scan no longer sees is kept); --tree keeps its
+    comments and live rows verbatim, drops a PAID row by name, and appends the new rows."""
+    repo = tmp / "wm"
+    repo.mkdir()
+    nohooks = tmp / "no-hooks-wm"
+    nm = FORBIDDEN[0]
+
+    def git(*args) -> str:
+        return _fixture_git(repo, nohooks, *args)
+
+    git("init", "-q")
+    (repo / "a.md").write_bytes(f"first {nm} line\n".encode("utf-8"))
+    git("add", "-A")
+    git("commit", "-q", "--no-verify", "-m", "c0")
+    sha0 = git("rev-parse", "HEAD")[:12]
+    (repo / "b.md").write_bytes(f"second {nm} line\n".encode("utf-8"))
+    (repo / f"{nm}-notes.md").write_bytes(b"plain\n")
+    git("add", "-A")
+    git("commit", "-q", "--no-verify", "-m", "c1")
+    note = "# ON THE CAPTAIN'S WORD -- an annotation between rows\n#   and its second line\n"
+    cases = {
+        "tree": (tree_mode, {"root": str(repo)},
+                 f"a.md\t{line_sha(f'first {nm} line')}\t{_FINDING_LABEL}\tKEPT-FOURTH-FIELD\n",
+                 "gone.md\t0000000000000000\ta paid row\n", 3),
+        "history": (history_mode, {"cwd": str(repo)},
+                    f"{sha0}\ta.md\t1\n", "000000000000\tgone.md\t1\n", 4),
+    }
+    for kind, (mode, kw, live, stale, want_rows) in cases.items():
+        bpath = tmp / f"wm-{kind}.tsv"
+        before = "# HEADER a reader wrote\n" + live + note + stale
+        bpath.write_bytes(before.encode("utf-8"))
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            try:
+                rc = mode(True, baseline=str(bpath), **kw)
+            except Exception as e:  # the type only
+                rc = f"raised {type(e).__name__}"
+        out = buf.getvalue()
+        if rc != 0:
+            failures.append(f"--{kind} --write-baseline over an annotated baseline must succeed (rc {rc})")
+            continue
+        after = bpath.read_bytes().decode("utf-8")
+        for l in before.splitlines():
+            if l.startswith("#") and l not in after.splitlines():
+                failures.append(f"--{kind} --write-baseline DROPPED an annotation line: {l[:50]!r}")
+        if live not in after:
+            failures.append(f"--{kind} --write-baseline must keep an existing live row VERBATIM")
+        rows = [l for l in after.splitlines() if l.strip() and not l.startswith("#")]
+        if len(rows) != want_rows:
+            failures.append(f"--{kind} --write-baseline must keep the live rows and APPEND the new ones "
+                            f"({len(rows)} rows, want {want_rows})")
+        if kind == "tree":
+            if stale in after:
+                failures.append("--tree --write-baseline must DROP a paid row (it shrinks after a repair)")
+            if "gone.md" not in out:
+                failures.append("--tree --write-baseline must NAME each row it drops")
+        elif not after.startswith(before):
+            failures.append("--history --write-baseline must be APPEND-ONLY: the old file must be a byte prefix "
+                            "of the new one (this list does not shrink)")
+        if nm in after.lower():
+            failures.append(f"--{kind} --write-baseline must never write the name in clear")
 
 
 def _self_test_git_rc(failures, tmp, contextlib, io) -> None:
