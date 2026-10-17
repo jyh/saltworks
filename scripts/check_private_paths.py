@@ -393,7 +393,12 @@ _PSEG = r"[A-Za-z0-9_.$>-]+"
 #   so `…/<root>.` hid the root; now a `.` ends the name unless a name character follows it. `./` and `../` are anchors: a
 #   RELATIVE sibling-checkout path is a location, not a coordinate.
 _END_NAME = r"(?![A-Za-z0-9_-])(?!\.[A-Za-z0-9_-])"
-_END_ROOT = (rf"(?:~|\.\.?|{_PSEG}{_SEP}{_PSEG}|{_PSEG}:~?){_SEP}(?:{_ROOT_ALT}){_END_NAME}(?!{_SEP}[A-Za-z0-9_.-])"
+# kent's delta read of saltbench #355 (2026-10-17 00:02:08): the anchor took ZERO directories before the root, so
+#   `~/bench-dry/<root>`, `host:~/dir/<root>` and `/srv/<root>` passed. An anchor (`~`, `.`, `..`, `<host>:`) now takes any
+#   number of directories after it, and a LEADING `/` (not preceded by a name character) is an anchor too. `jyh/<root>` and
+#   `dir/<root>` stay names.
+_END_ROOT = (rf"(?:(?:~|\.\.?|{_PSEG}:~?)(?:{_SEP}{_PSEG})*|{_PSEG}{_SEP}{_PSEG}|(?<![A-Za-z0-9_.>~$:-])(?:{_SEP}{_PSEG})+)"
+             rf"{_SEP}(?:{_ROOT_ALT}){_END_NAME}(?!{_SEP}[A-Za-z0-9_.-])"
              rf"|(?<=[A-Za-z0-9>_-]):(?:{_ROOT_ALT}){_END_NAME}")
 
 FORBIDDEN = [
