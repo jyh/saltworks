@@ -822,6 +822,11 @@ def self_test() -> int:
         # kent's read of saltbench #355 (2026-10-16 23:49:51): a SENTENCE-FINAL period hid the root; a RELATIVE sibling path is a location.
         ("end-period", "the export is ~/projects/claude/" + "saltbench-sy" + "stems" + ". Next sentence"),
         ("end-dotdot", "cd ../" + "saltbench-sy" + "stems-v3" + " and build"),
+        # kent's delta read of saltbench #355 (2026-10-17 00:02:08): ONE directory between the anchor and the root hid it.
+        ("end-one-tilde", "dest ~/bench-dry/" + "saltbench-sy" + "stems-v3-export-0d97b68" + " (marker)"),
+        ("end-one-tilde2", "dest ~/projects/" + "saltbench-sy" + "stems" + " tonight"),
+        ("end-one-host", "copied to host:~/bench-dry/" + "saltbench-sy" + "stems-v3" + " and built"),
+        ("end-one-abs", "dest /srv/" + "saltbench-sy" + "stems" + " on the box"),
         # ROOTLESS SHAPES (row J, 08/31). Assembled, never spelled.
         ("r-rl-b", "ruled in " + _ROOTLESS[0] + "/2026-08-30-x.md"),
         ("r-rl-f", "the row in " + _ROOTLESS[1] + "/RULING-x.md"),
@@ -869,6 +874,7 @@ def self_test() -> int:
         # item 11's guard: an owner/repo COORDINATE names a repo, it is not a path, and frozen amendments carry it.
         ("end-c-coord", "repo: jyh/" + "saltbench-sy" + "stems" + "          not the public repo"),
         ("end-c-clone", "cd <a clone of jyh/" + "saltbench-sy" + "stems" + ">"),
+        ("end-c-reldir", "the tree dir/" + "saltbench-sy" + "stems" + " has no anchor"),
         ("end-c-dotgit", "the bare repo ~/x/" + "saltbench-sy" + "stems" + ".git" + "x is a longer name"),
         ("c-meta", "this gate forbids paths into the private record"),
         # ROOTLESS guards: a bare name stays softened by the ruling; a MID-PATH
