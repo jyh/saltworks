@@ -1377,6 +1377,86 @@ def self_test() -> int:
         os.chdir(here2)
         shutil.rmtree(tmp2, ignore_errors=True)
 
+    # 12. --write-baseline MUST PRESERVE WHAT A READER WROTE (the helm's item 12, 2026-10-16 23:48:04). Until this arm,
+    #     every write REGENERATED its file from the scan: `--history --write-baseline` on this repo dropped d30ef38's
+    #     Captain's-word entry and row XK's text while every gate stayed green. The arm drives the three REAL write modes
+    #     over a scratch repo against ANNOTATED baselines: every `#` line survives, the history and message lists are
+    #     APPEND-ONLY (the old file is a byte prefix of the new one, a row the scan no longer sees is kept), and the tree
+    #     list keeps its comments and live rows in place, drops a paid row BY NAME, and appends the new one.
+    tmp12 = tempfile.mkdtemp()
+    here12 = os.getcwd()
+    saved12 = {k: globals()[k] for k in ("BASELINE", "HISTORY_BASELINE", "MSG_BASELINE")}
+    try:
+        r12 = os.path.join(tmp12, "r")
+        os.makedirs(r12)
+        os.chdir(r12)
+        g12 = ["git", "-c", "user.name=t", "-c", "user.email=t@t", "-c", "commit.gpgsign=false"]
+        subprocess.run(["git", "init", "-q"], check=True)
+        plant12 = ["see projects/claude/" + "saltbench-sys" + "tems" + "/tasks/a.md",
+                   "see projects/claude/" + "saltbench-sys" + "tems" + "/tasks/b.md"]
+        for i, text in enumerate(plant12):
+            with open(f"f{i}.md", "w") as fh:
+                fh.write(text + "\n")
+            subprocess.run(["git", "add", f"f{i}.md"], check=True)
+            subprocess.run(g12 + ["commit", "-q", "-m", f"c{i} " + text], check=True)
+        tf12 = tree_findings()
+        hf12 = history_findings()
+        mf12 = scan(commit_messages("HEAD"))
+        if len({(f, line_sha(l)) for f, _, l in tf12}) < 2 or len({history_key(a, f, l) for a, f, _, l in hf12}) < 2 \
+                or len({a for a, _, _ in mf12}) < 2:
+            failures.append("write-baseline arm: the scratch repo must carry TWO findings in each population "
+                            f"(tree {len(tf12)}, history {len(hf12)}, messages {len(mf12)}) or the arm tests nothing")
+        else:
+            t0 = sorted(tf12)[0]
+            h0 = sorted(hf12)[0]
+            m0 = sorted(mf12)[0]
+            cases12 = {
+                "tree": ("BASELINE", tree_mode,
+                         f"{t0[0]}\t{line_sha(t0[2])}\t{t0[1]}\tKEPT-THIRD-FIELD\n",
+                         "gone.md\t0000000000000000\ta paid row\n"),
+                "history": ("HISTORY_BASELINE", history_mode,
+                            f"{h0[0]}\t{h0[1]}\t{line_sha(h0[3])}\t{h0[2]}\n",
+                            "0" * 40 + "\tgone.md\t0000000000000000\ta row the scan no longer sees\n"),
+                "messages": ("MSG_BASELINE", messages_mode,
+                             f"{m0[0]}\t{m0[1]}\n", "1" * 40 + "\ta row the scan no longer sees\n"),
+            }
+            for kind, (var, mode, live, stale) in cases12.items():
+                bpath = os.path.join(tmp12, kind + ".tsv")
+                before = ("# HEADER a reader wrote\n" + live
+                          + "# ON THE CAPTAIN'S WORD -- an annotation between rows\n#   and its second line\n"
+                          + stale)
+                with open(bpath, "w", encoding="utf-8", newline="") as fh:
+                    fh.write(before)
+                globals()[var] = bpath
+                buf12 = io.StringIO()
+                with contextlib.redirect_stdout(buf12):
+                    rc12 = mode(True)
+                after = open(bpath, encoding="utf-8").read()
+                out12 = buf12.getvalue()
+                if rc12 != 0:
+                    failures.append(f"--{kind} --write-baseline must succeed (rc {rc12}): {out12.strip()[-160:]}")
+                    continue
+                for l in before.splitlines():
+                    if l.startswith("#") and l not in after.splitlines():
+                        failures.append(f"--{kind} --write-baseline DROPPED an annotation line: {l[:60]!r}")
+                if live not in after:
+                    failures.append(f"--{kind} --write-baseline must keep an existing live row VERBATIM")
+                rows12 = [l for l in after.splitlines() if l.strip() and not l.startswith("#")]
+                if len(rows12) < (2 if kind == "tree" else 3):
+                    failures.append(f"--{kind} --write-baseline must APPEND the newly found row ({len(rows12)} rows)")
+                if kind == "tree":
+                    if stale in after:
+                        failures.append("--tree --write-baseline must DROP a paid row (it shrinks after a repair)")
+                    if "gone.md" not in out12:
+                        failures.append("--tree --write-baseline must NAME each row it drops")
+                elif not after.startswith(before):
+                    failures.append(f"--{kind} --write-baseline must be APPEND-ONLY: the old file must be a byte "
+                                    "prefix of the new one (this list does not shrink)")
+    finally:
+        os.chdir(here12)
+        globals().update(saved12)
+        shutil.rmtree(tmp12, ignore_errors=True)
+
     for f in failures:
         print(f"SELF-TEST FAIL: {f}")
     if failures:
