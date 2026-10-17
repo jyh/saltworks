@@ -1553,6 +1553,49 @@ def _tree_unarmed_fatal(baseline, finding_count: int) -> bool:
     return baseline is None and finding_count > 0
 
 
+def merge_write_baseline(path: str, header: str, key_of, rows: list, shrink: bool) -> tuple:
+    """Write a baseline WITHOUT erasing what a reader wrote in it (the helm's item 12, 2026-10-16).
+
+    `rows` is [(key, line)] for every finding the scan sees; `key_of(line)` reads the same key back from an existing
+    row. Every `#` line and blank line is kept IN PLACE, and every existing row is kept VERBATIM (extra fields too).
+    shrink=False (history, messages: "this list does not shrink"): nothing is dropped, so the old file is a byte prefix
+    of the new one. shrink=True (tree: "shrink it after a repair"): an existing row whose key the scan no longer sees
+    is dropped, and returned so the caller NAMES it. New keys are appended in sorted order. A missing file gets
+    `header`. Returns (kept, added, dropped_lines).
+    ⛔ Until 2026-10-16 every write REGENERATED its file from the scan, so `--history --write-baseline` on saltbench
+       dropped a Captain's-word entry and a desk row's text while every gate stayed green.
+    """
+    want = dict(rows)
+    out, seen, dropped = [], set(), []
+    if os.path.exists(path):
+        with open(path, encoding="utf-8", newline="") as fh:
+            old = fh.read()
+        if old and not old.endswith("\n"):
+            old += "\n"
+        for line in old.splitlines(keepends=True):
+            body = line.rstrip("\r\n")
+            if not body.strip() or body.startswith("#"):
+                out.append(line)
+                continue
+            k = key_of(body)
+            if shrink and k not in want:
+                dropped.append(body)
+                continue
+            out.append(line)
+            seen.add(k)
+    else:
+        out.append(header)
+    added = 0
+    for k in sorted(want):
+        if k not in seen:
+            out.append(want[k] + "\n")
+            seen.add(k)
+            added += 1
+    with open(path, "w", encoding="utf-8", newline="") as fh:
+        fh.write("".join(out))
+    return len(seen) - added, added, dropped
+
+
 def tree_findings() -> list[tuple[str, str, str]]:
     return scan(tree_rows())
 
@@ -1565,15 +1608,20 @@ def tree_mode(write: bool) -> int:
         # (jas's encoding-hygiene gate caught this when the ratchet was ported there: a file that
         # ships byte-identical to three repos must satisfy the STRICTEST repo's gates, not the
         # source's -- a port inherits the destination's rules, measured 08/29).
-        with open(BASELINE, "w", encoding="utf-8", newline="") as fh:
-            fh.write("# private_paths_baseline.tsv -- ACCEPTED residue for the tree ratchet "
-                     "(check_private_paths.py --tree).\n# file<TAB>line-sha16<TAB>what. "
-                     "Shrink it after a repair with --tree --write-baseline; a growth is a "
-                     "reviewed diff.\n")
-            for f, what, line in sorted(found):
-                fh.write(f"{f}\t{line_sha(line)}\t{what}\n")
+        kept, added, dropped = merge_write_baseline(
+            BASELINE,
+            "# private_paths_baseline.tsv -- ACCEPTED residue for the tree ratchet "
+            "(check_private_paths.py --tree).\n# file<TAB>line-sha16<TAB>what. "
+            "Shrink it after a repair with --tree --write-baseline; a growth is a "
+            "reviewed diff.\n",
+            lambda l: tuple(l.split("\t")[:2]),
+            [((f, line_sha(line)), f"{f}\t{line_sha(line)}\t{what}") for f, what, line in sorted(found)],
+            shrink=True)
         print(f"check_private_paths --write-baseline: {len(found)} accepted residue "
-              f"line(s) in {len({f for f,_,_ in found})} file(s) written to {os.path.basename(BASELINE)}")
+              f"line(s) in {len({f for f,_,_ in found})} file(s) in {os.path.basename(BASELINE)} "
+              f"({kept} kept in place, {added} appended, {len(dropped)} paid row(s) dropped; every # line kept)")
+        for d in dropped:
+            print(f"  dropped (paid): {d}")
         return 0
     base = load_baseline()
     if _tree_unarmed_fatal(base, len(found)):
@@ -1683,18 +1731,21 @@ def messages_mode(write: bool) -> int:
         # newline="" for the same reason as the tree baseline: a file shipped
         # byte-identical to three repos must satisfy the STRICTEST repo's
         # encoding gate (jas), not the source's.
-        with open(MSG_BASELINE, "w", encoding="utf-8", newline="") as fh:
-            fh.write("# private_paths_message_baseline.tsv -- ACCEPTED historical commits whose "
-                     "MESSAGES carry a private-record path (check_private_paths.py --messages).\n"
-                     "# sha<TAB>what. NEVER the line itself: an excerpt would put the path into "
-                     "the tree, where the tree ratchet reds on it.\n"
-                     "# A pushed message cannot be repaired without a force-push (ruled out "
-                     "08/30), so this list does not shrink; a growth is a reviewed diff that "
-                     "should be nearly impossible to justify.\n")
-            for sha in sorted(per_sha):
-                fh.write(f"{sha}\t{per_sha[sha][0]}\n")
+        kept, added, _ = merge_write_baseline(
+            MSG_BASELINE,
+            "# private_paths_message_baseline.tsv -- ACCEPTED historical commits whose "
+            "MESSAGES carry a private-record path (check_private_paths.py --messages).\n"
+            "# sha<TAB>what. NEVER the line itself: an excerpt would put the path into "
+            "the tree, where the tree ratchet reds on it.\n"
+            "# A pushed message cannot be repaired without a force-push (ruled out "
+            "08/30), so this list does not shrink; a growth is a reviewed diff that "
+            "should be nearly impossible to justify.\n",
+            lambda l: l.split("\t")[0].strip(),
+            [(sha, f"{sha}\t{per_sha[sha][0]}") for sha in sorted(per_sha)],
+            shrink=False)
         print(f"check_private_paths --messages --write-baseline: {len(per_sha)} accepted "
-              f"commit(s) written to {os.path.basename(MSG_BASELINE)}")
+              f"commit(s) in {os.path.basename(MSG_BASELINE)} (APPEND-ONLY: {kept} kept, "
+              f"{added} appended; every # line kept)")
         return 0
     base = load_msg_baseline()
     if _msg_unarmed_fatal(base, len(per_sha)):
@@ -1866,17 +1917,20 @@ def history_mode(write: bool, path: str | None = None) -> int:
     keys = {history_key(sha, f, line) for sha, f, _, line in found}
     ncommits = len({sha for sha, _, _, _ in found})
     if write:
-        with open(target, "w", encoding="utf-8", newline="") as fh:
-            fh.write("# private_paths_history_baseline.tsv -- ACCEPTED HISTORICAL DEBT: content a\n"
-                     "# commit INTRODUCED, which every clone receives whatever the tree now says.\n"
-                     "# sha<TAB>file<TAB>line-sha16<TAB>what.\n"
-                     "# A TREE REPAIR NEVER SHRINKS THIS FILE. Only a history rewrite does, and\n"
-                     "# that is a council act -- so a shrink here is a diff somebody must have ruled.\n")
-            for sha, f, what, line in sorted(found):
-                fh.write(f"{sha}\t{f}\t{line_sha(line)}\t{what}\n")
+        kept, added, _ = merge_write_baseline(
+            target,
+            "# private_paths_history_baseline.tsv -- ACCEPTED HISTORICAL DEBT: content a\n"
+            "# commit INTRODUCED, which every clone receives whatever the tree now says.\n"
+            "# sha<TAB>file<TAB>line-sha16<TAB>what.\n"
+            "# A TREE REPAIR NEVER SHRINKS THIS FILE. Only a history rewrite does, and\n"
+            "# that is a council act -- so a shrink here is a diff somebody must have ruled.\n",
+            lambda l: tuple(l.split("\t")[:3]),
+            [(history_key(sha, f, line), f"{sha}\t{f}\t{line_sha(line)}\t{what}")
+             for sha, f, what, line in sorted(found)],
+            shrink=False)
         print(f"check_private_paths --history --write-baseline: {len(found)} accepted "
-              f"historical finding(s) across {ncommits} commit(s) written to "
-              f"{os.path.basename(target)}")
+              f"historical finding(s) across {ncommits} commit(s) in "
+              f"{os.path.basename(target)} (APPEND-ONLY: {kept} kept, {added} appended; every # line kept)")
         return 0
     base = load_history_baseline(target)
     if _msg_unarmed_fatal(base, len(found)):
