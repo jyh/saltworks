@@ -473,6 +473,7 @@ def _self_test_paths(failures: list) -> str:
             # git's exit status FIRST: every arm after it reads git, and a runner that misreads git breaks them all.
             _self_test_git_rc(failures, pathlib.Path(tmp), contextlib, io)
             _self_test_git(failures, pathlib.Path(tmp), p_bad, d_bad, p_ren, d_ren, leaks, contextlib, io)
+            _self_test_write_merge(failures, pathlib.Path(tmp), contextlib, io)
     except _FixtureError as e:
         failures.append(f"the scratch-repo fixture FAILED at {e} -- the path arms did NOT run (never a pass)")
     except Exception as e:  # the type only: a message could carry a fixture path
@@ -671,6 +672,74 @@ def _self_test_git(failures, tmp, p_bad, d_bad, p_ren, d_ren, leaks, contextlib,
         rc, out = drive(fn, *a, **kw)
         if rc != 1 or leaks(out) or path_digest(p_bin) not in out:
             failures.append(f"(i) a BINARY file at a name-bearing path must be refused under {label}, by digest")
+
+
+def _self_test_write_merge(failures, tmp, contextlib, io) -> None:
+    """--write-baseline MUST PRESERVE WHAT A READER WROTE (systems, 2026-10-17, O83 item 13; the sibling of
+    check_private_paths' item 12, saltbench #356). Both writers REGENERATED their file from the scan, so an annotation
+    (a ruling, a desk row's text) was erased by the next write while every gate stayed green. The arms drive the two
+    REAL write modes on a scratch repository against ANNOTATED baselines: every `#` line survives; --history is
+    APPEND-ONLY (the old file is a byte prefix of the new one, a row the scan no longer sees is kept); --tree keeps its
+    comments and live rows verbatim, drops a PAID row by name, and appends the new rows."""
+    repo = tmp / "wm"
+    repo.mkdir()
+    nohooks = tmp / "no-hooks-wm"
+    nm = FORBIDDEN[0]
+
+    def git(*args) -> str:
+        return _fixture_git(repo, nohooks, *args)
+
+    git("init", "-q")
+    (repo / "a.md").write_bytes(f"first {nm} line\n".encode("utf-8"))
+    git("add", "-A")
+    git("commit", "-q", "--no-verify", "-m", "c0")
+    sha0 = git("rev-parse", "HEAD")[:12]
+    (repo / "b.md").write_bytes(f"second {nm} line\n".encode("utf-8"))
+    (repo / f"{nm}-notes.md").write_bytes(b"plain\n")
+    git("add", "-A")
+    git("commit", "-q", "--no-verify", "-m", "c1")
+    note = "# ON THE CAPTAIN'S WORD -- an annotation between rows\n#   and its second line\n"
+    cases = {
+        "tree": (tree_mode, {"root": str(repo)},
+                 f"a.md\t{line_sha(f'first {nm} line')}\t{_FINDING_LABEL}\tKEPT-FOURTH-FIELD\n",
+                 "gone.md\t0000000000000000\ta paid row\n", 3),
+        "history": (history_mode, {"cwd": str(repo)},
+                    f"{sha0}\ta.md\t1\n", "000000000000\tgone.md\t1\n", 4),
+    }
+    for kind, (mode, kw, live, stale, want_rows) in cases.items():
+        bpath = tmp / f"wm-{kind}.tsv"
+        before = "# HEADER a reader wrote\n" + live + note + stale
+        bpath.write_bytes(before.encode("utf-8"))
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            try:
+                rc = mode(True, baseline=str(bpath), **kw)
+            except Exception as e:  # the type only
+                rc = f"raised {type(e).__name__}"
+        out = buf.getvalue()
+        if rc != 0:
+            failures.append(f"--{kind} --write-baseline over an annotated baseline must succeed (rc {rc})")
+            continue
+        after = bpath.read_bytes().decode("utf-8")
+        for l in before.splitlines():
+            if l.startswith("#") and l not in after.splitlines():
+                failures.append(f"--{kind} --write-baseline DROPPED an annotation line: {l[:50]!r}")
+        if live not in after:
+            failures.append(f"--{kind} --write-baseline must keep an existing live row VERBATIM")
+        rows = [l for l in after.splitlines() if l.strip() and not l.startswith("#")]
+        if len(rows) != want_rows:
+            failures.append(f"--{kind} --write-baseline must keep the live rows and APPEND the new ones "
+                            f"({len(rows)} rows, want {want_rows})")
+        if kind == "tree":
+            if stale in after:
+                failures.append("--tree --write-baseline must DROP a paid row (it shrinks after a repair)")
+            if "gone.md" not in out:
+                failures.append("--tree --write-baseline must NAME each row it drops")
+        elif not after.startswith(before):
+            failures.append("--history --write-baseline must be APPEND-ONLY: the old file must be a byte prefix "
+                            "of the new one (this list does not shrink)")
+        if nm in after.lower():
+            failures.append(f"--{kind} --write-baseline must never write the name in clear")
 
 
 def _self_test_git_rc(failures, tmp, contextlib, io) -> None:
@@ -905,6 +974,61 @@ def tree_verdict(found: list, baseline, path_found=()) -> tuple:
     return (new, base - matched, False)
 
 
+def merge_write_baseline(path: str, header: str, key_of, rows: list, shrink: bool) -> tuple:
+    """Write a baseline WITHOUT erasing what a reader wrote in it (systems, 2026-10-17, O83 item 13; the same writer as
+    check_private_paths' item 12, saltbench #356, kept standalone because each gate ships as one file).
+
+    `rows` is [(keys, line)] for every finding the scan sees, where `keys` is EVERY key an existing row may hold for that
+    finding (a file field is the clear path OR its digest, file_keys); `key_of(line)` reads an existing row's key. Every
+    `#` and blank line is kept IN PLACE and every existing row VERBATIM. shrink=False (history: "does not shrink"):
+    nothing is dropped, so the old file is a byte prefix of the new one. shrink=True (tree: "shrink it after a repair"):
+    an existing row no finding claims is dropped and returned, so the caller NAMES it. Unclaimed findings are appended
+    in the order given. A missing file gets `header`. Returns (kept, added, dropped_lines).
+    ⛔ Until 2026-10-17 both writers REGENERATED the file from the scan, so a write erased every annotation.
+    """
+    live = set()
+    for keys, _line in rows:
+        live.update(keys)
+    out, seen, dropped = [], set(), []
+    kept = 0
+    if os.path.exists(path):
+        with open(path, encoding="utf-8", newline="") as fh:
+            old = fh.read()
+        if old and not old.endswith("\n"):
+            old += "\n"
+        for line in old.splitlines(keepends=True):
+            body = line.rstrip("\r\n")
+            if not body.strip() or body.startswith("#"):
+                out.append(line)
+                continue
+            k = key_of(body)
+            if shrink and k not in live:
+                dropped.append(body)
+                continue
+            out.append(line)
+            seen.add(k)
+            kept += 1
+    else:
+        out.append(header)
+    added = 0
+    for keys, line in rows:
+        if not seen.intersection(keys):
+            out.append(line + "\n")
+            seen.update(keys)
+            added += 1
+    with open(path, "w", encoding="utf-8", newline="") as fh:
+        fh.write("".join(out))
+    return kept, added, dropped
+
+
+def _row_key(line: str) -> tuple:
+    """An existing baseline row's key: (field, field) for a LINE row, and a PATH row keeps PATH_KIND in its key."""
+    parts = line.split("\t")
+    if len(parts) >= 3 and parts[2] == PATH_KIND:
+        return (parts[0], parts[1], PATH_KIND)
+    return tuple(parts[:2])
+
+
 def tree_mode(write: bool, root=None, baseline=None) -> int:
     baseline = baseline or TREE_BASELINE
     rows = tracked_files(root)
@@ -915,14 +1039,19 @@ def tree_mode(write: bool, root=None, baseline=None) -> int:
     paths = tracked_paths(root)
     path_found = path_hits(paths)
     if write:
-        with open(baseline, "w", encoding="utf-8", newline="") as fh:
-            fh.write(_TREE_HEADER)
-            for rel, _i, line in sorted(found, key=lambda f: (file_field(f[0]), line_sha(f[2]))):
-                fh.write(f"{file_field(rel)}\t{line_sha(line)}\t{_FINDING_LABEL}\n")
-            for d in sorted(path_digest(p) for p in path_found):
-                fh.write(f"{d}\t{PATH_KIND}\t{PATH_LABEL}\n")
+        rows = [(tuple((k, line_sha(line)) for k in file_keys(rel)),
+                 f"{file_field(rel)}\t{line_sha(line)}\t{_FINDING_LABEL}")
+                for rel, _i, line in sorted(found, key=lambda f: (file_field(f[0]), line_sha(f[2])))]
+        rows += [(((d, PATH_KIND),), f"{d}\t{PATH_KIND}\t{PATH_LABEL}")
+                 for d in sorted(path_digest(p) for p in path_found)]
+        # a tree PATH row's key is (digest, PATH): two fields, the same shape load_tree_baseline reads
+        kept, added, dropped = merge_write_baseline(baseline, _TREE_HEADER, lambda l: tuple(l.split("\t")[:2]),
+                                                    rows, shrink=True)
+        for d in dropped:
+            print(f"  dropped (paid): {d}")
         print(f"check_infra_names --tree --write-baseline: {len(found)} accepted residue line(s) in "
-              f"{len({r for r, _, _ in found})} file(s) written to {os.path.basename(baseline)}"
+              f"{len({r for r, _, _ in found})} file(s) in {os.path.basename(baseline)} ({kept} kept in place, "
+              f"{added} appended, {len(dropped)} paid row(s) dropped; every # line kept)"
               + (f"; {len(path_found)} name-bearing path(s) written BY DIGEST" if path_found else ""))
         return 0
     new, paid, unarmed = tree_verdict(found, load_tree_baseline(baseline), path_found)
@@ -1111,14 +1240,14 @@ def history_mode(write: bool, cwd=None, baseline=None) -> int:
             per[(sha[:12], rel)] += 1
             total += 1
     if write:
-        out_rows = [(k[0], file_field(k[1]), str(per[k])) for k in per]
-        out_rows += [(sha, path_digest(p), PATH_KIND) for sha, p in path_per]
-        with open(baseline, "w", encoding="utf-8", newline="") as fh:
-            fh.write(_HIST_HEADER)
-            for r in sorted(out_rows):
-                fh.write("\t".join(r) + "\n")
+        out_rows = [(tuple((k[0], f) for f in file_keys(k[1])), (k[0], file_field(k[1]), str(per[k]))) for k in per]
+        out_rows += [(((sha, path_digest(p), PATH_KIND),), (sha, path_digest(p), PATH_KIND)) for sha, p in path_per]
+        kept, added, _ = merge_write_baseline(baseline, _HIST_HEADER, _row_key,
+                                              [(keys, "\t".join(r)) for keys, r in sorted(out_rows, key=lambda x: x[1])],
+                                              shrink=False)
         print(f"check_infra_names --history --write-baseline: {len(per)} accepted (commit, file) "
-              f"pair(s), {total} occurrence(s), written to {os.path.basename(baseline)}"
+              f"pair(s), {total} occurrence(s), in {os.path.basename(baseline)} (APPEND-ONLY: {kept} kept, "
+              f"{added} appended; every # line kept)"
               + (f"; {len(path_per)} (commit, name-bearing path) row(s) written BY DIGEST" if path_per else ""))
         return 0
     base_set = load_hist_baseline(baseline)
