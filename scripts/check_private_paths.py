@@ -1395,7 +1395,7 @@ def self_test() -> int:
         plant12 = ["see projects/claude/" + "saltbench-sys" + "tems" + "/tasks/a.md",
                    "see projects/claude/" + "saltbench-sys" + "tems" + "/tasks/b.md"]
         for i, text in enumerate(plant12):
-            with open(f"f{i}.md", "w") as fh:
+            with open(f"f{i}.md", "w", encoding="utf-8", newline="") as fh:
                 fh.write(text + "\n")
             subprocess.run(["git", "add", f"f{i}.md"], check=True)
             subprocess.run(g12 + ["commit", "-q", "-m", f"c{i} " + text], check=True)
@@ -1457,6 +1457,21 @@ def self_test() -> int:
         globals().update(saved12)
         shutil.rmtree(tmp12, ignore_errors=True)
 
+    # 13. A CWD ON ANOTHER DRIVE (systems, 2026-10-17, measured on jas #503's Windows lane): arm 12's scratch repo sits under
+    #     the temp dir, which is C: on a Windows runner while the checkout is D:, and os.path.relpath raises ValueError
+    #     across drives. Driven here on any platform by making relpath raise: tree_rows must still return rows.
+    _relpath13 = os.path.relpath
+
+    def _cross_drive13(*a, **k):
+        raise ValueError("path is on mount 'D:', start on mount 'C:'")
+    os.path.relpath = _cross_drive13
+    try:
+        tree_rows()
+    except ValueError:
+        failures.append("tree_rows must survive a cwd on another drive (os.path.relpath raises across Windows drives)")
+    finally:
+        os.path.relpath = _relpath13
+
     for f in failures:
         print(f"SELF-TEST FAIL: {f}")
     if failures:
@@ -1508,7 +1523,12 @@ def tree_rows(exclude_self: bool = True) -> list[tuple[str, str]]:
     out = subprocess.run(["git", "ls-files", "-z"], capture_output=True,
                          check=True).stdout.decode("utf-8", "replace")
     rows: list[tuple[str, str]] = []
-    own = os.path.relpath(os.path.abspath(__file__), os.getcwd())
+    try:
+        own = os.path.relpath(os.path.abspath(__file__), os.getcwd())
+    except ValueError:
+        # Windows: the cwd is on another drive (a self-test scratch repo under C:\\ beside a checkout on D:\\), so this
+        #   file cannot be in the scanned tree and there is nothing to exclude (systems, 2026-10-17, measured on jas #503).
+        own = None
     for path in out.split("\0"):
         if not path or (exclude_self and path == own):
             continue
