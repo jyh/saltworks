@@ -1395,7 +1395,7 @@ def self_test() -> int:
         plant12 = ["see projects/claude/" + "saltbench-sys" + "tems" + "/tasks/a.md",
                    "see projects/claude/" + "saltbench-sys" + "tems" + "/tasks/b.md"]
         for i, text in enumerate(plant12):
-            with open(f"f{i}.md", "w") as fh:
+            with open(f"f{i}.md", "w", encoding="utf-8", newline="") as fh:
                 fh.write(text + "\n")
             subprocess.run(["git", "add", f"f{i}.md"], check=True)
             subprocess.run(g12 + ["commit", "-q", "-m", f"c{i} " + text], check=True)
@@ -1523,7 +1523,12 @@ def tree_rows(exclude_self: bool = True) -> list[tuple[str, str]]:
     out = subprocess.run(["git", "ls-files", "-z"], capture_output=True,
                          check=True).stdout.decode("utf-8", "replace")
     rows: list[tuple[str, str]] = []
-    own = os.path.relpath(os.path.abspath(__file__), os.getcwd())
+    try:
+        own = os.path.relpath(os.path.abspath(__file__), os.getcwd())
+    except ValueError:
+        # Windows: the cwd is on another drive (a self-test scratch repo under C:\\ beside a checkout on D:\\), so this
+        #   file cannot be in the scanned tree and there is nothing to exclude (systems, 2026-10-17, measured on jas #503).
+        own = None
     for path in out.split("\0"):
         if not path or (exclude_self and path == own):
             continue
