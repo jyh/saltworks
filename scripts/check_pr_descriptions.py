@@ -88,6 +88,7 @@ import argparse
 import ast
 import contextlib
 import hashlib
+import html
 import io
 import json
 import os
@@ -97,6 +98,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import unicodedata
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import check_private_paths as gate  # noqa: E402  (the pattern owner)
@@ -130,6 +132,20 @@ def scan_session(number, title: str, body: str):
     return trailers.scan(rows)
 
 
+_HTML_COMMENT = re.compile(r"<!--.*?-->", re.S)
+_EMPHASIS = str.maketrans("", "", "*_~`")
+
+
+def rendered_text(s: str) -> str:
+    """What the forge SHOWS, near enough to match a name in (the helm's commission of 2026-10-18, on systems' G2):
+    drop HTML comments (keeping their newlines, so line numbers survive), html.unescape, NFKC, drop Unicode Cf
+    (zero-widths, soft hyphen, bidi), drop the markdown emphasis characters * _ ~ `. NOT a renderer: look-alike
+    letters from other scripts are not folded, and that is declared in the OK line."""
+    s = _HTML_COMMENT.sub(lambda m: "\n" * m.group(0).count("\n"), s or "")
+    s = unicodedata.normalize("NFKC", html.unescape(s))
+    return "".join(c for c in s if unicodedata.category(c) != "Cf").translate(_EMPHASIS)
+
+
 def scan_infra(number, title: str, body: str):
     """Infrastructure names (a host, an account) in one PR's forge-side prose, via the
     infra-name gate's FORBIDDEN list (imported, never re-typed; the helm's order of
@@ -140,7 +156,11 @@ def scan_infra(number, title: str, body: str):
         return []
     rows = [(f"PR #{number} TITLE", title or ""),
             (f"PR #{number} BODY", body or "")]
-    return [(rel, i) for rel, i, _text in infra.scan(rows)]
+    # the SOURCE and its RENDERING both scanned; one finding per (surface, line)
+    hits = {(rel, i) for rel, i, _text in infra.scan(rows)}
+    hits |= {(rel, i) for rel, i, _text in infra.scan([(rel, rendered_text(s)) for rel, s in rows])}
+    order = {rel: k for k, (rel, _s) in enumerate(rows)}
+    return sorted(hits, key=lambda h: (order[h[0]], h[1]))
 
 
 def infra_finding_lines(rows) -> list[str]:
@@ -679,7 +699,7 @@ def open_mode(repo: str) -> int:
           f"PR(s), 0 private-record paths and 0 session trailers/URLs in titles/bodies, "
           f"0 refused words in titles, head refs and bodies. {_vocab_id()}.")
     print("infra-name arm: " + ("0 infrastructure names (host or account) in open PR titles/bodies. NOT COVERED by this arm: "
-          "rendered-only spellings (HTML entities, invisible characters, markup inside the name: it reads the SOURCE, the forge shows the RENDERING); "
+          "look-alike letters from other scripts (confusables are not folded; the source AND its rendering are read: HTML comments, entities, Unicode Cf and * _ ~ ` dropped, then NFKC); "
           "PR and review comments; CLOSED or MERGED PR bodies; more than 100 open PRs (no paging)." if infra is not None
           else "NOT COVERED here: this repository carries no check_infra_names.py (declared, not skipped)."))
     print(_NOT_COVERED)
@@ -1135,8 +1155,8 @@ def self_test() -> int:
         rendered_cases = {
             "an HTML comment inside the name": a_ + "<!-- -->" + b_,
             "an HTML entity for one letter": "&#" + str(ord(nm[0])) + ";" + nm[1:],
-            "a zero-width space inside": a_ + "\u200b" + b_,
-            "a soft hyphen inside": a_ + "\u00ad" + b_,
+            "a zero-width space inside": a_ + chr(0x200B) + b_,      # chr(), never a literal: this file is cp1252-linted
+            "a soft hyphen inside": a_ + chr(0xAD) + b_,
             "an emphasis split": "**" + a_ + "**" + b_,
             "full-width letters": "".join(chr(ord(ch) + 0xFEE0) for ch in nm),
         }
@@ -1147,7 +1167,7 @@ def self_test() -> int:
                 failures.append("a TITLE that renders through " + what + " must be caught")
         if not scan_infra(14, "", "ran on " + nm):
             failures.append("the plain name must still be caught once the normaliser runs")
-        look = {"k": "\u043a", "y": "\u0443", "j": "\u0458", "s": "\u0455", "c": "\u0441", "a": "\u0430"}
+        look = {"k": chr(0x43A), "y": chr(0x443), "j": chr(0x458), "s": chr(0x455), "c": chr(0x441), "a": chr(0x430)}
         if scan_infra(15, "", "ran on " + nm[:2] + "-" + nm[2:]):
             failures.append("a HYPHENATED near-name is not the name: the normaliser must not drop '-'")
         if nm[0] in look and scan_infra(15, "", "ran on " + look[nm[0]] + nm[1:]):
