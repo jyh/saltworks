@@ -1123,10 +1123,38 @@ def self_test() -> int:
         if "ANOTHER PR" not in out_bad:
             failures.append("the infra FAIL block must carry the cross-PR remedy line")
         rc_ok, out_ok = _drive("ran on the Windows box")
-        if "rendered-only spellings" not in out_ok or "CLOSED or MERGED PR bodies" not in out_ok:
+        if "confusables are not folded" not in out_ok or "CLOSED or MERGED PR bodies" not in out_ok:
             failures.append("the OK line must DECLARE what the infra arm does not cover")
         if rc_ok != 0 or "infra-name arm: 0 infrastructure names" not in out_ok:
             failures.append("open_mode must stay GREEN on a clean PR and DECLARE the infra arm's scope")
+        # ARM 5c -- the helm's commission of 2026-10-18 (systems' G2 on kent's arm): the arm read the SOURCE while the
+        # forge shows the RENDERING, so six spellings that RENDER as the name passed. Each is caught after the
+        # normalisation; the plain name still matches; a hyphenated near-name and a look-alike letter from another
+        # script still do NOT (confusables are not folded, and that is declared); a multi-line comment keeps line numbers.
+        a_, b_ = nm[:2], nm[2:]
+        rendered_cases = {
+            "an HTML comment inside the name": a_ + "<!-- -->" + b_,
+            "an HTML entity for one letter": "&#" + str(ord(nm[0])) + ";" + nm[1:],
+            "a zero-width space inside": a_ + "\u200b" + b_,
+            "a soft hyphen inside": a_ + "\u00ad" + b_,
+            "an emphasis split": "**" + a_ + "**" + b_,
+            "full-width letters": "".join(chr(ord(ch) + 0xFEE0) for ch in nm),
+        }
+        for what, s in rendered_cases.items():
+            if not scan_infra(14, "", "ran on " + s):
+                failures.append("a name that RENDERS through " + what + " must be caught")
+            if not scan_infra(14, "on " + s, ""):
+                failures.append("a TITLE that renders through " + what + " must be caught")
+        if not scan_infra(14, "", "ran on " + nm):
+            failures.append("the plain name must still be caught once the normaliser runs")
+        look = {"k": "\u043a", "y": "\u0443", "j": "\u0458", "s": "\u0455", "c": "\u0441", "a": "\u0430"}
+        if scan_infra(15, "", "ran on " + nm[:2] + "-" + nm[2:]):
+            failures.append("a HYPHENATED near-name is not the name: the normaliser must not drop '-'")
+        if nm[0] in look and scan_infra(15, "", "ran on " + look[nm[0]] + nm[1:]):
+            failures.append("a look-alike letter from another script is NOT folded (declared): it must not match")
+        got_c = scan_infra(16, "", "x\n<!-- a\nb -->\nran on " + a_ + "<!-- -->" + b_)
+        if [w for w in got_c] != [("PR #16 BODY", 4)]:
+            failures.append("a multi-line comment must keep the line numbers (want PR #16 BODY line 4, got " + repr(got_c) + ")")
     # ARM 6 -- desks SN/WB: the remedy promises a re-run on edit ONLY where the
     # workflow's bytes say so. Every state planted, both list forms; the note
     # must not promise what an unarmed trigger cannot deliver; and THIS
