@@ -132,7 +132,7 @@ def scan_session(number, title: str, body: str):
     return trailers.scan(rows)
 
 
-_HTML_COMMENT = re.compile(r"<!--.*?-->", re.S)
+_HTML_COMMENT = re.compile(r"<!--.*?(?:-->|\Z)", re.S)   # unclosed: to the end, as the forge hides it; linear (kent R1)
 _EMPHASIS = str.maketrans("", "", "*_~`")
 
 
