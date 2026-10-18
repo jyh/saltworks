@@ -132,7 +132,7 @@ def scan_session(number, title: str, body: str):
     return trailers.scan(rows)
 
 
-_HTML_COMMENT = re.compile(r"<!--.*?-->", re.S)
+_HTML_COMMENT = re.compile(r"<!--.*?(?:-->|\Z)", re.S)   # unclosed: to the end, as the forge hides it; linear (kent R1)
 _EMPHASIS = str.maketrans("", "", "*_~`")
 
 
@@ -1172,6 +1172,14 @@ def self_test() -> int:
             failures.append("a HYPHENATED near-name is not the name: the normaliser must not drop '-'")
         if nm[0] in look and scan_infra(15, "", "ran on " + look[nm[0]] + nm[1:]):
             failures.append("a look-alike letter from another script is NOT folded (declared): it must not match")
+        # kent's R1 (10-18 13:08): an UNCLOSED comment opener repeated was quadratic (64 KiB of "<!--" took 3 s); bounded
+        # here at 1 s, ~100x the fixed cost; and a name after an unclosed opener is still caught (by the SOURCE scan)
+        import time as _t
+        _t0 = _t.monotonic(); rendered_text("<!--" * 16384); _dt = _t.monotonic() - _t0
+        if _dt > 1.0:
+            failures.append("rendered_text must be linear on unclosed comment openers (64 KiB took %.2f s)" % _dt)
+        if not scan_infra(17, "", "<!-- never closed\nran on " + nm):
+            failures.append("a name after an UNCLOSED comment opener must still be caught")
         got_c = scan_infra(16, "", "x\n<!-- a\nb -->\nran on " + a_ + "<!-- -->" + b_)
         if [w for w in got_c] != [("PR #16 BODY", 4)]:
             failures.append("a multi-line comment must keep the line numbers (want PR #16 BODY line 4, got " + repr(got_c) + ")")
