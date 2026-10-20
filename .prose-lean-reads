@@ -1,0 +1,1 @@
+# a claim record: id, path, claim-sha12, lean-decl (<tracked .lean path>::<name>), stmt-sha12, author, reader, date  -- see scripts/check_prose_lean.py

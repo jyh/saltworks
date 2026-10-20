@@ -579,3 +579,22 @@ jobs:
           assert rows[0][1] == c.WIDE_CORE_FENCE, "the F-core32 subject differs from the self-test's WIDE_CORE_FENCE"
           print("F-core32 subject == WIDE_CORE_FENCE")
           PY
+
+  prose-lean:
+    name: a prose claim about a Lean result names its statement and a non-author read
+    runs-on: ubuntu-latest
+    # Council 2026-10-20, ruling 1(b) (objective O88): no prose claim about a machine-checked result goes
+    #   public unless it names the Lean statement it paraphrases and a non-author has read the sentence
+    #   against that statement. Beside "a public verification claim names its check" (desk AAN), whose
+    #   helpers it imports. A claim needs a record in .prose-lean-reads (sentence hash, Lean declaration,
+    #   statement hash, author, reader); the claims that predate the gate are accepted debt in
+    #   .prose-lean-baseline and can only shrink. NOT a required check: that status is the Captain's to give.
+    # The self-test runs first, in its own step, so a vacuous checker cannot print green.
+    # The verdict prints its own limits (the reader is a name; the named statement is not judged right).
+    steps:
+      - uses: actions/checkout@v4
+      - name: the checker can still go red (self-test)
+        run: python3 scripts/check_prose_lean.py --self-test
+      - name: every prose claim about a machine-checked result is read against its Lean statement
+        if: success() || failure()
+        run: python3 scripts/check_prose_lean.py --verbose
