@@ -96,12 +96,26 @@ def is_headline(rel):
     return rel.endswith(".tex") or os.path.basename(rel).lower().startswith("readme")
 
 
+CODE_SPAN = re.compile(r"`[^`]*`")
+# claim phrasings the first census did not need but the non-author read found passing the README carrier;
+# a HEADLINE carrier only (in a working doc 'formalization' is a noun, not a claim)
+EXTRA_WORDS = re.compile(r"(?i)\bsorry-free\b|\bformali[sz]\w*|\bmechanically[- ]checked\b|\bformally (?:established|verified)\b"
+                         r"|\bcertified by the lean kernel\b")
+EXTRA_DECLARED = "sorry-free, formaliz*, mechanically checked, formally established/verified, certified by the Lean kernel (headline carriers only)"
+
+
 def claim_sentences(prose, headline=True):
-    """-> [(sentence, [shape names], [claim words])] for the claim sentences of a prose string."""
+    """-> [(sentence, [shape names], [claim words])] for the claim sentences of a prose string.
+    The sentence (and so its hash) KEEPS its inline code spans -- a span is the part that names the Lean, so a
+    span edited after the read must move the hash. Detection runs on the span-stripped sentence: a span can
+    cite, never claim."""
     out = []
     for sn in aan.sentences(flat(prose)):
-        words = [w for w, neg in aan.claim_hits(sn) if not neg]
-        shapes = [name for _, name, rx, needs in SHAPES if rx.search(sn) and (not needs or words)]
+        seen = flat(CODE_SPAN.sub(" ", sn))
+        words = [w for w, neg in aan.claim_hits(seen) if not neg]
+        if headline:
+            words += [m.group(0).lower() for m in EXTRA_WORDS.finditer(seen)]
+        shapes = [name for _, name, rx, needs in SHAPES if rx.search(seen) and (not needs or words)]
         if not headline:
             words = []
         if words or shapes:
@@ -120,7 +134,7 @@ def prose_of(rel, text):
         return [tex_body(text)]
     out = []
     for _, b in aan.md_blocks(text):
-        b = aan.strip_comments_md(re.sub(r"`[^`]*`", " ", b))
+        b = aan.strip_comments_md(b)
         rest = []
         for line in b.split("\n"):
             if line.lstrip().startswith("#"):
@@ -135,23 +149,104 @@ def lean_docstrings(text):
     return re.findall(r"/-[-!](.*?)-/", text, re.S)
 
 
+def lean_mask(text, strings=True):
+    """Blank out Lean comments (nested /- -/ and --) and string literals, keeping every newline and offset,
+    so a declaration is looked up in CODE and never in a comment or a string."""
+    out, i, n, depth = [], 0, len(text), 0
+    while i < n:
+        two = text[i:i + 2]
+        if depth:
+            if two == "/-":
+                depth += 1; out.append("  "); i += 2; continue
+            if two == "-/":
+                depth -= 1; out.append("  "); i += 2; continue
+            out.append("\n" if text[i] == "\n" else " "); i += 1; continue
+        if two == "/-":
+            depth = 1; out.append("  "); i += 2; continue
+        if two == "--":
+            j = text.find("\n", i)
+            j = n if j < 0 else j
+            out.append(" " * (j - i)); i = j; continue
+        if text[i] == "'" and re.match(r"'(?:\\.[^']*|[^\\'])'", text[i:i + 8]):
+            m = re.match(r"'(?:\\.[^']*|[^\\'])'", text[i:i + 8])
+            out.append(m.group(0)); i += len(m.group(0)); continue          # a char literal such as '"' opens no string
+        if text[i] == '"':
+            j = i + 1
+            while j < n and text[j] != '"':
+                j += 2 if text[j] == "\\" else 1
+            j = min(j + 1, n)
+            out.append("".join("\n" if c == "\n" else " " for c in text[i:j]) if strings else text[i:j]); i = j; continue
+        out.append(text[i]); i += 1
+    return "".join(out)
+
+
+DECL_HEAD = re.compile(r"(?m)^[ \t]*(?:@\[[^\]]*\][ \t]*)*(?:private[ \t]+|protected[ \t]+|noncomputable[ \t]+)*"
+                       r"(?:theorem|lemma|def|abbrev|structure|class|inductive|instance)[ \t]+([^\s(:{\[]+)")
+NS_LINE = re.compile(r"(?m)^[ \t]*(namespace|section|mutual|end)\b[ \t]*([^\s]*)")
+
+
+def lean_decls(code):
+    """-> [(qualified_name, bare_name, start_offset)] from masked Lean code, tracking namespace/section/end."""
+    events = [(m.start(), "ns", m) for m in NS_LINE.finditer(code)] + [(m.start(), "decl", m) for m in DECL_HEAD.finditer(code)]
+    stack, out = [], []
+    for _, kind, m in sorted(events, key=lambda e: e[0]):
+        if kind == "ns":
+            word, nm = m.group(1), m.group(2)
+            if word == "end":
+                if stack:
+                    stack.pop()
+            else:
+                stack.append(nm if word == "namespace" else "")      # section and mutual: anonymous scopes
+        else:
+            bare = m.group(1)
+            prefix = ".".join(x for x in stack if x)
+            q = bare[len("_root_."):] if bare.startswith("_root_.") else (prefix + "." + bare if prefix else bare)
+            out.append((q, bare, m.start()))
+    return out
+
+
+def stmt_end(code, start):
+    """Offset of the first ':=' or 'where' at bracket depth 0 after start (a binder default is inside brackets)."""
+    depth, i, n = 0, start, len(code)
+    while i < n:
+        c = code[i]
+        if c in "([{\u27e8":
+            depth += 1
+        elif c in ")]}\u27e9":
+            depth = max(0, depth - 1)
+        elif depth == 0 and code.startswith(":=", i):
+            return i
+        elif depth == 0 and code.startswith("where", i) and not (code[i - 1:i].isalnum() or code[i + 5:i + 6].isalnum()):
+            return i
+        i += 1
+    return min(n, start + 2000)
+
+
 def decl_statement(repo, spec):
-    """'<path>::<name>' -> (found, statement-or-None). 'found' False = not declared."""
+    """'<path>::<name>' -> (state, statement). state: 'found' | 'missing' | 'ambiguous'.
+    The name may be bare or namespace-qualified; a bare name matching more than one declaration in its file is
+    AMBIGUOUS (the record must then qualify it)."""
     if "::" not in spec:
-        return False, None
+        return "missing", None
     path, name = spec.split("::", 1)
     if path not in repo.fileset or not path.endswith(".lean"):
-        return False, None
-    text = aan.read(repo.root, path)
-    rx = re.compile(r"(?m)^[ \t]*(?:@\[[^\]]*\][ \t]*)?(?:private[ \t]+|protected[ \t]+|noncomputable[ \t]+)*"
-                    r"(?:theorem|lemma|def|abbrev|structure|class|inductive|instance)[ \t]+" +
-                    re.escape(name) + r"(?![\w.'])")
-    m = rx.search(text)
-    if not m:
-        return False, None
-    rest = text[m.start():]
-    cut = re.search(r":=|\bwhere\b", rest)
-    return True, flat(rest[:cut.start()] if cut else rest[:2000])
+        return "missing", None
+    raw = aan.read(repo.root, path)
+    code = lean_mask(raw)                        # for FINDING declarations: no comments, no strings
+    stmt_code = lean_mask(raw, strings=False)    # for HASHING one: a string inside a statement is part of it
+    exact = [d for d in lean_decls(code) if d[0] == name]
+    hits = exact or [d for d in lean_decls(code) if d[1] == name]
+    if not hits:
+        return "missing", None
+    if len(hits) > 1:
+        return "ambiguous", None
+    start = hits[0][2]
+    return "found", flat(stmt_code[start:stmt_end(code, start)])
+
+
+def norm_name(n):
+    """'Kent.' / 'kent (helm)' / 'KENT' -> kent / kent-helm / kent. An empty or '-' name names no one."""
+    return re.sub(r"[^a-z0-9]+", "-", n.casefold()).strip("-")
 
 
 def load_tsv(repo, name, ncols):
@@ -207,12 +302,19 @@ def scan(root):
         if not re.fullmatch(r"\d{4}-\d\d-\d\d", date):
             findings.append((READS_FILE, i, "BAD-RECORD", f"{rid}: date {date!r} is not YYYY-MM-DD"))
             continue
-        if not reader or reader.casefold() == author.casefold():
+        na, nr = norm_name(author), norm_name(reader)
+        if not na:
+            findings.append((READS_FILE, i, "BAD-RECORD", f"{rid}: the author {author!r} names no one"))
+            continue
+        if not nr or nr == na or nr.split("-")[0] == na.split("-")[0]:
             findings.append((READS_FILE, i, "SELF-READ", f"{rid}: reader {reader!r} is the author {author!r}"))
             continue
-        found, stmt = decl_statement(repo, decl)
-        if not found:
-            findings.append((READS_FILE, i, "NO-STATEMENT", f"{rid}: {decl} is not declared in a tracked .lean file"))
+        state, stmt = decl_statement(repo, decl)
+        if state == "ambiguous":
+            findings.append((READS_FILE, i, "AMBIGUOUS", f"{rid}: {decl} matches more than one declaration in its file -- qualify it with its namespace"))
+            continue
+        if state != "found":
+            findings.append((READS_FILE, i, "NO-STATEMENT", f"{rid}: {decl} is not declared in code in a tracked .lean file (a comment or string does not count)"))
             continue
         if sha12(stmt) != ssha:
             findings.append((READS_FILE, i, "STALE-STATEMENT",
@@ -239,6 +341,39 @@ def scan(root):
     return findings, claims, stats, ledgers
 
 
+def git_show(root, ref, path):
+    r = subprocess.run(["git", "-C", root, "show", f"{ref}:{path}"], capture_output=True)
+    return r.stdout.decode("utf-8", "replace") if r.returncode == 0 else None
+
+
+def rows_of(text, key_cols):
+    out = set()
+    for line in (text or "").split("\n"):
+        if line.strip() and not line.startswith("#"):
+            cols = [c.strip() for c in line.split("\t")]
+            out.add(tuple(cols[:key_cols]))
+    return out
+
+
+def ratchet(root, base):
+    """The baseline and the ledger prefixes may only SHRINK against BASE (the pull request's base ref): an added
+    line is refused. Without this the ratchet is a habit of whoever edits the file, not a property of the gate.
+    A file absent at BASE is a birth and is allowed once."""
+    probe = subprocess.run(["git", "-C", root, "rev-parse", "--verify", "--quiet", f"{base}^{{commit}}"], capture_output=True)
+    if probe.returncode != 0:
+        raise SystemExit(f"usage: --base {base!r} does not resolve to a commit here -- the ratchet cannot run, and a ratchet "
+                         f"that cannot run must not print OK (CI needs fetch-depth: 0 and the base ref fetched)")
+    findings = []
+    for name, cls, key in ((BASELINE_FILE, "BASELINE-GROWN", 2), (LEDGERS_FILE, "LEDGER-GROWN", 1)):
+        old = git_show(root, base, name)
+        if old is None:
+            continue
+        head = aan.read(root, name) if os.path.exists(os.path.join(root, name)) else ""
+        for row in sorted(rows_of(head, key) - rows_of(old, key)):
+            findings.append((name, 0, cls, f"{' / '.join(row)} is not in {base}:{name} -- the file can only shrink"))
+    return findings
+
+
 def limits(stats, ledgers):
     return [
         f"  population: {stats['carriers']} carrier file(s) (tracked .tex body, README, Markdown outside the ledger prefixes); "
@@ -247,6 +382,9 @@ def limits(stats, ledgers):
         f"  shapes: {SHAPES_DECLARED}; claim words: {aan.CLAIM_WORDS_DECLARED}",
         f"  NOT GATED, counted: {stats['ledger_files']} ledger file(s) from {LEDGERS_FILE} with {stats['ledger_claims']} claim sentence(s)"
         f" ({len(ledgers)} prefix(es)); {stats['docstring_claims']} claim sentence(s) in Lean docstrings",
+        "  RATCHET: the baseline and the ledger prefixes are diffed against the pull request's base only when --base is given "
+        "(CI on a pull_request); a direct push to the default branch is NOT diffed, and branch protection is what closes that",
+        f"  also a claim in a headline carrier: {EXTRA_DECLARED}; a bare 'machine-checked' in a working doc outside a headline carrier is NOT a claim, by design",
         "  NOT checked: that anyone read (the reader is a name, differing from the author); that the named statement is the RIGHT one "
         "(only that it exists and is unchanged since the read); a claim in words outside the lexicon; a sentence the splitter cut differently",
     ]
@@ -259,12 +397,15 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description="a prose claim about a machine-checked result names its Lean statement")
     ap.add_argument("--root", default=".")
     ap.add_argument("--verbose", action="store_true")
+    ap.add_argument("--base", help="git ref of the pull request's base: refuse an added baseline line or ledger prefix")
     ap.add_argument("--list-claims", action="store_true", help="print every claim sentence with its sha (to build the baseline)")
     ap.add_argument("--self-test", action="store_true")
     a = ap.parse_args(argv)
     if a.self_test:
         return self_test()
     findings, claims, stats, ledgers = scan(a.root)
+    if a.base:
+        findings += ratchet(a.root, a.base)
     if a.list_claims:
         for (path, csha), (sn, shapes, words) in sorted(claims.items()):
             print(f"{csha}\t{path}\t{'+'.join(shapes + words)}\t{sn[:200]}")
@@ -355,6 +496,111 @@ def self_test():
     expect("vmvt alone is not a claim", {"docs/b.md": "The Vinogradov mean value theorem is a classical bound.\n"}, [])
     expect("correct scoped sentence still needs a read",
            {"docs/c.md": "The classical-exponent Vinogradov bound is machine-checked.\n"}, ["UNREAD"])
+    # ---- the non-author read of PR 370 (F1-F4 and the minors), each a mutant
+    def sentence_rec(rid, path, sn, decl, ss, author="author-a", reader="reader-b"):
+        ssh = ss if re.fullmatch(r"[0-9a-f]{12}", ss) else sha12(ss)
+        return "\t".join([rid, path, sha12(flat(sn)), decl, ssh, author, reader, "2026-10-20"]) + "\n"
+
+    def lean_stmt(files, spec):
+        return decl_statement(aan.Repo(build(files)), spec)[1]
+
+    # F2: an inline code span is part of the hashed sentence
+    rd = "A machine-checked proof of `Dich = TPC ∨ NoSiegelZeros`, conditional on one hypothesis.\n"
+    rd_moved = rd.replace(" ∨ NoSiegelZeros", "")
+    st = lean_stmt({"A.lean": LEAN}, "A.lean::fulcrum_minimal")
+    recd = sentence_rec("f2", "README.md", rd.strip(), "A.lean::fulcrum_minimal", st)
+    expect("F2 span-in-hash: unmoved is green", {"A.lean": LEAN, "README.md": rd, READS_FILE: recd}, [])
+    expect("F2 span edited after the read", {"A.lean": LEAN, "README.md": rd_moved, READS_FILE: recd}, ["STALE-CLAIM", "UNREAD"])
+    # F3: a binder default does not end the statement
+    bd = "theorem probe (k : Nat := 3) (n : Nat) : n + k = k + n := by omega\n"
+    bd2 = bd.replace("n + k = k + n", "n + k = n + k")
+    sb = lean_stmt({"B.lean": bd}, "B.lean::probe")
+    ok = isinstance(sb, str) and "n + k = k + n" in sb
+    arms += 1
+    if not ok:
+        fails.append(f"F3 statement must reach the conclusion past a binder default, got {sb!r}")
+    sent = "This is machine-checked."
+    recb = sentence_rec("f3", "README.md", sent, "B.lean::probe", sb)
+    expect("F3 conclusion edited after the read", {"B.lean": bd2, "README.md": sent + "\n", READS_FILE: recb}, ["STALE-STATEMENT", "UNREAD"])
+    # F4: comments, strings and namespaces
+    expect("F4a declared only in a block comment", {"C.lean": "/-\ntheorem ghost : True := trivial\n-/\n", "README.md": sent + "\n",
+           READS_FILE: sentence_rec("f4a", "README.md", sent, "C.lean::ghost", "0" * 12)}, ["NO-STATEMENT", "UNREAD"])
+    expect("F4d declared only in a string", {"C.lean": 'def s := "\ntheorem ghost : True := trivial\n"\n', "README.md": sent + "\n",
+           READS_FILE: sentence_rec("f4d", "README.md", sent, "C.lean::ghost", "0" * 12)}, ["NO-STATEMENT", "UNREAD"])
+    live = "-- theorem probe : 1 = 1 := rfl\ntheorem probe : 2 = 2 := rfl\n"
+    sl = lean_stmt({"D.lean": live}, "D.lean::probe")
+    arms += 1
+    if sl is None or "2 = 2" not in sl:
+        fails.append(f"F4b the live statement must be hashed, not the commented-out copy: {sl!r}")
+    recl = sentence_rec("f4b", "README.md", sent, "D.lean::probe", sl)
+    expect("F4b live edited, comment above untouched", {"D.lean": live.replace("2 = 2", "2 = 3"), "README.md": sent + "\n", READS_FILE: recl},
+           ["STALE-STATEMENT", "UNREAD"])
+    two = "namespace A\ntheorem probe : 1 = 1 := rfl\nend A\nnamespace B\ntheorem probe : 2 = 2 := rfl\nend B\n"
+    expect("F4c bare name matching two declarations", {"E.lean": two, "README.md": sent + "\n",
+           READS_FILE: sentence_rec("f4c", "README.md", sent, "E.lean::probe", "0" * 12)}, ["AMBIGUOUS", "UNREAD"])
+    sa = lean_stmt({"E.lean": two}, "E.lean::A.probe")
+    expect("F4c qualified name reads the right one and survives an edit to the other",
+           {"E.lean": two.replace("2 = 2", "2 = 4"), "README.md": sent + "\n", READS_FILE: sentence_rec("f4c2", "README.md", sent, "E.lean::A.probe", sa)}, [])
+    # minors: the author/reader comparison and an empty author
+    recs = sentence_rec("m1", "README.md", sent, "A.lean::fulcrum_minimal", st)
+    for label, rdr in (("trailing dot", "author-a."), ("parenthesised role", "author-a (helm)"), ("case", "AUTHOR-A")):
+        expect(f"self-read via {label}", {"A.lean": LEAN, "README.md": sent + "\n",
+               READS_FILE: sentence_rec("m1", "README.md", sent, "A.lean::fulcrum_minimal", st, reader=rdr)}, ["SELF-READ", "UNREAD"])
+    expect("empty author", {"A.lean": LEAN, "README.md": sent + "\n",
+           READS_FILE: sentence_rec("m2", "README.md", sent, "A.lean::fulcrum_minimal", st, author="-")}, ["BAD-RECORD", "UNREAD"])
+    # lexicon: phrasings the read found passing the README carrier
+    for ph in ("A sorry-free Lean proof of the bound.", "The dichotomy is formally established in Lean.", "Every step is mechanically checked."):
+        expect(f"README phrasing: {ph[:30]}", {"README.md": ph + "\n"}, ["UNREAD"])
+    expect("the same phrasing in a working doc is not a claim", {"docs/w.md": "A sorry-free Lean proof of the bound.\n"}, [])
+    # F1: the baseline and the ledger prefixes only shrink against the base
+    def ratchet_case(base_files, head_files):
+        d = build(base_files)
+        git(d, "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "-m", "base")
+        for rel, txt in head_files.items():
+            with open(os.path.join(d, rel), "w", encoding="utf-8") as fh:
+                fh.write(txt)
+        git(d, "add", "-A")
+        return sorted({c for _, _, c, _ in ratchet(d, "HEAD")})
+
+    bl0 = f"{sha12('old claim')}\tREADME.md\tpredates\n"
+    bl1 = bl0 + f"{sha12('new claim')}\tREADME.md\tpredates\n"
+    nm = {BASELINE_FILE: bl0, LEDGERS_FILE: "docs/exploration/\n"}
+    for name, head, want in (
+            ("F1 a baseline line added", {BASELINE_FILE: bl1}, ["BASELINE-GROWN"]),
+            ("F1 a ledger prefix added", {LEDGERS_FILE: "docs/exploration/\npapers/new/\n"}, ["LEDGER-GROWN"]),
+            ("F1 a baseline line removed (shrink)", {BASELINE_FILE: ""}, []),
+            ("F1 a class edit only", {BASELINE_FILE: bl0.replace("predates", "shape")}, []),
+            ("F1 unchanged", {}, [])):
+        arms += 1
+        got = ratchet_case(nm, head)
+        if got != want:
+            fails.append(f"{name}: wanted {want}, got {got}")
+    arms += 1
+    if ratchet_case({"x": "1"}, {BASELINE_FILE: bl1, LEDGERS_FILE: "docs/\n"}):
+        fails.append("F1 a file absent at the base is a birth and must be allowed once")
+    # ---- the second read (N1-N4)
+    d = build({"x": "1"})
+    arms += 1
+    try:
+        ratchet(d, "origin/nonexistent")
+        fails.append("N1 an unresolvable --base must refuse, not print OK")
+    except SystemExit as e:
+        if "does not resolve" not in str(e):
+            fails.append(f"N1 wrong refusal: {e}")
+    sq = 'theorem q (h : s = "abc") : True := trivial\n'
+    s1 = lean_stmt({"S.lean": sq}, "S.lean::q")
+    s2 = lean_stmt({"S.lean": sq.replace("abc", "abcd")}, "S.lean::q")
+    arms += 1
+    if s1 == s2:
+        fails.append("N2 a string literal inside a statement must be part of the hash")
+    ch = "def q : Char := '\"'\ndef r : String := \"\ntheorem ghost : True := trivial\n\"\n"
+    expect("N3 char literal does not open a string", {"T.lean": ch, "README.md": sent + "\n",
+           READS_FILE: sentence_rec("n3", "README.md", sent, "T.lean::ghost", "0" * 12)}, ["NO-STATEMENT", "UNREAD"])
+    mu = "namespace Outer\nnamespace A\nmutual\ntheorem u : True := trivial\nend\ntheorem probe : 1 = 1 := rfl\nend A\nend Outer\n"
+    sm = lean_stmt({"M.lean": mu}, "M.lean::Outer.A.probe")
+    arms += 1
+    if sm is None:
+        fails.append("N4 a `mutual ... end` must not pop the enclosing namespace")
     if fails:
         print("check_prose_lean --self-test: FAIL")
         print("\n".join("  " + x for x in fails))
