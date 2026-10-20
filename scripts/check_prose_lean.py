@@ -434,7 +434,7 @@ def self_test():
         for rel, txt in files.items():
             p = os.path.join(d, rel)
             os.makedirs(os.path.dirname(p), exist_ok=True)
-            with open(p, "w", encoding="utf-8") as fh:
+            with open(p, "w", encoding="utf-8", newline="") as fh:
                 fh.write(txt)
         git(d, "add", "-A")
         return d
@@ -558,7 +558,7 @@ def self_test():
         d = build(base_files)
         git(d, "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "-m", "base")
         for rel, txt in head_files.items():
-            with open(os.path.join(d, rel), "w", encoding="utf-8") as fh:
+            with open(os.path.join(d, rel), "w", encoding="utf-8", newline="") as fh:
                 fh.write(txt)
         git(d, "add", "-A")
         return sorted({c for _, _, c, _ in ratchet(d, "HEAD")})
