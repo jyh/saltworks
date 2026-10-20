@@ -361,8 +361,9 @@ def ratchet(root, base):
     A file absent at BASE is a birth and is allowed once."""
     probe = subprocess.run(["git", "-C", root, "rev-parse", "--verify", "--quiet", f"{base}^{{commit}}"], capture_output=True)
     if probe.returncode != 0:
-        raise SystemExit(f"usage: --base {base!r} does not resolve to a commit here -- the ratchet cannot run, and a ratchet "
-                         f"that cannot run must not print OK (CI needs fetch-depth: 0 and the base ref fetched)")
+        print(f"usage: --base {base!r} does not resolve to a commit here -- the ratchet cannot run, and a ratchet "
+              f"that cannot run must not print OK (CI needs fetch-depth: 0 and the base ref fetched)", file=sys.stderr)
+        sys.exit(2)       # 2 = usage or broken, never 1 (findings): a caller must not read a missing base as findings
     findings = []
     for name, cls, key in ((BASELINE_FILE, "BASELINE-GROWN", 2), (LEDGERS_FILE, "LEDGER-GROWN", 1)):
         old = git_show(root, base, name)
@@ -585,8 +586,8 @@ def self_test():
         ratchet(d, "origin/nonexistent")
         fails.append("N1 an unresolvable --base must refuse, not print OK")
     except SystemExit as e:
-        if "does not resolve" not in str(e):
-            fails.append(f"N1 wrong refusal: {e}")
+        if e.code != 2:
+            fails.append(f"N1 an unresolvable --base must exit 2 (usage/broken), got {e.code!r}")
     sq = 'theorem q (h : s = "abc") : True := trivial\n'
     s1 = lean_stmt({"S.lean": sq}, "S.lean::q")
     s2 = lean_stmt({"S.lean": sq.replace("abc", "abcd")}, "S.lean::q")
