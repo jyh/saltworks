@@ -1,0 +1,40 @@
+# ACCEPTED DEBT at the gate's birth (council 2026-10-20 1(b)): claim sentences that predate it, by sha + path + class.
+# class 'shape' = a sentence matching one of the lexicon's shapes (read off the 2026-10-19 census; matching is NOT thereby an overclaim, and each census correction, being the Captain's wording, shrinks this file); 'predates' = a claim word in a headline carrier.
+# A line whose sentence is gone is refused (STALE-BASELINE): delete it. A NEW claim is refused until a .prose-lean-reads record names its Lean statement and a non-author reader.
+286fd47b2d52	README.md	predates
+2c750159d265	README.md	predates
+9aae11b34358	README.md	predates
+a30369479698	README.md	predates
+a760fcf63d31	README.md	shape
+c2824cfa2763	README.md	predates
+c98c45c693f1	README.md	predates
+d9f4ea4b773e	README.md	predates
+c8c4576953f5	SaltWorks/Silicon/Sim/d1t/README.md	predates
+1b175835b8c4	SaltWorks/Silicon/TT/README.md	predates
+1fc451924eb7	SaltWorks/Silicon/TT/README.md	predates
+ca47f1aa3ff2	SaltWorks/Silicon/TT/README.md	predates
+f4c2731d3e2a	SaltWorks/Silicon/TT/README.md	predates
+f94555b05f32	SaltWorks/Silicon/TT/test/README.md	predates
+dc076226851e	SaltWorks/Silicon/TTNDF/README.md	predates
+9fc2d12c54ea	docs/EVIDENCE-campaign.md	shape
+e9fce9c94946	docs/compiler-L4-review-criteria-PREREG-0814.md	shape
+84015b4e7f49	docs/core-account.md	shape
+54ef509cbd4d	docs/council-pack-0809.md	shape
+4bad8cbc3b91	docs/hdl-c2-generator-design-0807.md	shape
+991b2c2de44b	docs/hdl-c2-tools/README.md	predates
+c9c621b5d374	docs/hdl-c3-probe-verdict-0807.md	shape
+62fe1eb4fb70	docs/helm-doublecode-codebook-amendment-DRAFT2-0813.md	shape
+a8dc196e1538	docs/heritage-1988-rotation-design-v1.md	shape
+0600a6454c32	docs/ledger-tools/README.md	predates
+881e0508cc9e	docs/ledger-tools/README.md	predates
+9115d6a59728	docs/ledger-tools/README.md	predates
+913f9cb9ed83	docs/ledger-tools/README.md	predates
+a82a39105bf0	docs/ledger-tools/README.md	predates
+f7f441b887f5	docs/ledger-tools/README.md	predates
+1f92fd5296eb	docs/provenance/s2/README.md	predates
+36bc20cd1c5a	docs/provenance/s2/README.md	predates
+dd085561dd60	docs/provenance/s2/README.md	predates
+ee87a74f5160	docs/silicon-bb1-B0bc-0807.md	shape
+8d67dd4c64c4	docs/silicon-c5-execution-plan-0807.md	shape
+4697664b2ad5	docs/silicon-decoder-uncond-prereg-0807.md	shape
+be6fc0610861	docs/silicon-refute-decoder-uncond-0807.md	shape
