@@ -104,13 +104,43 @@ EXTRA_WORDS = re.compile(r"(?i)\bsorry-free\b|\bformali[sz]\w*|\bmechanically[- 
 EXTRA_DECLARED = "sorry-free, formaliz*, mechanically checked, formally established/verified, certified by the Lean kernel (headline carriers only)"
 
 
-def claim_sentences(prose, headline=True):
+# THE SPLITTER (desk O88, 2026-10-21, paris's measurement on x86lean's paper): `aan.sentences` splits only where a
+# sentence-ending [.!?] is DIRECTLY followed by whitespace and a capital, and two shapes this gate's own carriers
+# write are not that. (1) A TeX source tag rides AFTER its sentence's period -- `claim. \src{docs/X.md 1b} Next
+# sentence` -- and ends in `}`, so nothing splits after it: five sentences of a paper were ONE 1,983-character span
+# hashed as a single claim. (2) A closing quote after the period, `validation''. Next`, `."`, `.)`: the char before
+# the whitespace is the quote, not the period. The `\src{...}` tag stays with the sentence before it, as designed
+# (a citation edit moves that sentence's hash, by intent); only the span BOUNDARY moves. LIMITS: a nested brace
+# inside a \src tag, a next sentence opening with a macro, `$` or a digit, and an abbreviation inside a quote are
+# NOT split here (the same class `aan.sentences` already declines).
+_SRC_END = re.compile(r"(\\src\{[^{}]*\})\s+(?=[\"'*_`(\[A-Z])")
+_QUOTE_END = re.compile(r"([.!?](?:''|[\"')\]])+)\s+(?=[\"'*_`(\[A-Z])")
+
+
+def split_sentences(flat_text, legacy=False):
+    """aan.sentences, then each span cut again after a \\src{...} tag and after a closing quote that follows a period.
+    legacy=True is the splitter as it stood before this fix: the ratchet reads the BASE tree with it, so a baseline row
+    keyed on an old fused span can be matched to its text."""
+    if legacy:
+        return aan.sentences(flat_text)
+    out = []
+    for frag in aan.sentences(flat_text):
+        cuts = sorted({m.end(1) for rx in (_SRC_END, _QUOTE_END) for m in rx.finditer(frag)})
+        last = 0
+        for c in cuts:
+            out.append(frag[last:c].strip())
+            last = c
+        out.append(frag[last:].strip())
+    return [x for x in out if x]
+
+
+def claim_sentences(prose, headline=True, legacy=False):
     """-> [(sentence, [shape names], [claim words])] for the claim sentences of a prose string.
     The sentence (and so its hash) KEEPS its inline code spans -- a span is the part that names the Lean, so a
     span edited after the read must move the hash. Detection runs on the span-stripped sentence: a span can
     cite, never claim."""
     out = []
-    for sn in aan.sentences(flat(prose)):
+    for sn in split_sentences(flat(prose), legacy):
         seen = flat(CODE_SPAN.sub(" ", sn))
         words = [w for w, neg in aan.claim_hits(seen) if not neg]
         if headline:
@@ -370,9 +400,65 @@ def ratchet(root, base):
         if old is None:
             continue
         head = aan.read(root, name) if os.path.exists(os.path.join(root, name)) else ""
-        for row in sorted(rows_of(head, key) - rows_of(old, key)):
+        seen = set()
+        for line in head.split("\n"):
+            if line.strip() and not line.startswith("#"):
+                row = tuple(c.strip() for c in line.split("\t")[:key])
+                if name == BASELINE_FILE and row in seen:
+                    findings.append((name, 0, cls, f"{' / '.join(row)} appears twice -- a duplicate row is a second spend of one license"))
+                seen.add(row)
+        added = sorted(rows_of(head, key) - rows_of(old, key))
+        removed = rows_of(old, key) - rows_of(head, key)
+        migrated = split_migration(root, base, added, removed) if name == BASELINE_FILE and added and removed else set()
+        for row in added:
+            if row in migrated:
+                continue
             findings.append((name, 0, cls, f"{' / '.join(row)} is not in {base}:{name} -- the file can only shrink"))
     return findings
+
+
+def split_migration(root, base, added, removed):
+    """-> the set of ADDED baseline rows (sha, path) that are a SPLIT of a row the same change REMOVES (desk O88, the
+    splitter fix). An added row is allowed only if its hash is a PIECE the new splitter cuts a REMOVED row's span
+    into: the span is the sentence that row's hash named at BASE, read from the BASE tree's own text with the
+    splitter as it stood (`legacy`) -- derived, never typed. A new claim is not a piece of an old span, and a
+    sentence that merely APPEARS inside a removed span (a quotation, a half-sentence) is not a piece either, so both
+    are still refused; so is a piece of a row the change KEEPS. LIMIT: this proves the added text existed inside a removed span, not that
+    the removed span was acceptable debt: that was the baseline's own birth decision, unchanged here."""
+    claims = scan(root)[1]
+    old_text = {}                                   # (path, sha) -> the sentence at BASE
+    head_by_path = {}                               # path -> the flat prose blocks of the HEAD file
+    for path in {p for _, p in removed}:
+        text = git_show(root, base, path)
+        if text is None:
+            continue
+        want = {sh for sh, p in removed if p == path}
+        head_prose = [flat(x) for x in prose_of(path, aan.read(root, path))] if os.path.exists(os.path.join(root, path)) else []
+        head_by_path[path] = head_prose
+        for prose in prose_of(path, text):
+            for sn, _, _ in claim_sentences(prose, is_headline(path), legacy=True):
+                # the removed span must be INTACT at HEAD: a migration moves cut points and never removes or edits text
+                # (systems' A1/A2: delete the qualifier half, or edit the span, and baseline what is left)
+                if sha12(sn) in want and any(flat(sn) in hp for hp in head_prose):
+                    old_text[(path, sha12(sn))] = flat(sn)
+    pieces = {}                                      # path -> the shas of every PIECE the new splitter cuts those spans into
+    for (path, _), span in old_text.items():
+        pieces.setdefault(path, set()).update(sha12(x) for x in split_sentences(span))
+    out = set()
+    for sh, path in added:
+        if sh not in pieces.get(path, ()) or (path, sh) not in claims:
+            continue
+        # systems' A6/A7: the baseline keys on (path, sha), so a migrated piece licenses EVERY copy of its text in the
+        # file. Allow it only if every occurrence of the piece in the head prose lies INSIDE an intact removed span:
+        # the piece's total occurrences must equal its occurrences within those spans (a span counted once per place
+        # it occurs at HEAD). A bare copy elsewhere, or beside a never-rendered copy of the span, makes the totals differ.
+        piece = flat(claims[(path, sh)][0])
+        hp = head_by_path.get(path, [])
+        total = sum(b.count(piece) for b in hp)
+        inside = sum(sum(b.count(span) for b in hp) * span.count(piece) for (p, _), span in old_text.items() if p == path)
+        if total == inside:
+            out.add((sh, path))
+    return out
 
 
 def limits(stats, ledgers):
@@ -386,6 +472,11 @@ def limits(stats, ledgers):
         "  RATCHET: the baseline and the ledger prefixes are diffed against the pull request's base only when --base is given "
         "(CI on a pull_request); a direct push to the default branch is NOT diffed, and branch protection is what closes that",
         f"  also a claim in a headline carrier: {EXTRA_DECLARED}; a bare 'machine-checked' in a working doc outside a headline carrier is NOT a claim, by design",
+        "  A PR THAT TOUCHES check_prose_lean.py RUNS ITS OWN CHECKER IN CI, so the ratchet cannot bind a change to the checker itself: "
+        "such a PR is reviewed by its diff, and the five repos' copies stay ONE blob",
+        "  A BASELINE ROW LICENSES EVERY COPY of its sentence in that file (it keys on path + hash): a baselined sentence copied elsewhere in "
+        "its own file stays green, with or without a migration; and TeX that never renders (\\iffalse, a comment environment) counts as prose, "
+        "because only % comments are stripped. Both are older than the migration arm and are declared here, not fixed here",
         "  NOT checked: that anyone read (the reader is a name, differing from the author); that the named statement is the RIGHT one "
         "(only that it exists and is unchanged since the read); a claim in words outside the lexicon; a sentence the splitter cut differently",
     ]
@@ -602,6 +693,103 @@ def self_test():
     arms += 1
     if sm is None:
         fails.append("N4 a `mutual ... end` must not pop the enclosing namespace")
+    # ---- THE SPLITTER (desk O88, 2026-10-21): the shapes paris measured on x86lean's paper, red against the old split
+    def n_claims(files):
+        return len(scan(build(files))[1])
+
+    ca, cb = "The first result is machine-checked in Lean.", "The second result is machine-checked in Lean."
+    texf = lambda body: {"paper/p.tex": "\\begin{document}\n" + body + "\n\\end{document}\n"}
+    # S1 a \src tag rides after its sentence's period and ends in `}`: it is a boundary
+    arms += 1
+    if n_claims(texf(ca + " \\src{docs/X.md 1b} " + cb + " \\src{docs/Y.md 2}")) != 2:
+        fails.append("S1 a sentence after a \\src{...} tag must be its own claim, not fused into the one before it")
+    # S2 a closing quote after the period (TeX `''`, ASCII `"`) and a closing bracket are boundaries
+    for label, q in (("tex quote", "''"), ("ascii quote", '"'), ("paren", ")")):
+        arms += 1
+        if n_claims(texf(ca[:-1] + "." + q + " " + cb)) != 2:
+            fails.append(f"S2 {label}: a sentence after a closing {label} must be its own claim")
+    # S3 the \src tag stays WITH the sentence before it: editing the tag moves THAT sentence's hash and no other
+    def hashes(files):
+        return {k[1] for k in scan(build(files))[1]}
+    h1 = hashes(texf(ca + " \\src{docs/X.md 1b} " + cb))
+    h2 = hashes(texf(ca + " \\src{docs/X.md 1c} " + cb))
+    arms += 1
+    if len(h1 & h2) != 1 or len(h1) != 2:
+        fails.append(f"S3 a \\src edit must move exactly the sentence it rides with: {sorted(h1)} vs {sorted(h2)}")
+    # S4 CONTROLS: an abbreviation and a plain one-sentence paragraph are not over-split
+    arms += 1
+    if n_claims(texf("It is machine-checked, e.g. in the Lean kernel, and nothing else.")) != 1:
+        fails.append("S4 a sentence with an inner 'e.g.' must stay ONE claim")
+
+    # ---- THE MIGRATION ARM of the ratchet: a split of a REMOVED baseline row is allowed, nothing else is
+    fused = texf(ca + " \\src{docs/X.md 1b} " + cb)
+    def old_hash_of_fused():
+        t = fused["paper/p.tex"]
+        prose = next(iter(prose_of("paper/p.tex", t)))
+        return sha12([sn for sn, _, _ in claim_sentences(prose, is_headline("paper/p.tex"), legacy=True)][0])
+    hf = old_hash_of_fused()
+    hnew = sorted(hashes(fused))
+    bl_fused = f"{hf}\tpaper/p.tex\tpredates\n"
+    bl_split = "".join(f"{h}\tpaper/p.tex\tpredates\n" for h in hnew)
+    bl_extra = bl_fused + f"{hnew[0]}\tpaper/p.tex\tpredates\n"
+    arms += 1
+    if len(hnew) != 2 or hf in hnew:
+        fails.append("M0 the fixture must be a fused span under the old split and two claims under the new")
+    for name, head_bl, want in (
+            ("M1 a fused row replaced by its split pieces is a MIGRATION", bl_split, []),
+            ("M2 an unrelated added row is still refused", bl_split + f"{sha12('a brand new claim')}\tpaper/p.tex\tpredates\n", ["BASELINE-GROWN"]),
+            ("M3 a sub-span row added while the fused row is KEPT is still refused", bl_extra, ["BASELINE-GROWN"]),
+            ("M4 a row for a path whose base row was not removed is still refused", bl_split.replace("paper/p.tex", "paper/q.tex"), ["BASELINE-GROWN"])):
+        arms += 1
+        got = ratchet_case({BASELINE_FILE: bl_fused, **fused}, {BASELINE_FILE: head_bl})
+        if got != want:
+            fails.append(f"{name}: wanted {want}, got {got}")
+    # systems' attacks A1, A2, A5 (desk O88): the migration moves cut points and never removes or edits text
+    arms += 1
+    edit = texf(ca + " \\src{docs/X.md 1b} " + cb.replace("second", "second, unconditional,"))
+    got = ratchet_case({BASELINE_FILE: bl_fused, **fused}, {BASELINE_FILE: "".join(f"{h}\tpaper/p.tex\tpredates\n" for h in sorted(hashes(edit))), **edit})
+    if got != ["BASELINE-GROWN"]:
+        fails.append(f"A1 an EDITED removed span must not migrate: {got}")
+    arms += 1
+    dropq = texf(cb)
+    got = ratchet_case({BASELINE_FILE: bl_fused, **fused}, {BASELINE_FILE: f"{sorted(hashes(dropq))[0]}\tpaper/p.tex\tpredates\n", **dropq})
+    if got != ["BASELINE-GROWN"]:
+        fails.append(f"A2 deleting the qualifier half of a removed span and baselining the rest must be refused: {got}")
+    arms += 1
+    two = {**fused, "paper/q.tex": fused["paper/p.tex"]}
+    got = ratchet_case({BASELINE_FILE: bl_fused, **two}, {BASELINE_FILE: "".join(f"{h}\tpaper/q.tex\tpredates\n" for h in hnew)})
+    if got != ["BASELINE-GROWN"]:
+        fails.append(f"A5a a removed row in file A must not license rows in file B: {got}")
+    arms += 1
+    got = ratchet_case({BASELINE_FILE: bl_fused, **fused}, {BASELINE_FILE: bl_split + bl_split})
+    if got != ["BASELINE-GROWN"]:
+        fails.append(f"A5b a duplicate row (one license spent twice) must be refused: {got}")
+    arms += 1
+    if not any("TOUCHES check_prose_lean.py" in x for x in limits({"carriers": 0, "claims": 0, "read": 0, "baselined": 0, "ledger_files": 0, "ledger_claims": 0, "docstring_claims": 0}, [])):
+        fails.append("A4 the limits line must say a PR touching the checker is reviewed by its diff")
+    # systems' A6 and A7 (blob 820e3b8ee95a FAIL): a bare copy of a migrated piece must not ride in on the migration
+    bare = cb
+    a6 = texf(ca + " \\src{docs/X.md 1b} " + cb + "\n\n" + bare)
+    arms += 1
+    got = ratchet_case({BASELINE_FILE: bl_fused, **fused}, {BASELINE_FILE: "".join(f"{h}\tpaper/p.tex\tpredates\n" for h in sorted(hashes(a6))), **a6})
+    if got != ["BASELINE-GROWN"]:
+        fails.append(f"A6 an intact span migrated AND its claim piece copied alone elsewhere in the file must be refused: {got}")
+    a7 = texf("\\iffalse " + ca + " \\src{docs/X.md 1b} " + cb + " \\fi\n\n" + bare)
+    arms += 1
+    got = ratchet_case({BASELINE_FILE: bl_fused, **texf("\\iffalse " + ca + " \\src{docs/X.md 1b} " + cb + " \\fi")}, {BASELINE_FILE: "".join(f"{h}\tpaper/p.tex\tpredates\n" for h in sorted(hashes(a7))), **a7})
+    if got != ["BASELINE-GROWN"]:
+        fails.append(f"A7 the intact span inside \\iffalse and its claim piece in the visible prose must be refused: {got}")
+    arms += 1
+    if not any("LICENSES EVERY COPY" in x for x in limits({"carriers": 0, "claims": 0, "read": 0, "baselined": 0, "ledger_files": 0, "ledger_claims": 0, "docstring_claims": 0}, [])):
+        fails.append("A6b the limits line must declare that a baseline row licenses every copy of its sentence and that \\iffalse counts as prose")
+    # M5 (systems' A3) the removed span stays INTACT at HEAD and a NEW standalone sentence that merely APPEARS inside it is added: still refused
+    quoted = "Note that the claim is machine-checked in Lean proves nothing."
+    inner = "Note that the claim is machine-checked in Lean"
+    arms += 1
+    got = ratchet_case({BASELINE_FILE: f"{sha12(quoted)}\tpaper/p.tex\tpredates\n", **texf(quoted)},
+                       {BASELINE_FILE: f"{sha12(inner)}\tpaper/p.tex\tpredates\n", **texf(quoted + "\n\n" + inner)})
+    if got != ["BASELINE-GROWN"]:
+        fails.append(f"M5 a sentence that only appears inside a removed span must be refused: {got}")
     if fails:
         print("check_prose_lean --self-test: FAIL")
         print("\n".join("  " + x for x in fails))
