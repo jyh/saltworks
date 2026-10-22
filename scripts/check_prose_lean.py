@@ -53,10 +53,10 @@ Usage: check_prose_lean.py [--root DIR] [--verbose] [--list-claims] [--self-test
 from __future__ import annotations
 
 import argparse
-import collections
 import hashlib
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -78,23 +78,23 @@ SHAPES = [
     ("4", "rate-census", re.compile(r"(?i)exchange[- ]rate|neutrality theorem|\bprices? every\b|parity-invariant cone|\bheadline theorems?\b"), False),
     ("5", "vmvt", re.compile(r"(?i)\bVinogradov\b"), True),
 ]
-# ---- THE LEXICON EPOCH (desk O88, council 2026-10-22 items 3 and 5: R5, "yes adopt") --------------------------------------
+# ---- THE LEXICON EPOCH (desk O88, council 2026-10-22 items 3 and 5: R5 and R2, "yes adopt") --------------------------------
 # The lexicon is VERSIONED. Epoch 1 is the 2026-10-20 gate (as the 10-21 splitter fix left it). Epoch 2 is R5:
 #   R5a  theorem / proof / lemma are claim words in HEADLINE carriers (post-mortem section 4: blind catch 23 -> 30 of 40);
 #   R5b  three shapes: main conjecture; never free / pays in / costs exactly; optimal / least / minimum ... hypothesis;
 #   R5c  a RESULTS.md (the document that describes the corpus NOW) is a headline carrier.
+# Epoch 3 is R2: Lean docstring claim sentences are GATED (they were counted), with today's baselined at birth.
 # WHY A NUMBER: a widening makes every sentence the OLD lexicon missed a new accepted-debt row, and the ratchet refuses any added
 # baseline row. The WIDENING arm of the ratchet (below) licenses such a row only if this epoch is HIGHER than the pull request's
-# base, the sentence EXISTS at the same path in the BASE tree (no more copies at head), and the BASE lexicon (this table, one
-# epoch down) did not see it. ONE CONSEQUENCE, declared: a later epoch must keep every earlier epoch defined here, or the arm
-# cannot evaluate its base. (R2, gating Lean docstrings, is the NEXT epoch and its own change: the council's order is R5, R2, R1.)
-LEXICON_EPOCH = 2
+# base, the sentence EXISTS at the same path in the BASE tree, and the BASE lexicon (this table, one epoch down) did not see it.
+# ONE CONSEQUENCE, declared: a later epoch must keep every earlier epoch defined here, or the arm cannot evaluate its base.
+LEXICON_EPOCH = 3
 SHAPES_E2 = SHAPES + [
     ("5", "main-conjecture", re.compile(r"(?i)\bmain[- ]conjecture\b"), False),
     ("4", "never-free", re.compile(r"(?i)\bnever free\b|\bpays? in\b|\bmust pay in\b|\bcosts? exactly\b"), False),
     ("2", "optimal-hypothesis", re.compile(r"(?i)\b(?:optimal|least|minimum|smallest)\b[^.]{0,40}\bhypothes[ie]s\b"), False),
 ]
-EPOCH_SHAPES = {1: SHAPES, 2: SHAPES_E2}
+EPOCH_SHAPES = {1: SHAPES, 2: SHAPES_E2, 3: SHAPES_E2}
 SHAPES_DECLARED = ("log-Chowla, door-only, weakest, proved-minimal / minimal+hypothesis, strengthened / "
                    "'and effective', exchange-rate / neutrality theorem / prices every / parity-invariant cone / "
                    "headline theorem, Vinogradov (only beside an AAN claim word); from epoch 2 also main conjecture, never free / pays in / "
@@ -158,21 +158,24 @@ def split_sentences(flat_text, legacy=False):
     return [x for x in out if x]
 
 
-def claim_sentences(prose, headline=True, legacy=False, epoch=None):
+def claim_sentences(prose, headline=True, legacy=False, epoch=None, docstring=False):
     """-> [(sentence, [shape names], [claim words])] for the claim sentences of a prose string.
     The sentence (and so its hash) KEEPS its inline code spans -- a span is the part that names the Lean, so a
     span edited after the read must move the hash. Detection runs on the span-stripped sentence: a span can
-    cite, never claim. `epoch` picks the lexicon (default: this checker's)."""
+    cite, never claim. `epoch` picks the lexicon (default: this checker's). `docstring=True` is the Lean-docstring lexicon:
+    the epoch-1 headline words plus the epoch's shapes, and NOT the theorem/proof/lemma nouns -- in a docstring 'theorem' names
+    the thing being documented, and counting it would make every docstring a claim."""
     ep = LEXICON_EPOCH if epoch is None else epoch
+    shapes_tbl = EPOCH_SHAPES[ep]
     out = []
     for sn in split_sentences(flat(prose), legacy):
         seen = flat(CODE_SPAN.sub(" ", sn))
         words = [w for w, neg in aan.claim_hits(seen) if not neg]
         if headline:
             words += [m.group(0).lower() for m in EXTRA_WORDS.finditer(seen)]
-            if ep >= 2:
+            if ep >= 2 and not docstring:
                 words += [m.group(0).lower() for m in NOUN_WORDS.finditer(seen)]
-        shapes = [name for _, name, rx, needs in EPOCH_SHAPES[ep] if rx.search(seen) and (not needs or words)]
+        shapes = [name for _, name, rx, needs in shapes_tbl if rx.search(seen) and (not needs or words)]
         if not headline:
             words = []
         if words or shapes:
@@ -319,48 +322,132 @@ def load_tsv(repo, name, ncols):
     return rows
 
 
-def sentence_counts(path, text, epoch):
-    """-> (Counter: sha12 of EVERY sentence in the file's prose -> occurrences, set: sha12 of the sentences that are CLAIMS under
-    `epoch`'s lexicon, headline status taken under that epoch too)."""
-    cnt, claimed = collections.Counter(), set()
-    for prose in prose_of(path, text):
-        for sn in split_sentences(flat(prose)):
-            cnt[sha12(sn)] += 1
-        for sn, _, _ in claim_sentences(prose, is_headline(path, epoch), epoch=epoch):
-            claimed.add(sha12(sn))
-    return cnt, claimed
+def docstring_items(text):
+    """-> [(docstring_text, bare_decl_name_or_None)]: every /-- ... -/ and /-! ... -/ block of a Lean file. A `/--` block
+    documents the declaration that follows it (within a few lines, past attributes and modifiers); a module doc `/-!` has none."""
+    out = []
+    for m in re.finditer(r"/-([-!])(.*?)-/", text, re.S):
+        decl = None
+        if m.group(1) == "-":
+            nxt = DECL_HEAD.search(text, m.end())
+            if nxt and not text[m.end():nxt.start()].strip(" \t\r\n"):
+                decl = nxt.group(1)
+        out.append((m.group(2), decl))
+    return out
+
+
+def cited_in(public_text, decl):
+    """Does a public carrier NAME the declaration? A heuristic for READING ORDER ONLY (it labels a baseline class, it gates
+    nothing): the bare last component, at least 5 characters, not inside a longer identifier."""
+    bare = decl.split(".")[-1]
+    return len(bare) >= 5 and re.search(r"(?<![\w.])" + re.escape(bare.lower()) + r"(?!\w)", public_text) is not None
+
+
+def git_show_bytes(root, ref, path):
+    r = subprocess.run(["git", "-C", root, "show", f"{ref}:{path}"], capture_output=True)
+    return r.stdout if r.returncode == 0 else None
+
+
+def epoch_of(src):
+    """-> the LEXICON_EPOCH a checker source declares, or None when the shape is not the one plain line (the arm then stays CLOSED).
+    No mention of the token at all is epoch 1 (the gate before epochs). Exactly ONE assignment-like occurrence is required and it must be
+    `LEXICON_EPOCH = <int>` at column 0 with no annotation: an annotated, indented, doubled (a docstring that quotes the line) or
+    absent-file shape fails closed (systems' F2, 2026-10-22: the first parse read a real epoch-2 base as epoch 1 for four shapes)."""
+    if src is None:
+        return None
+    if "LEXICON_EPOCH" not in src:
+        return 1
+    assigns = re.findall(r"(?m)^[ \t]*LEXICON_EPOCH[ \t]*(?::[^=\n]*)?=[ \t]*\d+", src)
+    plain = re.findall(r"(?m)^LEXICON_EPOCH = (\d+)[ \t]*$", src)
+    if len(assigns) != 1 or len(plain) != 1:
+        return None
+    return int(plain[0])
+
+
+def base_module(root, base):
+    """Import the BASE tree's own checker (with its own check_verification_claims), isolated from this process's modules, so the base
+    lexicon is what the BASE gate computes and never what this file's tables say about it (systems' F3: an in-place edit of an earlier
+    epoch's table here must not be able to redefine the base). -> the module, or None (the arm then stays closed)."""
+    import importlib.util
+    tmp = tempfile.mkdtemp(prefix="prose-lean-base-")
+    try:
+        for name in ("check_prose_lean.py", "check_verification_claims.py"):
+            src = git_show(root, base, "scripts/" + name)
+            if src is None:
+                return None
+            with open(os.path.join(tmp, name), "w", encoding="utf-8", newline="") as fh:
+                fh.write(src)
+        saved = {k: sys.modules.pop(k) for k in ("check_verification_claims", "check_prose_lean_base") if k in sys.modules}
+        sys.path.insert(0, tmp)
+        try:
+            spec = importlib.util.spec_from_file_location("check_prose_lean_base", os.path.join(tmp, "check_prose_lean.py"))
+            mod = importlib.util.module_from_spec(spec)
+            sys.modules["check_prose_lean_base"] = mod
+            spec.loader.exec_module(mod)
+        finally:
+            sys.path.remove(tmp)
+            sys.modules.pop("check_verification_claims", None)
+            sys.modules.pop("check_prose_lean_base", None)
+            sys.modules.update(saved)
+        return mod
+    except Exception:
+        return None
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
+def base_claim_shas(bm, root, base, path, text):
+    """-> the claim hashes the BASE gate sees in this one file: the base module's own scan() over a one-file repo (so a base that
+    gates docstrings, or not, decides for itself), with the base's ledger prefixes."""
+    d = tempfile.mkdtemp(prefix="prose-lean-bview-")
+    try:
+        subprocess.run(["git", "-C", d, "init", "-q"], check=True, capture_output=True)
+        files = {path: text}
+        led = git_show(root, base, LEDGERS_FILE)
+        if led is not None:
+            files[LEDGERS_FILE] = led
+        for rel, txt in files.items():
+            p = os.path.join(d, rel)
+            os.makedirs(os.path.dirname(p), exist_ok=True)
+            with open(p, "wb") as fh:
+                fh.write(txt if isinstance(txt, bytes) else txt.encode("utf-8"))
+        subprocess.run(["git", "-C", d, "add", "-A"], check=True, capture_output=True)
+        return {sh for (p, sh) in bm.scan(d)[1] if p == path}
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
 
 
 def widening(root, base, added):
-    """-> the set of ADDED baseline rows (sha, path) licensed by a LEXICON WIDENING (epoch 2, R5). A row is licensed only if
-    (i) this checker's LEXICON_EPOCH is higher than the one in the pull request's BASE copy of this file (read from the base
-    tree, never typed), (ii) the sentence EXISTS at the same path in the BASE tree, with no more occurrences at HEAD than at BASE
-    (no new copy rides in), and (iii) the BASE lexicon did not already see it as a claim (so it was not debt the gate had
-    already refused). A NEW sentence, a copy, or a sentence the old lexicon caught is refused. LIMIT: this proves the
-    sentence predates the widening, not that it is acceptable; that is the baseline's own birth decision.
-    DECLARED EQUIVALENT MUTANTS (driven 2026-10-22, the self-test stays green): removing the epoch test (i) and removing
-    'occurs at least once at the base' from (ii) each change nothing observable, because (i) is implied by (iii) (an unchanged
-    lexicon sees nothing new, so no new head claim) and the 'at least once' is implied by 'no more at head than at base' for a
-    row that is a head claim. They are kept as the explicit statement of the rule; every other condition has a red arm."""
-    src = git_show(root, base, "scripts/check_prose_lean.py") or ""
-    m = re.search(r"(?m)^LEXICON_EPOCH\s*=\s*(\d+)", src)
-    b_ep = int(m.group(1)) if m else 1
-    if LEXICON_EPOCH <= b_ep or b_ep not in EPOCH_SHAPES:
+    """-> the set of ADDED baseline rows (sha, path) licensed by a LEXICON WIDENING (epoch 2 = R5, epoch 3 = R2). A row is licensed only if
+    (i) this checker's LEXICON_EPOCH is higher than the one the PR base's copy of this file declares (epoch_of: one plain line, else the
+    arm stays closed), (ii) the file is BYTE-IDENTICAL from base to head (an epoch change moves no prose: hidden TeX unhidden, a
+    new sentence, a new copy, a move between files all change the file and are refused; systems' F1), (iii) the row is a head claim, and
+    (iv) the BASE tree's own checker, run over that file's base text, did not already see the sentence (base_module, systems' F3).
+    A sentence the base gate caught was refused debt, not widening debt. LIMIT: this proves the sentence predates the widening, not that
+    it is acceptable; that is the baseline's own birth decision. ONE DECLARED EQUIVALENT MUTANT (driven 2026-10-22): removing the
+    epoch test (i) changes nothing observable, because (iv) implies it (a base running the same lexicon sees everything the head
+    sees). It is kept as the explicit statement of the rule; every other condition has a red arm, including F1-F3."""
+    b_ep = epoch_of(git_show(root, base, "scripts/check_prose_lean.py"))
+    if b_ep is None or LEXICON_EPOCH <= b_ep:
+        return set()
+    bm = base_module(root, base)
+    if bm is None:
         return set()
     head_claims = scan(root)[1]
     cache, out = {}, set()
     for sh, path in added:
         if (path, sh) not in head_claims:
             continue
-        if path not in cache:
-            btxt = git_show(root, base, path)
-            hp = os.path.join(root, path)
-            cache[path] = (sentence_counts(path, btxt, b_ep) if btxt is not None else None,
-                           sentence_counts(path, aan.read(root, path), LEXICON_EPOCH) if os.path.exists(hp) else None)
-        b, h = cache[path]
-        if b is None or h is None:
+        hp = os.path.join(root, path)
+        btxt = git_show_bytes(root, base, path)
+        if btxt is None or not os.path.exists(hp):
             continue
-        if b[0].get(sh, 0) >= 1 and h[0].get(sh, 0) <= b[0].get(sh, 0) and sh not in b[1]:
+        with open(hp, "rb") as fh:
+            if fh.read() != btxt:
+                continue
+        if path not in cache:
+            cache[path] = base_claim_shas(bm, root, base, path, btxt)
+        if sh not in cache[path]:
             out.add((sh, path))
     return out
 
@@ -368,14 +455,14 @@ def widening(root, base, added):
 def scan(root):
     repo = aan.Repo(root)
     ledgers = [c[0] for _, c, _ in load_tsv(repo, LEDGERS_FILE, 1) if c]
-    claims = {}                               # (path, sha) -> (sentence, shapes, words, tier)
-    stats = {"carriers": 0, "ledger_files": 0, "ledger_claims": 0, "docstring_claims": 0}
+    claims = {}                               # (path, sha) -> (sentence, shapes, words)
+    stats = {"carriers": 0, "ledger_files": 0, "ledger_claims": 0, "docstring_claims": 0, "tiers": {}}
+    lean_files, public_prose = [], []
     for rel in repo.files:
         low = rel.lower()
         is_carrier = rel.endswith(".tex") or (rel.endswith(".md") and True)
         if rel.endswith(".lean"):
-            for ds in lean_docstrings(aan.read(repo.root, rel)):
-                stats["docstring_claims"] += len(claim_sentences(ds))
+            lean_files.append(rel)
             continue
         if not is_carrier or (rel.endswith(".tex") and os.path.basename(low).startswith("readme")):
             continue
@@ -383,6 +470,8 @@ def scan(root):
         text = aan.read(repo.root, rel)
         found = 0
         for prose in prose_of(rel, text):
+            if not in_ledger:
+                public_prose.append(prose)
             for sn, shapes, words in claim_sentences(prose, is_headline(rel)):
                 found += 1
                 if in_ledger:
@@ -393,6 +482,20 @@ def scan(root):
             stats["ledger_files"] += 1
         else:
             stats["carriers"] += 1
+    # ---- R2 (epoch 3): a Lean docstring claim sentence is GATED like a prose claim (it was counted). A docstring on a
+    # declaration a public carrier names is tiered "docstring-cited" so the baseline's class column says which to read first.
+    public_text = flat(" ".join(public_prose)).lower() if LEXICON_EPOCH >= 3 else ""
+    for rel in lean_files:
+        in_ledger = any(rel.startswith(p) for p in ledgers)
+        for ds, decl in docstring_items(aan.read(repo.root, rel)):
+            for sn, shapes, words in claim_sentences(ds, True, docstring=True):
+                stats["docstring_claims"] += 1
+                if LEXICON_EPOCH >= 3 and not in_ledger:
+                    key = (rel, sha12(sn))
+                    claims[key] = (sn, shapes, words)
+                    cited = bool(decl) and cited_in(public_text, decl)
+                    if stats["tiers"].get(key) != "docstring-cited":
+                        stats["tiers"][key] = "docstring-cited" if cited else "docstring"
     findings = []
     reads = load_tsv(repo, READS_FILE, 8)
     base = load_tsv(repo, BASELINE_FILE, 3)
@@ -541,11 +644,14 @@ def limits(stats, ledgers):
         f"{stats['claims']} claim sentence(s): {stats['read']} READ (record), {stats['baselined']} BASELINED (accepted debt), "
         f"{stats['claims'] - stats['read'] - stats['baselined']} neither",
         f"  shapes: {SHAPES_DECLARED}; claim words: {aan.CLAIM_WORDS_DECLARED}",
+        f"  lexicon epoch {LEXICON_EPOCH}: Lean docstring claim sentences are GATED (epoch 3, R2): {stats['docstring_claims']} found, "
+        f"{sum(1 for v in stats.get('tiers', {}).values() if v == 'docstring-cited')} on a declaration a public carrier names (class docstring-cited, a reading ORDER and not a gate; "
+        f"a heuristic on the bare name, >= 5 characters); the docstring lexicon is the headline words plus the shapes and NOT the theorem/proof/lemma nouns",
         f"  NOT GATED, counted: {stats['ledger_files']} ledger file(s) from {LEDGERS_FILE} with {stats['ledger_claims']} claim sentence(s)"
-        f" ({len(ledgers)} prefix(es)); {stats['docstring_claims']} claim sentence(s) in Lean docstrings",
-        f"  lexicon epoch {LEXICON_EPOCH}. WIDENING: a baseline row is accepted past the ratchet only if LEXICON_EPOCH rose against the pull request's base copy of this "
-        "file, the sentence EXISTS at the same path in the base tree (no more copies at head), and the BASE lexicon did not already see it; the epochs are defined in this "
-        "file and an earlier epoch's definition must stay",
+        f" ({len(ledgers)} prefix(es))",
+        "  WIDENING: a baseline row is accepted past the ratchet only if LEXICON_EPOCH rose against the pull request's base copy of this file, the sentence "
+        "EXISTS at the same path in the base tree (no more copies at head), and the BASE lexicon did not already see it; the epochs are defined in this file and "
+        "an earlier epoch's definition must stay",
         "  RATCHET: the baseline and the ledger prefixes are diffed against the pull request's base only when --base is given "
         "(CI on a pull_request); a direct push to the default branch is NOT diffed, and branch protection is what closes that",
         f"  also a claim in a headline carrier: {EXTRA_DECLARED}; a RESULTS.md is a headline carrier from epoch 2; a bare 'machine-checked' in a working doc outside a headline carrier is NOT a claim, by design",
@@ -577,7 +683,8 @@ def main(argv=None):
         findings += ratchet(a.root, a.base)
     if a.list_claims:
         for (path, csha), (sn, shapes, words) in sorted(claims.items()):
-            print(f"{csha}\t{path}\t{'+'.join(shapes + words)}\t{sn[:200]}")
+            tier = stats["tiers"].get((path, csha), "prose")
+            print(f"{csha}\t{path}\t{tier}:{'+'.join(shapes + words)}\t{sn[:200]}")
         return 0
     for rel, line, cls, msg in findings:
         print(f"{rel}:{line}: {cls}: {msg}")
@@ -661,7 +768,8 @@ def self_test():
     # denials, ledgers and docstrings do not gate
     expect("denial passes", {"docs/a.md": "This is not machine-checked and nothing here is proven.\n"}, [])
     expect("ledger is counted not gated", {"docs/exploration/pilot.md": sent_weakest + "\n", LEDGERS_FILE: "docs/exploration/\n"}, [])
-    expect("docstring is counted not gated", {"Salt/A.lean": "/-- the weakest hypothesis, machine-checked -/\ntheorem a : True := trivial\n"}, [])
+    # R2 (epoch 3): this arm said "docstring is counted not gated" and expected [] until 2026-10-22. It now expects UNREAD: see the R2 arms below.
+    expect("R2 a docstring claim is GATED (was counted not gated)", {"Salt/A.lean": "/-- the weakest hypothesis, machine-checked -/\ntheorem a : True := trivial\n"}, ["UNREAD"])
     expect("vmvt alone is not a claim", {"docs/b.md": "The Vinogradov mean value theorem is a classical bound.\n"}, [])
     expect("correct scoped sentence still needs a read",
            {"docs/c.md": "The classical-exponent Vinogradov bound is machine-checked.\n"}, ["UNREAD"])
@@ -868,9 +976,9 @@ def self_test():
     if got != ["BASELINE-GROWN"]:
         fails.append(f"M5 a sentence that only appears inside a removed span must be refused: {got}")
 
-    # ---- R5 (desk O88, council 2026-10-22 items 3 and 5): the widened lexicon and the WIDENING arm of the ratchet
-    def epoch_claims(prose, rel="README.md", epoch=None):
-        return len(claim_sentences(prose, is_headline(rel, epoch), epoch=epoch))
+    # ---- R5 + R2 (desk O88, council 2026-10-22 items 3 and 5): the widened lexicon, the gated docstrings, the WIDENING arm of the ratchet
+    def epoch_claims(prose, rel="README.md", epoch=None, **kw):
+        return len(claim_sentences(prose, is_headline(rel, epoch), epoch=epoch, **kw))
 
     # R5a the three nouns are claim words in a HEADLINE carrier at epoch 2 and were not at epoch 1; a working doc is untouched
     nouns = "The theorem holds for every prime in the range."
@@ -898,11 +1006,42 @@ def self_test():
         arms += 1
         if epoch_claims(sn, "docs/w.md", epoch=1):
             fails.append(f"R5b '{label}' must NOT be a claim at epoch 1")
+    # R2 the docstring lexicon: the headline words and the shapes, and NOT the nouns (a docstring names its theorem)
+    expect("R2 a docstring that only says theorem is not a claim", {"Salt/B.lean": "/-- this theorem bounds the error term -/\ntheorem bound_b : True := trivial\n"}, [])
+    ds_sn = "the weakest hypothesis, machine-checked"
+    ds_files = {"Salt/A.lean": "/-- " + ds_sn + " -/\ntheorem a : True := trivial\n"}
+    ds_bl = f"{sha12(flat(ds_sn))}\tSalt/A.lean\tdocstring\n"
+    expect("R2 a baselined docstring claim is green", {**ds_files, BASELINE_FILE: ds_bl}, [])
+    expect("R2 a docstring baseline row whose sentence is gone is stale", {"Salt/A.lean": "/-- nothing here -/\ntheorem a : True := trivial\n", BASELINE_FILE: ds_bl}, ["STALE-BASELINE"])
+    expect("R2 a NEW docstring claim is not covered by the baseline", {"Salt/A.lean": "/-- " + ds_sn + " -/\ntheorem a : True := trivial\n/-- sorry-free and the weakest of all -/\ntheorem a2 : True := trivial\n", BASELINE_FILE: ds_bl}, ["UNREAD"])
+    # R2 the cited tier: a README that names the declaration marks its docstring claim for reading first
+    cite_files = {"Salt/Cited.lean": "/-- the weakest hypothesis, machine-checked -/\ntheorem fulcrum_gap_cited : True := trivial\n",
+                  "README.md": "See `fulcrum_gap_cited` for the statement.\n"}
+    arms += 1
+    tiers = scan(build(cite_files))[2]["tiers"]
+    if sorted(tiers.values()) != ["docstring-cited"]:
+        fails.append(f"R2 a docstring on a declaration a README names must be tiered docstring-cited: {tiers}")
+    arms += 1
+    tiers = scan(build({**cite_files, "README.md": "Nothing is named here.\n"}))[2]["tiers"]
+    if sorted(tiers.values()) != ["docstring"]:
+        fails.append(f"R2 a docstring on a declaration no carrier names must be tiered docstring: {tiers}")
     # ---- THE WIDENING ARM. The base copy of this file carries LEXICON_EPOCH; the fixtures write one into the base tree.
     CHK = "scripts/check_prose_lean.py"
     OLD = f"{sha12('an older accepted claim')}\tREADME.md\tpredates\n"      # a baseline must EXIST at the base, or the change is a birth
-    base_e1 = {CHK: "LEXICON_EPOCH = 1\n", BASELINE_FILE: OLD}
-    base_e2 = {CHK: "LEXICON_EPOCH = 2\n", BASELINE_FILE: OLD}
+    # A BASE CHECKER IS REAL: this file's own source with the epoch line rewritten (the code keeps every earlier epoch, which is the
+    # declared invariant), plus its check_verification_claims. widening() imports it and asks it, so the fixtures exercise the real path.
+    SELF_SRC = open(os.path.abspath(__file__), encoding="utf-8").read()
+    VSRC = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "check_verification_claims.py"), encoding="utf-8").read()
+
+    def base_checker(n, patch=None, raw=None):
+        t = raw if raw is not None else re.sub(r"(?m)^LEXICON_EPOCH = \d+$", f"LEXICON_EPOCH = {n}", SELF_SRC, count=1)
+        if patch:
+            assert patch[0] in t, patch[0]
+            t = t.replace(*patch)
+        return {CHK: t, "scripts/check_verification_claims.py": VSRC, BASELINE_FILE: OLD}
+
+    base_e1, base_e2, base_e3 = base_checker(1), base_checker(2), base_checker(3)
+    dbase = {"docs/w.md": "A line.\n\n" + nouns + "\n"}                       # a README-free tree: a noun in a working doc is NOT a claim
     rbase = {"README.md": "Intro.\n\n" + nouns + "\n"}                            # the same sentence in a README: a claim at epoch 2 only
     wl = OLD + f"{sha12(flat(nouns))}\tREADME.md\tlexicon-e2\n"
     for name, base_f, head_f, want in (
@@ -924,8 +1063,51 @@ def self_test():
         got = ratchet_case(base_f, head_f)
         if got != want:
             fails.append(f"{name}: wanted {want}, got {got}")
+    # W8 a docstring row: licensed when the docstring sentence existed at the base and the base (epoch 1) did not gate docstrings
+    dsb = {"Salt/A.lean": "/-- " + ds_sn + " -/\ntheorem a : True := trivial\n", **base_e2}
     arms += 1
-    if not any("WIDENING" in x for x in limits({"carriers": 0, "claims": 0, "read": 0, "baselined": 0, "ledger_files": 0, "ledger_claims": 0, "docstring_claims": 0}, [])):
+    got = ratchet_case(dsb, {BASELINE_FILE: OLD + ds_bl})
+    if got != []:
+        fails.append(f"W8 a docstring claim that existed at an epoch-2 base (docstrings counted, not gated) is licensed by the widening: {got}")
+    arms += 1
+    got = ratchet_case({**dsb, **base_e3}, {BASELINE_FILE: OLD + ds_bl})
+    if got != ["BASELINE-GROWN"]:
+        fails.append(f"W9 the same docstring row at an epoch-3 base (already gated) is refused: {got}")
+    arms += 1
+    got = ratchet_case({"Salt/A.lean": "/-- nothing -/\ntheorem a : True := trivial\n", **base_e2},
+                       {"Salt/A.lean": "/-- " + ds_sn + " -/\ntheorem a : True := trivial\n", BASELINE_FILE: OLD + ds_bl})
+    if got != ["BASELINE-GROWN"]:
+        fails.append(f"W10 a docstring claim WRITTEN in the same change is not predating debt: {got}")
+    # ---- systems' F1-F3 (non-author read of the R5 widening arm, 2026-10-22): each driven red first
+    # F1 hidden at base, unhidden at the epoch change: the file CHANGED, so the row is refused (TeX \\iffalse counts as prose at base)
+    hid = "Intro.\n\n\\iffalse " + nouns + " \\fi\n"
+    unh = "Intro.\n\n" + nouns + "\n"
+    arms += 1
+    got = ratchet_case({"papers/p.tex": "\\begin{document}\n" + hid + "\\end{document}\n", **base_e1},
+                       {"papers/p.tex": "\\begin{document}\n" + unh + "\\end{document}\n",
+                        BASELINE_FILE: OLD + f"{sha12(flat(nouns))}\tpapers/p.tex\tlexicon-e2\n"})
+    if got != ["BASELINE-GROWN"]:
+        fails.append(f"F1 a sentence hidden at the base and unhidden in the epoch change must be refused: {got}")
+    # F2 the epoch token must be ONE plain column-0 line; every other shape closes the arm
+    for label, src, want in (("plain", "LEXICON_EPOCH = 2\n", 2), ("absent token = epoch 1", "x = 1\n", 1),
+                             ("annotated", "LEXICON_EPOCH: int = 2\n", None), ("indented", "    LEXICON_EPOCH = 2\n", None),
+                             ("a docstring quotes a column-0 line above the real one", '"""\nLEXICON_EPOCH = 1\n"""\nLEXICON_EPOCH = 2\n', None),
+                             ("no file", None, None)):
+        arms += 1
+        if epoch_of(src) != want:
+            fails.append(f"F2 epoch_of({label}) must be {want!r}, got {epoch_of(src)!r}")
+    arms += 1
+    got = ratchet_case({**rbase, **base_checker(2, raw=SELF_SRC.replace("LEXICON_EPOCH = 3", "LEXICON_EPOCH: int = 2", 1)), }, {BASELINE_FILE: wl})
+    if got != ["BASELINE-GROWN"]:
+        fails.append(f"F2 a base whose epoch line is annotated must close the arm, not open it: {got}")
+    # F3 the base lexicon is the BASE checker's own: a base that already saw the nouns (epoch line 1, nouns on) refuses the row,
+    # whatever this file's epoch-1 table says
+    arms += 1
+    got = ratchet_case({**rbase, **base_checker(1, patch=("if ep >= 2 and not docstring:", "if ep >= 1 and not docstring:"))}, {BASELINE_FILE: wl})
+    if got != ["BASELINE-GROWN"]:
+        fails.append(f"F3 a row the BASE gate already refused must not be licensed, whatever the head's epoch table says: {got}")
+    arms += 1
+    if not any("WIDENING" in x for x in limits({"carriers": 0, "claims": 0, "read": 0, "baselined": 0, "ledger_files": 0, "ledger_claims": 0, "docstring_claims": 0, "tiers": {}}, [])):
         fails.append("W11 the limits line must declare the widening arm")
     if fails:
         print("check_prose_lean --self-test: FAIL")
