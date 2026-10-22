@@ -1,5 +1,7 @@
 # R9b — THE POSITIVE HALF, PRE-REGISTERED BEFORE ANY LEAN
 
+> *Erratum, 2026-10-22: this is a dated record and is kept as written. Line 128 says that `C4SpecD core` is refuted "under every scope". The Lean says less: `not_C4SpecD_core` (`SaltWorks/HDL/C4Refuted.lean`) states `¬ C4SpecD core`, with no scope in it, by a width argument (`core` has `stWidth` outputs and `C4SpecD` requires `stWidthD`). No scoped form of `C4SpecD` is defined in this repository, so no theorem here says anything about the D form under a scope. The width argument suggests that a scoped D form stating the whole-state equation (`∀ ins, scope ins → sem core ins = encDD …`) would also fail for any scope that admits at least one input (a scope that admits none would make it hold vacuously); that is an argument, not a result, and it does not reach a D form of this repository's own scoped notion, `CycleRealisesStepOrStallsOn`, which compares register and pc values only. Found by the O88 post-mortem (council 2026-10-21; form ruled 2026-10-22).*
+
 **Seat:** compiler. **Branch:** `compiler/r9b-positive-reduction`, off master `8def1ce`.
 **Written:** 2026-09-02 07:29:21 PDT. **Authority:** the Captain's 09/02 07:06 SHIP-EARLY ruling
 (*"we don't wait to ship, we should ship as early as possible"*), on the same standing law that

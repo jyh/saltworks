@@ -27,8 +27,13 @@
   3. `C4Spec core` IS STILL FALSE, UNSCOPED, AND NOTHING BELOW TOUCHES THAT. The landed
      refutation runs through `insL`, a memory-touching word this scope excludes. What is
      proved is the SCOPED flagship and nothing wider.
-  4. `C4SpecD core` STAYS REFUTED under every scope — a width argument with no witness in
-     it. Nobody may carry anything from this file to the D form.
+  4. `C4SpecD core` IS FALSE, UNSCOPED: `not_C4SpecD_core` (`HDL/C4Refuted.lean`) states
+     `¬ C4SpecD core` by a width argument (`core` has `stWidth` outputs, `C4SpecD` requires
+     `stWidthD`). No scoped form of `C4SpecD` is defined, so no theorem in this tree says
+     anything about the D form under a scope. Nobody may carry anything from this file to
+     the D form.
+     📜 HISTORY: until 2026-10-22 this limit read "STAYS REFUTED under every scope", which
+     states an argument as a result (the O88 post-mortem's finding).
 
   ⭐ NOTHING HERE IS A NEW DATAPATH PROOF. All four value rows were already landed, under
   FOUR DIFFERENT SPELLINGS across four files, and the files themselves say so
