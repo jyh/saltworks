@@ -59,6 +59,7 @@ import re
 import shutil
 import subprocess
 import sys
+import contextlib
 import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -84,17 +85,20 @@ SHAPES = [
 #   R5b  three shapes: main conjecture; never free / pays in / costs exactly; optimal / least / minimum ... hypothesis;
 #   R5c  a RESULTS.md (the document that describes the corpus NOW) is a headline carrier.
 # Epoch 3 is R2: Lean docstring claim sentences are GATED (they were counted), with today's baselined at birth.
+# Epoch 4 is desk AEG G4: the docstring reader skips line comments, string literals and plain (nested) block comments, so a `/--` inside
+#   one opens nothing (saltworks SaltWorks/HDL/C4.lean read a comment as a docstring opener and its docstring sentence moved: row re-keyed).
+#   Epoch 4 adds no table: the lexicon at epoch 4 is epoch 3's; the epoch rises so the WIDENING arm can license the one re-keyed row.
 # WHY A NUMBER: a widening makes every sentence the OLD lexicon missed a new accepted-debt row, and the ratchet refuses any added
 # baseline row. The WIDENING arm of the ratchet (below) licenses such a row only if this epoch is HIGHER than the pull request's
 # base, the sentence EXISTS at the same path in the BASE tree, and the BASE lexicon (this table, one epoch down) did not see it.
 # ONE CONSEQUENCE, declared: a later epoch must keep every earlier epoch defined here, or the arm cannot evaluate its base.
-LEXICON_EPOCH = 3
+LEXICON_EPOCH = 4
 SHAPES_E2 = SHAPES + [
     ("5", "main-conjecture", re.compile(r"(?i)\bmain[- ]conjecture\b"), False),
     ("4", "never-free", re.compile(r"(?i)\bnever free\b|\bpays? in\b|\bmust pay in\b|\bcosts? exactly\b"), False),
     ("2", "optimal-hypothesis", re.compile(r"(?i)\b(?:optimal|least|minimum|smallest)\b[^.]{0,40}\bhypothes[ie]s\b"), False),
 ]
-EPOCH_SHAPES = {1: SHAPES, 2: SHAPES_E2, 3: SHAPES_E2}
+EPOCH_SHAPES = {1: SHAPES, 2: SHAPES_E2, 3: SHAPES_E2, 4: SHAPES_E2}
 SHAPES_DECLARED = ("log-Chowla, door-only, weakest, proved-minimal / minimal+hypothesis, strengthened / "
                    "'and effective', exchange-rate / neutrality theorem / prices every / parity-invariant cone / "
                    "headline theorem, Vinogradov (only beside an AAN claim word); from epoch 2 also main conjecture, never free / pays in / "
@@ -324,15 +328,55 @@ def load_tsv(repo, name, ncols):
 
 def docstring_items(text):
     """-> [(docstring_text, bare_decl_name_or_None)]: every /-- ... -/ and /-! ... -/ block of a Lean file. A `/--` block
-    documents the declaration that follows it (within a few lines, past attributes and modifiers); a module doc `/-!` has none."""
-    out = []
-    for m in re.finditer(r"/-([-!])(.*?)-/", text, re.S):
-        decl = None
-        if m.group(1) == "-":
-            nxt = DECL_HEAD.search(text, m.end())
-            if nxt and not text[m.end():nxt.start()].strip(" \t\r\n"):
-                decl = nxt.group(1)
-        out.append((m.group(2), decl))
+    documents the declaration that follows it (within a few lines, past attributes and modifiers); a module doc `/-!` has none.
+    AEG G4 (systems' R2 read, 2026-10-22): the first cut was a regex over the raw text, so a `/--` inside a LINE COMMENT, a plain
+    block comment or a string literal opened a PHANTOM docstring that ran to the next `-/` (saltworks SaltWorks/HDL/C4.lean:97 glued
+    a comment, `set_option maxRecDepth 8000` and the module doc into one sentence). The walk now follows lean_mask's lexing: a
+    `--` comment, a nested plain `/- -/` comment, a string and a char literal open nothing. A docstring still ends at its first `-/`."""
+    out, i, n = [], 0, len(text)
+    while i < n:
+        two = text[i:i + 2]
+        if two == "--":
+            j = text.find("\n", i)
+            i = n if j < 0 else j
+            continue
+        if two == "/-":
+            kind = text[i + 2:i + 3]
+            if kind in ("-", "!"):
+                j = text.find("-/", i + 3)
+                if j < 0:
+                    break
+                end = j + 2
+                decl = None
+                if kind == "-":
+                    nxt = DECL_HEAD.search(text, end)
+                    if nxt and not text[end:nxt.start()].strip(" \t\r\n"):
+                        decl = nxt.group(1)
+                out.append((text[i + 3:j], decl))
+                i = end
+                continue
+            depth, i = 1, i + 2                      # a plain block comment: skipped whole, nested
+            while i < n and depth:
+                t = text[i:i + 2]
+                if t == "/-":
+                    depth += 1; i += 2
+                elif t == "-/":
+                    depth -= 1; i += 2
+                else:
+                    i += 1
+            continue
+        if text[i] == "'":
+            m = re.match(r"'(?:\\.[^']*|[^\\'])'", text[i:i + 8])
+            if m:
+                i += len(m.group(0))                 # a char literal such as '"' opens no string
+                continue
+        if text[i] == '"':
+            j = i + 1
+            while j < n and text[j] != '"':
+                j += 2 if text[j] == "\\" else 1
+            i = min(j + 1, n)
+            continue
+        i += 1
     return out
 
 
@@ -364,36 +408,90 @@ def epoch_of(src):
     return int(plain[0])
 
 
-def base_module(root, base):
-    """Import the BASE tree's own checker (with its own check_verification_claims), isolated from this process's modules, so the base
-    lexicon is what the BASE gate computes and never what this file's tables say about it (systems' F3: an in-place edit of an earlier
-    epoch's table here must not be able to redefine the base). -> the module, or None (the arm then stays closed)."""
-    import importlib.util
-    tmp = tempfile.mkdtemp(prefix="prose-lean-base-")
-    try:
-        for name in ("check_prose_lean.py", "check_verification_claims.py"):
-            src = git_show(root, base, "scripts/" + name)
-            if src is None:
-                return None
-            with open(os.path.join(tmp, name), "w", encoding="utf-8", newline="") as fh:
-                fh.write(src)
-        saved = {k: sys.modules.pop(k) for k in ("check_verification_claims", "check_prose_lean_base") if k in sys.modules}
-        sys.path.insert(0, tmp)
-        try:
-            spec = importlib.util.spec_from_file_location("check_prose_lean_base", os.path.join(tmp, "check_prose_lean.py"))
-            mod = importlib.util.module_from_spec(spec)
-            sys.modules["check_prose_lean_base"] = mod
-            spec.loader.exec_module(mod)
-        finally:
-            sys.path.remove(tmp)
-            sys.modules.pop("check_verification_claims", None)
-            sys.modules.pop("check_prose_lean_base", None)
-            sys.modules.update(saved)
-        return mod
-    except Exception:
+def git_ls_py(root, ref, d):
+    """-> the *.py file names the tree at `ref` holds directly under `d`, or None when git cannot list it."""
+    r = subprocess.run(["git", "-C", root, "ls-tree", "--name-only", ref, d.rstrip("/") + "/"], capture_output=True, text=True)
+    if r.returncode != 0:
         return None
+    return sorted(os.path.basename(x) for x in r.stdout.split("\n") if x.endswith(".py"))
+
+
+class _Box:
+    """What _base_sandbox hands back: .mod (the base module or None) and .leaked (set at exit: an import resolved outside the base tree and the stdlib)."""
+    mod = None
+    leaked = False
+
+
+def _is_stdlib(path):
+    import sysconfig
+    ap = os.path.abspath(path)
+    if "site-packages" in ap or "dist-packages" in ap:
+        return False
+    return any(ap.startswith(os.path.abspath(sysconfig.get_paths()[k]) + os.sep) for k in ("stdlib", "platstdlib"))
+
+
+@contextlib.contextmanager
+def _base_sandbox(root, base):
+    """Import the BASE tree's own checker (with EVERY sibling script the base ships), isolated from this process's modules, and KEEP the
+    isolation alive for the whole `with` block, so a LAZY import inside the base's scan() also resolves to the base's tmp tree, never to
+    this checker's scripts dir (systems' F1 on the first candidate). On exit sys.path, sys.modules and the tmp dir are restored whole.
+    The base lexicon is what the BASE gate computes and never what this file's tables say about it (systems' F3).
+    AEG G2: every scripts/*.py of the base is copied. A module imported by the base from anywhere OUTSIDE its tmp tree and the stdlib
+    (the head's scripts dir, another sys.path dir) sets box.leaked at exit; the caller then discards what it computed (systems' F2: the
+    spec rule, not only 'loaded from this checker's own directory'). G1: sys.path restored WHOLE. G3: SystemExit / any exception in the
+    base's import leaves box.mod None; it never crashes this checker. -> a _Box."""
+    import importlib.util
+    box = _Box()
+    tmp = tempfile.mkdtemp(prefix="prose-lean-base-")
+    tmp_abs = os.path.abspath(tmp)
+    saved_path = list(sys.path)
+    saved, before = {}, set(sys.modules)
+    try:
+        try:
+            names = git_ls_py(root, base, "scripts")
+            if names and "check_prose_lean.py" in names and "check_verification_claims.py" in names:
+                ok = True
+                for name in names:
+                    src = git_show(root, base, "scripts/" + name)
+                    if src is None:
+                        ok = False
+                        break
+                    with open(os.path.join(tmp, name), "w", encoding="utf-8", newline="") as fh:
+                        fh.write(src)
+                if ok:
+                    stems = {n[:-3] for n in names} | {"check_prose_lean_base"}
+                    saved = {k: sys.modules.pop(k) for k in list(sys.modules) if k in stems}
+                    sys.path.insert(0, tmp)
+                    spec = importlib.util.spec_from_file_location("check_prose_lean_base", os.path.join(tmp, "check_prose_lean.py"))
+                    mod = importlib.util.module_from_spec(spec)
+                    sys.modules["check_prose_lean_base"] = mod
+                    spec.loader.exec_module(mod)
+                    box.mod = mod
+        except (Exception, SystemExit):
+            box.mod = None
+        try:
+            yield box
+        except (Exception, SystemExit):
+            box.mod = None
+            box.leaked = True                   # a crash inside the block: whatever it computed is not trusted
     finally:
+        for k in set(sys.modules) - before:
+            f = getattr(sys.modules[k], "__file__", None)
+            if f and not os.path.abspath(f).startswith(tmp_abs + os.sep) and not _is_stdlib(f):
+                box.leaked = True
+        sys.path[:] = saved_path
+        for k in set(sys.modules) - before:
+            sys.modules.pop(k, None)
+        sys.modules.update(saved)
         shutil.rmtree(tmp, ignore_errors=True)
+
+
+def base_module(root, base):
+    """The base module (or None), with the process restored on return: a leak closes it (None). Used where no scan() runs; widening()
+    uses _base_sandbox directly so the isolation covers the base's scan()."""
+    with _base_sandbox(root, base) as box:
+        pass
+    return None if box.leaked else box.mod
 
 
 def base_claim_shas(bm, root, base, path, text):
@@ -412,7 +510,10 @@ def base_claim_shas(bm, root, base, path, text):
             with open(p, "wb") as fh:
                 fh.write(txt if isinstance(txt, bytes) else txt.encode("utf-8"))
         subprocess.run(["git", "-C", d, "add", "-A"], check=True, capture_output=True)
-        return {sh for (p, sh) in bm.scan(d)[1] if p == path}
+        try:
+            return {sh for (p, sh) in bm.scan(d)[1] if p == path}
+        except (Exception, SystemExit):
+            return None                          # AEG G3: a crash in the BASE's scan() leaves the row UNLICENSED; it never crashes this checker
     finally:
         shutil.rmtree(d, ignore_errors=True)
 
@@ -430,26 +531,29 @@ def widening(root, base, added):
     b_ep = epoch_of(git_show(root, base, "scripts/check_prose_lean.py"))
     if b_ep is None or LEXICON_EPOCH <= b_ep:
         return set()
-    bm = base_module(root, base)
-    if bm is None:
-        return set()
     head_claims = scan(root)[1]
     cache, out = {}, set()
-    for sh, path in added:
-        if (path, sh) not in head_claims:
-            continue
-        hp = os.path.join(root, path)
-        btxt = git_show_bytes(root, base, path)
-        if btxt is None or not os.path.exists(hp):
-            continue
-        with open(hp, "rb") as fh:
-            if fh.read() != btxt:
+    with _base_sandbox(root, base) as box:
+        bm = box.mod
+        if bm is None:
+            return set()
+        for sh, path in added:
+            if (path, sh) not in head_claims:
                 continue
-        if path not in cache:
-            cache[path] = base_claim_shas(bm, root, base, path, btxt)
-        if sh not in cache[path]:
-            out.add((sh, path))
-    return out
+            hp = os.path.join(root, path)
+            btxt = git_show_bytes(root, base, path)
+            if btxt is None or not os.path.exists(hp):
+                continue
+            with open(hp, "rb") as fh:
+                if fh.read() != btxt:
+                    continue
+            if path not in cache:
+                cache[path] = base_claim_shas(bm, root, base, path, btxt)
+            if cache[path] is None:
+                continue                         # the base could not be read: no row is licensed (fail closed)
+            if sh not in cache[path]:
+                out.add((sh, path))
+    return set() if box.leaked or box.mod is None else out
 
 
 def scan(root):
@@ -1097,7 +1201,7 @@ def self_test():
         if epoch_of(src) != want:
             fails.append(f"F2 epoch_of({label}) must be {want!r}, got {epoch_of(src)!r}")
     arms += 1
-    got = ratchet_case({**rbase, **base_checker(2, raw=SELF_SRC.replace("LEXICON_EPOCH = 3", "LEXICON_EPOCH: int = 2", 1)), }, {BASELINE_FILE: wl})
+    got = ratchet_case({**rbase, **base_checker(2, raw=SELF_SRC.replace("LEXICON_EPOCH = 4", "LEXICON_EPOCH: int = 2", 1)), }, {BASELINE_FILE: wl})
     if got != ["BASELINE-GROWN"]:
         fails.append(f"F2 a base whose epoch line is annotated must close the arm, not open it: {got}")
     # F3 the base lexicon is the BASE checker's own: a base that already saw the nouns (epoch line 1, nouns on) refuses the row,
@@ -1106,9 +1210,196 @@ def self_test():
     got = ratchet_case({**rbase, **base_checker(1, patch=("if ep >= 2 and not docstring:", "if ep >= 1 and not docstring:"))}, {BASELINE_FILE: wl})
     if got != ["BASELINE-GROWN"]:
         fails.append(f"F3 a row the BASE gate already refused must not be licensed, whatever the head's epoch table says: {got}")
+    # ---- systems' G1-G2 (non-author read of R2, 2026-10-22; desk AEG): the base checker is imported in ISOLATION from this process.
+    # A base checker that imports a THIRD sibling module must get the BASE tree's copy, never this process's (from a head directory on
+    # sys.path, or from sys.modules), and an import resolved outside the base tree and the stdlib closes the arm. THIRD is the sibling.
+    import types
+    THIRD = "prose_g2_third"
+    imp_line = "import check_verification_claims as aan  # noqa: E402\n"
+    gate_line = "if ep >= 2 and not docstring:"
+
+    def third_base(base_on, lazy=False, carried=True):
+        if lazy:
+            patch_src = SELF_SRC.replace(gate_line, f"if (ep >= 2 or __import__({THIRD!r}).NOUNS_ON) and not docstring:", 1)
+        else:
+            patch_src = SELF_SRC.replace(imp_line, imp_line + f"import {THIRD}  # noqa: E402\n", 1).replace(
+                gate_line, f"if (ep >= 2 or {THIRD}.NOUNS_ON) and not docstring:", 1)
+        f = base_checker(1, raw=re.sub(r"(?m)^LEXICON_EPOCH = \d+$", "LEXICON_EPOCH = 1", patch_src, count=1))
+        if carried:
+            f[f"scripts/{THIRD}.py"] = f"NOUNS_ON = {base_on}\n"
+        return f
+
+    def with_head_third(fn, route):
+        """Run fn() with THIS process holding a HEAD copy of THIRD that says NOUNS_ON = False, by `route`: 'path' (a directory on
+        sys.path, as the head's own scripts/ is) or 'modules' (already imported). Restores both afterwards."""
+        hd = tempfile.mkdtemp(prefix="prose-lean-headthird-")
+        saved_path, had = list(sys.path), sys.modules.pop(THIRD, None)
+        try:
+            if route == "here":
+                hd2 = os.path.join(os.path.dirname(os.path.abspath(__file__)), THIRD + ".py")
+                with open(hd2, "w") as fh:
+                    fh.write("NOUNS_ON = False\n")
+            elif route == "path":
+                with open(os.path.join(hd, THIRD + ".py"), "w") as fh:
+                    fh.write("NOUNS_ON = False\n")
+                sys.path.insert(0, hd)
+            else:
+                m = types.ModuleType(THIRD)
+                m.NOUNS_ON = False
+                sys.modules[THIRD] = m
+            return fn()
+        finally:
+            sys.path[:] = saved_path
+            sys.modules.pop(THIRD, None)
+            if had is not None:
+                sys.modules[THIRD] = had
+            shutil.rmtree(hd, ignore_errors=True)
+            if route == "here":
+                os.remove(os.path.join(os.path.dirname(os.path.abspath(__file__)), THIRD + ".py"))
+
+    for name, kw, route, want in (
+            ("G2-control the base's own THIRD says nouns OFF: the row is licensed (the base loaded and was asked)", {"base_on": False}, "path", []),
+            ("G2a path route: the head's THIRD on sys.path must not stand in for the base's", {"base_on": True}, "path", ["BASELINE-GROWN"]),
+            ("G2b sys.modules route: the head's imported THIRD must not stand in for the base's", {"base_on": True}, "modules", ["BASELINE-GROWN"]),
+            ("G2c a THIRD the base tree does not carry, resolved from the head: the arm closes", {"base_on": True, "carried": False}, "path", ["BASELINE-GROWN"]),
+            ("G2c-here the same, the head copy in THIS checker's own scripts dir (production shape)", {"base_on": True, "carried": False}, "here", ["BASELINE-GROWN"]),
+            ("G2d-here a LAZY import, the head copy in THIS checker's own scripts dir", {"base_on": True, "lazy": True}, "here", ["BASELINE-GROWN"]),
+            ("G2d a LAZY import inside the base's scan() gets the base's THIRD", {"base_on": True, "lazy": True}, "path", ["BASELINE-GROWN"])):
+        arms += 1
+        got = with_head_third(lambda: ratchet_case({**rbase, **third_base(**kw)}, {BASELINE_FILE: wl}), route)
+        if got != want:
+            fails.append(f"{name}: wanted {want}, got {got}")
+    # G1 the base import leaves this process's sys.path and sys.modules exactly as it found them (no stale tmp entry, no base module)
+    arms += 1
+    p0, m0 = list(sys.path), set(sys.modules)
+    with_head_third(lambda: ratchet_case({**rbase, **third_base(base_on=True)}, {BASELINE_FILE: wl}), "modules")
+    if sys.path != p0 or {k for k in set(sys.modules) - m0 if k in (THIRD, "check_prose_lean_base")}:
+        fails.append(f"G1 sys.path/sys.modules must be restored whole: path +{[x for x in sys.path if x not in p0]} -{[x for x in p0 if x not in sys.path]}")
+    # G1b/G1c (systems, on kent's candidate): after ONE base_module call, no module the base loaded from its tmp tree survives in this
+    # process (a base-only sibling must not become what a later head import gets), and every head module it popped is the SAME object again.
+    dg = build({**rbase, **third_base(base_on=True)})
+    git(dg, "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "-m", "base")
+    sys.modules.pop(THIRD, None)
+    aan_before = sys.modules.get("check_verification_claims")
+    bm_g = base_module(dg, "HEAD")
+    arms += 1
+    leaked = [k for k, m in list(sys.modules.items()) if "prose-lean-base-" in (getattr(m, "__file__", None) or "")]
+    if bm_g is None or THIRD in sys.modules or leaked:
+        fails.append(f"G1b no base module may survive the call: loaded={bm_g is not None} third-in-sys.modules={THIRD in sys.modules} leaked={leaked}")
+    arms += 1
+    if sys.modules.get("check_verification_claims") is not aan_before:
+        fails.append("G1c the head's check_verification_claims must be the same object after the call")
     arms += 1
     if not any("WIDENING" in x for x in limits({"carriers": 0, "claims": 0, "read": 0, "baselined": 0, "ledger_files": 0, "ledger_claims": 0, "docstring_claims": 0, "tiers": {}}, [])):
         fails.append("W11 the limits line must declare the widening arm")
+    # ---- AEG G1-G3 + G5 (systems' R2 read, 2026-10-22, seat fab693d3d; desk AEG): the base-module hardening, each arm RED before its fix
+    def commit(d):
+        git(d, "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "-m", "base")
+
+    here_dir = os.path.dirname(os.path.abspath(__file__))
+    sib_base = base_checker(1)
+    third = {**sib_base, CHK: sib_base[CHK].replace("import re\n", "import re\nimport third_sibling\nTHIRD = third_sibling.MARK\n", 1),
+             "scripts/third_sibling.py": "MARK = 'BASE-COPY'\n"}
+    assert third[CHK] != sib_base[CHK]
+    d = build(third); commit(d)
+    arms += 1
+    bm = base_module(d, "HEAD")
+    got = getattr(bm, "THIRD", None) if bm is not None else None
+    if got != "BASE-COPY":
+        fails.append(f"G2 a base that ships a THIRD sibling module must import ITS copy of it, not the head's: got {got!r}")
+    # G2b: a base whose import resolves to a sibling of THIS (head) checker, which the base does not ship. The head directory is a FAKE one built here, so
+    # the arm cannot be skipped in a checkout that happens to hold no other script (its first cut chose a real sibling and silently ran in none of my mutants).
+    fake_head = tempfile.mkdtemp(prefix="prose-lean-head-")
+    with open(os.path.join(fake_head, "zz_head_sibling.py"), "w", encoding="utf-8") as fh:
+        fh.write("MARK = 'HEAD-COPY'\n")
+    leak = {**sib_base, CHK: sib_base[CHK].replace("import re\n", "import re\nimport zz_head_sibling\n", 1)}
+    assert leak[CHK] != sib_base[CHK]
+    d = build(leak); commit(d)
+    _real_file, _real_path = globals()["__file__"], list(sys.path)
+    globals()["__file__"] = os.path.join(fake_head, "check_prose_lean.py")
+    sys.path.insert(0, fake_head)
+    try:
+        arms += 1
+        got = base_module(d, "HEAD")
+    finally:
+        globals()["__file__"] = _real_file
+        sys.path[:] = _real_path
+        sys.modules.pop("zz_head_sibling", None)
+        shutil.rmtree(fake_head, ignore_errors=True)
+    if got is not None:
+        fails.append("G2 a base whose import resolves to a sibling of the HEAD checker (the base ships none) must CLOSE the arm (None): it fails open")
+    before_path = list(sys.path)
+    ins = {**sib_base, CHK: sib_base[CHK].replace("import re\n", "import re\nimport sys as _s, os as _o\n_s.path.insert(0, _o.path.dirname(_o.path.abspath(__file__)))\n", 1)}
+    assert ins[CHK] != sib_base[CHK]
+    d = build(ins); commit(d)
+    arms += 1
+    base_module(d, "HEAD")
+    if sys.path != before_path:
+        fails.append("G1 base_module must leave sys.path exactly as it found it (a base that inserts its own dir a second time left a deleted tmp dir at sys.path[0])")
+    sys.path[:] = before_path
+    boom = {**sib_base, CHK: sib_base[CHK].replace("import re\n", "import re\nraise SystemExit(3)\n", 1)}
+    assert boom[CHK] != sib_base[CHK]
+    d = build(boom); commit(d)
+    arms += 1
+    try:
+        got = base_module(d, "HEAD")
+    except BaseException as e:
+        got = "CRASHED " + type(e).__name__
+    if got is not None:
+        fails.append(f"G3 a SystemExit in the base's import must CLOSE the arm (None), not escape: {got!r}")
+    # G3b a crash INSIDE the sandbox block (the caller's code, e.g. a scan() that dies) must not escape and must distrust the result
+    d = build(sib_base); commit(d)
+    arms += 1
+    try:
+        with _base_sandbox(d, "HEAD") as _bx:
+            raise RuntimeError("caller crashed inside the sandbox")
+        got = (_bx.mod is None, _bx.leaked)
+    except BaseException as e:
+        got = "CRASHED " + type(e).__name__
+    if got != (True, True):
+        fails.append(f"G3b a crash inside the sandbox block must close the result (mod None, leaked True) and not escape: {got!r}")
+    arms += 1
+    try:
+        got = ratchet_case({**rbase, **base_checker(1, patch=("def scan(root):\n", "def scan(root):\n    raise RuntimeError('base scan crashed')\n"))}, {BASELINE_FILE: wl})
+    except BaseException as e:
+        got = "CRASHED " + type(e).__name__
+    if got != ["BASELINE-GROWN"]:
+        fails.append(f"G3 an exception in the BASE's scan() must leave the row UNLICENSED (arm closed), not crash the checker: {got}")
+    # G5 the F2 ratchet arm, rebuilt so it is LOAD-BEARING: a base of epoch 1 whose epoch line is ANNOTATED. If epoch_of read it (as 1), (i) 3 > 1 holds and
+    # (iv) the epoch-1 base does not see the nouns, so the row would be LICENSED; only epoch_of's fail-closed parse refuses it. The arm drives its own mutant.
+    ann = re.sub(r"(?m)^LEXICON_EPOCH = \d+$", "LEXICON_EPOCH: int = 1", SELF_SRC, count=1)
+    assert ann != SELF_SRC and "LEXICON_EPOCH: int = 1" in ann
+    ann_base = {CHK: ann, "scripts/check_verification_claims.py": VSRC, BASELINE_FILE: OLD}
+    arms += 1
+    got = ratchet_case({**rbase, **ann_base}, {BASELINE_FILE: wl})
+    if got != ["BASELINE-GROWN"]:
+        fails.append(f"G5 a base of epoch 1 whose epoch line is annotated must close the arm: {got}")
+    _real_epoch_of = epoch_of
+    globals()["epoch_of"] = lambda src: int(re.search(r"LEXICON_EPOCH\D*=\s*(\d+)", src).group(1)) if src else None
+    try:
+        arms += 1
+        got = ratchet_case({**rbase, **ann_base}, {BASELINE_FILE: wl})
+    finally:
+        globals()["epoch_of"] = _real_epoch_of
+    if got != []:
+        fails.append(f"G5 MUTANT (epoch_of reads the first assignment of ANY shape) must LICENSE the row, proving the arm above can see the difference: {got}")
+    # ---- AEG G4: docstring openers are found by LEXING, not by a regex over the raw text (systems' G4; saltworks SaltWorks/HDL/C4.lean:97)
+    for name, txt, want in (
+            ("a /-- in a LINE COMMENT opens nothing (the C4.lean shape: comment, set_option, module doc)",
+             "-- the fifth costume of the reflex for `/--` before `#check`,\nset_option maxRecDepth 8000\n\n/-! # Heading\n\nThe module doc sentence.\n-/\n\n/-- doc of foo. -/\ntheorem foo : True := trivial\n",
+             [(" # Heading\n\nThe module doc sentence.\n", None), (" doc of foo. ", "foo")]),
+            ("a /-- in a STRING LITERAL opens nothing",
+             'def s : String := "a /-- b"\n/-- real -/\ndef t := 1\n', [(" real ", "t")]),
+            ("a /-- inside a NESTED plain block comment opens nothing",
+             "/- a plain /-- note -/ end -/\n/-- real2 -/\ndef u := 1\n", [(" real2 ", "u")]),
+            ("a char literal '\"' opens no string (guard)", "def c := '\"'\n/-- after char -/\ndef w := 1\n", [(" after char ", "w")]),
+            ("a -- inside a string starts no comment (guard)", 'def s := "x -- y"\n/-- doc -/\ndef z := 1\n', [(" doc ", "z")]),
+            ("ordinary docstrings are unchanged", "/-- one. -/\ntheorem a : True := trivial\n/-! mod -/\n/-- two. -/\n@[simp] def b := 2\n",
+             [(" one. ", "a"), (" mod ", None), (" two. ", "b")])):
+        arms += 1
+        got = docstring_items(txt)
+        if got != want:
+            fails.append(f"G4 {name}: wanted {want!r}, got {got!r}")
     if fails:
         print("check_prose_lean --self-test: FAIL")
         print("\n".join("  " + x for x in fails))
