@@ -410,7 +410,7 @@ def epoch_of(src):
 
 def git_ls_py(root, ref, d):
     """-> the *.py file names the tree at `ref` holds directly under `d`, or None when git cannot list it."""
-    r = subprocess.run(["git", "-C", root, "ls-tree", "--name-only", ref, d.rstrip("/") + "/"], capture_output=True, text=True)
+    r = subprocess.run(["git", "-C", root, "ls-tree", "--name-only", ref, d.rstrip("/") + "/"], capture_output=True, text=True, encoding="utf-8")
     if r.returncode != 0:
         return None
     return sorted(os.path.basename(x) for x in r.stdout.split("\n") if x.endswith(".py"))
@@ -1237,10 +1237,10 @@ def self_test():
         try:
             if route == "here":
                 hd2 = os.path.join(os.path.dirname(os.path.abspath(__file__)), THIRD + ".py")
-                with open(hd2, "w") as fh:
+                with open(hd2, "w", encoding="utf-8", newline="") as fh:
                     fh.write("NOUNS_ON = False\n")
             elif route == "path":
-                with open(os.path.join(hd, THIRD + ".py"), "w") as fh:
+                with open(os.path.join(hd, THIRD + ".py"), "w", encoding="utf-8", newline="") as fh:
                     fh.write("NOUNS_ON = False\n")
                 sys.path.insert(0, hd)
             else:
@@ -1310,7 +1310,7 @@ def self_test():
     # G2b: a base whose import resolves to a sibling of THIS (head) checker, which the base does not ship. The head directory is a FAKE one built here, so
     # the arm cannot be skipped in a checkout that happens to hold no other script (its first cut chose a real sibling and silently ran in none of my mutants).
     fake_head = tempfile.mkdtemp(prefix="prose-lean-head-")
-    with open(os.path.join(fake_head, "zz_head_sibling.py"), "w", encoding="utf-8") as fh:
+    with open(os.path.join(fake_head, "zz_head_sibling.py"), "w", encoding="utf-8", newline="") as fh:
         fh.write("MARK = 'HEAD-COPY'\n")
     leak = {**sib_base, CHK: sib_base[CHK].replace("import re\n", "import re\nimport zz_head_sibling\n", 1)}
     assert leak[CHK] != sib_base[CHK]
