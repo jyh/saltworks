@@ -1,1 +1,14 @@
 # a claim record: id, path, claim-sha12, lean-decl (<tracked .lean path>::<name>), stmt-sha12, author, reader, date  -- see scripts/check_prose_lean.py
+o88-sw-2026-10-24-02	SaltWorks/Silicon/Equiv/BitSliced.lean	37c2c5c18159	SaltWorks/Silicon/Equiv/BitSliced.lean::reflect	07ca5bb36205	paper	math	2026-10-24
+o88-sw-2026-10-24-03	SaltWorks/Silicon/Equiv/BitSliced.lean	48425486edb6	SaltWorks/Silicon/Equiv/BitSliced.lean::reflect	07ca5bb36205	paper	math	2026-10-24
+o88-sw-2026-10-24-04	SaltWorks/HDL/Sem.lean	963190c0da74	SaltWorks/HDL/Sem.lean::halfAdder_correct	f2768a641562	paper	math	2026-10-24
+o88-sw-2026-10-24-05	SaltWorks/HDL/Sem.lean	98f4ac71bce1	SaltWorks/HDL/Sem.lean::halfAdder_correct	f2768a641562	paper	math	2026-10-24
+o88-sw-2026-10-24-06	SaltWorks/HDL/Syntax.lean	6f3a49114926	SaltWorks/HDL/Syntax.lean::halfAdder	8ee2799a410c	paper	math	2026-10-24
+o88-sw-2026-10-24-07	SaltWorks/HDL/Opt.lean	14fbd1ffb00a	SaltWorks/HDL/Opt.lean::opt_fires	27b9d39d7b1c	paper	math	2026-10-24
+o88-sw-2026-10-24-08	SaltWorks/HDL/Opt.lean	1fba2923dc10	SaltWorks/HDL/Opt.lean::opt_sem	0f85a27714b9	paper	math	2026-10-24
+o88-sw-2026-10-24-09	SaltWorks/HDL/Opt.lean	69e65e8954f6	SaltWorks/HDL/Opt.lean::opt_sem	0f85a27714b9	paper	math	2026-10-24
+o88-sw-2026-10-24-10	SaltWorks/HDL/Opt.lean	929993342dd6	SaltWorks/HDL/Opt.lean::opt_withDead_correct	c74b8f90714e	paper	math	2026-10-24
+o88-sw-2026-10-24-11	SaltWorks/HDL/Certs.lean	3ba0d9ff703c	SaltWorks/HDL/Certs.lean::reflect	e761eeb78710	paper	math	2026-10-24
+o88-sw-2026-10-24-12	SaltWorks/HDL/Certs.lean	6d90e4e9b730	SaltWorks/HDL/Certs.lean::fungible_distinct	b7a1b1df2218	paper	math	2026-10-24
+o88-sw-2026-10-24-13	SaltWorks/HDL/EmitV.lean	d54478269472	SaltWorks/HDL/EmitV.lean::halfAdder_ttEmittable	b17609af291a	paper	math	2026-10-24
+o88-sw-2026-10-24-14	SaltWorks/Silicon/Equiv/ComparatorEquiv.lean	1db23a33d223	SaltWorks/Silicon/Equiv/Columns.lean::col_testBit	84e952abf52f	paper	math	2026-10-24

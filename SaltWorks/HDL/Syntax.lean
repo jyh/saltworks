@@ -115,11 +115,11 @@ def Circ.wf (c : Circ) : Bool :=
 
 /-! ## A worked example, kernel-checked
 
-The smallest circuit that exercises every field: two inputs, a shared subterm
-(net 2 is read twice — the DAG the doc's line 11 is about), and two outputs. -/
+The smallest circuit that exercises every field: two inputs, each read by both gates
+(the sharing, the DAG the doc's line 11 is about), and two outputs. -/
 
-/-- Half adder: `sum = a ^^^ b`, `carry = a &&& b`. Net 2 is `a ^^^ b`; note it
-is *not* recomputed for the second output. -/
+/-- Half adder: `sum = a ^^^ b`, `carry = a &&& b`. Net 2 is `a ^^^ b` and net 3 is
+`a &&& b`; inputs 0 and 1 are each read by both gates. -/
 def halfAdder : Circ where
   nIn   := 2
   gates := [⟨2, .xor 0 1⟩, ⟨3, .and 0 1⟩]

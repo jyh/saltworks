@@ -87,7 +87,7 @@ elab (name := auditAxiomsCmd) "#audit_axioms" ids:ident+ : command => do
 
 end Salt.Tactic
 
-/-! ## Self-tests (kernel-checked at build time via `#guard_msgs`)
+/-! ## Self-tests (checked at build time via `#guard_msgs`)
 
 The positive case (`Nat.add_comm`, axiom-clean) and the two failure paths — a
 non-whitelisted axiom dependency, and an unknown name — are pinned below. If the
