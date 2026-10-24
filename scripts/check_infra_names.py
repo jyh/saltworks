@@ -131,6 +131,7 @@ FORBIDDEN = [
     "claude-acct-" + "ja" + "son",      # the SAME account's SECOND config-dir spelling (the roster's live row; kent, 2026-10-07): the acct/account glob trap, closed here
     "salt" + "forge",           # an account, added 2026-09-12 on the Captain's order at council
     "kat" + "mai",              # the run box, RENAMED 2026-09-25 from the first stem (which stays: it is an account too)
+    "oto" + "rongo",            # the NAS the private bare repositories moved to (O54 S3, 2026-10-24; the helm's ruling 15:11); not a roster box
 ]
 
 # ⛔ THE ONE THAT CANNOT BE A BARE SUBSTRING, AND THE REASON IS NOT A TECHNICALITY.
@@ -156,8 +157,8 @@ FORBIDDEN = [
 #   The count is printed on every run so a reader can compare it against the fleet map rather than
 #   trusting a date. Reconciled against the fleet roster on the date below -- its box column and its
 #   account column. Adding a box or an account means editing BOTH lines, deliberately.
-DECLARED_NAMES = 10
-DECLARED_RECONCILED = "2026-10-07"
+DECLARED_NAMES = 11
+DECLARED_RECONCILED = "2026-10-24"   # the NAS name was added by ruling, not from the roster (the roster has no NAS row): the other ten were reconciled 2026-10-07
 
 # THE RECONCILIATION ITSELF, WRITTEN OUT, so a reader can check COMPLETENESS without re-deriving it.
 # The roster carries 6 ACCOUNTS and 4 BOXES -- 10 entities, covered by the 10 stems above because two
