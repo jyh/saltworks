@@ -1,7 +1,7 @@
 # Verified 2×2 element in the 8×8 fabric of a bit-serial Batcher–banyan switch — TinyTapeout TTSKY26c
 
-A self-routing 8×8 packet switch fabric whose **gate netlist is proved
-equivalent to its specification inside the Lean kernel**. It recreates the
+A self-routing 8×8 packet switch fabric of twelve 2×2 elements, whose **element's gate netlist is
+proved equivalent to its specification inside the Lean kernel**. It recreates the
 banyan half of **US Patent 4,910,730** (1988) — an ATM packet switch built as
 two chips, a Batcher sorter and a banyan router. That two-chip partition is also
 the proof's partition: the sorter is the *hypothesis*, the banyan is the

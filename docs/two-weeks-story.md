@@ -20,10 +20,10 @@ document is the running account.
 
 ## Days 1–3 [DONE — every claim commit-anchored]
 
-**A verified 8×8 bit-serial packet switch, hardened to GDS.** The
+**An 8×8 bit-serial packet switch with a verified 2×2 element, hardened to GDS.** The
 Batcher–banyan architecture of US Patent 4,910,730 (1988), recreated
 as a single 2×2 TinyTapeout tile on sky130A (130 nm) at 25 MHz. The
-scope, stated exactly: the gate netlist is proved equivalent to its
+scope, stated exactly: the element's gate netlist is proved equivalent to its
 Lean specification inside the Lean kernel; header delivery
 (`composed_switch_of_bnC_driven`) and payload delivery
 (`bnC_payload_delivered` — every output frame is the input frame of

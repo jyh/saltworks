@@ -12,8 +12,6 @@ d9f4ea4b773e	README.md	predates
 c8c4576953f5	SaltWorks/Silicon/Sim/d1t/README.md	predates
 1b175835b8c4	SaltWorks/Silicon/TT/README.md	predates
 1fc451924eb7	SaltWorks/Silicon/TT/README.md	predates
-ca47f1aa3ff2	SaltWorks/Silicon/TT/README.md	predates
-f4c2731d3e2a	SaltWorks/Silicon/TT/README.md	predates
 f94555b05f32	SaltWorks/Silicon/TT/test/README.md	predates
 dc076226851e	SaltWorks/Silicon/TTNDF/README.md	predates
 9fc2d12c54ea	docs/EVIDENCE-campaign.md	shape
@@ -57,7 +55,6 @@ f1197e6c56f9	README.md	lexicon-e2
 dba402716466	SaltWorks/Silicon/Sim/d1t/README.md	lexicon-e2
 27c53423c927	SaltWorks/Silicon/TT/README.md	lexicon-e2
 dcd4eab673c6	SaltWorks/Silicon/TT/README.md	lexicon-e2
-f198a455718c	SaltWorks/Silicon/TT/README.md	lexicon-e2
 1b4524cdfd6c	SaltWorks/Silicon/TTNDF/README.md	lexicon-e2
 ffa9e651c9d7	SaltWorks/Silicon/TTNDF/README.md	lexicon-e2
 396f564c9f09	docs/hdl-c3-probe-verdict-0807.md	lexicon-e2
@@ -205,7 +202,6 @@ abd93f869744	SaltWorks/HDL/Decoder.lean	docstring
 3e431185c2e1	SaltWorks/HDL/DecoderTransport.lean	docstring
 86434824e0d6	SaltWorks/HDL/DecoderTransport.lean	docstring
 cd1b50c6b506	SaltWorks/HDL/DecoderTransport.lean	docstring
-3ea5ba3ef3f4	SaltWorks/HDL/Dense.lean	docstring
 034cec5c1419	SaltWorks/HDL/EmitN.lean	docstring
 12d2841bf877	SaltWorks/HDL/EmitN.lean	docstring
 1864c6f012f8	SaltWorks/HDL/EmitN.lean	docstring
@@ -324,8 +320,6 @@ c02255092622	SaltWorks/HDL/SelValueXOR.lean	docstring
 99045871157d	SaltWorks/HDL/SelectCut32.lean	docstring
 c953ea03c7a8	SaltWorks/HDL/SelectCut32.lean	docstring
 dfc6df26cabe	SaltWorks/HDL/SelectCut32.lean	docstring
-55c31674fcca	SaltWorks/HDL/Seq.lean	docstring
-75e520a7547d	SaltWorks/HDL/Seq.lean	docstring
 a737de5d0acf	SaltWorks/HDL/ShellSeq.lean	docstring
 d6b039a541ce	SaltWorks/HDL/ShellSeq.lean	docstring
 0887d8d7babe	SaltWorks/HDL/SingleLevel.lean	docstring
@@ -361,17 +355,11 @@ fce98318fbaf	SaltWorks/HDL/Syntax.lean	docstring
 8f2d9aa08c6f	SaltWorks/Silicon/Equiv/A0Routes221.lean	docstring
 3887f012728a	SaltWorks/Silicon/Equiv/BitSliced.lean	docstring
 40586ede507b	SaltWorks/Silicon/Equiv/ComparatorEquiv.lean	docstring
-ba25a1761659	SaltWorks/Silicon/Equiv/ComparatorEquiv.lean	docstring
 d8f8e191b960	SaltWorks/Silicon/Equiv/ComparatorEquiv.lean	docstring
-f66c94ad42fd	SaltWorks/Silicon/Equiv/ComparatorEquiv.lean	docstring
 55f6c47c1051	SaltWorks/Silicon/Equiv/FabricRoutes.lean	docstring
-5fa52997c62f	SaltWorks/Silicon/Equiv/FabricRoutes.lean	docstring
-f73ab2fc6607	SaltWorks/Silicon/Equiv/FabricRoutes.lean	docstring
 2a38cd23d7d7	SaltWorks/Silicon/Equiv/PartialLoad.lean	docstring
 b18b236cc4ab	SaltWorks/Silicon/Equiv/PartialLoad.lean	docstring
 3d58e959b875	SaltWorks/Silicon/Equiv/ScenarioComplete.lean	docstring
-892eb94991a7	SaltWorks/Silicon/Equiv/SwitchRefinement.lean	docstring
-c373a79d0e0c	SaltWorks/Silicon/Equiv/SwitchRefinement.lean	docstring
 06ac577ae838	SaltWorks/Silicon/Refine/StatementChecks.lean	docstring
 b19ac2f961ad	SaltWorks/Stack/Perm.lean	docstring
 0b8f6df953a1	SaltWorks/Stack/Program.lean	docstring

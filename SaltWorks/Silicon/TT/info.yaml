@@ -13,7 +13,7 @@ project:
   title:       "Verified 2x2 element in the 8x8 fabric of a bit-serial Batcher-banyan switch"
   author:      "Jason Hickey"
   discord:     ""
-  description: "A self-routing 8x8 packet switch fabric whose gate netlist is proved equivalent to its Lean specification inside the Lean kernel. Recreates the banyan half of US Patent 4,910,730 (1988)."
+  description: "A self-routing 8x8 packet switch fabric of twelve 2x2 elements, whose element's gate netlist is proved equivalent to its Lean specification inside the Lean kernel. Recreates the banyan half of US Patent 4,910,730 (1988)."
   language:    "Verilog"
   clock_hz:    25000000
 
