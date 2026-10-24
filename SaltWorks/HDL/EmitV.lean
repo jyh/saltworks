@@ -10,8 +10,8 @@ import SaltWorks.HDL.Opt
 
 ## ⚠️ THIS BACKEND IS UNTRUSTED, BY DESIGN
 
-Nothing in this file is proved, and nothing in this file should ever be trusted.
-There is no `emitV_sem` and there is not going to be one. A printer bug is caught
+Nothing this printer prints is proved, and none of it should ever be trusted (the two
+end-of-file theorems check inputs). No `emitV_sem` exists or will. A printer bug is caught
 **downstream**: leg 3 synthesizes this output, imports the resulting gate
 netlist, and checks it against `sem` of the original `Circ`. If the printer
 mangles the circuit, the equivalence check fails — which is the point of the
