@@ -326,6 +326,9 @@ _LOCALONLY_BAREREPO = "(?<![A-Za-z0-9_.-])(?:" + _LOCALONLY_ALT + ")" + _BS + ".
 # The backup volume that holds it is itself a private-record location.
 _BACKUPVOL = ("Volumes" + _SEPCLASS + "Content[ _]HD" + _SEPCLASS
               + "Salt" + "works")
+# The NAS home the Saltworks bare repositories moved to (O54 S3, 2026-10-24) is a private-record location too: the
+# same words, assembled from pieces like the line above, so the gate source never spells the path it forbids.
+_NASHOME = ("vol" + "ume1" + _SEPCLASS + "git" + _SEPCLASS + "Salt" + "works")
 
 # ⛔ ROOTLESS SHAPES — helm codebook-law 2026-08-30 (desk row J, ruled on the
 # Captain's question). A path can identify the private record with NO root in
@@ -424,6 +427,8 @@ FORBIDDEN = [
      "a local-only private tree's bare repository (row VD)"),
     (re.compile(_BACKUPVOL),
      "the backup volume holding the private record"),
+    (re.compile(_NASHOME),
+     "the NAS home holding the private record"),
     (re.compile(_ROOTLESS_INTO),
      "a rootless path into the private record ("
      + _ROOTLESS[0] + "-/" + _ROOTLESS[1] + "-shape)"),
@@ -793,6 +798,10 @@ def self_test() -> int:
                       + _LOCALWORD + chr(92) + "x.md"),
         ("l-repo", "the bare repo " + _LOCALWORD + ".git"),
         ("l-vol", "/Volumes/Content HD/" + "Salt" + "works/archives"),
+        # 2026-10-24 (O54 S3): the NAS home. Split differently from `_NASHOME` ("v"+"olume1") so the plant never shares a constant with the pattern.
+        ("l-nas", "the bare repo on /v" + "olume1/git/" + "Salt" + "works/archives"),
+        ("l-nas-host", "pushed to oto" + "rongo:/v" + "olume1/git/" + "Salt" + "works/x.git"),
+        ("l-nas-bs", "see " + chr(92) + "v" + "olume1" + chr(92) + "git" + chr(92) + "Salt" + "works" + chr(92) + "x.git"),
         # ⛔⛔ ROW VD (2026-09-22): the two ordinary-word private trees born at council 2026-09-18, and the social
         #   seat's run directory. Split DIFFERENTLY from `_LOCALONLY` ("hom"+"e" vs "ho"+"me") so that editing one
         #   cannot silently keep the other in step — the plant must never share a constant with the pattern.
