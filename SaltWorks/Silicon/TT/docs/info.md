@@ -8,8 +8,8 @@
 
 ## How it works
 
-This is an **8×8 self-routing packet switch fabric**, bit-serial, and its gate
-netlist is **proved equivalent to its specification inside the Lean kernel**.
+This is an **8×8 self-routing packet switch fabric** of twelve bit-serial 2×2 elements, and the
+element's gate netlist is **proved equivalent to its specification inside the Lean kernel**.
 
 It recreates the banyan half of **US Patent 4,910,730** (1988) — a high-speed
 ATM packet switch built as two chips, a Batcher sorter and a banyan router. That
