@@ -20,7 +20,7 @@ document is the running account.
 
 ## Days 1–3 [DONE — every claim commit-anchored]
 
-**A verified 2×2 element of an 8×8 bit-serial packet switch, hardened to GDS.** The
+**An 8×8 bit-serial packet switch with a verified 2×2 element, hardened to GDS.** The
 Batcher–banyan architecture of US Patent 4,910,730 (1988), recreated
 as a single 2×2 TinyTapeout tile on sky130A (130 nm) at 25 MHz. The
 scope, stated exactly: the element's gate netlist is proved equivalent to its
