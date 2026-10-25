@@ -42,7 +42,7 @@ Three seats stated on 8/8 that `genSelect 20 4` *"silently reads only ten of its
 twenty sources."* **The conclusion it was offered for is right and the number is
 wrong.** Level-0 leaves are indexed `i < 2^b = 16` and pad only when `n ≤ i`, so
 at `n = 20` NO leaf pads: sixteen sources are read and `16..19` are named by no
-leaf. The `ten` belongs to `genSelect 10 4` — `aluSelect` — where six of the
+leaf. The `ten` belongs to `genSelect 10 4` — `aluSelect` until phase 3 — where six of the
 sixteen leaves DO pad. See `twenty_no_leaf_pads`, `twenty_ignores_high`,
 `ten_pads_six`.
 
@@ -571,7 +571,7 @@ theorem gate_count_aluSelect : aluSelect.gates.length = 291 := by
   decide
 
 /-- The same count with **no numeral**, for the post-re-cut world: true at every
-pair, and the form `gate_count_aluSelect` takes once the constants move.
+pair, beside the literal `gate_count_aluSelect` (291 since the phase-3 re-cut).
 
 📌 *Landed BESIDE the literal one rather than replacing it — the phase-1 pattern,
 applied to a theorem instead of a block. Consumers migrate to this at their own
