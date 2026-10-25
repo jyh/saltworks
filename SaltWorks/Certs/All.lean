@@ -122,7 +122,7 @@ docstring exactly what, if anything, was traded for readability.
   `Certs/Compiler.lean` proves. This file certifies the ite OFFSET ARITHMETIC and
   nothing about a compiler path that does not exist.*
   - `cert_exit_branch_lands` · `cert_back_branch_lands` — the offsets land correctly at
-    **every block size** (the backward one gets there by WRAPPING, which is why it
+    **every encodable block size** (the backward one gets there by WRAPPING, which is why it
     needed a proof rather than an inspection), plus the same pair at the machine's own
     `step`.
   - `cert_the_bound_is_tight_on_both_sides` · `cert_the_two_directions_differ_by_one` —
