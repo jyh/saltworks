@@ -466,7 +466,7 @@ PLACE IN C2 WHERE THE DISTINCTION HAS TEETH.** These are *legal RV32I
 instructions* — `LUI`, `JAL`, loads, stores, shifts, `SUB`, `BNE` — that Spike
 executes happily and Slice A deliberately excludes. **A seat treating the witness
 as an oracle would read 20 disagreements as 20 bugs and "fix" `decode` to accept
-them, silently destroying the stated scope.** *The seven-instruction claim would
+them, silently destroying the stated scope.** *The seven-instruction `decode` claim would
 become "seven instructions, plus whatever the simulator happened to accept."*
 ⇒ ***Every one of these disagreements is a PASS, and the exclusion list stops
 being prose and becomes a kernel-checked property of `decode`.***
