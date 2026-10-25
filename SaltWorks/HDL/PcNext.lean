@@ -22,10 +22,10 @@ and adding once costs **one** adder, where muxing the **result** costs two.
 
 📌 **AND IT KEEPS `inst_sem` OFF THE CRITICAL PATH.** The landed `adder32` would
 have to be *instantiated* to be reused here, and instantiation's semantics
-theorem is **owed, not proved** (`Compose.lean`). *Duplicating the carry chain
-inline would have avoided that too — at the cost of a second copy that can drift
-from the first.* **Emitting the addend and leaving the addition to the assembly
-avoids both: no duplication, and no dependence on an unproved combinator.**
+theorem was **owed** when this was written (`inst_sem`, `Compose.lean`, has since proved it).
+*Duplicating the carry chain inline would have avoided that too — at the cost of a second copy
+that can drift from the first.* **Emitting the addend and leaving the addition to the assembly
+avoided both: no duplication, and no dependence on a then-unproved combinator.**
 
 ## What it computes
 

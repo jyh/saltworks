@@ -18,10 +18,10 @@ import SaltWorks.HDL.RegNext
 /-!
 # STACK-S2 — THE PROGRAM: an agent-written bitonic sort in Slice A
 
-This is the application the STACK campaign runs on the verified tower: Batcher's
-bitonic sorting network at `n = 8`, fully unrolled, as a straight-line `List
-Instr` in the five-instruction Slice A subset, assembled to RV32I words by
-`SaltWorks.ISA.encode`.
+This is the application the STACK campaign runs on its tower (`Certs/EndToEnd.lean` says
+what is proved of it): Batcher's bitonic sorting network at `n = 8`, fully unrolled, as a
+straight-line `List Instr` in the five-instruction Slice A subset, assembled to RV32I words
+by `SaltWorks.ISA.encode`.
 
 ## ⭐ AUTHORSHIP — this is part of the artifact, not a footnote
 
