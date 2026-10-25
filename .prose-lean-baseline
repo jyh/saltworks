@@ -118,9 +118,6 @@ ab176a55edf5	SaltWorks/HDL/AluSelect.lean	docstring
 ccca87da6d67	SaltWorks/HDL/AluSelect.lean	docstring
 df5e4f54db93	SaltWorks/HDL/AluSelect.lean	docstring-cited
 890768e20425	SaltWorks/HDL/Banyan.lean	docstring
-2949daea42b3	SaltWorks/HDL/BatcherNetC.lean	docstring
-3591db8c80af	SaltWorks/HDL/BatcherNetC.lean	docstring
-55720ea2ca19	SaltWorks/HDL/BatcherNetC.lean	docstring
 8ef8ca8f37c6	SaltWorks/HDL/BatcherNetC.lean	docstring
 8d9282b1065a	SaltWorks/HDL/BatcherRun.lean	docstring
 ba5d1261a890	SaltWorks/HDL/BlockCalc.lean	docstring
@@ -316,14 +313,12 @@ d8f8e191b960	SaltWorks/Silicon/Equiv/ComparatorEquiv.lean	docstring
 06ac577ae838	SaltWorks/Silicon/Refine/StatementChecks.lean	docstring
 0b8f6df953a1	SaltWorks/Stack/Program.lean	docstring
 32a785b4f18d	SaltWorks/Stack/Program.lean	docstring-cited
-3f6e9abafe0f	SaltWorks/Stack/Program.lean	docstring
 4d178a6433ef	SaltWorks/Stack/Program.lean	docstring
 527612e88a54	SaltWorks/Stack/Program.lean	docstring-cited
 7c7c1ab8fa1e	SaltWorks/Stack/Program.lean	docstring-cited
 7e441dcf4f11	SaltWorks/Stack/Program.lean	docstring
 a0ba13847d3c	SaltWorks/Stack/Program.lean	docstring
 aa0548b03b27	SaltWorks/Stack/Program.lean	docstring
-b93cb4726f57	SaltWorks/Stack/Program.lean	docstring
 c63d90c1f091	SaltWorks/Stack/Program.lean	docstring
 cdff19904d6e	SaltWorks/Stack/Program.lean	docstring
 d1065efcda23	SaltWorks/Stack/Program.lean	docstring-cited
