@@ -267,7 +267,7 @@ as the core's nets `0…31` *are* `x0`, and both are register-major with 32-bit 
 *Checked at both ends: `j = 5 ↦ 32` (x1 bit 0) and `j = 996 ↦ 1023` (x31 bit 31 = 32*31+31).*
 
 📌 **AND σ IS THE FIELD EXTRACTOR — there is no missing organ.** `regWrite` consumes `rd` already
-isolated on its inputs `0…4` (`RegWrite.lean:55`), and `readTree` likewise wants an index, not a
+isolated on its inputs `0…4` (`RegWrite.lean:58`), and `readTree` likewise wants an index, not a
 word. Extracting a field from the instruction is **pure wiring**, so it belongs in σ, not in a
 circuit: the same fact as `ruledEnc` costing zero gates — *emit the nets, not a module.* Field
 positions are taken from the corpus's own encoder (`ISA.wR`: `funct7 rs2 rs1 funct3 rd opcode`),
@@ -347,9 +347,9 @@ Placements #1–#4 all read only core INPUTS, so `instOK_mono` lifted them to ev
 for free. **`regWrite` is the first placement where that is false**, and the difference is the
 whole reason the assembly order exists.
 
-`RegWrite.lean:55` gives its layout: `rd` on inputs `0…4`, `valid` on `5`, `isBEQ` on `6`.
+`RegWrite.lean:57-65`: `rd` on `0…4`, `isADD` on `5`, `isBEQ` on `6`, enables on `7…10`.
 * `rd` is an instruction field (bits `7…11` per `ISA.wR`) — a core input, below `off0`.
-* **`valid` and `isBEQ` are the DECODER'S OUTPUTS** — gate nets, and therefore *above* `off0`.
+* **The enables are DECODER OUTPUTS** (port 5 was `valid` until 08-19): gate nets, above `off0`.
 
 `instMap c σ off n = if n < c.nIn then σ n else off + (n - c.nIn)`, so the decoder's six outputs
 land at `[1135, 1151, 1167, 1176, 1185, 1189]` — `isBEQ` at index 4 (⚠️ and `valid` is index
