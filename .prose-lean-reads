@@ -1,4 +1,6 @@
 # a claim record: id, path, claim-sha12, lean-decl (<tracked .lean path>::<name>), stmt-sha12, author, reader, date  -- see scripts/check_prose_lean.py
+evidence-sw-2026-10-25-04	SaltWorks/Silicon/TT/README.md	4189ace7a16c	SaltWorks/Silicon/Equiv/SwitchRefinement.lean::switch_step_eq	b3797c054832	evidence	paper	2026-10-25
+evidence-sw-2026-10-25-05	SaltWorks/Silicon/TT/README.md	e3b795675ca2	SaltWorks/Silicon/Equiv/SwitchRefinement.lean::switch_step_eq	b3797c054832	evidence	paper	2026-10-25
 evidence-sw-2026-10-25-01	README.md	2a1f6bf9dde6	SaltWorks/Silicon/Refine/Main.lean::core32bus_refinesE	2a5bcc9ff27a	evidence	paper	2026-10-25
 evidence-sw-2026-10-25-02	README.md	36137e3fc72c	SaltWorks/Silicon/Refine/Main.lean::core32bus_refinesE	2a5bcc9ff27a	evidence	paper	2026-10-25
 evidence-sw-2026-10-25-03	README.md	edd60f5f24ab	SaltWorks/Silicon/Refine/Main.lean::core32bus_refinesE	2a5bcc9ff27a	evidence	paper	2026-10-25

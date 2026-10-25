@@ -1,12 +1,18 @@
-# Verified 2×2 element in the 8×8 fabric of a bit-serial Batcher–banyan switch — TinyTapeout TTSKY26c
+# Verified 2×2 element in the 8×8 fabric of a bit-serial Batcher–banyan switch — designed for TinyTapeout TTSKY26c
 
 A self-routing 8×8 packet switch fabric of twelve 2×2 elements, whose **element's gate netlist is
 proved equivalent to its specification inside the Lean kernel**. It recreates the
 banyan half of **US Patent 4,910,730** (1988) — an ATM packet switch built as
 two chips, a Batcher sorter and a banyan router. That two-chip partition is also
 the proof's partition: the sorter is the *hypothesis*, the banyan is the
-*theorem*. **This chip is the proved half**
+*theorem*. **This design is the proved half**
 ([`SwitchRefinement.lean`](../Equiv/SwitchRefinement.lean)).
+
+*(2026-10-25: this design is not on the shuttle. It was submitted to TTSKY26c on
+2026-08-07, and on 2026-08-21 its project slot was reused for
+`tt_um_saltworks_ndf_c32` (TinyTapeout/tinytapeout-sky-26c commit `a1bb59ccdc`,
+"Previous top module name: tt_um_saltworks_banyan"). The chip that goes to fab
+is the one the top-level [README](../../../README.md) describes.)*
 
 Read the datasheet first: [`docs/info.md`](docs/info.md).
 

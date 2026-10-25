@@ -14,7 +14,8 @@ element's gate netlist is **proved equivalent to its specification inside the Le
 It recreates the banyan half of **US Patent 4,910,730** (1988) — a high-speed
 ATM packet switch built as two chips, a Batcher sorter and a banyan router. That
 two-chip partition is also the proof's partition: the sorter is the *hypothesis*,
-the banyan is the *theorem*. This chip is the proved half.
+the banyan is the *theorem*. This design is the proved half. (2026-10-25: it is
+not on the TTSKY26c shuttle; its slot was reused on 2026-08-21.)
 
 **The fabric.** Twelve 2×2 switch elements in three stages. Each element latches
 two bits per frame — an activity bit and one destination-address bit — and then
