@@ -10,7 +10,6 @@ d9f4ea4b773e	README.md	predates
 1b175835b8c4	SaltWorks/Silicon/TT/README.md	predates
 1fc451924eb7	SaltWorks/Silicon/TT/README.md	predates
 f94555b05f32	SaltWorks/Silicon/TT/test/README.md	predates
-dc076226851e	SaltWorks/Silicon/TTNDF/README.md	predates
 9fc2d12c54ea	docs/EVIDENCE-campaign.md	shape
 e9fce9c94946	docs/compiler-L4-review-criteria-PREREG-0814.md	shape
 54ef509cbd4d	docs/council-pack-0809.md	shape
@@ -60,11 +59,9 @@ f5adce590675	docs/provenance/s2/README.md	lexicon-e2
 b80b65af4040	SaltWorks/HDL/Cell1988.lean	docstring
 1d59fe5e9f35	SaltWorks/HDL/EmitV.lean	docstring
 8238f7ccc2c1	SaltWorks/HDL/EmitV.lean	docstring
-35ec309dbd47	SaltWorks/HDL/StallShape.lean	docstring
 fce98318fbaf	SaltWorks/HDL/Syntax.lean	docstring
 10c8269a7820	SaltWorks/Silicon/Cells/Sky130.lean	docstring
 3887f012728a	SaltWorks/Silicon/Equiv/BitSliced.lean	docstring
 40586ede507b	SaltWorks/Silicon/Equiv/ComparatorEquiv.lean	docstring
 d8f8e191b960	SaltWorks/Silicon/Equiv/ComparatorEquiv.lean	docstring
-06ac577ae838	SaltWorks/Silicon/Refine/StatementChecks.lean	docstring
 4d178a6433ef	SaltWorks/Stack/Program.lean	docstring
