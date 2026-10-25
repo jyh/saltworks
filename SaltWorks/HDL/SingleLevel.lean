@@ -46,7 +46,7 @@ silently, so the only thing that catches one is looking.*
 
 `sem bitNot32 env = (List.range 32).map (fun k => !(env k))`, **∀ env, no side condition** —
 over an ARBITRARY env, which is the form `SubFragment`'s bar 4 consumed. ⚠️ **NOT the first
-unconditional semantics for a bitwise organ: `sem_bitNot32` (`Program.lean:3596`) predates it.**
+unconditional semantics for a bitwise organ: `sem_bitNot32` (`Program.lean:4515`) predates it.**
 
 ## ✅ ALL FOUR BITWISE ORGANS NOW HAVE ∀-env SPECS — closed 2026-08-08 21:5x
 
@@ -59,7 +59,7 @@ here, each ∀ env with no side condition.
 theorem bwCirc_sem (mk) (hfan : ∀ x y, (mk x y).fanin = [x, y]) (env) : …
 ```
 **does not elaborate here** — deterministic `whnf` timeout at `maxHeartbeats 1000000`.
-⛔ **BUT `Program.lean:3544`'s `sem_bwCirc` IS that lemma, PROVED, with the `hfan`/`hev`
+⛔ **BUT `Program.lean:4463`'s `sem_bwCirc` IS that lemma, PROVED, with the `hfan`/`hev`
 hypotheses I was groping toward.** *So "the route is known" was wrong twice over: the route was
 already walked.*
 ⇒ ***So the three organs are covered by three CONCRETE INSTANCES of `run_level_map`, one per op —
