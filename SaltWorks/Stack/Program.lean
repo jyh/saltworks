@@ -5862,7 +5862,7 @@ def asSelOf (E : Env) : Nat := gsSelOf asOps asSelBits E
 (`asV3_eq`, `asB3`, `asOut k 3 0`). That is why the ALU sizing question was a
 **deadline rather than a trade** (silicon, `79bb72a`): the gate saving is fixed
 at 770–1,154 and the proof cost is monotonically increasing, because every
-theorem proved against `asIn = 324` is another line in the eventual rewrite.
+theorem proved against `asIn = 324` was another line in the eventual rewrite.
 
 ⇒ **The deadline is not a property of the decision. It is a property of one
 proof having been written at a literal width.** What follows re-proves the block

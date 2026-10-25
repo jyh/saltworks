@@ -26,7 +26,10 @@ born	SaltWorks/Stack/Program.lean	b2bf183b7b04290a88479cca9859238f803ca383
 #   `sltCirc_correct_on_sample` instead of the alias `sltCirc_correct`, which pointed at that same
 #   theorem; the four aliases at HDL/Bitwise.lean are dropped in the same PR. No def changes; lines kept.
 #   Previous value: ce1a09d91d2fd8ca5240749fa3ec920ab2006a4d.
-blob	SaltWorks/Stack/Program.lean	bd7704a772aa363eb9dfb738437fff2e5bbae118
+# ⚖️ 2026-10-25 (O88, saltworks batch 10) — the blob row RE-PINNED again, after one intentional
+#   docstring edit (Program.lean:5865, "is another line" -> "was another line"; code-equal under
+#   lean_mask, lines kept). Previous value: bd7704a772aa363eb9dfb738437fff2e5bbae118.
+blob	SaltWorks/Stack/Program.lean	3b8b1b68053613e3cdcbdd0fa92453a7d2cc71b5
 # ⚖️ 2026-09-11 — s2/README.md's sha256 was REGENERATED, deliberately and not silently.
 #   Its transcript row was amended to say the file is WITHHELD and why (desk row KB,
 #   the saltworks lead's call). This header's standing instruction is "Regenerate after

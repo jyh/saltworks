@@ -465,11 +465,11 @@ def asSelectsOK (m : Nat) : Bool :=
 /-- ⛔ **DO NOT GENERALISE THIS — `asSelectsOK m` IS FALSE FOR `asOps ≤ m < asPad`.**
 
 *Math found it (`ec21bb5`, 8/7 18:44) and it is checkable at `asPrev` above:
-level 0 reads `asZero` — the shared tie constant — for every `i ≥ asOps`. Slots
-the slots at and above `asOps` are PADDING, so `asOneHot asOps` paints a region
+level 0 reads `asZero` — the shared tie constant — for every `i ≥ asOps`. So
+the slots at and above `asOps` are PADDING, and `asOneHot asOps` paints a region
 the tree NEVER READS while the predicate still expects `sel = asOps` to select
-it.* **The predicate holds exactly on `m < asOps ∨ asPad ≤ m`, and both points
-proved below sit inside the first range.**
+it.* **The predicate holds for every `m < asOps` (`asSelectsOK_of_lt`) and fails at
+`m = asOps`; both points proved below sit inside the first range.**
 
 ⚠️ **STATED AGAINST THE CONSTANTS SINCE PHASE 3, AND THAT IS NOT COSMETIC.** *In
 literal form ("FALSE for `10 ≤ m < 16`") this docstring was a TRUE sentence that

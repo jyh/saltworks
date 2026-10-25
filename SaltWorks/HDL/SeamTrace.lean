@@ -586,8 +586,8 @@ statement rather than relying on it silently.***
 
 📌 **③ SLOT NOTE: `runNet` and `applyComp` live in `SaltWorks/Stack/ZeroOne.lean`
 — math's slot, not mine.** The discharge must import rather than restate them,
-and the two `batcher*_length` theorems there are the corpus's only unaudited
-pair outside the 49 awaiting the maestro's ruling.
+and the two `batcher*_length` theorems there were then the corpus's only unaudited
+pair outside the 49 awaiting the maestro's ruling (audited since: ZeroOne.lean:348-349).
 
 ### ⛔ ④ AND THE DISCHARGE NEEDS A SECOND INDUCTION THE SIZE OF THE FIRST —
 ### the trace induction is about the STATE; `hseam` is about the DATA
@@ -595,9 +595,9 @@ pair outside the 49 awaiting the maestro's ruling.
 **Read `hseam` before estimating: `ComposedSwitch.lean:169` asks for
 `hw = runNet batcher8 v`, where `hw : Fin 8 → ℕ` is the network's EIGHT DATA
 OUTPUTS.** `bnC_trace_factors` is about `bnCSlice`, i.e. the 96 STATE bits.
-⇒ ***They are different halves of the machine and only one of them is proved.***
+⇒ ***They are different halves of the machine and only one of them was proved then.***
 
-📊 **MEASURED: nothing in the tree relates `bnCResult.2.1` — the fold's data-net
+📊 **MEASURED THEN: nothing in the tree related `bnCResult.2.1` — the fold's data-net
 list — to any VALUE. `grep` finds only `bnCBuild_dat_length`, about its LENGTH.**
 *The per-cycle machinery does exist (`bnCBuild_element_sem'` covers the data
 ports, which are `instOuts` entries 0 and 1), but the cross-element composition
@@ -1422,7 +1422,7 @@ theorem bnC_output_keys_are_runNetN (st : List Bool) (tr : List (List Bool))
 #audit_axioms applyCompN runNetN applyCompF_key runNetF_key
 #audit_axioms bnC_output_keys_are_runNetN
 
-/-! ## 🏦 THE JOIN — both halves are LANDED and this is the only step left
+/-! ## 🏦 THE JOIN — both halves are LANDED; this was the step left (now SeamJoinA/C)
 
 **Read this before attempting anything: the two halves were built by different
 executors in different vocabularies, and the remaining work is JOINING them, not
