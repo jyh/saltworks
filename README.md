@@ -32,7 +32,7 @@ The three defects, their causes and measured software workarounds are in
 | Layer | Where | What is proved |
 |---|---|---|
 | Application | [`SaltWorks/Stack/`](SaltWorks/Stack/) | application programs and their specifications, with the bridge theorems connecting them to the layers below |
-| Compiler | [`SaltWorks/HDL/`](SaltWorks/HDL/) | the verified compiler: expressions, straight-line code, and loops, down through the circuit DSL to Verilog, with the ISA semantics |
+| Compiler | [`SaltWorks/HDL/`](SaltWorks/HDL/) | the verified compiler from expressions, straight-line code and loops (no conditionals) to the ISA, with the ISA semantics; separately, the circuit DSL with its optimiser proved semantics-preserving (`opt_sem`), whose Verilog printer is untrusted by design and checked downstream by SAT equivalence |
 | Executive | [`SaltWorks/HDL/`](SaltWorks/HDL/) | the executive's isolation theorems (`Executive*.lean`), with the certificate restatement in [`SaltWorks/Certs/`](SaltWorks/Certs/) |
 | CPU / silicon | [`SaltWorks/Silicon/`](SaltWorks/Silicon/) | the flow, the netlist importer, and SAT-checked equivalence at the silicon boundary; its proofs cover the MAC cells, not the RISC-V core |
 | The switch | [`SaltWorks/Banyan/`](SaltWorks/Banyan/) | the Batcher–banyan self-routing switch, sort-then-route closed end to end |
@@ -49,8 +49,8 @@ Silicon-lane readers can start at the `silicon-*` documents under
 
 - [`SaltWorks/`](SaltWorks/) — a Lean 4 library: the machine-checked artifacts
   of the program (definitions, theorems, and the audit stanzas that certify
-  them). Every proof is checked by the Lean kernel; `lake build` replays the
-  entire check.
+  them). `lake build` replays the kernel's check of every module `SaltWorks.lean` imports; the 12 files of
+  `SaltWorks/Silicon/Refine/` and `SaltWorks/Silicon/Formal/` are not imported and build only by name.
 - [`docs/`](docs/) — the program's registers and records: preregistrations,
   evidence ledgers, design documents, and seat records, kept as the work
   happened.
@@ -144,9 +144,9 @@ live in `docs/`, and they are read differently:
   landed as corrections rather than edits. Errors are part of the record by
   design.
 - **Design documents** (`*-design-*.md`, the `aim-high-*` series): what each
-  campaign intended, written before it ran. Theorem provenance travels in the
-  library's audit stanzas: every public theorem is roll-called with its axiom
-  audit, and `lake build` replays the certification.
+  campaign intended, written before it ran. Provenance travels in the
+  library's audit stanzas: outside `SaltWorks/Silicon/Refine/`, whose 41 results carry no audit line, every public
+  result is roll-called with its axiom audit, and `lake build` replays the certification.
 
 The submission-state snapshot of this repository is preserved as an annotated
 tag and a release bundle; the default branch continues past it as the program

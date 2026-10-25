@@ -502,7 +502,7 @@ property, not only a correctness one.**
 
 Laying out just the slice-A rows reproduces the head of the full gate list
 exactly. ⇒ ***So `dcG1…dcG5` and everything proved about them in
-`Stack/Program.lean` — roughly 25 net-numbered declarations — are preserved by
+`Stack/Program.lean` — the 15 declarations whose statements name them — are preserved by
 CONSTRUCTION rather than by luck.*** *An insertion anywhere but the end re-nets
 all of them and invalidates the certificate suite this file warns about at
 `dcInvs`; that warning is why D2 appended.* -/
