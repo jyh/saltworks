@@ -15,7 +15,8 @@ born	SaltWorks/Stack/Program.lean	b2bf183b7b04290a88479cca9859238f803ca383
 #   Certs/EndToEnd.lean; code-equal under lean_mask, line count kept). Previous value:
 #   23bb06e7027ea5ade8b7a50a190b31d37d1ab234. The born row is untouched.
 # ⚖️ 2026-10-24 (O88, saltworks batch 8) — the blob row RE-PINNED again, after one intentional docstring
-#   edit (four stale names renamed to their `_on_sample` forms, `528d0b6`; code-equal, lines kept).
+#   edit (four misleading alias names, kept at HDL/Bitwise.lean:297-300 until Program.lean migrates,
+#   cited in prose by their `_on_sample` forms instead; code-equal, lines kept).
 #   Previous value: 3d1bd484b72eb2a82df40a0bfb08ff67d1abbc6a.
 blob	SaltWorks/Stack/Program.lean	bacc637ff2e4bbdde292cc82253f9374f7f55652
 # ⚖️ 2026-09-11 — s2/README.md's sha256 was REGENERATED, deliberately and not silently.
