@@ -32,8 +32,8 @@ Neither is needed:
 * drop `hdi`: FALSE at `d ≡ 0`, `w = 5` — the conclusion asserts `∃ i, d i = 5`.
 Both fail to elaborate; restore verified byte-identical.
 
-⚠️ **`import owed:` — `SaltWorks.lean` is maestro-only, so this module is not yet in the hub
-closure and carries a targeted-build verdict, not a full-build one.**
+⚠️ **`import owed:` when written — since discharged: `SaltWorks.lean:83` imports this module,
+so it is in the hub closure and the full build covers it.**
 -/
 
 
