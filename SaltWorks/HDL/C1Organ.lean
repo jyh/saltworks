@@ -11,7 +11,7 @@ import SaltWorks.HDL.EncoderE1
 
 Phase 2 of the `(3, 2)` expand-contract. Phase 1 landed two blocks beside the
 old ones — `SelectCut32.sliceASelect` (the select) and `EncoderE1.ruledEnc` (the
-encoder) — plus the ruled constants `rsOps` / `rsSelBits` (`AluSelect.lean:77-93`).
+encoder) — plus the ruled constants `rsOps` / `rsSelBits` (`AluSelect.lean:109-114`).
 This file is the **organ that joins them to the DECODER**: it says which ALU
 source the select block reads, as a function of the instruction word alone.
 
@@ -58,10 +58,10 @@ word's bits 12-14 cannot equal two distinct 3-bit literals.
 
 ## The wiring, and the three independent routes that agree on it
 
-`gsSel n _b j = n * 32 + j` (`AluSelect.lean:247`) and `gsSelUpTo`
-(`Program.lean:5368`) is LSB-first with bit `j` at weight `2 ^ j`, so at
+`gsSel n _b j = n * 32 + j` (`AluSelect.lean:324`) and `gsSelUpTo`
+(`Program.lean:5837`) is LSB-first with bit `j` at weight `2 ^ j`, so at
 `b = 2` the select value is `bit0 + 2 * bit1` — `sliceASelOf`
-(`SelectCut32.lean:140`) states exactly that. Codes `{ADD, XOR, SLT} = {0, 1, 2}`
+(`SelectCut32.lean:176`) states exactly that. Codes `{ADD, XOR, SLT} = {0, 1, 2}`
 (`EncoderE1.ruledCodes`) therefore force **bit 0 ← `xor`, bit 1 ← `slt`, and
 `add` drives nothing**, which is what `EncoderE1.selDrivers = [lineXOR, lineSLT]`
 says in code. `add` is the all-low default, so a word that is no ALU op at all
@@ -93,7 +93,7 @@ theorem dcF3_atMostOne (w : BitVec 32) {a b : Nat}
 /-- ⭐⭐ **AT MOST ONE ALU CLASS SIGNAL IS ASSERTED, FOR EVERY 32-BIT WORD.** No
 hypothesis, no fixture, no decoder-reachability side condition — the three
 signals are the decoder's own `dcADDm` / `dcXORm` / `dcSLTm`
-(`Program.lean:7962-7964`), which `decoder_correct` proves are what the circuit
+(`Program.lean:8837-8839`), which `decoder_correct` proves are what the circuit
 emits. -/
 theorem alu_classes_atMostOne (w : BitVec 32) :
     ¬(dcXORm w ∧ dcSLTm w) ∧ ¬(dcADDm w ∧ dcXORm w) ∧ ¬(dcADDm w ∧ dcSLTm w) := by
@@ -189,7 +189,7 @@ theorem sliceASelect_of_decoder_driven (w : BitVec 32) (E : Env)
 
 ⛔ **THIS SECTION EXISTS BECAUSE ITS ABSENCE COST A PEER REAL WORK.** Everything
 above is stated over the **matcher predicates** `dcXORm w` / `dcSLTm w`, which are
-pure functions of the word (bit-field tests, `Program.lean:7813`) — *not* the
+pure functions of the word (bit-field tests, `Program.lean:8837`) — *not* the
 decoder's gate outputs. So a reader auditing the seam found "the select is proved
 correct when driven by `dcXORm`" and could not tell whether the **circuit** drives
 that value. I was that reader, twice: first I published the seam as UNPROVED
@@ -204,7 +204,7 @@ it required holding two files in your head, which is exactly how I got it wrong.
 **One name, stated once, so no one has to do that again.** -/
 
 /-- **The gate-level decoder's output list IS the matcher list**, `∀ w`, no
-hypothesis. `ctrlOf` is `sem decoder` on the word's bits (`Decoder.lean:190`) — a
+hypothesis. `ctrlOf` is `sem decoder` on the word's bits (`Decoder.lean:379`) — a
 real circuit evaluation, not a definition in terms of the matchers, which is what
 makes this an equation rather than a restatement. -/
 theorem ctrlOf_eq_matchers (w : BitVec 32) :

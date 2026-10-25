@@ -55,8 +55,8 @@ violation. **That violation is proved impossible:**
 | theorem | where | says |
 |---|---|---|
 | `alu_classes_atMostOne` | `C1Organ.lean:98` | `∀ w`, no two of `dcADDm`/`dcXORm`/`dcSLTm` are hot together — **unconditional** |
-| `gsSelOf_of_decoder_driven` | `C1Organ.lean:158` | a decoder-driven select value **is** `opIndex w`, with **no one-hotness hypothesis** — it uses the theorem above |
-| `sliceASelect_of_decoder_driven` | `C1Organ.lean:178` | all 32 ports, arbitrary `Env`: the block delivers the source the decoder **named**, and `opIndex_lt_rsOps` discharges the `< 3` guard at every word |
+| `gsSelOf_of_decoder_driven` | `C1Organ.lean:160` | a decoder-driven select value **is** `opIndex w`, with **no one-hotness hypothesis** — it uses the theorem above |
+| `sliceASelect_of_decoder_driven` | `C1Organ.lean:180` | all 32 ports, arbitrary `Env`: the block delivers the source the decoder **named**, and `opIndex_lt_rsOps` discharges the `< 3` guard at every word |
 
 ⇒ ***So `select = 3` is unreachable from a decoder-driven select, and the
 `false`-arm hazard below is a property of the BLOCK in isolation, not a hazard of
@@ -67,7 +67,7 @@ certified separately from the seam.
 ⚠️ **SCOPE, so this is not over-read in the other direction:** those theorems are
 stated over the **matcher predicates** (`dcXORm w`, `dcSLTm w`) driving the select
 nets. That the *gate-level* `decoder.outs` nets carry exactly those matchers is
-the `decoder_correct` link (`Program.lean:7487`), which is **not audited in this
+the `decoder_correct` link (`Program.lean:8962`), which is **not audited in this
 correction pass**. Block-to-matcher: proved. Matcher-to-gates: cited, unchecked here.
 
 ### 🔴 AND THE PARAGRAPH THIS REPLACED, KEPT VERBATIM BECAUSE IT WAS QUOTED ELSEWHERE

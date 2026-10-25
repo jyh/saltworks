@@ -47,7 +47,7 @@ that silently normalised pair order would sort nothing.*
    `LinearOrder (BitVec 32)` for the SIGNED order and (b) a simulation theorem …
    Both need Mathlib, which leg 2 excludes."* **(a) IS LANDED.** True when written
    — leg 2 did exclude Mathlib — and false since `Perm.lean` landed:
-   * `wordSignedOrder : LinearOrder Word` (`Perm.lean:74`), where `wle a b` is *by
+   * `wordSignedOrder : LinearOrder Word` (`Perm.lean:321`), where `wle a b` is *by
      definition* `a.toInt ≤ b.toInt` — the **signed** order.
    * `runNetW net v = @runNet _ Word wordSignedOrder net v` (`:363`) — the network
      run with the **signed comparator, visible in the term**.
