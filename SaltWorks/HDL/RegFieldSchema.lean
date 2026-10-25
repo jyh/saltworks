@@ -72,9 +72,9 @@ theorem res_bank_is_register_independent (k : Nat) (hk : k < 32) :
 
 /-! ### What the retire change will touch — measured, not argued -/
 
-/-- ⭐⭐ **`regWrite` HAS NO RETIRE PORT, AND THIS IS THE NUMBER THAT SAYS SO.** Its seven
-inputs are `rd[0..4]`, `decOut 5` and `decOut 4` (`regWriteSig`) — *all seven are decode
-bits.* `weSpec rd valid isBEQ` likewise takes no stall or retire parameter.
+/-- ⭐⭐ **`regWrite` HAS NO RETIRE PORT, AND THIS IS THE NUMBER THAT SAYS SO.** Its eleven
+inputs are `rd[0..4]`, five decode lines and `isLW ∧ ¬trap` (`regWriteSig`): *none is a retire
+bit.* `weSpec rd isADD isBEQ isXOR isSLT isADDI isLW` likewise takes no stall or retire parameter.
 
 ⇒ ***A retire-gated write cannot be expressed by rewiring: item 10's hardware change must
 WIDEN this interface.*** And since `rwOut r` is the ONLY register-dependent half of the
