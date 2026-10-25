@@ -281,8 +281,8 @@ theorem ce_rejects_lsb_first : ceFrameOK' specLsb 3 = false := by decide +kernel
 /-- ⭐ **MUT-3 — IDLE-SORTS-LOW IS REJECTED, AND THIS IS THE ONE THAT MATTERS.**
 *Both orderings sort. Only one concentrates the active lines onto `Set.Iio n`,
 which is the half of the banyan's `StrictMonoOn dest (Set.Iio n)` that a plain
-sorter does NOT discharge.* **With `ce_frame_3`/`ce_frame_4`, which fix the other order,
-it discharges that half for the element at `n = 3, 4`, kernel-checked, not intended.** -/
+sorter does NOT discharge.* **With `ce_frame_3`/`ce_frame_4` (the other order) it discharges that
+half for the element at 3- and 4-bit addresses (mutant rejected at 3); kernel-checked.** -/
 theorem ce_rejects_idle_sorts_low : ceFrameOK' specIdleLow 3 = false := by
   decide +kernel
 
