@@ -63,7 +63,7 @@ cycle of the frame"
 ### What is landed, and what it costs
 
 The block asks "what makes the element STAY decided?" There **is** a landed
-theorem, and it is `ceC_step_decided` (`SeamElement.lean:110`):
+theorem, and it is `ceC_step_decided` (`SeamElement.lean:115`):
 
 ```
 stepSeq ceC [true, s, ph, ba] [false, x, y]
@@ -72,8 +72,8 @@ stepSeq ceC [true, s, ph, ba] [false, x, y]
 ```
 
 Read the *next state*: `decided' = true`, `swap' = s`. That is the staying-power,
-and it is proved, not assumed. `ceC_body_mux` (`SeamElement.lean:157`) lifts it
-to a payload of any length, and `ceC_pair_full_load` (`SeamElement.lean:209`)
+and it is proved, not assumed. `ceC_body_mux` (`SeamElement.lean:162`) lifts it
+to a payload of any length, and `ceC_pair_full_load` (`SeamElement.lean:214`)
 assembles header ++ payload. So the CONTENT of L1 is landed and is
 payload-length-generic already.
 
@@ -161,7 +161,7 @@ L1 says never-decided is the two-idle case and cites the
 1. **The enumeration is wrong.** There is a THIRD never-decided-inside-the-header
    case: two ACTIVE lines with the SAME destination. Their headers are
    bit-identical, no decision fires in `[0, 2k)`, and the element latches on
-   payload bit 0 — `ceC_pair_tie_splices_the_payload` (`SeamElement.lean:307`),
+   payload bit 0 — `ceC_pair_tie_splices_the_payload` (`SeamElement.lean:312`),
    whose own docstring records that the result is "a spliced frame — one line's
    header with the other's payload — still a well-formed `cFrame` for the right
    destination, so the defect is invisible to any header-level invariant."
@@ -298,7 +298,7 @@ INCLUDED.
 `initFabric := List.replicate 12 (false,false,false,false)`, `:102`) pins all 48
 banyan flops at the all-false state. The block's H2 ("from ANY initial register
 state") is therefore **discharged for the sorter** (`ceC_step_reset` /
-`ceFrameTrace_from_any_state`, `SeamElement.lean:119,126`, and `st` is free in
+`ceFrameTrace_from_any_state`, `SeamElement.lean:124,131`, and `st` is free in
 B4) and **NOT discharged for the banyan**. That asymmetry is the honest statement
 of what the successor theorem still owes on the banyan side — and it is not what
 §3 says is owed.
@@ -402,7 +402,7 @@ and `bnCOutKey` (`SeamJoinB.lean:86`) is `cDestOf ∘ (output column)`. `cDestOf
 (`SeamJoinA.lean:45`) reads stream indices **1, 3 and 5 and nothing else**. It is
 payload-blind by construction, so B4's conclusion is preserved by every
 payload-mangling transformation — including the two the landed source already
-exhibits (`ceC_pair_tie_splices_the_payload`, `SeamElement.lean:307`, and
+exhibits (`ceC_pair_tie_splices_the_payload`, `SeamElement.lean:312`, and
 `l1_failure_is_a_mid_frame_flip` above). -/
 
 /-- ⛔ **THE PAYLOAD IS INVISIBLE TO B4's CONCLUSION**: two frames differing in
