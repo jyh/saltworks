@@ -18,7 +18,10 @@ born	SaltWorks/Stack/Program.lean	b2bf183b7b04290a88479cca9859238f803ca383
 #   edit (four misleading alias names, kept at HDL/Bitwise.lean:297-300 until Program.lean migrates,
 #   cited in prose by their `_on_sample` forms instead; code-equal, lines kept).
 #   Previous value: 3d1bd484b72eb2a82df40a0bfb08ff67d1abbc6a.
-blob	SaltWorks/Stack/Program.lean	bacc637ff2e4bbdde292cc82253f9374f7f55652
+# ⚖️ 2026-10-25 (O88, saltworks aluSelect cluster) — the blob row RE-PINNED again, after one
+#   intentional docstring edit (the aluSelect prose restated at the live (3, 2, 4) constants;
+#   code-equal under lean_mask, lines kept). Previous value: bacc637ff2e4bbdde292cc82253f9374f7f55652.
+blob	SaltWorks/Stack/Program.lean	ce1a09d91d2fd8ca5240749fa3ec920ab2006a4d
 # ⚖️ 2026-09-11 — s2/README.md's sha256 was REGENERATED, deliberately and not silently.
 #   Its transcript row was amended to say the file is WITHHELD and why (desk row KB,
 #   the saltworks lead's call). This header's standing instruction is "Regenerate after

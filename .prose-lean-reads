@@ -94,3 +94,6 @@ o88-sw-2026-10-24-93	SaltWorks/Stack/Program.lean	b93cb4726f57	SaltWorks/Stack/P
 o88-sw-2026-10-24-94	SaltWorks/Stack/Program.lean	3f6e9abafe0f	SaltWorks/Stack/Program.lean::the_defect_and_the_fix	8d8553486c36	paper	math	2026-10-24
 o88-sw-2026-10-24-95	SaltWorks/HDL/BatcherNetC.lean	3591db8c80af	SaltWorks/HDL/BatcherNetC.lean::bnCBuild_element_sem'	c3f57a7bda04	paper	math	2026-10-24
 o88-sw-2026-10-24-96	SaltWorks/HDL/BatcherNetC.lean	eb038cbca044	SaltWorks/HDL/SeamTrace.lean::bnC_trace_factors	817a9ce6efc2	paper	math	2026-10-24
+o88-sw-2026-10-25-01	SaltWorks/HDL/AluSelect.lean	c20195a132c2	SaltWorks/HDL/AluSelect.lean::gsPad_eq	dc49af18b545	paper	math	2026-10-25
+o88-sw-2026-10-25-02	SaltWorks/Stack/Program.lean	4dded3d200e0	SaltWorks/Stack/Program.lean::run_muxRow	27217a6db0a7	paper	math	2026-10-25
+o88-sw-2026-10-25-03	SaltWorks/Stack/Program.lean	ac59ca94ac3a	SaltWorks/HDL/AluSelect.lean::aluSelect_selects_on_sample	6eaad2376a2e	paper	math	2026-10-25

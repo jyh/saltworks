@@ -5629,50 +5629,50 @@ end OrganSemantics
 /-! ## ⭐⭐ THE ALU OUTPUT SELECT — AND WHAT ITS CERTIFICATE QUANTIFIES OVER
 
 ⚠️ **READ THIS BEFORE ASSUMING `aluSelect` WAS ALREADY GENERAL.**
-`SaltWorks/HDL/AluSelect.lean:460-507` carries a driver, a predicate and two
+`SaltWorks/HDL/AluSelect.lean:437-519` carries a driver, a predicate and two
 theorems:
 
 ```
--- ⛔⛔ VERBATIM QUOTE OF `SaltWorks/HDL/AluSelect.lean:460-507`. NOT A
--- DEFINITION SITE. These five declarations are ALIVE and are defined in that
--- file; this fence is prose about them. A name-grep that lands here is reading
--- a quotation, and a census that treats this as their definition site will
--- conclude they have no consumers — which on 2026-08-08 nearly licensed a
--- wrong deletion of the whole sample layer. To change them, edit AluSelect.lean.
-def asOneHot (m sel : Nat) : Env := ...      -- result m all-ones, the other nine all-zero
+-- ⛔⛔ VERBATIM QUOTE OF `SaltWorks/HDL/AluSelect.lean:437-519`, NOT A DEFINITION SITE:
+-- these five declarations are ALIVE and defined there. A census that reads this fence
+-- as their definition site concludes they have no consumers, which on 2026-08-08 nearly
+-- licensed a wrong deletion of the whole sample layer. To change them, edit AluSelect.lean.
+def asOneHot (m sel : Nat) : Env := fun n => ...  -- result m all-ones, the other two all-zero
 def asBit0 (m sel : Nat) : Bool := (sem aluSelect (asOneHot m sel)).getD 0 false
-def asSelectsOK (m : Nat) : Bool := (List.range 16).all fun sel => asBit0 m sel == decide (sel = m)
-theorem aluSelect_selects_on_sample      : asSelectsOK 3 = true := by decide +kernel
-theorem aluSelect_selects_on_sample_last : asSelectsOK 9 = true := by decide +kernel
+def asSelectsOK (m : Nat) : Bool :=
+  (List.range asPad).all fun sel => asBit0 m sel == decide (sel = m)
+theorem aluSelect_selects_on_sample : asSelectsOK 0 = true := by decide +kernel
+theorem aluSelect_selects_on_sample_last :
+    asSelectsOK (asOps - 1) = true := by decide +kernel
 ```
 
-and a docstring reading *"all sixteen select values, kernel-checked"*. **That
+and its docstring read, until phase 3, *"all sixteen select values, kernel-checked"*. **That
 sentence is true about `sel` and silent about everything else.** Measured:
 
 | axis | size of the axis | what the two theorems cover |
 |---|---:|---|
-| `sel`, the select value | 16 | ⭐ **ALL 16 — genuinely exhaustive** |
-| `m`, which operand is live | unbounded | ⛔ **TWO POINTS: `m = 3` and `m = 9`** |
-| the 320 operand-result bits | `2^320` | ⛔ **one pattern per `m`** — all-ones in slot `m`, all-zero elsewhere; the driver cannot paint any other picture |
-| the 4 select-input bits | 16 | ✅ covered, and this is the `sel` axis |
+| `sel`, the select value | 4 (`asPad`) | ⭐ **ALL 4 — genuinely exhaustive** |
+| `m`, which operand is live | unbounded | ⛔ **TWO POINTS: `m = 0` and `m = asOps - 1` (= 2)** |
+| the 96 operand-result bits | `2^96` | ⛔ **one pattern per `m`** — all-ones in slot `m`, all-zero elsewhere; the driver cannot paint any other picture |
+| the 2 select-input bits | 4 | ✅ covered, and this is the `sel` axis |
 | the output | 32 bits | ⛔ **BIT 0 ONLY** — `asBit0` is `getD 0` |
 
-⇒ **`aluSelect` has `2^324` input valuations and 32 outputs. The certificate
-drives 32 of them and reads one output bit.** *`sel` is the universal argument;
+⇒ **`aluSelect` has `2^98` input valuations and 32 outputs. The certificate
+drives 8 of them and reads one output bit.** *`sel` is the universal argument;
 `m` is the sampled one; the operand bits are not an axis of the certificate at
 all.*
 
 ⛔ **AND `asSelectsOK` IS NOT A UNIVERSALLY TRUE STATEMENT ABOUT `m`.**
-`asSelectsOK_fails_at_ten` below proves `asSelectsOK 10 = false`: at the first
-PAD slot the tree correctly returns `false` while `decide (10 = 10)` is `true`.
-The predicate holds exactly on `m < 10 ∨ 16 ≤ m`, and both proved points sit
-inside the first range. *So "the certificate passes" is not even a property the
-block has for all `m` — it is a property of the ten real operand slots, which is
+`asSelectsOK_fails_at_the_pad_slot` below proves `asSelectsOK asOps = false`: at the
+first PAD slot (3) the tree returns `false` while `decide (asOps = asOps)` is `true`.
+The predicate holds for every `m < asOps` and fails at the one pad slot `m = asOps` (= 3);
+both sampled points sit in the first range. *So "the certificate passes" is not even a property the
+block has for all `m` — it is a property of the three real operand slots, which is
 what `asSelectsOK_of_lt` proves outright.*
 
 ## What lands here
 
-`sem_aluSelect` is universal in **every one of the 324 inputs** — arbitrary
+`sem_aluSelect` is universal in **every one of the 98 inputs** — arbitrary
 operand bits, arbitrary select bits, arbitrary garbage on the internal nets —
 and pins **all 32 outputs**:
 
@@ -5681,11 +5681,11 @@ sem aluSelect E = (List.range 32).map fun k =>
   if asSelOf E < asOps then E (asRes (asSelOf E) k) else false
 ```
 
-read in the block's own vocabulary (`asSelOf` is the four select nets as a
-number, LSB first; `asRes r k` is bit `k` of result `r`; `asOps = 10`). It says
-the block is a 16:1 mux whose top six sources are tied low — which is exactly
-the design claim `asPad = 16` makes and which nothing checked. `asSelectsOK_of_lt`
-then recovers the sampled predicate for **all ten** real operands as a corollary,
+read in the block's own vocabulary (`asSelOf` is the two select nets as a
+number, LSB first; `asRes r k` is bit `k` of result `r`; `asOps = 3`). It says
+the block is a 4:1 mux whose top source is tied low — which is exactly
+the design claim `asPad = 4` makes and which nothing checked. `asSelectsOK_of_lt`
+then recovers the sampled predicate for **all three** real operands as a corollary,
 so this supersedes the certificate rather than restating it.
 
 ## ⭐ WHICH LANDED MACHINERY TRANSFERRED, AND WHICH DID NOT
@@ -5693,7 +5693,7 @@ so this supersedes the certificate rather than restating it.
 *Measured before proving, per the two briefs that were wrong about this:*
 
 * `run_pointwise` — **did NOT transfer.** `aluSelect` has no pointwise block.
-  Apart from one `const` and four inverters, every gate is part of a mux triple
+  Apart from one `const` and two inverters, every gate is part of a mux triple
   whose fanin is another gate's output, so there is no row of gates that all read
   only primary inputs.
 * `run_orChain` — **did NOT transfer.** `aluSelect` contains no `orChain`; its
@@ -5706,20 +5706,20 @@ so this supersedes the certificate rather than restating it.
 ⭐ **THE NEW GENERIC PIECE IS `run_muxRow`** — a row of `n` two-to-one muxes,
 three gates each, proved generically over the base net, both source functions,
 both select nets and `n`. It is to selectors what `run_pointwise` is to bitwise
-blocks: `aluSelect`'s 1,440 mux gates are **four instances of it** (widths
-8/4/2/1), and any later block emitting `and/and/or` mux triples inherits it.
+blocks: `aluSelect`'s 288 mux gates are **two instances of it** (widths
+2/1), and any later block emitting `and/and/or` mux triples inherits it.
 
 ## The three shapes, in series
 
 ```
 1 gate     const false                        the shared pad source
-4 gates    not sel[j]                         one inverter per select bit, shared by every mux
-1440 gates 32 independent 4-level mux trees   45 gates per output bit, 15 muxes of 3 gates
+2 gates    not sel[j]                         one inverter per select bit, shared by every mux
+288 gates  32 independent 2-level mux trees   9 gates per output bit, 3 muxes of 3 gates
 ```
 
-Bit `k`'s tree occupies nets `329 + 45k … 329 + 45k + 44` and reads only primary
-inputs, the pad and the four inverters — so the 32 trees are proved once,
-generically in `k`, and composed by an induction whose frame is `m < 329`.
+Bit `k`'s tree occupies nets `101 + 9k … 101 + 9k + 8` and reads only primary
+inputs, the pad and the two inverters — so the 32 trees are proved once,
+generically in `k`, and composed by an induction whose frame is `m < 101`.
 
 ⛔ **`C4Spec` IS NOT CLOSED BY THIS, AND NOTHING HERE CLAIMS IT IS.** `core` does
 not exist. `aluField_is_aluSelect_add` is the service a `core` assembly would
@@ -5857,7 +5857,7 @@ def asSelOf (E : Env) : Nat := gsSelOf asOps asSelBits E
 
 /-! ## ⭐⭐⭐ THE SAME BLOCK AT EVERY SOURCE COUNT — `sem_genSelect`
 
-*Everything above this point is written at ONE WIDTH.* `329 + 45*k + 42`,
+*Until phase 3 everything above this point was written at ONE WIDTH.* `329 + 45*k + 42`,
 `pfr (320 + j)`, `< 324`, `∀ j, j < 4`, and **level 3 in the lemma names**
 (`asV3_eq`, `asB3`, `asOut k 3 0`). That is why the ALU sizing question was a
 **deadline rather than a trade** (silicon, `79bb72a`): the gate saving is fixed
@@ -5867,12 +5867,12 @@ theorem proved against `asIn = 324` is another line in the eventual rewrite.
 ⇒ **The deadline is not a property of the decision. It is a property of one
 proof having been written at a literal width.** What follows re-proves the block
 at `genSelect n b` (`HDL/AluSelect.lean`) — `n` sources, `b` encoded select bits,
-`2^b` padded leaves — and `sem_aluSelect` becomes the `n = 10, b = 4` corollary.
+`2^b` padded leaves — and `sem_aluSelect` is the `n = asOps = 3, b = asSelBits = 2` corollary.
 Shrinking the ALU to three sources is now an INSTANTIATION.
 
 ## The induction the shape actually wants, and the one it does not
 
-⛔ **The four levels above are NOT four instances of one lemma that could be
+⛔ **The levels of a tree are NOT instances of one lemma that could be
 `induction`-ed directly.** Level `j`'s inputs are level `j-1`'s *outputs*, so an
 induction whose invariant is "level `j` is correct" cannot state its own
 hypothesis: at `j = 0` the inputs are leaf nets and at `j > 0` they are gate
@@ -6311,7 +6311,7 @@ theorem genSelect_outs_eq (n b : Nat) :
 for every `n`, every `b ≥ 1`, and EVERY valuation of the `n * 32 + b` input nets,
 `genSelect n b` delivers all 32 bits of the source the select nets name, and
 `false` at every bit when they name a padding slot. `sem_aluSelect` is the
-`n = 10, b = 4` line of this. -/
+`n = asOps, b = asSelBits` line of this. -/
 theorem sem_genSelect (n b : Nat) (hb : 0 < b) (E : Env) :
     sem (genSelect n b) E
       = (List.range 32).map (fun k =>
@@ -6438,20 +6438,20 @@ theorem asPad_eq_two_pow : asPad = 2 ^ asSelBits := by decide
 /-! ### ⭐ THE PARAMETRIC SEEDS AND THE HONESTY DEVICE
 
 The `aluSelect_*` family below is restated and reproved with **no numeral standing
-for the pair `(asOps, asSelBits) = (10, 4)`**. What keeps that claim honest is the
+for the pair `(asOps, asSelBits) = (3, 2)`**. What keeps that claim honest is the
 device the parametric hinge uses: inside each `section AluSelectParametric*`,
 `asW`/`asOps`/`asPad`/`asSelBits` are made **locally irreducible**, so no `rfl`,
 `norm_num` or `decide` can compute its way through them. The only numeric input is
 the named seed facts, harvested *before* the attribute fires.
 
-⛔ **The device is an ELABORATOR hint, and the KERNEL ignores it.** Measured:
+⛔ **The device is an ELABORATOR hint, and the KERNEL ignores it.** Measured at the old pair:
 `asOps = 10 := by decide +kernel` SUCCEEDS under the device while `:= rfl` FAILS.
 So the device certifies elaborated proofs only; a `decide +kernel` certificate is
 numeral-bound whether or not it sits inside one of these sections. The sections
 exist so a later edit cannot silently re-numeralize an elaborated proof — and they
-are kept tight so the attribute never reaches the literal-width cross-checks
-(`sem_aluSelect_direct`, `gsSelOf_ten`) or the sampled certificate layer, all of
-which are numeral-bound BY DESIGN and would not elaborate under it.
+are kept tight so the attribute never reaches the sampled certificate layer, which
+is numeral-bound BY DESIGN and would not elaborate under it (as the literal-width
+cross-checks `sem_aluSelect_direct` and `gsSelOf_ten` were, until phase 3).
 
 *`asW`'s 32 may remain throughout: the hinge is not parametric in datapath width.* -/
 
@@ -6505,15 +6505,15 @@ section AluSelectParametricSem
 attribute [local irreducible] asW asOps asPad asSelBits
 
 /-- ⭐⭐ **THE THEOREM — NOW A COROLLARY, STATED VERBATIM.** Unconditional over
-all `2^324` valuations and all 32 outputs, exactly as before; what changed is
+all `2^98` valuations and all 32 outputs (`2^324` before the re-cut); what changed is
 that it is no longer *where the work is*. It is `sem_genSelect` at `n = asOps`,
 `b = asSelBits`, transported by `genSelect_eq_aluSelect` — **and the proof runs
 under the honesty device, so not one step of it reads a `10` or a `4`.**
 ⇒ **Nothing downstream moves, and the sizing question below is now an
 instantiation.**
 
-*(The literal-width proof survives as `sem_aluSelect_direct` above, an independent
-second route to the same statement — that one IS pinned at ten, by design.)* -/
+*(The literal-width proof, `sem_aluSelect_direct`, was an independent second route
+to the same statement, pinned at ten by design; phase 3 retired it, see above.)* -/
 theorem sem_aluSelect (E : Env) :
     sem aluSelect E
       = (List.range 32).map (fun k =>
@@ -6658,7 +6658,7 @@ theorem asSelectsOK_fails_at_the_pad_slot : asSelectsOK asOps = false := by
 
 /-! ## ⭐ THE GENERAL DRIVER AND THE WORD BRIDGE -/
 
-/-- **The general driver**: ten arbitrary operand results and a select value.
+/-- **The general driver**: `asOps` arbitrary operand results and a select value.
 `asOneHot` is the sub-family in which exactly one result is live. -/
 def asDrive (res : Nat → Word) (sel : Nat) : Env := fun n =>
   if n < asOps * asW then (res (n / asW)).getLsbD (n % asW)
@@ -6712,7 +6712,7 @@ theorem aluSelect_word (res : Nat → Word) (sel : Nat) (h : sel < asOps) :
   rw [sem_aluSelect_drive res sel h, wordOf_getD_map_range, wordOf_getLsbD_self]
 
 /-- ⭐⭐ **THE `rd` FIELD, THROUGH THE SELECT.** An `ADD` presents its result in
-operand slot `0` (`add` is the first of the ten) and drives `sel = 0`; the block
+operand slot `0` (`add` is the first of the three) and drives `sel = 0`; the block
 then delivers exactly the word `stepT` writes. ⛔ *This does NOT close any
 `C4Spec` field: `core` does not exist, and this is the service the assembly would
 apply, in the shape `addField_is_adder32` performs for the adder.* -/
@@ -6862,7 +6862,7 @@ def gsDrive2 (x y : Word) (s : Bool) : Env := fun m =>
   if m < 32 then x.getLsbD m else if m < 64 then y.getLsbD (m - 32) else s
 
 /-- ⭐ **THE SELECTED OPERAND, AS A WORD** — the form a `core` assembly applies,
-the shape `aluSelect_word` performs for the ten-source block. -/
+the shape `aluSelect_word` performs for the `asOps`-source block. -/
 theorem operandBMux_word (x y : Word) (s : Bool) :
     SaltWorks.HDL.wordOf (fun k => (sem (genSelect 2 1) (gsDrive2 x y s)).getD k false)
       = if s then y else x := by
@@ -6938,7 +6938,7 @@ theorem gsSelOf_three (E : Env) :
 /-- ⭐⭐ **SLICE A'S ALU SELECT, SPELLED OUT.** Three real sources and one padding
 slot: select `3` reads the tie constant and every output bit is `false`. That
 last arm is the behaviour the padding design decision is responsible for, and it
-is proved here rather than sampled. **−1,154 gates against the ten-source block,
+is proved here rather than sampled. **−1,154 gates against the retired ten-source block,
 and the shrink cost no proof.** -/
 theorem sem_sliceASelect (E : Env) :
     sem (genSelect 3 2) E
