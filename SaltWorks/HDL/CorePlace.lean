@@ -574,10 +574,10 @@ SECOND `obMux` INSTANCE choosing `immI` vs `immS`.
 **STAGE 1 (`58ee69d`) proved both PLACE LEGALLY while they were still inert.**
 ⚙️ **STAGE 2a — THIS STAGE — PLACES THEM: they are now in `core.gates` and in every
 decomposition definition, `offOb` follows `offImmMux`, and `placedGateTotal` accounts for
-them.** ⛔ **THEY ARE STILL NOT WIRED: `obSig` reads neither `selOrOut` nor `immMuxOut`, so
-operand B is bit-for-bit what it was and every value-layer theorem is untouched.**
+them.** ⛔ **AT STAGE 2a THEY WERE NOT WIRED: `obSig` read neither `selOrOut` nor `immMuxOut`,
+so operand B was bit-for-bit what it had been and no value-layer theorem moved.**
 
-*Stage 2b wires them — `obSig` routes through `immMuxOut`/`selOrOut` — and that is the pass
+*Stage 2b wired them — today's `obSig` routes through `immMuxOut`/`selOrOut` — the pass
 that moves values. Splitting PLACE from WIRE is not a preference: `chain_accounts_for_every_
 placed_organ` makes "re-pin without placing" FALSE, so the re-pin and the placement must land
 together, and the wiring is the only thing left that can be deferred.*
