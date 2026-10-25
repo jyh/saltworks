@@ -8,7 +8,7 @@ import SaltWorks.HDL.EmitN
 import SaltWorks.Silicon.Imported.CompareExchangeC
 
 /-!
-# BB-1 · B4 — THE SEAM: the FABRICATED element is the element that was PROVED
+# BB-1 · B4 — THE SEAM: the HARDENED element (`ce_c_nl.v`) is the element that was PROVED
 
 **Silicon's 14:31 named this as link ① of three and correctly refused to write
 it.** *Their reasoning is exact and I verified it before acting: `SaltWorks.HDL`
