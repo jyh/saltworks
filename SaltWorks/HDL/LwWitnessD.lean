@@ -4,8 +4,8 @@ import SaltWorks.HDL.StateCodecD
 
 The Q6 pre-registration fixes this bar: **any post-D verdict on an LW exhibit computed against a
 witness whose LOADED WORD IS NOT PROVABLY NON-ZERO IS VOID.** The landed witness `C4Refuted.sL`
-cannot clear it — measured, for EVERY `wL : BitVec 32` its top set bit is 1087, so the whole memory
-region reads zero by construction, not by choice.
+cannot clear it — measured, for EVERY `wL : BitVec 32` its set bits lie at or below 1087, so the
+whole memory region reads zero by construction, not by choice.
 
 ⛔ AND IT IS WORSE THAN VACUOUS UNDER D. `sL` places the instruction word at bit 1056 via
 `wL.toNat * 2^1056`. Under the D layout 1056..1087 is **memory word 0**, so the old witness's
