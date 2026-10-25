@@ -19,7 +19,7 @@ scoped — because "126 call sites" was my own first figure and it named the wro
      MUST NOT be renamed: rewriting them would erase the record the repair left
 ```
 *Five true numbers about five different objects. The one a migration is priced on is 67, and my
-first published figure was 126 — a factor of two, from a count with no scope attached.* `CorePlace.lean:409` records the order in a comment:
+first published figure was 126 — a factor of two, from a count with no scope attached.* `CorePlace.lean:1096` keeps the order in a comment:
 
 ```
 isADD  isXOR  isSLT  isADDI  isBEQ  isLW  isSW  req  valid
