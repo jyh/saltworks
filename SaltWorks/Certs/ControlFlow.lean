@@ -47,7 +47,7 @@ A compiled loop is four things laid end to end: the condition's code, a branch t
 goes **back** to the start. Each branch carries a number — how far to jump — and those
 numbers are computed by a formula from the block sizes.
 
-**The two landing certificates say the formulas are right for EVERY block size, not
+**The two landing certificates say the formulas are right for EVERY ENCODABLE block size, not
 for the sizes someone tried:**
 * `cert_exit_branch_lands` — taking the exit branch puts the `pc` exactly one
   instruction past the backward branch: the first instruction after the loop.
@@ -116,9 +116,9 @@ namespace SaltWorks.Certs
 -- CONSUMERS of the emitter rather than the other way round.
 open SaltWorks.ISA SaltWorks.CompileS SaltWorks.WhileScheme SaltWorks.IteScheme
 
-/-! ## 1. THE OFFSETS LAND — for every block size, not for the sizes someone tried -/
+/-! ## 1. THE OFFSETS LAND — for every encodable block size, not the sizes someone tried -/
 
-/-- ⭐⭐ **THE EXIT BRANCH LANDS PAST THE LOOP, AT EVERY BODY SIZE.** From the branch's
+/-- ⭐⭐ **THE EXIT BRANCH LANDS PAST THE LOOP, AT EVERY ENCODABLE BODY SIZE.** From the branch's
 own address, taking it puts the `pc` exactly one instruction past the backward branch.
 
 Direction: **same proposition** as `SaltWorks.WhileScheme.exit_branch_lands`.
@@ -131,7 +131,7 @@ theorem cert_exit_branch_lands {pc : BitVec 32} (n_b q : Nat)
   exit_branch_lands n_b q hb hq hp
 
 /-- ⭐⭐⭐ **THE BACKWARD BRANCH LANDS ON THE CONDITION'S FIRST INSTRUCTION, AT EVERY
-PAIR OF BLOCK SIZES — AND IT GETS THERE BY WRAPPING.** `2^32 − 4·(n_c+n_b+1)` is
+PAIR OF ENCODABLE BLOCK SIZES — AND IT GETS THERE BY WRAPPING.** `2^32 − 4·(n_c+n_b+1)` is
 **added**, not subtracted; the modular arithmetic is doing the work.
 
 *That is why a backward branch needs a proof and not an inspection.*

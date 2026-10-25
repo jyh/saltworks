@@ -326,7 +326,7 @@ theorem loop_relocates :
 
 #audit_axioms loop_relocates
 
-/-! ## 5b. ⭐⭐⭐ THE OFFSETS, PROVED FOR **ALL** BLOCK SIZES — the six configurations are a
+/-! ## 5b. ⭐⭐⭐ THE OFFSETS, PROVED FOR EVERY **ENCODABLE** BLOCK SIZE — the six configurations are a
 SAMPLE, and this is the theorem they were sampling
 
 §7's caveat said plainly that three points per formula are *"a discriminating test, not a
@@ -352,7 +352,7 @@ theorem whileBack_msb (n_c n_b : Nat) (hk : 2 * (n_c + n_b + 1) ≤ 2048) :
     omega
   simpa using h
 
-/-- ⭐⭐ **THE EXIT BRANCH LANDS PAST THE LOOP, FOR EVERY BODY SIZE.** From the branch's own
+/-- ⭐⭐ **THE EXIT BRANCH LANDS PAST THE LOOP, FOR EVERY ENCODABLE BODY SIZE.** From its own
 address at block-relative index `n_c`, taking it puts the `pc` exactly one instruction past
 the backward branch — the first instruction after the loop. -/
 theorem exit_branch_lands {pc : BitVec 32} (n_b q : Nat)
@@ -371,7 +371,7 @@ theorem exit_branch_lands {pc : BitVec 32} (n_b q : Nat)
   omega
 
 /-- ⭐⭐⭐ **THE BACKWARD BRANCH LANDS ON THE CONDITION'S FIRST INSTRUCTION, FOR EVERY PAIR OF
-BLOCK SIZES — AND IT GETS THERE BY WRAPPING.** From its own address at block-relative index
+ENCODABLE BLOCK SIZES — AND IT GETS THERE BY WRAPPING.** From its address at block-relative index
 `n_c+n_b+1`, the loop closes onto index `0` of the block.
 
 *`2^32 - 4*(n_c+n_b+1)` is added, not subtracted; the `mod` in `BitVec.toNat_add` is doing
