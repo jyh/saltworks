@@ -56,25 +56,12 @@ a951cd35b6b0	docs/ledger-tools/README.md	lexicon-e2
 23316cdf1cac	docs/provenance/s2/README.md	lexicon-e2
 f5adce590675	docs/provenance/s2/README.md	lexicon-e2
 # lexicon epoch 3 (R2, council 2026-10-22 item 3): Lean docstring claim sentences, gated from epoch 3 and accepted as debt by the WIDENING arm; class docstring-cited marks a declaration a public carrier names (read those first).
-bf901139df0a	SaltWorks/HDL/AdapterStateOrgan.lean	docstring
-de8e0593de16	SaltWorks/HDL/AdapterStateOrgan.lean	docstring
 12ecbe7fd361	SaltWorks/HDL/AluSelect.lean	docstring
 890768e20425	SaltWorks/HDL/Banyan.lean	docstring
-641560eeb8e4	SaltWorks/HDL/BusCycle.lean	docstring
-1ba6f9dc271b	SaltWorks/HDL/BusFSM.lean	docstring
-24990e128385	SaltWorks/HDL/BusFSM.lean	docstring
-59a317777440	SaltWorks/HDL/BusFSM.lean	docstring
-b65ee5e503ed	SaltWorks/HDL/BusFSM.lean	docstring
 b80b65af4040	SaltWorks/HDL/Cell1988.lean	docstring
-f23c9b9f6f09	SaltWorks/HDL/CorePlace.lean	docstring-cited
-cd1b50c6b506	SaltWorks/HDL/DecoderTransport.lean	docstring
 1d59fe5e9f35	SaltWorks/HDL/EmitV.lean	docstring
 8238f7ccc2c1	SaltWorks/HDL/EmitV.lean	docstring
-f1900d97f3a3	SaltWorks/HDL/LwTrapRefuted.lean	docstring
-0088193e02ef	SaltWorks/HDL/StallShape.lean	docstring-cited
-133f45481af0	SaltWorks/HDL/StallShape.lean	docstring
 35ec309dbd47	SaltWorks/HDL/StallShape.lean	docstring
-8a0ee5e1aacd	SaltWorks/HDL/StallShape.lean	docstring
 fce98318fbaf	SaltWorks/HDL/Syntax.lean	docstring
 10c8269a7820	SaltWorks/Silicon/Cells/Sky130.lean	docstring
 3887f012728a	SaltWorks/Silicon/Equiv/BitSliced.lean	docstring
