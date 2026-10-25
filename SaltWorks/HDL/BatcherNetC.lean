@@ -738,7 +738,7 @@ it.* **Seven instances in one day; the third tier cost five attempts.**
 
 /-! ## 🔗 LINK ② — THE DECOMPOSITION, and it is the expensive part
 
-**Silicon's 14:31 named three links for the composed theorem: ① the fabricated
+**Silicon's 14:31 named three links for the composed theorem: ① the hardened
 element vs the emission (CLOSED, `SeamC.lean`, `17b20ff`), ② the 24-instance
 network vs `runNet batcher8` — THIS, and mine — and ③ injectivity + bound, math's
 form.** *What follows is the decomposition and the anchor, not an attempt. The

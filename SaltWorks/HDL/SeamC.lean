@@ -72,13 +72,13 @@ def seamCases : List Nat := List.range 128
 
 /-! ### The seam -/
 
-/-- The fabricated netlist, read at its own port list, against the `Circ`
+/-- The hardened netlist, read at its own port list, against the `Circ`
 semantics that `ceC_step_eq` is a theorem about. -/
 def ceCSeamOK : Bool :=
   seamCases.all fun j =>
     nlRead ceCNL ceCNL_outs j == sem ceCcore (fun i => j.testBit i)
 
-/-- ⭐ **LINK ① — THE FABRICATED ELEMENT COMPUTES `ceCcore`.** For all 128
+/-- ⭐ **LINK ① — THE HARDENED ELEMENT COMPUTES `ceCcore`.** For all 128
 configurations, the hardened, flow-processed, re-imported netlist read at its own
 outputs agrees with the `Circ` whose behaviour `ceC_step_eq` certifies. **No
 reachability assumption — unreachable states are quantified too.** -/
@@ -91,7 +91,7 @@ theorem emitN_ceCcore_sem (ins : Env) :
       = sem ceCcore ins :=
   emitN_sem ceCcore ceCcore_ssa ins
 
-/-- ⭐ **THE CHAIN, CLOSED: the FABRICATED netlist and the EMITTED netlist compute
+/-- ⭐ **THE CHAIN, CLOSED: the HARDENED netlist and the EMITTED netlist compute
 the same six outputs, on every configuration.** *`ceCNL` came out of the flow;
 `emitN ceCcore` came out of the compiler. This says the flow did not change the
 element — which is the sentence the whole leg-2/leg-3 seam exists to support.* -/
