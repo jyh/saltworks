@@ -341,3 +341,6 @@ o88-sw-2026-10-25-247	SaltWorks/HDL/BusFSM.lean	b65ee5e503ed	SaltWorks/HDL/BusFS
 o88-sw-2026-10-25-248	SaltWorks/HDL/BusFSM.lean	24990e128385	SaltWorks/HDL/BusFSM.lean::shapeB_leaves_the_loop_end_arm_alone	6dbc21c01f54	paper	math	2026-10-25
 o88-sw-2026-10-25-249	SaltWorks/HDL/BusFSM.lean	59a317777440	SaltWorks/HDL/BusFSM.lean::proj	158c058d8e68	paper	math	2026-10-25
 o88-sw-2026-10-25-250	SaltWorks/HDL/BusCycle.lean	641560eeb8e4	SaltWorks/HDL/BusCycle.lean::proj	ce3289f74b12	paper	math	2026-10-25
+o88-sw-2026-10-25-251	SaltWorks/Silicon/TTNDF/README.md	dc076226851e	SaltWorks/HDL/MacInduction.lean::mac_correct	c080de9846e3	paper	math	2026-10-25
+o88-sw-2026-10-25-252	SaltWorks/HDL/StallShape.lean	35ec309dbd47	SaltWorks/HDL/StallShape.lean::memFreeB_iff	eaaffb40db9e	paper	math	2026-10-25
+o88-sw-2026-10-25-253	SaltWorks/Silicon/Refine/StatementChecks.lean	06ac577ae838	SaltWorks/Silicon/Refine/Statement.lean::RefinesE	d32e38ef9360	paper	math	2026-10-25
