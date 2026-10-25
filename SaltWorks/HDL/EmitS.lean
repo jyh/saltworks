@@ -32,7 +32,7 @@ DEPENDENCY.***
 `emitS` emits **already-mapped** sky130 cell instances instead — one cell per
 `Op` — so there is nothing left for synthesis to invent. The five-constructor
 `Op` type maps one-to-one onto five library cells, and the silicon seat has
-already proved all five as `_liberty` theorems.
+proved `_liberty` models of all five (`and2` at drive 0; the importer strips drive).
 
 ## The prize, stated precisely so it is not overstated
 

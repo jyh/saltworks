@@ -19,7 +19,6 @@ e9fce9c94946	docs/compiler-L4-review-criteria-PREREG-0814.md	shape
 84015b4e7f49	docs/core-account.md	shape
 54ef509cbd4d	docs/council-pack-0809.md	shape
 4bad8cbc3b91	docs/hdl-c2-generator-design-0807.md	shape
-991b2c2de44b	docs/hdl-c2-tools/README.md	predates
 c9c621b5d374	docs/hdl-c3-probe-verdict-0807.md	shape
 62fe1eb4fb70	docs/helm-doublecode-codebook-amendment-DRAFT2-0813.md	shape
 a8dc196e1538	docs/heritage-1988-rotation-design-v1.md	shape
@@ -32,7 +31,6 @@ f7f441b887f5	docs/ledger-tools/README.md	predates
 1f92fd5296eb	docs/provenance/s2/README.md	predates
 36bc20cd1c5a	docs/provenance/s2/README.md	predates
 dd085561dd60	docs/provenance/s2/README.md	predates
-ee87a74f5160	docs/silicon-bb1-B0bc-0807.md	shape
 8d67dd4c64c4	docs/silicon-c5-execution-plan-0807.md	shape
 4697664b2ad5	docs/silicon-decoder-uncond-prereg-0807.md	shape
 be6fc0610861	docs/silicon-refute-decoder-uncond-0807.md	shape
@@ -149,8 +147,6 @@ b179630a67d4	SaltWorks/HDL/C4Refuted.lean	docstring-cited
 b80b65af4040	SaltWorks/HDL/Cell1988.lean	docstring
 bd34dd61940f	SaltWorks/HDL/Cell1988.lean	docstring
 ea4f2b1941f6	SaltWorks/HDL/Cell1988.lean	docstring
-530efca70702	SaltWorks/HDL/CompareExchange.lean	docstring
-9c9c79cf1eb3	SaltWorks/HDL/CompareExchange.lean	docstring-cited
 067d8d5f973b	SaltWorks/HDL/CompareExchangeC.lean	docstring
 16e4d07485ed	SaltWorks/HDL/CompareExchangeC.lean	docstring
 6cd53483bc72	SaltWorks/HDL/CompareExchangeC.lean	docstring
@@ -161,7 +157,6 @@ d9e8b5380638	SaltWorks/HDL/CompileE.lean	docstring
 966c254b77c4	SaltWorks/HDL/CompileS.lean	docstring
 a2247b0ca7af	SaltWorks/HDL/CompileS.lean	docstring
 245d75382421	SaltWorks/HDL/Compose.lean	docstring
-38fb395ea69b	SaltWorks/HDL/Compose.lean	docstring
 67179d2796d8	SaltWorks/HDL/Compose.lean	docstring
 771bbc713386	SaltWorks/HDL/Compose.lean	docstring
 87d333a59c50	SaltWorks/HDL/Compose.lean	docstring
@@ -198,7 +193,6 @@ abd93f869744	SaltWorks/HDL/Decoder.lean	docstring
 3e431185c2e1	SaltWorks/HDL/DecoderTransport.lean	docstring
 86434824e0d6	SaltWorks/HDL/DecoderTransport.lean	docstring
 cd1b50c6b506	SaltWorks/HDL/DecoderTransport.lean	docstring
-4c0acda028c9	SaltWorks/HDL/EmitS.lean	docstring
 f607372f2738	SaltWorks/HDL/EmitS.lean	docstring
 1d59fe5e9f35	SaltWorks/HDL/EmitV.lean	docstring
 8238f7ccc2c1	SaltWorks/HDL/EmitV.lean	docstring
@@ -316,8 +310,6 @@ d6b039a541ce	SaltWorks/HDL/ShellSeq.lean	docstring
 5c47bf46798c	SaltWorks/HDL/SortDemo.lean	docstring
 c2cdd3f79dcf	SaltWorks/HDL/SortDemo.lean	docstring
 25082c508ffa	SaltWorks/HDL/SpikeVectors.lean	docstring-cited
-5ad89e98e782	SaltWorks/HDL/SpikeVectors.lean	docstring
-ee2d2f0c7d59	SaltWorks/HDL/SpikeVectors.lean	docstring
 0088193e02ef	SaltWorks/HDL/StallShape.lean	docstring-cited
 133f45481af0	SaltWorks/HDL/StallShape.lean	docstring
 35ec309dbd47	SaltWorks/HDL/StallShape.lean	docstring
@@ -330,8 +322,6 @@ a112de206c6c	SaltWorks/HDL/SubFragment.lean	docstring
 fce98318fbaf	SaltWorks/HDL/Syntax.lean	docstring
 0023fbd6a2d0	SaltWorks/HDL/TinyRustN0.lean	docstring
 993f8e74df6b	SaltWorks/HDL/TinyRustN0.lean	docstring
-373fceb02820	SaltWorks/HDL/Vectors.lean	docstring
-7da868619686	SaltWorks/HDL/Vectors.lean	docstring
 0dac5e3d9dca	SaltWorks/HDL/WfPortsNodupRefuted.lean	docstring
 514b6709dfee	SaltWorks/HDL/WhileScheme.lean	docstring
 8f5fd036799d	SaltWorks/HDL/WhileScheme.lean	docstring
@@ -344,7 +334,6 @@ fce98318fbaf	SaltWorks/HDL/Syntax.lean	docstring
 d8f8e191b960	SaltWorks/Silicon/Equiv/ComparatorEquiv.lean	docstring
 2a38cd23d7d7	SaltWorks/Silicon/Equiv/PartialLoad.lean	docstring
 b18b236cc4ab	SaltWorks/Silicon/Equiv/PartialLoad.lean	docstring
-3d58e959b875	SaltWorks/Silicon/Equiv/ScenarioComplete.lean	docstring
 06ac577ae838	SaltWorks/Silicon/Refine/StatementChecks.lean	docstring
 b19ac2f961ad	SaltWorks/Stack/Perm.lean	docstring
 0b8f6df953a1	SaltWorks/Stack/Program.lean	docstring
@@ -377,5 +366,3 @@ dbddd26401c1	SaltWorks/Stack/Program.lean	docstring-cited
 e438758bcdac	SaltWorks/Stack/Program.lean	docstring-cited
 eea6e66ff583	SaltWorks/Stack/Program.lean	docstring
 f8dd41687458	SaltWorks/Stack/Program.lean	docstring
-8ccbd9ad7dd6	SaltWorks/Stack/Spec.lean	docstring-cited
-e936a1dc6124	SaltWorks/Stack/ZeroOne.lean	docstring

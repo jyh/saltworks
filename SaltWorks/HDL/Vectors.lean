@@ -25,8 +25,8 @@ is the entire reason council ruling 3 names Spike.*
 ⇒ **What they DO establish is the thing that was actually blocking: that the
 consumer side works and what it costs.** When a witness exists, only the
 generator is missing — the format, the checker and its price are settled here.
-*Every one of these vectors is derived from a certificate already proved in
-`ISA.lean` by `decide +kernel`, so they are known-good by construction and
+*Eight of the ten come from a certificate already proved in `ISA.lean`, and all
+ten pass `suite_full` by `decide +kernel`, so they are known-good by construction and
 useless as evidence, which is exactly the right property for a cost harness.*
 
 ## The format
@@ -78,7 +78,7 @@ def Vec.checkObs (v : Vec) : Bool :=
   | none => false
   | some s => s.pc == v.pc' && v.post.all (fun (r, x) => s.get r == x)
 
-/-! ## The suite — every vector derived from a proved certificate in `ISA.lean` -/
+/-! ## The suite — ten vectors, eight from a certificate in `ISA.lean`, all in `suite_full` -/
 
 /-- `ADDI x1, x0, -1` → `0xFFFFFFFF`. From `addi_sign_extends`. -/
 def v_addi : Vec :=
