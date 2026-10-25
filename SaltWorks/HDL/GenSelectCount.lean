@@ -533,8 +533,8 @@ theorem gate_count_ten : (genSelect 10 4).gates.length = 1445 := by
   rw [genSelect_gates_length]
   rfl
 
-/-- The landed block's recorded size, now a corollary of the closed form — and
-stated with **no numeral**, so the phase-3 re-cut cannot falsify it.
+/-- The landed block's recorded size, now a corollary of the closed form. Its
+PROOF uses no numeral bridge; its statement keeps a literal, 291 since the flip.
 
 ⚠️ **THIS THEOREM WAS THE ONE PHASE 3'S ESTIMATE MISSED.** *It read
 `aluSelect.gates.length = 1445` and was proved `rw [← genSelect_ten]; exact
