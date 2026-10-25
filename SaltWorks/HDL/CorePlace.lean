@@ -76,10 +76,10 @@ proposed (11:26) wiring `add`'s `cin = 0` to net `0` for free, since `slicea16bm
 `rf [1:15]` and muxes register 0 to `32'd0`, **so x0 has no storage to be nonzero in.** Correct
 about the RTL, false about the model:
 ```
-ISA.lean:72-74  structure St where regs : Vector (BitVec 32) 32   ← x0 HAS STORAGE
+ISA.lean:85-87  structure St where regs : Vector (BitVec 32) 32   ← x0 HAS STORAGE
 StateCodec      stBit s 0 = (s.regs[0]).getLsbD 0                 ← net 0 READS it
-ISA.lean:96     "x0 reads as zero unconditionally — NOT AS AN INVARIANT"
-ISA.lean:163    "x0 reads zero. NO HYPOTHESIS — the point of enforcing on the READ"
+ISA.lean:192     "x0 reads as zero unconditionally — NOT AS AN INVARIANT"
+ISA.lean:312    "x0 reads zero. NO HYPOTHESIS — the point of enforcing on the READ"
 ```
 ⇒ ***x0-reads-zero is enforced AT THE READ, not on the state, so net `0` in an arbitrary `Env` is
 UNCONSTRAINED. A carry-in wired there is a latent bug firing exactly when `s.regs[0] ≠ 0` —
@@ -267,7 +267,7 @@ as the core's nets `0…31` *are* `x0`, and both are register-major with 32-bit 
 *Checked at both ends: `j = 5 ↦ 32` (x1 bit 0) and `j = 996 ↦ 1023` (x31 bit 31 = 32*31+31).*
 
 📌 **AND σ IS THE FIELD EXTRACTOR — there is no missing organ.** `regWrite` consumes `rd` already
-isolated on its inputs `0…4` (`RegWrite.lean:46`), and `readTree` likewise wants an index, not a
+isolated on its inputs `0…4` (`RegWrite.lean:55`), and `readTree` likewise wants an index, not a
 word. Extracting a field from the instruction is **pure wiring**, so it belongs in σ, not in a
 circuit: the same fact as `ruledEnc` costing zero gates — *emit the nets, not a module.* Field
 positions are taken from the corpus's own encoder (`ISA.wR`: `funct7 rs2 rs1 funct3 rd opcode`),
@@ -347,7 +347,7 @@ Placements #1–#4 all read only core INPUTS, so `instOK_mono` lifted them to ev
 for free. **`regWrite` is the first placement where that is false**, and the difference is the
 whole reason the assembly order exists.
 
-`RegWrite.lean:46` gives its layout: `rd` on inputs `0…4`, `valid` on `5`, `isBEQ` on `6`.
+`RegWrite.lean:55` gives its layout: `rd` on inputs `0…4`, `valid` on `5`, `isBEQ` on `6`.
 * `rd` is an instruction field (bits `7…11` per `ISA.wR`) — a core input, below `off0`.
 * **`valid` and `isBEQ` are the DECODER'S OUTPUTS** — gate nets, and therefore *above* `off0`.
 
@@ -1021,7 +1021,7 @@ theorem encoder_select_seam_closed :
 
 **The organ is math's, not mine** — `SaltWorks.Stack.Program.pcAdd`, the composite that computes
 the next pc: `pcNext`'s addend selected by the BEQ test, added to the pc by an instantiated
-`adder32`. `Program.lean:4184` fixes its host layout, and the whole content of this row is
+`adder32`. `Program.lean:5107` fixes its host layout, and the whole content of this row is
 honouring it:
 
 ```
@@ -1039,7 +1039,7 @@ shape — a σ that is valid and wrong — so it is asserted below rather than t
 `instOK` certifies that a wire is computed in time; it never certifies that it is the *right* wire.
 So the four producers are written down as a citable table — `pcAddPortMap` — beside the offset
 table, and `pcAddSig_follows_the_port_map` proves the σ is exactly that table read back. A reviewer
-checks a five-row list against `Program.lean:4184` instead of re-deriving five `if` branches. -/
+checks a five-row list against `Program.lean:5107` instead of re-deriving five `if` branches. -/
 
 /-! ## 12b. R9a — THE TRAP GATE'S PLACEMENT (ruling z, 2026-08-31)
 
@@ -1227,7 +1227,7 @@ structure PortRow where
   source  : String
 deriving DecidableEq, Repr
 
-/-- `Program.lean:4184`, transcribed once and cited thereafter. -/
+/-- `Program.lean:5107`, transcribed once and cited thereafter. -/
 def pcAddPortMap : List PortRow :=
   [ ⟨0,   31,  "state pc bits, core input 1024+k"⟩
   , ⟨32,  63,  "readTree.rs1 VALUE at off2"⟩
@@ -1332,7 +1332,7 @@ theorem pc_bits_are_core_inputs (k : Nat) (hk : k < 32) :
   -- conjunction. `abbrev Net := Nat` is not transparent to omega's preprocessing: it DROPS such
   -- a goal and then tries to derive `False` from the context, so its "counterexample" is made
   -- purely of the hypotheses — exactly what it printed. Math documented this at
-  -- `Program.lean:2994` and `:3471` before I ever hit it. The cure below (bounds proved at `Nat`
+  -- `Program.lean:3882` and `:4390` before I ever hit it. The cure below (bounds proved at `Nat`
   -- and supplied as terms) is the same one row 15 needs, and it is why `hlt` works here while
   -- the direct call did not. My first diagnosis named the conjunction; that was wrong.
   have hlt : 1024 + k < 1056 := by omega
@@ -1469,7 +1469,7 @@ theorem regNextSig_cur_lt (i : Nat) (h1 : 64 ≤ i) (h2 : i < 1088) : regNextSig
   -- ⚠️ `omega` CANNOT READ A GOAL WHOSE `<` SITS AT `Net`. It drops the goal and then tries to
   -- derive `False` from the context alone, so its "counterexample" is made purely of the
   -- hypotheses — on a goal that is trivially true. Math documented this twice
-  -- (`Program.lean:2994`, `:3471`); the cure is theirs: state every bound at `Nat` and feed it in
+  -- (`Program.lean:3882`, `:4390`); the cure is theirs: state every bound at `Nat` and feed it in
   -- as a term, never leave it for `omega` to read off a `Net`-typed goal.
   have e1 : ¬(i < 32) := Nat.not_lt.mpr (by omega)
   have e2 : ¬(i < 64) := Nat.not_lt.mpr (by omega)
