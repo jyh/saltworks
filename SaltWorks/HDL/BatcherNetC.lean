@@ -656,7 +656,7 @@ def bnCElemIn (env : Env) (a b : Nat) (dat : List Net) : List Bool :=
 theorem bnCElemIn_length (env : Env) (a b : Nat) (dat : List Net) :
     (bnCElemIn env a b dat).length = 3 := rfl
 
-/-! ## 🏦 BANKED 8/7 ~18:4x — THE TRACE INDUCTION IS THE SINGLE REMAINING ACT
+/-! ## 🏦 BANKED 8/7 ~18:4x — THE TRACE INDUCTION WAS THE LAST ACT (now `SeamTrace.lean`)
 
 **Successor: this is your one inherited task.** *Steps ①, ②, and ③'s per-cycle
 half, bookkeeping and vocabulary are landed and kernel-checked below. What is
