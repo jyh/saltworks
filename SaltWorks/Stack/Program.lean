@@ -3479,15 +3479,15 @@ sltOK     =  bwWords.all fun a => bwWords.all fun b => sltDrive a b == cmpWord �
 ```
 
 **`bwWords` is a TEN-WORD list** — `bwWords_sample_size` pins that in the kernel
-rather than by reading it. So each of `bitXor32_correct`, `sltCirc_correct`,
-`sltuCirc_correct` and `sub_via_adder_correct` is a check on **100 ordered
+rather than by reading it. So each of `bitXor32_correct_on_sample`, `sltCirc_correct_on_sample`,
+`sltuCirc_correct_on_sample` and `sub_via_adder_correct_on_sample` is a check on **100 ordered
 operand pairs out of 2^64 ≈ 1.8 × 10^19**, a 5 × 10^-18 slice of the input space.
 *Compiler said so in that file's own docstring — "sampled rather than exhaustive"
 — so this is not a discovery. It is the fact that decides what the bridges below
 may claim, and it belongs where the bridges are rather than only where the
 certificates are.*
 
-⇒ ***`bitXor32_correct` does NOT establish that `bitXor32` computes `^^^`.***
+⇒ ***`bitXor32_correct_on_sample` does NOT establish that `bitXor32` computes `^^^`.***
 
 ## ⇒ SO THE XOR BRIDGE IS PROVED, NOT SAMPLED
 
@@ -3507,7 +3507,7 @@ by `decide +kernel` — and it computes exactly `s31 ⊕ ((a31 ⊕ b31) ∧ (a31
 
 **The sampling enters one layer down.** `sltDrive` feeds that block the *real*
 `adder32`'s 31st output, and the only statement connecting that output to `a - b`
-is `sub_via_adder_correct`, at the same 100 pairs — because **`adder32` has no
+is `sub_via_adder_correct_on_sample`, at the same 100 pairs — because **`adder32` has no
 semantic theorem at all**, only `ssa` and `wf`. ⇒ *`sltField_is_sltCirc` carries
 `s.get x ∈ bwWords` and `s.get y ∈ bwWords` as hypotheses.* **Those membership
 premises ARE the sample.** *They put the weakness in the type, where a caller
@@ -3617,7 +3617,7 @@ theorem run_xorGates (env : SaltWorks.HDL.Env) :
 /-- ⭐⭐ **THE XOR BLOCK COMPUTES `^^^`, ON ALL 2^64 OPERAND PAIRS.** *Not
 `decide`d: 2^64 pairs is not a kernel computation. Proved from the gate list's
 shape, which is what a pointwise block makes possible and what the sampled
-`bitXor32_correct` could not reach.* -/
+`bitXor32_correct_on_sample` could not reach.* -/
 theorem sem_bitXor32 (a b : Word) :
     SaltWorks.HDL.sem SaltWorks.HDL.bitXor32 (SaltWorks.HDL.bwEnv a b)
       = (List.range 32).map (fun k => (a ^^^ b).getLsbD k) := by
@@ -3683,7 +3683,7 @@ theorem xorField_is_bitXor32 (s : St) (rd x y : Fin 32) (hrd : rd ≠ 0) :
 
 *Three input bits is 8 valuations, so unlike the 32-bit blocks this one CAN be
 decided outright. Doing so separates the two questions the sampled
-`sltCirc_correct` runs together: what the comparator computes from its inputs
+`sltCirc_correct_on_sample` runs together: what the comparator computes from its inputs
 (settled here, for every input) and whether the sign bit it is fed is the
 subtraction's (open, and blocked on the adder).* -/
 
@@ -3699,7 +3699,7 @@ theorem sem_sltCirc (a31 b31 s31 : Bool) :
 the adder's 31st output left as an opaque term. *This is the exact shape of what
 remains: the comparator is discharged unconditionally, and the ONLY thing between
 this and `BitVec.slt` is that `(subOut a b).getD 31 false` be the sign bit of
-`a - b`, which today is `sub_via_adder_correct` at 100 pairs.* -/
+`a - b`, which today is `sub_via_adder_correct_on_sample` at 100 pairs.* -/
 theorem sltDrive_eq_sign_formula (a b : Word) :
     SaltWorks.HDL.sltDrive a b
       = SaltWorks.HDL.cmpWord
@@ -3710,7 +3710,7 @@ theorem sltDrive_eq_sign_formula (a b : Word) :
 
 /-! ### ⚠️ THE ISA SIDE — the `SLT` destination field, at the sample's strength -/
 
-/-- **The sampled certificate, unpacked.** `sltCirc_correct` gives the comparison
+/-- **The sampled certificate, unpacked.** `sltCirc_correct_on_sample` gives the comparison
 only for operands drawn from `bwWords`; this is that `List.all` read back as the
 statement it is. -/
 theorem sltDrive_eq_of_mem {a b : Word}
@@ -3735,7 +3735,7 @@ theorem wordOf_cmpWord (r : Bool) :
 field is what the `sltCirc` datapath computes, widened to 32 bits.
 
 ⚠️ **The two membership premises are not decoration: they are precisely the
-strength of `sltCirc_correct`, which checks 100 operand pairs.** *Deleting them
+strength of `sltCirc_correct_on_sample`, which checks 100 operand pairs.** *Deleting them
 needs a semantic theorem for `adder32`, which does not exist. Stating them makes
 the bridge true today and makes the debt visible to every caller.* -/
 theorem sltField_is_sltCirc (s : St) (rd x y : Fin 32) (hrd : rd ≠ 0)
@@ -3808,7 +3808,7 @@ theorem control_states_exist :
 **`adder32` carried `adder32_ssa` and `adder32_wf` and nothing else: structure,
 no semantics.** Its behavioural statements were `adder32_adds_on_sample` and
 `adder32_carry_out_on_sample`, at 49 ordered pairs of `addWords`; the SLT path's
-was `sub_via_adder_correct`, at 100 pairs of `bwWords`. *Both are tripwires and
+was `sub_via_adder_correct_on_sample`, at 100 pairs of `bwWords`. *Both are tripwires and
 neither is a theorem — 100 pairs is 5 × 10⁻¹⁸ of 2^64, and `Adder.lean`'s own
 docstring names the hazard they cannot catch: **"a generator producing the right
 cone shape and the wrong sum would pass every check here."***
@@ -4095,7 +4095,7 @@ theorem bwEnv_eq_adEnv (a b : Word) (n : Nat) : bwEnv a b n = adEnv a b false n 
 /-- ⭐⭐ **THE 32-BIT RIPPLE ADDER ADDS, ON ALL 2^64 OPERAND PAIRS** — the
 carry-in `bwEnv` supplies is `false`, so this is `a + b` outright. *This
 supersedes `adder32_adds_on_sample` and `adder32_carry_out_on_sample` (49 pairs
-of `addWords`) the way `sem_bitXor32` superseded `bitXor32_correct`: the
+of `addWords`) the way `sem_bitXor32` superseded `bitXor32_correct_on_sample`: the
 certificates are points of a theorem that now holds everywhere.* -/
 theorem sem_adder32 (a b : Word) :
     sem adder32 (bwEnv a b)
@@ -4136,7 +4136,7 @@ theorem sem_adder32_cout (a b : Word) :
 /-! #### ⭐ THE SUBTRACTION PATH, UNCONDITIONALLY
 
 *`subOut` is the SAME `adder32`, driven with `~~~b` and carry-in `1`. Its only
-previous statement was `sub_via_adder_correct` at 100 pairs — and that sample is
+previous statement was `sub_via_adder_correct_on_sample` at 100 pairs — and that sample is
 exactly what put `∈ bwWords` into `sltField_is_sltCirc`'s type.* -/
 
 theorem subEnv_eq (a b : Word) (n : Nat) :
