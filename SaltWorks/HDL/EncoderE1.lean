@@ -25,7 +25,7 @@ ruled pair. The silicon seat's published "**3 gates at the live `m = 3`**" is a
 `.const false`). At `b = 2` the three live ops necessarily **re-index** to codes
 `{0,1,2}` — slots `{0,4,5}` are not addressable in two bits — and then
 `c = [1,1]`: each bit has exactly one source, and a one-source OR reduction *is a
-wire* (`orChain_one`, `Program.lean:3643`; and `Circ.wf` accepts an output that
+wire* (`orChain_one`, `Program.lean:4562`; and `Circ.wf` accepts an output that
 is a primary input, `Syntax.lean:112` over `Circ.defined`, `Syntax.lean:88-90`).
 
 `e1Cost` below is the price formula, general in `(φ, b)`. It reproduces **all

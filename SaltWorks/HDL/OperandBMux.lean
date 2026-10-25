@@ -48,7 +48,7 @@ any of them surfaced — a passing build cannot report a hole in the bar.*
   port index — so the port axis stays length-free and ①″ is satisfied
   vacuously. *Ask what the ELEMENTS of the compared list are:* ports ⇒ pinned;
   cycles ⇒ not pinned by shape, go find a length fact.
-  *Why it exists:* proved on a sequential sibling — `xorPrev_trace`'s exact
+  *Why it exists:* shown in an 08-08 scratch on a sequential sibling — `xorPrev_trace`'s exact
   statement survives appending a port to the core, and what catches the wide
   machine is `Seq.wf`, not the certificate.
 
@@ -98,7 +98,7 @@ any of them surfaced — a passing build cannot report a hole in the bar.*
   is weaker still than that: its `nodupB` is applied to `c.gates.map Gate.out`
   — **the gates, not the port list** — so `wf` does not even require the ports
   to be distinct. A circuit naming one net twice in `outs` passes `wf` *and*
-  `ssa` (both kernel-checked). `Circ.ssa` bounds each port's net *number*, never
+  `ssa` (an 08-08 scratch checked both). `Circ.ssa` bounds each port's net *number*, never
   the port *count*. `Seq.wf` (`Seq.lean:60-61`) *does* carry the width
   (`core.outs.length == nOut + nState`), which is why sequential machines are
   pinned for free and combinational ones are not.
@@ -168,7 +168,7 @@ block author that the ground is covered. They are recorded here as limits.
   *spec*; it never requires the spec to be anchored to anything outside the
   file. In this module the anchor chain reaches `gsDrive2`/`wordOf` and stops.
   **A five-line counterfeit — a spec that agrees with a wrong circuit — passes
-  the whole bar, and ② is already proved for it.** The proposed repair ("the RHS
+  the whole bar (an 08-08 scratch, not a tracked theorem).** The proposed repair ("the RHS
   must mention an external identifier") is satisfied by the counterfeit too, so
   it is not shipped. *"The bar had the anchor in its hand and used it as a style
   guide."*
