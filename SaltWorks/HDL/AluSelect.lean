@@ -14,7 +14,7 @@ Emitter obligations ③ *(name each op result before an output select)* and ⑤
 survey. They live together because both are the ALU's tail and both are the same
 lever the barrel shifter turned out to need: **tree it, and name the levels.**
 
-## The numbers to beat, and where they come from
+## The numbers to beat at the old ten sources, and where they come from
 
 | block | silicon, treated | mechanism |
 |---|---:|---|
@@ -36,8 +36,8 @@ cut and the mux is left flat**. ⇒ **Treeing the select and naming its levels
 takes it to 3**, exactly as the log shifter took the shift from 11 to 3 — a
 2:1 mux has two sources and one select bit and nothing can be smaller.
 
-The select is padded from 10 op results to 16 with a shared constant, so the tree
-is a clean four-level binary one. **The padding costs one gate and is invisible
+The select is padded from 3 op results (`asOps`) to 4 (`asPad`) with a shared constant,
+so the tree is a clean two-level binary one. **The padding costs one gate and is invisible
 to the cone**, because the pad leaf is a `const` rather than an input.
 
 ## What is NOT claimed
@@ -132,31 +132,31 @@ theorem rsPair_is_the_ruled_pair : rsOps = 3 ∧ rsSelBits = 2 := by decide +ker
 #audit_axioms rsPair_admissible
 #audit_axioms rsPair_is_the_ruled_pair
 
-/-- Op result `r` bit `k` occupies net `r * 32 + k`; the four select bits follow. -/
+/-- Op result `r` bit `k` occupies net `r * 32 + k`; the two select bits follow. -/
 def asIn : Nat := asOps * asW + asSelBits
 def asRes (r k : Nat) : Net := r * asW + k
 def asSel (j : Nat) : Net := asOps * asW + j
 
-/-- The shared constant that pads 10 results to 16 leaves. One gate for the whole
+/-- The shared constant that pads 3 results to 4 leaves. One gate for the whole
 file, and **invisible to every cone** because it is a `const` and not an input. -/
 def asZero : Net := asIn
 /-- One inverter per select bit, shared by every mux at that level. -/
 def asNot (j : Nat) : Net := asIn + 1 + j
 
-/-- Level `j` of bit `k`'s tree has `16 / 2^(j+1)` muxes. -/
+/-- Level `j` of bit `k`'s tree has `asPad / 2^(j+1)` muxes. -/
 def asLevelWidth (j : Nat) : Nat := asPad / 2 ^ (j + 1)
-/-- Muxes below level `j`, per bit: 8 + 4 + 2 + 1. -/
+/-- Muxes below level `j`, per bit: 2 + 1 at the live pair. -/
 def asBelow : Nat → Nat
   | 0 => 0
   | j + 1 => asBelow j + asLevelWidth j
-/-- Every bit's tree is 15 muxes; three gates each. -/
+/-- Every bit's tree is `asPad - 1` = 3 muxes; three gates each. -/
 def asBase (k j i : Nat) : Nat :=
   asIn + 1 + asSelBits + (k * (asPad - 1) + asBelow j + i) * 3
 /-- **The named output of level `j`, position `i`, for bit `k`.** -/
 def asOut (k j i : Nat) : Net := asBase k j i + 2
 
 /-- What level `j` reads: level 0 reads the op results (padding with the shared
-constant above index 9), later levels read the level below. -/
+constant from index `asOps` up), later levels read the level below. -/
 def asPrev (k j i : Nat) : Net :=
   if j == 0 then (if i ≥ asOps then asZero else asRes i k)
   else asOut k (j - 1) i
@@ -167,7 +167,7 @@ def asMux (k j i : Nat) : List Gate :=
    ⟨asBase k j i + 1, .and (asPrev k j (2 * i + 1)) (asSel j)⟩,
    ⟨asOut k j i,      .or (asBase k j i) (asBase k j i + 1)⟩]
 
-/-- **The ALU output select**: 32 bits, each a four-level tree over 16 padded
+/-- **The ALU output select**: 32 bits, each a two-level tree over 4 padded
 sources. -/
 def aluSelect : Circ :=
   { nIn := asIn
@@ -231,7 +231,7 @@ partial def asCone (c : Circ) (cut : List Net) (n : Net) : List Net :=
           | none   => go f seen rest
   go 200000 [] [n]
 
--- ③ UNCUT: 10 op results + 4 select bits = 14, the seat's ENCODED figure.
+-- ③ UNCUT: 3 op results + 2 select bits = 5 (the seat's ENCODED 14 was at ten sources).
 #eval (asCone aluSelect [] (asOut 0 (asSelBits - 1) 0)).length
 
 -- ③ CUT AT EVERY LEVEL: a 2:1 mux is 2 sources + 1 select.  MEASURED: max 3.
@@ -250,7 +250,7 @@ partial def asCone (c : Circ) (cut : List Net) (n : Net) : List Net :=
           (asCone zeroTree (zeroTreeCuts.filter (· != zrOut j i)) (zrOut j i)).length
       ).foldl Nat.max 0
 
--- Cells: the select is 32 bits x 15 muxes; the reduction is 31 nodes.
+-- Cells: the select is 32 bits x 3 muxes; the reduction is 31 nodes.
 #eval (aluSelect.gates.length, muxCount aluSelect, zeroTree.gates.length)
 
 
@@ -263,7 +263,7 @@ safe to embed in `core`, and `wf` then follows for free.* -/
 
 theorem aluSelect_ssa : aluSelect.ssa = true := by decide +kernel
 
-/-- **`wf` by the structural route** (1,445 gates). -/
+/-- **`wf` by the structural route** (291 gates). -/
 theorem aluSelect_wf : aluSelect.wf = true := Circ.wf_of_ssa aluSelect_ssa
 
 
@@ -277,7 +277,7 @@ phase 3 retired the ladder. Left alone it would have named a deleted theorem AND
 asserted a literal pair the constants no longer hold — a docstring that survives a
 re-cut while its content does not.*
 
-*The block above is written at one width, and the semantics theorem
+*The block above was written at one width, and the semantics theorem
 (`sem_aluSelect`, math's `Stack/Program.lean`) was written at that width too —
 `329 + 45*k + 42`, `pfr (320 + j)`, `< 324`, and level 3 baked into the lemma
 names (`asV3_eq`, `asB3`, `asOut k 3 0`). So every theorem proved against
@@ -394,7 +394,7 @@ commit before this one, so that this deletion could go in green.* -/
 The behavioural theorems for both are `sem_operandBMux` and `sem_sliceASelect`
 (math, `Stack/Program.lean`), and the mutation control that makes the `n = 2`
 number mean something is `genSelectCut2` beside them — the same place
-`aluSelectCut` sits for the ten-source block.* -/
+`aluSelectCut` sat for the ten-source block until phase 3 retired it.* -/
 
 -- (gates, gates, muxes, muxes) for `n = 2` and `n = 3`. ⚠️ The 98 is the
 -- table's 97 PLUS the unconditional pad constant, dead at `n = 2^b`.
@@ -423,18 +423,18 @@ theorem genSelect_three_wf : (genSelect 3 2).wf = true := Circ.wf_of_ssa genSele
 
 /-! ## ⭐ DOES IT SELECT? — the behavioural certificate this file did not have
 
-**Before today this file carried NO theorems.** *It is a 1,445-gate mux tree that
+**Before today this file carried NO theorems.** *It was a 1,445-gate mux tree (291 now) that
 `core` depends on totally, and nothing said it picks the operand the select bits
 name.* ⇒ **Found by census after the same gap turned up in three other files
 (`docs/hdl-c4-core-assembly-plan-0807.md`).**
 
 *Driver: operand result `m` alone holds all-ones, so bit 0 of the output is
-`true` exactly when the tree selected `m`. One bit distinguishes all sixteen
+`true` exactly when the tree selected `m`. One bit distinguishes all `asPad`
 select values — which is what makes this total over the select space AND cheap.
 No division: one comparison per net, per the `ReadTree` lesson that output count
 multiplies `sem`'s dominant cost.* -/
 
-/-- Operand result `m` alone holds all-ones; the four select bits carry `sel`. -/
+/-- Operand result `m` alone holds all-ones; the two select bits carry `sel`. -/
 def asOneHot (m sel : Nat) : Env := fun n =>
   if n < asOps * asW then decide (m * asW ≤ n ∧ n < m * asW + asW)
   else decide (sel.testBit (n - asOps * asW))
@@ -483,8 +483,8 @@ them to "the selector selects" would be asserting something FALSE, not merely
 something unproven.*
 
 ✅ **SUPERSEDED — use `sem_aluSelect` (math, `SaltWorks/Stack/Program.lean`):
-unconditional over all 2^324 valuations and all 32 outputs, with
-`asSelectsOK_of_lt` recovering this predicate for the ten REAL operands as a
+unconditional over all 2^98 valuations and all 32 outputs, with
+`asSelectsOK_of_lt` recovering this predicate for the three REAL operands as a
 corollary.** *What follows is a tripwire. That is the theorem.*
 
 ⚠️ **AND THIS DOCSTRING USED TO READ "all sixteen select values,
@@ -500,8 +500,8 @@ every admissible pair, which is what a sample point has to be if it is written
 once and read after a re-cut.* -/
 theorem aluSelect_selects_on_sample : asSelectsOK 0 = true := by decide +kernel
 
-/-- …and again at the LAST real operand (`asOps - 1`; `sra`, index 9, at ten
-sources), so the first is not an accident of where one index sits in the tree.
+/-- …and again at the LAST real operand (`asOps - 1`: `slt`, index 2, at three sources;
+`sra`, index 9, at ten), so the first is not an accident of where one index sits in the tree.
 
 ⛔ **CORRECTED: this docstring used to claim "the 9/10 padding boundary is
 exercised". IT IS NOT.** *`asOps - 1` is the last point at which the predicate is
@@ -511,8 +511,8 @@ stops at the last good value is evidence about the good range, never about the
 edge — see the correction above.**
 
 📌 **WRITTEN AS `asOps - 1` SINCE PHASE 3, WHICH IS THE SAME POINT IT ALWAYS
-NAMED.** *At ten sources it still elaborates to `9`, so this certificate's
-content is unchanged and its kernel check is the same computation — but "the last
+NAMED.** *At ten sources it elaborated to `9`; at the live three it elaborates to
+`2`, so the kernel check is a new computation of the same meaning: "the last
 real operand" now tracks the constant instead of asserting a numeral about it,
 and the sentence above is what it means at every pair.* -/
 theorem aluSelect_selects_on_sample_last :
@@ -579,7 +579,7 @@ hand (`ScratchDeviceProbe.lean`) after math reported it, because it is a claim
 about a guarantee math authored and this seat certified:
 
 ```
-under the live attribute:
+under the live attribute, at the OLD pair (10, 4), before the phase-3 re-cut:
   asOps = 10 := rfl                  ⛔ Type mismatch     ← the device working
   asSelBits = 4 := rfl               ⛔ Type mismatch     ← the device working
   asOps = 10 := by decide +kernel    ✅ SUCCEEDS, [0 axioms]
@@ -601,7 +601,7 @@ Math's negative control confirms the device BITES — both examples MUST fail an
 do, `ScratchHINGECTL.lean`, re-verified after the phase-3 deletion (13:39, both
 failing with **Type mismatch**):
 ```
-CONTROL 1  gsPad asSelBits = asPad        := rfl   -- would be computing 16 = 2^4
+CONTROL 1  gsPad asSelBits = asPad        := rfl   -- would be computing 4 = 2^2
 CONTROL 2  gsIn asOps asSelBits = asIn    := rfl   -- would be computing 98 = 3*32+2
 ```
 **A device that cannot fail would prove nothing, and this one was tested against
