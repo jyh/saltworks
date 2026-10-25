@@ -40,7 +40,8 @@ input order*, and the ordering must come from off-chip — as it did in 1988.
 
 `banyan_fabric.v` and `bitserial_switch.v` are **generated into this repo**, not
 authored here: they live once upstream, because the same bytes are what the
-equivalence proof and the synthesis script read, and a second hand-maintained
+synthesis script reads (the element's equivalence proof reads its synthesized
+netlist; no proof reads the fabric's), and a second hand-maintained
 copy would drift. What you see in `src/` is that copy, made by a script.
 
 ## Checking it
