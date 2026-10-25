@@ -5,6 +5,7 @@ Authors: Jason Hickey, Claude
 -/
 import SaltWorks.Silicon.Refine.Loop
 import Mathlib.Logic.Basic
+import SaltWorks.Tactic.AuditAxioms
 
 /-!
 # AAU W4 — phase 3 of a FETCH loop, for every non-memory instruction
@@ -94,4 +95,6 @@ theorem fetch3_nonmem (σ : St) (b : BitVec 8) (s s' : EState) (d : Dec) (lw : W
         Arch.set, Arch.get, immI, immS, immB, immU, immJ, shamt, *, -ite_not]
        try (by_cases hz : BitVec.extractLsb' 7 5 iw = 0#5 <;> simp [hz])
        try (simp_all [Arch.get, immI, immS, immB, immU, immJ, shamt, -ite_not])))
+#audit_axioms bv3_five bv3_seven ext30 fetch3_nonmem
+
 end SaltWorks.Silicon.Refine.Model

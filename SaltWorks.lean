@@ -77,6 +77,16 @@ import SaltWorks.Silicon.Equiv.CERefinementC
 import SaltWorks.Silicon.Equiv.PartialLoad
 import SaltWorks.Silicon.Equiv.ScenarioComplete
 import SaltWorks.Silicon.Equiv.DmemAddr8Suppress
+import SaltWorks.Silicon.Refine.Statement
+import SaltWorks.Silicon.Refine.StatementChecks
+import SaltWorks.Silicon.Refine.Model
+import SaltWorks.Silicon.Refine.Emit
+import SaltWorks.Silicon.Refine.Loop
+import SaltWorks.Silicon.Refine.Step
+import SaltWorks.Silicon.Refine.Mem
+import SaltWorks.Silicon.Refine.Run
+import SaltWorks.Silicon.Refine.Inst
+import SaltWorks.Silicon.Refine.Main
 import SaltWorks.HDL.PayloadL0
 import SaltWorks.HDL.PayloadL1
 import SaltWorks.HDL.PayloadL2

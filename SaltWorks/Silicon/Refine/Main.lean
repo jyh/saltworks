@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Jason Hickey, Claude
 -/
 import SaltWorks.Silicon.Refine.Inst
+import SaltWorks.Tactic.AuditAxioms
 
 /-!
 # AAU — THE THEOREM: the fabricated core refines RV32I with erratum E
@@ -99,5 +100,8 @@ theorem reset_edge (σ : St) (sof : BitVec 1) (b : BitVec 8) :
     step σ ⟨0#1, sof, b⟩ = core32bus.reset (step σ ⟨0#1, sof, b⟩).regs := by
   simp [step, core32bus, n_pc, n_phase, n_kind, n_storeBeat, n_fetchOwed, n_inAcc, n_instrR, n_rdataR,
     lowRst, rstn, not1, k, Ex.eval, Sig.eval, T_FETCH]
+
+#audit_axioms core32bus_not_refinesRV32I core32bus_refinesE core_x2 flatMap_emit_len refines_k
+#audit_axioms reset_edge spec_x2
 
 end SaltWorks.Silicon.Refine

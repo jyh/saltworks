@@ -15,6 +15,10 @@ that statement.
 `import owed:` neither module is in the `SaltWorks.lean` hub yet. Both build by module name through
 `saltbuild.sh`.
 
+*(2026-10-25, evidence: the import is no longer owed. `SaltWorks.lean` now imports all ten
+`Silicon/Refine/` modules, and their 41 theorems carry `#audit_axioms` lines. The line above is kept
+as written on 10-06.)*
+
 ## The claim, in words
 
 Let `M` be the composed `core32` + `busadapt8` at `jyh/tt-neural-dataflow-fabric@01e19f7`, seen
