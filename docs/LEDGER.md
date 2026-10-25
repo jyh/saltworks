@@ -1001,6 +1001,8 @@ audited at 3 whitelisted axioms, **deleted, not committed, and leg 3's file was 
 touched**) — so the unblock is measured, not predicted. It closes in 8 lines from
 `eq_filter_range_of_pairwise_lt` plus the `testBit_maskOf` / `maskOf_lt` already in
 `ScenarioComplete.lean`; the proof text went to leg 3 in the handoff report.
+*(2026-10-25: `mem_allScenarios` is now proved in `ScenarioComplete.lean` itself, from
+the same lemma, and is on that file's `#audit_axioms` line.)*
 
 One incidental finding for the maestro, not acted on: **`SaltWorks/Silicon/Equiv/
 ScenarioComplete.lean` is not imported from `SaltWorks.lean`** — an import is owed,

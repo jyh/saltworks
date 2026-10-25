@@ -432,7 +432,7 @@ control: a mismatched pair must FAIL.
 | V1 | instOK per placed organ | pattern landed |
 | V2 | ONE coverage/disjointness theorem, whole die | pattern landed |
 | V3 | seam theorem per wire class | pattern landed |
-| V4 | routing certificates: `fabric_routes` LANDED for prefix-concentrated destination-monotone at P=8; the demo's own rounds = V10; completeness gate `mem_allScenarios` stated-unproved | restated |
+| V4 | routing certificates: `fabric_routes` LANDED for prefix-concentrated destination-monotone at P=8; the demo's own rounds = V10; completeness gate `mem_allScenarios` stated-unproved *(PROVED 2026-10-25 in `Silicon/Equiv/ScenarioComplete.lean`)* | restated |
 | V5 | signed activation discipline (explicit wordSignedOrder) | law landed |
 | V6 | ∀ st₀ power-gating for all new state (acc CLEAR discharges the acc bank's) | pattern landed |
 | V7 | emitSeq acceptance: flops==nState(64) · cells==gates+nState(289) · conb==const-count(0 for scCore by theorem) · assigns==outs(96) | NEW |
