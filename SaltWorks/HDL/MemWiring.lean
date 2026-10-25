@@ -26,7 +26,7 @@ behind it — an `ok` address has its low two bits clear and is `< 32`, so the w
 bits 2,3,4. Taking `addOut 0,1,2` would index by byte and alias every fourth word.
 
 **WRITE-ENABLE — `decOut 6`, and this seat has already been bitten by the neighbouring index.**
-`CorePlace.lean:409` records the decoder's output order verbatim —
+`CorePlace.lean:1096` records the decoder's output order verbatim —
 `isADD isXOR isSLT isADDI isBEQ isLW isSW req valid` — **so `isSW` is 6 and `isLW` is 5.** Reading
 a bare index here was a real landed defect, kernel-proved at `a10f980` and repaired
 2026-08-19: `regWriteSig` fed `regWrite`'s `valid` port from `decOut 5` (`isLW`) when `decOut 8`
@@ -50,7 +50,7 @@ in §4, which is not the same thing as proved.
 
 -- The 32-fold `interval_cases k <;> decide +kernel` in §2 evaluates `readTree`'s placed output
 -- list once per bit. The tree's established budget for kernel-decided placement work —
--- CoreAssembly.lean:31, EnableX0.lean:58, C4Refuted.lean:58 all carry the same line.
+-- CoreAssembly.lean:31, EnableX0.lean:63, C4Refuted.lean:107 all carry the same line.
 set_option maxHeartbeats 4000000
 
 namespace SaltWorks.HDL.MemWiring
