@@ -103,7 +103,7 @@ theorem bnC_seam_runNet (st : List Bool) (tr : List (List Bool))
 
 /-! ## 4. The composed conclusion -/
 
-/-- ⭐⭐⭐ **THE COMPOSED SWITCH, ON THE FABRICATED SORTER.** `ElemSortsAt` is
+/-- ⭐⭐⭐ **THE COMPOSED SWITCH, ON THE HARDENED SORTER.** `ElemSortsAt` is
 still a hypothesis — J1 supplies it; the address bound is discharged by the
 decoder's own arithmetic. -/
 theorem composed_switch_of_bnC_seam (st : List Bool) (tr : List (List Bool))
