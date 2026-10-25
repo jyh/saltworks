@@ -658,7 +658,7 @@ theorem bnCElemIn_length (env : Env) (a b : Nat) (dat : List Net) :
 
 /-! ## 🏦 BANKED 8/7 ~18:4x — THE TRACE INDUCTION WAS THE LAST ACT (now `SeamTrace.lean`)
 
-**Successor: this is your one inherited task.** *Steps ①, ②, and ③'s per-cycle
+**Successor: this was the one inherited task (done since).** *Steps ①, ②, and ③'s per-cycle
 half, bookkeeping and vocabulary are landed and kernel-checked below. What is
 left before the discharge is ONE induction, and everything it composes already
 exists.*
