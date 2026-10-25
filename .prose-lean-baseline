@@ -53,8 +53,6 @@ f1197e6c56f9	README.md	lexicon-e2
 49240c1e3bde	SaltWorks/Silicon/Sim/d1t/README.md	lexicon-e2
 6ea15ccb8642	SaltWorks/Silicon/Sim/d1t/README.md	lexicon-e2
 dba402716466	SaltWorks/Silicon/Sim/d1t/README.md	lexicon-e2
-27c53423c927	SaltWorks/Silicon/TT/README.md	lexicon-e2
-dcd4eab673c6	SaltWorks/Silicon/TT/README.md	lexicon-e2
 1b4524cdfd6c	SaltWorks/Silicon/TTNDF/README.md	lexicon-e2
 ffa9e651c9d7	SaltWorks/Silicon/TTNDF/README.md	lexicon-e2
 396f564c9f09	docs/hdl-c3-probe-verdict-0807.md	lexicon-e2
@@ -68,7 +66,6 @@ fb6a20c2fe8b	docs/hdl-tools/README.md	lexicon-e2
 a951cd35b6b0	docs/ledger-tools/README.md	lexicon-e2
 23316cdf1cac	docs/provenance/s2/README.md	lexicon-e2
 f5adce590675	docs/provenance/s2/README.md	lexicon-e2
-ac915a0c6698	docs/silicon-R3-regfile-0806.md	lexicon-e2
 # lexicon epoch 3 (R2, council 2026-10-22 item 3): Lean docstring claim sentences, gated from epoch 3 and accepted as debt by the WIDENING arm; class docstring-cited marks a declaration a public carrier names (read those first).
 19c20a2428c4	SaltWorks/Certs/All.lean	docstring
 2077bd6b904e	SaltWorks/Certs/All.lean	docstring
@@ -152,7 +149,6 @@ b179630a67d4	SaltWorks/HDL/C4Refuted.lean	docstring-cited
 b80b65af4040	SaltWorks/HDL/Cell1988.lean	docstring
 bd34dd61940f	SaltWorks/HDL/Cell1988.lean	docstring
 ea4f2b1941f6	SaltWorks/HDL/Cell1988.lean	docstring
-719b803e889e	SaltWorks/HDL/CodegenSpec.lean	docstring
 530efca70702	SaltWorks/HDL/CompareExchange.lean	docstring
 9c9c79cf1eb3	SaltWorks/HDL/CompareExchange.lean	docstring-cited
 067d8d5f973b	SaltWorks/HDL/CompareExchangeC.lean	docstring
@@ -202,10 +198,6 @@ abd93f869744	SaltWorks/HDL/Decoder.lean	docstring
 3e431185c2e1	SaltWorks/HDL/DecoderTransport.lean	docstring
 86434824e0d6	SaltWorks/HDL/DecoderTransport.lean	docstring
 cd1b50c6b506	SaltWorks/HDL/DecoderTransport.lean	docstring
-034cec5c1419	SaltWorks/HDL/EmitN.lean	docstring
-12d2841bf877	SaltWorks/HDL/EmitN.lean	docstring
-1864c6f012f8	SaltWorks/HDL/EmitN.lean	docstring
-253f0ec5d7e4	SaltWorks/HDL/EmitN.lean	docstring
 4c0acda028c9	SaltWorks/HDL/EmitS.lean	docstring
 f607372f2738	SaltWorks/HDL/EmitS.lean	docstring
 1d59fe5e9f35	SaltWorks/HDL/EmitV.lean	docstring
@@ -219,11 +211,7 @@ ec7d264bf543	SaltWorks/HDL/EncoderE1.lean	docstring
 5caa44194af4	SaltWorks/HDL/GenSelectCount.lean	docstring
 a0ef2086a94a	SaltWorks/HDL/GenSelectCount.lean	docstring
 bc4a03469474	SaltWorks/HDL/GenSelectCount.lean	docstring-cited
-5ce4217a63a1	SaltWorks/HDL/ISA.lean	docstring
-6fb021611118	SaltWorks/HDL/ISA.lean	docstring
-782ce9bf036e	SaltWorks/HDL/ISA.lean	docstring
 a9173fd2d981	SaltWorks/HDL/ISA.lean	docstring
-f3066d58d613	SaltWorks/HDL/ISA.lean	docstring
 f1900d97f3a3	SaltWorks/HDL/LwTrapRefuted.lean	docstring
 824c5de3b0ab	SaltWorks/HDL/LwWitnessD.lean	docstring
 1d650933eee2	SaltWorks/HDL/MacBridge.lean	docstring
@@ -289,8 +277,6 @@ e973d3e85307	SaltWorks/HDL/RegFieldSchema.lean	docstring
 fcf9e4c420d2	SaltWorks/HDL/RegNext.lean	docstring-cited
 00912fef8fc4	SaltWorks/HDL/RegNextUniform.lean	docstring
 c5e38d2674e5	SaltWorks/HDL/RegNextUniform.lean	docstring
-9fce3830c61b	SaltWorks/HDL/Renumber.lean	docstring
-f6447cc7b166	SaltWorks/HDL/Renumber.lean	docstring
 2f4ef773f382	SaltWorks/HDL/ReqWordSource.lean	docstring
 a81cfc48aa35	SaltWorks/HDL/RotationInvariant.lean	docstring
 0779a538ddf5	SaltWorks/HDL/SeamC.lean	docstring
@@ -356,7 +342,6 @@ fce98318fbaf	SaltWorks/HDL/Syntax.lean	docstring
 3887f012728a	SaltWorks/Silicon/Equiv/BitSliced.lean	docstring
 40586ede507b	SaltWorks/Silicon/Equiv/ComparatorEquiv.lean	docstring
 d8f8e191b960	SaltWorks/Silicon/Equiv/ComparatorEquiv.lean	docstring
-55f6c47c1051	SaltWorks/Silicon/Equiv/FabricRoutes.lean	docstring
 2a38cd23d7d7	SaltWorks/Silicon/Equiv/PartialLoad.lean	docstring
 b18b236cc4ab	SaltWorks/Silicon/Equiv/PartialLoad.lean	docstring
 3d58e959b875	SaltWorks/Silicon/Equiv/ScenarioComplete.lean	docstring

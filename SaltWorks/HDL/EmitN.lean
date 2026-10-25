@@ -301,8 +301,8 @@ theorem runP_ssaFrom (ins : Env) :
 /-- **T2 — `emitN_sem`.** The netlist normal form's evaluator agrees with `sem`,
 output for output, at every input valuation.
 
-The one hypothesis is `Circ.ssa`, a `Bool`, discharged for every construction in
-this leg by `decide +kernel` below. -/
+The one hypothesis is `Circ.ssa`, a `Bool`, discharged for six named circuits and
+`fabric 3` by `decide +kernel` below. -/
 theorem emitN_sem (c : Circ) (h : c.ssa = true) (ins : Env) :
     c.outs.map (fun n => (Silicon.runP ins [] (emitN c)).getD n false) = sem c ins := by
   rw [Circ.ssa, Bool.and_eq_true] at h
@@ -391,7 +391,7 @@ pinned by a kernel-checked value and not only by a theorem. -/
 theorem emitN_halfAdder :
     emitN halfAdder = [.inp 0, .inp 1, .xor 0 1, .and 0 1] := by decide +kernel
 
-/-! ## Every construction in this leg is emittable — kernel-checked -/
+/-! ## Emittable, kernel-checked: six named circuits of this leg, and `fabric 3` -/
 
 theorem halfAdder_ssa : halfAdder.ssa = true := by decide +kernel
 theorem withDead_ssa : withDead.ssa = true := by decide +kernel
@@ -408,9 +408,9 @@ theorem fabric3_ssa : (fabric 3).ssa = true := by decide +kernel
 
 A precondition nobody can violate proves nothing, and `emitN_sem` would be
 satisfied by a circuit with no outputs. `Circ.ssa` has three conjuncts, and each
-gets a circuit below that violates **only** that one and on which the two
-evaluators then genuinely disagree: `opt withMidDead` (density), `denseButUnordered`
-(fanin ordering), `outOfRange` (the port list). All are `decide +kernel`
+gets a circuit below that violates it and on which the evaluators disagree: `opt withMidDead`
+(density, and the port list too: net 4 is past the end), `denseButUnordered` (fanin ordering),
+`outOfRange` (the port list alone, `outOfRange_ssaFrom_but_not_ssa`). All are `decide +kernel`
 refutations, not warnings. -/
 
 /-- Dense, well-named, and it reads a net that does not exist yet. -/
@@ -467,7 +467,7 @@ theorem outOfRange_ssaFrom_but_not_ssa :
 
 /-- …and dropping it is not free: `sem` reads the input valuation at net 7, the
 netlist reads past the end of its environment. Every conjunct of the emission
-precondition now has a kernel-checked circuit that violates only it. -/
+precondition now has a kernel-checked circuit that violates it. -/
 theorem outOfRange_emitN_wrong :
     outOfRange.outs.map
         (fun n => (Silicon.runP (fun _ => true) [] (emitN outOfRange)).getD n false)

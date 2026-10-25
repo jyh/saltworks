@@ -8,7 +8,8 @@
 #
 # WHY THIS EXISTS RATHER THAN A CHECKED-IN COPY OF THE RTL: the fabric and the
 # switch element live in ONE place, `SaltWorks/Silicon/RTL/`, because that is the
-# source the Lean equivalence proof and the synthesis script both read. A second
+# source the synthesis script reads (the element's Lean proof reads the netlist
+# synthesized from it; no proof reads the fabric). A second
 # committed copy under `src/` would be a copy a human maintains, and a copy a
 # human maintains drifts. This script makes the copy instead, every time, so the
 # submission tree is derived rather than asserted.
