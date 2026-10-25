@@ -6,6 +6,7 @@ Authors: Jason Hickey, Claude
 import Mathlib
 
 import SaltWorks.Silicon.Equiv.FabricRoutes
+import SaltWorks.Stack.Perm
 import SaltWorks.Tactic.AuditAxioms
 
 /-!
@@ -67,33 +68,31 @@ theorem maskOf_lt {ds : List Nat} (hlt : ∀ d ∈ ds, d < 8) : maskOf ds < 256 
       have := Nat.or_lt_two_pow (n := 8) h1 h2
       simpa [maskOf] using this
 
-/-! ## ⚠️ THE REMAINING STEP, stated exactly and NOT proved here
+/-! ## The bridge
 
-The bridge itself:
+Any strictly increasing, non-empty list of destinations below 8 is one of the 255
+scenarios. Its mask `maskOf ds` is below 256 (`maskOf_lt`), and `testBit_maskOf`
+gives `(List.range 8).filter (testBit (maskOf ds))` the same members as `ds`; two
+strictly increasing lists with the same members are equal, which is
+`SaltWorks.Stack.eq_filter_range_of_pairwise_lt` (`Stack/Perm.lean`).
 
-```lean
+The **abstract** lane (`banyan_selfrouting_of_sorts_bool`) does not need this. The
+**hardware** lane does, because `fabric_routes` is the only theorem that speaks
+about the imported gate netlist. -/
+
+/-- **`allScenarios` is complete:** every strictly increasing, non-empty list of
+destinations below 8 is one of its 255 members. -/
 theorem mem_allScenarios {ds : List Nat}
     (hs : ds.Pairwise (· < ·)) (hne : ds ≠ []) (hlt : ∀ d ∈ ds, d < 8) :
-    ds ∈ allScenarios
-```
+    ds ∈ allScenarios := by
+  have hds : ds = (List.range 8).filter (fun i => Nat.testBit (maskOf ds) i) :=
+    SaltWorks.Stack.eq_filter_range_of_pairwise_lt hs fun i => by
+      rw [testBit_maskOf]
+      exact ⟨fun h => ⟨hlt i h, h⟩, fun h => h.2⟩
+  unfold allScenarios
+  rw [List.mem_filter, List.mem_map]
+  exact ⟨⟨maskOf ds, List.mem_range.2 (maskOf_lt hlt), hds.symm⟩, by simpa using hne⟩
 
-**The mathematical content is complete above**: `maskOf ds < 256` and
-`testBit (maskOf ds) i ↔ i ∈ ds` are proved, and they give
-`(List.range 8).filter (testBit (maskOf ds))` the same membership as `ds`. What
-remains is one step — *two lists, both strictly increasing, with the same
-members, are equal* — and I stopped rather than guess Mathlib lemma names at
-this pin. ⚠️ **`List.Sorted` does not exist here** (it is `List.Pairwise`), and
-`List.eq_of_perm_of_sorted` does not resolve either.
-
-📌 **MATH: this is a one-line ask for you and a name-hunt for me** — the
-`Pairwise (· < ·)` + same-members ⇒ equal lemma, at this pin. Everything it needs
-is above it.
-
-⚠️ **And which lane needs it, restated because it decides whether it is on the
-critical path at all:** the **abstract** lane (`banyan_selfrouting_of_sorts_bool`)
-does **not** need this. The **hardware** lane does, because `fabric_routes` is the
-only theorem that speaks about the imported gate netlist. -/
-
-#audit_axioms testBit_maskOf maskOf_lt
+#audit_axioms testBit_maskOf maskOf_lt mem_allScenarios
 
 end SaltWorks.Silicon.Imported
