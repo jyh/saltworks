@@ -47,7 +47,7 @@ paragraph is where a reader disagrees with me.*
 ## THE ONE GATE THIS CELL ADDS OF ITS OWN
 
 `adder32.nIn = 65` and net `64` is a real carry-in **port**, so something below the instance has to
-hold `false`. That is the `pcAdd` precedent (`Program.lean:4240-4243`) and the core assembly's row-0
+hold `false`. That is the `pcAdd` precedent (`Program.lean:5163-5166`) and the core assembly's row-0
 tie cells: a constant is not decoration, it is the only way an instantiated adder gets a carry-in.
 -/
 
@@ -166,7 +166,7 @@ theorem no_constant_gates_remain :
 The per-cycle BitVec theorem — `stepSeq macSeq st inp = (bits of (acc + addend), same)` — is the
 next lemma and it is the real bridge. Its shape is fixed by what already exists:
 
-* `sem_adder32_gen` (`Program.lean:3147`) certifies `sem adder32 (adEnv a b cin)` as BitVec addition;
+* `sem_adder32_gen` (`Program.lean:4035`) certifies `sem adder32 (adEnv a b cin)` as BitVec addition;
 * `inst_sem` (`Compose.lean:397`) needs `hin : ∀ i < c.nIn, envN (σ i) = envC i`;
 * the `hin` clause splits three ways here — the `a` port reads the state, the `b` port reads the
   primary inputs, and **the carry-in reads a GATE, not an input**, so it needs the frame argument

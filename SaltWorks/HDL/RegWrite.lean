@@ -43,7 +43,7 @@ namespace SaltWorks.HDL
 
 open SaltWorks.ISA
 
-/-! ### Layout: `rd` on `0…4`, `valid` on `5`, `isBEQ` on `6`. -/
+/-! ### Layout: `rd` on `0…4`, `isADD` on `5` (was `valid`), `isBEQ` on `6`, more on `7…10`. -/
 
 /-! ⛔⛔ **REPAIRED 2026-08-19 — `valid` WAS THE SECOND ENABLE DEFECT.** This organ took `valid`
 on port 5 and computed `wrEn = valid ∧ ¬isBEQ`. **`valid` means "DECODES", not "writes a
