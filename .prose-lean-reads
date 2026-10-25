@@ -1,4 +1,7 @@
 # a claim record: id, path, claim-sha12, lean-decl (<tracked .lean path>::<name>), stmt-sha12, author, reader, date  -- see scripts/check_prose_lean.py
+evidence-sw-2026-10-25-01	README.md	2a1f6bf9dde6	SaltWorks/Silicon/Refine/Main.lean::core32bus_refinesE	2a5bcc9ff27a	evidence	paper	2026-10-25
+evidence-sw-2026-10-25-02	README.md	36137e3fc72c	SaltWorks/Silicon/Refine/Main.lean::core32bus_refinesE	2a5bcc9ff27a	evidence	paper	2026-10-25
+evidence-sw-2026-10-25-03	README.md	edd60f5f24ab	SaltWorks/Silicon/Refine/Main.lean::core32bus_refinesE	2a5bcc9ff27a	evidence	paper	2026-10-25
 o88-sw-2026-10-24-02	SaltWorks/Silicon/Equiv/BitSliced.lean	37c2c5c18159	SaltWorks/Silicon/Equiv/BitSliced.lean::reflect	07ca5bb36205	paper	math	2026-10-24
 o88-sw-2026-10-24-03	SaltWorks/Silicon/Equiv/BitSliced.lean	48425486edb6	SaltWorks/Silicon/Equiv/BitSliced.lean::reflect	07ca5bb36205	paper	math	2026-10-24
 o88-sw-2026-10-24-04	SaltWorks/HDL/Sem.lean	963190c0da74	SaltWorks/HDL/Sem.lean::halfAdder_correct	f2768a641562	paper	math	2026-10-24

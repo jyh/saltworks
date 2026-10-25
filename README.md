@@ -27,6 +27,29 @@ checks, is
 The three defects, their causes and measured software workarounds are in
 [`docs/ERRATUM-core32-2026-10-05.md`](docs/ERRATUM-core32-2026-10-05.md).
 
+### Addendum, 2026-10-25
+
+The correction above was true on its date and is kept as written. Since
+2026-10-06, after submission, a Lean theorem does relate a model of the core to
+the fabricated design. `core32bus_refinesE : RefinesE core32bus`, in
+[`SaltWorks/Silicon/Refine/Main.lean`](SaltWorks/Silicon/Refine/Main.lean), is
+about `core32bus`, a Lean transcription of the core and its bus adapter at
+`jyh/tt-neural-dataflow-fabric@01e19f7`. `RefinesE` says that, for the 31 in-scope
+RV32I instructions with `sof` held low, the machine's pins and architectural state
+match RV32I with erratum E: SRA and SRAI shift logically, and LW returns the word
+of the previous load. Two SAT checks tie the transcription to the fabricated RTL
+([`run_link.sh`](SaltWorks/Silicon/Formal/refine_link/run_link.sh)) and that RTL
+to the signed-off netlist
+([`run_w5.sh`](SaltWorks/Silicon/Formal/refine_w5/run_w5.sh)). They trust yosys's
+reading of the Verilog, the model's printer, the cell library and ABC, and neither
+reaches the layout. The control `core32bus_not_refinesRV32I` shows that the same
+machine does not refine plain RV32I. The scope, the limits and the statement's
+non-author read are in
+[`docs/silicon-aau-result-1006.md`](docs/silicon-aau-result-1006.md) and
+[`docs/silicon-aau-statement-1006.md`](docs/silicon-aau-statement-1006.md). This
+is a theorem about the design as fabricated, with its defects; it does not change
+the finding above that the core was not verified before tapeout.
+
 ## The stack, layer by layer
 
 | Layer | Where | What is proved |
@@ -34,7 +57,7 @@ The three defects, their causes and measured software workarounds are in
 | Application | [`SaltWorks/Stack/`](SaltWorks/Stack/) | application programs and their specifications, with the bridge theorems connecting them to the layers below |
 | Compiler | [`SaltWorks/HDL/`](SaltWorks/HDL/) | the verified compiler from expressions, straight-line code and loops (no conditionals) to the ISA, with the ISA semantics; separately, the circuit DSL with its optimiser proved semantics-preserving (`opt_sem`), whose Verilog printer is untrusted by design and checked downstream by SAT equivalence |
 | Executive | [`SaltWorks/HDL/`](SaltWorks/HDL/) | the executive's isolation theorems (`Executive*.lean`), with the certificate restatement in [`SaltWorks/Certs/`](SaltWorks/Certs/) |
-| CPU / silicon | [`SaltWorks/Silicon/`](SaltWorks/Silicon/) | the flow, the netlist importer, and SAT-checked equivalence at the silicon boundary; its proofs cover the MAC cells, not the RISC-V core |
+| CPU / silicon | [`SaltWorks/Silicon/`](SaltWorks/Silicon/) | the flow, the netlist importer, and SAT-checked equivalence at the silicon boundary; its proofs cover the MAC cells and, since 2026-10-06, the RISC-V core against RV32I with erratum E (`core32bus_refinesE`; see the addendum above) |
 | The switch | [`SaltWorks/Banyan/`](SaltWorks/Banyan/) | the Batcher–banyan self-routing switch, sort-then-route closed end to end |
 | Certificates | [`SaltWorks/Certs/`](SaltWorks/Certs/) | the comprehensibility layer: headline theorems restated in primitive vocabulary, the restatement kernel-proved equivalent |
 
