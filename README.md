@@ -49,8 +49,9 @@ Silicon-lane readers can start at the `silicon-*` documents under
 
 - [`SaltWorks/`](SaltWorks/) — a Lean 4 library: the machine-checked artifacts
   of the program (definitions, theorems, and the audit stanzas that certify
-  them). `lake build` replays the kernel's check of every module `SaltWorks.lean` imports; the 12 files of
-  `SaltWorks/Silicon/Refine/` and `SaltWorks/Silicon/Formal/` are not imported and build only by name.
+  them). `lake build` replays the kernel's check of every module except the two
+  generator scripts under `SaltWorks/Silicon/Formal/`, which write Verilog and
+  test vectors when run and so build only by name.
 - [`docs/`](docs/) — the program's registers and records: preregistrations,
   evidence ledgers, design documents, and seat records, kept as the work
   happened.
@@ -145,8 +146,8 @@ live in `docs/`, and they are read differently:
   design.
 - **Design documents** (`*-design-*.md`, the `aim-high-*` series): what each
   campaign intended, written before it ran. Provenance travels in the
-  library's audit stanzas: outside `SaltWorks/Silicon/Refine/`, whose 41 results carry no audit line, every public
-  result is roll-called with its axiom audit, and `lake build` replays the certification.
+  library's audit stanzas: every public result is roll-called with its axiom
+  audit, and `lake build` replays the certification.
 
 The submission-state snapshot of this repository is preserved as an annotated
 tag and a release bundle; the default branch continues past it as the program

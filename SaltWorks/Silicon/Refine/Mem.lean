@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Jason Hickey, Claude
 -/
 import SaltWorks.Silicon.Refine.Step
+import SaltWorks.Tactic.AuditAxioms
 
 /-!
 # AAU W4 — LW and SW: decode inversion, and phase 3 of the FETCH, LOAD and STORE loops
@@ -141,5 +142,8 @@ theorem out_storeD (σ : St) (b : BitVec 8) (iw : W) (hk : σ.kind = 3#2) (hsb :
     (hir : σ.instrR = iw) (h1 : iw.extractLsb' 0 7 = 35#7) (h2 : iw.extractLsb' 12 3 = 2#3) :
     out_word.eval σ (run b) = Arch.get ⟨σ.pc, σ.regs⟩ (iw.extractLsb' 20 5) := by
   coresimp
+
+#audit_axioms acc32_fetch3 c_instr_held decode_lw decode_sw fetch3_lw fetch3_sw load3 out_fetch
+#audit_axioms out_load out_storeA out_storeD store3a store3d
 
 end SaltWorks.Silicon.Refine.Model

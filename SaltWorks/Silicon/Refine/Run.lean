@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Jason Hickey, Claude
 -/
 import SaltWorks.Silicon.Refine.Mem
+import SaltWorks.Tactic.AuditAxioms
 
 /-!
 # AAU W4 — loops in time: `runFrom`, the assembled word, the boundary invariant, the pins per cycle
@@ -120,5 +121,8 @@ theorem loop_pins (σ : St) (h : Nat → BitVec 8) (c : Nat) (K : Kind) (w : W)
   obtain ⟨h1, h2, h3, h4, h5, h6, -⟩ := lowk σ h c i hp (by omega)
   rw [out_at, hw _ h2 h3 h4 h5 h6, h1, h4, hk]
   rcases (by omega : i = 0 ∨ i = 1 ∨ i = 2 ∨ i = 3) with rfl | rfl | rfl | rfl <;> simp [Loop.emit]
+
+#audit_axioms acc_bytes assemble_hostWord inv_reset loop_pins low3 lowk out_at runFrom_add
+#audit_axioms runFrom_succ
 
 end SaltWorks.Silicon.Refine.Model

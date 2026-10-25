@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Jason Hickey, Claude
 -/
 import SaltWorks.Silicon.Refine.Run
+import SaltWorks.Tactic.AuditAxioms
 
 /-!
 # AAU W4 — one instruction, every class
@@ -194,5 +195,7 @@ theorem inst_step (σ : St) (s : EState) (h : Nat → BitVec 8) (c : Nat) (hinv 
             show c + 8 + (i - 4 - 4) = c + i by omega] at e
           exact e
 
+
+#audit_axioms acc32_word aligned_add4 aligned_id emit_len exec_facts inst_step
 
 end SaltWorks.Silicon.Refine

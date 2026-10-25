@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Jason Hickey, Claude
 -/
 import SaltWorks.Silicon.Refine.Model
+import SaltWorks.Tactic.AuditAxioms
 
 /-!
 # AAU W3 — the bus loop: phases 0, 1, 2 and the pins they drive
@@ -51,5 +52,7 @@ theorem step_low (σ : St) (b : BitVec 8) (hp : σ.phase ≠ 3#2) :
     | simp [n_pc, n_phase, n_kind, n_storeBeat, n_fetchOwed, n_instrR, n_rdataR, lowRst, rstn,
         sof, pc_q, phase, kind, storeBeat, loop_end, eqk, k, and1, or1, not1, Ex.eval, Sig.eval, hp, hr,
         hia, hmr]
+
+#audit_axioms run_add step_low
 
 end SaltWorks.Silicon.Refine.Model
