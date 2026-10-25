@@ -118,7 +118,7 @@ theorem immICirc_outs_len : immICirc.outs.length = 32 := by decide +kernel
 `RegNext.lean:203-207` measures `regNext.outs.length` with `#eval` and labels the
 measurement "MEASURED, not proved … nothing should cite them as if they were".
 The number is nonetheless *proved* elsewhere: `sem_regNextN`
-(`Stack/Program.lean:7209`) is a whole-list equality universal in `R` and `W`, so
+(`Stack/Program.lean:8019`) is a whole-list equality universal in `R` and `W`, so
 it pins `(regNextN R W).outs.length = R * W`. This states the shipping
 instance. -/
 
@@ -141,7 +141,7 @@ It is worth having — a future certificate can cite it — but it is the *least
 of what these two blocks are missing, and citing it as coverage would be the
 `①″`-by-luck failure one level down. -/
 
-/-- `AluSelect.lean:135`. A single port: the root of the 5-level OR reduction.
+/-- `AluSelect.lean:206`. A single port: the root of the 5-level OR reduction.
 ⚠️ **UNCERTIFIED BLOCK** — see the section header. -/
 theorem zeroTree_outs_len : zeroTree.outs.length = 1 := by decide +kernel
 
@@ -152,8 +152,8 @@ theorem priorityEnc_outs_len : priorityEnc.outs.length = 5 := by decide +kernel
 /-! ## What is deliberately NOT here
 
 * **`genSelect n b` and `aluSelect`** — `genSelect_outs_eq`
-  (`Stack/Program.lean:5642`) is `rfl` and pins the port list at *every* `(n,b)`;
-  `aluSelect_outs_eq` (`:5754`) likewise. A `decide +kernel` cert here would be
+  (`Stack/Program.lean:6307`) is `rfl` and pins the port list at *every* `(n,b)`;
+  `aluSelect_outs_eq` (`:6484`) likewise. A `decide +kernel` cert here would be
   strictly weaker than what exists.
 * **`obMux` (32), `bnCore` (64), `bnCCore` (104), `ceCcore` (6), `fabric 3` (8),
   `genSelect 3 2` (32)** — all already carry an explicit kernel-proved

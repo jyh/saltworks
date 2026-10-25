@@ -175,10 +175,8 @@ aee961d45fdf	SaltWorks/HDL/EnableNonWriters.lean	docstring
 5a2fa8f8a1ea	SaltWorks/HDL/EncoderE1.lean	docstring
 ec7d264bf543	SaltWorks/HDL/EncoderE1.lean	docstring
 11c1547f333e	SaltWorks/HDL/Executive.lean	docstring
-1ea60512d91c	SaltWorks/HDL/GenSelectCount.lean	docstring
 40c7a5584c33	SaltWorks/HDL/GenSelectCount.lean	docstring-cited
 5caa44194af4	SaltWorks/HDL/GenSelectCount.lean	docstring
-a0ef2086a94a	SaltWorks/HDL/GenSelectCount.lean	docstring
 bc4a03469474	SaltWorks/HDL/GenSelectCount.lean	docstring-cited
 a9173fd2d981	SaltWorks/HDL/ISA.lean	docstring
 f1900d97f3a3	SaltWorks/HDL/LwTrapRefuted.lean	docstring
@@ -202,18 +200,8 @@ a109c3b5b6d8	SaltWorks/HDL/MemPortCorrespondence.lean	docstring
 857d77591e68	SaltWorks/HDL/MemWiring.lean	docstring
 95e5d5cd0b09	SaltWorks/HDL/MemWiring.lean	docstring
 a21459352588	SaltWorks/HDL/NetlistBridge.lean	docstring
-0a17f2b71ef2	SaltWorks/HDL/OperandBMux.lean	docstring
 111ae4b6adbb	SaltWorks/HDL/OperandBMux.lean	docstring
-20d9668a6a64	SaltWorks/HDL/OperandBMux.lean	docstring
 3cfb9a0e8d6e	SaltWorks/HDL/OperandBMux.lean	docstring
-417591405d2a	SaltWorks/HDL/OperandBMux.lean	docstring
-44ccabf2778e	SaltWorks/HDL/OperandBMux.lean	docstring
-537a06ae3e98	SaltWorks/HDL/OperandBMux.lean	docstring
-5ac8fdbe16c0	SaltWorks/HDL/OperandBMux.lean	docstring
-63f8a13e2f3b	SaltWorks/HDL/OperandBMux.lean	docstring
-be280438306d	SaltWorks/HDL/OperandBMux.lean	docstring
-d8d692e88c43	SaltWorks/HDL/OperandBMux.lean	docstring
-e7d72d09d36a	SaltWorks/HDL/OperandBMux.lean	docstring
 f80b27d3b153	SaltWorks/HDL/OperandBMux.lean	docstring
 8fd0dcaa8d17	SaltWorks/HDL/OperandBWidening.lean	docstring
 3037a1f3d0e7	SaltWorks/HDL/PartialLift.lean	docstring
@@ -234,9 +222,6 @@ e8584fe3db57	SaltWorks/HDL/PayloadL0.lean	docstring
 668f1622cc19	SaltWorks/HDL/PayloadRefutations.lean	docstring
 8710cb456aa0	SaltWorks/HDL/PayloadRefutations.lean	docstring
 d2a59b2e60b1	SaltWorks/HDL/PcTransport.lean	docstring
-4f663a98f82e	SaltWorks/HDL/PortLengths.lean	docstring
-68b8fd805582	SaltWorks/HDL/PortLengths.lean	docstring
-b7ab2bcc8e11	SaltWorks/HDL/PortLengths.lean	docstring
 52b577f9d419	SaltWorks/HDL/RegField0.lean	docstring
 ab52e375a271	SaltWorks/HDL/RegFieldSchema.lean	docstring
 e973d3e85307	SaltWorks/HDL/RegFieldSchema.lean	docstring
@@ -257,7 +242,6 @@ c02255092622	SaltWorks/HDL/SelValueXOR.lean	docstring
 1c7c98dcc31b	SaltWorks/HDL/SelectCut32.lean	docstring
 27c27f6eb193	SaltWorks/HDL/SelectCut32.lean	docstring
 34d59ed6de2b	SaltWorks/HDL/SelectCut32.lean	docstring
-51dc2a875a14	SaltWorks/HDL/SelectCut32.lean	docstring
 638f6b0812bb	SaltWorks/HDL/SelectCut32.lean	docstring
 99045871157d	SaltWorks/HDL/SelectCut32.lean	docstring
 c953ea03c7a8	SaltWorks/HDL/SelectCut32.lean	docstring
