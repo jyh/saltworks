@@ -512,9 +512,9 @@ theorem envWith_decQ_instr (ins : Env) (i : Nat) (hi : i < 32) :
 
 `C4Refuted` proves `core` has no I-type immediate: `obSig`'s operand-B "immediate" bank is
 `immBCirc`, the B-type BRANCH displacement. The repair re-points that σ at
-`instrNet (immI ·)`. An arm proved the re-pointed σ **PLACES** (`obSigFixed_instOK`) — and
-**PLACING IS NOT CORRECTNESS.** Because it wires straight to the instruction nets and BYPASSES
-`immICirc`, the landed certificate `sem_immICirc_of_decode` does NOT transfer for free.
+`instrNet (immI ·)`. An arm placed the re-pointed σ (`obSigFixed_instOK`, never committed here;
+`ob_instOK` places today's `obSig`), and **PLACING IS NOT CORRECTNESS.** Because it wires straight
+to the instruction nets and BYPASSES `immICirc`, `sem_immICirc_of_decode` does NOT transfer free.
 
 **This is the argument that replaces it**, and it lands FIRST because helm ruled the order:
 transport argument, then repair, differentials before both.
@@ -562,7 +562,7 @@ theorem immI_bit_of_decode {w : BitVec 32} {rd a : Fin 32} {imm : BitVec 12}
 /-- ⭐⭐ **THE TRANSPORT ARGUMENT — operand B's immediate bank IS `sext(imm)` on the RE-POINTED
 σ.** `obSigFixed` wires straight to `instrNet (immI ·)` and BYPASSES `immICirc`, so the landed
 certificate does not transfer for free; this is the argument that replaces it.
-⚠️ It is about the WIRE, not about a placement: `obSigFixed_instOK` says the σ PLACES, and
+⚠️ It is about the WIRE, not about a placement: a placement lemma (`ob_instOK`) says a σ PLACES, and
 placing is not correctness. -/
 theorem obB_is_sext_imm (ins : Env) (rd a : Fin 32) (imm : BitVec 12) (k : Nat) (hk : k < 32)
     (h : decode (SaltWorks.Stack.Program.seenWord ins) = some (.ADDI rd a imm)) :
