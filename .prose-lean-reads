@@ -308,3 +308,6 @@ o88-sw-2026-10-25-214	SaltWorks/HDL/AdapterPlacement.lean	9e1f80dbbea1	SaltWorks
 o88-sw-2026-10-25-215	SaltWorks/HDL/AdapterPlacement.lean	ea3a005ce1cb	SaltWorks/HDL/TrapOrgan.lean::trapOrgan_sem	dd5ffecd3562	paper	math	2026-10-25
 o88-sw-2026-10-25-216	SaltWorks/HDL/MemWiring.lean	f55f85fc1b6e	SaltWorks/HDL/MemWiring.lean::memWeNet_is_the_named_line	a6deae111653	paper	math	2026-10-25
 o88-sw-2026-10-25-217	SaltWorks/HDL/MemWiring.lean	857d77591e68	SaltWorks/HDL/MemWiring.lean::control_we_is_not_isLW	0f6c5b32e4ef	paper	math	2026-10-25
+evidence-sw-2026-10-25-01	README.md	2a1f6bf9dde6	SaltWorks/Silicon/Refine/Main.lean::core32bus_refinesE	2a5bcc9ff27a	evidence	paper	2026-10-25
+evidence-sw-2026-10-25-02	README.md	36137e3fc72c	SaltWorks/Silicon/Refine/Main.lean::core32bus_refinesE	2a5bcc9ff27a	evidence	paper	2026-10-25
+evidence-sw-2026-10-25-03	README.md	edd60f5f24ab	SaltWorks/Silicon/Refine/Main.lean::core32bus_refinesE	2a5bcc9ff27a	evidence	paper	2026-10-25
