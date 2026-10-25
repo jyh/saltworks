@@ -25,14 +25,14 @@ declared in the SAME outside module, stopping at everything else.
 
 That middle path is the whole trick, and it is why two shell-based attempts
 failed on 2026-08-07:
-  statement-only          missed `sub_via_adder_correct`, because
+  statement-only          missed `sub_via_adder_correct` (now `_on_sample`), because
                           `theorem _ : subOK = true` never names `adder32` --
                           the link is inside `subOK`'s BODY
   unfold everything       drowned in `Circ` (41), `Net` (25), `Op` (13): the
                           types every theorem is written in
 
 VALIDATED against a hand-derived ground truth: it must place `adder32` in the
-class, via `sub_via_adder_correct`.  It does.
+class, via `sub_via_adder_correct` (now `sub_via_adder_correct_on_sample`).  It does.
 
 ## ⛔ WHAT IT DOES **NOT** ANSWER, stated because the first run's header claimed
 ## it did

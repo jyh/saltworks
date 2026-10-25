@@ -3716,7 +3716,7 @@ statement it is. -/
 theorem sltDrive_eq_of_mem {a b : Word}
     (ha : a ∈ SaltWorks.HDL.bwWords) (hb : b ∈ SaltWorks.HDL.bwWords) :
     SaltWorks.HDL.sltDrive a b = SaltWorks.HDL.cmpWord (BitVec.slt a b) := by
-  have h := SaltWorks.HDL.sltCirc_correct
+  have h := SaltWorks.HDL.sltCirc_correct_on_sample
   unfold SaltWorks.HDL.sltOK at h
   have h1 := (List.all_eq_true.mp h) a ha
   have h2 := (List.all_eq_true.mp h1) b hb
