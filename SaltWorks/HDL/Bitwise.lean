@@ -284,21 +284,6 @@ theorem cmp_upper_bits_are_zero :
 #audit_axioms cmp_upper_bits_are_zero
 
 
-/-! ### Compatibility aliases — the OLD names, kept so no other seat's file breaks
-
-*Math's `Stack/Program.lean` imports four of these under their previous names.
-Renaming without an alias would have broken another seat's build in a shared
-worktree, which is the hazard the writer-slot law exists to prevent.*
-
-⚠️ **These are the MISLEADING names and they are deliberately not the primary
-ones.** *Drop them once `Program.lean` migrates; that is math's call and their
-file.* -/
-
-alias bitXor32_correct := bitXor32_correct_on_sample
-alias sub_via_adder_correct := sub_via_adder_correct_on_sample
-alias sltCirc_correct := sltCirc_correct_on_sample
-alias sltuCirc_correct := sltuCirc_correct_on_sample
-
 #audit_axioms bwCirc bitAnd32 bitOr32 bitXor32 bitNot32
 #audit_axioms bitAnd32_ssa bitOr32_ssa bitXor32_ssa bitNot32_ssa
 #audit_axioms bitAnd32_wf bitOr32_wf bitXor32_wf bitNot32_wf
