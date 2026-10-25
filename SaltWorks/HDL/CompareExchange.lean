@@ -12,7 +12,7 @@ import SaltWorks.HDL.Seq
 Circ: design sketch + the refinement statement ELABORATES."* This file carries
 the design, the one-cycle obligation **proved**, whole-frame certificates
 **proved**, four mutation controls **proved**, and the general refinement
-statement **elaborated but not proved** — B1 proves it.
+statement **elaborated but not proved**; no file proves it yet (it is B1's).
 
 ## The element (US 5,130,976): decide at the first difference, then stream
 
@@ -281,8 +281,8 @@ theorem ce_rejects_lsb_first : ceFrameOK' specLsb 3 = false := by decide +kernel
 /-- ⭐ **MUT-3 — IDLE-SORTS-LOW IS REJECTED, AND THIS IS THE ONE THAT MATTERS.**
 *Both orderings sort. Only one concentrates the active lines onto `Set.Iio n`,
 which is the half of the banyan's `StrictMonoOn dest (Set.Iio n)` that a plain
-sorter does NOT discharge.* **This theorem is the element-level discharge of
-that half, and it is kernel-checked rather than intended.** -/
+sorter does NOT discharge.* **With `ce_frame_3`/`ce_frame_4`, which fix the other order,
+it discharges that half for the element at `n = 3, 4`, kernel-checked, not intended.** -/
 theorem ce_rejects_idle_sorts_low : ceFrameOK' specIdleLow 3 = false := by
   decide +kernel
 
