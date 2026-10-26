@@ -20,7 +20,8 @@
 #   RM  MUTANT: the check removed from a copy ⇒ R1's case starts lake (R1 is load-bearing)
 set -u
 SB="${1:-$(cd "$(dirname "$0")" && pwd)/saltbuild.sh}"
-FLOCK="$(command -v flock)" || { echo "SKIP: no flock(1) on PATH — saltbuild itself refuses to run here"; exit 0; }
+# ⛔ A SKIP IS NOT A PASS: exit 3, so a caller that reads only the return code cannot take "nothing ran" for green (the helm's read of #125, LOW 1).
+FLOCK="$(command -v flock)" || { echo "SKIP: no flock(1) on PATH — saltbuild itself refuses to run here (exit 3: NOT a pass)"; exit 3; }
 TD="$(mktemp -d "${TMPDIR:-/tmp}/sb-mathlib.XXXXXX")"
 pass=0; fail=0
 ok(){ printf '  PASS %s\n' "$1"; pass=$((pass+1)); }

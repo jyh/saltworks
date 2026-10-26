@@ -19,7 +19,7 @@
 #   NOT handed on to lake. It covers the audit arm too: `lake env lean` resolves the same workspace.
 # ⛔ NOT `lake env` / `lake build --no-build` AS THE CHECK: measured 2026-10-26, `lake env printenv LEAN_PATH` in a tree with no .lake starts a
 #   `git clone` of mathlib4 from GitHub, which is the very cost this refuses.
-# LIMITS, declared: a tree with no lake-manifest.json, or none naming mathlib, is not checked; a manifest that does not parse, or no python3, PROCEEDS with a
+# LIMITS, declared: a tree with no lake-manifest.json, or none naming mathlib, is not checked; the check reads lake-manifest.json in the CWD, so a call from a SUBDIRECTORY of a tree runs unchecked (the wrapper is used from the tree root); a manifest that does not parse, or no python3, PROCEEDS with a
 #   line saying so (a doubt must not block a build); the top module's presence says mathlib finished building, not that it matches this tree's pinned revision.
 COLD=0; _sb_args=()
 for _sb_a in "$@"; do if [ "$_sb_a" = "--cold" ]; then COLD=1; else _sb_args+=("$_sb_a"); fi; done
