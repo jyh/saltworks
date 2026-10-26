@@ -10,6 +10,42 @@
 # (file mode), repo HEAD, EXIT. Logging is best-effort and can never
 # change the exit code. The log is the replayable record that a given
 # audit RAN on given bytes — green-exit-≠-verification's paper trail.
+# >>> NO-MATHLIB-BUILD CHECK (the helm's queue item, 2026-10-26 12:12; tools/saltbuild-mathlib-test.sh)
+# ⛔ A BUILD THAT WOULD COMPILE MATHLIB UNDER THE FLEET LOCK IS REFUSED UNLESS IT IS ASKED FOR. paper's builds compiled mathlib under this lock twice on
+#   2026-10-26 (06:3x, and ~20 min at 11:43), each in a worktree with no .lake, while its own card said "copy .lake first": a card did not stop it, the
+#   wrapper does. In a tree whose lake-manifest.json lists a package named `mathlib`, the built top module must exist at
+#   <packagesDir>/mathlib/.lake/build/lib/lean/Mathlib.olean, packagesDir READ FROM THE MANIFEST (default .lake/packages), never assumed. Absent: one refusing
+#   line, exit 77, NO LOCK TAKEN (this runs before the lock seam below), lake never started. `--cold` (anywhere in the arguments) builds it on purpose and is
+#   NOT handed on to lake. It covers the audit arm too: `lake env lean` resolves the same workspace.
+# ⛔ NOT `lake env` / `lake build --no-build` AS THE CHECK: measured 2026-10-26, `lake env printenv LEAN_PATH` in a tree with no .lake starts a
+#   `git clone` of mathlib4 from GitHub, which is the very cost this refuses.
+# LIMITS, declared: a tree with no lake-manifest.json, or none naming mathlib, is not checked; a manifest that does not parse, or no python3, PROCEEDS with a
+#   line saying so (a doubt must not block a build); the top module's presence says mathlib finished building, not that it matches this tree's pinned revision.
+COLD=0; _sb_args=()
+for _sb_a in "$@"; do if [ "$_sb_a" = "--cold" ]; then COLD=1; else _sb_args+=("$_sb_a"); fi; done
+set -- ${_sb_args[@]+"${_sb_args[@]}"}
+if [ "$COLD" = 0 ] && [ -f lake-manifest.json ]; then
+  _sb_ml=$(python3 -I -c '
+import json
+try:
+    m = json.load(open("lake-manifest.json"))
+    if not any(p.get("name") == "mathlib" for p in m.get("packages", [])): print("NONE")
+    else: print("DIR " + str(m.get("packagesDir") or ".lake/packages"))
+except Exception:
+    print("BAD")
+' 2>/dev/null)
+  case "$_sb_ml" in
+    "DIR "*)
+      _sb_pk="${_sb_ml#DIR }"
+      if [ ! -f "$_sb_pk/mathlib/.lake/build/lib/lean/Mathlib.olean" ]; then
+        echo "saltbuild EXIT=77 (REFUSED: this tree has no mathlib build: copy .lake from a built worktree (cp -c on APFS), or pass --cold to build it on purpose)" >&2
+        exit 77
+      fi ;;
+    NONE) : ;;
+    *) echo "saltbuild: NOTE: lake-manifest.json could not be read here (or no python3), so the no-mathlib-build check did NOT run; proceeding" >&2 ;;
+  esac
+fi
+# <<< NO-MATHLIB-BUILD CHECK
 # ⛔⛔ THE SEAM IS WRITTEN IN THE REFUSING FORM, AND THAT IS NOT STYLE. Until now LOCK and
 #   MAXWAIT were hardcoded, so the lock path could not be driven by a fixture at all — which
 #   is half of why contention was unmeasurable. The obvious seam, `${SALTBUILD_LOCK:-<fleet>}`,
