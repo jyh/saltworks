@@ -15,7 +15,8 @@
 #   L6  the sleeper never holds the flock: right after a P1 release the flock is free while the lease lives.
 #   L7  a P1 stopped by SIGTERM leaves NO lease (a cancelled P1 is a seat stopping, not a chain continuing).
 #   L8  a CRASHED P1 (SIGKILL) leaves no lease: a P2 behind it runs within seconds (the helm's WRONG-IF, 11-14 01:38).
-#   L9  no lease outlives its cap: a huge SALTBUILD_P1_LEASE is clamped to Q_LEASE_MAX (600 s).
+#   L9  no lease outlives its cap: a huge SALTBUILD_P1_LEASE is clamped to Q_LEASE_MAX (600 s), and the LEASE log line
+#       names the CLAMPED ttl (ttl=600s), never the requested one (h2c's AGN read, the LOW).   (L9b RED on 550f40a6f912)
 set -u
 SB="${1:-$(cd "$(dirname "$0")" && pwd)/saltbuild.sh}"
 FLOCK="$(command -v flock)" || { echo "SKIP: no flock(1) on PATH — saltbuild itself refuses to run here"; exit 3; }
@@ -117,7 +118,9 @@ echo "== L9 a lease cannot outlive its cap — expect: SALTBUILD_P1_LEASE=99999 
 d=$(fresh L9)
 go "$d" vir P1 1 SALTBUILD_P1_LEASE=99999
 lt=$(ls "$d"/lock.tkt.1.* 2>/dev/null | head -1); sc="$( [ -n "$lt" ] && ps -p "${lt##*.}" -o command= 2>/dev/null)"
-[ "$sc" = "sleep 600" ] && ok "L9  the sleeper is '$sc' (clamped)" || no "L9  clamp to 600" "sleeper command: '$sc'"
+[ "$sc" = "sleep 600" ] && ok "L9a the sleeper is '$sc' (clamped)" || no "L9a clamp to 600" "sleeper command: '$sc'"
+ll=$(grep -F "	LEASE	" "$d/lock.log" | tr '\t' '\n' | grep -F 'ttl=')
+[ "$ll" = "ttl=600s" ] && ok "L9b the LEASE line logs the clamped '$ll'" || no "L9b LEASE line logs the clamped ttl" "got '$ll'"
 
 echo "RESULT pass=$pass fail=$fail"
 [ "$fail" = 0 ]
