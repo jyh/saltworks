@@ -115,6 +115,41 @@ q__ahead && fail "q__ahead TRUE with no ticket of mine" || pass "unqueued: q__ah
 q_wait && pass "q_wait returns immediately when unqueued" || fail "q_wait blocked an unqueued caller"
 
 echo
+echo "(10) THE P1 LEASE (desk AGN) — each arm states its direction; RED on the pre-lease file"
+if ! command -v q_lease_write >/dev/null 2>&1; then
+  fail "q_lease_write is not defined — this saltqueue.sh has no P1 lease"
+else
+  q_take P2 math >/dev/null
+  q_lease_write vir 30
+  lf="$(ls "${Q_TKT_GLOB}".1.* 2>/dev/null | head -1)"
+  [ -n "$lf" ] && [ "$(sed -n 2p "$lf")" = LEASE ] && [ "${lf##*.}" = "$Q_LEASE_PID" ] \
+    && pass "a lease is a rank-1 ticket, class LEASE, pid = its sleeper" || fail "no rank-1 LEASE ticket (got: ${lf:-none})"
+  q__live "$lf" && pass "the lease ticket is LIVE by the ordinary pid+start-time test" || fail "the lease ticket is judged dead"
+  q__ahead && pass "EXPECT ahead: a lease holds my P2 back" || fail "a P2 did NOT see the lease ahead — the gap stays open"
+  [ "$(q_order_line)" = "LEASE:vir" ] && pass "q_order_line lists the lease and excludes my own ticket" || fail "q_order_line read '$(q_order_line)'"
+  q_release
+  q_take P1 mojave >/dev/null
+  q__ahead && fail "another seat's P1 waited on vir's lease" || pass "EXPECT not ahead: another seat's P1 skips the lease"
+  [ -e "$lf" ] && pass "...and mojave's q_take P1 did NOT cancel vir's lease" || fail "mojave's P1 cancelled vir's lease"
+  q_release
+  sp="${lf##*.}"
+  q_take P1 vir >/dev/null
+  [ -e "$lf" ] && fail "vir's next P1 left its own lease in place" || pass "EXPECT gone: vir's next P1 cancelled its own lease at q_take"
+  sleep 0.3; kill -0 "$sp" 2>/dev/null && fail "the lease sleeper $sp is still alive after the cancel" || pass "...and its sleeper is dead"
+  q_release
+  q_lease_write vir 1; lf="$(ls "${Q_TKT_GLOB}".1.* 2>/dev/null | head -1)"
+  q_take P2 math >/dev/null; sleep 2
+  q__ahead && fail "an EXPIRED lease still held a P2 — a lease outliving its TTL" || pass "EXPECT not ahead: an expired lease (TTL 1 s) is reaped"
+  q_release
+  q_lease_write vir 0;  [ -z "$Q_LEASE_PID" ] && pass "TTL 0 writes no lease (the off switch)" || fail "TTL 0 wrote a lease"
+  q_lease_write vir 2m; [ -z "$Q_LEASE_PID" ] && pass "a non-number writes no lease" || fail "TTL '2m' wrote a lease"
+  q_lease_write vir 99999
+  [ "$(ps -p "$Q_LEASE_PID" -o command= 2>/dev/null)" = "sleep $Q_LEASE_MAX" ] && pass "TTL is clamped to Q_LEASE_MAX ($Q_LEASE_MAX s)" \
+    || fail "TTL not clamped: '$(ps -p "$Q_LEASE_PID" -o command= 2>/dev/null)'"
+  q_lease_cancel vir
+fi
+
+echo
 [ "$RC" = 0 ] && echo "⇒ ✅ saltqueue SELFTEST PASSED — every arm driven both ways." \
               || echo "⇒ ⛔ saltqueue SELFTEST FAILED — do not deploy."
 exit $RC

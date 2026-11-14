@@ -60,7 +60,14 @@ if [ -z "$LOCK" ]; then
   echo "saltbuild EXIT=76 (SALTBUILD_LOCK is SET BUT EMPTY — refusing rather than falling back to the FLEET lock)" >&2
   exit 76
 fi
-AUDITLOG=/Users/jyh/projects/claude/.saltbuild-audit.log
+# The audit log takes the LOCKLOG seam's form (below): `-`, never `:-`, and an empty value is refused. Until
+#   2026-11-14 it had no seam, so every fixture that drove this file (the orphan and lock tests) appended its
+#   runs to the FLEET's audit log; a test now points it at its own file (desk AGN's lease test does).
+AUDITLOG="${SALTBUILD_AUDITLOG-/Users/jyh/projects/claude/.saltbuild-audit.log}"
+if [ -z "$AUDITLOG" ]; then
+  echo "saltbuild EXIT=76 (SALTBUILD_AUDITLOG is SET BUT EMPTY — refusing rather than writing into the FLEET's audit log)" >&2
+  exit 76
+fi
 # ══ ROW CK — THE LOCK LOG. CONTENTION WAS INVISIBLE ══════════════════════════════
 # The FIFO lock kept no record, so waiting was unmeasurable: the 24.5-minute stall that
 # put this row on the desk WAS SEEN ONLY BY LUCK, because somebody happened to be
@@ -189,6 +196,13 @@ fi
 
 # CLASS: default P2; P1 typed per build via PRIO=P1.
 PRIO_CLASS="${PRIO:-P2}"
+# THE P1 LEASE (desk AGN, 2026-11-14; the mechanism is documented in saltqueue.sh): seconds a released
+# P1 holds its class open for the same seat's next call. 0 turns it off. A value that is not a whole
+# number is refused toward 0 (today's behaviour) and SAID, never guessed.
+P1_LEASE="${SALTBUILD_P1_LEASE-120}"
+case "$P1_LEASE" in
+  ''|*[!0-9]*) echo "saltbuild: SALTBUILD_P1_LEASE='${P1_LEASE}' is not a whole number of seconds; NO P1 lease this run" >&2; P1_LEASE=0 ;;
+esac
 # ⏰ TAPEOUT=1 → P1 ALIAS, MIGRATION ONLY (helm ruling 12:0x ②). NAMED RETIREMENT: it dies
 #   when the last saltbuild copy carries tickets, OR 2026-09-08 (the lane's own expiry),
 #   WHICHEVER IS FIRST. It PRINTS its own deprecation so it cannot outlive its reason.
@@ -257,7 +271,7 @@ fi
 exec 9>"$LOCKFILE" || { echo "saltbuild EXIT=76 (cannot open $LOCKFILE)" >&2; exit 76; }
 # The clock starts BEFORE the flock, not after it: the flock wait is part of the wait.
 LOCK_T0=$(date +%s)
-lock_log WAIT-START stage=flock
+lock_log WAIT-START stage=flock "class=$PRIO_CLASS"
 if ! "$FLOCK" -w "$MAXWAIT" 9; then
   lock_log WAIT-ABORT stage=flock "waited=$(( $(date +%s) - LOCK_T0 ))s" "maxwait=${MAXWAIT}s"
   echo "saltbuild EXIT=75 (LOCK-WAIT ABORT: the build NEVER STARTED - this is NOT a build failure; RETRY the same command)"
@@ -416,7 +430,16 @@ release() {
     rm -rf "$LOCK"
     if [ "$_lock_released" = 0 ]; then
       _lock_released=1
-      lock_log RELEASED "held=$(( $(date +%s) - ${LOCK_HELD_FROM:-$(date +%s)} ))s"
+      # ⭐ THE LEASE IS WRITTEN BEFORE MY TICKET GOES (desk AGN), so there is no instant with neither:
+      #   a P2 polling q_wait between the two would otherwise take the gap the lease exists to close.
+      #   Not after a signal: a cancelled P1 is a seat stopping, not a chain continuing.
+      if [ "$PRIO_CLASS" = P1 ] && [ "${_sb_signalled:-0}" = 0 ] && command -v q_lease_write >/dev/null 2>&1; then
+        q_lease_write "$SB_SEAT" "$P1_LEASE"
+        [ -n "$Q_LEASE_PID" ] && lock_log LEASE "ttl=${P1_LEASE}s" "sleeper=$Q_LEASE_PID"
+      fi
+      # The queue as it stands at this release, my own ticket excluded: who is next, in order.
+      lock_log RELEASED "held=$(( $(date +%s) - ${LOCK_HELD_FROM:-$(date +%s)} ))s" \
+        "queue=$(command -v q_order_line >/dev/null 2>&1 && q_order_line || echo '?')"
     fi
   fi
   q_release
@@ -466,8 +489,8 @@ run_lake(){ # run_lake <argv…> -> lake's own exit code
   _lake_pid=""; _watch_pid=""
   return "$rc"
 }
-trap 'lake_group_kill; release; exit 130' INT
-trap 'lake_group_kill; release; exit 143' TERM
+trap '_sb_signalled=1; lake_group_kill; release; exit 130' INT
+trap '_sb_signalled=1; lake_group_kill; release; exit 143' TERM
 export LEAN_NUM_THREADS=4
 CAP=24000
 if [ "$1" = "--cap" ]; then CAP="$2"; shift 2; fi

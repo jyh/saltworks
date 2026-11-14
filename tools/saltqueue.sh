@@ -105,21 +105,91 @@ q_take() {
     echo "saltqueue: WARNING — could not write a ticket; proceeding UNQUEUED (exclusion unaffected)" >&2
     Q_TICKET=""; return 1; }
   echo "saltqueue: ticket $class seat=$seat pid=$$"
+  # My own ticket exists now, so cancelling my seat's lease opens no gap (desk AGN).
+  [ "$class" = P1 ] && q_lease_cancel "$seat"
   return 0
 }
 
 q_release() { [ -n "$Q_TICKET" ] && rm -f "$Q_TICKET" 2>/dev/null; Q_TICKET=""; return 0; }
 
+# ══ THE P1 LEASE — desk AGN (systems, 2026-11-14) ═══════════════════════════════════════
+# ⛔ MEASURED, NOT ARGUED: both P2 acquisitions over vir's P1 work on 11-13/14 (fleet lock log
+#   23:39:20→23:39:44 and 00:28:10→00:29:29) fell in a GAP BETWEEN TWO P1 CALLS. A P1 campaign is
+#   a CHAIN of saltbuild calls (build, audit, audit, edit or commit, again), each with its own
+#   ticket, so between calls NO P1 ticket exists and a P2 polling q_wait wins any gap over ~5 s.
+#   The queue was right about every ticket that existed; the class was simply not there.
+# ⇒ A P1 that RELEASES leaves a LEASE: an ordinary rank-1 ticket whose pid is a detached `sleep TTL`
+#   with fd 9 closed (it never holds the flock), class line `LEASE`. Because it IS a ticket, every
+#   existing ticket reader honors it unchanged (a P2 here, and any reimplementation that treats a
+#   live rank-1 ticket as ahead), and it dies by the ordinary reaper when the sleep ends.
+#   A P1 caller SKIPS LEASE tickets (another seat's P1 never waits on one); the seat's next P1
+#   cancels its own lease at q_take, after its own ticket exists, so there is no instant with neither.
+# ⚠️ COST, stated: at a chain's END, P2/P3 idle up to TTL. Fairness only; exclusion is untouched.
+Q_LEASE_CLASS=LEASE
+Q_LEASE_MAX=600
+
+q__class() { sed -n '2p' "$1" 2>/dev/null; }
+
+# q_lease_cancel <seat>: kill and remove this seat's live LEASE tickets. The pid is killed only
+# after q__live confirms pid AND start time, so a recycled pid is never signalled.
+q_lease_cancel() {
+  local seat="$1" f
+  for f in "${Q_TKT_GLOB}".*; do
+    [ -e "$f" ] || continue
+    [ "$(q__class "$f")" = "$Q_LEASE_CLASS" ] || continue
+    [ "$(sed -n '3p' "$f" 2>/dev/null)" = "$seat" ] || continue
+    q__live "$f" && kill "${f##*.}" 2>/dev/null
+    rm -f "$f" 2>/dev/null
+  done
+  return 0
+}
+
+# q_lease_write <seat> <ttl_s>: leave a rank-1 LEASE ticket for TTL seconds. Never fatal: any
+# failure leaves no lease, which is today's behaviour. Prints Q_LEASE_PID on success.
+Q_LEASE_PID=""
+q_lease_write() {
+  local seat="${1:-unknown}" ttl="${2:-0}" sp st f
+  Q_LEASE_PID=""
+  case "$ttl" in ''|*[!0-9]*) return 0 ;; esac
+  [ "$ttl" -gt 0 ] || return 0
+  [ "$ttl" -gt "$Q_LEASE_MAX" ] && ttl="$Q_LEASE_MAX"
+  q_lease_cancel "$seat"
+  # `exec` makes $! the sleeper itself (a bare subshell's $! is the subshell, not the job).
+  ( exec sleep "$ttl" ) 9>&- </dev/null >/dev/null 2>&1 &
+  sp=$!
+  disown "$sp" 2>/dev/null || true   # not our job to reap or report: it outlives this shell by design
+  st="$(q__starttime "$sp")"
+  [ -n "$st" ] || { kill "$sp" 2>/dev/null; return 0; }
+  f="${Q_TKT_GLOB}.1.$(q__now_ns).${sp}"
+  { echo "$st"; echo "$Q_LEASE_CLASS"; echo "$seat"; } > "$f" 2>/dev/null || { kill "$sp" 2>/dev/null; return 0; }
+  Q_LEASE_PID="$sp"
+  return 0
+}
+
+# One line, the queue in order, EXCLUDING my own ticket: comma-separated CLASS:<name> pairs, or `-`. For the lock log.
+q_order_line() {
+  local f out=""
+  for f in $(ls -1 "${Q_TKT_GLOB}".* 2>/dev/null | while read -r x; do printf '%s %s\n' "$(q__key "$x")" "$x"; done | sort | awk '{print $2}'); do
+    [ -e "$f" ] || continue
+    [ "$f" = "$Q_TICKET" ] && continue
+    q__live "$f" || continue
+    out="${out:+$out,}$(q__class "$f"):$(sed -n '3p' "$f" 2>/dev/null)"
+  done
+  printf '%s\n' "${out:--}"
+}
+
 # Is any LIVE ticket strictly ahead of mine? Total order: rank, then ns, then pid — so two
-# waiters can never each believe the other is ahead.
+# waiters can never each believe the other is ahead. A P1 skips LEASE tickets (see above).
 q__ahead() {
-  local f mine_key other_key
+  local f mine_key other_key mine_rank
   [ -n "$Q_TICKET" ] || return 1
   mine_key="$(q__key "$Q_TICKET")"
+  mine_rank="${mine_key%%|*}"
   for f in "${Q_TKT_GLOB}".*; do
     [ -e "$f" ] || continue
     [ "$f" = "$Q_TICKET" ] && continue
     q__live "$f" || { rm -f "$f" 2>/dev/null; continue; }
+    [ "$mine_rank" = 1 ] && [ "$(q__class "$f")" = "$Q_LEASE_CLASS" ] && continue
     other_key="$(q__key "$f")"
     [ "$(printf '%s\n%s\n' "$mine_key" "$other_key" | sort | head -1)" = "$other_key" ] && return 0
   done
@@ -147,6 +217,7 @@ q__ahead_count() {
     [ -e "$f" ] || continue
     [ "$f" = "$Q_TICKET" ] && continue
     q__live "$f" || continue
+    [ "${mine%%|*}" = 1 ] && [ "$(q__class "$f")" = "$Q_LEASE_CLASS" ] && continue
     [ "$(printf '%s\n%s\n' "$mine" "$(q__key "$f")" | sort | head -1)" = "$(q__key "$f")" ] && n=$((n+1))
   done
   echo "$n"
