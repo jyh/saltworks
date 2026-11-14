@@ -145,11 +145,13 @@ q_lease_cancel() {
 }
 
 # q_lease_write <seat> <ttl_s>: leave a rank-1 LEASE ticket for TTL seconds. Never fatal: any
-# failure leaves no lease, which is today's behaviour. Prints Q_LEASE_PID on success.
+# failure leaves no lease, which is today's behaviour. Sets Q_LEASE_PID on success, and Q_LEASE_TTL to
+# the ttl actually leased (after the Q_LEASE_MAX clamp), so a caller logs what was leased, not what it asked for.
 Q_LEASE_PID=""
+Q_LEASE_TTL=""
 q_lease_write() {
   local seat="${1:-unknown}" ttl="${2:-0}" sp st f
-  Q_LEASE_PID=""
+  Q_LEASE_PID=""; Q_LEASE_TTL=""
   case "$ttl" in ''|*[!0-9]*) return 0 ;; esac
   [ "$ttl" -gt 0 ] || return 0
   [ "$ttl" -gt "$Q_LEASE_MAX" ] && ttl="$Q_LEASE_MAX"
@@ -162,7 +164,7 @@ q_lease_write() {
   [ -n "$st" ] || { kill "$sp" 2>/dev/null; return 0; }
   f="${Q_TKT_GLOB}.1.$(q__now_ns).${sp}"
   { echo "$st"; echo "$Q_LEASE_CLASS"; echo "$seat"; } > "$f" 2>/dev/null || { kill "$sp" 2>/dev/null; return 0; }
-  Q_LEASE_PID="$sp"
+  Q_LEASE_PID="$sp"; Q_LEASE_TTL="$ttl"
   return 0
 }
 

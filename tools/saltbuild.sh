@@ -435,7 +435,7 @@ release() {
       #   Not after a signal: a cancelled P1 is a seat stopping, not a chain continuing.
       if [ "$PRIO_CLASS" = P1 ] && [ "${_sb_signalled:-0}" = 0 ] && command -v q_lease_write >/dev/null 2>&1; then
         q_lease_write "$SB_SEAT" "$P1_LEASE"
-        [ -n "$Q_LEASE_PID" ] && lock_log LEASE "ttl=${P1_LEASE}s" "sleeper=$Q_LEASE_PID"
+        [ -n "$Q_LEASE_PID" ] && lock_log LEASE "ttl=${Q_LEASE_TTL:-$P1_LEASE}s" "sleeper=$Q_LEASE_PID"
       fi
       # The queue as it stands at this release, my own ticket excluded: who is next, in order.
       lock_log RELEASED "held=$(( $(date +%s) - ${LOCK_HELD_FROM:-$(date +%s)} ))s" \
