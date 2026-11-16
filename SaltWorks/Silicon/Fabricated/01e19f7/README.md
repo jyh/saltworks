@@ -11,9 +11,12 @@ slot pins for `tt_um_saltworks_ndf_c32`; it carries **shape (B)**, the `fetch_ow
   2026-09-07 17:15:30 UTC; read 2026-10-14).
 - **Fabrication is the shuttle's, and it is PENDING.** No chip from this design exists yet; nothing
   here has been measured on silicon.
-- **Delivery is an ESTIMATE, not a date.** TinyTapeout's chips page (`tinytapeout.com/chips/`,
-  read 2026-10-14) lists TTSKY26c as closed 2026-09-07, *Chips expected* 2027-03-27, *Estimated
-  shipping date* 2027-05-12.
+- **Delivery is an ESTIMATE, not a date, and the vendor revises it.** TinyTapeout's chips page
+  (`tinytapeout.com/chips/`), read **2026-11-16**: TTSKY26c closed 2026-09-07, *Chips expected*
+  2027-03-11, *Estimated shipping date* 2027-04-11.
+  An earlier read, dated 2026-10-14, recorded *Chips expected* 2027-03-27 and *Estimated shipping
+  date* 2027-05-12. That read **cannot be re-derived**: the Wayback captures of the page (09-21,
+  09-28, 10-12) hold no table text. It is kept as a dated read, not as the current estimate.
 
 ⚠️ **THE NAME `Fabricated/` IS THE SHUTTLE SLOT'S LABEL, NOT A CLAIM THAT FABRICATION HAPPENED.**
 The path (and the labels in `PIN.psv` and `check_fabricated_fixture.sh`) name the design that goes

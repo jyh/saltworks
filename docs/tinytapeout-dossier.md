@@ -25,7 +25,7 @@
 | Top-level macro | `openframe_project_wrapper`; **`powered_netlists: true`** | same |
 | Tiles | **512 total, 290 used, 222 free** (2026-08-06) | shuttle API / supabase REST |
 | Subsidized PCBs | **80 of 80 SOLD** — the discounted devkit pool is **exhausted** | shuttle API |
-| Chips expected | 2027-03-27 · estimated delivery **2027-05-12** | `tinytapeout.com/runs/` |
+| Chips expected | 2027-03-27 · estimated delivery **2027-05-12** (⚠️ a 2026-08-06 read: 2027-03-27 was struck as unsourced on 08-07 and 2027-05-12 was confirmed at source then, `EVIDENCE-campaign.md:168-169`; both are superseded by the 2026-11-16 read in `SaltWorks/Silicon/Fabricated/01e19f7/README.md`) | `tinytapeout.com/runs/` |
 | Shuttle repo | `github.com/TinyTapeout/tinytapeout-sky-26c` | GitHub |
 
 **Fallbacks if we miss it.** `TTIHP26b` closes **2026-09-21** but is a
@@ -589,8 +589,8 @@ its GDS action passes. `[V-SRC]`
 | week 2 | P7 local dry run; first real GDS + precheck + gl_test green | area/timing surprises surface here, not in September |
 | **by Aug 31** | **H5–H8: submit a real revision** | one clear week of slack before the deadline |
 | **2026-09-07 13:00 PDT** | **HARD DEADLINE (20:00 UTC)** | no revisions after |
-| 2027-03-27 | chips expected | |
-| 2027-05-12 | estimated delivery | |
+| 2027-03-27 | chips expected (⚠️ superseded: see the Chips expected row above) | |
+| 2027-05-12 | estimated delivery (⚠️ superseded: see the Chips expected row above) | |
 
 **Recommendation: submit something real by August 31.** A submitted
 revision can be replaced any number of times before the deadline, so there
