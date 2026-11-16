@@ -120,12 +120,16 @@ theorem seen_ins0 : seenWord ins0 = wSW := by decide +kernel
 theorem rd_ins0 : rdOf ins0 = 4 := by decide +kernel
 theorem held_ins0 : ins0 (32 * rdOf ins0 + 0) = true := by rw [rd_ins0]; decide +kernel
 
-/-! ## The packed evaluation (STRICT: the kernel forces every one of the 10496 gates). -/
+/-! ## The packed evaluation (STRICT: the kernel forces every one of the 10526 gates). -/
 
-/-- ⭐ **THE PACKED WITNESS** — every one of `core`'s 10496 gates evaluated by the kernel.
+/-- ⭐ **THE PACKED WITNESS** — every one of `core`'s 10526 gates evaluated by the kernel.
 ⚠️ **Both the count and the net moved with leg ① stage 2a (2026-08-28): two organs entered
-the chain, so every net from `offOb` on shifted by 98. Read off the artifact, not computed:
-`core.gates.length = placedGateTotal = 10496`, kernel-checked, and `selOut 0 = 7773`.** -/
+the chain, so every net from `offOb` on shifted by 98, and the count became 10496. R9a's 30-gate
+trap gate (2026-08-31) moved the count to 10526. That figure is derived from theorems, not typed:
+`core.gates.length = placedGateTotal` (`core_gate_count`), the chain end is
+`offTie + placedGateTotal` (`chain_accounts_for_every_placed_organ`) and is 11614
+(`chain_end_is_11614`), and `offTie = 1088` (`offsets_pinned`), so 11614 − 1088 = 10526.
+For `selOut 0 = 7773`, see `selOut0_net` below.** -/
 theorem bFull : (runB s0 core.gates).testBit 7773 = false := by decide +kernel
 
 theorem selOut0_net : selOut 0 = 7773 := by decide +kernel
