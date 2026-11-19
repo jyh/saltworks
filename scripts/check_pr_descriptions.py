@@ -481,7 +481,19 @@ def msg_file_mode(path: str) -> int:
         print("\n".join(subject_finding_lines(bad)))
         _debt_remedy()
         return 1
-    print(f"check_pr_descriptions --msg-file {tag}: OK -- subject and body clean.")
+    # The session arm too (2026-09-27): this mode is also used as a receipt for
+    # a PR's title and body, and until today it ran the subject arm alone while
+    # its OK line claimed "body clean" -- a planted session URL passed it.
+    subject, _, body = text.partition("\n")
+    sess = [(f"MESSAGE {w.split(' ', 2)[-1]}", what, ln)
+            for w, what, ln in scan_session(0, subject, body)]
+    if sess:
+        print(f"REFUSED {tag}: this message carries a chat-session trailer or URL "
+              "(withheld).\n")
+        print("\n".join(session_finding_lines(sess)))
+        return 1
+    print(f"check_pr_descriptions --msg-file {tag}: OK -- subject words and "
+          "session shapes clean (subject arm + session arm).")
     return 0
 
 
@@ -940,6 +952,10 @@ def _subject_arms() -> list[str]:
         m_lane = bl("msg-lane.txt", "tidy " + w0 + "\n")
         m_kin = bl("msg-kin.txt", "the " + k0 + " agreed\n\nbody\n")
         m_clean = bl("msg-clean.txt", "clean\n\nbody\n")
+        # ASSEMBLED from the sibling gate's host pattern, never spelled out: this
+        # file is itself scanned, and a literal fixture is caught by its own gate.
+        m_sess = bl("msg-sess.txt", "clean subject\n\nhttps://"
+                    + trailers._HOST.replace(chr(92), "") + "/code/session_abc\n")
         # desk AGL: a PR body draft. The private path is built from pieces, as
         # ARM 4 does, so this source carries no path of its own.
         d_path = bl("body-path.md", "see " + "bri" + "efs" + "/2026-11-12-x/y.md here\n")
@@ -979,6 +995,7 @@ def _subject_arms() -> list[str]:
             ("msg-file, a family-reference subject", msg_file_mode, (m_kin,), 1),
             ("msg-file, a clean message", msg_file_mode, (m_clean,), 0),
             ("msg-file, unreadable", msg_file_mode, (b_none,), 1),
+            ("msg-file, a session URL in the BODY", msg_file_mode, (m_sess,), 1),
             ("body-file, a rootless private path (the #923 shape)", body_file_mode, (d_path,), 1),
             ("body-file, a clean draft", body_file_mode, (d_clean,), 0),
             ("body-file, unreadable", body_file_mode, (b_none,), 1),
@@ -1244,7 +1261,10 @@ def self_test() -> int:
     try:
         def wf(text):
             p = os.path.join(d, "w.yml")
-            with open(p, "w", encoding="utf-8") as fh:
+            # newline="" per jas's encoding-hygiene gate: a text-mode
+            # write without it emits CRLF on Windows, and these bytes are
+            # parsed back by the arm below.
+            with open(p, "w", encoding="utf-8", newline="") as fh:
                 fh.write(text)
             return p
         top = "on:\n  push:\n  pull_request:\n"
