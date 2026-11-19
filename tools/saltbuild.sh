@@ -4,6 +4,8 @@
 #   ../saltbuild.sh Salt.HB.Foo        # targeted build
 #   ../saltbuild.sh ScratchX.lean      # audit run (lake env lean file)
 #   ../saltbuild.sh --cap 100 X.lean   # audit run with a custom -M cap (MB)
+#   ../saltbuild.sh --fetch update     # `lake update` under the lock (desk ACC; tools/saltbuild-fetch-test.sh)
+#   ../saltbuild.sh --fetch cache      # `lake exe cache get` under the lock
 # One heavy job fleet-wide (atomic lock, stale-reaped), threads capped.
 # SELF-RECORDING (8/8, silicon's proposal, maestro-landed): every run
 # appends one line to $AUDITLOG — timestamp, cwd, args, source sha
@@ -21,9 +23,35 @@
 #   `git clone` of mathlib4 from GitHub, which is the very cost this refuses.
 # LIMITS, declared: a tree with no lake-manifest.json, or none naming mathlib, is not checked; the check reads lake-manifest.json in the CWD, so a call from a SUBDIRECTORY of a tree runs unchecked (the wrapper is used from the tree root); a manifest that does not parse, or no python3, PROCEEDS with a
 #   line saying so (a doubt must not block a build); the top module's presence says mathlib finished building, not that it matches this tree's pinned revision.
+# >>> FETCH MODE (desk ACC, 2026-11-18; tools/saltbuild-fetch-test.sh)
+# ⛔ THE NEVER-BARE-LAKE LAW HAD NO COMPLIANT PATH FOR A FETCH: the build arm runs `lake build "$@"`, so `lake update` and
+#   `lake exe cache get` could only be run bare (a seat did so, declared, on 2026-10-10). `--fetch update` and `--fetch cache`
+#   run exactly those two verbs through the SAME lock, thread cap, audit record and EXIT line as a build. Anything else after
+#   --fetch (no verb, another verb, a further argument) is refused here, exit 78, before the lock and before lake.
+#   A fetch is exempt from the no-mathlib-build check below: fetching the cache is that check's remedy.
+#   Its audit record names the mode (fetch-update / fetch-cache); the cap column reads `lakefile`, as for any non-audit run.
+# LIMITS, declared: `lake exe cache` may first compile mathlib's small cache executable (a few modules, not the library);
+#   `lake update` can run a package's post-update hook (mathlib's runs `cache get`). Both are network-bound, not elaboration
+#   of this tree. The lock is the full heavy slot: no LIGHT class exists, so a fetch waits behind a build and blocks one.
+FETCH=""
+if [ "${1:-}" = "--fetch" ]; then
+  case "${2:-}" in
+    update|cache) FETCH="$2" ;;
+    *) echo "saltbuild EXIT=78 (REFUSED: --fetch takes exactly one verb, update or cache; got '${2:-<none>}'; nothing ran, no lock taken)" >&2
+       exit 78 ;;
+  esac
+  if [ "$#" -ne 2 ]; then
+    echo "saltbuild EXIT=78 (REFUSED: --fetch $FETCH takes no further arguments; got $(( $# - 2 )) more; nothing ran, no lock taken)" >&2
+    exit 78
+  fi
+fi
+# <<< FETCH MODE
 COLD=0; _sb_args=()
 for _sb_a in "$@"; do if [ "$_sb_a" = "--cold" ]; then COLD=1; else _sb_args+=("$_sb_a"); fi; done
 set -- ${_sb_args[@]+"${_sb_args[@]}"}
+# FETCH MODE (desk ACC): a fetch skips the no-mathlib-build check below by setting COLD, the flag that check already reads,
+#   so that line stays byte-identical (additive-only, the helm 11-18 17:18). COLD has no other reader in this file.
+if [ -n "$FETCH" ]; then COLD=1; fi
 if [ "$COLD" = 0 ] && [ -f lake-manifest.json ]; then
   _sb_ml=$(python3 -I -c '
 import json
@@ -523,6 +551,9 @@ PRE_HEAD=$(git rev-parse --short HEAD 2>/dev/null || echo n/a)
 PRE_DIRTY=$(git status --porcelain 2>/dev/null | command grep -c .)
 START=$(date '+%H:%M:%S' 2>/dev/null || echo n/a)
 case "$1" in
+  --fetch) MODE="fetch-$FETCH"
+          if [ "$FETCH" = update ]; then run_lake ~/.elan/bin/lake update
+          else run_lake ~/.elan/bin/lake exe cache get; fi ;;
   *.lean) MODE=audit
           [ -f "$1" ] && PRESHA=$(shasum -a 256 "$1" 2>/dev/null | cut -c1-12)
           run_lake ~/.elan/bin/lake env lean -M "$CAP" "$@" ;;
