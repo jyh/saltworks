@@ -20,7 +20,7 @@
 #   F5  the audit record names the mode (`fetch-cache`), as a build's names `build`
 #   F6  the thread cap reaches lake (LEAN_NUM_THREADS=4 in lake's environment)
 #   F7  CONTROL: a plain build in the same no-mathlib tree is still refused 77 (the exemption is the fetch's only)
-#   FM  MUTANTS on a copy: (a) the 77 exemption removed ⇒ F1 refused; (b) the verb check removed ⇒ F3's unknown
+#   FM  MUTANTS on a copy: (a) the 77 exemption (the fetch block's COLD=1) removed ⇒ F1 refused; (b) the verb check removed ⇒ F3's unknown
 #       verb starts lake. Each must turn its arm red; a mutation that matches nothing is ROTTED and fails.
 set -u
 SB="${1:-$(cd "$(dirname "$0")" && pwd)/saltbuild.sh}"
@@ -99,7 +99,7 @@ PY
     mo=$(SBX="$M/saltbuild.sh" bash "$0" "$SB" --no-mutants 2>&1); mf=$(printf '%s\n' "$mo" | command grep -c '^  FAIL')
     if [ "$mf" -gt 0 ]; then ok "FM $1: the mutant turns $mf arm(s) red"; else no "FM $1" "the mutant SURVIVED"; fi
   }
-  mutant "no-77-exemption" 'if [ "$COLD" = 0 ] && [ -z "$FETCH" ] && [ -f lake-manifest.json ]; then' 'if [ "$COLD" = 0 ] && [ -f lake-manifest.json ]; then' \
+  mutant "no-77-exemption" 'if [ -n "$FETCH" ]; then COLD=1; fi' ':' \
     || no "FM no-77-exemption" "ROTTED: the target text is absent"
   mutant "no-verb-check" '    update|cache) FETCH="$2" ;;' '    *) FETCH="$2" ;;' \
     || no "FM no-verb-check" "ROTTED: the target text is absent"

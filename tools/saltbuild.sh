@@ -29,6 +29,7 @@
 #   run exactly those two verbs through the SAME lock, thread cap, audit record and EXIT line as a build. Anything else after
 #   --fetch (no verb, another verb, a further argument) is refused here, exit 78, before the lock and before lake.
 #   A fetch is exempt from the no-mathlib-build check below: fetching the cache is that check's remedy.
+#   Its audit record names the mode (fetch-update / fetch-cache); the cap column reads `lakefile`, as for any non-audit run.
 # LIMITS, declared: `lake exe cache` may first compile mathlib's small cache executable (a few modules, not the library);
 #   `lake update` can run a package's post-update hook (mathlib's runs `cache get`). Both are network-bound, not elaboration
 #   of this tree. The lock is the full heavy slot: no LIGHT class exists, so a fetch waits behind a build and blocks one.
@@ -48,7 +49,10 @@ fi
 COLD=0; _sb_args=()
 for _sb_a in "$@"; do if [ "$_sb_a" = "--cold" ]; then COLD=1; else _sb_args+=("$_sb_a"); fi; done
 set -- ${_sb_args[@]+"${_sb_args[@]}"}
-if [ "$COLD" = 0 ] && [ -z "$FETCH" ] && [ -f lake-manifest.json ]; then
+# FETCH MODE (desk ACC): a fetch skips the no-mathlib-build check below by setting COLD, the flag that check already reads,
+#   so that line stays byte-identical (additive-only, the helm 11-18 17:18). COLD has no other reader in this file.
+if [ -n "$FETCH" ]; then COLD=1; fi
+if [ "$COLD" = 0 ] && [ -f lake-manifest.json ]; then
   _sb_ml=$(python3 -I -c '
 import json
 try:
@@ -573,7 +577,7 @@ EXIT=$?
   printf '%s | %s | %s | args=%s |%s HEAD=%s | cap=%s | EXIT=%s | start=%s | pre_head=%s | dirty=%s->%s\n' \
     "$(date '+%Y-%m-%d %H:%M:%S')" "$MODE" "$(pwd)" "$*" "$SHA" \
     "$(git rev-parse --short HEAD 2>/dev/null || echo n/a)" \
-    "$(case "$MODE" in audit) echo "$CAP" ;; fetch-*) echo none ;; *) echo lakefile ;; esac)" "$EXIT" \
+    "$([ "$MODE" = audit ] && echo "$CAP" || echo lakefile)" "$EXIT" \
     "${START:-n/a}" "${PRE_HEAD:-n/a}" "${PRE_DIRTY:-?}" \
     "${POST_DIRTY:-?}" >> "$AUDITLOG"
 } 2>/dev/null || true
