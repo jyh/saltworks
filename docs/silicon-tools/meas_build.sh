@@ -53,6 +53,22 @@
 #   Both fired as specified on 2026-08-08: EXIT=1 with sorryAx named, and the
 #   module-form refusal. The refusal matters more than the red — a red result is
 #   loud, whereas the module form's green is the failure that looks like success.
+#
+# ⚠️ WHAT THAT CONTROL DOES NOT SHOW (added 2026-11-24, after the axiom-receipt TRIPLE
+#   landed in salt's CLAUDE.md, salt #815). `#print axioms` and `#audit_axioms` on an
+#   IMPORTED name read a table written into that name's olean at build time. A `sorry`
+#   planted in the target file itself, as above, tests only the printer: it stays green
+#   when an import's olean is stale. What this tool covers and what it does not:
+#     - a name DEFINED in the target file is kernel-checked fresh by the path form, but
+#       its axiom list includes whatever its imports' oleans recorded. If an imported
+#       module has gained a `sorry` since its last build, the audit here still reads clean.
+#     - a name defined in an IMPORT is read from a cached olean, with no build line for
+#       its defining module and no imported control. A clean line there is a claim about
+#       the cache.
+#   A current receipt needs the triple: a build line for each defining module after its
+#   last write, the audit log, and an imported control
+#   (`#print axioms Lean.reduceBool` printing `Lean.trustCompiler`, or a `sorry` in its
+#   own built and imported module printing `sorryAx`). This tool supplies none of that.
 
 set -u
 [ $# -ge 1 ] || { echo "usage: meas_build.sh <path/to/Module.lean> [...]"; exit 2; }
