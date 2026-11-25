@@ -2,7 +2,7 @@
 # FLEET BUILD/AUDIT WRAPPER — the ONLY sanctioned way to run lake OR lean.
 #   ../saltbuild.sh                    # full build of the cwd repo
 #   ../saltbuild.sh Salt.HB.Foo        # targeted build
-#   ../saltbuild.sh ScratchX.lean      # audit run (lake env lean file)
+#   ../saltbuild.sh ScratchX.lean      # audit run: lake build <its header imports>, then lake env lean file (desk AHM)
 #   ../saltbuild.sh --cap 100 X.lean   # audit run with a custom -M cap (MB)
 #   ../saltbuild.sh --fetch update     # `lake update` under the lock (desk ACC; tools/saltbuild-fetch-test.sh)
 #   ../saltbuild.sh --fetch cache      # `lake exe cache get` under the lock
@@ -74,6 +74,79 @@ except Exception:
   esac
 fi
 # <<< NO-MATHLIB-BUILD CHECK
+# >>> AUDIT IMPORT PRE-BUILD (desk AHM, 2026-11-25; the wrapper option in h2c's 11-23 axiom-path probe, its §3)
+# ⛔ `lake env lean X.lean` LOADS THE IMPORTS' .olean FILES AS THEY ARE ON DISK AND NEVER CHECKS THEM AGAINST THEIR
+#   SOURCES. An import edited after its last build is audited STALE: `#print axioms` reads the old olean's tables, in both
+#   directions (a sorry added since the build is missed; a sorry removed since is still reported). The axiom receipt is a
+#   triple (salt CLAUDE.md, council 11-23 ask 4) and its term 1 is THE BUILD LINE, which until now was the seat's manual step.
+#   ⇒ The audit arm builds the scratch's own imports first, under the same lock and thread cap, and audits only if that
+#   build exits 0. A failed import build is the audit's verdict (its exit code travels); the audit never runs on it.
+# THE IMPORTS ARE READ FROM THE FILE'S HEADER here, BEFORE the lock, so a refusal takes no lock and starts no lake:
+#   comments (`--`, nested `/- -/`) are skipped; `module`, `prelude`, `public`, `meta`, `private`, `all` and `runtime` are
+#   header words; each `import` takes one module name; the header ends at the first other token. Toolchain modules
+#   (roots Init, Std, Lean, Lake) ship prebuilt and are not lake targets, so they are dropped. A PROJECT module under one of
+#   those four roots would be dropped silently (salt's roots are Salt and SaltC1; none of its packages has such a root); any
+#   other toolchain root (LakeMain, Leanc, …) is not dropped and fails the import build, which is the loud direction.
+#   Each name must have a module name's shape (dotted identifiers, «…» components): `import -x` or `import Salt.*` is refused
+#   79, never handed to lake as an option or a glob (h2c's read, LOW 1). A leading byte-order mark is skipped.
+#   An unterminated block comment in the header, or no python3, is REFUSED (exit 79): an audit whose imports could not be
+#   read cannot say they were built, and a silent skip would put term 1 back on the seat's memory.
+# LIMITS, declared: only the scratch's DIRECT imports are named to lake, and lake rebuilds whatever of their closure is
+#   out of date (that is lake's trace check, not ours). A no-op import build still costs lake's trace walk of that closure.
+SB_IMPORTS=""; SB_PREBUILD=none
+_sb_af="${1:-}"; [ "$_sb_af" = "--cap" ] && _sb_af="${3:-}"
+case "$_sb_af" in
+  *.lean)
+    if [ -f "$_sb_af" ]; then
+      # ⛔ The parser is a single-quoted STRING passed to `python3 -c`, never a heredoc inside $( ): /bin/bash here is 3.2,
+      #   which does not run a heredoc inside a command substitution reliably.
+      SB_PY='import sys
+src = open(sys.argv[1], encoding="utf-8-sig", errors="replace").read()
+import re
+NAME = re.compile(r"^([A-Za-z_][A-Za-z0-9_!?\x27]*|«[^«»]+»)(\.([A-Za-z_][A-Za-z0-9_!?\x27]*|«[^«»]+»))*$")
+WORDS = {"module", "prelude", "public", "meta", "private", "all", "runtime"}
+CORE = {"Init", "Std", "Lean", "Lake"}
+i, n, mods, want = 0, len(src), [], False
+while i < n:
+    c = src[i]
+    if c.isspace():
+        i += 1; continue
+    if src.startswith("--", i):
+        j = src.find("\n", i); i = n if j < 0 else j; continue
+    if src.startswith("/-", i):
+        depth, i = 1, i + 2
+        while i < n and depth:
+            if src.startswith("/-", i): depth += 1; i += 2
+            elif src.startswith("-/", i): depth -= 1; i += 2
+            else: i += 1
+        if depth:
+            print("UNTERMINATED"); sys.exit(3)
+        continue
+    j = i
+    while j < n and not src[j].isspace() and not src.startswith("--", j) and not src.startswith("/-", j):
+        j += 1
+    tok, i = src[i:j], j
+    if tok == "import":
+        want = True
+    elif tok in WORDS:
+        pass
+    elif want:
+        want = False
+        if not NAME.match(tok):
+            print("NOT A MODULE NAME: " + tok[:60]); sys.exit(4)
+        if tok.split(".")[0] not in CORE: mods.append(tok)
+    else:
+        break
+print(" ".join(dict.fromkeys(mods)))
+'
+      SB_IMPORTS=$(python3 -I -c "$SB_PY" "$_sb_af"); _sb_ip=$?
+      if [ "$_sb_ip" != 0 ]; then
+        echo "saltbuild EXIT=79 (REFUSED: the imports of $_sb_af could not be read (${SB_IMPORTS:-no python3?}), so the audit could not build them first; nothing ran, no lock taken)" >&2
+        exit 79
+      fi
+    fi ;;
+esac
+# <<< AUDIT IMPORT PRE-BUILD (parse)
 # ⛔⛔ THE SEAM IS WRITTEN IN THE REFUSING FORM, AND THAT IS NOT STYLE. Until now LOCK and
 #   MAXWAIT were hardcoded, so the lock path could not be driven by a fixture at all — which
 #   is half of why contention was unmeasurable. The obvious seam, `${SALTBUILD_LOCK:-<fleet>}`,
@@ -556,7 +629,18 @@ case "$1" in
           else run_lake ~/.elan/bin/lake exe cache get; fi ;;
   *.lean) MODE=audit
           [ -f "$1" ] && PRESHA=$(shasum -a 256 "$1" 2>/dev/null | cut -c1-12)
-          run_lake ~/.elan/bin/lake env lean -M "$CAP" "$@" ;;
+          # desk AHM: the imports first (term 1 of the axiom receipt), then the audit, only on a green import build.
+          if [ -n "$SB_IMPORTS" ]; then
+            echo "saltbuild: audit: building the imports first: $SB_IMPORTS"
+            # shellcheck disable=SC2086  # one word per module, split on purpose
+            set -f; run_lake ~/.elan/bin/lake build $SB_IMPORTS; SB_PREBUILD=$?; set +f
+          fi
+          if [ "$SB_PREBUILD" = none ] || [ "$SB_PREBUILD" = 0 ]; then
+            run_lake ~/.elan/bin/lake env lean -M "$CAP" "$@"
+          else
+            echo "saltbuild: ⛔ the imports did NOT build (lake rc $SB_PREBUILD): the audit did NOT run, because it would read stale or missing oleans"
+            ( exit "$SB_PREBUILD" )
+          fi ;;
   *)      MODE=build; run_lake ~/.elan/bin/lake build "$@" ;;
 esac
 EXIT=$?
@@ -574,12 +658,12 @@ EXIT=$?
   # DIRTY before and CLEAN after spills only here, leaving a LONE `?` line (measured:
   # audit log line 3038, 2026-08-23, record `dirty=7->0`). Fixing only site 1 leaves it.
   POST_DIRTY=$(git status --porcelain 2>/dev/null | command grep -c .)
-  printf '%s | %s | %s | args=%s |%s HEAD=%s | cap=%s | EXIT=%s | start=%s | pre_head=%s | dirty=%s->%s\n' \
+  printf '%s | %s | %s | args=%s |%s HEAD=%s | cap=%s | EXIT=%s | start=%s | pre_head=%s | dirty=%s->%s%s\n' \
     "$(date '+%Y-%m-%d %H:%M:%S')" "$MODE" "$(pwd)" "$*" "$SHA" \
     "$(git rev-parse --short HEAD 2>/dev/null || echo n/a)" \
     "$([ "$MODE" = audit ] && echo "$CAP" || echo lakefile)" "$EXIT" \
     "${START:-n/a}" "${PRE_HEAD:-n/a}" "${PRE_DIRTY:-?}" \
-    "${POST_DIRTY:-?}" >> "$AUDITLOG"
+    "${POST_DIRTY:-?}" "$([ "$MODE" = audit ] && echo " | prebuild=$SB_PREBUILD")" >> "$AUDITLOG"
 } 2>/dev/null || true
 echo "saltbuild EXIT=$EXIT"
 exit $EXIT
