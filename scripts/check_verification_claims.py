@@ -466,13 +466,21 @@ def main(argv=None):
 # ---------------------------------------------------------------- self-test
 
 def self_test():
+    """Every scratch repository lives under ONE temporary directory, removed on every exit.
+    Each mkdtemp of the old self-test was left behind: 55 directories a run, about 21,000
+    on one box by 2026-11-27 (desk AHS)."""
+    with tempfile.TemporaryDirectory(prefix="vclaims-") as scratch:
+        return _self_test(scratch)
+
+
+def _self_test(scratch):
     """Every arm is driven red against a planted defect and green against its fix,
     in a scratch repository; the UNMUTATED subject runs in the same harness."""
     arms = 0
     fails = []
 
     def repo_with(files):
-        d = tempfile.mkdtemp(prefix="vclaims-")
+        d = tempfile.mkdtemp(prefix="vclaims-", dir=scratch)
         subprocess.run(["git", "init", "-q", d], check=True)
         for rel, body in files.items():
             p = os.path.join(d, rel)

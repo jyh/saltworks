@@ -888,6 +888,14 @@ def main(argv=None):
 # ---------------------------------------------------------------- self-test
 
 def self_test():
+    """Every scratch repository lives under ONE temporary directory, removed on every exit.
+    Each mkdtemp of the old self-test was left behind: 135 directories a run, about 40,000
+    on one box by 2026-11-27 (desk AHS)."""
+    with tempfile.TemporaryDirectory(prefix="prose-lean-") as scratch:
+        return _self_test(scratch)
+
+
+def _self_test(scratch):
     """Each arm driven red against a planted defect and green against its fix, in a scratch repo;
     the census's own sentences are the mutants."""
     fails, arms = [], 0
@@ -896,7 +904,7 @@ def self_test():
         subprocess.run(["git", "-C", d, *args], check=True, capture_output=True)
 
     def build(files):
-        d = tempfile.mkdtemp(prefix="prose-lean-")
+        d = tempfile.mkdtemp(prefix="prose-lean-", dir=scratch)
         git(d, "init", "-q")
         for rel, txt in files.items():
             p = os.path.join(d, rel)
